@@ -5,8 +5,7 @@
 Lists shared IP addresses for virtual servers
 
 This command outputs a list of shared IP addresses that can be used by new
-or existing virtual servers. You can use the --shared-ip flag to
-C<create-domain> to add the virtual server on one of the listed IPs.
+or existing virtual servers.
 
 Output is in table format by default, but you can switch to a more detailed
 and easily parsed list with the C<--multiline> flag. Or to just get a list

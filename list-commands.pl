@@ -6,7 +6,7 @@ Lists API scripts available
 
 This command lists all API commands available, categorized by type and
 with a brief summary of each. It is used to produce the output from the
-virtualmin --help command. By default the output is in a human-readable format,
+Virtualmin C<--help> command. By default the output is in a human-readable format,
 but you can switch to a more parsable format with the C<--multiline> flag.
 
 =cut
@@ -126,7 +126,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists available command-line API scripts.\n";
 print "\n";
 print "virtualmin list-commands [--short]\n";
-print "                         [--multiline | --nameonly]\n";
+print "                         [--multiline | --name-only]\n";
 exit(1);
 }
 

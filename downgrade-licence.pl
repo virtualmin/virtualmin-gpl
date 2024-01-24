@@ -7,7 +7,8 @@ Downgrade Virtualmin Pro system to GPL version
 This program downgrades Virtualmin Pro system to GPL by performing various
 actions like, swapping Pro package with GPL variant, locking resellers accounts,
 automatically switching repositories and reverting the license to GPL.
-The only required parameter to perform downgrade is C<--perform>.
+The only required parameter to perform downgrade is C<--perform>. Be careful,
+this program will not ask for confirmation before performing downgrade.
 
 =cut
 

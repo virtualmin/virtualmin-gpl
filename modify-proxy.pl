@@ -9,8 +9,8 @@ by the C<--domain> flag. The proxy to remove must be identified by the
 C<--path> parameter.
 
 The URL path for the proxy can be changed with the C<--new-path> flag, followed
-by a path like /foo. The destination URLs can be set with the C<--url> flag
-followed by a URL - this flag can be given multiple times.
+by a path like I</foo>. The destination URLs can be set with the C<--url> flag
+followed by a URL, which can be given multiple times.
 
 =cut
 
@@ -105,7 +105,7 @@ print "virtualmin modify-proxy --domain domain.name\n";
 print "                        --path url-path\n";
 print "                       [--new-path url-path]\n";
 print "                       [--no-proxy]\n";
-print "                       [--url http://something]*\n";
+print "                       [--url http://some-url]*\n";
 exit(1);
 }
 

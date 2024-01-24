@@ -8,7 +8,7 @@ The command simply outputs a list of available plans for use when
 creating new virtual servers, or for applying to existing servers.
 
 To just display the plan names, you can give the C<--name-only> parameter.
-Or to show full details about each plan in a more machine-readable format,
+Or to show full details about each plan in a more parsable format,
 use the C<--multiline> option.
 
 =cut

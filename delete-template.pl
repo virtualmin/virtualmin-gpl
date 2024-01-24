@@ -4,7 +4,7 @@
 
 Removes one virtual server template.
 
-This command can be used to delete a Vrtualmin template, specified either by
+This command can be used to delete a Virtualmin template, specified either by
 name with the C<--name> parameter, or by ID with the C<--id> flag. Any virtual
 servers still using the template will be un-effected.
 

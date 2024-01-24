@@ -58,7 +58,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Displays license information for this Virtualmin system.\n";
 print "\n";
-print "virtualmin info\n";
+print "virtualmin license-info\n";
 exit(1);
 }
 

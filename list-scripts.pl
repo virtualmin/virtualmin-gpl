@@ -12,7 +12,7 @@ Virtualmin administrator.
 
 The program displays a table of all scripts
 currently installed, including their install IDs and version numbers. To get
-more details in a program-friendly format, use the C<--multiline> parameter.
+more details in a parsable format, use the C<--multiline> parameter.
 To just get a list of script names, use C<--name-only>.
 
 To limit the output to just scripts of some type, use the C<--type> flag

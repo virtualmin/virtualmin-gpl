@@ -6,12 +6,12 @@ List available templates for new domains
 
 The command simply outputs a list of available templates for use when
 creating new virtual servers. For each the ID number and description
-are diplayed.
+are displayed.
 
 To just display the template names, you can give the C<--name-only> parameter.
 This is useful when iterating through them in other scripts.
 
-By default, deleted templates are not incluced in the list unless you
+By default, deleted templates are not included in the list unless you
 add the C<--deleted> flag.
 
 =cut

@@ -6,7 +6,7 @@ Delete one or more virtual servers.
 
 To delete one or many servers (and all of their sub-servers and alias domains)
 from the system, use this program. The domains to remove can be specified with
-the C<--domain> flag, must can be given multiple times. Alternately, you can
+the C<--domain> flag, which can be given multiple times. Alternately, you can
 select virtual servers by username, using the C<--user> flag.
 
 The C<--only> option can be used to not actually delete the servers, but

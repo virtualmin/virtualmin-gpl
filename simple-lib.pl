@@ -586,7 +586,7 @@ else {
 
 # create_autoreply_alias_links(&domain)
 # For all aliases and users in some domain that have simple aliases with
-# autoreponders, create hard links and update the aliases to use them.
+# autoresponders, create hard links and update the aliases to use them.
 sub create_autoreply_alias_links
 {
 local ($d) = @_;

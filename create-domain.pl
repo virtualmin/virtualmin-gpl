@@ -21,7 +21,7 @@ have a free address chosen from the allocation ranges. If you want to
 use a virtual IP that is already active on the system, you must add the
 --ip-already command-line option.
 
-If your system supports IPv6, Virtualmin can also add a v6 address for a
+If your system supports IPv6, Virtualmin can also add a IPv6 address for a
 new virtual server with the C<--ip6> flag followed by an address in the correct
 format. If you have IPv6 allocation enabled in the server templates, instead
 use the C<--allocate-ip6> flag to have Virtualmin select a free address

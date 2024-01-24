@@ -5,7 +5,7 @@
 Un-install one script from a virtual server
 
 This program completely removes a third-party script from a server. It
-takes the usual C<--domain> parameter to identifiy the server, and either
+takes the usual C<--domain> parameter to identify the server, and either
 C<--id> followed by the install ID, or C<--type> followed by the script's short
 name. The latter option is more convenient, but only works if there is only
 one instance of the script in the virtual server. If multiple different versions

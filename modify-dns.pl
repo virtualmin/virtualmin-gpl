@@ -77,7 +77,7 @@ Or if eligible, you can combine the zones with C<--enable-subdomain>.
 If this domain has a parent domain also hosted on the same system but not
 sharding the same zone file, you can use the C<--add-parent-ds> flags to add
 required DNSSEC DS records to the parent. Alternately you can use
-C<--remove-parent-ds> to delete them, but this is not recommded as it may
+C<--remove-parent-ds> to delete them, but this is not recommended as it may
 break DNSSEC validation.
 
 If you have Cloud DNS providers setup, you can move the domain to one

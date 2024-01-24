@@ -17,7 +17,7 @@ selected.
 If the C<--disassociate> flag is given, this command will simply remove the
 association between the domain and the underlying system configuration or
 database. For example, if disabling the MySQL with the C<--disassociate>
-flag set, the underlying databases beloning to the domain would not be
+flag set, the underlying databases belonging to the domain would not be
 removed.
 
 =cut

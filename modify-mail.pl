@@ -24,7 +24,7 @@ By default, Virtualmin implements mail alias domains with catchall aliases,
 which forward all email to addresses in the alias domain to the same address
 in the target. However, when using Postfix this prevents email to invalid
 addresses in the alias from being bounced at the SMTP conversation stage -
-instead, a bounce eamil is sent, which is regarded as poor mail server practice
+instead, a bounce email is sent, which is regarded as poor mail server practice
 and can be abused by spammers.
 
 To prevent this, the C<--alias-copy> flag can be used to duplicate Postfix

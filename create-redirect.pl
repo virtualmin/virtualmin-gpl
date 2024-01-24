@@ -9,7 +9,7 @@ different directory on the same virtual server. This can be used to provide
 more friendly URL paths on your website, or to cope with the movement of
 web pages to new locations.
 
-This command takes a manadatory C<--domain> parameter, followed by a virtual
+This command takes a mandatory C<--domain> parameter, followed by a virtual
 server's domain name. The C<--path> parameter is also mandatory, and must be
 followed by a local URL path like C</rails> or even C</>. 
 

@@ -4,7 +4,7 @@
 
 Checks if the mail server can RCPT to some address
 
-This command is debugging tool for mailboxes and aliases - it can be used
+This command is debugging tool for mailboxes and aliases, which can be used
 to check if some address is accepted by your mail server, and if SMTP
 authentication is working.
 
