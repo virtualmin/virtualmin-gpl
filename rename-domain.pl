@@ -8,13 +8,13 @@ This command is typically used to rename an existing server, selected with the
 C<--domain> flag, and changed to the name set with the C<--new-domain> option.
 
 By default, the administration username, home directory and prefix for mailboxes
-will remaing unchanged. You can have these selected automatically based on
+will remaining unchanged. You can have these selected automatically based on
 the new domain name with the C<--auto-user>, C<--auto-home> and C<--auto-prefix>
 flags. Alternately, you can set them directly with the C<--new-user>, 
 C<--new-home> and C<--new-prefix> flags followed by the settings you want.
 
 This command can also be used to change the home directory or username for
-a domain without even changign the domain name - just set the C<--new-home>
+a domain without even changing the domain name, just set the C<--new-home>
 or C<--new-user> flags without C<--new-domain>.
 
 =cut

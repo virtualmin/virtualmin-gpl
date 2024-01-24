@@ -11,7 +11,7 @@ which can be given multiple times. Or you can use C<--user> followed by an
 administrator's username. If neither are given, the email is sent to all 
 virtual servers.
 
-If the messsage is related to some service such as email or web serving, you
+If the message is related to some service such as email or web serving, you
 can use the C<--with-feature> flag followed by a feature code like C<mail> or
 C<web> to limit the servers notified to those with that feature enabled.
 Similarly, you can use C<--without-feature> to select only virtual servers
@@ -24,7 +24,7 @@ the contents on the command line with C<--body-message>. Als, you can set a
 custom character set for the message body with the optional C<--charset> flag.
 
 The email subject line must be set with the C<--subject> flag. The from address
-defaults to whatever you have configured globally in Virutalmin, but can be
+defaults to whatever you have configured globally in Virtualmin, but can be
 overridden with the C<--from> flag.
 
 By default only domain owners are notified, but you can include extra admins

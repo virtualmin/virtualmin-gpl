@@ -10,7 +10,7 @@ servers to update can be selected with the C<--domain> or C<--user> flags,
 or you can choose to modify them all with the C<--all-domains> option.
 
 If your system supports multiple PHP versions, you can limit the changes
-to the config for a specific version with the C<--php-version> flag folowed
+to the config for a specific version with the C<--php-version> flag followed
 by a number, like 7.4 or 8.2.
 
 The variables to show are set with the C<--ini-name> flag, which can be

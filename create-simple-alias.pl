@@ -12,14 +12,21 @@ used to set a comment or description for the alias. To create an alias that
 matches all email in the domain, use the option C<--from "*">.
 
 To just forward email to some other address, the C<--forward> parameter can
-be used. It can be given multiple times, and each instance must be followed by an email address.
+be used. It can be given multiple times, and each instance must be followed
+by an email address.
 
 To deliver directly to the inbox of some user (bypassing other forwarding),
 use the C<--local> parameter, followed by a full username like C<jamie.somedomain>.
 
-To bouce mail back to the sender, use the C<--bounce> flag. This is useful if you have a catchall address setup for the domain.
+To bounce mail back to the sender, use the C<--bounce> flag. This is useful if you
+have a catchall address setup for the domain.
 
-To setup an autoresponder, use the C<--autoreply> parameter followed by the text of the automatic reply message. The from address for automatica replies can be set with the optional (but highly recommended) C<--autoreply-from> flag, and the interval in hours between replies to the same address with the C<--autoreply-period> flag. For example :
+To setup an autoresponder, use the C<--autoreply> parameter followed by the text of
+the automatic reply message. The from address for automatic replies can be set with
+the optional (but highly recommended) C<--autoreply-from> flag, and the interval in
+hours between replies to the same address with the C<--autoreply-period> flag.
+
+For example :
 
   virtualmin create-simple-alias --domain something.com --from jamie --autoreply "Gone fishing" --autoreply-from jamie@something.com --autoreply-period 24
 

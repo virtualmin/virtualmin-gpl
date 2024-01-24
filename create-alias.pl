@@ -22,8 +22,8 @@ what the alias is for. To set one when creating, you can use the --desc
 option followed by a one-line description.
 
 To more easily create aliases with autoresponders, you should use the 
-C<create-simple-alias> command, which is analagous to the simple alias
-creation form in Virtualmin's web UI.
+C<create-simple-alias> command, which is analogous to the simple alias
+creation form in Virtualmin UI.
 
 =cut
 

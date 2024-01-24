@@ -6,7 +6,7 @@ List known scripts
 
 This command simply outputs a list of scripts that can potentially installed
 into Virtualmin servers. By default it displays a nicely formatted table, but
-if the C<--multiline> option is given it will use a more machine-readable format
+if the C<--multiline> option is given it will use a more parsable format
 which shows more information. Or you can use C<--name-only> to show just script
 names.
 

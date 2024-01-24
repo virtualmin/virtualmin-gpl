@@ -9,7 +9,7 @@ specified either by name with the C<--name> parameter, or by ID with the
 C<--id> flag.
 
 The setting to change is specified with the C<--setting> flag, followed by
-a template variable name like I<uquota>. Each occurrance of this flag must
+a template variable name like I<uquota>. Each occurrence of this flag must
 be followed by the C<--value> parameter, followed by the value to use for
 the previously named setting.
 

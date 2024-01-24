@@ -5,8 +5,8 @@
 Copy the cert and key from a virtual server to some other service.
 
 The domain to copy the cert from is specified with the C<--domain> flag
-followed by a virtual server name. The services (like dovecot, postfix, webmin
-or usermin) to copy it to are set with the C<--service> flag, which can be
+followed by a virtual server name. The services (like dovecot, postfix, mysql,
+webmin or usermin) to copy it to are set with the C<--service> flag, which can be
 given multiple times.
 
 If the C<--add-global> flag is given, the cert will be used as the default

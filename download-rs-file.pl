@@ -89,12 +89,12 @@ else {
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
-print "Uploads a single file to a Rackspace container.\n";
+print "Downloads a single file to a Rackspace container.\n";
 print "\n";
-print "virtualmin upload-download-file [--user name]\n";
-print "                                [--key key]\n";
-print "                                 --dest local-file\n";
-print "                                 --container name\n";
-print "                                 --file remote-file\n";
+print "virtualmin download-rs-file [--user name]\n";
+print "                            [--key key]\n";
+print "                            --dest local-file\n";
+print "                            --container name\n";
+print "                            --file remote-file\n";
 exit(1);
 }

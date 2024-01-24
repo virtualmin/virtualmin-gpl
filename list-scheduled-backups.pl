@@ -7,7 +7,7 @@ Outputs a list of scheduled backups
 By default, this program displays a table of all scheduled backups on
 the system. You can limit it to those owned by some virtual server with
 the C<--domain> or C<--user> flag, or to a reseller with the C<--reseller>
-flag. These must be folllowed by a domain name, administration username
+flag. These must be followed by a domain name, administration username
 or reseller login respectively.
 
 To switch to a more detailed and parseable output format, add the 

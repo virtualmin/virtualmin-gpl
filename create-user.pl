@@ -38,7 +38,7 @@ multiple times.
 
 For more control over the user's login abilities (FTP, SSH or email only),
 use the C<--shell> parameter followed by a full path to a Unix shell, such
-as C</usr/bin/scponly>. Available shells can be displayed using the 
+as C</bin/false>. Available shells can be displayed using the 
 C<list-available-shells> command.
 
 If you only have a pre-encrypted password that you want the new user
