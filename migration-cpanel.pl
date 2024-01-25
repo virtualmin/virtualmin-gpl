@@ -976,7 +976,7 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 		else {
 			# Create new FTP-only user
 			local $fuinfo = &create_initial_user(\%dom, 0,
-							     $fhome eq $ht);
+			     $fhome eq $ht || $fhome eq $dom{'home'});
 			$fuinfo->{'user'} = $fullfuser;
 			$fuinfo->{'pass'} = $fpass;
 			if ($fuinfo->{'webowner'}) {
