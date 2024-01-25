@@ -22,6 +22,8 @@ index_dignore=Ignorer utløpsdatoen
 
 index_running=Kjører sikkerhetskopier
 index_runningdesc=Vis alle planlagte sikkerhetskopier som for øyeblikket kjører, slik at de kan avbrytes.
+index_s3s=Amazon S3-kontoer
+index_s3sdesc=Vis kontoer hos Amazon S3 og kompatible leverandører, for bruk av Virtualmin-sikkerhetskopier.
 index_clouds=Cloud Storage Providers
 index_cloudsdesc=Konfigurer autentisering til leverandører av skylagring som S3, rackspace, Google og Dropbox.
 index_themeswitch=Virtualmin 5 kommer med et helt nytt HTML 5-tema! Vil du prøve det nå?
@@ -81,6 +83,7 @@ setup_efcgiwrap=.. mislyktes : $1
 setup_esslusermin=Usermin er ikke installert
 setup_bindremote=Legger til ny DNS-sone på $1 ..
 setup_bind_cloud=Legger til ny DNS-sone ved hjelp av $1 ..
+setup_bind_cloudi=Knytter til DNS-sonen som er vert for $1 ..
 setup_ebind_ecloud=.. støttes ikke : $1
 setup_ebind_cloud=.. mislyktes : $1 
 setup_ebind_cloud2=.. ferdig, men noen poster ble ikke opprettet : $1
@@ -393,6 +396,7 @@ backup_nicegop=$2 i Google-mappen $1
 backup_nicedb=Dropbox-mappen $1 
 backup_nicedbp=$2 i Dropbox-mappen $1 
 backup_nicebb=Bakblaze bøtte $1 
+backup_nicebbt=Bakgrunn
 backup_nicebbp=$2 i Backblaze-bøtte $1 
 backup_niceaz=Azure-beholder $1
 backup_niceazp=$2 i Azure-beholder $1
@@ -449,6 +453,7 @@ backup_eownergone=Eierdomenet eksisterer ikke lenger!
 backup_purging3=Sletter sikkerhetskopier fra $2 som matcher $3 eldre enn $1 dager ..
 backup_purgedtime=.. fant $1 sikkerhetskopier, men ingen var gamle nok
 backup_purgeegcbuckets=.. kunne ikke registrere Google-bøtter : $1 
+backup_purgeebbbuckets=.. kunne ikke liste Backblaze-bøtter : $1
 backup_purgeefiles3=.. kunne ikke registrere Google Cloud Storage-filer : $1 
 backup_purgeefiles4=.. kunne ikke liste Dropbox-filer : $1 
 backup_purgeefiles5=.. kunne ikke liste Backblaze-filer : $1 
@@ -458,6 +463,7 @@ backup_edelwebmin=.. Webmin sletting mislyktes : $1
 backup_efeature=.. funksjon%% mislyktes
 backup_purgeposs=Vurderer filen $1 datert $2 ..
 backup_purgeposs2=Vurderer bøtte $1 datert $2 ..
+backup_purgeposs2a=Vurderer bøtte $1 ..
 backup_purgeposs3=Vurderer beholder $1 datert $2 ..
 backup_purgeposs4=Vurderer mappe $1 datert $2 ..
 backup_purgepat=.. samsvarer ikke med mønsteret $1
@@ -681,6 +687,7 @@ tmpl_editmode_php=PHP-alternativer
 tmpl_editmode_newuser=Ny postkasse e-post
 tmpl_editmode_updateuser=Oppdatert postkasse-e-post
 tmpl_ewgroup=Velg Webmin-gruppe kan ikke inneholde Virtualmin-modulen
+tmpl_trashclear=Vil du automatisk slette gammelt søppel?
 tmpl_phpcgi=CGI-wrapper for PHP $1 
 tmpl_phpfcgi=FastCGI-wrapper for PHP $1 
 tmpl_ephpcgi=Manglende eller ugyldig CGI-wrapper for PHP $1 
@@ -930,6 +937,7 @@ tscripts_path_help=Angi URL-banen til skriptet, som er relativt til domenets dok
 tscripts_opts=Skriptalternativer
 tscripts_opts_help=Du kan eventuelt angi en kommadelt streng med <tt>key=value</tt> -par som skriptalternativer for installasjonsprogrammet. Disse alternativene tilsvarer parameterne for inndatanavn som finnes i skriptets HTML-skjema.
 
+spam_subfolders=Vil du også slette undermapper for søppelpost og søppel?
 spam_scanner4=Ekstern server skanner
 spam_lookup_port=Domenesøk daemon-port
 spam_elookup_port=Lookup daemon portnummer være et nummer
@@ -1754,6 +1762,7 @@ dnscloud_cloudflare_email=Cloudflare -kontoadresse
 dnscloud_cloudflare_apikey=Cloudflare API -nøkkel
 dnscloud_caccount=Bruker konto $1
 dnscloud_ctoken=Bruker API-token $1
+dnscloud_ntoken=Bruker Namecheap-kontoen $1
 dnscloud_cloudflare_longdesc=Innstillingene på denne siden finner du på <a target=_blank href=https://dash.cloudflare.com/profile/api-tokens>API-tokens</a> -siden i Cloudflare-oversikten.
 dnscloud_cloudflare_eemail=Manglende eller ugyldig e-postadresse
 dnscloud_cloudflare_eapikey=Heksidecimal API-nøkkel mangler eller er ugyldig
@@ -1767,6 +1776,13 @@ dnscloud_cloudflare_ens3=NS-poster funnet for <tt>$1</tt> -domene, men disse NS-
 dnscloud_cloudflare_explain_err_1116=For at Virtualmin skal kunne lage virtuelle underservere på toppnivå med Cloudflare DNS, må du først tillate opprettelse av DNS-underdomener med en annen eier på <a href='$1'>Virtualmin-konfigurasjon / avanserte alternativer</a> side.
 dnscloud_cloudflare_explain_err_1116_user=For at Virtualmin skal kunne lage virtuelle underservere på toppnivå med Cloudflare DNS, må systemadministrator først tillate opprettelse av DNS-underdomener med en annen eier på Virtualmin-konfigurasjonssiden.
 dnscloud_cloudflare_explain_err_1116_2=For at dette Virtualmin-systemet skal være vert for den virtuelle underserveren <tt>$2</tt> på toppnivå, må det også være vert for <tt>$1</tt>
+dnscloud_namecheap_longdesc=For å bruke Namecheap som DNS-leverandør, må du skrive inn Namecheap-pålogging og API-nøkkel fra Verktøy-siden under Profil på dashbordet. API-tilgang må også aktiveres først, og IP-en til dette systemet legges til Namecheap-hvitelisten.
+dnscloud_namecheap_account=Namecheap-konto
+dnscloud_namecheap_apikey=Namecheap API-nøkkel
+dnscloud_namecheap_eaccount=Mangler Namecheap-konto
+dnscloud_namecheap_eapikey=Manglende eller ugyldig Namecheap API-nøkkel
+dnscloud_namecheap_ecreds=Namecheap-legitimasjonen er feil : $1
+dnscloud_namecheap_erename=Namecheap støtter ikke endre navn på domene
 
 install_mod_perl_link=Bruk siden <a href='$1'>Perl Modules</a> i Webmin for å installere den
 
