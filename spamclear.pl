@@ -134,6 +134,17 @@ foreach $d (&list_domains()) {
 					     "$folder->{'file'}\n" if ($debug);
 				$folder->{'fn'} = $fn;
 				push(@process, $folder);
+				if ($auto->{'subfolders'}) {
+					# Also add sub-folders
+					my @subfolders = grep {
+					  $_->{'file'} =~ /\/(\.?)\Q$fn\E\./i &&
+					  $_->{'index'} != 0
+					  } @folders;
+					foreach my $subfolder (@subfolders) {
+						$subfolder->{'fn'} = $fn;
+						push(@process, $subfolder);
+						}
+					}
 				}
 			}
 

@@ -86,6 +86,7 @@ elsif ($in{'trashclear'} == 2) {
 	$in{'trashsize'} =~ /^\d+$/ || &error($text{'spam_etrashsize'});
 	$auto->{'trashsize'} = $in{'trashsize'}*$in{'trashsize_units'};
 	}
+$auto->{'subfolders'} = $in{'subfolders'};
 &save_domain_spam_autoclear($d, $auto);
 
 # Save spamtrap setting

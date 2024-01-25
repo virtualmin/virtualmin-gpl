@@ -82,6 +82,10 @@ print &ui_table_row(&hlink($text{'spam_trashclear'}, 'spam_trashclear'),
 		    &ui_bytesbox("trashsize", $auto->{'trashsize'})) ],
 		]));
 
+# Show option to also clear spam and trash subfolders
+print &ui_table_row(&hlink($text{'spam_subfolders'}, 'spam_subfolders'),
+	&ui_yesno_radio("subfolders", $auto->{'subfolders'}));
+
 # Show spamtrap option
 $st = &get_spamtrap_aliases($d);
 print &ui_table_row(&hlink($text{'spam_trap'}, 'spam_trap'),

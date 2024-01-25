@@ -5192,6 +5192,7 @@ spam_clear=Automatically delete spam?
 spam_trashclear=Automatically delete trash?
 spam_cleardays=Yes, if older than $1 days
 spam_clearsize=Yes, when mailbox exceeds $1
+spam_subfolders=Also clear spam and trash sub-folders?
 spam_esize=Missing or invalid maximum spam mailbox size
 spam_edays=Missing or invalid maximum spam age
 spam_etrashsize=Missing or invalid maximum trash mailbox size
