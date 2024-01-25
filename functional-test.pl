@@ -211,8 +211,12 @@ $ssl_prefix = &compute_prefix($test_ssl_subdomain, $test_ssl_subdomain_user,
 		 'group' => $test_domain_user,
 		 'template' => &get_init_template() );
 $test_full_user = &userdom_name($test_user, \%test_domain);
+$test_user_extra = $test_user."_extra";
+$test_full_user_extra = &userdom_name($test_user_extra, \%test_domain);
 $test_full_atuser = &userdom_name($test_user, \%test_domain, 6);
 $test_full_user_mysql = &mysql_username($test_full_user);
+$test_full_user_mysql_extra = &mysql_username($test_full_user_extra);
+$test_user_mysql_extra = &mysql_username($test_user_extra);
 $test_full_user_postgres = &postgres_username($test_full_user);
 ($test_target_domain_user) = &unixuser_name($test_target_domain);
 $test_target_domain_db = 'targetdb';
@@ -1833,6 +1837,19 @@ $database_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.'_extra -e "select version()"',
 	},
 
+	# Check MySQL extra login creation
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user_mysql_extra ],
+		      [ 'pass', 'smeg' ],
+		      [ 'mysql', $test_domain_db ],
+		      [ 'db-only' ] ],
+	},
+
+	# Check MySQL extra login
+	{ 'command' => 'mysql -u '.$test_full_user_mysql_extra.' -psmeg '.$test_domain_db.' -e "select version()"',
+	},
+	
 	# Make sure the MySQL database appears
 	{ 'command' => 'list-databases.pl',
 	  'args' => [ [ 'domain', $test_domain ],
