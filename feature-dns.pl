@@ -1551,6 +1551,9 @@ my $email = $bconfig{'tmpl_email'} || "root\@$master";
 $email = &bind8::email_to_dotted($email);
 my %zd;
 &bind8::get_zone_defaults(\%zd);
+my $serial = $bconfig{'soa_style'} ?
+	&bind8::date_serial().sprintf("%2.2d", $bconfig{'soa_start'}) :
+	time();
 my $soa = { 'name' => $d->{'dom'}.'.',
 	    'type' => 'SOA',
 	    'values' => [ $master, $email, $serial,
