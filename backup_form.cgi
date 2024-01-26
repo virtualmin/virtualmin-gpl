@@ -59,7 +59,8 @@ else {
 if ($cbmode == 3 && $sched && ($in{'sched'} || $in{'oneoff'})) {
 	# If this backup is to a domain's directory but the current
 	# user is a reseller, use that domain
-	($mode) = &parse_backup_url($sched->{'dest'});
+	my @dests = &get_scheduled_backup_dests($sched);
+	($mode) = &parse_backup_url($dests[0]);
 	if ($mode == 0) {
 		$d = &get_domain($sched->{'owner'});
 		}
