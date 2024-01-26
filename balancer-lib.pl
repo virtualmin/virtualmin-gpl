@@ -295,5 +295,57 @@ foreach my $p (&list_feature_plugins(1)) {
 	}
 }
 
+# allocate_port([base], [number])
+# Finds ports that are not in use by any domain's script
+# or server and returns a space-separated list of them
+sub allocate_port
+{
+my ($base, $ports) = @_;
+$base ||= 3000;
+my %used;
+foreach my $d (&list_domains()) {
+	foreach my $ds (&list_domain_scripts($d)) {
+		foreach my $p (split(/\s+/, $ds->{'opts'}->{'port'})) {
+			$used{$p} = 1;
+			}
+		}
+	}
+my @rv;
+while(scalar(@rv) < $ports) {
+	my $rport = &allocate_free_tcp_port(\%used, $base);
+	$rport || &error("Failed to allocate port starting from $base");
+	$used{$rport}++;
+	push(@rv, $rport);
+	}
+return join(" ", @rv);
+}
+
+# setup_proxy(&domain, path, port, [proxy-path], [protocol])
+# Adds webserver config entries to proxy some path to a local server
+sub setup_proxy
+{
+my ($d, $path, $rport, $ppath, $proto) = @_;
+$rport ||= &allocate_port(undef, 1);
+my @ports = split(/\s+/, $rport);
+$proto ||= "http";
+my $has = &has_proxy_balancer($d);
+my $balancer = { 'path' => $path };
+if ($has == 2) {
+	# Multiple-destination balancer
+	$balancer->{'balancer'} = "proxy".$ports[0];
+	}
+$balancer->{'urls'} = [ map { "$proto://127.0.0.1:$_$ppath" } @ports ];
+&create_proxy_balancer($d, $balancer);
+}
+
+# delete_proxy(&domain, path)
+# Delete the webserver config entries that proxy on some port
+sub delete_proxy
+{
+my ($d, $path) = @_;
+my ($balancer) = grep { $_->{'path'} eq $path } &list_proxy_balancers($d);
+&delete_proxy_balancer($d, $balancer) if ($balancer);
+}
+
 1;
 
