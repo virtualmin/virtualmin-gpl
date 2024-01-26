@@ -3712,8 +3712,8 @@ $o->{'port'} || $o->{'port'} =~ /^\d+$/ || &error($text{'scripts_service_eport'}
 $o->{'service'}->{'startcmd'} || &error($text{'scripts_service_estartcmd'});
 &foreign_require("init");
 &init::enable_at_boot(
-	"$o->{'name'}-$d->{'dom'}-$o->{'port'}",
-	"$o->{'descname'} service for $d->{'dom'} created by Virtualmin",
+	"$o->{'name'}-$d_->{'dom'}-$o->{'port'}",
+	"$o->{'descname'} service for $d_->{'dom'} created by Virtualmin",
 	$o->{'service'}->{'startcmd'},
 	$o->{'service'}->{'stopcmd'},
 	undef,
