@@ -295,10 +295,10 @@ foreach my $p (&list_feature_plugins(1)) {
 	}
 }
 
-# allocate_port([base], [number])
+# allocate_proxy_port([base], [number])
 # Finds ports that are not in use by any domain's script
 # or server and returns a space-separated list of them
-sub allocate_port
+sub allocate_proxy_port
 {
 my ($base, $ports) = @_;
 $base ||= 3000;
@@ -325,7 +325,7 @@ return join(" ", @rv);
 sub setup_proxy
 {
 my ($d, $path, $rport, $ppath, $proto) = @_;
-$rport ||= &allocate_port(undef, 1);
+$rport ||= &allocate_proxy_port(undef, 1);
 my @ports = split(/\s+/, $rport);
 $proto ||= "http";
 my $has = &has_proxy_balancer($d);
