@@ -1228,14 +1228,22 @@ return $out =~ /"region"\s*:\s*"(\S+)"/ ? $1 : undef;
 sub list_s3_accounts
 {
 my @rv;
-opendir(DIR, $s3_accounts_dir) || return ();
-foreach my $f (readdir(DIR)) {
-	next if ($f eq "." || $f eq "..");
-	my %account;
-	&read_file("$s3_accounts_dir/$f", \%account);
-	push(@rv, \%account);
+if ($config{'s3_akey'}) {
+	push(@rv, { 'access' => $config{'s3_akey'},
+		    'secret' => $config{'s3_skey'},
+		    'endpoint' => $config{'s3_endpoint'},
+		    'id' => 1,
+		    'default' => 1, });
 	}
-closedir(DIR);
+if (opendir(DIR, $s3_accounts_dir)) {
+	foreach my $f (readdir(DIR)) {
+		next if ($f eq "." || $f eq "..");
+		my %account;
+		&read_file("$s3_accounts_dir/$f", \%account);
+		push(@rv, \%account);
+		}
+	closedir(DIR);
+	}
 return @rv;
 }
 
@@ -1244,12 +1252,22 @@ return @rv;
 sub save_s3_account
 {
 my ($account) = @_;
-$account->{'id'} ||= &domain_id();
-&make_dir($s3_accounts_dir, 0700) if (!-d $s3_accounts_dir);
-my $file = "$s3_accounts_dir/$account->{'id'}";
-&lock_file($file);
-&write_file($file, $account);
-&unlock_file($file);
+if ($account->{'default'}) {
+	&lock_file($module_config_file);
+	$config{'s3_akey'} = $account->{'access'};
+	$config{'s3_skey'} = $account->{'secret'};
+	$config{'s3_endpoint'} = $account->{'endpoint'};
+	&unlock_file($module_config_file);
+	&save_module_config();
+	}
+else {
+	$account->{'id'} ||= &domain_id();
+	&make_dir($s3_accounts_dir, 0700) if (!-d $s3_accounts_dir);
+	my $file = "$s3_accounts_dir/$account->{'id'}";
+	&lock_file($file);
+	&write_file($file, $account);
+	&unlock_file($file);
+	}
 }
 
 # delete_s3_account(&account)
@@ -1257,9 +1275,19 @@ my $file = "$s3_accounts_dir/$account->{'id'}";
 sub delete_s3_account
 {
 my ($account) = @_;
-$account->{'id'} || &error("Missing account ID!");
-my $file = "$s3_accounts_dir/$account->{'id'}";
-&unlink_logged($file);
+if ($account->{'default'}) {
+	&lock_file($module_config_file);
+	delete($config{'s3_akey'});
+	delete($config{'s3_skey'});
+	delete($config{'s3_endpoint'});
+	&unlock_file($module_config_file);
+	&save_module_config();
+	}
+else {
+	$account->{'id'} || &error("Missing account ID!");
+	my $file = "$s3_accounts_dir/$account->{'id'}";
+	&unlink_logged($file);
+	}
 }
 
 1;
