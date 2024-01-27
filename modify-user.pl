@@ -166,7 +166,7 @@ while(@ARGV > 0) {
 		if (!$config{'allow_upper'}) {
 			$newusername = lc($newusername);
 			}
-		$newusername =~ /^[^ \t:]+$/ || &error("Invalid new username");
+		$newusername =~ /^[^ \t:]+$/ || &usage("Invalid new username");
 		}
 	elsif ($a eq "--enable-ftp") {
 		$shell = $ftp_shell;
