@@ -613,11 +613,9 @@ elsif ($user_type eq 'web') {
 	my $htpasswd_data;
 	foreach my $f (&list_mail_plugins()) {
 		if ($f eq "virtualmin-htpasswd") {
-			if ($f eq "virtualmin-htpasswd") {
-				$input = &trim(&plugin_call($f, "mailbox_inputs", $webuser, $in{'new'}, $d));
-				$htpasswd_data = $input if ($input);
-				last;
-				}
+			$input = &trim(&plugin_call($f, "mailbox_inputs", $webuser, $in{'new'}, $d));
+			$htpasswd_data = $input if ($input);
+			last;
 			}
 		}
 
