@@ -10482,6 +10482,83 @@ $htpasswd_tests = [
         },
 	];
 
+$htpasswd_tests_extra = [
+	# Create a domain with a website
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
+		      [ 'logrotate' ],
+		      [ 'content' => 'Test web page' ],
+		      @create_args, ],
+	},
+
+	# Test wget without protection
+	{ 'command' => $wget_command.' http://'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
+	# Setup protected directory
+	{ 'command' => 'virtualmin create-protected-directory',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Protection test' ],
+		      [ 'path', $test_domain_html ] ],
+	  'grep' => 'Added protection for '.$test_domain_html,
+	},
+
+	# Check the directory was created
+	{ 'command' => 'virtualmin list-protected-directories',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'dir-only' ] ],
+	  'grep' => $test_domain_html,
+	},
+
+	# Test wget with protection, which should now fail
+	{ 'command' => $wget_command.' http://'.$test_domain,
+	  'fail' => 1,
+	},
+
+	# Create webserver extra user
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user_extra ],
+		      [ 'pass', 'smeg' ],
+		      [ 'webserver-dir', $test_domain_html ],
+		      [ 'webserver-only' ] ],
+	},
+
+	# Check the user was created
+	{ 'command' => 'virtualmin list-protected-users',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', $test_domain_html ],
+		      [ 'name-only' ] ],
+	  'grep' => $test_user_extra,
+	},
+
+	# Test wget as the new user
+	{ 'command' => $wget_command.' http://'.&urlize($test_full_user_extra).':smeg@'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
+	# Delete extra user
+	{ 'command' => 'virtualmin delete-user',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user_extra ] ],
+	},
+
+	# Test wget as the user, which should fail now
+	{ 'command' => $wget_command.' http://'.&urlize($test_full_user_extra).':smeg@'.$test_domain,
+	  'fail' => 1,
+	},
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+
 $reset_tests = [
 	# Create a domain with all the features
 	{ 'command' => 'create-domain.pl',
@@ -11142,6 +11219,7 @@ $alltests = { '_config' => $_config_tests,
 	      'googledns' => $googledns_tests,
 	      'route53' => $route53_tests,
 	      'htpasswd' => $htpasswd_tests,
+	      'htpasswd_extra' => $htpasswd_tests_extra,
 	      'reset' => $reset_tests,
 	      'compression' => $compression_tests,
 	      'allscript' => $allscript_tests,
