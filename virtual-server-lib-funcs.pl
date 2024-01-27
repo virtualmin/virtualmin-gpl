@@ -19977,6 +19977,32 @@ foreach my $authorized_key (@$authorized_keys) {
 return undef;
 }
 
+# get_ssh_pubkey_from_file(file, [match])
+# Returns the SSH public key from some file,
+# alternatively matching by some string. If
+# match parameter is not set, returns the first
+# line of the file.
+sub get_ssh_pubkey_from_file
+{
+my ($sshpubkeyfile, $sshpubkeyid) = @_;
+my $pubkey;
+my $sshpubkeyfilelines = &read_file_lines($sshpubkeyfile, 1);
+foreach my $sshpubkeyfileline (@$sshpubkeyfilelines) {
+	$sshpubkeyfileline = &trim($sshpubkeyfileline);
+	if ($sshpubkeyid) {
+		if ($sshpubkeyfileline =~ /\Q$sshpubkeyid\E/) {
+			$pubkey = $sshpubkeyfileline;
+			last;
+			}
+		}
+	else {
+		$pubkey = $sshpubkeyfileline;
+		last;
+		}
+	}
+return $pubkey;
+}
+
 # validate_ssh_pubkey(pubkey)
 # Returns an error message if some SSH public key is invalid
 sub validate_ssh_pubkey

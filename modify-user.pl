@@ -10,7 +10,13 @@ change must be specified with the C<--domain> and C<--user> parameters, which ar
 followed by the server domain name and username respectively.
 
 To change the user's password, use the C<--pass> parameter followed by the new
-password. To modify his real name, use the C<--real> option followed by the new
+password. To add or change SSH public key for a user, use the C<--ssh-pubkey>
+flag followed by the key's content enclosed in quotes, or by the file name
+containing the key. If the given file contains multiple keys, only the key on
+the first line will be used, unless C<--ssh-pubkey-id> flag is also given, which
+will pick the key with the given ID by matching the key's comment.
+
+To modify his real name, use the C<--real> option followed by the new
 name (which must typically be quoted, in case it contains a space). If you
 want to change the user's login name, use the C<--newuser> option, followed by
 the new short username (without a suffix).
@@ -109,6 +115,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--passfile") {
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
+		}
+	elsif ($a eq "--ssh-pubkey") {
+		$sshpubkey = shift(@ARGV);
+		}
+	elsif ($a eq "--ssh-pubkey-id") {
+		$sshpubkeyid = shift(@ARGV);
 		}
 	elsif ($a eq "--real") {
 		$real = shift(@ARGV);
@@ -539,6 +551,28 @@ if ($user->{'extra'}) {
 		}
 	}
 else {
+	# Update SSH key if given
+	if ($sshpubkey) {
+		my $pubkey;
+		my $sshpubkeyfile = -r $sshpubkey ? $sshpubkey : undef;
+		if ($sshpubkeyfile) {
+			$pubkey = &get_ssh_pubkey_from_file($sshpubkeyfile, $sshpubkeyid);
+			}
+		else {
+			$pubkey = $sshpubkey;
+			}
+		my $pubkeyerr = &validate_ssh_pubkey($pubkey);
+		&usage($pubkeyerr) if ($pubkeyerr);
+		my $existing_pubkey = &get_domain_user_ssh_pubkey($d, $olduser);
+		if ($existing_pubkey) {
+			&update_domain_user_ssh_pubkey($d, $user, $olduser, $pubkey)
+			}
+		else {
+			my $addpubkey_err = &add_domain_user_ssh_pubkey($d, $user, $pubkey);
+			&usage($addpubkey_err) if ($addpubkey_err);
+			}
+		}
+	# Modify user
 	&modify_user($user, $olduser, $d);
 	}
 
@@ -584,6 +618,7 @@ print "\n";
 print "virtualmin modify-user --domain domain.name\n";
 print "                       --user username\n";
 print "                      [--pass \"new-password\" | --passfile password-file]\n";
+print "                      [--ssh-pubkey \"key\" | pubkey-file <--ssh-pubkey-id id]\n";
 print "                      [--disable | --enable]\n";
 print "                      [--real real-name]\n";
 if (&has_home_quotas()) {

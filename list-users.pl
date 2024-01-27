@@ -124,6 +124,12 @@ foreach $d (@doms) {
 			$pass = $u->{'pass'};
 			$disable = ($pass =~ s/^\!// ? 1 : 0);
 			print "    Encrypted password: ",$pass,"\n";
+			if ($u->{'unix'}) {
+				my $existing_key = &get_domain_user_ssh_pubkey($d, $u);
+				if ($existing_key) {
+					print "    SSH public key: $existing_key\n";
+					}
+				}
 			print "    Disabled: ",($disable ? "Yes" : "No"),"\n";
 			print "    Home directory: ",$u->{'home'},"\n";
 			if ($u->{'domainowner'}) {

@@ -56,6 +56,12 @@ All mail users can have a password recovery address set, used by the forgotten
 password feature in Virtualmin. For new users, this can be set with the 
 C<--recovery> flag followed by an address.
 
+To add a SSH public key to a user's account, use the C<--ssh-pubkey> flag followed
+by the key's content enclosed in quotes, or by the file name containing the key.
+If the given file contains multiple keys, only the key on the first line will be
+used, unless C<--ssh-pubkey-id> flag is also given, which will pick the key with
+the given ID by matching the key's comment.
+
 =cut
 
 package virtual_server;
@@ -104,6 +110,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--encpass") {
 		$encpass = shift(@ARGV);
+		}
+	elsif ($a eq "--ssh-pubkey") {
+		$sshpubkey = shift(@ARGV);
+		}
+	elsif ($a eq "--ssh-pubkey-id") {
+		$sshpubkeyid = shift(@ARGV);
 		}
 	elsif ($a eq "--real" || $a eq "--desc") {
 		$real = shift(@ARGV);
@@ -290,6 +302,19 @@ else {
 	$user->{'passmode'} = 2;
 	$user->{'pass'} = $encpass;
 	}
+# SSH public key
+my $pubkey;
+if ($sshpubkey) {
+	my $sshpubkeyfile = -r $sshpubkey ? $sshpubkey : undef;
+	if ($sshpubkeyfile) {
+		$pubkey = &get_ssh_pubkey_from_file($sshpubkeyfile, $sshpubkeyid);
+		}
+	else {
+		$pubkey = $sshpubkey;
+		}
+	my $pubkeyerr = &validate_ssh_pubkey($pubkey);
+	&usage($pubkeyerr) if ($pubkeyerr);
+	}
 if ($disable) {
 	&set_pass_disable($user, 1);
 	}
@@ -406,6 +431,10 @@ elsif ($webserver_only) {
 # Create the user and virtusers and alias
 else {
 	&create_user($user, $d);
+	if ($pubkey) {
+		my $addsshpubkey_err = &add_domain_user_ssh_pubkey($d, $user, $pubkey);
+		&usage($addsshpubkey_err) if ($addsshpubkey_err);
+		}
 	}
 
 # Create an empty mail file, if needed
@@ -436,6 +465,7 @@ print "                       --pass \"password-for-new-user\" |\n";
 print "                       --encpass encrypted-password |\n";
 print "                       --random-pass |\n";
 print "                       --passfile password-file\n";
+print "                      [--ssh-pubkey \"key\" | pubkey-file <--ssh-pubkey-id id]\n";
 if (&has_home_quotas()) {
 	print "                      [--quota quota-in-blocks|\"UNLIMITED\"]\n";
 	}
