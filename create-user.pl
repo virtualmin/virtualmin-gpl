@@ -18,8 +18,13 @@ specified username with the C<--noappend> flag.
 The C<--ftp> option can be used to give the new user an FTP login as well - by
 default, he will only be given an email account. The C<--noemail> option turns
 off the default email account, which is useful for creating FTP or
-database-only users. The C<--db-only> flag is used to create a database-only
-user, with no Unix user, email or FTP access.
+database-only users.
+
+The C<--db-only> flag is used to create a database-only user, with no Unix user,
+email or FTP access. The C<--webserver-only> flag is used to create a webserver-only
+user, with no Unix user, email, database or FTP access, and the C<--webserver-dir>
+option can be used to specify directories to which the webserver user will have access
+to. This option can be given multiple times to specify multiple directories.
 
 Extra email addresses for the new user can be specified with the C<--extra>
 option, followed by an email address within the virtual server. This option
@@ -137,7 +142,13 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--db-only") {
 		$db_only++;
-		$noemail++
+		}
+	elsif ($a eq "--webserver-only") {
+		$webserver_only++;
+		}
+	elsif ($a eq "--webserver-dir") {
+		$webdir = shift(@ARGV);
+		push(@webdirs, $webdir);
 		}
 	elsif ($a eq "--group") {
 		$group = shift(@ARGV);
@@ -379,6 +390,19 @@ if ($db_only) {
         $user->{'type'} = 'db';
         &update_extra_user($d, $user);
 	}
+# Create web-only user
+elsif ($webserver_only) {
+	# Create initial user
+        $user->{'extra'} = 1;
+        $user->{'type'} = 'web';
+        my $userclash = &check_extra_user_clash($d, $user->{'user'}, 'web');
+        !$userclash || &usage($userclash);
+        # Set initial password
+        $user->{'pass'} = $pass;
+        $user->{'pass_crypt'} = $encpass, delete($user->{'pass'}) if ($encpass);
+        $user->{'pass'} || $user->{'pass_crypt'} || &usage($text{'user_epasswebnotset'});
+        &modify_webserver_user($user, undef, $d, { virtualmin_htpasswd => join("\n", @webdirs) });
+	}
 # Create the user and virtusers and alias
 else {
 	&create_user($user, $d);
@@ -432,6 +456,7 @@ if (!$user || $user->{'unix'}) {
 	print "                      [--shell /path/to/shell]\n";
 	}
 print "                      [--noemail]\n";
+print "                      [--webserver-only <--webserver-dir path>*]\n";
 print "                      [--extra email.address\@some.domain]\n";
 print "                      [--recovery address\@offsite.com]\n";
 print "                      [--mysql db]*\n";

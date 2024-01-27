@@ -36,6 +36,11 @@ Access to MySQL databases in the domain can be granted with the
 C<--add-mysql> flag, followed by a database name. Similarly, access can be
 removed with the C<--remove-mysql> flag.
 
+Access to webserver directories can be granted with the C<--add-webserver-dir>
+flag, followed by a directory name. To remove access, use the
+C<--remove-webserver-dir> flag. Both of these can occur multiple times on the
+command line. Note that this option is only available for extra webserver user.
+
 To turn off spam checking for the user, the C<--no-check-spam> flag can be
 given. This is useful for mailboxes that are supposed to receive all the
 spam for some domain. To turn spam filtering back on, use the C<--check-spam>
@@ -132,6 +137,14 @@ while(@ARGV > 0) {
 		# Removing a MySQL DB from this user's allowed list
 		push(@deldbs, { 'type' => 'mysql',
 				'name' => shift(@ARGV) });
+		}
+	elsif ($a eq "--add-webserver-dir") {
+		# Adding a webserver directory access for webserver user
+		push(@addwebdirs, shift(@ARGV));
+		}
+	elsif ($a eq "--remove-webserver-dir") {
+		# Removing a webserver directory access from webserver user
+		push(@delwebdirs, shift(@ARGV));
 		}
 	elsif ($a eq "--enable-email") {
 		$enable_email = 1;
@@ -524,7 +537,10 @@ if ($user->{'extra'}) {
 		&update_extra_user($d, $user, $olduser);
 		}
 	if ($user->{'type'} eq 'web') {
-		&usage($text{'user_ewebusersupp'});
+		$user->{'pass'} = $pass if ($pass);
+		&modify_webserver_user($user, $olduser, $d,
+			{ virtualmin_htpasswd =>
+				join("\n", &list_webserver_user_dirs($d, $olduser)) });
 		}
 	}
 else {
@@ -588,6 +604,8 @@ if ($config{'mysql'}) {
 	print "                      [--add-mysql database]\n";
 	print "                      [--remove-mysql database]\n";
 	}
+print "                      [--add-webserver-dir path]*\n";
+print "                      [--remove-webserver-dir path]*\n";
 if ($config{'mail'}) {
 	print "                      [--enable-email]\n";
 	print "                      [--disable-email]\n";

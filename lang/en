@@ -980,7 +980,6 @@ user_ealreadyexist=User $1 already exists
 user_epasswebnotset=Webserver user password is not set!
 user_eaddwebuser=Failed to add webserver user : $1
 user_edeletewebuser=Failed to delete webserver user : $1
-user_ewebusersupp=Modifying webserver user is only supported in UI
 
 aliases_ecannot=You are not allowed to edit aliases in this domain
 aliases_indom=$1 aliases in domain $2
