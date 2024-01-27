@@ -19977,6 +19977,31 @@ foreach my $authorized_key (@$authorized_keys) {
 return undef;
 }
 
+# validate_ssh_pubkey(pubkey)
+# Returns an error message if some SSH public key is invalid
+sub validate_ssh_pubkey
+{
+my ($pubkey) = @_;
+my ($ssh_keytest_out, $ssh_keytest_err);
+($ssh_keytest_err = $text{'validate_esshpubkeyempty'}) if (!$pubkey);
+if (!$ssh_keytest_err) {
+	my $ssh_keygen = &has_command('ssh-keygen');
+	if ($ssh_keygen) {
+		my $pubkeyfile = &transname('id_rsa.pub');
+		&write_file_contents($pubkeyfile, $pubkey);
+		&execute_command("$ssh_keygen -l -f $pubkeyfile", undef, \$ssh_keytest_out, \$ssh_keytest_err);
+		($ssh_keytest_err =~ s/\s*\Q$pubkeyfile\E\s*|^\s+|\s+$//g, $ssh_keytest_err =~ s/\.$//,
+			$ssh_keytest_err = &text('validate_esshpubkeyinvalid', ucfirst($ssh_keytest_err)))
+				if ($ssh_keytest_err);
+		}
+	else {
+		($ssh_keytest_err = &text('validate_esshpubkeyinvalid', $text{'validate_esshpubkeyinvalidformat'}))
+			if ($pubkey && $pubkey !~ /^(ssh-rsa|ssh-dss|ecdsa-sha2-nistp256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521|ssh-ed25519)/);
+		}
+	}
+return wantarray ? ($ssh_keytest_err, $ssh_keytest_out) : $ssh_keytest_err;
+}
+
 sub get_module_version_and_type
 {
 my ($list, $gpl, $ver) = @_;

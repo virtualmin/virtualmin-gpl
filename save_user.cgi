@@ -587,6 +587,8 @@ else {
 			my $sshkey = $in{'sshkey'};
 			$sshkey =~ s/\r|\n/ /g;
 			$sshkey = &trim($sshkey);
+			$sshkeyerr = &validate_ssh_pubkey($sshkey);
+			&error($sshkeyerr) if ($sshkeyerr);
 			$err = &add_domain_user_ssh_pubkey($d, $user, $sshkey);
 			&error($err) if ($err);
 			}
@@ -739,6 +741,8 @@ else {
 			my $sshkey = $in{'sshkey'};
 			$sshkey =~ s/\r|\n/ /g;
 			$sshkey = &trim($sshkey);
+			$sshkeyerr = &validate_ssh_pubkey($sshkey);
+			&error($sshkeyerr) if ($sshkeyerr);
 			my $existing_key = &get_domain_user_ssh_pubkey($d, \%old);
 			if ($existing_key) {
 				&update_domain_user_ssh_pubkey($d, $user, \%old, $sshkey)

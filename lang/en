@@ -5161,6 +5161,9 @@ validate_espamcall=Procmail configuration file $1 does not call SpamAssassin
 validate_evirus=ClamAV is not called in server's procmail configuration file
 validate_estatusweb=No status monitor for website found
 validate_estatusssl=No status monitor for SSL website found
+validate_esshpubkeyempty=SSH public key is empty
+validate_esshpubkeyinvalid=SSH public key is invalid : $1
+validate_esshpubkeyinvalidformat=Format is wrong
 
 tscripts_title=Template Script Installers
 tscripts_sub=For template $1
