@@ -26,15 +26,15 @@ user, with no Unix user, email, database or FTP access, and the C<--webserver-di
 option can be used to specify directories to which the webserver user will have access
 to. This option can be given multiple times to specify multiple directories.
 
-Extra email addresses for the new user can be specified with the C<--extra>
-option, followed by an email address within the virtual server. This option
-can be given multiple times if you wish.
-
 The new user can be granted access to MySQL databases associated with the
 virtual server with the C<--mysql> option, which must be followed by a database
 name. This option can occur multiple times in order to grant access to more
 than one database. Unfortunately, there is no way to grant access to
 PostgreSQL databases.
+
+Extra email addresses for the new user can be specified with the C<--extra>
+option, followed by an email address within the virtual server. This option
+can be given multiple times if you wish.
 
 To create a user who has only FTP access to the domain's website, use the
 C<--web> flag. To turn off spam checking for the new user, include
@@ -456,10 +456,11 @@ if (!$user || $user->{'unix'}) {
 	print "                      [--shell /path/to/shell]\n";
 	}
 print "                      [--noemail]\n";
+print "                      [--db-only <--mysql db>*]\n";
 print "                      [--webserver-only <--webserver-dir path>*]\n";
+print "                      [--mysql db]*\n";
 print "                      [--extra email.address\@some.domain]\n";
 print "                      [--recovery address\@offsite.com]\n";
-print "                      [--mysql db]*\n";
 print "                      [--group name]*\n";
 print "                      [--web]\n";
 if ($config{'spam'}) {
