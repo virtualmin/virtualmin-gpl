@@ -15,6 +15,7 @@ else {
 	&can_edit_local() || &error($text{'users_ecannot2'});
 	}
 &can_edit_users() || &error($text{'users_ecannot'});
+$virtualmin_pro || &error($text{'users_ecannot4web'});
 
 # User to edit or delete
 my $user_full = lc("$in{'webuser'}"."@".$d->{'dom'});

@@ -399,6 +399,7 @@ else {
 		}
 
 	# Create or update the user
+	my $sshkey_mode = $in{'sshkey_mode'} == 2 && $virtualmin_pro ? 1 : 0;
 	$emailmailbox = 0;
 	if ($in{'new'}) {
 		# Set new user parameters
@@ -583,7 +584,7 @@ else {
 			}
 		
 		# Setup SSH public key if one was given
-		if ($in{'sshkey_mode'} == 2) {
+		if ($sshkey_mode) {
 			my $sshkey = $in{'sshkey'};
 			$sshkey =~ s/\r|\n/ /g;
 			$sshkey = &trim($sshkey);
@@ -737,7 +738,7 @@ else {
 			}
 
 		# Update SSH public key
-		if ($in{'sshkey_mode'} == 2) {
+		if ($sshkey_mode) {
 			my $sshkey = $in{'sshkey'};
 			$sshkey =~ s/\r|\n/ /g;
 			$sshkey = &trim($sshkey);

@@ -60,11 +60,24 @@ $text{"scripts_gpl_pro_tip_list_clouds"} = &text('scripts_gpl_pro_tip_clouds', $
 print &alert_pro_tip('list_clouds');
 }
 
+# list_extra_user_pro_tip(type, return-url)
+# Displays an alert for Create Database User and
+# Create Webserver User page explaining the feature
+sub list_extra_user_pro_tip
+{
+my ($etype, $return_url) = @_;
+$etype = "extra_${etype}_users";
+return if (!should_show_pro_tip($etype, 1));
+print &alert_pro_tip($etype,
+	{ return_url => $return_url,
+	  button_text => $text{'scripts_gpl_pro_tip_extra_user_dismiss'}} );
+}
+
 ############################################################
 # API general subs
 ############################################################
 
-# should_show_pro_tip(tipid)
+# should_show_pro_tip(tipid, [ignore])
 # If the current user should see Pro tip for the given page
 sub should_show_pro_tip
 {
@@ -107,7 +120,7 @@ my $alert_body2 =
 my $hide_button_text = ($text{"scripts_gpl_pro_tip_${tipid}_hide"} ||
                         $text{"scripts_gpl_pro_tip_hide"});
 my $hide_button_icon = 'fa2 fa-fw fa2-eye-off';
-
+my $return_url;
 if ($opts) {
 	$alert_title = $opts->{'alert_title'}
 		if ($opts->{'alert_title'});
@@ -127,6 +140,8 @@ if ($opts) {
 		if ($opts->{'button_text'});
 	$hide_button_icon3 = $opts->{'button_icon3'}
 		if ($opts->{'button_icon'});
+	$return_url = $opts->{'return_url'}
+		if ($opts->{'return_url'});
 	}
 my %tinfo = &get_theme_info($current_theme);
 my ($ptitle, $btncls, $alertcls);
@@ -144,6 +159,7 @@ my $form = $ptitle .
         $alert_body1 .
         $alert_body2 . "<p>\n" . 
         &ui_hidden("tipid", $tipid) .
+        ($return_url ? &ui_hidden("return_url", $return_url) : "") .
         &ui_form_end([
             $hide_button_text2 ? [ undef, $hide_button_text2, undef, undef,
                 "onclick=\"window.open('$virtualmin_shop_link_cat','_blank');event.preventDefault();event.stopPropagation();\"",
@@ -322,11 +338,11 @@ elsif (!$virtualmin_pro) {
 	}
 }
 
-# inline_html_pro_tip(html, name)
+# inline_html_pro_tip(html, name, always-show)
 # Modifies passed HTML element to advertise GPL user Pro features, if allowed
 sub inline_html_pro_tip
 {
-my ($h, $n) = @_;
+my ($h, $n, $a) = @_;
 my $f = sub {
 	my ($h) = @_;
 	map { $h =~ /<input/ &&
@@ -340,7 +356,7 @@ my $d = sub {
 	return "<span data-pro-disabled='$n'>$h</span>";
 	};
 if (!$virtualmin_pro) {
-	if ($config{'hide_pro_tips'} != 1) {
+	if ($config{'hide_pro_tips'} != 1 || $a) {
 		$h = &$d(&$f($h), "$n-elem");
 		$h .= &$d("&nbsp;&nbsp;<small><a target='_blank' ".
 		            "href='https://virtualmin.com/professional/#${n}' ".
@@ -382,5 +398,22 @@ my $fh = "SCRIPTS";
 &print_tempfile($fh, &serialise_variable(\@scripts_pro_list));
 &close_tempfile($fh);
 }
+
+# proshow()
+# Returns 1 or 0 depending on whether Pro features should be shown at all in GPL
+sub proshow
+{
+return 1 if ($virtualmin_pro);
+return ($config{'hide_pro_tips'} == 1 && !$virtualmin_pro) ? 0 : 1
+}
+
+# procell([tds-ref])
+# Returns a reference to an array of table cells
+sub procell {
+	my (@tds) = @_;
+	@tds = () if (!@tds);
+	unshift(@tds, "data-pro-disabled='cell'");
+	return $virtualmin_pro ? undef : \@tds;
+};
 
 1;

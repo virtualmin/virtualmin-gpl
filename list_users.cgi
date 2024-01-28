@@ -47,11 +47,13 @@ if ($mleft != 0) {
 		push(@links, [ "edit_user.cgi?new=1&type=mail&dom=$in{'dom'}",
 			$text{'users_add_mail'} ]);
 		}
-	if ($d->{'mysql'} || $d->{'postgres'}) {
+	if (($d->{'mysql'} || $d->{'postgres'}) &&
+	     ($virtualmin_pro || &should_show_pro_tip('extra_db_users', 1))) {
 		push(@links, [ "edit_user.cgi?new=1&type=db&dom=$in{'dom'}",
 			$text{'users_add_db'} ]);
 		}
-	if (&domain_has_website($d) && !$d->{'aliasmail'}) {
+	if (&domain_has_website($d) && !$d->{'aliasmail'} &&
+	    ($virtualmin_pro || &should_show_pro_tip('extra_web_users', 1))) {
 		if (&indexof('virtualmin-htpasswd', @plugins) >= 0) {
 			push(@links, [ "edit_user.cgi?new=1&type=web&dom=$in{'dom'}",
 				$text{'users_add_web'} ]);

@@ -732,6 +732,8 @@ equotacommand=Quota command $1 failed : $2
 users_ecannot=You are not allowed to edit users in this domain
 users_ecannot2=You are not allowed to edit local users
 users_ecannot3=You are not allowed to add mail users
+users_ecannot4db=You cannot manage extra database users in GPL version
+users_ecannot4web=You cannot manage extra webserver users in GPL version
 users_emailbox=The domain owner's user cannot be edited
 users_indom=$1 users in domain $2
 users_indomsub=$1 users in domain $2 ($3 including sub-domains)
@@ -4468,6 +4470,9 @@ scripts_gpl_pro_tip_clouds=Support for $1 providers is also available!
 scripts_gpl_pro_tip_title_dashboard=Get Virtualmin Pro
 scripts_gpl_pro_tip_enroll_dashboard=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support the development of the web hosting control panel you love and unlock many cool features.
 scripts_gpl_pro_tip_dashboard=Did you know that Virtualmin Pro brings plenty of great features not included in GPL version?
+scripts_gpl_pro_tip_extra_web_users=This form allows you to create and manage webserver users independently, without creating a new Unix user account.
+scripts_gpl_pro_tip_extra_db_users=This form allows you to create and manage database users independently, without creating a new Unix user account.
+scripts_gpl_pro_tip_extra_user_dismiss=Thanks for the tip! Hide this page and its link
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:

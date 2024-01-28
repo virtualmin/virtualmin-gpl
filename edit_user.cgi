@@ -64,14 +64,17 @@ if ($user_type eq 'ssh') {
 
 	# SSH public key for Unix user
 	my @ssh_shells = &list_available_shells_by_id('ssh', $d);
-	if ($user->{'unix'}) {
+	if (&proshow() && $user->{'unix'}) {
 		if (@ssh_shells) {
-			print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkey"),
-				&ui_radio("sshkey_mode", 0,
-					[ [ 0, $text{'form_sshkey0'} ],
-					  [ 2, $text{'form_sshkey2'} ] ])."<br>\n".
-				&ui_textarea("sshkey", undef, 3, 60,
-					undef, undef, &vui_ui_input_noauto_attrs()), undef, \@tds);
+			print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkeynogen"),
+				&inline_html_pro_tip(
+					&ui_radio("sshkey_mode", 0,
+						[ [ 0, $text{'form_sshkey0'} ],
+						  [ 2, $text{'form_sshkey2'} ] ]),
+					'manage-user-ssh-public-key').
+				"<br>\n".&ui_textarea("sshkey", undef, 3, 60,
+					undef, undef, &vui_ui_input_noauto_attrs()),
+						undef, &procell(@tds) || \@tds);
 			}
 		}
 
@@ -537,7 +540,7 @@ elsif ($user_type eq 'db') {
 	&ui_print_header($din, $text{$in{'new'} ? 'user_createdb' : 'user_edit'}, "",
 		$in{'new'} ? 'users_explain_user_db' : undef);
 	$user = &create_initial_user($d);
-
+	&list_extra_user_pro_tip('db', "list_users.cgi?dom=$in{'dom'}");
 	print &ui_form_start("save_user_db.cgi", "post");
 	print &ui_hidden("new", $in{'new'});
 	print &ui_hidden("olduser", $in{'user'});
@@ -555,10 +558,12 @@ elsif ($user_type eq 'db') {
 
 	# Edit db user
 	print &ui_table_row(&hlink($text{'user_user2'}, "username_db"),
-		&ui_textbox("dbuser", $dbuser_name, 15, 0, undef,
-			&vui_ui_input_noauto_attrs()).
-		($d ? "\@".&show_domain_name($d) : ""),
-		2, \@tds);
+		&inline_html_pro_tip(
+			&ui_textbox("dbuser", $dbuser_name, 15, 0, undef,
+				&vui_ui_input_noauto_attrs()).
+				  ($d ? "\@".&show_domain_name($d) : ""),
+			'manage-extra-database-users', 1),
+		2, &procell(@tds) || \@tds);
 
 	# Edit password
 	my $pwfield = &new_password_input("dbpass");
@@ -569,8 +574,9 @@ elsif ($user_type eq 'db') {
 				$text{'user_passset'});
 		}
 	print &ui_table_row(&hlink($text{'user_pass'}, "password"),
-				$pwfield,
-				2, \@tds);
+				&inline_html_pro_tip($pwfield,
+					'manage-extra-database-users', 1),
+					2, &procell(@tds) || \@tds);
 
 	# List databases
 	my @dbs;
@@ -586,7 +592,8 @@ elsif ($user_type eq 'db') {
 				$_->{'name'}." ($_->{'desc'})" ] } @dbs;
 		print &ui_table_row(&hlink($text{'user_dbs'},"userdbs"),
 		&ui_multi_select("dbs", \@userdbs, \@alldbs, 5, 1, 0,
-				$text{'user_dbsall'}, $text{'user_dbssel'}), 2, \@tds);
+				$text{'user_dbsall'}, $text{'user_dbssel'}),
+					2, &procell(@tds) || \@tds);
 		}
 
 	print &ui_table_end();
@@ -595,7 +602,7 @@ elsif ($user_type eq 'db') {
 elsif ($user_type eq 'web') {
 	&ui_print_header($din, $text{$in{'new'} ? 'user_createwebserver' : 'user_edit'}, "",
         $in{'new'} ? 'users_explain_user_web' : undef);
-
+	&list_extra_user_pro_tip('web', "list_users.cgi?dom=$in{'dom'}");
 	print &ui_form_start("save_user_web.cgi", "post");
 	print &ui_hidden("new", $in{'new'});
 	print &ui_hidden("olduser", $in{'user'});
@@ -625,10 +632,12 @@ elsif ($user_type eq 'web') {
 
 		# Edit web user
 		print &ui_table_row(&hlink($text{'user_user2'}, "username_web"),
-			&ui_textbox("webuser", $webuser_name, 15, 0, undef,
-				&vui_ui_input_noauto_attrs()).
-			($d ? "\@".&show_domain_name($d) : ""),
-			2, \@tds);
+			&inline_html_pro_tip(
+				&ui_textbox("webuser", $webuser_name, 15, 0, undef,
+					&vui_ui_input_noauto_attrs()).
+						($d ? "\@".&show_domain_name($d) : ""),
+				'manage-extra-webserver-users', 1),
+			2, &procell(@tds) || \@tds);
 
 		# Edit password
 		my $pwfield = &new_password_input("webpass", 0);
@@ -639,8 +648,9 @@ elsif ($user_type eq 'web') {
 					$text{'user_passset'}, 0);
 			}
 		print &ui_table_row(&hlink($text{'user_pass'}, "password"),
-					$pwfield,
-					2, \@tds);
+					&inline_html_pro_tip($pwfield,
+						'manage-extra-webserver-users', 1),
+			2, &procell(@tds) || \@tds);
 		print &ui_table_hr();
 		print $htpasswd_data;
 		my $msg = &text('users_addprotecteddir2',
@@ -781,15 +791,18 @@ else {
 
 		# SSH public key for Unix user
 		my @ssh_shells = &list_available_shells_by_id('ssh', $d);
-		if ($user->{'unix'}) {
+		if (&proshow() && $user->{'unix'}) {
 			if (@ssh_shells) {
 				my $existing_key = &get_domain_user_ssh_pubkey($d, $user);
-				print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkey"),
-					&ui_radio("sshkey_mode", $existing_key ? 2 : 0,
-						[ [ 0, $text{'form_sshkey0'} ],
-						  [ 2, $text{'form_sshkey2'} ] ])."<br>\n".
-					&ui_textarea("sshkey", $existing_key, 3, 60,
-						undef, undef, &vui_ui_input_noauto_attrs()), undef, \@tds);
+				print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkeynogen"),
+					&inline_html_pro_tip(
+						&ui_radio("sshkey_mode", $existing_key ? 2 : 0,
+							[ [ 0, $text{'form_sshkey0'} ],
+							  [ 2, $text{'form_sshkey2'} ] ]),
+								'manage-user-ssh-public-key').
+					"<br>\n". &ui_textarea("sshkey", $existing_key, 3, 60,
+						undef, undef, &vui_ui_input_noauto_attrs()),
+					undef, &procell(@tds) || \@tds);
 				}
 			}
 		# Password recovery field

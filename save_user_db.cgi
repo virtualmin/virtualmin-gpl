@@ -15,6 +15,7 @@ else {
 	&can_edit_local() || &error($text{'users_ecannot2'});
 	}
 &can_edit_users() || &error($text{'users_ecannot'});
+$virtualmin_pro || &error($text{'users_ecannot4db'});
 
 # User to edit or delete
 my $full_dbuser = lc("$in{'dbuser'}"."@".$d->{'dom'});

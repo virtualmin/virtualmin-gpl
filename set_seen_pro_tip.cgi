@@ -4,5 +4,5 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 &set_seen_pro_tip($in{'tipid'} . ($in{'remind'} ? '_reminder' : undef)) if ($in{'tipid'});
-&redirect(&get_referer_relative());
+&redirect($in{'return_url'} || &get_referer_relative());
 
