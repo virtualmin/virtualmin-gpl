@@ -407,12 +407,13 @@ return 1 if ($virtualmin_pro);
 return ($config{'hide_pro_tips'} == 1 && !$virtualmin_pro) ? 0 : 1
 }
 
-# procell([tds-ref])
-# Returns a reference to an array of table cells
+# procell([col-size], [tds-ref])
+# Returns a reference to an array of table cells attributes
 sub procell {
-	my (@tds) = @_;
-	@tds = () if (!@tds);
-	unshift(@tds, "data-pro-disabled='cell'");
+	my ($colsize, @tds) = @_;
+	$colsize ||= 1;
+	@tds = (("") x $colsize) if (!@tds);
+	@tds = map { "data-pro-disabled='cell' $_" } @tds;
 	return $virtualmin_pro ? undef : \@tds;
 };
 

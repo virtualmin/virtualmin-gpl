@@ -74,7 +74,7 @@ if ($user_type eq 'ssh') {
 					'manage-user-ssh-public-key').
 				"<br>\n".&ui_textarea("sshkey", undef, 3, 60,
 					undef, undef, &vui_ui_input_noauto_attrs()),
-						undef, &procell(@tds) || \@tds);
+						undef, &procell() || \@tds);
 			}
 		}
 
@@ -563,7 +563,7 @@ elsif ($user_type eq 'db') {
 				&vui_ui_input_noauto_attrs()).
 				  ($d ? "\@".&show_domain_name($d) : ""),
 			'manage-extra-database-users', 1),
-		2, &procell(@tds) || \@tds);
+		2, &procell(undef, @tds) || \@tds);
 
 	# Edit password
 	my $pwfield = &new_password_input("dbpass");
@@ -576,7 +576,7 @@ elsif ($user_type eq 'db') {
 	print &ui_table_row(&hlink($text{'user_pass'}, "password"),
 				&inline_html_pro_tip($pwfield,
 					'manage-extra-database-users', 1),
-					2, &procell(@tds) || \@tds);
+					2, &procell(undef, @tds) || \@tds);
 
 	# List databases
 	my @dbs;
@@ -593,7 +593,7 @@ elsif ($user_type eq 'db') {
 		print &ui_table_row(&hlink($text{'user_dbs'},"userdbs"),
 		&ui_multi_select("dbs", \@userdbs, \@alldbs, 5, 1, 0,
 				$text{'user_dbsall'}, $text{'user_dbssel'}),
-					2, &procell(@tds) || \@tds);
+					2, &procell(2));
 		}
 
 	print &ui_table_end();
@@ -637,7 +637,7 @@ elsif ($user_type eq 'web') {
 					&vui_ui_input_noauto_attrs()).
 						($d ? "\@".&show_domain_name($d) : ""),
 				'manage-extra-webserver-users', 1),
-			2, &procell(@tds) || \@tds);
+			2, &procell(undef, @tds) || \@tds);
 
 		# Edit password
 		my $pwfield = &new_password_input("webpass", 0);
@@ -650,7 +650,7 @@ elsif ($user_type eq 'web') {
 		print &ui_table_row(&hlink($text{'user_pass'}, "password"),
 					&inline_html_pro_tip($pwfield,
 						'manage-extra-webserver-users', 1),
-			2, &procell(@tds) || \@tds);
+			2, &procell(undef, @tds) || \@tds);
 		print &ui_table_hr();
 		print $htpasswd_data;
 		my $msg = &text('users_addprotecteddir2',
@@ -802,7 +802,7 @@ else {
 								'manage-user-ssh-public-key').
 					"<br>\n". &ui_textarea("sshkey", $existing_key, 3, 60,
 						undef, undef, &vui_ui_input_noauto_attrs()),
-					undef, &procell(@tds) || \@tds);
+					undef, &procell() || \@tds);
 				}
 			}
 		# Password recovery field
