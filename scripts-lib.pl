@@ -3700,5 +3700,82 @@ $ver =~ s/(?<=\.\d)\.\d$//; # remove minor version
 return $ver;
 }
 
+# setup_service(&domain, &service-options)
+# Sets up a service for some script
+sub script_setup_service
+{
+my ($d, $o) = @_;
+my $d_ = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+$o->{'name'} || $o->{'name'} =~ /^[a-zA-Z\d+]+$/ || &error($text{'scripts_service_ename'}); 
+$o->{'descname'} ||= ucfirst($o->{'name'});
+$o->{'port'} || $o->{'port'} =~ /^\d+$/ || &error($text{'scripts_service_eport'});
+$o->{'service'}->{'startcmd'} || &error($text{'scripts_service_estartcmd'});
+&foreign_require("init");
+&init::enable_at_boot(
+	"$o->{'name'}-$d_->{'dom'}-$o->{'port'}",
+	"$o->{'descname'} service for $d_->{'dom'} created by Virtualmin",
+	$o->{'service'}->{'startcmd'},
+	$o->{'service'}->{'stopcmd'},
+	undef,
+	{ 'opts' => {
+		'user'    => $d_->{'uid'},
+		'group'   => $d_->{'gid'},
+		'env'     => $o->{'service'}->{'env'} ? "PATH=$o->{'service'}->{'env'}" : undef,
+		'type'    => $o->{'service'}->{'type'} || 'simple',
+		'reload'  => $o->{'service'}->{'reloadcmd'},
+		'workdir' => $o->{'service'}->{'workdir'},
+		'logstd'  => $o->{'service'}->{'logstd'},
+		'logerr'  => $o->{'service'}->{'logerr'},
+		}},
+	);
+}
+
+# script_delete_service(&domain, script-name, script-port)
+# Deletes a service
+sub script_delete_service
+{
+my ($d, $script_name, $script_port) = @_;
+&script_stop_service($d, $script_name, $script_port);
+&foreign_require("init");
+&init::delete_at_boot("$script_name-$d->{'dom'}-$script_port");
+}
+
+# script_stop_service(&domain, script-name, script-port)
+# Stops and disables a service
+sub script_stop_service
+{
+my ($d, $script_name, $script_port) = @_;
+&foreign_require("init");
+my $action_name = "$script_name-$d->{'dom'}-$script_port";
+&init::stop_action($action_name) if (&init::action_status($action_name));
+&init::disable_at_boot($action_name);
+}
+
+# script_start_service(&domain, script-name, script-port)
+# Starts and enables a service
+sub script_start_service
+{
+my ($d, $script_name, $script_port) = @_;
+&foreign_require("init");
+my $action_name = "$script_name-$d->{'dom'}-$script_port";
+if (&init::action_status($action_name)) {
+	&init::start_action($action_name);
+	&init::enable_at_boot($action_name);
+	}
+}
+
+# script_status_service(&domain, script-name, script-port)
+# Returns status of service
+sub script_status_service
+{
+my ($d, $script_name, $script_port) = @_;
+&foreign_require("init");
+my $action_name = "$script_name-$d->{'dom'}-$script_port";
+if (&init::action_status($action_name)) {
+	my $status = &init::status_action($action_name);
+	return $status ? ( $status ) : ( );
+	}
+}
+
 1;
 

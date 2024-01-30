@@ -4444,6 +4444,10 @@ scripts_gpl_pro_tip_title_dashboard=Get Virtualmin Pro
 scripts_gpl_pro_tip_enroll_dashboard=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support the development of the web hosting control panel you love and unlock many cool features.
 scripts_gpl_pro_tip_dashboard=Did you know that Virtualmin Pro brings plenty of great features not included in GPL version?
 
+scripts_service_ename=Missing or invalid service name
+scripts_service_eport=Missing or invalid service port number
+scripts_service_estartcmd=Missing service start command
+
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:
 newnotify_header=Options for email to server owners
