@@ -958,6 +958,7 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 		s/^\s*#.*$//;
 		local ($fuser, $fpass, $fuid, $fgid, $fdummy, $fhome, $fshell) = split(/:/, $_);
 		next if (!$fuser);
+		$fuser = &remove_userdom($fuser, \%dom);
 		next if ($fuser eq "ftp" || $fuser eq $user ||
 			 $fuser eq $user."_logs");	# skip cpanel users
 		local $fullfuser = &userdom_name(lc($fuser), \%dom);
@@ -1520,6 +1521,7 @@ while(<PASSWD>) {
 	local ($muser, $mdummy, $muid, $mgid, $mreal, $mdir, $mshell) =
 		split(/:/, $_);
 	next if (!$muser);
+	$muser = &remove_userdom($muser, $d);
 	next if ($muser =~ /_logs$/);		# Special logs user
 	next if ($muser eq $user && !$parent);	# Domain owner
 	local $uinfo = &create_initial_user($d);
