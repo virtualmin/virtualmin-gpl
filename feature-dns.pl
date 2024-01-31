@@ -155,6 +155,15 @@ elsif (!$dnsparent) {
 		&$first_print(&text('setup_bindremote', $r->{'host'}));
 		}
 	my $conf = &remote_foreign_call($r, "bind8", "get_config");
+	my $czone = &get_bind_zone($d->{'dom'}, $conf, $d);
+	if ($czone) {
+		# Clashing zone already exists, but it's probably a slave.
+		# Just remove it.
+		my $pconf = &remote_foreign_call(
+			$r, "bind8", "get_config_parent", $czone->{'file'});
+		&remote_foreign_call($r, "bind8", "save_directive", $pconf,
+				     [ $czone ], [ ]);
+		}
 	my $rbconfig = &remote_foreign_config($r, "bind8");
 	my $base = $rbconfig->{'master_dir'} ||
 	      &remote_foreign_call($r, "bind8", "base_directory", $conf);
@@ -2443,7 +2452,7 @@ return $rv;
 # Returns 1 if a domain already exists in BIND, or remotely
 sub check_dns_clash
 {
-local ($d, $field, $repl) = @_;
+my ($d, $field, $repl) = @_;
 if (!$field || $field eq 'dom') {
 	if ($d->{'provision_dns'}) {
 		# Check on remote provisioning server
@@ -2480,8 +2489,15 @@ if (!$field || $field eq 'dom') {
 		}
 	else {
 		# Check locally
-		local ($czone) = &get_bind_zone($d->{'dom'});
-		return $czone ? 1 : 0;
+		my $czone = &get_bind_zone($d->{'dom'});
+		if (!$czone) {
+			return 0;
+			}
+		my $type = &bind8::find_value("type", $czone->{'members'});
+		if ($type eq "master") {
+			return 1;
+			}
+		return 0;
 		}
 	}
 return 0;
