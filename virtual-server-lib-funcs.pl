@@ -11067,7 +11067,37 @@ if (!@passwd_chars) {
 foreach (1 .. $len) {
 	$random_password .= $passwd_chars[rand(scalar(@passwd_chars))];
 	}
+# Check resulting password and try again
+# if it doesn't meet the requirements
+return &random_password(@_)
+	if (&random_password_validate(
+		\@passwd_chars, $len, $random_password) == 0);
 return $random_password;
+}
+
+sub random_password_validate {
+my ($chars, $len, $pass) = @_;
+my $has_uppercase = sub { return $_[0] =~ /[A-Z]/; };
+my $has_lowercase = sub { return $_[0] =~ /[a-z]/; };
+my $has_digit = sub { return $_[0] =~ /[0-9]/; };
+my $has_special = sub { return $_[0] =~ /[\@\#\$\%\^\&\*\(\)\_\+\!\-\=\[\]\{\}\;\:\'\"\,\<\.\>\/\?\~\`\\]/; };
+# Dereference $chars ref only once
+my @chars = @$chars;
+# Determine the required character types based on $chars
+my $complexity_level = 0;
+$complexity_level++ if grep { $has_uppercase->($_) } @chars;
+$complexity_level++ if grep { $has_lowercase->($_) } @chars;
+$complexity_level++ if grep { $has_digit->($_) } @chars;
+$complexity_level++ if grep { $has_special->($_) } @chars;
+# Check if the number of required types exceeds the password length
+return -1 if ($complexity_level > $len || $complexity_level == 0);
+# Check if $pass contains at least one of each required type
+my $valid = 1;
+$valid = 0 if $complexity_level >= 1 && !grep { $has_uppercase->($pass) } @chars;
+$valid = 0 if $complexity_level >= 2 && !grep { $has_lowercase->($pass) } @chars;
+$valid = 0 if $complexity_level >= 3 && !grep { $has_digit->($pass) } @chars;
+$valid = 0 if $complexity_level >= 4 && !grep { $has_special->($pass) } @chars;
+return $valid;
 }
 
 # random_salt([len])
