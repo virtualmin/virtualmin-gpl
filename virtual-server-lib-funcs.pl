@@ -11058,20 +11058,25 @@ sub random_password
 {
 &seed_random();
 &require_useradmin();
-local $random_password;
-local $len = $_[0] || $config{'passwd_length'} || 15;
-local @passwd_chars = split(//, $config{'passwd_chars'});
+my $random_password;
+my $len = $_[0] || $config{'passwd_length'} || 15;
+my @passwd_chars = split(//, $config{'passwd_chars'});
 if (!@passwd_chars) {
 	@passwd_chars = @useradmin::random_password_chars;
 	}
-foreach (1 .. $len) {
-	$random_password .= $passwd_chars[rand(scalar(@passwd_chars))];
-	}
+# Number of characters to operate on
+my $passwd_chars = scalar(@passwd_chars);
 # Check resulting password and try again
 # if it doesn't meet the requirements
-return &random_password(@_)
-	if (&random_password_validate(
-		\@passwd_chars, $len, $random_password) == 0);
+for (my $i = 0; $i < $passwd_chars; $i++) {
+	$random_password = '';
+	foreach (1 .. $len) {
+		$random_password .= $passwd_chars[rand($passwd_chars)];
+		}
+	return $random_password
+		if (&random_password_validate(
+			\@passwd_chars, $len, $random_password) != 0);
+	}
 return $random_password;
 }
 
