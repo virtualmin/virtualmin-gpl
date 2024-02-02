@@ -11082,8 +11082,10 @@ for (my $i = 0; $i < $passwd_chars*100; $i++) {
 return $random_password;
 }
 
-sub random_password_validate {
+sub random_password_validate
+{
 my ($chars, $len, $pass) = @_;
+# Define character type checks in a hash
 my %check = (
 	uppercase => qr/[A-Z]/,
 	lowercase => qr/[a-z]/,
@@ -11091,16 +11093,13 @@ my %check = (
 	special   => qr/[\@\#\$\%\^\&\*\(\)\_\+\!\-\=\[\]\{\}\;\:\'\"\,\<\.\>\/\?\~\`\\]/,
 	unicode   => qr/(?![A-Za-z])\p{L}/,
 	);
-
 # Determine required character types
 my %required = map {
 	my $__ = $_;
 	grep($_ =~ $check{$__}, @{$chars}) ? ($__ => 1) : ();
 } keys %check;
-
 # Return -1 if the number of required types exceeds the password length
 return -1 if scalar(keys %required) > $len;
-
 # Check if password contains one of each required types
 my $matches = grep { $pass =~ $check{$_} } keys %required;
 return 0 unless $matches == keys %required;
