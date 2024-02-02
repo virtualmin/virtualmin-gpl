@@ -11070,7 +11070,7 @@ if (!@passwd_chars) {
 my $passwd_chars = scalar(@passwd_chars);
 # Check resulting password and try again
 # if it doesn't meet the requirements
-for (my $i = 0; $i < $passwd_chars; $i++) {
+for (my $i = 0; $i < $passwd_chars*100; $i++) {
 	$random_password = '';
 	foreach (1 .. $len) {
 		$random_password .= $passwd_chars[rand($passwd_chars)];
@@ -11084,30 +11084,27 @@ return $random_password;
 
 sub random_password_validate {
 my ($chars, $len, $pass) = @_;
-my $has_uppercase = sub { return $_[0] =~ /[A-Z]/; };
-my $has_lowercase = sub { return $_[0] =~ /[a-z]/; };
-my $has_digit = sub { return $_[0] =~ /[0-9]/; };
-my $has_special = sub { return $_[0] =~ /[\@\#\$\%\^\&\*\(\)\_\+\!\-\=\[\]\{\}\;\:\'\"\,\<\.\>\/\?\~\`\\]/; };
-my $has_unicode_chars = sub { return $_[0] =~ /(?![A-Za-z])\p{L}/; };
-# Dereference $chars ref only once
-my @chars = @$chars;
-# Determine the required character types based on $chars
-my %complexity_levels;
-$complexity_levels{'has_uppercase'} = 1 if grep { $has_uppercase->($_) } @chars;
-$complexity_levels{'has_lowercase'} = 1 if grep { $has_lowercase->($_) } @chars;
-$complexity_levels{'has_digit'} = 1 if grep { $has_digit->($_) } @chars;
-$complexity_levels{'has_special'} = 1 if grep { $has_special->($_) } @chars;
-$complexity_levels{'has_unicode_chars'} = 1 if grep { $has_unicode_chars->($_) } @chars;
-# Check if the number of required types exceeds the password length
-return -1 if (scalar(keys %complexity_levels) > $len);
-# Check if $pass contains at least one of each required type
-my $valid = 1;
-$valid = 0 if $complexity_levels{'has_uppercase'} && !grep { $has_uppercase->($pass) } @chars;
-$valid = 0 if $complexity_levels{'has_lowercase'} && !grep { $has_lowercase->($pass) } @chars;
-$valid = 0 if $complexity_levels{'has_digit'} && !grep { $has_digit->($pass) } @chars;
-$valid = 0 if $complexity_levels{'has_special'} && !grep { $has_special->($pass) } @chars;
-$valid = 0 if $complexity_levels{'has_unicode_chars'} && !grep { $has_unicode_chars->($pass) } @chars;
-return $valid;
+my %check = (
+	uppercase => qr/[A-Z]/,
+	lowercase => qr/[a-z]/,
+	digit     => qr/[0-9]/,
+	special   => qr/[\@\#\$\%\^\&\*\(\)\_\+\!\-\=\[\]\{\}\;\:\'\"\,\<\.\>\/\?\~\`\\]/,
+	unicode   => qr/(?![A-Za-z])\p{L}/,
+	);
+
+# Determine required character types
+my %required = map {
+	my $__ = $_;
+	grep($_ =~ $check{$__}, @{$chars}) ? ($__ => 1) : ();
+} keys %check;
+
+# Return -1 if the number of required types exceeds the password length
+return -1 if scalar(keys %required) > $len;
+
+# Check if password contains one of each required types
+my $matches = grep { $pass =~ $check{$_} } keys %required;
+return 0 unless $matches == keys %required;
+return 1;
 }
 
 # random_salt([len])
