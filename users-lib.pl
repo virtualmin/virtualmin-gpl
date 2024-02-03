@@ -125,9 +125,7 @@ return &list_extra_users($d, 'web');
 sub get_extra_web_user
 {
 my ($d, $u) = @_;
-my @extra_web_users = &list_extra_web_users($d);
-my ($extra_web_user) = grep { $_->{'user'} eq $u } @extra_web_users;
-return $extra_web_user;
+return &get_extra_user($d, 'web', $u);
 }
 
 # delete_extra_user(&domain, &user)
