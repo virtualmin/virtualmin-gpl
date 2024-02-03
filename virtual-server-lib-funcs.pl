@@ -11058,16 +11058,56 @@ sub random_password
 {
 &seed_random();
 &require_useradmin();
-local $random_password;
-local $len = $_[0] || $config{'passwd_length'} || 15;
-local @passwd_chars = split(//, $config{'passwd_chars'});
+my $random_password;
+my $len = $_[0] || $config{'passwd_length'} || 15;
+eval "utf8::decode(\$config{'passwd_chars'})"
+	if ($config{'passwd_chars'});
+my @passwd_chars = split(//, $config{'passwd_chars'});
 if (!@passwd_chars) {
 	@passwd_chars = @useradmin::random_password_chars;
 	}
-foreach (1 .. $len) {
-	$random_password .= $passwd_chars[rand(scalar(@passwd_chars))];
+# Number of characters to operate on
+my $passwd_chars = scalar(@passwd_chars);
+# Check resulting password and try again
+# if it doesn't meet the requirements
+for (my $i = 0; $i < $passwd_chars*100; $i++) {
+	$random_password = '';
+	foreach (1 .. $len) {
+		$random_password .= $passwd_chars[rand($passwd_chars)];
+		}
+	return $random_password
+		if (&random_password_validate(
+			\@passwd_chars, $len, $random_password) != 0);
 	}
 return $random_password;
+}
+
+sub random_password_validate
+{
+my ($chars, $len, $pass) = @_;
+# Define character type checks in a hash
+my %check = (
+	uppercase => qr/[A-Z]/,
+	lowercase => qr/[a-z]/,
+	digit     => qr/[0-9]/,
+	special   => qr/[\@\#\$\%\^\&\*\(\)\_\+\!\-\=\[\]\{\}\;\:\'\"\,\<\.\>\/\?\~\`\\]/,
+	unicode   => qr/(?![A-Za-z])\p{L}/,
+	);
+# Determine required character types
+my %required;
+foreach my $key (keys %check) {
+	# If any character in @$chars matches the regex for this
+	# key, add the key to %required with a value of 1
+	if (grep { $_ =~ $check{$key} } @$chars) {
+		$required{$key} = 1;
+		}
+	}
+# Return -1 if the number of required types exceeds the password length
+return -1 if scalar(keys %required) > $len;
+# Check if password contains one of each required types
+my $matches = grep { $pass =~ $check{$_} } keys %required;
+return 0 unless $matches == keys %required;
+return 1;
 }
 
 # random_salt([len])
