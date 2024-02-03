@@ -117,8 +117,7 @@ return $extra_db_user;
 sub list_extra_web_users
 {
 my ($d) = @_;
-my @rv = &list_extra_users($d, 'web');
-return @rv;
+return &list_extra_users($d, 'web');
 }
 
 # get_extra_web_user(&domain, username)
