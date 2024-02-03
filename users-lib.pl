@@ -78,12 +78,12 @@ foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
 	}
 }
 
-# list_extra_db_users(&domain)
+# list_extra_db_users(&domain, [&user])
 # Returns a list of extra users for some domain with database list
 sub list_extra_db_users
 {
-my ($d) = @_;
-my @dbusers = &list_extra_users($d, 'db');
+my ($d, $u) = @_;
+my @dbusers = $u ? (&get_extra_user($d, 'db', $u)) : &list_extra_users($d, 'db');
 foreach my $dbuser (@dbusers) {
         my (@dbt) = grep { /^db_/ } keys %{$dbuser};
         my @dbs;
@@ -107,8 +107,8 @@ return @dbusers;
 sub get_extra_db_user
 {
 my ($d, $u) = @_;
-my @extra_db_users = &list_extra_db_users($d);
-my ($extra_db_user) = grep { $_->{'user'} eq $u } @extra_db_users;
+my ($extra_db_user) = grep { $_->{'user'} eq $u }
+	&list_extra_db_users($d, $u);
 return $extra_db_user;
 }
 
