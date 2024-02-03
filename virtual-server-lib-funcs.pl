@@ -1694,8 +1694,8 @@ if ($_[1]) {
 	&create_jailkit_passwd_file($_[1]);
 	}
 
-# Suppress incompatible extra users
-&suppress_extra_user($_[0], $_[1]);
+# Remove clashing records of extra user
+&merge_extra_user($_[0], $_[1]);
 }
 
 # modify_user(&user, &old, &domain, [noaliases])

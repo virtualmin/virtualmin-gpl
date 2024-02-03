@@ -196,10 +196,10 @@ sub suppressible_extra_users_types
 return ('db', 'web');
 }
 
-# suppress_extra_user(&unix-user, &domain)
+# merge_extra_user(&unix-user, &domain)
 # Remove records of extra user that
 # cannot coexist with Unix user
-sub suppress_extra_user
+sub merge_extra_user
 {
 my ($unix_user, $d) = @_;
 foreach (&suppressible_extra_users_types()) {
