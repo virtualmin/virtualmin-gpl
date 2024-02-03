@@ -11102,7 +11102,6 @@ foreach my $key (keys %check) {
 		$required{$key} = 1;
 		}
 	}
-var_dump(\%required);
 # Return -1 if the number of required types exceeds the password length
 return -1 if scalar(keys %required) > $len;
 # Check if password contains one of each required types
