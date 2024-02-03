@@ -546,7 +546,7 @@ if ($user->{'extra'}) {
 	if ($user->{'type'} eq 'web') {
 		$user->{'pass'} = $pass if ($pass);
 		&modify_webserver_user($user, $olduser, $d,
-			{ virtualmin_htpasswd =>
+			{ 'virtualmin_htpasswd' =>
 				join("\n", &list_webserver_user_dirs($d, $olduser)) });
 		}
 	}

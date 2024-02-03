@@ -426,7 +426,7 @@ elsif ($webserver_only) {
         $user->{'pass'} = $pass;
         $user->{'pass_crypt'} = $encpass, delete($user->{'pass'}) if ($encpass);
         $user->{'pass'} || $user->{'pass_crypt'} || &usage($text{'user_epasswebnotset'});
-        &modify_webserver_user($user, undef, $d, { virtualmin_htpasswd => join("\n", @webdirs) });
+        &modify_webserver_user($user, undef, $d, { 'virtualmin_htpasswd' => join("\n", @webdirs) });
 	}
 # Create the user and virtusers and alias
 else {
