@@ -5531,7 +5531,7 @@ sub revoke_webserver_user_access
 {
 my ($user, $d) = @_;
 if (&plugin_defined("virtualmin-htpasswd", "mailbox_delete")) {
-    &plugin_call("virtualmin-htpasswd", "mailbox_delete", $user, $d);
+	&plugin_call("virtualmin-htpasswd", "mailbox_delete", $user, $d);
 	}
 }
 
