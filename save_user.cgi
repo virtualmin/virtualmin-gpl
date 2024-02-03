@@ -556,6 +556,15 @@ else {
 			exit;
 			}
 		
+		# Validate SSH public key if given
+		my $sshkey = $in{'sshkey'};
+		if ($sshkey_mode) {
+			$sshkey =~ s/\r|\n/ /g;
+			$sshkey = &trim($sshkey);
+			$sshkeyerr = &validate_ssh_pubkey($sshkey);
+			&error($sshkeyerr) if ($sshkeyerr);
+			}
+
 		# Validate user
 		$user->{'nocheck'} = 1 if ($extra_db_user);
 		$err = &validate_user($d, $user);
@@ -583,13 +592,8 @@ else {
 			$emailmailbox = 1;
 			}
 		
-		# Setup SSH public key if one was given
+		# Setup SSH public key if given
 		if ($sshkey_mode) {
-			my $sshkey = $in{'sshkey'};
-			$sshkey =~ s/\r|\n/ /g;
-			$sshkey = &trim($sshkey);
-			$sshkeyerr = &validate_ssh_pubkey($sshkey);
-			&error($sshkeyerr) if ($sshkeyerr);
 			$err = &add_domain_user_ssh_pubkey($d, $user, $sshkey);
 			&error($err) if ($err);
 			}
