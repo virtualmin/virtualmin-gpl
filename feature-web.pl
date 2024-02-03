@@ -5495,27 +5495,22 @@ if (&plugin_defined("virtualmin-htpasswd", "can_directory")) {
 return @rv;
 }
 
-# modify_webserver_user(&user, &old-user, &domain, [input-data])
+# modify_webserver_user(&user, &old-user, &domain, &input-data)
 # Create or update a webserver user
 sub modify_webserver_user
 {
 my ($user, $olduser, $d, $indata) = @_;
-# Set input data
-$indata ||= \%in;
-
 # Encrypt user initial password if given
 $user->{'pass'} = &encrypt_user_password($user, $user->{'pass'})
 	if ($user->{'pass'});
 # Use new encrypted password if was given or use old one
 $user->{'pass_crypt'} = $user->{'pass'} || $user->{'pass_crypt'};
-
 # Validate plugins
 if (&plugin_defined("virtualmin-htpasswd", "mailbox_validate")) {
 	$err = &plugin_call("virtualmin-htpasswd", "mailbox_validate", $user, $olduser,
 				$indata, $in{'new'}, $d);
 	&error($err) if ($err);
 	}
-
 # Run plugin save functions
 if (&plugin_defined("virtualmin-htpasswd", "mailbox_save")) {
     &plugin_call("virtualmin-htpasswd", "mailbox_save", $user, $olduser,

@@ -44,7 +44,7 @@ if (!$in{'new'}) {
                         $user->{'pass'} || &error($text{'user_epasswebnotset'});
                         }
 
-                &modify_webserver_user($user, \%olduser, $d);
+                &modify_webserver_user($user, \%olduser, $d, \%in);
                 }
         }
 else {
@@ -59,7 +59,7 @@ else {
         $user->{'pass'} = $in{'webpass'};
         $user->{'pass'} || &error($text{'user_epasswebnotset'});
 
-        &modify_webserver_user($user, undef, $d);
+        &modify_webserver_user($user, undef, $d, \%in);
 	}
 
 # Log
