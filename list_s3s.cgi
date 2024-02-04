@@ -18,18 +18,7 @@ if (@s3s) {
 				  $text{'s3s_endpoint'},
 				  $text{'s3s_usedby'} ]);
 	foreach my $s3 (@s3s) {
-		my @users;
-		foreach my $sched (@scheds) {
-			foreach my $dest (&get_scheduled_backup_dests($sched)) {
-				my ($mode, $akey) = &parse_backup_url($dest);
-				if ($mode == 3 &&
-				    ($akey eq $s3->{'access'} ||
-				     !$akey && $s3->{'default'})) {
-					push(@users, $sched);
-					last;
-					}
-				}
-			}
+		my @users = grep { &backup_uses_s3_account($_, $s3) } @scheds;
 		print &ui_columns_row([
 			&ui_link("edit_s3.cgi?id=$s3->{'id'}", $s3->{'access'}),
 			&html_escape($s->{'endpoint'} ||

@@ -1290,5 +1290,21 @@ else {
 	}
 }
 
+# backup_uses_s3_account(&sched, &account)
+# Returns 1 if a scheduled backup uses an S3 account
+sub backup_uses_s3_account
+{
+my ($sched, $account) = @_;
+foreach my $dest (&get_scheduled_backup_dests($sched)) {
+	my ($mode, $akey) = &parse_backup_url($dest);
+	if ($mode == 3 &&
+	    ($akey eq $account->{'access'} ||
+	     !$akey && $account->{'default'})) {
+		return 1;
+		}
+	}
+return 0;
+}
+
 1;
 

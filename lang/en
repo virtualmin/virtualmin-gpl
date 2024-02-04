@@ -7954,5 +7954,21 @@ s3s_endpoint_def=Amazon AWS
 s3s_usedby=Used by
 s3s_users=$1 scheduled backups
 s3s_nousers=Not used
+s3s_return=S3 accounts
+
+s3_title1=Add S3 Account
+s3_title2=Edit S3 Account
+s3_desc=XXX
+s3_header=S3 account details
+s3_access=S3 access key
+s3_secret=S3 secret key
+s3_endpoint=S3-compatible endpoint URL
+s3_endpoint_def=Just use AWS
+s3_egone=S3 account does not exist!
+s3_err=Failed to save S3 account
+s3_err2=Failed to delete S3 account
+s3_eusers=Account is being used by $1 scheduled backups
+s3_usedby=Used by backups
+s3_nousers=Account is not used by any scheduled backups yet
 
 __norefs=1
