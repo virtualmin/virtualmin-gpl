@@ -20003,15 +20003,15 @@ foreach my $sshpubkeyfileline (@$sshpubkeyfilelines) {
 return $pubkey;
 }
 
-# validate_ssh_pubkey(pubkey)
+# validate_ssh_pubkey(pubkey, [no-ssh-keygen])
 # Returns an error message if some SSH public key is invalid
 sub validate_ssh_pubkey
 {
-my ($pubkey) = @_;
+my ($pubkey, $no_ssh_keygen) = @_;
 my ($ssh_keytest_out, $ssh_keytest_err);
 ($ssh_keytest_err = $text{'validate_esshpubkeyempty'}) if (!$pubkey);
 if (!$ssh_keytest_err) {
-	my $ssh_keygen = &has_command('ssh-keygen');
+	my $ssh_keygen = !$no_ssh_keygen && &has_command('ssh-keygen');
 	if ($ssh_keygen) {
 		my $pubkeyfile = &transname('id_rsa.pub');
 		&write_file_contents($pubkeyfile, $pubkey);
