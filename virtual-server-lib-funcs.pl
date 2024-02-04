@@ -20015,14 +20015,22 @@ if (!$ssh_keytest_err) {
 	if ($ssh_keygen) {
 		my $pubkeyfile = &transname('id_rsa.pub');
 		&write_file_contents($pubkeyfile, $pubkey);
-		&execute_command("$ssh_keygen -l -f $pubkeyfile", undef, \$ssh_keytest_out, \$ssh_keytest_err);
-		($ssh_keytest_err =~ s/\s*\Q$pubkeyfile\E\s*|^\s+|\s+$//g, $ssh_keytest_err =~ s/\.$//,
-			$ssh_keytest_err = &text('validate_esshpubkeyinvalid', ucfirst($ssh_keytest_err)))
-				if ($ssh_keytest_err);
+		&execute_command("$ssh_keygen -l -f $pubkeyfile",
+			undef, \$ssh_keytest_out, \$ssh_keytest_err);
+		if ($ssh_keytest_err) {
+			$ssh_keytest_err =~ s/\s*\Q$pubkeyfile\E\s*|^\s+|\s+$//g;
+			$ssh_keytest_err =~ s/\.$//;
+			$ssh_keytest_err = &text('validate_esshpubkeyinvalid', 
+				&html_escape(ucfirst($ssh_keytest_err)));
+			}
 		}
-	else {
-		($ssh_keytest_err = &text('validate_esshpubkeyinvalid', $text{'validate_esshpubkeyinvalidformat'}))
-			if ($pubkey && $pubkey !~ /^(ssh-rsa|ssh-dss|ecdsa-sha2-nistp256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521|ssh-ed25519)/);
+	elsif ($pubkey && $pubkey !~
+		/^(ssh-rsa|ssh-dss|ssh-dsa|ecdsa-sha2-nistp256|rsa-sha2-512|
+		   rsa-sha2-256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521|
+		   ssh-ed25519|sk-ecdsa-sha2-nistp256|sk-ssh-ed25519)/x) {
+		$ssh_keytest_err =
+			&text('validate_esshpubkeyinvalid',
+			$text{'validate_esshpubkeyinvalidformat'});
 		}
 	}
 return wantarray ? ($ssh_keytest_err, $ssh_keytest_out) : $ssh_keytest_err;
