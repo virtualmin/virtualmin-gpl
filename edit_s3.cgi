@@ -33,7 +33,7 @@ print &ui_table_row($text{'s3_secret'},
 # Endpoint URL
 print &ui_table_row($text{'s3_endpoint'},
 	&ui_opt_textbox("endpoint", $s3->{'endpoint'}, 40,
-			$text{'s3_endpoint_def'}));
+			$text{'s3_endpoint_def'}, $text{'s3_endpoint_hp'}));
 
 if (!$in{'new'}) {
 	# Current users

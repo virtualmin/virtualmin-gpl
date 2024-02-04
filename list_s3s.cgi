@@ -21,7 +21,7 @@ if (@s3s) {
 		my @users = grep { &backup_uses_s3_account($_, $s3) } @scheds;
 		print &ui_columns_row([
 			&ui_link("edit_s3.cgi?id=$s3->{'id'}", $s3->{'access'}),
-			&html_escape($s->{'endpoint'} ||
+			&html_escape($s3->{'endpoint'} ||
 				     $text{'s3s_endpoint_def'}),
 			@users ? &text('s3s_users', scalar(@users))
 			       : $text{'s3s_nousers'},
