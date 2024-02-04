@@ -467,7 +467,7 @@ if (&domain_has_website($d) eq 'virtualmin-nginx' &&
 			}
 		&virtualmin_nginx::flush_config_file_lines();
 		&virtualmin_nginx::unlock_all_config_files();
-		&virtualmin_nginx::apply_nginx();
+		&register_post_action(\&virtualmin_nginx::print_apply_nginx);
 		}
 	}
 }
@@ -512,7 +512,7 @@ if (&domain_has_website($d) eq 'virtualmin-nginx' &&
 			if ($directives_to_remove) {
 				&virtualmin_nginx::save_directive($server, [ $directives_to_remove ], [ ]);
 				&virtualmin_nginx::flush_config_file_lines();
-				&virtualmin_nginx::apply_nginx();
+				&register_post_action(\&virtualmin_nginx::print_apply_nginx);
 				}
 			&virtualmin_nginx::unlock_all_config_files();
 			}
