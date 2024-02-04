@@ -411,8 +411,11 @@ my ($d, $opts) = @_;
 if (&domain_has_website($d) eq 'virtualmin-nginx' &&
     &indexof('virtualmin-nginx', @plugins) >= 0) {
 	
-	my $locdir = $opts->{'path'}, $locdir =~ s/\/$//, $locdir ||= '/';
-	my $locdirarg = $locdir; $locdirarg .= '/' if ($locdirarg !~ /\/$/);
+	my $locdir = $opts->{'path'};
+	$locdir =~ s/\/$//;
+	$locdir ||= '/';
+	my $locdirarg = $locdir;
+	$locdirarg .= '/' if ($locdirarg !~ /\/$/);
 	&virtualmin_nginx::lock_all_config_files();
 	my $server = &virtualmin_nginx::find_domain_server($d);
 	if ($server) {
@@ -475,8 +478,11 @@ my ($d, $opts) = @_;
 # Remove Nginx webserver previously added records
 if (&domain_has_website($d) eq 'virtualmin-nginx' &&
     &indexof('virtualmin-nginx', @plugins) >= 0) {
-	my $locdir = $opts->{'path'}, $locdir =~ s/\/$//, $locdir ||= '/';
-	my $locdirarg = $locdir; $locdirarg .= '/' if ($locdirarg !~ /\/$/);
+	my $locdir = $opts->{'path'};
+	$locdir =~ s/\/$//;
+	$locdir ||= '/';
+	my $locdirarg = $locdir;
+	$locdirarg .= '/' if ($locdirarg !~ /\/$/);
 	&virtualmin_nginx::lock_all_config_files();
 	my $server = &virtualmin_nginx::find_domain_server($d);
 	if ($server) {
