@@ -961,7 +961,8 @@ return $req;
 sub make_s3_connection
 {
 my ($akey, $skey, $endpoint) = @_;
-$endpoint ||= $config{'s3_endpoint'};
+my $s3 = &get_s3_account($akey);
+$endpoint ||= $s3->{'endpoint'} if ($s3);
 &require_s3();
 my $endport;
 ($endpoint, $endport) = split(/:/, $endpoint);
@@ -1136,7 +1137,8 @@ return wantarray ? (1, undef) : 1;
 sub call_aws_s3_cmd
 {
 my ($akey, $params, $endpoint) = @_;
-$endpoint ||= $config{'s3_endpoint'};
+my $s3 = &get_s3_account($akey);
+$endpoint ||= $s3->{'endpoint'} if ($s3);
 return &call_aws_cmd($akey, "s3", $params, $endpoint);
 }
 
@@ -1245,6 +1247,19 @@ if (opendir(DIR, $s3_accounts_dir)) {
 	closedir(DIR);
 	}
 return @rv;
+}
+
+# get_s3_account(access-key)
+# Returns an account looked up by key, or undef
+sub get_s3_account
+{
+my ($akey) = @_;
+my $rv = $get_s3_account_cache{$akey};
+if (!$rv) {
+	($rv) = grep { $_->{'access'} eq $akey } &list_s3_accounts();
+	$get_s3_account_cache{$akey} = $rv if ($rv);
+	}
+return $rv;
 }
 
 # save_s3_account(&account)

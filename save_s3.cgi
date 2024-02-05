@@ -45,7 +45,9 @@ else {
 		}
 
 	# Validate that it works
-	# XXX
+	$get_s3_account_cache{$s3->{'access'}} = $s3;
+	my $buckets = &s3_list_buckets($s3->{'access'}, $s3->{'secret'});
+	&error(&text('s3_echeck', $buckets)) if (!ref($buckets));
 
 	# Save the account
 	&save_s3_account($s3);
