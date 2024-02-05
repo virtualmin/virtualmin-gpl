@@ -1328,5 +1328,27 @@ foreach my $dest (&get_scheduled_backup_dests($sched)) {
 return 0;
 }
 
+# create_s3_accounts_from_backups()
+# If any scheduled backups use S3, create S3 accounts from their creds
+sub create_s3_accounts_from_backups
+{
+my @s3s = &list_s3_accounts();
+foreach my $sched (&list_scheduled_backups()) {
+	foreach my $dest (&get_scheduled_backup_dests($sched)) {
+		my ($mode, $akey, $skey) = &parse_backup_url($dest);
+		my ($s3) = grep { $_->{'access'} eq $akey } @s3s;
+		if (!$s3) {
+			$s3 = { 'access' => $akey,
+				'secret' => $skey,
+				'desc' => "S3 account from backup ".
+					  $sched->{'desc'},
+			      };
+			&save_s3_account($s3);
+			push(@s3s, $s3);
+			}
+		}
+	}
+}
+
 1;
 
