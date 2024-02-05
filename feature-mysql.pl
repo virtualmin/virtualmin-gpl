@@ -1093,7 +1093,7 @@ else {
 return undef;
 }
 
-# backup_mysql(&domain, file, &options, home-format, incremental, [&as-domain],
+# backup_mysql(&domain, file, &options, home-format, differential, [&as-domain],
 #              &all-options, &key)
 # Dumps this domain's mysql database to a backup file
 sub backup_mysql

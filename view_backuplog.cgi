@@ -63,7 +63,7 @@ print &ui_table_row($text{'viewbackup_size'},
 print &ui_table_row($text{'viewbackup_time'},
 	&nice_hour_mins_secs($log->{'end'} - $log->{'start'}));
 
-# Incremental?
+# Differential?
 print &ui_table_row($text{'viewbackup_inc'},
 	$log->{'increment'} == 1 ? $text{'viewbackup_inc1'} :
 	$log->{'increment'} == 2 ? $text{'viewbackup_inc2'} :

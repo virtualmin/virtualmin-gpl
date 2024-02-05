@@ -365,7 +365,7 @@ print &ui_table_row(
 		    [ 2, $text{'backup_compression2'} ],
 		    [ 3, $text{'backup_compression3'} ] ]));
 
-# Show incremental option
+# Show differential option
 if (&has_incremental_tar()) {
 	print &ui_table_row(
 		&hlink($text{'backup_increment'}, "backup_increment"),
