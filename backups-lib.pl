@@ -4526,51 +4526,51 @@ $wt .= "</table>\n";
 push(@opts, [ 9, $text{'backup_mode9'}, $wt ]);
 
 # S3 backup fields (bucket, access key ID, secret key and file)
-local $s3user = $mode == 3 ? $user : undef;
-local $s3pass = $mode == 3 ? $pass : undef;
 if (&can_use_cloud("s3")) {
+	local $s3user = $mode == 3 ? $user : undef;
+	local $s3pass = $mode == 3 ? $pass : undef;
 	$s3user ||= $config{'s3_akey'};
 	$s3pass ||= $config{'s3_skey'};
-	}
-local $st = &$tablestart('s3');
-if ($s3user || !&can_use_aws_s3_creds()) {
-	$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
-	       &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
+	local $st = &$tablestart('s3');
+	if ($s3user || !&can_use_aws_s3_creds()) {
+		$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
+		       &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
+		       "</td> </tr>\n";
+		$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
+		       &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
+		       "</td> </tr>\n";
+		}
+	$st .= "<tr> <td>$text{'backup_s3path'}</td> <td>".
+	       &ui_textbox($name."_s3path", $mode != 3 ? "" :
+					    $server.($path ? "/".$path : ""), 50).
 	       "</td> </tr>\n";
-	$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
-	       &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
+	$st .= "<tr> <td></td> <td>".
+	       &ui_checkbox($name."_rrs", 1, $text{'backup_s3rrs'}, $port == 1).
 	       "</td> </tr>\n";
+	$st .= "</table>\n";
+	push(@opts, [ 3, $text{'backup_mode3'}, $st ]);
 	}
-$st .= "<tr> <td>$text{'backup_s3path'}</td> <td>".
-       &ui_textbox($name."_s3path", $mode != 3 ? "" :
-				    $server.($path ? "/".$path : ""), 50).
-       "</td> </tr>\n";
-$st .= "<tr> <td></td> <td>".
-       &ui_checkbox($name."_rrs", 1, $text{'backup_s3rrs'}, $port == 1).
-       "</td> </tr>\n";
-$st .= "</table>\n";
-push(@opts, [ 3, $text{'backup_mode3'}, $st ]);
 
 # Rackspace backup fields (username, API key and bucket/file)
-local $rsuser = $mode == 6 ? $user : undef;
-local $rspass = $mode == 6 ? $pass : undef;
 if (&can_use_cloud("rs")) {
+	local $rsuser = $mode == 6 ? $user : undef;
+	local $rspass = $mode == 6 ? $pass : undef;
 	$rsuser ||= $config{'rs_user'};
 	$rspass ||= $config{'rs_key'};
+	local $st = &$tablestart('rs');
+	$st .= "<tr> <td>$text{'backup_rsuser'}</td> <td>".
+	       &ui_textbox($name."_rsuser", $rsuser, 40, 0, undef, $noac).
+	       "</td> </tr>\n";
+	$st .= "<tr> <td>$text{'backup_rskey'}</td> <td>".
+	       &ui_password($name."_rskey", $rspass, 40, 0, undef, $noac).
+	       "</td> </tr>\n";
+	$st .= "<tr> <td>$text{'backup_rspath'}</td> <td>".
+	       &ui_textbox($name."_rspath", $mode != 6 ? undef :
+					    $server.($path ? "/".$path : ""), 50).
+	       "</td> </tr>\n";
+	$st .= "</table>\n";
+	push(@opts, [ 6, $text{'backup_mode6'}, $st ]);
 	}
-local $st = &$tablestart('rs');
-$st .= "<tr> <td>$text{'backup_rsuser'}</td> <td>".
-       &ui_textbox($name."_rsuser", $rsuser, 40, 0, undef, $noac).
-       "</td> </tr>\n";
-$st .= "<tr> <td>$text{'backup_rskey'}</td> <td>".
-       &ui_password($name."_rskey", $rspass, 40, 0, undef, $noac).
-       "</td> </tr>\n";
-$st .= "<tr> <td>$text{'backup_rspath'}</td> <td>".
-       &ui_textbox($name."_rspath", $mode != 6 ? undef :
-				    $server.($path ? "/".$path : ""), 50).
-       "</td> </tr>\n";
-$st .= "</table>\n";
-push(@opts, [ 6, $text{'backup_mode6'}, $st ]);
 
 # Google cloud files
 my $state = &cloud_google_get_state();
