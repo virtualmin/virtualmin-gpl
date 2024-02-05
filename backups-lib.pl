@@ -4074,8 +4074,12 @@ elsif ($url =~ /^webmin:\/\/([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
 	@rv = (9, undef, undef, $1, $3, $2 ? substr($2, 1) : 10000);
 	}
 elsif ($url =~ /^(s3|s3rrs):\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
-	# S3 with a username and password
+	# S3 with an access key and secret key
 	@rv = (3, $2, $3, $4, $6, $1 eq "s3rrs" ? 1 : 0);
+	}
+elsif ($url =~ /^(s3|s3rrs):\/\/([^:]*)\@([^\/]+)(\/(.*))?$/) {
+	# S3 with an access key only
+	@rv = (3, $2, undef, $3, $5, $1 eq "s3rrs" ? 1 : 0);
 	}
 elsif ($url =~ /^(s3|s3rrs):\/\/([^\/]+)(\/(.*))?$/ &&
        ($config{'s3_akey'} || &can_use_aws_s3_creds()) &&

@@ -962,7 +962,10 @@ sub make_s3_connection
 {
 my ($akey, $skey, $endpoint) = @_;
 my $s3 = &get_s3_account($akey);
-$endpoint ||= $s3->{'endpoint'} if ($s3);
+if ($s3) {
+	$endpoint ||= $s3->{'endpoint'};
+	$skey ||= $s3->{'secret'};
+	}
 &require_s3();
 my $endport;
 ($endpoint, $endport) = split(/:/, $endpoint);
@@ -1084,6 +1087,8 @@ return &can_use_aws_cmd($akey, $skey, $zone, \&call_aws_s3_cmd, "ls");
 sub can_use_aws_cmd
 {
 my ($akey, $skey, $zone, $func, @cmd) = @_;
+my $s3 = &get_s3_account($akey);
+$skey ||= $s3->{'secret'} if ($s3);
 my $acachekey = $akey || "none";
 if (!&has_aws_cmd()) {
 	return wantarray ? (0, "The <tt>aws</tt> command is not installed") : 0;
@@ -1234,6 +1239,7 @@ if ($config{'s3_akey'}) {
 	push(@rv, { 'access' => $config{'s3_akey'},
 		    'secret' => $config{'s3_skey'},
 		    'endpoint' => $config{'s3_endpoint'},
+		    'desc' => $config{'s3_desc'},
 		    'id' => 1,
 		    'default' => 1, });
 	}
@@ -1272,6 +1278,7 @@ if ($account->{'default'}) {
 	$config{'s3_akey'} = $account->{'access'};
 	$config{'s3_skey'} = $account->{'secret'};
 	$config{'s3_endpoint'} = $account->{'endpoint'};
+	$config{'s3_desc'} = $account->{'desc'};
 	&unlock_file($module_config_file);
 	&save_module_config();
 	}
