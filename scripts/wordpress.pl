@@ -277,6 +277,9 @@ if (!$upgrade) {
 	if (-r $hfile) {
 		&unlink_file_as_domain_user($d, $hfile);
 		}
+	
+	# Add webserver records
+	&script_wordpress_webserver_add_records($d, $opts);
 	}
 else {
 	# Do the upgrade
@@ -320,6 +323,9 @@ cleanup_script_database($d, $opts->{'db'}, $opts->{'dbtbpref'});
 if ($opts->{'newdb'}) {
         delete_script_database($d, $opts->{'db'});
         }
+
+# Remove the webserver records
+&script_wordpress_webserver_delete_records($d, $opts);
 
 return (1, "WordPress directory and tables deleted.");
 }
@@ -396,6 +402,122 @@ return (128, 'M') ;
 sub script_wordpress_passmode
 {
 return (1, 8, '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$');
+}
+
+sub script_wordpress_webserver_add_records
+{
+my ($d, $opts) = @_;
+# Add Nginx webserver records for permalinks to work
+if (&domain_has_website($d) eq 'virtualmin-nginx' &&
+    &indexof('virtualmin-nginx', @plugins) >= 0) {
+	
+	my $locdir = $opts->{'path'};
+	$locdir =~ s/\/$//;
+	$locdir ||= '/';
+	my $locdirarg = $locdir;
+	$locdirarg .= '/' if ($locdirarg !~ /\/$/);
+	&virtualmin_nginx::lock_all_config_files();
+	my $server = &virtualmin_nginx::find_domain_server($d);
+	if ($server) {
+		my @locs = &virtualmin_nginx::find("location", $server);
+		my ($loc) = grep {
+			if ($locdir eq '/') {
+				$_->{'words'}->[0] eq $locdir
+				}
+			else {
+				$_->{'words'}->[0] =~ /\Q$locdir\E$/ 
+				}	
+		} @locs;
+		# We already have a location for this directory
+		if ($loc) {
+			my $locold = $loc;
+			my ($contains_try_files) =
+					grep { $_->{name} eq 'try_files' &&
+					       $_->{'words'}->[0] eq '$uri' &&
+					       $_->{'words'}->[1] eq '$uri/' &&
+					       $_->{'words'}->[2] eq ($locdirarg.'index.php?$args') }
+							@{$loc->{members}};
+			if ($contains_try_files) {
+				# Exact record already exists
+				&virtualmin_nginx::unlock_all_config_files();
+				return;
+				}
+			else {
+				# Add try_files to existing location
+				push(@{$loc->{'members'}},
+					{ 'name' => 'try_files',
+					  'words' => [ '$uri',
+					               '$uri/',
+					               ($locdirarg.'index.php?$args') ]});
+				&virtualmin_nginx::save_directive($server, [ $locold ], [ $loc ]);
+				}
+			}
+		else {
+			# Add a new location for installed directory
+			$loc = {
+				'name' => 'location',
+				'words' => [ $locdir ],
+				'type' => 1,
+				'members' => [
+					{ 'name' => 'try_files',
+					  'words' => [ '$uri',
+						       '$uri/',
+						       ($locdirarg.'index.php?$args') ]}]};
+			&virtualmin_nginx::save_directive($server, [ ], [ $loc ]);
+			}
+		&virtualmin_nginx::flush_config_file_lines();
+		&virtualmin_nginx::unlock_all_config_files();
+		&register_post_action(\&virtualmin_nginx::print_apply_nginx);
+		}
+	}
+}
+
+sub script_wordpress_webserver_delete_records
+{
+my ($d, $opts) = @_;
+# Remove Nginx webserver previously added records
+if (&domain_has_website($d) eq 'virtualmin-nginx' &&
+    &indexof('virtualmin-nginx', @plugins) >= 0) {
+	my $locdir = $opts->{'path'};
+	$locdir =~ s/\/$//;
+	$locdir ||= '/';
+	my $locdirarg = $locdir;
+	$locdirarg .= '/' if ($locdirarg !~ /\/$/);
+	&virtualmin_nginx::lock_all_config_files();
+	my $server = &virtualmin_nginx::find_domain_server($d);
+	if ($server) {
+		my @locs = &virtualmin_nginx::find("location", $server);
+		my ($loc) = grep {
+			if ($locdir eq '/') {
+				$_->{'words'}->[0] eq $locdir
+				}
+			else {
+				$_->{'words'}->[0] =~ /\Q$locdir\E$/ 
+				}	
+		} @locs;
+		# Found location directive for this directory
+		if ($loc) {
+			my $locold = $loc;
+			my ($contains_try_files) =
+					grep { $_->{name} eq 'try_files' &&
+					       $_->{'words'}->[0] eq '$uri' &&
+					       $_->{'words'}->[1] eq '$uri/' &&
+					       $_->{'words'}->[2] eq ($locdirarg.'index.php?$args') }
+							@{$loc->{members}};
+			# If exact record exists alone remove the
+			# location, otherwise remove record alone
+			my $directives_to_remove =
+				(grep { $_ ne $contains_try_files } @{$loc->{members}}) ?
+					$contains_try_files : $loc;
+			if ($directives_to_remove) {
+				&virtualmin_nginx::save_directive($server, [ $directives_to_remove ], [ ]);
+				&virtualmin_nginx::flush_config_file_lines();
+				&register_post_action(\&virtualmin_nginx::print_apply_nginx);
+				}
+			&virtualmin_nginx::unlock_all_config_files();
+			}
+		}
+	}
 }
 
 1;
