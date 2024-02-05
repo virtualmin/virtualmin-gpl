@@ -27,6 +27,7 @@ if ($in{'delete'}) {
 	}
 else {
 	# Validate inputs
+	$s3->{'desc'} = $in{'desc'};
 	$in{'access'} =~ /^\S+$/ || &error($text{'backup_eakey'});
 	$s3->{'access'} = $in{'access'};
 	$in{'secret'} =~ /^\S+$/ || &error($text{'backup_eskey'});
@@ -52,7 +53,7 @@ else {
 	# Save the account
 	&save_s3_account($s3);
 
-	# Update existing backups
+	# Update existing backups if the keys changed
 	foreach my $s (@users) {
 		# XXX
 		}

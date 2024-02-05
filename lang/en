@@ -7945,10 +7945,11 @@ ports_fpm=PHP FPM server
 ports_script=Installed $1 script
 
 s3s_title=Amazon S3 Accounts
-s3s_desc=The S3 accounts on this page can be used by Virtualmin scheduled backups. Accounts can either be at Amazon AWS, or at other cloud storage providers that offer an S3-compatible HTTP API.
+s3s_longdesc=The S3 accounts on this page can be used by Virtualmin scheduled backups. Accounts can either be at Amazon AWS, or at other cloud storage providers that offer an S3-compatible HTTP API.
 s3s_none=No accounts have been registered yet.
 s3s_add=Add a new S3 account.
 s3s_access=Access Key
+s3s_desc=Description
 s3s_endpoint=API Endpoint URL
 s3s_endpoint_def=Amazon AWS
 s3s_usedby=Used by
@@ -7958,8 +7959,9 @@ s3s_return=S3 accounts
 
 s3_title1=Add S3 Account
 s3_title2=Edit S3 Account
-s3_desc=XXX
+s3_longdesc=XXX
 s3_header=S3 account details
+s3_desc=Account description
 s3_access=S3 access key
 s3_secret=S3 secret key
 s3_endpoint=S3-compatible endpoint

@@ -15,12 +15,16 @@ else {
 	$s3 || &error($text{'s3_egone'});
 	}
 
-print $text{'s3_desc'},"<p>\n";
+print $text{'s3_longdesc'},"<p>\n";
 
 print &ui_form_start("save_s3.cgi", "post");
 print &ui_hidden("new", $in{'new'});
 print &ui_hidden("id", $in{'id'});
 print &ui_table_start($text{'s3_header'}, undef, 2);
+
+# Account description
+print &ui_table_row($text{'s3_desc'},
+	&ui_textbox("desc", $s3->{'desc'}, 60));
 
 # Access key
 print &ui_table_row($text{'s3_access'},
