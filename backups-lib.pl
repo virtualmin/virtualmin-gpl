@@ -4180,6 +4180,118 @@ else {
 return @rv;
 }
 
+# join_backup_url(mode, user, pass, host, path, port)
+# Convert the parts returned by parse_backup_url back into a backup URL
+sub join_backup_url
+{
+my ($mode, $user, $pass, $host, $path, $port) = @_;
+my $rv;
+if ($mode == 0) {
+	# Local file
+	$rv = $path;
+	}
+elsif ($mode == 1) {
+	# FTP server
+	$rv .= "ftp://".$user.":".$pass."\@";
+	if (&check_ip6address($host)) {
+		$rv .= "[".$host."]";
+		}
+	else {
+		$rv .= $host;
+		}
+	if ($port != 21) {
+		$rv .= ":".$port;
+		}
+	$rv .= $path;
+	}
+elsif ($mode == 2) {
+	# SSH server
+	$rv .= "ssh://".$user.":".$pass."\@";
+	if (&check_ip6address($host)) {
+		$rv .= "[".$host."]";
+		}
+	else {
+		$rv .= $host;
+		}
+	if ($port != 22) {
+		$rv .= ":".$port;
+		}
+	$rv .= $path;
+	}
+elsif ($mode == 9) {
+	# Webmin URL
+	$rv .= "webmin://";
+	if ($user) {
+		$rv .= $user.":".$pass."\@";
+		}
+	$rv .= $host.":".$port.$path;
+	}
+elsif ($mode == 3) {
+	# S3 URL
+	$rv .= ($port ? "s3rrs" : "s3")."://";
+	if ($user && $pass) {
+		$rv .= $user.":".$pass."\@";
+		}
+	elsif ($user) {
+		$rv .= $user."\@";
+		}
+	$rv .= $host;
+	$rv .= "/".$path if ($path);
+	}
+elsif ($mode == 6) {
+	# Rackspace URL
+	$rv .= "rs://";
+	if ($user) {
+		$rs .= $user.":".$pass."\@";
+		}
+	$rv .= $host;
+	$rv .= "/".$path if ($path);
+	}
+elsif ($mode == 7) {
+	# Google cloud URL
+	$rv .= "gcs://";
+	$rv .= $host;
+	$rv .= "/".$path if ($path);
+	}
+elsif ($mode == 8) {
+	# Dropbox URL
+	$rv .= "dropbox://";
+	$rv .= $host."/" if ($host);
+	$rv .= $path;
+	}
+elsif ($mode == 10) {
+	# Backblaze URL
+	$rv .= "bb://";
+	$rv .= $host;
+	$rv .= "/".$path if ($path);
+	}
+elsif ($mode == 11) {
+	# Azure URL
+	$rv .= "azure://";
+	$rv .= $host;
+	$rv .= "/".$path if ($path);
+	}
+elsif ($mode == 12) {
+	# Google Drive URL
+	$rv .= "drive://";
+	$rv .= $host."/" if ($host);
+	$rv .= $path;
+	}
+elsif ($mode == 4) {
+	# Download file
+	$rv .= "download:";
+	}
+elsif ($mode == 44) {
+	# Download via link
+	$rv .= "downloadlink:";
+	}
+elsif ($mode == 5) {
+	# Upload file
+	$rv .= "upload:";
+	}
+return $rv;
+}
+
 # nice_backup_url(string, [caps-first])
 # Converts a backup URL to a nice human-readable format
 sub nice_backup_url
