@@ -1336,7 +1336,8 @@ my @s3s = &list_s3_accounts();
 foreach my $sched (&list_scheduled_backups()) {
 	foreach my $dest (&get_scheduled_backup_dests($sched)) {
 		my ($mode, $akey, $skey) = &parse_backup_url($dest);
-		my ($s3) = grep { $_->{'access'} eq $akey } @s3s;
+		my ($s3) = grep { $_->{'access'} eq $akey &&
+				  $_->{'secret'} eq $skey } @s3s;
 		if (!$s3) {
 			$s3 = { 'access' => $akey,
 				'secret' => $skey,

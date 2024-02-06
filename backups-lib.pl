@@ -4525,24 +4525,24 @@ $wt .= "<tr> <td>$text{'backup_pass'}</td> <td>".
 $wt .= "</table>\n";
 push(@opts, [ 9, $text{'backup_mode9'}, $wt ]);
 
-# S3 backup fields (bucket, access key ID, secret key and file)
-if (&can_use_cloud("s3")) {
+# S3 backup fields (bucket, account and file)
+my @s3s;
+if (&can_use_cloud("s3") && (@s3s = &list_s3_accounts())) {
 	local $s3user = $mode == 3 ? $user : undef;
 	local $s3pass = $mode == 3 ? $pass : undef;
-	$s3user ||= $config{'s3_akey'};
-	$s3pass ||= $config{'s3_skey'};
 	local $st = &$tablestart('s3');
 	if ($s3user || !&can_use_aws_s3_creds()) {
-		$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
-		       &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
-		       "</td> </tr>\n";
-		$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
-		       &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
-		       "</td> </tr>\n";
+		my ($s3) = grep { $_->{'access'} eq $s3user &&
+				 (!$s3pass || $_->{'secret'} eq $s3pass) } @s3s;
+		$st .= "<tr> <td>$text{'backup_as3'}</td> ";
+		$st .= "<td>".&ui_select($name."_as3",
+			$s3 ? $s3->{'id'} : undef,
+			[ map { [ $_->{'id'}, $_->{'desc'} || $_->{'access'} ] }
+			      @s3s ])."</td> </tr>\n";
 		}
 	$st .= "<tr> <td>$text{'backup_s3path'}</td> <td>".
 	       &ui_textbox($name."_s3path", $mode != 3 ? "" :
-					    $server.($path ? "/".$path : ""), 50).
+			    $server.($path ? "/".$path : ""), 50).
 	       "</td> </tr>\n";
 	$st .= "<tr> <td></td> <td>".
 	       &ui_checkbox($name."_rrs", 1, $text{'backup_s3rrs'}, $port == 1).
@@ -4743,9 +4743,10 @@ elsif ($mode == 3) {
 		&error($text{'backup_es3path2'});
 	local $proto = $in{$name.'_rrs'} ? 's3rrs' : 's3';
 	if (!&can_use_aws_s3_creds()) {
-		$in{$name.'_akey'} =~ /^\S+$/i || &error($text{'backup_eakey'});
-		$in{$name.'_skey'} =~ /^\S+$/i || &error($text{'backup_eskey'});
-		return $proto."://".$in{$name.'_akey'}.":".$in{$name.'_skey'}.
+		my @s3s = &list_s3_accounts();
+		my ($s3) = grep { $_->{'id'} eq $in{$name."_as3"} } @s3s;
+		$s3 || &error($text{'backup_eas3'});
+		return $proto."://".$s3->{'access'}.":".$s3->{'secret'}.
 		       "\@".$in{$name.'_s3path'};
 		}
 	else {
