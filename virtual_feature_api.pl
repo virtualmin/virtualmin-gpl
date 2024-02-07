@@ -223,7 +223,7 @@ sub feature_always_links
 {
 }
 
-# feature_backup(&domain, file, &opts, homeformat?, incremental?, as-owner,
+# feature_backup(&domain, file, &opts, homeformat?, differential?, as-owner,
 #                &all-opts)
 # Called to backup this feature for the domain to the given file. Must return 1
 # on success or 0 on failure

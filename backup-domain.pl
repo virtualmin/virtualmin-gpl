@@ -42,14 +42,14 @@ settings to include with the C<--virtualmin> parameter. For example,
 C<--virtualmin config> would only backup the module configuration.
 
 By default, backups include all files in each domain's home directory. However,
-if you use the C<--incremental> parameter, only those changed since the last
-non-incremental backup will be included. This allows you to reduce the size of
+if you use the C<--differential> parameter, only those changed since the last
+non-differential backup will be included. This allows you to reduce the size of
 backups for large websites that rarely change, but means that when restoring
-both the full and incremental backups are needed.
+both the full and differential backups are needed.
 
-The alternative parameter C<--no-incremental> can be used by prevent Virtualmin
+The alternative parameter C<--no-differential> can be used by prevent Virtualmin
 from clearing the list of files that were included in the last full backup.
-This is used if you have a scheduled incremental backup setup, and don't want
+This is used if you have a scheduled differential backup setup, and don't want
 to change its behavior by doing an ad-hoc full backup.
 
 To exclude some files from each virtual server's home directory from the
@@ -207,11 +207,11 @@ while(@ARGV > 0) {
 		$v = shift(@ARGV);
 		@vbs = grep { $_ ne $v } @vbs;
 		}
-	elsif ($a eq "--incremental") {
-		&has_incremental_tar() || &usage("The tar command on this system does not support incremental backups");
+	elsif ($a eq "--incremental" || $a eq "--differential") {
+		&has_incremental_tar() || &usage("The tar command on this system does not support differential backups");
 		$increment = 1;
 		}
-	elsif ($a eq "--no-incremental") {
+	elsif ($a eq "--no-incremental" || $a eq "--no-differential") {
 		$increment = 2;
 		}
 	elsif ($a eq "--purge") {
@@ -308,7 +308,7 @@ if ($onebyone && !$newformat) {
 	       "with --newformat");
 	}
 if ($increment) {
-	&has_incremental_format($compression) || &usage("The configured backup format does not support incremental backups");
+	&has_incremental_format($compression) || &usage("The configured backup format does not support differential backups");
 	}
 
 # Work out what will be backed up
@@ -472,7 +472,7 @@ print "                         [--newformat]\n";
 print "                         [--onebyone]\n";
 print "                         [--strftime] [--purge days]\n";
 if (&has_incremental_tar()) {
-	print "                         [--incremental] | [--no-incremental]\n";
+	print "                         [--differential] | [--no-differential]\n";
 	}
 print "                         [--all-virtualmin] | [--virtualmin config] |\n";
 print "                                              [--except-virtualmin config]\n";

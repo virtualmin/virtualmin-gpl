@@ -404,7 +404,7 @@
 * Updated the Z-push script installer to version 2.0.6, Dolibarr to 3.2.3, Django to 1.4.3, WordPress to 3.5.0, TWiki to 5.1.3, SMF to 2.0.3, CMS Made Simple to 1.11.4, Drupal to 7.19 and 6.28, phpMyAdmin to 3.5.5, eXtplorer to 2.1.2, TikiWiki to 10.0 and 6.9, SugarCRM to 6.5.9, Moodle to 2.4.1, FengOffice to 2.2.2, WebCalendar to 1.2.6, Instiki to 0.9.15, Coppermine to 1.5.22, ZenPhoto to 1.4.4, PiWik to 1.10.1, Trac to 0.12.5, and Movable Type to 5.2.2. Added script installers for FileCharger and AjaXplorer.
 
 #### Version 3.96
-* Backups can now be prevented from updating the incremental state, so that ad-hoc backups can be run without interfering with scheduled incremental backups.
+* Backups can now be prevented from updating the differential state, so that ad-hoc backups can be run without interfering with scheduled differential backups.
 * Virtualmin will now prompt the root user after logging in if any virtual servers with unsafe symlink or mod_php settings are found. Previous versions applied fixes for these security issues automatically, which broke some domains.
 * If running Virtualmin in SSL mode with a certificate of less than 2048 bits, a warning is now displayed on the system information page prompting the admin to generate or request a new cert.
 * Updated the MediaWiki script installer to versions 1.20.2 and 1.19.3, bbPress to 1.2, TextPattern to 4.5.4, and ZenPhoto to 1.4.3.5.
@@ -836,7 +836,7 @@
 * Added a Module Config option to have only one spamassassin process run at a time.
 * Added the notify-domains.pl command line script, for sending email to some or all virtual server owners.
 * When MySQL is on a remote system, the 'show table status' command is used to get an approximate size for each database.
-* On FreeBSD, the Gnu tar command gtar is used in preference to regular tar when installed. This allows incremental backups to be performed.
+* On FreeBSD, the Gnu tar command gtar is used in preference to regular tar when installed. This allows differential backups to be performed.
 * Added a button to the Edit Mailbox page for logging into Usermin as a user without having to enter their password. Requires Webmin 1.440 or later though.
 * Included domains for SPF for new virtual servers can now be set in server templates.
 * Resellers can now read mail in all mailboxes under domains they control, if allowed on the Module Config page under 'Extra modules'.
@@ -891,7 +891,7 @@
 * The remote hosts from which connections to MySQL are allowed can be easily edited on a per-domain basis on the Edit Databases page, in the new 'Remote hosts' tab. These apply to the domain owner and any mailboxes with database access. The modify-database-hosts.pl command can also be used to edit them from the shell or API.
 * All text in the Virtualmin user interface is now available in Dutch, thanks to Gandyman.
 * By default, new DNS zones only allow localhost, hosts on the local network and known slaves to transfer records.
-* Completely re-designed the Virtualmin backup UI, to support multiple backup schedules and allow domain owners and resellers to schedule their own backups (subject to limits configured by the master administrator). Domain owners can now also restore backups of their home directories and databases. Backups can either be full or incremental, to speed up the process of backing up large but infrequently-changing sites.
+* Completely re-designed the Virtualmin backup UI, to support multiple backup schedules and allow domain owners and resellers to schedule their own backups (subject to limits configured by the master administrator). Domain owners can now also restore backups of their home directories and databases. Backups can either be full or differential, to speed up the process of backing up large but infrequently-changing sites.
 * Fixed support for international domain names using non-european character sets (like Chinese and Cyrillic) in newer versions of Perl.
 * Improved the migration of Plesk mailbox aliases and forwarding, and protected directories.
 * When a domain's home directory is changed, update session.save_path in its php.ini files to match.

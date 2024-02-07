@@ -1632,7 +1632,7 @@ elsif ($d->{'proxy_pass_mode'} == 2) {
 return @dirs;
 }
 
-# backup_web(&domain, file, &opts, home-format?, incremental?, as-owner,
+# backup_web(&domain, file, &opts, home-format?, differential?, as-owner,
 # 	     &all-opts)
 # Save the virtual server's Apache config as a separate file, except for 
 # ServerAlias lines for alias domains

@@ -251,7 +251,7 @@ return $asd;
 
 # backup_domains(file, &domains, &features, dir-format, skip-errors, &options,
 #		 home-format, &virtualmin-backups, mkdir, onebyone, as-owner,
-#		 &callback-func, incremental, on-schedule, &key, kill-running,
+#		 &callback-func, differential, on-schedule, &key, kill-running,
 #		 compression-format)
 # Perform a backup of one or more domains into a single tar.gz file. Returns
 # an OK flag, the size of the backup file, and a list of domains for which
@@ -281,7 +281,7 @@ if (!defined($compression) || $compression eq '') {
 	}
 $opts->{'dir'}->{'compression'} = $compression;
 
-# Make sure incremental mode is supported with the compression format
+# Make sure differential mode is supported with the compression format
 if ($compression == 3 && $increment) {
 	&$first_print($text{'backup_eincrzip'});
 	return (0, 0, $doms);
@@ -1972,8 +1972,8 @@ foreach my $lockfile (@lockfiles) {
 	&unlock_file($lockfile);
 	}
 
-# For any domains that failed and were full backups, clear the incremental
-# file so that future incremental backups aren't diffs against it
+# For any domains that failed and were full backups, clear the differential
+# file so that future differential backups aren't diffs against it
 if ($increment == 0 && &has_incremental_tar()) {
 	foreach my $d (@errdoms) {
 		if ($d->{'id'}) {
@@ -4914,7 +4914,7 @@ else {
 
 
 # has_incremental_format([compression])
-# Returns 1 if the configured backup format supports incremental backups
+# Returns 1 if the configured backup format supports differential backups
 sub has_incremental_format
 {
 my ($compression) = @_;
@@ -4923,7 +4923,7 @@ $compression = $config{'compression'}
 return $compression != 3;
 }
 
-# Returns 1 if tar supports incremental backups
+# Returns 1 if tar supports differential backups
 sub has_incremental_tar
 {
 return 0 if ($config{'tar_args'} =~ /--acls/);
@@ -6341,7 +6341,7 @@ elsif ($mode == 12 && $host =~ /\%/) {
 return $ok;
 }
 
-# write_backup_log(&domains, dest, incremental?, start, size, ok?,
+# write_backup_log(&domains, dest, differential?, start, size, ok?,
 # 		   "cgi"|"sched"|"api", output, &errordoms, [user], [&key],
 # 		   [schedule-id], [separate-format], [allow-owner-restore],
 # 		   [compression], [description])

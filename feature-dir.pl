@@ -465,7 +465,7 @@ sub check_dir_clash
 return 0;
 }
 
-# backup_dir(&domain, file, &options, home-format, incremental, [&as-domain],
+# backup_dir(&domain, file, &options, home-format, differential, [&as-domain],
 # 	     &all-options, &key)
 # Backs up the server's home directory in tar format to the given file
 sub backup_dir
@@ -556,7 +556,7 @@ foreach my $x (@xlist) {
 	}
 &close_tempfile(XTEMP);
 
-# Work out incremental flags
+# Work out differential flags
 local ($iargs, $iflag, $ifile, $ifilecopy);
 if (&has_incremental_tar() && $increment != 2) {
 	if (!-d $incremental_backups_dir) {
@@ -568,7 +568,7 @@ if (&has_incremental_tar() && $increment != 2) {
 		&unlink_file($ifile);
 		}
 	else {
-		# Add a flag file indicating that this was an incremental,
+		# Add a flag file indicating that this was an differential,
 		# and take a copy of the file so we can put it back as before
 		# the backup (as tar modifies it)
 		if (-r $ifile) {
@@ -817,7 +817,7 @@ if ($ex) {
 	return 0;
 	}
 else {
-	# Check for incremental restore of newly-created domain, which indicates
+	# Check for differential restore of newly-created domain, which indicates
 	# that is is not complete
 	my $wasincr = -r $iflag;
 	if ($d->{'wasmissing'} && $wasincr) {
@@ -844,7 +844,7 @@ else {
 		&set_php_wrappers_writable($d, 0, 1);
 		}
 	
-	# Incremental file is no longer valid, so clear it
+	# differential file is no longer valid, so clear it
 	local $ifile = "$incremental_backups_dir/$d->{'id'}";
 	&unlink_file($ifile);
 
@@ -864,7 +864,7 @@ else {
 			}
 		}
 
-	# For a non-incremental restore, delete files that weren't in the backup
+	# For a non-differential restore, delete files that weren't in the backup
 	if (!$wasincr && $cf != 4 && $opts->{'delete'}) {
 		# Parse tar output to find files that were restored
 		my %restored;

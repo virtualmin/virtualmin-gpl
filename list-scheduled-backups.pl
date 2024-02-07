@@ -113,7 +113,7 @@ if ($multi) {
 			($s->{'fmt'} == 0 ? "Single archive file" :
 			 $s->{'fmt'} == 1 ? "One file per server (old format)" :
 					    "One file per server"),"\n";
-		print "    Incremental: ",$s->{'increment'} ? "Yes" : "No","\n";
+		print "    Differential: ",$s->{'increment'} ? "Yes" : "No","\n";
 		print "    Enabled: ",$s->{'enabled'} ? "Yes" : "No","\n";
 		if ($s->{'special'}) {
 			print "    Cron schedule: $s->{'special'}\n";
