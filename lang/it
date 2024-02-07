@@ -784,7 +784,6 @@ backup_sel=Solo selezionati ..
 backup_mkdir=Creare directory destinazione?
 backup_increment=Livello salvataggio
 backup_increment0=Completo (tutti i file)
-backup_increment1=Incrementale (solo i file cambiati dall'ultimo salvataggio)
 backup_onebyone=Trasferisci ogni server virtuale dopo il suo salvataggio
 backup_now=Salva ora
 backup_save=Salva programma
