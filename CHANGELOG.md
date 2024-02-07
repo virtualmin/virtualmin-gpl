@@ -1,6 +1,6 @@
-#### Version 7.9.1
+#### Version 7.10.0
 * Add support for selecting CGI mode for virtual server using Website Options page and CLI
-* 
+* Updated terminology now refers to incremental backups as differential backups
 
 #### Version 7.9.0
 * Add reworked navigation menu for better usability and accessibility
