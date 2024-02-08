@@ -72,10 +72,10 @@ if (@logs) {
 			$log->{'increment'} == 1 ? $text{'viewbackup_inc1'} :
 						   $text{'viewbackup_inc0'},
 			&nice_size($log->{'size'}),
-			$log->{'ok'} && !$log->{'errdoms'} ? $text{'yes'} :
+			$log->{'ok'} && !$log->{'errdoms'} ? $text{'backuplog_status_ok'} :
 			 $log->{'ok'} && $log->{'errdoms'} ?
-			  "<font color=#ffaa00>$text{'backuplog_part'}</font>" :
-			  "<font color=#ff0000>$text{'no'}</font>"
+			  &ui_text_color($text{'backuplog_status_partial'}, 'warn') :
+			  &ui_text_color($text{'backuplog_status_failed'}, 'danger')
 			]);
 		}
 	print &ui_columns_table([ $text{'sched_dest'}, $text{'sched_doms'},
@@ -83,9 +83,9 @@ if (@logs) {
 				  $text{'backuplog_who'},
 				  $text{'backuplog_when'},
 				  $text{'backuplog_len'},
-				  $text{'backuplog_type'},
+				  $text{'backuplog_incr'},
 				  $text{'backuplog_size'},
-				  $text{'backuplog_ok2'} ],
+				  $text{'backuplog_status'} ],
 				100, \@table);
 				  
 	}
