@@ -132,7 +132,7 @@ if ($multi) {
 			print "    Failed domains: $l->{'errdoms'}\n";
 			}
 		print "    Destination: $l->{'dest'}\n";
-		print "    Incremental: ",
+		print "    Differential: ",
 		      ($l->{'increment'} == 1 ? "Yes" :
 		       $l->{'increment'} == 2 ? "Disabled" : "No"),"\n";
 		if (defined($l->{'compression'})) {

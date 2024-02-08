@@ -197,7 +197,7 @@ else {
 		&virtualmin_ui_parse_cron_time("enabled", $sched, \%in);
 		}
 
-	# Check for incremental-only setup
+	# Check for differential-only setup
 	if ($in{'new'} && $sched->{'increment'}) {
 		my @full = grep { !$_->{'increment'} } @scheds;
 		if (!@full) {

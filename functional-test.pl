@@ -64,8 +64,8 @@ $test_backup_file = "/tmp/$test_domain.tar.gz";
 $test_zip_backup_file = "/tmp/$test_domain.zip";
 $test_tar_backup_file = "/tmp/$test_domain.tar";
 $test_bzip2_backup_file = "/tmp/$test_domain.tar.bz2";
-$test_incremental_backup_file = "/tmp/$test_domain.incremental.tar.gz";
-$test_incremental_backup_file2 = "/tmp/$test_domain.incremental2.tar.gz";
+$test_differential_backup_file = "/tmp/$test_domain.differential.tar.gz";
+$test_differential_backup_file2 = "/tmp/$test_domain.differential2.tar.gz";
 $test_backup_dir = "/tmp/functional-test-backups";
 $test_backup_dir2 = "/tmp/functional-test-backups2";
 $test_email_dir = "/usr/local/webadmin/virtualmin/testmail";
@@ -2723,7 +2723,7 @@ $backup_tests = [
 		      'Final status: OK',
 		      'Destination: '.$test_backup_file,
 		      'Run from: api',
-		      'Incremental: No' ],
+		      'Differential: No' ],
 	},
 
 	# Backup to a temp dir
@@ -4664,7 +4664,7 @@ $splitbackup_tests = [
 
 $enc_splitbackup_tests = &convert_to_encrypted($splitbackup_tests);
 
-$incremental_tests = [
+$differential_tests = [
 	# Create a test domain
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -4705,40 +4705,40 @@ $incremental_tests = [
 		      [ 'content' => 'New website content' ] ],
 	},
 
-	# Create an incremental backup
+	# Create an differential backup
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'all-features' ],
-		      [ 'incremental' ],
-		      [ 'dest', $test_incremental_backup_file ] ],
+		      [ 'differential' ],
+		      [ 'dest', $test_differential_backup_file ] ],
 	},
 
-	# Make sure the incremental is smaller than the full
+	# Make sure the differential is smaller than the full
 	{ 'command' =>
 		"full=`du -k $test_backup_file | cut -f 1` ; ".
-		"incr=`du -k $test_incremental_backup_file | cut -f 1` ; ".
+		"incr=`du -k $test_differential_backup_file | cut -f 1` ; ".
 		"test \$incr -lt \$full"
 	},
 
-	# Create another incremental backup
+	# Create another differential backup
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'all-features' ],
-		      [ 'incremental' ],
-		      [ 'dest', $test_incremental_backup_file2 ] ],
+		      [ 'differential' ],
+		      [ 'dest', $test_differential_backup_file2 ] ],
 	},
 
-	# Make sure the second incremental is smaller than the full
+	# Make sure the second differential is smaller than the full
 	{ 'command' =>
 		"full=`du -k $test_backup_file | cut -f 1` ; ".
-		"incr=`du -k $test_incremental_backup_file2 | cut -f 1` ; ".
+		"incr=`du -k $test_differential_backup_file2 | cut -f 1` ; ".
 		"test \$incr -lt \$full"
 	},
 
-	# Make sure the two incrementals are the same
+	# Make sure the two differentials are the same
 	{ 'command' =>
-		"incr=`du -k $test_incremental_backup_file | cut -f 1` ; ".
-		"incr2=`du -k $test_incremental_backup_file2 | cut -f 1` ; ".
+		"incr=`du -k $test_differential_backup_file | cut -f 1` ; ".
+		"incr2=`du -k $test_differential_backup_file2 | cut -f 1` ; ".
 		"test \$incr -eq \$incr2"
 	},
 
@@ -4754,11 +4754,11 @@ $incremental_tests = [
 		      [ 'source', $test_backup_file ] ],
 	},
 
-	# Restore the incremental
+	# Restore the differential
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'all-features' ],
-		      [ 'source', $test_incremental_backup_file ] ],
+		      [ 'source', $test_differential_backup_file ] ],
 	},
 
 	# Verify that the latest files were restored
@@ -4776,7 +4776,7 @@ $incremental_tests = [
 	},
 	];
 
-$enc_incremental_tests = &convert_to_encrypted($incremental_tests);
+$enc_differential_tests = &convert_to_encrypted($differential_tests);
 
 $purge_tests = [
 	# Create a test domain to backup
@@ -11198,8 +11198,8 @@ $alltests = { '_config' => $_config_tests,
 	      'enc_webminbackup' => $enc_webminbackup_tests,
 	      'ipbackup' => $ipbackup_tests,
 	      'purge' => $purge_tests,
-	      'incremental' => $incremental_tests,
-	      'enc_incremental' => $enc_incremental_tests,
+	      'differential' => $differential_tests,
+	      'enc_differential' => $enc_differential_tests,
               'mail' => $mail_tests,
               'atmail' => $atmail_tests,
               'aliasmail' => $aliasmail_tests,
@@ -11281,7 +11281,7 @@ TESTS: foreach $tt (@tests) {
 
 	# Cleanup backups first
 	&unlink_file($test_backup_file);
-	&unlink_file($test_incremental_backup_file);
+	&unlink_file($test_differential_backup_file);
 	&unlink_file($test_backup_dir);
 	system("mkdir -p $test_backup_dir");
 	&unlink_file($test_backup_dir2);
