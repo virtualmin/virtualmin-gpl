@@ -50,6 +50,7 @@ while(@ARGV > 0) {
 
 if ($multi) {
 	# Full details
+	my @scheds = &list_scheduled_backups();
 	foreach $s (@s3s) {
 		print $s->{'access'},"\n";
 		print "    Secret key: $s->{'secret'}\n";
@@ -58,6 +59,10 @@ if ($multi) {
 			}
 		if ($s->{'endpoint'}) {
 			print "    Endpoint: $s->{'endpoint'}\n";
+			}
+		my @users = grep { &backup_uses_s3_account($_, $s) } @scheds;
+		foreach my $b (@users) {
+			print "    Used by backup ID: ",$b->{'id'},"\n";
 			}
 		}
 	}
