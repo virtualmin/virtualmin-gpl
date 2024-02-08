@@ -20,15 +20,21 @@ default, he will only be given an email account. The C<--noemail> option turns
 off the default email account, which is useful for creating FTP or
 database-only users.
 
-Extra email addresses for the new user can be specified with the C<--extra>
-option, followed by an email address within the virtual server. This option
-can be given multiple times if you wish.
+The C<--db-only> flag is used to create a database-only user, with no Unix user,
+email or FTP access. The C<--webserver-only> flag is used to create a webserver-only
+user, with no Unix user, email, database or FTP access, and the C<--webserver-dir>
+option can be used to specify directories to which the webserver user will have access
+to. This option can be given multiple times to specify multiple directories.
 
 The new user can be granted access to MySQL databases associated with the
 virtual server with the C<--mysql> option, which must be followed by a database
 name. This option can occur multiple times in order to grant access to more
 than one database. Unfortunately, there is no way to grant access to
 PostgreSQL databases.
+
+Extra email addresses for the new user can be specified with the C<--extra>
+option, followed by an email address within the virtual server. This option
+can be given multiple times if you wish.
 
 To create a user who has only FTP access to the domain's website, use the
 C<--web> flag. To turn off spam checking for the new user, include
@@ -49,6 +55,12 @@ as it needs to know the plaintext password to re-hash it for MySQL.
 All mail users can have a password recovery address set, used by the forgotten
 password feature in Virtualmin. For new users, this can be set with the 
 C<--recovery> flag followed by an address.
+
+To add a SSH public key to a user's account, use the C<--ssh-pubkey> flag followed
+by the key's content enclosed in quotes, or by the file name containing the key.
+If the given file contains multiple keys, only the key on the first line will be
+used, unless C<--ssh-pubkey-id> flag is also given, which will pick the key with
+the given ID by matching the key's comment.
 
 =cut
 
@@ -99,6 +111,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--encpass") {
 		$encpass = shift(@ARGV);
 		}
+	elsif ($a eq "--ssh-pubkey") {
+		$sshpubkey = shift(@ARGV);
+		}
+	elsif ($a eq "--ssh-pubkey-id") {
+		$sshpubkeyid = shift(@ARGV);
+		}
 	elsif ($a eq "--real" || $a eq "--desc") {
 		$real = shift(@ARGV);
 		}
@@ -133,6 +151,16 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mysql") {
 		$db = shift(@ARGV);
 		push(@dbs, { 'type' => 'mysql', 'name' => $db });
+		}
+	elsif ($a eq "--db-only") {
+		$db_only++;
+		}
+	elsif ($a eq "--webserver-only") {
+		$webserver_only++;
+		}
+	elsif ($a eq "--webserver-dir") {
+		$webdir = shift(@ARGV);
+		push(@webdirs, $webdir);
 		}
 	elsif ($a eq "--group") {
 		$group = shift(@ARGV);
@@ -274,6 +302,19 @@ else {
 	$user->{'passmode'} = 2;
 	$user->{'pass'} = $encpass;
 	}
+# SSH public key
+my $pubkey;
+if ($sshpubkey) {
+	my $sshpubkeyfile = -r $sshpubkey ? $sshpubkey : undef;
+	if ($sshpubkeyfile) {
+		$pubkey = &get_ssh_pubkey_from_file($sshpubkeyfile, $sshpubkeyid);
+		}
+	else {
+		$pubkey = $sshpubkey;
+		}
+	my $pubkeyerr = &validate_ssh_pubkey($pubkey);
+	&usage($pubkeyerr) if ($pubkeyerr);
+	}
 if ($disable) {
 	&set_pass_disable($user, 1);
 	}
@@ -334,7 +375,7 @@ if ($user->{'unix'}) {
 # Check for clash within this domain
 ($clash) = grep { $_->{'user'} eq $username &&
 		  $_->{'unix'} == $user->{'unix'} } @users;
-$clash && &error($text{'user_eclash2'});
+$clash && &usage($text{'user_eclash2'});
 
 if (!$user->{'noextra'}) {
 	# Check if any extras clash
@@ -361,8 +402,40 @@ if ($user->{'home'} && !$user->{'nocreatehome'} &&
 	&create_user_home($user, $d);
 	}
 
+# Create database user only
+if ($db_only) {
+	my $dbuserclash = &check_extra_user_clash($d, $user->{'user'}, 'db');
+        !$dbuserclash || &usage($dbuserclash);
+	$user->{'pass'} = $pass;
+	# Create database user
+        my $err = &create_databases_user($d, $user);
+        &usage($err) if ($err);
+        # Add user to domain list
+	$user->{'extra'} = 1;
+        $user->{'type'} = 'db';
+        &update_extra_user($d, $user);
+	}
+# Create web-only user
+elsif ($webserver_only) {
+	# Create initial user
+        $user->{'extra'} = 1;
+        $user->{'type'} = 'web';
+        my $userclash = &check_extra_user_clash($d, $user->{'user'}, 'web');
+        !$userclash || &usage($userclash);
+        # Set initial password
+        $user->{'pass'} = $pass;
+        $user->{'pass_crypt'} = $encpass, delete($user->{'pass'}) if ($encpass);
+        $user->{'pass'} || $user->{'pass_crypt'} || &usage($text{'user_epasswebnotset'});
+        &modify_webserver_user($user, undef, $d, { 'virtualmin_htpasswd' => join("\n", @webdirs) });
+	}
 # Create the user and virtusers and alias
-&create_user($user, $d);
+else {
+	&create_user($user, $d);
+	if ($pubkey) {
+		my $addsshpubkey_err = &add_domain_user_ssh_pubkey($d, $user, $pubkey);
+		&usage($addsshpubkey_err) if ($addsshpubkey_err);
+		}
+	}
 
 # Create an empty mail file, if needed
 if ($user->{'email'} && !$user->{'nomailfile'}) {
@@ -392,6 +465,7 @@ print "                       --pass \"password-for-new-user\" |\n";
 print "                       --encpass encrypted-password |\n";
 print "                       --random-pass |\n";
 print "                       --passfile password-file\n";
+print "                      [--ssh-pubkey \"key\" | pubkey-file <--ssh-pubkey-id id]\n";
 if (&has_home_quotas()) {
 	print "                      [--quota quota-in-blocks|\"UNLIMITED\"]\n";
 	}
@@ -412,9 +486,11 @@ if (!$user || $user->{'unix'}) {
 	print "                      [--shell /path/to/shell]\n";
 	}
 print "                      [--noemail]\n";
+print "                      [--db-only <--mysql db>*]\n";
+print "                      [--webserver-only <--webserver-dir path>*]\n";
+print "                      [--mysql db]*\n";
 print "                      [--extra email.address\@some.domain]\n";
 print "                      [--recovery address\@offsite.com]\n";
-print "                      [--mysql db]*\n";
 print "                      [--group name]*\n";
 print "                      [--web]\n";
 if ($config{'spam'}) {

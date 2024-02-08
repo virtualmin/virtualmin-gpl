@@ -147,13 +147,41 @@ setup_overgroupquota=Serverquotum voor $2 van $1 is bereikt
 setup_overuserquota=Quotum voor domeineigenaar voor $2 van $1 is bereikt
 setup_ewebfcgidcmd=Kon <tt>fcgiwrap</tt> serveropdracht niet vinden!
 
+users_ecannot3=U mag geen e-mailgebruikers toevoegen
 users_indom=$1 gebruikers in domein $2
 
 users_indomsub=$1 gebruikers in domein $2 ($3 inclusief subdomeinen)
+users_add_ssh=SSH-gebruiker toevoegen.
+users_add_ftp=FTP-gebruiker toevoegen.
+users_add_mail=E-mailgebruiker toevoegen.
+users_add_db=Databasegebruiker toevoegen.
+users_add_web=Webgebruiker toevoegen.
 users_mailclient=Instellingen voor e-mailclient weergeven
 users_mailclientdesc=Weergave-instellingen die moeten worden gebruikt door de e-mailclients van gebruikers voor dit domein.
+users_owner_label=EIGENAAR
+users_shared_label=GEDEELD
+users_disabled_label=GEHANDICAPT
+users_login_access_none=Geen
+users_login_access_web=Web
+users_login_access_db=Database
+users_login_access_mail=E-mail
+users_login_access_ftp=FTP
+users_login_access_ssh=SSH
+users_login_access__and=En
+users_login_access__only=alleen
 
+user_createssh=SSH-gebruiker aanmaken
+user_createmail=Maak een e-mailgebruiker aan
+user_createdb=Databasegebruiker maken
 user_chrootwarn=Waarschuwing: omdat FTP-directorybeperkingen niet zijn ingeschakeld, heeft deze gebruiker ook toegang tot de webinhoud van de hoogste server.
+user_header_ssh=SSH-gebruikersgegevens
+user_header_ftp=FTP-gebruikersgegevens
+user_header_mail=Mail gebruikersgegevens
+user_header_db=Gegevens databasegebruiker
+user_header2b=Instellingen voor de thuismap
+user_header3a=Door de gebruiker geconfigureerde e-maildoorsturing
+user_user3=Login gebruikersnaam
+user_userweb=Stel de ID van de nieuwe gebruiker zo in dat deze overeenkomt met de domeineigenaar
 user_recovery=Adres voor wachtwoordherstel
 user_norecovery=Geen ingesteld
 user_gotrecovery=Offsite adres
@@ -167,6 +195,7 @@ user_eovermquota=Het e-mailquotum van de gebruiker mag niet hoger zijn dan het e
 user_nospam2=E-mail controleren op spam?
 user_eremail=Ontbrekend of ongeldig adres voor e-mail met gebruikersupdate
 user_ehomehome=Home-directory staat niet onder $1
+user_header6=Overige toegangsinstellingen
 user_charset=Tekenset voor antwoordbericht
 user_charset_def=Hetzelfde als de originele e-mail
 user_echarset=Tekenset moet lijken op UTF-8 of iso-8859-1
@@ -174,6 +203,11 @@ user_ehomeexists=Thuismap $1 moet een bestaande map zijn voor FTP-gebruikers van
 user_remailbut=Verzend aanmeldings-e-mail opnieuw
 user_sendrecover=Wachtwoord herstellen
 user_noforward=Automatisch antwoord op doorgestuurde e-mail?
+user_edoesntexist=Gebruiker $1 bestaat niet!
+user_epassdbnotset=Databse-gebruikerswachtwoord is niet ingesteld!
+user_eadddbuser=Kan databasegebruiker $1 niet toevoegen
+user_edeletedbuser=Kan databasegebruiker $1 niet verwijderen
+user_ealreadyexist=Gebruiker $1 bestaat al
 
 aliases_indom=$1 aliassen in domein $2
 
@@ -196,6 +230,7 @@ edit_disabled_time=Uitgeschakeld op : $1
 edit_ips=IP-adressen
 edit_noip6support=<i>Niet ondersteund op dit systeem</i>
 edit_dnsip2=$1 extern
+edit_users=Gebruikers bewerken
 edit_catcert=SSL-certificaat instellen
 edit_aliasmail=Met eigen e-mail
 edit_catproxy=Proxy instellingen
@@ -1067,6 +1102,8 @@ sysinfo_pythonpath=Pad naar Python
 newquotas_nobody=Niemand
 newquotas_addr=Adressen
 
+mass_evirtuser=.. niet mogelijk voor niet-Unix-gebruikers
+
 links_webminlog_dom=Geregistreerde domeinacties
 links_phpini3=PHP-FPM-configuratie
 links_phplog=PHP-foutenlogboek
@@ -1343,6 +1380,9 @@ azure_account=Azure-account $1
 tdelete_err2=Kan de standaardsjabloon niet wijzigen
 tdelete_edefsub=De standaard subserversjabloon kan niet de standaard zijn voor servers op het hoogste niveau
 tdelete_edeftop=De standaardsjabloon kan niet de standaard zijn voor subservers
+
+showpass_dbmysql=MySQL-gebruiker
+showpass_dbpostgres=PostgreSQL-gebruiker
 
 sharedips_def6=Standaard gedeeld IPv6-adres
 sharedips_ip6s=Gedeelde IPv6-adressen voor alle servers

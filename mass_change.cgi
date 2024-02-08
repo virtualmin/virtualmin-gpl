@@ -12,7 +12,7 @@ $d = &get_domain($in{'dom'});
 
 &obtain_lock_unix($d);
 &obtain_lock_mail($d);
-@users = &list_domain_users($d);
+@users = &list_domain_users($d, 0, 0, 0, 0, 1);
 @ashells = grep { $_->{'mailbox'} && $_->{'avail'} } &list_available_shells();
 
 # Get the users
@@ -43,6 +43,13 @@ foreach $user (@musers) {
 	&$first_print(&text('mass_user', "<tt>$user->{'user'}</tt>"));
 	&$indent_print();
 	$pop3 = &remove_userdom($user->{'user'}, $d);
+
+	# Skip virtual (extra) users
+	if ($user->{'extra'}) {
+		&$outdent_print();
+		&$second_print($text{'mass_evirtuser'});
+		next;
+		}
 
 	# Home directory quota
 	if (&has_home_quotas() && $in{'quota_def'} != 2) {

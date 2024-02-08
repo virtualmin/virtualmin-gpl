@@ -15,7 +15,7 @@ if ($in{'confirm'}) {
 	&obtain_lock_unix($d);
 	&obtain_lock_mail($d);
 	}
-@users = &list_domain_users($d);
+@users = &list_domain_users($d, 0, 0, 0, 0, 1);
 
 # Get the users
 foreach $du (@del) {
@@ -41,6 +41,9 @@ if ($in{'confirm'}) {
 			$simple = &get_simple_alias($d, $user);
 			&delete_simple_autoreply($d, $simple) if ($simple);
 			}
+
+		# Delete SSH public key
+		&delete_domain_user_ssh_pubkey($d, $user);
 
 		# Delete the user, his virtusers and aliases
 		&delete_user($user, $d);

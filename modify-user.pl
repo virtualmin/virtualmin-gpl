@@ -10,7 +10,13 @@ change must be specified with the C<--domain> and C<--user> parameters, which ar
 followed by the server domain name and username respectively.
 
 To change the user's password, use the C<--pass> parameter followed by the new
-password. To modify his real name, use the C<--real> option followed by the new
+password. To add or change SSH public key for a user, use the C<--ssh-pubkey>
+flag followed by the key's content enclosed in quotes, or by the file name
+containing the key. If the given file contains multiple keys, only the key on
+the first line will be used, unless C<--ssh-pubkey-id> flag is also given, which
+will pick the key with the given ID by matching the key's comment.
+
+To modify his real name, use the C<--real> option followed by the new
 name (which must typically be quoted, in case it contains a space). If you
 want to change the user's login name, use the C<--newuser> option, followed by
 the new short username (without a suffix).
@@ -35,6 +41,11 @@ remove, and both can occur multiple times on the command line.
 Access to MySQL databases in the domain can be granted with the 
 C<--add-mysql> flag, followed by a database name. Similarly, access can be
 removed with the C<--remove-mysql> flag.
+
+Access to webserver directories can be granted with the C<--add-webserver-dir>
+flag, followed by a directory name. To remove access, use the
+C<--remove-webserver-dir> flag. Both of these can occur multiple times on the
+command line. Note that this option is only available for extra webserver user.
 
 To turn off spam checking for the user, the C<--no-check-spam> flag can be
 given. This is useful for mailboxes that are supposed to receive all the
@@ -105,6 +116,12 @@ while(@ARGV > 0) {
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
+	elsif ($a eq "--ssh-pubkey") {
+		$sshpubkey = shift(@ARGV);
+		}
+	elsif ($a eq "--ssh-pubkey-id") {
+		$sshpubkeyid = shift(@ARGV);
+		}
 	elsif ($a eq "--real") {
 		$real = shift(@ARGV);
 		}
@@ -133,6 +150,14 @@ while(@ARGV > 0) {
 		push(@deldbs, { 'type' => 'mysql',
 				'name' => shift(@ARGV) });
 		}
+	elsif ($a eq "--add-webserver-dir") {
+		# Adding a webserver directory access for webserver user
+		push(@addwebdirs, shift(@ARGV));
+		}
+	elsif ($a eq "--remove-webserver-dir") {
+		# Removing a webserver directory access from webserver user
+		push(@delwebdirs, shift(@ARGV));
+		}
 	elsif ($a eq "--enable-email") {
 		$enable_email = 1;
 		}
@@ -153,7 +178,7 @@ while(@ARGV > 0) {
 		if (!$config{'allow_upper'}) {
 			$newusername = lc($newusername);
 			}
-		$newusername =~ /^[^ \t:]+$/ || &error("Invalid new username");
+		$newusername =~ /^[^ \t:]+$/ || &usage("Invalid new username");
 		}
 	elsif ($a eq "--enable-ftp") {
 		$shell = $ftp_shell;
@@ -257,7 +282,7 @@ $d = &get_domain_by("dom", $domain);
 $d || &usage("Virtual server $domain does not exist");
 &obtain_lock_mail($d);
 &obtain_lock_unix($d);
-@users = &list_domain_users($d);
+@users = &list_domain_users($d, 0, 0, 0, 0, 1);
 ($user) = grep { $_->{'user'} eq $username ||
 		 &remove_userdom($_->{'user'}, $d) eq $username } @users;
 $user || &usage("No user named $username was found in the server $domain");
@@ -508,11 +533,48 @@ if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
 	}
 
 # Validate user
+$user->{'nocheck'} = 1 if ($user->{'extra'});
 $err = &validate_user($d, $user, $olduser);
 &usage($err) if ($err);
 
 # Save the user
-&modify_user($user, $olduser, $d);
+if ($user->{'extra'}) {
+	if ($user->{'type'} eq 'db') {
+		&modify_database_user($user, $olduser, $d);
+		&update_extra_user($d, $user, $olduser);
+		}
+	if ($user->{'type'} eq 'web') {
+		$user->{'pass'} = $pass if ($pass);
+		&modify_webserver_user($user, $olduser, $d,
+			{ 'virtualmin_htpasswd' =>
+				join("\n", &list_webserver_user_dirs($d, $olduser)) });
+		}
+	}
+else {
+	# Update SSH key if given
+	if ($sshpubkey) {
+		my $pubkey;
+		my $sshpubkeyfile = -r $sshpubkey ? $sshpubkey : undef;
+		if ($sshpubkeyfile) {
+			$pubkey = &get_ssh_pubkey_from_file($sshpubkeyfile, $sshpubkeyid);
+			}
+		else {
+			$pubkey = $sshpubkey;
+			}
+		my $pubkeyerr = &validate_ssh_pubkey($pubkey);
+		&usage($pubkeyerr) if ($pubkeyerr);
+		my $existing_pubkey = &get_domain_user_ssh_pubkey($d, $olduser);
+		if ($existing_pubkey) {
+			&update_domain_user_ssh_pubkey($d, $user, $olduser, $pubkey)
+			}
+		else {
+			my $addpubkey_err = &add_domain_user_ssh_pubkey($d, $user, $pubkey);
+			&usage($addpubkey_err) if ($addpubkey_err);
+			}
+		}
+	# Modify user
+	&modify_user($user, $olduser, $d);
+	}
 
 if ($remail) {
 	# Email the user his new account details
@@ -556,6 +618,7 @@ print "\n";
 print "virtualmin modify-user --domain domain.name\n";
 print "                       --user username\n";
 print "                      [--pass \"new-password\" | --passfile password-file]\n";
+print "                      [--ssh-pubkey \"key\" | pubkey-file <--ssh-pubkey-id id]\n";
 print "                      [--disable | --enable]\n";
 print "                      [--real real-name]\n";
 if (&has_home_quotas()) {
@@ -571,6 +634,8 @@ if ($config{'mysql'}) {
 	print "                      [--add-mysql database]\n";
 	print "                      [--remove-mysql database]\n";
 	}
+print "                      [--add-webserver-dir path]*\n";
+print "                      [--remove-webserver-dir path]*\n";
 if ($config{'mail'}) {
 	print "                      [--enable-email]\n";
 	print "                      [--disable-email]\n";
