@@ -244,9 +244,9 @@ index_backuplog=Backup Logs
 index_backuplogdesc=Show logs of all backups that you have permissions to create, made via the Virtualmin UI, command line or on schedule.
 index_bkeys=Backup Encryption Keys
 index_bkeysdesc=List GPG keys used for signing and encrypting Virtualmin backups.
-index_buckets=Amazon S3 Buckets
+index_buckets=S3 Buckets
 index_bucketsdesc=Show S3 buckets used for backups, and allow migration to Glacier to be configured.
-index_s3s=Amazon S3 Accounts
+index_s3s=S3 Accounts
 index_s3sdesc=Show accounts at Amazon S3 and compatible providers, for use by Virtualmin backups.
 index_clouds=Cloud Storage Providers
 index_cloudsdesc=Configure authentication to cloud storage providers like S3, rackspace, Google and Dropbox.
@@ -2451,7 +2451,7 @@ backup_mode0=Local file or directory
 backup_mode0a=File under <tt>virtualmin-backup/</tt>
 backup_mode1=FTP server
 backup_mode2=SSH server
-backup_mode3=Amazon S3 bucket
+backup_mode3=S3 bucket
 backup_mode44=Download via link
 backup_mode5=Upload to server
 backup_mode6=Rackspace Cloud Files
@@ -2512,8 +2512,8 @@ backup_niceftp=$1 on FTP server $2
 backup_nicescp=$1 on SSH server $2
 backup_nicewebmin=$1 on Webmin server $2
 backup_nicefile=local file $1
-backup_nices3=Amazon S3 bucket $1
-backup_nices3p=$2 in Amazon S3 bucket $1
+backup_nices3=S3 bucket $1
+backup_nices3p=$2 in S3 bucket $1
 backup_nicers=Rackspace container $1
 backup_nicersp=$2 in Rackspace container $1
 backup_nicego=Google folder $1
@@ -2875,7 +2875,7 @@ restore_disabledomain=Re-disabling virtual server $1 ..
 restore_fordomain=Restoring backup for virtual server $1 ..
 restore_download=Downloading archive from FTP server ..
 restore_downloadssh=Downloading archive from SSH server ..
-restore_downloads3=Downloading archive from Amazon S3 server ..
+restore_downloads3=Downloading archive from S3 server ..
 restore_downloadrs=Downloading archive from Rackspace Cloud Files ..
 restore_downloadgc=Downloading archive from Google Cloud Storage ..
 restore_downloaddb=Downloading archive from Dropbox ..
@@ -7271,7 +7271,7 @@ fixmodphp_ecannot=You are not allowed to fix PHP permissions
 fixmodphp_doing=Updating all virtual servers to prevent use of mod_php when disabled ..
 fixmodphp_done=.. fixed $1 domains
 
-buckets_title=Amazon S3 Buckets
+buckets_title=S3 Buckets
 buckets_ecannot=You are not allowed to manage S3 buckets
 buckets_eaccounts=No scheduled backups to S3 have been created yet, and no default S3 keys have been set.
 buckets_none=No S3 buckets associated with any of your S3 accounts were found.
@@ -7288,7 +7288,7 @@ bucket_title2=Edit S3 Bucket
 bucket_eagone=Account does not exist!
 bucket_elist=Failed to list buckets : $1
 bucket_egone=Bucket no longer exists!
-bucket_header=Amazon S3 bucket details
+bucket_header=S3 bucket details
 bucket_account=S3 account key
 bucket_name=Bucket name
 bucket_owner=Owned by
@@ -7519,7 +7519,7 @@ cloud_google_project=Project ID
 cloud_google_location=Location for new buckets
 cloud_google_oauth=OAuth2 code from Google
 cloud_google_token=OAuth2 token from Google
-cloud_s3_longdesc=The credentials to enter on this page can be found on the Security Credentials page of your account on the <a href=https://console.aws.amazon.com/ target=_blank>AWS Console</a>.
+cloud_s3_longdesc2=The credentials for Amazon S3 or other compatible providers can be entered on the <a href='$1'>S3 Accounts</a> page.
 cloud_google_longdesc=The settings on this page are supplied by Google when you grant API access to your project on the <a href=https://console.cloud.google.com/apis/credentials target=_blank>Google Cloud Console</a> page, under <b>APIs & Services ⇾ Credentials</b> page. You must create an <b>OAuth 2.0 Client ID</b> credential, with the <b>Authorized redirect URI</b> set to <tt>$1</tt> value. Once created, the <b>client ID</b> and <b>client secret</b> can be entered here.
 cloud_dropbox_longdesc=Before you can backup to Dropbox, you must first <a href=https://www.dropbox.com/register target=_blank>create an account</a> on their website if you don't already have one.
 cloud_bb_longdesc=Before you can backup to Backblaze, you must first <a href=https://backblaze.com/ target=_blank>create an account</a>, and then enable <b>B2 Cloud Storage</b> on the <b>My Settings</b> page. Then you need to generate an Application key with all capabilities on the <b>App Keys</b> page.
@@ -7942,7 +7942,7 @@ global_dismiss=Dismiss
 ports_fpm=PHP FPM server
 ports_script=Installed $1 script
 
-s3s_title=Amazon S3 Accounts
+s3s_title=S3 Accounts
 s3s_longdesc=The S3 accounts on this page can be used by Virtualmin scheduled backups. Accounts can either be at Amazon AWS, or at other cloud storage providers that offer an S3-compatible HTTP API.
 s3s_none=No accounts have been registered yet.
 s3s_add=Add a new S3 account.
@@ -7957,7 +7957,7 @@ s3s_return=S3 accounts
 
 s3_title1=Add S3 Account
 s3_title2=Edit S3 Account
-s3_longdesc=XXX
+s3_longdesc=The credentials to enter on this page can be found on the Security Credentials page of your account on the <a href=https://console.aws.amazon.com/ target=_blank>AWS Console</a> if you are using AWS. Other S3 compatible providers will also supply an access key and secret key for your account that you can enter here, along with the provider's endpoint URL.
 s3_header=S3 account details
 s3_desc=Account description
 s3_access=S3 access key

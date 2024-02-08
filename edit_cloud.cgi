@@ -83,7 +83,7 @@ print &ui_table_row($text{'cloud_users'}, $utable);
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ],
-		     $state->{'ok'} ? ( [ 'clear', $text{'cloud_clear'} ] )
-				    : ( ) ]);
+		     $state->{'ok'} && $prov->{'clear'} ?
+			( [ 'clear', $text{'cloud_clear'} ] ) : ( ) ]);
 
 &ui_print_footer("list_clouds.cgi", $text{'clouds_return'});

@@ -1244,7 +1244,7 @@ if ($config{'s3_akey'}) {
 		    'default' => 1, });
 	}
 if (opendir(DIR, $s3_accounts_dir)) {
-	foreach my $f (readdir(DIR)) {
+	foreach my $f (sort { $a cmp $b } readdir(DIR)) {
 		next if ($f eq "." || $f eq "..");
 		my %account;
 		&read_file("$s3_accounts_dir/$f", \%account);
@@ -1266,6 +1266,30 @@ if (!$rv) {
 	$get_s3_account_cache{$akey} = $rv if ($rv);
 	}
 return $rv;
+}
+
+# get_default_s3_account()
+# Returns the first or default S3 account
+sub get_default_s3_account
+{
+my @s3s = &list_s3_accounts();
+return undef if (!@s3s);
+my ($s3) = grep { $_->{'default'} } @s3s;
+$s3 ||= $s3s[0];
+return $s3;
+}
+
+# lookup_s3_credentials([access-key], [secret-key])
+# Returns either the default access and secret key, or the secret key from
+# the account matching the access key
+sub lookup_s3_credentials
+{
+my ($akey, $skey) = @_;
+if ($akey && $skey) {
+	return ($akey, $skey);
+	}
+my $s3 = $akey ? &get_s3_account($akey) : &get_default_s3_account();
+return $s3 ? ( $s3->{'access'}, $s3->{'secret'} ) : ( );
 }
 
 # save_s3_account(&account)
@@ -1344,6 +1368,7 @@ foreach my $sched (&list_scheduled_backups()) {
 					'secret' => $skey,
 					'desc' => "S3 account from backup ".
 						  $sched->{'desc'},
+				        'endpoint' => $config{'s3_endpoint'},
 				      };
 				&save_s3_account($s3);
 				push(@s3s, $s3);

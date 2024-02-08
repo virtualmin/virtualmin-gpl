@@ -524,6 +524,9 @@ if (&has_home_quotas()) {
 		}
 	}
 
+# Create S3 account entries from scheduled backups
+&create_s3_accounts_from_backups();
+
 # Run any needed actions, like server restarts
 &run_post_actions_silently();
 

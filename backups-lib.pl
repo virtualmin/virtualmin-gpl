@@ -6625,9 +6625,11 @@ if ($owner ne $oldowner) {
 sub list_all_s3_accounts
 {
 local @rv;
-if (&can_use_cloud("s3") && $config{'s3_akey'} && $config{'s3_skey'}) {
-	push(@rv, [ $config{'s3_akey'}, $config{'s3_skey'},
-		    $config{'s3_endpoint'} ]);
+if (&can_cloud_providers()) {
+	foreach my $s3 (&list_s3_accounts()) {
+		push(@rv, [ $s3->{'access'}, $s3->{'secret'},
+			    $s3->{'endpoint'} ]);
+		}
 	}
 foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
 	local @dests = &get_scheduled_backup_dests($sched);
@@ -6637,12 +6639,6 @@ foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
 		if ($mode == 3) {
 			push(@rv, [ $user, $pass ]);
 			}
-		}
-	}
-if (&can_cloud_providers()) {
-	foreach my $s3 (&list_s3_accounts()) {
-		push(@rv, [ $s3->{'access'}, $s3->{'secret'},
-			    $s3->{'endpoint'} ]);
 		}
 	}
 local %done;

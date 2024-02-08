@@ -52,7 +52,8 @@ if ($multi) {
 	# Full details
 	my @scheds = &list_scheduled_backups();
 	foreach $s (@s3s) {
-		print $s->{'access'},"\n";
+		print $s->{'id'},"\n";
+		print "    Access key: $s->{'access'}\n";
 		print "    Secret key: $s->{'secret'}\n";
 		if ($s->{'desc'}) {
 			print "    Description: $s->{'desc'}\n";

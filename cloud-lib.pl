@@ -6,11 +6,13 @@ sub list_cloud_providers
 {
 my @rv = ( { 'name' => 's3',
 	     'prefix' => [ 's3', 's3rrs' ],
+	     'clear' => 0,
 	     'url' => 'https://aws.amazon.com/s3/',
 	     'desc' => $text{'cloud_s3desc'},
 	     'longdesc' => \&cloud_s3_longdesc },
 	   { 'name' => 'rs',
 	     'prefix' => [ 'rs' ],
+	     'clear' => 0,
 	     'url' => 'https://www.rackspace.com/openstack/public/files',
 	     'desc' => $text{'cloud_rsdesc'},
 	     'longdesc' => $text{'cloud_rs_longdesc'} } );
@@ -18,26 +20,31 @@ if ($virtualmin_pro) {
 	my $ourl = &get_miniserv_base_url()."/$module_name/oauth.cgi";
 	push(@rv, { 'name' => 'google',
 		    'prefix' => [ 'gcs' ],
+		    'clear' => 1,
 		    'url' => 'https://cloud.google.com/storage',
 		    'desc' => $text{'cloud_googledesc'},
 		    'longdesc' => \&cloud_google_longdesc });
 	push(@rv, { 'name' => 'dropbox',
 		    'prefix' => [ 'dropbox' ],
+		    'clear' => 1,
 		    'url' => 'https://www.dropbox.com/',
 		    'desc' => $text{'cloud_dropboxdesc'},
 		    'longdesc' => $text{'cloud_dropbox_longdesc'} });
 	push(@rv, { 'name' => 'bb',
 		    'prefix' => [ 'bb' ],
+		    'clear' => 1,
 		    'url' => 'https://www.backblaze.com/',
 		    'desc' => $text{'cloud_bbdesc'},
 		    'longdesc' => $text{'cloud_bb_longdesc'} });
 	push(@rv, { 'name' => 'azure',
 		    'prefix' => [ 'azure' ],
+		    'clear' => 1,
 		    'url' => 'https://azure.microsoft.com/',
 		    'desc' => $text{'cloud_azdesc'},
 		    'longdesc' => $text{'cloud_az_longdesc'} });
 	push(@rv, { 'name' => 'drive',
 		    'prefix' => [ 'drive' ],
+		    'clear' => 1,
 		    'url' => 'https://drive.google.com/',
 		    'desc' => $text{'cloud_drivedesc'},
 		    'longdesc' => \&cloud_drive_longdesc });
@@ -68,10 +75,11 @@ return wantarray ? @rv : $rv[0];
 
 sub cloud_s3_get_state
 {
-if ($config{'s3_akey'}) {
+my @s3s = &list_s3_accounts();
+if (@s3s) {
 	return { 'ok' => 1,
 		 'desc' => &text('cloud_s3account',
-				 "<tt>$config{'s3_akey'}</tt>"),
+				 "<tt>$s3s[0]->{'access'}</tt>"),
 	       };
 	}
 elsif (&can_use_aws_s3_creds()) {
@@ -86,35 +94,18 @@ else {
 
 sub cloud_s3_longdesc
 {
-if (!$config{'s3_akey'} && &can_use_aws_s3_creds()) {
+my @s3s = &list_s3_accounts();
+if (!@s3s && &can_use_aws_s3_creds()) {
 	return $text{'cloud_s3_creds'};
 	}
 else {
-	return $text{'cloud_s3_longdesc'};
+	return &text('cloud_s3_longdesc2', 'list_s3s.cgi');
 	}
 }
 
 sub cloud_s3_show_inputs
 {
 my $rv;
-
-# Default login
-if ($config{'s3_akey'} || !&can_use_aws_s3_creds()) {
-	# Prompt for login
-	$rv .= &ui_table_row($text{'cloud_s3_akey'},
-		&ui_radio("s3_akey_def", $config{'s3_akey'} ? 0 : 1,
-			  [ [ 1, $text{'cloud_noneset'} ],
-			    [ 0, $text{'cloud_below'} ] ])."<br>\n".
-		&ui_grid_table([ "<b>$text{'cloud_s3_access'}</b>",
-			 &ui_textbox("s3_akey", $config{'s3_akey'}, 50),
-			 "<b>$text{'cloud_s3_secret'}</b>",
-			 &ui_textbox("s3_skey", $config{'s3_skey'}, 50) ], 2));
-	}
-
-# S3 endpoint hostname, for non-amazon implementations
-$rv .= &ui_table_row($text{'cloud_s3_endpoint'},
-	&ui_opt_textbox("s3_endpoint", $config{'s3_endpoint'}, 40,
-			$text{'cloud_s3_amazon'}));
 
 # Upload chunk size
 $rv .= &ui_table_row($text{'cloud_s3_chunk'},
@@ -146,33 +137,6 @@ return $rv;
 sub cloud_s3_parse_inputs
 {
 my ($in) = @_;
-
-# Parse default login
-if ($config{'s3_akey'} || !&can_use_aws_s3_creds()) {
-	if ($in->{'s3_akey_def'}) {
-		delete($config{'s3_akey'});
-		delete($config{'s3_skey'});
-		}
-	else {
-		$in->{'s3_akey'} =~ /^\S+$/ || &error($text{'backup_eakey'});
-		$in->{'s3_skey'} =~ /^\S+$/ || &error($text{'backup_eskey'});
-		$config{'s3_akey'} = $in->{'s3_akey'};
-		$config{'s3_skey'} = $in->{'s3_skey'};
-		}
-	}
-
-# Parse endpoint hostname
-if ($in->{'s3_endpoint_def'}) {
-	delete($config{'s3_endpoint'});
-	}
-else {
-	my ($host, $port) = split(/:/, $in->{'s3_endpoint'});
-	&to_ipaddress($host) ||
-		&error($text{'cloud_es3_endpoint'});
-	!$port || $port =~ /^\d+$/ ||
-		&error($text{'cloud_es3_endport'});
-	$config{'s3_endpoint'} = $in->{'s3_endpoint'};
-	}
 
 # Parse chunk size
 if ($in->{'s3_chunk_def'}) {
@@ -207,11 +171,7 @@ return undef;
 sub cloud_s3_clear
 {
 # Clear Virtualmin's credentials
-my $akey = $config{'s3_akey'};
 &lock_file($module_config_file);
-delete($config{'s3_akey'});
-delete($config{'s3_skey'});
-delete($config{'s3_location'});
 &save_module_config();
 &unlock_file($module_config_file);
 
