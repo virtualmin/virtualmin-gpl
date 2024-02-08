@@ -181,16 +181,15 @@ if (!&check_jailkit_support()) {
 		&ui_textbox("jail_esects", $d->{'jail_esects'}, 50), 'jailkit');
 	my $jail_ecmds = &inline_html_pro_tip(
 		&ui_textbox("jail_ecmds", $d->{'jail_ecmds'}, 50), 'jailkit');
-	my $datacelldis = $virtualmin_pro ? undef : ["data-pro-disabled='cell'"];
 	print &ui_table_row(&hlink($text{'limits_jail'}, "limits_jail"),
 		&ui_radio("jail", $jail ? 1 : 0,
 		  [ [ 1, $text{'yes'}.($jail ? " (<tt>$jail</tt>)" : "") ],
 		    [ 0, $text{'no'} ] ]).$jail_reset);
 	print &ui_table_row(&hlink($text{'limits_jail2'}, "limits_jail_esects"),
-		$jail_esects, undef, $datacelldis)
+		$jail_esects, undef, &procell())
 		if ($jail_esects);
 	print &ui_table_row(&hlink($text{'limits_jail3'}, "limits_jail_ecmds"),
-		$jail_ecmds, undef, $datacelldis)
+		$jail_ecmds, undef, &procell())
 		if ($jail_ecmds);
 	print &ui_hidden_table_end("jail");
 	}

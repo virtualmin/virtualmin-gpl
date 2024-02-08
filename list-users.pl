@@ -102,7 +102,7 @@ else {
 @ashells = grep { $_->{'mailbox'} } &list_available_shells();
 
 foreach $d (@doms) {
-	@users = &list_domain_users($d, $owner, 0, 0, 0);
+	@users = &list_domain_users($d, $owner, 0, 0, 0, 1);
 	if (%usernames) {
 		@users = grep { $usernames{$_->{'user'}} ||
 				$usernames{&remove_userdom($_->{'user'}, $d)} }
@@ -116,7 +116,7 @@ foreach $d (@doms) {
 			print "$u->{'user'}\n";
 			print "    User: " . &remove_userdom($u->{'user'}, $d),"\n";
 			print "    Domain: $d->{'dom'}\n";
-			print "    Unix username: ",$u->{'user'},"\n";
+			print "    Unix username: ",$u->{'user'},"\n" if (!$u->{'extra'});
 			print "    Real name: ",$u->{'real'},"\n";
 			if (defined($u->{'plainpass'})) {
 				print "    Password: ",$u->{'plainpass'},"\n";
@@ -124,6 +124,12 @@ foreach $d (@doms) {
 			$pass = $u->{'pass'};
 			$disable = ($pass =~ s/^\!// ? 1 : 0);
 			print "    Encrypted password: ",$pass,"\n";
+			if ($u->{'unix'}) {
+				my $existing_key = &get_domain_user_ssh_pubkey($d, $u);
+				if ($existing_key) {
+					print "    SSH public key: $existing_key\n";
+					}
+				}
 			print "    Disabled: ",($disable ? "Yes" : "No"),"\n";
 			print "    Home directory: ",$u->{'home'},"\n";
 			if ($u->{'domainowner'}) {
@@ -223,6 +229,9 @@ foreach $d (@doms) {
 			@dblist = ( );
 			foreach $db (@{$u->{'dbs'}}) {
 				push(@dblist, $db->{'name'}." ($db->{'type'})");
+				}
+			if ($u->{'extra'} && $u->{'type'} eq 'db') {
+				print "    Database username: ",$u->{'user'},"\n";
 				}
 			if (@dblist) {
 				print "    Databases: ",

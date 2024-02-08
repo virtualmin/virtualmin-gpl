@@ -16,7 +16,7 @@ if (!$virtual_server_root) {
 	$0 =~ /^(.*)\//;
 	$virtual_server_root = "$1/virtual-server";
 	}
-foreach my $lib ("scripts", "resellers", "admins", "simple", "s3",
+foreach my $lib ("scripts", "resellers", "admins", "users", "simple", "s3",
 		 "php", "ruby", "vui", "dynip", "collect", "maillog",
 		 "balancer", "newfeatures", "resources", "backups",
 		 "domainname", "commands", "connectivity", "plans",
@@ -709,12 +709,12 @@ foreach my $m (keys %get_domain_by_maps) {
 	}
 }
 
-# list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs])
+# list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs], [include-extra])
 # List all Unix users who are in the domain's primary group.
 # If domain is omitted, returns local users.
 sub list_domain_users
 {
-local ($d, $skipunix, $novirts, $noquotas, $nodbs) = @_;
+local ($d, $skipunix, $novirts, $noquotas, $nodbs, $includeextra) = @_;
 
 # Get all aliases (and maybe generics) to look for those that match users
 local (%aliases, %generics);
@@ -1062,7 +1062,11 @@ if (!$novirts) {
 		}
 	}
 
-if (!$_[4] && $d) {
+# Push domain extra database users
+push(@users, &list_extra_db_users($d))
+	if ($includeextra);
+
+if (!$nodbs && $d) {
 	# Add accessible databases
 	local @dbs = &domain_databases($d);
 	local $db;
@@ -1119,6 +1123,12 @@ if (!$_[4] && $d) {
 		}
 	}
 
+if ($includeextra && &domain_has_website($d) &&
+    &indexof('virtualmin-htpasswd', @plugins) >= 0) {
+	# Include webserver users
+	push(@users, &list_extra_web_users($d));
+	}
+
 # Add any secondary groups in the template
 local @sgroups = &allowed_secondary_groups($d);
 if (@sgroups) {
@@ -1150,8 +1160,71 @@ if ($d) {
 			}
 		}
 	}
-
+# Return users list
 return @users;
+}
+
+# create_databases_user(&domain, &user, [type])
+# Create a database user for some domain
+# Returns an error message on failure, or undef on success
+sub create_databases_user
+{
+my ($d, $user, $type) = @_;
+foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
+	next if ($type && $type ne $dt);
+	eval {
+		local $main::error_must_die = 1;
+		my @dbs = map { $_->{'name'} }
+					grep { $_->{'type'} eq $dt } @{$user->{'dbs'}};
+		if (&indexof($dt, &list_database_plugins()) < 0) {
+			# Create in core database
+			my $crfunc = "create_${dt}_database_user";
+			&$crfunc($d, \@dbs, $user->{'user'}, $user->{'pass'});
+			}
+		elsif (&indexof($dt, &list_database_plugins()) >= 0) {
+			# Create in plugin database
+			&plugin_call($dt, "database_create_user",
+					$d, \@dbs, $user->{'user'},
+					$user->{'pass'});
+			}
+		};
+	# Show error
+	if ($@) {
+		return &text('user_eadddbuser', "$user->{'user'} : $@");
+		}
+	}
+return undef;
+}
+
+# delete_databases_user(&domain, &user)
+# Delete a database user from a domain
+# Returns an error message on failure, or undef on success
+sub delete_databases_user
+{
+my ($d, $user) = @_;
+my @dts;
+foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
+	push(@dts, $dt);
+	eval {
+		local $main::error_must_die = 1;
+		if (&indexof($dt, &list_database_plugins()) < 0) {
+			# Delete from core database
+			local $dlfunc = "delete_${dt}_database_user";
+			&$dlfunc($d, $user);
+			}
+		elsif (&indexof($dt, &list_database_plugins()) >= 0) {
+			# Delete from plugin database
+			&plugin_call($dt, "delete_database_user",
+				$d, $user);
+			}
+		};
+	# Show error
+	if ($@) {
+		my $err = &text('user_edeletedbuser', "$user : $@");
+		return wantarray ? ($err) : $err;
+		}
+	}
+return wantarray ? (0, \@dts) : undef;
 }
 
 # safe_unix_crypt(pass, salt)
@@ -1620,6 +1693,9 @@ if ($_[1] && $_[1]->{'mail'}) {
 if ($_[1]) {
 	&create_jailkit_passwd_file($_[1]);
 	}
+
+# Remove clashing records of extra user
+&merge_extra_user($_[0], $_[1]);
 }
 
 # modify_user(&user, &old, &domain, [noaliases])
@@ -1950,66 +2026,7 @@ if (!$_[0]->{'domainowner'} && $_[2] && $_[2]->{'hashpass'}) {
 
 # Update his allowed databases (unless this is the domain owner), if any
 # have been added or removed.
-local $newdbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
-				@{$_[0]->{'dbs'}});
-local $olddbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
-				@{$_[1]->{'dbs'}});
-if ($_[2] && !$_[0]->{'domainowner'} &&
-    ($newdbstr ne $olddbstr ||
-     $_[0]->{'pass'} ne $_[1]->{'pass'} ||
-     $_[0]->{'user'} ne $_[1]->{'user'})) {
-	local $dt;
-	foreach $dt (&unique(map { $_->{'type'} } &domain_databases($_[2]))) {
-		local @dbs = map { $_->{'name'} }
-				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
-		local @olddbs = map { $_->{'name'} }
-				 grep { $_->{'type'} eq $dt } @{$_[1]->{'dbs'}};
-		local $plugin = &indexof($dt, &list_database_plugins()) >= 0;
-		if (@dbs && !@olddbs) {
-			# Need to add database user
-			if (!$plugin) {
-				local $crfunc = "create_${dt}_database_user";
-				&$crfunc($_[2], \@dbs, $_[0]->{'user'},
-					 $_[0]->{'plainpass'},
-					 $_[0]->{'pass_'.$dt});
-				}
-			else {
-				&plugin_call($dt, "database_create_user",
-					     $_[2], \@dbs, $_[0]->{'user'},
-					     $_[0]->{'plainpass'},
-					     $_[0]->{'pass_'.$dt});
-				}
-			}
-		elsif (@dbs && @olddbs) {
-			# Need to update database user
-			if (!$plugin) {
-				local $mdfunc = "modify_${dt}_database_user";
-				&$mdfunc($_[2], \@olddbs, \@dbs,
-					 $_[1]->{'user'}, $_[0]->{'user'},
-					 $_[0]->{'plainpass'},
-					 $_[0]->{'pass_'.$dt});
-				}
-			else {
-				&plugin_call($dt, "database_modify_user",
-					     $_[2], \@olddbs, \@dbs,
-					     $_[1]->{'user'}, $_[0]->{'user'},
-					     $_[0]->{'plainpass'},
-					     $_[0]->{'pass_'.$dt});
-				}
-			}
-		elsif (!@dbs && @olddbs) {
-			# Need to delete database user
-			if (!$plugin) {
-				local $dlfunc = "delete_${dt}_database_user";
-				&$dlfunc($_[2], $_[1]->{'user'});
-				}
-			else {
-				&plugin_call($dt, "database_delete_user",
-					     $_[2], $_[1]->{'user'});
-				}
-			}
-		}
-	}
+&modify_database_user(@_);
 
 # Rename user in secondary groups, and update membership
 local @groups = &list_all_groups();
@@ -2131,6 +2148,22 @@ if ($_[2]) {
 # Delete a mailbox user and all associated virtusers and aliases
 sub delete_user
 {
+# For extra specific user associated
+# with domain delete it and return
+if ($_[0]->{'extra'}) {
+	if ($_[0]->{'type'} eq 'db') {
+		# Delete database user
+		my ($err, $dts) = &delete_databases_user($_[1], $_[0]->{'user'});
+		&error($err) if ($err);
+		# Delete user from domain config
+		&delete_extra_user($_[1], $_[0]);
+		}
+	if ($_[0]->{'type'} eq 'web') {
+		&delete_webserver_user($_[0], $_[1]);
+		}
+	return undef;
+	}
+
 # Zero out his quotas
 if ($_[0]->{'unix'} && !$_[0]->{'noquota'}) {
 	&set_user_quotas($_[0]->{'user'}, 0, 0, $_[1]);
@@ -2320,6 +2353,72 @@ if ($_[1]) {
 # Sync up jail password file
 if ($_[1]) {
 	&create_jailkit_passwd_file($_[1]);
+	}
+}
+
+# modify_databse_user(&user, &olduser, &domain)
+# Updates the database user, including database
+# permissions and password
+sub modify_database_user
+{
+my $newdbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
+				@{$_[0]->{'dbs'}});
+my $olddbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
+				@{$_[1]->{'dbs'}});
+if ($_[2] && !$_[0]->{'domainowner'} &&
+    ($newdbstr ne $olddbstr ||
+     $_[0]->{'pass'} ne $_[1]->{'pass'} ||
+     $_[0]->{'user'} ne $_[1]->{'user'})) {
+	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($_[2]))) {
+		my @dbs = map { $_->{'name'} }
+				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
+		my @olddbs = map { $_->{'name'} }
+				 grep { $_->{'type'} eq $dt } @{$_[1]->{'dbs'}};
+		my $plugin = &indexof($dt, &list_database_plugins()) >= 0;
+		if (@dbs && !@olddbs) {
+			# Need to add database user
+			if (!$plugin) {
+				my $crfunc = "create_${dt}_database_user";
+				&$crfunc($_[2], \@dbs, $_[0]->{'user'},
+					 $_[0]->{'plainpass'},
+					 $_[0]->{'pass_'.$dt});
+				}
+			else {
+				&plugin_call($dt, "database_create_user",
+					     $_[2], \@dbs, $_[0]->{'user'},
+					     $_[0]->{'plainpass'},
+					     $_[0]->{'pass_'.$dt});
+				}
+			}
+		elsif (@dbs && @olddbs) {
+			# Need to update database user
+			if (!$plugin) {
+				my $mdfunc = "modify_${dt}_database_user";
+				&$mdfunc($_[2], \@olddbs, \@dbs,
+					 $_[1]->{'user'}, $_[0]->{'user'},
+					 $_[0]->{'plainpass'},
+					 $_[0]->{'pass_'.$dt});
+				}
+			else {
+				&plugin_call($dt, "database_modify_user",
+					     $_[2], \@olddbs, \@dbs,
+					     $_[1]->{'user'}, $_[0]->{'user'},
+					     $_[0]->{'plainpass'},
+					     $_[0]->{'pass_'.$dt});
+				}
+			}
+		elsif (!@dbs && @olddbs) {
+			# Need to delete database user
+			if (!$plugin) {
+				my $dlfunc = "delete_${dt}_database_user";
+				&$dlfunc($_[2], $_[1]->{'user'});
+				}
+			else {
+				&plugin_call($dt, "database_delete_user",
+					     $_[2], $_[1]->{'user'});
+				}
+			}
+		}
 	}
 }
 
@@ -2539,15 +2638,8 @@ if ($d && @{$user->{'dbs'}} && (!$old || !@{$old->{'dbs'}})) {
 		return $text{'user_edbpass'};
 		}
 	# Check for username clash
-	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
-		local $cfunc = "check_".$dt."_user_clash";
-		next if (!defined(&$cfunc));
-		local $ufunc = $dt."_username";
-		if (&$cfunc($d, &$ufunc($user->{'user'}))) {
-			# Found a clash!
-			return $text{'user_edbclash'};
-			}
-		}
+	return &check_any_database_user_clash($d, $user->{'user'})
+		if (!$user->{'nocheck'});
 	}
 if ($d && $user->{'home'} &&
     (!$old || $old->{'home'} ne $user->{'home'}) &&
@@ -5588,12 +5680,31 @@ local $can_quotas = &has_home_quotas() || &has_mail_quotas();
 local $can_qquotas = $config{'mail_system'} == 5;
 local @ashells = &list_available_shells($d);
 
+# Given a list of services return
+# user-friendly login access label
+my $login_access_label = sub {
+	my @s = @_;
+	@s = map { $text{'users_login_access_'.$_} } @s;
+	@s = grep { $_ } @s;
+	my $n = scalar(@s);
+	if ($n == 0) {
+		return '';
+		}
+	elsif ($n == 1) {
+		return "$s[0] $text{'users_login_access__only'}";
+		}
+	else {
+		my $l = pop(@s);
+		return join(', ', @s) . " $text{'users_login_access__and'} $l";
+		}
+	};
+
 # Work out table header
 local @headers;
 push(@headers, "") if ($cgi);
 push(@headers, $text{'users_name'},
-	    $d->{'mail'} ? $text{'users_pop3'} : $text{'users_pop3f'},
-	    $text{'users_real'} );
+	       $text{'user_user2'},
+	       $text{'users_real'} );
 if ($can_quotas) {
 	push(@headers, $text{'users_quota'}, $text{'users_uquota'});
 	}
@@ -5607,15 +5718,19 @@ if ($config{'show_lastlogin'} && $d->{'mail'}) {
 	push(@headers, $text{'users_ll'});
 	}
 push(@headers, $text{'users_ushell'});
-if ($d->{'mysql'} || $d->{'postgres'}) {
+# Database column
+if (($d->{'mysql'} || $d->{'postgres'}) && $config{'show_dbs'}) {
 	push(@headers, $text{'users_db'});
 	}
+# Other plugins columns
 local ($f, %plugcol);
-foreach $f (&list_mail_plugins()) {
-	local $col = &plugin_call($f, "mailbox_header", $d);
-	if ($col) {
-		$plugcol{$f} = $col;
-		push(@headers, $col);
+if ($config{'show_plugins'}) {
+	foreach $f (&list_mail_plugins()) {
+		local $col = &plugin_call($f, "mailbox_header", $d);
+		if ($col) {
+			$plugcol{$f} = $col;
+			push(@headers, $col);
+			}
 		}
 	}
 
@@ -5623,20 +5738,27 @@ foreach $f (&list_mail_plugins()) {
 local $u;
 local $did = $d ? $d->{'id'} : 0;
 local @table;
+local $userdesc;
+my @domsdbs = &domain_databases($d);
 foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		   $a->{'user'} cmp $b->{'user'} } @$users) {
 	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
+	local $pop3_dis =
+		&ui_text_color($pop3.&vui_inline_label('users_disabled_label', undef, 'disabled'), 'danger');
 	$pop3 = &html_escape($pop3);
 	local @cols;
-	push(@cols, "<a href='edit_user.cgi?dom=$did&amp;".
+	local $filetype = $u->{'extra'} ? "&type=@{[&urlize($u->{'type'})]}" : "";
+	push(@cols, "<a href='edit_user.cgi?dom=$did$filetype&amp;".
 	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>".
-	      ($u->{'domainowner'} ? "<b>$pop3</b>" :
+	      ($u->{'domainowner'} ? "<b>$pop3</b>".&vui_inline_label('users_owner_label') :
 	       $u->{'webowner'} &&
-	        $u->{'pass'} =~ /^\!/ ? "<u><i>$pop3</i></u>" :
-	       $u->{'webowner'} ? "<u>$pop3</u>" :
-	       $u->{'pass'} =~ /^\!/ ? "<i>$pop3</i>" : $pop3)."</a>\n");
+	        $u->{'pass'} =~ /^\!/ ? $pop3_dis :
+	       $u->{'webowner'} ? $pop3 :
+	       $u->{'pass'} =~ /^\!/ ? $pop3_dis :
+	       $pop3)."</a>\n");
 	push(@cols, &html_escape($u->{'user'}));
 	push(@cols, &html_escape($u->{'real'}));
+	$userdesc++ if ($u->{'real'});
 
 	# Add columns for quotas
 	local $quota;
@@ -5645,20 +5767,21 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	local $uquota;
 	$uquota += $u->{'uquota'} if (&has_home_quotas());
 	$uquota += $u->{'muquota'} if (&has_mail_quotas());
-	if ($u->{'webowner'} && defined($quota)) {
-		# Website owners have no real quota
-		push(@cols, $text{'users_same'}, "");
+	if (($u->{'webowner'} || $u->{'extra'}) && defined($quota)) {
+		# Website owners, virtual database and web users have no real quota
+		push(@cols, $u->{'type'} eq 'web' ?
+			$text{'users_na'} : $text{'users_same'}, "");
 		}
 	elsif (defined($quota)) {
 		# Has Unix quotas
 		push(@cols, $quota ? &quota_show($quota, "home")
 				   : $text{'form_unlimit'});
 		my $color = $u->{'over_quota'} ? "#ff0000" :
-			    $u->{'warn_quota'} ? "#ff8800" :
+			    $u->{'warn_quota'} ? "#df7d0e" :
 			    $u->{'spam_quota'} ? "#aaaaaa" : undef;
 		if ($color) {
-			push(@cols, "<font color=$color>".
-				    &quota_show($uquota, "home")."</font>");
+			push(@cols, "<font color=$color><i>".
+				    &quota_show($uquota, "home")."</i></font>");
 			}
 		else {
 			push(@cols, &quota_show($uquota, "home"));
@@ -5714,22 +5837,38 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		$u->{'shell'} = &get_domain_shell($d, $u);
 		}
 	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
-	push(@cols, !$u->{'shell'} ? $text{'users_qmail'} :
+	my $udbs = scalar(@{$u->{'dbs'}}) || $u->{'domainowner'};
+	push(@cols, ($u->{'extra'} && $u->{'type'} eq 'db') ? &$login_access_label('db') :
+		    ($u->{'extra'} && $u->{'type'} eq 'web') ? &$login_access_label('web') :
+		    !$u->{'shell'} ? &$login_access_label($udbs ? 'db' : undef, 'mail') :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
 	            $shell->{'id'} eq 'ftp' && !$u->{'email'} ?
-			$text{'shells_mailboxftp2'} :
-		    	$shell->{'desc'});
+			&$login_access_label($udbs ? 'db' : undef, 'ftp') :
+		    	(&$login_access_label(
+				($u->{'extra'} && $u->{'type'} eq 'web') ? 'web' :
+				$udbs ? 'db' : undef,
+				$shell->{'id'} eq 'nologin' ? ($u->{'email'} ? 'mail' : undef) :
+				$shell->{'id'} eq 'ftp' ? ($u->{'email'} ? 'mail' : undef, 'ftp') :
+				$shell->{'id'} eq 'scp' ? ($u->{'email'} ? 'mail' : undef, 'scp') :
+				$shell->{'id'} eq 'ssh' ? ($u->{'email'} ? 'mail' : undef, 'ftp', 'ssh') : undef
+			) || ($shell->{'id'} eq 'nologin' ?
+				(!$u->{'email'} ? $text{'users_login_access_none'} :
+					$shell->{'desc'}) : $shell->{'desc'})));
 
 	# Show number of DBs
-	if ($d->{'mysql'} || $d->{'postgres'}) {
+	if (($d->{'mysql'} || $d->{'postgres'}) && $config{'show_dbs'}) {
+		my $userdbscnt = scalar(@{$u->{'dbs'}});
 		push(@cols, $u->{'domainowner'} ? $text{'users_all'} :
-					   @{$u->{'dbs'}} ? $text{'yes'}
-					   		  : $text{'no'});
+			    $userdbscnt ? scalar(@domsdbs) == $userdbscnt
+					? $text{'users_all'} : $userdbscnt
+					: $text{'no'});
 		}
 
 	# Show columns from plugins
-	foreach $f (grep { $plugcol{$_} } &list_mail_plugins()) {
-		push(@cols, &plugin_call($f, "mailbox_column", $u, $d));
+	if ($config{'show_plugins'}) {
+		foreach $f (grep { $plugcol{$_} } &list_mail_plugins()) {
+			push(@cols, &plugin_call($f, "mailbox_column", $u, $d));
+			}
 		}
 
 	# Insert checkbox, if needed
@@ -5740,6 +5879,13 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 				 'disabled' => $u->{'domainowner'} });
 		}
 	push(@table, \@cols);
+	}
+
+# Drop "Real name" column if no column has any data
+if (!$userdesc) {
+	my $colnum = $cgi ? 3 : 2;
+	map { splice(@$_, $colnum, 1) } @table;
+	splice(@headers, $colnum, 1);
 	}
 
 # Generate the table, perhaps with a form
@@ -5898,6 +6044,28 @@ if ($unlimited) {
 return $rv;
 }
 
+# quota_field(name, value, used, files-used, filesystem, &user)
+sub quota_field
+{
+my ($name, $value, $used, $fused, $fs, $u) = @_;
+my $rv;
+my $color = $u->{'over_quota'} ? "#ff0000" :
+	    $u->{'warn_quota'} ? "#df7d0e" :
+	    $u->{'spam_quota'} ? "#aaaaaa" : undef;
+if (&can_mailbox_quota()) {
+	# Show inputs for editing quotas
+	local $quota = $_[1];
+	$quota = undef if ($quota eq "none");
+	$rv .= &opt_quota_input($_[0], $quota, $_[3]);
+	$rv .= "\n";
+	}
+else {
+	# Just show current settings, or default
+	$rv .= ($defmquota[0] ? &quota_show($defmquota[0], $_[3]) : $text{'form_unlimit'})."\n";
+	}
+return $rv;
+}
+
 # backup_virtualmin(&domain, file)
 # Adds a domain's configuration file to the backup
 sub backup_virtualmin
@@ -5964,6 +6132,12 @@ if (-d "$extra_admins_dir/$d->{'id'}") {
 	&execute_command(
 	    "cd ".quotemeta("$extra_admins_dir/$d->{'id'}").
 	    " && ".&make_tar_command("cf", $file."_admins", "."));
+	}
+if (-d "$extra_users_dir/$d->{'id'}") {
+	# Extra users details
+	&execute_command(
+	    "cd ".quotemeta("$extra_users_dir/$d->{'id'}").
+	    " && ".&make_tar_command("cf", $file."_users", "."));
 	}
 if ($config{'bw_active'}) {
 	# Bandwidth logs
@@ -6877,8 +7051,10 @@ if (!$allopts->{'fix'}) {
 		}
 	if (-r $file."_admins") {
 		# Also restore extra admins
-		&execute_command(
-			"rm -rf ".quotemeta("$extra_admins_dir/$d->{'id'}"));
+		if ($d->{'id'}) {
+			&execute_command(
+				"rm -rf ".quotemeta("$extra_admins_dir/$d->{'id'}"));
+			}
 		if (!-d $extra_admins_dir) {
 			&make_dir($extra_admins_dir, 755);
 			}
@@ -6886,6 +7062,20 @@ if (!$allopts->{'fix'}) {
 		&execute_command(
 		    "cd ".quotemeta("$extra_admins_dir/$d->{'id'}")." && ".
 		    &make_tar_command("xf", $file."_admins", "."));
+		}
+	if (-r $file."_users") {
+		# Also restore extra users
+		if ($d->{'id'}) {
+			&execute_command(
+				"rm -rf ".quotemeta("$extra_users_dir/$d->{'id'}"));
+			}
+		if (!-d $extra_users_dir) {
+			&make_dir($extra_users_dir, 0700);
+			}
+		&make_dir("$extra_users_dir/$d->{'id'}", 0700);
+		&execute_command(
+		    "cd ".quotemeta("$extra_users_dir/$d->{'id'}")." && ".
+		    &make_tar_command("xf", $file."_users", "."));
 		}
 	if ($config{'bw_active'} && -r $file."_bw" &&
 	    !-r "$bandwidth_dir/$d->{'id'}") {
@@ -8617,7 +8807,7 @@ foreach my $dd (@alldoms) {
 	if (!$only) {
 		local @users = $dd->{'alias'} && !$dd->{'aliasmail'} ||
 			       !$dd->{'group'} ? ( )
-					       : &list_domain_users($dd, 1);
+					       : &list_domain_users($dd, 1, 0, 0, 0, 1);
 		local @aliases = &list_domain_aliases($dd);
 
 		# Stop any processes belonging to installed scripts, such
@@ -12983,7 +13173,7 @@ if ($crv) {
 if (&can_domain_have_users($d) && &can_edit_users()) {
 	# Users button
 	push(@rv, { 'page' => 'list_users.cgi',
-		    'title' => $text{'edit_users4'},
+		    'title' => $text{'edit_users'},
 		    'desc' => $text{'edit_usersdesc'},
 		    'cat' => 'objects',
 		    'icon' => 'group',
@@ -18051,13 +18241,16 @@ if (-r $custom_shells_file) {
 	close(SHELLS);
 	}
 if (!@rv) {
+	# Master admin should be able to create SSH users by default
+	my $defloginshell_admin = &master_admin() ? 1 : 0;
+
 	# Fake up from config file and known shells, if there is no custom
 	# file or if it is somehow empty.
 	push(@rv, { 'shell' => $config{'shell'},
 		    'desc' => $mail ? $text{'shells_mailbox'}
 				    : $text{'shells_mailbox2'},
 		    'mailbox' => 1,
-		    'default' => 1,
+		    'default' => !$defloginshell_admin,
 		    'avail' => 1,
 		    'id' => 'nologin' });
 	push(@rv, { 'shell' => $config{'ftp_shell'},
@@ -18095,6 +18288,7 @@ if (!@rv) {
 		if ($us->[1] eq $best_unix_shell) {
 			$shell{'default'} = 1;
 			$shell{'avail'} = 1;
+			$shell{'mailbox'} = $defloginshell_admin;
 			$defclass = $us->[0];
 			}
 		push(@rv, \%shell);
@@ -18104,13 +18298,13 @@ if (!@rv) {
 		# Default for owners was not found .. use config
 		local %shell = ( 'shell' => $best_unix_shell,
 				 'desc' => $text{'shells_ssh'},
-			         'id' => 'ssh',
+				 'id' => 'ssh',
 				 'owner' => 1,
 				 'reseller' => 1,
 				 'default' => 1,
 				 'avail' => 1 );
 		push(@rv, \%shell);
-                $classes{'ssh'}++;
+		$classes{'ssh'}++;
 		$defclass = 'ssh';
 		}
 	# Only the default or first of each class are available for each user
@@ -18124,8 +18318,22 @@ if (!@rv) {
 			}
 		}
 	}
+# Sort based on both description and shell
+# name to avoid random ordering
+@rv = sort { $a->{'desc'} cmp $b->{'desc'} ||
+	     $a->{'shell'} cmp $b->{'shell'} } @rv;
+
 $list_available_shells_cache{$mail} = \@rv;
 return @rv;
+}
+
+# list_available_shells_by_id(id, [&domain], [mail])
+# Returns a list of shells assignable to domain by given id
+sub list_available_shells_by_id
+{
+my ($id, $d, $mail) = @_;
+my @rv = &list_available_shells($d, $mail);
+return grep { $_->{'id'} eq $id && $_->{'avail'} } @rv;
 }
 
 # save_available_shells(&shells|undef)
@@ -19810,6 +20018,162 @@ my $ex = -e $sshfile;
 &close_tempfile_as_domain_user($d, SSHFILE);
 &set_permissions_as_domain_user($d, 0600, $sshfile) if (!$ex);
 return undef;
+}
+
+# get_ssh_key_identifier(&user)
+# Returns a string that uniquely identifies a user's SSH public key
+sub get_ssh_key_identifier
+{
+my ($user, $d) = @_;
+my $username = &remove_userdom($user->{'user'}, $d);
+return "[$d->{'id'}:$username]"; # [1234567890123456:ilia]
+}
+
+# add_domain_user_ssh_pubkey(&domain, &user, pubkey)
+# Adds an SSH public key to the authorized keys file
+sub add_domain_user_ssh_pubkey
+{
+my ($d, $user, $pubkey) = @_;
+my $identifier = &get_ssh_key_identifier($user, $d);
+my $err = &save_domain_ssh_pubkey($d, "$pubkey $identifier");
+return $err;
+}
+
+# get_domain_user_ssh_pubkey(&domain, &user)
+# Returns the SSH public key for some user
+# in a domain, or undef if none
+sub get_domain_user_ssh_pubkey
+{
+my ($d, $user) = @_;
+return if (!$d->{'dir'});
+my $sshdir = $d->{'home'}."/.ssh";
+return if (!-d $sshdir);
+my $sshfile = "$sshdir/authorized_keys";
+return if (!-f $sshfile);
+my $identifier = &get_ssh_key_identifier($user, $d);
+my $pubkey;
+my $authorized_keys = &read_file_lines_as_domain_user($d, $sshfile, 1);
+foreach my $authorized_key (@$authorized_keys) {
+	if ($authorized_key =~ /\Q$identifier\E/) {
+		$pubkey = $authorized_key;
+		$pubkey =~ s/\s+\Q$identifier\E//;
+		last;
+		}
+	}
+return $pubkey;
+}
+
+# delete_domain_user_ssh_pubkey(&domain, &user)
+# Removes an SSH public key from the authorized keys file
+# if it is used by the domain and key can be identified
+sub delete_domain_user_ssh_pubkey
+{
+my ($d, $user) = @_;
+return if (!$d->{'dir'});
+my $sshdir = $d->{'home'}."/.ssh";
+return if (!-d $sshdir);
+my $sshfile = "$sshdir/authorized_keys";
+return if (!-f $sshfile);
+my $identifier = &get_ssh_key_identifier($user, $d);
+my $authorized_keys = &read_file_lines_as_domain_user($d, $sshfile);
+for (my $i = 0; $i < @$authorized_keys; $i++) {
+	if ($authorized_keys->[$i] =~ /\Q$identifier\E/) {
+        	splice(@$authorized_keys, $i, 1);
+        	last;
+		}
+	}
+&flush_file_lines_as_domain_user($d, $sshfile);
+return undef;
+}
+
+# update_domain_user_ssh_pubkey(&domain, &user, &olduser, [pubkey])
+# Updates an SSH public key or key identifier in the authorized
+# keys file if it is used by the domain and the old key can be 
+# identified
+sub update_domain_user_ssh_pubkey
+{
+my ($d, $user, $olduser, $pubkey) = @_;
+return if (!$d->{'dir'});
+my $sshdir = $d->{'home'}."/.ssh";
+return if (!-d $sshdir);
+my $sshfile = "$sshdir/authorized_keys";
+return if (!-f $sshfile);
+my $identifier = &get_ssh_key_identifier($user, $d);
+my $identifier_old = &get_ssh_key_identifier($olduser, $d);
+my $authorized_keys = &read_file_lines_as_domain_user($d, $sshfile);
+foreach my $authorized_key (@$authorized_keys) {
+	if ($authorized_key =~ /\Q$identifier_old\E/) {
+		# Replace old key with new key if set
+		if ($pubkey) {
+			$authorized_key = "$pubkey $identifier";
+			}
+		# Just update identifier and keep same key
+		else {
+			$authorized_key =~ s/\Q$identifier_old\E/$identifier/;
+			}
+		}
+	}
+&flush_file_lines_as_domain_user($d, $sshfile);
+return undef;
+}
+
+# get_ssh_pubkey_from_file(file, [match])
+# Returns the SSH public key from some file,
+# alternatively matching by some string. If
+# match parameter is not set, returns the first
+# line of the file.
+sub get_ssh_pubkey_from_file
+{
+my ($sshpubkeyfile, $sshpubkeyid) = @_;
+my $pubkey;
+my $sshpubkeyfilelines = &read_file_lines($sshpubkeyfile, 1);
+foreach my $sshpubkeyfileline (@$sshpubkeyfilelines) {
+	$sshpubkeyfileline = &trim($sshpubkeyfileline);
+	if ($sshpubkeyid) {
+		if ($sshpubkeyfileline =~ /\Q$sshpubkeyid\E/) {
+			$pubkey = $sshpubkeyfileline;
+			last;
+			}
+		}
+	else {
+		$pubkey = $sshpubkeyfileline;
+		last;
+		}
+	}
+return $pubkey;
+}
+
+# validate_ssh_pubkey(pubkey, [no-ssh-keygen])
+# Returns an error message if some SSH public key is invalid
+sub validate_ssh_pubkey
+{
+my ($pubkey, $no_ssh_keygen) = @_;
+my ($ssh_keytest_out, $ssh_keytest_err);
+($ssh_keytest_err = $text{'validate_esshpubkeyempty'}) if (!$pubkey);
+if (!$ssh_keytest_err) {
+	my $ssh_keygen = !$no_ssh_keygen && &has_command('ssh-keygen');
+	if ($ssh_keygen) {
+		my $pubkeyfile = &transname('id_rsa.pub');
+		&write_file_contents($pubkeyfile, $pubkey);
+		&execute_command("$ssh_keygen -l -f $pubkeyfile",
+			undef, \$ssh_keytest_out, \$ssh_keytest_err);
+		if ($ssh_keytest_err) {
+			$ssh_keytest_err =~ s/\s*\Q$pubkeyfile\E\s*|^\s+|\s+$//g;
+			$ssh_keytest_err =~ s/\.$//;
+			$ssh_keytest_err = &text('validate_esshpubkeyinvalid', 
+				&html_escape(ucfirst($ssh_keytest_err)));
+			}
+		}
+	elsif ($pubkey && $pubkey !~
+		/^(ssh-rsa|ssh-dss|ssh-dsa|ecdsa-sha2-nistp256|rsa-sha2-512|
+		   rsa-sha2-256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521|
+		   ssh-ed25519|sk-ecdsa-sha2-nistp256|sk-ssh-ed25519)/x) {
+		$ssh_keytest_err =
+			&text('validate_esshpubkeyinvalid',
+			$text{'validate_esshpubkeyinvalidformat'});
+		}
+	}
+return wantarray ? ($ssh_keytest_err, $ssh_keytest_out) : $ssh_keytest_err;
 }
 
 sub get_module_version_and_type

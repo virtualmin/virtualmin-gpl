@@ -5597,6 +5597,74 @@ if (!$d->{'alias'}) {
 	}
 }
 
+# list_webserver_user_dirs(&domain, user)
+# Returns a list of directories that the webserver user has access to
+sub list_webserver_user_dirs
+{
+my ($d, $user) = @_;
+my @rv;
+if (&plugin_defined("virtualmin-htpasswd", "can_directory")) {
+	my @dirs = grep { &plugin_call("virtualmin-htpasswd", "can_directory", $_->[0], $d) }
+		&htaccess_htpasswd::list_directories();
+	my %currwebdirs = &plugin_call("virtualmin-htpasswd", "get_in_dirs", \@dirs, $user->{'user'});
+	my @currwebdirs = keys %currwebdirs;
+	# Add directories from @addwebdirs to @currwebdirs if they're not already present
+	@currwebdirs = (@currwebdirs, grep { my $__ = $_; not grep { $__ eq $_ } @currwebdirs } @addwebdirs)
+		if (@addwebdirs);
+	# Remove directories listed in @delwebdirs from @currwebdirs
+	@currwebdirs = grep { my $__ = $_; not grep { $__ eq $_ } @delwebdirs } @currwebdirs
+		if (@delwebdirs);
+	@rv = @currwebdirs;
+	}
+return @rv;
+}
+
+# modify_webserver_user(&user, &old-user, &domain, &input-data)
+# Create or update a webserver user
+sub modify_webserver_user
+{
+my ($user, $olduser, $d, $indata) = @_;
+# Encrypt user initial password if given
+$user->{'pass'} = &encrypt_user_password($user, $user->{'pass'})
+	if ($user->{'pass'});
+# Use new encrypted password if was given or use old one
+$user->{'pass_crypt'} = $user->{'pass'} || $user->{'pass_crypt'};
+# Validate plugins
+if (&plugin_defined("virtualmin-htpasswd", "mailbox_validate")) {
+	$err = &plugin_call("virtualmin-htpasswd", "mailbox_validate", $user, $olduser,
+				$indata, $in{'new'}, $d);
+	&error($err) if ($err);
+	}
+# Run plugin save functions
+if (&plugin_defined("virtualmin-htpasswd", "mailbox_save")) {
+    &plugin_call("virtualmin-htpasswd", "mailbox_save", $user, $olduser,
+				$indata, $in{'new'}, $d);
+	}
+# Add user to domain config
+&update_extra_user($d, $user, $olduser);
+}
+
+# revoke_webserver_user_access(&user, &domain)
+# Remove a webserver user access
+sub revoke_webserver_user_access
+{
+my ($user, $d) = @_;
+if (&plugin_defined("virtualmin-htpasswd", "mailbox_delete")) {
+	&plugin_call("virtualmin-htpasswd", "mailbox_delete", $user, $d);
+	}
+}
+
+# delete_webserver_user(&user, &domain)
+# Delete a webserver user
+sub delete_webserver_user
+{
+my ($user, $d) = @_;
+# Remove a webserver user access
+&revoke_webserver_user_access($user, $d);
+# Delete user from domain config
+&delete_extra_user($d, $user);
+}
+
 $done_feature_script{'web'} = 1;
 
 1;

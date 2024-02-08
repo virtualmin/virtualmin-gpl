@@ -78,6 +78,9 @@ elsif ($in{'delete'}) {
 		$simple = &get_simple_alias($d, $user);
 		&delete_simple_autoreply($d, $simple) if ($simple);
 
+		# Delete SSH public key
+		&delete_domain_user_ssh_pubkey($d, $user);
+
 		# Delete the user, his virtusers and aliases
 		&delete_user($user, $d);
 
@@ -369,7 +372,7 @@ else {
 
 		# Make sure home exists, for web owner user
 		if ($user->{'webowner'} && !-d $home) {
-			&error(&text('user_ehomeexists2', &html_escape($home)));
+			&error(&text('user_ehomeexists', &html_escape($home)));
 			}
 		}
 
@@ -396,6 +399,7 @@ else {
 		}
 
 	# Create or update the user
+	my $sshkey_mode = $in{'sshkey_mode'} == 2 && $virtualmin_pro ? 1 : 0;
 	$emailmailbox = 0;
 	if ($in{'new'}) {
 		# Set new user parameters
@@ -523,9 +527,55 @@ else {
 			&error($err) if ($err);
 			}
 
+		# Validate if extra database user exists
+		# which can be merged with Unix user
+		my $extra_db_user = &get_extra_db_user($d, $user->{'user'});
+		my $extra_web_user = &get_extra_web_user($d, $user->{'user'});
+		if (($extra_db_user || $extra_web_user) && !$in{'confirm'}) {
+			# Confirm suppression first
+			&ui_print_header(&domain_in($d), $text{'user_createovertitle'}, "");
+			print "<center>\n";
+			print &ui_form_start("save_user.cgi");
+			foreach my $key (keys %in) {
+				print &ui_hidden($key, $in{$key});
+				}
+			my $createoverdesc = $extra_db_user && $extra_web_user ?
+				"dbweb" : $extra_db_user ? "db" : "web";
+			my $createoverdescm = $extra_db_user && $extra_web_user ? 2 : 1;
+			print &text("user_createoverdesc$createoverdesc", "<tt>$user->{'user'}</tt>");
+			print "<br>".$text{"user_createoverdescm$createoverdescm"};
+			print "<br>".$text{"user_createoverdescmf$createoverdescm"};
+			print &ui_form_end([ [ "confirm", $text{"user_createover$createoverdescm"} ],
+					     [ "", $text{'user_creategoback'}, undef,  undef,
+							'onclick="event.preventDefault(); '.
+							'event.stopImmediatePropagation(); '.
+							'window.history.back();"' ] ]);
+			print "</center>\n";
+			&ui_print_footer("list_users.cgi?dom=$in{'dom'}",
+				$text{'users_return'});
+			exit;
+			}
+		
+		# Validate SSH public key if given
+		my $sshkey = $in{'sshkey'};
+		if ($sshkey_mode) {
+			$sshkey =~ s/\r|\n/ /g;
+			$sshkey = &trim($sshkey);
+			$sshkeyerr = &validate_ssh_pubkey($sshkey);
+			&error($sshkeyerr) if ($sshkeyerr);
+			}
+
 		# Validate user
+		$user->{'nocheck'} = 1 if ($extra_db_user);
 		$err = &validate_user($d, $user);
 		&error($err) if ($err);
+
+		# If an extra web user exists and new directories are given then
+		# remove access to the old directories first to avoid overlap and
+		# have duplicated records
+		if ($extra_web_user && $in{'virtualmin_htpasswd'}) {
+			&revoke_webserver_user_access($user, $d);
+			}
 
 		if ($home && !$user->{'nocreatehome'} &&
 		    (!$user->{'maybecreatehome'} || !-d $home)) {
@@ -541,8 +591,14 @@ else {
 		if ($user->{'email'} || $newmailto) {
 			$emailmailbox = 1;
 			}
+		
+		# Setup SSH public key if given
+		if ($sshkey_mode) {
+			$err = &add_domain_user_ssh_pubkey($d, $user, $sshkey);
+			&error($err) if ($err);
+			}
 		}
-	else {
+	else { 
 		# Check if any extras clash
 		%oldextra = map { $_, 1 } @{$old{'extraemail'}};
 		foreach $e (@extra) {
@@ -674,6 +730,36 @@ else {
 				# Rename his mail file (if needed)
 				&rename_mail_file($user, \%old);
 				}
+			}
+		elsif (&master_admin()) {
+			# Update shell if called in master admin mode, and only if available 
+			if (defined($in{'shell'})) {
+				&check_available_shell($in{'shell'}, 'mailbox',
+						       $user->{'shell'}) ||
+					&error($text{'user_eshell'});
+				$user->{'shell'} = $in{'shell'};
+				}
+			}
+
+		# Update SSH public key
+		if ($sshkey_mode) {
+			my $sshkey = $in{'sshkey'};
+			$sshkey =~ s/\r|\n/ /g;
+			$sshkey = &trim($sshkey);
+			$sshkeyerr = &validate_ssh_pubkey($sshkey);
+			&error($sshkeyerr) if ($sshkeyerr);
+			my $existing_key = &get_domain_user_ssh_pubkey($d, \%old);
+			if ($existing_key) {
+				&update_domain_user_ssh_pubkey($d, $user, \%old, $sshkey)
+				}
+			else {
+				$err = &add_domain_user_ssh_pubkey($d, $user, $sshkey);
+				&error($err) if ($err);
+				}
+			}
+		# Delete SSH public key
+		else {
+			&delete_domain_user_ssh_pubkey($d, \%old);
 			}
 
 		# Update the user and any virtusers and aliases

@@ -211,8 +211,12 @@ $ssl_prefix = &compute_prefix($test_ssl_subdomain, $test_ssl_subdomain_user,
 		 'group' => $test_domain_user,
 		 'template' => &get_init_template() );
 $test_full_user = &userdom_name($test_user, \%test_domain);
+$test_user_extra = $test_user."_extra";
+$test_full_user_extra = &userdom_name($test_user_extra, \%test_domain);
 $test_full_atuser = &userdom_name($test_user, \%test_domain, 6);
 $test_full_user_mysql = &mysql_username($test_full_user);
+$test_full_user_mysql_extra = &mysql_username($test_full_user_extra);
+$test_user_mysql_extra = &mysql_username($test_user_extra);
 $test_full_user_postgres = &postgres_username($test_full_user);
 ($test_target_domain_user) = &unixuser_name($test_target_domain);
 $test_target_domain_db = 'targetdb';
@@ -1836,6 +1840,19 @@ $database_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.'_extra -e "select version()"',
 	},
 
+	# Check MySQL extra login creation
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user_mysql_extra ],
+		      [ 'pass', 'smeg' ],
+		      [ 'mysql', $test_domain_db ],
+		      [ 'db-only' ] ],
+	},
+
+	# Check MySQL extra login
+	{ 'command' => 'mysql -u '.$test_full_user_mysql_extra.' -psmeg '.$test_domain_db.' -e "select version()"',
+	},
+	
 	# Make sure the MySQL database appears
 	{ 'command' => 'list-databases.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -10502,6 +10519,83 @@ $htpasswd_tests = [
         },
 	];
 
+$htpasswd_tests_extra = [
+	# Create a domain with a website
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
+		      [ 'logrotate' ],
+		      [ 'content' => 'Test web page' ],
+		      @create_args, ],
+	},
+
+	# Test wget without protection
+	{ 'command' => $wget_command.' http://'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
+	# Setup protected directory
+	{ 'command' => 'virtualmin create-protected-directory',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Protection test' ],
+		      [ 'path', $test_domain_html ] ],
+	  'grep' => 'Added protection for '.$test_domain_html,
+	},
+
+	# Check the directory was created
+	{ 'command' => 'virtualmin list-protected-directories',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'dir-only' ] ],
+	  'grep' => $test_domain_html,
+	},
+
+	# Test wget with protection, which should now fail
+	{ 'command' => $wget_command.' http://'.$test_domain,
+	  'fail' => 1,
+	},
+
+	# Create webserver extra user
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user_extra ],
+		      [ 'pass', 'smeg' ],
+		      [ 'webserver-dir', $test_domain_html ],
+		      [ 'webserver-only' ] ],
+	},
+
+	# Check the user was created
+	{ 'command' => 'virtualmin list-protected-users',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', $test_domain_html ],
+		      [ 'name-only' ] ],
+	  'grep' => $test_user_extra,
+	},
+
+	# Test wget as the new user
+	{ 'command' => $wget_command.' http://'.&urlize($test_full_user_extra).':smeg@'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
+	# Delete extra user
+	{ 'command' => 'virtualmin delete-user',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user_extra ] ],
+	},
+
+	# Test wget as the user, which should fail now
+	{ 'command' => $wget_command.' http://'.&urlize($test_full_user_extra).':smeg@'.$test_domain,
+	  'fail' => 1,
+	},
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+
 $reset_tests = [
 	# Create a domain with all the features
 	{ 'command' => 'create-domain.pl',
@@ -11235,6 +11329,7 @@ $alltests = { '_config' => $_config_tests,
 	      'googledns' => $googledns_tests,
 	      'route53' => $route53_tests,
 	      'htpasswd' => $htpasswd_tests,
+	      'htpasswd_extra' => $htpasswd_tests_extra,
 	      'reset' => $reset_tests,
 	      'compression' => $compression_tests,
 	      'allscript' => $allscript_tests,
