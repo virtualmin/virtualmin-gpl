@@ -3605,7 +3605,9 @@ if (!$webmin_user || !$webmin_pass) {
 
 $enc_webminbackup_tests = &convert_to_encrypted($webminbackup_tests);
 
-$s3_backup_prefix = "s3://$config{'s3_akey'}:$config{'s3_skey'}\@virtualmin-test-backup-bucket";
+if ($s3_account = &get_default_s3_account()) {
+	$s3_backup_prefix = "s3://$s3_account->{'access'}:$s3_account->{'secret'}\@virtualmin-test-backup-bucket";
+	}
 $s3backup_tests = [
 	# Create target bucket
 	{ 'command' => 'create-s3-bucket.pl',
@@ -9729,7 +9731,7 @@ $s3_tests = [
 	  'cleanup' => 1,
 	},
 	];
-if (!$config{'s3_akey'} || !$config{'s3_skey'}) {
+if (!$s3_account) {
 	$s3_tests = [ { 'command' => 'echo No default S3 access or secret key defined on this system' } ];
 	}
 else {
