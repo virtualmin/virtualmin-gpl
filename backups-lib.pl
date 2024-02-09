@@ -4041,8 +4041,9 @@ return $rv;
 # and port
 sub parse_backup_url
 {
-local ($url) = @_;
-local @rv;
+my ($url) = @_;
+my @rv;
+my $defs3 = &get_default_s3_account();
 if ($url =~ /^ftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
     $url =~ /^ftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
     $url =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
@@ -4082,10 +4083,15 @@ elsif ($url =~ /^(s3|s3rrs):\/\/([^:]*)\@([^\/]+)(\/(.*))?$/) {
 	@rv = (3, $2, undef, $3, $5, $1 eq "s3rrs" ? 1 : 0);
 	}
 elsif ($url =~ /^(s3|s3rrs):\/\/([^\/]+)(\/(.*))?$/ &&
-       ($config{'s3_akey'} || &can_use_aws_s3_creds()) &&
-       &can_use_cloud("s3")) {
-	# S3 with the default login
-	return (3, $config{'s3_akey'}, $config{'s3_skey'}, $2, $4,
+       $defs3 && &can_use_cloud("s3")) {
+	# S3 with the default account
+	return (3, $defs3->{'access'}, $defs3->{'secret'}, $2, $4,
+		$1 eq "s3rrs" ? 1 : 0);
+	}
+elsif ($url =~ /^(s3|s3rrs):\/\/([^\/]+)(\/(.*))?$/ &&
+       &can_use_aws_s3_creds() && &can_use_cloud("s3")) {
+	# S3 with AWS credentials
+	return (3, undef, undef, $2, $4,
 		$1 eq "s3rrs" ? 1 : 0);
 	}
 elsif ($url =~ /^rs:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {

@@ -10,8 +10,9 @@ sub check_s3
 {
 # Return no error if `aws_cmd` is set and installed
 if (&has_aws_cmd()) {
+	my $defs3 = &get_default_s3_account();
 	my ($ok, $err) = &can_use_aws_s3_cmd(
-		$config{'s3_akey'}, $config{'s3_skey'});
+		$defs3 ? ( $defs3->{'access'}, $defs3->{'secret'} ) : ( ));
 	if (!$ok) {
 		return (undef, &text('s3_eawscmd',
 				"<tt>".&html_escape($err)."</tt>"));

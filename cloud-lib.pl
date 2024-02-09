@@ -116,7 +116,7 @@ $rv .= &ui_table_row($text{'cloud_s3_chunk'},
 my $l = $config{'s3_location'};
 if ($config{'s3_endpoint'}) {
 	$rv .= &ui_table_row($text{'cloud_s3_location'},
-		&ui_opt_textbox("s3_location", $l, 30,
+		&ui_opt_textbox("s3_location", $l, 50,
 				$text{'default'}));
 	}
 else {
@@ -128,7 +128,7 @@ else {
 			     @locs,
 			     [ "*", $text{'cloud_s3_lother'} ] ],
 			   1, 0, 1)." ".
-		&ui_textbox("s3_location_other", $found ? "" : $l, 20));
+		&ui_textbox("s3_location_other", $found ? "" : $l, 40));
 	}
 
 return $rv;
