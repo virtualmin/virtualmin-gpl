@@ -1,4 +1,6 @@
 #### Version 7.10.0
+* Add reworked **Edit Users** page with ability to add separate database and webserver users
+* Add support for adding and updating SSH public key for newly created users
 * Add support for selecting CGI mode for virtual server using Website Options page and CLI
 * Updated terminology now refers to incremental backups as differential backups
 
