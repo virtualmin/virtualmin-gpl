@@ -6627,7 +6627,7 @@ if ($owner ne $oldowner) {
 }
 
 # list_all_s3_accounts()
-# Returns a list of S3 accounts from backups, as tuples
+# Returns a list of S3 accounts from backups owned by this user, as tuples
 sub list_all_s3_accounts
 {
 local @rv;

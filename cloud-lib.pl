@@ -112,6 +112,22 @@ $rv .= &ui_table_row($text{'cloud_s3_chunk'},
 	&ui_opt_textbox("s3_chunk", $config{'s3_chunk'}, 6,
 			$text{'default'}." (5 MB)"));
 
+# Available accounts
+my @s3s = &list_s3_accounts();
+my $ac;
+if (@s3s) {
+	$ac = &ui_columns_start([ $text{'s3s_access'},
+                                  $text{'s3s_desc'} ]);
+	foreach my $s3 (@s3s) {
+		$ac .= &ui_columns_row([ $s3->{'access'}, $s3->{'desc'} ]);
+		}
+	$ac .= &ui_columns_end();
+	}
+else {
+	$ac = "<i>$text{'cloud_s3_noaccounts'}</i>";
+	}
+$rv .= &ui_table_row($text{'cloud_s3_accounts'}, $ac);
+
 # Location for new buckets
 my $l = $config{'s3_location'};
 if ($config{'s3_endpoint'}) {
