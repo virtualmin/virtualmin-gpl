@@ -166,41 +166,6 @@ else {
 return undef;
 }
 
-# cloud_s3_clear()
-# Reset the S3 account to the default
-sub cloud_s3_clear
-{
-# Clear Virtualmin's credentials
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
-
-# Also clear the AWS creds
-my @uinfo = getpwnam("root");
-foreach my $f ("$uinfo[7]/.aws/config", "$uinfo[7]/.aws/credentials") {
-	&lock_file($f);
-	my $lref = &read_file_lines($f);
-	my ($start, $end, $inside) = (-1, -1, 0);
-	for(my $i=0; $i<@$lref; $i++) {
-		if ($lref->[$i] =~ /^\[(profile\s+)?\Q$akey\E\]$/) {
-			$start = $end = $i;
-			$inside = 1;
-			}
-		elsif ($lref->[$i] =~ /^\S+\s*=\s*\S+/ && $inside) {
-			$end = $i;
-			}
-		else {
-			$inside = 0;
-			}
-		}
-	if ($start >= 0) {
-		splice(@$lref, $start, $end-$start+1);
-		}
-	&flush_file_lines($f);
-	&unlock_file($f);
-	}
-}
-
 ######## Functions for Rackspace Cloud Files ########
 
 sub cloud_rs_get_state
