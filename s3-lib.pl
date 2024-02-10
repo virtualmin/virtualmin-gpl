@@ -77,6 +77,8 @@ sub init_s3_bucket
 {
 &require_s3();
 my ($akey, $skey, $bucket, $tries, $location) = @_;
+my $s3 = &get_s3_account($akey);
+$location ||= $s3->{'location'} if ($s3);
 if (&can_use_aws_s3_cmd($akey, $skey)) {
 	return &init_s3_bucket_aws_cmd(@_);
 	}
@@ -1052,15 +1054,19 @@ return (1, $rheader{'etag'});
 }
 
 # s3_list_locations(access-key, secret-key)
-# Returns a list of all possible S3 locations for buckets
+# Returns a list of all possible S3 locations for buckets. Currently this is
+# only supported for AWS.
 sub s3_list_locations
 {
 my ($akey, $skey) = @_;
-return ("us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1",
-	"ap-east-1", "ap-south-1", "ap-northeast-2", "ap-southeast-1",
-	"ap-southeast-2", "ap-northeast-1", "ca-central-1", "eu-central-1",
-	"eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-north-1",
-	"me-south-1", "sa-east-1");
+my $s3 = &get_s3_account($akey) || &get_default_s3_account();
+return () if (!$s3);
+if ($s3->{'endpoint'}) {
+	return ( "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-2", "ap-southeast-3", "ap-southeast-4", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "ca-west-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-south-2", "eu-north-1", "eu-central-2", "il-central-1", "me-south-1", "me-central-1", "sa-east-1", "us-gov-east-1", "us-gov-west-1");
+	}
+else {
+	return ();
+	}
 }
 
 # can_use_aws_s3_creds()
@@ -1240,6 +1246,7 @@ if ($config{'s3_akey'}) {
 	push(@rv, { 'access' => $config{'s3_akey'},
 		    'secret' => $config{'s3_skey'},
 		    'endpoint' => $config{'s3_endpoint'},
+		    'location' => $config{'s3_location'},
 		    'desc' => $config{'s3_desc'},
 		    'id' => 1,
 		    'default' => 1, });
@@ -1303,6 +1310,7 @@ if ($account->{'default'}) {
 	$config{'s3_akey'} = $account->{'access'};
 	$config{'s3_skey'} = $account->{'secret'};
 	$config{'s3_endpoint'} = $account->{'endpoint'};
+	$config{'s3_location'} = $account->{'location'};
 	$config{'s3_desc'} = $account->{'desc'};
 	&unlock_file($module_config_file);
 	&save_module_config();
@@ -1328,6 +1336,7 @@ if ($account->{'default'}) {
 	delete($config{'s3_akey'});
 	delete($config{'s3_skey'});
 	delete($config{'s3_endpoint'});
+	delete($config{'s3_location'});
 	&unlock_file($module_config_file);
 	&save_module_config();
 	}

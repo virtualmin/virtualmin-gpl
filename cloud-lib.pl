@@ -133,25 +133,6 @@ else {
 	}
 $rv .= &ui_table_row($text{'cloud_s3_accounts'}, $ac);
 
-# Location for new buckets
-my $l = $config{'s3_location'};
-if ($config{'s3_endpoint'}) {
-	$rv .= &ui_table_row($text{'cloud_s3_location'},
-		&ui_opt_textbox("s3_location", $l, 50,
-				$text{'default'}));
-	}
-else {
-	my @locs = &s3_list_locations();
-	my $found = !$l || &indexof($l, @locs) >= 0;
-	$rv .= &ui_table_row($text{'cloud_s3_location'},
-		&ui_select("s3_location", $found ? $l : "*",
-			   [ [ "", $text{'default'} ],
-			     @locs,
-			     [ "*", $text{'cloud_s3_lother'} ] ],
-			   1, 0, 1)." ".
-		&ui_textbox("s3_location_other", $found ? "" : $l, 40));
-	}
-
 return $rv;
 }
 
@@ -167,17 +148,6 @@ else {
 	$in->{'s3_chunk'} =~ /^[1-9][0-9]*$/ ||
 		&error($text{'cloud_es3_chunk'});
 	$config{'s3_chunk'} = $in->{'s3_chunk'};
-	}
-
-# Parse new bucket location
-if ($in->{'s3_location_def'}) {
-	$config{'s3_location'} = '';
-	}
-else {
-	my $l = $in->{'s3_location'};
-	$l = $in->{'s3_location_other'} if ($l eq "*");
-	$l =~ /^[a-z0-9\.\-]*/i || &error($text{'cloud_es3_location'});
-	$config{'s3_location'} = $l;
 	}
 
 &lock_file($module_config_file);

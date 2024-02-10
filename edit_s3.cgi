@@ -39,6 +39,14 @@ print &ui_table_row($text{'s3_endpoint'},
 	&ui_opt_textbox("endpoint", $s3->{'endpoint'}, 40,
 			$text{'s3_endpoint_def'}, $text{'s3_endpoint_hp'}));
 
+# Default bucket location
+if (!$in{'new'} && (@locs = &s3_list_locations($s3->{'access'}))) {
+	print &ui_table_row($text{'s3_location'},
+		&ui_select("location", $s3->{'location'},
+			   [ [ "", $text{'default'} ],
+			     @locs ], 1, 0, 1));
+	}
+
 if (!$in{'new'}) {
 	# Current users
 	@users = grep { &backup_uses_s3_account($_, $s3) }

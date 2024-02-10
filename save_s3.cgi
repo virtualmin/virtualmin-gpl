@@ -44,6 +44,9 @@ else {
 			&error($text{'cloud_es3_endport'});
 		$s3->{'endpoint'} = $in{'endpoint'};
 		}
+	if (defined($in{'location'})) {
+		$s3->{'location'} = $in{'location'};
+		}
 
 	# Validate that it works
 	$get_s3_account_cache{$s3->{'access'}} = $s3;

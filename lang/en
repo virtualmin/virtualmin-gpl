@@ -8035,6 +8035,7 @@ s3_header=S3 account details
 s3_desc=Account description
 s3_access=S3 access key
 s3_secret=S3 secret key
+s3_location=New bucket location
 s3_endpoint=S3-compatible endpoint
 s3_endpoint_def=Just use AWS
 s3_endpoint_hp=Host:port

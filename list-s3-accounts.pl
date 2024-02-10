@@ -61,6 +61,9 @@ if ($multi) {
 		if ($s->{'endpoint'}) {
 			print "    Endpoint: $s->{'endpoint'}\n";
 			}
+		if ($s->{'location'}) {
+			print "    Default location: $s->{'location'}\n";
+			}
 		my @users = grep { &backup_uses_s3_account($_, $s) } @scheds;
 		foreach my $b (@users) {
 			print "    Used by backup ID: ",$b->{'id'},"\n";
