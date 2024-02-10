@@ -76,10 +76,15 @@ return wantarray ? @rv : $rv[0];
 sub cloud_s3_get_state
 {
 my @s3s = &list_s3_accounts();
-if (@s3s) {
+if (@s3s == 1) {
 	return { 'ok' => 1,
 		 'desc' => &text('cloud_s3account',
 				 "<tt>$s3s[0]->{'access'}</tt>"),
+	       };
+	}
+elsif (@s3s > 1) {
+	return { 'ok' => 1,
+		 'desc' => &text('cloud_s3accounts', scalar(@s3s)),
 	       };
 	}
 elsif (&can_use_aws_s3_creds()) {

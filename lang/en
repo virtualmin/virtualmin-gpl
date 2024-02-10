@@ -7541,6 +7541,7 @@ cloud_bbdesc=Backblaze B2
 cloud_azdesc=Azure Blob Storage
 cloud_drivedesc=Google Drive
 cloud_s3account=Using access key $1
+cloud_s3accounts=Using $1 accounts
 cloud_s3creds=Using EC2 credentials
 cloud_rsuser=Using login $1
 cloud_s3_noawscli=We recommend installing the official AWS command line interface.
