@@ -966,8 +966,9 @@ sub make_s3_connection
 my ($akey, $skey, $endpoint) = @_;
 my $s3 = &get_s3_account($akey);
 if ($s3) {
-	$endpoint ||= $s3->{'endpoint'};
+	$akey = $s3->{'access'};
 	$skey ||= $s3->{'secret'};
+	$endpoint ||= $s3->{'endpoint'};
 	}
 &require_s3();
 my $endport;
@@ -1095,7 +1096,10 @@ sub can_use_aws_cmd
 {
 my ($akey, $skey, $zone, $func, @cmd) = @_;
 my $s3 = &get_s3_account($akey);
-$skey ||= $s3->{'secret'} if ($s3);
+if ($s3) {
+	$skey ||= $s3->{'secret'};
+	$zone ||= $s3->{'location'};
+	}
 my $acachekey = $akey || "none";
 if (!&has_aws_cmd()) {
 	return wantarray ? (0, "The <tt>aws</tt> command is not installed") : 0;
@@ -1263,15 +1267,19 @@ if (opendir(DIR, $s3_accounts_dir)) {
 return @rv;
 }
 
-# get_s3_account(access-key)
+# get_s3_account(access-key|id)
 # Returns an account looked up by key, or undef
 sub get_s3_account
 {
 my ($akey) = @_;
 my $rv = $get_s3_account_cache{$akey};
 if (!$rv) {
-	($rv) = grep { $_->{'access'} eq $akey } &list_s3_accounts();
-	$get_s3_account_cache{$akey} = $rv if ($rv);
+	($rv) = grep { $_->{'access'} eq $akey ||
+		       $_->{'id'} eq $akey } &list_s3_accounts();
+	if ($rv) {
+		$get_s3_account_cache{$rv->{'access'}} = $rv;
+		$get_s3_account_cache{$rv->{'id'}} = $rv;
+		}
 	}
 return $rv;
 }
