@@ -1110,7 +1110,7 @@ else {
 			last;
 			}
 		}
-	if ($ip6addr) {
+	if ($ip6addr && !$d->{'dns_cloud'}) {
 		if (!$d->{'ip6'}) {
 			return &text('validate_ewebipv6', $ip6addr, $ip6name);
 			}
