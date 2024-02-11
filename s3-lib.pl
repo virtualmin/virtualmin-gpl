@@ -77,6 +77,7 @@ sub init_s3_bucket
 {
 &require_s3();
 my ($akey, $skey, $bucket, $tries, $location) = @_;
+print STDERR "init_s3_bucket akey=$akey\n";
 my $s3 = &get_s3_account($akey);
 $location ||= $s3->{'location'} if ($s3);
 if (&can_use_aws_s3_cmd($akey, $skey)) {
@@ -199,6 +200,7 @@ print STDERR "upload for $akey,$skey\n";
 if (&can_use_aws_s3_cmd($akey, $skey)) {
 	return &s3_upload_aws_cmd(@_);
 	}
+print STDERR "using built-in API\n";
 &require_s3();
 my $headers = { };
 if ($rrs) {
@@ -1103,8 +1105,10 @@ sub can_use_aws_cmd
 my ($akey_or_id, $skey, $zone, $func, @cmd) = @_;
 my $akey;
 my $profile;
+print STDERR "akey_or_id=$akey_or_id\n";
 if ($akey_or_id) {
 	my $s3 = &get_s3_account($akey_or_id);
+	print STDERR "s3=$s3\n";
 	if ($s3) {
 		$profile = $s3->{'id'} <= 1 ? $s3->{'access'} : $s3->{'id'};
 		$akey = $s3->{'access'};
@@ -1115,6 +1119,7 @@ if ($akey_or_id) {
 		$profile = $akey = akey_or_id;
 		}
 	}
+print STDERR "profile=$profile\n";
 my $acachekey = $akey || "none";
 if (!&has_aws_cmd()) {
 	return wantarray ? (0, "The <tt>aws</tt> command is not installed") : 0;
@@ -1123,7 +1128,9 @@ if (defined($can_use_aws_cmd_cache{$acachekey})) {
 	return wantarray ? @{$can_use_aws_cmd_cache{$acachekey}}
 			 : $can_use_aws_cmd_cache{$acachekey}->[0];
 	}
+print STDERR "calling $func with $akey_or_id\n";
 my $out = &$func($akey_or_id, @cmd);
+print STDERR "out=$out\n";
 if ($? || $out =~ /Unable to locate credentials/i ||
 	  $out =~ /could not be found/) {
 	# Credentials profile hasn't been setup yet
@@ -1199,7 +1206,7 @@ my $profile;
 if ($akey) {
 	my $s3 = &get_s3_account($akey);
 	if ($s3) {
-		$profile = $s3->{'id'} || $s3->{'access'};
+		$profile = $s3->{'id'} <= 1 ? $s3->{'access'} : $s3->{'id'};
 		}
 	else {
 		$profile = $akey;
@@ -1214,6 +1221,7 @@ if (ref($params)) {
 	}
 my $aws = $config{'aws_cmd'} || "aws";
 my ($out, $err);
+print STDERR "$aws $cmd ",($profile ? "--profile=".quotemeta($profile)." " : ""),"$endpoint_param $params\n";
 &execute_command(
 	"TZ=GMT $aws $cmd ".
 	($profile ? "--profile=".quotemeta($profile)." " : "").
