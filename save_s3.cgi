@@ -44,14 +44,23 @@ else {
 			&error($text{'cloud_es3_endport'});
 		$s3->{'endpoint'} = $in{'endpoint'};
 		}
+	$get_s3_account_cache{$s3->{'access'}} = $s3;
 	if (defined($in{'location'})) {
+		if ($in{'location'}) {
+			@locs = &s3_list_locations($s3->{'access'});
+			&indexof($in{'location'}, @locs) ||
+				&error($text{'s3_elocation'});
+			}
 		$s3->{'location'} = $in{'location'};
 		}
 
 	# Validate that it works
-	$get_s3_account_cache{$s3->{'access'}} = $s3;
+	$s3->{'id'} ||= &domain_id();
 	my $buckets = &s3_list_buckets($s3->{'access'}, $s3->{'secret'});
-	&error(&text('s3_echeck', $buckets)) if (!ref($buckets));
+	if (!ref($buckets)) {
+		&delete_s3_account($s3) if ($in{'new'});
+		&error(&text('s3_echeck', $buckets));
+		}
 
 	# Save the account
 	&save_s3_account($s3);

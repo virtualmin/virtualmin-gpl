@@ -40,7 +40,14 @@ print &ui_table_row($text{'s3_endpoint'},
 			$text{'s3_endpoint_def'}, $text{'s3_endpoint_hp'}));
 
 # Default bucket location
-if (!$in{'new'} && (@locs = &s3_list_locations($s3->{'access'}))) {
+my @locs;
+if ($in{'new'}) {
+	@locs = &s3_list_aws_locations();
+	}
+else {
+	@locs = &s3_list_locations($s3->{'access'});
+	}
+if (@locs) {
 	print &ui_table_row($text{'s3_location'},
 		&ui_select("location", $s3->{'location'},
 			   [ [ "", $text{'default'} ],

@@ -195,6 +195,7 @@ my ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
 $tries ||= 1;
 my @st = stat($sourcefile);
 @st || return "File $sourcefile does not exist";
+print STDERR "upload for $akey,$skey\n";
 if (&can_use_aws_s3_cmd($akey, $skey)) {
 	return &s3_upload_aws_cmd(@_);
 	}
@@ -453,6 +454,7 @@ if($rrs) {
 	push(@rrsargs, "--storage-class", "REDUCED_REDUNDANCY");
 	}
 my @regionflag = &s3_region_flag($akey, $skey, $bucket);
+print STDERR "region flag for $akey,$skey = ",join(" ", @regionflag),"\n";
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
 	my $out = &call_aws_s3_cmd($akey,
@@ -1054,20 +1056,24 @@ $rheader{'etag'} =~ s/^"(.*)"$/$1/;
 return (1, $rheader{'etag'});
 }
 
-# s3_list_locations(access-key, secret-key)
+# s3_list_locations(access-key)
 # Returns a list of all possible S3 locations for buckets. Currently this is
 # only supported for AWS.
 sub s3_list_locations
 {
 my ($akey, $skey) = @_;
 my $s3 = &get_s3_account($akey) || &get_default_s3_account();
-return () if (!$s3);
-if ($s3->{'endpoint'}) {
-	return ( "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-2", "ap-southeast-3", "ap-southeast-4", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "ca-west-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-south-2", "eu-north-1", "eu-central-2", "il-central-1", "me-south-1", "me-central-1", "sa-east-1", "us-gov-east-1", "us-gov-west-1");
+if ($s3 && !$s3->{'endpoint'}) {
+	return &s3_list_aws_locations();
 	}
-else {
-	return ();
-	}
+return ();
+}
+
+# s3_list_aws_locations()
+# Returns locations supported by Amazon S3
+sub s3_list_aws_locations
+{
+return ( "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-2", "ap-southeast-3", "ap-southeast-4", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "ca-west-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-south-2", "eu-north-1", "eu-central-2", "il-central-1", "me-south-1", "me-central-1", "sa-east-1", "us-gov-east-1", "us-gov-west-1");
 }
 
 # can_use_aws_s3_creds()
@@ -1094,11 +1100,20 @@ return &can_use_aws_cmd($akey, $skey, $zone, \&call_aws_s3_cmd, "ls");
 # downloads
 sub can_use_aws_cmd
 {
-my ($akey, $skey, $zone, $func, @cmd) = @_;
-my $s3 = &get_s3_account($akey);
-if ($s3) {
-	$skey ||= $s3->{'secret'};
-	$zone ||= $s3->{'location'};
+my ($akey_or_id, $skey, $zone, $func, @cmd) = @_;
+my $akey;
+my $profile;
+if ($akey_or_id) {
+	my $s3 = &get_s3_account($akey_or_id);
+	if ($s3) {
+		$profile = $s3->{'id'} <= 1 ? $s3->{'access'} : $s3->{'id'};
+		$akey = $s3->{'access'};
+		$skey ||= $s3->{'secret'};
+		$zone ||= $s3->{'location'};
+		}
+	else {
+		$profile = $akey = akey_or_id;
+		}
 	}
 my $acachekey = $akey || "none";
 if (!&has_aws_cmd()) {
@@ -1108,7 +1123,7 @@ if (defined($can_use_aws_cmd_cache{$acachekey})) {
 	return wantarray ? @{$can_use_aws_cmd_cache{$acachekey}}
 			 : $can_use_aws_cmd_cache{$acachekey}->[0];
 	}
-my $out = &$func($akey, @cmd);
+my $out = &$func($akey_or_id, @cmd);
 if ($? || $out =~ /Unable to locate credentials/i ||
 	  $out =~ /could not be found/) {
 	# Credentials profile hasn't been setup yet
@@ -1129,7 +1144,7 @@ if ($? || $out =~ /Unable to locate credentials/i ||
 		&close_tempfile(TEMP);
 		my $aws = $config{'aws_cmd'} || "aws";
 		$out = &backquote_command(
-			"$aws configure --profile=".quotemeta($akey).
+			"$aws configure --profile=".quotemeta($profile).
 			" <$temp 2>&1");
 		my $ex = $?;
 		if (!$ex) {
@@ -1175,11 +1190,21 @@ if (!$? && $json) {
 return $out;
 }
 
-# call_aws_cmd(akey, command, params, endpoint)
+# call_aws_cmd(akey|id, command, params, endpoint)
 # Run the aws command for s3 with some params, and return output
 sub call_aws_cmd
 {
 my ($akey, $cmd, $params, $endpoint) = @_;
+my $profile;
+if ($akey) {
+	my $s3 = &get_s3_account($akey);
+	if ($s3) {
+		$profile = $s3->{'id'} || $s3->{'access'};
+		}
+	else {
+		$profile = $akey;
+		}
+	}
 my $endpoint_param;
 if ($endpoint) {
 	$endpoint_param = "--endpoint-url=".quotemeta("https://$endpoint");
@@ -1191,7 +1216,7 @@ my $aws = $config{'aws_cmd'} || "aws";
 my ($out, $err);
 &execute_command(
 	"TZ=GMT $aws $cmd ".
-	($akey ? "--profile=".quotemeta($akey)." " : "").
+	($profile ? "--profile=".quotemeta($profile)." " : "").
 	$endpoint_param." ".$params, undef, \$out, \$err);
 return $out if (!$?);
 return $err || $out;
@@ -1339,6 +1364,7 @@ sub delete_s3_account
 {
 my ($account) = @_;
 my $akey = $account->{'access'};
+my $id = $account->{'id'};
 if ($account->{'default'}) {
 	&lock_file($module_config_file);
 	delete($config{'s3_akey'});
@@ -1358,24 +1384,28 @@ else {
 my @uinfo = getpwnam("root");
 foreach my $f ("$uinfo[7]/.aws/config", "$uinfo[7]/.aws/credentials") {
 	&lock_file($f);
-	my $lref = &read_file_lines($f);
-	my ($start, $end, $inside) = (-1, -1, 0);
-	for(my $i=0; $i<@$lref; $i++) {
-		if ($lref->[$i] =~ /^\[(profile\s+)?\Q$akey\E\]$/) {
-			$start = $end = $i;
-			$inside = 1;
+	foreach my $mark ($id, $akey) {
+		my $lref = &read_file_lines($f);
+		my ($start, $end, $inside) = (-1, -1, 0);
+		for(my $i=0; $i<@$lref; $i++) {
+			if ($lref->[$i] =~ /^\[(profile\s+)?\Q$mark\E\]$/) {
+				$start = $end = $i;
+				$inside = 1;
+				}
+			elsif ($lref->[$i] =~ /^\S+\s*=\s*\S+/ && $inside) {
+				$end = $i;
+				}
+			else {
+				$inside = 0;
+				}
 			}
-		elsif ($lref->[$i] =~ /^\S+\s*=\s*\S+/ && $inside) {
-			$end = $i;
+		if ($start >= 0) {
+			splice(@$lref, $start, $end-$start+1);
+			&flush_file_lines($f);
+			last;
 			}
-		else {
-			$inside = 0;
-			}
+		&unflush_file_lines($f);
 		}
-	if ($start >= 0) {
-		splice(@$lref, $start, $end-$start+1);
-		}
-	&flush_file_lines($f);
 	&unlock_file($f);
 	}
 }
@@ -1388,7 +1418,8 @@ my ($sched, $account) = @_;
 foreach my $dest (&get_scheduled_backup_dests($sched)) {
 	my ($mode, $akey) = &parse_backup_url($dest);
 	if ($mode == 3 &&
-	    ($akey eq $account->{'access'} ||
+	    ($akey eq $account->{'id'} ||
+	     $akey eq $account->{'access'} ||
 	     !$akey && $account->{'default'})) {
 		return 1;
 		}
