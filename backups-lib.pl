@@ -4538,7 +4538,8 @@ if (&can_use_cloud("s3") && (@s3s = &list_s3_accounts())) {
 	local $s3pass = $mode == 3 ? $pass : undef;
 	local $st = &$tablestart('s3');
 	if ($s3user || !&can_use_aws_s3_creds()) {
-		my ($s3) = grep { $_->{'access'} eq $s3user &&
+		my ($s3) = grep { ($_->{'access'} eq $s3user ||
+				   $_->{'id'} eq $s3user) &&
 				 (!$s3pass || $_->{'secret'} eq $s3pass) } @s3s;
 		$st .= "<tr> <td>$text{'backup_as3'}</td> ";
 		$st .= "<td>".&ui_select($name."_as3",
@@ -4752,8 +4753,7 @@ elsif ($mode == 3) {
 		my @s3s = &list_s3_accounts();
 		my ($s3) = grep { $_->{'id'} eq $in{$name."_as3"} } @s3s;
 		$s3 || &error($text{'backup_eas3'});
-		return $proto."://".$s3->{'access'}.":".$s3->{'secret'}.
-		       "\@".$in{$name.'_s3path'};
+		return $proto."://".$s3->{'id'}."\@".$in{$name.'_s3path'};
 		}
 	else {
 		return $proto."://".$in{$name.'_s3path'};
