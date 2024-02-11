@@ -558,11 +558,9 @@ sub script_django_latest
 {
 local ($ver) = @_;
 return ( "http://www.djangoproject.com/download/",
-	 $ver >= 4.2 ? "Django-([0-9\\.]+)\\.tar\\.gz" :
-	 $ver >= 4.1 ? "Django-(4\\.1\\.[0-9\\.]+)\\.tar\\.gz" :
-	 $ver >= 3.1 ? "Django-(3\\.[0-9\\.]+)\\.tar\\.gz" :
-	 $ver >= 2.2 ? "Django-(2\\.[0-9\\.]+)\\.tar\\.gz" 
-		     : "Django-(1\\.[0-9\\.]+)\\.tar\\.gz" );
+	 $ver >= 5.0 ? "Django-([0-9\\.]+)\\.tar\\.gz" :
+	 $ver >= 4.2 ? "Django-(4\\.2\\.[0-9\\.]+)\\.tar\\.gz" :
+	 	       "Django-(3\\.[0-9\\.]+)\\.tar\\.gz" );
 }
 
 sub script_django_site
