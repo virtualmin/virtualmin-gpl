@@ -1455,6 +1455,9 @@ foreach my $sched (&list_scheduled_backups()) {
 			my ($s3) = grep { $_->{'access'} eq $akey &&
 					  $_->{'secret'} eq $skey } @s3s;
 			if (!$s3) {
+				($s3) = grep { $_->{'id'} eq $akey } @s3s;
+				}
+			if (!$s3) {
 				$s3 = { 'access' => $akey,
 					'secret' => $skey,
 					'desc' => "S3 account from backup ".

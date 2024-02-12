@@ -6629,6 +6629,8 @@ foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
 		local ($mode, $user, $pass, $server, $path, $port) =
 			&parse_backup_url($dest);
 		if ($mode == 3) {
+			my $s3 = &get_s3_account($user);
+			$user = $s3->{'access'} if ($s3);
 			push(@rv, [ $user, $pass ]);
 			}
 		}
