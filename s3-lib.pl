@@ -71,15 +71,14 @@ sub init_s3_bucket
 {
 &require_s3();
 my ($akey, $skey, $bucket, $tries, $location) = @_;
-print STDERR "init_s3_bucket akey=$akey\n";
-my $s3 = &get_s3_account($akey);
-$location ||= $s3->{'location'} if ($s3);
 if (&can_use_aws_s3_cmd($akey, $skey)) {
 	return &init_s3_bucket_aws_cmd(@_);
 	}
 $tries ||= 1;
 my $err;
 my $data;
+my $s3 = &get_s3_account($akey);
+$location ||= $s3->{'location'} if ($s3);
 if ($location) {
 	$data = "<CreateBucketConfiguration>".
 		"<LocationConstraint>".
@@ -135,9 +134,12 @@ return $err;
 sub init_s3_bucket_aws_cmd
 {
 my ($akey, $skey, $bucket, $tries, $location) = @_;
-my $s3 = &get_s3_account($akey);
-$location ||= $s3->{'location'} if ($s3);
-my @regionflag = $location ? ( "--region", $location ) : ( );
+my @regionflag = &s3_region_flag($akey, $skey, $bucket);
+if (!@regionflag) {
+	my $s3 = &get_s3_account($akey);
+	$location ||= $s3->{'location'} if ($s3);
+	@regionflag = $location ? ( "--region", $location ) : ( );
+	}
 $tries ||= 1;
 my $err;
 for(my $i=0; $i<$tries; $i++) {
@@ -192,11 +194,9 @@ my ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
 $tries ||= 1;
 my @st = stat($sourcefile);
 @st || return "File $sourcefile does not exist";
-print STDERR "upload for $akey,$skey\n";
 if (&can_use_aws_s3_cmd($akey, $skey)) {
 	return &s3_upload_aws_cmd(@_);
 	}
-print STDERR "using built-in API\n";
 &require_s3();
 my $headers = { };
 if ($rrs) {
@@ -452,7 +452,6 @@ if($rrs) {
 	push(@rrsargs, "--storage-class", "REDUCED_REDUNDANCY");
 	}
 my @regionflag = &s3_region_flag($akey, $skey, $bucket);
-print STDERR "region flag for $akey,$skey = ",join(" ", @regionflag),"\n";
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
 	my $out = &call_aws_s3_cmd($akey,
@@ -1120,10 +1119,8 @@ sub can_use_aws_cmd
 my ($akey_or_id, $skey, $zone, $func, @cmd) = @_;
 my $akey;
 my $profile;
-print STDERR "akey_or_id=$akey_or_id\n";
 if ($akey_or_id) {
 	my $s3 = &get_s3_account($akey_or_id);
-	print STDERR "s3=$s3\n";
 	if ($s3) {
 		$profile = $s3->{'id'} <= 1 ? $s3->{'access'} : $s3->{'id'};
 		$akey = $s3->{'access'};
@@ -1134,7 +1131,6 @@ if ($akey_or_id) {
 		$profile = $akey = akey_or_id;
 		}
 	}
-print STDERR "profile=$profile\n";
 my $acachekey = $akey || "none";
 if (!&has_aws_cmd()) {
 	return wantarray ? (0, "The <tt>aws</tt> command is not installed") : 0;
@@ -1143,9 +1139,7 @@ if (defined($can_use_aws_cmd_cache{$acachekey})) {
 	return wantarray ? @{$can_use_aws_cmd_cache{$acachekey}}
 			 : $can_use_aws_cmd_cache{$acachekey}->[0];
 	}
-print STDERR "calling $func with $akey_or_id\n";
 my $out = &$func($akey_or_id, @cmd);
-print STDERR "out=$out\n";
 if ($? || $out =~ /Unable to locate credentials/i ||
 	  $out =~ /could not be found/) {
 	# Credentials profile hasn't been setup yet
@@ -1236,7 +1230,6 @@ if (ref($params)) {
 	}
 my $aws = $config{'aws_cmd'} || "aws";
 my ($out, $err);
-print STDERR "$aws $cmd ",($profile ? "--profile=".quotemeta($profile)." " : ""),"$endpoint_param $params\n";
 &execute_command(
 	"TZ=GMT $aws $cmd ".
 	($profile ? "--profile=".quotemeta($profile)." " : "").
