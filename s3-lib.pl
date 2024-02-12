@@ -10,13 +10,7 @@ sub check_s3
 {
 # Return no error if `aws_cmd` is set and installed
 if (&has_aws_cmd()) {
-	my $defs3 = &get_default_s3_account();
-	my ($ok, $err) = &can_use_aws_s3_cmd(
-		$defs3 ? ( $defs3->{'access'}, $defs3->{'secret'} ) : ( ));
-	if (!$ok) {
-		return (undef, &text('s3_eawscmd',
-				"<tt>".&html_escape($err)."</tt>"));
-		}
+	return (undef, undef);
 	}
 
 # Check for core S3 modules
@@ -141,6 +135,8 @@ return $err;
 sub init_s3_bucket_aws_cmd
 {
 my ($akey, $skey, $bucket, $tries, $location) = @_;
+my $s3 = &get_s3_account($akey);
+$location ||= $s3->{'location'} if ($s3);
 my @regionflag = $location ? ( "--region", $location ) : ( );
 $tries ||= 1;
 my $err;
@@ -492,10 +488,9 @@ return $err;
 sub s3_region_flag
 {
 my ($akey, $skey, $bucket) = @_;
-my @regionflag;
-my $info = &s3_get_bucket($akey, $skey, $bucket);
-if (ref($info) && $info->{'location'}) {
-	return ("--region", $info->{'location'});
+my $location = &s3_get_bucket_location($akey, $skey, $bucket);
+if ($location) {
+	return ("--region", $location);
 	}
 return ( );
 }
@@ -655,6 +650,26 @@ else {
 		$rv{'lifecycle'} = $response->{'LifecycleConfiguration'};
 		}
 	return \%rv;
+	}
+}
+
+# s3_get_bucket_location(access-key, secret-key, bucket)
+# Returns just the location of a bucket
+sub s3_get_bucket_location
+{
+my ($akey, $skey, $bucket) = @_;
+if (&can_use_aws_s3_cmd($akey, $skey)) {
+	my $out = &call_aws_s3api_cmd($akey,
+                [ "get-bucket-location", "--bucket", $bucket ], undef, 1);
+	return ref($out) ? $out->{'LocationConstraint'} : undef;
+	}
+else {
+	my $conn = &make_s3_connection($akey, $skey);
+        my $response = $conn->get_bucket_location($bucket);
+	if ($response->http_response->code == 200) {
+		return $response->{'LocationConstraint'};
+		}
+	return undef;
 	}
 }
 
