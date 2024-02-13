@@ -1256,8 +1256,8 @@ return 2 if (!-r $cfile);	# Credentials magically work with no config,
 my $lref = &read_file_lines($cfile, 1);
 my %defv;
 foreach my $l (@$lref) {
-	if ($l =~ /^\s*\[(\S+)\]/) {
-		$indef = $1 eq "default" ? 1 : 0;
+	if ($l =~ /^\s*\[(profile\s+)?(\S+)\]/) {
+		$indef = $2 eq "default" ? 1 : 0;
 		}
 	elsif ($l =~ /^\s*(\S+)\s*=\s*(\S+)/ && $indef) {
 		$defv{$1} = $2;
