@@ -8027,6 +8027,7 @@ s3s_usedby=Used by
 s3s_users=$1 scheduled backups
 s3s_nousers=Not used
 s3s_return=S3 accounts
+s3s_auto=From IAM account
 
 s3_title1=Add S3 Account
 s3_title2=Edit S3 Account
@@ -8047,5 +8048,6 @@ s3_usedby=Used by backups
 s3_nousers=Account is not used by any scheduled backups yet
 s3_echeck=S3 account cannot be used : $1
 s3_elocation=Selected bucket location is not supported by this S3 provider
+s3_defcreds=EC2 IAM credentials
 
 __norefs=1

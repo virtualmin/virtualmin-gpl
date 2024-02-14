@@ -53,8 +53,14 @@ if ($multi) {
 	my @scheds = &list_scheduled_backups();
 	foreach $s (@s3s) {
 		print $s->{'id'},"\n";
-		print "    Access key: $s->{'access'}\n";
-		print "    Secret key: $s->{'secret'}\n";
+		if ($s->{'iam'}) {
+			print "    IAM credentials: Yes\n";
+			}
+		else {
+			print "    Access key: $s->{'access'}\n";
+			print "    Secret key: $s->{'secret'}\n";
+			print "    IAM credentials: No\n";
+			}
 		if ($s->{'desc'}) {
 			print "    Description: $s->{'desc'}\n";
 			}
@@ -73,7 +79,7 @@ if ($multi) {
 elsif ($nameonly) {
 	# Access keys only
 	foreach $s (@s3s) {
-                print $s->{'access'},"\n";
+                print ($s->{'access'} || "None"),"\n";
 		}
 	}
 else {
@@ -82,7 +88,7 @@ else {
 	printf $fmt, "Access Key", "Description";
 	printf $fmt, ("-" x 45), ("-" x 30);
 	foreach $s (@s3s) {
-		printf $fmt, $s->{'access'}, $s->{'desc'};
+		printf $fmt, $s->{'access'} || "None", $s->{'desc'};
 		}
 	}
 

@@ -1198,6 +1198,7 @@ $endpoint ||= $config{'s3_endpoint'};
 my $out = &call_aws_cmd($akey, "s3api", $params, $endpoint);
 if (!$? && $json) {
 	eval "use JSON::PP";
+	$@ && return "Missing JSON::PP Perl module";
 	my $coder = JSON::PP->new->pretty;
 	eval {
 		$out = $coder->decode($out);
@@ -1246,24 +1247,25 @@ my ($cmd) = &split_quoted_string($config{'aws_cmd'} || "aws");
 return &has_command($cmd);
 }
 
-# has_aws_ec2_creds()
+# has_aws_ec2_creds([&options])
 # Check if the config file says to get credentials from EC2 metadata
 sub has_aws_ec2_creds
 {
+my ($defv) = @_;
+$defv ||= { };
 my $cfile = "/root/.aws/credentials";
 return 2 if (!-r $cfile);	# Credentials magically work with no config,
 				# which means they are provided by EC2
 my $lref = &read_file_lines($cfile, 1);
-my %defv;
 foreach my $l (@$lref) {
 	if ($l =~ /^\s*\[(profile\s+)?(\S+)\]/) {
 		$indef = $2 eq "default" ? 1 : 0;
 		}
 	elsif ($l =~ /^\s*(\S+)\s*=\s*(\S+)/ && $indef) {
-		$defv{$1} = $2;
+		$defv->{$1} = $2;
 		}
 	}
-if ($defv{'credential_source'} eq 'Ec2InstanceMetadata') {
+if ($defv->{'credential_source'} eq 'Ec2InstanceMetadata') {
 	return 1;
 	}
 return 0;
@@ -1287,7 +1289,9 @@ return $out =~ /"region"\s*:\s*"(\S+)"/ ? $1 : undef;
 sub list_s3_accounts
 {
 my @rv;
+my %opts;
 if ($config{'s3_akey'}) {
+	# Old S3 account stored in Virtualmin config
 	push(@rv, { 'access' => $config{'s3_akey'},
 		    'secret' => $config{'s3_skey'},
 		    'endpoint' => $config{'s3_endpoint'},
@@ -1295,6 +1299,14 @@ if ($config{'s3_akey'}) {
 		    'desc' => $config{'s3_desc'},
 		    'id' => 1,
 		    'default' => 1, });
+	}
+elsif (&has_aws_ec2_creds(\%opts) == 1) {
+	# Credentials come from EC2 IAM role
+	push(@rv, { 'id' => 1,
+		    'default' => 1,
+		    'desc' => $text{'s3_defcreds'},
+		    'location' => $opts{'region'},
+		    'iam' => 1 });
 	}
 if (opendir(DIR, $s3_accounts_dir)) {
 	foreach my $f (sort { $a cmp $b } readdir(DIR)) {
@@ -1346,7 +1358,7 @@ if ($akey && $skey) {
 	return ($akey, $skey);
 	}
 my $s3 = $akey ? &get_s3_account($akey) : &get_default_s3_account();
-return $s3 ? ( $s3->{'access'}, $s3->{'secret'} ) : ( );
+return $s3 ? ( $s3->{'access'}, $s3->{'secret'}, $s3->{'iam'} ) : ( );
 }
 
 # save_s3_account(&account)

@@ -58,11 +58,9 @@ while(@ARGV > 0) {
 		&usage("Unknown parameter $a");
 		}
 	}
-($akey, $skey) = &lookup_s3_credentials($akey, $skey);
-if (!&can_use_aws_s3_creds()) {
-	$akey || &usage("Missing --access-key parameter");
-	$skey || &usage("Missing --secret-key parameter");
-	}
+($akey, $skey, $iam) = &lookup_s3_credentials($akey, $skey);
+$iam || $akey || &usage("Missing --access-key parameter");
+$iam || $skey || &usage("Missing --secret-key parameter");
 
 # List the directory
 $files = &s3_list_buckets($akey, $skey);

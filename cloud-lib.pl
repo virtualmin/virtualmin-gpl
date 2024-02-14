@@ -77,19 +77,16 @@ sub cloud_s3_get_state
 {
 my @s3s = &list_s3_accounts();
 if (@s3s == 1) {
+	my $desc = $s3s[0]->{'iam'} ? $text{'cloud_s3creds'} :
+			&text('cloud_s3account',
+                              "<tt>$s3s[0]->{'access'}</tt>");
 	return { 'ok' => 1,
-		 'desc' => &text('cloud_s3account',
-				 "<tt>$s3s[0]->{'access'}</tt>"),
+		 'desc' => $desc,
 	       };
 	}
 elsif (@s3s > 1) {
 	return { 'ok' => 1,
 		 'desc' => &text('cloud_s3accounts', scalar(@s3s)),
-	       };
-	}
-elsif (&can_use_aws_s3_creds()) {
-	return { 'ok' => 1,
-		 'desc' => $text{'cloud_s3creds'},
 	       };
 	}
 else {
@@ -100,12 +97,7 @@ else {
 sub cloud_s3_longdesc
 {
 my @s3s = &list_s3_accounts();
-if (!@s3s && &can_use_aws_s3_creds()) {
-	return $text{'cloud_s3_creds'};
-	}
-else {
-	return &text('cloud_s3_longdesc2', 'list_s3s.cgi');
-	}
+return &text('cloud_s3_longdesc2', 'list_s3s.cgi');
 }
 
 sub cloud_s3_show_inputs
