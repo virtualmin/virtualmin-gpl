@@ -197,7 +197,7 @@ if ($bash) {
 #!$bash
 WEBMIN_CONFIG=$config_directory
 WEBMIN_VAR=$var_directory
-PERLLIB=$root_directory
+PERLLIB=${root_directory}:${root_directory}/vendor_perl
 WRAPPER_ORIGINAL_PWD=`pwd`
 unset SCRIPT_NAME
 unset FOREIGN_MODULE_NAME
