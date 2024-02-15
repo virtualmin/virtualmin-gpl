@@ -3210,10 +3210,11 @@ my %cannums = map { $mmap->{$_}, 1 } &supported_php_modes();
 $cannums{int($tmpl->{'web_php_suexec'})} = 1;
 my @opts = grep { $cannums{$_->[0]} }
 		([ 4, $text{'phpmode_none'} ],
-		 [ 0, &ui_text_color($text{'phpmode_mod_php'}, 'danger') ],
-	         [ 1, $text{'phpmode_cgi'} ],
+	         [ 3, $text{'phpmode_fpm'} ],
 	         [ 2, $text{'phpmode_fcgid'} ],
-	         [ 3, $text{'phpmode_fpm'} ]);
+	         [ 1, $text{'phpmode_cgi'} ],
+		 [ 0, &ui_text_color($text{'phpmode_mod_php'}, 'danger') ],
+		);
 print &ui_table_row(
     &hlink($text{'tmpl_phpmode'}, "template_phpmode"),
     &ui_radio_table("web_php_suexec", int($tmpl->{'web_php_suexec'}), \@opts));
