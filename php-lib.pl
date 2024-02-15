@@ -915,49 +915,16 @@ else {
 # Returns a list of PHP execution modes possible for a domain
 sub supported_php_modes
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p ne 'web') {
 	return &plugin_call($p, "feature_web_supported_php_modes", $d);
 	}
-&require_apache();
-local @rv;
-push(@rv, "none");	# Turn off PHP entirely
-if (&get_apache_mod_php_version()) {
-	# Check for Apache PHP module
-	push(@rv, "mod_php");
+my @rv = ( "none" );
+foreach my $ver (&list_available_php_versions()) {
+	push(@rv, @{$ver->[2]});
 	}
-local $suexec = &supports_suexec($d);
-if ($suexec) {
-	# PHP in CGI and fcgid modes only works if suexec does, and if the
-	# required Apache modules are installed
-	if ($apache::httpd_modules{'core'} < 2.4 ||
-	    $apache::httpd_modules{'mod_cgi'} ||
-	    $apache::httpd_modules{'mod_cgid'}) {
-		if ($d) {
-			# Check for domain's cgi-bin directory
-			local ($pvirt, $pconf) = &get_apache_virtual(
-				$d->{'dom'}, $d->{'web_port'});
-			if ($pconf) {
-				local @sa = grep { /^\/cgi-bin\s/ }
-				 &apache::find_directive("ScriptAlias", $pconf);
-				push(@rv, "cgi");
-				}
-			}
-		else {
-			# Assume all domains have CGI
-			push(@rv, "cgi");
-			}
-		}
-	if ($apache::httpd_modules{'mod_fcgid'}) {
-		# Check for Apache fcgi module
-		push(@rv, "fcgid");
-		}
-	}
-# Do any FPM versions exist?
-my @okfpms = grep { !$_->{'err'} } &list_php_fpm_configs();
-push(@rv, "fpm") if (@okfpms);
-return @rv;
+return &unique(@rv);
 }
 
 # php_mode_numbers_map()
@@ -973,7 +940,8 @@ return { 'mod_php' => 0,
 
 # list_available_php_versions([&domain], [forcemode])
 # Returns a list of PHP versions and their executables installed on the system,
-# for use by a domain
+# for use by a domain. If forcemode is not set, the mode is taken from the
+# domain.
 sub list_available_php_versions
 {
 local ($d, $mode) = @_;
