@@ -1019,10 +1019,10 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 foreach my $v (sort { $a <=> $b } (keys %vercmds)) {
 	my ($already) = grep { $_->[0] eq $v } @rv;
 	if ($already) {
-		$already->[2] = [ &unique(@{$already->[2]}, "cgi", "fcgid") ];
+		$already->[2] = [ &unique(@{$already->[2]}, "fcgid", "cgi") ];
 		}
 	else {
-		push(@rv, [ $v, $vercmds{$v}, ["cgi", "fcgid"] ]);
+		push(@rv, [ $v, $vercmds{$v}, ["fcgid", "cgi"] ]);
 		}
 	}
 
