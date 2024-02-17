@@ -71,7 +71,7 @@ sub init_s3_bucket
 {
 &require_s3();
 my ($akey, $skey, $bucket, $tries, $location) = @_;
-if (&can_use_aws_s3_cmd($akey, $skey)) {
+if (&has_aws_cmd()) {
 	return &init_s3_bucket_aws_cmd(@_);
 	}
 $tries ||= 1;
@@ -134,6 +134,8 @@ return $err;
 sub init_s3_bucket_aws_cmd
 {
 my ($akey, $skey, $bucket, $tries, $location) = @_;
+my $err = &setup_aws_cmd($akey, $skey, $location);
+return $err if ($err);
 my @regionflag = &s3_region_flag($akey, $skey, $bucket);
 if (!@regionflag) {
 	my $s3 = &get_s3_account($akey);
@@ -194,7 +196,7 @@ my ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
 $tries ||= 1;
 my @st = stat($sourcefile);
 @st || return "File $sourcefile does not exist";
-if (&can_use_aws_s3_cmd($akey, $skey)) {
+if (&has_aws_cmd()) {
 	return &s3_upload_aws_cmd(@_);
 	}
 &require_s3();
@@ -445,6 +447,8 @@ sub s3_upload_aws_cmd
 {
 my ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
        $rrs, $multipart) = @_;
+my $err = &setup_aws_cmd($akey, $skey);
+return $err if ($err);
 $tries ||= 1;
 my $err;
 my @rrsargs;
@@ -577,8 +581,10 @@ sub s3_list_buckets
 {
 &require_s3();
 my ($akey, $skey) = @_;
-if (&can_use_aws_s3_cmd($akey, $skey)) {
+if (&has_aws_cmd()) {
 	# Use the aws command
+	my $err = &setup_aws_cmd($akey, $skey);
+	return $err if ($err);
 	my $out = &call_aws_s3_cmd($akey, [ "ls" ]);
 	return $out if ($?);
 	my @rv;
@@ -611,21 +617,27 @@ sub s3_get_bucket
 {
 &require_s3();
 my ($akey, $skey, $bucket) = @_;
-if (&can_use_aws_s3_cmd($akey, $skey)) {
+if (&has_aws_cmd()) {
 	# Use the S3 API command
+	&setup_aws_cmd($akey, $skey);
 	my %rv;
 	my $out = &call_aws_s3api_cmd($akey,
 		[ "get-bucket-location", "--bucket", $bucket ], undef, 1);
-	$rv->{'location'} = $out->{'LocationConstraint'} if (ref($out));
+	$rv{'location'} = $out->{'LocationConstraint'} if (ref($out));
 	my $out = &call_aws_s3api_cmd($akey,
 		[ "get-bucket-logging", "--bucket", $bucket ], undef, 1);
-	$rv->{'logging'} = $out->{'BucketLoggingStatus'} if (ref($out));
+	$rv{'logging'} = $out->{'BucketLoggingStatus'} if (ref($out));
 	my $out = &call_aws_s3api_cmd($akey,
 		[ "get-bucket-acl", "--bucket", $bucket ], undef, 1);
-	$rv->{'acl'} = $out->{'AccessControlPolicy'} if (ref($out));
+	if (ref($out)) {
+		# XXX
+		$out->{'Owner'} = [ $out->{'Owner'} ]
+			if (ref($out->{'Owner'}) eq 'HASH');
+		$rv{'acl'} = $out;
+		}
 	my $out = &call_aws_s3api_cmd($akey,
 		[ "get-bucket-lifecycle-configuration", "--bucket", $bucket ], undef, 1);
-	$rv->{'lifecycle'} = $out->{'LifecycleConfiguration'} if (ref($out));
+	$rv{'lifecycle'} = $out->{'LifecycleConfiguration'} if (ref($out));
 	return \%rv;
 	}
 else {
@@ -657,7 +669,9 @@ else {
 sub s3_get_bucket_location
 {
 my ($akey, $skey, $bucket) = @_;
-if (&can_use_aws_s3_cmd($akey, $skey)) {
+if (&has_aws_cmd()) {
+	my $err = &setup_aws_cmd($akey, $skey);
+	return $err if ($err);
 	my $out = &call_aws_s3api_cmd($akey,
                 [ "get-bucket-location", "--bucket", $bucket ], undef, 1);
 	return ref($out) ? $out->{'LocationConstraint'} : undef;
@@ -719,8 +733,10 @@ return $response->http_response->code == 200 ||
 sub s3_list_files
 {
 my ($akey, $skey, $bucket) = @_;
-if (&can_use_aws_s3_cmd($akey, $skey)) {
+if (&has_aws_cmd()) {
 	# Use the aws command
+	my $err = &setup_aws_cmd($akey, $skey);
+	return $err if ($err);
 	my @regionflag = &s3_region_flag($akey, $skey, $bucket);
 	my $out = &call_aws_s3_cmd($akey,
 		[ @regionflag,
@@ -753,8 +769,10 @@ else {
 sub s3_delete_file
 {
 my ($akey, $skey, $bucket, $file) = @_;
-if (&can_use_aws_s3_cmd($akey, $skey, $bucket)) {
+if (&has_aws_cmd()) {
 	# Use the aws command to delete a file
+	my $err = &setup_aws_cmd($akey, $skey);
+	return $err if ($err);
 	my @regionflag = &s3_region_flag($akey, $skey, $bucket);
 	my $out = &call_aws_s3_cmd($akey,
 		[ @regionflag,
@@ -797,8 +815,10 @@ sub s3_delete_bucket
 {
 my ($akey, $skey, $bucket, $norecursive) = @_;
 $bucket || return "Missing bucket parameter to s3_delete_bucket";
-if (&can_use_aws_s3_cmd($akey, $skey, $bucket)) {
+if (&has_aws_cmd()) {
 	# Use the aws command to delete the whole bucket
+	my $err = &setup_aws_cmd($akey, $skey);
+	return $err if ($err);
 	my @regionflag = &s3_region_flag($akey, $skey, $bucket);
 	my $out = &call_aws_s3_cmd($akey,
 		[ @regionflag,
@@ -838,7 +858,7 @@ sub s3_download
 {
 my ($akey, $skey, $bucket, $file, $destfile, $tries) = @_;
 $tries ||= 1;
-if (&can_use_aws_s3_cmd($akey, $skey)) {
+if (&has_aws_cmd()) {
 	return &s3_download_aws_cmd(@_);
 	}
 &require_s3();
@@ -938,6 +958,8 @@ return $err;
 sub s3_download_aws_cmd
 {
 my ($akey, $skey, $bucket, $file, $destfile, $tries) = @_;
+my $err = &setup_aws_cmd($akey, $skey);
+return $err if ($err);
 $tries ||= 1;
 my $err;
 my @regionflag = &s3_region_flag($akey, $skey, $bucket);
@@ -1179,6 +1201,61 @@ $can_use_aws_cmd_cache{$acachekey} = [1, undef];
 return wantarray ? (1, undef) : 1;
 }
 
+# setup_aws_cmd(access-key|id, secret-key, location)
+# Creates the credentials file for the aws command, and returns undef on
+# success or an error message on failure.
+sub setup_aws_cmd
+{
+my ($akey_or_id, $skey, $zone) = @_;
+
+# Figure out the profile name
+my $akey;
+my $profile;
+if ($akey_or_id) {
+	my $s3 = &get_s3_account($akey_or_id);
+	if ($s3) {
+		$profile = $s3->{'id'} <= 1 ? $s3->{'access'} : $s3->{'id'};
+		$akey = $s3->{'access'};
+		$skey ||= $s3->{'secret'};
+		$zone ||= $s3->{'location'};
+		}
+	else {
+		$profile = $akey = akey_or_id;
+		}
+	}
+
+# Check if this already exists in the credentials file
+if ($profile) {
+	my $creds = &get_aws_credentials_config($profile, "credentials");
+	$creds ||= { };
+	$creds->{'aws_access_key_id'} = $akey;
+	$creds->{'aws_secret_access_key'} = $skey;
+	# XXX what if zone isn't set?
+	if (defined($zone)) {
+		if ($zone) {
+			$creds->{'region'} = $zone;
+			}
+		else {
+			delete($creds->{'region'});
+			}
+		}
+	&save_aws_credentials_config($profile, "credentials", $creds);
+	my $conf = &get_aws_credentials_config($profile, "config");
+	$conf ||= { };
+	if (defined($zone)) {
+		if ($zone) {
+			$conf->{'region'} = $zone;
+			}
+		else {
+			delete($conf->{'region'});
+			}
+		}
+	&save_aws_credentials_config($profile, "config", $conf);
+	}
+
+return undef;
+}
+
 # call_aws_s3_cmd(akey, params, [endpoint])
 # Run the aws command for s3 with some params, and return output
 sub call_aws_s3_cmd
@@ -1194,7 +1271,8 @@ return &call_aws_cmd($akey, "s3", $params, $endpoint);
 sub call_aws_s3api_cmd
 {
 my ($akey, $params, $endpoint, $json) = @_;
-$endpoint ||= $config{'s3_endpoint'};
+my $s3 = &get_s3_account($akey);
+$endpoint ||= $s3->{'endpoint'} if ($s3);
 my $out = &call_aws_cmd($akey, "s3api", $params, $endpoint);
 if (!$? && $json) {
 	eval "use JSON::PP";
@@ -1409,33 +1487,64 @@ else {
 	}
 
 # Also clear the AWS creds
+&save_aws_credentials_config($mark, "config", undef);
+&save_aws_credentials_config($mark, "credentials", undef);
+}
+
+# get_aws_credentials_config(profile, file)
+# Returns a hash ref of keys and values in a block from the credentials or
+# config files
+sub get_aws_credentials_config
+{
+my ($profile, $file) = @_;
 my @uinfo = getpwnam("root");
-foreach my $f ("$uinfo[7]/.aws/config", "$uinfo[7]/.aws/credentials") {
-	&lock_file($f);
-	foreach my $mark ($id, $akey) {
-		my $lref = &read_file_lines($f);
-		my ($start, $end, $inside) = (-1, -1, 0);
-		for(my $i=0; $i<@$lref; $i++) {
-			if ($lref->[$i] =~ /^\[(profile\s+)?\Q$mark\E\]$/) {
-				$start = $end = $i;
-				$inside = 1;
-				}
-			elsif ($lref->[$i] =~ /^\S+\s*=\s*\S+/ && $inside) {
-				$end = $i;
-				}
-			else {
-				$inside = 0;
-				}
-			}
-		if ($start >= 0) {
-			splice(@$lref, $start, $end-$start+1);
-			&flush_file_lines($f);
-			last;
-			}
-		&unflush_file_lines($f);
+my $path = "$uinfo[7]/.aws/$file";
+my $lref = &read_file_lines($path, 1);
+my $rv;
+my $inregion = 0;
+for(my $i=0; $i<@$lref; $i++) {
+	if ($lref->[$i] =~ /^\[(profile\s+)?\Q$profile\E\]$/) {
+		$rv = { '_start' => $i,
+			'_file' => $path };
+		$inregion = 1;
 		}
-	&unlock_file($f);
+	elsif ($lref->[$i] =~ /^(\S+)\s*=\s*(\S+)/ && $inregion) {
+		$rv->{$1} = $2;
+		$rv->{'_end'} = $i;
+		}
+	else {
+		$inregion = 0;
+		}
 	}
+return $rv;
+}
+
+# save_aws_credentials_config(profile, file, [&config])
+# Update the block in a credentials or config file with the given name
+sub save_aws_credentials_config
+{
+my ($profile, $file, $conf) = @_;
+my $oldconf = &get_aws_credentials_config($profile, $file);
+my @uinfo = getpwnam("root");
+my $path = "$uinfo[7]/.aws/$file";
+&lock_file($path);
+my $lref = &read_file_lines($path);
+my @lines;
+if ($conf) {
+	push(@lines, "[$profile]");
+	foreach my $k (sort { $a cmp $b } keys %$conf) {
+		push(@lines, $k." = ".$conf->{$k}) if ($k !~ /^_/);
+		}
+	}
+if ($oldconf) {
+	splice(@$lref, $oldconf->{'_start'},
+	       $oldconf->{'_end'} - $oldconf->{'_start'} + 1, @lines);
+	}
+elsif ($conf) {
+	push(@$lref, @lines);
+	}
+&flush_file_lines($path);
+&unlock_file($path);
 }
 
 # backup_uses_s3_account(&sched, &account)

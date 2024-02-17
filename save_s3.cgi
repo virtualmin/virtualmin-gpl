@@ -34,6 +34,7 @@ else {
 	$s3->{'secret'} = $in{'secret'};
 	if ($in{'endpoint_def'}) {
 		delete($s3->{'endpoint'});
+		$s3->{'location'} = $in{'location'};
 		}
 	else {
 		$in{'endpoint'} =~ s/^(http|https):\/\///;
@@ -43,15 +44,13 @@ else {
 		!$port || $port =~ /^\d+$/ ||
 			&error($text{'cloud_es3_endport'});
 		$s3->{'endpoint'} = $in{'endpoint'};
+		$s3->{'location'} = $in{'location2'};
 		}
 	$get_s3_account_cache{$s3->{'access'}} = $s3;
-	if (defined($in{'location'})) {
-		if ($in{'location'}) {
-			@locs = &s3_list_locations($s3->{'access'});
-			&indexof($in{'location'}, @locs) ||
-				&error($text{'s3_elocation'});
-			}
-		$s3->{'location'} = $in{'location'};
+	if ($s3->{'location'}) {
+		@locs = &s3_list_locations($s3->{'access'});
+		!@locs || &indexof($in{'location'}, @locs) ||
+			&error($text{'s3_elocation'});
 		}
 
 	# Validate that it works

@@ -34,25 +34,20 @@ print &ui_table_row($text{'s3_access'},
 print &ui_table_row($text{'s3_secret'},
 	&ui_textbox("secret", $s3->{'secret'}, 60));
 
-# Endpoint URL
+# Endpoint and region
+my @locs = $in{'new'} ? ( ) : &s3_list_locations($s3->{'access'});
+@locs = &s3_list_aws_locations() if (!@locs);
 print &ui_table_row($text{'s3_endpoint'},
-	&ui_opt_textbox("endpoint", $s3->{'endpoint'}, 40,
-			$text{'s3_endpoint_def'}, $text{'s3_endpoint_hp'}));
-
-# Default bucket location
-my @locs;
-if ($in{'new'}) {
-	@locs = &s3_list_aws_locations();
-	}
-else {
-	@locs = &s3_list_locations($s3->{'access'});
-	}
-if (@locs) {
-	print &ui_table_row($text{'s3_location'},
-		&ui_select("location", $s3->{'location'},
-			   [ [ "", $text{'default'} ],
-			     @locs ], 1, 0, 1));
-	}
+	&ui_radio_table("endpoint_def", $s3->{'endpoint'} ? 0 : 1,
+		[ [ 1, $text{'s3_endpoint_def'},
+		    $text{'s3_location'}." ".
+		    &ui_select("location", $s3->{'location'},
+			       [ [ "", $text{'default'} ],
+				 @locs ], 1, 0, 1) ],
+		  [ 0, $text{'s3_endpoint_hp'},
+		    &ui_textbox("endpoint", $s3->{'endpoint'}, 40)." ".
+		    $text{'s3_location'}." ".
+		    &ui_textbox("location2", $s3->{'location'}, 10) ] ]));
 
 if (!$in{'new'}) {
 	# Current users
