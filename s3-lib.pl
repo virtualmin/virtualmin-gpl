@@ -1117,6 +1117,7 @@ return ( "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-s
 # can_use_aws_s3_creds()
 # Returns 1 if the AWS command can be used with local credentials, such as on
 # an EC2 instance with IAM
+# Cannot delete as it's still used in dnscloud-lib.pl
 sub can_use_aws_s3_creds
 {
 return 0 if (!&has_aws_cmd());
@@ -1125,17 +1126,10 @@ return 0 if (!$ok);
 return &has_aws_ec2_creds() ? 1 : 0;
 }
 
-# can_use_aws_s3_cmd(access-key, secret-key, [default-zone])
-# Returns 1 if the aws command can be used to access S3
-sub can_use_aws_s3_cmd
-{
-my ($akey, $skey, $zone) = @_;
-return &can_use_aws_cmd($akey, $skey, $zone, \&call_aws_s3_cmd, "ls");
-}
-
 # can_use_aws_cmd(access-key, secret-key, [default-zone], &testfunc, cmd, ...)
 # Returns 1 if the aws command is installed and can be used for uploads and
 # downloads
+# Cannot delete as it's still used in dnscloud-lib.pl
 sub can_use_aws_cmd
 {
 my ($akey_or_id, $skey, $zone, $func, @cmd) = @_;

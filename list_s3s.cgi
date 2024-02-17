@@ -9,6 +9,11 @@ require './virtual-server-lib.pl';
 
 print "<p>",$text{'s3s_longdesc'},"</p>\n";
 
+($err, $warn) = &check_s3();
+print &ui_alert_box(&text('s3s_echeck', $err),
+		    'warn', undef, undef, '') if ($err);
+print &ui_alert_box($warn, 'warn') if ($warn);
+
 my @s3s = &list_s3_accounts();
 my @scheds = &list_scheduled_backups();
 my @links = ( &ui_link("edit_s3.cgi?new=1", $text{'s3s_add'}) );
