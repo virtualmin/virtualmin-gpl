@@ -1465,6 +1465,7 @@ sub delete_s3_account
 my ($account) = @_;
 my $akey = $account->{'access'};
 my $id = $account->{'id'};
+my $profile = $account->{'id'} <= 1 ? $account->{'access'} : $account->{'id'};
 if ($account->{'default'}) {
 	&lock_file($module_config_file);
 	delete($config{'s3_akey'});
@@ -1481,8 +1482,8 @@ else {
 	}
 
 # Also clear the AWS creds
-&save_aws_credentials_config($mark, "config", undef);
-&save_aws_credentials_config($mark, "credentials", undef);
+&save_aws_credentials_config($profile, "config", undef);
+&save_aws_credentials_config($profile, "credentials", undef);
 }
 
 # get_aws_credentials_config(profile, file)
@@ -1568,7 +1569,8 @@ foreach my $sched (&list_scheduled_backups()) {
 		my ($mode, $akey, $skey) = &parse_backup_url($dest);
 		if ($mode == 3) {
 			my ($s3) = grep { $_->{'access'} eq $akey &&
-					  $_->{'secret'} eq $skey } @s3s;
+					  (!$skey || $_->{'secret'} eq $skey) }
+					@s3s;
 			if (!$s3) {
 				($s3) = grep { $_->{'id'} eq $akey } @s3s;
 				}
