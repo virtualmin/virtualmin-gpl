@@ -108,8 +108,8 @@ if (&domain_has_ssl_cert($d)) {
 		foreach my $d (@others) {
 			my $l = &can_config_domain($d) ? "edit_domain.cgi"
 						       : "view_domain.cgi";
-			push(@links, "<a href='$l?dom=$_->{'id'}'>".
-				     &show_domain_name($_)."</a>");
+			push(@links, "<a href='${l}?dom=$d->{'id'}'>".
+				     &show_domain_name($d)."</a>");
 			}
 		print &ui_table_row($text{'cert_also'},
 				    &ui_links_row(\@links));
