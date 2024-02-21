@@ -302,16 +302,17 @@ if ($config{'php_vars'} =~ /^memory_limit=32M/) {
 	}
 
 # If the default template uses a PHP mode that isn't supported, change it
-my ($tmpl) = &list_templates();
 my $mmap = &php_mode_numbers_map();
 my @supp = &supported_php_modes();
-my %cannums = map { $mmap->{$_}, 1 } @supp;
-if (!$cannums{int($tmpl->{'web_php_suexec'})} && @supp) {
-	# Default mode cannot be used .. change to first that can
-	my @goodsupp = grep { $_ ne 'none' } @supp;
-	@goodsupp = @supp if (!@goodsupp);
-	$tmpl->{'web_php_suexec'} = $mmap->{$goodsupp[0]};
-	&save_template($tmpl);
+foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
+	my %cannums = map { $mmap->{$_}, 1 } @supp;
+	if (!$cannums{int($tmpl->{'web_php_suexec'})} && @supp) {
+		# Default mode cannot be used .. change to first that can
+		my @goodsupp = grep { $_ ne 'none' } @supp;
+		@goodsupp = @supp if (!@goodsupp);
+		$tmpl->{'web_php_suexec'} = $mmap->{$goodsupp[0]};
+		&save_template($tmpl);
+		}
 	}
 
 # Cache current PHP modes and error log files
