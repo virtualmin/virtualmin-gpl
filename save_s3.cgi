@@ -46,16 +46,15 @@ else {
 		$s3->{'endpoint'} = $in{'endpoint'};
 		$s3->{'location'} = $in{'location2'};
 		}
-	$get_s3_account_cache{$s3->{'access'}} = $s3;
+	$s3->{'id'} ||= &domain_id();
 	if ($s3->{'location'}) {
-		@locs = &s3_list_locations($s3->{'access'});
-		!@locs || &indexof($in{'location'}, @locs) ||
+		@locs = &s3_list_locations($s3);
+		!@locs || &indexof($s3->{'location'}, @locs) >= 0 ||
 			&error($text{'s3_elocation'});
 		}
 
 	# Validate that it works
-	$s3->{'id'} ||= &domain_id();
-	my $buckets = &s3_list_buckets($s3->{'access'}, $s3->{'secret'});
+	my $buckets = &s3_list_buckets($s3);
 	if (!ref($buckets)) {
 		&delete_s3_account($s3) if ($in{'new'});
 		&error(&text('s3_echeck', $buckets));

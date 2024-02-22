@@ -8039,6 +8039,7 @@ s3_title1=Add S3 Account
 s3_title2=Edit S3 Account
 s3_longdesc=The credentials to enter on this page can be found on the Security Credentials page of your account on the <a href=https://console.aws.amazon.com/ target=_blank>AWS Console</a> if you are using AWS. Other S3 compatible providers will also supply an access key and secret key for your account that you can enter here, along with the provider's endpoint URL.
 s3_header=S3 account details
+s3_id=Virtualmin account ID
 s3_desc=Account description
 s3_access=S3 access key
 s3_secret=S3 secret key

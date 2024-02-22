@@ -22,6 +22,11 @@ print &ui_hidden("new", $in{'new'});
 print &ui_hidden("id", $in{'id'});
 print &ui_table_start($text{'s3_header'}, undef, 2);
 
+# Account ID
+if (!$in{'new'}) {
+	print &ui_table_row($text{'s3_id'}, "<tt>$s3->{'id'}</tt>");
+	}
+
 # Account description
 print &ui_table_row($text{'s3_desc'},
 	&ui_textbox("desc", $s3->{'desc'}, 60));
@@ -35,7 +40,7 @@ print &ui_table_row($text{'s3_secret'},
 	&ui_textbox("secret", $s3->{'secret'}, 60));
 
 # Endpoint and region
-my @locs = $in{'new'} ? ( ) : &s3_list_locations($s3->{'access'});
+my @locs = $in{'new'} ? ( ) : &s3_list_locations($s3);
 @locs = &s3_list_aws_locations() if (!@locs);
 print &ui_table_row($text{'s3_endpoint'},
 	&ui_radio_table("endpoint_def", $s3->{'endpoint'} ? 0 : 1,

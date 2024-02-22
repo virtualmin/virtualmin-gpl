@@ -1303,6 +1303,9 @@ if (ref($params)) {
 	}
 my $aws = $config{'aws_cmd'} || "aws";
 my ($out, $err);
+print STDERR "TZ=GMT $aws $cmd ".
+	($profile ? "--profile=".quotemeta($profile)." " : "").
+	$endpoint_param." ".$params."\n";
 &execute_command(
 	"TZ=GMT $aws $cmd ".
 	($profile ? "--profile=".quotemeta($profile)." " : "").
@@ -1392,11 +1395,12 @@ if (opendir(DIR, $s3_accounts_dir)) {
 return @rv;
 }
 
-# get_s3_account(access-key|id)
+# get_s3_account(access-key|id|&account)
 # Returns an account looked up by key, or undef
 sub get_s3_account
 {
 my ($akey) = @_;
+return $akey if (ref($akey) eq 'HASH');
 my $rv = $get_s3_account_cache{$akey};
 if (!$rv) {
 	($rv) = grep { $_->{'access'} eq $akey ||
@@ -1500,6 +1504,7 @@ my $inregion = 0;
 for(my $i=0; $i<@$lref; $i++) {
 	if ($lref->[$i] =~ /^\[(profile\s+)?\Q$profile\E\]$/) {
 		$rv = { '_start' => $i,
+			'_end' => $i,
 			'_file' => $path };
 		$inregion = 1;
 		}
