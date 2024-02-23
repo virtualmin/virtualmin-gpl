@@ -7365,6 +7365,7 @@ bucket_elist=Failed to list buckets : $1
 bucket_egone=Bucket no longer exists!
 bucket_header=S3 bucket details
 bucket_account=S3 account key
+bucket_account2=S3 account
 bucket_name=Bucket name
 bucket_owner=Owned by
 bucket_location=Storage location

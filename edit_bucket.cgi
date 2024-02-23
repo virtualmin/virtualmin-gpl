@@ -49,8 +49,14 @@ if ($in{'new'}) {
 	}
 else {
 	# Account, bucket and location are fixed
-	print &ui_table_row($text{'bucket_account'},
-		"<tt>$in{'account'}</tt>");
+	if ($account->[3]) {
+		print &ui_table_row($text{'bucket_account2'},
+			$account->[3]->{'desc'} || $account->[3]->{'access'});
+		}
+	else {
+		print &ui_table_row($text{'bucket_account'},
+			"<tt>$in{'account'}</tt>");
+		}
 
 	print &ui_table_row($text{'bucket_name'},
 		"<tt>$in{'name'}</tt>");

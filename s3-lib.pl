@@ -1591,5 +1591,38 @@ foreach my $sched (&list_scheduled_backups()) {
 	}
 }
 
+# list_all_s3_accounts()
+# Returns a list of S3 accounts from backups owned by this user, as tuples of
+# access key, secret key and endpoint. Duplicate access keys are not repeated.
+sub list_all_s3_accounts
+{
+local @rv;
+if (&can_cloud_providers()) {
+	foreach my $s3 (&list_s3_accounts()) {
+		push(@rv, [ $s3->{'access'}, $s3->{'secret'},
+			    $s3->{'endpoint'}, $s3 ]);
+		}
+	}
+foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
+	local @dests = &get_scheduled_backup_dests($sched);
+	foreach my $dest (@dests) {
+		local ($mode, $user, $pass, $server, $path, $port) =
+			&parse_backup_url($dest);
+		if ($mode == 3) {
+			my $s3 = &get_s3_account($user);
+			if ($s3) {
+				push(@rv, [ $s3->{'access'}, $s3->{'secret'},
+					    $s3->{'endpoint'}, $s3 ]);
+				}
+			else {
+				push(@rv, [ $user, $pass, undef, undef ]);
+				}
+			}
+		}
+	}
+local %done;
+return grep { !$done{$_->[0]}++ } @rv;
+}
+
 1;
 

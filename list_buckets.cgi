@@ -45,11 +45,13 @@ if (@buckets) {
 				  $text{'buckets_account'},
 				  $text{'buckets_created'} ]);
 	foreach my $b (sort { $a->{'Name'} cmp $b->{'Name'} } @buckets) {
+		my $a = $b->{'s3_account'};
+		my $desc = $a->[3] ? $a->[3]->{'desc'} : $a->[0];
 		print &ui_columns_row([
 			"<a href='edit_bucket.cgi?name=".&urlize($b->{'Name'}).
 			  "&account=".&urlize($b->{'s3_account'}->[0]).
 			  "'>".&html_escape($b->{'Name'})."</a>",
-			$b->{'s3_account'}->[0],
+			$desc,
 			&make_date(&s3_parse_date($b->{'CreationDate'})),
 			]);
 		}
