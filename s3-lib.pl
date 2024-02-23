@@ -1303,9 +1303,6 @@ if (ref($params)) {
 	}
 my $aws = $config{'aws_cmd'} || "aws";
 my ($out, $err);
-print STDERR "TZ=GMT $aws $cmd ".
-	($profile ? "--profile=".quotemeta($profile)." " : "").
-	$endpoint_param." ".$params."\n";
 &execute_command(
 	"TZ=GMT $aws $cmd ".
 	($profile ? "--profile=".quotemeta($profile)." " : "").
