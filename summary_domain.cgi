@@ -171,6 +171,21 @@ if (!$aliasdom && $d->{'dir'}) {
 		}
 	print &ui_table_row($text{'edit_home'}, $domhome, 3, \@tds);
 	}
+# PHP mode and version
+my $showphp = !$aliasdom && &domain_has_website($d);
+if ($showphp) {
+	my $phpmode = &get_domain_php_mode($d);
+	if ($phpmode && $phpmode ne "none") {
+		my ($phpdir) = &list_domain_php_directories($d);
+		my $phpver = $phpdir->{'version'};
+		$phpmode = $text{"phpmode_$phpmode"};
+		my $phpinfo = &text('summary_phpmodeverdesc', $phpver, $phpmode);
+		if (&can_edit_phpmode($d) && &can_edit_phpver($d)) {
+			$phpinfo = "<a href='edit_phpmode.cgi?dom=$d->{'id'}'>$phpinfo</a>"
+			}
+		print &ui_table_row($text{'summary_phpmodever'}, $phpinfo, 3, \@tds);
+		}
+	}
 
 # Description
 if ($d->{'owner'} && 
