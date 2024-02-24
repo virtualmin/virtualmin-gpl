@@ -617,7 +617,7 @@ sub s3_get_bucket
 {
 &require_s3();
 my ($akey, $skey, $bucket) = @_;
-if (&has_aws_cmd()) {
+if (&has_aws_cmd() && 0) {
 	# Use the S3 API command
 	&setup_aws_cmd($akey, $skey);
 	my %rv;
@@ -630,7 +630,6 @@ if (&has_aws_cmd()) {
 	my $out = &call_aws_s3api_cmd($akey,
 		[ "get-bucket-acl", "--bucket", $bucket ], undef, 1);
 	if (ref($out)) {
-		# XXX
 		$out->{'Owner'} = [ $out->{'Owner'} ]
 			if (ref($out->{'Owner'}) eq 'HASH');
 		$rv{'acl'} = $out;
@@ -647,6 +646,7 @@ else {
 	my $response = $conn->get_bucket_location($bucket);
 	if ($response->http_response->code == 200) {
 		$rv{'location'} = $response->{'LocationConstraint'};
+		$conn->{REGION} = $rv{'location'};
 		}
 	$response = $conn->get_bucket_logging($bucket);
 	if ($response->http_response->code == 200) {
@@ -986,6 +986,7 @@ $headers ||= { };
 $authpath ||= $path;
 my $metadata = $object->metadata;
 my $merged = S3::merge_meta($headers, $metadata);
+# XXX use the correct function
 $conn->_add_auth_header($merged, $method, $authpath);
 my $protocol = $conn->{IS_SECURE} ? 'https' : 'http';
 my $url = "$protocol://$conn->{SERVER}:$conn->{PORT}/$path";
@@ -999,21 +1000,23 @@ $req->content($object->data);
 return $req;
 }
 
-# make_s3_connection(access-key, secret-key, [endpoint])
+# make_s3_connection(access-key, secret-key, [endpoint], [location])
 # Returns an S3::AWSAuthConnection connection object
 sub make_s3_connection
 {
-my ($akey, $skey, $endpoint) = @_;
+my ($akey, $skey, $endpoint, $location) = @_;
 my $s3 = &get_s3_account($akey);
 if ($s3) {
 	$akey = $s3->{'access'};
 	$skey ||= $s3->{'secret'};
 	$endpoint ||= $s3->{'endpoint'};
+	$location ||= $s3->{'location'};
 	}
 &require_s3();
 my $endport;
 ($endpoint, $endport) = split(/:/, $endpoint);
-return S3::AWSAuthConnection->new($akey, $skey, undef, $endpoint, $endport);
+return S3::AWSAuthConnection->new($akey, $skey, undef, $endpoint, $endport,
+				  $location);
 }
 
 # s3_part_upload(&s3-connection, bucket, endpoint, sourcefile, destfile,
