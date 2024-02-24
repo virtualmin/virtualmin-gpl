@@ -3324,41 +3324,60 @@ sub parse_template_php
 local ($tmpl) = @_;
 
 # Save PHP settings
-# XXX what if in inherit mode?
 &require_apache();
-if ($in{'web_php_suexec'} == 1 || $in{'web_php_suexec'} == 2) {
-	my @vers = grep { $_->[1] }
-			&list_available_php_versions(undef, "cgi");
-	@vers || &error($text{'tmpl_ephpcmd'});
-	}
-$tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
+if ($in{'web_php_suexec'} ne '') {
+	if ($in{'web_php_suexec'} == 1 || $in{'web_php_suexec'} == 2) {
+		my @vers = grep { $_->[1] }
+				&list_available_php_versions(undef, "cgi");
+		@vers || &error($text{'tmpl_ephpcmd'});
+		}
+	$tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
 
-# Check that PHP version is valid for the mode
-my $mmap = &php_mode_numbers_map();
-$mmap = { reverse(%$mmap) };
-my $mode = $mmap->{$in{'web_php_suexec'}};
-if ($in{'web_phpver'} && $mode && $mode ne "none") {
-	my @vers = map { $_->[0] } &list_available_php_versions(undef, $mode);
-	my ($gotver) = grep { $_ eq $in{'web_phpver'} } @vers;
-	$gotver || &error(&text('tmpl_ephpvers', $in{'web_phpver'}, $mode,
-				join(", ", @vers)));
-	}
-$tmpl->{'web_phpver'} = $in{'web_phpver'};
+	# Check that PHP version is valid for the mode
+	my $mmap = &php_mode_numbers_map();
+	$mmap = { reverse(%$mmap) };
+	my $mode = $mmap->{$in{'web_php_suexec'}};
+	if ($in{'web_phpver'} && $mode && $mode ne "none") {
+		my @vers = map { $_->[0] }
+			       &list_available_php_versions(undef, $mode);
+		my ($gotver) = grep { $_ eq $in{'web_phpver'} } @vers;
+		$gotver || &error(&text('tmpl_ephpvers', $in{'web_phpver'},
+					$mode, join(", ", @vers)));
+		}
+	$tmpl->{'web_phpver'} = $in{'web_phpver'};
 
-# Save PHP child processes
-if ($in{'web_phpchildren_def'} ||
-    !defined($in{'web_phpchildren_def'})) {
-	$tmpl->{'web_phpchildren'} = undef;
+	# Save PHP child processes
+	if ($in{'web_phpchildren_def'} ||
+	    !defined($in{'web_phpchildren_def'})) {
+		$tmpl->{'web_phpchildren'} = undef;
+		}
+	else {
+		if ($in{'web_phpchildren'} < 1) {
+			&error($text{'phpmode_echildren'});
+			}
+		$tmpl->{'web_phpchildren'} = $in{'web_phpchildren'};
+		}
+
+	# Save option to edit php.ini
+	$tmpl->{'web_php_noedit'} = $in{'web_php_noedit'};
+
+	# Save FPM specific options
+	if (&indexof("fpm", &supported_php_modes()) >= 0) {
+		if ($in{'php_fpm'}) {
+			$tmpl->{'php_fpm'} =
+				join("\t", split(/\r?\n/, $in{'php_fpm'}));
+			}
+		else {
+			$tmpl->{'php_fpm'} = 'none';
+			}
+		$tmpl->{'php_sock'} = $in{'php_sock'};
+		}
+	$tmpl->{'php_log'} = $in{'php_log'};
+	$tmpl->{'php_log_path'} = $in{'php_log_path_def'} ? undef : $in{'php_log_path'};
 	}
 else {
-	if ($in{'web_phpchildren'} < 1) {
-		&error($text{'phpmode_echildren'});
-		}
-	$tmpl->{'web_phpchildren'} = $in{'web_phpchildren'};
+	$tmpl->{'web_php_suexec'} = '';
 	}
-
-# Save option to edit php.ini
-$tmpl->{'web_php_noedit'} = $in{'web_php_noedit'};
 
 # Save PHP variables
 if ($in{"php_vars_mode"} == 0) {
@@ -3378,19 +3397,6 @@ elsif ($in{"php_vars_mode"} == 2) {
 		}
 	$tmpl->{'php_vars'} = join("\t", @phpvars);
 	}
-
-# Save FPM specific options
-if (&indexof("fpm", &supported_php_modes()) >= 0) {
-	if ($in{'php_fpm'}) {
-		$tmpl->{'php_fpm'} = join("\t", split(/\r?\n/, $in{'php_fpm'}));
-		}
-	else {
-		$tmpl->{'php_fpm'} = 'none';
-		}
-	$tmpl->{'php_sock'} = $in{'php_sock'};
-	}
-$tmpl->{'php_log'} = $in{'php_log'};
-$tmpl->{'php_log_path'} = $in{'php_log_path_def'} ? undef : $in{'php_log_path'};
 }
 
 # list_php_wrapper_templates([only-installed])
