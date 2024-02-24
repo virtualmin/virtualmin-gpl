@@ -3202,7 +3202,6 @@ if ($tmpl->{'id'} == 0) {
 sub show_template_php
 {
 my ($tmpl) = @_;
-my @allvers = &unique(map { $_->[0] } &list_available_php_versions());
 my @fields = ( "web_phpver", "web_phpchildren", "web_phpchildren_def",
 	       "web_php_noedit", "php_fpm", "php_sock", "php_log",
 	       "php_log_path", "php_log_path_def" );
@@ -3246,15 +3245,6 @@ print &ui_table_row(
 	int($tmpl->{'web_php_suexec'}) == 2 ? 
 	$text{'tmpl_phpchildrenauto'} :
 	&text('tmpl_phpchildrennone', &get_php_max_childred_allowed())));
-
-# Source php.ini files
-foreach my $phpver (@allvers) {
-	print &ui_table_row(
-	    &hlink(&text('tmpl_php_iniv', $phpver), "template_php_ini"),
-	    &ui_opt_textbox("web_php_ini_$phpver",
-			    $tmpl->{'web_php_ini_'.$phpver},
-			    40, $text{'default'}));
-	}
 
 # Allow editing of PHP configs
 print &ui_table_row(
@@ -3355,6 +3345,7 @@ if ($in{'web_phpver'} && $mode && $mode ne "none") {
 	}
 $tmpl->{'web_phpver'} = $in{'web_phpver'};
 
+# Save PHP child processes
 if ($in{'web_phpchildren_def'} ||
     !defined($in{'web_phpchildren_def'})) {
 	$tmpl->{'web_phpchildren'} = undef;
@@ -3365,15 +3356,8 @@ else {
 		}
 	$tmpl->{'web_phpchildren'} = $in{'web_phpchildren'};
 	}
-foreach my $phpver (&unique(map { $_->[0] }
-			    &list_available_php_versions())) {
-	$in{'web_php_ini_'.$phpver.'_def'} ||
-	  -r $in{'web_php_ini_'.$phpver} ||
-		&error($text{'tmpl_ephpini'});
-	$tmpl->{'web_php_ini_'.$phpver} =
-		$in{'web_php_ini_'.$phpver.'_def'} ? undef
-			       : $in{'web_php_ini_'.$phpver};
-	}
+
+# Save option to edit php.ini
 $tmpl->{'web_php_noedit'} = $in{'web_php_noedit'};
 
 # Save PHP variables
