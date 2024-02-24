@@ -3201,23 +3201,34 @@ if ($tmpl->{'id'} == 0) {
 
 sub show_template_php
 {
-local ($tmpl) = @_;
-local @allvers = &unique(map { $_->[0] } &list_available_php_versions());
+my ($tmpl) = @_;
+my @allvers = &unique(map { $_->[0] } &list_available_php_versions());
+my @fields = ( "web_phpver", "web_phpchildren", "web_phpchildren_def",
+	       "web_php_noedit", "php_fpm", "php_sock", "php_log",
+	       "php_log_path", "php_log_path_def" );
+my $dis1 = &js_disable_inputs(\@fields, [ ]);
+my $dis2 = &js_disable_inputs([ ], \@fields);
 
 # Run PHP scripts using mode
 my $mmap = &php_mode_numbers_map();
 my %cannums = map { $mmap->{$_}, 1 } &supported_php_modes();
-$cannums{int($tmpl->{'web_php_suexec'})} = 1;
+if ($tmpl->{'web_php_suexec'} ne '') {
+	$cannums{int($tmpl->{'web_php_suexec'})} = 1;
+	}
 my @opts = grep { $cannums{$_->[0]} }
-		([ 4, $text{'phpmode_none'} ],
-	         [ 3, $text{'phpmode_fpm'} ],
-	         [ 2, $text{'phpmode_fcgid'} ],
-	         [ 1, $text{'phpmode_cgi'} ],
-		 [ 0, &ui_text_color($text{'phpmode_mod_php'}, 'danger') ],
+		([ 4, $text{'phpmode_none'}, undef, "onClick='$dis2'" ],
+	         [ 3, $text{'phpmode_fpm'}, undef, "onClick='$dis2'" ],
+	         [ 2, $text{'phpmode_fcgid'}, undef, "onClick='$dis2'" ],
+	         [ 1, $text{'phpmode_cgi'}, undef, "onClick='$dis2'" ],
+		 [ 0, &ui_text_color($text{'phpmode_mod_php'}, 'danger'),
+		      undef, "onClick='$dis2'" ],
 		);
+if (!$tmpl->{'default'}) {
+	unshift(@opts, [ '', $text{'tmpl_default'}, undef, "onClick='$dis1'" ]);
+	}
 print &ui_table_row(
     &hlink($text{'tmpl_phpmode'}, "template_phpmode"),
-    &ui_radio_table("web_php_suexec", int($tmpl->{'web_php_suexec'}), \@opts));
+    &ui_radio_table("web_php_suexec", $tmpl->{'web_php_suexec'}, \@opts));
 
 # Default PHP version to setup
 print &ui_table_row(
@@ -3229,14 +3240,12 @@ print &ui_table_row(
 		     &list_available_php_versions() ]));
 
 # Default number of PHP child processes
-if (int($tmpl->{'web_php_suexec'}) >= 2) {
-	print &ui_table_row(
-	    &hlink($text{'tmpl_phpchildren'}, "template_phpchildren"),
-	    &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'}, 5,
-	    	int($tmpl->{'web_php_suexec'}) == 2 ? 
-	    	$text{'tmpl_phpchildrenauto'} :
-	        &text('tmpl_phpchildrennone', &get_php_max_childred_allowed())));
-	}
+print &ui_table_row(
+    &hlink($text{'tmpl_phpchildren'}, "template_phpchildren"),
+    &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'}, 5,
+	int($tmpl->{'web_php_suexec'}) == 2 ? 
+	$text{'tmpl_phpchildrenauto'} :
+	&text('tmpl_phpchildrennone', &get_php_max_childred_allowed())));
 
 # Source php.ini files
 foreach my $phpver (@allvers) {
@@ -3252,37 +3261,6 @@ print &ui_table_row(
     &hlink($text{'tmpl_php_noedit'}, "template_php_noedit"),
     &ui_radio("web_php_noedit", $tmpl->{'web_php_noedit'},
 	      [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
-
-# PHP variables for scripts
-local $i = 0;
-local @pv = $tmpl->{'php_vars'} eq "none" ? ( ) :
-	split(/\t+/, $tmpl->{'php_vars'});
-local @pfields;
-local @table;
-foreach $pv (@pv, "", "") {
-	local ($n, $v) = split(/=/, $pv, 2);
-	local $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
-	push(@table, [ &ui_textbox("phpname_$i", $n, 25),
-		       &ui_select("phpdiff_$i", $diff,
-				  [ [ '', $text{'tmpl_phpexact'} ],
-				    [ '+', $text{'tmpl_phpatleast'} ],
-				    [ '-', $text{'tmpl_phpatmost'} ] ]),
-		       &ui_textbox("phpval_$i", $v, 35), ]);
-	push(@pfields, "phpname_$i", "phpdiff_$i", "phpval_$i");
-	$i++;
-	}
-local $ptable = &ui_columns_table(
-	[ $text{'tmpl_phpname'}, $text{'tmpl_phpdiff'}, $text{'tmpl_phpval'} ],
-	undef,
-	\@table,
-	undef,
-	1);
-print &ui_table_row(
-	&hlink($text{'tmpl_php_vars'}, "template_php_vars"),
-	&none_def_input("php_vars", $tmpl->{'php_vars'},
-			$text{'tmpl_disabled_websel'}, 0, 0, undef,
-			\@pfields)."<br>\n".
-	$ptable);
 
 # FPM specific options
 if (&indexof("fpm", &supported_php_modes()) >= 0) {
@@ -3314,6 +3292,39 @@ print &ui_table_row(
 	&hlink($text{'tmpl_php_log_path'}, "template_php_log_path"),
 	&ui_opt_textbox("php_log_path", $tmpl->{'php_log_path'}, 60,
 			$text{'default'}." (<tt>logs/php_log</tt>)"));
+
+print &ui_table_hr();
+
+# PHP variables for scripts
+local $i = 0;
+local @pv = $tmpl->{'php_vars'} eq "none" ? ( ) :
+	split(/\t+/, $tmpl->{'php_vars'});
+local @pfields;
+local @table;
+foreach $pv (@pv, "", "") {
+	local ($n, $v) = split(/=/, $pv, 2);
+	local $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
+	push(@table, [ &ui_textbox("phpname_$i", $n, 25),
+		       &ui_select("phpdiff_$i", $diff,
+				  [ [ '', $text{'tmpl_phpexact'} ],
+				    [ '+', $text{'tmpl_phpatleast'} ],
+				    [ '-', $text{'tmpl_phpatmost'} ] ]),
+		       &ui_textbox("phpval_$i", $v, 35), ]);
+	push(@pfields, "phpname_$i", "phpdiff_$i", "phpval_$i");
+	$i++;
+	}
+local $ptable = &ui_columns_table(
+	[ $text{'tmpl_phpname'}, $text{'tmpl_phpdiff'}, $text{'tmpl_phpval'} ],
+	undef,
+	\@table,
+	undef,
+	1);
+print &ui_table_row(
+	&hlink($text{'tmpl_php_vars'}, "template_php_vars"),
+	&none_def_input("php_vars", $tmpl->{'php_vars'},
+			$text{'tmpl_disabled_websel'}, 0, 0, undef,
+			\@pfields)."<br>\n".
+	$ptable);
 }
 
 # parse_template_php(&tmpl)
@@ -3323,6 +3334,7 @@ sub parse_template_php
 local ($tmpl) = @_;
 
 # Save PHP settings
+# XXX what if in inherit mode?
 &require_apache();
 if ($in{'web_php_suexec'} == 1 || $in{'web_php_suexec'} == 2) {
 	my @vers = grep { $_->[1] }

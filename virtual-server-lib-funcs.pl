@@ -10248,8 +10248,8 @@ if (!$tmpl->{'default'}) {
 	foreach $p ("dns_spf", "dns_sub", "dns_master", "dns_mx", "dns_dmarc",
 		    "dns_cloud", "dns_slaves",
 		    "web_webmail", "web_admin", "web_http2",
-		    "web_redirects", "web_sslredirect",
-		    "web", "dns", "ftp", "frame", "user_aliases",
+		    "web_redirects", "web_sslredirect", "web_php",
+		    "web", "dns", "ftp", "mail", "frame", "user_aliases",
 		    "ugroup", "sgroup", "quota", "uquota", "ushell", "ujail",
 		    "mailboxlimit", "domslimit",
 		    "dbslimit", "aliaslimit", "bwlimit", "mongrelslimit","skel",
@@ -10276,29 +10276,23 @@ if (!$tmpl->{'default'}) {
 		    "hashpass", "hashtypes", "autoconfig", "outlook_autoconfig",
 		    (map { $_."limit", $_."server", $_."master", $_."view",
 			   $_."passwd" } @plugins)) {
-		if ($tmpl->{$p} eq "") {
+		my $psel = $p eq "web_php" ? "web_php_suexec" :
+			   $p eq "mail" ? "mail_on" : $p;
+		if ($tmpl->{$psel} eq "") {
 			local $k;
 			foreach $k (keys %$def) {
-				next if ($p eq "dns" && $k =~ /^dns_(spf|cloud|slaves)/);
-				next if ($p eq "php" && $k =~ /^php_(fpm|sock)/);
-				next if ($p eq "web" && $k =~ /^web_(webmail|admin|http2|redirects|sslredirect)/);
-				if (!$done{$k} &&
-				    ($k =~ /^\Q$p\E_/ || $k eq $p)) {
+				next if ($p eq "dns" &&
+					 $k =~ /^dns_(spf|cloud|slaves)/);
+				next if ($p eq "php" &&
+					 $k =~ /^php_(fpm|sock)/);
+				next if ($p eq "web" &&
+					 $k =~ /^web_(webmail|admin|http2|redirects|sslredirect|php)/);
+				next if ($done{$k});
+				if ($k =~ /^\Q$p\E_/ ||
+				    $k eq $psel || $k eq $p) {
 					$tmpl->{$k} = $def->{$k};
 					$done{$k}++;
 					}
-				}
-			}
-		}
-	# Mail is a special case - it is the mail_on variable that controls
-	# inheritance.
-	if ($tmpl->{'mail_on'} eq '') {
-		local $k;
-		foreach $k (keys %$def) {
-			if (!$done{$k} &&
-			    ($k =~ /^mail_/ || $k eq 'mail')) {
-				$tmpl->{$k} = $def->{$k};
-				$done{$k}++;
 				}
 			}
 		}
