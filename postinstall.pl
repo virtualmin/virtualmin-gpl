@@ -306,7 +306,8 @@ my $mmap = &php_mode_numbers_map();
 my @supp = &supported_php_modes();
 foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 	my %cannums = map { $mmap->{$_}, 1 } @supp;
-	if (!$cannums{int($tmpl->{'web_php_suexec'})} && @supp) {
+	if ($tmpl->{'web_php_suexec'} ne '' &&
+	    !$cannums{int($tmpl->{'web_php_suexec'})} && @supp) {
 		# Default mode cannot be used .. change to first that can
 		my @goodsupp = grep { $_ ne 'none' } @supp;
 		@goodsupp = @supp if (!@goodsupp);
