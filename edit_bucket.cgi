@@ -66,7 +66,8 @@ else {
 				    : $text{'default'});
 
 	print &ui_table_row($text{'bucket_owner'},
-	    "<tt>$info->{'acl'}->{'Owner'}->[0]->{'DisplayName'}->[0]</tt>");
+	    "<tt>".($info->{'acl'}->{'Owner'}->[0]->{'DisplayName'}->[0] ||
+		    $info->{'acl'}->{'Owner'}->[0]->{'ID'}->[0])."</tt>");
 
 	# Show file count and size
 	$files = &s3_list_files(@$account, $in{'name'});
@@ -91,6 +92,7 @@ $grant = $in{'new'} ? [ ] :
 $i = 0;
 foreach my $g (@$grant, { }) {
 	$grantee = $g->{'Grantee'}->[0]->{'DisplayName'}->[0] ||
+		   $g->{'Grantee'}->[0]->{'ID'}->[0] ||
 		   $g->{'Grantee'}->[0]->{'URI'}->[0];
 	$grantee =~ s/^\Q$s3_groups_uri\E//;
 	$ptable .= &ui_columns_row([

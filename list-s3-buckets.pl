@@ -85,12 +85,12 @@ if ($multi) {
 			}
 		if ($info && $info->{'acl'}) {
 			print "    Owner: ",
-			      $info->{'acl'}->{'Owner'}->[0]->{'DisplayName'}->[0],"\n";
+			      ($info->{'acl'}->{'Owner'}->[0]->{'DisplayName'}->[0] || $info->{'acl'}->{'Owner'}->[0]->{'ID'}->[0]),"\n";
 			$acl = $info->{'acl'}->{'AccessControlList'}->[0];
 			@grant = @{$acl->{'Grant'}};
 			foreach my $g (@grant) {
 				print "    Grant: $g->{'Permission'}->[0] to ",
-				      $g->{'Grantee'}->[0]->{'DisplayName'}->[0],"\n";
+				      ($g->{'Grantee'}->[0]->{'DisplayName'}->[0] || $g->{'Grantee'}->[0]->{'ID'}->[0]),"\n";
 				}
 			}
 		if ($info && $info->{'lifecycle'}) {
