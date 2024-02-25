@@ -37,9 +37,10 @@ if ($single_domain_mode) {
 
 print <<EOF;
 <script>
-document.querySelectorAll('a[href*="config.cgi?module=$module_name"][href*="cscript="]')
-        .forEach((link) => link.offsetParent !== null &&
-            (link.href += "&section=line1.3&nnext=1"));
+document.querySelectorAll(
+  'a[href*="config.cgi?module=$module_name"][href*="cscript="]').forEach((l) =>
+	{ const q = '&section=line1.3&nnext=1';
+	  !l.href.includes(q) && (l.href += q)});
 </script>
 EOF
 
