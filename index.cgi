@@ -35,6 +35,14 @@ if ($single_domain_mode) {
 &ui_print_header(undef, $text{'index_title'}, "", "index", 1, 1, 0,
 	undef, undef, undef, $vtitle);
 
+print <<EOF;
+<script>
+document.querySelectorAll('a[href*="config.cgi?module=$module_name"]')
+        .forEach((link) => link.offsetParent !== null &&
+            (link.href += "&section=line1.3&nnext=1"));
+</script>
+EOF
+
 # Check if server module configuration has been checked
 $formno = 0;
 if (&need_config_check() && &can_check_config()) {
