@@ -9736,6 +9736,7 @@ if (!$s3_account) {
 	}
 else {
 	$s3_eu_tests = &convert_to_location($s3_tests, "eu-west-1");
+	$s3_http_tests = &convert_to_http_api($s3_tests);
 	}
 
 $rs_tests = [
@@ -11322,6 +11323,7 @@ $alltests = { '_config' => $_config_tests,
 	      'clonesub' => $clonesub_tests,
 	      's3' => $s3_tests,
 	      's3_eu' => $s3_eu_tests,
+	      's3_http' => $s3_http_tests,
 	      'exclude' => $exclude_tests,
 	      'rs' => $rs_tests,
 	      'jail' => $jail_tests,
@@ -11530,6 +11532,9 @@ foreach my $a (@{$t->{'args'}}) {
 		$cmd .= " --".$a->[0];
 		}
 	}
+foreach my $e (keys %{$t->{'envs'}}) {
+	$cmd = $e."=".quotemeta($t->{'envs'}->{$e})." ".$cmd;
+	}
 if ($cmd =~ /^wget/) {
 	# Wget needs to write to current dir sometimes
 	$cmd = "cd / ; $cmd";
@@ -11722,6 +11727,20 @@ foreach my $t (@$tests) {
 			$a->[1] .= "-".lc($location);
 			}
 		}
+	push(@$rv, $nt);
+	}
+return $rv;
+}
+
+# convert_to_http_api(&tests)
+# Convert S3 tests to run with an environment var set to use HTTP calls
+sub convert_to_http_api
+{
+my ($tests) = @_;
+my $rv = [ ];
+foreach my $t (@$tests) {
+        my $nt = { %$t };
+	$nt->{'envs'}->{'NO_AWS_CMD'} = 1;
 	push(@$rv, $nt);
 	}
 return $rv;
