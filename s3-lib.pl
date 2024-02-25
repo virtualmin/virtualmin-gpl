@@ -617,51 +617,27 @@ sub s3_get_bucket
 {
 &require_s3();
 my ($akey, $skey, $bucket) = @_;
-if (&has_aws_cmd() && 0) {
-	# Use the S3 API command
-	&setup_aws_cmd($akey, $skey);
-	my %rv;
-	my $out = &call_aws_s3api_cmd($akey,
-		[ "get-bucket-location", "--bucket", $bucket ], undef, 1);
-	$rv{'location'} = $out->{'LocationConstraint'} if (ref($out));
-	my $out = &call_aws_s3api_cmd($akey,
-		[ "get-bucket-logging", "--bucket", $bucket ], undef, 1);
-	$rv{'logging'} = $out->{'BucketLoggingStatus'} if (ref($out));
-	my $out = &call_aws_s3api_cmd($akey,
-		[ "get-bucket-acl", "--bucket", $bucket ], undef, 1);
-	if (ref($out)) {
-		$out->{'Owner'} = [ $out->{'Owner'} ]
-			if (ref($out->{'Owner'}) eq 'HASH');
-		$rv{'acl'} = $out;
-		}
-	my $out = &call_aws_s3api_cmd($akey,
-		[ "get-bucket-lifecycle-configuration", "--bucket", $bucket ], undef, 1);
-	$rv{'lifecycle'} = $out->{'LifecycleConfiguration'} if (ref($out));
-	return \%rv;
+# Always make an HTTP call becase the s3api command doesn't do consistent JSON
+my %rv;
+my $conn = &make_s3_connection($akey, $skey);
+my $response = $conn->get_bucket_location($bucket);
+if ($response->http_response->code == 200) {
+	$rv{'location'} = $response->{'LocationConstraint'};
+	$conn->{REGION} = $rv{'location'};
 	}
-else {
-	# Make an HTTP API call
-	my %rv;
-	my $conn = &make_s3_connection($akey, $skey);
-	my $response = $conn->get_bucket_location($bucket);
-	if ($response->http_response->code == 200) {
-		$rv{'location'} = $response->{'LocationConstraint'};
-		$conn->{REGION} = $rv{'location'};
-		}
-	$response = $conn->get_bucket_logging($bucket);
-	if ($response->http_response->code == 200) {
-		$rv{'logging'} = $response->{'BucketLoggingStatus'};
-		}
-	$response = $conn->get_bucket_acl($bucket);
-	if ($response->http_response->code == 200) {
-		$rv{'acl'} = $response->{'AccessControlPolicy'};
-		}
-	$response = $conn->get_bucket_lifecycle($bucket);
-	if ($response->http_response->code == 200) {
-		$rv{'lifecycle'} = $response->{'LifecycleConfiguration'};
-		}
-	return \%rv;
+$response = $conn->get_bucket_logging($bucket);
+if ($response->http_response->code == 200) {
+	$rv{'logging'} = $response->{'BucketLoggingStatus'};
 	}
+$response = $conn->get_bucket_acl($bucket);
+if ($response->http_response->code == 200) {
+	$rv{'acl'} = $response->{'AccessControlPolicy'};
+	}
+$response = $conn->get_bucket_lifecycle($bucket);
+if ($response->http_response->code == 200) {
+	$rv{'lifecycle'} = $response->{'LifecycleConfiguration'};
+	}
+return \%rv;
 }
 
 # s3_get_bucket_location(access-key, secret-key, bucket)
@@ -986,8 +962,6 @@ $headers ||= { };
 $authpath ||= $path;
 my $metadata = $object->metadata;
 my $merged = S3::merge_meta($headers, $metadata);
-# XXX use the correct function
-$conn->_add_auth_header($merged, $method, $authpath);
 my $protocol = $conn->{IS_SECURE} ? 'https' : 'http';
 my $url = "$protocol://$conn->{SERVER}:$conn->{PORT}/$path";
 
@@ -997,6 +971,7 @@ foreach my $h ($merged->header_field_names()) {
 	}
 my $req = HTTP::Request->new($method, $url, \@http_headers);
 $req->content($object->data);
+$req = $conn->_add_auth_sig($req);
 return $req;
 }
 

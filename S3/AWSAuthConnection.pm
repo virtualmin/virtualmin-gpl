@@ -37,7 +37,7 @@ sub new {
     $self->{IS_SECURE} = 1 if (not defined $self->{IS_SECURE});
     $self->{SERVER} = shift || $DEFAULT_HOST;
     $self->{PORT} = shift || $PORTS_BY_SECURITY->{$self->{IS_SECURE}};
-    $self->{REGION} = shift || 'us-east-1';
+    $self->{REGION} = shift;
     $self->{AGENT} = LWP::UserAgent->new();
     bless ($self, $class);
     return $self;
@@ -298,13 +298,11 @@ sub _make_request {
 
     my $http_headers = merge_meta($headers, $metadata);
 
-    #$self->_add_auth_header($http_headers, $method, $authpath);
     my $protocol = $self->{IS_SECURE} ? 'https' : 'http';
     my $url = "$protocol://$self->{SERVER}:$self->{PORT}/$path";
     my $request = HTTP::Request->new($method, $url, $http_headers);
     $request->content($data);
-    my $sig = Net::Amazon::Signature::V4->new( $self->{AWS_ACCESS_KEY_ID}, $self->{AWS_SECRET_ACCESS_KEY}, $self->{REGION}, 's3' );
-    $request = $sig->sign($request);
+    $request = $self->_add_auth_sig($request);
     my $response = $self->{AGENT}->request($request);
     if ($response->code >= 300 && $response->code < 400) {
       # S3 redirect .. read the new endpoint from the content
@@ -346,18 +344,11 @@ sub _make_request {
     return $response;
 }
 
-sub _add_auth_header {
-    my ($self, $headers, $method, $path) = @_;
-
-    if (not $headers->header('Date')) {
-        $headers->header(Date => time2str(time));
-    }
-    if (not $headers->header('Host')) {
-        $headers->header(Host => $self->{SERVER});
-    }
-    my $canonical_string = S3::canonical_string($method, $path, $headers);
-    my $encoded_canonical = S3::encode($self->{AWS_SECRET_ACCESS_KEY}, $canonical_string);
-    $headers->header(Authorization => "AWS $self->{AWS_ACCESS_KEY_ID}:$encoded_canonical");
+sub _add_auth_sig
+{
+    my ($self, $request) = @_;
+    my $sig = Net::Amazon::Signature::V4->new( $self->{AWS_ACCESS_KEY_ID}, $self->{AWS_SECRET_ACCESS_KEY}, $self->{REGION} || 'us-east-1', 's3' );
+    return $sig->sign($request);
 }
 
 1;
