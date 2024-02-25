@@ -240,10 +240,12 @@ for(my $i=0; $i<$tries; $i++) {
 	my $req;
 	if ($multipart) {
 		$req = &s3_make_request($conn, $path."?uploads", "POST",
-				"dummy", $headers, $authpath."?uploads");
+				"", $headers, $authpath."?uploads");
 		}
 	else {
-		$req = &s3_make_request($conn, $path, "PUT", "dummy",
+		$headers->{'x-amz-content-sha256'} =
+			&s3_sha256_file_digest($sourcefile);
+		$req = &s3_make_request($conn, $path, "PUT", "",
 				$headers, $authpath);
 		}
 	my ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
@@ -315,8 +317,9 @@ for(my $i=0; $i<$tries; $i++) {
 			}
 		}
 	elsif ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
-		my ($out1) = split(/\r?\n/, $out);
-		$err = "Invalid HTTP response : $line : $out1";
+		my @outs = split(/\r?\n/, $out);
+		shift(@outs) if ($outs[0] !~ /<Error>/);
+		$err = "Invalid HTTP response : $line : $outs[0]";
 		}
 	elsif ($1 >= 300 && $1 < 400) {
 		# Follow the SOAP redirect
@@ -669,7 +672,8 @@ sub s3_put_bucket_acl
 {
 &require_s3();
 my ($akey, $skey, $bucket, $acl) = @_;
-my $conn = &make_s3_connection($akey, $skey);
+my $location = &s3_get_bucket_location($akey, $skey, $bucket);
+my $conn = &make_s3_connection($akey, $skey, undef, $location);
 my $xs = XML::Simple->new(KeepRoot => 1);
 my $xml = $xs->XMLout({ 'AccessControlPolicy' => [ $acl ] });
 my $response = $conn->put_bucket_acl($bucket, $xml);
@@ -684,7 +688,8 @@ sub s3_put_bucket_lifecycle
 {
 &require_s3();
 my ($akey, $skey, $bucket, $lifecycle) = @_;
-my $conn = &make_s3_connection($akey, $skey);
+my $location = &s3_get_bucket_location($akey, $skey, $bucket);
+my $conn = &make_s3_connection($akey, $skey, undef, $location);
 my $response;
 if (@{$lifecycle->{'Rule'}}) {
 	# Update lifecycle config
@@ -730,7 +735,8 @@ if (&has_aws_cmd()) {
 else {
 	# Make direct API call
 	&require_s3();
-	my $conn = &make_s3_connection($akey, $skey);
+	my $location = &s3_get_bucket_location($akey, $skey, $bucket);
+	my $conn = &make_s3_connection($akey, $skey, undef, $location);
 	return $text{'s3_econn'} if (!$conn);
 	my $response = $conn->list_bucket($bucket);
 	if ($response->http_response->code != 200) {
@@ -758,7 +764,8 @@ if (&has_aws_cmd()) {
 else {
 	# Call the HTTP API directly
 	&require_s3();
-	my $conn = &make_s3_connection($akey, $skey);
+	my $location = &s3_get_bucket_location($akey, $skey, $bucket);
+	my $conn = &make_s3_connection($akey, $skey, undef, $location);
 	return $text{'s3_econn'} if (!$conn);
 	my $response = $conn->delete($bucket, $file);
 	if ($response->http_response->code < 200 ||
@@ -804,7 +811,8 @@ if (&has_aws_cmd()) {
 else {
 	# Call the HTTP API directly
 	&require_s3();
-	my $conn = &make_s3_connection($akey, $skey);
+	my $location = &s3_get_bucket_location($akey, $skey, $bucket);
+	my $conn = &make_s3_connection($akey, $skey, undef, $location);
 	return $text{'s3_econn'} if (!$conn);
 
 	if (!$norecursive) {
@@ -1008,7 +1016,9 @@ my $authpath = "$bucket/$destfile";
 my $params = "?partNumber=".$part."&uploadId=".$uploadid;
 $path .= $params;
 $authpath .= $params;
-my $req = &s3_make_request($conn, $path, "PUT", "dummy",
+$headers->{'x-amz-content-sha256'} =
+	&s3_sha256_file_digest($sourcefile, $sent, $chunk);
+my $req = &s3_make_request($conn, $path, "PUT", "",
 		$headers, $authpath);
 my ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
 
@@ -1293,6 +1303,7 @@ return $err || $out;
 # Returns 1 if the configured "aws" command is installed, minus flags
 sub has_aws_cmd
 {
+return undef if ($ENV{'NO_AWS_CMD'});
 my ($cmd) = &split_quoted_string($config{'aws_cmd'} || "aws");
 return &has_command($cmd);
 }
@@ -1600,6 +1611,34 @@ foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
 	}
 local %done;
 return grep { !$done{$_->[0]}++ } @rv;
+}
+
+# s3_sha256_file_digest(file, [start, len])
+# Returns the SHA256 digest in hex of the contents of a file
+sub s3_sha256_file_digest
+{
+my ($file, $start, $len) = @_;
+$start ||= 0;
+if (!$len) {
+	my @st = stat($file);
+	$len = $st[7];
+	}
+eval "use Digest::SHA";
+$@ && &error("Missing Digest::SHA perl module");
+my $sha = Digest::SHA->new("sha256");
+open(my $fh, $file) || return undef;
+seek($fh, $start, 0);
+my $bufsz = &get_buffer_size();
+for(my $got=0; $got<$len; $got+=$bufsz) {
+	my $buf;
+	my $want = $bufsz;
+	if ($len - $got < $want) {
+		$want = $len - $got;
+		}
+	read($fh, $buf, $bufsz);
+	$sha->add($buf);
+	}
+return $sha->hexdigest();
 }
 
 1;
