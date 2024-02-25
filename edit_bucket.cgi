@@ -17,11 +17,11 @@ else {
 	# Get the account and bucket
 	($account) = grep { $_->[0] eq $in{'account'} } @accounts;
 	$account || &error($text{'bucket_eagone'});
-	$buckets = &s3_list_buckets(@$account);
+	$buckets = &s3_list_buckets($account->[0], $account->[1]);
 	ref($buckets) || &error(&text('bucket_elist', $buckets));
 	($bucket) = grep { $_->{'Name'} eq $in{'name'} } @$buckets;
 	$bucket || &error($text{'bucket_egone'});
-	$info = &s3_get_bucket(@$account, $in{'name'});
+	$info = &s3_get_bucket($account->[0], $account->[1], $in{'name'});
 	}
 
 print &ui_form_start("save_bucket.cgi", "post");
@@ -45,7 +45,7 @@ if ($in{'new'}) {
 	print &ui_table_row($text{'bucket_location'},
 		&ui_select("location", $config{'s3_location'},
 			   [ [ "", $text{'default'} ],
-			     &s3_list_locations(@$account) ]));
+			     &s3_list_locations($account->[0], $account->[1]) ]));
 	}
 else {
 	# Account, bucket and location are fixed
@@ -70,7 +70,7 @@ else {
 		    $info->{'acl'}->{'Owner'}->[0]->{'ID'}->[0])."</tt>");
 
 	# Show file count and size
-	$files = &s3_list_files(@$account, $in{'name'});
+	$files = &s3_list_files($account->[0], $account->[1], $in{'name'});
 	if (ref($files)) {
 		$size = 0;
 		foreach my $f (@$files) {

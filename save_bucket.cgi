@@ -11,7 +11,7 @@ require './virtual-server-lib.pl';
 $account || &error($text{'bucket_eagone'});
 
 # Get the bucket(s)
-$buckets = &s3_list_buckets(@$account);
+$buckets = &s3_list_buckets($account->[0], $account->[1]);
 ref($buckets) || &error(&text('bucket_elist', $buckets));
 if (!$in{'new'}) {
 	($bucket) = grep { $_->{'Name'} eq $in{'name'} } @$buckets;
@@ -23,7 +23,8 @@ if ($in{'delete'}) {
 	&error_setup($text{'bucket_derr'});
 	if ($in{'confirm'}) {
 		# Just do it
-		$err = &s3_delete_bucket(@$account, $in{'name'}, 0);
+		$err = &s3_delete_bucket(
+			$account->[0], $account->[1], $in{'name'}, 0);
 		&error($err) if ($err);
 		&webmin_log("delete", "bucket", $in{'name'});
 		&redirect("list_buckets.cgi");
@@ -33,7 +34,7 @@ if ($in{'delete'}) {
 		&ui_print_header(undef, $text{'bucket_title3'}, "");
 
 		# Get size of all files
-		$files = &s3_list_files(@$account, $in{'name'});
+		$files = &s3_list_files($account->[0], $account->[1], $in{'name'});
 		ref($files) || &error($files);
 		$size = 0;
 		foreach my $f (@$files) {
@@ -61,7 +62,7 @@ else {
 
 	# Get current bucket ACL
 	if (!$in{'new'}) {
-		$oldinfo = &s3_get_bucket(@$account, $in{'name'});
+		$oldinfo = &s3_get_bucket($account->[0], $account->[1], $in{'name'});
 		$oldacl = $oldinfo->{'acl'};
 		foreach my $g (@{$oldacl->{'AccessControlList'}->[0]->{'Grant'}}) {
 			$grantee = $g->{'Grantee'}->[0];
@@ -153,22 +154,22 @@ else {
 		$clash && &error($text{'bucket_eeclash'});
 
 		# Create the bucket
-		$err = &init_s3_bucket(@$account, $in{'name'}, 1,
+		$err = &init_s3_bucket($account->[0], $account->[1], $in{'name'}, 1,
 				       $in{'location'});
 		&error($err) if ($err);
 		}
 
 	# Apply permisisons
 	if ($in{'new'}) {
-		$oldinfo = &s3_get_bucket(@$account, $in{'name'});
+		$oldinfo = &s3_get_bucket($account->[0], $account->[1], $in{'name'});
 		$oldacl = $oldinfo->{'acl'};
 		$acl->{'Owner'} = $oldacl->{'Owner'};
 		}
-	$err = &s3_put_bucket_acl(@$account, $in{'name'}, $acl);
+	$err = &s3_put_bucket_acl($account->[0], $account->[1], $in{'name'}, $acl);
 	&error($err) if ($err);
 
 	# Apply expiry policy
-	$err = &s3_put_bucket_lifecycle(@$account, $in{'name'}, $lifecycle);
+	$err = &s3_put_bucket_lifecycle($account->[0], $account->[1], $in{'name'}, $lifecycle);
 	&error($err) if ($err);
 
 	&webmin_log($in{'new'} ? "create" : "modify", "bucket", $in{'name'});
