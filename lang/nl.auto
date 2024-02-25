@@ -148,6 +148,8 @@ setup_overuserquota=Quotum voor domeineigenaar voor $2 van $1 is bereikt
 setup_ewebfcgidcmd=Kon <tt>fcgiwrap</tt> serveropdracht niet vinden!
 
 users_ecannot3=U mag geen e-mailgebruikers toevoegen
+users_ecannot4db=In de GPL-versie kunt u geen extra databasegebruikers beheren
+users_ecannot4web=In de GPL-versie kunt u geen extra webservergebruikers beheren
 users_indom=$1 gebruikers in domein $2
 
 users_indomsub=$1 gebruikers in domein $2 ($3 inclusief subdomeinen)
@@ -159,8 +161,8 @@ users_add_web=Webgebruiker toevoegen.
 users_mailclient=Instellingen voor e-mailclient weergeven
 users_mailclientdesc=Weergave-instellingen die moeten worden gebruikt door de e-mailclients van gebruikers voor dit domein.
 users_owner_label=EIGENAAR
-users_shared_label=GEDEELD
 users_disabled_label=GEHANDICAPT
+users_na=Niet toepasbaar
 users_login_access_none=Geen
 users_login_access_web=Web
 users_login_access_db=Database
@@ -169,15 +171,19 @@ users_login_access_ftp=FTP
 users_login_access_ssh=SSH
 users_login_access__and=En
 users_login_access__only=alleen
+users_addprotecteddir=Navigeer om te beginnen naar de module <a href='$1'>Beveiligde mappen</a> om een map toe te voegen. Eenmaal toegevoegd, kunt u deze map specifiek beveiligen voor de toegang van deze gebruiker.
+users_addprotecteddir2=Navigeer naar de module <a href='$1'>Beveiligde mappen</a> voor het toevoegen, bewerken of verwijderen van beveiligde mappen.
 
 user_createssh=SSH-gebruiker aanmaken
 user_createmail=Maak een e-mailgebruiker aan
 user_createdb=Databasegebruiker maken
+user_createwebserver=Webservergebruiker aanmaken
 user_chrootwarn=Waarschuwing: omdat FTP-directorybeperkingen niet zijn ingeschakeld, heeft deze gebruiker ook toegang tot de webinhoud van de hoogste server.
 user_header_ssh=SSH-gebruikersgegevens
 user_header_ftp=FTP-gebruikersgegevens
 user_header_mail=Mail gebruikersgegevens
 user_header_db=Gegevens databasegebruiker
+user_header_webserver=Gebruikersgegevens van de webserver
 user_header2b=Instellingen voor de thuismap
 user_header3a=Door de gebruiker geconfigureerde e-maildoorsturing
 user_user3=Login gebruikersnaam
@@ -192,9 +198,23 @@ user_enumeric=Gebruikersnamen mogen niet beginnen met een cijfer
 user_used2=($1 gebruikt in $2 bestanden)
 user_eoverquota=Het gebruikersquotum mag niet hoger zijn dan het domeinquotum van $1
 user_eovermquota=Het e-mailquotum van de gebruiker mag niet hoger zijn dan het e-mailquotum van $1 van het domein
+user_createovertitle=Gebruiker bestaat
+user_createover1=Ja, vervang extra gebruiker
+user_createover2=Ja, vervang extra gebruikers
+user_creategoback=Nee, ga terug naar het gebruikersaanmaakformulier
+user_createoverdescdb=Extra databasegebruiker $1 bestaat al!
+user_createoverdescweb=Extra webgebruiker $1 bestaat al!
+user_createoverdescdbweb=Extra database- en webgebruiker $1 bestaat al!
+user_createoverdescm1=Als u doorgaat, wordt de bestaande extra gebruiker vervangen.
+user_createoverdescm2=Als u doorgaat, worden bestaande extra gebruikers vervangen.
+user_createoverdescmf1=Wilt u een bestaande extra gebruiker vervangen?
+user_createoverdescmf2=Wilt u bestaande extra gebruikers vervangen?
 user_nospam2=E-mail controleren op spam?
 user_eremail=Ontbrekend of ongeldig adres voor e-mail met gebruikersupdate
 user_ehomehome=Home-directory staat niet onder $1
+user_edbclash_mysql=MySQL-databaseaanmelding met de naam $1 bestaat al
+user_edbclash_postgres=PostgreSQL-databaseaanmelding met de naam $1 bestaat al
+user_ewebclash=Er bestaat al een webserveraanmelding met de naam $1
 user_header6=Overige toegangsinstellingen
 user_charset=Tekenset voor antwoordbericht
 user_charset_def=Hetzelfde als de originele e-mail
@@ -208,6 +228,9 @@ user_epassdbnotset=Databse-gebruikerswachtwoord is niet ingesteld!
 user_eadddbuser=Kan databasegebruiker $1 niet toevoegen
 user_edeletedbuser=Kan databasegebruiker $1 niet verwijderen
 user_ealreadyexist=Gebruiker $1 bestaat al
+user_epasswebnotset=Webserver-gebruikerswachtwoord is niet ingesteld!
+user_eaddwebuser=Kan webservergebruiker $1 niet toevoegen
+user_edeletewebuser=Kan webservergebruiker $1 niet verwijderen
 
 aliases_indom=$1 aliassen in domein $2
 
@@ -465,6 +488,9 @@ log_save_cloud=Bijgewerkte cloudback-upprovider $1
 log_clear_cloud=Cloudback-upprovider $1 gewist
 log_save_dnscloud=Bijgewerkte cloud DNS-provider $1
 log_clear_dnscloud=Cloud DNS-provider $1 gewist
+log_create_s3=S3-account $1 toegevoegd
+log_delete_s3=S3-account $1 verwijderd
+log_update_s3=S3-account $1 bijgewerkt
 
 backup_desc=Back-upbeschrijving
 backup_selplan=Geselecteerde plannen ..
@@ -517,7 +543,10 @@ backup_pass4_or=of
 backup_pass42_desc=Kies SSH-sleutelbestand
 backup_dirhomes2=Voeg de directory <tt>$1</tt> toe
 backup_nicewebmin=$1 op Webmin-server $2
-backup_nices3p=$2 in Amazon S3-bucket $1
+backup_nices3a=S3-bucket $1 gebruikt $2
+backup_nices3pa=$2 in S3-bucket $1 met $2
+backup_nices3akey=toegangssleutel $1
+backup_nices3unknown=standaard toegangssleutel
 backup_nicers=Rackspace-container $1
 backup_nicersp=$2 in Rackspace-container $1
 backup_nicego=Google-map $1
@@ -678,7 +707,12 @@ restore_mysqldummy=MySQL-databases herstellen. ..
 restore_mysqlsameremote=.. het terugzetten naar de oorspronkelijke server $1 in replicatiemodus overslaan
 restore_emysqlgrant=.. herstellen mislukt : $1
 restore_eusersql=MySQL-gebruikers kunnen niet automatisch toegang krijgen tot de database
+restore_mysqludummy=Virtuele MySQL-gebruikers herstellen ..
+restore_mysqludummy2=$1 gebruiker aanmaken ..
+restore_emysqluimport=.. kan gebruiker niet aanmaken: <tt>$1</tt>
+restore_emysqluimport2=.. mislukt, databasegebruiker bestaat al buiten het herstelde domein
 restore_postgresdummy=PostgreSQL-databases herstellen.
+restore_postgresudummy=Virtuele PostgreSQL-gebruikers herstellen ..
 restore_postgressameremote=.. het terugzetten naar de oorspronkelijke server $1 in replicatiemodus overslaan
 restore_dnssec=DNSSEC opnieuw inschakelen voor hersteld domein ..
 restore_ednssec=.. DNSSEC mislukt : $1
@@ -1083,12 +1117,17 @@ scripts_gpl_pro_tip_clouds=Ondersteuning voor $1 providers is ook beschikbaar!
 scripts_gpl_pro_tip_title_dashboard=Download Virtualmin Pro
 scripts_gpl_pro_tip_enroll_dashboard=Overweeg om een <a target=_blank href='$1'>Virtualmin Pro</a>-licentie aan te schaffen om de ontwikkeling van het webhostingcontrolepaneel waar u van houdt te ondersteunen en om veel coole functies te ontgrendelen.
 scripts_gpl_pro_tip_dashboard=Wist je dat Virtualmin Pro tal van geweldige functies biedt die niet zijn opgenomen in de GPL-versie?
+scripts_gpl_pro_tip_extra_web_users=Met dit formulier kunt u onafhankelijk webservergebruikers aanmaken en beheren, zonder een nieuw Unix-gebruikersaccount aan te maken.
+scripts_gpl_pro_tip_extra_db_users=Met dit formulier kunt u zelfstandig databasegebruikers aanmaken en beheren, zonder een nieuw Unix-gebruikersaccount aan te maken.
+scripts_gpl_pro_tip_extra_user_dismiss=Bedankt voor de tip! Verberg deze pagina en de link ervan
 
 scripts_service_ename=Ontbrekende of ongeldige servicenaam
 scripts_service_eport=Ontbrekend of ongeldig servicepoortnummer
 scripts_service_estartcmd=Ontbrekend servicestartcommando
 
 newnotify_users=Ook e-mailen in geselecteerde domeinen?
+
+summary_phpvermode=$1 ($2-modus)
 
 migrate_directadmin=DirectAdmin-back-up
 migrate_ip6=IPv6-adres van nieuwe server
@@ -1219,6 +1258,9 @@ validate_esslcainfo=SSL CA-bestand $1 kan niet worden geparseerd
 validate_esslcamatch=SSL CA-certificaat voor $1/$2 komt niet overeen met de uitgever van het SSL-certificaat $3/$4
 validate_esslexpired=Het SSL-certificaat voor deze virtuele server is verlopen op $1
 validate_emysqlmod=MySQL Webmin-module $1 bestaat niet!
+validate_esshpubkeyempty=De openbare SSH-sleutel is leeg
+validate_esshpubkeyinvalid=De openbare SSH-sleutel is ongeldig : $1
+validate_esshpubkeyinvalidformat=Formaat is verkeerd
 
 tscripts_path=URL-pad
 tscripts_path_help=Geef het URL-pad naar het script op, dat relatief is ten opzichte van de documenthoofdmap van het domein. Bijvoorbeeld <tt>/wordpress</tt> of <tt>/</tt>.
@@ -1535,6 +1577,10 @@ wizard_essldir=Ontbrekende sjabloon voor aangepaste sleutelbestanden
 backuplog_sched=Logboeken weergeven van geplande back-up naar $1 ..
 backuplog_desc=Omschrijving
 backuplog_incr=Type
+backuplog_status=Toestand
+backuplog_status_ok=Succesvol
+backuplog_status_partial=Gedeeltelijk
+backuplog_status_failed=Mislukt
 backuplg_esched=Geplande back-up bestaat niet!
 
 viewbackup_desc=Originele back-upbeschrijving
@@ -1796,6 +1842,7 @@ bucket_elist=Kan buckets niet weergeven : $1
 bucket_egone=Emmer bestaat niet meer!
 bucket_header=Amazon S3-bucketdetails
 bucket_account=S3-accountcode
+bucket_account2=S3-account
 bucket_name=Bucketnaam
 bucket_owner=Eigendom van
 bucket_location=Opslaglocatie
@@ -1977,6 +2024,7 @@ cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob-opslag
 cloud_drivedesc=Google Drive
 cloud_s3account=Toegangssleutel $1 gebruiken
+cloud_s3accounts=$1 accounts gebruiken
 cloud_s3creds=EC2-referenties gebruiken
 cloud_rsuser=Login $1 gebruiken
 cloud_s3_noawscli=Het wordt aanbevolen om de officiële AWS-opdrachtregelinterface te installeren.
@@ -1993,6 +2041,8 @@ cloud_s3_secret=Geheime sleutel
 cloud_s3_endpoint=S3-compatibele hostnaam van de server
 cloud_s3_amazon=Gebruik Amazon S3
 cloud_s3_chunk=Upload brokgrootte in MB
+cloud_s3_accounts=Geregistreerde S3-accounts
+cloud_s3_noaccounts=Er zijn nog geen accounts ingesteld
 cloud_s3_location=Locatie voor nieuwe emmers
 cloud_s3_lother=Ander..
 
@@ -2026,7 +2076,7 @@ cloud_google_project=Project-ID
 cloud_google_location=Locatie voor nieuwe emmers
 cloud_google_oauth=OAuth2-code van Google
 cloud_google_token=OAuth2-token van Google
-cloud_s3_longdesc=De inloggegevens op deze pagina zijn te vinden op de pagina Beveiligingsreferenties van uw account op de <a href=https://console.aws.amazon.com/ target=_blank>AWS-console</a>.
+cloud_s3_longdesc2=De inloggegevens voor Amazon S3 of andere compatibele providers kunnen worden ingevoerd op de pagina <a href='$1'>S3 Accounts</a>.
 cloud_google_longdesc=De instellingen op deze pagina worden geleverd door Google wanneer u API-toegang verleent tot uw project op de <a href=https://console.cloud.google.com/apis/credentials target=_blank>Google APIs Console</a> -pagina, onder <b>API's en verificatie</b> -> <b>Referenties</b>.
 cloud_dropbox_longdesc=Voordat je een back-up kunt maken naar Dropbox, moet je eerst <a href=https://www.dropbox.com/register target=_blank>een account maken</a> op hun website als je er nog geen hebt.
 cloud_bb_longdesc=Voordat u een back-up kunt maken naar Backblaze, moet u eerst <a href=https://backblaze.com/ target=_blank>een account maken</a> en vervolgens <b>B2 Cloud Storage</b> inschakelen op de <b>Mijn instellingen</b> pagina. Vervolgens moet u een applicatiesleutel genereren met alle mogelijkheden op de pagina <b>App-sleutels</b>.
@@ -2451,6 +2501,7 @@ ports_script=$1 script geïnstalleerd
 
 s3s_title=Amazon S3-accounts
 s3s_longdesc=De S3-accounts op deze pagina kunnen worden gebruikt voor geplande back-ups van Virtualmin. Accounts kunnen zich bij Amazon AWS bevinden, of bij andere cloudopslagproviders die een S3-compatibele HTTP API aanbieden.
+s3s_echeck=S3-accounts kunnen niet worden gebruikt : $1
 s3s_none=Er zijn nog geen accounts geregistreerd.
 s3s_add=Voeg een nieuw S3-account toe.
 s3s_access=Toegangssleutel
@@ -2461,13 +2512,17 @@ s3s_usedby=Gebruikt door
 s3s_users=$1 geplande back-ups
 s3s_nousers=Niet gebruikt
 s3s_return=S3-accounts
+s3s_auto=Van IAM-account
 
 s3_title1=S3-account toevoegen
 s3_title2=S3-account bewerken
+s3_longdesc=De inloggegevens die u op deze pagina moet invoeren, vindt u op de pagina Beveiligingsgegevens van uw account op de <a href=https://console.aws.amazon.com/ target=_blank>AWS Console</a> als u gebruikmaakt van AWS. Andere S3-compatibele providers leveren ook een toegangssleutel en een geheime sleutel voor uw account die u hier kunt invoeren, samen met de eindpunt-URL van de provider.
 s3_header=S3-accountgegevens
+s3_id=Virtualmin-account-ID
 s3_desc=Accountbeschrijving
 s3_access=S3-toegangssleutel
 s3_secret=S3 geheime sleutel
+s3_location=in regio
 s3_endpoint=S3-compatibel eindpunt
 s3_endpoint_def=Gebruik gewoon AWS
 s3_endpoint_hp=Gastheer: poort
@@ -2478,3 +2533,5 @@ s3_eusers=Account wordt gebruikt door $1 geplande back-ups
 s3_usedby=Gebruikt door back-ups
 s3_nousers=Account wordt nog niet gebruikt door geplande back-ups
 s3_echeck=S3-account kan niet worden gebruikt : $1
+s3_elocation=De geselecteerde bucketlocatie wordt niet ondersteund door deze S3-provider
+s3_defcreds=EC2 IAM-referenties

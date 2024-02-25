@@ -1536,7 +1536,6 @@ backup_ehomeformat3=使用新格式备份必须所有虚拟服务器都有用户
 backup_niceftp=FTP服务器$2上的$1
 backup_nicescp=SSH服务器$2上的$1
 backup_nicefile=本地文件$1
-backup_nices3=Amazon S3 bucket $1
 backup_senabled1=Virtualmin的定期备份被设置用于所有虚拟服务器。
 backup_senabled0=Virtualmin的定期备份被设置用于$1个虚拟服务器。
 backup_sdisabled=Virtualmin的定期备份被禁用。

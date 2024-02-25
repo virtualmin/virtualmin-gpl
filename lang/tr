@@ -1443,7 +1443,6 @@ backup_ehomeformat3=Yeni bir biçim yedeklemesi sadece tüm sunucularýn anaklas
 backup_niceftp=FTP sunucu $2'deki $1
 backup_nicescp=SSH sunucu $2'deki $1
 backup_nicefile=lokal dosya $1
-backup_nices3=Amazon S3 arabelleði $1
 
 backup_err=Yedekleme baþarýsýz
 backup_err2=Planlý yedekleme kaydedilemedi

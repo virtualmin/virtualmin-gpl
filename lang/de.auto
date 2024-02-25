@@ -260,6 +260,8 @@ setup_overuserquota=Domaininhaberkontingent für $2 von $1 wurde erreicht
 setup_ewebfcgidcmd=Serverbefehl <tt>fcgiwrap</tt> konnte nicht gefunden werden!
 
 users_ecannot3=Es ist Ihnen nicht gestattet, E-Mail-Benutzer hinzuzufügen
+users_ecannot4db=In der GPL-Version können Sie keine zusätzlichen Datenbankbenutzer verwalten
+users_ecannot4web=In der GPL-Version können Sie keine zusätzlichen Webserver-Benutzer verwalten
 users_indom=$1 Benutzer in Domain $2
 
 users_indomsub=$1 Benutzer in Domain $2 ($3 einschließlich Subdomains)
@@ -278,8 +280,8 @@ users_drusure=Möchten Sie die ausgewählten $1 -Benutzer wirklich löschen? $2 
 users_mailclient=E-Mail-Client-Einstellungen anzeigen
 users_mailclientdesc=Anzeigeeinstellungen, die von den E-Mail-Clients der Benutzer für diese Domain verwendet werden sollen.
 users_owner_label=EIGENTÜMER
-users_shared_label=GETEILT
 users_disabled_label=DEAKTIVIERT
+users_na=Unzutreffend
 users_login_access_none=Keiner
 users_login_access_web=Netz
 users_login_access_db=Datenbank
@@ -288,15 +290,19 @@ users_login_access_ftp=FTP
 users_login_access_ssh=SSH
 users_login_access__and=Und
 users_login_access__only=nur
+users_addprotecteddir=Navigieren Sie zunächst zum Modul <a href='$1'>Geschützte Verzeichnisse</a>, um ein Verzeichnis hinzuzufügen. Nach dem Hinzufügen können Sie dieses Verzeichnis dann speziell für den Zugriff dieses Benutzers sichern.
+users_addprotecteddir2=Navigieren Sie zum Modul <a href='$1'>Geschützte Verzeichnisse</a>, um geschützte Verzeichnisse hinzuzufügen, zu bearbeiten oder zu löschen.
 
 user_createssh=Erstellen Sie einen SSH-Benutzer
 user_createmail=E-Mail-Benutzer erstellen
 user_createdb=Datenbankbenutzer erstellen
+user_createwebserver=Erstellen Sie einen Webserver-Benutzer
 user_chrootwarn=Warnung: Da die Einschränkungen für FTP-Verzeichnisse nicht aktiviert sind, hat dieser Benutzer auch Zugriff auf den Webinhalt des Servers der obersten Ebene.
 user_header_ssh=SSH-Benutzerdetails
 user_header_ftp=FTP-Benutzerdetails
 user_header_mail=E-Mail-Benutzerdetails
 user_header_db=Angaben zum Datenbankbenutzer
+user_header_webserver=Angaben zum Webserver-Benutzer
 user_header2=Kontingent- und Ausgangsverzeichniseinstellungen
 user_header2b=Home-Verzeichniseinstellungen
 user_header3=Einstellungen für die E-Mail-Weiterleitung
@@ -320,11 +326,25 @@ user_ehome2=Das Home-Verzeichnis des Benutzers ist relativ zur Domäne und darf 
 user_rusureh=Möchten Sie den Benutzer $1 wirklich löschen? $3 der Dateien im Home-Verzeichnis $4 werden gelöscht.
 user_rusurew=Möchten Sie den Benutzer $1 wirklich löschen? Es werden keine Dateien gelöscht.
 user_hclash=Warnung - Die Home-Verzeichnisse der folgenden Benutzer überschneiden sich und werden ebenfalls gelöscht : $1
+user_createovertitle=Benutzer existiert
+user_createover1=Ja, zusätzlichen Benutzer ersetzen
+user_createover2=Ja, zusätzliche Benutzer ersetzen
+user_creategoback=Nein, kehren Sie zum Benutzererstellungsformular zurück
+user_createoverdescdb=Der zusätzliche Datenbankbenutzer $1 existiert bereits!
+user_createoverdescweb=Der zusätzliche Webbenutzer $1 existiert bereits!
+user_createoverdescdbweb=Zusätzliche Datenbank und Webbenutzer $1 existieren bereits!
+user_createoverdescm1=Wenn Sie fortfahren, wird der vorhandene zusätzliche Benutzer ersetzt.
+user_createoverdescm2=Wenn Sie fortfahren, werden vorhandene zusätzliche Benutzer ersetzt.
+user_createoverdescmf1=Möchten Sie den vorhandenen zusätzlichen Benutzer ersetzen?
+user_createoverdescmf2=Möchten Sie vorhandene zusätzliche Benutzer ersetzen?
 user_newmail2=Nirgends
 user_remail=Senden Sie eine aktualisierte Konto-E-Mail an
 user_nospam2=E-Mail auf Spam prüfen?
 user_edbpass=Das Kennwort des Benutzers muss geändert werden, wenn zum ersten Mal Zugriff auf Datenbanken gewährt wird
 user_ehomehome=Das Home-Verzeichnis befindet sich nicht unter $1
+user_edbclash_mysql=Die MySQL-Datenbankanmeldung mit dem Namen $1 ist bereits vorhanden
+user_edbclash_postgres=Die PostgreSQL-Datenbankanmeldung mit dem Namen $1 ist bereits vorhanden
+user_ewebclash=Ein Webserver-Login mit dem Namen $1 ist bereits vorhanden
 user_spamquota=Warnung! Dieser Benutzer befindet sich innerhalb von $1 seines Festplattenkontingents. Die Spamfilterung wurde deaktiviert.
 user_spamquota2=Warnung! Dieser Benutzer hat sein Festplattenkontingent erreicht. Die Spamfilterung wurde deaktiviert.
 user_header5=Benutzerkonfigurierte E-Mail-Weiterleitung
@@ -345,6 +365,9 @@ user_epassdbnotset=Das Passwort des Datenbankbenutzers ist nicht festgelegt!
 user_eadddbuser=Datenbankbenutzer $1 konnte nicht hinzugefügt werden
 user_edeletedbuser=Datenbankbenutzer $1 konnte nicht gelöscht werden
 user_ealreadyexist=Benutzer $1 existiert bereits
+user_epasswebnotset=Webserver-Benutzerpasswort ist nicht gesetzt!
+user_eaddwebuser=Webserver-Benutzer $1 konnte nicht hinzugefügt werden
+user_edeletewebuser=Der Webserver-Benutzer $1 konnte nicht gelöscht werden
 
 aliases_indom=$1 Aliase in Domäne $2
 aliases_mass=Batch erstellen Aliase.
@@ -882,6 +905,9 @@ log_save_cloud=Aktualisierter Cloud-Backup-Anbieter $1
 log_clear_cloud=Cloud-Backup-Anbieter $1 gelöscht
 log_save_dnscloud=Aktualisierter Cloud-DNS-Anbieter $1
 log_clear_dnscloud=Cloud-DNS-Anbieter $1 gelöscht
+log_create_s3=S3-Konto $1 hinzugefügt
+log_delete_s3=S3-Konto $1 entfernt
+log_update_s3=S3-Konto $1 aktualisiert
 
 backup_title3=Geplante Sicherung erstellen
 backup_desc=Sicherungsbeschreibung
@@ -938,6 +964,10 @@ backup_pass42_desc=Wählen Sie die SSH-Schlüsseldatei
 backup_dirhomes2=Schließen Sie das Verzeichnis <tt>$1</tt> ein
 backup_ehomeformat3=Eine Sicherung im neuen Format kann nur durchgeführt werden, wenn alle virtuellen Server über ein Basisverzeichnis verfügen ($1 nicht).
 backup_nicewebmin=$1 auf dem Webmin-Server $2
+backup_nices3a=S3-Bucket $1 verwendet $2
+backup_nices3pa=$2 im S3-Bucket $1 mit $2
+backup_nices3akey=Zugriffsschlüssel $1
+backup_nices3unknown=Standardzugriffsschlüssel
 backup_nicego=Google-Ordner $1
 backup_nicegop=$2 im Google-Ordner $1
 backup_nicedb=Dropbox-Ordner $1
@@ -1159,9 +1189,14 @@ restore_mysqldummy=Wiederherstellen von MySQL-Datenbanken.
 restore_mysqlsameremote=.. Überspringen der Wiederherstellung auf dem ursprünglichen Server $1 im Replikationsmodus
 restore_emysqlgrant=.. Wiederherstellung fehlgeschlagen : $1
 restore_eusersql=MySQL-Benutzern kann nicht automatisch Zugriff auf die Datenbank gewährt werden
+restore_mysqludummy=Wiederherstellung virtueller MySQL-Benutzer ..
+restore_mysqludummy2=$1 Benutzer wird erstellt ..
+restore_emysqluimport=.. Benutzer konnte nicht erstellt werden: <tt>$1</tt>
+restore_emysqluimport2=.. fehlgeschlagen, der Datenbankbenutzer existiert bereits außerhalb der wiederhergestellten Domäne
 restore_apachecp2=Wiederherstellen von Apache-Aliasen.
 restore_apachelog=Wiederherstellen von Apache-Protokolldateien.
 restore_postgresdummy=Wiederherstellen von PostgreSQL-Datenbanken.
+restore_postgresudummy=Wiederherstellung virtueller PostgreSQL-Benutzer ..
 restore_postgressameremote=.. Überspringen der Wiederherstellung auf dem ursprünglichen Server $1 im Replikationsmodus
 restore_dnssec=Erneutes Aktivieren von DNSSEC für wiederhergestellte Domain ..
 restore_ednssec=.. DNSSEC fehlgeschlagen : $1
@@ -1790,6 +1825,9 @@ scripts_gpl_pro_tip_clouds=Unterstützung für $1 Anbieter ist ebenfalls verfüg
 scripts_gpl_pro_tip_title_dashboard=Holen Sie sich Virtualmin Pro
 scripts_gpl_pro_tip_enroll_dashboard=Bitte erwägen Sie den Kauf einer <a target=_blank href='$1'>Virtualmin Pro</a>-Lizenz, um die Entwicklung Ihres bevorzugten Webhosting-Control-Panels zu unterstützen und viele coole Funktionen freizuschalten.
 scripts_gpl_pro_tip_dashboard=Wussten Sie, dass Virtualmin Pro viele großartige Funktionen bietet, die nicht in der GPL-Version enthalten sind?
+scripts_gpl_pro_tip_extra_web_users=Mit diesem Formular können Sie Webserver-Benutzer unabhängig erstellen und verwalten, ohne ein neues Unix-Benutzerkonto erstellen zu müssen.
+scripts_gpl_pro_tip_extra_db_users=Mit diesem Formular können Sie Datenbankbenutzer unabhängig erstellen und verwalten, ohne ein neues Unix-Benutzerkonto erstellen zu müssen.
+scripts_gpl_pro_tip_extra_user_dismiss=Danke für den Tipp! Verstecken Sie diese Seite und ihren Link
 
 scripts_service_ename=Fehlender oder ungültiger Dienstname
 scripts_service_eport=Fehlende oder ungültige Service-Portnummer
@@ -1814,6 +1852,7 @@ mailusers_desc=Dieses Formular kann verwendet werden, um E-Mails an alle Benutze
 summary_title2=Zusammenfassung des virtuellen Subservers
 summary_title3=Alias Server Zusammenfassung
 summary_title4=Zusammenfassung der virtuellen Subdomain
+summary_phpvermode=$1 ($2-Modus)
 
 migrate_desc=Auf dieser Seite können Sie einen neuen virtuellen Server erstellen, indem Sie eine Sicherungsdatei migrieren, die vom Produkt eines Mitbewerbers erstellt wurde. Die Konfiguration für alle unterstützten Funktionen wird aus der Sicherung extrahiert und für die Verwendung durch Virtualmin konvertiert. Der gesamte Inhalt des Domänenverzeichnisses wird in das Ausgangsverzeichnis des neuen Benutzers kopiert.
 migrate_file=Quellensicherungsdatei
@@ -2078,6 +2117,9 @@ validate_esslcamatch=Das SSL-CA-Zertifikat für $1/$2 stimmt nicht mit dem Ausst
 validate_esslexpired=Das SSL-Zertifikat für diesen virtuellen Server ist auf $1 abgelaufen
 validate_esslfirst=Das SSL-Zertifikat für den ersten virtuellen Apache SSL-Host auf $4 stimmt nicht mit $1 oder $2 überein. Stattdessen stimmt es mit den Hostnamen überein : $3
 validate_emysqlmod=MySQL Webmin Modul $1 existiert nicht!
+validate_esshpubkeyempty=Der öffentliche SSH-Schlüssel ist leer
+validate_esshpubkeyinvalid=Der öffentliche SSH-Schlüssel ist ungültig : $1
+validate_esshpubkeyinvalidformat=Das Format ist falsch
 
 tscripts_none=Keiner
 tscripts_path=URL-Pfad
@@ -2793,6 +2835,10 @@ backuplog_sched=Anzeigen von Protokollen von der geplanten Sicherung bis $1 ..
 backuplog_desc=Beschreibung
 backuplog_who=Hergestellt von
 backuplog_incr=Art
+backuplog_status=Status
+backuplog_status_ok=Erfolgreich
+backuplog_status_partial=Teilweise
+backuplog_status_failed=Fehlgeschlagen
 backuplog_nomatch=Es wurden keine Sicherungsprotokolle gefunden, die Ihrer Suche entsprechen.
 backuplog_none2=Es wurden keine Sicherungen protokolliert, auf die Sie Zugriff haben.
 backuplg_esched=Geplante Sicherung existiert nicht!
@@ -3045,6 +3091,7 @@ buckets_errs=Ein oder mehrere Fehler sind beim Auflisten Ihrer S3-Buckets aufget
 buckets_return=Liste der Eimer
 
 bucket_elist=Buckets konnten nicht aufgelistet werden : $1
+bucket_account2=S3-Konto
 bucket_owner=Gehört
 bucket_type=Grant-Typ
 bucket_sizestr=$2 Dateien mit insgesamt $1
@@ -3196,6 +3243,7 @@ cloud_bbdesc=Backblaze
 cloud_azdesc=Azure-Blobspeicher
 cloud_drivedesc=Google Drive
 cloud_s3account=Zugriffsschlüssel $1 verwenden
+cloud_s3accounts=Es werden $1 Konten verwendet
 cloud_s3creds=Verwenden von EC2-Anmeldeinformationen
 cloud_rsuser=Login $1 verwenden
 cloud_s3_noawscli=Es wird empfohlen, die offizielle AWS-Befehlszeilenschnittstelle installiert zu haben.
@@ -3212,6 +3260,8 @@ cloud_s3_secret=Geheimer Schlüssel
 cloud_s3_endpoint=S3-kompatibler Server-Hostname
 cloud_s3_amazon=Verwenden Sie Amazon S3
 cloud_s3_chunk=Laden Sie die Blockgröße in MB hoch
+cloud_s3_accounts=Registrierte S3-Konten
+cloud_s3_noaccounts=Es wurden noch keine Konten eingerichtet
 cloud_s3_location=Standort für neue Eimer
 cloud_s3_lother=Andere..
 
@@ -3245,7 +3295,7 @@ cloud_google_project=Projekt-ID
 cloud_google_location=Standort für neue Eimer
 cloud_google_oauth=OAuth2-Code von Google
 cloud_google_token=OAuth2-Token von Google
-cloud_s3_longdesc=Die Anmeldeinformationen auf dieser Seite finden Sie auf der Seite Sicherheitsanmeldeinformationen Ihres Kontos in der <a href=https://console.aws.amazon.com/ target=_blank>AWS-Konsole</a>.
+cloud_s3_longdesc2=Die Anmeldeinformationen für Amazon S3 oder andere kompatible Anbieter können auf der Seite <a href='$1'>S3-Konten</a> eingegeben werden.
 cloud_google_longdesc=Die Einstellungen auf dieser Seite werden von Google bereitgestellt, wenn Sie auf der Seite <a href=https://console.cloud.google.com/apis/credentials target=_blank>Google APIs Console</a> API-Zugriff auf Ihr Projekt gewähren, unter <b>APIs und Auth</b> -> <b>Anmeldeinformationen</b>.
 cloud_dropbox_longdesc=Bevor Sie ein Backup auf Dropbox erstellen können, müssen Sie zunächst <a href=https://www.dropbox.com/register target=_blank>auf ihrer Website ein Konto</a> erstellen, falls Sie noch keines haben.
 cloud_bb_longdesc=Bevor Sie ein Backup auf Backblaze erstellen können, müssen Sie zunächst <a href=https://backblaze.com/ target=_blank>ein Konto erstellen</a> und dann <b>B2 Cloud Storage</b> auf dem aktivieren <b>Seite Meine Einstellungen</b>. Anschließend müssen Sie auf der Seite <b>App Keys</b> einen Anwendungsschlüssel mit allen Funktionen generieren.
@@ -3659,6 +3709,7 @@ ports_script=Das $1-Skript wurde installiert
 
 s3s_title=Amazon S3-Konten
 s3s_longdesc=Die S3-Konten auf dieser Seite können von geplanten Virtualmin-Backups verwendet werden. Konten können entweder bei Amazon AWS oder bei anderen Cloud-Speicheranbietern liegen, die eine S3-kompatible HTTP-API anbieten.
+s3s_echeck=S3-Konten können nicht verwendet werden : $1
 s3s_none=Es wurden noch keine Konten registriert.
 s3s_add=Fügen Sie ein neues S3-Konto hinzu.
 s3s_access=Zugangsschlüssel
@@ -3669,13 +3720,17 @@ s3s_usedby=Benutzt von
 s3s_users=$1 geplante Sicherungen
 s3s_nousers=Nicht benutzt
 s3s_return=S3-Konten
+s3s_auto=Vom IAM-Konto
 
 s3_title1=S3-Konto hinzufügen
 s3_title2=S3-Konto bearbeiten
+s3_longdesc=Die auf dieser Seite einzugebenden Anmeldeinformationen finden Sie auf der Seite „Sicherheitsanmeldeinformationen“ Ihres Kontos in der <a href=https://console.aws.amazon.com/ target=_blank>AWS-Konsole</a>, sofern Sie diese verwenden AWS. Andere S3-kompatible Anbieter stellen ebenfalls einen Zugriffsschlüssel und einen geheimen Schlüssel für Ihr Konto bereit, die Sie hier zusammen mit der Endpunkt-URL des Anbieters eingeben können.
 s3_header=S3-Kontodetails
+s3_id=Virtualmin-Konto-ID
 s3_desc=Account Beschreibung
 s3_access=S3-Zugriffsschlüssel
 s3_secret=Geheimer S3-Schlüssel
+s3_location=in der Region
 s3_endpoint=S3-kompatibler Endpunkt
 s3_endpoint_def=Verwenden Sie einfach AWS
 s3_endpoint_hp=Host:Port
@@ -3686,3 +3741,5 @@ s3_eusers=Das Konto wird von $1 geplanten Sicherungen verwendet
 s3_usedby=Wird von Backups verwendet
 s3_nousers=Das Konto wird noch nicht von geplanten Sicherungen verwendet
 s3_echeck=S3-Konto kann nicht verwendet werden : $1
+s3_elocation=Der ausgewählte Bucket-Speicherort wird von diesem S3-Anbieter nicht unterstützt
+s3_defcreds=EC2 IAM-Anmeldeinformationen

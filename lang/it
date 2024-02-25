@@ -800,7 +800,6 @@ backup_mailfiles2=Inclusi file mail
 backup_niceftp=$1 su server FTP $2
 backup_nicescp=$1 su server SSH $2
 backup_nicefile=file locale $1
-backup_nices3=Amazon S3 bucket $1
 backup_nicedownload=downloaded file
 backup_niceupload=uploaded file
 backup_sdisabled=I salvataggi programmati di Virtualmin sono stati disabilitati.
