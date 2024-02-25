@@ -76,6 +76,8 @@ form_rmysql=Servidor de base de datos MySQL
 form_noreseller=&lt;Ninguno&gt;
 form_web=¿Configurar el sitio web de Apache?
 form_ssl=¿Configurar el sitio web Apache SSL?
+form_mysql=¿Habilitar la base de datos MySQL?
+form_postgres=¿Habilitar la base de datos PostgresSQL?
 form_sshkey=Clave pública SSH
 form_sshkey0=Sin clave predeterminada
 form_sshkey1=Genera claves públicas y privadas
@@ -230,6 +232,8 @@ setup_overuserquota=Se alcanzó la cuota de propietario de dominio para $2 de $1
 setup_ewebfcgidcmd=¡No se pudo encontrar el comando del servidor <tt>fcgiwrap</tt>!
 
 users_ecannot3=No tienes permiso para agregar usuarios de correo
+users_ecannot4db=No puede administrar usuarios de bases de datos adicionales en la versión GPL
+users_ecannot4web=No puede administrar usuarios adicionales del servidor web en la versión GPL
 users_indom=$1 usuarios en el dominio $2
 
 users_indomsub=$1 usuarios en el dominio $2 ($3 incluyendo subdominios)
@@ -244,9 +248,9 @@ users_dlist=Usuarios a eliminar : $1
 users_mailclient=Mostrar la configuración del cliente de correo electrónico
 users_mailclientdesc=Muestra la configuración que deben usar los clientes de correo electrónico de los usuarios para este dominio.
 users_owner_label=DUEÑO
-users_shared_label=COMPARTIDO
 users_disabled_label=DESACTIVADO
 users_same=Igual que admin
+users_na=No aplica
 users_login_access_none=Ninguno
 users_login_access_web=Web
 users_login_access_db=Base de datos
@@ -255,16 +259,20 @@ users_login_access_ftp=ftp
 users_login_access_ssh=SSH
 users_login_access__and=y
 users_login_access__only=solo
+users_addprotecteddir=Para comenzar, navegue hasta el módulo <a href='$1'>Directorios protegidos</a> para agregar un directorio. Una vez agregado, puede proteger este directorio específicamente para el acceso de este usuario.
+users_addprotecteddir2=Navegue hasta el módulo <a href='$1'>Directorios protegidos</a> para agregar, editar o eliminar directorios protegidos.
 
 user_createssh=Crear usuario SSH
 user_createweb=Crear usuario FTP
 user_createmail=Crear usuario de correo
 user_createdb=Crear usuario de base de datos
+user_createwebserver=Crear usuario del servidor web
 user_chrootwarn=Advertencia: Debido a que las restricciones del directorio FTP no están habilitadas, este usuario también tendrá acceso al contenido web del servidor de nivel superior.
 user_header_ssh=Detalles del usuario SSH
 user_header_ftp=Detalles del usuario FTP
 user_header_mail=Detalles del usuario de correo
 user_header_db=Detalles del usuario de la base de datos
+user_header_webserver=Detalles del usuario del servidor web
 user_header2b=Configuración del directorio de inicio
 user_header3a=Reenvío de correo configurado por el usuario
 user_user3=Nombre de usuario de inicio de sesión
@@ -285,10 +293,24 @@ user_eovermquota=La cuota de correo del usuario no puede ser superior a la cuota
 user_eextra7=La dirección de correo electrónico adicional '$1' no puede estar en un dominio de alias
 user_ehome2=El directorio de inicio del usuario es relativo al dominio, por lo que no debe comenzar con un /
 user_hclash=Advertencia: los siguientes directorios principales de los usuarios se superponen y también se eliminarán : $1
+user_createovertitle=El usuario existe
+user_createover1=Sí, reemplazar usuario adicional
+user_createover2=Sí, reemplazar usuarios adicionales
+user_creategoback=No, volver al formulario de creación de usuario
+user_createoverdescdb=¡El usuario de base de datos adicional $1 ya existe!
+user_createoverdescweb=¡El usuario web adicional $1 ya existe!
+user_createoverdescdbweb=¡La base de datos adicional y el usuario web $1 ya existen!
+user_createoverdescm1=Si continúa, se reemplazará el usuario adicional existente.
+user_createoverdescm2=Si continúa, los usuarios adicionales existentes serán reemplazados.
+user_createoverdescmf1=¿Quiere reemplazar el usuario adicional existente?
+user_createoverdescmf2=¿Quiere reemplazar a los usuarios adicionales existentes?
 user_nospam2=¿Verifica el correo electrónico en busca de spam?
 user_eremail=Dirección faltante o no válida para el correo de actualización del usuario
 user_dbssel=Acceso otorgado a
 user_ehomehome=El directorio de inicio no está por debajo de $1
+user_edbclash_mysql=El inicio de sesión de la base de datos MySQL con el nombre $1 ya existe
+user_edbclash_postgres=El inicio de sesión de la base de datos PostgreSQL con el nombre $1 ya existe
+user_ewebclash=Ya existe un inicio de sesión de servidor web con el nombre $1
 user_mysqluser2=Nombre de usuario MySQL
 user_header6=Otras configuraciones de acceso
 user_everyone=Reenviar a todos en el dominio?
@@ -316,6 +338,9 @@ user_epassdbnotset=¡La contraseña de usuario de la base de datos no está esta
 user_eadddbuser=No se pudo agregar el usuario de la base de datos : $1
 user_edeletedbuser=No se pudo eliminar el usuario de la base de datos : $1
 user_ealreadyexist=El usuario $1 ya existe
+user_epasswebnotset=¡La contraseña de usuario del servidor web no está configurada!
+user_eaddwebuser=No se pudo agregar el usuario del servidor web : $1
+user_edeletewebuser=No se pudo eliminar el usuario del servidor web : $1
 
 alias_etype1f=No está permitido reenviar correos electrónicos a '$1'
 
@@ -735,6 +760,9 @@ log_save_cloud=Proveedor de respaldo en la nube actualizado $1
 log_clear_cloud=Proveedor de respaldo en la nube despejado $1 
 log_save_dnscloud=Proveedor de DNS en la nube actualizado $1 
 log_clear_dnscloud=Proveedor de DNS en la nube despejado $1 
+log_create_s3=Se agregó la cuenta S3 $1
+log_delete_s3=Se eliminó la cuenta S3 $1
+log_update_s3=Cuenta S3 actualizada $1
 
 backup_desc=Descripción de respaldo
 backup_reseller=Límite a los servidores propiedad del revendedor
@@ -769,6 +797,10 @@ backup_pass4_or=o
 backup_pass42_desc=Elija el archivo de clave SSH
 backup_dirhomes2=Incluir directorio <tt>$1</tt>
 backup_nicewebmin=$1 en el servidor Webmin $2
+backup_nices3a=Depósito S3 $1 usando $2
+backup_nices3pa=$2 en el depósito S3 $1 usando $2
+backup_nices3akey=clave de acceso $1
+backup_nices3unknown=clave de acceso predeterminada
 backup_nicebb=Cubo de backblaze $1 
 backup_nicebbt=Contrafuego
 backup_nicebbp=$2 en el depósito Backblaze $1 
@@ -891,8 +923,13 @@ restore_emysqlgrant=.. restauración fallida : $1
 restore_eusersql=A los usuarios de MySQL no se les puede otorgar acceso a la base de datos automáticamente
 restore_mysqlclash=.. ya existe una base de datos con el mismo nombre!
 restore_mysqlimport=.. la base de datos ya existe
+restore_mysqludummy=Restaurando usuarios virtuales de MySQL ..
+restore_mysqludummy2=Creando $1 usuario. ..
+restore_emysqluimport=.. no se pudo crear el usuario: <tt>$1</tt>
+restore_emysqluimport2=.. falló, el usuario de la base de datos ya existe fuera del dominio restaurado
 restore_apachecp2=Restaurando los alias de Apache.
 restore_postgresdummy=Restaurando bases de datos PostgreSQL.
+restore_postgresudummy=Restaurando usuarios virtuales de PostgreSQL ..
 restore_postgressameremote=.. omitiendo restaurar al servidor original $1 en modo de replicación
 restore_postgresclash=.. ya existe una base de datos con el mismo nombre!
 restore_dnssec=Volver a habilitar DNSSEC para el dominio restaurado ..
@@ -1452,6 +1489,9 @@ scripts_gpl_pro_tip_clouds=¡También hay soporte para proveedores de $1 !
 scripts_gpl_pro_tip_title_dashboard=Obtén Virtualmin Pro
 scripts_gpl_pro_tip_enroll_dashboard=Considere comprar la licencia de <a target=_blank href='$1'>Virtualmin Pro</a> para respaldar el desarrollo del panel de control de alojamiento web que ama y desbloquear muchas funciones interesantes.
 scripts_gpl_pro_tip_dashboard=¿Sabías que Virtualmin Pro ofrece muchas funciones geniales que no están incluidas en la versión GPL?
+scripts_gpl_pro_tip_extra_web_users=Este formulario le permite crear y administrar usuarios del servidor web de forma independiente, sin crear una nueva cuenta de usuario de Unix.
+scripts_gpl_pro_tip_extra_db_users=Este formulario le permite crear y administrar usuarios de bases de datos de forma independiente, sin crear una nueva cuenta de usuario de Unix.
+scripts_gpl_pro_tip_extra_user_dismiss=¡Gracias por el consejo! Ocultar esta página y su enlace
 
 scripts_service_ename=Nombre de servicio faltante o no válido
 scripts_service_eport=Número de puerto de servicio faltante o no válido
@@ -1464,6 +1504,7 @@ newnotify_nomany=Solo envíe un correo electrónico a cada propietario de domini
 summary_title2=Resumen del servidor secundario virtual
 summary_title3=Resumen del servidor de alias
 summary_title4=Resumen de subdominio virtual
+summary_phpvermode=$1 (modo $2)
 
 migrate_directadmin=Copia de seguridad de DirectAdmin
 migrate_plesk9=Copia de seguridad de Plesk 9+
@@ -1668,6 +1709,9 @@ validate_emysqlmod=¡El módulo MySQL Webmin $1 no existe!
 validate_emysqlcheck=Error al verificar el inicio de sesión de MySQL en el host de servicios : $1
 validate_emysqldbcheck=Error al verificar la base de datos MySQL $1 en el host de servicios : $2
 validate_emysqluserhost=El anfitrión de servicios informó que el inicio de sesión de MySQL se encontró en $1, pero Virtualmin esperaba $2
+validate_esshpubkeyempty=La clave pública SSH está vacía
+validate_esshpubkeyinvalid=La clave pública SSH no es válida : $1
+validate_esshpubkeyinvalidformat=El formato es incorrecto
 
 tscripts_path=ruta URL
 tscripts_path_help=Especifique la ruta URL al script, que es relativa al directorio raíz del documento del dominio. Por ejemplo, <tt>/wordpress</tt> o <tt>/</tt>.
@@ -2394,6 +2438,10 @@ wizard_essldir=Falta la plantilla de archivo de clave personalizada
 
 backuplog_desc=Descripción
 backuplog_incr=Tipo
+backuplog_status=Estado
+backuplog_status_ok=Exitoso
+backuplog_status_partial=Parcial
+backuplog_status_failed=Fallido
 
 viewbackup_title=Ver registro de respaldo
 viewbackup_eid=ID de copia de seguridad faltante o no válida
@@ -2866,6 +2914,8 @@ fixmodphp_ecannot=No tienes permiso para arreglar permisos PHP
 fixmodphp_doing=Actualización de todos los servidores virtuales para evitar el uso de mod_php cuando está deshabilitado.
 fixmodphp_done=.. dominios fijos de $1
 
+bucket_account2=cuenta S3
+
 ratelimit_title=Limitación de tarifa de correo
 ratelimit_eos=La limitación de velocidad de correo electrónico no es compatible con este sistema operativo
 ratelimit_econfig=El archivo de configuración milter-greylist $1 no existe
@@ -3002,6 +3052,7 @@ cloud_bbdesc=Backblaze
 cloud_azdesc=Almacenamiento de blobs de Azure
 cloud_drivedesc=Google Drive
 cloud_s3account=Usando la tecla de acceso $1
+cloud_s3accounts=Usando $1 cuentas
 cloud_s3creds=Uso de credenciales de EC2
 cloud_rsuser=Usando login $1
 cloud_s3_noawscli=Se recomienda tener instalada la interfaz de línea de comandos oficial de AWS.
@@ -3018,6 +3069,8 @@ cloud_s3_secret=Llave secreta
 cloud_s3_endpoint=Nombre de host del servidor compatible con S3
 cloud_s3_amazon=Utiliza Amazon S3
 cloud_s3_chunk=Subir tamaño de fragmento en MB
+cloud_s3_accounts=Cuentas S3 registradas
+cloud_s3_noaccounts=Aún no se han configurado cuentas
 cloud_s3_location=Ubicación para nuevos cubos
 cloud_s3_lother=Otro..
 
@@ -3051,7 +3104,7 @@ cloud_google_project=Projecto ID
 cloud_google_location=Ubicación para nuevos cubos
 cloud_google_oauth=Código OAuth2 de Google
 cloud_google_token=Token OAuth2 de Google
-cloud_s3_longdesc=Las credenciales de esta página se pueden encontrar en la página Credenciales de seguridad de su cuenta en la <a href=https://console.aws.amazon.com/ target=_blank>Consola de AWS</a>.
+cloud_s3_longdesc2=Las credenciales de Amazon S3 u otros proveedores compatibles se pueden ingresar en la página <a href='$1'>Cuentas S3</a>.
 cloud_google_longdesc=Google proporciona la configuración de esta página cuando concede acceso de API a su proyecto en <a href=https://console.cloud.google.com/apis/credentials target=_blank&gt;Google APIs Console Página de la <a href=https://console.cloud.google.com/apis/credentials target=_blank&gt;Google APIs Console, en <b>API y Autenticación</a> -&gt; <b>Credenciales</b>.
 cloud_dropbox_longdesc=Antes de que pueda hacer una copia de seguridad en Dropbox, primero debe <a href=https://www.dropbox.com/register target=_blank&gt;create an account en su sitio web si aún no tiene una.
 cloud_bb_longdesc=Antes de poder hacer una copia de seguridad en Backblaze, primero debe <a href=https://backblaze.com/ target=_blank>crear una cuenta</a> y luego habilitar <b>B2 Cloud Storage</b> en el <b>página Mi configuración</b>. Luego, debe generar una clave de aplicación con todas las capacidades en la página <b>Claves de la aplicación</b>.
@@ -3423,6 +3476,7 @@ ports_script=Script $1 instalado
 
 s3s_title=Cuentas de Amazon S3
 s3s_longdesc=Las cuentas S3 en esta página pueden ser utilizadas por las copias de seguridad programadas de Virtualmin. Las cuentas pueden estar en Amazon AWS o en otros proveedores de almacenamiento en la nube que ofrecen una API HTTP compatible con S3.
+s3s_echeck=Las cuentas S3 no se pueden utilizar : $1
 s3s_none=Aún no se han registrado cuentas.
 s3s_add=Agregue una nueva cuenta S3.
 s3s_access=Llave de acceso
@@ -3433,13 +3487,17 @@ s3s_usedby=Usado por
 s3s_users=$1 copias de seguridad programadas
 s3s_nousers=No utilizado
 s3s_return=cuentas s3
+s3s_auto=Desde la cuenta IAM
 
 s3_title1=Agregar cuenta S3
 s3_title2=Editar cuenta S3
+s3_longdesc=Las credenciales para ingresar en esta página se pueden encontrar en la página Credenciales de seguridad de su cuenta en la <a href=https://console.aws.amazon.com/ target=_blank>Consola de AWS</a> si está utilizando AWS. Otros proveedores compatibles con S3 también le proporcionarán una clave de acceso y una clave secreta para su cuenta que puede ingresar aquí, junto con la URL del punto final del proveedor.
 s3_header=Detalles de la cuenta S3
+s3_id=ID de cuenta virtualmin
 s3_desc=Descripción de cuenta
 s3_access=Clave de acceso S3
 s3_secret=clave secreta S3
+s3_location=en la región
 s3_endpoint=Punto final compatible con S3
 s3_endpoint_def=Solo usa AWS
 s3_endpoint_hp=Puerto host
@@ -3450,3 +3508,5 @@ s3_eusers=La cuenta está siendo utilizada por $1 copias de seguridad programada
 s3_usedby=Utilizado por copias de seguridad
 s3_nousers=La cuenta aún no se utiliza en ninguna copia de seguridad programada
 s3_echeck=La cuenta S3 no se puede utilizar : $1
+s3_elocation=La ubicación del depósito seleccionado no es compatible con este proveedor de S3
+s3_defcreds=Credenciales EC2 IAM

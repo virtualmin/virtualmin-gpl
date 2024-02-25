@@ -53,6 +53,8 @@ form_generic_aliasshort=Alias
 form_rmysql=MySQL-databaseserver
 form_web=Sett opp Apache-nettstedet?
 form_ssl=Sett opp Apache SSL-nettsted?
+form_mysql=Vil du aktivere MySQL-databasen?
+form_postgres=Vil du aktivere PostgresSQL-databasen?
 form_sshkey=SSH offentlig nøkkel
 form_sshkey0=Ingen standardnøkkel
 form_sshkey1=Generer private og offentlige nøkler
@@ -133,6 +135,8 @@ setup_overuserquota=Domeneeierkvoten for $2 av $1 er nådd
 setup_ewebfcgidcmd=Fant ikke <tt>fcgiwrap</tt> serverkommando!
 
 users_ecannot3=Du har ikke lov til å legge til e-postbrukere
+users_ecannot4db=Du kan ikke administrere ekstra databasebrukere i GPL-versjon
+users_ecannot4web=Du kan ikke administrere ekstra nettserverbrukere i GPL-versjon
 users_indomsub=$1 brukere i domene $2 ($3 inkludert underdomener)
 users_add_ssh=Legg til SSH-bruker.
 users_add_ftp=Legg til FTP-bruker.
@@ -142,8 +146,8 @@ users_add_web=Legg til nettbruker.
 users_mailclient=Vis innstillinger for e-postklient
 users_mailclientdesc=Vis innstillinger som skal brukes av brukernes e-postklienter for dette domenet.
 users_owner_label=EIEREN
-users_shared_label=DELT
 users_disabled_label=FUNKSJONSHEMMET
+users_na=Ikke aktuelt
 users_login_access_none=Ingen
 users_login_access_web=Web
 users_login_access_db=Database
@@ -152,14 +156,18 @@ users_login_access_ftp=FTP
 users_login_access_ssh=SSH
 users_login_access__and=og
 users_login_access__only=bare
+users_addprotecteddir=For å begynne, naviger til modulen <a href='$1'>Beskyttede kataloger</a> for å legge til en katalog. Når den er lagt til, kan du sikre denne katalogen spesielt for denne brukerens tilgang.
+users_addprotecteddir2=Naviger til modulen <a href='$1'>Beskyttede kataloger</a> for å legge til, redigere eller slette beskyttede kataloger.
 
 user_createssh=Opprett SSH-bruker
 user_createmail=Opprett e-postbruker
 user_createdb=Opprett databasebruker
+user_createwebserver=Opprett nettserverbruker
 user_header_ssh=SSH brukerdetaljer
 user_header_ftp=FTP-brukerdetaljer
 user_header_mail=Send brukerdetaljer via e-post
 user_header_db=Database brukerdetaljer
+user_header_webserver=Webserver brukerdetaljer
 user_header2b=Innstillinger for hjemmekatalog
 user_header3a=Brukerkonfigurert videresending av e-post
 user_user3=Logg inn brukernavn
@@ -170,8 +178,22 @@ user_gotrecovery=Adresse på stedet
 user_erecovery=Manglende eller ugyldig adresse for gjenoppretting av passord
 user_enumeric=Brukernavn kan ikke begynne med et tall
 user_used2=($1 brukt i $2 filer)
+user_createovertitle=Bruker finnes
+user_createover1=Ja, Erstatt ekstra bruker
+user_createover2=Ja, Erstatt ekstra brukere
+user_creategoback=Nei, gå tilbake til brukeropprettingsskjema
+user_createoverdescdb=Ekstra databasebruker $1 eksisterer allerede!
+user_createoverdescweb=Ekstra nettbruker $1 eksisterer allerede!
+user_createoverdescdbweb=Ekstra database og nettbruker $1 eksisterer allerede!
+user_createoverdescm1=Hvis du fortsetter, vil eksisterende ekstra bruker bli erstattet.
+user_createoverdescm2=Hvis du fortsetter, vil eksisterende ekstra brukere bli erstattet.
+user_createoverdescmf1=Ønsker du å erstatte eksisterende ekstra bruker?
+user_createoverdescmf2=Ønsker du å erstatte eksisterende ekstrabrukere?
 user_nospam2=Sjekk e-post for spam?
 user_ehomehome=Hjemmekatalogen er ikke under $1 
+user_edbclash_mysql=MySQL-databasepålogging med navnet $1 eksisterer allerede
+user_edbclash_postgres=PostgreSQL-databasepålogging med navnet $1 eksisterer allerede
+user_ewebclash=En nettserverpålogging med navnet $1 eksisterer allerede
 user_header6=Andre tilgangsinnstillinger
 user_charset=Tegn satt for svarmelding
 user_charset_def=Samme som original e-post
@@ -184,6 +206,9 @@ user_epassdbnotset=Database brukerpassord er ikke satt!
 user_eadddbuser=Kunne ikke legge til databasebruker : $1
 user_edeletedbuser=Kunne ikke slette databasebruker : $1
 user_ealreadyexist=Bruker $1 eksisterer allerede
+user_epasswebnotset=Nettserverens brukerpassord er ikke angitt!
+user_eaddwebuser=Kunne ikke legge til nettserverbruker : $1
+user_edeletewebuser=Kunne ikke slette nettserverbruker : $1
 
 alias_etype1f=Du har ikke lov til å videresende e-post til '$1'
 
@@ -387,6 +412,9 @@ log_save_cloud=Oppdatert leverandør av sikkerhetskopier av sky $1
 log_clear_cloud=Fjernet leverandør av sikkerhetskopier i skyen $1 
 log_save_dnscloud=Oppdatert sky DNS-leverandør $1 
 log_clear_dnscloud=Fjernet sky-DNS-leverandør $1 
+log_create_s3=Lagt til S3-konto $1
+log_delete_s3=Fjernet S3-kontoen $1
+log_update_s3=Oppdatert S3-konto $1
 
 backup_desc=Beskrivelse av sikkerhetskopien
 backup_reseller=Begrens til servere som eies av forhandleren
@@ -429,6 +457,10 @@ backup_pass4_or=eller
 backup_pass42_desc=Velg SSH-nøkkelfil
 backup_dirhomes2=Ta med <tt>$1</tt> katalog
 backup_nicewebmin=$1 på Webmin-server $2 
+backup_nices3a=S3-bøtte $1 bruker $2
+backup_nices3pa=$2 i S3-bøtte $1 med $2
+backup_nices3akey=tilgangsnøkkel $1
+backup_nices3unknown=standard tilgangsnøkkel
 backup_nicego=Google-mappen $1 
 backup_nicegop=$2 i Google-mappen $1 
 backup_nicedb=Dropbox-mappen $1 
@@ -545,7 +577,12 @@ restore_mysqldummy=Gjenopprette MySQL-databaser ..
 restore_mysqlsameremote=.. hopper over gjenoppretting til original server $1 i replikasjonsmodus
 restore_emysqlgrant=.. gjenoppretting mislyktes : $1 
 restore_eusersql=MySQL-brukere kan ikke gis tilgang til databasen automatisk
+restore_mysqludummy=Gjenoppretter virtuelle MySQL-brukere ..
+restore_mysqludummy2=Oppretter $1 bruker ..
+restore_emysqluimport=.. kunne ikke opprette bruker: <tt>$1</tt>
+restore_emysqluimport2=.. mislyktes, databasebrukeren eksisterer allerede utenfor det gjenopprettede domenet
 restore_postgresdummy=Gjenopprette PostgreSQL databaser ..
+restore_postgresudummy=Gjenoppretter virtuelle PostgreSQL-brukere ..
 restore_postgressameremote=.. hopper over gjenoppretting til original server $1 i replikasjonsmodus
 restore_dnssec=Aktiverer DNSSEC på nytt for gjenopprettet domene ..
 restore_ednssec=.. DNSSEC mislyktes : $1
@@ -853,10 +890,15 @@ scripts_gpl_pro_tip_clouds=Støtte for $1-leverandører er også tilgjengelig!
 scripts_gpl_pro_tip_title_dashboard=Skaff deg Virtualmin Pro
 scripts_gpl_pro_tip_enroll_dashboard=Vennligst vurder å kjøpe <a target=_blank href='$1'>Virtualmin Pro</a>-lisens for å støtte utviklingen av webhotellets kontrollpanel du elsker og låse opp mange kule funksjoner.
 scripts_gpl_pro_tip_dashboard=Visste du at Virtualmin Pro har mange flotte funksjoner som ikke er inkludert i GPL -versjonen?
+scripts_gpl_pro_tip_extra_web_users=Dette skjemaet lar deg opprette og administrere webserverbrukere uavhengig, uten å opprette en ny Unix-brukerkonto.
+scripts_gpl_pro_tip_extra_db_users=Dette skjemaet lar deg opprette og administrere databasebrukere uavhengig, uten å opprette en ny Unix-brukerkonto.
+scripts_gpl_pro_tip_extra_user_dismiss=Takk for tipset! Skjul denne siden og dens link
 
 scripts_service_ename=Manglende eller ugyldig tjenestenavn
 scripts_service_eport=Manglende eller ugyldig tjenesteportnummer
 scripts_service_estartcmd=Mangler tjenestestartkommando
+
+summary_phpvermode=$1 ($2-modus)
 
 migrate_ok=Vellykket migrert $2 virtuell server. <a href='$1'>klikk her</a> for å administrere den.
 migrate_uploading=Laster opp migrasjonsfilen <tt>$1</tt> ..
@@ -978,6 +1020,9 @@ validate_esslcainfo=SSL CA-fil $1 kunne ikke analyseres
 validate_esslcamatch=SSL CA-sertifisering for $1/$2 samsvarer ikke med utstederen av SSL-sertifiseringen $3/$4 
 validate_esslexpired=SSL-sertifikatet for denne virtuelle serveren gikk ut på $1 
 validate_emysqlmod=MySQL Webmin-modul $1 eksisterer ikke!
+validate_esshpubkeyempty=SSH offentlig nøkkel er tom
+validate_esshpubkeyinvalid=SSH offentlig nøkkel er ugyldig : $1
+validate_esshpubkeyinvalidformat=Formatet er feil
 
 tscripts_path=URL-bane
 tscripts_path_help=Angi URL-banen til skriptet, som er relativt til domenets dokumentrotkatalog. For eksempel <tt>/wordpress</tt> eller <tt>/</tt>.
@@ -1243,6 +1288,10 @@ wizard_essldir=Mangler egendefinert nøkkelfilmal
 backuplog_sched=Viser logger fra planlagt sikkerhetskopi til $1 ..
 backuplog_desc=Beskrivelse
 backuplog_incr=Type
+backuplog_status=Status
+backuplog_status_ok=Vellykket
+backuplog_status_partial=Delvis
+backuplog_status_failed=Mislyktes
 backuplg_esched=Planlagt sikkerhetskopi eksisterer ikke!
 
 viewbackup_desc=Original sikkerhetskopibeskrivelse
@@ -1371,6 +1420,8 @@ fixperms_failed=.. mislyktes : $1
 bkey_extra=Eksisterende nøkkel
 bkey_download=Last ned nøkkel
 
+bucket_account2=S3 konto
+
 transfer_eoldhost=Gammel vert eksisterer ikke!
 transfer_subs=inkludert underservere
 transfer_ssh=SSH
@@ -1420,6 +1471,7 @@ cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob Storage
 cloud_drivedesc=Google Disk
 cloud_s3account=Bruker tilgangsnøkkel $1 
+cloud_s3accounts=Bruker $1 kontoer
 cloud_s3creds=Bruker EC2-legitimasjon
 cloud_rsuser=Bruker innlogging $1 
 cloud_s3_noawscli=Det anbefales å ha offisielt AWS kommandolinjegrensesnitt installert.
@@ -1436,6 +1488,8 @@ cloud_s3_secret=Hemmelig nøkkel
 cloud_s3_endpoint=S3-kompatibel serververtsnavn
 cloud_s3_amazon=Bruk Amazon S3
 cloud_s3_chunk=Last opp delestørrelse i MB
+cloud_s3_accounts=Registrerte S3-kontoer
+cloud_s3_noaccounts=Ingen kontoer er konfigurert ennå
 cloud_s3_location=Plassering for nye bøtter
 cloud_s3_lother=Annen..
 
@@ -1469,7 +1523,7 @@ cloud_google_project=Prosjekt-ID
 cloud_google_location=Plassering for nye bøtter
 cloud_google_oauth=OAuth2-kode fra Google
 cloud_google_token=OAuth2-token fra Google
-cloud_s3_longdesc=Legitimasjonen på denne siden finner du på siden Sikkerhetsopplysninger for kontoen din på <a href=https://console.aws.amazon.com/ target=_blank>AWS -konsollen</a>.
+cloud_s3_longdesc2=Påloggingsinformasjonen for Amazon S3 eller andre kompatible leverandører kan legges inn på <a href='$1'>S3-kontoer</a>-siden.
 cloud_google_longdesc=Innstillingene på denne siden leveres av Google når du gir API-tilgang til prosjektet ditt på <a href=https://console.cloud.google.com/apis/credentials target=_blank>Google APIs Console</a> -siden, under <b>APIer og autentisering</b> -> <b>legitimasjon</b>.
 cloud_dropbox_longdesc=Før du kan ta sikkerhetskopi til Dropbox, må du først <a href=https://www.dropbox.com/register target=_blank>opprette en konto</a> på nettstedet deres hvis du ikke allerede har en.
 cloud_bb_longdesc=Før du kan sikkerhetskopiere til Backblaze, må du først <a href=https://backblaze.com/ target=_blank>opprette en konto</a>, og deretter aktivere <b>B2 Cloud Storage</b> på <b>Mine innstillinger</b> side. Deretter må du generere en applikasjonsnøkkel med alle funksjoner på siden <b>App-nøkler</b>.
@@ -1894,6 +1948,7 @@ ports_script=Installert $1-skript
 
 s3s_title=Amazon S3-kontoer
 s3s_longdesc=S3-kontoene på denne siden kan brukes av Virtualmin planlagte sikkerhetskopier. Kontoer kan enten være hos Amazon AWS, eller hos andre skylagringsleverandører som tilbyr en S3-kompatibel HTTP API.
+s3s_echeck=S3-kontoer kan ikke brukes : $1
 s3s_none=Ingen kontoer er registrert ennå.
 s3s_add=Legg til en ny S3-konto.
 s3s_access=Tilgangsnøkkel
@@ -1904,13 +1959,17 @@ s3s_usedby=Brukt av
 s3s_users=$1 planlagte sikkerhetskopier
 s3s_nousers=Ikke brukt
 s3s_return=S3-kontoer
+s3s_auto=Fra IAM-konto
 
 s3_title1=Legg til S3-konto
 s3_title2=Rediger S3-konto
+s3_longdesc=Påloggingsinformasjonen du skal legge inn på denne siden finner du på sikkerhetslegitimasjonssiden for kontoen din på <a href=https://console.aws.amazon.com/ target=_blank>AWS-konsollen</a> hvis du bruker AWS. Andre S3-kompatible leverandører vil også levere en tilgangsnøkkel og hemmelig nøkkel for kontoen din som du kan angi her, sammen med leverandørens endepunkts-URL.
 s3_header=S3-kontodetaljer
+s3_id=Virtualmin-konto-ID
 s3_desc=Kontobeskrivelse
 s3_access=S3 tilgangsnøkkel
 s3_secret=S3 hemmelig nøkkel
+s3_location=i regionen
 s3_endpoint=S3-kompatibelt endepunkt
 s3_endpoint_def=Bare bruk AWS
 s3_endpoint_hp=Vert: port
@@ -1921,3 +1980,5 @@ s3_eusers=Kontoen brukes av $1 planlagte sikkerhetskopier
 s3_usedby=Brukes av sikkerhetskopier
 s3_nousers=Kontoen er ikke brukt av noen planlagte sikkerhetskopier ennå
 s3_echeck=S3-kontoen kan ikke brukes : $1
+s3_elocation=Valgt bøtteplassering støttes ikke av denne S3-leverandøren
+s3_defcreds=EC2 IAM-legitimasjon

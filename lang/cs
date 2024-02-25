@@ -598,7 +598,6 @@ backup_ehomeformat3=Maji li vsechny virtualni servery domovsky adresar, lze prov
 backup_niceftp=$1 na FTP serveru $2
 backup_nicescp=$1 na SSH serveru $2
 backup_nicefile=mistni soubor $1
-backup_nices3=Kos Amazon S3 $1
 backup_nicedownload=stazeny soubor
 backup_niceupload=nacteny soubor
 backup_senabled1=Planovac zaloh Virtualmin byl povolen pro vsechny virtualni domeny.

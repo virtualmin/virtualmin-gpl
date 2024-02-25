@@ -179,11 +179,11 @@ if ($showphp) {
 		my ($phpdir) = &list_domain_php_directories($d);
 		my $phpver = $phpdir->{'version'};
 		$phpmode = $text{"phpmode_$phpmode"};
-		my $phpinfo = &text('summary_phpmodeverdesc', $phpver, $phpmode);
+		my $phpinfo = &text('summary_phpvermode', $phpver, $phpmode);
 		if (&can_edit_phpmode($d) && &can_edit_phpver($d)) {
 			$phpinfo = "<a href='edit_phpmode.cgi?dom=$d->{'id'}'>$phpinfo</a>"
 			}
-		print &ui_table_row($text{'summary_phpmodever'}, $phpinfo, 3, \@tds);
+		print &ui_table_row($text{'scripts_iphpver'}, $phpinfo, 3, \@tds);
 		}
 	}
 
