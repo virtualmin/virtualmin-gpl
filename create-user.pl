@@ -209,6 +209,7 @@ $d || usage("Virtual server $domain does not exist");
 &obtain_lock_unix($d);
 &obtain_lock_mail($d);
 $user = &create_initial_user($d, 0, $web);
+$username = &remove_userdom($username, $d);
 
 # Make sure all needed args are set
 if ($user->{'unix'} && !$user->{'noquota'}) {
