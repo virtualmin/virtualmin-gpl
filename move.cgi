@@ -51,11 +51,11 @@ else {
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'move_title'}, "");
 if ($parent) {
-	&$second_print(&text('move_doing', "<tt>$d->{'dom'}</tt>",
+	&$first_print(&text('move_doing', "<tt>$d->{'dom'}</tt>",
 			  "<tt>$parent->{'dom'}</tt>"));
 	}
 else {
-	&$second_print(&text('move_doing2', "<tt>$d->{'dom'}</tt>"));
+	&$first_print(&text('move_doing2', "<tt>$d->{'dom'}</tt>"));
 	}
 &$indent_print();
 # Do the move
