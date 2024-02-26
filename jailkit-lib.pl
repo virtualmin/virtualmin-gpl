@@ -324,7 +324,7 @@ foreach my $zdir ("/usr/share/zoneinfo") {
 	}
 
 # Remove write permissions for group
-&remove_write_permissions_for_group($dir, "home/$home_virtualmin_backup");
+&remove_write_permissions_for_group($dir, "$dir/home/$home_virtualmin_backup");
 
 $d->{'jail_last_copy'} = time();
 return undef;
