@@ -421,7 +421,7 @@ foreach $d (@doms) {
 		}
 	@supp = &supported_php_modes($d);
 	!$mode || &indexof($mode, @supp) >= 0 ||
-		&usage("The selected PHP exection mode cannot be used with $d->{'dom'}");
+		&usage("The selected PHP execution mode cannot be used with $d->{'dom'}");
 	if ($version) {
 		$mode eq "mod_php" &&
 			&usage("The PHP version cannot be set for $d->{'dom'}, as it is using mod_php");
@@ -433,7 +433,7 @@ foreach $d (@doms) {
 						   : ( );
 	!$rubymode || $rubymode eq "none" ||
 	    &indexof($rubymode, @rubysupp) >= 0 ||
-		&usage("The selected Ruby exection mode cannot be used with $d->{'dom'}");
+		&usage("The selected Ruby execution mode cannot be used with $d->{'dom'}");
 	}
 
 if ($defaultwebsite && @doms > 1) {
