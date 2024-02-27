@@ -9737,6 +9737,7 @@ if (!$s3_account) {
 else {
 	$s3_eu_tests = &convert_to_location($s3_tests, "eu-west-1");
 	$s3_http_tests = &convert_to_http_api($s3_tests);
+	$s3_eu_http_tests = &convert_to_http_api($s3_eu_tests);
 	}
 
 $rs_tests = [
@@ -11324,6 +11325,7 @@ $alltests = { '_config' => $_config_tests,
 	      's3' => $s3_tests,
 	      's3_eu' => $s3_eu_tests,
 	      's3_http' => $s3_http_tests,
+	      's3_eu_http' => $s3_eu_http_tests,
 	      'exclude' => $exclude_tests,
 	      'rs' => $rs_tests,
 	      'jail' => $jail_tests,
