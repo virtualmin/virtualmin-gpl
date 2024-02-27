@@ -51,13 +51,13 @@ else {
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'move_title'}, "");
 if ($parent) {
-	print "<b>",&text('move_doing', "<tt>$d->{'dom'}</tt>",
-			  "<tt>$parent->{'dom'}</tt>"),"</b><p>\n";
+	&$first_print(&text('move_doing', "<tt>$d->{'dom'}</tt>",
+			  "<tt>$parent->{'dom'}</tt>"));
 	}
 else {
-	print "<b>",&text('move_doing2', "<tt>$d->{'dom'}</tt>"),"</b><p>\n";
+	&$first_print(&text('move_doing2', "<tt>$d->{'dom'}</tt>"));
 	}
-
+&$indent_print();
 # Do the move
 if ($in{'parent'}) {
 	$ok = &move_virtual_server($d, $parent);
@@ -65,11 +65,12 @@ if ($in{'parent'}) {
 else {
 	$ok = &reparent_virtual_server($d, $in{'newuser'}, $in{'newpass'});
 	}
+&$outdent_print();
 if ($ok) {
-	print "<b>$text{'setup_ok'}</b><p>\n";
+	&$second_print($text{'setup_done'});
 	}
 else {
-	print "<b>$text{'move_failed'}</b><p>\n";
+	&$second_print($text{'move_failed'});
 	}
 
 &run_post_actions();

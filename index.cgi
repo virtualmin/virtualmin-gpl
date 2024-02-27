@@ -32,8 +32,8 @@ if ($single_domain_mode) {
 	exit;
 	}
 
-&ui_print_header(undef, $text{'index_title'}, "", "index", 1, 1, 0,
-	undef, undef, undef, $vtitle);
+&ui_print_header(undef, $text{'index_title'}, "", "index",
+	'&section=line1.3&nnext=1', 1, 0, undef, undef, undef, $vtitle);
 
 # Check if server module configuration has been checked
 $formno = 0;
