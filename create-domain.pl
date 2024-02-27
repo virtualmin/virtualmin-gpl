@@ -812,7 +812,7 @@ if ($remotedns) {
 if ($phpmode) {
 	my @supp = &supported_php_modes();
 	&indexof($phpmode, @supp) >= 0 ||
-		&usage("The selected PHP exection mode cannot be used");
+		&usage("The selected PHP execution mode cannot be used");
 	}
 
 # Work out prefix if needed, and check it
