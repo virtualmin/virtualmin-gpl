@@ -13055,14 +13055,21 @@ if ($crv) {
 
 # Links provided by features, like editing DNS records
 foreach my $f (@features) {
-	if ($d->{$f}) {
-		local $lfunc = "links_".$f;
-		if (defined(&$lfunc)) {
-			foreach my $l (&$lfunc($d)) {
-				if (&foreign_available($l->{'mod'})) {
-					$l->{'title'} ||= $l->{'desc'};
-					push(@rv, $l);
-					}
+	my $lfunc = "links_".$f;
+	if ($d->{$f} && defined(&$lfunc)) {
+		foreach my $l (&$lfunc($d)) {
+			if (&foreign_available($l->{'mod'})) {
+				$l->{'title'} ||= $l->{'desc'};
+				push(@rv, $l);
+				}
+			}
+		}
+	my $lfunc = "links_always_".$f;
+	if (defined(&$lfunc)) {
+		foreach my $l (&$lfunc($d)) {
+			if (&foreign_available($l->{'mod'})) {
+				$l->{'title'} ||= $l->{'desc'};
+				push(@rv, $l);
 				}
 			}
 		}

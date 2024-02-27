@@ -1270,9 +1270,9 @@ else {
 return $rv;
 }
 
-# links_webmin(&domain)
+# links_always_webmin(&domain)
 # Returns a link to the Webmin Actions Log module
-sub links_webmin
+sub links_always_webmin
 {
 my ($d) = @_;
 my %miniserv;
