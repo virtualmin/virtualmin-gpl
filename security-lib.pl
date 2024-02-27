@@ -600,19 +600,24 @@ my $done_num = &set_permissions_as_domain_user($d, $perms, @files)
 return $done_num;
 }
 
-# remove_write_permissions_for_group(dir, [exclude])
-# Removes write permissions for group from all files and directories
-# under given directory, except those that match exclude pattern
+# remove_write_permissions_for_group(dir, [&excludes])
+# Removes write permissions for group from all files and directories under
+# given directory, except those that match excludes given in array reference
 sub remove_write_permissions_for_group
 {
-my ($dir, $exclude) = @_;
+my ($dir, $excludes) = @_;
 opendir(my $dh, $dir) || die("Cannot open directory $dir: $!");
 my @entries = readdir($dh);
-closedir($dh); 
+closedir($dh);
+ENTRY: 
 foreach my $entry (@entries) {
 	next if ($entry eq '.' || $entry eq '..');
 	my $path = "$dir/$entry";
-	next if ($exclude && $path =~ /\Q$exclude\E/);
+	if ($excludes) {
+		foreach my $exclude (@$excludes) {
+			next ENTRY if ($path =~ /\Q$exclude\E/);
+			}
+		}
 	my $mode = (stat($path))[2];
 	next if (!($mode & S_IWGRP));
 	$mode &= ~S_IWGRP;
