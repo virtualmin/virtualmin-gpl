@@ -13060,13 +13060,13 @@ foreach my $f (@features) {
 		foreach my $l (&$lfunc($d)) {
 			if (&foreign_available($l->{'mod'})) {
 				$l->{'title'} ||= $l->{'desc'};
-				push(@rv, $l);
+				# push(@rv, $l);
 				}
 			}
 		}
-	my $lfunc = "links_always_".$f;
-	if (defined(&$lfunc)) {
-		foreach my $l (&$lfunc($d)) {
+	my $lafunc = "links_always_".$f;
+	if (defined(&$lafunc)) {
+		foreach my $l (&$lafunc($d)) {
 			if (&foreign_available($l->{'mod'})) {
 				$l->{'title'} ||= $l->{'desc'};
 				push(@rv, $l);
