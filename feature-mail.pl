@@ -6165,25 +6165,27 @@ return ($smtp_host, $smtp_port, $smtp_type, $smtp_ssl, $smtp_enc);
 # Create or update the CGI script used for email autoconfig
 sub enable_cgi_autoconfig
 {
-local ($d) = @_;
+my ($d) = @_;
 
 # Work out mail server ports and modes
-local ($imap_host, $imap_port, $imap_type, $imap_ssl, $imap_enc,
-       $pop3_port, $pop3_enc) = &get_email_autoconfig_imap($d);
-local ($smtp_host, $smtp_port, $smtp_type, $smtp_ssl, $smtp_enc) =
-      &get_email_autoconfig_smtp($d);
+my ($imap_host, $imap_port, $imap_type, $imap_ssl, $imap_enc,
+    $pop3_port, $pop3_enc) = &get_email_autoconfig_imap($d);
+my ($smtp_host, $smtp_port, $smtp_type, $smtp_ssl, $smtp_enc) =
+	&get_email_autoconfig_smtp($d);
+my $smtp_ssl2 = $smtp_ssl eq "yes" ? "on" : "off";
+my $imap_ssl2 = $imap_ssl eq "yes" ? "on" : "off";
 
 # Create CGI that outputs the correct XML for the domain
-local $cgidir = &cgi_bin_dir($d);
-local $autocgi = "$cgidir/autoconfig.cgi";
+my $cgidir = &cgi_bin_dir($d);
+my $autocgi = "$cgidir/autoconfig.cgi";
 if (!-d $cgidir) {
 	return "CGI directory $cgidir does not exist";
 	}
 &lock_file($autocgi);
 &copy_source_dest_as_domain_user($d, "$module_root_directory/autoconfig.cgi",
 				 $autocgi);
-local $lref = &read_file_lines_as_domain_user($d, $autocgi);
-local $tmpl = &get_template($d->{'template'});
+my $lref = &read_file_lines_as_domain_user($d, $autocgi);
+my $tmpl = &get_template($d->{'template'});
 foreach my $l (@$lref) {
 	if ($l =~ /^#!/) {
 		$l = "#!".&get_perl_path();
@@ -6210,6 +6212,9 @@ foreach my $l (@$lref) {
 	elsif ($l =~ /^\$SMTP_SSL\s+=/) {
 		$l = "\$SMTP_SSL = '$smtp_ssl';";
 		}
+	elsif ($l =~ /^\$SMTP_SSL2\s+=/) {
+		$l = "\$SMTP_SSL2 = '$smtp_ssl2';";
+		}
 	elsif ($l =~ /^\$IMAP_HOST\s+=/) {
 		$l = "\$IMAP_HOST = '$imap_host';";
 		}
@@ -6224,6 +6229,9 @@ foreach my $l (@$lref) {
 		}
 	elsif ($l =~ /^\$IMAP_SSL\s+=/) {
 		$l = "\$IMAP_SSL = '$imap_ssl';";
+		}
+	elsif ($l =~ /^\$IMAP_SSL2\s+=/) {
+		$l = "\$IMAP_SSL2 = '$imap_ssl2';";
 		}
 	elsif ($l =~ /^\$POP3_PORT\s+=/) {
 		$l = "\$POP3_PORT = '$pop3_port';";
@@ -6651,7 +6659,7 @@ return <<'EOF';
         <Port>$IMAP_PORT</Port>
         <DomainRequired>off</DomainRequired>
         <SPA>off</SPA>
-        <SSL>$IMAP_SSL</SSL>
+        <SSL>$IMAP_SSL2</SSL>
         <AuthRequired>on</AuthRequired>
         <LoginName>$SMTP_LOGIN</LoginName>
       </Protocol>
@@ -6661,7 +6669,7 @@ return <<'EOF';
         <Port>$SMTP_PORT</Port>
         <DomainRequired>off</DomainRequired>
         <SPA>off</SPA>
-        <SSL>$SMTP_SSL</SSL>
+        <SSL>$SMTP_SSL2</SSL>
         <AuthRequired>on</AuthRequired>
         <LoginName>$SMTP_LOGIN</LoginName>
       </Protocol>
