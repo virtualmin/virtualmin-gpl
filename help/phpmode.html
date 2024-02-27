@@ -1,20 +1,27 @@
 <header>PHP script execution mode</header>
 
-This option determines if PHP scripts are run as the Apache web server user
-(typically <tt>httpd</tt> or <tt>apache</tt>), or the Unix user who owns
-the virtual server. The former is faster as it means that no additional
-processes need to be started to execute PHP code, but less secure as scripts
-read and write files as a user other than the domain owner. <p>
+PHP script execution modes define how PHP code is processed by the server.<p>
 
-If your system supports it, the <b>FPM</b> or <b>FCGId</b> options are the best,
-as they run PHP scripts quickly and as the domain owner. Otherwise, unless your
-system is heavily loaded or security between users is not an issue, the
-<b>CGI wrapper</b> option is recommended. <p>
+<b>Disabled</b> mode means that PHP scripts are not executed by the server but
+are instead treated as plain text files. This mode can be used when PHP processing
+is not required or when serving PHP code as downloadable files.<p>
 
-The <tt>mod_php</tt> mode is not recommended, as the small gain in performance
-should be balanced against the lack of security between virtual servers.
-Finally, the <b>Disabled</b> mode can be used to turn off PHP scripts entirely.
-<p>
+<b style="color: green;">FPM</b> is the preferred mode, offering high efficiency
+and advanced features like adaptive process management. It operates as a standalone
+FastCGI server, ideal for high-traffic sites due to its robust performance capabilities.<p>
 
+<b>FCGId</b> is useful for servers where FPM is not available. It also supports
+per-virtual-host configurations, though it generally doesn't match FPM in terms
+of scalability and management features.<p>
+
+<b>CGI Wrapper</b> mode runs each PHP script as a separate process through the
+CGI protocol. This mode is less efficient than FPM or FCGId due to the overhead
+of creating a new process for each request. It's rarely used in modern setups
+due to its performance limitations.<p>
+
+<b style="color:crimson">mod_php</b> integrates PHP directly into the Apache
+web server, allowing PHP scripts to execute within the server's own process.
+However, due to security and isolation issues, plus the discontinuation of
+support and updates, it is now obsolete.
+        
 <footer>
-
