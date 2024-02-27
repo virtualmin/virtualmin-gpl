@@ -619,10 +619,11 @@ foreach my $entry (@entries) {
 			}
 		}
 	my $mode = (stat($path))[2];
-	next if (!($mode & S_IWGRP));
-	$mode &= ~S_IWGRP;
-	chmod($mode, $path) || warn("Failed to change permissions for $path: $!");
-	&remove_write_permissions_for_group($path, $exclude) if (-d $path);
+	if ($mode & S_IWGRP) {
+		$mode &= ~S_IWGRP;
+		chmod($mode, $path) || warn("Failed to change permissions for $path: $!");
+		}
+	&remove_write_permissions_for_group($path, $excludes) if (-d $path);
 	}
 }
 
