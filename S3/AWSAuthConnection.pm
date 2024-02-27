@@ -133,8 +133,6 @@ sub delete {
     croak 'must specify key' unless $key;
     $headers ||= {};
 
-    $key = urlencode($key);
-
     return S3::Response->new($self->_make_request('DELETE', "$bucket/$key", $headers));
 }
 
