@@ -6246,7 +6246,6 @@ foreach my $l (@$lref) {
 		$l = "\$STYLE = '$tmpl->{'append_style'}';";
 		}
 	}
-local $tmpl = &get_template($d->{'template'});
 
 # Sub in XML for thunderbird
 local $xml;
