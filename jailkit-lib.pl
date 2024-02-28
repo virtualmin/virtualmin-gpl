@@ -296,7 +296,6 @@ foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp", "sftp",
 	if ($?) {
 		return &text('jailkit_einit', $err);
 		}
-	&system_logged("chmod -R g-w ".quotemeta($dir)."/*");
 	}
 
 # Use jk_cp to copy in any other files/directories
@@ -309,7 +308,6 @@ foreach my $jail_cmd (split(/\s+/, $d->{'jail_ecmds'})) {
 	if ($?) {
 		return &text('jailkit_einit2', $jail_cmd, $err);
 		}
-	&system_logged("chmod -R g-w ".quotemeta($dir)."/*");
 	}
 
 # Make sure /tmp exists
@@ -324,6 +322,11 @@ foreach my $zdir ("/usr/share/zoneinfo") {
 	&make_dir($dir.$zdir, 0755, 1) if (!-d $dir.$zdir);
 	&copy_source_dest($zdir, $dir.$zdir);
 	}
+
+# Remove write permissions for group
+&remove_write_permissions_for_group($dir,
+	["$dir/tmp", 
+	 "$dir$d->{'home'}/$home_virtualmin_backup"]);
 
 $d->{'jail_last_copy'} = time();
 return undef;
