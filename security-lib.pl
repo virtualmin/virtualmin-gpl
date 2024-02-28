@@ -1,5 +1,6 @@
 
 use feature 'state';
+use Fcntl ':mode';
 
 # Functions for accessing files and running commands as a domain owner
 
@@ -597,6 +598,33 @@ my @files = keys %{$fileparts};
 my $done_num = &set_permissions_as_domain_user($d, $perms, @files)
     if (@files);
 return $done_num;
+}
+
+# remove_write_permissions_for_group(dir, [&excludes])
+# Removes write permissions for group from all files and directories under
+# given directory, except those that match excludes given in array reference
+sub remove_write_permissions_for_group
+{
+my ($dir, $excludes) = @_;
+opendir(my $dh, $dir) || die("Cannot open directory $dir: $!");
+my @entries = readdir($dh);
+closedir($dh);
+ENTRY: 
+foreach my $entry (@entries) {
+	next if ($entry eq '.' || $entry eq '..');
+	my $path = "$dir/$entry";
+	if ($excludes) {
+		foreach my $exclude (@$excludes) {
+			next ENTRY if ($path =~ /\Q$exclude\E/);
+			}
+		}
+	my $mode = (stat($path))[2];
+	if ($mode & S_IWGRP) {
+		$mode &= ~S_IWGRP;
+		chmod($mode, $path) || warn("Failed to change permissions for $path: $!");
+		}
+	&remove_write_permissions_for_group($path, $excludes) if (-d $path);
+	}
 }
 
 # restore_filepath_permissions_as_domain_user(&domain, file, [under])
