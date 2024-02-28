@@ -31,7 +31,7 @@ if ($d->{'mail'} && !&check_dkim() && ($dkim = &get_dkim_config()) &&
 @$recs = grep { $_->{'type'} ne 'NS' &&
 		$_->{'type'} ne 'SOA' &&
 		!$_->{'defttl'} } @$recs;
-$out = &dns_records_to_text(@$recs);
+$out = &format_dns_text_records(&dns_records_to_text(@$recs));
 
 # Show them
 print &ui_alert_box($text{'records_viewdesc'}, 'warn', undef, undef, "");

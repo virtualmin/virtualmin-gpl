@@ -4856,9 +4856,6 @@ foreach my $r (@_) {
 				   $r->{'type'}, &join_record_values($r));
 	$rv .= "\n" if ($rv && &trim($rv));
 	}
-
-# Format DNS records
-$rv = format_dns_text_records($rv);
 return $rv;
 }
 

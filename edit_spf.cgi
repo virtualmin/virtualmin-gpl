@@ -121,7 +121,8 @@ if ($key) {
 			     "off", 0, "readonly"));
 	$dsrecs = &get_domain_dnssec_ds_records($d);
 	if (ref($dsrecs)) {
-		$dsrecstext = &dns_records_to_text(@$dsrecs);
+		$dsrecstext = &format_dns_text_records(
+			&dns_records_to_text(@$dsrecs));
 		$dsrecsbox = &ui_textarea("dsrecs", $dsrecstext, 2, 80,
 					  "off", 0, "readonly");
 		$dsrecsbox .= &ui_columns_start([
