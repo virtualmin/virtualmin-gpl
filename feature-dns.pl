@@ -1202,9 +1202,9 @@ if ($r->{'type'} eq 'SOA' && !$oneline) {
 	return "$v->[0] $v->[1] ($sep$v->[2]$sep$v->[3]".
 	       "$sep$v->[4]$sep$v->[5]$sep$v->[6] )";
 	}
-elsif (($r->{'type'} eq 'TXT' || $r->{'type'} eq 'SPF') && !$oneline &&
+elsif (($r->{'type'} eq 'TXT' || $r->{'type'} eq 'SPF') &&
        (length($j) > 255 || @{$r->{'values'}} > 1)) {
-	# Multi-line text, possibly with brackets
+	# Text that needs to be split up
 	my $rv = &split_long_txt_record($j);
 	$rv =~ s/\r?\n\s*/ /g;
 	return $rv;
