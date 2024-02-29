@@ -200,6 +200,7 @@ if (&has_aws_cmd()) {
 	return &s3_upload_aws_cmd(@_);
 	}
 &require_s3();
+my $location = &s3_get_bucket_location($akey, $skey, $bucket);
 my $headers = { };
 if ($rrs) {
 	$headers->{'x-amz-storage-class'} = 'REDUCED_REDUNDANCY';
@@ -215,12 +216,12 @@ if (!$multipart) {
 
 my $err;
 my $endpoint = undef;
-my $noep_conn = &make_s3_connection($akey, $skey);
+my $noep_conn = &make_s3_connection($akey, $skey, undef, $location);
 my $backoff = 2;
 for(my $i=0; $i<$tries; $i++) {
 	my $newendpoint;
 	$err = undef;
-	my $conn = &make_s3_connection($akey, $skey, $endpoint);
+	my $conn = &make_s3_connection($akey, $skey, $endpoint, $location);
 	if (!$conn) {
 		$err = $text{'s3_econn'};
 		next;
@@ -846,6 +847,7 @@ if (&has_aws_cmd()) {
 	return &s3_download_aws_cmd(@_);
 	}
 &require_s3();
+my $location = &s3_get_bucket_location($akey, $skey, $bucket);
 
 my $err;
 my $endpoint = undef;
@@ -854,7 +856,7 @@ for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
 
 	# Connect to S3
-	my $conn = &make_s3_connection($akey, $skey, $endpoint);
+	my $conn = &make_s3_connection($akey, $skey, $endpoint, $location);
 	if (!$conn) {
 		$err = $text{'s3_econn'};
 		next;
