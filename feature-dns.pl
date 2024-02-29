@@ -5254,6 +5254,11 @@ if ($newcloud !~ /^(local|services|remote_.*)$/) {
 	my $sfunc = "dnscloud_".$cloud."_get_state";
 	my $s = &$sfunc();
 	return $s->{'desc'} if (!$s->{'ok'});
+	my $tfunc = "dnscloud_".$cloud."_test";
+	if (defined(&$tfunc)) {
+		my $err = &$tfunc();
+		return $err if ($err);
+		}
 	}
 
 # Get current records, then re-create the DNS config

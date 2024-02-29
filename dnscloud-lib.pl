@@ -95,6 +95,17 @@ else {
 	}
 }
 
+# dnscloud_route53_test()
+# Returns an error message if route53 API calls fail, or undef if OK
+sub dnscloud_route53_test
+{
+my $rv = &call_route53_cmd(
+	$config{'route53_akey'},
+	[ 'list-hosted-zones' ],
+	undef, 1);
+return ref($rv) ? undef : $rv;
+}
+
 # dnscloud_route53_show_inputs()
 # Show fields for entering credentials for AWS
 sub dnscloud_route53_show_inputs
