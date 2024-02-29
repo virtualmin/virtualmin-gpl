@@ -307,6 +307,10 @@ sub _make_request {
       if ($response->content =~ /<Endpoint>([^<]*)<\/Endpoint>/i) {
 	my $oldserver = $self->{SERVER};
 	$self->{SERVER} = $1;
+	if ($self->{SERVER} =~ /^(.*)\.s3\.(amazonaws.com)$/ &&
+	    $self->{REGION}) {
+		$self->{SERVER} = $1.".s3-".$self->{REGION}.".".$2;
+	}
 	$self->{SERVER_REDIRECTS} ||= 0;
 	$self->{SERVER_REDIRECTS}++;
 	my $newpath = $path;
