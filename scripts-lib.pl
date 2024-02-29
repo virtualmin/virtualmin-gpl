@@ -1221,7 +1221,7 @@ if ($err) {
 	return (undef, &text('scripts_ephpverchange', $dirpath, $vers[0]));
 	}
 else {
-	return ($vers[0], undef);
+	return ($setver, undef);
 	}
 }
 
