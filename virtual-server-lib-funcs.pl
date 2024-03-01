@@ -430,12 +430,13 @@ for(my $i=0; $i<@_; $i+=2) {
 return wantarray ? @rv : $rv[0];
 }
 
-# get_domains_by_names_users(&dnames, &usernames, &errorfunc, &plans)
+# get_domains_by_names_users(&dnames, &usernames, &errorfunc, &plans,
+# 			     [subservers-too])
 # Given a list of domain names, usernames and plans, returns all matching
-# domains (unioned). May callback to the error function if one cannot be found
+# domains (unioned). May callback to the error function if one cannot be found.
 sub get_domains_by_names_users
 {
-local ($dnames, $users, $efunc, $plans) = @_;
+local ($dnames, $users, $efunc, $plans, $subs) = @_;
 foreach my $domain (&unique(@$dnames)) {
 	local $d = &get_domain_by("dom", $domain);
 	$d || &$efunc("Virtual server $domain does not exist");
@@ -456,6 +457,18 @@ foreach my $plan (&unique(@$plans)) {
 		push(@doms, $dinfo);
 		push(@doms, &get_domain_by("parent", $dinfo->{'id'}));
 		}
+	}
+if ($subs) {
+	my @add;
+	foreach my $d (@doms) {
+		push(@add, &get_domain_by("parent", $d->{'id'}))
+			if (!$d->{'parent'});
+		push(@add, &get_domain_by("alias", $d->{'id'}))
+			if (!$d->{'alias'});
+		push(@add, &get_domain_by("subdom", $d->{'id'}))
+			if (!$d->{'subdom'});
+		}
+	push(@doms, @add);
 	}
 local %donedomain;
 @doms = grep { !$donedomain{$_->{'id'}}++ } @doms;

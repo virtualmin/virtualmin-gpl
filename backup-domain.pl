@@ -15,7 +15,9 @@ per domain, it specifies a directory instead.
 
 The C<--domain> and C<--all-domains> options can be used to control which virtual
 servers are included in the backup. The C<--domain> parameter followed by a
-domain name can be given multiple times, to select more than one server.
+domain name can be given multiple times, to select more than one server. You can
+also add the C<--parent> flag to include all sub-servers and aliases of the
+selected domains.
 
 Alternately, virtual servers can be selected with the C<--user> flag followed
 by an administrator's username, C<--plan> followed by a plan name, or
@@ -122,6 +124,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--user") {
 		push(@users, shift(@ARGV));
+		}
+	elsif ($a eq "--parent") {
+		$includesubs = 1;
 		}
 	elsif ($a eq "--reseller") {
 		defined(&list_resellers) ||
@@ -318,7 +323,8 @@ if ($all_doms) {
 	}
 else {
 	# Get domains by name and user
-	@doms = &get_domains_by_names_users(\@bdoms, \@users, \&usage, \@plans);
+	@doms = &get_domains_by_names_users(\@bdoms, \@users, \&usage, \@plans,
+					    $includesubs);
 	}
 
 if ($test) {
@@ -462,6 +468,7 @@ print "\n";
 print "virtualmin backup-domain [--dest file]+\n";
 print "                         [--test]\n";
 print "                         [--domain name] | [--all-domains]\n";
+print "                         [--parent]\n";
 print "                         [--user name]\n";
 print "                         [--reseller name]\n";
 print "                         [--plan name]\n";
