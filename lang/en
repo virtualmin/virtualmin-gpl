@@ -7942,6 +7942,7 @@ dnscloud_cloudflare_mode0=Email and API key
 dnscloud_cloudflare_mode1=API token
 dnscloud_cloudflare_email=Cloudflare account address
 dnscloud_cloudflare_apikey=Cloudflare API key
+dnscloud_cloudflare_etokenperms=Minimum permissions required for Cloudflare API token are : Read access to <tt>Account Settings</tt>, edit access to <tt>Zone:Zone</tt> and <tt>Zone:DNS</tt>
 dnscloud_caccount=Using account $1
 dnscloud_ctoken=Using API token $1
 dnscloud_ntoken=Using Namecheap account $1
