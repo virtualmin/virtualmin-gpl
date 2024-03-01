@@ -61,6 +61,7 @@ else {
 	&error_setup($text{'bucket_err'});
 
 	# Get current bucket ACL
+	$acl = { 'AccessControlList' => [ { 'Grant' => [ ] } ] };
 	if (!$in{'new'}) {
 		$oldinfo = &s3_get_bucket($account->[0], $account->[1], $in{'name'});
 		$oldacl = $oldinfo->{'acl'};
@@ -71,11 +72,10 @@ else {
 					$grantee->{'ID'}->[0];
 				}
 			}
+		$acl->{'Owner'} = $oldacl->{'Owner'};
 		}
 
 	# Validate and parse permissions
-	$acl = { 'Owner' => $oldacl->{'Owner'},
-		 'AccessControlList' => [ { 'Grant' => [ ] } ] };
 	for(my $i=0; defined($in{"type_$i"}); $i++) {
 		next if (!$in{"type_$i"});
 		$in{"grantee_$i"} =~ /^\S+$/ ||
@@ -161,12 +161,23 @@ else {
 
 	# Apply permisisons
 	if ($in{'new'}) {
-		$oldinfo = &s3_get_bucket($account->[0], $account->[1], $in{'name'});
+		$oldinfo = &s3_get_bucket(
+			$account->[0], $account->[1], $in{'name'});
 		$oldacl = $oldinfo->{'acl'};
 		$acl->{'Owner'} = $oldacl->{'Owner'};
+		if (@{$acl->{'AccessControlList'}} > 1 ||
+		    @{$acl->{'AccessControlList'}->[0]->{'Grant'}} > 0) {
+			$err = &s3_put_bucket_acl(
+			    $account->[0], $account->[1], $in{'name'}, $acl);
+			}
 		}
-	$err = &s3_put_bucket_acl($account->[0], $account->[1], $in{'name'}, $acl);
-	&error($err) if ($err);
+	else {
+		$err = &s3_put_bucket_acl(
+			$account->[0], $account->[1], $in{'name'}, $acl);
+		}
+	if ($err) {
+		&error($err." ".$text{'bucket_eacls'});
+		}
 
 	# Apply expiry policy
 	$err = &s3_put_bucket_lifecycle($account->[0], $account->[1], $in{'name'}, $lifecycle);

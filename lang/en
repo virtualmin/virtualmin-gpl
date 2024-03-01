@@ -7403,6 +7403,7 @@ bucket_eldays=Missing or non-numeric number of days in lifecycle $1
 bucket_elday=Missing or non-numeric day in lifecycle $1
 bucket_elmonth=Missing or non-numeric month in lifecycle $1
 bucket_elyear=Missing or non-numeric year in lifecycle $1
+bucket_eacls=ACLs for new buckets must be enabled on the AWS Console.
 
 ratelimit_title=Mail Rate Limiting
 ratelimit_eos=Email rate limiting is not supported on this operating system
