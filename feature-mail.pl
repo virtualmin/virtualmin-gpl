@@ -6670,6 +6670,7 @@ return <<'EOF';
         <DomainRequired>off</DomainRequired>
         <SPA>off</SPA>
         <SSL>$IMAP_SSL2</SSL>
+	<Encryption>auto</Encryption>
         <AuthRequired>on</AuthRequired>
         <LoginName>$SMTP_LOGIN</LoginName>
       </Protocol>
@@ -6680,6 +6681,7 @@ return <<'EOF';
         <DomainRequired>off</DomainRequired>
         <SPA>off</SPA>
         <SSL>$SMTP_SSL2</SSL>
+	<Encryption>auto</Encryption>
         <AuthRequired>on</AuthRequired>
         <LoginName>$SMTP_LOGIN</LoginName>
       </Protocol>
