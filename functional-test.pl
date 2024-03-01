@@ -3614,6 +3614,12 @@ $s3backup_tests = [
 	  'args' => [ [ 'bucket', 'virtualmin-test-backup-bucket' ] ],
 	},
 
+	# Create target bucket in another region
+	{ 'command' => 'create-s3-bucket.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-test-backup-bucket-eu-west-1' ],
+		      [ 'location', 'eu-west-1' ] ],
+	},
+
 	# Create a simple domain to be backed up
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -3732,15 +3738,34 @@ $s3backup_tests = [
 	  'sleep' => 5,
 	},
 
+	# Backup to S3 in the other bucket
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$s3_backup_prefix-eu-west-1/$test_domain.tar.gz" ] ],
+	},
+
+	# Restore from S3 in the other bucket
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', $s3_backup_prefix."-eu-west-1" ] ],
+	},
+
 	# Cleanup the backup domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1,
 	},
 
-	# Delete the S3 bucket
+	# Delete the S3 buckets
 	{ 'command' => 'delete-s3-bucket.pl',
 	  'args' => [ [ 'bucket', 'virtualmin-test-backup-bucket' ],
+		      [ 'recursive' ] ],
+	  'cleanup' => 1,
+	},
+	{ 'command' => 'delete-s3-bucket.pl',
+	  'args' => [ [ 'bucket', 'virtualmin-test-backup-bucket-eu-west-1' ],
 		      [ 'recursive' ] ],
 	  'cleanup' => 1,
 	},
