@@ -73,8 +73,14 @@ sub list_bucket {
 		$path .= "?".join('&', map { "$_=".urlencode($o{$_}) } keys %o)
 	    }
 
+	    my $oldserver = $self->{SERVER};
+	    if ($self->{REGION} && $self->{SERVER} eq $DEFAULT_HOST) {
+		$self->{SERVER} = $bucket.".s3-".$self->{REGION}.".amazonaws.com";
+		$path = "";
+	    }
 	    my $r = S3::ListBucketResponse->new(
 		$self->_make_request('GET', $path, $headers));
+	    $self->{SERVER} = $oldserver;
 	    if ($r->http_response->code != 200) {
 		return $r;
 	    }
@@ -307,10 +313,6 @@ sub _make_request {
       if ($response->content =~ /<Endpoint>([^<]*)<\/Endpoint>/i) {
 	my $oldserver = $self->{SERVER};
 	$self->{SERVER} = $1;
-	if ($self->{SERVER} =~ /^(.*)\.s3\.(amazonaws.com)$/ &&
-	    $self->{REGION}) {
-		$self->{SERVER} = $1.".s3-".$self->{REGION}.".".$2;
-	}
 	$self->{SERVER_REDIRECTS} ||= 0;
 	$self->{SERVER_REDIRECTS}++;
 	my $newpath = $path;
