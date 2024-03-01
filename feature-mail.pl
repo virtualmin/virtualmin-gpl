@@ -6117,7 +6117,8 @@ return ($imap_host, $imap_port, $imap_type, $imap_ssl, $imap_enc,
 }
 
 # get_email_autoconfig_smtp(&domain)
-# Returns the SMTP
+# Returns the SMTP host, port number, encryption type (plain, SSL or STARTTLS),
+# ssl flag (yes/no), and password encryption method.
 sub get_email_autoconfig_smtp
 {
 local ($d) = @_;
@@ -6131,13 +6132,23 @@ if ($config{'mail_system'} == 0) {
 	# Check for Postfix submission port
 	&foreign_require("postfix");
 	local $master = postfix::get_master_config();
-	local ($submission) = grep { $_->{'name'} =~ /^(submission|[0-9\.]+:submissions)$/ &&
-				     $_->{'enabled'} } @$master;
-	if ($submission) {
+	local ($submission) = grep {
+		$_->{'name'} =~ /^(submission|[0-9\.]+:submission)$/ &&
+		$_->{'enabled'} } @$master;
+	local ($smtps) = grep {
+		$_->{'name'} =~ /^(smtps|[0-9\.]+:smtps)$/ &&
+		$_->{'enabled'} } @$master;
+	if ($smtps) {
+		# Pure SSL SMTP connection
+		$smtp_port = 465;
+		$smtp_type = "SSL";
+		$smtp_ssl = "yes";
+		}
+	elsif ($submission) {
 		$smtp_port = 587;
 		if ($submission->{'command'} =~ /smtpd_sasl_auth_enable=(yes)/) {
 			$smtp_type = "STARTTLS";
-			$smtp_ssl = "yes";
+			$smtp_ssl = "no";
 			}
 		}
 	}
