@@ -5671,7 +5671,7 @@ $webmin_tests = [
 	# List users in the domain
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/list_users.cgi?dom=\$DOMAIN_ID",
-	  'grep' => [ '<body', '</body>', 'Mail and FTP Users',
+	  'grep' => [ '<body', '</body>', 'Edit Users',
 		      '<b>'.$test_domain_user.'</b>' ],
 	},
 
@@ -8682,7 +8682,7 @@ $admin_tests = [
 		       "${webmin_proto}://localhost:${webmin_port}".
 		       "/virtual-server/list_users.cgi\\?dom=".
 		       "`virtualmin list-domains.pl --domain $test_domain --id-only`",
-	  'grep' => [ $test_domain, 'Mail and FTP Users' ],
+	  'grep' => [ $test_domain, 'Edit Users' ],
 	},
 
 	# Take away access to aliases and users
@@ -8707,7 +8707,7 @@ $admin_tests = [
 		       "${webmin_proto}://localhost:${webmin_port}".
 		       "/virtual-server/list_users.cgi\\?dom=".
 		       "`virtualmin list-domains.pl --domain $test_domain --id-only`",
-	  'antigrep' => 'Mail and FTP Users',
+	  'antigrep' => 'Edit Users',
 	  'grep' => 'You are not allowed to edit users in this domain',
 	},
 
