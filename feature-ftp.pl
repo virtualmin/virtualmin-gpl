@@ -585,9 +585,9 @@ my $lf = &get_proftpd_log($d);
 if ($lf) {
 	local $param = &master_admin() ? "file"
 				       : "extra";
-	push(@rv, { 'mod' => 'syslog',
+	push(@rv, { 'mod' => 'logviewer',
 		    'desc' => $text{'links_flog'},
-		    'page' => "save_log.cgi?view=1&nonavlinks=1".
+		    'page' => "view_log.cgi?view=1&nonavlinks=1".
 			      "&linktitle=".&urlize($text{'links_flog'})."&".
 			      "$param=".&urlize($lf),
 		    'cat' => 'logs',

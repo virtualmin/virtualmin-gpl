@@ -13073,7 +13073,7 @@ foreach my $f (@features) {
 		foreach my $l (&$lfunc($d)) {
 			if (&foreign_available($l->{'mod'})) {
 				$l->{'title'} ||= $l->{'desc'};
-				# push(@rv, $l);
+				push(@rv, $l);
 				}
 			}
 		}
@@ -17209,7 +17209,7 @@ local @rv = (
         [ 'custom', 'Custom Commands' ],
         [ 'shell', 'Command Shell (run commands as admin)' ],
         [ 'webminlog', 'Webmin Actions Log (view own actions)' ],
-        [ 'syslog', 'System Logs (view Apache and FTP logs)' ],
+        [ 'logviewer', 'System Logs (view Apache and FTP logs)' ],
         [ 'phpini', 'PHP Configuration (for domain\'s php.ini files)' ],
 	);
 &load_plugin_libraries();

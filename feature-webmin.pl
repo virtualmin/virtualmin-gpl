@@ -802,7 +802,7 @@ else {
 	@mods = grep { $_ ne "mailboxes" } @mods;
 	}
 
-if ($extramods{'syslog'} && $d->{'webmin'}) {
+if ($extramods{'logviewer'} && $d->{'webmin'}) {
 	# Can view log files for Apache and ProFTPd
 	local @extras;
 	local %done;
@@ -840,17 +840,18 @@ if ($extramods{'syslog'} && $d->{'webmin'}) {
 			       'noedit' => 1,
 			       'syslog' => 0,
 			       'others' => 0 );
-		&save_module_acl_logged(\%acl, $wuser->{'name'}, "syslog")
-			if (!$hasmods{'syslog'});
-		push(@mods, "syslog");
+		&save_module_acl_logged(\%acl, $wuser->{'name'}, "logviewer")
+			if (!$hasmods{'logviewer'});
+		push(@mods, "logviewer");
+		@mods = grep { $_ ne "syslog" } @mods;
 		}
 	else {
 		# No logs found!
-		@mods = grep { $_ ne "syslog" } @mods;
+		@mods = grep { $_ ne "syslog" && $_ ne "logviewer" } @mods;
 		}
 	}
 else {
-	@mods = grep { $_ ne "syslog" } @mods;
+	@mods = grep { $_ ne "syslog" && $_ ne "logviewer" } @mods;
 	}
 
 local @pconfs;

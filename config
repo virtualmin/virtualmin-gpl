@@ -32,6 +32,7 @@ avail_shell=0
 avail_xterm=0
 avail_webminlog=1
 avail_syslog=1
+avail_logviewer=1
 avail_bind8=1
 display_max=
 postgres=0

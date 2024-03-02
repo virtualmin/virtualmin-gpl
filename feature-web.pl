@@ -2592,9 +2592,9 @@ foreach my $log ([ 0, $text{'links_alog'} ],
 				    $d->{'web_port'}, $log->[0]);
 	if ($lf) {
 		local $param = &master_admin() ? "file" : "extra";
-		push(@rv, { 'mod' => 'syslog',
+		push(@rv, { 'mod' => 'logviewer',
 			    'desc' => $log->[1],
-			    'page' => "save_log.cgi?view=1&nonavlinks=1".
+			    'page' => "view_log.cgi?view=1&nonavlinks=1".
 				      "&linktitle=".&urlize($log->[1])."&".
 				      "$param=".&urlize($lf),
 			    'cat' => 'logs',
@@ -2606,9 +2606,9 @@ foreach my $log ([ 0, $text{'links_alog'} ],
 my $phplog = &get_domain_php_error_log($d);
 if ($phplog) {
 	my $param = &master_admin() ? "file" : "extra";
-	push(@rv, { 'mod' => 'syslog',
+	push(@rv, { 'mod' => 'logviewer',
 		    'desc' => $text{'links_phplog'},
-		    'page' => "save_log.cgi?view=1&nonavlinks=1".
+		    'page' => "view_log.cgi?view=1&nonavlinks=1".
 			      "&linktitle=".&urlize($text{'links_phplog'})."&".
 			      "$param=".&urlize($phplog),
 		    'cat' => 'logs',
