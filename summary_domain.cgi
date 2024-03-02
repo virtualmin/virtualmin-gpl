@@ -21,50 +21,45 @@ $tmpl = &get_template($d->{'template'});
                                  $subdom ?    $text{'summary_title4'} :
                                  $parentdom ? $text{'summary_title2'} :
                                               $text{'summary_title'}, "");
-@tds = ( "width=30%" );
+
 print &ui_table_start($text{'edit_header'}, "width=100%", 4);
 
 # Domain name (with link), user and group
 if (&domain_has_website($d)) {
 	my $url = &get_domain_url($d, 1);
 	print &ui_table_row($text{'edit_domain'},
-	    "<tt>".&ui_link($url, $d->{'dom'}, undef, "target=_blank")."</tt>",
-	    undef, \@tds);
+	    "<tt>".&ui_link($url, $d->{'dom'}, undef, "target=_blank")."</tt>");
 	}
 else {
 	print &ui_table_row($text{'edit_domain'},
-			    "<tt>$d->{'dom'}</tt>", undef, \@tds);
+			    "<tt>$d->{'dom'}</tt>");
 	}
 
 # Default domain
 if ($d->{'defaultdomain'}) {
 	print &ui_table_row($text{'check_defhost_desc'},
-			    $text{'yes'}, undef, \@tds);
+			    $text{'yes'});
 	}
 
 # Creator
 print &ui_table_row($text{'edit_created'},
 	$d->{'creator'} ? &text('edit_createdby', &make_date($d->{'created'},1),
 						  $d->{'creator'})
-			: &make_date($d->{'created'}),
-	$d->{'creator'} ? 3 : 1, \@tds);
+			: &make_date($d->{'created'}));
 
 # Owner
 my $owner = "<tt title='$d->{'user'} ($d->{'uid'})'>$d->{'user'}</tt>";
 if (&can_edit_domain($d) && &can_rename_domains()) {
 	$owner = "<a href='rename_form.cgi?dom=$d->{'id'}'>$owner</a>"
 	}
-print &ui_table_row($text{'edit_user'}, $owner,
-		    undef, \@tds);
+print &ui_table_row($text{'edit_user'}, $owner);
 if (!$d->{'parent'}) {
 	my $gr = $d->{'unix'} &&
 	          $d->{'group'} ? "<tt title='$d->{'group'} ($d->{'gid'})'>$d->{'group'}</tt>" : $text{'edit_nogroup'};
 	if (&can_edit_domain($d) && &can_rename_domains()) {
 		$gr = "<a href='rename_form.cgi?dom=$d->{'id'}'>$gr</a>"
 		}
-	print &ui_table_row($text{'edit_group'},
-		    $gr,
-		    undef, \@tds);
+	print &ui_table_row($text{'edit_group'}, $gr);
 	}
 
 # Show user and group quotas
@@ -74,14 +69,14 @@ if (&has_home_quotas() && !$parentdom) {
 	if (&can_config_domain($d)) {
 		$uq = "<a href='edit_domain.cgi?dom=$d->{'id'}'>$uq</a>"
 		}
-	print &ui_table_row($text{'edit_quota'}, $uq, 1, \@tds);
+	print &ui_table_row($text{'edit_quota'}, $uq);
 
 	my $uuq = $d->{'uquota'} ? &quota_show($d->{'uquota'}, "home")
 			   : $text{'form_unlimit'};
 	if (&can_config_domain($d)) {
 		$uuq = "<a href='edit_domain.cgi?dom=$d->{'id'}'>$uuq</a>"
 		}
-	print &ui_table_row($text{'edit_uquota'}, $uuq, 1, \@tds);
+	print &ui_table_row($text{'edit_uquota'}, $uuq);
 	}
 
 
@@ -104,7 +99,7 @@ if (!$aliasdom) {
 		   "$ip ".($d->{'virt'} ? $text{'edit_private'} :
 		   $d->{'ip'} eq $reselip ? &text('edit_rshared',
 						  "<tt>$resel->{'name'}</tt>") :
-					    $text{'edit_shared'}), 3, \@tds);
+					    $text{'edit_shared'}));
 	}
 if ($d->{'ip6'} && !$aliasdom) {
 	my $ipv6 = "<tt>$d->{'ip6'}</tt>";
@@ -115,7 +110,7 @@ if ($d->{'ip6'} && !$aliasdom) {
 		"$ipv6 ".($d->{'virt6'} ? $text{'edit_private'} :
 		 $d->{'ip6'} eq $reselip6 ? &text('edit_rshared',
 						  "<tt>$resel->{'name'}</tt>") :
-			       		    $text{'edit_shared'}), 3, \@tds);
+			       		    $text{'edit_shared'}));
 	}
 
 # Plan, if any
@@ -125,15 +120,14 @@ if (!$parentdom && $d->{'plan'} ne '') {
 	if (&can_config_domain($d)) {
 		$plan_name = "<a href='edit_domain.cgi?dom=$d->{'id'}'>$plan_name</a>"
 		}
-	print &ui_table_row($text{'edit_plan'}, $plan_name, undef, \@tds);
+	print &ui_table_row($text{'edit_plan'}, $plan_name);
 	}
 
 if ($aliasdom) {
 	# Alias destination
 	print &ui_table_row($text{'edit_aliasto'},
 	   "<a href='view_domain.cgi?dom=$d->{'alias'}'>".
-	    &show_domain_name($aliasdom)."</a>",
-	   undef, \@tds);
+	    &show_domain_name($aliasdom)."</a>");
 	}
 elsif (!$parentdom) {
 	# Contact email address
@@ -141,15 +135,29 @@ elsif (!$parentdom) {
 	if (&can_config_domain($d)) {
 		$domemail = "<a href='edit_domain.cgi?dom=$d->{'id'}'>$domemail</a>"
 		}
-	print &ui_table_row($text{'edit_email'},
-			    $domemail, undef, \@tds);
+	print &ui_table_row($text{'edit_email'}, $domemail);
 	}
 else {
 	# Show link to parent domain
 	print &ui_table_row($text{'edit_parent'},
 	    "<a href='view_domain.cgi?dom=$d->{'parent'}'>".
-	     &show_domain_name($parentdom)."</a>",
-	    undef, \@tds);
+	     &show_domain_name($parentdom)."</a>");
+	}
+
+# PHP mode and version
+my $showphp = !$aliasdom && &domain_has_website($d);
+if ($showphp) {
+	my $phpmode = &get_domain_php_mode($d);
+	if ($phpmode && $phpmode ne "none") {
+		my ($phpdir) = &list_domain_php_directories($d);
+		my $phpver = $phpdir->{'version'};
+		$phpmode = $text{"phpmode_$phpmode"};
+		my $phpinfo = &text('summary_phpvermode', $phpver, $phpmode);
+		if (&can_edit_phpmode($d) && &can_edit_phpver($d)) {
+			$phpinfo = "<a href='edit_phpmode.cgi?dom=$d->{'id'}'>$phpinfo</a>"
+			}
+		print &ui_table_row($text{'scripts_iphpver'}, $phpinfo);
+		}
 	}
 
 # Home directory
@@ -169,22 +177,7 @@ if (!$aliasdom && $d->{'dir'}) {
 			}
 		$domhome = "<a href=\"@{[&get_webprefix_safe()]}/filemin/index.cgi?path=@{[&urlize($phd)]}\">$domhome</a>";
 		}
-	print &ui_table_row($text{'edit_home'}, $domhome, 3, \@tds);
-	}
-# PHP mode and version
-my $showphp = !$aliasdom && &domain_has_website($d);
-if ($showphp) {
-	my $phpmode = &get_domain_php_mode($d);
-	if ($phpmode && $phpmode ne "none") {
-		my ($phpdir) = &list_domain_php_directories($d);
-		my $phpver = $phpdir->{'version'};
-		$phpmode = $text{"phpmode_$phpmode"};
-		my $phpinfo = &text('summary_phpvermode', $phpver, $phpmode);
-		if (&can_edit_phpmode($d) && &can_edit_phpver($d)) {
-			$phpinfo = "<a href='edit_phpmode.cgi?dom=$d->{'id'}'>$phpinfo</a>"
-			}
-		print &ui_table_row($text{'scripts_iphpver'}, $phpinfo, 3, \@tds);
-		}
+	print &ui_table_row($text{'edit_home'}, $domhome, 3);
 	}
 
 # Description
@@ -194,7 +187,7 @@ if ($d->{'owner'} &&
 	if (&can_config_domain($d)) {
 		$owner = &ui_link("edit_domain.cgi?dom=$d->{'id'}", $owner);
 		}
-	print &ui_table_row($text{'edit_owner'}, $owner, 3, \@tds);
+	print &ui_table_row($text{'edit_owner'}, $owner, 3);
 	}
 
 # Show domain ID
@@ -205,8 +198,7 @@ if (&master_admin()) {
 		my $qfile = &quote_escape("$domains_dir/$d->{'id'}");
 		$domid = "<a data-dom-file=\"$qfile\" href=\"@{[&get_webprefix_safe()]}/filemin/edit_file.cgi?file=$efile\">$domid</a>";
 		}
-	print &ui_table_row($text{'edit_id'},
-			    $domid, 3);
+	print &ui_table_row($text{'edit_id'}, $domid);
 	my $now = time();
 
 	# Show SSL cert expiry date and add color based on time
@@ -221,7 +213,7 @@ if (&master_admin()) {
 		if (&can_edit_domain($d) && &can_edit_ssl()) {
 			$exp = "<a class=\"no-color\" href='cert_form.cgi?dom=$d->{'id'}'>$exp</a>"
 			}
-		print &ui_table_row($text{'edit_ssl_exp'}, $exp, 3);
+		print &ui_table_row($text{'edit_ssl_exp'}, $exp);
 		}
 
 	# Show domain registration expiry date and add color based on time
@@ -233,7 +225,7 @@ if (&master_admin()) {
 		elsif ($now > $d->{'whois_expiry'} - 7*24*60*60) {
 			$exp = &ui_text_color($exp, 'warn');
 			}
-		print &ui_table_row($text{'edit_whois_exp'}, $exp, 3);
+		print &ui_table_row($text{'edit_whois_exp'}, $exp);
 		}
 	}
 
