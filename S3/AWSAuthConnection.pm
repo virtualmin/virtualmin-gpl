@@ -113,8 +113,6 @@ sub put {
     croak 'must specify key' unless $key;
     $headers ||= {};
 
-    $key = urlencode($key);
-
     if (ref($object) ne 'S3::S3Object') {
         $object = S3::S3Object->new($object);
     }
@@ -127,8 +125,6 @@ sub get {
     croak 'must specify bucket' unless $bucket;
     croak 'must specify key' unless $key;
     $headers ||= {};
-
-    $key = urlencode($key);
 
     return S3::GetResponse->new($self->_make_request('GET', "$bucket/$key", $headers));
 }
@@ -315,6 +311,7 @@ sub _make_request {
 	$self->{SERVER} = $1;
 	$self->{SERVER_REDIRECTS} ||= 0;
 	$self->{SERVER_REDIRECTS}++;
+	print STDERR "location=$1\n";
 	my $newpath = $path;
 	if ($self->{'SERVER_REDIRECTS'} == 1) {
 		# Redirecting from default to new endpoint. Remove the leading

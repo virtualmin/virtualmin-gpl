@@ -409,18 +409,19 @@ for(my $i=0; $i<$tries; $i++) {
 
 	if (!$err && $info) {
 		# Write out the info file, if given
-		my $iconn = &make_s3_connection($akey, $skey);
+		my $iconn = &make_s3_connection($akey, $skey, undef, $location);
 		my $response = $iconn->put($bucket, $destfile.".info",
 					     &serialise_variable($info),
 					     $rrsheaders);
 		if ($response->http_response->code != 200) {
+		        print STDERR "reply = ",$response->body(),"\n";
 			$err = &text('s3_einfo',
                                      &extract_s3_message($response));
 			}
 		}
 	if (!$err && $dom) {
 		# Write out the .dom file, if given
-		my $iconn = &make_s3_connection($akey, $skey);
+		my $iconn = &make_s3_connection($akey, $skey, undef, $location);
 		my $response = $iconn->put($bucket, $destfile.".dom",
 		     &serialise_variable(&clean_domain_passwords($dom)),
 		     $rrsheaders);
