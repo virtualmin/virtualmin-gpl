@@ -37,7 +37,7 @@ print &ui_table_start($text{'bucket_header'}, "width=100%", 2);
 if ($in{'new'}) {
 	# Can select account, enter a bucket name and choose a location
 	print &ui_table_row($text{'bucket_account'},
-		&ui_select("account", undef, [ map { $_->[0] } @accounts ]));
+		&ui_select("account", undef, [ map { [ $_->[0], $_->[3]->{'desc'} ] } @accounts ]));
 
 	print &ui_table_row($text{'bucket_name'},
 		&ui_textbox("name", undef, 40));
