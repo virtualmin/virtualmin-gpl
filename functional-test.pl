@@ -3773,6 +3773,8 @@ $s3backup_tests = [
 
 $enc_s3backup_tests = &convert_to_encrypted($s3backup_tests);
 
+$http_s3backup_tests = &convert_to_http_api($s3backup_tests);
+
 $rs_backup_prefix = "rs://$config{'rs_user'}:$config{'rs_key'}\@virtualmin-test-backup-container";
 $rsbackup_tests = [
 	# Create target container
@@ -11303,6 +11305,7 @@ $alltests = { '_config' => $_config_tests,
 	      'enc_remotebackup' => $enc_remotebackup_tests,
 	      's3backup' => $s3backup_tests,
 	      'enc_s3backup' => $enc_s3backup_tests,
+	      'http_s3backup' => $http_s3backup_tests,
 	      'gcsbackup' => $gcsbackup_tests,
 	      'enc_gcsbackup' => $enc_gcsbackup_tests,
 	      'dropboxbackup' => $dropboxbackup_tests,
