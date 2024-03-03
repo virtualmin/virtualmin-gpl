@@ -163,13 +163,10 @@ if ($user_type eq 'ssh') {
 			}
 		else {
 			# Home is under server root, and so can be edited
-			# XXX what does '1 ?' mean here?
 			$homefield = &ui_radio("home_def", 1 ? 1 : 0,
 					[ [ 1, $text{'user_home1'} ],
 					[ 0, &text('user_homeunder') ] ])." ".
-				&ui_textbox("home", 1 ? "" :
-				substr($user->{'home'}, length($d->{'home'})+1),
-				20);
+				&ui_textbox("home", "", 20);
 			}
 		print &ui_table_row(&hlink($text{'user_home'}, $helppage),
 				$homefield,
