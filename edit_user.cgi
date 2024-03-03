@@ -279,7 +279,8 @@ elsif ($user_type eq 'ftp') {
 elsif ($user_type eq 'mail') {
 	$d->{'mail'} || &error($text{'users_ecannot3'});
 
-	&ui_print_header($din, $text{'user_createmail'}, "", "users_explain_user_mail");
+	&ui_print_header($din, $text{'user_createmail'}, "",
+			 "users_explain_user_mail");
 	$user = &create_initial_user($d);
 
 	print &ui_form_start("save_user.cgi", "post");
@@ -292,9 +293,11 @@ elsif ($user_type eq 'mail') {
 	# it has to be always considered
 	my $showmailquota = $user->{'mailquota'};
 	my $showquota = $user->{'unix'} && !$user->{'noquota'};
-	my $showhome = &can_mailbox_home($user) && $d && $d->{'home'} && !$user->{'fixedhome'};
+	my $showhome = &can_mailbox_home($user) && $d && $d->{'home'} &&
+		       !$user->{'fixedhome'};
 	if ($showmailquota) {
-		my $qquota_default = $user->{'qquota'} ne "none" && $user->{'qquota'} ? 0 : 1;
+		my $qquota_default = $user->{'qquota'} ne "none" &&
+				     $user->{'qquota'} ? 0 : 1;
 		my $qquota = &ui_hidden("qquota_def", $qquota_default);
 		$qquota .= &ui_hidden("qquota", $user->{'qquota'})
 			if (!$qquota_default);
@@ -302,26 +305,29 @@ elsif ($user_type eq 'mail') {
 		}
 	if ($showquota) {
 		if (&has_home_quotas()) {
-			my $quota_data =
-				&quota_field("quota", $user->{'quota'},
-				$user->{'uquota'}, $user->{'ufquota'}, "home", $user);
+			my $quota_data = &quota_field(
+				"quota", $user->{'quota'}, $user->{'uquota'},
+				$user->{'ufquota'}, "home", $user);
 			print &vui_hidden($quota_data);
 			}
 		if (&has_mail_quotas()) {
-			my $mquota_data =
-				&quota_field("mquota", $user->{'mquota'},
-				$user->{'umquota'},$user->{'umfquota'}, "mail", $user);
+			my $mquota_data = &quota_field(
+				"mquota", $user->{'mquota'}, $user->{'umquota'},
+				$user->{'umfquota'}, "mail", $user);
 			print &vui_hidden($mquota_data);
 			}
 		}
 
 	# Show accordions
-	print &ui_hidden_table_start($d ? $text{'user_header_mail'} : $text{'user_lheader'},
-				"width=100%", 2, "table1", 1);
+	print &ui_hidden_table_start(
+		$d ? $text{'user_header_mail'} : $text{'user_lheader'},
+		"width=100%", 2, "table1", 1);
 
 	# Edit mail username
-	my $universal_type = $config{'nopostfix_extra_user'} != 2 ? "_universal" : "";
-	print &ui_table_row(&hlink($text{'user_user'}, "username$universal_type"),
+	my $universal_type = $config{'nopostfix_extra_user'} != 2 ?
+				"_universal" : "";
+	print &ui_table_row(
+		&hlink($text{'user_user'}, "username$universal_type"),
 		&ui_textbox("mailuser", undef, 13, 0, undef,
 			&vui_ui_input_noauto_attrs()).
 		($d ? "\@".&show_domain_name($d) : ""),
@@ -348,9 +354,10 @@ elsif ($user_type eq 'mail') {
 
 	# Real name - only for true Unix users or LDAP persons
 	if ($user->{'person'}) {
-		print &ui_table_row(&hlink($text{'user_real'}, "realname"),
-				&ui_textbox("real", $user->{'real'}, 40, 0, undef,
-					&vui_ui_input_noauto_attrs()), 2, \@tds);
+		print &ui_table_row(
+			&hlink($text{'user_real'}, "realname"),
+			&ui_textbox("real", $user->{'real'}, 40, 0, undef,
+				    &vui_ui_input_noauto_attrs()), 2, \@tds);
 		}
 
 	print &ui_hidden_table_end();
@@ -362,17 +369,21 @@ elsif ($user_type eq 'mail') {
 	$hasextra = !$user->{'noextra'};
 	$hassend = &will_send_user_email($d, $in{'new'});
 	$hasspam = $config{'spam'} && $hasprimary;
-	$hasemail = $hasprimary || $hasmailfile || $hasextra || $hassend || $hasspam;
+	$hasemail = $hasprimary || $hasmailfile || $hasextra ||
+		    $hassend || $hasspam;
 
 	# Email settings
 	if ($hasemail) {
+		# XXX what is style_display_none for??
 		my $style_display_none = $d->{'mail'} ? "" : " style='display:none' ";
-		print &ui_hidden_table_start($text{'user_header3'}, "${style_display_none}width=100%", 2,
-					"table2a", 0);
+		print &ui_hidden_table_start(
+			$text{'user_header3'},
+			"${style_display_none}width=100%", 2, "table2a", 0);
 		}
 
 	if ($hasprimary) {
 		# Show primary email address field
+		# XXX why hide this field in the HTML??
 		print &ui_table_row(&hlink($text{'user_mailbox'}, "mailbox"),
 			&ui_yesno_radio("mailbox",
 					$user->{'email'} || $in{'new'} ? 1 : 0),
@@ -390,7 +401,8 @@ elsif ($user_type eq 'mail') {
 			$mffield = "<tt>$umf</tt>\n";
 			}
 		if ($lastmod) {
-			$mffield .= "(".&text('user_lastmod', &make_date($lastmod)).")";
+			$mffield .= "(".&text('user_lastmod',
+					      &make_date($lastmod)).")";
 			}
 		if ($user->{'spam_quota'}) {
 			$mffield .= "<br><font color=#ff0000>".
@@ -423,9 +435,9 @@ elsif ($user_type eq 'mail') {
 		# Show address for confirmation email (for the mailbox itself)
 		print &ui_table_row(&hlink($text{'user_newmail'},"newmail"),
 			&ui_opt_textbox("newmail", undef, 40,
-					$user->{'email'} ? $text{'user_newmail1'}
-							: $text{'user_newmail2'},
-					$text{'user_newmail0'}),
+				$user->{'email'} ? $text{'user_newmail1'}
+						: $text{'user_newmail2'},
+				$text{'user_newmail0'}),
 			2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
 		}
 	elsif (!$in{'new'} && &will_send_user_email($d, 0)) {
@@ -478,47 +490,51 @@ elsif ($user_type eq 'mail') {
 		}
 
 	if ($hasemail) {
-		# Show forwarding setup for this user, using simple form if possible
-		if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
+		# Show forwarding setup for this user, using simple form
+		# if possible
+		if (($user->{'email'} || $user->{'noprimary'}) &&
+		    !$user->{'noalias'}) {
 			print &ui_table_row(undef, $hrr, 2);
 
 			# Work out if simple mode is supported
 			if (!@{$user->{'to'}}) {
-				# If no forwarding, just check delivery to me as this is
-				# the default.
+				# If no forwarding, just check delivery to me
+				# as this is the default.
 				$simple = { 'tome' => 1 };
 				}
 			else {
 				$simple = &get_simple_alias($d, $user, 1);
 				}
 			if ($simple && ($simple->{'local'} || $simple->{'bounce'})) {
-				# Local and bounce delivery are not allowed on the simple form,
-				# unless we can merge some (@) local users with forward users, 
-				# which will be handled automatically on save to prevent showing
-				# advanced form for no reason
-				$simple = undef
-					if (!$simple->{'local-all'} || $simple->{'bounce'});
+				# Local and bounce delivery are not allowed on
+				# the simple form, unless we can merge some
+				# (@) local users with forward users, which
+				# will be handled automatically on save to
+				# prevent showing advanced form for no reason
+				$simple = undef if (!$simple->{'local-all'} ||
+						    $simple->{'bounce'});
 				}
 
 			if ($simple) {
 				# Show simple form
 				print &ui_hidden("simplemode", "simple");
-				&show_simple_form($simple, 1, 1, 1, 1, \@tds, "user");
+				&show_simple_form(
+					$simple, 1, 1, 1, 1, \@tds, "user");
 				}
 			else {
 				# Show complex form
 				print &ui_hidden("simplemode", "complex");
 				&alias_form($user->{'to'},
-					&hlink($text{'user_aliases'}, "userdest"),
-					$d, "user", $in{'user'}, \@tds);
+				    &hlink($text{'user_aliases'}, "userdest"),
+				    $d, "user", $in{'user'}, \@tds);
 				}
 
 			}
 		# Show user-level mail filters, if he has any
 		@filters = ( );
 		$procmailrc = "$user->{'home'}/.procmailrc" if (!$in{'new'});
-		if (!$in{'new'} && $user->{'email'} && $user->{'unix'} && -r $procmailrc &&
-		&foreign_check("filter")) {
+		if (!$in{'new'} && $user->{'email'} && $user->{'unix'} &&
+		    -r $procmailrc && &foreign_check("filter")) {
 			&foreign_require("filter");
 			@filters = &filter::list_filters($procmailrc);
 			}
@@ -526,12 +542,14 @@ elsif ($user_type eq 'mail') {
 			my $mail_filter_title = $text{'user_header3a'};
 			my $mail_filter_body;
 			$lastalways = 0;
-			@folders = &mailboxes::list_user_folders($user->{'user'});
+			@folders = &mailboxes::list_user_folders(
+					$user->{'user'});
 			@table = ( );
 			foreach $filter (@filters) {
-				($cdesc, $lastalways) = &filter::describe_condition($filter);
-				$adesc = &filter::describe_action($filter, \@folders,
-								$user->{'home'});
+				($cdesc, $lastalways) =
+					&filter::describe_condition($filter);
+				$adesc = &filter::describe_action(
+					$filter, \@folders, $user->{'home'});
 				push(@table, [ $cdesc, $adesc ]);
 				}
 			if (!$lastalways) {
@@ -539,7 +557,8 @@ elsif ($user_type eq 'mail') {
 					$filter::text{'index_adefault'} ]);
 				}
 			$mail_filter_body = &ui_columns_table(
-				[ $text{'user_fcondition'}, $text{'user_faction'} ],
+				[ $text{'user_fcondition'},
+				  $text{'user_faction'} ],
 				100,
 				\@table);
 			my $mail_filter_details = &ui_details({
@@ -547,7 +566,9 @@ elsif ($user_type eq 'mail') {
 				'content' => $mail_filter_body,
 				'class' =>'default',
 				'html' => 1});
-			print &ui_table_row(undef, $mail_filter_details, 2, undef, ["data-row-wrapper='details'"]);
+			print &ui_table_row(
+				undef, $mail_filter_details, 2,
+				undef, ["data-row-wrapper='details'"]);
 			}
 
 		print &ui_hidden_table_end("table2a");
@@ -555,7 +576,8 @@ elsif ($user_type eq 'mail') {
 	}
 # Create database user only form
 elsif ($user_type eq 'db') {
-	&ui_print_header($din, $text{$in{'new'} ? 'user_createdb' : 'user_edit'}, "",
+	&ui_print_header(
+		$din, $text{$in{'new'} ? 'user_createdb' : 'user_edit'}, "",
 		$in{'new'} ? 'users_explain_user_db' : undef);
 	$user = &create_initial_user($d);
 	&list_extra_user_pro_tip('db', "list_users.cgi?dom=$in{'dom'}");
@@ -568,8 +590,10 @@ elsif ($user_type eq 'db') {
 	my $dbuser_name;
 	if (!$in{'new'}) {
 		$dbuser = &get_extra_db_user($d, $in{'user'});
-		$dbuser || &error(&text('user_edoesntexist', &html_escape($in{'user'})));
-		$dbuser_name = &remove_userdom($dbuser->{'user'}, $d) || $dbuser->{'user'};
+		$dbuser || &error(&text('user_edoesntexist',
+					&html_escape($in{'user'})));
+		$dbuser_name = &remove_userdom(
+			$dbuser->{'user'}, $d) || $dbuser->{'user'};
 		}
 
 	print &ui_table_start($text{'user_header_db'}, "width=100%", 2);
@@ -618,8 +642,9 @@ elsif ($user_type eq 'db') {
 	}
 # Create web user only form
 elsif ($user_type eq 'web') {
-	&ui_print_header($din, $text{$in{'new'} ? 'user_createwebserver' : 'user_edit'}, "",
-        $in{'new'} ? 'users_explain_user_web' : undef);
+	&ui_print_header(
+	    $din, $text{$in{'new'} ? 'user_createwebserver' : 'user_edit'}, "",
+	    $in{'new'} ? 'users_explain_user_web' : undef);
 	&list_extra_user_pro_tip('web', "list_users.cgi?dom=$in{'dom'}");
 	print &ui_form_start("save_user_web.cgi", "post");
 	print &ui_hidden("new", $in{'new'});
@@ -630,15 +655,18 @@ elsif ($user_type eq 'web') {
 	my $webuser_name;
 	if (!$in{'new'}) {
 		$webuser = &get_extra_web_user($d, $in{'user'});
-		$webuser || &error(&text('user_edoesntexist', &html_escape($in{'user'})));
-		$webuser_name = &remove_userdom($webuser->{'user'}, $d) || $webuser->{'user'};
+		$webuser || &error(&text('user_edoesntexist',
+					 &html_escape($in{'user'})));
+		$webuser_name = &remove_userdom($webuser->{'user'}, $d) ||
+				$webuser->{'user'};
 		}
 
 	# At first check if we have protected webdirectories in this domain
 	my $htpasswd_data;
 	foreach my $f (&list_mail_plugins()) {
 		if ($f eq "virtualmin-htpasswd") {
-			$input = &trim(&plugin_call($f, "mailbox_inputs", $webuser, $in{'new'}, $d));
+			$input = &trim(&plugin_call($f, "mailbox_inputs",
+						    $webuser, $in{'new'}, $d));
 			$htpasswd_data = $input if ($input);
 			last;
 			}
@@ -646,7 +674,8 @@ elsif ($user_type eq 'web') {
 
 	# Print protected directories selector if found
 	if ($htpasswd_data) {
-		print &ui_table_start($text{'user_header_webserver'}, "width=100%", 2);
+		print &ui_table_start(
+			$text{'user_header_webserver'}, "width=100%", 2);
 
 		# Edit web user
 		print &ui_table_row(&hlink($text{'user_user2'}, "username_web"),
@@ -665,40 +694,47 @@ elsif ($user_type eq 'web') {
 					$text{'user_passdef'},
 					$text{'user_passset'}, 0);
 			}
-		print &ui_table_row(&hlink($text{'user_pass'}, "password"),
-					&inline_html_pro_tip($pwfield,
-						'manage-extra-webserver-users', 1),
+		print &ui_table_row(
+			&hlink($text{'user_pass'}, "password"),
+			&inline_html_pro_tip(
+				$pwfield, 'manage-extra-webserver-users', 1),
 			2, &procell(undef, @tds) || \@tds);
 		print &ui_table_hr();
 		print $htpasswd_data;
 		my $msg = &text('users_addprotecteddir2',
-			&get_webprefix()."/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
+			&get_webprefix().
+			"/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
 		print &ui_table_row(undef, $msg, 2);
 		print &ui_table_end();
 		}
 	else {
 		print &text('users_addprotecteddir',
-			&get_webprefix()."/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
+			&get_webprefix().
+			"/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
 		}
 	$form_end = $htpasswd_data ? 1 : 0;
 	}
 # Create user form
 else {
 	if ($in{'new'}) {
-		&ui_print_header($din, $text{'user_create'}, "", "users_explain_user");
+		&ui_print_header(
+			$din, $text{'user_create'}, "", "users_explain_user");
 		$user = &create_initial_user($d);
 		}
 	else {
 		@users = &list_domain_users($d);
-		($user) = grep { ($_->{'user'} eq $in{'user'} ||
-				&remove_userdom($_->{'user'}, $d) eq $in{'user'}) &&
-				$_->{'unix'} == $in{'unix'} } @users;
-		$mailbox = $d && $d->{'user'} eq $user->{'user'} && $user->{'unix'};
+		($user) = grep {
+			($_->{'user'} eq $in{'user'} ||
+			 &remove_userdom($_->{'user'}, $d) eq $in{'user'}) &&
+			$_->{'unix'} == $in{'unix'} } @users;
+		$mailbox = $d && $d->{'user'} eq $user->{'user'} &&
+			   $user->{'unix'};
 		$suffix = $user->{'webowner'} ? 'web' : '';
 		&ui_print_header($din, $text{'user_edit'.$suffix}, "");
 		}
 
-	$shell_switch = ((&can_mailbox_ftp() && !$mailbox) || &master_admin()) && $user->{'unix'} && !$user->{'webowner'};
+	$shell_switch = ((&can_mailbox_ftp() && !$mailbox) || &master_admin())&&
+			 $user->{'unix'} && !$user->{'webowner'};
 	@sgroups = &allowed_secondary_groups($d);
 	# Work out if the other permissions section has anything to display
 	if ($d && !$mailbox) {
@@ -723,16 +759,20 @@ else {
 	print &ui_hidden("unix", $in{'unix'});
 	print &ui_hidden("web", $in{'web'});
 
-	print &ui_hidden_table_start($mailbox ? $text{'user_mheader'} :
-				$user->{'webowner'} ? $text{'user_header_ftp'} :
-				$d ? $text{'user_header'} : $text{'user_lheader'},
-				"width=100%", 2, "table1", 1);
+	print &ui_hidden_table_start(
+		$mailbox ? $text{'user_mheader'} :
+		$user->{'webowner'} ? $text{'user_header_ftp'} :
+		$d ? $text{'user_header'} : $text{'user_lheader'},
+		"width=100%", 2, "table1", 1);
 
 	# Show username, editable if this is not the domain owner
 	my $universal_type = $config{'nopostfix_extra_user'} != 2 ? "_universal" : "";
-	$ulabel = ($d->{'mail'} && !$user->{'webowner'}) ? &hlink($text{'user_user'}, "username$universal_type")
-			: &hlink($text{'user_user2'}, "username2$universal_type");
-	$ulabel = &hlink($text{'user_user3'}, ($user->{'webowner'} ? 'username4' : 'username3').$universal_type)
+	$ulabel = ($d->{'mail'} && !$user->{'webowner'}) ?
+		&hlink($text{'user_user'}, "username$universal_type") :
+		&hlink($text{'user_user2'}, "username2$universal_type");
+	$ulabel = &hlink($text{'user_user3'},
+			 ($user->{'webowner'} ? 'username4' : 'username3').
+		  $universal_type)
 		if ($universal_type && $in{'new'});
 	$ulabel = &hlink($text{'user_user2'}, "username4$universal_type")
 		if ($user->{'webowner'});
@@ -743,8 +783,9 @@ else {
 		if ($d->{'mail'} && $ouser_email !~ /\@/) {
 			$ouser_email = $user->{'user'} . "\@" . $d->{'dom'};
 			}
-		print &ui_table_row(&hlink($text{'user_user2'}, "username2$universal_type"),
-				"<tt>$user->{'user'}</tt>", 2, \@tds);
+		print &ui_table_row(
+			&hlink($text{'user_user2'}, "username2$universal_type"),
+			"<tt>$user->{'user'}</tt>", 2, \@tds);
 		print &ui_table_row($ulabel, "<tt>$ouser_email</tt>", 2, \@tds)
 			if ($d->{'mail'});
 		$pop3 = $user->{'user'};
@@ -755,10 +796,9 @@ else {
 			&remove_userdom($user->{'user'}, $d) : $user->{'user'};
 		# Full username differs
 		if ($pop3 ne $user->{'user'}) {
-			my $username_label =
-				$d->{'mail'} ?
-					&hlink($text{"user_user3"}, 'user_imap') :
-					&hlink($text{"user_user3"}, 'user_imapf');
+			my $username_label = $d->{'mail'} ?
+				&hlink($text{"user_user3"}, 'user_imap') :
+				&hlink($text{"user_user3"}, 'user_imapf');
 			if ($config{'nopostfix_extra_user'} != 2) {
 				$username_label = &hlink($text{"user_user3"},
 					$user->{'webowner'} ? 'username4' : 'username3');
@@ -774,10 +814,10 @@ else {
 			($d ? "\@".&show_domain_name($d) : ""),
 			2, \@tds);
 		print &ui_hidden("oldpop3", $pop3),"\n";
-
 		}
 
-	# Password cannot be edited for domain owners (because it is the domain pass)
+	# Password cannot be edited for domain owners (because it is the
+	# domain pass)
 	if (!$mailbox) {
 		$pwfield = "";
 		if ($in{'new'}) {
@@ -792,16 +832,17 @@ else {
 				$text{'user_passset'});
 			if ($user->{'unix'} && $user->{'change'}) {
 				local $tm = timelocal(gmtime($user->{'change'} *
-							60*60*24));
-				$pwfield .= "&nbsp;&nbsp;".&text('user_lastch', &make_date($tm, 1));
+							     60*60*24));
+				$pwfield .= "&nbsp;&nbsp;".
+				    &text('user_lastch', &make_date($tm, 1));
 				}
 			}
 		if (!$user->{'alwaysplain'}) {
 			# Option to disable
 			$pwfield .= "<br>" if ($pwfield !~ /\/table>/);
-			$pwfield .=
-				&ui_checkbox("disable", 1, $text{'user_disabled'},
-					$user->{'pass'} =~ /^\!/ ? 1 : 0);
+			$pwfield .= &ui_checkbox(
+				"disable", 1, $text{'user_disabled'},
+				$user->{'pass'} =~ /^\!/ ? 1 : 0);
 			}
 		print &ui_table_row(&hlink($text{'user_pass'}, "password"),
 				$pwfield,
@@ -825,19 +866,22 @@ else {
 			}
 		# Password recovery field
 		if (!$user->{'webowner'}) {
-			print &ui_table_row(&hlink($text{'user_recovery'}, "recovery"),
-				&ui_opt_textbox("recovery", $user->{'recovery'}, 40,
-						$text{'user_norecovery'},
-						$text{'user_gotrecovery'}));
+			print &ui_table_row(
+				&hlink($text{'user_recovery'}, "recovery"),
+				&ui_opt_textbox(
+					"recovery", $user->{'recovery'}, 40,
+					$text{'user_norecovery'},
+					$text{'user_gotrecovery'}));
 			}
 		}
 
 	# Real name - only for true Unix users or LDAP persons
 	if ($user->{'person'} && (!$mailbox || $user->{'real'})) {
-		print &ui_table_row(&hlink($text{'user_real'}, "realname"),
+		print &ui_table_row(
+			&hlink($text{'user_real'}, "realname"),
 			$mailbox ? $user->{'real'} :
-				&ui_textbox("real", $user->{'real'}, 40, 0, undef,
-				&vui_ui_input_noauto_attrs()),
+				&ui_textbox("real", $user->{'real'}, 40, 0,
+					undef, &vui_ui_input_noauto_attrs()),
 			2, \@tds);
 		}
 
@@ -878,9 +922,10 @@ else {
 		# Start quota and home table
 		my $header2_title = 'user_header2';
 		$header2_title = 'user_header2a' if (!$showhome);
-		$header2_title = 'user_header2b' if (!$showmailquota && !$showquota);
-		print &ui_hidden_table_start($text{$header2_title}, "width=100%", 2,
-					"table2", 0);
+		$header2_title = 'user_header2b' if (!$showmailquota &&
+						     !$showquota);
+		print &ui_hidden_table_start(
+			$text{$header2_title}, "width=100%", 2, "table2", 0);
 		}
 
 	if ($showmailquota) {
@@ -907,11 +952,12 @@ else {
 				2, \@tds);
 			}
 		if (&has_mail_quotas()) {
-			print &ui_table_row(&hlink($text{'user_mquota'}, "diskmquota"),
-					&quota_field("mquota", $user->{'mquota'},
-						$user->{'umquota'},$user->{'umfquota'},
-						"mail", $user),
-					2, \@tds);
+			print &ui_table_row(
+				&hlink($text{'user_mquota'}, "diskmquota"),
+				&quota_field("mquota", $user->{'mquota'},
+					     $user->{'umquota'},
+					     $user->{'umfquota'}, "mail",$user),
+				2, \@tds);
 			}
 		}
 
@@ -920,18 +966,21 @@ else {
 		local $reshome = &resolve_links($user->{'home'});
 		local $helppage = "userhome";
 		if ($user->{'brokenhome'}) {
-			# Home directory is in odd location, and so cannot be edited
+			# Home directory is in odd location, and so cannot
+			# be edited
 			$homefield = "<tt>$user->{'home'}</tt>";
 			print &ui_hidden("brokenhome", 1),"\n";
 			}
 		elsif ($user->{'webowner'}) {
 			# Home can be public_html or a sub-dir
 			local $phd = &public_html_dir($d);
-			local $auto = $in{'new'} || $reshome eq &resolve_links($phd);
+			local $auto = $in{'new'} ||
+				      $reshome eq &resolve_links($phd);
 			$homefield = &ui_radio("home_def", $auto ? 1 : 0,
 					[ [ 1, $text{'user_home2'} ],
-						[ 0, $text{'user_homeunder2'} ] ])." ".
-				&ui_textbox("home", $auto ? "" :
+					  [ 0, $text{'user_homeunder2'} ] ]).
+				     " ".
+				     &ui_textbox("home", $auto ? "" :
 					substr($user->{'home'}, length($phd)+1), 20);
 			$helppage = "userhomeftp";
 			}
@@ -957,20 +1006,21 @@ else {
 
 	# Start third table, for email settings
 	$hasprimary = $d && !$user->{'noprimary'} && $d->{'mail'};
-	$hasmailfile = !$in{'new'} && ($user->{'email'} || @{$user->{'extraemail'}}) &&
-		!$user->{'nomailfile'};
+	$hasmailfile = !$in{'new'} && ($user->{'email'} ||
+		       @{$user->{'extraemail'}}) && !$user->{'nomailfile'};
 	$hasextra = !$user->{'noextra'};
 	$hassend = &will_send_user_email($d, $in{'new'});
 	$hasspam = $config{'spam'} && $hasprimary;
-	$hasemail = $hasprimary || $hasmailfile || $hasextra || $hassend || $hasspam;
+	$hasemail = $hasprimary || $hasmailfile || $hasextra ||
+		    $hassend || $hasspam;
 	$hasemailaccordion = !$user->{'webowner'};
 
 	# Email settings
 	if ($hasemailaccordion) {
 		if ($hasemail) {
 			my $style_display_none = $d->{'mail'} ? "" : " style='display:none' ";
-			print &ui_hidden_table_start($text{'user_header3'}, "${style_display_none}width=100%", 2,
-						"table2a", 0);
+			print &ui_hidden_table_start(
+				$text{'user_header3'}, "${style_display_none}width=100%", 2, "table2a", 0);
 			}
 
 		if ($hasprimary) {
