@@ -76,6 +76,7 @@ $supports_fcgid = &indexof("fcgid", &supported_php_modes()) >= 0;
 $supports_fpm = &indexof("fpm", &supported_php_modes()) >= 0;
 $supports_cgi = &indexof("cgi", &supported_php_modes()) >= 0;
 @php_versions = sort { &compare_versions($a->[0], $b->[0]) }
+		  grep { &indexof("fcgid", @{$_->[2]}) >= 0 }
 		     &list_available_php_versions();
 $max_php_version = $php_versions[@php_versions-1]->[0];
 $scriptdb = 'mysql';
