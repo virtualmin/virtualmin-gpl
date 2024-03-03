@@ -37,6 +37,7 @@ if ($user_type eq 'ssh') {
 	print &ui_hidden("new", 1);
 	print &ui_hidden("dom", $in{'dom'});
 	print &ui_hidden("recovery_def", 1);
+	print &ui_hidden('newmail_def', 1);
 
 	print &ui_hidden_table_start(
 		$d ? $text{'user_header_ssh'} : $text{'user_lheader'},
@@ -198,6 +199,7 @@ elsif ($user_type eq 'ftp') {
 	print &ui_hidden("quota_def", 1);
 	print &ui_hidden("mquota_def", 1);
 	print &ui_hidden("recovery_def", 1);
+	print &ui_hidden('newmail_def', 1);
 	print &ui_hidden("web", 1);
 	print &ui_hidden("shell", '/bin/false');
 
