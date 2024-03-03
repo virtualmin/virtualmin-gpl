@@ -1223,7 +1223,9 @@ foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
 		if (&indexof($dt, &list_database_plugins()) < 0) {
 			# Delete from core database
 			local $dlfunc = "delete_${dt}_database_user";
-			&$dlfunc($d, $user);
+			if (defined(&$dlfunc)) {
+				&$dlfunc($d, $user);
+				}
 			}
 		elsif (&indexof($dt, &list_database_plugins()) >= 0) {
 			# Delete from plugin database
