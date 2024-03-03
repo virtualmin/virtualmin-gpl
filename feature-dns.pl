@@ -2223,7 +2223,8 @@ else {
 			if ($r->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/ ||
 			    $r->{'name'} eq $d->{'dom'}.".") {
 				# Need to rename
-				$r->{'name'} = $r->{'name'}."disabled.";
+				$r->{'name'} = $r->{'realname'} =
+					$r->{'name'}."disabled.";
 				&modify_dns_record($recs, $file, $r);
 				}
 			}
@@ -2321,6 +2322,7 @@ else {
 			    $r->{'name'} eq $d->{'dom'}.".disabled.") {
 				# Need to rename
 				$r->{'name'} =~ s/\.disabled\.$/\./;
+				$r->{'realname'} =~ s/\.disabled\.$/\./;
 				&modify_dns_record($recs, $file, $r);
 				}
 			}
