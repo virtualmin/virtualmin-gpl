@@ -29,7 +29,8 @@ $form_end = 1;
 
 # Create SSH user only form
 if ($user_type eq 'ssh') {
-	&ui_print_header($din, $text{'user_createssh'}, "", "users_explain_user_ssh");
+	&ui_print_header($din, $text{'user_createssh'}, "",
+			 "users_explain_user_ssh");
 	$user = &create_initial_user($d);
 
 	print &ui_form_start("save_user.cgi", "post");
@@ -37,18 +38,21 @@ if ($user_type eq 'ssh') {
 	print &ui_hidden("dom", $in{'dom'});
 	print &ui_hidden("recovery_def", 1);
 
-	print &ui_hidden_table_start($d ? $text{'user_header_ssh'} : $text{'user_lheader'},
-				"width=100%", 2, "table1", 1);
+	print &ui_hidden_table_start(
+		$d ? $text{'user_header_ssh'} : $text{'user_lheader'},
+		"width=100%", 2, "table1", 1);
 
 	# Edit mail username
 	my $universal_type = $config{'nopostfix_extra_user'} != 2 ? "_universal" : "";
-	print &ui_table_row(&hlink($text{'user_user2'}, "username2$universal_type"),
+	print &ui_table_row(
+		&hlink($text{'user_user2'}, "username2$universal_type"),
 		&ui_textbox("mailuser", undef, 13, 0, undef,
 			&vui_ui_input_noauto_attrs()).
 		($d ? "\@".&show_domain_name($d) : ""),
 		2, \@tds);
 
-	# Password cannot be edited for domain owners (because it is the domain pass)
+	# Password cannot be edited for domain owners (because it is the
+	# domain pass)
 	$pwfield = "";
 	$pwfield = &new_password_input("mailpass");
 	if (!$user->{'alwaysplain'}) {
@@ -66,7 +70,8 @@ if ($user_type eq 'ssh') {
 	my @ssh_shells = &list_available_shells_by_id('ssh', $d);
 	if (&proshow() && $user->{'unix'}) {
 		if (@ssh_shells) {
-			print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkeynogen"),
+			print &ui_table_row(
+				&hlink($text{'form_sshkey'}, "sshkeynogen"),
 				&inline_html_pro_tip(
 					&ui_radio("sshkey_mode", 0,
 						[ [ 0, $text{'form_sshkey0'} ],
@@ -80,9 +85,10 @@ if ($user_type eq 'ssh') {
 
 	# Real name - only for true Unix users or LDAP persons
 	if ($user->{'person'}) {
-		print &ui_table_row(&hlink($text{'user_real'}, "realname"),
-				&ui_textbox("real", $user->{'real'}, 40, 0, undef,
-				&vui_ui_input_noauto_attrs()),
+		print &ui_table_row(
+			&hlink($text{'user_real'}, "realname"),
+			&ui_textbox("real", $user->{'real'}, 40, 0, undef,
+				    &vui_ui_input_noauto_attrs()),
 			2, \@tds);
 		}
 
@@ -93,9 +99,11 @@ if ($user_type eq 'ssh') {
 			print &ui_hidden("shell", $ssh_shell);
 			}
 		else {
-			print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
-				&available_shells_menu("shell", $ssh_shell || $user->{'shell'}, "mailbox",
-						0, $user->{'webowner'}),
+			print &ui_table_row(
+				&hlink($text{'user_ushell'}, "ushell"),
+				&available_shells_menu(
+					"shell", $ssh_shell || $user->{'shell'},
+					"mailbox", 0, $user->{'webowner'}),
 				2, \@tds);
 			}
 		}
@@ -118,8 +126,8 @@ if ($user_type eq 'ssh') {
 
 	if ($showquota || $showhome) {
 		# Start quota and home table
-		print &ui_hidden_table_start($text{'user_header2'}, "width=100%", 2,
-					"table2", 1);
+		print &ui_hidden_table_start(
+			$text{'user_header2'}, "width=100%", 2, "table2", 1);
 		}
 
 	if ($showquota) {
@@ -134,11 +142,12 @@ if ($user_type eq 'ssh') {
 				2, \@tds);
 			}
 		if (&has_mail_quotas()) {
-			print &ui_table_row(&hlink($text{'user_mquota'}, "diskmquota"),
-					&quota_field("mquota", $user->{'mquota'},
-						$user->{'umquota'},$user->{'umfquota'},
-						"mail", $user),
-					2, \@tds);
+			print &ui_table_row(
+				&hlink($text{'user_mquota'}, "diskmquota"),
+				&quota_field("mquota", $user->{'mquota'},
+					$user->{'umquota'},$user->{'umfquota'},
+					"mail", $user),
+				2, \@tds);
 			}
 		}
 
@@ -147,17 +156,20 @@ if ($user_type eq 'ssh') {
 		local $reshome = &resolve_links($user->{'home'});
 		local $helppage = "userhome";
 		if ($user->{'brokenhome'}) {
-			# Home directory is in odd location, and so cannot be edited
+			# Home directory is in odd location, and so cannot
+			# be edited
 			$homefield = "<tt>$user->{'home'}</tt>";
 			print &ui_hidden("brokenhome", 1),"\n";
 			}
 		else {
 			# Home is under server root, and so can be edited
+			# XXX what does '1 ?' mean here?
 			$homefield = &ui_radio("home_def", 1 ? 1 : 0,
 					[ [ 1, $text{'user_home1'} ],
 					[ 0, &text('user_homeunder') ] ])." ".
 				&ui_textbox("home", 1 ? "" :
-				substr($user->{'home'}, length($d->{'home'})+1), 20);
+				substr($user->{'home'}, length($d->{'home'})+1),
+				20);
 			}
 		print &ui_table_row(&hlink($text{'user_home'}, $helppage),
 				$homefield,
@@ -171,7 +183,8 @@ if ($user_type eq 'ssh') {
 	}
 # Create FTP user only form
 elsif ($user_type eq 'ftp') {
-	&ui_print_header($din, $text{'user_createweb'}, "", "users_explain_user_ftp");
+	&ui_print_header($din, $text{'user_createweb'}, "",
+			 "users_explain_user_ftp");
 	$user = &create_initial_user($d, undef, 1);
 
 	# FTP user in a sub-server .. check if FTP restrictions are active
@@ -191,17 +204,20 @@ elsif ($user_type eq 'ftp') {
 	print &ui_hidden("web", 1);
 	print &ui_hidden("shell", '/bin/false');
 
-	print &ui_table_start($d ? $text{'user_header_ftp'} : $text{'user_lheader'},
-				"width=100%", 2);
+	print &ui_table_start(
+		$d ? $text{'user_header_ftp'} : $text{'user_lheader'},
+		"width=100%", 2);
 
 	# Edit mail username
 	my $universal_type = $config{'nopostfix_extra_user'} != 2 ? "_universal" : "";
-	print &ui_table_row(&hlink($text{'user_user2'}, "username4$universal_type"),
+	print &ui_table_row(
+		&hlink($text{'user_user2'}, "username4$universal_type"),
 		&ui_textbox("mailuser", undef, 13, 0, undef,
 			&vui_ui_input_noauto_attrs()).
 		($d ? "\@".&show_domain_name($d) : ""), 2, \@tds);
 
-	# Password cannot be edited for domain owners (because it is the domain pass)
+	# Password cannot be edited for domain owners (because it is the
+	# domain pass)
 	$pwfield = "";
 	$pwfield = &new_password_input("mailpass");
 	if (!$user->{'alwaysplain'}) {
@@ -217,9 +233,10 @@ elsif ($user_type eq 'ftp') {
 
 	# Real name - only for true Unix users or LDAP persons
 	if ($user->{'person'}) {
-		print &ui_table_row(&hlink($text{'user_real'}, "realname"),
-				&ui_textbox("real", $user->{'real'}, 40, 0, undef,
-				&vui_ui_input_noauto_attrs()),
+		print &ui_table_row(
+			&hlink($text{'user_real'}, "realname"),
+			&ui_textbox("real", $user->{'real'}, 40, 0, undef,
+				    &vui_ui_input_noauto_attrs()),
 			2, \@tds);
 		}
 
@@ -237,7 +254,8 @@ elsif ($user_type eq 'ftp') {
 		!$user->{'fixedhome'};
 	if ($showhome) {
 		if ($user->{'brokenhome'}) {
-			# Home directory is in odd location, and so cannot be edited
+			# Home directory is in odd location, and so cannot
+			# be edited
 			$homefield = "<tt>$user->{'home'}</tt>";
 			print &ui_hidden("brokenhome", 1),"\n";
 			}
@@ -246,8 +264,8 @@ elsif ($user_type eq 'ftp') {
 			local $phd = &public_html_dir($d);
 			$homefield = &ui_radio("home_def", 1 ? 1 : 0,
 					[ [ 1, $text{'user_home2'} ],
-						[ 0, $text{'user_homeunder2'} ] ])." ".
-				&ui_textbox("home", 1 ? "" :
+					  [ 0, $text{'user_homeunder2'} ] ]).
+				     " ".&ui_textbox("home", 1 ? "" :
 					substr($user->{'home'}, length($phd)+1), 20);
 			}
 		print &ui_table_row(&hlink($text{'user_home'}, 'userhomeftp'),
