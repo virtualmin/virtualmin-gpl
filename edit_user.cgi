@@ -361,56 +361,23 @@ elsif ($user_type eq 'mail') {
 
 	# Start third table, for email settings
 	$hasprimary = $d && !$user->{'noprimary'} && $d->{'mail'};
-	$hasmailfile = !$in{'new'} && ($user->{'email'} || @{$user->{'extraemail'}}) &&
-		!$user->{'nomailfile'};
 	$hasextra = !$user->{'noextra'};
-	$hassend = &will_send_user_email($d, $in{'new'});
+	$hassend = &will_send_user_email($d, 1);
 	$hasspam = $config{'spam'} && $hasprimary;
-	$hasemail = $hasprimary || $hasmailfile || $hasextra ||
+	$hasemail = $hasprimary || $hasextra ||
 		    $hassend || $hasspam;
 
 	# Email settings
 	if ($hasemail) {
-		# XXX what is style_display_none for??
-		my $style_display_none = $d->{'mail'} ? "" : " style='display:none' ";
 		print &ui_hidden_table_start(
-			$text{'user_header3'},
-			"${style_display_none}width=100%", 2, "table2a", 0);
+			$text{'user_header3'}, "width=100%", 2, "table2a", 0);
 		}
 
 	if ($hasprimary) {
 		# Show primary email address field
-		# XXX why hide this field in the HTML??
 		print &ui_table_row(&hlink($text{'user_mailbox'}, "mailbox"),
-			&ui_yesno_radio("mailbox",
-					$user->{'email'} || $in{'new'} ? 1 : 0),
-			2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
-		}
-
-	if ($hasmailfile && $config{'show_mailuser'}) {
-		# Show the user's mail file
-		local ($sz, $umf, $lastmod) = &mail_file_size($user);
-		local $link = &read_mail_link($user, $d);
-		if ($link) {
-			$mffield = "<a href='$link'><tt>$umf</tt></a>\n";
-			}
-		else {
-			$mffield = "<tt>$umf</tt>\n";
-			}
-		if ($lastmod) {
-			$mffield .= "(".&text('user_lastmod',
-					      &make_date($lastmod)).")";
-			}
-		if ($user->{'spam_quota'}) {
-			$mffield .= "<br><font color=#ff0000>".
-			&text($user->{'spam_quota_diff'} ? 'user_spamquota'
-							: 'user_soamquota2',
-				&nice_size($user->{'spam_quota_diff'})).
-			"</font>\n";
-			}
-		print &ui_table_row(&hlink($text{'user_mail'}, "mailfile"),
-				$mffield,
-				2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+			&ui_yesno_radio("mailbox", 1),
+			2, \@tds);
 		}
 
 	if ($hasextra) {
@@ -425,65 +392,28 @@ elsif ($user_type eq 'mail') {
 			}
 		print &ui_table_row(&hlink($text{'user_extra'}, "extraemail"),
 				&ui_textarea("extra", join("\n", @extra), 5, 50),
-				2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+				2, \@tds);
 		}
 
-	if ($in{'new'} && &will_send_user_email($d, 1)) {
+	if (&will_send_user_email($d, 1)) {
 		# Show address for confirmation email (for the mailbox itself)
 		print &ui_table_row(&hlink($text{'user_newmail'},"newmail"),
 			&ui_opt_textbox("newmail", undef, 40,
 				$user->{'email'} ? $text{'user_newmail1'}
 						: $text{'user_newmail2'},
 				$text{'user_newmail0'}),
-			2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
-		}
-	elsif (!$in{'new'} && &will_send_user_email($d, 0)) {
-		# Show option to re-send info email
-		print &ui_table_row(&hlink($text{'user_remail'},"remail"),
-			&ui_radio("remail_def", 1,
-				[ [ 1, $text{'user_remail1'} ],
-				[ 0, $text{'user_remail0'} ] ])." ".
-			&ui_textbox("remail", $user->{'email'}, 40),
-			2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+			2, \@tds);
 		}
 
 	# Show spam check flag
 	if ($hasspam) {
-		$awl_link = undef;
-		if (!$in{'new'} && &foreign_available("spam")) {
-			# Create AWL link
-			&foreign_require("spam");
-			if (defined(&spam::can_edit_awl) &&
-			&spam::supports_auto_whitelist() == 2 &&
-			&spam::get_auto_whitelist_file($user->{'user'}) &&
-			&spam::can_edit_awl($user->{'user'})) {
-				$awl_link = "&nbsp;( <a href='../spam/edit_awl.cgi?".
-					"user=".&urlize($user->{'user'}).
-					"'>$text{'user_awl'}</a> )";
-				}
-			}
 		print &ui_table_row(
 			&hlink($d->{'virus'} ? $text{'user_nospam'}
 					: $text{'user_nospam2'}, "nospam"),
 			!$d->{'spam'} ? $text{'user_spamdis'} :
 				&ui_radio("nospam", int($user->{'nospam'}),
-					[ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]).
-				$awl_link,
-			2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
-		}
-
-	# Show most recent logins
-	if ($hasemail && !$in{'new'}) {
-		$ll = &get_last_login_time($user->{'user'});
-		@grid = ( );
-		foreach $k (keys %$ll) {
-			push(@grid, $text{'user_lastlogin_'.$k},
-				&make_date($ll->{$k}));
-			}
-		print &ui_table_row(&hlink($text{'user_lastlogin'}, "lastlogin"),
-			@grid ? &ui_grid_table(\@grid, 2, 50)
-			: $text{'user_lastlogin_never'}, undef, undef,
-				$d->{'mail'} ? undef : ['style="display: none"']);
+					[ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]),
+			2, \@tds);
 		}
 
 	if ($hasemail) {
@@ -529,12 +459,6 @@ elsif ($user_type eq 'mail') {
 			}
 		# Show user-level mail filters, if he has any
 		@filters = ( );
-		$procmailrc = "$user->{'home'}/.procmailrc" if (!$in{'new'});
-		if (!$in{'new'} && $user->{'email'} && $user->{'unix'} &&
-		    -r $procmailrc && &foreign_check("filter")) {
-			&foreign_require("filter");
-			@filters = &filter::list_filters($procmailrc);
-			}
 		if (@filters) {
 			my $mail_filter_title = $text{'user_header3a'};
 			my $mail_filter_body;
@@ -1002,6 +926,7 @@ else {
 		}
 
 	# Start third table, for email settings
+	$tr_hidden = $d->{'mail'} ? undef : ['style="display: none"'];
 	$hasprimary = $d && !$user->{'noprimary'} && $d->{'mail'};
 	$hasmailfile = !$in{'new'} && ($user->{'email'} ||
 		       @{$user->{'extraemail'}}) && !$user->{'nomailfile'};
@@ -1025,7 +950,7 @@ else {
 			print &ui_table_row(&hlink($text{'user_mailbox'}, "mailbox"),
 				&ui_yesno_radio("mailbox",
 						$user->{'email'} || $in{'new'} ? 1 : 0),
-				2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+				2, \@tds, $tr_hidden);
 			}
 
 		if ($hasmailfile && $config{'show_mailuser'}) {
@@ -1049,8 +974,7 @@ else {
 				"</font>\n";
 				}
 			print &ui_table_row(&hlink($text{'user_mail'}, "mailfile"),
-					$mffield,
-					2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+					$mffield, 2, \@tds, $tr_hidden);
 			}
 
 		if ($hasextra) {
@@ -1065,7 +989,7 @@ else {
 				}
 			print &ui_table_row(&hlink($text{'user_extra'}, "extraemail"),
 					&ui_textarea("extra", join("\n", @extra), 5, 50),
-					2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+					2, \@tds, $tr_hidden);
 			}
 
 		if ($in{'new'} && &will_send_user_email($d, 1)) {
@@ -1075,7 +999,7 @@ else {
 						$user->{'email'} ? $text{'user_newmail1'}
 								: $text{'user_newmail2'},
 						$text{'user_newmail0'}),
-				2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+				2, \@tds, $tr_hidden);
 			}
 		elsif (!$in{'new'} && &will_send_user_email($d, 0)) {
 			# Show option to re-send info email
@@ -1084,7 +1008,7 @@ else {
 					[ [ 1, $text{'user_remail1'} ],
 					[ 0, $text{'user_remail0'} ] ])." ".
 				&ui_textbox("remail", $user->{'email'}, 40),
-				2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+				2, \@tds, $tr_hidden);
 			}
 
 		# Show spam check flag
@@ -1109,7 +1033,7 @@ else {
 					&ui_radio("nospam", int($user->{'nospam'}),
 						[ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]).
 					$awl_link,
-				2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+				2, \@tds, $tr_hidden);
 			}
 
 		# Show most recent logins
@@ -1122,8 +1046,7 @@ else {
 				}
 			print &ui_table_row(&hlink($text{'user_lastlogin'}, "lastlogin"),
 				@grid ? &ui_grid_table(\@grid, 2, 50)
-				: $text{'user_lastlogin_never'}, undef, undef,
-					$d->{'mail'} ? undef : ['style="display: none"']);
+				: $text{'user_lastlogin_never'}, undef, undef, $tr_hidden);
 			}
 
 		if ($hasemail) {
