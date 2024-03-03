@@ -110,7 +110,6 @@ domains_sort=Seradit virtualni servery dle,1,user-Vlastnika,dom-Nazvu domeny,own
 spam_level=Vychozi hodnoceni spamu k rozhodnuti vymazat,3,Nemazat,4
 line1=Nastaveni serveru,11
 post_command=Prikazy ke spusteni po aplikovani zmen na serveru,0
-avail_syslog=Systemove logy,1,1-Ano,0-Ne
 webalizer_nocron=Prednastavit Cron ulohu Webalizeru pro kazdy virtualni server?,1,0-Ano,1-Ne
 generics=Aktualizovat take odchozi adresy postovnich uzivatelu?,1,1-Ano,0-Ne
 update_template=Soubor se vzorem emailu k doruceni upravenym postovnim uzivatelum,10,default-Vychozi
