@@ -512,7 +512,7 @@ if ($d->{'parent'}) {
 elsif (&postgres_user_exists($d)) {
 	&require_postgres();
 	my $date = localtime(0);
-	&execute_dom_pgsql($d, undef,
+	&execute_dom_psql($d, undef,
 		"alter user ".&postgres_uquote($user).
 		" valid until ".&postgres_quote($date));
 	&$second_print($text{'setup_done'});
@@ -537,7 +537,7 @@ if ($d->{'parent'}) {
 	}
 elsif (&postgres_user_exists($d)) {
 	&require_postgres();
-	&execute_dom_pgsql($d, undef,
+	&execute_dom_psql($d, undef,
 		"alter user ".&postgres_uquote($user).
 		" valid until ".&postgres_quote("Jan 1 2038"));
 	&$second_print($text{'setup_done'});
