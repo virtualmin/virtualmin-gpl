@@ -123,12 +123,12 @@ elsif ($in{'delete'}) {
 
 		# Count up home directory size
 		local ($mailsz) = &mail_file_size($user);
-		local $msg;
+		local ($msg, $homesz);
 		if ($user->{'nocreatehome'} || !$user->{'home'}) {
 			$msg = 'user_rusurew';
 			}
 		else {
-			local ($homesz) = &disk_usage_kb($user->{'home'});
+			($homesz) = &disk_usage_kb($user->{'home'});
 			$msg = $mailsz && $homesz && !&mail_under_home() ?
 				'user_rusure' :'user_rusureh';
 			}
