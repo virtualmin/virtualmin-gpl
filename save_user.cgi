@@ -129,7 +129,7 @@ elsif ($in{'delete'}) {
 			}
 		else {
 			local ($homesz) = &disk_usage_kb($user->{'home'});
-			local $msg = $mailsz && $homesz && !&mail_under_home() ?
+			$msg = $mailsz && $homesz && !&mail_under_home() ?
 				'user_rusure' :'user_rusureh';
 			}
 		print "<p>",&text($msg, "<tt>$in{'old'}</tt>",
