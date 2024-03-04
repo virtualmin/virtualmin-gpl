@@ -423,7 +423,7 @@ elsif ($user_type eq 'mail') {
 		# if possible
 		if (($user->{'email'} || $user->{'noprimary'}) &&
 		    !$user->{'noalias'}) {
-			print &ui_table_row(undef, $hrr, 2);
+			print &ui_table_hr();
 
 			# Work out if simple mode is supported
 			if (!@{$user->{'to'}}) {
@@ -637,8 +637,8 @@ elsif ($user_type eq 'web') {
 		}
 	$form_end = $htpasswd_data ? 1 : 0;
 	}
-# Create user form
 else {
+	# Regular create user form
 	if ($in{'new'}) {
 		&ui_print_header(
 			$din, $text{'user_create'}, "", "users_explain_user");
@@ -659,12 +659,11 @@ else {
 	$shell_switch = ((&can_mailbox_ftp() && !$mailbox) || &master_admin())&&
 			 $user->{'unix'} && !$user->{'webowner'};
 	@sgroups = &allowed_secondary_groups($d);
+
 	# Work out if the other permissions section has anything to display
 	if ($d && !$mailbox) {
 		@dbs = grep { $_->{'users'} } &domain_databases($d);
 		}
-	# Row separators for logical clarity
-	my $hrr = "<hr data-row-separator>";
 
 	# FTP user in a sub-server .. check if FTP restrictions are active
 	if ($user->{'webowner'} && $d->{'parent'} && $config{'ftp'}) {
@@ -949,9 +948,10 @@ else {
 
 		if ($hasprimary) {
 			# Show primary email address field
-			print &ui_table_row(&hlink($text{'user_mailbox'}, "mailbox"),
+			print &ui_table_row(
+				&hlink($text{'user_mailbox'}, "mailbox"),
 				&ui_yesno_radio("mailbox",
-						$user->{'email'} || $in{'new'} ? 1 : 0),
+					$user->{'email'} || $in{'new'} ? 1 : 0),
 				2, \@tds, $tr_hidden);
 			}
 
@@ -966,7 +966,8 @@ else {
 				$mffield = "<tt>$umf</tt>\n";
 				}
 			if ($lastmod) {
-				$mffield .= "(".&text('user_lastmod', &make_date($lastmod)).")";
+				$mffield .= "(".&text('user_lastmod',
+						&make_date($lastmod)).")";
 				}
 			if ($user->{'spam_quota'}) {
 				$mffield .= "<br><font color=#ff0000>".
@@ -989,23 +990,27 @@ else {
 					$e = $eu."\@".$ed;
 					}
 				}
-			print &ui_table_row(&hlink($text{'user_extra'}, "extraemail"),
-					&ui_textarea("extra", join("\n", @extra), 5, 50),
-					2, \@tds, $tr_hidden);
+			print &ui_table_row(
+				&hlink($text{'user_extra'}, "extraemail"),
+				&ui_textarea("extra", join("\n", @extra), 5, 50),
+				2, \@tds, $tr_hidden);
 			}
 
 		if ($in{'new'} && &will_send_user_email($d, 1)) {
-			# Show address for confirmation email (for the mailbox itself)
-			print &ui_table_row(&hlink($text{'user_newmail'},"newmail"),
+			# Show address for confirmation email (for the mailbox
+			# itself)
+			print &ui_table_row(
+				&hlink($text{'user_newmail'},"newmail"),
 				&ui_opt_textbox("newmail", undef, 40,
-						$user->{'email'} ? $text{'user_newmail1'}
-								: $text{'user_newmail2'},
-						$text{'user_newmail0'}),
+				    $user->{'email'} ? $text{'user_newmail1'}
+						     : $text{'user_newmail2'},
+				    $text{'user_newmail0'}),
 				2, \@tds, $tr_hidden);
 			}
 		elsif (!$in{'new'} && &will_send_user_email($d, 0)) {
 			# Show option to re-send info email
-			print &ui_table_row(&hlink($text{'user_remail'},"remail"),
+			print &ui_table_row(
+				&hlink($text{'user_remail'},"remail"),
 				&ui_radio("remail_def", 1,
 					[ [ 1, $text{'user_remail1'} ],
 					[ 0, $text{'user_remail0'} ] ])." ".
@@ -1029,11 +1034,13 @@ else {
 					}
 				}
 			print &ui_table_row(
-				&hlink($d->{'virus'} ? $text{'user_nospam'}
-						: $text{'user_nospam2'}, "nospam"),
+				&hlink($d->{'virus'} ? $text{'user_nospam'} :
+					$text{'user_nospam2'}, "nospam"),
 				!$d->{'spam'} ? $text{'user_spamdis'} :
-					&ui_radio("nospam", int($user->{'nospam'}),
-						[ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]).
+					&ui_radio("nospam",
+						int($user->{'nospam'}),
+						[ [ 0, $text{'yes'} ],
+						  [ 1, $text{'no'} ] ]).
 					$awl_link,
 				2, \@tds, $tr_hidden);
 			}
@@ -1046,26 +1053,31 @@ else {
 				push(@grid, $text{'user_lastlogin_'.$k},
 					&make_date($ll->{$k}));
 				}
-			print &ui_table_row(&hlink($text{'user_lastlogin'}, "lastlogin"),
+			print &ui_table_row(
+				&hlink($text{'user_lastlogin'}, "lastlogin"),
 				@grid ? &ui_grid_table(\@grid, 2, 50)
 				: $text{'user_lastlogin_never'}, undef, undef, $tr_hidden);
 			}
 
 		if ($hasemail) {
-			# Show forwarding setup for this user, using simple form if possible
-			if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
-				print &ui_table_row(undef, $hrr, 2);
+			# Show forwarding setup for this user, using
+			# simple form if possible
+			if (($user->{'email'} || $user->{'noprimary'}) &&
+			    !$user->{'noalias'}) {
+				print &ui_table_hr();
 
 				# Work out if simple mode is supported
 				if (!@{$user->{'to'}}) {
-					# If no forwarding, just check delivery to me as this is
-					# the default.
+					# If no forwarding, just check delivery
+					# to me as this is the default.
 					$simple = { 'tome' => 1 };
 					}
 				else {
-					$simple = &get_simple_alias($d, $user, 1);
+					$simple = &get_simple_alias(
+							$d, $user, 1);
 					}
-				if ($simple && ($simple->{'local'} || $simple->{'bounce'})) {
+				if ($simple && ($simple->{'local'} ||
+						$simple->{'bounce'})) {
 					# Local and bounce delivery are not allowed on the simple form,
 					# unless we can merge some (@) local users with forward users, 
 					# which will be handled automatically on save to prevent showing
@@ -1141,35 +1153,40 @@ else {
 			$htpasswdplugin++;
 			}
 		else {
-			$anyotherplugins++ if (&plugin_defined($f, "mailbox_inputs"));
+			$anyotherplugins++
+				if (&plugin_defined($f, "mailbox_inputs"));
 			}
 		}
 
 	# Put user databases select under separate category
 	if (@dbs) {
-		print &ui_hidden_table_start($text{'user_header4'}, "width=100%", 2,
-					"table4", 0, \@tds);
 		# Show allowed databases
+		print &ui_hidden_table_start(
+			$text{'user_header4'}, "width=100%", 2,
+			"table4", 0, \@tds);
 		@userdbs = map { [ $_->{'type'}."_".$_->{'name'},
-				$_->{'name'}." ($_->{'desc'})" ] } @{$user->{'dbs'}};
+				$_->{'name'}." ($_->{'desc'})" ] }
+			       @{$user->{'dbs'}};
 		@alldbs = map { [ $_->{'type'}."_".$_->{'name'},
 				$_->{'name'}." ($_->{'desc'})" ] } @dbs;
 		print &ui_table_row(&hlink($text{'user_dbs'},"userdbs"),
 		&ui_multi_select("dbs", \@userdbs, \@alldbs, 5, 1, 0,
-				$text{'user_dbsall'}, $text{'user_dbssel'}), 2, \@tds);
+			$text{'user_dbsall'}, $text{'user_dbssel'}), 2, \@tds);
 		print &ui_hidden_table_end("table4");
 		}
 
 	# Put htpasswd into separate category for clarity
 	if ($htpasswdplugin) {
-		print &ui_hidden_table_start($text{'user_header5'}, "width=100%", 2,
-					"table5", 0, \@tds);
+		print &ui_hidden_table_start(
+			$text{'user_header5'}, "width=100%", 2,
+			"table5", 0, \@tds);
 		foreach my $f (@list_mail_plugins) {
 			if ($f eq "virtualmin-htpasswd") {
-				$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
+				$input = &plugin_call($f, "mailbox_inputs",
+						      $user, $in{'new'}, $d);
 				print $input;
 				my $msg = &text('users_addprotecteddir2',
-				&get_webprefix()."/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
+					&get_webprefix()."/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
 				print &ui_table_row(undef, $msg, 2);
 				last;
 				}
@@ -1181,16 +1198,18 @@ else {
 	# Find and show all plugin features
 	foreach my $f (@list_mail_plugins) {
 		if ($f ne "virtualmin-htpasswd") {
-			my $input = &trim(&plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d));
+			my $input = &trim(&plugin_call($f, "mailbox_inputs",
+						       $user, $in{'new'}, $d));
 			if ($input) {
-				$anyotherpluginsdata .= &ui_table_row(undef, $hrr, 2)
+				$anyotherpluginsdata .= &ui_table_hr()
 					if ($list_mail_plugin++);
 				$anyotherpluginsdata .= $input;
 				}
 			}
 		}
 	if ($anyotherplugins && $anyotherpluginsdata) {
-		print &ui_hidden_table_start($text{'user_header6'}, "width=100%", 2, "table6", 0, \@tds);
+		print &ui_hidden_table_start($text{'user_header6'},
+			"width=100%", 2, "table6", 0, \@tds);
 		print $anyotherpluginsdata;
 		print &ui_hidden_table_end("table6");
 		}
@@ -1198,13 +1217,13 @@ else {
 	# Work out if switching to Usermin is allowed
 	$usermin = 0;
 	if (&can_switch_usermin($d, $user) &&
-	$user->{'unix'} && &foreign_installed("usermin", 1)) {
+	    $user->{'unix'} && &foreign_installed("usermin", 1)) {
 		&foreign_require("usermin");
 		local %uminiserv;
 		&usermin::get_usermin_miniserv_config(\%uminiserv);
 		if (&check_pid_file($uminiserv{'pidfile'}) &&
-		defined(&usermin::switch_to_usermin_user) &&
-		$uminiserv{'session'}) {
+		    defined(&usermin::switch_to_usermin_user) &&
+		    $uminiserv{'session'}) {
 			$usermin = 1;
 			}
 		}
