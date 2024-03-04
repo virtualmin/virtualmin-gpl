@@ -927,7 +927,6 @@ else {
 		}
 
 	# Start third table, for email settings
-	$tr_hidden = $d->{'mail'} ? undef : ['style="display: none"'];
 	$hasprimary = $d && !$user->{'noprimary'} && $d->{'mail'};
 	$hasmailfile = !$in{'new'} && ($user->{'email'} ||
 		       @{$user->{'extraemail'}}) && !$user->{'nomailfile'};
@@ -936,14 +935,13 @@ else {
 	$hasspam = $config{'spam'} && $hasprimary;
 	$hasemail = $hasprimary || $hasmailfile || $hasextra ||
 		    $hassend || $hasspam;
-	$hasemailaccordion = !$user->{'webowner'};
+	$hasemailaccordion = !$user->{'webowner'} && $d->{'mail'};
 
 	# Email settings
 	if ($hasemailaccordion) {
-		if ($hasemail) {
-			my $style_display_none = $d->{'mail'} ? "" : " style='display:none' ";
+		if ($hasemail && $d->{'mail'}) {
 			print &ui_hidden_table_start(
-				$text{'user_header3'}, "${style_display_none}width=100%", 2, "table2a", 0);
+				$text{'user_header3'}, "width=100%", 2, "table2a", 0);
 			}
 
 		if ($hasprimary) {
@@ -952,7 +950,7 @@ else {
 				&hlink($text{'user_mailbox'}, "mailbox"),
 				&ui_yesno_radio("mailbox",
 					$user->{'email'} || $in{'new'} ? 1 : 0),
-				2, \@tds, $tr_hidden);
+				2, \@tds);
 			}
 
 		if ($hasmailfile && $config{'show_mailuser'}) {
@@ -977,7 +975,7 @@ else {
 				"</font>\n";
 				}
 			print &ui_table_row(&hlink($text{'user_mail'}, "mailfile"),
-					$mffield, 2, \@tds, $tr_hidden);
+					$mffield, 2, \@tds);
 			}
 
 		if ($hasextra) {
@@ -993,7 +991,7 @@ else {
 			print &ui_table_row(
 				&hlink($text{'user_extra'}, "extraemail"),
 				&ui_textarea("extra", join("\n", @extra), 5, 50),
-				2, \@tds, $tr_hidden);
+				2, \@tds);
 			}
 
 		if ($in{'new'} && &will_send_user_email($d, 1)) {
@@ -1005,7 +1003,7 @@ else {
 				    $user->{'email'} ? $text{'user_newmail1'}
 						     : $text{'user_newmail2'},
 				    $text{'user_newmail0'}),
-				2, \@tds, $tr_hidden);
+				2, \@tds);
 			}
 		elsif (!$in{'new'} && &will_send_user_email($d, 0)) {
 			# Show option to re-send info email
@@ -1015,7 +1013,7 @@ else {
 					[ [ 1, $text{'user_remail1'} ],
 					[ 0, $text{'user_remail0'} ] ])." ".
 				&ui_textbox("remail", $user->{'email'}, 40),
-				2, \@tds, $tr_hidden);
+				2, \@tds);
 			}
 
 		# Show spam check flag
@@ -1042,7 +1040,7 @@ else {
 						[ [ 0, $text{'yes'} ],
 						  [ 1, $text{'no'} ] ]).
 					$awl_link,
-				2, \@tds, $tr_hidden);
+				2, \@tds);
 			}
 
 		# Show most recent logins
@@ -1056,7 +1054,7 @@ else {
 			print &ui_table_row(
 				&hlink($text{'user_lastlogin'}, "lastlogin"),
 				@grid ? &ui_grid_table(\@grid, 2, 50)
-				: $text{'user_lastlogin_never'}, undef, undef, $tr_hidden);
+				: $text{'user_lastlogin_never'});
 			}
 
 		if ($hasemail) {
@@ -1138,10 +1136,6 @@ else {
 
 			print &ui_hidden_table_end("table2a");
 			}
-		}
-	else {
-		print &ui_hidden('recovery_def', 1);
-		print &ui_hidden('remail_def', 1);
 		}
 
 	# Cache the list of available mail plugins

@@ -319,7 +319,7 @@ else {
 		}
 
 	# Save recovery address
-	if (!$mailbox) {
+	if (!$mailbox && ($in{'recovery_def'} || $in{'recovery'})) {
 		$in{'recovery_def'} || $in{'recovery'} =~ /^\S+\@\S+$/ ||
 			&error($text{'user_erecovery'});
 		$user->{'recovery'} = $in{'recovery_def'} ? ""
@@ -329,12 +329,12 @@ else {
 	# Get the email address to send new/updated mailbox, for the mailbox
 	# itself. Email may also be sent to the reseller and domain owner
 	if ($in{'new'} && &will_send_user_email($d, 1) &&
-	    !$in{'newmail_def'}) {
+	    !$in{'newmail_def'} && $in{'newmail'}) {
 		$in{'newmail'} =~ /^\S+$/ || &error($text{'user_enewmail'});
 		$newmailto = $in{'newmail'};
 		}
 	elsif (!$in{'new'} && &will_send_user_email($d, 0) &&
-	       !$in{'remail_def'}) {
+	       !$in{'remail_def'} && $in{'remail'}) {
 		$in{'remail'} =~ /^\S+$/ || &error($text{'user_eremail'});
 		$newmailto = $in{'remail'};
 		}
