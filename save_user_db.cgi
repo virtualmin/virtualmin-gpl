@@ -18,7 +18,10 @@ else {
 $virtualmin_pro || &error($text{'users_ecannot4db'});
 
 # User to edit or delete
-my $full_dbuser = lc("$in{'dbuser'}"."@".$d->{'dom'});
+my $full_dbuser = lc($in{'dbuser'});
+$full_dbuser = &userdom_name($in{'dbuser'}, $d)
+        if ($config{'append'});
+
 if (!$in{'new'}) {
         my $olduser_name = $in{'olduser'};
         $user = &get_extra_db_user($d, $olduser_name);

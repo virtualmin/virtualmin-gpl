@@ -18,7 +18,10 @@ else {
 $virtualmin_pro || &error($text{'users_ecannot4web'});
 
 # User to edit or delete
-my $user_full = lc("$in{'webuser'}"."@".$d->{'dom'});
+my $user_full = lc($in{'webuser'});
+$user_full = &userdom_name($in{'webuser'}, $d)
+        if ($config{'append'});
+
 if (!$in{'new'}) {
         my $olduser_name = $in{'olduser'};
         $user = &get_extra_web_user($d, $olduser_name);
