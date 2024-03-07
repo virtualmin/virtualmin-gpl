@@ -250,13 +250,38 @@ $nbsps = "&nbsp;&nbsp;" if ($nbsps);
 
 =head2 vui_ui_input_noauto_attrs()
 
-Returns attributes preventing browser
-to autofill input fields
+Returns attributes preventing browser to autofill input fields
 
 =cut
 sub vui_ui_input_noauto_attrs
 {
 return "autocomplete='new-password' autocorrect='off' spellcheck='false'";
+}
+
+=head2 vui_noauto_textbox(name, value, size, [disabled?], [maxlength], [tags])
+
+Like ui_textbox, but with autocompletion disabled
+
+=cut
+sub vui_noauto_textbox
+{
+my ($name, $value, $size, $dis, $max, $tags) = @_;
+$tags ||= "";
+$tags .= " ".&vui_ui_input_noauto_attrs();
+return &ui_textbox($name, $value, $size, $dis, $max, $tags);
+}
+
+=head2 vui_noauto_password(name, value, size, [disabled?], [maxlength], [tags])
+
+Like ui_password, but with autocompletion disabled
+
+=cut
+sub vui_noauto_password
+{
+my ($name, $value, $size, $dis, $max, $tags) = @_;
+$tags ||= "";
+$tags .= " ".&vui_ui_input_noauto_attrs();
+return &ui_password($name, $value, $size, $dis, $max, $tags);
 }
 
 =head2 vui_edit_link_icon()

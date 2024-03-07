@@ -178,8 +178,7 @@ print &ui_hidden_table_start($text{'form_header'}, "width=100%", 2,
 if ($subdom) {
 	# Under top-level domain
 	print &ui_table_row(&hlink($text{'form_domain'}, "domainname"),
-		&ui_textbox("dom", undef, 20, 0, undef,
-		  &vui_ui_input_noauto_attrs()).".$subdom->{'dom'}",
+		&vui_noauto_textbox("dom", undef, 20).".$subdom->{'dom'}",
 		undef, \@tds);
 	}
 else {
@@ -188,8 +187,8 @@ else {
 			".$parentdom->{'dom'}" :
 		       $access{'subdom'} ? ".$access{'subdom'}" : undef;
 	print &ui_table_row(&hlink($text{'form_domain'}, "domainname"),
-	      &ui_textbox("dom", $force, 50, 0, undef,
-			  "onBlur='domain_change(this)' @{[&vui_ui_input_noauto_attrs()]}'"),
+	      &vui_noauto_textbox("dom", $force, 50, 0, undef,
+				  "onBlur='domain_change(this)'"),
 	      undef, \@tds);
 
 	# Javascript to append domain name if needed
@@ -207,8 +206,7 @@ else {
 
 # Description / owner
 print &ui_table_row(&hlink($text{'form_owner'}, "ownersname"),
-		    &ui_textbox("owner", undef, 50, undef, undef,
-			  &vui_ui_input_noauto_attrs()),
+		    &vui_noauto_textbox("owner", undef, 50),
 		    undef, \@tds);
 
 if (!$parentuser) {
@@ -223,8 +221,7 @@ if (!$parentuser) {
 			  [ [ 0, $text{'form_sshkey0'} ],
 			    [ 1, $text{'form_sshkey1'} ],
 			    [ 2, $text{'form_sshkey2'} ] ])."<br>\n".
-		&ui_textarea("sshkey", undef, 3, 60,
-		             undef, undef, &vui_ui_input_noauto_attrs()), undef, \@tds);
+		&ui_textarea("sshkey", undef, 3, 60), undef, \@tds);
 	}
 
 # Generate Javascript for template change

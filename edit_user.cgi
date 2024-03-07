@@ -47,8 +47,7 @@ if ($user_type eq 'ssh') {
 	my $universal_type = $config{'nopostfix_extra_user'} != 2 ? "_universal" : "";
 	print &ui_table_row(
 		&hlink($text{'user_user2'}, "username2$universal_type"),
-		&ui_textbox("mailuser", undef, 13, 0, undef,
-			&vui_ui_input_noauto_attrs()).
+		&vui_noauto_textbox("mailuser", undef, 13).
 		($d ? "\@".&show_domain_name($d) : ""),
 		2, \@tds);
 
@@ -78,8 +77,7 @@ if ($user_type eq 'ssh') {
 						[ [ 0, $text{'form_sshkey0'} ],
 						  [ 2, $text{'form_sshkey2'} ] ]),
 					'manage-user-ssh-public-key').
-				"<br>\n".&ui_textarea("sshkey", undef, 3, 60,
-					undef, undef, &vui_ui_input_noauto_attrs()),
+				"<br>\n".&ui_textarea("sshkey", undef, 3, 60),
 						undef, &procell() || \@tds);
 			}
 		}
@@ -88,8 +86,7 @@ if ($user_type eq 'ssh') {
 	if ($user->{'person'}) {
 		print &ui_table_row(
 			&hlink($text{'user_real'}, "realname"),
-			&ui_textbox("real", $user->{'real'}, 40, 0, undef,
-				    &vui_ui_input_noauto_attrs()),
+			&vui_noauto_textbox("real", $user->{'real'}, 40),
 			2, \@tds);
 		}
 
@@ -211,8 +208,7 @@ elsif ($user_type eq 'ftp') {
 	my $universal_type = $config{'nopostfix_extra_user'} != 2 ? "_universal" : "";
 	print &ui_table_row(
 		&hlink($text{'user_user2'}, "username4$universal_type"),
-		&ui_textbox("mailuser", undef, 13, 0, undef,
-			&vui_ui_input_noauto_attrs()).
+		&vui_noauto_textbox("mailuser", undef, 13).
 		($d ? "\@".&show_domain_name($d) : ""), 2, \@tds);
 
 	# Password cannot be edited for domain owners (because it is the
@@ -234,8 +230,7 @@ elsif ($user_type eq 'ftp') {
 	if ($user->{'person'}) {
 		print &ui_table_row(
 			&hlink($text{'user_real'}, "realname"),
-			&ui_textbox("real", $user->{'real'}, 40, 0, undef,
-				    &vui_ui_input_noauto_attrs()),
+			&vui_noauto_textbox("real", $user->{'real'}, 40),
 			2, \@tds);
 		}
 
@@ -327,9 +322,8 @@ elsif ($user_type eq 'mail') {
 				"_universal" : "";
 	print &ui_table_row(
 		&hlink($text{'user_user'}, "username$universal_type"),
-		&ui_textbox("mailuser", undef, 13, 0, undef,
-			&vui_ui_input_noauto_attrs()).
-		($d ? "\@".&show_domain_name($d) : ""),
+		&vui_noauto_textbox("mailuser", undef, 13).
+			($d ? "\@".&show_domain_name($d) : ""),
 		2, \@tds);
 
 	# Password field
@@ -355,8 +349,8 @@ elsif ($user_type eq 'mail') {
 	if ($user->{'person'}) {
 		print &ui_table_row(
 			&hlink($text{'user_real'}, "realname"),
-			&ui_textbox("real", $user->{'real'}, 40, 0, undef,
-				    &vui_ui_input_noauto_attrs()), 2, \@tds);
+			&vui_noauto_textbox("real", $user->{'real'}, 40),
+			2, \@tds);
 		}
 
 	print &ui_hidden_table_end();
@@ -525,8 +519,7 @@ elsif ($user_type eq 'db') {
 	# Edit db user
 	print &ui_table_row(&hlink($text{'user_user2'}, "username_db"),
 		&inline_html_pro_tip(
-			&ui_textbox("dbuser", $dbuser_name, 15, 0, undef,
-				&vui_ui_input_noauto_attrs()).
+			&vui_noauto_textbox("dbuser", $dbuser_name, 15).
 				  ($d ? "\@".&show_domain_name($d) : ""),
 			'manage-extra-database-users', 1),
 		2, &procell(undef, @tds) || \@tds);
@@ -602,9 +595,8 @@ elsif ($user_type eq 'web') {
 		# Edit web user
 		print &ui_table_row(&hlink($text{'user_user2'}, "username_web"),
 			&inline_html_pro_tip(
-				&ui_textbox("webuser", $webuser_name, 15, 0, undef,
-					&vui_ui_input_noauto_attrs()).
-						($d ? "\@".&show_domain_name($d) : ""),
+				&vui_noauto_textbox("webuser", $webuser_name, 15).
+					($d ? "\@".&show_domain_name($d) : ""),
 				'manage-extra-webserver-users', 1),
 			2, &procell(undef, @tds) || \@tds);
 
