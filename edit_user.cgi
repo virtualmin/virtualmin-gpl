@@ -44,9 +44,8 @@ if ($user_type eq 'ssh') {
 		"width=100%", 2, "table1", 1);
 
 	# Edit mail username
-	my $universal_type = $config{'nopostfix_extra_user'} != 2 ? "_universal" : "";
 	print &ui_table_row(
-		&hlink($text{'user_user2'}, "username2$universal_type"),
+		&hlink($text{'user_user2'}, "username2_universal"),
 		&vui_noauto_textbox("mailuser", undef, 13).
 		($d ? "\@".&show_domain_name($d) : ""),
 		2, \@tds);
@@ -205,9 +204,8 @@ elsif ($user_type eq 'ftp') {
 		"width=100%", 2);
 
 	# Edit mail username
-	my $universal_type = $config{'nopostfix_extra_user'} != 2 ? "_universal" : "";
 	print &ui_table_row(
-		&hlink($text{'user_user2'}, "username4$universal_type"),
+		&hlink($text{'user_user2'}, "username4_universal"),
 		&vui_noauto_textbox("mailuser", undef, 13).
 		($d ? "\@".&show_domain_name($d) : ""), 2, \@tds);
 
@@ -318,10 +316,8 @@ elsif ($user_type eq 'mail') {
 		"width=100%", 2, "table1", 1);
 
 	# Edit mail username
-	my $universal_type = $config{'nopostfix_extra_user'} != 2 ?
-				"_universal" : "";
 	print &ui_table_row(
-		&hlink($text{'user_user'}, "username$universal_type"),
+		&hlink($text{'user_user'}, "username_universal"),
 		&vui_noauto_textbox("mailuser", undef, 13).
 			($d ? "\@".&show_domain_name($d) : ""),
 		2, \@tds);
@@ -679,17 +675,16 @@ else {
 		"width=100%", 2, "table1", 1);
 
 	# Show username, editable if this is not the domain owner
-	my $universal_type = $config{'nopostfix_extra_user'} != 2 ? "_universal" : "";
 	$ulabel = ($d->{'mail'} && !$user->{'webowner'}) ?
-		&hlink($text{'user_user'}, "username$universal_type") :
-		&hlink($text{'user_user2'}, "username2$universal_type");
-	$ulabel = &hlink($text{'user_user3'},
-			 ($user->{'webowner'} ? 'username4' : 'username3').
-		  $universal_type)
-		if ($universal_type && $in{'new'});
-	$ulabel = &hlink($text{'user_user2'}, "username4$universal_type")
-		if ($user->{'webowner'});
-
+		&hlink($text{'user_user'}, "username_universal") :
+		&hlink($text{'user_user2'}, "username2_universal");
+	if ($in{'new'}) {
+		$ulabel = &hlink($text{'user_user3'},
+				($user->{'webowner'} ? 'username4' : 'username3')."_universal");
+		}
+	if ($user->{'webowner'}) {
+		$ulabel = &hlink($text{'user_user2'}, "username4_universal");
+		}
 	if ($mailbox) {
 		# Domain owner
 		my $ouser_email = $user->{'user'};
@@ -697,7 +692,7 @@ else {
 			$ouser_email = $user->{'user'} . "\@" . $d->{'dom'};
 			}
 		print &ui_table_row(
-			&hlink($text{'user_user2'}, "username2$universal_type"),
+			&hlink($text{'user_user2'}, "username2_universal"),
 			"<tt>$user->{'user'}</tt>", 2, \@tds);
 		print &ui_table_row($ulabel, "<tt>$ouser_email</tt>", 2, \@tds)
 			if ($d->{'mail'});
@@ -709,15 +704,9 @@ else {
 			&remove_userdom($user->{'user'}, $d) : $user->{'user'};
 		# Full username differs
 		if ($pop3 ne $user->{'user'}) {
-			my $username_label = $d->{'mail'} ?
-				&hlink($text{"user_user3"}, 'user_imap') :
-				&hlink($text{"user_user3"}, 'user_imapf');
-			if ($config{'nopostfix_extra_user'} != 2) {
-				$username_label = &hlink($text{"user_user3"},
-					$user->{'webowner'} ? 'username4' : 'username3');
-				}
 			print &ui_table_row(
-				$username_label,
+				&hlink($text{"user_user3"},
+					$user->{'webowner'} ? 'username4' : 'username3'),
 				"<tt>$user->{'user'}</tt>");
 			}
 		# Edit mail username
