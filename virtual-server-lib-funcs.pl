@@ -1188,7 +1188,7 @@ foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
 	eval {
 		local $main::error_must_die = 1;
 		my @dbs = map { $_->{'name'} }
-					grep { $_->{'type'} eq $dt } @{$user->{'dbs'}};
+			      grep { $_->{'type'} eq $dt } @{$user->{'dbs'}};
 		if (&indexof($dt, &list_database_plugins()) < 0) {
 			# Create in core database
 			my $crfunc = "create_${dt}_database_user";
@@ -1197,8 +1197,8 @@ foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
 		elsif (&indexof($dt, &list_database_plugins()) >= 0) {
 			# Create in plugin database
 			&plugin_call($dt, "database_create_user",
-					$d, \@dbs, $user->{'user'},
-					$user->{'pass'});
+				     $d, \@dbs, $user->{'user'},
+				     $user->{'pass'});
 			}
 		};
 	# Show error

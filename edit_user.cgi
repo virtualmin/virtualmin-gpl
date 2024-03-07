@@ -502,6 +502,7 @@ elsif ($user_type eq 'db') {
 	&ui_print_header(
 		$din, $text{$in{'new'} ? 'user_createdb' : 'user_edit'}, "",
 		$in{'new'} ? 'users_explain_user_db' : undef);
+
 	$user = &create_initial_user($d);
 	&list_extra_user_pro_tip('db', "list_users.cgi?dom=$in{'dom'}");
 	print &ui_form_start("save_user_db.cgi", "post");
@@ -543,11 +544,8 @@ elsif ($user_type eq 'db') {
 					'manage-extra-database-users', 1),
 					2, &procell(undef, @tds) || \@tds);
 
-	# List databases
-	my @dbs;
-	@dbs = grep { $_->{'users'} } &domain_databases($d) if ($d);
-
 	# Show allowed databases
+	my @dbs = grep { $_->{'users'} } &domain_databases($d) if ($d);
 	if (@dbs) {
 		print &ui_table_hr();
 		my @idbs = $in{'new'} ? @{$user->{'dbs'}} : @{$dbuser->{'dbs'}};
@@ -556,7 +554,7 @@ elsif ($user_type eq 'db') {
 		@alldbs = map { [ $_->{'type'}."_".$_->{'name'},
 				$_->{'name'}." ($_->{'desc'})" ] } @dbs;
 		print &ui_table_row(&hlink($text{'user_dbs'},"userdbs"),
-		&ui_multi_select("dbs", \@userdbs, \@alldbs, 5, 1, 0,
+			&ui_multi_select("dbs", \@userdbs, \@alldbs, 5, 1, 0,
 				$text{'user_dbsall'}, $text{'user_dbssel'}),
 					2, &procell(2));
 		}
@@ -568,6 +566,7 @@ elsif ($user_type eq 'web') {
 	&ui_print_header(
 	    $din, $text{$in{'new'} ? 'user_createwebserver' : 'user_edit'}, "",
 	    $in{'new'} ? 'users_explain_user_web' : undef);
+
 	&list_extra_user_pro_tip('web', "list_users.cgi?dom=$in{'dom'}");
 	print &ui_form_start("save_user_web.cgi", "post");
 	print &ui_hidden("new", $in{'new'});
@@ -1164,7 +1163,7 @@ else {
 		@alldbs = map { [ $_->{'type'}."_".$_->{'name'},
 				$_->{'name'}." ($_->{'desc'})" ] } @dbs;
 		print &ui_table_row(&hlink($text{'user_dbs'},"userdbs"),
-		&ui_multi_select("dbs", \@userdbs, \@alldbs, 5, 1, 0,
+		    &ui_multi_select("dbs", \@userdbs, \@alldbs, 5, 1, 0,
 			$text{'user_dbsall'}, $text{'user_dbssel'}), 2, \@tds);
 		print &ui_hidden_table_end("table4");
 		}
