@@ -504,7 +504,7 @@ elsif ($user_type eq 'db') {
 		$in{'new'} ? 'users_explain_user_db' : undef);
 	$user = &create_initial_user($d);
 	&list_extra_user_pro_tip('db', "list_users.cgi?dom=$in{'dom'}");
-	print &ui_form_start("save_user_db.cgi", "post");
+	print &ui_form_start("pro/save_user_db.cgi", "post");
 	print &ui_hidden("new", $in{'new'});
 	print &ui_hidden("olduser", $in{'user'});
 	print &ui_hidden("dom", $in{'dom'});
@@ -569,7 +569,7 @@ elsif ($user_type eq 'web') {
 	    $din, $text{$in{'new'} ? 'user_createwebserver' : 'user_edit'}, "",
 	    $in{'new'} ? 'users_explain_user_web' : undef);
 	&list_extra_user_pro_tip('web', "list_users.cgi?dom=$in{'dom'}");
-	print &ui_form_start("save_user_web.cgi", "post");
+	print &ui_form_start("pro/save_user_web.cgi", "post");
 	print &ui_hidden("new", $in{'new'});
 	print &ui_hidden("olduser", $in{'user'});
 	print &ui_hidden("dom", $in{'dom'});
