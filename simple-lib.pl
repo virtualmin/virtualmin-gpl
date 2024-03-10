@@ -427,7 +427,10 @@ else {
 if (!$nobounce) {
 	$simple->{'bounce'} = $in->{'bounce'};
 	}
-if ($in->{'forward'}) {
+my $mb_or_alias =
+	(defined($in->{'mailbox'}) && $in->{'mailbox'}) ||
+	!defined($in->{'mailbox'});
+if ($in->{'forward'} && $mb_or_alias) {
 	$in->{'forwardto'} || &error($text{'alias_eforward'});
 	$simple->{'forward'} = [ split(/\s+/, $in->{'forwardto'}) ];
 	foreach my $f (@{$simple->{'forward'}}) {
@@ -524,7 +527,7 @@ if ($in->{'autotext'}) {
 if ($in->{'auto'}) {
 	$in->{'autotext'} =~ /\S/ || &error($text{'alias_eautotext'});
 	}
-$simple->{'auto'} = $in->{'auto'};
+$simple->{'auto'} = $in->{'auto'} && $mb_or_alias;
 }
 
 # get_autoreply_file_dir()
