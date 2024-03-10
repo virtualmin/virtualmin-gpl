@@ -225,9 +225,11 @@ else {
 				if ( $in{'quota'} eq -1 ) {
 					$in{'quota'} = $in{'otherquota'};
 					}
-				$in{'quota_def'} || $in{'quota'} =~ /^[0-9\.]+$/ ||
+				$in{'quota_def'} ||
+				    $in{'quota'} =~ /^[0-9\.]+$/ ||
 					&error($text{'user_equota'});
-				$user->{'quota'} = $in{'quota_def'} ? 0 : &quota_parse("quota", "home");
+				$user->{'quota'} = $in{'quota_def'} ? 0 :
+					&quota_parse("quota", "home");
 				!$user->{'quota'} || !$pd->{'quota'} ||
 				  $user->{'quota'} <= $pd->{'quota'} ||
 				  &error(&text('user_eoverquota',
@@ -242,9 +244,11 @@ else {
 				if ( $in{'mquota'} eq -1 ) {
 					$in{'mquota'} = $in{'othermquota'};
 					}
-				$in{'mquota_def'} || $in{'mquota'} =~ /^[0-9\.]+$/ ||
+				$in{'mquota_def'} ||
+				    $in{'mquota'} =~ /^[0-9\.]+$/ ||
 					&error($text{'user_equota'});
-				$user->{'mquota'} = $in{'mquota_def'} ? 0 : &quota_parse("mquota", "mail");
+				$user->{'mquota'} = $in{'mquota_def'} ? 0 :
+					&quota_parse("mquota", "mail");
 				!$user->{'mquota'} || !$pd->{'mquota'} ||
 				  $user->{'mquota'} <= $pd->{'mquota'} ||
 				  &error(&text('user_eovermquota',
@@ -447,7 +451,8 @@ else {
 			# Need to append domain name
 			if ($d) {
 				# Add group name
-				$user->{'user'} = &userdom_name($in{'mailuser'},$d);
+				$user->{'user'} = &userdom_name(
+					$in{'mailuser'},$d);
 				}
 			else {
 				# No domain to add, so give up!
@@ -497,8 +502,8 @@ else {
 				&parse_simple_form($simple, \%in, $d, 1, 1, 1,
 						   $user->{'user'});
 				$simple->{'from'} = $fullemail;
-				$user->{'user_extra'} = &replace_atsign($user->{'user'})
-					if (&need_extra_user($user));
+				$user->{'user_extra'} = &replace_atsign(
+				  $user->{'user'}) if (&need_extra_user($user));
 				&save_simple_alias($d, $user, $simple);
 				if (@{$user->{'to'}} == 1 &&
 				    $simple->{'tome'}) {
@@ -527,7 +532,8 @@ else {
 
 		# Validate plugins
 		foreach $f (&list_mail_plugins()) {
-			$err = &plugin_call($f, "mailbox_validate", $user, \%old, \%in, $in{'new'}, $d);
+			$err = &plugin_call($f, "mailbox_validate", $user,
+					    \%old, \%in, $in{'new'}, $d);
 			&error($err) if ($err);
 			}
 
@@ -537,6 +543,7 @@ else {
 		my $extra_web_user = &get_extra_web_user($d, $user->{'user'});
 		if (($extra_db_user || $extra_web_user) && !$in{'confirm'}) {
 			# Confirm suppression first
+			# XXX clean this up, or use ui_confirmation_form
 			&ui_print_header(&domain_in($d), $text{'user_createovertitle'}, "");
 			print "<center>\n";
 			print &ui_form_start("save_user.cgi");
@@ -575,8 +582,8 @@ else {
 		&error($err) if ($err);
 
 		# If an extra web user exists and new directories are given then
-		# remove access to the old directories first to avoid overlap and
-		# have duplicated records
+		# remove access to the old directories first to avoid overlap
+		# and have duplicated records
 		if ($extra_web_user && $in{'virtualmin_htpasswd'}) {
 			&revoke_webserver_user_access($user, $d);
 			}
@@ -628,7 +635,8 @@ else {
 			# Update user parameters (handle rename and .group)
 			if ($in{'mailuser'} ne $in{'oldpop3'}) {
 				# Check for a clash in this domain
-				($clash) = grep { $_->{'user'} eq $in{'mailuser'} &&
+				($clash) = grep {
+				  $_->{'user'} eq $in{'mailuser'} &&
 				  $_->{'unix'} == $user->{'unix'} } @users;
 				$clash && &error($text{'user_eclash2'});
 
@@ -690,7 +698,8 @@ else {
 
 		# Validate plugins
 		foreach $f (&list_mail_plugins()) {
-			$err = &plugin_call($f, "mailbox_validate", $user, \%old, \%in, $in{'new'}, $d);
+			$err = &plugin_call($f, "mailbox_validate", $user,
+					    \%old, \%in, $in{'new'}, $d);
 			&error($err) if ($err);
 			}
 
@@ -736,7 +745,8 @@ else {
 				}
 			}
 		elsif (&master_admin()) {
-			# Update shell if called in master admin mode, and only if available 
+			# Update shell if called in master admin mode, and
+			# only if available 
 			if (defined($in{'shell'})) {
 				&check_available_shell($in{'shell'}, 'mailbox',
 						       $user->{'shell'}) ||
@@ -752,12 +762,15 @@ else {
 			$sshkey = &trim($sshkey);
 			$sshkeyerr = &validate_ssh_pubkey($sshkey);
 			&error($sshkeyerr) if ($sshkeyerr);
-			my $existing_key = &get_domain_user_ssh_pubkey($d, \%old);
+			my $existing_key = &get_domain_user_ssh_pubkey(
+						$d, \%old);
 			if ($existing_key) {
-				&update_domain_user_ssh_pubkey($d, $user, \%old, $sshkey)
+				&update_domain_user_ssh_pubkey(
+					$d, $user, \%old, $sshkey)
 				}
 			else {
-				$err = &add_domain_user_ssh_pubkey($d, $user, $sshkey);
+				$err = &add_domain_user_ssh_pubkey(
+					$d, $user, $sshkey);
 				&error($err) if ($err);
 				}
 			}
