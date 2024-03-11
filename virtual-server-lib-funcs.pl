@@ -18392,10 +18392,16 @@ if (defined($value)) {
 			push(@ashells, $got);
 			}
 		else {
+			# Add unknown shell description if available
+			my ($value_desc) = 
+				grep { $_->{'shell'} eq $value }
+					@aashells;
 			# Totally unknown
 			if ($value) {
-				push(@ashells, { 'shell' => $value,
-						 'desc' => $value });
+				push(@ashells,
+					{ 'shell' => $value,
+					  'desc' => $value_desc->{'desc'} ||
+						    $value });
 				}
 			else {
 				push(@ashells, { 'shell' => '',
