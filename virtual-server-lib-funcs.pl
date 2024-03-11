@@ -18374,17 +18374,17 @@ else {
 # Returns HTML for selecting a shell for a mailbox or domain owner
 sub available_shells_menu
 {
-local ($name, $value, $type, $showcmd, $mustftp) = @_;
-local @tshells = grep { $_->{$type} } &list_available_shells(
-					undef, $mustftp ? 0 : undef);
-local @ashells = grep { $_->{'avail'} } @tshells;
+my ($name, $value, $type, $showcmd, $mustftp) = @_;
+my @aashells = &list_available_shells(undef, $mustftp ? 0 : undef);
+my @tshells = grep { $_->{$type} } @aashells;
+my @ashells = grep { $_->{'avail'} } @tshells;
 if ($mustftp) {
 	# Only show shells with FTP access or better
 	@ashells = grep { $_->{'id'} ne 'nologin' } @ashells;
 	}
 if (defined($value)) {
 	# Is current shell on the list?
-	local ($got) = grep { $_->{'shell'} eq $value } @ashells;
+	my ($got) = grep { $_->{'shell'} eq $value } @ashells;
 	if (!$got) {
 		($got) = grep { $_->{'shell'} eq $value } @tshells;
 		if ($got) {
@@ -18405,7 +18405,7 @@ if (defined($value)) {
 		}
 	}
 else {
-	local ($def) = grep { $_->{'default'} } @ashells;
+	my ($def) = grep { $_->{'default'} } @ashells;
 	$value = $def ? $def->{'shell'} : undef;
 	}
 return &ui_select($name, $value,
