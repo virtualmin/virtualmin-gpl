@@ -5939,7 +5939,6 @@ return 0 if (!$maillog);
 # Seek to the last position
 &lock_file($mail_login_file);
 open(MAILLOG, $maillog);
-print STDERR "reading $maillog\n";
 if ($maillog !~ /\|$/) {
 	# Reading a regular file, so seek into it
 	my @st = stat($maillog);
@@ -5965,14 +5964,7 @@ while(<MAILLOG>) {
 
 	if (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+dovecot\S*:\s+(pop3|imap)-login:\s+Login:\s+user=<([^>]+)>/) {
 		# POP3 or IMAP login with dovecot
-		my $ltime;
-		eval { $ltime = timelocal($5, $4, $3, $2,
-				          $apache_mmap{lc($1)}, $tm[5]); };
-		if (!$ltime || $ltime > $now+(24*60*60)) {
-			# Must have been last year!
-			eval { $ltime = timelocal($5, $4, $3, $2,
-					  $apache_mmap{lc($1)}, $tm[5]-1); };
-			}
+		my $ltime = &log_time_to_unix_time($tm[5], $1, $2, $3, $4, $5);
 		if (!$lasttime || $ltime > $lasttime) {
 			&add_last_login_time(\%logins, $ltime, $7, $8);
 			$finaltime = $ltime;
@@ -5980,14 +5972,7 @@ while(<MAILLOG>) {
 		}
 	elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+.*sasl_username=([^ ,]+)/) {
 		# Postfix SMTP
-		my $ltime;
-		eval { $ltime = timelocal($5, $4, $3, $2,
-				          $apache_mmap{lc($1)}, $tm[5]); };
-		if (!$ltime || $ltime > $now+(24*60*60)) {
-			# Must have been last year!
-			eval { $ltime = timelocal($5, $4, $3, $2,
-					  $apache_mmap{lc($1)}, $tm[5]-1); };
-			}
+		my $ltime = &log_time_to_unix_time($tm[5], $1, $2, $3, $4, $5);
 		if (!$lasttime || $ltime > $lasttime) {
 			&add_last_login_time(\%logins, $ltime, 'smtp', $7);
 			$finaltime = $ltime;
@@ -6001,6 +5986,22 @@ $logins{'lasttime'} = $finaltime || $now;
 &write_file($mail_login_file, \%logins);
 &unlock_file($mail_login_file);
 return 1;
+}
+
+# log_time_to_unix_time(year, month, day, hour, minute, second)
+# Convert the parts of a log line with the date and time to a Unix time
+sub log_time_to_unix_time
+{
+my ($year, $mon, $day, $hour, $min, $sec) = @_;
+my $ltime;
+eval { $ltime = timelocal($sec, $min, $hour, $day,
+			  $apache_mmap{lc($mon)}, $year); };
+if (!$ltime || $ltime > time()+(24*60*60)) {
+	# Must have been last year!
+	eval { $ltime = timelocal($sec, $min, $hour, $day,
+			  $apache_mmap{lc($mon)}, $year-1); };
+	}
+return $ltime;
 }
 
 # add_last_login_time(&logins, time, type, username)
