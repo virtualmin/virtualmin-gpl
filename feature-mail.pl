@@ -6150,18 +6150,19 @@ if ($config{'mail_system'} == 0) {
 	local ($smtps) = grep {
 		$_->{'name'} =~ /^(smtps|[0-9\.]+:smtps)$/ &&
 		$_->{'enabled'} } @$master;
-	if ($smtps) {
-		# Pure SSL SMTP connection
-		$smtp_port = 465;
-		$smtp_type = "SSL";
-		$smtp_ssl = "yes";
-		}
-	elsif ($submission) {
+	if ($submission) {
+		# Submission port, hopefully with TLS
 		$smtp_port = 587;
 		if ($submission->{'command'} =~ /smtpd_sasl_auth_enable=(yes)/) {
 			$smtp_type = "STARTTLS";
 			$smtp_ssl = "no";
 			}
+		}
+	elsif ($smtps) {
+		# Pure SSL SMTP connection
+		$smtp_port = 465;
+		$smtp_type = "SSL";
+		$smtp_ssl = "yes";
 		}
 	}
 elsif ($config{'mail_system'} == 1) {
