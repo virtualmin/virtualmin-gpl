@@ -5962,21 +5962,20 @@ while(<MAILLOG>) {
 	# Remove Solaris extra part like [ID 197553 mail.info]
 	s/\[ID\s+\d+\s+\S+\]\s+//;
 
+	# Extract date from log line
+	/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+/ || next;
+	my $ltime = &log_time_to_unix_time($now, $tm[5], $1, $2, $3, $4, $5);
+	next if (!$ltime);
+	next if ($lasttime && $ltime <= $lasttime);
+	$finaltime = $ltime;
+
 	if (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+dovecot\S*:\s+(pop3|imap)-login:\s+Login:\s+user=<([^>]+)>/) {
 		# POP3 or IMAP login with dovecot
-		my $ltime = &log_time_to_unix_time($tm[5], $1, $2, $3, $4, $5);
-		if (!$lasttime || $ltime > $lasttime) {
-			&add_last_login_time(\%logins, $ltime, $7, $8);
-			$finaltime = $ltime;
-			}
+		&add_last_login_time(\%logins, $ltime, $7, $8);
 		}
 	elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+.*sasl_username=([^ ,]+)/) {
 		# Postfix SMTP
-		my $ltime = &log_time_to_unix_time($tm[5], $1, $2, $3, $4, $5);
-		if (!$lasttime || $ltime > $lasttime) {
-			&add_last_login_time(\%logins, $ltime, 'smtp', $7);
-			$finaltime = $ltime;
-			}
+		&add_last_login_time(\%logins, $ltime, 'smtp', $7);
 		}
 	}
 close(MAILLOG);
@@ -5988,15 +5987,15 @@ $logins{'lasttime'} = $finaltime || $now;
 return 1;
 }
 
-# log_time_to_unix_time(year, month, day, hour, minute, second)
+# log_time_to_unix_time(start-time, year, month, day, hour, minute, second)
 # Convert the parts of a log line with the date and time to a Unix time
 sub log_time_to_unix_time
 {
-my ($year, $mon, $day, $hour, $min, $sec) = @_;
+my ($now, $year, $mon, $day, $hour, $min, $sec) = @_;
 my $ltime;
 eval { $ltime = timelocal($sec, $min, $hour, $day,
 			  $apache_mmap{lc($mon)}, $year); };
-if (!$ltime || $ltime > time()+(24*60*60)) {
+if (!$ltime || $ltime > $now+(24*60*60)) {
 	# Must have been last year!
 	eval { $ltime = timelocal($sec, $min, $hour, $day,
 			  $apache_mmap{lc($mon)}, $year-1); };
