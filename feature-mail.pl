@@ -4007,8 +4007,7 @@ foreach my $lt (values %$starts) {
 
 local $f;
 foreach $f ($config{'bw_maillog_rotated'} ?
-	    &all_log_files($maillog, $min_ltime) :
-	    ( $maillog )) {
+	    &all_log_files($maillog, $min_ltime) : ( $maillog )) {
 	local $_;
 	&open_uncompress_file(LOG, $f);
 
@@ -5939,19 +5938,25 @@ return 0 if (!$maillog);
 
 # Seek to the last position
 &lock_file($mail_login_file);
-my @st = stat($maillog);
-my $lastpost;
-my %logins;
-&read_file($mail_login_file, \%logins);
-$lastpos = $logins{'lastpos'} || $st[7];
-if ($lastpos > $st[7]) {
-	# Off end .. file has probably been rotated
-	$lastpos = 0;
+open(MAILLOG, $maillog);
+print STDERR "reading $maillog\n";
+if ($maillog !~ /\|$/) {
+	# Reading a regular file, so seek into it
+	my @st = stat($maillog);
+	my $lastpost;
+	$lastpos = $logins{'lastpos'} || $st[7];
+	if ($lastpos > $st[7]) {
+		# Off end .. file has probably been rotated
+		$lastpos = 0;
+		}
+	seek(MAILLOG, $lastpos, 0);
 	}
-open(MAILLOG, "<".$maillog);
-seek(MAILLOG, $lastpos, 0);
 my $now = time();
 my @tm = localtime($now);
+my %logins;
+&read_file($mail_login_file, \%logins);
+my $lasttime = $logins{'lasttime'};
+my $finaltime = $lasttime;
 while(<MAILLOG>) {
 	s/\r|\n//g;
 
@@ -5968,7 +5973,10 @@ while(<MAILLOG>) {
 			eval { $ltime = timelocal($5, $4, $3, $2,
 					  $apache_mmap{lc($1)}, $tm[5]-1); };
 			}
-		&add_last_login_time(\%logins, $ltime, $7, $8);
+		if (!$lasttime || $ltime > $lasttime) {
+			&add_last_login_time(\%logins, $ltime, $7, $8);
+			$finaltime = $ltime;
+			}
 		}
 	elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+.*sasl_username=([^ ,]+)/) {
 		# Postfix SMTP
@@ -5980,12 +5988,16 @@ while(<MAILLOG>) {
 			eval { $ltime = timelocal($5, $4, $3, $2,
 					  $apache_mmap{lc($1)}, $tm[5]-1); };
 			}
-		&add_last_login_time(\%logins, $ltime, 'smtp', $7);
+		if (!$lasttime || $ltime > $lasttime) {
+			&add_last_login_time(\%logins, $ltime, 'smtp', $7);
+			$finaltime = $ltime;
+			}
 		}
 	}
 close(MAILLOG);
 @st = stat($maillog);
 $logins{'lastpos'} = $st[7];
+$logins{'lasttime'} = $finaltime || $now;
 &write_file($mail_login_file, \%logins);
 &unlock_file($mail_login_file);
 return 1;
