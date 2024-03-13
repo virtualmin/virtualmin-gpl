@@ -543,25 +543,27 @@ else {
 		my $extra_web_user = &get_extra_web_user($d, $user->{'user'});
 		if (($extra_db_user || $extra_web_user) && !$in{'confirm'}) {
 			# Confirm suppression first
-			# XXX clean this up, or use ui_confirmation_form
 			&ui_print_header(&domain_in($d), $text{'user_createovertitle'}, "");
-			print "<center>\n";
-			print &ui_form_start("save_user.cgi");
+			my @save_user_hids;
 			foreach my $key (keys %in) {
-				print &ui_hidden($key, $in{$key});
+				push(@save_user_hids, [$key, $in{$key}]);
 				}
 			my $createoverdesc = $extra_db_user && $extra_web_user ?
 				"dbweb" : $extra_db_user ? "db" : "web";
 			my $createoverdescm = $extra_db_user && $extra_web_user ? 2 : 1;
-			print &text("user_createoverdesc$createoverdesc", "<tt>$user->{'user'}</tt>");
-			print "<br>".$text{"user_createoverdescm$createoverdescm"};
-			print "<br>".$text{"user_createoverdescmf$createoverdescm"};
-			print &ui_form_end([ [ "confirm", $text{"user_createover$createoverdescm"} ],
-					     [ "", $text{'user_creategoback'}, undef,  undef,
-							'onclick="event.preventDefault(); '.
-							'event.stopImmediatePropagation(); '.
-							'window.history.back();"' ] ]);
-			print "</center>\n";
+			print &ui_confirmation_form(
+				"save_user.cgi",
+				&text("user_createoverdesc$createoverdesc",
+					"<tt>$user->{'user'}</tt>").
+				  "<br>".$text{"user_createoverdescm$createoverdescm"}.
+				  "<br>".$text{"user_createoverdescmf$createoverdescm"},
+				\@save_user_hids,
+				[ [ "confirm", $text{"user_createover$createoverdescm"} ],
+				  [ "", $text{'user_creategoback'}, undef,  undef,
+					'onclick="event.preventDefault(); '.
+					'event.stopImmediatePropagation(); '.
+					'window.history.back();"' ] ],
+				);
 			&ui_print_footer("list_users.cgi?dom=$in{'dom'}",
 				$text{'users_return'});
 			exit;
