@@ -95,7 +95,10 @@ foreach $s (@scripts) {
 				($host, $port, $page, $ssl) = &parse_http_url($url);
 				$h = &make_http_connection(
 					$host, $port, $ssl,
-					$f->{'method'} || "HEAD", $page);
+					$f->{'method'} || "HEAD", $page,
+					[ [ 'Host', $host ],
+					  [ 'User-agent', 'Webmin' ],
+					  [ 'Accept-language', 'en' ] ]);
 				if (!ref($h)) {
 					print ".. failed : $h\n";
 					push(@errs, [ $script, $v, $url, $h ]);
@@ -103,9 +106,6 @@ foreach $s (@scripts) {
 					}
 				
 				# Make sure the file exists
-				&write_http_connection($h, "Host: $host\r\n");
-				&write_http_connection($h, "User-agent: Webmin\r\n");
-				&write_http_connection($h, "\r\n");
 				$line = &read_http_connection($h);
 				$line =~ s/\r|\n//g;
 				if ($line !~ /^HTTP\/1\..\s+(200|30[0-9])\s+/) {
