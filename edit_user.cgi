@@ -76,7 +76,8 @@ if ($user_type eq 'ssh') {
 						[ [ 0, $text{'form_sshkey0'} ],
 						  [ 2, $text{'form_sshkey2'} ] ]),
 					'manage-user-ssh-public-key').
-				"<br>\n".&ui_textarea("sshkey", undef, 3, 60),
+				"<br>\n".&ui_textarea("sshkey", undef, 3, 60,
+						      undef, !$virtualmin_pro),
 						undef, &procell() || \@tds);
 			}
 		}
@@ -757,6 +758,12 @@ else {
 		if (&proshow() && $user->{'unix'}) {
 			if (@ssh_shells) {
 				my $existing_key = &get_domain_user_ssh_pubkey($d, $user);
+				my $existing_key_hidden;
+				if ($existing_key && !$virtualmin_pro) {
+					$existing_key_hidden =
+						&ui_hidden("sshkey", $existing_key).
+						&ui_hidden("sshkey_mode", 2);
+					}
 				print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkeynogen"),
 					&inline_html_pro_tip(
 						&ui_radio("sshkey_mode", $existing_key ? 2 : 0,
@@ -764,7 +771,8 @@ else {
 							  [ 2, $text{'form_sshkey2'} ] ]),
 								'manage-user-ssh-public-key').
 					"<br>\n". &ui_textarea("sshkey", $existing_key, 3, 60,
-						undef, undef, &vui_ui_input_noauto_attrs()),
+						undef, !$virtualmin_pro, &vui_ui_input_noauto_attrs()).
+					$existing_key_hidden,
 					undef, &procell() || \@tds);
 				}
 			}
