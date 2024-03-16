@@ -588,6 +588,13 @@ elsif ($user_type eq 'web') {
 	if ($htpasswd_data) {
 		print &ui_table_start(
 			$text{'user_header_webserver'}, "width=100%", 2);
+	
+		# Show current full username
+		if (!$in{'new'}) {
+			print &ui_table_row(
+				&hlink($text{'user_user3'}, "username3"),
+				"<tt>$webuser->{'user'}</tt>", 2, \@tds);
+			}
 
 		# Edit web user
 		print &ui_table_row(&hlink($text{'user_user2'}, "username_web"),
@@ -683,7 +690,8 @@ else {
 		&hlink($text{'user_user2'}, "username2_universal");
 	if ($in{'new'}) {
 		$ulabel = &hlink($text{'user_user3'},
-				($user->{'webowner'} ? 'username4' : 'username3')."_universal");
+			($user->{'webowner'} ? 'username4' : 'username3').
+			"_universal");
 		}
 	if ($user->{'webowner'}) {
 		$ulabel = &hlink($text{'user_user2'}, "username4_universal");
@@ -705,6 +713,7 @@ else {
 		# Regular user
 		$pop3 = $d && !$user->{'noappend'} ?
 			&remove_userdom($user->{'user'}, $d) : $user->{'user'};
+	
 		# Full username differs
 		if ($pop3 ne $user->{'user'}) {
 			print &ui_table_row(
@@ -712,6 +721,7 @@ else {
 					$user->{'webowner'} ? 'username4' : 'username3'),
 				"<tt>$user->{'user'}</tt>");
 			}
+
 		# Edit mail username
 		print &ui_table_row($ulabel,
 			&ui_textbox("mailuser", $pop3, 13, 0, undef,
