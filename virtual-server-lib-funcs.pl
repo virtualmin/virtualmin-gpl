@@ -5763,14 +5763,18 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	$pop3 = &html_escape($pop3);
 	local @cols;
 	local $filetype = $u->{'extra'} ? "&type=@{[&urlize($u->{'type'})]}" : "";
-	push(@cols, "<a href='edit_user.cgi?dom=$did$filetype&amp;".
-	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>".
-	      ($u->{'domainowner'} ? "<b>$pop3</b>".&vui_inline_label('users_owner_label') :
-	       $u->{'webowner'} &&
-	        $u->{'pass'} =~ /^\!/ ? $pop3_dis :
-	       $u->{'webowner'} ? $pop3 :
-	       $u->{'pass'} =~ /^\!/ ? $pop3_dis :
-	       $pop3)."</a>\n");
+	my $col_text =
+	  ($u->{'domainowner'} ?
+	   "<b>$pop3</b>".&vui_inline_label('users_owner_label') :
+	    $u->{'webowner'} && $u->{'pass'} =~ /^\!/ ? $pop3_dis :
+	    $u->{'webowner'} ? $pop3 :
+	    $u->{'pass'} =~ /^\!/ ? $pop3_dis : $pop3);
+	my $col_val = "<a href='edit_user.cgi?dom=$did$filetype&amp;".
+	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>$col_text</a>";
+	if (!$virtualmin_pro && $u->{'extra'}) {
+		$col_val = $col_text;
+		}
+	push(@cols, "$col_val\n");
 	push(@cols, &html_escape($u->{'user'}));
 	push(@cols, &html_escape($u->{'real'}));
 	$userdesc++ if ($u->{'real'});
