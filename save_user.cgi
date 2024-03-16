@@ -407,7 +407,7 @@ else {
 		}
 
 	# Create or update the user
-	my $sshkey_mode = $in{'sshkey_mode'} == 2 && $virtualmin_pro ? 1 : 0;
+	my $sshkey_mode = $in{'sshkey_mode'} == 2 ? 1 : 0;
 	$emailmailbox = 0;
 	if ($in{'new'}) {
 		# Set new user parameters
