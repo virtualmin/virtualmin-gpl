@@ -76,7 +76,8 @@ if ($user_type eq 'ssh') {
 						[ [ 0, $text{'form_sshkey0'} ],
 						  [ 2, $text{'form_sshkey2'} ] ]),
 					'manage-user-ssh-public-key').
-				"<br>\n".&ui_textarea("sshkey", undef, 3, 60),
+				"<br>\n".&ui_textarea("sshkey", undef, 3, 60,
+						      undef, !$virtualmin_pro),
 						undef, &procell() || \@tds);
 			}
 		}
@@ -762,7 +763,7 @@ else {
 							  [ 2, $text{'form_sshkey2'} ] ]),
 								'manage-user-ssh-public-key').
 					"<br>\n". &ui_textarea("sshkey", $existing_key, 3, 60,
-						undef, undef, &vui_ui_input_noauto_attrs()),
+						undef, !$virtualmin_pro, &vui_ui_input_noauto_attrs()),
 					undef, &procell() || \@tds);
 				}
 			}
