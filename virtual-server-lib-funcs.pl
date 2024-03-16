@@ -18344,13 +18344,26 @@ $list_available_shells_cache{$mail} = \@rv;
 return @rv;
 }
 
-# list_available_shells_by_id(id, [&domain], [mail])
-# Returns a list of shells assignable to domain by given id
+# list_available_shells_by_id(id, [type], [&domain], [mail])
+# Returns a list of shells by given id
 sub list_available_shells_by_id
 {
-my ($id, $d, $mail) = @_;
+my ($id, $type, $d, $mail) = @_;
 my @rv = &list_available_shells($d, $mail);
-return grep { $_->{'id'} eq $id && $_->{'avail'} } @rv;
+@rv = grep { $_->{'id'} eq $id && $_->{'avail'} } @rv;
+@rv = grep { $_->{$type} } @rv if ($type);
+return @rv;
+}
+
+# list_available_shells_by_type(type, [id], [include-current-shell])
+# Returns a list of shells by given type. If current shell is given
+# it will be added to a list of available shells
+sub list_available_shells_by_type
+{
+my ($type, $id, $current_shell) = @_;
+my @rv = &available_shells($type, $current_shell);
+@rv = grep { $_->{'id'} eq $id } @rv if ($id);
+return @rv;
 }
 
 # save_available_shells(&shells|undef)

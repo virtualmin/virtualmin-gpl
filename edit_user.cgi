@@ -66,7 +66,8 @@ if ($user_type eq 'ssh') {
 				2, \@tds);
 
 	# SSH public key for Unix user
-	my @ssh_shells = &list_available_shells_by_id('ssh', $d);
+	my @ssh_shells =
+		&list_available_shells_by_type('mailbox', 'ssh', $user->{'shell'});
 	if (&proshow() && $user->{'unix'}) {
 		if (@ssh_shells) {
 			print &ui_table_row(
@@ -771,7 +772,8 @@ else {
 				2, \@tds);
 
 		# SSH public key for Unix user
-		my @ssh_shells = &list_available_shells_by_id('ssh', $d);
+		my @ssh_shells =
+			&list_available_shells_by_type('mailbox', 'ssh', $user->{'shell'});
 		if (&proshow() && $user->{'unix'}) {
 			if (@ssh_shells) {
 				my $existing_key = &get_domain_user_ssh_pubkey($d, $user);
