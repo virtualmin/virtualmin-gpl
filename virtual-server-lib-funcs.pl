@@ -18403,9 +18403,10 @@ if (defined($value)) {
 			# Totally unknown
 			if ($value) {
 				push(@ashells,
-					{ 'shell' => $value,
-					  'desc' => $value_desc->{'desc'} ||
-						    $value });
+					{ 'id'    => $value_desc->{'id'},
+					  'shell' => $value,
+					  'desc'  => $value_desc->{'desc'} ||
+					             $value });
 				}
 			else {
 				push(@ashells, { 'shell' => '',
