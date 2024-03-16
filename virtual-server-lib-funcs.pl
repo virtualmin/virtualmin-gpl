@@ -5787,8 +5787,9 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	$uquota += $u->{'uquota'} if (&has_home_quotas());
 	$uquota += $u->{'muquota'} if (&has_mail_quotas());
 	if (($u->{'webowner'} || $u->{'extra'}) && defined($quota)) {
-		# Website owners, virtual database and web users have no real quota
-		push(@cols, $u->{'type'} eq 'web' ?
+		# Website owners, virtual database and web users have no
+		# real quota
+		push(@cols, $u->{'type'} eq 'web' || $u->{'type'} eq 'db' ?
 			$text{'users_na'} : $text{'users_same'}, "");
 		}
 	elsif (defined($quota)) {
