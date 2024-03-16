@@ -615,7 +615,7 @@ elsif ($user_type eq 'web') {
 		my $msg = &text('users_addprotecteddir2',
 			&get_webprefix().
 			"/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
-		print &ui_table_row(undef, $msg, 2);
+		print &ui_table_row("", $msg, 1);
 		print &ui_table_end();
 		}
 	else {
@@ -1171,7 +1171,7 @@ else {
 				print $input;
 				my $msg = &text('users_addprotecteddir2',
 					&get_webprefix()."/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
-				print &ui_table_row(undef, $msg, 2);
+				print &ui_table_row("", $msg, 1);
 				last;
 				}
 			}
