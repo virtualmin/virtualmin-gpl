@@ -812,7 +812,7 @@ users_login_access_ftp=FTP
 users_login_access_ssh=SSH
 users_login_access__and=and
 users_login_access__only=only
-users_addprotecteddir=To begin, navigate to the <a href='$1'>Protected Directories</a> module to add a directory. Once added, you can then secure this directory specifically for this user's access.
+users_addprotecteddir=Before creating a webserver user, navigate to the <a href='$1'>Protected Directories</a> module to add a directory. Once added, you can then secure this directory for web access.
 users_addprotecteddir2=Navigate to the <a href='$1'>Protected Directories</a> module for adding, editing, or deleting protected directories.
 
 user_create=Create User

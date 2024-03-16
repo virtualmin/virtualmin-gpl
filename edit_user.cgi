@@ -618,9 +618,11 @@ elsif ($user_type eq 'web') {
 		print &ui_table_end();
 		}
 	else {
-		print &text('users_addprotecteddir',
+		print &ui_alert_box(
+		  &text('users_addprotecteddir',
 			&get_webprefix().
-			"/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
+			"/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}"),
+		  'info');
 		}
 	$form_end = $htpasswd_data ? 1 : 0;
 	}
