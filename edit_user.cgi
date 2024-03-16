@@ -513,6 +513,13 @@ elsif ($user_type eq 'db') {
 
 	print &ui_table_start($text{'user_header_db'}, "width=100%", 2);
 
+	# Show current full username
+	if (!$in{'new'}) {
+		print &ui_table_row(
+			&hlink($text{'user_user3'}, "username3"),
+			"<tt>$dbuser->{'user'}</tt>", 2, \@tds);
+		}
+
 	# Edit db user
 	print &ui_table_row(&hlink($text{'user_user2'}, "username_db"),
 		&inline_html_pro_tip(
