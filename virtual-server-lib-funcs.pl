@@ -18374,12 +18374,11 @@ else {
 	}
 }
 
-# available_shells(name, [value], 'owner'|'mailbox'|'reseller', [show-cmd],
-# 		   [must-ftp])
+# available_shells('owner'|'mailbox'|'reseller', [value], [must-ftp])
 # Returns available shells for a mailbox or domain owner
 sub available_shells
 {
-my ($name, $value, $type, $showcmd, $mustftp) = @_;
+my ($type, $value, $mustftp) = @_;
 my @aashells = &list_available_shells(undef, $mustftp ? 0 : undef);
 my @tshells = grep { $_->{$type} } @aashells;
 my @ashells = grep { $_->{'avail'} } @tshells;
@@ -18431,7 +18430,7 @@ my ($name, $value, $type, $showcmd, $mustftp) = @_;
 return &ui_select($name, $value,
 	  [ map { [ $_->{'shell'},
 		    $_->{'desc'}.($showcmd ? " ($_->{'shell'})" : "") ] }
-	  &available_shells($name, $value, $type, $showcmd, $mustftp) ]);
+	  &available_shells($type, $value, $mustftp) ]);
 }
 
 # default_available_shell('owner'|'mailbox'|'reseller')
