@@ -80,6 +80,8 @@ $supports_cgi = &indexof("cgi", &supported_php_modes()) >= 0;
 		     &list_available_php_versions();
 $max_php_version = $php_versions[@php_versions-1]->[0];
 $scriptdb = 'mysql';
+$test_ssh_private_key = "/tmp/functional-test.key";
+$test_ssh_public_key = "/tmp/functional-test.key.pub";
 
 @create_args = ( [ 'limits-from-plan' ],
 		 [ 'no-email' ],
@@ -1139,6 +1141,88 @@ $mailbox_tests = [
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1 },
+	];
+
+# SSH user tests
+$sshuser_tests = [
+	# Create a domain for testing
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ],
+		      @create_args, ],
+        },
+
+	# Generate a keypair for SSH
+	{ 'command' => 'rm -f '.$test_ssh_private_key.' '.$test_ssh_public_key,
+	},
+	{ 'command' => 'ssh-keygen -f '.$test_ssh_private_key.' </dev/null',
+	},
+
+	# Add a user with an SSH key
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'shell', '/bin/sh' ],
+		      [ 'ssh-pubkey', $test_ssh_public_key ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Make sure we can SSH as that user
+	{ 'command' => 'ssh -i '.$test_ssh_private_key.' '.$test_full_user.'@localhost echo OK',
+	  'grep' => 'OK',
+	},
+
+	# Remove the user
+	{ 'command' => 'delete-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user' => $test_user ] ],
+	},
+
+	# Re-create without an SSH key
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'shell', '/bin/sh' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# SSH should now fail
+	{ 'command' => 'ssh -i '.$test_ssh_private_key.' '.$test_full_user.'@localhost echo OK',
+	  'antigrep' => 'OK',
+	  'fail' => 1,
+	},
+
+	# Add an SSH key to the user
+	{ 'command' => 'modify-user.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'user', $test_user ],
+		      [ 'ssh-pubkey', $test_ssh_public_key ],
+		    ],
+	},
+
+	# SSH should now work again
+	{ 'command' => 'ssh -i '.$test_ssh_private_key.' '.$test_full_user.'@localhost echo OK',
+	  'grep' => 'OK',
+	},
+
+	# Cleanup the key
+	{ 'command' => 'rm -f '.$test_ssh_private_key.' '.$test_ssh_public_key,
+	  'cleanup' => 1,
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
 	];
 
 # Alias tests
@@ -11280,6 +11364,7 @@ $alltests = { '_config' => $_config_tests,
 	      'disable' => $disable_tests,
 	      'web' => $web_tests,
 	      'mailbox' => $mailbox_tests,
+	      'sshuser' => $sshuser_tests,
 	      'alias' => $alias_tests,
 	      'atalias' => $atalias_tests,
 	      'aliasdom' => $aliasdom_tests,
