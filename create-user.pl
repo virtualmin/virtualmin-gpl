@@ -56,8 +56,10 @@ All mail users can have a password recovery address set, used by the forgotten
 password feature in Virtualmin. For new users, this can be set with the 
 C<--recovery> flag followed by an address.
 
-To add a SSH public key to a user's account, use the C<--ssh-pubkey> flag followed
-by the key's content enclosed in quotes, or by the file name containing the key.
+To add a SSH public key to a user's account, use the C<--ssh-pubkey> flag
+followed by the key's content enclosed in quotes, or by the file name containing
+the key.
+
 If the given file contains multiple keys, only the key on the first line will be
 used, unless C<--ssh-pubkey-id> flag is also given, which will pick the key with
 the given ID by matching the key's comment.
@@ -403,8 +405,8 @@ if ($user->{'home'} && !$user->{'nocreatehome'} &&
 	&create_user_home($user, $d);
 	}
 
-# Create database user only
 if ($db_only) {
+	# Create database user only
 	my $dbuserclash = &check_extra_user_clash($d, $user->{'user'}, 'db');
         !$dbuserclash || &usage($dbuserclash);
 	$user->{'pass'} = $pass;
@@ -416,8 +418,8 @@ if ($db_only) {
         $user->{'type'} = 'db';
         &update_extra_user($d, $user);
 	}
-# Create web-only user
 elsif ($webserver_only) {
+	# Create web-only user
 	# Create initial user
         $user->{'extra'} = 1;
         $user->{'type'} = 'web';
@@ -429,12 +431,12 @@ elsif ($webserver_only) {
         $user->{'pass'} || $user->{'pass_crypt'} || &usage($text{'user_epasswebnotset'});
         &modify_webserver_user($user, undef, $d, { 'virtualmin_htpasswd' => join("\n", @webdirs) });
 	}
-# Create the user and virtusers and alias
 else {
+	# Create the user and virtusers and alias
 	&create_user($user, $d);
 	if ($pubkey) {
-		my $addsshpubkey_err = &add_domain_user_ssh_pubkey($d, $user, $pubkey);
-		&usage($addsshpubkey_err) if ($addsshpubkey_err);
+		my $err = &add_domain_user_ssh_pubkey($d, $user, $pubkey);
+		&usage($err) if ($err);
 		}
 	}
 
