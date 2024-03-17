@@ -221,7 +221,7 @@ if (defined($in{'htmldir'}) &&
 	}
 
 if (!$anything) {
-	&$first_print($text{'phpmode_nothing'});
+	&$first_print($text{'phpmode_nothing2'});
 	&$second_print($text{'phpmode_nothing_skip'});
 	}
 
