@@ -2813,7 +2813,7 @@ if (@cgimodes > 0) {
 		&ui_radio("cgimode", $tmpl->{'web_cgimode'},
 			  [ [ '', $text{'tmpl_web_cgimodenone'} ],
 			    map { [ $_, $text{'tmpl_web_cgimode'.$_} ] }
-				@cgimodes ]));
+				reverse(@cgimodes) ]));
 	}
 
 # HTML sub-directory input

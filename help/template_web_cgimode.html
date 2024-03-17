@@ -1,14 +1,15 @@
 <header>CGI script execution mode</header>
 
 This option determines if and how CGI scripts are executed by default for
-new virtual servers. The possible options are :
+new virtual servers. The possible options are:
 
 <ul>
 <li><b>CGI scripts disabled</b> - scripts cannot be run at all.
 
-<li><b>FCGIwrap</b> - scripts are run via a background FCGIwrap server, one per domain.
+<li><b>FCGIwrap server</b> - scripts are run via a background server, one per domain.
 
-<li><b>suEXEC</b> - scripts are launched via the Apache <tt>suexec</tt> wrapper.
+<li><b>suEXEC wrapper</b> - scripts are launched via the Apache <tt>suexec</tt> wrapper. Note
+that this option might not be accessible on all systems.
 </ul>
 
 <footer>

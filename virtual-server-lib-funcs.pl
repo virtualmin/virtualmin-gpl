@@ -15887,9 +15887,7 @@ if (&domain_has_website()) {
 	local @newvernums = sort { $a <=> $b } map { $_->[0] } &unique(@vers);
 	local @oldvernums = sort { $a <=> $b } split(/\s+/, $config{'last_check_php_vers'});
 	if (join(" ", @newvernums) ne join(" ", @oldvernums)) {
-		&$first_print(&text('check_webphpversinis',
-				     join(", ", @newvernums)));
-		&$indent_print();
+		my $indented_print;
 		foreach my $d (grep { &domain_has_website($_) &&
 				      !$_->{'alias'} }
 				    &list_domains()) {
@@ -15899,18 +15897,22 @@ if (&domain_has_website()) {
 					      &get_domain_php_mode($d);
 				if ($mode && $mode ne "mod_php" &&
 				    $mode ne "fpm" && $mode ne "none") {
+					if (!$indented_print++) {
+						&$first_print(&text('check_webphpversinis',
+							join(", ", @newvernums)));
+						&$indent_print();
+						}
 					&$first_print(&text('check_webphpversd',
 						&show_domain_name($d)));
 					&obtain_lock_web($d);
 					&save_domain_php_mode($d, $mode);
 					&clear_links_cache($d);
 					&release_lock_web($d);
-					&$first_print($text{'setup_done'});
+					&$second_print($text{'setup_done'});
 					}
 				};
 			}
-		&$outdent_print();
-		&$second_print("");
+		&$outdent_print(), &$second_print("") if ($indented_print);
 		$config{'last_check_php_vers'} = join(" ", @newvernums);
 		}
 	}
