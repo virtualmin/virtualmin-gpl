@@ -17,19 +17,35 @@ my @uinfo = getpwnam($d->{'user'});
 return scalar(@uinfo) ? 1 : 0;
 }
 
-# switch_to_domain_user(&domain)
-# Changes the current UID and GID to that of the domain's unix user
+# switch_to_domain_user(&domain|&user)
+# Changes the current UID and GID to that of the domain's unix user, or
+# a mailbox user
 sub switch_to_domain_user
 {
-my ($d) = @_;
-if ($d->{'parent'}) {
-	$d = &get_domain($d->{'parent'});
+my ($d_or_user) = @_;
+if ($d_or_user->{'id'}) {
+	# Virtualmin domain given
+	my $d = $d_or_user;
+	if ($d->{'parent'}) {
+		$d = &get_domain($d->{'parent'});
+		}
+	return 0 if (!$d->{'unix'});	# Doesn't have a user
+	&switch_to_unix_user([ $d->{'user'}, undef, $d->{'uid'},
+			       $d->{'ugid'} ]);
+	$ENV{'USER'} = $ENV{'LOGNAME'} = $d->{'user'};
+	$ENV{'HOME'} = $d->{'home'};
+	return 1;
 	}
-return 0 if (!$d->{'unix'});	# Doesn't have a user
-&switch_to_unix_user([ $d->{'user'}, undef, $d->{'uid'},
-		       $d->{'ugid'} ]);
-$ENV{'USER'} = $ENV{'LOGNAME'} = $d->{'user'};
-$ENV{'HOME'} = $d->{'home'};
+else {
+	# Mailbox user given
+	my $user = $d_or_user;
+	return 0 if (!$user->{'uid'});
+	&switch_to_unix_user([ $user->{'user'}, undef, $user->{'uid'},
+			       $user->{'gid'} ]);
+	$ENV{'USER'} = $ENV{'LOGNAME'} = $user->{'user'};
+	$ENV{'HOME'} = $user->{'home'};
+	return 1;
+	}
 }
 
 # run_as_domain_user(&domain, command, background, [never-su])
