@@ -20080,9 +20080,16 @@ return "[$d->{'id'}:$username]"; # [1234567890123456:ilia]
 sub add_domain_user_ssh_pubkey
 {
 my ($d, $user, $pubkey) = @_;
+return if (!$d->{'dir'});
+my %user = (%{$user}, ugid => $d->{'ugid'});
+my $sshdir = $user->{'home'}."/.ssh";
+&make_dir_as_domain_user(\%user, $sshdir, 0700);
+my $sshfile = "$sshdir/authorized_keys";
 my $identifier = &get_ssh_key_identifier($user, $d);
-my $err = &save_domain_ssh_pubkey($d, "$pubkey $identifier");
-return $err;
+eval { &write_as_domain_user(\%user,
+	sub { &write_file_contents($sshfile, "$pubkey $identifier") }); };
+return $@ if ($@);
+return 0;
 }
 
 # get_domain_user_ssh_pubkey(&domain, &user)
@@ -20092,13 +20099,14 @@ sub get_domain_user_ssh_pubkey
 {
 my ($d, $user) = @_;
 return if (!$d->{'dir'});
-my $sshdir = $d->{'home'}."/.ssh";
+my $sshdir = $user->{'home'}."/.ssh";
 return if (!-d $sshdir);
 my $sshfile = "$sshdir/authorized_keys";
 return if (!-f $sshfile);
 my $identifier = &get_ssh_key_identifier($user, $d);
 my $pubkey;
-my $authorized_keys = &read_file_lines_as_domain_user($d, $sshfile, 1);
+my %user = (%{$user}, ugid => $d->{'ugid'});
+my $authorized_keys = &read_file_lines_as_domain_user(\%user, $sshfile, 1);
 foreach my $authorized_key (@$authorized_keys) {
 	if ($authorized_key =~ /\Q$identifier\E/) {
 		$pubkey = $authorized_key;
@@ -20116,19 +20124,20 @@ sub delete_domain_user_ssh_pubkey
 {
 my ($d, $user) = @_;
 return if (!$d->{'dir'});
-my $sshdir = $d->{'home'}."/.ssh";
+my $sshdir = $user->{'home'}."/.ssh";
 return if (!-d $sshdir);
 my $sshfile = "$sshdir/authorized_keys";
 return if (!-f $sshfile);
 my $identifier = &get_ssh_key_identifier($user, $d);
-my $authorized_keys = &read_file_lines_as_domain_user($d, $sshfile);
+my %user = (%{$user}, ugid => $d->{'ugid'});
+my $authorized_keys = &read_file_lines_as_domain_user(\%user, $sshfile);
 for (my $i = 0; $i < @$authorized_keys; $i++) {
 	if ($authorized_keys->[$i] =~ /\Q$identifier\E/) {
         	splice(@$authorized_keys, $i, 1);
         	last;
 		}
 	}
-&flush_file_lines_as_domain_user($d, $sshfile);
+&flush_file_lines_as_domain_user(\%user, $sshfile);
 return undef;
 }
 
@@ -20140,13 +20149,14 @@ sub update_domain_user_ssh_pubkey
 {
 my ($d, $user, $olduser, $pubkey) = @_;
 return if (!$d->{'dir'});
-my $sshdir = $d->{'home'}."/.ssh";
+my $sshdir = $user->{'home'}."/.ssh";
 return if (!-d $sshdir);
 my $sshfile = "$sshdir/authorized_keys";
 return if (!-f $sshfile);
 my $identifier = &get_ssh_key_identifier($user, $d);
 my $identifier_old = &get_ssh_key_identifier($olduser, $d);
-my $authorized_keys = &read_file_lines_as_domain_user($d, $sshfile);
+my %user = (%{$user}, ugid => $d->{'ugid'});
+my $authorized_keys = &read_file_lines_as_domain_user(\%user, $sshfile);
 foreach my $authorized_key (@$authorized_keys) {
 	if ($authorized_key =~ /\Q$identifier_old\E/) {
 		# Replace old key with new key if set
@@ -20159,7 +20169,7 @@ foreach my $authorized_key (@$authorized_keys) {
 			}
 		}
 	}
-&flush_file_lines_as_domain_user($d, $sshfile);
+&flush_file_lines_as_domain_user(\%user, $sshfile);
 return undef;
 }
 
