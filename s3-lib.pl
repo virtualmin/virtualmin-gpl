@@ -1515,7 +1515,9 @@ sub save_aws_credentials_config
 my ($profile, $file, $conf) = @_;
 my $oldconf = &get_aws_credentials_config($profile, $file);
 my @uinfo = getpwnam("root");
-my $path = "$uinfo[7]/.aws/$file";
+my $awsdir = "$uinfo[7]/.aws";
+&make_dir($awsdir, 0755) if (!-d $awsdir);
+my $path = "$awsdir/$file";
 &lock_file($path);
 my $lref = &read_file_lines($path);
 my @lines;
