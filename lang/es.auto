@@ -249,7 +249,7 @@ users_mailclient=Mostrar la configuración del cliente de correo electrónico
 users_mailclientdesc=Muestra la configuración que deben usar los clientes de correo electrónico de los usuarios para este dominio.
 users_owner_label=DUEÑO
 users_disabled_label=DESACTIVADO
-users_same=Igual que admin
+users_same=Dividido con el dueño
 users_na=No aplica
 users_login_access_none=Ninguno
 users_login_access_web=Web
@@ -2915,6 +2915,7 @@ fixmodphp_doing=Actualización de todos los servidores virtuales para evitar el 
 fixmodphp_done=.. dominios fijos de $1
 
 bucket_account2=cuenta S3
+bucket_eacls=ACLs for new buckets must be enabled on the AWS Console.
 
 ratelimit_title=Limitación de tarifa de correo
 ratelimit_eos=La limitación de velocidad de correo electrónico no es compatible con este sistema operativo
@@ -3395,6 +3396,7 @@ dnscloud_cloudflare_mode0=Correo electrónico y clave API
 dnscloud_cloudflare_mode1=token API
 dnscloud_cloudflare_email=Dirección de la cuenta de Cloudflare
 dnscloud_cloudflare_apikey=Clave de API de Cloudflare
+dnscloud_cloudflare_etokenperms=Minimum permissions required for Cloudflare API token are : Read access to <tt>Account Settings</tt>, edit access to <tt>Zone:Zone</tt> and <tt>Zone:DNS</tt>
 dnscloud_caccount=Usando la cuenta $1 
 dnscloud_ctoken=Usando el token API $1
 dnscloud_ntoken=Usando la cuenta Namecheap $1

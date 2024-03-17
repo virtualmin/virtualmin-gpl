@@ -147,6 +147,7 @@ users_mailclient=Vis innstillinger for e-postklient
 users_mailclientdesc=Vis innstillinger som skal brukes av brukernes e-postklienter for dette domenet.
 users_owner_label=EIEREN
 users_disabled_label=FUNKSJONSHEMMET
+users_same=Splitt med eier
 users_na=Ikke aktuelt
 users_login_access_none=Ingen
 users_login_access_web=Web
@@ -1421,6 +1422,7 @@ bkey_extra=Eksisterende nøkkel
 bkey_download=Last ned nøkkel
 
 bucket_account2=S3 konto
+bucket_eacls=ACLs for new buckets must be enabled on the AWS Console.
 
 transfer_eoldhost=Gammel vert eksisterer ikke!
 transfer_subs=inkludert underservere
@@ -1867,6 +1869,7 @@ dnscloud_cloudflare_mode0=E-post og API-nøkkel
 dnscloud_cloudflare_mode1=API-token
 dnscloud_cloudflare_email=Cloudflare -kontoadresse
 dnscloud_cloudflare_apikey=Cloudflare API -nøkkel
+dnscloud_cloudflare_etokenperms=Minimum permissions required for Cloudflare API token are : Read access to <tt>Account Settings</tt>, edit access to <tt>Zone:Zone</tt> and <tt>Zone:DNS</tt>
 dnscloud_caccount=Bruker konto $1
 dnscloud_ctoken=Bruker API-token $1
 dnscloud_ntoken=Bruker Namecheap-kontoen $1

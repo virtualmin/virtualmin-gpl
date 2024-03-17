@@ -523,7 +523,6 @@ users_noemail=Keine
 users_defaults=Editiere neue Benutzer Standards
 users_defaultsdesc=Zeige und editiere Standard Einstellungen für neue Benutzer in diesem Virtuellen Server.
 users_all=Alle
-users_same=Gleiche wie admin
 
 user_create=Mailbox einrichten
 user_createweb=Erstelle FTP-Benutzer

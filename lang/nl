@@ -642,7 +642,6 @@ users_noemail=Geen
 users_defaults=Bewerk Nieuwe Gebruiker Standaarden
 users_defaultsdesc=Bekijk en bewerk de standaard instellingen voor de nieuwe gebruikers in deze virtuele server.
 users_all=Alles
-users_same=Zelfde als admin
 
 user_create=Gebruiker Aanmaken
 user_createweb=FTP Gebruiker Aanmaken

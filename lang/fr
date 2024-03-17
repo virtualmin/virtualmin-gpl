@@ -412,7 +412,6 @@ users_noemail=Aucun
 users_defaults=Modifier Nouveaux paramètres par défaut de l'utilisateur
 users_defaultsdesc=Voir et modifier les paramètres par défaut pour les nouveaux utilisateurs de ce serveur virtuel.
 users_all=Tous
-users_same=Égal à admin
 
 user_create=Créer une boite aux lettres
 user_createweb=Créer utilisateur FTP

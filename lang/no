@@ -658,7 +658,6 @@ users_noemail=Ingen
 users_defaults=Rediger standardverdier for ny bruker
 users_defaultsdesc=Vis og rediger innstillinger for nye brukere på denne virtuelle tjeneren.
 users_all=Alle
-users_same=Samme som admin
 
 user_create=Opprett postboks
 user_createweb=Opprett FTP bruker
