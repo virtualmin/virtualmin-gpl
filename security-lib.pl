@@ -26,18 +26,8 @@ if ($d->{'parent'}) {
 	$d = &get_domain($d->{'parent'});
 	}
 return 0 if (!$d->{'unix'});	# Doesn't have a user
-if (defined(&switch_to_unix_user)) {
-	# Use new Webmin function that takes care of platform issues
-	&switch_to_unix_user([ $d->{'user'}, undef, $d->{'uid'},
-			       $d->{'ugid'} ]);
-	}
-else {
-	# DIY
-	($(, $)) = ( $d->{'ugid'},
-		     "$d->{'ugid'} ".join(" ", $d->{'ugid'},
-					 &other_groups($d->{'user'})) );
-	($<, $>) = ( $d->{'uid'}, $d->{'uid'} );
-	}
+&switch_to_unix_user([ $d->{'user'}, undef, $d->{'uid'},
+		       $d->{'ugid'} ]);
 $ENV{'USER'} = $ENV{'LOGNAME'} = $d->{'user'};
 $ENV{'HOME'} = $d->{'home'};
 }
