@@ -34,6 +34,7 @@ return if (!should_show_pro_tip('dnsclouds'));
 my @pro_dnsclouds_list = (
 	"<em>Cloudflare DNS</em>",
 	"<em>Google Cloud DNS</em>",
+	"<em>Namecheap DNS</em>",
 	);
 my $pro_dnsclouds = join(', ', @pro_dnsclouds_list);
 $pro_dnsclouds =~ s/(.+)(,)(.+)$/$1 $text{'scripts_gpl_pro_tip_and'}$3/;
