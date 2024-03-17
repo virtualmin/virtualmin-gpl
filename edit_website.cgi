@@ -92,11 +92,11 @@ if (!$d->{'alias'} && &can_log_paths() &&
 my @cgimodes = &has_cgi_support();
 if (@cgimodes > 0) {
 	print &ui_table_row(
-		&hlink($text{'tmpl_web_cgimode'}, "template_web_cgimode"),
+		&hlink($text{'tmpl_web_cgimode'}, "web_cgimode"),
 		&ui_radio_table("cgimode", &get_domain_cgi_mode($d),
 			  [ [ '', $text{'tmpl_web_cgimodenone'} ],
 			    map { [ $_, $text{'tmpl_web_cgimode'.$_} ] }
-				@cgimodes ]));
+				reverse(@cgimodes) ]));
 	}
 
 # Ruby execution mode
