@@ -36,6 +36,26 @@ if (defined($in{'ssi'}) && $in{'ssi'} == 1) {
 &obtain_lock_dns($d);
 &obtain_lock_logrotate($d) if ($d->{'logrotate'});
 
+# Save CGI execution mode
+if (defined($in{'cgimode'}) && &get_domain_cgi_mode($d) ne $in{'cgimode'} &&
+    $can) {
+	if ($in{'cgimode'}) {
+		&$first_print(&text('phpmode_cmoding',
+				$text{'phpmode_cgimode'.$in{'cgimode'}}));
+		}
+	else {
+		&$first_print($text{'phpmode_cmodingnone'});
+		}
+	my $err = &save_domain_cgi_mode($d, $in{'cgimode'});
+	if ($err) {
+		&$second_print(&text('setup_efcgiwrap', $err));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	$anything++;
+	}
+
 # Save Ruby execution mode
 if (defined($in{'rubymode'}) && &get_domain_ruby_mode($d) ne $in{'rubymode'} &&
     $can) {
