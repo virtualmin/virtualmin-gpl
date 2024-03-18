@@ -115,14 +115,6 @@ if (!$gotvirt) {
 		&procmail::create_recipe($var1);
 		&procmail::create_recipe($var2);
 		}
-	# Fix up bad quoted VIRTUAMIN= line, introduced by Webmin 1.410
-	local $lref = &read_file_lines($procmail::procmailrc);
-	foreach my $l (@$lref) {
-		if ($l =~ /^\"(VIRTUALMIN=.*)\"$/) {
-			$l = $1;
-			}
-		}
-	&flush_file_lines($procmail::procmailrc);
 	}
 
 # Add procmail rule to bounce mail if quota is full
