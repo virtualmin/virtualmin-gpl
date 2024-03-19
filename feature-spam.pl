@@ -34,6 +34,8 @@ return undef;
 # include file for this domain.
 sub setup_spam
 {
+my ($d) = @_;
+
 &$first_print($text{'setup_spam'});
 &require_spam();
 &foreign_require("cron");
@@ -47,12 +49,12 @@ if (!-d $spam_config_dir) {
 	&make_dir($spam_config_dir, 0755);
 	&set_ownership_permissions(undef, undef, 0755, $spam_config_dir);
 	}
-local $spamdir = "$spam_config_dir/$_[0]->{'id'}";
+local $spamdir = "$spam_config_dir/$d->{'id'}";
 &make_dir($spamdir, 0750);
-&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'}, 0750, $spamdir);
+&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, 0750, $spamdir);
 
-&obtain_lock_spam($_[0]);
-&obtain_lock_cron($_[0]);
+&obtain_lock_spam($d);
+&obtain_lock_cron($d);
 
 # Add the procmail entry to get the VIRTUALMIN variable
 local @recipes = &procmail::get_procmailrc();
@@ -134,10 +136,10 @@ splice(@$lref, 1, 0, "delete(\$ENV{'IFS'});",
 &flush_file_lines($domain_lookup_cmd);
 
 # Build spamassassin command to call
-local $cmd = &spamassassin_client_command($_[0]);
+local $cmd = &spamassassin_client_command($d);
 
 # Create recipes to call spamassassin
-local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
+local $spamrc = "$procmail_spam_dir/$d->{'id'}";
 local $recipe0 = { 'name' => 'DROPPRIVS',	# Run all commands as user
 		   'value' => 'yes' };
 local @conds;
@@ -183,19 +185,19 @@ if ($recipe2 || $recipe3) {
 
 # Link all files in the default directory (/etc/mail/spamassassin) to
 # the domain's directory
-&create_spam_config_links($_[0]);
+&create_spam_config_links($d);
 
 # Create the config file for this server
 &open_tempfile(TOUCH, ">$spamdir/virtualmin.cf", 0, 1);
 &print_tempfile(TOUCH, "whitelist_from $d->{'emailto_addr'}\n");
 &close_tempfile(TOUCH);
-&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'}, 0755,
+&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, 0755,
 			  "$spamdir/virtualmin.cf");
 
 # Whitelist all domain mailboxes
 if ($config{'spam_white'}) {
-	$_[0]->{'spam_white'} = 1;
-	&update_spam_whitelist($_[0]);
+	$d->{'spam_white'} = 1;
+	&update_spam_whitelist($d);
 	}
 
 # Setup automatic spam clearing
@@ -209,18 +211,18 @@ if ($tmode eq 'days' || $tmode eq 'size') {
 	$opts->{'trash'.$tmode} = $tnum;
 	}
 if (keys %$opts) {
-	&save_domain_spam_autoclear($_[0], $opts);
+	&save_domain_spam_autoclear($d, $opts);
 	}
 
 # Setup spamtrap aliases, if requested
 if ($tmpl->{'spamtrap'} eq 'yes') {
-	&obtain_lock_mail($_[0]);
-	&setup_spamtrap_aliases($_[0]);
-	&release_lock_mail($_[0]);
+	&obtain_lock_mail($d);
+	&setup_spamtrap_aliases($d);
+	&release_lock_mail($d);
 	}
 
-&release_lock_cron($_[0]);
-&release_lock_spam($_[0]);
+&release_lock_cron($d);
+&release_lock_spam($d);
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -229,10 +231,10 @@ return 1;
 # Returns the command for calling spamassassin in some domain, plus args
 sub spamassassin_client_command
 {
-local ($d, $client) = @_;
-local $spamid = $d->{'parent'} || $d->{'id'};
+my ($d, $client) = @_;
+my $spamid = $d->{'parent'} || $d->{'id'};
 $client ||= $config{'spam_client'};
-local $cmd = &has_command($client);
+my $cmd = &has_command($client);
 if ($client eq 'spamc') {
 	local ($host, $port) = split(/:/, $config{'spam_host'});
 	if ($host) {
@@ -255,15 +257,15 @@ return $cmd;
 # Make sure the domain's procmail config file exists
 sub validate_spam
 {
-local ($d) = @_;
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my ($d) = @_;
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
 return &text('validate_espamprocmail', "<tt>$spamrc</tt>") if (!-r $spamrc);
-local $spamdir = "$spam_config_dir/$d->{'id'}";
+my $spamdir = "$spam_config_dir/$d->{'id'}";
 return &text('validate_espamconfig', "<tt>$spamdir</tt>") if (!-d $spamdir);
 &require_spam();
-local @recs = &procmail::parse_procmail_file($spamrc);
-local $cmd = $spam::config{'spamassassin'};
-local $found;
+my @recs = &procmail::parse_procmail_file($spamrc);
+my $cmd = $spam::config{'spamassassin'};
+my $found;
 foreach my $r (@recs) {
 	$found++ if ($r->{'action'} =~ /\Q$cmd\E|spamc|spamassassin/);
 	}
@@ -541,22 +543,25 @@ return 0;
 # Doesn't have to do anything
 sub modify_spam
 {
+my ($d, $oldd) = @_;
+return 1;
 }
 
 # delete_spam(&domain)
 # Just remove the domain's procmail config file
 sub delete_spam
 {
-&$first_print($_[0]->{'virus'} ? $text{'delete_spamvirus'}
-			       : $text{'delete_spam'});
-&obtain_lock_spam($_[0]);
-local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
+my ($d) = @_;
+&$first_print($d->{'virus'} ? $text{'delete_spamvirus'}
+			    : $text{'delete_spam'});
+&obtain_lock_spam($d);
+local $spamrc = "$procmail_spam_dir/$d->{'id'}";
 &unlink_logged($spamrc);
-local $spamdir = "$spam_config_dir/$_[0]->{'id'}";
+local $spamdir = "$spam_config_dir/$d->{'id'}";
 &system_logged("rm -rf ".quotemeta($spamdir));
-&clear_lookup_domain_cache($_[0]);
-&save_domain_spam_autoclear($_[0], undef);
-&release_lock_spam($_[0]);
+&clear_lookup_domain_cache($d);
+&save_domain_spam_autoclear($d, undef);
+&release_lock_spam($d);
 &$second_print($text{'setup_done'});
 return 1;
 }
