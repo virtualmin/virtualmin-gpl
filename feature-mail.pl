@@ -6894,6 +6894,42 @@ return ( [ 0, "username.domain" ],
 	 [ 7, "username\%domain" ] );
 }
 
+# remove_forward_in_other_users(&user, &domain)
+# Remove any forward to this user in other aliases
+sub remove_forward_in_other_users
+{
+my ($user, $d) = @_;
+if ($config{'mail_system'} == 0) {
+	# Postfix
+	return if (!$user->{'email'});
+	my $user_alias = "\\" . &escape_alias($user->{'email'});
+	&foreign_require("postfix");
+	my $afiles =
+		[ &postfix::get_aliases_files(
+		  &postfix::get_real_value("alias_maps")) ];
+	&postfix::lock_alias_files($afiles);
+	my @aliases = &postfix::list_postfix_aliases($afiles);
+	my @oaliases = grep { &indexof($user_alias,
+				@{$_->{'values'}}) >= 0 } @aliases;
+	my $malias;
+	if (@oaliases) {
+		foreach my $oalias (@oaliases) {
+			my @values = grep { $_ ne $user_alias } @{$oalias->{'values'}};
+			my %nalias = %$oalias;
+			delete($nalias{'value'});
+			$nalias{'values'} = \@values;
+			&postfix::modify_postfix_alias($oalias, \%nalias);
+			$malias++;
+			}
+		}
+	&postfix::unlock_alias_files($afiles);
+	if ($malias) {
+		&postfix::regenerate_aliases();
+		&postfix::reload_postfix();
+		}
+	}
+}
+
 $done_feature_script{'mail'} = 1;
 
 1;
