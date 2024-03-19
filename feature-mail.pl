@@ -6912,15 +6912,13 @@ if ($config{'mail_system'} == 0) {
 	my @oaliases = grep { &indexof($user_alias,
 				@{$_->{'values'}}) >= 0 } @aliases;
 	my $malias;
-	if (@oaliases) {
-		foreach my $oalias (@oaliases) {
-			my @values = grep { $_ ne $user_alias } @{$oalias->{'values'}};
-			my %nalias = %$oalias;
-			delete($nalias{'value'});
-			$nalias{'values'} = \@values;
-			&postfix::modify_postfix_alias($oalias, \%nalias);
-			$malias++;
-			}
+	foreach my $oalias (@oaliases) {
+		my @values = grep { $_ ne $user_alias } @{$oalias->{'values'}};
+		my %nalias = %$oalias;
+		delete($nalias{'value'});
+		$nalias{'values'} = \@values;
+		&postfix::modify_postfix_alias($oalias, \%nalias);
+		$malias++;
 		}
 	&postfix::unlock_alias_files($afiles);
 	if ($malias) {
