@@ -1274,10 +1274,9 @@ sub reset_unix
 {
 my ($d) = @_;
 &$first_print($text{'reset_unix'});
-my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} }
-		   &list_domain_users($d);
-my ($ginfo) = grep { $_->{'group'} eq $d->{'group'} }
-		   &list_all_groups();
+&require_useradmin();
+my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } &list_all_users();
+my ($ginfo) = grep { $_->{'group'} eq $d->{'group'} } &list_all_groups();
 if (!$uinfo) {
 	# User does not exist! Re-create it by re-running setup
 	&$second_print(&text('reset_eunixuser', $d->{'user'}));
@@ -1309,6 +1308,7 @@ $uinfo->{'real'} = $d->{'owner'};
 $uinfo->{'home'} = $d->{'home'};
 if ($d->{'pass'} ne '' && !$d->{'disabled'}) {
 	# Re-save password, if changed
+	# XXX really?
 	my $enc = &foreign_call($usermodule, "encrypt_password", $d->{'pass'});
 	if ($uinfo->{'pass'} ne $enc) {
 		$uinfo->{'pass'} = $enc;
@@ -1317,7 +1317,13 @@ if ($d->{'pass'} ne '' && !$d->{'disabled'}) {
 		}
 	}
 $uinfo->{'gid'} = $d->{'ugid'} || $d->{'gid'};
-&modify_user($uinfo, $olduinfo, undef);
+
+&foreign_call($usermodule, "set_user_envs", $uinfo, 'MODIFY_USER',
+      $uinfo->{'plainpass'}, undef, $olduinfo, $olduinfo->{'plainpass'});
+&foreign_call($usermodule, "making_changes");
+&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
+&foreign_call($usermodule, "made_changes");
+
 &set_server_quotas($d);
 &$second_print($text{'setup_done'});
 }
