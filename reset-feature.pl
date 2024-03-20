@@ -92,6 +92,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 		}
 
 	# Check if resetting is even possible
+	my %canmap;
 	foreach $f (@dom_features) {
 		my $can = 1;
 		my $fn = &feature_name($f, $d);
@@ -108,6 +109,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 			$failed = 1;
 			next DOMAIN;
 			}
+		$canmap{$f} = $can;
 		}
 
 	# Check if resetting could cause any data loss
@@ -152,8 +154,9 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 		if ($feature{$f}) {
 			# Core feature of Virtualmin
 			my $rfunc = "reset_".$f;
-			if (defined(&$rfunc) && !$fullreset) {
-				# A reset function exists
+			if (defined(&$rfunc) &&
+			    (!$fullreset || $canmap{$f} == 2)) {
+				# A reset function exists and should be used
 				&try_function($f, $rfunc, $d);
 				}
 			else {
@@ -167,7 +170,8 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 			}
 		if ($plugin{$f}) {
 			# Defined by a plugin
-			if (&plugin_defined($f, "feature_reset") && !$fullreset) {
+			if (&plugin_defined($f, "feature_reset") &&
+			    (!$fullreset || $canmap{$f} == 2)) {
 				# Call the reset function
 				&plugin_call($f, "feature_reset", $d);
 				}

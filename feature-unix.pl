@@ -1268,6 +1268,11 @@ my ($d) = @_;
 return &get_user_database_url();
 }
 
+sub can_reset_unix
+{
+return 2;	# On/off reset isn't allowed
+}
+
 # reset_unix(&domain)
 # Re-write the Unix user and group for this domain
 sub reset_unix

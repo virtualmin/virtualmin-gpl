@@ -18,6 +18,7 @@ my %feature = map { $_, 1 } grep { $sel{$_} } @features;
 my %plugins = map { $_, 1 } grep { $sel{$_} } &list_feature_plugins();
 
 # Can each be reset?
+my %canmap;
 foreach $f (@dom_features) {
 	my $can = 1;
 	my $fn = &feature_name($f, $d);
@@ -30,6 +31,7 @@ foreach $f (@dom_features) {
 			&plugin_call($f, "feature_can_reset", $d) : 1;
 		}
 	$can || &error(&text('reset_enoreset', $fn));
+	$canmap{$f} = $can;
 	}
 
 # Run the before command
@@ -77,7 +79,8 @@ foreach $f (@dom_features) {
 	if ($feature{$f}) {
 		# Core feature of Virtualmin
 		my $rfunc = "reset_".$f;
-		if (defined(&$rfunc) && !$in{'fullreset'}) {
+		if (defined(&$rfunc) &&
+		    (!$in{'fullreset'} || $canmap{$f} == 2)) {
 			# A reset function exists
 			&try_function($f, $rfunc, $d);
 			}
@@ -92,7 +95,8 @@ foreach $f (@dom_features) {
 		}
 	if ($plugin{$f}) {
 		# Defined by a plugin
-		if (&plugin_defined($f, "feature_reset") && !$in{'fullreset'}) {
+		if (&plugin_defined($f, "feature_reset") &&
+		    (!$in{'fullreset'} || $canmap{$f} == 2)) {
 			# Call the reset function
 			&plugin_call($f, "feature_reset", $d);
 			}
