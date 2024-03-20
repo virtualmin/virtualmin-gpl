@@ -556,7 +556,8 @@ else {
 		my $pubkey;
 		my $sshpubkeyfile = -r $sshpubkey ? $sshpubkey : undef;
 		if ($sshpubkeyfile) {
-			$pubkey = &get_ssh_pubkey_from_file($sshpubkeyfile, $sshpubkeyid);
+			$pubkey = &get_ssh_pubkey_from_file(
+				$sshpubkeyfile, $sshpubkeyid);
 			}
 		else {
 			$pubkey = $sshpubkey;
@@ -565,11 +566,13 @@ else {
 		&usage($pubkeyerr) if ($pubkeyerr);
 		my $existing_pubkey = &get_domain_user_ssh_pubkey($d, $olduser);
 		if ($existing_pubkey) {
-			&update_domain_user_ssh_pubkey($d, $user, $olduser, $pubkey)
+			&update_domain_user_ssh_pubkey(
+				$d, $user, $olduser, $pubkey)
 			}
 		else {
-			my $addpubkey_err = &add_domain_user_ssh_pubkey($d, $user, $pubkey);
-			&usage($addpubkey_err) if ($addpubkey_err);
+			my $err = &add_domain_user_ssh_pubkey(
+				$d, $user, $pubkey);
+			&usage($err) if ($err);
 			}
 		}
 	# Modify user
