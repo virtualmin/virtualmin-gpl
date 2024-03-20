@@ -2179,6 +2179,9 @@ if ($_[0]->{'extra'}) {
 	return undef;
 	}
 
+# Check if deleted user present in other users aliases
+&remove_forward_in_other_users($_[0], $_[1]);
+
 # Zero out his quotas
 if ($_[0]->{'unix'} && !$_[0]->{'noquota'}) {
 	&set_user_quotas($_[0]->{'user'}, 0, 0, $_[1]);
