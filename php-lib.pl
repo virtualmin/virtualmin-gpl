@@ -2877,7 +2877,7 @@ my ($confs) = @_;
 my @rv;
 foreach my $pv (@$confs) {
 	push(@rv, $pv) if ($pv->[0] =~ /^(php_value|php_admin_value|env)\[/ ||
-		           $pv->[0] =~ /^pm\./);
+		           $pv->[0] eq 'pm' || $pv->[0] =~ /^pm\./);
 	}
 return @rv;
 }
