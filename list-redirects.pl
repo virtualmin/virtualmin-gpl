@@ -94,7 +94,7 @@ elsif ($nameonly) {
 	}
 else {
 	# Show all on one line
-	$fmt = "%-20s %-59s\n";
+	$fmt = "%-20.20s %-59.59s\n";
 	printf $fmt, "Path", "Destination";
 	printf $fmt, ("-" x 20), ("-" x 59);
 	foreach $r (@redirects) {
