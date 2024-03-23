@@ -698,16 +698,16 @@ foreach my $script (@domain_scripts) {
 	my $sname = $script->{'name'};
 	my $sdata = &get_script($sname);
 	my $sproject = $script->{'opts'}->{'project'};
-	my $db_conn_desc = $sdata->{'db_conn_desc_func'};
+	my $db_conn_func = $sdata->{'db_conn_desc_func'};
 	my ($sdbtype) = split(/_/, $script->{'opts'}->{'db'}, 2);
 	my $sdir = $script->{'opts'}->{'dir'};
 	my ($dhome, $olddhome) = ($d->{'home'}, $oldd->{'home'});
 	if ($dhome ne $olddhome) {
 		$sdir =~ s/^\Q$olddhome\E/$dhome/;
 		}
-	if (defined(&$db_conn_desc) && $dbtype eq $sdbtype) {
+	if (defined(&$db_conn_func) && $dbtype eq $sdbtype) {
 		# Check if a script has a description sub
-		$db_conn_desc = &$db_conn_desc($d, $script->{'opts'});
+		my $db_conn_desc = &$db_conn_func($d, $script->{'opts'});
 		if (ref($db_conn_desc)) {
 			&$first_print($text{"save_installed_scripts_${type}_${dbtype}"}) if (!$printed_type++);
 			# Extract script config file(s) to operate on
@@ -783,9 +783,8 @@ foreach my $script (@domain_scripts) {
 							                  'sdbpass' => $sdbpass
 							                 );
 							}
-
-						# Construct simple replacement based on type
 						else {
+							# Construct simple replacement based on type
 							$replace_with =~ s/\$\$s$type/$value/;
 							}
 
