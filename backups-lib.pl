@@ -740,7 +740,7 @@ foreach my $desturl (@$desturls) {
 			&$second_print(&text('backup_ekilllock', $lpid));
 			}
 		else {
-			# Exit immediatel
+			# Exit immediately
 			&$second_print(&text('backup_esamelock', $lpid));
 			return (0, 0, $doms);
 			}
