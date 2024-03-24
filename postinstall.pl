@@ -319,6 +319,7 @@ foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 # Cache current PHP modes and error log files
 foreach my $d (grep { &domain_has_website($_) && !$_->{'alias'} }
 		    &list_domains()) {
+	&lock_domain($d);
 	if (!$d->{'php_mode'}) {
 		$d->{'php_mode'} = &get_domain_php_mode($d);
 		&save_domain($d);
@@ -327,13 +328,16 @@ foreach my $d (grep { &domain_has_website($_) && !$_->{'alias'} }
 		$d->{'php_error_log'} = &get_domain_php_error_log($d) || "";
 		&save_domain($d);
 		}
+	&unlock_domain($d);
 	}
 foreach my $d (grep { $_->{'alias'} } &list_domains()) {
+	&lock_domain($d);
 	my $dd = &get_domain($d->{'alias'});
 	if ($dd && $dd->{'php_mode'}) {
 		$d->{'php_mode'} = $dd->{'php_mode'};
 		&save_domain($d);
 		}
+	&unlock_domain($d);
 	}
 
 # Enable checking for latest scripts
