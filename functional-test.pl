@@ -8582,7 +8582,7 @@ $redirect_tests = [
 		      [ 'desc', 'Test redirect domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
-		      [ 'logrotate' ],
+		      [ 'mail' ], [ 'logrotate' ],
 		      [ 'content' => 'Non-redirected web page' ],
 		      @create_args, ],
 	},
@@ -8699,6 +8699,40 @@ $redirect_tests = [
 	# Validate that the file can no longer be fetched
 	{ 'command' => $wget_command.'http://'.$test_domain.'/somedir/bar.txt',
 	  'fail' => 1,
+	},
+
+	# Create a redirect from www.domain to just the domain
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/' ],
+		      [ 'host', 'www.'.$test_domain ],
+		      [ 'redirect', 'http://'.$test_domain ] ],
+	},
+
+	# Make sure the redirect appears
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/$', 'Destination: http://'.$test_domain,
+		      'Limit to hostname: www.'.$test_domain,
+		      'Type: Redirect', 'Match sub-paths: No' ],
+	},
+
+	# Check that it works
+	{ 'command' => $wget_command.'http://www.'.$test_domain,
+	  'grep' => 'http://'.$test_domain,
+	},
+
+	# Check that there is no redirect for another domain
+	{ 'command' => $wget_command.'http://mail.'.$test_domain,
+	  'antigrep' => 'http://'.$test_domain,
+	},
+
+	# Delete the redirect
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/' ],
+		      [ 'host', 'www.'.$test_domain ] ],
 	},
 
 	# Get rid of the domain
