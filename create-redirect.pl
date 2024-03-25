@@ -27,6 +27,10 @@ For domains with both non-SSL and SSL websites, you can use the C<--http> and
 C<--https> flags to limit the alias or redirect to one website type or the
 other.
 
+To limit the redirect to requests to a specific URL host, use the 
+C<--host> flag followed by a hostname. This is useful for redirecting 
+www.domain.com to domain.com, for example.
+
 To set a custom HTTP status code for the redirect, you can use the C<--code>
 flag followed by a number. Otherwise the default code of 301 (temporary
 redirect) will be used.
@@ -125,8 +129,10 @@ $d || usage("Virtual server $domain does not exist");
 # Check for clash
 &obtain_lock_web($d);
 @redirects = &list_redirects($d);
-($clash) = grep { $_->{'path'} eq $path } @balancers;
-$clash && &usage("A redirect for the path $path already exists");
+($clash) = grep { $_->{'path'} eq $path &&
+		  $_->{'host'} eq $host } @balancers;
+$clash && &usage("A redirect for path $path ".
+		 ($host ? " and host $host" : "")." already exists");
 
 # Create it
 $r = { 'path' => $path,

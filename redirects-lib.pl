@@ -24,7 +24,7 @@ return &plugin_defined($p, "feature_supports_web_redirects") &&
 sub list_redirects
 {
 my ($d) = @_;
-local $p = &domain_has_website($d);
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
         my @rv = &plugin_call($p, "feature_list_web_redirects", $d);
 	foreach my $r (@rv) {
@@ -40,14 +40,14 @@ my @ports = ( $d->{'web_port'},
 	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 my @rv;
 foreach my $p (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
 	next if (!$virt);
+	my $proto = $p == $d->{'web_port'} ? 'http' : 'https';
 	foreach my $al (&apache::find_directive_struct("Alias", $vconf),
 			&apache::find_directive_struct("AliasMatch", $vconf),
 			&apache::find_directive_struct("Redirect", $vconf),
 			&apache::find_directive_struct("RedirectMatch", $vconf),
 		       ) {
-		my $proto = $p == $d->{'web_port'} ? 'http' : 'https';
 		my $rd = { 'alias' => $al->{'name'} =~ /^Alias/i ? 1 : 0,
 			   'dir' => $al,
 			   'dirs' => [ $al ],
@@ -178,7 +178,10 @@ foreach my $p (@ports) {
 		$rd->{'id'} = $rwc->{'name'}.'_'.$rd->{'path'};
 		my ($already) = grep { $_->{'path'} eq $rd->{'path'} &&
 				       $_->{'host'} eq $rd->{'host'} } @rv;
-		if (!$already) {
+		if ($already) {
+			$already->{$proto} = 1;
+			}
+		else {
 			push(@rv, $rd);
 			}
 		}
@@ -310,7 +313,6 @@ foreach my $port (@ports) {
 			}
 		elsif ($redirect->{'exact'}) {
 			# Handle ^ at start and $ at end
-			print STDERR "in only mode for ^$re\$\n";
 			@newaliases = grep { !/^(\d+\s+)?\^\Q$re\E\$\s/ } @aliases;
 			}
 		else {

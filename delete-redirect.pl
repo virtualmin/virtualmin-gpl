@@ -37,6 +37,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--path") {
 		$path = shift(@ARGV);
 		}
+	elsif ($a eq "--host") {
+		$host = shift(@ARGV);
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -57,8 +60,11 @@ $d || usage("Virtual server $domain does not exist");
 # Get the redirect
 &obtain_lock_web($d);
 @redirects = &list_redirects($d);
-($r) = grep { $_->{'path'} eq $path } @redirects;
-$r || &usage("No redirect for the path $path was found");
+@r = grep { $_->{'path'} eq $path } @redirects;
+@r || &usage("No redirect for path $path".
+	     ($host ? " and host $host" : "")." was found");
+@r > 1 && &usage("Multiple redirects for path $path found!");
+$r = $r[0];
 
 # Delete it
 $err = &delete_redirect($d, $r);
@@ -81,6 +87,7 @@ print "Removes a web redirect or alias from some domain.\n";
 print "\n";
 print "virtualmin delete-redirect --domain domain.name\n";
 print "                           --path url-path\n";
+print "                          [--host hostname]\n";
 exit(1);
 }
 
