@@ -81,6 +81,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--https") {
 		$https = 1;
 		}
+	elsif ($a eq "--host") {
+		$host = shift(@ARGV);
+		}
 	elsif ($a eq "--code") {
 		$code = shift(@ARGV);
 		$code =~ /^\d{3}$/ && $code >= 300 && $code < 400 ||
@@ -134,6 +137,7 @@ $r = { 'path' => $path,
        'http' => $http,
        'https' => $https,
        'code' => $code,
+       'host' => $host,
      };
 $err = &create_redirect($d, $r);
 &release_lock_web($d);
@@ -158,6 +162,7 @@ print "                           --path url-path\n";
 print "                           --alias directory | --redirect url\n";
 print "                          [--regexp | --exact]\n";
 print "                          [--code number]\n";
+print "                          [--host hostname]\n";
 print "                          [--http | --https]\n";
 exit(1);
 }

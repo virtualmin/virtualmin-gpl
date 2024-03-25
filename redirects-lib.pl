@@ -50,6 +50,7 @@ foreach my $p (@ports) {
 		my $proto = $p == $d->{'web_port'} ? 'http' : 'https';
 		my $rd = { 'alias' => $al->{'name'} =~ /^Alias/i ? 1 : 0,
 			   'dir' => $al,
+			   'dirs' => [ $al ],
 			   $proto => 1 };
 		my @w = @{$al->{'words'}};
 		if (@w == 3) {
@@ -96,29 +97,69 @@ foreach my $p (@ports) {
 			}
 		}
 
-	# Find rewrite rules used for redirects that preserve the hostname
+	# Find rewrite rules used for redirects that preserve the hostname.
+	# We expect that the config be formatted like :
+	# RewriteCond ...
+	# RewriteCond ...
+	# RewriteRule ...
 	my @rws = (&apache::find_directive_struct("RewriteCond", $vconf),
 		   &apache::find_directive_struct("RewriteRule", $vconf));
 	@rws = sort { $a->{'line'} <=> $b->{'line'} } @rws;
 	for(my $i=0; $i<@rws; $i++) {
-		my $rwc = $rws[$i];
-		next if ($rwc->{'name'} ne 'RewriteCond');
-		my $rwr = $i+1 < @rws ? $rws[$i+1] : undef;
-		next if (!$rwr || $rwr->{'name'} ne 'RewriteRule');
-		next if ($rwc->{'words'}->[0] ne '%{HTTPS}');
-		next if ($rwr->{'words'}->[2] !~ /^\[R(=\d+)?\]$/);
-		my $rd = { 'alias' => 0,
-			   'dir' => $rwc,
-			   'dir2' => $rwr,
-			 };
-		if (lc($rwc->{'words'}->[1]) eq 'on') {
-			$rd->{'https'} = 1;
+		next if ($rws[$i]->{'name'} ne 'RewriteCond');
+		my $j = $i;
+		my $rwr;
+		my ($rwc, $rwh);
+		while($j < @rws) {
+			if ($rws[$j]->{'name'} eq 'RewriteRule') {
+				# Found final rule
+				$rwr = $rws[$j];
+				last;
+				}
+			if ($rws[$j]->{'words'}->[0] eq '%{HTTPS}') {
+				# Found protocol selector condition
+				$rwc = $rws[$j];
+				}
+			if ($rws[$j]->{'words'}->[0] eq '%{HTTP_HOST}') {
+				# Found host selector condition
+				$rwh = $rws[$j];
+				}
+			$j++;
 			}
-		elsif (lc($rwc->{'words'}->[1]) eq 'off') {
-			$rd->{'http'} = 1;
+		next if (!$rwr || !$rwc && !$rwh);
+		next if ($rwr->{'words'}->[2] !~ /^\[R(=\d+)?\]$/);
+		my @dirs = ( $rwr );
+		push(@dirs, $rwc) if ($rwc);
+		push(@dirs, $rwh) if ($rwh);
+		my $rd = { 'alias' => 0,
+			   'dir' => $rwc || $rwh,
+			   'dir2' => $rwr,
+			   'dirs' => \@dirs,
+			 };
+		if ($rwc) {
+			# Has HTTP / HTTPS condition
+			if (lc($rwc->{'words'}->[1]) eq 'on') {
+				$rd->{'https'} = 1;
+				}
+			elsif (lc($rwc->{'words'}->[1]) eq 'off') {
+				$rd->{'http'} = 1;
+				}
+			else {
+				next;
+				}
 			}
 		else {
-			next;
+			# All protocols match
+			$rd->{'https'} = $rd->{'http'} = 1;
+			}
+		if ($rwh) {
+			# Has hostname condition
+			if ($rwh->{'words'}->[1] =~ /^=(.*)$/) {
+				$rd->{'host'} = $1;
+				}
+			else {
+				next;
+				}
 			}
 		$rd->{'path'} = $rwr->{'words'}->[0];
 		$rd->{'dest'} = $rwr->{'words'}->[1];
@@ -135,7 +176,11 @@ foreach my $p (@ports) {
 			$rd->{'code'} = $1;
 			}
 		$rd->{'id'} = $rwc->{'name'}.'_'.$rd->{'path'};
-		push(@rv, $rd);
+		my ($already) = grep { $_->{'path'} eq $rd->{'path'} &&
+				       $_->{'host'} eq $rd->{'host'} } @rv;
+		if (!$already) {
+			push(@rv, $rd);
+			}
 		}
 	}
 return @rv;
@@ -164,14 +209,18 @@ foreach my $p (@ports) {
 	my $proto = $p == $d->{'web_port'} ? 'http' : 'https';
 	next if (!$redirect->{$proto});
 	next if (!$virt);
-	if ($redirect->{'dest'} =~ /%\{HTTP_/) {
-		# Destination uses variables, so RewriteRule is needed
+	if ($redirect->{'dest'} =~ /%\{HTTP_/ || $redirect->{'host'}) {
+		# Destination uses variables or matches on a hostname,
+		# so RewriteRule is needed
 		my @rwes = &apache::find_directive("RewriteEngine", $vconf);
 		my @rwcs = &apache::find_directive("RewriteCond", $vconf);
 		my @rwrs = &apache::find_directive("RewriteRule", $vconf);
 		my $flag = $redirect->{'code'} ? "[R=".$redirect->{'code'}."]"
 					       : "[R]";
 		push(@rwcs, "%{HTTPS} ".($proto eq 'http' ? 'off' : 'on'));
+		if ($redirect->{'host'}) {
+			push(@rwcs, "%{HTTP_HOST} =".$redirect->{'host'});
+			}
 		my $path = $redirect->{'path'};
 		$path .= "(\.\*)\$" if ($redirect->{'regexp'});
 		$path = "^".$path."\$" if ($redirect->{'exact'});
@@ -230,14 +279,15 @@ foreach my $port (@ports) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
 	my $changed = 0;
-	if ($redirect->{'dir2'}) {
+	if ($redirect->{'dirs'}->[0]->{'name'} =~ /^Rewrite/i) {
 		# Remove RewriteCond and RewriteRule
 		my @rwcs = &apache::find_directive_struct("RewriteCond",$vconf);
 		my @rwrs = &apache::find_directive_struct("RewriteRule",$vconf);
+		my @dirlines = map { $_->{'line'} } @{$redirect->{'dirs'}};
 		my @newrwcs = map { join(" ", @{$_->{'words'}}) }
-		  grep { $_->{'line'} != $redirect->{'dir'}->{'line'} } @rwcs;
+		  grep { &indexof($_->{'line'}, @dirlines) < 0 } @rwcs;
 		my @newrwrs = map { join(" ", @{$_->{'words'}}) }
-		  grep { $_->{'line'} != $redirect->{'dir2'}->{'line'} } @rwrs;
+		  grep { &indexof($_->{'line'}, @dirlines) < 0 } @rwrs;
 		if (@rwcs != @newrwcs || @rwrs != @newrwrs) {
 			&apache::save_directive(
 				"RewriteCond", \@newrwcs, $vconf, $conf);

@@ -79,10 +79,12 @@ if ($multi) {
 			print "    Code: ",$r->{'code'},"\n";
 			}
 		print "    Protocols: ",join(" ", grep { $r->{$_} } ("http", "https")),"\n";
-		if ($r->{'dir'}) {
-			my @dirs = ( $r->{'dir'}->{'name'} );
-			push(@dirs, $r->{'dir2'}->{'name'}) if ($r->{'dir2'});
-			print "    Directives: ",join(" ", @dirs),"\n";
+		if ($r->{'host'}) {
+			print "    Limit to hostname: $r->{'host'}\n";
+			}
+		if ($r->{'dirs'}) {
+			print "    Directives: ",join(" ", map { $_->{'name'} }
+							@{$r->{'dirs'}}),"\n";
 			}
 		}
 	}
