@@ -1339,8 +1339,15 @@ else {
 			}
 		$i++;
 		}
-	my $keyfile = $dkim_config;
-	$keyfile =~ s/\/([^\/]+)$/\/$d->{'id'}.dkim-key/;
+	my $keydir = $dkim_config;
+	$keydir =~ s/\/([^\/]+)$//;
+	if ($keydir eq "/etc" && -d "/etc/dkimkeys" &&
+	    !-r $keydir."/".$d->{'id'}.".dkim-key") {
+		# Use /etc/dkimkeys if if exists and the key isn't
+		# already in /etc
+		$keydir = "/etc/dkimkeys";
+		}
+	my $keyfile = $keydir."/".$d->{'id'}.".dkim-key";
 	my $keyline = "$d->{'id'}\t$d->{'dom'}:$dkim->{'selector'}:$keyfile";
 	if ($kidx < 0 && $key) {
 		# Need to add
