@@ -6783,6 +6783,13 @@ if ($config{'mail_system'} == 0) {
 			  $file."_maincf");
 	&copy_source_dest($postfix::config{'postfix_master'},
 			  $file."_mastercf");
+	foreach my $o ("smtpd_tls_cert_file", "smtpd_tls_key_file",
+		       "smtpd_tls_CAfile") {
+		my $v = &postfix::get_current_value($o);
+		if ($v) {
+			&copy_source_dest($v, $file."_".$o);
+			}
+		}
 	&$second_print($text{'setup_done'});
 	}
 elsif ($config{'mail_system'} == 1) {
@@ -6990,6 +6997,13 @@ if ($bms eq $config{'mail_system'}) {
 		&unlock_file($postfix::config{'postfix_master'});
 		&unlock_file($postfix::config{'postfix_config_file'});
 		undef(@postfix::master_config_cache);
+		foreach my $o ("smtpd_tls_cert_file", "smtpd_tls_key_file",
+			       "smtpd_tls_CAfile") {
+			my $v = &postfix::get_current_value($o);
+			if ($v) {
+				&copy_source_dest($file."_".$o, $v);
+				}
+			}
 		&$second_print($text{'setup_done'});
 		}
 	elsif ($config{'mail_system'} == 1) {
