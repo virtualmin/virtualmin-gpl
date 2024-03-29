@@ -12,6 +12,19 @@ return &plugin_defined($p, "feature_supports_web_redirects") &&
 	&plugin_call($p, "feature_supports_web_redirects", $d);
 }
 
+# has_web_host_redirects(&domain)
+# Returns 1 if redirect editing by hostname is supported for this domain's
+# webserver
+sub has_web_host_redirects
+{
+my ($d) = @_;
+return 1 if ($d->{'web'});
+my $p = &domain_has_website($d);
+return 0 if (!$p);
+return &plugin_defined($p, "feature_supports_web_host_redirects") &&
+	&plugin_call($p, "feature_supports_web_host_redirects", $d);
+}
+
 # list_redirects(&domain)
 # Returns a list of URL paths and destinations for redirects and aliases. Each
 # is a hash ref with keys :
@@ -176,6 +189,7 @@ foreach my $p (@ports) {
 			$rd->{'code'} = $1;
 			}
 		$rd->{'id'} = $rwc->{'name'}.'_'.$rd->{'path'};
+		$rd->{'id'} .= '_'.$rd->{'host'} if ($rd->{'host'});
 		my ($already) = grep { $_->{'path'} eq $rd->{'path'} &&
 				       $_->{'host'} eq $rd->{'host'} } @rv;
 		if ($already) {
@@ -206,6 +220,10 @@ if ($redirect->{'dest'} =~ /%\{HTTP_/ &&
     $redirect->{'http'} && $redirect->{'https'}) {
 	return "Redirects using HTTP_ variables cannot be applied to both ".
 	       "HTTP and HTTPS modes";
+	}
+if ($redirect->{'host'} && $redirect->{'alias'}) {
+	return "Redirects to a directory cannot be limited to a ".
+	       "specific hostname";
 	}
 foreach my $p (@ports) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);

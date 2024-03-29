@@ -90,6 +90,16 @@ else {
 	$r->{'exact'} = $in{'regexp'} == 2 ? 1 : 0;
 	$r->{'http'} = $in{'http'};
 	$r->{'https'} = $in{'https'};
+	if (&has_web_host_redirects($d)) {
+		if ($in{'host_def'}) {
+			delete($r->{'host'});
+			}
+		else {
+			$in{'host'} =~ /^[a-z0-9\.\_\-]+$/i ||
+				&error($text{'redirect_ehost'});
+			$r->{'host'} = $in{'host'};
+			}
+		}
 	$r = &add_wellknown_redirect($r);
 
 	# Create or update

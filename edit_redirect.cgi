@@ -44,7 +44,7 @@ elsif ($r->{'dest'} &&
 	$dproto = $1;
 	$dpath = $2;
 	}
-elsif ($r->{'dest'} && $r->{'desc'} =~ /^(http|https):\/\//) {
+elsif ($r->{'dest'} && $r->{'dest'} =~ /^(http|https):\/\//) {
 	# A URL on a different website
 	$mode = 0;
 	$url = $r->{'dest'};
@@ -58,19 +58,23 @@ print &ui_table_row(&hlink($text{'redirect_dest'}, 'redirect_dest'),
 	&ui_radio_table("mode", $mode,
 		[ [ 0, $text{'redirect_url'},
 		    &ui_textbox("url", $url, 34, undef, undef,
-				"placeholder=\"$text{'index_global_eg'} https://google.com\"") ],
+				"placeholder=\"$text{'index_global_eg'} ".
+				"https://google.com\"") ],
 		  [ 3, $text{'redirect_urlpath'},
 		    &ui_textbox("urlpath", $urlpath, 35, undef, undef,
-				"placeholder=\"$text{'index_global_eg'} /new-path\"") ],
+				"placeholder=\"$text{'index_global_eg'} ".
+				"/new-path\"") ],
 		  [ 2, $text{'redirect_dpath'},
 		    &ui_select("dproto", $dproto,
 			       [ [ 'http', 'HTTP' ],
 			         [ 'https', 'HTTPS' ] ])." ".
 		    &ui_textbox("dpath", $dpath, 29, undef, undef,
-				"placeholder=\"$text{'index_global_eg'} /new-path\"") ],
+				"placeholder=\"$text{'index_global_eg'} ".
+				"/new-path\"") ],
 		  [ 1, $text{'redirect_dir'},
 		    &ui_textbox("dir", $dir, 52, undef, undef,
-				"placeholder=\"$text{'index_global_eg'} $d->{'home'}/$d->{'public_html_dir'}/new-path\"") ],
+			"placeholder=\"$text{'index_global_eg'} ".
+			"$d->{'home'}/$d->{'public_html_dir'}/new-path\"") ],
 		]));
 
 # HTTP status code
@@ -98,6 +102,15 @@ if (&domain_has_ssl($d)) {
 	}
 else {
 	print &ui_hidden("http", 1);
+	}
+
+# Hostname to match
+if (&has_web_host_redirects($d)) {
+	print &ui_table_row(&hlink($text{'redirect_host'}, 'redirect_host'),
+		&ui_opt_textbox("host", $r->{'host'}, 30,
+				$text{'redirect_host_def'}, undef, 0, undef, 0,
+				"placeholder=\"$text{'index_global_eg'} ".
+				"www.$d->{'dom'}\""));
 	}
 
 print &ui_table_end();

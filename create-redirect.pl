@@ -125,6 +125,8 @@ $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 &has_web_redirects($d) ||
 	&usage("Virtual server $domain does not support redirects");
+!$host || &has_web_host_redirects($d) ||
+    &usage("Virtual server $domain does not support hostname-based redirects");
 
 # Check for clash
 &obtain_lock_web($d);

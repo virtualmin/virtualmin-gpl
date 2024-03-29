@@ -11,6 +11,7 @@ $d = &get_domain($in{'dom'});
 
 # Build table data
 @redirects = map { &remove_wellknown_redirect($_) } &list_redirects($d);
+$canhost = &has_web_host_redirects($d);
 foreach $r (@redirects) {
 	my @protos;
 	push(@protos, "HTTP") if ($r->{'http'});
@@ -28,6 +29,7 @@ foreach $r (@redirects) {
 		$r->{'alias'} ? $text{'redirects_alias'}
 			      : $text{'redirects_redirect'},
 		join(", ", @protos),
+		$canhost ? ( $r->{'host'} || $text{'redirects_any'} ) : ( ),
 		$dest,
 		]);
 	}
@@ -43,6 +45,7 @@ print &ui_form_columns_table(
 	[ "", $text{'redirects_path'},
           $text{'redirects_type'},
           $text{'redirects_protos'},
+	  $canhost ? ( $text{'redirects_host'} ) : ( ),
           $text{'redirects_dest'},
 	],
 	100,
