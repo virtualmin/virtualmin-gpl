@@ -3533,7 +3533,9 @@ sub is_webmail_path
 my ($p, $wanturl) = @_;
 my $url;
 ($p, $url) = split(/\s+/, $p);
-return ($p eq "(.*)" || $p eq "^(?!/.well-known)(.*)" ||
+return ($p eq "(.*)" ||
+	$p eq "^(?!/.well-known)(.*)" ||
+	$p eq "^(?!/.well-known)(.*)\$" ||
         $p eq "^(?!/.well-known)") && (!$wanturl || $url =~ /^\Q$wanturl\E/);
 }
 
@@ -3596,7 +3598,7 @@ foreach my $r ('webmail', 'admin') {
 		my ($rcond) = grep { $_ eq $condv } @rcond;
 		push(@rcond, $condv) if (!$rcond);
 		my ($rrule) = grep { &is_webmail_path($_, $url) } @rrule;
-		push(@rrule, "^(?!/.well-known) $url [R]") if (!$rrule);
+		push(@rrule, "^(?!/.well-known)(.*)\$ $url [R]") if (!$rrule);
 
 		# Add the ServerAlias
 		my $foundsa;
