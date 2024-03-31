@@ -3531,9 +3531,9 @@ return $err;
 # Usermin and Webmin. Also updates the ServerAlias if needed.
 sub add_webmail_redirect_directives
 {
-local ($d, $tmpl, $force) = @_;
+my ($d, $tmpl, $force) = @_;
 $tmpl ||= &get_template($d->{'template'});
-local $p = &domain_has_website($d);
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_add_web_webmail_redirect", $d, $tmpl,
 			    $force);
@@ -3548,16 +3548,16 @@ foreach my $r ('webmail', 'admin') {
 
 	# Get directives we will be changing
 	foreach my $port (@ports) {
-		local ($virt, $vconf, $conf) =
+		my ($virt, $vconf, $conf) =
 			&get_apache_virtual($d->{'dom'}, $port);
 		next if (!$virt);
-		local @reng = &apache::find_directive("RewriteEngine", $vconf);
-		local @rcond = &apache::find_directive("RewriteCond", $vconf);
-		local @rrule = &apache::find_directive("RewriteRule", $vconf);
-		local @sa = &apache::find_directive("ServerAlias", $vconf);
+		my @reng = &apache::find_directive("RewriteEngine", $vconf);
+		my @rcond = &apache::find_directive("RewriteCond", $vconf);
+		my @rrule = &apache::find_directive("RewriteRule", $vconf);
+		my @sa = &apache::find_directive("ServerAlias", $vconf);
 
 		# Work out the URL to redirect to
-		local $url = $tmpl->{'web_'.$r.'dom'};
+		my $url = $tmpl->{'web_'.$r.'dom'};
 		if ($url) {
 			# Sub in any template
 			$url = &substitute_domain_template($url, $d);
@@ -3578,19 +3578,19 @@ foreach my $r ('webmail', 'admin') {
 			}
 
 		# Add the mod_rewrite directives
-		local $rhost = "$r.$d->{'dom'}";
-		local ($ron) = grep { lc($_) eq "on" } @ron;
+		my $rhost = "$r.$d->{'dom'}";
+		my ($ron) = grep { lc($_) eq "on" } @ron;
 		push(@ron, "on") if (!$ron);
-		local $condv = "\%{HTTP_HOST} =$rhost";
-		local ($rcond) = grep { $_ eq $condv } @rcond;
+		my $condv = "\%{HTTP_HOST} =$rhost";
+		my ($rcond) = grep { $_ eq $condv } @rcond;
 		push(@rcond, $condv) if (!$rcond);
-		local $oldrulev = "^(.*) $url [R]";
-		local $rulev = "^(?!/.well-known)(.*) $url [R]";
-		local ($rrule) = grep { $_ eq $rulev || $_ eq $oldrulev } @rrule;
+		my $oldrulev = "^(.*) $url [R]";
+		my $rulev = "^(?!/.well-known)(.*) $url [R]";
+		my ($rrule) = grep { $_ eq $rulev || $_ eq $oldrulev } @rrule;
 		push(@rrule, $rulev) if (!$rrule);
 
 		# Add the ServerAlias
-		local $foundsa;
+		my $foundsa;
 		foreach my $s (@sa) {
 			$foundsa++ if (&indexof($rhost, split(/\s+/, $s)) >= 0);
 			}
@@ -3615,8 +3615,8 @@ if ($fixed) {
 # Take out webmail and admin redirects from the Apache config
 sub remove_webmail_redirect_directives
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_remove_web_webmail_redirect", $d);
 	}
@@ -3627,11 +3627,11 @@ my @ports = ( $d->{'web_port'} );
 push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
 my $fixed = 0;
 foreach my $port (@ports) {
-	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
-	local @rcond = &apache::find_directive("RewriteCond", $vconf);
-	local @rrule = &apache::find_directive("RewriteRule", $vconf);
-	local @sa = &apache::find_directive("ServerAlias", $vconf);
+	my @rcond = &apache::find_directive("RewriteCond", $vconf);
+	my @rrule = &apache::find_directive("RewriteRule", $vconf);
+	my @sa = &apache::find_directive("ServerAlias", $vconf);
 
 	# Filter out redirect rules
 	for(my $i=0; $i<@rcond; $i++) {
@@ -3649,9 +3649,9 @@ foreach my $port (@ports) {
 	&apache::save_directive("RewriteRule", \@rrule, $vconf, $conf);
 
 	# Fix up the ServerAlias
-	local @newsa;
+	my @newsa;
 	foreach my $s (@sa) {
-		local @sav = split(/\s+/, $s);
+		my @sav = split(/\s+/, $s);
 		@sav = grep { $_ ne "webmail.$d->{'dom'}" &&
 			      $_ ne "admin.$d->{'dom'}" } @sav;
 		if (@sav) {
