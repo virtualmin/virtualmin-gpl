@@ -21,11 +21,14 @@ foreach $r (@redirects) {
 	    $dest =~ /^(http|https):\/\/%\{HTTP_HOST\}(\/.*)$/) {
 		$dest = &text('redirects_with', "$2", uc($1));
 		}
+	my $canedit = !&is_webmail_redirect($d, $r);
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
-		  'value' => $r->{'id'} },
-		"<a href='edit_redirect.cgi?dom=$in{'dom'}&".
-		  "id=$r->{'id'}'>$r->{'path'}</a>",
+		  'value' => $r->{'id'}, 'disabled' => !$canedit },
+		$canedit ? 
+			&ui_link("edit_redirect.cgi?dom=$in{'dom'}&".
+				 "id=$r->{'id'}", $r->{'path'}) :
+			$r->{'path'},
 		$r->{'alias'} ? $text{'redirects_alias'}
 			      : $text{'redirects_redirect'},
 		join(", ", @protos),
