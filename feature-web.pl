@@ -3526,6 +3526,17 @@ if (defined(&save_domain_ruby_mode)) {
 return $err;
 }
 
+# is_webmail_path(path, [url])
+# Returns 1 if a path could be used for a webmail redirect
+sub is_webmail_path
+{
+my ($p, $wanturl) = @_;
+my $url;
+($p, $url) = split(/\s+/, $p);
+return ($p eq "(.*)" || $p eq "^(?!/.well-known)(.*)" ||
+        $p eq "^(?!/.well-known)") && (!$wanturl || $url =~ /^\Q$wanturl\E/);
+}
+
 # add_webmail_redirect_directives(&domain, &template, [force-enable])
 # Add mod_rewrite directives to direct webmail.$DOM and admin.$DOM to
 # Usermin and Webmin. Also updates the ServerAlias if needed.
@@ -3584,10 +3595,8 @@ foreach my $r ('webmail', 'admin') {
 		my $condv = "\%{HTTP_HOST} =$rhost";
 		my ($rcond) = grep { $_ eq $condv } @rcond;
 		push(@rcond, $condv) if (!$rcond);
-		my $oldrulev = "^(.*) $url [R]";
-		my $rulev = "^(?!/.well-known)(.*) $url [R]";
-		my ($rrule) = grep { $_ eq $rulev || $_ eq $oldrulev } @rrule;
-		push(@rrule, $rulev) if (!$rrule);
+		my ($rrule) = grep { &is_webmail_path($_, $url) } @rrule;
+		push(@rrule, "^(?!/.well-known) $url [R]") if (!$rrule);
 
 		# Add the ServerAlias
 		my $foundsa;
@@ -3637,9 +3646,7 @@ foreach my $port (@ports) {
 	for(my $i=0; $i<@rcond; $i++) {
 		if ($rcond[$i] =~ /^\%\{HTTP_HOST\}\s+=(webmail|admin)\.\Q$d->{'dom'}\E/) {
 			splice(@rcond, $i, 1);
-			my @rrw = split(/\s+/, $rrule[$i]);
-			if (($rrw[0] eq "^(.*)" || $rrw[0] eq "^(?!/.well-known)(.*)") &&
-			    $rrw[1] =~ /^(http|https):/) {
+			if (&is_webmail_path($rrule[$i], "https:")) {
 				splice(@rrule, $i, 1);
 				}
 			$i--;
@@ -3674,19 +3681,19 @@ return $fixed;
 # configured
 sub get_webmail_redirect_directives
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_get_web_webmail_redirect", $d);
 	}
 
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return ( ) if (!$virt);
-local @rcond = &apache::find_directive("RewriteCond", $vconf);
-local @rrule = &apache::find_directive("RewriteRule", $vconf);
-local @rv;
-local $i = 0;
+my @rcond = &apache::find_directive("RewriteCond", $vconf);
+my @rrule = &apache::find_directive("RewriteRule", $vconf);
+my @rv;
+my $i = 0;
 foreach my $r (@rcond) {
 	if ($r =~ /^\%\{HTTP_HOST\}\s+=([^\.]+\.\Q$d->{'dom'}\E)/) {
 		my $rhost = $1;
