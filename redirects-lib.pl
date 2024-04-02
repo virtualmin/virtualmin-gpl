@@ -62,7 +62,6 @@ foreach my $p (@ports) {
 			&apache::find_directive_struct("RedirectMatch", $vconf),
 		       ) {
 		my $rd = { 'alias' => $al->{'name'} =~ /^Alias/i ? 1 : 0,
-			   'dir' => $al,
 			   'dirs' => [ $al ],
 			   $proto => 1 };
 		my @w = @{$al->{'words'}};
@@ -145,8 +144,6 @@ foreach my $p (@ports) {
 		push(@dirs, $rwc) if ($rwc);
 		push(@dirs, $rwh) if ($rwh);
 		my $rd = { 'alias' => 0,
-			   'dir' => $rwc || $rwh,
-			   'dir2' => $rwr,
 			   'dirs' => \@dirs,
 			 };
 		if ($rwc) {
