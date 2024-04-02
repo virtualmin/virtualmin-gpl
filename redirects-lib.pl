@@ -103,6 +103,7 @@ foreach my $p (@ports) {
 		my ($already) = grep { $_->{'path'} eq $rd->{'path'} } @rv;
 		if ($already) {
 			$already->{$proto} = 1;
+			push(@{$already->{'dirs'}}, @{$rd->{'dirs'}});
 			}
 		else {
 			push(@rv, $rd);
@@ -191,6 +192,7 @@ foreach my $p (@ports) {
 				       $_->{'host'} eq $rd->{'host'} } @rv;
 		if ($already) {
 			$already->{$proto} = 1;
+			push(@{$already->{'dirs'}}, @{$rd->{'dirs'}});
 			}
 		else {
 			push(@rv, $rd);

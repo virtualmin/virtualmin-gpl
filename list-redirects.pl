@@ -83,8 +83,9 @@ if ($multi) {
 			print "    Limit to hostname: $r->{'host'}\n";
 			}
 		if ($r->{'dirs'}) {
-			print "    Directives: ",join(" ", map { $_->{'name'} }
-							@{$r->{'dirs'}}),"\n";
+			print "    Directives: ",
+				join(" ", &unique(map { $_->{'name'} }
+							@{$r->{'dirs'}})),"\n";
 			}
 		}
 	}
