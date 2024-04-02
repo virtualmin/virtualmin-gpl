@@ -10,6 +10,11 @@ table format, but can be switched to a more complete and parsable output with
 the C<--multiline> flag. Or you can have just the alias paths listed with
 the C<--name-only> parameter.
 
+By default the underlying path to redirect from will be shown, which
+typically excludes the C<.well-known> path used by Let's Encrypt. However,
+you can transform this to the more user-friendly path shown in the
+Virtualmin UI with the C<--fix-wellknown> flag.
+
 =cut
 
 package virtual_server;
@@ -43,6 +48,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--path") {
 		$onlypath = shift(@ARGV);
 		}
+	elsif ($a eq "--fix-wellknown") {
+		$wellknown = 1;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -63,6 +71,9 @@ if ($path) {
 	$phd = &public_html_dir($d);
 	@redirects = grep { $_->{'path'} eq $path ||
 			    $_->{'path'} eq $phd.$path } @redirects;
+	}
+if ($wellknown) {
+	@redirects = map { &remove_wellknown_redirect($_) } @redirects;
 	}
 
 if ($multi) {
@@ -112,6 +123,7 @@ print "Lists the web aliases and redirects in some virtual server.\n";
 print "\n";
 print "virtualmin list-redirects --domain domain.name\n";
 print "                         [--multiline | --name-only]\n";
+print "                         [--fix-wellknown]\n";
 exit(1);
 }
 

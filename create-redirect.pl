@@ -23,6 +23,11 @@ the same sub-path in the destination directory or path. However, you can
 use the C<--exact> flag to only match the given path, or the C<--regexp> flag
 to ignore sub-paths when redirecting.
 
+If the path to redirect is C</>, this can break requests by Let's Encrypt
+needed when issuing new SSL certificates. To prevent this, add the
+C<--fix-wellknown> flag which excludes the C<.well-known> path, which is
+the same behavior as when a redirect is created in the Virtualmin UI.
+
 For domains with both non-SSL and SSL websites, you can use the C<--http> and
 C<--https> flags to limit the alias or redirect to one website type or the
 other.
@@ -93,6 +98,9 @@ while(@ARGV > 0) {
 		$code =~ /^\d{3}$/ && $code >= 300 && $code < 400 ||
 			&usage("--code must be followed by a HTTP status code between 300 and 400");
 		}
+	elsif ($a eq "--fix-wellknown") {
+		$wellknown = 1;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -147,6 +155,9 @@ $r = { 'path' => $path,
        'code' => $code,
        'host' => $host,
      };
+if ($wellknown) {
+	$r = &add_wellknown_redirect($r);
+	}
 $err = &create_redirect($d, $r);
 &release_lock_web($d);
 if ($err) {
@@ -172,6 +183,7 @@ print "                          [--regexp | --exact]\n";
 print "                          [--code number]\n";
 print "                          [--host hostname]\n";
 print "                          [--http | --https]\n";
+print "                          [--fix-wellknown]\n";
 exit(1);
 }
 
