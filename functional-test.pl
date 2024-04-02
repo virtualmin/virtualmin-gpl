@@ -8581,8 +8581,8 @@ $redirect_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'desc', 'Test redirect domain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
-		      [ 'mail' ], [ 'logrotate' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ $ssl ],
+		      [ 'dns' ], [ 'mail' ], [ 'logrotate' ],
 		      [ 'content' => 'Non-redirected web page' ],
 		      @create_args, ],
 	},
@@ -8723,6 +8723,11 @@ $redirect_tests = [
 	  'grep' => 'http://'.$test_domain,
 	},
 
+	# Check that it works for SSL
+	{ 'command' => $wget_command.'https://www.'.$test_domain,
+	  'grep' => 'http://'.$test_domain,
+	},
+
 	# Check that there is no redirect for another domain
 	{ 'command' => $wget_command.'http://mail.'.$test_domain,
 	  'antigrep' => 'http://'.$test_domain,
@@ -8733,6 +8738,42 @@ $redirect_tests = [
           'args' => [ [ 'domain', $test_domain ],
                       [ 'path', '/' ],
 		      [ 'host', 'www.'.$test_domain ] ],
+	},
+
+	# Check that it no longer works
+	{ 'command' => $wget_command.'http://www.'.$test_domain,
+	  'antigrep' => 'http://'.$test_domain,
+	},
+
+	# Create an HTTP-only redirect
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/' ],
+		      [ 'host', 'www.'.$test_domain ],
+		      [ 'http' ],
+		      [ 'redirect', 'http://'.$test_domain ] ],
+	},
+
+	# Check that it works
+	{ 'command' => $wget_command.'http://www.'.$test_domain,
+	  'grep' => 'http://'.$test_domain,
+	},
+
+	# Check that it doesn't work for SSL
+	{ 'command' => $wget_command.'https://www.'.$test_domain,
+	  'antigrep' => 'http://'.$test_domain,
+	},
+
+	# Delete the redirect
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/' ],
+		      [ 'host', 'www.'.$test_domain ] ],
+	},
+
+	# Check that it no longer works
+	{ 'command' => $wget_command.'http://www.'.$test_domain,
+	  'antigrep' => 'http://'.$test_domain,
 	},
 
 	# Get rid of the domain
