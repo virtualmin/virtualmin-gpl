@@ -16161,6 +16161,10 @@ if ($config{'spam'}) {
 			# Procmail does not exist
 			return &text('check_spamwrappercmd', $mbc[0]);
 			}
+		if ($mbc[0] !~ /\/procmail-wrapper$/) {
+			# Command must be the procmail wrapper
+			return &text('check_spamwrappercmd2', $mbc[0]);
+			}
 		if ($st[4] != 0) {
 			# User is not root
 			local $user = getpwuid($st[4]);
@@ -16179,17 +16183,15 @@ if ($config{'spam'}) {
 				     sprintf("%o", $st[2]));
 			}
 		# Check for safe flags
-		if ($mbc[0] =~ /\/procmail-wrapper$/) {
-			my @safe = ("-o", "-a", "\$DOMAIN", "-d", "\$LOGNAME");
-			my $ok = 1;
-			for(my $i=0; $i<@safe; $i++) {
-				$ok = 0 if ($mbc[$i+1] ne $safe[$i]);
-				}
-			$ok = 0 if (@mbc != @safe+1);
-			if (!$ok) {
-				return &text('check_spamwrapperargs',
-					$mbc, join(" ", @safe));
-				}
+		my @safe = ("-o", "-a", "\$DOMAIN", "-d", "\$LOGNAME");
+		my $ok = 1;
+		for(my $i=0; $i<@safe; $i++) {
+			$ok = 0 if ($mbc[$i+1] ne $safe[$i]);
+			}
+		$ok = 0 if (@mbc != @safe+1);
+		if (!$ok) {
+			return &text('check_spamwrapperargs',
+				$mbc, join(" ", @safe));
 			}
 		}
 	}
