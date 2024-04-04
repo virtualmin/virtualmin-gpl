@@ -177,9 +177,7 @@ if ($tmplname) {
 $webmin_proto = "http";
 if ($miniserv{'ssl'}) {
 	eval "use Net::SSLeay";
-	if (!$@) {
-		$webmin_proto = "https";
-		}
+	$webmin_proto = "https" if (!$@);
 	}
 $webmin_port = $miniserv{'port'};
 $webmin_url = "$webmin_proto://localhost:$webmin_port";
@@ -194,6 +192,11 @@ if (&foreign_installed("usermin")) {
 	&foreign_require("usermin");
 	&usermin::get_usermin_miniserv_config(\%uminiserv);
 	$usermin_port = $uminiserv{'port'};
+	$usermin_proto = "http";
+	if ($uminiserv{'ssl'}) {
+		eval "use Net::SSLeay";
+		$usermin_proto = "https" if (!$@);
+		}
 	}
 
 ($test_domain_user) = &unixuser_name($test_domain);
@@ -8806,6 +8809,32 @@ $redirect_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
 	  'grep' => [ '^'.quotemeta('^(?!/.well-known)').'$', ],
+	},
+
+	# Enable webmail and admin redirects
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'webmail' ] ],
+	},
+
+	# Make sure they shows up
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'host', 'webmail.'.$test_domain ],
+		      [ 'fix-wellknown' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/$',
+		      'Limit to hostname: webmail.'.$test_domain,
+		      'Destination: '.$usermin_proto.'://'.$test_domain.':'.$usermin_port ],
+	},
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'host', 'admin.'.$test_domain ],
+		      [ 'fix-wellknown' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/$',
+		      'Limit to hostname: admin.'.$test_domain,
+		      'Destination: '.$webmin_proto.'://'.$test_domain.':'.$webmin_port ],
 	},
 
 	# Get rid of the domain
