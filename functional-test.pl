@@ -8776,6 +8776,38 @@ $redirect_tests = [
 	  'antigrep' => 'http://'.$test_domain,
 	},
 
+	# Create a redirect that excludes well-known
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/' ],
+		      [ 'redirect', 'http://www.google.com' ],
+		      [ 'fix-wellknown' ] ],
+	},
+
+	# Test wget to redirect to google
+	{ 'command' => $wget_command.'http://'.$test_domain.'/',
+	  'grep' => 'Feeling Lucky',
+	},
+
+	# Test wget doesn't redirect .well-known
+	{ 'command' => $wget_command.'http://'.$test_domain.'/.well-known/',
+	  'antigrep' => 'Feeling Lucky',
+	  'fail' => 1,
+	},
+
+	# Make sure the redirect appears
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ],
+		      [ 'fix-wellknown' ] ],
+	  'grep' => [ '^/$', ],
+	},
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^'.quotemeta('^(?!/.well-known)').'$', ],
+	},
+
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
