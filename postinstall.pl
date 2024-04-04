@@ -301,9 +301,10 @@ if ($config{'php_vars'} =~ /^memory_limit=32M/) {
 	&save_module_config();
 	}
 
-# If the default template uses a PHP mode that isn't supported, change it
+# If the default template uses a PHP or CGI mode that isn't supported, change it
 my $mmap = &php_mode_numbers_map();
 my @supp = &supported_php_modes();
+my @cgimodes = &has_cgi_support();
 foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 	my %cannums = map { $mmap->{$_}, 1 } @supp;
 	if ($tmpl->{'web_php_suexec'} ne '' &&
@@ -312,6 +313,11 @@ foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 		my @goodsupp = grep { $_ ne 'none' } @supp;
 		@goodsupp = @supp if (!@goodsupp);
 		$tmpl->{'web_php_suexec'} = $mmap->{$goodsupp[0]};
+		&save_template($tmpl);
+		}
+	if ($tmpl->{'web_cgimode'} &&
+	    &indexof($tmpl->{'web_cgimode'}, @cgimodes) < 0) {
+		$tmpl->{'web_cgimode'} = $cgimodes[0];
 		&save_template($tmpl);
 		}
 	}
