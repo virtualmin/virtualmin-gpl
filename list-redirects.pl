@@ -10,6 +10,10 @@ table format, but can be switched to a more complete and parsable output with
 the C<--multiline> flag. Or you can have just the alias paths listed with
 the C<--name-only> parameter.
 
+To limit the list to only redirects for some path, use the C<--path> flag
+followed by a URL path. Or to limit to redirects for a certain hostname,
+use the C<--host> flag.
+
 By default the underlying path to redirect from will be shown, which
 typically excludes the C<.well-known> path used by Let's Encrypt. However,
 you can transform this to the more user-friendly path shown in the
@@ -46,7 +50,10 @@ while(@ARGV > 0) {
 		$nameonly = 1;
 		}
 	elsif ($a eq "--path") {
-		$onlypath = shift(@ARGV);
+		$path = shift(@ARGV);
+		}
+	elsif ($a eq "--host") {
+		$host = shift(@ARGV);
 		}
 	elsif ($a eq "--fix-wellknown") {
 		$wellknown = 1;
@@ -71,6 +78,9 @@ if ($path) {
 	$phd = &public_html_dir($d);
 	@redirects = grep { $_->{'path'} eq $path ||
 			    $_->{'path'} eq $phd.$path } @redirects;
+	}
+if (defined($host)) {
+	@redirects = grep { $_->{'host'} eq $host } @redirects;
 	}
 if ($wellknown) {
 	@redirects = map { &remove_wellknown_redirect($_) } @redirects;
@@ -123,6 +133,8 @@ print "Lists the web aliases and redirects in some virtual server.\n";
 print "\n";
 print "virtualmin list-redirects --domain domain.name\n";
 print "                         [--multiline | --name-only]\n";
+print "                         [--path /path]\n";
+print "                         [--host hostname]\n";
 print "                         [--fix-wellknown]\n";
 exit(1);
 }
