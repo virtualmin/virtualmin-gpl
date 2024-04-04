@@ -125,7 +125,7 @@ else {
 	}
 
 # Default location for zones
-my @locs = &s3_list_locations();
+my @locs = &s3_list_aws_locations();
 if (&get_ec2_aws_region()) {
 	unshift(@locs, [ "", $text{'dnscloud_route53_def'} ]);
 	}
