@@ -1449,7 +1449,6 @@ check_updateerr=Das ausgewählte Paket-Update-System kann nicht genutzt werden :
 check_apicmd=Erstelle API helper Befehl ..
 check_apicmdok=.. erstellt <tt>$1</tt>
 check_apicmderr=.. fehlgeschlagen : $1
-check_spamwrappercmd=Der Befehl procmail <tt>$1</tt> in der Postfix-Konfiguration existiert nicht
 check_lostplugin=Das Plugin <i>$1</i> kann nicht deaktiviert werden, da es durch die folgenden Virtuellen Server verwendet wird : $2
 
 checkmap_enone=Keine Map Quellen wurden in <a href='$1'>Postfix Konfiguration</a> gefunden

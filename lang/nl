@@ -1761,10 +1761,6 @@ check_apicmdok=.. gemaakt <tt>$1</tt>
 check_apicmderr=. . mislukt : $1
 check_spamlockon=Toevoegen van de slot-file voor alle domeinen' spamassassin verzoeken ..
 check_spamlockoff=Verwijderen van de slot-file van alle domeinen, spamassassin verzoeken ..
-check_spamwrappercmd=De Procmail opdracht <tt>$1</tt> in de Postfix configuratie bestaat niet
-check_spamwrapperuser=De procmail opdracht <tt>$1</tt> is nu van de gebruiker $2, de eigenaar kan beter <tt>root</tt> zijn. Anders kan het gebeuren dat email niet juist word afgeleverd of word gecontroleerd op spam
-check_spamwrappergroup=De procmail opdracht <tt>$1</tt> is van groep $2, de eigenaar kan beter <tt>root</tt> zijn. Anders kan het gebeuren dat email niet juist word afgeleverd of word gecontroleerd op spam
-check_spamwrapperperms=De procmail opdracht <tt>$1</tt> heeft $2 permissies, het is beter dat setuid en setgid voor de <tt>root</tt> zijn. Anders kan het gebeuren dat email niet juist word afgeleverd of word gecontroleerd op spam
 check_lostfeature=De optie <i>$1</i> kan niet worden uitgeschakeld, omdat het in gebruik is door de volgende virtuele servers : $2
 check_lostplugin=De plugin <i>$1</i> kan niet worden uitgeschakeld, omdat het in gebruik is door de volgende virtuele servers : $2
 check_ehomebase=De home basis directory $1 is geen absoluut pad. Dit kan worden gecorrigeerd op de <a href='$2'>Virtualmin configuratie</a> pagina

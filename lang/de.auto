@@ -749,10 +749,12 @@ check_hostdefaultdomain_change=Host-Standarddomäne von <tt>$1</tt> auf <tt>$2</
 check_hostdefaultdomain_errold=.. Host-Standarddomäne konnte nicht erstellt werden, da die Standarddomäne <tt>$1</tt> bereits vorhanden ist
 check_spamlockon=Hinzufügen einer Sperrdatei zu den Spamassassin-Aufrufen aller Domains
 check_spamlockoff=Entfernen der Sperrdatei aus den Spamassassin-Aufrufen aller Domains
-check_spamwrapperargs=Der procmail-Befehl <tt>$1</tt> in der Postfix-Konfiguration hat nicht die erwarteten Flags <tt>$2</tt>
-check_spamwrapperuser=Der procmail-Befehl <tt>$1</tt> gehört dem Benutzer $2, wenn er dem <tt>root</tt> gehören soll. E-Mails werden möglicherweise nicht ordnungsgemäß zugestellt oder auf Spam überprüft
-check_spamwrappergroup=Der procmail-Befehl <tt>$1</tt> gehört der Gruppe $2, wenn er <tt>root</tt> gehören soll. E-Mails werden möglicherweise nicht ordnungsgemäß zugestellt oder auf Spam überprüft
-check_spamwrapperperms=Der procmail-Befehl <tt>$1</tt> verfügt über $2 -Berechtigungen, wenn er auf root gesetzt und auf root gesetzt werden soll. E-Mails werden möglicherweise nicht ordnungsgemäß zugestellt oder auf Spam überprüft
+check_spamwrappercmd=Der Mailbox-Befehl <tt>$1</tt> existiert in der Postfix-Konfiguration nicht
+check_spamwrappercmd2=Der in der Postfix-Konfiguration auf <tt>$1</tt> eingestellte Mailbox-Befehl stimmt nicht mit dem erforderlichen <tt>procmail-wrapper</tt> Befehl überein
+check_spamwrapperargs=Der Procmail-Wrapperbefehl <tt>$1</tt> in der Postfix-Konfiguration hat nicht die erwarteten Flags <tt>$2</tt>
+check_spamwrapperuser=Der Procmail-Wrapperbefehl <tt>$1</tt> gehört dem Benutzer $2, obwohl er eigentlich <tt>root</tt> gehören sollte. E-Mails werden möglicherweise nicht richtig zugestellt oder auf Spam geprüft
+check_spamwrappergroup=Der Procmail-Befehl <tt>$1</tt> gehört der Gruppe $2, obwohl er eigentlich <tt>root</tt> gehören sollte. E-Mails werden möglicherweise nicht richtig zugestellt oder auf Spam geprüft
+check_spamwrapperperms=Der procmail-Befehl <tt>$1</tt> hat <tt>$2</tt> Berechtigungen, wenn er auf <tt>root</tt> <tt>setuid</tt> <tt>setgid</tt> sollte. E-Mails werden möglicherweise nicht richtig zugestellt oder auf Spam geprüft
 check_lostfeature=Die Funktion <i>$1</i> kann nicht deaktiviert werden, da sie von den folgenden virtuellen Servern verwendet wird : $2
 check_ehomebase=Das Basisverzeichnis $1 ist kein absoluter Pfad. Dies kann auf der Seite <a href='$2'>Virtualmin-Konfiguration</a> korrigiert werden
 check_ehomebase2=Das Basisverzeichnis $1 ist kein absoluter Pfad. Dies kann auf der Seite <a href='$2'>Modulkonfiguration für Benutzer und Gruppen</a> korrigiert werden
@@ -2881,6 +2883,8 @@ redirects_none=Es wurden noch keine Website-Weiterleitungen definiert.
 redirects_derr=Website-Weiterleitungen konnten nicht gelöscht werden
 redirects_protos=Protokolle
 redirects_with=$1 mit $2
+redirects_host=Auf Host beschränken
+redirects_any=Jeder Host
 
 redirect_header=Website-Weiterleitung oder Alias-Details
 redirect_code=HTTP-Umleitungstyp
@@ -2897,6 +2901,9 @@ redirect_regexp2no=Gleiches Unterverzeichnis unter der Ziel-URL
 redirect_proto=Aktivieren Sie die Umleitung für
 redirect_http=Nicht-SSL-Website
 redirect_https=SSL-Website
+redirect_host=Umleitung auf Hostnamen beschränken
+redirect_host_def=Alle Hostnamen
+redirect_ehost=Fehlender oder ungültig aussehender Hostname
 redirect_eurlpath=Fehlender oder ungültiger Ziel-URL-Pfad
 redirect_eurlpath2=Eine Weiterleitung von/zu einer lokalen URL würde eine Endlosschleife verursachen
 redirect_edir=Nicht absolutes Zielverzeichnis

@@ -1820,10 +1820,6 @@ check_apicmdok=.. opprettet <tt>$1</tt>
 check_apicmderr=.. feilet : $1
 check_spamlockon=Legg til låsefil i alle domeners spamassassin kall ..
 check_spamlockoff=Fjerner låsefil fra alle domeners spamassassin kall ..
-check_spamwrappercmd=Procmail kommandoen <tt>$1</tt>  i Postfix konfigurasjonen finnes ikke
-check_spamwrapperuser=Procmail kommandoen <tt>$1</tt> er eid av bruker $2, når den burd vært eid av <tt>root</tt>. Det kan derfor være at e-post ikke blir korrekt levert eller sjekket for søppelpost
-check_spamwrappergroup=Procmail kommandoen <tt>$1</tt> er eid av gruppe $2, mens den skulle ha vært eid av <tt>root</tt>. Det kan hende at e-post ikke blir riktig levert, eller at den ikke blir sjekket for søppelpost
-check_spamwrapperperms=Procmail kommandoen <tt>$1</tt> har tillatelsene $2, når den burd vært setuid og setgid til root. Det kan derfor være at e-post ikke blir korrekt levert eller sjekket for søppelpost
 check_lostfeature=Funksjonen <i>$1</i> kan ikke deaktiveres, siden den er i bruk i følgende virtuelle tjenere : $2
 check_lostplugin=Tillegget <i>$1</i> kan ikke deaktiveres, siden det brukes av følgende virtuelle tjenere : $2
 check_ehomebase=Bae-katalogen for hjemmekataloger $1 er ikke en absolutt sti. Dette kan endre i <a href='$2'>modulkonfigurasjonen</a> for modulen Brukere og grupper
