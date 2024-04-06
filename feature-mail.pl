@@ -5938,11 +5938,13 @@ return 0 if (!$maillog);
 
 # Seek to the last position
 &lock_file($mail_login_file);
+my %logins;
+&read_file($mail_login_file, \%logins);
 open(MAILLOG, $maillog);
 if ($maillog !~ /\|$/) {
 	# Reading a regular file, so seek into it
 	my @st = stat($maillog);
-	my $lastpost;
+	my $lastpos;
 	$lastpos = $logins{'lastpos'} || $st[7];
 	if ($lastpos > $st[7]) {
 		# Off end .. file has probably been rotated
@@ -5952,8 +5954,6 @@ if ($maillog !~ /\|$/) {
 	}
 my $now = time();
 my @tm = localtime($now);
-my %logins;
-&read_file($mail_login_file, \%logins);
 my $lasttime = $logins{'lasttime'};
 my $finaltime = $lasttime;
 while(<MAILLOG>) {
