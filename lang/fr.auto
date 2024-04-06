@@ -923,11 +923,12 @@ check_hostdefaultdomain_change=Modification du domaine par défaut de l'hôte de
 check_hostdefaultdomain_errold=.. impossible de créer le domaine par défaut de l'hôte, car le domaine par défaut <tt>$1</tt> existe déjà
 check_spamlockon=Ajout d'un fichier de verrouillage aux appels spamassassin de tous les domaines
 check_spamlockoff=Suppression du fichier de verrouillage des appels spamassassin de tous les domaines
-check_spamwrappercmd=La commande procmail <tt>$1</tt> dans la configuration de Postfix n'existe pas
-check_spamwrapperargs=La commande procmail <tt>$1</tt> dans la configuration de Postfix n'a pas les drapeaux attendus <tt>$2</tt>
-check_spamwrapperuser=La commande procmail <tt>$1</tt> appartient à l'utilisateur $2, alors qu'elle devrait appartenir à <tt>root</tt>. Il est possible que les e-mails ne soient pas correctement envoyés ou vérifiés pour détecter les spams
-check_spamwrappergroup=La commande procmail <tt>$1</tt> appartient au groupe $2, alors qu'elle devrait appartenir à <tt>root</tt>. Il est possible que les e-mails ne soient pas correctement envoyés ou vérifiés pour détecter les spams
-check_spamwrapperperms=La commande procmail <tt>$1</tt> dispose des autorisations $2, alors qu'elle doit être setuid et setgid à root. Il est possible que les e-mails ne soient pas correctement envoyés ou vérifiés pour détecter les spams
+check_spamwrappercmd=La commande de boîte aux lettres <tt>$1</tt> dans la configuration Postfix n'existe pas
+check_spamwrappercmd2=La commande mailbox définie sur <tt>$1</tt> dans la configuration de Postfix ne correspond pas à la commande <tt>procmail-wrapper</tt> requise
+check_spamwrapperargs=La commande <tt>$1</tt> du wrapper procmail dans la configuration de Postfix n'a pas les indicateurs attendus <tt>$2</tt>
+check_spamwrapperuser=La commande <tt>$1</tt> du wrapper procmail appartient à l'utilisateur $2, alors qu'elle devrait appartenir à <tt>root</tt>. L'e-mail peut ne pas être correctement envoyé ou vérifié pour le spam
+check_spamwrappergroup=La commande procmail <tt>$1</tt> appartient au groupe $2, alors qu'elle devrait appartenir à <tt>root</tt>. L'e-mail peut ne pas être correctement envoyé ou vérifié pour le spam
+check_spamwrapperperms=La commande procmail <tt>$1</tt> a les autorisations <tt>$2</tt>, alors qu'elle devrait être <tt>setuid</tt> et <tt>setgid</tt> sur <tt>root</tt>. L'e-mail peut ne pas être correctement envoyé ou vérifié pour le spam
 check_lostfeature=La fonctionnalité <i>$1</i> ne peut pas être désactivée, car elle est utilisée par les serveurs virtuels suivants : $2 
 check_lostplugin=Le plugin <i>$1</i> ne peut pas être désactivé, car il est utilisé par les serveurs virtuels suivants : $2 
 check_ehomebase=Le répertoire de base de base $1 n'est pas un chemin absolu. Cela peut être corrigé sur la page <a href='$2'>Configuration de Virtualmin</a>
@@ -4195,6 +4196,8 @@ dbackup_failed=.. a échoué : $1
 
 redirects_protos=Protocoles
 redirects_with=$1 avec $2
+redirects_host=Limiter à l'hébergement
+redirects_any=N'importe quel hôte
 
 redirect_code=Type de redirection HTTP
 redirect_301=Permanent (301)
@@ -4206,6 +4209,9 @@ redirect_regexp2=Rediriger les sous-répertoires vers
 redirect_regexp2yes=Uniquement l'URL de destination
 redirect_regexp2exact=Ignorer les sous-répertoires
 redirect_regexp2no=Même sous-répertoire sous l'URL de destination
+redirect_host=Limiter la redirection au nom d'hôte
+redirect_host_def=Tous les noms d'hôtes
+redirect_ehost=Nom d'hôte manquant ou d'apparence invalide
 redirect_eurlpath=Chemin d'URL de destination manquant ou non valide
 redirect_eurlpath2=Une redirection depuis/vers une URL locale provoquerait une boucle infinie
 redirect_ecode=Code d'état HTTP non valide
