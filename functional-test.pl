@@ -8095,12 +8095,12 @@ if (!$webmin_user || !$webmin_pass) {
 $test_bw_domain = 'bw'.time().$test_domain;
 $test_bw_domain_user = 'bw'.time().$test_domain_user;
 $bw_tests = [
-	# Create a domain for bandwidth loggin
+	# Create a domain for bandwidth logging
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_bw_domain ],
 		      [ 'user', $test_bw_domain_user ],
 		      [ 'prefix', $prefix ],
-		      [ 'desc', 'Test rename domain' ],
+		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
 		      [ 'logrotate' ],
@@ -8265,6 +8265,79 @@ $bw_tests = [
 	  'args' => [ [ 'domain', $test_bw_domain ] ],
 	  'grep' => [ 'mail:2[0-9]{6}',
 		      'ftp:2[0-9]{6}' ],
+	},
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_bw_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+
+$datestr = &make_date(time(), 1);
+$lastlogin_tests = [
+	# Create domain for logins
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_bw_domain ],
+		      [ 'user', $test_bw_domain_user ],
+		      [ 'prefix', $prefix ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      [ 'content' => 'Test bandwidth page' ],
+		      @create_args, ],
+	},
+
+	# Create a 1M test file
+	{ 'command' => '(cat '.$ok_email_file.' ; head -c250000 /dev/zero | od -c -v) >/tmp/random.txt',
+	},
+
+	# Send email with SMTP authentication
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'from', 'nobody@webmin.com' ],
+		      [ 'to', $test_bw_domain_user.'@'.$test_bw_domain ],
+		      [ 'user', $test_bw_domain_user ],
+                      [ 'pass', 'smeg' ],
+		      [ 'data', '/tmp/random.txt' ] ],
+	},
+
+	# Check IMAP for admin mailbox
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_bw_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+
+	# Check POP3 for admin mailbox
+	{ 'command' => 'test-pop3.pl',
+	  'args' => [ [ 'user', $test_bw_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+
+	# Send email to the domain user
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'from', 'nobody@webmin.com' ],
+		      [ 'to', $test_bw_domain_user.'@'.$test_bw_domain ],
+		      [ 'data', '/tmp/random.txt' ] ],
+	},
+
+	# Do a status collection run
+	{ 'command' => $module_config_directory."/collectinfo.pl",
+	  'antigrep' => 'Already running',
+	  'sleep' => 5,
+	  'tries' => 5,
+	},
+
+	# Check for various recent logins
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_bw_domain ],
+		      [ 'include-owner' ],
+		      [ 'multiline' ] ],
+	  'grep' => 'Last logins: imap '.$datestr.' \d+:\d+, '.
+		    'pop3 '.$datestr.' \d+:\d+, '.
+		    'smtp '.$datestr.' \d+:\d+',
 	},
 
 	# Get rid of the domain
@@ -11566,6 +11639,7 @@ $alltests = { '_config' => $_config_tests,
 	      'webrename' => $webrename_tests,
 	      'rename' => $rename_tests,
 	      'bw' => $bw_tests,
+	      'lastlogin' => $lastlogin_tests,
 	      'quota' => $quota_tests,
 	      'overlap' => $overlap_tests,
 	      'redirect' => $redirect_tests,
