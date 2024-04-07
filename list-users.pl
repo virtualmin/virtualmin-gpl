@@ -224,7 +224,7 @@ foreach $d (@doms) {
 				print "    Last logins: ",
 				    join(", ",
 				       map { $_." ".&make_date($ll->{$_}) }
-					   keys %$ll),"\n";
+					   sort { $a cmp $b } keys %$ll),"\n";
 				}
 			@dblist = ( );
 			foreach $db (@{$u->{'dbs'}}) {
