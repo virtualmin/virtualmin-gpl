@@ -13,6 +13,7 @@ $in{'selector'} =~ /^[a-z0-9\.\-\_]+/i || &error($text{'dkim_eselector'});
 $dkim->{'selector'} = $in{'selector'};
 $dkim->{'enabled'} = $in{'enabled'};
 $dkim->{'verify'} = $in{'verify'};
+$dkim->{'alldns'} = $in{'alldns'};
 $dkim->{'sign'} = 1;
 @extra = split(/\s+/, $in{'extra'});
 foreach $e (@extra) {

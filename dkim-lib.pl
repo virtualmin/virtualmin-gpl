@@ -311,6 +311,7 @@ elsif ($config{'mail_system'} == 1) {
 
 # Add extra domains
 $rv{'extra'} = [ split(/\s+/, $config{'dkim_extra'}) ];
+$rv{'alldns'} = $config{'dkim_alldns'} || 0;
 $rv{'exclude'} = [ split(/\s+/, $config{'dkim_exclude'}) ];
 
 # Work out key size
@@ -394,7 +395,7 @@ my ($dkim, $newkey, $size) = @_;
 # Find domains that we can enable DKIM for (those with mail and DNS)
 &$first_print($text{'dkim_domains'});
 my @alldoms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } &list_domains();
-my @doms = grep { $_->{'dns'} && $_->{'mail'} } @alldoms;
+my @doms = grep { $_->{'dns'} && ($_->{'mail'} || $dkim->{'alldns'}) } @alldoms;
 if (@doms && @{$dkim->{'extra'}}) {
 	&$second_print(&text('dkim_founddomains3', scalar(@doms),
 			     scalar(@{$dkim->{'extra'}})));
@@ -558,6 +559,7 @@ if ($dkim_config) {
 	# Save list of extra domains
 	$config{'dkim_extra'} = join(" ", @{$dkim->{'extra'}});
 	$config{'dkim_exclude'} = join(" ", @{$dkim->{'exclude'}});
+	$config{'dkim_alldns'} = $dkim->{'alldns'};
 	&save_module_config();
 	}
 
@@ -647,7 +649,7 @@ elsif (&get_dkim_type() eq 'redhat') {
 # or are on the extra domains list
 my %extra = map { $_, 1 } @{$dkim->{'extra'}};
 my @dnsdoms = grep { $_->{'dns'} &&
-		     ($_->{'mail'} || $extra{$_->{'dom'}}) } @alldoms;
+		     ($_->{'mail'} || $dkim->{'alldns'} || $extra{$_->{'dom'}}) } @alldoms;
 &add_dkim_dns_records(\@dnsdoms, $dkim);
 
 # Remove from excluded domains
@@ -893,7 +895,7 @@ my $dkim = &get_dkim_config();
 return if (!$dkim || !$dkim->{'enabled'});
 
 # Enable DKIM for all domains with mail
-my @doms = grep { $_->{'mail'} && $_->{'dns'} } &list_domains();
+my @doms = grep { $_->{'dns'} && ($_->{'mail'} || $dkim->{'alldns'}) } &list_domains();
 if (($action eq 'setup' || $action eq 'modify')) {
 	push(@doms, $d);
 	}

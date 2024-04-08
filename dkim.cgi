@@ -58,6 +58,12 @@ print &ui_table_row($text{'dkim_size'},
 	&ui_textbox("size", $dkim->{'size'} || 2048, 5).
 	" ".$text{'dkim_bits'});
 
+# Sign for all domains, or just those with email?
+print &ui_table_row($text{'dkim_alldns'},
+	&ui_radio("alldns", $dkim->{'alldns'},
+		   [ [ 0, $text{'dkim_alldns0'} ],
+		     [ 1, $text{'dkim_alldns1'} ] ]));
+
 # Additional domains to sign for, defaulting to local hostname
 @extra = @{$dkim->{'extra'}};
 if (!@extra && (!$dkim || !$dkim->{'enabled'})) {
