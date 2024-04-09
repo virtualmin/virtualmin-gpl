@@ -4385,7 +4385,7 @@ foreach my $f ("/var/log/mail", "/var/log/maillog", "/var/log/mail.log") {
 	return $f if (-r $f);
 	}
 if (&has_command("journalctl")) {
-	return "journalctl -u 'postfix*' -u 'dovecot*' |";
+	return "journalctl -u 'postfix*' -u 'dovecot*' --since '1 hour ago' |";
 	}
 return undef;
 }
