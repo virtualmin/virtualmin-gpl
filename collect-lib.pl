@@ -377,18 +377,20 @@ if (-r $procmail_log_file && $hasprocmail) {
 	}
 
 # Read mail server log to count messages since the last run
+local $lastinfo = &read_file_contents("$historic_info_dir/maillogpos");
+local ($lastpos, $lastinode, $lasttime);
+if (defined($lastinfo)) {
+	($lastpos, $lastinode, $lasttime) = split(/\s+/, $lastinfo);
+	}
 local $mail_log_file = $config{'bw_maillog'};
-$mail_log_file = &get_mail_log() if ($mail_log_file eq "auto");
+$mail_log_file = &get_mail_log(time() - $lasttime)
+	if ($mail_log_file eq "auto");
+
 if ($mail_log_file) {
 	# Get last seek position
 	local ($spamcount, $mailcount) = (0, 0);
-	local $lastinfo = &read_file_contents("$historic_info_dir/maillogpos");
 	local @st = stat($mail_log_file);
-	local ($lastpos, $lastinode, $lasttime);
-	if (defined($lastinfo)) {
-		($lastpos, $lastinode, $lasttime) = split(/\s+/, $lastinfo);
-		}
-	else {
+	if (!defined($lastinfo)) {
 		# For the first run, start at the end of the file
 		$lastpos = $st[7];
 		$lastinode = $st[1];

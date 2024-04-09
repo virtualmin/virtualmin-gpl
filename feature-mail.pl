@@ -3977,10 +3977,19 @@ return 1;
 sub bandwidth_all_mail
 {
 local ($doms, $starts, $bws) = @_;
+
+# Find the minimum last activity time
+local $start_now = time();
+local $min_ltime = $start_now+24*60*60;
+foreach my $lt (values %$starts) {
+	$min_ltime = $lt if ($lt && $lt < $min_ltime);
+	}
 local %max_ltime = %$starts;
+
+# Find the mail log
 local %max_updated;
 local $maillog = $config{'bw_maillog'};
-$maillog = &get_mail_log() if ($maillog eq "auto");
+$maillog = &get_mail_log(time() - $min_ltime) if ($maillog eq "auto");
 return $starts if (!$maillog);
 
 # Build a map from domain names to objects, and from Unix usernames to objects
@@ -3997,13 +4006,6 @@ foreach my $d (@$doms) {
 		}
 	}
 local $myhostname = &get_system_hostname();
-
-# Find the minimum last activity time
-local $start_now = time();
-local $min_ltime = $start_now+24*60*60;
-foreach my $lt (values %$starts) {
-	$min_ltime = $lt if ($lt && $lt < $min_ltime);
-	}
 
 local $f;
 foreach $f ($config{'bw_maillog_rotated'} ?
@@ -4347,10 +4349,11 @@ elsif ($config{'mail_system'} == 5) {
 return 0;
 }
 
-# get_mail_log()
+# get_mail_log([max-age])
 # Returns the default mail log file for this system
 sub get_mail_log
 {
+my ($maxage) = @_;
 if (&foreign_installed("syslog")) {
 	# Try syslog first
 	&foreign_require("syslog");
@@ -4385,7 +4388,11 @@ foreach my $f ("/var/log/mail", "/var/log/maillog", "/var/log/mail.log") {
 	return $f if (-r $f);
 	}
 if (&has_command("journalctl")) {
-	return "journalctl -u 'postfix*' -u 'dovecot*' --since '1 hour ago' |";
+	my $cmd = "journalctl -u 'postfix*' -u 'dovecot*'";
+	if ($maxage) {
+		$cmd .= " --since '$maxage seconds ago'";
+		}
+	return $cmd." |";
 	}
 return undef;
 }
@@ -5931,15 +5938,20 @@ return lc($dn0) eq lc($dn1);
 # or SMTP.
 sub update_last_login_times
 {
-# Find the mail log
-my $maillog = $config{'bw_maillog'};
-$maillog = &get_mail_log() if ($maillog eq "auto");
-return 0 if (!$maillog);
-
-# Seek to the last position
+# Read the file tracking the mail log position
 &lock_file($mail_login_file);
 my %logins;
 &read_file($mail_login_file, \%logins);
+
+# Find the mail log
+my $maillog = $config{'bw_maillog'};
+$maillog = &get_mail_log(time() - $logins{'lasttime'}) if ($maillog eq "auto");
+if (!$maillog) {
+	&unlock_file($mail_login_file);
+	return 0;
+	}
+
+# Seek to the last position
 open(MAILLOG, $maillog);
 if ($maillog !~ /\|$/) {
 	# Reading a regular file, so seek into it
