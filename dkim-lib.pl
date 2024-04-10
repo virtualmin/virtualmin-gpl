@@ -652,9 +652,9 @@ my @dnsdoms = grep { $_->{'dns'} &&
 		     ($_->{'mail'} || $dkim->{'alldns'} || $extra{$_->{'dom'}}) } @alldoms;
 &add_dkim_dns_records(\@dnsdoms, $dkim);
 
-# Remove from excluded domains
-my @exdoms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) >= 0 }
-		  grep { $_->{'dns'} } &list_domains();
+# Remove from domains that didn't get the DNS records added
+my %dnsdoms = map { $_->{'id'}, $_ } @dnsdoms;
+my @exdoms = grep { !$dnsdoms{$_->{'id'}} && $_->{'dns'} } &list_domains();
 if (@exdoms) {
 	&remove_dkim_dns_records(\@exdoms, $dkim);
 	}
@@ -804,7 +804,7 @@ my ($dkim) = @_;
 &foreign_require("init");
 
 # Remove from DNS
-my @doms = grep { $_->{'dns'} && $_->{'mail'} } &list_domains();
+my @doms = grep { $_->{'dns'} } &list_domains();
 &remove_dkim_dns_records(\@doms, $dkim);
 
 &$first_print($text{'dkim_unmailserver'});
