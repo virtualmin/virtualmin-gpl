@@ -3625,7 +3625,6 @@ if ($p && $p ne 'web') {
 	}
 
 # Find the redirects to remove
-# XXX shouldn't need to reverse
 my @redirects = &list_redirects($d);
 foreach my $r (reverse(@redirects)) {
 	if ($r->{'host'} eq 'admin.'.$d->{'dom'} ||
