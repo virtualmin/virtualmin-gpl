@@ -3529,19 +3529,6 @@ if (defined(&save_domain_ruby_mode)) {
 return $err;
 }
 
-# is_webmail_path(path, [url])
-# Returns 1 if a path could be used for a webmail redirect
-sub is_webmail_path
-{
-my ($p, $wanturl) = @_;
-my $url;
-($p, $url) = split(/\s+/, $p);
-return ($p eq "(.*)" ||
-	$p eq "^(?!/.well-known)(.*)" ||
-	$p eq "^(?!/.well-known)(.*)\$" ||
-        $p eq "^(?!/.well-known)") && (!$wanturl || $url =~ /^\Q$wanturl\E/);
-}
-
 # add_webmail_redirect_directives(&domain, &template, [force-enable])
 # Add mod_rewrite directives to direct webmail.$DOM and admin.$DOM to
 # Usermin and Webmin. Also updates the ServerAlias if needed.
