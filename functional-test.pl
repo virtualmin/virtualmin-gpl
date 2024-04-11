@@ -8874,12 +8874,14 @@ $redirect_tests = [
 	# Make sure the redirect appears
 	{ 'command' => 'list-redirects.pl',
 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'host', '' ],
 		      [ 'multiline' ],
 		      [ 'fix-wellknown' ] ],
 	  'grep' => [ '^/$', ],
 	},
 	{ 'command' => 'list-redirects.pl',
 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'host', '' ],
 		      [ 'multiline' ] ],
 	  'grep' => [ '^'.quotemeta('^(?!/.well-known)').'$', ],
 	},
@@ -11847,7 +11849,7 @@ sub run_test_command
 local $cmd = $t->{'command'};
 foreach my $a (@{$t->{'args'}}) {
 	if (defined($a->[1])) {
-		if ($a->[1] =~ /\s/) {
+		if ($a->[1] =~ /\s/ || $a->[1] eq '') {
 			$cmd .= " --".$a->[0]." '".$a->[1]."'";
 			}
 		else {
