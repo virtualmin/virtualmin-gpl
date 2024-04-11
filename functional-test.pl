@@ -8883,7 +8883,7 @@ $redirect_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'host', '' ],
 		      [ 'multiline' ] ],
-	  'grep' => [ '^'.quotemeta('^(?!/.well-known)').'$', ],
+	  'grep' => [ '^'.quotemeta('^/(?!.well-known)').'$', ],
 	},
 
 	# Enable webmail and admin redirects
@@ -8910,6 +8910,16 @@ $redirect_tests = [
 	  'grep' => [ '^/$',
 		      'Limit to hostname: admin.'.$test_domain,
 		      'Destination: '.$webmin_proto.'://'.$test_domain.':'.$webmin_port ],
+	},
+
+	# Test HTTP get to webmail alias
+	{ 'command' => $wget_command.'http://webmail.'.$test_domain,
+	  'grep' => 'Usermin',
+	},
+
+	# Test HTTP get to admin alias
+	{ 'command' => $wget_command.'http://admin.'.$test_domain,
+	  'grep' => 'Webmin',
 	},
 
 	# Get rid of the domain
