@@ -577,21 +577,23 @@ if (@newsa) {
 }
 
 # is_empty(&lref|file)
+# Returns 1 if a file or a reference to a list of lines is contains no
+# non-whitespace characters
 sub is_empty
 {
-local ($lref_or_file) = @_;
-local $lref;
+my ($lref_or_file) = @_;
+my $lref;
 if (ref($lref_or_file)) {
-$lref = $lref_or_file;
-}
-else {
-$lref = &read_file_lines($lref_or_file, 1);
-}
-foreach my $l (@$lref) {
-if ($l =~ /\S/) {
-	return 0;
+	$lref = $lref_or_file;
 	}
-}
+else {
+	$lref = &read_file_lines($lref_or_file, 1);
+	}
+foreach my $l (@$lref) {
+	if ($l =~ /\S/) {
+		return 0;
+		}
+	}
 return 1;
 }
 
