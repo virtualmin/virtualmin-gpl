@@ -107,7 +107,7 @@ else {
 # Hostname to match
 if (&has_web_host_redirects($d)) {
 	print &ui_table_row(&hlink($text{'redirect_host'}, 'redirect_host'),
-		&ui_opt_textbox("host", $r->{'host'}, 30,
+		&ui_opt_textbox("host", $r->{'host'}, 35,
 				$text{'redirect_host_def'}, undef, 0, undef, 0,
 				"placeholder=\"$text{'index_global_eg'} ".
 				"www.$d->{'dom'}\""));
