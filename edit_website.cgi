@@ -36,6 +36,19 @@ if (&domain_has_ssl($d) && &can_edit_redirect() && &has_web_redirects($d)) {
 		&ui_yesno_radio("sslredir", $defredir ? 1 : 0));
 	}
 
+# Redirect www to non-www or vice-versa
+if (!$d->{'alias'} && &can_edit_redirect() &&
+    &has_web_redirects($d) && &has_web_host_redirects($d)) {
+	my ($r) = grep { &is_www_redirect($d, $_) } &list_redirects($d);
+	print &ui_table_row(
+		&hlink($text{'phpmode_wwwredir'}, "wwwredir"),
+		&ui_radio("wwwredir",
+			  !$r ? 0 : $r->{'host'} =~ /^www\./ ? 1 : 2,
+			  [ [ 0, $text{'phpmode_wwwredir0'} ],
+			    [ 1, $text{'phpmode_wwwredir1'} ],
+			    [ 2, $text{'phpmode_wwwredir2'} ] ]));
+	}
+
 # Match all sub-domains
 if ($p eq 'web' || &plugin_defined($p, "feature_get_web_domain_star")) {
 	print &ui_table_row(&hlink($text{'phpmode_matchall'}, "matchall"),

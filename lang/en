@@ -5597,6 +5597,13 @@ phpmode_phpinfo_show_dir=Click to display information about PHP environment on y
 phpmode_phpinfo_ecannot=You are not allowed to view PHP information for this virtual server
 phpmode_phpinfo_dir_ecannot_dir=This virtual server doesn't have requested $1 directory under $2
 phpmode_fixport=Fixing PHP-FPM endpoint configuration ..
+phpmode_wwwredir=Redirect to canonical domain
+phpmode_wwwredir0=Disabled
+phpmode_wwwredir1=www to non-www
+phpmode_wwwredir2=non-www to www
+phpmode_wwwrediroff=Disabling redirect to canonical domain ..
+phpmode_wwwredirnon=Adding redirect to non-www domain ..
+phpmode_wwwredirwww=Adding redirect to www domain ..
 
 website_header=Website options
 

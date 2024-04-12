@@ -229,6 +229,38 @@ if (&domain_has_ssl($d) && &can_edit_redirect() && &has_web_redirects($d)) {
 		}
 	}
 
+# Update www redirect
+if (!$d->{'alias'} && &can_edit_redirect() &&
+    &has_web_redirects($d) && &has_web_host_redirects($d)) {
+	my ($r) = grep { &is_www_redirect($d, $_) } &list_redirects($d);
+	my $oldredir = &is_www_redirect($d, $r);
+	if ($in{'wwwredir'} == 0 && $oldredir != 0) {
+		# Turn off the www redirect
+		&$first_print($text{'phpmode_wwwrediroff'});
+		my $err = &delete_redirect($d, $r);
+		&$second_print($err ? $err : $text{'setup_done'});
+		$anything++;
+		}
+	elsif ($in{'wwwredir'} == 1 && $oldredir != 1) {
+		# Redirect www to non-www
+		&$first_print($text{'phpmode_wwwredirnon'});
+		&delete_redirect($d, $r) if ($r);
+		$r = &get_non_www_redirect($d);
+		my $err = &create_redirect($d, $r);
+		&$second_print($err ? $err : $text{'setup_done'});
+		$anything++;
+		}
+	elsif ($in{'wwwredir'} == 2 && $oldredir != 2) {
+		# Redirect non-www to www
+		&$first_print($text{'phpmode_wwwredirwww'});
+		&delete_redirect($d, $r) if ($r);
+		$r = &get_www_redirect($d);
+		my $err = &create_redirect($d, $r);
+		&$second_print($err ? $err : $text{'setup_done'});
+		$anything++;
+		}
+	}
+
 # Change HTML directory
 if (defined($in{'htmldir'}) &&
     !$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ &&
