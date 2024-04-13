@@ -21,7 +21,8 @@ foreach $r (@redirects) {
 	    $dest =~ /^(http|https):\/\/%\{HTTP_HOST\}(\/.*)$/) {
 		$dest = &text('redirects_with', "$2", uc($1));
 		}
-	my $canedit = !&is_webmail_redirect($d, $r);
+	my $canedit = !&is_webmail_redirect($d, $r) &&
+		      !&is_www_redirect($d, $r);
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $r->{'id'}, 'disabled' => !$canedit },

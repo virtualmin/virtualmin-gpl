@@ -437,13 +437,15 @@ my ($d, $r) = @_;
 return 0 if (!$r);
 return 0 if (!$r->{'host'});
 return 0 if ($r->{'path'} ne '/');
-if ($r->{'host'} eq 'www.'.$d->{'dom'} &&
-    $r->{'dest'} =~ /^(http|https):\/\/\Q$d->{'dom'}\E\//) {
-	return 1;
-	}
-if ($r->{'host'} eq $d->{'dom'} &&
-    $r->{'dest'} =~ /^(http|https):\/\/www\.\Q$d->{'dom'}\E\//) {
-	return 2;
+foreach my $ad ($d, &get_domain_by("alias", $d->{'id'})) {
+	if ($r->{'host'} eq 'www.'.$ad->{'dom'} &&
+	    $r->{'dest'} =~ /^(http|https):\/\/\Q$ad->{'dom'}\E\//) {
+		return 1;
+		}
+	if ($r->{'host'} eq $ad->{'dom'} &&
+	    $r->{'dest'} =~ /^(http|https):\/\/www\.\Q$ad->{'dom'}\E\//) {
+		return 2;
+		}
 	}
 return 0;
 }
@@ -451,29 +453,37 @@ return 0;
 sub get_www_redirect
 {
 my ($d) = @_;
-return { 'path' => '/',
-	 'host' => $d->{'dom'},
-	 'http' => 1,
-	 'https' => 1,
-	 'regexp' => 1,
-	 'dest' => (&domain_has_ssl($d) ? 'https://' : 'http://').
-		   'www.'.$d->{'dom'}.'/$1',
-       };
+my @rv;
+foreach my $ad ($d, &get_domain_by("alias", $d->{'id'})) {
+	push(@rv, { 'path' => '/',
+		    'host' => $d->{'dom'},
+		    'http' => 1,
+		    'https' => 1,
+		    'regexp' => 1,
+		    'dest' => (&domain_has_ssl($d) ? 'https://' : 'http://').
+		   	      'www.'.$d->{'dom'}.'/$1',
+	          });
+	}
+return @rv;
 }
 
 # get_non_www_redirect(&domain)
-# Returns the object for a redirect from www.domain to domain
+# Returns the objects for a redirect from www.domain to domain
 sub get_non_www_redirect
 {
 my ($d) = @_;
-return { 'path' => '/',
-	 'host' => 'www.'.$d->{'dom'},
-	 'http' => 1,
-	 'https' => 1,
-	 'regexp' => 1,
-	 'dest' => (&domain_has_ssl($d) ? 'https://' : 'http://').
-		   $d->{'dom'}.'/$1',
-       };
+my @rv;
+foreach my $ad ($d, &get_domain_by("alias", $d->{'id'})) {
+	push(@rv, { 'path' => '/',
+		    'host' => 'www.'.$ad->{'dom'},
+		    'http' => 1,
+		    'https' => 1,
+		    'regexp' => 1,
+		    'dest' => (&domain_has_ssl($ad) ? 'https://' : 'http://').
+			      $ad->{'dom'}.'/$1',
+		  });
+	}
+return @rv;
 }
 
 1;
