@@ -86,6 +86,10 @@ $config{'pre_command'} = $precommand if ($precommand);
 $config{'post_command'} = $postcommand if ($postcommand);
 foreach $d (@doms) {
 	print "Deleting virtual server $d->{'dom'} ..\n";
+	if ($d->{'protected'}) {
+		print ".. skip : protected domain\n\n";
+		next;
+		}
 	&$indent_print();
 	$err = &delete_virtual_server($d, $only, 0, $preserve);
 	&$outdent_print();

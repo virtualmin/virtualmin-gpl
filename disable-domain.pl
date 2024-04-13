@@ -86,6 +86,10 @@ if ($subservers && !$d->{'parent'}) {
 
 foreach $d (@doms) {
 	print "Disabling virtual server $d->{'dom'} ..\n\n";
+	if ($d->{'protected'}) {
+		print ".. skip : protected domain\n\n";
+		next;
+		}
 	$err = &disable_virtual_server($d, 'manual', $why,
 				       @feats ? \@feats : undef);
 	&usage($err) if ($err);

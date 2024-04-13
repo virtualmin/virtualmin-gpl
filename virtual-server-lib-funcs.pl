@@ -3061,7 +3061,7 @@ else {
 sub can_delete_domain
 {
 local ($d) = @_;
-return &can_edit_domain($d) &&
+return &can_edit_domain($d) && !$d->{'protected'} &&
        (&master_admin() || &reseller_admin() && !$access{'nodelete'} ||
 	$_[0]->{'parent'} && $access{'edit_delete'});
 }
@@ -3070,7 +3070,7 @@ return &can_edit_domain($d) &&
 # Only the master admin is allowed to disconnect or connect features
 sub can_associate_domain
 {
-return &master_admin();
+return &master_admin() && !$d->{'protected'};
 }
 
 sub can_move_domain
@@ -3464,7 +3464,7 @@ return &master_admin() || &reseller_admin() || $access{'edit_mail'};
 sub can_disable_domain
 {
 local ($d) = @_;
-return &can_edit_domain($d) &&
+return &can_edit_domain($d) && !$d->{'protected'} &&
        (&master_admin() || &reseller_admin() ||
         $d->{'parent'} && !$d->{'alias'} && $access{'edit_disable'});
 }

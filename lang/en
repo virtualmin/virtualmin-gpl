@@ -1179,6 +1179,7 @@ edit_nolinkdom=This domain name
 edit_elinkdom=Domain for use in links does not exist!
 edit_elinkdom2=Domain for use in links is not an alias of this domain
 edit_passwd=Administration password
+edit_protected=Deletion and disabling safeguard
 edit_dbsync=Warning - any database passwords will also be updated if the admin password is changed
 edit_parent=Parent virtual server
 edit_lv=Leave unchanged
@@ -7754,6 +7755,7 @@ assoc_features=Features known to Virtualmin
 assoc_validate=Require successful validation before saving?
 assoc_err=Failed to associate features
 assoc_evalidate=Validation failed for $1 : $2
+assoc_ecannot=You are not allowed to associate features
 
 running_title=Running Backups
 running_stop=Stop Selected Backups

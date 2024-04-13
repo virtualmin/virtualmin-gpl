@@ -259,6 +259,9 @@ if (!$d->{'parent'}) {
 	&compute_emailto($d);
 	}
 
+# Set domain protection
+$d->{'protected'} = $in{'protected'} ? 1 : 0;
+
 # Update quotas in domain object
 if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
 	$d->{'uquota'} = $newdom{'uquota'};

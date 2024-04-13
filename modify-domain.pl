@@ -11,6 +11,9 @@ changes to make are specified by the other optional parameters, such as
 C<--pass> to set a new password, C<--desc> to change the server description,
 and C<--quota> and C<--uquota> to change the disk quota.
 
+To make domain protected from deletion and disabling, the C<--protected> flag
+can be used. To remove the protection, use C<--unprotected> flag.
+
 To add a private IP address to a virtual server that currently does not have
 one, the C<--ip> or C<--allocate-ip> options can be used, as described in the
 section on C<create-domain>.
@@ -110,6 +113,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--email") {
 		$email = shift(@ARGV);
 		}
+	elsif ($a eq "--protected") {
+		$protected = 1;
+		}
+	elsif ($a eq "--unprotected") {
+		$protected = 0;
+		}
 	elsif ($a eq "--quota") {
 		$quota = shift(@ARGV);
 		$quota = 0 if ($quota eq 'UNLIMITED');
@@ -118,7 +127,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--uquota") {
 		$uquota = shift(@ARGV);
 		$uquota = 0 if ($uquota eq 'UNLIMITED');
-		$uquota =~ /^\d+$/ ||&usage("Quota must be a number of blocks");
+		$uquota =~ /^\d+$/ || &usage("Quota must be a number of blocks");
 		}
 	elsif ($a eq "--user") {
 		$user = shift(@ARGV);
@@ -496,6 +505,11 @@ if (defined($email)) {
 		&compute_emailto($d);
 		}
 	}
+
+# Make domain protected or unprotected from deletion and disabling
+$dom->{'protected'} = $protected if (defined($protected));
+
+# Apply quota changes
 if (defined($quota)) {
 	$dom->{'quota'} = $quota;
 	}
@@ -930,6 +944,7 @@ print "                        [--desc new-description]\n";
 print "                        [--user new-username]\n";
 print "                        [--pass \"new-password\" | --passfile password-file]\n";
 print "                        [--email new-email]\n";
+print "                        [--protected | --unprotected]\n";
 print "                        [--quota new-quota|UNLIMITED]\n";
 print "                        [--uquota new-unix-quota|UNLIMITED]\n";
 print "                        [--apply-quotas | --apply-all-quotas]\n";
