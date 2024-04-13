@@ -234,6 +234,10 @@ if (!$parentdom) {
 		$smsg);
 	}
 
+# Made domain protected
+print &ui_table_row($text{'edit_protected'},
+	&ui_yesno_radio("protected", $d->{'protected'}));
+
 # Show domain for use in links
 my @aliases = grep { &domain_has_website($_) }
 		   &get_domain_by("alias", $d->{'id'});
