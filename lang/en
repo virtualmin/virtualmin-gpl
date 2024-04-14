@@ -6869,6 +6869,9 @@ redirects_protos=Protocols
 redirects_with=$1 with $2
 redirects_host=Limit to host
 redirects_any=Any host
+redirects_webmin=Redirect to Virtualmin
+redirects_usermin=Redirect to Webmail
+redirects_canon=Redirect to canonical domain
 
 redirect_egone=Redirect no longer exists!
 redirect_create=Create Website Redirect

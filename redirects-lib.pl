@@ -421,11 +421,15 @@ return { 'path' => '^/(?!.well-known)(.*)$',
 }
 
 # is_webmail_redirect(&domain, &redirect)
-# Returns 1 if a redirect is for use by admin or webmail sub-domains
+# Returns 1 if a redirect is for use by admin sub-domain, 2 if for the webmail
+# sub-domain, or 0 otherwise.
 sub is_webmail_redirect
 {
 my ($d, $r) = @_;
-return $r->{'host'} && $r->{'host'} =~ /^(admin|webmail)\.\Q$d->{'dom'}\E$/;
+return 0 if (!$r->{'host'});
+return 1 if ($r->{'host'} =~ /^admin\.\Q$d->{'dom'}\E$/);
+return 2 if ($r->{'host'} =~ /^webmail\.\Q$d->{'dom'}\E$/);
+return 0;
 }
 
 # is_www_redirect(&domain, &redirect)
