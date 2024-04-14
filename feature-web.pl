@@ -83,6 +83,17 @@ if ($d->{'alias'} && $tmpl->{'web_alias'} == 1) {
 	    &get_webmail_redirect_directives($alias)) {
 		&add_webmail_redirect_directives($d, $tmpl, 1);
 		}
+
+	# If the target domain had a www to non-www or vice-versa redirect
+	# enabled, do it for the alias
+	my ($r) = grep { &is_www_redirect($alias, $_) } &list_redirects($alias);
+	if ($r) {
+		my $func = &is_www_redirect($d, $r) == 1 ?
+			\&get_non_www_redirect : \&get_www_redirect;
+		foreach my $r (&$func($d)) {
+			&create_redirect($alias, $r);
+			}
+		}
 	}
 else {
 	# Add the actual <VirtualHost>
@@ -378,6 +389,16 @@ if ($d->{'alias_mode'}) {
 		&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
 		&flush_file_lines($pvirt->{'file'});
 		}
+
+	# Also remove any host-based redirects for the alias
+	foreach my $r (reverse(&list_redirects($alias))) {
+		if ($r->{'host'} &&
+		    ($r->{'host'} eq $d->{'dom'} ||
+		     $r->{'host'} =~ /^[^\.]+\.\Q$d->{'dom'}\E$/)) {
+			&delete_redirect($alias, $r);
+			}
+		}
+
 	&release_lock_web($alias);
 	&register_post_action(\&restart_apache);
 	&$second_print($text{'setup_done'});
