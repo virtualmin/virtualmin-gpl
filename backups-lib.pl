@@ -4301,7 +4301,7 @@ elsif ($proto == 2) {
 	}
 elsif ($proto == 3) {
 	my $s3 = $user ? &get_s3_account($user) : &get_default_s3_account();
-	my $desc = $s3 ? $s3->{'desc'} : undef;
+	my $desc = $s3 ? $s3->{'desc'} || &text('backup_nices3akey', $s3->{'access'}) : undef;
 	$desc ||= &text('backup_nices3akey', $user) if ($user);
 	$desc ||= $text{'backup_nices3unknown'};
 	$rv = $path ?
