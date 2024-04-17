@@ -220,6 +220,7 @@ edit_linkdom=Domenenavn for bruk i lenker
 edit_nolinkdom=Dette domenenavnet
 edit_elinkdom=Domenet for bruk i lenker eksisterer ikke!
 edit_elinkdom2=Domenet for bruk i lenker er ikke et alias for dette domenet
+edit_protected=Sletting og deaktivering av beskyttelse
 edit_dbsync=Advarsel - eventuelle databasepassord vil også bli oppdatert hvis administratorpassordet endres
 edit_hash=Hash passord
 edit_assoc=Koble fra funksjoner
@@ -464,7 +465,7 @@ backup_pass42_desc=Velg SSH-nøkkelfil
 backup_dirhomes2=Ta med <tt>$1</tt> katalog
 backup_nicewebmin=$1 på Webmin-server $2 
 backup_nices3a=S3-bøtte $1 bruker $2
-backup_nices3pa=$2 i S3-bøtte $1 med $2
+backup_nices3pa=$2 i S3-bøtte $1 med $3
 backup_nices3akey=tilgangsnøkkel $1
 backup_nices3unknown=standard tilgangsnøkkel
 backup_nicego=Google-mappen $1 
@@ -1112,6 +1113,13 @@ phpmode_phpinfo_show_dir=Klikk for å vise informasjon om PHP-miljøet på serve
 phpmode_phpinfo_ecannot=Du har ikke lov til å se PHP-informasjon for denne virtuelle serveren
 phpmode_phpinfo_dir_ecannot_dir=Denne virtuelle serveren har ikke forespurt katalogen $1 under $2
 phpmode_fixport=Fikser PHP-FPM-endepunktkonfigurasjon ..
+phpmode_wwwredir=Omdirigere til kanonisk domene
+phpmode_wwwredir0=Funksjonshemmet
+phpmode_wwwredir1=www til ikke-www
+phpmode_wwwredir2=ikke-www til www
+phpmode_wwwrediroff=Deaktiverer viderekobling til kanonisk domene ..
+phpmode_wwwredirnon=Legger til omdirigering til ikke-www-domene ..
+phpmode_wwwredirwww=Legger til viderekobling til www-domene ..
 
 website_header=Nettstedsalternativer
 
@@ -1327,6 +1335,9 @@ redirects_protos=Protokoller
 redirects_with=$1 med $2
 redirects_host=Begrens til vert
 redirects_any=Enhver vert
+redirects_webmin=Omdirigere til Virtualmin
+redirects_usermin=Omdirigere til webmail
+redirects_canon=Omdirigere til kanonisk domene
 
 redirect_code=HTTP-viderekoblingstype
 redirect_301=Permanent (301)
@@ -1350,6 +1361,9 @@ redirect_ecode=Ugyldig HTTP-statuskode
 
 dkim_header2=Nøkler og poster for offsite hosting
 dkim_header3=Domener som for øyeblikket er signert for
+dkim_alldns=Domener å signere for
+dkim_alldns0=Bare de med DNS og e-post aktivert
+dkim_alldns1=Alle domener med DNS
 dkim_extra=Ekstra domener å signere for
 
 dkim_ednsadded=.. DNS-oppdatering mislyktes : $1
@@ -1674,6 +1688,7 @@ assoc_features=Funksjoner kjent for Virtualmin
 assoc_validate=Krever vellykket validering før du lagrer?
 assoc_err=Kunne ikke knytte funksjoner
 assoc_evalidate=Valideringen mislyktes for $1 : $2 
+assoc_ecannot=Du har ikke lov til å tilknytte funksjoner
 
 running_title=Kjører sikkerhetskopier
 running_stop=Stopp valgte sikkerhetskopier
