@@ -7914,8 +7914,6 @@ deftmplt_tmpltpagefootersourcesshop=Shop
 deftmplt_tmpltpagefooterabout=About
 deftmplt_tmpltpagefooteraboutcomp=Company
 deftmplt_tmpltpagefooteraboutcont=Contact
-deftmplt_tmpltpagefooteraboutpriv=Privacy Policy
-deftmplt_tmpltpagefooteraboutterms=Terms and Conditions
 
 2fa_title=Two-Factor Authentication
 2fa_euser=Webmin user does not exist!
