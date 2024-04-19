@@ -18255,12 +18255,12 @@ if (@ttdoms > 10) {
 return join(", ", @ttdoms);
 }
 
-# list_available_shells([&domain], [mail])
+# list_available_shells([&domain], [mail], [force-defaults])
 # Returns a list of shells assignable to domain owners and/or mailboxes.
 # Each is a hash ref with shell, desc, owner and mailbox keys.
 sub list_available_shells
 {
-local ($d, $mail) = @_;
+local ($d, $mail, $fdef) = @_;
 if (!defined($mail)) {
 	$mail = !$d || $d->{'mail'};
 	}
@@ -18280,7 +18280,7 @@ if (-r $custom_shells_file) {
 	}
 if (!@rv) {
 	# Master admin should be able to create SSH users by default
-	my $defloginshell_admin = &master_admin() ? 1 : 0;
+	my $defloginshell_admin = (&master_admin() && !$fdef) ? 1 : 0;
 
 	# Fake up from config file and known shells, if there is no custom
 	# file or if it is somehow empty.
