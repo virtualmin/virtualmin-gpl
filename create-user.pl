@@ -84,10 +84,8 @@ if (!$module_name) {
 @OLDARGV = @ARGV;
 
 # Get shells
-@ashells = grep { $_->{'mailbox'} && $_->{'avail'} } &list_available_shells(undef, undef, 1);
 ($nologin_shell, $ftp_shell, $jailed_shell, $shell) =
-	&get_common_available_shells();
-
+	&get_common_available_shells(1);
 # Parse command-line args
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);

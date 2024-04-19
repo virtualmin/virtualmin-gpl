@@ -18260,13 +18260,16 @@ return join(", ", @ttdoms);
 # Each is a hash ref with shell, desc, owner and mailbox keys.
 sub list_available_shells
 {
-local ($d, $mail, $fdef) = @_;
+my ($d, $mail, $fdef) = @_;
 if (!defined($mail)) {
 	$mail = !$d || $d->{'mail'};
 	}
+$mail ||= 0;
+$fdef ||= 0;
+my $cacheid = "${mail}_${fdef}";
 local @rv;
-if ($list_available_shells_cache{$mail}) {
-	return @{$list_available_shells_cache{$mail}};
+if ($list_available_shells_cache{$cacheid}) {
+	return @{$list_available_shells_cache{$cacheid}};
 	}
 if (-r $custom_shells_file) {
 	# Read shells data file
@@ -18361,7 +18364,7 @@ if (!@rv) {
 @rv = sort { $a->{'desc'} cmp $b->{'desc'} ||
 	     $a->{'shell'} cmp $b->{'shell'} } @rv;
 
-$list_available_shells_cache{$mail} = \@rv;
+$list_available_shells_cache{$cacheid} = \@rv;
 return @rv;
 }
 
@@ -18489,13 +18492,14 @@ local ($got) = grep { $_->{'shell'} eq $shell } @ashells;
 return $got || $old && $shell eq $old;
 }
 
-# get_common_available_shells()
+# get_common_available_shells([force-defaults])
 # Returns the nologin, FTP and jailed FTP shells for mailbox users, some of
 # which may be undef. Mainly for legacy use.
 sub get_common_available_shells
 {
+my ($fdef) = @_;
 my @ashells = grep { $_->{'mailbox'} && $_->{'avail'} }
-		   &list_available_shells();
+		   &list_available_shells(undef, undef, $fdef);
 my ($nologin_shell) = grep { $_->{'id'} eq 'nologin' } @ashells;
 my ($ftp_shell) = grep { $_->{'id'} eq 'ftp' } @ashells;
 my ($jailed_shell) = grep { $_->{'id'} eq 'ftp' && $_ ne $ftp_shell } @ashells;
