@@ -84,7 +84,7 @@ if ($sched->{'reseller'}) {
 # Work out who the schedule is being run for
 if ($sched->{'owner'}) {
 	$asd = &get_domain($sched->{'owner'});
-	$owner = $asd ? $asd->{'user'} : undef;
+	$owner = $asd ? $asd->{'user'} : $sched->{'owner'};
 	$cbmode = &can_backup_domain(undef, $owner);
 	@doms = grep { &can_backup_domain($_, $owner) } @doms;
 	}

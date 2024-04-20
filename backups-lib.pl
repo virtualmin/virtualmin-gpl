@@ -5182,6 +5182,7 @@ sub can_backup_domain
 {
 local ($d, $acluser) = @_;
 $acluser ||= $base_remote_user;
+local $base_remote_user = $acluser;
 local %access = &get_module_acl($acluser);	# Use local for scoping
 if (&master_admin()) {
 	# Master admin can do anything
