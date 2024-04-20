@@ -18279,16 +18279,13 @@ if (-r $custom_shells_file) {
 	close(SHELLS);
 	}
 if (!@rv) {
-	# Master admin should be able to create SSH users by default
-	my $defloginshell_admin = &master_admin() ? 1 : 0;
-
 	# Fake up from config file and known shells, if there is no custom
 	# file or if it is somehow empty.
 	push(@rv, { 'shell' => $config{'shell'},
 		    'desc' => $mail ? $text{'shells_mailbox'}
 				    : $text{'shells_mailbox2'},
 		    'mailbox' => 1,
-		    'default' => !$defloginshell_admin,
+		    'default' => 1,
 		    'avail' => 1,
 		    'id' => 'nologin' });
 	push(@rv, { 'shell' => $config{'ftp_shell'},
@@ -18326,7 +18323,7 @@ if (!@rv) {
 		if ($us->[1] eq $best_unix_shell) {
 			$shell{'default'} = 1;
 			$shell{'avail'} = 1;
-			$shell{'mailbox'} = $defloginshell_admin;
+			$shell{'mailbox'} = 0;
 			$defclass = $us->[0];
 			}
 		push(@rv, \%shell);
