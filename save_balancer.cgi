@@ -33,16 +33,10 @@ else {
 			# In no-proxy mode, we don't need balancing
 			$b = { };
 			}
-		elsif ($in{'balancer_def'}) {
-			# Choose name automatically
+		else {
+			# Choose balancer name automatically from the path
 			$in{'path'} =~ /^\/(\S*)$/;
 			$b = { 'balancer' => $1 || "root" };
-			}
-		else {
-			# Use entered name
-			$in{'balancer'} =~ /^[a-z0-9\_]+$/i ||
-				&error($text{'balancer_ebalancer'});
-			$b = { 'balancer' => $in{'balancer'} };
 			}
 		}
 	$b->{'path'} = $in{'path'};

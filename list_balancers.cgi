@@ -35,9 +35,8 @@ foreach $b (@balancers) {
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $b->{'path'} },
-		"<a href='edit_balancer.cgi?dom=$in{'dom'}&".
-		  "path=$b->{'path'}'>$b->{'path'}</a>",
-		$has == 2 ? ( $b->{'balancer'} ) : ( ),
+		&ui_link("edit_balancer.cgi?dom=$in{'dom'}&path=".
+			 &urlize($b->{'path'}), $b->{'path'}),
 		$b->{'none'} ? "<i>$text{'balancers_none2'}</i>"
 			     : join("<br>", @{$b->{'urls'}}),
 		$umsg,
@@ -53,7 +52,6 @@ print &ui_form_columns_table(
 	    $text{'balancers_add'} ] ],
 	[ [ "dom", $in{'dom'} ] ],
 	[ "", $text{'balancers_path'},
-          $has == 2 ? ( $text{'balancers_name'} ) : ( ),
           $text{'balancers_urls'},
           $text{'balancers_used2'} ],
 	100,

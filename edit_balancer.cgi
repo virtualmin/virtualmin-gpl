@@ -38,14 +38,6 @@ print &ui_hidden("dom", $in{'dom'});
 print &ui_hidden("old", $in{'path'});
 print &ui_table_start($text{'balancer_header'}, undef, 2);
 
-if ($in{'new'} && $has == 2 || !$in{'new'} && $b->{'balancer'}) {
-	# Balancer name (non-editable for existing)
-	print &ui_table_row($text{'balancer_name'},
-		$in{'new'} ? &ui_opt_textbox("balancer", undef, 20,
-					     $text{'balancer_auto'})
-			   : "<tt>$b->{'balancer'}</tt>");
-	}
-
 # URL path
 print &ui_table_row($text{'balancer_path'},
 	&ui_textbox("path", $b->{'path'}, 20, undef, undef, " placeholder=\"$text{'index_global_eg'} /path1\""));
