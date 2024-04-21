@@ -9,6 +9,9 @@ by domain owners and mailbox users. To limit it to just domain owners,
 the C<--owner> flag can be given. Or to show only shells designated for use
 by mailboxes, add C<--mailbox> to the command line.
 
+To filter to only shells available for selection in the Virtualmin UI, add
+the C<--available> flag.
+
 To get a more parsable format with full details for each shell, use the
 C<--multiline> parameter. Or to only output shell paths, use C<--name-only>.
 
@@ -45,6 +48,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--reseller") {
 		$type = "reseller";
 		}
+	elsif ($a eq "--available") {
+		$avail = 1;
+		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
 		}
@@ -60,6 +66,9 @@ while(@ARGV > 0) {
 @shells = &list_available_shells();
 if ($type) {
 	@shells = grep { $_->{$type} } @shells;
+	}
+if ($avail) {
+	@shells = grep { $_->{'avail'} } @shells;
 	}
 
 if ($multi) {
@@ -108,6 +117,7 @@ print "Lists the shells available for mailboxes and domain administrators.\n";
 print "\n";
 print "virtualmin list-available-shells [--multiline | --name-only]\n";
 print "                                 [--owner | --mailbox | --reseller]\n";
+print "                                 [--available]\n";
 exit(1);
 }
 
