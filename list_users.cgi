@@ -33,7 +33,7 @@ if ($mleft != 0) {
 	push(@links, [ "edit_user.cgi?new=1&dom=$in{'dom'}",
 		       $text{'users_add'} ]);
 	# Only available for master admin
-	if (&list_available_shells_by_id('ssh', 'mailbox', $d)) {
+	if (&can_mailbox_ssh()) {
 		push(@links, [ "edit_user.cgi?new=1&type=ssh&dom=$in{'dom'}",
 					$text{'users_add_ssh'} ]);
 		}

@@ -29,6 +29,7 @@ $form_end = 1;
 
 # Create SSH user only form
 if ($user_type eq 'ssh') {
+	&can_mailbox_ssh() || &error($text{'users_ecannotssh'});
 	&ui_print_header($din, $text{'user_createssh'}, "",
 			 "users_explain_user_ssh");
 	$user = &create_initial_user($d);
@@ -52,7 +53,6 @@ if ($user_type eq 'ssh') {
 
 	# Password cannot be edited for domain owners (because it is the
 	# domain pass)
-	$pwfield = "";
 	$pwfield = &new_password_input("mailpass");
 	if (!$user->{'alwaysplain'}) {
 		# Option to disable
@@ -66,21 +66,17 @@ if ($user_type eq 'ssh') {
 				2, \@tds);
 
 	# SSH public key for Unix user
-	my @ssh_shells =
-		&list_available_shells_by_type('mailbox', 'ssh', $user->{'shell'});
 	if (&proshow() && $user->{'unix'}) {
-		if (@ssh_shells) {
-			print &ui_table_row(
-				&hlink($text{'form_sshkey'}, "sshkeynogen"),
-				&inline_html_pro_tip(
-					&ui_radio("sshkey_mode", 0,
-						[ [ 0, $text{'form_sshkey0'} ],
-						  [ 2, $text{'form_sshkey2'} ] ]),
-					'manage-user-ssh-public-key').
-				"<br>\n".&ui_textarea("sshkey", undef, 3, 60,
-						      undef, !$virtualmin_pro),
-						undef, &procell() || \@tds);
-			}
+		print &ui_table_row(
+			&hlink($text{'form_sshkey'}, "sshkeynogen"),
+			&inline_html_pro_tip(
+				&ui_radio("sshkey_mode", 0,
+					[ [ 0, $text{'form_sshkey0'} ],
+					  [ 2, $text{'form_sshkey2'} ] ]),
+				'manage-user-ssh-public-key').
+			"<br>\n".&ui_textarea("sshkey", undef, 3, 60,
+					      undef, !$virtualmin_pro),
+					undef, &procell() || \@tds);
 		}
 
 	# Real name - only for true Unix users or LDAP persons
@@ -91,20 +87,19 @@ if ($user_type eq 'ssh') {
 			2, \@tds);
 		}
 
-	if (&can_mailbox_ftp() && $user->{'unix'}) {
-		# Show SSH shell select if more than one available
-		my $ssh_shell = $ssh_shells[0]->{'shell'};
-		if (scalar(@ssh_shells) == 1) {
-			print &ui_hidden("shell", $ssh_shell);
-			}
-		else {
-			print &ui_table_row(
-				&hlink($text{'user_ushell'}, "ushell"),
-				&available_shells_menu(
-					"shell", $ssh_shell || $user->{'shell'},
-					"mailbox", 0, $user->{'webowner'}),
-				2, \@tds);
-			}
+	# Show SSH shell select if more than one available
+	my @ssh_shells = &list_available_shells_by_type('owner', 'ssh');
+	my $ssh_shell = $ssh_shells[0]->{'shell'};
+	if (scalar(@ssh_shells) == 1) {
+		print &ui_hidden("shell", $ssh_shell);
+		}
+	else {
+		print &ui_table_row(
+			&hlink($text{'user_ushell'}, "ushell"),
+			&available_shells_menu(
+				"shell", $ssh_shell || $user->{'shell'},
+				"owner", 0),
+			2, \@tds);
 		}
 
 	# Show secondary groups
@@ -213,7 +208,6 @@ elsif ($user_type eq 'ftp') {
 
 	# Password cannot be edited for domain owners (because it is the
 	# domain pass)
-	$pwfield = "";
 	$pwfield = &new_password_input("mailpass");
 	if (!$user->{'alwaysplain'}) {
 		# Option to disable
@@ -772,28 +766,24 @@ else {
 				2, \@tds);
 
 		# SSH public key for Unix user
-		my @ssh_shells =
-			&list_available_shells_by_type('mailbox', 'ssh', $user->{'shell'});
 		if (&proshow() && $user->{'unix'}) {
-			if (@ssh_shells) {
-				my $existing_key = &get_domain_user_ssh_pubkey($d, $user);
-				my $existing_key_hidden;
-				if ($existing_key && !$virtualmin_pro) {
-					$existing_key_hidden =
-						&ui_hidden("sshkey", $existing_key).
-						&ui_hidden("sshkey_mode", 2);
-					}
-				print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkeynogen"),
-					&inline_html_pro_tip(
-						&ui_radio("sshkey_mode", $existing_key ? 2 : 0,
-							[ [ 0, $text{'form_sshkey0'} ],
-							  [ 2, $text{'form_sshkey2'} ] ]),
-								'manage-user-ssh-public-key').
-					"<br>\n". &ui_textarea("sshkey", $existing_key, 3, 60,
-						undef, !$virtualmin_pro, &vui_ui_input_noauto_attrs()).
-					$existing_key_hidden,
-					undef, &procell() || \@tds);
+			my $existing_key = &get_domain_user_ssh_pubkey($d, $user);
+			my $existing_key_hidden;
+			if ($existing_key && !$virtualmin_pro) {
+				$existing_key_hidden =
+					&ui_hidden("sshkey", $existing_key).
+					&ui_hidden("sshkey_mode", 2);
 				}
+			print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkeynogen"),
+				&inline_html_pro_tip(
+					&ui_radio("sshkey_mode", $existing_key ? 2 : 0,
+						[ [ 0, $text{'form_sshkey0'} ],
+						  [ 2, $text{'form_sshkey2'} ] ]),
+							'manage-user-ssh-public-key').
+				"<br>\n". &ui_textarea("sshkey", $existing_key, 3, 60,
+					undef, !$virtualmin_pro, &vui_ui_input_noauto_attrs()).
+				$existing_key_hidden,
+				undef, &procell() || \@tds);
 			}
 		# Password recovery field
 		if (!$user->{'webowner'}) {

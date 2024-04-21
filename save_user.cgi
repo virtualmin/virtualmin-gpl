@@ -429,13 +429,12 @@ else {
 
 		if ($user->{'unix'}) {
 			if (&can_mailbox_ftp()) {
-				# Shell can be set based on FTP flag
-				&check_available_shell($in{'shell'}, 'mailbox',
-						       undef) ||
-					&error($text{'user_eshell'});
+				# Shell can be set to one that's allowed for FTP
+				&check_available_shell($in{'shell'}, 'mailbox')
+					|| &error($text{'user_eshell'});
 				$user->{'shell'} = $in{'shell'};
 				}
-			elsif ($in{'new'}) {
+			else {
 				# If the shell cannot be edited, always use
 				# the default.
 				$user->{'shell'} =

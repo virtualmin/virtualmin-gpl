@@ -736,6 +736,7 @@ indom=In domain $1
 equotacommand=Quota command $1 failed : $2
 
 users_ecannot=You are not allowed to edit users in this domain
+users_ecannotssh=You are not allowed to edit SSH users
 users_ecannot2=You are not allowed to edit local users
 users_ecannot3=You are not allowed to add mail users
 users_ecannot4db=You cannot manage extra database users in GPL version

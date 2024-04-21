@@ -3508,6 +3508,13 @@ sub can_mailbox_ftp
 return &master_admin() || $config{'edit_ftp'};
 }
 
+# Returns 1 if the current user can create SSH-capable mailboxes
+sub can_mailbox_ssh
+{
+return &master_admin();
+}
+
+
 # Returns 1 if the current user can set the quota for mailboxes
 sub can_mailbox_quota
 {
@@ -18257,7 +18264,14 @@ return join(", ", @ttdoms);
 
 # list_available_shells([&domain], [mail])
 # Returns a list of shells assignable to domain owners and/or mailboxes.
-# Each is a hash ref with shell, desc, owner and mailbox keys.
+# Each is a hash ref with keys :
+# shell - Path to the shell command
+# desc - Human readable description of what this shell grants
+# id - One of the classes 'nologin', 'ftp', 'scp' or 'ssh'
+# mailbox - Set to 1 if this shell can be used by mailbox users
+# owner - Set to 1 if this shell can be used by domain admins
+# default - Set to 1 if this is the default shell for the user type,
+# avail - Set to 1 if it is available for use
 sub list_available_shells
 {
 local ($d, $mail) = @_;
@@ -18477,12 +18491,14 @@ return $def ? $def->{'shell'} : undef;
 }
 
 # check_available_shell(shell, type, [old])
-# Returns 1 if some shell is on the available list for this type
+# Returns 1 if some shell is on the available list for this type for the current
+# user. Root can use any kind of shell for any user.
 sub check_available_shell
 {
-local ($shell, $type, $old) = @_;
-local @ashells = grep { $_->{$type} && $_->{'avail'} } &list_available_shells();
-local ($got) = grep { $_->{'shell'} eq $shell } @ashells;
+my ($shell, $type, $old) = @_;
+my @ashells = grep { &can_mailbox_ssh() ||
+		     ($_->{$type} && $_->{'avail'}) } &list_available_shells();
+my ($got) = grep { $_->{'shell'} eq $shell } @ashells;
 return $got || $old && $shell eq $old;
 }
 
