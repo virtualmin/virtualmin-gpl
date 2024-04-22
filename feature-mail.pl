@@ -3636,13 +3636,6 @@ else {
 	}
 }
 
-# mail_system_needs_group()
-# Returns 1 if the current mail system needs a Unix group for mailboxes
-sub mail_system_needs_group
-{
-return 1;
-}
-
 # bandwidth_all_mail(&domains-list, &starts-hash, &bw-hash-hash)
 # Scans through the mail log, and updates all domains at once. Returns a new
 # hash reference of start times.

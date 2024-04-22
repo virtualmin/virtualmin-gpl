@@ -16,7 +16,7 @@ my (%uinfo, %ginfo);
 if ($d->{'user'} eq '') {
 	&error("Domain is missing Unix username!");
 	}
-if ($d->{'group'} eq '' && &mail_system_needs_group()) {
+if ($d->{'group'} eq '') {
 	&error("Domain is missing Unix group name!");
 	}
 
@@ -44,7 +44,7 @@ if ($gclash || !$d->{'gid'}) {
 	}
 $d->{'ugid'} = $d->{'gid'} if ($d->{'ugid'} eq '');
 
-if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
+if ($d->{'gid'} == $d->{'ugid'}) {
 	# Create the group
 	&$first_print(&text('setup_group', $d->{'group'}));
 	%ginfo = ( 'group', $d->{'group'},
@@ -494,7 +494,7 @@ return &text('validate_euid', $d->{'user'}, $d->{'uid'}, $user->{'uid'})
 
 # Make sure group exists and has right ID
 my $group;
-if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
+if ($d->{'gid'} == $d->{'ugid'}) {
 	my @groups = &list_all_groups_quotas(0);
 	($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
 	return &text('validate_egroup', $d->{'group'}) if (!$group);
