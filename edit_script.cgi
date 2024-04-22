@@ -131,6 +131,22 @@ if (defined(&$sfunc)) {
 
 print &ui_table_end();
 
+# Script Kit
+my $kit_func = $script->{'kit_func'};
+if (defined(&$kit_func)) {
+	my $rows =
+		&{$script->{'kit_func'}}($d, $script, $sinfo);
+	if ($rows) {
+		print &ui_hidden_table_start(
+			$text{'scripts_kit'}, undef, 4, 'script_kit', 1);
+		foreach my $td (@$rows) {
+			print &ui_table_row(
+				$td->{'desc'}, $td->{'value'});
+			}
+		print &ui_hidden_table_end();
+		}
+	}
+
 # Show un-install and upgrade buttons
 print &ui_submit($text{'scripts_uok'}, "uninstall"),"\n";
 

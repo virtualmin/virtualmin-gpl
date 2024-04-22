@@ -4495,6 +4495,8 @@ scripts_can=Available in
 scripts_gpl_to_pro=Now only available in Pro
 scripts_gpl_to_pro_upgrade=Upgrade for this script is now only available in Pro
 
+scripts_kit=Script Kit
+
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up
 scripts_gpl_pro_tip_hide2=Thanks, I will think about it

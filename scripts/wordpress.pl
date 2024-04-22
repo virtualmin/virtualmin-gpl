@@ -521,4 +521,14 @@ if (&domain_has_website($d) eq 'virtualmin-nginx' &&
 	}
 }
 
+# script_wordpress_kit(&domain, &script, &opts)
+# Called after a script is installed, to enable any extra actions needed
+sub script_wordpress_kit
+{
+my ($d, $script, $sinfo) = @_;
+### XXX
+my $rows;
+return $rows;
+}
+
 1;
