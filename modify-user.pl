@@ -135,11 +135,6 @@ while(@ARGV > 0) {
 		&has_mail_quotas() || &usage("--mail-quota option is not available unless mail directory quotas are enabled");
 		$mquota eq "UNLIMITED" || $mquota =~ /^\d+$/ || &usage("Mail directory quota must be a number of blocks, or UNLIMITED");
 		}
-	elsif ($a eq "--qmail-quota") {
-		$qquota = shift(@ARGV);
-		&has_server_quotas() || &usage("--qmail-quota option is not available unless supported by the mail server");
-		$qquota eq "UNLIMITED" || $qquota =~ /^\d+$/ || &usage("Qmail quota must be a number of blocks, or UNLIMITED");
-		}
 	elsif ($a eq "--add-mysql") {
 		# Adding a MySQL DB to this user's allowed list
 		push(@adddbs, { 'type' => 'mysql',
@@ -629,9 +624,6 @@ if (&has_home_quotas()) {
 	}
 if (&has_mail_quotas()) {
 	print "                      [--mail-quota quota-in-blocks]\n";
-	}
-if (&has_server_quotas()) {
-	print "                      [--qmail-quota quota-in-bytes]\n";
 	}
 if ($config{'mysql'}) {
 	print "                      [--add-mysql database]\n";

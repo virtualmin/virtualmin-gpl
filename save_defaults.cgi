@@ -37,17 +37,6 @@ if (&has_mail_quotas()) {
 		}
 	}
 
-# Save mail server quota
-if (&has_server_quotas()) {
-	if ($in{'qquota_def'} == 1) {
-		$user->{'qquota'} = "none";
-		}
-	else {
-		$in{'qquota'} =~ /^\d+$/ || &error($text{'defaults_eqquota'});
-		$user->{'qquota'} = $in{'qquota'};
-		}
-	}
-
 # Save default shell
 if (&can_mailbox_ftp()) {
 	&check_available_shell($in{'shell'}, 'mailbox', $user->{'shell'}) ||

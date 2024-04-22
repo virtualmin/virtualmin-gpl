@@ -474,9 +474,6 @@ if (&has_home_quotas()) {
 if (&has_mail_quotas()) {
 	print "                      [--mail-quota quota-in-blocks|\"UNLIMITED\"]\n";
 	}
-if (&has_server_quotas()) {
-	print "                       --qmail-quota quota-in-bytes|\"UNLIMITED\"\n";
-	}
 if (!$user || $user->{'person'}) {
 	print "                      [--real real-name-for-new-user]\n";
 	}

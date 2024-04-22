@@ -12462,12 +12462,6 @@ return $config{'mail_quotas'} &&
        $config{'mail_quotas'} ne $config{'home_quotas'} ? 1 : 0;
 }
 
-# Returns 1 if the system's mail server supports mail quotas
-sub has_server_quotas
-{
-return 0;
-}
-
 # has_group_quotas()
 # Returns 1 if group quotas are enabled
 sub has_group_quotas

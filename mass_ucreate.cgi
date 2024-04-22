@@ -63,7 +63,6 @@ USER: foreach $line (@lines) {
 		}
 	$quota = &has_home_quotas() ? $quota : undef;
 	local $mquota = &has_mail_quotas() ? $quota : undef;
-	local $qquota = &has_server_quotas() ? $quota : undef;
 
 	# Make sure needed parameters are given
 	if (!$username) {
