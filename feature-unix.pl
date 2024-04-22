@@ -130,7 +130,7 @@ if (&has_home_quotas()) {
 	}
 
 # Create virtuser pointing to new user, and possibly generics entry
-if ($d->{'mail'} && $config{'mail_system'} != 5) {
+if ($d->{'mail'}) {
 	&$first_print($text{'setup_usermail2'});
 	&create_email_for_unix($d);
 	&$second_print($text{'setup_done'});
@@ -303,7 +303,7 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 	# Unix feature has been turned off .. so delete the user and group
 	&delete_unix($oldd);
 	}
-if ($d->{'mail'} && !$oldd->{'mail'} && $config{'mail_system'} != 5) {
+if ($d->{'mail'} && !$oldd->{'mail'}) {
 	# Add email for the domain user
 	&$first_print($text{'setup_usermail2'});
 	&create_email_for_unix($d);

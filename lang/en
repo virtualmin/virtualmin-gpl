@@ -58,7 +58,6 @@ index_emodssl2=The Apache configuration on your system does not appear to be lis
 index_esendmail=The Sendmail mail server does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>Sendmail Mail Server</a> module. If you are running a different mail server, select it on the <a href='$2'>module configuration</a> page
 index_epostfix=The Postfix server does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>Postfix Configuration</a> module. If you are running a different mail server, select it on the <a href='$2'>module configuration</a> page
 index_eqmail=The QMail server does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>QMail Configuration</a> module. If you are running a different mail server, select it on the <a href='$2'>module configuration</a> page
-index_evpopmail=The QMail server does not appear to be installed on your system, is missing the VPOPMail extensions, or has not yet been set up properly in Webmin's <a href='$1'>QMail Configuration</a> module. If you are running a different mail server, select it on the <a href='$2'>module configuration</a> page
 index_emailboxessystem=The Read User Mail module is not setup to use the $3 mail server. Either adjust its <a href='$1'>module configuration</a> to match, or change the <a href='$2'>Virtualmin configuration</a>
 index_eiface=No Ethernet interface could be automatically found on your system. Use the <a href='$1'>module configuration</a> page to set the interface manually
 index_elogrotate=The Logrotate program does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>Log File Rotation</a> module. If your system does not use Logrotate, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page
@@ -478,7 +477,6 @@ setup_edepssl5=SSL cannot be enabled for more than one domain on the IP address 
 setup_edepftp=Virtual FTP cannot be enabled unless a virtual IP address is allocated
 setup_edepftpdir=Virtual FTP cannot be enabled unless the server has a home directory
 setup_edepspam=Spam filtering cannot be enabled unless email is
-setup_edepspamvpop=Spam filtering cannot be used with VPopMail
 setup_edepvirus=Virus filtering cannot be enabled unless email and spam filtering is
 setup_edepstatus=Status monitoring cannot be enabled unless a website is
 setup_ecrgroup=.. administration group was created but does not exist!
@@ -2094,7 +2092,6 @@ check_dependentesupport=Postfix can support per-domain outgoing IP addresses, bu
 check_qmailok=Mail server Qmail is installed and configured
 check_qmailmode6=Mail server Qmail is installed and configured. However, the username format on the server templates page is set to <b>username@domain</b>, which may not work
 check_postfixmode6=Mail server Postfix is installed and configured. However, the username format on the server templates page is set to <b>username@domain</b>, is not supported by Postfix
-check_vpopmailok=Mail server Qmail with VPOPMail extensions is installed and configured
 check_done=.. your system is ready for use by Virtualmin
 check_failed=.. your system is not ready for use by Virtualmin
 check_nogroup=User quotas are enabled for home and email directories, but group quotas are not. Total virtual server quotas will not be enforced
@@ -3943,7 +3940,6 @@ mail_system_0=Postfix
 mail_system_1=Sendmail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
-mail_system_5=Qmail+VPOPMail
 
 databases_title=Edit Databases
 databases_indom=$1 databases in domain $2

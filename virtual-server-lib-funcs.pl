@@ -743,10 +743,6 @@ if ($config{'mail'} && !$novirts) {
 		%aliases = map { $_->{'name'}, $_ }
 			       &$postfix_list_aliases($postfix_afiles);
 		}
-	elsif ($config{'mail_system'} == 5) {
-		# Find VPOPMail aliases to match with users
-		%valiases = map { $_->{'from'}, $_ } &list_virtusers();
-		}
 	if ($config{'generics'}) {
 		%generics = &get_generics_hash();
 		}
@@ -774,9 +770,6 @@ if ($d) {
 		if ($u->{'user'} eq $d->{'user'} && $u->{'unix'}) {
 			# Virtual server owner
 			$u->{'domainowner'} = 1;
-			if ($config{'mail_system'} == 5) {
-				$u->{'noprimary'} = 1;
-				}
 			if ($d->{'hashpass'}) {
 				$u->{'pass_crypt'} = $d->{'crypt_enc_pass'};
 				$u->{'pass_md5'} = $d->{'md5_enc_pass'};
@@ -823,54 +816,6 @@ if ($d) {
 		local %umap = map { &replace_atsign($_->{'user'}), $_ }
 				grep { $_->{'user'} =~ /\@/ } @users;
 		@users = grep { !$umap{$_->{'user'}} } @users;
-		}
-
-	if ($config{'mail_system'} == 5) {
-		# Add VPOPMail users for this domain
-		local %attr_map = ( 'name' => 'user',
-				    'passwd' => 'pass',
-				    'clear passwd' => 'plainpass',
-				    'comment/gecos' => 'real',
-				    'dir' => 'home',
-				    'quota' => 'qquota',
-				   );
-		local $user;
-		local $_;
-		open(UINFO, "$vpopbin/vuserinfo -D $d->{'dom'} |");
-		while(<UINFO>) {
-			s/\r|\n//g;
-			if (/^([^:]+):\s+(.*)$/) {
-				local ($attr, $value) = ($1, $2);
-				if ($attr eq "name") {
-					# Start of a new user
-					$user = { 'vpopmail' => 1,
-						  'mailquota' => 1,
-						  'person' => 1,
-						  'fixedhome' => 1,
-						  'noappend' => 1,
-						  'noprimary' => 1,
-						  'alwaysplain' => 1 };
-					push(@users, $user);
-					}
-				local $amapped = $attr_map{$attr};
-				$user->{$amapped} = $value if ($amapped);
-				if ($amapped eq "qquota") {
-					# Convert quota to virtualmin format
-					if ($value eq "NOQUOTA") {
-						$user->{$amapped} = 0;
-						}
-					else {
-						$user->{$amapped} = int($value);
-						}
-					}
-				if ($amapped eq "user") {
-					# Email is fixed with vpopmail
-					$user->{'email'} =
-						$value."\@".$d->{'dom'};
-					}
-				}
-			}
-		close(UINFO);
 		}
 
 	# Find users with broken home dir (not under homes, or
@@ -1034,8 +979,7 @@ if (!$novirts) {
 			$u->{'valias'} = $va;
 			$u->{'to'} = $va->{'to'};
 			}
-		elsif ($config{'mail_system'} == 2 ||
-		       $config{'mail_system'} == 5) {
+		elsif ($config{'mail_system'} == 2) {
 			# Find .qmail file
 			local $alias = &get_dotqmail(&dotqmail_file($u));
 			if ($alias) {
@@ -1054,8 +998,7 @@ if (!$novirts) {
 			if (@{$v->{'to'}} == 1 &&
 			    ($v->{'to'}->[0] eq $escuser ||
 			     $v->{'to'}->[0] eq $escalias ||
-			     ($v->{'to'}->[0] eq $email &&
-			      $config{'mail_system'} != 5) ||
+			     $v->{'to'}->[0] eq $email ||
 			     $v->{'from'} eq $email &&
 			      $v->{'to'}->[0] =~ /^BOUNCE/) &&
 			    (!$d || $v->{'from'} ne $d->{'dom'})) {
@@ -1471,38 +1414,24 @@ local $pop3 = &remove_userdom($_[0]->{'user'}, $_[1]);
 &require_useradmin();
 &require_mail();
 
-if ($_[0]->{'vpopmail'}) {
-	# Create user in VPOPMail
-	local $quser = quotemeta($_[0]->{'user'});
-	local $qdom = $_[1]->{'dom'};
-	local $qreal = quotemeta($_[0]->{'real'}) || '""';
-	local $quota = $_[0]->{'qquota'} ? "-q $_[0]->{'qquota'}" : "-q NOQUOTA";
-	local $qpass = quotemeta($_[0]->{'plainpass'}) || '""';
-	local $cmd = "$vpopbin/vadduser $quota -c $qreal $quser\@$qdom $qpass";
-	local $out = &backquote_logged("$cmd 2>&1");
-	&error("<tt>$cmd</tt> failed: <pre>$out</pre>") if ($?);
-	$_[0]->{'home'} = &domain_vpopmail_dir($_[1])."/".$_[0]->{'user'};
-	}
-else {
-	# Add the Unix user
-	if ($config{'ldap_mail'}) {
-		$_[0]->{'ldap_attrs'} = [ ];
-		if ($_[0]->{'email'}) {
-			push(@{$_[0]->{'ldap_attrs'}}, "mail",$_[0]->{'email'});
-			}
-		local $ea = $config{'ldap_mail'} == 2 ?
-				'mailAlternateAddress' : 'mail';
-		push(@{$_[0]->{'ldap_attrs'}},
-		     map { ( $ea, $_ ) } @{$_[0]->{'extraemail'}});
+# Add the Unix user
+if ($config{'ldap_mail'}) {
+	$_[0]->{'ldap_attrs'} = [ ];
+	if ($_[0]->{'email'}) {
+		push(@{$_[0]->{'ldap_attrs'}}, "mail",$_[0]->{'email'});
 		}
-	&foreign_call($usermodule, "set_user_envs", $_[0], 'CREATE_USER',
-		      $_[0]->{'plainpass'}, [ ]);
-	&set_virtualmin_user_envs($_[0], $_[1]);
-	&foreign_call($usermodule, "making_changes");
-	&userdom_substitutions($_[0], $_[1]);
-	&foreign_call($usermodule, "create_user", $_[0]);
-	&foreign_call($usermodule, "made_changes");
+	local $ea = $config{'ldap_mail'} == 2 ?
+			'mailAlternateAddress' : 'mail';
+	push(@{$_[0]->{'ldap_attrs'}},
+	     map { ( $ea, $_ ) } @{$_[0]->{'extraemail'}});
 	}
+&foreign_call($usermodule, "set_user_envs", $_[0], 'CREATE_USER',
+	      $_[0]->{'plainpass'}, [ ]);
+&set_virtualmin_user_envs($_[0], $_[1]);
+&foreign_call($usermodule, "making_changes");
+&userdom_substitutions($_[0], $_[1]);
+&foreign_call($usermodule, "create_user", $_[0]);
+&foreign_call($usermodule, "made_changes");
 
 # If we are running Postfix and the username has an @ in it, create an extra
 # Unix user without the @ but all the other details the same
@@ -1568,8 +1497,7 @@ if (@to) {
 		&postfix::unlock_alias_files($postfix_afiles);
 		&postfix::regenerate_aliases();
 		}
-	elsif ($config{'mail_system'} == 2 ||
-	       $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2) {
 		# Set up user's .qmail file
 		local $dqm = &dotqmail_file($_[0]);
 		&lock_file($dqm);
@@ -1724,88 +1652,50 @@ if ($_[0]->{'unix'}) {
 
 local $pop3 = &remove_userdom($_[0]->{'user'}, $_[2]);
 local $extrauser;
-if ($_[1]->{'vpopmail'}) {
-	# Update VPOPMail user
-	local $quser = quotemeta($_[1]->{'user'});
-	local $qdom = $_[2]->{'dom'};
-	local $qreal = quotemeta($_[0]->{'real'}) || '""';
-	local $qpass = quotemeta($_[0]->{'plainpass'});
-	local $qquota = $_[0]->{'qquota'} ? $_[0]->{'qquota'} : "NOQUOTA";
-	local $cmd = "$vpopbin/vmoduser -c $qreal ".
-		     ($_[0]->{'passmode'} == 3 ? " -C $qpass" : "").
-		     " -q $qquota $quser\@$qdom";
-	local $out = &backquote_logged("$cmd 2>&1");
-	if ($?) {
-		&error("<tt>$cmd</tt> failed: <pre>$out</pre>");
+&require_useradmin();
+&require_mail();
+
+# Update the unix user
+if ($config{'ldap_mail'}) {
+	$_[0]->{'ldap_attrs'} = [ ];
+	if ($_[0]->{'email'}) {
+		push(@{$_[0]->{'ldap_attrs'}}, "mail",$_[0]->{'email'});
 		}
-	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-		# Need to rename manually
-		local $vdomdir = &domain_vpopmail_dir($_[2]);
-		&rename_logged("$vdomdir/$_[1]->{'user'}", "$vdomdir/$_[0]->{'user'}");
-		&lock_file("$vdomdir/vpasswd");
-		local $lref = &read_file_lines("$vdomdir/vpasswd");
-		local $l;
-		foreach $l (@$lref) {
-			local @u = split(/:/, $l);
-			if ($u[0] eq $_[1]->{'user'}) {
-				$u[0] = $_[0]->{'user'};
-				$u[5] =~ s/$_[1]->{'user'}$/$_[0]->{'user'}/;
-				$l = join(":", @u);
-				}
-			}
-		&flush_file_lines();
-		&unlock_file("$vdomdir/vpasswd");
-		&system_logged("$vpopbin/vmkpasswd $qdom");
+	local $ea = $config{'ldap_mail'} == 2 ?
+			'mailAlternateAddress' : 'mail';
+	push(@{$_[0]->{'ldap_attrs'}},
+	     map { ( $ea, $_ ) } @{$_[0]->{'extraemail'}});
+	}
+&foreign_call($usermodule, "set_user_envs", $_[0], 'MODIFY_USER',
+	      $_[0]->{'plainpass'}, undef, $_[1], $_[1]->{'plainpass'});
+&set_virtualmin_user_envs($_[0], $_[2]);
+&foreign_call($usermodule, "making_changes");
+&userdom_substitutions($_[0], $_[2]);
+&foreign_call($usermodule, "modify_user", $_[1], $_[0]);
+&foreign_call($usermodule, "made_changes");
+
+if ($config{'mail_system'} == 0 && $_[1]->{'user'} =~ /\@/) {
+	local $esc = &replace_atsign($_[1]->{'user'});
+	local @allusers = &list_all_users_quotas(1);
+	local ($oldextrauser) = grep { $_->{'user'} eq $esc } @allusers;
+	if ($oldextrauser) {
+		# Found him .. fix up
+		$extrauser = { %{$_[0]} };
+		$extrauser->{'user'} = &replace_atsign($_[0]->{'user'});
+		$extrauser->{'dn'} = $oldextrauser->{'dn'};
+		&foreign_call($usermodule, "set_user_envs", $extrauser,
+				'MODIFY_USER', $_[0]->{'plainpass'},
+				undef, $oldextrauser,
+				$_[1]->{'plainpass'});
+		&set_virtualmin_user_envs($_[0], $_[2]);
+		&foreign_call($usermodule, "making_changes");
+		&userdom_substitutions($extrauser, $_[2]);
+		&foreign_call($usermodule, "modify_user",
+				$oldextrauser, $extrauser);
+		&foreign_call($usermodule, "made_changes");
 		}
 	}
-else {
-	# Modifying Unix user
-	&require_useradmin();
-	&require_mail();
-
-	# Update the unix user
-	if ($config{'ldap_mail'}) {
-		$_[0]->{'ldap_attrs'} = [ ];
-		if ($_[0]->{'email'}) {
-			push(@{$_[0]->{'ldap_attrs'}}, "mail",$_[0]->{'email'});
-			}
-		local $ea = $config{'ldap_mail'} == 2 ?
-				'mailAlternateAddress' : 'mail';
-		push(@{$_[0]->{'ldap_attrs'}},
-		     map { ( $ea, $_ ) } @{$_[0]->{'extraemail'}});
-		}
-	&foreign_call($usermodule, "set_user_envs", $_[0], 'MODIFY_USER',
-		      $_[0]->{'plainpass'}, undef, $_[1], $_[1]->{'plainpass'});
-	&set_virtualmin_user_envs($_[0], $_[2]);
-	&foreign_call($usermodule, "making_changes");
-	&userdom_substitutions($_[0], $_[2]);
-	&foreign_call($usermodule, "modify_user", $_[1], $_[0]);
-	&foreign_call($usermodule, "made_changes");
-
-	if ($config{'mail_system'} == 0 && $_[1]->{'user'} =~ /\@/) {
-		local $esc = &replace_atsign($_[1]->{'user'});
-		local @allusers = &list_all_users_quotas(1);
-		local ($oldextrauser) = grep { $_->{'user'} eq $esc } @allusers;
-		if ($oldextrauser) {
-			# Found him .. fix up
-			$extrauser = { %{$_[0]} };
-			$extrauser->{'user'} = &replace_atsign($_[0]->{'user'});
-			$extrauser->{'dn'} = $oldextrauser->{'dn'};
-			&foreign_call($usermodule, "set_user_envs", $extrauser,
-					'MODIFY_USER', $_[0]->{'plainpass'},
-					undef, $oldextrauser,
-					$_[1]->{'plainpass'});
-			&set_virtualmin_user_envs($_[0], $_[2]);
-			&foreign_call($usermodule, "making_changes");
-			&userdom_substitutions($extrauser, $_[2]);
-			&foreign_call($usermodule, "modify_user",
-					$oldextrauser, $extrauser);
-			&foreign_call($usermodule, "made_changes");
-			}
-		}
-
-	goto NOALIASES if ($_[3]);	# no need to touch aliases and virtusers
-	}
+goto NOALIASES if ($_[3]);	# no need to touch aliases and virtusers
 
 # Check if email has changed
 local $echanged;
@@ -1910,8 +1800,7 @@ if (@to && !@oldto) {
 		&postfix::unlock_alias_files($postfix_afiles);
 		&postfix::regenerate_aliases();
 		}
-	elsif ($config{'mail_system'} == 2 ||
-	       $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2) {
 		# Set up user's .qmail file
 		local $dqm = &dotqmail_file($_[0]);
 		&lock_file($dqm);
@@ -1935,8 +1824,7 @@ elsif (!@to && @oldto) {
 		&unlock_file($_[0]->{'alias'}->{'file'});
 		&postfix::regenerate_aliases();
 		}
-	elsif ($config{'mail_system'} == 2 ||
-	       $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2) {
 		# Remove user's .qmail file
 		local $dqm = &dotqmail_file($_[0]);
 		&unlink_logged($dqm);
@@ -1960,8 +1848,7 @@ elsif (@to && @oldto && join(" ", @to) ne join(" ", @oldto)) {
 		&unlock_file($_[1]->{'alias'}->{'file'});
 		&postfix::regenerate_aliases();
 		}
-	elsif ($config{'mail_system'} == 2 ||
-	       $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2) {
 		# Set up user's .qmail file
 		local $dqm = &dotqmail_file($_[0]);
 		&lock_file($dqm);
@@ -2193,33 +2080,21 @@ if ($_[0]->{'unix'}) {
 	&delete_unix_cron_jobs($_[0]->{'user'});
 	}
 
-if ($_[0]->{'vpopmail'}) {
-	# Call VPOPMail delete user program
-	local $quser = quotemeta($_[0]->{'user'});
-	local $qdom = $_[1]->{'dom'};
-	local $cmd = "$vpopbin/vdeluser $quser\@$qdom";
-	local $out = &backquote_logged("$cmd 2>&1");
-	if ($?) {
-		&error("<tt>$cmd</tt> failed: <pre>$out</pre>");
-		}
-	}
-else {
-	# Delete Unix user
-	$_[0]->{'user'} eq 'root' && &error("Cannot delete root user!");
-	$_[0]->{'uid'} == 0 && &error("Cannot delete UID 0 user!");
-	&require_useradmin();
-	&require_mail();
+# Delete Unix user
+$_[0]->{'user'} eq 'root' && &error("Cannot delete root user!");
+$_[0]->{'uid'} == 0 && &error("Cannot delete UID 0 user!");
+&require_useradmin();
+&require_mail();
 
-	# Delete the user
-	&foreign_call($usermodule, "set_user_envs", $_[0], 'DELETE_USER');
-	&set_virtualmin_user_envs($_[0], $_[1]);
-	&foreign_call($usermodule, "making_changes");
-	&foreign_call($usermodule, "delete_user", $_[0]);
-	&foreign_call($usermodule, "made_changes");
+# Delete the user
+&foreign_call($usermodule, "set_user_envs", $_[0], 'DELETE_USER');
+&set_virtualmin_user_envs($_[0], $_[1]);
+&foreign_call($usermodule, "making_changes");
+&foreign_call($usermodule, "delete_user", $_[0]);
+&foreign_call($usermodule, "made_changes");
 
-	# Record the old UID to prevent re-use
-	&record_old_uid($_[0]->{'uid'});
-	}
+# Record the old UID to prevent re-use
+&record_old_uid($_[0]->{'uid'});
 
 if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 	# Find the Unix user with the @ escaped and delete it too
@@ -2263,8 +2138,7 @@ if ($_[0]->{'alias'}) {
 			$_[0]->{'alias'}->{'deleted'} = 1;
 			}
 		}
-	elsif ($config{'mail_system'} == 2 ||
-	       $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2) {
 		# .qmail will be deleted when user is
 		}
 	}
@@ -4926,16 +4800,12 @@ return $_[0];
 # 9 - Bounce, possibly with message
 # 10- Current user's mailbox
 # 11- Throw away
-# 12- VPopMail autoreply
 # 13- Everyone in some domain
 sub alias_type
 {
 local @rv;
 if ($_[0] =~ /^\|\s*$module_config_directory\/autoreply.pl\s+(\S+)/) {
         @rv = (5, $1);
-        }
-elsif ($_[0] =~ /^\|\s*$config{'vpopmail_auto'}\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)(\s+(\S+)\s+(\S+))?/) {
-        @rv = (12, $3, $1, $2, $4, $6, $7);
         }
 elsif ($_[0] =~ /^\|\s*$module_config_directory\/filter.pl\s+(\S+)/) {
         @rv = (6, $1);
@@ -4944,9 +4814,6 @@ elsif ($_[0] =~ /^\|\s*(.*)$/) {
         @rv = (4, $1);
         }
 elsif ($_[0] eq "./Maildir/") {
-	return (10);
-	}
-elsif ($config{'vpopmail_md'} && $_[0] eq "./$config{'vpopmail_md'}/") {
 	return (10);
 	}
 elsif ($_[0] eq "/dev/null") {
@@ -5263,7 +5130,7 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 			&error(&text('alias_etype4', $prog));
 		}
 	elsif ($t == 7 && !defined(getpwnam($v)) &&
-	       $config{'mail_system'} != 4 && $config{'mail_system'} != 5) {
+	       $config{'mail_system'} != 4) {
 		&error(&text('alias_etype7', $v));
 		}
 	elsif ($t == 8 && $v !~ /^[a-z0-9\.\-\_]+$/) {
@@ -5319,46 +5186,6 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 		}
 	elsif ($t == 11) {
 		push(@values, "/dev/null");
-		}
-	elsif ($t == 12) {
-		# Setup vpopmail autoresponder script
-		local @qm = getpwnam($config{'vpopmail_user'});
-		if (!$v) {
-			# Create an empty responder file
-			local $ddir = &domain_vpopmail_dir($_[4]);
-			$v = $_[3] eq "alias" ?
-				"$ddir/$_[1].respond" : "$ddir/$_[1]/respond";
-			if (!-r $v) {
-				&open_tempfile(MSG, ">$v");
-				&close_tempfile(MSG);
-				&set_ownership_permissions($qm[2], $qm[3],
-							   undef, $v);
-				}
-			}
-		elsif (!$v) {
-			&error(&text('alias_eautorepond'));
-			}
-		$v = "$d->{'home'}/$v" if ($v !~ /^\//);
-		local @av;
-		if ($_[2] && &alias_type($_[2]->[$i]) == 12) {
-			# Use old settings for delay/etc
-			local @oldav = &alias_type($_[2]->[$i]);
-			@av = ( $oldav[2], $oldav[3], $v, $oldav[4] );
-			push(@av, $oldav[5]) if ($oldav[5] ne "");
-			push(@av, $oldav[6]) if ($oldav[6] ne "");
-			}
-		else {
-			# User default settings for timeouts, and create log
-			# directory
-			local $vdir = "$v.log";
-			if (!-d $vdir) {
-				&make_dir($vdir, 0755);
-				&set_ownership_permissions($qm[2], $qm[3],
-							   0755, $vdir);
-				}
-			@av = ( 10000, 5, $v, $vdir );
-			}
-		push(@values, "|$config{'vpopmail_auto'} ".join(" ", @av));
 		}
 	elsif ($t == 13) {
 		# Work out ID for everyone file
@@ -5702,7 +5529,6 @@ sub users_table
 local ($users, $d, $cgi, $buttons, $links, $empty) = @_;
 
 local $can_quotas = &has_home_quotas() || &has_mail_quotas();
-local $can_qquotas = $config{'mail_system'} == 5;
 local @ashells = &list_available_shells($d);
 
 # Given a list of services return
@@ -5732,9 +5558,6 @@ push(@headers, $text{'users_name'},
 	       $text{'users_real'} );
 if ($can_quotas) {
 	push(@headers, $text{'users_quota'}, $text{'users_uquota'});
-	}
-if ($can_qquotas) {
-	push(@headers, $text{'users_qquota'});
 	}
 if ($config{'show_mailsize'} && $d->{'mail'}) {
 	push(@headers, $text{'users_size'});
@@ -5820,9 +5643,6 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	if ($u->{'mailquota'}) {
 		push(@cols, $u->{'qquota'} ? &nice_size($u->{'qquota'}) :
 					     $text{'form_unlimit'});
-		}
-	elsif ($can_qquotas) {
-		push(@cols, "");
 		}
 
 	if ($config{'show_mailsize'} && $d->{'mail'}) {
@@ -6807,7 +6627,7 @@ elsif ($config{'mail_system'} == 1) {
 			  $file."_sendmailmc");
 	&$second_print($text{'setup_done'});
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
+elsif ($config{'mail_system'} == 2) {
 	# Save Qmail dir
 	&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
 			 &make_tar_command("cf", $file, "."));
@@ -7026,7 +6846,7 @@ if ($bms eq $config{'mail_system'}) {
 		undef(@sendmail::sendmailcf_cache);
 		&$second_print($text{'setup_done'});
 		}
-	elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2) {
 		# Un-tar qmail dir
 		&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
 				 &make_tar_command("xf", $file));
@@ -9554,12 +9374,7 @@ if (@{$_[0]->{'values'}}) {
 	foreach $v (@{$_[0]->{'values'}}) {
 		if ($v eq "\\$_[2]" || $v eq "\\NEWUSER") {
 			# Delivery to this user means to his maildir
-			if ($config{'vpopmail_md'}) {
-				&print_tempfile(AFILE, "./$config{'vpopmail_md'}/\n");
-				}
-			else {
-				&print_tempfile(AFILE, "./Maildir/\n");
-				}
+			&print_tempfile(AFILE, "./Maildir/\n");
 			}
 		else {
 			&print_tempfile(AFILE, $v,"\n");
@@ -10827,22 +10642,8 @@ return @rv;
 sub create_initial_user
 {
 my ($d, $notmpl, $forweb) = @_;
-my $user;
-if ($config{'mail_system'} == 5) {
-	# VPOPMail user
-	$user = { 'vpopmail' => 1,
-		  'mailquota' => 1,
-		  'person' => 1,
-		  'fixedhome' => 1,
-		  'noappend' => 1,
-		  'noprimary' => 1,
-		  'alwaysplain' => 1 };
-	}
-else {
-	# Normal unix user
-	$user = { 'unix' => 1,
-		  'person' => 1 };
-	}
+my $user = { 'unix' => 1,
+	     'person' => 1 };
 if ($d && !$notmpl) {
 	# Initial aliases and quota come from template
 	local $tmpl = &get_template($d->{'template'});
@@ -12661,11 +12462,10 @@ return $config{'mail_quotas'} &&
        $config{'mail_quotas'} ne $config{'home_quotas'} ? 1 : 0;
 }
 
-# has_server_quotas()
 # Returns 1 if the system's mail server supports mail quotas
 sub has_server_quotas
 {
-return $config{'mail'} && $config{'mail_system'} == 5;
+return 0;
 }
 
 # has_group_quotas()
@@ -12750,7 +12550,6 @@ foreach my $f (@features) {
 	}
 foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "ldap_base", "ldap_login", "ldap_pass", "ldap_port", "ldap",
-	       "vpopmail_dir", "vpopmail_user", "vpopmail_group",
 	       "clamscan_cmd", "iface", "netmask6", "localgroup", "home_quotas",
 	       "mail_quotas", "group_quotas", "quotas", "shell", "ftp_shell",
 	       "dns_ip", "default_procmail",
@@ -14153,11 +13952,11 @@ return 0 if ($d->{'alias'} && !$d->{'aliasmail'} ||
 	     $d->{'subdom'});		# never allowed for aliases
 if (!$d->{'mail'}) {
 	# Qmail+LDAP and VPOPMail require mail to be enabled
-	return 0 if ($config{'mail_system'}==4 || $config{'mail_system'}==5);
+	return 0 if ($config{'mail_system'} == 4);
 	}
 if (!$d->{'dir'}) {
-	# Only VPOPMail allows mail without a dir
-	return 0 if ($config{'mail_system'} != 5);
+	# Users need a home dir
+	return 0;
 	}
 return 1;
 }
@@ -15431,9 +15230,6 @@ if ($config{'mail'}) {
 		if (&postfix_installed()) {
 			$config{'mail_system'} = 0;
 			}
-		elsif (&qmail_vpopmail_installed()) {
-			$config{'mail_system'} = 5;
-			}
 		elsif (&qmail_installed()) {
 			$config{'mail_system'} = 2;
 			}
@@ -15599,21 +15395,6 @@ if ($config{'mail'}) {
 	elsif ($config{'mail_system'} == 4) {
 		# Qmail+LDAP is deprecated
 		return $text{'check_eqmailldap'};
-		}
-	elsif ($config{'mail_system'} == 5) {
-		# Make sure qmail with VPOPMail is installed
-		if (!&qmail_vpopmail_installed()) {
-			return &text('index_evpopmail', '/qmailadmin/',
-					   "../config.cgi?$module_name");
-			}
-		if ($config{'generics'}) {
-			return &text('index_eqgens', $mclink);
-			}
-		if ($config{'bccs'}) {
-			return &text('check_eqmailbccs', $mclink);
-			}
-		&$second_print($text{'check_vpopmailok'});
-		$expected_mailboxes = 5;
 		}
 	# Check that Read User Mail module agrees
 	if (&foreign_check("mailboxes") && defined($expected_mailboxes)) {

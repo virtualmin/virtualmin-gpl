@@ -1,5 +1,5 @@
 line1=Servereinstellungen,11
-mail_system=Konfigurierbarer Mailserver,1,1-Sendmail,0-Postfix,2-Qmail,4-QMail+LDAP,5-Qmail+VPOPMail,6-Exim (Experimentell),3-Automatisch herausfinden
+mail_system=Konfigurierbarer Mailserver,1,1-Sendmail,0-Postfix,2-Qmail,4-QMail+LDAP,3-Automatisch herausfinden
 generics=Auch abgehende Adressen für Mailboxen aktualisieren?,1,1-Ja,0-Nein
 bccs=Erlaube die automatische Blindkopie aller ausgehenden Mails?,1,1-Ja,0-Nein
 quotas=Speicherplatzbegrenzung für Domainen&#45; und Mail&#45;Benutzer?,1,1-Ja (wenn eingeschaltet),0-Nein

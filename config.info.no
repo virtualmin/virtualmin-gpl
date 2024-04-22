@@ -1,5 +1,5 @@
 line1=Tjener innstillinger,11
-mail_system=E-post tjener som skal konfigureres,4,1-Sendmail,0-Postfix,2-Qmail,4-Qmail+LDAP,5-Qmail+VPOPMail,6-Exim (eksperimentell),3-Oppdag automatisk
+mail_system=E-post tjener som skal konfigureres,4,1-Sendmail,0-Postfix,2-Qmail,4-Qmail+LDAP,3-Oppdag automatisk
 generics=Oppdater også utgående adresser for postbokser?,1,1-Ja,0-Nei
 bccs=Tillat automatisk blindkopiering av utgående e-post,1,1-Ja,0-Nei
 quotas=Sett kvoter for domene og e-post brukere?,1,1-Ja (hvis aktivert),0-Nei

@@ -1,5 +1,5 @@
 line1=Configuración del servidor,11
-mail_system=Servidor de correo a configurar,4,1-Sendmail,0-Postfix,2-Qmail,4-Qmail+LDAP,5-Qmail+VPOPMail,3-Detectar automáticamente
+mail_system=Servidor de correo a configurar,4,1-Sendmail,0-Postfix,2-Qmail,4-Qmail+LDAP,3-Detectar automáticamente
 generics=También actualizar direcciones salientes para cuentas de correo?,1,1-Si,0-No
 quotas=Configuración de quota para el dominio y usuarios de correo?,1,1-Si (si se encuentra habilitado),0-No
 disable=Opciones a desactivar al deshabilitar,13,Usuario de Administración-unix (bloquear cuenta),mail-Mail (no aceptar mas mails para el dominio),web-Website (reemplazar el sitio con una página de error),dns-DNS (dejar de resolver el dominio),mysql-MySQL (deshabilitar logueo de usuario de MySQL),postgres-PostgreSQL (deshabilitar logueo de usuario de PostgreSQL),ftp-ProFTPD (rechazar acceso)

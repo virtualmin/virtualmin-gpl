@@ -1,5 +1,5 @@
 line1=Ustawienia serwera,11
-mail_system=Serwer e-mail,4,1-Sendmail,0-Postfix,2-Qmail,4-Qmail+LDAP,5-Qmail+VPOPMail,6-Exim (eksperymentalne),3-Wykryj automatycznie
+mail_system=Serwer e-mail,4,1-Sendmail,0-Postfix,2-Qmail,4-Qmail+LDAP,3-Wykryj automatycznie
 line1.3=Ustawienia sieci,11
 line1.4=Ustawienia interfejsu użytkownika,11
 line1.5=Uprawnienia administratora serwera,11

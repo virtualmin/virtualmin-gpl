@@ -22,10 +22,6 @@ if (!$_[0]->{'mail'}) {
 	# Mail must be enabled for spam filtering to work!
 	return $text{'setup_edepspam'};
 	}
-if ($config{'mail_system'} == 5) {
-	# Not implemented for VPopMail
-	return $text{'setup_edepspamvpop'};
-	}
 return undef;
 }
 
