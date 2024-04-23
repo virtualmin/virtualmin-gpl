@@ -12536,6 +12536,7 @@ sub need_config_check
 {
 local @cst = stat($module_config_file);
 return 0 if ($cst[9] <= $config{'last_check'});
+return 1 if ($config{'mail_system'} == 5 || $config{'mail_system'} == 6);
 local %lastconfig;
 &read_file("$module_config_directory/last-config", \%lastconfig) || return 1;
 foreach my $f (@features) {
