@@ -15219,6 +15219,12 @@ if ($config{'dns'}) {
 	}
 
 if ($config{'mail'}) {
+	if ($config{'mail_system'} == 5) {
+		return $text{'check_evpopmail'};
+		}
+	if ($config{'mail_system'} == 6) {
+		return $text{'check_eexim'};
+		}
 	if ($config{'mail_system'} == 3) {
 		# Work out which mail server we have
 		if (&postfix_installed()) {

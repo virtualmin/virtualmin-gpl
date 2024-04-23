@@ -2120,6 +2120,8 @@ check_eldap=An error occurred contacting the LDAP server : $1. Either LDAP must 
 check_eldap2=The LDAP Users and Groups module is too old to be used by Virtualmin for user management. Either LDAP must be disabled in the <a href='$1'>module configuration</a> page, or the module upgraded to version $2
 check_ldap=LDAP user and group management is properly configured
 check_detected=Detected mail server $1
+check_evpopmail=Support for the VPOPMail mail server has been removed from Virtualmin!
+check_eexim=Support for the Exim mail server has been removed from Virtualmin!
 check_spamok=SpamAssassin and Procmail are installed and configured for use
 check_noprocmail=SpamAssassin and Procmail are installed. However, your mail server does not appear to be configured to deliver using Procmail
 check_spamglobal=SpamAssassin is configured to be run from the global Procmail configuration $1, which is not needed as Virtualmin will set it up on a per-domain basis
