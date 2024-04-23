@@ -1,5 +1,5 @@
 line1=Diğer sunucu ayarları,11
-mail_system=Yapılandırılacak e-posta sunucusu,4,1-Sendmail,0-Postfix,2-Qmail,4-Qmail+LDAP,3-Otomatik olarak tespit et
+mail_system=Yapılandırılacak e-posta sunucusu,4,1-Sendmail,0-Postfix,2-Qmail,3-Otomatik olarak tespit et
 generics=Posta kutusu için Giden adresleri de güncellensin mi?,1,1-Evet,0-Hayır
 quotas=Alanadı ve eposta kullanıcıları için kota kurulsun mu?,1,1-Evet (etkinleştirilmişse),0-Hayır
 disable=Engellenirken etkinliği kaldırılacak özellikler,13,unix-Unix kullanıcısı (hesabı kilitle),mail-eposta (alanadı için eposta kabulünü durdur),web-web sitesi (siteyi hata sayfasıyla yerdeğiştir),dns-DNS (alanadını sunmayı durdur),mysql-MySQL (MySQL kullanıcısının loginini durdur),postgres-PostgreSQL (PostgreSQL kullanıcısının loginini durdur),ftp-ProFTPD (erişimi engelle)

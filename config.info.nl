@@ -1,5 +1,5 @@
 line1=Server instellingen,11
-mail_system=Email server om te configureren,4,1-Sendmail,0-Postfix,2-Qmail,4-Qmail+LDAP,3-Detecteer automatisch
+mail_system=Email server om te configureren,4,1-Sendmail,0-Postfix,2-Qmail,3-Detecteer automatisch
 generics=Ook uitgaande adressen voor mailboxen updaten?,1,1-Ja,0-Nee
 bccs=Automatisch BCCing van uitgaande email toestaan?,1,1-Ja,0-Nee
 quotas=Quota opzetten voor domein en email gebruikers?,1,1-Ja (indien aangezet),0-Nee

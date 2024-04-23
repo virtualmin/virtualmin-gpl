@@ -5129,10 +5129,6 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 		   $prog eq "if" || $prog eq "export" || &has_command($prog) ||
 			&error(&text('alias_etype4', $prog));
 		}
-	elsif ($t == 7 && !defined(getpwnam($v)) &&
-	       $config{'mail_system'} != 4) {
-		&error(&text('alias_etype7', $v));
-		}
 	elsif ($t == 8 && $v !~ /^[a-z0-9\.\-\_]+$/) {
 		&error(&text('alias_etype8', $v));
 		}
@@ -13945,10 +13941,6 @@ sub can_domain_have_users
 local ($d) = @_;
 return 0 if ($d->{'alias'} && !$d->{'aliasmail'} ||
 	     $d->{'subdom'});		# never allowed for aliases
-if (!$d->{'mail'}) {
-	# Qmail+LDAP and VPOPMail require mail to be enabled
-	return 0 if ($config{'mail_system'} == 4);
-	}
 if (!$d->{'dir'}) {
 	# Users need a home dir
 	return 0;
@@ -15226,6 +15218,9 @@ if ($config{'mail'}) {
 	if ($config{'mail_system'} == 6) {
 		return $text{'check_eexim'};
 		}
+	if ($config{'mail_system'} == 4) {
+		return $text{'check_eqmailldap'};
+		}
 	if ($config{'mail_system'} == 3) {
 		# Work out which mail server we have
 		if (&postfix_installed()) {
@@ -15392,10 +15387,6 @@ if ($config{'mail'}) {
 			&$second_print($text{'check_qmailok'});
 			}
 		$expected_mailboxes = 2;
-		}
-	elsif ($config{'mail_system'} == 4) {
-		# Qmail+LDAP is deprecated
-		return $text{'check_eqmailldap'};
 		}
 	# Check that Read User Mail module agrees
 	if (&foreign_check("mailboxes") && defined($expected_mailboxes)) {

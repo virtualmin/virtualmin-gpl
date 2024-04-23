@@ -96,12 +96,6 @@ elsif ($config{'mail_system'} == 2) {
 	%qmconfig = &foreign_config("qmailadmin");
 	$can_alias_types{2} = 0;	# cannot use addresses in file
 	$can_alias_types{8} = 0;	# cannot use same in other domain
-	if ($config{'mail_system'} == 4) {
-		# Qmail+LDAP can only alias to email addresses
-		foreach my $t (3, 4, 5, 6, 7, 9, 10, 11) {
-			$can_alias_types{$t} = 0;
-			}
-		}
 	# Qmail cannot use the bouncer
 	$can_alias_types{7} = 0;
 	$can_alias_types{9} = 0;
@@ -118,20 +112,18 @@ sub list_domain_aliases
 local ($d, $ignore_plugins) = @_;
 &require_mail();
 local ($u, %foruser);
-if ($config{'mail_system'} != 4) {
-	# Filter out aliases that point to users
-	foreach $u (&list_domain_users($d, 0, 1, 1, 1)) {
-		local $pop3 = &remove_userdom($u->{'user'}, $d);
-		$foruser{$pop3."\@".$d->{'dom'}} = $u->{'user'};
-		if ($config{'mail_system'} == 0 && $u->{'user'} =~ /\@/) {
-			# Special case for Postfix @ users
-			$foruser{$pop3."\@".$d->{'dom'}} =
-				&escape_replace_atsign_if_exists($u->{'user'});
-			}
+# Filter out aliases that point to users
+foreach $u (&list_domain_users($d, 0, 1, 1, 1)) {
+	local $pop3 = &remove_userdom($u->{'user'}, $d);
+	$foruser{$pop3."\@".$d->{'dom'}} = $u->{'user'};
+	if ($config{'mail_system'} == 0 && $u->{'user'} =~ /\@/) {
+		# Special case for Postfix @ users
+		$foruser{$pop3."\@".$d->{'dom'}} =
+			&escape_replace_atsign_if_exists($u->{'user'});
 		}
-	if ($d->{'mail'}) {
-		$foruser{$d->{'user'}."\@".$d->{'dom'}} = $d->{'user'};
-		}
+	}
+if ($d->{'mail'}) {
+	$foruser{$d->{'user'}."\@".$d->{'dom'}} = $d->{'user'};
 	}
 local @virts = &list_virtusers();
 local %ignore;
@@ -435,9 +427,6 @@ elsif ($config{'mail_system'} == 2) {
 	local ($virtmap) = grep { lc($_->{'domain'}) eq $d->{'dom'} &&
 				  !$_->{'user'} } &qmailadmin::list_virts();
 	&qmailadmin::delete_virt($virtmap) if ($virtmap);
-        if ($config{'mail_system'} == 4) {
-                &execute_command("cd /etc/qmail && make");
-                }
 	if (!$no_restart_mail) {
 		&qmailadmin::restart_qmail();
 		}
@@ -2335,9 +2324,6 @@ elsif ($config{'mail_system'} == 0) {
 elsif ($config{'mail_system'} == 2) {
 	return $qmconfig{'mail_system'} != 0 || !$qmconfig{'mail_dir'};
 	}
-elsif ($config{'mail_system'} == 4) {
-	return $config{'ldap_mailstore'} =~ /^(\$HOME|\$\{HOME\})/;
-	}
 return 0;
 }
 
@@ -2366,16 +2352,6 @@ elsif ($config{'mail_system'} == 2) {
 	# Find out from Qmail which file or dir to check
 	@rv = ( &qmailadmin::user_mail_dir($_[0]->{'user'}),
 		$qmailadmin::config{'mail_system'} == 1 ? 1 : 0 );
-	}
-elsif ($config{'mail_system'} == 4) {
-	# Mail file is an LDAP property
-	local $rv = &add_ldapmessagestore($_[0]->{'mailstore'});
-	if (-d "$rv/Maildir") {
-		@rv = ( "$rv/Maildir", 1 );
-		}
-	else {
-		@rv = ( $rv, 1 );
-		}
 	}
 return wantarray ? @rv : $rv[0];
 }
@@ -2545,18 +2521,7 @@ return $home_base;
 # domain, or undef
 sub mail_domain_base
 {
-if ($config{'mail_system'} == 4) {
-	# Guess base for domain from mailstore pattern
-	local $guess = { 'user' => 'USER', 'home' => 'HOME' };
-	&userdom_substitutions($guess, $_[0]);
-	local $dir = &add_ldapmessagestore(
-		&substitute_domain_template($config{'ldap_mailstore'}, $guess));
-	if ($dir =~ /^(.*)\/\Q$_[0]->{'dom'}\E/) {
-		return $1;
-		}
-	return undef;
-	}
-elsif (&mail_under_home()) {
+if (&mail_under_home()) {
 	return "$_[0]->{'home'}/homes";
 	}
 else {
@@ -3934,7 +3899,7 @@ return undef;
 # when using VPOPMail and Qmail+LDAP
 sub can_users_without_mail
 {
-return $config{'mail_system'} != 4;
+return 1;
 }
 
 # sysinfo_mail()
