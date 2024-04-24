@@ -138,10 +138,16 @@ if (defined(&$kit_func)) {
 		&{$script->{'kit_func'}}($d, $script, $sinfo);
 	if ($rows) {
 		print &ui_hidden_table_start(
-			$text{'scripts_kit'}, undef, 4, 'script_kit', 1);
-		foreach my $td (@$rows) {
-			print &ui_table_row(
-				$td->{'desc'}, $td->{'value'});
+			&text('scripts_kit', $script->{'desc'}),
+				undef, 4, 'script_kit', 1);
+		if (ref($rows) eq 'ARRAY') {
+			foreach my $td (@$rows) {
+				print &ui_table_row(
+					$td->{'desc'}, $td->{'value'});
+				}
+			}
+		else {
+			print &ui_table_row(undef, $rows, 2);
 			}
 		print &ui_hidden_table_end();
 		}
