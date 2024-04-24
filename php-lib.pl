@@ -997,32 +997,37 @@ foreach my $path (split(/\t+/, $config{'php_paths'})) {
 	}
 
 local $php = &has_command("php-cgi");
-if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
-	# What version is the php command? If it is a version we don't have
-	# a command for yet, use it.
-	if (!$php_command_version_cache) {
-		&clean_environment();
-		local $out = &backquote_command("$php -v 2>&1 </dev/null");
-		&reset_environment();
-		if ($out =~ /PHP\s+(\d+\.\d+)/) {
-			my $v = $1;
-			$v = int($v) if (int($v) <= 5);
-			$php_command_version_cache = $v;
+my ($is_apache, $can_suexec) =
+	(&domain_has_website($d) eq 'web', &supports_suexec($d));
+if ($php && ($can_suexec && $is_apache || !$is_apache)) {
+	if (scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
+		# What version is the php command? If it is a version
+		# we don't have a command for yet, use it.
+		if (!$php_command_version_cache) {
+			&clean_environment();
+			local $out =
+				&backquote_command("$php -v 2>&1 </dev/null");
+			&reset_environment();
+			if ($out =~ /PHP\s+(\d+\.\d+)/) {
+				my $v = $1;
+				$v = int($v) if (int($v) <= 5);
+				$php_command_version_cache = $v;
+				}
+			}
+		if ($php_command_version_cache) {
+			$vercmds{$php_command_version_cache} ||= $php;
 			}
 		}
-	if ($php_command_version_cache) {
-		$vercmds{$php_command_version_cache} ||= $php;
-		}
-	}
-
-# Add versions found to the final list
-foreach my $v (sort { $a <=> $b } (keys %vercmds)) {
-	my ($already) = grep { $_->[0] eq $v } @rv;
-	if ($already) {
-		$already->[2] = [ &unique(@{$already->[2]}, "fcgid", "cgi") ];
-		}
-	else {
-		push(@rv, [ $v, $vercmds{$v}, ["fcgid", "cgi"] ]);
+	# Add versions found to the final list
+	foreach my $v (sort { $a <=> $b } (keys %vercmds)) {
+		my ($already) = grep { $_->[0] eq $v } @rv;
+		if ($already) {
+			$already->[2] =
+				[ &unique(@{$already->[2]}, "fcgid", "cgi") ];
+			}
+		else {
+			push(@rv, [ $v, $vercmds{$v}, ["fcgid", "cgi"] ]);
+			}
 		}
 	}
 
