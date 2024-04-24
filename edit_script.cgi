@@ -85,7 +85,7 @@ if ($dbtype && $script->{'name'} !~ /^php(\S+)admin$/i) {
 			"name=$dbname",
 		      $text{'databases_'.$dbtype}, "<tt>$dbname</tt>" . 
 		      ($opts->{'dbtbpref'} ? " $text{'scripts_idbtbpref'} <tt>$opts->{'dbtbpref'}</tt>" : "")).
-		($opts->{'newdb'} ? "<br>".&ui_text_color($text{'scripts_inewdb'}, 'warn') : ""));
+		($opts->{'newdb'} ? &ui_help($text{'scripts_inewdb'}) : ""));
 	}
 
 # Show login, if we have it
