@@ -1128,9 +1128,7 @@ foreach my $user (&list_domain_users($_[0], 1)) {
 		&set_pass_disable($user, 1);
 		&modify_user($user, $user, $_[0]);
 		}
-	if ($user->{'unix'}) {
-		&disable_unix_cron_jobs($user->{'user'});
-		}
+	&disable_unix_cron_jobs($user->{'user'});
 	}
 &$second_print($text{'setup_done'});
 &release_lock_mail($_[0]);
@@ -1161,9 +1159,7 @@ foreach my $user (&list_domain_users($_[0], 1)) {
 		&set_pass_disable($user, 0);
 		&modify_user($user, $user, $_[0]);
 		}
-	if ($user->{'unix'}) {
-		&enable_unix_cron_jobs($user->{'user'});
-		}
+	&enable_unix_cron_jobs($user->{'user'});
 	}
 &$second_print($text{'setup_done'});
 &release_lock_mail($_[0]);
@@ -2082,7 +2078,7 @@ elsif ($md) {
 	@rv = ( $md, 1 );
 	}
 
-if (-d $user->{'home'} && $user->{'unix'}) {
+if (-d $user->{'home'}) {
 	# Create Usermin ~/mail directory (if installed)
 	if (&foreign_installed("usermin")) {
 		local %uminiserv;
@@ -2653,7 +2649,7 @@ foreach $u (&list_domain_users($d)) {
 			      $u->{'email'}));
 
 	# Add home and mail quotas
-	if (&has_home_quotas() && $u->{'unix'}) {
+	if (&has_home_quotas()) {
 		&print_tempfile(UFILE, ":$u->{'quota'}");
 		if (&has_mail_quotas()) {
 			&print_tempfile(UFILE, ":$u->{'mquota'}");
@@ -2848,7 +2844,7 @@ if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 # If any user's homes are outside the domain root, back them up separately
 local @homeless;
 foreach $u (&list_domain_users($d, 1)) {
-	if ($u->{'unix'} && -d $u->{'home'} &&
+	if (-d $u->{'home'} &&
 	    !&is_under_directory($d->{'home'}, $u->{'home'})) {
 		push(@homeless, $u);
 		}
@@ -2945,7 +2941,7 @@ else {
 	}
 local %exists;
 foreach $u (&list_all_users()) {
-	$exists{$u->{'name'},$u->{'unix'}} = $u;
+	$exists{$u->{'name'}} = $u;
 	}
 local $foundmailuser;
 local $_;
@@ -2991,7 +2987,7 @@ while(<UFILE>) {
 	else {
 		# Need to re-create user
 		local $uinfo = &create_initial_user($d, 0, $user[2] eq 'w');
-		if ($exists{$user[0],$uinfo->{'unix'}}) {
+		if ($exists{$user[0]}) {
 			push(@errs, &text('restore_mailexists', $user[0]));
 			next;
 			}
@@ -3037,7 +3033,7 @@ while(<UFILE>) {
 		if ($uinfo->{'mailquota'}) {
 			$uinfo->{'qquota'} = $user[8];
 			}
-		elsif ($uinfo->{'unix'} && !$uinfo->{'noquota'}) {
+		elsif (!$uinfo->{'noquota'}) {
 			$uinfo->{'quota'} = $user[8];
 			$uinfo->{'mquota'} = $user[9];
 			}
@@ -3092,8 +3088,7 @@ while(<UFILE>) {
 
 		# If the user's home is outside the domain's home, re-extract
 		# it from the backup
-		if ($uinfo->{'unix'} &&
-		    !&is_under_directory($d->{'home'}, $uinfo->{'home'})) {
+		if (!&is_under_directory($d->{'home'}, $uinfo->{'home'})) {
 			local $file = $file."_homes_".$uinfo->{'user'};
 			if (!-d $uinfo->{'home'}) {
 				&create_user_home($uinfo, $d);
@@ -3892,14 +3887,6 @@ elsif ($_[0] =~ /^(\d+)\.(\d+)$/) {
 	return $1;
 	}
 return undef;
-}
-
-# can_users_without_mail(&domain)
-# Returns 1 if some domain can have users without mail enabled. Not allowed
-# when using VPOPMail and Qmail+LDAP
-sub can_users_without_mail
-{
-return 1;
 }
 
 # sysinfo_mail()

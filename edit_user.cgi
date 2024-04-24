@@ -66,7 +66,7 @@ if ($user_type eq 'ssh') {
 				2, \@tds);
 
 	# SSH public key for Unix user
-	if (&proshow() && $user->{'unix'}) {
+	if (&proshow()) {
 		print &ui_table_row(
 			&hlink($text{'form_sshkey'}, "sshkeynogen"),
 			&inline_html_pro_tip(
@@ -104,7 +104,7 @@ if ($user_type eq 'ssh') {
 
 	# Show secondary groups
 	my @sgroups = &allowed_secondary_groups($d);
-	if (@sgroups && $user->{'unix'}) {
+	if (@sgroups) {
 		print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
 				&ui_select("groups", $user->{'secs'},
 					[ map { [ $_ ] } @sgroups ], 5, 1, 1),
@@ -114,7 +114,7 @@ if ($user_type eq 'ssh') {
 	print &ui_hidden_table_end();
 
 	# Quota and home directory related fields
-	my $showquota = $user->{'unix'} && !$user->{'noquota'};
+	my $showquota = !$user->{'noquota'};
 	my $showhome = &can_mailbox_home($user) && $d && $d->{'home'} &&
 		!$user->{'fixedhome'};
 
@@ -230,7 +230,7 @@ elsif ($user_type eq 'ftp') {
 
 	# Show secondary groups
 	my @sgroups = &allowed_secondary_groups($d);
-	if (@sgroups && $user->{'unix'}) {
+	if (@sgroups) {
 		print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
 				&ui_select("groups", $user->{'secs'},
 					[ map { [ $_ ] } @sgroups ], 5, 1, 1),
@@ -280,7 +280,7 @@ elsif ($user_type eq 'mail') {
 	# Print quota hidden defaults as
 	# it has to be always considered
 	my $showmailquota = $user->{'mailquota'};
-	my $showquota = $user->{'unix'} && !$user->{'noquota'};
+	my $showquota = !$user->{'noquota'};
 	my $showhome = &can_mailbox_home($user) && $d && $d->{'home'} &&
 		       !$user->{'fixedhome'};
 	if ($showmailquota) {
@@ -647,16 +647,15 @@ else {
 		@users = &list_domain_users($d);
 		($user) = grep {
 			($_->{'user'} eq $in{'user'} ||
-			 &remove_userdom($_->{'user'}, $d) eq $in{'user'}) &&
-			$_->{'unix'} == $in{'unix'} } @users;
-		$mailbox = $d && $d->{'user'} eq $user->{'user'} &&
-			   $user->{'unix'};
+			 &remove_userdom($_->{'user'}, $d) eq $in{'user'})
+			} @users;
+		$mailbox = $d && $d->{'user'} eq $user->{'user'};
 		$suffix = $user->{'webowner'} ? 'web' : '';
 		&ui_print_header($din, $text{'user_edit'.$suffix}, "");
 		}
 
 	$shell_switch = ((&can_mailbox_ftp() && !$mailbox) || &master_admin())&&
-			 $user->{'unix'} && !$user->{'webowner'};
+			!$user->{'webowner'};
 	@sgroups = &allowed_secondary_groups($d);
 
 	# Work out if the other permissions section has anything to display
@@ -677,7 +676,6 @@ else {
 	print &ui_hidden("new", $in{'new'});
 	print &ui_hidden("dom", $in{'dom'});
 	print &ui_hidden("old", $in{'user'});
-	print &ui_hidden("unix", $in{'unix'});
 	print &ui_hidden("web", $in{'web'});
 
 	print &ui_hidden_table_start(
@@ -747,7 +745,7 @@ else {
 				(defined($user->{'plainpass'}) ?
 				&show_password_popup($d, $user) : ""),
 				$text{'user_passset'});
-			if ($user->{'unix'} && $user->{'change'}) {
+			if ($user->{'change'}) {
 				local $tm = timelocal(gmtime($user->{'change'} *
 							     60*60*24));
 				$pwfield .= "&nbsp;&nbsp;".
@@ -766,7 +764,7 @@ else {
 				2, \@tds);
 
 		# SSH public key for Unix user
-		if (&proshow() && $user->{'unix'}) {
+		if (&proshow()) {
 			my $existing_key = &get_domain_user_ssh_pubkey($d, $user);
 			my $existing_key_hidden;
 			if ($existing_key && !$virtualmin_pro) {
@@ -825,7 +823,7 @@ else {
 		}
 
 	# Show secondary groups
-	if (@sgroups && $user->{'unix'}) {
+	if (@sgroups) {
 		print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
 				&ui_select("groups", $user->{'secs'},
 					[ map { [ $_ ] } @sgroups ], 5, 1, 1),
@@ -835,7 +833,7 @@ else {
 	print &ui_hidden_table_end();
 
 	$showmailquota = !$mailbox && $user->{'mailquota'};
-	$showquota = !$mailbox && $user->{'unix'} && !$user->{'noquota'};
+	$showquota = !$mailbox && !$user->{'noquota'};
 	$showhome = &can_mailbox_home($user) && $d && $d->{'home'} &&
 		!$mailbox && !$user->{'fixedhome'};
 
@@ -1100,7 +1098,7 @@ else {
 			# Show user-level mail filters, if he has any
 			@filters = ( );
 			$procmailrc = "$user->{'home'}/.procmailrc" if (!$in{'new'});
-			if (!$in{'new'} && $user->{'email'} && $user->{'unix'} && -r $procmailrc &&
+			if (!$in{'new'} && $user->{'email'} && -r $procmailrc &&
 			&foreign_check("filter")) {
 				&foreign_require("filter");
 				@filters = &filter::list_filters($procmailrc);
@@ -1210,7 +1208,7 @@ else {
 	# Work out if switching to Usermin is allowed
 	$usermin = 0;
 	if (&can_switch_usermin($d, $user) &&
-	    $user->{'unix'} && &foreign_installed("usermin", 1)) {
+	    &foreign_installed("usermin", 1)) {
 		&foreign_require("usermin");
 		local %uminiserv;
 		&usermin::get_usermin_miniserv_config(\%uminiserv);

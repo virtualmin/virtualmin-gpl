@@ -124,11 +124,9 @@ foreach $d (@doms) {
 			$pass = $u->{'pass'};
 			$disable = ($pass =~ s/^\!// ? 1 : 0);
 			print "    Encrypted password: ",$pass,"\n";
-			if ($u->{'unix'}) {
-				my $existing_key = &get_domain_user_ssh_pubkey($d, $u);
-				if ($existing_key) {
-					print "    SSH public key: $existing_key\n";
-					}
+			my $existing_key = &get_domain_user_ssh_pubkey($d, $u);
+			if ($existing_key) {
+				print "    SSH public key: $existing_key\n";
 				}
 			print "    Disabled: ",($disable ? "Yes" : "No"),"\n";
 			print "    Home directory: ",$u->{'home'},"\n";
@@ -152,8 +150,7 @@ foreach $d (@doms) {
 				print "    Mail server quota: ",
 				      $u->{'qquota'},"\n";
 				}
-			if ($u->{'unix'} && &has_home_quotas() &&
-			    !$u->{'noquota'}) {
+			if (&has_home_quotas() && !$u->{'noquota'}) {
 				print "    Home quota: ",
 				      &quota_show($u->{'quota'}, "home"),"\n";
 				print "    Home quota used: ",
@@ -172,8 +169,7 @@ foreach $d (@doms) {
 					      ($u->{'quota_cache'} * $home_bsize),"\n";
 					}
 				}
-			if ($u->{'unix'} && &has_mail_quotas() &&
-			    !$u->{'noquota'}) {
+			if (&has_mail_quotas() && !$u->{'noquota'}) {
 				print "    Mail quota: ",
 				      &quota_show($u->{'mquota'}, "mail"),"\n";
 				print "    Mail quota used: ",

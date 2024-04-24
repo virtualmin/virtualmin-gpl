@@ -767,7 +767,7 @@ if ($d) {
 			$_->{'gid'} == $d->{'gid'} ||
 			$_->{'user'} eq $d->{'user'} } @users;
 	foreach my $u (@users) {
-		if ($u->{'user'} eq $d->{'user'} && $u->{'unix'}) {
+		if ($u->{'user'} eq $d->{'user'}) {
 			# Virtual server owner
 			$u->{'domainowner'} = 1;
 			if ($d->{'hashpass'}) {
@@ -777,7 +777,7 @@ if ($d) {
 				$u->{'pass_digest'} = $d->{'digest_enc_pass'};
 				}
 			}
-		elsif ($u->{'uid'} == $d->{'uid'} && $u->{'unix'}) {
+		elsif ($u->{'uid'} == $d->{'uid'}) {
 			# Web management user
 			$u->{'webowner'} = 1;
 			$u->{'noquota'} = 1;
@@ -1053,8 +1053,7 @@ if (!$nodbs && $d) {
 		local $domu = defined(&$domufunc) ? &$domufunc($d) : undef;
 		foreach $u (@users) {
 			# Domain owner always gets all databases
-			next if ($u->{'user'} eq $d->{'user'} &&
-				 $u->{'unix'});
+			next if ($u->{'user'} eq $d->{'user'});
 
 			# For each user, add this DB to his list if there
 			# is a user for it with the same name. Unless this
@@ -1512,7 +1511,7 @@ if ($config{'generics'} && $firstemail) {
 	&create_generic($_[0]->{'user'}, $firstemail);
 	}
 
-if ($_[0]->{'unix'} && !$_[0]->{'noquota'}) {
+if (!$_[0]->{'noquota'}) {
 	# Set his initial quotas
 	&set_user_quotas($_[0]->{'user'}, $_[0]->{'quota'}, $_[0]->{'mquota'},
 			 $_[1]);
@@ -1646,9 +1645,7 @@ if ($_[1]) {
 sub modify_user
 {
 # Rename any of his cron jobs
-if ($_[0]->{'unix'}) {
-	&rename_unix_cron_jobs($_[0]->{'user'}, $_[1]->{'user'});
-	}
+&rename_unix_cron_jobs($_[0]->{'user'}, $_[1]->{'user'});
 
 local $pop3 = &remove_userdom($_[0]->{'user'}, $_[2]);
 local $extrauser;
@@ -1871,7 +1868,7 @@ if ($config{'generics'} && $echanged) {
 NOALIASES:
 
 # Save his quotas if changed (unless this is the domain owner)
-if ($_[0]->{'unix'} && $_[2] && $_[0]->{'user'} ne $_[2]->{'user'} &&
+if ($_[2] && $_[0]->{'user'} ne $_[2]->{'user'} &&
     !$_[0]->{'noquota'} &&
     ($_[0]->{'quota'} != $_[1]->{'quota'} ||
      $_[0]->{'mquota'} != $_[1]->{'mquota'})) {
@@ -2070,15 +2067,13 @@ if ($_[0]->{'extra'}) {
 &remove_forward_in_other_users($_[0], $_[1]);
 
 # Zero out his quotas
-if ($_[0]->{'unix'} && !$_[0]->{'noquota'}) {
+if (!$_[0]->{'noquota'}) {
 	&set_user_quotas($_[0]->{'user'}, 0, 0, $_[1]);
 	&update_user_quota_cache($_[1], $_[0], 1);
 	}
 
 # Delete any of his cron jobs
-if ($_[0]->{'unix'}) {
-	&delete_unix_cron_jobs($_[0]->{'user'});
-	}
+&delete_unix_cron_jobs($_[0]->{'user'});
 
 # Delete Unix user
 $_[0]->{'user'} eq 'root' && &error("Cannot delete root user!");
@@ -2320,7 +2315,7 @@ if ($_[2] && !$_[0]->{'domainowner'} &&
 sub set_usermin_imap_password
 {
 local ($user) = @_;
-return 0 if (!$user->{'unix'} || !$user->{'home'});
+return 0 if (!$user->{'home'});
 return 0 if (!$user->{'plainpass'});
 
 # Make sure Usermin is installed, and the mailbox module is setup for IMAP
@@ -2389,7 +2384,7 @@ foreach my $dir ($user->{'home'}, "$user->{'home'}/.usermin", "$user->{'home'}/.
 sub set_usermin_recovery_address
 {
 my ($user) = @_;
-return 0 if (!$user->{'unix'} || !$user->{'home'});
+return 0 if (!$user->{'home'});
 &create_usermin_module_directory($user, "changepass");
 if (-d "$user->{'home'}/.usermin/changepass") {
 	my $rfile = "$user->{'home'}/.usermin/changepass/recovery";
@@ -2773,7 +2768,7 @@ if ($home) {
 sub delete_user_home
 {
 local ($user, $d) = @_;
-if ($user->{'unix'} && -d $user->{'home'} &&
+if (-d $user->{'home'} &&
     &safe_delete_dir($d, $user->{'home'})) {
 	&system_logged("rm -rf ".quotemeta($user->{'home'}));
 	}
@@ -5599,7 +5594,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	    $u->{'webowner'} ? $pop3 :
 	    $u->{'pass'} =~ /^\!/ ? $pop3_dis : $pop3);
 	my $col_val = "<a href='edit_user.cgi?dom=$did$filetype&amp;".
-	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>$col_text</a>";
+		      "user=".&urlize($u->{'user'})."'>$col_text</a>";
 	if (!$virtualmin_pro && $u->{'extra'}) {
 		$col_val = $col_text;
 		}
@@ -5721,7 +5716,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	if ($cgi) {
 		unshift(@cols, { 'type' => 'checkbox',
 				 'name' => 'd',
-				 'value' => int($u->{'unix'})."/".$u->{'user'},
+				 'value' => $u->{'user'},
 				 'disabled' => $u->{'domainowner'} });
 		}
 	push(@table, \@cols);
@@ -10685,7 +10680,7 @@ if ($d) {
 		}
 	}
 
-if ($forweb && $user->{'unix'}) {
+if ($forweb) {
 	# This is a website management user
 	local (undef, $ftp_shell, undef, $def_shell) =
 		&get_common_available_shells();
@@ -10705,7 +10700,7 @@ if ($forweb && $user->{'unix'}) {
 	}
 
 # For a unix user, apply default password expiry restrictions
-if ($user->{'unix'} && $gconfig{'os_type'} =~ /-linux$/) {
+if ($gconfig{'os_type'} =~ /-linux$/) {
 	&require_useradmin();
 	local %uconfig = &foreign_config("useradmin");
 	if ($usermodule eq "ldap-useradmin") {
@@ -12601,16 +12596,15 @@ foreach my $g ("mailgroup", "ftpgroup", "dbgroup") {
 
 	# Work out who is in the group
 	if ($g eq "mailgroup") {
-		@inusers = grep { $_->{'unix'} && $_->{'email'} } @$users;
+		@inusers = grep { $_->{'email'} } @$users;
 		}
 	elsif ($g eq "ftpgroup") {
-		@inusers = grep { $_->{'unix'} &&
-				  $shellmap{$_->{'shell'}} &&
+		@inusers = grep { $shellmap{$_->{'shell'}} &&
 				  $shellmap{$_->{'shell'}} ne 'nologin' }
 				@$users;
 		}
 	elsif ($g eq "dbgroup") {
-		@inusers = grep { $_->{'unix'} && @{$_->{'dbs'}} > 0 ||
+		@inusers = grep { @{$_->{'dbs'}} > 0 ||
 			  $_->{'domainowner'} && $dom->{'mysql'} } @$users;
 		}
 	local @innames = map { $_->{'user'} } @inusers;

@@ -17,9 +17,7 @@ $d = &get_domain($in{'dom'});
 
 # Get the users
 foreach $mu (@mass) {
-	($unix, $name) = split(/\//, $mu, 2);
-	($user) = grep { $_->{'user'} eq $name &&
-			 $_->{'unix'} == $unix } @users;
+	($user) = grep { $_->{'user'} eq $mu } @users;
 	if ($user) {
 		push(@musers, $user);
 		}
@@ -58,9 +56,6 @@ foreach $user (@musers) {
 		elsif ($user->{'noquota'}) {
 			&$second_print($text{'mass_enoquota'});
 			}
-		elsif (!$user->{'unix'}) {
-			&$second_print($text{'mass_eunix'});
-			}
 		elsif ($in{'quota_def'} == 1) {
 			# Quota set to unlimited
 			if ($user->{'quota'}) {
@@ -89,9 +84,6 @@ foreach $user (@musers) {
 			}
 		elsif ($user->{'noquota'}) {
 			&$second_print($text{'mass_enoquota'});
-			}
-		elsif (!$user->{'unix'}) {
-			&$second_print($text{'mass_eunix'});
 			}
 		elsif ($in{'mquota_def'} == 1) {
 			if ($user->{'mquota'}) {
@@ -138,10 +130,7 @@ foreach $user (@musers) {
 		&$first_print($text{'mass_setshell'});
 		($shell) = grep { $_->{'shell'} eq $in{'shell'} }
 				@ashells;
-		if (!$user->{'unix'}) {
-			&$second_print($text{'mass_eunix'});
-			}
-		elsif ($shell) {
+		if ($shell) {
 			if ($user->{'shell'} ne $in{'shell'}) {
 				$user->{'shell'} = $in{'shell'};
 				$changed++;

@@ -795,7 +795,6 @@ if ($log) {
 		}
 	foreach $u (&list_domain_users($d, 0, 1, 1, 1)) {
 		# Only add Unix users with FTP access
-		next if (!$u->{'unix'});
 		my ($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
                                       @ashells;
 		if (!$shell || $shell->{'id'} ne 'nologin') {

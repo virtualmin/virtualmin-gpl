@@ -397,8 +397,8 @@ if (defined($newusername)) {
 	# Generate a new username.. first check for a clash in this domain
 	$newusername eq $shortusername &&
 		&usage("New username is the same as the old");
-	($clash) = grep { &remove_userdom($_->{'user'}, $d) eq $newusername &&
-			  $_->{'unix'} == $user->{'unix'} } @users;
+	($clash) = grep { &remove_userdom($_->{'user'}, $d) eq $newusername
+			} @users;
 	$clash && &usage("A user named $newusername already exists in this ".
 			 "virtual server");
 
@@ -440,8 +440,6 @@ if (defined($newusername)) {
 		}
 	}
 if ($shell) {
-	$user->{'unix'} ||
-		&usage("The shell cannot be changed for non-Unix users");
 	$user->{'shell'} = $shell->{'shell'};
 	}
 if (defined($nospam)) {

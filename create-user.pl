@@ -213,7 +213,7 @@ $user = &create_initial_user($d, 0, $web);
 $username = &remove_userdom($username, $d);
 
 # Make sure all needed args are set
-if ($user->{'unix'} && !$user->{'noquota'}) {
+if (!$user->{'noquota'}) {
 	if (&has_home_quotas() && defined($quota)) {
 		$quota =~ /^\d+$/ || &usage("Quota must be a number");
 		}
@@ -262,7 +262,7 @@ foreach $g (@groups) {
 &build_taken(\%taken, \%utaken);
 
 # Construct user object
-if ($user->{'unix'} && !$user->{'webowner'}) {
+if (!$user->{'webowner'}) {
 	$user->{'uid'} = &allocate_uid(\%taken);
 	}
 else {
@@ -272,9 +272,7 @@ $user->{'gid'} = $d->{'gid'} || $d->{'ugid'};
 if ($user->{'person'}) {
 	$user->{'real'} = $real;
 	}
-if ($user->{'unix'}) {
-	$user->{'shell'} = $shell->{'shell'};
-	}
+$user->{'shell'} = $shell->{'shell'};
 if (!$user->{'fixedhome'}) {
 	if (defined($home)) {
 		# Home was set manually
@@ -344,7 +342,7 @@ if (defined($recovery)) {
 if ($user->{'mailquota'}) {
 	$user->{'qquota'} = $qquota;
 	}
-if ($user->{'unix'} && !$user->{'noquota'}) {
+if (!$user->{'noquota'}) {
 	# Set quotas, if not using the defaults
 	$pd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 	if (defined($quota)) {
@@ -364,19 +362,16 @@ $user->{'dbs'} = \@dbs if (@dbs);
 $user->{'secs'} = \@groups;
 $user->{'nospam'} = $nospam;
 
-if ($user->{'unix'}) {
-	# Check for a Unix clash
-	$mclash = &check_clash($username, $d->{'dom'});
-	if ($utaken{$user->{'user'}} ||
-	    $user->{'email'} && $mclash ||
-	    !$user->{'email'} && $mclash == 2) {
-		usage($text{'user_eclash'});
-		}
+# Check for a Unix clash
+$mclash = &check_clash($username, $d->{'dom'});
+if ($utaken{$user->{'user'}} ||
+    $user->{'email'} && $mclash ||
+    !$user->{'email'} && $mclash == 2) {
+	usage($text{'user_eclash'});
 	}
 
 # Check for clash within this domain
-($clash) = grep { $_->{'user'} eq $username &&
-		  $_->{'unix'} == $user->{'unix'} } @users;
+($clash) = grep { $_->{'user'} eq $username } @users;
 $clash && &usage($text{'user_eclash2'});
 
 if (!$user->{'noextra'}) {
@@ -474,16 +469,12 @@ if (&has_home_quotas()) {
 if (&has_mail_quotas()) {
 	print "                      [--mail-quota quota-in-blocks|\"UNLIMITED\"]\n";
 	}
-if (!$user || $user->{'person'}) {
-	print "                      [--real real-name-for-new-user]\n";
+print "                      [--real real-name-for-new-user]\n";
+print "                      [--ftp]\n";
+if ($jailed_shell) {
+	print "                      [--jail-ftp]\n";
 	}
-if (!$user || $user->{'unix'}) {
-	print "                      [--ftp]\n";
-	if ($jailed_shell) {
-		print "                      [--jail-ftp]\n";
-		}
-	print "                      [--shell /path/to/shell]\n";
-	}
+print "                      [--shell /path/to/shell]\n";
 print "                      [--noemail]\n";
 print "                      [--db-only <--mysql db>*]\n";
 print "                      [--webserver-only <--webserver-dir path>*]\n";
