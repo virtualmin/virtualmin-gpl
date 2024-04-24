@@ -18185,12 +18185,15 @@ else {
 }
 
 # available_shells('owner'|'mailbox'|'reseller', [value], [must-ftp])
-# Returns available shells for a mailbox or domain owner
+# Returns available shells for a mailbox or domain owner user. Root 
+# can use any kind of shell for any user.
 sub available_shells
 {
 my ($type, $value, $mustftp) = @_;
 my @aashells = &list_available_shells(undef, $mustftp ? 0 : undef);
-my @tshells = grep { $_->{$type} } @aashells;
+my %sshells;
+my @tshells = grep { &can_mailbox_ssh() || $_->{$type} }
+	grep { !$seen{$_->{shell}}++ } @aashells;
 my @ashells = grep { $_->{'avail'} } @tshells;
 if ($mustftp) {
 	# Only show shells with FTP access or better
