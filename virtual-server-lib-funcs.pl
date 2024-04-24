@@ -1310,7 +1310,6 @@ foreach my $u (@users) {
 				   $main::used_mail_fquota{$altuser};
 		}
 	$u->{'unix'} = 1;
-	$u->{'person'} = 1;
 	$uidmap{$u->{'uid'}} ||= $u;
 	}
 return @users;
@@ -10633,8 +10632,7 @@ return @rv;
 sub create_initial_user
 {
 my ($d, $notmpl, $forweb) = @_;
-my $user = { 'unix' => 1,
-	     'person' => 1 };
+my $user = { 'unix' => 1 };
 if ($d && !$notmpl) {
 	# Initial aliases and quota come from template
 	local $tmpl = &get_template($d->{'template'});

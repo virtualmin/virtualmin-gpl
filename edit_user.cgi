@@ -79,13 +79,11 @@ if ($user_type eq 'ssh') {
 					undef, &procell() || \@tds);
 		}
 
-	# Real name - only for true Unix users or LDAP persons
-	if ($user->{'person'}) {
-		print &ui_table_row(
-			&hlink($text{'user_real'}, "realname"),
-			&vui_noauto_textbox("real", $user->{'real'}, 40),
-			2, \@tds);
-		}
+	# Real name
+	print &ui_table_row(
+		&hlink($text{'user_real'}, "realname"),
+		&vui_noauto_textbox("real", $user->{'real'}, 40),
+		2, \@tds);
 
 	# Show SSH shell select if more than one available
 	my @ssh_shells = &list_available_shells_by_type('owner', 'ssh');
@@ -220,13 +218,11 @@ elsif ($user_type eq 'ftp') {
 				$pwfield,
 				2, \@tds);
 
-	# Real name - only for true Unix users or LDAP persons
-	if ($user->{'person'}) {
-		print &ui_table_row(
-			&hlink($text{'user_real'}, "realname"),
-			&vui_noauto_textbox("real", $user->{'real'}, 40),
-			2, \@tds);
-		}
+	# Real name
+	print &ui_table_row(
+		&hlink($text{'user_real'}, "realname"),
+		&vui_noauto_textbox("real", $user->{'real'}, 40),
+		2, \@tds);
 
 	# Show secondary groups
 	my @sgroups = &allowed_secondary_groups($d);
@@ -337,13 +333,11 @@ elsif ($user_type eq 'mail') {
 				$text{'user_norecovery'},
 				$text{'user_gotrecovery'}));
 
-	# Real name - only for true Unix users or LDAP persons
-	if ($user->{'person'}) {
-		print &ui_table_row(
-			&hlink($text{'user_real'}, "realname"),
-			&vui_noauto_textbox("real", $user->{'real'}, 40),
-			2, \@tds);
-		}
+	# Real name
+	print &ui_table_row(
+		&hlink($text{'user_real'}, "realname"),
+		&vui_noauto_textbox("real", $user->{'real'}, 40),
+		2, \@tds);
 
 	print &ui_hidden_table_end();
 
@@ -794,8 +788,8 @@ else {
 			}
 		}
 
-	# Real name - only for true Unix users or LDAP persons
-	if ($user->{'person'} && (!$mailbox || $user->{'real'})) {
+	# Real name - only for show for mailbox users
+	if (!$mailbox || $user->{'real'}) {
 		print &ui_table_row(
 			&hlink($text{'user_real'}, "realname"),
 			$mailbox ? $user->{'real'} :

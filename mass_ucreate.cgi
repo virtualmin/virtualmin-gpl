@@ -74,7 +74,7 @@ USER: foreach $line (@lines) {
 		&line_error($err);
 		next USER;
 		}
-	if ($user->{'person'} && $real !~ /^[^:]*$/) {
+	if ($real !~ /^[^:]*$/) {
 		&line_error($text{'user_ereal'});
 		next USER;
 		}
@@ -167,9 +167,7 @@ USER: foreach $line (@lines) {
 		}
 	$taken{$user->{'uid'}}++;
 	$user->{'gid'} = $d->{'gid'} || $d->{'ugid'};
-	if ($user->{'person'}) {
-		$user->{'real'} = $real;
-		}
+	$user->{'real'} = $real;
 	if ($ftp =~ /^\//) {
 		# Custom shell
 		($shell) = grep { $_->{'shell'} eq $ftp } @ashells;

@@ -179,11 +179,9 @@ else {
 		$olderr = $in{'new'} ? undef
 				     : &valid_mailbox_name($user->{'user'});
 		&error($err) if ($err && !$olderr);
-		if ($user->{'person'}) {
-			$in{'real'} =~ /^[^:\r\n]*$/ ||
-				&error($text{'user_ereal'});
-			$user->{'real'} = $in{'real'};
-			}
+		$in{'real'} =~ /^[^:\r\n]*$/ ||
+			&error($text{'user_ereal'});
+		$user->{'real'} = $in{'real'};
 		if (!$in{'new'} && $in{'mailpass_def'}) {
 			# Password not being changed
 			$user->{'passmode'} = 4;

@@ -226,9 +226,7 @@ if ($user->{'mailquota'}) {
 	}
 $err = &valid_mailbox_name($username);
 &usage($err) if ($err);
-if ($user->{'person'}) {
-	$real =~ /^[^:]*$/ || usage($text{'user_ereal'});
-	}
+$real =~ /^[^:]*$/ || usage($text{'user_ereal'});
 foreach $e (@extra) {
 	$user->{'noextra'} && &usage("This user cannot have extra email addresses");
 	$e = lc($e);
@@ -269,9 +267,7 @@ else {
 	$user->{'uid'} = $d->{'uid'};
 	}
 $user->{'gid'} = $d->{'gid'} || $d->{'ugid'};
-if ($user->{'person'}) {
-	$user->{'real'} = $real;
-	}
+$user->{'real'} = $real;
 $user->{'shell'} = $shell->{'shell'};
 if (!$user->{'fixedhome'}) {
 	if (defined($home)) {
