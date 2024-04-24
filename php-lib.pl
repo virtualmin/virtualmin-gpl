@@ -1015,14 +1015,15 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 		}
 	}
 
-# Add versions found to the final list
+# Add versions found to the final list for CGI and fcgid modes
+my @cgimodes = &has_cgi_support($d) ? ("fcgid", "cgi") : ( );
 foreach my $v (sort { $a <=> $b } (keys %vercmds)) {
 	my ($already) = grep { $_->[0] eq $v } @rv;
 	if ($already) {
-		$already->[2] = [ &unique(@{$already->[2]}, "fcgid", "cgi") ];
+		$already->[2] = [ &unique(@{$already->[2]}, @cgimodes) ];
 		}
 	else {
-		push(@rv, [ $v, $vercmds{$v}, ["fcgid", "cgi"] ]);
+		push(@rv, [ $v, $vercmds{$v}, [@cgimodes] ]);
 		}
 	}
 
