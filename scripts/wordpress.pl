@@ -105,7 +105,7 @@ else {
 		     ui_textbox("dbtbpref", "wp_", 20));
 	$rv .= ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			   ui_opt_textbox("dir", &substitute_scriptname_template("wordpress", $d), 30, "At top level"));
-	$rv .= ui_table_row("WordPress site title",
+	$rv .= ui_table_row("WordPress site name",
 		ui_textbox("title", $d->{'owner'} || "My Blog", 25).
 			   "&nbsp;".ui_checkbox("noauto", 1, "Do not perform initial setup", 0,
 			   	"onchange=\"form.title.disabled=this.checked;document.getElementById('title_row').nextElementSibling.style.visibility=(this.checked?'hidden':'visible')\""), undef, undef, ["id='title_row'"]);
@@ -126,7 +126,7 @@ else {
 	my $hdir = public_html_dir($d, 0);
 	$in{'dir_def'} || $in{'dir'} =~ /\S/ && $in{'dir'} !~ /\.\./ ||
 		return "Missing or invalid installation directory";
-	(!$in{'title'} && !$in->{'noauto'}) && return "Missing or invalid WordPress site title";
+	(!$in{'title'} && !$in->{'noauto'}) && return "Missing or invalid WordPress site name";
 	$in{'passmodepass'} =~ /['"\\]/ && return "WordPress password cannot contain single quotes, double quotes, or backslashes";
 	my $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
 	my ($newdb) = ($in->{'db'} =~ s/^\*//);
