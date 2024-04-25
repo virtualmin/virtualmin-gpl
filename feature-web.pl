@@ -4120,8 +4120,8 @@ return undef;
 }
 
 # supports_suexec([&domain])
-# Returns 1 if suexec is enabled and usable for a domain, and thus it can run
-# CGI scripts
+# Returns 1 if suexec is usable for a domain, 2 if usable and enabled and
+# thus it can run CGI scripts. Otherwise return 0.
 sub supports_suexec
 {
 local ($d) = @_;
@@ -4154,10 +4154,11 @@ if ($d) {
 	# Is suEXEC enabled in the Apache config?
 	local ($virt, $vconf) = &get_apache_virtual(
 					$d->{'dom'}, $d->{'web_port'});
-	return 0 if (!$virt);
+	return 1 if (!$virt);
 	local ($suexec) = &apache::find_directive_struct(
 					"SuexecUserGroup", $vconf);
-	return 0 if (!$suexec);
+	return 1 if (!$suexec);
+	return 2;
 	}
 
 return 1;
