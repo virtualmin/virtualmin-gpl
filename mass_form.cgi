@@ -47,7 +47,8 @@ if (&can_mailbox_ftp()) {
 		&ui_radio('shell_def', 1, 
 			  [ [ 1, $text{'mass_leave'} ],
 			    [ 0, $text{'mass_set'} ] ])." ".
-		&available_shells_menu("shell", undef, "mailbox"));
+		&available_shells_menu("shell", undef,
+			&can_mailbox_ssh() ? "owner" : "mailbox"));
 	}
 
 # Disable or enable

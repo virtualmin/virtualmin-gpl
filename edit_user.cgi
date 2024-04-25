@@ -811,8 +811,9 @@ else {
 				}
 			}
 		print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
-			&available_shells_menu("shell", $user_shell, "mailbox",
-					0, $user->{'webowner'}),
+			&available_shells_menu("shell", $user_shell,
+				&can_mailbox_ssh() ? "owner" : "mailbox",
+				0, $user->{'webowner'}),
 			2, \@tds);
 		}
 
