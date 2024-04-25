@@ -171,7 +171,6 @@ setup_eauto2=Nie można automatycznie znaleźć wolnej nazwy grupy administrator
 setup_edeplogrotate=Rotacja logów nie może być włączona, chyba że strona web jest
 setup_edepdnssub=Sub-domena nie może posiadać stref DNS, jest to bez sensu jeżeli domena ją posiada
 setup_edepftp=Wirtualny FTP nie może być włączony, chyba że zostanie przydzielony wirtualny adres IP
-setup_edepspamvpop=Filtrowanie spamu nie może być użyte z VPopMail
 setup_ecrgroup=.. grupa administratora została utworzona, ale nie istnieje!
 setup_ecrgroup2=.. błąd tworzenia grupy administratora : $1
 setup_ecruser=.. administrator został utworzony, ale nie istnieje!

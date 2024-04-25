@@ -52,7 +52,6 @@ index_emodssl2=La configuración de Apache de su sistema no parece estar esperan
 index_esendmail=El servidor de mail Sendmail no parece estar instalado en su sistema, o bien no ha sido correctamente configurado en el módulo de <a href='$1'>Configuració de Sendmail</a>. Si Ud. está ejecutando un servidor de mail diferente, selecciónelo en la página de <a href='$2'>configuración de módulo</a>.
 index_epostfix=El servidor Postfix no parece estar instalado en su sistema, o bien no ha sido configurado correctamente en el módulo de <a href='$1'>Configuración de Postfix </a>. Si Ud. está ejecutando un servidor de mail diferente, selecciónelo en la página de <a href='$2'>configuración de módulo</a>.
 index_eqmail=El servidor Qmain no parece estar instalado en su sistema, o bien no ha sido correctamente configurado en el módulo de <a href='$1'>Configuración de Qmail</a>. Si Ud. está ejecutando un servidor de mail diferente, selecciónelo en la página de <a href='$2'>configuración de módulo</a>.
-index_evpopmail=El servidor Qmail no parece esar instalado en su sistema, le faltan las extensiones VPOPMail o no ha sido aún correctamente seteado en el módulo de Webmin   <a href='$1'>Configuración de Qmail</a>. Si está utilizando un servidor de mail diferente, selecciónelo en la página <a href='$2'>Configuración de módulo</a>.
 index_emailboxessystem=El módulo de lectura de mail de usuario no está seteado para utilizar el servidor de mail $3. Ajuste la <a href='$1'>Configuración de módulo</a> para que coincida o cambiar la <a href='$2'>Configuración de Virtualmin</a>.
 index_eiface=No se pudo encontrar automáticamente ninguna interfaz Ethernet en el sistema. Utilice la página de <a href='$1'>configuración de módulo</a> para establecer manualmente la interfaz.
 index_elogrotate=El programa Logrotate no parece estar instalado en su sistema, o bien no ha sido configurado adecuadamente en el módulo de <a href='$1'>Rotación de Archivos de Bitácora</a> de Webmin. Si su sistema no utiliza Logrotate, debería ser deshabilitado en la página de <a href='$2'>configuración de módulo</a> de Webmin.
@@ -352,7 +351,6 @@ setup_edepssl=SSL no podrá ser habilitado salvo que se configure un sitio web, 
 setup_edepssl4=El SSL no puede ser habilitado ya que existe un host virtual de Apache en la dirección IP $1 y el puerto $2
 setup_edepftp=El FTP virtual no puede ser habilitado salvo que se asigne una dirección IP virtual
 setup_edepspam=El filtrado de spam no puede ser habilitado a menos que el mail sea
-setup_edepspamvpop=El filtrado de spam no puede ser utilizado co VPopMail
 setup_edepvirus=El filtrado de virus no puede ser habilitado a menos que esté habilitado el filtrado de mails y spam
 setup_edepstatus=El monitoreo de estado no puede ser habilitado a menos que el website sea
 setup_ecrgroup=¡Falló creación de nuevo grupo Unix!
@@ -1514,7 +1512,6 @@ check_dependentesupport=Postfix puede soportar direcciones IP diferentes para ca
 check_qmailok=El servidor de mail Qmail está instalado y configurado
 check_qmailmode6=El servidor de mail Qmail está instalado y configurado. Sin embargo, el formato del nombre de usuario en la página de templates del servidor está seteado como <b>usuario@dominio</b>, cosa que podría no funcionar
 check_postfixmode6=El servidor de mail Postfix está instalado y configurado. Sin embargo, el formato de nombre de usuario en la página de templates del servidor esta seteado como <b>usuario@dominio</b> y no es soportado por Postfix
-check_vpopmailok=El servidor de mail Qmail con las extensiones de VPOPMail está instalado y configurado
 check_done=... su sistema está listo para ser usado por Virtualmin
 check_failed=... su sistema está preparado para ser utilizado con Virtualmin
 check_nogroup=Los límites de espacio de usuario están habilitados para los directorios base y de email, no así los límites de espacio de grupo. Los límites totales para un servidor virtual no serán activados
@@ -2700,7 +2697,6 @@ mail_system_0=Postfix
 mail_system_1=Sendmail
 mail_system_2=Qmal
 mail_system_4=Qmail+LDAP
-mail_system_5=Qmail+VPOPMail
 
 databases_title=Editar base de datos
 databases_indom=$1 bases de datos en el dominio $2
@@ -4155,7 +4151,6 @@ balancers_ecannot=Ud. no está autorizado a editar rutas de proxy para este domi
 balancers_esupport=El dominio o el sistema no soportan proxys
 balancers_add=Agregar una nueva ruta de proxy
 balancers_path=Ruta URL
-balancers_name=Nombre del balanceador
 balancers_urls=URLs de destino
 balancers_delete=Borrar proxys seleccionados
 balancers_none=Ninguna ruta de proxy ha sido definida aún.
@@ -4168,8 +4163,6 @@ balancer_create=Crear ruta de Proxy
 balancer_edit=Editar ruta de Proxy
 balancer_egone=La ruta del proxy seleccionada no existe mas
 balancer_header=Detallos del HTTP Proxy
-balancer_name=Nombre del balanceador
-balancer_auto=Seleccionar automáticamente
 balancer_path=Ruta URL local
 balancer_urls=URLs de destino
 balancer_url=URL de destino

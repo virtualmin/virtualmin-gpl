@@ -145,7 +145,6 @@ setup_edepssl4=SSL kann nicht aktiviert werden, da auf IP-Adresse $1 und Port $2
 setup_edepssl5=SSL kann nicht für mehr als eine Domäne unter der IP-Adresse $1 aktiviert werden, es sei denn, eine virtuelle IP-Schnittstelle oder ein privater Port ist aktiviert oder das Zertifikat kann für diese Domäne verwendet werden. Das aktuelle Zertifikat ist nur gültig für: $2 und wird von $3 verwendet.
 setup_edepftpdir=Virtuelles FTP kann nur aktiviert werden, wenn der Server über ein Home-Verzeichnis verfügt
 setup_edepspam=Die Spamfilterung kann nur aktiviert werden, wenn E-Mail aktiviert ist
-setup_edepspamvpop=Die Spamfilterung kann mit VPopMail nicht verwendet werden
 setup_edepvirus=Die Virenfilterung kann nur aktiviert werden, wenn die E-Mail- und Spamfilterung aktiviert ist
 setup_edepstatus=Die Statusüberwachung kann nur aktiviert werden, wenn eine Website vorhanden ist
 setup_eemail3=Die Kontakt-E-Mail-Adresse ist ungültig - muss einen Domainnamen enthalten
@@ -261,6 +260,7 @@ setup_overgroupquota=Serverkontingent für $2 von $1 wurde erreicht
 setup_overuserquota=Domaininhaberkontingent für $2 von $1 wurde erreicht
 setup_ewebfcgidcmd=Serverbefehl <tt>fcgiwrap</tt> konnte nicht gefunden werden!
 
+users_ecannotssh=Sie dürfen keine SSH-Benutzer bearbeiten
 users_ecannot3=Es ist Ihnen nicht gestattet, E-Mail-Benutzer hinzuzufügen
 users_ecannot4db=In der GPL-Version können Sie keine zusätzlichen Datenbankbenutzer verwalten
 users_ecannot4web=In der GPL-Version können Sie keine zusätzlichen Webserver-Benutzer verwalten
@@ -714,6 +714,8 @@ check_egquotasync=Standarddatenträgerkontingente für neue Gruppen sind auf den
 check_allresel=Aktualisieren aller Reseller mit neuen Einstellungen
 check_plugin=Plugin $1 ist installiert
 check_eplugin=Plugin $1 kann nicht verwendet werden : $2
+check_evpopmail=Die Unterstützung für den VPOPMail-Mailserver wurde aus Virtualmin entfernt!
+check_eexim=Die Unterstützung für den Exim-Mailserver wurde aus Virtualmin entfernt!
 check_spamglobal=SpamAssassin ist so konfiguriert, dass es über die globale Procmail-Konfiguration $1 ausgeführt wird, die nicht benötigt wird, da Virtualmin sie domänenweise einrichtet
 check_spamwhite=Die Whitelist aller Postfächer in jeder Domäne ist auf der Seite <a href='$1'>Virtualmin-Konfiguration</a> aktiviert. Dies ist jedoch nicht mit der Verwendung des SpamAssassins <a href='$2'>Spamc</a> kompatibel Client-Programm
 check_eset_user=Externe Kontingentbefehle sind aktiviert, aber der Befehl zum Festlegen des Kontingents eines Benutzers ist nicht definiert oder nicht vorhanden
@@ -3604,8 +3606,6 @@ deftmplt_tmpltpagefootersourcesshop=Geschäft
 deftmplt_tmpltpagefooterabout=Um
 deftmplt_tmpltpagefooteraboutcomp=Unternehmen
 deftmplt_tmpltpagefooteraboutcont=Kontakt
-deftmplt_tmpltpagefooteraboutpriv=Datenschutzrichtlinie
-deftmplt_tmpltpagefooteraboutterms=Geschäftsbedingungen
 
 2fa_title=Zwei-Faktor-Authentifizierung
 2fa_euser=Webmin-Benutzer existiert nicht!

@@ -42,7 +42,6 @@ index_emodssl2=Zdá se, že konfigurace Apache ve vašem systému nenaslouchá n
 index_esendmail=Zdá se, že poštovní server Sendmail není nainstalován ve vašem systému, nebo ještě nebyl správně nastaven v modulu <a href='$1'>Sendmail Mail Server</a> správce webu. Pokud provozujete jiný poštovní server, vyberte jej na stránce <a href='$2'>konfigurace modulu</a>.
 index_epostfix=Zdá se, že server Postfix není nainstalován ve vašem systému, nebo ještě nebyl správně nastaven v modulu <a href='$1'>Postfix Configuration</a> správce webu. Pokud provozujete jiný poštovní server, vyberte jej na stránce <a href='$2'>konfigurace modulu</a>.
 index_eqmail=Zdá se, že server QMail není nainstalován ve vašem systému, nebo ještě nebyl správně nastaven v modulu <a href='$1'>Konfigurace QMail</a> správce webu. Pokud provozujete jiný poštovní server, vyberte jej na stránce <a href='$2'>konfigurace modulu</a>.
-index_evpopmail=Zdá se, že server QMail není nainstalován ve vašem systému, chybí rozšíření VPOPMail nebo nebyl ještě správně nastaven v modulu <a href='$1'>QMail Configuration</a> správce webu. Pokud provozujete jiný poštovní server, vyberte jej na stránce <a href='$2'>konfigurace modulu</a>.
 index_emailboxessystem=Modul Číst poštu uživatele není nastaven na použití poštovního serveru $3. Upravte <a href='$1'>konfiguraci modulu</a> tak, aby odpovídala, nebo změňte <a href='$2'>konfiguraci Virtualmin</a>.
 index_eiface=Ve vašem systému nebylo automaticky nalezeno žádné rozhraní Ethernet. Pomocí stránky <a href='$1'>konfigurace modulu</a> můžete ručně nastavit rozhraní.
 index_elogrotate=Zdá se, že program Logrotate není nainstalován ve vašem systému, nebo nebyl ještě správně nastaven v modulu <a href='$1'>Protokolování souborů protokolu</a> správce webu. Pokud váš systém Logrotate nepoužívá, měl by být deaktivován na stránce <a href='$2'>konfigurace modulu</a> společnosti Virtualmin.
@@ -406,7 +405,6 @@ setup_edepssl4=SSL nelze povolit, protože na IP adrese $1 a portu $2 již exist
 setup_edepssl5=SSL nelze povolit pro více než jednu doménu na IP adrese $1, pokud není povoleno virtuální IP rozhraní nebo soukromý port nebo pokud pro tuto doménu nelze certifikát použít. Aktuální certifikát je platný pouze pro: $2 a používá ho $3.
 setup_edepftpdir=Virtuální FTP nelze povolit, pokud server nemá domovský adresář
 setup_edepspam=Filtrování spamu nelze povolit, pokud není e-mail
-setup_edepspamvpop=Filtrování spamu nelze použít s VPopMail
 setup_edepvirus=Filtrování virů nelze povolit, pokud není filtrování e-mailů a spamu
 setup_edepstatus=Sledování stavu nelze povolit, pokud web není
 setup_edirectives=Direktivy Apache pro nové weby nastavené na stránce Virtualmin Configuration nejsou platné : $1 
@@ -636,6 +634,7 @@ setup_ewebfcgidcmd=Nelze najít příkaz serveru <tt>fcgiwrap</tt>!
 equotacommand=Příkaz kvóty $1 selhal : $2 
 
 users_ecannot=V této doméně nemáte dovoleno upravovat uživatele
+users_ecannotssh=Nemáte oprávnění upravovat uživatele SSH
 users_ecannot2=Není dovoleno upravovat místní uživatele
 users_ecannot3=Nemáte oprávnění přidávat uživatele pošty
 users_ecannot4db=Ve verzi GPL nemůžete spravovat další uživatele databáze
@@ -1626,7 +1625,6 @@ check_dependentesupport=Postfix může podporovat odchozí IP adresy v doméně,
 check_qmailok=Poštovní server Qmail je nainstalován a nakonfigurován
 check_qmailmode6=Poštovní server Qmail je nainstalován a nakonfigurován. Formát uživatelského jména na stránce šablon serveru je však nastaven na <b>uživatelské jméno @ doména</b>, což nemusí fungovat
 check_postfixmode6=Poštovní server Postfix je nainstalován a nakonfigurován. Formát uživatelského jména na stránce šablon serveru je však nastaven na <b>uživatelské jméno @ doména</b>, není Postfixem podporován
-check_vpopmailok=Je nainstalován a nakonfigurován poštovní server Qmail s rozšířeními VPOPMail
 check_failed=.. váš systém není připraven k použití Virtualmin
 check_nogroup=Uživatelské kvóty jsou povoleny pro domácí a e-mailové adresáře, ale skupinové kvóty nejsou. Celkové kvóty virtuálního serveru nebudou vynucovány
 check_group=Pro domovské a e-mailové adresáře jsou povoleny uživatelské i skupinové kvóty
@@ -1646,6 +1644,8 @@ check_eplugin=Plugin $1 nelze použít : $2
 check_eldap=Při kontaktování serveru LDAP došlo k chybě: $1. Na stránce <a href='$2'>konfigurace modulu</a> musí být deaktivován protokol LDAP nebo musí být správně nastaven modul <a href='$3'>Uživatelé a skupiny LDAP</a>
 check_eldap2=Modul Uživatelé a skupiny LDAP je příliš starý na to, aby jej mohl Virtualmin použít pro správu uživatelů. Na stránce <a href='$1'>konfigurace modulu</a> musí být deaktivován protokol LDAP nebo modul upgradován na verzi $2
 check_ldap=Správa uživatelů a skupin LDAP je správně nakonfigurována
+check_evpopmail=Podpora pro poštovní server VPOPMail byla z Virtualminu odstraněna!
+check_eexim=Podpora pro poštovní server Exim byla z Virtualminu odstraněna!
 check_spamok=SpamAssassin a Procmail jsou nainstalovány a nakonfigurovány pro použití
 check_noprocmail=Jsou nainstalovány programy SpamAssassin a Procmail. Zdá se však, že váš poštovní server není nakonfigurován pro doručování pomocí protokolu Procmail
 check_spamglobal=SpamAssassin je nakonfigurován tak, aby byl spouštěn z globální konfigurace Procmail $1, což není nutné, protože Virtualmin jej nastaví pro jednotlivé domény
@@ -3150,7 +3150,6 @@ mail_system_0=Postfix
 mail_system_1=Poslat mail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
-mail_system_5=Qmail+VPOPMail
 
 databases_indom=Databáze v doméně $1 
 databases_hosted=Všechny databáze pro tuto doménu jsou hostovány na vzdáleném serveru MySQL $1.
@@ -6655,8 +6654,6 @@ deftmplt_tmpltpagefootersourcesshop=Prodejna
 deftmplt_tmpltpagefooterabout=O
 deftmplt_tmpltpagefooteraboutcomp=Společnost
 deftmplt_tmpltpagefooteraboutcont=Kontakt
-deftmplt_tmpltpagefooteraboutpriv=Zásady ochrany osobních údajů
-deftmplt_tmpltpagefooteraboutterms=Pravidla a podmínky
 
 2fa_title=Dvoufaktorové ověřování
 2fa_euser=Uživatel Webmin neexistuje!

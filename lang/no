@@ -52,7 +52,6 @@ index_emodssl2=Det ser ikke ut som om Apache konfigurasjonen på systemet ditt l
 index_esendmail=Sendmail tjeneren ser ikke ut til å være installert på systemet ditt, eller så er den ikke satt opp korrekt i <a href='$1'>Webmins Sendmail konfigurasjon</a> modul.Dersom du bruker en annen e-post tjener kan du velge den på <a href='$2'>modulens konfigurasjonsside</a>.
 index_epostfix=Postfix tjeneren ser ikke ut til å være installert på systemet ditt, eller så er den ikke satt opp korrekt i Webmins <a href='$1'>Postfix konfigurasjon</a> modul. Dersom du benytter en annen e-post tjener, må du velge den i Virtualmins <a href='$2'>modulkonfigurasjon</a>.
 index_eqmail=QMail tjeneren ser ikke ut til å være installert på systemet ditt, eller så er den ikke satt opp korrekt i <a href='$1'>Webmins QMail konfigurasjon</a> modul. Dersom du bruker en annen e-post tjener kan du velge den på <a href='$2'>modulens konfigurasjonsside</a>.
-index_evpopmail=QMail tjeneren ser ikke ut til å være installert på systemet ditt, mangler VPOPMail utvidelsene, eller så er den ikke korrekt satt opp i Webmin-modulen <a href='$1'>QMail e-post tjener</a>. Dersom du bruker en annen e-post tjener må du velg den i <a href='$2'>modulkonfigurasjonen</a>.
 index_emailboxessystem=Modulen Les brukers e-post er ikke satt opp til å bruke $3 e-post tjeneren. Du må enten endre <a href='$1'>modulkonfigurasjonen</a> i henhold til dette, eller endre <a href='$1'>Virtualmin konfigurasjonen</a>.
 index_eiface=Kunne ikke finne noe Ethernet grensesnitt automatisk på systemet ditt. Bruk <a href='$1'>modulkonfigurasjonen</a> for å angi grensesnittet manuelt.
 index_elogrotate=Logrotate programmet ser ikke ut til å være installert på systemet ditt, eller så er det ikke korrekt satt opp i Webmin-modulen <a href='$1'>Loggfil rotasjon</a>. Dersom systemet ditt ikke bruker Logrotate bør du deaktivere den i Virtualmins <a href='$2'>modulkonfigurasjon</a>.
@@ -405,7 +404,6 @@ setup_edepssl4=SSL kan ikke aktiveres siden det allerede finnes en Apache virtue
 setup_edepssl5=SSL kan ikke aktiveres for mer enn ett domene på IP-adressen $1 med mindre et virtuelt IP grensesnitt eller en privat port er aktivert, eller dersom sertifikatet kan brukes for dette domenet. Gjeldende sertifikat er kun gyldig for : $2, og det blir brukt av $3.
 setup_edepftp=Virtuell FTP kan ikke aktiveres med mindre en virtuell IP adresse er tildelt
 setup_edepspam=Filtrering av søppelpost kan ikke aktiveres med mindre e-post er
-setup_edepspamvpop=Filtrering av søppelpost kan ikke brukes sammen med VPopMail
 setup_edepvirus=Virus-filtrering kan ikke aktiveres med mindre e-post og søppelpostfiltrering også er aktivert
 setup_edepstatus=Status overvåking kan ikke aktiveres med mindre ett nettsted er
 setup_ecrgroup=.. administrasjonsgruppe ble opprettet med finnes ikke!
@@ -1746,7 +1744,6 @@ check_dependentesupport=Postfix kan støtte per-domene utgående IP adresser, me
 check_qmailok=E-post tjener Qmail er installert og konfigurert
 check_qmailmode6=E-post tjener QMail er installert og konfigurert. Brukernavnformatet på tjenerens mal-side er imidlertid satt til <b>brukernavn@domene</b>. Det er ikke sikkert at dette virker
 check_postfixmode6=E-post tjener Postfix er installert og konfigurert. Brukernavnformatet på tjenerens mal-side er imidlertid satt til <b>brukernavn@domene</b> og dette formatet støttes ikke av Postfix
-check_vpopmailok=E-post tjener Qmail med VPOPMail utvidelser er installert og konfigurert
 check_done=.. systemet ditt er klart for bruk av Virtualmin
 check_failed=.. systemet ditt er ikke klart for bruk av Virtualmin
 check_nogroup=Brukerkvoter er aktivert for hjemme- og e-post-kataloger, men gruppekvoter er ikke aktivert. Totalt kvoter for virtuelle tjenere vil ikke bli håndhevet
@@ -3190,7 +3187,6 @@ mail_system_0=Postfix
 mail_system_1=Sendmail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
-mail_system_5=Qmail+VPOPMail
 
 databases_title=Rediger databaser
 databases_indom=$1 databaser i domene $2
@@ -4940,7 +4936,6 @@ balancers_ecannot=Du har ikke lov til å redigere proxy stier for dette domenet
 balancers_esupport=Domenet eller systemet støtter ikke proxies
 balancers_add=Legg til ny proxy sti.
 balancers_path=URL sti
-balancers_name=Balancer navn
 balancers_urls=Mål URLer
 balancers_delete=Slett valgte proxies
 balancers_none=Ingen proxy stier er definert enda.
@@ -4953,8 +4948,6 @@ balancer_create=Opprett proxy sti
 balancer_edit=Rediger Proxy sti
 balancer_egone=Den valgte proxy stien finnes ikke lenger.
 balancer_header=HTTP proxy detaljer
-balancer_name=Balancer navn
-balancer_auto=Velg automatisk
 balancer_path=Lokal URL sti
 balancer_urls=Mål URLer
 balancer_url=Mål URL

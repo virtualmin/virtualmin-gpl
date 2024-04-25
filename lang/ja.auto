@@ -58,7 +58,6 @@ index_emodssl2=お使いのシステムのApache構成は、SSL Webサイトを�
 index_esendmail=Sendmailメールサーバーがシステムにインストールされていないか、Webminの<a href='$1'>Sendmail Mail Server</a>モジュールでまだ正しく設定されていません。別のメールサーバーを実行している場合は、<a href='$2'>モジュール構成</a>ページで選択します。
 index_epostfix=Postfixサーバーがシステムにインストールされていないか、Webminの<a href='$1'>Postfix構成</a>モジュールでまだ正しく設定されていません。別のメールサーバーを実行している場合は、<a href='$2'>モジュール構成</a>ページで選択します。
 index_eqmail=QMailサーバーがシステムにインストールされていないか、Webminの<a href='$1'>QMail Configuration</a>モジュールでまだ正しく設定されていません。別のメールサーバーを実行している場合は、<a href='$2'>モジュール構成</a>ページで選択します。
-index_evpopmail=QMailサーバーがシステムにインストールされていないか、VPOPMail拡張機能がないか、Webminの<a href='$1'>QMail Configuration</a>モジュールでまだ正しく設定されていません。別のメールサーバーを実行している場合は、<a href='$2'>モジュール構成</a>ページで選択します。
 index_emailboxessystem=ユーザーメールの読み取りモジュールは、 $3メールサーバーを使用するように設定されていません。 <a href='$1'>モジュール構成</a>を調整して一致させるか、<a href='$2'>Virtualmin構成</a>を変更してください。
 index_eiface=システムでイーサネットインターフェイスが自動的に検出されませんでした。 <a href='$1'>モジュール構成</a>ページを使用して、インターフェースを手動で設定します。
 index_elogrotate=Logrotateプログラムがシステムにインストールされていないか、Webminの<a href='$1'>ログファイルローテーション</a>モジュールでまだ正しく設定されていません。システムがLogrotateを使用していない場合は、Virtualminの<a href='$2'>モジュール構成</a>ページで無効にする必要があります。
@@ -478,7 +477,6 @@ setup_edepssl5=仮想IPインターフェイスまたはプライベートポー
 setup_edepftp=仮想IPアドレスが割り当てられていないと、仮想FTPを有効にできません
 setup_edepftpdir=サーバーにホーム ディレクトリがない場合、仮想 FTP を有効にすることはできません
 setup_edepspam=メールが有効でない限り、スパムフィルタリングを有効にできません
-setup_edepspamvpop=スパムフィルタリングはVPopMailでは使用できません
 setup_edepvirus=メールとスパムのフィルタリングが有効になっていない限り、ウイルスフィルタリングを有効にすることはできません
 setup_edepstatus=ステータスの監視は、ウェブサイトが
 setup_ecrgroup=..管理グループが作成されましたが、存在しません！
@@ -736,6 +734,7 @@ indom=ドメイン $1内
 equotacommand=クォータコマンド $1が失敗しました： $2
 
 users_ecannot=このドメインのユーザーを編集することはできません
+users_ecannotssh=SSHユーザーを編集することはできません
 users_ecannot2=ローカルユーザーの編集は許可されていません
 users_ecannot3=メールユーザーを追加することはできません
 users_ecannot4db=GPL バージョンでは追加のデータベース ユーザーを管理できません
@@ -2093,7 +2092,6 @@ check_dependentesupport=Postfixはドメインごとの発信IPアドレスを�
 check_qmailok=メールサーバーQmailがインストールおよび構成されています。
 check_qmailmode6=メールサーバーQmailがインストールおよび構成されています。ただし、サーバーテンプレートページのユーザー名の形式は<b>username @ domain</b>に設定されているため、機能しない可能性があります。
 check_postfixmode6=メールサーバーPostfixがインストールおよび構成されています。ただし、サーバーテンプレートページのユーザー名の形式は<b>username @ domain</b>に設定されており、Postfixではサポートされていません。
-check_vpopmailok=VPOPMail拡張機能を備えたメールサーバーQmailがインストールおよび設定されています。
 check_done=..システムはVirtualminで使用する準備ができています。
 check_failed=..お使いのシステムはVirtualminで使用する準備ができていません。
 check_nogroup=ユーザークォータはホームディレクトリと電子メールディレクトリに対して有効になっていますが、グループクォータは無効になっています。仮想サーバーの合計割り当て量は適用されません。
@@ -2122,6 +2120,8 @@ check_eldap=LDAPサーバーへの接続中にエラーが発生しました： 
 check_eldap2=LDAPユーザーとグループモジュールが古すぎて、Virtualminでユーザー管理に使用できません。 <a href='$1'>モジュール構成</a>ページでLDAPを無効にするか、モジュールをバージョン $2にアップグレードする必要があります。
 check_ldap=LDAPユーザーとグループの管理が適切に構成されている。
 check_detected=メールサーバー $1が検出されました。
+check_evpopmail=VPOPMail メール サーバーのサポートが Virtualmin から削除されました。
+check_eexim=Exim メール サーバーのサポートが Virtualmin から削除されました。
 check_spamok=SpamAssassinとProcmailがインストールされ、使用できるように構成されています。
 check_noprocmail=SpamAssassinとProcmailがインストールされています。ただし、メールサーバーがProcmailを使用して配信するように構成されていないようです。
 check_spamglobal=SpamAssassinは、グローバルなProcmail構成 $1から実行されるように構成されています。これは、Virtualminがドメインごとにセットアップするため、必要ありません。
@@ -3942,7 +3942,6 @@ mail_system_0=Postfix
 mail_system_1=Sendmail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
-mail_system_5=Qmail+VPOPMail
 
 databases_title=データベースを編集
 databases_indom=ドメイン $2の $1データベース
@@ -6074,7 +6073,6 @@ balancers_ecannot=このドメインのプロキシパスを編集すること�
 balancers_esupport=ドメインまたはシステムはプロキシをサポートしていません
 balancers_add=新しいプロキシパスを追加します。
 balancers_path=URLパス
-balancers_name=バランサー名
 balancers_urls=リンク先URL
 balancers_used2=によって使われた
 balancers_delete=選択したプロキシを削除
@@ -6089,8 +6087,6 @@ balancer_create=プロキシパスを作成
 balancer_edit=プロキシパスを編集
 balancer_egone=選択したプロキシパスは存在しません
 balancer_header=HTTPプロキシの詳細
-balancer_name=バランサー名
-balancer_auto=自動的に選択
 balancer_path=ローカルURLパス
 balancer_urls=リンク先URL
 balancer_url=リンク先URL
@@ -7914,8 +7910,6 @@ deftmplt_tmpltpagefootersourcesshop=店
 deftmplt_tmpltpagefooterabout=について
 deftmplt_tmpltpagefooteraboutcomp=会社
 deftmplt_tmpltpagefooteraboutcont=接触
-deftmplt_tmpltpagefooteraboutpriv=プライバシーポリシー
-deftmplt_tmpltpagefooteraboutterms=利用規約
 
 2fa_title=二要素認証
 2fa_euser=Webminユーザーは存在しません！

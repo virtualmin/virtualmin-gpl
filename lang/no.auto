@@ -134,6 +134,7 @@ setup_overgroupquota=Serverkvoten for $2 av $1 er nådd
 setup_overuserquota=Domeneeierkvoten for $2 av $1 er nådd
 setup_ewebfcgidcmd=Fant ikke <tt>fcgiwrap</tt> serverkommando!
 
+users_ecannotssh=Du har ikke lov til å redigere SSH-brukere
 users_ecannot3=Du har ikke lov til å legge til e-postbrukere
 users_ecannot4db=Du kan ikke administrere ekstra databasebrukere i GPL-versjon
 users_ecannot4web=Du kan ikke administrere ekstra nettserverbrukere i GPL-versjon
@@ -364,6 +365,8 @@ check_mysqlnopasssocket=MySQL $1 er installert og kjører med Unix-socket-autent
 check_postgresok3=Virtualmin bruker en ekstern PostgreSQL-server
 check_plugin=Plugin $1 er installert
 check_eplugin=Plugin $1 kan ikke brukes : $2
+check_evpopmail=Støtte for VPOPMail-postserveren er fjernet fra Virtualmin!
+check_eexim=Støtte for Exim-postserveren er fjernet fra Virtualmin!
 check_packageok=De valgte pakkeadministrasjons- og oppdateringssystemene er installert
 check_bashphpprofile=Oppretter Bash-oppstartsprofil for PHP-alias ..
 check_hostdefaultdomain_enable=Oppretter <tt>$1</tt> som vertsstandarddomene ..
@@ -1844,8 +1847,6 @@ deftmplt_tmpltpagefootersourcesshop=Butikk
 deftmplt_tmpltpagefooterabout=Om
 deftmplt_tmpltpagefooteraboutcomp=Selskap
 deftmplt_tmpltpagefooteraboutcont=Kontakt
-deftmplt_tmpltpagefooteraboutpriv=Personvernerklæring
-deftmplt_tmpltpagefooteraboutterms=Vilkår og betingelser
 
 2fa_title=Tofaktorautentisering
 2fa_euser=Webmin-bruker eksisterer ikke!

@@ -29,7 +29,6 @@ index_emodssl2=Wygląda na to, że konfiguracja Apache w twoim systemie nie nas�
 index_esendmail=Serwer pocztowy Sendmail nie wygląda na zainstalowany w twoim systemie lub nie został jeszcze poprawnie skonfigurowany w module <a href='$1'>Sendmail Mail Server</a> Webmina. Jeśli używasz innego serwera poczty, wybierz go na stronie <a href='$2'>konfiguracji modułu</a>.
 index_epostfix=Serwer Postfix nie wydaje się być zainstalowany w systemie lub nie został jeszcze poprawnie skonfigurowany w module <a href='$1'>Konfiguracja Postfix</a> Webmina. Jeśli używasz innego serwera poczty, wybierz go na stronie <a href='$2'>konfiguracji modułu</a>.
 index_eqmail=Serwer QMail nie wygląda na zainstalowany w twoim systemie lub nie został jeszcze poprawnie skonfigurowany w module <a href='$1'>Konfiguracja QMail</a> Webmina. Jeśli używasz innego serwera poczty, wybierz go na stronie <a href='$2'>konfiguracji modułu</a>.
-index_evpopmail=Serwer QMail nie wygląda na zainstalowany w systemie, brakuje rozszerzeń VPOPMail lub nie został jeszcze poprawnie skonfigurowany w module <a href='$1'>Konfiguracja QMail</a> Webmina. Jeśli używasz innego serwera poczty, wybierz go na stronie <a href='$2'>konfiguracji modułu</a>.
 index_emailboxessystem=Moduł Czytaj pocztę użytkownika nie jest skonfigurowany do używania serwera poczty $3. Dostosuj jego <a href='$1'>konfigurację modułu</a>, aby dopasować, lub zmień <a href='$2'>konfigurację Virtualmin</a>.
 index_eiface=W systemie nie można automatycznie znaleźć interfejsu Ethernet. Użyj strony <a href='$1'>konfiguracji modułu</a>, aby ręcznie ustawić interfejs.
 index_elogrotate=Wygląda na to, że program Logrotate nie jest zainstalowany w twoim systemie lub nie został jeszcze poprawnie skonfigurowany w module <a href='$1'>Web Log Rotation</a> Webmina. Jeśli twój system nie używa Logrotate, należy go wyłączyć na stronie <a href='$2'>konfiguracji modułu</a> programu Virtualmin.
@@ -484,6 +483,7 @@ setup_ewebfcgidcmd=Nie można znaleźć polecenia serwera <tt>fcgiwrap</tt>!
 equotacommand=Komenda przydziału $1 nie powiodła się : $2 
 
 users_ecannot=Nie możesz edytować użytkowników w tej domenie
+users_ecannotssh=Nie masz uprawnień do edytowania użytkowników SSH
 users_ecannot2=Nie możesz edytować lokalnych użytkowników
 users_ecannot3=Nie możesz dodawać użytkowników poczty
 users_ecannot4db=W wersji GPL nie można zarządzać dodatkowymi użytkownikami bazy danych
@@ -1703,7 +1703,6 @@ check_dependentesupport=Postfix może obsługiwać wychodzące adresy IP dla pos
 check_qmailok=Serwer pocztowy Qmail jest zainstalowany i skonfigurowany
 check_qmailmode6=Serwer pocztowy Qmail jest zainstalowany i skonfigurowany. Jednak format nazwy użytkownika na stronie szablonów serwera jest ustawiony na <b>nazwa użytkownika @ domena</b>, co może nie działać
 check_postfixmode6=Serwer pocztowy Postfix jest zainstalowany i skonfigurowany. Jednak format nazwy użytkownika na stronie szablonów serwera jest ustawiony na <b>nazwa użytkownika @ domena</b>, nie jest obsługiwany przez Postfix
-check_vpopmailok=Serwer pocztowy Qmail z rozszerzeniami VPOPMail jest zainstalowany i skonfigurowany
 check_nogroup=Przydziały użytkowników są włączone dla katalogów domowych i e-mailowych, ale przydziały grupowe nie. Całkowite kwoty serwerów wirtualnych nie będą egzekwowane
 check_noquotas=Przydziały dysku zostały wyłączone w konfiguracji modułu
 check_edepwebalizer=Webalizer nie może być włączony w konfiguracji modułu Virtualmin <a href='$1'></a>, chyba że jest to serwer WWW
@@ -1725,6 +1724,8 @@ check_eplugin=Nie można użyć wtyczki $1 : $2
 check_eldap=Wystąpił błąd podczas łączenia się z serwerem LDAP: $1. Albo LDAP musi być wyłączony na stronie <a href='$2'>konfiguracja modułu</a>, albo moduł <a href='$3'>Użytkownicy i grupy LDAP</a> musi być poprawnie skonfigurowany
 check_eldap2=Moduł Użytkownicy i grupy LDAP jest zbyt stary, aby mógł być używany przez Virtualmin do zarządzania użytkownikami. Albo LDAP musi być wyłączony na stronie <a href='$1'>konfiguracji modułu</a>, albo moduł zaktualizowany do wersji $2
 check_ldap=Zarządzanie użytkownikami i grupami LDAP jest poprawnie skonfigurowane
+check_evpopmail=Obsługa serwera pocztowego VPOPMail została usunięta z Virtualmin!
+check_eexim=Obsługa serwera pocztowego Exim została usunięta z Virtualmin!
 check_spamok=SpamAssassin i Procmail są zainstalowane i skonfigurowane do użytku
 check_noprocmail=SpamAssassin i Procmail są zainstalowane. Jednak Twój serwer pocztowy nie jest skonfigurowany do dostarczania przy użyciu Procmail
 check_spamglobal=SpamAssassin jest skonfigurowany do uruchamiania z globalnej konfiguracji Procmail $1, co nie jest potrzebne, ponieważ Virtualmin skonfiguruje go dla poszczególnych domen
@@ -3412,7 +3413,6 @@ mail_system_0=Przyrostek
 mail_system_1=Wyślij maila
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
-mail_system_5=Qmail+VPOPMail
 
 databases_hosted=Wszystkie bazy danych dla tej domeny są hostowane na zdalnym serwerze MySQL $1.
 databases_none=Ten serwer wirtualny nie ma jeszcze żadnych baz danych.
@@ -5155,7 +5155,6 @@ balancers_ecannot=Nie możesz edytować ścieżek proxy dla tej domeny
 balancers_esupport=Domena lub system nie obsługuje serwerów proxy
 balancers_add=Dodaj nową ścieżkę proxy.
 balancers_path=Ścieżka URL
-balancers_name=Nazwa balansera
 balancers_urls=Docelowe adresy URL
 balancers_used2=Używany przez
 balancers_none=Nie zdefiniowano jeszcze ścieżek proxy.
@@ -5168,8 +5167,6 @@ balancer_create=Utwórz ścieżkę proxy
 balancer_edit=Edytuj ścieżkę proxy
 balancer_egone=Wybrana ścieżka proxy już nie istnieje
 balancer_header=Szczegóły proxy HTTP
-balancer_name=Nazwa balansera
-balancer_auto=Wybierz automatycznie
 balancer_path=Ścieżka lokalnego adresu URL
 balancer_urls=Docelowe adresy URL
 balancer_url=docelowy adres URL
@@ -6810,8 +6807,6 @@ deftmplt_tmpltpagefootersourcesshop=Sklep
 deftmplt_tmpltpagefooterabout=O
 deftmplt_tmpltpagefooteraboutcomp=Firma
 deftmplt_tmpltpagefooteraboutcont=Kontakt
-deftmplt_tmpltpagefooteraboutpriv=Polityka prywatności
-deftmplt_tmpltpagefooteraboutterms=Regulamin
 
 2fa_title=Uwierzytelnianie dwuskładnikowe
 2fa_euser=Użytkownik Webmin nie istnieje!

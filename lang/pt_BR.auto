@@ -57,7 +57,6 @@ index_emodssl2=A configuração do Apache no seu sistema não parece estar atend
 index_esendmail=O servidor de email do Sendmail não parece estar instalado no seu sistema ou ainda não foi configurado corretamente no módulo <a href='$1'>Sendmail Mail Server</a> do Webmin. Se você estiver executando um servidor de email diferente, selecione-o na página <a href='$2'>configuração do módulo</a>.
 index_epostfix=O servidor Postfix parece não estar instalado no seu sistema ou ainda não foi configurado corretamente no módulo <a href='$1'>Postfix Configuration da Webmin</a>. Se você estiver executando um servidor de email diferente, selecione-o na página <a href='$2'>configuração do módulo</a>.
 index_eqmail=O servidor QMail não parece estar instalado no seu sistema ou ainda não foi configurado corretamente no módulo <a href='$1'>Configuração do QMail</a> da Webmin. Se você estiver executando um servidor de email diferente, selecione-o na página <a href='$2'>configuração do módulo</a>.
-index_evpopmail=O servidor QMail não parece estar instalado no seu sistema, não possui as extensões VPOPMail ou ainda não foi configurado corretamente no módulo <a href='$1'>QMail Configuration</a> da Webmin. Se você estiver executando um servidor de email diferente, selecione-o na página <a href='$2'>configuração do módulo</a>.
 index_emailboxessystem=O módulo Ler email do usuário não está configurado para usar o servidor de email $3. Ajuste sua <a href='$1'>configuração do módulo</a> para corresponder ou altere a <a href='$2'>configuração do Virtualmin</a>.
 index_eiface=Nenhuma interface Ethernet foi encontrada automaticamente no seu sistema. Use a página de configuração do módulo <a href='$1'></a> para definir a interface manualmente.
 index_elogrotate=O programa Logrotate não parece estar instalado no seu sistema ou ainda não foi configurado corretamente no módulo <a href='$1'>Rotação do arquivo de log</a> da Webmin. Se o seu sistema não usa o Logrotate, ele deve ser desativado na página de configuração do módulo <a href='$2'>do Virtualmin</a>.
@@ -477,7 +476,6 @@ setup_edepssl5=O SSL não pode ser ativado para mais de um domínio no endereço
 setup_edepftp=O FTP virtual não pode ser ativado, a menos que um endereço IP virtual seja alocado
 setup_edepftpdir=O FTP virtual não pode ser ativado a menos que o servidor tenha um diretório inicial
 setup_edepspam=A filtragem de spam não pode ser ativada, a menos que o email seja
-setup_edepspamvpop=A filtragem de spam não pode ser usada com o VPopMail
 setup_edepvirus=A filtragem de vírus não pode ser ativada, a menos que a filtragem de email e spam seja
 setup_edepstatus=O monitoramento de status não pode ser ativado, a menos que um site seja
 setup_ecrgroup=.. grupo de administração foi criado, mas não existe!
@@ -734,6 +732,7 @@ setup_ewebfcgidcmd=Não foi possível encontrar o comando do servidor <tt>fcgiwr
 equotacommand=Falha no comando da cota $1 : $2 
 
 users_ecannot=Você não tem permissão para editar usuários neste domínio
+users_ecannotssh=Você não tem permissão para editar usuários SSH
 users_ecannot2=Você não tem permissão para editar usuários locais
 users_ecannot3=Você não tem permissão para adicionar usuários de e-mail
 users_ecannot4db=Você não pode gerenciar usuários extras de banco de dados na versão GPL
@@ -1928,7 +1927,6 @@ check_dependentesupport=O Postfix pode suportar endereços IP de saída por dom�
 check_qmailok=Servidor de correio Qmail está instalado e configurado
 check_qmailmode6=Servidor de correio Qmail está instalado e configurado. No entanto, o formato do nome de usuário na página de modelos do servidor está definido como <b>nome_do_usuário @ domínio</b>, o que pode não funcionar
 check_postfixmode6=O servidor de correio Postfix está instalado e configurado. No entanto, o formato do nome de usuário na página de modelos do servidor está definido como <b>nome do usuário @ domínio</b>, não é suportado pelo Postfix
-check_vpopmailok=Servidor de correio Qmail com extensões VPOPMail está instalado e configurado
 check_done=.. seu sistema está pronto para uso pelo Virtualmin
 check_failed=.. seu sistema não está pronto para uso pelo Virtualmin
 check_nogroup=As cotas de usuário estão ativadas para diretórios pessoais e de email, mas as cotas de grupo não. As cotas totais do servidor virtual não serão aplicadas
@@ -1957,6 +1955,8 @@ check_eldap=Ocorreu um erro ao entrar em contato com o servidor LDAP: $1. O LDAP
 check_eldap2=O módulo Usuários e Grupos LDAP é muito antigo para ser usado pelo Virtualmin para gerenciamento de usuários. O LDAP deve estar desativado na página <a href='$1'>configuração do módulo</a> ou o módulo atualizado para a versão $2
 check_ldap=O gerenciamento de usuários e grupos LDAP está configurado corretamente
 check_detected=Servidor de email detectado $1
+check_evpopmail=O suporte para o servidor de e-mail VPOPMail foi removido do Virtualmin!
+check_eexim=O suporte para o servidor de e-mail Exim foi removido do Virtualmin!
 check_spamok=O SpamAssassin e o Procmail estão instalados e configurados para uso
 check_noprocmail=O SpamAssassin e o Procmail estão instalados. No entanto, seu servidor de email não parece estar configurado para ser entregue usando o Procmail
 check_spamglobal=O SpamAssassin está configurado para ser executado a partir da configuração global do Procmail $1, o que não é necessário, pois o Virtualmin o configurará por domínio
@@ -3768,7 +3768,6 @@ mail_system_0=Postfix
 mail_system_1=Enviar correio
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
-mail_system_5=Qmail+VPOPMail
 
 databases_indom=$1 bancos de dados no domínio $2 
 databases_mysql=MySQL
@@ -5822,7 +5821,6 @@ balancers_ecannot=Você não tem permissão para editar caminhos de proxy para e
 balancers_esupport=O domínio ou sistema não suporta proxies
 balancers_add=Adicione um novo caminho de proxy.
 balancers_path=Caminho do URL
-balancers_name=Nome do balanceador
 balancers_urls=URLs de destino
 balancers_used2=Usado por
 balancers_delete=Excluir proxies selecionados
@@ -5837,8 +5835,6 @@ balancer_create=Criar caminho de proxy
 balancer_edit=Editar caminho do proxy
 balancer_egone=O caminho do proxy selecionado não existe mais
 balancer_header=Detalhes do proxy HTTP
-balancer_name=Nome do balanceador
-balancer_auto=Selecionar automaticamente
 balancer_path=Caminho do URL local
 balancer_urls=URLs de destino
 balancer_url=URL de destino
@@ -7630,8 +7626,6 @@ deftmplt_tmpltpagefootersourcesshop=Comprar
 deftmplt_tmpltpagefooterabout=Sobre
 deftmplt_tmpltpagefooteraboutcomp=Empresa
 deftmplt_tmpltpagefooteraboutcont=Contato
-deftmplt_tmpltpagefooteraboutpriv=política de Privacidade
-deftmplt_tmpltpagefooteraboutterms=Termos e Condições
 
 2fa_title=Autenticação de dois fatores
 2fa_euser=O usuário Webmin não existe!

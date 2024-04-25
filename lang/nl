@@ -52,7 +52,6 @@ index_emodssl2=Het lijkt erop dat de Apache configuratie op uw systeem niet luis
 index_esendmail=De Sendmail email server lijkt niet te zijn geinstalleerd op uw systeem, of is niet goed geconfigureerd in de Webmin's <a href='$1'>Sendmail Email Server</a> module. Indien u werkt met een andere email server selecteert u die dan op de <a href='$2'>module configuratie</a> pagina.
 index_epostfix=De Postfix server lijkt niet te zijn geinstalleerd op uw systeem, of is niet goed geconfigureerd in de Webmin's <a href='$1'>Postfix Configuratie</a> module. Indien u werkt met een andere email server selecteert u die dan op de  <a href='$2'>module configuratie</a> pagina.
 index_eqmail=De QMail server lijkt niet te zijn geinstalleerd op uw systeem, of is niet goed geconfigureerd in de Webmin's <a href='$1'>QMail Configuratie</a> module. Indien u werkt met een andere email server selecteert u die dan op de <a href='$2'>module configuratie</a> pagina.
-index_evpopmail=De QMail server lijkt niet te zijn geinstalleerd op uw systeem, of hij mist de VPOPMail extensies, of is niet goed geconfigureerd in de Webmin's <a href='$1'>QMail Configuratie</a> module. Indien u werkt met een andere email server selecteert u die dan op de <a href='$2'>module configuratie</a> pagina.
 index_emailboxessystem=De Lees Gebruikers Email module is niet opgezet om de email server $3 te gebruiken. Of u verandert zijn <a href='$1'>module configuratie</a>, of u verandert de <a href='$2'>Virtualmin configuratie</a>.
 index_eiface=Er kon niet automatisch een Ethernet interface gevonden worden op uw systeem. Gebruik de <a href='$1'>module configuratie</a> pagina om dit handmatig in te stellen.
 index_elogrotate=Het Logrotatie programma lijkt niet geinstalleerd te zijn op uw systeem, of is nog niet op de juiste manier ingesteld in Webmin's <a href='$1'>Log File Rotatie</a> module. Indien uw systeem geen Logrotatie gebruikt moet u het uitschakelen in de Virtualmin's <a href='$2'>module configuratie</a> pagina.
@@ -394,7 +393,6 @@ setup_edepssl4=SSL kan niet worden aangezet omdat er reeds een Apache virtuele h
 setup_edepssl5=SSL kan niet worden aangezet voor meer dan 1 domein op het IP adres $1 totdat er een virtuele IP interface of prive poort word aangezet, anders kan het certificaat alleen gebruikt worden voor dit domein. Het huidige certificaat is alleen geldig voor : $2 , en word nu gebruikt door $3.
 setup_edepftp=Virtuele FTP kan niet worden aangezet totdat er een virtueel IP adres is toegewezen
 setup_edepspam=Spam filtering kan niet aanstaan totdat email aanstaat
-setup_edepspamvpop=Spam filtering kan niet worden gebruikt met VPopMail
 setup_edepvirus=Virus filteren kan niet worden aangezet totdat email en spam filteren aanstaat
 setup_edepstatus=Status monitoren kan niet worden aangezet totdat een website gemaakt is
 setup_ecrgroup=.. administratie groep was gemaakt maar bestaat niet!
@@ -1687,7 +1685,6 @@ check_postfixok=EMail server Postfix is geinstalleerd en configureert
 check_qmailok=Email server Qmail is geinstalleerd en configureert
 check_qmailmode6=Email server Qmail is geinstalleerd en geconfigureerd. Echter het formaat waarmee de gebruikersnaam op de server templates pagina is ingesteld, zoals <b>gebruikersnaam@domein</b>, zal niet gaan werken
 check_postfixmode6=Email server Postfix is geinstalleerd en geconfigureerd. Echter, het formaat van de gebruikersnaam op de server templates pagina is ingesteld op <b>gebruikersnaam@domein</b>, dit word niet ondersteund door Postfix
-check_vpopmailok=Email server Qmail met VPOPMail extensies zijn geinstalleerd en geconfigureerd
 check_done=.. uw systeem is klaar voor gebruik met Virtualmin
 check_failed=.. uw systeem is niet gereed voor gebruik door Virtualmin
 check_nogroup=Gebruikers quota's staat aan voor home en email directory's, maar groep quota's niet. Totale virtuele server quota's zullen niet worden afgedwongen
@@ -3006,7 +3003,6 @@ mail_system_0=Postfix
 mail_system_1=Sendmail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
-mail_system_5=Qmail+VPOPMail
 
 databases_title=Bewerk Databases
 databases_hosted=Alle databases op dit systeem worden gehost op de remote MySQL server $1.
@@ -4680,7 +4676,6 @@ balancers_ecannot=U bent niet bevoegd om proxy paden te bewerken voor dit domein
 balancers_esupport=Het domein of systeem heeft geen support voor proxies
 balancers_add=Toevoegen van een nieuw proxy pad.
 balancers_path=URL pad
-balancers_name=Balancer naam
 balancers_urls=Bestemming URL's
 balancers_delete=Verwijder Geselecteerde Proxies
 balancers_none=Er zijn nog geen proxy paden gedefinieerd
@@ -4693,8 +4688,6 @@ balancer_create=Proxy Pad Aanmaken
 balancer_edit=Bewerk Proxy Pad
 balancer_egone=Het geselecteerde proxy pad bestaat niet langer
 balancer_header=HTTP proxy details
-balancer_name=Balancer naam
-balancer_auto=Selecteer automatisch
 balancer_path=Locale URL pad
 balancer_urls=Bestemming URL's
 balancer_url=Bestemming URL

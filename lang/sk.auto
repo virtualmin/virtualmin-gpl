@@ -58,7 +58,6 @@ index_emodssl2=Zdá sa, že konfigurácia Apache vo vašom systéme nepočúva n
 index_esendmail=Zdá sa, že poštový server Sendmail nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>Sendmail Mail Server</a> Webmin. Ak používate iný poštový server, vyberte ho na stránke <a href='$2'>konfigurácia modulu</a>.
 index_epostfix=Zdá sa, že server Postfix nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>Konfigurácia Postfix</a> Webmin. Ak používate iný poštový server, vyberte ho na stránke <a href='$2'>konfigurácia modulu</a>.
 index_eqmail=Zdá sa, že server QMail nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>QMail Configuration</a> Webmin. Ak používate iný poštový server, vyberte ho na stránke <a href='$2'>konfigurácia modulu</a>.
-index_evpopmail=Zdá sa, že server QMail nie je nainštalovaný vo vašom systéme, chýbajú mu rozšírenia VPOPMail alebo ešte nebol správne nastavený v module <a href='$1'>QMail Configuration</a> Webmin. Ak používate iný poštový server, vyberte ho na stránke <a href='$2'>konfigurácia modulu</a>.
 index_emailboxessystem=Modul čítania pošty používateľa nie je nastavený na používanie poštového servera $3. Buď upravte jeho <a href='$1'>konfiguráciu modulu</a> tak, aby sa zhodovala, alebo zmeňte <a href='$2'>konfiguráciu Virtualmin</a>.
 index_eiface=Vo vašom systéme nebolo možné automaticky nájsť žiadne ethernetové rozhranie. Na manuálne nastavenie rozhrania použite stránku <a href='$1'>konfigurácia modulu</a>.
 index_elogrotate=Zdá sa, že program Logrotate nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>Otočenie súboru denníka</a> Webmin. Ak váš systém nepoužíva Logrotate, mal by byť vypnutý na stránke <a href='$2'>modulu</a> Virtualmin.
@@ -478,7 +477,6 @@ setup_edepssl5=SSL nemôže byť povolené pre viac ako jednu doménu na IP adre
 setup_edepftp=Virtuálny FTP nemožno povoliť, pokiaľ nie je pridelená virtuálna adresa IP
 setup_edepftpdir=Virtuálny FTP nemožno povoliť, pokiaľ server nemá domovský adresár
 setup_edepspam=Filtrovanie spamu nie je možné povoliť, pokiaľ nie je povolený e-mail
-setup_edepspamvpop=Filtrovanie spamu nemožno použiť s VPopMail
 setup_edepvirus=Filtrovanie vírusov nemožno povoliť, pokiaľ nie je zapnuté filtrovanie e-mailov a spamu
 setup_edepstatus=Monitorovanie stavu nie je možné povoliť, pokiaľ nie je povolená webová lokalita
 setup_ecrgroup=.. administračná skupina bola vytvorená, ale neexistuje!
@@ -736,6 +734,7 @@ indom=V doméne $1
 equotacommand=Príkaz kvóty $1 zlyhal : $2
 
 users_ecannot=Nemáte povolenie upravovať používateľov v tejto doméne
+users_ecannotssh=Nemáte povolenie upravovať používateľov SSH
 users_ecannot2=Nemáte povolené upravovať miestnych používateľov
 users_ecannot3=Nemáte povolené pridávať používateľov pošty
 users_ecannot4db=Vo verzii GPL nemôžete spravovať ďalších používateľov databázy
@@ -2093,7 +2092,6 @@ check_dependentesupport=Postfix môže podporovať odchádzajúce IP adresy pre 
 check_qmailok=Poštový server Qmail je nainštalovaný a nakonfigurovaný
 check_qmailmode6=Poštový server Qmail je nainštalovaný a nakonfigurovaný. Formát používateľského mena na stránke šablón servera je však nastavený na <b>používateľské meno@doména</b>, čo nemusí fungovať
 check_postfixmode6=Poštový server Postfix je nainštalovaný a nakonfigurovaný. Formát používateľského mena na stránke so šablónami servera je však nastavený na <b>používateľské meno@doména</b> a Postfix ho nepodporuje
-check_vpopmailok=Poštový server Qmail s rozšíreniami VPOPMail je nainštalovaný a nakonfigurovaný
 check_done=.. váš systém je pripravený na použitie pre Virtualmin
 check_failed=.. váš systém nie je pripravený na použitie pre Virtualmin
 check_nogroup=Používateľské kvóty sú povolené pre domáce a e-mailové adresáre, ale kvóty pre skupiny nie. Celkové kvóty virtuálneho servera sa nebudú uplatňovať
@@ -2122,6 +2120,8 @@ check_eldap=Pri kontaktovaní servera LDAP sa vyskytla chyba: $1. Buď musí by�
 check_eldap2=Modul Používatelia a skupiny LDAP je príliš starý na to, aby ho Virtualmin používal na správu používateľov. Buď musí byť LDAP zakázaný na stránke <a href='$1'>konfigurácia modulu</a>, alebo musí byť modul inovovaný na verziu $2
 check_ldap=Správa používateľov a skupín LDAP je správne nakonfigurovaná
 check_detected=Zistený poštový server $1
+check_evpopmail=Podpora pre poštový server VPOPMail bola z Virtualminu odstránená!
+check_eexim=Podpora pre poštový server Exim bola z Virtualminu odstránená!
 check_spamok=SpamAssassin a Procmail sú nainštalované a nakonfigurované na používanie
 check_noprocmail=SpamAssassin a Procmail sú nainštalované. Zdá sa však, že váš poštový server nie je nakonfigurovaný na doručovanie pomocou Procmailu
 check_spamglobal=SpamAssassin je nakonfigurovaný na spustenie z globálnej konfigurácie Procmail $1, čo nie je potrebné, pretože Virtualmin ho nastaví pre jednotlivé domény
@@ -3942,7 +3942,6 @@ mail_system_0=Postfix
 mail_system_1=Poslať mail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
-mail_system_5=Qmail+VPOPMail
 
 databases_title=Upraviť databázy
 databases_indom=$1 databáz v doméne $2
@@ -6074,7 +6073,6 @@ balancers_ecannot=Nemáte povolenie upravovať cesty proxy pre túto doménu
 balancers_esupport=Doména alebo systém nepodporuje servery proxy
 balancers_add=Pridajte novú cestu proxy.
 balancers_path=cesta URL
-balancers_name=Názov balancéra
 balancers_urls=Cieľové adresy URL
 balancers_used2=Používaný
 balancers_delete=Odstrániť vybrané servery proxy
@@ -6089,8 +6087,6 @@ balancer_create=Vytvorte cestu proxy
 balancer_edit=Upravte cestu proxy
 balancer_egone=Vybratá cesta proxy už neexistuje
 balancer_header=Podrobnosti HTTP proxy
-balancer_name=Názov balancéra
-balancer_auto=Vybrať automaticky
 balancer_path=Miestna cesta URL
 balancer_urls=Cieľové adresy URL
 balancer_url=Cieľová adresa URL
@@ -7914,8 +7910,6 @@ deftmplt_tmpltpagefootersourcesshop=Obchod
 deftmplt_tmpltpagefooterabout=O
 deftmplt_tmpltpagefooteraboutcomp=Spoločnosť
 deftmplt_tmpltpagefooteraboutcont=Kontakt
-deftmplt_tmpltpagefooteraboutpriv=Zásady ochrany osobných údajov
-deftmplt_tmpltpagefooteraboutterms=Podmienky
 
 2fa_title=Dvojfaktorová autentifikácia
 2fa_euser=Používateľ Webmin neexistuje!

@@ -49,7 +49,6 @@ index_emodssl2=Die Apache-Konfiguration scheint keine Einstellungen für den Por
 index_esendmail=Der Sendmail-Mail-Server scheint nicht auf Ihrem System installiert zu sein oder er wurde in Webmin's <a href='$1'>Sendmail-Konfiguration</a>-Modul nicht richtig eingerichtet. Wenn Ihr System einen anderen Mail-Server benutzt, so sollten Sie dies in Virtualmin's <a href='$2'>Modul-Konfiguration</a> einrichten.
 index_epostfix=Der Postfix-Mail-Server scheint nicht auf Ihrem System installiert zu sein oder er wurde in Webmin's <a href='$1'>POstfix-Konfiguration</a>-Modul nicht richtig eingerichtet. Wenn Ihr System einen anderen Mail-Server benutzt, so sollten Sie dies in Virtualmin's <a href='$2'>Modul-Konfiguration</a> einrichten.
 index_eqmail=QMail scheint auf Ihrem System nicht installiert oder wurde nicht korrekt in der <a href='$1'>QMail-Konfiguration</a> konfiguriert. Wenn Sie einen anderen E-Mail-Server nutzen, dann sollten diesen in der <a href='$2'>Modulkonfiguration</a> auswählen.
-index_evpopmail=QMail scheint auf Ihrem System nicht installiert, nicht für VPOPMail-Erweiterungen konfiguriert oder wurde nicht korrekt in der <a href='$1'>QMail-Konfiguration</a> konfiguriert. Wenn Sie einen anderen E-Mail-Server nutzen, dann sollten diesen in der <a href='$2'>Modulkonfiguration</a> auswählen.
 index_emailboxessystem=Die Read-Benutzer-Mail-Modul wird nicht eingerichtet, um die $3 Mail-Server zu verwenden. Entweder stellen Sie ihre <a href='$1'>Modul Konfiguration</a> ein, oder ändern Sie die <a href='$2'>Virtualmin Konfiguration</a>.
 index_eiface=Auf Ihrem System wurde kein Netzwerk-Interface erkannt. Bitte benutzen Sie die <a href='$1'>Modul-Konfiguration</a> um ein Netzwerk-Interface manuell einzutragen.
 index_elogrotate=Das Logrotate-Programm scheint auf Ihrem System nicht installiert zu sein oder es wurde in der <a href='$1'>Logrotation-Konfiguration</a> nicht richtig konfiguriert. Wenn Ihr System Logrotate nicht nutzt, dann ändern Sie dies bitte in der <a href='$2'>Modulkonfiguration</a>.
@@ -1410,7 +1409,6 @@ check_dependentesupport=Postfix unterstützt pro Domaine ausgehende IP-Adressen,
 check_qmailok=Der E-Mail-Server Qmail ist installiert und konfiguriert
 check_qmailmode6=Mailserver Qmail ist installiert und konfiguriert. Der Benutzername, der in der <a href='$1'>Modulkonfiguration</a> verwendet wird, ist im Format <b>benutzername@domain</b> gespeichert. Dies wird eventuell nicht funktionieren
 check_postfixmode6=Mailserver Postfix ist installiert und konfiguriert. Jedoch wird das Benutzername Format auf dem Server Template ist auf <b>username@domain</b> gesetzt, welches nicht von Postfix unterstützt
-check_vpopmailok=Mailserver QMail mit VPOPMail-Erweiterung ist installiert und konfiguriert
 check_done=.. Ihr System kann mit Virtualmin konfiguriert werden
 check_failed=.. Ihr System kann nicht mit Virtualmin bearbeitet werden
 check_nogroup=Benutzer-Speicherplatzbegrenzungen sind für Heimat- und E-Mail-Verzeichnisse eingerichtet, jedoch nicht für Gruppen. Die Speicherplatzbegrenzungen für die Virtuellen Server wird nicht erzwungen
@@ -2421,7 +2419,6 @@ mail_system_0=Postfix
 mail_system_1=Sendmail
 mail_system_2=QMail
 mail_system_4=QMail+LDAP
-mail_system_5=QMail+VPOPMail
 
 databases_title=Datenbanken bearbeiten
 databases_hosted=Alle Datenbanken auf diesem System sind auf dem entfernten MySQL Server $1 gehostet.
@@ -3623,7 +3620,6 @@ balancers_title=Proxy Pfad
 balancers_esupport=Die Domain oder System unterstützt keine Proxies
 balancers_add=Füge einen neuen Proxy Pfad hinzu.
 balancers_path=URL Pfad
-balancers_name=Balancer Name
 balancers_urls=Ziel URLs
 balancers_delete=Lösche ausgewählte Proxies
 balancers_none=Kein Proxy Pfad wurde bisher definiert.
@@ -3636,8 +3632,6 @@ balancer_create=Erstelle Proxy Pfad
 balancer_edit=Editiere Proxy Pfad
 balancer_egone=Der gewählte Proxy Pfad existiert nicht länger
 balancer_header=HTTP Proxy Details
-balancer_name=Balancer Name
-balancer_auto=Wähle automatisch
 balancer_path=Lokaler URL Pfad
 balancer_urls=Ziel URLs
 balancer_url=Ziel URL
