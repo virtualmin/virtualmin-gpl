@@ -41,7 +41,6 @@ index_emodssl2=你系統上的Apache配置沒有監聽$1端口，在網站中使
 index_esendmail=你的系統沒有安裝Sendmail郵件服務器，或者沒有在Webmin的<a href='$1'>Sendmail配置Configuration</a>模塊中正確配置。如果你使用其他的郵件服務器，請在<a href='$2'>模塊配置</a>頁面中選擇。
 index_epostfix=你的系統沒有安裝Postfix服務器，或者沒有在Webmin的<a href='$1'>Postfix配置</a>模塊中正確配置。如果你使用其他的郵件服務器，請在<a href='$2'>模塊配置</a>頁面中選擇。
 index_eqmail=你的系統沒有安裝QMail服務器，或者沒有在Webmin的<a href='$1'>QMail配置</a>模塊中正確配置。如果你使用其他的郵件服務器，請在<a href='$2'>模塊配置</a>頁面中選擇。
-index_evpopmail=你的系統沒有安裝QMail服務器，或者缺少VPOPMail擴展，或者沒有在Webmin的<a href='$1'>QMail配置</a>模塊中正確配置。如果你使用其他的郵件服務器，請在<a href='$2'>模塊配置</a>頁面中選擇。
 index_eiface=在你的系統上沒有自動找到以太網接口。使用<a href='$1'>模塊配置</a>頁面手動設置接口。
 index_elogrotate=你的系統沒有安裝Logrotate程序，或者沒有在Webmin的<a href='$1'>日志文件輪換</a>模塊中正確配置。如果你的系統不使用Logrotate，你必須在Virtualmin的<a href='$2'>模塊配置</a>頁面中禁用它。
 index_elogrotatever=Logrotate程序的版本為$3，但Virtualmin需要版本$4或更高版本來支持同一個區域中的多個日志文件。
@@ -295,7 +294,6 @@ setup_edepwebalizer=網站配置之前，Webalizer不可用
 setup_edepssl=網站配置之前，SSL不可用
 setup_edepftp=分配虛擬IP地址之前，虛擬FTP不可用
 setup_edepspam=郵件功能可用之前，垃圾郵件過濾不可用
-setup_edepspamvpop=垃圾郵件過濾不能用于VPopMail
 setup_edepvirus=郵件功能和垃圾郵件過濾可用之前，病毒過濾不可用
 setup_edepstatus=網站可用之前，狀態監控不可用
 setup_ecrgroup=創建管理員用戶組失敗！
@@ -1340,7 +1338,6 @@ check_postfixok=郵件服務器Postfix已安裝和配置。
 check_qmailok=郵件服務器Qmail已安裝和配置。
 check_qmailmode6=郵件服務器Qmail已安裝和配置。但是，服務器模板中的用戶名格式被設置成<b>username@domain</b>，可能不能工作。
 check_postfixmode6=郵件服務器Postfix已安裝和配置。但是，服務器模板中的用戶名格式被設置成<b>username@domain</b>，Postfix不支持這樣的格式
-check_vpopmailok=使用VPOPMail擴展的郵件服務器Qmail已安裝和配置。
 check_done=.. 你的系統可以通過Virtualmin使用。
 check_failed=.. 你的系統不能通過Virtualmin使用。
 check_nogroup=已為用戶主目錄和郵件目錄定義用戶限額，但是沒有為用戶組定義限額。整個虛擬服務器的限額可能不能被貫徹。
@@ -2156,7 +2153,6 @@ mail_system_0=Postfix
 mail_system_1=Sendmail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
-mail_system_5=Qmail+VPOPMail
 
 databases_title=編輯數據庫
 databases_none=該虛擬服務器還沒有任何數據庫

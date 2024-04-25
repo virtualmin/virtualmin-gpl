@@ -231,6 +231,7 @@ setup_overgroupquota=Se alcanzó la cuota de servidor para $2 de $1
 setup_overuserquota=Se alcanzó la cuota de propietario de dominio para $2 de $1 
 setup_ewebfcgidcmd=¡No se pudo encontrar el comando del servidor <tt>fcgiwrap</tt>!
 
+users_ecannotssh=No tienes permiso para editar usuarios SSH
 users_ecannot3=No tienes permiso para agregar usuarios de correo
 users_ecannot4db=No puede administrar usuarios de bases de datos adicionales en la versión GPL
 users_ecannot4web=No puede administrar usuarios adicionales del servidor web en la versión GPL
@@ -603,6 +604,8 @@ check_equotasync=Las cuotas de disco predeterminadas para nuevos usuarios están
 check_egquotasync=Las cuotas de disco predeterminadas para nuevos grupos están habilitadas en los sistemas de archivos: $1. Esto no es necesario, ya que Virtualmin establece cuotas para nuevos dominios, por lo que debe deshabilitarse en el módulo <a href='$2'>Cuotas de disco</a>
 check_plugin=El complemento $1 está instalado
 check_eplugin=No se puede usar el complemento $1 : $2 
+check_evpopmail=¡Se ha eliminado la compatibilidad con el servidor de correo VPOPMail de Virtualmin!
+check_eexim=¡Se ha eliminado la compatibilidad con el servidor de correo Exim de Virtualmin!
 check_spamwhite=La lista blanca de todos los buzones de cada dominio está habilitada en la página de <a href='$1'>configuración de Virtualmin</a>, pero esto es incompatible con el uso del programa de cliente <a href='$2'>Spam Spassssin</a> de <a href='$2'>spamc</a>
 check_epbzip2out=Ha seleccionado la compresión bzip2 paralela, pero no se pudo determinar el número de versión de <tt>pbzip2</tt>  : $1
 check_epbzip2ver=Ha seleccionado la compresión bzip2 paralela, pero esto requiere la versión <tt>pbzip2</tt> $1 o posterior, y su sistema tiene la versión $2
@@ -3368,8 +3371,6 @@ deftmplt_tmpltpagefootersourcesshop=Comercio
 deftmplt_tmpltpagefooterabout=Acerca de
 deftmplt_tmpltpagefooteraboutcomp=Compañía
 deftmplt_tmpltpagefooteraboutcont=Contacto
-deftmplt_tmpltpagefooteraboutpriv=política de privacidad
-deftmplt_tmpltpagefooteraboutterms=Términos y condiciones
 
 2fa_title=Autenticación de dos factores
 2fa_euser=¡El usuario de Webmin no existe!

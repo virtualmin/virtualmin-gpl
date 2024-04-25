@@ -149,6 +149,7 @@ setup_overgroupquota=Serverquotum voor $2 van $1 is bereikt
 setup_overuserquota=Quotum voor domeineigenaar voor $2 van $1 is bereikt
 setup_ewebfcgidcmd=Kon <tt>fcgiwrap</tt> serveropdracht niet vinden!
 
+users_ecannotssh=Het is u niet toegestaan SSH-gebruikers te bewerken
 users_ecannot3=U mag geen e-mailgebruikers toevoegen
 users_ecannot4db=In de GPL-versie kunt u geen extra databasegebruikers beheren
 users_ecannot4web=In de GPL-versie kunt u geen extra webservergebruikers beheren
@@ -426,6 +427,8 @@ check_dependentever=Uw Postfix-versie ondersteunt geen uitgaande IP-adressen per
 check_dependentesupport=Postfix ondersteunt uitgaande IP-adressen per domein, maar is momenteel niet geconfigureerd om dit te doen. Dit kan worden ingesteld in de module <a href='$1'>Postfix Mailserver</a>
 check_plugin=Plug-in $1 is geïnstalleerd
 check_eplugin=Plug-in $1 kan niet worden gebruikt : $2
+check_evpopmail=Ondersteuning voor de VPOPMail-mailserver is verwijderd uit Virtualmin!
+check_eexim=Ondersteuning voor de Exim-mailserver is verwijderd uit Virtualmin!
 check_packageok=De geselecteerde pakketbeheer- en updatesystemen zijn geïnstalleerd
 check_bashphpprofile=Bash-opstartprofiel maken voor PHP-alias ..
 check_hostdefaultdomain_enable=<tt>$1</tt> maken als standaard hostdomein ..
@@ -2399,8 +2402,6 @@ deftmplt_tmpltpagefootersourcesshop=Winkel
 deftmplt_tmpltpagefooterabout=Over
 deftmplt_tmpltpagefooteraboutcomp=Bedrijf
 deftmplt_tmpltpagefooteraboutcont=Contact
-deftmplt_tmpltpagefooteraboutpriv=Privacybeleid
-deftmplt_tmpltpagefooteraboutterms=Voorwaarden
 
 2fa_title=Twee-factorenauthenticatie
 2fa_euser=Webmin-gebruiker bestaat niet!

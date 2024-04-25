@@ -334,6 +334,7 @@ setup_ewebfcgidcmd=<tt>fcgiwrap</tt> sunucu komutu bulunamadı!
 
 equotacommand=$1 kota komutu başarısız oldu : $2 
 
+users_ecannotssh=SSH kullanıcılarını düzenlemenize izin verilmiyor
 users_ecannot3=Posta kullanıcılarını eklemenize izin verilmiyor
 users_ecannot4db=GPL sürümünde fazladan veritabanı kullanıcılarını yönetemezsiniz
 users_ecannot4web=GPL sürümünde fazladan web sunucusu kullanıcılarını yönetemezsiniz
@@ -848,6 +849,8 @@ check_egquotasync=Yeni gruplar için varsayılan disk kotaları dosya sistemleri
 check_allresel=Tüm satıcıları yeni ayarlarla güncelleme ..
 check_plugin=$1 eklentisi yüklendi
 check_eplugin=$1 eklentisi kullanılamaz  : $2
+check_evpopmail=VPOPPail posta sunucusu desteği Virtualmin'den kaldırıldı!
+check_eexim=Exim posta sunucusu desteği Virtualmin'den kaldırıldı!
 check_spamwhite=Her alan adındaki tüm posta kutularının beyaz listelemesi <a href='$1'>Virtualmin Configuration</a> sayfasında etkinleştirilir, ancak bu <a href='$2'>spamc</a> SpamAssassin kullanımı ile uyumlu değildir istemci programı
 check_virusok2=ClamAV kuruldu ve çalıştığı varsayıldı
 check_epbzip2out=Paralel bzip2 sıkıştırmasını seçtiniz, ancak <tt>pbzip2</tt> sürüm numarası belirlenemedi : $1 
@@ -3373,7 +3376,6 @@ balancers_ecannot=Bu etki alanı için proxy yollarını düzenleme izniniz yok
 balancers_esupport=Etki alanı veya sistem proxy'leri desteklemiyor
 balancers_add=Yeni bir proxy yolu ekleyin.
 balancers_path=URL yolu
-balancers_name=Dengeleyici adı
 balancers_urls=Hedef URL'ler
 balancers_used2=Tarafından kullanılan
 balancers_delete=Seçilen Proxy'leri Sil
@@ -3388,8 +3390,6 @@ balancer_create=Proxy Yolu Oluştur
 balancer_edit=Proxy Yolunu Düzenle
 balancer_egone=Seçilen proxy yolu artık mevcut değil
 balancer_header=HTTP proxy ayrıntıları
-balancer_name=Dengeleyici adı
-balancer_auto=Otomatik olarak seç
 balancer_path=Yerel URL yolu
 balancer_urls=Hedef URL'ler
 balancer_url=hedef URL
@@ -5213,8 +5213,6 @@ deftmplt_tmpltpagefootersourcesshop=Mağaza
 deftmplt_tmpltpagefooterabout=Hakkında
 deftmplt_tmpltpagefooteraboutcomp=Şirket
 deftmplt_tmpltpagefooteraboutcont=Temas etmek
-deftmplt_tmpltpagefooteraboutpriv=Gizlilik Politikası
-deftmplt_tmpltpagefooteraboutterms=Şartlar ve koşullar
 
 2fa_title=İki Faktörlü Kimlik Doğrulama
 2fa_euser=Webmin kullanıcısı mevcut değil!

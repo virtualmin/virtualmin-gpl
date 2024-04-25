@@ -181,7 +181,6 @@ setup_edepssl4=SSL ne peut pas être activé car il existe déjà un hôte virtu
 setup_edepssl5=SSL ne peut pas être activé pour plusieurs domaines sur l'adresse IP $1 à moins qu'une interface IP virtuelle ou un port privé ne soit activé, ou que le certificat ne puisse être utilisé pour ce domaine. Le certificat actuel n'est valide que pour: $2, et il est utilisé par $3.
 setup_edepftpdir=Le FTP virtuel ne peut pas être activé sauf si le serveur dispose d'un répertoire personnel
 setup_edepspam=Le filtrage anti-spam ne peut être activé que si le courrier électronique est
-setup_edepspamvpop=Le filtrage anti-spam ne peut pas être utilisé avec VPopMail
 setup_edepvirus=Le filtrage antivirus ne peut être activé que si le filtrage des e-mails et des spams est
 setup_edepstatus=La surveillance de l'état ne peut être activée que si un site Web est
 setup_ecrgroup2=.. n'a pas réussi à créer le groupe d'administration : $1 
@@ -378,6 +377,7 @@ setup_ewebfcgidcmd=Impossible de trouver la commande serveur <tt>fcgiwrap</tt> 
 
 equotacommand=La commande de quota $1 a échoué : $2 
 
+users_ecannotssh=Vous n'êtes pas autorisé à modifier les utilisateurs SSH
 users_ecannot3=Vous n'êtes pas autorisé à ajouter des utilisateurs de messagerie
 users_ecannot4db=Vous ne pouvez pas gérer des utilisateurs de base de données supplémentaires dans la version GPL
 users_ecannot4web=Vous ne pouvez pas gérer d'utilisateurs supplémentaires sur le serveur Web dans la version GPL
@@ -865,13 +865,14 @@ check_dependentever=Votre version Postfix ne prend pas en charge les adresses IP
 check_dependentesupport=Postfix peut prendre en charge les adresses IP sortantes par domaine, mais n'est pas actuellement configuré pour le faire. Cela peut être configuré dans le module <a href='$1'>Postfix Mailserver</a>
 check_qmailmode6=Le serveur de messagerie Qmail est installé et configuré. Cependant, le format de nom d'utilisateur sur la page des modèles de serveur est défini sur <b>nom d'utilisateur @ domaine</b>, ce qui peut ne pas fonctionner
 check_postfixmode6=Le serveur de messagerie Postfix est installé et configuré. Cependant, le format de nom d'utilisateur sur la page des modèles de serveur est défini sur <b>nom d'utilisateur @ domaine</b>, n'est pas pris en charge par Postfix
-check_vpopmailok=Le serveur de messagerie Qmail avec les extensions VPOPMail est installé et configuré
 check_emysqlsync=La synchronisation entre les utilisateurs Unix et MySQL est activée dans le module <a href='$1'>Base de données MySQL</a>. Ce n'est pas nécessaire, car Virtualmin crée des comptes MySQL pour les propriétaires de domaine en cas de besoin, et doit donc être désactivé
 check_equotasync=Les quotas de disque par défaut pour les nouveaux utilisateurs sont activés sur les systèmes de fichiers: $1. Cela n'est pas nécessaire, car Virtualmin définit des quotas pour les nouveaux utilisateurs et doit donc être désactivé dans le module <a href='$2'>Quotas de disque</a>
 check_egquotasync=Les quotas de disque par défaut pour les nouveaux groupes sont activés sur les systèmes de fichiers: $1. Cela n'est pas nécessaire, car Virtualmin définit des quotas pour les nouveaux domaines et doit donc être désactivé dans le module <a href='$2'>Quotas de disque</a>
 check_allresel=Mise à jour de tous les revendeurs avec de nouveaux paramètres ..
 check_plugin=Le plug-in $1 est installé
 check_eplugin=Le plug-in $1 ne peut pas être utilisé  : $2
+check_evpopmail=Le support du serveur de messagerie VPOPMail a été supprimé de Virtualmin !
+check_eexim=Le support du serveur de messagerie Exim a été supprimé de Virtualmin !
 check_spamok=SpamAssassin et Procmail sont installés et configurés pour être utilisés
 check_spamglobal=SpamAssassin est configuré pour être exécuté à partir de la configuration globale de Procmail $1, ce qui n'est pas nécessaire car Virtualmin le configurera par domaine
 check_spamwhite=La liste blanche de toutes les boîtes aux lettres de chaque domaine est activée sur la page <a href='$1'>Configuration Virtualmin</a>, mais cela est incompatible avec l'utilisation de la <a href='$2'>spamc</a> SpamAssassin programme client
@@ -1950,7 +1951,6 @@ mail_system_0=Postfix
 mail_system_1=Envoyer un mail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
-mail_system_5=Qmail+VPOPMail
 
 databases_canadd1=En fonction des limites de votre revendeur, $1 bases de données supplémentaires peuvent être ajoutées.
 databases_canadd2=En fonction de vos limites de revendeur, $1 bases de données supplémentaires peuvent être ajoutées.
@@ -3511,7 +3511,6 @@ balancers_ecannot=Vous n'êtes pas autorisé à modifier les chemins d'accès pr
 balancers_esupport=Le domaine ou le système ne prend pas en charge les proxys
 balancers_add=Ajoutez un nouveau chemin de proxy.
 balancers_path=Chemin URL
-balancers_name=Nom de l'équilibreur
 balancers_urls=URL de destination
 balancers_used2=Utilisé par
 balancers_delete=Supprimer les proxys sélectionnés
@@ -3526,8 +3525,6 @@ balancer_create=Créer un chemin proxy
 balancer_edit=Modifier le chemin du proxy
 balancer_egone=Le chemin du proxy sélectionné n'existe plus
 balancer_header=Détails du proxy HTTP
-balancer_name=Nom de l'équilibreur
-balancer_auto=Sélectionnez automatiquement
 balancer_path=Chemin de l'URL locale
 balancer_urls=URL de destination
 balancer_url=URL de destination
@@ -5152,8 +5149,6 @@ deftmplt_tmpltpagefootersourcesshop=Boutique
 deftmplt_tmpltpagefooterabout=À propos
 deftmplt_tmpltpagefooteraboutcomp=Entreprise
 deftmplt_tmpltpagefooteraboutcont=Contact
-deftmplt_tmpltpagefooteraboutpriv=politique de confidentialité
-deftmplt_tmpltpagefooteraboutterms=Termes et conditions
 
 2fa_title=Authentification à deux facteurs
 2fa_euser=L'utilisateur Webmin n'existe pas!

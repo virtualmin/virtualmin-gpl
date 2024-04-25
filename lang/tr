@@ -41,7 +41,6 @@ index_emodssl2=Sisteminizdeki Apache konfigürasyonu, SSL web sitelerini barýnd
 index_esendmail=Sisteminizde Sendmail Posta Sunucusu ya kurulu deðil ya da Webmin'in <a href='$1'>Sendmail Konfigürasyonu</a> modülüyle uygun olarak ayarlanmamýþ. Eðer farklý bir posta sunucusu kullanýyorsanýz, <a href='$2'>modül konfigürasyoýnu</a> sayfasýndan seçiniz.
 index_epostfix=Sisteminizde Postfix Posta Sunucusu ya kurulu deðil ya da Webmin'in <a href='$1'>Postfix Konfigürasyonu</a> modülüyle uygun olarak ayarlanmamýþ. Eðer farklý bir posta sunucusu kullanýyorsanýz, <a href='$2'>modül konfigürasyonu</a> sayfasýndan seçiniz.
 index_eqmail=Sisteminizde QMail Posta Sunucusu ya kurulu deðil ya da Webmin'in <a href='$1'>QMail Konfigürasyonu</a> modülüyle uygun olarak ayarlanmamýþ. Eðer farklý bir posta sunucusu kullanýyorsanýz, <a href='$2'>modül konfigürasyonu</a> sayfasýndan seçiniz.
-index_evpopmail=Sisteminizde QMail Posta Sunucusu ya kurulu deðil (VPOPMail uzantýlarý yok) ya da Webmin'in <a href='$1'>QMail Konfigürasyonu</a> modülüyle uygun olarak ayarlanmamýþ. Eðer farklý bir posta sunucusu kullanýyorsanýz, <a href='$2'>modül konfigürasyonu</a> sayfasýndan seçiniz.
 index_eiface=Sisteminizde ethernet arabirimi bulunamadý. <a href='$1'>module konfigürasyonu</a> sayfasýný kullanarak arabirimi kendiniz ayarlayýn.
 index_elogrotate=Logrotate programý ya sisteminizde kurulu deðil ya da Webmin <a href='$1'>Log Dosyasý Çevirimi</a> modülü içinde düzgün olarak ayarlanmamýþ. Eðer sisteminiz Logrotate programýný kullanmýyorsa, Virtualmin'i <a href='$2'>modül konfigürasyonu</a> sayfasýndan kapatýlmalýdýr.
 index_elogrotatever=Logrotate programý $3 versiyonunda, fakat Virtualmin'in birden çok log dosyasýný ayný bölümde desteklemesi için $4 veya üstü versiyonlar gerekir.
@@ -280,7 +279,6 @@ setup_edepwebalizer=Bir web sitesi yapýlandýrýlmadýkça webalizer etkinleþt
 setup_edepssl=Bir web sitesi yapýlandýrýlmadýkça SSL etkinleþtirilemez
 setup_edepftp=Bir sanal IP adresi tahsis edilmedikçe sanal FTP etkinleþtirilemez
 setup_edepspam=E-posta etkinleþtirilmedikçe spam filtrelemesi etkinleþtirilemez
-setup_edepspamvpop=Spam filtrelemesi VPopMail ile birlikte kullanýlamaz
 setup_edepvirus=E-posta ve spam filtrelemesi etkinleþtirilmedikçe virüs filtrelemesi etkinleþtirilemez
 setup_edepstatus=Bir web sitesi etkinleþtirilmedikçe durum monitörü etkinleþtirilemez
 setup_ecrgroup=Unix grubu oluþturulamadý!
@@ -1276,7 +1274,6 @@ check_postfixok=E-posta sunucusu Postfix kurulu
 check_qmailok=E-posta sunucusu Qmail kurulu
 check_qmailmode6=E-posta sunucusu Qmail kurulu ve yapýlandýrýlmýþ. Buna raðmen sunucu þablonlarý sayfasýndaki kullanýcý ismi biçimi <b>kullanýcýismi@domain</b> þeklinde ayarlandýðýndan çlýþmayabilir
 check_postfixmode6=E-posta sunucusu Postfix kurulu ve yapýlandýrýlmýþ. Buna raðmen sunucu þablonlarý sayfasýndaki kullanýcý ismi biçimi <b>kullanýcýismi@domain</b> þeklinde ayarlandýðýndan ve bu ayar Postfix tarafýndan desteklenmediði için çalýþmaz
-check_vpopmailok=Mail sunucusu Qmail (VPOPMail uzantýlý) kurulu
 check_done=.. ...sisteminiz Virtualmin kullanýmýna hazýr
 check_failed=.. sisteminiz Virtualmin kullanýmýna hazýr deðil
 check_nogroup=Anaklasörler ve e-posta klasörleri için kullanýcý kotalarý etkinleþtirildi fakat grup kotalarý etkinleþtirilmedi. Toplam sanal sunucu kotalarý zorlanmayacak
@@ -2008,7 +2005,6 @@ mail_system_0=Postfix
 mail_system_1=Sendmail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
-mail_system_5=Qmail+VPOPMail
 
 databases_title=Veritabanlarýný Düzenle
 databases_none=Bu sanal sunucuda henüz veritabaný yok.
