@@ -526,9 +526,189 @@ if (&domain_has_website($d) eq 'virtualmin-nginx' &&
 sub script_wordpress_kit
 {
 my ($d, $script, $sinfo) = @_;
-### XXX
-my $rows;
-return $rows;
+my $opts = $sinfo->{'opts'};
+my $php = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
+my $wp_cli = "$php $opts->{'dir'}/wp-cli.phar --path=$opts->{'dir'}";
+my $_t = 'scripts_kit_wp_';
+
+# Has to be called using eval for maximum speed (avg 
+# expected load time is + 0.5s to default page load)
+my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
+    "wp_debug" => defined("WP_DEBUG") ? WP_DEBUG : 0, 
+    "wp_debug_display" => defined("WP_DEBUG_DISPLAY") ? WP_DEBUG_DISPLAY : 0, 
+    "wp_debug_log" => defined("WP_DEBUG_LOG") ? str_replace("'.$opts->{'dir'}.'", "", WP_DEBUG_LOG) : 0, 
+    "wp_memory_limit" => defined("WP_MEMORY_LIMIT") ? WP_MEMORY_LIMIT : 0, 
+    "wp_max_memory_limit" => defined("WP_MAX_MEMORY_LIMIT") ? WP_MAX_MEMORY_LIMIT : 0, 
+    "disallow_file_edit" => defined("DISALLOW_FILE_EDIT") ? DISALLOW_FILE_EDIT : 0, 
+    "concatenate_scripts" => defined("CONCATENATE_SCRIPTS") ? (CONCATENATE_SCRIPTS == false ? 0 : 1) : 1, 
+    "wp_auto_update_core" => defined("WP_AUTO_UPDATE_CORE") ? WP_AUTO_UPDATE_CORE : 0, 
+    "automatic_updater_disabled" => defined("AUTOMATIC_UPDATER_DISABLED") ? AUTOMATIC_UPDATER_DISABLED : 0, 
+    "blogname" => get_option("blogname"), 
+    "blog_public" => get_option("blog_public"), 
+    "default_pingback_flag" => get_option("default_pingback_flag"), 
+    "default_ping_status" => get_option("default_ping_status"), 
+    "maintenance_mode" => get_option("maintenance_mode"), 
+    "admin_email" => get_option("admin_email"),
+    "version" => get_bloginfo("version"),
+    "description" => get_bloginfo("description"),
+    "wpurl" => get_bloginfo("wpurl"),
+    "url" => get_bloginfo("url"),
+    "language" => get_bloginfo("language"),
+    "plugins" => array_map(function($plugin) {
+        require_once(ABSPATH . "wp-admin/includes/plugin.php");
+        require_once(ABSPATH . "wp-admin/includes/update.php");
+        $data = get_plugin_data(WP_PLUGIN_DIR . "/" . $plugin);
+        $update = get_site_transient("update_plugins");
+        return [
+            "name" => $data["Name"],
+            "version" => $data["Version"],
+            "new_version" => isset($update->response[$plugin]) ? $update->response[$plugin]->new_version : 0
+        ];
+    }, array_keys(get_plugins())),
+    "themes" => array_map(function($theme) {
+        require_once(ABSPATH . "wp-admin/includes/theme.php");
+        require_once(ABSPATH . "wp-admin/includes/update.php");
+        $theme_data = wp_get_theme($theme);
+        $update = get_site_transient("update_themes");
+        return [
+            "name" => $theme_data->get("Name"),
+            "version" => $theme_data->get("Version"),
+            "new_version" => isset($update->response[$theme]) ? $update->response[$theme]->new_version : 0
+        ];
+    }, array_keys(wp_get_themes()))
+]);\'';
+my $wp = &run_as_domain_user($d, "$wp_cli_command 2>&1");
+eval { $wp = &convert_from_json($wp); };
+if ($@) {
+	&error_stderr("Failed to parse JSON output from WP-CLI command : $@");
+	my $err = " : $@";
+	$err = " : $wp" if ($wp);
+	return "<pre>$err</pre>";
+	}
+
+# Setttings tab
+my $settings_tab_content;
+# Site URL
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}url"},
+	value => &ui_opt_textbox(
+	    "kit_url", undef, 35, $wp->{'url'} . "<br>",
+	    $text{'edit_set'})});
+# Home
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}wpurl"},
+	value => &ui_opt_textbox(
+	    "kit_wpurl", undef, 35, $wp->{'wpurl'} . "<br>",
+	    $text{'edit_set'})});
+# Admin email
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}admin_email"},
+	value => &ui_opt_textbox(
+	    "kit_admin_email", undef, 30, $wp->{'admin_email'} . "<br>",
+	    $text{'edit_set'})});
+# Set password
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}admin_pass"},
+	value => &ui_opt_textbox(
+	    "kit_admin_password", undef, 20, $text{'user_passdef'},
+	    $text{'edit_set'})});
+# Site name
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}blogname"},
+	value => &ui_opt_textbox(
+	    "kit_blogname", undef, 25, $wp->{'blogname'} . "<br>",
+	    $text{'edit_set'})});
+# Site description
+if ($wp->{'description'}) {
+	push(@$settings_tab_content, {
+		desc  => $text{"${_t}description"},
+		value => &ui_opt_textbox(
+		"kit_description", undef, 35, $wp->{'description'} . "<br>",
+		$text{'edit_set'}) });
+	}
+# Debug mode
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}debug"},
+	value => &ui_radio(
+	    "kit_wp_debug",
+	    $wp->{'wp_debug'} ? ($wp->{'wp_debug_log'} ? 2 : 1) : 0,
+		[ [ 0, $text{"${_t}debug0"} . "<br>" ],
+		  [ 1, $text{"${_t}debug1"} . "<br>" ],
+		  [ 2, $text{"${_t}debug2"} ] ] )});
+# Maintenance mode
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}maintenance_mode"},
+	value => &ui_yesno_radio(
+	    "kit_maintenance_mode", $wp->{'maintenance_mode'} ? 1 : 0)});
+# Site visibility
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}blog_public"},
+	value => &ui_yesno_radio(
+	    "kit_blog_public", $wp->{'blog_public'} ? 1 : 0)});
+# Pingbacks
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}default_pingback_flag"},
+	value => &ui_yesno_radio(
+	    "kit_default_pingback_flag",
+	    	$wp->{'default_pingback_flag'} ? 1 : 0)});
+# Trackbacks
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}default_ping_status"},
+	value => &ui_yesno_radio(
+	    "kit_default_ping_status",
+	    	$wp->{'default_ping_status'} eq 'open' ? 1 : 0)});
+# File editing
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}disallow_file_edit"},
+	value => &ui_yesno_radio(
+	    "kit_disallow_file_edit", $wp->{'disallow_file_edit'} ? 1 : 0)});
+# Script concatenation
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}concatenate_scripts"},
+	value => &ui_yesno_radio(
+	    "kit_concatenate_scripts", $wp->{'concatenate_scripts'} ? 1 : 0)});
+# Memory limit
+push(@$settings_tab_content, {
+	desc  => $text{"${_t}memory_limit"},
+	value => &ui_opt_textbox(
+	    "kit_memory_limit", undef, 6,
+	    	"$text{\"${_t}memory_limit_upto\"} $wp->{'wp_memory_limit'}",
+		$text{'edit_set'})});
+
+# XXX: Add more tabs
+
+# Tabs
+my @tabs = (
+	[ "settings", 'Settings' ],
+	[ "plugins_and_themes", 'Plugin and Themes' ],
+	[ "clone", 'Clone' ],
+	[ "backup", 'Backup and Restore' ] );
+
+my $data = &ui_tabs_start(\@tabs, "tab", "settings", 0);
+
+$data .= &ui_tabs_start_tab("tab", "settings");
+$data .= &ui_table_start(undef, "width=100%", 2);
+foreach my $option (@$settings_tab_content) {
+	$data .= &ui_table_row($option->{'desc'}, $option->{'value'});
+	}
+$data .= &ui_table_end();
+$data .= &ui_tabs_end_tab();
+
+$data .= &ui_tabs_start_tab("tab", "clone");
+$data .= "";
+$data .= &ui_tabs_end_tab();
+
+$data .= &ui_tabs_start_tab("tab", "plugins_and_themes");
+$data .= "";
+$data .= &ui_tabs_end_tab();
+
+$data .= &ui_tabs_start_tab("tab", "backup");
+$data .= "";
+$data .= &ui_tabs_end_tab();
+
+$data .= &ui_tabs_end();
+
+return $data;
 }
 
 1;
