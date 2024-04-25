@@ -921,7 +921,7 @@ if ($p ne 'web') {
 	return &plugin_call($p, "feature_web_supported_php_modes", $d);
 	}
 my @rv = ( "none" );
-foreach my $ver (&list_available_php_versions()) {
+foreach my $ver (&list_available_php_versions($d, "all")) {
 	push(@rv, @{$ver->[2]});
 	}
 return &unique(@rv);
@@ -938,7 +938,7 @@ return { 'mod_php' => 0,
 	 'none' => 4, };
 }
 
-# list_available_php_versions([&domain], [forcemode])
+# list_available_php_versions([&domain], [forcemode|"all"])
 # Returns a list of PHP versions and their executables installed on the system,
 # for use by a domain. If forcemode is not set, the mode is taken from the
 # domain.
@@ -948,12 +948,13 @@ local ($d, $mode) = @_;
 if ($d) {
 	$mode ||= &get_domain_php_mode($d);
 	}
+$mode ||= "all";
 return () if ($mode eq "none");
 &require_apache();
 
 # In FPM mode, only the versions for which packages are installed can be used
 my @rv;
-if ($mode eq "fpm" || !$mode) {
+if ($mode eq "fpm" || $mode eq "all") {
 	foreach my $conf (grep { !$_->{'err'} } &list_php_fpm_configs()) {
 		my $ver = $conf->{'shortversion'};
 		my $cmd = $conf->{'cmd'} || &php_command_for_version($ver, 0);
@@ -970,7 +971,7 @@ if ($mode eq "fpm" || !$mode) {
 	}
 
 # Add the mod_php version if installed
-if ($mode eq "mod_php" || !$mode) {
+if ($mode eq "mod_php" || $mode eq "all") {
 	my $v = &get_apache_mod_php_version();
 	if ($v) {
 		my $cmd = &has_command("php$v") ||
@@ -1016,8 +1017,8 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	}
 
 # Add versions found to the final list for CGI and fcgid modes
-my @cgimodes = &has_cgi_support($d) &&
-	       (!$d || &get_domain_cgi_mode($d)) ? ("fcgid", "cgi") : ( );
+my @cgimodes = ($d ? &get_domain_cgi_mode($d) : &has_cgi_support()) ?
+			("fcgid", "cgi") : ( );
 foreach my $v (sort { $a <=> $b } (keys %vercmds)) {
 	my ($already) = grep { $_->[0] eq $v } @rv;
 	if ($already) {
@@ -1029,7 +1030,7 @@ foreach my $v (sort { $a <=> $b } (keys %vercmds)) {
 	}
 
 # If a mode was given, filter down to it
-if ($mode) {
+if ($mode ne "all") {
 	@rv = grep { &indexof($mode, @{$_->[2]}) >= 0 } @rv;
 	}
 
