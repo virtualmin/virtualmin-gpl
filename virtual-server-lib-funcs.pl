@@ -18191,9 +18191,8 @@ sub available_shells
 {
 my ($type, $value, $mustftp) = @_;
 my @aashells = &list_available_shells(undef, $mustftp ? 0 : undef);
-my %sshells;
-my @tshells = grep { &can_mailbox_ssh() || $_->{$type} }
-	grep { !$seen{$_->{shell}}++ } @aashells;
+$type = 'owner' if (&can_mailbox_ssh());
+my @tshells = grep { $_->{$type} } @aashells;
 my @ashells = grep { $_->{'avail'} } @tshells;
 if ($mustftp) {
 	# Only show shells with FTP access or better
