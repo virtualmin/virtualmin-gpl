@@ -11446,12 +11446,7 @@ if ($p eq 'web') {
 	# Check if Apache supports suexec or fcgiwrap
 	my @rv;
 	push(@rv, 'suexec') if (&supports_suexec($d));
-	if ($d) {
-		push(@rv, 'fcgiwrap') if ($d->{'fcgiwrap_port'});
-		}
-	else {
-		push(@rv, 'fcgiwrap') if (&supports_fcgiwrap());
-		}
+	push(@rv, 'fcgiwrap') if (&supports_fcgiwrap());
 	return @rv;
 	}
 elsif ($p) {
@@ -11475,7 +11470,7 @@ if ($p eq 'web') {
 	if (&get_domain_suexec($d)) {
 		return 'suexec';
 		}
-	elsif (&get_domain_fcgiwrap($d)) {
+	elsif ($d->{'fcgiwrap_port'} && &get_domain_fcgiwrap($d)) {
 		return 'fcgiwrap';
 		}
 	return undef;
