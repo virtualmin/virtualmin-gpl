@@ -4496,6 +4496,8 @@ scripts_gpl_to_pro=Now only available in Pro
 scripts_gpl_to_pro_upgrade=Upgrade for this script is now only available in Pro
 
 scripts_kit=$1 Kit
+scripts_kit_not_set=Not set
+scripts_kit_unlimited=Unlimited
 scripts_kit_wp_url=Site URL
 scripts_kit_wp_wpurl=Home URL
 scripts_kit_wp_admin_email=Administrator email address
@@ -4507,6 +4509,7 @@ scripts_kit_wp_debug0=Disabled
 scripts_kit_wp_debug1=Enabled, with errors displayed
 scripts_kit_wp_debug2=Enabled, with errors logged to <tt>~/logs/wp_debug_log</tt>
 scripts_kit_wp_memory_limit=Memory limit
+scripts_kit_wp_max_memory_limit=Admin Memory limit
 scripts_kit_wp_memory_limit_upto=Up to
 scripts_kit_wp_maintenance_mode=Enable maintenance mode
 scripts_kit_wp_blog_public=Enable search engine indexing
@@ -4514,6 +4517,10 @@ scripts_kit_wp_default_pingback_flag=Enable pingbacks
 scripts_kit_wp_default_ping_status=Enable trackbacks
 scripts_kit_wp_disallow_file_edit=Disable file editing
 scripts_kit_wp_concatenate_scripts=Enable scripts concatenation
+scripts_kit_wp_auto_update_core=Enable automatic core updates
+scripts_kit_wp_auto_updates_disabled=Disabled
+scripts_kit_wp_auto_updates_minor=Enabled for minor versions
+scripts_kit_wp_auto_updates_major_minor=Enabled for major and minor versions
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up

@@ -674,6 +674,24 @@ push(@$settings_tab_content, {
 	    "kit_memory_limit", undef, 6,
 	    	"$text{\"${_t}memory_limit_upto\"} $wp->{'wp_memory_limit'}",
 		$text{'edit_set'})});
+# Admin memory limit
+push(@$settings_tab_content, {
+	desc  => &hlink($text{"${_t}max_memory_limit"}, "kit_wp_max_memory_limit"),
+	value => &ui_opt_textbox(
+	    "kit_max_memory_limit", undef, 6,
+		"$text{\"${_t}memory_limit_upto\"} ".
+			($wp->{'wp_max_memory_limit'} == -1 ? '256M' : 
+			 $wp->{'wp_max_memory_limit'}),
+		$text{'edit_set'})});
+# Site automatic updates
+push(@$settings_tab_content, {
+	desc  => &hlink($text{"${_t}auto_update_core"}, "kit_wp_auto_update_core"),
+	value => &ui_radio(
+	    "kit_auto_updates", $wp->{'automatic_updater_disabled'} == 1 ? 0 : $wp->{'wp_auto_update_core'},
+		[ [ 0, $text{"${_t}auto_updates_disabled"} . "<br>" ],
+		  [ 1, $text{"${_t}auto_updates_minor"} . "<br>" ],
+		  [ 2, $text{"${_t}auto_updates_major_minor"} ] ] )});
+
 
 # XXX: Add more tabs
 
