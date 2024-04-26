@@ -541,7 +541,7 @@ my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
     "wp_max_memory_limit" => defined("WP_MAX_MEMORY_LIMIT") ? WP_MAX_MEMORY_LIMIT : 0, 
     "disallow_file_edit" => defined("DISALLOW_FILE_EDIT") ? DISALLOW_FILE_EDIT : 0, 
     "concatenate_scripts" => defined("CONCATENATE_SCRIPTS") ? (CONCATENATE_SCRIPTS == false ? 0 : 1) : 1, 
-    "wp_auto_update_core" => defined("WP_AUTO_UPDATE_CORE") ? WP_AUTO_UPDATE_CORE : 0, 
+    "wp_auto_update_core" => defined("WP_AUTO_UPDATE_CORE") ? (WP_AUTO_UPDATE_CORE == true ? 2 : (WP_AUTO_UPDATE_CORE == "minor" ? 1 : 0)) : (defined("WP_DEBUG") ? (WP_DEBUG == true ? 2 : 1) : 1),
     "automatic_updater_disabled" => defined("AUTOMATIC_UPDATER_DISABLED") ? AUTOMATIC_UPDATER_DISABLED : 0, 
     "blogname" => get_option("blogname"), 
     "blog_public" => get_option("blog_public"), 
