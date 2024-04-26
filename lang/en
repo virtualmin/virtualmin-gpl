@@ -5518,6 +5518,7 @@ phpmode_maxtime=Maximum PHP script run time
 phpmode_maxing=Changing maximum PHP script run time to $1 seconds ..
 phpmode_nomax=Removing limit on maximum PHP script run time ..
 phpmode_emaxtime=Missing or invalid maximum PHP script run time
+phpmode_ecgimode=The CGI and fCGId PHP modes depend on CGI script support
 phpmode_moding=Changing PHP execution mode to $1 ..
 phpmode_emoding=.. change failed : $1
 phpmode_emode=.. selected mode is not supported!
