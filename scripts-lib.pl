@@ -3163,8 +3163,7 @@ push(@rv, map { &text('scripts_icommand', "<tt>$_</tt>") }
 
 # Check for webserver CGI or PHP support
 local $p = &domain_has_website($d);
-local @cancgi = &has_cgi_support($d);
-if (&indexof("cgi", @{$script->{'uses'}}) >= 0 && !@cancgi) {
+if (&indexof("cgi", @{$script->{'uses'}}) >= 0 && !&get_domain_cgi_mode($d)) {
 	return $text{'scripts_inocgi'};
 	}
 if ($p ne "web" && &indexof("apache", @{$script->{'uses'}}) >= 0) {
