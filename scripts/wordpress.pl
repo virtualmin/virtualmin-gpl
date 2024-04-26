@@ -550,7 +550,7 @@ my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
     "maintenance_mode" => get_option("maintenance_mode"), 
     "admin_email" => get_option("admin_email"),
     "version" => get_bloginfo("version"),
-    "description" => get_bloginfo("description"),
+    "blogdescription" => get_option("blogdescription"),
     "wpurl" => get_bloginfo("wpurl"),
     "url" => get_bloginfo("url"),
     "language" => get_bloginfo("language"),
@@ -618,12 +618,12 @@ push(@$settings_tab_content, {
 	value => &ui_opt_textbox(
 	    "kit_blogname", undef, 25, $wp->{'blogname'} . "<br>",
 	    $text{'edit_set'})});
-# Site description
+# Site blogdescription
 push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}description"}, "kit_wp_description"),
+	desc  => &hlink($text{"${_t}blogdescription"}, "kit_wp_blogdescription"),
 	value => &ui_opt_textbox(
-	    "kit_description", undef, 35,
-	    $text{"scripts_kit_not_set"} || $wp->{'description'} . "<br>",
+	    "kit_blogdescription", undef, 35,
+	    $wp->{'blogdescription'} || $text{"scripts_kit_not_set"} . "<br>",
 	    $text{'edit_set'}) });
 # Site visibility
 push(@$settings_tab_content, {
