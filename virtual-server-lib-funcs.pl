@@ -18184,7 +18184,12 @@ else {
 sub available_shells
 {
 my ($type, $value, $mustftp) = @_;
+$type = [ $type ] if (!ref($type));
 my @aashells = &list_available_shells(undef, $mustftp ? 0 : undef);
+my @tshells;
+foreach my $t (@$type) {
+	push(@tshells, grep { $_->{$t} } @aashells);
+	}
 my @tshells = grep { $_->{$type} } @aashells;
 my @ashells = grep { $_->{'avail'} } @tshells;
 if ($mustftp) {
