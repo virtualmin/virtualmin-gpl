@@ -4031,25 +4031,6 @@ database_encoding=Encoding for new database
 database_opts=Additional options for $1
 database_edbdef=You are not allowed to delete the default database for a domain
 
-vfile_title=Edit Autoresponder File
-vfile_ecannot=You are not allowed to edit autoresponder files
-vfile_desc=Use the text area below to edit the autoresponder message in $1.
-vfile_time=Time to remember sender
-vfile_secs=seconds
-vfile_num=Number of replies to send in that time
-vfile_dir=Log file directory
-vfile_auto=Automatic
-vfile_flag=Append original message?
-vfile_from=From: address for reply
-vfile_blank=Blank
-vfile_to=Destination address
-vfile_other=Other address
-vfile_err=Failed to save autoresponder file
-vfile_etime=Missing or invalid time to remember sender
-vfile_enum=Missing or invalid number of replies to send
-vfile_edir=Missing or non-existant log directory
-vfile_eother=Missing From: address for reply
-
 reemail_title=Re-Send Signup Email
 reemail_dis=The signup email cannot be sent to this server owner, as it is disabled in the server's template.
 reemail_desc=This page can be used to re-send the email that was originally sent when the virtual server was created.

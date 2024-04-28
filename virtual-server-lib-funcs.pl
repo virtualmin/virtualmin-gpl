@@ -5083,8 +5083,7 @@ for(my $i=0; $i<=@values+2; $i++) {
 	if (&can_edit_afiles()) {
 		local $prog = $type == 2 ? "edit_afile.cgi" :
 			      $type == 5 ? "edit_rfile.cgi" :
-			      $type == 6 ? "edit_ffile.cgi" :
-			      $type == 12 ? "edit_vfile.cgi" : undef;
+			      $type == 6 ? "edit_ffile.cgi" : undef;
 		if ($prog && $_[2]) {
 			local $di = $_[2] ? $_[2]->{'id'} : undef;
 			$f .= "<a href='$prog?dom=$di&amp;file=$val&amp;$_[3]=$_[4]&amp;idx=$i'>$text{'alias_afile'}</a>\n";
