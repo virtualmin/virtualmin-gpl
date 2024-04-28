@@ -87,7 +87,7 @@ if ($user_type eq 'ssh') {
 
 	# Show SSH shell select if more than one available
 	my @ssh_shells = &list_available_shells_by_type(
-		['owner', mailbox'], 'ssh');
+		['owner', 'mailbox'], 'ssh');
 	my $ssh_shell = $ssh_shells[0]->{'shell'};
 	if (scalar(@ssh_shells) == 1) {
 		print &ui_hidden("shell", $ssh_shell);
