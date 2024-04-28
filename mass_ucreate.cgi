@@ -251,7 +251,7 @@ USER: foreach $line (@lines) {
 
 	# Check for clash within this domain
 	local ($clash) = grep { &remove_userdom($_->{'user'}, $d) eq
-				  &remove_userdom($username, $d) &&
+				  &remove_userdom($username, $d)
 			      } @users;
 	if ($clash) {
 		&line_error($text{'user_eclash2'});
