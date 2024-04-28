@@ -145,10 +145,6 @@ while(@ARGV > 0) {
 		$mquota = shift(@ARGV);
 		$mquota = 0 if ($mquota eq "UNLIMITED");
 		}
-	elsif ($a eq "--qmail-quota") {
-		$qquota = shift(@ARGV);
-		$qquota = 0 if ($qquota eq "UNLIMITED");
-		}
 	elsif ($a eq "--mysql") {
 		$db = shift(@ARGV);
 		push(@dbs, { 'type' => 'mysql', 'name' => $db });
@@ -220,9 +216,6 @@ if (!$user->{'noquota'}) {
 	if (&has_mail_quotas() && defined($mquota)) {
 		$mquota =~ /^\d+$/ || &usage("Quota must be a number");
 		}
-	}
-if ($user->{'mailquota'}) {
-	!$qquota || $qquota =~ /^\d+$/ || usage("Mail quota must be a number");
 	}
 $err = &valid_mailbox_name($username);
 &usage($err) if ($err);
@@ -334,9 +327,6 @@ if (!$user->{'noprimary'}) {
 	}
 if (defined($recovery)) {
 	$user->{'recovery'} = $recovery;
-	}
-if ($user->{'mailquota'}) {
-	$user->{'qquota'} = $qquota;
 	}
 if (!$user->{'noquota'}) {
 	# Set quotas, if not using the defaults

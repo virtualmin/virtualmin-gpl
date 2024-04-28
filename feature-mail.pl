@@ -2658,10 +2658,6 @@ foreach $u (&list_domain_users($d)) {
 			&print_tempfile(UFILE, ":-");
 			}
 		}
-	elsif ($u->{'mailquota'}) {
-		&print_tempfile(UFILE, ":$u->{'qquota'}");
-		&print_tempfile(UFILE, ":-");
-		}
 	else {
 		&print_tempfile(UFILE, ":-:-");
 		}
@@ -3030,10 +3026,7 @@ while(<UFILE>) {
 		$uinfo->{'shell'} = $user[6];
 		$uinfo->{'email'} = $user[7];
 		$uinfo->{'to'} = \@to;
-		if ($uinfo->{'mailquota'}) {
-			$uinfo->{'qquota'} = $user[8];
-			}
-		elsif (!$uinfo->{'noquota'}) {
+		if (!$uinfo->{'noquota'}) {
 			$uinfo->{'quota'} = $user[8];
 			$uinfo->{'mquota'} = $user[9];
 			}

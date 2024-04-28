@@ -146,10 +146,6 @@ foreach $d (@doms) {
 				($u->{'domainowner'} ? "Server owner" :
 				 $u->{'webowner'} ? "Website manager" :
 						    "Normal user"),"\n";
-			if ($u->{'mailquota'}) {
-				print "    Mail server quota: ",
-				      $u->{'qquota'},"\n";
-				}
 			if (&has_home_quotas() && !$u->{'noquota'}) {
 				print "    Home quota: ",
 				      &quota_show($u->{'quota'}, "home"),"\n";
@@ -312,7 +308,6 @@ foreach $d (@doms) {
 				    $u->{'email'} ? "Yes" : "No",
 				    $shell->{'id'} eq 'nologin' ? "No" : "Yes",
 				    scalar(@{$u->{'dbs'}}) || "No",
-				    $u->{'mailquota'} ? $u->{'qquota'} :
 				    &has_home_quotas() ? 
 					    &quota_show($u->{'quota'}, "home") :
 					    "NA";

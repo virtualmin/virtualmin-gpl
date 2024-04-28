@@ -413,7 +413,6 @@ if ($userident->{$origuser}) {
 		$uinfo->{'email'} = lc($mu).'@'.$dom;
 		if ($qu) {
 			$uinfo->{'quota'} = $uinfo->{'mquota'} =
-			  $uinfo->{'qquota'} =
 			    $qu->{'config'}->{'quota'} / &quota_bsize("home");
 			}
 		&create_user_home($uinfo, \%dom, 1);

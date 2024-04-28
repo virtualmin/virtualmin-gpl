@@ -539,7 +539,6 @@ foreach my $name (keys %$mailusers) {
 	if (&has_home_quotas()) {
 		local $q = $mailuser->{'mailbox-quota'} < 0 ? undef :
 				$mailuser->{'mailbox-quota'}*1024;
-		$uinfo->{'qquota'} = $q;
 		$uinfo->{'quota'} = $q / &quota_bsize("home");
 		$uinfo->{'mquota'} = $q / &quota_bsize("home");
 		}

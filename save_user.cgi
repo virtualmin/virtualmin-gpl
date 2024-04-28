@@ -200,17 +200,6 @@ else {
 			# Disable account if requested
 			&set_pass_disable($user, $in{'disable'});
 			}
-		if ($user->{'mailquota'}) {
-			# Check and save qmail quota
-			if (!$in{'qquota_def'}) {
-				$in{'qquota'} =~ /^\d+$/ ||
-					&error($text{'user_eqquota'});
-				$user->{'qquota'} = $in{'qquota'};
-				}
-			else {
-				$user->{'qquota'} = 0;
-				}
-			}
 		if (!$user->{'noquota'}) {
 			# Check and save quota inputs
 			$qedit = &can_mailbox_quota();

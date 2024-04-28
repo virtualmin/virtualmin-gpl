@@ -238,9 +238,6 @@ USER: foreach $line (@lines) {
 		$user->{'quota'} = $quota;
 		$user->{'mquota'} = $mquota;
 		}
-	if ($user->{'mailquota'}) {
-		$user->{'qquota'} = $qquota;
-		}
 	$user->{'dbs'} = \@dbs if (@dbs);
 
 	# Check for a Unix clash

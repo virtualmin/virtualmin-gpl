@@ -298,7 +298,7 @@ if ($user->{'domainowner'}) {
 	defined($pass) &&
 	  &usage("The --pass and --passfile flags cannot be used when ".
 		 "editing a domain owner");
-	($quota || $mquota || $qquota) &&
+	($quota || $mquota) &&
 	  &usage("Quotas cannot be changed when editing a domain owner");
 	(@adddbs || @deldbs) &&
 	  &usage("Databases cannot be changed when editing a domain owner");
@@ -339,9 +339,6 @@ if (defined($mquota) && !$user->{'noquota'}) {
 	    $mquota <= $pd->{'mquota'}||
 		&usage("User's mail quota cannot be higher than domain's ".
 		       "mail quota of $pd->{'quota'}");
-	}
-if (defined($qquota) && $user->{'mailquota'}) {
-	$user->{'qquota'} = $qquota eq "UNLIMITED" ? 0 : $qquota;
 	}
 @domdbs = &domain_databases($d);
 @newdbs = @{$user->{'dbs'}};

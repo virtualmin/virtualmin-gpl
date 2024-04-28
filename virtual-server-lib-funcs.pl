@@ -4529,9 +4529,6 @@ if ($hash{'mquota'}) {
 if ($hash{'umquota'}) {
 	$hash{'umquota'} = &nice_size($user->{'umquota'}*&quota_bsize("mail"));
 	}
-if ($hash{'qquota'}) {
-	$hash{'qquota'} = &nice_size($user->{'qquota'});
-	}
 return %hash;
 }
 
@@ -5628,10 +5625,6 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		else {
 			push(@cols, &quota_show($uquota, "home"));
 			}
-		}
-	if ($u->{'mailquota'}) {
-		push(@cols, $u->{'qquota'} ? &nice_size($u->{'qquota'}) :
-					     $text{'form_unlimit'});
 		}
 
 	if ($config{'show_mailsize'} && $d->{'mail'}) {
@@ -10657,7 +10650,7 @@ $user->{'shell'} = &default_available_shell('mailbox');
 if ($d) {
 	local %init;
 	&read_file("$initial_users_dir/$d->{'id'}", \%init);
-	foreach my $a ("email", "quota", "mquota", "qquota", "shell") {
+	foreach my $a ("email", "quota", "mquota", "shell") {
 		$user->{$a} = $init{$a} if (defined($init{$a}));
 		}
 	foreach my $a ("secs", "to") {
@@ -10685,7 +10678,6 @@ if ($forweb) {
 	$user->{'fixedhome'} = 0;
 	$user->{'home'} = &public_html_dir($d);
 	$user->{'noquota'} = 1;
-	$user->{'mailquota'} = 0;
 	$user->{'noprimary'} = 1;
 	$user->{'noextra'} = 1;
 	$user->{'noalias'} = 1;
@@ -10726,7 +10718,7 @@ if (!-d $initial_users_dir) {
 	}
 &lock_file("$initial_users_dir/$dom->{'id'}");
 local %init;
-foreach my $a ("email", "quota", "mquota", "qquota", "shell") {
+foreach my $a ("email", "quota", "mquota", "shell") {
 	$init{$a} = $user->{$a} if (defined($user->{$a}));
 	}
 foreach my $a ("secs", "to") {

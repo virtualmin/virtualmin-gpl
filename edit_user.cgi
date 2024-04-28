@@ -276,18 +276,9 @@ elsif ($user_type eq 'mail') {
 
 	# Print quota hidden defaults as
 	# it has to be always considered
-	my $showmailquota = $user->{'mailquota'};
 	my $showquota = !$user->{'noquota'};
 	my $showhome = &can_mailbox_home($user) && $d && $d->{'home'} &&
 		       !$user->{'fixedhome'};
-	if ($showmailquota) {
-		my $qquota_default = $user->{'qquota'} ne "none" &&
-				     $user->{'qquota'} ? 0 : 1;
-		my $qquota = &ui_hidden("qquota_def", $qquota_default);
-		$qquota .= &ui_hidden("qquota", $user->{'qquota'})
-			if (!$qquota_default);
-		print $qquota;
-		}
 	if ($showquota) {
 		if (&has_home_quotas()) {
 			my $quota_data = &quota_field(
@@ -827,31 +818,17 @@ else {
 
 	print &ui_hidden_table_end();
 
-	$showmailquota = !$mailbox && $user->{'mailquota'};
 	$showquota = !$mailbox && !$user->{'noquota'};
 	$showhome = &can_mailbox_home($user) && $d && $d->{'home'} &&
 		!$mailbox && !$user->{'fixedhome'};
 
-	if ($showmailquota || $showquota || $showhome) {
+	if ($showquota || $showhome) {
 		# Start quota and home table
 		my $header2_title = 'user_header2';
 		$header2_title = 'user_header2a' if (!$showhome);
-		$header2_title = 'user_header2b' if (!$showmailquota &&
-						     !$showquota);
+		$header2_title = 'user_header2b' if (!$showquota);
 		print &ui_hidden_table_start(
 			$text{$header2_title}, "width=100%", 2, "table2", 0);
-		}
-
-	if ($showmailquota) {
-		# Show Qmail/VPOPMail quota field
-		$user->{'qquota'} = "" if ($user->{'qquota'} eq "none");
-		print &ui_table_row(&hlink($text{'user_qquota'},"qmailquota"),
-			&ui_radio("qquota_def", $user->{'qquota'} ? 0 : 1,
-				[ [ 1, $text{'form_unlimit'} ],
-					[ 0, " " ] ])." ".
-			&ui_textbox("qquota", $user->{'qquota'} || "", 10)." ".
-				$text{'form_bytes'},
-			2, \@tds);
 		}
 
 	if ($showquota) {
@@ -914,7 +891,7 @@ else {
 				2, \@tds);
 		}
 
-	if ($showmailquota || $showquota || $showhome) {
+	if ($showquota || $showhome) {
 		print &ui_hidden_table_end("table2");
 		}
 
