@@ -20,7 +20,7 @@ return "A semantic personal publishing platform with a focus on aesthetics, web 
 # script_wordpress_versions()
 sub script_wordpress_versions
 {
-return ( "6.5.2" );
+return ( "6.5.2", "6.4.4", "6.3.4", "6.2.5", "6.1.6", "6.0.8", "5.9.9", "5.8.9", "5.7.11", "5.6.13", "5.5.14", "5.4.15", "5.3.17", "5.2.20", "5.1.18", "5.0.21", "4.9.25", "4.8.24", "4.7.28", "4.6.28", "4.5.31", "4.4.32", "4.3.33", "4.2.37", "4.1.40", "4.0.38", "3.9.40" );
 }
 
 sub script_wordpress_category
@@ -67,7 +67,7 @@ return ( "mysql" );
 
 sub script_wordpress_release
 {
-return 8;	# Fix regex for passmode
+return 9; # Support fallback download servers: virtualmin.com or custom
 }
 
 sub script_wordpress_php_fullver
@@ -88,7 +88,17 @@ sub script_wordpress_params
 my ($d, $ver, $upgrade) = @_;
 my $rv;
 my $hdir = public_html_dir($d, 1);
+my $download_server = "virtualmin.com";
+if ($config{'wp_download_server'}) {
+	$download_server = $config{'wp_download_server'};
+	$download_server =~ s/^.*:\/\///;
+	}
 if ($upgrade) {
+	$rv .= &ui_table_row("Download WordPress source from",
+		&ui_radio("mirror",
+			$upgrade->{'opts'}->{'mirror'} || 0,
+				[ [ 0, "wordpress.org" ],
+				  [ 1, $download_server ] ]));
 	# Options are fixed when upgrading
 	my ($dbtype, $dbname) = split(/_/, $upgrade->{'opts'}->{'db'}, 2);
 	$rv .= ui_table_row("Database for WordPress tables", $dbname);
@@ -97,6 +107,9 @@ if ($upgrade) {
 	$rv .= ui_table_row("Install directory", $dir);
 	}
 else {
+	$rv .= &ui_table_row("Download WordPress source from",
+		&ui_radio("mirror", 0, [ [ 0, "wordpress.org" ],
+				         [ 1, $download_server ] ]));
 	# Show editable install options
 	my @dbs = domain_databases($d, [ "mysql" ]);
 	$rv .= ui_table_row("Database for WordPress tables",
@@ -119,7 +132,11 @@ sub script_wordpress_parse
 {
 my ($d, $ver, $in, $upgrade) = @_;
 if ($upgrade) {
-	# Options are always the same
+	# Options are always the same except for the mirror
+	if (defined($in->{'mirror'})) {
+		$upgrade->{'opts'}->{'mirror'} =
+			$in->{'mirror'} ? 1 : 0;
+		}
 	return $upgrade->{'opts'};
 	}
 else {
@@ -131,6 +148,7 @@ else {
 	my $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
 	my ($newdb) = ($in->{'db'} =~ s/^\*//);
 	return { 'db' => $in->{'db'},
+		 'mirror' => $in->{'mirror'} ? 1 : 0,
 		 'newdb' => $newdb,
 		 'dir' => $dir,
 		 'noauto' => $in->{'noauto'},
@@ -208,12 +226,21 @@ my $wp = "cd $opts->{'dir'} && $dom_php_bin $opts->{'dir'}/wp-cli.phar";
 &copy_source_dest($files->{'cli'}, "$opts->{'dir'}/wp-cli.phar");
 &set_permissions_as_domain_user($d, 0750, "$opts->{'dir'}/wp-cli.phar");
 
+# Source URL
+my $download_server = "http://scripts.virtualmin.com";
+if ($config{'wp_download_server'}) {
+	$download_server = $config{'wp_download_server'};
+	$download_server = "http://$download_server" if ($download_server !~ /^.*:\/\//);
+	}
+my $download_url = "--version=$version";
+$download_url = "$download_server/wordpress-$version.zip"
+	if ($opts->{'mirror'});
 # Install using cli
 if (!$upgrade) {
 	my $err_continue = "<br>Installation can be continued manually at <a target=_blank href='${url}wp-admin'>$url</a>.";
 
 	# Start installation
-	my $out = &run_as_domain_user($d, "$wp core download --version=$version 2>&1");
+	my $out = &run_as_domain_user($d, "$wp core download $download_url 2>&1");
 	if ($? && $out !~ /Success:\s+WordPress\s+downloaded/i) {
 		return (-1, "\`wp core download\` failed` : $out");
 		}
@@ -285,7 +312,7 @@ if (!$upgrade) {
 else {
 	# Do the upgrade
 	my $out = &run_as_domain_user($d,
-                    "$wp core upgrade --version=$version 2>&1");
+                    "$wp core upgrade $download_url 2>&1");
 	if ($?) {
 		return (-1, "\`wp core upgrade\` failed : $out");
 		}
