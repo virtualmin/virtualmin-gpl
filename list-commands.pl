@@ -76,6 +76,7 @@ foreach my $c (&list_api_categories()) {
 	# Print a line for each command
 	my $donehead = 0;
 	foreach my $cmd (@cmds) {
+		next if (-l $cmd);
 		my $src = &read_file_contents($cmd);
 		next if ($src !~ /=head1\s+(.*)\n\n(.*)\n/);
 		my $desc = $2;
