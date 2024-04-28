@@ -2799,6 +2799,9 @@ if ($config{'web'}) {
 	if (defined(&get_domain_ruby_mode)) {
 		push(@webfields, "web_ruby_suexec");
 		}
+	if (@cgimodes > 0) {
+		push(@webfields, "cgimode");
+		}
 
 	# Apache directives
 	local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
