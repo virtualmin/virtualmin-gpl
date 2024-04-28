@@ -12275,6 +12275,18 @@ else {
 &modify_user($user, $olduser, $d);
 }
 
+# can_domain_shell_login(&domain)
+# Can the domain's shell be used to run commands?
+sub can_domain_shell_login
+{
+my ($d) = @_;
+my $shellpath = &get_domain_shell($d);
+return 0 if (!$shellpath);
+my @ashells = &list_available_shells($d);
+my ($shell) = grep { $_->{'shell'} eq $shellpath } @ashells;
+return $shell && $shell->{'id'} eq 'ssh';
+}
+
 # new_password_input(name)
 # Returns HTML for a password selection field
 sub new_password_input
@@ -13427,7 +13439,8 @@ if ($d->{'dir'} && !$d->{'alias'} &&
 	}
 
 if (&foreign_available("xterm") &&
-    !$d->{'alias'} && $d->{'unix'} && $d->{'user'}) {
+    !$d->{'alias'} && $d->{'unix'} && $d->{'user'} &&
+    &can_domain_shell_login($d)) {
 	# Link to Terminal for master admin
 	push(@rv, { 'page' => 'index.cgi?user='.&urlize($d->{'user'}).
 			      '&dir='.&urlize($d->{'home'}),
