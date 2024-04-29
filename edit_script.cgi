@@ -13,11 +13,6 @@ $opts = $sinfo->{'opts'};
 
 &ui_print_header(&domain_in($d), $text{'scripts_etitle'}, "");
 print "$text{'scripts_udesc'}<p>\n";
-
-# Show install options form
-print &ui_form_start("unscript_install.cgi", "post");
-print &ui_hidden("dom", $in{'dom'}),"\n";
-print &ui_hidden("script", $in{'script'}),"\n";
 print &ui_table_start($text{'scripts_uheader'}, undef, 2);
 
 # Show script description
@@ -152,6 +147,11 @@ if (defined(&$kit_func)) {
 		print &ui_hidden_table_end();
 		}
 	}
+
+# Show install options form
+print &ui_form_start("unscript_install.cgi", "post");
+print &ui_hidden("dom", $in{'dom'}),"\n";
+print &ui_hidden("script", $in{'script'}),"\n";
 
 # Show un-install and upgrade buttons
 print &ui_submit($text{'scripts_uok'}, "uninstall"),"\n";
