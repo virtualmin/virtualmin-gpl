@@ -559,21 +559,35 @@ my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
         require_once(ABSPATH . "wp-admin/includes/update.php");
         $data = get_plugin_data(WP_PLUGIN_DIR . "/" . $plugin);
         $update = get_site_transient("update_plugins");
+	$auto_updates = (array) get_site_option("auto_update_plugins", array());
+    	$isAutoUpdateEnabled = in_array($plugin, $auto_updates);
         return [
             "name" => $data["Name"],
+	    "description" => $data["Description"],
             "version" => $data["Version"],
-            "new_version" => isset($update->response[$plugin]) ? $update->response[$plugin]->new_version : 0
+            "new_version" => isset($update->response[$plugin]) ? $update->response[$plugin]->new_version : 0,
+	    "active" => is_plugin_active($plugin) ? 1 : 0,
+	    "auto_update" => $isAutoUpdateEnabled ? 1 : 0,
+	    "reqphp" => $data["RequiresPHP"],
+	    "reqwp" => $data["RequiresWP"],
         ];
     }, array_keys(get_plugins())),
     "themes" => array_map(function($theme) {
         require_once(ABSPATH . "wp-admin/includes/theme.php");
         require_once(ABSPATH . "wp-admin/includes/update.php");
         $theme_data = wp_get_theme($theme);
+	$current_theme = wp_get_theme()->get_stylesheet();
+	$isActive = ($theme === $current_theme);
         $update = get_site_transient("update_themes");
+	$auto_updates = (array) get_site_option("auto_update_themes", array());
+    	$isAutoUpdateEnabled = in_array($theme, $auto_updates);
         return [
             "name" => $theme_data->get("Name"),
+            "description" => $theme_data->get("Description"),
             "version" => $theme_data->get("Version"),
-            "new_version" => isset($update->response[$theme]) ? $update->response[$theme]->new_version : 0
+            "new_version" => isset($update->response[$theme]) ? $update->response[$theme]->new_version : 0,
+            "active" => $isActive ? 1 : 0,
+	    "auto_update" => $isAutoUpdateEnabled ? 1 : 0,
         ];
     }, array_keys(wp_get_themes()))
 ]);\'';
