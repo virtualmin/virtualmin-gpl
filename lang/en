@@ -4521,6 +4521,13 @@ scripts_kit_wp_auto_update_core=Enable automatic core updates
 scripts_kit_wp_auto_updates_disabled=Disabled
 scripts_kit_wp_auto_updates_minor=Enabled for minor versions
 scripts_kit_wp_auto_updates_major_minor=Enabled for major and minor versions
+scripts_kit_tb_plugin=Plugin
+scripts_kit_tb_theme=Theme
+scripts_kit_tb_installed_version=Installed version
+scripts_kit_tb_update_available=Update available
+scripts_kit_tb_enabled=Enabled
+scripts_kit_tb_active=Active
+scripts_kit_tb_auto_update=Auto-update
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up

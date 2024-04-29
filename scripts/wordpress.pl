@@ -705,43 +705,51 @@ push(@$settings_tab_content, {
 		  [ 1, $text{"${_t}auto_updates_minor"} . "<br>" ],
 		  [ 2, $text{"${_t}auto_updates_major_minor"} ] ] )});
 
-# Select and submit for plugins
+# Plugins tab
 my $plugins_tab_content;
 $plugins_tab_content = "<p></p>" . &ui_columns_start(
-	[ "", "Name",
-	      "Installed version",
-	      "Update available",
-	      "Enabled",
-	      "Auto-update",
+	[ "", $text{'scripts_kit_tb_plugin'},
+	      $text{'scripts_kit_tb_installed_version'},
+	      $text{'scripts_kit_tb_update_available'},
+	      $text{'scripts_kit_tb_enabled'},
+	      $text{'scripts_kit_tb_auto_update'},
 	], 100, 0, [ ( "width=5" ) ]);
 foreach my $plugin (@{$wp->{'plugins'}}) {
 	$plugins_tab_content .= &ui_checked_columns_row([
-		$plugin->{'name'} . " " . &ui_help(&html_escape(&html_strip($plugin->{'description'}))),
-		$plugin->{'version'},
-		$plugin->{'new_version'} ? &ui_text_color($plugin->{'new_version'}, 'success') : "No",
-		$plugin->{'active'} ? "Yes" : "No",
-		$plugin->{'auto_update'} ? "Yes" : "No",
+		&html_escape($plugin->{'name'}) . " " .
+			&ui_help(&html_strip(
+				&html_escape($plugin->{'description'}))),
+		&html_escape($plugin->{'version'}),
+		$plugin->{'new_version'} ?
+			&ui_text_color(&html_escape(
+				$plugin->{'new_version'}), 'success') : $text{'no'},
+		$plugin->{'active'} ? $text{'yes'} : $text{'no'},
+		$plugin->{'auto_update'} ? $text{'yes'} : $text{'no'},
 	], [ ( "width=5" ) ], undef, &quote_escape($plugin->{'name'}, '"'));
 }
 $plugins_tab_content .= &ui_columns_end();
 
-# Select and submit for themes
+# Themes tab
 my $themes_tab_content;
 $themes_tab_content = "<p></p>" . &ui_columns_start(
-	[ "", "Name",
-	      "Installed version",
-	      "Update available",
-	      "Active",
-	      "Auto-update",
+	[ "", $text{'scripts_kit_tb_theme'},
+	      $text{'scripts_kit_tb_installed_version'},
+	      $text{'scripts_kit_tb_update_available'},
+	      $text{'scripts_kit_tb_active'},
+	      $text{'scripts_kit_tb_auto_update'},
 	], 100, 0, [ ( "width=5" ) ]);
-foreach my $plugin (@{$wp->{'themes'}}) {
+foreach my $theme (@{$wp->{'themes'}}) {
 	$themes_tab_content .= &ui_checked_columns_row([
-		$plugin->{'name'} . " " . &ui_help(&html_escape(&html_strip($plugin->{'description'}))),
-		$plugin->{'version'},
-		$plugin->{'new_version'} ? &ui_text_color($plugin->{'new_version'}, 'success') : "No",
-		$plugin->{'active'} ? "Yes" : "No",
-		$plugin->{'auto_update'} ? "Yes" : "No",
-	], [ ( "width=5" ) ], undef, &quote_escape($plugin->{'name'}, '"'));
+		&html_escape($theme->{'name'}) . " " .
+			&ui_help(&html_strip(
+				&html_escape($theme->{'description'}))),
+		&html_escape($theme->{'version'}),
+		$theme->{'new_version'} ?
+			&ui_text_color(&html_escape(
+				$theme->{'new_version'}), 'success') : $text{'no'},
+		$theme->{'active'} ? $text{'yes'} : $text{'no'},
+		$theme->{'auto_update'} ? $text{'yes'} : $text{'no'},
+	], [ ( "width=5" ) ], undef, &quote_escape($theme->{'name'}, '"'));
 }
 $themes_tab_content .= &ui_columns_end();
 
