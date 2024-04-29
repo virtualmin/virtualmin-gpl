@@ -691,13 +691,55 @@ push(@$settings_tab_content, {
 		  [ 1, $text{"${_t}auto_updates_minor"} . "<br>" ],
 		  [ 2, $text{"${_t}auto_updates_major_minor"} ] ] )});
 
+# Select and submit for plugins
+my $plugins_tab_content;
+$plugins_tab_content = "<p></p>" . &ui_columns_start(
+	[ "", "Name",
+	      "Installed version",
+	      "Update available",
+	      "Enabled",
+	      "Auto-update",
+	], 100, 0, [ ( "width=5" ) ]);
+foreach my $plugin (@{$wp->{'plugins'}}) {
+	$plugins_tab_content .= &ui_checked_columns_row([
+		$plugin->{'name'} . " " . &ui_help(&html_escape(&html_strip($plugin->{'description'}))),
+		$plugin->{'version'},
+		$plugin->{'new_version'} ? &ui_text_color($plugin->{'new_version'}, 'success') : "No",
+		$plugin->{'active'} ? "Yes" : "No",
+		$plugin->{'auto_update'} ? "Yes" : "No",
+	], [ ( "width=5" ) ], undef, &quote_escape($plugin->{'name'}, '"'));
+}
+$plugins_tab_content .= &ui_columns_end();
+
+# Select and submit for themes
+my $themes_tab_content;
+$themes_tab_content = "<p></p>" . &ui_columns_start(
+	[ "", "Name",
+	      "Installed version",
+	      "Update available",
+	      "Active",
+	      "Auto-update",
+	], 100, 0, [ ( "width=5" ) ]);
+foreach my $plugin (@{$wp->{'themes'}}) {
+	$themes_tab_content .= &ui_checked_columns_row([
+		$plugin->{'name'} . " " . &ui_help(&html_escape(&html_strip($plugin->{'description'}))),
+		$plugin->{'version'},
+		$plugin->{'new_version'} ? &ui_text_color($plugin->{'new_version'}, 'success') : "No",
+		$plugin->{'active'} ? "Yes" : "No",
+		$plugin->{'auto_update'} ? "Yes" : "No",
+	], [ ( "width=5" ) ], undef, &quote_escape($plugin->{'name'}, '"'));
+}
+$themes_tab_content .= &ui_columns_end();
+
+
 
 # XXX: Add more tabs
 
 # Tabs
 my @tabs = (
 	[ "settings", 'Settings' ],
-	[ "plugins_and_themes", 'Plugin and Themes' ],
+	[ "plugins", 'Plugins' ],
+	[ "themes", 'Themes' ],
 	[ "clone", 'Clone' ],
 	[ "backup", 'Backup and Restore' ] );
 
@@ -715,8 +757,12 @@ $data .= &ui_tabs_start_tab("tab", "clone");
 $data .= "";
 $data .= &ui_tabs_end_tab();
 
-$data .= &ui_tabs_start_tab("tab", "plugins_and_themes");
-$data .= "";
+$data .= &ui_tabs_start_tab("tab", "plugins");
+$data .= $plugins_tab_content;
+$data .= &ui_tabs_end_tab();
+
+$data .= &ui_tabs_start_tab("tab", "themes");
+$data .= $themes_tab_content;
 $data .= &ui_tabs_end_tab();
 
 $data .= &ui_tabs_start_tab("tab", "backup");
