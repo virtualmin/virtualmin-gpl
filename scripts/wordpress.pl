@@ -707,7 +707,17 @@ push(@$settings_tab_content, {
 
 # Plugins tab
 my $plugins_tab_content;
-$plugins_tab_content = "<p></p>" . &ui_columns_start(
+my $table_select_opts =
+	[ [ "", $text{'scripts_kit_wp_selopt_bulk'} ],
+	  [ "activate", $text{'scripts_kit_wp_selopt_activate'} ],
+	  [ "deactivate", $text{'scripts_kit_wp_selopt_deactivate'} ],
+	  [ "update", $text{'scripts_kit_wp_selopt_update'} ],
+	  [ "delete", $text{'scripts_kit_wp_selopt_delete'} ],
+	  [ "enable-auto-update", $text{'scripts_kit_wp_selopt_enable_auto'} ],
+	  [ "disable-auto-update", $text{'scripts_kit_wp_selopt_disable_auto'} ] ];
+$plugins_tab_content = &ui_select("kit_action_p", "", $table_select_opts);
+$plugins_tab_content .= &ui_button($text{'scripts_kit_apply'}, "kit_action_p_apply");
+$plugins_tab_content .= &ui_columns_start(
 	[ "", $text{'scripts_kit_tb_plugin'},
 	      $text{'scripts_kit_tb_installed_version'},
 	      $text{'scripts_kit_tb_update_available'},
@@ -731,7 +741,10 @@ $plugins_tab_content .= &ui_columns_end();
 
 # Themes tab
 my $themes_tab_content;
-$themes_tab_content = "<p></p>" . &ui_columns_start(
+splice(@$table_select_opts, 2, 1);
+$themes_tab_content = &ui_select("kit_action_t", "", $table_select_opts);
+$themes_tab_content .= &ui_button($text{'scripts_kit_apply'}, "kit_action_t_apply");
+$themes_tab_content .= &ui_columns_start(
 	[ "", $text{'scripts_kit_tb_theme'},
 	      $text{'scripts_kit_tb_installed_version'},
 	      $text{'scripts_kit_tb_update_available'},

@@ -4528,6 +4528,14 @@ scripts_kit_tb_update_available=Update available
 scripts_kit_tb_enabled=Enabled
 scripts_kit_tb_active=Active
 scripts_kit_tb_auto_update=Auto-update
+scripts_kit_wp_selopt_bulk=Bulk actions
+scripts_kit_wp_selopt_activate=Activate
+scripts_kit_wp_selopt_deactivate=Deactivate
+scripts_kit_wp_selopt_update=Update
+scripts_kit_wp_selopt_delete=Delete
+scripts_kit_wp_selopt_enable_auto=Enable auto-updates
+scripts_kit_wp_selopt_disable_auto=Disable auto-updates
+scripts_kit_apply=Apply
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up
