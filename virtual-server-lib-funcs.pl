@@ -18245,7 +18245,7 @@ my ($name, $value, $type, $showcmd, $mustftp) = @_;
 return &ui_select($name, $value,
 	  [ map { [ $_->{'shell'},
 		    $_->{'desc'}.($showcmd ? " ($_->{'shell'})" : "") ] }
-	  &available_shells($type, $value, $mustftp) ]);
+		&available_shells($type, $value, $mustftp) ]);
 }
 
 # default_available_shell('owner'|'mailbox'|'reseller')

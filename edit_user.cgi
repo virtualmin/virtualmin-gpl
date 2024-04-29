@@ -86,17 +86,15 @@ if ($user_type eq 'ssh') {
 		2, \@tds);
 
 	# Show SSH shell select if more than one available
-	my @ssh_shells = &list_available_shells_by_type(
-		['owner', 'mailbox'], 'ssh');
-	my $ssh_shell = $ssh_shells[0]->{'shell'};
+	my @ssh_shells = &list_available_shells_by_type(['owner', 'mailbox']);
 	if (scalar(@ssh_shells) == 1) {
-		print &ui_hidden("shell", $ssh_shell);
+		print &ui_hidden("shell", $ssh_shells[0]->{'shell'});
 		}
 	else {
 		print &ui_table_row(
 			&hlink($text{'user_ushell'}, "ushell"),
 			&available_shells_menu(
-				"shell", $ssh_shell || $user->{'shell'},
+				"shell", $user->{'shell'},
 				["owner", "mailbox"], 0),
 			2, \@tds);
 		}
@@ -792,15 +790,18 @@ else {
 
 	# Show FTP shell field
 	if ($shell_switch) {
-		my $user_shell = $user->{'shell'};
-		# For the new user fall-back the user with no login shell
+		my $user_shell;
 		if ($in{'new'}) {
+			# For the new user fall-back to the no login shell
 			my @ftp_shell =
 				grep { $_->{'id'} eq 'ftp' && $_->{'avail'} }
 					&list_available_shells($d);
 			if (@ftp_shell) {
 				$user_shell = $ftp_shell[0]->{'shell'};
 				}
+			}
+		else {
+			$user_shell = $user->{'shell'};
 			}
 		print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
 			&available_shells_menu("shell", $user_shell, "mailbox",
