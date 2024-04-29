@@ -399,8 +399,10 @@ return undef;
 sub script_wordpress_latest
 {
 my ($ver) = @_;
-return ( "http://wordpress.org/download/",
-	 "Download\\s+WordPress\\s+([0-9\\.]+)" );
+if (&compare_versions($ver, 6) >= 0) {
+	return ( "http://wordpress.org/download/",
+		 "Download\\s+WordPress\\s+([0-9\\.]+)" );
+	}
 }
 
 sub script_wordpress_site
