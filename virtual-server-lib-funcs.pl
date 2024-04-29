@@ -18194,7 +18194,6 @@ my @tshells;
 foreach my $t (@$type) {
 	push(@tshells, grep { $_->{$t} } @aashells);
 	}
-my @tshells = grep { $_->{$type} } @aashells;
 my @ashells = grep { $_->{'avail'} } @tshells;
 if ($mustftp) {
 	# Only show shells with FTP access or better
