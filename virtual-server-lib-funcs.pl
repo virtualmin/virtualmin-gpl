@@ -18229,10 +18229,6 @@ if (defined($value)) {
 			}
 		}
 	}
-else {
-	my ($def) = grep { $_->{'default'} } @ashells;
-	$value = $def ? $def->{'shell'} : undef;
-	}
 return @ashells;
 }
 
