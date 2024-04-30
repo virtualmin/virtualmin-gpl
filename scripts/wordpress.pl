@@ -67,7 +67,7 @@ return ( "mysql" );
 
 sub script_wordpress_release
 {
-return 10; # Fix to automatically re-download from aux download server if fails
+return 11; # Fix latest check
 }
 
 sub script_wordpress_php_fullver
