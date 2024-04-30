@@ -787,11 +787,16 @@ my @tabs = (
 my $data = &ui_tabs_start(\@tabs, "tab", "settings", 0);
 
 $data .= &ui_tabs_start_tab("tab", "settings");
+$data .= &ui_form_start("pro/wordpress_kit.cgi", "post");
+$data .= &ui_hidden("dom", $d->{'dom'});
+$data .= &ui_hidden("type", 'settings');
 $data .= &ui_table_start(undef, "width=100%", 2);
 foreach my $option (@$settings_tab_content) {
 	$data .= &ui_table_row($option->{'desc'}, $option->{'value'});
 	}
 $data .= &ui_table_end();
+$data .= &ui_submit($text{'scripts_kit_apply'}, "kit_action_p_apply");
+$data .= &ui_form_end();
 $data .= &ui_tabs_end_tab();
 
 $data .= &ui_tabs_start_tab("tab", "clone");
