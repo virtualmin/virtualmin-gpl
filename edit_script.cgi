@@ -128,6 +128,7 @@ print &ui_table_end();
 
 # Script Kit
 my $kit_func = $script->{'kit_func'};
+my $extra_submits;
 if (defined(&$kit_func)) {
 	my $rows =
 		&{$script->{'kit_func'}}($d, $script, $sinfo);
@@ -141,17 +142,25 @@ if (defined(&$kit_func)) {
 					$td->{'desc'}, $td->{'value'});
 				}
 			}
+		elsif (ref($rows) eq 'HASH') {
+			$extra_submits = $rows->{'extra_submits'};
+			print &ui_table_row(undef, $rows->{'data'}, 2);
+			}
 		else {
 			print &ui_table_row(undef, $rows, 2);
 			}
 		print &ui_hidden_table_end();
 		}
 	}
-
 # Show install options form
 print &ui_form_start("unscript_install.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_hidden("script", $in{'script'}),"\n";
+if ($extra_submits) {
+	foreach my $submit (@$extra_submits) {
+		print $submit."\n";
+		}
+	}
 
 # Show un-install and upgrade buttons
 print &ui_submit($text{'scripts_uok'}, "uninstall"),"\n";
@@ -187,7 +196,7 @@ if (!$sinfo->{'deleted'}) {
 		if (@pids) {
 			print &ui_submit($text{'scripts_ustop'},
 					 "stop"),"\n";
-			print &ui_submit($text{'scripts_urestart'},
+			print &ui_submit($text{'scripts_ureload'},
 					 "restart"),"\n";
 			}
 		else {

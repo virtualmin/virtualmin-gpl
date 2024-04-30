@@ -4352,7 +4352,7 @@ scripts_rusurei=Are you sure you want to install $1 into the directory $2? $3 fi
 scripts_rusurehome=Because this script is installed into the virtual server's top-level web directory, <b>all</b> files under <tt>$1</tt> will be deleted when it is un-installed!
 scripts_uok2=Un-Install Now
 scripts_ustop=Stop Server
-scripts_urestart=Restart Server
+scripts_ureload=Restart Server
 scripts_ustart=Start Server
 scripts_etitle=Manage Script
 scripts_uheader=Details of installed script
@@ -6330,7 +6330,6 @@ stopscript_doing=Shutting down the server process for $1 ..
 startscript_title=Start Server
 startscript_doing=Starting up the server process for $1 ..
 startscript_failed=.. failed : $1
-restartscript_title=Restart Server
 
 newshells_title=Custom Shells
 newshells_descr=This page allows you to customize the shells that are available to virtual server administrators and mail/FTP users to meet your site's needs. Custom shells are often used to grant users access to FTP, SSH or other services.
