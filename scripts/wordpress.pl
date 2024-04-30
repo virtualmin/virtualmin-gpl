@@ -403,6 +403,7 @@ if (&compare_versions($ver, 6) >= 0) {
 	return ( "http://wordpress.org/download/",
 		 "Download\\s+WordPress\\s+([0-9\\.]+)" );
 	}
+return ( );
 }
 
 sub script_wordpress_site
