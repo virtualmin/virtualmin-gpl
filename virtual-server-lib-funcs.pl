@@ -18140,18 +18140,7 @@ $list_available_shells_cache{$mail} = \@rv;
 return @rv;
 }
 
-# list_available_shells_by_id(id, [type], [&domain], [mail])
-# Returns a list of shells by given id
-sub list_available_shells_by_id
-{
-my ($id, $type, $d, $mail) = @_;
-my @rv = &list_available_shells($d, $mail);
-@rv = grep { $_->{'id'} eq $id && $_->{'avail'} } @rv;
-@rv = grep { $_->{$type} } @rv if ($type);
-return @rv;
-}
-
-# list_available_shells_by_type(type, [id], [include-current-shell])
+# list_available_shells_by_type('owner'|'mailbox', ['ssh'|'scp'|'ftp'|'nologin'], [include-current-shell])
 # Returns a list of shells by given type. If current shell is given
 # it will be added to a list of available shells
 sub list_available_shells_by_type
@@ -18183,11 +18172,12 @@ else {
 	}
 }
 
-# available_shells('owner'|'mailbox'|'reseller', [value], [must-ftp])
+# available_shells('owner'|'mailbox'|'reseller', [value],
+#		   ['ssh'|'scp'|'ftp'|'nologin'])
 # Returns available shells for a mailbox or domain owner
 sub available_shells
 {
-my ($type, $value, $mustftp) = @_;
+my ($type, $value, $id) = @_;
 $type = [ $type ] if (!ref($type));
 my @aashells = &list_available_shells(undef, $mustftp ? 0 : undef);
 my @tshells;
@@ -18195,9 +18185,10 @@ foreach my $t (@$type) {
 	push(@tshells, grep { $_->{$t} } @aashells);
 	}
 my @ashells = grep { $_->{'avail'} } @tshells;
-if ($mustftp) {
-	# Only show shells with FTP access or better
-	@ashells = grep { $_->{'id'} ne 'nologin' } @ashells;
+if ($id) {
+	# Only return shells with the given IDs
+	my @ids = ref($id) ? @$id : ($id);
+	@ashells = grep { &indexof($_->{'id'}, @ids) >= 0 } @ashells;
 	}
 if (defined($value)) {
 	# Is current shell on the list?
@@ -18232,16 +18223,15 @@ if (defined($value)) {
 return @ashells;
 }
 
-# available_shells_menu(name, [value], 'owner'|'mailbox'|'reseller', [show-cmd],
-# 			[must-ftp])
+# available_shells_menu(name, [value], 'owner'|'mailbox'|'reseller',
+# 			['ssh'|'scp'|'ftp'|'nologin'])
 # Returns HTML for selecting a shell for a mailbox or domain owner
 sub available_shells_menu
 {
-my ($name, $value, $type, $showcmd, $mustftp) = @_;
+my ($name, $value, $type, $id) = @_;
 return &ui_select($name, $value,
-	  [ map { [ $_->{'shell'},
-		    $_->{'desc'}.($showcmd ? " ($_->{'shell'})" : "") ] }
-		&available_shells($type, $value, $mustftp) ]);
+	  [ map { [ $_->{'shell'}, $_->{'desc'} ] }
+		&available_shells($type, $value, $id) ]);
 }
 
 # default_available_shell('owner'|'mailbox'|'reseller')

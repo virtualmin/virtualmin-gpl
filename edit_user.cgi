@@ -86,7 +86,7 @@ if ($user_type eq 'ssh') {
 		2, \@tds);
 
 	# Show SSH shell select if more than one available
-	my @ssh_shells = &list_available_shells_by_type(['owner', 'mailbox']);
+	my @ssh_shells = &list_available_shells_by_type('owner', 'ssh');
 	if (scalar(@ssh_shells) == 1) {
 		print &ui_hidden("shell", $ssh_shells[0]->{'shell'});
 		}
@@ -94,8 +94,7 @@ if ($user_type eq 'ssh') {
 		print &ui_table_row(
 			&hlink($text{'user_ushell'}, "ushell"),
 			&available_shells_menu(
-				"shell", $user->{'shell'},
-				["owner", "mailbox"], 0),
+				"shell", $user->{'shell'}, "owner"),
 			2, \@tds);
 		}
 
@@ -621,7 +620,7 @@ elsif ($user_type eq 'web') {
 	$form_end = $htpasswd_data ? 1 : 0;
 	}
 else {
-	# Regular create user form
+	# Regular create or edit user form
 	if ($in{'new'}) {
 		&ui_print_header(
 			$din, $text{'user_create'}, "", "users_explain_user");
@@ -805,7 +804,7 @@ else {
 			}
 		print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
 			&available_shells_menu("shell", $user_shell, "mailbox",
-					0, $user->{'webowner'}),
+				       $user->{'webowner'} ? 'ftp' : undef),
 			2, \@tds);
 		}
 

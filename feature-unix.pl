@@ -846,7 +846,7 @@ print &ui_table_row(&hlink($text{'tmpl_ushell'}, "template_ushell"),
     &none_def_input("ushell", $tmpl->{'ushell'},
 	&available_shells_menu("ushell",
 		$tmpl->{'ushell'} eq "none" ? undef : $tmpl->{'ushell'},
-		"owner", 1),
+		"owner"),
 	0, 0, $text{'tmpl_ushelldef'}, [ "ushell" ]));
 
 # Chroot by default
