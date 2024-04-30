@@ -730,8 +730,8 @@ $plugins_tab_content .= &ui_columns_start(
 foreach my $plugin (@{$wp->{'plugins'}}) {
 	$plugins_tab_content .= &ui_checked_columns_row([
 		&html_escape($plugin->{'name'}) . " " .
-			&ui_help(&html_strip(
-				&html_escape($plugin->{'description'}))),
+			&ui_help(&html_escape(
+				&html_strip($plugin->{'description'}))),
 		&html_escape($plugin->{'version'}),
 		$plugin->{'new_version'} ?
 			&ui_text_color(&html_escape(
@@ -760,8 +760,8 @@ $themes_tab_content .= &ui_columns_start(
 foreach my $theme (@{$wp->{'themes'}}) {
 	$themes_tab_content .= &ui_checked_columns_row([
 		&html_escape($theme->{'name'}) . " " .
-			&ui_help(&html_strip(
-				&html_escape($theme->{'description'}))),
+			&ui_help(&html_escape(
+				&html_strip($theme->{'description'}))),
 		&html_escape($theme->{'version'}),
 		$theme->{'new_version'} ?
 			&ui_text_color(&html_escape(
