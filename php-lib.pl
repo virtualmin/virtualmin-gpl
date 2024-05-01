@@ -1017,7 +1017,7 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	}
 
 # Add versions found to the final list for CGI and fcgid modes
-my @cgimodes = ($d ? &get_domain_cgi_mode($d) : &has_cgi_support()) ?
+my @cgimodes = ($d ? &get_domain_cgi_mode($d) : scalar(&has_cgi_support())) ?
 			("fcgid", "cgi") : ( );
 foreach my $v (sort { $a <=> $b } (keys %vercmds)) {
 	my ($already) = grep { $_->[0] eq $v } @rv;
