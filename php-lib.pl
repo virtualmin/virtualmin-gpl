@@ -944,7 +944,8 @@ return { 'mod_php' => 0,
 # domain.
 sub list_available_php_versions
 {
-local ($d, $mode) = @_;
+my ($d, $mode) = @_;
+my $p = &domain_has_website($d);
 if ($d) {
 	$mode ||= &get_domain_php_mode($d);
 	}
@@ -971,7 +972,7 @@ if ($mode eq "fpm" || $mode eq "all") {
 	}
 
 # Add the mod_php version if installed
-if ($mode eq "mod_php" || $mode eq "all") {
+if ($p eq 'web' && ($mode eq "mod_php" || $mode eq "all")) {
 	my $v = &get_apache_mod_php_version();
 	if ($v) {
 		my $cmd = &has_command("php$v") ||
@@ -1017,8 +1018,19 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	}
 
 # Add versions found to the final list for CGI and fcgid modes
-my @cgimodes = ($d ? &get_domain_cgi_mode($d) : scalar(&has_cgi_support())) ?
-			("fcgid", "cgi") : ( );
+my $hascgi = $d ? &get_domain_cgi_mode($d) : scalar(&has_cgi_support());
+my @cgimodes;
+if ($p eq 'web') {
+	# Under Apache, CGI and fCGId modes need cgi-script support
+	if ($hascgi) {
+		push(@cgimodes, "fcgid", "cgi");
+		}
+	}
+else {
+	# Other webservers like Nginx have their own check for supported modes
+	push(@cgimodes, grep { /^(cgi|fcgid)$/ }
+		&plugin_call($p, "feature_web_supported_php_modes", $d));
+	}
 foreach my $v (sort { $a <=> $b } (keys %vercmds)) {
 	my ($already) = grep { $_->[0] eq $v } @rv;
 	if ($already) {
