@@ -47,7 +47,7 @@ sub script_wordpress_php_optional_modules
 {
 return ( "curl", "ssh2", "pecl-ssh2", "date",
          "hash", "imagick", "pecl-imagick", 
-         "iconv", "mbstring", "openssl",
+         "iconv", "mbstring", "openssl", "zip",
          "posix", "sockets", "tokenizer" );
 }
 
@@ -67,7 +67,7 @@ return ( "mysql" );
 
 sub script_wordpress_release
 {
-return 11; # Fix latest check
+return 12; # zip extension has to be installed
 }
 
 sub script_wordpress_php_fullver
