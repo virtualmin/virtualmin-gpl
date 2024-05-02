@@ -3379,7 +3379,21 @@ return &master_admin() || $config{'edit_ftp'};
 # Returns 1 if the current user can create SSH-capable mailboxes
 sub can_mailbox_ssh
 {
-return &master_admin();
+if (&master_admin()) {
+	return 1;
+	}
+elsif (&reseller_admin()) {
+	return 0;
+	}
+else {
+	my $d = &get_domain_by("user", $base_remote_user);
+	return 0 if (!$d);
+	my $shellpath = &get_domain_shell($d);
+	return 0 if (!$shellpath);
+	my @ashells = &list_available_shells($d);
+	my ($shell) = grep { $_->{'shell'} eq $shellpath } @ashells;
+	return $shell && $shell->{'id'} eq 'ssh';
+	}
 }
 
 
@@ -18250,8 +18264,9 @@ return $def ? $def->{'shell'} : undef;
 sub check_available_shell
 {
 my ($shell, $type, $old) = @_;
-my @ashells = grep { &can_mailbox_ssh() ||
-		     ($_->{$type} && $_->{'avail'}) } &list_available_shells();
+my $ssh = &can_mailbox_ssh();
+my @ashells = grep { $ssh || ($_->{$type} && $_->{'avail'}) }
+		   &list_available_shells();
 my ($got) = grep { $_->{'shell'} eq $shell } @ashells;
 return $got || $old && $shell eq $old;
 }
