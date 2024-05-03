@@ -2100,6 +2100,9 @@ return 0 if (!$oldfile || $oldfile eq $file);
 &create_ssl_certificate_directories($d);
 &write_ssl_file_contents($d, $file, $oldfile);
 &save_website_ssl_file($d, $type, $file);
+foreach my $sd (&get_domain_by("ssl_same", $d->{'id'})) {
+	&save_website_ssl_file($sd, $type, $file);
+	}
 if (&is_under_directory($d->{'home'}, $oldfile)) {
 	&unlink_file_as_domain_user($d, $oldfile);
 	}
