@@ -2089,6 +2089,25 @@ sub list_ssl_file_types
 return ('cert', 'key', 'chain', 'combined', 'everything');
 }
 
+# move_website_ssl_file(&domain, type, new-file)
+# Move an SSL cert or key file to a new location
+sub move_website_ssl_file
+{
+my ($d, $type, $file) = @_;
+my $oldfile = &get_website_ssl_file($d, $type);
+return 0 if (!$oldfile || $oldfile eq $file);
+&create_ssl_certificate_directories($d);
+&write_ssl_file_contents($d, $file, $oldfile);
+&save_website_ssl_file($d, $type, $file);
+if (&is_under_directory($d->{'home'}, $oldfile)) {
+	&unlink_file_as_domain_user($d, $oldfile);
+	}
+else {
+	&unlink_file($oldfile);
+	}
+return 1;
+}
+
 # break_ssl_linkage(&domain, &old-same-domain)
 # If domain was using the SSL cert from old-same-domain before, break the link
 # by copying the cert into the default location for domain and updating the
@@ -2112,32 +2131,15 @@ delete($d->{'ssl_same'});
 # Re-generate any combined cert files
 &sync_combined_ssl_cert($d);
 
+# Update webserver config
 my $p = &domain_has_website($d);
-if ($p eq 'web') {
-	# Update Apache config to point to the new cert file
-	local ($ovirt, $ovconf, $conf) = &get_apache_virtual(
-		$d->{'dom'}, $d->{'web_sslport'});
-	if ($ovirt) {
-		if (&apache_combined_cert()) {
-			&apache::save_directive("SSLCertificateFile",
-				[ $d->{'ssl_combined'} ], $ovconf, $conf);
-			}
-		else {
-			&apache::save_directive("SSLCertificateFile",
-				[ $d->{'ssl_cert'} ], $ovconf, $conf);
-			}
-		&apache::save_directive("SSLCertificateKeyFile",
-			$d->{'ssl_key'} ? [ $d->{'ssl_key'} ] : [ ],
-			$ovconf, $conf);
-		&apache::save_directive("SSLCACertificateFile",
-			$d->{'ssl_chain'} ? [ $d->{'ssl_chain'} ] : [ ],
-			$ovconf, $conf);
-		&flush_file_lines($ovirt->{'file'});
+if ($p) {
+	if ($p eq 'web' && &apache_combined_cert()) {
+		&save_website_ssl_file($d, "cert", $d->{'ssl_combined'});
 		}
-	}
-else {
-	# Update the other webserver's config
-	&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
+	else {
+		&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
+		}
 	&save_website_ssl_file($d, "key", $d->{'ssl_key'});
 	&save_website_ssl_file($d, "ca", $d->{'ssl_chain'});
 	}

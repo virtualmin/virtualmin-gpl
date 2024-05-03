@@ -19197,14 +19197,12 @@ if (&domain_has_ssl($d)) {
 		&register_post_action(\&restart_apache,
 				      &ssl_needs_apache_restart());
 		}
-	return undef;
 	}
-else {
-	# Just update the domain object
-	my $k = $type eq 'ca' ? 'ssl_chain' : 'ssl_'.$type;
-	$d->{$k} = $file;
-	return undef;
-	}
+
+# Update the domain object
+my $k = $type eq 'ca' ? 'ssl_chain' : 'ssl_'.$type;
+$d->{$k} = $file;
+return undef;
 }
 
 # get_website_ssl_file(&domain, "cert"|"key"|"ca")

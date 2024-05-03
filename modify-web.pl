@@ -288,6 +288,24 @@ while(@ARGV > 0) {
 	elsif ($a eq "--link-ssl-cert") {
 		$linkcert = 1;
 		}
+	elsif ($a eq "--ssl-cert") {
+		$ssl_cert = shift(@ARGV);
+		}
+	elsif ($a eq "--default-ssl-cert") {
+		$ssl_cert = "default";
+		}
+	elsif ($a eq "--ssl-key") {
+		$ssl_key = shift(@ARGV);
+		}
+	elsif ($a eq "--default-ssl-key") {
+		$ssl_key = "default";
+		}
+	elsif ($a eq "--ssl-ca") {
+		$ssl_ca = shift(@ARGV);
+		}
+	elsif ($a eq "--default-ssl-ca") {
+		$ssl_ca = "default";
+		}
 	elsif ($a eq "--sync-tlsa") {
 		$tlsa = 1;
 		}
@@ -358,6 +376,7 @@ $mode || defined($proxy) || defined($framefwd) || $tlsa || $rubymode ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
   $fpmsock || $fpmtype || $defmode || defined($cgimode) || $subprefix ||
   @add_dirs || @remove_dirs || $protocols || $fix_mod_php ||
+  $ssl_cert || $ssl_key || $ssl_ca ||
 	&usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
@@ -848,6 +867,58 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Update SSL cert, key and CA paths
+	my $ssl_changed = 0;
+	if (&domain_has_ssl_cert($d) && $ssl_cert) {
+		my $dom_cert = $ssl_cert eq "default" ?
+			&default_certificate_file($d, "cert") :
+			&absolute_domain_path($d, $ssl_cert);
+		&$first_print("Moving SSL cert to $dom_cert ..");
+		if ($s->{'ssl_same'}) {
+			&$second_print(".. not possible for shared certs");
+			}
+		elsif (&move_website_ssl_file($d, "cert", $dom_cert)) {
+			$ssl_changed = 1;
+			&$second_print(".. done");
+			}
+		else {
+			&$second_print(".. no change needed");
+			}
+		}
+	if (&domain_has_ssl_cert($d) && $ssl_key) {
+		my $dom_key = $ssl_key eq "default" ?
+			&default_certificate_file($d, "key") :
+			&absolute_domain_path($d, $ssl_key);
+		&$first_print("Moving SSL key to $dom_key ..");
+		if ($s->{'ssl_same'}) {
+			&$second_print(".. not possible for shared certs");
+			}
+		elsif (&move_website_ssl_file($d, "key", $dom_key)) {
+			# XXX fix SSL combined file
+			$ssl_changed = 1;
+			&$second_print(".. done");
+			}
+		else {
+			&$second_print(".. no change needed");
+			}
+		}
+	if (&domain_has_ssl_cert($d) && $ssl_ca) {
+		my $dom_ca = $ssl_ca eq "default" ?
+			&default_certificate_file($d, "ca") :
+			&absolute_domain_path($d, $ssl_ca);
+		&$first_print("Moving SSL CA cert to $dom_ca ..");
+		if ($s->{'ssl_same'}) {
+			&$second_print(".. not possible for shared certs");
+			}
+		elsif (&move_website_ssl_file($d, "ca", $dom_ca)) {
+			$ssl_changed = 1;
+			&$second_print(".. done");
+			}
+		else {
+			&$second_print(".. no change needed");
+			}
+		}
+
 	if ($tlsa && $d->{'dns'}) {
 		# Resync TLSA records
 		&$first_print("Updating TLSA DNS records ..");
@@ -969,7 +1040,7 @@ foreach $d (@doms) {
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($children_no_check) || defined($renew) || $breakcert ||
 	    $linkcert || $fixhtmldir || defined($fcgiwrap) ||
-	    defined($phplog) || defined($fcgiwrap)) {
+	    defined($phplog) || defined($fcgiwrap) || $ssl_changed) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
@@ -1037,6 +1108,9 @@ print "                     [--sync-tlsa]\n";
 print "                     [--add-directive \"name value\"]\n";
 print "                     [--remove-directive \"name value\"]\n";
 print "                     [--protocols \"proto ..\" | --default-protocols]\n";
+print "                     [--ssl-cert file | --default-ssl-cert]\n";
+print "                     [--ssl-key file | --default-ssl-key]\n";
+print "                     [--ssl-ca file | --default-ssl-ca]\n";
 exit(1);
 }
 
