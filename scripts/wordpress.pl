@@ -779,7 +779,11 @@ my $clone_tab_content = &ui_form_start("pro/wordpress_kit.cgi", "post");
 $clone_tab_content .= &ui_hidden("dom", $d->{'dom'});
 $clone_tab_content .= &ui_hidden("type", 'clone');
 $clone_tab_content .= &ui_table_start(undef, "width=100%", 2);
-$clone_tab_content .= &ui_table_row($text{'scripts_kit_clone_source'}, $opts->{'dir'}, 2);
+my $slink = $sinfo->{'url'};
+$slink =~ s/^https?:\/\///;
+$slink =~ s/\/$//;
+$clone_tab_content .= &ui_table_row($text{'scripts_kit_clone_source1'}, $slink, 2);
+$clone_tab_content .= &ui_table_row($text{'scripts_kit_clone_source2'}, $opts->{'dir'}, 2);
 my $clone_target;
 my @visdoms = sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }
 	      grep { !$_->{'parent'} && &can_config_domain($_) }
