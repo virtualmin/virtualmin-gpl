@@ -880,22 +880,6 @@ foreach $d (@doms) {
 
 	# Update SSL cert, key and CA paths
 	my $ssl_changed = 0;
-	if (&domain_has_ssl_cert($d) && $ssl_cert) {
-		my $dom_cert = $ssl_cert eq "default" ?
-			&default_certificate_file($d, "cert") :
-			&absolute_domain_path($d, $ssl_cert);
-		&$first_print("Moving SSL cert to $dom_cert ..");
-		if ($d->{'ssl_same'}) {
-			&$second_print(".. not possible for shared certs");
-			}
-		elsif (&move_website_ssl_file($d, "cert", $dom_cert)) {
-			$ssl_changed = 1;
-			&$second_print(".. done");
-			}
-		else {
-			&$second_print(".. no change needed");
-			}
-		}
 	if (&domain_has_ssl_cert($d) && $ssl_key) {
 		my $dom_key = $ssl_key eq "default" ?
 			&default_certificate_file($d, "key") :
@@ -909,6 +893,22 @@ foreach $d (@doms) {
 				&default_certificate_file($d, "combined", 1));
 			&move_website_ssl_file($d, "everything",
 				&default_certificate_file($d, "everything", 1));
+			$ssl_changed = 1;
+			&$second_print(".. done");
+			}
+		else {
+			&$second_print(".. no change needed");
+			}
+		}
+	if (&domain_has_ssl_cert($d) && $ssl_cert) {
+		my $dom_cert = $ssl_cert eq "default" ?
+			&default_certificate_file($d, "cert") :
+			&absolute_domain_path($d, $ssl_cert);
+		&$first_print("Moving SSL cert to $dom_cert ..");
+		if ($d->{'ssl_same'}) {
+			&$second_print(".. not possible for shared certs");
+			}
+		elsif (&move_website_ssl_file($d, "cert", $dom_cert)) {
 			$ssl_changed = 1;
 			&$second_print(".. done");
 			}

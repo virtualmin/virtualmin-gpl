@@ -85,17 +85,17 @@ $newcertinfo = &cert_file_info($temp);
 &obtain_lock_ssl($d);
 &create_ssl_certificate_directories($d);
 &$first_print($text{'newkey_apache'});
-if ($in{'cert_mode'} == 2) {
-	$d->{'ssl_cert'} = $in{'certfile'};
-	}
-else {
-	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
-	}
 if ($in{'newkey_mode'} == 2) {
 	$d->{'ssl_key'} = $in{'newkeyfile'};
 	}
 else {
 	$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
+	}
+if ($in{'cert_mode'} == 2) {
+	$d->{'ssl_cert'} = $in{'certfile'};
+	}
+else {
+	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 	}
 &save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
 &save_website_ssl_file($d, "key", $d->{'ssl_key'});

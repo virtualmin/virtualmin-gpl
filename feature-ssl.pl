@@ -2046,8 +2046,8 @@ if ($save) {
 sub generate_default_certificate
 {
 my ($d) = @_;
-$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 $d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
+$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 	# Need to do it
 	my $temp = &transname();
@@ -2087,7 +2087,7 @@ return 0;
 
 sub list_ssl_file_types
 {
-return ('cert', 'key', 'chain', 'combined', 'everything');
+return ('key', 'cert', 'chain', 'combined', 'everything');
 }
 
 # move_website_ssl_file(&domain, type, new-file)
@@ -3436,7 +3436,7 @@ sub ssl_certificate_directories
 {
 my ($d, $abs) = @_;
 my @paths;
-foreach my $t ('key', 'cert', 'chain', 'combined', 'everything') {
+foreach my $t (&list_ssl_file_types()) {
 	push(@paths, &default_certificate_file($d, $t));
 	if ($d->{'ssl_'.$t}) {
 		push(@paths, $d->{'ssl_'.$t});

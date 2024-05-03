@@ -231,8 +231,8 @@ $test_domain_home = $test_domain{'home'} =
 $test_domain_html = $test_domain_home.'/public_html';
 $test_full_user_home = $test_domain_home.'/homes/'.$test_user;
 $test_domain_db = &database_name(\%test_domain);
-$test_domain_cert = &default_certificate_file(\%test_domain, "cert");
 $test_domain_key = &default_certificate_file(\%test_domain, "key");
+$test_domain_cert = &default_certificate_file(\%test_domain, "cert");
 
 %test_rename_domain = ( 'dom' => $test_rename_domain,
 		        'prefix' => $rename_prefix,
