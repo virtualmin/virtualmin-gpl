@@ -774,7 +774,68 @@ foreach my $theme (@{$wp->{'themes'}}) {
 }
 $themes_tab_content .= &ui_columns_end();
 
-
+# Clone tab
+my $clone_tab_content = &ui_form_start("pro/wordpress_kit.cgi", "post");
+$clone_tab_content .= &ui_hidden("dom", $d->{'dom'});
+$clone_tab_content .= &ui_hidden("type", 'clone');
+$clone_tab_content .= &ui_table_start(undef, "width=100%", 2);
+$clone_tab_content .= &ui_table_row($text{'scripts_kit_clone_source'}, $opts->{'dir'}, 2);
+my $clone_target;
+my @visdoms = sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }
+	      grep { !$_->{'parent'} && &can_config_domain($_) }
+		&list_visible_domains();
+my $doms_select = &ui_select("clone_dom", undef,
+	[ map { [ $_->{'id'}, &show_domain_name($_) ] } @visdoms ]);
+my $opts_path = "$opts->{'path'}-clone";
+$opts_path =~ s/\///;
+$clone_target = &ui_radio_table("clone_target", 1,
+	[ [ 1, $text{'scripts_kit_clone_target1'},
+		&ui_textbox("clone_target", undef, 15, undef, undef,
+			"placeholder='$opts->{'path'}-clone'") ],
+	  [ 2, $text{'scripts_kit_clone_target2'},
+		$doms_select."&nbsp;/&nbsp;&nbsp;".
+		&ui_textbox("clone_target", undef, 15, undef, undef,
+			"placeholder='$opts_path'")],
+	  [ 3, $text{'scripts_kit_clone_target3'},
+		&ui_textbox("clone_subdom", undef, 5, undef, undef,
+			"placeholder='sub1'").
+		"&nbsp;.&nbsp;&nbsp;$doms_select&nbsp;/&nbsp;&nbsp;".
+		&ui_textbox("clone_target", undef, 15, undef, undef,
+			"placeholder='$opts_path'") ],
+	  [ 4, $text{'scripts_kit_clone_target4'},
+		&ui_textbox("clone_dom", "", 20). "&nbsp;/&nbsp;&nbsp;".
+		&ui_textbox("clone_target", undef, 15, undef, undef,
+			"placeholder='$opts_path'") ],
+	]);
+$clone_tab_content .= &ui_table_row(
+	&hlink($text{'scripts_kit_clone_target'},
+		"kit_wp_clone_target"), $clone_target, 2);
+$clone_tab_content .= &ui_table_row(
+	&hlink($text{"${_t}url_cloned"}, "kit_wp_url_cloned"),
+		&ui_opt_textbox(
+			"cloned_url", undef, 35,
+			$text{'scripts_kit_auto'} . "<br>",
+		$text{'edit_set'}), 2);
+$clone_tab_content .= &ui_table_row(
+	&hlink($text{"${_t}blogname_cloned"}, "kit_wp_blogname_cloned"),
+		&ui_opt_textbox(
+			"cloned_blogname", undef, 25,
+			$text{'scripts_kit_nochange'} . "<br>",
+		$text{'edit_set'}), 2);
+$clone_tab_content .= &ui_table_row(
+	&hlink($text{"${_t}admin_email_cloned"}, "kit_wp_admin_email_cloned"),
+		&ui_opt_textbox(
+			"cloned_admin_email", undef, 30,
+			$text{'scripts_kit_nochange'} . "<br>",
+		$text{'edit_set'}), 2);
+$clone_tab_content .= &ui_table_row(
+	&hlink($text{"${_t}admin_pass_cloned"}, "kit_wp_admin_password_cloned"),
+		&ui_opt_textbox(
+			"cloned_admin_pass", undef, 20,
+			$text{'scripts_kit_nochange'} . "<br>",
+		$text{'edit_set'}), 2);
+$clone_tab_content .= &ui_table_end();
+$clone_tab_content .= &ui_form_end();
 
 # XXX: Add more tabs
 
@@ -801,16 +862,16 @@ push(@data_submits, &ui_submit($text{'scripts_kit_apply'}, "kit_action_p_apply",
 $data .= &ui_form_end();
 $data .= &ui_tabs_end_tab();
 
-$data .= &ui_tabs_start_tab("tab", "clone");
-$data .= "";
-$data .= &ui_tabs_end_tab();
-
 $data .= &ui_tabs_start_tab("tab", "plugins");
 $data .= $plugins_tab_content;
 $data .= &ui_tabs_end_tab();
 
 $data .= &ui_tabs_start_tab("tab", "themes");
 $data .= $themes_tab_content;
+$data .= &ui_tabs_end_tab();
+
+$data .= &ui_tabs_start_tab("tab", "clone");
+$data .= $clone_tab_content;
 $data .= &ui_tabs_end_tab();
 
 $data .= &ui_tabs_start_tab("tab", "backup");
