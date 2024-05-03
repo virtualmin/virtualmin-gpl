@@ -803,8 +803,9 @@ else {
 			$user_shell = $user->{'shell'};
 			}
 		print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
-			&available_shells_menu("shell", $user_shell, "mailbox",
-				       $user->{'webowner'} ? 'ftp' : undef),
+			&available_shells_menu("shell", $user_shell,
+			  &can_mailbox_ssh() ? ["mailbox", "owner"] : "mailbox",
+			  $user->{'webowner'} ? 'ftp' : undef),
 			2, \@tds);
 		}
 
