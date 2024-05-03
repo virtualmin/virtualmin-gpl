@@ -614,18 +614,6 @@ push(@$settings_tab_content, {
 	value => &ui_opt_textbox(
 	    "kit_wpurl", undef, 35, $wp->{'wpurl'} . "<br>",
 	    $text{'edit_set'})});
-# Admin email
-push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}admin_email"}, "kit_wp_admin_email"),
-	value => &ui_opt_textbox(
-	    "kit_admin_email", undef, 30, $wp->{'admin_email'} . "<br>",
-	    $text{'edit_set'})});
-# Set password
-push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}admin_pass"}, "kit_wp_admin_password"),
-	value => &ui_opt_textbox(
-	    "kit_admin_password", undef, 20, $text{'user_passdef'},
-	    $text{'edit_set'})});
 # Site name
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}blogname"}, "kit_wp_blogname"),
@@ -639,6 +627,18 @@ push(@$settings_tab_content, {
 	    "kit_blogdescription", undef, 35,
 	    $wp->{'blogdescription'} || $text{"scripts_kit_not_set"} . "<br>",
 	    $text{'edit_set'}) });
+# Admin email
+push(@$settings_tab_content, {
+	desc  => &hlink($text{"${_t}admin_email"}, "kit_wp_admin_email"),
+	value => &ui_opt_textbox(
+	    "kit_admin_email", undef, 30, $wp->{'admin_email'} . "<br>",
+	    $text{'edit_set'})});
+# Set password
+push(@$settings_tab_content, {
+	desc  => &hlink($text{"${_t}admin_pass"}, "kit_wp_admin_password"),
+	value => &ui_opt_textbox(
+	    "kit_admin_password", undef, 20, $text{'user_passdef'},
+	    $text{'edit_set'})});
 # Site visibility
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}blog_public"}, "kit_wp_blog_public"),
