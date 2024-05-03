@@ -489,6 +489,7 @@ if (defined($includes) && !&supports_ssi()) {
 
 # Lock them all
 foreach $d (@doms) {
+	&lock_domain($d);
 	&obtain_lock_web($d) if ($d->{'web'});
 	&obtain_lock_dns($d) if ($d->{'dns'} &&
 				 (defined($webmail) || defined($matchall)));
@@ -884,7 +885,7 @@ foreach $d (@doms) {
 			&default_certificate_file($d, "cert") :
 			&absolute_domain_path($d, $ssl_cert);
 		&$first_print("Moving SSL cert to $dom_cert ..");
-		if ($s->{'ssl_same'}) {
+		if ($d->{'ssl_same'}) {
 			&$second_print(".. not possible for shared certs");
 			}
 		elsif (&move_website_ssl_file($d, "cert", $dom_cert)) {
@@ -900,11 +901,14 @@ foreach $d (@doms) {
 			&default_certificate_file($d, "key") :
 			&absolute_domain_path($d, $ssl_key);
 		&$first_print("Moving SSL key to $dom_key ..");
-		if ($s->{'ssl_same'}) {
+		if ($d->{'ssl_same'}) {
 			&$second_print(".. not possible for shared certs");
 			}
 		elsif (&move_website_ssl_file($d, "key", $dom_key)) {
-			# XXX fix SSL combined file
+			&move_website_ssl_file($d, "combined",
+				&default_certificate_file($d, "combined", 1));
+			&move_website_ssl_file($d, "everything",
+				&default_certificate_file($d, "everything", 1));
 			$ssl_changed = 1;
 			&$second_print(".. done");
 			}
@@ -917,7 +921,7 @@ foreach $d (@doms) {
 			&default_certificate_file($d, "ca") :
 			&absolute_domain_path($d, $ssl_ca);
 		&$first_print("Moving SSL CA cert to $dom_ca ..");
-		if ($s->{'ssl_same'}) {
+		if ($d->{'ssl_same'}) {
 			&$second_print(".. not possible for shared certs");
 			}
 		elsif (&move_website_ssl_file($d, "ca", $dom_ca)) {
@@ -1067,6 +1071,7 @@ foreach $d (@doms) {
 	&release_lock_dns($d) if ($d->{'dns'} && 
 				  (defined($webmail) || defined($matchall)));
 	&release_lock_web($d) if ($d->{'web'});
+	&unlock_domain($d);
 	}
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV);

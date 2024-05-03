@@ -19170,7 +19170,7 @@ if (&domain_has_ssl($d)) {
 		}
 	&obtain_lock_ssl($d);
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-							   $d->{'web_sslport'});
+							$d->{'web_sslport'});
 	if (!$virt) {
 		&release_lock_ssl($d);
 		return "No virtual host found for ".
@@ -19210,6 +19210,10 @@ return undef;
 sub get_website_ssl_file
 {
 my ($d, $type) = @_;
+if ($type eq "combined" || $type eq "everything") {
+	# These exist only in the domain's config
+	return $d->{"ssl_".$type};
+	}
 if (&domain_has_ssl($d)) {
 	# Get from the actual Apache config
 	my $p = &domain_has_website($d);

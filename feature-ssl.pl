@@ -1724,17 +1724,18 @@ foreach my $cdata (@certs) {
 return undef;
 }
 
-# default_certificate_file(&domain, "cert"|"key"|"ca"|"combined"|"everything")
+# default_certificate_file(&domain, "cert"|"key"|"ca"|"combined"|"everything",
+# 			   [force-auto-path])
 # Returns the default path that should be used for a cert, key or CA file
 sub default_certificate_file
 {
-my ($d, $mode) = @_;
+my ($d, $mode, $forceauto) = @_;
 $mode = "ca" if ($mode eq "chain");
 my $tmpl = &get_template($d->{'template'});
-my $file = $tmpl->{'cert_'.$mode.'_tmpl'};
+my $file = $forceauto ? "auto" : $tmpl->{'cert_'.$mode.'_tmpl'};
 if ($file eq "auto" && $mode ne "key") {
 	# Path is relative to the key file
-	my $keyfile = $tmpl->{'cert_key_tmpl'};
+	my $keyfile = $d->{'ssl_key'} || $tmpl->{'cert_key_tmpl'};
 	if ($keyfile && $keyfile =~ s/\/[^\/]+$//) {
 		$file = $keyfile."/ssl.".$mode;
 		}
