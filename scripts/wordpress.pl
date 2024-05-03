@@ -717,6 +717,7 @@ my $table_select_opts =
 	  [ "disable-auto-update", $text{'scripts_kit_wp_selopt_disable_auto'} ] ];
 $plugins_tab_content = &ui_form_start("pro/wordpress_kit.cgi", "post");
 $plugins_tab_content .= &ui_hidden("dom", $d->{'dom'});
+$plugins_tab_content .= &ui_hidden("type", 'plugins');
 $plugins_tab_content .= &ui_select("plugins", "", $table_select_opts);
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $plugins_tab_content .= &ui_form_end();
@@ -747,6 +748,7 @@ my $themes_tab_content;
 splice(@$table_select_opts, 2, 1);
 $themes_tab_content = &ui_form_start("pro/wordpress_kit.cgi", "post");
 $themes_tab_content .= &ui_hidden("dom", $d->{'dom'});
+$themes_tab_content .= &ui_hidden("type", 'themes');
 $themes_tab_content .= &ui_select("themes", "", $table_select_opts);
 $themes_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $themes_tab_content .= &ui_form_end();
