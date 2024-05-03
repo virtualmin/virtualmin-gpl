@@ -18154,7 +18154,8 @@ $list_available_shells_cache{$mail} = \@rv;
 return @rv;
 }
 
-# list_available_shells_by_type('owner'|'mailbox', ['ssh'|'scp'|'ftp'|'nologin'], [include-current-shell])
+# list_available_shells_by_type('owner'|'mailbox',
+# 	['ssh'|'scp'|'ftp'|'nologin'], [include-current-shell])
 # Returns a list of shells by given type. If current shell is given
 # it will be added to a list of available shells
 sub list_available_shells_by_type
@@ -18198,7 +18199,8 @@ my @tshells;
 foreach my $t (@$type) {
 	push(@tshells, grep { $_->{$t} } @aashells);
 	}
-my @ashells = grep { $_->{'avail'} } @tshells;
+my %done;
+my @ashells = grep { $_->{'avail'} && !$done{$_->{'shell'}}++ } @tshells;
 if ($id) {
 	# Only return shells with the given IDs
 	my @ids = ref($id) ? @$id : ($id);
