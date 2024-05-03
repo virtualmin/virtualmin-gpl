@@ -95,6 +95,13 @@ sharing and allow this domain's cert to be re-generated. Conversely, if the
 server isn't sharing a cert but could, the C<--link-ssl-cert> flag can be used
 to enable sharing.
 
+To move the SSL cert, key or CA cert files to a new location, use the
+C<--ssl-cert>, C<--ssl-key> or C<--ssl-ca> flags respectively, followed
+by an absolute or relative path. To switch to the default locations set in the
+server's template, use the C<--default-ssl-cert>, C<--default-ssl-key> or
+C<--default-ssl-ca> flags. Or to switch all SSL paths to match the template,
+simply use C<--default-ssl-paths>.
+
 To change the domain's HTML directory, use the C<--document-dir> flag followed
 by a path relative to the domain's home. Alternately, if the Apache config has
 been modified outside of Virtualmin and you just want to detect the new path,
@@ -305,6 +312,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--default-ssl-ca") {
 		$ssl_ca = "default";
+		}
+	elsif ($a eq "--default-ssl-paths") {
+		$ssl_cert = $ssl_key = $ssl_ca = "default";
 		}
 	elsif ($a eq "--sync-tlsa") {
 		$tlsa = 1;
@@ -1111,6 +1121,7 @@ print "                     [--protocols \"proto ..\" | --default-protocols]\n";
 print "                     [--ssl-cert file | --default-ssl-cert]\n";
 print "                     [--ssl-key file | --default-ssl-key]\n";
 print "                     [--ssl-ca file | --default-ssl-ca]\n";
+print "                     [--default-ssl-paths]\n";
 exit(1);
 }
 
