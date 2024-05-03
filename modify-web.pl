@@ -890,9 +890,9 @@ foreach $d (@doms) {
 			}
 		elsif (&move_website_ssl_file($d, "key", $dom_key)) {
 			&move_website_ssl_file($d, "combined",
-				&default_certificate_file($d, "combined", 1));
+				&relative_certificate_file($dom_key, "combined"));
 			&move_website_ssl_file($d, "everything",
-				&default_certificate_file($d, "everything", 1));
+				&relative_certificate_file($dom_key, "everything"));
 			$ssl_changed = 1;
 			&$second_print(".. done");
 			}

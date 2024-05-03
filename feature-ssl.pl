@@ -1724,18 +1724,17 @@ foreach my $cdata (@certs) {
 return undef;
 }
 
-# default_certificate_file(&domain, "cert"|"key"|"ca"|"combined"|"everything",
-# 			   [force-auto-path])
+# default_certificate_file(&domain, "cert"|"key"|"ca"|"combined"|"everything")
 # Returns the default path that should be used for a cert, key or CA file
 sub default_certificate_file
 {
-my ($d, $mode, $forceauto) = @_;
+my ($d, $mode) = @_;
 $mode = "ca" if ($mode eq "chain");
 my $tmpl = &get_template($d->{'template'});
-my $file = $forceauto ? "auto" : $tmpl->{'cert_'.$mode.'_tmpl'};
+my $file = $tmpl->{'cert_'.$mode.'_tmpl'};
 if ($file eq "auto" && $mode ne "key") {
 	# Path is relative to the key file
-	my $keyfile = $d->{'ssl_key'} || $tmpl->{'cert_key_tmpl'};
+	my $keyfile = $tmpl->{'cert_key_tmpl'};
 	if ($keyfile && $keyfile =~ s/\/[^\/]+$//) {
 		$file = $keyfile."/ssl.".$mode;
 		}
@@ -1745,6 +1744,17 @@ if ($file eq "auto" && $mode ne "key") {
 	}
 return $file ? &absolute_domain_path($d, &substitute_domain_template($file, $d))
 	     : "$d->{'home'}/ssl.".$mode;
+}
+
+# relative_certificate_file(file, type)
+# Returns a cert path in the same directory as the given file, but of a
+# different type.
+sub relative_certificate_file
+{
+my ($file, $mode) = @_;
+$mode = "ca" if ($mode eq "chain");
+$file =~ s/\/[^\/]+$//;
+return $file."/ssl.".$mode;
 }
 
 # set_certificate_permissions(&domain, file)
