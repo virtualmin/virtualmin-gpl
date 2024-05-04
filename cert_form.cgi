@@ -137,19 +137,17 @@ if (&domain_has_ssl_cert($d)) {
 		}
 
 	# Links to download
-	@dlinks = (
-		"<a href='download_cert.cgi/cert.pem?dom=$in{'dom'}'>".
-		"$text{'cert_pem'}</a>",
-		"<a href='download_cert.cgi/cert.p12?dom=$in{'dom'}'>".
-		"$text{'cert_pkcs12'}</a>",
-		);
+	@dlinks = ( &ui_link("download_cert.cgi/cert.pem?dom=$in{'dom'}",
+			     $text{'cert_pem'}),
+		    &ui_link("download_cert.cgi/cert.p12?dom=$in{'dom'}",
+			     $text{'cert_pkcs12'}),
+		  );
 	print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
-	@dlinks = (
-		"<a href='download_key.cgi/key.pem?dom=$in{'dom'}'>".
-		"$text{'cert_pem'}</a>",
-		"<a href='download_key.cgi/key.p12?dom=$in{'dom'}'>".
-		"$text{'cert_pkcs12'}</a>",
-		);
+	@dlinks = ( &ui_link("download_key.cgi/key.pem?dom=$in{'dom'}",
+			     $text{'cert_pem'}),
+		    &ui_link("download_key.cgi/key.p12?dom=$in{'dom'}",
+			     $text{'cert_pkcs12'}),
+		  );
 	print &ui_table_row($text{'cert_kdownload'},
 			    &ui_links_row(\@dlinks), 3);
 
