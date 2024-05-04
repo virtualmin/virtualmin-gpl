@@ -502,7 +502,6 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 	}
 
 print &ui_tabs_end(1);
-print "</div>";
 
 # Make sure the left menu is showing this domain
 if (defined(&theme_select_domain)) {
