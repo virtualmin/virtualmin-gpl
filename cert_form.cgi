@@ -213,8 +213,8 @@ if (&domain_has_ssl_cert($d)) {
 			&ui_hidden("dom", $in{'dom'}).
 			&ui_hidden("enable", 1));
 		}
-	# Show button to uninstall all per-service
 	else {
+		# Show button to uninstall all per-service
 		print &ui_hr() if (!$ui_hr++);
 		print &ui_buttons_row(
 			"peripcerts.cgi",
@@ -234,6 +234,22 @@ if (&domain_has_ssl_cert($d)) {
 			    &vui_make_and(map { $_->{'desc'} } @gmissing)),
 			&ui_hidden("dom", $in{'dom'}));
 		}
+
+	# Show button to copy to the default location
+	if (!$d->{'ssl_same'} &&
+	    (&get_website_ssl_file($d, "cert") ne 
+	     &default_certificate_file($d, "cert")) ||
+	    (&get_website_ssl_file($d, "key") ne 
+	     &default_certificate_file($d, "key"))) {
+		print &ui_hr() if (!$ui_hr++);
+		print &ui_buttons_row(
+			"default_cert.cgi",
+			$text{'cert_defaultpath'},
+			&text('cert_defaultpathdesc',
+			  "<tt>".&default_certificate_file($d, "cert")."</tt>"),
+			&ui_hidden("dom", $in{'dom'}));
+		}
+
 	print &ui_buttons_end();
 	}
 else {
