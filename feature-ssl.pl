@@ -2109,16 +2109,20 @@ my $oldfile = &get_website_ssl_file($d, $type);
 return 0 if (!$oldfile || $oldfile eq $file);
 &create_ssl_certificate_directories($d);
 &write_ssl_file_contents($d, $file, $oldfile);
+&lock_file($file);
 &save_website_ssl_file($d, $type, $file);
+&unlock_file($file);
 foreach my $sd (&get_domain_by("ssl_same", $d->{'id'})) {
 	&save_website_ssl_file($sd, $type, $file);
 	}
+&lock_file($oldfile);
 if (&is_under_directory($d->{'home'}, $oldfile)) {
 	&unlink_file_as_domain_user($d, $oldfile);
 	}
 else {
 	&unlink_file($oldfile);
 	}
+&unlock_file($oldfile);
 return 1;
 }
 
@@ -2409,6 +2413,7 @@ else {
 					"ssl_key", "<".$d->{'ssl_key'});
 				&dovecot::save_directive($l->{'members'},
 					"ssl_ca", undef);
+				&flush_file_lines($l->{'file'}, undef, 1);
 				}
 			else {
 				# Need to add

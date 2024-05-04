@@ -880,6 +880,9 @@ foreach $d (@doms) {
 
 	# Update SSL cert, key and CA paths
 	my $ssl_changed = 0;
+	my @beforecerts = &get_all_domain_service_ssl_certs($d);
+	use Data::Dumper;
+	print STDERR Dumper(\@beforecerts);
 	if (&domain_has_ssl_cert($d) && $ssl_key) {
 		my $dom_key = $ssl_key eq "default" ?
 			&default_certificate_file($d, "key") :
@@ -931,6 +934,10 @@ foreach $d (@doms) {
 		else {
 			&$second_print(".. no change needed");
 			}
+		}
+	if ($ssl_changed) {
+		# Update other services using the cert
+		&update_all_domain_service_ssl_certs($d, \@beforecerts);
 		}
 
 	if ($tlsa && $d->{'dns'}) {

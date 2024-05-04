@@ -12,6 +12,7 @@ $d->{'ssl_same'} && &error($text{'defaultcert_esame'});
 
 &lock_domain($d);
 &obtain_lock_web($d);
+@beforecerts = &get_all_domain_service_ssl_certs($d);
 
 foreach my $t ("key", "cert", "ca", "combined", "everything") {
 	$deffile = &default_certificate_file($d, $t);
@@ -24,6 +25,9 @@ foreach my $t ("key", "cert", "ca", "combined", "everything") {
 		&$second_print($text{'defaultcert_none'});
 		}
 	}
+
+# Update other services using the cert
+&update_all_domain_service_ssl_certs($d, \@beforecerts);
 
 &run_post_actions();
 &save_domain($d);
