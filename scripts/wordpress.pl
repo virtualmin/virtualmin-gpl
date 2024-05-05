@@ -849,7 +849,9 @@ my @tabs = (
 	[ "plugins", 'Plugins' ],
 	[ "themes", 'Themes' ],
 	[ "clone", 'Clone' ],
-	[ "backup", 'Backup and Restore' ] );
+	[ "backup", 'Backup and Restore' ],
+	[ "devel", 'Development' ],
+	[ "system", 'System' ] );
 
 my $data = &ui_tabs_start(\@tabs, "tab", "settings", 0);
 my @data_submits;
@@ -879,6 +881,14 @@ $data .= $clone_tab_content;
 $data .= &ui_tabs_end_tab();
 
 $data .= &ui_tabs_start_tab("tab", "backup");
+$data .= "";
+$data .= &ui_tabs_end_tab();
+
+$data .= &ui_tabs_start_tab("tab", "development");
+$data .= "";
+$data .= &ui_tabs_end_tab();
+
+$data .= &ui_tabs_start_tab("tab", "system");
 $data .= "";
 $data .= &ui_tabs_end_tab();
 
