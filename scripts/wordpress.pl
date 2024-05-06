@@ -600,7 +600,45 @@ if ($@) {
 	return "<pre>$err</pre>";
 	}
 
-# Setttings tab
+# Tabs list
+my @tabs = (
+	[ "system", 'System' ],
+	[ "settings", 'Settings' ],
+	[ "plugins", 'Plugins' ],
+	[ "themes", 'Themes' ],
+	[ "backup", 'Backup and Restore' ],
+	[ "clone", 'Clone' ],
+	[ "development", 'Development' ] );
+
+# System tab prepare
+my $system_tab_content;
+# Memory limit
+push(@$system_tab_content, {
+	desc  => &hlink($text{"${_t}memory_limit"}, "kit_wp_memory_limit"),
+	value => &ui_opt_textbox(
+	    "kit_memory_limit", undef, 6,
+	    	"$text{\"${_t}memory_limit_upto\"} $wp->{'wp_memory_limit'}",
+		$text{'edit_set'})});
+# Admin memory limit
+push(@$system_tab_content, {
+	desc  => &hlink($text{"${_t}max_memory_limit"}, "kit_wp_max_memory_limit"),
+	value => &ui_opt_textbox(
+	    "kit_max_memory_limit", undef, 6,
+		"$text{\"${_t}memory_limit_upto\"} ".
+			($wp->{'wp_max_memory_limit'} == -1 ? '256M' : 
+			 $wp->{'wp_max_memory_limit'}),
+		$text{'edit_set'})});
+# Site automatic updates
+push(@$system_tab_content, {
+	desc  => &hlink($text{"${_t}auto_update_core"}, "kit_wp_auto_update_core"),
+	value => &ui_radio(
+	    "kit_auto_updates", $wp->{'automatic_updater_disabled'} == 1 ? 0 :
+	    		$wp->{'wp_auto_update_core'},
+		[ [ 0, $text{"${_t}auto_updates_disabled"} . "<br>" ],
+		  [ 1, $text{"${_t}auto_updates_minor"} . "<br>" ],
+		  [ 2, $text{"${_t}auto_updates_major_minor"} ] ] )});
+
+# Setttings tab prepare
 my $settings_tab_content;
 # Site URL
 push(@$settings_tab_content, {
@@ -661,51 +699,8 @@ push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}disallow_file_edit"}, "kit_wp_disallow_file_edit"),
 	value => &ui_yesno_radio(
 	    "kit_disallow_file_edit", $wp->{'disallow_file_edit'} ? 1 : 0)});
-# Script concatenation
-push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}concatenate_scripts"}, "kit_wp_concatenate_scripts"),
-	value => &ui_yesno_radio(
-	    "kit_concatenate_scripts", $wp->{'concatenate_scripts'} ? 1 : 0)});
-# Debug mode
-push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}debug"}, "kit_wp_wp_debug"),
-	value => &ui_radio(
-	    "kit_wp_debug",
-	    $wp->{'wp_debug'} ? ($wp->{'wp_debug_log'} ? 2 : 1) : 0,
-		[ [ 0, $text{"${_t}debug0"} . "<br>" ],
-		  [ 1, $text{"${_t}debug1"} . "<br>" ],
-		  [ 2, $text{"${_t}debug2"} ] ] )});
-# Maintenance mode
-push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}maintenance_mode"}, "kit_wp_maintenance_mode"),
-	value => &ui_yesno_radio(
-	    "kit_maintenance_mode", $wp->{'maintenance_mode'} ? 1 : 0)});
-# Memory limit
-push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}memory_limit"}, "kit_wp_memory_limit"),
-	value => &ui_opt_textbox(
-	    "kit_memory_limit", undef, 6,
-	    	"$text{\"${_t}memory_limit_upto\"} $wp->{'wp_memory_limit'}",
-		$text{'edit_set'})});
-# Admin memory limit
-push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}max_memory_limit"}, "kit_wp_max_memory_limit"),
-	value => &ui_opt_textbox(
-	    "kit_max_memory_limit", undef, 6,
-		"$text{\"${_t}memory_limit_upto\"} ".
-			($wp->{'wp_max_memory_limit'} == -1 ? '256M' : 
-			 $wp->{'wp_max_memory_limit'}),
-		$text{'edit_set'})});
-# Site automatic updates
-push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}auto_update_core"}, "kit_wp_auto_update_core"),
-	value => &ui_radio(
-	    "kit_auto_updates", $wp->{'automatic_updater_disabled'} == 1 ? 0 : $wp->{'wp_auto_update_core'},
-		[ [ 0, $text{"${_t}auto_updates_disabled"} . "<br>" ],
-		  [ 1, $text{"${_t}auto_updates_minor"} . "<br>" ],
-		  [ 2, $text{"${_t}auto_updates_major_minor"} ] ] )});
 
-# Plugins tab
+# Plugins tab prepare
 my $plugins_tab_content;
 my $table_select_opts =
 	[ [ "", $text{'scripts_kit_wp_selopt_bulk'} ],
@@ -715,12 +710,13 @@ my $table_select_opts =
 	  [ "delete", $text{'scripts_kit_wp_selopt_delete'} ],
 	  [ "enable-auto-update", $text{'scripts_kit_wp_selopt_enable_auto'} ],
 	  [ "disable-auto-update", $text{'scripts_kit_wp_selopt_disable_auto'} ] ];
-$plugins_tab_content = &ui_form_start("pro/wordpress_kit.cgi", "post");
+$plugins_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
+	"post", undef, "id='kit_plugins_form'");
 $plugins_tab_content .= &ui_hidden("dom", $d->{'dom'});
+$plugins_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $plugins_tab_content .= &ui_hidden("type", 'plugins');
 $plugins_tab_content .= &ui_select("plugins", "", $table_select_opts);
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
-$plugins_tab_content .= &ui_form_end();
 $plugins_tab_content .= &ui_columns_start(
 	[ "", $text{'scripts_kit_tb_plugin'},
 	      $text{'scripts_kit_tb_installed_version'},
@@ -742,16 +738,18 @@ foreach my $plugin (@{$wp->{'plugins'}}) {
 	], [ ( "width=5" ) ], undef, &quote_escape($plugin->{'name'}, '"'));
 }
 $plugins_tab_content .= &ui_columns_end();
+$plugins_tab_content .= &ui_form_end();
 
-# Themes tab
+# Themes tab prepare
 my $themes_tab_content;
 splice(@$table_select_opts, 2, 1);
-$themes_tab_content = &ui_form_start("pro/wordpress_kit.cgi", "post");
+$themes_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
+	"post", undef, "id='kit_themes_form'");
 $themes_tab_content .= &ui_hidden("dom", $d->{'dom'});
+$themes_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $themes_tab_content .= &ui_hidden("type", 'themes');
 $themes_tab_content .= &ui_select("themes", "", $table_select_opts);
 $themes_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
-$themes_tab_content .= &ui_form_end();
 $themes_tab_content .= &ui_columns_start(
 	[ "", $text{'scripts_kit_tb_theme'},
 	      $text{'scripts_kit_tb_installed_version'},
@@ -773,10 +771,13 @@ foreach my $theme (@{$wp->{'themes'}}) {
 	], [ ( "width=5" ) ], undef, &quote_escape($theme->{'name'}, '"'));
 }
 $themes_tab_content .= &ui_columns_end();
+$themes_tab_content .= &ui_form_end();
 
-# Clone tab
-my $clone_tab_content = &ui_form_start("pro/wordpress_kit.cgi", "post");
+# Clone tab prepare
+my $clone_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
+	"post", undef, "id='kit_clone_form'");
 $clone_tab_content .= &ui_hidden("dom", $d->{'dom'});
+$clone_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $clone_tab_content .= &ui_hidden("type", 'clone');
 $clone_tab_content .= &ui_table_start(undef, "width=100%", 2);
 my $slink = $sinfo->{'url'};
@@ -841,57 +842,100 @@ $clone_tab_content .= &ui_table_row(
 $clone_tab_content .= &ui_table_end();
 $clone_tab_content .= &ui_form_end();
 
-# XXX: Add more tabs
+# Development tab prepare
+my $development_tab_content;
+# Debug mode
+push(@$development_tab_content, {
+	desc  => &hlink($text{"${_t}debug"}, "kit_wp_wp_debug"),
+	value => &ui_radio(
+	    "kit_wp_debug",
+	    $wp->{'wp_debug'} ? ($wp->{'wp_debug_log'} ? 2 : 1) : 0,
+		[ [ 0, $text{"${_t}debug0"} . "<br>" ],
+		  [ 1, $text{"${_t}debug1"} . "<br>" ],
+		  [ 2, $text{"${_t}debug2"} ] ] )});
+# Maintenance mode
+push(@$development_tab_content, {
+	desc  => &hlink($text{"${_t}maintenance_mode"}, "kit_wp_maintenance_mode"),
+	value => &ui_yesno_radio(
+	    "kit_maintenance_mode", $wp->{'maintenance_mode'} ? 1 : 0)});
+# Script concatenation
+push(@$development_tab_content, {
+	desc  => &hlink($text{"${_t}concatenate_scripts"}, "kit_wp_concatenate_scripts"),
+	value => &ui_yesno_radio(
+	    "kit_concatenate_scripts", $wp->{'concatenate_scripts'} ? 1 : 0)});
 
-# Tabs
-my @tabs = (
-	[ "settings", 'Settings' ],
-	[ "plugins", 'Plugins' ],
-	[ "themes", 'Themes' ],
-	[ "clone", 'Clone' ],
-	[ "backup", 'Backup and Restore' ],
-	[ "devel", 'Development' ],
-	[ "system", 'System' ] );
-
+# All tabs start
 my $data = &ui_tabs_start(\@tabs, "tab", "settings", 0);
+
+# System tab content
+$data .= &ui_tabs_start_tab("tab", "system");
+$data .= &ui_form_start("pro/wordpress_kit.cgi",
+		"post", undef, "id='kit_system_form'");
+$data .= &ui_hidden("dom", $d->{'dom'});
+$data .= &ui_hidden("sid", $sinfo->{'id'});;
+$data .= &ui_hidden("type", 'system');
+$data .= &ui_table_start(undef, "width=100%", 2);
+foreach my $option (@$system_tab_content) {
+	$data .= &ui_table_row($option->{'desc'}, $option->{'value'});
+	}
+$data .= &ui_table_end();
+$data .= &ui_form_end();
+$data .= &ui_tabs_end_tab();
+
+# Settings tab content
 my @data_submits;
 $data .= &ui_tabs_start_tab("tab", "settings");
-$data .= &ui_form_start("pro/wordpress_kit.cgi", "post", undef, "id='kit_settings_apply'");
+$data .= &ui_form_start("pro/wordpress_kit.cgi",
+		"post", undef, "id='kit_settings_form'");
 $data .= &ui_hidden("dom", $d->{'dom'});
+$data .= &ui_hidden("sid", $sinfo->{'id'});
 $data .= &ui_hidden("type", 'settings');
 $data .= &ui_table_start(undef, "width=100%", 2);
 foreach my $option (@$settings_tab_content) {
 	$data .= &ui_table_row($option->{'desc'}, $option->{'value'});
 	}
 $data .= &ui_table_end();
-push(@data_submits, &ui_submit($text{'scripts_kit_apply'}, "kit_action_p_apply", undef, "form='kit_settings_apply'"));
+push(@data_submits, &ui_submit($text{'scripts_kit_apply'},
+	"kit_form_apply", undef, "form='kit_settings_form'"));
 $data .= &ui_form_end();
 $data .= &ui_tabs_end_tab();
 
+# Plugins tab content
 $data .= &ui_tabs_start_tab("tab", "plugins");
 $data .= $plugins_tab_content;
 $data .= &ui_tabs_end_tab();
 
+# Themes tab content
 $data .= &ui_tabs_start_tab("tab", "themes");
 $data .= $themes_tab_content;
 $data .= &ui_tabs_end_tab();
 
+# Clone tab content
 $data .= &ui_tabs_start_tab("tab", "clone");
 $data .= $clone_tab_content;
 $data .= &ui_tabs_end_tab();
 
+# Backup and restore tab content
 $data .= &ui_tabs_start_tab("tab", "backup");
 $data .= "";
 $data .= &ui_tabs_end_tab();
 
+# Developemnt tab content
 $data .= &ui_tabs_start_tab("tab", "development");
-$data .= "";
+$data .= &ui_form_start("pro/wordpress_kit.cgi",
+		"post", undef, "id='kit_development_form'");
+$data .= &ui_hidden("dom", $d->{'dom'});
+$data .= &ui_hidden("sid", $sinfo->{'id'});
+$data .= &ui_hidden("type", 'development');
+$data .= &ui_table_start(undef, "width=100%", 2);
+foreach my $option (@$development_tab_content) {
+	$data .= &ui_table_row($option->{'desc'}, $option->{'value'});
+	}
+$data .= &ui_table_end();
+$data .= &ui_form_end();
 $data .= &ui_tabs_end_tab();
 
-$data .= &ui_tabs_start_tab("tab", "system");
-$data .= "";
-$data .= &ui_tabs_end_tab();
-
+# All tabs end
 $data .= &ui_tabs_end();
 
 return { extra_submits => \@data_submits, data => $data };
