@@ -2852,6 +2852,10 @@ my @webmail;
 if ($p eq "web") {
 	@webmail = &get_webmail_redirect_directives($d);
 	}
+my @recs;
+if ($d->{'dns'}) {
+	@recs = &get_domain_dns_records($d);
+	}
 foreach my $full ("www.".$d->{'dom'},
 		  ($d->{'mail'} ? ("mail.".$d->{'dom'}) : ()),
 		  "admin.".$d->{'dom'},
@@ -2879,7 +2883,6 @@ foreach my $full ("www.".$d->{'dom'},
 
 	# Is there a DNS entry for this hostname?
 	if ($d->{'dns'}) {
-		my @recs = &get_domain_dns_records($d);
 		my ($r) = grep { $_->{'name'} eq $full."." } @recs;
 		if ($r) {
 			push(@rv, $full);
