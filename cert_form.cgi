@@ -241,12 +241,14 @@ if (&domain_has_ssl_cert($d)) {
 	     &default_certificate_file($d, "cert")) ||
 	    (&get_website_ssl_file($d, "key") ne 
 	     &default_certificate_file($d, "key"))) {
+		my $defcert_dir = &default_certificate_file($d, "cert");
+		$defcert_dir =~ s|/[^/]+$||;
 		print &ui_hr() if (!$ui_hr++);
 		print &ui_buttons_row(
 			"default_cert.cgi",
 			$text{'cert_defaultpath'},
 			&text('cert_defaultpathdesc',
-			  "<tt>".&default_certificate_file($d, "cert")."</tt>"),
+			  "<tt>$defcert_dir</tt>"),
 			&ui_hidden("dom", $in{'dom'}));
 		}
 
