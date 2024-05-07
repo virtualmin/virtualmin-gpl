@@ -20369,6 +20369,70 @@ $config{'defaultdomain_name'} = $new_hostname;
 return $err ? 0 : 1;
 }
 
+# check_external_dns(hostname, [expected-ip])
+# Checks if some DNS record can be looked up externally by consulting the 
+# 8.8.8.8 nameserver. Returns 1 if yes, 0 if not, or -1 if the command needed
+# is not installed.
+sub check_external_dns
+{
+my ($host, $wantip) = @_;
+if (&has_command("dig")) {
+	my $out = &backquote_command(
+		"dig ".quotemeta($host)." \@8.8.8.8 2>/dev/null");
+	return -1 if ($?);
+	return 0 if ($out !~ /ANSWER\s+SECTION/i);
+	if ($out =~ /\Q$host\E\.?.*\s+(\d+\.\d+\.\d+\.\d+)/) {
+		# Found an IP
+		return !$wantip || $wantip eq $1;
+		}
+	return 0;
+	}
+elsif (&has_command("host")) {
+	&clean_environment();
+	my $out = &backquote_command(
+		"host ".quotemeta($host)." 8.8.8.8 2>/dev/null");
+	&reset_environment();
+	return 0 if ($out =~ /Host\s+\S+\s+not\s+found/i);
+	return -1 if ($?);
+	if ($out =~ /has\s+address\s+(\d+\.\d+\.\d+\.\d+)/i) {
+		# Found an IP
+		return !$wantip || $wantip eq $1;
+		}
+	return 0;
+	}
+return -1;
+}
+
+# filter_external_dns(&hostnames, &unresolvable)
+# Given a list of hostnames, removes those that can't be resolved and adds them
+# to the unresolvable list. Returns 1 if all are OK, 0 if any are not resolvable
+# and -1 if any lookups fail.
+sub filter_external_dns
+{
+my ($dnames, $badnames) = @_;
+my $fail = 0;
+my @newdnames;
+foreach my $h (@$dnames) {
+	if ($h =~ /\*/) {
+		# Let's Encrypt wildcards are always OK
+		push(@newdnames, $h);
+		}
+	else {
+		# Check if it can be resolved
+		my $ok = &check_external_dns($h);
+		$fail = 1 if ($ok < 0);
+		if ($ok) {
+			push(@newdnames, $h);
+			}
+		else {
+			push(@$badnames, $h);
+			}
+		}
+	}
+@$dnames = @newdnames;
+return $fail ? -1 : @$badnames ? 0 : 1;
+}
+
 # check_virtualmin_default_hostname_ssl()
 # Check default host domain
 sub check_virtualmin_default_hostname_ssl

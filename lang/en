@@ -7795,6 +7795,10 @@ letsencrypt_conncheck=Checking external connectivity for $1 ..
 letsencrypt_connerrs=.. errors were found, which will prevent Let's Encrypt from issuing a certificate :
 letsencrypt_connok=.. no problems found
 letsencrypt_validcheck=Validating configuration for $1 ..
+letsencrypt_dnscheck=Checking hostnames for resolvability ..
+letsencrypt_ednscheck=.. check could not be performed!
+letsencrypt_dnscheckok=.. all hostnames can be resolved
+letsencrypt_dnscheckbad=.. some hostnames were removed : $1
 
 php_fpmrestart=Restarting PHP-FPM $1 server ..
 php_fpmnoinit=.. no bootup action found!

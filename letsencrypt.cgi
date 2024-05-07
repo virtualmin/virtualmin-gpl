@@ -102,6 +102,21 @@ else {
 
 		}
 
+	# Filter down hostnames to those that can be resolved
+	&$first_print($text{'letsencrypt_dnscheck'});
+	my @badnames;
+	my $fok = &filter_external_dns(\@dnames, \@badnames);
+	if ($fok < 0) {
+		&$second_print($text{'letsencrypt_ednscheck'});
+		}
+	elsif ($fok) {
+		&$second_print($text{'letsencrypt_dnscheckok'});
+		}
+	else {
+		&$second_print(&text('letsencrypt_dnscheckbad',
+			join(', ', map { "<tt>$_</tt>" } @badnames)));
+		}
+
 	# Run the before command
 	&set_domain_envs($d, "SSL_DOMAIN");
 	$merr = &making_changes();
