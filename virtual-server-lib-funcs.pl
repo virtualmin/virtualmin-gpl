@@ -19234,6 +19234,12 @@ if (&domain_has_ssl($d)) {
 		$dir = "SSLCertificateChainFile";
 		($file) = &apache::find_directive($dir, $vconf);
 		}
+	if ($type eq "cert" && $file eq $d->{'ssl_combined'} &&
+	    $d->{'ssl_cert'}) {
+		# The Apache directive points to the combined file, but the
+		# cert-only file is what we really want to return
+		$file = $d->{'ssl_cert'};
+		}
 	return $file;
 	}
 else {
