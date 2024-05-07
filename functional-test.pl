@@ -6410,6 +6410,48 @@ $ssl_tests = [
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
+	# Move the cert and key files to a custom location
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'ssl-cert', $test_domain_home.'/ssl.cert' ],
+		      [ 'ssl-key', $test_domain_home.'/ssl.key' ] ],
+	},
+
+	# Make sure it worked
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'SSL cert file: '.$test_domain_home.'/ssl.cert',
+		      'SSL key file: '.$test_domain_home.'/ssl.key' ],
+	},
+
+	# Also check that HTTPS still works
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# And re-run validation
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Move back to default paths
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'default-ssl-paths' ] ],
+	},
+
+	# Make sure it worked too
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => [ 'SSL cert file: '.$test_domain_home.'/ssl.cert',
+		          'SSL key file: '.$test_domain_home.'/ssl.key' ],
+	},
+
 	# Cleanup the domains
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_ssl_subdomain ] ],
