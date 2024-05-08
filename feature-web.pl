@@ -1126,14 +1126,16 @@ else {
 	# If an IPv6 DNS record exists, make sure the Apache config supports it
 	my $ip6addr;
 	my $ip6name;
+	my $system_hostname = &get_system_hostname();
 	foreach my $try ("www.".$d->{'dom'}, $d->{'dom'}) {
+		next if ($try eq $system_hostname);
 		$ip6addr = &to_ip6address($try);
 		if ($ip6addr) {
 			$ip6name = $try;
 			last;
 			}
 		}
-	if ($ip6addr && $ip6addr ne "::1" && !$d->{'dns_cloud'}) {
+	if ($ip6addr && !$d->{'dns_cloud'}) {
 		if (!$d->{'ip6'}) {
 			return &text('validate_ewebipv6', $ip6addr, $ip6name);
 			}
