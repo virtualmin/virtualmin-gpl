@@ -334,7 +334,7 @@ else {
 				"&nbsp;".&ui_help($text{'wizard_mysql5'});
 			print &ui_hidden("socket", 1);
 			print &ui_table_row($text{'wizard_mysql_pass'},
-			&ui_opt_textbox("mypass", undef, 20,
+			&ui_opt_textbox("mypass", &random_password(16), 20,
 					$text_mysql_def."<br>",
 					$text{'wizard_mysql_pass0'}));
 			}
