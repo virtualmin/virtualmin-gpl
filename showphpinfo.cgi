@@ -21,7 +21,7 @@ my $ipage = $dir ? "$dir/$file" : "$file";
 my $filepath = "$public_html/$ipage";
 my ($iout, $ierror);
 &write_as_domain_user($d, sub {
-	&write_file_contents($filepath, "<?php\nphpinfo();\n?>");
+	&write_file_contents($filepath, "<?php\nif (function_exists('exec')){echo '<div style=\"font-size:115%;font-weight:500;text-align:center;margin: 1em auto;\">PHP is running as user: <span style=\"color:#5d73e8\">'.exec('whoami').'</span></div>';}\nphpinfo();\n?>");
 	});
 &get_http_connection($d, "/$ipage", \$iout, \$ierror);
 &PrintHeader();
