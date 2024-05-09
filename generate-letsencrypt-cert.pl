@@ -84,6 +84,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--validate-first") {
 		$validation = 1;
 		}
+	elsif ($a eq "--skip-dns-check") {
+		$nodnscheck = 1;
+		}
 	elsif ($a =~ /^--(web|dns)$/) {
 		$mode = $1;
 		}
@@ -184,6 +187,27 @@ if ($connectivity || $validation) {
 		}
 	}
 
+# Filter hostnames down to those that can be resolved
+if (!$nodnscheck) {
+	&$first_print("Checking hostnames for resolvability ..");
+	my @badnames;
+	my $fok = &filter_external_dns(\@dnames, \@badnames);
+	if ($fok < 0) {
+		&$second_print(".. check could not be performed!");
+		}
+	elsif ($fok) {
+		&$second_print(".. all hostnames can be resolved");
+		}
+	elsif (!@dnames) {
+		&$second_print(".. none of the hostnames could be resolved!");
+		exit(1);
+		}
+	else {
+		&$second_print(".. some hostnames were removed : ".
+			join(', ', map { "<tt>$_</tt>" } @badnames));
+		}
+	}
+
 # Run the before command
 &set_domain_envs($d, "SSL_DOMAIN");
 my $merr = &making_changes();
@@ -275,6 +299,7 @@ print "                                    [--renew]\n";
 print "                                    [--size bits]\n";
 print "                                    [--staging]\n";
 print "                                    [--check-first | --validate-first]\n";
+print "                                    [--skip-dns-check]\n";
 print "                                    [--web | --dns]\n";
 print "                                    [--rsa | --ec]\n";
 print "                                    [--server url]\n";

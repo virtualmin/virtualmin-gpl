@@ -112,6 +112,9 @@ else {
 	elsif ($fok) {
 		&$second_print($text{'letsencrypt_dnscheckok'});
 		}
+	elsif (!@dnames) {
+		&error($text{'letsencrypt_dnscheckall'});
+		}
 	else {
 		&$second_print(&text('letsencrypt_dnscheckbad',
 			join(', ', map { "<tt>$_</tt>" } @badnames)));
