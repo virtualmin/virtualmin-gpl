@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "5.0.5", "4.2.12", "3.2.25" );
+return ( "5.0.6", "4.2.13", "3.2.25" );
 }
 
 sub script_django_version_desc
