@@ -3025,14 +3025,7 @@ sub renew_letsencrypt_cert
 {
 my ($d) = @_;
 
-# Run the before command
-&set_domain_envs($d, "SSL_DOMAIN");
-my $merr = &making_changes();
-&reset_domain_envs($d);
-
-# Time to do it!
-my $phd = &public_html_dir($d);
-my ($ok, $cert, $key, $chain);
+# Work out the hostnames to request
 my @dnames;
 if ($d->{'letsencrypt_dname'}) {
 	@dnames = split(/\s+/, $d->{'letsencrypt_dname'});
@@ -3043,20 +3036,31 @@ else {
 push(@dnames, "*.".$d->{'dom'}) if ($d->{'letsencrypt_dwild'});
 my $fdnames = &filter_ssl_wildcards(\@dnames);
 @dnames = @$fdnames;
-&foreign_require("webmin");
+my @badnames;
+my $fok = &filter_external_dns(\@dnames, \@badnames);
+if (!@dnames) {
+	return (0, "None of the hostnames could be resolved", \@badnames);
+	}
+
+# Run the before command
+&set_domain_envs($d, "SSL_DOMAIN");
+my $merr = &making_changes();
+&reset_domain_envs($d);
 if ($merr) {
 	# Pre-command failed
 	return (0, $merr, \@dnames);
 	}
-else {
-	my $before = &before_letsencrypt_website($d);
-	($ok, $cert, $key, $chain) =
-		&request_domain_letsencrypt_cert($d, \@dnames, 0,
-		    $d->{'letsencrypt_size'}, undef, $d->{'letsencrypt_ctype'},
-		    $d->{'letsencrypt_server'}, $d->{'letsencrypt_key'},
-		    $d->{'letsencrypt_hmac'});
-	&after_letsencrypt_website($d, $before);
-	}
+
+# Time to do it!
+my $phd = &public_html_dir($d);
+&foreign_require("webmin");
+my $before = &before_letsencrypt_website($d);
+my ($ok, $cert, $key, $chain) =
+	&request_domain_letsencrypt_cert($d, \@dnames, 0,
+	    $d->{'letsencrypt_size'}, undef, $d->{'letsencrypt_ctype'},
+	    $d->{'letsencrypt_server'}, $d->{'letsencrypt_key'},
+	    $d->{'letsencrypt_hmac'});
+&after_letsencrypt_website($d, $before);
 
 my ($subject, $body);
 if (!$ok) {
