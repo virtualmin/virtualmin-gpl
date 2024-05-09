@@ -130,9 +130,15 @@ if (@dnames == @alldnames) {
 	print &ui_hidden_table_end();
 	}
 
+# Can we restore?
+my $restore = 0;
+if ($log->{'ok'} || scalar(@alldnames) != scalar(@errdnames)) {
+	$restore = 1;
+	}
+
 if ($log->{'ok'} || $log->{'errdoms'}) {
 	print &ui_form_end([
-		[ undef, $text{'viewbackup_restore'} ],
+		$restore ? ( [ undef, $text{'viewbackup_restore'} ] ) : ( ),
 		$can == 2 ? ( ) : ( [ 'delete', $text{'viewbackup_delete'} ] )
 		]);
 	}
