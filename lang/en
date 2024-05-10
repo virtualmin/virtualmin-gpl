@@ -5594,6 +5594,8 @@ phpmode_wwwredirnon=Adding redirect to non-www domain ..
 phpmode_wwwredirwww=Adding redirect to www domain ..
 
 website_header=Website options
+website_ephpcgi=CGI scripts cannot be disabled while PHP is using the CGI or fCGId execution mode
+website_ephpfcgid=CGI scripts cannot be run via fcgiwrap while PHP is using the fCGId execution mode
 
 spf_title=DNS Options
 spf_ecannot=You are not allowed to edit DNS options

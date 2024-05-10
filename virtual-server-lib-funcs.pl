@@ -11495,6 +11495,15 @@ sub save_domain_cgi_mode
 my ($d, $mode) = @_;
 my $p = &domain_has_website($d);
 if ($p eq 'web') {
+	# Is PHP mode compatible?
+	my $phpmode = &get_domain_php_mode($d);
+	if (!$mode && ($phpmode eq 'cgi' || $phpmode eq 'fcgid')) {
+		return $text{'website_ephpcgi'};
+		}
+	if ($mode eq 'fcgiwrap' && $phpmode eq 'fcgid') {
+		return $text{'website_ephpfcgid'};
+		}
+
 	&obtain_lock_web($d);
 	if ($mode ne 'fcgiwrap') {
 		&disable_apache_fcgiwrap($d);
