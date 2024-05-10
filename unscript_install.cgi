@@ -24,6 +24,10 @@ elsif ($in{'restart'}) {
 	# Redirect to Rails server restart form
 	&redirect("restart_script.cgi?dom=$in{'dom'}&script=$in{'script'}");
 	}
+elsif ($in{'reinstall-deps'}) {
+	# Redirect to reinstall dependencies form
+	&redirect("script_reinstall_dependencies.cgi?dom=$in{'dom'}&script=$in{'script'}");
+	}
 
 # Get the script being removed
 @got = &list_domain_scripts($d);
