@@ -1018,13 +1018,20 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	}
 
 # Add versions found to the final list for CGI and fcgid modes
-my $hascgi = $d ? &get_domain_cgi_mode($d) : scalar(&has_cgi_support());
+my @hascgi;
+if ($d) {
+	my $m = get_domain_cgi_mode($d);
+	push(@hascgi, $m) if ($m);
+	}
+else {
+	@hascgi = &has_cgi_support();
+	}
 my @cgimodes;
 if ($p eq 'web') {
-	# Under Apache, CGI and fCGId modes need cgi-script support
-	if ($hascgi) {
-		push(@cgimodes, "fcgid", "cgi");
-		}
+	# Under Apache, CGI and fCGId modes need cgi-script support. But fcgid
+	# mode only works with suexec
+	push(@cgimodes, "fcgid") if (&indexof("suexec", @hascgi) >= 0);
+	push(@cgimodes, "cgi") if (@hascgi);
 	}
 else {
 	# Other webservers like Nginx have their own check for supported modes
