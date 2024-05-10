@@ -17,12 +17,8 @@ $script || &error($text{'stopscript_egone'});
 my $phpver;
 my @dirs = &list_domain_php_directories($d);
 foreach my $dir (@dirs) {
-        if ($dir->{'dir'} eq $sinfo->{'dir'}) {
-                $phpver ||= $dir->{'version'};
-                }
-        }
-foreach my $dir (@dirs) {
-        if ($dir->{'dir'} eq &public_html_dir($d)) {
+        if ($dir->{'dir'} eq $sinfo->{'dir'} ||
+            $dir->{'dir'} eq &public_html_dir($d)) {
                 $phpver ||= $dir->{'version'};
                 }
         }
