@@ -379,6 +379,7 @@ local %serial;
 local $cb = $nocallback ? undef : \&progress_callback;
 local @files = &{$script->{'files_func'}}($d, $ver, $opts, $sinfo);
 foreach my $f (@files) {
+	next if ($f->{'nodownload'});
 	if (-r "$script->{'dir'}/$f->{'file'}") {
 		# Included in script's directory
 		$gotfiles->{$f->{'name'}} = "$script->{'dir'}/$f->{'file'}";
