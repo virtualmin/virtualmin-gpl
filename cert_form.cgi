@@ -475,6 +475,11 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 				    [ 0, $text{'cert_connectivity0'} ] ]));
 			}
 
+		# Check DNS lookup?
+		print &ui_table_row($text{'cert_dnscheck'},
+			&ui_yesno_radio("dnscheck",
+					!$d->{'letsencrypt_nodnscheck'}));
+
 		# Certificate type, if supported
 		if (&letsencrypt_supports_ec()) {
 			print &ui_table_row($text{'cert_hash'},

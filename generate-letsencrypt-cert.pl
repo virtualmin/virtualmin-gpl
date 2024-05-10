@@ -27,6 +27,12 @@ use a different ACME-compatible provider with the C<--server> flag followed
 by the provider's API URL. The C<--server-key> and C<--server-hmac> flags can
 be used to specify a login to the provider.
 
+By default Virtualmin will attempt to perform an external DNS lookup of all
+domain names that the certificate is requested for, to make sure they can be
+resolved by the Let's Encrypt service. To disable this check, use the
+C<--skip-dns-check> flag. Or to forcible enable it because it was disabled
+for the domain in the UI, use the C<--dns-check> flag.
+
 =cut
 
 package virtual_server;
@@ -86,6 +92,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--skip-dns-check") {
 		$nodnscheck = 1;
+		}
+	elsif ($a eq "--dns-check") {
+		$nodnscheck = 0;
 		}
 	elsif ($a =~ /^--(web|dns)$/) {
 		$mode = $1;
@@ -188,6 +197,7 @@ if ($connectivity || $validation) {
 	}
 
 # Filter hostnames down to those that can be resolved
+$nodnscheck = $d->{'letsencrypt_nodnscheck'} if (!defined($nodnscheck));
 if (!$nodnscheck) {
 	&$first_print("Checking hostnames for resolvability ..");
 	my @badnames;
@@ -246,6 +256,7 @@ else {
 	$d->{'letsencrypt_server'} = $leserver;
 	$d->{'letsencrypt_key'} = $leserver_key;
 	$d->{'letsencrypt_hmac'} = $leserver_hmac;
+	$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
 	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);
 
@@ -299,7 +310,7 @@ print "                                    [--renew]\n";
 print "                                    [--size bits]\n";
 print "                                    [--staging]\n";
 print "                                    [--check-first | --validate-first]\n";
-print "                                    [--skip-dns-check]\n";
+print "                                    [--skip-dns-check | --dns-check]\n";
 print "                                    [--web | --dns]\n";
 print "                                    [--rsa | --ec]\n";
 print "                                    [--server url]\n";

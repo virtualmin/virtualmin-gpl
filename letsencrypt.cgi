@@ -38,6 +38,7 @@ if ($in{'only'}) {
 	$d->{'letsencrypt_dname'} = $custom_dname;
 	$d->{'letsencrypt_dwild'} = $in{'dwild'};
 	$d->{'letsencrypt_renew'} = $in{'renew'};
+	$d->{'letsencrypt_nodnscheck'} = !$in{'dnscheck'};
 	&save_domain($d);
 	&redirect("cert_form.cgi?dom=$d->{'id'}");
 	}
@@ -103,21 +104,23 @@ else {
 		}
 
 	# Filter down hostnames to those that can be resolved
-	&$first_print($text{'letsencrypt_dnscheck'});
-	my @badnames;
-	my $fok = &filter_external_dns(\@dnames, \@badnames);
-	if ($fok < 0) {
-		&$second_print($text{'letsencrypt_ednscheck'});
-		}
-	elsif ($fok) {
-		&$second_print($text{'letsencrypt_dnscheckok'});
-		}
-	elsif (!@dnames) {
-		&error($text{'letsencrypt_dnscheckall'});
-		}
-	else {
-		&$second_print(&text('letsencrypt_dnscheckbad',
-			join(', ', map { "<tt>$_</tt>" } @badnames)));
+	if ($in{'dnscheck'}) {
+		&$first_print($text{'letsencrypt_dnscheck'});
+		my @badnames;
+		my $fok = &filter_external_dns(\@dnames, \@badnames);
+		if ($fok < 0) {
+			&$second_print($text{'letsencrypt_ednscheck'});
+			}
+		elsif ($fok) {
+			&$second_print($text{'letsencrypt_dnscheckok'});
+			}
+		elsif (!@dnames) {
+			&error($text{'letsencrypt_dnscheckall'});
+			}
+		else {
+			&$second_print(&text('letsencrypt_dnscheckbad',
+				join(', ', map { "<tt>$_</tt>" } @badnames)));
+			}
 		}
 
 	# Run the before command
@@ -157,6 +160,7 @@ else {
 		$d->{'letsencrypt_ctype'} = $in{'ctype'} =~ /^ec/ ? "ecdsa" : "rsa";
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_success'} = time();
+		$d->{'letsencrypt_nodnscheck'} = !$in{'dnscheck'};
 		&refresh_ssl_cert_expiry($d);
 		&save_domain($d);
 

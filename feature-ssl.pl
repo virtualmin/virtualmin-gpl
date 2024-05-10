@@ -3036,10 +3036,12 @@ else {
 push(@dnames, "*.".$d->{'dom'}) if ($d->{'letsencrypt_dwild'});
 my $fdnames = &filter_ssl_wildcards(\@dnames);
 @dnames = @$fdnames;
-my @badnames;
-my $fok = &filter_external_dns(\@dnames, \@badnames);
-if (!@dnames) {
-	return (0, "None of the hostnames could be resolved", \@badnames);
+if (!$d->{'letsencrypt_nodnscheck'}) {
+	my @badnames;
+	my $fok = &filter_external_dns(\@dnames, \@badnames);
+	if (!@dnames) {
+		return (0, "None of the hostnames could be resolved", \@badnames);
+		}
 	}
 
 # Run the before command

@@ -3321,6 +3321,7 @@ cert_connectivity=Check connectivity first?
 cert_connectivity2=Test connectivity
 cert_connectivity1=Validate domain
 cert_connectivity0=Skip tests
+cert_dnscheck=Check if domain names can be resolved?
 cert_letsage=Time since last renewal
 cert_letsmonths=$1 months
 cert_lets_success=Last successful renewal
