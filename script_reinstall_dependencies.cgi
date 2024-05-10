@@ -9,8 +9,9 @@ my $d = &get_domain($in{'dom'});
 # Get the script being started
 my @got = &list_domain_scripts($d);
 my ($sinfo) = grep { $_->{'id'} eq $in{'script'} } @got;
+$sinfo || &error($text{'stopscript_egone'});
 my $script = &get_script($sinfo->{'name'});
-$sinfo && $script || &error($text{'stopscript_egone'});
+$script || &error($text{'stopscript_egone'});
 
 # Work out PHP version for this domain
 my $phpver;
