@@ -166,11 +166,15 @@ return undef;
 sub script_wordpress_files
 {
 my ($d, $ver, $opts, $upgrade) = @_;
-return (
-	{ 'name' => "cli",
+return ( { 'name' => "cli",
 	   'file' => "wordpress-cli.phar",
 	   'url' => "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar",
-	   'nocache' => 1 } );
+	   'nocache' => 1 },
+	 { 'name' => 'source',
+	   'file' => 'wordpress-'.$ver.'.zip',
+	   'url' => 'https://wordpress.org/wordpress-'.$ver.'.zip',
+	   'nodownload' => 1,
+	 } );
 }
 
 sub script_wordpress_commands
