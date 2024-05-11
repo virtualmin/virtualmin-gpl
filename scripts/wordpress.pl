@@ -610,6 +610,13 @@ my @tabs = (
 	[ "clone", 'Clone' ],
 	[ "development", 'Development' ] );
 
+# Do we have tab in URL
+my $tab = $in{'tab'};
+
+# Validate if passed tab in URL is in
+# tabs list or fall back to default
+$tab = $tabs[1]->[0] if (!$tab || !grep { $_->[0] eq $tab } @tabs);
+
 # System tab prepare
 my $system_tab_content;
 # Memory limit
@@ -713,6 +720,7 @@ my $table_select_opts =
 $plugins_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
 	"post", undef, "data-form-nested='apply' id='kit_plugins_form'");
 $plugins_tab_content .= &ui_hidden("dom", $d->{'dom'});
+$plugins_tab_content .= &ui_hidden("tab", "plugins");
 $plugins_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $plugins_tab_content .= &ui_hidden("type", 'plugins');
 $plugins_tab_content .= &ui_select("plugins", "", $table_select_opts);
@@ -746,6 +754,7 @@ splice(@$table_select_opts, 2, 1);
 $themes_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
 	"post", undef, "data-form-nested='apply' id='kit_themes_form'");
 $themes_tab_content .= &ui_hidden("dom", $d->{'dom'});
+$themes_tab_content .= &ui_hidden("tab", "themes");
 $themes_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $themes_tab_content .= &ui_hidden("type", 'themes');
 $themes_tab_content .= &ui_select("themes", "", $table_select_opts);
@@ -777,6 +786,7 @@ $themes_tab_content .= &ui_form_end();
 my $clone_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
 	"post", undef, "data-form-nested='apply' id='kit_clone_form'");
 $clone_tab_content .= &ui_hidden("dom", $d->{'dom'});
+$clone_tab_content .= &ui_hidden("tab", "clone");
 $clone_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $clone_tab_content .= &ui_hidden("type", 'clone');
 $clone_tab_content .= &ui_table_start(undef, "width=100%", 2);
@@ -865,7 +875,7 @@ push(@$development_tab_content, {
 	    "kit_concatenate_scripts", $wp->{'concatenate_scripts'} ? 1 : 0)});
 
 # All tabs start
-my $data = &ui_tabs_start(\@tabs, "tab", "settings", 0);
+my $data = &ui_tabs_start(\@tabs, "tab", $tab, 0);
 
 # System tab content
 $data .= &ui_tabs_start_tab("tab", "system");
@@ -873,8 +883,7 @@ $data .= &ui_form_start("pro/wordpress_kit.cgi",
 		"post", undef,
 		"data-form-nested='apply' id='kit_system_form'");
 $data .= &ui_hidden("dom", $d->{'dom'});
-$data .= &ui_hidden("sid", $sinfo->{'id'});;
-$data .= &ui_hidden("type", 'system');
+$data .= &ui_hidden("tab", "system");
 $data .= &ui_table_start(undef, "width=100%", 2);
 foreach my $option (@$system_tab_content) {
 	$data .= &ui_table_row($option->{'desc'}, $option->{'value'});
@@ -890,6 +899,7 @@ $data .= &ui_form_start("pro/wordpress_kit.cgi",
 		"post", undef,
 		"data-form-nested='apply' id='kit_settings_form'");
 $data .= &ui_hidden("dom", $d->{'dom'});
+$data .= &ui_hidden("tab", "settings");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
 $data .= &ui_hidden("type", 'settings');
 $data .= &ui_table_start(undef, "width=100%", 2);
@@ -929,6 +939,7 @@ $data .= &ui_form_start("pro/wordpress_kit.cgi",
 		"post", undef,
 		"data-form-nested='apply' id='kit_development_form'");
 $data .= &ui_hidden("dom", $d->{'dom'});
+$data .= &ui_hidden("tab", "development");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
 $data .= &ui_hidden("type", 'development');
 $data .= &ui_table_start(undef, "width=100%", 2);
