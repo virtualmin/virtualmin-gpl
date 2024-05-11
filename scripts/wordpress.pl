@@ -711,7 +711,7 @@ my $table_select_opts =
 	  [ "enable-auto-update", $text{'scripts_kit_wp_selopt_enable_auto'} ],
 	  [ "disable-auto-update", $text{'scripts_kit_wp_selopt_disable_auto'} ] ];
 $plugins_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
-	"post", undef, "id='kit_plugins_form'");
+	"post", undef, "data-form-nested='apply' id='kit_plugins_form'");
 $plugins_tab_content .= &ui_hidden("dom", $d->{'dom'});
 $plugins_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $plugins_tab_content .= &ui_hidden("type", 'plugins');
@@ -744,7 +744,7 @@ $plugins_tab_content .= &ui_form_end();
 my $themes_tab_content;
 splice(@$table_select_opts, 2, 1);
 $themes_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
-	"post", undef, "id='kit_themes_form'");
+	"post", undef, "data-form-nested='apply' id='kit_themes_form'");
 $themes_tab_content .= &ui_hidden("dom", $d->{'dom'});
 $themes_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $themes_tab_content .= &ui_hidden("type", 'themes');
@@ -775,7 +775,7 @@ $themes_tab_content .= &ui_form_end();
 
 # Clone tab prepare
 my $clone_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
-	"post", undef, "id='kit_clone_form'");
+	"post", undef, "data-form-nested='apply' id='kit_clone_form'");
 $clone_tab_content .= &ui_hidden("dom", $d->{'dom'});
 $clone_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $clone_tab_content .= &ui_hidden("type", 'clone');
@@ -870,7 +870,8 @@ my $data = &ui_tabs_start(\@tabs, "tab", "settings", 0);
 # System tab content
 $data .= &ui_tabs_start_tab("tab", "system");
 $data .= &ui_form_start("pro/wordpress_kit.cgi",
-		"post", undef, "id='kit_system_form'");
+		"post", undef,
+		"data-form-nested='apply' id='kit_system_form'");
 $data .= &ui_hidden("dom", $d->{'dom'});
 $data .= &ui_hidden("sid", $sinfo->{'id'});;
 $data .= &ui_hidden("type", 'system');
@@ -886,7 +887,8 @@ $data .= &ui_tabs_end_tab();
 my @data_submits;
 $data .= &ui_tabs_start_tab("tab", "settings");
 $data .= &ui_form_start("pro/wordpress_kit.cgi",
-		"post", undef, "id='kit_settings_form'");
+		"post", undef,
+		"data-form-nested='apply' id='kit_settings_form'");
 $data .= &ui_hidden("dom", $d->{'dom'});
 $data .= &ui_hidden("sid", $sinfo->{'id'});
 $data .= &ui_hidden("type", 'settings');
@@ -896,7 +898,8 @@ foreach my $option (@$settings_tab_content) {
 	}
 $data .= &ui_table_end();
 push(@data_submits, &ui_submit($text{'scripts_kit_apply'},
-	"kit_form_apply", undef, "form='kit_settings_form'"));
+	"kit_form_apply", undef,
+	"data-submit-nested='apply' form='kit_${tab}_form'"));
 $data .= &ui_form_end();
 $data .= &ui_tabs_end_tab();
 
@@ -923,7 +926,8 @@ $data .= &ui_tabs_end_tab();
 # Developemnt tab content
 $data .= &ui_tabs_start_tab("tab", "development");
 $data .= &ui_form_start("pro/wordpress_kit.cgi",
-		"post", undef, "id='kit_development_form'");
+		"post", undef,
+		"data-form-nested='apply' id='kit_development_form'");
 $data .= &ui_hidden("dom", $d->{'dom'});
 $data .= &ui_hidden("sid", $sinfo->{'id'});
 $data .= &ui_hidden("type", 'development');
