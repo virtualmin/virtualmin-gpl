@@ -1,1 +1,1 @@
-<header> Chroot监狱域Unix用户？ </header>如果启用，则虚拟服务器的Unix用户的所有SSH和SCP访问将被限制在其主目录中。这也适用于以FPM或FCGId模式运行的PHP脚本。 <p><footer>
+<header>为域名启用 Jailkit</header>此选项允许管理员使用 Jailkit 限制特定域的用户环境，从而通过将其与整个系统隔离来潜在地增强安全性。<p>启用后，域的关联 Unix 用户将使用 Jailkit 置于<em>chrooted</em>环境中。这意味着用户只能访问由 Jailkit 配置定义的一组有限资源。<p> Jailkit 配置利用<tt>jk_init.ini</tt>配置文件中的设置来确定哪些文件、二进制文件和库可在<em>chrooted</em>环境中访问。还可以根据需要定义其他配置，例如额外的部分或命令。<p>在为域启用 Jailkit 之前，请确保您了解其含义。用户在访问某些系统资源或执行特定命令时可能会遇到限制。<p><footer>

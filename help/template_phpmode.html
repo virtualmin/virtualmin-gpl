@@ -7,20 +7,20 @@ in new virtual servers.<p>
 are instead treated as plain text files. This mode can be used when PHP processing
 is not required or when serving PHP code as downloadable files.<p>
 
-<b style="color: green;">FPM</b> is the preferred mode, offering high efficiency
-and advanced features like adaptive process management. It operates as a standalone
-FastCGI server, ideal for high-traffic sites due to its robust performance capabilities.<p>
+<b>FPM</b> is the preferred mode, offering high efficiency and advanced features
+like adaptive process management. It operates as a standalone FastCGI server,
+ideal for high-traffic sites due to its robust performance capabilities.<p>
 
-<b>FCGId</b> is useful for servers where FPM is not available. It also supports
+<b>FCGI</b> is useful for servers where FPM is not available. It also supports
 per-virtual-host configurations, though it generally doesn't match FPM in terms
 of scalability and management features.<p>
 
-<b>CGI Wrapper</b> mode runs each PHP script as a separate process through the
-CGI protocol. This mode is less efficient than FPM or FCGId due to the overhead
+<b>CGI</b> mode runs each PHP script as a separate process through the
+CGI protocol. This mode is less efficient than FPM or FCGI due to the overhead
 of creating a new process for each request. It's rarely used in modern setups
 due to its performance limitations.<p>
 
-<b style="color:crimson">mod_php</b> integrates PHP directly into the Apache
+<b>mod_php</b> integrates PHP directly into the Apache
 web server, allowing PHP scripts to execute within the server's own process.
 However, due to security and isolation issues, plus the discontinuation of
 support and updates, it is now obsolete.

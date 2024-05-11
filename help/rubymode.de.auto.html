@@ -1,6 +1,2 @@
-<header> Ruby-Skriptausführungsmodus </header> Diese Option bestimmt, ob Ruby-Skripts als Apache-Webserverbenutzer (normalerweise <tt>httpd</tt> oder <tt>apache</tt> ) oder als Unix-Benutzer ausgeführt werden, dem der virtuelle Server gehört. Ersteres ist schneller, da keine zusätzlichen Prozesse gestartet werden müssen, um Ruby-Code auszuführen, aber weniger sicher, da Skripte Dateien als anderer Benutzer als der Domänenbesitzer lesen und schreiben. <p><!--
-If your system supports it, the <b>FCGId</b> option is the best, as it runs
-Ruby scripts quickly and as the domain owner. Otherwise, unless your system is
-heavily loaded or security between users is not an issue, the
-<b>CGI wrapper</b> option is recommended. <p>
---><footer>
+<header>Ruby-Skriptausführungsmodus</header> Diese Option legt fest, ob Ruby-Skripte als Benutzer des Apache-Webservers (normalerweise <tt>httpd</tt> oder <tt>apache</tt> ) oder als Unix-Benutzer ausgeführt werden, dem der virtuelle Server gehört. Ersteres ist schneller, da keine zusätzlichen Prozesse gestartet werden müssen, um Ruby-Code auszuführen. Allerdings ist es weniger sicher, da Skripte Dateien als ein anderer Benutzer als der Domänenbesitzer lesen und schreiben.<p><footer>
+
