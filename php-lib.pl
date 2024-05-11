@@ -1927,6 +1927,34 @@ if ($mode ne "mod_php") {
 return undef;
 }
 
+# get_domain_php_version_for_directory(&domain, [directory])
+# Get the PHP version used by the domain in some directory.
+# If directory param is not specified, it defaults to the
+# public_html directory.
+# If PHP is disabled or not set, undef is returned.
+sub get_domain_php_version_for_directory
+{
+my ($d, $directory) = @_;
+return undef if (!$d);
+my $phpver;
+my @dirs = &list_domain_php_directories($d);
+@dirs = sort { length($b->{'dir'}) <=> length($a->{'dir'}) } @dirs;
+foreach my $dir (@dirs) {
+        if ($dir->{'dir'} eq $directory) {
+                $phpver = $dir->{'version'};
+                last;
+                }
+        if ($dir->{'dir'} eq &public_html_dir($d)) {
+		$phpver = $dir->{'version'};
+		}
+        }
+if (!$phpver) {
+	my @allvers = map { $_->[0] } &list_available_php_versions($d);
+	$phpver = $allvers[0];
+	}
+return $phpver;
+}
+
 # create_php_ini_link(&domain, [php-mode])
 # Create a link from etc/php.ini to the PHP version used by the domain's
 # public_html directory

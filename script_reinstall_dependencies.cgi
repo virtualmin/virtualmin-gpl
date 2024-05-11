@@ -13,17 +13,8 @@ $sinfo || &error($text{'stopscript_egone'});
 my $script = &get_script($sinfo->{'name'});
 $script || &error($text{'stopscript_egone'});
 
-# Work out PHP version for this domain
-my $phpver;
-my @dirs = &list_domain_php_directories($d);
-foreach my $dir (@dirs) {
-        if ($dir->{'dir'} eq $sinfo->{'dir'} ||
-            $dir->{'dir'} eq &public_html_dir($d)) {
-                $phpver ||= $dir->{'version'};
-                }
-        }
-my @allvers = map { $_->[0] } &list_available_php_versions($d);
-$phpver ||= $allvers[0];
+# Work out PHP version for this domain/directory
+my $phpver = &get_domain_php_version_for_directory($d, $sinfo->{'opts'}->{'dir'});
 
 # Print the header and starting message
 &ui_print_unbuffered_header(&domain_in($d), $text{'scripts_rdepstitle'}, "");
@@ -31,8 +22,10 @@ $phpver ||= $allvers[0];
 &$indent_print();
 
 # Run the install dependencies functions
-&setup_php_modules($d, $script, $sinfo->{'version'}, $phpver, $sinfo->{'opts'});
-&setup_pear_modules($d, $script, $sinfo->{'version'}, $phpver, $sinfo->{'opts'});
+if ($phpver) {
+        &setup_php_modules($d, $script, $sinfo->{'version'}, $phpver, $sinfo->{'opts'});
+        &setup_pear_modules($d, $script, $sinfo->{'version'}, $phpver, $sinfo->{'opts'});
+        }
 &setup_perl_modules($d, $script, $sinfo->{'version'}, $sinfo->{'opts'});
 &setup_ruby_modules($d, $script, $sinfo->{'version'}, $sinfo->{'opts'});
 &setup_python_modules($d, $script, $sinfo->{'version'}, $sinfo->{'opts'});
