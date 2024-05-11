@@ -1457,7 +1457,6 @@ backup_es3path=S3' de çoklu dosyalara yedekleme yapýldýðýnda bir dosya ismi
 backup_doing=$1 alanadýnýn $2'ye yedeklenmesi baþlýyor ..
 backup_doing2=$1 Virtualmin konfigürasyon ayarlarýnýn $2'ye yedeklenmesi baþlýyor ..
 backup_euser=FTP sunucu logininde geçersiz karakterler
-backup_epass=FTP sunucu þifresinde geçersiz karakterler
 backup_ebucket=Hatalý ya da geçersiz S3 arabellek adý
 backup_done=Yedeklenme tamamlandý. Nihai boyut $1.
 backup_failed=Yedeklenemedi! Nedenini görmek için yukardaki ilerleme çýktýsýna bakýn.
@@ -2048,25 +2047,6 @@ database_title4=Disassociate Veritabaný
 database_rusure=$1 veritabnýný silmek istediðinizden emin misiniz?? Ýçerdiði tüm veriler kaybedilecektir
 database_ok=Þimdi Sil
 database_charset=MySQL veritabaný için karakter seti ayarlanmasý
-
-vfile_title=Otomatik Yanýt Dosyasýný Düzenle
-vfile_ecannot=Otomatik yanýt dosyalarýný düzenlemeye izniniz yok
-vfile_desc=Use the text area below to edit the autoresponder message in $1.
-vfile_time=Gönderenin hatýrlanma süresi
-vfile_secs=saniye
-vfile_num=Bu süre içinde gönderilecek cevap sayýsý
-vfile_dir=Log dosyasý klasörü
-vfile_auto=Otomatik
-vfile_flag=Orjinal mesaj eklensin mi?
-vfile_from=Cevap için Kimden: adresi
-vfile_blank=Boþluk
-vfile_to=Hedef adresi
-vfile_other=Diðer adresi
-vfile_err=Otomatik yanýt dosyasý kaydedilemedi
-vfile_etime=eksik veya geçersiz göndereni hatýrlama süresi
-vfile_enum=Eksik veya geçersiz gönderilecek cevap sayýsý
-vfile_edir=Eksik veya varolmayan log klasörü
-vfile_eother=Cevap için Kimden: adresi eksik
 
 reemail_title=Kaydolma e-postasýný yeniden yolla
 
@@ -2754,7 +2734,6 @@ phpmode_title=Website Secenekleri
 phpmode_ecannot=You are not allowed to configure website options for this virtual server
 phpmode_mode=PHP script execution mode
 phpmode_mod_php=Apache <tt>mod_php</tt> (run as Apache's user)
-phpmode_cgi=CGI wrapper (run as virtual server owner)
 phpmode_err=Website seçeneklerinin kayýtýnda hata oluþtu
 
 spf_title=DNS Secenekleri

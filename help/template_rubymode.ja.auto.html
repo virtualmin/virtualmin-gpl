@@ -1,7 +1,2 @@
-<header>デフォルトのRuby実行モード</header>このオプションは、新しい仮想サーバーの Ruby スクリプトを Apache Web サーバー ユーザー (通常は<tt>httpd</tt>または<tt>apache</tt> ) として実行するか、仮想サーバーを所有する Unix ユーザーとして実行するかを決定します。前者は、Ruby コードを実行するために追加のプロセスを開始する必要がないため高速ですが、スクリプトはドメイン所有者以外のユーザーとしてファイルを読み書きするため、安全性は低くなります。 <p><!--
-If your system supports it, the <b>FCGId</b> option is the best, as it runs
-Ruby scripts quickly and as the domain owner. Otherwise, unless your system is
-heavily loaded or security between users is not an issue, the
-<b>CGI wrapper</b> option is recommended. <p>
---><footer>
+<header>デフォルトのRuby実行モード</header>このオプションは、新しい仮想サーバー内の Ruby スクリプトが Apache Web サーバー ユーザー (通常は<tt>httpd</tt>または<tt>apache</tt> ) として実行されるか、仮想サーバーを所有する Unix ユーザーとして実行されるかを決定します。前者の方が、Ruby コードを実行するために追加のプロセスを開始する必要がないため高速ですが、スクリプトがドメイン所有者以外のユーザーとしてファイルを読み書きするため、安全性が低くなります。<p><footer>
 

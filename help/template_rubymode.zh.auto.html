@@ -1,7 +1,2 @@
-<header>默认 Ruby 执行模式</header>此选项确定新虚拟服务器中的 Ruby 脚本是作为 Apache Web 服务器用户（通常为<tt>httpd</tt>或<tt>apache</tt> ）运行，还是作为拥有虚拟服务器的 Unix 用户运行。前者速度更快，因为这意味着不需要启动额外的进程来执行 Ruby 代码，但安全性较低，因为脚本以域所有者以外的用户身份读写文件。 <p><!--
-If your system supports it, the <b>FCGId</b> option is the best, as it runs
-Ruby scripts quickly and as the domain owner. Otherwise, unless your system is
-heavily loaded or security between users is not an issue, the
-<b>CGI wrapper</b> option is recommended. <p>
---><footer>
+<header>默认 Ruby 执行模式</header>此选项确定新虚拟服务器中的 Ruby 脚本是以 Apache Web 服务器用户（通常是<tt>httpd</tt>或<tt>apache</tt> ）还是以拥有虚拟服务器的 Unix 用户身份运行。前者速度更快，因为这意味着无需启动其他进程即可执行 Ruby 代码，但安全性较差，因为脚本以域所有者以外的用户身份读取和写入文件。<p><footer>
 
