@@ -1934,18 +1934,18 @@ return undef;
 # If PHP is disabled or not set, undef is returned.
 sub get_domain_php_version_for_directory
 {
-my ($d, $directory) = @_;
+my ($d, $dir) = @_;
 return undef if (!$d);
 my $phpver;
-my @dirs = &list_domain_php_directories($d);
-@dirs = sort { length($b->{'dir'}) <=> length($a->{'dir'}) } @dirs;
-foreach my $dir (@dirs) {
-        if ($dir->{'dir'} eq $directory) {
-                $phpver = $dir->{'version'};
-                last;
-                }
-        if ($dir->{'dir'} eq &public_html_dir($d)) {
-		$phpver = $dir->{'version'};
+my @pdirs = &list_domain_php_directories($d);
+@pdirs = sort { length($a->{'dir'}) <=> length($b->{'dir'}) } @pdirs;
+foreach my $pdir (@pdirs) {
+	if ($pdir->{'dir'} eq $dir) {
+		$phpver = $pdir->{'version'};
+		last;
+		}
+	if (&is_under_directory($pdir->{'dir'}, $dir || &public_html_dir($d))) {
+		$phpver = $pdir->{'version'};
 		}
         }
 if (!$phpver) {
