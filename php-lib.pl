@@ -1936,6 +1936,7 @@ sub get_domain_php_version_for_directory
 {
 my ($d, $dir) = @_;
 return undef if (!$d);
+$dir ||= &public_html_dir($d);
 my $phpver;
 my @pdirs = &list_domain_php_directories($d);
 @pdirs = sort { length($a->{'dir'}) <=> length($b->{'dir'}) } @pdirs;
@@ -1944,7 +1945,7 @@ foreach my $pdir (@pdirs) {
 		$phpver = $pdir->{'version'};
 		last;
 		}
-	if (&is_under_directory($pdir->{'dir'}, $dir || &public_html_dir($d))) {
+	if (&is_under_directory($pdir->{'dir'}, $dir)) {
 		$phpver = $pdir->{'version'};
 		}
         }
