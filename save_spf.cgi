@@ -95,6 +95,28 @@ else {
 	}
 &error($err) if ($err);
 
+# Update DKIM records
+my $dkim = &get_dkim_config();
+if ($dkim && defined($in{'dkim'})) {
+	my $olddkim = &has_dkim_domain($d, $dkim);
+	if ($in{'dkim'} eq '1') {
+		$d->{'dkim_enabled'} = 1;
+		}
+	elsif ($in{'dkim'} eq '0') {
+		$d->{'dkim_enabled'} = 0;
+		}
+	else {
+		delete($d->{'dkim_enabled'});
+		}
+	my $newdkim = &has_dkim_domain($d, $dkim);
+	if (!$olddkim && $newdkim) {
+		&update_dkim_domains($d, 'setup');
+		}
+	elsif ($olddkim && !$newdkim) {
+		&update_dkim_domains($d, 'delete');
+		}
+	}
+
 if (&can_domain_dnssec($d) && defined($in{'dnssec'})) {
 	# Turn DNSSEC on or off
 	&pre_records_change($d);

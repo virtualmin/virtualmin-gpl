@@ -394,8 +394,8 @@ my ($dkim, $newkey, $size) = @_;
 
 # Find domains that we can enable DKIM for (those with mail and DNS)
 &$first_print($text{'dkim_domains'});
-my @alldoms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } &list_domains();
-my @doms = grep { &can_dkim_domain($_, $dkim) } @alldoms;
+my @alldoms = &list_domains();
+my @doms = grep { &has_dkim_domain($_, $dkim) } @alldoms;
 if (@doms && @{$dkim->{'extra'}}) {
 	&$second_print(&text('dkim_founddomains3', scalar(@doms),
 			     scalar(@{$dkim->{'extra'}})));
@@ -648,7 +648,7 @@ elsif (&get_dkim_type() eq 'redhat') {
 # Add public key to DNS zones for all domains that have DNS and email enabled,
 # or are on the extra domains list
 my %extra = map { $_, 1 } @{$dkim->{'extra'}};
-my @dnsdoms = grep { &can_dkim_domain($_, $dkim) || $extra{$_->{'dom'}} } @alldoms;
+my @dnsdoms = grep { &has_dkim_domain($_, $dkim) || $extra{$_->{'dom'}} } @alldoms;
 &add_dkim_dns_records(\@dnsdoms, $dkim);
 
 # Remove from domains that didn't get the DNS records added
@@ -884,11 +884,22 @@ return 1;
 }
 
 # can_dkim_domain(&domain, &dkim)
-# Returns 1 if a domain should have DKIM enabled
+# Returns 1 if a domain should have DKIM enabled by default
 sub can_dkim_domain
 {
 my ($d, $dkim) = @_;
 return $d->{'dns'} && ($d->{'mail'} || $dkim->{'alldns'});
+}
+
+# has_dkim_domain(&domain, &dkim)
+# Returns 1 if a domain must have DKIM enabled
+sub has_dkim_domain
+{
+my ($d, $dkim) = @_;
+return 0 if (!$d->{'dns'});
+return 0 if ($d->{'dkim_enabled'} eq '0');
+return 1 if ($d->{'dkim_enabled'} eq '1');
+return &can_dkim_domain($d, $dkim);
 }
 
 # update_dkim_domains(&domain, action, [no-dns])
@@ -902,7 +913,7 @@ my $dkim = &get_dkim_config();
 return if (!$dkim || !$dkim->{'enabled'});
 
 # Enable DKIM for all domains with mail
-my @doms = grep { &can_dkim_domain($_, $dkim) } &list_domains();
+my @doms = grep { &has_dkim_domain($_, $dkim) } &list_domains();
 if (($action eq 'setup' || $action eq 'modify')) {
 	push(@doms, $d);
 	}
@@ -911,7 +922,6 @@ elsif ($action eq 'delete') {
 	}
 my %done;
 @doms = grep { !$done{$_->{'id'}}++ } @doms;
-@doms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } @doms;
 &set_dkim_domains(\@doms, $dkim);
 &unlock_file(&get_dkim_config_file());
 
@@ -1041,10 +1051,6 @@ my ($doms, $dkim) = @_;
 my $anychanged = 0;
 foreach my $d (@$doms) {
 	&$first_print(&text('dkim_dns', "<tt>$d->{'dom'}</tt>"));
-	if (&indexof($d->{'dom'}, @{$dkim->{'exclude'}}) >= 0) {
-		&$second_print($text{'dkim_ednsexclude'});
-		next;
-		}
 	&pre_records_change($d);
 	my ($recs, $file) = &get_domain_dns_records_and_file($d);
 	if (!$file) {

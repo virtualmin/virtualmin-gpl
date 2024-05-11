@@ -494,10 +494,24 @@ if (!&check_ratelimit() && &is_ratelimit_enabled()) {
 		}
 	}
 
-# Cache the DKIM status
 if (!&check_dkim()) {
+	# Cache the DKIM status
 	my $dkim = &get_dkim_config();
 	$config{'dkim_enabled'} = $dkim && $dkim->{'enabled'} ? 1 : 0;
+
+	# Replace the list of excluded DKIM domains with a new field
+	if ($dkim) {
+		foreach my $e (@{$dkim->{'exclude'}}) {
+			my $d = &get_domain_by("dom", $e);
+			&lock_domain($d);
+			if ($d) {
+				$d->{'dkim_enabled'} = 0;
+				&save_domain($d);
+				}
+			&unlock_domain($d);
+			}
+		delete($config{'dkim_exclude'});
+		}
 	&save_module_config();
 	}
 
