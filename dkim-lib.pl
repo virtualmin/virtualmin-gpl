@@ -395,7 +395,7 @@ my ($dkim, $newkey, $size) = @_;
 # Find domains that we can enable DKIM for (those with mail and DNS)
 &$first_print($text{'dkim_domains'});
 my @alldoms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } &list_domains();
-my @doms = grep { $_->{'dns'} && ($_->{'mail'} || $dkim->{'alldns'}) } @alldoms;
+my @doms = grep { &can_dkim_domain($_, $dkim) } @alldoms;
 if (@doms && @{$dkim->{'extra'}}) {
 	&$second_print(&text('dkim_founddomains3', scalar(@doms),
 			     scalar(@{$dkim->{'extra'}})));
@@ -648,8 +648,7 @@ elsif (&get_dkim_type() eq 'redhat') {
 # Add public key to DNS zones for all domains that have DNS and email enabled,
 # or are on the extra domains list
 my %extra = map { $_, 1 } @{$dkim->{'extra'}};
-my @dnsdoms = grep { $_->{'dns'} &&
-		     ($_->{'mail'} || $dkim->{'alldns'} || $extra{$_->{'dom'}}) } @alldoms;
+my @dnsdoms = grep { &can_dkim_domain($_, $dkim) || $extra{$_->{'dom'}} } @alldoms;
 &add_dkim_dns_records(\@dnsdoms, $dkim);
 
 # Remove from domains that didn't get the DNS records added
@@ -884,6 +883,14 @@ my $init = &get_dkim_init_name();
 return 1;
 }
 
+# can_dkim_domain(&domain, &dkim)
+# Returns 1 if a domain should have DKIM enabled
+sub can_dkim_domain
+{
+my ($d, $dkim) = @_;
+return $d->{'dns'} && ($d->{'mail'} || $dkim->{'alldns'});
+}
+
 # update_dkim_domains(&domain, action, [no-dns])
 # Updates the list of domains to sign mail for, if needed
 sub update_dkim_domains
@@ -895,7 +902,7 @@ my $dkim = &get_dkim_config();
 return if (!$dkim || !$dkim->{'enabled'});
 
 # Enable DKIM for all domains with mail
-my @doms = grep { $_->{'dns'} && ($_->{'mail'} || $dkim->{'alldns'}) } &list_domains();
+my @doms = grep { &can_dkim_domain($_, $dkim) } &list_domains();
 if (($action eq 'setup' || $action eq 'modify')) {
 	push(@doms, $d);
 	}
