@@ -554,6 +554,29 @@ my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
     "url" => get_bloginfo("url"),
     "wpurl" => get_bloginfo("wpurl"),
     "language" => get_bloginfo("language"),
+    "permalink_structure" => get_option("permalink_structure"),
+    "permalinks" => [
+	"plain" => [
+		"label" => "Plain",
+		"structure" => "",
+		"example" => "/?p=123"
+	],
+	"day_and_name" => [
+		"label" => "Day and name",
+		"structure" => "/%year%/%monthnum%/%day%/%postname%/",
+		"example" => "/2024/05/12/sample-post/"
+	],
+	"month_and_name" => [
+		"label" => "Month and name",
+		"structure" => "/%year%/%monthnum%/%postname%/",
+		"example" => "/2024/05/sample-post/"
+	],
+	"post_name" => [
+		"label" => "Post name",
+		"structure" => "/%postname%/",
+		"example" => "/sample-post/"
+	]
+    ],
     "login_url" => (function() {
         $admin_email = get_option("admin_email");
         $user = get_user_by("email", $admin_email);
