@@ -554,6 +554,14 @@ my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
     "wpurl" => get_bloginfo("wpurl"),
     "url" => get_bloginfo("url"),
     "language" => get_bloginfo("language"),
+    "login_url" => (function() {
+        $admin_email = get_option("admin_email");
+        $user = get_user_by("email", $admin_email);
+        if (!$user) {
+            return "";
+        }
+        return [$user->ID, admin_url()];
+    })(),
     "plugins" => array_map(function($plugin) {
         require_once(ABSPATH . "wp-admin/includes/plugin.php");
         require_once(ABSPATH . "wp-admin/includes/update.php");
