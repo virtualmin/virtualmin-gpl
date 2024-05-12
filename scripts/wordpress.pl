@@ -551,8 +551,8 @@ my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
     "admin_email" => get_option("admin_email"),
     "version" => get_bloginfo("version"),
     "blogdescription" => get_option("blogdescription"),
-    "wpurl" => get_bloginfo("wpurl"),
     "url" => get_bloginfo("url"),
+    "wpurl" => get_bloginfo("wpurl"),
     "language" => get_bloginfo("language"),
     "login_url" => (function() {
         $admin_email = get_option("admin_email");
@@ -560,7 +560,7 @@ my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
         if (!$user) {
             return "";
         }
-        return [$user->ID, admin_url()];
+        return [$user->ID, admin_url(), get_bloginfo("url")];
     })(),
     "plugins" => array_map(function($plugin) {
         require_once(ABSPATH . "wp-admin/includes/plugin.php");
@@ -727,7 +727,7 @@ my $table_select_opts =
 	  [ "disable-auto-update", $text{'scripts_kit_wp_selopt_disable_auto'} ] ];
 $plugins_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
 	"post", undef, "data-form-nested='apply' id='kit_plugins_form'");
-$plugins_tab_content .= &ui_hidden("dom", $d->{'dom'});
+$plugins_tab_content .= &ui_hidden("dom", $d->{'id'});
 $plugins_tab_content .= &ui_hidden("tab", "plugins");
 $plugins_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $plugins_tab_content .= &ui_hidden("type", "plugins");
@@ -761,7 +761,7 @@ my $themes_tab_content;
 splice(@$table_select_opts, 2, 1);
 $themes_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
 	"post", undef, "data-form-nested='apply' id='kit_themes_form'");
-$themes_tab_content .= &ui_hidden("dom", $d->{'dom'});
+$themes_tab_content .= &ui_hidden("dom", $d->{'id'});
 $themes_tab_content .= &ui_hidden("tab", "themes");
 $themes_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $themes_tab_content .= &ui_hidden("type", "themes");
@@ -793,7 +793,7 @@ $themes_tab_content .= &ui_form_end();
 # Clone tab prepare
 my $clone_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
 	"post", undef, "data-form-nested='apply' id='kit_clone_form'");
-$clone_tab_content .= &ui_hidden("dom", $d->{'dom'});
+$clone_tab_content .= &ui_hidden("dom", $d->{'id'});
 $clone_tab_content .= &ui_hidden("tab", "clone");
 $clone_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $clone_tab_content .= &ui_hidden("type", "clone");
@@ -890,7 +890,7 @@ $data .= &ui_tabs_start_tab("tab", "system");
 $data .= &ui_form_start("pro/wordpress_kit.cgi",
 		"post", undef,
 		"data-form-nested='apply' id='kit_system_form'");
-$data .= &ui_hidden("dom", $d->{'dom'});
+$data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("tab", "system");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
 $data .= &ui_hidden("type", "system");
@@ -908,7 +908,7 @@ $data .= &ui_tabs_start_tab("tab", "settings");
 $data .= &ui_form_start("pro/wordpress_kit.cgi",
 		"post", undef,
 		"data-form-nested='apply' id='kit_settings_form'");
-$data .= &ui_hidden("dom", $d->{'dom'});
+$data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("tab", "settings");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
 $data .= &ui_hidden("type", "settings");
@@ -920,6 +920,8 @@ $data .= &ui_table_end();
 push(@data_submits, &ui_submit($text{'scripts_kit_apply'},
 	"kit_form_apply", undef,
 	"data-submit-nested='apply' form='kit_${tab}_form'"));
+push(@data_submits, &ui_submit(&text('scripts_kit_login', $script->{'desc'}),
+	"kit_form_login", undef, "form='kit_login_form'"));
 $data .= &ui_form_end();
 $data .= &ui_tabs_end_tab();
 
@@ -948,7 +950,7 @@ $data .= &ui_tabs_start_tab("tab", "development");
 $data .= &ui_form_start("pro/wordpress_kit.cgi",
 		"post", undef,
 		"data-form-nested='apply' id='kit_development_form'");
-$data .= &ui_hidden("dom", $d->{'dom'});
+$data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("tab", "development");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
 $data .= &ui_hidden("type", "development");
@@ -958,12 +960,57 @@ foreach my $option (@$development_tab_content) {
 	}
 $data .= &ui_table_end();
 $data .= &ui_form_end();
+$data .= &ui_form_start("script_login.cgi",
+		"post", undef, "id='kit_login_form' target='_blank'");
+$data .= &ui_hidden("dom", $d->{'id'});
+$data .= &ui_hidden("sid", $sinfo->{'id'});
+$data .= &ui_hidden("scall", &convert_to_json($wp));
+$data .= &ui_form_end();
 $data .= &ui_tabs_end_tab();
 
 # All tabs end
 $data .= &ui_tabs_end();
 
 return { extra_submits => \@data_submits, data => $data };
+}
+
+# script_wordpress_kit_login(&domain, &script, &script-info, &script-call-data)
+# Called to login to the WordPress admin panel
+sub script_wordpress_kit_login
+{
+my ($d, $script, $sinfo, $scall) = @_;
+my $esdesc = "$script->{'desc'} $text{'scripts_kit_loginkit'}";
+my $login_data = $scall->{'login_url'};
+my $login_uid = $login_data->[0];
+$login_uid =~ /^\d+$/ ||
+	&error("$esdesc : $text{'scripts_kit_einvaliduid'} : $login_uid");
+my $admin_url = $login_data->[1];
+$admin_url =~ /:\/\// ||
+	&error("$esdesc : $text{'scripts_kit_einvalidadminurl'} : $admin_url");
+my $site_url = $login_data->[2];
+$site_url =~ /:\/\// ||
+	&error("$esdesc : $text{'scripts_kit_einvalidsiteurl'} : $site_url");
+my $dir = $sinfo->{'opts'}->{'dir'};
+my $filename = "/wp-login-".&substitute_pattern('[a-f0-9]{40}').".php";
+my $dir_filename = "$dir/$filename";
+$dir_filename =~ s/([^:])\/\//$1\//g;
+my $redir_url = "$site_url$filename";
+$redir_url =~ s/([^:])\/\//$1\//g;
+my $fcontents = <<EOF;
+<?php
+require __DIR__ . '/wp-load.php';
+register_shutdown_function(function() {
+    unlink('$dir_filename');
+});
+wp_clear_auth_cookie();
+wp_set_current_user($login_uid);
+wp_set_auth_cookie($login_uid);
+wp_redirect('$admin_url');
+exit;
+EOF
+&write_as_domain_user($d, sub { 
+	&write_file_contents($dir_filename, $fcontents) });
+&redirect($redir_url);
 }
 
 1;

@@ -4552,6 +4552,13 @@ scripts_kit_wp_selopt_delete=Delete
 scripts_kit_wp_selopt_enable_auto=Enable auto-updates
 scripts_kit_wp_selopt_disable_auto=Disable auto-updates
 scripts_kit_apply=Apply
+scripts_kit_login=Login to $1
+scripts_kit_einvaliduid=Invalid user ID
+scripts_kit_einvalidadminurl=Invalid admin URL
+scripts_kit_einvalidsiteurl=Invalid site URL
+scripts_kit_loginkit=Login Kit
+
+
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up
