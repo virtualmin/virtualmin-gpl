@@ -775,6 +775,14 @@ if ($multi) {
 			      ($dmarc ? "Enabled" : "Disabled"),"\n";
 			}
 
+		# Show DKIM setting
+		if ($d->{'dkim_enabled'} eq '1') {
+			print "    DKIM enabled: Yes\n";
+			}
+		elsif ($d->{'dkim_enabled'} eq '0') {
+			print "    DKIM enabled: No\n";
+			}
+
 		# Slave DNS servers
 		if ($config{'dns'} && $d->{'dns'} && $d->{'dns_slave'}) {
 			print "    Slave DNS servers: ",

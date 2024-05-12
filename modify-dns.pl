@@ -89,6 +89,10 @@ Similarly, the C<--remote-dns> flag followed by a hostname can be used to move
 this domain to a remote Webmin DNS server, if one is configured. Or to move it
 back to local hosting, use the C<--local-dns> flag.
 
+If DKIM is enabled on your system, you can enable it for this domain with the
+C<--enable-dkim> flag, or turn it off with C<--disable-dkim>. Or switch to
+the default state for this domain with C<--default-dkim>.
+
 =cut
 
 package virtual_server;
@@ -261,6 +265,15 @@ while(@ARGV > 0) {
 	elsif ($a eq "--remove-parent-ds") {
 		$parentds = 0;
 		}
+	elsif ($a eq "--enable-dkim") {
+		$dkim_enabled = 1;
+		}
+	elsif ($a eq "--disable-dkim") {
+		$dkim_enabled = 0;
+		}
+	elsif ($a eq "--default-dkim") {
+		$dkim_enabled = 2;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -274,7 +287,7 @@ defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
   defined($tlsa) || $syncallslaves || defined($submode) || $clouddns ||
   defined($remotedns) || defined($parentds) || defined($clouddns_import) ||
-  &usage("Nothing to do");
+  defined($dkim_enabled) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -349,6 +362,13 @@ if (defined($remotedns)) {
 		}
 	$rserver->{'slave'} && &usage("Remote DNS server $rserver->{'host'} ".
 				      "cannot be used for master zones");
+	}
+
+# Validate DKIM flag
+my $dkim = &get_dkim_config();
+if (defined($dkim_enabled)) {
+	$dkim && $dkim->{'enabled'} ||
+		&usage("DKIM is not enabled on this system");
 	}
 
 # Do it for all domains
@@ -621,6 +641,27 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Update DKIM records
+	if (defined($dkim_enabled)) {
+		my $olddkim = &has_dkim_domain($d, $dkim);
+		if ($dkim_enabled == 1) {
+			$d->{'dkim_enabled'} = 1;
+			}
+		elsif ($dkim_enabled == 0) {
+			$d->{'dkim_enabled'} = 0;
+			}
+		else {
+			delete($d->{'dkim_enabled'});
+			}
+		my $newdkim = &has_dkim_domain($d, $dkim);
+		if (!$olddkim && $newdkim) {
+			&update_dkim_domains($d, 'setup');
+			}
+		elsif ($olddkim && !$newdkim) {
+			&update_dkim_domains($d, 'delete');
+			}
+		}
+
 	# Move into a DNS sub-domain
 	if (defined($submode)) {
 		if ($submode == 1) {
@@ -782,6 +823,7 @@ print "                     [--cloud-dns provider|\"local\"]\n";
 print "                     [--cloud-dns-import]\n";
 print "                     [--remote-dns hostname | --local-dns]\n";
 print "                     [--add-parent-ds | --remove-parent-ds]\n";
+print "                     [--enable-dkim | --disable-dkim | --default-dkim]\n";
 exit(1);
 }
 
