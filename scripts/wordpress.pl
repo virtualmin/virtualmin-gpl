@@ -920,7 +920,7 @@ $data .= &ui_table_end();
 push(@data_submits, &ui_submit($text{'scripts_kit_apply'},
 	"kit_form_apply", undef,
 	"data-submit-nested='apply' form='kit_${tab}_form'"));
-push(@data_submits, &ui_submit(&text('scripts_kit_login', $script->{'desc'}),
+push(@data_submits, &ui_submit($text{'scripts_kit_wp_login'},
 	"kit_form_login", undef, "form='kit_login_form'"));
 $data .= &ui_form_end();
 $data .= &ui_tabs_end_tab();

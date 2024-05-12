@@ -165,7 +165,7 @@ if ($extra_submits) {
 # Show un-install and upgrade buttons
 print &ui_submit($text{'scripts_uok'}, "uninstall"),"\n";
 # Reinstall dependencies
-print &ui_submit($text{'scripts_rdeps'}, "reinstall-deps"),"\n";
+print &ui_submit($text{'scripts_rdeps'}, "reinstall_deps"),"\n";
 
 if (!script_migrated_disallowed($script->{'migrated'})) {
 	@vers = sort { $a <=> $b }
