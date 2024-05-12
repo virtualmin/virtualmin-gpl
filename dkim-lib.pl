@@ -152,7 +152,6 @@ return scalar(@inst) || !&check_dkim();
 # enabled - Set to 1 if postfix is setup to use DKIM
 # selector - Record within the domain for the key
 # extra - Additional domains to enable for
-# exclude - Domains for forcibly disable for
 # keyfile - Private key file
 sub get_dkim_config
 {
@@ -646,9 +645,7 @@ elsif (&get_dkim_type() eq 'redhat') {
 &$second_print($text{'setup_done'});
 
 # Add public key to DNS zones for all domains that have DNS and email enabled,
-# or are on the extra domains list
-my %extra = map { $_, 1 } @{$dkim->{'extra'}};
-my @dnsdoms = grep { &has_dkim_domain($_, $dkim) || $extra{$_->{'dom'}} } @alldoms;
+my @dnsdoms = grep { &has_dkim_domain($_, $dkim) } @alldoms;
 &add_dkim_dns_records(\@dnsdoms, $dkim);
 
 # Remove from domains that didn't get the DNS records added

@@ -499,18 +499,35 @@ if (!&check_dkim()) {
 	my $dkim = &get_dkim_config();
 	$config{'dkim_enabled'} = $dkim && $dkim->{'enabled'} ? 1 : 0;
 
-	# Replace the list of excluded DKIM domains with a new field
 	if ($dkim) {
+		# Replace the list of excluded DKIM domains with a new field
 		foreach my $e (@{$dkim->{'exclude'}}) {
 			my $d = &get_domain_by("dom", $e);
-			&lock_domain($d);
 			if ($d) {
+				&lock_domain($d);
 				$d->{'dkim_enabled'} = 0;
 				&save_domain($d);
+				&unlock_domain($d);
 				}
-			&unlock_domain($d);
 			}
 		delete($config{'dkim_exclude'});
+
+		# Replace the list of extra DKIM domains with a new field, as
+		# long as they are Virtualmin domains
+		my @newextra;
+		foreach my $e (@{$dkim->{'extra'}}) {
+			my $d = &get_domain_by("dom", $e);
+			if ($d) {
+				&lock_domain($d);
+				$d->{'dkim_enabled'} = 1;
+				&save_domain($d);
+				&unlock_domain($d);
+				}
+			else {
+				push(@newextra, $e);
+				}
+			}
+		$config{'dkim_extra'} = join(' ', @newextra);
 		}
 	&save_module_config();
 	}
