@@ -18,7 +18,7 @@
 # License and version
 SERIAL=GPL
 KEY=GPL
-VER=7.3.4
+VER=7.4.0
 vm_version=7
 
 # Server
@@ -571,7 +571,7 @@ install_msg() {
       UNSTABLERHEL
     ${CYANBG}${BLACK}${BOLD}Debian Linux and derivatives${NORMAL}${CYAN}
       - Debian 10, 11 and 12 on i386 and amd64
-      - Ubuntu 20.04 LTS and 22.04 LTS on i386 and amd64${NORMAL}
+      - Ubuntu 20.04 LTS, 22.04 LTS and 24.04 LTS on i386 and amd64${NORMAL}
       UNSTABLEDEB"
 
   cat <<EOF
@@ -1060,7 +1060,7 @@ install_virtualmin_release() {
   debian | ubuntu | kali)
     case "$os_type" in
     ubuntu)
-      if [ "$os_version" != "18.04" ] && [ "$os_version" != "20.04" ] && [ "$os_version" != "22.04" ] && [ "$vm6_repos" -eq 0 ]; then
+      if [ "$os_version" != "18.04" ] && [ "$os_version" != "20.04" ] && [ "$os_version" != "22.04" ] && [ "$os_version" != "24.04" ] && [ "$vm6_repos" -eq 0 ]; then
         printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
         exit 1
       fi
