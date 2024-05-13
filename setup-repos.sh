@@ -1,19 +1,11 @@
 #!/bin/sh
 # shellcheck disable=SC2059 disable=SC2181 disable=SC2154 disable=SC2317
 # virtualmin-install.sh
-# Copyright 2005-2023 Virtualmin, Inc.
-# Simple script to grab the virtualmin-release and virtualmin-base packages.
-# The packages do most of the hard work, so this script can be small-ish and
-# lazy-ish.
+# Copyright 2005-2024 Virtualmin
+# Simple script to install Virtualmin on a supported OS
 
-# WARNING: Anything not listed in the currently supported systems list is not
-# going to work, despite the fact that you might see code that detects your
-# OS and acts on it.  If it isn't in the list, the code is not complete and
-# will not work.  More importantly, the repos that this script uses do not
-# exist, if the OS isn't listed.  Don't even bother trying it.
-#
-# A manual install might work for you though.
-# See here: https://www.virtualmin.com/documentation/installation/manual/
+# Different installation guides are available at:
+# https://www.virtualmin.com/docs/installation/guides
 
 # License and version
 SERIAL=GPL
@@ -24,9 +16,6 @@ vm_version=7
 # Server
 upgrade_virtualmin_host=software.virtualmin.com
 upgrade_virtualmin_host_lib="$upgrade_virtualmin_host/lib"
-
-# Currently supported systems
-# https://www.virtualmin.com/os-support/
 
 # Save current working directory
 pwd="$PWD"
