@@ -17354,6 +17354,7 @@ if ($ddis) {
 	$content =~ s/<a\s+data-login=["']\Qbutton\E["'](.*?)<\/a>//s,
 	$content =~ s/<x-div\s+data-postlogin=["']\Qcontainer\E["'](.*?)<\/x-div>//s,
 	$content =~ s/(data-(login|domain)=["'].*?["'].*?)(success)/$1warning/gm;
+	$content =~ s/domain\s+font-monospace/$1 text-danger/gm;
 	}
 $content =~ s/(data-login=["']row["'].*)(col-l.*)(".*)/$1col-lg-8 col-xl-7$3/gm;
 $content =~ s/x-(main|div)/$1/g;

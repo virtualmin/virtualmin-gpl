@@ -7888,8 +7888,8 @@ mailclient_smtp_starttls=STARTTLS
 mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Unencrypted
 
-deftmplt_tmpltpagedefdom=Domain default page
-deftmplt_tmpltpagedefhost=Host default page
+deftmplt_tmpltpagedefdom=Domain default page for
+deftmplt_tmpltpagedefhost=Host default page for
 deftmplt_tmpltpagedomstatus1=Website Enabled
 deftmplt_tmpltpagedomstatus0=Website Disabled
 deftmplt_tmpltpagedommsg1=This page indicates a newly created website is working. This default page is automatically generated after a virtual server is setup by Virtualmin &mdash; a premier open-source hosting control panel, offering automation and comprehensive management for webhosting environments.
