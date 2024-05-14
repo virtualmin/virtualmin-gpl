@@ -723,6 +723,17 @@ $domains_tests = [
 	  'grep' => '5.6.7.8',
 	},
 
+	# Modify one of the records
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'update-record', 'testing A', 'testing A 5.5.5.5' ] ],
+	},
+
+	# Verify that it worked
+	{ 'command' => 'host -t A testing.'.$test_domain,
+	  'grep' => '5.5.5.5',
+	},
+
 	# Delete the records
 	{ 'command' => 'modify-dns.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -11900,16 +11911,15 @@ sub run_test_command
 {
 local $cmd = $t->{'command'};
 foreach my $a (@{$t->{'args'}}) {
-	if (defined($a->[1])) {
-		if ($a->[1] =~ /\s/ || $a->[1] eq '') {
-			$cmd .= " --".$a->[0]." '".$a->[1]."'";
+	my ($flag, @vals) = @$a;
+	$cmd .= " --".$flag;
+	foreach my $v (@vals) {
+		if ($v =~ /\s/ || $v eq '') {
+			$cmd .= " '".$v."'";
 			}
 		else {
-			$cmd .= " --".$a->[0]." ".$a->[1];
+			$cmd .= " ".$v;
 			}
-		}
-	else {
-		$cmd .= " --".$a->[0];
 		}
 	}
 foreach my $e (keys %{$t->{'envs'}}) {
