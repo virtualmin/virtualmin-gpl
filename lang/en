@@ -5648,6 +5648,8 @@ spf_dkim2=Use default behavior
 spf_delrecs=Deleting $1 DNS records ..
 spf_addrecs=Adding $1 DNS records ..
 spf_eaddrecs=.. a record named $1 already exists
+spf_uprecs=Updating $1 DNS records ..
+spf_euprecs=.. a record named $1 does not exist
 spf_eaddproxy=.. Cloud DNS provider does not support proxy records
 spf_ttl=Setting default TTL to $1 ..
 spf_ettlsupport=.. not supported by DNS provider
@@ -5863,6 +5865,7 @@ newdynip_eext=Failed to work out externally visible IP address
 newdynip_eexternal=In external script mode, the full path to a script to run must be entered
 
 dynip_dyndns=DynDNS
+dynip_dyndns=Virtualmin hosted domain ..
 dynip_external=Run external script ..
 dynip_none=Don't update any service
 
