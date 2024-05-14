@@ -42,8 +42,12 @@ use the C<--add-proxy-record> with the same parameters as C<--add-record>.
 Conversely, deletion is done with the C<--remove-record> flag, followed by a 
 single parameter containing the name and type of the record(s) to delete. You
 can also optionally include the record values, to disambiguate records with
-the same name but different values (like MX records). Both the additional and
-deletion flags can be given multiple times.
+the same name but different values (like MX records).
+
+You can also update an existing record with the C<--update-record> flag,
+which must be followed by two parameters. First is the current name and type,
+and second is the new name, type and values.  The record addition, modification
+and deletion flags can be given multiple times.
 
 Similarly, the default TTL for records can be set with the C<--ttl> flag
 followed by a number in seconds. Suffixes like h, m and d are also allowed
@@ -199,6 +203,13 @@ while(@ARGV > 0) {
 		$name && $type || &usage("--remove-record must be followed by the record name and type, all in one parameter");
 		push(@delrecs, [ $name, $type, @values ]);
 		}
+	elsif ($a eq "--update-record") {
+		my ($oldname, $oldtype) = split(/\s+/, shift(@ARGV));
+		my ($name, $type, @values) = split(/\s+/, shift(@ARGV));
+		$oldname && $oldtype || &usage("--update-record must be followed by the original record name and type, all in one parameter");
+		$name && $type && @values || &usage("--update-record must be followed by the new record name, type and values, all in one parameter");
+                push(@uprecs, [ $oldname, $oldtype, $name, $type, undef, \@values, 0 ]);
+		}
 	elsif ($a eq "--ttl") {
 		$ttl = shift(@ARGV);
 		$ttl =~ /^\d+(s|m|h|d)?$/ || &usage("--ttl must be followed by a number with a valid suffix");
@@ -283,7 +294,8 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage("No domains specified");
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
-  @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
+  @addrecs || @delrecs || @uprecs ||
+  @addslaves || @delslaves || $addallslaves || $ttl ||
   defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
   defined($tlsa) || $syncallslaves || defined($submode) || $clouddns ||
   defined($remotedns) || defined($parentds) || defined($clouddns_import) ||
@@ -531,6 +543,41 @@ foreach $d (@doms) {
 				$changed++;
 				}
 			}
+		&$second_print($text{'setup_done'});
+		}
+
+	# Update records in the domain
+	if (@uprecs) {
+		&$first_print(&text('spf_uprecs', scalar(@addrecs)));
+		if (!$recs) {
+			&pre_records_change($d);
+			($recs, $file) = &get_domain_dns_records_and_file($d);
+			}
+		foreach my $rn (@uprecs) {
+			my ($oldname, $oldtype, $name, $type, $ttl, $values, $proxied) = @$rn;
+			if ($oldname !~ /\.$/ && $oldname ne "\@") {
+				$oldname .= ".".$d->{'dom'}.".";
+				}
+			if ($name !~ /\.$/ && $name ne "\@") {
+				$name .= ".".$d->{'dom'}.".";
+				}
+			my ($r) = grep { $_->{'name'} eq $oldname &&
+					 $_->{'type'} eq $oldtype } @$recs;
+			if (!$r) {
+				&$second_print(&text('spf_euprecs', $oldname));
+				}
+			else {
+				$r->{'name'} = $name;
+				$r->{'type'} = $type;
+				$r->{'ttl'} = $ttl if (defined($ttl));
+				$r->{'proxied'} = $proxied
+					if (defined($proxied));
+				$r->{'values'} = $values;
+				&modify_dns_record($recs, $file, $r);
+				$changed++;
+				}
+			}
+
 		&$second_print($text{'setup_done'});
 		}
 
@@ -812,6 +859,7 @@ print "                     [--add-record \"name type value\"]\n";
 print "                     [--add-record-with-ttl \"name type TTL value\"]\n";
 print "                     [--add-proxy-record \"name type value\"]\n";
 print "                     [--remove-record \"name type value\"]\n";
+print "                     [--update-record \"oldname oldtype\" \"name type value\"]\n";
 print "                     [--ttl seconds | --all-ttl seconds]\n";
 print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
 print "                     [--remove-slave hostname]* | [--sync-all-slaves]\n";
