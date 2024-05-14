@@ -561,7 +561,7 @@ local $file = "$domains_dir/$d->{'id'}";
 if (!$creating && $d->{'id'} && !-r $file) {
 	# Deleted from under us! Don't save
 	print STDERR "Domain $file was deleted before saving!\n";
-	&print_call_stack();
+	&print_call_stack() if ($gconfig{'error_stack'});
 	return 0;
 	}
 if ($d->{'dom'} eq '') {
