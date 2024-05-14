@@ -533,7 +533,7 @@ my $_t = 'scripts_kit_wp_';
 
 # Has to be called using eval for maximum speed (avg 
 # expected load time is + 0.5s to default page load)
-my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
+my $wp_cli_command = $wp_cli . ' eval \'error_reporting(E_ALL & ~E_WARNING); echo json_encode([
     "wp_debug" => defined("WP_DEBUG") ? WP_DEBUG : 0, 
     "wp_debug_display" => defined("WP_DEBUG_DISPLAY") ? WP_DEBUG_DISPLAY : 0, 
     "wp_debug_log" => defined("WP_DEBUG_LOG") ? str_replace("'.$opts->{'dir'}.'", "", WP_DEBUG_LOG) : 0, 
