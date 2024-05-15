@@ -99,7 +99,7 @@ if (!$d->{'disabled'}) {
 	foreach $f (@dom_features, &list_feature_plugins()) {
 		if ($in{$f}) {
 			if (grep {$_ eq $f} @forbidden_domain_features) {
-				&error(&text('setup_efeatforbid',
+				&error(&text('setup_efeatforbidhostdef',
 					"<tt>@{[&html_escape($f)]}</tt>"));
 				}
 			$newdom{$f} = 1;
