@@ -19717,7 +19717,11 @@ my @rv;
 return @rv if ($config{'nocheck_forbidden_domain_features'});
 # Not allowed features for host default domain
 if ($d->{'dom'} eq &get_system_hostname()) {
-	push(@rv, 'spam', 'virus', 'mail');
+	my @forbidden = ('spam', 'virus', 'mail');
+	foreach $ff (@forbidden) {
+		# If not already forced-enabled using CLI
+		push(@rv, $ff) if (!$d->{$ff});
+		}
 	}
 return @rv;
 }
