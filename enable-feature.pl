@@ -102,8 +102,9 @@ foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 	my $f;
 	foreach $f (&list_ordered_features(\%newdom)) {
 		if ($feature{$f} || $plugin{$f}) {
-			if (grep {$_ eq $f} @forbidden_domain_features) {
-				&$second_print(".. the feature $f cannot be enabled for this type of virtual server");
+			if (!$skipwarnings &&
+			    grep {$_ eq $f} @forbidden_domain_features) {
+				&$second_print(".. the feature $f cannot be enabled for this type of virtual server unless the --skip-warnings flag is given");
 				$failed = 1;
 				next DOMAIN;
 				}
