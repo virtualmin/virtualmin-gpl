@@ -5836,6 +5836,27 @@ else {
 	}
 }
 
+# feature_check_chained_javascript(feature)
+# Return inline JavaScript code to chain disable/enable dependent features
+sub feature_check_chained_javascript
+{
+my ($f) = @_;
+my $chained = {
+	mail => ['spam', 'virus'],
+};
+if (exists($chained->{$f})) {
+	my $deps = join(', ', map { "form.$_ && (form.$_.checked = false)" }
+			@{$chained->{$f}});
+	return "oninput=\"if (!form.$f.checked) { $deps }\"";
+	}
+for my $c (keys %$chained) {
+	return "oninput=\"if (form.$f.checked) ".
+			   "{ form.$c && (form.$c.checked = true) }\""
+		if (grep { $_ eq $f } @{$chained->{$c}});
+	}
+return undef;
+}
+
 # quota_javascript(name, value, filesystem|"bw"|"none", unlimited-possible)
 # Returns Javascript to set some quota field using Javascript
 sub quota_javascript
