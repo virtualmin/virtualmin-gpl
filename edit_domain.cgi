@@ -376,7 +376,8 @@ if (!$d->{'disabled'}) {
 			}
 		else {
 			push(@grid_order_initial, $f);
-			push(@grid, &ui_checkbox($f, 1, "", $d->{$f}).
+			push(@grid, &ui_checkbox($f, 1, "", $d->{$f},
+					&feature_check_chained_javascript($f)).
 				    " <b>".&hlink($txt, $f)."</b>");
 			}
 		}
@@ -405,7 +406,8 @@ if (!$d->{'disabled'}) {
 			}
 		else {
 			push(@grid_order_initial, $f);
-			push(@grid, &ui_checkbox($f, 1, "", $d->{$f}).
+			push(@grid, &ui_checkbox($f, 1, "", $d->{$f},
+					&feature_check_chained_javascript($f)).
 				    $label);
 			}
 		}

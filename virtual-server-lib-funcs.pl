@@ -5836,6 +5836,31 @@ else {
 	}
 }
 
+# feature_check_chained_javascript(feature)
+# Return inline JavaScript code to chain disable/enable dependent features
+sub feature_check_chained_javascript
+{
+my ($f) = @_;
+my $chained = {
+	'mail'                 => ['spam', 'virus'],
+	'web'                  => ['ssl', 'status', 'webalizer', 'virtualmin-awstats'],
+	'virtualmin-nginx'     => ['virtualmin-nginx-ssl', 'status', 'webalizer', 'virtualmin-awstats'],
+};
+my $cfeature = $chained->{$f};
+if ($cfeature) {
+	my $deps = join(', ', map { "form['$_'] && (form['$_'].checked = false)" }
+			@{$cfeature});
+	return "oninput=\"if (form['$f'] && !form['$f'].checked) { $deps }\"";
+	}
+for my $c (keys %$chained) {
+	next if (!$config{$c} && &indexof($c, @plugins) < 0);
+	return "oninput=\"if (form['$f'] && form['$f'].checked) ".
+			   "{ form['$c'] && (form['$c'].checked = true) }\""
+		if (grep { $_ eq $f } @{$chained->{$c}});
+	}
+return undef;
+}
+
 # quota_javascript(name, value, filesystem|"bw"|"none", unlimited-possible)
 # Returns Javascript to set some quota field using Javascript
 sub quota_javascript
