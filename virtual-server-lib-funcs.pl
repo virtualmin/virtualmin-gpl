@@ -19716,7 +19716,7 @@ my ($d) = @_;
 my @rv;
 return @rv if ($config{'nocheck_forbidden_domain_features'});
 # Not allowed features for host default domain
-if ($d->{'dom'} eq $config{'defaultdomain_name'}) {
+if ($d->{'dom'} eq &get_system_hostname()) {
 	push(@rv, 'spam', 'virus', 'mail');
 	}
 return @rv;
@@ -19727,7 +19727,7 @@ return @rv;
 sub filter_possible_domain_features
 {
 my ($features, $d) = @_;
-my @forbidden = forbidden_domain_features($d);
+my @forbidden = &forbidden_domain_features($d);
 @$features = grep {
 	my $feature = $_;
         !grep { $feature eq $_ } @forbidden; } @$features;
