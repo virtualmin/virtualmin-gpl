@@ -342,7 +342,9 @@ if (!$d->{'disabled'}) {
 	@grid = ( );
 	@grid_order_initial = ( );
 	$i = 0;
-	foreach my $f (&list_possible_domain_features($d)) {
+	my @domain_possible_features = &list_possible_domain_features($d);
+	&filter_possible_domain_features(\@domain_possible_features, $d);
+	foreach my $f (@domain_possible_features) {
 		# Don't show features that are chained from another, if both
 		# are in the same state
 		my @ch = &can_chained_feature($f, 1);

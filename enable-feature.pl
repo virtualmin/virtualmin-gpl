@@ -93,6 +93,7 @@ $failed = 0;
 DOMAIN:
 foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 		   ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) } @doms) {
+	my @forbidden_domain_features = &forbidden_domain_features($d);
 	&$first_print("Updating server $d->{'dom'} ..");
 
 	# Check for various clashes
@@ -101,6 +102,11 @@ foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 	my $f;
 	foreach $f (&list_ordered_features(\%newdom)) {
 		if ($feature{$f} || $plugin{$f}) {
+			if (grep {$_ eq $f} @forbidden_domain_features) {
+				&$second_print(".. the feature $f cannot be enabled for this type of virtual server");
+				$failed = 1;
+				next DOMAIN;
+				}
 			$newdom{$f} = 1;
 			if (!$d->{$f}) {
 				$check{$f}++;
