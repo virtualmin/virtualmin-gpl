@@ -19714,6 +19714,7 @@ sub forbidden_domain_features
 {
 my ($d) = @_;
 my @rv;
+return @rv if ($config{'nocheck_forbidden_domain_features'});
 # Not allowed features for host default domain
 if ($d->{'dom'} eq $config{'defaultdomain_name'}) {
 	push(@rv, 'spam', 'virus', 'mail');
