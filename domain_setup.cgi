@@ -457,6 +457,11 @@ $cerr = &virtual_server_clashes(\%dom);
 $lerr = &virtual_server_limits(\%dom);
 &error($lerr) if ($lerr);
 
+# Check if features are not forbidden
+foreach my $ff (&forbidden_domain_features(\%dom, 1)) {
+	$dom{$ff} && &error(&text('setup_efeatforbidhostdef', $ff));
+	}
+
 # Update custom fields
 &parse_custom_fields(\%dom, \%in);
 
