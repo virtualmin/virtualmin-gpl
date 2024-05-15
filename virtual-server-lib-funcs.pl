@@ -5842,16 +5842,20 @@ sub feature_check_chained_javascript
 {
 my ($f) = @_;
 my $chained = {
-	mail => ['spam', 'virus'],
+	'mail'                 => ['spam', 'virus'],
+	'web'                  => ['ssl', 'status', 'webalizer', 'virtualmin-awstats'],
+	'virtualmin-nginx'     => ['virtualmin-nginx-ssl', 'status', 'webalizer', 'virtualmin-awstats'],
 };
-if (exists($chained->{$f})) {
-	my $deps = join(', ', map { "form.$_ && (form.$_.checked = false)" }
-			@{$chained->{$f}});
-	return "oninput=\"if (!form.$f.checked) { $deps }\"";
+my $cfeature = $chained->{$f};
+if ($cfeature) {
+	my $deps = join(', ', map { "form['$_'] && (form['$_'].checked = false)" }
+			@{$cfeature});
+	return "oninput=\"if (form['$f'] && !form['$f'].checked) { $deps }\"";
 	}
 for my $c (keys %$chained) {
-	return "oninput=\"if (form.$f.checked) ".
-			   "{ form.$c && (form.$c.checked = true) }\""
+	next if (!$config{$c} && &indexof($c, @plugins) < 0);
+	return "oninput=\"if (form['$f'] && form['$f'].checked) ".
+			   "{ form['$c'] && (form['$c'].checked = true) }\""
 		if (grep { $_ eq $f } @{$chained->{$c}});
 	}
 return undef;
