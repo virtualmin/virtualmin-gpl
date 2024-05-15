@@ -69,7 +69,7 @@ foreach $iv (@in) {
 		push(@args, "--$i");
 		}
 	else {
-		push(@args, "--$i", $v);
+		push(@args, "--$i", split(/\n/, $v));
 		}
 	}
 
