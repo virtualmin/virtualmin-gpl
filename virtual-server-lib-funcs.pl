@@ -20255,6 +20255,7 @@ my %dom;
 	'default_php_mode', 4,
 	'dom_defnames', $system_host_name
     );
+&lock_domain(\%dom);
 
 # Set initial features
 $dom{'dir'} = 1;
@@ -20313,6 +20314,7 @@ if (&can_default_website(\%dom)) {
 	&set_default_website(\%dom);
 	}
 &run_post_actions_silently();
+&unlock_domain(\%dom);
 &unlock_domain_name($system_host_name);
 &clear_links_cache() if ($config{'default_domain_ssl'} == 2);
 return &$err($succ_msg, $succ, $rs);
