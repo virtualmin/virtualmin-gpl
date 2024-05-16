@@ -5836,6 +5836,31 @@ else {
 	}
 }
 
+# feature_check_chained_javascript(feature)
+# Return inline JavaScript code to chain disable/enable dependent features
+sub feature_check_chained_javascript
+{
+my ($f) = @_;
+my $chained = {
+	'mail'                 => ['spam', 'virus'],
+	'web'                  => ['ssl', 'status', 'webalizer', 'virtualmin-awstats'],
+	'virtualmin-nginx'     => ['virtualmin-nginx-ssl', 'status', 'webalizer', 'virtualmin-awstats'],
+};
+my $cfeature = $chained->{$f};
+if ($cfeature) {
+	my $deps = join(', ', map { "form['$_'] && (form['$_'].checked = false)" }
+			@{$cfeature});
+	return "oninput=\"if (form['$f'] && !form['$f'].checked) { $deps }\"";
+	}
+for my $c (keys %$chained) {
+	next if (!$config{$c} && &indexof($c, @plugins) < 0);
+	return "oninput=\"if (form['$f'] && form['$f'].checked) ".
+			   "{ form['$c'] && (form['$c'].checked = true) }\""
+		if (grep { $_ eq $f } @{$chained->{$c}});
+	}
+return undef;
+}
+
 # quota_javascript(name, value, filesystem|"bw"|"none", unlimited-possible)
 # Returns Javascript to set some quota field using Javascript
 sub quota_javascript
@@ -19708,6 +19733,35 @@ foreach my $f (&domain_features($d)) {
 return @rv;
 }
 
+# forbidden_domain_features(&domain, [creating])
+# Returns a list of features that cannot be enabled for some domain
+sub forbidden_domain_features
+{
+my ($d, $new) = @_;
+my @rv;
+return @rv if ($config{'nocheck_forbidden_domain_features'});
+# Not allowed features for host default domain
+if ($d->{'dom'} eq &get_system_hostname()) {
+	my @forbidden = ('mail', 'spam', 'virus');
+	foreach $ff (@forbidden) {
+		# If not already forced-enabled using CLI
+		push(@rv, $ff) if (!$d->{$ff} || $new);
+		}
+	}
+return @rv;
+}
+
+# filter_possible_domain_features(&features, &domain, [creating])
+# Given a list of features, returns only those that aren't forbidden for domain
+sub filter_possible_domain_features
+{
+my ($features, $d, $new) = @_;
+my @forbidden = &forbidden_domain_features($d, $new);
+@$features = grep {
+	my $feature = $_;
+        !grep { $feature eq $_ } @forbidden; } @$features;
+}
+
 # list_possible_domain_plugins(&domain)
 # Given a domain, returns a list of plugin features that can possibly be enabled
 # or disabled for it
@@ -20255,6 +20309,7 @@ my %dom;
 	'default_php_mode', 4,
 	'dom_defnames', $system_host_name
     );
+&lock_domain(\%dom);
 
 # Set initial features
 $dom{'dir'} = 1;
@@ -20313,6 +20368,7 @@ if (&can_default_website(\%dom)) {
 	&set_default_website(\%dom);
 	}
 &run_post_actions_silently();
+&unlock_domain(\%dom);
 &unlock_domain_name($system_host_name);
 &clear_links_cache() if ($config{'default_domain_ssl'} == 2);
 return &$err($succ_msg, $succ, $rs);

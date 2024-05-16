@@ -94,9 +94,14 @@ if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
 	$newdom{'quota'} = $in{'quota_def'} ? undef :
 				&quota_parse('quota', "home");
 	}
+my @forbidden_domain_features = &forbidden_domain_features($d);
 if (!$d->{'disabled'}) {
 	foreach $f (@dom_features, &list_feature_plugins()) {
 		if ($in{$f}) {
+			if (grep {$_ eq $f} @forbidden_domain_features) {
+				&error(&text('setup_efeatforbidhostdef',
+					"<tt>@{[&html_escape($f)]}</tt>"));
+				}
 			$newdom{$f} = 1;
 			if (!$d->{$f}) {
 				$check{$f}++;

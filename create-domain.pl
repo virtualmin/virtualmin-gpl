@@ -949,6 +949,13 @@ $derr = &virtual_server_depends(\%dom);
 $cerr = &virtual_server_clashes(\%dom);
 &usage($cerr) if ($cerr);
 
+# Check if features are not forbidden
+if (!$skipwarnings) {
+	foreach my $ff (&forbidden_domain_features(\%dom, 1)) {
+		$dom{$ff} && &usage("The feature $ff is not allowed for virtual server matching the hostname unless the --skip-warnings flag is given.");
+		}
+	}
+
 # Check for warnings, unless overriding
 @warns = &virtual_server_warnings(\%dom);
 if (@warns) {
