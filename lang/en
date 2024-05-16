@@ -5865,7 +5865,7 @@ newdynip_eext=Failed to work out externally visible IP address
 newdynip_eexternal=In external script mode, the full path to a script to run must be entered
 
 dynip_dyndns=DynDNS
-dynip_dyndns=Virtualmin hosted domain ..
+dynip_webmin=Virtualmin system ..
 dynip_external=Run external script ..
 dynip_none=Don't update any service
 

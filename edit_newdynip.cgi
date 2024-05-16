@@ -20,9 +20,9 @@ print &ui_table_row($text{'newdynip_service'},
 		   [ map { [ $_->{'name'}, $_->{'desc'} ] }
 			 &list_dynip_services() ],
 		   1, 0, 0, 0,
-		   "onChange='form.external.disabled = value != \"external\"'")." ".
+		   "onChange='form.external.disabled = (value != \"external\" && value != \"webmin\")'")." ".
 	&ui_textbox("external", $config{'dynip_external'}, 50,
-		    $config{'dynip_service'} ne 'external'));
+		    $config{'dynip_service'} !~ /^(external|webmin)$/));
 
 # Hostname to update
 print &ui_table_row($text{'newdynip_host'},

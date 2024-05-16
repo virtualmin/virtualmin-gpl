@@ -6,6 +6,8 @@ sub list_dynip_services
 {
 return ( { 'name' => 'dyndns',
 	   'desc' => $text{'dynip_dyndns'} },
+	 { 'name' => 'webmin',
+	   'desc' => $text{'dynip_webmin'} },
 	 { 'name' => 'none',
 	   'desc' => $text{'dynip_none'} },
 	 { 'name' => 'external',
@@ -109,6 +111,37 @@ if ($config{'dynip_service'} eq 'dyndns') {
 	else {
 		return (undef, $out);
 		}
+	}
+elsif ($config{'dynip_service'} eq 'webmin') {
+	# Call the Virtualmin remote API
+	my ($out, $error);
+	my ($host, $dom) = split(/\./, $config{'dynip_host'}, 2);
+	my ($whost, $wport) = split(/:/, $config{'dynip_external'});
+	$wport ||= 10000;
+	&http_download($whost, $wport,
+		       "/virtual-server/remote.cgi?program=modify-dns&".
+		       "domain=".&urlize($dom)."&".
+		       "update-record=".&urlize("$host A\n$host A $newip"),
+		       \$out, \$error, undef, 1,
+		       $config{'dynip_user'},
+		       $config{'dynip_pass'},
+		       10, 0, 1);
+	if ($error =~ /401/) {
+		return (undef, "Invalid login or password");
+		}
+	elsif ($error) {
+		return (undef, $error);
+		}
+	elsif ($out =~ /does not exist/i) {
+		return (undef, "Invalid hostname");
+		}
+	elsif ($out =~ /Exit\s+status:\s+0/i) {
+		return ($newip, undef);
+		}
+	else {
+		return (undef, $out);
+		}
+
 	}
 elsif ($config{'dynip_service'} eq 'external') {
 	# Just run an external script with the IP and hostname as args

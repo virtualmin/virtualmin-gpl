@@ -19,6 +19,9 @@ $config{'dynip_service'} = $in{'service'};
 if ($in{'service'} eq 'external') {
 	$in{'external'} =~ /^\// || &error($text{'newdynip_eexternal'});
 	}
+elsif ($in{'service'} eq 'webmin') {
+	&to_ipaddress($in{'external'}) || &error($text{'newdynip_eexternal2'});
+	}
 $config{'dynip_external'} = $in{'external'};
 $config{'dynip_host'} = $in{'host'};
 $config{'dynip_auto'} = $in{'auto'};
