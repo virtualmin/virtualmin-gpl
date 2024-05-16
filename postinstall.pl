@@ -417,7 +417,7 @@ foreach my $d (@doms) {
 					my $tmplver = $2;
 					$efix++ if ($tmplver && &compare_version_numbers($tmplver, '<=', '3.2'));
 					}
-				$efix++ if ($efix == 2 && $l =~ /\*\sCopyright\s+[\d]{4}\sVirtualmin$/);
+				$efix++ if ($efix == 2 && $l =~ /\*\sCopyright\s+[\d]{4}\sVirtualmin(?:,\s+Inc\.)?$/);
 				$efix++ if ($efix == 3 && $l =~ /\*\sLicensed\sunder\sMIT$/);
 				}
 
