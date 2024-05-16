@@ -19733,6 +19733,35 @@ foreach my $f (&domain_features($d)) {
 return @rv;
 }
 
+# forbidden_domain_features(&domain, [creating])
+# Returns a list of features that cannot be enabled for some domain
+sub forbidden_domain_features
+{
+my ($d, $new) = @_;
+my @rv;
+return @rv if ($config{'nocheck_forbidden_domain_features'});
+# Not allowed features for host default domain
+if ($d->{'dom'} eq &get_system_hostname()) {
+	my @forbidden = ('mail', 'spam', 'virus');
+	foreach $ff (@forbidden) {
+		# If not already forced-enabled using CLI
+		push(@rv, $ff) if (!$d->{$ff} || $new);
+		}
+	}
+return @rv;
+}
+
+# filter_possible_domain_features(&features, &domain, [creating])
+# Given a list of features, returns only those that aren't forbidden for domain
+sub filter_possible_domain_features
+{
+my ($features, $d, $new) = @_;
+my @forbidden = &forbidden_domain_features($d, $new);
+@$features = grep {
+	my $feature = $_;
+        !grep { $feature eq $_ } @forbidden; } @$features;
+}
+
 # list_possible_domain_plugins(&domain)
 # Given a domain, returns a list of plugin features that can possibly be enabled
 # or disabled for it
