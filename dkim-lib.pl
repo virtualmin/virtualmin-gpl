@@ -885,7 +885,21 @@ return 1;
 sub can_dkim_domain
 {
 my ($d, $dkim) = @_;
-return $d->{'dns'} && ($d->{'mail'} || $dkim->{'alldns'});
+if (!$d->{'dns'}) {
+	return 0;
+	}
+elsif ($dkim->{'alldns'} == 1) {
+	# Can be enabled even without email
+	return 1;
+	}
+elsif ($dkim->{'alldns'} == 2) {
+	# Cannot be enabled even with email
+	return 0;
+	}
+else {
+	# Depends on email feature
+	return $d->{'mail'} ? 1 : 0;
+	}
 }
 
 # has_dkim_domain(&domain, &dkim)
