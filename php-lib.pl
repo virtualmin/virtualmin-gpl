@@ -2929,5 +2929,173 @@ foreach my $pv (@$confs) {
 return @rv;
 }
 
+# setup_web_for_php(&domain, &script, php-version)
+# Update a virtual server's web config to add any PHP settings from the template and optionally from a script
+sub setup_web_for_php
+{
+my ($d, $script, $phpver) = @_;
+$phpver ||= &get_domain_php_version($d);
+my $tmpl = &get_template($d->{'template'});
+my $any = 0;
+my $varstr = &substitute_domain_template($tmpl->{'php_vars'}, $d);
+my @tmplphpvars = $varstr eq 'none' ? ( ) : split(/\t+/, $varstr);
+my $p = &domain_has_website($d);
+
+if ($p eq "web" && &get_apache_mod_php_version()) {
+	# Add the PHP variables to the domain's <Virtualhost> in Apache config
+	&require_apache();
+	my $conf = &apache::get_config();
+	my @ports;
+	push(@ports, $d->{'web_port'}) if ($d->{'web'});
+	push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+	foreach my $port (@ports) {
+		my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+		next if (!$virt);
+
+		# Find currently set PHP variables
+		my @phpv = &apache::find_directive("php_value", $vconf);
+		my %got;
+		foreach my $p (@phpv) {
+			if ($p =~ /^(\S+)/) {
+				$got{$1}++;
+				}
+			}
+
+		# Get PHP variables from template
+		my @oldphpv = @phpv;
+		my $changed;
+		foreach my $pv (@tmplphpvars) {
+			my ($n, $v) = split(/=/, $pv, 2);
+			my $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
+			if (!$got{$n}) {
+				push(@phpv, "$n $v");
+				$changed++;
+				}
+			}
+		if ($script && defined(&{$script->{'php_vars_func'}})) {
+			# Get from script too
+			foreach my $v (&{$script->{'php_vars_func'}}($d)) {
+				if (!$got{$v->[0]}) {
+					if ($v->[1] =~ /\s/) {
+						push(@phpv,
+						     "$v->[0] \"$v->[1]\"");
+						}
+					else {
+						push(@phpv, "$v->[0] $v->[1]");
+						}
+					$changed++;
+					}
+				}
+			}
+
+		# Update if needed
+		if ($changed) {
+			&apache::save_directive("php_value",
+						\@phpv, $vconf, $conf);
+			$any++;
+			}
+		&flush_file_lines();
+		}
+	}
+
+# Find PHP variables from template and from script
+my @todo;
+foreach my $pv (@tmplphpvars) {
+	my ($n, $v) = split(/=/, $pv, 2);
+	my $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
+	push(@todo, [ $n, $v, $diff ]);
+	}
+if ($script && defined(&{$script->{'php_vars_func'}})) {
+	push(@todo, &{$script->{'php_vars_func'}}($d));
+	}
+
+# Always set the session.save_path to ~/tmp, as on some systems
+# it is set by default to a directory only writable by Apache
+push(@todo, [ 'session.save_path', &create_server_tmp($d) ]);
+
+# Magic quotes directive not supported in PHP 5.4
+if ($phpver) {
+	my $realver = &get_php_version($phpver, $d);
+	if ($realver >= 5.4) {
+		@todo = grep { $_->[0] ne "magic_quotes_gpc" } @todo;
+		}
+	}
+
+my $phpini = &get_domain_php_ini($d, $phpver);
+if ($phpini && -r $phpini && &foreign_check("phpini")) {
+	# Add the variables to the domain's php.ini file. Start by finding
+	# the variables already set, including those that are commented out.
+	&foreign_require("phpini");
+	my $conf = &phpini::get_config($phpini);
+	my $anyini;
+
+	# Make any needed changes. Variables can be either forced to a
+	# particular value, or have maximums or minumums
+	foreach my $t (@todo) {
+		my ($n, $v, $diff) = @$t;
+		my $ov = &phpini::find_value($n, $conf);
+		my $change = $diff eq '' && $ov ne $v ||
+				$diff eq '+' && &php_value_diff($ov, $v) < 0 ||
+				$diff eq '-' && &php_value_diff($ov, $v) > 0;
+		if ($change) {
+			&phpini::save_directive($conf, $n, $v);
+			if ($n eq "max_execution_time" &&
+			    $config{'fcgid_max'} eq "") {
+				&set_fcgid_max_execution_time($d, $v);
+				}
+			$any++;
+			$anyini++;
+			}
+		}
+
+	if ($anyini) {
+		&write_as_domain_user($d, sub { &flush_file_lines($phpini) });
+		my $p = &domain_has_website($d);
+		if ($p ne "web") {
+			&plugin_call($p, "feature_restart_web_php", $d);
+			}
+		}
+	}
+
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "fpm") {
+	# Update PHP ini values in FPM config file as well
+	foreach my $t (@todo) {
+		my ($n, $v, $diff) = @$t;
+		my $ov = &get_php_fpm_ini_value($d, $n);
+		my $change = $diff eq '' && $ov ne $v ||
+				$diff eq '+' && &php_value_diff($ov, $v) < 0 ||
+				$diff eq '-' && &php_value_diff($ov, $v) > 0;
+		if ($change) {
+			&save_php_fpm_ini_value($d, $n, $v, 1);
+			}
+		}
+	}
+
+# Call web plugin specific variable function
+if ($p && $p ne "web") {
+	&plugin_call($p, "feature_setup_web_for_php", $d, $script, $phpver);
+	}
+
+return $any;
+}
+
+# php_value_diff(value1, value2)
+# Compares two values like 32 and 64 or 8M and 32M. Returns -1 if v1 is < v2,
+# +1 if v1 > v2, or 0 if same
+sub php_value_diff
+{
+my ($v1, $v2) = @_;
+$v1 = $v1 =~ /^(\d+)k/i ? $1*1024 :
+      $v1 =~ /^(\d+)M/i ? $1*1024*1024 :
+      $v1 =~ /^(\d+)G/i ? $1*1024*1024*1024 : $v1;
+$v2 = $v2 =~ /^(\d+)k/i ? $1*1024 :
+      $v2 =~ /^(\d+)M/i ? $1*1024*1024 :
+      $v2 =~ /^(\d+)G/i ? $1*1024*1024*1024 : $v2;
+return $v1 <=> $v2;
+}
+
+
+
 1;
 

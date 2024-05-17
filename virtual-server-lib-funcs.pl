@@ -8173,6 +8173,9 @@ if ($aliasname && $aliasname ne $dom->{'dom'}) {
 		}
 	}
 
+# Set any PHP variables defined in the template
+&setup_web_for_php($dom, undef, undef);
+
 # Install any scripts specified in the template
 local @scripts = &get_template_scripts($tmpl);
 if (@scripts && !$dom->{'alias'} && !$noscripts &&
