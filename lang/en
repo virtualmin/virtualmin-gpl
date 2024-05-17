@@ -5846,6 +5846,7 @@ newdynip_service=Dynamic DNS service
 newdynip_host=Full hostname to update
 newdynip_user=Login for service
 newdynip_pass=Password for service
+newdynip_update=Update virtual servers on IP change?
 newdynip_header=Automatic dynamic DNS update options
 newdynip_ok=Save and Apply
 newdynip_auto=Source of IP address

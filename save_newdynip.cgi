@@ -25,6 +25,7 @@ elsif ($in{'service'} eq 'webmin') {
 $config{'dynip_external'} = $in{'external'};
 $config{'dynip_host'} = $in{'host'};
 $config{'dynip_auto'} = $in{'auto'};
+$config{'dynip_update'} = $in{'update'};
 $config{'dynip_user'} = $in{'duser'};
 $config{'dynip_pass'} = $in{'dpass'};
 $config{'dynip_email'} = $in{'email_def'} ? undef : $in{'email'};

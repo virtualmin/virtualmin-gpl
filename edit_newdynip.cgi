@@ -45,7 +45,11 @@ print &ui_table_row($text{'newdynip_notify'},
 	&ui_opt_textbox("email", $config{'dynip_email'}, 40,
 			$text{'newdynip_none'}));
 
-# Current settings
+# Update all domains on IP change?
+print &ui_table_row($text{'newdynip_update'},
+	&ui_yesno_radio("update", $config{'dynip_update'}));
+
+# Current state
 print &ui_table_hr();
 
 if ($config{'dynip_service'}) {
