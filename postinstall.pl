@@ -295,12 +295,6 @@ foreach my $d (&list_domains()) {
 	}
 &release_lock_unix();
 
-# Fix old PHP memory limit default
-if ($config{'php_vars'} =~ /^memory_limit=32M/) {
-	$config{'php_vars'} = "+".$config{'php_vars'};
-	&save_module_config();
-	}
-
 # If the default template uses a PHP or CGI mode that isn't supported, change it
 my $mmap = &php_mode_numbers_map();
 my @supp = &supported_php_modes();
