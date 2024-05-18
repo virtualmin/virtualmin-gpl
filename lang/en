@@ -4526,6 +4526,7 @@ scripts_kit_wp_debug1=Enabled, with errors displayed
 scripts_kit_wp_debug2=Enabled, with errors logged to <tt>~/logs/wp_debug_log</tt>
 scripts_kit_wp_memory_limit=Memory limit
 scripts_kit_wp_max_memory_limit=Admin memory limit
+scripts_kit_wp_fail2ban=Enable Fail2Ban protection
 scripts_kit_wp_memory_limit_upto=Up to
 scripts_kit_wp_maintenance_mode=Enable maintenance mode
 scripts_kit_wp_blog_public=Enable search engine indexing

@@ -666,6 +666,13 @@ push(@$system_tab_content, {
 			($wp->{'wp_max_memory_limit'} == -1 ? '256M' : 
 			 $wp->{'wp_max_memory_limit'}),
 		$text{'edit_set'})});
+# Fail2Ban protection
+if (foreign_available("fail2ban")) {
+	push(@$system_tab_content, {
+		desc  => &hlink($text{"${_t}fail2ban"}, "kit_wp_fail2ban"),
+		value => &ui_yesno_radio(
+		    "kit_fail2ban", $wp->{'fail2ban'} ? 1 : 0) });
+	}
 # Site automatic updates
 push(@$system_tab_content, {
 	desc  => &hlink($text{"${_t}auto_update_core"}, "kit_wp_auto_update_core"),
