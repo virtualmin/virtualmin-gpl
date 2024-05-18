@@ -654,14 +654,14 @@ my $system_tab_content;
 push(@$system_tab_content, {
 	desc  => &hlink($text{"${_t}memory_limit"}, "kit_wp_memory_limit"),
 	value => &ui_opt_textbox(
-	    "kit_memory_limit", undef, 6,
+	    "kit_const_memory_limit", undef, 6,
 	    	"$text{\"${_t}memory_limit_upto\"} $wp->{'wp_memory_limit'}",
 		$text{'edit_set'})});
 # Admin memory limit
 push(@$system_tab_content, {
 	desc  => &hlink($text{"${_t}max_memory_limit"}, "kit_wp_max_memory_limit"),
 	value => &ui_opt_textbox(
-	    "kit_max_memory_limit", undef, 6,
+	    "kit_const_max_memory_limit", undef, 6,
 		"$text{\"${_t}memory_limit_upto\"} ".
 			($wp->{'wp_max_memory_limit'} == -1 ? '256M' : 
 			 $wp->{'wp_max_memory_limit'}),
@@ -677,7 +677,7 @@ if (foreign_available("fail2ban")) {
 push(@$system_tab_content, {
 	desc  => &hlink($text{"${_t}auto_update_core"}, "kit_wp_auto_update_core"),
 	value => &ui_radio(
-	    "kit_auto_updates", $wp->{'automatic_updater_disabled'} == 1 ? 0 :
+	    "kit_const_wp_auto_update_core", $wp->{'automatic_updater_disabled'} == 1 ? 0 :
 	    		$wp->{'wp_auto_update_core'},
 		[ [ 0, $text{"${_t}auto_updates_disabled"} . "<br>" ],
 		  [ 1, $text{"${_t}auto_updates_minor"} . "<br>" ],
@@ -689,61 +689,61 @@ my $settings_tab_content;
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}url"}, "kit_wp_url"),
 	value => &ui_opt_textbox(
-	    "kit_url", undef, 35, $wp->{'url'} . "<br>",
+	    "kit_option_url", undef, 35, $wp->{'url'} . "<br>",
 	    $text{'edit_set'})});
 # Home
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}wpurl"}, "kit_wp_wpurl"),
 	value => &ui_opt_textbox(
-	    "kit_wpurl", undef, 35, $wp->{'wpurl'} . "<br>",
+	    "kit_option_wpurl", undef, 35, $wp->{'wpurl'} . "<br>",
 	    $text{'edit_set'})});
 # Site name
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}blogname"}, "kit_wp_blogname"),
 	value => &ui_opt_textbox(
-	    "kit_blogname", undef, 25, $wp->{'blogname'} . "<br>",
+	    "kit_option_blogname", undef, 25, $wp->{'blogname'} . "<br>",
 	    $text{'edit_set'})});
 # Site blogdescription
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}blogdescription"}, "kit_wp_blogdescription"),
 	value => &ui_opt_textbox(
-	    "kit_blogdescription", undef, 35,
+	    "kit_option_blogdescription", undef, 35,
 	    $wp->{'blogdescription'} || $text{"scripts_kit_not_set"} . "<br>",
 	    $text{'edit_set'}) });
 # Admin email
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}admin_email"}, "kit_wp_admin_email"),
 	value => &ui_opt_textbox(
-	    "kit_admin_email", undef, 30, $wp->{'admin_email'} . "<br>",
+	    "kit_option_admin_email", undef, 30, $wp->{'admin_email'} . "<br>",
 	    $text{'edit_set'})});
 # Set password
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}admin_pass"}, "kit_wp_admin_password"),
 	value => &ui_opt_textbox(
-	    "kit_admin_password", undef, 20, $text{'user_passdef'},
+	    "kit_option_admin_password", undef, 20, $text{'user_passdef'},
 	    $text{'edit_set'})});
 # Site visibility
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}blog_public"}, "kit_wp_blog_public"),
 	value => &ui_yesno_radio(
-	    "kit_blog_public", $wp->{'blog_public'} ? 1 : 0)});
+	    "kit_option_blog_public", $wp->{'blog_public'} ? 1 : 0)});
 # Pingbacks
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}default_pingback_flag"}, "kit_wp_default_pingback_flag"),
 	value => &ui_yesno_radio(
-	    "kit_default_pingback_flag",
+	    "kit_option_default_pingback_flag",
 	    	$wp->{'default_pingback_flag'} ? 1 : 0)});
 # Trackbacks
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}default_ping_status"}, "kit_wp_default_ping_status"),
 	value => &ui_yesno_radio(
-	    "kit_default_ping_status",
+	    "kit_option_default_ping_status",
 	    	$wp->{'default_ping_status'} eq 'open' ? 1 : 0)});
 # File editing
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}disallow_file_edit"}, "kit_wp_disallow_file_edit"),
 	value => &ui_yesno_radio(
-	    "kit_disallow_file_edit", $wp->{'disallow_file_edit'} ? 1 : 0)});
+	    "kit_const_disallow_file_edit", $wp->{'disallow_file_edit'} ? 1 : 0)});
 
 # Plugins tab prepare
 my $plugins_tab_content;
@@ -896,7 +896,7 @@ my $development_tab_content;
 push(@$development_tab_content, {
 	desc  => &hlink($text{"${_t}debug"}, "kit_wp_wp_debug"),
 	value => &ui_radio(
-	    "kit_wp_debug",
+	    "kit_const_wp_debug",
 	    $wp->{'wp_debug'} ? ($wp->{'wp_debug_log'} ? 2 : 1) : 0,
 		[ [ 0, $text{"${_t}debug0"} . "<br>" ],
 		  [ 1, $text{"${_t}debug1"} . "<br>" ],
@@ -905,12 +905,12 @@ push(@$development_tab_content, {
 push(@$development_tab_content, {
 	desc  => &hlink($text{"${_t}maintenance_mode"}, "kit_wp_maintenance_mode"),
 	value => &ui_yesno_radio(
-	    "kit_maintenance_mode", $wp->{'maintenance_mode'} ? 1 : 0)});
+	    "kit_option_maintenance_mode", $wp->{'maintenance_mode'} ? 1 : 0)});
 # Script concatenation
 push(@$development_tab_content, {
 	desc  => &hlink($text{"${_t}concatenate_scripts"}, "kit_wp_concatenate_scripts"),
 	value => &ui_yesno_radio(
-	    "kit_concatenate_scripts", $wp->{'concatenate_scripts'} ? 1 : 0)});
+	    "kit_const_concatenate_scripts", $wp->{'concatenate_scripts'} ? 1 : 0)});
 
 # All tabs start
 my $data = &ui_tabs_start(\@tabs, "tab", $tab, 0);
