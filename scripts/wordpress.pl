@@ -748,13 +748,13 @@ push(@$settings_tab_content, {
 # Plugins tab prepare
 my $plugins_tab_content;
 my $table_select_opts =
-	[ [ "", $text{'scripts_kit_wp_selopt_bulk'} ],
-	  [ "activate", $text{'scripts_kit_wp_selopt_activate'} ],
-	  [ "deactivate", $text{'scripts_kit_wp_selopt_deactivate'} ],
-	  [ "update", $text{'scripts_kit_wp_selopt_update'} ],
-	  [ "delete", $text{'scripts_kit_wp_selopt_delete'} ],
-	  [ "enable-auto-update", $text{'scripts_kit_wp_selopt_enable_auto'} ],
-	  [ "disable-auto-update", $text{'scripts_kit_wp_selopt_disable_auto'} ] ];
+	[ [ "", $text{"${_t}selopt_bulk"} ],
+	  [ "activate", $text{"${_t}selopt_activate"} ],
+	  [ "deactivate", $text{"${_t}selopt_deactivate"} ],
+	  [ "update", $text{"${_t}selopt_update"} ],
+	  [ "delete", $text{"${_t}selopt_delete"} ],
+	  [ "enable-auto-update", $text{"${_t}selopt_enable_auto"} ],
+	  [ "disable-auto-update", $text{"${_t}selopt_disable_auto"} ] ];
 $plugins_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
 	"post", undef, "data-form-nested='apply' id='kit_plugins_form'");
 $plugins_tab_content .= &ui_hidden("dom", $d->{'id'});
@@ -764,11 +764,11 @@ $plugins_tab_content .= &ui_hidden("type", "plugins");
 $plugins_tab_content .= &ui_select("plugins", "", $table_select_opts);
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $plugins_tab_content .= &ui_columns_start(
-	[ "", $text{'scripts_kit_tb_plugin'},
-	      $text{'scripts_kit_tb_installed_version'},
-	      $text{'scripts_kit_tb_update_available'},
-	      $text{'scripts_kit_tb_enabled'},
-	      $text{'scripts_kit_tb_auto_update'},
+	[ "", $text{"${_t}tb_plugin"},
+	      $text{"${_t}tb_installed_version"},
+	      $text{"${_t}tb_update_available"},
+	      $text{"${_t}tb_enabled"},
+	      $text{"${_t}tb_auto_update"},
 	], 100, 0, [ ( "width=5" ) ]);
 foreach my $plugin (@{$wp->{'plugins'}}) {
 	$plugins_tab_content .= &ui_checked_columns_row([
@@ -798,6 +798,28 @@ $themes_tab_content .= &ui_hidden("type", "themes");
 $themes_tab_content .= &ui_select("themes", "", $table_select_opts);
 $themes_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $themes_tab_content .= &ui_columns_start(
+	[ "", $text{"${_t}tb_theme"},
+	      $text{"${_t}tb_installed_version"},
+	      $text{"${_t}tb_update_available"},
+	      $text{"${_t}tb_active"},
+	      $text{"${_t}tb_auto_update"},
+	], 100, 0, [ ( "width=5" ) ]);
+foreach my $theme (@{$wp->{'themes'}}) {
+	$themes_tab_content .= &ui_checked_columns_row([
+		&html_escape($theme->{'name'}) . " " .
+			&ui_help(&html_escape(
+				&html_strip($theme->{'description'}))),
+		&html_escape($theme->{'version'}),
+		$theme->{'new_version'} ?
+			&ui_text_color(&html_escape(
+				$theme->{'new_version'}), 'success') : $text{'no'},
+		$theme->{'active'} ? $text{'yes'} : $text{'no'},
+		$theme->{'auto_update'} ? $text{'yes'} : $text{'no'},
+	], [ ( "width=5" ) ], undef, &quote_escape($theme->{'name'}, '"'));
+}
+$themes_tab_content .= &ui_columns_end();
+$themes_tab_content .= &ui_form_end();
+
 	[ "", $text{'scripts_kit_tb_theme'},
 	      $text{'scripts_kit_tb_installed_version'},
 	      $text{'scripts_kit_tb_update_available'},
