@@ -2,7 +2,7 @@
 
 =head1 install-script.pl
 
-Install one third-party script
+Install one third-party script (web app)
 
 This program performs the actual upgrade or install of a script into a virtual
 server. The required parameters are C<--domain> (followed by the domain name),

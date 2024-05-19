@@ -2,7 +2,7 @@
 
 =head1 list-available-scripts.pl
 
-List known scripts
+List known scripts (web apps)
 
 This command simply outputs a list of scripts that can potentially installed
 into Virtualmin servers. By default it displays a nicely formatted table, but
