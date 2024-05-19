@@ -530,6 +530,8 @@ my $opts = $sinfo->{'opts'};
 my $php = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
 my $wp_cli = "$php $opts->{'dir'}/wp-cli.phar --path=$opts->{'dir'}";
 my $_t = 'scripts_kit_wp_';
+my $save_kit_form = "pro/script_kit.cgi";
+my $kit_form_main = "data-form-nested='apply'";
 
 # Has to be called using eval for maximum speed (avg 
 # expected load time is + 0.5s to default page load)
@@ -757,12 +759,12 @@ my $table_select_opts =
 	  [ "delete", $text{"${_t}selopt_delete"} ],
 	  [ "enable-auto-update", $text{"${_t}selopt_enable_auto"} ],
 	  [ "disable-auto-update", $text{"${_t}selopt_disable_auto"} ] ];
-$plugins_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
-	"post", undef, "data-form-nested='apply' id='kit_plugins_form'");
+$plugins_tab_content =
+	&ui_form_start($save_kit_form, "post", undef,
+		       "$kit_form_main id='kit_plugins_form'");
 $plugins_tab_content .= &ui_hidden("dom", $d->{'id'});
 $plugins_tab_content .= &ui_hidden("tab", "plugins");
 $plugins_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
-$plugins_tab_content .= &ui_hidden("type", "plugins");
 $plugins_tab_content .= &ui_select("plugins", "", $table_select_opts);
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $plugins_tab_content .= &ui_columns_start(
@@ -791,12 +793,12 @@ $plugins_tab_content .= &ui_form_end();
 # Themes tab prepare
 my $themes_tab_content;
 splice(@$table_select_opts, 2, 1);
-$themes_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
-	"post", undef, "data-form-nested='apply' id='kit_themes_form'");
+$themes_tab_content =
+	&ui_form_start($save_kit_form, "post", undef,
+		       "$kit_form_main id='kit_themes_form'");
 $themes_tab_content .= &ui_hidden("dom", $d->{'id'});
 $themes_tab_content .= &ui_hidden("tab", "themes");
 $themes_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
-$themes_tab_content .= &ui_hidden("type", "themes");
 $themes_tab_content .= &ui_select("themes", "", $table_select_opts);
 $themes_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $themes_tab_content .= &ui_columns_start(
@@ -824,22 +826,22 @@ $themes_tab_content .= &ui_form_end();
 
 # Backup and restore tab prepare
 my $backup_tab_content;
-$backup_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
-	"post", undef, "data-form-nested='apply' id='kit_backup_form'");
+$backup_tab_content =
+	&ui_form_start($save_kit_form, "post", undef,
+		       "$kit_form_main id='kit_backup_form'");
 $backup_tab_content .= &ui_hidden("dom", $d->{'id'});
 $backup_tab_content .= &ui_hidden("tab", "backup");
-$backup_tab_content .= &ui_hidden("type", "backup");
 $backup_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 # XXXX
 $backup_tab_content .= &ui_form_end();
 
 # Clone tab prepare
-my $clone_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
-	"post", undef, "data-form-nested='apply' id='kit_clone_form'");
+my $clone_tab_content =
+	&ui_form_start($save_kit_form, "post", undef,
+		       "$kit_form_main id='kit_clone_form'");
 $clone_tab_content .= &ui_hidden("dom", $d->{'id'});
 $clone_tab_content .= &ui_hidden("tab", "clone");
 $clone_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
-$clone_tab_content .= &ui_hidden("type", "clone");
 $clone_tab_content .= &ui_table_start(undef, "width=100%", 2);
 my $slink = $sinfo->{'url'};
 $slink =~ s/^https?:\/\///;
@@ -931,13 +933,11 @@ my $data = &ui_tabs_start(\@tabs, "tab", $tab, 0);
 # System tab content
 $data .= &ui_tabs_start_tab("tab", "system");
 $data .= &vui_ui_block($text{'scripts_kit_wp_system_desc'});
-$data .= &ui_form_start("pro/wordpress_kit.cgi",
-		"post", undef,
-		"data-form-nested='apply' id='kit_system_form'");
+$data .= &ui_form_start($save_kit_form, "post", undef,
+			"$kit_form_main id='kit_system_form'");
 $data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("tab", "system");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
-$data .= &ui_hidden("type", "system");
 $data .= &ui_table_start(undef, "width=100%", 2);
 foreach my $option (@$system_tab_content) {
 	$data .= &ui_table_row($option->{'desc'}, $option->{'value'});
@@ -950,13 +950,11 @@ $data .= &ui_tabs_end_tab();
 my @data_submits;
 $data .= &ui_tabs_start_tab("tab", "settings");
 $data .= &vui_ui_block($text{'scripts_kit_wp_settings_desc'});
-$data .= &ui_form_start("pro/wordpress_kit.cgi",
-		"post", undef,
-		"data-form-nested='apply' id='kit_settings_form'");
+$data .= &ui_form_start($save_kit_form, "post", undef,
+			"$kit_form_main id='kit_settings_form'");
 $data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("tab", "settings");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
-$data .= &ui_hidden("type", "settings");
 $data .= &ui_table_start(undef, "width=100%", 2);
 foreach my $option (@$settings_tab_content) {
 	$data .= &ui_table_row($option->{'desc'}, $option->{'value'});
@@ -997,21 +995,19 @@ $data .= &ui_tabs_end_tab();
 # Developemnt tab content
 $data .= &ui_tabs_start_tab("tab", "development");
 $data .= &vui_ui_block($text{'scripts_kit_wp_development_desc'});
-$data .= &ui_form_start("pro/wordpress_kit.cgi",
-		"post", undef,
-		"data-form-nested='apply' id='kit_development_form'");
+$data .= &ui_form_start($save_kit_form, "post", undef,
+			"$kit_form_main id='kit_development_form'");
 $data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("tab", "development");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
-$data .= &ui_hidden("type", "development");
 $data .= &ui_table_start(undef, "width=100%", 2);
 foreach my $option (@$development_tab_content) {
 	$data .= &ui_table_row($option->{'desc'}, $option->{'value'});
 	}
 $data .= &ui_table_end();
 $data .= &ui_form_end();
-$data .= &ui_form_start("script_login.cgi",
-		"post", undef, "id='kit_login_form' target='_blank'");
+$data .= &ui_form_start("script_login.cgi", "post", undef,
+			"id='kit_login_form' target='_blank'");
 $data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("sid", $sinfo->{'id'});
 $data .= &ui_hidden("scall", &convert_to_json($wp));
