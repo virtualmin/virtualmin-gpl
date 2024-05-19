@@ -554,6 +554,8 @@ my $wp_cli_command = $wp_cli . ' eval \'error_reporting(E_ALL & ~E_WARNING); ech
     "url" => get_bloginfo("url"),
     "wpurl" => get_bloginfo("wpurl"),
     "language" => get_bloginfo("language"),
+    "wordpress_version" => get_bloginfo("version"),
+    "php_version" => phpversion(),
     "permalink_structure" => get_option("permalink_structure"),
     "permalinks" => [
 	"plain" => [
@@ -820,27 +822,16 @@ foreach my $theme (@{$wp->{'themes'}}) {
 $themes_tab_content .= &ui_columns_end();
 $themes_tab_content .= &ui_form_end();
 
-	[ "", $text{'scripts_kit_tb_theme'},
-	      $text{'scripts_kit_tb_installed_version'},
-	      $text{'scripts_kit_tb_update_available'},
-	      $text{'scripts_kit_tb_active'},
-	      $text{'scripts_kit_tb_auto_update'},
-	], 100, 0, [ ( "width=5" ) ]);
-foreach my $theme (@{$wp->{'themes'}}) {
-	$themes_tab_content .= &ui_checked_columns_row([
-		&html_escape($theme->{'name'}) . " " .
-			&ui_help(&html_escape(
-				&html_strip($theme->{'description'}))),
-		&html_escape($theme->{'version'}),
-		$theme->{'new_version'} ?
-			&ui_text_color(&html_escape(
-				$theme->{'new_version'}), 'success') : $text{'no'},
-		$theme->{'active'} ? $text{'yes'} : $text{'no'},
-		$theme->{'auto_update'} ? $text{'yes'} : $text{'no'},
-	], [ ( "width=5" ) ], undef, &quote_escape($theme->{'name'}, '"'));
-}
-$themes_tab_content .= &ui_columns_end();
-$themes_tab_content .= &ui_form_end();
+# Backup and restore tab prepare
+my $backup_tab_content;
+$backup_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
+	"post", undef, "data-form-nested='apply' id='kit_backup_form'");
+$backup_tab_content .= &ui_hidden("dom", $d->{'id'});
+$backup_tab_content .= &ui_hidden("tab", "backup");
+$backup_tab_content .= &ui_hidden("type", "backup");
+$backup_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
+# XXXX
+$backup_tab_content .= &ui_form_end();
 
 # Clone tab prepare
 my $clone_tab_content = &ui_form_start("pro/wordpress_kit.cgi",
@@ -939,6 +930,7 @@ my $data = &ui_tabs_start(\@tabs, "tab", $tab, 0);
 
 # System tab content
 $data .= &ui_tabs_start_tab("tab", "system");
+$data .= &vui_ui_block($text{'scripts_kit_wp_system_desc'});
 $data .= &ui_form_start("pro/wordpress_kit.cgi",
 		"post", undef,
 		"data-form-nested='apply' id='kit_system_form'");
@@ -957,6 +949,7 @@ $data .= &ui_tabs_end_tab();
 # Settings tab content
 my @data_submits;
 $data .= &ui_tabs_start_tab("tab", "settings");
+$data .= &vui_ui_block($text{'scripts_kit_wp_settings_desc'});
 $data .= &ui_form_start("pro/wordpress_kit.cgi",
 		"post", undef,
 		"data-form-nested='apply' id='kit_settings_form'");
@@ -979,26 +972,31 @@ $data .= &ui_tabs_end_tab();
 
 # Plugins tab content
 $data .= &ui_tabs_start_tab("tab", "plugins");
+$data .= &vui_ui_block($text{'scripts_kit_wp_plugins_desc'});
 $data .= $plugins_tab_content;
 $data .= &ui_tabs_end_tab();
 
 # Themes tab content
 $data .= &ui_tabs_start_tab("tab", "themes");
+$data .= &vui_ui_block($text{'scripts_kit_wp_themes_desc'});
 $data .= $themes_tab_content;
-$data .= &ui_tabs_end_tab();
-
-# Clone tab content
-$data .= &ui_tabs_start_tab("tab", "clone");
-$data .= $clone_tab_content;
 $data .= &ui_tabs_end_tab();
 
 # Backup and restore tab content
 $data .= &ui_tabs_start_tab("tab", "backup");
-$data .= "";
+$data .= &vui_ui_block($text{'scripts_kit_wp_backup_desc'});
+$data .= $backup_tab_content;
+$data .= &ui_tabs_end_tab();
+
+# Clone tab content
+$data .= &ui_tabs_start_tab("tab", "clone");
+$data .= &vui_ui_block($text{'scripts_kit_wp_clone_desc'});
+$data .= $clone_tab_content;
 $data .= &ui_tabs_end_tab();
 
 # Developemnt tab content
 $data .= &ui_tabs_start_tab("tab", "development");
+$data .= &vui_ui_block($text{'scripts_kit_wp_development_desc'});
 $data .= &ui_form_start("pro/wordpress_kit.cgi",
 		"post", undef,
 		"data-form-nested='apply' id='kit_development_form'");
