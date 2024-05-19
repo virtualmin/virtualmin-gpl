@@ -174,6 +174,8 @@ $d || usage("Virtual server $domain does not exist");
 @scripts = &list_domain_scripts($d);
 $script = &get_script($sname);
 $script || &usage("Script type $sname is not known");
+($script->{'migrated'} && !$virtualmin_pro) &&
+	&usage("Script type $sname is not known");
 @vers = defined($id) ? @{$script->{'versions'}}
 		     : @{$script->{'install_versions'}};
 $ver || &usage("Missing version number. Available versions are : ".
