@@ -248,6 +248,17 @@ $nbsps = "&nbsp;&nbsp;" if ($nbsps);
 	return "<div style='white-space: nowrap;'>$nbsps$html$nbsps</div>";
 }
 
+=head2 vui_ui_block(html)
+
+Returns passed HTML as block element
+
+=cut
+sub vui_ui_block
+{
+my ($html) = @_;
+return "<div class='vui_ui_block'>$html</div>";
+}
+
 =head2 vui_ui_input_noauto_attrs()
 
 Returns attributes preventing browser to autofill input fields
