@@ -1587,7 +1587,8 @@ $aliasfile || &error("No zone file for alias target $aliasd->{'dom'} found");
 local $olddom = $aliasd->{'dom'};
 local $dom = $d->{'dom'};
 local $oldip = $aliasd->{'ip'};
-local @sublist = grep { $_->{'id'} ne $aliasd->{'id'} &&
+local @sublist = grep { $_->{'dns'} &&
+			$_->{'id'} ne $aliasd->{'id'} &&
 			$_->{'dom'} =~ /\.\Q$aliasd->{'dom'}\E$/ }
 		      &list_domains();
 
