@@ -78,6 +78,7 @@ setup_epassvalid=Ugyldig passord : $1
 setup_emax=Din nåværende lisens lar deg opprette opptil <tt>$1</tt> toppnivå- og underservere kombinert. For muligheten til å lage flere toppnivå- eller undertjenere, bør du vurdere å oppgradere lisensen din ved å gå til siden <a target=_blank href='$2'>virtualmin.com / Min konto / Abonnementer</a>.
 setup_eslashpass=Passord som inneholder et tilbakeskritt støttes ikke av MySQL
 setup_etmpl=Du har ikke lov til å bruke den valgte malen
+setup_efeatforbidhostdef=Funksjonen $1 er ikke tillatt for virtuell server som samsvarer med vertsnavnet
 
 setup_ewebphpmode=PHP-utførelsesmodus $1 ble valgt, men støttes ikke på dette systemet!
 setup_cgimode=Bytter til CGI-kjøringsmodus $1 ..
@@ -862,12 +863,15 @@ scripts_ephpminmax=Ingen av de tilgjengelige PHP-versjonene ($1) er mellom $2 og
 scripts_ephpmin=Ingen av de tilgjengelige PHP-versjonene ($1) er på eller over $2
 scripts_ephpmax=Ingen av de tilgjengelige PHP-versjonene ($1) er under $3
 scripts_uerr=Kunne ikke avinstallere skriptet
+scripts_rdepstitle=Re-installere avhengigheter
 scripts_rusure=Er du sikker på at du vil avinstallere <tt>$1</tt> -skriptet? Alle filer under <tt>$2</tt> vil bli slettet ( $3 ).
 scripts_rusuredb=Tabellene relatert til dette skriptet i <tt>$1</tt> -databasen <tt>$2</tt> vil også bli fjernet.
 scripts_idb2=Bruker database med tabellprefiks
 scripts_idbtbpref=med bordprefiks
 scripts_iphpver=PHP-versjon
+scripts_rdeps=Installer avhengigheter på nytt
 scripts_deregistering=Avregistrerer nå $1 versjon $2 ..
+scripts_reinstallingdeps=Installerer nå avhengigheter for $1 på nytt ..
 scripts_equota=Dette skriptet krever $1 av ledig diskkvote, men bare $2 er tilgjengelig
 scripts_cats=kategorier
 scripts_needmod=Installerer nødvendig PHP $1-modul ..
@@ -1155,9 +1159,15 @@ spf_denabled=DMARC-post aktivert?
 spf_dnssec=DNSSEC-signatur aktivert?
 spf_dp=DMARC-policy for e-postmeldinger som svikter SPF eller DKIM
 spf_dpct=Prosentandel av meldinger som skal brukes
+spf_dkim=Vil du legge til DomainKeys Identified Mail-poster?
+spf_dkim1=Legg alltid til DKIM-poster
+spf_dkim0=Legg aldri til DKIM-poster
+spf_dkim2=Bruk standard oppførsel
 spf_delrecs=Slette $1 DNS-poster ..
 spf_addrecs=Legger til $1 DNS-poster ..
 spf_eaddrecs=.. en post kalt $1 eksisterer allerede
+spf_uprecs=Oppdaterer $1 DNS-poster ..
+spf_euprecs=.. en post kalt $1 eksisterer ikke
 spf_eaddproxy=.. Cloud DNS-leverandør støtter ikke proxy-poster
 spf_ttl=Setter standard TTL til $1 ..
 spf_ettlsupport=.. støttes ikke av DNS -leverandør
@@ -1206,8 +1216,10 @@ tdelete_edeftop=Standardmalen kan ikke være standard for underservere
 showpass_dbmysql=MySQL-bruker
 showpass_dbpostgres=PostgreSQL-bruker
 
+newdynip_update=Oppdatere virtuelle servere ved endring av IP?
 newdynip_eexternal=I ekstern skriptmodus må hele banen til et skript som skal kjøres legges inn
 
+dynip_webmin=Virtualmin system ..
 dynip_external=Eksternt manus ..
 dynip_none=Ikke oppdater noen tjeneste
 
