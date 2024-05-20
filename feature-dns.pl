@@ -200,7 +200,8 @@ elsif (!$dnsparent) {
 			foreach my $s (@extra_slaves) {
 				push(@also, { 'name' => &to_ipaddress($s) });
 				}
-			@also = grep { $_->{'name'} } @also;
+			my %donealso;
+			@also = grep { $_->{'name'} && !$donealso{$_->{'name'}}++ } @also;
 			$also->{'members'} = \@also;
 			push(@{$dir->{'members'}}, $also);
 			push(@{$dir->{'members'}}, 
@@ -231,7 +232,8 @@ elsif (!$dnsparent) {
 	if ($gat) {
 		push(@trans, @{$gat->{'members'}});
 		}
-	@trans = grep { $_->{'name'} } @trans;
+	my %donetrans;
+	@trans = grep { $_->{'name'} && !$donetrans{$_->{'name'}}++ } @trans;
 	local ($trans) = grep { $_->{'name'} eq 'allow-transfer' }
 			      @{$dir->{'members'}};
 	if (!$trans && !$tmpl->{'namedconf_no_allow_transfer'}) {
