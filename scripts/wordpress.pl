@@ -601,11 +601,19 @@ my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
         $update = get_site_transient("update_plugins");
 	$auto_updates = (array) get_site_option("auto_update_plugins", array());
     	$isAutoUpdateEnabled = in_array($plugin, $auto_updates);
+	$new_version = 0;
+	if (isset($update->response[$plugin])) {
+		if (is_object($update->response[$plugin])) {
+			$new_version = $update->response[$plugin]->new_version;
+		} elseif (is_array($update->response[$plugin])) {
+			$new_version = $update->response[$plugin]["new_version"];
+		}
+	}
         return [
             "name" => $data["Name"],
 	    "description" => $data["Description"],
             "version" => $data["Version"],
-            "new_version" => isset($update->response[$plugin]["new_version"]) ? $update->response[$plugin]["new_version"] : 0,
+            "new_version" => $new_version,
 	    "active" => is_plugin_active($plugin) ? 1 : 0,
 	    "auto_update" => $isAutoUpdateEnabled ? 1 : 0,
 	    "reqphp" => $data["RequiresPHP"],
@@ -621,11 +629,19 @@ my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
         $update = get_site_transient("update_themes");
 	$auto_updates = (array) get_site_option("auto_update_themes", array());
     	$isAutoUpdateEnabled = in_array($theme, $auto_updates);
+	$new_version = 0;
+	if (isset($update->response[$theme])) {
+		if (is_object($update->response[$theme])) {
+		$new_version = $update->response[$theme]->new_version;
+		} elseif (is_array($update->response[$theme])) {
+		$new_version = $update->response[$theme]["new_version"];
+		}
+	}
         return [
             "name" => $theme_data->get("Name"),
             "description" => $theme_data->get("Description"),
             "version" => $theme_data->get("Version"),
-            "new_version" => isset($update->response[$theme]["new_version"]) ? $update->response[$theme]["new_version"] : 0,
+	    "new_version" => $new_version,
             "active" => $isActive ? 1 : 0,
 	    "auto_update" => $isAutoUpdateEnabled ? 1 : 0,
         ];
