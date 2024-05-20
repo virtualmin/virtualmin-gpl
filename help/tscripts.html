@@ -1,25 +1,25 @@
-<header>Template Script Installers</header>
+<header>Template Webapp Installers</header>
 
-This page allows you to specify third-party scripts to be installed when a 
-new virtual server is created using this template. For each script, the
+This page allows you to specify third-party web apps to be installed when a 
+new virtual server is created using this template. For each webapp, the
 following information must be entered :<p>
 <dl>
-<dt><b>Script</b>
-<dd>The name and version of a script to install
+<dt><b>Webapp</b>
+<dd>The name and version of a webapp to install
 <dt><b>URL path</b>
-<dd>A path under the virtual server's website to install the script, such as <tt>/phpmyadmin</tt>. This will also determine the directory under <tt>~/public_html</tt> that contains the script's files.
+<dd>A path under the virtual server's website to install the webapp, such as <tt>/wordpress</tt>. This will also determine the directory under <tt>~/public_html</tt> that contains the webapp's files.
 <dt><b>DB name</b>
-<dd>The name of the database that the script will use to store data. The options are :
+<dd>The name of the database that the webapp will use to store data. The options are :
 	<dl>
 	<dt><b>None</b>
-	<dd>This should be selected for scripts that do not need a database, such as <b>Gallery</b>.
+	<dd>This should be selected for web apps that do not need a database, such as <b>Gallery</b>.
 	<dt><b>Main database</b>
-	<dd>The script's database will be the virtual server's primary database of the chosen type.
+	<dd>The webapp's database will be the virtual server's primary database of the chosen type.
 	<dt><b>Other</b>
-	<dd>If you want this script to use its own private database, this option can be selected and the pattern for a database entered in the adjacent text field. For example, you might enter <i>${DB}_phpnuke</i>. If the resulting database does not exist, it will be created as part of the script installation process.
+	<dd>If you want this webapp to use its own private database, this option can be selected and the pattern for a database entered in the adjacent text field. For example, you might enter <i>${DB}_phpnuke</i>. If the resulting database does not exist, it will be created as part of the webapp installation process.
 	</dl>
 <dt><b>DB type</b>
-<dd>The type of database use for the scripts data, if any is selected.
+<dd>The type of database use for the web apps data, if any is selected.
 </dl>
 
 <footer>
