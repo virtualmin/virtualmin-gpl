@@ -12910,6 +12910,7 @@ my $modify_plugin_category = sub {
 		$l->{'cat'} = 'mail';
 		}
 	elsif ($l->{'mod'} =~ /virtualmin-(htpasswd|dav)/ ||
+	       ($l->{'cat'} eq 'services' && $l->{'mod'} eq 'phpini') ||
 	       ($l->{'cat'} eq 'services' && $l->{'mod'} eq 'virtualmin-nginx')) {
 		$l->{'cat'} = 'web';
 		}
