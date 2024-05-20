@@ -528,6 +528,11 @@ sub script_wordpress_kit
 my ($d, $script, $sinfo) = @_;
 my $opts = $sinfo->{'opts'};
 my $php = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
+my $logs_dir = "$d->{'home'}/logs";
+if (!-d $logs_dir) {
+	&make_dir_as_domain_user($d, "$logs_dir/logs", 0750);
+	}
+my $wp_cli_log = "$logs_dir/wp_cli_log";
 my $wp_cli = "$php $opts->{'dir'}/wp-cli.phar --path=$opts->{'dir'}";
 my $_t = 'scripts_kit_wp_';
 my $save_kit_form = "pro/script_kit.cgi";
@@ -535,7 +540,7 @@ my $kit_form_main = "data-form-nested='apply'";
 
 # Has to be called using eval for maximum speed (avg 
 # expected load time is + 0.5s to default page load)
-my $wp_cli_command = $wp_cli . ' eval \'error_reporting(E_ALL & ~E_WARNING); echo json_encode([
+my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
     "wp_debug" => defined("WP_DEBUG") ? WP_DEBUG : 0, 
     "wp_debug_display" => defined("WP_DEBUG_DISPLAY") ? WP_DEBUG_DISPLAY : 0, 
     "wp_debug_log" => defined("WP_DEBUG_LOG") ? str_replace("'.$opts->{'dir'}.'", "", WP_DEBUG_LOG) : 0, 
@@ -600,7 +605,7 @@ my $wp_cli_command = $wp_cli . ' eval \'error_reporting(E_ALL & ~E_WARNING); ech
             "name" => $data["Name"],
 	    "description" => $data["Description"],
             "version" => $data["Version"],
-            "new_version" => isset($update->response[$plugin]) ? $update->response[$plugin]->new_version : 0,
+            "new_version" => isset($update->response[$plugin]["new_version"]) ? $update->response[$plugin]["new_version"] : 0,
 	    "active" => is_plugin_active($plugin) ? 1 : 0,
 	    "auto_update" => $isAutoUpdateEnabled ? 1 : 0,
 	    "reqphp" => $data["RequiresPHP"],
@@ -620,19 +625,20 @@ my $wp_cli_command = $wp_cli . ' eval \'error_reporting(E_ALL & ~E_WARNING); ech
             "name" => $theme_data->get("Name"),
             "description" => $theme_data->get("Description"),
             "version" => $theme_data->get("Version"),
-            "new_version" => isset($update->response[$theme]) ? $update->response[$theme]->new_version : 0,
+            "new_version" => isset($update->response[$theme]["new_version"]) ? $update->response[$theme]["new_version"] : 0,
             "active" => $isActive ? 1 : 0,
 	    "auto_update" => $isAutoUpdateEnabled ? 1 : 0,
         ];
     }, array_keys(wp_get_themes()))
 ]);\'';
-my $wp = &run_as_domain_user($d, "$wp_cli_command 2>&1");
+my $wp = &run_as_domain_user($d, "$wp_cli_command 2>> $wp_cli_log");
 eval { $wp = &convert_from_json($wp); };
 if ($@) {
 	&error_stderr("Failed to parse JSON output from WP-CLI command : $@");
-	my $err = " : $@";
-	$err = " : $wp" if ($wp);
-	return "<pre>$err</pre>";
+	my $err = "$text{'scripts_kit_ewp'} : $@";
+	$wp = &text('scripts_kit_elog', "`$wp_cli`", $wp_cli_log);
+	$err .= ($err =~ /\n$/ ? $wp : " : $wp");
+	return "<pre>@{[&html_escape($err)]}</pre>";
 	}
 
 # Tabs list
