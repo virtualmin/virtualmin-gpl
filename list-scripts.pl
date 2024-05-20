@@ -2,7 +2,7 @@
 
 =head1 list-scripts.pl
 
-Display script installed into some virtual server
+Display script (web app) installed into some virtual server
 
 The virtual servers to display scripts for can be specified with the 
 C<--domain> parameter, which must be followed by a domain name and can appear

@@ -2,7 +2,7 @@
 
 =head1 install-script.pl
 
-Install one third-party script
+Install one third-party script (web app)
 
 This program performs the actual upgrade or install of a script into a virtual
 server. The required parameters are C<--domain> (followed by the domain name),
@@ -174,6 +174,8 @@ $d || usage("Virtual server $domain does not exist");
 @scripts = &list_domain_scripts($d);
 $script = &get_script($sname);
 $script || &usage("Script type $sname is not known");
+($script->{'migrated'} && !$virtualmin_pro) &&
+	&usage("Script type $sname is not known");
 @vers = defined($id) ? @{$script->{'versions'}}
 		     : @{$script->{'install_versions'}};
 $ver || &usage("Missing version number. Available versions are : ".
