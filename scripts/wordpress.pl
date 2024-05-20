@@ -580,6 +580,11 @@ my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
 		"structure" => "/%year%/%monthnum%/%postname%/",
 		"example" => "/2024/05/sample-post/"
 	],
+	"numeric" => [
+		"label" => "Numeric",
+		"structure" => "/archives/%post_id%",
+		"example" => "/archives/123"
+	],
 	"post_name" => [
 		"label" => "Post name",
 		"structure" => "/%postname%/",
@@ -736,6 +741,29 @@ push(@$settings_tab_content, {
 	    "kit_option_blogdescription", undef, 35,
 	    $wp->{'blogdescription'} || $text{"scripts_kit_not_set"} . "<br>",
 	    $text{'edit_set'}) });
+# Permalink structure
+my $permlink_structure_opts = [
+	[ $wp->{'permalinks'}->{'plain'}->{'structure'},
+	  $wp->{'permalinks'}->{'plain'}->{'label'} ],
+	[ $wp->{'permalinks'}->{'day_and_name'}->{'structure'},
+	  $wp->{'permalinks'}->{'day_and_name'}->{'label'} ],
+	[ $wp->{'permalinks'}->{'month_and_name'}->{'structure'},
+	  $wp->{'permalinks'}->{'month_and_name'}->{'label'} ],
+	[ $wp->{'permalinks'}->{'post_name'}->{'structure'},
+	  $wp->{'permalinks'}->{'post_name'}->{'label'} ] ];
+# If custom permalink structure is not in the list, add it
+if (!grep { $_->[0] eq $wp->{'permalink_structure'} } @$permlink_structure_opts) {
+	push(@$permlink_structure_opts,
+		[ $wp->{'permalink_structure'},
+		  $text{"${_t}permalink_structure_custom"} . 
+		  	" [$wp->{'permalink_structure'}]" ]);
+	}
+push(@$settings_tab_content, {
+	desc  => &hlink($text{"${_t}permalink_structure"},
+			"kit_wp_permalink_structure"),
+	value => &ui_select("kit_option_permalink_structure",
+			$wp->{'permalink_structure'},
+			$permlink_structure_opts) });
 # Admin email
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}admin_email"}, "kit_wp_admin_email"),
