@@ -14,7 +14,7 @@ my $kit_login_func = $script->{'kit_login_func'};
 if (defined(&$kit_login_func)) {
         # Call script login function
         my $scall = $in{'scall'} ? &convert_from_json($in{'scall'}) : undef;
-        $kit_login_func->($d, $script, $sinfo, $scall);
+        $kit_login_func->($d, $script, $sinfo, $scall, \%in);
         # Redirect to script login page
         exit;
         }

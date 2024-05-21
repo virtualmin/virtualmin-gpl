@@ -818,6 +818,9 @@ $plugins_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $plugins_tab_content .= &ui_select("plugins", "", $table_select_opts);
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_updcache'}, "update");
+$plugins_tab_content .= &ui_submit($text{'scripts_kit_openin_wp'},
+				   "kit_form_login_plugins", undef,
+				   "form='kit_login_form'");
 $plugins_tab_content .= &ui_columns_start(
 	[ "", $text{"${_t}tb_plugin"},
 	      $text{"${_t}tb_installed_version"},
@@ -853,6 +856,9 @@ $themes_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $themes_tab_content .= &ui_select("themes", "", $table_select_opts);
 $themes_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $themes_tab_content .= &ui_submit($text{'scripts_kit_updcache'}, "update");
+$themes_tab_content .= &ui_submit($text{'scripts_kit_openin_wp'},
+				  "kit_form_login_themes", undef,
+				  "form='kit_login_form'");
 $themes_tab_content .= &ui_columns_start(
 	[ "", $text{"${_t}tb_theme"},
 	      $text{"${_t}tb_installed_version"},
@@ -1072,11 +1078,11 @@ $data .= &ui_tabs_end();
 return { extra_submits => \@data_submits, data => $data };
 }
 
-# script_wordpress_kit_login(&domain, &script, &script-info, &script-call-data)
+# script_wordpress_kit_login(&domain, &script, &script-info, &script-call-data, &post-data)
 # Called to login to the WordPress admin panel
 sub script_wordpress_kit_login
 {
-my ($d, $script, $sinfo, $scall) = @_;
+my ($d, $script, $sinfo, $scall, $post) = @_;
 my $esdesc = "$script->{'desc'} $text{'scripts_kit_loginkit'}";
 my $login_data = $scall->{'login_url'};
 my $login_uid = $login_data->[0];
@@ -1088,6 +1094,8 @@ $admin_url =~ /:\/\// ||
 my $site_url = $login_data->[2];
 $site_url =~ /:\/\// ||
 	&error("$esdesc : $text{'scripts_kit_einvalidsiteurl'} : $site_url");
+$admin_url .= "plugins.php" if ($post->{'kit_form_login_plugins'});
+$admin_url .= "themes.php" if ($post->{'kit_form_login_themes'});
 my $dir = $sinfo->{'opts'}->{'dir'};
 my $filename = "/wp-login-".&substitute_pattern('[a-f0-9]{40}').".php";
 my $dir_filename = "$dir/$filename";
