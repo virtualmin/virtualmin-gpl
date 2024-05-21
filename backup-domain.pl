@@ -507,7 +507,7 @@ print " - An S3 bucket, like s3://accesskey:secretkey\@bucket\n";
 print " - A Rackspace container, like rs://user:apikey\@container\n";
 print " - A Google Cloud Storage bucket, like gcs://bucket\n";
 print " - A Dropbox folder, like dropbox://folder\n";
-print "Multiple destinations can be given, if they are all remote.\n";
+print "Multiple destinations can be given by repeating this flag.\n";
 exit(1);
 }
 
