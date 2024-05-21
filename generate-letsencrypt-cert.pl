@@ -33,6 +33,10 @@ resolved by the Let's Encrypt service. To disable this check, use the
 C<--skip-dns-check> flag. Or to forcible enable it because it was disabled
 for the domain in the UI, use the C<--dns-check> flag.
 
+By default both web and DNS validation will be attempted by Let's Encrypt for
+domain ownership, but you can select just one with either the C<--web> or
+C<--dns> flags.
+
 =cut
 
 package virtual_server;
