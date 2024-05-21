@@ -142,14 +142,6 @@ if (&can_php_error_log($mode)) {
 if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 	# Build versions list
 	my @avail = &list_available_php_versions($d, $mode);
-	my $get_php_info_bubble = sub {
-		my ($placement_type, $subdir) = @_;
-		$placement_type ||= 'cell';
-		return "&nbsp;&nbsp;" .
-		       &ui_link("showphpinfo.cgi?dom=$in{'dom'}&dir=$subdir",
-		       	&ui_help(&text('phpmode_phpinfo_show' . ($subdir ? '_dir' : ''), $subdir)),
-		       	          undef, "target=_blank data-placement=\"$placement_type\"");
-	};
 	my @vlist = ( );
 	foreach my $v (@avail) {
 		if ($v->[1]) {
@@ -169,7 +161,7 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 		# System has only one version
 		$fullver = $avail[0]->[1] ? &get_php_version($avail[0]->[1], $d)
 					  : $avail[0]->[0];
-		print &ui_table_row($text{'phpmode_version'}, $fullver . &$get_php_info_bubble('label'))
+		print &ui_table_row($text{'phpmode_version'}, $fullver . &get_php_info_link($d->{'id'}, 'label'))
 		    if ($mode ne 'none');
 		}
 	elsif ($mode eq "fpm" && @dirs == 1 ||
@@ -177,7 +169,7 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 		# Only one version can be set
 		print &ui_table_row(
 			&hlink($text{'phpmode_version'}, "phpmode_version"),
-			&ui_select("ver_0", $dirs[0]->{'version'}, \@vlist) . &$get_php_info_bubble('label'));
+			&ui_select("ver_0", $dirs[0]->{'version'}, \@vlist) . &get_php_info_link($d->{'id'}, 'label'));
 		print &ui_hidden("dir_0", $dirs[0]->{'dir'});
 		print &ui_hidden("d", $dirs[0]->{'dir'});
 		}
@@ -198,7 +190,7 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 					  'value' => $i,
 					  'disabled' => 1,
 					  'checked' => 1, },
-					"<i>$text{'phpver_pub'}</i>" . &$get_php_info_bubble(),
+					"<i>$text{'phpver_pub'}</i>" . &get_php_info_link($d->{'id'}),
 					$sel
 					]);
 				}
@@ -209,7 +201,7 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 					{ 'type' => 'checkbox', 'name' => 'd',
 					  'value' => $i,
 					  'checked' => 1, },
-					"<tt>$subdir</tt>" . &$get_php_info_bubble('cell', $subdir),
+					"<tt>$subdir</tt>" . &get_php_info_link($d->{'id'}, 'cell', $subdir),
 					$sel
 					]);
 				$anydelete++;
