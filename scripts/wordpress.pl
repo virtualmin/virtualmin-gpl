@@ -1108,9 +1108,12 @@ require __DIR__ . '/wp-load.php';
 register_shutdown_function(function() {
     unlink('$dir_filename');
 });
-wp_clear_auth_cookie();
-wp_set_current_user($login_uid);
-wp_set_auth_cookie($login_uid);
+\$current_user_id = get_current_user_id();
+if (\$current_user_id != $login_uid) {
+	wp_clear_auth_cookie();
+	wp_set_current_user($login_uid);
+	wp_set_auth_cookie($login_uid);
+}
 wp_redirect('$admin_url');
 exit;
 EOF
