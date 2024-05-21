@@ -817,6 +817,7 @@ $plugins_tab_content .= &ui_hidden("tab", "plugins");
 $plugins_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $plugins_tab_content .= &ui_select("plugins", "", $table_select_opts);
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
+$plugins_tab_content .= &ui_submit($text{'scripts_kit_updcache'}, "update");
 $plugins_tab_content .= &ui_columns_start(
 	[ "", $text{"${_t}tb_plugin"},
 	      $text{"${_t}tb_installed_version"},
@@ -851,6 +852,7 @@ $themes_tab_content .= &ui_hidden("tab", "themes");
 $themes_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $themes_tab_content .= &ui_select("themes", "", $table_select_opts);
 $themes_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
+$themes_tab_content .= &ui_submit($text{'scripts_kit_updcache'}, "update");
 $themes_tab_content .= &ui_columns_start(
 	[ "", $text{"${_t}tb_theme"},
 	      $text{"${_t}tb_installed_version"},
