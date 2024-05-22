@@ -83,7 +83,8 @@ To override the default compression format set on the Virtualmin Configuration
 page, use the C<--compression> flag followed by one of C<gzip>, C<bzip2>, 
 C<tar> or C<zip>.
 
-XXX flags
+Scheduled backups can have an optional description, which can be set with the
+C<--desc> flag.
 
 =cut
 
@@ -243,6 +244,16 @@ while(@ARGV > 0) {
 			       $c eq "zip" ? 3 : -1;
 		&usage("Invalid compression format $c") if ($compression < 0);
 		}
+	elsif ($a eq "--schedule") {
+		$schedule = shift(@ARGV);
+		if ($schedule =~ /^(hourly|daily|weekly|monthly|yearly)$/) {
+			$special = $schedule;
+			}
+		else {
+			@schedule = split(/\s+/, $schedule);
+			@schedule == 5 || &usage("--schedule must be followed by a valid cron spec");
+			}
+		}
 	elsif ($a eq "--disabled") {
 		$enabled = 0;
 		}
@@ -266,7 +277,12 @@ while(@ARGV > 0) {
 @bdoms || $all_doms || @resellers || @plans || @vbs || $purge ||
 	&usage("No domains specified");
 if (@bdoms || @users || $all_doms) {
-	@bfeats || usage("No features specified");
+	@bfeats || $all_bfeats || usage("No features specified");
+	}
+foreach my $dname (@bdoms) {
+	$d = &get_domain_by("dom", $dname);
+	$d || &usage("Virtual server $dname does not exist");
+	push(@doms, $d);
 	}
 foreach $dest (@dests) {
 	# Validate destination URL
@@ -313,7 +329,7 @@ if ($increment) {
 
 # Create a backup schedule object
 my $sched = { };
-$sched->{'desc'} = $desc;	# XXX
+$sched->{'desc'} = $desc;
 for(my $i=0; $i<@dests; $i++) {
 	$sched->{'dest'.$i} = $dests[$i];
 	}
@@ -342,10 +358,25 @@ $sched->{'increment'} = $increment;
 $sched->{'compression'} = $compression;
 $sched->{'strftime'} = $strftime;
 $sched->{'onebyone'} = $onebyone;
-
-# XXX fmnt / etc...
+$sched->{'exclude'} = join("\t", @exclude);
+$sched->{'include'} = join("\t", @include);
+foreach my $f (keys %opts) {
+	$sched->{'backup_opts_'.$f} =
+		join(",", map { $_."=".$opts{$f}->{$_} }
+                              keys %{$opts{$f}});
+	}
+# XXX before/after
+# XXX ownrestore
+# XXX owner
 
 # Save scheduled-related options
+if ($special) {
+	$sched->{'special'} = $special;
+	}
+else {
+	($sched->{'mins'}, $sched->{'hours'}, $sched->{'days'},
+	 $sched->{'months'}, $sched->{'weekdays'}) = @schedule;
+	}
 $sched->{'enabled'} = $enabled;
 $sched->{'email'} = $email;
 $sched->{'email_err'} = $email_err;
@@ -353,6 +384,7 @@ $sched->{'email_doms'} = $email_doms;
 
 # Save the scheduled backup
 &save_scheduled_backup($sched);
+print "Scheduled backup created with ID $sched->{'id'}\n";
 
 &virtualmin_api_log(\@OLDARGV);
 exit($ex);
@@ -390,6 +422,7 @@ if (defined(&list_backup_keys)) {
 	print "                         [--key id]\n";
 	}
 print "                         [--compression gzip|bzip2|tar|zip]\n";
+print "                         [--desc \"backup description\"]\n";
 print "                         [--disabled]\n";
 print "                         [--schedule \"cron-spec\"]\n";
 print "                         [--email address]\n";
