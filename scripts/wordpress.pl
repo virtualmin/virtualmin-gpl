@@ -540,13 +540,38 @@ my $kit_form_main = "data-form-nested='apply'";
 
 # Has to be called using eval for maximum speed (avg 
 # expected load time is + 0.5s to default page load)
-my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
+my $wp_cli_command = $wp_cli . ' eval \'
+$backup_dir = "' . $d->{"home"} . '/.wordpress-backups";
+if (!is_dir($backup_dir)) {
+    mkdir($backup_dir, 0750, true);
+}
+$backups_data = array();
+if (is_dir($backup_dir)) {
+    $backup_files = scandir($backup_dir);
+    foreach ($backup_files as $backup_file) {
+        if ($backup_file !== "." && $backup_file !== "..") {
+            $backup_filepath = $backup_dir . "/" . $backup_file;
+            if (!is_readable($backup_filepath)) {
+                continue;
+                }
+            $size = filesize($backup_filepath);
+            $creation_date = filectime($backup_filepath);
+            $backups_data[] = array(
+                "filename" => $backup_file,
+                "filepath" => $backup_filepath,
+                "size" => $size,
+                "creation_date" => date("Y-m-d H:i:s", $creation_date),
+            );
+        }
+    }
+}
+echo json_encode([
     "memory_limit" => ini_get("memory_limit"),
     "upload_max_filesize" => ini_get("upload_max_filesize"),
     "post_max_size" => ini_get("post_max_size"),
     "wp_debug" => defined("WP_DEBUG") ? WP_DEBUG : 0, 
     "wp_debug_display" => defined("WP_DEBUG_DISPLAY") ? WP_DEBUG_DISPLAY : 0, 
-    "wp_debug_log" => defined("WP_DEBUG_LOG") ? str_replace("'.$opts->{'dir'}.'", "", WP_DEBUG_LOG) : 0, 
+    "wp_debug_log" => defined("WP_DEBUG_LOG") ? str_replace("' . $opts->{'dir'} . '", "", WP_DEBUG_LOG) : 0, 
     "wp_memory_limit" => defined("WP_MEMORY_LIMIT") ? WP_MEMORY_LIMIT : 0, 
     "wp_max_memory_limit" => defined("WP_MAX_MEMORY_LIMIT") ? WP_MAX_MEMORY_LIMIT : 0, 
     "disallow_file_edit" => defined("DISALLOW_FILE_EDIT") ? DISALLOW_FILE_EDIT : 0, 
@@ -568,31 +593,31 @@ my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
     "php_version" => phpversion(),
     "permalink_structure" => get_option("permalink_structure"),
     "permalinks" => [
-	"plain" => [
-		"label" => "Plain",
-		"structure" => "",
-		"example" => "/?p=123"
-	],
-	"day_and_name" => [
-		"label" => "Day and name",
-		"structure" => "/%year%/%monthnum%/%day%/%postname%/",
-		"example" => "/2024/05/12/sample-post/"
-	],
-	"month_and_name" => [
-		"label" => "Month and name",
-		"structure" => "/%year%/%monthnum%/%postname%/",
-		"example" => "/2024/05/sample-post/"
-	],
-	"numeric" => [
-		"label" => "Numeric",
-		"structure" => "/archives/%post_id%",
-		"example" => "/archives/123"
-	],
-	"post_name" => [
-		"label" => "Post name",
-		"structure" => "/%postname%/",
-		"example" => "/sample-post/"
-	]
+        "plain" => [
+                "label" => "Plain",
+                "structure" => "",
+                "example" => "/?p=123"
+        ],
+        "day_and_name" => [
+                "label" => "Day and name",
+                "structure" => "/%year%/%monthnum%/%day%/%postname%/",
+                "example" => "/2024/05/12/sample-post/"
+        ],
+        "month_and_name" => [
+                "label" => "Month and name",
+                "structure" => "/%year%/%monthnum%/%postname%/",
+                "example" => "/2024/05/sample-post/"
+        ],
+        "numeric" => [
+                "label" => "Numeric",
+                "structure" => "/archives/%post_id%",
+                "example" => "/archives/123"
+        ],
+        "post_name" => [
+                "label" => "Post name",
+                "structure" => "/%postname%/",
+                "example" => "/sample-post/"
+        ]
     ],
     "login_url" => (function() {
         $admin_email = get_option("admin_email");
@@ -607,53 +632,54 @@ my $wp_cli_command = $wp_cli . ' eval \'echo json_encode([
         require_once(ABSPATH . "wp-admin/includes/update.php");
         $data = get_plugin_data(WP_PLUGIN_DIR . "/" . $plugin);
         $update = get_site_transient("update_plugins");
-	$auto_updates = (array) get_site_option("auto_update_plugins", array());
-    	$isAutoUpdateEnabled = in_array($plugin, $auto_updates);
-	$new_version = 0;
-	if (isset($update->response[$plugin])) {
-		if (is_object($update->response[$plugin])) {
-			$new_version = $update->response[$plugin]->new_version;
-		} elseif (is_array($update->response[$plugin])) {
-			$new_version = $update->response[$plugin]["new_version"];
-		}
-	}
+        $auto_updates = (array) get_site_option("auto_update_plugins", array());
+            $isAutoUpdateEnabled = in_array($plugin, $auto_updates);
+        $new_version = 0;
+        if (isset($update->response[$plugin])) {
+                if (is_object($update->response[$plugin])) {
+                        $new_version = $update->response[$plugin]->new_version;
+                } elseif (is_array($update->response[$plugin])) {
+                        $new_version = $update->response[$plugin]["new_version"];
+                }
+        }
         return [
             "name" => $data["Name"],
-	    "description" => $data["Description"],
+            "description" => $data["Description"],
             "version" => $data["Version"],
             "new_version" => $new_version,
-	    "active" => is_plugin_active($plugin) ? 1 : 0,
-	    "auto_update" => $isAutoUpdateEnabled ? 1 : 0,
-	    "reqphp" => $data["RequiresPHP"],
-	    "reqwp" => $data["RequiresWP"],
+            "active" => is_plugin_active($plugin) ? 1 : 0,
+            "auto_update" => $isAutoUpdateEnabled ? 1 : 0,
+            "reqphp" => $data["RequiresPHP"],
+            "reqwp" => $data["RequiresWP"],
         ];
     }, array_keys(get_plugins())),
     "themes" => array_map(function($theme) {
         require_once(ABSPATH . "wp-admin/includes/theme.php");
         require_once(ABSPATH . "wp-admin/includes/update.php");
         $theme_data = wp_get_theme($theme);
-	$current_theme = wp_get_theme()->get_stylesheet();
-	$isActive = ($theme === $current_theme);
+        $current_theme = wp_get_theme()->get_stylesheet();
+        $isActive = ($theme === $current_theme);
         $update = get_site_transient("update_themes");
-	$auto_updates = (array) get_site_option("auto_update_themes", array());
-    	$isAutoUpdateEnabled = in_array($theme, $auto_updates);
-	$new_version = 0;
-	if (isset($update->response[$theme])) {
-		if (is_object($update->response[$theme])) {
-		$new_version = $update->response[$theme]->new_version;
-		} elseif (is_array($update->response[$theme])) {
-		$new_version = $update->response[$theme]["new_version"];
-		}
-	}
+        $auto_updates = (array) get_site_option("auto_update_themes", array());
+            $isAutoUpdateEnabled = in_array($theme, $auto_updates);
+        $new_version = 0;
+        if (isset($update->response[$theme])) {
+                if (is_object($update->response[$theme])) {
+                $new_version = $update->response[$theme]->new_version;
+                } elseif (is_array($update->response[$theme])) {
+                $new_version = $update->response[$theme]["new_version"];
+                }
+        }
         return [
             "name" => $theme_data->get("Name"),
             "description" => $theme_data->get("Description"),
             "version" => $theme_data->get("Version"),
-	    "new_version" => $new_version,
+            "new_version" => $new_version,
             "active" => $isActive ? 1 : 0,
-	    "auto_update" => $isAutoUpdateEnabled ? 1 : 0,
+            "auto_update" => $isAutoUpdateEnabled ? 1 : 0,
         ];
-    }, array_keys(wp_get_themes()))
+    }, array_keys(wp_get_themes())),
+    "backups_data" => $backups_data,
 ]);\'';
 my $wp = &run_as_domain_user($d, "$wp_cli_command 2>> $wp_cli_log");
 eval { $wp = &convert_from_json($wp); };
@@ -804,7 +830,7 @@ push(@$settings_tab_content, {
 
 # Plugins tab prepare
 my $plugins_tab_content;
-my $table_select_opts =
+my $plugins_actions_opts =
 	[ [ "", $text{"${_t}selopt_bulk"} ],
 	  [ "activate", $text{"${_t}selopt_activate"} ],
 	  [ "deactivate", $text{"${_t}selopt_deactivate"} ],
@@ -818,7 +844,7 @@ $plugins_tab_content =
 $plugins_tab_content .= &ui_hidden("dom", $d->{'id'});
 $plugins_tab_content .= &ui_hidden("tab", "plugins");
 $plugins_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
-$plugins_tab_content .= &ui_select("plugins", "", $table_select_opts);
+$plugins_tab_content .= &ui_select("plugins", "", $plugins_actions_opts);
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_updcache'}, "update");
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_openin_wp'},
@@ -838,8 +864,8 @@ foreach my $plugin (@{$wp->{'plugins'}}) {
 				&html_strip($plugin->{'description'}))),
 		&html_escape($plugin->{'version'}),
 		$plugin->{'new_version'} ?
-			&ui_text_color(&html_escape(
-				$plugin->{'new_version'}), 'success') : $text{'no'},
+			"<b>".&ui_text_color(&html_escape(
+				$plugin->{'new_version'}), 'success')."</b>" : $text{'no'},
 		$plugin->{'active'} ? $text{'yes'} : $text{'no'},
 		$plugin->{'auto_update'} ? $text{'yes'} : $text{'no'},
 	], [ ( "width=5" ) ], undef, &quote_escape($plugin->{'name'}, '"'));
@@ -849,14 +875,14 @@ $plugins_tab_content .= &ui_form_end();
 
 # Themes tab prepare
 my $themes_tab_content;
-splice(@$table_select_opts, 2, 1);
+splice(@$plugins_actions_opts, 2, 1);
 $themes_tab_content =
 	&ui_form_start($save_kit_form, "post", undef,
 		       "$kit_form_main id='kit_themes_form'");
 $themes_tab_content .= &ui_hidden("dom", $d->{'id'});
 $themes_tab_content .= &ui_hidden("tab", "themes");
 $themes_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
-$themes_tab_content .= &ui_select("themes", "", $table_select_opts);
+$themes_tab_content .= &ui_select("themes", "", $plugins_actions_opts);
 $themes_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $themes_tab_content .= &ui_submit($text{'scripts_kit_updcache'}, "update");
 $themes_tab_content .= &ui_submit($text{'scripts_kit_openin_wp'},
@@ -876,8 +902,8 @@ foreach my $theme (@{$wp->{'themes'}}) {
 				&html_strip($theme->{'description'}))),
 		&html_escape($theme->{'version'}),
 		$theme->{'new_version'} ?
-			&ui_text_color(&html_escape(
-				$theme->{'new_version'}), 'success') : $text{'no'},
+			"<b>".&ui_text_color(&html_escape(
+				$theme->{'new_version'}), 'success')."</b>" : $text{'no'},
 		$theme->{'active'} ? $text{'yes'} : $text{'no'},
 		$theme->{'auto_update'} ? $text{'yes'} : $text{'no'},
 	], [ ( "width=5" ) ], undef, &quote_escape($theme->{'name'}, '"'));
@@ -887,13 +913,50 @@ $themes_tab_content .= &ui_form_end();
 
 # Backup and restore tab prepare
 my $backup_tab_content;
-$backup_tab_content =
+my $backup_actions_opts =
+	[ [ "", $text{"${_t}selopt_bulk"} ],
+	  [ "all", $text{"${_t}selopt_backup_all"} ],
+	  [ "files", $text{"${_t}selopt_backup_files"} ],
+	  [ "db", $text{"${_t}selopt_backup_db"} ],
+	  [ "restore", $text{"${_t}selopt_backup_restore"} ],
+	  [ "db", $text{"${_t}selopt_backup_del"} ] ];
+$backup_tab_content .=
 	&ui_form_start($save_kit_form, "post", undef,
 		       "$kit_form_main id='kit_backup_form'");
 $backup_tab_content .= &ui_hidden("dom", $d->{'id'});
 $backup_tab_content .= &ui_hidden("tab", "backup");
 $backup_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
-# XXXX
+$backup_tab_content .= &ui_select("backups", "", $backup_actions_opts);
+$backup_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "backup");
+my $backup_content_files;
+my $backup_content_files_size_all = 0;
+foreach my $backup_data (@{$wp->{'backups_data'}}) {
+        if ($backup_data->{'size'}) {
+                $backup_content_files_size_all += $backup_data->{'size'};
+                $backup_content_files .= &ui_checked_columns_row([
+                        &html_escape($backup_data->{'creation_date'}),
+                        &nice_size(&html_escape($backup_data->{'size'})),
+                        &html_escape($backup_data->{'filename'}),
+                        " ",
+                ], [ ( "width=5" ) ], undef, &quote_escape($plugin->{'name'}, '"'));
+                }
+        }
+$backup_tab_content .= &ui_table_start(undef, "width=100%", 2);
+$backup_tab_content .= &ui_table_row(
+		$text{'scripts_kit_backups_location'}, "~/.wordpress-backups", 2);
+$backup_tab_content .= &ui_table_row(
+		$text{'scripts_kit_backups_size'}, &nice_size($backup_content_files_size_all), 2);
+$backup_tab_content .= &ui_table_end();
+if ($backup_content_files) {
+        $backup_tab_content .= &ui_columns_start(
+                [ "", $text{"scripts_kit_backup_tb_date"},
+                $text{"scripts_kit_backup_tb_size"},
+                $text{"scripts_kit_backup_tb_filename"},
+                $text{"scripts_kit_backup_tb_download"},
+                ], 100, 0, [ ( "width=5" ) ]);
+        $backup_tab_content .= $backup_content_files;
+        $backup_tab_content .= &ui_columns_end();
+        }
 $backup_tab_content .= &ui_form_end();
 
 # Clone tab prepare
