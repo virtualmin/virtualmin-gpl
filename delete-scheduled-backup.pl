@@ -5,7 +5,9 @@
 Delete a scheduled backup for one or more virtual servers
 
 This command removes the scheduled backup identified with the C<--id> flag,
-which must be followed by the backup's unique numeric ID.
+which must be followed by the backup's unique numeric ID. This only prevents
+future backups from happening on schedule, and it does not remove any existing
+backup files.
 
 =cut
 
@@ -45,8 +47,12 @@ while(@ARGV > 0) {
 
 # Get the backup to remove
 $id || &usage("Missing --id parameter");
-$sched = &get_scheduled_backup($id);
+($sched) = grep { $_->{'id'} eq $id } &list_scheduled_backups();
 $sched || &usage("No backup with ID $id exists");
+&delete_scheduled_backup($sched);
+print "Scheduled backup deleted with ID $sched->{'id'}\n";
+
+&virtualmin_api_log(\@OLDARGV);
 
 sub usage
 {
