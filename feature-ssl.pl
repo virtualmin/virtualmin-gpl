@@ -650,6 +650,9 @@ if (!$cert) {
 elsif (!-e $cert) {
 	return &text('validate_esslcertfile', "<tt>$cert</tt>");
 	}
+elsif (-l $cert) {
+	return &text('validate_esslcertlink', "<tt>$cert</tt>");
+	}
 elsif (&is_under_directory($d->{'home'}, $cert) &&
        !&readable_by_domain_user($d, $cert)) {
 	return &text('validate_esslcertfile2', "<tt>$cert</tt>");
@@ -660,6 +663,9 @@ local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf, 1);
 if ($key) {
 	if (!-e $key) {
 		return &text('validate_esslkeyfile', "<tt>$key</tt>");
+		}
+	elsif (-l $key) {
+		return &text('validate_esslkeylink', "<tt>$key</tt>");
 		}
 	elsif (&is_under_directory($d->{'home'}, $key) &&
 	       !&readable_by_domain_user($d, $key)) {
