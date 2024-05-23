@@ -387,7 +387,6 @@ $sched->{'email_doms'} = $email_doms;
 print "Scheduled backup created with ID $sched->{'id'}\n";
 
 &virtualmin_api_log(\@OLDARGV);
-exit($ex);
 
 sub usage
 {
