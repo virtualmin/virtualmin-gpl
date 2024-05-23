@@ -209,6 +209,7 @@ elsif (!$backup->{'enabled'} && $job) {
 sub delete_scheduled_backup
 {
 local ($backup) = @_;
+$backup->{'id'} || &error("Missing backup ID!");
 $backup->{'id'} == 1 && &error("The default backup cannot be deleted!");
 &unlink_file($backup->{'file'});
 
