@@ -641,7 +641,7 @@ if (defined(&get_autoreply_file_dir)) {
 	}
 
 # Delete scheduled backups owned by the domain owner, or that backup only
-# this dokmain
+# this domain
 foreach my $sched (&list_scheduled_backups()) {
 	my @dids = split(/\s+/, $sched->{'doms'});
 	if ($sched->{'owner'} eq $id) {
