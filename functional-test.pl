@@ -2737,6 +2737,152 @@ $aliasdom_tests = [
 	},
 	);
 
+$scheduled_tests = [
+	# Create a parent domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'webmin' ], [ 'logrotate' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Add a user to the domain being backed up
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 777*1024 ],
+		      [ 'mail-quota', 777*1024 ] ],
+	},
+
+	# Add an extra database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_db.'_extra' ] ],
+	},
+
+	# Create a scheduled backup for just this domain to a file
+	{ 'command' => 'create-scheduled-backup.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ],
+		      [ 'schedule', '* * * * *' ] ],
+	},
+
+	# Wait a minute for it to run
+	{ 'command' => 'sleep 90'
+	},
+
+	# Make sure the file and meta-files exist
+	{ 'command' => 'ls -l '.$test_backup_file },
+	{ 'command' => 'ls -l '.$test_backup_file.'.info' },
+	{ 'command' => 'ls -l '.$test_backup_file.'.dom' },
+
+	# Make sure it was logged
+	{ 'command' => 'list-backup-logs.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'start', -1 ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Domains: '.$test_domain,
+		      'Final status: OK',
+		      'Destination: '.$test_backup_file,
+		      'Run from: sched',
+		      'Differential: No' ],
+	},
+
+	# Delete the domain, in preparation for re-creation
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Re-create from backup
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Run post-restore tests
+	# Test DNS lookup
+	{ 'command' => 'host -t A '.$test_domain,
+	  'grep' => &get_default_ip(),
+	},
+	{ 'command' => 'host -t A www.'.$test_domain,
+	  'grep' => &get_default_ip(),
+	},
+
+	# Test HTTP get
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test home page',
+	  'quiet' => 1,
+	},
+
+	# Check FTP login
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain_user.':smeg@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Check Webmin login
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://localhost:'.$webmin_port.'/',
+	},
+
+	# Check MySQL login
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
+	},
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.'_extra -e "select version()"',
+	},
+
+	$config{'postgres'} ?
+		# Check PostgreSQL login
+		&postgresql_login_commands($test_domain_user, 'smeg',
+					   $test_domain_db,
+					   $test_domain_home)
+		: ( ),
+
+	# Make sure the mailbox still exists
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ] ],
+	  'grep' => "^$test_user",
+	},
+
+	# Make sure the mailbox has the same settings
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'multiline' ],
+		      [ 'user' => $test_user ] ],
+	  'grep' => [ 'Password: smeg',
+		      'Email address: '.$test_user.'@'.$test_domain,
+		      'Home quota: 777' ],
+	  'antigrep' => [ 'Home quota expected:' ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+
+	# Delete the scheduled backup
+	{ 'command' => 'delete-scheduled-backup.pl',
+	  'args' => [ [ 'dest', $test_backup_file ] ],
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
+	},
+	];
+
 $backup_tests = [
 	# Create a parent domain to be backed up
 	{ 'command' => 'create-domain.pl',
@@ -11731,6 +11877,7 @@ $alltests = { '_config' => $_config_tests,
 	      'parallel_backup' => $parallel_backup_tests,
 	      'transfer' => $transfer_tests,
 	      'ftp' => $ftp_tests,
+	      'scheduled' => $scheduled_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
