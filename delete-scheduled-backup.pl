@@ -5,9 +5,11 @@
 Delete a scheduled backup for one or more virtual servers
 
 This command removes the scheduled backup identified with the C<--id> flag,
-which must be followed by the backup's unique numeric ID. This only prevents
-future backups from happening on schedule, and it does not remove any existing
-backup files.
+which must be followed by the backup's unique numeric ID. Or you can select
+a backup with C<--dest> followed by a backup destination path.
+
+This only prevents future backups from happening on schedule, and it does not
+remove any existing backup files.
 
 =cut
 
@@ -34,6 +36,9 @@ while(@ARGV > 0) {
 	if ($a eq "--id") {
 		$id = shift(@ARGV);
 		}
+	elsif ($a eq "--dest") {
+		$dest = shift(@ARGV);
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -46,9 +51,17 @@ while(@ARGV > 0) {
 	}
 
 # Get the backup to remove
-$id || &usage("Missing --id parameter");
-($sched) = grep { $_->{'id'} eq $id } &list_scheduled_backups();
-$sched || &usage("No backup with ID $id exists");
+if ($id) {
+	($sched) = grep { $_->{'id'} eq $id } &list_scheduled_backups();
+	$sched || &usage("No backup with ID $id exists");
+	}
+elsif ($dest) {
+	($sched) = grep { &indexof($dest, &get_scheduled_backup_dests($_)) >= 0 } &list_scheduled_backups();
+	$sched || &usage("No backup with destination $dest exists");
+	}
+else {
+	&usage("Missing --id or --dest parameters");
+	}
 &delete_scheduled_backup($sched);
 print "Scheduled backup deleted with ID $sched->{'id'}\n";
 
@@ -61,7 +74,8 @@ if ($_[0]) {
 	}
 print "Delete a scheduled backup for one or more virtual servers.\n";
 print "\n";
-print "virtualmin delete-scheduled-backup --id number\n";
+print "virtualmin delete-scheduled-backup [--id number]\n";
+print "                                   [--dest path]\n";
 exit(1);
 }
 
