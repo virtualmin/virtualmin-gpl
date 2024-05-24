@@ -205,6 +205,7 @@ my $url = script_path_url($d, $opts);
 return (0, "Database connection failed : $dberr") if ($dberr);
 
 my $dom_php_bin = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
+$dom_php_bin || return (0, "Could not find PHP CLI command");
 my $wp = "cd $opts->{'dir'} && $dom_php_bin $opts->{'dir'}/wp-cli.phar";
 
 # Copy wordpress-cli
