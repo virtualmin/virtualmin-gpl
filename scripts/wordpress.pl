@@ -215,10 +215,7 @@ my $wp = "cd $opts->{'dir'} && $dom_php_bin $opts->{'dir'}/wp-cli.phar";
 
 # Source URL
 my $aux_download_server = "http://scripts.virtualmin.com";
-if ($config{'wp_aux_download_server'}) {
-	$aux_download_server = $config{'wp_aux_download_server'};
-	$aux_download_server = "http://$aux_download_server" if ($aux_download_server !~ /^.*:\/\//);
-	}
+
 # Install using cli
 if (!$upgrade) {
 	my $err_continue = "<br>Installation can be continued manually at <a target=_blank href='${url}wp-admin'>$url</a>.";
