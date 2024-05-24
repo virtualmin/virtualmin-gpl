@@ -493,7 +493,14 @@ foreach my $f (@files) {
 			$firsterror = undef;
 			last;
 			}
-		return $firsterror if ($firsterror);
+		if ($firsterror) {
+			if (defined(&clear_http_cache)) {
+				foreach my $url (@urls) {
+					&clear_http_cache($url);
+					}
+				}
+			return $firsterror;
+			}
 
 		$gotfiles->{$f->{'name'}} = $temp;
 		}
