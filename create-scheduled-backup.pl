@@ -365,9 +365,6 @@ foreach my $f (keys %opts) {
 		join(",", map { $_."=".$opts{$f}->{$_} }
                               keys %{$opts{$f}});
 	}
-# XXX before/after
-# XXX ownrestore
-# XXX owner
 
 # Save scheduled-related options
 if ($special) {
