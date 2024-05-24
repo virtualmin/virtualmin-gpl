@@ -271,6 +271,7 @@ sub add_domain_script
 {
 local ($d, $name, $version, $opts, $desc, $url, $user, $pass, $partial) = @_;
 $main::add_domain_script_count++;
+$partial =~ s/\n/ /g if ($partial);
 local %info = ( 'id' => time().$$.$main::add_domain_script_count,
 		'name' => $name,
 		'version' => $version,
