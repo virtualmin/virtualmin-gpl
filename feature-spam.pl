@@ -893,7 +893,7 @@ if ($mode != 5) {
 			$folder = $dest;
 			}
 		else {
-			$folder = "Junk";
+			$folder = &default_spam_folder_suffix($d);
 			}
 		}
 	local $action = $mode == 0 ? "/dev/null" :
@@ -932,6 +932,20 @@ if (@want) {
 	}
 &clear_lookup_domain_cache($_[0]);
 return 1;
+}
+
+# default_spam_folder_suffix(&domain)
+# Returns either "Spam" or "Junk" depending on the default folder name
+sub default_spam_folder_suffix
+{
+my ($d) = @_;
+if ($config{'spam_delivery'} =~ /\/Maildir\/\.([^\/]+)\/$/) {
+	return $1;
+	}
+elsif ($config{'spam_delivery'} =~ /\/mail\/([^\/]+)$/) {
+	return $1;
+	}
+return "Junk";
 }
 
 # get_domain_spam_client(&domain)
