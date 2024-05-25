@@ -477,7 +477,6 @@ local $compression = $opts->{'compression'};
 			      : $text{'backup_dirtar'});
 local $out;
 local $cmd;
-local $gzip = $homefmt && &has_command("gzip");
 local $destfile = $file;
 if (!$homefmt) {
 	$destfile .= ".".&compression_to_suffix($compression);
