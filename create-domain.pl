@@ -990,7 +990,7 @@ $config{'pre_command'} = $precommand if ($precommand);
 $config{'post_command'} = $postcommand if ($postcommand);
 $err = &create_virtual_server(\%dom, $parent,
 			      $parent ? $parent->{'user'} : undef,
-			      0, 0, $parent ? undef : $pass, $content);
+			      0, 1, $parent ? undef : $pass, $content);
 &unlock_domain(\%dom);
 if ($err) {
 	print "$err\n";
