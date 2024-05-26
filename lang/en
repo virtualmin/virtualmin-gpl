@@ -2957,6 +2957,9 @@ restore_egid=GID $1 is already in use
 restore_cgimode=Changing CGI execution mode to $1 ..
 restore_cgimodenone=Disabling CGI scripts ..
 restore_ecgimode=.. failed : $1
+restore_scriptstart=Re-starting script servers ..
+restore_noscriptstart=.. none found
+restore_scriptstarted=.. started $1 servers
 
 restore_unixuser=Updating administration password and quotas ..
 restore_unixsame=.. skipping restore to original LDAP server $1 in replication mode

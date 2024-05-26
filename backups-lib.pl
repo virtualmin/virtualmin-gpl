@@ -3092,9 +3092,10 @@ elsif (!$ok) {
 
 # If any created restored domains had scripts, re-verify their dependencies
 local @wasmissing = grep { $_->{'wasmissing'} } @$doms;
-if (defined(&list_domain_scripts) && scalar(@wasmissing)) {
+my $bootcount = 0;
+local %scache;
+if (@wasmissing) {
 	&$first_print($text{'restore_phpmods'});
-	local %scache;
 	local (@phpinstalled, $phpanyfailed, @phpbad);
 	foreach my $d (@wasmissing) {
 		local @sinfos = &list_domain_scripts($d);
@@ -3106,6 +3107,9 @@ if (defined(&list_domain_scripts) && scalar(@wasmissing)) {
 					&get_script($sinfo->{'name'});
 				}
 			next if (!$script);
+			my $bfunc = $script->{'bootup_func'};
+			my $sfunc = $script->{'start_server_func'};
+			$bootcount++ if (defined(&$bfunc) || defined(&$bfunc));
 			next if (&indexof('php', @{$script->{'uses'}}) < 0);
 
 			# Work out PHP version for this particular install. Use
@@ -3161,6 +3165,37 @@ if (defined(&list_domain_scripts) && scalar(@wasmissing)) {
 					  $b->[2]->{'desc'}, $b->[3])."<br>\n";
 			}
 		&$second_print($badlist);
+		}
+	}
+
+# If any created restored domains had scripts that started servers at boot
+# time, re-start them
+# XXX re-start regardless?
+if (@wasmissing && $bootcount) {
+	&$first_print($text{'restore_scriptstart'});
+	my $booted = 0;
+	foreach my $d (@wasmissing) {
+		local @sinfos = &list_domain_scripts($d);
+		foreach my $sinfo (@sinfos) {
+			local $script = $scache{$sinfo->{'name'}};
+			next if (!$script);
+			my $bfunc = $script->{'bootup_func'};
+			my $sfunc = $script->{'start_server_func'};
+			next if (!defined(&$bfunc) && !defined(&$bfunc));
+			if (defined(&$bfunc)) {
+				&$bfunc($d, $sinfo->{'opts'});
+				}
+			if (defined(&$sfunc)) {
+				&$sfunc($d, $sinfo->{'opts'});
+				}
+			$booted++;
+			}
+		}
+	if ($booted) {
+		&$second_print(&text('restore_scriptstarted', $booted));
+		}
+	else {
+		&$second_print($text{'restore_noscriptstart'});
 		}
 	}
 
