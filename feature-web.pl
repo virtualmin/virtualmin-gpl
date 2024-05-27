@@ -278,6 +278,11 @@ if ($config{'mail_autoconfig'} && $d->{'mail'} &&
 	&enable_email_autoconfig($d);
 	}
 
+# Add any proxypass directives
+if (!$d->{'alias'} && $d->{'proxy_pass'}) {
+	&update_apache_proxy_pass($d, undef);
+	}
+
 &$first_print($text{'setup_webpost'});
 my $err;
 eval {
@@ -803,22 +808,14 @@ else {
 		# This is a proxying forwarding website and the URL has
 		# changed - update all Proxy* directives
 		&$first_print($text{'save_apache6'});
-		if (!$virt) {
-			&$second_print($text{'delete_noapache'});
-			goto VIRTFAILED;
+		my $err = &update_apache_proxy_pass($d, $oldd);
+		if ($err) {
+			&$second_print(&text('save_eapache6', $err));
 			}
-		my $lref = &read_file_lines($virt->{'file'});
-		for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-			if ($lref->[$i] =~ /^\s*ProxyPass(Reverse)?\s/) {
-				$lref->[$i] =~ s/$oldd->{'proxy_pass'}/$d->{'proxy_pass'}/g;
-				}
+		else {
+			$rv++;
+			&$second_print($text{'setup_done'});
 			}
-		&flush_file_lines($virt->{'file'});
-		undef(@apache::get_config_cache);
-		($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
-						      $oldd->{'web_port'});
-		$rv++;
-		&$second_print($text{'setup_done'});
 		}
 	if ($d->{'proxy_pass_mode'} != $oldd->{'proxy_pass_mode'}) {
 		# Proxy mode has been enabled or disabled .. remove all
@@ -828,38 +825,14 @@ else {
 			      $oldd->{'proxy_pass_mode'};
 		&$first_print($mode == 2 ? $text{'save_apache8'}
 					 : $text{'save_apache9'});
-		if (!$virt) {
-			&$second_print($text{'delete_noapache'});
-			goto VIRTFAILED;
+		my $err = &update_apache_proxy_pass($d, $oldd);
+		if ($err) {
+			&$second_print(&text('save_eapache8', $err));
 			}
-
-		# Take out old proxy directives and block
-		my $lref = &read_file_lines($virt->{'file'});
-		my @lines = @$lref[$virt->{'line'}+1 .. $virt->{'eline'}-1];
-		@lines = grep { !/^\s*ProxyPass\s+\/\s/ &&
-				!/^\s*ProxyPassReverse\s+\/\s/ &&
-				!/^\s*AliasMatch\s+\^\/\.\*\$\s/ &&
-				!/^\s*SSLProxyEngine\s/ } @lines;
-		for(my $i=0; $i<@lines; $i++) {
-			if ($lines[$i] =~ /^\s*<Proxy \*>/ &&
-			    $lines[$i+2] =~ /^\s*<\/Proxy>/) {
-				# Take out <Proxy *> block
-				splice(@lines, $i, 3);
-				last;
-				}
+		else {
+			$rv++;
+			&$second_print($text{'setup_done'});
 			}
-
-		# Add new directives
-		my @ppdirs = &apache_proxy_directives($d);
-		push(@lines, @ppdirs);
-		splice(@$lref, $virt->{'line'} + 1,
-		       $virt->{'eline'} - $virt->{'line'} - 1, @lines);
-		&flush_file_lines($virt->{'file'});
-		undef(@apache::get_config_cache);
-		($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
-						      $oldd->{'web_port'});
-		$rv++;
-		&$second_print($text{'setup_done'});
 		}
 	if ($d->{'user'} ne $oldd->{'user'}) {
 		# Username has changed .. update SuexecUserGroup
@@ -1591,10 +1564,6 @@ if (!$sudir && $pdom->{'unix'}) {
 	unshift(@dirs, "SuexecUserGroup \"#$pdom->{'uid'}\" ".
 		       "\"#$pdom->{'ugid'}\"");
 	}
-if (!$ppdir && $d->{'proxy_pass'}) {
-	# Add proxy directives
-	push(@dirs, &apache_proxy_directives($d));
-	}
 if ($tmpl->{'web_writelogs'}) {
 	# Fix any CustomLog or ErrorLog directives to write via writelogs.pl
 	foreach my $dir (@dirs) {
@@ -1628,31 +1597,6 @@ if ($d->{'dom_defnames'}) {
 		&indexof($+{r_serv_name}, split(/\s+/, $d->{'dom_defnames'})) < 0
 		} @dirs) < 0 } @dirs;
 	# XXXX Maybe add too? It already works in Nginx
-	}
-return @dirs;
-}
-
-# apache_proxy_directives(&domain)
-# Returns text lines for proxy pass or frame forwarding directives
-sub apache_proxy_directives
-{
-local ($d) = @_;
-&require_apache();
-local @dirs;
-if ($d->{'proxy_pass_mode'} == 1) {
-	# Proxy to another server
-	push(@dirs, "ProxyPass / $d->{'proxy_pass'}",
-		    "ProxyPassReverse / $d->{'proxy_pass'}");
-	if ($d->{'proxy_pass'} =~ /^https:/ &&
-	    $apache::httpd_modules{'core'} >= 2.0) {
-		# SSL proxy mode
-		push(@dirs, "SSLProxyEngine on");
-		}
-	}
-elsif ($d->{'proxy_pass_mode'} == 2) {
-	# Redirect to /framefwd.html
-	local $ff = &framefwd_file($d);
-	push(@dirs, "AliasMatch ^/.*\$ $ff");
 	}
 return @dirs;
 }
@@ -5676,6 +5620,57 @@ my ($user, $d) = @_;
 &revoke_webserver_user_access($user, $d);
 # Delete user from domain config
 &delete_extra_user($d, $user);
+}
+
+# update_apache_proxy_pass(&domain, &old-domain)
+# Enable or disable Apache proxying of the whole site. Returns undef on success
+# or an error message on failure.
+sub update_apache_proxy_pass
+{
+my ($d, $oldd) = @_;
+my @balancers = &list_proxy_balancers($d);
+if ($d->{'proxy_pass_mode'} && (!$oldd || !$oldd->{'proxy_pass_mode'})) {
+	# Proxying enabled
+	if ($d->{'proxy_pass_mode'} == 1) {
+		# Need to add proxy directives
+		my $b = { 'path' => '/',
+			  'urls' => [ $d->{'proxy_pass'} ] };
+		return &create_proxy_balancer($d, $b);
+		}
+	else {
+		# Setup frame forwarding
+		# XXX
+		}
+	}
+elsif (!$d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'}) {
+	# Proxying disabled
+	if ($oldd->{'proxy_pass_mode'} == 1) {
+		# Need to remove proxy directives
+		my ($b) = grep { $_->{'path'} eq '/' } @balancers;
+		return "Missing proxy for /" if (!$b);
+		return &delete_proxy_balancer($d, $b);
+		}
+	else {
+		# Turn off frame forwarding
+		# XXX
+		}
+	}
+elsif ($d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'} &&
+       $d->{'proxy_pass'} ne $oldd->{'proxy_pass'}) {
+	# URL has changed
+	if ($d->{'proxy_pass_mode'} == 1) {
+		my ($b) = grep { $_->{'path'} eq '/' } @balancers;
+                return "Missing proxy for /" if (!$b);
+		my $oldb = { %$b };
+		$b->{'urls'} = [ $d->{'proxy_pass'} ];
+		return &modify_proxy_balancer($d, $b, $oldb);
+		}
+	else {
+		# Update frame forwarding
+		# XXX
+		}
+	}
+return undef;
 }
 
 $done_feature_script{'web'} = 1;

@@ -76,6 +76,11 @@ Use the C<--letsencrypt> flag to request an auto-renewable Let's Encrypt
 certificate. To do the same but skip connectivity checks, use 
 C<--letsencrypt-always> flag instead.
 
+The C<--proxy> parameter can be used to have the website proxy all requests
+to another URL, which must follow C<--proxy>. Alternately, the C<--framefwd>
+parameter similarly can be used to forward requests to the virtual server to
+another URL, using a hidden frame rather than proxying.
+
 =cut
 
 package virtual_server;
@@ -427,6 +432,14 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--subprefix") {
 		$subprefix = shift(@ARGV);
+		}
+	elsif ($a eq "--proxy") {
+		$proxy_pass_mode = 1;
+		$proxy_pass = shift(@ARGV);
+		}
+	elsif ($a eq "--framefwd") {
+		$proxy_pass_mode = 2;
+		$proxy_pass = shift(@ARGV);
 		}
 	elsif ($a =~ /^\-\-(.*)$/ && $plugin_args{$1}) {
 		# Plugin-specific arg
@@ -882,6 +895,8 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'dns_cloud', $clouddns,
 	 'dns_cloud_import', $clouddns_import,
 	 'dns_remote', $remotedns,
+	 'proxy_pass_mode', $proxy_pass_mode,
+	 'proxy_pass', $proxy_pass,
         );
 $dom{'dns_submode'} = $dns_submode if (defined($dns_submode));
 $dom{'dns_subany'} = $dns_subany if (defined($dns_subany));
@@ -1127,6 +1142,7 @@ print "                        [--generate-ssh-key | --use-ssh-key file|data]\n"
 print "                        [--append-style format]\n";
 print "                        [--shell command]\n";
 print "                        [--subprefix directory]\n";
+print "                        [--proxy url | --framefwd url]\n";
 exit(1);
 }
 
