@@ -5629,6 +5629,7 @@ sub update_apache_proxy_pass
 {
 my ($d, $oldd) = @_;
 my @balancers = &list_proxy_balancers($d);
+my @redirects = &list_redirects($d);
 if ($d->{'proxy_pass_mode'} && (!$oldd || !$oldd->{'proxy_pass_mode'})) {
 	# Proxying enabled
 	if ($d->{'proxy_pass_mode'} == 1) {
@@ -5639,7 +5640,15 @@ if ($d->{'proxy_pass_mode'} && (!$oldd || !$oldd->{'proxy_pass_mode'})) {
 		}
 	else {
 		# Setup frame forwarding
-		# XXX
+		&create_framefwd_file($d);
+		my $ff = &framefwd_file($d);
+		my $r = { 'path' => '/',
+			  'regexp' => 1,
+			  'alias' => 1,
+			  'dest' => $ff,
+			  'http' => 1,
+			  'https' => 1 };
+		return &create_redirect($d, $r);
 		}
 	}
 elsif (!$d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'}) {
@@ -5652,7 +5661,9 @@ elsif (!$d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'}) {
 		}
 	else {
 		# Turn off frame forwarding
-		# XXX
+		my ($r) = grep { $_->{'path'} eq '/' } @redirects;
+		return "Missing redirect for /" if (!$r);
+		return &delete_redirect($d, $r);
 		}
 	}
 elsif ($d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'} &&
@@ -5666,8 +5677,9 @@ elsif ($d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'} &&
 		return &modify_proxy_balancer($d, $b, $oldb);
 		}
 	else {
-		# Update frame forwarding
-		# XXX
+		# Update frame forwarding, which is all in the HTML
+		&create_framefwd_file($d);
+		return undef;
 		}
 	}
 return undef;
