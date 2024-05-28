@@ -805,8 +805,7 @@ else {
 	if ($d->{'proxy_pass_mode'} == 1 &&
 	    $oldd->{'proxy_pass_mode'} == 1 &&
 	    $d->{'proxy_pass'} ne $oldd->{'proxy_pass'}) {
-		# This is a proxying forwarding website and the URL has
-		# changed - update all Proxy* directives
+		# This is a proxying forwarding website and the URL has changed
 		&$first_print($text{'save_apache6'});
 		my $err = &update_apache_proxy_pass($d, $oldd);
 		if ($err) {
@@ -818,9 +817,7 @@ else {
 			}
 		}
 	if ($d->{'proxy_pass_mode'} != $oldd->{'proxy_pass_mode'}) {
-		# Proxy mode has been enabled or disabled .. remove all
-		# ProxyPass / , ProxyPassReverse / and AliasMatch ^/$
-		# directives, and create new ones as appropriate.
+		# Proxy mode has been enabled or disabled
 		my $mode = $d->{'proxy_pass_mode'} ||
 			      $oldd->{'proxy_pass_mode'};
 		&$first_print($mode == 2 ? $text{'save_apache8'}
@@ -1552,10 +1549,9 @@ my ($dirs, $d) = @_;
 $dirs =~ s/\t/\n/g;
 $dirs = &substitute_domain_template($dirs, $d);
 local @dirs = split(/\n/, $dirs);
-local ($sudir, $ppdir);
+local $sudir;
 foreach (@dirs) {
 	$sudir++ if (/^\s*SuexecUserGroup\s/i);
-	$ppdir++ if (/^\s*ProxyPass\s/);
 	}
 local $tmpl = &get_template($d->{'template'});
 local $pdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
