@@ -313,51 +313,6 @@ if ($d->{'home'} ne $oldd->{'home'}) {
 					      	     $oldd->{'web_sslport'});
 	&$second_print($text{'setup_done'});
 	}
-if ($d->{'proxy_pass_mode'} == 1 &&
-    $oldd->{'proxy_pass_mode'} == 1 &&
-    $d->{'proxy_pass'} ne $oldd->{'proxy_pass'}) {
-	# This is a proxying forwarding website and the URL has
-	# changed - update all Proxy* directives
-	&$first_print($text{'save_ssl6'});
-	if (!$virt) {
-		&$second_print($text{'delete_noapache'});
-		goto VIRTFAILED;
-		}
-	local $lref = &read_file_lines($virt->{'file'});
-	for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-		if ($lref->[$i] =~ /^\s*ProxyPass(Reverse)?\s/) {
-			$lref->[$i] =~ s/$oldd->{'proxy_pass'}/$d->{'proxy_pass'}/g;
-			}
-		}
-	&flush_file_lines();
-	$rv++;
-	&$second_print($text{'setup_done'});
-	}
-if ($d->{'proxy_pass_mode'} != $oldd->{'proxy_pass_mode'}) {
-	# Proxy mode has been enabled or disabled .. copy all directives from
-	# non-SSL site
-	local $mode = $d->{'proxy_pass_mode'} ||
-		      $oldd->{'proxy_pass_mode'};
-	&$first_print($mode == 2 ? $text{'save_ssl8'}
-				 : $text{'save_ssl9'});
-	if (!$virt) {
-		&$second_print($text{'delete_noapache'});
-		goto VIRTFAILED;
-		}
-	local $lref = &read_file_lines($virt->{'file'});
-	local $nonlref = &read_file_lines($nonvirt->{'file'});
-	local $tmpl = &get_template($d->{'tmpl'});
-	local @dirs = @$nonlref[$nonvirt->{'line'}+1 .. $nonvirt->{'eline'}-1];
-	push(@dirs, &apache_ssl_directives($d, $tmpl));
-	splice(@$lref, $virt->{'line'} + 1,
-	       $virt->{'eline'} - $virt->{'line'} - 1, @dirs);
-	&flush_file_lines($virt->{'file'});
-	$rv++;
-	undef(@apache::get_config_cache);
-	($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
-					      	     $oldd->{'web_sslport'});
-	&$second_print($text{'setup_done'});
-	}
 if ($d->{'user'} ne $oldd->{'user'}) {
 	# Username has changed .. copy suexec directives from parent
 	&$first_print($text{'save_ssl10'});
