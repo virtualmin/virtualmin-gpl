@@ -62,8 +62,7 @@ if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_create_web_balancer", $d, $balancer);
         }
 &require_apache();
-my $conf = &apache::get_config();
-my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return "Failed to find Apache config for $d->{'dom'}" if (!$virt);
 
 # Check for clashes
@@ -93,21 +92,29 @@ foreach my $port (@ports) {
 		}
 	if ($balancer->{'balancer'}) {
 		# To multiple URLs
-		my $lref = &read_file_lines($virt->{'file'});
-		my @pdirs = (map { "BalancerMember $_" } @{$balancer->{'urls'}});
-		if (&supports_check_peer_name() && $ssl) {
-			push(@pdirs, "SSLProxyCheckPeerName off");
-			push(@pdirs, "SSLProxyCheckPeerCN off");
-			push(@pdirs, "SSLProxyCheckPeerExpire off");
+		my @mems;
+		my $pxy = { 'name' => 'Proxy',
+			    'type' => 1,
+			    'value' => "balancer://$balancer->{'balancer'}",
+			    'members' => \@mems };
+		foreach my $u (@{$balancer->{'urls'}}) {
+			push(@mems, { 'name' => 'BalancerMember',
+				      'value' => $u });
 			}
-		splice(@$lref, $virt->{'eline'}, 0,
-		   "<Proxy balancer://$balancer->{'balancer'}>",
-		   @pdirs,
-		   "</Proxy>",
-		   "ProxyPass $balancer->{'path'} balancer://$balancer->{'balancer'}$slash",
-		   "ProxyPassReverse $balancer->{'path'} balancer://$balancer->{'balancer'}$slash",
-		   );
-		undef(@apache::get_config_cache);
+		if (&supports_check_peer_name() && $ssl) {
+			push(@mems, { 'name' => 'SSLProxyCheckPeerName',
+				      'value' => 'off' });
+			push(@mems, { 'name' => 'SSLProxyCheckPeerCN',
+				      'value' => 'off' });
+			push(@mems, { 'name' => 'SSLProxyCheckPeerExpire',
+				      'value' => 'off' });
+			}
+		&apache::save_directive_struct(undef, $pxy, $vconf, $conf);
+		foreach my $dir ("ProxyPass", "ProxyPassReverse") {
+			my @pp = &apache::find_directive($dir, $vconf);
+			push(@pp, "$balancer->{'path'} balancer://$balancer->{'balancer'}$slash");
+			&apache::save_directive($dir, \@pp, $vconf, $conf);
+			}
 		}
 	else {
 		# To just one URL - longest paths must always go first
@@ -170,27 +177,28 @@ foreach my $port (@ports) {
 	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
 
-	# Find the directives
-	my @pp = &apache::find_directive_struct("ProxyPass", $vconf);
-	my ($pp) = grep { $_->{'value'} =~ /^(\/\S*)\s+/ &&
-			     $1 eq $balancer->{'path'} } @pp;
-	my @ppr = &apache::find_directive_struct("ProxyPassReverse", $vconf);
-	my ($ppr) = grep { $_->{'value'} =~ /^(\/\S*)\s+/ &&
-			     $1 eq $balancer->{'path'} } @ppr;
-	my @proxy = &apache::find_directive_struct("Proxy", $vconf);
-	my ($proxy) = grep { $_->{'value'} =~ /balancer:\/\/([^\/ ]+)/ &&
-				$1 eq $balancer->{'balancer'} } @proxy;
+	# Remove regular directives
+	foreach my $dir ("ProxyPass", "ProxyPassReverse") {
+		my @oldpp = &apache::find_directive_struct($dir, $vconf);
+		my @pp = grep { $_->{'value'} !~ /^(\/\S*)\s+/ ||
+			        $1 ne $balancer->{'path'} } @oldpp;
+		$done++ if (@pp != @oldpp);
+		&apache::save_directive($dir, \@pp, $vconf, $conf);
+		}
 
-	# Splice them out
-	my $lref = &read_file_lines($virt->{'file'});
-	foreach my $r (sort { $b->{'line'} <=> $a->{'line'} }
-			    grep { $_ } $pp, $ppr, $proxy) {
-		splice(@$lref, $r->{'line'},
-			       $r->{'eline'} - $r->{'line'} + 1);
-		$done++;
+	if ($balancer->{'balancer'}) {
+		# Remove the Proxy block
+		my @proxy = &apache::find_directive_struct("Proxy", $vconf);
+		my ($proxy) = grep {
+			$_->{'value'} =~ /balancer:\/\/([^\/ ]+)/ &&
+			$1 eq $balancer->{'balancer'} } @proxy;
+		if ($proxy) {
+			&apache::save_directive_struct(
+				$proxy, undef, $vconf, $conf);
+			$done++;
+			}
 		}
 	&flush_file_lines($virt->{'file'});
-	undef(@apache::get_config_cache);
 	}
 
 &register_post_action(\&restart_apache);
