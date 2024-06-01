@@ -13,15 +13,15 @@
 # Returns a list of URL paths and backends for balancer blocks
 sub list_proxy_balancers
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_list_web_balancers", $d);
         }
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return ( ) if (!$virt);
-local @rv;
+my @rv;
 foreach my $pp (&apache::find_directive("ProxyPass", $vconf)) {
 	if ($pp =~ /^(\/\S*)\s+balancer:\/\/([^\/ ]+)/) {
 		# Balancer proxy
@@ -41,7 +41,7 @@ foreach my $pp (&apache::find_directive("ProxyPass", $vconf)) {
 	}
 foreach my $proxy (&apache::find_directive_struct("Proxy", $vconf)) {
 	if ($proxy->{'value'} =~ /^balancer:\/\/([^\/ ]+)/) {
-		local ($rv) = grep { $_->{'balancer'} eq $1 } @rv;
+		my ($rv) = grep { $_->{'balancer'} eq $1 } @rv;
 		if ($rv) {
 			$rv->{'urls'} = [ &apache::find_directive(
 				"BalancerMember", $proxy->{'members'}) ];
@@ -56,45 +56,45 @@ return @rv;
 # message on failure, undef on success.
 sub create_proxy_balancer
 {
-local ($d, $balancer) = @_;
-local $p = &domain_has_website($d);
+my ($d, $balancer) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_create_web_balancer", $d, $balancer);
         }
 &require_apache();
-local $conf = &apache::get_config();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my $conf = &apache::get_config();
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return "Failed to find Apache config for $d->{'dom'}" if (!$virt);
 
 # Check for clashes
-local @pp = &apache::find_directive("ProxyPass", $vconf);
-local ($clash) = grep { $_ =~ /^(\/\S*)\s+/ && $1 eq $balancer->{'path'} } @pp;
+my @pp = &apache::find_directive("ProxyPass", $vconf);
+my ($clash) = grep { $_ =~ /^(\/\S*)\s+/ && $1 eq $balancer->{'path'} } @pp;
 return "A ProxyPass for $balancer->{'path'} already exists" if ($clash);
 if ($balancer->{'balancer'}) {
-	local @proxy = &apache::find_directive("Proxy", $vconf);
-	local ($clash) = grep { $_ =~ /balancer:\/\/([^\/ ]+)/ &&
+	my @proxy = &apache::find_directive("Proxy", $vconf);
+	my ($clash) = grep { $_ =~ /balancer:\/\/([^\/ ]+)/ &&
 				$1 eq $balancer->{'balancer'} } @proxy;
 	return "A Proxy block for $balancer->{'balancer'} already exists"
 		if ($clash);
 	}
 
 # Add the directives
-local @ports = ( $d->{'web_port'},
+my @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 foreach my $port (@ports) {
 	if ($port != $d->{'web_port'}) {
 		($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
 		}
 	next if (!$virt);
-	local $slash = $balancer->{'path'} eq '/' ? '/' : undef;
-	local $ssl = 0;
+	my $slash = $balancer->{'path'} eq '/' ? '/' : undef;
+	my $ssl = 0;
 	foreach my $u (@{$balancer->{'urls'}}) {
 		$ssl++ if ($u =~ /^https:/i);
 		}
 	if ($balancer->{'balancer'}) {
 		# To multiple URLs
-		local $lref = &read_file_lines($virt->{'file'});
-		local @pdirs = (map { "BalancerMember $_" } @{$balancer->{'urls'}});
+		my $lref = &read_file_lines($virt->{'file'});
+		my @pdirs = (map { "BalancerMember $_" } @{$balancer->{'urls'}});
 		if (&supports_check_peer_name() && $ssl) {
 			push(@pdirs, "SSLProxyCheckPeerName off");
 			push(@pdirs, "SSLProxyCheckPeerCN off");
@@ -111,7 +111,7 @@ foreach my $port (@ports) {
 		}
 	else {
 		# To just one URL - longest paths must always go first
-		local $url = $balancer->{'none'} ? "!" :
+		my $url = $balancer->{'none'} ? "!" :
 				$balancer->{'urls'}->[0];
 		if ($path eq "/" && $url ne "!" &&
 		    $url =~ /^(http|https):\/\/[a-z0-9\_\-:]+$/i) {
@@ -120,7 +120,7 @@ foreach my $port (@ports) {
 			$url .= "/";
 			}
 		foreach my $dir ("ProxyPass", "ProxyPassReverse") {
-			local @pp = &apache::find_directive($dir, $vconf);
+			my @pp = &apache::find_directive($dir, $vconf);
 			@pp = &sort_proxy_paths(@pp,
 				"$balancer->{'path'} $url");
 			&apache::save_directive($dir, \@pp, $vconf, $conf);
@@ -130,14 +130,14 @@ foreach my $port (@ports) {
 	}
 
 # If proxying to SSL, turn on SSLProxyEngine
-local $ssl = 0;
+my $ssl = 0;
 foreach my $url (@{$balancer->{'urls'}}) {
 	$ssl = 1 if ($url =~ /^https:/i);
 	}
 if ($ssl) {
 	foreach my $port (@ports) {
-		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
-		local @spe = &apache::find_directive("SSLProxyEngine", $vconf);
+		my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+		my @spe = &apache::find_directive("SSLProxyEngine", $vconf);
 		if (!@spe && lc($spe[0]) ne "on") {
 			&apache::save_directive("SSLProxyEngine", [ "on" ],
 						$vconf, $conf);
@@ -154,35 +154,35 @@ return undef;
 # Removes the ProxyPass directive and Proxy block for a balancer
 sub delete_proxy_balancer
 {
-local ($d, $balancer) = @_;
-local $p = &domain_has_website($d);
+my ($d, $balancer) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_delete_web_balancer", $d, $balancer);
         }
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return "Failed to find Apache config for $d->{'dom'}" if (!$virt);
 
-local @ports = ( $d->{'web_port'},
+my @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-local $done = 0;
+my $done = 0;
 foreach my $port (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
 
 	# Find the directives
-	local @pp = &apache::find_directive_struct("ProxyPass", $vconf);
-	local ($pp) = grep { $_->{'value'} =~ /^(\/\S*)\s+/ &&
+	my @pp = &apache::find_directive_struct("ProxyPass", $vconf);
+	my ($pp) = grep { $_->{'value'} =~ /^(\/\S*)\s+/ &&
 			     $1 eq $balancer->{'path'} } @pp;
-	local @ppr = &apache::find_directive_struct("ProxyPassReverse", $vconf);
-	local ($ppr) = grep { $_->{'value'} =~ /^(\/\S*)\s+/ &&
+	my @ppr = &apache::find_directive_struct("ProxyPassReverse", $vconf);
+	my ($ppr) = grep { $_->{'value'} =~ /^(\/\S*)\s+/ &&
 			     $1 eq $balancer->{'path'} } @ppr;
-	local @proxy = &apache::find_directive_struct("Proxy", $vconf);
-	local ($proxy) = grep { $_->{'value'} =~ /balancer:\/\/([^\/ ]+)/ &&
+	my @proxy = &apache::find_directive_struct("Proxy", $vconf);
+	my ($proxy) = grep { $_->{'value'} =~ /balancer:\/\/([^\/ ]+)/ &&
 				$1 eq $balancer->{'balancer'} } @proxy;
 
 	# Splice them out
-	local $lref = &read_file_lines($virt->{'file'});
+	my $lref = &read_file_lines($virt->{'file'});
 	foreach my $r (sort { $b->{'line'} <=> $a->{'line'} }
 			    grep { $_ } $pp, $ppr, $proxy) {
 		splice(@$lref, $r->{'line'},
@@ -201,28 +201,28 @@ return $done ? undef : "No proxy directives for $balancer->{'path'} found";
 # Updates a balancer block - the name of which cannot change
 sub modify_proxy_balancer
 {
-local ($d, $b, $oldb) = @_;
-local $p = &domain_has_website($d);
+my ($d, $b, $oldb) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_modify_web_balancer", $d, $b, $oldb);
         }
 &require_apache();
-local $bn = $b->{'balancer'};
-local $conf = &apache::get_config();
+my $bn = $b->{'balancer'};
+my $conf = &apache::get_config();
 
-local $done = 0;
-local @ports = ( $d->{'web_port'},
+my $done = 0;
+my @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 foreach my $port (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
 
 	# Find and fix the ProxyPass and ProxyPassReverse
-	local $slash = $b->{'path'} eq '/' ? '/' : undef;
+	my $slash = $b->{'path'} eq '/' ? '/' : undef;
 	foreach my $dir ("ProxyPass", "ProxyPassReverse") {
-		local @npp;
+		my @npp;
 		foreach my $pp (&apache::find_directive($dir, $vconf)) {
-			local ($dirpath, $dirurl) = split(/\s+/, $pp);
+			my ($dirpath, $dirurl) = split(/\s+/, $pp);
 			if ($dirpath eq $oldb->{'path'} &&
 			    $dirurl =~ /^(balancer:\/\/\Q$bn\E)/) {
 				# Balancer
@@ -251,7 +251,7 @@ foreach my $port (@ports) {
 
 	# Find and fix the URLs in the <Proxy> block
 	if ($bn) {
-		local ($proxy) = grep
+		my ($proxy) = grep
 			{ $_->{'value'} =~ /^balancer:\/\/\Q$bn\E/ }
 			&apache::find_directive_struct("Proxy", $vconf);
 		if ($proxy) {
@@ -321,7 +321,7 @@ return join(" ", @rv);
 }
 
 # setup_proxy(&domain, path, port, [proxy-path], [protocol])
-# Adds webserver config entries to proxy some path to a local server
+# Adds webserver config entries to proxy some path to a my server
 sub setup_proxy
 {
 my ($d, $path, $rport, $ppath, $proto) = @_;
