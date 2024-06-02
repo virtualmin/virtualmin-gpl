@@ -109,6 +109,11 @@ foreach my $port (@ports) {
 			push(@mems, { 'name' => 'SSLProxyCheckPeerExpire',
 				      'value' => 'off' });
 			}
+		if ($d->{'ssl'} && $port == $d->{'web_ssl_port'}) {
+			push(@mems, { 'name' => 'RequestHeader',
+				      'value' => 'set X-Forwarded-Proto https'
+				    });
+			}
 		&apache::save_directive_struct(undef, $pxy, $vconf, $conf);
 		foreach my $dir ("ProxyPass", "ProxyPassReverse") {
 			my @pp = &apache::find_directive($dir, $vconf);
