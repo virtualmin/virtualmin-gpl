@@ -174,13 +174,13 @@ my @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 my $done = 0;
 foreach my $port (@ports) {
-	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
 
 	# Remove regular directives
 	foreach my $dir ("ProxyPass", "ProxyPassReverse") {
-		my @oldpp = &apache::find_directive_struct($dir, $vconf);
-		my @pp = grep { $_->{'value'} !~ /^(\/\S*)\s+/ ||
+		my @oldpp = &apache::find_directive($dir, $vconf);
+		my @pp = grep { !/^(\/\S*)\s+/ ||
 			        $1 ne $balancer->{'path'} } @oldpp;
 		$done++ if (@pp != @oldpp);
 		&apache::save_directive($dir, \@pp, $vconf, $conf);
@@ -216,13 +216,12 @@ if ($p && $p ne 'web') {
         }
 &require_apache();
 my $bn = $b->{'balancer'};
-my $conf = &apache::get_config();
 
 my $done = 0;
 my @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 foreach my $port (@ports) {
-	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
 
 	# Find and fix the ProxyPass and ProxyPassReverse
