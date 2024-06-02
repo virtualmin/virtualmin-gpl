@@ -2061,13 +2061,69 @@ $proxy_tests = [
 	# Check the proxy list
 	{ 'command' => 'list-proxies.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
-	  'grep' => '/google/',
+	  'grep' => [ '/google/', 'http://www.google.com/' ],
+	},
+
+	# Modify the proxy URL
+	{ 'command' => 'modify-proxy.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/google/' ],
+		      [ 'url', 'http://www.bing.com/' ] ],
+	},
+
+	# Test that it works with the new URL
+	{ 'command' => $wget_command.'http://'.$test_domain.'/google/',
+	  'grep' => '<title>Bing',
+	},
+
+	# Check the proxy list for the new URL
+	{ 'command' => 'list-proxies.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'grep' => [ '/google/', 'http://www.bing.com/' ],
 	},
 
 	# Delete the proxy
 	{ 'command' => 'delete-proxy.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'path', '/google/' ] ],
+	},
+
+	# Check that it's gone from the proxy list
+	{ 'command' => 'list-proxies.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'antigrep' => '/google/',
+	},
+
+	# Create a proxy to multiple URLs
+	{ 'command' => 'create-proxy.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/google/' ],
+		      [ 'url', 'http://www.google.com/' ],
+		      [ 'url', 'http://www.google.com.au/' ] ],
+	},
+
+	# Test that it works
+	{ 'command' => $wget_command.'http://'.$test_domain.'/google/',
+	  'grep' => '<title>Google',
+	},
+
+	# Check the proxy list
+	{ 'command' => 'list-proxies.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'grep' => [ '/google/', 'http://www.google.com/',
+		      'http://www.google.com.au/' ],
+	},
+
+	# Delete the proxy
+	{ 'command' => 'delete-proxy.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/google/' ] ],
+	},
+
+	# Check that it's gone from the proxy list
+	{ 'command' => 'list-proxies.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'antigrep' => '/google/',
 	},
 
 	# Cleanup the domain
