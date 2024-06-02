@@ -88,7 +88,7 @@ if ($has == 1) {
 	$balancer && &usage("No balancer name is needed for virtual servers ".
 			    "that only support a single URL");
 	}
-elsif (!$balancer) {
+elsif (!$balancer && @urls > 1) {
 	$path =~ /^\/(\S*)$/;
 	$balancer = $1 || "root";
 	}
