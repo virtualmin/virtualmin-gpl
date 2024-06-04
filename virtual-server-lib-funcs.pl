@@ -12589,7 +12589,7 @@ foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "ldap_base", "ldap_login", "ldap_pass", "ldap_port", "ldap",
 	       "clamscan_cmd", "iface", "netmask6", "localgroup", "home_quotas",
 	       "mail_quotas", "group_quotas", "quotas", "shell", "ftp_shell",
-	       "dns_ip", "default_procmail",
+	       "dns_ip", "default_procmail", "defaultdomain_name",
 	       "compression", "pbzip2", "domains_group",
 	       "quota_commands", "home_base",
 	       "quota_set_user_command", "quota_set_group_command",
@@ -20375,6 +20375,18 @@ $config{'default_domain_ssl'} = 1
 if (&can_default_website(\%dom)) {
 	&set_default_website(\%dom);
 	}
+# Enable as default domain for all services
+&push_all_print();
+&set_all_null_print();
+foreach my $st (&list_service_ssl_cert_types()) {
+	my ($a) = grep { !$_->{'d'} && $_->{'id'} eq $st->{'id'} }
+			&get_all_domain_service_ssl_certs(\%dom);
+	if (!$a) {
+		my $cfunc = "copy_".$st->{'id'}."_ssl_service";
+		&$cfunc(\%dom);
+		}
+	}
+&pop_all_print();
 &run_post_actions_silently();
 &unlock_domain(\%dom);
 &unlock_domain_name($system_host_name);

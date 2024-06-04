@@ -352,7 +352,7 @@ return join(" ", @rv);
 }
 
 # setup_proxy(&domain, path, port, [proxy-path], [protocol])
-# Adds webserver config entries to proxy some path to a my server
+# Adds webserver config entries to proxy some path to a local server
 sub setup_proxy
 {
 my ($d, $path, $rport, $ppath, $proto) = @_;
