@@ -370,7 +370,7 @@ while(scalar(@rv) < $ports) {
 return join(" ", @rv);
 }
 
-# setup_proxy(&domain, path, port, [proxy-path], [protocol])
+# setup_proxy(&domain, path, [port], [proxy-path], [protocol])
 # Adds webserver config entries to proxy some path to a local server
 sub setup_proxy
 {
