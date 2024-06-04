@@ -104,11 +104,9 @@ foreach my $port (@ports) {
 			    'type' => 1,
 			    'value' => "balancer://$balancer->{'balancer'}",
 			    'members' => \@mems };
-		my $balancer_ssl;
 		foreach my $u (@{$balancer->{'urls'}}) {
 			push(@mems, { 'name' => 'BalancerMember',
 				      'value' => $u });
-			$balancer_ssl = 1 if ($u =~ /^https:/i);
 			}
 		if (&supports_check_peer_name() && $ssl) {
 			push(@mems, { 'name' => 'SSLProxyCheckPeerName',
@@ -118,10 +116,10 @@ foreach my $port (@ports) {
 			push(@mems, { 'name' => 'SSLProxyCheckPeerExpire',
 				      'value' => 'off' });
 			}
-		if ($balancer_ssl && $d->{'ssl'} && $port == $d->{'web_sslport'} &&
+		if ($d->{'ssl'} && $port == $d->{'web_sslport'} &&
 		    &indexof('mod_headers', &apache::available_modules()) > 0) {
-			push(@mems, { 'name' => 'RequestHeader',
-				      'value' => 'set X-Forwarded-Proto https' });
+			push(@mems, { 'name' =>  'RequestHeader',
+				      'value' => 'set X-Forwarded-Proto "https" env=HTTPS' });
 			}
 		&apache::save_directive_struct(undef, $pxy, $vconf, $conf);
 		foreach my $dir ("ProxyPass", "ProxyPassReverse") {
