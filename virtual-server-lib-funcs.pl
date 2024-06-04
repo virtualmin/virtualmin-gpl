@@ -20379,8 +20379,8 @@ if (&can_default_website(\%dom)) {
 &push_all_print();
 &set_all_null_print();
 foreach my $st (&list_service_ssl_cert_types()) {
-	($a) = grep { !$_->{'d'} && $_->{'id'} eq $st->{'id'} }
-		&get_all_domain_service_ssl_certs(\%dom);
+	my ($a) = grep { !$_->{'d'} && $_->{'id'} eq $st->{'id'} }
+			&get_all_domain_service_ssl_certs(\%dom);
 	if (!$a) {
 		my $cfunc = "copy_".$st->{'id'}."_ssl_service";
 		&$cfunc(\%dom);
