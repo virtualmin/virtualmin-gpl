@@ -151,8 +151,7 @@ foreach my $port (@ports) {
 		my $wsurl = $balancer->{'urls'}->[0];
 		$wsurl =~ s/^(http|https):\/\///;
 		my @rwc = &apache::find_directive("RewriteCond", $vconf);
-		push(@rwc, "%{HTTP:UPGRADE} ^WebSocket\$ [NC]");
-		push(@rwc, "%{HTTP:CONNECTION} ^Upgrade\$ [NC]");
+		push(@rwc, &websockets_rewriteconds());
 		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf, 1);
 		my @rwr = &apache::find_directive("RewriteRule", $vconf);
 		push(@rwr, "$balancer->{'path'} ws://$wsurl%{REQUEST_URI} [P]");
@@ -180,6 +179,12 @@ if ($ssl) {
 
 &register_post_action(\&restart_apache);
 return undef;
+}
+
+sub websockets_rewriteconds
+{
+return ("%{HTTP:UPGRADE} ^WebSocket\$ [NC]",
+	"%{HTTP:CONNECTION} ^Upgrade\$ [NC]");
 }
 
 # delete_proxy_balancer(&domain, &balancer)
@@ -223,6 +228,19 @@ foreach my $port (@ports) {
 			$done++;
 			}
 		}
+
+	# Remove any rewrite directives for websockets
+	my @rwc = &apache::find_directive("RewriteCond", $vconf);
+	my @rwr = &apache::find_directive("RewriteRule", $vconf);
+	my ($rwr) = grep { /^\Q$balancer->{'path'}\E\s+ws:/ } @rwr;
+	if ($rwr) {
+		# There is one, delete it
+		@rwr = grep { $_ ne $rwr } @rwr;
+		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf);
+		@rwc = grep { &indexof($_, &websockets_rewriteconds()) < 0 } @rwc;
+		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf);
+		}
+
 	&flush_file_lines($virt->{'file'});
 	}
 
