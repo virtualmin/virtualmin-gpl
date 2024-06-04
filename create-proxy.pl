@@ -62,6 +62,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-proxy") {
 		$none = 1;
 		}
+	elsif ($a eq "--websockets") {
+		$websockets = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -107,6 +110,7 @@ if ($balancer) {
 $b = { 'path' => $path,
        'balancer' => $balancer,
        'none' => $none,
+       'websockets' => $websockets,
        'urls' => \@urls };
 $err = &create_proxy_balancer($d, $b);
 &release_lock_web($d);
@@ -136,6 +140,7 @@ else {
 	print "                        --url destination\n";
 	}
 print "                        --no-proxy\n";
+print "                       [--websockets]\n";
 exit(1);
 }
 

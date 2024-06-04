@@ -21,22 +21,29 @@ if ($p && $p ne 'web') {
 &require_apache();
 my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return ( ) if (!$virt);
+my @rwr = &apache::find_directive("RewriteRule", $vconf);
 my @rv;
 foreach my $pp (&apache::find_directive("ProxyPass", $vconf)) {
+	my $b;
 	if ($pp =~ /^(\/\S*)\s+balancer:\/\/([^\/ ]+)/) {
 		# Balancer proxy
-		push(@rv, { 'path' => $1,
-			    'balancer' => $2 });
+		$b = { 'path' => $1,
+		       'balancer' => $2 };
 		}
 	elsif ($pp =~ /^(\/\S*)\s+((http|http):\/\/\S+)/) {
 		# Single-host proxy
-		push(@rv, { 'path' => $1,
-			    'urls' => [ $2 ] });
+		$b = { 'path' => $1,
+		       'urls' => [ $2 ] };
 		}
 	elsif ($pp =~ /^(\/\S*)\s+\!/) {
 		# Proxying disabled for path
-		push(@rv, { 'path' => $1,
-			    'none' => 1 });
+		$b = { 'path' => $1,
+		       'none' => 1 };
+		}
+	if ($b) {
+		my ($rwr) = grep { /^\Q$b->{'path'}\E\s+ws:\/\// } @rwr;
+		$b->{'websockets'} = 1 if ($rwr);
+		push(@rv, $b);
 		}
 	}
 foreach my $proxy (&apache::find_directive_struct("Proxy", $vconf)) {
@@ -137,6 +144,18 @@ foreach my $port (@ports) {
 				"$balancer->{'path'} $url");
 			&apache::save_directive($dir, \@pp, $vconf, $conf);
 			}
+		}
+	if ($balancer->{'websockets'} && !$balancer->{'none'}) {
+		# Add RewriteCond and RewriteRule for the path
+		my $wsurl = $balancer->{'urls'}->[0];
+		$wsurl =~ s/^(http|https):\/\///;
+		my @rwc = &apache::find_directive("RewriteCond", $vconf);
+		push(@rwc, "%{HTTP:UPGRADE} ^WebSocket\$ [NC]");
+		push(@rwc, "%{HTTP:CONNECTION} ^Upgrade\$ [NC]");
+		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf, 1);
+		my @rwr = &apache::find_directive("RewriteRule", $vconf);
+		push(@rwr, "$balancer->{'path'} ws://$wsurl%{REQUEST_URI} [P]");
+		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf, 1);
 		}
 	&flush_file_lines($virt->{'file'});
 	}
