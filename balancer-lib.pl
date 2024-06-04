@@ -116,7 +116,8 @@ foreach my $port (@ports) {
 			push(@mems, { 'name' => 'SSLProxyCheckPeerExpire',
 				      'value' => 'off' });
 			}
-		if ($d->{'ssl'} && $port == $d->{'web_ssl_port'}) {
+		if ($d->{'ssl'} && $port == $d->{'web_sslport'} &&
+		    $apache::httpd_modules{'mod_headers'}) {
 			push(@mems, { 'name' => 'RequestHeader',
 				      'value' => 'set X-Forwarded-Proto https'
 				    });
