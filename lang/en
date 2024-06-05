@@ -6110,6 +6110,7 @@ balancer_scriptver=Web app version
 balancer_none=Don't proxy for this path and serve locally instead
 balancer_scriptused=This proxy path is being used by the installed web app $1 version $2. Modifying or deleting it may cause the web app to stop working!
 balancer_pluginused=This proxy path is being used by $1. Modifying or deleting it may cause this feature to stop working!
+balancer_websockets=Also proxy websockets?
 
 scriptwarn_header=The following web apps managed by Virtualmin have new versions available :
 scriptwarn_header2=The following web apps managed by Virtualmin have new versions available, in the\nvirtual server $1 :

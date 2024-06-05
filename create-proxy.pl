@@ -85,6 +85,8 @@ $has || &usage("Proxies cannot be configured for this virtual server");
 $has == 2 || $none || @urls == 1 || &usage("Multiple URL proxy balancers cannot be configured for this virtual server");
 !$none || &has_proxy_none($d) ||
 	&usage("Paths that do not proxy cannot be configured on this system");
+$none && $websockets &&
+	&usage("The --none and --websockets flags are incompatible");
 
 # Work out balancer name, if needed
 if ($has == 1) {

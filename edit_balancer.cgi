@@ -63,6 +63,12 @@ if (($in{'new'} || !$b->{'balancer'}) &&
 		 $b->{'none'}, "onClick='form.urls.disabled = this.checked'"));
 	}
 
+# Also proxy websockets?
+if ($in{'new'} || !$b->{'none'}) {
+	print &ui_table_row($text{'balancer_websockets'},
+		&ui_yesno_radio("websockets", $b->{'websockets'}));
+	}
+
 # Used by script
 if (!$in{'new'}) {
 	($sinfo) = grep { $_->{'opts'}->{'path'} eq $b->{'path'} }

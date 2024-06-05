@@ -62,6 +62,7 @@ else {
 		$b->{'urls'} = [ $in{'urls'} ];
 		$b->{'none'} = 0;
 		}
+	$b->{'websockets'} = $in{'websockets'};
 
 	# Create or update
 	if ($in{'new'}) {
