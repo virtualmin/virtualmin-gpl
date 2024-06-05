@@ -5631,6 +5631,7 @@ if ($d->{'proxy_pass_mode'} && (!$oldd || !$oldd->{'proxy_pass_mode'})) {
 	if ($d->{'proxy_pass_mode'} == 1) {
 		# Need to add proxy directives
 		my $b = { 'path' => '/',
+			  'websockets' => 1,
 			  'urls' => [ $d->{'proxy_pass'} ] };
 		return &create_proxy_balancer($d, $b);
 		}

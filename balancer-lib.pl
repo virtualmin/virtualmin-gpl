@@ -150,11 +150,12 @@ foreach my $port (@ports) {
 		# Add RewriteCond and RewriteRule for the path
 		my $wsurl = $balancer->{'urls'}->[0];
 		$wsurl =~ s/^(http|https):\/\///;
+		$wsurl = "ws://$wsurl%{REQUEST_URI}";
 		my @rwc = &apache::find_directive("RewriteCond", $vconf);
 		push(@rwc, &websockets_rewriteconds());
 		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf, 1);
 		my @rwr = &apache::find_directive("RewriteRule", $vconf);
-		push(@rwr, "$balancer->{'path'} ws://$wsurl%{REQUEST_URI} [P]");
+		push(@rwr, "$balancer->{'path'} $wsurl [P]");
 		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf, 1);
 		}
 	&flush_file_lines($virt->{'file'});
@@ -310,6 +311,38 @@ foreach my $port (@ports) {
 			$done++;
 			}
 		}
+
+	# Fix any RewriteRule for websockets
+	my @rwc = &apache::find_directive("RewriteCond", $vconf);
+	my @rwr = &apache::find_directive("RewriteRule", $vconf);
+	my ($rwr) = grep { /^\Q$oldb->{'path'}\E\s+ws:/ } @rwr;
+	my $wsurl;
+	if (!$b->{'none'} && $b->{'websockets'}) {
+		$wsurl = $b->{'urls'}->[0];
+		$wsurl =~ s/^(http|https):\/\///;
+		$wsurl = "ws://$wsurl%{REQUEST_URI}";
+		}
+	if (($b->{'none'} || !$b->{'websockets'}) && $rwr) {
+		# Need to remove entirely
+		@rwr = grep { $_ ne $rwr } @rwr;
+                &apache::save_directive("RewriteRule", \@rwr, $vconf, $conf);
+		@rwc = grep { &indexof($_, &websockets_rewriteconds()) < 0 } @rwc;
+		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf);
+		}
+	elsif (!$b->{'none'} && $b->{'websockets'} && $rwr) {
+		# Need to update path
+		my $idx = &indexof($rwr, @rwr);
+		$rwr[$idx] = "$b->{'path'} $wsurl [P]";
+		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf);
+		}
+	elsif (!$b->{'none'} && $b->{'websockets'} && !$rwr) {
+		# Need to add
+		push(@rwc, &websockets_rewriteconds());
+		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf, 1);
+		push(@rwr, "$b->{'path'} $wsurl [P]");
+		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf, 1);
+		}
+
 	&flush_file_lines($virt->{'file'});
 	}
 
