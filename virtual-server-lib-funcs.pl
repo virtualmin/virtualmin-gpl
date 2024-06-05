@@ -16742,7 +16742,7 @@ if (-d $profiled && !-r $profiledphpalias) {
 	&$second_print($text{'setup_done'});
 	}
 
-# Check host default domain
+# Check LE SSL for hostname
 &check_virtualmin_default_hostname_ssl();
 
 # Restart lookup-domain daemon, if need
@@ -19748,7 +19748,7 @@ sub forbidden_domain_features
 my ($d, $new) = @_;
 my @rv;
 return @rv if ($config{'nocheck_forbidden_domain_features'});
-# Not allowed features for host default domain
+# Not allowed features for a domain matching hostname
 if ($d->{'dom'} eq &get_system_hostname()) {
 	my @forbidden = ('mail', 'spam', 'virus');
 	foreach $ff (@forbidden) {
@@ -20398,11 +20398,11 @@ return &$err($succ_msg, $succ, $rs);
 # Delete default hostname domain
 sub delete_virtualmin_default_hostname_ssl
 {
-# Test host default domain being deleted
+# Test if hostname domain being deleted
 my $d = &get_domain_by("defaulthostdomain", 1);
 return if (!$d->{'dom'});
 return if (!&can_delete_domain($d));
-# Delete host default domain
+# Delete hostname domain
 # &lock_domain_name($d->{'dom'});   #### XXXX do we need locking on delete?
 &push_all_print();
 &set_all_null_print();

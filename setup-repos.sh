@@ -1435,7 +1435,7 @@ kill "$config_system_pid" 1>/dev/null 2>&1
 # Make sure the cursor is back (if spinners misbehaved)
 tput cnorm 1>/dev/null 2>&1
 
-# Was host default domain SSL request successful?
+# Was LE SSL for hostname request successful?
 if [ -d "$VIRTUALMIN_INSTALL_TEMPDIR/virtualmin_ssl_host_success" ]; then
   ssl_host_success=1
 fi

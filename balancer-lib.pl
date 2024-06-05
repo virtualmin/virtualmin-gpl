@@ -117,10 +117,9 @@ foreach my $port (@ports) {
 				      'value' => 'off' });
 			}
 		if ($d->{'ssl'} && $port == $d->{'web_sslport'} &&
-		    $apache::httpd_modules{'mod_headers'}) {
-			push(@mems, { 'name' => 'RequestHeader',
-				      'value' => 'set X-Forwarded-Proto https'
-				    });
+		    &indexof('mod_headers', &apache::available_modules()) > 0) {
+			push(@mems, { 'name' =>  'RequestHeader',
+				      'value' => 'set X-Forwarded-Proto "https" env=HTTPS' });
 			}
 		&apache::save_directive_struct(undef, $pxy, $vconf, $conf);
 		foreach my $dir ("ProxyPass", "ProxyPassReverse") {
@@ -403,7 +402,7 @@ while(scalar(@rv) < $ports) {
 return join(" ", @rv);
 }
 
-# setup_proxy(&domain, path, port, [proxy-path], [protocol])
+# setup_proxy(&domain, path, [port], [proxy-path], [protocol])
 # Adds webserver config entries to proxy some path to a local server
 sub setup_proxy
 {
