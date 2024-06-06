@@ -270,7 +270,7 @@ foreach my $port (@ports) {
 	next if (!$virt);
 
 	# Find and fix the ProxyPass and ProxyPassReverse
-	my $slash = $b->{'path'} eq '/' ? '/' : undef;
+	my $slash = $b->{'path'} eq '/' || $b->{'path'} =~ /\/$/ ? '/' : undef;
 	foreach my $dir ("ProxyPass", "ProxyPassReverse") {
 		my @npp;
 		foreach my $pp (&apache::find_directive($dir, $vconf)) {
