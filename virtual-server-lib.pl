@@ -403,15 +403,6 @@ my ($newconf, $oldconf) = @_;
 if ($newconf->{'hide_pro_tips'} ne $oldconf->{'hide_pro_tips'}) {
 	&clear_links_cache();
 	}
-if (!defined($newconf->{'default_domain_ssl'}) &&
-    $oldconf->{'default_domain_ssl'} == 2) {
-	# Preserve deleted option to avoid desruption
-	&lock_file($module_config_file);
-	my %config = &foreign_config($module_name);
-	$config{'default_domain_ssl'} = 2;
-	&save_module_config(\%config);
-	&unlock_file($module_config_file);
-	}
 }
 
 # config_pre_load(mod-info-ref, [mod-order-ref])
