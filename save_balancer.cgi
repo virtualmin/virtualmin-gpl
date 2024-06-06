@@ -63,6 +63,8 @@ else {
 		$b->{'none'} = 0;
 		}
 	$b->{'websockets'} = $in{'websockets'};
+	&error($text{'balancer_ewsbalancer'})
+		if ($b->{'balancer'} && $b->{'websockets'});
 
 	# Create or update
 	if ($in{'new'}) {
