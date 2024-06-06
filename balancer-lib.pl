@@ -41,7 +41,7 @@ foreach my $pp (&apache::find_directive("ProxyPass", $vconf)) {
 		       'none' => 1 };
 		}
 	if ($b) {
-		my ($rwr) = grep { /^\Q$b->{'path'}\E\s+ws:\/\// } @rwr;
+		my ($rwr) = grep { /^\Q^$b->{'path'}?(.*)\E\s+"ws?s:\/\// } @rwr;
 		$b->{'websockets'} = 1 if ($rwr);
 		push(@rv, $b);
 		}
@@ -156,7 +156,7 @@ foreach my $port (@ports) {
 		push(@rwc, &websockets_rewriteconds());
 		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf, 1);
 		my @rwr = &apache::find_directive("RewriteRule", $vconf);
-		push(@rwr, "$balancer->{'path'} $wsurl [P]");
+		push(@rwr, "^$balancer->{'path'}?(.*) \"$wsurl\" [P]");
 		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf, 1);
 		}
 	&flush_file_lines($virt->{'file'});
@@ -234,7 +234,7 @@ foreach my $port (@ports) {
 	# Remove any rewrite directives for websockets
 	my @rwc = &apache::find_directive("RewriteCond", $vconf);
 	my @rwr = &apache::find_directive("RewriteRule", $vconf);
-	my ($rwr) = grep { /^\Q$balancer->{'path'}\E\s+ws:/ } @rwr;
+	my ($rwr) = grep { /^\Q^$balancer->{'path'}?(.*)\E\s+"ws?s:/ } @rwr;
 	if ($rwr) {
 		# There is one, delete it
 		@rwr = grep { $_ ne $rwr } @rwr;
@@ -316,7 +316,7 @@ foreach my $port (@ports) {
 	# Fix any RewriteRule for websockets
 	my @rwc = &apache::find_directive("RewriteCond", $vconf);
 	my @rwr = &apache::find_directive("RewriteRule", $vconf);
-	my ($rwr) = grep { /^\Q$oldb->{'path'}\E\s+ws:/ } @rwr;
+	my ($rwr) = grep { /^\Q^$oldb->{'path'}?(.*)\E\s+"ws?s:/ } @rwr;
 	my $wsurl;
 	my $wsprot;
 	if (!$b->{'none'} && $b->{'websockets'}) {
@@ -336,14 +336,14 @@ foreach my $port (@ports) {
 	elsif (!$b->{'none'} && $b->{'websockets'} && $rwr) {
 		# Need to update path
 		my $idx = &indexof($rwr, @rwr);
-		$rwr[$idx] = "$b->{'path'} $wsurl [P]";
+		$rwr[$idx] = "^$b->{'path'}?(.*) \"$wsurl\" [P]";
 		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf);
 		}
 	elsif (!$b->{'none'} && $b->{'websockets'} && !$rwr) {
 		# Need to add
 		push(@rwc, &websockets_rewriteconds());
 		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf, 1);
-		push(@rwr, "$b->{'path'} $wsurl [P]");
+		push(@rwr, "^$b->{'path'}?(.*) \"$wsurl\" [P]");
 		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf, 1);
 		}
 
