@@ -148,9 +148,10 @@ foreach my $port (@ports) {
 	if ($balancer->{'websockets'} && !$balancer->{'none'}) {
 		# Add RewriteCond and RewriteRule for the path
 		my $wsurl = $balancer->{'urls'}->[0];
+		my $wsprot = $wsurl =~ /^https:/i ? "wss" : "ws";
 		$wsurl =~ s/^(http|https):\/\///;
 		$wsurl =~ s/\/$//;
-		$wsurl = "ws://$wsurl%{REQUEST_URI}";
+		$wsurl = "$wsprot://$wsurl/\$1";
 		my @rwc = &apache::find_directive("RewriteCond", $vconf);
 		push(@rwc, &websockets_rewriteconds());
 		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf, 1);
@@ -317,11 +318,13 @@ foreach my $port (@ports) {
 	my @rwr = &apache::find_directive("RewriteRule", $vconf);
 	my ($rwr) = grep { /^\Q$oldb->{'path'}\E\s+ws:/ } @rwr;
 	my $wsurl;
+	my $wsprot;
 	if (!$b->{'none'} && $b->{'websockets'}) {
 		$wsurl = $b->{'urls'}->[0];
+		$wsprot = $wsurl =~ /^https:/i ? "wss" : "ws";
 		$wsurl =~ s/^(http|https):\/\///;
 		$wsurl =~ s/\/$//;
-		$wsurl = "ws://$wsurl%{REQUEST_URI}";
+		$wsurl = "$wsprot://$wsurl/\$1";
 		}
 	if (($b->{'none'} || !$b->{'websockets'}) && $rwr) {
 		# Need to remove entirely
