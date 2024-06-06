@@ -58,6 +58,7 @@ return ($err, $warn);
 # Load Perl modules needed by S3 (which are included in Virtualmin)
 sub require_s3
 {
+return if (&has_aws_cmd());
 foreach my $m (@s3_perl_modules) {
 	eval "use $m";
 	die "$@" if ($@);
