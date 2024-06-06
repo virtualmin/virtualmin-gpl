@@ -35,12 +35,6 @@ else {
 			    "<tt>$d->{'dom'}</tt>");
 	}
 
-# Default domain
-if ($d->{'defaultdomain'}) {
-	print &ui_table_row($text{'check_defhost_desc'},
-			    $text{'yes'});
-	}
-
 # Creator
 print &ui_table_row($text{'edit_created'},
 	$d->{'creator'} ? &text('edit_createdby', &make_date($d->{'created'},1),
