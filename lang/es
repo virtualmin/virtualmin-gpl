@@ -4000,7 +4000,6 @@ balancers_none2=No proxying
 balancer_create=Crear ruta de Proxy
 balancer_edit=Editar ruta de Proxy
 balancer_egone=La ruta del proxy seleccionada no existe mas
-balancer_header=Detallos del HTTP Proxy
 balancer_path=Ruta URL local
 balancer_urls=URLs de destino
 balancer_err=Falla al guardar la ruta del proxy

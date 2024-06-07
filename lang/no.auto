@@ -1403,6 +1403,7 @@ balancers_urls=Mål
 balancers_used2=Brukt av
 balancers_script=Webapp $1 versjon $2
 
+balancer_header=Fullmaktsdetaljer
 balancer_url=Mål
 balancer_ewsbalancer=Proxying WebSockets støttes ikke for flere destinasjonsadresser
 balancer_ewsnonhttp=Proxying WebSockets støttes bare for HTTP- og HTTPS-destinasjonsadresser

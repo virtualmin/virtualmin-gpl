@@ -3498,7 +3498,6 @@ balancers_none2=Kein Proxy
 balancer_create=Erstelle Proxy Pfad
 balancer_edit=Editiere Proxy Pfad
 balancer_egone=Der gewählte Proxy Pfad existiert nicht länger
-balancer_header=HTTP Proxy Details
 balancer_path=Lokaler URL Pfad
 balancer_urls=Ziel URLs
 balancer_err=Fehlgeschlagen Proxy Pfad zu speichern

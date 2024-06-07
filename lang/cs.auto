@@ -4906,6 +4906,7 @@ balancers_urls=Destinace
 balancers_used2=Použito uživatelem
 balancers_script=Webová aplikace $1 verze $2
 
+balancer_header=Podrobnosti o proxy
 balancer_url=Destinace
 balancer_ewsbalancer=Proxy WebSockets není podporováno pro více cílových adres URL
 balancer_ewsnonhttp=Proxy WebSockets je podporováno pouze pro cílové adresy URL HTTP a HTTPS

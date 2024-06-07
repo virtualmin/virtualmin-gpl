@@ -2187,6 +2187,7 @@ balancers_urls=Destino
 balancers_used2=Usado por
 balancers_script=Aplicación web $1 versión $2
 
+balancer_header=Detalles del proxy
 balancer_url=Destino
 balancer_ewsbalancer=No se admite el proxy WebSockets para múltiples URL de destino
 balancer_ewsnonhttp=El proxy WebSockets solo se admite para URL de destino HTTP y HTTPS

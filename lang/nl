@@ -4510,7 +4510,6 @@ balancers_none2=Geen proxying
 balancer_create=Proxy Pad Aanmaken
 balancer_edit=Bewerk Proxy Pad
 balancer_egone=Het geselecteerde proxy pad bestaat niet langer
-balancer_header=HTTP proxy details
 balancer_path=Locale URL pad
 balancer_urls=Bestemming URL's
 balancer_err=Mislukt om proxy pad op te slaan

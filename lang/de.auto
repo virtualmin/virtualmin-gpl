@@ -2704,6 +2704,7 @@ balancers_urls=Ziel
 balancers_used2=Benutzt von
 balancers_script=Webanwendung $1 Version $2
 
+balancer_header=Proxy-Details
 balancer_url=Ziel
 balancer_ebalancer=Fehlender oder ungültiger Balancername - nur Buchstaben und Zahlen sind zulässig
 balancer_ewsbalancer=Das Proxying von WebSockets wird für mehrere Ziel-URLs nicht unterstützt

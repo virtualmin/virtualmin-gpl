@@ -1278,7 +1278,6 @@ balancers_none2=Proxy neni povoleno
 balancer_create=Vytvor cestu k Proxy
 balancer_edit=Upravit cestu k Proxy
 balancer_egone=Zvolena cesta k Proxy jiz neni platna
-balancer_header=Detail HTTP proxy
 balancer_path=Mistni adresa URL
 balancer_urls=Cilove URL
 balancer_err=Chyba behem ukladani cesty k Proxy

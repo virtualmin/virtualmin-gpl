@@ -4766,7 +4766,6 @@ balancers_none2=Ingen proxying
 balancer_create=Opprett proxy sti
 balancer_edit=Rediger Proxy sti
 balancer_egone=Den valgte proxy stien finnes ikke lenger.
-balancer_header=HTTP proxy detaljer
 balancer_path=Lokal URL sti
 balancer_urls=Mål URLer
 balancer_err=Kunne ikke lagre proxy sti

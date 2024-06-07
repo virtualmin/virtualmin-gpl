@@ -1665,6 +1665,7 @@ balancers_urls=Bestemming
 balancers_used2=Gebruikt door
 balancers_script=Webapp $1 versie $2
 
+balancer_header=Proxydetails
 balancer_url=Bestemming
 balancer_ewsbalancer=Proxy-websockets worden niet ondersteund voor meerdere bestemmings-URL's
 balancer_ewsnonhttp=Proxy-websockets worden alleen ondersteund voor HTTP- en HTTPS-bestemmings-URL's
