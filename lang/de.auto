@@ -2700,11 +2700,15 @@ exclude_err=Ausgeschlossene Verzeichnisse konnten nicht gespeichert werden
 exclude_edb=Der Datenbankname '$1' ist ungültig
 
 balancers_ecannot=Sie dürfen keine Proxy-Pfade für diese Domain bearbeiten
+balancers_urls=Ziel
 balancers_used2=Benutzt von
 balancers_script=Webanwendung $1 Version $2
 
+balancer_url=Ziel
 balancer_ebalancer=Fehlender oder ungültiger Balancername - nur Buchstaben und Zahlen sind zulässig
 balancer_ewsbalancer=Das Proxying von WebSockets wird für mehrere Ziel-URLs nicht unterstützt
+balancer_ewsnonhttp=Das Proxying von WebSockets wird nur für HTTP- und HTTPS-Ziel-URLs unterstützt
+balancer_eurl2=Fehlendes oder ungültiges Ziel
 balancer_script=Wird vom Webapp-Installer verwendet
 balancer_scriptver=Webapp-Version
 balancer_none=Verwenden Sie keinen Proxy für diesen Pfad und stellen Sie stattdessen lokal bereit

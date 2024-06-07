@@ -2183,10 +2183,14 @@ exclude_dbs=Bases de datos y tablas para omitir
 exclude_dbdesc=En cada línea, introduzca una <tt>database</tt> nombre o <tt>database.table</tt> nombre.
 exclude_edb=El nombre de la base de datos '$1' no es válido
 
+balancers_urls=Destino
 balancers_used2=Usado por
 balancers_script=Aplicación web $1 versión $2
 
+balancer_url=Destino
 balancer_ewsbalancer=No se admite el proxy WebSockets para múltiples URL de destino
+balancer_ewsnonhttp=El proxy WebSockets solo se admite para URL de destino HTTP y HTTPS
+balancer_eurl2=Destino faltante o no válido
 balancer_script=Utilizado por el instalador de aplicaciones web
 balancer_scriptver=Versión de la aplicación web
 balancer_none=No utilice proxy para esta ruta y sirva localmente en su lugar

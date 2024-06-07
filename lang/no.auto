@@ -1399,10 +1399,14 @@ exclude_dbs=Databaser og tabeller du kan hoppe over
 exclude_dbdesc=Skriv inn en <tt>database</tt> navn eller <tt>database.table</tt> på hver linje.
 exclude_edb=Databasens navn '$1' er ugyldig
 
+balancers_urls=Mål
 balancers_used2=Brukt av
 balancers_script=Webapp $1 versjon $2
 
+balancer_url=Mål
 balancer_ewsbalancer=Proxying WebSockets støttes ikke for flere destinasjonsadresser
+balancer_ewsnonhttp=Proxying WebSockets støttes bare for HTTP- og HTTPS-destinasjonsadresser
+balancer_eurl2=Manglende eller ugyldig destinasjon
 balancer_script=Brukes av webapp-installasjonsprogrammet
 balancer_scriptver=Webapp-versjon
 balancer_none=Ikke bruk proxy for denne banen, og tjen lokalt i stedet

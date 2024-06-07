@@ -4902,10 +4902,14 @@ exclude_eabs=Adresář '$1' nemůže být absolutní cestou
 exclude_edot=Adresář '$1' nemůže obsahovat ..
 exclude_edb=Název databáze '$1' je neplatný
 
+balancers_urls=Destinace
 balancers_used2=Použito uživatelem
 balancers_script=Webová aplikace $1 verze $2
 
+balancer_url=Destinace
 balancer_ewsbalancer=Proxy WebSockets není podporováno pro více cílových adres URL
+balancer_ewsnonhttp=Proxy WebSockets je podporováno pouze pro cílové adresy URL HTTP a HTTPS
+balancer_eurl2=Chybějící nebo neplatný cíl
 balancer_script=Používá se instalačním programem webové aplikace
 balancer_scriptver=Verze webové aplikace
 balancer_none=Neposkytujte proxy pro tuto cestu a poskytujte místo toho místně

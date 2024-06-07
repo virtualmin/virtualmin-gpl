@@ -1322,7 +1322,6 @@ aedit_etwice=Un alias con lo stesso nome è elencato più di una volta
 aedit_eauto=Le risposte automatiche non possono essere configurate quando si modifica manualmente un alias
 
 balancers_title=Percorso proxy
-balancers_urls=Indirizzi di destinazione
 
 history_ecannot=Non hai i permessi per vedere la storia delle statistiche del sistema
 history_month=1 mese
