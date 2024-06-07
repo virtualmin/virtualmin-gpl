@@ -54,7 +54,7 @@ else {
 		}
 
 	# Validate that it works
-	my $buckets = &s3_list_buckets($s3->{'access'}, $s3->{'secret'});
+	my $buckets = &s3_list_buckets($s3);
 	if (!ref($buckets)) {
 		&delete_s3_account($s3) if ($in{'new'});
 		&error(&text('s3_echeck', $buckets));
