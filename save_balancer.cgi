@@ -57,7 +57,7 @@ else {
 		}
 	else {
 		# One URL
-		$in{'urls'} =~ /^(http|https):\/\/(\S+)$/ ||
+		$in{'urls'} =~ /^(http|https|ajp|fcgi|scgi):\/\/(\S+)$|^unix:(\/\S+)\|\S+:\/\/\S+$/ ||
 			&error($text{'balancer_eurl2'});
 		$b->{'urls'} = [ $in{'urls'} ];
 		$b->{'none'} = 0;
