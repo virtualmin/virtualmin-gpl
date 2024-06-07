@@ -66,7 +66,8 @@ else {
 	&error($text{'balancer_ewsbalancer'})
 		if ($b->{'balancer'} && $b->{'websockets'});
 	&error($text{'balancer_ewsnonhttp'})
-		if ($in{'urls'} !~ /^http/);
+		if ($b->{'websockets'} && $in{'urls'} !~
+			/^(http|https):\/\/(\S+)$/);
 
 	# Create or update
 	if ($in{'new'}) {
