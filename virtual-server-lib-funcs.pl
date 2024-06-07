@@ -10174,6 +10174,8 @@ if (!$tmpl->{'default'}) {
 					 $k =~ /^php_(fpm|sock)/);
 				next if ($p eq "web" &&
 					 $k =~ /^web_(webmail|admin|http2|redirects|sslredirect|php)/);
+				next if ($p eq "mysql" &&
+					 $k =~ /^mysql_(hosts|mkdb|suffix|chgrp|nopass|wild|charset|nouser)/);
 				next if ($done{$k});
 				if ($k =~ /^\Q$p\E_/ ||
 				    $k eq $psel || $k eq $p) {
