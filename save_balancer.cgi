@@ -57,8 +57,14 @@ else {
 		}
 	else {
 		# One URL
-		$in{'urls'} =~ /^(http|https|ajp|fcgi|scgi):\/\/(\S+)$|^unix:(\/\S+)\|\S+:\/\/\S+$/ ||
-			&error($text{'balancer_eurl2'});
+		if (&master_admin()) {
+			$in{'urls'} =~ /^(http|https|ajp|fcgi|scgi):\/\/(\S+)$|^unix:(\/\S+)\|\S+:\/\/\S+$/ ||
+				&error($text{'balancer_eurl2'});
+			}
+		else {
+			$in{'urls'} =~ /^(http|https):\/\/(\S+)$/ ||
+				&error($text{'balancer_eurl3'});
+			}
 		$b->{'urls'} = [ $in{'urls'} ];
 		$b->{'none'} = 0;
 		}
