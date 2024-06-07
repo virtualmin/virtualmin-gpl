@@ -400,17 +400,9 @@ return "$module_var_directory/$name";
 sub config_post_save
 {
 my ($newconf, $oldconf) = @_;
-if ($newconf->{'hide_pro_tips'} ne $oldconf->{'hide_pro_tips'}) {
+if ($newconf->{'hide_pro_tips'} ne $oldconf->{'hide_pro_tips'} ||
+    $newconf->{'default_domain_ssl'} ne $oldconf->{'default_domain_ssl'}) {
 	&clear_links_cache();
-	}
-if (!defined($newconf->{'default_domain_ssl'}) &&
-    $oldconf->{'default_domain_ssl'} == 2) {
-	# Preserve deleted option to avoid desruption
-	&lock_file($module_config_file);
-	my %config = &foreign_config($module_name);
-	$config{'default_domain_ssl'} = 2;
-	&save_module_config(\%config);
-	&unlock_file($module_config_file);
 	}
 }
 

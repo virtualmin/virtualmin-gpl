@@ -2210,7 +2210,7 @@ check_eqmailldap=Qmail+LDAP support has been removed in Virtualmin 6.00
 
 check_defhost_nok=The given host name <tt>$1</tt> is not a fully qualified domain name
 check_defhost_clash=The domain named <tt>$1</tt> already exists
-check_defhost_desc=Serving Let's Encrypt SSL certificate for the hostname
+check_defhost_desc=Providing Let's Encrypt SSL certificate for the hostname
 check_defhost_succ=Successfully set up Let's Encrypt SSL certificate for the <tt>$1</tt> hostname
 check_defhost_sharedsucc=Successfully used the shared SSL certificate for the <tt>$1</tt> hostname
 check_defhost_sharedsucc2=.. done with shared SSL certificate
@@ -6102,6 +6102,7 @@ balancer_url=Destination URL
 balancer_err=Failed to save proxy path
 balancer_epath=Missing or invalid URL path - it must be like / or /foo
 balancer_ebalancer=Missing or invalid balancer name - only letters and numbers are allowed
+balancer_ewsbalancer=Proxying WebSockets is not supported for multiple destination URLs
 balancer_eurl=Invalid destination URL : $1
 balancer_eurl2=Missing or invalid destination URL
 balancer_eurls=No destination URLs entered
