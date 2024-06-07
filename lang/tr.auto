@@ -3499,6 +3499,7 @@ balancer_url=hedef URL
 balancer_err=Proxy yolu kaydedilemedi
 balancer_epath=Eksik veya geçersiz URL yolu - / veya / foo gibi olmalıdır
 balancer_ebalancer=Eksik veya geçersiz dengeleyici adı - yalnızca harf ve sayılara izin verilir
+balancer_ewsbalancer=Birden fazla hedef URL için WebSockets'in proxylenmesi desteklenmez
 balancer_eurl=Geçersiz hedef URL : $1 
 balancer_eurl2=Eksik veya geçersiz hedef URL
 balancer_eurls=Hedef URL girilmedi
@@ -3507,6 +3508,7 @@ balancer_scriptver=Web uygulaması sürümü
 balancer_none=Bu yol için proxy yapmayın ve bunun yerine yerel olarak sunun
 balancer_scriptused=Bu proxy yolu, yüklü web uygulaması $1 sürüm $2 tarafından kullanılıyor. Bunu değiştirmek veya silmek, web uygulamasının çalışmayı durdurmasına neden olabilir!
 balancer_pluginused=Bu proxy yolu $1 tarafından kullanılıyor. Bunu değiştirmek veya silmek bu özelliğin çalışmasının durmasına neden olabilir!
+balancer_websockets=Ayrıca proxy websocket'leri mi?
 
 scriptwarn_header=Virtualmin tarafından yönetilen aşağıdaki web uygulamalarının yeni sürümleri mevcuttur :
 scriptwarn_header2=Virtualmin tarafından yönetilen aşağıdaki web uygulamalarının $1 sanal sunucusunda\nyeni sürümleri mevcuttur :

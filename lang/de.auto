@@ -2704,11 +2704,13 @@ balancers_used2=Benutzt von
 balancers_script=Webanwendung $1 Version $2
 
 balancer_ebalancer=Fehlender oder ungültiger Balancername - nur Buchstaben und Zahlen sind zulässig
+balancer_ewsbalancer=Das Proxying von WebSockets wird für mehrere Ziel-URLs nicht unterstützt
 balancer_script=Wird vom Webapp-Installer verwendet
 balancer_scriptver=Webapp-Version
 balancer_none=Verwenden Sie keinen Proxy für diesen Pfad und stellen Sie stattdessen lokal bereit
 balancer_scriptused=Dieser Proxy-Pfad wird von der installierten Webanwendung $1, Version $2, verwendet. Wenn Sie ihn ändern oder löschen, funktioniert die Webanwendung möglicherweise nicht mehr!
 balancer_pluginused=Dieser Proxy-Pfad wird von $1 verwendet. Das Ändern oder Löschen kann dazu führen, dass diese Funktion nicht mehr funktioniert!
+balancer_websockets=Auch Proxy-WebSockets?
 
 scriptwarn_header=Für die folgenden von Virtualmin verwalteten Webanwendungen sind neue Versionen verfügbar :
 scriptwarn_header2=Für die folgenden von Virtualmin verwalteten Webanwendungen sind neue Versionen auf dem virtuellen Server $1 verfügbar :

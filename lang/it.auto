@@ -4848,6 +4848,7 @@ balancer_url=URL di destinazione
 balancer_err=Impossibile salvare il percorso del proxy
 balancer_epath=Percorso URL mancante o non valido: deve essere come / o / pippo
 balancer_ebalancer=Nome del bilanciamento mancante o non valido: sono consentite solo lettere e numeri
+balancer_ewsbalancer=L'inoltro di WebSocket non è supportato per più URL di destinazione
 balancer_eurl=URL di destinazione non valido : $1 
 balancer_eurl2=URL di destinazione mancante o non valido
 balancer_eurls=Nessun URL di destinazione inserito
@@ -4856,6 +4857,7 @@ balancer_scriptver=Versione dell'app Web
 balancer_none=Non eseguire il proxy per questo percorso e servirlo localmente
 balancer_scriptused=Questo percorso proxy è utilizzato dall'app Web $1 installata versione $2. La modifica o l'eliminazione potrebbe causare il blocco del funzionamento della webapp!
 balancer_pluginused=Questo percorso proxy è utilizzato da $1. La modifica o l'eliminazione potrebbe causare l'interruzione del funzionamento di questa funzionalità!
+balancer_websockets=Anche web socket proxy?
 
 scriptwarn_header=Le seguenti webapp gestite da Virtualmin hanno nuove versioni disponibili :
 scriptwarn_header2=Le seguenti webapp gestite da Virtualmin hanno nuove versioni disponibili, nel\nserver virtuale $1 :

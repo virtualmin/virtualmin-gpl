@@ -1664,11 +1664,13 @@ exclude_edb=Databasenaam '$1' is ongeldig
 balancers_used2=Gebruikt door
 balancers_script=Webapp $1 versie $2
 
+balancer_ewsbalancer=Proxy-websockets worden niet ondersteund voor meerdere bestemmings-URL's
 balancer_script=Gebruikt door webapp-installatieprogramma
 balancer_scriptver=Webapp-versie
 balancer_none=Proxy niet voor dit pad en in plaats daarvan lokaal serveren
 balancer_scriptused=Dit proxypad wordt gebruikt door de geïnstalleerde webapp $1, versie $2. Als u deze wijzigt of verwijdert, werkt de webapp mogelijk niet meer!
 balancer_pluginused=Dit proxypad wordt gebruikt door $1. Als u deze wijzigt of verwijdert, werkt deze functie mogelijk niet meer!
+balancer_websockets=Ook proxy-websockets?
 
 scriptwarn_header=Van de volgende door Virtualmin beheerde webapps zijn nieuwe versies beschikbaar :
 scriptwarn_header2=Van de volgende webapps beheerd door Virtualmin zijn nieuwe versies beschikbaar op de\nvirtuele server $1 :

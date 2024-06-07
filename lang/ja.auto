@@ -6102,6 +6102,7 @@ balancer_url=リンク先URL
 balancer_err=プロキシパスを保存できませんでした
 balancer_epath=URLパスがないか無効です-/または/ fooのようにする必要があります
 balancer_ebalancer=バランサー名がないか無効です-使用できるのは文字と数字のみです
+balancer_ewsbalancer=複数の宛先 URL に対する WebSocket のプロキシはサポートされていません
 balancer_eurl=無効なリンク先URL： $1
 balancer_eurl2=リンク先URLがないか無効です
 balancer_eurls=リンク先URLが入力されていません
@@ -6110,6 +6111,7 @@ balancer_scriptver=Webアプリバージョン
 balancer_none=このパスをプロキシせず、代わりにローカルでサービスを提供してください
 balancer_scriptused=このプロキシ パスは、インストールされた Web アプリケーション $1 バージョン $2 によって使用されています。これを変更または削除すると、Web アプリケーションが動作しなくなる可能性があります。
 balancer_pluginused=このプロキシ パスは $1 によって使用されています。変更または削除すると、この機能が動作しなくなる可能性があります。
+balancer_websockets=プロキシ Websocket もですか?
 
 scriptwarn_header=Virtualmin によって管理される次の Web アプリケーションに新しいバージョンが利用可能です :
 scriptwarn_header2=Virtualmin によって管理される次の Web アプリケーションは、仮想サーバー $1 で新しいバージョンが利用可能です :

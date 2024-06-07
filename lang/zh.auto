@@ -3006,6 +3006,7 @@ balancer_url=目标网址
 balancer_err=保存代理路径失败
 balancer_epath=URL路径缺失或无效-必须类似于/或/ foo
 balancer_ebalancer=平衡器名称缺失或无效-只能使用字母和数字
+balancer_ewsbalancer=不支持多个目标 URL 的代理 WebSockets
 balancer_eurl=无效的目标网址： $1
 balancer_eurl2=目标网址缺失或无效
 balancer_eurls=没有输入目标网址
@@ -3014,6 +3015,7 @@ balancer_scriptver=Web 应用程序版本
 balancer_none=不要代理此路径并在本地提供服务
 balancer_scriptused=已安装的 Web 应用程序 $1 版本 $2 正在使用此代理路径。修改或删除它可能会导致 Web 应用程序停止工作！
 balancer_pluginused=此代理路径正被 $1 使用。修改或删除可能会导致该功能停止工作！
+balancer_websockets=还有代理 websockets？
 
 scriptwarn_header=Virtualmin 管理的以下 Web 应用程序有新版本可用：
 scriptwarn_header2=由 Virtualmin 管理的以下 Web 应用程序在\n虚拟服务器 $1 中有可用的新版本：

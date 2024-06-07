@@ -1402,11 +1402,13 @@ exclude_edb=Databasens navn '$1' er ugyldig
 balancers_used2=Brukt av
 balancers_script=Webapp $1 versjon $2
 
+balancer_ewsbalancer=Proxying WebSockets støttes ikke for flere destinasjonsadresser
 balancer_script=Brukes av webapp-installasjonsprogrammet
 balancer_scriptver=Webapp-versjon
 balancer_none=Ikke bruk proxy for denne banen, og tjen lokalt i stedet
 balancer_scriptused=Denne proxy-banen brukes av den installerte webappen $1 versjon $2. Å endre eller slette den kan føre til at webappen slutter å fungere!
 balancer_pluginused=Denne proxy-banen brukes av $1. Modifisering eller sletting kan føre til at denne funksjonen slutter å fungere!
+balancer_websockets=Også proxy websockets?
 
 scriptwarn_header=Følgende webapper administrert av Virtualmin har nye versjoner tilgjengelig :
 scriptwarn_header2=Følgende webapper administrert av Virtualmin har nye versjoner tilgjengelig på den\nvirtuelle serveren $1 :

@@ -3625,6 +3625,7 @@ balancer_url=URL de destination
 balancer_err=Impossible d'enregistrer le chemin du proxy
 balancer_epath=Chemin URL manquant ou invalide - il doit être comme / ou / foo
 balancer_ebalancer=Nom d'équilibreur manquant ou invalide - seuls les lettres et les chiffres sont autorisés
+balancer_ewsbalancer=Le proxy WebSockets n'est pas pris en charge pour plusieurs URL de destination
 balancer_eurl=URL de destination non valide : $1 
 balancer_eurl2=URL de destination manquante ou non valide
 balancer_eurls=Aucune URL de destination saisie
@@ -3633,6 +3634,7 @@ balancer_scriptver=Version de l'application Web
 balancer_none=Ne pas proxy pour ce chemin et servir localement à la place
 balancer_scriptused=Ce chemin de proxy est utilisé par l'application Web $1 version $2 installée. Le modifier ou le supprimer peut entraîner l’arrêt du fonctionnement de la webapp !
 balancer_pluginused=Ce chemin proxy est utilisé par $1. Le modifier ou le supprimer peut empêcher cette fonctionnalité de fonctionner !
+balancer_websockets=Également des websockets proxy ?
 
 scriptwarn_header=Les webapps suivantes gérées par Virtualmin ont de nouvelles versions disponibles  :
 scriptwarn_header2=Les webapps suivantes gérées par Virtualmin ont de nouvelles versions disponibles, sur le\nserveur virtuel $1  :

@@ -6102,6 +6102,7 @@ balancer_url=Cieľová adresa URL
 balancer_err=Uloženie cesty proxy zlyhalo
 balancer_epath=Chýbajúca alebo neplatná cesta URL – musí byť ako / alebo /foo
 balancer_ebalancer=Chýbajúci alebo neplatný názov balancéra – povolené sú len písmená a čísla
+balancer_ewsbalancer=Proxy WebSockets nie je podporované pre viacero cieľových adries URL
 balancer_eurl=Neplatná cieľová adresa URL : $1
 balancer_eurl2=Chýbajúca alebo neplatná cieľová adresa URL
 balancer_eurls=Nie sú zadané žiadne cieľové adresy URL
@@ -6110,6 +6111,7 @@ balancer_scriptver=Verzia webovej aplikácie
 balancer_none=Neposkytujte proxy pre túto cestu a namiesto toho podávajte lokálne
 balancer_scriptused=Túto cestu proxy používa nainštalovaná webová aplikácia $1 verzie $2. Úprava alebo odstránenie môže spôsobiť, že webová aplikácia prestane fungovať!
 balancer_pluginused=Túto cestu proxy používa $1. Úprava alebo odstránenie môže spôsobiť, že táto funkcia prestane fungovať!
+balancer_websockets=Tiež proxy webové zásuvky?
 
 scriptwarn_header=Nasledujúce webové aplikácie, ktoré spravuje Virtualmin, majú k dispozícii nové verzie :
 scriptwarn_header2=Nasledujúce webové aplikácie, ktoré spravuje Virtualmin, majú k dispozícii nové verzie na\nvirtuálnom serveri $1 :

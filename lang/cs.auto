@@ -4905,11 +4905,13 @@ exclude_edb=Název databáze '$1' je neplatný
 balancers_used2=Použito uživatelem
 balancers_script=Webová aplikace $1 verze $2
 
+balancer_ewsbalancer=Proxy WebSockets není podporováno pro více cílových adres URL
 balancer_script=Používá se instalačním programem webové aplikace
 balancer_scriptver=Verze webové aplikace
 balancer_none=Neposkytujte proxy pro tuto cestu a poskytujte místo toho místně
 balancer_scriptused=Tuto cestu proxy používá nainstalovaná webová aplikace $1 verze $2. Úprava nebo smazání může způsobit, že webová aplikace přestane fungovat!
 balancer_pluginused=Tuto cestu proxy používá $1. Úprava nebo smazání může způsobit, že tato funkce přestane fungovat!
+balancer_websockets=Také proxy webové zásuvky?
 
 scriptwarn_header=Následující webové aplikace spravované Virtualminem mají k dispozici nové verze :
 scriptwarn_header2=Následující webové aplikace spravované Virtualminem mají k dispozici nové verze na\nvirtuálním serveru $1 :

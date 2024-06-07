@@ -5253,6 +5253,7 @@ balancer_url=docelowy adres URL
 balancer_err=Nie udało się zapisać ścieżki proxy
 balancer_epath=Brakująca lub niepoprawna ścieżka adresu URL - musi być jak / lub / foo
 balancer_ebalancer=Brakująca lub niepoprawna nazwa modułu równoważącego - dozwolone są tylko litery i cyfry
+balancer_ewsbalancer=Serwer proxy protokołu WebSockets nie jest obsługiwany w przypadku wielu docelowych adresów URL
 balancer_eurl=Nieprawidłowy docelowy adres URL : $1 
 balancer_eurl2=Brakujący lub nieprawidłowy docelowy adres URL
 balancer_eurls=Nie wprowadzono docelowych adresów URL
@@ -5261,6 +5262,7 @@ balancer_scriptver=Wersja aplikacji internetowej
 balancer_none=Nie używaj proxy dla tej ścieżki i zamiast tego wyświetlaj lokalnie
 balancer_scriptused=Ta ścieżka proxy jest używana przez zainstalowaną aplikację internetową $1 w wersji $2. Modyfikowanie lub usuwanie może spowodować, że aplikacja internetowa przestanie działać!
 balancer_pluginused=Ta ścieżka proxy jest używana przez $1. Modyfikowanie lub usuwanie może spowodować, że ta funkcja przestanie działać!
+balancer_websockets=Również gniazda internetowe proxy?
 
 scriptwarn_header=Następujące aplikacje internetowe zarządzane przez Virtualmin mają dostępne nowe wersje :
 scriptwarn_header2=Następujące aplikacje internetowe zarządzane przez Virtualmin mają dostępne nowe wersje na\nwirtualnym serwerze $1 :

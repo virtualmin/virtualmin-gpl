@@ -2186,11 +2186,13 @@ exclude_edb=El nombre de la base de datos '$1' no es válido
 balancers_used2=Usado por
 balancers_script=Aplicación web $1 versión $2
 
+balancer_ewsbalancer=No se admite el proxy WebSockets para múltiples URL de destino
 balancer_script=Utilizado por el instalador de aplicaciones web
 balancer_scriptver=Versión de la aplicación web
 balancer_none=No utilice proxy para esta ruta y sirva localmente en su lugar
 balancer_scriptused=Esta ruta de proxy está siendo utilizada por la aplicación web $1 instalada, versión $2. ¡Modificarla o eliminarla puede hacer que la aplicación web deje de funcionar!
 balancer_pluginused=Esta ruta de proxy está siendo utilizada por $1. ¡Modificarlo o eliminarlo puede hacer que esta función deje de funcionar!
+balancer_websockets=¿También websockets proxy?
 
 scriptwarn_header=Las siguientes webapps gestionadas por Virtualmin tienen nuevas versiones disponibles :
 scriptwarn_header2=Las siguientes webapps administradas por Virtualmin tienen nuevas versiones disponibles, en el\nservidor virtual $1 :
