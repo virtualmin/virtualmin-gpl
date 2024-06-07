@@ -65,6 +65,8 @@ else {
 	$b->{'websockets'} = $in{'websockets'};
 	&error($text{'balancer_ewsbalancer'})
 		if ($b->{'balancer'} && $b->{'websockets'});
+	&error($text{'balancer_ewsnonhttp'})
+		if ($in{'urls'} !~ /^http/);
 
 	# Create or update
 	if ($in{'new'}) {
