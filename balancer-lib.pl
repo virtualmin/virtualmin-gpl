@@ -30,7 +30,7 @@ foreach my $pp (&apache::find_directive("ProxyPass", $vconf)) {
 		$b = { 'path' => $1,
 		       'balancer' => $2 };
 		}
-	elsif ($pp =~ /^(\/\S*)\s+((http|http):\/\/\S+)/) {
+	elsif ($pp =~ /^(\/\S*)\s+((http|https):\/\/\S+)/) {
 		# Single-host proxy
 		$b = { 'path' => $1,
 		       'urls' => [ $2 ] };
