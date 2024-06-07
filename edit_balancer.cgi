@@ -71,10 +71,11 @@ else {
 	}
 
 # Also proxy websockets?
-print &ui_table_row($text{'balancer_websockets'},
-	&ui_yesno_radio("websockets", $b->{'websockets'},
-		undef, undef, $b->{'none'}));
-
+if ($in{'new'} || !$b->{'balancer'}) {
+	print &ui_table_row($text{'balancer_websockets'},
+		&ui_yesno_radio("websockets", $b->{'websockets'},
+			undef, undef, $b->{'none'}));
+	}
 # Used by script
 if (!$in{'new'}) {
 	($sinfo) = grep { $_->{'opts'}->{'path'} eq $b->{'path'} }
