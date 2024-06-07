@@ -42,32 +42,38 @@ print &ui_table_start($text{'balancer_header'}, undef, 2);
 print &ui_table_row($text{'balancer_path'},
 	&ui_textbox("path", $b->{'path'}, 20, undef, undef, " placeholder=\"$text{'index_global_eg'} /path1\""));
 
+# Disable proxying for this URL. This is only supported under Apache 2.0+,
+# and cannot be enabled for existing balancers
+my $noneheckbox;
+if (($in{'new'} || !$b->{'balancer'}) &&
+    (&has_proxy_none($d) || $b->{'none'})) {
+	$noneheckbox = "<br>".&ui_checkbox("none", 1, $text{'balancer_none'},
+		 $b->{'none'}, "onClick='form.urls.disabled = this.checked;".
+		    "document.querySelectorAll(\"input[name=websockets]\")".
+		        ".forEach(function(radio) { radio.disabled = ".
+			    "this.checked; }, this);'");
+	}
+
 if ($in{'new'} && $has == 2 || !$in{'new'} && $b->{'balancer'}) {
 	# Destinations
 	print &ui_table_row($text{'balancer_urls'},
 		&ui_textarea("urls", join("\n", @{$b->{'urls'}}), 5, 60,
-			     undef, $b->{'none'}, " placeholder=\"$text{'index_global_eg'} https://127.0.0.1:1234\""));
+			undef, $b->{'none'},
+				" placeholder=\"$text{'index_global_eg'} ".
+					"https://127.0.0.1:1234\"").
+			$noneheckbox);
 	}
 else {
 	# Just one destination
 	print &ui_table_row($text{'balancer_url'},
-		&ui_textbox("urls", $b->{'urls'}->[0], 60, $b->{'none'}));
-	}
-
-# Disable proxying for this URL. This is only supported under Apache 2.0+,
-# and cannot be enabled for existing balancers
-if (($in{'new'} || !$b->{'balancer'}) &&
-    (&has_proxy_none($d) || $b->{'none'})) {
-	print &ui_table_row(" ",
-	    &ui_checkbox("none", 1, $text{'balancer_none'},
-		 $b->{'none'}, "onClick='form.urls.disabled = this.checked'"));
+		&ui_textbox("urls", $b->{'urls'}->[0], 60, $b->{'none'}).
+		$noneheckbox);
 	}
 
 # Also proxy websockets?
-if ($in{'new'} || !$b->{'none'}) {
-	print &ui_table_row($text{'balancer_websockets'},
-		&ui_yesno_radio("websockets", $b->{'websockets'}));
-	}
+print &ui_table_row($text{'balancer_websockets'},
+	&ui_yesno_radio("websockets", $b->{'websockets'},
+		undef, undef, $b->{'none'}));
 
 # Used by script
 if (!$in{'new'}) {
