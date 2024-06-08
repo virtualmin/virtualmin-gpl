@@ -62,23 +62,8 @@ else {
 				&error($text{'balancer_eurl2'});
 			}
 		else {
-			if ($in{'urls'} !~ /^(http|https):\/\/(\S+)$/) {
-				$in{'urls'} =~ /^unix:(\/\S+)\|\S+:\/\/\S+$/;
-				my $socket = $1;
-				if ($socket) {
-					if (!&is_under_directory(
-					      $d->{'home'}, $socket)) {
-						&error($text{'balancer_eurl4'});
-						}
-					if (!-S $socket) {
-						&error(&text('balancer_eurl5',
-						       &html_escape($socket)));
-						}
-					}
-				else {
-					&error($text{'balancer_eurl3'});
-					}
-				}
+			$in{'urls'} =~ /^(http|https):\/\/(\S+)$/ ||
+				&error($text{'balancer_eurl3'});
 			}
 		$b->{'urls'} = [ $in{'urls'} ];
 		$b->{'none'} = 0;
