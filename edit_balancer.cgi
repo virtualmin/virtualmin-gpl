@@ -56,7 +56,7 @@ if (($in{'new'} || !$b->{'balancer'}) &&
 my $placeholder = "$text{'index_global_eg'} http://127.0.0.1:12345";
 my $placeholder_sock_format = &domain_has_website($d) eq 'web' ? 
 	"unix:/path/to/socket|http://127.0.0.1" :
-	"http://unix:/path/to/socket.sock:";
+	"http://unix:/path/to/socket.sock";
 $placeholder .= " $text{'or'} $placeholder_sock_format"
 	if (&master_admin());
 if ($in{'new'} && $has == 2 || !$in{'new'} && $b->{'balancer'}) {
