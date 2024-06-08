@@ -54,7 +54,8 @@ if (($in{'new'} || !$b->{'balancer'}) &&
 			    "this.checked; }, this);'");
 	}
 my $placeholder = "$text{'index_global_eg'} http://127.0.0.1:12345";
-$placeholder .= " $text{'or'} unix:/path/to/socket|http://";
+$placeholder .= " $text{'or'} unix:/path/to/socket|http://"
+	if (&master_admin());
 if ($in{'new'} && $has == 2 || !$in{'new'} && $b->{'balancer'}) {
 	# Destinations
 	print &ui_table_row($text{'balancer_urls'},
