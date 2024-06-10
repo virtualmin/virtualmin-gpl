@@ -57,7 +57,7 @@ else {
 		}
 	else {
 		# One URL
-		if (&master_admin()) {
+		if (&can_balancer_unix()) {
 			$in{'urls'} =~ /^(http|https|ajp|fcgi|scgi):\/\/(\S+)$|^unix:(\/\S+)\|\S+:\/\/\S+$/ ||
 				&error($text{'balancer_eurl2'});
 			}

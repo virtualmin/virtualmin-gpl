@@ -58,7 +58,7 @@ my $placeholder_sock_format = &domain_has_website($d) eq 'web' ?
 	"unix:/path/to/socket|http://127.0.0.1" :
 	"http://unix:/path/to/socket.sock";
 $placeholder .= " $text{'or'} $placeholder_sock_format"
-	if (&master_admin());
+	if (&can_balancer_unix());
 if ($in{'new'} && $has == 2 || !$in{'new'} && $b->{'balancer'}) {
 	# Destinations
 	print &ui_table_row($text{'balancer_urls'},

@@ -9,6 +9,12 @@
 # or
 # ProxyPass / http://127.0.0.1:8000/
 
+# Can the current user create a proxy balancer to a Unix socket?
+sub can_balancer_unix
+{
+return &master_admin();
+}
+
 # list_proxy_balancers(&domain)
 # Returns a list of URL paths and backends for balancer blocks
 sub list_proxy_balancers
