@@ -57,14 +57,23 @@ else {
 		}
 	else {
 		# One URL
-		$in{'urls'} =~ /^(http|https):\/\/(\S+)$/ ||
-			&error($text{'balancer_eurl2'});
+		if (&master_admin()) {
+			$in{'urls'} =~ /^(http|https|ajp|fcgi|scgi):\/\/(\S+)$|^unix:(\/\S+)\|\S+:\/\/\S+$/ ||
+				&error($text{'balancer_eurl2'});
+			}
+		else {
+			$in{'urls'} =~ /^(http|https):\/\/(\S+)$/ ||
+				&error($text{'balancer_eurl3'});
+			}
 		$b->{'urls'} = [ $in{'urls'} ];
 		$b->{'none'} = 0;
 		}
 	$b->{'websockets'} = $in{'websockets'};
 	&error($text{'balancer_ewsbalancer'})
 		if ($b->{'balancer'} && $b->{'websockets'});
+	&error($text{'balancer_ewsnonhttp'})
+		if ($b->{'websockets'} && $in{'urls'} !~
+			/^(http|https):\/\/(\S+)$/);
 
 	# Create or update
 	if ($in{'new'}) {

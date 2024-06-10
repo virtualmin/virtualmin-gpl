@@ -1661,10 +1661,15 @@ exclude_dbs=Databases en tabellen om over te slaan
 exclude_dbdesc=Voer op elke regel een <tt>database</tt> -naam of <tt>database.table</tt> -naam in.
 exclude_edb=Databasenaam '$1' is ongeldig
 
+balancers_urls=Bestemming
 balancers_used2=Gebruikt door
 balancers_script=Webapp $1 versie $2
 
+balancer_header=Proxydetails
+balancer_url=Bestemming
 balancer_ewsbalancer=Proxy-websockets worden niet ondersteund voor meerdere bestemmings-URL's
+balancer_ewsnonhttp=Proxy-websockets worden alleen ondersteund voor HTTP- en HTTPS-bestemmings-URL's
+balancer_eurl2=Ontbrekende of ongeldige bestemming
 balancer_script=Gebruikt door webapp-installatieprogramma
 balancer_scriptver=Webapp-versie
 balancer_none=Proxy niet voor dit pad en in plaats daarvan lokaal serveren

@@ -53,20 +53,25 @@ if (($in{'new'} || !$b->{'balancer'}) &&
 		        ".forEach(function(radio) { radio.disabled = ".
 			    "this.checked; }, this);'");
 	}
-
+my $placeholder = "$text{'index_global_eg'} http://127.0.0.1:12345";
+my $placeholder_sock_format = &domain_has_website($d) eq 'web' ? 
+	"unix:/path/to/socket|http://127.0.0.1" :
+	"http://unix:/path/to/socket.sock";
+$placeholder .= " $text{'or'} $placeholder_sock_format"
+	if (&master_admin());
 if ($in{'new'} && $has == 2 || !$in{'new'} && $b->{'balancer'}) {
 	# Destinations
 	print &ui_table_row($text{'balancer_urls'},
 		&ui_textarea("urls", join("\n", @{$b->{'urls'}}), 5, 60,
 			undef, $b->{'none'},
-				" placeholder=\"$text{'index_global_eg'} ".
-					"https://127.0.0.1:1234\"").
+				" placeholder=\"$placeholder\"").
 			$noneheckbox);
 	}
 else {
 	# Just one destination
 	print &ui_table_row($text{'balancer_url'},
-		&ui_textbox("urls", $b->{'urls'}->[0], 60, $b->{'none'}).
+		&ui_textbox("urls", $b->{'urls'}->[0], 60, $b->{'none'},
+			undef, " placeholder=\"$placeholder\"").
 		$noneheckbox);
 	}
 
