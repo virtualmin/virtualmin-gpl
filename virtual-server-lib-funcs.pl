@@ -12158,7 +12158,7 @@ if (&has_group_quotas()) {
 	my ($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
 	if ($group) {
 		$home = $group->{'uquota'};
-		if ($config{'mail_quotas'}) {
+		if (&has_mail_quotas()) {
 			$mail = $group->{'umquota'};
 			}
 		}
@@ -12546,7 +12546,7 @@ local ($d) = @_;
 local $rv = 0;
 local $qrv = 0;
 foreach my $db (&domain_databases($d, [ 'mysql', 'postgres' ])) {
-	local ($size, $qsize) = &get_one_database_usage($d, $db);
+	local ($size, undef, $qsize) = &get_one_database_usage($d, $db);
 	$rv += $size;
 	$qrv += $qsize;
 	}
@@ -17527,7 +17527,7 @@ local ($homequota, $mailquota, $duser, $dbquota, $dbquota_home) =
 
 # Get usage for sub-domain mail users
 local @subs = &get_domain_by("parent", $d->{'id'});
-local ($subhomequota, $submailquota, $dummy, $subdbquota) =
+local ($subhomequota, $submailquota, $dummy, $subdbquota, $subdbquota_home) =
 	&get_domain_user_quotas(@subs);
 
 # Get group usage for the domain
@@ -17570,7 +17570,7 @@ if ($dbquota+$subdbquota) {
 		&nice_size($dbquota),
 		&nice_size($subdbquota)), 3);
 	$tcount++;
-	$total += $dbquota+$subdbquota;
+	$total += $dbquota + $subdbquota;
 	}
 
 # Show overall total, if needed
