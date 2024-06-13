@@ -6107,16 +6107,16 @@ $webmin_tests = [
 	# Verify that list of scripts works
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/list_scripts.cgi?dom=\$DOMAIN_ID",
-	  'grep' => [ '<body', '</body>', 'Install Scripts',
-		      'phpMyAdmin', 'Installed Scripts', 'Available Scripts' ],
+	  'grep' => [ '<body', '</body>', 'Manage Web Apps',
+		      'phpMyAdmin', 'Installed Web Apps','Available Web Apps' ],
 	},
 
 	# Install a script via the web UI
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.3.17\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
-	  'grep' => [ '<body', '</body>', 'Install Script', 
+	  'grep' => [ '<body', '</body>', 'Install Web App', 
 		      'Now installing RoundCube' ],
-	  'antigrep' => [ 'Failed to install script' ],
+	  'antigrep' => [ 'Failed to install' ],
 	},
 
 	# Make sure it worked
