@@ -603,7 +603,7 @@ if (@newsa) {
 }
 
 # is_empty(&lref|file)
-# Returns 1 if a file or a reference to a list of lines is contains no
+# Returns 1 if a file or a reference to a list of lines contains no
 # non-whitespace characters
 sub is_empty
 {
