@@ -12309,7 +12309,7 @@ foreach my $t (@$tests) {
 	my $nt = { %$t };
 	my @na;
 	foreach my $a (@{$t->{'args'}}) {
-		push(@na, [ $a->[0], $a->[1] ]);
+		push(@na, [ @$a ]);
 		}
 	$nt->{'args'} = \@na;
 	if ($nt->{'command'} eq 'create-s3-bucket.pl') {
