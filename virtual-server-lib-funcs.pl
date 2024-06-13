@@ -14816,6 +14816,7 @@ $d->{'email'} = $parent->{'email'};
 sub rename_virtual_server
 {
 my ($d, $dom, $user, $home, $prefix) = @_;
+&lock_domain($d);
 
 $dom = undef if ($dom eq $d->{'dom'});
 $home = undef if ($home eq $d->{'home'});
@@ -15133,6 +15134,7 @@ my $merr = &made_changes();
 
 # Clear all left-frame links caches, as links to Apache may no longer be valid
 &clear_links_cache();
+&unlock_domain($d);
 
 return undef;
 }
