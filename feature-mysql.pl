@@ -10,6 +10,23 @@ if (!$mysql::config{'login'}) {
 	}
 %mconfig = &foreign_config("mysql");
 $mysql_user_size = $config{'mysql_user_size'} || 16;
+# Try once to determine the maximum username size
+if (!$config{'mysql_user_size'} &&
+    !$config{'mysql_user_size_auto'}) {
+	&lock_file($module_config_file);
+	eval {
+		local $main::error_must_die = 1;
+		my @str = &mysql::table_structure($mysql::master_db, "user");
+		my ($ufield) = grep { lc($_->{'field'}) eq 'user' } @str;
+		if ($ufield && $ufield->{'type'} =~ /\((\d+)\)/) {
+			$config{'mysql_user_size'} = $1;
+			$mysql_user_size = $1;
+			}
+		};
+	$config{'mysql_user_size_auto'} = 1;
+	&save_module_config();
+	&unlock_file($module_config_file);
+	}
 }
 
 sub check_module_mysql
