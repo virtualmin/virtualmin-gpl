@@ -425,8 +425,11 @@ if (!$config{'mysql_user_size'}) {
 		my @str = &mysql::table_structure($mysql::master_db, "user");
 		my ($ufield) = grep { lc($_->{'field'}) eq 'user' } @str;
 		if ($ufield && $ufield->{'type'} =~ /\((\d+)\)/) {
+			&lock_file($module_config_file);
 			$config{'mysql_user_size'} = $1;
+			$config{'mysql_user_size_auto'} = 1;
 			&save_module_config();
+			&unlock_file($module_config_file);
 			}
 		};
 	}
