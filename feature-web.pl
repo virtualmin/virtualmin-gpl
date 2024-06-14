@@ -5341,12 +5341,7 @@ sub get_fcgiwrap_server_command
 {
 my ($d, $port) = @_;
 my $cmd = &has_command("fcgiwrap");
-if ($port =~ /^\//) {
-	$cmd .= " -s unix:".$port;
-	}
-else {
-	$cmd .= " -s tcp:127.0.0.1:".$port;
-	}
+$cmd .= " -s unix:".$port;
 my $log = "$d->{'home'}/logs/fcgiwrap.log";
 my $piddir = "/var/fcgiwrap";
 if (!-d $piddir) {
