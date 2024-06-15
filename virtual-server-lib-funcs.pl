@@ -20682,6 +20682,70 @@ sub list_script_plugins
 return grep { &plugin_defined($_, "scripts_list") } @plugins;
 }
 
+# domain_last_login(&domain)
+# Returns last login for domain
+sub domain_last_login
+{
+my ($d) = @_;
+&foreign_require("acl");
+# Get domain owner user login
+my %miniserv;
+&get_miniserv_config(\%miniserv);
+&acl::open_session_db(\%miniserv);
+my @logins;
+foreach my $k (keys %acl::sessiondb) {
+	next if ($k =~ /^1111111/);
+	next if (!$acl::sessiondb{$k});
+	my ($user, $ltime, $lip) = split(/\s+/, $acl::sessiondb{$k});
+	next if ($user ne $d->{'user'});
+	push(@logins, $ltime);
+	}
+# Mail user logins
+foreach my $user (&list_domain_users($d, 1)) {
+	my $ll = &get_last_login_time($user->{'user'});
+	foreach $k (keys %$ll) {
+		push(@logins, $ll->{$k});
+		}
+	}
+@logins = sort { $b <=> $a } @logins;
+if (!@logins) {
+	return wantarray ?
+		($text{'users_ll_never'}, undef) :
+		 $text{'users_ll_never'};
+	}
+my $last = &make_date($logins[0], { '_' });
+my $last_login;
+# Show ago for last login if within 24 hours
+if (ref($last) eq 'HASH' &&
+    $last->{'ago'} && !$last->{'ago'}->{'days'}) {
+	my $hours = $last->{'ago'}->{'hours'};
+	my $minutes = $last->{'ago'}->{'minutes'};
+	if ($hours) {
+		$last_login = $hours . " " .
+			($hours == 1 ?
+			 $text{'summary_lastlogin_hour'} :
+			 $text{'summary_lastlogin_hours'});
+		}
+	elsif ($minutes) {
+		$last_login = $minutes . " " .
+			($minutes == 1 ?
+			 $text{'summary_lastlogin_min'} :
+			 $text{'summary_lastlogin_mins'});
+		}
+	else {
+		my $seconds = $last->{'ago'}->{'seconds'};
+		$last_login = $seconds . " " .
+			($seconds == 1 ?
+			 $text{'summary_lastlogin_sec'} :
+			 $text{'summary_lastlogin_secs'});
+		}
+	}
+else {
+	$last_login = &make_date($logins[0]);
+	}
+return wantarray ? ($last_login, $logins[0]) : $last_login;
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

@@ -4552,6 +4552,12 @@ summary_title2=Virtual Sub-Server Summary
 summary_title3=Alias Server Summary
 summary_title4=Virtual Sub-Domain Summary
 summary_phpvermode=$1 ($2 mode)
+summary_lastlogin_hour=hour ago
+summary_lastlogin_hours=hours ago
+summary_lastlogin_min=minute ago
+summary_lastlogin_mins=minutes ago
+summary_lastlogin_sec=second ago
+summary_lastlogin_secs=seconds ago
 
 migrate_title=Migrate Virtual Server
 migrate_desc=This page allows you to create a new virtual server by migrating a backup file created by a competitor's product. The configuration for all supported features will be extracted from the backup, and converted for use by Virtualmin. All contents of the domain's directory will be copied into the home directory of the new user.

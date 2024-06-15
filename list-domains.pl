@@ -923,6 +923,16 @@ if ($multi) {
 					}
 				}
 			}
+		
+		# Last login
+		if (!$d->{'alias'}) {
+			my ($last_login, $last_login_ts) = &domain_last_login($d);
+			print "    Last login: $last_login\n";
+			if ($last_login_ts) {
+				print "    Last login time: ",
+				      "$last_login_ts\n";
+				}
+			}
 		}
 	}
 elsif ($nameonly) {

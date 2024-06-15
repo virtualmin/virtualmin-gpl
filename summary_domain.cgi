@@ -41,6 +41,14 @@ print &ui_table_row($text{'edit_created'},
 						  $d->{'creator'})
 			: &make_date($d->{'created'}));
 
+# Last login
+if (!$d->{'alias'}) {
+	my $last_login = &domain_last_login($d);
+	if ($last_login) {
+		print &ui_table_row($text{'users_ll'}, $last_login);
+		}
+	}
+
 # Owner
 my $owner = "<tt title='$d->{'user'} ($d->{'uid'})'>$d->{'user'}</tt>";
 if (&can_edit_domain($d) && &can_rename_domains()) {
