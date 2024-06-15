@@ -419,14 +419,17 @@ if ($in->{'delanon'}) {
 	}
 
 # Work out the max mysql username length, but only for new installs
-if (!$config{'mysql_user_size'}) {
+if ($config{'mysql_user_size_auto'} != 2) {
 	eval {
 		local $main::error_must_die = 1;
 		my @str = &mysql::table_structure($mysql::master_db, "user");
 		my ($ufield) = grep { lc($_->{'field'}) eq 'user' } @str;
 		if ($ufield && $ufield->{'type'} =~ /\((\d+)\)/) {
+			&lock_file($module_config_file);
 			$config{'mysql_user_size'} = $1;
+			$config{'mysql_user_size_auto'} = 2;
 			&save_module_config();
+			&unlock_file($module_config_file);
 			}
 		};
 	}
