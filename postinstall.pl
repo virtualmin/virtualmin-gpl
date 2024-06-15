@@ -555,6 +555,21 @@ if (&has_home_quotas()) {
 		}
 	}
 
+# Try to determine the maximum MariaDB/MySQL username size
+if ($config{'mysql_user_size_auto'} != 1) {
+	&require_mysql();
+	eval {
+		local $main::error_must_die = 1;
+		my @str = &mysql::table_structure($mysql::master_db, "user");
+		my ($ufield) = grep { lc($_->{'field'}) eq 'user' } @str;
+		if ($ufield && $ufield->{'type'} =~ /\((\d+)\)/) {
+			$config{'mysql_user_size'} = $1;
+			}
+		};
+	$config{'mysql_user_size_auto'} = 1;
+	&save_module_config();
+	}
+
 # Create S3 account entries from scheduled backups
 &create_s3_accounts_from_backups();
 
