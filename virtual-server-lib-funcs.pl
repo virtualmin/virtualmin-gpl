@@ -20701,7 +20701,7 @@ foreach my $k (keys %acl::sessiondb) {
 	push(@logins, $ltime);
 	}
 # Mail user logins
-foreach my $user (&list_domain_users($d, 1)) {
+foreach my $user (&list_domain_users($d, 1, 0, 1, 1)) {
 	my $ll = &get_last_login_time($user->{'user'});
 	foreach $k (keys %$ll) {
 		push(@logins, $ll->{$k});
