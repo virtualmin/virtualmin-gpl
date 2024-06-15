@@ -1784,6 +1784,7 @@ enable_subservers=Also enable sub-servers?
 enable_doing=Enabling virtual server $1 ..
 enable_bind_cloud=Enabling DNS zone on $1 ..
 enable_ebind_cloud=.. failed : $1
+enable_disabled=disabled
 
 mail_usubject=Mailbox created
 mail_dsubject=Virtual server created
