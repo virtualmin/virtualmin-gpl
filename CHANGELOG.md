@@ -6,6 +6,7 @@
 * Add an API to move SSL certificates to a new location if it differs from the active template
 * Add an option to the Website Options page to redirect www to non-www and vice versa (currently for Apache systems only)
 * Add support for host-based redirects (currently for Apache systems only)
+* Fix to change the default settings so that records are not proxied by default when using Cloudflare
 * Fix a bug where CGI execution mode was disabled on initial install
 * Fix PHP modes availability depending on the CGI execution mode
 * Fix a bug with default shell selection when a user is created using the CLI
