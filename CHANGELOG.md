@@ -1,4 +1,5 @@
 #### Version 7.20.0
+* Add an API to manage scheduled backups
 * Add the ability to enable DKIM even if the mail feature is disabled
 * Add ability to check the resolvability of alternative names before issuing a Let's Encrypt certificate
 * Add an API to move SSL certificates to a new location if it differs from the active template
