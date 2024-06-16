@@ -5118,6 +5118,7 @@ validate_egroup=Administration group $1 does not exist
 validate_egid=Administration group $1 has GID $3, but the domain's GID is $2
 validate_eenc=Encrypted password for Unix user $1 does not match virtual server
 validate_eenc2=Hashed password for Unix user $1 does not match virtual server
+validate_eenc3=The password was likely changed outside of Virtualmin. Please update it on the Edit Virtual Server page to resync it.
 validate_euquota=Unix user $1's quota of $2 does not match the domain owner's quota of $3
 validate_egquota=Unix group $1's quota of $2 does not match the virtual server's quota of $3
 validate_eport=Port $1 is being used by $2 to run unexpected server '$3'
