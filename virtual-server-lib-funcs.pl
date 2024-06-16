@@ -8562,8 +8562,17 @@ if ($valid) {
 my $phd = &public_html_dir($d);
 my $before = &before_letsencrypt_website($d);
 my @beforecerts = &get_all_domain_service_ssl_certs($d);
-my ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
-					$d, \@dnames);
+my ($ok, $cert, $key, $chain) =
+	&request_domain_letsencrypt_cert($d, \@dnames);
+if (!$ok) {
+	# Try again with just externally resolvable hostnames
+	my @badnames;
+	my $fok = &filter_external_dns(\@dnames, \@badnames);
+	if ($fok > 0 && @badnames) {
+		($ok, $cert, $key, $chain) =
+			&request_domain_letsencrypt_cert($d, \@dnames);
+		}
+	}
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
 	if ($showerrors) {
