@@ -2872,7 +2872,7 @@ return 1;
 # Restore all mail aliases and mailbox users for this domain
 sub restore_mail
 {
-local ($d, $file, $opts, $allopts) = @_;
+local ($d, $file, $opts, $allopts, $homefmt, $oldd) = @_;
 local ($u, %olduid, @errs);
 
 # Check if users are being stored in the same remote storage, if replicating
@@ -2891,14 +2891,14 @@ if ($url && $burl && $url eq $burl && $allopts->{'repl'} &&
 
 # Restore plain-text password file first
 if (-r $file."_plainpass") {
-	if ($_[2]->{'mailuser'}) {
+	if ($opts->{'mailuser'}) {
 		# Just copy one plain password
 		local (%oldplain, %newplain);
 		&read_file($file."_plainpass", \%oldplain);
 		&read_file("$plainpass_dir/$d->{'id'}", \%newplain);
-		$newplain{$_[2]->{'mailuser'}} = $oldplain{$_[2]->{'mailuser'}};
-		$newplain{$_[2]->{'mailuser'}." encrypted"} =
-			$oldplain{$_[2]->{'mailuser'}." encrypted"};
+		$newplain{$opts->{'mailuser'}} = $oldplain{$opts->{'mailuser'}};
+		$newplain{$opts->{'mailuser'}." encrypted"} =
+			$oldplain{$opts->{'mailuser'}." encrypted"};
 		&write_file("$plainpass_dir/$d->{'id'}", \%newplain);
 		}
 	else {
@@ -2998,7 +2998,7 @@ while(<UFILE>) {
 			# Use old UID
 			$uinfo->{'uid'} = $olduid{$user[0]};
 			}
-		elsif ($_[3]->{'reuid'}) {
+		elsif ($allopts->{'reuid'}) {
 			# Re-allocate UID
 			local %taken;
 			&build_taken(\%taken);
@@ -3013,11 +3013,11 @@ while(<UFILE>) {
 		if ($uinfo->{'fixedhome'}) {
 			# Home directory is fixed, so don't set
 			}
-		elsif ($_[5]->{'home'} && $_[5]->{'home'} ne $d->{'home'}) {
+		elsif ($old->{'home'} && $oldd->{'home'} ne $d->{'home'}) {
 			# Restoring under different domain home, so need to fix
 			# user's home
 			$uinfo->{'home'} = $user[5];
-			$uinfo->{'home'} =~s/^$_[5]->{'home'}/$d->{'home'}/g;
+			$uinfo->{'home'} =~s/^$oldd->{'home'}/$d->{'home'}/g;
 			}
 		else {
 			# Use home from original
@@ -3095,14 +3095,14 @@ close(UFILE);
 
 # Restore hashed password file too
 if (-r $file."_hashpass") {
-	if ($_[2]->{'mailuser'}) {
+	if ($opts->{'mailuser'}) {
 		# Just copy one hash password
 		local (%oldhash, %newhash);
 		&read_file($file."_hashpass", \%oldhash);
 		&read_file("$hashpass_dir/$d->{'id'}", \%newhash);
 		foreach my $s (@hashpass_types) {
-			$newhash{$_[2]->{'mailuser'}.' '.$s} =
-				$oldhash{$_[2]->{'mailuser'}.' '.$s};
+			$newhash{$opts->{'mailuser'}.' '.$s} =
+				$oldhash{$opts->{'mailuser'}.' '.$s};
 			}
 		&write_file("$hashpass_dir/$d->{'id'}", \%newhash);
 		}
@@ -3115,15 +3115,15 @@ if (-r $file."_hashpass") {
 
 # Restore quota cache
 if (-r $file."_quota_cache") {
-	if ($_[2]->{'mailuser'}) {
+	if ($opts->{'mailuser'}) {
 		# Just copy for one user
 		my (%oldqc, %newqc);
 		&read_file($file."_quota_cache", \%oldqc);
 		&read_file("$quota_cache_dir/$d->{'id'}", \%newqc);
-		$newqc{$_[2]->{'mailuser'}."_quota"} =
-			$oldqc{$_[2]->{'mailuser'}."_quota"};
-		$newqc{$_[2]->{'mailuser'}."_mquota"} =
-			$oldqc{$_[2]->{'mailuser'}."_mquota"};
+		$newqc{$opts->{'mailuser'}."_quota"} =
+			$oldqc{$opts->{'mailuser'}."_quota"};
+		$newqc{$opts->{'mailuser'}."_mquota"} =
+			$oldqc{$opts->{'mailuser'}."_mquota"};
 		&write_file("$quota_cache_dir/$d->{'id'}", \%newqc);
 		}
 	else {
@@ -3135,12 +3135,12 @@ if (-r $file."_quota_cache") {
 
 # Restore no-spam flags file too
 if (-r $file."_nospam") {
-	if ($_[2]->{'mailuser'}) {
+	if ($opts->{'mailuser'}) {
 		# Just copy one flag
 		local (%oldspam, %newspam);
 		&read_file($file."_nospam", \%oldspam);
 		&read_file("$nospam_dir/$d->{'id'}", \%newspam);
-		$newspam{$_[2]->{'mailuser'}} = $oldspam{$_[2]->{'mailuser'}};
+		$newspam{$opts->{'mailuser'}} = $oldspam{$opts->{'mailuser'}};
 		&write_file("$nospam_dir/$d->{'id'}", \%newspam);
 		}
 	else {
@@ -3189,14 +3189,14 @@ if ($restore_eusersql) {
 elsif (@errs) {
 	&$second_print(&text('restore_mailerrs', join(" ", @errs)));
 	}
-elsif ($_[2]->{'mailuser'} && !$foundmailuser) {
-	&$second_print(&text('restore_mailnosuch', $_[2]->{'mailuser'}));
+elsif ($opts->{'mailuser'} && !$foundmailuser) {
+	&$second_print(&text('restore_mailnosuch', $opts->{'mailuser'}));
 	}
 else {
 	&$second_print($text{'setup_done'});
 	}
 
-if (!$_[2]->{'mailuser'}) {
+if (!$opts->{'mailuser'}) {
 	# Delete all aliases and re-create (except for those used by plugins
 	# such as mailman)
 	&$first_print($text{'restore_mailaliases'});
@@ -3238,12 +3238,12 @@ if (!$_[2]->{'mailuser'}) {
 # Get users whose mail files may need to be moved
 &foreign_require("mailboxes");
 local @users = &list_domain_users($d);
-if ($_[2]->{'mailuser'}) {
+if ($opts->{'mailuser'}) {
 	@users = grep { $_->{'user'} eq $foundmailuser } @users;
 	}
 
 if (-r $file."_files" &&
-    (!$_[2]->{'mailuser'} || $foundmailuser)) {
+    (!$opts->{'mailuser'} || $foundmailuser)) {
 	local $xtract;
 	if (!&mail_under_home()) {
 		# Can just extract all mail files in /var/mail
@@ -3257,9 +3257,9 @@ if (-r $file."_files" &&
 		&make_dir($xtract, 0700);
 		}
 	local $out;
-	if ($_[2]->{'mailuser'}) {
+	if ($opts->{'mailuser'}) {
 		# Just do one user
-		&$first_print(&text('restore_mailfiles3', $_[2]->{'mailuser'}));
+		&$first_print(&text('restore_mailfiles3', $opts->{'mailuser'}));
 		$out = &backquote_command(&make_unarchive_command(
 			$xtract, $file."_files", $foundmailuser)." 2>&1");
 		}
@@ -3393,7 +3393,7 @@ if (-r $file."_cron") {
 	&$first_print($text{'restore_mailcrons'});
 	&foreign_require("cron");
 	foreach $u (&list_domain_users($d, 1)) {
-		next if ($_[2]->{'mailuser'} && $u->{'user'} ne $foundmailuser);
+		next if ($opts->{'mailuser'} && $u->{'user'} ne $foundmailuser);
 		local $cf = $file."_cron_".$u->{'user'};
 		$cf = "/dev/null" if (!-r $cf);
 		&copy_source_dest($cf, $cron::cron_temp_file);
@@ -3434,8 +3434,8 @@ if (-r $file."_control" && &foreign_check("dovecot") &&
 
 		# Fix up control file permissions for users in this domain
 		foreach $u (&list_domain_users($d, 0, 1, 1, 1)) {
-			next if ($_[2]->{'mailuser'} &&
-				 $_[2]->{'mailuser'} ne $u->{'user'});
+			next if ($opts->{'mailuser'} &&
+				 $opts->{'mailuser'} ne $u->{'user'});
 			&execute_command("chown -R $u->{'uid'}:$u->{'gid'} ".
 			       quotemeta("$control/$u->{'user'}"));
 			}
@@ -3446,7 +3446,7 @@ if (-r $file."_control" && &foreign_check("dovecot") &&
 local $hb = "$d->{'home'}/$config{'homes_dir'}";
 foreach $u (&list_domain_users($d, 1)) {
 	if (-d $u->{'home'} && &is_under_directory($hb, $u->{'home'}) &&
-	    (!$_[2]->{'mailuser'} || $u->{'user'} eq $foundmailuser)) {
+	    (!$opts->{'mailuser'} || $u->{'user'} eq $foundmailuser)) {
 		&execute_command("chown -R $u->{'uid'}:$u->{'gid'} ".
 		       quotemeta($u->{'home'}));
 		}
