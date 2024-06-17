@@ -58,9 +58,6 @@ if ($in{'confirm'} || $in{'confirm_auto'}) {
 			$auto_disable < $ts_era) {
 				&error($text{'disable_save_eautodisable2'});
 			}
-			if ($auto_disable && $in{'protected'}) {
-				&error($text{'disable_save_eautodisable3'});
-				}
 			my $tlabel = !$d->{'disabled_auto'} ? 
 				'disable_save_autodisable3' :
 				'disable_save_autodisable'; 
