@@ -305,6 +305,7 @@ disable_ebind_cloud2=.. støttes ikke av skyleverandør
 
 enable_bind_cloud=Aktiverer DNS-sone på $1 ..
 enable_ebind_cloud=.. mislyktes : $1 
+enable_disabled=funksjonshemmet
 
 newweb_sslprotos=Apache SSL-protokoller å tillate
 newweb_sslprotos_def=Ikke tillat alle usikre protokoller
@@ -577,6 +578,7 @@ backup_purgenew=.. ikke eldre enn $1
 backup_purgecan=.. samsvarer med mønsteret $1 og er $2 dager gammelt
 
 restore_reuser=Vil du tildele bruker- og gruppenavn på nytt?
+restore_reuser2=Genererer du fullstendige brukernavn på nytt?
 restore_contents=Kontrollerer innholdet i sikkerhetskopien ..
 restore_gotcontents2=.. fant $1 virtuelle servere og $2 globale virtualmin-innstillinger
 restore_gotcontents=.. fant $1 virtuelle servere
@@ -1408,6 +1410,7 @@ balancer_url=Mål
 balancer_ewsbalancer=Proxying WebSockets støttes ikke for flere destinasjonsadresser
 balancer_ewsnonhttp=Proxying WebSockets støttes bare for HTTP- og HTTPS-destinasjonsadresser
 balancer_eurl2=Manglende eller ugyldig destinasjon
+balancer_eurl3=Domeneeier har ikke lov til å bruke andre destinasjonsadresser enn HTTP og HTTPS
 balancer_script=Brukes av webapp-installasjonsprogrammet
 balancer_scriptver=Webapp-versjon
 balancer_none=Ikke bruk proxy for denne banen, og tjen lokalt i stedet
@@ -1589,6 +1592,7 @@ dkim_header3=Domener som for øyeblikket er signert for
 dkim_alldns=Domener å signere for
 dkim_alldns0=Bare de med DNS og e-post aktivert
 dkim_alldns1=Alle domener med DNS
+dkim_alldns2=Ingen domener, med mindre det er aktivert på siden for DNS-alternativer
 dkim_extra=Ekstra domener å signere for
 
 dkim_ednsadded=.. DNS-oppdatering mislyktes : $1
