@@ -8568,7 +8568,7 @@ if (!$ok) {
 	# Try again with just externally resolvable hostnames
 	my @badnames;
 	my $fok = &filter_external_dns(\@dnames, \@badnames);
-	if ($fok > 0 && @badnames) {
+	if ($fok == 0 && @dnames) {
 		($ok, $cert, $key, $chain) =
 			&request_domain_letsencrypt_cert($d, \@dnames);
 		}
