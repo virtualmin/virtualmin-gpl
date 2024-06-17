@@ -267,6 +267,38 @@ if (!$d->{'parent'}) {
 # Set domain protection
 $d->{'protected'} = $in{'protected'} ? 1 : 0;
 
+# Update auto-disabled flag
+my $auto_disable =
+	$in{'autodisable_def'} ? undef :
+		$in{'autodisable'} =~ /^(\d+)$/ ? $1 : undef;
+if (defined($auto_disable)) {
+	my $ts_era = 876002400;
+	$auto_disable = int($auto_disable);
+	$auto_disable || &error($text{'save_eautodisable'});
+	if ($auto_disable > 365 &&
+	    $auto_disable < $ts_era) {
+	 	&error($text{'save_eautodisable2'});
+	    }
+	if ($auto_disable && $in{'protected'}) {
+		&error($text{'save_eautodisable3'});
+		}
+	$d->{'disabled_auto'} = 
+		$auto_disable >= $ts_era ? $auto_disable :
+		time() + $auto_disable * 86400;
+	if ($auto_disable < $ts_era) {
+		&$first_print($text{'save_autodisable'});
+		&$second_print($text{'setup_done'});
+		}
+	}
+else {
+	$in{'autodisable'} && &error($text{'save_eautodisable'});
+	if ($d->{'disabled_auto'}) {
+		&$first_print($text{'save_autodisable2'});
+		delete($d->{'disabled_auto'});
+		&$second_print($text{'setup_done'});
+		}
+	}
+
 # Update quotas in domain object
 if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
 	$d->{'uquota'} = $newdom{'uquota'};

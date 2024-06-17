@@ -8944,6 +8944,7 @@ my %disable = map { $_, 1 } @disable;
 $d->{'disabled_reason'} = $reason;
 $d->{'disabled_why'} = $why;
 $d->{'disabled_time'} = time();
+delete($d->{'disabled_auto'});
 
 # Run the before command
 &set_domain_envs($d, "DISABLE_DOMAIN");
@@ -9003,6 +9004,7 @@ my @enable = &get_enable_features($d);
 my %enable = map { $_, 1 } @enable;
 delete($d->{'disabled_reason'});
 delete($d->{'disabled_why'});
+delete($d->{'disabled_auto'});
 
 # Run the before command
 &set_domain_envs($d, "ENABLE_DOMAIN");
@@ -16589,6 +16591,25 @@ if ($gconfig{'os_type'} =~ /^(redhat-linux|debian-linux)$/) {
 				&text('check_repoeoutdate',
 					"$virtualmin_link/documentation/repositories/"), 'warn'));
 			}
+		}
+	}
+
+# Disable scheduled domains
+foreach my $d (grep { !$_->{'disabled'} && 
+		$_->{'disabled_auto'} < time() } &list_domains()) {
+	
+	next if ($d->{'protected'});
+	&push_all_print();
+	&set_all_null_print();
+	eval {
+		local $main::error_must_die = 1;
+		my $disabled_auto = &make_date($d->{'disabled_auto'});
+		&disable_virtual_server($d, 'schedule',
+			&text('edit_autodisabledone', $disabled_auto));
+		};
+	&pop_all_print();
+	if ($@) {
+		&error_stderr_local("Disabling domain on schedule failed : $@");
 		}
 	}
 

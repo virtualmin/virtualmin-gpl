@@ -238,6 +238,27 @@ if (!$parentdom) {
 print &ui_table_row($text{'edit_protected'},
 	&ui_yesno_radio("protected", $d->{'protected'}));
 
+# Make domain auto-disable
+if (!$d->{'disabled'}) {
+	my $autodisable;
+	if ($d->{'disabled_auto'}) {
+		$autodisable = &ui_radio("autodisable",
+			$d->{'disabled_auto'}, 
+			[ [ undef, $text{'no'} ],
+			  [ $d->{'disabled_auto'},
+				&text($d->{'disabled_auto'} > time() ? 
+					'edit_autodisable_on' :
+						'edit_autodisable_on2',
+					&make_date($d->{'disabled_auto'})) ] ]);
+		}
+	else {
+		$autodisable = &ui_opt_textbox("autodisable",
+			$d->{'disabled_auto'}, 3, $text{'no'},
+			$text{'edit_autodisable_in'});
+		}
+	print &ui_table_row($text{'edit_autodisable'}, $autodisable);
+	}
+
 # Show domain for use in links
 my @aliases = grep { &domain_has_website($_) }
 		   &get_domain_by("alias", $d->{'id'});

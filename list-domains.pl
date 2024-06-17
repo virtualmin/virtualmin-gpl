@@ -424,6 +424,8 @@ if ($multi) {
 				  "For exceeding bandwidth limit" :
 				$d->{'disabled_reason'} eq 'transfer' ?
 				  "Transferred to another system" :
+				$d->{'disabled_reason'} eq 'schedule' ?
+				  "Manually configured schedule" :
 				$d->{'disabled_why'} ?
 				  "Manually ($d->{'disabled_why'})" :
 				  "Manually";
