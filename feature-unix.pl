@@ -516,14 +516,12 @@ if (!$cannot_rehash_password && $d->{'pass'}) {
 	    $user->{'pass'} ne $encmd5 &&
 	    $user->{'pass'} ne $encdes &&
 	    !$d->{'disabled'}) {
-		return &text('validate_eenc', $user->{'user'})." ".
-			&ui_help($text{'validate_eenc3'});
+		return &text('validate_eenc', $user->{'user'});
 		}
 	}
 elsif ($d->{'enc_pass'}) {
 	if ($user->{'pass'} ne $d->{'enc_pass'} && !$d->{'disabled'}) {
-		return &text('validate_eenc2', $user->{'user'})." ".
-			&ui_help($text{'validate_eenc3'});
+		return &text('validate_eenc2', $user->{'user'});
 		}
 	}
 
