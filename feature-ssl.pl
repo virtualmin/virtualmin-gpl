@@ -665,7 +665,7 @@ if (!$match) {
 	}
 
 # Make sure the cert isn't expired
-if ($info && $info->{'notafter'}) {
+if ($info && $info->{'notafter'} && !$d->{'disabled'}) {
 	local $notafter = &parse_notafter_date($info->{'notafter'});
 	if ($notafter < time()) {
 		return &text('validate_esslexpired', &make_date($notafter));
