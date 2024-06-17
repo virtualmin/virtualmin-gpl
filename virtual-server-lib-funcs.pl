@@ -8924,6 +8924,30 @@ else {
 	}
 }
 
+# disable_scheduled_virtual_servers()
+# Disables all scheduled virtual servers that are due to be disabled
+sub disable_scheduled_virtual_servers
+{
+foreach my $d (grep {
+		!$_->{'disabled'} && 
+		$_->{'disabled_auto'} > 876002400 && 
+		$_->{'disabled_auto'} < time() } &list_domains()) {
+	next if ($d->{'protected'});
+	&push_all_print();
+	&set_all_null_print();
+	eval {
+		local $main::error_must_die = 1;
+		my $disabled_auto = &make_date($d->{'disabled_auto'});
+		&disable_virtual_server($d, 'schedule',
+			&text('disable_autodisabledone', $disabled_auto));
+		};
+	&pop_all_print();
+	if ($@) {
+		&error_stderr_local("Disabling domain on schedule failed : $@");
+		}
+	}
+}
+
 # disable_virtual_server(&domain, [reason-code], [reason-why], [&only-features])
 # Disables all features of one virtual server. Returns undef on success, or
 # an error message on failure.
@@ -16591,25 +16615,6 @@ if ($gconfig{'os_type'} =~ /^(redhat-linux|debian-linux)$/) {
 				&text('check_repoeoutdate',
 					"$virtualmin_link/documentation/repositories/"), 'warn'));
 			}
-		}
-	}
-
-# Disable scheduled domains
-foreach my $d (grep { !$_->{'disabled'} && 
-		$_->{'disabled_auto'} < time() } &list_domains()) {
-	
-	next if ($d->{'protected'});
-	&push_all_print();
-	&set_all_null_print();
-	eval {
-		local $main::error_must_die = 1;
-		my $disabled_auto = &make_date($d->{'disabled_auto'});
-		&disable_virtual_server($d, 'schedule',
-			&text('edit_autodisabledone', $disabled_auto));
-		};
-	&pop_all_print();
-	if ($@) {
-		&error_stderr_local("Disabling domain on schedule failed : $@");
 		}
 	}
 
