@@ -4112,6 +4112,7 @@ if ($disallow_newlines) {
 	}
 $rv =~ s/<tt>|<\/tt>//g;
 $rv =~ s/<span.*?>|<\/span>//g;
+$rv =~ s/\s*<sup.*(data-title|aria-label)="([^"]*)".*?<\/sup>/. $2/s;
 $rv =~ s/<b>|<\/b>//g;
 $rv =~ s/<i>|<\/i>//g;
 $rv =~ s/<u>|<\/u>//g;
