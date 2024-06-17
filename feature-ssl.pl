@@ -3627,10 +3627,12 @@ if ($contents =~ /^\// && -r $contents) {
 my $newfile = !-r $file;
 if (&is_under_directory($d->{'home'}, $file)) {
 	# Assume write can be done as the domain owner
+	&disable_quotas($d);
 	&open_tempfile_as_domain_user($d, KEY, ">$file");
 	&print_tempfile(KEY, $contents);
 	&close_tempfile_as_domain_user($d, KEY);
 	&set_certificate_permissions($d, $file) if ($newfile);
+	&enable_quotas($d);
 	}
 else {
 	# If SSL cert is elsewhere (like /etc/ssl), write as root
