@@ -2987,7 +2987,15 @@ while(<UFILE>) {
 			push(@errs, &text('restore_mailexists', $user[0]));
 			next;
 			}
-		$uinfo->{'user'} = $user[0];
+		if ($opts->{'reuser'}) {
+			# Re-generate full username based on template
+			my $short = &remove_userdom($user[0], $d);
+			$uinfo->{'user'} = &userdom_name($short, $d);
+			}
+		else {
+			# Keep original full username
+			$uinfo->{'user'} = $user[0];
+			}
 		$uinfo->{'pass'} = $user[1];
 		$uinfo->{'plainpass'} = $plainpass{$uinfo->{'user'}};
 		if ($user[2] eq 'w') {
@@ -3464,12 +3472,15 @@ return 1;
 # Returns HTML for mail restore option inputs
 sub show_restore_mail
 {
-local $rv;
-if ($_[1] && !&mail_under_home()) {
+my ($opts, $d) = @_;
+my $rv;
+if ($d && !&mail_under_home()) {
 	# Offer to restore just one user
-	$rv .= "<br>".$text{'restore_mailuser'}." ".
-		&ui_textbox("mail_mailuser", $_[0]->{'mailuser'}, 15);
+	$rv .= $text{'restore_mailuser'}." ".
+		&ui_textbox("mail_mailuser", $opts->{'mailuser'}, 15)."<br>\n";
 	}
+$rv .= &ui_checkbox("reuser", 1, $text{'restore_reuser2'},
+		    $opts->{'reuser'})."<br>\n";
 return $rv;
 }
 
@@ -3477,8 +3488,9 @@ return $rv;
 # Parses the inputs for mail backup options
 sub parse_restore_mail
 {
-local %in = %{$_[0]};
-return { 'mailuser' => $in{'mail_mailuser'} };
+my ($in, $d) = @_;
+return { 'mailuser' => $in->{'mail_mailuser'},
+	 'reuser' => $in->{'mail_reuser'} };
 }
 
 # check_clash(name, dom)
