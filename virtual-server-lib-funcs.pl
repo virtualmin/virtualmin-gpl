@@ -7979,6 +7979,12 @@ if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
 	$dom->{'autoalias'} = $aliasname;
 	}
 
+# Work out auto disable schedule
+if ($tmpl->{'domauto_disable'} &&
+    $tmpl->{'domauto_disable'} =~ /^(\d+)$/) {
+	$dom->{'disabled_auto'} = time() + $tmpl->{'domauto_disable'}*86400;
+	}
+
 # Check if only hashed passwords are stored, and if so generate a random
 # MySQL password now. This has to be done before any features are setup
 # so that mysql_pass is available to all features.
@@ -9678,6 +9684,7 @@ push(@rv, { 'id' => 0,
 	    'append_style' => $config{'append_style'},
 	    'domalias' => $config{'domalias'} || "none",
 	    'domalias_type' => $config{'domalias_type'} || 0,
+	    'domauto_disable' => $config{'domauto_disable'},
 	    'for_parent' => 1,
 	    'for_sub' => 0,
 	    'for_alias' => 1,
@@ -10075,6 +10082,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'domalias'} = $tmpl->{'domalias'} eq 'none' ? undef :
 			      $tmpl->{'domalias'};
 	$config{'domalias_type'} = $tmpl->{'domalias_type'};
+	$config{'domauto_disable'} = $tmpl->{'domauto_disable'};
 	$config{'tmpl_autoconfig'} = $tmpl->{'autoconfig'};
 	$config{'tmpl_outlook_autoconfig'} = $tmpl->{'outlook_autoconfig'};
 	$config{'key_tmpl'} = $tmpl->{'cert_key_tmpl'};
@@ -17205,6 +17213,14 @@ print &ui_table_row(&hlink($text{'tmpl_domalias_type'},
 		[ 2, $text{'tmpl_domalias_type2'}." ".
 		     &ui_textbox("domalias_tmpl",
 			$mode == 2 ? $tmpl->{'domalias_type'} : "", 20) ] ]));
+
+# Automatic domain disabling
+print &ui_table_row($text{'disable_autodisable'},
+	&ui_opt_textbox(
+		"domauto_disable", 
+		$tmpl->{'domauto_disable'}, 4,
+		$text{'no'},
+		$text{'disable_autodisable_in'}));
 }
 
 # parse_template_virtualmin(&tmpl)
@@ -17226,6 +17242,18 @@ if ($in{'domalias_mode'} == 2) {
 	else {
 		$tmpl->{'domalias_type'} = $in{'domalias_type'};
 		}
+	}
+
+# Parse automatic domain disabling
+my $auto_disable = $in{'autodisable_def'} ? undef : $in{'domauto_disable'};
+if (defined($auto_disable)) {
+	$auto_disable =~ /^\d+$/ || &error($text{'disable_save_eautodisable'});
+	$auto_disable <= 0 && &error($text{'disable_save_eautodisable'});
+	$auto_disable > 365*100 && &error($text{'disable_save_eautodisable2'});
+	$tmpl->{'domauto_disable'} = $auto_disable;
+	}
+else {
+	$tmpl->{'domauto_disable'} = undef;
 	}
 }
 
