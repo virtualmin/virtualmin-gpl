@@ -135,11 +135,11 @@ else {
 	if ($r->{'type'} eq 'CNAME') {
 		$newrecs = [ @$recs ];
 		push(@$newrecs, $r) if ($in{'type'});
-		%clash = map { $_->{'name'}, $_ }
+		%clash = map { lc($_->{'name'}), $_ }
 			     grep { $_ ne $r } @$newrecs;
 		foreach $e (@$newrecs) {
 			if ($e->{'type'} =~ /^(CNAME|A|AAAA|MX)$/ &&
-			    $clash{$r->{'name'}}) {
+			    $clash{lc($r->{'name'})}) {
 				&error(&text('record_ecname', $r->{'name'}));
 				}
 			}
