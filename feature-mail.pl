@@ -5624,11 +5624,15 @@ foreach my $k (keys %acl::sessiondb) {
 my @logins = &useradmin::list_last_logins();
 eval "use Time::Local;";
 foreach my $entry (@logins) {
-	my ($user, $ltime) = ($entry->[0], $entry->[4]);
+	my ($user, $ltime) = ($entry->[0], $entry->[4] || $entry->[3]);
 	my ($day_of_week, $month, $day, $time, $year) = split(/\s+/, $ltime);
 	my ($hour, $min, $sec) = split(/:/, $time);
-	my $ts = timelocal($sec, $min, $hour, $day, 
-		$month_to_number_map{lc($month)}, $year - 1900);
+	my $ts;
+	eval {
+		$ts = timelocal($sec, $min, $hour, $day, 
+			$month_to_number_map{lc($month)}, $year - 1900);
+		};
+	next if ($@);
 	if ($ts > $syslogins{$user} || !$syslogins{$user}) {
 		$syslogins{$user} = $ts;
 		}
