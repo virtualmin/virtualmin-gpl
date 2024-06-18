@@ -20687,18 +20687,13 @@ return grep { &plugin_defined($_, "scripts_list") } @plugins;
 sub domain_last_login
 {
 my ($d) = @_;
-&foreign_require("acl");
-# Get domain owner user login
-my %miniserv;
-&get_miniserv_config(\%miniserv);
-&acl::open_session_db(\%miniserv);
 my @logins;
-foreach my $k (keys %acl::sessiondb) {
-	next if ($k =~ /^1111111/);
-	next if (!$acl::sessiondb{$k});
-	my ($user, $ltime, $lip) = split(/\s+/, $acl::sessiondb{$k});
+# Get other system logins
+my %syslogins;
+&read_file($system_login_file, \%syslogins);
+foreach my $user (keys %syslogins) {
 	next if ($user ne $d->{'user'});
-	push(@logins, $ltime);
+	push(@logins, $syslogins{$user});
 	}
 # Mail user logins
 foreach my $user (&list_domain_users($d, 1, 0, 1, 1)) {
