@@ -5602,6 +5602,39 @@ $logins{'lastpos'} = $st[7];
 $logins{'lasttime'} = $finaltime || $now;
 &write_file($mail_login_file, \%logins);
 &unlock_file($mail_login_file);
+
+# Other system logins
+&lock_file($system_login_file);
+my %syslogins;
+&read_file($system_login_file, \%syslogins);
+# Domain owners login times
+&foreign_require("acl");
+my %miniserv;
+&get_miniserv_config(\%miniserv);
+&acl::open_session_db(\%miniserv);
+foreach my $k (keys %acl::sessiondb) {
+	next if ($k =~ /^1111111/);
+	next if (!$acl::sessiondb{$k});
+	my ($user, $ltime, $lip) = split(/\s+/, $acl::sessiondb{$k});
+	$syslogins{$user} = $ltime
+		if ($ltime > $syslogins{$user} || !$syslogins{$user});
+	}
+# System last logins
+&foreign_require('useradmin');
+my @logins = &useradmin::list_last_logins();
+eval "use Time::Local;";
+foreach my $entry (@logins) {
+	my ($user, $ltime) = ($entry->[0], $entry->[4]);
+	my ($day_of_week, $month, $day, $time, $year) = split(/\s+/, $ltime);
+	my ($hour, $min, $sec) = split(/:/, $time);
+	my $ts = timelocal($sec, $min, $hour, $day, 
+		$month_to_number_map{lc($month)}, $year - 1900);
+	if ($ts > $syslogins{$user} || !$syslogins{$user}) {
+		$syslogins{$user} = $ts;
+		}
+	}
+&write_file($system_login_file, \%syslogins);
+&unlock_file($system_login_file);
 return 1;
 }
 
