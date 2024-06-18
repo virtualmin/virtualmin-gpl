@@ -3350,15 +3350,21 @@ my ($ver) = @_;
 my $basever = substr($ver, 0, 1);
 my @opts = ( $config{'python_cmd'} );
 if (!$basever || $basever == 3) {
-	push(@opts, "python3", "python30",
+	push(@opts, "python3.14", "python314",
+		    "python3.13", "python313",
+		    "python3.12", "python312",
+		    "python3.11", "python311",
+		    "python3.10", "python310",
 		    "python3.9", "python39",
 		    "python3.8", "python38",
 		    "python3.7", "python37",
-		    "python3.6", "python36");
+		    "python3.6", "python36",
+		    "python3", "python30");
 	}
 if (!$basever || $basever == 2) {
 	push(@opts, "python2.7", "python27",
-		    "python2.6", "python26");
+		    "python2.6", "python26",
+		    "python2", "python20");
 	}
 push(@opts, "python");
 foreach my $o (@opts) {
