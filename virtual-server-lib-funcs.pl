@@ -20708,7 +20708,7 @@ if (!@logins) {
 		($text{'users_ll_never'}, undef) :
 		 $text{'users_ll_never'};
 	}
-my $last = &make_date($logins[0], { });
+my $last = &make_date($logins[0], { '_' }); # XXXX '_' can be removed later
 my $last_login;
 # Show ago for last login if within 24 hours
 if (ref($last) eq 'HASH' &&
