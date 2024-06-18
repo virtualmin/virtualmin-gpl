@@ -435,6 +435,10 @@ if ($multi) {
 				      &make_date($d->{'disabled_time'}),"\n";
 				}
 			}
+		elsif ($d->{'disabled_auto'}) {
+			print "    Disable scheduled on: ",
+			      &make_date($d->{'disabled_auto'}),"\n";
+			}
 		if ($d->{'virt'}) {
 			if ($multi == 2) {
 				print "    IP address: $d->{'ip'} (Private)\n";
