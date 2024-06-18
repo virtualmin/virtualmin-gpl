@@ -8941,12 +8941,14 @@ foreach my $d (grep {
 	next if ($d->{'protected'});
 	&push_all_print();
 	&set_all_null_print();
+	&lock_domain($d);
 	eval {
 		local $main::error_must_die = 1;
 		my $disabled_auto = &make_date($d->{'disabled_auto'});
 		&disable_virtual_server($d, 'schedule',
 			&text('disable_autodisabledone', $disabled_auto));
 		};
+	&unlock_domain($d);
 	&pop_all_print();
 	if ($@) {
 		&error_stderr_local("Disabling domain on schedule failed : $@");
