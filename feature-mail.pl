@@ -3479,7 +3479,7 @@ if ($d && !&mail_under_home()) {
 	$rv .= $text{'restore_mailuser'}." ".
 		&ui_textbox("mail_mailuser", $opts->{'mailuser'}, 15)."<br>\n";
 	}
-$rv .= &ui_checkbox("reuser", 1, $text{'restore_reuser2'},
+$rv .= &ui_checkbox("mail_reuser", 1, $text{'restore_reuser2'},
 		    $opts->{'reuser'})."<br>\n";
 return $rv;
 }
