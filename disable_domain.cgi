@@ -43,6 +43,9 @@ if ($in{'confirm'} || $in{'confirm_auto'}) {
 
 		&run_post_actions();
 		&webmin_log("disable", "domain", $d->{'dom'}, $d);
+		# Add link to re-enable domain
+		@auto_disable_link = ( "enable_domain.cgi?dom=$in{'dom'}",
+				       $text{'disable_domain_return'} );
 		}
 	elsif ($in{'confirm_auto'}) {
 		# Update auto-disabled flag
@@ -80,9 +83,10 @@ if ($in{'confirm'} || $in{'confirm_auto'}) {
 		print $text{'save_domain'},"<br>\n";
 		&save_domain($d);
 		&$second_print($text{'setup_done'});
+		# Add link to show domain schedule
 		@auto_disable_link =
 			( "disable_domain.cgi?dom=$d->{'id'}&mode=schedule",
-			  $text{'disable_domain_return'} );
+			  $text{'disable_domain_return2'} );
 	}
 
 	# Call any theme post command
@@ -179,4 +183,5 @@ else {
 		}
 	}
 
-&ui_print_footer(@auto_disable_link, &domain_footer_link($d), "", $text{'index_return'});
+&ui_print_footer(@auto_disable_link, &domain_footer_link($d),
+		 "", $text{'index_return'});

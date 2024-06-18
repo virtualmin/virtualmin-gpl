@@ -1763,7 +1763,8 @@ disable_doing=Disabling virtual server $1 ..
 disable_domain=Disable Now
 disable_domain_sched=Schedule Disable
 disable_domain_sched2=Update Disable Schedule
-disable_domain_return=disable schedule details
+disable_domain_return=enable server form
+disable_domain_return2=disable schedule details
 disable_edomain_sched2=Error scheduling disable
 disable_sched_rusure=This form allows you to schedule the disabling of the virtual server $1 in a given number of days.
 disable_autodisable=Set up a disable schedule
@@ -1804,6 +1805,7 @@ enable_doing=Enabling virtual server $1 ..
 enable_bind_cloud=Enabling DNS zone on $1 ..
 enable_ebind_cloud=.. failed : $1
 enable_disabled=disabled
+enable_return=disable server form
 
 mail_usubject=Mailbox created
 mail_dsubject=Virtual server created

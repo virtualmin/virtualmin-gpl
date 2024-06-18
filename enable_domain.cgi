@@ -17,7 +17,7 @@ else {
 
 # Work out what can be enabled
 @enable = &get_enable_features($d);
-
+@disable_domain_link = ( );
 if (!$in{'confirm'}) {
 	# Ask the user if he is sure
 	@distext = map { $text{"disable_f".$_} ||
@@ -77,7 +77,10 @@ else {
 	if (defined(&theme_post_save_domain)) {
 		&theme_post_save_domain($d, 'modify');
 		}
+	# Add link to the disabled domain
+	@disable_domain_link = ( "disable_domain.cgi?dom=$in{'dom'}",
+				 $text{'enable_return'} );
 	}
 
-&ui_print_footer(&domain_footer_link($d),
+&ui_print_footer(@disable_domain_link, &domain_footer_link($d),
 	"", $text{'index_return'});
