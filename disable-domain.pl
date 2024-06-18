@@ -108,11 +108,11 @@ if ($scheduled) {
 		}
 	elsif ($schedule =~ /^(?<ts>\d+)$/ &&
 	       ($+{ts} > time() ||
-	       ($+{ts} > 0 && $+{ts} < 365*100))) {
+	       ($+{ts} > 0 && $+{ts} < 365*10))) {
 		# Schedule a disable
 		my $ts = $+{ts};
 		# If timestamp is in days
-		if ($ts < 365*100) {
+		if ($ts < 365*10) {
 			$ts = time() + $ts * 86400;
 			}
 		my $amsg = $d->{'disabled_auto'} ? "Updating" : "Setting";

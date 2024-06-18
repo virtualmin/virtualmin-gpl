@@ -8935,9 +8935,9 @@ else {
 sub disable_scheduled_virtual_servers
 {
 foreach my $d (grep {
-		!$_->{'disabled'} && 
-		$_->{'disabled_auto'} > 876002400 && 
-		$_->{'disabled_auto'} < time() } &list_domains()) {
+		!$_->{'disabled'} && $_->{'disabled_auto'} &&
+		$_->{'disabled_auto'} =~ /(\d{10,})/ && 
+		$_->{'disabled_auto'} <= time() } &list_domains()) {
 	next if ($d->{'protected'});
 	&push_all_print();
 	&set_all_null_print();
@@ -17251,7 +17251,7 @@ my $auto_disable = $in{'autodisable_def'} ? undef : $in{'domauto_disable'};
 if (defined($auto_disable)) {
 	$auto_disable =~ /^\d+$/ || &error($text{'disable_save_eautodisable'});
 	$auto_disable <= 0 && &error($text{'disable_save_eautodisable'});
-	$auto_disable > 365*100 && &error($text{'disable_save_eautodisable2'});
+	$auto_disable > 365*10 && &error($text{'disable_save_eautodisable2'});
 	$tmpl->{'domauto_disable'} = $auto_disable;
 	}
 else {

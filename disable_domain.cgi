@@ -54,20 +54,20 @@ if ($in{'confirm'} || $in{'confirm_auto'}) {
 			$in{'autodisable_def'} ? undef :
 				$in{'autodisable'} =~ /^(\d+)$/ ? $1 : undef;
 		if (defined($auto_disable)) {
-			my $ts_era = 876002400;
+			my $ts = time();
 			$auto_disable = int($auto_disable);
 			$auto_disable || &error($text{'disable_save_eautodisable'});
-			if ($auto_disable > 365*100 &&
-			$auto_disable < $ts_era) {
+			if ($auto_disable > 365*10 &&
+			    $auto_disable < $ts) {
 				&error($text{'disable_save_eautodisable2'});
-			}
+				}
 			my $tlabel = !$d->{'disabled_auto'} ? 
 				'disable_save_autodisable3' :
 				'disable_save_autodisable'; 
 			$d->{'disabled_auto'} = 
-				$auto_disable >= $ts_era ? $auto_disable :
-				time() + $auto_disable * 86400;
-			if ($auto_disable < $ts_era) {
+				$auto_disable >= $ts ? $auto_disable :
+				$ts + $auto_disable * 86400;
+			if ($auto_disable < $ts) {
 				&$first_print($text{$tlabel});
 				&$second_print($text{'setup_done'});
 				}
