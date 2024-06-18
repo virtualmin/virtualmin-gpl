@@ -24,8 +24,7 @@ To schedule a domain to be disabled at a later time, use the C<--schedule>
 flag followed by a number of days or a Unix timestamp. For example, to
 disable a domain in 3 days use C<--schedule 3> or to disable it on a specific
 datetime use C<--schedule 3400606800> where 3400606800 is a Unix timestamp. To
-cancel a scheduled disable, use C<--schedule none>. To show the current
-scheduled disable time, use C<--schedule show>.
+cancel a scheduled disable, use C<--schedule none>.
 
 =cut
 
@@ -87,17 +86,7 @@ $d->{'disabled'} && &usage("Virtual server $domain is already disabled");
 @doms = ( $d );
 
 if ($scheduled) {
-	if ($schedule eq "show") {
-		# Show scheduled disable time
-		if ($d->{'disabled_auto'}) {
-			print "Scheduled disable for $d->{'dom'} is set for ",
-			      &make_date($d->{'disabled_auto'}),"\n";
-			}
-		else {
-			print "No scheduled disable for $d->{'dom'} was configured\n";
-			}
-		}
-	elsif ($schedule eq "none") {
+	if ($schedule eq "none") {
 		# Cancel scheduled disable
 		print "Turning off disable schedule for $d->{'dom'} ..\n";
 		&lock_domain($d);
@@ -162,7 +151,7 @@ print "virtualmin disable-domain --domain domain.name\n";
 print "                         [--why \"explanation for disable\"]\n";
 print "                         [--subservers]\n";
 print "                         [--feature name]*\n";
-print "                         [--schedule days|timestamp|none|show]\n";
+print "                         [--schedule days|timestamp|none]\n";
 exit(1);
 }
 
