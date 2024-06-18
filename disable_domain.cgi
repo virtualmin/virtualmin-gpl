@@ -150,6 +150,9 @@ else {
 			if ($disauto) {
 				$disautodaysround = 
 				    sprintf("%.0f", ($disauto-time())/86400);
+				$disautodaysround = 1
+					if (!$disautodaysround &&
+					    $disauto-time() > 0)
 				}
 			my $disautodays = $disautodaysround > 0 ? 
 				$disautodaysround : undef;
