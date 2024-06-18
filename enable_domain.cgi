@@ -35,16 +35,15 @@ if (!$in{'confirm'}) {
 	print &text('enable_rusure2', "<tt>$d->{'dom'}</tt>", $distext),"<p>\n";
 
 	# Show OK button
-	print "<center>\n";
 	print &ui_form_start("enable_domain.cgi");
+	print &ui_table_start(undef, undef, 2);
 	if (!$d->{'parent'}) {
-		@grid = ( "<b>$text{'enable_subservers'}</b>",
-			  &ui_yesno_radio("subservers", 0) );
-		print &ui_grid_table(\@grid, 2, 30, [ "nowrap" ]);
+		print &ui_table_row($text{'enable_subservers'},
+				&ui_yesno_radio("subservers", 0));
 		}
+	print &ui_table_end();
 	print &ui_hidden("dom", $in{'dom'});
 	print &ui_form_end([ [ "confirm", $text{'enable_ok'} ] ]);
-	print "</center>\n";
 	}
 else {
 	# Build list of domains

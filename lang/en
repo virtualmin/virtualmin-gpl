@@ -1780,7 +1780,7 @@ disable_save_autodisable2=Turning off domain disable schedule ..
 disable_save_autodisable3=Setting up domain disable schedule ..
 
 enable_title=Enable Server
-enable_rusure2=Are you sure you want to re-enable the virtual server $1? Its $2 will be restored to their original enabled states.
+enable_rusure2=This form allows you to re-enable a previously disabled virtual server $1? Its $2 will be restored to their original enabled states.
 enable_ok=Yes, Enable It
 enable_unix=Restoring administration user's password ..
 enable_webmin=Restoring Webmin user's password ..
