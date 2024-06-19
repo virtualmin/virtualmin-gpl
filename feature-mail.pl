@@ -5622,7 +5622,7 @@ foreach my $k (keys %acl::sessiondb) {
 # System last logins
 &foreign_require('useradmin');
 my @logins = &useradmin::list_last_logins();
-eval "use Time::Local;";
+eval "use Time::Local";
 foreach my $entry (@logins) {
 	my ($user, $ltime) = ($entry->[0], $entry->[4] || $entry->[3]);
 	my ($day_of_week, $month, $day, $time, $year) = split(/\s+/, $ltime);
