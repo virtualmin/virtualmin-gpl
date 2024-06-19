@@ -109,8 +109,6 @@ else {
 				$prog."schedule" ],
 			);
 		print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "disable", 1);
-
-		# Details of current cert
 		print &ui_tabs_start_tab("mode", "disable");
 		# Ask the user if he is sure
 		my @distext = map { $text{"disable_f".$_} ||
