@@ -296,7 +296,6 @@ $procmail_log_cache = "$ENV{'WEBMIN_VAR'}/procmail.cache";
 $procmail_log_times = "$ENV{'WEBMIN_VAR'}/procmail.times";
 
 $mail_login_file = &cache_file_path("mailbox-logins");
-$system_login_file = &cache_file_path("system-logins");
 
 @newfeatures_dirs = ( "$module_root_directory/newfeatures-all",
 		      $virtualmin_pro ? "$module_root_directory/newfeatures-pro"

@@ -5597,28 +5597,23 @@ while(<MAILLOG>) {
 		}
 	}
 close(MAILLOG);
-@st = stat($maillog);
-$logins{'lastpos'} = $st[7];
-$logins{'lasttime'} = $finaltime || $now;
-&write_file($mail_login_file, \%logins);
-&unlock_file($mail_login_file);
 
-# Other system logins
-&lock_file($system_login_file);
-my %syslogins;
-&read_file($system_login_file, \%syslogins);
-# Domain owners login times
+# Miniserv last logins
 &foreign_require("acl");
 my %miniserv;
 &get_miniserv_config(\%miniserv);
 &acl::open_session_db(\%miniserv);
+my %syslogins;
 foreach my $k (keys %acl::sessiondb) {
 	next if ($k =~ /^1111111/);
 	next if (!$acl::sessiondb{$k});
 	my ($user, $ltime, $lip) = split(/\s+/, $acl::sessiondb{$k});
-	$syslogins{$user} = $ltime
-		if ($ltime > $syslogins{$user} || !$syslogins{$user});
+	if ($ltime > $syslogins{$user} || !$syslogins{$user}) {
+		$syslogins{$user} = $ltime;
+		&add_last_login_time(\%logins, $ltime, 'miniserv', $user);
+		}
 	}
+
 # System last logins
 &foreign_require('useradmin');
 my @logins = &useradmin::list_last_logins();
@@ -5635,10 +5630,18 @@ foreach my $entry (@logins) {
 	next if ($@);
 	if ($ts > $syslogins{$user} || !$syslogins{$user}) {
 		$syslogins{$user} = $ts;
+		&add_last_login_time(\%logins, $ts, 'pts', $user);
 		}
 	}
-&write_file($system_login_file, \%syslogins);
-&unlock_file($system_login_file);
+
+# MySQL last logins XXXX
+
+# Cache the last login times
+@st = stat($maillog);
+$logins{'lastpos'} = $st[7];
+$logins{'lasttime'} = $finaltime || $now;
+&write_file($mail_login_file, \%logins);
+&unlock_file($mail_login_file);
 return 1;
 }
 
