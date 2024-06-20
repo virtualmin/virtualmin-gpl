@@ -222,6 +222,12 @@ if (&master_admin()) {
 		}
 	}
 
+# Domain auto disable state
+if ($d->{'disabled_auto'}) {
+	print &ui_table_row($text{'disable_autodisable2'},
+		&make_date($d->{'disabled_auto'}));
+	}
+
 print &ui_table_end();
 
 # Make sure the left menu is showing this domain

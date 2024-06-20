@@ -7980,6 +7980,12 @@ if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
 	$dom->{'autoalias'} = $aliasname;
 	}
 
+# Work out auto disable schedule
+if ($tmpl->{'domauto_disable'} &&
+    $tmpl->{'domauto_disable'} =~ /^(\d+)$/) {
+	$dom->{'disabled_auto'} = time() + $tmpl->{'domauto_disable'}*86400;
+	}
+
 # Check if only hashed passwords are stored, and if so generate a random
 # MySQL password now. This has to be done before any features are setup
 # so that mysql_pass is available to all features.
@@ -8925,6 +8931,32 @@ else {
 	}
 }
 
+# disable_scheduled_virtual_servers()
+# Disables all scheduled virtual servers that are due to be disabled
+sub disable_scheduled_virtual_servers
+{
+my @disdoms = grep {
+	!$_->{'protected'} &&                   # if domain is not protected
+	!$_->{'disabled'} &&                    # if not already disabled
+	&is_timestamp($_->{'disabled_auto'}) && # if actually a timestamp
+	$_->{'disabled_auto'} <= time()         # if timestamp is in the past
+	} &list_domains();
+foreach my $d (@disdoms) {
+	&push_all_print();
+	&set_all_null_print();
+	&lock_domain($d);
+	eval {
+		local $main::error_must_die = 1;
+		my $disabled_auto = &make_date($d->{'disabled_auto'});
+		&disable_virtual_server($d, 'schedule',
+			&text('disable_autodisabledone', $disabled_auto));
+		};
+	&unlock_domain($d);
+	&pop_all_print();
+	&error_stderr_local("Disabling domain on schedule failed : $@") if ($@);
+	}
+}
+
 # disable_virtual_server(&domain, [reason-code], [reason-why], [&only-features])
 # Disables all features of one virtual server. Returns undef on success, or
 # an error message on failure.
@@ -8945,6 +8977,7 @@ my %disable = map { $_, 1 } @disable;
 $d->{'disabled_reason'} = $reason;
 $d->{'disabled_why'} = $why;
 $d->{'disabled_time'} = time();
+delete($d->{'disabled_auto'});
 
 # Run the before command
 &set_domain_envs($d, "DISABLE_DOMAIN");
@@ -9004,6 +9037,7 @@ my @enable = &get_enable_features($d);
 my %enable = map { $_, 1 } @enable;
 delete($d->{'disabled_reason'});
 delete($d->{'disabled_why'});
+delete($d->{'disabled_auto'});
 
 # Run the before command
 &set_domain_envs($d, "ENABLE_DOMAIN");
@@ -9653,6 +9687,7 @@ push(@rv, { 'id' => 0,
 	    'append_style' => $config{'append_style'},
 	    'domalias' => $config{'domalias'} || "none",
 	    'domalias_type' => $config{'domalias_type'} || 0,
+	    'domauto_disable' => $config{'domauto_disable'},
 	    'for_parent' => 1,
 	    'for_sub' => 0,
 	    'for_alias' => 1,
@@ -10050,6 +10085,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'domalias'} = $tmpl->{'domalias'} eq 'none' ? undef :
 			      $tmpl->{'domalias'};
 	$config{'domalias_type'} = $tmpl->{'domalias_type'};
+	$config{'domauto_disable'} = $tmpl->{'domauto_disable'};
 	$config{'tmpl_autoconfig'} = $tmpl->{'autoconfig'};
 	$config{'tmpl_outlook_autoconfig'} = $tmpl->{'outlook_autoconfig'};
 	$config{'key_tmpl'} = $tmpl->{'cert_key_tmpl'};
@@ -17180,6 +17216,14 @@ print &ui_table_row(&hlink($text{'tmpl_domalias_type'},
 		[ 2, $text{'tmpl_domalias_type2'}." ".
 		     &ui_textbox("domalias_tmpl",
 			$mode == 2 ? $tmpl->{'domalias_type'} : "", 20) ] ]));
+
+# Automatic domain disabling
+print &ui_table_row($text{'disable_autodisable'},
+	&ui_opt_textbox(
+		"domauto_disable", 
+		$tmpl->{'domauto_disable'}, 4,
+		$text{'no'},
+		$text{'disable_autodisable_in'}));
 }
 
 # parse_template_virtualmin(&tmpl)
@@ -17201,6 +17245,18 @@ if ($in{'domalias_mode'} == 2) {
 	else {
 		$tmpl->{'domalias_type'} = $in{'domalias_type'};
 		}
+	}
+
+# Parse automatic domain disabling
+my $auto_disable = $in{'autodisable_def'} ? undef : $in{'domauto_disable'};
+if (defined($auto_disable)) {
+	$auto_disable =~ /^\d+$/ || &error($text{'disable_save_eautodisable'});
+	$auto_disable <= 0 && &error($text{'disable_save_eautodisable'});
+	$auto_disable > 365*10 && &error($text{'disable_save_eautodisable2'});
+	$tmpl->{'domauto_disable'} = $auto_disable;
+	}
+else {
+	$tmpl->{'domauto_disable'} = undef;
 	}
 }
 
@@ -18363,6 +18419,14 @@ opendir(EMPTYDIR, $dir) || return 0;
 my @files = grep { $_ ne "." && $_ ne ".." } readdir(EMPTYDIR);
 closedir(EMPTYDIR);
 return @files ? 0 : 1;
+}
+
+# is_timestamp(unix-timestamp)
+# Returns 1 if a given number is a timestamp
+sub is_timestamp
+{
+my ($t) = @_;
+return $t =~ /^\d{10}$/ ? 1 : 0;
 }
 
 # update_miniserv_preloads(mode)

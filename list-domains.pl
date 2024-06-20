@@ -424,6 +424,8 @@ if ($multi) {
 				  "For exceeding bandwidth limit" :
 				$d->{'disabled_reason'} eq 'transfer' ?
 				  "Transferred to another system" :
+				$d->{'disabled_reason'} eq 'schedule' ?
+				  "Manually configured schedule" :
 				$d->{'disabled_why'} ?
 				  "Manually ($d->{'disabled_why'})" :
 				  "Manually";
@@ -432,6 +434,10 @@ if ($multi) {
 				print "    Disabled at: ",
 				      &make_date($d->{'disabled_time'}),"\n";
 				}
+			}
+		elsif ($d->{'disabled_auto'}) {
+			print "    Disable scheduled on: ",
+			      &make_date($d->{'disabled_auto'}),"\n";
 			}
 		if ($d->{'virt'}) {
 			if ($multi == 2) {

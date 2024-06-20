@@ -46,6 +46,9 @@ if ($info) {
 # Resync all jails
 &copy_all_domain_jailkit_files();
 
+# Check if any domains are setup to be disabled
+&disable_scheduled_virtual_servers();
+
 # Kill disallowed server processes
 if ($config{'check_ports'} == 2) {
 	foreach my $d (grep { $_->{'unix'} && !$_->{'parent'} }
