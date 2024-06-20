@@ -5651,8 +5651,6 @@ foreach my $entry (&useradmin::list_last_logins()) {
 		}
 	}
 
-# MySQL last logins XXXX
-
 # Cache the last login times
 @st = stat($maillog);
 $logins{'lastpos'} = $st[7];
