@@ -20704,8 +20704,8 @@ foreach my $d (&list_domains()) {
 		$last_login_timestamp = undef;
 		$last_login = $text{'users_ll_never'};
 		}
-	# Logins found
 	else {
+		# Logins found
 		# Sort logins and get last login
 		@logins = sort { $b <=> $a } @logins;
 		# Save timestamp
