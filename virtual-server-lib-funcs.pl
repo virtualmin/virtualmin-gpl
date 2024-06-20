@@ -20693,7 +20693,7 @@ foreach my $d (&list_domains()) {
 	my $last_login;
 	my @logins;
 	# Get all users logins timestamps
-	foreach my $user (&list_domain_users($d, 0, 0, 1, 1)) {
+	foreach my $user (&list_domain_users($d, 0, 1, 1, 1)) {
 		my $ll = &get_last_login_time($user->{'user'});
 		foreach my $k (sort { $a cmp $b } keys %$ll) {
 			push(@logins, $ll->{$k});
