@@ -5609,6 +5609,61 @@ while(<MAILLOG>) {
 		}
 	}
 close(MAILLOG);
+
+# Webmin last logins
+&foreign_require("acl");
+my %miniserv;
+&get_miniserv_config(\%miniserv);
+&acl::open_session_db(\%miniserv);
+my %wsyslogins;
+foreach my $k (keys %acl::sessiondb) {
+	next if ($k =~ /^1111111/);
+	next if (!$acl::sessiondb{$k});
+	my ($user, $ltime, $lip) = split(/\s+/, $acl::sessiondb{$k});
+	if ($ltime > $wsyslogins{$user} || !$wsyslogins{$user}) {
+		$wsyslogins{$user} = $ltime;
+		&add_last_login_time(\%logins, $ltime, 'webmin', $user);
+		}
+	}
+
+# Usermin last logins
+&foreign_require("usermin");
+my %uminiserv;
+&usermin::get_usermin_miniserv_config(\%uminiserv);
+&acl::open_session_db(\%uminiserv);
+my %usyslogins;
+foreach my $k (keys %acl::sessiondb) {
+	next if ($k =~ /^1111111/);
+	next if (!$acl::sessiondb{$k});
+	my ($user, $ltime, $lip) = split(/\s+/, $acl::sessiondb{$k});
+	if ($ltime > $usyslogins{$user} || !$usyslogins{$user}) {
+		$usyslogins{$user} = $ltime;
+		&add_last_login_time(\%logins, $ltime, 'usermin', $user);
+		}
+	}
+
+# System last logins
+&foreign_require('useradmin');
+eval "use Time::Local";
+foreach my $entry (&useradmin::list_last_logins()) {
+	my ($user, $ltime) = ($entry->[0], $entry->[4] || $entry->[3]);
+	my ($day_of_week, $month, $day, $time, $year) = split(/\s+/, $ltime);
+	my ($hour, $min, $sec) = split(/:/, $time);
+	my $ts;
+	eval {
+		$ts = timelocal($sec, $min, $hour, $day, 
+			$month_to_number_map{lc($month)}, $year - 1900);
+		};
+	next if ($@);
+	if ($ts > $syslogins{$user} || !$syslogins{$user}) {
+		my ($service) = $entry->[1] =~ /^(tty|pts|ftp)/;
+		next if (!$service);
+		$syslogins{$user} = $ts;
+		&add_last_login_time(\%logins, $ts, $service, $user);
+		}
+	}
+
+# Cache the last login times
 @st = stat($maillog);
 $logins{'lastpos'} = $st[7];
 $logins{'lasttime'} = $finaltime || $now;

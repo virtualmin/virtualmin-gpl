@@ -41,6 +41,12 @@ print &ui_table_row($text{'edit_created'},
 						  $d->{'creator'})
 			: &make_date($d->{'created'}));
 
+# Last login
+if ($config{'show_domains_lastlogin'} && $d->{'last_login_timestamp'}) {
+	print &ui_table_row($text{'users_ll'},
+		&human_readable_time($d->{'last_login_timestamp'}));
+	}
+
 # Owner
 my $owner = "<tt title='$d->{'user'} ($d->{'uid'})'>$d->{'user'}</tt>";
 if (&can_edit_domain($d) && &can_rename_domains()) {

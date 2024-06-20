@@ -40,6 +40,10 @@ if ($info) {
 # Update DB of per-user last login times
 &update_last_login_times();
 
+# Update DB with last user logins for all domains
+&update_domains_last_login_times()
+	if ($config{'show_domains_lastlogin'});
+
 # For any domains that are due for a let's encrypt cert renewal, do it now
 &apply_letsencrypt_cert_renewals();
 

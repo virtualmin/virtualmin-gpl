@@ -3557,6 +3557,9 @@ my @colnames = split(/,/, $config{'index_cols'});
 if (!@colnames) {
 	@colnames = ( 'dom', 'user', 'owner', 'users', 'aliases');
 	}
+if ($config{'show_domains_lastlogin'}) {
+	push(@colnames, 'lastlogin');
+	}
 if (!&has_home_quotas()) {
 	@colnames = grep { $_ ne 'quota' && $_ ne 'uquota' } @colnames;
 	}
@@ -3675,6 +3678,11 @@ foreach my $d (&sort_indent_domains($doms)) {
 			else {
 				push(@cols, $text{'index_nomail'});
 				}
+			}
+		elsif ($c eq "lastlogin") {
+			my $lt = &human_readable_time(
+				$d->{'last_login_timestamp'});
+			push(@cols, $lt || $text{'users_ll_never'});
 			}
 		elsif ($c eq "quota") {
 			# Quota assigned
@@ -5673,7 +5681,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		# Last mail login
 		my $ll = &get_last_login_time($u->{'user'});
 		my $llbest;
-		foreach $k (keys %$ll) {
+		foreach $k (sort { $a cmp $b } keys %$ll) {
 			$llbest = $ll->{$k} if ($ll->{$k} > $llbest);
 			}
 		push(@cols, $llbest ? &make_date($llbest)
@@ -20755,6 +20763,72 @@ sub list_script_plugins
 {
 &load_plugin_libraries();
 return grep { &plugin_defined($_, "scripts_list") } @plugins;
+}
+
+# update_domains_last_login_times()
+# Updates last login time for all domains on the system
+sub update_domains_last_login_times
+{
+foreach my $d (&list_domains()) {
+	next if ($d->{'alias'});
+	next if ($d->{'no_last_login'});
+	my @logins;
+	# Get all users logins timestamps
+	foreach my $user (&list_domain_users($d, 0, 1, 1, 1)) {
+		my $ll = &get_last_login_time($user->{'user'});
+		foreach my $k (sort { $a cmp $b } keys %$ll) {
+			push(@logins, $ll->{$k});
+			}
+		}
+	next if (!@logins);
+	# Logins found
+	# Sort logins and get last login
+	@logins = sort { $b <=> $a } @logins;
+	# Save most recent timestamp
+	&lock_domain($d);
+	$d->{'last_login_timestamp'} = $logins[0];
+	&save_domain($d);
+	&unlock_domain($d);
+	}
+}
+
+# human_readable_time(timestamp)
+# Returns a string representing the time since the given timestamp
+# if within 24 hours, otherwise returns a human-readable date
+sub human_readable_time
+{
+my $ts = shift;
+return undef if (!&is_timestamp($ts));
+my $last_login;
+my $last = &make_date($ts, { '_' }); # XXXX rm '_' later
+if (ref($last) eq 'HASH' &&
+    $last->{'ago'} && !$last->{'ago'}->{'days'}) {
+	my $hours = $last->{'ago'}->{'hours'};
+	my $minutes = $last->{'ago'}->{'minutes'};
+	if ($hours) {
+		$last_login = $hours . " " .
+			($hours == 1 ?
+				$text{'summary_lastlogin_hour'} :
+				$text{'summary_lastlogin_hours'});
+		}
+	elsif ($minutes) {
+		$last_login = $minutes . " " .
+			($minutes == 1 ?
+				$text{'summary_lastlogin_min'} :
+				$text{'summary_lastlogin_mins'});
+		}
+	else {
+		my $seconds = $last->{'ago'}->{'seconds'};
+		$last_login = $seconds . " " .
+			($seconds == 1 ?
+				$text{'summary_lastlogin_sec'} :
+				$text{'summary_lastlogin_secs'});
+		}
+	}
+else {
+	$last_login = &make_date($ts);
+	}
+return $last_login;
 }
 
 $done_virtual_server_lib_funcs = 1;

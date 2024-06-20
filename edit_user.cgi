@@ -679,6 +679,7 @@ else {
 	if ($user->{'webowner'}) {
 		$ulabel = &hlink($text{'user_user2'}, "username4_universal");
 		}
+
 	if ($mailbox) {
 		# Domain owner
 		my $ouser_email = $user->{'user'};
@@ -807,6 +808,20 @@ else {
 			  &can_mailbox_ssh() ? ["mailbox", "owner"] : "mailbox",
 			  $user->{'webowner'} ? 'ftp' : undef),
 			2, \@tds);
+		}
+
+	# Show most recent logins
+	if (!$in{'new'}) {
+		$ll = &get_last_login_time($user->{'user'});
+		@grid = ( );
+		foreach $k (sort { $a cmp $b } keys %$ll) {
+			push(@grid, $text{'user_lastlogin_'.$k},
+				&make_date($ll->{$k}));
+			}
+		print &ui_table_row(
+			&hlink($text{'user_lastlogin'}, "lastlogin"),
+			@grid ? &ui_grid_table(\@grid, 2, 50)
+			: $text{'user_lastlogin_never'});
 		}
 
 	# Show secondary groups
@@ -1011,20 +1026,6 @@ else {
 						  [ 1, $text{'no'} ] ]).
 					$awl_link,
 				2, \@tds);
-			}
-
-		# Show most recent logins
-		if ($hasemail && !$in{'new'}) {
-			$ll = &get_last_login_time($user->{'user'});
-			@grid = ( );
-			foreach $k (keys %$ll) {
-				push(@grid, $text{'user_lastlogin_'.$k},
-					&make_date($ll->{$k}));
-				}
-			print &ui_table_row(
-				&hlink($text{'user_lastlogin'}, "lastlogin"),
-				@grid ? &ui_grid_table(\@grid, 2, 50)
-				: $text{'user_lastlogin_never'});
 			}
 
 		if ($hasemail) {
