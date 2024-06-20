@@ -3681,7 +3681,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 			}
 		elsif ($c eq "lastlogin") {
 			push(@cols, $d->{'last_login'} ||
-				    $d->{'users_ll_never'});
+				    $text{'users_ll_never'});
 			}
 		elsif ($c eq "quota") {
 			# Quota assigned
