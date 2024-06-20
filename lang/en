@@ -2211,7 +2211,7 @@ check_eqmailldap=Qmail+LDAP support has been removed in Virtualmin 6.00
 
 check_defhost_nok=The given host name <tt>$1</tt> is not a fully qualified domain name
 check_defhost_clash=The domain named <tt>$1</tt> already exists
-check_defhost_desc=Providing Let's Encrypt SSL certificate for the hostname
+check_defhost_desc=Hostname default page
 check_defhost_succ=Successfully set up Let's Encrypt SSL certificate for the <tt>$1</tt> hostname
 check_defhost_sharedsucc=Successfully used the shared SSL certificate for the <tt>$1</tt> hostname
 check_defhost_sharedsucc2=.. done with shared SSL certificate
