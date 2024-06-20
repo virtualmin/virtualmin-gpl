@@ -8934,11 +8934,13 @@ else {
 # Disables all scheduled virtual servers that are due to be disabled
 sub disable_scheduled_virtual_servers
 {
-foreach my $d (grep {
-		!$_->{'disabled'} && $_->{'disabled_auto'} &&
-		$_->{'disabled_auto'} =~ /(\d{10,})/ && 
-		$_->{'disabled_auto'} <= time() } &list_domains()) {
-	next if ($d->{'protected'});
+my @disdoms = grep {
+	!$_->{'protected'} &&                  # if domain is not protected
+	!$_->{'disabled'} &&                   # if not already disabled
+	$_->{'disabled_auto'} =~ /^\d{10}$/ && # if actually a timestamp
+	$_->{'disabled_auto'} <= time()        # if timestamp is in the past
+	} &list_domains();
+foreach my $d (@disdoms) {
 	&push_all_print();
 	&set_all_null_print();
 	&lock_domain($d);
@@ -8950,9 +8952,7 @@ foreach my $d (grep {
 		};
 	&unlock_domain($d);
 	&pop_all_print();
-	if ($@) {
-		&error_stderr_local("Disabling domain on schedule failed : $@");
-		}
+	&error_stderr_local("Disabling domain on schedule failed : $@") if ($@);
 	}
 }
 
