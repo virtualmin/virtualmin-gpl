@@ -3350,7 +3350,8 @@ my ($ver) = @_;
 my $basever = substr($ver, 0, 1);
 my @opts = ( $config{'python_cmd'} );
 if (!$basever || $basever == 3) {
-	push(@opts, "python3.14", "python314",
+	push(@opts, "/etc/alternatives/python3",
+		    "python3.14", "python314",
 		    "python3.13", "python313",
 		    "python3.12", "python312",
 		    "python3.11", "python311",
@@ -3362,7 +3363,8 @@ if (!$basever || $basever == 3) {
 		    "python3", "python30");
 	}
 if (!$basever || $basever == 2) {
-	push(@opts, "python2.7", "python27",
+	push(@opts, "/etc/alternatives/python2",
+		    "python2.7", "python27",
 		    "python2.6", "python26",
 		    "python2", "python20");
 	}
