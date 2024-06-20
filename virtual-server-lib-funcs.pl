@@ -8935,10 +8935,10 @@ else {
 sub disable_scheduled_virtual_servers
 {
 my @disdoms = grep {
-	!$_->{'protected'} &&                  # if domain is not protected
-	!$_->{'disabled'} &&                   # if not already disabled
-	$_->{'disabled_auto'} =~ /^\d{10}$/ && # if actually a timestamp
-	$_->{'disabled_auto'} <= time()        # if timestamp is in the past
+	!$_->{'protected'} &&                   # if domain is not protected
+	!$_->{'disabled'} &&                    # if not already disabled
+	&is_timestamp($_->{'disabled_auto'}) && # if actually a timestamp
+	$_->{'disabled_auto'} <= time()         # if timestamp is in the past
 	} &list_domains();
 foreach my $d (@disdoms) {
 	&push_all_print();
@@ -18418,6 +18418,14 @@ opendir(EMPTYDIR, $dir) || return 0;
 my @files = grep { $_ ne "." && $_ ne ".." } readdir(EMPTYDIR);
 closedir(EMPTYDIR);
 return @files ? 0 : 1;
+}
+
+# is_timestamp(unix-timestamp)
+# Returns 1 if a given number is a timestamp
+sub is_timestamp
+{
+my ($t) = @_;
+return $t =~ /^\d{10}$/ ? 1 : 0;
 }
 
 # update_miniserv_preloads(mode)
