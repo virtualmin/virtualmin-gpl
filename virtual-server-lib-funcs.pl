@@ -20713,7 +20713,7 @@ foreach my $d (&list_domains()) {
 		# Show ago for last login if within 24 hours
 		my $last = &make_date($logins[0], { '_' }); # XXXX rm '_' later
 		if (ref($last) eq 'HASH' &&
-		$last->{'ago'} && !$last->{'ago'}->{'days'}) {
+		    $last->{'ago'} && !$last->{'ago'}->{'days'}) {
 			my $hours = $last->{'ago'}->{'hours'};
 			my $minutes = $last->{'ago'}->{'minutes'};
 			if ($hours) {
