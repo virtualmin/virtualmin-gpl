@@ -20418,13 +20418,13 @@ my $d = &get_domain_by("defaulthostdomain", 1);
 return if (!$d->{'dom'});
 return if (!&can_delete_domain($d));
 # Delete hostname domain
-# &lock_domain_name($d->{'dom'});   #### XXXX do we need locking on delete?
+&lock_domain_name($d->{'dom'});
 &push_all_print();
 &set_all_null_print();
 $err = &delete_virtual_server($d, 0, 0);
 &pop_all_print();
 &run_post_actions_silently();
-# &unlock_domain_name($d->{'dom'}); #### XXXX
+&unlock_domain_name($d->{'dom'});
 &lock_file($module_config_file);
 $config{'defaultdomain_name'} = undef;
 &save_module_config();
