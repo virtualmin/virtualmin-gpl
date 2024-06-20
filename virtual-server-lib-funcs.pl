@@ -5671,7 +5671,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		# Last mail login
 		my $ll = &get_last_login_time($u->{'user'});
 		my $llbest;
-		foreach $k (keys %$ll) {
+		foreach $k (sort { $a cmp $b } keys %$ll) {
 			$llbest = $ll->{$k} if ($ll->{$k} > $llbest);
 			}
 		push(@cols, $llbest ? &make_date($llbest)
@@ -20698,7 +20698,7 @@ foreach my $user (keys %syslogins) {
 # Mail user logins
 foreach my $user (&list_domain_users($d, 1, 0, 1, 1)) {
 	my $ll = &get_last_login_time($user->{'user'});
-	foreach my $k (keys %$ll) {
+	foreach my $k (sort { $a cmp $b } keys %$ll) {
 		push(@logins, $ll->{$k});
 		}
 	}

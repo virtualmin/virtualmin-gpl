@@ -814,7 +814,7 @@ else {
 	if (!$in{'new'}) {
 		$ll = &get_last_login_time($user->{'user'});
 		@grid = ( );
-		foreach $k (keys %$ll) {
+		foreach $k (sort { $a cmp $b } keys %$ll) {
 			push(@grid, $text{'user_lastlogin_'.$k},
 				&make_date($ll->{$k}));
 			}
