@@ -27,6 +27,7 @@ index_cols=Columns to show,2,dom-Domain name,type-Domain type,user-Username,owne
 index_fcols=Feature columns to show,2,web-Website,ssl-SSL website,dns-DNS domain,mail-Email<br>,mysql-MySQL,postgres-PostgreSQL,spam-Spam filtering,virus-Virus filtering<br>,webalizer-Webalizer,webmin-Webmin login
 show_mailsize=Show mailbox size in users list?,1,1-Yes,0-No
 show_mailuser=Show mailbox size when editing users?,1,1-Yes,0-No
+show_domains_lastlogin=Show most recent user login in virtual servers list?,1,1-Yes,0-No
 show_lastlogin=Show last login in users list?,1,1-Yes,0-No
 show_dbs=Show databases in users list?,1,1-Yes,0-No
 show_plugins=Show other plugins in users list?,1,1-Yes,0-No

@@ -20682,63 +20682,72 @@ sub list_script_plugins
 return grep { &plugin_defined($_, "scripts_list") } @plugins;
 }
 
-# domain_last_login(&domain)
-# Returns last login for domain
-sub domain_last_login
+# update_domains_last_login_times()
+# Updates last login time for all domains on the system
+sub update_domains_last_login_times
 {
-my ($d) = @_;
-my @logins;
-# Get other system logins
-my %syslogins;
-&read_file($system_login_file, \%syslogins);
-foreach my $user (keys %syslogins) {
-	next if ($user ne $d->{'user'});
-	push(@logins, $syslogins{$user});
-	}
-# Mail user logins
-foreach my $user (&list_domain_users($d, 1, 0, 1, 1)) {
-	my $ll = &get_last_login_time($user->{'user'});
-	foreach my $k (sort { $a cmp $b } keys %$ll) {
-		push(@logins, $ll->{$k});
+foreach my $d (&list_domains()) {
+	next if ($d->{'alias'});
+	next if ($d->{'no_last_login'});
+	my $last_login_timestamp;
+	my $last_login;
+	my @logins;
+	# Get all users logins timestamps
+	foreach my $user (&list_domain_users($d, 0, 0, 1, 1)) {
+		my $ll = &get_last_login_time($user->{'user'});
+		foreach my $k (sort { $a cmp $b } keys %$ll) {
+			push(@logins, $ll->{$k});
+			}
 		}
-	}
-@logins = sort { $b <=> $a } @logins;
-if (!@logins) {
-	return wantarray ?
-		($text{'users_ll_never'}, undef) :
-		 $text{'users_ll_never'};
-	}
-my $last = &make_date($logins[0], { '_' }); # XXXX '_' can be removed later
-my $last_login;
-# Show ago for last login if within 24 hours
-if (ref($last) eq 'HASH' &&
-    $last->{'ago'} && !$last->{'ago'}->{'days'}) {
-	my $hours = $last->{'ago'}->{'hours'};
-	my $minutes = $last->{'ago'}->{'minutes'};
-	if ($hours) {
-		$last_login = $hours . " " .
-			($hours == 1 ?
-			 $text{'summary_lastlogin_hour'} :
-			 $text{'summary_lastlogin_hours'});
+	# No logins recorded yet
+	if (!@logins) {
+		$last_login_timestamp = undef;
+		$last_login = $text{'users_ll_never'};
 		}
-	elsif ($minutes) {
-		$last_login = $minutes . " " .
-			($minutes == 1 ?
-			 $text{'summary_lastlogin_min'} :
-			 $text{'summary_lastlogin_mins'});
-		}
+	# Logins found
 	else {
-		my $seconds = $last->{'ago'}->{'seconds'};
-		$last_login = $seconds . " " .
-			($seconds == 1 ?
-			 $text{'summary_lastlogin_sec'} :
-			 $text{'summary_lastlogin_secs'});
+		# Sort logins and get last login
+		@logins = sort { $b <=> $a } @logins;
+		# Save timestamp
+		$last_login_timestamp = $logins[0];
+		# Show ago for last login if within 24 hours
+		my $last = &make_date($logins[0], { '_' }); # XXXX rm '_' later
+		if (ref($last) eq 'HASH' &&
+		$last->{'ago'} && !$last->{'ago'}->{'days'}) {
+			my $hours = $last->{'ago'}->{'hours'};
+			my $minutes = $last->{'ago'}->{'minutes'};
+			if ($hours) {
+				$last_login = $hours . " " .
+					($hours == 1 ?
+					 $text{'summary_lastlogin_hour'} :
+					 $text{'summary_lastlogin_hours'});
+				}
+			elsif ($minutes) {
+				$last_login = $minutes . " " .
+					($minutes == 1 ?
+					 $text{'summary_lastlogin_min'} :
+					 $text{'summary_lastlogin_mins'});
+				}
+			else {
+				my $seconds = $last->{'ago'}->{'seconds'};
+				$last_login = $seconds . " " .
+					($seconds == 1 ?
+					 $text{'summary_lastlogin_sec'} :
+					 $text{'summary_lastlogin_secs'});
+				}
+			}
+		else {
+			$last_login = &make_date($logins[0]);
+			}
 		}
+	&lock_domain($d);
+	$d->{'last_login'} = $last_login
+		if ($last_login);
+	$d->{'last_login_timestamp'} = $last_login_timestamp
+		if ($last_login_timestamp);
+	&save_domain($d);
+	&unlock_domain($d);
 	}
-else {
-	$last_login = &make_date($logins[0]);
-	}
-return wantarray ? ($last_login, $logins[0]) : $last_login;
 }
 
 $done_virtual_server_lib_funcs = 1;

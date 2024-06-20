@@ -258,3 +258,4 @@ php_fpm_init=php-fpm
 php_fpm_pool=/usr/local/etc/php-fpm.d
 cgimode=suexec
 dynip_update=1
+show_domains_lastlogin=1
