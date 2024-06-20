@@ -5684,7 +5684,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		foreach $k (sort { $a cmp $b } keys %$ll) {
 			$llbest = $ll->{$k} if ($ll->{$k} > $llbest);
 			}
-		push(@cols, $llbest ? &make_date($llbest)
+		push(@cols, $llbest ? &human_readable_time($llbest)
 				    : $text{'users_ll_never'});
 		}
 
