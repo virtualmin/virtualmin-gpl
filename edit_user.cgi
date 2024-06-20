@@ -679,6 +679,21 @@ else {
 	if ($user->{'webowner'}) {
 		$ulabel = &hlink($text{'user_user2'}, "username4_universal");
 		}
+
+	# Show most recent logins
+	my $lastlogin;
+	if (!$in{'new'}) {
+		$ll = &get_last_login_time($user->{'user'});
+		@grid = ( );
+		foreach $k (keys %$ll) {
+			push(@grid, $text{'user_lastlogin_'.$k},
+				&make_date($ll->{$k}));
+			}
+		$lastlogin = &ui_table_row(
+			&hlink($text{'user_lastlogin'}, "lastlogin"),
+			@grid ? &ui_grid_table(\@grid, 2, 50)
+			: $text{'user_lastlogin_never'});
+		}
 	if ($mailbox) {
 		# Domain owner
 		my $ouser_email = $user->{'user'};
@@ -687,7 +702,7 @@ else {
 			}
 		print &ui_table_row(
 			&hlink($text{'user_user2'}, "username2_universal"),
-			"<tt>$user->{'user'}</tt>", 2, \@tds);
+			"<tt>$user->{'user'}</tt>", 2, \@tds) . $lastlogin;
 		print &ui_table_row($ulabel, "<tt>$ouser_email</tt>", 2, \@tds)
 			if ($d->{'mail'});
 		$pop3 = $user->{'user'};
@@ -702,7 +717,7 @@ else {
 			print &ui_table_row(
 				&hlink($text{"user_user3"},
 					$user->{'webowner'} ? 'username4' : 'username3'),
-				"<tt>$user->{'user'}</tt>");
+				"<tt>$user->{'user'}</tt>") . $lastlogin;
 			}
 
 		# Edit mail username
@@ -1011,20 +1026,6 @@ else {
 						  [ 1, $text{'no'} ] ]).
 					$awl_link,
 				2, \@tds);
-			}
-
-		# Show most recent logins
-		if ($hasemail && !$in{'new'}) {
-			$ll = &get_last_login_time($user->{'user'});
-			@grid = ( );
-			foreach $k (keys %$ll) {
-				push(@grid, $text{'user_lastlogin_'.$k},
-					&make_date($ll->{$k}));
-				}
-			print &ui_table_row(
-				&hlink($text{'user_lastlogin'}, "lastlogin"),
-				@grid ? &ui_grid_table(\@grid, 2, 50)
-				: $text{'user_lastlogin_never'});
 			}
 
 		if ($hasemail) {

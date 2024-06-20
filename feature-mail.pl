@@ -5598,27 +5598,42 @@ while(<MAILLOG>) {
 	}
 close(MAILLOG);
 
-# Miniserv last logins
+# Webmin last logins
 &foreign_require("acl");
 my %miniserv;
 &get_miniserv_config(\%miniserv);
 &acl::open_session_db(\%miniserv);
-my %syslogins;
+my %wsyslogins;
 foreach my $k (keys %acl::sessiondb) {
 	next if ($k =~ /^1111111/);
 	next if (!$acl::sessiondb{$k});
 	my ($user, $ltime, $lip) = split(/\s+/, $acl::sessiondb{$k});
-	if ($ltime > $syslogins{$user} || !$syslogins{$user}) {
-		$syslogins{$user} = $ltime;
-		&add_last_login_time(\%logins, $ltime, 'miniserv', $user);
+	if ($ltime > $wsyslogins{$user} || !$wsyslogins{$user}) {
+		$wsyslogins{$user} = $ltime;
+		&add_last_login_time(\%logins, $ltime, 'webmin', $user);
+		}
+	}
+
+# Usermin last logins
+&foreign_require("usermin");
+my %uminiserv;
+&usermin::get_usermin_miniserv_config(\%uminiserv);
+&acl::open_session_db(\%uminiserv);
+my %usyslogins;
+foreach my $k (keys %acl::sessiondb) {
+	next if ($k =~ /^1111111/);
+	next if (!$acl::sessiondb{$k});
+	my ($user, $ltime, $lip) = split(/\s+/, $acl::sessiondb{$k});
+	if ($ltime > $usyslogins{$user} || !$usyslogins{$user}) {
+		$usyslogins{$user} = $ltime;
+		&add_last_login_time(\%logins, $ltime, 'usermin', $user);
 		}
 	}
 
 # System last logins
 &foreign_require('useradmin');
-my @logins = &useradmin::list_last_logins();
 eval "use Time::Local";
-foreach my $entry (@logins) {
+foreach my $entry (&useradmin::list_last_logins()) {
 	my ($user, $ltime) = ($entry->[0], $entry->[4] || $entry->[3]);
 	my ($day_of_week, $month, $day, $time, $year) = split(/\s+/, $ltime);
 	my ($hour, $min, $sec) = split(/:/, $time);
@@ -5629,8 +5644,10 @@ foreach my $entry (@logins) {
 		};
 	next if ($@);
 	if ($ts > $syslogins{$user} || !$syslogins{$user}) {
+		my ($service) = $entry->[1] =~ /^(tty|pts|ftp)/;
+		next if (!$service);
 		$syslogins{$user} = $ts;
-		&add_last_login_time(\%logins, $ts, 'pts', $user);
+		&add_last_login_time(\%logins, $ts, $service, $user);
 		}
 	}
 
