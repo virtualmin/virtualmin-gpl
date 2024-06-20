@@ -26,6 +26,7 @@ index_mail=Email?
 index_webmin=Webmin?
 index_users=Users
 index_aliases=Aliases
+index_lastlogin=Last login
 index_reseller=Reseller
 index_emailto=Email address
 index_admins=Admins

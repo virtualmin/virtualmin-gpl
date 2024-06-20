@@ -3557,6 +3557,9 @@ my @colnames = split(/,/, $config{'index_cols'});
 if (!@colnames) {
 	@colnames = ( 'dom', 'user', 'owner', 'users', 'aliases');
 	}
+if ($config{'show_domains_lastlogin'}) {
+	push(@colnames, 'lastlogin');
+	}
 if (!&has_home_quotas()) {
 	@colnames = grep { $_ ne 'quota' && $_ ne 'uquota' } @colnames;
 	}
@@ -3675,6 +3678,10 @@ foreach my $d (&sort_indent_domains($doms)) {
 			else {
 				push(@cols, $text{'index_nomail'});
 				}
+			}
+		elsif ($c eq "lastlogin") {
+			push(@cols, $d->{'last_login'} ||
+				    $d->{'users_ll_never'});
 			}
 		elsif ($c eq "quota") {
 			# Quota assigned
