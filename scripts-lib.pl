@@ -3370,15 +3370,7 @@ if (!$basever || $basever == 2) {
 	}
 push(@opts, "python");
 foreach my $o (@opts) {
-	my $p;
-	if ($o =~ /^\//) {
-		my ($path, $cmd) = ($o =~ m|^(.*)/([^/]+)$|);
-		local $ENV{'PATH'} = $path;
-		$p = &has_command($cmd);
-		}
-	else {
-		$p = &has_command($o);
-		}
+	my $p = &has_command($o);
 	next if (!$p);
 	next if ($ver && &get_python_version($p) !~ /^\Q$ver\E(\.|$)/);
 	return $p;
