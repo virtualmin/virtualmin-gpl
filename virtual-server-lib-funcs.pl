@@ -3680,8 +3680,9 @@ foreach my $d (&sort_indent_domains($doms)) {
 				}
 			}
 		elsif ($c eq "lastlogin") {
-			push(@cols, $d->{'last_login'} ||
-				    $text{'users_ll_never'});
+			my $lt = &human_readable_time(
+				$d->{'last_login_timestamp'});
+			push(@cols, $lt || $text{'users_ll_never'});
 			}
 		elsif ($c eq "quota") {
 			# Quota assigned
@@ -20696,8 +20697,6 @@ sub update_domains_last_login_times
 foreach my $d (&list_domains()) {
 	next if ($d->{'alias'});
 	next if ($d->{'no_last_login'});
-	my $last_login_timestamp;
-	my $last_login;
 	my @logins;
 	# Get all users logins timestamps
 	foreach my $user (&list_domain_users($d, 0, 1, 1, 1)) {
@@ -20706,55 +20705,55 @@ foreach my $d (&list_domains()) {
 			push(@logins, $ll->{$k});
 			}
 		}
-	# No logins recorded yet
-	if (!@logins) {
-		$last_login_timestamp = undef;
-		$last_login = $text{'users_ll_never'};
-		}
-	else {
-		# Logins found
-		# Sort logins and get last login
-		@logins = sort { $b <=> $a } @logins;
-		# Save timestamp
-		$last_login_timestamp = $logins[0];
-		# Show ago for last login if within 24 hours
-		my $last = &make_date($logins[0], { '_' }); # XXXX rm '_' later
-		if (ref($last) eq 'HASH' &&
-		    $last->{'ago'} && !$last->{'ago'}->{'days'}) {
-			my $hours = $last->{'ago'}->{'hours'};
-			my $minutes = $last->{'ago'}->{'minutes'};
-			if ($hours) {
-				$last_login = $hours . " " .
-					($hours == 1 ?
-					 $text{'summary_lastlogin_hour'} :
-					 $text{'summary_lastlogin_hours'});
-				}
-			elsif ($minutes) {
-				$last_login = $minutes . " " .
-					($minutes == 1 ?
-					 $text{'summary_lastlogin_min'} :
-					 $text{'summary_lastlogin_mins'});
-				}
-			else {
-				my $seconds = $last->{'ago'}->{'seconds'};
-				$last_login = $seconds . " " .
-					($seconds == 1 ?
-					 $text{'summary_lastlogin_sec'} :
-					 $text{'summary_lastlogin_secs'});
-				}
-			}
-		else {
-			$last_login = &make_date($logins[0]);
-			}
-		}
+	next if (!@logins);
+	# Logins found
+	# Sort logins and get last login
+	@logins = sort { $b <=> $a } @logins;
+	# Save most recent timestamp
 	&lock_domain($d);
-	$d->{'last_login'} = $last_login
-		if ($last_login);
-	$d->{'last_login_timestamp'} = $last_login_timestamp
-		if ($last_login_timestamp);
+	$d->{'last_login_timestamp'} = $logins[0];
 	&save_domain($d);
 	&unlock_domain($d);
 	}
+}
+
+# human_readable_time(timestamp)
+# Returns a string representing the time since the given timestamp
+# if within 24 hours, otherwise returns a human-readable date
+sub human_readable_time
+{
+my $ts = shift;
+return undef if (!&is_timestamp($ts));
+my $last_login;
+my $last = &make_date($ts, { '_' }); # XXXX rm '_' later
+if (ref($last) eq 'HASH' &&
+    $last->{'ago'} && !$last->{'ago'}->{'days'}) {
+	my $hours = $last->{'ago'}->{'hours'};
+	my $minutes = $last->{'ago'}->{'minutes'};
+	if ($hours) {
+		$last_login = $hours . " " .
+			($hours == 1 ?
+				$text{'summary_lastlogin_hour'} :
+				$text{'summary_lastlogin_hours'});
+		}
+	elsif ($minutes) {
+		$last_login = $minutes . " " .
+			($minutes == 1 ?
+				$text{'summary_lastlogin_min'} :
+				$text{'summary_lastlogin_mins'});
+		}
+	else {
+		my $seconds = $last->{'ago'}->{'seconds'};
+		$last_login = $seconds . " " .
+			($seconds == 1 ?
+				$text{'summary_lastlogin_sec'} :
+				$text{'summary_lastlogin_secs'});
+		}
+	}
+else {
+	$last_login = &make_date($ts);
+	}
+return $last_login;
 }
 
 $done_virtual_server_lib_funcs = 1;

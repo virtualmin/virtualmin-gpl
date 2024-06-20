@@ -925,11 +925,16 @@ if ($multi) {
 			}
 		
 		# Last login
-		if ($d->{'last_login'} && $config{'show_domains_lastlogin'}) {
-			print "    Last login: $d->{'last_login'}\n";
+		if ($config{'show_domains_lastlogin'}) {
 			if ($d->{'last_login_timestamp'}) {
+				print "    Last login: ".
+					&human_readable_time(
+					    $d->{'last_login_timestamp'})."\n";
 				print "    Last login time: ",
-				      "$d->{'last_login_timestamp'}\n";
+					"$d->{'last_login_timestamp'}\n";
+				}
+			else {
+				print "    Last login: Never\n";
 				}
 			}
 		}
