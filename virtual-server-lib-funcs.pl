@@ -1643,119 +1643,121 @@ if ($_[1]) {
 # Update a mail / FTP user
 sub modify_user
 {
-# Rename any of his cron jobs
-&rename_unix_cron_jobs($_[0]->{'user'}, $_[1]->{'user'});
+my ($user, $olduser, $d, $noaliases) = @_;
 
-local $pop3 = &remove_userdom($_[0]->{'user'}, $_[2]);
+# Rename any of his cron jobs
+&rename_unix_cron_jobs($user->{'user'}, $olduser->{'user'});
+
+local $pop3 = &remove_userdom($user->{'user'}, $d);
 local $extrauser;
 &require_useradmin();
 &require_mail();
 
 # Update the unix user
 if ($config{'ldap_mail'}) {
-	$_[0]->{'ldap_attrs'} = [ ];
-	if ($_[0]->{'email'}) {
-		push(@{$_[0]->{'ldap_attrs'}}, "mail",$_[0]->{'email'});
+	$user->{'ldap_attrs'} = [ ];
+	if ($user->{'email'}) {
+		push(@{$user->{'ldap_attrs'}}, "mail",$user->{'email'});
 		}
 	local $ea = $config{'ldap_mail'} == 2 ?
 			'mailAlternateAddress' : 'mail';
-	push(@{$_[0]->{'ldap_attrs'}},
-	     map { ( $ea, $_ ) } @{$_[0]->{'extraemail'}});
+	push(@{$user->{'ldap_attrs'}},
+	     map { ( $ea, $_ ) } @{$user->{'extraemail'}});
 	}
-&foreign_call($usermodule, "set_user_envs", $_[0], 'MODIFY_USER',
-	      $_[0]->{'plainpass'}, undef, $_[1], $_[1]->{'plainpass'});
-&set_virtualmin_user_envs($_[0], $_[2]);
+&foreign_call($usermodule, "set_user_envs", $user, 'MODIFY_USER',
+	      $user->{'plainpass'}, undef, $olduser, $olduser->{'plainpass'});
+&set_virtualmin_user_envs($user, $d);
 &foreign_call($usermodule, "making_changes");
-&userdom_substitutions($_[0], $_[2]);
-&foreign_call($usermodule, "modify_user", $_[1], $_[0]);
+&userdom_substitutions($user, $d);
+&foreign_call($usermodule, "modify_user", $olduser, $user);
 &foreign_call($usermodule, "made_changes");
 
-if ($config{'mail_system'} == 0 && $_[1]->{'user'} =~ /\@/) {
-	local $esc = &replace_atsign($_[1]->{'user'});
+if ($config{'mail_system'} == 0 && $olduser->{'user'} =~ /\@/) {
+	local $esc = &replace_atsign($olduser->{'user'});
 	local @allusers = &list_all_users_quotas(1);
 	local ($oldextrauser) = grep { $_->{'user'} eq $esc } @allusers;
 	if ($oldextrauser) {
 		# Found him .. fix up
-		$extrauser = { %{$_[0]} };
-		$extrauser->{'user'} = &replace_atsign($_[0]->{'user'});
+		$extrauser = { %{$user} };
+		$extrauser->{'user'} = &replace_atsign($user->{'user'});
 		$extrauser->{'dn'} = $oldextrauser->{'dn'};
 		&foreign_call($usermodule, "set_user_envs", $extrauser,
-				'MODIFY_USER', $_[0]->{'plainpass'},
+				'MODIFY_USER', $user->{'plainpass'},
 				undef, $oldextrauser,
-				$_[1]->{'plainpass'});
-		&set_virtualmin_user_envs($_[0], $_[2]);
+				$olduser->{'plainpass'});
+		&set_virtualmin_user_envs($user, $d);
 		&foreign_call($usermodule, "making_changes");
-		&userdom_substitutions($extrauser, $_[2]);
+		&userdom_substitutions($extrauser, $d);
 		&foreign_call($usermodule, "modify_user",
 				$oldextrauser, $extrauser);
 		&foreign_call($usermodule, "made_changes");
 		}
 	}
-goto NOALIASES if ($_[3]);	# no need to touch aliases and virtusers
+goto NOALIASES if ($noaliases);	# no need to touch aliases and virtusers
 
 # Check if email has changed
 local $echanged;
-if (!$_[0]->{'email'} && $_[1]->{'virt'} &&		# disabling
-     $_[1]->{'virt'}->{'to'}->[0] !~ /^BOUNCE/ ||
-    $_[0]->{'email'} && !$_[1]->{'virt'} ||		# enabling
-    $_[0]->{'email'} && $_[1]->{'virt'} &&		# changing
-     $_[0]->{'email'} ne $_[1]->{'virt'}->{'from'} ||
-    $_[0]->{'email'} && $_[1]->{'virt'} &&		# also enabling
-     $_[1]->{'virt'}->{'to'}->[0] =~ /^BOUNCE/
+if (!$user->{'email'} && $olduser->{'virt'} &&		# disabling
+     $olduser->{'virt'}->{'to'}->[0] !~ /^BOUNCE/ ||
+    $user->{'email'} && !$olduser->{'virt'} ||		# enabling
+    $user->{'email'} && $olduser->{'virt'} &&		# changing
+     $user->{'email'} ne $olduser->{'virt'}->{'from'} ||
+    $user->{'email'} && $olduser->{'virt'} &&		# also enabling
+     $olduser->{'virt'}->{'to'}->[0] =~ /^BOUNCE/
     ) {
 	# Primary has changed
 	$echanged = 1;
 	}
-local $oldextra = join(" ", map { $_->{'from'} } @{$_[1]->{'extravirt'}});
-local $newextra = join(" ", @{$_[0]->{'extraemail'}});
+local $oldextra = join(" ", map { $_->{'from'} } @{$olduser->{'extravirt'}});
+local $newextra = join(" ", @{$user->{'extraemail'}});
 if ($oldextra ne $newextra) {
 	# Extra has changed
 	$echanged = 1;
 	}
-if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+if ($user->{'user'} ne $olduser->{'user'}) {
 	# Always update on a rename
 	$echanged = 1;
 	}
-local $oldto = join(" ", @{$_[1]->{'to'}});
-local $newto = join(" ", @{$_[0]->{'to'}});
+local $oldto = join(" ", @{$olduser->{'to'}});
+local $newto = join(" ", @{$user->{'to'}});
 if ($oldto ne $newto) {
 	# Always update if forwarding dest has changed
 	$echanged = 1;
 	}
 
 local $firstemail;
-local @to = @{$_[0]->{'to'}};
-local @oldto = @{$_[1]->{'to'}};
+local @to = @{$user->{'to'}};
+local @oldto = @{$olduser->{'to'}};
 if ($echanged) {
 	# Take away all virtusers and add new ones, for non Qmail+LDAP users
-	&delete_virtuser($_[1]->{'virt'}) if ($_[1]->{'virt'});
+	&delete_virtuser($olduser->{'virt'}) if ($olduser->{'virt'});
 	local %oldcmt;
-	foreach my $e (@{$_[1]->{'extravirt'}}) {
+	foreach my $e (@{$olduser->{'extravirt'}}) {
 		$oldcmt{$e->{'from'}} = $e->{'cmt'};
 		&delete_virtuser($e);
 		}
-	local $vto = @to ? &escape_alias($_[0]->{'user'}) :
+	local $vto = @to ? &escape_alias($user->{'user'}) :
 		     $extrauser ? $extrauser->{'user'} :
-				  &escape_user($_[0]->{'user'});
-	if ($_[0]->{'email'}) {
-		local $virt = { 'from' => $_[0]->{'email'},
+				  &escape_user($user->{'user'});
+	if ($user->{'email'}) {
+		local $virt = { 'from' => $user->{'email'},
 				'to' => [ $vto ],
-				'cmt' => $oldcmt{$_[0]->{'email'}} };
+				'cmt' => $oldcmt{$user->{'email'}} };
 		&create_virtuser($virt);
-		$_[0]->{'virt'} = $virt;
-		$firstemail ||= $_[0]->{'email'};
+		$user->{'virt'} = $virt;
+		$firstemail ||= $user->{'email'};
 		}
-	elsif ($can_alias_types{9} && $_[2] && !$_[0]->{'noprimary'} &&
-	       $_[2]->{'mail'}) {
+	elsif ($can_alias_types{9} && $d && !$user->{'noprimary'} &&
+	       $d->{'mail'}) {
 		# Add bouncer if email disabled
-		local $virt = { 'from' => "$pop3\@$_[2]->{'dom'}",
+		local $virt = { 'from' => "$pop3\@$d->{'dom'}",
 				'to' => [ "BOUNCE" ],
-				'cmt' => $oldcmt{"$pop3\@$_[2]->{'dom'}"} };
+				'cmt' => $oldcmt{"$pop3\@$d->{'dom'}"} };
 		&create_virtuser($virt);
-		$_[0]->{'virt'} = $virt;
+		$user->{'virt'} = $virt;
 		}
 	local @extravirt;
-	foreach my $e (&unique(@{$_[0]->{'extraemail'}})) {
+	foreach my $e (&unique(@{$user->{'extraemail'}})) {
 		local $virt = { 'from' => $e,
 				'to' => [ $vto ],
 				'cmt' => $oldcmt{$e} };
@@ -1763,14 +1765,14 @@ if ($echanged) {
 		push(@extravirt, $virt);
 		$firstemail ||= $e;
 		}
-	$_[0]->{'extravirt'} = \@extravirt;
+	$user->{'extravirt'} = \@extravirt;
 	}
 else {
 	# Just work out primary email address, for use by generics
-	if ($_[0]->{'email'}) {
-		$firstemail ||= $_[0]->{'email'};
+	if ($user->{'email'}) {
+		$firstemail ||= $user->{'email'};
 		}
-	foreach my $e (@{$_[0]->{'extraemail'}}) {
+	foreach my $e (@{$user->{'extraemail'}}) {
 		$firstemail ||= $e;
 		}
 	}
@@ -1778,11 +1780,11 @@ else {
 # Update, create or delete alias
 if (@to && !@oldto) {
 	# Need to add alias
-	local $alias = { 'name' => &escape_alias($_[0]->{'user'}),
+	local $alias = { 'name' => &escape_alias($user->{'user'}),
 			 'enabled' => 1,
-			 'values' => $_[0]->{'to'} };
-	&check_alias_clash($_[0]->{'user'}) &&
-		&error(&text('alias_eclash2', $_[0]->{'user'}));
+			 'values' => $user->{'to'} };
+	&check_alias_clash($user->{'user'}) &&
+		&error(&text('alias_eclash2', $user->{'user'}));
 	if ($config{'mail_system'} == 1) {
 		# Create Sendmail alias with same name as user
 		&sendmail::lock_alias_files($sendmail_afiles);
@@ -1798,128 +1800,128 @@ if (@to && !@oldto) {
 		}
 	elsif ($config{'mail_system'} == 2) {
 		# Set up user's .qmail file
-		local $dqm = &dotqmail_file($_[0]);
+		local $dqm = &dotqmail_file($user);
 		&lock_file($dqm);
 		&save_dotqmail($alias, $dqm, $pop3);
 		&unlock_file($dqm);
 		}
-	$_[0]->{'alias'} = $alias;
+	$user->{'alias'} = $alias;
 	}
 elsif (!@to && @oldto) {
 	# Need to delete alias
 	if ($config{'mail_system'} == 1) {
 		# Delete Sendmail alias
-		&lock_file($_[0]->{'alias'}->{'file'});
-		&sendmail::delete_alias($_[0]->{'alias'});
-		&unlock_file($_[0]->{'alias'}->{'file'});
+		&lock_file($user->{'alias'}->{'file'});
+		&sendmail::delete_alias($user->{'alias'});
+		&unlock_file($user->{'alias'}->{'file'});
 		}
 	elsif ($config{'mail_system'} == 0) {
 		# Delete Postfix alias
-		&lock_file($_[0]->{'alias'}->{'file'});
-		&$postfix_delete_alias($_[0]->{'alias'});
-		&unlock_file($_[0]->{'alias'}->{'file'});
+		&lock_file($user->{'alias'}->{'file'});
+		&$postfix_delete_alias($user->{'alias'});
+		&unlock_file($user->{'alias'}->{'file'});
 		&postfix::regenerate_aliases();
 		}
 	elsif ($config{'mail_system'} == 2) {
 		# Remove user's .qmail file
-		local $dqm = &dotqmail_file($_[0]);
+		local $dqm = &dotqmail_file($user);
 		&unlink_logged($dqm);
 		}
 	}
 elsif (@to && @oldto && join(" ", @to) ne join(" ", @oldto)) {
 	# Need to update the alias
-	local $alias = { 'name' => &escape_alias($_[0]->{'user'}),
+	local $alias = { 'name' => &escape_alias($user->{'user'}),
 			 'enabled' => 1,
-			 'values' => $_[0]->{'to'} };
+			 'values' => $user->{'to'} };
 	if ($config{'mail_system'} == 1) {
 		# Update Sendmail alias
-		&lock_file($_[1]->{'alias'}->{'file'});
-		&sendmail::modify_alias($_[1]->{'alias'}, $alias);
-		&unlock_file($_[1]->{'alias'}->{'file'});
+		&lock_file($olduser->{'alias'}->{'file'});
+		&sendmail::modify_alias($olduser->{'alias'}, $alias);
+		&unlock_file($olduser->{'alias'}->{'file'});
 		}
 	elsif ($config{'mail_system'} == 0) {
 		# Update Postfix alias
-		&lock_file($_[1]->{'alias'}->{'file'});
-		&$postfix_modify_alias($_[1]->{'alias'}, $alias);
-		&unlock_file($_[1]->{'alias'}->{'file'});
+		&lock_file($olduser->{'alias'}->{'file'});
+		&$postfix_modify_alias($olduser->{'alias'}, $alias);
+		&unlock_file($olduser->{'alias'}->{'file'});
 		&postfix::regenerate_aliases();
 		}
 	elsif ($config{'mail_system'} == 2) {
 		# Set up user's .qmail file
-		local $dqm = &dotqmail_file($_[0]);
+		local $dqm = &dotqmail_file($user);
 		&lock_file($dqm);
 		&save_dotqmail($alias, $dqm, $pop3);
 		&unlock_file($dqm);
 		}
-	$_[0]->{'alias'} = $alias;
+	$user->{'alias'} = $alias;
 	}
 
 if ($config{'generics'} && $echanged) {
 	# Update genericstable entry too
-	if ($_[1]->{'generic'}) {
-		&delete_generic($_[1]->{'generic'});
+	if ($olduser->{'generic'}) {
+		&delete_generic($olduser->{'generic'});
 		}
 	if ($firstemail) {
-		&create_generic($_[0]->{'user'}, $firstemail);
+		&create_generic($user->{'user'}, $firstemail);
 		}
 	}
-&sync_alias_virtuals($_[2]);
+&sync_alias_virtuals($d);
 NOALIASES:
 
 # Save his quotas if changed (unless this is the domain owner)
-if ($_[2] && $_[0]->{'user'} ne $_[2]->{'user'} &&
-    !$_[0]->{'noquota'} &&
-    ($_[0]->{'quota'} != $_[1]->{'quota'} ||
-     $_[0]->{'mquota'} != $_[1]->{'mquota'})) {
-	&set_user_quotas($_[0]->{'user'}, $_[0]->{'quota'}, $_[0]->{'mquota'},
-			 $_[2]);
-	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-		&update_user_quota_cache($_[1], $_[0], 1);
+if ($d && $user->{'user'} ne $d->{'user'} &&
+    !$user->{'noquota'} &&
+    ($user->{'quota'} != $olduser->{'quota'} ||
+     $user->{'mquota'} != $olduser->{'mquota'})) {
+	&set_user_quotas($user->{'user'}, $user->{'quota'}, $user->{'mquota'},
+			 $d);
+	if ($user->{'user'} ne $olduser->{'user'}) {
+		&update_user_quota_cache($olduser, $user, 1);
 		}
-	&update_user_quota_cache($_[2], $_[0], 0);
+	&update_user_quota_cache($d, $user, 0);
 	}
 
 # Update the plain-text password file, except for a domain owner
-if (!$_[0]->{'domainowner'} && $_[2] && !$_[2]->{'hashpass'}) {
+if (!$user->{'domainowner'} && $d && !$d->{'hashpass'}) {
 	local %plain;
 	mkdir($plainpass_dir, 0700);
-	&read_file_cached("$plainpass_dir/$_[2]->{'id'}", \%plain);
-	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-		$plain{$_[0]->{'user'}} = $plain{$_[1]->{'user'}};
-		delete($plain{$_[1]->{'user'}});
-		$plain{$_[0]->{'user'}." encrypted"} =
-			$plain{$_[1]->{'user'}." encrypted"};
-		delete($plain{$_[1]->{'user'}." encrypted"});
+	&read_file_cached("$plainpass_dir/$d->{'id'}", \%plain);
+	if ($user->{'user'} ne $olduser->{'user'}) {
+		$plain{$user->{'user'}} = $plain{$olduser->{'user'}};
+		delete($plain{$olduser->{'user'}});
+		$plain{$user->{'user'}." encrypted"} =
+			$plain{$olduser->{'user'}." encrypted"};
+		delete($plain{$olduser->{'user'}." encrypted"});
 		}
-	if (defined($_[0]->{'plainpass'})) {
-		$plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
-		$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
+	if (defined($user->{'plainpass'})) {
+		$plain{$user->{'user'}} = $user->{'plainpass'};
+		$plain{$user->{'user'}." encrypted"} = $user->{'pass'};
 		}
-	&write_file("$plainpass_dir/$_[2]->{'id'}", \%plain);
+	&write_file("$plainpass_dir/$d->{'id'}", \%plain);
 	}
 
 # Update hashed passwords file, except for domain owner
-if (!$_[0]->{'domainowner'} && $_[2] && $_[2]->{'hashpass'}) {
+if (!$user->{'domainowner'} && $d && $d->{'hashpass'}) {
 	local %hash;
 	mkdir($hashpass_dir, 0700);
-	&read_file_cached("$hashpass_dir/$_[2]->{'id'}", \%hash);
-	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+	&read_file_cached("$hashpass_dir/$d->{'id'}", \%hash);
+	if ($user->{'user'} ne $olduser->{'user'}) {
 		foreach my $s (@hashpass_types) {
-			$hash{$_[0]->{'user'}.' '.$s} =
-				$hash{$_[1]->{'user'}.' '.$s};
-			delete($hash{$_[1]->{'user'}.' '.$s});
+			$hash{$user->{'user'}.' '.$s} =
+				$hash{$olduser->{'user'}.' '.$s};
+			delete($hash{$olduser->{'user'}.' '.$s});
 			}
 		}
-	if (defined($_[0]->{'plainpass'})) {
+	if (defined($user->{'plainpass'})) {
 		# Re-hash new password
 		local $g = &generate_password_hashes(
-				$_[0], $_[0]->{'plainpass'}, $_[2]);
+				$user, $user->{'plainpass'}, $d);
 		foreach my $s (@hashpass_types) {
-			$hash{$_[0]->{'user'}.' '.$s} = $g->{$s};
-			$_[0]->{'pass_'.$s} = $g->{$s};
+			$hash{$user->{'user'}.' '.$s} = $g->{$s};
+			$user->{'pass_'.$s} = $g->{$s};
 			}
 		}
-	&write_file("$hashpass_dir/$_[2]->{'id'}", \%hash);
+	&write_file("$hashpass_dir/$d->{'id'}", \%hash);
 	}
 
 # Update his allowed databases (unless this is the domain owner), if any
@@ -1928,18 +1930,18 @@ if (!$_[0]->{'domainowner'} && $_[2] && $_[2]->{'hashpass'}) {
 
 # Rename user in secondary groups, and update membership
 local @groups = &list_all_groups();
-local %secs = map { $_, 1 } @{$_[0]->{'secs'}};
-local @sgroups = &allowed_secondary_groups($_[2]);
+local %secs = map { $_, 1 } @{$user->{'secs'}};
+local @sgroups = &allowed_secondary_groups($d);
 foreach my $group (@groups) {
 	local @mems = split(/,/, $group->{'members'});
-	local $idx = &indexof($_[1]->{'user'}, @mems);
+	local $idx = &indexof($olduser->{'user'}, @mems);
 	local $changed;
 	if ($idx >= 0) {
 		# User is currently in group
-		if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+		if ($user->{'user'} ne $olduser->{'user'}) {
 			# Just rename in group, if needed
 			$changed = 1;
-			$mems[$idx] = $_[0]->{'user'};
+			$mems[$idx] = $user->{'user'};
 			}
 		elsif (!$secs{$group->{'group'}}) {
 			# Remove from group, if this is a secondary managed
@@ -1952,7 +1954,7 @@ foreach my $group (@groups) {
 		}
 	elsif ($secs{$group->{'group'}}) {
 		# User is not in group, but needs to be
-		push(@mems, $_[0]->{'user'});
+		push(@mems, $user->{'user'});
 		$changed = 1;
 		}
 	if ($changed) {
@@ -1964,81 +1966,81 @@ foreach my $group (@groups) {
 	}
 
 # Update mail/FTP/db groups
-&update_secondary_groups($_[2]) if ($_[2]);
+&update_secondary_groups($d) if ($d);
 
 # Update spamassassin whitelist
-if ($_[2]) {
-	&obtain_lock_spam($_[2]);
-	&update_spam_whitelist($_[2]);
-	&release_lock_spam($_[2]);
+if ($d) {
+	&obtain_lock_spam($d);
+	&update_spam_whitelist($d);
+	&release_lock_spam($d);
 	}
 
 # Update the no-spam-check flag
-if ($_[2]) {
+if ($d) {
 	if (!-d $nospam_dir) {
 		mkdir($nospam_dir, 0700);
 		}
-	if (defined($_[0]->{'nospam'})) {
+	if (defined($user->{'nospam'})) {
 		local %nospam;
-		&read_file_cached("$nospam_dir/$_[2]->{'id'}", \%nospam);
-		if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-			delete($nospam{$_[1]->{'user'}});
+		&read_file_cached("$nospam_dir/$d->{'id'}", \%nospam);
+		if ($user->{'user'} ne $olduser->{'user'}) {
+			delete($nospam{$olduser->{'user'}});
 			}
-		$nospam{$_[0]->{'user'}} = $_[0]->{'nospam'};
-		&write_file("$nospam_dir/$_[2]->{'id'}", \%nospam);
+		$nospam{$user->{'user'}} = $user->{'nospam'};
+		&write_file("$nospam_dir/$d->{'id'}", \%nospam);
 		}
 	}
 
 # Update the last logins file
-if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+if ($user->{'user'} ne $olduser->{'user'}) {
 	&lock_file($mail_login_file);
 	my %logins;
 	&read_file_cached($mail_login_file, \%logins);
-	if ($logins{$_[1]->{'user'}}) {
-		$logins{$_[0]->{'user'}} = $logins{$_[1]->{'user'}};
-		delete($logins{$_[1]->{'user'}});
+	if ($logins{$olduser->{'user'}}) {
+		$logins{$user->{'user'}} = $logins{$olduser->{'user'}};
+		delete($logins{$olduser->{'user'}});
 		&write_file($mail_login_file, \%logins);
 		}
 	&unlock_file($mail_login_file);
 	}
 
 # Clear quota cache for this user
-if (defined(&clear_lookup_domain_cache) && $_[2]) {
-	&clear_lookup_domain_cache($_[2], $_[0]);
+if (defined(&clear_lookup_domain_cache) && $d) {
+	&clear_lookup_domain_cache($d, $user);
 	}
 
 # Set the user's Usermin IMAP password
-if ($_[0]->{'email'} || @{$_[0]->{'extraemail'}}) {
-	&set_usermin_imap_password($_[0]);
+if ($user->{'email'} || @{$user->{'extraemail'}}) {
+	&set_usermin_imap_password($user);
 	}
 
 # Save the recovery address
-&set_usermin_recovery_address($_[0]);
+&set_usermin_recovery_address($user);
 
 # Update cache of existing usernames
-if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-	$unix_user{&escape_alias($_[0]->{'user'})}++;
-	$unix_user{&escape_alias($_[1]->{'user'})} = 0;
+if ($user->{'user'} ne $olduser->{'user'}) {
+	$unix_user{&escape_alias($user->{'user'})}++;
+	$unix_user{&escape_alias($olduser->{'user'})} = 0;
 	}
 
-if ($_[0]->{'shell'} ne $_[1]->{'shell'}) {
+if ($user->{'shell'} ne $olduser->{'shell'}) {
 	# Rebuild denied user list, by shell
 	&build_denied_ssh_group();
 	}
 
 # Rebuild group of domain owners
-if ($_[0]->{'domainowner'}) {
+if ($user->{'domainowner'}) {
 	&update_domain_owners_group();
 	}
 
 # Create everyone file for domain
-if ($_[2] && $_[2]->{'mail'}) {
-	&create_everyone_file($_[2]);
+if ($d && $d->{'mail'}) {
+	&create_everyone_file($d);
 	}
 
 # Sync up jail password file
-if ($_[2]) {
-	&create_jailkit_passwd_file($_[2]);
+if ($d) {
+	&create_jailkit_passwd_file($d);
 	}
 }
 
