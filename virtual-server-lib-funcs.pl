@@ -3559,9 +3559,6 @@ my @colnames = split(/,/, $config{'index_cols'});
 if (!@colnames) {
 	@colnames = ( 'dom', 'user', 'owner', 'users', 'aliases');
 	}
-if ($config{'show_domains_lastlogin'}) {
-	push(@colnames, 'lastlogin');
-	}
 if (!&has_home_quotas()) {
 	@colnames = grep { $_ ne 'quota' && $_ ne 'uquota' } @colnames;
 	}
