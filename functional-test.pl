@@ -8595,6 +8595,13 @@ $lastlogin_tests = [
 		    'smtp '.$datestr.' \d+:\d+',
 	},
 
+	# Check that the most recent login for the domain was collected
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain' => $test_bw_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'Last login: '.$datestr.' \d+:\d+',
+	},
+
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_bw_domain ] ],
