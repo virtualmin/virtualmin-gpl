@@ -1995,7 +1995,7 @@ if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 	my %logins;
 	&read_file_cached($mail_login_file, \%logins);
 	if ($logins{$_[1]->{'user'}}) {
-		$logins{$_[1]->{'user'}} = $logins{$_[1]->{'user'}};
+		$logins{$_[0]->{'user'}} = $logins{$_[1]->{'user'}};
 		delete($logins{$_[1]->{'user'}});
 		&write_file($mail_login_file, \%logins);
 		}
