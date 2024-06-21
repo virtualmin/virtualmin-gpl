@@ -1468,7 +1468,6 @@ disable_users=Låser e-post brukeres konti ..
 disable_why=Årsak til deaktivering:
 disable_subservers=Deaktiver også under-tjenere?
 disable_doing=Deaktiverer virtuell tjener $1 ..
-
 enable_title=Aktiver tjener
 enable_rusure2=Er du sikker på at du ønsker å re-aktivere den virtuelle tjeneren $1? Dens $2 vil gjenopprettes til deres opprinnelige aktiverte tilstander.
 enable_ok=Ja, aktiver den
@@ -1846,6 +1845,7 @@ log_create_domain=Opprettet virtuell tjener $1
 log_modify_domain=Endret virtuell tjener $1
 log_delete_domain=Slette virtuell tjener $1
 log_disable_domain=Deaktivert virtuell tjener $1
+
 log_enable_domain=Aktiverte virtuell tjener $1
 log_import_domain=Importerte virtuell tjener $1
 log_rename_domain=Omdøpte virtuell tjener $1

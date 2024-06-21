@@ -1269,7 +1269,6 @@ disable_users=Bloqueando usuarios de cuentas de mail ..
 disable_why=Razón para deshabilitar:
 disable_subservers=Desactivar también subservidores?
 disable_doing=Desactivando servidor virtual $1 ..
-
 enable_title=Habilitar Servidor
 enable_rusure2=¿Está Ud. seguro de que desea rehabilitar el servidor virtual $1? Sus $2 serán restaurados a sus estados de habilitación originales.
 enable_ok=Sí, Habilitarlo
@@ -1594,6 +1593,7 @@ log_create_domain=Se creó servidor virtual $1
 log_modify_domain=Se modificó servidor virtual $1
 log_delete_domain=Se eliminó servidor virtual $1
 log_disable_domain=Se deshabilitó servidor virtual $1
+
 log_enable_domain=Se habilitó servidor virtual $1
 log_import_domain=Se importó servidor virtual $1
 log_rename_domain=Se renombró servidor virtual $1

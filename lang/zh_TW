@@ -1110,7 +1110,6 @@ disable_status=正在禁用網站狀態監控 ..
 disable_statusssl=正在禁用SSL網站狀態監控 ..
 disable_users=正在鎖郵件用戶賬號 ..
 disable_why=禁用原因：
-
 enable_title=啟用服務器
 enable_rusure2=你確定要重新啟用虛擬服務器$1？它的$2將被回複到原先可用狀態。
 enable_ok=是，啟用它
@@ -1391,6 +1390,7 @@ log_create_domain=創建虛擬服務器$1
 log_modify_domain=修改虛擬服務器$1
 log_delete_domain=刪除虛擬服務器$1
 log_disable_domain=禁用虛擬服務器$1
+
 log_enable_domain=啟用虛擬服務器$1
 log_import_domain=導入虛擬服務器$1
 log_rename_domain=重命名虛擬服務器$1

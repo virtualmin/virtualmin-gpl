@@ -1074,7 +1074,6 @@ disable_fpostgres=Login PostgreSQL
 disable_fftp=Serveur FTP
 disable_and=$1 et $2
 disable_nothing=Ce domaine n'a aucune fonctionnalité configurée qui puisse être désactivée.
-
 enable_title=Activer le serveur
 enable_rusure2=Etes vous sûr de vouloir réactiver le serveur virtuel $1? Ses $2 seront réactivés.
 enable_ok=Oui, l'activer
@@ -1292,6 +1291,7 @@ log_create_domain=Serveur virtuel $1 créé
 log_modify_domain=Serveur virtuel $1 modifié
 log_delete_domain=Serveur virtuel $1 effacé
 log_disable_domain=Serveur virtuel $1 désactivé
+
 log_enable_domain=Serveur virtuel $1 activé
 log_import_domain=Serveur virtuel $1 importé
 log_rename_domain=Renommé le serveur virtuel $1

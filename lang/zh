@@ -1110,7 +1110,6 @@ disable_status=正在禁用网站状态监控 ..
 disable_statusssl=正在禁用SSL网站状态监控 ..
 disable_users=正在锁邮件用户账号 ..
 disable_why=禁用原因：
-
 enable_title=启用服务器
 enable_rusure2=你确定要重新启用虚拟服务器$1？它的$2将被回复到原先可用状态。
 enable_ok=是，启用它
@@ -1391,6 +1390,7 @@ log_create_domain=创建虚拟服务器$1
 log_modify_domain=修改虚拟服务器$1
 log_delete_domain=删除虚拟服务器$1
 log_disable_domain=禁用虚拟服务器$1
+
 log_enable_domain=启用虚拟服务器$1
 log_import_domain=导入虚拟服务器$1
 log_rename_domain=重命名虚拟服务器$1

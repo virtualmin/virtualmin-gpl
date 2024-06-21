@@ -1176,7 +1176,6 @@ disable_statusssl=Deaktiviere Statusmonitor für die SSL-Webseite ..
 disable_why=Grund des Deaktivierens
 disable_subservers=Auch Sub-Server deaktivieren?
 disable_doing=Deaktiviere Virtuellen Server $1
-
 enable_title=Virtuellen Server reaktivieren
 enable_rusure2=Sind Sie sicher, daß Sie den Virtuellen Server $1 reaktivieren wollen? Seine $2 werden wieder in den Originalzustand hergestellt.
 enable_ok=Ja, jetzt reaktivieren!
@@ -1461,6 +1460,7 @@ log_create_domain=Virtueller Server $1 erzeugt
 log_modify_domain=Virtueller Server $1 geändert
 log_delete_domain=Virtueller Server $1 gelöscht
 log_disable_domain=Virtueller Server $1 deaktiviert
+
 log_enable_domain=Virtueller Server $1 aktiviert
 log_import_domain=Virtueller Server $1 importiert
 log_rename_domain=Virtueller Server $1 umbenannt

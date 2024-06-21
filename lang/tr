@@ -1062,7 +1062,6 @@ disable_status=Web sitesi durum monitörü durduruluyor ..
 disable_statusssl=SSL web sitesi durum monitörü durduruluyor ..
 disable_users=Posta kullanýcýlarýnýn hesaplarý kilitleniyor ..
 disable_why=Engelleme Sebebi:
-
 enable_title=Sunucuyu Etkinlþtir
 enable_rusure2=$1 sanal sunucusunu tekrar etkinleþtirmek istediðinizden emin misiniz? Its $2 orjinal etkin durumlarýna geri yüklenecekler.
 enable_ok=Evet, Etkinleþtir
@@ -1321,6 +1320,7 @@ log_create_domain=Sanal sunucu oluþturuldu $1
 log_modify_domain=Sanal sunucu deðiþtirildi $1
 log_delete_domain=Sanal sunucu silindi $1
 log_disable_domain=Sanal sunucu engellendi $1
+
 log_enable_domain=Sanal sunucu etkinleþtirildi $1
 log_import_domain=Sanal sunucu import edildi $1
 log_rename_domain=Sanal sunucu yeniden adlandýrýldý $1
