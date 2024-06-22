@@ -118,6 +118,10 @@ $d->{'letsencrypt_renew'} = 1;		# Default let's encrypt renewal
 
 # Create a self-signed cert and key, if needed
 my $generated = &generate_default_certificate($d);
+if (!$generated && !-r $d->{'ssl_cert'}) {
+	# SSL cert failed, so don't proceed
+	return 0;
+	}
 &refresh_ssl_cert_expiry($d);
 local $chained = $d->{'ssl_chain'};
 &sync_combined_ssl_cert($d);
