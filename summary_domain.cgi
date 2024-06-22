@@ -42,9 +42,10 @@ print &ui_table_row($text{'edit_created'},
 			: &make_date($d->{'created'}));
 
 # Last login
-if ($config{'show_domains_lastlogin'} && $d->{'last_login_timestamp'}) {
+if ($config{'show_domains_lastlogin'}) {
 	print &ui_table_row($text{'users_ll'},
-		&human_readable_time($d->{'last_login_timestamp'}));
+		&human_readable_time($d->{'last_login_timestamp'}) ||
+		$text{'users_ll_never'});
 	}
 
 # Owner

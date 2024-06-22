@@ -375,7 +375,6 @@ acheck_edom=Brak dyrektyw ServerName lub ServerAlias zawartych w $DOM
 acheck_edoc=Brakująca dyrektywa DocumentRoot
 
 disable_title=Wyłącz serwer
-
 enable_title=Włącz serwer
 enable_ok=Tak, włącz
 
@@ -425,6 +424,7 @@ check_apicmdok=.. utworzono <tt>$1</tt>
 check_apicmderr=.. błąd : $1
 
 log_disable_domain=Wyłączono serwer wirtualny $1
+
 log_enable_spamd=Włączono serwer SpamAssassin
 log_disable_spamd=Wyłączono serwer SpamAssassin
 

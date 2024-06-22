@@ -3557,7 +3557,7 @@ if ($showchecks) {
 	}
 my @colnames = split(/,/, $config{'index_cols'});
 if (!@colnames) {
-	@colnames = ( 'dom', 'user', 'owner', 'users', 'aliases');
+	@colnames = ( 'dom', 'user', 'owner', 'users', 'aliases', 'lastlogin' );
 	}
 if (!&has_home_quotas()) {
 	@colnames = grep { $_ ne 'quota' && $_ ne 'uquota' } @colnames;
@@ -3678,11 +3678,6 @@ foreach my $d (&sort_indent_domains($doms)) {
 				push(@cols, $text{'index_nomail'});
 				}
 			}
-		elsif ($c eq "lastlogin") {
-			my $lt = &human_readable_time(
-				$d->{'last_login_timestamp'});
-			push(@cols, $lt || $text{'users_ll_never'});
-			}
 		elsif ($c eq "quota") {
 			# Quota assigned
 			my $qd = $d->{'parent'} ? &get_domain($d->{'parent'})
@@ -3753,6 +3748,11 @@ foreach my $d (&sort_indent_domains($doms)) {
 			else {
 				push(@cols, "<i>$text{'maillog_unknown'}</i>");
 				}
+			}
+		elsif ($c eq "lastlogin") {
+			my $lt = &human_readable_time(
+				$d->{'last_login_timestamp'});
+			push(@cols, $lt || $text{'users_ll_never'});
 			}
 		elsif ($c =~ /^field_/) {
 			# Some custom field

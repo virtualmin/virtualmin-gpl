@@ -1423,7 +1423,6 @@ disable_status=De-activeer website status monitoren ..
 disable_statusssl=De-activeer SSL website status monitoren ..
 disable_users=Op slot zetten van gebruikers email accounten ..
 disable_why=Reden voor uitschakelen:
-
 enable_title=Aanzetten Server
 enable_rusure2=Weet u zeker dat u de virtuele server $1 opnieuw wilt aanzetten? Zijn $2 zullen worden hersteld naar hun originele staat toen ze aanstonden.
 enable_ok=Ja, Aanzetten
@@ -1787,6 +1786,7 @@ log_create_domain=Aangemaakte virtuele server $1
 log_modify_domain=Gemodificeerde virtuele server $1
 log_delete_domain=Verwijderde virtuele server $1
 log_disable_domain=Uitschakelen van virtuele server $1
+
 log_enable_domain=Aangezette virtuele server $1
 log_import_domain=Geïmporteerde virtuele server $1
 log_rename_domain=Hernoemde virtuele server $1

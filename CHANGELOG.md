@@ -1,4 +1,6 @@
 #### Version 7.20.0
+* Add support to record most recent user logins for virtual servers
+* Add ability to disable domains on given schedule
 * Add support for proxying WebSocket with Apache and Nginx proxy paths
 * Add an API to manage scheduled backups
 * Add the ability to enable DKIM even if the mail feature is disabled
