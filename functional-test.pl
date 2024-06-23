@@ -916,6 +916,13 @@ $disable_tests = [
 	  'args' => [ [ 'domain' => $test_domain ] ],
 	},
 
+	# Check that it was disabled
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'Disabled: Manually',
+	},
+
 	# Test that DNS lookup fails
 	{ 'command' => 'host -t A '.$test_domain,
 	  'antigrep' => &get_default_ip(),
@@ -1012,6 +1019,42 @@ $disable_tests = [
 	{ 'command' => 'validate-domains.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
 		      [ 'all-features' ] ],
+	},
+
+	# Schedule a disable for a few seconds into the future
+	{ 'command' => 'disable-domain.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'schedule' => 0.0001 ] ],
+	},
+
+	# Check that it shows up in list-domains
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'Disable scheduled on',
+	},
+
+	# Wait a bit for the disable time
+	{ 'command' => 'sleep 8',
+	},
+
+	# Run a schedule collection, which should trigger the disable
+	{ 'command' => $module_config_directory."/collectinfo.pl",
+	  'antigrep' => 'Already running',
+	  'tries' => 5,
+	},
+
+	# Check that it was disabled
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'Disabled: Manually configured schedule',
+	},
+
+	# Make sure website is gone
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'antigrep' => 'Test home page',
+	  'quiet' => 1,
 	},
 
 	# Cleanup the domains
