@@ -95,15 +95,18 @@ if ($scheduled) {
 		&unlock_domain($d);
 		print ".. done\n";
 		}
-	elsif ($schedule =~ /^(?<ts>\d+)$/ &&
-	       ($+{ts} > time() ||
-	       ($+{ts} > 0 && $+{ts} < 365*10))) {
-		# Schedule a disable
-		my $ts = $+{ts};
-		# If timestamp is in days
-		if ($ts < 365*10) {
-			$ts = time() + $ts * 86400;
+	elsif ($schedule =~ /^\d+(\.\d+)$/) {
+		# Schedule can either be a timestamp or a number of days
+		my $ts;
+		if ($schedule < 365*10) {
+			# Number of days
+			$ts = time() + int($schedule * 86400);
 			}
+		else {
+			# Unix time
+			$ts = $schedule;
+			}
+		$ts > time() || &usage("Disable time must be in the future");
 		my $amsg = $d->{'disabled_auto'} ? "Updating" : "Setting";
 		print "$amsg up disable schedule for $d->{'dom'} to @{[&make_date($ts)]} ..\n";
 		&lock_domain($d);
