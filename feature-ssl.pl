@@ -1888,7 +1888,7 @@ else {
 		" $size 2>&1 </dev/null");
 	}
 my $rv = $?;
-if (!-r $keytemp || $rv) {
+if (!-s $keytemp || $rv) {
 	return &text('csr_ekey', "<pre>$out</pre>");
 	}
 
