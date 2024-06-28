@@ -5525,6 +5525,7 @@ local $defrecs = [ ];
 
 # Compare with the actual records
 my $recs = [ &get_domain_dns_records($d) ];
+$recs = &filter_domain_dns_records($d, $recs);
 return undef if (!@$recs);
 my @doomed;
 foreach my $r (@$recs) {
@@ -5533,7 +5534,8 @@ foreach my $r (@$recs) {
 	my ($dr) = grep { &expand_dns_record($_->{'name'}, $d) eq
 			    &expand_dns_record($r->{'name'}, $d) &&
 			  ($_->{'type'} eq 'SPF' ? 'TXT' : $_->{'type'}) eq
-			    ($r->{'type'} eq 'SPF' ? 'TXT' : $_->{'type'}) } @$defrecs;
+			    ($r->{'type'} eq 'SPF' ? 'TXT' : $_->{'type'}) }
+			@$defrecs;
 	if (!$dr) {
 		my $n = $r->{'name'};
 		$n =~ s/\.\Q$d->{'dom'}\E\.//;
