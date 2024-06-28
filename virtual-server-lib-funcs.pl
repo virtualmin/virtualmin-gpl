@@ -8551,6 +8551,13 @@ if ($valid) {
 	my @errs = &validate_letsencrypt_config($d, $vcheck);
 	if (@errs) {
 		if ($showerrors) {
+			my @err;
+			foreach my $e (@errs) {
+				next if (!$e->{'desc'} || !$e->{'error'});
+				push(@err, "$e->{'desc'} : ".
+					"@{[&html_strip($e->{'error'})]}");
+				}
+			@errs = @err if (@err);
 			&$second_print(&text('letsencrypt_evalid',
 				&html_escape(join(", ", @errs))));
 			}
