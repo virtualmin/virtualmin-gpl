@@ -20,6 +20,7 @@ $ENV{'PATH'} = "$module_root_directory:$module_root_directory/pro:$ENV{'PATH'}";
 &require_mysql();
 &require_postgres();
 &require_mail();
+&foreign_require("dovecot");
 $mysql::mysql_login ||= 'root';
 
 # Make sure wget doesn't use a cache
@@ -6775,6 +6776,11 @@ $sslserv_tests = [
 		    ],
 	},
 
+	# Check that cert is in the Dovecot config
+	{ 'command' => 'cat '.&dovecot::get_config_file(),
+	  'grep' => [ 'local $PRIVATE_IP', ],
+	},
+
 	# Validate that Webmin cert works
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
@@ -6859,6 +6865,13 @@ $sslserv_tests = [
 		      'SSL cert used by: usermin \\('.$test_domain.'\\)',
 		    ],
 	  'antigrep' => [ 'SSL cert used by: postfix' ],
+	},
+
+	# Check that cert is in the Dovecot config, but by hostname
+	{ 'command' => 'cat '.&dovecot::get_config_file(),
+	  'grep' => [ 'local_name '.$test_domain,
+		      'local_name \\*\\.'.$test_domain,
+		    ],
 	},
 
 	# Validate that Webmin cert still works with SNI
@@ -6950,6 +6963,13 @@ $sslserv_tests = [
 		      [ 'service', 'usermin' ],
 		      [ 'service', 'dovecot' ],
 		      [ 'service', 'postfix' ] ],
+	},
+
+	# Check that cert is no longer in the Dovecot config
+	{ 'command' => 'cat '.&dovecot::get_config_file(),
+	  'antigrep' => [ 'local_name '.$test_domain,
+		          'local_name \\*\\.'.$test_domain,
+		        ],
 	},
 
 	# Re-check that per-domain cert is no longer being used
