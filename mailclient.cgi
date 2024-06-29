@@ -10,7 +10,7 @@ $d || &error($text{'edit_egone'});
 
 # Work out mail server ports and modes
 ($imap_host, $imap_port, $imap_type, $imap_ssl, $imap_enc,
- $pop3_port, $pop3_enc) = &get_email_autoconfig_imap($d);
+ $pop3_port, $pop3_enc, $pop3_ssl) = &get_email_autoconfig_imap($d);
 ($smtp_host, $smtp_port, $smtp_type, $smtp_ssl, $smtp_enc) =
       &get_email_autoconfig_smtp($d);
 
@@ -56,6 +56,9 @@ if ($pop3_port) {
 
 	print &ui_table_row($text{'mailclient_pop3_port'},
 		"<tt>".$pop3_port."</tt>");
+
+	print &ui_table_row($text{'mailclient_pop3_ssl'},
+		$pop3_ssl eq 'yes'? $text{'yes'} : $text{'no'});
 	}
 
 print &ui_table_hr();

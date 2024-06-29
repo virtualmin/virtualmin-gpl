@@ -5784,6 +5784,7 @@ local $imap_ssl = "no";
 local $imap_enc = "password-cleartext";
 local $pop3_port = 110;
 local $pop3_enc = "password-cleartext";
+local $pop3_ssl = "no";
 if (&foreign_installed("dovecot")) {
 	&foreign_require("dovecot");
 	local $conf = &dovecot::get_config();
@@ -5795,6 +5796,7 @@ if (&foreign_installed("dovecot")) {
 		$pop3_port = 995;
 		$imap_type = "SSL";
 		$imap_ssl = "yes";
+		$pop3_ssl = "yes";
 		}
 	elsif ($sslopt eq "ssl_disable" &&
 	       &dovecot::find_value($sslopt, $conf) ne "yes") {
@@ -5802,6 +5804,7 @@ if (&foreign_installed("dovecot")) {
 		$pop3_port = 995;
 		$imap_type = "SSL";
 		$imap_ssl = "yes";
+		$pop3_ssl = "yes";
 		}
 	if ($imap_type ne "SSL" &&
 	    &dovecot::find_value("disable_plaintext_auth", $conf) ne "no") {
@@ -5810,7 +5813,7 @@ if (&foreign_installed("dovecot")) {
 		}
 	}
 return ($imap_host, $imap_port, $imap_type, $imap_ssl, $imap_enc,
-	$pop3_port, $pop3_enc);
+	$pop3_port, $pop3_enc, $pop3_ssl);
 }
 
 # get_email_autoconfig_smtp(&domain)

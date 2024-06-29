@@ -7931,6 +7931,7 @@ mailclient_imap_plain=Plaintext
 mailclient_imap_enc=Encrypted
 mailclient_pop3_host=POP3 server hostname
 mailclient_pop3_port=POP3 server port
+mailclient_pop3_ssl=Use SSL for POP3?
 mailclient_smtp_host=SMTP server hostname
 mailclient_smtp_port=SMTP server port
 mailclient_smtp_ssl=Use SSL for SMTP?
