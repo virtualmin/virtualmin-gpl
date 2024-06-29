@@ -20453,7 +20453,7 @@ my ($rs) = &create_virtual_server(
 if ($rs && ref($rs) ne 'HASH') {
 	&unlock_domain(\%dom);
 	&unlock_domain_name($system_host_name);
-	return &$err($rs) ;
+	return &$err($rs);
 	}
 my $succ = $rs->{'letsencrypt_last'} ? 1 : 0;
 # Perhaps shared SSL certificate was installed, trust it
