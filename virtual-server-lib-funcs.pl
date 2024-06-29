@@ -20492,8 +20492,9 @@ sub delete_virtualmin_default_hostname_ssl
 {
 # Test if hostname domain being deleted
 my $d = &get_domain_by("defaulthostdomain", 1);
-return if (!$d->{'dom'});
+return if (!$d || !$d->{'dom'});
 return if (!&can_delete_domain($d));
+
 # Delete hostname domain
 &lock_domain_name($d->{'dom'});
 &push_all_print();
