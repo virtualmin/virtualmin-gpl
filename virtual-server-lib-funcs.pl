@@ -9786,6 +9786,7 @@ foreach my $tmpl (@rv) {
 	$tmpl->{'resellers'} = '*' if (!defined($tmpl->{'resellers'}));
 	$tmpl->{'owners'} = '*' if (!defined($tmpl->{'owners'}));
 	if (!defined($tmpl->{'web_cgimode'})) {
+		# Switch from the old CGI mode field to the new one
 		my @cgimodes = &has_cgi_support();
 		$tmpl->{'web_cgimode'} = $tmpl->{'web_fcgiwrap'} ?
 						'fcgiwrap' : $cgimodes[0];

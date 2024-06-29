@@ -302,7 +302,7 @@ foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 	my %cannums = map { $mmap->{$_}, 1 } @supp;
 	if ($tmpl->{'web_php_suexec'} ne '' &&
 	    !$cannums{int($tmpl->{'web_php_suexec'})} && @supp) {
-		# Default mode cannot be used .. change to first that can
+		# Default PHP mode cannot be used .. change to first that can
 		my @goodsupp = grep { $_ ne 'none' } @supp;
 		@goodsupp = @supp if (!@goodsupp);
 		$tmpl->{'web_php_suexec'} = $mmap->{$goodsupp[0]};
@@ -310,8 +310,14 @@ foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 		}
 	if ($tmpl->{'web_cgimode'} &&
 	    &indexof($tmpl->{'web_cgimode'}, @cgimodes) < 0) {
+		# Default CGI mode cannot be used
 		$tmpl->{'web_cgimode'} = $cgimodes[0];
 		&save_template($tmpl);
+		}
+	elsif (!defined($tmpl->{'web_cgimode'}) && @cgimodes) {
+		# No CGI mode set at all and it wasn't disabled, so use the first on
+		$tmpl->{'web_cgimode'} = $cgimodes[0];
+                &save_template($tmpl);
 		}
 	}
 
