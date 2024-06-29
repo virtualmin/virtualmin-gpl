@@ -20447,6 +20447,7 @@ return &$err(join(" ", @warns)) if (@warns);
 # Create the server
 &push_all_print();
 &set_all_null_print();
+$main::setup_virtualmin_default_hostname_ssl_created++;
 my ($rs) = &create_virtual_server(
 	\%dom, undef, undef, 1, 0, $pass, $dom{'owner'});
 &pop_all_print();
@@ -20494,6 +20495,11 @@ return &$err($succ_msg, $succ, $rs);
 # Delete default hostname domain
 sub delete_virtualmin_default_hostname_ssl
 {
+# Clear cache if deleted in the same call
+if ($main::setup_virtualmin_default_hostname_ssl_created) {
+	undef(@dovecot::get_config_cache);
+	}
+
 # Test if hostname domain being deleted
 my $d = &get_domain_by("defaulthostdomain", 1);
 return if (!$d || !$d->{'dom'});
