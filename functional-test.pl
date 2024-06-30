@@ -6776,7 +6776,7 @@ $sslserv_tests = [
 		    ],
 	},
 
-	# Check that cert is in the Dovecot config
+	# Check that cert is in the Dovecot config for the IP
 	{ 'command' => 'cat '.&dovecot::get_config_file(),
 	  'grep' => [ 'local $PRIVATE_IP', ],
 	},
@@ -6872,6 +6872,11 @@ $sslserv_tests = [
 	  'grep' => [ 'local_name '.$test_domain,
 		      'local_name \\*\\.'.$test_domain,
 		    ],
+	},
+
+	# Check that cert is in the Dovecot config not for the IP anymore
+	{ 'command' => 'cat '.&dovecot::get_config_file(),
+	  'grep' => [ 'local $PRIVATE_IP', ],
 	},
 
 	# Validate that Webmin cert still works with SNI

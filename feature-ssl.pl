@@ -2254,18 +2254,16 @@ if ($d->{'virt'}) {
 
 	if ($enable) {
 		# Needs a cert for the IP
-		# XXX use create_section rather than save_section when available
 		if (!$l) {
 			$l = { 'name' => 'local',
 			       'value' => $d->{'ip'},
+			       'enabled' => 1,
 			       'section' => 1,
 			       'members' => [],
 			       'file' => $cfile };
-			my $lref = &read_file_lines($l->{'file'}, 1);
-			$l->{'line'} = scalar(@$lref);
-			$l->{'eline'} = $l->{'line'} + 1;
-			&dovecot::save_section($conf, $l);
+			&dovecot::create_section($conf, $l);
 			push(@$conf, $l);
+			&flush_file_lines($l->{'file'}, undef, 1);
 			}
 		my $created = 0;
 		if (!$imap) {
@@ -2337,6 +2335,7 @@ if ($d->{'virt'}) {
 		# Doesn't need one, either because SSL isn't enabled or the
 		# domain doesn't have a private IP. So remove the local block.
 		if ($l) {
+			# XXX use delete_section
 			my $lref = &read_file_lines($l->{'file'});
 			splice(@$lref, $l->{'line'},
 			       $l->{'eline'}-$l->{'line'}+1);
