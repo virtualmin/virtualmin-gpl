@@ -8556,8 +8556,10 @@ if ($valid) {
 				push(@estr, $e->{'desc'}." : ".
 					    &html_strip($e->{'error'}));
 				}
-			&$second_print(&text('letsencrypt_evalid',
-				&html_escape(join(", ", @estr))));
+			my $err = &html_escape(join(", ", @estr));
+			$virtual_server::create_initial_letsencrypt_cert::error =
+				$err;
+			&$second_print(&text('letsencrypt_evalid', $err));
 			}
 		else {
 			&$second_print($text{'letsencrypt_doing3failed'});
@@ -8569,8 +8571,11 @@ if ($valid) {
 			$d, { 'mail' => 1, 'ssl' => 1 });
 		if (@errs) {
 			if ($showerrors) {
+				my $err = &html_escape(join(", ",
+					map { $_->{'desc'} } @errs));
+				$virtual_server::create_initial_letsencrypt_cert::error = $err;
 				&$second_print(&text('letsencrypt_econnect',
-					&html_escape(join(", ", map { $_->{'desc'} } @errs))));
+					$err));
 				}
 			else {
 				&$second_print($text{'letsencrypt_doing3failed'});
@@ -8596,6 +8601,7 @@ if (!$ok) {
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
 	if ($showerrors) {
+		$virtual_server::create_initial_letsencrypt_cert::error = $cert;
 		&$second_print(&text('letsencrypt_failed', $cert));
 		}
 	else {
@@ -20458,9 +20464,12 @@ if ($rs && ref($rs) ne 'HASH') {
 my $succ = $rs->{'letsencrypt_last'} ? 1 : 0;
 # Perhaps shared SSL certificate was installed, trust it
 $succ = 2 if ($rs->{'ssl_same'});
+my $ele = $virtual_server::create_initial_letsencrypt_cert::error;
+$ele = "<br>$ele" if ($ele);
 my $succ_msg = $succ ? 
-	&text($succ == 2 ? 'check_defhost_sharedsucc' : 'check_defhost_succ', $system_host_name) :
-    &text('check_defhost_err', $system_host_name);
+	&text($succ == 2 ? 'check_defhost_sharedsucc' : 'check_defhost_succ',
+		$system_host_name) :
+	&text('check_defhost_err', $system_host_name).$ele;
 $config{'defaultdomain_name'} = $dom{'dom'};
 $config{'default_domain_ssl'} = 1
 	if ($succ && !$config{'default_domain_ssl'});
