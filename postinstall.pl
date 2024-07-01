@@ -308,16 +308,23 @@ foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 		$tmpl->{'web_php_suexec'} = $mmap->{$goodsupp[0]};
 		&save_template($tmpl);
 		}
-	if ($tmpl->{'web_cgimode'} &&
-	    &indexof($tmpl->{'web_cgimode'}, @cgimodes) < 0) {
-		# Default CGI mode cannot be used
-		$tmpl->{'web_cgimode'} = $cgimodes[0];
-		&save_template($tmpl);
+	if (@cgimodes) {
+		if (!$tmpl->{'web_cgimode'}) {
+			# No CGI mode set at all, so use the first one
+			$tmpl->{'web_cgimode'} = $cgimodes[0];
+			&save_template($tmpl);
+			}
+		elsif (&indexof($tmpl->{'web_cgimode'}, @cgimodes) < 0) {
+			# Default CGI mode cannot be used
+			$tmpl->{'web_cgimode'} = $cgimodes[0];
+			&save_template($tmpl);
+			}
 		}
-	elsif (!defined($tmpl->{'web_cgimode'}) && @cgimodes) {
-		# No CGI mode set at all and it wasn't disabled, so use the first on
-		$tmpl->{'web_cgimode'} = $cgimodes[0];
-                &save_template($tmpl);
+	elsif (!$tmpl->{'web_cgimode'}) {
+		# If no CGI nodes are available and no mode was set,
+		# explicity disable CGIs
+		$tmpl->{'web_cgimode'} = 'none';
+		&save_template($tmpl);
 		}
 	}
 

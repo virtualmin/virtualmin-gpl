@@ -9788,8 +9788,8 @@ foreach my $tmpl (@rv) {
 	if (!defined($tmpl->{'web_cgimode'})) {
 		# Switch from the old CGI mode field to the new one
 		my @cgimodes = &has_cgi_support();
-		$tmpl->{'web_cgimode'} = $tmpl->{'web_fcgiwrap'} ?
-						'fcgiwrap' : $cgimodes[0];
+		$tmpl->{'web_cgimode'} = $tmpl->{'web_fcgiwrap'} ? 'fcgiwrap' :
+					 @cgimodes ? $cgimodes[0] : 'none';
 		delete($tmpl->{'web_fcgiwrap'});
 		}
 	}

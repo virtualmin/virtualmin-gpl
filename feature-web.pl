@@ -247,6 +247,7 @@ else {
 if (!$d->{'alias'} && !$d->{'notmplcgimode'}) {
 	# Switch to the template CGI mode, if supported (unless restoring)
 	my $mode = $tmpl->{'web_cgimode'};
+	$mode = '' if ($mode eq 'none');
 	my @cgimodes = &has_cgi_support();
 	if (!$mode || &indexof($mode, @cgimodes) >= 0) {
 		&$first_print($mode ? &text('setup_cgimode',
@@ -2782,7 +2783,7 @@ if (@cgimodes > 0) {
 	print &ui_table_row(
 		&hlink($text{'tmpl_web_cgimode'}, "template_web_cgimode"),
 		&ui_radio("cgimode", $tmpl->{'web_cgimode'},
-			  [ [ '', $text{'tmpl_web_cgimodenone'} ],
+			  [ [ 'none', $text{'tmpl_web_cgimodenone'} ],
 			    map { [ $_, $text{'tmpl_web_cgimode'.$_} ] }
 				reverse(@cgimodes) ]));
 	}
