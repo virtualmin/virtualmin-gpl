@@ -396,7 +396,7 @@ if ($in{'sched'} || $in{'new'}) {
 
 	# Email input
 	print &ui_table_row(&hlink($text{'backup_email'}, "backup_email"),
-			    &ui_textbox("email", $sched->{'email'}, 40).
+			    &ui_textbox("email", $sched->{'email'}, 80).
 			    "<br>\n".
 			    &ui_checkbox("email_err", 1,
 					 $text{'backup_email_err'},
