@@ -20474,7 +20474,10 @@ $succ = 2 if ($rs->{'ssl_same'});
 my $elelast;
 if ($config{'err_letsencrypt'}) {
 	$elelast = $rs->{'letsencrypt_last_err'};
-	$elelast =~ s/\t/\n/g, $elelast = " : $elelast" if ($elelast);
+	if ($elelast) {
+		$elelast =~ s/\t/\n/g;
+		$elelast = " : $elelast";
+		}
 	}
 my $succ_msg = $succ ? 
 	&text($succ == 2 ? 'check_defhost_sharedsucc' : 'check_defhost_succ', $system_host_name) :
