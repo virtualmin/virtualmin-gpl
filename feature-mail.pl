@@ -2943,6 +2943,7 @@ local $foundmailuser;
 local $_;
 local @users = &list_domain_users($d);
 open(UFILE, "<".$file."_users");
+local %renamedusers;
 while(<UFILE>) {
 	s/\r|\n//g;
 	local @user = split(/:/, $_);
@@ -2991,6 +2992,9 @@ while(<UFILE>) {
 			# Re-generate full username based on template
 			my $short = &remove_userdom($user[0], $d);
 			$uinfo->{'user'} = &userdom_name($short, $d);
+			$renamedusers{$user[0]} = $uinfo->{'user'};
+			$renamedusers{&escape_user($user[0])} = $uinfo->{'user'};
+			$renamedusers{&replace_atsign($user[0])} = $uinfo->{'user'};
 			}
 		else {
 			# Keep original full username
@@ -3220,6 +3224,12 @@ if (!$opts->{'mailuser'}) {
 			local $virt = { 'from' => $1,
 					'to' => [ split(/,/, $2) ] };
 			next if ($exists{$virt->{'from'}}++);
+			for(my $i=0; $i<@{$virt->{'to'}}; $i++) {
+				my $nn = $renamedusers{$virt->{'to'}->[$i]};
+				if ($nn) {
+					$virt->{'to'}->[$i] = $nn;
+					}
+				}
 			if ($virt->{'to'}->[0] =~ /^(\S+)\\@(\S+)$/ &&
 			    $config{'mail_system'} == 0) {
 				# Virtuser is to a local user with an @ in
