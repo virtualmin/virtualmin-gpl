@@ -239,6 +239,13 @@ $before = &before_letsencrypt_website($d);
 	$leserver_key, $leserver_hmac);
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
+	# Always store last Certbot error
+	&lock_domain($d);
+	$d->{'letsencrypt_last_failure'} = time();
+	$d->{'letsencrypt_last_err'} = $cert;
+	$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
+	&save_domain($d);
+	&unlock_domain($d);
 	&$second_print(".. failed : $cert");
 	exit(1);
 	}

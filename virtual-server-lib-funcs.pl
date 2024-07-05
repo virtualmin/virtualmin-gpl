@@ -8550,14 +8550,18 @@ if ($valid) {
 		}
 	my @errs = &validate_letsencrypt_config($d, $vcheck);
 	if (@errs) {
+		# Always store last Certbot error
+		my @estr;
+		foreach my $e (@errs) {
+			push(@estr, $e->{'desc'}." : ".
+					&html_strip($e->{'error'}));
+			}
+		my $err = &html_escape(join(", ", @estr));
+		$d->{'letsencrypt_last_failure'} = time();
+		$d->{'letsencrypt_last_err'} = $err;
+		$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 		if ($showerrors) {
-			my @estr;
-			foreach my $e (@errs) {
-				push(@estr, $e->{'desc'}." : ".
-					    &html_strip($e->{'error'}));
-				}
-			&$second_print(&text('letsencrypt_evalid',
-				&html_escape(join(", ", @estr))));
+			&$second_print(&text('letsencrypt_evalid', $err));
 			}
 		else {
 			&$second_print($text{'letsencrypt_doing3failed'});
@@ -8568,9 +8572,14 @@ if ($valid) {
 		@errs = &check_domain_connectivity(
 			$d, { 'mail' => 1, 'ssl' => 1 });
 		if (@errs) {
+			# Always store last Certbot error
+			my $e = &html_escape(join(", ",
+				map { $_->{'desc'} } @errs));
+			$d->{'letsencrypt_last_failure'} = time();
+			$d->{'letsencrypt_last_err'} = $e;
+			$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 			if ($showerrors) {
-				&$second_print(&text('letsencrypt_econnect',
-					&html_escape(join(", ", map { $_->{'desc'} } @errs))));
+				&$second_print(&text('letsencrypt_econnect', $e));
 				}
 			else {
 				&$second_print($text{'letsencrypt_doing3failed'});
@@ -8595,6 +8604,10 @@ if (!$ok) {
 	}
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
+	# Always store last Certbot error
+	$d->{'letsencrypt_last_failure'} = time();
+	$d->{'letsencrypt_last_err'} = $cert;
+	$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 	if ($showerrors) {
 		&$second_print(&text('letsencrypt_failed', $cert));
 		}
@@ -20458,9 +20471,17 @@ if ($rs && ref($rs) ne 'HASH') {
 my $succ = $rs->{'letsencrypt_last'} ? 1 : 0;
 # Perhaps shared SSL certificate was installed, trust it
 $succ = 2 if ($rs->{'ssl_same'});
+my $elelast;
+if ($config{'err_letsencrypt'}) {
+	$elelast = $rs->{'letsencrypt_last_err'};
+	if ($elelast) {
+		$elelast =~ s/\t/\n/g;
+		$elelast = " : $elelast";
+		}
+	}
 my $succ_msg = $succ ? 
 	&text($succ == 2 ? 'check_defhost_sharedsucc' : 'check_defhost_succ', $system_host_name) :
-    &text('check_defhost_err', $system_host_name);
+    &text('check_defhost_err', $system_host_name).$elelast;
 $config{'defaultdomain_name'} = $dom{'dom'};
 $config{'default_domain_ssl'} = 1
 	if ($succ && !$config{'default_domain_ssl'});
