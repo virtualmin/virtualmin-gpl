@@ -8922,6 +8922,15 @@ foreach my $dd (@alldoms) {
 &release_lock_mail();
 &release_lock_unix();
 
+# If deleted domain was default host name
+if ($d->{'dom'} eq $config{'defaultdomain_name'}) {
+	&lock_file($module_config_file);
+	delete($config{'defaultdomain_name'});
+	$config{'default_domain_ssl'} = 0;
+	&save_module_config();
+	&unlock_file($module_config_file);
+	}
+
 # Run the after deletion command
 if (!$nopost) {
 	&run_post_actions();
