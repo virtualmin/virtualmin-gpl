@@ -2988,6 +2988,7 @@ while(<UFILE>) {
 			push(@errs, &text('restore_mailexists', $user[0]));
 			next;
 			}
+		print STDERR "reuser=$opts->{'reuser'}\n";
 		if ($opts->{'reuser'}) {
 			# Re-generate full username based on template
 			my $short = &remove_userdom($user[0], $d);
@@ -2995,6 +2996,7 @@ while(<UFILE>) {
 			$renamedusers{$user[0]} = $uinfo->{'user'};
 			$renamedusers{&escape_user($user[0])} = $uinfo->{'user'};
 			$renamedusers{&replace_atsign($user[0])} = $uinfo->{'user'};
+			$renamedusers{&add_atsign($user[0])} = $uinfo->{'user'};
 			}
 		else {
 			# Keep original full username
@@ -3227,11 +3229,12 @@ if (!$opts->{'mailuser'}) {
 			for(my $i=0; $i<@{$virt->{'to'}}; $i++) {
 				my $nn = $renamedusers{$virt->{'to'}->[$i]};
 				if ($nn) {
-					$virt->{'to'}->[$i] = $nn;
+					$virt->{'to'}->[$i] = &escape_user($nn);
 					}
 				}
 			if ($virt->{'to'}->[0] =~ /^(\S+)\\@(\S+)$/ &&
-			    $config{'mail_system'} == 0) {
+			    $config{'mail_system'} == 0 &&
+			    getpwnam($1."-".$2)) {
 				# Virtuser is to a local user with an @ in
 				# the name, like foo\@bar.com. But on Postfix
 				# this won't work - instead, we need to use the
