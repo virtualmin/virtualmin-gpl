@@ -20485,7 +20485,7 @@ if ($config{'err_letsencrypt'}) {
 	$elelast = $rs->{'letsencrypt_last_err'};
 	if ($elelast) {
 		$elelast =~ s/\t/\n/g;
-		$elelast = " : $elelast";
+		$elelast = " :<br>$elelast";
 		}
 	}
 my $succ_msg = $succ ? 
