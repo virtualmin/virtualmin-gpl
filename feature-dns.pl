@@ -1464,6 +1464,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				  'type' => 'A',
 				  'proxied' => $proxied ? 1 : 0,
 				  'values' => [ $ip ] });
+			$already{$n}++;
 			}
 		}
 
@@ -1479,6 +1480,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				  'type' => 'A',
 				  'proxied' => $proxied == 1 ? 1 : 0,
 				  'values' => [ $ip ] });
+			$already{$ns}++;
 			}
 		}
 
@@ -1490,17 +1492,19 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			{ 'name' => $n,
 			  'type' => 'A',
 			  'values' => [ "127.0.0.1" ] });
+		$already{$n}++;
 		}
 
 	# If the hostname of the system is within this domain, add a record
 	# for it
-	my $hn = &get_system_hostname();
-	if ($hn =~ /\.\Q$d->{'dom'}\E$/ && !$already{$hn."."}) {
+	my $hn = &get_system_hostname().".";
+	if ($hn =~ /\.\Q$withdot\E$/ && !$already{$hn}) {
 		&create_dns_record($recs, $file,
-			{ 'name' => $hn.".",
+			{ 'name' => $hn,
 			  'type' => 'A',
 			  'proxied' => $proxied == 1 ? 1 : 0,
 			  'values' => [ &get_default_ip() ] });
+		$already{$hn}++;
 		}
 
 	# If enabled in the template, add webmail and admin records
@@ -1793,6 +1797,7 @@ foreach my $r ('webmail', 'admin') {
 			  'proxied' => $proxied == 1 ? 1 : 0,
 			  'values' => [ $ip ] };
 		&create_dns_record($recs, $file, $r);
+		$already->{$n}++ if ($already);
 		$count++;
 		}
 	}
