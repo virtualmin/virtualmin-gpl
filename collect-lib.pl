@@ -172,6 +172,13 @@ foreach my $f ("virtualmin", @features) {
 			}
 		}
 	}
+foreach my $f (split(" ", $config{'plugins'})) {
+	if (&plugin_defined($f, "feature_sysinfo")) {
+		$f =~ s/-/_/g;
+		my $ifunc = "${f}::feature_sysinfo";
+		push(@progs, &$ifunc());
+		}
+	}
 $info->{'progs'} = \@progs;
 
 # Classify Virtualmin-specific packages
