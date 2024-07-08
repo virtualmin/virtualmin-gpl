@@ -863,5 +863,11 @@ sub scripts_list
 {
 }
 
+# feature_sysinfo
+# If defined returns a hash ref of system information for this feature
+sub feature_sysinfo
+{
+}
+
 1;
 
