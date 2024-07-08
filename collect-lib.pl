@@ -174,9 +174,8 @@ foreach my $f ("virtualmin", @features) {
 	}
 foreach my $f (@plugins) {
 	if (&plugin_defined($f, "feature_sysinfo")) {
-		$f =~ s/-/_/g;
-		my $ifunc = "${f}::feature_sysinfo";
-		push(@progs, &$ifunc());
+		my @rs = &plugin_call($f, "feature_sysinfo");
+		push(@progs, @rs) if (@rs);
 		}
 	}
 $info->{'progs'} = \@progs;
