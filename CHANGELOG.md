@@ -1,7 +1,7 @@
 #### Version 7.20.1
-* Add support for changing username format to match the local system when  restoring a backup
-* Fixed a bug that can corrupt the Dovecot config when creation of the default domain fails
-* Fixed a bug that can cause CGI scripts to be disabled by default
+* Add support for changing username format to match the local system when restoring a backup
+* Fix a bug that can corrupt the Dovecot config when creation of the default domain fails
+* Fix a bug that can cause CGI scripts to be disabled by default
 
 #### Version 7.20.0
 * Add support to record most recent user logins for virtual servers
