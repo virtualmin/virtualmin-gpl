@@ -12219,9 +12219,16 @@ if ($gconfig{'os_type'} !~ /-linux$/ && &has_command("bash")) {
 local $to = $t->{'timeout'} || $timeout;
 local ($out, $timed_out) = &backquote_with_timeout(
 				"($cmd) 2>&1 </dev/null", $to);
+local @lout = split(/\r?\n/, $out);
+local $shortout = $out;
+if (length($shortout) > 1024) {
+	$shortout = substr($shortout, 0, 2048);
+	$shortout .= "\n" if ($shortout !~ /\n$/);
+	$shortout .= "(Plus ".(length($out) - 2048)." more bytes...)\n";
+	}
 if (!$t->{'ignorefail'}) {
 	if ($? && !$t->{'fail'} || !$? && $t->{'fail'}) {
-		print $out if ($output || !$t->{'quiet'});
+		print $shortout if ($output || !$t->{'quiet'});
 		if ($t->{'fail'}) {
 			print "    .. failed to fail\n";
 			}
@@ -12246,7 +12253,7 @@ if ($t->{'grep'}) {
 				}
 			}
 		if (!$match) {
-			print $out if ($output || !$t->{'quiet'});
+			print $shortout if ($output || !$t->{'quiet'});
 			print "    .. no match on $grep\n";
 			return 0;
 			}
@@ -12265,13 +12272,13 @@ if ($t->{'antigrep'}) {
 				}
 			}
 		if ($match) {
-			print $out if ($output || !$t->{'quiet'});
+			print $shortout if ($output || !$t->{'quiet'});
 			print "    .. unexpected match on $grep\n";
 			return 0;
 			}
 		}
 	}
-print $out if ($output);
+print $shortout if ($output);
 if ($t->{'save'}) {
 	# Save output to variable
 	$out =~ s/^\s*//;
