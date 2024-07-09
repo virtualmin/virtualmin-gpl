@@ -2436,6 +2436,7 @@ else {
 	}
 &unlock_file($cfile);
 &dovecot::apply_configuration() if (!$nochange);
+undef(@dovecot::get_config_cache);
 return 1;
 }
 
