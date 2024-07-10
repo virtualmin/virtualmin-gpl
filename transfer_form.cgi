@@ -44,7 +44,7 @@ if ($d->{'dns'}) {
 		}
 	}
 
-print &ui_form_start("transfer.cgi");
+print &ui_form_start("transfer.cgi", "post");
 print &ui_hidden("dom", $d->{'id'}),"\n";
 print &ui_table_start($text{'transfer_header'}, undef, 2);
 
