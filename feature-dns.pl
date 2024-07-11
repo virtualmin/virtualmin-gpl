@@ -3987,6 +3987,8 @@ if ($d->{'ip'} ne $defip && $d->{'ip'} !~ /^(10\.|192\.168\.)/ &&
 if ($d->{'ip6'} && $d->{'ip6'} ne $defip6 && !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip6:'}}, $d->{'ip6'});
 	}
+@{$spf->{'ip4:'}} = &unique(@{$spf->{'ip4:'}});
+@{$spf->{'ip6:'}} = &unique(@{$spf->{'ip6:'}});
 $spf->{'all'} = $tmpl->{'dns_spfall'} + 1;
 
 # Add SPF records for DNS cloud
