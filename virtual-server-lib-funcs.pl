@@ -8621,15 +8621,17 @@ if ($valid) {
 my $phd = &public_html_dir($d);
 my $before = &before_letsencrypt_website($d);
 my @beforecerts = &get_all_domain_service_ssl_certs($d);
+my @leargs = ($d, \@dnames, undef, undef, undef, undef, undef, undef, undef,
+	      $d->{'letsencrypt_subset'});
 my ($ok, $cert, $key, $chain) =
-	&request_domain_letsencrypt_cert($d, \@dnames);
+	&request_domain_letsencrypt_cert(@leargs);
 if (!$ok) {
 	# Try again with just externally resolvable hostnames
 	my @badnames;
 	my $fok = &filter_external_dns(\@dnames, \@badnames);
 	if ($fok == 0 && @dnames) {
 		($ok, $cert, $key, $chain) =
-			&request_domain_letsencrypt_cert($d, \@dnames);
+			&request_domain_letsencrypt_cert(@leargs);
 		}
 	}
 &after_letsencrypt_website($d, $before);
@@ -20473,6 +20475,7 @@ my $sslf = &domain_has_ssl();
 $dom{$webf} = 1;
 $dom{$sslf} = 1;
 $dom{'letsencrypt_dname'} = $system_host_name;
+$dom{'letsencrypt_subset'} = 1;
 $dom{'auto_letsencrypt'} = 2;
 
 # Fill in other default fields
@@ -20519,18 +20522,21 @@ if ($config{'err_letsencrypt'}) {
 		}
 	}
 my $succ_msg = $succ ? 
-	&text($succ == 2 ? 'check_defhost_sharedsucc' : 'check_defhost_succ', $system_host_name) :
-    &text('check_defhost_err', $system_host_name).$elelast;
+	&text($succ == 2 ? 'check_defhost_sharedsucc'
+			 : 'check_defhost_succ', $system_host_name) :
+	&text('check_defhost_err', $system_host_name).$elelast;
 $config{'defaultdomain_name'} = $dom{'dom'};
 $config{'default_domain_ssl'} = 1
 	if ($succ && !$config{'default_domain_ssl'});
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
+
 # Set as default domain if create some time later
 if (&can_default_website(\%dom)) {
 	&set_default_website(\%dom);
 	}
+
 # Enable as default domain for all services
 if ($succ) {
 	&push_all_print();
@@ -20545,6 +20551,7 @@ if ($succ) {
 		}
 	&pop_all_print();
 	}
+
 &run_post_actions_silently();
 &unlock_domain(\%dom);
 &unlock_domain_name($system_host_name);
