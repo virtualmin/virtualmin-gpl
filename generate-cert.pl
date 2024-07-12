@@ -162,7 +162,7 @@ if ($self) {
 	&$second_print(".. done");
 
 	# Remove any SSL passphrase on this domain
-	&$first_print("Configuring webserver to use it ..");
+	&$first_print("Configuring server to use it ..");
 	$d->{'ssl_pass'} = undef;
 	&save_domain_passphrase($d);
 	&save_domain($d);

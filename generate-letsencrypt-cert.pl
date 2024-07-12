@@ -33,6 +33,10 @@ resolved by the Let's Encrypt service. To disable this check, use the
 C<--skip-dns-check> flag. Or to forcible enable it because it was disabled
 for the domain in the UI, use the C<--dns-check> flag.
 
+Alternately, you can use the C<--allow-subset> flag to have Let's Encrypt
+exclude any hostnames that cannot be resolved or validated from the certificate.
+Otherwise, failure of any hostname will block the entire request.
+
 By default both web and DNS validation will be attempted by Let's Encrypt for
 domain ownership, but you can select just one with either the C<--web> or
 C<--dns> flags.
@@ -99,6 +103,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--dns-check") {
 		$nodnscheck = 0;
+		}
+	elsif ($a eq "--allow-subset") {
+		$subset = 1;
 		}
 	elsif ($a =~ /^--(web|dns)$/) {
 		$mode = $1;
@@ -236,7 +243,7 @@ $before = &before_letsencrypt_website($d);
 @beforecerts = &get_all_domain_service_ssl_certs($d);
 ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 	$d, \@dnames, $staging, $size, $mode, $ctype, $leserver,
-	$leserver_key, $leserver_hmac);
+	$leserver_key, $leserver_hmac, $subset);
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
 	# Always store last Certbot error
@@ -254,7 +261,7 @@ else {
 
 	# Worked .. copy to the domain
 	&obtain_lock_ssl($d);
-	&$first_print("Copying to webserver configuration ..");
+	&$first_print("Copying to server configuration ..");
 	&install_letsencrypt_cert($d, $cert, $key, $chain);
 
 	# Save renewal state
@@ -268,6 +275,7 @@ else {
 	$d->{'letsencrypt_key'} = $leserver_key;
 	$d->{'letsencrypt_hmac'} = $leserver_hmac;
 	$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
+	$d->{'letsencrypt_subset'} = $subset;
 	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);
 
@@ -322,6 +330,7 @@ print "                                    [--size bits]\n";
 print "                                    [--staging]\n";
 print "                                    [--check-first | --validate-first]\n";
 print "                                    [--skip-dns-check | --dns-check]\n";
+print "                                    [--allow-subset]\n";
 print "                                    [--web | --dns]\n";
 print "                                    [--rsa | --ec]\n";
 print "                                    [--server url]\n";

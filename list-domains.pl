@@ -741,6 +741,14 @@ if ($multi) {
 			print "    Lets Encrypt domain: ",
 			    $d->{'letsencrypt_dname'},"\n";
 			}
+		if (defined($d->{'letsencrypt_nodnscheck'})) {
+			print "    Lets Encrypt DNS check: ",
+			    ($d->{'letsencrypt_nodnscheck'} ? "Skip" : "Filter"),"\n";
+			}
+		if (defined($d->{'letsencrypt_subset'})) {
+			print "    Lets Encrypt subset mode: ",
+			    ($d->{'letsencrypt_subset'} ? "Yes" : "No"),"\n";
+			}
 
 		# Show SSL cert usage by other services
 		if ($multi == 1) {
