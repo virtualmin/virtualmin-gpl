@@ -6059,6 +6059,15 @@ if ($plan) {
 &copy_source_dest("$saved_aliases_dir/$d->{'id'}",
 		  $file."_saved_aliases");
 
+# Save SSL cert and key, in case Apache isn't enabled
+foreach my $ssltype ('cert', 'key', 'ca') {
+	my $sslfile = &get_website_ssl_file($d, $ssltype);
+	if ($sslfile && -r $sslfile) {
+		&copy_write_as_domain_user($d, $sslfile,
+					   $file."_ssl_".$ssltype);
+		}
+	}
+
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -7012,6 +7021,27 @@ if (!$allopts->{'fix'}) {
 		&copy_source_dest($file."_saved_aliases",
 				  "$saved_aliases_dir/$d->{'id'}");
 		}
+
+	# Restore SSL cert and key unless the domain has an SSL website, in
+	# which case we can assume that feature has covered it
+	if (!&domain_has_ssl($d)) {
+		my $changed = 0;
+		foreach my $ssltype ('cert', 'key', 'ca') {
+			my $sslfile = &get_website_ssl_file($d, $ssltype);
+			my $bfile = $file."_ssl_".$ssltype;
+			if ($sslfile && -r $bfile) {
+				&lock_file($sslfile);
+				&write_ssl_file_contents($d, $sslfile, $bfile);
+				&unlock_file($sslfile);
+				$changed++;
+				}
+			}
+		if ($changed) {
+			&refresh_ssl_cert_expiry($d);
+			&sync_combined_ssl_cert($d);
+			}
+		}
+
 	&$second_print($text{'setup_done'});
 	}
 return 1;
@@ -8452,8 +8482,8 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
 		}
 	}
 
-# Update service certs and DANE DNS records
-# if a new Let's Encrypt cert was generated
+# Update service certs and DANE DNS records if a new Let's Encrypt cert
+# was generated
 if ($generated == 2) {
 	&enable_domain_service_ssl_certs($dom);
 	&sync_domain_tlsa_records($dom);
