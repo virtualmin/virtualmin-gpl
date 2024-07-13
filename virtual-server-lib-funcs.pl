@@ -7026,6 +7026,7 @@ if (!$allopts->{'fix'}) {
 	# which case we can assume that feature has covered it
 	if (!&domain_has_ssl($d)) {
 		my $changed = 0;
+		&create_ssl_certificate_directories($d);
 		foreach my $ssltype ('cert', 'key', 'ca') {
 			my $sslfile = &get_website_ssl_file($d, $ssltype);
 			my $bfile = $file."_ssl_".$ssltype;
