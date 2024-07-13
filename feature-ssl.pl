@@ -411,10 +411,10 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
 		$info->{'c'},
 		$info->{'st'},
 		$info->{'l'},
-		$info->{'o'},
+		undef,
 		$info->{'ou'},
 		"*.$d->{'dom'}",
-		$d->{'emailto_addr'},
+		undef,
 		\@newalt,
 		$d,
 		);
@@ -2035,9 +2035,8 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 	@alts = &unique(@alts);
 	my $err = &generate_self_signed_cert(
 		$d->{'ssl_cert'}, $d->{'ssl_key'}, undef, 1825,
-		undef, undef, undef, $d->{'owner'}, undef,
-		"*.$d->{'dom'}", $d->{'emailto_addr'},
-		\@alts, $d);
+		undef, undef, undef, undef, undef,
+		"*.$d->{'dom'}", undef, \@alts, $d);
 	if ($err) {
 		&$second_print(&text('setup_eopenssl', $err));
 		return 0;
