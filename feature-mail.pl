@@ -2988,7 +2988,6 @@ while(<UFILE>) {
 			push(@errs, &text('restore_mailexists', $user[0]));
 			next;
 			}
-		print STDERR "reuser=$opts->{'reuser'}\n";
 		if ($opts->{'reuser'}) {
 			# Re-generate full username based on template
 			my $short = &remove_userdom($user[0], $d);
