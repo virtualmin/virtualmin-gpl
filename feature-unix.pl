@@ -19,6 +19,12 @@ if ($d->{'user'} eq '') {
 if ($d->{'group'} eq '') {
 	&error("Domain is missing Unix group name!");
 	}
+if ($d->{'ugroup'} eq '') {
+	&error("Domain is missing Unix group name for the domain owner!");
+	}
+if ($d->{'group'} ne $d->{'ugroup'} && !getgrnam($d->{'ugroup'})) {
+	&error("Unix group for the domain owner $d->{'ugroup'} does not exist!");
+	}
 
 # Check if the UID or GID has been allocated to someone else, and if so
 # re-allocate them. Also allocate if they haven't been done yet.

@@ -2550,7 +2550,7 @@ if ($ok) {
 
 			# If the domain had a custom ugroup before, make sure
 			# it exists on the new system
-			if (!$parentdom && $d->{'gid'} != $d->{'ugid'} &&
+			if (!$parentdom && $d->{'group'} ne $d->{'ugroup'} &&
 			    !getgrnam($d->{'ugroup'})) {
 				if ($skipwarnings) {
 					&$second_print(&text('restore_eugroup2',
