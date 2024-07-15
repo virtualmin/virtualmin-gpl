@@ -480,6 +480,10 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 			&ui_yesno_radio("dnscheck",
 					!$d->{'letsencrypt_nodnscheck'}));
 
+		# Skip unverifiable hostnames?
+		print &ui_table_row($text{'cert_subset'},
+			&ui_yesno_radio("subset", $d->{'letsencrypt_subset'}));
+
 		# Certificate type, if supported
 		if (&letsencrypt_supports_ec()) {
 			print &ui_table_row($text{'cert_hash'},

@@ -39,6 +39,7 @@ if ($in{'only'}) {
 	$d->{'letsencrypt_dwild'} = $in{'dwild'};
 	$d->{'letsencrypt_renew'} = $in{'renew'};
 	$d->{'letsencrypt_nodnscheck'} = !$in{'dnscheck'};
+	$d->{'letsencrypt_subset'} = $in{'subset'};
 	&save_domain($d);
 	&redirect("cert_form.cgi?dom=$d->{'id'}");
 	}
@@ -136,7 +137,8 @@ else {
 	$before = &before_letsencrypt_website($d);
 	($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 					$d, \@dnames, 0, undef, undef,
-					$in{'ctype'});
+					$in{'ctype'}, undef, undef, undef,
+					$in{'subset'});
 	&after_letsencrypt_website($d, $before);
 	if (!$ok) {
 		# Always store last Certbot error
@@ -149,7 +151,8 @@ else {
 		&$second_print(&text('letsencrypt_failed', $cert));
 		}
 	else {
-		&$second_print($text{'letsencrypt_done'});
+		$info = &cert_file_info($cert);
+		&$second_print(&text('letsencrypt_done2', join(" ", $info->{'cn'}, @{$info->{'alt'}})));
 
 		# Figure out which services (webmin, postfix, etc)
 		# were using the old cert
@@ -168,6 +171,7 @@ else {
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_success'} = time();
 		$d->{'letsencrypt_nodnscheck'} = !$in{'dnscheck'};
+		$d->{'letsencrypt_subset'} = $in{'subset'};
 		&refresh_ssl_cert_expiry($d);
 		&save_domain($d);
 

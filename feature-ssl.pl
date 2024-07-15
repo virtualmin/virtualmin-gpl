@@ -3037,7 +3037,7 @@ my ($ok, $cert, $key, $chain) =
 	&request_domain_letsencrypt_cert($d, \@dnames, 0,
 	    $d->{'letsencrypt_size'}, undef, $d->{'letsencrypt_ctype'},
 	    $d->{'letsencrypt_server'}, $d->{'letsencrypt_key'},
-	    $d->{'letsencrypt_hmac'});
+	    $d->{'letsencrypt_hmac'}, $d->{'letsencrypt_subset'});
 &after_letsencrypt_website($d, $before);
 
 my ($subject, $body);

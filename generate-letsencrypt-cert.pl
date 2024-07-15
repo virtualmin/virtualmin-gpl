@@ -257,7 +257,8 @@ if (!$ok) {
 	exit(1);
 	}
 else {
-	&$second_print(".. done");
+	$info = &cert_file_info($cert);
+	&$second_print(".. done for ".join(" ", $info->{'cn'}, @{$info->{'alt'}}));
 
 	# Worked .. copy to the domain
 	&obtain_lock_ssl($d);
