@@ -153,7 +153,8 @@ else {
 	else {
 		$info = &cert_file_info($cert);
 		&$second_print(&text('letsencrypt_done2',
-			join(" ", &unique($info->{'cn'}, @{$info->{'alt'}}))));
+			join(", ", map { "<tt>$_</tt>" }
+			     &unique($info->{'cn'}, @{$info->{'alt'}}))));
 
 		# Figure out which services (webmin, postfix, etc)
 		# were using the old cert

@@ -259,7 +259,7 @@ if (!$ok) {
 else {
 	$info = &cert_file_info($cert);
 	&$second_print(".. done for ".
-		join(" ", &unique($info->{'cn'}, @{$info->{'alt'}})));
+		join(", ", &unique($info->{'cn'}, @{$info->{'alt'}})));
 
 	# Worked .. copy to the domain
 	&obtain_lock_ssl($d);
