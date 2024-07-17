@@ -7100,6 +7100,7 @@ smtpcloud_title=Cloud Mail Delivery Provider
 smtpcloud_echeck=Cloud mail delivery provider $1 cannot be used : $2
 
 provision_title=Cloudmin Services Client
+provision_return=services client options
 provision_ecannot=You are not allowed to setup the Cloudmin services client
 provision_header=Cloudmin services client options
 provision_server=Cloudmin services master
