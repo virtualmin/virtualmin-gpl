@@ -31,7 +31,7 @@ exit(0);
 
 # Get email address parameter
 my $mode;
-if ($ENV{'QUERY_STRING'} =~ /emailaddress=([^&]+)/) {
+if ($ENV{'QUERY_STRING'} =~ /emailaddress=([^&]+)/i) {
 	# Thunderbird style
 	$email = $1;
 	$email =~ s/%(..)/pack("c",hex($1))/ge;
