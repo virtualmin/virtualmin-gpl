@@ -6827,6 +6827,11 @@ wizard_ssldir_mode1=Per-domain directory under $1
 wizard_ssldir_mode2=Custom key file template
 wizard_ssldir_mode3=Existing custom location
 wizard_essldir=Missing custom key file template
+wizard_title_email=System email address
+wizard_email_desc=Email notifications sent by Virtualmin will come from the address you set on this page. It is recommended that this address forward or deliver email to a person, so that replies to system email messages will be read.
+wizard_from_addr=Master administrator's email address
+wizard_from_addr2=Your address
+wizard_efrom_addr=Email address must be in user@domain format
 
 backuplog_title=Backup Logs
 backuplog_ecannot=You are not allowed to view Virtualmin backup logs

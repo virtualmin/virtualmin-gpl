@@ -20,6 +20,7 @@ return ( "intro",
 	 "db",
 	 $config{'mysql'} ? ( "mysql" ) : ( ),
 	 $config{'dns'} ? ( "dns" ) : ( ),
+	 "email",
 	 "done",
 	 "hashpass",
 	 $config{'mysql'} ? ( "mysize" ) : ( ),
@@ -232,9 +233,9 @@ sub wizard_show_db
 {
 print &ui_table_row(undef, $text{'wizard_db'}. "<p></p>", 2);
 print &ui_table_row($text{'wizard_db_mysql'},
-                    &ui_yesno_radio("mysql", $config{'mysql'}));
+                    &ui_yesno_radio("mysql", $config{'mysql'} ? 1 : 0));
 print &ui_table_row($text{'wizard_db_postgres'},
-                    &ui_yesno_radio("postgres", $config{'postgres'}));
+                    &ui_yesno_radio("postgres", $config{'postgres'} ? 1 : 0));
 }
 
 # Enable or disable MySQL and PostgreSQL, depending on user's selections
@@ -629,6 +630,30 @@ $tmpl->{'dns_ns'} = join(" ", @secns);
 # Save skip option
 $config{'prins_skip'} = $in{'prins_skip'};
 &save_module_config();
+}
+
+sub wizard_show_email
+{
+&foreign_require("mailboxes");
+print &ui_table_row(undef, $text{'wizard_email_desc'}, 2);
+
+print &ui_table_row($text{'wizard_from_addr'},
+	&ui_opt_textbox("from_addr", $config{'from_addr'}, 50,
+		$text{'default'}." (".&mailboxes::get_from_address().")<br>",
+		$text{'wizard_from_addr2'}));
+}
+
+sub wizard_parse_email
+{
+local ($in) = @_;
+if ($in->{'from_addr_def'}) {
+	delete($config{'from_addr'});
+	}
+else {
+	$in->{'from_addr'} =~ /\S+\@\S+/ || return $text{'wizard_efrom_addr'};
+	$config{'from_addr'} = $in->{'from_addr'};
+	&save_module_config();
+	}
 }
 
 sub wizard_show_done
