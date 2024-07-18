@@ -667,11 +667,7 @@ return @rv;
 
 sub get_virtualmin_docs
 {               
-return &master_admin() ?
-		"https://www.virtualmin.com/documentation" :
-       &reseller_admin() ?
-		"https://www.virtualmin.com/documentation/users/reseller" :
-       		"https://www.virtualmin.com/documentation/users/server-owner";
+return "https://www.virtualmin.com/docs/";
 }      
 
 sub parse_license_date
