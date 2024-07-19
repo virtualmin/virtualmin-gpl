@@ -7869,7 +7869,7 @@ letsencrypt_dnscheck=Checking hostnames for resolvability ..
 letsencrypt_ednscheck=.. check could not be performed!
 letsencrypt_dnscheckok=.. all hostnames can be resolved
 letsencrypt_dnscheckbad=.. some hostnames were removed : $1
-letsencrypt_dnscheckall=None of the hostnames could be resolved!
+letsencrypt_dnscheckall=.. none of the hostnames could be resolved!
 
 php_fpmrestart=Restarting PHP-FPM $1 server ..
 php_fpmnoinit=.. no bootup action found!

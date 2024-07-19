@@ -116,7 +116,8 @@ else {
 			&$second_print($text{'letsencrypt_dnscheckok'});
 			}
 		elsif (!@dnames) {
-			&error($text{'letsencrypt_dnscheckall'});
+			&$second_print($text{'letsencrypt_dnscheckall'});
+			goto FAILED;
 			}
 		else {
 			&$second_print(&text('letsencrypt_dnscheckbad',
@@ -217,6 +218,7 @@ else {
 		&webmin_log("letsencrypt", "domain", $d->{'dom'}, $d);
 		}
 
+	FAILED:
 	&ui_print_footer("cert_form.cgi?dom=$in{'dom'}", $text{'cert_return'},
 		&domain_footer_link($d),
 			 "", $text{'index_return'});
