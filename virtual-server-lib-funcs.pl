@@ -16692,7 +16692,7 @@ if ($gconfig{'os_type'} =~ /^(redhat-linux|debian-linux)$/) {
 		if (!$repofound) {
 			&$second_print(&ui_text_color(
 				&text('check_repoeoutdate',
-					"$virtualmin_link/documentation/repositories/"), 'warn'));
+					"$virtualmin_link/docs/installation/troubleshooting-repositories/"), 'warn'));
 			}
 		}
 	}
