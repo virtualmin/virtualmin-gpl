@@ -666,9 +666,9 @@ return @rv;
 }
 
 sub get_virtualmin_docs
-{               
+{
 return "https://www.virtualmin.com/docs/";
-}      
+}
 
 sub parse_license_date
 {
