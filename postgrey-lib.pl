@@ -52,8 +52,7 @@ return "postgrey";
 # Returns the Postgrey command-line arguments
 sub get_postgrey_args
 {
-local $ofile = "/etc/default/postgrey";
-local $postgrey = &has_command("postgrey");
+my $postgrey = &has_command("postgrey");
 
 # First try running process
 &foreign_require("proc");
@@ -63,8 +62,9 @@ foreach my $p (&proc::list_processes()) {
 		}
 	}
 
+# Get from options file on Debian
+my $ofile = "/etc/default/postgrey";
 if (-r $ofile) {
-	# Get from options file on Debian
 	my $lref = &read_file_lines($ofile, 1);
 	foreach my $l (@$lref) {
 		if ($l =~ /^\s*POSTGREY_OPTS="(.*)"/) {
@@ -73,10 +73,21 @@ if (-r $ofile) {
 		}
 	}
 
+# Get from options file on CentOS / Rocky 9
+my $sfile = "/etc/sysconfig/postgrey";
+if (-r $sfile) {
+	my $lref = &read_file_lines($sfile, 1);
+	foreach my $l (@$lref) {
+		if ($l =~ /^\s*POSTGREY_TYPE="(.*)"/) {
+			return $1;
+			}
+		}
+	}
+
 &foreign_require("init");
 if ($init::init_mode eq 'init') {
 	# Last try checking the init script
-	local $ifile = &init::action_filename(&get_postgrey_init());
+	my $ifile = &init::action_filename(&get_postgrey_init());
 	my $lref = &read_file_lines($ifile, 1);
 	foreach my $l (@$lref) {
 		if ($l =~ /\Q$postgrey\E\s+(.*)/i) {
