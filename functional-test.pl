@@ -101,6 +101,8 @@ $test_ssh_public_key = "/tmp/functional-test.key.pub";
 			'reemail', 'pro/maillog', 'disable_domain',
 			'assoc_form', 'pro/edit_html' );
 
+$max_output = 2048;
+
 # Parse command-line args
 $web = 'web';
 $ssl = 'ssl';
@@ -163,6 +165,9 @@ while(@ARGV > 0) {
 		$tmplname = shift(@ARGV);
 		$tmplname || &usage("--template must be followed by a ".
 				    "template name or ID");
+		}
+	elsif ($a eq "--max-output") {
+		$max_output = shift(@ARGV);
 		}
 	else {
 		&usage("Unknown parameter $a");
@@ -12221,10 +12226,10 @@ local ($out, $timed_out) = &backquote_with_timeout(
 				"($cmd) 2>&1 </dev/null", $to);
 local @lout = split(/\r?\n/, $out);
 local $shortout = $out;
-if (length($shortout) > 1024) {
-	$shortout = substr($shortout, 0, 2048);
+if (length($shortout) > $max_output) {
+	$shortout = substr($shortout, 0, $max_output);
 	$shortout .= "\n" if ($shortout !~ /\n$/);
-	$shortout .= "(Plus ".(length($out) - 2048)." more bytes...)\n";
+	$shortout .= "(Plus ".(length($out) - $max_output)." more bytes...)\n";
 	}
 if (!$t->{'ignorefail'}) {
 	if ($? && !$t->{'fail'} || !$? && $t->{'fail'}) {
@@ -12304,6 +12309,7 @@ print "                           [--test type]*\n";
 print "                           [--skip-test type]*\n";
 print "                           [--no-cleanup | --skip-cleanup]\n";
 print "                           [--output]\n";
+print "                           [--max-output bytes]\n";
 print "                           [--migrate $mig]\n";
 print "                           [--user webmin-login --pass password]\n";
 print "                           [--script name]*\n";
