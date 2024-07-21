@@ -87,7 +87,8 @@ $test_ssh_public_key = "/tmp/functional-test.key.pub";
 @create_args = ( [ 'limits-from-plan' ],
 		 [ 'no-email' ],
 		 [ 'no-slaves' ],
-	  	 [ 'no-secondaries' ] );
+	  	 [ 'no-secondaries' ],
+		 [ 'default-cert-owner' ], );
 
 @other_webmin_pages = ( 'cert_form', 'edit_spf', 'edit_domain',
 			'edit_domdkim', 'edit_limits', 'edit_mail',
