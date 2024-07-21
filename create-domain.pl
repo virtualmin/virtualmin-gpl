@@ -441,6 +441,9 @@ while(@ARGV > 0) {
 		$proxy_pass_mode = 2;
 		$proxy_pass = shift(@ARGV);
 		}
+	elsif ($a eq "--default-cert-owner") {
+		$default_cert_owner = 1;
+		}
 	elsif ($a =~ /^\-\-(.*)$/ && $plugin_args{$1}) {
 		# Plugin-specific arg
 		if ($plugin_args{$1}->{'novalue'}) {
@@ -885,6 +888,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'nocreationmail', $nocreationmail,
 	 'noslaves', $noslaves,
 	 'nosecondaries', $nosecondaries,
+	 'default_cert_owner', $default_cert_owner,
 	 'subprefix', $subprefix,
 	 'hashpass', $hashpass,
 	 'auto_letsencrypt', $letsencrypt,
