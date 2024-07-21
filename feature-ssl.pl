@@ -404,6 +404,8 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
 			$a = $1.".".$d->{'dom'};
 			}
 		}
+	local $email = $info->{'emailAddress'};
+	$email =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
 	local $err = &generate_self_signed_cert(
 		$d->{'ssl_cert'}, $d->{'ssl_key'},
 		undef,
@@ -411,10 +413,10 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
 		$info->{'c'},
 		$info->{'st'},
 		$info->{'l'},
-		undef,
+		$info->{'o'},
 		$info->{'ou'},
 		"*.$d->{'dom'}",
-		undef,
+		$email,
 		\@newalt,
 		$d,
 		);
