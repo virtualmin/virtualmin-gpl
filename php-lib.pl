@@ -134,9 +134,11 @@ if ($mode =~ /mod_php|none/ && $oldmode !~ /mod_php|none/) {
 	}
 
 my $oldplog;
+my $oldmail;
 if ($mode ne $oldmode) {
-	# Save the PHP error log path
+	# Save the PHP error log path and mail mode
 	$oldplog = &get_domain_php_error_log($d);
+	$oldmail = &get_php_can_send_mail($d);
 	}
 
 # Work out source php.ini files
@@ -598,6 +600,10 @@ if ($mode !~ /mod_php|none/ && $oldmode =~ /mod_php|none/ &&
 if (defined($oldplog)) {
 	# Restore the old PHP error log
 	&save_domain_php_error_log($d, $oldplog);
+	}
+if (defined($oldmail)) {
+	# Restore the old mail option
+	&save_php_can_send_mail($d, $oldmail);
 	}
 
 # Link ~/etc/php.ini to the per-version ini file
@@ -3102,7 +3108,7 @@ sub get_php_can_send_mail
 my ($d) = @_;
 my $mode = &get_domain_php_mode($d);
 if ($mode eq "none" || $mode eq "mod_php") {
-	return -1;
+	return undef;
 	}
 my $dis;
 if ($mode eq "fpm") {
