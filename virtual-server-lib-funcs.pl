@@ -20634,8 +20634,16 @@ if (&has_command("dig")) {
 		"dig ".quotemeta($host)." \@8.8.8.8 2>/dev/null");
 	return -1 if ($?);
 	return 0 if ($out !~ /ANSWER\s+SECTION/i);
+	# IPv4 and CNAME
 	if ($out =~ /\Q$host\E\.?.*\s+(\d+\.\d+\.\d+\.\d+)/ ||
 	    $out =~ /\Q$host\E\.?.*CNAME\s+(\S+)/) {
+		# Found an IP
+		return !$wantrec || $wantrec eq $1;
+		}
+	# IPv6 only
+	$out = &backquote_command(
+		"dig AAAA ".quotemeta($host)." \@8.8.8.8 2>/dev/null");
+	if ($out =~ /\Q$host\E\.?.*\s+AAAA\s+(\S+)/) {
 		# Found an IP
 		return !$wantrec || $wantrec eq $1;
 		}
