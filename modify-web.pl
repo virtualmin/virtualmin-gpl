@@ -36,6 +36,11 @@ a path like C<logs/php.log>. Alternately you can opt to use the default
 path with the C<--default-php-log> flag, or turn logging off with the flag
 C<--no-php-log>.
 
+By default PHP scripts can send email, but you can prevent this with the 
+C<--no-php-mail> flag. This can provide some protection against a PHP script
+vulnerability being used to send email. Or to re-enable email again, use the
+C<--php-mail> flag.
+
 If your Apache configuration contains unsupported C<mod_php> directives,
 the C<--cleanup-mod-php> flag can be used to remove them from a virtual server.
 This is primarily useful if the Apache module has been disabled, but not all
@@ -370,6 +375,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-php-log") {
 		$phplog = "";
 		}
+	elsif ($a eq "--no-php-mail") {
+		$phpmail = 0;
+		}
+	elsif ($a eq "--php-mail") {
+		$phpmail = 1;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -386,7 +397,7 @@ $mode || defined($proxy) || defined($framefwd) || $tlsa || $rubymode ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
   $fpmsock || $fpmtype || $defmode || defined($cgimode) || $subprefix ||
   @add_dirs || @remove_dirs || $protocols || $fix_mod_php ||
-  $ssl_cert || $ssl_key || $ssl_ca ||
+  $ssl_cert || $ssl_key || $ssl_ca || defined($phpmail) ||
 	&usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
@@ -1055,6 +1066,23 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Update PHP mail setting
+	if (defined($phpmail)) {
+		if ($phpmail) {
+			&$first_print("Allowing PHP scripts to send email ..");
+			}
+		else {
+			&$first_print("Disallowing PHP scripts from sending email ..");
+			}
+		my $err = &save_php_can_send_mail($d, $phpmail);
+		if ($err) {
+			&$second_print(".. failed : $err");
+			}
+		else {
+			&$second_print(".. done");
+			}
+		}
+
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($children_no_check) || defined($renew) || $breakcert ||
@@ -1094,6 +1122,7 @@ print "                     [--php-timeout seconds | --no-php-timeout]\n";
 print "                     [--php-fpm-port | --php-fpm-socket]\n";
 print "                     [--php-fpm-mode dynamic|static|ondemand]\n";
 print "                     [--php-log filename | --no-php-log | --default-php-log]\n";
+print "                     [--php-mail | --no-php-mail]\n";
 print "                     [--cleanup-mod-php]\n";
 print "                     [--proxy http://... | --no-proxy]\n";
 print "                     [--framefwd http://... | --no-framefwd]\n";

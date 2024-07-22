@@ -3095,7 +3095,89 @@ $v2 = $v2 =~ /^(\d+)k/i ? $1*1024 :
 return $v1 <=> $v2;
 }
 
+# get_php_can_send_mail(&domain)
+# Returns 1 if PHP can send email on this domain
+sub get_php_can_send_mail
+{
+my ($d) = @_;
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "none" || $mode eq "mod_php") {
+	return -1;
+	}
+my $dis;
+if ($mode eq "fpm") {
+	# Get from FPM pool file
+	$dis = &get_php_fpm_ini_value($d, "disable_functions");
+	}
+else {
+	# Get from php.ini
+	&foreign_require("phpini");
+	foreach my $i (&list_domain_php_inis($d)) {
+		my $pconf = &phpini::get_config($i->[1]);
+		$dis = &phpini::find_value("disable_functions", $pconf);
+		last if ($dis);
+		}
+	}
+my @dis = split(/\s*,\s*/, $dis);
+return &indexof("mail", @dis) >= 0 ? 0 : 1;
+}
 
+# save_php_can_send_mail(&domain, can-send)
+# Update the PHP config to allow or disallow sending email
+sub save_php_can_send_mail
+{
+my ($d, $canmail) = @_;
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "none" || $mode eq "mod_php") {
+	return $text{'phpmode_esendmode'};
+	}
+my $dis;
+if ($mode eq "fpm") {
+	# Get the current value from the FPM pool
+	$dis = &get_php_fpm_ini_value($d, "disable_functions");
+	}
+else {
+	# Get the current value from php.ini
+	&foreign_require("phpini");
+	foreach my $i (&list_domain_php_inis($d)) {
+		my $pconf = &phpini::get_config($i->[1]);
+		$dis = &phpini::find_value("disable_functions", $pconf);
+		last if ($dis);
+		}
+	}
+
+# Add or remove the mail disable
+my @dis = split(/\s*,\s*/, $dis);
+my $idx = &indexof("mail", @dis);
+if ($idx < 0 && !$canmail) {
+	push(@dis, "mail");
+	}
+elsif ($idx >= 0 && $canmail) {
+	splice(@dis, $idx, 1);
+	}
+$dis = join(",", @dis);
+
+if ($mode eq "fpm") {
+	# Update the FPM pool file
+	&save_php_fpm_ini_value($d, "disable_functions", $dis || undef, 0);
+	}
+else {
+	# Update all php.ini files
+	&foreign_require("phpini");
+	my $fixed;
+	foreach my $i (&list_domain_php_inis($d)) {
+		&lock_file($i->[1]);
+		my $pconf = &phpini::get_config($i->[1]);
+		&phpini::save_directive($pconf, "disable_functions", $dis || undef);
+		&flush_file_lines($i->[1], undef, 1);
+                &unlock_file($i->[1]);
+		$fixed++;
+                }
+	$fixed || return $text{'phpmode_ephpinis'};
+	# XXX need restart??
+	}
+return undef;
+}
 
 1;
 
