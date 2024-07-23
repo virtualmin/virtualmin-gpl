@@ -2875,18 +2875,11 @@ elsif ($mode ne "none" && $mode ne "mod_php") {
 		&flush_file_lines($i->[1], undef, 1);
 		&unlock_file($i->[1]);
 		}
-	if ($mode eq 'fcgid') {
-		if ($p eq "web") {
-			&register_post_action(\&restart_apache);
-			}
-		elsif ($p) {
-			&plugin_call($p, "feature_restart_web_php", $d);
-			}
-		}
 	}
 else {
 	return "PHP error log cannot be set in $mode mode";
 	}
+&register_php_restart_action($d);
 $d->{'php_error_log'} = $phplog || "";
 if ($phplog && !-r $phplog) {
 	# Make sure the log file exists
@@ -2898,6 +2891,27 @@ if ($phplog && !-r $phplog) {
 &modify_logrotate($d, $oldd);
 &pop_all_print();
 return undef;
+}
+
+# register_php_restart_action(&domain)
+# Register an action to restart any PHP server for a domain
+sub register_php_restart_action
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+if ($p eq "web") {
+	my $mode = &get_domain_php_mode($d);
+	if ($mode eq "fcgid") {
+		&register_post_action(\&restart_apache);
+		}
+	elsif ($mode eq "fpm") {
+		my $conf = &get_php_fpm_config($d);
+		&register_post_action(\&restart_php_fpm_server, $conf);
+		}
+	}
+else {
+	&register_post_action(\&plugin_call, $p, "feature_restart_web_php", $d);
+	}
 }
 
 # can_php_error_log(&domain|mode)
@@ -3182,8 +3196,8 @@ else {
 		&flush_file_lines($i->[1], undef, 1);
                 &unlock_file($i->[1]);
                 }
-	# XXX need restart??
 	}
+&register_php_restart_action($d);
 return undef;
 }
 
