@@ -8593,11 +8593,15 @@ my $before = &before_letsencrypt_website($d);
 my @beforecerts = &get_all_domain_service_ssl_certs($d);
 my ($ok, $cert, $key, $chain) =
 	&request_domain_letsencrypt_cert($d, \@dnames);
-if (!$ok) {
+if ($ok) {
+	$d->{'letsencrypt_nodnscheck'} = 1;
+	}
+else {
 	# Try again with just externally resolvable hostnames
 	my @badnames;
 	my $fok = &filter_external_dns(\@dnames, \@badnames);
 	if ($fok == 0 && @dnames) {
+		$d->{'letsencrypt_nodnscheck'} = 0;
 		($ok, $cert, $key, $chain) =
 			&request_domain_letsencrypt_cert($d, \@dnames);
 		}
