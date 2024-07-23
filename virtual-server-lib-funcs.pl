@@ -20584,21 +20584,30 @@ $config{'defaultdomain_name'} = $new_hostname;
 return $err ? 0 : 1;
 }
 
-# check_external_dns(hostname, [expected-ip])
+# check_external_dns(hostname, [expected-ip|expected-cname])
 # Checks if some DNS record can be looked up externally by consulting the 
 # 8.8.8.8 nameserver. Returns 1 if yes, 0 if not, or -1 if the command needed
 # is not installed.
 sub check_external_dns
 {
-my ($host, $wantip) = @_;
+my ($host, $wantrec) = @_;
 if (&has_command("dig")) {
 	my $out = &backquote_command(
 		"dig ".quotemeta($host)." \@8.8.8.8 2>/dev/null");
 	return -1 if ($?);
 	return 0 if ($out !~ /ANSWER\s+SECTION/i);
-	if ($out =~ /\Q$host\E\.?.*\s+(\d+\.\d+\.\d+\.\d+)/) {
+	# IPv4 and CNAME
+	if ($out =~ /\Q$host\E\.?.*\s+(\d+\.\d+\.\d+\.\d+)/ ||
+	    $out =~ /\Q$host\E\.?.*CNAME\s+(\S+)/) {
 		# Found an IP
-		return !$wantip || $wantip eq $1;
+		return !$wantrec || $wantrec eq $1;
+		}
+	# IPv6 only
+	$out = &backquote_command(
+		"dig AAAA ".quotemeta($host)." \@8.8.8.8 2>/dev/null");
+	if ($out =~ /\Q$host\E\.?.*\s+AAAA\s+(\S+)/) {
+		# Found an IP
+		return !$wantrec || $wantrec eq $1;
 		}
 	return 0;
 	}
@@ -20609,9 +20618,15 @@ elsif (&has_command("host")) {
 	&reset_environment();
 	return 0 if ($out =~ /Host\s+\S+\s+not\s+found/i);
 	return -1 if ($?);
+	# IPv4
 	if ($out =~ /has\s+address\s+(\d+\.\d+\.\d+\.\d+)/i) {
 		# Found an IP
-		return !$wantip || $wantip eq $1;
+		return !$wantrec || $wantrec eq $1;
+		}
+	# IPv6
+	if ($out =~ /has\s+IPv6\s+address\s+(\S+)/i) {
+		# Found an IP
+		return !$wantrec || $wantrec eq $1;
 		}
 	return 0;
 	}
