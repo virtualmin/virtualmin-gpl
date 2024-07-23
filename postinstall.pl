@@ -314,7 +314,8 @@ foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 			$tmpl->{'web_cgimode'} = $cgimodes[0];
 			&save_template($tmpl);
 			}
-		elsif (&indexof($tmpl->{'web_cgimode'}, @cgimodes) < 0) {
+		elsif ($tmpl->{'web_cgimode'} ne 'none' &&
+		       &indexof($tmpl->{'web_cgimode'}, @cgimodes) < 0) {
 			# Default CGI mode cannot be used
 			$tmpl->{'web_cgimode'} = $cgimodes[0];
 			&save_template($tmpl);
