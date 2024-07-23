@@ -8626,8 +8626,10 @@ my @leargs = ($d, \@dnames, undef, undef, undef, undef, undef, undef, undef,
 	      $d->{'letsencrypt_subset'});
 my ($ok, $cert, $key, $chain) =
 	&request_domain_letsencrypt_cert(@leargs);
-$d->{'letsencrypt_nodnscheck'} = 1 if ($ok);
-if (!$ok) {
+if ($ok) {
+	$d->{'letsencrypt_nodnscheck'} = 1;
+	}
+else {
 	# Try again with just externally resolvable hostnames
 	my @badnames;
 	my $fok = &filter_external_dns(\@dnames, \@badnames);
