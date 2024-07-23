@@ -311,6 +311,7 @@ foreach my $k (keys %$sinfo) {
 		$info{$k} = $sinfo->{$k};
 		}
 	}
+delete($sinfo->{'opts'});
 &write_file("$script_log_directory/$d->{'id'}/$sinfo->{'id'}.script", \%info);
 }
 
