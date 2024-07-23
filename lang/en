@@ -5641,6 +5641,7 @@ phpmode_wwwredirnon=Adding redirect to non-www domain ..
 phpmode_wwwredirwww=Adding redirect to www domain ..
 phpmode_esendmode=Sending email cannot be changed in this PHP mode
 phpmode_ephpinis=No php.ini files to update found
+phpmode_mail=PHP scripts can send email?
 
 website_header=Website options
 website_ephpcgi=CGI scripts cannot be disabled while PHP is using the CGI or FCGI execution mode

@@ -194,6 +194,12 @@ if (&can_php_error_log($mode)) {
 		}
 	}
 
+# Save PHP mail option
+my $phpmail = &get_php_can_send_mail($d);
+if (defined($phpmail) && defined($in{'mail'})) {
+	&save_php_can_send_mail($d, $in{'mail'});
+	}
+
 if ($can) {
 	# Save PHP-FPM process manager mode
 	my $fpmtype = $in{'fpmtype'};

@@ -138,6 +138,13 @@ if (&can_php_error_log($mode)) {
 		}
 	}
 
+# Show PHP mail option
+my $phpmail = &get_php_can_send_mail($d);
+if (defined($phpmail)) {
+	print &ui_table_row(&hlink($text{'phpmode_mail'}, 'phpmail'),
+		&ui_yesno_radio("mail", $phpmail));
+	}
+
 # PHP versions
 if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 	# Build versions list

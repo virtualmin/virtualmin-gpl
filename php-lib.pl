@@ -3118,7 +3118,9 @@ if ($mode eq "fpm") {
 else {
 	# Get from php.ini
 	&foreign_require("phpini");
-	foreach my $i (&list_domain_php_inis($d)) {
+	my @inis = &list_domain_php_inis($d);
+	return undef if (!@inis);
+	foreach my $i (@inis) {
 		my $pconf = &phpini::get_config($i->[1]);
 		$dis = &phpini::find_value("disable_functions", $pconf);
 		last if ($dis);
@@ -3138,6 +3140,7 @@ if ($mode eq "none" || $mode eq "mod_php") {
 	return $text{'phpmode_esendmode'};
 	}
 my $dis;
+my @inis;
 if ($mode eq "fpm") {
 	# Get the current value from the FPM pool
 	$dis = &get_php_fpm_ini_value($d, "disable_functions");
@@ -3145,7 +3148,8 @@ if ($mode eq "fpm") {
 else {
 	# Get the current value from php.ini
 	&foreign_require("phpini");
-	foreach my $i (&list_domain_php_inis($d)) {
+	@inis = &list_domain_php_inis($d);
+	foreach my $i (@inis) {
 		my $pconf = &phpini::get_config($i->[1]);
 		$dis = &phpini::find_value("disable_functions", $pconf);
 		last if ($dis);
@@ -3170,16 +3174,14 @@ if ($mode eq "fpm") {
 else {
 	# Update all php.ini files
 	&foreign_require("phpini");
-	my $fixed;
-	foreach my $i (&list_domain_php_inis($d)) {
+	@inis || return $text{'phpmode_ephpinis'};
+	foreach my $i (@inis) {
 		&lock_file($i->[1]);
 		my $pconf = &phpini::get_config($i->[1]);
 		&phpini::save_directive($pconf, "disable_functions", $dis || undef);
 		&flush_file_lines($i->[1], undef, 1);
                 &unlock_file($i->[1]);
-		$fixed++;
                 }
-	$fixed || return $text{'phpmode_ephpinis'};
 	# XXX need restart??
 	}
 return undef;

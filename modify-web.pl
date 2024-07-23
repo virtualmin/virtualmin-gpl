@@ -38,7 +38,7 @@ C<--no-php-log>.
 
 By default PHP scripts can send email, but you can prevent this with the 
 C<--no-php-mail> flag. This can provide some protection against a PHP script
-vulnerability being used to send email. Or to re-enable email again, use the
+vulnerability being used to send spam. Or to re-enable email again, use the
 C<--php-mail> flag.
 
 If your Apache configuration contains unsupported C<mod_php> directives,
