@@ -8633,6 +8633,7 @@ if (!$ok) {
 	if ($fok == 0 && @dnames) {
 		($ok, $cert, $key, $chain) =
 			&request_domain_letsencrypt_cert(@leargs);
+		$d->{'letsencrypt_nodnscheck'} = 0 if ($ok);
 		}
 	}
 &after_letsencrypt_website($d, $before);
