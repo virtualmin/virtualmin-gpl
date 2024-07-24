@@ -2928,13 +2928,11 @@ if (&is_dns_remote()) {
 	# No local BIND in provisioning mode
 	return ( );
 	}
-if (!$bind8::bind_version) {
-	local $out = &backquote_command("$bind8::config{'named_path'} -v 2>&1");
-	if ($out =~ /(bind|named)\s+([0-9\.]+)/i) {
-		$bind8::bind_version = $2;
-		}
+my $ver = &bind8::get_bind_version();
+if ($ver) {
+	return ( [ $text{'sysinfo_bind'}, $ver ] );
 	}
-return ( [ $text{'sysinfo_bind'}, $bind8::bind_version ] );
+return ( );
 }
 
 sub startstop_dns
