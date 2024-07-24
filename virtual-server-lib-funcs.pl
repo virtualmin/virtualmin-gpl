@@ -20440,7 +20440,7 @@ my %dom;
 # Set initial features
 $dom{'dir'} = 1;
 $dom{'unix'} = 1;
-$dom{'dns'} = 1;
+$dom{'dns'} = $config{'dns'};
 $dom{'mail'} = 0;
 my $webf = &domain_has_website();
 my $sslf = &domain_has_ssl();
