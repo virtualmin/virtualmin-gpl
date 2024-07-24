@@ -237,10 +237,8 @@ if (&domain_has_ssl_cert($d)) {
 
 	# Show button to copy to the default location
 	if (!$d->{'ssl_same'} &&
-	    (&get_website_ssl_file($d, "cert") ne 
-	     &default_certificate_file($d, "cert")) ||
-	    (&get_website_ssl_file($d, "key") ne 
-	     &default_certificate_file($d, "key"))) {
+	    &get_website_ssl_file($d, "key") ne 
+	     &default_certificate_file($d, "key")) {
 		my $defcert_dir = &default_certificate_file($d, "cert");
 		$defcert_dir =~ s|/[^/]+$||;
 		print &ui_hr() if (!$ui_hr++);
