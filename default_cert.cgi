@@ -27,7 +27,9 @@ foreach my $t ("key", "cert", "ca", "combined", "everything") {
 	}
 
 # Update other services using the cert
+&$first_print($text{'cert_updatesvcs'});
 &update_all_domain_service_ssl_certs($d, \@beforecerts);
+&$second_print($text{'setup_done'});
 
 &run_post_actions();
 &save_domain($d);
