@@ -19366,13 +19366,15 @@ elsif ($p) {
 sub save_website_ssl_file
 {
 my ($d, $type, $file) = @_;
-if (&domain_has_ssl($d)) {
-	# Update the actual webserver config
-	my $p = &domain_has_website($d);
-	if ($p ne "web") {
-		return &plugin_call($p, "feature_save_web_ssl_file",
-				    $d, $type, $file);
-		}
+my $p = &domain_has_website($d);
+my $s = &domain_has_ssl($d);
+if ($s && $p ne "web") {
+	# Update the actual Nginx config
+	return &plugin_call($p, "feature_save_web_ssl_file",
+			    $d, $type, $file);
+	}
+elsif ($s && $p eq "web") {
+	# Update the actual Apache config
 	&obtain_lock_ssl($d);
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 							$d->{'web_sslport'});
