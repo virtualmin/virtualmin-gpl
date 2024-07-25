@@ -144,7 +144,9 @@ if ($in{'cert_mode'} != 2 && ($cafile = &get_website_ssl_file($d, "ca"))) {
 	}
 
 # Update other services using the cert
+&$first_print($text{'cert_updatesvcs'});
 &update_all_domain_service_ssl_certs($d, \@beforecerts);
+&$second_print($text{'setup_done'});
 
 # Remove the new private key we just installed
 &release_lock_ssl($d);

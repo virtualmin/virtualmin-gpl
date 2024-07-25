@@ -177,9 +177,12 @@ else {
 		$d->{'letsencrypt_subset'} = $in{'subset'};
 		&refresh_ssl_cert_expiry($d);
 		&save_domain($d);
+		&$second_print($text{'setup_done'});
 
 		# Update other services using the cert
+		&$first_print($text{'cert_updatesvcs'});
 		&update_all_domain_service_ssl_certs($d, \@beforecerts);
+		&$second_print($text{'setup_done'});
 
 		# For domains that were using the SSL cert on this domain
 		# originally but can no longer due to the cert hostname
@@ -205,7 +208,6 @@ else {
 			}
 
 		&release_lock_ssl($d);
-		&$second_print($text{'setup_done'});
 
 		# Run the after command
 		&set_domain_envs($d, "SSL_DOMAIN");

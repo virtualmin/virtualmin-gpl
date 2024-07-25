@@ -3371,6 +3371,7 @@ cert_type_cert=SSL certificate
 cert_type_ca=CA certificate
 cert_type_combined=combined SSL certificate and key
 cert_type_everything=combined SSL certificate, CA and key
+cert_updatesvcs=Updating service certificates ..
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate
