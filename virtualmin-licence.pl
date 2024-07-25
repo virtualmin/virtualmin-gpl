@@ -34,7 +34,8 @@ return $out =~ /^EXP\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
 	(0, $1, undef, $2, $3, $4, $5) :	# Auto-renewal flag
        $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
 	(0, $1, undef, $2, $3, $4) :
-	(1, undef, "No valid licence was found for your host ID $_[0] and serial number $serial{'LicenseKey'}", undef);
+	(1, undef, "No valid licence was found for your host ID $hostid and ".
+		   "serial number $serial{'SerialNumber'}", undef);
 }
 
 1;
