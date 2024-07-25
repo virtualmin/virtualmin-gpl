@@ -722,6 +722,17 @@ foreach my $m (keys %get_domain_by_maps) {
 	}
 }
 
+# supports_firstname()
+# Returns 1 if users can have a first name and surname
+sub supports_firstname
+{
+if ($usermodule eq "ldap-useradmin") {
+	my %luconfig = &foreign_config("ldap-useradmin");
+	return $luconfig{'given'} ? 1 : 0;
+	}
+return 0;
+}
+
 # list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs], [include-extra])
 # List all Unix users who are in the domain's primary group.
 # If domain is omitted, returns local users.

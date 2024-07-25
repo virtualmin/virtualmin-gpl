@@ -125,6 +125,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--real") {
 		$real = shift(@ARGV);
 		}
+	elsif ($a eq "--firstname") {
+		$firstname = shift(@ARGV);
+		&supports_firstname() || &usage("This system does not support setting first names for users");
+		}
+	elsif ($a eq "--surname") {
+		$surname = shift(@ARGV);
+		&supports_firstname() || &usage("This system does not support setting surnames for users");
+		}
 	elsif ($a eq "--quota") {
 		$quota = shift(@ARGV);
 		&has_home_quotas() || &usage("--quota option is not available unless home directory quotas are enabled");
@@ -325,6 +333,12 @@ elsif ($enable) {
 if (defined($real)) {
 	$real =~ /^[^:]*$/ || &usage("Invalid real name");
 	$user->{'real'} = $real;
+	}
+if (defined($firstname)) {
+	$user->{'firstname'} = $firstname;
+	}
+if (defined($surname)) {
+	$user->{'surname'} = $surname;
 	}
 $pd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 if (defined($quota) && !$user->{'noquota'}) {
@@ -614,6 +628,10 @@ print "                      [--pass \"new-password\" | --passfile password-file
 print "                      [--ssh-pubkey \"key\" | pubkey-file <--ssh-pubkey-id id]\n";
 print "                      [--disable | --enable]\n";
 print "                      [--real real-name]\n";
+if (&supports_firstname()) {
+	print "                      [--firstname first-name]\n";
+	print "                      [--surname surname]\n";
+	}
 if (&has_home_quotas()) {
 	print "                      [--quota quota-in-blocks]\n";
 	}

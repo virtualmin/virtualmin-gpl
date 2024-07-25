@@ -118,6 +118,12 @@ foreach $d (@doms) {
 			print "    Domain: $d->{'dom'}\n";
 			print "    Unix username: ",$u->{'user'},"\n" if (!$u->{'extra'});
 			print "    Real name: ",$u->{'real'},"\n";
+			if (defined($u->{'firstname'})) {
+				print "    First name: ",$u->{'firstname'},"\n";
+				}
+			if (defined($u->{'surname'})) {
+				print "    Surname: ",$u->{'surname'},"\n";
+				}
 			if (defined($u->{'plainpass'})) {
 				print "    Password: ",$u->{'plainpass'},"\n";
 				}

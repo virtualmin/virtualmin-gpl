@@ -121,6 +121,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--real" || $a eq "--desc") {
 		$real = shift(@ARGV);
 		}
+	elsif ($a eq "--firstname") {
+		$firstname = shift(@ARGV);
+		&supports_firstname() || &usage("This system does not support setting first names for users");
+		}
+	elsif ($a eq "--surname") {
+		$surname = shift(@ARGV);
+		&supports_firstname() || &usage("This system does not support setting surnames for users");
+		}
 	elsif ($a eq "--ftp") {
 		$shell = $ftp_shell;
 		}
@@ -261,6 +269,8 @@ else {
 	}
 $user->{'gid'} = $d->{'gid'} || $d->{'ugid'};
 $user->{'real'} = $real;
+$user->{'firstname'} = $firstname;
+$user->{'surname'} = $surname;
 $user->{'shell'} = $shell->{'shell'};
 if (!$user->{'fixedhome'}) {
 	if (defined($home)) {
@@ -456,6 +466,10 @@ if (&has_mail_quotas()) {
 	print "                      [--mail-quota quota-in-blocks|\"UNLIMITED\"]\n";
 	}
 print "                      [--real real-name-for-new-user]\n";
+if (&supports_firstname()) {
+	print "                      [--firstname first-name]\n";
+	print "                      [--surname surname]\n";
+	}
 print "                      [--ftp]\n";
 if ($jailed_shell) {
 	print "                      [--jail-ftp]\n";
