@@ -19370,8 +19370,9 @@ my $p = &domain_has_website($d);
 my $s = &domain_has_ssl($d);
 if ($s && $p ne "web") {
 	# Update the actual Nginx config
-	return &plugin_call($p, "feature_save_web_ssl_file",
-			    $d, $type, $file);
+	my $err = &plugin_call($p, "feature_save_web_ssl_file",
+			       $d, $type, $file);
+	return $err if ($err);
 	}
 elsif ($s && $p eq "web") {
 	# Update the actual Apache config
