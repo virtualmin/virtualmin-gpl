@@ -726,6 +726,7 @@ foreach my $m (keys %get_domain_by_maps) {
 # Returns 1 if users can have a first name and surname
 sub supports_firstname
 {
+&require_useradmin();
 if ($usermodule eq "ldap-useradmin") {
 	my %luconfig = &foreign_config("ldap-useradmin");
 	return $luconfig{'given'} ? 1 : 0;
@@ -10309,6 +10310,17 @@ if (!$tmpl->{'default'}) {
 				next if ($done{$k});
 				if ($k =~ /^\Q$p\E_/ ||
 				    $k eq $psel || $k eq $p) {
+					# If the selector is named like 'web',
+					# the template inherits default values
+					# like 'web' or 'web_foo'
+					$tmpl->{$k} = $def->{$k};
+					$done{$k}++;
+					}
+				elsif ($p =~ /^(dns_spf)$/ &&
+				       $k =~ /^\Q$p\E/) {
+					# If the selector is named like 'dns_spf'
+					# the template inherits default values
+					# like 'dns_spfall'
 					$tmpl->{$k} = $def->{$k};
 					$done{$k}++;
 					}
