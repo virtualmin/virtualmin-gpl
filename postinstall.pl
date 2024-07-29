@@ -150,30 +150,12 @@ if ($config{'virus'}) {
 $config{'old_defip'} ||= &get_default_ip();
 $config{'old_defip6'} ||= &get_default_ip6();
 
-# Check if we have enough memory to preload
-local $lowmem;
-&foreign_require("proc");
-if (defined(&proc::get_memory_info)) {
-	local ($real) = &proc::get_memory_info();
-	local $arch = &backquote_command("uname -m 2>/dev/null");
-	local $megs = $arch =~ /x86_64/ ? 512 : 384;
-	if ($real*1024 <= $megs*1024*1024) {
-		# Less that 384 M (or 512 M with 64-bit) .. don't preload
-		$lowmem = 1;
-		}
-	}
-if (&running_in_zone() || &running_in_vserver()) {
-	# Assume that zones and vservers don't have a lot of memory
-	$lowmem = 1;
-	}
-
 # Decide whether to preload, and then do it
-if ($config{'preload_mode'} eq '') {
-	$config{'preload_mode'} = !$virtualmin_pro ? 0 :
-				  $lowmem ? 0 : 2;
-	}
 if ($gconfig{'no_virtualmin_preload'}) {
 	$config{'preload_mode'} = 0;
+	}
+elsif ($config{'preload_mode'} eq '') {
+	$config{'preload_mode'} = 2;
 	}
 &save_module_config();
 &update_miniserv_preloads($config{'preload_mode'});

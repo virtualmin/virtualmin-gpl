@@ -14,7 +14,7 @@ return undef;
 sub get_wizard_steps
 {
 return ( "intro",
-	 "memory",
+	 $config{'spam'} ? ( "memory" ) : ( ),
 	 $config{'virus'} ? ( "virus" ) : ( ),
 	 $config{'spam'} ? ( "spam" ) : ( ),
 	 "db",
@@ -34,24 +34,16 @@ print &ui_table_row(undef,
 	$text{'wizard_intro'}, 2);
 }
 
-# Show a form to enable or disable pre-loading and lookup-domain-daemon
+# Show a form to enable or disable lookup-domain-daemon
 sub wizard_show_memory
 {
-print &ui_table_row(undef, $text{'wizard_memory'}. "<p></p>", 2);
+print &ui_table_row(undef, $text{'wizard_memory2'}. "<p></p>", 2);
 
-local $mem = &get_uname_arch() =~ /64/ ? "40M" : "20M";
-print &ui_table_row($text{'wizard_memory_preload'},
-	&ui_radio("preload", $config{'preload_mode'} ? 1 : 0,
-		  [ [ 1, &text('wizard_memory_preload1', $mem)."<br>" ],
-		    [ 0, $text{'wizard_memory_preload0'} ] ]));
-
-if ($config{'spam'}) {
-	local $mem = &get_uname_arch() =~ /64/ ? "70M" : "35M";
-	print &ui_table_row($text{'wizard_memory_lookup'},
-		&ui_radio("lookup", &check_lookup_domain_daemon(),
-			  [ [ 1, &text('wizard_memory_lookup1', $mem)."<br>" ],
-			    [ 0, $text{'wizard_memory_lookup0'} ] ]));
-	}
+local $mem = &get_uname_arch() =~ /64/ ? "70M" : "35M";
+print &ui_table_row($text{'wizard_memory_lookup'},
+	&ui_radio("lookup", &check_lookup_domain_daemon(),
+		  [ [ 1, &text('wizard_memory_lookup1', $mem)."<br>" ],
+		    [ 0, $text{'wizard_memory_lookup0'} ] ]));
 }
 
 # Enable or disable pre-loading and lookup-domain-daemon
@@ -61,34 +53,17 @@ local ($in) = @_;
 &push_all_print();
 &set_all_null_print();
 
-if ($in->{'preload'} && !$config{'preload_mode'}) {
-	# Turn on preloading
-	$config{'preload_mode'} = 2;
-	&save_module_config();
-	&update_miniserv_preloads(2);
-	&restart_miniserv();
+local $lud = &check_lookup_domain_daemon();
+if ($in->{'lookup'} && !$lud) {
+	# Startup lookup daemon
+	&setup_lookup_domain_daemon();
 	}
-elsif (!$in->{'preload'} && $config{'preload_mode'}) {
-	# Turn off preloading
-	$config{'preload_mode'} = 0;
-	&save_module_config();
-	&update_miniserv_preloads(0);
-	&restart_miniserv();
+elsif (!$in->{'lookup'} && $lud) {
+	# Stop lookup daemon
+	&delete_lookup_domain_daemon();
 	}
-
-if ($config{'spam'}) {
-	local $lud = &check_lookup_domain_daemon();
-	if ($in->{'lookup'} && !$lud) {
-		# Startup lookup daemon
-		&setup_lookup_domain_daemon();
-		}
-	elsif (!$in->{'lookup'} && $lud) {
-		# Stop lookup daemon
-		&delete_lookup_domain_daemon();
-		}
-	$config{'no_lookup_domain_daemon'} = !$in->{'lookup'};
-	&save_module_config();
-	}
+$config{'no_lookup_domain_daemon'} = !$in->{'lookup'};
+&save_module_config();
 
 &pop_all_print();
 return undef;
