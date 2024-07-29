@@ -189,8 +189,16 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 		$temp = &transname().".".$sfx;
 		}
 	else {
-		$tempfile = @doms == 1 ? $doms[0]->{'dom'}
-				       : "virtualmin-backup";
+		my $filename = "virtualmin-all-domains-on-";
+		my $hostname = &get_system_hostname();
+		$hostname =~ s/\./-/g;
+		$filename .= $hostname;
+		my $time = strftime("%Y-%m-%d-%H-%M", localtime);
+		$filename .= "-".$time;
+		my $filename_dom = "$doms[0]->{'dom'}-$time";
+		$filename_dom =~ s/\./-/g;
+		$tempfile = @doms == 1 ? $filename_dom
+				       : $filename;
 		$tempfile .= ".".$sfx;
 		$temp = &tempname($remote_user.":".$tempfile);
 		}
