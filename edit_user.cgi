@@ -79,11 +79,8 @@ if ($user_type eq 'ssh') {
 					undef, &procell() || \@tds);
 		}
 
-	# Real name
-	print &ui_table_row(
-		&hlink($text{'user_real'}, "realname"),
-		&vui_noauto_textbox("real", $user->{'real'}, 40),
-		2, \@tds);
+	# Real name components
+	&show_real_name_fields($user);
 
 	# Show SSH shell select if more than one available
 	my @ssh_shells = &list_available_shells_by_type('owner', 'ssh');
@@ -216,11 +213,8 @@ elsif ($user_type eq 'ftp') {
 				$pwfield,
 				2, \@tds);
 
-	# Real name
-	print &ui_table_row(
-		&hlink($text{'user_real'}, "realname"),
-		&vui_noauto_textbox("real", $user->{'real'}, 40),
-		2, \@tds);
+	# Real name components
+	&show_real_name_fields($user);
 
 	# Show secondary groups
 	my @sgroups = &allowed_secondary_groups($d);
@@ -322,11 +316,8 @@ elsif ($user_type eq 'mail') {
 				$text{'user_norecovery'},
 				$text{'user_gotrecovery'}));
 
-	# Real name
-	print &ui_table_row(
-		&hlink($text{'user_real'}, "realname"),
-		&vui_noauto_textbox("real", $user->{'real'}, 40),
-		2, \@tds);
+	# Real name components
+	&show_real_name_fields($user);
 
 	print &ui_hidden_table_end();
 
@@ -780,12 +771,7 @@ else {
 
 	# Real name - only for show for mailbox users
 	if (!$mailbox || $user->{'real'}) {
-		print &ui_table_row(
-			&hlink($text{'user_real'}, "realname"),
-			$mailbox ? $user->{'real'} :
-				&ui_textbox("real", $user->{'real'}, 40, 0,
-					undef, &vui_ui_input_noauto_attrs()),
-			2, \@tds);
+		&show_real_name_fields($user);
 		}
 
 	# Show FTP shell field
@@ -1230,3 +1216,26 @@ else {
 	&ui_print_footer("", $text{'index_return'});
 	}
 
+sub show_real_name_fields
+{
+my ($user) = @_;
+
+# First name and surname
+if (&supports_firstname()) {
+	print &ui_table_row(
+		&hlink($text{'user_firstname'}, "firstname"),
+		&vui_noauto_textbox("firstname", $user->{'firstname'}, 40),
+		2, \@tds);
+
+	print &ui_table_row(
+		&hlink($text{'user_surname'}, "surname"),
+		&vui_noauto_textbox("surname", $user->{'surname'}, 40),
+		2, \@tds);
+	}
+
+# Real name
+print &ui_table_row(
+	&hlink($text{'user_real'}, "realname"),
+	&vui_noauto_textbox("real", $user->{'real'}, 40),
+	2, \@tds);
+}

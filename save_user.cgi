@@ -179,6 +179,14 @@ else {
 		$olderr = $in{'new'} ? undef
 				     : &valid_mailbox_name($user->{'user'});
 		&error($err) if ($err && !$olderr);
+		if (&supports_firstname()) {
+			$in{'firstname'} =~ /^[^:\r\n]*$/ ||
+				&error($text{'user_efirstname'});
+			$user->{'firstname'} = $in{'firstname'};
+			$in{'surname'} =~ /^[^:\r\n]*$/ ||
+				&error($text{'user_esurname'});
+			$user->{'surname'} = $in{'surname'};
+			}
 		$in{'real'} =~ /^[^:\r\n]*$/ ||
 			&error($text{'user_ereal'});
 		$user->{'real'} = $in{'real'};
