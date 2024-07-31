@@ -15377,16 +15377,18 @@ if ($config{'dns'}) {
 			$mastermsg = &text('check_dnsmaster',
 					   "<tt>$master</tt>");
 			}
-		my $masterip = &to_ipaddress($master);
-		if (!$masterip) {
-			$mastermsg ||= &text('check_dnsmaster2',
-					     "<tt>$master</tt>");
-			}
-		elsif ($masterip ne &get_dns_ip() &&
-		       $masterip ne &get_external_ip_address() &&
-		       &indexof($masterip, &active_ip_addresses()) < 0) {
-			$mastermsg ||= &text('check_dnsmaster2',
-				     "<tt>$master</tt>", "<tt>$masterip</tt>");
+		if ($master !~ /\$/) {
+			my $masterip = &to_ipaddress($master);
+			if (!$masterip) {
+				$mastermsg ||= &text('check_dnsmaster2',
+						     "<tt>$master</tt>");
+				}
+			elsif ($masterip ne &get_dns_ip() &&
+			       $masterip ne &get_external_ip_address() &&
+			       &indexof($masterip, &active_ip_addresses()) < 0) {
+				$mastermsg ||= &text('check_dnsmaster2',
+					     "<tt>$master</tt>", "<tt>$masterip</tt>");
+				}
 			}
 		$mastermsg = ", $mastermsg" if ($mastermsg);
 		&$second_print($text{'check_dnsok2'}.$mastermsg);
