@@ -2020,6 +2020,7 @@ $got{'A'} || return $text{'validate_ednsa2'};
 if ($d->{'virt6'}) {
 	$got{'AAAA'} || return $text{'validate_ednsa6'};
 	}
+my @recerrs;
 if (&domain_has_website($d)) {
 	foreach my $n ($d->{'dom'}.'.', 'www.'.$d->{'dom'}.'.') {
 		my @nips = map { $_->{'values'}->[0] }
@@ -2029,12 +2030,12 @@ if (&domain_has_website($d)) {
 			       grep { $_->{'type'} eq 'AAAA' &&
 				      $_->{'name'} eq $n } @$recs;
 		if (@nips && &indexof($ip, @nips) < 0) {
-			return &text('validate_ednsip', "<tt>$n</tt>",
-			    "<tt>".join(' or ', @nips)."</tt>", "<tt>$ip</tt>");
+			push(@recerrs, &text('validate_ednsip', "<tt>$n</tt>",
+			    "<tt>".join(' or ', @nips)."</tt>", "<tt>$ip</tt>"));
 			}
 		if ($d->{'virt6'} && @nips6 && &indexof($ip6, @nips6) < 0) {
-			return &text('validate_ednsip6', "<tt>$n</tt>",
-			  "<tt>".join(' or ', @nips6)."</tt>", "<tt>$ip6</tt>");
+			push(@recerrs, &text('validate_ednsip6', "<tt>$n</tt>",
+			  "<tt>".join(' or ', @nips6)."</tt>", "<tt>$ip6</tt>"));
 			}
 		}
 	}
@@ -2079,7 +2080,7 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 			push(@mxips, $mxh);
 			}
 		if (!$found) {
-			return &text('validate_ednsmx', join(" ", @mxips));
+			push(@recerrs, &text('validate_ednsmx', join(" ", @mxips)));
 			}
 		}
 	}
@@ -2093,9 +2094,10 @@ if (!$d->{'dns_submode'}) {
 				       ($_->{'type'} eq 'A' ||
 					$_->{'type'} eq 'AAAA') } @$recs;
 		$arec || &to_ipaddress($ns) || &to_ip6address($ns) ||
-			return &text('validate_ednsns', $ns);
+			push(@recerrs, &text('validate_ednsns', $ns));
 		}
 	}
+return join("<br>\n", @recerrs) if (@recerrs);
 
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
