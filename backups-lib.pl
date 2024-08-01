@@ -2203,10 +2203,12 @@ if ($ok) {
 			$lerr =~ s/\r/ /g;
 			my $l = length($key->{'key'});
 			if ($lerr =~ /Good\s+signature\s+from/) {
-				if ($lerr =~ /(key,\s+ID|using\s+\S+\s+key)\s+([A-Za-z0-9]+)/ && substr($2, -$l) eq $key->{'key'}) {
+				if ($lerr =~ /(key,\s+ID|using\s+\S+\s+key)\s+([A-Za-z0-9]+)/ &&
+				    (substr($2, -$l) eq $key->{'key'} || $2 eq substr($key->{'key'}, -length($2)))) {
 					$keyok = 1;
 					}
-				elsif ($lerr =~ /(key\s+ID)\s+([A-Za-z0-9]+)/ && substr($2, -$l) eq $key->{'key'}) {
+				elsif ($lerr =~ /(key\s+ID)\s+([A-Za-z0-9]+)/ &&
+				       (substr($2, -$l) eq $key->{'key'} || $2 eq substr($key->{'key'}, -length($2)))) {
 					$keyok = 1;
 					}
 				}
