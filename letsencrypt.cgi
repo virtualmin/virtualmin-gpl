@@ -40,6 +40,7 @@ if ($in{'only'}) {
 	$d->{'letsencrypt_renew'} = $in{'renew'};
 	$d->{'letsencrypt_nodnscheck'} = !$in{'dnscheck'};
 	$d->{'letsencrypt_subset'} = $in{'subset'};
+	$d->{'letsencrypt_email'} = $in{'email'};
 	&save_domain($d);
 	&redirect("cert_form.cgi?dom=$d->{'id'}");
 	}
@@ -175,6 +176,7 @@ else {
 		$d->{'letsencrypt_last_success'} = time();
 		$d->{'letsencrypt_nodnscheck'} = !$in{'dnscheck'};
 		$d->{'letsencrypt_subset'} = $in{'subset'};
+		$d->{'letsencrypt_email'} = $in{'email'};
 		&refresh_ssl_cert_expiry($d);
 		&save_domain($d);
 		&$second_print($text{'setup_done'});

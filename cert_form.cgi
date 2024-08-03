@@ -467,6 +467,13 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 			&ui_yesno_radio("renew",
 					$d->{'letsencrypt_renew'} ? 1 : 0));
 
+		# Renewal email option
+		print &ui_table_row($text{'cert_letsemail'},
+			&ui_radio("email", $d->{'letsencrypt_email'} || 0,
+				  [ [ 0, $text{'yes'} ],
+				    [ 1, $text{'cert_letsemailerr'} ],
+				    [ 2, $text{'no'} ] ]));
+
 		# Test connectivity first?
 		if (defined(&check_domain_connectivity)) {
 			print &ui_table_row($text{'cert_connectivity'},

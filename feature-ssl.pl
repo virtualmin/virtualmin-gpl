@@ -2993,7 +2993,10 @@ foreach my $d (&list_domains()) {
 
 	# Send email
 	my $from = &get_global_from_address($d);
-	&send_notify_email($from, [$d], $d, $subject, $body);
+	if ($d->{'letsencrypt_email'} == 0 ||
+	    $d->{'letsencrypt_email'} == 1 && !$ok) {
+		&send_notify_email($from, [$d], $d, $subject, $body);
+		}
 	&unlock_domain($d);
 	}
 

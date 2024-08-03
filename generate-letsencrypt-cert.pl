@@ -12,7 +12,9 @@ flag, which can be given multiple times. Or you can force use of the default
 SSL hostname list with C<--default-hosts>.
 
 If the optional C<--renew> flag is given, automatic renewal will be configured
-to occur when the certificate is close to expiry.
+to occur when the certificate is close to expiry. You can also choose if email
+is sent on every renewal with the C<--email-always> flag, only if renewal failed
+with C<--email-error>, or never with C<--email-never>.
 
 To have Virtualmin attempt to verify external Internet connectivity to your
 domain before requesting the certificate, use the C<--check-first> flag. This
@@ -121,6 +123,15 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--server-hmac") {
 		$leserver_hmac = shift(@ARGV);
+		}
+	elsif ($a eq "--email-always") {
+		$email = 0;
+		}
+	elsif ($a eq "--email-never") {
+		$email = 2;
+		}
+	elsif ($a eq "--email-error") {
+		$email = 1;
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -278,6 +289,7 @@ else {
 	$d->{'letsencrypt_hmac'} = $leserver_hmac;
 	$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
 	$d->{'letsencrypt_subset'} = $subset;
+	$d->{'letsencrypt_email'} = $email;
 	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);
 
@@ -333,6 +345,9 @@ print "                                    [--staging]\n";
 print "                                    [--check-first | --validate-first]\n";
 print "                                    [--skip-dns-check | --dns-check]\n";
 print "                                    [--allow-subset]\n";
+print "                                    [--email-always |\n";
+print "                                     --email-never |\n";
+print "                                     --email-error]\n";
 print "                                    [--web | --dns]\n";
 print "                                    [--rsa | --ec]\n";
 print "                                    [--server url]\n";
