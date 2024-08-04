@@ -732,6 +732,10 @@ if ($multi) {
 			print "    Lets Encrypt renewal: ",
 			    ($d->{'letsencrypt_renew'} ? "Enabled"
 						       : "Disabled"),"\n";
+			print "    Let's Encrypt email: ",
+			    ($d->{'letsencrypt_email'} == 0 ? "Always" :
+			     $d->{'letsencrypt_email'} == 1 ? "On error" :
+							      "Never"),"\n";
 			}
 		if ($d->{'letsencrypt_last'}) {
 			print "    Lets Encrypt cert issued: ",
