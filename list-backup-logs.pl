@@ -126,7 +126,7 @@ if ($multi) {
 	# Show all details
 	%schedmap = map { $_->{'id'}, $_ } &list_scheduled_backups();
 	foreach my $l (@logs) {
-		print "$l->{'id'}:\n";
+		print "$l->{'id'}\n";
 		print "    Domains: $l->{'doms'}\n";
 		if ($l->{'errdoms'}) {
 			print "    Failed domains: $l->{'errdoms'}\n";
