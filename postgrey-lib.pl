@@ -125,22 +125,30 @@ return undef;
 # configured to use it.
 sub is_postgrey_enabled
 {
-if (!&find_byname("postgrey")) {
-	# Not running
-	return 0;
-	}
+return 0 if (!&is_postgrey_running());
 &foreign_require("init");
 if (&init::action_status(&get_postgrey_init()) != 2) {
 	# Not enabled at boot
 	return 0;
 	}
-local $port = &get_postgrey_port();
-if (!$port) {
-	# No port, so we can't tell!
-	return 0;
-	}
+return &is_postgrey_configured();
+}
+
+# is_postgrey_running()
+# Returns 1 if the postgrey server is running
+sub is_postgrey_running
+{
+return &find_byname("postgrey") ? 1 : 0;
+}
+
+# is_postgrey_configured()
+# Returns 1 if Postfix is confgured to use Postgrey, 0 if not
+sub is_postgrey_configured
+{
+my $port = &get_postgrey_port();
+return 0 if (!$port);
 &require_mail();
-local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
+my $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
 if ($rr =~ /check_policy_service\s+inet:\S+:\Q$port\E/ ||
     $rr =~ /check_policy_service\s+unix:\Q$port\E/) {
 	return 1;

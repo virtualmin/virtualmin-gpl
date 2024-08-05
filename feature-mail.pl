@@ -2680,6 +2680,10 @@ foreach $u (&list_domain_users($d)) {
 	# Add secondary groups
 	&print_tempfile(UFILE, ":".(join(";", @{$u->{'secs'}}) || "-"));
 
+	# Add firstname and surname
+	&print_tempfile(UFILE, ":".($u->{'firstname'} || "-"));
+	&print_tempfile(UFILE, ":".($u->{'surname'} || "-"));
+
 	&print_tempfile(UFILE, "\n");
 	&print_tempfile(UFILE, join(",", @{$u->{'to'}}),"\n");
 	}
@@ -3066,6 +3070,14 @@ while(<UFILE>) {
 		# Restore secondary groups
 		if ($user[12] && $user[12] ne "-") {
 			$uinfo->{'secs'} = [ split(/;/, $user[12]) ];
+			}
+
+		# Restore firstname and surname
+		if (&supports_firstname() && $user[13] && $user[13] ne "-") {
+			$uinfo->{'firsrtname'} = $user[13];
+			}
+		if (&supports_firstname() && $user[14] && $user[14] ne "-") {
+			$uinfo->{'surname'} = $user[14];
 			}
 
 		# Check for possible DB username clashes
@@ -4045,6 +4057,8 @@ if (&can_show_history() &&
 		push(@links, { 'stat' => $s });
 		}
 	}
+
+# Show mail server status (Postfix or Sendmail)
 if (defined($typestatus->{$msn}) ? $typestatus->{$msn} == 1
 				 : &is_mail_running()) {
 	push(@rv,{ 'status' => 1,
@@ -4061,6 +4075,7 @@ else {
 		   'longdesc' => $text{'index_mstartdesc'},
 		   'links' => \@links } );
 	}
+
 if (&foreign_installed("dovecot")) {
 	# Add status for Dovecot
 	&foreign_require("dovecot");
@@ -4086,7 +4101,9 @@ if (&foreign_installed("dovecot")) {
 			   'links' => \@dlinks } );
 		}
 	}
+
 if (&foreign_check("init")) {
+	# Add status for SASLauthd
 	&foreign_require("init");
 	my $st = &init::action_status("saslauthd");
 	my $r = &init::status_action("saslauthd");
@@ -4110,6 +4127,28 @@ if (&foreign_check("init")) {
 			}
 		}
 	}
+
+if (!&check_postgrey() && &is_postgrey_configured()) {
+	# Postgrey server
+	if (&is_postgrey_running()) {
+		push(@rv, { 'status' => 1,
+			    'feature' => 'postgrey',
+			    'name' => $text{'index_grname'},
+			    'desc' => $text{'index_grstop'},
+			    'restartdesc' => $text{'index_grrestart'},
+			    'longdesc' => $text{'index_grstopdesc'},
+			    'links' => [] } );
+		}
+	else {
+		push(@rv, { 'status' => 0,
+			    'feature' => 'postgrey',
+			    'name' => $text{'index_grname'},
+			    'desc' => $text{'index_grstart'},
+			    'longdesc' => $text{'index_grstartdesc'},
+			    'links' => [] } );
+		}
+	}
+
 return @rv;
 }
 
