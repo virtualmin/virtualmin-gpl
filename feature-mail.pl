@@ -4188,6 +4188,20 @@ my ($ok, $err) = &init::stop_action("saslauthd");
 return $ok ? undef : $err;
 }
 
+sub start_service_postgrey
+{
+&foreign_require("init");
+my ($ok, $err) = &init::start_action(&get_postgrey_init());
+return $ok ? undef : $err;
+}
+
+sub stop_service_postgrey
+{
+&foreign_require("init");
+my ($ok, $err) = &init::stop_action(&get_postgrey_init());
+return $ok ? undef : $err;
+}
+
 # check_secondary_mx()
 # Returns undef if this system can be a secondary MX, or an error message if not
 sub check_secondary_mx
