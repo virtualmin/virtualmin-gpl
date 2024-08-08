@@ -4149,6 +4149,30 @@ if (!&check_postgrey() && &is_postgrey_configured()) {
 		}
 	}
 
+if (&foreign_installed("usermin")) {
+	# Usermin server
+	&foreign_require("usermin");
+	my %miniserv;
+	&usermin::get_usermin_miniserv_config(\%miniserv);
+	if (&check_pid_file($miniserv{'pidfile'})) {
+		push(@rv, { 'status' => 1,
+			    'feature' => 'usermin',
+			    'name' => $text{'index_usname'},
+			    'desc' => $text{'index_usstop'},
+			    'restartdesc' => $text{'index_usrestart'},
+			    'longdesc' => $text{'index_usstopdesc'},
+			    'links' => [] } );
+		}
+	else {
+		push(@rv, { 'status' => 0,
+			    'feature' => 'usermin',
+			    'name' => $text{'index_usname'},
+			    'desc' => $text{'index_usstart'},
+			    'longdesc' => $text{'index_usstartdesc'},
+			    'links' => [] } );
+		}
+	}
+
 return @rv;
 }
 
@@ -4200,6 +4224,18 @@ sub stop_service_postgrey
 &foreign_require("init");
 my ($ok, $err) = &init::stop_action(&get_postgrey_init());
 return $ok ? undef : $err;
+}
+
+sub start_service_usermin
+{
+&foreign_require("usermin");
+return &usermin::start_usermin();
+}
+
+sub stop_service_usermin
+{
+&foreign_require("usermin");
+return &usermin::stop_usermin();
 }
 
 # check_secondary_mx()
