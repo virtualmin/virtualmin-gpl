@@ -87,6 +87,16 @@ if ($in{'denabled'}) {
 	$in{'dpct'} =~ /^\d+$/ && $in{'dpct'} >= 0 &&
 	  $in{'dpct'} <= 100 || &error($text{'tmpl_edmarcpct'});
 	$dmarc->{'pct'} = $in{'dpct'};
+	foreach my $r ('ruf', 'rua') {
+		if ($in{'dmarc'.$r.'_def'}) {
+			delete($dmarc->{$r});
+			}
+		else {
+			$in{'dmarc'.$r} =~ /^mailto:\S+\@\S+$/ ||
+				&error($text{'tmpl_edmarc'.$r});
+			$dmarc->{$r} = $in{'dmarc'.$r};
+			}
+		}
 	$err = &save_domain_dmarc($d, $dmarc);
 	}
 else {

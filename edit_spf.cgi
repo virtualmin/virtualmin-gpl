@@ -110,6 +110,16 @@ print &ui_table_row(&hlink($text{'spf_dp'}, 'spf_dp'),
 print &ui_table_row(&hlink($text{'spf_dpct'}, 'spf_dpct'),
 	&ui_textbox("dpct", $eddmarc->{'pct'} || 100, 5)."%");
 
+# DMARC email addresses
+foreach my $r ('ruf', 'rua') {
+	print &ui_table_row(&hlink($text{'spf_dmarc'.$r}, 'spf_dmarc'.$r),
+		&ui_radio("dmarc".$r."_def",
+			  $eddmarc->{$r} eq "" ? 1 : 0,
+			  [ [ 1, $text{'tmpl_dmarcskip'} ],
+                            [ 0, &ui_textbox('dmarc'.$r,
+                                        $eddmarc->{$r}, 40) ] ]));
+	}
+
 # DNSSEC enabled
 if (&can_domain_dnssec($d)) {
 	print &ui_table_row(&hlink($text{'spf_dnssec'}, 'spf_dnssec'),
