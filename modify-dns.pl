@@ -32,6 +32,10 @@ disable it, use C<--no-dmarc>. The DMARC action for other mail servers to
 perform can be set with the C<--dmarc-policy> flag, and the percentage of
 messages it should be applied to can be set with C<--dmarc-percent>.
 
+You can also set the email address to send DMARC aggregate reports to with
+C<--dmarc-rua>, or turn it off with C<--no-dmarc-rua>. Similarly the forensic
+report email can be set with C<--dmarc-ruf> and C<--no-dmarc-ruf>.
+
 This command can also be used to add and remove DNS records from all the
 selected domains. Adding is done with the C<--add-record> flag, which must
 be followed by a single parameter containing the record name, type and value.
@@ -175,6 +179,24 @@ while(@ARGV > 0) {
 			&usage("--dmarc-percent must be followed by an ".
 			       "integer between 0 and 100");
 		}
+	elsif ($a eq "--dmarc-rua") {
+		$dmarcrua = shift(@ARGV);
+		$dmarcrua =~ /^mailto:\S+\@\S+$/ ||
+			&usage("--dmarc-rua must be followed by an address ".
+			       "formatted like mailto:user\@domain");
+		}
+	elsif ($a eq "--no-dmarc-rua") {
+		$dmarcrua = "";
+		}
+	elsif ($a eq "--dmarc-ruf") {
+		$dmarcruf = shift(@ARGV);
+		$dmarcruf =~ /^mailto:\S+\@\S+$/ ||
+			&usage("--dmarc-ruf must be followed by an address ".
+			       "formatted like mailto:user\@domain");
+		}
+	elsif ($a eq "--no-dmarc-ruf") {
+		$dmarcruf = "";
+		}
 	elsif ($a eq "--dns-ip") {
 		$dns_ip = shift(@ARGV);
 		&check_ipaddress($dns_ip) ||
@@ -297,6 +319,7 @@ defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   @addrecs || @delrecs || @uprecs ||
   @addslaves || @delslaves || $addallslaves || $ttl ||
   defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
+  defined($dmarcrua) || defined($dmarcruf) ||
   defined($tlsa) || $syncallslaves || defined($submode) || $clouddns ||
   defined($remotedns) || defined($parentds) || defined($clouddns_import) ||
   defined($dkim_enabled) || &usage("Nothing to do");
@@ -455,7 +478,8 @@ foreach $d (@doms) {
 		&$second_print($text{'setup_done'});
 		}
 
-	if (($dmarcp || defined($dmarcpct)) && $currdmarc) {
+	if (($dmarcp || defined($dmarcpct) || defined($dmarcrua) ||
+	     defined($dmarcruf)) && $currdmarc) {
 		# Update current DMARC record
 		&$first_print($text{'spf_dmarcchange'});
 		if ($dmarcp) {
@@ -463,6 +487,12 @@ foreach $d (@doms) {
 			}
 		if (defined($dmarcpct)) {
 			$currdmarc->{'pct'} = $dmarcpct;
+			}
+		if (defined($dmarcrua)) {
+			$currdmarc->{'rua'} = $dmarcrua;
+			}
+		if (defined($dmarcruf)) {
+			$currdmarc->{'ruf'} = $dmarcruf;
 			}
 		&save_domain_dmarc($d, $currdmarc);
 		&$second_print($text{'setup_done'});
@@ -855,6 +885,8 @@ print "                      --spf-all-default]\n";
 print "                     [--dmarc | --no-dmarc]\n";
 print "                     [--dmarc-policy none|quarantine|reject]\n";
 print "                     [--dmarc-percent number]\n";
+print "                     [--dmarc-rua mailto:user\@domain | --no-dmarc-rua]\n";
+print "                     [--dmarc-ruf mailto:user\@domain | --no-dmarc-ruf]\n";
 print "                     [--add-record \"name type value\"]\n";
 print "                     [--add-record-with-ttl \"name type TTL value\"]\n";
 print "                     [--add-proxy-record \"name type value\"]\n";
