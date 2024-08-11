@@ -80,7 +80,7 @@ if ($user_type eq 'ssh') {
 		}
 
 	# Real name components
-	&show_real_name_fields($user);
+	&show_real_name_fields($user, 1);
 
 	# Show SSH shell select if more than one available
 	my @ssh_shells = &list_available_shells_by_type('owner', 'ssh');
@@ -214,7 +214,7 @@ elsif ($user_type eq 'ftp') {
 				2, \@tds);
 
 	# Real name components
-	&show_real_name_fields($user);
+	&show_real_name_fields($user, 1);
 
 	# Show secondary groups
 	my @sgroups = &allowed_secondary_groups($d);
@@ -317,7 +317,7 @@ elsif ($user_type eq 'mail') {
 				$text{'user_gotrecovery'}));
 
 	# Real name components
-	&show_real_name_fields($user);
+	&show_real_name_fields($user, 1);
 
 	print &ui_hidden_table_end();
 
@@ -771,7 +771,7 @@ else {
 
 	# Real name - only for show for mailbox users
 	if (!$mailbox || $user->{'real'}) {
-		&show_real_name_fields($user);
+		&show_real_name_fields($user, $in{'new'});
 		}
 
 	# Show FTP shell field
@@ -1218,18 +1218,29 @@ else {
 
 sub show_real_name_fields
 {
-my ($user) = @_;
+my ($user, $autofill) = @_;
 
 # First name and surname
 if (&supports_firstname()) {
+	my $onch = "";
+	if ($autofill && $ldap_useradmin::config{'given_order'} == 0) {
+		# Real name is first+last
+		$onch = "onChange='form.real.value = form.firstname.value+\" \"+form.surname.value'";
+		}
+	elsif ($autofill && $ldap_useradmin::config{'given_order'} == 1) {
+		# Real name is last+first
+		$onch = "onChange='form.real.value = form.surname.value+\" \"+form.firstname.value'";
+		}
 	print &ui_table_row(
 		&hlink($text{'user_firstname'}, "firstname"),
-		&vui_noauto_textbox("firstname", $user->{'firstname'}, 40),
+		&vui_noauto_textbox("firstname", $user->{'firstname'}, 40,
+				    0, undef, $onch),
 		2, \@tds);
 
 	print &ui_table_row(
 		&hlink($text{'user_surname'}, "surname"),
-		&vui_noauto_textbox("surname", $user->{'surname'}, 40),
+		&vui_noauto_textbox("surname", $user->{'surname'}, 40,
+				    0, undef, $onch),
 		2, \@tds);
 	}
 
