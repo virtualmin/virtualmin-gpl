@@ -6318,6 +6318,12 @@ $ssl_tests = [
 		      @create_args, ],
 	},
 
+	# Make sure TLSA records are enabled
+	{ 'command' => 'modify-dns.pl',
+          'args' => [ [ 'domain', $test_domain ],
+		      [ 'enable-tlsa' ] ],
+	},
+
 	# Test DNS lookup
 	{ 'command' => 'host -t A '.$test_domain,
 	  'antigrep' => &get_default_ip(),
@@ -6400,6 +6406,20 @@ $ssl_tests = [
 		      '/domains/'.$test_ssl2_subdomain.'/',
 		      'SSL cert file: '.$test_domain_home.
                       '/domains/'.$test_ssl2_subdomain.'/' ],
+	},
+
+	# Check for TLSA records
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'TLSA' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^_443._tcp.www.'.$test_domain,
+		      '^_443._tcp.'.$test_domain,
+		      $webmin_proto eq 'https' ?
+			( '^_'.$webmin_port.'._tcp.'.$test_domain ) : ( ),
+		      $usermin_proto eq 'https' ?
+			( '^_'.$usermin_port.'._tcp.'.$test_domain ) : ( ),
+		    ],
 	},
 
 	# Re-link SSL on the second domain
@@ -6713,6 +6733,34 @@ $ssl_tests = [
 		      [ 'multiline' ] ],
 	  'antigrep' => [ 'SSL cert file: '.$test_domain_home.'/ssl.cert',
 		          'SSL key file: '.$test_domain_home.'/ssl.key' ],
+	},
+
+	# Check for TLSA records again after all these changes
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'TLSA' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^_443._tcp.www.'.$test_domain,
+		      '^_443._tcp.'.$test_domain,
+		      $webmin_proto eq 'https' ?
+			( '^_'.$webmin_port.'._tcp.'.$test_domain ) : ( ),
+		      $usermin_proto eq 'https' ?
+			( '^_'.$usermin_port.'._tcp.'.$test_domain ) : ( ),
+		    ],
+	},
+
+	# Turn off TLSA
+	{ 'command' => 'modify-dns.pl',
+          'args' => [ [ 'domain', $test_domain ],
+		      [ 'disable-tlsa' ] ],
+	},
+
+	# Make sure TLSA records are gone
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'TLSA' ],
+		      [ 'multiline' ] ],
+	  'antigrep' => [ 'TLSA' ],
 	},
 
 	# Cleanup the domains
