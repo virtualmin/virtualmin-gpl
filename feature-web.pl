@@ -2747,8 +2747,9 @@ if ($config{'web'}) {
 		}
 
 	# Apache directives
-	local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
-				     0, undef, \@webfields);
+	local $ndi = &none_def_input(
+		"web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
+		0, undef, \@webfields);
 	print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
 		$ndi."<br>\n".
 		&ui_textarea("web", $tmpl->{'web'} eq "none" ? "" :
@@ -2771,11 +2772,12 @@ if ($config{'web'}) {
 	print &ui_table_row(&hlink($text{'newweb_user'}, "template_user_def"),
 		&ui_radio("user_def", $tmpl->{'web_user'} eq 'none' ? 2 :
 					   $tmpl->{'web_user'} ? 1 : 0,
-		       [ [ 2, $text{'no'}."<br>" ],
-			 [ 0, $text{'newweb_userdef'}."<br>" ],
-			 [ 1, $text{'newweb_useryes'}." ".
-			      &ui_user_textbox("user", $tmpl->{'web_user'} eq 'none' ?
-							'' : $tmpl->{'web_user'}) ] ]));
+	           [ [ 2, $text{'no'}."<br>" ],
+		     [ 0, $text{'newweb_userdef'}."<br>" ],
+		     [ 1, $text{'newweb_useryes'}." ".
+		          &ui_user_textbox(
+				"user", $tmpl->{'web_user'} eq 'none' ?  '' :
+					  $tmpl->{'web_user'}) ] ]));
 	}
 
 # CGI script execution mode
@@ -2824,7 +2826,8 @@ if ($config{'web'}) {
 		&ui_textbox("web_port", $tmpl->{'web_port'}, 6));
 
 	# Port for SSL webserver
-	print &ui_table_row(&hlink($text{'newweb_sslport'}, "template_web_sslport"),
+	print &ui_table_row(
+		&hlink($text{'newweb_sslport'}, "template_web_sslport"),
 		&ui_textbox("web_sslport", $tmpl->{'web_sslport'}, 6));
 
 	# URL port for normal webserver
@@ -2849,7 +2852,7 @@ if ($config{'web'}) {
 		# Run ruby scripts as user
 		print &ui_table_row(
 		    &hlink($text{'tmpl_rubymode'}, "template_rubymode"),
-		    &ui_radio("web_ruby_suexec", int($tmpl->{'web_ruby_suexec'}),
+		    &ui_radio("web_ruby_suexec",int($tmpl->{'web_ruby_suexec'}),
 			      [ [ -1, $text{'phpmode_noruby'}."<br>" ],
 				[ 0, $text{'phpmode_mod_ruby'}."<br>" ],
 				[ 1, $text{'phpmode_cgi'}."<br>" ] ]));
@@ -2866,21 +2869,23 @@ if ($config{'web'} && $config{'webalizer'}) {
 	local ($hdir) = ($tmpl->{'web_html_dir'} || 'public_html');
 	print &ui_table_row(&hlink($text{'newweb_statsdir'}, "template_stats_dir"),
 		&ui_radio("stats_mode", $smode,
-			  [ [ 0, "$text{'default'} (<tt>$hdir/stats</tt>)<br>" ],
-			    [ 1, &text('newweb_statsdir0', "<tt>$hdir</tt>")."\n".
-				 &ui_textbox("stats_dir",
-					     $tmpl->{'web_stats_dir'}, 20)."<br>" ],
-			    [ 2, &text('newweb_statsdir2', "<tt>$hdir</tt>")."\n".
-				 &ui_textbox("stats_hdir",
-					     $tmpl->{'web_stats_hdir'}, 20) ] ]));
+		  [ [ 0, "$text{'default'} (<tt>$hdir/stats</tt>)<br>" ],
+		    [ 1, &text('newweb_statsdir0', "<tt>$hdir</tt>")."\n".
+			 &ui_textbox("stats_dir",
+				     $tmpl->{'web_stats_dir'}, 20)."<br>" ],
+		    [ 2, &text('newweb_statsdir2', "<tt>$hdir</tt>")."\n".
+			 &ui_textbox("stats_hdir",
+				     $tmpl->{'web_stats_hdir'}, 20) ] ]));
 
 	# Password-protect webalizer dir
-	print &ui_table_row(&hlink($text{'newweb_statspass'}, "template_statspass"),
+	print &ui_table_row(
+		&hlink($text{'newweb_statspass'}, "template_statspass"),
 		&ui_radio("statspass", $tmpl->{'web_stats_pass'} ? 1 : 0,
 			  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 	# Allow editing of Webalizer report
-	print &ui_table_row(&hlink($text{'newweb_statsedit'}, "template_statsedit"),
+	print &ui_table_row(
+		&hlink($text{'newweb_statsedit'}, "template_statsedit"),
 		&ui_radio("statsnoedit", $tmpl->{'web_stats_noedit'} ? 1 : 0,
 			  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 
@@ -2969,8 +2974,10 @@ for(my $i=0; $i<@redirs; $i++) {
 		&ui_textbox("rfrom_$i", $redirs[$i]->[0], 30),
 		&ui_textbox("rto_$i", $redirs[$i]->[1], 40),
 		&vui_ui_block_no_wrap(
-			&ui_checkbox("rprotos_$i", "http", "HTTP", $protos{'http'})." ".
-			&ui_checkbox("rprotos_$i", "https", "HTTPS", $protos{'https'}), 1)
+			&ui_checkbox("rprotos_$i", "http", "HTTP",
+				     $protos{'http'})." ".
+			&ui_checkbox("rprotos_$i", "https", "HTTPS",
+				     $protos{'https'}), 1)
 		]);
 	}
 $rtable .= &ui_columns_end();
