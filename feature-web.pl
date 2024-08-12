@@ -2758,14 +2758,15 @@ if ($config{'web'}) {
 
 	# Extra SSL directives
 	print &ui_table_row(&hlink($text{'tmpl_web_ssl'}, "template_web_ssl"),
-		&ui_textarea("web_ssl", join("\n", split(/\t/, $tmpl->{'web_ssl'})),
+		&ui_textarea("web_ssl",
+			     join("\n", split(/\t/, $tmpl->{'web_ssl'})),
 			     5, 60));
 
 	# Input for logging via program. Deprecated so don't show unless enabled
 	if ($tmpl->{'web_writelogs'}) {
 		print &ui_table_row(&hlink($text{'newweb_writelogs'},
 					   "template_writelogs"),
-			&ui_yesno_radio("writelogs", $tmpl->{'web_writelogs'} ? 1 : 0));
+			&ui_yesno_radio("writelogs", $tmpl->{'web_writelogs'}));
 		}
 
 	# Input for Apache user to add to domain's group
