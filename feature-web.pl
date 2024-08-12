@@ -2906,9 +2906,14 @@ if ($config{'web'} && $config{'webalizer'}) {
 print &ui_table_hr()
 	if ($hr);
 foreach my $r ('webmail', 'admin') {
+	my @opts = ( [ 1, $text{'yes'} ],
+		     [ 0, $text{'no'} ] );
+	if (!$tmpl->{'default'}) {
+		unshift(@opts, [ '', $text{'tmpl_default'} ]);
+		}
 	print &ui_table_row(&hlink($text{'newweb_'.$r},
 				   "template_".$r),
-		&ui_yesno_radio($r, $tmpl->{'web_'.$r} ? 1 : 0));
+		&ui_radio($r, $tmpl->{'web_'.$r}, \@opts));
 
 	# Domain name to use in webmail redirect
 	print &ui_table_row(&hlink($text{'newweb_'.$r.'dom'},
