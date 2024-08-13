@@ -3000,7 +3000,8 @@ my $plugin = &get_mysql_plugin($d, 1);
 if (!$encpass && $plainpass) {
 	$encpass = &encrypt_plain_mysql_pass($d, $plainpass) 
 	}
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Need to use new 'create user' command
 	return ("create user '$user'\@'$host' identified $plugin by ".
 		($plainpass ? "'".&mysql_escape($plainpass)."'"
