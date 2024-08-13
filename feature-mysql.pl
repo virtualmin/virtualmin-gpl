@@ -2773,7 +2773,8 @@ local ($d, $host, $user, $mailbox) = @_;
 local $conns = &get_mysql_user_connections($d, $mailbox);
 if ($conns) {
 	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-	if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+	if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+	    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 		# Need to use the alter user command
 		&execute_dom_sql($d, $mysql::master_db,
 			"alter user '$user'\@'$host' ".
