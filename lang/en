@@ -4484,7 +4484,7 @@ scripts_can=Available in
 scripts_gpl_to_pro=Now only available in Pro
 scripts_gpl_to_pro_upgrade=Upgrade for this web app is now only available in Pro
 
-scripts_kit=$1 Kit
+scripts_kit=$1 Workbench
 scripts_kit_ewp=Perl : Failed to parse JSON output from WP-CLI command
 scripts_kit_elog=PHP  : Failed running $1 command. See the log file at $2
 scripts_kit_not_set=Not set
