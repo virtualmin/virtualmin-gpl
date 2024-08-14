@@ -25,7 +25,8 @@ if ($mymod->{'minfo'}->{'dir'} eq $newmod->{'minfo'}->{'dir'}) {
 print "<b>",&text('databases_moving',
 		  $mymod->{'desc'}, $newmod->{'desc'}),"</b><p>\n";
 
-&move_mysql_server($d, $newmod->{'minfo'}->{'dir'});
+&move_mysql_server($d, $newmod->{'minfo'}->{'dir'},
+		   $newmod->{'config'}->{'host'});
 &webmin_log("mysqlremote", "domain", $d->{'dom'}, $d);
 
 &ui_print_footer("list_databases.cgi?dom=$in{'dom'}", $text{'databases_return'});
