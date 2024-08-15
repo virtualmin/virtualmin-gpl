@@ -79,7 +79,7 @@ print &ui_table_row($text{'newmysqls_port'},
 
 # SSL mode
 print &ui_table_row($text{'newmysqls_ssl'},
-	&ui_yesno_radio("ssl", 0));
+	&ui_yesno_radio("ssl", 1));
 
 # Username and password
 print &ui_table_row($text{'newmysqls_user'},
