@@ -3643,7 +3643,7 @@ return $plugin;
 # permissions. Prints progress, and returns 1 on success or 0 on failure.
 sub move_mysql_server
 {
-my ($d, $newmod) = @_;
+my ($d, $newmod, $newhost) = @_;
 return 1 if (&require_dom_mysql($d) eq $newmod);	# Already using it
 
 # Get all the domain objects being moved
@@ -3712,7 +3712,10 @@ foreach my $ad (@doms) {
 		&modify_user($u, $beforeu, $ad);
 		}
 	}
-
+# Update all installed scripts database host which are using MySQL
+$newhost ||= 'localhost';
+&update_all_installed_scripts_database_credentials(
+	$d, $oldd, 'dbhost', $newhost, 'mysql');
 foreach my $sd (@doms) {
 	&save_domain($sd);
 	}
