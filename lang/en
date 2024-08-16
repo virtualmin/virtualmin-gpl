@@ -4485,6 +4485,7 @@ scripts_gpl_to_pro=Now only available in Pro
 scripts_gpl_to_pro_upgrade=Upgrade for this web app is now only available in Pro
 
 scripts_kit=$1 Workbench
+scripts_ekit=Failed to apply the web app workbench
 scripts_kit_ewp=Perl : Failed to parse JSON output from WP-CLI command
 scripts_kit_elog=PHP  : Failed running $1 command. See the log file at $2
 scripts_kit_not_set=Not set
@@ -4586,6 +4587,7 @@ scripts_gpl_pro_tip_dashboard=Did you know that Virtualmin Pro brings plenty of 
 scripts_gpl_pro_tip_extra_web_users=This form allows you to create and manage webserver users independently, without creating a new Unix user account.
 scripts_gpl_pro_tip_extra_db_users=This form allows you to create and manage database users independently, without creating a new Unix user account.
 scripts_gpl_pro_tip_extra_user_dismiss=Thanks for the tip! Hide this page and its link
+scripts_gpl_pro_tip_workbench_pro_only=The $1 Workbench feature is not available in the GPL version.
 
 scripts_service_ename=Missing or invalid service name
 scripts_service_eport=Missing or invalid service port number
