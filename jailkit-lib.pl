@@ -66,22 +66,29 @@ foreach $f (&mount::files_to_lock()) {
 
 # Modify the domain user's home dir and shell
 &require_useradmin();
-my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } &list_all_users();
-if (!$uinfo) {
-	return &text('jailkit_euser', $d->{'user'});
+foreach my $duser (map { $_->{'user'} } &list_domain_users($d, 0, 0, 1, 1, 0)) {
+	my ($uinfo) = grep { $_->{'user'} eq $duser } &list_all_users();
+	if (!$uinfo) {
+		if ($duser eq $d->{'user'}) {
+			return &text('jailkit_euser', $duser);
+			}
+		else {
+			next;
+			}
+		}
+	my $olduinfo = { %$uinfo };
+	if ($uinfo->{'shell'} !~ /\/jk_chrootsh$/) {
+		$d->{"unjailed_shell_$duser"} = $uinfo->{'shell'};
+		$uinfo->{'shell'} = &has_command("jk_chrootsh") ||
+				"/usr/sbin/jk_chrootsh";
+		}
+	$uinfo->{'home'} = $dir."/.".$uinfo->{'home'};
+	&foreign_call($usermodule, "set_user_envs", $uinfo,
+		'MODIFY_USER', $plainpass, [], $olduinfo);
+	&foreign_call($usermodule, "making_changes");
+	&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
+	&foreign_call($usermodule, "made_changes");
 	}
-my $olduinfo = { %$uinfo };
-if ($uinfo->{'shell'} !~ /\/jk_chrootsh$/) {
-	$d->{'unjailed_shell'} = $uinfo->{'shell'};
-	$uinfo->{'shell'} = &has_command("jk_chrootsh") ||
-			    "/usr/sbin/jk_chrootsh";
-	}
-$uinfo->{'home'} = $dir."/.".$d->{'home'};
-&foreign_call($usermodule, "set_user_envs", $uinfo,
-	      'MODIFY_USER', $plainpass, [], $olduinfo);
-&foreign_call($usermodule, "making_changes");
-&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
-&foreign_call($usermodule, "made_changes");
 
 # Create a fake /etc/passwd file in the jail
 &create_jailkit_passwd_file($d);
@@ -153,25 +160,32 @@ foreach my $pd ($d, &get_domain_by("parent", $d->{'id'})) {
 
 # Switch back the user's shell and home dir
 &require_useradmin();
-my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } &list_all_users();
-if (!$uinfo) {
-	return &text('jailkit_euser', $d->{'user'});
-	}
-my $olduinfo = { %$uinfo };
-if ($uinfo->{'shell'} =~ /\/jk_chrootsh$/) {
-	my $tmpl = &get_template($d->{'template'});
-	my $defshell = $tmpl->{'ushell'};
-	if ($defshell eq 'none' || !$defshell) {
-		$defshell = &default_available_shell('owner');
+foreach my $duser (map { $_->{'user'} } &list_domain_users($d, 0, 0, 1, 1, 0)) {
+	my ($uinfo) = grep { $_->{'user'} eq $duser } &list_all_users();
+	if (!$uinfo) {
+		if ($duser eq $d->{'user'}) {
+			return &text('jailkit_euser', $duser);
+			}
+		else {
+			next;
+			}
 		}
-	$uinfo->{'shell'} = $d->{'unjailed_shell'} || $defshell;
-	}
-if ($uinfo->{'home'} =~ s/^\Q$dir\E\/\.//) {
-	&foreign_call($usermodule, "set_user_envs", $uinfo,
-		      'MODIFY_USER', $plainpass, [], $olduinfo);
-	&foreign_call($usermodule, "making_changes");
-	&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
-	&foreign_call($usermodule, "made_changes");
+	my $olduinfo = { %$uinfo };
+	if ($uinfo->{'shell'} =~ /\/jk_chrootsh$/) {
+		my $tmpl = &get_template($d->{'template'});
+		my $defshell = $tmpl->{'ushell'};
+		if ($defshell eq 'none' || !$defshell) {
+			$defshell = &default_available_shell('owner');
+			}
+		$uinfo->{'shell'} = $d->{"unjailed_shell_$duser"} || $defshell;
+		}
+	if ($uinfo->{'home'} =~ s/^\Q$dir\E\/\.//) {
+		&foreign_call($usermodule, "set_user_envs", $uinfo,
+			'MODIFY_USER', $plainpass, [], $olduinfo);
+		&foreign_call($usermodule, "making_changes");
+		&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
+		&foreign_call($usermodule, "made_changes");
+		}
 	}
 
 # Remove the BIND mount
@@ -251,8 +265,10 @@ foreach my $u (@ucreate) {
 	my $shell = $u->{'shell'};
 	if ($shell =~ /\/jk_chrootsh$/) {
 		# Put back real shell
-		$shell = $u->{'domainowner'} ? $d->{'unjailed_shell'}
-					     : "/bin/false";
+		my $ushell = $d->{"unjailed_shell_$u->{'user'}"};
+		$shell = $u->{'domainowner'} ? 
+				$ushell || $d->{'unjailed_shell'} :
+				$ushell || "/bin/false";
 		}
 	my $home = $u->{'home'};
 	$home =~ s/^\Q$dir\E\/\.//;
