@@ -4578,6 +4578,7 @@ scripts_gpl_pro_tip_open=Purchase Virtualmin Pro
 scripts_gpl_pro_tip_remind=Remind Me Later
 scripts_gpl_pro_tip_and=and
 scripts_gpl_pro_tip_enroll=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support the development and unlock these and many other cool features.
+scripts_gpl_pro_tip_enroll_single=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support the development and unlock this and many other cool features.
 scripts_gpl_pro_tip_list_scripts=There are more web apps available!
 scripts_gpl_pro_tip_enroll_list_scripts=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support the development and unlock all web apps listed below.
 scripts_gpl_pro_tip_clouds=Support for $1 providers is also available!
