@@ -535,7 +535,7 @@ if (!-d $logs_dir) {
 my $wp_cli_log = "$logs_dir/wp_cli_log";
 my $wp_cli = "$php $opts->{'dir'}/wp-cli.phar --path=$opts->{'dir'}";
 my $_t = 'scripts_kit_wp_';
-my $save_kit_form = "workbench.cgi?no_check=1"; 
+my $save_kit_form = "workbench.cgi?pro=1"; 
 my $kit_form_main = "data-form-nested='apply'";
 
 # Has to be called using eval for maximum speed (avg 

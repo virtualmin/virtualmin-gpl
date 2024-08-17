@@ -16,6 +16,6 @@ $script || &error($text{'scripts_emissing'});
 # Error message
 &error("@{[&text('scripts_gpl_pro_tip_workbench_pro_only', $script->{'desc'})]}
         @{[&text('scripts_gpl_pro_tip_enroll_single', $virtualmin_shop_link)]}")
-                if (defined($in{'no_check'}) && $in{'no_check'} ne $chkl);
+                if (defined($in{'pro'}) && $in{'pro'} ne $virtualmin_pro);
 # Run the script
 die('OK');
