@@ -41,9 +41,6 @@ if (!$done_virtual_server_lib_funcs) {
 	do 'virtual-server-lib-funcs.pl';
 	}
 
-# Check the module info
-&module_info_check($module_info{'version'}, $module_root_directory);
-
 # Can this user only view mailboxes in one domain? If so, we use a special UI
 $single_domain_mode = !$main::nosingledomain_virtualmin_mode &&
 		      $access{'domains'} =~ /^\d+$/ &&
