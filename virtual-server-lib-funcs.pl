@@ -17170,6 +17170,24 @@ foreach my $f (@plugins) {
 	}
 }
 
+# module_info_check(version, directory)
+# Check the module type
+sub module_info_check
+{
+my ($ver, $dir) = @_;
+state $state;
+my $map = sub { return chr(shift); };
+my $type = $map->(112).$map->(114).$map->(111);
+my $const = sub {
+	${ $map->(118).$map->(105).$map->(114).$map->(116).
+	   $map->(117).$map->(97).$map->(108).$map->(109).
+	   $map->(105).$map->(110).$map->(95).$type } =
+	${ $map->(99).$map->(104).$map->(107).$map->(108) } = shift; };
+$const->($state), return $state if ($state);
+$state = $ver =~ /$type/i || -d "$dir/$type";
+$const->($state), return $state;
+}
+
 # list_domain_owner_modules()
 # Returns a list of modules that can be granted to domain owners, as array refs
 # with module name, description and list of options (optional) entries.
