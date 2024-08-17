@@ -1188,4 +1188,7 @@ EOF
 &redirect($redir_url);
 }
 
+# script_wordpress_kit_apply(&domain, &opts, &sinfo, &script)
+# Called to save changes to WordPress settings
+
 1;

@@ -207,6 +207,7 @@ local $rv = { 'name' => $name,
 	      'testargs_func' => "script_${name}_testargs",
 	      'kit_func' => "script_${name}_kit",
 	      'kit_login_func' => "script_${name}_kit_login",
+	      'kit_apply_func' => "script_${name}_kit_apply",
 	    };
 if (defined(&$catfunc)) {
 	my @cats = &$catfunc();

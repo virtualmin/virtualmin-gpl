@@ -17,5 +17,11 @@ $script || &error($text{'scripts_emissing'});
 &error("@{[&text('scripts_gpl_pro_tip_workbench_pro_only', $script->{'desc'})]}
         @{[&text('scripts_gpl_pro_tip_enroll_single', $virtualmin_shop_link)]}")
                 if (defined($in{'pro'}) && $in{'pro'} ne $virtualmin_pro);
-# Run the script
-die('OK');
+# Run
+my $apply_func = $script->{'kit_apply_func'};
+if (defined(&$apply_func)) {
+        &$apply_func($d, \%in, $sinfo, $script);
+        }
+else {
+        &error(&text('scripts_gpl_pro_tip_workbench_no_apply', $script->{'desc'}));
+        }
