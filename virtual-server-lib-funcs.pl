@@ -24,8 +24,7 @@ foreach my $lib ("scripts", "resellers", "admins", "users", "simple", "s3",
 		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
 		 "jailkit", "ports", "bb", "dnscloud", "dnscloudpro",
-		 "smtpcloud", "pro-tip", "azure", "remotedns", "drive",
-		 "scripts/workbench") {
+		 "smtpcloud", "pro-tip", "azure", "remotedns", "drive") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
 		$libfile = "$virtual_server_root/$lib-lib.pl";
