@@ -80,7 +80,7 @@ foreach my $duser (map { $_->{'user'} } &list_domain_users($d, 0, 0, 1, 1, 0)) {
 	if ($uinfo->{'shell'} !~ /\/jk_chrootsh$/) {
 		$d->{"unjailed_shell_$duser"} = $uinfo->{'shell'};
 		$uinfo->{'shell'} = &has_command("jk_chrootsh") ||
-				"/usr/sbin/jk_chrootsh";
+				    "/usr/sbin/jk_chrootsh";
 		}
 	$uinfo->{'home'} = $dir."/.".$uinfo->{'home'};
 	&foreign_call($usermodule, "set_user_envs", $uinfo,
@@ -230,12 +230,12 @@ my $uinfo = &get_domain_owner($d, 1, 1, 1);
 return $uinfo && $uinfo->{'home'} =~ /^\Q$dir\E\/\.\// ? $dir : undef;
 }
 
-# create_jailkit_passwd_file(&domain)
+# create_jailkit_passwd_file(&domain, [username], [old-username])
 # Create limit /etc/passwd, /etc/shadow and /etc/group files inside a jail
 # for a domain's users
 sub create_jailkit_passwd_file
 {
-my ($d) = @_;
+my ($d, $uname, $olduname) = @_;
 my $dir = &domain_jailkit_dir($d);
 return undef if (!-d $dir);		# Jailing isn't enabled
 return undef if (!-d "$dir/etc");	# Jail directory is invalid
@@ -261,8 +261,10 @@ my $pfile = $dir."/etc/passwd";
 my $sfile = $dir."/etc/shadow";
 &open_lock_tempfile(PASSWD, ">$pfile");
 &open_lock_tempfile(SHADOW, ">$sfile");
+my @users_map;
 foreach my $u (@ucreate) {
 	my $shell = $u->{'shell'};
+	push(@users_map, [$u->{'user'}, $shell]);
 	if ($shell =~ /\/jk_chrootsh$/) {
 		# Put back real shell
 		my $ushell = $d->{"unjailed_shell_$u->{'user'}"};
@@ -291,6 +293,38 @@ foreach my $g (@gcreate) {
 	&print_tempfile(GROUP, join(":", @gline),"\n");
 	}
 &close_tempfile(GROUP);
+
+# Sync user real shell when user added or modified after jail creation
+if ($uname) {
+	my ($uinfo) = grep { $_->{'user'} eq $uname } &list_all_users();
+	if ($uinfo) {
+		my $olduinfo = { %$uinfo };
+		if ($uinfo->{'shell'} !~ /\/jk_chrootsh$/) {
+			$uinfo->{'shell'} = &has_command("jk_chrootsh") ||
+					    "/usr/sbin/jk_chrootsh";
+			}
+		my $ushell;
+		if ($olduname) {
+			$ushell = $d->{"unjailed_shell_$olduname"};
+			}
+		else {
+			($ushell) = map { $_->[1] } grep { $_->[0] eq $uname } 
+				@users_map;
+			}
+		&lock_domain($d);
+		delete($d->{"unjailed_shell_$olduname"}) if ($olduname);
+		$d->{"unjailed_shell_$uname"} = $ushell;
+		&save_domain($d);
+		&unlock_domain($d);
+		$uinfo->{'home'} =~ s/^\Q$dir\E\/\.//;
+		$uinfo->{'home'} = $dir."/.".$uinfo->{'home'};
+		&foreign_call($usermodule, "set_user_envs", $uinfo,
+			'MODIFY_USER', $plainpass, [], $olduinfo);
+		&foreign_call($usermodule, "making_changes");
+		&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
+		&foreign_call($usermodule, "made_changes");
+		}
+	}
 }
 
 # copy_jailkit_files(&domain, [dir])
