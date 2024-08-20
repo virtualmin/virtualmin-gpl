@@ -11,7 +11,7 @@ $script = &get_script($sinfo->{'name'});
 $script || &error($text{'scripts_emissing'});
 $opts = $sinfo->{'opts'};
 
-&ui_print_header(&domain_in($d), $text{'scripts_etitle'}, "");
+&ui_print_header(&domain_in($d), &text('scripts_etitle', $script->{'desc'}), "");
 print "$text{'scripts_udesc'}<p>\n";
 print &ui_table_start($text{'scripts_uheader'}, undef, 2);
 
