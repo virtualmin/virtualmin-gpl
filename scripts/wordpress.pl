@@ -731,7 +731,7 @@ if (foreign_available("fail2ban")) {
 	push(@$system_tab_content, {
 		desc  => &hlink($text{"${_t}fail2ban"}, "kit_wp_fail2ban"),
 		value => &ui_yesno_radio(
-		    "kit_fail2ban", $wp->{'fail2ban'} ? 1 : 0) });
+		    "kit_fail2ban_foreign", $sinfo->{'fail2ban'} ? 1 : 0) });
 	}
 # Site automatic updates
 push(@$system_tab_content, {
