@@ -691,6 +691,12 @@ if ($@) {
 	return "<pre>@{[&html_escape($err)]}</pre>";
 	}
 
+# Store original 
+my $wpj = $wp;
+map { delete $_->{'description'} } @{$wpj->{'plugins'}};
+map { delete $_->{'description'} } @{$wpj->{'themes'}};
+$wpj = &convert_to_json($wpj);
+
 # Tabs list
 my @tabs = (
 	[ "system", 'System' ],
@@ -812,19 +818,23 @@ push(@$settings_tab_content, {
 	    "kit_option_blog_public", $wp->{'blog_public'} ? 1 : 0)});
 # Pingbacks
 push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}default_pingback_flag"}, "kit_wp_default_pingback_flag"),
+	desc  => &hlink($text{"${_t}default_pingback_flag"},
+			      "kit_wp_default_pingback_flag"),
 	value => &ui_yesno_radio(
 	    "kit_option_default_pingback_flag",
 	    	$wp->{'default_pingback_flag'} ? 1 : 0)});
 # Trackbacks
 push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}default_ping_status"}, "kit_wp_default_ping_status"),
+	desc  => &hlink($text{"${_t}default_ping_status"},
+			      "kit_wp_default_ping_status"),
 	value => &ui_yesno_radio(
 	    "kit_option_default_ping_status",
-	    	$wp->{'default_ping_status'} eq 'open' ? 1 : 0)});
+	    	$wp->{'default_ping_status'} eq 'open' ? 'open' : 'closed',
+			'open', 'closed')});
 # File editing
 push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}disallow_file_edit"}, "kit_wp_disallow_file_edit"),
+	desc  => &hlink($text{"${_t}disallow_file_edit"},
+			      "kit_wp_disallow_file_edit"),
 	value => &ui_yesno_radio(
 	    "kit_const_disallow_file_edit", $wp->{'disallow_file_edit'} ? 1 : 0)});
 
@@ -844,6 +854,7 @@ $plugins_tab_content =
 $plugins_tab_content .= &ui_hidden("dom", $d->{'id'});
 $plugins_tab_content .= &ui_hidden("tab", "plugins");
 $plugins_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
+$plugins_tab_content .= &ui_hidden("sstate", $wpj);
 $plugins_tab_content .= &ui_select("plugins", "", $plugins_actions_opts);
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_updcache'}, "update");
@@ -882,6 +893,7 @@ $themes_tab_content =
 $themes_tab_content .= &ui_hidden("dom", $d->{'id'});
 $themes_tab_content .= &ui_hidden("tab", "themes");
 $themes_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
+$themes_tab_content .= &ui_hidden("sstate", $wpj);
 $themes_tab_content .= &ui_select("themes", "", $plugins_actions_opts);
 $themes_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $themes_tab_content .= &ui_submit($text{'scripts_kit_updcache'}, "update");
@@ -926,6 +938,7 @@ $backup_tab_content .=
 $backup_tab_content .= &ui_hidden("dom", $d->{'id'});
 $backup_tab_content .= &ui_hidden("tab", "backup");
 $backup_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
+$backup_tab_content .= &ui_hidden("sstate", $wpj);
 $backup_tab_content .= &ui_select("backups", "", $backup_actions_opts);
 $backup_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "backup");
 my $backup_content_files;
@@ -966,6 +979,7 @@ my $clone_tab_content =
 $clone_tab_content .= &ui_hidden("dom", $d->{'id'});
 $clone_tab_content .= &ui_hidden("tab", "clone");
 $clone_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
+$clone_tab_content .= &ui_hidden("sstate", $wpj);
 $clone_tab_content .= &ui_table_start(undef, "width=100%", 2);
 my $slink = $sinfo->{'url'};
 $slink =~ s/^https?:\/\///;
@@ -1062,6 +1076,7 @@ $data .= &ui_form_start($save_kit_form, "post", undef,
 $data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("tab", "system");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
+$data .= &ui_hidden("sstate", $wpj);
 $data .= &ui_table_start(undef, "width=100%", 2);
 foreach my $option (@$system_tab_content) {
 	$data .= &ui_table_row($option->{'desc'}, $option->{'value'});
@@ -1079,6 +1094,7 @@ $data .= &ui_form_start($save_kit_form, "post", undef,
 $data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("tab", "settings");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
+$data .= &ui_hidden("sstate", $wpj);
 $data .= &ui_table_start(undef, "width=100%", 2);
 foreach my $option (@$settings_tab_content) {
 	$data .= &ui_table_row($option->{'desc'}, $option->{'value'});
@@ -1124,6 +1140,7 @@ $data .= &ui_form_start($save_kit_form, "post", undef,
 $data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("tab", "development");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
+$data .= &ui_hidden("sstate", $wpj);
 $data .= &ui_table_start(undef, "width=100%", 2);
 foreach my $option (@$development_tab_content) {
 	$data .= &ui_table_row($option->{'desc'}, $option->{'value'});
@@ -1134,7 +1151,7 @@ $data .= &ui_form_start("script_login.cgi", "post", undef,
 			"id='kit_login_form' target='_blank'");
 $data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("sid", $sinfo->{'id'});
-$data .= &ui_hidden("scall", &convert_to_json($wp));
+$data .= &ui_hidden("sstate", $wpj);
 $data .= &ui_form_end();
 $data .= &ui_tabs_end_tab();
 
@@ -1144,13 +1161,13 @@ $data .= &ui_tabs_end();
 return { extra_submits => \@data_submits, data => $data };
 }
 
-# script_wordpress_kit_login(&domain, &script, &script-info, &script-call-data, &post-data)
+# script_wordpress_kit_login(&domain, &script, &script-info, &script-current-data, &post-data)
 # Called to login to the WordPress admin panel
 sub script_wordpress_kit_login
 {
-my ($d, $script, $sinfo, $scall, $post) = @_;
+my ($d, $script, $sinfo, $sstate, $post) = @_;
 my $esdesc = "$script->{'desc'} $text{'scripts_kit_loginkit'}";
-my $login_data = $scall->{'login_url'};
+my $login_data = $sstate->{'login_url'};
 my $login_uid = $login_data->[0];
 $login_uid =~ /^\d+$/ ||
 	&error("$esdesc : $text{'scripts_kit_einvaliduid'} : $login_uid");

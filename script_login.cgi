@@ -13,8 +13,8 @@ $script || &error($text{'scripts_emissing'});
 my $kit_login_func = $script->{'kit_login_func'};
 if (defined(&$kit_login_func)) {
         # Call script login function
-        my $scall = $in{'scall'} ? &convert_from_json($in{'scall'}) : undef;
-        $kit_login_func->($d, $script, $sinfo, $scall, \%in);
+        my $sstate = $in{'sstate'} ? &convert_from_json($in{'sstate'}) : undef;
+        $kit_login_func->($d, $script, $sinfo, $sstate, \%in);
         # Redirect to script login page
         return;
         }
