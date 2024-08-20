@@ -807,9 +807,9 @@ push(@$settings_tab_content, {
 	    $text{'edit_set'})});
 # Set password
 push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}admin_pass"}, "kit_wp_admin_password"),
+	desc  => &hlink($text{"${_t}user_pass"}, "kit_wp_user_pass"),
 	value => &ui_opt_textbox(
-	    "kit_option_admin_password", undef, 20, $text{'user_passdef'},
+	    "kit_user_user_pass", undef, 20, $text{'user_passdef'},
 	    $text{'edit_set'})});
 # Site visibility
 push(@$settings_tab_content, {
@@ -1035,9 +1035,9 @@ $clone_tab_content .= &ui_table_row(
 			$text{'scripts_kit_nochange'} . "<br>",
 		$text{'edit_set'}), 2);
 $clone_tab_content .= &ui_table_row(
-	&hlink($text{"${_t}admin_pass_cloned"}, "kit_wp_admin_password_cloned"),
+	&hlink($text{"${_t}user_pass_cloned"}, "kit_wp_user_pass_cloned"),
 		&ui_opt_textbox(
-			"cloned_admin_pass", undef, 20,
+			"cloned_user_pass", undef, 20,
 			$text{'scripts_kit_nochange'} . "<br>",
 		$text{'edit_set'}), 2);
 $clone_tab_content .= &ui_table_end();
