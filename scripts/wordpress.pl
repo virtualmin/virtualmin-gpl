@@ -720,14 +720,14 @@ my $system_tab_content;
 push(@$system_tab_content, {
 	desc  => &hlink($text{"${_t}memory_limit"}, "kit_wp_memory_limit"),
 	value => &ui_opt_textbox(
-	    "kit_const_memory_limit", undef, 6,
+	    "kit_const_wp_memory_limit", undef, 6,
 	    	"$text{\"${_t}memory_limit_upto\"} $wp->{'wp_memory_limit'}",
 		$text{'edit_set'})});
 # Admin memory limit
 push(@$system_tab_content, {
 	desc  => &hlink($text{"${_t}max_memory_limit"}, "kit_wp_max_memory_limit"),
 	value => &ui_opt_textbox(
-	    "kit_const_max_memory_limit", undef, 6,
+	    "kit_const_wp_max_memory_limit", undef, 6,
 		"$text{\"${_t}memory_limit_upto\"} ".
 			($wp->{'wp_max_memory_limit'} == -1 ? '256M' : 
 			 $wp->{'wp_max_memory_limit'}),
