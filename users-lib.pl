@@ -215,8 +215,8 @@ sub get_user_shell
 {
 my ($user) = @_;
 my $shell = $user->{'shell'};
-if ($user->{'juinfo'} && $user->{'juinfo'}->{'shell'}) {
-	$shell = $user->{'juinfo'}->{'shell'};
+if ($user->{'jailed'} && $user->{'jailed'}->{'shell'}) {
+	$shell = $user->{'jailed'}->{'shell'};
 	}
 return $shell;
 }

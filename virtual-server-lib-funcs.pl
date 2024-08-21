@@ -1134,7 +1134,7 @@ if ($d && $d->{'jail'}) {
 	foreach my $juser (@jusers) {
 		my ($user) = grep { $_->{'user'} eq $juser->{'user'} } @users;
 		if ($user) {
-			$user->{'juinfo'} = $juser;
+			$user->{'jailed'} = $juser;
 			}
 		}
 	}
@@ -12462,7 +12462,7 @@ sub get_domain_shell
 my ($d, $user) = @_;
 $user ||= &get_domain_owner($d, 1, 1, 1);
 if ($user->{'shell'} =~ /\/jk_chrootsh$/) {
-	return $user->{'juinfo'}->{'shell'} ||
+	return $user->{'jailed'}->{'shell'} ||
 	       $d->{"unjailed_shell_$user->{'user'}"} ||
 	       $d->{'unjailed_shell'};
 	}
