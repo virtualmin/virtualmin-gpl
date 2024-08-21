@@ -66,8 +66,8 @@ foreach $f (&mount::files_to_lock()) {
 
 # Modify the domain user's home dir and shell
 &require_useradmin();
-foreach my $duser (map { $_->{'user'} } &list_domain_users($d, 0, 0, 1, 1, 0)) {
-	my ($uinfo) = grep { $_->{'user'} eq $duser } &list_all_users();
+foreach my $uinfo (&list_domain_users($d, 0, 0, 1, 1, 0)) {
+	my $duser = $uinfo->{'user'};
 	if (!$uinfo) {
 		if ($duser eq $d->{'user'}) {
 			return &text('jailkit_euser', $duser);
@@ -160,8 +160,8 @@ foreach my $pd ($d, &get_domain_by("parent", $d->{'id'})) {
 
 # Switch back the user's shell and home dir
 &require_useradmin();
-foreach my $duser (map { $_->{'user'} } &list_domain_users($d, 0, 0, 1, 1, 0)) {
-	my ($uinfo) = grep { $_->{'user'} eq $duser } &list_all_users();
+foreach my $uinfo (&list_domain_users($d, 0, 0, 1, 1, 0)) {
+	my $duser = $uinfo->{'user'};
 	if (!$uinfo) {
 		if ($duser eq $d->{'user'}) {
 			return &text('jailkit_euser', $duser);
