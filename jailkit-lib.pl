@@ -82,7 +82,8 @@ foreach my $uinfo (&list_domain_users($d, 0, 0, 1, 1, 0)) {
 		$uinfo->{'shell'} = &has_command("jk_chrootsh") ||
 				    "/usr/sbin/jk_chrootsh";
 		}
-	$uinfo->{'home'} = $dir."/.".$uinfo->{'home'};
+	$uinfo->{'home'} = $dir."/.".$uinfo->{'home'}
+		if ($uinfo->{'home'} !~ /^\Q$dir\E\/\./);
 	&foreign_call($usermodule, "set_user_envs", $uinfo,
 		'MODIFY_USER', $plainpass, [], $olduinfo);
 	&foreign_call($usermodule, "making_changes");
