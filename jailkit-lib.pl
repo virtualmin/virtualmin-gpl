@@ -262,10 +262,8 @@ my $pfile = $dir."/etc/passwd";
 my $sfile = $dir."/etc/shadow";
 &open_lock_tempfile(PASSWD, ">$pfile");
 &open_lock_tempfile(SHADOW, ">$sfile");
-my @users_map;
 foreach my $u (@ucreate) {
 	my $shell = $u->{'shell'};
-	push(@users_map, [$u->{'user'}, $shell]);
 	if ($shell =~ /\/jk_chrootsh$/) {
 		# Put back real shell
 		my $ushell = $d->{"unjailed_shell_$u->{'user'}"};
@@ -296,27 +294,21 @@ foreach my $g (@gcreate) {
 &close_tempfile(GROUP);
 
 # Sync user real shell when user added or modified after jail creation
-if ($uname) {
+if ($d->{'jail'} && $uname) {
 	my ($uinfo) = grep { $_->{'user'} eq $uname } &list_all_users();
 	if ($uinfo) {
+		my $ushell = $uinfo->{'shell'};
+		&lock_domain($d);
+		delete($d->{"unjailed_shell_$olduname"}) if ($olduname);
+		$d->{"unjailed_shell_$uname"} = $ushell
+			if ($ushell !~ /\/jk_chrootsh$/);
+		&save_domain($d);
+		&unlock_domain($d);
 		my $olduinfo = { %$uinfo };
 		if ($uinfo->{'shell'} !~ /\/jk_chrootsh$/) {
 			$uinfo->{'shell'} = &has_command("jk_chrootsh") ||
 					    "/usr/sbin/jk_chrootsh";
 			}
-		my $ushell;
-		if ($olduname) {
-			$ushell = $d->{"unjailed_shell_$olduname"};
-			}
-		else {
-			($ushell) = map { $_->[1] } grep { $_->[0] eq $uname } 
-				@users_map;
-			}
-		&lock_domain($d);
-		delete($d->{"unjailed_shell_$olduname"}) if ($olduname);
-		$d->{"unjailed_shell_$uname"} = $ushell;
-		&save_domain($d);
-		&unlock_domain($d);
 		$uinfo->{'home'} =~ s/^\Q$dir\E\/\.//;
 		$uinfo->{'home'} = $dir."/.".$uinfo->{'home'};
 		&foreign_call($usermodule, "set_user_envs", $uinfo,
