@@ -5715,7 +5715,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	if ($u->{'domainowner'}) {
 		$u->{'shell'} = &get_domain_shell($d, $u);
 		}
-	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
+	local ($shell) = grep { $_->{'shell'} eq &get_user_shell($u) } @ashells;
 	my $udbs = scalar(@{$u->{'dbs'}}) || $u->{'domainowner'};
 	push(@cols, ($u->{'extra'} && $u->{'type'} eq 'db') ? &$login_access_label('db') :
 		    ($u->{'extra'} && $u->{'type'} eq 'web') ? &$login_access_label('web') :

@@ -208,4 +208,17 @@ foreach (&suppressible_extra_users_types()) {
         }
 }
 
+# get_user_shell
+# Returns the actual shell for the user either jailed
+# if the user is jailed or the default shell
+sub get_user_shell
+{
+my ($user) = @_;
+my $shell = $user->{'shell'};
+if ($user->{'juinfo'} && $user->{'juinfo'}->{'shell'}) {
+	$shell = $user->{'juinfo'}->{'shell'};
+	}
+return $shell;
+}
+
 1;
