@@ -1127,6 +1127,18 @@ if ($d) {
 			}
 		}
 	}
+
+# Add jailed user info for each user
+if ($d && $d->{'jail'}) {
+	my @jusers = &get_domain_jailed_users_shell($d);
+	foreach my $juser (@jusers) {
+		my ($user) = grep { $_->{'user'} eq $juser->{'user'} } @users;
+		if ($user) {
+			$user->{'juinfo'} = $juser;
+			}
+		}
+	}
+
 # Return users list
 return @users;
 }

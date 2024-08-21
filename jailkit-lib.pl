@@ -405,4 +405,22 @@ foreach my $d (&list_domains()) {
 	}
 }
 
+# get_domain_jailed_users_shell(&domain)
+# Get the actual jailed users info in the domain
+sub get_domain_jailed_users_shell
+{
+my ($d) = @_;
+return () if (!$d->{'jail'});
+my $dir = &domain_jailkit_dir($d);
+my $pfile = $dir."/etc/passwd";
+return () if (!-r $pfile);
+&foreign_require("useradmin");
+local $useradmin::config{'passwd_file'} = $pfile;
+my @users_cache = @useradmin::list_users_cache;
+undef(@useradmin::list_users_cache);
+my @jusers = &useradmin::list_users();
+@useradmin::list_users_cache = @users_cache;
+return @jusers;
+}
+
 1;
