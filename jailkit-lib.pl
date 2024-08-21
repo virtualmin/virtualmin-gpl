@@ -178,7 +178,7 @@ foreach my $uinfo (&list_domain_users($d, 0, 0, 1, 1, 0)) {
 		if ($defshell eq 'none' || !$defshell) {
 			$defshell = &default_available_shell('owner');
 			}
-		$uinfo->{'shell'} = $d->{"unjailed_shell_$duser"} || $defshell;
+		$uinfo->{'shell'} = $uinfo->{'juinfo'}->{'shell'} || $defshell;
 		}
 	if ($uinfo->{'home'} =~ s/^\Q$dir\E\/\.//) {
 		&foreign_call($usermodule, "set_user_envs", $uinfo,

@@ -12462,7 +12462,9 @@ sub get_domain_shell
 my ($d, $user) = @_;
 $user ||= &get_domain_owner($d, 1, 1, 1);
 if ($user->{'shell'} =~ /\/jk_chrootsh$/) {
-	return $d->{'unjailed_shell'};
+	return $user->{'juinfo'}->{'shell'} ||
+	       $d->{"unjailed_shell_$user->{'user'}"} ||
+	       $d->{'unjailed_shell'};
 	}
 else {
 	return $user->{'shell'};
@@ -12476,13 +12478,7 @@ sub change_domain_shell
 my ($d, $shell) = @_;
 my $user = &get_domain_owner($d);
 my $olduser = { %$user };
-if ($user->{'shell'} =~ /\/jk_chrootsh$/) {
-	$d->{'unjailed_shell'} = $shell;
-	&save_domain($d);
-	}
-else {
-	$user->{'shell'} = $shell;
-	}
+$user->{'shell'} = $shell;
 &modify_user($user, $olduser, $d);
 }
 
