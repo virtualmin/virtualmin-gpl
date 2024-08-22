@@ -402,17 +402,12 @@ foreach my $d (&list_domains()) {
 sub get_domain_jailed_users_shell
 {
 my ($d) = @_;
-return () if (!$d->{'jail'});
+return if (!$d->{'jail'});
 my $dir = &domain_jailkit_dir($d);
 my $pfile = $dir."/etc/passwd";
-return () if (!-r $pfile);
-&foreign_require("useradmin");
-local $useradmin::config{'passwd_file'} = $pfile;
-my @users_cache = @useradmin::list_users_cache;
-undef(@useradmin::list_users_cache);
-my @jusers = &useradmin::list_users();
-@useradmin::list_users_cache = @users_cache;
-return @jusers;
+return if (!-r $pfile);
+my $sfile = $dir."/etc/shadow";
+return &list_users_from($pfile, $sfile);
 }
 
 1;

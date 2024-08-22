@@ -221,4 +221,63 @@ if ($user->{'jailed'} && $user->{'jailed'}->{'shell'}) {
 return $shell;
 }
 
+sub list_users_from
+{
+my ($passwd_file, $shadow_file) = @_;
+my (@rv, %idx);
+my $clean = sub {
+	my ($val) = @_;
+	return ($val < 0 ? "" : $val);
+	};
+
+# Read "passwd" file
+open(my $PASSWD, '<', $passwd_file) or return;
+my $line_num = 0;
+while (my $line = <$PASSWD>) {
+	chomp($line);
+	next if ($line =~ /^[#\+\-]/ || $line !~ /\S/);
+	my @fields = split(/:/, $line, -1);
+	my $entry = {
+		'user' => $fields[0],
+		'pass' => $fields[1],
+		'uid' => $fields[2],
+		'gid' => $fields[3],
+		'real' => $fields[4],
+		'home' => $fields[5],
+		'shell' => $fields[6],
+		'line' => $line_num,
+		'num'  => scalar(@rv),
+		};
+	push(@rv, $entry);
+	$idx{$fields[0]} = $entry;
+	$line_num++;
+	}
+close($PASSWD);
+
+# Read "shadow" file (if given)
+if (open(my $SHADOW, '<', $shadow_file)) {
+	my $line_num = 0;
+	while (my $line = <$SHADOW>) {
+		chomp($line);
+		next if ($line =~ /^[#\+\-]/ || $line !~ /\S/);
+		my @fields = split(/:/, $line, -1);
+		if (my $p = $idx{$fields[0]}) {
+			@{$p}{qw(pass change min max warn inactive expire sline)} = (
+				$fields[1],
+				map { $clean->($_) } @fields[2..7],
+				$line_num);
+			}
+		$line_num++;
+		}
+	close($SHADOW);
+
+	# Remove entries not in shadow
+	@rv = grep { defined $_->{'sline'} } @rv;
+	}
+
+# Update 'num' field
+$rv[$_]->{'num'} = $_ for (0 .. $#rv);
+return @rv;
+}
+
 1;
