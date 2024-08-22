@@ -208,7 +208,7 @@ foreach (&suppressible_extra_users_types()) {
         }
 }
 
-# get_user_shell
+# get_user_shell(&user)
 # Returns the actual shell for the user either jailed
 # if the user is jailed or the default shell
 sub get_user_shell
@@ -221,6 +221,9 @@ if ($user->{'jailed'} && $user->{'jailed'}->{'shell'}) {
 return $shell;
 }
 
+# list_users_from(passwd-file, [shadow-file])
+# Returns a list of users from the passed passwd file, with
+# additional fields from the shadow file if given
 sub list_users_from
 {
 my ($passwd_file, $shadow_file) = @_;
