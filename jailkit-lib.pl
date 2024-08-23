@@ -68,14 +68,6 @@ foreach $f (&mount::files_to_lock()) {
 &require_useradmin();
 foreach my $uinfo (&list_domain_users($d, 0, 0, 1, 1, 0)) {
 	my $duser = $uinfo->{'user'};
-	if (!$uinfo) {
-		if ($duser eq $d->{'user'}) {
-			return &text('jailkit_euser', $duser);
-			}
-		else {
-			next;
-			}
-		}
 	my $olduinfo = { %$uinfo };
 	if ($uinfo->{'shell'} !~ /\/jk_chrootsh$/) {
 		$d->{"unjailed_shell_$duser"} = $uinfo->{'shell'};
@@ -163,14 +155,6 @@ foreach my $pd ($d, &get_domain_by("parent", $d->{'id'})) {
 &require_useradmin();
 foreach my $uinfo (&list_domain_users($d, 0, 0, 1, 1, 0)) {
 	my $duser = $uinfo->{'user'};
-	if (!$uinfo) {
-		if ($duser eq $d->{'user'}) {
-			return &text('jailkit_euser', $duser);
-			}
-		else {
-			next;
-			}
-		}
 	my $olduinfo = { %$uinfo };
 	if ($uinfo->{'shell'} =~ /\/jk_chrootsh$/) {
 		my $tmpl = &get_template($d->{'template'});
