@@ -8140,6 +8140,9 @@ delete($dom->{'creating'});
 &save_domain($dom);
 &$second_print($text{'setup_done'});
 
+# Now we have an ID, lock the domain
+&lock_domain($dom);
+
 # If mail client autoconfig is enabled globally, set it up for
 # this domain
 if ($config{'mail_autoconfig'} && $dom->{'mail'} &&
@@ -8562,6 +8565,7 @@ if (!$dom->{'alias'} && &domain_has_website($dom) && defined($content)) {
 if (!$nopost) {
 	&run_post_actions();
 	}
+&unlock_domain($dom);
 &set_domain_envs($dom, "CREATE_DOMAIN");
 local $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
@@ -8753,6 +8757,11 @@ foreach my $dd (@alldoms) {
 				     &show_domain_name($du));
 			}
 		}
+	}
+
+# Lock before deleting
+foreach my $dd (@alldoms) {
+	&lock_domain($dd);
 	}
 
 # Delete any jail
@@ -8983,6 +8992,11 @@ if ($d->{'dom'} eq $config{'defaultdomain_name'}) {
 # Run the after deletion command
 if (!$nopost) {
 	&run_post_actions();
+	}
+
+# Unlock now we're done
+foreach my $dd (reverse(@alldoms)) {
+	&unlock_domain($dd);
 	}
 
 return undef;
