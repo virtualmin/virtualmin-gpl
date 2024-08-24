@@ -265,10 +265,14 @@ if (open(my $SHADOW, '<', $shadow_file)) {
 		next if ($line =~ /^[#\+\-]/ || $line !~ /\S/);
 		my @fields = split(/:/, $line, -1);
 		if (my $p = $idx{$fields[0]}) {
-			@{$p}{qw(pass change min max warn inactive expire sline)} = (
-				$fields[1],
-				map { $clean->($_) } @fields[2..7],
-				$line_num);
+			$p->{'pass'}     = $fields[1];
+			$p->{'change'}   = $clean->($fields[2]);
+			$p->{'min'}      = $clean->($fields[3]);
+			$p->{'max'}      = $clean->($fields[4]);
+			$p->{'warn'}     = $clean->($fields[5]);
+			$p->{'inactive'} = $clean->($fields[6]);
+			$p->{'expire'}   = $clean->($fields[7]);
+			$p->{'sline'}    = $line_num;
 			}
 		$line_num++;
 		}
