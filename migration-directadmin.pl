@@ -102,6 +102,10 @@ if (-r $zonefile) {
 if (-r "$domains/$dom/stats/webalizer.current") {
 	push(@got, "webalizer");
 	}
+if (-d "$domains/$dom/awstats" &&
+    &indexof("virtualmin-awstats", @plugins) >= 0) {
+	push(@got, "virtualmin-awstats");
+	}
 if (-r "$backup/$dom/email/aliases") {
 	push(@got, "mail");
 	}
@@ -280,6 +284,18 @@ if (-d $statssrc && $dom{'webalizer'}) {
 	else {
 		&$second_print(".. done");
 		}
+	}
+
+# Copy over AWstats files
+if ($dom{'virtualmin-awstats'}) {
+	&$first_print("Copying AWstats data files ..");
+	&execute_command(
+		"cp ".quotemeta("$domains/$dom/awstats")."/.data/*.$dom.txt ".
+		quotemeta("$dom{'home'}/awstats"));
+	&execute_command(
+		"chown -R $dom{'uid'}:$dom{'ugid'} ".
+		quotemeta("$dom{'home'}/awstats"));
+	&$second_print(".. done");
 	}
 
 # Copy over public_ftp directory
