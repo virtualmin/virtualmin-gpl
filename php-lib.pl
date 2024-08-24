@@ -2527,10 +2527,20 @@ sub restart_php_fpm_server
 {
 my ($conf) = @_;
 $conf ||= &get_php_fpm_config();
-&$first_print(&text('php_fpmrestart', $conf->{'shortversion'}));
+my $action_mode = $conf->{'init'} ? &init::get_action_mode($conf->{'init'})
+				  : $init::init_mode;
+if ($action_mode eq "systemd") {
+	&$first_print(&text('php_fpmreload', $conf->{'shortversion'}));
+	}
+else {
+	&$first_print(&text('php_fpmrestart', $conf->{'shortversion'}));
+	}
 if ($conf->{'init'}) {
 	&foreign_require("init");
-	my ($ok, $err) = &init::restart_action($conf->{'init'});
+	my ($ok, $err) = &init::reload_action($conf->{'init'});
+	if (!$ok && $err =~ /Not\s+implemented/i) {
+		($ok, $err) = &init::restart_action($conf->{'init'});
+		}
 	if ($ok) {
 		&$second_print($text{'setup_done'});
 		return 1;
