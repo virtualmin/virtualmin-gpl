@@ -627,7 +627,8 @@ if ($mode eq "fpm" && $d->{'php_error_log'}) {
 	# Also needs to restart the FPM server
 	my $conf = &get_php_fpm_config($d);
 	if ($conf && $conf->{'init'}) {
-		$fpmcmd = "virtualmin restart-server --server fpm --domain $d->{'id'} --quiet";
+		$fpmcmd = "virtualmin restart-server --server fpm --domain $d->{'id'} ".
+			  "--quiet --reload";
 		}
 	}
 if ($p eq 'web') {
