@@ -107,7 +107,7 @@ index_grstop=Stop Greylisting Server
 index_grstart=Start Greylisting Server
 index_grrestart=Restart Greylisting Server
 index_grstartdesc=The Postgrey greylisting server is currently down, which will prevent all email delivery. Click this button to start it.
-index_grstartdesc=The Postgrey greylisting server is currently active and delaying email from suspicious senders to reduce spam. Click this button to stop it.
+index_grstopdesc=The Postgrey greylisting server is currently active and delaying email from suspicious senders to reduce spam. Click this button to stop it.
 index_usname=Usermin Server
 index_usstop=Stop Usermin Server
 index_usstart=Start Usermin Server
@@ -7895,6 +7895,7 @@ letsencrypt_dnscheckbad=.. some hostnames were removed : $1
 letsencrypt_dnscheckall=.. none of the hostnames could be resolved!
 
 php_fpmrestart=Restarting PHP-FPM $1 server ..
+php_fpmreload=Reloading PHP-FPM $1 server ..
 php_fpmnoinit=.. no bootup action found!
 php_fpmeinit=.. failed : $1
 php_fpmnodir=No PHP-FPM configuration directory found

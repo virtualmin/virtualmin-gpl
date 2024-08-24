@@ -2522,7 +2522,7 @@ foreach my $conf (@fpms) {
 }
 
 # restart_php_fpm_server([&config])
-# Post-action script to restart the server
+# Post-action script to reload or restart the server
 sub restart_php_fpm_server
 {
 my ($conf) = @_;

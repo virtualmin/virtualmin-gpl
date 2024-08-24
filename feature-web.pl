@@ -2696,6 +2696,15 @@ sleep(1) if (!$err);
 return $err;
 }
 
+# reload_service_web()
+# Attempts to reload the web service config, returning undef on success or any
+# error message on failure.
+sub reload_service_web
+{
+&require_apache();
+return &apache::restart_apache();
+}
+
 # start_service_fpm(version)
 # Attempts to start the FPM server for some version
 sub start_service_fpm
@@ -2717,6 +2726,21 @@ my ($fpm) = grep { $_->{'version'} eq $ver } &list_php_fpm_configs();
 return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
 &foreign_require("init");
 my ($ok, $err) = &init::stop_action($fpm->{'init'});
+return $ok ? undef : $err;
+}
+
+# reload_service_fpm(version)
+# Attempts to reload the FPM server for some version
+sub reload_service_fpm
+{
+my ($ver) = @_;
+my ($fpm) = grep { $_->{'version'} eq $ver } &list_php_fpm_configs();
+return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
+&foreign_require("init");
+my ($ok, $err) = &init::reload_action($fpm->{'init'});
+if (!$ok && $err =~ /Not\s+implemented/i) {
+	($ok, $err) = &init::restart_action($fpm->{'init'});
+	}
 return $ok ? undef : $err;
 }
 
