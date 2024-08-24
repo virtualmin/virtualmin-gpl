@@ -969,6 +969,7 @@ return $err;
 sub s3_make_request
 {
 my ($conn, $path, $method, $data, $headers, $authpath) = @_;
+eval "use S3::S3Object";
 my $object = S3::S3Object->new($data);
 $headers ||= { };
 $authpath ||= $path;
@@ -1002,6 +1003,7 @@ if ($s3) {
 &require_s3();
 my $endport;
 ($endpoint, $endport) = split(/:/, $endpoint);
+eval "use S3::AWSAuthConnection";
 return S3::AWSAuthConnection->new($akey, $skey, undef, $endpoint, $endport,
 				  $location);
 }
