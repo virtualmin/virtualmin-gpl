@@ -16,11 +16,11 @@ if (!-r $domains && $dom && -d "$backup/$dom") {
 -d $domains && -d $backup || return ("Not a DirectAdmin backup file");
 
 if (!$dom) {
-	# Try to work out the domain
-	local @domdirs = grep { !/\/default$/ } glob("$domains/*");
+	# Try to work out the default domain
+	local @domdirs = grep { !/^default$/ }
+			      split(/\r?\n/, &backquote_command("ls -t $domains"));
 	@domdirs || return ("No domains found in backup");
-	$domdirs[0] =~ /\/([^\/]+)$/;
-	$dom = $1;
+	$dom = $domdirs[0];
 	}
 else {
 	# Validate the domain
