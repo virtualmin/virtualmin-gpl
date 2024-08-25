@@ -1026,29 +1026,29 @@ $clone_target = &ui_radio_table("clone_target", 1,
 	]);
 $clone_tab_content .= &ui_table_row(
 	&hlink($text{'scripts_kit_clone_target'},
-		"kit_wp_clone_target"), $clone_target, 2);
+		"kit_target_cloned"), $clone_target, 2);
 $clone_tab_content .= &ui_table_row(
 	&hlink($text{"${_t}url_cloned"}, "kit_wp_url_cloned"),
 		&ui_opt_textbox(
-			"cloned_url", undef, 35,
+			"kit_option_url_cloned", undef, 35,
 			$text{'scripts_kit_auto'} . "<br>",
 		$text{'edit_set'}), 2);
 $clone_tab_content .= &ui_table_row(
 	&hlink($text{"${_t}blogname_cloned"}, "kit_wp_blogname_cloned"),
 		&ui_opt_textbox(
-			"cloned_blogname", undef, 25,
+			"kit_option_blogname_cloned", undef, 25,
 			$text{'scripts_kit_nochange'} . "<br>",
 		$text{'edit_set'}), 2);
 $clone_tab_content .= &ui_table_row(
 	&hlink($text{"${_t}admin_email_cloned"}, "kit_wp_admin_email_cloned"),
 		&ui_opt_textbox(
-			"cloned_admin_email", undef, 30,
+			"kit_option_admin_email_cloned", undef, 30,
 			$text{'scripts_kit_nochange'} . "<br>",
 		$text{'edit_set'}), 2);
 $clone_tab_content .= &ui_table_row(
 	&hlink($text{"${_t}user_pass_cloned"}, "kit_wp_user_pass_cloned"),
 		&ui_opt_textbox(
-			"cloned_user_pass", undef, 20,
+			"kit_user_user_pass_cloned", undef, 20,
 			$text{'scripts_kit_nochange'} . "<br>",
 		$text{'edit_set'}), 2);
 $clone_tab_content .= &ui_table_end();
