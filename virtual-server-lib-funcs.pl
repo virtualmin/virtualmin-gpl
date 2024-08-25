@@ -9207,8 +9207,12 @@ local @newpost;
 foreach my $a (@main::post_actions) {
 	# Don't run multiple times
 	my $key;
-	if ($a->[0] eq \&restart_bind ||
-	    $a->[0] eq \&update_secondary_mx_virtusers) {
+	if ($a->[0] eq \&restart_bind && $a->[1]) {
+		# Restarts for the same DNS server are equal
+		my $p = $a->[1]->{'provision_dns'} || $a->[1]->{'dns_cloud'};
+		$key = $a->[0].",".$p;
+		}
+	elsif ($a->[0] eq \&update_secondary_mx_virtusers) {
 		# Restarts in the same domain are considered equal
 		$key = $a->[0].($a->[1] ? ",".$a->[1]->{'dom'} : "");
 		}

@@ -2415,6 +2415,7 @@ else {
 	&$second_print($text{'setup_notrun'});
 	$rv = 0;
 	}
+
 local @shosts = split(/\s+/, $d->{'dns_slave'});
 if (&bind8::list_slave_servers() && @shosts) {
 	# Re-start on slaves too

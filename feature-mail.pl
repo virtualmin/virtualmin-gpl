@@ -1738,7 +1738,7 @@ foreach my $s (@servers) {
 return @rv;
 }
 
-# update_secondary_mx_virtusers(domain, &mailbox-names)
+# update_secondary_mx_virtusers(&domain, &mailbox-names)
 # Update the list of mailboxes allowed to relay for some domain.
 # This is called on the secondary MX Virtualmins.
 sub update_secondary_mx_virtusers
