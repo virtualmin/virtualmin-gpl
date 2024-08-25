@@ -861,6 +861,7 @@ $plugins_tab_content =
 $plugins_tab_content .= &ui_hidden("dom", $d->{'id'});
 $plugins_tab_content .= &ui_hidden("tab", "plugins");
 $plugins_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
+$plugins_tab_content .= &ui_hidden("uid", $wp->{'admin_id'});
 $plugins_tab_content .= &ui_hidden("sstate", $wpj);
 $plugins_tab_content .= &ui_select("plugins", "", $plugins_actions_opts);
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
@@ -900,6 +901,7 @@ $themes_tab_content =
 $themes_tab_content .= &ui_hidden("dom", $d->{'id'});
 $themes_tab_content .= &ui_hidden("tab", "themes");
 $themes_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
+$themes_tab_content .= &ui_hidden("uid", $wp->{'admin_id'});
 $themes_tab_content .= &ui_hidden("sstate", $wpj);
 $themes_tab_content .= &ui_select("themes", "", $plugins_actions_opts);
 $themes_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
@@ -945,6 +947,7 @@ $backup_tab_content .=
 $backup_tab_content .= &ui_hidden("dom", $d->{'id'});
 $backup_tab_content .= &ui_hidden("tab", "backup");
 $backup_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
+$backup_tab_content .= &ui_hidden("uid", $wp->{'admin_id'});
 $backup_tab_content .= &ui_hidden("sstate", $wpj);
 $backup_tab_content .= &ui_select("backups", "", $backup_actions_opts);
 $backup_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "backup");
@@ -986,6 +989,7 @@ my $clone_tab_content =
 $clone_tab_content .= &ui_hidden("dom", $d->{'id'});
 $clone_tab_content .= &ui_hidden("tab", "clone");
 $clone_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
+$clone_tab_content .= &ui_hidden("uid", $wp->{'admin_id'});
 $clone_tab_content .= &ui_hidden("sstate", $wpj);
 $clone_tab_content .= &ui_table_start(undef, "width=100%", 2);
 my $slink = $sinfo->{'url'};
@@ -1083,6 +1087,7 @@ $data .= &ui_form_start($save_kit_form, "post", undef,
 $data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("tab", "system");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
+$data .= &ui_hidden("uid", $wp->{'admin_id'});
 $data .= &ui_hidden("sstate", $wpj);
 $data .= &ui_table_start(undef, "width=100%", 2);
 foreach my $option (@$system_tab_content) {
@@ -1101,6 +1106,7 @@ $data .= &ui_form_start($save_kit_form, "post", undef,
 $data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("tab", "settings");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
+$data .= &ui_hidden("uid", $wp->{'admin_id'});
 $data .= &ui_hidden("sstate", $wpj);
 $data .= &ui_table_start(undef, "width=100%", 2);
 foreach my $option (@$settings_tab_content) {
@@ -1147,6 +1153,7 @@ $data .= &ui_form_start($save_kit_form, "post", undef,
 $data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("tab", "development");
 $data .= &ui_hidden("sid", $sinfo->{'id'});
+$data .= &ui_hidden("uid", $wp->{'admin_id'});
 $data .= &ui_hidden("sstate", $wpj);
 $data .= &ui_table_start(undef, "width=100%", 2);
 foreach my $option (@$development_tab_content) {
@@ -1158,6 +1165,7 @@ $data .= &ui_form_start("script_login.cgi", "post", undef,
 			"id='kit_login_form' target='_blank'");
 $data .= &ui_hidden("dom", $d->{'id'});
 $data .= &ui_hidden("sid", $sinfo->{'id'});
+$data .= &ui_hidden("uid", $wp->{'admin_id'});
 $data .= &ui_hidden("sstate", $wpj);
 $data .= &ui_form_end();
 $data .= &ui_tabs_end_tab();
