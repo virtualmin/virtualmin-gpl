@@ -88,30 +88,7 @@ local %dinfo;
 
 # First work out what features we have ..
 &$first_print("Checking for DirectAdmin features ..");
-local @got = ( "dir", $parent ? () : ("unix"),
-	       &domain_has_website(), "logrotate" );
-push(@got, "webmin") if ($webmin && !$parent);
-local @sqlfiles = glob("$backup/*.sql");
-if (@sqlfiles) {
-	push(@got, "mysql");
-	}
-local $zonefile = "$backup/$dom/$dom.db";
-if (-r $zonefile) {
-	push(@got, "dns");
-	}
-if (-r "$domains/$dom/stats/webalizer.current") {
-	push(@got, "webalizer");
-	}
-if (-d "$domains/$dom/awstats" &&
-    &indexof("virtualmin-awstats", @plugins) >= 0) {
-	push(@got, "virtualmin-awstats");
-	}
-if (-r "$backup/$dom/email/aliases") {
-	push(@got, "mail");
-	}
-if (uc($dinfo{'ssl'}) eq 'ON') {
-	push(@got, &domain_has_ssl());
-	}
+local @got = &directadmin_domain_features($dom, $domains, $backup);
 
 # Tell the user what we have got
 @got = &show_check_migration_features(@got);
@@ -240,22 +217,8 @@ local @rvdoms = ( \%dom );
 # Fix home permissions
 &set_home_ownership(\%dom);
 
-if ($got{'web'}) {
-	# Just adjust cgi-bin directory to match DirectAdmin
-	# XXX do this for sub-servers too
-	local $conf = &apache::get_config();
-	local ($virt, $vconf) = &get_apache_virtual($dom, undef);
-	if ($virt) {
-		&apache::save_directive("ScriptAlias",
-			[ "/cgi-bin $dom{'home'}/public_html/cgi-bin" ],
-			$vconf, $conf);
-		&flush_file_lines($virt->{'file'});
-		&register_post_action(\&restart_apache) if (!$got{'ssl'});
-		}
-	&save_domain(\%dom);
-	&add_script_language_directives(\%dom, $tmpl, $dom{'web_port'});
-	}
-$dom{'cgi_bin_correct'} = 0;	# So that it is computed from now on
+# Just adjust cgi-bin directory to match DirectAdmin
+&fix_directadmin_cgi_bin(\%dom);
 
 # Migrate DNS domain
 &copy_directadmin_dns_records(\%dom, $backup);
@@ -592,6 +555,8 @@ if (!$dom{'parent'}) {
 				'nocopyskel', 1,
 			        'nocreationscripts', 1,
 				);
+		# Set cgi directories to DirectAdmin standard
+		my %got = map { $_, 1 } &directadmin_domain_features($dname, $domains, $backup);
 		foreach my $f (@features, &list_feature_plugins()) {
 			next if ($f eq "unix" || $f eq "webmin");
 			$subd{$f} = $got{$f} ? 1 : 0;
@@ -599,6 +564,9 @@ if (!$dom{'parent'}) {
 		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 						  : \%dom;
 		$subd{'home'} = &server_home_directory(\%subd, $parentdom);
+		$subd{'cgi_bin_dir'} = "public_html/cgi-bin";
+		$subd{'cgi_bin_path'} = "$subd{'home'}/$subd{'cgi_bin_dir'}";
+		$subd{'cgi_bin_correct'} = 1;
 		&generate_domain_password_hashes(\%subd, 1);
 		&complete_domain(\%subd);
 		&create_virtual_server(\%subd, $parentdom,
@@ -613,6 +581,9 @@ if (!$dom{'parent'}) {
 
 		# Copy custom DNS records
 		&copy_directadmin_dns_records(\%subd, $backup);
+
+		# Just adjust cgi-bin directory to match DirectAdmin
+		&fix_directadmin_cgi_bin(\%subd);
 
 		# Fix home permissions
 		&set_home_ownership(\%subd);
@@ -815,6 +786,64 @@ if ($d->{'dns'} && -r $dnsfile && !$d->{'dns_submode'}) {
 	&$second_print(".. done");
 	&register_post_action(\&reload_bind_records, $d);
 	}
+}
+
+# fix_directadmin_cgi_bin(&domain)
+# Fix the cgi-bin path to follow the directadmin standard
+sub fix_directadmin_cgi_bin
+{
+my ($d) = @_;
+if ($d->{'web'}) {
+	my @ports = ( $d->{'web_port'} );
+	push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+	foreach my $p (@ports) {
+		my ($virt, $vconf, $conf) = &get_apache_virtual($dom, undef);
+		next if (!$virt);
+		my @sa = &apache::find_directive("ScriptAlias", $vconf);
+		next if (!@sa);
+		&apache::save_directive("ScriptAlias",
+			[ "/cgi-bin $d->{'home'}/public_html/cgi-bin" ],
+			$vconf, $conf);
+		&flush_file_lines($virt->{'file'});
+		&register_post_action(\&restart_apache);
+		}
+	}
+$dom{'cgi_bin_correct'} = 0;	# So that it is computed from now on
+}
+
+# directadmin_domain_features(domain-name, domains-dir, backup-dir)
+# Return a list of features that should be enabled
+sub directadmin_domain_features
+{
+my ($dom, $domains, $backup) = @_;
+my %dinfo;
+&read_env_file("$backup/$dom/domain.conf", \%dinfo) || return ();
+my @got = ( "dir", $parent ? () : ("unix"),
+	    &domain_has_website(), "logrotate" );
+push(@got, "webmin") if ($webmin && !$parent);
+local @sqlfiles = glob("$backup/*.sql");
+if (@sqlfiles) {
+	push(@got, "mysql");
+	}
+local $zonefile = "$backup/$dom/$dom.db";
+if (-r $zonefile) {
+	push(@got, "dns");
+	}
+if (-r "$domains/$dom/stats/webalizer.current") {
+	push(@got, "webalizer");
+	}
+if (-d "$domains/$dom/awstats" &&
+    &indexof("virtualmin-awstats", @plugins) >= 0) {
+	push(@got, "virtualmin-awstats");
+	}
+if (-r "$backup/$dom/email/aliases") {
+	push(@got, "mail");
+	}
+if (uc($dinfo{'ssl'}) eq 'ON') {
+	# XXX where to find SSL cert and key?
+	push(@got, &domain_has_ssl());
+	}
+return @got;
 }
 
 1;
