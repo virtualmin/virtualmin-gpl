@@ -4505,6 +4505,7 @@ scripts_kit_clone_target4=New top-level domain
 scripts_kit_wp_url=Site URL
 scripts_kit_wp_url_cloned=Cloned site URL
 scripts_kit_wp_wpurl=Home URL
+scripts_kit_wp_admin_username=Administrator username
 scripts_kit_wp_admin_email=Administrator email address
 scripts_kit_wp_admin_email_cloned=Cloned site administrator email address
 scripts_kit_wp_user_pass=Administrator password
