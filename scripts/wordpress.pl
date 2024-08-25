@@ -802,6 +802,10 @@ push(@$settings_tab_content, {
 	value => &ui_select("kit_option_permalink_structure",
 			$wp->{'permalink_structure'},
 			$permlink_structure_opts) });
+# Admin username
+push(@$settings_tab_content, {
+	desc  => &hlink($text{"${_t}admin_username"}, "kit_wp_admin_username"),
+	value => $wp->{'admin_user'}});
 # Admin email
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}admin_email"}, "kit_wp_admin_email"),
