@@ -4489,6 +4489,7 @@ scripts_ekit=Failed to apply the web app workbench
 scripts_kit_ewp=Perl : Failed to parse JSON output from WP-CLI command
 scripts_kit_elog=PHP  : Failed running $1 command. See the log file at $2
 scripts_kit_wp_applying=Applying $1 settings ..
+scripts_kit_eunchanged=.. unchanged : $1
 scripts_kit_wp_eapplying=.. error : $1
 scripts_kit_wp_sapplying=.. done, no settings changed
 scripts_kit_not_set=Not set
