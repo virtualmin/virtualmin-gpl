@@ -565,6 +565,8 @@ if (is_dir($backup_dir)) {
         }
     }
 }
+$admin_user_email = get_option("admin_email");
+$admin_user_id = get_user_by("email", $admin_user_email)->ID;
 echo json_encode([
     "memory_limit" => ini_get("memory_limit"),
     "upload_max_filesize" => ini_get("upload_max_filesize"),
@@ -583,7 +585,9 @@ echo json_encode([
     "default_pingback_flag" => get_option("default_pingback_flag"), 
     "default_ping_status" => get_option("default_ping_status"), 
     "maintenance_mode" => get_option("maintenance_mode"), 
-    "admin_email" => get_option("admin_email"),
+    "admin_id" => $admin_user_id,
+    "admin_user" => get_userdata($admin_user_id)->user_login,
+    "admin_email" => $admin_user_email,
     "version" => get_bloginfo("version"),
     "blogdescription" => get_option("blogdescription"),
     "url" => get_bloginfo("url"),
@@ -619,9 +623,8 @@ echo json_encode([
                 "example" => "/sample-post/"
         ]
     ],
-    "login_url" => (function() {
-        $admin_email = get_option("admin_email");
-        $user = get_user_by("email", $admin_email);
+    "login_url" => (function() use ($admin_user_email) {
+        $user = get_user_by("email", $admin_user_email);
         if (!$user) {
             return "";
         }
