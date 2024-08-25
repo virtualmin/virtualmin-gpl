@@ -843,6 +843,7 @@ foreach my $adom (keys %$aliasdoms) {
 			 'reseller', $dom{'reseller'},
 			 'nocreationmail', 1,
 			 'nocopyskel', 1,
+			 'nocreationscripts', 1,
 			);
 	$alias{'dom'} =~ s/^www\.//;
 	foreach my $f (@alias_features) {
@@ -906,11 +907,11 @@ foreach my $sdom (keys %$subdoms) {
 			'ip', $dom{'ip'},
 			'virt', 0,
 			'source', $dom{'source'},
-			'parent', $dom{'id'},
 			'template', $dom{'template'},
 			'reseller', $dom{'reseller'},
 			'nocreationmail', 1,
 			'nocopyskel', 1,
+			'nocreationscripts', 1,
 			);
 	foreach my $f (@subdom_features) {
 		local $want = $f eq 'ssl' ? 0 : 1;
