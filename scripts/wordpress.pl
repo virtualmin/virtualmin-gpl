@@ -425,7 +425,7 @@ return (128, 'M') ;
 
 sub script_wordpress_passmode
 {
-return (1, 8, '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$');
+return (1, 14, '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$');
 }
 
 sub script_wordpress_webserver_add_records
