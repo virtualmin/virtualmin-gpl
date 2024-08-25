@@ -231,100 +231,18 @@ else {
 	}
 local @rvdoms = ( \%dom );
 
-# Copy over public_html dir
-local $phd = &public_html_dir(\%dom);
-local $phdsrc = "$domains/$dom/public_html";
-if (-d $phdsrc) {
-	&$first_print("Copying public_html directory ..");
-	&execute_command("cd ".quotemeta($phdsrc)." && ".
-			 &make_tar_command("cf", "-", ".")." | ".
-			 "(cd ".quotemeta($phd)." && ".
-			   &make_tar_command("xf", "-").")",
-			 undef, \$out, \$out);
-	if ($?) {
-		&$second_print(".. copy failed : <tt>$out</tt>");
-		}
-	else {
-		&$second_print(".. done");
-		}
-	}
+# Copy over public_html and private_html dirs
+&copy_directadmin_html_dir(\%dom, $domains);
 
-# Copy over private_html dir
-local $phd = "$dom{'home'}/private_html";
-local $phdsrc = "$domains/$dom/private_html";
-if (-d $phdsrc) {
-	&$first_print("Copying private_html directory ..");
-	&make_dir_as_domain_user(\%dom, $phd, 0700);
-	&execute_command("cd ".quotemeta($phdsrc)." && ".
-			 &make_tar_command("cf", "-", ".")." | ".
-			 "(cd ".quotemeta($phd)." && ".
-			   &make_tar_command("xf", "-").")",
-			 undef, \$out, \$out);
-	if ($?) {
-		&$second_print(".. copy failed : <tt>$out</tt>");
-		}
-	else {
-		&$second_print(".. done");
-		}
-	}
-
-# Copy over stats directory
-local $stats = &webalizer_stats_dir(\%dom);
-local $statssrc = "$domains/$dom/stats";
-if (-d $statssrc && $dom{'webalizer'}) {
-	&$first_print("Copying stats directory ..");
-	&execute_command("cd ".quotemeta($statssrc)." && ".
-			 &make_tar_command("cf", "-", ".")." | ".
-			 "(cd ".quotemeta($stats)." && ".
-			   &make_tar_command("xf", "-").")",
-			 undef, \$out, \$out);
-	if ($?) {
-		&$second_print(".. copy failed : <tt>$out</tt>");
-		}
-	else {
-		&$second_print(".. done");
-		}
-	}
-
-# Copy over AWstats files
-if ($dom{'virtualmin-awstats'}) {
-	&$first_print("Copying AWstats data files ..");
-	&execute_command(
-		"cp ".quotemeta("$domains/$dom/awstats")."/.data/*.$dom.txt ".
-		quotemeta("$dom{'home'}/awstats"));
-	&execute_command(
-		"chown -R $dom{'uid'}:$dom{'ugid'} ".
-		quotemeta("$dom{'home'}/awstats"));
-	&$second_print(".. done");
-	}
-
-# Copy over public_ftp directory
-local $ftp = $dom{'home'}.'/'.($tmpl->{'ftp_dir'} || 'ftp');
-local $ftpsrc = "$domains/$dom/public_ftp";
-if (-d $ftpsrc) {
-	&$first_print("Copying public_ftp directory ..");
-	if (!-d $ftp) {
-		&make_dir($ftp, 0755);
-		&set_ownership_permissions($dom{'uid'}, $dom{'ugid'}, 0755, $ftp);
-		}
-	&execute_command("cd ".quotemeta($ftpsrc)." && ".
-			 &make_tar_command("cf", "-", ".")." | ".
-			 "(cd ".quotemeta($ftp)." && ".
-			   &make_tar_command("xf", "-").")",
-			 undef, \$out, \$out);
-	if ($?) {
-		&$second_print(".. copy failed : <tt>$out</tt>");
-		}
-	else {
-		&$second_print(".. done");
-		}
-	}
+# Copy over webalizer and awstats directories
+&copy_directadmin_stats_dir(\%dom, $domains);
 
 # Fix home permissions
 &set_home_ownership(\%dom);
 
 if ($got{'web'}) {
 	# Just adjust cgi-bin directory to match DirectAdmin
+	# XXX do this for sub-servers too
 	local $conf = &apache::get_config();
 	local ($virt, $vconf) = &get_apache_virtual($dom, undef);
 	if ($virt) {
@@ -340,53 +258,7 @@ if ($got{'web'}) {
 $dom{'cgi_bin_correct'} = 0;	# So that it is computed from now on
 
 # Migrate DNS domain
-local $dnsfile = "$backup/$dom/$dom.db";
-if ($got{'dns'} && -r $dnsfile) {
-	&$first_print("Copying and fixing DNS records ..");
-	&require_bind();
-	local $zonefile = &get_domain_dns_file(\%dom);
-	&copy_source_dest($dnsfile, &bind8::make_chroot($zonefile));
-	local ($recs, $zdstfile) =
-		&get_domain_dns_records_and_file(\%dom);
-	foreach my $r (@$recs) {
-		my $change = 0;
-		if (($r->{'name'} eq $dom."." ||
-		     $r->{'name'} eq "www.".$dom."." ||
-		     $r->{'name'} eq "pop.".$dom."." ||
-		     $r->{'name'} eq "smtp.".$dom."." ||
-		     $r->{'name'} eq "cp.".$dom."." ||
-		     $r->{'name'} eq "ftp.".$dom."." ||
-		     $r->{'name'} eq "mail.".$dom.".") &&
-		    $r->{'type'} eq 'A') {
-			# Fix IP in domain record
-			$r->{'values'} = [ $dom{'ip'} ];
-			$change++;
-			}
-		elsif ($r->{'name'} eq $dom."." &&
-		       $r->{'type'} eq 'NS') {
-			# Set NS record to this server
-			local $master = $bconfig{'default_prins'} ||
-					&get_system_hostname();
-			$master .= "." if ($master !~ /\.$/);
-			$r->{'values'} = [ $master ];
-			$change++;
-			}
-		elsif ($r->{'name'} eq $dom."." &&
-		       ($r->{'type'} eq 'SPF' ||
-			$r->{'type'} eq 'TXT') &&
-		    $r->{'values'}->[0] =~ /ip4:/) {
-			# Fix IP in SPF record
-			$r->{'values'}->[0] =~ s/ip4:([0-9\.]+)/ip4:$dom{'ip'}/;
-			$change++;
-			}
-		if ($change) {
-			&modify_dns_record($recs, $zdstfile, $r);
-			}
-		}
-	&post_records_change(\%dom, $recs, $zdstfile);
-	&$second_print(".. done");
-	&register_post_action(\&restart_bind);
-	}
+&copy_directadmin_dns_records(\%dom, $backup);
 
 # Lock the user DB and build list of used IDs
 &obtain_lock_unix(\%dom);
@@ -611,6 +483,7 @@ foreach my $adom (keys %aliaslist) {
 			 'reseller', $dom{'reseller'},
 			 'nocreationmail', 1,
 			 'nocopyskel', 1,
+			 'nocreationscripts', 1,
 			);
 	foreach my $f (@alias_features) {
 		$alias{$f} = $dom{$f};
@@ -629,8 +502,10 @@ foreach my $adom (keys %aliaslist) {
 
 # Migrate any sub-domains
 my $sublist = &read_file_lines("$backup/$dom/subdomain.list", 1);
+my %sublist;
 foreach my $sdom (@$sublist) {
 	my $sname = $sdom.".".$dom{'dom'};
+	$sublist{$sname} = 1;
 	&$first_print("Creating sub-domain $sname ..");
 	if (&domain_name_clash($sname)) {
 		&$second_print(".. the domain $sname already exists");
@@ -649,7 +524,7 @@ foreach my $sdom (@$sublist) {
 			'uid', $dom{'uid'},
 			'gid', $dom{'gid'},
 			'ugid', $dom{'ugid'},
-			'owner', "Migrated Ensim sub-domain",
+			'owner', "Migrated DirectAdmin sub-domain",
 			'email', $dom{'email'},
 			'name', 1,
 			'ip', $dom{'ip'},
@@ -661,6 +536,7 @@ foreach my $sdom (@$sublist) {
 			'nocreationmail', 1,
 			'nocopyskel', 1,
 			'no_tmpl_aliases', 1,
+			'nocreationscripts', 1,
 			);
 	foreach my $f (@subdom_features) {
 		$subd{$f} = $dom{$f};
@@ -677,6 +553,75 @@ foreach my $sdom (@$sublist) {
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	push(@rvdoms, \%subd);
+	}
+
+# Migrate any additional domains in the backup, as sub-servers
+if (!$dom{'parent'}) {
+	opendir(DOMS, $domains);
+	foreach my $dname (readdir(DOMS)) {
+		next if ($dname eq "." || $dname eq ".." ||
+			 $dname eq "default" || $dname eq $dom);
+		next if ($aliaslist{$dname} || $sublist{$sname});
+		&$first_print("Creating sub-server $dname ..");
+		if (&domain_name_clash($sname)) {
+			&$second_print(".. the domain $dname already exists");
+			next;
+			}
+		&$indent_print();
+
+		local %subd = ( 'id', &domain_id(),
+				'dom', $dname,
+				'user', $dom{'user'},
+				'group', $dom{'group'},
+				'prefix', $dom{'prefix'},
+				'ugroup', $dom{'ugroup'},
+				'pass', $dom{'pass'},
+				'parent', $dom{'id'},
+				'uid', $dom{'uid'},
+				'gid', $dom{'gid'},
+				'ugid', $dom{'ugid'},
+				'owner', "Migrated DirectAdmin sub-server for $dom{'dom'}",
+				'email', $dom{'email'},
+				'name', 1,
+				'ip', $dom{'ip'},
+				'virt', 0,
+				'source', $dom{'source'},
+				'template', $dom{'template'},
+				'reseller', $dom{'reseller'},
+				'nocreationmail', 1,
+				'nocopyskel', 1,
+			        'nocreationscripts', 1,
+				);
+		foreach my $f (@features, &list_feature_plugins()) {
+			next if ($f eq "unix" || $f eq "webmin");
+			$subd{$f} = $got{$f} ? 1 : 0;
+			}
+		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+						  : \%dom;
+		$subd{'home'} = &server_home_directory(\%subd, $parentdom);
+		&generate_domain_password_hashes(\%subd, 1);
+		&complete_domain(\%subd);
+		&create_virtual_server(\%subd, $parentdom,
+				       $parentdom->{'user'}, 0, 1);
+		push(@rvdoms, \%subd);
+
+		# Copy over public_html dir
+		&copy_directadmin_html_dir(\%subd, $domains);
+
+		# Copy over webalizer and awstats directories
+		&copy_directadmin_stats_dir(\%subd, $domains);
+
+		# Copy custom DNS records
+		&copy_directadmin_dns_records(\%subd, $backup);
+
+		# Fix home permissions
+		&set_home_ownership(\%subd);
+
+		&$outdent_print();
+		&$second_print($text{'setup_done'});
+		}
+	closedir(DOMS);
+	&run_post_actions();
 	}
 
 if ($parent) {
@@ -716,6 +661,160 @@ else {
 	}
 $main::directadmin_dir_cache{$file} = $dir;
 return (1, $dir);
+}
+
+# copy_directadmin_html_dir(&domain, domains-dir)
+# Copy the public HTML and FTP directories
+sub copy_directadmin_html_dir
+{
+my ($d, $domains) = @_;
+my $tmpl = &get_template($d->{'template'});
+
+my $phd = &public_html_dir($d);
+my $phdsrc = "$domains/$d->{'dom'}/public_html";
+if (-d $phdsrc) {
+	&$first_print("Copying public_html directory ..");
+	&execute_command("cd ".quotemeta($phdsrc)." && ".
+			 &make_tar_command("cf", "-", ".")." | ".
+			 "(cd ".quotemeta($phd)." && ".
+			   &make_tar_command("xf", "-").")",
+			 undef, \$out, \$out);
+	if ($?) {
+		&$second_print(".. copy failed : <tt>$out</tt>");
+		}
+	else {
+		&$second_print(".. done");
+		}
+	}
+
+# Copy over private_html dir
+my $phd = "$d->{'home'}/private_html";
+my $phdsrc = "$domains/$d->{'dom'}/private_html";
+if (-d $phdsrc) {
+	&$first_print("Copying private_html directory ..");
+	&make_dir_as_domain_user($d, $phd, 0700);
+	&execute_command("cd ".quotemeta($phdsrc)." && ".
+			 &make_tar_command("cf", "-", ".")." | ".
+			 "(cd ".quotemeta($phd)." && ".
+			   &make_tar_command("xf", "-").")",
+			 undef, \$out, \$out);
+	if ($?) {
+		&$second_print(".. copy failed : <tt>$out</tt>");
+		}
+	else {
+		&$second_print(".. done");
+		}
+	}
+
+# Copy over public_ftp directory
+my $ftp = $d->{'home'}.'/'.($tmpl->{'ftp_dir'} || 'ftp');
+my $ftpsrc = "$domains/$d->{'dom'}/public_ftp";
+if (-d $ftpsrc) {
+	&$first_print("Copying public_ftp directory ..");
+	&make_dir_as_domain_user($d, $ftp, 0755);
+	&execute_command("cd ".quotemeta($ftpsrc)." && ".
+			 &make_tar_command("cf", "-", ".")." | ".
+			 "(cd ".quotemeta($ftp)." && ".
+			   &make_tar_command("xf", "-").")",
+			 undef, \$out, \$out);
+	if ($?) {
+		&$second_print(".. copy failed : <tt>$out</tt>");
+		}
+	else {
+		&$second_print(".. done");
+		}
+	}
+}
+
+# copy_directadmin_stats_dir(&domain, domains-dir)
+# Copy the webalizer and AWstats dirs
+sub copy_directadmin_stats_dir
+{
+my ($d, $domains) = @_;
+
+# Copy over stats directory
+my $stats = &webalizer_stats_dir($d);
+my $statssrc = "$domains/$d->{'dom'}/stats";
+if (-d $statssrc && $d->{'webalizer'}) {
+	&$first_print("Copying stats directory ..");
+	&execute_command("cd ".quotemeta($statssrc)." && ".
+			 &make_tar_command("cf", "-", ".")." | ".
+			 "(cd ".quotemeta($stats)." && ".
+			   &make_tar_command("xf", "-").")",
+			 undef, \$out, \$out);
+	if ($?) {
+		&$second_print(".. copy failed : <tt>$out</tt>");
+		}
+	else {
+		&$second_print(".. done");
+		}
+	}
+
+# Copy over AWstats files
+if ($d->{'virtualmin-awstats'}) {
+	&$first_print("Copying AWstats data files ..");
+	&execute_command(
+		"cp ".quotemeta("$domains/$d->{'dom'}/awstats")."/.data/*.$d->{'dom'}.txt ".
+		quotemeta("$d->{'home'}/awstats"));
+	&execute_command(
+		"chown -R $d->{'uid'}:$d->{'ugid'} ".
+		quotemeta("$d->{'home'}/awstats"));
+	&$second_print(".. done");
+	}
+}
+
+# copy_directadmin_dns_records(&domain, backup-dir)
+# Copy DNS records from the backup
+sub copy_directadmin_dns_records
+{
+my ($d, $backup) = @_;
+
+my $dnsfile = "$backup/$d->{'dom'}/$d->{'dom'}.db";
+if ($d->{'dns'} && -r $dnsfile && !$d->{'dns_submode'}) {
+	&$first_print("Copying and fixing DNS records ..");
+	&require_bind();
+	my $zonefile = &get_domain_dns_file($d);
+	&copy_source_dest($dnsfile, &bind8::make_chroot($zonefile));
+	my ($recs, $zdstfile) = &get_domain_dns_records_and_file($d, 1);
+	foreach my $r (@$recs) {
+		my $change = 0;
+		if (($r->{'name'} eq $d->{'dom'}."." ||
+		     $r->{'name'} eq "www.".$d->{'dom'}."." ||
+		     $r->{'name'} eq "pop.".$d->{'dom'}."." ||
+		     $r->{'name'} eq "smtp.".$d->{'dom'}."." ||
+		     $r->{'name'} eq "cp.".$d->{'dom'}."." ||
+		     $r->{'name'} eq "ftp.".$d->{'dom'}."." ||
+		     $r->{'name'} eq "mail.".$d->{'dom'}.".") &&
+		    $r->{'type'} eq 'A') {
+			# Fix IP in domain record
+			$r->{'values'} = [ $d->{'ip'} ];
+			$change++;
+			}
+		elsif ($r->{'name'} eq $d->{'dom'}."." &&
+		       $r->{'type'} eq 'NS') {
+			# Set NS record to this server
+			local $master = $bconfig{'default_prins'} ||
+					&get_system_hostname();
+			$master .= "." if ($master !~ /\.$/);
+			$r->{'values'} = [ $master ];
+			$change++;
+			}
+		elsif ($r->{'name'} eq $d->{'dom'}."." &&
+		       ($r->{'type'} eq 'SPF' ||
+			$r->{'type'} eq 'TXT') &&
+		    $r->{'values'}->[0] =~ /ip4:/) {
+			# Fix IP in SPF record
+			$r->{'values'}->[0] =~ s/ip4:([0-9\.]+)/ip4:$d->{'ip'}/;
+			$change++;
+			}
+		if ($change) {
+			&modify_dns_record($recs, $zdstfile, $r);
+			}
+		}
+	&post_records_change($d, $recs, $zdstfile);
+	&$second_print(".. done");
+	&register_post_action(\&reload_bind_records, $d);
+	}
 }
 
 1;
