@@ -5877,6 +5877,8 @@ return ( "autoconfig.".$d->{'dom'}, "autodiscover.".$d->{'dom'} );
 # the POP3 port and encryption type.
 sub get_email_autoconfig_imap
 {
+my ($d) = @_;
+
 # Work out IMAP server port and mode
 local $imap_host = "mail.$d->{'dom'}";
 local $imap_port = 143;
