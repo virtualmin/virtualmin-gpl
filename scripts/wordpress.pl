@@ -758,13 +758,13 @@ my $settings_tab_content;
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}url"}, "kit_wp_url"),
 	value => &ui_opt_textbox(
-	    "kit_option_url", undef, 35, $wp->{'url'} . "<br>",
+	    "kit_option_siteurl", undef, 35, $wp->{'wpurl'} . "<br>",
 	    $text{'edit_set'})});
 # Home
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}wpurl"}, "kit_wp_wpurl"),
 	value => &ui_opt_textbox(
-	    "kit_option_wpurl", undef, 35, $wp->{'wpurl'} . "<br>",
+	    "kit_option_home", undef, 35, $wp->{'url'} . "<br>",
 	    $text{'edit_set'})});
 # Site name
 push(@$settings_tab_content, {
@@ -1030,7 +1030,7 @@ $clone_tab_content .= &ui_table_row(
 $clone_tab_content .= &ui_table_row(
 	&hlink($text{"${_t}url_cloned"}, "kit_wp_url_cloned"),
 		&ui_opt_textbox(
-			"kit_option_url_cloned", undef, 35,
+			"kit_option_siteurl_cloned", undef, 35,
 			$text{'scripts_kit_auto'} . "<br>",
 		$text{'edit_set'}), 2);
 $clone_tab_content .= &ui_table_row(
