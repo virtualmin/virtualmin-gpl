@@ -223,6 +223,9 @@ local @rvdoms = ( \%dom );
 # Migrate DNS domain
 &copy_directadmin_dns_records(\%dom, $backup);
 
+# Copy SSL cert
+&copy_directadmin_ssl_cert(\%dom, $backup);
+
 # Lock the user DB and build list of used IDs
 &obtain_lock_unix(\%dom);
 &obtain_lock_mail(\%dom);
@@ -585,6 +588,9 @@ if (!$dom{'parent'}) {
 		# Just adjust cgi-bin directory to match DirectAdmin
 		&fix_directadmin_cgi_bin(\%subd);
 
+		# Copy SSL cert
+		&copy_directadmin_ssl_cert(\%subd, $backup);
+
 		# Fix home permissions
 		&set_home_ownership(\%subd);
 
@@ -809,6 +815,34 @@ if ($d->{'web'}) {
 		}
 	}
 $dom{'cgi_bin_correct'} = 0;	# So that it is computed from now on
+}
+
+# copy_directadmin_ssl_cert(&domain, backup-dir)
+# Copy the SSL cert and key into place from the backup
+sub copy_directadmin_ssl_cert
+{
+my ($d, $backup) = @_;
+my $cfile = "$backup/$d->{'dom'}/domain.cert";
+my $kfile = "$backup/$d->{'dom'}/domain.key";
+my $cafile = "$backup/$d->{'dom'}/domain.cacert";
+if (&domain_has_ssl_cert($d) && -r $cfile && -r $kfile) {
+	&$first_print("Copying SSL certificate and key ..");
+	my $cdom = &get_website_ssl_file($d, "cert");
+	&write_ssl_file_contents($d, $cdom, $cfile);
+	my $kdom = &get_website_ssl_file($d, "key");
+	&write_ssl_file_contents($d, $kdom, $kfile);
+	if ($cafile) {
+		my $cadom = &get_website_ssl_file($d, "ca");
+		$cadom ||= &default_certificate_file($d, "ca");
+		&write_ssl_file_contents($d, $cadom, $cafile);
+		&save_website_ssl_file($d, "ca", $cadom);
+		}
+	else {
+		&save_website_ssl_file($d, "ca", undef);
+		}
+	&sync_combined_ssl_cert($d);
+	&$second_print(".. done");
+	}
 }
 
 # directadmin_domain_features(domain-name, domains-dir, backup-dir)
