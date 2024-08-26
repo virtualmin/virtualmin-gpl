@@ -284,33 +284,8 @@ if ($got{'mail'}) {
 	&$second_print(".. done (migrated $mcount users)");
 	}
 
-if ($got{'mail'}) {
-	# Migrate mail aliases
-	local $acount = 0;
-	&$first_print("Copying email aliases ..");
-	&set_alias_programs();
-	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
-	my $lref = &read_file_lines("$backup/$dom/email/aliases", 1);
-	foreach my $l (@$lref) {
-		my ($name, $values) = split(/:/, $l, 2);
-		next if ($name eq $dom{'user'} && $values eq $dom{'user'});
-		my @values = split(/,/, $values);
-		foreach my $v (@values) {
-			if ($v eq ":fail:") {
-				$v = "BOUNCE";
-				}
-			}
-		local $virt = { 'from' => $name =~ /^\*/ ?
-				  "\@".$dom :
-				  $name."\@".$dom,
-				'to' => \@values };
-		local $clash = $gotvirt{$virt->{'from'}};
-		&delete_virtuser($clash) if ($clash);
-		&create_virtuser($virt);
-		$acount++;
-		}
-	&$second_print(".. done (migrated $acount aliases)");
-	}
+# Migrate email aliases
+&copy_directadmin_mail_aliases(\%dom, $backup);
 
 # Migrate FTP users
 local $fcount = 0;
@@ -591,6 +566,9 @@ if (!$dom{'parent'}) {
 		# Copy SSL cert
 		&copy_directadmin_ssl_cert(\%subd, $backup);
 
+		# Migrate email aliases
+		&copy_directadmin_mail_aliases(\%subd, $backup);
+
 		# Fix home permissions
 		&set_home_ownership(\%subd);
 
@@ -842,6 +820,40 @@ if (&domain_has_ssl_cert($d) && -r $cfile && -r $kfile) {
 		}
 	&sync_combined_ssl_cert($d);
 	&$second_print(".. done");
+	}
+}
+
+# copy_directadmin_mail_aliases(&domain, backup-dir)
+# Copy email aliases from the backup
+sub copy_directadmin_mail_aliases
+{
+my ($d, $backup) = @_;
+my $afile = "$backup/$d->{'dom'}/email/aliases";
+if ($d->{'mail'} && -r $afile) {
+	local $acount = 0;
+	&$first_print("Copying email aliases ..");
+	&set_alias_programs();
+	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
+	my $lref = &read_file_lines($afile, 1);
+	foreach my $l (@$lref) {
+		my ($name, $values) = split(/:/, $l, 2);
+		next if ($name eq $d->{'user'} && $values eq $d->{'user'});
+		my @values = split(/,/, $values);
+		foreach my $v (@values) {
+			if ($v eq ":fail:") {
+				$v = "BOUNCE";
+				}
+			}
+		local $virt = { 'from' => $name =~ /^\*/ ?
+				  "\@".$d->{'dom'} :
+				  $name."\@".$d->{'dom'},
+				'to' => \@values };
+		my $clash = $gotvirt{$virt->{'from'}};
+		&delete_virtuser($clash) if ($clash);
+		&create_virtuser($virt);
+		$acount++;
+		}
+	&$second_print(".. done (migrated $acount aliases)");
 	}
 }
 
