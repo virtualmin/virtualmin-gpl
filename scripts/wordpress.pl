@@ -578,7 +578,7 @@ echo json_encode([
     "wp_max_memory_limit" => defined("WP_MAX_MEMORY_LIMIT") ? WP_MAX_MEMORY_LIMIT : 0, 
     "disallow_file_edit" => defined("DISALLOW_FILE_EDIT") ? (DISALLOW_FILE_EDIT == false ? \'false\' : \'true\') : \'false\', 
     "concatenate_scripts" => defined("CONCATENATE_SCRIPTS") ? (CONCATENATE_SCRIPTS == false ? 0 : 1) : 1, 
-    "wp_auto_update_core" => defined("WP_AUTO_UPDATE_CORE") ? (WP_AUTO_UPDATE_CORE == true ? 2 : (WP_AUTO_UPDATE_CORE == "minor" ? 1 : 0)) : (defined("WP_DEBUG") ? (WP_DEBUG == true ? 2 : 1) : 1),
+    "wp_auto_update_core" => defined("WP_AUTO_UPDATE_CORE") ? (WP_AUTO_UPDATE_CORE === false ? "false" : (WP_AUTO_UPDATE_CORE === "minor" ? "minor" : "true")) : "minor",
     "automatic_updater_disabled" => defined("AUTOMATIC_UPDATER_DISABLED") ? (AUTOMATIC_UPDATER_DISABLED == true ? 1 : 0) : 0,
     "blogname" => get_option("blogname"), 
     "blog_public" => get_option("blog_public"), 
@@ -746,11 +746,10 @@ if (foreign_available("fail2ban")) {
 push(@$system_tab_content, {
 	desc  => &hlink($text{"${_t}auto_update_core"}, "kit_wp_auto_update_core"),
 	value => &ui_radio(
-	    "kit_const_wp_auto_update_core", $wp->{'automatic_updater_disabled'} == 1 ? 0 :
-	    		$wp->{'wp_auto_update_core'},
-		[ [ 0, $text{"${_t}auto_updates_disabled"} . "<br>" ],
-		  [ 1, $text{"${_t}auto_updates_minor"} . "<br>" ],
-		  [ 2, $text{"${_t}auto_updates_major_minor"} ] ] )});
+	    "kit_const_wp_auto_update_core", $wp->{'wp_auto_update_core'} ,
+		[ [ 'false', $text{"${_t}auto_updates_disabled"} . "<br>" ],
+		  [ 'minor', $text{"${_t}auto_updates_minor"} . "<br>" ],
+		  [ 'true', $text{"${_t}auto_updates_major_minor"} ] ] )});
 
 # Setttings tab prepare
 my $settings_tab_content;
