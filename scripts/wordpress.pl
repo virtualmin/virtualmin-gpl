@@ -576,7 +576,7 @@ echo json_encode([
     "wp_debug_log" => defined("WP_DEBUG_LOG") ? str_replace("' . $opts->{'dir'} . '", "", WP_DEBUG_LOG) : 0, 
     "wp_memory_limit" => defined("WP_MEMORY_LIMIT") ? WP_MEMORY_LIMIT : 0, 
     "wp_max_memory_limit" => defined("WP_MAX_MEMORY_LIMIT") ? WP_MAX_MEMORY_LIMIT : 0, 
-    "disallow_file_edit" => defined("DISALLOW_FILE_EDIT") ? DISALLOW_FILE_EDIT : 0, 
+    "disallow_file_edit" => defined("DISALLOW_FILE_EDIT") ? (DISALLOW_FILE_EDIT == false ? \'false\' : \'true\') : \'false\', 
     "concatenate_scripts" => defined("CONCATENATE_SCRIPTS") ? (CONCATENATE_SCRIPTS == false ? 0 : 1) : 1, 
     "wp_auto_update_core" => defined("WP_AUTO_UPDATE_CORE") ? (WP_AUTO_UPDATE_CORE == true ? 2 : (WP_AUTO_UPDATE_CORE == "minor" ? 1 : 0)) : (defined("WP_DEBUG") ? (WP_DEBUG == true ? 2 : 1) : 1),
     "automatic_updater_disabled" => defined("AUTOMATIC_UPDATER_DISABLED") ? (AUTOMATIC_UPDATER_DISABLED == true ? 1 : 0) : 0,
@@ -843,7 +843,8 @@ push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}disallow_file_edit"},
 			      "kit_wp_disallow_file_edit"),
 	value => &ui_yesno_radio(
-	    "kit_const_disallow_file_edit", $wp->{'disallow_file_edit'} ? 1 : 0)});
+	    "kit_const_disallow_file_edit", ${$wp->{'disallow_file_edit'}} ?
+	    	'true': 'false', 'true', 'false')});
 
 # Plugins tab prepare
 my $plugins_tab_content;
