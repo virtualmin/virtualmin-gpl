@@ -70,7 +70,6 @@ foreach my $uinfo (&list_domain_users($d, 0, 0, 1, 1, 0)) {
 	my $duser = $uinfo->{'user'};
 	my $olduinfo = { %$uinfo };
 	if ($uinfo->{'shell'} !~ /\/jk_chrootsh$/) {
-		$d->{"unjailed_shell_$duser"} = $uinfo->{'shell'};
 		$uinfo->{'shell'} = &has_command("jk_chrootsh") ||
 				    "/usr/sbin/jk_chrootsh";
 		}
@@ -157,12 +156,8 @@ foreach my $uinfo (&list_domain_users($d, 0, 0, 1, 1, 0)) {
 	my $duser = $uinfo->{'user'};
 	my $olduinfo = { %$uinfo };
 	if ($uinfo->{'shell'} =~ /\/jk_chrootsh$/) {
-		my $tmpl = &get_template($d->{'template'});
-		my $defshell = $tmpl->{'ushell'};
-		if ($defshell eq 'none' || !$defshell) {
-			$defshell = &default_available_shell('owner');
-			}
-		$uinfo->{'shell'} = $uinfo->{'jailed'}->{'shell'} || $defshell;
+		$uinfo->{'shell'} = $uinfo->{'jailed'}->{'shell'} ||
+				    '/bin/false'; # must never happen
 		}
 	if ($uinfo->{'home'} =~ s/^\Q$dir\E\/\.//) {
 		&foreign_call($usermodule, "set_user_envs", $uinfo,
