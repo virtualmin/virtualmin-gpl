@@ -1657,7 +1657,7 @@ if ($_[1] && $_[1]->{'mail'}) {
 # Sync up jail password file
 if ($_[1]) {
 	&create_jailkit_passwd_file($_[1]);
-	&modify_jailkit_users($_[1], $_[0]->{'user'});
+	&modify_jailkit_user($_[1], $_[0]);
 	}
 
 # Remove clashing records of extra user
@@ -2066,7 +2066,7 @@ if ($d && $d->{'mail'}) {
 # Sync up jail password file
 if ($d) {
 	&create_jailkit_passwd_file($d);
-	&modify_jailkit_users($d, $user->{'user'}, $olduser->{'user'});
+	&modify_jailkit_user($d, $user);
 	}
 }
 
@@ -2267,7 +2267,6 @@ if ($_[1]) {
 # Sync up jail password file
 if ($_[1]) {
 	&create_jailkit_passwd_file($_[1]);
-	&modify_jailkit_users($_[1]);
 	}
 }
 
@@ -12465,9 +12464,7 @@ sub get_domain_shell
 my ($d, $user) = @_;
 $user ||= &get_domain_owner($d, 1, 1, 1);
 if ($user->{'shell'} =~ /\/jk_chrootsh$/) {
-	return $user->{'jailed'}->{'shell'} ||
-	       $d->{"unjailed_shell_$user->{'user'}"} ||
-	       $d->{'unjailed_shell'};
+	return $user->{'jailed'}->{'shell'};
 	}
 else {
 	return $user->{'shell'};
