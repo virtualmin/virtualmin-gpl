@@ -1536,18 +1536,21 @@ if ($_[1] && !$_[0]->{'domainowner'}) {
 		eval {
 			local $main::error_must_die = 1;
 			local @dbs = map { $_->{'name'} }
-					 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
-			if (@dbs && &indexof($dt, &list_database_plugins()) < 0) {
+				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
+			next if (!@dbs);
+			if (&indexof($dt, &list_database_plugins()) < 0) {
 				# Create in core database
 				local $crfunc = "create_${dt}_database_user";
 				&$crfunc($_[1], \@dbs, $_[0]->{'user'},
-					 $_[0]->{'plainpass'}, $_[0]->{$dt.'_pass'});
+					 $_[0]->{'plainpass'},
+					 $_[0]->{$dt.'_pass'});
 				}
-			elsif (@dbs && &indexof($dt, &list_database_plugins()) >= 0) {
+			else {
 				# Create in plugin database
 				&plugin_call($dt, "database_create_user",
 					     $_[1], \@dbs, $_[0]->{'user'},
-					     $_[0]->{'plainpass'},$_[0]->{$dt.'_pass'});
+					     $_[0]->{'plainpass'},
+					     $_[0]->{$dt.'_pass'});
 				}
 			};
 		if ($@) {
