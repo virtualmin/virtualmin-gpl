@@ -215,12 +215,12 @@ my $uinfo = &get_domain_owner($d, 1, 1, 1);
 return $uinfo && $uinfo->{'home'} =~ /^\Q$dir\E\/\.\// ? $dir : undef;
 }
 
-# create_jailkit_passwd_file(&domain, [username], [old-username])
+# create_jailkit_passwd_file(&domain)
 # Create limit /etc/passwd, /etc/shadow and /etc/group files inside a jail
 # for a domain's users
 sub create_jailkit_passwd_file
 {
-my ($d, $uname, $olduname) = @_;
+my ($d) = @_;
 my $dir = &domain_jailkit_dir($d);
 return undef if (!-d $dir);		# Jailing isn't enabled
 return undef if (!-d "$dir/etc");	# Jail directory is invalid
@@ -276,9 +276,16 @@ foreach my $g (@gcreate) {
 	&print_tempfile(GROUP, join(":", @gline),"\n");
 	}
 &close_tempfile(GROUP);
+}
 
+# modify_jailkit_users(&domain, [username], [old-username])
+# Sync user real shell when user added or modified after jail creation
+sub modify_jailkit_users
+{
+my ($d, $uname, $olduname) = @_;
 # Sync user real shell when user added or modified after jail creation
 if ($d->{'jail'} && $uname) {
+	my $dir = &domain_jailkit_dir($d);
 	my ($uinfo) = grep { $_->{'user'} eq $uname } &list_all_users();
 	if ($uinfo) {
 		my $ushell = $uinfo->{'shell'};

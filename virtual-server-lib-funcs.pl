@@ -1656,7 +1656,8 @@ if ($_[1] && $_[1]->{'mail'}) {
 
 # Sync up jail password file
 if ($_[1]) {
-	&create_jailkit_passwd_file($_[1], $_[0]->{'user'});
+	&create_jailkit_passwd_file($_[1]);
+	&modify_jailkit_users($_[1], $_[0]->{'user'});
 	}
 
 # Remove clashing records of extra user
@@ -2064,7 +2065,8 @@ if ($d && $d->{'mail'}) {
 
 # Sync up jail password file
 if ($d) {
-	&create_jailkit_passwd_file($d, $user->{'user'}, $olduser->{'user'});
+	&create_jailkit_passwd_file($d);
+	&modify_jailkit_users($d, $user->{'user'}, $olduser->{'user'});
 	}
 }
 
@@ -2265,6 +2267,7 @@ if ($_[1]) {
 # Sync up jail password file
 if ($_[1]) {
 	&create_jailkit_passwd_file($_[1]);
+	&modify_jailkit_users($_[1]);
 	}
 }
 
