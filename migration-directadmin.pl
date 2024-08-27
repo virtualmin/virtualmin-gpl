@@ -351,6 +351,7 @@ if ($got{'mysql'}) {
 				next if ($myuser eq $user);
 				next if ($dbusers{$myuser} !~ /passwd=([^&]+)/);
 				my $mypass = $1;
+				$mypass =~ s/^%2A/\*/;
 				local $myuinfo = &create_initial_user(\%dom);
 				$myuinfo->{'user'} = $myuser;
 				$myuinfo->{'pass'} = "x";	# not needed
@@ -645,7 +646,7 @@ if (-d $phdsrc) {
 # Copy over private_html dir
 my $phd = "$d->{'home'}/private_html";
 my $phdsrc = "$domains/$d->{'dom'}/private_html";
-if (-d $phdsrc) {
+if (-d $phdsrc && !-l $phdsrc) {
 	&$first_print("Copying private_html directory ..");
 	&make_dir_as_domain_user($d, $phd, 0700);
 	&execute_command("cd ".quotemeta($phdsrc)." && ".
