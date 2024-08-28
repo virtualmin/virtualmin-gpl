@@ -29,7 +29,7 @@ if (&has_mail_quotas()) {
 # Default shell
 if (&can_mailbox_ftp()) {
         print &ui_table_row($text{'user_ushell'},
-	    &available_shells_menu("shell", $user->{'shell'}, "mailbox"));
+	    &available_shells_menu("shell", &get_user_shell($user), "mailbox"));
         }
 
 # Mail forwarding

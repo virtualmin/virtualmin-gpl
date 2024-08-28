@@ -91,7 +91,7 @@ if ($user_type eq 'ssh') {
 		print &ui_table_row(
 			&hlink($text{'user_ushell'}, "ushell"),
 			&available_shells_menu(
-				"shell", $user->{'shell'}, "owner"),
+				"shell", &get_user_shell($user), "owner"),
 			2, \@tds);
 		}
 
@@ -787,7 +787,7 @@ else {
 				}
 			}
 		else {
-			$user_shell = $user->{'shell'};
+			$user_shell = &get_user_shell($user);
 			}
 		print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
 			&available_shells_menu("shell", $user_shell,
