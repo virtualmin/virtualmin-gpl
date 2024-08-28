@@ -584,7 +584,7 @@ echo json_encode([
     "blog_public" => get_option("blog_public"), 
     "default_pingback_flag" => get_option("default_pingback_flag"), 
     "default_ping_status" => get_option("default_ping_status"), 
-    "maintenance_mode" => get_option("maintenance_mode"), 
+    "maintenance" => file_exists(ABSPATH . ".maintenance") == true ? "activate" : "deactivate",
     "admin_id" => $admin_user_id,
     "admin_user" => get_userdata($admin_user_id)->user_login,
     "admin_email" => $admin_user_email,
@@ -1069,7 +1069,8 @@ push(@$development_tab_content, {
 push(@$development_tab_content, {
 	desc  => &hlink($text{"${_t}maintenance_mode"}, "kit_wp_maintenance_mode"),
 	value => &ui_yesno_radio(
-	    "kit_option_maintenance_mode", $wp->{'maintenance_mode'} ? 1 : 0)});
+	    "kit_constructor_maintenance", $wp->{'maintenance'},
+	    	'activate', 'deactivate')});
 # Script concatenation
 push(@$development_tab_content, {
 	desc  => &hlink($text{"${_t}concatenate_scripts"}, "kit_wp_concatenate_scripts"),
