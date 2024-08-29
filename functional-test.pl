@@ -895,6 +895,31 @@ $jail_tests = [
 		},
 		) : ( ),
 
+	# Change the mailbox user's shell
+	{ 'command' => 'modify-user.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'shell' => '/bin/bash' ] ],
+	},
+
+	# Check that the mailbox Unix user is chroot'd still
+	{ 'command' => 'su '.$test_full_user." -c 'ls $home_base' | wc -l",
+	  'grep' => '^1$',
+	},
+
+	# Check the mailbox user's shell is the new one
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'multiline' ],
+		      [ 'user' => $test_user ] ],
+	  'grep' => [ 'Shell: /bin/bash' ],
+	},
+
+	# Check shells in /etc/passwd again
+	{ 'command' => 'grep ^'.$test_full_user.': /etc/passwd',
+	  'antigrep' => [ '/bin/bash', '/bin/sh' ],
+	},
+
 	# Turn off the chroot
 	{ 'command' => 'modify-domain.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
@@ -923,7 +948,7 @@ $jail_tests = [
 	  'args' => [ [ 'domain' => $test_domain ],
 		      [ 'multiline' ],
 		      [ 'user' => $test_user ] ],
-	  'grep' => [ 'Shell: /bin/sh' ],
+	  'grep' => [ 'Shell: /bin/bash' ],
 	},
 
 	# Cleanup the domains
