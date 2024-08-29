@@ -845,9 +845,38 @@ $jail_tests = [
 	  'grep' => "Jail directory:",
 	},
 
-	# Check that the Unix user is chroot'd
+	# Add a mailbox to the domain
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'shell', '/bin/sh' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Check that the domain owner Unix user is chroot'd
 	{ 'command' => 'su '.$test_domain_user." -c 'ls $home_base' | wc -l",
 	  'grep' => '^1$',
+	},
+
+	# Check that the mailbox Unix user is chroot'd
+	{ 'command' => 'su '.$test_full_user." -c 'ls $home_base' | wc -l",
+	  'grep' => '^1$',
+	},
+
+	# Check the mailbox user's shell
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'multiline' ],
+		      [ 'user' => $test_user ] ],
+	  'grep' => [ 'Shell: /bin/sh' ],
+	},
+
+	# Check shells in /etc/passwd
+	{ 'command' => 'grep ^'.$test_full_user.': /etc/passwd',
+	  'antigrep' => '/bin/sh',
 	},
 
 	$supports_fpm ? (
@@ -882,6 +911,19 @@ $jail_tests = [
 	# Check that the Unix user is not chroot'd
 	{ 'command' => 'su '.$test_domain_user." -c 'ls $home_base' | wc -l",
 	  'antigrep' => '^1$',
+	},
+
+	# Check that the mailbox Unix user is not chroot'd
+	{ 'command' => 'su '.$test_full_user." -c 'ls $home_base' | wc -l",
+	  'antigrep' => '^1$',
+	},
+
+	# Check the user's shell was preserved
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'multiline' ],
+		      [ 'user' => $test_user ] ],
+	  'grep' => [ 'Shell: /bin/sh' ],
 	},
 
 	# Cleanup the domains
