@@ -915,6 +915,11 @@ if ($uinfo->{'php'} =~ /off/i) {
 	&save_domain_php_mode($d, "none");
 	&$second_print(".. done");
 	}
+if ($uinfo->{'cgi'} =~ /off/i) {
+	&$first_print("Disabling CGI scripts ..");
+	&save_domain_cgi_mode($d, undef);
+	&$second_print(".. done");
+	}
 }
 
 1;
