@@ -56,6 +56,7 @@ local ($ok, $root) = &extract_directadmin_dir($file);
 $ok || return ("Not a DirectAdmin tar.gz file : $root");
 local $domains = "$root/domains";
 local $backup = "$root/backup";
+local $imap = "$root/imap";
 if (!-r $domains && $dom && -d "$backup/$dom") {
 	$domains = $backup;
 	}
@@ -88,7 +89,7 @@ local %dinfo;
 
 # First work out what features we have ..
 &$first_print("Checking for DirectAdmin features ..");
-local @got = &directadmin_domain_features($dom, $domains, $backup);
+local @got = &directadmin_domain_features($dom, $domains, $backup, $imap);
 
 # Tell the user what we have got
 @got = &show_check_migration_features(@got);
@@ -272,7 +273,11 @@ if ($got{'mail'}) {
 		local ($crfile, $crtype) = &create_mail_file($uinfo, \%dom);
 
 		# Move his Maildir directory
+		# XXX sub-folders??
 		local $mailsrc = "$backup/$dom/email/data/imap/$muser/Maildir";
+		if (!-d $mailsrc) {
+			$mailsrc = "$imap/$dom/$muser/Maildir";
+			}
 		if (-d $mailsrc) {
 			local $srcfolder = { 'type' => 1,
 					     'file' => $mailsrc };
@@ -871,11 +876,11 @@ if ($d->{'mail'} && -r $afile) {
 	}
 }
 
-# directadmin_domain_features(domain-name, domains-dir, backup-dir)
+# directadmin_domain_features(domain-name, domains-dir, backup-dir, imap-dir)
 # Return a list of features that should be enabled
 sub directadmin_domain_features
 {
-my ($dom, $domains, $backup) = @_;
+my ($dom, $domains, $backup, $imap) = @_;
 my %dinfo;
 &read_env_file("$backup/$dom/domain.conf", \%dinfo) || return ();
 my @got = ( "dir", $parent ? () : ("unix"),
@@ -897,7 +902,9 @@ if (-d "$domains/$dom/awstats" &&
 	push(@got, "virtualmin-awstats");
 	}
 my $lref = &read_file_lines("$backup/$dom/email/aliases", 1);
-if (@$lref > 1 || glob("$backup/$dom/email/data/imap/*/Maildir")) {
+if (@$lref > 1 ||
+    glob("$backup/$dom/email/data/imap/*/Maildir") ||
+    glob("$imap/$dom/*/Maildir")) {
 	push(@got, "mail");
 	}
 if (uc($dinfo{'ssl'}) eq 'ON') {
