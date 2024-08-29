@@ -569,7 +569,19 @@ if (is_dir($backup_dir)) {
     }
 }
 $admin_user_email = get_option("admin_email");
-$admin_user_id = get_user_by("email", $admin_user_email)->ID ?? 1;
+$admin_id = get_user_by("email", $admin_user_email)->ID ?? 1;
+$admin_user = get_userdata($admin_id)->user_login;
+$admins = get_users([
+    "role"    => "administrator",
+    "orderby" => "ID",
+    "order"   => "ASC"
+]);
+$admins_count = count($admins);
+$admins_select_html = "<select id=\"admins_select\">\n";
+foreach ($admins as $admin) {
+    $admins_select_html .= "<option value=\"" . esc_attr($admin->ID) . "\">" . esc_html($admin->user_login) . "</option>\n";
+}
+$admins_select_html .= "</select>\n";
 echo json_encode([
     "memory_limit" => ini_get("memory_limit"),
     "upload_max_filesize" => ini_get("upload_max_filesize"),
@@ -588,9 +600,11 @@ echo json_encode([
     "default_pingback_flag" => get_option("default_pingback_flag"), 
     "default_ping_status" => get_option("default_ping_status"), 
     "maintenance" => file_exists(ABSPATH . ".maintenance") == true ? "activate" : "deactivate",
-    "admin_id" => $admin_user_id,
-    "admin_user" => get_userdata($admin_user_id)->user_login,
+    "admins_count" => $admins_count,
+    "admin_id" => $admin_id,
+    "admin_user" => $admin_user,
     "admin_email" => $admin_user_email,
+    "admins_select" => $admins_select_html,
     "version" => get_bloginfo("version"),
     "blogdescription" => get_option("blogdescription"),
     "url" => get_bloginfo("url"),
@@ -626,13 +640,7 @@ echo json_encode([
                 "example" => "/sample-post/"
         ]
     ],
-    "login_url" => (function() use ($admin_user_email) {
-        $user = get_user_by("email", $admin_user_email);
-        if (!$user) {
-            return "";
-        }
-        return [$user->ID, admin_url(), get_bloginfo("url")];
-    })(),
+    "login_url" => [admin_url(), get_bloginfo("url")],
     "plugins" => array_map(function($plugin) {
         require_once(ABSPATH . "wp-admin/includes/plugin.php");
         require_once(ABSPATH . "wp-admin/includes/update.php");
@@ -805,9 +813,26 @@ push(@$settings_tab_content, {
 			$wp->{'permalink_structure'},
 			$permlink_structure_opts) });
 # Admin username
-push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}admin_username"}, "kit_wp_admin_username"),
-	value => $wp->{'admin_user'}});
+if (!$wp->{'admins_count'}) {
+	push(@$settings_tab_content, {
+		desc  => &hlink($text{"${_t}admin_username_missing"},
+				      "kit_wp_admin_username_missing"),
+		value => &ui_submit($text{"${_t}admin_username_setup_admin"},
+					  'kit_constructor_add_admin')});
+	}
+elsif ($wp->{'admins_count'} == 1) {
+	push(@$settings_tab_content, {
+		desc  => &hlink($text{"${_t}admin_username"},
+				      "kit_wp_admin_username"),
+		value => $wp->{'admin_user'}});
+	}
+elsif ($wp->{'admins_count'} > 1) {
+	push(@$settings_tab_content, {
+		desc  => &hlink($text{"${_t}admin_usernames"},
+				      "kit_wp_admin_usernames"),
+		value => $wp->{'admins_select'}});
+	}
+
 # Set password
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}user_pass"}, "kit_wp_user_pass"),
@@ -1178,6 +1203,37 @@ $data .= &ui_tabs_end_tab();
 # All tabs end
 $data .= &ui_tabs_end();
 
+# Print JS script to handle multiple admins select
+$data .= <<EOF;
+<script>
+(function() {
+	const select = document.getElementById("admins_select");
+	if (select) {
+		select.addEventListener("change", function() {
+			const forms = document.querySelectorAll('form[action^="script_login.cgi"], form[action^="workbench.cgi"]');
+			forms.forEach((form) => {
+				form.uid.value = this.value;;
+			});
+		});
+	}
+})();
+</script>
+EOF
+
+# If the admin was previously selected, select it in the form on page load
+if ($in{'auid'}) {
+	$data .= <<EOF;
+<script>
+(function() {
+	const select = document.getElementById("admins_select");
+	if (select) {
+		select.value = "$in{'auid'}";
+		select.dispatchEvent(new Event('change'));
+	}
+})();
+</script>
+EOF
+	}
 return { extra_submits => \@data_submits, data => $data };
 }
 
@@ -1188,13 +1244,13 @@ sub script_wordpress_kit_login
 my ($d, $script, $sinfo, $sstate, $post) = @_;
 my $esdesc = "$script->{'desc'} $text{'scripts_kit_loginkit'}";
 my $login_data = $sstate->{'login_url'};
-my $login_uid = $login_data->[0];
+my $login_uid = $post->{'uid'};
 $login_uid =~ /^\d+$/ ||
 	&error("$esdesc : $text{'scripts_kit_einvaliduid'} : $login_uid");
-my $admin_url = $login_data->[1];
+my $admin_url = $login_data->[0];
 $admin_url =~ /:\/\// ||
 	&error("$esdesc : $text{'scripts_kit_einvalidadminurl'} : $admin_url");
-my $site_url = $login_data->[2];
+my $site_url = $login_data->[1];
 $site_url =~ /:\/\// ||
 	&error("$esdesc : $text{'scripts_kit_einvalidsiteurl'} : $site_url");
 $admin_url .= "plugins.php" if ($post->{'kit_form_login_plugins'});
