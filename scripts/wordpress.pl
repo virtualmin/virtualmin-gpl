@@ -533,7 +533,10 @@ if (!-d $logs_dir) {
 	&make_dir_as_domain_user($d, "$logs_dir/logs", 0750);
 	}
 my $wp_cli_log = "$logs_dir/wp_cli_log";
-my $wp_cli = "$php $opts->{'dir'}/wp-cli.phar --path=$opts->{'dir'}";
+my $wp_cli_path = -r "$d->{'home'}/bin/wp" ?
+		     "$d->{'home'}/bin/wp" : 
+		     "$opts->{'dir'}/wp-cli.phar";
+my $wp_cli = "$php $wp_cli_path --path=$opts->{'dir'}";
 my $_t = 'scripts_kit_wp_';
 my $save_kit_form = "workbench.cgi?pro=1"; 
 my $kit_form_main = "data-form-nested='apply'";
