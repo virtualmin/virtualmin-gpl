@@ -896,7 +896,8 @@ if (-d "$domains/$dom/awstats" &&
     &indexof("virtualmin-awstats", @plugins) >= 0) {
 	push(@got, "virtualmin-awstats");
 	}
-if (-r "$backup/$dom/email/aliases") {
+my $lref = &read_file_lines("$backup/$dom/email/aliases", 1);
+if (@$lref > 1 || glob("$backup/$dom/email/data/imap/*/Maildir")) {
 	push(@got, "mail");
 	}
 if (uc($dinfo{'ssl'}) eq 'ON') {
