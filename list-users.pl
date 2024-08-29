@@ -139,7 +139,7 @@ foreach $d (@doms) {
 			if ($u->{'domainowner'}) {
 				$u->{'shell'} = &get_domain_shell($d, $u);
 				}
-			($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
+			($shell) = grep { $_->{'shell'} eq &get_user_shell($u) }
 					@ashells;
 			print "    FTP access: ",
 			    ($shell->{'id'} eq 'nologin' ? "No" : "Yes"),"\n";
@@ -147,7 +147,10 @@ foreach $d (@doms) {
 				print "    Login permissions: ",
 				      $shell->{'desc'},"\n";
 				}
-			print "    Shell: ",$u->{'shell'},"\n";
+			my $ushell = &get_user_shell($u);
+			$ushell .= " ($u->{'shell'})"
+				if ($ushell ne $u->{'shell'});
+			print "    Shell: $ushell","\n";
 			print "    User type: ",
 				($u->{'domainowner'} ? "Server owner" :
 				 $u->{'webowner'} ? "Website manager" :

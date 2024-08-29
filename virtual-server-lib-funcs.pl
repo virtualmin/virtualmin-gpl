@@ -1127,6 +1127,18 @@ if ($d) {
 			}
 		}
 	}
+
+# Add jailed user info for each user
+if ($d && $d->{'jail'}) {
+	my @jusers = &get_domain_jailed_users_shell($d);
+	foreach my $juser (@jusers) {
+		my ($user) = grep { $_->{'user'} eq $juser->{'user'} } @users;
+		if ($user) {
+			$user->{'jailed'} = $juser;
+			}
+		}
+	}
+
 # Return users list
 return @users;
 }
@@ -1648,6 +1660,7 @@ if ($_[1] && $_[1]->{'mail'}) {
 # Sync up jail password file
 if ($_[1]) {
 	&create_jailkit_passwd_file($_[1]);
+	&modify_jailkit_user($_[1], $_[0]);
 	}
 
 # Remove clashing records of extra user
@@ -2056,6 +2069,7 @@ if ($d && $d->{'mail'}) {
 # Sync up jail password file
 if ($d) {
 	&create_jailkit_passwd_file($d);
+	&modify_jailkit_user($d, $user);
 	}
 }
 
@@ -5706,7 +5720,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	if ($u->{'domainowner'}) {
 		$u->{'shell'} = &get_domain_shell($d, $u);
 		}
-	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
+	local ($shell) = grep { $_->{'shell'} eq &get_user_shell($u) } @ashells;
 	my $udbs = scalar(@{$u->{'dbs'}}) || $u->{'domainowner'};
 	push(@cols, ($u->{'extra'} && $u->{'type'} eq 'db') ? &$login_access_label('db') :
 		    ($u->{'extra'} && $u->{'type'} eq 'web') ? &$login_access_label('web') :
@@ -12471,7 +12485,7 @@ sub get_domain_shell
 my ($d, $user) = @_;
 $user ||= &get_domain_owner($d, 1, 1, 1);
 if ($user->{'shell'} =~ /\/jk_chrootsh$/) {
-	return $d->{'unjailed_shell'};
+	return $user->{'jailed'}->{'shell'};
 	}
 else {
 	return $user->{'shell'};
@@ -12485,13 +12499,7 @@ sub change_domain_shell
 my ($d, $shell) = @_;
 my $user = &get_domain_owner($d);
 my $olduser = { %$user };
-if ($user->{'shell'} =~ /\/jk_chrootsh$/) {
-	$d->{'unjailed_shell'} = $shell;
-	&save_domain($d);
-	}
-else {
-	$user->{'shell'} = $shell;
-	}
+$user->{'shell'} = $shell;
 &modify_user($user, $olduser, $d);
 }
 
