@@ -226,6 +226,9 @@ local @rvdoms = ( \%dom );
 # Copy SSL cert
 &copy_directadmin_ssl_cert(\%dom, $backup);
 
+# Setup PHP options
+&fix_directadmin_php_options(\%dom, \%uinfo);
+
 # Lock the user DB and build list of used IDs
 &obtain_lock_unix(\%dom);
 &obtain_lock_mail(\%dom);
@@ -567,6 +570,9 @@ if (!$dom{'parent'}) {
 		# Copy SSL cert
 		&copy_directadmin_ssl_cert(\%subd, $backup);
 
+		# Set PHP options
+		&fix_directadmin_php_options(\%subd, \%uinfo);
+
 		# Migrate email aliases
 		&copy_directadmin_mail_aliases(\%subd, $backup);
 
@@ -822,6 +828,13 @@ if (&domain_has_ssl_cert($d) && -r $cfile && -r $kfile) {
 	&sync_combined_ssl_cert($d);
 	&$second_print(".. done");
 	}
+
+my %dinfo;
+&read_env_file("$backup/$d->{'dom'}/domain.conf", \%dinfo);
+if ($dinfo{'force_ssl'} =~ /yes/i && &domain_has_ssl($d)) {
+	# Add redirect to SSL
+	&create_redirect($d, &get_redirect_to_ssl($d));
+	}
 }
 
 # copy_directadmin_mail_aliases(&domain, backup-dir)
@@ -887,10 +900,21 @@ if (-r "$backup/$dom/email/aliases") {
 	push(@got, "mail");
 	}
 if (uc($dinfo{'ssl'}) eq 'ON') {
-	# XXX where to find SSL cert and key?
 	push(@got, &domain_has_ssl());
 	}
 return @got;
+}
+
+# fix_directadmin_php_options(&domain, user-options)
+# Set the PHP version and enabled/disabled state
+sub fix_directadmin_php_options
+{
+my ($d, $uinfo) = @_;
+if ($uinfo->{'php'} =~ /off/i) {
+	&$first_print("Disabling PHP ..");
+	&save_domain_php_mode($d, "none");
+	&$second_print(".. done");
+	}
 }
 
 1;
