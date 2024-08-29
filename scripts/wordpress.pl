@@ -569,7 +569,7 @@ if (is_dir($backup_dir)) {
     }
 }
 $admin_user_email = get_option("admin_email");
-$admin_user_id = get_user_by("email", $admin_user_email)->ID;
+$admin_user_id = get_user_by("email", $admin_user_email)->ID ?? 1;
 echo json_encode([
     "memory_limit" => ini_get("memory_limit"),
     "upload_max_filesize" => ini_get("upload_max_filesize"),
