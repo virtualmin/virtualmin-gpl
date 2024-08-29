@@ -808,17 +808,17 @@ push(@$settings_tab_content, {
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}admin_username"}, "kit_wp_admin_username"),
 	value => $wp->{'admin_user'}});
-# Admin email
-push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}admin_email"}, "kit_wp_admin_email"),
-	value => &ui_opt_textbox(
-	    "kit_option_admin_email", undef, 30, $wp->{'admin_email'} . "<br>",
-	    $text{'edit_set'})});
 # Set password
 push(@$settings_tab_content, {
 	desc  => &hlink($text{"${_t}user_pass"}, "kit_wp_user_pass"),
 	value => &ui_opt_textbox(
 	    "kit_user_user_pass", undef, 20, $text{'user_passdef'},
+	    $text{'edit_set'})});
+# Admin email
+push(@$settings_tab_content, {
+	desc  => &hlink($text{"${_t}admin_email"}, "kit_wp_admin_email"),
+	value => &ui_opt_textbox(
+	    "kit_option_admin_email", undef, 30, $wp->{'admin_email'} . "<br>",
 	    $text{'edit_set'})});
 # Site visibility
 push(@$settings_tab_content, {
