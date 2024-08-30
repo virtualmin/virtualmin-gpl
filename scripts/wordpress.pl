@@ -658,6 +658,7 @@ echo json_encode([
         }
         return [
             "name" => $data["Name"],
+            "dir" =>  dirname(plugin_basename($plugin)),
             "description" => $data["Description"],
             "version" => $data["Version"],
             "new_version" => $new_version,
@@ -686,6 +687,7 @@ echo json_encode([
         }
         return [
             "name" => $theme_data->get("Name"),
+	    "dir" =>  $theme_data->get_stylesheet(),
             "description" => $theme_data->get("Description"),
             "version" => $theme_data->get("Version"),
             "new_version" => $new_version,
@@ -883,17 +885,18 @@ my $plugins_actions_opts =
 	  [ "deactivate", $text{"${_t}selopt_deactivate"} ],
 	  [ "update", $text{"${_t}selopt_update"} ],
 	  [ "delete", $text{"${_t}selopt_delete"} ],
-	  [ "enable-auto-update", $text{"${_t}selopt_enable_auto"} ],
-	  [ "disable-auto-update", $text{"${_t}selopt_disable_auto"} ] ];
+	  [ "enable-auto-updates", $text{"${_t}selopt_enable_auto"} ],
+	  [ "disable-auto-updates", $text{"${_t}selopt_disable_auto"} ] ];
 $plugins_tab_content =
 	&ui_form_start($save_kit_form, "post", undef,
 		       "$kit_form_main id='kit_plugins_form'");
 $plugins_tab_content .= &ui_hidden("dom", $d->{'id'});
 $plugins_tab_content .= &ui_hidden("tab", "plugins");
+$plugins_tab_content .= &ui_hidden("bulktype", "plugin");
 $plugins_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $plugins_tab_content .= &ui_hidden("uid", $wp->{'admin_id'});
 $plugins_tab_content .= &ui_hidden("sstate", $wpj);
-$plugins_tab_content .= &ui_select("plugins", "", $plugins_actions_opts);
+$plugins_tab_content .= &ui_select("plugin", "", $plugins_actions_opts);
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_updcache'}, "update");
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_openin_wp'},
@@ -907,17 +910,23 @@ $plugins_tab_content .= &ui_columns_start(
 	      $text{"${_t}tb_auto_update"},
 	], 100, 0, [ ( "width=5" ) ]);
 foreach my $plugin (@{$wp->{'plugins'}}) {
-	$plugins_tab_content .= &ui_checked_columns_row([
-		&html_escape($plugin->{'name'}) . " " .
+	my $plugin_desc = $plugin->{'description'};
+	if ($plugin_desc) {
+		$plugin_desc = " " .
 			&ui_help(&html_escape(
-				&html_strip($plugin->{'description'}))),
+				&html_strip($plugin_desc)));
+		}
+	$plugins_tab_content .= &ui_checked_columns_row([
+		&html_escape($plugin->{'name'}, 1).$plugin_desc,
 		&html_escape($plugin->{'version'}),
 		$plugin->{'new_version'} ?
 			"<b>".&ui_text_color(&html_escape(
-				$plugin->{'new_version'}), 'success')."</b>" : $text{'no'},
+				$plugin->{'new_version'}), 'success')."</b>" :
+			$text{'no'},
 		$plugin->{'active'} ? $text{'yes'} : $text{'no'},
 		$plugin->{'auto_update'} ? $text{'yes'} : $text{'no'},
-	], [ ( "width=5" ) ], 'bulk', &quote_escape($plugin->{'name'}, '"'));
+	], [ ( "width=5" ) ], 'bulk',
+		&quote_escape("$plugin->{'dir'}\n$plugin->{'name'}", '"'));
 }
 $plugins_tab_content .= &ui_columns_end();
 $plugins_tab_content .= &ui_form_end();
@@ -930,10 +939,11 @@ $themes_tab_content =
 		       "$kit_form_main id='kit_themes_form'");
 $themes_tab_content .= &ui_hidden("dom", $d->{'id'});
 $themes_tab_content .= &ui_hidden("tab", "themes");
+$themes_tab_content .= &ui_hidden("bulktype", "theme");
 $themes_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $themes_tab_content .= &ui_hidden("uid", $wp->{'admin_id'});
 $themes_tab_content .= &ui_hidden("sstate", $wpj);
-$themes_tab_content .= &ui_select("themes", "", $plugins_actions_opts);
+$themes_tab_content .= &ui_select("theme", "", $plugins_actions_opts);
 $themes_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 $themes_tab_content .= &ui_submit($text{'scripts_kit_updcache'}, "update");
 $themes_tab_content .= &ui_submit($text{'scripts_kit_openin_wp'},
@@ -947,17 +957,23 @@ $themes_tab_content .= &ui_columns_start(
 	      $text{"${_t}tb_auto_update"},
 	], 100, 0, [ ( "width=5" ) ]);
 foreach my $theme (@{$wp->{'themes'}}) {
-	$themes_tab_content .= &ui_checked_columns_row([
-		&html_escape($theme->{'name'}) . " " .
+	my $theme_desc = $theme->{'description'};
+	if ($theme_desc) {
+		$theme_desc = " " .
 			&ui_help(&html_escape(
-				&html_strip($theme->{'description'}))),
+				&html_strip($theme_desc)));
+		}
+	$themes_tab_content .= &ui_checked_columns_row([
+		&html_escape($theme->{'name'}, 1).$theme_desc,
 		&html_escape($theme->{'version'}),
 		$theme->{'new_version'} ?
 			"<b>".&ui_text_color(&html_escape(
-				$theme->{'new_version'}), 'success')."</b>" : $text{'no'},
+				$theme->{'new_version'}), 'success')."</b>" :
+			$text{'no'},
 		$theme->{'active'} ? $text{'yes'} : $text{'no'},
 		$theme->{'auto_update'} ? $text{'yes'} : $text{'no'},
-	], [ ( "width=5" ) ], 'bulk', &quote_escape($theme->{'name'}, '"'));
+	], [ ( "width=5" ) ], 'bulk',
+		&quote_escape("$theme->{'dir'}\n$theme->{'name'}", '"'));
 }
 $themes_tab_content .= &ui_columns_end();
 $themes_tab_content .= &ui_form_end();
