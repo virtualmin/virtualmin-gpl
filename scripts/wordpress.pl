@@ -706,7 +706,9 @@ if ($@) {
 	}
 
 # Store original 
-my $wpj = $wp;
+my $wpj = { %$wp,
+	    plugins => [ map { { %$_ } } @{$wp->{'plugins'}} ],
+	    themes  => [ map { { %$_ } } @{$wp->{'themes'}} ] };
 map { delete $_->{'description'} } @{$wpj->{'plugins'}};
 map { delete $_->{'description'} } @{$wpj->{'themes'}};
 $wpj = &convert_to_json($wpj);
