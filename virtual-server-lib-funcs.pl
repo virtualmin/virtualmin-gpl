@@ -2068,6 +2068,7 @@ if ($d && $d->{'mail'}) {
 
 # Sync up jail password file
 if ($d) {
+	&rename_jailkit_passwd_file($d, $olduser->{'user'}, $user->{'user'});
 	&create_jailkit_passwd_file($d);
 	&modify_jailkit_user($d, $user);
 	}

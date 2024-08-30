@@ -211,7 +211,7 @@ return $uinfo && $uinfo->{'home'} =~ /^\Q$dir\E\/\.\// ? $dir : undef;
 }
 
 # create_jailkit_passwd_file(&domain)
-# Create limit /etc/passwd, /etc/shadow and /etc/group files inside a jail
+# Create limited /etc/passwd, /etc/shadow and /etc/group files inside a jail
 # for a domain's users
 sub create_jailkit_passwd_file
 {
@@ -239,8 +239,8 @@ foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 # Write out chosen users to the jail passwd file
 my $pfile = $dir."/etc/passwd";
 my $sfile = $dir."/etc/shadow";
-my %jail_shell =
-	map { $_->{'user'} => $_->{'shell'} } &get_domain_jailed_users_shell($d);
+my %jail_shell = map { $_->{'user'} => $_->{'shell'} }
+		     &get_domain_jailed_users_shell($d);
 &open_lock_tempfile(PASSWD, ">$pfile");
 &open_lock_tempfile(SHADOW, ">$sfile");
 foreach my $u (@ucreate) {
@@ -269,8 +269,27 @@ foreach my $g (@gcreate) {
 &close_tempfile(GROUP);
 }
 
+# rename_jailkit_passwd_file(&domain, old-user, new-user)
+# Rename one user in a jail's /etc/passwd file
+sub rename_jailkit_passwd_file
+{
+my ($d, $olduser, $newuser) = @_;
+my $dir = &domain_jailkit_dir($d);
+foreach my $file ($dir."/etc/passwd", $dir."/etc/shadow") {
+	next if (!-r $file);
+	my $lref = &read_file_lines($file);
+	foreach my $l (@$lref) {
+		if ($l =~ /^\Q$olduser\E:/) {
+			$l =~ s/^\Q$olduser\E/$newuser/;
+			}
+		}
+	&flush_file_lines($file);
+	}
+}
+
 # modify_jailkit_user(&domain, username)
-# Fix up the shell for the actual user domain
+# Update a real Unix user in a jailed domain to have the correct jailed
+# shell and home directory
 sub modify_jailkit_user
 {
 my ($d, $user) = @_;

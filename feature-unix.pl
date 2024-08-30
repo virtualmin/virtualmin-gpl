@@ -245,6 +245,10 @@ if (!$d->{'parent'}) {
 			&obtain_lock_cron($d);
 			&rename_unix_cron_jobs($d->{'user'},
 					       $oldd->{'user'});
+			if ($d->{'jail'}) {
+				&rename_jailkit_passwd_file(
+				    $d, $oldd->{'user'}, $d->{'user'});
+				}
 			&release_lock_cron($d);
 			}
 
