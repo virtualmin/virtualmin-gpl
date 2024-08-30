@@ -915,7 +915,7 @@ foreach my $plugin (@{$wp->{'plugins'}}) {
 				$plugin->{'new_version'}), 'success')."</b>" : $text{'no'},
 		$plugin->{'active'} ? $text{'yes'} : $text{'no'},
 		$plugin->{'auto_update'} ? $text{'yes'} : $text{'no'},
-	], [ ( "width=5" ) ], undef, &quote_escape($plugin->{'name'}, '"'));
+	], [ ( "width=5" ) ], 'bulk', &quote_escape($plugin->{'name'}, '"'));
 }
 $plugins_tab_content .= &ui_columns_end();
 $plugins_tab_content .= &ui_form_end();
@@ -955,7 +955,7 @@ foreach my $theme (@{$wp->{'themes'}}) {
 				$theme->{'new_version'}), 'success')."</b>" : $text{'no'},
 		$theme->{'active'} ? $text{'yes'} : $text{'no'},
 		$theme->{'auto_update'} ? $text{'yes'} : $text{'no'},
-	], [ ( "width=5" ) ], undef, &quote_escape($theme->{'name'}, '"'));
+	], [ ( "width=5" ) ], 'bulk', &quote_escape($theme->{'name'}, '"'));
 }
 $themes_tab_content .= &ui_columns_end();
 $themes_tab_content .= &ui_form_end();
