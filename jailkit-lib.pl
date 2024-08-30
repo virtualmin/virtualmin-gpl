@@ -277,6 +277,7 @@ my ($d, $olduser, $newuser) = @_;
 my $dir = &domain_jailkit_dir($d);
 foreach my $file ($dir."/etc/passwd", $dir."/etc/shadow") {
 	next if (!-r $file);
+	&lock_file($file);
 	my $lref = &read_file_lines($file);
 	foreach my $l (@$lref) {
 		if ($l =~ /^\Q$olduser\E:/) {
@@ -284,6 +285,7 @@ foreach my $file ($dir."/etc/passwd", $dir."/etc/shadow") {
 			}
 		}
 	&flush_file_lines($file);
+	&unlock_file($file);
 	}
 }
 
