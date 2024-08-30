@@ -228,7 +228,7 @@ local @rvdoms = ( \%dom );
 &copy_directadmin_ssl_cert(\%dom, $backup);
 
 # Setup PHP options
-&fix_directadmin_php_options(\%dom, \%uinfo);
+&fix_directadmin_php_options(\%dom, \%uinfo, $backup);
 
 # Lock the user DB and build list of used IDs
 &obtain_lock_unix(\%dom);
@@ -576,7 +576,7 @@ if (!$dom{'parent'}) {
 		&copy_directadmin_ssl_cert(\%subd, $backup);
 
 		# Set PHP options
-		&fix_directadmin_php_options(\%subd, \%uinfo);
+		&fix_directadmin_php_options(\%subd, \%uinfo, $backup);
 
 		# Migrate email aliases
 		&copy_directadmin_mail_aliases(\%subd, $backup);
@@ -917,11 +917,30 @@ return @got;
 # Set the PHP version and enabled/disabled state
 sub fix_directadmin_php_options
 {
-my ($d, $uinfo) = @_;
+my ($d, $uinfo, $backup) = @_;
 if ($uinfo->{'php'} =~ /off/i) {
 	&$first_print("Disabling PHP ..");
 	&save_domain_php_mode($d, "none");
 	&$second_print(".. done");
+	}
+else {
+	my %crontab;
+	&read_env_file("$backup/crontab.conf", \%crontab);
+	my $wantver;
+	if ($crontab{'PATH'} =~ /\/php(\d)(\d+)\//) {
+		my $ver = $1.".".$2;
+		foreach my $v (&list_available_php_versions($d)) {
+			if ($v->[0] eq $ver) {
+				$wantver = $v->[0];
+				}
+			}
+		}
+	if ($wantver) {
+		&$first_print("Changing PHP version to $wantver ..");
+		my $phd = &public_html_dir($d);
+		my $err = &save_domain_php_directory($d, $phd, $wantver);
+		&$second_print($err ? "..failed : $err" : ".. done");
+		}
 	}
 if ($uinfo->{'cgi'} =~ /off/i) {
 	&$first_print("Disabling CGI scripts ..");
