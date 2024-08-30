@@ -783,7 +783,7 @@ if ($extramods{'mailboxes'} && @maildoms) {
 		       'canattach' => 0,
 		       'candetach' => 0,
 		       'dir' => &mail_domain_base($d),
-		       'mmode' => 6,
+		       'mmode' => 5,
 		       'musers' => $d->{'gid'},
 		     );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "mailboxes")
