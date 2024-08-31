@@ -175,7 +175,7 @@ while(@ARGV > 0) {
 		# Removing an extra email address
 		push(@delemails, shift(@ARGV));
 		}
-	elsif ($a eq "--newuser") {
+	elsif ($a eq "--newuser" || $a eq "--new-user") {
 		# Changing the username
 		$newusername = shift(@ARGV);
 		if (!$config{'allow_upper'}) {
