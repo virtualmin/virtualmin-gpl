@@ -593,6 +593,7 @@ echo json_encode([
     "wp_max_memory_limit" => defined("WP_MAX_MEMORY_LIMIT") ? WP_MAX_MEMORY_LIMIT : 0, 
     "disallow_file_edit" => defined("DISALLOW_FILE_EDIT") ? (DISALLOW_FILE_EDIT === false ? "false" : "true") : "false", 
     "concatenate_scripts" => defined("CONCATENATE_SCRIPTS") ? (CONCATENATE_SCRIPTS === false ? "false" : "true") : "true", 
+    "disable_wp_cron" => defined("DISABLE_WP_CRON") ? (DISABLE_WP_CRON === true ? "true" : "false") : "false", 
     "wp_auto_update_core" => defined("WP_AUTO_UPDATE_CORE") ? (WP_AUTO_UPDATE_CORE === false ? "false" : (WP_AUTO_UPDATE_CORE === "minor" ? "minor" : "true")) : "minor",
     "automatic_updater_disabled" => defined("AUTOMATIC_UPDATER_DISABLED") ? (AUTOMATIC_UPDATER_DISABLED == true ? 1 : 0) : 0,
     "blogname" => get_option("blogname"), 
@@ -1119,6 +1120,12 @@ push(@$development_tab_content, {
 	value => &ui_yesno_radio(
 	    "kit_constructor_maintenance", $wp->{'maintenance'},
 	    	'activate', 'deactivate')});
+# Disable cron jobs
+push(@$development_tab_content, {
+	desc  => &hlink($text{"${_t}disable_cron"}, "kit_wp_disable_cron"),
+	value => &ui_yesno_radio(
+	    "kit_const_disable_wp_cron", $wp->{'disable_wp_cron'},
+	    	'true', 'false')});
 # Script concatenation
 push(@$development_tab_content, {
 	desc  => &hlink($text{"${_t}concatenate_scripts"}, "kit_wp_concatenate_scripts"),
