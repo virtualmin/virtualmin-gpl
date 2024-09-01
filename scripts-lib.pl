@@ -1102,6 +1102,7 @@ if (defined(&$optmodfunc)) {
 
 my $installing;
 foreach my $m (@mods) {
+	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	if ($phpver >= 7 && $m eq "mysql") {
 		# PHP actual package name is mysqlnd on all systems
 		$m = "mysqlnd";
@@ -1114,7 +1115,6 @@ foreach my $m (@mods) {
 		&$first_print($text{'scripts_install_phpmods_check'});
 		&$indent_print();
 		}
-	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	&$first_print(&text($opt ? 'scripts_optmod' : 'scripts_needmod',
 			    "<tt>$m</tt>"));
 
