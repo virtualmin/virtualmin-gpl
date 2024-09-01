@@ -4626,6 +4626,10 @@ scripts_kit_wp_apply_bulk_theme_update=Updating selected themes ..
 scripts_kit_wp_apply_bulk_theme_delete=Deleting selected themes ..
 scripts_kit_wp_apply_bulk_theme_enable-auto-updates=Enabling auto-updates for selected themes ..
 scripts_kit_wp_apply_bulk_theme_disable-auto-updates=Disabling auto-updates for selected themes ..
+scripts_kit_wp_apply_cache_wp_version_check=Checking for WordPress updates ..
+scripts_kit_wp_apply_cache_wp_update_plugins=Checking for plugin updates ..
+scripts_kit_wp_apply_cache_wp_update_themes=Checking for theme updates ..
+scripts_kit_wp_apply_cache_flush=Flushing object cache ..
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up

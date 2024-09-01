@@ -898,7 +898,8 @@ $plugins_tab_content .= &ui_hidden("uid", $wp->{'admin_id'});
 $plugins_tab_content .= &ui_hidden("sstate", $wpj);
 $plugins_tab_content .= &ui_select("plugin", "", $plugins_actions_opts);
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
-$plugins_tab_content .= &ui_submit($text{'scripts_kit_updcache'}, "flushcache");
+$plugins_tab_content .= &ui_submit($text{'scripts_kit_updcache'},
+				   "kit_constructor_flushcache");
 $plugins_tab_content .= &ui_submit($text{'scripts_kit_openin_wp'},
 				   "kit_form_login_plugins", undef,
 				   "form='kit_login_form'");
@@ -945,7 +946,8 @@ $themes_tab_content .= &ui_hidden("uid", $wp->{'admin_id'});
 $themes_tab_content .= &ui_hidden("sstate", $wpj);
 $themes_tab_content .= &ui_select("theme", "", $plugins_actions_opts);
 $themes_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
-$themes_tab_content .= &ui_submit($text{'scripts_kit_updcache'}, "flushcache");
+$themes_tab_content .= &ui_submit($text{'scripts_kit_updcache'},
+				  "kit_constructor_flushcache");
 $themes_tab_content .= &ui_submit($text{'scripts_kit_openin_wp'},
 				  "kit_form_login_themes", undef,
 				  "form='kit_login_form'");
