@@ -8173,4 +8173,15 @@ s3_echeck=S3 account cannot be used : $1
 s3_elocation=Selected bucket location is not supported by this S3 provider
 s3_defcreds=EC2 IAM credentials
 
+newacmes_title=ACME SSL Providers
+newacmes_ecannot=You are not allowed to manage ACME SSL providers
+newacmes_intro=Virtualmin can automatically request and renew SSL certificates from the providers configured on this page.
+newacmes_add=Add a new ACME provider.
+
+acme_letsencrypt=Let's Encrypt
+acme_type=Provider
+acme_desc=Description
+acme_doms=Used by
+acme_defdesc=Default Virtualmin Let's Encrypt provider
+
 __norefs=1
