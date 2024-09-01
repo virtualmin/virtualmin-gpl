@@ -1239,28 +1239,33 @@ $data .= <<EOF;
 		select.addEventListener("change", function() {
 			const forms = document.querySelectorAll('form[action^="script_login.cgi"], form[action^="workbench.cgi"]');
 			forms.forEach((form) => {
-				form.uid.value = this.value;;
+				form.uid.value = this.value;
 			});
+			const up = 'wp-' + btoa(location.origin).slice(0, 32) +
+				'-admin-user';
+			localStorage.setItem(up, this.value);
 		});
 	}
 })();
 </script>
 EOF
 
-# If the admin was previously selected, select it in the form on page load
-if ($in{'auid'}) {
-	$data .= <<EOF;
+# If the admin was previously selected, select it in the form on page reload
+$data .= <<EOF;
 <script>
 (function() {
+	const up = localStorage.getItem('wp-' +
+		btoa(location.origin).slice(0, 32) + '-admin-user') ||
+		'$in{'auid'}';
 	const select = document.getElementById("admins_select");
-	if (select) {
-		select.value = "$in{'auid'}";
+	if (select && up) {
+		select.value = up;
 		select.dispatchEvent(new Event('change'));
 	}
 })();
 </script>
 EOF
-	}
+
 return { extra_submits => \@data_submits, data => $data };
 }
 
