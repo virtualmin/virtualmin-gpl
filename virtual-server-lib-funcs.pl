@@ -7100,7 +7100,9 @@ if ($dest =~ /\s|\(|\)/) {
 		$dest = $host.":".quotemeta($path);
 		}
 	}
-local $cmd = "scp -r ".($port ? "-P $port " : "").$config{'ssh_args'}." ".
+local $cmd = "scp -r ".($port ? "-P $port " : "").
+	     $config{'ssh_args'}." ".
+	     $config{'scp_args'}." ".
 	     quotemeta($src)." ".quotemeta($dest);
 &run_ssh_command($cmd, $pass, $err, $asuser);
 }

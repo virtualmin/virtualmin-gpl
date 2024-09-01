@@ -170,6 +170,7 @@ backuplog_age=Number of days to keep backup logs for,3,Forever,5
 tar_cmd=Full path to <tt>tar</tt> command,3,Detect automatically
 tar_args=Additional parameters to <tt>tar</tt> command,0
 ssh_args=Additional parameters to <tt>ssh</tt> and <tt>scp</tt> commands,0
+scp_args=Additional parameters to <tt>scp</tt> command only,0
 aws_cmd=Full path to <tt>aws</tt> command for S3 operations,3,Find automatically
 b2_cmd=Full path to <tt>b2</tt> command for Backblaze,3,Find automatically
 delete_logs=Remove logs when deleting scheduled backups?,1,1-Yes,0-No
