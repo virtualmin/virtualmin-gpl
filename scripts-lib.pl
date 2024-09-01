@@ -1103,9 +1103,8 @@ if (defined(&$optmodfunc)) {
 my $installing;
 foreach my $m (@mods) {
 	if ($phpver >= 7 && $m eq "mysql") {
-		# PHP 7 only supports mysqli, but that's OK because most scripts
-		# can use it
-		$m = "mysqli";
+		# PHP actual package name is mysqlnd on all systems
+		$m = "mysqlnd";
 		}
 	# Module name can never contain `pecl-`, unlike package name!
 	my $mphp = $m;
