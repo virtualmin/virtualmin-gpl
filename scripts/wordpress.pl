@@ -995,6 +995,7 @@ $backup_tab_content .=
 		       "$kit_form_main id='kit_backup_form'");
 $backup_tab_content .= &ui_hidden("dom", $d->{'id'});
 $backup_tab_content .= &ui_hidden("tab", "backup");
+$backup_tab_content .= &ui_hidden("bulktype", "backup");
 $backup_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $backup_tab_content .= &ui_hidden("uid", $wp->{'admin_id'});
 $backup_tab_content .= &ui_hidden("sstate", $wpj);
@@ -1005,12 +1006,14 @@ my $backup_content_files_size_all = 0;
 foreach my $backup_data (@{$wp->{'backups_data'}}) {
         if ($backup_data->{'size'}) {
                 $backup_content_files_size_all += $backup_data->{'size'};
+		$backup_type = $backup_data->{'filename'};
+		$backup_type =~ s/^(db\+files|db|files)-.*$/$1/;
                 $backup_content_files .= &ui_checked_columns_row([
+			&html_escape($text{"scripts_kit_backup_tb_type_".$backup_type}),
                         &html_escape($backup_data->{'creation_date'}),
                         &nice_size(&html_escape($backup_data->{'size'})),
-                        &html_escape($backup_data->{'filename'}),
-                        " ",
-                ], [ ( "width=5" ) ], undef, &quote_escape($plugin->{'name'}, '"'));
+                        &html_escape($backup_data->{'filename'})
+                ], [ ( "width=5" ) ], 'bulk', &quote_escape($backup_data->{'filename'}, '"'));
                 }
         }
 $backup_tab_content .= &ui_table_start(undef, "width=100%", 2);
@@ -1021,10 +1024,10 @@ $backup_tab_content .= &ui_table_row(
 $backup_tab_content .= &ui_table_end();
 if ($backup_content_files) {
         $backup_tab_content .= &ui_columns_start(
-                [ "", $text{"scripts_kit_backup_tb_date"},
+                [ "", $text{"scripts_kit_backup_tb_type"},
+		$text{"scripts_kit_backup_tb_date"},
                 $text{"scripts_kit_backup_tb_size"},
                 $text{"scripts_kit_backup_tb_filename"},
-                $text{"scripts_kit_backup_tb_download"},
                 ], 100, 0, [ ( "width=5" ) ]);
         $backup_tab_content .= $backup_content_files;
         $backup_tab_content .= &ui_columns_end();
