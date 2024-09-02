@@ -321,6 +321,10 @@ if ($dom->{'dns'} && $dom->{'dns_submode'} && !$dom->{'dns_subof'}) {
 	# Assume parent DNS domain is parent virtual server
 	$dom->{'dns_subof'} = $dom->{'subdom'} || $dom->{'parent'};
 	}
+if (!$dom->{'letsencrypt_id'} && $dom->{'letsencrypt_last'}) {
+	# Default ACME provider to Let's Encrypt
+	$dom->{'letsencrypt_id'} = 1;
+	}
 
 # Emailto is a computed field
 &compute_emailto($dom);
