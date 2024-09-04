@@ -3043,11 +3043,15 @@ if ($merr) {
 my $phd = &public_html_dir($d);
 &foreign_require("webmin");
 my $before = &before_letsencrypt_website($d);
+my $acme;
+if ($d->{'letsencrypt_id'} && defined(&list_acme_providers)) {
+	($acme) = grep { $_->{'id'} eq $d->{'letsencrypt_id'} }
+		       &list_acme_providers();
+	}
 my ($ok, $cert, $key, $chain) =
 	&request_domain_letsencrypt_cert($d, \@dnames, 0,
 	    $d->{'letsencrypt_size'}, undef, $d->{'letsencrypt_ctype'},
-	    $d->{'letsencrypt_server'}, $d->{'letsencrypt_key'},
-	    $d->{'letsencrypt_hmac'}, $d->{'letsencrypt_subset'});
+	    $acme, $d->{'letsencrypt_subset'});
 &after_letsencrypt_website($d, $before);
 
 my ($subject, $body);
@@ -3287,14 +3291,28 @@ return \@rv;
 }
 
 # request_domain_letsencrypt_cert(&domain, &dnames, [staging], [size], [mode],
-# 				  [key-type], [letsencrypt-server],
-# 				  [server-key], [server-hmac], [allow-subset])
+# 				  [key-type], [&acme], [allow-subset])
 # Attempts to request a Let's Encrypt cert for a domain, trying both web and
 # DNS modes if possible. The key type must be one of 'rsa' or 'ecdsa'
 sub request_domain_letsencrypt_cert
 {
-my ($d, $dnames, $staging, $size, $mode, $ctype, $server, $keytype,
-    $hmac, $subset) = @_;
+my ($d, $dnames, $staging, $size, $mode, $ctype, $acme, $subset) = @_;
+my ($server, $keytype, $hmac);
+if ($acme) {
+	defined(&list_acme_providers) ||
+	    return "Custom ACME providers are only supported in Virtualmin Pro";
+	$keytype = $acme->{'key'};
+	$hmac = $acme->{'hmac'};
+	if ($acme->{'type'}) {
+		my ($prov) = grep { $_->{'id'} eq $acme->{'type'} }
+				  &list_acme_providers();
+		$prov || return "ACME provider $acme->{'type'} does not exist";
+		$server = $prov->{'url'};
+		}
+	else {
+		$server = $acme->{'url'};
+		}
+	}
 my ($ok, $cert, $key, $chain, @errs);
 my @tried = $config{'letsencrypt_retry'} ? (0..1) : (1);
 $dnames = &filter_ssl_wildcards($dnames);

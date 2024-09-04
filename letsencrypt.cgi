@@ -139,8 +139,7 @@ else {
 	$before = &before_letsencrypt_website($d);
 	($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 					$d, \@dnames, 0, undef, undef,
-					$in{'ctype'}, undef, undef, undef,
-					$in{'subset'});
+					$in{'ctype'}, undef, $in{'subset'});
 	&after_letsencrypt_website($d, $before);
 	if (!$ok) {
 		# Always store last Certbot error

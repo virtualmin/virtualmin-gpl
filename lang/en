@@ -8178,12 +8178,15 @@ newacmes_ecannot=You are not allowed to manage ACME SSL providers
 newacmes_intro=Virtualmin can automatically request and renew SSL certificates from the providers configured on this page.
 newacmes_add=Add a new ACME provider.
 newacmes_nousers=Not used by any domains
+newacmes_return=list of ACME SSL providers
 
 acme_letsencrypt=Let's Encrypt
 acme_zerossl=ZeroSSL
 acme_type=Provider
 acme_desc=Description
 acme_doms=Used by domains
+acme_nodoms=Not in use
+acme_ndoms=$1 domains
 acme_dom=Domain name
 acme_status=Renewal status
 acme_renew=Last renewed
@@ -8199,5 +8202,9 @@ acme_fail=Last renewal failed
 acme_key=EAB key for provider
 acme_opt=(If authentication is required)
 acme_hmac=EAB HMAC for provider
+acme_err=Failed to save ACME SSL provider
+acme_err2=Failed to delete ACME SSL provider
+acme_einuse=Provider is still in use by $1 domains
+acme_eurl=Missing or invalid-looking provider URL
 
 __norefs=1

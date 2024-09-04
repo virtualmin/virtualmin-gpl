@@ -24,11 +24,6 @@ To have Virtualmin perform a local validation check of the domain, use the
 C<--validate-first> flag. This is automatically enabled when C<--check-first>
 is set.
 
-By default, the standard Let's Encrypt service will be used. However, you can
-use a different ACME-compatible provider with the C<--server> flag followed
-by the provider's API URL. The C<--server-key> and C<--server-hmac> flags can
-be used to specify a login to the provider.
-
 By default Virtualmin will attempt to perform an external DNS lookup of all
 domain names that the certificate is requested for, to make sure they can be
 resolved by the Let's Encrypt service. To disable this check, use the
@@ -115,15 +110,6 @@ while(@ARGV > 0) {
 	elsif ($a =~ /^--(sha1|sha2|rsa|ec)$/) {
 		$ctype = $1 eq "sha1" || $1 eq "sha2" ? "rsa" : $1;
 		}
-	elsif ($a eq "--server") {
-		$leserver = shift(@ARGV);
-		}
-	elsif ($a eq "--server-key") {
-		$leserver_key = shift(@ARGV);
-		}
-	elsif ($a eq "--server-hmac") {
-		$leserver_hmac = shift(@ARGV);
-		}
 	elsif ($a eq "--email-always") {
 		$email = 0;
 		}
@@ -132,6 +118,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--email-error") {
 		$email = 1;
+		}
+	elsif ($a eq "--acme") {
+		$acmeid = shift(@ARGV);
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -177,6 +166,13 @@ else {
                 &usage($err) if ($err);
 		}
 	$custom_dname = join(" ", @dnames);
+	}
+if ($acmeid) {
+	defined(&list_acme_providers) ||
+		&usage("The --acme flag is only available in Virtualmin Pro");
+	($acme) = grep { $_->{'id'} eq $acmeid ||
+			 $_->{'type'} eq $acmeid } &list_acme_providers();
+	$acme || &usage("No ACME provider with ID of type $acmeid found");
 	}
 
 # Build a list of the domains being validated
@@ -253,8 +249,7 @@ $phd = &public_html_dir($d);
 $before = &before_letsencrypt_website($d);
 @beforecerts = &get_all_domain_service_ssl_certs($d);
 ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
-	$d, \@dnames, $staging, $size, $mode, $ctype, $leserver,
-	$leserver_key, $leserver_hmac, $subset);
+	$d, \@dnames, $staging, $size, $mode, $ctype, $acme, $subset);
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
 	# Always store last Certbot error
@@ -284,9 +279,7 @@ else {
 	$d->{'letsencrypt_renew'} = $renew;
 	$d->{'letsencrypt_ctype'} = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
 	$d->{'letsencrypt_size'} = $size;
-	$d->{'letsencrypt_server'} = $leserver;
-	$d->{'letsencrypt_key'} = $leserver_key;
-	$d->{'letsencrypt_hmac'} = $leserver_hmac;
+	$d->{'letsencrypt_id'} = $acme ? $acme->{'id'} : undef;
 	$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
 	$d->{'letsencrypt_subset'} = $subset;
 	$d->{'letsencrypt_email'} = $email;
@@ -350,9 +343,7 @@ print "                                     --email-never |\n";
 print "                                     --email-error]\n";
 print "                                    [--web | --dns]\n";
 print "                                    [--rsa | --ec]\n";
-print "                                    [--server url]\n";
-print "                                    [--server-key id]\n";
-print "                                    [--server-hmac string]\n";
+print "                                    [--acme id|provider]\n";
 exit(1);
 }
 

@@ -8666,7 +8666,7 @@ if ($valid) {
 my $phd = &public_html_dir($d);
 my $before = &before_letsencrypt_website($d);
 my @beforecerts = &get_all_domain_service_ssl_certs($d);
-my @leargs = ($d, \@dnames, undef, undef, undef, undef, undef, undef, undef,
+my @leargs = ($d, \@dnames, undef, undef, undef, undef, undef,
 	      $d->{'letsencrypt_subset'});
 my ($ok, $cert, $key, $chain) =
 	&request_domain_letsencrypt_cert(@leargs);
