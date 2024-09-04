@@ -4636,6 +4636,11 @@ scripts_kit_wp_apply_cache_wp_version_check=Checking for WordPress updates ..
 scripts_kit_wp_apply_cache_wp_update_plugins=Checking for plugin updates ..
 scripts_kit_wp_apply_cache_wp_update_themes=Checking for theme updates ..
 scripts_kit_wp_apply_cache_flush=Flushing object cache ..
+scripts_kit_wp_apply_backup_nothing=No action selected to apply for the backups ..
+scripts_kit_wp_apply_backup_rm=Deleting selected backup files ..
+scripts_kit_wp_apply_backup_erm=.. failed : no backup files selected to remove
+scripts_kit_wp_apply_backup_rmf=Deleting <tt>$1</tt> ..
+scripts_kit_wp_apply_backup_ermf=.. failed : <tt>$1</tt>
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up
