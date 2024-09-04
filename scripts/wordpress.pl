@@ -996,11 +996,11 @@ $backup_tab_content .=
 		       "$kit_form_main id='kit_backup_form'");
 $backup_tab_content .= &ui_hidden("dom", $d->{'id'});
 $backup_tab_content .= &ui_hidden("tab", "backup");
-$backup_tab_content .= &ui_hidden("bulktype", "backup");
 $backup_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $backup_tab_content .= &ui_hidden("uid", $wp->{'admin_id'});
 $backup_tab_content .= &ui_hidden("sstate", $wpj);
-$backup_tab_content .= &ui_select("backup", "", $backup_actions_opts);
+$backup_tab_content .= &ui_select("kit_constructor_backup", "",
+	$backup_actions_opts);
 $backup_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 my $backup_content_files;
 my $backup_content_files_size_all = 0;
