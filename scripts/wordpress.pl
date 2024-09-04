@@ -533,6 +533,7 @@ if (!-d $logs_dir) {
 	&make_dir_as_domain_user($d, "$logs_dir/logs", 0750);
 	}
 my $wp_cli_log = "$logs_dir/wp_cli_log";
+my $backup_dir_name = $sinfo->{'backup_dir'} || 'wordpress-backups';
 my $wp_cli_path = -r "$d->{'home'}/bin/wp" ?
 		     "$d->{'home'}/bin/wp" : 
 		     "$opts->{'dir'}/wp-cli.phar";
@@ -544,7 +545,7 @@ my $kit_form_main = "data-form-nested='apply'";
 # Has to be called using eval for maximum speed (avg 
 # expected load time is + 0.5s to default page load)
 my $wp_cli_command = $wp_cli . ' eval \'
-$backup_dir = "' . $d->{"home"} . '/.wordpress-backups";
+$backup_dir = "' . $d->{"home"} . '/' . $backup_dir_name . '";
 if (!is_dir($backup_dir)) {
     mkdir($backup_dir, 0750, true);
 }
@@ -985,11 +986,11 @@ $themes_tab_content .= &ui_form_end();
 my $backup_tab_content;
 my $backup_actions_opts =
 	[ [ "", $text{"${_t}selopt_bulk"} ],
-	  [ "all", $text{"${_t}selopt_backup_all"} ],
+	  [ "db+files", $text{"${_t}selopt_backup_all"} ],
 	  [ "files", $text{"${_t}selopt_backup_files"} ],
 	  [ "db", $text{"${_t}selopt_backup_db"} ],
 	  [ "restore", $text{"${_t}selopt_backup_restore"} ],
-	  [ "db", $text{"${_t}selopt_backup_del"} ] ];
+	  [ "rm", $text{"${_t}selopt_backup_del"} ] ];
 $backup_tab_content .=
 	&ui_form_start($save_kit_form, "post", undef,
 		       "$kit_form_main id='kit_backup_form'");
@@ -999,8 +1000,8 @@ $backup_tab_content .= &ui_hidden("bulktype", "backup");
 $backup_tab_content .= &ui_hidden("sid", $sinfo->{'id'});
 $backup_tab_content .= &ui_hidden("uid", $wp->{'admin_id'});
 $backup_tab_content .= &ui_hidden("sstate", $wpj);
-$backup_tab_content .= &ui_select("backups", "", $backup_actions_opts);
-$backup_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "backup");
+$backup_tab_content .= &ui_select("backup", "", $backup_actions_opts);
+$backup_tab_content .= &ui_submit($text{'scripts_kit_apply'}, "apply");
 my $backup_content_files;
 my $backup_content_files_size_all = 0;
 foreach my $backup_data (@{$wp->{'backups_data'}}) {
@@ -1018,7 +1019,7 @@ foreach my $backup_data (@{$wp->{'backups_data'}}) {
         }
 $backup_tab_content .= &ui_table_start(undef, "width=100%", 2);
 $backup_tab_content .= &ui_table_row(
-		$text{'scripts_kit_backups_location'}, "~/.wordpress-backups", 2);
+		$text{'scripts_kit_backups_location'}, "~/$backup_dir_name", 2);
 $backup_tab_content .= &ui_table_row(
 		$text{'scripts_kit_backups_size'}, &nice_size($backup_content_files_size_all), 2);
 $backup_tab_content .= &ui_table_end();
