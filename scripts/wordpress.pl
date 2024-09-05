@@ -553,7 +553,8 @@ $backups_data = array();
 if (is_dir($backup_dir)) {
     $backup_files = scandir($backup_dir);
     foreach ($backup_files as $backup_file) {
-        if ($backup_file !== "." && $backup_file !== "..") {
+        if ($backup_file !== "." && $backup_file !== ".." &&
+	    preg_match("/\.tar\.gz$/", $backup_file)) {
             $backup_filepath = $backup_dir . "/" . $backup_file;
             if (!is_readable($backup_filepath)) {
                 continue;
@@ -568,6 +569,9 @@ if (is_dir($backup_dir)) {
             );
         }
     }
+    usort($backups_data, function($a, $b) {
+        return $b["creation_date"] <=> $a["creation_date"];
+    });
 }
 $admin_user_email = get_option("admin_email");
 $admin_id = get_user_by("email", $admin_user_email)->ID ?? 1;
@@ -986,7 +990,7 @@ $themes_tab_content .= &ui_form_end();
 my $backup_tab_content;
 my $backup_actions_opts =
 	[ [ "", $text{"${_t}selopt_bulk"} ],
-	  [ "db+files", $text{"${_t}selopt_backup_all"} ],
+	  [ "full", $text{"${_t}selopt_backup_all"} ],
 	  [ "files", $text{"${_t}selopt_backup_files"} ],
 	  [ "db", $text{"${_t}selopt_backup_db"} ],
 	  [ "restore", $text{"${_t}selopt_backup_restore"} ],
@@ -1008,13 +1012,19 @@ foreach my $backup_data (@{$wp->{'backups_data'}}) {
         if ($backup_data->{'size'}) {
                 $backup_content_files_size_all += $backup_data->{'size'};
 		$backup_type = $backup_data->{'filename'};
-		$backup_type =~ s/^(db\+files|db|files)-.*$/$1/;
+		$backup_type =~ s/.*?_\S+-\S+_(full|db|files)\.tar.gz$/$1/;
+		my $f =
+		     "$d->{'home'}/$backup_dir_name/$backup_data->{'filename'}";
+		$backup_data->{'creation_date'} = strftime("%Y-%m-%d %H:%M:%S",
+			localtime((stat($f))[10]));
                 $backup_content_files .= &ui_checked_columns_row([
-			&html_escape($text{"scripts_kit_backup_tb_type_".$backup_type}),
                         &html_escape($backup_data->{'creation_date'}),
                         &nice_size(&html_escape($backup_data->{'size'})),
+			&html_escape($text{"scripts_kit_backup_tb_type_".
+				$backup_type}),
                         &html_escape($backup_data->{'filename'})
-                ], [ ( "width=5" ) ], 'bulk', &quote_escape($backup_data->{'filename'}, '"'));
+                ], [ ( "width=5" ) ], 'bulk',
+			&quote_escape($backup_data->{'filename'}, '"'));
                 }
         }
 $backup_tab_content .= &ui_table_start(undef, "width=100%", 2);
@@ -1025,9 +1035,10 @@ $backup_tab_content .= &ui_table_row(
 $backup_tab_content .= &ui_table_end();
 if ($backup_content_files) {
         $backup_tab_content .= &ui_columns_start(
-                [ "", $text{"scripts_kit_backup_tb_type"},
+                [ "",
 		$text{"scripts_kit_backup_tb_date"},
                 $text{"scripts_kit_backup_tb_size"},
+		$text{"scripts_kit_backup_tb_type"},
                 $text{"scripts_kit_backup_tb_filename"},
                 ], 100, 0, [ ( "width=5" ) ]);
         $backup_tab_content .= $backup_content_files;
