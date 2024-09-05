@@ -742,14 +742,16 @@ $tab = $tabs[1]->[0] if (!$tab || !grep { $_->[0] eq $tab } @tabs);
 my $system_tab_content;
 # Memory limit
 push(@$system_tab_content, {
-	desc  => &hlink($text{"${_t}memory_limit"}, "kit_wp_memory_limit"),
+	desc  => &hlink($text{"${_t}memory_limit"},
+			      "kit_wp_memory_limit"),
 	value => &ui_opt_textbox(
 	    "kit_const_wp_memory_limit", undef, 6,
 	    	"$text{\"${_t}memory_limit_upto\"} $wp->{'wp_memory_limit'}",
 		$text{'edit_set'})});
 # Admin memory limit
 push(@$system_tab_content, {
-	desc  => &hlink($text{"${_t}max_memory_limit"}, "kit_wp_max_memory_limit"),
+	desc  => &hlink($text{"${_t}max_memory_limit"},
+			      "kit_wp_max_memory_limit"),
 	value => &ui_opt_textbox(
 	    "kit_const_wp_max_memory_limit", undef, 6,
 		"$text{\"${_t}memory_limit_upto\"} ".
@@ -765,7 +767,8 @@ if (foreign_available("fail2ban")) {
 	}
 # Site automatic updates
 push(@$system_tab_content, {
-	desc  => &hlink($text{"${_t}auto_update_core"}, "kit_wp_auto_update_core"),
+	desc  => &hlink($text{"${_t}auto_update_core"},
+	                "kit_wp_auto_update_core"),
 	value => &ui_radio(
 	    "kit_const_wp_auto_update_core", $wp->{'wp_auto_update_core'} ,
 		[ [ 'false', $text{"${_t}auto_updates_disabled"} . "<br>" ],
@@ -794,7 +797,8 @@ push(@$settings_tab_content, {
 	    $text{'edit_set'})});
 # Site blogdescription
 push(@$settings_tab_content, {
-	desc  => &hlink($text{"${_t}blogdescription"}, "kit_wp_blogdescription"),
+	desc  => &hlink($text{"${_t}blogdescription"},
+			"kit_wp_blogdescription"),
 	value => &ui_opt_textbox(
 	    "kit_option_blogdescription", undef, 35,
 	    $wp->{'blogdescription'} || $text{"scripts_kit_not_set"} . "<br>",
@@ -1031,7 +1035,8 @@ $backup_tab_content .= &ui_table_start(undef, "width=100%", 2);
 $backup_tab_content .= &ui_table_row(
 		$text{'scripts_kit_backups_location'}, "~/$backup_dir_name", 2);
 $backup_tab_content .= &ui_table_row(
-		$text{'scripts_kit_backups_size'}, &nice_size($backup_content_files_size_all), 2);
+		$text{'scripts_kit_backups_size'},
+			&nice_size($backup_content_files_size_all), 2);
 $backup_tab_content .= &ui_table_end();
 if ($backup_content_files) {
         $backup_tab_content .= &ui_columns_start(
@@ -1059,8 +1064,10 @@ $clone_tab_content .= &ui_table_start(undef, "width=100%", 2);
 my $slink = $sinfo->{'url'};
 $slink =~ s/^https?:\/\///;
 $slink =~ s/\/$//;
-$clone_tab_content .= &ui_table_row($text{'scripts_kit_clone_source1'}, $slink, 2);
-$clone_tab_content .= &ui_table_row($text{'scripts_kit_clone_source2'}, $opts->{'dir'}, 2);
+$clone_tab_content .=
+	&ui_table_row($text{'scripts_kit_clone_source1'}, $slink, 2);
+$clone_tab_content .=
+	&ui_table_row($text{'scripts_kit_clone_source2'}, $opts->{'dir'}, 2);
 my $clone_target;
 my @visdoms = sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }
 	      grep { !$_->{'parent'} && &can_config_domain($_) }
@@ -1131,7 +1138,8 @@ push(@$development_tab_content, {
 		  [ 2, $text{"${_t}debug2"} ] ] )});
 # Maintenance mode
 push(@$development_tab_content, {
-	desc  => &hlink($text{"${_t}maintenance_mode"}, "kit_wp_maintenance_mode"),
+	desc  => &hlink($text{"${_t}maintenance_mode"},
+			      "kit_wp_maintenance_mode"),
 	value => &ui_yesno_radio(
 	    "kit_constructor_maintenance", $wp->{'maintenance'},
 	    	'activate', 'deactivate')});
@@ -1143,7 +1151,8 @@ push(@$development_tab_content, {
 	    	'true', 'false')});
 # Script concatenation
 push(@$development_tab_content, {
-	desc  => &hlink($text{"${_t}concatenate_scripts"}, "kit_wp_concatenate_scripts"),
+	desc  => &hlink($text{"${_t}concatenate_scripts"},
+			      "kit_wp_concatenate_scripts"),
 	value => &ui_yesno_radio(
 	    "kit_const_concatenate_scripts", $wp->{'concatenate_scripts'},
 	    	'true', 'false')});
