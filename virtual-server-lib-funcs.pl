@@ -9911,8 +9911,13 @@ foreach my $tmpl (@rv) {
 		}
 	}
 closedir(DIR);
-@list_templates_cache = @rv;
-return @rv;
+
+my @default_templates = grep { $_->{'default'} } @rv;
+my @non_default_templates = grep { !$_->{'default'} } @rv;
+my @sorted_templates = sort { $a->{'name'} cmp $b->{'name'} } @non_default_templates;
+@list_templates_cache = (@default_templates, @sorted_templates);
+
+return @list_templates_cache;
 }
 
 # list_available_templates([&parentdom], [&aliasdom])
