@@ -4646,6 +4646,10 @@ scripts_kit_wp_apply_archive_db=Creating WordPress backup archive for database .
 scripts_kit_wp_apply_archive_files=Creating WordPress backup archive for files ..
 scripts_kit_wp_apply_archive_full=Creating WordPress backup archive for database and files ..
 scripts_kit_wp_apply_earchive=failed to create archive
+scripts_kit_wp_apply_restore=Restoring selected backups ..
+scripts_kit_wp_apply_restore_x=Extracting <tt>$1</tt> file ..
+scripts_kit_wp_apply_restore_eopen=.. failed to open temporary directory : <tt>$1</tt>
+scripts_kit_wp_apply_restore_er=.. done, with errors
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up
