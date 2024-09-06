@@ -1401,7 +1401,6 @@ backup_save=Kaydet ve Uygula
 backup_mode0=Lokal dosya veya klasör
 backup_mode0a=<tt>virtualmin-yedeði/</tt> altýndaki dosya veya klasör
 backup_mode1=FTP sunucu
-backup_mode2=SSH sunucu
 backup_mode3=Amazon S3 arabellleði
 backup_path=sunucudaki dosya
 backup_login=Giriþ yapýlacak kullanýcý

@@ -788,7 +788,6 @@ backup_none=Nessuna configurazione
 backup_mode0=File o directory locale
 backup_mode0a=File o directory sotto <tt>virtualmin-backup/<tt>
 backup_mode1=FTP server
-backup_mode2=SSH server
 backup_mode3=Amazon S3 bucket
 backup_mode5=Upload al server
 backup_path=File sul server
