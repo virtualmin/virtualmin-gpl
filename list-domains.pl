@@ -308,6 +308,9 @@ if ($multi) {
 		 &supports_resource_limits();
 	@tmpls = &list_templates();
 	@fplugins = &list_feature_plugins();
+	if (defined(&list_acme_providers)) {
+		%acmes = map { $_->{'id'}, $_ } &list_acme_providers();
+		}
 	if ($multi == 1) {
 		$hs = &quota_bsize("home");
 		$ms = &quota_bsize("mail");
@@ -752,6 +755,11 @@ if ($multi) {
 		if (defined($d->{'letsencrypt_subset'})) {
 			print "    Lets Encrypt subset mode: ",
 			    ($d->{'letsencrypt_subset'} ? "Yes" : "No"),"\n";
+			}
+		if ($d->{'letsencrypt_id'} && %acmes) {
+			my $acme = $acmes{$d->{'letsencrypt_id'}};
+			print "    ACME SSL provider: ",
+			      ($acme->{'type'} || $acme->{'url'}),"\n";
 			}
 
 		# Show SSL cert usage by other services
