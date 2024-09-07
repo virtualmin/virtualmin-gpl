@@ -419,7 +419,12 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 	&foreign_require("webmin");
 	$err = &webmin::check_letsencrypt();
 	print &ui_tabs_start_tab("mode", "lets");
-	print "$text{'cert_desc9'}<p>\n";
+	print "$text{'cert_desc9'}\n";
+	if  (defined(&can_acme_providers) && &can_acme_providers()) {
+		print &text('cert_acmelink',
+			    'pro/edit_newacmes.cgi'),"\n";
+		}
+	print "<p>\n";
 
 	if ($err) {
 		print &text('cert_elets', $err),"<p>\n";
