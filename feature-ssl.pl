@@ -3326,7 +3326,8 @@ if ($acme) {
 		my ($prov) = grep { $_->{'id'} eq $acme->{'type'} }
 				  &list_known_acme_providers();
 		$prov || return (0, "ACME provider $acme->{'type'} does not exist");
-		$server = $prov->{'url'};
+		$server = ($staging ? $prov->{'staging_url'} : undef) ||
+			  $prov->{'url'};
 		}
 	else {
 		$server = $acme->{'url'};
