@@ -1004,7 +1004,6 @@ backup_now=Сохранить Резервную Копию
 backup_save=Сохранить Расписание
 backup_mode0=Локальный файл
 backup_mode1=FTP сервер
-backup_mode2=SSH сервер
 backup_path=файл на сервере
 backup_login=Залогиниться как пользователь
 backup_mailfiles2=Включить почтовые файлы
