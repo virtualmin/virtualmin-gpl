@@ -3300,13 +3300,13 @@ my ($d, $dnames, $staging, $size, $mode, $ctype, $acme, $subset) = @_;
 my ($server, $keytype, $hmac);
 if ($acme) {
 	defined(&list_acme_providers) ||
-	    return "Custom ACME providers are only supported in Virtualmin Pro";
+	    return (0, "Custom ACME providers are only supported in Virtualmin Pro");
 	$keytype = $acme->{'key'};
 	$hmac = $acme->{'hmac'};
 	if ($acme->{'type'}) {
 		my ($prov) = grep { $_->{'id'} eq $acme->{'type'} }
-				  &list_acme_providers();
-		$prov || return "ACME provider $acme->{'type'} does not exist";
+				  &list_known_acme_providers();
+		$prov || return (0, "ACME provider $acme->{'type'} does not exist");
 		$server = $prov->{'url'};
 		}
 	else {
