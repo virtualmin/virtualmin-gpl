@@ -41,6 +41,7 @@ if ($in{'only'}) {
 	$d->{'letsencrypt_nodnscheck'} = !$in{'dnscheck'};
 	$d->{'letsencrypt_subset'} = $in{'subset'};
 	$d->{'letsencrypt_email'} = $in{'email'};
+	$d->{'letsencrypt_id'} = $in{'acme'} if (defined($in{'acme'}));
 	&save_domain($d);
 	&redirect("cert_form.cgi?dom=$d->{'id'}");
 	}
@@ -132,14 +133,27 @@ else {
 	&reset_domain_envs($d);
 	&error(&text('setup_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
-	&$first_print(&text('letsencrypt_doing2',
-			    join(", ", map { "<tt>$_</tt>" } @dnames)));
+	$dlist = join(", ", map { "<tt>$_</tt>" } @dnames);
+	if (defined($in{'acme'})) {
+		($acme) = grep { $_->{'id'} eq $in{'acme'} }
+			       &list_acme_providers();
+		$acme || &error($text{'letsencrypt_eacme'});
+		if ($acme->{'type'}) {
+			($prov) = grep { $_->{'id'} eq $acme->{'type'} }
+				       &list_known_acme_providers();
+			}
+		&$first_print(&text('letsencrypt_doing2a', $dlist,
+				    $prov ? $prov->{'desc'} : $acme->{'desc'}));
+		}
+	else {
+		&$first_print(&text('letsencrypt_doing2', $dlist));
+		}
 	&foreign_require("webmin");
 	$phd = &public_html_dir($d);
 	$before = &before_letsencrypt_website($d);
 	($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 					$d, \@dnames, 0, undef, undef,
-					$in{'ctype'}, undef, $in{'subset'});
+					$in{'ctype'}, $acme, $in{'subset'});
 	&after_letsencrypt_website($d, $before);
 	if (!$ok) {
 		# Always store last Certbot error
@@ -176,6 +190,7 @@ else {
 		$d->{'letsencrypt_nodnscheck'} = !$in{'dnscheck'};
 		$d->{'letsencrypt_subset'} = $in{'subset'};
 		$d->{'letsencrypt_email'} = $in{'email'};
+		$d->{'letsencrypt_id'} = $acme->{'id'} if ($acme);
 		&refresh_ssl_cert_expiry($d);
 		&save_domain($d);
 		&$second_print($text{'setup_done'});

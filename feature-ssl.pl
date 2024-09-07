@@ -2969,6 +2969,24 @@ foreach my $d (&list_domains()) {
 			}
 		}
 
+	# Find the SSL proivider name
+	my $pname;
+	if (defined(&list_acme_providers)) {
+		my ($acme) = grep { $_->{'id'} eq $d->{'letsencrypt_id'} }
+                                  &list_acme_providers();
+		if ($acme->{'type'}) {
+			my ($prov) = grep { $_->{'id'} eq $acme->{'type'} }
+				          &list_known_acme_providers();
+			$pname = $prov->{'desc'};
+			}
+		else {
+			$pname = $acme->{'desc'};
+			}
+		}
+	else {
+		$pname = $text{'acme_letsencrypt'};
+		}
+
 	# Time to attempt the renewal
 	$done++;
 	my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
@@ -2976,9 +2994,9 @@ foreach my $d (&list_domains()) {
 	&lock_domain($d);
 	if (!$ok) {
 		# Failed! Tell the user
-		$subject = $text{'letsencrypt_sfailed'};
-		$body = &text('letsencrypt_bfailed',
-			      join(", ", @$dnames), $err);
+		$subject = $text{'letsencrypt_sfaileda'};
+		$body = &text('letsencrypt_bfaileda',
+			      join(", ", @$dnames), $err, $pname);
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_failure'} = time();
 		$err =~ s/\r?\n/\t/g;
@@ -2988,7 +3006,8 @@ foreach my $d (&list_domains()) {
 	else {
 		# Tell the user it worked
 		$subject = $text{'letsencrypt_sdone'};
-		$body = &text('letsencrypt_bdone', join(", ", @$dnames));
+		$body = &text('letsencrypt_bdonea',
+			      join(", ", @$dnames), $pname);
 		}
 
 	# Send email

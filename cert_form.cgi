@@ -39,7 +39,7 @@ $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
 	  [ "chain", $text{'cert_tabchain'}, $prog."chain" ],
 	  &can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'}) ?
-		( [ "lets", $text{'cert_tablets'}, $prog."lets" ] ) :
+		( [ "lets", $text{'cert_tabacme'}, $prog."lets" ] ) :
 		( ),
 	);
 print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "current", 1);
@@ -419,7 +419,7 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 	&foreign_require("webmin");
 	$err = &webmin::check_letsencrypt();
 	print &ui_tabs_start_tab("mode", "lets");
-	print "$text{'cert_desc8'}<p>\n";
+	print "$text{'cert_desc9'}<p>\n";
 
 	if ($err) {
 		print &text('cert_elets', $err),"<p>\n";
@@ -433,7 +433,7 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 		}
 	else {
 		$phd = &public_html_dir($d);
-		print &text('cert_letsdesc', "<tt>$phd</tt>"),"<p>\n";
+		print &text('cert_acmedesc', "<tt>$phd</tt>"),"<p>\n";
 
 		print &ui_form_start("letsencrypt.cgi");
 		print &ui_hidden("dom", $in{'dom'});
@@ -461,6 +461,18 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 			    join("\n", split(/\s+/, $d->{'letsencrypt_dname'})),
 			     5, 60, undef, $d->{'letsencrypt_dname'} ? 0 : 1).
 			  $wildcb, $dis0 ] ]));
+
+		# SSL certificate provider
+		if (defined(&list_acme_providers)) {
+			print &ui_table_row($text{'cert_acmes'},
+				&ui_select("acme", $d->{'letsencrypt_id'},
+					[ map { [ $_->{'id'}, $_->{'desc'} ] }
+					      &list_acme_providers() ]));
+			}
+		else {
+			print &ui_table_row($text{'cert_acmes'},
+				$text{'acme_letsencrypt'});
+			}
 
 		# Setup automatic renewal?
 		print &ui_table_row($text{'cert_letsrenew2'},
