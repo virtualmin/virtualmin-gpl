@@ -8185,6 +8185,7 @@ newacmes_return=list of SSL providers
 
 acme_letsencrypt=Let's Encrypt
 acme_zerossl=ZeroSSL
+acme_gcp=Google Trust Services
 acme_type=Provider
 acme_desc=Description
 acme_doms=Used by domains
@@ -8209,5 +8210,8 @@ acme_err=Failed to save SSL provider
 acme_err2=Failed to delete SSL provider
 acme_einuse=Provider is still in use by $1 domains
 acme_eurl=Missing or invalid-looking provider URL
+acme_default=The default Let's Encrypt provider cannot be removed
+acme_ekey=The selected SSL provider requires an EAB key
+acme_ehmac=The selected SSL provider requires an EAB HMAC
 
 __norefs=1
