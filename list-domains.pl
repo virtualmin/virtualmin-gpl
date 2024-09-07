@@ -732,33 +732,35 @@ if ($multi) {
 			print "    SSL cert expiry time: ",$exp,"\n";
 			}
 		if ($d->{'letsencrypt_renew'} || $d->{'letsencrypt_last'}) {
-			print "    Lets Encrypt renewal: ",
+			print "    SSL provider renewal: ",
 			    ($d->{'letsencrypt_renew'} ? "Enabled"
 						       : "Disabled"),"\n";
-			print "    Let's Encrypt email: ",
+			print "    SSL provider email: ",
 			    ($d->{'letsencrypt_email'} == 0 ? "Always" :
 			     $d->{'letsencrypt_email'} == 1 ? "On error" :
 							      "Never"),"\n";
 			}
 		if ($d->{'letsencrypt_last'}) {
-			print "    Lets Encrypt cert issued: ",
+			print "    SSL provider cert issued: ",
 			    &make_date($d->{'letsencrypt_last'}),"\n";
 			}
 		if ($d->{'letsencrypt_dname'}) {
-			print "    Lets Encrypt domain: ",
+			print "    SSL provider domain: ",
 			    $d->{'letsencrypt_dname'},"\n";
 			}
 		if (defined($d->{'letsencrypt_nodnscheck'})) {
-			print "    Lets Encrypt DNS check: ",
+			print "    SSL provider DNS check: ",
 			    ($d->{'letsencrypt_nodnscheck'} ? "Skip" : "Filter"),"\n";
 			}
 		if (defined($d->{'letsencrypt_subset'})) {
-			print "    Lets Encrypt subset mode: ",
+			print "    SSL provider subset mode: ",
 			    ($d->{'letsencrypt_subset'} ? "Yes" : "No"),"\n";
 			}
 		if ($d->{'letsencrypt_id'} && %acmes) {
 			my $acme = $acmes{$d->{'letsencrypt_id'}};
-			print "    ACME SSL provider: ",
+			print "    SSL provider ID: ",
+			      $d->{'letsencrypt_id'},"\n";
+			print "    SSL provider type: ",
 			      ($acme->{'type'} || $acme->{'url'}),"\n";
 			}
 
