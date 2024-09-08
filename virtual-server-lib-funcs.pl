@@ -8666,7 +8666,13 @@ if ($valid) {
 my $phd = &public_html_dir($d);
 my $before = &before_letsencrypt_website($d);
 my @beforecerts = &get_all_domain_service_ssl_certs($d);
-my @leargs = ($d, \@dnames, undef, undef, undef, undef, undef,
+my $acme;
+if ($tmpl->{'web_acme'} && defined(&list_acme_providers)) {
+	($acme) = grep { $_->{'id'} eq $tmpl->{'web_acme'} }
+		       &list_acme_providers();
+	}
+$d->{'letsencrypt_id'} = $acme->{'id'} if ($acme);
+my @leargs = ($d, \@dnames, undef, undef, undef, undef, $acme,
 	      $d->{'letsencrypt_subset'});
 my ($ok, $cert, $key, $chain) =
 	&request_domain_letsencrypt_cert(@leargs);
@@ -9625,6 +9631,7 @@ push(@rv, { 'id' => 0,
 	    'web_urlsslport' => $config{'web_urlsslport'},
 	    'web_sslprotos' => $config{'web_sslprotos'},
 	    'web_alias' => $config{'alias_mode'},
+	    'web_acme' => $config{'web_acme'},
 	    'web_webmin_ssl' => $config{'webmin_ssl'},
 	    'web_usermin_ssl' => $config{'usermin_ssl'},
 	    'web_webmail' => $config{'web_webmail'},
@@ -9981,6 +9988,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'web_urlport'} = $tmpl->{'web_urlport'};
 	$config{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
 	$config{'web_sslprotos'} = $tmpl->{'web_sslprotos'};
+	$config{'web_acme'} = $tmpl->{'web_acme'};
 	$config{'webmin_ssl'} = $tmpl->{'web_webmin_ssl'};
 	$config{'usermin_ssl'} = $tmpl->{'web_usermin_ssl'};
 	$config{'web_webmail'} = $tmpl->{'web_webmail'};
@@ -10316,7 +10324,7 @@ if (!$tmpl->{'default'}) {
 	local %done;
 	foreach $p ("dns_spf", "dns_sub", "dns_master", "dns_mx", "dns_dmarc",
 		    "dns_cloud", "dns_slaves",
-		    "web_webmail", "web_admin", "web_http2",
+		    "web_acme", "web_webmail", "web_admin", "web_http2",
 		    "web_redirects", "web_sslredirect", "web_php",
 		    "web", "dns", "ftp", "mail", "frame", "user_aliases",
 		    "ugroup", "sgroup", "quota", "uquota", "ushell", "ujail",
@@ -10355,7 +10363,7 @@ if (!$tmpl->{'default'}) {
 				next if ($p eq "php" &&
 					 $k =~ /^php_(fpm|sock)/);
 				next if ($p eq "web" &&
-					 $k =~ /^web_(webmail|admin|http2|redirects|sslredirect|php)/);
+					 $k =~ /^web_(webmail|admin|http2|redirects|sslredirect|php|acme)/);
 				next if ($p eq "mysql" &&
 					 $k =~ /^mysql_(hosts|mkdb|suffix|chgrp|nopass|wild|charset|nouser)/);
 				next if ($done{$k});

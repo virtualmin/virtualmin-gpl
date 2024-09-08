@@ -3000,6 +3000,7 @@ foreach my $d (&list_domains()) {
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_failure'} = time();
 		$err =~ s/\r?\n/\t/g;
+		$d->{'letsencrypt_last_err'} = $err;
 		}
 	else {
 		# Tell the user it worked
@@ -3583,6 +3584,16 @@ foreach my $t ("key", "cert", "ca", "combined", "everything") {
 		&ui_radio_table("web_certmode_".$t, $mode, \@opts));
 	}
 
+# SSL cert provider
+if (defined(&list_acme_providers)) {
+	print &ui_table_row(
+		&hlink($text{'newweb_acme'}, "template_web_acme"),
+		&ui_select("web_acme", $tmpl->{'web_acme'},
+			   [ [ "", $text{'default'} ],
+			     map { [ $_->{'id'}, $_->{'desc'} ] }
+				 &list_acme_providers() ]));
+	}
+
 print &ui_table_hr();
 
 # Setup matching Webmin/Usermin SSL certs
@@ -3630,6 +3641,9 @@ foreach my $t ("key", "cert", "ca", "combined", "everything") {
 		$v =~ /\S/ || &error($text{'newweb_cert_efile'});
 		}
 	$tmpl->{'cert_'.$t.'_tmpl'} = $v;
+	}
+if (defined($in{'web_acme'})) {
+	$tmpl->{'web_acme'} = $in{'web_acme'};
 	}
 
 # Save options to setup per-service SSL certs
