@@ -178,6 +178,10 @@ if ($acmeid) {
 			 $_->{'type'} eq $acmeid } &list_acme_providers();
 	$acme || &usage("No ACME provider with ID of type $acmeid found");
 	}
+elsif (defined(&list_acme_providers)) {
+	($acme) = grep { $_->{'id'} eq $d->{'letsencrypt_id'} }
+		       &list_acme_providers();
+	}
 
 # Build a list of the domains being validated
 my @cdoms = ( $d );
@@ -249,7 +253,13 @@ my $merr = &making_changes();
 # Request the cert
 &foreign_require("webmin");
 $phd = &public_html_dir($d);
-&$first_print("Requesting SSL certificate for ".join(" ", @dnames)." ..");
+if ($acme) {
+	&$first_print("Requesting SSL certificate for ".join(" ", @dnames).
+		      " from $acme->{'desc'} ..");
+	}
+else {
+	&$first_print("Requesting SSL certificate for ".join(" ", @dnames)." ..");
+	}
 $before = &before_letsencrypt_website($d);
 @beforecerts = &get_all_domain_service_ssl_certs($d);
 ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
@@ -287,6 +297,7 @@ else {
 	$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
 	$d->{'letsencrypt_subset'} = $subset;
 	$d->{'letsencrypt_email'} = $email;
+	delete($d->{'letsencrypt_last_err'});
 	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);
 

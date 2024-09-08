@@ -3000,15 +3000,15 @@ foreach my $d (&list_domains()) {
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_failure'} = time();
 		$err =~ s/\r?\n/\t/g;
-		$d->{'letsencrypt_last_err'} = $err;
-		&save_domain($d);
 		}
 	else {
 		# Tell the user it worked
+		delete($d->{'letsencrypt_last_err'});
 		$subject = $text{'letsencrypt_sdone'};
 		$body = &text('letsencrypt_bdonea',
 			      join(", ", @$dnames), $pname);
 		}
+	&save_domain($d);
 
 	# Send email
 	my $from = &get_global_from_address($d);

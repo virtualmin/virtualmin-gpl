@@ -28,6 +28,12 @@ if ($d->{'ssl_same'}) {
 	return;
 	}
 
+# Get ACME providers, if there are any
+my @provs;
+if (defined(&list_acme_providers)) {
+	@provs = grep { &can_acme_provider($_) } &list_acme_providers();
+	}
+
 # Show tabs
 $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 @tabs = ( [ "current", $text{'cert_tabcurrent'}, $prog."current" ],
@@ -38,7 +44,9 @@ $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 		( ),
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
 	  [ "chain", $text{'cert_tabchain'}, $prog."chain" ],
-	  &can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'}) ?
+	  &can_edit_letsencrypt() &&
+	  (@provs || !defined(&list_acme_providers)) &&
+	  (&domain_has_website($d) || $d->{'dns'}) ?
 		( [ "lets", $text{'cert_tabacme'}, $prog."lets" ] ) :
 		( ),
 	);
@@ -472,7 +480,7 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 			print &ui_table_row($text{'cert_acmes'},
 				&ui_select("acme", $d->{'letsencrypt_id'},
 					[ map { [ $_->{'id'}, $_->{'desc'} ] }
-					      &list_acme_providers() ]));
+					      @provs ]));
 			}
 		else {
 			print &ui_table_row($text{'cert_acmes'},

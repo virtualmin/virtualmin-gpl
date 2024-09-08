@@ -138,6 +138,8 @@ else {
 		($acme) = grep { $_->{'id'} eq $in{'acme'} }
 			       &list_acme_providers();
 		$acme || &error($text{'letsencrypt_eacme'});
+		&can_acme_provider($acme) ||
+			&error($text{'letsencrypt_eacme2'});
 		if ($acme->{'type'}) {
 			($prov) = grep { $_->{'id'} eq $acme->{'type'} }
 				       &list_known_acme_providers();
@@ -191,6 +193,7 @@ else {
 		$d->{'letsencrypt_subset'} = $in{'subset'};
 		$d->{'letsencrypt_email'} = $in{'email'};
 		$d->{'letsencrypt_id'} = $acme->{'id'} if ($acme);
+		delete($d->{'letsencrypt_last_err'});
 		&refresh_ssl_cert_expiry($d);
 		&save_domain($d);
 		&$second_print($text{'setup_done'});
