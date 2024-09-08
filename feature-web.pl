@@ -3548,11 +3548,12 @@ if ($p && $p ne 'web') {
 			    $force);
 	}
 &require_apache();
-my @ports = ( $d->{'web_port'} );
-push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+my $reald = $d->{'alias'} ? &get_domain($d->{'alias'}) : $d;
+my @ports = ( $reald->{'web_port'} );
+push(@ports, $reald->{'web_sslport'}) if ($reald->{'ssl'});
 
 my $fixed = 0;
-my @redirects = &list_redirects($d);
+my @redirects = &list_redirects($reald);
 foreach my $r ('webmail', 'admin') {
 	next if (!$tmpl->{'web_'.$r} && !$force);
 
@@ -3567,8 +3568,7 @@ foreach my $r ('webmail', 'admin') {
 		my ($port, $proto);
 		if ($r eq 'webmail') {
 			# From Usermin
-			($port, $proto) =
-				&get_usermin_miniserv_port_proto();
+			($port, $proto) = &get_usermin_miniserv_port_proto();
 			}
 		else {
 			# From Webmin
@@ -3588,14 +3588,14 @@ foreach my $r ('webmail', 'admin') {
 		       'https' => 1,
 		       'alias' => 0 };
 		$r = &add_wellknown_redirect($r);
-		&create_redirect($d, $r);
+		&create_redirect($reald, $r);
 		}
 
 	# Add a ServerAlias directive
 	my $fixedone = 0;
 	foreach my $port (@ports) {
 		my ($virt, $vconf, $conf) =
-			&get_apache_virtual($d->{'dom'}, $port);
+			&get_apache_virtual($reald->{'dom'}, $port);
 		next if (!$virt);
 
 		# Add the ServerAlias
@@ -3640,10 +3640,11 @@ foreach my $r (reverse(@redirects)) {
 # Fix up the ServerAlias directives
 my $fixed = 0;
 &require_apache();
-my @ports = ( $d->{'web_port'} );
-push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+my $reald = $d->{'alias'} ? &get_domain($d->{'alias'}) : $d;
+my @ports = ( $reald->{'web_port'} );
+push(@ports, $reald->{'web_sslport'}) if ($reald->{'ssl'});
 foreach my $port (@ports) {
-	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($reald->{'dom'}, $port);
 	next if (!$virt);
 	my @sa = &apache::find_directive("ServerAlias", $vconf);
 	my @newsa;
@@ -3677,7 +3678,8 @@ if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_get_web_webmail_redirect", $d);
 	}
 my @rv;
-my @redirects = &list_redirects($d);
+my $reald = $d->{'alias'} ? &get_domain($d->{'alias'}) : $d;
+my @redirects = &list_redirects($reald);
 foreach my $r (@redirects) {
 	if ($r->{'host'} eq 'admin.'.$d->{'dom'} ||
 	    $r->{'host'} eq 'webmail.'.$d->{'dom'}) {
