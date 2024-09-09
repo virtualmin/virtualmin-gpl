@@ -6213,6 +6213,15 @@ foreach my $tmpl (&list_templates()) {
 &execute_command(
     "cd ".quotemeta($plans_dir).
     " && ".&make_tar_command("cf", $file."_plans", "."));
+
+# Save ACME providers
+if (defined(&list_acme_providers)) {
+	&make_dir($acme_providers_dir, 0700);
+	&execute_command(
+	    "cd ".quotemeta($acme_providers_dir).
+	    " && ".&make_tar_command("cf", $file."_acmes", "."));
+	}
+
 &$second_print($text{'setup_done'});
 }
 
@@ -6283,9 +6292,18 @@ foreach my $tmpl (&list_templates()) {
 
 # Restore plans, if included
 if (-r $file."_plans") {
+	&make_dir($plans_dir, 0700);
 	&execute_command(
 	    "cd ".quotemeta($plans_dir)." && ".
 	    &make_tar_command("xf", $file."_plans"));
+	}
+
+# Restore ACME providers if included
+if (-r $file."_acmes" && defined(&list_acme_providers)) {
+	&make_dir($acme_providers_dir, 0700);
+	&execute_command(
+	    "cd ".quotemeta($acme_providers_dir)." && ".
+	    &make_tar_command("xf", $file."_acmes"));
 	}
 
 &$second_print($text{'setup_done'});
