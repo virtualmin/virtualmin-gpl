@@ -8212,6 +8212,7 @@ acme_hmac=EAB HMAC for provider
 acme_err=Failed to save SSL provider
 acme_err2=Failed to delete SSL provider
 acme_einuse=Provider is still in use by $1 domains
+acme_einuse2=Provider is still in use by $1 templates
 acme_eurl=Missing or invalid-looking provider URL
 acme_default=The default Let's Encrypt provider cannot be removed
 acme_ekey=The selected SSL provider requires an EAB key
