@@ -4549,7 +4549,7 @@ scripts_kit_ewp=Perl : Failed to parse JSON output from WP-CLI command
 scripts_kit_elog=PHP  : Failed running $1 command. See the log file at $2
 scripts_kit_wp_applying=Applying $1 settings ..
 scripts_kit_eunchanged=.. unchanged : $1
-scripts_kit_wp_eapplying=.. error : $1
+scripts_kit_err=.. error : $1
 scripts_kit_wp_sapplying=.. skipped
 scripts_kit_not_set=Not set
 scripts_kit_unlimited=Unlimited
@@ -4709,6 +4709,8 @@ scripts_kit_wp_apply_restore=Restoring selected backups ..
 scripts_kit_wp_apply_restore_x=Extracting <tt>$1</tt> file ..
 scripts_kit_wp_apply_restore_eopen=.. failed to open temporary directory : $1
 scripts_kit_wp_apply_restore_er=.. done, with errors
+scripts_kit_wp_apply_restore_db=Restoring database from backup ..
+scripts_kit_wp_apply_restore_files=Restoring files from backup ..
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up
