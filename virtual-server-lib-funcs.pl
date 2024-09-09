@@ -12945,17 +12945,17 @@ if (!$rv) {
 return $rv;
 }
 
-# extract_compressed_file(file, [destdir])
+# extract_compressed_file(file, [destdir], [&dom])
 # Extracts the contents of some compressed file to the given directory. Returns
 # undef if OK, or an error message on failure.
 # If the directory is not given, a test extraction is done instead.
 sub extract_compressed_file
 {
-local ($file, $dir) = @_;
-local $format = &compression_format($file);
-local $tar = &get_tar_command();
-local $bunzip2 = &get_bunzip2_command();
-local @needs = ( undef,
+my ($file, $dir, $d) = @_;
+my $format = &compression_format($file);
+my $tar = &get_tar_command();
+my $bunzip2 = &get_bunzip2_command();
+my @needs = ( undef,
 		 [ "gunzip", $tar ],
 		 [ "uncompress", $tar ],
 		 [ $bunzip2, $tar ],
@@ -12967,8 +12967,8 @@ foreach my $n (@{$needs[$format]}) {
 	my ($noargs) = split(/\s+/, $n);
 	&has_command($noargs) || return &text('addstyle_ecmd', "<tt>$n</tt>");
 	}
-local ($qfile, $qdir) = ( quotemeta($file), quotemeta($dir) );
-local @cmds;
+my ($qfile, $qdir) = ( quotemeta($file), quotemeta($dir) );
+my @cmds;
 if ($dir) {
 	# Actually extract
 	@cmds = ( undef,
@@ -13000,7 +13000,15 @@ else {
 		  );
 	}
 $cmds[$format] || return "Unknown compression format";
-local $out = &backquote_command("($cmds[$format]) 2>&1 </dev/null");
+my $out;
+if ($d) {
+	# Run as domain owner
+	$out = &run_as_domain_user($d, "($cmds[$format]) 2>&1 </dev/null");
+	}
+else {
+	# Run as root
+	$out = &backquote_command("($cmds[$format]) 2>&1 </dev/null");
+	}
 return $? ? &text('addstyle_ecmdfailed',
 		  "<tt>".&html_escape($out)."</tt>") : undef;
 }
