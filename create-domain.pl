@@ -72,9 +72,10 @@ used. However, you can override this with the C<--cloud-dns> flag followed by
 either C<local> to host locally, C<services> to use Cloudmin services, or
 the ID of one of the supported providers like C<route53> or C<google>.
 
-Use the C<--letsencrypt> flag to request an auto-renewable Let's Encrypt
-certificate. To do the same but skip connectivity checks, use 
-C<--letsencrypt-always> flag instead.
+Use the C<--acme> flag to request an auto-renewable SSL certificate from
+the provider set in the server template, which defaults to Let's
+Encrypt. To do the same but skip connectivity checks, use 
+C<--acme-always> flag instead.
 
 The C<--proxy> parameter can be used to have the website proxy all requests
 to another URL, which must follow C<--proxy>. Alternately, the C<--framefwd>
@@ -354,10 +355,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--skip-warnings") {
 		$skipwarnings = 1;
 		}
-	elsif ($a eq "--letsencrypt") {
+	elsif ($a eq "--letsencrypt" || $a eq "--acme") {
 		$letsencrypt = 1;
 		}
-	elsif ($a eq "--letsencrypt-always") {
+	elsif ($a eq "--letsencrypt-always" || $a eq "--acme-always") {
 		$letsencrypt = 2;
 		}
 	elsif ($a eq "--enable-jail") {
@@ -1130,8 +1131,8 @@ foreach $f (&list_feature_plugins()) {
 		}
 	}
 print "                        [--skip-warnings]\n";
-print "                        [--letsencrypt]\n";
-print "                        [--letsencrypt-always]\n";
+print "                        [--acme]\n";
+print "                        [--acme-always]\n";
 print "                        [--field-name value]*\n";
 print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
