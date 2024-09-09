@@ -8189,6 +8189,8 @@ newacmes_return=list of SSL providers
 acme_letsencrypt=Let's Encrypt
 acme_zerossl=ZeroSSL
 acme_gcp=Google Trust Services
+acme_buypass=Buypass
+acme_sslcom=SSL.com
 acme_type=Provider
 acme_desc=Description
 acme_doms=Used by domains
@@ -8222,5 +8224,6 @@ acme_can0=All users
 acme_can1=Resellers
 acme_can2=Master admin only
 acme_edefault=The default Let's Encrypt provider cannot be edited
+acme_website=SSL provider's website
 
 __norefs=1
