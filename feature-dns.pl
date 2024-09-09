@@ -2902,7 +2902,7 @@ foreach my $r (@$recs) {
 		}
 	if ($r->{'type'} eq 'MX') {
 		# Fix mail server in MX record
-		$r->{'values'}->[1] =~ s/$olddom/$newdom/;
+		$r->{'values'}->[1] =~ s/$olddom(\.disabled)?\.$/$newdom$1\./;
 		}
 	if ($fn) {
 		&modify_dns_record($recs, $fn, $r);
