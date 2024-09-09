@@ -121,6 +121,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--real" || $a eq "--desc") {
 		$real = shift(@ARGV);
 		}
+	elsif ($a eq "--firstname") {
+		$firstname = shift(@ARGV);
+		&supports_firstname() || &usage("This system does not support setting first names for users");
+		}
+	elsif ($a eq "--surname") {
+		$surname = shift(@ARGV);
+		&supports_firstname() || &usage("This system does not support setting surnames for users");
+		}
 	elsif ($a eq "--ftp") {
 		$shell = $ftp_shell;
 		}
@@ -144,10 +152,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mail-quota") {
 		$mquota = shift(@ARGV);
 		$mquota = 0 if ($mquota eq "UNLIMITED");
-		}
-	elsif ($a eq "--qmail-quota") {
-		$qquota = shift(@ARGV);
-		$qquota = 0 if ($qquota eq "UNLIMITED");
 		}
 	elsif ($a eq "--mysql") {
 		$db = shift(@ARGV);
@@ -213,7 +217,7 @@ $user = &create_initial_user($d, 0, $web);
 $username = &remove_userdom($username, $d);
 
 # Make sure all needed args are set
-if ($user->{'unix'} && !$user->{'noquota'}) {
+if (!$user->{'noquota'}) {
 	if (&has_home_quotas() && defined($quota)) {
 		$quota =~ /^\d+$/ || &usage("Quota must be a number");
 		}
@@ -221,14 +225,9 @@ if ($user->{'unix'} && !$user->{'noquota'}) {
 		$mquota =~ /^\d+$/ || &usage("Quota must be a number");
 		}
 	}
-if ($user->{'mailquota'}) {
-	!$qquota || $qquota =~ /^\d+$/ || usage("Mail quota must be a number");
-	}
 $err = &valid_mailbox_name($username);
 &usage($err) if ($err);
-if ($user->{'person'}) {
-	$real =~ /^[^:]*$/ || usage($text{'user_ereal'});
-	}
+$real =~ /^[^:]*$/ || usage($text{'user_ereal'});
 foreach $e (@extra) {
 	$user->{'noextra'} && &usage("This user cannot have extra email addresses");
 	$e = lc($e);
@@ -262,19 +261,17 @@ foreach $g (@groups) {
 &build_taken(\%taken, \%utaken);
 
 # Construct user object
-if ($user->{'unix'} && !$user->{'webowner'}) {
+if (!$user->{'webowner'}) {
 	$user->{'uid'} = &allocate_uid(\%taken);
 	}
 else {
 	$user->{'uid'} = $d->{'uid'};
 	}
 $user->{'gid'} = $d->{'gid'} || $d->{'ugid'};
-if ($user->{'person'}) {
-	$user->{'real'} = $real;
-	}
-if ($user->{'unix'}) {
-	$user->{'shell'} = $shell->{'shell'};
-	}
+$user->{'real'} = $real;
+$user->{'firstname'} = $firstname;
+$user->{'surname'} = $surname;
+$user->{'shell'} = $shell->{'shell'};
 if (!$user->{'fixedhome'}) {
 	if (defined($home)) {
 		# Home was set manually
@@ -341,10 +338,7 @@ if (!$user->{'noprimary'}) {
 if (defined($recovery)) {
 	$user->{'recovery'} = $recovery;
 	}
-if ($user->{'mailquota'}) {
-	$user->{'qquota'} = $qquota;
-	}
-if ($user->{'unix'} && !$user->{'noquota'}) {
+if (!$user->{'noquota'}) {
 	# Set quotas, if not using the defaults
 	$pd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 	if (defined($quota)) {
@@ -364,19 +358,16 @@ $user->{'dbs'} = \@dbs if (@dbs);
 $user->{'secs'} = \@groups;
 $user->{'nospam'} = $nospam;
 
-if ($user->{'unix'}) {
-	# Check for a Unix clash
-	$mclash = &check_clash($username, $d->{'dom'});
-	if ($utaken{$user->{'user'}} ||
-	    $user->{'email'} && $mclash ||
-	    !$user->{'email'} && $mclash == 2) {
-		usage($text{'user_eclash'});
-		}
+# Check for a Unix clash
+$mclash = &check_clash($username, $d->{'dom'});
+if ($utaken{$user->{'user'}} ||
+    $user->{'email'} && $mclash ||
+    !$user->{'email'} && $mclash == 2) {
+	usage($text{'user_eclash'});
 	}
 
 # Check for clash within this domain
-($clash) = grep { $_->{'user'} eq $username &&
-		  $_->{'unix'} == $user->{'unix'} } @users;
+($clash) = grep { $_->{'user'} eq $username } @users;
 $clash && &usage($text{'user_eclash2'});
 
 if (!$user->{'noextra'}) {
@@ -474,19 +465,16 @@ if (&has_home_quotas()) {
 if (&has_mail_quotas()) {
 	print "                      [--mail-quota quota-in-blocks|\"UNLIMITED\"]\n";
 	}
-if (&has_server_quotas()) {
-	print "                       --qmail-quota quota-in-bytes|\"UNLIMITED\"\n";
+print "                      [--real real-name-for-new-user]\n";
+if (&supports_firstname()) {
+	print "                      [--firstname first-name]\n";
+	print "                      [--surname surname]\n";
 	}
-if (!$user || $user->{'person'}) {
-	print "                      [--real real-name-for-new-user]\n";
+print "                      [--ftp]\n";
+if ($jailed_shell) {
+	print "                      [--jail-ftp]\n";
 	}
-if (!$user || $user->{'unix'}) {
-	print "                      [--ftp]\n";
-	if ($jailed_shell) {
-		print "                      [--jail-ftp]\n";
-		}
-	print "                      [--shell /path/to/shell]\n";
-	}
+print "                      [--shell /path/to/shell]\n";
 print "                      [--noemail]\n";
 print "                      [--db-only <--mysql db>*]\n";
 print "                      [--webserver-only <--webserver-dir path>*]\n";

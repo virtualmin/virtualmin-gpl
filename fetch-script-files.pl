@@ -80,11 +80,12 @@ foreach $s (@scripts) {
 				# Looks OK .. but was it really a file?
 				$fmt = &compression_format($temp);
 				$cont = undef;
-				if (!$fmt && $temp =~ /\.(pl|php)$/i) {
+				if (!$fmt && $temp =~ /\.(pl|php|phar)$/i) {
 					$cont = &read_file_contents($temp);
 					}
 				if (!$fmt &&
 				    $cont !~ /^\#\!\s*\S+(perl|php)/i &&
+				    $cont !~ /^\#\!\s*\S+\/env\s+(perl|php)/i &&
 				    $cont !~ /^\s*<\?php/i) {
 					print "status: BADFILE\n";
 					}

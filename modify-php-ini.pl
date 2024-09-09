@@ -5,10 +5,10 @@
 Changes PHP variables for some or all domains.
 
 This command can be used to change the value of a PHP configuration variable
-(set in the php.ini file and Apache configuration) for one or many virtual
-servers at once. The servers to update can be selected with the C<--domain> or
-C<--user> flags, or you can choose to modify them all with the C<--all-domains>
-option.
+(set in the php.ini file, FPM .conf file and Apache configuration) for one or
+many virtual servers at once. The servers to update can be selected with the
+C<--domain> or C<--user> flags, or you can choose to modify them all with the
+C<--all-domains> option.
 
 If your system supports multiple PHP versions, you can limit the changes
 to the config for a specific version with the C<--php-version> flag followed

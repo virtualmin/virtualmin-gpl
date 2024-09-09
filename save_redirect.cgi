@@ -45,7 +45,7 @@ else {
 		}
 	elsif ($in{'mode'} == 3) {
 		# Redirect to a URL path on this host
-		$in{'urlpath'} =~ /^\/\S+$/ ||
+		$in{'urlpath'} =~ /^\/\S*$/ ||
 			&error($text{'redirect_eurlpath'});
 		$r->{'dest'} = $in{'urlpath'};
 		$r->{'alias'} = 0;

@@ -141,7 +141,6 @@ edit_rename=Modificar nome do domínio
 edit_proxy=Editar Site Proxy
 edit_redirects=Redirecionamento de site
 edit_redirectsdesc=Edite redirecionamentos para caminhos de URL sob o site do servidor para outros domínios ou diretórios.
-edit_scripts=Instalar aplicativos
 edit_spamvirus=Entrega de Spam e Vírus
 edit_spf=DNS Opções
 edit_recordsdesc=Criar, editar e excluir registros de DNS para este servidor virtual.
@@ -225,14 +224,9 @@ databases_hosts_fmt=Cada nome ou IP deve ser digitado em uma linha separada.
 database_size=Espaço ocupado
 database_tables=Número de tabelas
 
-scripts_uok2=Desinstalar agora
-scripts_uok=Desinstalar aplicativo
-scripts_unsupname=Aplicativos para instalar
 scripts_unsupver=Versão
-scripts_unsupdesc=Este formulário permite que você instale uma versão do script que não foi testado por Virtualmin, ou não é mais suportado. Esteja ciente de que isso pode não funcionar, e poderia até quebrar outras páginas no servidor virtual.
 
 addscripts_elocal=Arquivo local não existe
-addscripts_done=$1 instaladores de script foi adicionado com sucesso a partir do arquivo especificado.
 
 newquotas_nobody=Ninguém
 newquotas_mailbox_send=Notificar e-mail e usuários FTP ?

@@ -64,27 +64,26 @@ foreach $f (&mount::files_to_lock()) {
 	&unlock_file($f);
 	}
 
-# Modify the domain user's home dir and shell
-&require_useradmin();
-my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } &list_all_users();
-if (!$uinfo) {
-	return &text('jailkit_euser', $d->{'user'});
-	}
-my $olduinfo = { %$uinfo };
-if ($uinfo->{'shell'} !~ /\/jk_chrootsh$/) {
-	$d->{'unjailed_shell'} = $uinfo->{'shell'};
-	$uinfo->{'shell'} = &has_command("jk_chrootsh") ||
-			    "/usr/sbin/jk_chrootsh";
-	}
-$uinfo->{'home'} = $dir."/.".$d->{'home'};
-&foreign_call($usermodule, "set_user_envs", $uinfo,
-	      'MODIFY_USER', $plainpass, [], $olduinfo);
-&foreign_call($usermodule, "making_changes");
-&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
-&foreign_call($usermodule, "made_changes");
-
 # Create a fake /etc/passwd file in the jail
 &create_jailkit_passwd_file($d);
+
+# Modify the domain user's home dir and shell
+&require_useradmin();
+foreach my $uinfo (&list_domain_users($d, 0, 0, 1, 1, 0)) {
+	my $duser = $uinfo->{'user'};
+	my $olduinfo = { %$uinfo };
+	if ($uinfo->{'shell'} !~ /\/jk_chrootsh$/) {
+		$uinfo->{'shell'} = &has_command("jk_chrootsh") ||
+				    "/usr/sbin/jk_chrootsh";
+		}
+	$uinfo->{'home'} = $dir."/.".$uinfo->{'home'}
+		if ($uinfo->{'home'} !~ /^\Q$dir\E\/\./);
+	&foreign_call($usermodule, "set_user_envs", $uinfo,
+		'MODIFY_USER', $plainpass, [], $olduinfo);
+	&foreign_call($usermodule, "making_changes");
+	&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
+	&foreign_call($usermodule, "made_changes");
+	}
 
 # Set chroot for all domains' PHP-FPM configs
 foreach my $pd ($d, &get_domain_by("parent", $d->{'id'})) {
@@ -153,25 +152,20 @@ foreach my $pd ($d, &get_domain_by("parent", $d->{'id'})) {
 
 # Switch back the user's shell and home dir
 &require_useradmin();
-my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } &list_all_users();
-if (!$uinfo) {
-	return &text('jailkit_euser', $d->{'user'});
-	}
-my $olduinfo = { %$uinfo };
-if ($uinfo->{'shell'} =~ /\/jk_chrootsh$/) {
-	my $tmpl = &get_template($d->{'template'});
-	my $defshell = $tmpl->{'ushell'};
-	if ($defshell eq 'none' || !$defshell) {
-		$defshell = &default_available_shell('owner');
+foreach my $uinfo (&list_domain_users($d, 0, 0, 1, 1, 0)) {
+	my $duser = $uinfo->{'user'};
+	my $olduinfo = { %$uinfo };
+	if ($uinfo->{'shell'} =~ /\/jk_chrootsh$/) {
+		$uinfo->{'shell'} = $uinfo->{'jailed'}->{'shell'} ||
+				    '/bin/false'; # must never happen
 		}
-	$uinfo->{'shell'} = $d->{'unjailed_shell'} || $defshell;
-	}
-if ($uinfo->{'home'} =~ s/^\Q$dir\E\/\.//) {
-	&foreign_call($usermodule, "set_user_envs", $uinfo,
-		      'MODIFY_USER', $plainpass, [], $olduinfo);
-	&foreign_call($usermodule, "making_changes");
-	&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
-	&foreign_call($usermodule, "made_changes");
+	if ($uinfo->{'home'} =~ s/^\Q$dir\E\/\.//) {
+		&foreign_call($usermodule, "set_user_envs", $uinfo,
+			'MODIFY_USER', $plainpass, [], $olduinfo);
+		&foreign_call($usermodule, "making_changes");
+		&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
+		&foreign_call($usermodule, "made_changes");
+		}
 	}
 
 # Remove the BIND mount
@@ -217,7 +211,7 @@ return $uinfo && $uinfo->{'home'} =~ /^\Q$dir\E\/\.\// ? $dir : undef;
 }
 
 # create_jailkit_passwd_file(&domain)
-# Create limit /etc/passwd, /etc/shadow and /etc/group files inside a jail
+# Create limited /etc/passwd, /etc/shadow and /etc/group files inside a jail
 # for a domain's users
 sub create_jailkit_passwd_file
 {
@@ -245,15 +239,13 @@ foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 # Write out chosen users to the jail passwd file
 my $pfile = $dir."/etc/passwd";
 my $sfile = $dir."/etc/shadow";
+my %jail_shell = map { $_->{'user'} => $_->{'shell'} }
+		     &get_domain_jailed_users_shell($d);
 &open_lock_tempfile(PASSWD, ">$pfile");
 &open_lock_tempfile(SHADOW, ">$sfile");
 foreach my $u (@ucreate) {
 	my $shell = $u->{'shell'};
-	if ($shell =~ /\/jk_chrootsh$/) {
-		# Put back real shell
-		$shell = $u->{'domainowner'} ? $d->{'unjailed_shell'}
-					     : "/bin/false";
-		}
+	$shell = $jail_shell{$u->{'user'}} if ($shell =~ /\/jk_chrootsh$/);
 	my $home = $u->{'home'};
 	$home =~ s/^\Q$dir\E\/\.//;
 	my @pline = ( $u->{'user'}, "x", $u->{'uid'}, $u->{'gid'},
@@ -275,6 +267,48 @@ foreach my $g (@gcreate) {
 	&print_tempfile(GROUP, join(":", @gline),"\n");
 	}
 &close_tempfile(GROUP);
+}
+
+# rename_jailkit_passwd_file(&domain, old-user, new-user)
+# Rename one user in a jail's /etc/passwd file
+sub rename_jailkit_passwd_file
+{
+my ($d, $olduser, $newuser) = @_;
+my $dir = &domain_jailkit_dir($d);
+foreach my $file ($dir."/etc/passwd", $dir."/etc/shadow") {
+	next if (!-r $file);
+	&lock_file($file);
+	my $lref = &read_file_lines($file);
+	foreach my $l (@$lref) {
+		if ($l =~ /^\Q$olduser\E:/) {
+			$l =~ s/^\Q$olduser\E/$newuser/;
+			}
+		}
+	&flush_file_lines($file);
+	&unlock_file($file);
+	}
+}
+
+# modify_jailkit_user(&domain, username)
+# Update a real Unix user in a jailed domain to have the correct jailed
+# shell and home directory
+sub modify_jailkit_user
+{
+my ($d, $user) = @_;
+return if (!$d->{'jail'});	# Jailing isn't enabled
+my $dir = &domain_jailkit_dir($d);
+return if (!-d $dir);		# Jailing isn't enabled
+return if (!-d "$dir/etc");	# Jail directory is invalid
+my $olduser = { %$user };
+$user->{'shell'} = &has_command("jk_chrootsh") ||
+			"/usr/sbin/jk_chrootsh";
+$user->{'home'} = $dir."/.".$user->{'home'}
+	if ($user->{'home'} !~ /^\Q$dir\E/);
+&foreign_call($usermodule, "set_user_envs", $user,
+	'MODIFY_USER', $plainpass, [], $olduser);
+&foreign_call($usermodule, "making_changes");
+&foreign_call($usermodule, "modify_user", $olduser, $user);
+&foreign_call($usermodule, "made_changes");
 }
 
 # copy_jailkit_files(&domain, [dir])
@@ -352,6 +386,19 @@ foreach my $d (&list_domains()) {
 		&unlock_domain($d);
 		}
 	}
+}
+
+# get_domain_jailed_users_shell(&domain)
+# Get the actual jailed users info in the domain
+sub get_domain_jailed_users_shell
+{
+my ($d) = @_;
+return if (!$d->{'jail'});
+my $dir = &domain_jailkit_dir($d);
+my $pfile = $dir."/etc/passwd";
+return if (!-r $pfile);
+my $sfile = $dir."/etc/shadow";
+return &list_users_from($pfile, $sfile);
 }
 
 1;

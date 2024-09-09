@@ -219,6 +219,7 @@ if (!$pid) {
 	# Make this process have its own list of temp files to clean up
 	$main::initial_process_id = undef;
 	@main::temporary_files = undef;
+	$main::webmin_script_type = 'cmd';
 
 	untie(*STDOUT);
 	close(STDOUT);

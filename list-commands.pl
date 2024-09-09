@@ -71,11 +71,15 @@ foreach my $c (&list_api_categories()) {
 	my ($cname, @cglobs) = @$c;
 	@cglobs = map { my $g = $_; ($g, "pro/$g", map { "$root_directory/$_/$g" } @plugins) } @cglobs;
 	my @cmds = map { glob($_) } @cglobs;
-	@cmds = grep { &indexof($_, @skips) < 0 && !$done{$_} } @cmds;
 
 	# Print a line for each command
 	my $donehead = 0;
 	foreach my $cmd (@cmds) {
+		next if (-l $cmd);
+		next if (&indexof($cmd, @skips) >= 0);
+		my $spellcmd = $cmd;
+		$spellcmd =~ s/licence/license/g;
+		next if ($done{$spellcmd}++);
 		my $src = &read_file_contents($cmd);
 		next if ($src !~ /=head1\s+(.*)\n\n(.*)\n/);
 		my $desc = $2;
@@ -113,7 +117,6 @@ foreach my $c (&list_api_categories()) {
 			printf $fmt, $scmd, $desc;
 			printf $fmt, "", $wrap if ($wrap);
 			}
-		$done{$cmd}++;
 		}
 	if ($donehead && !$multiline && !$nameonly) {
 		print "\n";

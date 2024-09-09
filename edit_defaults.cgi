@@ -26,24 +26,10 @@ if (&has_mail_quotas()) {
 				 $text{'defaults_tmpl'}));
 	}
 
-# Mail server quota
-if (&has_server_quotas()) {
-	$qquota = $user->{'qquota'};
-	local $dis1 = &js_disable_inputs([ "qquota" ], [ ]);
-	local $dis2 = &js_disable_inputs([ ], [ "qquota" ]);
-	print &ui_table_row($text{'defaults_qquota'},
-		&ui_radio("qquota_def", 
-			$qquota eq "" || $qquota eq "none" ? 1 : 0,
-			[ [ 1, $text{'form_unlimit'}, "onClick='$dis1'" ],
-			  [ 0, " ", "onClick='$dis2'" ] ])."\n".
-		&ui_textbox("qquota", $qquota eq "none" ? "" : $qquota, 10,
-			    $qquota eq "" || $qquota eq "none"), 1);
-	}
-
 # Default shell
 if (&can_mailbox_ftp()) {
         print &ui_table_row($text{'user_ushell'},
-	    &available_shells_menu("shell", $user->{'shell'}, "mailbox"));
+	    &available_shells_menu("shell", &get_user_shell($user), "mailbox"));
         }
 
 # Mail forwarding

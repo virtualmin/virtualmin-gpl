@@ -36,6 +36,11 @@ a path like C<logs/php.log>. Alternately you can opt to use the default
 path with the C<--default-php-log> flag, or turn logging off with the flag
 C<--no-php-log>.
 
+By default PHP scripts can send email, but you can prevent this with the 
+C<--no-php-mail> flag. This can provide some protection against a PHP script
+vulnerability being used to send spam. Or to re-enable email again, use the
+C<--php-mail> flag.
+
 If your Apache configuration contains unsupported C<mod_php> directives,
 the C<--cleanup-mod-php> flag can be used to remove them from a virtual server.
 This is primarily useful if the Apache module has been disabled, but not all
@@ -94,6 +99,13 @@ CN matches both of them), you can use the C<--break-ssl-cert> flag to stop
 sharing and allow this domain's cert to be re-generated. Conversely, if the
 server isn't sharing a cert but could, the C<--link-ssl-cert> flag can be used
 to enable sharing.
+
+To move the SSL cert, key or CA cert files to a new location, use the
+C<--ssl-cert>, C<--ssl-key> or C<--ssl-ca> flags respectively, followed
+by an absolute or relative path. To switch to the default locations set in the
+server's template, use the C<--default-ssl-cert>, C<--default-ssl-key> or
+C<--default-ssl-ca> flags. Or to switch all SSL paths to match the template,
+simply use C<--default-ssl-paths>.
 
 To change the domain's HTML directory, use the C<--document-dir> flag followed
 by a path relative to the domain's home. Alternately, if the Apache config has
@@ -288,6 +300,27 @@ while(@ARGV > 0) {
 	elsif ($a eq "--link-ssl-cert") {
 		$linkcert = 1;
 		}
+	elsif ($a eq "--ssl-cert") {
+		$ssl_cert = shift(@ARGV);
+		}
+	elsif ($a eq "--default-ssl-cert") {
+		$ssl_cert = "default";
+		}
+	elsif ($a eq "--ssl-key") {
+		$ssl_key = shift(@ARGV);
+		}
+	elsif ($a eq "--default-ssl-key") {
+		$ssl_key = "default";
+		}
+	elsif ($a eq "--ssl-ca") {
+		$ssl_ca = shift(@ARGV);
+		}
+	elsif ($a eq "--default-ssl-ca") {
+		$ssl_ca = "default";
+		}
+	elsif ($a eq "--default-ssl-paths") {
+		$ssl_cert = $ssl_key = $ssl_ca = "default";
+		}
 	elsif ($a eq "--sync-tlsa") {
 		$tlsa = 1;
 		}
@@ -342,6 +375,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-php-log") {
 		$phplog = "";
 		}
+	elsif ($a eq "--no-php-mail") {
+		$phpmail = 0;
+		}
+	elsif ($a eq "--php-mail") {
+		$phpmail = 1;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -358,6 +397,7 @@ $mode || defined($proxy) || defined($framefwd) || $tlsa || $rubymode ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
   $fpmsock || $fpmtype || $defmode || defined($cgimode) || $subprefix ||
   @add_dirs || @remove_dirs || $protocols || $fix_mod_php ||
+  $ssl_cert || $ssl_key || $ssl_ca || defined($phpmail) ||
 	&usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
@@ -460,6 +500,7 @@ if (defined($includes) && !&supports_ssi()) {
 
 # Lock them all
 foreach $d (@doms) {
+	&lock_domain($d);
 	&obtain_lock_web($d) if ($d->{'web'});
 	&obtain_lock_dns($d) if ($d->{'dns'} &&
 				 (defined($webmail) || defined($matchall)));
@@ -848,6 +889,66 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Update SSL cert, key and CA paths
+	my $ssl_changed = 0;
+	my @beforecerts = &get_all_domain_service_ssl_certs($d);
+	if (&domain_has_ssl_cert($d) && $ssl_cert) {
+		my $dom_cert = $ssl_cert eq "default" ?
+			&default_certificate_file($d, "cert") :
+			&absolute_domain_path($d, $ssl_cert);
+		&$first_print("Moving SSL cert to $dom_cert ..");
+		if ($d->{'ssl_same'}) {
+			&$second_print(".. not possible for shared certs");
+			}
+		elsif (&move_website_ssl_file($d, "cert", $dom_cert)) {
+			$ssl_changed = 1;
+			&$second_print(".. done");
+			}
+		else {
+			&$second_print(".. no change needed");
+			}
+		}
+	if (&domain_has_ssl_cert($d) && $ssl_key) {
+		my $dom_key = $ssl_key eq "default" ?
+			&default_certificate_file($d, "key") :
+			&absolute_domain_path($d, $ssl_key);
+		&$first_print("Moving SSL key to $dom_key ..");
+		if ($d->{'ssl_same'}) {
+			&$second_print(".. not possible for shared certs");
+			}
+		elsif (&move_website_ssl_file($d, "key", $dom_key)) {
+			&move_website_ssl_file($d, "combined",
+				&relative_certificate_file($dom_key, "combined"));
+			&move_website_ssl_file($d, "everything",
+				&relative_certificate_file($dom_key, "everything"));
+			$ssl_changed = 1;
+			&$second_print(".. done");
+			}
+		else {
+			&$second_print(".. no change needed");
+			}
+		}
+	if (&domain_has_ssl_cert($d) && $ssl_ca) {
+		my $dom_ca = $ssl_ca eq "default" ?
+			&default_certificate_file($d, "ca") :
+			&absolute_domain_path($d, $ssl_ca);
+		&$first_print("Moving SSL CA cert to $dom_ca ..");
+		if ($d->{'ssl_same'}) {
+			&$second_print(".. not possible for shared certs");
+			}
+		elsif (&move_website_ssl_file($d, "ca", $dom_ca)) {
+			$ssl_changed = 1;
+			&$second_print(".. done");
+			}
+		else {
+			&$second_print(".. no change needed");
+			}
+		}
+	if ($ssl_changed) {
+		# Update other services using the cert
+		&update_all_domain_service_ssl_certs($d, \@beforecerts);
+		}
+
 	if ($tlsa && $d->{'dns'}) {
 		# Resync TLSA records
 		&$first_print("Updating TLSA DNS records ..");
@@ -965,11 +1066,28 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Update PHP mail setting
+	if (defined($phpmail)) {
+		if ($phpmail) {
+			&$first_print("Allowing PHP scripts to send email ..");
+			}
+		else {
+			&$first_print("Disallowing PHP scripts from sending email ..");
+			}
+		my $err = &save_php_can_send_mail($d, $phpmail);
+		if ($err) {
+			&$second_print(".. failed : $err");
+			}
+		else {
+			&$second_print(".. done");
+			}
+		}
+
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($children_no_check) || defined($renew) || $breakcert ||
 	    $linkcert || $fixhtmldir || defined($fcgiwrap) ||
-	    defined($phplog) || defined($fcgiwrap)) {
+	    defined($phplog) || defined($fcgiwrap) || $ssl_changed) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
@@ -986,6 +1104,7 @@ foreach $d (@doms) {
 	&release_lock_dns($d) if ($d->{'dns'} && 
 				  (defined($webmail) || defined($matchall)));
 	&release_lock_web($d) if ($d->{'web'});
+	&unlock_domain($d);
 	}
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV);
@@ -1003,6 +1122,7 @@ print "                     [--php-timeout seconds | --no-php-timeout]\n";
 print "                     [--php-fpm-port | --php-fpm-socket]\n";
 print "                     [--php-fpm-mode dynamic|static|ondemand]\n";
 print "                     [--php-log filename | --no-php-log | --default-php-log]\n";
+print "                     [--php-mail | --no-php-mail]\n";
 print "                     [--cleanup-mod-php]\n";
 print "                     [--proxy http://... | --no-proxy]\n";
 print "                     [--framefwd http://... | --no-framefwd]\n";
@@ -1037,6 +1157,10 @@ print "                     [--sync-tlsa]\n";
 print "                     [--add-directive \"name value\"]\n";
 print "                     [--remove-directive \"name value\"]\n";
 print "                     [--protocols \"proto ..\" | --default-protocols]\n";
+print "                     [--ssl-cert file | --default-ssl-cert]\n";
+print "                     [--ssl-key file | --default-ssl-key]\n";
+print "                     [--ssl-ca file | --default-ssl-ca]\n";
+print "                     [--default-ssl-paths]\n";
 exit(1);
 }
 

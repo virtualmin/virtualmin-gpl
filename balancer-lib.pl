@@ -9,39 +9,52 @@
 # or
 # ProxyPass / http://127.0.0.1:8000/
 
+# Can the current user create a proxy balancer to a Unix socket?
+sub can_balancer_unix
+{
+return &master_admin();
+}
+
 # list_proxy_balancers(&domain)
 # Returns a list of URL paths and backends for balancer blocks
 sub list_proxy_balancers
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_list_web_balancers", $d);
         }
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return ( ) if (!$virt);
-local @rv;
+my @rwr = &apache::find_directive("RewriteRule", $vconf);
+my @rv;
 foreach my $pp (&apache::find_directive("ProxyPass", $vconf)) {
+	my $b;
 	if ($pp =~ /^(\/\S*)\s+balancer:\/\/([^\/ ]+)/) {
 		# Balancer proxy
-		push(@rv, { 'path' => $1,
-			    'balancer' => $2 });
+		$b = { 'path' => $1,
+		       'balancer' => $2 };
 		}
-	elsif ($pp =~ /^(\/\S*)\s+((http|http):\/\/\S+)/) {
+	elsif ($pp =~ /^(\/\S*)\s+((http|https|ajp|fcgi|scgi):\/\/\S+|unix:(\/\S+)\|\S+:\/\/\S+)$/) {
 		# Single-host proxy
-		push(@rv, { 'path' => $1,
-			    'urls' => [ $2 ] });
+		$b = { 'path' => $1,
+		       'urls' => [ $2 ] };
 		}
 	elsif ($pp =~ /^(\/\S*)\s+\!/) {
 		# Proxying disabled for path
-		push(@rv, { 'path' => $1,
-			    'none' => 1 });
+		$b = { 'path' => $1,
+		       'none' => 1 };
+		}
+	if ($b) {
+		my ($rwr) = grep { /^\Q^$b->{'path'}?(.*)\E\s+"ws?s:\/\// } @rwr;
+		$b->{'websockets'} = 1 if ($rwr);
+		push(@rv, $b);
 		}
 	}
 foreach my $proxy (&apache::find_directive_struct("Proxy", $vconf)) {
 	if ($proxy->{'value'} =~ /^balancer:\/\/([^\/ ]+)/) {
-		local ($rv) = grep { $_->{'balancer'} eq $1 } @rv;
+		my ($rv) = grep { $_->{'balancer'} eq $1 } @rv;
 		if ($rv) {
 			$rv->{'urls'} = [ &apache::find_directive(
 				"BalancerMember", $proxy->{'members'}) ];
@@ -56,62 +69,74 @@ return @rv;
 # message on failure, undef on success.
 sub create_proxy_balancer
 {
-local ($d, $balancer) = @_;
-local $p = &domain_has_website($d);
+my ($d, $balancer) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_create_web_balancer", $d, $balancer);
         }
 &require_apache();
-local $conf = &apache::get_config();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return "Failed to find Apache config for $d->{'dom'}" if (!$virt);
 
 # Check for clashes
-local @pp = &apache::find_directive("ProxyPass", $vconf);
-local ($clash) = grep { $_ =~ /^(\/\S*)\s+/ && $1 eq $balancer->{'path'} } @pp;
+my @pp = &apache::find_directive("ProxyPass", $vconf);
+my ($clash) = grep { $_ =~ /^(\/\S*)\s+/ && $1 eq $balancer->{'path'} } @pp;
 return "A ProxyPass for $balancer->{'path'} already exists" if ($clash);
 if ($balancer->{'balancer'}) {
-	local @proxy = &apache::find_directive("Proxy", $vconf);
-	local ($clash) = grep { $_ =~ /balancer:\/\/([^\/ ]+)/ &&
+	my @proxy = &apache::find_directive("Proxy", $vconf);
+	my ($clash) = grep { $_ =~ /balancer:\/\/([^\/ ]+)/ &&
 				$1 eq $balancer->{'balancer'} } @proxy;
 	return "A Proxy block for $balancer->{'balancer'} already exists"
 		if ($clash);
 	}
 
 # Add the directives
-local @ports = ( $d->{'web_port'},
+my @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 foreach my $port (@ports) {
 	if ($port != $d->{'web_port'}) {
 		($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
 		}
 	next if (!$virt);
-	local $slash = $balancer->{'path'} eq '/' ? '/' : undef;
-	local $ssl = 0;
+	my $slash = $balancer->{'path'} eq '/' ? '/' : undef;
+	my $ssl = 0;
 	foreach my $u (@{$balancer->{'urls'}}) {
 		$ssl++ if ($u =~ /^https:/i);
 		}
 	if ($balancer->{'balancer'}) {
 		# To multiple URLs
-		local $lref = &read_file_lines($virt->{'file'});
-		local @pdirs = (map { "BalancerMember $_" } @{$balancer->{'urls'}});
-		if (&supports_check_peer_name() && $ssl) {
-			push(@pdirs, "SSLProxyCheckPeerName off");
-			push(@pdirs, "SSLProxyCheckPeerCN off");
-			push(@pdirs, "SSLProxyCheckPeerExpire off");
+		my @mems;
+		my $pxy = { 'name' => 'Proxy',
+			    'type' => 1,
+			    'value' => "balancer://$balancer->{'balancer'}",
+			    'members' => \@mems };
+		foreach my $u (@{$balancer->{'urls'}}) {
+			push(@mems, { 'name' => 'BalancerMember',
+				      'value' => $u });
 			}
-		splice(@$lref, $virt->{'eline'}, 0,
-		   "<Proxy balancer://$balancer->{'balancer'}>",
-		   @pdirs,
-		   "</Proxy>",
-		   "ProxyPass $balancer->{'path'} balancer://$balancer->{'balancer'}$slash",
-		   "ProxyPassReverse $balancer->{'path'} balancer://$balancer->{'balancer'}$slash",
-		   );
-		undef(@apache::get_config_cache);
+		if (&supports_check_peer_name() && $ssl) {
+			push(@mems, { 'name' => 'SSLProxyCheckPeerName',
+				      'value' => 'off' });
+			push(@mems, { 'name' => 'SSLProxyCheckPeerCN',
+				      'value' => 'off' });
+			push(@mems, { 'name' => 'SSLProxyCheckPeerExpire',
+				      'value' => 'off' });
+			}
+		if ($d->{'ssl'} && $port == $d->{'web_sslport'} &&
+		    &indexof('mod_headers', &apache::available_modules()) > 0) {
+			push(@mems, { 'name' =>  'RequestHeader',
+				      'value' => 'set X-Forwarded-Proto "https" env=HTTPS' });
+			}
+		&apache::save_directive_struct(undef, $pxy, $vconf, $conf);
+		foreach my $dir ("ProxyPass", "ProxyPassReverse") {
+			my @pp = &apache::find_directive($dir, $vconf);
+			push(@pp, "$balancer->{'path'} balancer://$balancer->{'balancer'}$slash");
+			&apache::save_directive($dir, \@pp, $vconf, $conf);
+			}
 		}
 	else {
 		# To just one URL - longest paths must always go first
-		local $url = $balancer->{'none'} ? "!" :
+		my $url = $balancer->{'none'} ? "!" :
 				$balancer->{'urls'}->[0];
 		if ($path eq "/" && $url ne "!" &&
 		    $url =~ /^(http|https):\/\/[a-z0-9\_\-:]+$/i) {
@@ -120,24 +145,38 @@ foreach my $port (@ports) {
 			$url .= "/";
 			}
 		foreach my $dir ("ProxyPass", "ProxyPassReverse") {
-			local @pp = &apache::find_directive($dir, $vconf);
+			my @pp = &apache::find_directive($dir, $vconf);
 			@pp = &sort_proxy_paths(@pp,
 				"$balancer->{'path'} $url");
 			&apache::save_directive($dir, \@pp, $vconf, $conf);
 			}
 		}
+	if ($balancer->{'websockets'} && !$balancer->{'none'}) {
+		# Add RewriteCond and RewriteRule for the path
+		my $wsurl = $balancer->{'urls'}->[0];
+		my $wsprot = $wsurl =~ /^https:/i ? "wss" : "ws";
+		$wsurl =~ s/^(http|https):\/\///;
+		$wsurl =~ s/\/$//;
+		$wsurl = "$wsprot://$wsurl/\$1";
+		my @rwc = &apache::find_directive("RewriteCond", $vconf);
+		push(@rwc, &websockets_rewriteconds());
+		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf, 1);
+		my @rwr = &apache::find_directive("RewriteRule", $vconf);
+		push(@rwr, "^$balancer->{'path'}?(.*) \"$wsurl\" [P]");
+		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf, 1);
+		}
 	&flush_file_lines($virt->{'file'});
 	}
 
 # If proxying to SSL, turn on SSLProxyEngine
-local $ssl = 0;
+my $ssl = 0;
 foreach my $url (@{$balancer->{'urls'}}) {
 	$ssl = 1 if ($url =~ /^https:/i);
 	}
 if ($ssl) {
 	foreach my $port (@ports) {
-		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
-		local @spe = &apache::find_directive("SSLProxyEngine", $vconf);
+		my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+		my @spe = &apache::find_directive("SSLProxyEngine", $vconf);
 		if (!@spe && lc($spe[0]) ne "on") {
 			&apache::save_directive("SSLProxyEngine", [ "on" ],
 						$vconf, $conf);
@@ -150,47 +189,67 @@ if ($ssl) {
 return undef;
 }
 
+sub websockets_rewriteconds
+{
+return ("%{HTTP:UPGRADE} ^WebSocket\$ [NC]",
+	"%{HTTP:CONNECTION} ^Upgrade\$ [NC]");
+}
+
 # delete_proxy_balancer(&domain, &balancer)
 # Removes the ProxyPass directive and Proxy block for a balancer
 sub delete_proxy_balancer
 {
-local ($d, $balancer) = @_;
-local $p = &domain_has_website($d);
+my ($d, $balancer) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_delete_web_balancer", $d, $balancer);
         }
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return "Failed to find Apache config for $d->{'dom'}" if (!$virt);
 
-local @ports = ( $d->{'web_port'},
+my @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-local $done = 0;
+my $done = 0;
 foreach my $port (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
 
-	# Find the directives
-	local @pp = &apache::find_directive_struct("ProxyPass", $vconf);
-	local ($pp) = grep { $_->{'value'} =~ /^(\/\S*)\s+/ &&
-			     $1 eq $balancer->{'path'} } @pp;
-	local @ppr = &apache::find_directive_struct("ProxyPassReverse", $vconf);
-	local ($ppr) = grep { $_->{'value'} =~ /^(\/\S*)\s+/ &&
-			     $1 eq $balancer->{'path'} } @ppr;
-	local @proxy = &apache::find_directive_struct("Proxy", $vconf);
-	local ($proxy) = grep { $_->{'value'} =~ /balancer:\/\/([^\/ ]+)/ &&
-				$1 eq $balancer->{'balancer'} } @proxy;
-
-	# Splice them out
-	local $lref = &read_file_lines($virt->{'file'});
-	foreach my $r (sort { $b->{'line'} <=> $a->{'line'} }
-			    grep { $_ } $pp, $ppr, $proxy) {
-		splice(@$lref, $r->{'line'},
-			       $r->{'eline'} - $r->{'line'} + 1);
-		$done++;
+	# Remove regular directives
+	foreach my $dir ("ProxyPass", "ProxyPassReverse") {
+		my @oldpp = &apache::find_directive($dir, $vconf);
+		my @pp = grep { !/^(\/\S*)\s+/ ||
+			        $1 ne $balancer->{'path'} } @oldpp;
+		$done++ if (@pp != @oldpp);
+		&apache::save_directive($dir, \@pp, $vconf, $conf);
 		}
+
+	if ($balancer->{'balancer'}) {
+		# Remove the Proxy block
+		my @proxy = &apache::find_directive_struct("Proxy", $vconf);
+		my ($proxy) = grep {
+			$_->{'value'} =~ /balancer:\/\/([^\/ ]+)/ &&
+			$1 eq $balancer->{'balancer'} } @proxy;
+		if ($proxy) {
+			&apache::save_directive_struct(
+				$proxy, undef, $vconf, $conf);
+			$done++;
+			}
+		}
+
+	# Remove any rewrite directives for websockets
+	my @rwc = &apache::find_directive("RewriteCond", $vconf);
+	my @rwr = &apache::find_directive("RewriteRule", $vconf);
+	my ($rwr) = grep { /^\Q^$balancer->{'path'}?(.*)\E\s+"ws?s:/ } @rwr;
+	if ($rwr) {
+		# There is one, delete it
+		@rwr = grep { $_ ne $rwr } @rwr;
+		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf);
+		@rwc = grep { &indexof($_, &websockets_rewriteconds()) < 0 } @rwc;
+		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf);
+		}
+
 	&flush_file_lines($virt->{'file'});
-	undef(@apache::get_config_cache);
 	}
 
 &register_post_action(\&restart_apache);
@@ -201,28 +260,27 @@ return $done ? undef : "No proxy directives for $balancer->{'path'} found";
 # Updates a balancer block - the name of which cannot change
 sub modify_proxy_balancer
 {
-local ($d, $b, $oldb) = @_;
-local $p = &domain_has_website($d);
+my ($d, $b, $oldb) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_modify_web_balancer", $d, $b, $oldb);
         }
 &require_apache();
-local $bn = $b->{'balancer'};
-local $conf = &apache::get_config();
+my $bn = $b->{'balancer'};
 
-local $done = 0;
-local @ports = ( $d->{'web_port'},
+my $done = 0;
+my @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 foreach my $port (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
 
 	# Find and fix the ProxyPass and ProxyPassReverse
-	local $slash = $b->{'path'} eq '/' ? '/' : undef;
+	my $slash = $b->{'path'} eq '/' || $b->{'path'} =~ /\/$/ ? '/' : undef;
 	foreach my $dir ("ProxyPass", "ProxyPassReverse") {
-		local @npp;
+		my @npp;
 		foreach my $pp (&apache::find_directive($dir, $vconf)) {
-			local ($dirpath, $dirurl) = split(/\s+/, $pp);
+			my ($dirpath, $dirurl) = split(/\s+/, $pp);
 			if ($dirpath eq $oldb->{'path'} &&
 			    $dirurl =~ /^(balancer:\/\/\Q$bn\E)/) {
 				# Balancer
@@ -230,7 +288,7 @@ foreach my $port (@ports) {
 				$done++;
 				}
 			elsif ($dirpath eq $oldb->{'path'} &&
-			       $dirurl =~ /^((http|https):\/\/)|\!/) {
+			       $dirurl =~ /^((http|https|ajp|fcgi|scgi):\/\/\S+|unix:(\/\S+)\|\S+:\/\/\S+)|\!/) {
 				# Single URL
 				if ($b->{'none'}) {
 					$pp = "$b->{'path'} !";
@@ -251,7 +309,7 @@ foreach my $port (@ports) {
 
 	# Find and fix the URLs in the <Proxy> block
 	if ($bn) {
-		local ($proxy) = grep
+		my ($proxy) = grep
 			{ $_->{'value'} =~ /^balancer:\/\/\Q$bn\E/ }
 			&apache::find_directive_struct("Proxy", $vconf);
 		if ($proxy) {
@@ -260,6 +318,41 @@ foreach my $port (@ports) {
 			$done++;
 			}
 		}
+
+	# Fix any RewriteRule for websockets
+	my @rwc = &apache::find_directive("RewriteCond", $vconf);
+	my @rwr = &apache::find_directive("RewriteRule", $vconf);
+	my ($rwr) = grep { /^\Q^$oldb->{'path'}?(.*)\E\s+"ws?s:/ } @rwr;
+	my $wsurl;
+	my $wsprot;
+	if (!$b->{'none'} && $b->{'websockets'}) {
+		$wsurl = $b->{'urls'}->[0];
+		$wsprot = $wsurl =~ /^https:/i ? "wss" : "ws";
+		$wsurl =~ s/^(http|https):\/\///;
+		$wsurl =~ s/\/$//;
+		$wsurl = "$wsprot://$wsurl/\$1";
+		}
+	if (($b->{'none'} || !$b->{'websockets'}) && $rwr) {
+		# Need to remove entirely
+		@rwr = grep { $_ ne $rwr } @rwr;
+                &apache::save_directive("RewriteRule", \@rwr, $vconf, $conf);
+		@rwc = grep { &indexof($_, &websockets_rewriteconds()) < 0 } @rwc;
+		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf);
+		}
+	elsif (!$b->{'none'} && $b->{'websockets'} && $rwr) {
+		# Need to update path
+		my $idx = &indexof($rwr, @rwr);
+		$rwr[$idx] = "^$b->{'path'}?(.*) \"$wsurl\" [P]";
+		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf);
+		}
+	elsif (!$b->{'none'} && $b->{'websockets'} && !$rwr) {
+		# Need to add
+		push(@rwc, &websockets_rewriteconds());
+		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf, 1);
+		push(@rwr, "^$b->{'path'}?(.*) \"$wsurl\" [P]");
+		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf, 1);
+		}
+
 	&flush_file_lines($virt->{'file'});
 	}
 
@@ -320,7 +413,7 @@ while(scalar(@rv) < $ports) {
 return join(" ", @rv);
 }
 
-# setup_proxy(&domain, path, port, [proxy-path], [protocol])
+# setup_proxy(&domain, path, [port], [proxy-path], [protocol])
 # Adds webserver config entries to proxy some path to a local server
 sub setup_proxy
 {

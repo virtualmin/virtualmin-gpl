@@ -72,6 +72,18 @@ print &ui_table_row(&hlink($text{'spf_all'}, 'template_dns_spfall'),
 			         [ 1, $text{'spf_all1'} ],
 			         [ 0, $text{'spf_all0'} ] ]));
 
+# DKIM status
+my $dkim = &get_dkim_config();
+if ($dkim && $dkim->{'enabled'}) {
+	my $def = &can_dkim_domain($d, $dkim) ? $text{'yes'} : $text{'no'};
+	print &ui_table_row(&hlink($text{'spf_dkim'}, 'spf_dkim'),
+		&ui_radio("dkim", $d->{'dkim_enabled'} eq '1' ? 1 :
+				  $d->{'dkim_enabled'} eq '0' ? 0 : 2,
+			  [ [ 1, $text{'spf_dkim1'} ],
+			    [ 0, $text{'spf_dkim0'} ],
+			    [ 2, $text{'spf_dkim2'}.' ('.$def.')' ] ]));
+	}
+
 # TLSA records
 $err = &check_tlsa_support();
 if (!$err) {
@@ -97,6 +109,16 @@ print &ui_table_row(&hlink($text{'spf_dp'}, 'spf_dp'),
 # DMARC percent
 print &ui_table_row(&hlink($text{'spf_dpct'}, 'spf_dpct'),
 	&ui_textbox("dpct", $eddmarc->{'pct'} || 100, 5)."%");
+
+# DMARC email addresses
+foreach my $r ('ruf', 'rua') {
+	print &ui_table_row(&hlink($text{'spf_dmarc'.$r}, 'spf_dmarc'.$r),
+		&ui_radio("dmarc".$r."_def",
+			  $eddmarc->{$r} eq "" ? 1 : 0,
+			  [ [ 1, $text{'tmpl_dmarcskip'} ],
+                            [ 0, &ui_textbox('dmarc'.$r,
+                                        $eddmarc->{$r}, 40) ] ]));
+	}
 
 # DNSSEC enabled
 if (&can_domain_dnssec($d)) {

@@ -12,6 +12,9 @@ The URL path for the proxy can be changed with the C<--new-path> flag, followed
 by a path like I</foo>. The destination URLs can be set with the C<--url> flag
 followed by a URL, which can be given multiple times.
 
+You can also turn on or off websockets proxying with the C<--websockets> or
+C<--no-websockets> flags respectively.
+
 =cut
 
 package virtual_server;
@@ -50,6 +53,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-proxy") {
 		$none = 1;
 		}
+	elsif ($a eq "--websockets") {
+		$websockets = 1;
+		}
+	elsif ($a eq "--no-websockets") {
+		$websockets = 0;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -81,6 +90,9 @@ elsif (@urls) {
 	$b->{'none'} = 0;
 	$b->{'urls'} = \@urls;
 	}
+if (defined($websockets)) {
+	$b->{'websockets'} = $websockets;
+	}
 
 # Update it
 $err = &modify_proxy_balancer($d, $b, $oldb);
@@ -106,6 +118,7 @@ print "                        --path url-path\n";
 print "                       [--new-path url-path]\n";
 print "                       [--no-proxy]\n";
 print "                       [--url http://some-url]*\n";
+print "                       [--websockets | --no-websockets]\n";
 exit(1);
 }
 

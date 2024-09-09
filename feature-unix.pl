@@ -16,8 +16,14 @@ my (%uinfo, %ginfo);
 if ($d->{'user'} eq '') {
 	&error("Domain is missing Unix username!");
 	}
-if ($d->{'group'} eq '' && &mail_system_needs_group()) {
+if ($d->{'group'} eq '') {
 	&error("Domain is missing Unix group name!");
+	}
+if ($d->{'ugroup'} eq '') {
+	&error("Domain is missing Unix group name for the domain owner!");
+	}
+if ($d->{'group'} ne $d->{'ugroup'} && !getgrnam($d->{'ugroup'})) {
+	&error("Unix group for the domain owner $d->{'ugroup'} does not exist!");
 	}
 
 # Check if the UID or GID has been allocated to someone else, and if so
@@ -44,7 +50,7 @@ if ($gclash || !$d->{'gid'}) {
 	}
 $d->{'ugid'} = $d->{'gid'} if ($d->{'ugid'} eq '');
 
-if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
+if ($d->{'gid'} == $d->{'ugid'}) {
 	# Create the group
 	&$first_print(&text('setup_group', $d->{'group'}));
 	%ginfo = ( 'group', $d->{'group'},
@@ -130,7 +136,7 @@ if (&has_home_quotas()) {
 	}
 
 # Create virtuser pointing to new user, and possibly generics entry
-if ($d->{'mail'} && $config{'mail_system'} != 5) {
+if ($d->{'mail'}) {
 	&$first_print($text{'setup_usermail2'});
 	&create_email_for_unix($d);
 	&$second_print($text{'setup_done'});
@@ -239,6 +245,10 @@ if (!$d->{'parent'}) {
 			&obtain_lock_cron($d);
 			&rename_unix_cron_jobs($d->{'user'},
 					       $oldd->{'user'});
+			if ($d->{'jail'}) {
+				&rename_jailkit_passwd_file(
+				    $d, $oldd->{'user'}, $d->{'user'});
+				}
 			&release_lock_cron($d);
 			}
 
@@ -303,7 +313,7 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 	# Unix feature has been turned off .. so delete the user and group
 	&delete_unix($oldd);
 	}
-if ($d->{'mail'} && !$oldd->{'mail'} && $config{'mail_system'} != 5) {
+if ($d->{'mail'} && !$oldd->{'mail'}) {
 	# Add email for the domain user
 	&$first_print($text{'setup_usermail2'});
 	&create_email_for_unix($d);
@@ -494,7 +504,7 @@ return &text('validate_euid', $d->{'user'}, $d->{'uid'}, $user->{'uid'})
 
 # Make sure group exists and has right ID
 my $group;
-if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
+if ($d->{'gid'} == $d->{'ugid'}) {
 	my @groups = &list_all_groups_quotas(0);
 	($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
 	return &text('validate_egroup', $d->{'group'}) if (!$group);
@@ -795,7 +805,6 @@ if ($log) {
 		}
 	foreach $u (&list_domain_users($d, 0, 1, 1, 1)) {
 		# Only add Unix users with FTP access
-		next if (!$u->{'unix'});
 		my ($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
                                       @ashells;
 		if (!$shell || $shell->{'id'} ne 'nologin') {
@@ -847,7 +856,7 @@ print &ui_table_row(&hlink($text{'tmpl_ushell'}, "template_ushell"),
     &none_def_input("ushell", $tmpl->{'ushell'},
 	&available_shells_menu("ushell",
 		$tmpl->{'ushell'} eq "none" ? undef : $tmpl->{'ushell'},
-		"owner", 1),
+		"owner"),
 	0, 0, $text{'tmpl_ushelldef'}, [ "ushell" ]));
 
 # Chroot by default

@@ -19,9 +19,7 @@ if ($in{'confirm'}) {
 
 # Get the users
 foreach $du (@del) {
-	($unix, $name) = split(/\//, $du, 2);
-	($user) = grep { $_->{'user'} eq $name &&
-			 $_->{'unix'} == $unix } @users;
+	($user) = grep { $_->{'user'} eq $du } @users;
 	if ($user) {
 		push(@dusers, $user);
 		&error($text{'users_edunix'}) if ($user->{'domainowner'});

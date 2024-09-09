@@ -200,7 +200,8 @@ elsif (!$dnsparent) {
 			foreach my $s (@extra_slaves) {
 				push(@also, { 'name' => &to_ipaddress($s) });
 				}
-			@also = grep { $_->{'name'} } @also;
+			my %donealso;
+			@also = grep { $_->{'name'} && !$donealso{$_->{'name'}}++ } @also;
 			$also->{'members'} = \@also;
 			push(@{$dir->{'members'}}, $also);
 			push(@{$dir->{'members'}}, 
@@ -231,7 +232,8 @@ elsif (!$dnsparent) {
 	if ($gat) {
 		push(@trans, @{$gat->{'members'}});
 		}
-	@trans = grep { $_->{'name'} } @trans;
+	my %donetrans;
+	@trans = grep { $_->{'name'} && !$donetrans{$_->{'name'}}++ } @trans;
 	local ($trans) = grep { $_->{'name'} eq 'allow-transfer' }
 			      @{$dir->{'members'}};
 	if (!$trans && !$tmpl->{'namedconf_no_allow_transfer'}) {
@@ -1462,6 +1464,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				  'type' => 'A',
 				  'proxied' => $proxied ? 1 : 0,
 				  'values' => [ $ip ] });
+			$already{$n}++;
 			}
 		}
 
@@ -1477,6 +1480,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				  'type' => 'A',
 				  'proxied' => $proxied == 1 ? 1 : 0,
 				  'values' => [ $ip ] });
+			$already{$ns}++;
 			}
 		}
 
@@ -1488,17 +1492,19 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			{ 'name' => $n,
 			  'type' => 'A',
 			  'values' => [ "127.0.0.1" ] });
+		$already{$n}++;
 		}
 
 	# If the hostname of the system is within this domain, add a record
 	# for it
-	my $hn = &get_system_hostname();
-	if ($hn =~ /\.\Q$d->{'dom'}\E$/ && !$already{$hn."."}) {
+	my $hn = &get_system_hostname().".";
+	if ($hn =~ /\.\Q$withdot\E$/ && !$already{$hn}) {
 		&create_dns_record($recs, $file,
-			{ 'name' => $hn.".",
+			{ 'name' => $hn,
 			  'type' => 'A',
 			  'proxied' => $proxied == 1 ? 1 : 0,
 			  'values' => [ &get_default_ip() ] });
+		$already{$hn}++;
 		}
 
 	# If enabled in the template, add webmail and admin records
@@ -1587,7 +1593,8 @@ $aliasfile || &error("No zone file for alias target $aliasd->{'dom'} found");
 local $olddom = $aliasd->{'dom'};
 local $dom = $d->{'dom'};
 local $oldip = $aliasd->{'ip'};
-local @sublist = grep { $_->{'id'} ne $aliasd->{'id'} &&
+local @sublist = grep { $_->{'dns'} &&
+			$_->{'id'} ne $aliasd->{'id'} &&
 			$_->{'dom'} =~ /\.\Q$aliasd->{'dom'}\E$/ }
 		      &list_domains();
 
@@ -1790,6 +1797,7 @@ foreach my $r ('webmail', 'admin') {
 			  'proxied' => $proxied == 1 ? 1 : 0,
 			  'values' => [ $ip ] };
 		&create_dns_record($recs, $file, $r);
+		$already->{$n}++ if ($already);
 		$count++;
 		}
 	}
@@ -2012,6 +2020,7 @@ $got{'A'} || return $text{'validate_ednsa2'};
 if ($d->{'virt6'}) {
 	$got{'AAAA'} || return $text{'validate_ednsa6'};
 	}
+my @recerrs;
 if (&domain_has_website($d)) {
 	foreach my $n ($d->{'dom'}.'.', 'www.'.$d->{'dom'}.'.') {
 		my @nips = map { $_->{'values'}->[0] }
@@ -2021,12 +2030,12 @@ if (&domain_has_website($d)) {
 			       grep { $_->{'type'} eq 'AAAA' &&
 				      $_->{'name'} eq $n } @$recs;
 		if (@nips && &indexof($ip, @nips) < 0) {
-			return &text('validate_ednsip', "<tt>$n</tt>",
-			    "<tt>".join(' or ', @nips)."</tt>", "<tt>$ip</tt>");
+			push(@recerrs, &text('validate_ednsip', "<tt>$n</tt>",
+			    "<tt>".join(' or ', @nips)."</tt>", "<tt>$ip</tt>"));
 			}
 		if ($d->{'virt6'} && @nips6 && &indexof($ip6, @nips6) < 0) {
-			return &text('validate_ednsip6', "<tt>$n</tt>",
-			  "<tt>".join(' or ', @nips6)."</tt>", "<tt>$ip6</tt>");
+			push(@recerrs, &text('validate_ednsip6', "<tt>$n</tt>",
+			  "<tt>".join(' or ', @nips6)."</tt>", "<tt>$ip6</tt>"));
 			}
 		}
 	}
@@ -2071,7 +2080,7 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 			push(@mxips, $mxh);
 			}
 		if (!$found) {
-			return &text('validate_ednsmx', join(" ", @mxips));
+			push(@recerrs, &text('validate_ednsmx', join(" ", @mxips)));
 			}
 		}
 	}
@@ -2085,9 +2094,10 @@ if (!$d->{'dns_submode'}) {
 				       ($_->{'type'} eq 'A' ||
 					$_->{'type'} eq 'AAAA') } @$recs;
 		$arec || &to_ipaddress($ns) || &to_ip6address($ns) ||
-			return &text('validate_ednsns', $ns);
+			push(@recerrs, &text('validate_ednsns', $ns));
 		}
 	}
+return join("<br>\n", @recerrs) if (@recerrs);
 
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
@@ -2405,6 +2415,7 @@ else {
 	&$second_print($text{'setup_notrun'});
 	$rv = 0;
 	}
+
 local @shosts = split(/\s+/, $d->{'dns_slave'});
 if (&bind8::list_slave_servers() && @shosts) {
 	# Re-start on slaves too
@@ -2920,13 +2931,11 @@ if (&is_dns_remote()) {
 	# No local BIND in provisioning mode
 	return ( );
 	}
-if (!$bind8::bind_version) {
-	local $out = &backquote_command("$bind8::config{'named_path'} -v 2>&1");
-	if ($out =~ /(bind|named)\s+([0-9\.]+)/i) {
-		$bind8::bind_version = $2;
-		}
+my $ver = &bind8::get_bind_version();
+if ($ver) {
+	return ( [ $text{'sysinfo_bind'}, $ver ] );
 	}
-return ( [ $text{'sysinfo_bind'}, $bind8::bind_version ] );
+return ( );
 }
 
 sub startstop_dns
@@ -3979,6 +3988,8 @@ if ($d->{'ip'} ne $defip && $d->{'ip'} !~ /^(10\.|192\.168\.)/ &&
 if ($d->{'ip6'} && $d->{'ip6'} ne $defip6 && !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip6:'}}, $d->{'ip6'});
 	}
+@{$spf->{'ip4:'}} = &unique(@{$spf->{'ip4:'}});
+@{$spf->{'ip6:'}} = &unique(@{$spf->{'ip6:'}});
 $spf->{'all'} = $tmpl->{'dns_spfall'} + 1;
 
 # Add SPF records for DNS cloud
@@ -4771,8 +4782,11 @@ if (&domain_has_website($d) && &domain_has_ssl_cert($d)) {
 	# SSL website
 	my $chain = &get_website_ssl_file($d, 'ca');
 	foreach my $hn (&get_hostnames_for_ssl($d)) {
-		push(@need, &create_tlsa_dns_record(
-			$d->{'ssl_cert'}, $chain, $d->{'web_sslport'}, $hn));
+		if ($hn eq $d->{'dom'} ||
+		    $hn =~ /\.\Q$d->{'dom'}\E$/) {
+			push(@need, &create_tlsa_dns_record(
+				$d->{'ssl_cert'}, $chain, $d->{'web_sslport'}, $hn));
+			}
 		}
 	}
 foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
@@ -5522,6 +5536,7 @@ local $defrecs = [ ];
 
 # Compare with the actual records
 my $recs = [ &get_domain_dns_records($d) ];
+$recs = &filter_domain_dns_records($d, $recs);
 return undef if (!@$recs);
 my @doomed;
 foreach my $r (@$recs) {
@@ -5530,7 +5545,8 @@ foreach my $r (@$recs) {
 	my ($dr) = grep { &expand_dns_record($_->{'name'}, $d) eq
 			    &expand_dns_record($r->{'name'}, $d) &&
 			  ($_->{'type'} eq 'SPF' ? 'TXT' : $_->{'type'}) eq
-			    ($r->{'type'} eq 'SPF' ? 'TXT' : $_->{'type'}) } @$defrecs;
+			    ($r->{'type'} eq 'SPF' ? 'TXT' : $_->{'type'}) }
+			@$defrecs;
 	if (!$dr) {
 		my $n = $r->{'name'};
 		$n =~ s/\.\Q$d->{'dom'}\E\.//;

@@ -72,9 +72,15 @@ used. However, you can override this with the C<--cloud-dns> flag followed by
 either C<local> to host locally, C<services> to use Cloudmin services, or
 the ID of one of the supported providers like C<route53> or C<google>.
 
-Use the C<--letsencrypt> flag to request an auto-renewable Let's Encrypt
-certificate. To do the same but skip connectivity checks, use 
-C<--letsencrypt-always> flag instead.
+Use the C<--acme> flag to request an auto-renewable SSL certificate from
+the provider set in the server template, which defaults to Let's
+Encrypt. To do the same but skip connectivity checks, use 
+C<--acme-always> flag instead.
+
+The C<--proxy> parameter can be used to have the website proxy all requests
+to another URL, which must follow C<--proxy>. Alternately, the C<--framefwd>
+parameter similarly can be used to forward requests to the virtual server to
+another URL, using a hidden frame rather than proxying.
 
 =cut
 
@@ -349,10 +355,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--skip-warnings") {
 		$skipwarnings = 1;
 		}
-	elsif ($a eq "--letsencrypt") {
+	elsif ($a eq "--letsencrypt" || $a eq "--acme") {
 		$letsencrypt = 1;
 		}
-	elsif ($a eq "--letsencrypt-always") {
+	elsif ($a eq "--letsencrypt-always" || $a eq "--acme-always") {
 		$letsencrypt = 2;
 		}
 	elsif ($a eq "--enable-jail") {
@@ -427,6 +433,17 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--subprefix") {
 		$subprefix = shift(@ARGV);
+		}
+	elsif ($a eq "--proxy") {
+		$proxy_pass_mode = 1;
+		$proxy_pass = shift(@ARGV);
+		}
+	elsif ($a eq "--framefwd") {
+		$proxy_pass_mode = 2;
+		$proxy_pass = shift(@ARGV);
+		}
+	elsif ($a eq "--default-cert-owner") {
+		$default_cert_owner = 1;
 		}
 	elsif ($a =~ /^\-\-(.*)$/ && $plugin_args{$1}) {
 		# Plugin-specific arg
@@ -872,6 +889,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'nocreationmail', $nocreationmail,
 	 'noslaves', $noslaves,
 	 'nosecondaries', $nosecondaries,
+	 'default_cert_owner', $default_cert_owner,
 	 'subprefix', $subprefix,
 	 'hashpass', $hashpass,
 	 'auto_letsencrypt', $letsencrypt,
@@ -882,6 +900,8 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'dns_cloud', $clouddns,
 	 'dns_cloud_import', $clouddns_import,
 	 'dns_remote', $remotedns,
+	 'proxy_pass_mode', $proxy_pass_mode,
+	 'proxy_pass', $proxy_pass,
         );
 $dom{'dns_submode'} = $dns_submode if (defined($dns_submode));
 $dom{'dns_subany'} = $dns_subany if (defined($dns_subany));
@@ -949,6 +969,13 @@ $derr = &virtual_server_depends(\%dom);
 $cerr = &virtual_server_clashes(\%dom);
 &usage($cerr) if ($cerr);
 
+# Check if features are not forbidden
+if (!$skipwarnings) {
+	foreach my $ff (&forbidden_domain_features(\%dom, 1)) {
+		$dom{$ff} && &usage("The feature $ff is not allowed for virtual server matching the hostname unless the --skip-warnings flag is given.");
+		}
+	}
+
 # Check for warnings, unless overriding
 @warns = &virtual_server_warnings(\%dom);
 if (@warns) {
@@ -978,11 +1005,13 @@ if ($parent) {
 
 # Do it
 print "Beginning server creation ..\n\n";
+&lock_domain(\%dom);
 $config{'pre_command'} = $precommand if ($precommand);
 $config{'post_command'} = $postcommand if ($postcommand);
 $err = &create_virtual_server(\%dom, $parent,
 			      $parent ? $parent->{'user'} : undef,
-			      0, 0, $parent ? undef : $pass, $content);
+			      0, 1, $parent ? undef : $pass, $content);
+&unlock_domain(\%dom);
 if ($err) {
 	print "$err\n";
 	exit(1);
@@ -1102,8 +1131,8 @@ foreach $f (&list_feature_plugins()) {
 		}
 	}
 print "                        [--skip-warnings]\n";
-print "                        [--letsencrypt]\n";
-print "                        [--letsencrypt-always]\n";
+print "                        [--acme]\n";
+print "                        [--acme-always]\n";
 print "                        [--field-name value]*\n";
 print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
@@ -1118,6 +1147,7 @@ print "                        [--generate-ssh-key | --use-ssh-key file|data]\n"
 print "                        [--append-style format]\n";
 print "                        [--shell command]\n";
 print "                        [--subprefix directory]\n";
+print "                        [--proxy url | --framefwd url]\n";
 exit(1);
 }
 

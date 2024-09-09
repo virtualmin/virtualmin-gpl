@@ -32,6 +32,10 @@ disable it, use C<--no-dmarc>. The DMARC action for other mail servers to
 perform can be set with the C<--dmarc-policy> flag, and the percentage of
 messages it should be applied to can be set with C<--dmarc-percent>.
 
+You can also set the email address to send DMARC aggregate reports to with
+C<--dmarc-rua>, or turn it off with C<--no-dmarc-rua>. Similarly the forensic
+report email can be set with C<--dmarc-ruf> and C<--no-dmarc-ruf>.
+
 This command can also be used to add and remove DNS records from all the
 selected domains. Adding is done with the C<--add-record> flag, which must
 be followed by a single parameter containing the record name, type and value.
@@ -42,8 +46,12 @@ use the C<--add-proxy-record> with the same parameters as C<--add-record>.
 Conversely, deletion is done with the C<--remove-record> flag, followed by a 
 single parameter containing the name and type of the record(s) to delete. You
 can also optionally include the record values, to disambiguate records with
-the same name but different values (like MX records). Both the additional and
-deletion flags can be given multiple times.
+the same name but different values (like MX records).
+
+You can also update an existing record with the C<--update-record> flag,
+which must be followed by two parameters. First is the current name and type,
+and second is the new name, type and values.  The record addition, modification
+and deletion flags can be given multiple times.
 
 Similarly, the default TTL for records can be set with the C<--ttl> flag
 followed by a number in seconds. Suffixes like h, m and d are also allowed
@@ -88,6 +96,10 @@ with the flag C<--cloud-dns local>.
 Similarly, the C<--remote-dns> flag followed by a hostname can be used to move
 this domain to a remote Webmin DNS server, if one is configured. Or to move it
 back to local hosting, use the C<--local-dns> flag.
+
+If DKIM is enabled on your system, you can enable it for this domain with the
+C<--enable-dkim> flag, or turn it off with C<--disable-dkim>. Or switch to
+the default state for this domain with C<--default-dkim>.
 
 =cut
 
@@ -167,6 +179,24 @@ while(@ARGV > 0) {
 			&usage("--dmarc-percent must be followed by an ".
 			       "integer between 0 and 100");
 		}
+	elsif ($a eq "--dmarc-rua") {
+		$dmarcrua = shift(@ARGV);
+		$dmarcrua =~ /^mailto:\S+\@\S+$/ ||
+			&usage("--dmarc-rua must be followed by an address ".
+			       "formatted like mailto:user\@domain");
+		}
+	elsif ($a eq "--no-dmarc-rua") {
+		$dmarcrua = "";
+		}
+	elsif ($a eq "--dmarc-ruf") {
+		$dmarcruf = shift(@ARGV);
+		$dmarcruf =~ /^mailto:\S+\@\S+$/ ||
+			&usage("--dmarc-ruf must be followed by an address ".
+			       "formatted like mailto:user\@domain");
+		}
+	elsif ($a eq "--no-dmarc-ruf") {
+		$dmarcruf = "";
+		}
 	elsif ($a eq "--dns-ip") {
 		$dns_ip = shift(@ARGV);
 		&check_ipaddress($dns_ip) ||
@@ -194,6 +224,13 @@ while(@ARGV > 0) {
 		my ($name, $type, @values) = split(/\s+/, shift(@ARGV));
 		$name && $type || &usage("--remove-record must be followed by the record name and type, all in one parameter");
 		push(@delrecs, [ $name, $type, @values ]);
+		}
+	elsif ($a eq "--update-record") {
+		my ($oldname, $oldtype) = split(/\s+/, shift(@ARGV));
+		my ($name, $type, @values) = split(/\s+/, shift(@ARGV));
+		$oldname && $oldtype || &usage("--update-record must be followed by the original record name and type, all in one parameter");
+		$name && $type && @values || &usage("--update-record must be followed by the new record name, type and values, all in one parameter");
+                push(@uprecs, [ $oldname, $oldtype, $name, $type, undef, \@values, 0 ]);
 		}
 	elsif ($a eq "--ttl") {
 		$ttl = shift(@ARGV);
@@ -261,6 +298,15 @@ while(@ARGV > 0) {
 	elsif ($a eq "--remove-parent-ds") {
 		$parentds = 0;
 		}
+	elsif ($a eq "--enable-dkim") {
+		$dkim_enabled = 1;
+		}
+	elsif ($a eq "--disable-dkim") {
+		$dkim_enabled = 0;
+		}
+	elsif ($a eq "--default-dkim") {
+		$dkim_enabled = 2;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -270,11 +316,13 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage("No domains specified");
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
-  @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
+  @addrecs || @delrecs || @uprecs ||
+  @addslaves || @delslaves || $addallslaves || $ttl ||
   defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
+  defined($dmarcrua) || defined($dmarcruf) ||
   defined($tlsa) || $syncallslaves || defined($submode) || $clouddns ||
   defined($remotedns) || defined($parentds) || defined($clouddns_import) ||
-  &usage("Nothing to do");
+  defined($dkim_enabled) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -351,6 +399,13 @@ if (defined($remotedns)) {
 				      "cannot be used for master zones");
 	}
 
+# Validate DKIM flag
+my $dkim = &get_dkim_config();
+if (defined($dkim_enabled)) {
+	$dkim && $dkim->{'enabled'} ||
+		&usage("DKIM is not enabled on this system");
+	}
+
 # Do it for all domains
 foreach $d (@doms) {
 	&$first_print("Updating server $d->{'dom'} ..");
@@ -423,7 +478,8 @@ foreach $d (@doms) {
 		&$second_print($text{'setup_done'});
 		}
 
-	if (($dmarcp || defined($dmarcpct)) && $currdmarc) {
+	if (($dmarcp || defined($dmarcpct) || defined($dmarcrua) ||
+	     defined($dmarcruf)) && $currdmarc) {
 		# Update current DMARC record
 		&$first_print($text{'spf_dmarcchange'});
 		if ($dmarcp) {
@@ -431,6 +487,12 @@ foreach $d (@doms) {
 			}
 		if (defined($dmarcpct)) {
 			$currdmarc->{'pct'} = $dmarcpct;
+			}
+		if (defined($dmarcrua)) {
+			$currdmarc->{'rua'} = $dmarcrua;
+			}
+		if (defined($dmarcruf)) {
+			$currdmarc->{'ruf'} = $dmarcruf;
 			}
 		&save_domain_dmarc($d, $currdmarc);
 		&$second_print($text{'setup_done'});
@@ -511,6 +573,41 @@ foreach $d (@doms) {
 				$changed++;
 				}
 			}
+		&$second_print($text{'setup_done'});
+		}
+
+	# Update records in the domain
+	if (@uprecs) {
+		&$first_print(&text('spf_uprecs', scalar(@addrecs)));
+		if (!$recs) {
+			&pre_records_change($d);
+			($recs, $file) = &get_domain_dns_records_and_file($d);
+			}
+		foreach my $rn (@uprecs) {
+			my ($oldname, $oldtype, $name, $type, $ttl, $values, $proxied) = @$rn;
+			if ($oldname !~ /\.$/ && $oldname ne "\@") {
+				$oldname .= ".".$d->{'dom'}.".";
+				}
+			if ($name !~ /\.$/ && $name ne "\@") {
+				$name .= ".".$d->{'dom'}.".";
+				}
+			my ($r) = grep { $_->{'name'} eq $oldname &&
+					 $_->{'type'} eq $oldtype } @$recs;
+			if (!$r) {
+				&$second_print(&text('spf_euprecs', $oldname));
+				}
+			else {
+				$r->{'name'} = $name;
+				$r->{'type'} = $type;
+				$r->{'ttl'} = $ttl if (defined($ttl));
+				$r->{'proxied'} = $proxied
+					if (defined($proxied));
+				$r->{'values'} = $values;
+				&modify_dns_record($recs, $file, $r);
+				$changed++;
+				}
+			}
+
 		&$second_print($text{'setup_done'});
 		}
 
@@ -618,6 +715,27 @@ foreach $d (@doms) {
 		if ($changed) {
 			# Records have changed, so re-read
 			($recs, $file) = &get_domain_dns_records_and_file($d);
+			}
+		}
+
+	# Update DKIM records
+	if (defined($dkim_enabled)) {
+		my $olddkim = &has_dkim_domain($d, $dkim);
+		if ($dkim_enabled == 1) {
+			$d->{'dkim_enabled'} = 1;
+			}
+		elsif ($dkim_enabled == 0) {
+			$d->{'dkim_enabled'} = 0;
+			}
+		else {
+			delete($d->{'dkim_enabled'});
+			}
+		my $newdkim = &has_dkim_domain($d, $dkim);
+		if (!$olddkim && $newdkim) {
+			&update_dkim_domains($d, 'setup');
+			}
+		elsif ($olddkim && !$newdkim) {
+			&update_dkim_domains($d, 'delete');
 			}
 		}
 
@@ -767,10 +885,13 @@ print "                      --spf-all-default]\n";
 print "                     [--dmarc | --no-dmarc]\n";
 print "                     [--dmarc-policy none|quarantine|reject]\n";
 print "                     [--dmarc-percent number]\n";
+print "                     [--dmarc-rua mailto:user\@domain | --no-dmarc-rua]\n";
+print "                     [--dmarc-ruf mailto:user\@domain | --no-dmarc-ruf]\n";
 print "                     [--add-record \"name type value\"]\n";
 print "                     [--add-record-with-ttl \"name type TTL value\"]\n";
 print "                     [--add-proxy-record \"name type value\"]\n";
 print "                     [--remove-record \"name type value\"]\n";
+print "                     [--update-record \"oldname oldtype\" \"name type value\"]\n";
 print "                     [--ttl seconds | --all-ttl seconds]\n";
 print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
 print "                     [--remove-slave hostname]* | [--sync-all-slaves]\n";
@@ -782,6 +903,7 @@ print "                     [--cloud-dns provider|\"local\"]\n";
 print "                     [--cloud-dns-import]\n";
 print "                     [--remote-dns hostname | --local-dns]\n";
 print "                     [--add-parent-ds | --remove-parent-ds]\n";
+print "                     [--enable-dkim | --disable-dkim | --default-dkim]\n";
 exit(1);
 }
 

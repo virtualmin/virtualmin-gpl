@@ -477,7 +477,6 @@ local $compression = $opts->{'compression'};
 			      : $text{'backup_dirtar'});
 local $out;
 local $cmd;
-local $gzip = $homefmt && &has_command("gzip");
 local $destfile = $file;
 if (!$homefmt) {
 	$destfile .= ".".&compression_to_suffix($compression);
@@ -498,6 +497,17 @@ if ($src{'mount'} !~ /^[a-z0-9_\-\.]+:/i) {
 &write_as_domain_user($d, sub {
 	&write_file("$d->{'home'}/.virtualmin-src", \%src)
 	});
+
+# If this is a home-format backup, create a dummy file in .backup even though
+# it's not used so that the restore process knows what domain this came from
+if ($homefmt) {
+	my $backupdir = "$d->{'home'}/.backup";
+	my $dummy = $backupdir."/".$d->{'dom'}."_dir";
+	&make_dir_as_domain_user($d, $backupdir, 0755);
+	&write_as_domain_user($d, sub {
+		&write_file_contents($dummy, "")
+		});
+	}
 
 # Create exclude file
 local $xtemp = &transname();

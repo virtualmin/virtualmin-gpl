@@ -63,7 +63,6 @@ USER: foreach $line (@lines) {
 		}
 	$quota = &has_home_quotas() ? $quota : undef;
 	local $mquota = &has_mail_quotas() ? $quota : undef;
-	local $qquota = &has_server_quotas() ? $quota : undef;
 
 	# Make sure needed parameters are given
 	if (!$username) {
@@ -75,7 +74,7 @@ USER: foreach $line (@lines) {
 		&line_error($err);
 		next USER;
 		}
-	if ($user->{'person'} && $real !~ /^[^:]*$/) {
+	if ($real !~ /^[^:]*$/) {
 		&line_error($text{'user_ereal'});
 		next USER;
 		}
@@ -160,7 +159,7 @@ USER: foreach $line (@lines) {
 
 	# Populate the user object
 	local $user = &create_initial_user($d, 0, $ftp == 3);
-	if ($user->{'unix'} && !$user->{'webowner'}) {
+	if (!$user->{'webowner'}) {
 		$user->{'uid'} = &allocate_uid(\%taken);
 		}
 	else {
@@ -168,30 +167,26 @@ USER: foreach $line (@lines) {
 		}
 	$taken{$user->{'uid'}}++;
 	$user->{'gid'} = $d->{'gid'} || $d->{'ugid'};
-	if ($user->{'person'}) {
-		$user->{'real'} = $real;
-		}
-	if ($user->{'unix'}) {
-		if ($ftp =~ /^\//) {
-			# Custom shell
-			($shell) = grep { $_->{'shell'} eq $ftp } @ashells;
-			if (!$shell) {
-				&line_error(&text('umass_eshell2', $ftp));
-				next USER;
-				}
+	$user->{'real'} = $real;
+	if ($ftp =~ /^\//) {
+		# Custom shell
+		($shell) = grep { $_->{'shell'} eq $ftp } @ashells;
+		if (!$shell) {
+			&line_error(&text('umass_eshell2', $ftp));
+			next USER;
 			}
-		else {
-			# Old-style number
-			$shell = $ftp == 1 ? $ftp_shell :
-			         $ftp == 3 ? $ftp_shell :
-				 $ftp == 2 ? $jailed_shell : $nologin_shell;
-			if (!$shell) {
-				&line_error(&text('umass_eshell'));
-				next USER;
-				}
-			}
-		$user->{'shell'} = $shell->{'shell'};
 		}
+	else {
+		# Old-style number
+		$shell = $ftp == 1 ? $ftp_shell :
+			 $ftp == 3 ? $ftp_shell :
+			 $ftp == 2 ? $jailed_shell : $nologin_shell;
+		if (!$shell) {
+			&line_error(&text('umass_eshell'));
+			next USER;
+			}
+		}
+	$user->{'shell'} = $shell->{'shell'};
 	if ($in{'randpass'} && $pass eq '') {
 		# No password given - make one up
 		$user->{'passmode'} = 3;
@@ -239,30 +234,25 @@ USER: foreach $line (@lines) {
 	else {
 		$user->{'email'} = undef;
 		}
-	if ($user->{'unix'} && !$user->{'noquota'}) {
+	if (!$user->{'noquota'}) {
 		$user->{'quota'} = $quota;
 		$user->{'mquota'} = $mquota;
 		}
-	if ($user->{'mailquota'}) {
-		$user->{'qquota'} = $qquota;
-		}
 	$user->{'dbs'} = \@dbs if (@dbs);
 
-	if ($user->{'unix'}) {
-		# Check for a Unix clash
-		$mclash = &check_clash($username, $d->{'dom'});
-		if ($utaken{$user->{'user'}} ||
-		    $user->{'email'} && $mclash ||
-		    !$user->{'email'} && $mclash == 2) {
-			&line_error($text{'user_eclash'});
-			next USER;
-			}
+	# Check for a Unix clash
+	$mclash = &check_clash($username, $d->{'dom'});
+	if ($utaken{$user->{'user'}} ||
+	    $user->{'email'} && $mclash ||
+	    !$user->{'email'} && $mclash == 2) {
+		&line_error($text{'user_eclash'});
+		next USER;
 		}
 
 	# Check for clash within this domain
 	local ($clash) = grep { &remove_userdom($_->{'user'}, $d) eq
-				  &remove_userdom($username, $d) &&
-			  	$_->{'unix'} == $user->{'unix'} } @users;
+				  &remove_userdom($username, $d)
+			      } @users;
 	if ($clash) {
 		&line_error($text{'user_eclash2'});
 		next USER;

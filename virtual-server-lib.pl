@@ -367,6 +367,8 @@ $lookup_domain_port = 11000;
 
 $quota_cache_dir = "$module_var_directory/quota-cache";
 
+$acme_providers_dir = "$module_config_directory/acme";
+
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config
 # or given space-separated string.
@@ -400,7 +402,8 @@ return "$module_var_directory/$name";
 sub config_post_save
 {
 my ($newconf, $oldconf) = @_;
-if ($newconf->{'hide_pro_tips'} ne $oldconf->{'hide_pro_tips'}) {
+if ($newconf->{'hide_pro_tips'} ne $oldconf->{'hide_pro_tips'} ||
+    $newconf->{'default_domain_ssl'} ne $oldconf->{'default_domain_ssl'}) {
 	&clear_links_cache();
 	}
 }

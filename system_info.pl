@@ -292,14 +292,12 @@ if (!$data->{'nostatus'} && $info->{'startstop'} &&
 		     "<img src='$idir/reload.png'".
 		     "alt='$status->{'restartdesc'}'></a>\n";
 
-		push(@table, { 'desc' => $label,
-			       'value' =>
-			(!$status->{'status'} ?
-			      "<img src='$idir/down.gif' alt='Stopped'>" :
-			      "<img src='$idir/up.gif' alt='Running'>").
-			    ("&nbsp;" x 10).
-			    $action_link.
-			    "&nbsp;".$restart_link });
+		push(@table, { 'desc' => "&nbsp;".
+				  (!$status->{'status'} ?
+				  "<img src='$idir/down.gif' alt='Stopped'>" :
+				  "<img src='$idir/up.gif' alt='Running'>").
+					"&nbsp;&nbsp;$label",
+			       'value' => $action_link."&nbsp;".$restart_link });
 		}
 	push(@rv, { 'type' => 'table',
 		    'id' => 'status',
@@ -668,13 +666,9 @@ return @rv;
 }
 
 sub get_virtualmin_docs
-{               
-return &master_admin() ?
-		"https://www.virtualmin.com/documentation" :
-       &reseller_admin() ?
-		"https://www.virtualmin.com/documentation/users/reseller" :
-       		"https://www.virtualmin.com/documentation/users/server-owner";
-}      
+{
+return "https://www.virtualmin.com/docs/";
+}
 
 sub parse_license_date
 {

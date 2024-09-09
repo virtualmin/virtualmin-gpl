@@ -41,12 +41,11 @@ if ($can) {
 			}
 		}
 
-	# Check for working Apache suexec for PHP
+	# Check for working Apache CGI when PHP scripts are run via CGI
 	if (!$d->{'alias'} && ($newmode eq 'cgi' || $newmode eq 'fcgid') &&
 	    $can && $p eq 'web') {
-		$tmpl = &get_template($d->{'template'});
-		$err = &check_suexec_install($tmpl);
-		&error($err) if ($err);
+		&get_domain_cgi_mode($d) ||
+			&error($text{'phpmode_ecgimode'});
 		}
 	}
 
@@ -193,6 +192,12 @@ if (&can_php_error_log($mode)) {
 				     : &text('phpmode_logerr', $err));
 		$anything++;
 		}
+	}
+
+# Save PHP mail option
+my $phpmail = &get_php_can_send_mail($d);
+if (defined($phpmail) && defined($in{'mail'})) {
+	&save_php_can_send_mail($d, $in{'mail'});
 	}
 
 if ($can) {

@@ -24,8 +24,9 @@ if ($in{'delete'}) {
 else {
 	# Validate inputs
 	$in{'path'} =~ /^\/\S*$/ || &error($text{'balancer_epath'});
+	my @urls = grep { /\S/ } split(/\r?\n/, $in{'urls'});
 	if ($in{'new'}) {
-		if ($has == 1) {
+		if ($has == 1 || scalar(@urls) == 1) {
 			# Doesn't support balancers
 			$b = { };
 			}
@@ -44,9 +45,8 @@ else {
 		# Not proxying anywhere
 		$b->{'none'} = 1;
 		}
-	elsif ($in{'new'} && $has == 2 || !$in{'new'} && $b->{'balancer'}) {
+	elsif (($in{'new'} && $has == 2 && scalar(@urls) > 1) || !$in{'new'} && $b->{'balancer'}) {
 		# Many URLs
-		@urls = grep { /\S/ } split(/\r?\n/, $in{'urls'});
 		foreach my $u (@urls) {
 			$u =~ /^(http|https):\/\/(\S+)$/ ||
 				&error(&text('balancer_eurl', $u));
@@ -57,11 +57,23 @@ else {
 		}
 	else {
 		# One URL
-		$in{'urls'} =~ /^(http|https):\/\/(\S+)$/ ||
-			&error($text{'balancer_eurl2'});
+		if (&can_balancer_unix()) {
+			$in{'urls'} =~ /^(http|https|ajp|fcgi|scgi):\/\/(\S+)$|^unix:(\/\S+)\|\S+:\/\/\S+$/ ||
+				&error($text{'balancer_eurl2'});
+			}
+		else {
+			$in{'urls'} =~ /^(http|https):\/\/(\S+)$/ ||
+				&error($text{'balancer_eurl3'});
+			}
 		$b->{'urls'} = [ $in{'urls'} ];
 		$b->{'none'} = 0;
 		}
+	$b->{'websockets'} = $in{'websockets'};
+	&error($text{'balancer_ewsbalancer'})
+		if ($b->{'balancer'} && $b->{'websockets'});
+	&error($text{'balancer_ewsnonhttp'})
+		if ($b->{'websockets'} && $in{'urls'} !~
+			/^(http|https):\/\/(\S+)$/);
 
 	# Create or update
 	if ($in{'new'}) {

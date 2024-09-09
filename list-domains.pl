@@ -308,12 +308,14 @@ if ($multi) {
 		 &supports_resource_limits();
 	@tmpls = &list_templates();
 	@fplugins = &list_feature_plugins();
+	if (defined(&list_acme_providers)) {
+		%acmes = map { $_->{'id'}, $_ } &list_acme_providers();
+		}
 	if ($multi == 1) {
 		$hs = &quota_bsize("home");
 		$ms = &quota_bsize("mail");
 		$sender_bcc = &get_all_domains_sender_bcc();
 		$recipient_bcc = &get_all_domains_recipient_bcc();
-		@cgimodes = &has_cgi_support();
 		}
 	foreach $d (@doms) {
 		local @users = &list_domain_users($d, 0, 1, 0, 1);
@@ -425,6 +427,8 @@ if ($multi) {
 				  "For exceeding bandwidth limit" :
 				$d->{'disabled_reason'} eq 'transfer' ?
 				  "Transferred to another system" :
+				$d->{'disabled_reason'} eq 'schedule' ?
+				  "Manually configured schedule" :
 				$d->{'disabled_why'} ?
 				  "Manually ($d->{'disabled_why'})" :
 				  "Manually";
@@ -433,6 +437,10 @@ if ($multi) {
 				print "    Disabled at: ",
 				      &make_date($d->{'disabled_time'}),"\n";
 				}
+			}
+		elsif ($d->{'disabled_auto'}) {
+			print "    Disable scheduled on: ",
+			      &make_date($d->{'disabled_auto'}),"\n";
 			}
 		if ($d->{'virt'}) {
 			if ($multi == 2) {
@@ -608,6 +616,7 @@ if ($multi) {
 			if ($d->{'fcgiwrap_port'} && $d->{'web'}) {
 				print "    FCGIwrap port for CGIs: ",$d->{'fcgiwrap_port'},"\n";
 				}
+			@cgimodes = &has_cgi_support($d);
 			print "    Possible CGI script execution modes: ",
 				join(" ", @cgimodes),"\n";
 			}
@@ -723,17 +732,36 @@ if ($multi) {
 			print "    SSL cert expiry time: ",$exp,"\n";
 			}
 		if ($d->{'letsencrypt_renew'} || $d->{'letsencrypt_last'}) {
-			print "    Lets Encrypt renewal: ",
+			print "    SSL provider renewal: ",
 			    ($d->{'letsencrypt_renew'} ? "Enabled"
 						       : "Disabled"),"\n";
+			print "    SSL provider email: ",
+			    ($d->{'letsencrypt_email'} == 0 ? "Always" :
+			     $d->{'letsencrypt_email'} == 1 ? "On error" :
+							      "Never"),"\n";
 			}
 		if ($d->{'letsencrypt_last'}) {
-			print "    Lets Encrypt cert issued: ",
+			print "    SSL provider cert issued: ",
 			    &make_date($d->{'letsencrypt_last'}),"\n";
 			}
 		if ($d->{'letsencrypt_dname'}) {
-			print "    Lets Encrypt domain: ",
+			print "    SSL provider domain: ",
 			    $d->{'letsencrypt_dname'},"\n";
+			}
+		if (defined($d->{'letsencrypt_nodnscheck'})) {
+			print "    SSL provider DNS check: ",
+			    ($d->{'letsencrypt_nodnscheck'} ? "Skip" : "Filter"),"\n";
+			}
+		if (defined($d->{'letsencrypt_subset'})) {
+			print "    SSL provider subset mode: ",
+			    ($d->{'letsencrypt_subset'} ? "Yes" : "No"),"\n";
+			}
+		if ($d->{'letsencrypt_id'} && %acmes) {
+			my $acme = $acmes{$d->{'letsencrypt_id'}};
+			print "    SSL provider ID: ",
+			      $d->{'letsencrypt_id'},"\n";
+			print "    SSL provider type: ",
+			      ($acme->{'type'} || $acme->{'url'}),"\n";
 			}
 
 		# Show SSL cert usage by other services
@@ -773,6 +801,14 @@ if ($multi) {
 			$dmarc = &is_domain_dmarc_enabled($d);
 			print "    DMARC DNS record: ",
 			      ($dmarc ? "Enabled" : "Disabled"),"\n";
+			}
+
+		# Show DKIM setting
+		if ($d->{'dkim_enabled'} eq '1') {
+			print "    DKIM enabled: Yes\n";
+			}
+		elsif ($d->{'dkim_enabled'} eq '0') {
+			print "    DKIM enabled: No\n";
 			}
 
 		# Slave DNS servers
@@ -913,6 +949,19 @@ if ($multi) {
 					print "    Allowed $f hosts: ",
 					      join(" ", @hosts),"\n";
 					}
+				}
+			}
+		
+		# Last login
+		if ($config{'show_domains_lastlogin'}) {
+			if ($d->{'last_login_timestamp'}) {
+				print "    Last login: ",
+				  &make_date($d->{'last_login_timestamp'}),"\n";
+				print "    Last login time: ",
+				  $d->{'last_login_timestamp'},"\n";
+				}
+			else {
+				print "    Last login: Never\n";
 				}
 			}
 		}

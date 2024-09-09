@@ -1534,7 +1534,6 @@ while(<PASSWD>) {
 			   lc($muser);
 	$uinfo->{'shell'} = $nologin_shell->{'shell'};
 	$uinfo->{'email'} = lc($muser)."\@$dom";
-	$uinfo->{'qquota'} = $quota{$muser};
 	$uinfo->{'quota'} = $quota{$muser};
 	$uinfo->{'mquota'} = $quota{$muser};
 	&create_user_home($uinfo, $d, 1);

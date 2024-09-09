@@ -118,24 +118,28 @@ foreach $d (@doms) {
 			print "    Domain: $d->{'dom'}\n";
 			print "    Unix username: ",$u->{'user'},"\n" if (!$u->{'extra'});
 			print "    Real name: ",$u->{'real'},"\n";
+			if (defined($u->{'firstname'})) {
+				print "    First name: ",$u->{'firstname'},"\n";
+				}
+			if (defined($u->{'surname'})) {
+				print "    Surname: ",$u->{'surname'},"\n";
+				}
 			if (defined($u->{'plainpass'})) {
 				print "    Password: ",$u->{'plainpass'},"\n";
 				}
 			$pass = $u->{'pass'};
 			$disable = ($pass =~ s/^\!// ? 1 : 0);
 			print "    Encrypted password: ",$pass,"\n";
-			if ($u->{'unix'}) {
-				my $existing_key = &get_domain_user_ssh_pubkey($d, $u);
-				if ($existing_key) {
-					print "    SSH public key: $existing_key\n";
-					}
+			my $existing_key = &get_domain_user_ssh_pubkey($d, $u);
+			if ($existing_key) {
+				print "    SSH public key: $existing_key\n";
 				}
 			print "    Disabled: ",($disable ? "Yes" : "No"),"\n";
 			print "    Home directory: ",$u->{'home'},"\n";
 			if ($u->{'domainowner'}) {
 				$u->{'shell'} = &get_domain_shell($d, $u);
 				}
-			($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
+			($shell) = grep { $_->{'shell'} eq &get_user_shell($u) }
 					@ashells;
 			print "    FTP access: ",
 			    ($shell->{'id'} eq 'nologin' ? "No" : "Yes"),"\n";
@@ -143,17 +147,15 @@ foreach $d (@doms) {
 				print "    Login permissions: ",
 				      $shell->{'desc'},"\n";
 				}
-			print "    Shell: ",$u->{'shell'},"\n";
+			my $ushell = &get_user_shell($u);
+			$ushell .= " ($u->{'shell'})"
+				if ($ushell ne $u->{'shell'});
+			print "    Shell: $ushell","\n";
 			print "    User type: ",
 				($u->{'domainowner'} ? "Server owner" :
 				 $u->{'webowner'} ? "Website manager" :
 						    "Normal user"),"\n";
-			if ($u->{'mailquota'}) {
-				print "    Mail server quota: ",
-				      $u->{'qquota'},"\n";
-				}
-			if ($u->{'unix'} && &has_home_quotas() &&
-			    !$u->{'noquota'}) {
+			if (&has_home_quotas() && !$u->{'noquota'}) {
 				print "    Home quota: ",
 				      &quota_show($u->{'quota'}, "home"),"\n";
 				print "    Home quota used: ",
@@ -172,8 +174,7 @@ foreach $d (@doms) {
 					      ($u->{'quota_cache'} * $home_bsize),"\n";
 					}
 				}
-			if ($u->{'unix'} && &has_mail_quotas() &&
-			    !$u->{'noquota'}) {
+			if (&has_mail_quotas() && !$u->{'noquota'}) {
 				print "    Mail quota: ",
 				      &quota_show($u->{'mquota'}, "mail"),"\n";
 				print "    Mail quota used: ",
@@ -316,7 +317,6 @@ foreach $d (@doms) {
 				    $u->{'email'} ? "Yes" : "No",
 				    $shell->{'id'} eq 'nologin' ? "No" : "Yes",
 				    scalar(@{$u->{'dbs'}}) || "No",
-				    $u->{'mailquota'} ? $u->{'qquota'} :
 				    &has_home_quotas() ? 
 					    &quota_show($u->{'quota'}, "home") :
 					    "NA";

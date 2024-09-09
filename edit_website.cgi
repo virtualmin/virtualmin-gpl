@@ -102,7 +102,7 @@ if (!$d->{'alias'} && &can_log_paths() &&
 		}
 	}
 # CGI execution mode
-my @cgimodes = &has_cgi_support();
+my @cgimodes = &has_cgi_support($d);
 if (@cgimodes > 0) {
 	print &ui_table_row(
 		&hlink($text{'tmpl_web_cgimode'}, "web_cgimode"),

@@ -24,7 +24,8 @@ foreach my $lib ("scripts", "resellers", "admins", "users", "simple", "s3",
 		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
 		 "jailkit", "ports", "bb", "dnscloud", "dnscloudpro",
-		 "smtpcloud", "pro-tip", "azure", "remotedns", "drive") {
+		 "smtpcloud", "pro-tip", "azure", "remotedns", "drive",
+		 "acme") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
 		$libfile = "$virtual_server_root/$lib-lib.pl";
@@ -320,6 +321,10 @@ if ($dom->{'dns'} && $dom->{'dns_submode'} && !$dom->{'dns_subof'}) {
 	# Assume parent DNS domain is parent virtual server
 	$dom->{'dns_subof'} = $dom->{'subdom'} || $dom->{'parent'};
 	}
+if (!$dom->{'letsencrypt_id'} && $dom->{'letsencrypt_last'}) {
+	# Default ACME provider to Let's Encrypt
+	$dom->{'letsencrypt_id'} = 1;
+	}
 
 # Emailto is a computed field
 &compute_emailto($dom);
@@ -561,7 +566,7 @@ local $file = "$domains_dir/$d->{'id'}";
 if (!$creating && $d->{'id'} && !-r $file) {
 	# Deleted from under us! Don't save
 	print STDERR "Domain $file was deleted before saving!\n";
-	&print_call_stack();
+	&print_call_stack() if ($gconfig{'error_stack'});
 	return 0;
 	}
 if ($d->{'dom'} eq '') {
@@ -576,7 +581,7 @@ if (&read_file($file, $oldd)) {
 	my @st = stat($file);
 	if ($d->{'lastread_time'} && $st[9] > $d->{'lastread_time'}) {
 		print STDERR "Domain $file was modified since last read!\n";
-		&print_call_stack();
+		&print_call_stack() if ($gconfig{'error_stack'});
 		}
 	}
 if (!$d->{'created'}) {
@@ -641,7 +646,7 @@ if (defined(&get_autoreply_file_dir)) {
 	}
 
 # Delete scheduled backups owned by the domain owner, or that backup only
-# this dokmain
+# this domain
 foreach my $sched (&list_scheduled_backups()) {
 	my @dids = split(/\s+/, $sched->{'doms'});
 	if ($sched->{'owner'} eq $id) {
@@ -722,6 +727,18 @@ foreach my $m (keys %get_domain_by_maps) {
 	}
 }
 
+# supports_firstname()
+# Returns 1 if users can have a first name and surname
+sub supports_firstname
+{
+&require_useradmin();
+if ($usermodule eq "ldap-useradmin") {
+	my %luconfig = &foreign_config("ldap-useradmin");
+	return $luconfig{'given'} ? 1 : 0;
+	}
+return 0;
+}
+
 # list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs], [include-extra])
 # List all Unix users who are in the domain's primary group.
 # If domain is omitted, returns local users.
@@ -742,10 +759,6 @@ if ($config{'mail'} && !$novirts) {
 		# Find Postfix aliases for users
 		%aliases = map { $_->{'name'}, $_ }
 			       &$postfix_list_aliases($postfix_afiles);
-		}
-	elsif ($config{'mail_system'} == 5) {
-		# Find VPOPMail aliases to match with users
-		%valiases = map { $_->{'from'}, $_ } &list_virtusers();
 		}
 	if ($config{'generics'}) {
 		%generics = &get_generics_hash();
@@ -771,12 +784,9 @@ if ($d) {
 			$_->{'gid'} == $d->{'gid'} ||
 			$_->{'user'} eq $d->{'user'} } @users;
 	foreach my $u (@users) {
-		if ($u->{'user'} eq $d->{'user'} && $u->{'unix'}) {
+		if ($u->{'user'} eq $d->{'user'}) {
 			# Virtual server owner
 			$u->{'domainowner'} = 1;
-			if ($config{'mail_system'} == 5) {
-				$u->{'noprimary'} = 1;
-				}
 			if ($d->{'hashpass'}) {
 				$u->{'pass_crypt'} = $d->{'crypt_enc_pass'};
 				$u->{'pass_md5'} = $d->{'md5_enc_pass'};
@@ -784,7 +794,7 @@ if ($d) {
 				$u->{'pass_digest'} = $d->{'digest_enc_pass'};
 				}
 			}
-		elsif ($u->{'uid'} == $d->{'uid'} && $u->{'unix'}) {
+		elsif ($u->{'uid'} == $d->{'uid'}) {
 			# Web management user
 			$u->{'webowner'} = 1;
 			$u->{'noquota'} = 1;
@@ -823,54 +833,6 @@ if ($d) {
 		local %umap = map { &replace_atsign($_->{'user'}), $_ }
 				grep { $_->{'user'} =~ /\@/ } @users;
 		@users = grep { !$umap{$_->{'user'}} } @users;
-		}
-
-	if ($config{'mail_system'} == 5) {
-		# Add VPOPMail users for this domain
-		local %attr_map = ( 'name' => 'user',
-				    'passwd' => 'pass',
-				    'clear passwd' => 'plainpass',
-				    'comment/gecos' => 'real',
-				    'dir' => 'home',
-				    'quota' => 'qquota',
-				   );
-		local $user;
-		local $_;
-		open(UINFO, "$vpopbin/vuserinfo -D $d->{'dom'} |");
-		while(<UINFO>) {
-			s/\r|\n//g;
-			if (/^([^:]+):\s+(.*)$/) {
-				local ($attr, $value) = ($1, $2);
-				if ($attr eq "name") {
-					# Start of a new user
-					$user = { 'vpopmail' => 1,
-						  'mailquota' => 1,
-						  'person' => 1,
-						  'fixedhome' => 1,
-						  'noappend' => 1,
-						  'noprimary' => 1,
-						  'alwaysplain' => 1 };
-					push(@users, $user);
-					}
-				local $amapped = $attr_map{$attr};
-				$user->{$amapped} = $value if ($amapped);
-				if ($amapped eq "qquota") {
-					# Convert quota to virtualmin format
-					if ($value eq "NOQUOTA") {
-						$user->{$amapped} = 0;
-						}
-					else {
-						$user->{$amapped} = int($value);
-						}
-					}
-				if ($amapped eq "user") {
-					# Email is fixed with vpopmail
-					$user->{'email'} =
-						$value."\@".$d->{'dom'};
-					}
-				}
-			}
-		close(UINFO);
 		}
 
 	# Find users with broken home dir (not under homes, or
@@ -1034,8 +996,7 @@ if (!$novirts) {
 			$u->{'valias'} = $va;
 			$u->{'to'} = $va->{'to'};
 			}
-		elsif ($config{'mail_system'} == 2 ||
-		       $config{'mail_system'} == 5) {
+		elsif ($config{'mail_system'} == 2) {
 			# Find .qmail file
 			local $alias = &get_dotqmail(&dotqmail_file($u));
 			if ($alias) {
@@ -1054,8 +1015,7 @@ if (!$novirts) {
 			if (@{$v->{'to'}} == 1 &&
 			    ($v->{'to'}->[0] eq $escuser ||
 			     $v->{'to'}->[0] eq $escalias ||
-			     ($v->{'to'}->[0] eq $email &&
-			      $config{'mail_system'} != 5) ||
+			     $v->{'to'}->[0] eq $email ||
 			     $v->{'from'} eq $email &&
 			      $v->{'to'}->[0] =~ /^BOUNCE/) &&
 			    (!$d || $v->{'from'} ne $d->{'dom'})) {
@@ -1110,8 +1070,7 @@ if (!$nodbs && $d) {
 		local $domu = defined(&$domufunc) ? &$domufunc($d) : undef;
 		foreach $u (@users) {
 			# Domain owner always gets all databases
-			next if ($u->{'user'} eq $d->{'user'} &&
-				 $u->{'unix'});
+			next if ($u->{'user'} eq $d->{'user'});
 
 			# For each user, add this DB to his list if there
 			# is a user for it with the same name. Unless this
@@ -1173,6 +1132,18 @@ if ($d) {
 			}
 		}
 	}
+
+# Add jailed user info for each user
+if ($d && $d->{'jail'}) {
+	my @jusers = &get_domain_jailed_users_shell($d);
+	foreach my $juser (@jusers) {
+		my ($user) = grep { $_->{'user'} eq $juser->{'user'} } @users;
+		if ($user) {
+			$user->{'jailed'} = $juser;
+			}
+		}
+	}
+
 # Return users list
 return @users;
 }
@@ -1368,7 +1339,6 @@ foreach my $u (@users) {
 				   $main::used_mail_fquota{$altuser};
 		}
 	$u->{'unix'} = 1;
-	$u->{'person'} = 1;
 	$uidmap{$u->{'uid'}} ||= $u;
 	}
 return @users;
@@ -1471,38 +1441,24 @@ local $pop3 = &remove_userdom($_[0]->{'user'}, $_[1]);
 &require_useradmin();
 &require_mail();
 
-if ($_[0]->{'vpopmail'}) {
-	# Create user in VPOPMail
-	local $quser = quotemeta($_[0]->{'user'});
-	local $qdom = $_[1]->{'dom'};
-	local $qreal = quotemeta($_[0]->{'real'}) || '""';
-	local $quota = $_[0]->{'qquota'} ? "-q $_[0]->{'qquota'}" : "-q NOQUOTA";
-	local $qpass = quotemeta($_[0]->{'plainpass'}) || '""';
-	local $cmd = "$vpopbin/vadduser $quota -c $qreal $quser\@$qdom $qpass";
-	local $out = &backquote_logged("$cmd 2>&1");
-	&error("<tt>$cmd</tt> failed: <pre>$out</pre>") if ($?);
-	$_[0]->{'home'} = &domain_vpopmail_dir($_[1])."/".$_[0]->{'user'};
-	}
-else {
-	# Add the Unix user
-	if ($config{'ldap_mail'}) {
-		$_[0]->{'ldap_attrs'} = [ ];
-		if ($_[0]->{'email'}) {
-			push(@{$_[0]->{'ldap_attrs'}}, "mail",$_[0]->{'email'});
-			}
-		local $ea = $config{'ldap_mail'} == 2 ?
-				'mailAlternateAddress' : 'mail';
-		push(@{$_[0]->{'ldap_attrs'}},
-		     map { ( $ea, $_ ) } @{$_[0]->{'extraemail'}});
+# Add the Unix user
+if ($config{'ldap_mail'}) {
+	$_[0]->{'ldap_attrs'} = [ ];
+	if ($_[0]->{'email'}) {
+		push(@{$_[0]->{'ldap_attrs'}}, "mail",$_[0]->{'email'});
 		}
-	&foreign_call($usermodule, "set_user_envs", $_[0], 'CREATE_USER',
-		      $_[0]->{'plainpass'}, [ ]);
-	&set_virtualmin_user_envs($_[0], $_[1]);
-	&foreign_call($usermodule, "making_changes");
-	&userdom_substitutions($_[0], $_[1]);
-	&foreign_call($usermodule, "create_user", $_[0]);
-	&foreign_call($usermodule, "made_changes");
+	local $ea = $config{'ldap_mail'} == 2 ?
+			'mailAlternateAddress' : 'mail';
+	push(@{$_[0]->{'ldap_attrs'}},
+	     map { ( $ea, $_ ) } @{$_[0]->{'extraemail'}});
 	}
+&foreign_call($usermodule, "set_user_envs", $_[0], 'CREATE_USER',
+	      $_[0]->{'plainpass'}, [ ]);
+&set_virtualmin_user_envs($_[0], $_[1]);
+&foreign_call($usermodule, "making_changes");
+&userdom_substitutions($_[0], $_[1]);
+&foreign_call($usermodule, "create_user", $_[0]);
+&foreign_call($usermodule, "made_changes");
 
 # If we are running Postfix and the username has an @ in it, create an extra
 # Unix user without the @ but all the other details the same
@@ -1568,8 +1524,7 @@ if (@to) {
 		&postfix::unlock_alias_files($postfix_afiles);
 		&postfix::regenerate_aliases();
 		}
-	elsif ($config{'mail_system'} == 2 ||
-	       $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2) {
 		# Set up user's .qmail file
 		local $dqm = &dotqmail_file($_[0]);
 		&lock_file($dqm);
@@ -1584,7 +1539,7 @@ if ($config{'generics'} && $firstemail) {
 	&create_generic($_[0]->{'user'}, $firstemail);
 	}
 
-if ($_[0]->{'unix'} && !$_[0]->{'noquota'}) {
+if (!$_[0]->{'noquota'}) {
 	# Set his initial quotas
 	&set_user_quotas($_[0]->{'user'}, $_[0]->{'quota'}, $_[0]->{'mquota'},
 			 $_[1]);
@@ -1598,18 +1553,21 @@ if ($_[1] && !$_[0]->{'domainowner'}) {
 		eval {
 			local $main::error_must_die = 1;
 			local @dbs = map { $_->{'name'} }
-					 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
-			if (@dbs && &indexof($dt, &list_database_plugins()) < 0) {
+				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
+			next if (!@dbs);
+			if (&indexof($dt, &list_database_plugins()) < 0) {
 				# Create in core database
 				local $crfunc = "create_${dt}_database_user";
 				&$crfunc($_[1], \@dbs, $_[0]->{'user'},
-					 $_[0]->{'plainpass'}, $_[0]->{$dt.'_pass'});
+					 $_[0]->{'plainpass'},
+					 $_[0]->{$dt.'_pass'});
 				}
-			elsif (@dbs && &indexof($dt, &list_database_plugins()) >= 0) {
+			else {
 				# Create in plugin database
 				&plugin_call($dt, "database_create_user",
 					     $_[1], \@dbs, $_[0]->{'user'},
-					     $_[0]->{'plainpass'},$_[0]->{$dt.'_pass'});
+					     $_[0]->{'plainpass'},
+					     $_[0]->{$dt.'_pass'});
 				}
 			};
 		if ($@) {
@@ -1707,6 +1665,7 @@ if ($_[1] && $_[1]->{'mail'}) {
 # Sync up jail password file
 if ($_[1]) {
 	&create_jailkit_passwd_file($_[1]);
+	&modify_jailkit_user($_[1], $_[0]);
 	}
 
 # Remove clashing records of extra user
@@ -1717,159 +1676,121 @@ if ($_[1]) {
 # Update a mail / FTP user
 sub modify_user
 {
+my ($user, $olduser, $d, $noaliases) = @_;
+
 # Rename any of his cron jobs
-if ($_[0]->{'unix'}) {
-	&rename_unix_cron_jobs($_[0]->{'user'}, $_[1]->{'user'});
-	}
+&rename_unix_cron_jobs($user->{'user'}, $olduser->{'user'});
 
-local $pop3 = &remove_userdom($_[0]->{'user'}, $_[2]);
+local $pop3 = &remove_userdom($user->{'user'}, $d);
 local $extrauser;
-if ($_[1]->{'vpopmail'}) {
-	# Update VPOPMail user
-	local $quser = quotemeta($_[1]->{'user'});
-	local $qdom = $_[2]->{'dom'};
-	local $qreal = quotemeta($_[0]->{'real'}) || '""';
-	local $qpass = quotemeta($_[0]->{'plainpass'});
-	local $qquota = $_[0]->{'qquota'} ? $_[0]->{'qquota'} : "NOQUOTA";
-	local $cmd = "$vpopbin/vmoduser -c $qreal ".
-		     ($_[0]->{'passmode'} == 3 ? " -C $qpass" : "").
-		     " -q $qquota $quser\@$qdom";
-	local $out = &backquote_logged("$cmd 2>&1");
-	if ($?) {
-		&error("<tt>$cmd</tt> failed: <pre>$out</pre>");
+&require_useradmin();
+&require_mail();
+
+# Update the unix user
+if ($config{'ldap_mail'}) {
+	$user->{'ldap_attrs'} = [ ];
+	if ($user->{'email'}) {
+		push(@{$user->{'ldap_attrs'}}, "mail",$user->{'email'});
 		}
-	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-		# Need to rename manually
-		local $vdomdir = &domain_vpopmail_dir($_[2]);
-		&rename_logged("$vdomdir/$_[1]->{'user'}", "$vdomdir/$_[0]->{'user'}");
-		&lock_file("$vdomdir/vpasswd");
-		local $lref = &read_file_lines("$vdomdir/vpasswd");
-		local $l;
-		foreach $l (@$lref) {
-			local @u = split(/:/, $l);
-			if ($u[0] eq $_[1]->{'user'}) {
-				$u[0] = $_[0]->{'user'};
-				$u[5] =~ s/$_[1]->{'user'}$/$_[0]->{'user'}/;
-				$l = join(":", @u);
-				}
-			}
-		&flush_file_lines();
-		&unlock_file("$vdomdir/vpasswd");
-		&system_logged("$vpopbin/vmkpasswd $qdom");
+	local $ea = $config{'ldap_mail'} == 2 ?
+			'mailAlternateAddress' : 'mail';
+	push(@{$user->{'ldap_attrs'}},
+	     map { ( $ea, $_ ) } @{$user->{'extraemail'}});
+	}
+&foreign_call($usermodule, "set_user_envs", $user, 'MODIFY_USER',
+	      $user->{'plainpass'}, undef, $olduser, $olduser->{'plainpass'});
+&set_virtualmin_user_envs($user, $d);
+&foreign_call($usermodule, "making_changes");
+&userdom_substitutions($user, $d);
+&foreign_call($usermodule, "modify_user", $olduser, $user);
+&foreign_call($usermodule, "made_changes");
+
+if ($config{'mail_system'} == 0 && $olduser->{'user'} =~ /\@/) {
+	local $esc = &replace_atsign($olduser->{'user'});
+	local @allusers = &list_all_users_quotas(1);
+	local ($oldextrauser) = grep { $_->{'user'} eq $esc } @allusers;
+	if ($oldextrauser) {
+		# Found him .. fix up
+		$extrauser = { %{$user} };
+		$extrauser->{'user'} = &replace_atsign($user->{'user'});
+		$extrauser->{'dn'} = $oldextrauser->{'dn'};
+		&foreign_call($usermodule, "set_user_envs", $extrauser,
+				'MODIFY_USER', $user->{'plainpass'},
+				undef, $oldextrauser,
+				$olduser->{'plainpass'});
+		&set_virtualmin_user_envs($user, $d);
+		&foreign_call($usermodule, "making_changes");
+		&userdom_substitutions($extrauser, $d);
+		&foreign_call($usermodule, "modify_user",
+				$oldextrauser, $extrauser);
+		&foreign_call($usermodule, "made_changes");
 		}
 	}
-else {
-	# Modifying Unix user
-	&require_useradmin();
-	&require_mail();
-
-	# Update the unix user
-	if ($config{'ldap_mail'}) {
-		$_[0]->{'ldap_attrs'} = [ ];
-		if ($_[0]->{'email'}) {
-			push(@{$_[0]->{'ldap_attrs'}}, "mail",$_[0]->{'email'});
-			}
-		local $ea = $config{'ldap_mail'} == 2 ?
-				'mailAlternateAddress' : 'mail';
-		push(@{$_[0]->{'ldap_attrs'}},
-		     map { ( $ea, $_ ) } @{$_[0]->{'extraemail'}});
-		}
-	&foreign_call($usermodule, "set_user_envs", $_[0], 'MODIFY_USER',
-		      $_[0]->{'plainpass'}, undef, $_[1], $_[1]->{'plainpass'});
-	&set_virtualmin_user_envs($_[0], $_[2]);
-	&foreign_call($usermodule, "making_changes");
-	&userdom_substitutions($_[0], $_[2]);
-	&foreign_call($usermodule, "modify_user", $_[1], $_[0]);
-	&foreign_call($usermodule, "made_changes");
-
-	if ($config{'mail_system'} == 0 && $_[1]->{'user'} =~ /\@/) {
-		local $esc = &replace_atsign($_[1]->{'user'});
-		local @allusers = &list_all_users_quotas(1);
-		local ($oldextrauser) = grep { $_->{'user'} eq $esc } @allusers;
-		if ($oldextrauser) {
-			# Found him .. fix up
-			$extrauser = { %{$_[0]} };
-			$extrauser->{'user'} = &replace_atsign($_[0]->{'user'});
-			$extrauser->{'dn'} = $oldextrauser->{'dn'};
-			&foreign_call($usermodule, "set_user_envs", $extrauser,
-					'MODIFY_USER', $_[0]->{'plainpass'},
-					undef, $oldextrauser,
-					$_[1]->{'plainpass'});
-			&set_virtualmin_user_envs($_[0], $_[2]);
-			&foreign_call($usermodule, "making_changes");
-			&userdom_substitutions($extrauser, $_[2]);
-			&foreign_call($usermodule, "modify_user",
-					$oldextrauser, $extrauser);
-			&foreign_call($usermodule, "made_changes");
-			}
-		}
-
-	goto NOALIASES if ($_[3]);	# no need to touch aliases and virtusers
-	}
+goto NOALIASES if ($noaliases);	# no need to touch aliases and virtusers
 
 # Check if email has changed
 local $echanged;
-if (!$_[0]->{'email'} && $_[1]->{'virt'} &&		# disabling
-     $_[1]->{'virt'}->{'to'}->[0] !~ /^BOUNCE/ ||
-    $_[0]->{'email'} && !$_[1]->{'virt'} ||		# enabling
-    $_[0]->{'email'} && $_[1]->{'virt'} &&		# changing
-     $_[0]->{'email'} ne $_[1]->{'virt'}->{'from'} ||
-    $_[0]->{'email'} && $_[1]->{'virt'} &&		# also enabling
-     $_[1]->{'virt'}->{'to'}->[0] =~ /^BOUNCE/
+if (!$user->{'email'} && $olduser->{'virt'} &&		# disabling
+     $olduser->{'virt'}->{'to'}->[0] !~ /^BOUNCE/ ||
+    $user->{'email'} && !$olduser->{'virt'} ||		# enabling
+    $user->{'email'} && $olduser->{'virt'} &&		# changing
+     $user->{'email'} ne $olduser->{'virt'}->{'from'} ||
+    $user->{'email'} && $olduser->{'virt'} &&		# also enabling
+     $olduser->{'virt'}->{'to'}->[0] =~ /^BOUNCE/
     ) {
 	# Primary has changed
 	$echanged = 1;
 	}
-local $oldextra = join(" ", map { $_->{'from'} } @{$_[1]->{'extravirt'}});
-local $newextra = join(" ", @{$_[0]->{'extraemail'}});
+local $oldextra = join(" ", map { $_->{'from'} } @{$olduser->{'extravirt'}});
+local $newextra = join(" ", @{$user->{'extraemail'}});
 if ($oldextra ne $newextra) {
 	# Extra has changed
 	$echanged = 1;
 	}
-if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+if ($user->{'user'} ne $olduser->{'user'}) {
 	# Always update on a rename
 	$echanged = 1;
 	}
-local $oldto = join(" ", @{$_[1]->{'to'}});
-local $newto = join(" ", @{$_[0]->{'to'}});
+local $oldto = join(" ", @{$olduser->{'to'}});
+local $newto = join(" ", @{$user->{'to'}});
 if ($oldto ne $newto) {
 	# Always update if forwarding dest has changed
 	$echanged = 1;
 	}
 
 local $firstemail;
-local @to = @{$_[0]->{'to'}};
-local @oldto = @{$_[1]->{'to'}};
+local @to = @{$user->{'to'}};
+local @oldto = @{$olduser->{'to'}};
 if ($echanged) {
 	# Take away all virtusers and add new ones, for non Qmail+LDAP users
-	&delete_virtuser($_[1]->{'virt'}) if ($_[1]->{'virt'});
+	&delete_virtuser($olduser->{'virt'}) if ($olduser->{'virt'});
 	local %oldcmt;
-	foreach my $e (@{$_[1]->{'extravirt'}}) {
+	foreach my $e (@{$olduser->{'extravirt'}}) {
 		$oldcmt{$e->{'from'}} = $e->{'cmt'};
 		&delete_virtuser($e);
 		}
-	local $vto = @to ? &escape_alias($_[0]->{'user'}) :
+	local $vto = @to ? &escape_alias($user->{'user'}) :
 		     $extrauser ? $extrauser->{'user'} :
-				  &escape_user($_[0]->{'user'});
-	if ($_[0]->{'email'}) {
-		local $virt = { 'from' => $_[0]->{'email'},
+				  &escape_user($user->{'user'});
+	if ($user->{'email'}) {
+		local $virt = { 'from' => $user->{'email'},
 				'to' => [ $vto ],
-				'cmt' => $oldcmt{$_[0]->{'email'}} };
+				'cmt' => $oldcmt{$user->{'email'}} };
 		&create_virtuser($virt);
-		$_[0]->{'virt'} = $virt;
-		$firstemail ||= $_[0]->{'email'};
+		$user->{'virt'} = $virt;
+		$firstemail ||= $user->{'email'};
 		}
-	elsif ($can_alias_types{9} && $_[2] && !$_[0]->{'noprimary'} &&
-	       $_[2]->{'mail'}) {
+	elsif ($can_alias_types{9} && $d && !$user->{'noprimary'} &&
+	       $d->{'mail'}) {
 		# Add bouncer if email disabled
-		local $virt = { 'from' => "$pop3\@$_[2]->{'dom'}",
+		local $virt = { 'from' => "$pop3\@$d->{'dom'}",
 				'to' => [ "BOUNCE" ],
-				'cmt' => $oldcmt{"$pop3\@$_[2]->{'dom'}"} };
+				'cmt' => $oldcmt{"$pop3\@$d->{'dom'}"} };
 		&create_virtuser($virt);
-		$_[0]->{'virt'} = $virt;
+		$user->{'virt'} = $virt;
 		}
 	local @extravirt;
-	foreach my $e (&unique(@{$_[0]->{'extraemail'}})) {
+	foreach my $e (&unique(@{$user->{'extraemail'}})) {
 		local $virt = { 'from' => $e,
 				'to' => [ $vto ],
 				'cmt' => $oldcmt{$e} };
@@ -1877,14 +1798,14 @@ if ($echanged) {
 		push(@extravirt, $virt);
 		$firstemail ||= $e;
 		}
-	$_[0]->{'extravirt'} = \@extravirt;
+	$user->{'extravirt'} = \@extravirt;
 	}
 else {
 	# Just work out primary email address, for use by generics
-	if ($_[0]->{'email'}) {
-		$firstemail ||= $_[0]->{'email'};
+	if ($user->{'email'}) {
+		$firstemail ||= $user->{'email'};
 		}
-	foreach my $e (@{$_[0]->{'extraemail'}}) {
+	foreach my $e (@{$user->{'extraemail'}}) {
 		$firstemail ||= $e;
 		}
 	}
@@ -1892,11 +1813,11 @@ else {
 # Update, create or delete alias
 if (@to && !@oldto) {
 	# Need to add alias
-	local $alias = { 'name' => &escape_alias($_[0]->{'user'}),
+	local $alias = { 'name' => &escape_alias($user->{'user'}),
 			 'enabled' => 1,
-			 'values' => $_[0]->{'to'} };
-	&check_alias_clash($_[0]->{'user'}) &&
-		&error(&text('alias_eclash2', $_[0]->{'user'}));
+			 'values' => $user->{'to'} };
+	&check_alias_clash($user->{'user'}) &&
+		&error(&text('alias_eclash2', $user->{'user'}));
 	if ($config{'mail_system'} == 1) {
 		# Create Sendmail alias with same name as user
 		&sendmail::lock_alias_files($sendmail_afiles);
@@ -1910,133 +1831,130 @@ if (@to && !@oldto) {
 		&postfix::unlock_alias_files($postfix_afiles);
 		&postfix::regenerate_aliases();
 		}
-	elsif ($config{'mail_system'} == 2 ||
-	       $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2) {
 		# Set up user's .qmail file
-		local $dqm = &dotqmail_file($_[0]);
+		local $dqm = &dotqmail_file($user);
 		&lock_file($dqm);
 		&save_dotqmail($alias, $dqm, $pop3);
 		&unlock_file($dqm);
 		}
-	$_[0]->{'alias'} = $alias;
+	$user->{'alias'} = $alias;
 	}
 elsif (!@to && @oldto) {
 	# Need to delete alias
 	if ($config{'mail_system'} == 1) {
 		# Delete Sendmail alias
-		&lock_file($_[0]->{'alias'}->{'file'});
-		&sendmail::delete_alias($_[0]->{'alias'});
-		&unlock_file($_[0]->{'alias'}->{'file'});
+		&lock_file($user->{'alias'}->{'file'});
+		&sendmail::delete_alias($user->{'alias'});
+		&unlock_file($user->{'alias'}->{'file'});
 		}
 	elsif ($config{'mail_system'} == 0) {
 		# Delete Postfix alias
-		&lock_file($_[0]->{'alias'}->{'file'});
-		&$postfix_delete_alias($_[0]->{'alias'});
-		&unlock_file($_[0]->{'alias'}->{'file'});
+		&lock_file($user->{'alias'}->{'file'});
+		&$postfix_delete_alias($user->{'alias'});
+		&unlock_file($user->{'alias'}->{'file'});
 		&postfix::regenerate_aliases();
 		}
-	elsif ($config{'mail_system'} == 2 ||
-	       $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2) {
 		# Remove user's .qmail file
-		local $dqm = &dotqmail_file($_[0]);
+		local $dqm = &dotqmail_file($user);
 		&unlink_logged($dqm);
 		}
 	}
 elsif (@to && @oldto && join(" ", @to) ne join(" ", @oldto)) {
 	# Need to update the alias
-	local $alias = { 'name' => &escape_alias($_[0]->{'user'}),
+	local $alias = { 'name' => &escape_alias($user->{'user'}),
 			 'enabled' => 1,
-			 'values' => $_[0]->{'to'} };
+			 'values' => $user->{'to'} };
 	if ($config{'mail_system'} == 1) {
 		# Update Sendmail alias
-		&lock_file($_[1]->{'alias'}->{'file'});
-		&sendmail::modify_alias($_[1]->{'alias'}, $alias);
-		&unlock_file($_[1]->{'alias'}->{'file'});
+		&lock_file($olduser->{'alias'}->{'file'});
+		&sendmail::modify_alias($olduser->{'alias'}, $alias);
+		&unlock_file($olduser->{'alias'}->{'file'});
 		}
 	elsif ($config{'mail_system'} == 0) {
 		# Update Postfix alias
-		&lock_file($_[1]->{'alias'}->{'file'});
-		&$postfix_modify_alias($_[1]->{'alias'}, $alias);
-		&unlock_file($_[1]->{'alias'}->{'file'});
+		&lock_file($olduser->{'alias'}->{'file'});
+		&$postfix_modify_alias($olduser->{'alias'}, $alias);
+		&unlock_file($olduser->{'alias'}->{'file'});
 		&postfix::regenerate_aliases();
 		}
-	elsif ($config{'mail_system'} == 2 ||
-	       $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2) {
 		# Set up user's .qmail file
-		local $dqm = &dotqmail_file($_[0]);
+		local $dqm = &dotqmail_file($user);
 		&lock_file($dqm);
 		&save_dotqmail($alias, $dqm, $pop3);
 		&unlock_file($dqm);
 		}
-	$_[0]->{'alias'} = $alias;
+	$user->{'alias'} = $alias;
 	}
 
 if ($config{'generics'} && $echanged) {
 	# Update genericstable entry too
-	if ($_[1]->{'generic'}) {
-		&delete_generic($_[1]->{'generic'});
+	if ($olduser->{'generic'}) {
+		&delete_generic($olduser->{'generic'});
 		}
 	if ($firstemail) {
-		&create_generic($_[0]->{'user'}, $firstemail);
+		&create_generic($user->{'user'}, $firstemail);
 		}
 	}
-&sync_alias_virtuals($_[2]);
+&sync_alias_virtuals($d);
 NOALIASES:
 
 # Save his quotas if changed (unless this is the domain owner)
-if ($_[0]->{'unix'} && $_[2] && $_[0]->{'user'} ne $_[2]->{'user'} &&
-    !$_[0]->{'noquota'} &&
-    ($_[0]->{'quota'} != $_[1]->{'quota'} ||
-     $_[0]->{'mquota'} != $_[1]->{'mquota'})) {
-	&set_user_quotas($_[0]->{'user'}, $_[0]->{'quota'}, $_[0]->{'mquota'},
-			 $_[2]);
-	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-		&update_user_quota_cache($_[1], $_[0], 1);
+if ($d && $user->{'user'} ne $d->{'user'} &&
+    !$user->{'noquota'} &&
+    ($user->{'quota'} != $olduser->{'quota'} ||
+     $user->{'mquota'} != $olduser->{'mquota'})) {
+	&set_user_quotas($user->{'user'}, $user->{'quota'}, $user->{'mquota'},
+			 $d);
+	if ($user->{'user'} ne $olduser->{'user'}) {
+		&update_user_quota_cache($olduser, $user, 1);
 		}
-	&update_user_quota_cache($_[2], $_[0], 0);
+	&update_user_quota_cache($d, $user, 0);
 	}
 
 # Update the plain-text password file, except for a domain owner
-if (!$_[0]->{'domainowner'} && $_[2] && !$_[2]->{'hashpass'}) {
+if (!$user->{'domainowner'} && $d && !$d->{'hashpass'}) {
 	local %plain;
 	mkdir($plainpass_dir, 0700);
-	&read_file_cached("$plainpass_dir/$_[2]->{'id'}", \%plain);
-	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-		$plain{$_[0]->{'user'}} = $plain{$_[1]->{'user'}};
-		delete($plain{$_[1]->{'user'}});
-		$plain{$_[0]->{'user'}." encrypted"} =
-			$plain{$_[1]->{'user'}." encrypted"};
-		delete($plain{$_[1]->{'user'}." encrypted"});
+	&read_file_cached("$plainpass_dir/$d->{'id'}", \%plain);
+	if ($user->{'user'} ne $olduser->{'user'}) {
+		$plain{$user->{'user'}} = $plain{$olduser->{'user'}};
+		delete($plain{$olduser->{'user'}});
+		$plain{$user->{'user'}." encrypted"} =
+			$plain{$olduser->{'user'}." encrypted"};
+		delete($plain{$olduser->{'user'}." encrypted"});
 		}
-	if (defined($_[0]->{'plainpass'})) {
-		$plain{$_[0]->{'user'}} = $_[0]->{'plainpass'};
-		$plain{$_[0]->{'user'}." encrypted"} = $_[0]->{'pass'};
+	if (defined($user->{'plainpass'})) {
+		$plain{$user->{'user'}} = $user->{'plainpass'};
+		$plain{$user->{'user'}." encrypted"} = $user->{'pass'};
 		}
-	&write_file("$plainpass_dir/$_[2]->{'id'}", \%plain);
+	&write_file("$plainpass_dir/$d->{'id'}", \%plain);
 	}
 
 # Update hashed passwords file, except for domain owner
-if (!$_[0]->{'domainowner'} && $_[2] && $_[2]->{'hashpass'}) {
+if (!$user->{'domainowner'} && $d && $d->{'hashpass'}) {
 	local %hash;
 	mkdir($hashpass_dir, 0700);
-	&read_file_cached("$hashpass_dir/$_[2]->{'id'}", \%hash);
-	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+	&read_file_cached("$hashpass_dir/$d->{'id'}", \%hash);
+	if ($user->{'user'} ne $olduser->{'user'}) {
 		foreach my $s (@hashpass_types) {
-			$hash{$_[0]->{'user'}.' '.$s} =
-				$hash{$_[1]->{'user'}.' '.$s};
-			delete($hash{$_[1]->{'user'}.' '.$s});
+			$hash{$user->{'user'}.' '.$s} =
+				$hash{$olduser->{'user'}.' '.$s};
+			delete($hash{$olduser->{'user'}.' '.$s});
 			}
 		}
-	if (defined($_[0]->{'plainpass'})) {
+	if (defined($user->{'plainpass'})) {
 		# Re-hash new password
 		local $g = &generate_password_hashes(
-				$_[0], $_[0]->{'plainpass'}, $_[2]);
+				$user, $user->{'plainpass'}, $d);
 		foreach my $s (@hashpass_types) {
-			$hash{$_[0]->{'user'}.' '.$s} = $g->{$s};
-			$_[0]->{'pass_'.$s} = $g->{$s};
+			$hash{$user->{'user'}.' '.$s} = $g->{$s};
+			$user->{'pass_'.$s} = $g->{$s};
 			}
 		}
-	&write_file("$hashpass_dir/$_[2]->{'id'}", \%hash);
+	&write_file("$hashpass_dir/$d->{'id'}", \%hash);
 	}
 
 # Update his allowed databases (unless this is the domain owner), if any
@@ -2045,18 +1963,18 @@ if (!$_[0]->{'domainowner'} && $_[2] && $_[2]->{'hashpass'}) {
 
 # Rename user in secondary groups, and update membership
 local @groups = &list_all_groups();
-local %secs = map { $_, 1 } @{$_[0]->{'secs'}};
-local @sgroups = &allowed_secondary_groups($_[2]);
+local %secs = map { $_, 1 } @{$user->{'secs'}};
+local @sgroups = &allowed_secondary_groups($d);
 foreach my $group (@groups) {
 	local @mems = split(/,/, $group->{'members'});
-	local $idx = &indexof($_[1]->{'user'}, @mems);
+	local $idx = &indexof($olduser->{'user'}, @mems);
 	local $changed;
 	if ($idx >= 0) {
 		# User is currently in group
-		if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+		if ($user->{'user'} ne $olduser->{'user'}) {
 			# Just rename in group, if needed
 			$changed = 1;
-			$mems[$idx] = $_[0]->{'user'};
+			$mems[$idx] = $user->{'user'};
 			}
 		elsif (!$secs{$group->{'group'}}) {
 			# Remove from group, if this is a secondary managed
@@ -2069,7 +1987,7 @@ foreach my $group (@groups) {
 		}
 	elsif ($secs{$group->{'group'}}) {
 		# User is not in group, but needs to be
-		push(@mems, $_[0]->{'user'});
+		push(@mems, $user->{'user'});
 		$changed = 1;
 		}
 	if ($changed) {
@@ -2081,81 +1999,86 @@ foreach my $group (@groups) {
 	}
 
 # Update mail/FTP/db groups
-&update_secondary_groups($_[2]) if ($_[2]);
+&update_secondary_groups($d) if ($d);
 
 # Update spamassassin whitelist
-if ($_[2]) {
-	&obtain_lock_spam($_[2]);
-	&update_spam_whitelist($_[2]);
-	&release_lock_spam($_[2]);
+if ($d) {
+	&obtain_lock_spam($d);
+	&update_spam_whitelist($d);
+	&release_lock_spam($d);
 	}
 
 # Update the no-spam-check flag
-if ($_[2]) {
+if ($d) {
 	if (!-d $nospam_dir) {
 		mkdir($nospam_dir, 0700);
 		}
-	if (defined($_[0]->{'nospam'})) {
+	if (defined($user->{'nospam'})) {
 		local %nospam;
-		&read_file_cached("$nospam_dir/$_[2]->{'id'}", \%nospam);
-		if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-			delete($nospam{$_[1]->{'user'}});
+		&read_file_cached("$nospam_dir/$d->{'id'}", \%nospam);
+		if ($user->{'user'} ne $olduser->{'user'}) {
+			delete($nospam{$olduser->{'user'}});
 			}
-		$nospam{$_[0]->{'user'}} = $_[0]->{'nospam'};
-		&write_file("$nospam_dir/$_[2]->{'id'}", \%nospam);
+		$nospam{$user->{'user'}} = $user->{'nospam'};
+		&write_file("$nospam_dir/$d->{'id'}", \%nospam);
 		}
 	}
 
 # Update the last logins file
-if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+if ($user->{'user'} ne $olduser->{'user'}) {
 	&lock_file($mail_login_file);
 	my %logins;
 	&read_file_cached($mail_login_file, \%logins);
-	if ($logins{$_[1]->{'user'}}) {
-		$logins{$_[1]->{'user'}} = $logins{$_[1]->{'user'}};
-		delete($logins{$_[1]->{'user'}});
+	if ($logins{$olduser->{'user'}}) {
+		$logins{$user->{'user'}} = $logins{$olduser->{'user'}};
+		delete($logins{$olduser->{'user'}});
 		&write_file($mail_login_file, \%logins);
 		}
 	&unlock_file($mail_login_file);
 	}
 
 # Clear quota cache for this user
-if (defined(&clear_lookup_domain_cache) && $_[2]) {
-	&clear_lookup_domain_cache($_[2], $_[0]);
+if (defined(&clear_lookup_domain_cache) && $d) {
+	&clear_lookup_domain_cache($d, $user);
 	}
 
 # Set the user's Usermin IMAP password
-if ($_[0]->{'email'} || @{$_[0]->{'extraemail'}}) {
-	&set_usermin_imap_password($_[0]);
+if ($user->{'email'} || @{$user->{'extraemail'}}) {
+	&set_usermin_imap_password($user);
 	}
 
 # Save the recovery address
-&set_usermin_recovery_address($_[0]);
+&set_usermin_recovery_address($user);
 
 # Update cache of existing usernames
-if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-	$unix_user{&escape_alias($_[0]->{'user'})}++;
-	$unix_user{&escape_alias($_[1]->{'user'})} = 0;
+if ($user->{'user'} ne $olduser->{'user'}) {
+	$unix_user{&escape_alias($user->{'user'})}++;
+	$unix_user{&escape_alias($olduser->{'user'})} = 0;
 	}
 
-if ($_[0]->{'shell'} ne $_[1]->{'shell'}) {
+if ($user->{'shell'} ne $olduser->{'shell'}) {
 	# Rebuild denied user list, by shell
 	&build_denied_ssh_group();
 	}
 
 # Rebuild group of domain owners
-if ($_[0]->{'domainowner'}) {
+if ($user->{'domainowner'}) {
 	&update_domain_owners_group();
 	}
 
 # Create everyone file for domain
-if ($_[2] && $_[2]->{'mail'}) {
-	&create_everyone_file($_[2]);
+if ($d && $d->{'mail'}) {
+	&create_everyone_file($d);
 	}
 
 # Sync up jail password file
-if ($_[2]) {
-	&create_jailkit_passwd_file($_[2]);
+if ($d) {
+	if ($olduser->{'user'} ne $user->{'user'}) {
+		&rename_jailkit_passwd_file($d, $olduser->{'user'},
+					    $user->{'user'});
+		}
+	&create_jailkit_passwd_file($d);
+	&modify_jailkit_user($d, $user);
 	}
 }
 
@@ -2183,43 +2106,29 @@ if ($_[0]->{'extra'}) {
 &remove_forward_in_other_users($_[0], $_[1]);
 
 # Zero out his quotas
-if ($_[0]->{'unix'} && !$_[0]->{'noquota'}) {
+if (!$_[0]->{'noquota'}) {
 	&set_user_quotas($_[0]->{'user'}, 0, 0, $_[1]);
 	&update_user_quota_cache($_[1], $_[0], 1);
 	}
 
 # Delete any of his cron jobs
-if ($_[0]->{'unix'}) {
-	&delete_unix_cron_jobs($_[0]->{'user'});
-	}
+&delete_unix_cron_jobs($_[0]->{'user'});
 
-if ($_[0]->{'vpopmail'}) {
-	# Call VPOPMail delete user program
-	local $quser = quotemeta($_[0]->{'user'});
-	local $qdom = $_[1]->{'dom'};
-	local $cmd = "$vpopbin/vdeluser $quser\@$qdom";
-	local $out = &backquote_logged("$cmd 2>&1");
-	if ($?) {
-		&error("<tt>$cmd</tt> failed: <pre>$out</pre>");
-		}
-	}
-else {
-	# Delete Unix user
-	$_[0]->{'user'} eq 'root' && &error("Cannot delete root user!");
-	$_[0]->{'uid'} == 0 && &error("Cannot delete UID 0 user!");
-	&require_useradmin();
-	&require_mail();
+# Delete Unix user
+$_[0]->{'user'} eq 'root' && &error("Cannot delete root user!");
+$_[0]->{'uid'} == 0 && &error("Cannot delete UID 0 user!");
+&require_useradmin();
+&require_mail();
 
-	# Delete the user
-	&foreign_call($usermodule, "set_user_envs", $_[0], 'DELETE_USER');
-	&set_virtualmin_user_envs($_[0], $_[1]);
-	&foreign_call($usermodule, "making_changes");
-	&foreign_call($usermodule, "delete_user", $_[0]);
-	&foreign_call($usermodule, "made_changes");
+# Delete the user
+&foreign_call($usermodule, "set_user_envs", $_[0], 'DELETE_USER');
+&set_virtualmin_user_envs($_[0], $_[1]);
+&foreign_call($usermodule, "making_changes");
+&foreign_call($usermodule, "delete_user", $_[0]);
+&foreign_call($usermodule, "made_changes");
 
-	# Record the old UID to prevent re-use
-	&record_old_uid($_[0]->{'uid'});
-	}
+# Record the old UID to prevent re-use
+&record_old_uid($_[0]->{'uid'});
 
 if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 	# Find the Unix user with the @ escaped and delete it too
@@ -2263,8 +2172,7 @@ if ($_[0]->{'alias'}) {
 			$_[0]->{'alias'}->{'deleted'} = 1;
 			}
 		}
-	elsif ($config{'mail_system'} == 2 ||
-	       $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2) {
 		# .qmail will be deleted when user is
 		}
 	}
@@ -2446,7 +2354,7 @@ if ($_[2] && !$_[0]->{'domainowner'} &&
 sub set_usermin_imap_password
 {
 local ($user) = @_;
-return 0 if (!$user->{'unix'} || !$user->{'home'});
+return 0 if (!$user->{'home'});
 return 0 if (!$user->{'plainpass'});
 
 # Make sure Usermin is installed, and the mailbox module is setup for IMAP
@@ -2515,7 +2423,7 @@ foreach my $dir ($user->{'home'}, "$user->{'home'}/.usermin", "$user->{'home'}/.
 sub set_usermin_recovery_address
 {
 my ($user) = @_;
-return 0 if (!$user->{'unix'} || !$user->{'home'});
+return 0 if (!$user->{'home'});
 &create_usermin_module_directory($user, "changepass");
 if (-d "$user->{'home'}/.usermin/changepass") {
 	my $rfile = "$user->{'home'}/.usermin/changepass/recovery";
@@ -2899,7 +2807,7 @@ if ($home) {
 sub delete_user_home
 {
 local ($user, $d) = @_;
-if ($user->{'unix'} && -d $user->{'home'} &&
+if (-d $user->{'home'} &&
     &safe_delete_dir($d, $user->{'home'})) {
 	&system_logged("rm -rf ".quotemeta($user->{'home'}));
 	}
@@ -3511,7 +3419,21 @@ return &master_admin() || $config{'edit_ftp'};
 # Returns 1 if the current user can create SSH-capable mailboxes
 sub can_mailbox_ssh
 {
-return &master_admin();
+if (&master_admin()) {
+	return 1;
+	}
+elsif (&reseller_admin()) {
+	return 0;
+	}
+else {
+	my $d = &get_domain_by("user", $base_remote_user);
+	return 0 if (!$d);
+	my $shellpath = &get_domain_shell($d);
+	return 0 if (!$shellpath);
+	my @ashells = &list_available_shells($d);
+	my ($shell) = grep { $_->{'shell'} eq $shellpath } @ashells;
+	return $shell && $shell->{'id'} eq 'ssh';
+	}
 }
 
 
@@ -3673,7 +3595,7 @@ if ($showchecks) {
 	}
 my @colnames = split(/,/, $config{'index_cols'});
 if (!@colnames) {
-	@colnames = ( 'dom', 'user', 'owner', 'users', 'aliases');
+	@colnames = ( 'dom', 'user', 'owner', 'users', 'aliases', 'lastlogin' );
 	}
 if (!&has_home_quotas()) {
 	@colnames = grep { $_ ne 'quota' && $_ ne 'uquota' } @colnames;
@@ -3864,6 +3786,11 @@ foreach my $d (&sort_indent_domains($doms)) {
 			else {
 				push(@cols, "<i>$text{'maillog_unknown'}</i>");
 				}
+			}
+		elsif ($c eq "lastlogin") {
+			my $lt = &human_readable_time(
+				$d->{'last_login_timestamp'});
+			push(@cols, $lt || $text{'users_ll_never'});
 			}
 		elsif ($c =~ /^field_/) {
 			# Some custom field
@@ -4230,6 +4157,8 @@ if ($disallow_newlines) {
 	}
 $rv =~ s/<tt>|<\/tt>//g;
 $rv =~ s/<span.*?>|<\/span>//g;
+$rv =~ s/<sup.*?(data-title|aria-label)="([^"]*)".*?<\/sup>//g;
+$rv =~ s/<sup.*?>|<\/sup>//g;
 $rv =~ s/<b>|<\/b>//g;
 $rv =~ s/<i>|<\/i>//g;
 $rv =~ s/<u>|<\/u>//g;
@@ -4573,7 +4502,7 @@ sub send_user_email
 local ($d, $user, $userto, $mode) = @_;
 local $tmpl = &get_template($d ? $d->{'template'} : 0);
 local $tmode = $mode ? "updateuser" : "newuser";
-local $subject = $config{$tmode.'_subject'};
+local $subject = $tmpl->{$tmode.'_subject'};
 if ($tmpl->{$tmode.'_on'} eq 'none') {
 	return (1, undef);
 	}
@@ -4660,9 +4589,6 @@ if ($hash{'mquota'}) {
 	}
 if ($hash{'umquota'}) {
 	$hash{'umquota'} = &nice_size($user->{'umquota'}*&quota_bsize("mail"));
-	}
-if ($hash{'qquota'}) {
-	$hash{'qquota'} = &nice_size($user->{'qquota'});
 	}
 return %hash;
 }
@@ -4926,16 +4852,12 @@ return $_[0];
 # 9 - Bounce, possibly with message
 # 10- Current user's mailbox
 # 11- Throw away
-# 12- VPopMail autoreply
 # 13- Everyone in some domain
 sub alias_type
 {
 local @rv;
 if ($_[0] =~ /^\|\s*$module_config_directory\/autoreply.pl\s+(\S+)/) {
         @rv = (5, $1);
-        }
-elsif ($_[0] =~ /^\|\s*$config{'vpopmail_auto'}\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)(\s+(\S+)\s+(\S+))?/) {
-        @rv = (12, $3, $1, $2, $4, $6, $7);
         }
 elsif ($_[0] =~ /^\|\s*$module_config_directory\/filter.pl\s+(\S+)/) {
         @rv = (6, $1);
@@ -4944,9 +4866,6 @@ elsif ($_[0] =~ /^\|\s*(.*)$/) {
         @rv = (4, $1);
         }
 elsif ($_[0] eq "./Maildir/") {
-	return (10);
-	}
-elsif ($config{'vpopmail_md'} && $_[0] eq "./$config{'vpopmail_md'}/") {
 	return (10);
 	}
 elsif ($_[0] eq "/dev/null") {
@@ -5222,8 +5141,7 @@ for(my $i=0; $i<=@values+2; $i++) {
 	if (&can_edit_afiles()) {
 		local $prog = $type == 2 ? "edit_afile.cgi" :
 			      $type == 5 ? "edit_rfile.cgi" :
-			      $type == 6 ? "edit_ffile.cgi" :
-			      $type == 12 ? "edit_vfile.cgi" : undef;
+			      $type == 6 ? "edit_ffile.cgi" : undef;
 		if ($prog && $_[2]) {
 			local $di = $_[2] ? $_[2]->{'id'} : undef;
 			$f .= "<a href='$prog?dom=$di&amp;file=$val&amp;$_[3]=$_[4]&amp;idx=$i'>$text{'alias_afile'}</a>\n";
@@ -5261,10 +5179,6 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 		(-x $prog) && &check_aliasfile($prog, 0) ||
 		   $prog eq "if" || $prog eq "export" || &has_command($prog) ||
 			&error(&text('alias_etype4', $prog));
-		}
-	elsif ($t == 7 && !defined(getpwnam($v)) &&
-	       $config{'mail_system'} != 4 && $config{'mail_system'} != 5) {
-		&error(&text('alias_etype7', $v));
 		}
 	elsif ($t == 8 && $v !~ /^[a-z0-9\.\-\_]+$/) {
 		&error(&text('alias_etype8', $v));
@@ -5319,46 +5233,6 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 		}
 	elsif ($t == 11) {
 		push(@values, "/dev/null");
-		}
-	elsif ($t == 12) {
-		# Setup vpopmail autoresponder script
-		local @qm = getpwnam($config{'vpopmail_user'});
-		if (!$v) {
-			# Create an empty responder file
-			local $ddir = &domain_vpopmail_dir($_[4]);
-			$v = $_[3] eq "alias" ?
-				"$ddir/$_[1].respond" : "$ddir/$_[1]/respond";
-			if (!-r $v) {
-				&open_tempfile(MSG, ">$v");
-				&close_tempfile(MSG);
-				&set_ownership_permissions($qm[2], $qm[3],
-							   undef, $v);
-				}
-			}
-		elsif (!$v) {
-			&error(&text('alias_eautorepond'));
-			}
-		$v = "$d->{'home'}/$v" if ($v !~ /^\//);
-		local @av;
-		if ($_[2] && &alias_type($_[2]->[$i]) == 12) {
-			# Use old settings for delay/etc
-			local @oldav = &alias_type($_[2]->[$i]);
-			@av = ( $oldav[2], $oldav[3], $v, $oldav[4] );
-			push(@av, $oldav[5]) if ($oldav[5] ne "");
-			push(@av, $oldav[6]) if ($oldav[6] ne "");
-			}
-		else {
-			# User default settings for timeouts, and create log
-			# directory
-			local $vdir = "$v.log";
-			if (!-d $vdir) {
-				&make_dir($vdir, 0755);
-				&set_ownership_permissions($qm[2], $qm[3],
-							   0755, $vdir);
-				}
-			@av = ( 10000, 5, $v, $vdir );
-			}
-		push(@values, "|$config{'vpopmail_auto'} ".join(" ", @av));
 		}
 	elsif ($t == 13) {
 		# Work out ID for everyone file
@@ -5702,7 +5576,6 @@ sub users_table
 local ($users, $d, $cgi, $buttons, $links, $empty) = @_;
 
 local $can_quotas = &has_home_quotas() || &has_mail_quotas();
-local $can_qquotas = $config{'mail_system'} == 5;
 local @ashells = &list_available_shells($d);
 
 # Given a list of services return
@@ -5732,9 +5605,6 @@ push(@headers, $text{'users_name'},
 	       $text{'users_real'} );
 if ($can_quotas) {
 	push(@headers, $text{'users_quota'}, $text{'users_uquota'});
-	}
-if ($can_qquotas) {
-	push(@headers, $text{'users_qquota'});
 	}
 if ($config{'show_mailsize'} && $d->{'mail'}) {
 	push(@headers, $text{'users_size'});
@@ -5780,7 +5650,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	    $u->{'webowner'} ? $pop3 :
 	    $u->{'pass'} =~ /^\!/ ? $pop3_dis : $pop3);
 	my $col_val = "<a href='edit_user.cgi?dom=$did$filetype&amp;".
-	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>$col_text</a>";
+		      "user=".&urlize($u->{'user'})."'>$col_text</a>";
 	if (!$virtualmin_pro && $u->{'extra'}) {
 		$col_val = $col_text;
 		}
@@ -5817,13 +5687,6 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 			push(@cols, &quota_show($uquota, "home"));
 			}
 		}
-	if ($u->{'mailquota'}) {
-		push(@cols, $u->{'qquota'} ? &nice_size($u->{'qquota'}) :
-					     $text{'form_unlimit'});
-		}
-	elsif ($can_qquotas) {
-		push(@cols, "");
-		}
 
 	if ($config{'show_mailsize'} && $d->{'mail'}) {
 		# Mailbox link, if this user has email enabled or is the owner
@@ -5855,10 +5718,10 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		# Last mail login
 		my $ll = &get_last_login_time($u->{'user'});
 		my $llbest;
-		foreach $k (keys %$ll) {
+		foreach $k (sort { $a cmp $b } keys %$ll) {
 			$llbest = $ll->{$k} if ($ll->{$k} > $llbest);
 			}
-		push(@cols, $llbest ? &make_date($llbest)
+		push(@cols, $llbest ? &human_readable_time($llbest)
 				    : $text{'users_ll_never'});
 		}
 
@@ -5866,7 +5729,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	if ($u->{'domainowner'}) {
 		$u->{'shell'} = &get_domain_shell($d, $u);
 		}
-	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
+	local ($shell) = grep { $_->{'shell'} eq &get_user_shell($u) } @ashells;
 	my $udbs = scalar(@{$u->{'dbs'}}) || $u->{'domainowner'};
 	push(@cols, ($u->{'extra'} && $u->{'type'} eq 'db') ? &$login_access_label('db') :
 		    ($u->{'extra'} && $u->{'type'} eq 'web') ? &$login_access_label('web') :
@@ -5905,7 +5768,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	if ($cgi) {
 		unshift(@cols, { 'type' => 'checkbox',
 				 'name' => 'd',
-				 'value' => int($u->{'unix'})."/".$u->{'user'},
+				 'value' => $u->{'user'},
 				 'disabled' => $u->{'domainowner'} });
 		}
 	push(@table, \@cols);
@@ -6018,6 +5881,31 @@ if (!$bsize) {
 else {
 	return int($in{$_[0]}*$in{$_[0]."_units"}/$bsize);
 	}
+}
+
+# feature_check_chained_javascript(feature)
+# Return inline JavaScript code to chain disable/enable dependent features
+sub feature_check_chained_javascript
+{
+my ($f) = @_;
+my $chained = {
+	'mail'                 => ['spam', 'virus'],
+	'web'                  => ['ssl', 'status', 'webalizer', 'virtualmin-awstats'],
+	'virtualmin-nginx'     => ['virtualmin-nginx-ssl', 'status', 'webalizer', 'virtualmin-awstats'],
+};
+my $cfeature = $chained->{$f};
+if ($cfeature) {
+	my $deps = join(', ', map { "form['$_'] && (form['$_'].checked = false)" }
+			@{$cfeature});
+	return "oninput=\"if (form['$f'] && !form['$f'].checked) { $deps }\"";
+	}
+for my $c (keys %$chained) {
+	next if (!$config{$c} && &indexof($c, @plugins) < 0);
+	return "oninput=\"if (form['$f'] && form['$f'].checked) ".
+			   "{ form['$c'] && (form['$c'].checked = true) }\""
+		if (grep { $_ eq $f } @{$chained->{$c}});
+	}
+return undef;
 }
 
 # quota_javascript(name, value, filesystem|"bw"|"none", unlimited-possible)
@@ -6209,6 +6097,15 @@ if ($plan) {
 &copy_source_dest("$saved_aliases_dir/$d->{'id'}",
 		  $file."_saved_aliases");
 
+# Save SSL cert and key, in case Apache isn't enabled
+foreach my $ssltype ('cert', 'key', 'ca') {
+	my $sslfile = &get_website_ssl_file($d, $ssltype);
+	if ($sslfile && -r $sslfile) {
+		&copy_write_as_domain_user($d, $sslfile,
+					   $file."_ssl_".$ssltype);
+		}
+	}
+
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -6316,6 +6213,15 @@ foreach my $tmpl (&list_templates()) {
 &execute_command(
     "cd ".quotemeta($plans_dir).
     " && ".&make_tar_command("cf", $file."_plans", "."));
+
+# Save ACME providers
+if (defined(&list_acme_providers)) {
+	&make_dir($acme_providers_dir, 0700);
+	&execute_command(
+	    "cd ".quotemeta($acme_providers_dir).
+	    " && ".&make_tar_command("cf", $file."_acmes", "."));
+	}
+
 &$second_print($text{'setup_done'});
 }
 
@@ -6386,9 +6292,18 @@ foreach my $tmpl (&list_templates()) {
 
 # Restore plans, if included
 if (-r $file."_plans") {
+	&make_dir($plans_dir, 0700);
 	&execute_command(
 	    "cd ".quotemeta($plans_dir)." && ".
 	    &make_tar_command("xf", $file."_plans"));
+	}
+
+# Restore ACME providers if included
+if (-r $file."_acmes" && defined(&list_acme_providers)) {
+	&make_dir($acme_providers_dir, 0700);
+	&execute_command(
+	    "cd ".quotemeta($acme_providers_dir)." && ".
+	    &make_tar_command("xf", $file."_acmes"));
 	}
 
 &$second_print($text{'setup_done'});
@@ -6807,7 +6722,7 @@ elsif ($config{'mail_system'} == 1) {
 			  $file."_sendmailmc");
 	&$second_print($text{'setup_done'});
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
+elsif ($config{'mail_system'} == 2) {
 	# Save Qmail dir
 	&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
 			 &make_tar_command("cf", $file, "."));
@@ -7026,7 +6941,7 @@ if ($bms eq $config{'mail_system'}) {
 		undef(@sendmail::sendmailcf_cache);
 		&$second_print($text{'setup_done'});
 		}
-	elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2) {
 		# Un-tar qmail dir
 		&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
 				 &make_tar_command("xf", $file));
@@ -7162,6 +7077,28 @@ if (!$allopts->{'fix'}) {
 		&copy_source_dest($file."_saved_aliases",
 				  "$saved_aliases_dir/$d->{'id'}");
 		}
+
+	# Restore SSL cert and key unless the domain has an SSL website, in
+	# which case we can assume that feature has covered it
+	if (!&domain_has_ssl($d)) {
+		my $changed = 0;
+		&create_ssl_certificate_directories($d);
+		foreach my $ssltype ('cert', 'key', 'ca') {
+			my $sslfile = &get_website_ssl_file($d, $ssltype);
+			my $bfile = $file."_ssl_".$ssltype;
+			if ($sslfile && -r $bfile) {
+				&lock_file($sslfile);
+				&write_ssl_file_contents($d, $sslfile, $bfile);
+				&unlock_file($sslfile);
+				$changed++;
+				}
+			}
+		if ($changed) {
+			&refresh_ssl_cert_expiry($d);
+			&sync_combined_ssl_cert($d);
+			}
+		}
+
 	&$second_print($text{'setup_done'});
 	}
 return 1;
@@ -7185,7 +7122,9 @@ if ($dest =~ /\s|\(|\)/) {
 		$dest = $host.":".quotemeta($path);
 		}
 	}
-local $cmd = "scp -r ".($port ? "-P $port " : "").$config{'ssh_args'}." ".
+local $cmd = "scp -r ".($port ? "-P $port " : "").
+	     $config{'ssh_args'}." ".
+	     $config{'scp_args'}." ".
 	     quotemeta($src)." ".quotemeta($dest);
 &run_ssh_command($cmd, $pass, $err, $asuser);
 }
@@ -8137,6 +8076,12 @@ if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
 	$dom->{'autoalias'} = $aliasname;
 	}
 
+# Work out auto disable schedule
+if ($tmpl->{'domauto_disable'} &&
+    $tmpl->{'domauto_disable'} =~ /^(\d+)$/) {
+	$dom->{'disabled_auto'} = time() + $tmpl->{'domauto_disable'}*86400;
+	}
+
 # Check if only hashed passwords are stored, and if so generate a random
 # MySQL password now. This has to be done before any features are setup
 # so that mysql_pass is available to all features.
@@ -8241,6 +8186,9 @@ delete($dom->{'creating'});
 &save_domain($dom);
 &$second_print($text{'setup_done'});
 
+# Now we have an ID, lock the domain
+&lock_domain($dom);
+
 # If mail client autoconfig is enabled globally, set it up for
 # this domain
 if ($config{'mail_autoconfig'} && $dom->{'mail'} &&
@@ -8331,6 +8279,9 @@ if ($aliasname && $aliasname ne $dom->{'dom'}) {
 		&$second_print($text{'setup_done'});
 		}
 	}
+
+# Set any PHP variables defined in the template
+&setup_web_for_php($dom, undef, undef);
 
 # Install any scripts specified in the template
 local @scripts = &get_template_scripts($tmpl);
@@ -8593,8 +8544,8 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
 		}
 	}
 
-# Update service certs and DANE DNS records
-# if a new Let's Encrypt cert was generated
+# Update service certs and DANE DNS records if a new Let's Encrypt cert
+# was generated
 if ($generated == 2) {
 	&enable_domain_service_ssl_certs($dom);
 	&sync_domain_tlsa_records($dom);
@@ -8660,6 +8611,7 @@ if (!$dom->{'alias'} && &domain_has_website($dom) && defined($content)) {
 if (!$nopost) {
 	&run_post_actions();
 	}
+&unlock_domain($dom);
 &set_domain_envs($dom, "CREATE_DOMAIN");
 local $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
@@ -8691,9 +8643,18 @@ if ($valid) {
 		}
 	my @errs = &validate_letsencrypt_config($d, $vcheck);
 	if (@errs) {
+		# Always store last Certbot error
+		my @estr;
+		foreach my $e (@errs) {
+			push(@estr, $e->{'desc'}." : ".
+					&html_strip($e->{'error'}));
+			}
+		my $err = &html_escape(join(", ", @estr));
+		$d->{'letsencrypt_last_failure'} = time();
+		$d->{'letsencrypt_last_err'} = $err;
+		$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 		if ($showerrors) {
-			&$second_print(&text('letsencrypt_evalid',
-				&html_escape(join(", ", @errs))));
+			&$second_print(&text('letsencrypt_evalid', $err));
 			}
 		else {
 			&$second_print($text{'letsencrypt_doing3failed'});
@@ -8704,9 +8665,14 @@ if ($valid) {
 		@errs = &check_domain_connectivity(
 			$d, { 'mail' => 1, 'ssl' => 1 });
 		if (@errs) {
+			# Always store last Certbot error
+			my $e = &html_escape(join(", ",
+				map { $_->{'desc'} } @errs));
+			$d->{'letsencrypt_last_failure'} = time();
+			$d->{'letsencrypt_last_err'} = $e;
+			$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 			if ($showerrors) {
-				&$second_print(&text('letsencrypt_econnect',
-					&html_escape(join(", ", map { $_->{'desc'} } @errs))));
+				&$second_print(&text('letsencrypt_econnect', $e));
 				}
 			else {
 				&$second_print($text{'letsencrypt_doing3failed'});
@@ -8718,10 +8684,35 @@ if ($valid) {
 my $phd = &public_html_dir($d);
 my $before = &before_letsencrypt_website($d);
 my @beforecerts = &get_all_domain_service_ssl_certs($d);
-my ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
-					$d, \@dnames);
+my $acme;
+if ($tmpl->{'web_acme'} && defined(&list_acme_providers)) {
+	($acme) = grep { $_->{'id'} eq $tmpl->{'web_acme'} }
+		       &list_acme_providers();
+	}
+$d->{'letsencrypt_id'} = $acme->{'id'} if ($acme);
+my @leargs = ($d, \@dnames, undef, undef, undef, undef, $acme,
+	      $d->{'letsencrypt_subset'});
+my ($ok, $cert, $key, $chain) =
+	&request_domain_letsencrypt_cert(@leargs);
+if ($ok) {
+	$d->{'letsencrypt_nodnscheck'} = 1;
+	}
+else {
+	# Try again with just externally resolvable hostnames
+	my @badnames;
+	my $fok = &filter_external_dns(\@dnames, \@badnames);
+	if ($fok == 0 && @dnames) {
+		$d->{'letsencrypt_nodnscheck'} = 0;
+		($ok, $cert, $key, $chain) =
+			&request_domain_letsencrypt_cert(@leargs);
+		}
+	}
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
+	# Always store last Certbot error
+	$d->{'letsencrypt_last_failure'} = time();
+	$d->{'letsencrypt_last_err'} = $cert;
+	$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 	if ($showerrors) {
 		&$second_print(&text('letsencrypt_failed', $cert));
 		}
@@ -8818,6 +8809,11 @@ foreach my $dd (@alldoms) {
 				     &show_domain_name($du));
 			}
 		}
+	}
+
+# Lock before deleting
+foreach my $dd (@alldoms) {
+	&lock_domain($dd);
 	}
 
 # Delete any jail
@@ -9036,9 +9032,23 @@ foreach my $dd (@alldoms) {
 &release_lock_mail();
 &release_lock_unix();
 
+# If deleted domain was default host name
+if ($d->{'dom'} eq $config{'defaultdomain_name'}) {
+	&lock_file($module_config_file);
+	delete($config{'defaultdomain_name'});
+	$config{'default_domain_ssl'} = 0;
+	&save_module_config();
+	&unlock_file($module_config_file);
+	}
+
 # Run the after deletion command
 if (!$nopost) {
 	&run_post_actions();
+	}
+
+# Unlock now we're done
+foreach my $dd (reverse(@alldoms)) {
+	&unlock_domain($dd);
 	}
 
 return undef;
@@ -9070,6 +9080,32 @@ else {
 	}
 }
 
+# disable_scheduled_virtual_servers()
+# Disables all scheduled virtual servers that are due to be disabled
+sub disable_scheduled_virtual_servers
+{
+my @disdoms = grep {
+	!$_->{'protected'} &&                   # if domain is not protected
+	!$_->{'disabled'} &&                    # if not already disabled
+	&is_timestamp($_->{'disabled_auto'}) && # if actually a timestamp
+	$_->{'disabled_auto'} <= time()         # if timestamp is in the past
+	} &list_domains();
+foreach my $d (@disdoms) {
+	&push_all_print();
+	&set_all_null_print();
+	&lock_domain($d);
+	eval {
+		local $main::error_must_die = 1;
+		my $disabled_auto = &make_date($d->{'disabled_auto'});
+		&disable_virtual_server($d, 'schedule',
+			&text('disable_autodisabledone', $disabled_auto));
+		};
+	&unlock_domain($d);
+	&pop_all_print();
+	&error_stderr_local("Disabling domain on schedule failed : $@") if ($@);
+	}
+}
+
 # disable_virtual_server(&domain, [reason-code], [reason-why], [&only-features])
 # Disables all features of one virtual server. Returns undef on success, or
 # an error message on failure.
@@ -9090,6 +9126,7 @@ my %disable = map { $_, 1 } @disable;
 $d->{'disabled_reason'} = $reason;
 $d->{'disabled_why'} = $why;
 $d->{'disabled_time'} = time();
+delete($d->{'disabled_auto'});
 
 # Run the before command
 &set_domain_envs($d, "DISABLE_DOMAIN");
@@ -9149,6 +9186,7 @@ my @enable = &get_enable_features($d);
 my %enable = map { $_, 1 } @enable;
 delete($d->{'disabled_reason'});
 delete($d->{'disabled_why'});
+delete($d->{'disabled_auto'});
 
 # Run the before command
 &set_domain_envs($d, "ENABLE_DOMAIN");
@@ -9221,10 +9259,18 @@ local @newpost;
 foreach my $a (@main::post_actions) {
 	# Don't run multiple times
 	my $key;
-	if ($a->[0] eq \&restart_bind ||
-	    $a->[0] eq \&update_secondary_mx_virtusers) {
+	if ($a->[0] eq \&restart_bind && $a->[1]) {
+		# Restarts for the same DNS server are equal
+		my $p = $a->[1]->{'provision_dns'} || $a->[1]->{'dns_cloud'};
+		$key = $a->[0].",".$p;
+		}
+	elsif ($a->[0] eq \&update_secondary_mx_virtusers) {
 		# Restarts in the same domain are considered equal
 		$key = $a->[0].($a->[1] ? ",".$a->[1]->{'dom'} : "");
+		}
+	elsif ($a->[0] eq \&restart_php_fpm_server) {
+		# Restarts of the same FPM version are equal
+		$key = $a->[0].($a->[1] ? ",".$a->[1]->{'init'} : "");
 		}
 	else {
 		$key = join(",", @$a);
@@ -9554,12 +9600,7 @@ if (@{$_[0]->{'values'}}) {
 	foreach $v (@{$_[0]->{'values'}}) {
 		if ($v eq "\\$_[2]" || $v eq "\\NEWUSER") {
 			# Delivery to this user means to his maildir
-			if ($config{'vpopmail_md'}) {
-				&print_tempfile(AFILE, "./$config{'vpopmail_md'}/\n");
-				}
-			else {
-				&print_tempfile(AFILE, "./Maildir/\n");
-				}
+			&print_tempfile(AFILE, "./Maildir/\n");
 			}
 		else {
 			&print_tempfile(AFILE, $v,"\n");
@@ -9608,6 +9649,7 @@ push(@rv, { 'id' => 0,
 	    'web_urlsslport' => $config{'web_urlsslport'},
 	    'web_sslprotos' => $config{'web_sslprotos'},
 	    'web_alias' => $config{'alias_mode'},
+	    'web_acme' => $config{'web_acme'},
 	    'web_webmin_ssl' => $config{'webmin_ssl'},
 	    'web_usermin_ssl' => $config{'usermin_ssl'},
 	    'web_webmail' => $config{'web_webmail'},
@@ -9799,6 +9841,7 @@ push(@rv, { 'id' => 0,
 	    'append_style' => $config{'append_style'},
 	    'domalias' => $config{'domalias'} || "none",
 	    'domalias_type' => $config{'domalias_type'} || 0,
+	    'domauto_disable' => $config{'domauto_disable'},
 	    'for_parent' => 1,
 	    'for_sub' => 0,
 	    'for_alias' => 1,
@@ -9885,15 +9928,21 @@ foreach my $tmpl (@rv) {
 	$tmpl->{'resellers'} = '*' if (!defined($tmpl->{'resellers'}));
 	$tmpl->{'owners'} = '*' if (!defined($tmpl->{'owners'}));
 	if (!defined($tmpl->{'web_cgimode'})) {
+		# Switch from the old CGI mode field to the new one
 		my @cgimodes = &has_cgi_support();
-		$tmpl->{'web_cgimode'} = $tmpl->{'web_fcgiwrap'} ?
-						'fcgiwrap' : $cgimodes[0];
+		$tmpl->{'web_cgimode'} = $tmpl->{'web_fcgiwrap'} ? 'fcgiwrap' :
+					 @cgimodes ? $cgimodes[0] : 'none';
 		delete($tmpl->{'web_fcgiwrap'});
 		}
 	}
 closedir(DIR);
-@list_templates_cache = @rv;
-return @rv;
+
+my @default_templates = grep { $_->{'default'} } @rv;
+my @non_default_templates = grep { !$_->{'default'} } @rv;
+my @sorted_templates = sort { $a->{'name'} cmp $b->{'name'} } @non_default_templates;
+@list_templates_cache = (@default_templates, @sorted_templates);
+
+return @list_templates_cache;
 }
 
 # list_available_templates([&parentdom], [&aliasdom])
@@ -9957,6 +10006,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'web_urlport'} = $tmpl->{'web_urlport'};
 	$config{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
 	$config{'web_sslprotos'} = $tmpl->{'web_sslprotos'};
+	$config{'web_acme'} = $tmpl->{'web_acme'};
 	$config{'webmin_ssl'} = $tmpl->{'web_webmin_ssl'};
 	$config{'usermin_ssl'} = $tmpl->{'web_usermin_ssl'};
 	$config{'web_webmail'} = $tmpl->{'web_webmail'};
@@ -10196,6 +10246,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'domalias'} = $tmpl->{'domalias'} eq 'none' ? undef :
 			      $tmpl->{'domalias'};
 	$config{'domalias_type'} = $tmpl->{'domalias_type'};
+	$config{'domauto_disable'} = $tmpl->{'domauto_disable'};
 	$config{'tmpl_autoconfig'} = $tmpl->{'autoconfig'};
 	$config{'tmpl_outlook_autoconfig'} = $tmpl->{'outlook_autoconfig'};
 	$config{'key_tmpl'} = $tmpl->{'cert_key_tmpl'};
@@ -10291,7 +10342,7 @@ if (!$tmpl->{'default'}) {
 	local %done;
 	foreach $p ("dns_spf", "dns_sub", "dns_master", "dns_mx", "dns_dmarc",
 		    "dns_cloud", "dns_slaves",
-		    "web_webmail", "web_admin", "web_http2",
+		    "web_acme", "web_webmail", "web_admin", "web_http2",
 		    "web_redirects", "web_sslredirect", "web_php",
 		    "web", "dns", "ftp", "mail", "frame", "user_aliases",
 		    "ugroup", "sgroup", "quota", "uquota", "ushell", "ujail",
@@ -10330,10 +10381,23 @@ if (!$tmpl->{'default'}) {
 				next if ($p eq "php" &&
 					 $k =~ /^php_(fpm|sock)/);
 				next if ($p eq "web" &&
-					 $k =~ /^web_(webmail|admin|http2|redirects|sslredirect|php)/);
+					 $k =~ /^web_(webmail|admin|http2|redirects|sslredirect|php|acme)/);
+				next if ($p eq "mysql" &&
+					 $k =~ /^mysql_(hosts|mkdb|suffix|chgrp|nopass|wild|charset|nouser)/);
 				next if ($done{$k});
 				if ($k =~ /^\Q$p\E_/ ||
 				    $k eq $psel || $k eq $p) {
+					# If the selector is named like 'web',
+					# the template inherits default values
+					# like 'web' or 'web_foo'
+					$tmpl->{$k} = $def->{$k};
+					$done{$k}++;
+					}
+				elsif ($p =~ /^(dns_spf)$/ &&
+				       $k =~ /^\Q$p\E/) {
+					# If the selector is named like 'dns_spf'
+					# the template inherits default values
+					# like 'dns_spfall'
 					$tmpl->{$k} = $def->{$k};
 					$done{$k}++;
 					}
@@ -10827,22 +10891,7 @@ return @rv;
 sub create_initial_user
 {
 my ($d, $notmpl, $forweb) = @_;
-my $user;
-if ($config{'mail_system'} == 5) {
-	# VPOPMail user
-	$user = { 'vpopmail' => 1,
-		  'mailquota' => 1,
-		  'person' => 1,
-		  'fixedhome' => 1,
-		  'noappend' => 1,
-		  'noprimary' => 1,
-		  'alwaysplain' => 1 };
-	}
-else {
-	# Normal unix user
-	$user = { 'unix' => 1,
-		  'person' => 1 };
-	}
+my $user = { 'unix' => 1 };
 if ($d && !$notmpl) {
 	# Initial aliases and quota come from template
 	local $tmpl = &get_template($d->{'template'});
@@ -10868,7 +10917,7 @@ $user->{'shell'} = &default_available_shell('mailbox');
 if ($d) {
 	local %init;
 	&read_file("$initial_users_dir/$d->{'id'}", \%init);
-	foreach my $a ("email", "quota", "mquota", "qquota", "shell") {
+	foreach my $a ("email", "quota", "mquota", "shell") {
 		$user->{$a} = $init{$a} if (defined($init{$a}));
 		}
 	foreach my $a ("secs", "to") {
@@ -10888,7 +10937,7 @@ if ($d) {
 		}
 	}
 
-if ($forweb && $user->{'unix'}) {
+if ($forweb) {
 	# This is a website management user
 	local (undef, $ftp_shell, undef, $def_shell) =
 		&get_common_available_shells();
@@ -10896,7 +10945,6 @@ if ($forweb && $user->{'unix'}) {
 	$user->{'fixedhome'} = 0;
 	$user->{'home'} = &public_html_dir($d);
 	$user->{'noquota'} = 1;
-	$user->{'mailquota'} = 0;
 	$user->{'noprimary'} = 1;
 	$user->{'noextra'} = 1;
 	$user->{'noalias'} = 1;
@@ -10908,7 +10956,7 @@ if ($forweb && $user->{'unix'}) {
 	}
 
 # For a unix user, apply default password expiry restrictions
-if ($user->{'unix'} && $gconfig{'os_type'} =~ /-linux$/) {
+if ($gconfig{'os_type'} =~ /-linux$/) {
 	&require_useradmin();
 	local %uconfig = &foreign_config("useradmin");
 	if ($usermodule eq "ldap-useradmin") {
@@ -10937,7 +10985,7 @@ if (!-d $initial_users_dir) {
 	}
 &lock_file("$initial_users_dir/$dom->{'id'}");
 local %init;
-foreach my $a ("email", "quota", "mquota", "qquota", "shell") {
+foreach my $a ("email", "quota", "mquota", "shell") {
 	$init{$a} = $user->{$a} if (defined($user->{$a}));
 	}
 foreach my $a ("secs", "to") {
@@ -11656,12 +11704,7 @@ if ($p eq 'web') {
 	# Check if Apache supports suexec or fcgiwrap
 	my @rv;
 	push(@rv, 'suexec') if (&supports_suexec($d));
-	if ($d) {
-		push(@rv, 'fcgiwrap') if ($d->{'fcgiwrap_port'});
-		}
-	else {
-		push(@rv, 'fcgiwrap') if (&supports_fcgiwrap());
-		}
+	push(@rv, 'fcgiwrap') if (&supports_fcgiwrap());
 	return @rv;
 	}
 elsif ($p) {
@@ -11685,7 +11728,7 @@ if ($p eq 'web') {
 	if (&get_domain_suexec($d)) {
 		return 'suexec';
 		}
-	elsif (&get_domain_fcgiwrap($d)) {
+	elsif ($d->{'fcgiwrap_port'} && &get_domain_fcgiwrap($d)) {
 		return 'fcgiwrap';
 		}
 	return undef;
@@ -11705,6 +11748,15 @@ sub save_domain_cgi_mode
 my ($d, $mode) = @_;
 my $p = &domain_has_website($d);
 if ($p eq 'web') {
+	# Is PHP mode compatible?
+	my $phpmode = &get_domain_php_mode($d);
+	if (!$mode && ($phpmode eq 'cgi' || $phpmode eq 'fcgid')) {
+		return $text{'website_ephpcgi'};
+		}
+	if ($mode eq 'fcgiwrap' && $phpmode eq 'fcgid') {
+		return $text{'website_ephpfcgid'};
+		}
+
 	&obtain_lock_web($d);
 	if ($mode ne 'fcgiwrap') {
 		&disable_apache_fcgiwrap($d);
@@ -12325,7 +12377,7 @@ if (&has_group_quotas()) {
 	my ($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
 	if ($group) {
 		$home = $group->{'uquota'};
-		if ($config{'mail_quotas'}) {
+		if (&has_mail_quotas()) {
 			$mail = $group->{'umquota'};
 			}
 		}
@@ -12475,7 +12527,7 @@ sub get_domain_shell
 my ($d, $user) = @_;
 $user ||= &get_domain_owner($d, 1, 1, 1);
 if ($user->{'shell'} =~ /\/jk_chrootsh$/) {
-	return $d->{'unjailed_shell'};
+	return $user->{'jailed'}->{'shell'};
 	}
 else {
 	return $user->{'shell'};
@@ -12489,14 +12541,20 @@ sub change_domain_shell
 my ($d, $shell) = @_;
 my $user = &get_domain_owner($d);
 my $olduser = { %$user };
-if ($user->{'shell'} =~ /\/jk_chrootsh$/) {
-	$d->{'unjailed_shell'} = $shell;
-	&save_domain($d);
-	}
-else {
-	$user->{'shell'} = $shell;
-	}
+$user->{'shell'} = $shell;
 &modify_user($user, $olduser, $d);
+}
+
+# can_domain_shell_login(&domain)
+# Can the domain's shell be used to run commands?
+sub can_domain_shell_login
+{
+my ($d) = @_;
+my $shellpath = &get_domain_shell($d);
+return 0 if (!$shellpath);
+my @ashells = &list_available_shells($d);
+my ($shell) = grep { $_->{'shell'} eq $shellpath } @ashells;
+return $shell && $shell->{'id'} eq 'ssh';
 }
 
 # new_password_input(name)
@@ -12661,13 +12719,6 @@ return $config{'mail_quotas'} &&
        $config{'mail_quotas'} ne $config{'home_quotas'} ? 1 : 0;
 }
 
-# has_server_quotas()
-# Returns 1 if the system's mail server supports mail quotas
-sub has_server_quotas
-{
-return $config{'mail'} && $config{'mail_system'} == 5;
-}
-
 # has_group_quotas()
 # Returns 1 if group quotas are enabled
 sub has_group_quotas
@@ -12708,7 +12759,7 @@ local ($d) = @_;
 local $rv = 0;
 local $qrv = 0;
 foreach my $db (&domain_databases($d, [ 'mysql', 'postgres' ])) {
-	local ($size, $qsize) = &get_one_database_usage($d, $db);
+	local ($size, undef, $qsize) = &get_one_database_usage($d, $db);
 	$rv += $size;
 	$qrv += $qsize;
 	}
@@ -12742,6 +12793,7 @@ sub need_config_check
 {
 local @cst = stat($module_config_file);
 return 0 if ($cst[9] <= $config{'last_check'});
+return 1 if ($config{'mail_system'} == 5 || $config{'mail_system'} == 6);
 local %lastconfig;
 &read_file("$module_config_directory/last-config", \%lastconfig) || return 1;
 foreach my $f (@features) {
@@ -12750,10 +12802,9 @@ foreach my $f (@features) {
 	}
 foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "ldap_base", "ldap_login", "ldap_pass", "ldap_port", "ldap",
-	       "vpopmail_dir", "vpopmail_user", "vpopmail_group",
 	       "clamscan_cmd", "iface", "netmask6", "localgroup", "home_quotas",
 	       "mail_quotas", "group_quotas", "quotas", "shell", "ftp_shell",
-	       "dns_ip", "default_procmail",
+	       "dns_ip", "default_procmail", "defaultdomain_name",
 	       "compression", "pbzip2", "domains_group",
 	       "quota_commands", "home_base",
 	       "quota_set_user_command", "quota_set_group_command",
@@ -12761,7 +12812,7 @@ foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "quota_get_user_command", "quota_get_group_command",
 	       "preload_mode", "collect_interval", "api_helper",
 	       "spam_lock", "spam_white", "mem_low",
-	       "lookup_domain_serial") {
+	       "lookup_domain_serial", "default_domain_ssl") {
 	# Some important config option was changed
 	return 1 if ($config{$c} ne $lastconfig{$c});
 	}
@@ -12811,16 +12862,15 @@ foreach my $g ("mailgroup", "ftpgroup", "dbgroup") {
 
 	# Work out who is in the group
 	if ($g eq "mailgroup") {
-		@inusers = grep { $_->{'unix'} && $_->{'email'} } @$users;
+		@inusers = grep { $_->{'email'} } @$users;
 		}
 	elsif ($g eq "ftpgroup") {
-		@inusers = grep { $_->{'unix'} &&
-				  $shellmap{$_->{'shell'}} &&
+		@inusers = grep { $shellmap{$_->{'shell'}} &&
 				  $shellmap{$_->{'shell'}} ne 'nologin' }
 				@$users;
 		}
 	elsif ($g eq "dbgroup") {
-		@inusers = grep { $_->{'unix'} && @{$_->{'dbs'}} > 0 ||
+		@inusers = grep { @{$_->{'dbs'}} > 0 ||
 			  $_->{'domainowner'} && $dom->{'mysql'} } @$users;
 		}
 	local @innames = map { $_->{'user'} } @inusers;
@@ -12878,9 +12928,10 @@ local $two;
 read(BACKUP, $two, 2);
 close(BACKUP);
 local $rv = $two eq "\037\213" ? 1 :
-	     $two eq "\037\235" ? 2 :
-	     $two eq "PK" ? 4 :
-	     $two eq "BZ" ? 3 : 0;
+	    $two eq "\037\235" ? 2 :
+	    $two eq chr(0x28).chr(0xB5) ? 6 :
+	    $two eq "PK" ? 4 :
+	    $two eq "BZ" ? 3 : 0;
 if (!$rv) {
 	# Fall back to 'file' command for tar
 	local $out = &backquote_command("file ".quotemeta($_[0]));
@@ -13079,6 +13130,7 @@ my $modify_plugin_category = sub {
 		$l->{'cat'} = 'mail';
 		}
 	elsif ($l->{'mod'} =~ /virtualmin-(htpasswd|dav)/ ||
+	       ($l->{'cat'} eq 'services' && $l->{'mod'} eq 'phpini') ||
 	       ($l->{'cat'} eq 'services' && $l->{'mod'} eq 'virtualmin-nginx')) {
 		$l->{'cat'} = 'web';
 		}
@@ -13659,7 +13711,8 @@ if ($d->{'dir'} && !$d->{'alias'} &&
 	}
 
 if (&foreign_available("xterm") &&
-    !$d->{'alias'} && $d->{'unix'} && $d->{'user'}) {
+    !$d->{'alias'} && $d->{'unix'} && $d->{'user'} &&
+    &can_domain_shell_login($d)) {
 	# Link to Terminal for master admin
 	push(@rv, { 'page' => 'index.cgi?user='.&urlize($d->{'user'}).
 			      '&dir='.&urlize($d->{'home'}),
@@ -13813,6 +13866,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'bw',
    $config{'mysql'} ? ( 'mysqls' ) : ( ),
    'dnsclouds',
    $virtualmin_pro ? ( 'remotedns' ) : ( ),
+   $virtualmin_pro ? ( 'acmes' ) : ( ),
    );
 local %tmplcat = (
 	'features' => 'setting',
@@ -13848,6 +13902,7 @@ local %tmplcat = (
 	'mysqls' => 'setting',
 	'dnsclouds' => 'ip',
 	'remotedns' => 'ip',
+	'acmes' => 'ip',
 	);
 local %nonew = ( 'history', 1,
 		 'postgrey', 1,
@@ -13861,7 +13916,8 @@ local %nonew = ( 'history', 1,
 local %pro = ( 'resels', 1,
 	       'reseller', 1,
 	       'smtpclouds', 1,
-	       'remotedns', 1, );
+	       'remotedns', 1,
+	       'acmes', 1 );
 local @tlinks = map { ($pro{$_} ? "pro/" : "").
 		      ($nonew{$_} ? "${_}.cgi" : "edit_new${_}.cgi") } @tmpls;
 local @ttitles = map { $nonew{$_} ? $text{"${_}_title"}
@@ -14151,13 +14207,9 @@ sub can_domain_have_users
 local ($d) = @_;
 return 0 if ($d->{'alias'} && !$d->{'aliasmail'} ||
 	     $d->{'subdom'});		# never allowed for aliases
-if (!$d->{'mail'}) {
-	# Qmail+LDAP and VPOPMail require mail to be enabled
-	return 0 if ($config{'mail_system'}==4 || $config{'mail_system'}==5);
-	}
 if (!$d->{'dir'}) {
-	# Only VPOPMail allows mail without a dir
-	return 0 if ($config{'mail_system'} != 5);
+	# Users need a home dir
+	return 0;
 	}
 return 1;
 }
@@ -14981,6 +15033,7 @@ $d->{'email'} = $parent->{'email'};
 sub rename_virtual_server
 {
 my ($d, $dom, $user, $home, $prefix) = @_;
+&lock_domain($d);
 
 $dom = undef if ($dom eq $d->{'dom'});
 $home = undef if ($home eq $d->{'home'});
@@ -15298,6 +15351,7 @@ my $merr = &made_changes();
 
 # Clear all left-frame links caches, as links to Apache may no longer be valid
 &clear_links_cache();
+&unlock_domain($d);
 
 return undef;
 }
@@ -15398,16 +15452,18 @@ if ($config{'dns'}) {
 			$mastermsg = &text('check_dnsmaster',
 					   "<tt>$master</tt>");
 			}
-		my $masterip = &to_ipaddress($master);
-		if (!$masterip) {
-			$mastermsg ||= &text('check_dnsmaster2',
-					     "<tt>$master</tt>");
-			}
-		elsif ($masterip ne &get_dns_ip() &&
-		       $masterip ne &get_external_ip_address() &&
-		       &indexof($masterip, &active_ip_addresses()) < 0) {
-			$mastermsg ||= &text('check_dnsmaster2',
-				     "<tt>$master</tt>", "<tt>$masterip</tt>");
+		if ($master !~ /\$/) {
+			my $masterip = &to_ipaddress($master);
+			if (!$masterip) {
+				$mastermsg ||= &text('check_dnsmaster2',
+						     "<tt>$master</tt>");
+				}
+			elsif ($masterip ne &get_dns_ip() &&
+			       $masterip ne &get_external_ip_address() &&
+			       &indexof($masterip, &active_ip_addresses()) < 0) {
+				$mastermsg ||= &text('check_dnsmaster2',
+					     "<tt>$master</tt>", "<tt>$masterip</tt>");
+				}
 			}
 		$mastermsg = ", $mastermsg" if ($mastermsg);
 		&$second_print($text{'check_dnsok2'}.$mastermsg);
@@ -15426,13 +15482,19 @@ if ($config{'dns'}) {
 	}
 
 if ($config{'mail'}) {
+	if ($config{'mail_system'} == 5) {
+		return $text{'check_evpopmail'};
+		}
+	if ($config{'mail_system'} == 6) {
+		return $text{'check_eexim'};
+		}
+	if ($config{'mail_system'} == 4) {
+		return $text{'check_eqmailldap'};
+		}
 	if ($config{'mail_system'} == 3) {
 		# Work out which mail server we have
 		if (&postfix_installed()) {
 			$config{'mail_system'} = 0;
-			}
-		elsif (&qmail_vpopmail_installed()) {
-			$config{'mail_system'} = 5;
 			}
 		elsif (&qmail_installed()) {
 			$config{'mail_system'} = 2;
@@ -15595,25 +15657,6 @@ if ($config{'mail'}) {
 			&$second_print($text{'check_qmailok'});
 			}
 		$expected_mailboxes = 2;
-		}
-	elsif ($config{'mail_system'} == 4) {
-		# Qmail+LDAP is deprecated
-		return $text{'check_eqmailldap'};
-		}
-	elsif ($config{'mail_system'} == 5) {
-		# Make sure qmail with VPOPMail is installed
-		if (!&qmail_vpopmail_installed()) {
-			return &text('index_evpopmail', '/qmailadmin/',
-					   "../config.cgi?$module_name");
-			}
-		if ($config{'generics'}) {
-			return &text('index_eqgens', $mclink);
-			}
-		if ($config{'bccs'}) {
-			return &text('check_eqmailbccs', $mclink);
-			}
-		&$second_print($text{'check_vpopmailok'});
-		$expected_mailboxes = 5;
 		}
 	# Check that Read User Mail module agrees
 	if (&foreign_check("mailboxes") && defined($expected_mailboxes)) {
@@ -16753,7 +16796,7 @@ if ($gconfig{'os_type'} =~ /^(redhat-linux|debian-linux)$/) {
 		if (!$repofound) {
 			&$second_print(&ui_text_color(
 				&text('check_repoeoutdate',
-					"$virtualmin_link/documentation/repositories/"), 'warn'));
+					"$virtualmin_link/docs/installation/troubleshooting-repositories/"), 'warn'));
 			}
 		}
 	}
@@ -16922,7 +16965,7 @@ if (-d $profiled && !-r $profiledphpalias) {
 	&$second_print($text{'setup_done'});
 	}
 
-# Check host default domain
+# Check LE SSL for hostname
 &check_virtualmin_default_hostname_ssl();
 
 # Restart lookup-domain daemon, if need
@@ -17345,6 +17388,14 @@ print &ui_table_row(&hlink($text{'tmpl_domalias_type'},
 		[ 2, $text{'tmpl_domalias_type2'}." ".
 		     &ui_textbox("domalias_tmpl",
 			$mode == 2 ? $tmpl->{'domalias_type'} : "", 20) ] ]));
+
+# Automatic domain disabling
+print &ui_table_row($text{'disable_autodisable'},
+	&ui_opt_textbox(
+		"domauto_disable", 
+		$tmpl->{'domauto_disable'}, 4,
+		$text{'no'},
+		$text{'disable_autodisable_in'}));
 }
 
 # parse_template_virtualmin(&tmpl)
@@ -17366,6 +17417,18 @@ if ($in{'domalias_mode'} == 2) {
 	else {
 		$tmpl->{'domalias_type'} = $in{'domalias_type'};
 		}
+	}
+
+# Parse automatic domain disabling
+my $auto_disable = $in{'autodisable_def'} ? undef : $in{'domauto_disable'};
+if (defined($auto_disable)) {
+	$auto_disable =~ /^\d+$/ || &error($text{'disable_save_eautodisable'});
+	$auto_disable <= 0 && &error($text{'disable_save_eautodisable'});
+	$auto_disable > 365*10 && &error($text{'disable_save_eautodisable2'});
+	$tmpl->{'domauto_disable'} = $auto_disable;
+	}
+else {
+	$tmpl->{'domauto_disable'} = undef;
 	}
 }
 
@@ -17567,6 +17630,7 @@ if ($ddis) {
 	$content =~ s/<a\s+data-login=["']\Qbutton\E["'](.*?)<\/a>//s,
 	$content =~ s/<x-div\s+data-postlogin=["']\Qcontainer\E["'](.*?)<\/x-div>//s,
 	$content =~ s/(data-(login|domain)=["'].*?["'].*?)(success)/$1warning/gm;
+	$content =~ s/domain\s+font-monospace/$1 text-danger/gm;
 	}
 $content =~ s/(data-login=["']row["'].*)(col-l.*)(".*)/$1col-lg-8 col-xl-7$3/gm;
 $content =~ s/x-(main|div)/$1/g;
@@ -17704,7 +17768,7 @@ local ($homequota, $mailquota, $duser, $dbquota, $dbquota_home) =
 
 # Get usage for sub-domain mail users
 local @subs = &get_domain_by("parent", $d->{'id'});
-local ($subhomequota, $submailquota, $dummy, $subdbquota) =
+local ($subhomequota, $submailquota, $dummy, $subdbquota, $subdbquota_home) =
 	&get_domain_user_quotas(@subs);
 
 # Get group usage for the domain
@@ -17747,7 +17811,7 @@ if ($dbquota+$subdbquota) {
 		&nice_size($dbquota),
 		&nice_size($subdbquota)), 3);
 	$tcount++;
-	$total += $dbquota+$subdbquota;
+	$total += $dbquota + $subdbquota;
 	}
 
 # Show overall total, if needed
@@ -18376,18 +18440,8 @@ $list_available_shells_cache{$mail} = \@rv;
 return @rv;
 }
 
-# list_available_shells_by_id(id, [type], [&domain], [mail])
-# Returns a list of shells by given id
-sub list_available_shells_by_id
-{
-my ($id, $type, $d, $mail) = @_;
-my @rv = &list_available_shells($d, $mail);
-@rv = grep { $_->{'id'} eq $id && $_->{'avail'} } @rv;
-@rv = grep { $_->{$type} } @rv if ($type);
-return @rv;
-}
-
-# list_available_shells_by_type(type, [id], [include-current-shell])
+# list_available_shells_by_type('owner'|'mailbox',
+# 	['ssh'|'scp'|'ftp'|'nologin'], [include-current-shell])
 # Returns a list of shells by given type. If current shell is given
 # it will be added to a list of available shells
 sub list_available_shells_by_type
@@ -18419,17 +18473,24 @@ else {
 	}
 }
 
-# available_shells('owner'|'mailbox'|'reseller', [value], [must-ftp])
+# available_shells('owner'|'mailbox'|'reseller', [value],
+#		   ['ssh'|'scp'|'ftp'|'nologin'])
 # Returns available shells for a mailbox or domain owner
 sub available_shells
 {
-my ($type, $value, $mustftp) = @_;
+my ($type, $value, $id) = @_;
+$type = [ $type ] if (!ref($type));
 my @aashells = &list_available_shells(undef, $mustftp ? 0 : undef);
-my @tshells = grep { $_->{$type} } @aashells;
-my @ashells = grep { $_->{'avail'} } @tshells;
-if ($mustftp) {
-	# Only show shells with FTP access or better
-	@ashells = grep { $_->{'id'} ne 'nologin' } @ashells;
+my @tshells;
+foreach my $t (@$type) {
+	push(@tshells, grep { $_->{$t} } @aashells);
+	}
+my %done;
+my @ashells = grep { $_->{'avail'} && !$done{$_->{'shell'}}++ } @tshells;
+if ($id) {
+	# Only return shells with the given IDs
+	my @ids = ref($id) ? @$id : ($id);
+	@ashells = grep { &indexof($_->{'id'}, @ids) >= 0 } @ashells;
 	}
 if (defined($value)) {
 	# Is current shell on the list?
@@ -18461,23 +18522,18 @@ if (defined($value)) {
 			}
 		}
 	}
-else {
-	my ($def) = grep { $_->{'default'} } @ashells;
-	$value = $def ? $def->{'shell'} : undef;
-	}
 return @ashells;
 }
 
-# available_shells_menu(name, [value], 'owner'|'mailbox'|'reseller', [show-cmd],
-# 			[must-ftp])
+# available_shells_menu(name, [value], 'owner'|'mailbox'|'reseller',
+# 			['ssh'|'scp'|'ftp'|'nologin'])
 # Returns HTML for selecting a shell for a mailbox or domain owner
 sub available_shells_menu
 {
-my ($name, $value, $type, $showcmd, $mustftp) = @_;
+my ($name, $value, $type, $id) = @_;
 return &ui_select($name, $value,
-	  [ map { [ $_->{'shell'},
-		    $_->{'desc'}.($showcmd ? " ($_->{'shell'})" : "") ] }
-	  &available_shells($type, $value, $mustftp) ]);
+	  [ map { [ $_->{'shell'}, $_->{'desc'} ] }
+		&available_shells($type, $value, $id) ]);
 }
 
 # default_available_shell('owner'|'mailbox'|'reseller')
@@ -18496,8 +18552,9 @@ return $def ? $def->{'shell'} : undef;
 sub check_available_shell
 {
 my ($shell, $type, $old) = @_;
-my @ashells = grep { &can_mailbox_ssh() ||
-		     ($_->{$type} && $_->{'avail'}) } &list_available_shells();
+my $ssh = &can_mailbox_ssh();
+my @ashells = grep { $ssh || ($_->{$type} && $_->{'avail'}) }
+		   &list_available_shells();
 my ($got) = grep { $_->{'shell'} eq $shell } @ashells;
 return $got || $old && $shell eq $old;
 }
@@ -18534,6 +18591,14 @@ opendir(EMPTYDIR, $dir) || return 0;
 my @files = grep { $_ ne "." && $_ ne ".." } readdir(EMPTYDIR);
 closedir(EMPTYDIR);
 return @files ? 0 : 1;
+}
+
+# is_timestamp(unix-timestamp)
+# Returns 1 if a given number is a timestamp
+sub is_timestamp
+{
+my ($t) = @_;
+return $t =~ /^\d{10}$/ ? 1 : 0;
 }
 
 # update_miniserv_preloads(mode)
@@ -19390,16 +19455,19 @@ elsif ($p) {
 sub save_website_ssl_file
 {
 my ($d, $type, $file) = @_;
-if (&domain_has_ssl($d)) {
-	# Update the actual webserver config
-	my $p = &domain_has_website($d);
-	if ($p ne "web") {
-		return &plugin_call($p, "feature_save_web_ssl_file",
-				    $d, $type, $file);
-		}
+my $p = &domain_has_website($d);
+my $s = &domain_has_ssl($d);
+if ($s && $p ne "web") {
+	# Update the actual Nginx config
+	my $err = &plugin_call($p, "feature_save_web_ssl_file",
+			       $d, $type, $file);
+	return $err if ($err);
+	}
+elsif ($s && $p eq "web") {
+	# Update the actual Apache config
 	&obtain_lock_ssl($d);
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-							   $d->{'web_sslport'});
+							$d->{'web_sslport'});
 	if (!$virt) {
 		&release_lock_ssl($d);
 		return "No virtual host found for ".
@@ -19426,14 +19494,12 @@ if (&domain_has_ssl($d)) {
 		&register_post_action(\&restart_apache,
 				      &ssl_needs_apache_restart());
 		}
-	return undef;
 	}
-else {
-	# Just update the domain object
-	my $k = $type eq 'ca' ? 'ssl_chain' : 'ssl_'.$type;
-	$d->{$k} = $file;
-	return undef;
-	}
+
+# Update the domain object
+my $k = $type eq 'ca' ? 'ssl_chain' : 'ssl_'.$type;
+$d->{$k} = $file;
+return undef;
 }
 
 # get_website_ssl_file(&domain, "cert"|"key"|"ca")
@@ -19441,6 +19507,10 @@ else {
 sub get_website_ssl_file
 {
 my ($d, $type) = @_;
+if ($type eq "combined" || $type eq "everything") {
+	# These exist only in the domain's config
+	return $d->{"ssl_".$type};
+	}
 if (&domain_has_ssl($d)) {
 	# Get from the actual Apache config
 	my $p = &domain_has_website($d);
@@ -19460,6 +19530,12 @@ if (&domain_has_ssl($d)) {
 		# Check for the alternate directive
 		$dir = "SSLCertificateChainFile";
 		($file) = &apache::find_directive($dir, $vconf);
+		}
+	if ($type eq "cert" && $file eq $d->{'ssl_combined'} &&
+	    $d->{'ssl_cert'}) {
+		# The Apache directive points to the combined file, but the
+		# cert-only file is what we really want to return
+		$file = $d->{'ssl_cert'};
 		}
 	return $file;
 	}
@@ -19917,6 +19993,35 @@ foreach my $f (&domain_features($d)) {
 	push(@rv, $f);
 	}
 return @rv;
+}
+
+# forbidden_domain_features(&domain, [creating])
+# Returns a list of features that cannot be enabled for some domain
+sub forbidden_domain_features
+{
+my ($d, $new) = @_;
+my @rv;
+return @rv if ($config{'nocheck_forbidden_domain_features'});
+# Not allowed features for a domain matching hostname
+if ($d->{'dom'} eq &get_system_hostname()) {
+	my @forbidden = ('mail', 'spam', 'virus');
+	foreach $ff (@forbidden) {
+		# If not already forced-enabled using CLI
+		push(@rv, $ff) if (!$d->{$ff} || $new);
+		}
+	}
+return @rv;
+}
+
+# filter_possible_domain_features(&features, &domain, [creating])
+# Given a list of features, returns only those that aren't forbidden for domain
+sub filter_possible_domain_features
+{
+my ($features, $d, $new) = @_;
+my @forbidden = &forbidden_domain_features($d, $new);
+@$features = grep {
+	my $feature = $_;
+        !grep { $feature eq $_ } @forbidden; } @$features;
 }
 
 # list_possible_domain_plugins(&domain)
@@ -20466,17 +20571,19 @@ my %dom;
 	'default_php_mode', 4,
 	'dom_defnames', $system_host_name
     );
+&lock_domain(\%dom);
 
 # Set initial features
 $dom{'dir'} = 1;
 $dom{'unix'} = 1;
-$dom{'dns'} = 1;
+$dom{'dns'} = $config{'dns'};
 $dom{'mail'} = 0;
 my $webf = &domain_has_website();
 my $sslf = &domain_has_ssl();
 $dom{$webf} = 1;
 $dom{$sslf} = 1;
 $dom{'letsencrypt_dname'} = $system_host_name;
+$dom{'letsencrypt_subset'} = 1;
 $dom{'auto_letsencrypt'} = 2;
 
 # Fill in other default fields
@@ -20506,24 +20613,55 @@ return &$err(join(" ", @warns)) if (@warns);
 my ($rs) = &create_virtual_server(
 	\%dom, undef, undef, 1, 0, $pass, $dom{'owner'});
 &pop_all_print();
-return &$err($rs) if ($rs && ref($rs) ne 'HASH');
+if ($rs && ref($rs) ne 'HASH') {
+	&unlock_domain(\%dom);
+	&unlock_domain_name($system_host_name);
+	return &$err($rs);
+	}
 my $succ = $rs->{'letsencrypt_last'} ? 1 : 0;
 # Perhaps shared SSL certificate was installed, trust it
 $succ = 2 if ($rs->{'ssl_same'});
+my $elelast;
+if ($config{'err_letsencrypt'}) {
+	$elelast = $rs->{'letsencrypt_last_err'};
+	if ($elelast) {
+		$elelast =~ s/\t/\n/g;
+		$elelast = " :<br>$elelast";
+		}
+	}
 my $succ_msg = $succ ? 
-	&text($succ == 2 ? 'check_defhost_sharedsucc' : 'check_defhost_succ', $system_host_name) :
-    &text('check_defhost_err', $system_host_name);
+	&text($succ == 2 ? 'check_defhost_sharedsucc'
+			 : 'check_defhost_succ', $system_host_name) :
+	&text('check_defhost_err', $system_host_name).$elelast;
 $config{'defaultdomain_name'} = $dom{'dom'};
 $config{'default_domain_ssl'} = 1
 	if ($succ && !$config{'default_domain_ssl'});
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
+
 # Set as default domain if create some time later
 if (&can_default_website(\%dom)) {
 	&set_default_website(\%dom);
 	}
+
+# Enable as default domain for all services
+if ($succ) {
+	&push_all_print();
+	&set_all_null_print();
+	foreach my $st (&list_service_ssl_cert_types()) {
+		my ($a) = grep { !$_->{'d'} && $_->{'id'} eq $st->{'id'} }
+				&get_all_domain_service_ssl_certs(\%dom);
+		if (!$a) {
+			my $cfunc = "copy_".$st->{'id'}."_ssl_service";
+			&$cfunc(\%dom);
+			}
+		}
+	&pop_all_print();
+	}
+
 &run_post_actions_silently();
+&unlock_domain(\%dom);
 &unlock_domain_name($system_host_name);
 &clear_links_cache() if ($config{'default_domain_ssl'} == 2);
 return &$err($succ_msg, $succ, $rs);
@@ -20533,18 +20671,19 @@ return &$err($succ_msg, $succ, $rs);
 # Delete default hostname domain
 sub delete_virtualmin_default_hostname_ssl
 {
-# Test host default domain being deleted
+# Test if hostname domain being deleted
 my $d = &get_domain_by("defaulthostdomain", 1);
-return if (!$d->{'dom'});
+return if (!$d || !$d->{'dom'});
 return if (!&can_delete_domain($d));
-# Delete host default domain
-# &lock_domain_name($d->{'dom'});   #### XXXX do we need locking on delete?
+
+# Delete hostname domain
+&lock_domain_name($d->{'dom'});
 &push_all_print();
 &set_all_null_print();
 $err = &delete_virtual_server($d, 0, 0);
 &pop_all_print();
 &run_post_actions_silently();
-# &unlock_domain_name($d->{'dom'}); #### XXXX
+&unlock_domain_name($d->{'dom'});
 &lock_file($module_config_file);
 $config{'defaultdomain_name'} = undef;
 &save_module_config();
@@ -20588,6 +20727,85 @@ $config{'defaultdomain_name'} = $new_hostname;
 &pop_all_print();
 &clear_links_cache() if ($config{'default_domain_ssl'} == 2);
 return $err ? 0 : 1;
+}
+
+# check_external_dns(hostname, [expected-ip|expected-cname])
+# Checks if some DNS record can be looked up externally by consulting the 
+# 8.8.8.8 nameserver. Returns 1 if yes, 0 if not, or -1 if the command needed
+# is not installed.
+sub check_external_dns
+{
+my ($host, $wantrec) = @_;
+if (&has_command("dig")) {
+	my $out = &backquote_command(
+		"dig ".quotemeta($host)." \@8.8.8.8 2>/dev/null");
+	return -1 if ($?);
+	return 0 if ($out !~ /ANSWER\s+SECTION/i);
+	# IPv4 and CNAME
+	if ($out =~ /\Q$host\E\.?.*\s+(\d+\.\d+\.\d+\.\d+)/ ||
+	    $out =~ /\Q$host\E\.?.*CNAME\s+(\S+)/) {
+		# Found an IP
+		return !$wantrec || $wantrec eq $1;
+		}
+	# IPv6 only
+	$out = &backquote_command(
+		"dig AAAA ".quotemeta($host)." \@8.8.8.8 2>/dev/null");
+	if ($out =~ /\Q$host\E\.?.*\s+AAAA\s+(\S+)/) {
+		# Found an IP
+		return !$wantrec || $wantrec eq $1;
+		}
+	return 0;
+	}
+elsif (&has_command("host")) {
+	&clean_environment();
+	my $out = &backquote_command(
+		"host ".quotemeta($host)." 8.8.8.8 2>/dev/null");
+	&reset_environment();
+	return 0 if ($out =~ /Host\s+\S+\s+not\s+found/i);
+	return -1 if ($?);
+	# IPv4
+	if ($out =~ /has\s+address\s+(\d+\.\d+\.\d+\.\d+)/i) {
+		# Found an IP
+		return !$wantrec || $wantrec eq $1;
+		}
+	# IPv6
+	if ($out =~ /has\s+IPv6\s+address\s+(\S+)/i) {
+		# Found an IP
+		return !$wantrec || $wantrec eq $1;
+		}
+	return 0;
+	}
+return -1;
+}
+
+# filter_external_dns(&hostnames, &unresolvable)
+# Given a list of hostnames, removes those that can't be resolved and adds them
+# to the unresolvable list. Returns 1 if all are OK, 0 if any are not resolvable
+# and -1 if any lookups fail.
+sub filter_external_dns
+{
+my ($dnames, $badnames) = @_;
+my $fail = 0;
+my @newdnames;
+foreach my $h (@$dnames) {
+	if ($h =~ /\*/) {
+		# Let's Encrypt wildcards are always OK
+		push(@newdnames, $h);
+		}
+	else {
+		# Check if it can be resolved
+		my $ok = &check_external_dns($h);
+		$fail = 1 if ($ok < 0);
+		if ($ok) {
+			push(@newdnames, $h);
+			}
+		else {
+			push(@$badnames, $h);
+			}
+		}
+	}
+@$dnames = @newdnames;
+return $fail ? -1 : @$badnames ? 0 : 1;
 }
 
 # check_virtualmin_default_hostname_ssl()
@@ -20747,6 +20965,72 @@ sub list_script_plugins
 {
 &load_plugin_libraries();
 return grep { &plugin_defined($_, "scripts_list") } @plugins;
+}
+
+# update_domains_last_login_times()
+# Updates last login time for all domains on the system
+sub update_domains_last_login_times
+{
+foreach my $d (&list_domains()) {
+	next if ($d->{'alias'});
+	next if ($d->{'no_last_login'});
+	my @logins;
+	# Get all users logins timestamps
+	foreach my $user (&list_domain_users($d, 0, 1, 1, 1)) {
+		my $ll = &get_last_login_time($user->{'user'});
+		foreach my $k (sort { $a cmp $b } keys %$ll) {
+			push(@logins, $ll->{$k});
+			}
+		}
+	next if (!@logins);
+	# Logins found
+	# Sort logins and get last login
+	@logins = sort { $b <=> $a } @logins;
+	# Save most recent timestamp
+	&lock_domain($d);
+	$d->{'last_login_timestamp'} = $logins[0];
+	&save_domain($d);
+	&unlock_domain($d);
+	}
+}
+
+# human_readable_time(timestamp)
+# Returns a string representing the time since the given timestamp
+# if within 24 hours, otherwise returns a human-readable date
+sub human_readable_time
+{
+my $ts = shift;
+return undef if (!&is_timestamp($ts));
+my $last_login;
+my $last = &make_date($ts, { '_' }); # XXXX rm '_' later
+if (ref($last) eq 'HASH' &&
+    $last->{'ago'} && !$last->{'ago'}->{'days'}) {
+	my $hours = $last->{'ago'}->{'hours'};
+	my $minutes = $last->{'ago'}->{'minutes'};
+	if ($hours) {
+		$last_login = $hours . " " .
+			($hours == 1 ?
+				$text{'summary_lastlogin_hour'} :
+				$text{'summary_lastlogin_hours'});
+		}
+	elsif ($minutes) {
+		$last_login = $minutes . " " .
+			($minutes == 1 ?
+				$text{'summary_lastlogin_min'} :
+				$text{'summary_lastlogin_mins'});
+		}
+	else {
+		my $seconds = $last->{'ago'}->{'seconds'};
+		$last_login = $seconds . " " .
+			($seconds == 1 ?
+				$text{'summary_lastlogin_sec'} :
+				$text{'summary_lastlogin_secs'});
+		}
+	}
+else {
+	$last_login = &make_date($ts);
+	}
+return $last_login;
 }
 
 $done_virtual_server_lib_funcs = 1;

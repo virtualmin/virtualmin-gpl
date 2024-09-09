@@ -565,7 +565,8 @@ foreach $f (@dom_features) {
 	local $txt = $parentdom ? $text{'form_sub'.$f} : undef;
 	$txt ||= $text{'form_'.$f};
 	push(@grid_order_initial, $f);
-	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1).
+	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1,
+		&feature_check_chained_javascript($f)).
 		    " <b>".&hlink($txt, $f)."</b>");
 	}
 
@@ -589,7 +590,8 @@ foreach $f (@fplugins) {
 	$hlink = &plugin_call($f, "feature_hlink");
 	$label = &hlink($label, $hlink, $f) if ($hlink);
 	push(@grid_order_initial, $f);
-	push(@grid, &ui_checkbox($f, 1, "", !$plugins_inactive{$f}).$label);
+	push(@grid, &ui_checkbox($f, 1, "", !$plugins_inactive{$f},
+		&feature_check_chained_javascript($f)).$label);
 	if (&plugin_call($f, "feature_inputs_show", undef)) {
 		push(@input_plugins, $f);
 		}

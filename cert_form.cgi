@@ -28,6 +28,14 @@ if ($d->{'ssl_same'}) {
 	return;
 	}
 
+# Get ACME providers, if there are any
+my @provs;
+if (defined(&list_acme_providers)) {
+	@provs = grep { &can_acme_provider($_) &&
+			$d->{'letsencrypt_id'} eq $_->{'id'} }
+		      &list_acme_providers();
+	}
+
 # Show tabs
 $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 @tabs = ( [ "current", $text{'cert_tabcurrent'}, $prog."current" ],
@@ -38,8 +46,10 @@ $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 		( ),
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
 	  [ "chain", $text{'cert_tabchain'}, $prog."chain" ],
-	  &can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'}) ?
-		( [ "lets", $text{'cert_tablets'}, $prog."lets" ] ) :
+	  &can_edit_letsencrypt() &&
+	  (@provs || !defined(&list_acme_providers)) &&
+	  (&domain_has_website($d) || $d->{'dns'}) ?
+		( [ "lets", $text{'cert_tabacme'}, $prog."lets" ] ) :
 		( ),
 	);
 print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "current", 1);
@@ -137,19 +147,17 @@ if (&domain_has_ssl_cert($d)) {
 		}
 
 	# Links to download
-	@dlinks = (
-		"<a href='download_cert.cgi/cert.pem?dom=$in{'dom'}'>".
-		"$text{'cert_pem'}</a>",
-		"<a href='download_cert.cgi/cert.p12?dom=$in{'dom'}'>".
-		"$text{'cert_pkcs12'}</a>",
-		);
+	@dlinks = ( &ui_link("download_cert.cgi/cert.pem?dom=$in{'dom'}",
+			     $text{'cert_pem'}),
+		    &ui_link("download_cert.cgi/cert.p12?dom=$in{'dom'}",
+			     $text{'cert_pkcs12'}),
+		  );
 	print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
-	@dlinks = (
-		"<a href='download_key.cgi/key.pem?dom=$in{'dom'}'>".
-		"$text{'cert_pem'}</a>",
-		"<a href='download_key.cgi/key.p12?dom=$in{'dom'}'>".
-		"$text{'cert_pkcs12'}</a>",
-		);
+	@dlinks = ( &ui_link("download_key.cgi/key.pem?dom=$in{'dom'}",
+			     $text{'cert_pem'}),
+		    &ui_link("download_key.cgi/key.p12?dom=$in{'dom'}",
+			     $text{'cert_pkcs12'}),
+		  );
 	print &ui_table_row($text{'cert_kdownload'},
 			    &ui_links_row(\@dlinks), 3);
 
@@ -215,8 +223,8 @@ if (&domain_has_ssl_cert($d)) {
 			&ui_hidden("dom", $in{'dom'}).
 			&ui_hidden("enable", 1));
 		}
-	# Show button to uninstall all per-service
 	else {
+		# Show button to uninstall all per-service
 		print &ui_hr() if (!$ui_hr++);
 		print &ui_buttons_row(
 			"peripcerts.cgi",
@@ -236,6 +244,22 @@ if (&domain_has_ssl_cert($d)) {
 			    &vui_make_and(map { $_->{'desc'} } @gmissing)),
 			&ui_hidden("dom", $in{'dom'}));
 		}
+
+	# Show button to copy to the default location
+	if (!$d->{'ssl_same'} &&
+	    &get_website_ssl_file($d, "key") ne 
+	     &default_certificate_file($d, "key")) {
+		my $defcert_dir = &default_certificate_file($d, "cert");
+		$defcert_dir =~ s|/[^/]+$||;
+		print &ui_hr() if (!$ui_hr++);
+		print &ui_buttons_row(
+			"default_cert.cgi",
+			$text{'cert_defaultpath'},
+			&text('cert_defaultpathdesc',
+			  "<tt>$defcert_dir</tt>"),
+			&ui_hidden("dom", $in{'dom'}));
+		}
+
 	print &ui_buttons_end();
 	}
 else {
@@ -405,7 +429,12 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 	&foreign_require("webmin");
 	$err = &webmin::check_letsencrypt();
 	print &ui_tabs_start_tab("mode", "lets");
-	print "$text{'cert_desc8'}<p>\n";
+	print "$text{'cert_desc9'}\n";
+	if  (defined(&can_acme_providers) && &can_acme_providers()) {
+		print &text('cert_acmelink',
+			    'pro/edit_newacmes.cgi'),"\n";
+		}
+	print "<p>\n";
 
 	if ($err) {
 		print &text('cert_elets', $err),"<p>\n";
@@ -419,7 +448,7 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 		}
 	else {
 		$phd = &public_html_dir($d);
-		print &text('cert_letsdesc', "<tt>$phd</tt>"),"<p>\n";
+		print &text('cert_acmedesc', "<tt>$phd</tt>"),"<p>\n";
 
 		print &ui_form_start("letsencrypt.cgi");
 		print &ui_hidden("dom", $in{'dom'});
@@ -437,18 +466,40 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 				$d->{'letsencrypt_dwild'});
 			}
 		print &ui_table_row($text{'cert_dnamefor'},
-			&ui_radio_table("dname_def", 
-			      $d->{'letsencrypt_dname'} ? 0 : 1,
-			      [ [ 1, $text{'cert_dnamedef'},
-				  join("<br>\n", map { "<tt>$_</tt>" } @defnames), $dis1 ],
-				[ 0, $text{'cert_dnamesel'},
-				  &ui_textarea("dname", join("\n", split(/\s+/, $d->{'letsencrypt_dname'})), 5, 60,
-					       undef, $d->{'letsencrypt_dname'} ? 0 : 1).$wildcb, $dis0 ] ]));
+		    &ui_radio_table("dname_def", 
+		      $d->{'letsencrypt_dname'} ? 0 : 1,
+		      [ [ 1, $text{'cert_dnamedef'},
+			  join("<br>\n", map { "<tt>$_</tt>" } @defnames),
+			  $dis1 ],
+		        [ 0, $text{'cert_dnamesel'},
+			  &ui_textarea("dname",
+			    join("\n", split(/\s+/, $d->{'letsencrypt_dname'})),
+			     5, 60, undef, $d->{'letsencrypt_dname'} ? 0 : 1).
+			  $wildcb, $dis0 ] ]));
+
+		# SSL certificate provider
+		if (defined(&list_acme_providers)) {
+			print &ui_table_row($text{'cert_acmes'},
+				&ui_select("acme", $d->{'letsencrypt_id'},
+					[ map { [ $_->{'id'}, $_->{'desc'} ] }
+					      @provs ]));
+			}
+		else {
+			print &ui_table_row($text{'cert_acmes'},
+				$text{'acme_letsencrypt'});
+			}
 
 		# Setup automatic renewal?
 		print &ui_table_row($text{'cert_letsrenew2'},
 			&ui_yesno_radio("renew",
 					$d->{'letsencrypt_renew'} ? 1 : 0));
+
+		# Renewal email option
+		print &ui_table_row($text{'cert_letsemail'},
+			&ui_radio("email", $d->{'letsencrypt_email'} || 0,
+				  [ [ 0, $text{'yes'} ],
+				    [ 1, $text{'cert_letsemailerr'} ],
+				    [ 2, $text{'no'} ] ]));
 
 		# Test connectivity first?
 		if (defined(&check_domain_connectivity)) {
@@ -458,6 +509,15 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 				    [ 1, $text{'cert_connectivity1'} ],
 				    [ 0, $text{'cert_connectivity0'} ] ]));
 			}
+
+		# Check DNS lookup?
+		print &ui_table_row($text{'cert_dnscheck'},
+			&ui_yesno_radio("dnscheck",
+					!$d->{'letsencrypt_nodnscheck'}));
+
+		# Skip unverifiable hostnames?
+		print &ui_table_row($text{'cert_subset'},
+			&ui_yesno_radio("subset", $d->{'letsencrypt_subset'}));
 
 		# Certificate type, if supported
 		if (&letsencrypt_supports_ec()) {
@@ -502,7 +562,6 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 	}
 
 print &ui_tabs_end(1);
-print "</div>";
 
 # Make sure the left menu is showing this domain
 if (defined(&theme_select_domain)) {

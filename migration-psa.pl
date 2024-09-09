@@ -417,7 +417,6 @@ foreach my $mailuser (@mailusers) {
 		}
 	if (&has_home_quotas()) {
 		local $q = $mailuser->{'login'}->{'quota'};
-		$muinfo->{'qquota'} = $q;
 		$muinfo->{'quota'} = $q / &quota_bsize("home");
 		$muinfo->{'mquota'} = $q / &quota_bsize("home");
 		}

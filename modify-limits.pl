@@ -90,6 +90,9 @@ To restrict the virtual server owner to only installing certain scripts
 a quoted list of script codes. To grant access to all script installers, use
 the C<--all-scripts> flag instead.
 
+To hide the Webmin tab in the UI from the domain owner, use the
+C<-no-cat-webmin> flag. Or to make it visible again, use C<--cat-webmin>.
+
 =cut
 
 package virtual_server;
@@ -227,6 +230,12 @@ while(@ARGV > 0) {
 				  $_->{'id'} eq $shellmode } @shells;
 		$shell || &usage("Unknown or un-supported shell $shellmode");
 		}
+	elsif ($a eq "--no-cat-webmin") {
+		$nocatwebmin = 1;
+		}
+	elsif ($a eq "--cat-webmin") {
+		$nocatwebmin = 0;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -306,6 +315,9 @@ foreach $e (@cannotedit) {
 if (defined($allowedscripts)) {
 	$dom->{'allowedscripts'} = $allowedscripts;
 	}
+if (defined($nocatwebmin)) {
+	$dom->{'webmin_nocat_modules'} = $nocatwebmin;
+	}
 
 # Save domain object
 &set_all_null_print();
@@ -347,6 +359,7 @@ print "                        [--disallow feature]*\n";
 print "                        [--can-edit capability]*\n";
 print "                        [--cannot-edit capability]*\n";
 print "                        [--shell nologin|ftp|ssh]\n";
+print "                        [--no-cat-webmin | --cat-webmin]\n";
 exit(1);
 }
 

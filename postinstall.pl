@@ -26,7 +26,6 @@ if (!@oldplans) {
 # detected IP for DNS records, and cache it.
 if (!$config{'first_version'} && !$config{'dns_ip'}) {
 	$config{'dns_ip'} = '*';
-	&get_external_ip_address();
 	&save_module_config();
 	}
 
@@ -151,30 +150,12 @@ if ($config{'virus'}) {
 $config{'old_defip'} ||= &get_default_ip();
 $config{'old_defip6'} ||= &get_default_ip6();
 
-# Check if we have enough memory to preload
-local $lowmem;
-&foreign_require("proc");
-if (defined(&proc::get_memory_info)) {
-	local ($real) = &proc::get_memory_info();
-	local $arch = &backquote_command("uname -m 2>/dev/null");
-	local $megs = $arch =~ /x86_64/ ? 512 : 384;
-	if ($real*1024 <= $megs*1024*1024) {
-		# Less that 384 M (or 512 M with 64-bit) .. don't preload
-		$lowmem = 1;
-		}
-	}
-if (&running_in_zone() || &running_in_vserver()) {
-	# Assume that zones and vservers don't have a lot of memory
-	$lowmem = 1;
-	}
-
 # Decide whether to preload, and then do it
-if ($config{'preload_mode'} eq '') {
-	$config{'preload_mode'} = !$virtualmin_pro ? 0 :
-				  $lowmem ? 0 : 2;
-	}
 if ($gconfig{'no_virtualmin_preload'}) {
 	$config{'preload_mode'} = 0;
+	}
+elsif ($config{'preload_mode'} eq '') {
+	$config{'preload_mode'} = 2;
 	}
 &save_module_config();
 &update_miniserv_preloads($config{'preload_mode'});
@@ -295,12 +276,6 @@ foreach my $d (&list_domains()) {
 	}
 &release_lock_unix();
 
-# Fix old PHP memory limit default
-if ($config{'php_vars'} =~ /^memory_limit=32M/) {
-	$config{'php_vars'} = "+".$config{'php_vars'};
-	&save_module_config();
-	}
-
 # If the default template uses a PHP or CGI mode that isn't supported, change it
 my $mmap = &php_mode_numbers_map();
 my @supp = &supported_php_modes();
@@ -309,15 +284,29 @@ foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 	my %cannums = map { $mmap->{$_}, 1 } @supp;
 	if ($tmpl->{'web_php_suexec'} ne '' &&
 	    !$cannums{int($tmpl->{'web_php_suexec'})} && @supp) {
-		# Default mode cannot be used .. change to first that can
+		# Default PHP mode cannot be used .. change to first that can
 		my @goodsupp = grep { $_ ne 'none' } @supp;
 		@goodsupp = @supp if (!@goodsupp);
 		$tmpl->{'web_php_suexec'} = $mmap->{$goodsupp[0]};
 		&save_template($tmpl);
 		}
-	if ($tmpl->{'web_cgimode'} &&
-	    &indexof($tmpl->{'web_cgimode'}, @cgimodes) < 0) {
-		$tmpl->{'web_cgimode'} = $cgimodes[0];
+	if (@cgimodes) {
+		if (!$tmpl->{'web_cgimode'}) {
+			# No CGI mode set at all, so use the first one
+			$tmpl->{'web_cgimode'} = $cgimodes[0];
+			&save_template($tmpl);
+			}
+		elsif ($tmpl->{'web_cgimode'} ne 'none' &&
+		       &indexof($tmpl->{'web_cgimode'}, @cgimodes) < 0) {
+			# Default CGI mode cannot be used
+			$tmpl->{'web_cgimode'} = $cgimodes[0];
+			&save_template($tmpl);
+			}
+		}
+	elsif (!$tmpl->{'web_cgimode'}) {
+		# If no CGI nodes are available and no mode was set,
+		# explicity disable CGIs
+		$tmpl->{'web_cgimode'} = 'none';
 		&save_template($tmpl);
 		}
 	}
@@ -380,7 +369,7 @@ foreach my $m ("mysql", "postgresql", "ldap-client", "ldap-server",
 		}
 	}
 
-# Always update outdated (lower than v3.2)
+# Always update outdated (lower than v3.3)
 # Virtualmin default default page
 my $readdir = sub {
     my ($dir) = @_;
@@ -415,9 +404,9 @@ foreach my $d (@doms) {
 				if ($efix == 1 &&
 					$l =~ /\*\s(Virtualmin\sLanding|Website\sDefault\sPage|Virtualmin\s+Default\s+Page)\sv([\d+\.]+)$/) {
 					my $tmplver = $2;
-					$efix++ if ($tmplver && &compare_version_numbers($tmplver, '<=', '3.1'));
+					$efix++ if ($tmplver && &compare_version_numbers($tmplver, '<=', '3.2'));
 					}
-				$efix++ if ($efix == 2 && $l =~ /\*\sCopyright\s+[\d]{4}\sVirtualmin,\sInc\.$/);
+				$efix++ if ($efix == 2 && $l =~ /\*\sCopyright\s+[\d]{4}\sVirtualmin(?:,\s+Inc\.)?$/);
 				$efix++ if ($efix == 3 && $l =~ /\*\sLicensed\sunder\sMIT$/);
 				}
 
@@ -494,10 +483,41 @@ if (!&check_ratelimit() && &is_ratelimit_enabled()) {
 		}
 	}
 
-# Cache the DKIM status
 if (!&check_dkim()) {
+	# Cache the DKIM status
 	my $dkim = &get_dkim_config();
 	$config{'dkim_enabled'} = $dkim && $dkim->{'enabled'} ? 1 : 0;
+
+	if ($dkim) {
+		# Replace the list of excluded DKIM domains with a new field
+		foreach my $e (@{$dkim->{'exclude'}}) {
+			my $d = &get_domain_by("dom", $e);
+			if ($d) {
+				&lock_domain($d);
+				$d->{'dkim_enabled'} = 0;
+				&save_domain($d);
+				&unlock_domain($d);
+				}
+			}
+		delete($config{'dkim_exclude'});
+
+		# Replace the list of extra DKIM domains with a new field, as
+		# long as they are Virtualmin domains
+		my @newextra;
+		foreach my $e (@{$dkim->{'extra'}}) {
+			my $d = &get_domain_by("dom", $e);
+			if ($d) {
+				&lock_domain($d);
+				$d->{'dkim_enabled'} = 1;
+				&save_domain($d);
+				&unlock_domain($d);
+				}
+			else {
+				push(@newextra, $e);
+				}
+			}
+		$config{'dkim_extra'} = join(' ', @newextra);
+		}
 	&save_module_config();
 	}
 
@@ -529,6 +549,21 @@ if (&has_home_quotas()) {
 		my @users = &list_domain_users($d, 1, 1, 0, 1);
 		&update_user_quota_cache($d, \@users, 0);
 		}
+	}
+
+# Try to determine the maximum MariaDB/MySQL username size
+if ($config{'mysql_user_size_auto'} != 1) {
+	&require_mysql();
+	eval {
+		local $main::error_must_die = 1;
+		my @str = &mysql::table_structure($mysql::master_db, "user");
+		my ($ufield) = grep { lc($_->{'field'}) eq 'user' } @str;
+		if ($ufield && $ufield->{'type'} =~ /\((\d+)\)/) {
+			$config{'mysql_user_size'} = $1;
+			}
+		};
+	$config{'mysql_user_size_auto'} = 1;
+	&save_module_config();
 	}
 
 # Create S3 account entries from scheduled backups

@@ -12,6 +12,10 @@ For server types that have multiple versions such as FPM, you can select
 the version to restart with the C<--version> flag. Or use C<--domain> to find
 automatically select the correct version for the given domain.
 
+By default the server will be completely stopped and re-started, but for some
+server types you can request a configuration reload instead with the 
+C<--reload> flag.
+
 =cut
 
 package virtual_server;
@@ -49,6 +53,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--quiet") {
 		$quiet = 1;
+		}
+	elsif ($a eq "--reload") {
+		$reload = 1;
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -94,22 +101,42 @@ if ($sname eq "fpm" && !$ver) {
 
 # Restart the server
 if (!$quiet) {
-	&$first_print("Restarting server $sname".($ver ? " version $ver" : "")." ...");
+	if ($reload) {
+		&$first_print("Reloading server $sname".($ver ? " version $ver" : "")." ...");
+		}
+	else {
+		&$first_print("Restarting server $sname".($ver ? " version $ver" : "")." ...");
+		}
 	}
 if ($found == 1) {
 	# Core server
 	my $startfunc = "start_service_".$sname;
 	my $stopfunc = "stop_service_".$sname;
-	$err = &$stopfunc($ver);
-	if (!$err) {
-		$err = &$startfunc($ver);
+	my $reloadfunc = "reload_service_".$sname;
+	if ($reload && defined(&$reloadfunc)) {
+		# Call reload function
+		$err = &$reloadfunc($ver);
+		}
+	else {
+		# Just call start and stop
+		$err = &$stopfunc($ver);
+		if (!$err) {
+			$err = &$startfunc($ver);
+			}
 		}
 	}
 else {
 	# Plugin server
-	$err = &plugin_call($sname, "feature_stop_service", $ver);
-	if (!$err) {
-		$err = &plugin_call($sname, "feature_start_service", $ver);
+	if ($reload && &plugin_defined($sname, "feature_reload_service")) {
+		# Call reload function
+		$err = &plugin_call($sname, "feature_reload_service", $ver);
+		}
+	else {
+		# Just call start and stop
+		$err = &plugin_call($sname, "feature_stop_service", $ver);
+		if (!$err) {
+			$err = &plugin_call($sname, "feature_start_service", $ver);
+			}
 		}
 	}
 if (!$quiet) {
@@ -133,6 +160,7 @@ print "\n";
 print "virtualmin restart-server --server name\n";
 print "                         [--domain name | --version number]\n";
 print "                         [--quiet]\n";
+print "                         [--reload]\n";
 exit(1);
 }
 

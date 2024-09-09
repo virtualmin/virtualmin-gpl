@@ -125,6 +125,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--real") {
 		$real = shift(@ARGV);
 		}
+	elsif ($a eq "--firstname") {
+		$firstname = shift(@ARGV);
+		&supports_firstname() || &usage("This system does not support setting first names for users");
+		}
+	elsif ($a eq "--surname") {
+		$surname = shift(@ARGV);
+		&supports_firstname() || &usage("This system does not support setting surnames for users");
+		}
 	elsif ($a eq "--quota") {
 		$quota = shift(@ARGV);
 		&has_home_quotas() || &usage("--quota option is not available unless home directory quotas are enabled");
@@ -134,11 +142,6 @@ while(@ARGV > 0) {
 		$mquota = shift(@ARGV);
 		&has_mail_quotas() || &usage("--mail-quota option is not available unless mail directory quotas are enabled");
 		$mquota eq "UNLIMITED" || $mquota =~ /^\d+$/ || &usage("Mail directory quota must be a number of blocks, or UNLIMITED");
-		}
-	elsif ($a eq "--qmail-quota") {
-		$qquota = shift(@ARGV);
-		&has_server_quotas() || &usage("--qmail-quota option is not available unless supported by the mail server");
-		$qquota eq "UNLIMITED" || $qquota =~ /^\d+$/ || &usage("Qmail quota must be a number of blocks, or UNLIMITED");
 		}
 	elsif ($a eq "--add-mysql") {
 		# Adding a MySQL DB to this user's allowed list
@@ -172,7 +175,7 @@ while(@ARGV > 0) {
 		# Removing an extra email address
 		push(@delemails, shift(@ARGV));
 		}
-	elsif ($a eq "--newuser") {
+	elsif ($a eq "--newuser" || $a eq "--new-user") {
 		# Changing the username
 		$newusername = shift(@ARGV);
 		if (!$config{'allow_upper'}) {
@@ -303,7 +306,7 @@ if ($user->{'domainowner'}) {
 	defined($pass) &&
 	  &usage("The --pass and --passfile flags cannot be used when ".
 		 "editing a domain owner");
-	($quota || $mquota || $qquota) &&
+	($quota || $mquota) &&
 	  &usage("Quotas cannot be changed when editing a domain owner");
 	(@adddbs || @deldbs) &&
 	  &usage("Databases cannot be changed when editing a domain owner");
@@ -331,6 +334,12 @@ if (defined($real)) {
 	$real =~ /^[^:]*$/ || &usage("Invalid real name");
 	$user->{'real'} = $real;
 	}
+if (defined($firstname)) {
+	$user->{'firstname'} = $firstname;
+	}
+if (defined($surname)) {
+	$user->{'surname'} = $surname;
+	}
 $pd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 if (defined($quota) && !$user->{'noquota'}) {
 	$user->{'quota'} = $quota eq "UNLIMITED" ? 0 : $quota;
@@ -344,9 +353,6 @@ if (defined($mquota) && !$user->{'noquota'}) {
 	    $mquota <= $pd->{'mquota'}||
 		&usage("User's mail quota cannot be higher than domain's ".
 		       "mail quota of $pd->{'quota'}");
-	}
-if (defined($qquota) && $user->{'mailquota'}) {
-	$user->{'qquota'} = $qquota eq "UNLIMITED" ? 0 : $qquota;
 	}
 @domdbs = &domain_databases($d);
 @newdbs = @{$user->{'dbs'}};
@@ -402,8 +408,8 @@ if (defined($newusername)) {
 	# Generate a new username.. first check for a clash in this domain
 	$newusername eq $shortusername &&
 		&usage("New username is the same as the old");
-	($clash) = grep { &remove_userdom($_->{'user'}, $d) eq $newusername &&
-			  $_->{'unix'} == $user->{'unix'} } @users;
+	($clash) = grep { &remove_userdom($_->{'user'}, $d) eq $newusername
+			} @users;
 	$clash && &usage("A user named $newusername already exists in this ".
 			 "virtual server");
 
@@ -445,8 +451,6 @@ if (defined($newusername)) {
 		}
 	}
 if ($shell) {
-	$user->{'unix'} ||
-		&usage("The shell cannot be changed for non-Unix users");
 	$user->{'shell'} = $shell->{'shell'};
 	}
 if (defined($nospam)) {
@@ -624,14 +628,15 @@ print "                      [--pass \"new-password\" | --passfile password-file
 print "                      [--ssh-pubkey \"key\" | pubkey-file <--ssh-pubkey-id id]\n";
 print "                      [--disable | --enable]\n";
 print "                      [--real real-name]\n";
+if (&supports_firstname()) {
+	print "                      [--firstname first-name]\n";
+	print "                      [--surname surname]\n";
+	}
 if (&has_home_quotas()) {
 	print "                      [--quota quota-in-blocks]\n";
 	}
 if (&has_mail_quotas()) {
 	print "                      [--mail-quota quota-in-blocks]\n";
-	}
-if (&has_server_quotas()) {
-	print "                      [--qmail-quota quota-in-bytes]\n";
 	}
 if ($config{'mysql'}) {
 	print "                      [--add-mysql database]\n";

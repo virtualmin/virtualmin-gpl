@@ -16,8 +16,7 @@ else {
 
 if ($in{'recoverybut'}) {
 	# Redirect to password recovery form
-	&redirect("recovery.cgi?dom=$in{'dom'}&user=$in{'old'}&".
-		  "unix=$in{'unix'}");
+	&redirect("recovery.cgi?dom=$in{'dom'}&user=".&urlize($in{'old'}));
 	return;
 	}
 
@@ -30,11 +29,11 @@ $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
 if (!$in{'new'}) {
 	# Lookup user details
 	($user) = grep { ($_->{'user'} eq $in{'old'} ||
-			  &remove_userdom($_->{'user'}, $d) eq $in{'old'}) &&
-			 $_->{'unix'} == $in{'unix'} } @users;
+			  &remove_userdom($_->{'user'}, $d) eq $in{'old'})
+		       } @users;
 	$user || &error("User does not exist!");
 	%old = %$user;
-	$mailbox = $d && $d->{'user'} eq $user->{'user'} && $user->{'unix'};
+	$mailbox = $d && $d->{'user'} eq $user->{'user'};
 	$user->{'olduser'} = $user->{'user'};
 	}
 else {
@@ -118,7 +117,6 @@ elsif ($in{'delete'}) {
 		print &ui_form_start("save_user.cgi");
 		print &ui_hidden("dom", $in{'dom'});
 		print &ui_hidden("old", $in{'old'});
-		print &ui_hidden("unix", $in{'unix'});
 		print &ui_hidden("delete", 1);
 
 		# Count up home directory size
@@ -181,11 +179,17 @@ else {
 		$olderr = $in{'new'} ? undef
 				     : &valid_mailbox_name($user->{'user'});
 		&error($err) if ($err && !$olderr);
-		if ($user->{'person'}) {
-			$in{'real'} =~ /^[^:\r\n]*$/ ||
-				&error($text{'user_ereal'});
-			$user->{'real'} = $in{'real'};
+		if (&supports_firstname()) {
+			$in{'firstname'} =~ /^[^:\r\n]*$/ ||
+				&error($text{'user_efirstname'});
+			$user->{'firstname'} = $in{'firstname'};
+			$in{'surname'} =~ /^[^:\r\n]*$/ ||
+				&error($text{'user_esurname'});
+			$user->{'surname'} = $in{'surname'};
 			}
+		$in{'real'} =~ /^[^:\r\n]*$/ ||
+			&error($text{'user_ereal'});
+		$user->{'real'} = $in{'real'};
 		if (!$in{'new'} && $in{'mailpass_def'}) {
 			# Password not being changed
 			$user->{'passmode'} = 4;
@@ -204,18 +208,7 @@ else {
 			# Disable account if requested
 			&set_pass_disable($user, $in{'disable'});
 			}
-		if ($user->{'mailquota'}) {
-			# Check and save qmail quota
-			if (!$in{'qquota_def'}) {
-				$in{'qquota'} =~ /^\d+$/ ||
-					&error($text{'user_eqquota'});
-				$user->{'qquota'} = $in{'qquota'};
-				}
-			else {
-				$user->{'qquota'} = 0;
-				}
-			}
-		if ($user->{'unix'} && !$user->{'noquota'}) {
+		if (!$user->{'noquota'}) {
 			# Check and save quota inputs
 			$qedit = &can_mailbox_quota();
 			@defmquota = split (/ /, $tmpl->{'defmquota'});
@@ -411,7 +404,7 @@ else {
 	$emailmailbox = 0;
 	if ($in{'new'}) {
 		# Set new user parameters
-		if ($user->{'unix'} && !$user->{'webowner'}) {
+		if (!$user->{'webowner'}) {
 			# UID needs to be unique
 			$user->{'uid'} = &allocate_uid(\%taken);
 			}
@@ -423,23 +416,20 @@ else {
 				      getgrnam($config{'localgroup'});
 
 		# Check for clash within this domain
-		($clash) = grep { $_->{'user'} eq $in{'mailuser'} &&
-			  	  $_->{'unix'} == $user->{'unix'} } @users;
+		($clash) = grep { $_->{'user'} eq $in{'mailuser'} } @users;
 		$clash && &error($text{'user_eclash2'});
 
-		if ($user->{'unix'}) {
-			if (&can_mailbox_ftp()) {
-				# Shell can be set to one that's allowed for FTP
-				&check_available_shell($in{'shell'}, 'mailbox')
-					|| &error($text{'user_eshell'});
-				$user->{'shell'} = $in{'shell'};
-				}
-			else {
-				# If the shell cannot be edited, always use
-				# the default.
-				$user->{'shell'} =
-					&default_available_shell('mailbox');
-				}
+		if (&can_mailbox_ftp()) {
+			# Shell can be set to one that's allowed for FTP
+			&check_available_shell($in{'shell'}, 'mailbox')
+				|| &error($text{'user_eshell'});
+			$user->{'shell'} = $in{'shell'};
+			}
+		else {
+			# If the shell cannot be edited, always use
+			# the default.
+			$user->{'shell'} =
+				&default_available_shell('mailbox');
 			}
 		if (!$user->{'fixedhome'} && !$user->{'brokenhome'}) {
 			$user->{'home'} = $home;
@@ -463,7 +453,7 @@ else {
 			$user->{'user'} = $in{'mailuser'};
 			}
 
-		if ($d && $user->{'unix'}) {
+		if ($d) {
 			# Check for a Unix clash
 			$mclash = &check_clash($in{'mailuser'}, $d->{'dom'});
 			if ($utaken{$user->{'user'}} ||
@@ -482,8 +472,7 @@ else {
 			}
 
 		# Check if the name is too long
-		if ($user->{'unix'} &&
-		    ($lerr = &too_long($user->{'user'}))) {
+		if ($lerr = &too_long($user->{'user'})) {
 			&error($lerr);
 			}
 
@@ -637,8 +626,7 @@ else {
 			if ($in{'mailuser'} ne $in{'oldpop3'}) {
 				# Check for a clash in this domain
 				($clash) = grep {
-				  $_->{'user'} eq $in{'mailuser'} &&
-				  $_->{'unix'} == $user->{'unix'} } @users;
+				  $_->{'user'} eq $in{'mailuser'} } @users;
 				$clash && &error($text{'user_eclash2'});
 
 				# Has been renamed .. check for a username clash

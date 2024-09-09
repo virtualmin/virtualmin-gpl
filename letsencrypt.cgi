@@ -38,6 +38,10 @@ if ($in{'only'}) {
 	$d->{'letsencrypt_dname'} = $custom_dname;
 	$d->{'letsencrypt_dwild'} = $in{'dwild'};
 	$d->{'letsencrypt_renew'} = $in{'renew'};
+	$d->{'letsencrypt_nodnscheck'} = !$in{'dnscheck'};
+	$d->{'letsencrypt_subset'} = $in{'subset'};
+	$d->{'letsencrypt_email'} = $in{'email'};
+	$d->{'letsencrypt_id'} = $in{'acme'} if (defined($in{'acme'}));
 	&save_domain($d);
 	&redirect("cert_form.cgi?dom=$d->{'id'}");
 	}
@@ -102,26 +106,72 @@ else {
 
 		}
 
+	# Filter down hostnames to those that can be resolved
+	if ($in{'dnscheck'}) {
+		&$first_print($text{'letsencrypt_dnscheck'});
+		my @badnames;
+		my $fok = &filter_external_dns(\@dnames, \@badnames);
+		if ($fok < 0) {
+			&$second_print($text{'letsencrypt_ednscheck'});
+			}
+		elsif ($fok) {
+			&$second_print($text{'letsencrypt_dnscheckok'});
+			}
+		elsif (!@dnames) {
+			&$second_print($text{'letsencrypt_dnscheckall'});
+			goto FAILED;
+			}
+		else {
+			&$second_print(&text('letsencrypt_dnscheckbad',
+				join(', ', map { "<tt>$_</tt>" } @badnames)));
+			}
+		}
+
 	# Run the before command
 	&set_domain_envs($d, "SSL_DOMAIN");
 	$merr = &making_changes();
 	&reset_domain_envs($d);
 	&error(&text('setup_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
-	&$first_print(&text('letsencrypt_doing2',
-			    join(", ", map { "<tt>$_</tt>" } @dnames)));
+	$dlist = join(", ", map { "<tt>$_</tt>" } @dnames);
+	if (defined($in{'acme'})) {
+		($acme) = grep { $_->{'id'} eq $in{'acme'} }
+			       &list_acme_providers();
+		$acme || &error($text{'letsencrypt_eacme'});
+		&can_acme_provider($acme) ||
+			&error($text{'letsencrypt_eacme2'});
+		if ($acme->{'type'}) {
+			($prov) = grep { $_->{'id'} eq $acme->{'type'} }
+				       &list_known_acme_providers();
+			}
+		&$first_print(&text('letsencrypt_doing2a', $dlist,
+				    $prov ? $prov->{'desc'} : $acme->{'desc'}));
+		}
+	else {
+		&$first_print(&text('letsencrypt_doing2', $dlist));
+		}
 	&foreign_require("webmin");
 	$phd = &public_html_dir($d);
 	$before = &before_letsencrypt_website($d);
 	($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 					$d, \@dnames, 0, undef, undef,
-					$in{'ctype'});
+					$in{'ctype'}, $acme, $in{'subset'});
 	&after_letsencrypt_website($d, $before);
 	if (!$ok) {
+		# Always store last Certbot error
+		&lock_domain($d);
+		$d->{'letsencrypt_last_failure'} = time();
+		$d->{'letsencrypt_last_err'} = $cert;
+		$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
+		&save_domain($d);
+		&unlock_domain($d);
 		&$second_print(&text('letsencrypt_failed', $cert));
 		}
 	else {
-		&$second_print($text{'letsencrypt_done'});
+		$info = &cert_file_info($cert);
+		&$second_print(&text('letsencrypt_done2',
+			join(", ", map { "<tt>$_</tt>" }
+			     &unique($info->{'cn'}, @{$info->{'alt'}}))));
 
 		# Figure out which services (webmin, postfix, etc)
 		# were using the old cert
@@ -139,11 +189,19 @@ else {
 		$d->{'letsencrypt_ctype'} = $in{'ctype'} =~ /^ec/ ? "ecdsa" : "rsa";
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_success'} = time();
+		$d->{'letsencrypt_nodnscheck'} = !$in{'dnscheck'};
+		$d->{'letsencrypt_subset'} = $in{'subset'};
+		$d->{'letsencrypt_email'} = $in{'email'};
+		$d->{'letsencrypt_id'} = $acme->{'id'} if ($acme);
+		delete($d->{'letsencrypt_last_err'});
 		&refresh_ssl_cert_expiry($d);
 		&save_domain($d);
+		&$second_print($text{'setup_done'});
 
 		# Update other services using the cert
+		&$first_print($text{'cert_updatesvcs'});
 		&update_all_domain_service_ssl_certs($d, \@beforecerts);
+		&$second_print($text{'setup_done'});
 
 		# For domains that were using the SSL cert on this domain
 		# originally but can no longer due to the cert hostname
@@ -169,7 +227,6 @@ else {
 			}
 
 		&release_lock_ssl($d);
-		&$second_print($text{'setup_done'});
 
 		# Run the after command
 		&set_domain_envs($d, "SSL_DOMAIN");
@@ -182,6 +239,7 @@ else {
 		&webmin_log("letsencrypt", "domain", $d->{'dom'}, $d);
 		}
 
+	FAILED:
 	&ui_print_footer("cert_form.cgi?dom=$in{'dom'}", $text{'cert_return'},
 		&domain_footer_link($d),
 			 "", $text{'index_return'});

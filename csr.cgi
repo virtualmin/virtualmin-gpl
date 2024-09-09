@@ -104,8 +104,8 @@ else {
 
 	&$first_print($text{'csr_selfing'});
 	&obtain_lock_ssl($d);
-	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 	$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
+	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 	@beforecerts = &get_all_domain_service_ssl_certs($d);
 	$err = &generate_self_signed_cert(
 				   $d->{'ssl_cert'}, $d->{'ssl_key'},

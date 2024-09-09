@@ -169,6 +169,7 @@ local $rv = { 'name' => $name,
 	      'realversion_func' => "script_${name}_realversion",
 	      'can_upgrade_func' => "script_${name}_can_upgrade",
 	      'stop_func' => "script_${name}_stop",
+	      'bootup_func' => "script_${name}_bootup",
 	      'stop_server_func' => "script_${name}_stop_server",
 	      'start_server_func' => "script_${name}_start_server",
 	      'status_server_func' => "script_${name}_status_server",
@@ -274,6 +275,7 @@ sub add_domain_script
 {
 local ($d, $name, $version, $opts, $desc, $url, $user, $pass, $partial) = @_;
 $main::add_domain_script_count++;
+$partial =~ s/\n/ /g if ($partial);
 local %info = ( 'id' => time().$$.$main::add_domain_script_count,
 		'name' => $name,
 		'version' => $version,
@@ -312,6 +314,7 @@ foreach my $k (keys %$sinfo) {
 		$info{$k} = $sinfo->{$k};
 		}
 	}
+delete($sinfo->{'opts'});
 &write_file("$script_log_directory/$d->{'id'}/$sinfo->{'id'}.script", \%info);
 }
 
@@ -382,6 +385,7 @@ local %serial;
 local $cb = $nocallback ? undef : \&progress_callback;
 local @files = &{$script->{'files_func'}}($d, $ver, $opts, $sinfo);
 foreach my $f (@files) {
+	next if ($f->{'nodownload'});
 	if (-r "$script->{'dir'}/$f->{'file'}") {
 		# Included in script's directory
 		$gotfiles->{$f->{'name'}} = "$script->{'dir'}/$f->{'file'}";
@@ -495,7 +499,14 @@ foreach my $f (@files) {
 			$firsterror = undef;
 			last;
 			}
-		return $firsterror if ($firsterror);
+		if ($firsterror) {
+			if (defined(&clear_http_cache)) {
+				foreach my $url (@urls) {
+					&clear_http_cache($url);
+					}
+				}
+			return $firsterror;
+			}
 
 		$gotfiles->{$f->{'name'}} = $temp;
 		}
@@ -859,169 +870,6 @@ foreach my $script (@domain_scripts) {
 &$second_print($text{"setup_done"}) if ($printed_type);
 }
 
-# setup_web_for_php(&domain, &script, php-version)
-# Update a virtual server's web config to add any PHP settings from the template
-sub setup_web_for_php
-{
-local ($d, $script, $phpver) = @_;
-local $tmpl = &get_template($d->{'template'});
-local $any = 0;
-local $varstr = &substitute_domain_template($tmpl->{'php_vars'}, $d);
-local @tmplphpvars = $varstr eq 'none' ? ( ) : split(/\t+/, $varstr);
-local $p = &domain_has_website($d);
-
-if ($p eq "web" && &get_apache_mod_php_version()) {
-	# Add the PHP variables to the domain's <Virtualhost> in Apache config
-	&require_apache();
-	local $conf = &apache::get_config();
-	local @ports;
-	push(@ports, $d->{'web_port'}) if ($d->{'web'});
-	push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
-	foreach my $port (@ports) {
-		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
-		next if (!$virt);
-
-		# Find currently set PHP variables
-		local @phpv = &apache::find_directive("php_value", $vconf);
-		local %got;
-		foreach my $p (@phpv) {
-			if ($p =~ /^(\S+)/) {
-				$got{$1}++;
-				}
-			}
-
-		# Get PHP variables from template
-		local @oldphpv = @phpv;
-		local $changed;
-		foreach my $pv (@tmplphpvars) {
-			local ($n, $v) = split(/=/, $pv, 2);
-			local $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
-			if (!$got{$n}) {
-				push(@phpv, "$n $v");
-				$changed++;
-				}
-			}
-		if ($script && defined(&{$script->{'php_vars_func'}})) {
-			# Get from script too
-			foreach my $v (&{$script->{'php_vars_func'}}($d)) {
-				if (!$got{$v->[0]}) {
-					if ($v->[1] =~ /\s/) {
-						push(@phpv,
-						     "$v->[0] \"$v->[1]\"");
-						}
-					else {
-						push(@phpv, "$v->[0] $v->[1]");
-						}
-					$changed++;
-					}
-				}
-			}
-
-		# Update if needed
-		if ($changed) {
-			&apache::save_directive("php_value",
-						\@phpv, $vconf, $conf);
-			$any++;
-			}
-		&flush_file_lines();
-		}
-	}
-
-# Find PHP variables from template and from script
-local @todo;
-foreach my $pv (@tmplphpvars) {
-	local ($n, $v) = split(/=/, $pv, 2);
-	local $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
-	push(@todo, [ $n, $v, $diff ]);
-	}
-if ($script && defined(&{$script->{'php_vars_func'}})) {
-	push(@todo, &{$script->{'php_vars_func'}}($d));
-	}
-
-# Always set the session.save_path to ~/tmp, as on some systems
-# it is set by default to a directory only writable by Apache
-push(@todo, [ 'session.save_path', &create_server_tmp($d) ]);
-
-# Magic quotes directive not supported in PHP 5.4
-local $realver = &get_php_version($phpver, $d);
-if ($realver >= 5.4) {
-	@todo = grep { $_->[0] ne "magic_quotes_gpc" } @todo;
-	}
-
-local $phpini = &get_domain_php_ini($d, $phpver);
-if (-r $phpini && &foreign_check("phpini")) {
-	# Add the variables to the domain's php.ini file. Start by finding
-	# the variables already set, including those that are commented out.
-	&foreign_require("phpini");
-	local $conf = &phpini::get_config($phpini);
-	local $anyini;
-
-	# Make any needed changes. Variables can be either forced to a
-	# particular value, or have maximums or minumums
-	foreach my $t (@todo) {
-		local ($n, $v, $diff) = @$t;
-		local $ov = &phpini::find_value($n, $conf);
-		local $change = $diff eq '' && $ov ne $v ||
-				$diff eq '+' && &php_value_diff($ov, $v) < 0 ||
-				$diff eq '-' && &php_value_diff($ov, $v) > 0;
-		if ($change) {
-			&phpini::save_directive($conf, $n, $v);
-			if ($n eq "max_execution_time" &&
-			    $config{'fcgid_max'} eq "") {
-				&set_fcgid_max_execution_time($d, $v);
-				}
-			$any++;
-			$anyini++;
-			}
-		}
-
-	if ($anyini) {
-		&write_as_domain_user($d, sub { &flush_file_lines($phpini) });
-		local $p = &domain_has_website($d);
-		if ($p ne "web") {
-			&plugin_call($p, "feature_restart_web_php", $d);
-			}
-		}
-	}
-
-my $mode = &get_domain_php_mode($d);
-if ($mode eq "fpm") {
-	# Update PHP ini values in FPM config file as well
-	foreach my $t (@todo) {
-		local ($n, $v, $diff) = @$t;
-		local $ov = &get_php_fpm_ini_value($d, $n);
-		local $change = $diff eq '' && $ov ne $v ||
-				$diff eq '+' && &php_value_diff($ov, $v) < 0 ||
-				$diff eq '-' && &php_value_diff($ov, $v) > 0;
-		if ($change) {
-			&save_php_fpm_ini_value($d, $n, $v, 1);
-			}
-		}
-	}
-
-# Call web plugin specific variable function
-if ($p && $p ne "web") {
-	&plugin_call($p, "feature_setup_web_for_php", $d, $script, $phpver);
-	}
-
-return $any;
-}
-
-# php_value_diff(value1, value2)
-# Compares two values like 32 and 64 or 8M and 32M. Returns -1 if v1 is < v2,
-# +1 if v1 > v2, or 0 if same
-sub php_value_diff
-{
-local ($v1, $v2) = @_;
-$v1 = $v1 =~ /^(\d+)k/i ? $1*1024 :
-      $v1 =~ /^(\d+)M/i ? $1*1024*1024 :
-      $v1 =~ /^(\d+)G/i ? $1*1024*1024*1024 : $v1;
-$v2 = $v2 =~ /^(\d+)k/i ? $1*1024 :
-      $v2 =~ /^(\d+)M/i ? $1*1024*1024 :
-      $v2 =~ /^(\d+)G/i ? $1*1024*1024*1024 : $v2;
-return $v1 <=> $v2;
-}
-
 # check_pear_module(mod, [php-version], [&domain])
 # Returns 1 if some PHP Pear module is installed, 0 if not, or -1 if pear is
 # missing.
@@ -1257,10 +1105,10 @@ if (defined(&$optmodfunc)) {
 
 my $installing;
 foreach my $m (@mods) {
+	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	if ($phpver >= 7 && $m eq "mysql") {
-		# PHP 7 only supports mysqli, but that's OK because most scripts
-		# can use it
-		$m = "mysqli";
+		# PHP actual package name is mysqlnd on all systems
+		$m = "mysqlnd";
 		}
 	# Module name can never contain `pecl-`, unlike package name!
 	my $mphp = $m;
@@ -1270,7 +1118,6 @@ foreach my $m (@mods) {
 		&$first_print($text{'scripts_install_phpmods_check'});
 		&$indent_print();
 		}
-	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	&$first_print(&text($opt ? 'scripts_optmod' : 'scripts_needmod',
 			    "<tt>$m</tt>"));
 
@@ -2999,8 +2846,9 @@ local ($d, $script, $ver, $phpver, $opts) = @_;
 &setup_python_modules($d, $script, $ver, $opts) || return 0;
 &setup_noproxy_path($d, $script, $ver, $opts) || return 0;
 
-# Setup PHP variables
-if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+# Setup PHP variables, if the script has any
+if (&indexof("php", @{$script->{'uses'}}) >= 0 &&
+    defined(&{$script->{'php_vars_func'}})) {
 	&$first_print($text{'scripts_apache'});
 	if (&setup_web_for_php($d, $script, $phpver)) {
 		&$second_print($text{'setup_done'});
@@ -3166,8 +3014,7 @@ push(@rv, map { &text('scripts_icommand', "<tt>$_</tt>") }
 
 # Check for webserver CGI or PHP support
 local $p = &domain_has_website($d);
-local @cancgi = &has_cgi_support($d);
-if (&indexof("cgi", @{$script->{'uses'}}) >= 0 && !@cancgi) {
+if (&indexof("cgi", @{$script->{'uses'}}) >= 0 && !&get_domain_cgi_mode($d)) {
 	return $text{'scripts_inocgi'};
 	}
 if ($p ne "web" && &indexof("apache", @{$script->{'uses'}}) >= 0) {
@@ -3506,15 +3353,23 @@ my ($ver) = @_;
 my $basever = substr($ver, 0, 1);
 my @opts = ( $config{'python_cmd'} );
 if (!$basever || $basever == 3) {
-	push(@opts, "python3", "python30",
+	push(@opts, "/etc/alternatives/python3",
+		    "python3.14", "python314",
+		    "python3.13", "python313",
+		    "python3.12", "python312",
+		    "python3.11", "python311",
+		    "python3.10", "python310",
 		    "python3.9", "python39",
 		    "python3.8", "python38",
 		    "python3.7", "python37",
-		    "python3.6", "python36");
+		    "python3.6", "python36",
+		    "python3", "python30");
 	}
 if (!$basever || $basever == 2) {
-	push(@opts, "python2.7", "python27",
-		    "python2.6", "python26");
+	push(@opts, "/etc/alternatives/python2",
+		    "python2.7", "python27",
+		    "python2.6", "python26",
+		    "python2", "python20");
 	}
 push(@opts, "python");
 foreach my $o (@opts) {

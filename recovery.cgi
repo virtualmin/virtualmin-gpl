@@ -11,8 +11,7 @@ $d = &get_domain($in{'dom'});
 # Get the user
 @users = &list_domain_users($d);
 ($user) = grep { ($_->{'user'} eq $in{'user'} ||
-		  &remove_userdom($_->{'user'}, $d) eq $in{'user'}) &&
-		 $_->{'unix'} == $in{'unix'} } @users;
+		  &remove_userdom($_->{'user'}, $d) eq $in{'user'}) } @users;
 $user || &error("User does not exist!");
 
 &ui_print_header(&domain_in($d), $text{'recovery_title'}, "");
@@ -65,7 +64,6 @@ else {
 		      "<tt>".&html_escape($user->{'user'})."</tt>",
 		      "<tt>".&html_escape($user->{'recovery'})."</tt>"),
 		[ [ "user", $in{'user'} ],
-		  [ "unix", $in{'unix'} ],
 		  [ "dom", $in{'dom'} ] ],
 		[ [ "confirm", $text{'recovery_send'} ] ],
 		);

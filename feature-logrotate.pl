@@ -27,7 +27,7 @@ my ($d) = @_;
 my $tmpl = &get_template($d->{'template'});
 
 # Work out the log files we are rotating
-my @logs = &get_all_domain_logs($d);
+my @logs = &get_all_domain_logs($d, 0);
 my @tmpllogs = &get_domain_template_logs($d);
 if (@logs) {
 	# If in single config mode, check if there is a block for Virtualmin
@@ -73,21 +73,21 @@ if (@logs) {
 			$tmpl->{'logrotate_shared'} eq 'yes' ?
 			    'virtualmin' : $d->{'dom'});
 		my $lconf = { 'file' => $file,
-				 'name' => \@logs };
+			      'name' => \@logs };
 		my $newfile = !-r $lconf->{'file'};
 		if ($tmpl->{'logrotate'} eq 'none') {
 			# Use automatic configuration
 			my $script = &get_postrotate_script($d);
 			$lconf->{'members'} = [
-					{ 'name' => 'rotate',
-					  'value' => $config{'logrotate_num'} || 5 },
-					{ 'name' => 'weekly' },
-					{ 'name' => 'compress' },
-					{ 'name' => 'postrotate',
-					  'script' => $script },
-					{ 'name' => 'sharedscripts' },
-					{ 'name' => 'missingok' },
-					];
+				{ 'name' => 'rotate',
+				  'value' => $config{'logrotate_num'} || 5 },
+				{ 'name' => 'weekly' },
+				{ 'name' => 'compress' },
+				{ 'name' => 'postrotate',
+				  'script' => $script },
+				{ 'name' => 'sharedscripts' },
+				{ 'name' => 'missingok' },
+				];
 			}
 		else {
 			# Use manually defined directives
@@ -253,7 +253,7 @@ my $lconf = &get_logrotate_section($d);
 my $parent = &logrotate::get_config_parent();
 if ($lconf) {
 	# Check if all log files in the section are related to the domain
-	my %logs = map { $_, 1 } &get_all_domain_logs($d);
+	my %logs = map { $_, 1 } &get_all_domain_logs($d, 1);
 	my @leftover = grep { !$logs{$_} } @{$lconf->{'name'}};
 	if (@leftover) {
 		# Just remove some log files, but leave the block
@@ -627,7 +627,8 @@ if ($mode eq "fpm" && $d->{'php_error_log'}) {
 	# Also needs to restart the FPM server
 	my $conf = &get_php_fpm_config($d);
 	if ($conf && $conf->{'init'}) {
-		$fpmcmd = "virtualmin restart-server --server fpm --domain $d->{'id'} --quiet";
+		$fpmcmd = "virtualmin restart-server --server fpm --domain $d->{'id'} ".
+			  "--quiet --reload";
 		}
 	}
 if ($p eq 'web') {
@@ -652,21 +653,24 @@ else {
 return $script;
 }
 
-# get_all_domain_logs(&domain)
+# get_all_domain_logs(&domain, [include-template])
 # Returns all logs that should be rotated for a domain
 sub get_all_domain_logs
 {
-my ($d) = @_;
+my ($d, $tmpl) = @_;
 my $alog = &get_website_log($d, 0);
 my $elog = &get_website_log($d, 1);
 my @logs = ( $alog, $elog );
 if ($d->{'ftp'}) {
 	push(@logs, &get_proftpd_log($d));
 	}
-push(@logs, &get_domain_template_logs($d));
-push(@logs, &get_apache_template_log($d, 0));
-push(@logs, &get_apache_template_log($d, 1));
 push(@logs, $d->{'php_error_log'} || &get_domain_php_error_log($d));
+if ($tmpl) {
+	push(@logs, &get_domain_template_logs($d));
+	push(@logs, &get_apache_template_log($d, 0));
+	push(@logs, &get_apache_template_log($d, 1));
+	push(@logs, &get_default_php_error_log($d));
+	}
 return &unique(grep { $_ } @logs);
 }
 

@@ -1,1 +1,2 @@
-<header>PHP服务最大子进程数</header>此选项设置将服务的同时请求数的限制，当此域的 PHP 脚本设置为通过 FPM 运行时，当<tt>pm</tt>选项设置为<tt>static</tt>时将创建子进程数和最大子进程数当<tt>pm</tt>选项设置为<tt>dynamic</tt>时可能会创建。最大子进程数不能低于<tt>pm.max_spare_servers</tt> ，默认为 5。<p>当此域的 PHP 脚本设置为通过 FCGId 运行时，应始终禁用 PHP 子进程管理，这一次只会将一个请求路由到它产生的应用程序进程。默认情况下，使用环境变量设置<tt>PHP_FCGI_CHILDREN=0</tt> ，PHP 子进程管理被禁用。<p><footer>
+<header>PHP 服务最大子进程数</header>此选项设置将同时提供的请求数的限制，当此域设置的 PHP 脚本通过 FPM 运行时，当<tt>pm</tt>选项设置为<tt>static</tt>时将创建子进程数，而当<tt>pm</tt>选项设置为<tt>dynamic.</tt><p>当此域的 PHP 脚本设置为通过 FCGI 运行时，应始终禁用 PHP 子进程管理，这将每次仅将一个请求路由到它生成的应用程序进程。默认情况下，通过环境变量设置<tt>PHP_FCGI_CHILDREN=0</tt> ，PHP 子进程管理被禁用。<p><footer>
+

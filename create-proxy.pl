@@ -62,6 +62,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-proxy") {
 		$none = 1;
 		}
+	elsif ($a eq "--websockets") {
+		$websockets = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -82,13 +85,15 @@ $has || &usage("Proxies cannot be configured for this virtual server");
 $has == 2 || $none || @urls == 1 || &usage("Multiple URL proxy balancers cannot be configured for this virtual server");
 !$none || &has_proxy_none($d) ||
 	&usage("Paths that do not proxy cannot be configured on this system");
+$none && $websockets &&
+	&usage("The --none and --websockets flags are incompatible");
 
 # Work out balancer name, if needed
 if ($has == 1) {
 	$balancer && &usage("No balancer name is needed for virtual servers ".
 			    "that only support a single URL");
 	}
-elsif (!$balancer) {
+elsif (!$balancer && @urls > 1) {
 	$path =~ /^\/(\S*)$/;
 	$balancer = $1 || "root";
 	}
@@ -107,6 +112,7 @@ if ($balancer) {
 $b = { 'path' => $path,
        'balancer' => $balancer,
        'none' => $none,
+       'websockets' => $websockets,
        'urls' => \@urls };
 $err = &create_proxy_balancer($d, $b);
 &release_lock_web($d);
@@ -136,6 +142,7 @@ else {
 	print "                        --url destination\n";
 	}
 print "                        --no-proxy\n";
+print "                       [--websockets]\n";
 exit(1);
 }
 

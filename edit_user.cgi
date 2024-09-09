@@ -66,7 +66,7 @@ if ($user_type eq 'ssh') {
 				2, \@tds);
 
 	# SSH public key for Unix user
-	if (&proshow() && $user->{'unix'}) {
+	if (&proshow()) {
 		print &ui_table_row(
 			&hlink($text{'form_sshkey'}, "sshkeynogen"),
 			&inline_html_pro_tip(
@@ -79,32 +79,25 @@ if ($user_type eq 'ssh') {
 					undef, &procell() || \@tds);
 		}
 
-	# Real name - only for true Unix users or LDAP persons
-	if ($user->{'person'}) {
-		print &ui_table_row(
-			&hlink($text{'user_real'}, "realname"),
-			&vui_noauto_textbox("real", $user->{'real'}, 40),
-			2, \@tds);
-		}
+	# Real name components
+	&show_real_name_fields($user, 1);
 
 	# Show SSH shell select if more than one available
 	my @ssh_shells = &list_available_shells_by_type('owner', 'ssh');
-	my $ssh_shell = $ssh_shells[0]->{'shell'};
 	if (scalar(@ssh_shells) == 1) {
-		print &ui_hidden("shell", $ssh_shell);
+		print &ui_hidden("shell", $ssh_shells[0]->{'shell'});
 		}
 	else {
 		print &ui_table_row(
 			&hlink($text{'user_ushell'}, "ushell"),
 			&available_shells_menu(
-				"shell", $ssh_shell || $user->{'shell'},
-				"owner", 0),
+				"shell", &get_user_shell($user), "owner"),
 			2, \@tds);
 		}
 
 	# Show secondary groups
 	my @sgroups = &allowed_secondary_groups($d);
-	if (@sgroups && $user->{'unix'}) {
+	if (@sgroups) {
 		print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
 				&ui_select("groups", $user->{'secs'},
 					[ map { [ $_ ] } @sgroups ], 5, 1, 1),
@@ -114,7 +107,7 @@ if ($user_type eq 'ssh') {
 	print &ui_hidden_table_end();
 
 	# Quota and home directory related fields
-	my $showquota = $user->{'unix'} && !$user->{'noquota'};
+	my $showquota = !$user->{'noquota'};
 	my $showhome = &can_mailbox_home($user) && $d && $d->{'home'} &&
 		!$user->{'fixedhome'};
 
@@ -220,17 +213,12 @@ elsif ($user_type eq 'ftp') {
 				$pwfield,
 				2, \@tds);
 
-	# Real name - only for true Unix users or LDAP persons
-	if ($user->{'person'}) {
-		print &ui_table_row(
-			&hlink($text{'user_real'}, "realname"),
-			&vui_noauto_textbox("real", $user->{'real'}, 40),
-			2, \@tds);
-		}
+	# Real name components
+	&show_real_name_fields($user, 1);
 
 	# Show secondary groups
 	my @sgroups = &allowed_secondary_groups($d);
-	if (@sgroups && $user->{'unix'}) {
+	if (@sgroups) {
 		print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
 				&ui_select("groups", $user->{'secs'},
 					[ map { [ $_ ] } @sgroups ], 5, 1, 1),
@@ -279,18 +267,9 @@ elsif ($user_type eq 'mail') {
 
 	# Print quota hidden defaults as
 	# it has to be always considered
-	my $showmailquota = $user->{'mailquota'};
-	my $showquota = $user->{'unix'} && !$user->{'noquota'};
+	my $showquota = !$user->{'noquota'};
 	my $showhome = &can_mailbox_home($user) && $d && $d->{'home'} &&
 		       !$user->{'fixedhome'};
-	if ($showmailquota) {
-		my $qquota_default = $user->{'qquota'} ne "none" &&
-				     $user->{'qquota'} ? 0 : 1;
-		my $qquota = &ui_hidden("qquota_def", $qquota_default);
-		$qquota .= &ui_hidden("qquota", $user->{'qquota'})
-			if (!$qquota_default);
-		print $qquota;
-		}
 	if ($showquota) {
 		if (&has_home_quotas()) {
 			my $quota_data = &quota_field(
@@ -337,13 +316,8 @@ elsif ($user_type eq 'mail') {
 				$text{'user_norecovery'},
 				$text{'user_gotrecovery'}));
 
-	# Real name - only for true Unix users or LDAP persons
-	if ($user->{'person'}) {
-		print &ui_table_row(
-			&hlink($text{'user_real'}, "realname"),
-			&vui_noauto_textbox("real", $user->{'real'}, 40),
-			2, \@tds);
-		}
+	# Real name components
+	&show_real_name_fields($user, 1);
 
 	print &ui_hidden_table_end();
 
@@ -637,7 +611,7 @@ elsif ($user_type eq 'web') {
 	$form_end = $htpasswd_data ? 1 : 0;
 	}
 else {
-	# Regular create user form
+	# Regular create or edit user form
 	if ($in{'new'}) {
 		&ui_print_header(
 			$din, $text{'user_create'}, "", "users_explain_user");
@@ -647,16 +621,15 @@ else {
 		@users = &list_domain_users($d);
 		($user) = grep {
 			($_->{'user'} eq $in{'user'} ||
-			 &remove_userdom($_->{'user'}, $d) eq $in{'user'}) &&
-			$_->{'unix'} == $in{'unix'} } @users;
-		$mailbox = $d && $d->{'user'} eq $user->{'user'} &&
-			   $user->{'unix'};
+			 &remove_userdom($_->{'user'}, $d) eq $in{'user'})
+			} @users;
+		$mailbox = $d && $d->{'user'} eq $user->{'user'};
 		$suffix = $user->{'webowner'} ? 'web' : '';
 		&ui_print_header($din, $text{'user_edit'.$suffix}, "");
 		}
 
 	$shell_switch = ((&can_mailbox_ftp() && !$mailbox) || &master_admin())&&
-			 $user->{'unix'} && !$user->{'webowner'};
+			!$user->{'webowner'};
 	@sgroups = &allowed_secondary_groups($d);
 
 	# Work out if the other permissions section has anything to display
@@ -677,7 +650,6 @@ else {
 	print &ui_hidden("new", $in{'new'});
 	print &ui_hidden("dom", $in{'dom'});
 	print &ui_hidden("old", $in{'user'});
-	print &ui_hidden("unix", $in{'unix'});
 	print &ui_hidden("web", $in{'web'});
 
 	print &ui_hidden_table_start(
@@ -698,6 +670,7 @@ else {
 	if ($user->{'webowner'}) {
 		$ulabel = &hlink($text{'user_user2'}, "username4_universal");
 		}
+
 	if ($mailbox) {
 		# Domain owner
 		my $ouser_email = $user->{'user'};
@@ -747,7 +720,7 @@ else {
 				(defined($user->{'plainpass'}) ?
 				&show_password_popup($d, $user) : ""),
 				$text{'user_passset'});
-			if ($user->{'unix'} && $user->{'change'}) {
+			if ($user->{'change'}) {
 				local $tm = timelocal(gmtime($user->{'change'} *
 							     60*60*24));
 				$pwfield .= "&nbsp;&nbsp;".
@@ -766,7 +739,7 @@ else {
 				2, \@tds);
 
 		# SSH public key for Unix user
-		if (&proshow() && $user->{'unix'}) {
+		if (&proshow()) {
 			my $existing_key = &get_domain_user_ssh_pubkey($d, $user);
 			my $existing_key_hidden;
 			if ($existing_key && !$virtualmin_pro) {
@@ -796,21 +769,16 @@ else {
 			}
 		}
 
-	# Real name - only for true Unix users or LDAP persons
-	if ($user->{'person'} && (!$mailbox || $user->{'real'})) {
-		print &ui_table_row(
-			&hlink($text{'user_real'}, "realname"),
-			$mailbox ? $user->{'real'} :
-				&ui_textbox("real", $user->{'real'}, 40, 0,
-					undef, &vui_ui_input_noauto_attrs()),
-			2, \@tds);
+	# Real name - only for show for mailbox users
+	if (!$mailbox || $user->{'real'}) {
+		&show_real_name_fields($user, $in{'new'});
 		}
 
 	# Show FTP shell field
 	if ($shell_switch) {
-		my $user_shell = $user->{'shell'};
-		# For the new user fall-back the user with no login shell
+		my $user_shell;
 		if ($in{'new'}) {
+			# For the new user fall-back to the no login shell
 			my @ftp_shell =
 				grep { $_->{'id'} eq 'ftp' && $_->{'avail'} }
 					&list_available_shells($d);
@@ -818,14 +786,32 @@ else {
 				$user_shell = $ftp_shell[0]->{'shell'};
 				}
 			}
+		else {
+			$user_shell = &get_user_shell($user);
+			}
 		print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
-			&available_shells_menu("shell", $user_shell, "mailbox",
-					0, $user->{'webowner'}),
+			&available_shells_menu("shell", $user_shell,
+			  &can_mailbox_ssh() ? ["mailbox", "owner"] : "mailbox",
+			  $user->{'webowner'} ? 'ftp' : undef),
 			2, \@tds);
 		}
 
+	# Show most recent logins
+	if (!$in{'new'}) {
+		$ll = &get_last_login_time($user->{'user'});
+		@grid = ( );
+		foreach $k (sort { $a cmp $b } keys %$ll) {
+			push(@grid, $text{'user_lastlogin_'.$k},
+				&make_date($ll->{$k}));
+			}
+		print &ui_table_row(
+			&hlink($text{'user_lastlogin'}, "lastlogin"),
+			@grid ? &ui_grid_table(\@grid, 2, 50)
+			: $text{'user_lastlogin_never'});
+		}
+
 	# Show secondary groups
-	if (@sgroups && $user->{'unix'}) {
+	if (@sgroups) {
 		print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
 				&ui_select("groups", $user->{'secs'},
 					[ map { [ $_ ] } @sgroups ], 5, 1, 1),
@@ -834,31 +820,17 @@ else {
 
 	print &ui_hidden_table_end();
 
-	$showmailquota = !$mailbox && $user->{'mailquota'};
-	$showquota = !$mailbox && $user->{'unix'} && !$user->{'noquota'};
+	$showquota = !$mailbox && !$user->{'noquota'};
 	$showhome = &can_mailbox_home($user) && $d && $d->{'home'} &&
 		!$mailbox && !$user->{'fixedhome'};
 
-	if ($showmailquota || $showquota || $showhome) {
+	if ($showquota || $showhome) {
 		# Start quota and home table
 		my $header2_title = 'user_header2';
 		$header2_title = 'user_header2a' if (!$showhome);
-		$header2_title = 'user_header2b' if (!$showmailquota &&
-						     !$showquota);
+		$header2_title = 'user_header2b' if (!$showquota);
 		print &ui_hidden_table_start(
 			$text{$header2_title}, "width=100%", 2, "table2", 0);
-		}
-
-	if ($showmailquota) {
-		# Show Qmail/VPOPMail quota field
-		$user->{'qquota'} = "" if ($user->{'qquota'} eq "none");
-		print &ui_table_row(&hlink($text{'user_qquota'},"qmailquota"),
-			&ui_radio("qquota_def", $user->{'qquota'} ? 0 : 1,
-				[ [ 1, $text{'form_unlimit'} ],
-					[ 0, " " ] ])." ".
-			&ui_textbox("qquota", $user->{'qquota'} || "", 10)." ".
-				$text{'form_bytes'},
-			2, \@tds);
 		}
 
 	if ($showquota) {
@@ -921,7 +893,7 @@ else {
 				2, \@tds);
 		}
 
-	if ($showmailquota || $showquota || $showhome) {
+	if ($showquota || $showhome) {
 		print &ui_hidden_table_end("table2");
 		}
 
@@ -1042,20 +1014,6 @@ else {
 				2, \@tds);
 			}
 
-		# Show most recent logins
-		if ($hasemail && !$in{'new'}) {
-			$ll = &get_last_login_time($user->{'user'});
-			@grid = ( );
-			foreach $k (keys %$ll) {
-				push(@grid, $text{'user_lastlogin_'.$k},
-					&make_date($ll->{$k}));
-				}
-			print &ui_table_row(
-				&hlink($text{'user_lastlogin'}, "lastlogin"),
-				@grid ? &ui_grid_table(\@grid, 2, 50)
-				: $text{'user_lastlogin_never'});
-			}
-
 		if ($hasemail) {
 			# Show forwarding setup for this user, using
 			# simple form if possible
@@ -1100,7 +1058,7 @@ else {
 			# Show user-level mail filters, if he has any
 			@filters = ( );
 			$procmailrc = "$user->{'home'}/.procmailrc" if (!$in{'new'});
-			if (!$in{'new'} && $user->{'email'} && $user->{'unix'} && -r $procmailrc &&
+			if (!$in{'new'} && $user->{'email'} && -r $procmailrc &&
 			&foreign_check("filter")) {
 				&foreign_require("filter");
 				@filters = &filter::list_filters($procmailrc);
@@ -1210,7 +1168,7 @@ else {
 	# Work out if switching to Usermin is allowed
 	$usermin = 0;
 	if (&can_switch_usermin($d, $user) &&
-	    $user->{'unix'} && &foreign_installed("usermin", 1)) {
+	    &foreign_installed("usermin", 1)) {
 		&foreign_require("usermin");
 		local %uminiserv;
 		&usermin::get_usermin_miniserv_config(\%uminiserv);
@@ -1258,3 +1216,37 @@ else {
 	&ui_print_footer("", $text{'index_return'});
 	}
 
+sub show_real_name_fields
+{
+my ($user, $autofill) = @_;
+
+# First name and surname
+if (&supports_firstname()) {
+	my $onch = "";
+	if ($autofill && $ldap_useradmin::config{'given_order'} == 0) {
+		# Real name is first+last
+		$onch = "onChange='form.real.value = form.firstname.value+\" \"+form.surname.value'";
+		}
+	elsif ($autofill && $ldap_useradmin::config{'given_order'} == 1) {
+		# Real name is last+first
+		$onch = "onChange='form.real.value = form.surname.value+\" \"+form.firstname.value'";
+		}
+	print &ui_table_row(
+		&hlink($text{'user_firstname'}, "firstname"),
+		&vui_noauto_textbox("firstname", $user->{'firstname'}, 40,
+				    0, undef, $onch),
+		2, \@tds);
+
+	print &ui_table_row(
+		&hlink($text{'user_surname'}, "surname"),
+		&vui_noauto_textbox("surname", $user->{'surname'}, 40,
+				    0, undef, $onch),
+		2, \@tds);
+	}
+
+# Real name
+print &ui_table_row(
+	&hlink($text{'user_real'}, "realname"),
+	&vui_noauto_textbox("real", $user->{'real'}, 40),
+	2, \@tds);
+}

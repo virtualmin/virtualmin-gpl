@@ -246,7 +246,7 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 			if ($qddb ne $qdb) {
 				eval {
 					local $main::error_must_die = 1;
-					&execute_dom_sql($d, $mysql::master_db, "grant all on `$qddb`.* to '$user'\@'$host' with grant option");
+					&execute_dom_sql($d, $mysql::master_db, "grant all privileges on `$qddb`.* to '$user'\@'$host'");
 					}
 				}
 			}
@@ -254,7 +254,7 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 	# Update given database
 	eval {
 		local $main::error_must_die = 1;
-		&execute_dom_sql($d, $mysql::master_db, "grant all on `$qdb`.* to '$user'\@'$host' with grant option");
+		&execute_dom_sql($d, $mysql::master_db, "grant all privileges on `$qdb`.* to '$user'\@'$host'");
 		}
 	}
 else {
@@ -297,8 +297,11 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 		foreach my $r (@{$rv->{'data'}}) {
 			eval {
 				local $main::error_must_die = 1;
+				&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbs from '$user'\@'$r->[0]'");
+				};
+			eval {
+				local $main::error_must_die = 1;
 				&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
-				&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$r->[0]'");
 				};
 			}
 		}
@@ -2770,7 +2773,8 @@ local ($d, $host, $user, $mailbox) = @_;
 local $conns = &get_mysql_user_connections($d, $mailbox);
 if ($conns) {
 	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-	if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+	if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+	    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 		# Need to use the alter user command
 		&execute_dom_sql($d, $mysql::master_db,
 			"alter user '$user'\@'$host' ".
@@ -2964,12 +2968,15 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 	foreach my $r (@{$rv->{'data'}}) {
 		eval {
 			local $main::error_must_die = 1;
-			&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$olduser'\@'$r->[0]'");
-			&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$olduser'\@'$r->[0]'");
+			&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbs from '$olduser'\@'$r->[0]'");
 			};
 		eval {
 			local $main::error_must_die = 1;
-			&execute_dom_sql($d, $mysql::master_db, "grant all on $dbs to '$user'\@'$r->[0]' with grant option");
+			&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$olduser'\@'$r->[0]'");
+			};
+		eval {
+			local $main::error_must_die = 1;
+			&execute_dom_sql($d, $mysql::master_db, "grant all privileges on $dbs to '$user'\@'$r->[0]'");
 			};
 		}
 	}
@@ -2994,7 +3001,8 @@ my $plugin = &get_mysql_plugin($d, 1);
 if (!$encpass && $plainpass) {
 	$encpass = &encrypt_plain_mysql_pass($d, $plainpass) 
 	}
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Need to use new 'create user' command
 	return ("create user '$user'\@'$host' identified $plugin by ".
 		($plainpass ? "'".&mysql_escape($plainpass)."'"
@@ -3635,7 +3643,7 @@ return $plugin;
 # permissions. Prints progress, and returns 1 on success or 0 on failure.
 sub move_mysql_server
 {
-my ($d, $newmod) = @_;
+my ($d, $newmod, $newhost) = @_;
 return 1 if (&require_dom_mysql($d) eq $newmod);	# Already using it
 
 # Get all the domain objects being moved
@@ -3704,7 +3712,10 @@ foreach my $ad (@doms) {
 		&modify_user($u, $beforeu, $ad);
 		}
 	}
-
+# Update all installed scripts database host which are using MySQL
+$newhost ||= 'localhost';
+&update_all_installed_scripts_database_credentials(
+	$d, $oldd, 'dbhost', $newhost, 'mysql');
 foreach my $sd (@doms) {
 	&save_domain($sd);
 	}

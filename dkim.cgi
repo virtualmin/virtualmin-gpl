@@ -61,8 +61,9 @@ print &ui_table_row($text{'dkim_size'},
 # Sign for all domains, or just those with email?
 print &ui_table_row($text{'dkim_alldns'},
 	&ui_radio("alldns", $dkim->{'alldns'},
-		   [ [ 0, $text{'dkim_alldns0'} ],
-		     [ 1, $text{'dkim_alldns1'} ] ]));
+		   [ [ 0, $text{'dkim_alldns0'}."<br>" ],
+		     [ 1, $text{'dkim_alldns1'}."<br>" ],
+		     [ 2, $text{'dkim_alldns2'} ] ]));
 
 # Additional domains to sign for, defaulting to local hostname
 @extra = @{$dkim->{'extra'}};
@@ -73,11 +74,6 @@ if (!@extra && (!$dkim || !$dkim->{'enabled'})) {
 	}
 print &ui_table_row($text{'dkim_extra'},
 	&ui_textarea("extra", join("\n", @extra), 5, 80));
-
-# Domains to never sign for
-@exclude = @{$dkim->{'exclude'}};
-print &ui_table_row($text{'dkim_exclude'},
-	&ui_textarea("exclude", join("\n", @exclude), 5, 80));
 
 print &ui_table_end();
 

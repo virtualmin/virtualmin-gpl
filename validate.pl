@@ -57,7 +57,8 @@ foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @doms) {
 
 	# Add message to output
 	if ($count && (@errs || $config{'validate_always'})) {
-		$out .= $d->{'dom'}."\n";
+		$out .= $d->{'dom'}.($d->{'disabled'} ?
+			" [$text{'enable_disabled'}]" : '')."\n";
 		if (@errs) {
 			foreach $e (@errs) {
 				$out .= "    ".&html_tags_to_text($e)."\n";

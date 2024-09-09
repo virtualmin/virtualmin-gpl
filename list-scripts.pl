@@ -2,7 +2,7 @@
 
 =head1 list-scripts.pl
 
-Display script installed into some virtual server
+Display script (web app) installed into some virtual server
 
 The virtual servers to display scripts for can be specified with the 
 C<--domain> parameter, which must be followed by a domain name and can appear
@@ -145,9 +145,9 @@ foreach my $d (@doms) {
 			if (@doms > 1) {
 				print "Scripts in domain $d->{'dom'} :\n"; 
 				}
-			$fmt = "%-18.18s %-25.25s %-10.10s %-25.25s\n";
+			$fmt = "%-18.18s %-24.24s %-10.10s %-25.25s\n";
 			printf $fmt, "ID", "Description", "Version", "URL path";
-			printf $fmt, ("-" x 18), ("-" x 25), ("-" x 10), ("-" x 25);
+			printf $fmt, ("-" x 18), ("-" x 24), ("-" x 10), ("-" x 25);
 			foreach $sinfo (@scripts) {
 				$script = &get_script($sinfo->{'name'});
 				$path = $sinfo->{'url'};

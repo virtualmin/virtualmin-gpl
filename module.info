@@ -2,6 +2,6 @@ desc=Virtualmin Virtual Servers
 category=servers
 depends=net useradmin quota webmin mount init acl cron mailboxes phpini procmail 2.014
 os_support=*-linux macos freebsd openbsd solaris
-version=7.10.0
+version=7.20.1
 readonly=1
 feedback=feedback@webmin.com

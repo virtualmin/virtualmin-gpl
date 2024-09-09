@@ -20,9 +20,9 @@ print &ui_table_row($text{'newdynip_service'},
 		   [ map { [ $_->{'name'}, $_->{'desc'} ] }
 			 &list_dynip_services() ],
 		   1, 0, 0, 0,
-		   "onChange='form.external.disabled = value != \"external\"'")." ".
+		   "onChange='form.external.disabled = (value != \"external\" && value != \"webmin\")'")." ".
 	&ui_textbox("external", $config{'dynip_external'}, 50,
-		    $config{'dynip_service'} ne 'external'));
+		    $config{'dynip_service'} !~ /^(external|webmin)$/));
 
 # Hostname to update
 print &ui_table_row($text{'newdynip_host'},
@@ -45,7 +45,11 @@ print &ui_table_row($text{'newdynip_notify'},
 	&ui_opt_textbox("email", $config{'dynip_email'}, 40,
 			$text{'newdynip_none'}));
 
-# Current settings
+# Update all domains on IP change?
+print &ui_table_row($text{'newdynip_update'},
+	&ui_yesno_radio("update", $config{'dynip_update'}));
+
+# Current state
 print &ui_table_hr();
 
 if ($config{'dynip_service'}) {

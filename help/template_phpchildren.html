@@ -6,7 +6,7 @@ will be created when <tt>pm</tt> option is set to <tt>static</tt> and the maximu
 child processes could potentially be created when <tt>pm</tt> option is set to <tt>dynamic.</tt>
 <p>
 
-When PHP scripts for this domain setup to run via FCGId, PHP child process management
+When PHP scripts for this domain setup to run via FCGI, PHP child process management
 should always be disabled, which will only route one request at a time to application processes
 it has spawned. By default, and with the environment variable setting <tt>PHP_FCGI_CHILDREN=0</tt>,
 PHP child process management is disabled.<p>

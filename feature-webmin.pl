@@ -782,18 +782,10 @@ if ($extramods{'mailboxes'} && @maildoms) {
 		       'from' => join(" ", map { $_->{'dom'} } @maildoms),
 		       'canattach' => 0,
 		       'candetach' => 0,
-		       'dir' => &mail_domain_base($d) );
-	if (!&mail_system_needs_group()) {
-		# For vpopmail, mailboxes are identified by domain
-		$acl{'mmode'} = 6;
-		$acl{'musers'} = ".*\@(".
-				 join("|", map { $_->{'dom'} } @maildoms).")";
-		}
-	else {
-		# By server GID
-		$acl{'mmode'} = 5;
-		$acl{'musers'} = $d->{'gid'};
-		}
+		       'dir' => &mail_domain_base($d),
+		       'mmode' => 5,
+		       'musers' => $d->{'gid'},
+		     );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "mailboxes")
 		if (!$hasmods{'mailboxes'});
 	push(@mods, "mailboxes");

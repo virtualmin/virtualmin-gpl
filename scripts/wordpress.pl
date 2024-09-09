@@ -20,7 +20,7 @@ return "A semantic personal publishing platform with a focus on aesthetics, web 
 # script_wordpress_versions()
 sub script_wordpress_versions
 {
-return ( "6.5.2" );
+return ( "6.6.1", "5.9.9", "4.9.25", "3.9.40" );
 }
 
 sub script_wordpress_category
@@ -47,7 +47,7 @@ sub script_wordpress_php_optional_modules
 {
 return ( "curl", "ssh2", "pecl-ssh2", "date",
          "hash", "imagick", "pecl-imagick", 
-         "iconv", "mbstring", "openssl",
+         "iconv", "mbstring", "openssl", "zip",
          "posix", "sockets", "tokenizer" );
 }
 
@@ -67,7 +67,7 @@ return ( "mysql" );
 
 sub script_wordpress_release
 {
-return 8;	# Fix regex for passmode
+return 12; # zip extension has to be installed
 }
 
 sub script_wordpress_php_fullver
@@ -166,11 +166,15 @@ return undef;
 sub script_wordpress_files
 {
 my ($d, $ver, $opts, $upgrade) = @_;
-return (
-	{ 'name' => "cli",
+return ( { 'name' => "cli",
 	   'file' => "wordpress-cli.phar",
 	   'url' => "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar",
-	   'nocache' => 1 } );
+	   'nocache' => 1 },
+	 { 'name' => 'source',
+	   'file' => 'wordpress-'.$ver.'.zip',
+	   'url' => 'https://wordpress.org/wordpress-'.$ver.'.zip',
+	   'nodownload' => 1,
+	 } );
 }
 
 sub script_wordpress_commands
@@ -201,12 +205,16 @@ my $url = script_path_url($d, $opts);
 return (0, "Database connection failed : $dberr") if ($dberr);
 
 my $dom_php_bin = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
+$dom_php_bin || return (0, "Could not find PHP CLI command");
 my $wp = "cd $opts->{'dir'} && $dom_php_bin $opts->{'dir'}/wp-cli.phar";
 
 # Copy wordpress-cli
 &make_dir_as_domain_user($d, $opts->{'dir'}, 0755) if (!-d $opts->{'dir'});
 &copy_source_dest($files->{'cli'}, "$opts->{'dir'}/wp-cli.phar");
 &set_permissions_as_domain_user($d, 0750, "$opts->{'dir'}/wp-cli.phar");
+
+# Source URL
+my $aux_download_server = "http://scripts.virtualmin.com";
 
 # Install using cli
 if (!$upgrade) {
@@ -215,7 +223,10 @@ if (!$upgrade) {
 	# Start installation
 	my $out = &run_as_domain_user($d, "$wp core download --version=$version 2>&1");
 	if ($? && $out !~ /Success:\s+WordPress\s+downloaded/i) {
-		return (-1, "\`wp core download\` failed` : $out");
+		my $out_aux = &run_as_domain_user($d, "$wp core download $aux_download_server/wordpress-$version.zip 2>&1");
+		if ($? && $out_aux !~ /Success:\s+WordPress\s+downloaded/i) {
+			return (-1, "\`wp core download\` failed` : $out : $out_aux");
+			}
 		}
 
 	if (!$opts->{'noauto'}) {
@@ -283,11 +294,20 @@ if (!$upgrade) {
 	&script_wordpress_webserver_add_records($d, $opts);
 	}
 else {
+	# In case of reinstalling or downgrading use --force flag
+	my $wp_force = "";
+	if (&compare_versions($upgrade->{'version'}, $version) >= 0) {
+		$wp_force = " --force";
+		}
 	# Do the upgrade
 	my $out = &run_as_domain_user($d,
-                    "$wp core upgrade --version=$version 2>&1");
-	if ($?) {
-		return (-1, "\`wp core upgrade\` failed : $out");
+                    "$wp core upgrade --version=$version$wp_force 2>&1");
+	if ($? && $out !~ /Success:\s+WordPress\s+updated\s+successfully/i) {
+		my $out_aux = &run_as_domain_user($d,
+		    "$wp core upgrade $aux_download_server/wordpress-$version.zip$wp_force 2>&1");
+		if ($? && $out !~ /Success:\s+WordPress\s+updated\s+successfully/i) {
+			return (-1, "\`wp core upgrade\` failed : $out : $out_aux");
+			}
 		}
 	}
 
@@ -381,8 +401,11 @@ return undef;
 sub script_wordpress_latest
 {
 my ($ver) = @_;
-return ( "http://wordpress.org/download/",
-	 "Download\\s+WordPress\\s+([0-9\\.]+)" );
+if (&compare_versions($ver, 6) >= 0) {
+	return ( "http://wordpress.org/download/",
+		 "Download\\s+WordPress\\s+([0-9\\.]+)" );
+	}
+return ( );
 }
 
 sub script_wordpress_site
@@ -402,7 +425,7 @@ return (128, 'M') ;
 
 sub script_wordpress_passmode
 {
-return (1, 8, '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$');
+return (1, 14, '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$');
 }
 
 sub script_wordpress_webserver_add_records

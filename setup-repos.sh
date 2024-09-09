@@ -1,32 +1,21 @@
 #!/bin/sh
 # shellcheck disable=SC2059 disable=SC2181 disable=SC2154 disable=SC2317
 # virtualmin-install.sh
-# Copyright 2005-2023 Virtualmin, Inc.
-# Simple script to grab the virtualmin-release and virtualmin-base packages.
-# The packages do most of the hard work, so this script can be small-ish and
-# lazy-ish.
+# Copyright 2005-2024 Virtualmin
+# Simple script to install Virtualmin on a supported OS
 
-# WARNING: Anything not listed in the currently supported systems list is not
-# going to work, despite the fact that you might see code that detects your
-# OS and acts on it.  If it isn't in the list, the code is not complete and
-# will not work.  More importantly, the repos that this script uses do not
-# exist, if the OS isn't listed.  Don't even bother trying it.
-#
-# A manual install might work for you though.
-# See here: https://www.virtualmin.com/documentation/installation/manual/
+# Different installation guides are available at:
+# https://www.virtualmin.com/docs/installation/guides
 
 # License and version
 SERIAL=GPL
 KEY=GPL
-VER=7.3.4
+VER=7.4.0
 vm_version=7
 
 # Server
 upgrade_virtualmin_host=software.virtualmin.com
 upgrade_virtualmin_host_lib="$upgrade_virtualmin_host/lib"
-
-# Currently supported systems
-# https://www.virtualmin.com/os-support/
 
 # Save current working directory
 pwd="$PWD"
@@ -571,7 +560,7 @@ install_msg() {
       UNSTABLERHEL
     ${CYANBG}${BLACK}${BOLD}Debian Linux and derivatives${NORMAL}${CYAN}
       - Debian 10, 11 and 12 on i386 and amd64
-      - Ubuntu 20.04 LTS and 22.04 LTS on i386 and amd64${NORMAL}
+      - Ubuntu 20.04 LTS, 22.04 LTS and 24.04 LTS on i386 and amd64${NORMAL}
       UNSTABLEDEB"
 
   cat <<EOF
@@ -1060,7 +1049,7 @@ install_virtualmin_release() {
   debian | ubuntu | kali)
     case "$os_type" in
     ubuntu)
-      if [ "$os_version" != "18.04" ] && [ "$os_version" != "20.04" ] && [ "$os_version" != "22.04" ] && [ "$vm6_repos" -eq 0 ]; then
+      if [ "$os_version" != "18.04" ] && [ "$os_version" != "20.04" ] && [ "$os_version" != "22.04" ] && [ "$os_version" != "24.04" ] && [ "$vm6_repos" -eq 0 ]; then
         printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
         exit 1
       fi
@@ -1446,7 +1435,7 @@ kill "$config_system_pid" 1>/dev/null 2>&1
 # Make sure the cursor is back (if spinners misbehaved)
 tput cnorm 1>/dev/null 2>&1
 
-# Was host default domain SSL request successful?
+# Was LE SSL for hostname request successful?
 if [ -d "$VIRTUALMIN_INSTALL_TEMPDIR/virtualmin_ssl_host_success" ]; then
   ssl_host_success=1
 fi

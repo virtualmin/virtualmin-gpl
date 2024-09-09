@@ -247,6 +247,7 @@ else {
 if (!$d->{'alias'} && !$d->{'notmplcgimode'}) {
 	# Switch to the template CGI mode, if supported (unless restoring)
 	my $mode = $tmpl->{'web_cgimode'};
+	$mode = '' if ($mode eq 'none');
 	my @cgimodes = &has_cgi_support();
 	if (!$mode || &indexof($mode, @cgimodes) >= 0) {
 		&$first_print($mode ? &text('setup_cgimode',
@@ -276,6 +277,11 @@ if ($tmpl->{'web_user'} ne 'none' && $web_user) {
 if ($config{'mail_autoconfig'} && $d->{'mail'} &&
     !$d->{'creating'} && !$d->{'alias'}) {
 	&enable_email_autoconfig($d);
+	}
+
+# Add any proxypass directives
+if (!$d->{'alias'} && $d->{'proxy_pass'}) {
+	&update_apache_proxy_pass($d, undef);
 	}
 
 &$first_print($text{'setup_webpost'});
@@ -598,7 +604,7 @@ if (@newsa) {
 }
 
 # is_empty(&lref|file)
-# Returns 1 if a file or a reference to a list of lines is contains no
+# Returns 1 if a file or a reference to a list of lines contains no
 # non-whitespace characters
 sub is_empty
 {
@@ -800,66 +806,31 @@ else {
 	if ($d->{'proxy_pass_mode'} == 1 &&
 	    $oldd->{'proxy_pass_mode'} == 1 &&
 	    $d->{'proxy_pass'} ne $oldd->{'proxy_pass'}) {
-		# This is a proxying forwarding website and the URL has
-		# changed - update all Proxy* directives
+		# This is a proxying forwarding website and the URL has changed
 		&$first_print($text{'save_apache6'});
-		if (!$virt) {
-			&$second_print($text{'delete_noapache'});
-			goto VIRTFAILED;
+		my $err = &update_apache_proxy_pass($d, $oldd);
+		if ($err) {
+			&$second_print(&text('save_eapache6', $err));
 			}
-		my $lref = &read_file_lines($virt->{'file'});
-		for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-			if ($lref->[$i] =~ /^\s*ProxyPass(Reverse)?\s/) {
-				$lref->[$i] =~ s/$oldd->{'proxy_pass'}/$d->{'proxy_pass'}/g;
-				}
+		else {
+			$rv++;
+			&$second_print($text{'setup_done'});
 			}
-		&flush_file_lines($virt->{'file'});
-		undef(@apache::get_config_cache);
-		($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
-						      $oldd->{'web_port'});
-		$rv++;
-		&$second_print($text{'setup_done'});
 		}
 	if ($d->{'proxy_pass_mode'} != $oldd->{'proxy_pass_mode'}) {
-		# Proxy mode has been enabled or disabled .. remove all
-		# ProxyPass / , ProxyPassReverse / and AliasMatch ^/$
-		# directives, and create new ones as appropriate.
+		# Proxy mode has been enabled or disabled
 		my $mode = $d->{'proxy_pass_mode'} ||
 			      $oldd->{'proxy_pass_mode'};
 		&$first_print($mode == 2 ? $text{'save_apache8'}
 					 : $text{'save_apache9'});
-		if (!$virt) {
-			&$second_print($text{'delete_noapache'});
-			goto VIRTFAILED;
+		my $err = &update_apache_proxy_pass($d, $oldd);
+		if ($err) {
+			&$second_print(&text('save_eapache8', $err));
 			}
-
-		# Take out old proxy directives and block
-		my $lref = &read_file_lines($virt->{'file'});
-		my @lines = @$lref[$virt->{'line'}+1 .. $virt->{'eline'}-1];
-		@lines = grep { !/^\s*ProxyPass\s+\/\s/ &&
-				!/^\s*ProxyPassReverse\s+\/\s/ &&
-				!/^\s*AliasMatch\s+\^\/\.\*\$\s/ &&
-				!/^\s*SSLProxyEngine\s/ } @lines;
-		for(my $i=0; $i<@lines; $i++) {
-			if ($lines[$i] =~ /^\s*<Proxy \*>/ &&
-			    $lines[$i+2] =~ /^\s*<\/Proxy>/) {
-				# Take out <Proxy *> block
-				splice(@lines, $i, 3);
-				last;
-				}
+		else {
+			$rv++;
+			&$second_print($text{'setup_done'});
 			}
-
-		# Add new directives
-		my @ppdirs = &apache_proxy_directives($d);
-		push(@lines, @ppdirs);
-		splice(@$lref, $virt->{'line'} + 1,
-		       $virt->{'eline'} - $virt->{'line'} - 1, @lines);
-		&flush_file_lines($virt->{'file'});
-		undef(@apache::get_config_cache);
-		($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
-						      $oldd->{'web_port'});
-		$rv++;
-		&$second_print($text{'setup_done'});
 		}
 	if ($d->{'user'} ne $oldd->{'user'}) {
 		# Username has changed .. update SuexecUserGroup
@@ -1126,14 +1097,16 @@ else {
 	# If an IPv6 DNS record exists, make sure the Apache config supports it
 	my $ip6addr;
 	my $ip6name;
+	my $system_hostname = &get_system_hostname();
 	foreach my $try ("www.".$d->{'dom'}, $d->{'dom'}) {
+		next if ($try eq $system_hostname);
 		$ip6addr = &to_ip6address($try);
 		if ($ip6addr) {
 			$ip6name = $try;
 			last;
 			}
 		}
-	if ($ip6addr && $ip6addr ne "::1" && !$d->{'dns_cloud'}) {
+	if ($ip6addr && !$d->{'dns_cloud'}) {
 		if (!$d->{'ip6'}) {
 			return &text('validate_ewebipv6', $ip6addr, $ip6name);
 			}
@@ -1577,10 +1550,9 @@ my ($dirs, $d) = @_;
 $dirs =~ s/\t/\n/g;
 $dirs = &substitute_domain_template($dirs, $d);
 local @dirs = split(/\n/, $dirs);
-local ($sudir, $ppdir);
+local $sudir;
 foreach (@dirs) {
 	$sudir++ if (/^\s*SuexecUserGroup\s/i);
-	$ppdir++ if (/^\s*ProxyPass\s/);
 	}
 local $tmpl = &get_template($d->{'template'});
 local $pdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
@@ -1588,10 +1560,6 @@ if (!$sudir && $pdom->{'unix'}) {
 	# Automatically add suexec directives if missing
 	unshift(@dirs, "SuexecUserGroup \"#$pdom->{'uid'}\" ".
 		       "\"#$pdom->{'ugid'}\"");
-	}
-if (!$ppdir && $d->{'proxy_pass'}) {
-	# Add proxy directives
-	push(@dirs, &apache_proxy_directives($d));
 	}
 if ($tmpl->{'web_writelogs'}) {
 	# Fix any CustomLog or ErrorLog directives to write via writelogs.pl
@@ -1626,31 +1594,6 @@ if ($d->{'dom_defnames'}) {
 		&indexof($+{r_serv_name}, split(/\s+/, $d->{'dom_defnames'})) < 0
 		} @dirs) < 0 } @dirs;
 	# XXXX Maybe add too? It already works in Nginx
-	}
-return @dirs;
-}
-
-# apache_proxy_directives(&domain)
-# Returns text lines for proxy pass or frame forwarding directives
-sub apache_proxy_directives
-{
-local ($d) = @_;
-&require_apache();
-local @dirs;
-if ($d->{'proxy_pass_mode'} == 1) {
-	# Proxy to another server
-	push(@dirs, "ProxyPass / $d->{'proxy_pass'}",
-		    "ProxyPassReverse / $d->{'proxy_pass'}");
-	if ($d->{'proxy_pass'} =~ /^https:/ &&
-	    $apache::httpd_modules{'core'} >= 2.0) {
-		# SSL proxy mode
-		push(@dirs, "SSLProxyEngine on");
-		}
-	}
-elsif ($d->{'proxy_pass_mode'} == 2) {
-	# Redirect to /framefwd.html
-	local $ff = &framefwd_file($d);
-	push(@dirs, "AliasMatch ^/.*\$ $ff");
 	}
 return @dirs;
 }
@@ -2753,6 +2696,15 @@ sleep(1) if (!$err);
 return $err;
 }
 
+# reload_service_web()
+# Attempts to reload the web service config, returning undef on success or any
+# error message on failure.
+sub reload_service_web
+{
+&require_apache();
+return &apache::restart_apache();
+}
+
 # start_service_fpm(version)
 # Attempts to start the FPM server for some version
 sub start_service_fpm
@@ -2774,6 +2726,21 @@ my ($fpm) = grep { $_->{'version'} eq $ver } &list_php_fpm_configs();
 return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
 &foreign_require("init");
 my ($ok, $err) = &init::stop_action($fpm->{'init'});
+return $ok ? undef : $err;
+}
+
+# reload_service_fpm(version)
+# Attempts to reload the FPM server for some version
+sub reload_service_fpm
+{
+my ($ver) = @_;
+my ($fpm) = grep { $_->{'version'} eq $ver } &list_php_fpm_configs();
+return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
+&foreign_require("init");
+my ($ok, $err) = &init::reload_action($fpm->{'init'});
+if (!$ok && $err =~ /Not\s+implemented/i) {
+	($ok, $err) = &init::restart_action($fpm->{'init'});
+	}
 return $ok ? undef : $err;
 }
 
@@ -2799,10 +2766,14 @@ if ($config{'web'}) {
 	if (defined(&get_domain_ruby_mode)) {
 		push(@webfields, "web_ruby_suexec");
 		}
+	if (@cgimodes > 0) {
+		push(@webfields, "cgimode");
+		}
 
 	# Apache directives
-	local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
-				     0, undef, \@webfields);
+	local $ndi = &none_def_input(
+		"web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
+		0, undef, \@webfields);
 	print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
 		$ndi."<br>\n".
 		&ui_textarea("web", $tmpl->{'web'} eq "none" ? "" :
@@ -2811,25 +2782,27 @@ if ($config{'web'}) {
 
 	# Extra SSL directives
 	print &ui_table_row(&hlink($text{'tmpl_web_ssl'}, "template_web_ssl"),
-		&ui_textarea("web_ssl", join("\n", split(/\t/, $tmpl->{'web_ssl'})),
+		&ui_textarea("web_ssl",
+			     join("\n", split(/\t/, $tmpl->{'web_ssl'})),
 			     5, 60));
 
 	# Input for logging via program. Deprecated so don't show unless enabled
 	if ($tmpl->{'web_writelogs'}) {
 		print &ui_table_row(&hlink($text{'newweb_writelogs'},
 					   "template_writelogs"),
-			&ui_yesno_radio("writelogs", $tmpl->{'web_writelogs'} ? 1 : 0));
+			&ui_yesno_radio("writelogs", $tmpl->{'web_writelogs'}));
 		}
 
 	# Input for Apache user to add to domain's group
 	print &ui_table_row(&hlink($text{'newweb_user'}, "template_user_def"),
 		&ui_radio("user_def", $tmpl->{'web_user'} eq 'none' ? 2 :
 					   $tmpl->{'web_user'} ? 1 : 0,
-		       [ [ 2, $text{'no'}."<br>" ],
-			 [ 0, $text{'newweb_userdef'}."<br>" ],
-			 [ 1, $text{'newweb_useryes'}." ".
-			      &ui_user_textbox("user", $tmpl->{'web_user'} eq 'none' ?
-							'' : $tmpl->{'web_user'}) ] ]));
+	           [ [ 2, $text{'no'}."<br>" ],
+		     [ 0, $text{'newweb_userdef'}."<br>" ],
+		     [ 1, $text{'newweb_useryes'}." ".
+		          &ui_user_textbox(
+				"user", $tmpl->{'web_user'} eq 'none' ?  '' :
+					  $tmpl->{'web_user'}) ] ]));
 	}
 
 # CGI script execution mode
@@ -2837,7 +2810,7 @@ if (@cgimodes > 0) {
 	print &ui_table_row(
 		&hlink($text{'tmpl_web_cgimode'}, "template_web_cgimode"),
 		&ui_radio("cgimode", $tmpl->{'web_cgimode'},
-			  [ [ '', $text{'tmpl_web_cgimodenone'} ],
+			  [ [ 'none', $text{'tmpl_web_cgimodenone'} ],
 			    map { [ $_, $text{'tmpl_web_cgimode'.$_} ] }
 				reverse(@cgimodes) ]));
 	}
@@ -2878,7 +2851,8 @@ if ($config{'web'}) {
 		&ui_textbox("web_port", $tmpl->{'web_port'}, 6));
 
 	# Port for SSL webserver
-	print &ui_table_row(&hlink($text{'newweb_sslport'}, "template_web_sslport"),
+	print &ui_table_row(
+		&hlink($text{'newweb_sslport'}, "template_web_sslport"),
 		&ui_textbox("web_sslport", $tmpl->{'web_sslport'}, 6));
 
 	# URL port for normal webserver
@@ -2903,7 +2877,7 @@ if ($config{'web'}) {
 		# Run ruby scripts as user
 		print &ui_table_row(
 		    &hlink($text{'tmpl_rubymode'}, "template_rubymode"),
-		    &ui_radio("web_ruby_suexec", int($tmpl->{'web_ruby_suexec'}),
+		    &ui_radio("web_ruby_suexec",int($tmpl->{'web_ruby_suexec'}),
 			      [ [ -1, $text{'phpmode_noruby'}."<br>" ],
 				[ 0, $text{'phpmode_mod_ruby'}."<br>" ],
 				[ 1, $text{'phpmode_cgi'}."<br>" ] ]));
@@ -2920,21 +2894,23 @@ if ($config{'web'} && $config{'webalizer'}) {
 	local ($hdir) = ($tmpl->{'web_html_dir'} || 'public_html');
 	print &ui_table_row(&hlink($text{'newweb_statsdir'}, "template_stats_dir"),
 		&ui_radio("stats_mode", $smode,
-			  [ [ 0, "$text{'default'} (<tt>$hdir/stats</tt>)<br>" ],
-			    [ 1, &text('newweb_statsdir0', "<tt>$hdir</tt>")."\n".
-				 &ui_textbox("stats_dir",
-					     $tmpl->{'web_stats_dir'}, 20)."<br>" ],
-			    [ 2, &text('newweb_statsdir2', "<tt>$hdir</tt>")."\n".
-				 &ui_textbox("stats_hdir",
-					     $tmpl->{'web_stats_hdir'}, 20) ] ]));
+		  [ [ 0, "$text{'default'} (<tt>$hdir/stats</tt>)<br>" ],
+		    [ 1, &text('newweb_statsdir0', "<tt>$hdir</tt>")."\n".
+			 &ui_textbox("stats_dir",
+				     $tmpl->{'web_stats_dir'}, 20)."<br>" ],
+		    [ 2, &text('newweb_statsdir2', "<tt>$hdir</tt>")."\n".
+			 &ui_textbox("stats_hdir",
+				     $tmpl->{'web_stats_hdir'}, 20) ] ]));
 
 	# Password-protect webalizer dir
-	print &ui_table_row(&hlink($text{'newweb_statspass'}, "template_statspass"),
+	print &ui_table_row(
+		&hlink($text{'newweb_statspass'}, "template_statspass"),
 		&ui_radio("statspass", $tmpl->{'web_stats_pass'} ? 1 : 0,
 			  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 	# Allow editing of Webalizer report
-	print &ui_table_row(&hlink($text{'newweb_statsedit'}, "template_statsedit"),
+	print &ui_table_row(
+		&hlink($text{'newweb_statsedit'}, "template_statsedit"),
 		&ui_radio("statsnoedit", $tmpl->{'web_stats_noedit'} ? 1 : 0,
 			  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 
@@ -2954,9 +2930,14 @@ if ($config{'web'} && $config{'webalizer'}) {
 print &ui_table_hr()
 	if ($hr);
 foreach my $r ('webmail', 'admin') {
+	my @opts = ( [ 1, $text{'yes'} ],
+		     [ 0, $text{'no'} ] );
+	if (!$tmpl->{'default'}) {
+		unshift(@opts, [ '', $text{'tmpl_default'} ]);
+		}
 	print &ui_table_row(&hlink($text{'newweb_'.$r},
 				   "template_".$r),
-		&ui_yesno_radio($r, $tmpl->{'web_'.$r} ? 1 : 0));
+		&ui_radio($r, $tmpl->{'web_'.$r}, \@opts));
 
 	# Domain name to use in webmail redirect
 	print &ui_table_row(&hlink($text{'newweb_'.$r.'dom'},
@@ -3023,8 +3004,10 @@ for(my $i=0; $i<@redirs; $i++) {
 		&ui_textbox("rfrom_$i", $redirs[$i]->[0], 30),
 		&ui_textbox("rto_$i", $redirs[$i]->[1], 40),
 		&vui_ui_block_no_wrap(
-			&ui_checkbox("rprotos_$i", "http", "HTTP", $protos{'http'})." ".
-			&ui_checkbox("rprotos_$i", "https", "HTTPS", $protos{'https'}), 1)
+			&ui_checkbox("rprotos_$i", "http", "HTTP",
+				     $protos{'http'})." ".
+			&ui_checkbox("rprotos_$i", "https", "HTTPS",
+				     $protos{'https'}), 1)
 		]);
 	}
 $rtable .= &ui_columns_end();
@@ -3565,11 +3548,12 @@ if ($p && $p ne 'web') {
 			    $force);
 	}
 &require_apache();
-my @ports = ( $d->{'web_port'} );
-push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+my $reald = $d->{'alias'} ? &get_domain($d->{'alias'}) : $d;
+my @ports = ( $reald->{'web_port'} );
+push(@ports, $reald->{'web_sslport'}) if ($reald->{'ssl'});
 
 my $fixed = 0;
-my @redirects = &list_redirects($d);
+my @redirects = &list_redirects($reald);
 foreach my $r ('webmail', 'admin') {
 	next if (!$tmpl->{'web_'.$r} && !$force);
 
@@ -3584,8 +3568,7 @@ foreach my $r ('webmail', 'admin') {
 		my ($port, $proto);
 		if ($r eq 'webmail') {
 			# From Usermin
-			($port, $proto) =
-				&get_usermin_miniserv_port_proto();
+			($port, $proto) = &get_usermin_miniserv_port_proto();
 			}
 		else {
 			# From Webmin
@@ -3605,14 +3588,14 @@ foreach my $r ('webmail', 'admin') {
 		       'https' => 1,
 		       'alias' => 0 };
 		$r = &add_wellknown_redirect($r);
-		&create_redirect($d, $r);
+		&create_redirect($reald, $r);
 		}
 
 	# Add a ServerAlias directive
 	my $fixedone = 0;
 	foreach my $port (@ports) {
 		my ($virt, $vconf, $conf) =
-			&get_apache_virtual($d->{'dom'}, $port);
+			&get_apache_virtual($reald->{'dom'}, $port);
 		next if (!$virt);
 
 		# Add the ServerAlias
@@ -3657,10 +3640,11 @@ foreach my $r (reverse(@redirects)) {
 # Fix up the ServerAlias directives
 my $fixed = 0;
 &require_apache();
-my @ports = ( $d->{'web_port'} );
-push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+my $reald = $d->{'alias'} ? &get_domain($d->{'alias'}) : $d;
+my @ports = ( $reald->{'web_port'} );
+push(@ports, $reald->{'web_sslport'}) if ($reald->{'ssl'});
 foreach my $port (@ports) {
-	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($reald->{'dom'}, $port);
 	next if (!$virt);
 	my @sa = &apache::find_directive("ServerAlias", $vconf);
 	my @newsa;
@@ -3694,7 +3678,8 @@ if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_get_web_webmail_redirect", $d);
 	}
 my @rv;
-my @redirects = &list_redirects($d);
+my $reald = $d->{'alias'} ? &get_domain($d->{'alias'}) : $d;
+my @redirects = &list_redirects($reald);
 foreach my $r (@redirects) {
 	if ($r->{'host'} eq 'admin.'.$d->{'dom'} ||
 	    $r->{'host'} eq 'webmail.'.$d->{'dom'}) {
@@ -4120,8 +4105,8 @@ return undef;
 }
 
 # supports_suexec([&domain])
-# Returns 1 if suexec is enabled and usable for a domain, and thus it can run
-# CGI scripts
+# Returns 1 if suexec is usable for a domain, 2 if usable and enabled and
+# thus it can run CGI scripts. Otherwise return 0.
 sub supports_suexec
 {
 local ($d) = @_;
@@ -4154,10 +4139,11 @@ if ($d) {
 	# Is suEXEC enabled in the Apache config?
 	local ($virt, $vconf) = &get_apache_virtual(
 					$d->{'dom'}, $d->{'web_port'});
-	return 0 if (!$virt);
+	return 1 if (!$virt);
 	local ($suexec) = &apache::find_directive_struct(
 					"SuexecUserGroup", $vconf);
-	return 0 if (!$suexec);
+	return 1 if (!$suexec);
+	return 2;
 	}
 
 return 1;
@@ -5395,12 +5381,7 @@ sub get_fcgiwrap_server_command
 {
 my ($d, $port) = @_;
 my $cmd = &has_command("fcgiwrap");
-if ($port =~ /^\//) {
-	$cmd .= " -s unix:".$port;
-	}
-else {
-	$cmd .= " -s tcp:127.0.0.1:".$port;
-	}
+$cmd .= " -s unix:".$port;
 my $log = "$d->{'home'}/logs/fcgiwrap.log";
 my $piddir = "/var/fcgiwrap";
 if (!-d $piddir) {
@@ -5670,6 +5651,70 @@ my ($user, $d) = @_;
 &revoke_webserver_user_access($user, $d);
 # Delete user from domain config
 &delete_extra_user($d, $user);
+}
+
+# update_apache_proxy_pass(&domain, &old-domain)
+# Enable or disable Apache proxying of the whole site. Returns undef on success
+# or an error message on failure.
+sub update_apache_proxy_pass
+{
+my ($d, $oldd) = @_;
+my @balancers = &list_proxy_balancers($d);
+my @redirects = &list_redirects($d);
+if ($d->{'proxy_pass_mode'} && (!$oldd || !$oldd->{'proxy_pass_mode'})) {
+	# Proxying enabled
+	if ($d->{'proxy_pass_mode'} == 1) {
+		# Need to add proxy directives
+		my $b = { 'path' => '/',
+			  'websockets' => 1,
+			  'urls' => [ $d->{'proxy_pass'} ] };
+		return &create_proxy_balancer($d, $b);
+		}
+	else {
+		# Setup frame forwarding
+		&create_framefwd_file($d);
+		my $ff = &framefwd_file($d);
+		my $r = { 'path' => '/',
+			  'regexp' => 1,
+			  'alias' => 1,
+			  'dest' => $ff,
+			  'http' => 1,
+			  'https' => 1 };
+		return &create_redirect($d, $r);
+		}
+	}
+elsif (!$d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'}) {
+	# Proxying disabled
+	if ($oldd->{'proxy_pass_mode'} == 1) {
+		# Need to remove proxy directives
+		my ($b) = grep { $_->{'path'} eq '/' } @balancers;
+		return "Missing proxy for /" if (!$b);
+		return &delete_proxy_balancer($d, $b);
+		}
+	else {
+		# Turn off frame forwarding
+		my ($r) = grep { $_->{'path'} eq '/' } @redirects;
+		return "Missing redirect for /" if (!$r);
+		return &delete_redirect($d, $r);
+		}
+	}
+elsif ($d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'} &&
+       $d->{'proxy_pass'} ne $oldd->{'proxy_pass'}) {
+	# URL has changed
+	if ($d->{'proxy_pass_mode'} == 1) {
+		my ($b) = grep { $_->{'path'} eq '/' } @balancers;
+                return "Missing proxy for /" if (!$b);
+		my $oldb = { %$b };
+		$b->{'urls'} = [ $d->{'proxy_pass'} ];
+		return &modify_proxy_balancer($d, $b, $oldb);
+		}
+	else {
+		# Update frame forwarding, which is all in the HTML
+		&create_framefwd_file($d);
+		return undef;
+		}
+	}
+return undef;
 }
 
 $done_feature_script{'web'} = 1;

@@ -30,13 +30,15 @@ exit(0);
 }
 
 # Get email address parameter
-if ($ENV{'QUERY_STRING'} =~ /emailaddress=([^&]+)/) {
+my $mode;
+if ($ENV{'QUERY_STRING'} =~ /emailaddress=([^&]+)/i) {
 	# Thunderbird style
 	$email = $1;
 	$email =~ s/%(..)/pack("c",hex($1))/ge;
 	($mailbox, $SMTP_DOMAIN) = split(/\@/, $email);
 	$mailbox && $SMTP_DOMAIN ||
 	    &error_exit("emailaddress parameter is not in user@domain format");
+	$mode = "thunderbird";
 	}
 elsif ($ENV{'REQUEST_METHOD'} eq 'POST') {
 	# Outlook style
@@ -45,6 +47,7 @@ elsif ($ENV{'REQUEST_METHOD'} eq 'POST') {
 		&error_exit("EMailAddress missing from input XML");
 	($mailbox, $SMTP_DOMAIN) = ($1, $2);
 	$email = $1."\@".$2;
+	$mode = "outlook";
 	}
 else {
 	&error_exit("Missing emailaddress parameter");
@@ -86,7 +89,7 @@ $MAILBOX = $mailbox;
 
 # Output the XML
 print "Content-type: text/xml\n\n";
-if ($ENV{'SCRIPT_NAME'} =~ /autodiscover.xml/i) {
+if ($mode eq "outlook") {
 	# Outlook
 	print <<EOF;
 _OUTLOOK_XML_GOES_HERE_

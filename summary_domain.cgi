@@ -35,17 +35,18 @@ else {
 			    "<tt>$d->{'dom'}</tt>");
 	}
 
-# Default domain
-if ($d->{'defaultdomain'}) {
-	print &ui_table_row($text{'check_defhost_desc'},
-			    $text{'yes'});
-	}
-
 # Creator
 print &ui_table_row($text{'edit_created'},
 	$d->{'creator'} ? &text('edit_createdby', &make_date($d->{'created'},1),
 						  $d->{'creator'})
 			: &make_date($d->{'created'}));
+
+# Last login
+if ($config{'show_domains_lastlogin'}) {
+	print &ui_table_row($text{'users_ll'},
+		&human_readable_time($d->{'last_login_timestamp'}) ||
+		$text{'users_ll_never'});
+	}
 
 # Owner
 my $owner = "<tt title='$d->{'user'} ($d->{'uid'})'>$d->{'user'}</tt>";
@@ -182,8 +183,7 @@ if (!$aliasdom && $d->{'dir'}) {
 	}
 
 # Description
-if ($d->{'owner'} && 
-	$d->{'owner'} ne $text{'check_defhost_desc'}) {
+if ($d->{'owner'}) {
 	my $owner = &html_escape($d->{'owner'});
 	if (&can_config_domain($d)) {
 		$owner = &ui_link("edit_domain.cgi?dom=$d->{'id'}", $owner);
@@ -228,6 +228,12 @@ if (&master_admin()) {
 			}
 		print &ui_table_row($text{'edit_whois_exp'}, $exp);
 		}
+	}
+
+# Domain auto disable state
+if ($d->{'disabled_auto'}) {
+	print &ui_table_row($text{'disable_autodisable2'},
+		&make_date($d->{'disabled_auto'}));
 	}
 
 print &ui_table_end();

@@ -59,7 +59,9 @@ foreach my $d (@doms) {
 	
 	# Print message, if anything done
 	if ($count) {
-		&$first_print("<b>".&show_domain_name($d)."</b>");
+		&$first_print("<b>".&show_domain_name($d).
+			($d->{'disabled'} ?
+				" [$text{'enable_disabled'}]" : '')."</b>");
 		if (@errs) {
 			&$second_print("<font color=#ff0000>&nbsp;&nbsp;&mdash;",join("<br>&nbsp;&nbsp;&mdash;\n", @errs),"</font>");
 			}

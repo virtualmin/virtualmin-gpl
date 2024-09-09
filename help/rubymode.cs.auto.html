@@ -1,6 +1,2 @@
-<header> Režim provádění skriptu Ruby </header> Tato volba určuje, zda jsou skripty Ruby spouštěny jako uživatel webového serveru Apache (obvykle <tt>httpd</tt> nebo <tt>apache</tt> ) nebo uživatel Unixu, který vlastní virtuální server. První z nich je rychlejší, protože to znamená, že k provádění Ruby kódu nemusí být spuštěny žádné další procesy, ale méně bezpečné, protože skripty čtou a zapisují soubory jako uživatel jiný než vlastník domény. <p><!--
-If your system supports it, the <b>FCGId</b> option is the best, as it runs
-Ruby scripts quickly and as the domain owner. Otherwise, unless your system is
-heavily loaded or security between users is not an issue, the
-<b>CGI wrapper</b> option is recommended. <p>
---><footer>
+<header>Režim provádění skriptu Ruby</header> Tato volba určuje, zda jsou skripty Ruby spouštěny jako uživatel webového serveru Apache (obvykle <tt>httpd</tt> nebo <tt>apache</tt> ), nebo uživatel Unixu, který vlastní virtuální server. První je rychlejší, protože to znamená, že ke spuštění kódu Ruby není třeba spouštět žádné další procesy, ale je méně bezpečný, protože skripty čtou a zapisují soubory jako jiný uživatel než vlastník domény.<p><footer>
+

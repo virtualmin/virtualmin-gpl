@@ -458,7 +458,7 @@ if ($test) {
 
 # Do it!
 $opts{'reuid'} = $reuid;
-$opts{'reuser'} = $reuser;
+$opts{'mail'}->{'reuser'} = $reuser;
 $opts{'fix'} = $fix;
 $opts{'repl'} = $replication;
 &$first_print("Starting restore..");

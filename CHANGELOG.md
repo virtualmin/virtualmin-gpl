@@ -1,3 +1,27 @@
+#### Version 7.20.1
+* Add support for changing username format to match the local system when restoring a backup
+* Fix a bug that can corrupt the Dovecot config when creation of the default domain fails
+* Fix a bug that can cause CGI scripts to be disabled by default
+
+#### Version 7.20.0
+* Add support to record most recent user logins for virtual servers
+* Add ability to disable domains on given schedule
+* Add support for proxying WebSocket with Apache and Nginx proxy paths
+* Add an API to manage scheduled backups
+* Add the ability to enable DKIM even if the mail feature is disabled
+* Add ability to check the resolvability of alternative names before issuing a Let's Encrypt certificate
+* Add an API to move SSL certificates to a new location if it differs from the active template
+* Add an option to the Website Options page to redirect www to non-www and vice versa (currently for Apache systems only)
+* Add support for host-based redirects (currently for Apache systems only)
+* Fix to change the default settings so that records are not proxied by default when using Cloudflare
+* Fix a bug where CGI execution mode was disabled on initial install
+* Fix PHP modes availability depending on the CGI execution mode
+* Fix a bug with default shell selection when a user is created using the CLI
+* Fix the issue where the last login time is not being updated
+* Fix false-positive warnings about missing IPv6 addresses
+* Fix domain locking bugs
+* Drop support for obsolete or not fully supported mail servers like VPopMail, and Exim
+
 #### Version 7.10.0
 * Add S3 account management integration
 * Add reworked **Edit Users** page with ability to add separate database and webserver users

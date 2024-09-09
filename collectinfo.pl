@@ -40,11 +40,18 @@ if ($info) {
 # Update DB of per-user last login times
 &update_last_login_times();
 
+# Update DB with last user logins for all domains
+&update_domains_last_login_times()
+	if ($config{'show_domains_lastlogin'});
+
 # For any domains that are due for a let's encrypt cert renewal, do it now
 &apply_letsencrypt_cert_renewals();
 
 # Resync all jails
 &copy_all_domain_jailkit_files();
+
+# Check if any domains are setup to be disabled
+&disable_scheduled_virtual_servers();
 
 # Kill disallowed server processes
 if ($config{'check_ports'} == 2) {
@@ -59,12 +66,6 @@ if ($config{'php_session_age'}) {
 	foreach my $d (grep { &domain_has_website($_) } &list_domains()) {
 		my @f = &cleanup_php_sessions($d, 0);
 		}
-	}
-
-# Clean up websockets connections
-if (&foreign_check("xterm")) {
-	&foreign_require("xterm");
-	&xterm::cleanup_miniserv_websockets();
 	}
 
 &run_post_actions_silently();

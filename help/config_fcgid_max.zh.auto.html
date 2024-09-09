@@ -1,1 +1,2 @@
-<header>最大fcgid执行时间</header>默认情况下，Virtualmin设置fastCGI进程的最大执行时间以匹配PHP脚本的执行时间，这由域的<tt>php.ini</tt>文件确定。这样可以确保PHP应用程序不会运行超过预期的时间。 <p>但是，您可以通过在此配置字段中选择<b>“不设置”</b>来禁用此行为。或者，您可以通过选择<b>以秒为单位的时间</b>并输入数字来为fastCGI脚本指定自己的超时<b>时间</b> 。 <p>这是通过设置Apache <tt>IPCCommTimeout</tt>指令或Nginx中的等效指令来实现的。 <p><footer>
+<header>最大 FCGI 执行时间</header>默认情况下，Virtualmin 将 FastCGI 进程的最大执行时间设置为与 PHP 脚本的执行时间相匹配，由域的<tt>php.ini</tt>文件确定。这可确保 PHP 应用程序的运行时间不会超过预期。<p>但是，您可以通过在此配置字段中选择<b>“不设置”</b>来禁用此行为。或者，您可以通过选择<b>“时间（秒）”</b>并输入一个数字来为 fastCGI 脚本指定自己的超时时间。<p>这是通过设置 Apache <tt>IPCCommTimeout</tt>指令或 Nginx 中的等效指令来实现的。<p><footer>
+

@@ -32,7 +32,7 @@ foreach $w (@what) {
 	# Show fields for dest
 	($pfx, $vmode, $vdest) = @$w;
 	$folder = $vmode == 4 || $vmode == 6 ? $vdest :
-		  $pfx eq "spam" ? "Junk" : "Virus";
+		  $pfx eq "spam" ? &default_spam_folder_suffix($d) : "Virus";
 	print &ui_table_row(&hlink($text{'spam_'.$pfx}, 'spam_'.$pfx),
 	 &ui_radio($pfx."_mode", $vmode,
 	  [ [ 0, $text{'spam_'.$pfx.'0'}."<br>" ],

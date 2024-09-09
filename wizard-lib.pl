@@ -14,12 +14,13 @@ return undef;
 sub get_wizard_steps
 {
 return ( "intro",
-	 "memory",
+	 $config{'spam'} ? ( "memory" ) : ( ),
 	 $config{'virus'} ? ( "virus" ) : ( ),
 	 $config{'spam'} ? ( "spam" ) : ( ),
 	 "db",
 	 $config{'mysql'} ? ( "mysql" ) : ( ),
 	 $config{'dns'} ? ( "dns" ) : ( ),
+	 "email",
 	 "done",
 	 "hashpass",
 	 $config{'mysql'} ? ( "mysize" ) : ( ),
@@ -33,24 +34,16 @@ print &ui_table_row(undef,
 	$text{'wizard_intro'}, 2);
 }
 
-# Show a form to enable or disable pre-loading and lookup-domain-daemon
+# Show a form to enable or disable lookup-domain-daemon
 sub wizard_show_memory
 {
-print &ui_table_row(undef, $text{'wizard_memory'}. "<p></p>", 2);
+print &ui_table_row(undef, $text{'wizard_memory2'}. "<p></p>", 2);
 
-local $mem = &get_uname_arch() =~ /64/ ? "40M" : "20M";
-print &ui_table_row($text{'wizard_memory_preload'},
-	&ui_radio("preload", $config{'preload_mode'} ? 1 : 0,
-		  [ [ 1, &text('wizard_memory_preload1', $mem)."<br>" ],
-		    [ 0, $text{'wizard_memory_preload0'} ] ]));
-
-if ($config{'spam'}) {
-	local $mem = &get_uname_arch() =~ /64/ ? "70M" : "35M";
-	print &ui_table_row($text{'wizard_memory_lookup'},
-		&ui_radio("lookup", &check_lookup_domain_daemon(),
-			  [ [ 1, &text('wizard_memory_lookup1', $mem)."<br>" ],
-			    [ 0, $text{'wizard_memory_lookup0'} ] ]));
-	}
+local $mem = &get_uname_arch() =~ /64/ ? "70M" : "35M";
+print &ui_table_row($text{'wizard_memory_lookup'},
+	&ui_radio("lookup", &check_lookup_domain_daemon(),
+		  [ [ 1, &text('wizard_memory_lookup1', $mem)."<br>" ],
+		    [ 0, $text{'wizard_memory_lookup0'} ] ]));
 }
 
 # Enable or disable pre-loading and lookup-domain-daemon
@@ -60,34 +53,17 @@ local ($in) = @_;
 &push_all_print();
 &set_all_null_print();
 
-if ($in->{'preload'} && !$config{'preload_mode'}) {
-	# Turn on preloading
-	$config{'preload_mode'} = 2;
-	&save_module_config();
-	&update_miniserv_preloads(2);
-	&restart_miniserv();
+local $lud = &check_lookup_domain_daemon();
+if ($in->{'lookup'} && !$lud) {
+	# Startup lookup daemon
+	&setup_lookup_domain_daemon();
 	}
-elsif (!$in->{'preload'} && $config{'preload_mode'}) {
-	# Turn off preloading
-	$config{'preload_mode'} = 0;
-	&save_module_config();
-	&update_miniserv_preloads(0);
-	&restart_miniserv();
+elsif (!$in->{'lookup'} && $lud) {
+	# Stop lookup daemon
+	&delete_lookup_domain_daemon();
 	}
-
-if ($config{'spam'}) {
-	local $lud = &check_lookup_domain_daemon();
-	if ($in->{'lookup'} && !$lud) {
-		# Startup lookup daemon
-		&setup_lookup_domain_daemon();
-		}
-	elsif (!$in->{'lookup'} && $lud) {
-		# Stop lookup daemon
-		&delete_lookup_domain_daemon();
-		}
-	$config{'no_lookup_domain_daemon'} = !$in->{'lookup'};
-	&save_module_config();
-	}
+$config{'no_lookup_domain_daemon'} = !$in->{'lookup'};
+&save_module_config();
 
 &pop_all_print();
 return undef;
@@ -232,9 +208,9 @@ sub wizard_show_db
 {
 print &ui_table_row(undef, $text{'wizard_db'}. "<p></p>", 2);
 print &ui_table_row($text{'wizard_db_mysql'},
-                    &ui_yesno_radio("mysql", $config{'mysql'}));
+                    &ui_yesno_radio("mysql", $config{'mysql'} ? 1 : 0));
 print &ui_table_row($text{'wizard_db_postgres'},
-                    &ui_yesno_radio("postgres", $config{'postgres'}));
+                    &ui_yesno_radio("postgres", $config{'postgres'} ? 1 : 0));
 }
 
 # Enable or disable MySQL and PostgreSQL, depending on user's selections
@@ -334,7 +310,7 @@ else {
 				"&nbsp;".&ui_help($text{'wizard_mysql5'});
 			print &ui_hidden("socket", 1);
 			print &ui_table_row($text{'wizard_mysql_pass'},
-			&ui_opt_textbox("mypass", undef, 20,
+			&ui_opt_textbox("mypass", &random_password(16), 20,
 					$text_mysql_def."<br>",
 					$text{'wizard_mysql_pass0'}));
 			}
@@ -419,14 +395,17 @@ if ($in->{'delanon'}) {
 	}
 
 # Work out the max mysql username length, but only for new installs
-if (!$config{'mysql_user_size'}) {
+if ($config{'mysql_user_size_auto'} != 2) {
 	eval {
 		local $main::error_must_die = 1;
 		my @str = &mysql::table_structure($mysql::master_db, "user");
 		my ($ufield) = grep { lc($_->{'field'}) eq 'user' } @str;
 		if ($ufield && $ufield->{'type'} =~ /\((\d+)\)/) {
+			&lock_file($module_config_file);
 			$config{'mysql_user_size'} = $1;
+			$config{'mysql_user_size_auto'} = 2;
 			&save_module_config();
+			&unlock_file($module_config_file);
 			}
 		};
 	}
@@ -626,6 +605,30 @@ $tmpl->{'dns_ns'} = join(" ", @secns);
 # Save skip option
 $config{'prins_skip'} = $in{'prins_skip'};
 &save_module_config();
+}
+
+sub wizard_show_email
+{
+&foreign_require("mailboxes");
+print &ui_table_row(undef, $text{'wizard_email_desc'}, 2);
+
+print &ui_table_row($text{'wizard_from_addr'},
+	&ui_opt_textbox("from_addr", $config{'from_addr'}, 50,
+		$text{'default'}." (".&mailboxes::get_from_address().")<br>",
+		$text{'wizard_from_addr2'}));
+}
+
+sub wizard_parse_email
+{
+local ($in) = @_;
+if ($in->{'from_addr_def'}) {
+	delete($config{'from_addr'});
+	}
+else {
+	$in->{'from_addr'} =~ /\S+\@\S+/ || return $text{'wizard_efrom_addr'};
+	$config{'from_addr'} = $in->{'from_addr'};
+	&save_module_config();
+	}
 }
 
 sub wizard_show_done

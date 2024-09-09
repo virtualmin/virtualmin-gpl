@@ -869,7 +869,8 @@ if ($mysql_module) {
 		my ($mod) = grep { $_->{'minfo'}->{'dir'} eq $mysql_module }
 			         &list_remote_mysql_modules();
 		&$first_print("Moving databases to MySQL server $mod->{'desc'} ..");
-		my $ok = &move_mysql_server($dom, $mysql_module);
+		my $ok = &move_mysql_server($dom, $mysql_module,
+					    $mod->{'config'}->{'host'});
 		if ($ok) {
 			&$second_print($text{'setup_done'});
 			}

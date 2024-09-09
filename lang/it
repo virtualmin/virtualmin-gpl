@@ -546,7 +546,6 @@ edit_bwgraph=Grafico larghezza di banda
 edit_history=Statistiche sistema
 edit_databases=Modifica database
 edit_databasesdesc=Vedi, crea e cancella database associato a questo server virtuale.
-edit_scripts=Installa script
 edit_html=Modifica pagine web
 edit_admins=Gestione extra amministratori
 edit_spamvirus=Consegna spam e virus
@@ -789,7 +788,6 @@ backup_none=Nessuna configurazione
 backup_mode0=File o directory locale
 backup_mode0a=File o directory sotto <tt>virtualmin-backup/<tt>
 backup_mode1=FTP server
-backup_mode2=SSH server
 backup_mode3=Amazon S3 bucket
 backup_mode5=Upload al server
 backup_path=File sul server
@@ -841,7 +839,6 @@ limits_edit_domain=Può modificare i server virtuali
 limits_edit_users=Può gestire utenti
 limits_edit_aliases=Può gestire gli alias
 limits_edit_dbs=Può gestire i database
-limits_edit_scripts=Può installare scripts
 limits_edit_rename=Può rinominare i server virtuali
 limits_edit_ip=Può cambiare l'indirizzo IP
 limits_edit_dnsip=Può cambiare gli indirizzi IP esterni
@@ -1037,16 +1034,10 @@ licence_unlimited=illimitata
 licence_goterr=.. un problema trovato: $1
 licence_ecannot=Non hai i permessi per ricontrollare la licenza di Virtualmin
 
-addscripts_err=Aggiunta del file di installazione fallita
 addscripts_elocal=Il file locale non esiste
 addscripts_eupload=Nessun file da caricare selezionato
 addscripts_eurl=URL non valido o mancante
 addscripts_etar=Estrazione del file tar $1 fallita
-addscripts_efile=Nome del file $1 non valido
-addscripts_title=Aggiungi script di installazione
-addscripts_done=Il file di installazione $1 è stato correttamente aggiunto dal file specificato.
-addscripts_done1=Il file di installazione $1 è stato correttamente aggiunto dal file specificato.
-addscripts_enone=Il file specificato non contiene file di installazione!
 
 defaults_title=Modifica utente predefinito
 defaults_quota=Quota directory home
@@ -1165,8 +1156,6 @@ validate_edir=Home directory $1 inesistente
 
 tscripts_sub=Per template $1
 tscripts_none=Nessuno
-tscripts_name=Script
-
 tscripts_version=Versione
 tscripts_latest=Ultimi disponibili
 tscripts_exact=Sempre
@@ -1332,9 +1321,6 @@ aedit_etwice=Un alias con lo stesso nome è elencato più di una volta
 aedit_eauto=Le risposte automatiche non possono essere configurate quando si modifica manualmente un alias
 
 balancers_title=Percorso proxy
-balancers_urls=Indirizzi di destinazione
-
-balancer_auto=Seleziona automaticamente
 
 history_ecannot=Non hai i permessi per vedere la storia delle statistiche del sistema
 history_month=1 mese
@@ -1453,7 +1439,6 @@ plan_err=Salvataggio piano fallito
 plan_eresellers=Nessun reseller selezionato
 plan_ename=Nome piano mancante
 plan_clone=Clona
-plan_scriptssel=Permesso
 
 dplans_err=Cancellazione piani fallita
 dplans_enone=Nessuno selezionato

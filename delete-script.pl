@@ -2,7 +2,7 @@
 
 =head1 delete-script.pl
 
-Un-install one script from a virtual server
+Un-install one script (web app) from a virtual server
 
 This program completely removes a third-party script from a server. It
 takes the usual C<--domain> parameter to identify the server, and either

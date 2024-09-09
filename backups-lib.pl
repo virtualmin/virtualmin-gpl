@@ -209,6 +209,7 @@ elsif (!$backup->{'enabled'} && $job) {
 sub delete_scheduled_backup
 {
 local ($backup) = @_;
+$backup->{'id'} || &error("Missing backup ID!");
 $backup->{'id'} == 1 && &error("The default backup cannot be deleted!");
 &unlink_file($backup->{'file'});
 
@@ -2202,10 +2203,12 @@ if ($ok) {
 			$lerr =~ s/\r/ /g;
 			my $l = length($key->{'key'});
 			if ($lerr =~ /Good\s+signature\s+from/) {
-				if ($lerr =~ /(key,\s+ID|using\s+\S+\s+key)\s+([A-Za-z0-9]+)/ && substr($2, -$l) eq $key->{'key'}) {
+				if ($lerr =~ /(key,\s+ID|using\s+\S+\s+key)\s+([A-Za-z0-9]+)/ &&
+				    (substr($2, -$l) eq $key->{'key'} || $2 eq substr($key->{'key'}, -length($2)))) {
 					$keyok = 1;
 					}
-				elsif ($lerr =~ /(key\s+ID)\s+([A-Za-z0-9]+)/ && substr($2, -$l) eq $key->{'key'}) {
+				elsif ($lerr =~ /(key\s+ID)\s+([A-Za-z0-9]+)/ &&
+				       (substr($2, -$l) eq $key->{'key'} || $2 eq substr($key->{'key'}, -length($2)))) {
 					$keyok = 1;
 					}
 				}
@@ -2549,7 +2552,7 @@ if ($ok) {
 
 			# If the domain had a custom ugroup before, make sure
 			# it exists on the new system
-			if (!$parentdom && $d->{'gid'} != $d->{'ugid'} &&
+			if (!$parentdom && $d->{'group'} ne $d->{'ugroup'} &&
 			    !getgrnam($d->{'ugroup'})) {
 				if ($skipwarnings) {
 					&$second_print(&text('restore_eugroup2',
@@ -3091,9 +3094,10 @@ elsif (!$ok) {
 
 # If any created restored domains had scripts, re-verify their dependencies
 local @wasmissing = grep { $_->{'wasmissing'} } @$doms;
-if (defined(&list_domain_scripts) && scalar(@wasmissing)) {
+my $bootcount = 0;
+local %scache;
+if (@wasmissing) {
 	&$first_print($text{'restore_phpmods'});
-	local %scache;
 	local (@phpinstalled, $phpanyfailed, @phpbad);
 	foreach my $d (@wasmissing) {
 		local @sinfos = &list_domain_scripts($d);
@@ -3105,6 +3109,9 @@ if (defined(&list_domain_scripts) && scalar(@wasmissing)) {
 					&get_script($sinfo->{'name'});
 				}
 			next if (!$script);
+			my $bfunc = $script->{'bootup_func'};
+			my $sfunc = $script->{'start_server_func'};
+			$bootcount++ if (defined(&$bfunc) || defined(&$bfunc));
 			next if (&indexof('php', @{$script->{'uses'}}) < 0);
 
 			# Work out PHP version for this particular install. Use
@@ -3160,6 +3167,37 @@ if (defined(&list_domain_scripts) && scalar(@wasmissing)) {
 					  $b->[2]->{'desc'}, $b->[3])."<br>\n";
 			}
 		&$second_print($badlist);
+		}
+	}
+
+# If any created restored domains had scripts that started servers at boot
+# time, re-start them
+# XXX re-start regardless?
+if (@wasmissing && $bootcount) {
+	&$first_print($text{'restore_scriptstart'});
+	my $booted = 0;
+	foreach my $d (@wasmissing) {
+		local @sinfos = &list_domain_scripts($d);
+		foreach my $sinfo (@sinfos) {
+			local $script = $scache{$sinfo->{'name'}};
+			next if (!$script);
+			my $bfunc = $script->{'bootup_func'};
+			my $sfunc = $script->{'start_server_func'};
+			next if (!defined(&$bfunc) && !defined(&$bfunc));
+			if (defined(&$bfunc)) {
+				&$bfunc($d, $sinfo->{'opts'});
+				}
+			if (defined(&$sfunc)) {
+				&$sfunc($d, $sinfo->{'opts'});
+				}
+			$booted++;
+			}
+		}
+	if ($booted) {
+		&$second_print(&text('restore_scriptstarted', $booted));
+		}
+	else {
+		&$second_print($text{'restore_noscriptstart'});
 		}
 	}
 
@@ -4301,7 +4339,9 @@ elsif ($proto == 2) {
 	}
 elsif ($proto == 3) {
 	my $s3 = $user ? &get_s3_account($user) : &get_default_s3_account();
-	my $desc = $s3 ? $s3->{'desc'} || &text('backup_nices3akey', $s3->{'access'}) : undef;
+	my $desc = $s3 ? $s3->{'desc'} ||
+			 &text('backup_nices3akey',
+				substr($s3->{'access'}, 0, 3)."***") : undef;
 	$desc ||= &text('backup_nices3akey', $user) if ($user);
 	$desc ||= $text{'backup_nices3unknown'};
 	$rv = $path ?

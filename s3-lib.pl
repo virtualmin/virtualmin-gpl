@@ -58,6 +58,7 @@ return ($err, $warn);
 # Load Perl modules needed by S3 (which are included in Virtualmin)
 sub require_s3
 {
+return if (&has_aws_cmd());
 foreach my $m (@s3_perl_modules) {
 	eval "use $m";
 	die "$@" if ($@);
@@ -968,6 +969,7 @@ return $err;
 sub s3_make_request
 {
 my ($conn, $path, $method, $data, $headers, $authpath) = @_;
+eval "use S3::S3Object";
 my $object = S3::S3Object->new($data);
 $headers ||= { };
 $authpath ||= $path;
@@ -1001,6 +1003,7 @@ if ($s3) {
 &require_s3();
 my $endport;
 ($endpoint, $endport) = split(/:/, $endpoint);
+eval "use S3::AWSAuthConnection";
 return S3::AWSAuthConnection->new($akey, $skey, undef, $endpoint, $endport,
 				  $location);
 }
@@ -1102,7 +1105,14 @@ return ();
 # Returns locations supported by Amazon S3
 sub s3_list_aws_locations
 {
-return ( "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-2", "ap-southeast-3", "ap-southeast-4", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "ca-west-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-south-2", "eu-north-1", "eu-central-2", "il-central-1", "me-south-1", "me-central-1", "sa-east-1", "us-gov-east-1", "us-gov-west-1");
+return ( "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1",
+	 "ap-south-2", "ap-southeast-3", "ap-southeast-4", "ap-south-1",
+	 "ap-northeast-3", "ap-northeast-2", "ap-southeast-1",
+	 "ap-southeast-2", "ap-northeast-1", "ca-central-1", "ca-west-1",
+	 "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3",
+	 "eu-south-2", "eu-north-1", "eu-central-2", "il-central-1",
+	 "me-south-1", "me-central-1", "sa-east-1", "us-gov-east-1",
+	 "us-gov-west-1" );
 }
 
 # can_use_aws_s3_creds()

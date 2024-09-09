@@ -71,6 +71,7 @@ if ($multi) {
 			print "    Plugin module: $pinfo->{'plugin'}\n";
 			print "    Plugin use: $pinfo->{'desc'}\n";
 			}
+		print "    Websockets: ",$b->{'websockets'} ? "Yes" : "No","\n";
 		}
 	}
 elsif ($nameonly) {

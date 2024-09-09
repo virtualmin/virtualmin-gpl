@@ -13,6 +13,7 @@ index_aliases=Aliasů
 index_emailto=Emailová adresa
 index_list=Seznam..
 index_emysql=MySQL pravděpodobně neběží, nebo není nainstalován na Váš systém, nebo nebyl správně nastaven ve Webmin modulu <a href='$1'>Databáze MySQL</a>. Jestliže Váš systém nepoužívá MySQL, měl by být vypnut na stránce <a href='$2'>nastavení modulů</a> Virtualminu.
+
 index_epostgres=PostgreSQL pravděpodobně neběží, nebo není nainstalován na Váš systém, nebo nebyl správně nastaven ve Webmin modulu <a href='$1'>Databáze PostgreSQL</a>. Jestliže Váš systém nepoužívá PostgreSQL, měl by být vypnut na stránce <a href='$2'>nastavení modulů</a> Virtualminu.
 index_mmanage=Spravovat postovni server
 index_dstop=Ukoncit Dovecot
@@ -98,7 +99,6 @@ setup_mysqldb=Vytvářím MySQL databázi $1 ..
 setup_postgresdb=Vytvářím PostgreSQL databázi $1 ..
 setup_save=Ukládám informace o serveru ..
 setup_done=.. hotovo
-setup_scriptclash=.. skript potřebuje vytvořit databázi s názvem $1, která již existuje
 setup_scriptdone=.. hotovo. $1
 
 indom=V doméně $1
@@ -570,11 +570,9 @@ backup_disabled=Zakazano
 backup_mode0=Mistni soubor nebo adresar
 backup_mode0a=Soubor nebo adresar v <tt>virtualmin-backup/</tt>
 backup_mode1=FTP server
-backup_mode2=SSH server
 backup_mode3=Kos Amazon S3
 backup_mode5=Nahrat na server
 backup_ftpserver=FTP server
-backup_sshserver=SSH server
 backup_path=Soubor na serveru
 backup_login=Prihlasit se jako uzivatel
 backup_mailfiles2=Zahrnout soubory s postou
@@ -625,9 +623,7 @@ backup_es3path=Nemuzete urcovat nazev souboru, ma-li byt zaloha provedena do nek
 backup_doing=Zahajeno zalohovani $1 domen do $2 ..
 backup_doing2=Zahajeno zalohovani $1 konfiguraci Virtualminu do $2 ..
 backup_euser=Nepripustne znaky prihlasovani FTP
-backup_epass=Neplatne znaky v hesle FTP - "@", ":" a "/" nelze pouzit
 backup_euser2=Nepripustne znaky prihlasivani SSH
-backup_epass2=Neplatny znak v hesle SSH - @ nelze pouzit
 backup_ebucket=Chybejici ci chyby nazev pouzdra S3
 backup_esfile=Nepripustne znaky v souboru S3
 backup_done=Zaloha provedena. Vysledna velikost zalohy cini $1.
@@ -677,7 +673,6 @@ backup_vtemplates=Sablony serveru
 backup_vresellers=Ucet distributora
 backup_vemail=Emailove zpravy pro nove schranky
 backup_vcustom=Vlastni pole, odkazy a procesy
-backup_vscripts=Instalatory skriptu tretich stran
 backup_vstyles=Styl obsahu modulu tretich stran
 backup_vscheds=Planovane zalohy Virtualmin
 backup_virtualmin=Nastaveni Virtualmin taktez zalohovat
@@ -914,9 +909,6 @@ resel_edefip2=IP adresa není na tomto systému zatím aktivní
 licence_unlimited=neomezená
 
 scripts_longdesc=Popis
-scripts_idesc=Popis skriptu
-scripts_findok=Hledat
-
 mailusers_title=Poslat Vsem
 mailusers_all=Vse
 
@@ -934,16 +926,10 @@ newscripts_src1=Nahraný soubor $1
 newscripts_longdesc=Popis
 newscripts_wother=Emailová adresa
 
-addscripts_err=Pridani skriptu nebylo v poradku dokonceno.
 addscripts_elocal=Lokalni soubor neexistuje.
 addscripts_eupload=Nebyl vybran zadny soubor pro upload.
 addscripts_eurl=Chybejici ci chybna adresa URL
 addscripts_etar=Chyba pri pokusu extrahovat soubor typu tar: $1
-addscripts_efile=Chybny nazev souboru pro skript $1
-addscripts_title=Pridat Skript instalator
-addscripts_done=Instalatory skriptu $1 byly uspesne pridany z urceneho souboru.
-addscripts_done1=Instalator skriptu $1 byl uspesne pridan z urceneho souboru.
-addscripts_enone=Soubor neobsahuje zadny instalator skriptu.
 
 mass_title=Upravit vice uzivatelu najednou
 mass_quota=Kvóta domovského adresáře
@@ -1137,8 +1123,6 @@ amass_done=Vytvoren alias postovni schranky $1
 amass_eclash=Alias se stejnym nazvem jiz existuje
 amass_eunknown=Neznamy prijemne aliasu $1
 
-massu_rusuredb=Data z $1 databází budou také odstraněny.
-
 usage_sdb=Velikost databází
 usage_userheader=Diskový prostor využitý uživateli mailu a FTP na tomto serveru a všech sub-serverech.
 usage_user=Uživatelské jméno
@@ -1282,8 +1266,6 @@ balancers_ecannot=Nejste opravnen upravovat cesty k Proxy teto domeny
 balancers_esupport=Domena ci system nepodporuje proxy
 balancers_add=Pridat novou cestu k Proxy
 balancers_path=URL adresa
-balancers_name=Nazev proxy
-balancers_urls=Cilove URL
 balancers_delete=Odstranit zvolene proxy
 balancers_none=Nebyla doposud definovana zadna cesta k Proxy
 balancers_return=seznam cest k Proxy
@@ -1294,20 +1276,13 @@ balancers_none2=Proxy neni povoleno
 balancer_create=Vytvor cestu k Proxy
 balancer_edit=Upravit cestu k Proxy
 balancer_egone=Zvolena cesta k Proxy jiz neni platna
-balancer_header=Detail HTTP proxy
-balancer_name=Nazev proxy
-balancer_auto=Vybrat automaticky
 balancer_path=Mistni adresa URL
 balancer_urls=Cilove URL
-balancer_url=Cilova URL
 balancer_err=Chyba behem ukladani cesty k Proxy
 balancer_epath=Chybna ci chybejici adresa URL - musi byt ve tvaru / nebo /cokoliv
 balancer_ebalancer=Chybny ci chybejici nazev proxy - lze pouzit pouze pismena a cisla
 balancer_eurl=Chybne cilove URL : $1
-balancer_eurl2=Chybna ci neplatna cilova URL
 balancer_eurls=Nebyla zvolena zadna cilova URL
-balancer_script=Pouzito instalatorem skriptu
-balancer_scriptver=Verze skriptu
 
 scriptwarn_dom=Název domény
 

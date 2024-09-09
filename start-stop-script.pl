@@ -2,7 +2,7 @@
 
 =head1 start-stop-script.pl
 
-Stops, starts or restarts the server process for some script.
+Stops, starts or restarts the server process for some script (web app).
 
 This command can be used to start, stop or restart the server process behind
 some script, such as one using Node.JS or Ruby on Rails. It

@@ -134,9 +134,11 @@ if ($mode =~ /mod_php|none/ && $oldmode !~ /mod_php|none/) {
 	}
 
 my $oldplog;
+my $oldmail;
 if ($mode ne $oldmode) {
-	# Save the PHP error log path
+	# Save the PHP error log path and mail mode
 	$oldplog = &get_domain_php_error_log($d);
+	$oldmail = &get_php_can_send_mail($d);
 	}
 
 # Work out source php.ini files
@@ -599,6 +601,10 @@ if (defined($oldplog)) {
 	# Restore the old PHP error log
 	&save_domain_php_error_log($d, $oldplog);
 	}
+if (defined($oldmail)) {
+	# Restore the old mail option
+	&save_php_can_send_mail($d, $oldmail);
+	}
 
 # Link ~/etc/php.ini to the per-version ini file
 &create_php_ini_link($d, $mode);
@@ -921,7 +927,7 @@ if ($p ne 'web') {
 	return &plugin_call($p, "feature_web_supported_php_modes", $d);
 	}
 my @rv = ( "none" );
-foreach my $ver (&list_available_php_versions()) {
+foreach my $ver (&list_available_php_versions($d, "all")) {
 	push(@rv, @{$ver->[2]});
 	}
 return &unique(@rv);
@@ -938,22 +944,24 @@ return { 'mod_php' => 0,
 	 'none' => 4, };
 }
 
-# list_available_php_versions([&domain], [forcemode])
+# list_available_php_versions([&domain], [forcemode|"all"])
 # Returns a list of PHP versions and their executables installed on the system,
 # for use by a domain. If forcemode is not set, the mode is taken from the
 # domain.
 sub list_available_php_versions
 {
-local ($d, $mode) = @_;
+my ($d, $mode) = @_;
+my $p = &domain_has_website($d);
 if ($d) {
 	$mode ||= &get_domain_php_mode($d);
 	}
+$mode ||= "all";
 return () if ($mode eq "none");
 &require_apache();
 
 # In FPM mode, only the versions for which packages are installed can be used
 my @rv;
-if ($mode eq "fpm" || !$mode) {
+if ($mode eq "fpm" || $mode eq "all") {
 	foreach my $conf (grep { !$_->{'err'} } &list_php_fpm_configs()) {
 		my $ver = $conf->{'shortversion'};
 		my $cmd = $conf->{'cmd'} || &php_command_for_version($ver, 0);
@@ -970,7 +978,7 @@ if ($mode eq "fpm" || !$mode) {
 	}
 
 # Add the mod_php version if installed
-if ($mode eq "mod_php" || !$mode) {
+if ($p eq 'web' && ($mode eq "mod_php" || $mode eq "all")) {
 	my $v = &get_apache_mod_php_version();
 	if ($v) {
 		my $cmd = &has_command("php$v") ||
@@ -1015,19 +1023,39 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 		}
 	}
 
-# Add versions found to the final list
+# Add versions found to the final list for CGI and fcgid modes
+my @hascgi;
+if ($d) {
+	my $m = get_domain_cgi_mode($d);
+	push(@hascgi, $m) if ($m);
+	}
+else {
+	@hascgi = &has_cgi_support();
+	}
+my @cgimodes;
+if ($p eq 'web') {
+	# Under Apache, CGI and fCGId modes need cgi-script support. But fcgid
+	# mode only works with suexec
+	push(@cgimodes, "fcgid") if (&indexof("suexec", @hascgi) >= 0);
+	push(@cgimodes, "cgi") if (@hascgi);
+	}
+else {
+	# Other webservers like Nginx have their own check for supported modes
+	push(@cgimodes, grep { /^(cgi|fcgid)$/ }
+		&plugin_call($p, "feature_web_supported_php_modes", $d));
+	}
 foreach my $v (sort { $a <=> $b } (keys %vercmds)) {
 	my ($already) = grep { $_->[0] eq $v } @rv;
 	if ($already) {
-		$already->[2] = [ &unique(@{$already->[2]}, "fcgid", "cgi") ];
+		$already->[2] = [ &unique(@{$already->[2]}, @cgimodes) ];
 		}
 	else {
-		push(@rv, [ $v, $vercmds{$v}, ["fcgid", "cgi"] ]);
+		push(@rv, [ $v, $vercmds{$v}, [@cgimodes] ]);
 		}
 	}
 
 # If a mode was given, filter down to it
-if ($mode) {
+if ($mode ne "all") {
 	@rv = grep { &indexof($mode, @{$_->[2]}) >= 0 } @rv;
 	}
 
@@ -2494,15 +2522,25 @@ foreach my $conf (@fpms) {
 }
 
 # restart_php_fpm_server([&config])
-# Post-action script to restart the server
+# Post-action script to reload or restart the server
 sub restart_php_fpm_server
 {
 my ($conf) = @_;
 $conf ||= &get_php_fpm_config();
-&$first_print(&text('php_fpmrestart', $conf->{'shortversion'}));
+my $action_mode = $conf->{'init'} ? &init::get_action_mode($conf->{'init'})
+				  : $init::init_mode;
+if ($action_mode eq "systemd") {
+	&$first_print(&text('php_fpmreload', $conf->{'shortversion'}));
+	}
+else {
+	&$first_print(&text('php_fpmrestart', $conf->{'shortversion'}));
+	}
 if ($conf->{'init'}) {
 	&foreign_require("init");
-	my ($ok, $err) = &init::restart_action($conf->{'init'});
+	my ($ok, $err) = &init::reload_action($conf->{'init'});
+	if (!$ok && $err =~ /Not\s+implemented/i) {
+		($ok, $err) = &init::restart_action($conf->{'init'});
+		}
 	if ($ok) {
 		&$second_print($text{'setup_done'});
 		return 1;
@@ -2847,18 +2885,11 @@ elsif ($mode ne "none" && $mode ne "mod_php") {
 		&flush_file_lines($i->[1], undef, 1);
 		&unlock_file($i->[1]);
 		}
-	if ($mode eq 'fcgid') {
-		if ($p eq "web") {
-			&register_post_action(\&restart_apache);
-			}
-		elsif ($p) {
-			&plugin_call($p, "feature_restart_web_php", $d);
-			}
-		}
 	}
 else {
 	return "PHP error log cannot be set in $mode mode";
 	}
+&register_php_restart_action($d);
 $d->{'php_error_log'} = $phplog || "";
 if ($phplog && !-r $phplog) {
 	# Make sure the log file exists
@@ -2870,6 +2901,27 @@ if ($phplog && !-r $phplog) {
 &modify_logrotate($d, $oldd);
 &pop_all_print();
 return undef;
+}
+
+# register_php_restart_action(&domain)
+# Register an action to restart any PHP server for a domain
+sub register_php_restart_action
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+if ($p eq "web") {
+	my $mode = &get_domain_php_mode($d);
+	if ($mode eq "fcgid") {
+		&register_post_action(\&restart_apache);
+		}
+	elsif ($mode eq "fpm") {
+		my $conf = &get_php_fpm_config($d);
+		&register_post_action(\&restart_php_fpm_server, $conf);
+		}
+	}
+else {
+	&register_post_action(\&plugin_call, $p, "feature_restart_web_php", $d);
+	}
 }
 
 # can_php_error_log(&domain|mode)
@@ -2919,6 +2971,258 @@ return "&nbsp;&nbsp;" .
 	&ui_link("showphpinfo.cgi?dom=$dom&dir=$subdir",
 	&ui_help(&text('phpmode_phpinfo_show' . ($subdir ? '_dir' : ''), $subdir)),
 			undef, "target=_blank data-placement=\"$placement\"");
+}
+
+# setup_web_for_php(&domain, &script, php-version)
+# Update a virtual server's web config to add any PHP settings from the template and optionally from a script
+sub setup_web_for_php
+{
+my ($d, $script, $phpver) = @_;
+$phpver ||= &get_domain_php_version($d);
+my $tmpl = &get_template($d->{'template'});
+my $any = 0;
+my $varstr = &substitute_domain_template($tmpl->{'php_vars'}, $d);
+my @tmplphpvars = $varstr eq 'none' ? ( ) : split(/\t+/, $varstr);
+my $p = &domain_has_website($d);
+
+if ($p eq "web" && &get_apache_mod_php_version()) {
+	# Add the PHP variables to the domain's <Virtualhost> in Apache config
+	&require_apache();
+	my $conf = &apache::get_config();
+	my @ports;
+	push(@ports, $d->{'web_port'}) if ($d->{'web'});
+	push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+	foreach my $port (@ports) {
+		my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+		next if (!$virt);
+
+		# Find currently set PHP variables
+		my @phpv = &apache::find_directive("php_value", $vconf);
+		my %got;
+		foreach my $p (@phpv) {
+			if ($p =~ /^(\S+)/) {
+				$got{$1}++;
+				}
+			}
+
+		# Get PHP variables from template
+		my @oldphpv = @phpv;
+		my $changed;
+		foreach my $pv (@tmplphpvars) {
+			my ($n, $v) = split(/=/, $pv, 2);
+			my $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
+			if (!$got{$n}) {
+				push(@phpv, "$n $v");
+				$changed++;
+				}
+			}
+		if ($script && defined(&{$script->{'php_vars_func'}})) {
+			# Get from script too
+			foreach my $v (&{$script->{'php_vars_func'}}($d)) {
+				if (!$got{$v->[0]}) {
+					if ($v->[1] =~ /\s/) {
+						push(@phpv,
+						     "$v->[0] \"$v->[1]\"");
+						}
+					else {
+						push(@phpv, "$v->[0] $v->[1]");
+						}
+					$changed++;
+					}
+				}
+			}
+
+		# Update if needed
+		if ($changed) {
+			&apache::save_directive("php_value",
+						\@phpv, $vconf, $conf);
+			$any++;
+			}
+		&flush_file_lines();
+		}
+	}
+
+# Find PHP variables from template and from script
+my @todo;
+foreach my $pv (@tmplphpvars) {
+	my ($n, $v) = split(/=/, $pv, 2);
+	my $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
+	push(@todo, [ $n, $v, $diff ]);
+	}
+if ($script && defined(&{$script->{'php_vars_func'}})) {
+	push(@todo, &{$script->{'php_vars_func'}}($d));
+	}
+
+# Always set the session.save_path to ~/tmp, as on some systems
+# it is set by default to a directory only writable by Apache
+push(@todo, [ 'session.save_path', &create_server_tmp($d) ]);
+
+# Magic quotes directive not supported in PHP 5.4
+if ($phpver) {
+	my $realver = &get_php_version($phpver, $d);
+	if ($realver >= 5.4) {
+		@todo = grep { $_->[0] ne "magic_quotes_gpc" } @todo;
+		}
+	}
+
+my $phpini = &get_domain_php_ini($d, $phpver);
+if ($phpini && -r $phpini && &foreign_check("phpini")) {
+	# Add the variables to the domain's php.ini file. Start by finding
+	# the variables already set, including those that are commented out.
+	&foreign_require("phpini");
+	my $conf = &phpini::get_config($phpini);
+	my $anyini;
+
+	# Make any needed changes. Variables can be either forced to a
+	# particular value, or have maximums or minumums
+	foreach my $t (@todo) {
+		my ($n, $v, $diff) = @$t;
+		my $ov = &phpini::find_value($n, $conf);
+		my $change = $diff eq '' && $ov ne $v ||
+				$diff eq '+' && &php_value_diff($ov, $v) < 0 ||
+				$diff eq '-' && &php_value_diff($ov, $v) > 0;
+		if ($change) {
+			&phpini::save_directive($conf, $n, $v);
+			if ($n eq "max_execution_time" &&
+			    $config{'fcgid_max'} eq "") {
+				&set_fcgid_max_execution_time($d, $v);
+				}
+			$any++;
+			$anyini++;
+			}
+		}
+
+	if ($anyini) {
+		&write_as_domain_user($d, sub { &flush_file_lines($phpini) });
+		my $p = &domain_has_website($d);
+		if ($p ne "web") {
+			&plugin_call($p, "feature_restart_web_php", $d);
+			}
+		}
+	}
+
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "fpm") {
+	# Update PHP ini values in FPM config file as well
+	foreach my $t (@todo) {
+		my ($n, $v, $diff) = @$t;
+		my $ov = &get_php_fpm_ini_value($d, $n);
+		my $change = $diff eq '' && $ov ne $v ||
+				$diff eq '+' && &php_value_diff($ov, $v) < 0 ||
+				$diff eq '-' && &php_value_diff($ov, $v) > 0;
+		if ($change) {
+			&save_php_fpm_ini_value($d, $n, $v, 1);
+			}
+		}
+	}
+
+# Call web plugin specific variable function
+if ($p && $p ne "web") {
+	&plugin_call($p, "feature_setup_web_for_php", $d, $script, $phpver);
+	}
+
+return $any;
+}
+
+# php_value_diff(value1, value2)
+# Compares two values like 32 and 64 or 8M and 32M. Returns -1 if v1 is < v2,
+# +1 if v1 > v2, or 0 if same
+sub php_value_diff
+{
+my ($v1, $v2) = @_;
+$v1 = $v1 =~ /^(\d+)k/i ? $1*1024 :
+      $v1 =~ /^(\d+)M/i ? $1*1024*1024 :
+      $v1 =~ /^(\d+)G/i ? $1*1024*1024*1024 : $v1;
+$v2 = $v2 =~ /^(\d+)k/i ? $1*1024 :
+      $v2 =~ /^(\d+)M/i ? $1*1024*1024 :
+      $v2 =~ /^(\d+)G/i ? $1*1024*1024*1024 : $v2;
+return $v1 <=> $v2;
+}
+
+# get_php_can_send_mail(&domain)
+# Returns 1 if PHP can send email on this domain
+sub get_php_can_send_mail
+{
+my ($d) = @_;
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "none" || $mode eq "mod_php") {
+	return undef;
+	}
+my $dis;
+if ($mode eq "fpm") {
+	# Get from FPM pool file
+	$dis = &get_php_fpm_ini_value($d, "disable_functions");
+	}
+else {
+	# Get from php.ini
+	&foreign_require("phpini");
+	my @inis = &list_domain_php_inis($d);
+	return undef if (!@inis);
+	foreach my $i (@inis) {
+		my $pconf = &phpini::get_config($i->[1]);
+		$dis = &phpini::find_value("disable_functions", $pconf);
+		last if ($dis);
+		}
+	}
+my @dis = split(/\s*,\s*/, $dis);
+return &indexof("mail", @dis) >= 0 ? 0 : 1;
+}
+
+# save_php_can_send_mail(&domain, can-send)
+# Update the PHP config to allow or disallow sending email
+sub save_php_can_send_mail
+{
+my ($d, $canmail) = @_;
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "none" || $mode eq "mod_php") {
+	return $text{'phpmode_esendmode'};
+	}
+my $dis;
+my @inis;
+if ($mode eq "fpm") {
+	# Get the current value from the FPM pool
+	$dis = &get_php_fpm_ini_value($d, "disable_functions");
+	}
+else {
+	# Get the current value from php.ini
+	&foreign_require("phpini");
+	@inis = &list_domain_php_inis($d);
+	foreach my $i (@inis) {
+		my $pconf = &phpini::get_config($i->[1]);
+		$dis = &phpini::find_value("disable_functions", $pconf);
+		last if ($dis);
+		}
+	}
+
+# Add or remove the mail disable
+my @dis = split(/\s*,\s*/, $dis);
+my $idx = &indexof("mail", @dis);
+if ($idx < 0 && !$canmail) {
+	push(@dis, "mail");
+	}
+elsif ($idx >= 0 && $canmail) {
+	splice(@dis, $idx, 1);
+	}
+$dis = join(",", @dis);
+
+if ($mode eq "fpm") {
+	# Update the FPM pool file
+	&save_php_fpm_ini_value($d, "disable_functions", $dis || undef, 0);
+	}
+else {
+	# Update all php.ini files
+	&foreign_require("phpini");
+	@inis || return $text{'phpmode_ephpinis'};
+	foreach my $i (@inis) {
+		&lock_file($i->[1]);
+		my $pconf = &phpini::get_config($i->[1]);
+		&phpini::save_directive($pconf, "disable_functions", $dis || undef);
+		&flush_file_lines($i->[1], undef, 1);
+                &unlock_file($i->[1]);
+                }
+	}
+&register_php_restart_action($d);
+return undef;
 }
 
 1;

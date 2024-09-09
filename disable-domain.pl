@@ -20,6 +20,12 @@ use C<--disable web>.
 To have all sub-servers owned by the same user as the specified server
 disabled as well, use the C<--subservers> flag.
 
+To schedule a domain to be disabled at a later time, use the C<--schedule>
+flag followed by a number of days or a Unix timestamp. For example, to
+disable a domain in 3 days use C<--schedule 3> or to disable it on a specific
+datetime use C<--schedule 3400606800> where 3400606800 is a Unix timestamp. To
+cancel a scheduled disable, use C<--schedule none>.
+
 =cut
 
 package virtual_server;
@@ -60,6 +66,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--feature") {
 		push(@feats, shift(@ARGV));
 		}
+	elsif ($a eq "--schedule") {
+		$scheduled = 1;
+		$schedule = shift(@ARGV);
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -75,29 +85,58 @@ $d || &usage("Virtual server $domain does not exist");
 $d->{'disabled'} && &usage("Virtual server $domain is already disabled");
 @doms = ( $d );
 
-# If disabling sub-servers, find them too
-if ($subservers && !$d->{'parent'}) {
-	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
-		if (!$sd->{'disabled'}) {
-			push(@doms, $sd);
+if ($scheduled) {
+	if ($schedule eq "none") {
+		# Cancel scheduled disable
+		print "Turning off disable schedule for $d->{'dom'} ..\n";
+		&lock_domain($d);
+		delete($d->{'disabled_auto'});
+		&save_domain($d);
+		&unlock_domain($d);
+		print ".. done\n";
+		}
+	elsif ($schedule =~ /^(\d+(?:\.\d+)?)$/) {
+		# Schedule can either be a timestamp or a number of days
+		$schedule = time() + int($schedule * 86400)
+			if ($schedule < 365*10);
+		$schedule > time() || &usage("Disable time must be in the future");
+		my $amsg = $d->{'disabled_auto'} ? "Updating" : "Setting";
+		print "$amsg up disable schedule for $d->{'dom'} to @{[&make_date($schedule)]} ..\n";
+		&lock_domain($d);
+		$d->{'disabled_auto'} = $schedule;
+		&save_domain($d);
+		&unlock_domain($d);
+		print ".. done\n";
+		}
+	else {
+		&usage("Invalid schedule time $schedule");
+		}
+	}
+else {
+	# If disabling sub-servers, find them too
+	if ($subservers && !$d->{'parent'}) {
+		foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
+			if (!$sd->{'disabled'}) {
+				push(@doms, $sd);
+				}
 			}
 		}
-	}
 
-foreach $d (@doms) {
-	print "Disabling virtual server $d->{'dom'} ..\n\n";
-	if ($d->{'protected'}) {
-		print ".. skip : protected domain\n\n";
-		next;
+	foreach $d (@doms) {
+		print "Disabling virtual server $d->{'dom'} ..\n\n";
+		if ($d->{'protected'}) {
+			print ".. skip : protected domain\n\n";
+			next;
+			}
+		$err = &disable_virtual_server($d, 'manual', $why,
+					@feats ? \@feats : undef);
+		&usage($err) if ($err);
 		}
-	$err = &disable_virtual_server($d, 'manual', $why,
-				       @feats ? \@feats : undef);
-	&usage($err) if ($err);
-	}
 
-&run_post_actions();
-&virtualmin_api_log(\@OLDARGV, $doms[0]);
-print "All done!\n";
+	&run_post_actions();
+	&virtualmin_api_log(\@OLDARGV, $doms[0]);
+	print "All done!\n";
+	}
 
 sub usage
 {
@@ -108,6 +147,7 @@ print "virtualmin disable-domain --domain domain.name\n";
 print "                         [--why \"explanation for disable\"]\n";
 print "                         [--subservers]\n";
 print "                         [--feature name]*\n";
+print "                         [--schedule days|timestamp|none]\n";
 exit(1);
 }
 
