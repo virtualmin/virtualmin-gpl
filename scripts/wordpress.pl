@@ -1097,26 +1097,28 @@ my @visdoms = sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }
 		&list_visible_domains();
 my $doms_select = &ui_select("clone_dom", undef,
 	[ map { [ $_->{'id'}, &show_domain_name($_) ] } @visdoms ]);
-my $opts_path = "$opts->{'path'}-clone";
-$opts_path =~ s/\///;
+my $opts_path_placeholder = "$opts->{'path'}";
+$opts_path_placeholder =~ s/\///;
+$opts_path_placeholder ||= $sinfo->{'name'};
+$opts_path_placeholder .= '-clone';
 $clone_target = &ui_radio_table("clone_target", 1,
 	[ [ 1, $text{'scripts_kit_clone_target1'},
 		&ui_textbox("clone_target", undef, 15, undef, undef,
-			"placeholder='$opts->{'path'}-clone'") ],
+			"placeholder='$opts_path_placeholder'") ],
 	  [ 2, $text{'scripts_kit_clone_target2'},
 		$doms_select."&nbsp;/&nbsp;&nbsp;".
 		&ui_textbox("clone_target", undef, 15, undef, undef,
-			"placeholder='$opts_path'")],
+			"placeholder='$opts_path_placeholder'")],
 	  [ 3, $text{'scripts_kit_clone_target3'},
 		&ui_textbox("clone_subdom", undef, 5, undef, undef,
 			"placeholder='sub1'").
 		"&nbsp;.&nbsp;&nbsp;$doms_select&nbsp;/&nbsp;&nbsp;".
 		&ui_textbox("clone_target", undef, 15, undef, undef,
-			"placeholder='$opts_path'") ],
+			"placeholder='$opts_path_placeholder'") ],
 	  [ 4, $text{'scripts_kit_clone_target4'},
 		&ui_textbox("clone_dom", "", 20). "&nbsp;/&nbsp;&nbsp;".
 		&ui_textbox("clone_target", undef, 15, undef, undef,
-			"placeholder='$opts_path'") ],
+			"placeholder='$opts_path_placeholder'") ],
 	]);
 $clone_tab_content .= &ui_table_row(
 	&hlink($text{'scripts_kit_clone_target'},
