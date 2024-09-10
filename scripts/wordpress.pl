@@ -1095,8 +1095,11 @@ my $clone_target;
 my @visdoms = sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }
 	      grep { !$_->{'parent'} && &can_config_domain($_) }
 		&list_visible_domains();
-my $doms_select = &ui_select("clone_dom", undef,
-	[ map { [ $_->{'id'}, &show_domain_name($_) ] } @visdoms ]);
+my $doms_select = sub {
+	my $name = shift;
+	&ui_select($name, undef,
+		[ map { [ $_->{'id'}, &show_domain_name($_) ] } @visdoms ]);
+	};
 my $opts_path_placeholder = "$opts->{'path'}";
 $opts_path_placeholder =~ s/\///;
 $opts_path_placeholder ||= $sinfo->{'name'};
@@ -1106,13 +1109,15 @@ $clone_target = &ui_radio_table("clone_target", 1,
 		&ui_textbox("clone_target", undef, 15, undef, undef,
 			"placeholder='$opts_path_placeholder'") ],
 	  [ 2, $text{'scripts_kit_clone_target2'},
-		$doms_select."&nbsp;/&nbsp;&nbsp;".
+		$doms_select->('dom_clone_existing')."&nbsp;/&nbsp;&nbsp;".
 		&ui_textbox("clone_target", undef, 15, undef, undef,
 			"placeholder='$opts_path_placeholder'")],
 	  [ 3, $text{'scripts_kit_clone_target3'},
-		&ui_textbox("clone_subdom", undef, 5, undef, undef,
+		&ui_textbox("clone_subname", undef, 5, undef, undef,
 			"placeholder='sub1'").
-		"&nbsp;.&nbsp;&nbsp;$doms_select&nbsp;/&nbsp;&nbsp;".
+		"&nbsp;.&nbsp;&nbsp;".
+			$doms_select->('dom_clone_subdom').
+			"&nbsp;/&nbsp;&nbsp;".
 		&ui_textbox("clone_target", undef, 15, undef, undef,
 			"placeholder='$opts_path_placeholder'") ],
 	  [ 4, $text{'scripts_kit_clone_target4'},
@@ -1126,25 +1131,25 @@ $clone_tab_content .= &ui_table_row(
 $clone_tab_content .= &ui_table_row(
 	&hlink($text{"${_t}url_cloned"}, "kit_wp_url_cloned"),
 		&ui_opt_textbox(
-			"kit_option_siteurl_cloned", undef, 35,
+			"kit_clone_option_siteurl", undef, 35,
 			$text{'scripts_kit_auto'} . "<br>",
 		$text{'edit_set'}), 2);
 $clone_tab_content .= &ui_table_row(
 	&hlink($text{"${_t}blogname_cloned"}, "kit_wp_blogname_cloned"),
 		&ui_opt_textbox(
-			"kit_option_blogname_cloned", undef, 25,
+			"kit_clone_option_blogname", undef, 25,
 			$text{'scripts_kit_nochange'} . "<br>",
 		$text{'edit_set'}), 2);
 $clone_tab_content .= &ui_table_row(
 	&hlink($text{"${_t}admin_email_cloned"}, "kit_wp_admin_email_cloned"),
 		&ui_opt_textbox(
-			"kit_option_admin_email_cloned", undef, 30,
+			"kit_clone_option_admin_email", undef, 30,
 			$text{'scripts_kit_nochange'} . "<br>",
 		$text{'edit_set'}), 2);
 $clone_tab_content .= &ui_table_row(
 	&hlink($text{"${_t}user_pass_cloned"}, "kit_wp_user_pass_cloned"),
 		&ui_opt_textbox(
-			"kit_user_user_pass_cloned", undef, 20,
+			"kit_clone_user_user_pass", undef, 20,
 			$text{'scripts_kit_nochange'} . "<br>",
 		$text{'edit_set'}), 2);
 $clone_tab_content .= &ui_table_end();
