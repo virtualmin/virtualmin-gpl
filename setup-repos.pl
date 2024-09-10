@@ -74,7 +74,7 @@ if ($serial && $key) {
 &$first_print("Setting up Virtualmin software repositories ..");
 my $shcmd = &has_command('sh');
 my ($out, $err);
-&execute_command("INTERACTIVE_MODE=off $shcmd setup-repos.sh --setup --force", undef, \$out, \$err);
+&execute_command("INTERACTIVE_MODE=off $shcmd setup-repos.sh --setup", undef, \$out, \$err);
 if ($?) {
 	&$second_print("..error : @{[setup_error($err || $out)]}");
 	}
