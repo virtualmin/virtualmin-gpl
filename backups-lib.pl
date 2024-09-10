@@ -2494,6 +2494,26 @@ if ($ok) {
 				$d->{'reseller'} = join(" ", @existing);
 				}
 
+			# Does the ACME provider exist?
+			if ($d->{'letsencrypt_id'} &&
+			    $d->{'letsencrypt_renew'}) {
+				if (defined(&list_acme_providers)) {
+					($acme) = grep { $_->{'id'} eq $d->{'letsencrypt_id'} } &list_acme_providers();
+					}
+				elsif ($d->{'letsencrypt_id'} eq '1') {
+					$acme = { 'type' => 'letsencrypt' };
+					}
+				if (!$acme && $skipwarnings) {
+					&$second_print($text{'restore_eacme2'});
+					delete($d->{'letsencrypt_id'});
+					}
+				elsif (!$acme) {
+					&$second_print($text{'restore_eacme'});
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
+					}
+				}
+
 			# Does the remote MySQL server module exist? If not,
 			# use the default. However, if this is a sub-server,
 			# always use the setting from parent.
