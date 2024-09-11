@@ -2495,8 +2495,7 @@ if ($ok) {
 				}
 
 			# Does the ACME provider exist?
-			if ($d->{'letsencrypt_id'} &&
-			    $d->{'letsencrypt_renew'}) {
+			if ($d->{'letsencrypt_id'}) {
 				if (defined(&list_acme_providers)) {
 					($acme) = grep { $_->{'id'} eq $d->{'letsencrypt_id'} } &list_acme_providers();
 					}
