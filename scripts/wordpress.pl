@@ -1092,13 +1092,13 @@ $clone_tab_content .=
 $clone_tab_content .=
 	&ui_table_row($text{'scripts_kit_clone_source2'}, $opts->{'dir'}, 2);
 my $clone_target;
-my @visdoms = sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }
-	      grep { !$_->{'parent'} && &can_config_domain($_) }
-		&list_visible_domains();
+my @vdoms = sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }
+	    grep { &can_config_domain($_) } &list_visible_domains();
+my @edoms = grep {  $_->{'dom'} ne $d->{'dom'} } @vdoms;
 my $doms_select = sub {
-	my $name = shift;
+	my ($name, $doms) = @_;
 	&ui_select($name, undef,
-		[ map { [ $_->{'id'}, &show_domain_name($_) ] } @visdoms ]);
+		[ map { [ $_->{'id'}, &show_domain_name($_) ] } @{$doms} ]);
 	};
 my $opts_path_placeholder = "$opts->{'path'}";
 $opts_path_placeholder =~ s/\///;
@@ -1106,24 +1106,26 @@ $opts_path_placeholder ||= $sinfo->{'name'};
 $opts_path_placeholder .= '-clone';
 $clone_target = &ui_radio_table("clone_target", 1,
 	[ [ 1, $text{'scripts_kit_clone_target1'},
-		&ui_textbox("clone_target", undef, 15, undef, undef,
+		&ui_textbox("clone_dir", undef, 15, undef, undef,
 			"placeholder='$opts_path_placeholder'") ],
-	  [ 2, $text{'scripts_kit_clone_target2'},
-		$doms_select->('dom_clone_existing')."&nbsp;/&nbsp;&nbsp;".
-		&ui_textbox("clone_target", undef, 15, undef, undef,
-			"placeholder='$opts_path_placeholder'")],
-	  [ 3, $text{'scripts_kit_clone_target3'},
-		&ui_textbox("clone_subname", undef, 5, undef, undef,
-			"placeholder='sub1'").
-		"&nbsp;.&nbsp;&nbsp;".
-			$doms_select->('dom_clone_subdom').
-			"&nbsp;/&nbsp;&nbsp;".
-		&ui_textbox("clone_target", undef, 15, undef, undef,
-			"placeholder='$opts_path_placeholder'") ],
-	  [ 4, $text{'scripts_kit_clone_target4'},
-		&ui_textbox("clone_dom", "", 20). "&nbsp;/&nbsp;&nbsp;".
-		&ui_textbox("clone_target", undef, 15, undef, undef,
-			"placeholder='$opts_path_placeholder'") ],
+	  @edoms ? 
+	  	[ 2, $text{'scripts_kit_clone_target2'},
+		     $doms_select->('clone_dom', \@edoms)."&nbsp;/&nbsp;&nbsp;".
+		     &ui_textbox("clone_dom_dir", undef, 15, undef, undef,
+		     	"placeholder='$opts_path_placeholder'")] : (),
+	  &can_create_sub_servers() ?
+	  	[ 3, $text{'scripts_kit_clone_target3'},
+			&ui_textbox("clone_subdom_name", undef, 5, undef, undef,
+				"placeholder='sub1'")."&nbsp;.&nbsp;&nbsp;".
+				$doms_select->('clone_subdom_dom', \@vdoms).
+				"&nbsp;/&nbsp;&nbsp;".
+			&ui_textbox("clone_subdom_dir", undef, 15, undef, undef,
+				"placeholder='$opts_path_placeholder'") ] : (),
+	  (&master_admin() || &reseller_admin()) ? 
+		[ 4, $text{'scripts_kit_clone_target4'},
+		     &ui_textbox("clone_newdom", "", 20). "&nbsp;/&nbsp;&nbsp;".
+		     &ui_textbox("clone_newdom_dir", undef, 15, undef, undef,
+		     	"placeholder='$opts_path_placeholder'") ] : (),
 	]);
 $clone_tab_content .= &ui_table_row(
 	&hlink($text{'scripts_kit_clone_target'},
