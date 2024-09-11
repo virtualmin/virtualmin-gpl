@@ -74,6 +74,10 @@ elsif ($type eq "resel") {
 elsif ($type eq "resels") {
 	return &text('log_'.$action.'_resels', $object);
 	}
+elsif ($type eq "acme") {
+	return &text('log_'.$action.'_acme',
+		     "<tt>".($p->{'type'} || $p->{'url'})."</tt>");
+	}
 elsif ($type eq "template") {
 	return &text('log_'.$action.'_template', &html_escape($object));
 	}

@@ -2485,6 +2485,9 @@ log_clear_dnscloud=Cleared cloud DNS provider $1
 log_create_s3=Added S3 account $1
 log_delete_s3=Removed S3 account $1
 log_update_s3=Updated S3 account $1
+log_create_acme=Added SSL provider for $1
+log_delete_acme=Removed SSL provider for $1
+log_update_acme=Updated SSL provider for $1
 
 backup_title=Backup Virtual Servers
 backup_title2=Edit Scheduled Backup
