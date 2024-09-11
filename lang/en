@@ -4711,6 +4711,12 @@ scripts_kit_wp_apply_restore_eopen=.. failed to open temporary directory : $1
 scripts_kit_wp_apply_restore_er=.. done, with errors
 scripts_kit_wp_apply_restore_db=Restoring database from backup ..
 scripts_kit_wp_apply_restore_files=Restoring files from backup ..
+scripts_kit_wp_apply_clone1=Creating clone under the same domain ..
+scripts_kit_wp_apply_clone2=Creating clone under <tt>$1</tt> domain ..
+scripts_kit_wp_apply_clone3=Creating clone under new <tt>$1</tt> sub-domain ..
+scripts_kit_wp_apply_clone4=Creating clone under new <tt>$1</tt> top-level domain ..
+scripts_kit_wp_apply_clone_eclone=.. failed : you are not allowed to create this type of clone
+scripts_kit_wp_apply_clone_edir=.. failed : clone directory cannot start with a slash
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up
