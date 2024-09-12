@@ -34,7 +34,7 @@ if ($config{'mail'} && $config{'mail_system'} == 0) {
 		   'virt' => 1,
 		   'short' => 'p' });
 	}
-if ($config{'ftp'}) {
+if ($config{'ftp'} || &foreign_installed("proftpd")) {
 	push(@rv, {'id' => 'proftpd',
 		   'dom' => 0,
 		   'virt' => 1,
@@ -215,7 +215,7 @@ if ($config{'mail_system'} == 0) {
 		}
 	}
 
-if ($config{'ftp'}) {
+if ($config{'ftp'} || &foreign_installed("proftpd")) {
 	# Check ProFTPd per-IP certificate
 	&foreign_require("proftpd");
 	my $conf = &proftpd::get_config();
