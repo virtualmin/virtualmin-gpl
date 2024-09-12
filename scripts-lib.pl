@@ -699,14 +699,14 @@ my $sdbpass = $sdbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
 return ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass);
 }
 
-# update_all_installed_scripts_database_credentials(&domain, &olddomain, option-record-type, option-record-value, database-type)
+# update_all_installed_scripts_database_credentials(&domain, &olddomain, option-record-type, option-record-value, database-type, $script-info)
 # Updates script's given database related setting option (db-username, db-password, db-name)
 # with a new value for all installed scripts under the given virtual server, considering database type,
 # in case installed script supports it (uses database).
 sub update_all_installed_scripts_database_credentials
 {
-my ($d, $oldd, $type, $value, $dbtype) = @_;
-my @domain_scripts = &list_domain_scripts($d);
+my ($d, $oldd, $type, $value, $dbtype, $sinfo) = @_;
+my @domain_scripts = $sinfo ? ($sinfo) : &list_domain_scripts($d);
 my ($printed_type, @printed_name);
 foreach my $script (@domain_scripts) {
 	my $sname = $script->{'name'};
