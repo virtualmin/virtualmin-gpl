@@ -3335,7 +3335,6 @@ if ($acme) {
 		}
 	}
 my ($ok, $cert, $key, $chain, @errs);
-my @tried = $config{'letsencrypt_retry'} ? (0..1) : (1);
 $dnames = &filter_ssl_wildcards($dnames);
 $size ||= $config{'key_size'};
 &foreign_require("webmin");
@@ -3350,8 +3349,7 @@ $actype_reuse = -1 if (!$dcalgo || !$dclets);
 my @wilds = grep { /^\*\./ } @$dnames;
 &lock_file($ssl_letsencrypt_lock);
 &disable_quotas($d);
-foreach (@tried) {
-	my $try = $_;
+foreach my $try (0, 1) {
 	@errs = ();
 	if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
 		# Try using website first
