@@ -167,20 +167,6 @@ else {
 				}
 			}
 		}
-	elsif ($d->{'public_html_path'}) {
-		# If a custom HTML directory was requested, set it up
-		local $mydir;
-		foreach my $dir (@dirs) {
-			if ($dir =~ /^\s*DocumentRoot\s+"([^"]+)"/ ||
-			    $dir =~ /^\s*DocumentRoot\s+(\S+)/) {
-				$mydir = $1;
-				$dir = "DocumentRoot $d->{'public_html_path'}";
-				}
-			elsif ($dir =~ /^\s*<Directory\s+\Q$mydir\E>/ && $mydir) {
-				$dir = "<Directory $d->{'public_html_path'}>";
-				}
-			}
-		}
 
 	# Work out where in the file to add.
 	# If this domain is foo.bar.com and a virtual host for *.bar.com exists
@@ -211,9 +197,22 @@ else {
 		}
 	undef(@apache::get_config_cache);
 
-	# Same the HTML and CGI dirs that we set
+	# Set the public HTML directory based on the template or domain config
 	if (!$d->{'alias'} && !$d->{'subdom'}) {
-		&find_html_cgi_dirs($d);
+		my $htmldir;
+		if ($d->{'public_html_dir'}) {
+			# Typically set during migration
+			$htmldir = $d->{'public_html_dir'};
+			}
+		elsif ($tmpl->{'web_html_dir'}) {
+			# Custom template
+			$htmldir = $tmpl->{'web_html_dir'};
+			}
+		else {
+			# Standard default
+			$htmldir = "public_html";
+			}
+		&set_public_html_dir($d, $htmldir);
 		}
 
 	# Redirect webmail and admin to Usermin and Webmin, if enabled in
