@@ -440,5 +440,35 @@ my ($balancer) = grep { $_->{'path'} eq $path } &list_proxy_balancers($d);
 &delete_proxy_balancer($d, $balancer) if ($balancer);
 }
 
+# add_unix_localhost(&balancer)
+# If a balancer URL is missing the |http:// suffix, add it
+sub add_unix_localhost
+{
+my ($b) = @_;
+foreach my $u (@{$b->{'urls'}}) {
+	if ($u =~ /^unix:/ && $u !~ /\|/) {
+		# Need to append localhost URL
+		$u .= "|http://127.0.0.1";
+		}
+	}
+}
+
+# remove_unix_localhost(&balancer, always-remove-suffix)
+# If a balancer URL has the |http://127.0.0.1 suffix, remove it (for display)
+sub remove_unix_localhost
+{
+my ($b, $always) = @_;
+foreach my $u (@{$b->{'urls'}}) {
+	if ($u =~ /^unix:/) {
+		if ($always) {
+			$u =~ s/\|.*$//;
+			}
+		else {
+			$u =~ s/\|http:\/\/127.0.0.1\/?//;
+			}
+		}
+	}
+}
+
 1;
 

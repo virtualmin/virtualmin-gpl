@@ -32,6 +32,7 @@ foreach $b (@balancers) {
 				&ui_link($pinfo->{'link'}, $pinfo->{'desc'}) :
 				$pinfo->{'desc'};
 		}
+	&remove_unix_localhost($b);
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $b->{'path'} },

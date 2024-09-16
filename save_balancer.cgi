@@ -58,7 +58,9 @@ else {
 	else {
 		# One URL
 		if (&can_balancer_unix()) {
-			$in{'urls'} =~ /^(http|https|ajp|fcgi|scgi):\/\/(\S+)$|^unix:(\/\S+)\|\S+:\/\/\S+$/ ||
+			$in{'urls'} =~ /^(http|https|ajp|fcgi|scgi):\/\/(\S+)$/ ||
+			  $in{'urls'} =~ /^unix:(\/\S+)\|\S+:\/\/\S+$/ ||
+			    $in{'urls'} =~ /^unix:(\/\S+)$/ ||
 				&error($text{'balancer_eurl2'});
 			}
 		else {
@@ -68,6 +70,7 @@ else {
 		$b->{'urls'} = [ $in{'urls'} ];
 		$b->{'none'} = 0;
 		}
+	&add_unix_localhost($b);
 	$b->{'websockets'} = $in{'websockets'};
 	&error($text{'balancer_ewsbalancer'})
 		if ($b->{'balancer'} && $b->{'websockets'});
