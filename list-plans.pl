@@ -39,7 +39,11 @@ while(@ARGV > 0) {
 		$idonly = 1;
 		}
 	elsif ($a eq "--multiline") {
-		$multiline = 1;
+		$multi = 1;
+		}
+	elsif ($a eq "--multiline-json") {
+		$multi = 1;
+		&cli_list_catch_convert_stdout_to_json();
 		}
 	elsif ($a eq "--id") {
 		$planid = shift(@ARGV);
@@ -82,7 +86,7 @@ elsif ($idonly) {
 		print $plan->{'id'},"\n";
 		}
 	}
-elsif ($multiline) {
+elsif ($multi) {
 	# Full details
 	foreach $plan (@plans) {
 		print $plan->{'id'},"\n";
@@ -157,7 +161,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the available account plans for virtual servers.\n";
 print "\n";
-print "virtualmin list-plans [--name-only | --multiline]\n";
+print "virtualmin list-plans [--multiline | --multiline-json]\n";
 print "                      [--id number | --name \"plan name\"]\n";
 exit(1);
 }

@@ -47,6 +47,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
+	elsif ($a eq "--multiline-json") {
+		$multi = 1;
+		&cli_list_catch_convert_stdout_to_json();
+		}
 	elsif ($a eq "--id-only") {
 		$idonly = 1;
 		}
@@ -174,7 +178,7 @@ print "\n";
 print "virtualmin list-scheduled-backups [--domain domain.name |\n";
 print "                                   --user name |\n";
 print "                                   --reseller name]\n";
-print "                                  [--multiline | --id-only]\n";
+print "                                  [--multiline | --multiline-json | --id-only]\n";
 exit(1);
 }
 

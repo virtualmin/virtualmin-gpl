@@ -38,7 +38,11 @@ while(@ARGV > 0) {
 		$short = 0;
 		}
 	elsif ($a eq "--multiline") {
-		$multiline = 1;
+		$multi = 1;
+		}
+	elsif ($a eq "--multiline-json") {
+		$multi = 1;
+		&cli_list_catch_convert_stdout_to_json();
 		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
@@ -86,7 +90,7 @@ foreach my $c (&list_api_categories()) {
 		my $scmd = $cmd;
 		$scmd =~ s/^.*\///;
 		$scmd =~ s/\.pl$// if ($short);
-		if ($multiline) {
+		if ($multi) {
 			# Show a block for the command
 			print $scmd,"\n";
 			print "    Description: $desc\n";
@@ -118,7 +122,7 @@ foreach my $c (&list_api_categories()) {
 			printf $fmt, "", $wrap if ($wrap);
 			}
 		}
-	if ($donehead && !$multiline && !$nameonly) {
+	if ($donehead && !$multi && !$nameonly) {
 		print "\n";
 		}
 	}

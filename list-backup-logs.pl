@@ -74,6 +74,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
+	elsif ($a eq "--multiline-json") {
+		$multi = 1;
+		&cli_list_catch_convert_stdout_to_json();
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -220,6 +224,6 @@ print "                            [--failed | --succeeded]\n";
 print "                            [--mode \"cgi\"|\"sched\"|\"api\"]\n";
 print "                            [--start yyyy-mm-dd]\n";
 print "                            [--end yyyy-mm-dd]\n";
-print "                            [--multiline]\n";
+print "                            [--multiline | --multiline-json]\n";
 exit(1);
 }
