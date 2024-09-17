@@ -28,7 +28,7 @@ return undef;
 sub convert_remote_format
 {
 my ($out, $ex, $cmd, $in, $format) = @_;
-my $arr = ref($out) eq 'ARRAY';
+
 # Parse into a data structure
 my $data = { 'command' => $cmd,
 	     'status' => $ex ? 'failure' : 'success',
@@ -40,8 +40,8 @@ if ($ex) {
 	$data->{'error'} = $err;
 	$data->{'full_error'} = $out;
 	}
-elsif (!$arr && ($cmd =~ /^(list\-|get-dns)/ && defined($in->{'multiline'}) ||
-       $cmd =~ /^(list\-php\-ini|get\-command)/)) {
+elsif ($cmd =~ /^(list\-|get-dns)/ && defined($in->{'multiline'}) ||
+       $cmd =~ /^(list\-php\-ini|get\-command)/) {
 	# Parse multiline output into data structure
 	my @lines = split(/\r?\n/, $out);
 	my $obj;
@@ -69,14 +69,14 @@ elsif (!$arr && ($cmd =~ /^(list\-|get-dns)/ && defined($in->{'multiline'}) ||
 		}
 	$data->{'data'} = \@data;
 	}
-elsif (!$arr && ($cmd =~ /^list\-/ &&
-       (defined($in->{'name-only'}) || defined($in->{'id-only'})))) {
+elsif ($cmd =~ /^list\-/ &&
+       (defined($in->{'name-only'}) || defined($in->{'id-only'}))) {
 	# Parse list of names into values
 	my @lines = split(/\r?\n/, $out);
 	$data->{'data'} = \@lines;
 	}
-elsif (!$arr && (($cmd eq "list-bandwidth" ||
-        $cmd eq "list-owner-bandwidth") && $module_name eq "server-manager")) {
+elsif (($cmd eq "list-bandwidth" ||
+        $cmd eq "list-owner-bandwidth") && $module_name eq "server-manager") {
 	# Parse Cloudmin bandwidth table
 	my @lines = split(/\r?\n/, $out);
         my $obj;
@@ -101,7 +101,7 @@ elsif (!$arr && (($cmd eq "list-bandwidth" ||
 		}
 	$data->{'data'} = \@data;
 	}
-elsif (!$arr && $cmd eq "list-bandwidth" && $module_name eq "virtual-server") {
+elsif ($cmd eq "list-bandwidth" && $module_name eq "virtual-server") {
 	# Parse Virtualmin bandwidth table
 	my @lines = split(/\r?\n/, $out);
         my $obj;
@@ -125,7 +125,7 @@ elsif (!$arr && $cmd eq "list-bandwidth" && $module_name eq "virtual-server") {
 		}
 	$data->{'data'} = \@data;
 	}
-elsif (!$arr && $cmd eq "validate-domains" && $module_name eq "virtual-server") {
+elsif ($cmd eq "validate-domains" && $module_name eq "virtual-server") {
 	# Parse Virtualmin validation output
         my @lines = split(/\r?\n/, $out);
         my ($obj, $dom);
@@ -150,7 +150,7 @@ elsif (!$arr && $cmd eq "validate-domains" && $module_name eq "virtual-server") 
 		}
 	$data->{'data'} = \@data;
 	}
-elsif (!$arr && ($cmd eq "get-ssl" || $cmd eq "stat-file")) {
+elsif ($cmd eq "get-ssl" || $cmd eq "stat-file") {
 	# Parse attributes and values
 	my @lines = split(/\r?\n/, $out);
 	foreach my $l (@lines) {
@@ -226,20 +226,6 @@ END {
 		}
 	# Otherwise, convert the output to JSON
 	else {
-		my @out;
-		for my $line (split /\n/, $lines) {
-			chomp $line;
-			if ($line =~ /^\S/) {
-				push (@out, { name => $line, values => {} });
-				}
-			elsif ($line =~ /^\s*(.+?):\s*(.*)$/) {
-				my $key = lc($1);
-				my $value = $2;
-				$key =~ s/ /_/g;
-				$value = '' if $value =~ /^\s*$/;
-				push (@{$out[-1]->{'values'}->{$key}}, $value);
-				}
-			}
 		my $program = $0;
 		$program =~ s/.*\/|\.\w+$//g;
 		my %in;
@@ -250,7 +236,7 @@ END {
 					if (@ARGV_ && $ARGV_[0] !~ /^--/);
 				}
 			}
-		print &convert_remote_format(\@out, 0, $program, \%in, $format);
+		print &convert_remote_format($lines, 0, $program, \%in, $format);
 		}
 	}
 }
