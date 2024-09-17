@@ -52,8 +52,12 @@ while (@ARGV > 0) {
         $sort_type = shift(@ARGV);
     	}
     elsif ($a eq "--multiline") {
-        $multiline = 1;
+        $multi = 1;
         }
+    elsif ($a eq "--multiline-json") {
+		$multi = 1;
+		&cli_list_catch_convert_stdout_to_json();
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -106,8 +110,6 @@ if (@data) {
     my $fpm_in  = "%b  %d %H:%M:%S %Y";
     my $fpm_out = "%b %d, %Y";
     my $now     = Time::Piece->new();
-    my $table   = Text::ASCIITable->new({ headingText => 'SSL CERTIFICATES EXPIRATION DATES' });
-    $table->setCols('DOMAIN NAME', 'PATH TO CERTIFICATE FILE', 'VALID UNTIL', 'EXPIRES IN', 'STATUS');
     my $i = 1;
     foreach my $d (@data) {
         if ($i % 2 == 1) {
@@ -156,22 +158,35 @@ if (@data) {
 
     # Sort results
     my @rows = $sort_type eq 'desc' ? reverse sort keys %rows : sort keys %rows;
-    foreach my $column (@rows) {
-    	if ($all_doms || $rows{$column}[0] =~ /$domain/) {
-        	$table->addRow($rows{$column}[0],
-        		           $rows{$column}[1], 
-        		           $rows{$column}[2],
-        		           $rows{$column}[3],
-        		           $rows{$column}[4]);
-    		}
-    	}
-    if (@{$table->{'tbl_rows'}}) {
-	    $table->addRowLine();
-	    print $table;
-    	}
+    if ($multi) {
+        foreach my $column (@rows) {
+            print "$rows{$column}[0]\n";
+            print "  Path to certificate file: $rows{$column}[1]\n";
+            print "  Valid until: $rows{$column}[2]\n";
+            print "  Expires in: $rows{$column}[3]\n";
+            print "  Status: $rows{$column}[4]\n";
+            }
+        }
     else {
-    	print "No matching domain names found\n";
-    	}
+        my $table   = Text::ASCIITable->new({ headingText => 'SSL CERTIFICATES EXPIRATION DATES' });
+        $table->setCols('DOMAIN NAME', 'PATH TO CERTIFICATE FILE', 'VALID UNTIL', 'EXPIRES IN', 'STATUS');
+        foreach my $column (@rows) {
+            if ($all_doms || $rows{$column}[0] =~ /$domain/) {
+                $table->addRow($rows{$column}[0],
+                            $rows{$column}[1], 
+                            $rows{$column}[2],
+                            $rows{$column}[3],
+                            $rows{$column}[4]);
+                }
+            }
+        if (@{$table->{'tbl_rows'}}) {
+            $table->addRowLine();
+            print $table;
+            }
+        else {
+            print "No matching domain names found\n";
+            }
+        }
 	} 
 else {
 print "There are no virtual servers with valid SSL certificates found\n";
@@ -185,5 +200,6 @@ print "\n";
 print "virtualmin list-certs-expiry --all-domains | --domain regex\n";
 print "                            [--sort [expiry|name]\n";
 print "                            [--sort-order [asc|desc]\n";
+print "                            [--multiline | --multiline-json]\n";
 exit(1);
 }
