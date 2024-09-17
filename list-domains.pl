@@ -1031,8 +1031,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the virtual servers on this system.\n";
 print "\n";
-print "virtualmin list-domains [--multiline | --json | --xml |\n";
-print "                         --simple-multiline | --simple-multiline-json]\n";
+print "virtualmin list-domains [--multiline | --simple-multiline |\n";
+print "                         --json | --xml]\n";
 print "                        [--name-only | --id-only | --user-only |\n";
 print "                         --home-only | --file-only | --ip-only]\n";
 print "                        [--domain name]*\n";
