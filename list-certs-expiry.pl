@@ -160,11 +160,13 @@ if (@data) {
 	my @rows = $sort_type eq 'desc' ? reverse sort keys %rows : sort keys %rows;
 	if ($multi) {
 		foreach my $column (@rows) {
-			print "$rows{$column}[0]\n";
-			print "  Path to certificate file: $rows{$column}[1]\n";
-			print "  Valid until: $rows{$column}[2]\n";
-			print "  Expires in: $rows{$column}[3]\n";
-			print "  Status: $rows{$column}[4]\n";
+			if ($all_doms || $rows{$column}[0] =~ /$domain/) {
+				print "$rows{$column}[0]\n";
+				print "  Path to certificate file: $rows{$column}[1]\n";
+				print "  Valid until: $rows{$column}[2]\n";
+				print "  Expires in: $rows{$column}[3]\n";
+				print "  Status: $rows{$column}[4]\n";
+				}
 			}
 		}
 	else {
