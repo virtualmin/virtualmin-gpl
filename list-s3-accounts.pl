@@ -36,9 +36,13 @@ while(@ARGV > 0) {
 	if ($a eq "--multiline") {
 		$multi = 1;
 		}
-	elsif ($a eq "--multiline-json") {
+	elsif ($a eq "--xml") {
 		$multi = 1;
-		&cli_list_catch_convert_stdout_to_json();
+		&cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = 1;
+		&cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
@@ -101,6 +105,6 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists all S3 Virtualmin accounts.\n";
 print "\n";
-print "virtualmin list-s3-accounts [--multiline | --multiline-json | --name-only]\n";
+print "virtualmin list-s3-accounts [--multiline | --json | --xml | --name-only]\n";
 exit(1);
 }

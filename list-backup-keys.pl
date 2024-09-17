@@ -33,9 +33,13 @@ while(@ARGV > 0) {
 	if ($a eq "--multiline") {
 		$multi = 1;
 		}
-	elsif ($a eq "--multiline-json") {
+	elsif ($a eq "--xml") {
 		$multi = 1;
-		&cli_list_catch_convert_stdout_to_json();
+		&cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = 1;
+		&cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--id-only") {
 		$idonly = 1;
@@ -84,7 +88,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists all available backup encryption keys.\n";
 print "\n";
-print "virtualmin list-backup-keys [--multiline | --multiline-json]\n";
+print "virtualmin list-backup-keys [--multiline | --json | --xml]\n";
 print "                            [--id-only]\n";
 exit(1);
 }

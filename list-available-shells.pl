@@ -39,9 +39,13 @@ while(@ARGV > 0) {
 	if ($a eq "--multiline") {
 		$multi = 1;
 		}
-	elsif ($a eq "--multiline-json") {
+	elsif ($a eq "--xml") {
 		$multi = 1;
-		&cli_list_catch_convert_stdout_to_json();
+		&cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = 1;
+		&cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--owner") {
 		$type = "owner";
@@ -119,7 +123,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the shells available for mailboxes and domain administrators.\n";
 print "\n";
-print "virtualmin list-available-shells [--multiline | --multiline-json |\n";
+print "virtualmin list-available-shells [--multiline | --json | --xml |\n";
 print "                                  --name-only]\n";
 print "                                 [--owner | --mailbox | --reseller]\n";
 print "                                 [--available]\n";
