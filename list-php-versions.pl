@@ -47,11 +47,7 @@ while(@ARGV > 0) {
 		$forcemode = shift(@ARGV);
 		}
 	elsif ($a eq "--multiline") {
-		$multi = 1;
-		}
-	elsif ($a eq "--multiline-json") {
-		$multi = 1;
-		&cli_list_catch_convert_stdout_to_json();
+		$multiline = 1;
 		}
 	elsif ($a eq "--full-version") {
 		$fullver = 1;
@@ -79,7 +75,7 @@ if ($nameonly) {
 		print $v,"\n";
 		}
 	}
-elsif ($multi) {
+elsif ($multiline) {
 	# Show full details
 	foreach $s (@vers) {
 		print $s->[0],"\n";
@@ -116,7 +112,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the available PHP versions on this system.\n";
 print "\n";
-print "virtualmin list-php-versions [--multiline | --multiline-json]\n";
+print "virtualmin list-php-versions [--name-only | --multiline]\n";
 print "                             [--domain name]\n";
 print "                             [--mode fpm|fcgid|cgi]\n";
 print "                             [--full-version]\n";

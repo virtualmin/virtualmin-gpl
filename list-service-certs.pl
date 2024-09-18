@@ -33,11 +33,7 @@ while(@ARGV > 0) {
 		$dname = shift(@ARGV);
 		}
 	elsif ($a eq "--multiline") {
-		$multi = 1;
-		}
-	elsif ($a eq "--multiline-json") {
-		$multi = 1;
-		&cli_list_catch_convert_stdout_to_json();
+		$multiline = 1;
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -55,10 +51,10 @@ $d || &usage("Virtual server $dname does not exist");
 	&usage("Virtual server $dname does not have an SSL cert");
 @svcs = &get_all_domain_service_ssl_certs($d);
 
-if ($multi) {
+if ($multiline) {
 	# Show all details of each service
 	foreach my $svc (@svcs) {
-		print $svc->{'id'},"\n";
+		print $svc->{'id'},":\n";
 		print "    Service type: ",
 		      ($svc->{'d'} ? "domain" : "global"),"\n";
 		print "    Cert file: ",$svc->{'cert'},"\n";
@@ -87,7 +83,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Output a virtual server's certificates used by other services.\n";
 print "\n";
 print "virtualmin list-service-certs --domain name\n";
-print "                             [--multiline | --multiline-json]\n";
+print "                             [--multiline]\n";
 exit(1);
 }
 

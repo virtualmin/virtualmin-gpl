@@ -41,10 +41,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
-	elsif ($a eq "--multiline-json") {
-		$multi = 1;
-		&cli_list_catch_convert_stdout_to_json();
-		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
 		}
@@ -100,8 +96,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists web directories with different PHP versions in a virtual server.\n";
 print "\n";
 print "virtualmin list-php-directories --domain domain.name\n";
-print "                               [--multiline | --multiline-json |\n";
-print "                                --name-only]\n";
+print "                               [--multiline | --name-only]\n";
 print "                               [--full-version]\n";
 exit(1);
 }

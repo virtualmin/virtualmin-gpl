@@ -36,10 +36,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
-	elsif ($a eq "--multiline-json") {
-		$multi = 1;
-		&cli_list_catch_convert_stdout_to_json();
-		}
 	elsif ($a eq "--port-only") {
 		$portonly = 1;
 		}
@@ -110,7 +106,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists TCP ports associated with some virtual server.\n";
 print "\n";
 print "virtualmin list-ports --domain name\n";
-print "                     [--multiline | --multiline-json]\n";
+print "                     [--multiline]\n";
 print "                     [--port-only]\n";
 exit(1);
 }

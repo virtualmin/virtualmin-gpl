@@ -53,10 +53,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
-	elsif ($a eq "--multiline-json") {
-		$multi = 1;
-		&cli_list_catch_convert_stdout_to_json();
-		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
 		}
@@ -126,7 +122,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the available features for new virtual servers.\n";
 print "\n";
-print "virtualmin list-features [--multiline | --multiline-json | --name-only]\n";
+print "virtualmin list-features [--multiline | --name-only]\n";
 print "                         [--parent name | --subdom name | --alias name]\n";
 exit(1);
 }

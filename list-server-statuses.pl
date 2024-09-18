@@ -29,11 +29,7 @@ if (!$module_name) {
 while(@ARGV > 0) {
         local $a = shift(@ARGV);
 	if ($a eq "--multiline") {
-		$multi = 1;
-		}
-	elsif ($a eq "--multiline-json") {
-		$multi = 1;
-		&cli_list_catch_convert_stdout_to_json();
+		$multiline = 1;
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -44,7 +40,7 @@ while(@ARGV > 0) {
 	}
 
 @ss = &get_startstop_links();
-if ($multi) {
+if ($multiline) {
 	foreach my $ss (@ss) {
 		print $ss->{'feature'},"\n";
 		print "    ID: ",$ss->{'id'},"\n" if ($ss->{'id'});

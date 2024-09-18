@@ -54,10 +54,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
-	elsif ($a eq "--multiline-json") {
-		$multi = 1;
-		&cli_list_catch_convert_stdout_to_json();
-		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
 		}
@@ -176,7 +172,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists the scripts installed on one or more virtual servers.\n";
 print "\n";
 print "virtualmin list-scripts --all-domains | --domain name | --user username\n";
-print "                       [--multiline | --multiline-json | --name-only]\n";
+print "                       [--multiline | --name-only]\n";
 print "                       [--type script]\n";
 exit(1);
 }
