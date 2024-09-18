@@ -37,13 +37,9 @@ while(@ARGV > 0) {
 	if ($a eq "--multiline") {
 		$multi = 1;
 		}
-	elsif ($a eq "--xml") {
+	elsif ($a eq "--multiline-json") {
 		$multi = 1;
-		&cli_convert_remote_format('xml');
-		}
-	elsif ($a eq "--json") {
-		$multi = 1;
-		&cli_convert_remote_format('json');
+		&cli_list_catch_convert_stdout_to_json();
 		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
@@ -116,7 +112,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists all files under a Dropbox path.\n";
 print "\n";
-print "virtualmin list-dropbox-files [--multiline | --json | --xml |\n";
+print "virtualmin list-dropbox-files [--multiline | --multiline-json |\n";
 print "                               --name-only]\n";
 print "                              [--path dir]\n";
 exit(1);

@@ -46,13 +46,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
-	elsif ($a eq "--xml") {
+	elsif ($a eq "--multiline-json") {
 		$multi = 1;
-		&cli_convert_remote_format('xml');
-		}
-	elsif ($a eq "--json") {
-		$multi = 1;
-		&cli_convert_remote_format('json');
+		&cli_list_catch_convert_stdout_to_json();
 		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
@@ -140,7 +136,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists the web aliases and redirects in some virtual server.\n";
 print "\n";
 print "virtualmin list-redirects --domain domain.name\n";
-print "                         [--multiline | --json | --xml | --name-only]\n";
+print "                         [--multiline | --multiline-json | --name-only]\n";
 print "                         [--path /path]\n";
 print "                         [--host hostname]\n";
 print "                         [--fix-wellknown]\n";

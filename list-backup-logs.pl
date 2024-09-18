@@ -74,13 +74,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
-	elsif ($a eq "--xml") {
+	elsif ($a eq "--multiline-json") {
 		$multi = 1;
-		&cli_convert_remote_format('xml');
-		}
-	elsif ($a eq "--json") {
-		$multi = 1;
-		&cli_convert_remote_format('json');
+		&cli_list_catch_convert_stdout_to_json();
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -228,6 +224,6 @@ print "                            [--failed | --succeeded]\n";
 print "                            [--mode \"cgi\"|\"sched\"|\"api\"]\n";
 print "                            [--start yyyy-mm-dd]\n";
 print "                            [--end yyyy-mm-dd]\n";
-print "                            [--multiline | --json | --xml]\n";
+print "                            [--multiline | --multiline-json]\n";
 exit(1);
 }

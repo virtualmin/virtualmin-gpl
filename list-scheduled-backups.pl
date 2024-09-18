@@ -47,13 +47,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
-	elsif ($a eq "--xml") {
+	elsif ($a eq "--multiline-json") {
 		$multi = 1;
-		&cli_convert_remote_format('xml');
-		}
-	elsif ($a eq "--json") {
-		$multi = 1;
-		&cli_convert_remote_format('json');
+		&cli_list_catch_convert_stdout_to_json();
 		}
 	elsif ($a eq "--id-only") {
 		$idonly = 1;
@@ -182,7 +178,7 @@ print "\n";
 print "virtualmin list-scheduled-backups [--domain domain.name |\n";
 print "                                   --user name |\n";
 print "                                   --reseller name]\n";
-print "                                  [--multiline | --json | --xml | --id-only]\n";
+print "                                  [--multiline | --multiline-json | --id-only]\n";
 exit(1);
 }
 

@@ -61,13 +61,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
-	elsif ($a eq "--xml") {
-		$multi = 1;
-		&cli_convert_remote_format('xml');
-		}
-	elsif ($a eq "--json") {
+	elsif ($a eq "--multiline-json") {
 		$multiline = 1;
-		&cli_convert_remote_format('json');
+		&cli_list_catch_convert_stdout_to_json();
 		}
 	elsif ($a eq "--help") {
 		&usage();
