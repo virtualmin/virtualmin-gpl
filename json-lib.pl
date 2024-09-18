@@ -191,7 +191,11 @@ sub create_json_format
 {
 my ($data) = @_;
 eval "use JSON::PP";
-my $coder = JSON::PP->new->pretty;
+my $pretty = $config{'json_pretty'} // 1;
+if (defined($in{'json'})) {
+	$pretty = $in{'json'} eq 'minified' ? 0 : 1;
+	}
+my $coder = JSON::PP->new->pretty($pretty ? 1 : 0);
 return $coder->encode($data)."\n";
 }
 
@@ -202,6 +206,45 @@ sub create_perl_format
 my ($data) = @_;
 eval "use Data::Dumper";
 return Dumper($data);
+}
+
+# cli_convert_remote_format(format)
+# Catches and displays Virtualmin CLI standard listing
+# commands in JSON or XML format
+sub cli_convert_remote_format
+{
+my ($format) = @_;
+my ($lines, $fh, $ofh);
+# Redirect STDOUT to a variable
+open ($fh, '>', \$lines) || return;
+# Save the original STDOUT
+$ofh = select($fh);
+END {
+	no warnings 'closure';
+	# Restore the original STDOUT
+	select($ofh);
+	# In case of error, print the output as is
+	if ($? != 0) {
+		print $lines;
+		}
+	# Otherwise, convert the output to JSON
+	else {
+		my $program = $0;
+		$program =~ s/.*\/|\.\w+$//g;
+		my %in;
+		while (my $arg = shift @ARGV_) {
+			if ($arg =~ /^--(?!json|xml)([\w-]+)$/) {
+				$in{$1} = 1;
+				$in{$1} = (shift @ARGV_)
+					if (@ARGV_ && $ARGV_[0] !~ /^--/);
+				}
+			}
+		# Always force multiline format, as JSON and XML output make no
+		# sense without it
+		$in{'multiline'} = 1;
+		print &convert_remote_format($lines, 0, $program, \%in, $format);
+		}
+	}
 }
 
 # execute_webmin_script(command, module, &args, output-fh)

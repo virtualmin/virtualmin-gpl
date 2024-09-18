@@ -41,7 +41,15 @@ while(@ARGV > 0) {
 		$nameonly = 1;
 		}
 	elsif ($a eq "--multiline") {
-		$multiline = 1;
+		$multi = 1;
+		}
+	elsif ($a eq "--xml") {
+		$multi = 1;
+		&cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = 1;
+		&cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--deleted") {
 		$deleted = 1;
@@ -66,7 +74,7 @@ if ($nameonly) {
 		print $tmpl->{'name'},"\n";
 		}
 	}
-elsif ($multiline) {
+elsif ($multi) {
 	# Multiline format with some details
 	foreach $tmpl (@tmpls) {
 		print $tmpl->{'id'},"\n";
@@ -94,7 +102,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the available templates for new virtual servers.\n";
 print "\n";
-print "virtualmin list-templates [--name-only | --multiline]\n";
+print "virtualmin list-templates [--multiline | --json | --xml]\n";
 print "                          [--deleted]\n";
 exit(1);
 }

@@ -3,7 +3,7 @@
 
 BEGIN { push(@INC, ".."); };
 use WebminCore;
-
+@ARGV_ = @ARGV if (@ARGV && !@ARGV_);
 &init_config();
 if (&indexof($module_root_directory, @INC) < 0) {
 	push(@INC, $module_root_directory);

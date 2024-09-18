@@ -36,6 +36,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
+	elsif ($a eq "--xml") {
+		$multi = 1;
+		&cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = 1;
+		&cli_convert_remote_format('json');
+		}
 	elsif ($a eq "--port-only") {
 		$portonly = 1;
 		}
@@ -106,7 +114,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists TCP ports associated with some virtual server.\n";
 print "\n";
 print "virtualmin list-ports --domain name\n";
-print "                     [--multiline]\n";
+print "                     [--multiline | --json | --xml]\n";
 print "                     [--port-only]\n";
 exit(1);
 }
