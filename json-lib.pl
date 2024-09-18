@@ -236,9 +236,6 @@ END {
 					if (@ARGV_ && $ARGV_[0] !~ /^--/);
 				}
 			}
-		# Always force multiline format, as JSON and XML output make no
-		# sense without it
-		$in{'multiline'} = 1;
 		print &convert_remote_format($lines, 0, $program, \%in, $format);
 		}
 	}
