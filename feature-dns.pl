@@ -69,16 +69,22 @@ elsif ($dns_submode) {
 # Create the list of DNS records
 my $recs = [ ];
 my $recstemp = &transname();
+my $err;
 eval {
 	local $bind8::config{'auto_chroot'} = undef;
 	local $bind8::config{'chroot'} = undef;
 	if ($d->{'alias'}) {
-		&create_alias_records($recs, $recstemp, $d, $ip);
+		$err = &create_alias_records($recs, $recstemp, $d, $ip);
 		}
 	else {
-		&create_standard_records($recs, $recstemp, $d, $ip);
+		$err = &create_standard_records($recs, $recstemp, $d, $ip);
 		}
 	};
+$err ||= $@;
+if ($err) {
+	&$second_print(&text('setup_bind_erecs', $err));
+	return 0;
+	}
 
 # Create domain info object
 my $info;
@@ -1396,13 +1402,20 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			# Add NS records from template
 			push(@created_ns, &get_slave_nameservers($d));
 
+			# Make sure we have some NS records
 			@created_ns = &unique(@created_ns);
+			if ($tmpl->{'dns_indom'}) {
+				@created_ns = grep { &to_ipaddress($_) } @created_ns;
+				}
+			if (!@created_ns) {
+				return $text{'setup_ednsns'};
+				}
+
 			if ($tmpl->{'dns_indom'}) {
 				# Add A records pointing to the nameserver IPs
 				my $i = 1;
 				foreach my $ns (@created_ns) {
 					my $a = &to_ipaddress($ns);
-					next if (!$a);
 					my $r = "ns".$i.".".$d->{'dom'}.".";
 					&create_dns_record($recs, $file,
 						{ 'name' => '@',
@@ -1555,6 +1568,7 @@ if ($tmpl->{'dns_replace'} && !$d->{'dns_submode'}) {
 		&create_dns_record($recs, $file, $r);
 		}
 	}
+return undef;
 }
 
 # get_default_soa_record(&domain, master-nameserver)
@@ -1588,8 +1602,8 @@ local ($recs, $file, $d, $ip, $diff) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $aliasd = &get_domain($d->{'alias'});
 local ($aliasrecs, $aliasfile) = &get_domain_dns_records_and_file($aliasd);
-$aliasfile || &error("No zone file for alias target $aliasd->{'dom'} found");
-@$aliasrecs || &error("No records for alias target $aliasd->{'dom'} found");
+$aliasfile || return "No zone file for alias target $aliasd->{'dom'} found";
+@$aliasrecs || return "No records for alias target $aliasd->{'dom'} found";
 local $olddom = $aliasd->{'dom'};
 local $dom = $d->{'dom'};
 local $oldip = $aliasd->{'ip'};
@@ -1724,6 +1738,7 @@ if ($diff) {
 		&delete_dns_record($recs, $file, $r);
 		}
 	}
+return undef;
 }
 
 # get_master_nameserver(&template, &domain)
