@@ -192,9 +192,6 @@ sub create_json_format
 my ($data) = @_;
 eval "use JSON::PP";
 my $pretty = $config{'json_pretty'} // 1;
-if (defined($in{'json'})) {
-	$pretty = $in{'json'} eq 'minified' ? 0 : 1;
-	}
 my $coder = JSON::PP->new->pretty($pretty ? 1 : 0);
 return $coder->encode($data)."\n";
 }
