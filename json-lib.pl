@@ -204,50 +204,6 @@ eval "use Data::Dumper";
 return Dumper($data);
 }
 
-# cli_list_catch_convert_stdout_to_json()
-# Catches and converts Virtualmin CLI standard listing commands to JSON
-sub cli_list_catch_convert_stdout_to_json
-{
-my ($lines, $fh, $ofh);
-# Redirect STDOUT to a variable
-open ($fh, '>', \$lines) || return;
-# Save the original STDOUT
-$ofh = select($fh);
-END {
-	no warnings 'closure';
-	# Restore the original STDOUT
-	select($ofh);
-	# In case of error, print the output as is
-	if ($? != 0) {
-		print $lines;
-		}
-	# Otherwise, convert the output to JSON
-	else {
-		my %data;
-		my $id;
-		for my $line (split /\n/, $lines) {
-			chomp $line;
-			if ($line =~ /^\S/) {
-				# New id (domain, user, etc.) detected
-				$id = $line;
-				# Initialize an array for this id
-				$data{$id} = [] unless exists($data{$id});
-				# Start a new entry (hashref) for this occurrence
-				push(@{$data{$id}}, {});
-				}
-			elsif ($line =~ /^\s*(.+?):\s*(.*)$/) {
-				# Extract key and value from indented lines
-				my $key = $1;
-				my $value = $2;
-				# Add the key-value pair to the last entry for this id
-				$data{$id}[-1]{$key} = $value;
-				}	
-			}
-		print &convert_to_json(\%data, $config{'cli_json_pretty'}), "\n";
-		}
-	}
-}
-
 # execute_webmin_script(command, module, &args, output-fh)
 # Run some Virtualmin or Cloudmin API command in a forked sub-process, but with
 # out executing a new perl instance. Returns the PID.
