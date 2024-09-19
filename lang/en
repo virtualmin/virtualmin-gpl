@@ -4733,6 +4733,8 @@ scripts_kit_wp_apply_clone_switch=Switch to clone <tt>$1</tt> ..
 scripts_kit_wp_apply_clone_name=(clone)
 scripts_kit_wp_apply_clone_sub=Creating new sub-server for clone ..
 scripts_kit_wp_apply_clone_esub=.. failed to create sub-server for clone : $1
+scripts_kit_wp_apply_clone_top=Creating new top-level server for clone ..
+scripts_kit_wp_apply_clone_etop=.. failed to create top-level server for clone : $1
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up
