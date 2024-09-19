@@ -1093,7 +1093,8 @@ $clone_tab_content .=
 	&ui_table_row($text{'scripts_kit_clone_source2'}, $opts->{'dir'}, 2);
 my $clone_target;
 my @vdoms = sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }
-	    grep { &can_config_domain($_) } &list_visible_domains();
+	    grep { &can_config_domain($_) && !$_->{'alias'} }
+	    		&list_visible_domains();
 my @edoms = grep {  $_->{'dom'} ne $d->{'dom'} } @vdoms;
 my $doms_select = sub {
 	my ($name, $doms) = @_;
