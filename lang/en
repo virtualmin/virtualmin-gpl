@@ -4728,6 +4728,9 @@ scripts_kit_wp_apply_clone_eexists=.. failed : target <tt>$1</tt> already exists
 scripts_kit_wp_apply_clone_eexists2=.. failed : target <tt>$1</tt> already has WordPress instance installed
 scripts_kit_wp_apply_clone_emove=.. failed to move file : $1
 scripts_kit_wp_apply_clone_edb=.. failed to create database for clone because $1
+scripts_kit_wp_apply_clone_config=Configuring clone settings ..
+scripts_kit_wp_apply_clone_switch=Switch to clone <tt>$1</tt> ..
+scripts_kit_wp_apply_clone_name=(clone)
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up
