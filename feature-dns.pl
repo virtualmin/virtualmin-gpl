@@ -69,22 +69,18 @@ elsif ($dns_submode) {
 # Create the list of DNS records
 my $recs = [ ];
 my $recstemp = &transname();
-my $err;
+my $recserr;
 eval {
 	local $bind8::config{'auto_chroot'} = undef;
 	local $bind8::config{'chroot'} = undef;
 	if ($d->{'alias'}) {
-		$err = &create_alias_records($recs, $recstemp, $d, $ip);
+		$recserr = &create_alias_records($recs, $recstemp, $d, $ip);
 		}
 	else {
-		$err = &create_standard_records($recs, $recstemp, $d, $ip);
+		$recserr = &create_standard_records($recs, $recstemp, $d, $ip);
 		}
 	};
-$err ||= $@;
-if ($err) {
-	&$second_print(&text('setup_bind_erecs', $err));
-	return 0;
-	}
+$recserr ||= $@;
 
 # Create domain info object
 my $info;
@@ -105,6 +101,10 @@ if ($d->{'provision_dns'}) {
 	$info->{'record'} = [ &records_to_text($d, \@precs) ];
 	delete($info->{'recs'});
 	&$first_print($text{'setup_bind_provision'});
+	if ($recserr) {
+		&$second_print(&text('setup_bind_erecs', $err));
+		return 0;
+		}
 	my ($ok, $msg) = &provision_api_call(
 		"provision-dns-zone", $info, 0);
 	if (!$ok || $msg !~ /host=(\S+)/) {
@@ -124,6 +124,10 @@ elsif ($d->{'dns_cloud'} && !$dnsparent) {
 		}
 	else {
 		&$first_print(&text('setup_bind_cloud', $cloud->{'desc'}));
+		}
+	if ($recserr) {
+		&$second_print(&text('setup_bind_erecs', $err));
+		return 0;
 		}
 	my $vfunc = "dnscloud_".$ctype."_valid_domain";
 	my $err = &$vfunc($d, $info);
@@ -159,6 +163,10 @@ elsif (!$dnsparent) {
 		}
 	else {
 		&$first_print(&text('setup_bindremote', $r->{'host'}));
+		}
+	if ($recserr) {
+		&$second_print(&text('setup_bind_erecs', $err));
+		return 0;
 		}
 	my $conf = &remote_foreign_call($r, "bind8", "get_config");
 	my $czone = &get_bind_zone($d->{'dom'}, $conf, $d);
