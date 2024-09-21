@@ -12930,6 +12930,7 @@ close(BACKUP);
 local $rv = $two eq "\037\213" ? 1 :
 	    $two eq "\037\235" ? 2 :
 	    $two eq chr(0x28).chr(0xB5) ? 6 :
+	    $two eq "P*" ? 6 :
 	    $two eq "PK" ? 4 :
 	    $two eq "BZ" ? 3 : 0;
 if (!$rv) {
