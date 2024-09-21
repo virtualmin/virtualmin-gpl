@@ -14,7 +14,6 @@ $xfile && -r $xfile || return ("Not a complete Plesk 9, 10 or 11 backup file - m
 # Check if the domain is in there
 local $dump = &read_plesk_xml($xfile);
 ref($dump) || return ($dump);
-use Data::Dumper;
 local $domain;
 local $domains = $dump->{'admin'} ? $dump->{'admin'}->{'domains'}
 				  : $dump->{'domains'};
@@ -644,20 +643,24 @@ if ($got{'mysql'}) {
 		local $cids = [ $database->{'content'}->{'cid'} ];
 		local $sqldir = &extract_plesk9_cid($root, $cids, "sqldump");
 		local ($sqlfile) = glob("$sqldir/*$name*");
+		&$first_print("Restoring database $name ..");
 		if (!$sqlfile || !-f $sqlfile) {
 			($sqlfile) = glob("$sqldir/backup_*");
 			}
 		if (!$sqldir) {
-			&$first_print("No database content found");
+			&$second_print(".. no database content found");
 			}
 		elsif (!$sqlfile || !-f $sqlfile) {
-			&$first_print("Database content missing SQL file");
+			&$second_print(".. database content missing SQL file");
 			}
 		else {
 			local ($ex, $out) = &execute_dom_sql_file(\%dom, $name,
 								  $sqlfile);
 			if ($ex) {
-				&$first_print("Error loading $db : $out");
+				&$second_print(".. error loading $db : $out");
+				}
+			else {
+				&$second_print(".. done");
 				}
 			}
 
@@ -1061,6 +1064,7 @@ if (!$dir) {
 	$dir = &transname();
 	&make_dir($dir, 0700);
 	local $err = &extract_compressed_file($file, $dir);
+	print STDERR "file=$file err=$err\n";
 	return undef if ($err);
 	$main::extract_plesk9_cid_cache{$file} = $dir;
 	}
