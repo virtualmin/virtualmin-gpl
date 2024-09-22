@@ -369,9 +369,10 @@ if (defined(&set_php_wrappers_writable)) {
 	}
 local $hdir = &public_html_dir(\%dom);
 local $phdir = $hdir;
+local $user_data_files;
 if ($cids) {
+	$user_data_files = &extract_plesk9_cid($root, $cids, "user-data");
 	local $docroot_files = &extract_plesk9_cid($root, $cids, "docroot");
-	local $user_data_files = &extract_plesk9_cid($root, $cids, "user-data");
 	local $httpdocs = $domain->{'phosting'}->{'www-root'} || "httpdocs";
 	local $cgidocs = "cgi-bin";
 	if ($docroot_files) {
@@ -956,6 +957,13 @@ foreach my $sdom (keys %$subdoms) {
 		&set_home_ownership(\%subd);
 		&$second_print(".. done");
 		}
+	elsif (-d $user_data_files."/".$subd{'dom'}) {
+		&$first_print(
+			"Copying web pages for sub-domain $subd{'dom'} ..");
+		&copy_source_dest($user_data_files."/".$subd{'dom'}, $hdir);
+		&set_home_ownership(\%subd);
+		&$second_print(".. done");
+		}
 
 	# Extract sub-domains CGI directory
 	local $cdir = &cgi_bin_dir(\%subd);
@@ -1064,7 +1072,6 @@ if (!$dir) {
 	$dir = &transname();
 	&make_dir($dir, 0700);
 	local $err = &extract_compressed_file($file, $dir);
-	print STDERR "file=$file err=$err\n";
 	return undef if ($err);
 	$main::extract_plesk9_cid_cache{$file} = $dir;
 	}
