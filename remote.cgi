@@ -100,7 +100,7 @@ if ($format) {
 		}
 	waitpid($pid, 0);
 	print &convert_remote_format($out, $?, $in{'program'},
-				     \%in, $format);
+				     \%in, $format, \%config);
 	}
 else {
 	# Stream output
