@@ -2,7 +2,11 @@
 
 When this option is set to <b>Yes</b> as it is by default, an NS record
 will be added to new DNS zones for the <b>Primary DNS server hostname</b>
-set above. It should only ever be set to <b>No</b> if you are using a hidden
-primary nameserver. <p>
+set above. A corresponding A record will also be created with the correct
+IP address for this nameserver. <p>
+
+It should only ever be set to <b>No</b> if you are using a hidden
+primary nameserver. If you are using a cloud DNS provider, this option
+has no effect. <p>
 
 <footer>
