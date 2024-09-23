@@ -3150,9 +3150,11 @@ print &ui_table_row(&hlink($text{'tmpl_dnsprins'}, "template_dns_prins"),
 	&ui_yesno_radio("dnsprins", $tmpl->{'dns_prins'} ? 1 : 0));
 
 # Add NS records in this domain
-print &ui_table_row(&hlink($text{'tmpl_dnsindom'},
-                           "template_dns_indom"),
-	&ui_yesno_radio("dns_indom", $tmpl->{'dns_indom'}));
+if ($tmpl->{'dns_indom'}) {
+	print &ui_table_row(&hlink($text{'tmpl_dnsindom'},
+				   "template_dns_indom"),
+		&ui_yesno_radio("dns_indom", $tmpl->{'dns_indom'}));
+	}
 
 print &ui_table_hr();
 
@@ -3357,7 +3359,9 @@ $in{'dns_master_mode'} != 2 ||
 	&error($text{'tmpl_ednsmaster'});
 $tmpl->{'dns_master'} = $in{'dns_master_mode'} == 0 ? "none" :
 		        $in{'dns_master_mode'} == 1 ? undef : $in{'dns_master'};
-$tmpl->{'dns_indom'} = $in{'dns_indom'};
+if (defined($in{'dns_indom'})) {
+	$tmpl->{'dns_indom'} = $in{'dns_indom'};
+	}
 
 # Save MX hostname
 $in{'dns_mx_mode'} != 2 || $in{'dns_mx'} =~ /^[a-z0-9\.\-\_\$\{\}]+$/i ||
