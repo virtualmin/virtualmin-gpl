@@ -46,7 +46,7 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	elsif ($a eq "--xml") {
-		$multi = 1;
+		$multiline = 1;
 		&cli_convert_remote_format('xml');
 		}
 	elsif ($a eq "--json") {
