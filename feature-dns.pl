@@ -3016,8 +3016,8 @@ if (!&is_dns_remote()) {
 
 # DNS records
 local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 0,
-     0, $text{'tmpl_dnsnone'},
-	[ "dns", "bind_replace" ]);
+			     0, $text{'tmpl_dnsnone'},
+			     [ "dns", "bind_replace" ]);
 print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 	$ndi."<br>\n".
 	&ui_textarea("dns", $tmpl->{'dns'} eq "none" ? "" :
@@ -3089,7 +3089,6 @@ foreach my $c (&list_dns_clouds()) {
 		push(@clouds, [ $c->{'name'}, $c->{'desc'} ]);
 		}
 	}
-my @remotes;
 if (defined(&list_remote_dns)) {
 	foreach my $r (grep { $_->{'id'} != 0 && !$_->{'slave'} }
 			    &list_remote_dns()) {
@@ -3146,8 +3145,13 @@ print &ui_table_row(&hlink($text{'tmpl_dnsmaster'},
 					$tmpl->{'dns_master'}, 40));
 
 # Add NS record for master?
+my @opts = ( [ 1, $text{'yes'} ],
+	     [ 0, $text{'no'} ] );
+if (!$tmpl->{'default'}) {
+	unshift(@opts, [ '', $text{'tmpl_default'} ]);
+	}
 print &ui_table_row(&hlink($text{'tmpl_dnsprins'}, "template_dns_prins"),
-	&ui_yesno_radio("dnsprins", $tmpl->{'dns_prins'} ? 1 : 0));
+	&ui_radio("dnsprins", $tmpl->{'dns_prins'}, \@opts));
 
 # Add NS records in this domain
 if ($tmpl->{'dns_indom'}) {

@@ -10341,7 +10341,7 @@ if (!$tmpl->{'default'}) {
 	local $p;
 	local %done;
 	foreach $p ("dns_spf", "dns_sub", "dns_master", "dns_mx", "dns_dmarc",
-		    "dns_cloud", "dns_slaves",
+		    "dns_cloud", "dns_slaves", "dns_prins",
 		    "web_acme", "web_webmail", "web_admin", "web_http2",
 		    "web_redirects", "web_sslredirect", "web_php",
 		    "web", "dns", "ftp", "mail", "frame", "user_aliases",
@@ -10377,7 +10377,7 @@ if (!$tmpl->{'default'}) {
 			local $k;
 			foreach $k (keys %$def) {
 				next if ($p eq "dns" &&
-					 $k =~ /^dns_(spf|cloud|slaves)/);
+					 $k =~ /^dns_(spf|cloud|slaves|prins)/);
 				next if ($p eq "php" &&
 					 $k =~ /^php_(fpm|sock)/);
 				next if ($p eq "web" &&
