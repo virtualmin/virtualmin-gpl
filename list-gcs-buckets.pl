@@ -33,6 +33,7 @@ $state = &cloud_google_get_state();
 $state->{'ok'} || &usage("Google Cloud Storage has not been configured yet");
 
 # Parse command-line args
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--multiline") {

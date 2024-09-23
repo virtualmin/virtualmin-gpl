@@ -40,6 +40,7 @@ if (!$module_name) {
 	$< == 0 || die "info.pl must be run as root";
 	}
 
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--help") {

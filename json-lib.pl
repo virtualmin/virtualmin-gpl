@@ -235,11 +235,12 @@ END {
 		my $program = $0;
 		$program =~ s/.*\/|\.\w+$//g;
 		my %in;
-		while (my $arg = shift @ARGV_) {
+		local @ARGV = @ARGV;
+		while (my $arg = shift @ARGV) {
 			if ($arg =~ /^--(?!json|xml)([\w-]+)$/) {
 				$in{$1} = 1;
-				$in{$1} = (shift @ARGV_)
-					if (@ARGV_ && $ARGV_[0] !~ /^--/);
+				$in{$1} = (shift @ARGV)
+					if (@ARGV && $ARGV[0] !~ /^--/);
 				}
 			}
 		# Always force multiline format, as JSON and XML output make no

@@ -32,6 +32,7 @@ $state = &cloud_dropbox_get_state();
 $state->{'ok'} || &usage("Dropbox has not been configured yet");
 
 # Parse command-line args
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--multiline") {

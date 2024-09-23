@@ -108,6 +108,7 @@ $max_output = 2048;
 $web = 'web';
 $ssl = 'ssl';
 &load_plugin_libraries();
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {

@@ -13,6 +13,7 @@ if (&foreign_check("mailboxes")) {
 # Get the schedule being used
 $id = 1;
 $backup_debug = 0;
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--id") {
