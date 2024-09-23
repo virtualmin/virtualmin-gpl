@@ -43,12 +43,10 @@ while(@ARGV > 0) {
 		$multi = 1;
 		}
 	elsif ($a eq "--xml") {
-		$multi = 1;
-		&cli_convert_remote_format('xml');
+		$multi = &cli_convert_remote_format('xml');
 		}
 	elsif ($a eq "--json") {
-		$multi = 1;
-		&cli_convert_remote_format('json');
+		$multi = &cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--id") {
 		$planid = shift(@ARGV);

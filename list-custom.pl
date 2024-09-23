@@ -46,12 +46,10 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	elsif ($a eq "--xml") {
-		$multiline = 1;
-		&cli_convert_remote_format('xml');
+		$multiline = &cli_convert_remote_format('xml');
 		}
 	elsif ($a eq "--json") {
-		$multiline = 1;
-		&cli_convert_remote_format('json');
+		$multiline = &cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--field") {
 		$field = shift(@ARGV);

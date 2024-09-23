@@ -213,7 +213,8 @@ return Dumper($data);
 
 # cli_convert_remote_format(format)
 # Catches and displays Virtualmin CLI standard listing
-# commands in JSON or XML format
+# commands in JSON or XML format. Returns 1 if the output
+# should be multiline, 0 if not.
 sub cli_convert_remote_format
 {
 my ($format) = @_;
@@ -249,6 +250,13 @@ END {
 		print &convert_remote_format($lines, 0, $program, \%in, $format);
 		}
 	}
+# Should we auto-enable multiline output?
+foreach my $arg (@ARGV) {
+	if ($arg =~ /--(name|id|user|home|file|ip)-only/) {
+		return 0;
+		}
+	}
+return 1;
 }
 
 # execute_webmin_script(command, module, &args, output-fh)
