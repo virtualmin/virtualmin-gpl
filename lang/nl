@@ -3009,8 +3009,6 @@ databases_noimport=Echter er zijn geen databases op het systeem zonder eigenaar.
 databases_tabhosts=Remote hosts
 databases_desc5=Dit formulier geeft een lijst van remote hosts die mogen verbinden met de databases die behoren aan deze virtuele server, en ieder subserver. Deze worden toegevoegd aan de domein eigenaar en iedere andere mailbox gebruiker met MySQL toegang.
 databases_ahosts=Toegestane hosts voor $1
-databases_hosts_mysql=U mag zaken invullen zoals hostnamen, IP adressen, of netwerk adressen zoals <tt>192.168.1.%</tt>
-databases_hosts_fmt=Iedere hostnaam of IP moet worden ingevuld op een aparte regel.
 
 database_title1=Maak Database
 database_title2=Bewerk Database
