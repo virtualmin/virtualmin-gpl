@@ -4642,6 +4642,7 @@ scripts_kit_einvaliduid=Invalid user ID
 scripts_kit_einvalidadminurl=Invalid admin URL
 scripts_kit_einvalidsiteurl=Invalid site URL
 scripts_kit_loginkit=Login Kit
+scripts_kit_php_memory=Changing PHP memory limit for virtual server ..
 scripts_kit_wp_apply_wp_memory_limit=Changing memory limit ..
 scripts_kit_wp_apply_wp_max_memory_limit=Changing admin memory limit ..
 scripts_kit_wp_apply_fail2ban_1=Enabling Fail2Ban protection ..
