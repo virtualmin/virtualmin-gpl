@@ -103,6 +103,7 @@ $sdir =~ s/\/[^\/]+$//;
 # Read in the .pl file
 (do $spath) || return undef;
 local $dfunc = "script_${name}_desc";
+local $tmdfunc = "script_${name}_tmdesc";
 local $lfunc = "script_${name}_longdesc";
 local $vfunc = "script_${name}_versions";
 local $nvfunc = "script_${name}_numeric_version";
@@ -120,7 +121,7 @@ local $testpathfunc = "script_${name}_testpath";
 local $testargsfunc = "script_${name}_testargs";
 
 # Check for critical functions
-return undef if (!defined(&$dfunc) || !defined(&$vfunc));
+return undef if (!defined(&$dfunc) || !defined(&$vfunc) || !defined(&$tmdfunc));
 
 # Work out availability
 local %unavail;
@@ -144,6 +145,7 @@ if ($access{'allowedscripts'}) {
 # Create script structure
 local $rv = { 'name' => $name,
 	      'desc' => &$dfunc(),
+	      'tmdesc' => &$tmdfunc(),
 	      'longdesc' => defined(&$lfunc) ? &$lfunc() : undef,
 	      'versions' => [ &$vfunc(0) ],
 	      'install_versions' => [ &$vfunc(1) ],

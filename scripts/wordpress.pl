@@ -7,6 +7,12 @@ sub script_wordpress_desc
 return "WordPress";
 }
 
+# script_wordpress_tmdesc()
+sub script_wordpress_tmdesc
+{
+return "WP";
+}
+
 sub script_wordpress_uses
 {
 return ( "php" );
