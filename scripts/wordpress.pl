@@ -785,8 +785,11 @@ push(@$system_tab_content, {
 if (&master_admin() && &foreign_available("fail2ban")) {
 	&foreign_require("fail2ban");
 	my $conf_dir = $fail2ban::config{'config_dir'};
-	my $conf_file = "$conf_dir/jail.d/99-$d->{'dom'}-$script->{'name'}.conf";
-	my $conf_exists = -r $conf_file ? 1 : 0;
+	my $name = "$script->{'name'}-$d->{'dom'}";
+	$name =~ s/\./-/g;
+	my $ffile = "$conf_dir/filter.d/$name.conf";
+	my $jfile = "$conf_dir/jail.d/99-$name.conf";
+	my $conf_exists = -r $ffile || -r $jfile? 1 : 0;
 	my $wp = &convert_from_json($wpj);
 	$wp->{'fail2ban'} = $conf_exists;
 	$wpj = &convert_to_json($wp);
