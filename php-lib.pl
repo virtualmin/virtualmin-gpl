@@ -2959,20 +2959,6 @@ foreach my $pv (@$confs) {
 return @rv;
 }
 
-# get_php_info_link(dom, [placement, subdir])
-# Returns a link to the PHP info page for a domain.
-# If subdir is set, the link will point to a
-# specific directory.
-sub get_php_info_link
-{
-my ($dom, $placement, $subdir) = @_;
-$placement ||= 'cell';
-return "&nbsp;&nbsp;" .
-	&ui_link("showphpinfo.cgi?dom=$dom&dir=$subdir",
-	&ui_help(&text('phpmode_phpinfo_show' . ($subdir ? '_dir' : ''), $subdir)),
-			undef, "target=_blank data-placement=\"$placement\"");
-}
-
 # setup_web_for_php(&domain, &script, php-version)
 # Update a virtual server's web config to add any PHP settings from the template and optionally from a script
 sub setup_web_for_php
