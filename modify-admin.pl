@@ -53,6 +53,7 @@ if (!$module_name) {
 @OLDARGV = @ARGV;
 
 # Parse command-line args
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {

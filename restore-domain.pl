@@ -124,6 +124,7 @@ $asowner = 0;
 $reuid = 1;
 $reuser = 0;
 $ipinfo = { };
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--source") {

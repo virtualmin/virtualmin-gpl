@@ -32,6 +32,7 @@ if (!$module_name) {
 # Parse command-line args
 &require_mysql();
 $user = $mysql::config{'login'};
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--pass") {

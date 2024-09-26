@@ -31,10 +31,17 @@ if (!$module_name) {
 
 # Parse command-line args
 $owner = 1;
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--multiline") {
 		$multi = 1;
+		}
+	elsif ($a eq "--xml") {
+		$multi = &cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = &cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
@@ -97,6 +104,6 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists all S3 Virtualmin accounts.\n";
 print "\n";
-print "virtualmin list-s3-accounts [--multiline | --name-only]\n";
+print "virtualmin list-s3-accounts [--multiline | --json | --xml | --name-only]\n";
 exit(1);
 }

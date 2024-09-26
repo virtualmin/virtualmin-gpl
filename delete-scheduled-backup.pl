@@ -31,6 +31,7 @@ if (!$module_name) {
 
 # Parse command-line args
 @OLDARGV = @ARGV;
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--id") {

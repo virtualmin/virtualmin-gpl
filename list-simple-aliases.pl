@@ -28,6 +28,7 @@ if (!$module_name) {
 	}
 
 # Parse command-line args
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -41,6 +42,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--multiline") {
 		$multi = 1;
+		}
+	elsif ($a eq "--xml") {
+		$multi = &cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = &cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--plugins") {
 		$plugins = 1;
@@ -135,7 +142,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists the simple mail aliases in some virtual server.\n";
 print "\n";
 print "virtualmin list-simple-aliases --all-domains | --domain name | --user username\n";
-print "                              [--multiline]\n";
+print "                              [--multiline | --json | --xml]\n";
 print "                              [--plugins]\n";
 exit(1);
 }

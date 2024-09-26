@@ -23,11 +23,11 @@ else {
 return undef;
 }
 
-# convert_remote_format(&output, exit-status, command, &in, [format])
+# convert_remote_format(&output, exit-status, command, &in, [format], [config])
 # Converts output from some API command to JSON or XML format
 sub convert_remote_format
 {
-my ($out, $ex, $cmd, $in, $format) = @_;
+my ($out, $ex, $cmd, $in, $format, $config) = @_;
 
 # Parse into a data structure
 my $data = { 'command' => $cmd,
@@ -168,7 +168,13 @@ else {
 if ($format) {
 	# Call formatting function
 	my $ffunc = "create_".$format."_format";
-	return &$ffunc($data);
+	# JSON output can be minified or pretty
+	my $pretty;
+	if ($format eq 'json') {
+		$pretty = $in->{'json'} eq 'minified' ? 0 :
+			  ($config->{'json_pretty'} // 1);
+		}
+	return &$ffunc($data, $pretty);
 	}
 else {
 	# Just return perl hash (for internal use)
@@ -185,13 +191,14 @@ eval "use XML::Simple";
 return XMLout($data, RootName => 'api');
 }
 
-# create_json_format(&hash)
+# create_json_format(&hash, [pretty])
 # Convert a hash into JSON
 sub create_json_format
 {
-my ($data) = @_;
+my ($data, $pretty) = @_;
 eval "use JSON::PP";
-my $coder = JSON::PP->new->pretty;
+$pretty //= 1;
+my $coder = JSON::PP->new->pretty($pretty);
 return $coder->encode($data)."\n";
 }
 
@@ -202,6 +209,54 @@ sub create_perl_format
 my ($data) = @_;
 eval "use Data::Dumper";
 return Dumper($data);
+}
+
+# cli_convert_remote_format(format)
+# Catches and displays Virtualmin CLI standard listing
+# commands in JSON or XML format. Returns 1 if the output
+# should be multiline, 0 if not.
+sub cli_convert_remote_format
+{
+my ($format) = @_;
+my ($lines, $fh, $ofh);
+# Redirect STDOUT to a variable
+open ($fh, '>', \$lines) || return;
+# Save the original STDOUT
+$ofh = select($fh);
+END {
+	no warnings 'closure';
+	# Restore the original STDOUT
+	select($ofh);
+	# In case of error, print the output as is
+	if ($? != 0) {
+		print $lines;
+		}
+	# Otherwise, convert the output to JSON
+	else {
+		my $program = $0;
+		$program =~ s/.*\/|\.\w+$//g;
+		my %in;
+		local @ARGV = @ARGV;
+		while (my $arg = shift @ARGV) {
+			if ($arg =~ /^--(?!json|xml)([\w-]+)$/) {
+				$in{$1} = 1;
+				$in{$1} = (shift @ARGV)
+					if (@ARGV && $ARGV[0] !~ /^--/);
+				}
+			}
+		# Always force multiline format, as JSON and XML output make no
+		# sense without it
+		$in{'multiline'} = 1;
+		print &convert_remote_format($lines, 0, $program, \%in, $format);
+		}
+	}
+# Should we auto-enable multiline output?
+foreach my $arg (@ARGV) {
+	if ($arg =~ /--(name|id|user|home|file|ip)-only/) {
+		return 0;
+		}
+	}
+return 1;
 }
 
 # execute_webmin_script(command, module, &args, output-fh)

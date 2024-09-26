@@ -94,6 +94,7 @@ if (!$module_name) {
 # Parse command-line args
 $name = 1;
 $virt = 0;
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {

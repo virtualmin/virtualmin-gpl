@@ -26,10 +26,17 @@ if (!$module_name) {
 	}
 @OLDARGV = @ARGV;
 
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
         local $a = shift(@ARGV);
 	if ($a eq "--multiline") {
-		$multiline = 1;
+		$multi = 1;
+		}
+	elsif ($a eq "--xml") {
+		$multi = &cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = &cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -40,7 +47,7 @@ while(@ARGV > 0) {
 	}
 
 @ss = &get_startstop_links();
-if ($multiline) {
+if ($multi) {
 	foreach my $ss (@ss) {
 		print $ss->{'feature'},"\n";
 		print "    ID: ",$ss->{'id'},"\n" if ($ss->{'id'});

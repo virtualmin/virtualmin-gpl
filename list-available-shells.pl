@@ -34,10 +34,17 @@ if (!$module_name) {
 	}
 
 # Parse command-line args
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--multiline") {
 		$multi = 1;
+		}
+	elsif ($a eq "--xml") {
+		$multi = &cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = &cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--owner") {
 		$type = "owner";
@@ -115,7 +122,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the shells available for mailboxes and domain administrators.\n";
 print "\n";
-print "virtualmin list-available-shells [--multiline | --name-only]\n";
+print "virtualmin list-available-shells [--multiline | --json | --xml |\n";
+print "                                  --name-only]\n";
 print "                                 [--owner | --mailbox | --reseller]\n";
 print "                                 [--available]\n";
 exit(1);

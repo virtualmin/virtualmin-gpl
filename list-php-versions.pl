@@ -35,6 +35,7 @@ if (!$module_name) {
 
 # Parse command-line args
 $owner = 1;
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--name-only") {
@@ -47,7 +48,13 @@ while(@ARGV > 0) {
 		$forcemode = shift(@ARGV);
 		}
 	elsif ($a eq "--multiline") {
-		$multiline = 1;
+		$multi = 1;
+		}
+	elsif ($a eq "--xml") {
+		$multi = &cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = &cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--full-version") {
 		$fullver = 1;
@@ -75,7 +82,7 @@ if ($nameonly) {
 		print $v,"\n";
 		}
 	}
-elsif ($multiline) {
+elsif ($multi) {
 	# Show full details
 	foreach $s (@vers) {
 		print $s->[0],"\n";
@@ -112,7 +119,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the available PHP versions on this system.\n";
 print "\n";
-print "virtualmin list-php-versions [--name-only | --multiline]\n";
+print "virtualmin list-php-versions [--multiline | --json | --xml]\n";
 print "                             [--domain name]\n";
 print "                             [--mode fpm|fcgid|cgi]\n";
 print "                             [--full-version]\n";

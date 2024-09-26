@@ -27,13 +27,20 @@ if (!$module_name) {
 	}
 
 # Parse command line to get domains
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		$dname = shift(@ARGV);
 		}
 	elsif ($a eq "--multiline") {
-		$multiline = 1;
+		$multi = 1;
+		}
+	elsif ($a eq "--xml") {
+		$multi = &cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = &cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -51,10 +58,10 @@ $d || &usage("Virtual server $dname does not exist");
 	&usage("Virtual server $dname does not have an SSL cert");
 @svcs = &get_all_domain_service_ssl_certs($d);
 
-if ($multiline) {
+if ($multi) {
 	# Show all details of each service
 	foreach my $svc (@svcs) {
-		print $svc->{'id'},":\n";
+		print $svc->{'id'},"\n";
 		print "    Service type: ",
 		      ($svc->{'d'} ? "domain" : "global"),"\n";
 		print "    Cert file: ",$svc->{'cert'},"\n";
@@ -83,7 +90,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Output a virtual server's certificates used by other services.\n";
 print "\n";
 print "virtualmin list-service-certs --domain name\n";
-print "                             [--multiline]\n";
+print "                             [--multiline | --json | --xml]\n";
 exit(1);
 }
 

@@ -64,6 +64,7 @@ if (!$module_name) {
 
 # Parse command-line args
 $size = $config{'key_size'};
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
