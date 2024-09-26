@@ -3211,5 +3211,19 @@ else {
 return undef;
 }
 
+# get_php_info_link(dom, [placement, subdir])
+# Returns a link to the PHP info page for a domain.
+# If subdir is set, the link will point to a
+# specific directory.
+sub get_php_info_link
+{
+my ($dom, $placement, $subdir) = @_;
+$placement ||= 'cell';
+return "&nbsp;&nbsp;" .
+	&ui_link("showphpinfo.cgi?dom=$dom&dir=$subdir",
+	&ui_help(&text('phpmode_phpinfo_show' . ($subdir ? '_dir' : ''), $subdir)),
+			undef, "target=_blank data-placement=\"$placement\"");
+}
+
 1;
 
