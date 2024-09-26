@@ -19,7 +19,7 @@ $script || &error($text{'scripts_emissing'});
         @{[&text('scripts_gpl_pro_tip_enroll_single', $virtualmin_shop_link)]}")
                 if (defined($in{$p}) && $in{$p} ne $virtualmin_pro);
 # Run
-my $lib = "./$p/scripts/@{[ basename($0) =~ /^(.*)\.cgi$/ ]}-lib.pl";
+my $lib = "./$p/scripts/workbench-lib.pl";
 do $lib if (-r $lib);
 my $apply_func = $script->{'kit_apply_func'};
 if (defined(&$apply_func)) {
