@@ -680,19 +680,25 @@ return $v == 9999 ? undef : $v ? $v-1 : 40;
 # config file
 sub set_php_max_execution_time
 {
-local ($d, $max) = @_;
+my ($d, $max) = @_;
 &foreign_require("phpini");
+my $err;
 foreach my $ini (&list_domain_php_inis($d)) {
-	local $f = $ini->[1];
-	local $conf = &phpini::get_config($f);
-	&phpini::save_directive($conf, "max_execution_time", $max);
-	&flush_file_lines($f);
+	eval {
+		local $main::error_must_die = 1;
+		local $f = $ini->[1];
+		local $conf = &phpini::get_config($f);
+		&phpini::save_directive($conf, "max_execution_time", $max);
+		&flush_file_lines($f);
+		};
+	$err ||= $@;
 	}
 my $mode = &get_domain_php_mode($d);
 if ($mode eq "fpm") {
 	&save_php_fpm_ini_value($d, "max_execution_time",
 				$max == 0 ? undef : $max);
 	}
+return $err;
 }
 
 # get_php_max_execution_time(&domain)
