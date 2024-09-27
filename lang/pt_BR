@@ -219,7 +219,6 @@ databases_desc4=Este formulário permite que você traga existentes bases de dad
 databases_tabhosts=Host remoto
 databases_desc5=Esse formulário lista hosts remotos que são permitidos para se conectar a bancos de dados pertencentes a esse servidor virtual, e todos os servidores sub-. Estas se aplicam ao proprietário do domínio e quaisquer outros usuários de caixas de correio com acesso MySQL.
 databases_ahosts=Hosts permitido para $1
-databases_hosts_fmt=Cada nome ou IP deve ser digitado em uma linha separada.
 
 database_size=Espaço ocupado
 database_tables=Número de tabelas

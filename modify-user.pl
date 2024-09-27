@@ -101,6 +101,7 @@ if (!$module_name) {
 ($nologin_shell, $ftp_shell, $jailed_shell) = &get_common_available_shells();
 
 # Parse command-line args
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {

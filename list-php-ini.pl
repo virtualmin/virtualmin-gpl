@@ -38,6 +38,7 @@ if (!$module_name) {
 &set_all_text_print();
 
 # Parse command-line args
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -60,6 +61,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
+		}
+	elsif ($a eq "--xml") {
+		$multiline = &cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multiline = &cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--help") {
 		&usage();

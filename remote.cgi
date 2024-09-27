@@ -31,9 +31,9 @@ if (!$in{'program'}) {
 	}
 
 # Get output format
-$format = defined($in{'json'}) ? 'json' :
-          defined($in{'xml'}) ? 'xml' :
-          defined($in{'perl'}) ? 'perl' :
+$format = exists($in{'json'}) ? 'json' :
+          exists($in{'xml'}) ? 'xml' :
+          exists($in{'perl'}) ? 'perl' :
                 undef;
 
 # Build the arg list
@@ -100,7 +100,7 @@ if ($format) {
 		}
 	waitpid($pid, 0);
 	print &convert_remote_format($out, $?, $in{'program'},
-				     \%in, $format);
+				     \%in, $format, \%config);
 	}
 else {
 	# Stream output

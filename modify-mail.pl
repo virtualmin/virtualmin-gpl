@@ -86,6 +86,7 @@ $config{'mail'} || &usage("Email is not enabled for Virtualmin");
 &set_all_text_print();
 
 # Parse command-line args
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {

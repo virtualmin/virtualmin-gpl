@@ -157,7 +157,8 @@ if ($showphp) {
 		if (&can_edit_phpmode($d) && &can_edit_phpver($d)) {
 			$phpinfo = "<a href='edit_phpmode.cgi?dom=$d->{'id'}'>$phpinfo</a>"
 			}
-		print &ui_table_row($text{'scripts_iphpver'}, $phpinfo);
+		print &ui_table_row($text{'scripts_iphpver'}, $phpinfo.
+			&get_php_info_link($d->{'id'}, 'label'));
 		}
 	}
 

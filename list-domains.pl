@@ -76,10 +76,17 @@ if (!$module_name) {
 # Parse command-line args
 $owner = 1;
 @allplans = &list_plans();
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--multiline") {
 		$multi = 1;
+		}
+	elsif ($a eq "--xml") {
+		$multi = &cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = &cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--simple-multiline") {
 		$multi = 2;
@@ -1023,8 +1030,9 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the virtual servers on this system.\n";
 print "\n";
-print "virtualmin list-domains [--multiline | --name-only | --id-only |\n";
-print "                         --simple-multiline | --user-only |\n";
+print "virtualmin list-domains [--multiline | --simple-multiline |\n";
+print "                         --json | --xml]\n";
+print "                        [--name-only | --id-only | --user-only |\n";
 print "                         --home-only | --file-only | --ip-only]\n";
 print "                        [--domain name]*\n";
 print "                        [--user name]*\n";

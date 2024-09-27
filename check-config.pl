@@ -30,6 +30,7 @@ if (!$module_name) {
 	}
 @OLDARGV = @ARGV;
 
+local @ARGV = @ARGV;
 while(@ARGV > 0) {
         local $a = shift(@ARGV);
 	if ($a eq "--multiline") {

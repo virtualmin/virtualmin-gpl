@@ -54,9 +54,11 @@ while (@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
-	elsif ($a eq "--multiline-json") {
-		$multi = 1;
-		&cli_list_catch_convert_stdout_to_json();
+	elsif ($a eq "--xml") {
+		$multi = &cli_convert_remote_format('xml');
+		}
+	elsif ($a eq "--json") {
+		$multi = &cli_convert_remote_format('json');
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -202,6 +204,6 @@ print "\n";
 print "virtualmin list-certs-expiry --all-domains | --domain regex\n";
 print "                            [--sort [expiry|name]\n";
 print "                            [--sort-order [asc|desc]\n";
-print "                            [--multiline | --multiline-json]\n";
+print "                            [--multiline | --json | --xml]\n";
 exit(1);
 }

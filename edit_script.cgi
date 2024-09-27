@@ -70,7 +70,8 @@ if ($opts->{'dir'}) {
 		$fullver = &get_php_version($bestdir->{'version'}, $d) ||
 			   $bestdir->{'version'};
 		print &ui_table_row($text{'scripts_iphpver'},
-			$fullver." (".$text{'phpmode_short_'.$mode}.")");
+			$fullver." (".$text{'phpmode_short_'.$mode}.")".
+				&get_php_info_link($d->{'id'}, 'label'));
 		}
 	}
 
