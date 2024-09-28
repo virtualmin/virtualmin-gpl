@@ -682,7 +682,7 @@ sub set_php_max_execution_time
 {
 my ($d, $max) = @_;
 &foreign_require("phpini");
-my $err = "";
+my @errs;
 foreach my $ini (&list_domain_php_inis($d)) {
 	eval {
 		local $main::error_must_die = 1;
@@ -691,14 +691,14 @@ foreach my $ini (&list_domain_php_inis($d)) {
 		&phpini::save_directive($conf, "max_execution_time", $max);
 		&flush_file_lines($f);
 		};
-	$err .= $@;
+	puah(@errs, $@) if ($@);
 	}
 my $mode = &get_domain_php_mode($d);
 if ($mode eq "fpm") {
 	&save_php_fpm_ini_value($d, "max_execution_time",
 				$max == 0 ? undef : $max);
 	}
-return $err;
+return @errs ? join(" ", @errs) : undef;
 }
 
 # get_php_max_execution_time(&domain)
