@@ -691,7 +691,7 @@ foreach my $ini (&list_domain_php_inis($d)) {
 		&phpini::save_directive($conf, "max_execution_time", $max);
 		&flush_file_lines($f);
 		};
-	puah(@errs, $@) if ($@);
+	push(@errs, $@) if ($@);
 	}
 my $mode = &get_domain_php_mode($d);
 if ($mode eq "fpm") {
