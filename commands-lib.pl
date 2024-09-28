@@ -256,5 +256,43 @@ else {
 	}
 }
 
+# parse_common_cli_flags(&argv)
+# Parses and updates the provided argv, and sets global variables $multi,
+# $idonly, $nameonly. May also start capturing output for XML and JSON.
+sub parse_common_cli_flags
+{
+my ($argv) = @_;
+my $i = 0;
+while($i < @$argv) {
+	if ($argv->[$i] eq "--multiline") {
+		$multi = $multiline = 1;
+		splice(@$argv, $i, 1);
+		}
+	elsif ($argv->[$i] eq "--simple-multiline") {
+		$multi = $multiline = 2;
+		splice(@$argv, $i, 1);
+		}
+	elsif ($argv->[$i] eq "--id-only") {
+		$idonly = 1;
+		splice(@$argv, $i, 1);
+		}
+	elsif ($argv->[$i] eq "--name-only") {
+		$nameonly = 1;
+		splice(@$argv, $i, 1);
+		}
+	elsif ($argv->[$i] =~ /^--(xml|json)$/) {
+		&cli_convert_remote_format($1);
+		$convert_format = $1;
+		splice(@$argv, $i, 1);
+		}
+	elsif ($argv->[$i] eq "--help") {
+		&usage();
+		}
+	else {
+		$i++;
+		}
+	}
+}
+
 1;
 

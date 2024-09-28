@@ -47,6 +47,7 @@ if (!$module_name) {
 
 # Parse command-line args
 local @ARGV = @ARGV;
+&parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -58,26 +59,11 @@ while(@ARGV > 0) {
 	elsif ($a eq "--all-domains") {
 		$all = 1;
 		}
-	elsif ($a eq "--multiline") {
-		$multi = 1;
-		}
-	elsif ($a eq "--xml") {
-		$multi = &cli_convert_remote_format('xml');
-		}
-	elsif ($a eq "--json") {
-		$multi = &cli_convert_remote_format('json');
-		}
-	elsif ($a eq "--name-only") {
-		$nameonly = 1;
-		}
 	elsif ($a eq "--email-only") {
 		$emailonly = 1;
 		}
 	elsif ($a eq "--plugins") {
 		$plugins = 1;
-		}
-	elsif ($a eq "--help") {
-		&usage();
 		}
 	else {
 		&usage("Unknown parameter $a");
