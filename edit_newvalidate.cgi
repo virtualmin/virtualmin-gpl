@@ -31,18 +31,7 @@ print &ui_table_row($text{'newvalidate_servers'},
 		    &servers_input("servers", [ ], \@doms));
 
 # Features to check
-my @validate_features_ = @validate_features;
-features_sort(\@validate_features_, \@validate_features_);
-foreach $f (@validate_features_) {
-	push(@fopts, [ $f, $text{'feature_'.$f} ]);
-	}
-my @list_feature_plugins = &list_feature_plugins();
-features_sort(\@list_feature_plugins, \@list_feature_plugins);
-foreach $f (@list_feature_plugins) {
-	if (&plugin_defined($f, "feature_validate")) {
-		push(@fopts, [ $f, &plugin_call($f, "feature_name") ]);
-		}
-	}
+my @fopts = &validation_select_features();
 print &ui_table_row($text{'newvalidate_feats'},
 		    &ui_radio("features_def", 1,
 			[ [ 1, $text{'newvalidate_all'} ],

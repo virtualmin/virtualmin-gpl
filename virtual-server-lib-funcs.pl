@@ -21041,6 +21041,27 @@ else {
 return $last_login;
 }
 
+# validation_select_features()
+# Returns a list of tuples for validatable features or plugins, each of which
+# is the feature ID and description
+sub validation_select_features
+{
+my @fopts;
+my @sorted_features = @validate_features;
+features_sort(\@sorted_features, \@sorted_features);
+foreach $f (@sorted_features) {
+	push(@fopts, [ $f, $text{'feature_'.$f} ]);
+	}
+my @sorted_plugins = &list_feature_plugins();
+features_sort(\@sorted_plugins, \@sorted_plugins);
+foreach $f (@sorted_plugins) {
+	if (&plugin_defined($f, "feature_validate")) {
+		push(@fopts, [ $f, &plugin_call($f, "feature_name") ]);
+		}
+	}
+return @fopts;
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;
