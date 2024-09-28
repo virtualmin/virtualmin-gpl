@@ -1,4 +1,5 @@
 # Functions for use by the command-line API
+use feature 'state';
 
 sub list_api_categories
 {
@@ -257,41 +258,36 @@ else {
 }
 
 # parse_common_cli_flags(&argv)
-# Parses and updates the provided argv, and sets global variables $multi,
-# $idonly, $nameonly. May also start capturing output for XML and JSON.
+# Parses and updates the provided argv, and returns a hash reference with
+# flags like 'multi', 'idonly', 'nameonly'. If already parsed, returns the
+# cached hash reference.
 sub parse_common_cli_flags
 {
 my ($argv) = @_;
-my $i = 0;
-while($i < @$argv) {
+state %flags;
+return \%flags if keys (%flags);
+for (my $i = 0; $i < @$argv;) {
 	if ($argv->[$i] eq "--multiline") {
-		$multi = $multiline = 1;
+		$flags{'multi'} = $flags{'multiline'} = 1;
 		splice(@$argv, $i, 1);
 		}
 	elsif ($argv->[$i] eq "--simple-multiline") {
-		$multi = $multiline = 2;
+		$flags{'multi'} = $flags{'multiline'} = 2;
 		splice(@$argv, $i, 1);
 		}
 	elsif ($argv->[$i] eq "--id-only") {
-		$idonly = 1;
+		$flags{'idonly'} = 1;
 		splice(@$argv, $i, 1);
 		}
 	elsif ($argv->[$i] eq "--name-only") {
-		$nameonly = 1;
+		$flags{'nameonly'} = 1;
 		splice(@$argv, $i, 1);
-		}
-	elsif ($argv->[$i] =~ /^--(xml|json)$/) {
-		&cli_convert_remote_format($1);
-		$convert_format = $1;
-		splice(@$argv, $i, 1);
-		}
-	elsif ($argv->[$i] eq "--help") {
-		&usage();
 		}
 	else {
 		$i++;
 		}
 	}
+return \%flags;
 }
 
 1;
