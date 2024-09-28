@@ -77,27 +77,10 @@ if (!$module_name) {
 $owner = 1;
 @allplans = &list_plans();
 local @ARGV = @ARGV;
+&parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
-	if ($a eq "--multiline") {
-		$multi = 1;
-		}
-	elsif ($a eq "--xml") {
-		$multi = &cli_convert_remote_format('xml');
-		}
-	elsif ($a eq "--json") {
-		$multi = &cli_convert_remote_format('json');
-		}
-	elsif ($a eq "--simple-multiline") {
-		$multi = 2;
-		}
-	elsif ($a eq "--name-only") {
-		$nameonly = 1;
-		}
-	elsif ($a eq "--id-only") {
-		$idonly = 1;
-		}
-	elsif ($a eq "--user-only") {
+	if ($a eq "--user-only") {
 		$useronly = 1;
 		}
 	elsif ($a eq "--home-only") {
@@ -196,9 +179,6 @@ while(@ARGV > 0) {
 		$ip = shift(@ARGV);
 		&check_ipaddress($ip) || &check_ip6address($ip) ||
 		    &usage("--ip must be followed by an IPv4 or v6 address");
-		}
-	elsif ($a eq "--help") {
-		&usage();
 		}
 	else {
 		&usage("Unknown parameter $a");

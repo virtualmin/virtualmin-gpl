@@ -35,18 +35,10 @@ if (!$module_name) {
 
 # Parse command-line args
 local @ARGV = @ARGV;
+&parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
-	if ($a eq "--multiline") {
-		$multi = 1;
-		}
-	elsif ($a eq "--xml") {
-		$multi = &cli_convert_remote_format('xml');
-		}
-	elsif ($a eq "--json") {
-		$multi = &cli_convert_remote_format('json');
-		}
-	elsif ($a eq "--owner") {
+	if ($a eq "--owner") {
 		$type = "owner";
 		}
 	elsif ($a eq "--mailbox") {
@@ -57,12 +49,6 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--available") {
 		$avail = 1;
-		}
-	elsif ($a eq "--name-only") {
-		$nameonly = 1;
-		}
-	elsif ($a eq "--help") {
-		&usage();
 		}
 	else {
 		&usage("Unknown parameter $a");

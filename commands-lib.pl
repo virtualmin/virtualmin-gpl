@@ -280,10 +280,17 @@ while($i < @$argv) {
 		$nameonly = 1;
 		splice(@$argv, $i, 1);
 		}
+	elsif ($argv->[$i] eq "--email-only") {
+		$emailonly = 1;
+		splice(@$argv, $i, 1);
+		}
 	elsif ($argv->[$i] =~ /^--(xml|json)$/) {
 		&cli_convert_remote_format($1);
 		$convert_format = $1;
 		splice(@$argv, $i, 1);
+		if (!$multi && !$idonly && !$nameonly && !$emailonly) {
+			$multi = $multiline = 1;
+			}
 		}
 	elsif ($argv->[$i] eq "--help") {
 		&usage();

@@ -59,9 +59,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--all-domains") {
 		$all = 1;
 		}
-	elsif ($a eq "--email-only") {
-		$emailonly = 1;
-		}
 	elsif ($a eq "--plugins") {
 		$plugins = 1;
 		}
