@@ -13092,22 +13092,21 @@ my @order_initial = @{$features_order};
 my %ordered_;
 my @ordered;
 my @unordered;
-for my $i (0 .. $#order_initial) {
-
+foreach my $i (0 .. $#order_initial) {
 	# Store all features
 	$ordered_{$order_initial[$i]} = $features_values->[$i];
 
 	# Unordered keys
-	if (! grep( /^$order_initial[$i]$/, @order_manual ) ) {
+	if (&indexof($order_initial[$i], @order_manual) < 0) {
 		push(@unordered, $features_values->[$i]);
 		}
 	}
 
 # Sort ordered based on manual sorting
-for my $i (0 .. $#order_manual) {
-	my $__ = $ordered_{$order_manual[$i]};
-	push(@ordered, $__) if ($__);
-}
+foreach my $i (0 .. $#order_manual) {
+	my $o = $ordered_{$order_manual[$i]};
+	push(@ordered, $o) if ($o);
+	}
 
 # Combine both and modify original
 my @ordered_combined = (@ordered, @unordered);
