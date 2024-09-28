@@ -6035,6 +6035,7 @@ upgrade_eyumfile=No Virtualmin GPL repository was found in $1
 upgrade_update_pkgs=Updating available packages ..
 upgrade_yumclear=Clearing repository caches ..
 upgrade_etypematch=Upgrading is not possible as Virtualmin's install type is <tt>$1</tt> but Webmin's is <tt>$2</tt>
+upgrade_addrepo=Adding Virtualmin Pro repository ..
 
 maillog_title=Search Mail Log
 maillog_desc=This form can be used to search the mail logs for messages matching some conditions, to find out what happened to them. All fields are optional, and will be skipped for comparison purposes if left empty.
