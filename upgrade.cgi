@@ -374,6 +374,7 @@ else {
 	}
 
 &webmin_log("upgrade");
+&ui_print_footer("", $text{'index_return'});
 
 sub apt_package_versions
 {
