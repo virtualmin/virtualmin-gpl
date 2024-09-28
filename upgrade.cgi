@@ -109,10 +109,14 @@ if ($itype eq "rpm") {
 	$found || &error(&text('upgrade_eyumfile',
 			       "<tt>$virtualmin_yum_repo</tt>"));
 
-	# Clear all YUM caches
-	&$first_print($text{'upgrade_yumclear'});
-	&execute_command("yum clean all");
-	&$second_print($text{'setup_done'});
+	# Clean package manager cache
+	if (&foreign_available("package-updates")) {
+		&foreign_require("package-updates");
+		&$first_print($package_updates::text{'refresh_clearing'});
+		&package_updates::flush_package_caches();
+		&package_updates::clear_repository_cache();
+		&$second_print($package_updates::text{'refresh_done'});
+		}
 
 	# Update Virtualmin to Pro, and install support module
 	my @packages = ('wbm-virtual-server', 'wbm-virtualmin-support');
@@ -170,6 +174,15 @@ elsif ($itype eq "deb") {
 		&write_file_contents(
 		    "$virtualmin_apt_auth_dir/virtualmin.conf",
 		    "machine $upgrade_virtualmin_host login $in{'serial'} password $in{'key'}\n");
+		}
+
+	# Clean package manager cache
+	if (&foreign_available("package-updates")) {
+		&foreign_require("package-updates");
+		&$first_print($package_updates::text{'refresh_clearing'});
+		&package_updates::flush_package_caches();
+		&package_updates::clear_repository_cache();
+		&$second_print($package_updates::text{'refresh_done'});
 		}
 
 	# Force refresh of packages
