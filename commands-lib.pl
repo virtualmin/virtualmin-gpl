@@ -257,7 +257,7 @@ else {
 }
 
 # parse_common_cli_flags(&argv)
-# Parses and updates the provided argv, and sets global variables $multi,
+# Parses and updates the provided argv, and sets global variables $multiline,
 # $idonly, $nameonly. May also start capturing output for XML and JSON.
 sub parse_common_cli_flags
 {
@@ -265,7 +265,7 @@ my ($argv) = @_;
 my $i = 0;
 while($i < @$argv) {
 	if ($argv->[$i] eq "--multiline") {
-		$multi = $multiline = 1;
+		$multiline = 1;
 		splice(@$argv, $i, 1);
 		}
 	elsif ($argv->[$i] eq "--simple-multiline") {

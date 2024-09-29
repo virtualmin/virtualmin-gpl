@@ -39,7 +39,7 @@ while(@ARGV > 0) {
 		$dest = shift(@ARGV);
 		}
 	elsif ($a eq "--multiline") {
-		$multi = 1;
+		$multiline = 1;
 		}
 	elsif ($a eq "--help") {
 		&usage();

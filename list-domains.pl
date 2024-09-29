@@ -288,7 +288,7 @@ if ($ip) {
 		       $_->{'ip6'} eq $ip } @doms;
 	}
 
-if ($multi) {
+if ($multiline) {
 	# Show attributes on multiple lines
 	@shells = grep { $_->{'owner'} } &list_available_shells();
 	$resok = defined(&supports_resource_limits) &&
@@ -298,7 +298,7 @@ if ($multi) {
 	if (defined(&list_acme_providers)) {
 		%acmes = map { $_->{'id'}, $_ } &list_acme_providers();
 		}
-	if ($multi == 1) {
+	if ($multiline == 1) {
 		$hs = &quota_bsize("home");
 		$ms = &quota_bsize("mail");
 		$sender_bcc = &get_all_domains_sender_bcc();
@@ -430,7 +430,7 @@ if ($multi) {
 			      &make_date($d->{'disabled_auto'}),"\n";
 			}
 		if ($d->{'virt'}) {
-			if ($multi == 2) {
+			if ($multiline == 2) {
 				print "    IP address: $d->{'ip'} (Private)\n";
 				}
 			else {
@@ -443,7 +443,7 @@ if ($multi) {
 			print "    IP address: $d->{'ip'} (Shared)\n";
 			}
 		if ($d->{'virt6'}) {
-			if ($multi == 2) {
+			if ($multiline == 2) {
 				print "    IP address: $d->{'ip6'} (Private)\n";
 				}
 			else {
@@ -472,7 +472,7 @@ if ($multi) {
 			      &quota_show($d->{'quota'}, "home"),"\n";
 			print "    Server block quota: ",
 			      ($d->{'quota'} || "Unlimited"),"\n";
-			if ($multi == 1) {
+			if ($multiline == 1) {
 				($qhome, $qmail) = &get_domain_quota($d);
 				print "    Server quota used: ",
 				      &nice_size($qhome*$hs + $qmail*$ms),"\n";
@@ -485,7 +485,7 @@ if ($multi) {
 			      &quota_show($d->{'uquota'}, "home"),"\n";
 			print "    User block quota: ",
 			      ($d->{'uquota'} || "Unlimited"),"\n";
-			if ($multi == 1) {
+			if ($multiline == 1) {
 				print "    User quota used: ",
 				      &nice_size($duser->{'uquota'}*$hs +
 						 $duser->{'umquota'}*$ms),"\n";
@@ -497,7 +497,7 @@ if ($multi) {
 				       $duser->{'umquota'}*$ms),"\n";
 				}
 			}
-		if ($multi == 1) {
+		if ($multiline == 1) {
 			@dbs = &domain_databases($d);
 			if (@dbs) {
 				$dbquota = &get_database_usage($d);
@@ -534,7 +534,7 @@ if ($multi) {
 			}
 
 		# Show spam and virus delivery
-		if ($multi == 1) {
+		if ($multiline == 1) {
 			foreach $w ('spam', 'virus') {
 				next if (!$config{$w} || !$d->{$w});
 				$func = "get_domain_${w}_delivery";
@@ -557,13 +557,13 @@ if ($multi) {
 			}
 
 		# Show spam filtering client
-		if ($config{'spam'} && $d->{'spam'} && $multi == 1) {
+		if ($config{'spam'} && $d->{'spam'} && $multiline == 1) {
 			$c = &get_domain_spam_client($d);
 			print "    SpamAssassin client: $c\n";
 			}
 
 		# Show spam clearing setting
-		if ($config{'spam'} && $d->{'spam'} && $multi == 1) {
+		if ($config{'spam'} && $d->{'spam'} && $multiline == 1) {
 			$auto = &get_domain_spam_autoclear($d);
 			print "    Spam clearing policy: ",
 			  ($auto->{'days'} ? "$auto->{'days'} days" :
@@ -577,7 +577,7 @@ if ($multi) {
 
 		# Show PHP and suexec execution mode
 		my $p = &domain_has_website($d);
-		my $showphp = !$d->{'alias'} && $p && $multi == 1;
+		my $showphp = !$d->{'alias'} && $p && $multiline == 1;
 		if ($showphp) {
 			$pm = &get_domain_php_mode($d);
 			print "    PHP execution mode: $pm\n";
@@ -607,7 +607,7 @@ if ($multi) {
 			print "    Possible CGI script execution modes: ",
 				join(" ", @cgimodes),"\n";
 			}
-		elsif (!$d->{'alias'} && $multi == 2 && $d->{'php_mode'}) {
+		elsif (!$d->{'alias'} && $multiline == 2 && $d->{'php_mode'}) {
 			print "    PHP execution mode: $d->{'php_mode'}\n";
 			}
 		if ($showphp &&
@@ -682,7 +682,7 @@ if ($multi) {
 			}
 
 		# Show default website flag
-		if (&domain_has_website($d) && $multi == 1 &&
+		if (&domain_has_website($d) && $multiline == 1 &&
 		    (!$d->{'alias'} || $d->{'alias_mode'} != 1)) {
 			print "    Default website for IP: ",
 				(&is_default_website($d) ? "Yes" : "No"),"\n";
@@ -709,7 +709,7 @@ if ($multi) {
 		if ($same) {
 			print "    SSL shared with: $same->{'dom'}\n";
 			}
-		if ($multi == 1) {
+		if ($multiline == 1) {
 			@sslhn = &get_hostnames_for_ssl($d);
 			print "    SSL candidate hostnames: ",
 				join(" ", @sslhn),"\n";
@@ -752,7 +752,7 @@ if ($multi) {
 			}
 
 		# Show SSL cert usage by other services
-		if ($multi == 1) {
+		if ($multiline == 1) {
 			foreach my $svc (&get_all_domain_service_ssl_certs($d)) {
 				print "    SSL cert used by: ",
 				      $svc->{'id'},
@@ -781,7 +781,7 @@ if ($multi) {
 
 		# Show DNS SPF mode
 		if ($config{'dns'} && $d->{'dns'} && !$d->{'dns_submode'} &&
-		    $multi == 1) {
+		    $multiline == 1) {
 			$spf = &is_domain_spf_enabled($d);
 			print "    SPF DNS record: ",
 			      ($spf ? "Enabled" : "Disabled"),"\n";
@@ -827,7 +827,7 @@ if ($multi) {
 			}
 
 		# Show cloud mail setting
-		if ($config{'mail'} && $d->{'mail'} && $multi == 1) {
+		if ($config{'mail'} && $d->{'mail'} && $multiline == 1) {
 			if ($d->{'cloud_mail_provider'}) {
 				print "    Cloud mail filter: ",
 				      $d->{'cloud_mail_provider'},"\n";
@@ -904,7 +904,7 @@ if ($multi) {
 			}
 
 		# Show resource limits
-		if (!$d->{'parent'} && $resok && $multi == 1) {
+		if (!$d->{'parent'} && $resok && $multiline == 1) {
 			$rv = &get_domain_resource_limits($d);
 			print "    Maximum processes: ",
 				$rv->{'procs'} || "Unlimited","\n";
@@ -927,7 +927,7 @@ if ($multi) {
 			}
 
 		# Show allowed DB hosts
-		if (!$d->{'parent'} && $multi == 1) {
+		if (!$d->{'parent'} && $multiline == 1) {
 			foreach $f (grep { $config{$_} &&
 					   $d->{$_} } @database_features) {
 				$gfunc = "get_".$f."_allowed_hosts";
