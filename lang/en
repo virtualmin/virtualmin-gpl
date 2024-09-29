@@ -8236,4 +8236,13 @@ acme_can2=Master admin only
 acme_edefault=The default Let's Encrypt provider cannot be edited
 acme_website=SSL provider's website
 
+monitor_validate=Validate Virtualmin Domains
+monitor_doms=Domains to check
+monitor_edoms=No domains to check selected
+monitor_feats=Features to check
+monitor_efeats=No features to check selected
+monitor_nodoms=No domains to check found!
+monitor_nofeats=No features to check found!
+monitor_done=Successfully checked $2 features in $1 domains
+
 __norefs=1
