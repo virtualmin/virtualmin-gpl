@@ -13061,8 +13061,40 @@ return undef;
 }
 
 # features_sort(\@features_values, \@features_order)
-# Sorts features based on given pre-sorted list,
-# and fills unlisted based on initial sorting
+#
+# Sorts the elements in the array referenced by the first argument based on a
+# predefined manual order of features. The second argument provides the
+# corresponding features for each element in the first array, serving as a
+# mapping between elements and their associated features.
+#
+# Parameters:
+# - The first argument ($features_values) is a reference to an array of elements
+#   to be sorted. These elements can be any data structures that represent
+#   features but may not directly contain the feature identifiers.
+# - The second argument ($features_order) is a reference to an array of feature
+#   identifiers, where each feature corresponds to the element at the same index
+#   in the first array. This array provides the necessary mapping to associate
+#   each element with its feature.
+#
+# Behavior:
+# - The function first creates a mapping of features to their corresponding
+#   elements from the arrays provided.
+# - It then sorts the elements whose features appear in the predefined manual
+#   order (@order_manual), placing them first and in the exact order specified.
+# - Elements whose features do not appear in @order_manual are considered
+#   unordered and are placed after the ordered elements, maintaining their
+#   original order.
+# - The original array referenced by the first argument ($features_values) is
+#   modified in-place to reflect the new sorted order.
+#
+# Notes:
+# - The use of two separate arrays allows the function to sort elements that may
+#   not directly contain their feature identifiers or are complex structures, by
+#   using the mapping provided by the features array ($features_order).
+# - This provides flexibility, as the elements to be sorted can be of any type,
+#   as long as there is a corresponding feature for each element.
+# - The function assumes that the features in @$features_order correspond
+#   one-to-one with the elements in @$features_values.
 sub features_sort
 {
 my ($features_values, $features_order) = @_;
