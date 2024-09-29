@@ -36,6 +36,7 @@ if (!$module_name) {
 # Parse command-line args
 $owner = 1;
 local @ARGV = @ARGV;
+&parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -47,19 +48,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--filesonly") {
 		$filesonly = 1;
 		}
-	elsif ($a eq "--multiline") {
-		$multiline = 1;
-		}
 	elsif ($a eq "--folder") {
 		$folderid = shift(@ARGV);
-		}
-	elsif ($a eq "--help") {
-		&usage();
 		}
 	else {
 		&usage("Unknown parameter $a");
 		}
 	}
+$convert_format && &usage("XML or JSON conversion is not supported");
 
 # Parse args and get domain
 $dname || &usage("No domain specified");

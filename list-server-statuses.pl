@@ -27,23 +27,10 @@ if (!$module_name) {
 @OLDARGV = @ARGV;
 
 local @ARGV = @ARGV;
+&parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
         local $a = shift(@ARGV);
-	if ($a eq "--multiline") {
-		$multi = 1;
-		}
-	elsif ($a eq "--xml") {
-		$multi = &cli_convert_remote_format('xml');
-		}
-	elsif ($a eq "--json") {
-		$multi = &cli_convert_remote_format('json');
-		}
-	elsif ($a eq "--help") {
-		&usage();
-		}
-	else {
-		&usage("Unknown parameter $a");
-		}
+	&usage("Unknown parameter $a");
 	}
 
 @ss = &get_startstop_links();
