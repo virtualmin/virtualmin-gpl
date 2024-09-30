@@ -304,6 +304,91 @@ while($i < @$argv) {
 	}
 }
 
+# extract_params_from_usage()
+# Extracts a hash of command-line parameters (flags) from the output of the
+# usage() function of the current sub-program. This function captures the output
+# of usage(), scans for parameters prefixed with '--', and determines whether
+# each parameter requires a value and whether it can be specified multiple times
+# (indicated by '*'). The function returns a hash where each key is a parameter
+# name (without '--'), and the value indicates:
+#
+# - 0: Parameter does not require a value.
+# - 1: Parameter requires a value.
+# - 2: Parameter requires a value and can be specified multiple times (indicated
+#   by '*').
+#
+# The function handles the capturing of usage output through a forked process
+# and pipes, allowing it to process the output of the usage() function that
+# prints to STDOUT.
+sub extract_params_from_usage
+{
+my ($usage) = @_;
+my $lines = q{};
+# Capture the output of the usage subroutine
+pipe(my $reader, my $writer) || die("Cannot extract parameters from usage: $!");
+my $pid = fork();
+die "Fork failed: $!" unless defined($pid);
+if ($pid == 0) {
+	# Child process
+	close($reader);
+	open(STDOUT, '>&', $writer) || die("Can't redirect STDOUT: $!");
+	close($writer);
+	$usage->();
+	# Ensure child process exits
+	exit(0);
+	}
+# Parent process
+close($writer);
+while (my $line = <$reader>) {
+	$lines .= $line;
+	}
+close($reader);
+waitpid($pid, 0);
+# Parse the usage output and extract parameters
+my %params;
+my @lines = split(/\n/, $lines);
+foreach my $line (@lines) {
+	# Remove leading and trailing whitespace
+	$line =~ s/^\s+|\s+$//g;
+	# Skip empty lines
+	next unless $line;
+	# Process lines containing parameters
+	next unless $line =~ /--/;
+	# Remove surrounding brackets for easier processing
+	$line =~ s/^\[//;
+	$line =~ s/\]$//;
+	# Handle multiple parameters separated by '|'
+	my @parts = split(/\|/, $line);
+	foreach my $part (@parts) {
+		# Trim whitespace
+		$part =~ s/^\s+|\s+$//g;
+		# Match parameter patterns
+		if ($part =~ /--([^\s\[\]|]+)/) {
+			my $param_name = $1;
+			my $takes_value = 0;
+			my $reusable = 0;
+			# Check if parameter is followed by a value
+			if ($part =~ /--$param_name\s+([^\s\[\]|]+)/) {
+				$takes_value = 1;
+				}
+			# Check if parameter or its value is followed by '*'
+			if ($part =~ /\*\s*$/ ||
+			    $part =~ /[^\s\[\]|]+\s*\*\s*$/) {
+				$reusable = 1;
+				}
+			# Determine the value to store in %params
+			my $param_value =
+				$takes_value ? ($reusable ? 2 : 1) : 0;
+			# Store the parameter and its value, unless already
+			# stored
+			$params{$param_name} =
+				$param_value unless exists($params{$param_name});
+			}
+		}
+	}
+return %params;
+}
+
 # cli_convert_remote_format(format)
 # Catches and displays Virtualmin CLI standard listing
 # commands in JSON or XML format. Returns 1 if the output
