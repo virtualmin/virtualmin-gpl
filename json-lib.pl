@@ -211,38 +211,6 @@ eval "use Data::Dumper";
 return Dumper($data);
 }
 
-# cli_convert_remote_format(format)
-# Catches and displays Virtualmin CLI standard listing
-# commands in JSON or XML format. Returns 1 if the output
-# should be multiline, 0 if not.
-sub cli_convert_remote_format
-{
-my ($format) = @_;
-my ($lines, $fh, $ofh);
-# Redirect STDOUT to a variable
-open ($fh, '>', \$lines) || return;
-# Save the original STDOUT
-$ofh = select($fh);
-
-# Setup end handler to convert saved output
-END {
-	no warnings 'closure';
-	# Restore the original STDOUT
-	select($ofh);
-
-	# Convert output to XML or JSON
-	my $program = $0;
-	$program =~ s/^.*\///;
-	my %fakein = ( 'multiline' => $multiline,
-		       'id-only' => $idonly,
-		       'name-only' => $nameonly,
-		       'email-only' => $emailonly );
-	print &convert_remote_format($lines, $?, $program,
-				     \%fakein, $convert_format);
-	}
-return 1;
-}
-
 # execute_webmin_script(command, module, &args, output-fh)
 # Run some Virtualmin or Cloudmin API command in a forked sub-process, but with
 # out executing a new perl instance. Returns the PID.

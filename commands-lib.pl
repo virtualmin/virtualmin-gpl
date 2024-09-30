@@ -1,5 +1,8 @@
 # Functions for use by the command-line API
 
+our ($convert_multiline, $convert_idonly, $convert_nameonly, $convert_emailonly,
+     $convert_format);
+
 sub list_api_categories
 {
 return ([ "Backup and restore", "backup-domain.pl", "*-scheduled-backup*.pl",
@@ -265,31 +268,31 @@ my ($argv) = @_;
 my $i = 0;
 while($i < @$argv) {
 	if ($argv->[$i] eq "--multiline") {
-		$multiline = 1;
+		$convert_multiline = $multiline = 1;
 		splice(@$argv, $i, 1);
 		}
 	elsif ($argv->[$i] eq "--simple-multiline") {
-		$multiline = 2;
+		$convert_multiline = $multiline = 2;
 		splice(@$argv, $i, 1);
 		}
 	elsif ($argv->[$i] eq "--id-only") {
-		$idonly = 1;
+		$convert_idonly = $idonly = 1;
 		splice(@$argv, $i, 1);
 		}
 	elsif ($argv->[$i] eq "--name-only") {
-		$nameonly = 1;
+		$convert_nameonly = $nameonly = 1;
 		splice(@$argv, $i, 1);
 		}
 	elsif ($argv->[$i] eq "--email-only") {
-		$emailonly = 1;
+		$convert_emailonly = $emailonly = 1;
 		splice(@$argv, $i, 1);
 		}
 	elsif ($argv->[$i] =~ /^--(xml|json)$/) {
 		&cli_convert_remote_format($1);
 		$convert_format = $1;
 		splice(@$argv, $i, 1);
-		if (!$multi && !$idonly && !$nameonly && !$emailonly) {
-			$multi = $multiline = 1;
+		if (!$multiline && !$idonly && !$nameonly && !$emailonly) {
+			$convert_multiline = $multiline = 1;
 			}
 		}
 	elsif ($argv->[$i] eq "--help") {
@@ -299,6 +302,38 @@ while($i < @$argv) {
 		$i++;
 		}
 	}
+}
+
+# cli_convert_remote_format(format)
+# Catches and displays Virtualmin CLI standard listing
+# commands in JSON or XML format. Returns 1 if the output
+# should be multiline, 0 if not.
+sub cli_convert_remote_format
+{
+my ($format) = @_;
+my ($lines, $fh, $ofh);
+# Redirect STDOUT to a variable
+open ($fh, '>', \$lines) || return;
+# Save the original STDOUT
+$ofh = select($fh);
+
+# Setup end handler to convert saved output
+END {
+	no warnings 'closure';
+	# Restore the original STDOUT
+	select($ofh);
+
+	# Convert output to XML or JSON
+	my $program = $0;
+	$program =~ s/^.*\///;
+	my %fakein = ( 'multiline' => $convert_multiline,
+		       'id-only' => $convert_idonly,
+		       'name-only' => $convert_nameonly,
+		       'email-only' => $convert_emailonly );
+	print &convert_remote_format($lines, $?, $program,
+				     \%fakein, $convert_format);
+	}
+return 1;
 }
 
 1;
