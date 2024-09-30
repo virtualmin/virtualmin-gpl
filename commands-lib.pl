@@ -269,7 +269,7 @@ while($i < @$argv) {
 		splice(@$argv, $i, 1);
 		}
 	elsif ($argv->[$i] eq "--simple-multiline") {
-		$multi = $multiline = 2;
+		$multiline = 2;
 		splice(@$argv, $i, 1);
 		}
 	elsif ($argv->[$i] eq "--id-only") {

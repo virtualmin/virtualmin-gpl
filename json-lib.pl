@@ -223,38 +223,22 @@ my ($lines, $fh, $ofh);
 open ($fh, '>', \$lines) || return;
 # Save the original STDOUT
 $ofh = select($fh);
+
+# Setup end handler to convert saved output
 END {
 	no warnings 'closure';
 	# Restore the original STDOUT
 	select($ofh);
-	# In case of error, print the output as is
-	if ($? != 0) {
-		print $lines;
-		}
-	# Otherwise, convert the output to JSON
-	else {
-		my $program = $0;
-		$program =~ s/.*\/|\.\w+$//g;
-		my %in;
-		local @ARGV = @ARGV;
-		while (my $arg = shift @ARGV) {
-			if ($arg =~ /^--(?!json|xml)([\w-]+)$/) {
-				$in{$1} = 1;
-				$in{$1} = (shift @ARGV)
-					if (@ARGV && $ARGV[0] !~ /^--/);
-				}
-			}
-		# Always force multiline format, as JSON and XML output make no
-		# sense without it
-		$in{'multiline'} = 1;
-		print &convert_remote_format($lines, 0, $program, \%in, $format);
-		}
-	}
-# Should we auto-enable multiline output?
-foreach my $arg (@ARGV) {
-	if ($arg =~ /--(name|id|user|home|file|ip)-only/) {
-		return 0;
-		}
+
+	# Convert output to XML or JSON
+	my $program = $0;
+	$program =~ s/^.*\///;
+	my %fakein = ( 'multiline' => $multiline,
+		       'id-only' => $idonly,
+		       'name-only' => $nameonly,
+		       'email-only' => $emailonly );
+	print &convert_remote_format($lines, $?, $program,
+				     \%fakein, $convert_format);
 	}
 return 1;
 }
