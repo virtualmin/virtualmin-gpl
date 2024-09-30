@@ -64,7 +64,7 @@ if ($avail) {
 	@shells = grep { $_->{'avail'} } @shells;
 	}
 
-if ($multi) {
+if ($multiline) {
 	# Show full details
 	foreach $shell (@shells) {
 		print $shell->{'shell'},"\n";

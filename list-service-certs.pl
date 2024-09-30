@@ -47,7 +47,7 @@ $d || &usage("Virtual server $dname does not exist");
 	&usage("Virtual server $dname does not have an SSL cert");
 @svcs = &get_all_domain_service_ssl_certs($d);
 
-if ($multi) {
+if ($multiline) {
 	# Show all details of each service
 	foreach my $svc (@svcs) {
 		print $svc->{'id'},"\n";

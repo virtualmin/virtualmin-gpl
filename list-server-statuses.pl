@@ -34,7 +34,7 @@ while(@ARGV > 0) {
 	}
 
 @ss = &get_startstop_links();
-if ($multi) {
+if ($multiline) {
 	foreach my $ss (@ss) {
 		print $ss->{'feature'},"\n";
 		print "    ID: ",$ss->{'id'},"\n" if ($ss->{'id'});

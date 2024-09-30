@@ -71,7 +71,7 @@ if (!ref($files)) {
 if ($container) {
 	@$files = grep { $_ eq $container } @$files;
 	}
-if ($multi) {
+if ($multiline) {
 	# Full details
 	foreach $f (@$files) {
 		print $f,"\n";

@@ -55,7 +55,7 @@ if (!ref($files)) {
 if ($bucket) {
 	@$files = grep { $_ eq $bucket } @$files;
 	}
-if ($multi) {
+if ($multiline) {
 	# Full details
 	foreach $st (@$files) {
 		print $st->{'name'},"\n";

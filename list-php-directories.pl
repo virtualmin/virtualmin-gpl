@@ -53,7 +53,7 @@ $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 @dirs = &list_domain_php_directories($d);
 
-if ($multi) {
+if ($multiline) {
 	# Show on separate lines
 	foreach $dir (@dirs) {
 		my $fullver = &get_php_version($dir->{'version'}, $d);

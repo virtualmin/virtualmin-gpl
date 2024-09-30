@@ -39,7 +39,7 @@ while(@ARGV > 0) {
 	}
 @s3s = &list_s3_accounts();
 
-if ($multi) {
+if ($multiline) {
 	# Full details
 	my @scheds = &list_scheduled_backups();
 	foreach $s (@s3s) {

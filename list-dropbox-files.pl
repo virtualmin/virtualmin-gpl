@@ -52,7 +52,7 @@ if (!ref($files)) {
 	exit(1);
 	}
 
-if ($multi) {
+if ($multiline) {
 	# Full details
 	foreach $f (@$files) {
 		$name = $f->{'path_display'};

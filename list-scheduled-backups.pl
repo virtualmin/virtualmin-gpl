@@ -71,7 +71,7 @@ elsif ($reseller) {
 	@scheds = grep { $_->{'owner'} eq $reseller } @scheds;
 	}
 
-if ($multi) {
+if ($multiline) {
 	# Show all details
 	%running = map { $_->{'id'}, $_ } &list_running_backups();
 	foreach my $s (@scheds) {

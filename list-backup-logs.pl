@@ -118,7 +118,7 @@ foreach $l (@alllogs) {
 	push(@logs, $l);
 	}
 
-if ($multi) {
+if ($multiline) {
 	# Show all details
 	%schedmap = map { $_->{'id'}, $_ } &list_scheduled_backups();
 	foreach my $l (@logs) {

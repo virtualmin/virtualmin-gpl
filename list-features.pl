@@ -80,7 +80,7 @@ if ($subname) {
 
 # Get and show feautures
 @feats = &list_available_features($parentdom, $aliasdom, $subdom);
-if ($multi) {
+if ($multiline) {
 	# Several lines each
 	foreach $f (@feats) {
 		print "$f->{'feature'}\n";

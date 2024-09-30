@@ -51,7 +51,7 @@ $d || usage("Virtual server $domain does not exist");
 if ($type) {
 	@dbs = grep { $_->{'type'} eq $type } @dbs;
 	}
-if ($multi) {
+if ($multiline) {
 	# Show each database on a separate line
 	if (defined(&list_domain_scripts)) {
 		@scripts = &list_domain_scripts($d);

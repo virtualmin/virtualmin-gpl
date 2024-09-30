@@ -47,7 +47,7 @@ $d || usage("Virtual server $domain does not exist");
 &has_proxy_balancer($d) || &usage("Proxies cannot be configured for this virtual server");
 
 @balancers = &list_proxy_balancers($d);
-if ($multi) {
+if ($multiline) {
 	# Show each destination on a separate line
 	&get_balancer_usage($d, \%used, \%pused);
 	foreach $b (@balancers) {

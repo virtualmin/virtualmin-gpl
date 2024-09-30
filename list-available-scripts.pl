@@ -69,7 +69,7 @@ if ($availonly) {
 @scripts = grep { $_->{'enabled'} } @scripts;
 @scripts = sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @scripts;
 
-if ($multi) {
+if ($multiline) {
 	# Show each script on a separate line
 	foreach $script (@scripts) {
 		next if (&script_migrated_disallowed($script->{'migrated'}));

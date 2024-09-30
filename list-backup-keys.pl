@@ -36,7 +36,7 @@ while(@ARGV > 0) {
 	}
 
 @keys = &list_backup_keys();
-if ($multi) {
+if ($multiline) {
 	# Show full details
 	foreach $key (@keys) {
 		print $key->{'id'},"\n";

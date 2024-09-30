@@ -68,7 +68,7 @@ if ($nameonly) {
 		print $v,"\n";
 		}
 	}
-elsif ($multi) {
+elsif ($multiline) {
 	# Show full details
 	foreach $s (@vers) {
 		print $s->[0],"\n";

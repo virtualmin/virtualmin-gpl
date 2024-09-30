@@ -53,7 +53,7 @@ foreach $ip (&list_shared_ips()) {
 	push(@ips, { 'ip' => $ip, 'type' => 'shared' });
 	}
 
-if ($multi) {
+if ($multiline) {
 	# Several lines each
 	foreach $ip (@ips) {
 		print "$ip->{'ip'}\n";

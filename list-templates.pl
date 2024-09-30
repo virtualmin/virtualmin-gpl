@@ -59,7 +59,7 @@ if ($nameonly) {
 		print $tmpl->{'name'},"\n";
 		}
 	}
-elsif ($multi) {
+elsif ($multiline) {
 	# Multiline format with some details
 	foreach $tmpl (@tmpls) {
 		print $tmpl->{'id'},"\n";

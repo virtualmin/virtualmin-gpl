@@ -63,7 +63,7 @@ if (!ref($files)) {
 	exit(1);
 	}
 
-if ($multi) {
+if ($multiline) {
 	# Full details
 	foreach $f (@$files) {
 		print $f->{'Key'},"\n";

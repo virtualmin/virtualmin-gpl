@@ -149,7 +149,7 @@ if (@data) {
 
 	# Sort results
 	my @rows = $sort_type eq 'desc' ? reverse sort keys %rows : sort keys %rows;
-	if ($multi) {
+	if ($multiline) {
 		foreach my $column (@rows) {
 			if ($all_doms || $rows{$column}[0] =~ /$domain/) {
 				print "$rows{$column}[0]\n";

@@ -78,7 +78,7 @@ else {
 
 foreach $d (@doms) {
 	@aliases = &list_domain_aliases($d, !$plugins);
-	if ($multi) {
+	if ($multiline) {
 		# Show each destination on a separate line
 		foreach $a (@aliases) {
 			print $a->{'from'},"\n";

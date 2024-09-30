@@ -60,7 +60,7 @@ else {
 
 foreach $d (@doms) {
 	@aliases = &list_domain_aliases($d, !$plugins);
-	if ($multi) {
+	if ($multiline) {
 		# Show each destination on a separate line
 		foreach $a (@aliases) {
 			$simple = &get_simple_alias($d, $a);

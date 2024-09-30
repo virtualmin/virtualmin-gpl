@@ -45,7 +45,7 @@ $domain || &usage("No domain specified");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 @admins = &list_extra_admins($d);
-if ($multi) {
+if ($multiline) {
 	# Show each admin on a separate line
 	foreach $admin (@admins) {
 		print "$admin->{'name'}\n";

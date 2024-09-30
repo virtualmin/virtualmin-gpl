@@ -76,7 +76,7 @@ foreach my $d (@doms) {
 		@scripts = grep { $_->{'name'} eq $scripttype } @scripts;
 		}
 
-	if ($multi) {
+	if ($multiline) {
 		# Show each script on a separate line
 		foreach $sinfo (@scripts) {
 			$script = &get_script($sinfo->{'name'});

@@ -52,7 +52,7 @@ my @canports = &allowed_domain_server_ports($d);
 my @allports = sort { $a->{'lport'} <=> $b->{'lport'} } (@useports, @canports);
 
 my %done;
-if ($multi) {
+if ($multiline) {
 	# Show full details
 	foreach my $p (@allports) {
 		next if ($done{$p->{'lport'}}++);

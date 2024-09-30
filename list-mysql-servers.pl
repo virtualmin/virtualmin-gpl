@@ -35,7 +35,7 @@ while(@ARGV > 0) {
 	}
 @mods = &list_remote_mysql_modules();
 
-if ($multi) {
+if ($multiline) {
 	# Show full details
 	foreach $m (@mods) {
 		print $m->{'minfo'}->{'dir'},"\n";

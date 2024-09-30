@@ -98,7 +98,7 @@ foreach $d (@doms) {
 				$usernames{&remove_userdom($_->{'user'}, $d)} }
 			      @users;
 		}
-	if ($multi) {
+	if ($multiline) {
 		# Show attributes on separate lines
 		$home_bsize = &has_home_quotas() ? &quota_bsize("home") : 0;
 		$mail_bsize = &has_mail_quotas() ? &quota_bsize("mail") : 0;

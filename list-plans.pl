@@ -72,7 +72,7 @@ elsif ($idonly) {
 		print $plan->{'id'},"\n";
 		}
 	}
-elsif ($multi) {
+elsif ($multiline) {
 	# Full details
 	foreach $plan (@plans) {
 		print $plan->{'id'},"\n";

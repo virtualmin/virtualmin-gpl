@@ -79,7 +79,7 @@ if ($wellknown) {
 	@redirects = map { &remove_wellknown_redirect($_) } @redirects;
 	}
 
-if ($multi) {
+if ($multiline) {
 	# Show in multi-line format
 	foreach $r (@redirects) {
 		print "$r->{'path'}\n";
