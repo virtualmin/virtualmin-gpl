@@ -389,6 +389,116 @@ foreach my $line (@lines) {
 return %params;
 }
 
+# parse_cli_args(&argv, &params_ref)
+# Parses command-line arguments based on predefined parameter definitions. It
+# processes an array of arguments, identifies known parameters, handles their
+# values (if required), and detects unknown or improperly formatted parameters.
+#
+# The function returns a hash reference containing the parsed parameters and
+# their associated values or flags, without changing the original argument
+# array.
+sub parse_cli_args
+{
+my ($argv, $params_ref) = @_;
+my %params = %$params_ref;
+my %flags;
+# Create a copy of the argument array to avoid modifying the original
+my @args = @{$argv};
+# Initialize index to iterate through @args
+for (my $i = 0; $i < @args;) {
+	my $arg = $args[$i];  # Current argument
+	# Handle the '--help' flag separately to display usage information
+	if ($arg eq '--help' || $arg eq '-h') {
+		&usage();  # Display usage and exit
+		}
+	# Check if the argument starts with '--', indicating a parameter
+	elsif ($arg =~ /^--(.+)/) {
+		my $param = $1; # Extract parameter name without '--'
+		# Verify if the parameter is recognized based on predefined
+		# definitions
+		if (exists($params{$param})) {
+			my $param_type = $params{$param};  # Get parameter type
+			# Parameter requires a value (type 1 or 2) or may have
+			# an optional value (type 3)
+			if (grep { $_ == $param_type } (1, 2, 3)) {
+				# Check if a value exists for the parameter and
+				# does not start with '--'
+				if ($i + 1 < @args && $args[$i + 1] !~ /^--/) {
+					# Retrieve the parameter's value
+					my $value = $args[$i + 1];
+					if ($param_type == 2) {
+						# Parameter can be specified
+						# multiple times
+						push(@{$flags{$param}}, $value);
+						}
+					else {
+						# Parameter requires a single
+						# value or has an optional value
+						$flags{$param} = $value;
+						}
+					# Remove the parameter and its value
+					# from @args
+					splice(@args, $i, 2);
+					# Do not increment $i since the array
+					# has shifted
+					next;
+					}
+				elsif ($param_type == 1 || $param_type == 2) {
+					# Parameter requires a value but none
+					# was provided
+					&usage("Error: Parameter '--$param' ".
+					       "requires a value");
+					}
+				elsif ($param_type == 3) {
+					# Parameter may optionally take a value
+					if ($i + 1 < @args &&
+					    $args[$i + 1] !~ /^--/) {
+						# Optional value is provided
+						my $value = $args[$i + 1];
+						$flags{$param} = $value;
+						# Remove parameter and its value
+						splice(@args, $i, 2);
+						}
+					else {
+						# No value provided; set
+						# parameter as present without a
+						# value
+						$flags{$param} = undef;
+						# Remove only the parameter
+						splice(@args, $i, 1);
+						}
+					# Do not increment $i since the array
+					# has shifted
+					next;
+					}
+				}
+			# No value required (i.e. $param_type == 0)
+			else {
+				# Set the flag as present
+				$flags{$param} = 1;
+				# Remove the parameter from @args
+				splice(@args, $i, 1);
+				# Do not increment $i since the array has
+				# shifted
+				next;
+				}
+			}
+		else {
+			# Parameter is not recognized; display an error
+			&usage("Unknown parameter '--$param'");
+			}
+		}
+	else {
+		# Argument does not start with '--' and is not a value for a
+		# parameter This is an unknown or misplaced parameter
+		&usage("Unknown parameter '$arg'");
+		}
+	# Move to the next argument
+	$i++;
+	}
+return \%flags;
+}
+
 # cli_convert_remote_format(format)
 # Catches and displays Virtualmin CLI standard listing
 # commands in JSON or XML format. Returns 1 if the output
