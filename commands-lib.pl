@@ -368,7 +368,7 @@ foreach my $line (@lines) {
 			my $takes_value = 0;
 			my $reusable = 0;
 			# Check if parameter is followed by a value
-			if ($part =~ /--$param_name\s+([^\s\[\]|]+)/) {
+			if ($part =~ /--\Q$param_name\E\s+([^\s\[\]|]+)/) {
 				$takes_value = 1;
 				}
 			# Check if parameter or its value is followed by '*'
