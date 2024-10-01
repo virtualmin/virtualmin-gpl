@@ -34,7 +34,6 @@ $indent_print = \&indent_text_print;
 $outdent_print = \&outdent_text_print;
 
 # Parse command-line args
-local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {

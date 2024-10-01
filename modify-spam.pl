@@ -75,7 +75,6 @@ $config{'spam'} || &usage("Spam filtering is not enabled for Virtualmin");
 # Parse command-line args
 $spamlevel = undef;
 $auto = { };
-local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {

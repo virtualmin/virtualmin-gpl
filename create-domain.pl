@@ -118,7 +118,6 @@ $name = 1;
 $virt = 0;
 $anylimits = 0;
 $email = $config{'contact_email'};
-local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {

@@ -44,7 +44,6 @@ if (!$module_name) {
 
 # Parse command line to get domains
 @alltypes = ( "cert", "key", "ca", "csr", "newkey" );
-local @ARGV = @ARGV;
 &parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);

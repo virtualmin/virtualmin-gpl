@@ -114,7 +114,6 @@ if (!$module_name) {
 
 # Parse command-line args
 @all_allow = (@opt_features, "virt", &list_feature_plugins());
-local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {

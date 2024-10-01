@@ -30,7 +30,6 @@ if (!$module_name) {
 
 # Parse command line
 $logtype = "alog";
-local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {

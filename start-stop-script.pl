@@ -36,7 +36,6 @@ if (!$module_name) {
 
 # Parse command-line args
 &set_all_text_print();
-local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {

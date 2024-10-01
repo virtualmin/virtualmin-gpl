@@ -74,7 +74,6 @@ $outdent_print = \&outdent_text_print;
 # Parse command-line args
 $template = "";
 $ipinfo = { };
-local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--source") {
