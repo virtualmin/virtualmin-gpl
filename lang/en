@@ -2962,6 +2962,7 @@ restore_firstfailed=.. extraction of $1 failed : $2
 restore_badkey=.. backup was not signed with key $1 : $2
 restore_zipcmd=.. decompression command $1 is not installed
 restore_ezipcmd=Decompression command $1 is not installed
+restore_ersync=Synchronization command <tt>$1</tt> is not installed
 restore_missinginfo=Backup does not contain virtual server information for missing domain $1.
 restore_deletefirst=Deleting virtual server $1 ..
 restore_createdomain=Re-creating virtual server $1 ..
