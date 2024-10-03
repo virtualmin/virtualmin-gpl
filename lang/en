@@ -5548,6 +5548,7 @@ phpmode_title=Website Options
 phpmode_return=website options
 phpmode_title2=PHP Options
 phpmode_ecannot=You are not allowed to configure website options for this virtual server
+phpmode_ewebsite=PHP options cannot be edited for a domain that does not have a website!
 phpmode_header=PHP options for this domain
 phpmode_fixport_desc=Click <b>Save</b> button below to update the PHP-FPM configuration and correct this error
 phpmode_fixport_desc2=This can be corrected on its $1 page
