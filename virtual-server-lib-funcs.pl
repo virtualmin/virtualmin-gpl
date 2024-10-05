@@ -8031,7 +8031,8 @@ return 0;
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
-local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass, $content) = @_;
+local ($dom, $parentdom, $parentuser, $noscripts, $nopost,
+       $pass, $content) = @_;
 
 # Sanity checks
 $dom->{'ip'} || return $text{'setup_edefip'};
@@ -13569,7 +13570,7 @@ if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} &&
 		  });
 	}
 
-if (&can_edit_records($d) && !&copy_alias_records($d)) {
+if (&can_edit_records($d)) {
 	if ($d->{'dns'}) {
 		# DNS edit records button
 		push(@rv, { 'page' => 'list_records.cgi',
