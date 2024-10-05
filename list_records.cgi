@@ -116,7 +116,7 @@ RECORD: foreach $r (@$recs) {
 			}
 		}
 	print &ui_checked_columns_row([
-		$etype && &can_edit_record($r, $d) ?
+		$etype && &can_edit_record($r, $d) && !$readonly ?
 		    "<a href='edit_record.cgi?dom=$in{'dom'}&id=".
 		      &urlize($r->{'id'})."&show=$in{'show'}'>$name</a>" :
 		    $name,

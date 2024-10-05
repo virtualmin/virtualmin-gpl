@@ -7396,6 +7396,7 @@ records_provmsg=$1, hosted on Cloudmin Services
 records_cloudmsg=$1, hosted on $2
 records_aliasof=DNS records cannot be edited here, as this server is an alias of $1 and uses the same records.
 records_ecannot=You are not allowed to edit DNS records
+records_ecannot2=Alias domain DNS records cannot be edited
 records_name=Record name
 records_type=Type
 records_typeprox=Proxied
