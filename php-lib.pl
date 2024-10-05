@@ -2977,63 +2977,6 @@ my $varstr = &substitute_domain_template($tmpl->{'php_vars'}, $d);
 my @tmplphpvars = $varstr eq 'none' ? ( ) : split(/\t+/, $varstr);
 my $p = &domain_has_website($d);
 
-if ($p eq "web" && &get_apache_mod_php_version()) {
-	# Add the PHP variables to the domain's <Virtualhost> in Apache config
-	&require_apache();
-	my $conf = &apache::get_config();
-	my @ports;
-	push(@ports, $d->{'web_port'}) if ($d->{'web'});
-	push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
-	foreach my $port (@ports) {
-		my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
-		next if (!$virt);
-
-		# Find currently set PHP variables
-		my @phpv = &apache::find_directive("php_value", $vconf);
-		my %got;
-		foreach my $p (@phpv) {
-			if ($p =~ /^(\S+)/) {
-				$got{$1}++;
-				}
-			}
-
-		# Get PHP variables from template
-		my @oldphpv = @phpv;
-		my $changed;
-		foreach my $pv (@tmplphpvars) {
-			my ($n, $v) = split(/=/, $pv, 2);
-			my $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
-			if (!$got{$n}) {
-				push(@phpv, "$n $v");
-				$changed++;
-				}
-			}
-		if ($script && defined(&{$script->{'php_vars_func'}})) {
-			# Get from script too
-			foreach my $v (&{$script->{'php_vars_func'}}($d)) {
-				if (!$got{$v->[0]}) {
-					if ($v->[1] =~ /\s/) {
-						push(@phpv,
-						     "$v->[0] \"$v->[1]\"");
-						}
-					else {
-						push(@phpv, "$v->[0] $v->[1]");
-						}
-					$changed++;
-					}
-				}
-			}
-
-		# Update if needed
-		if ($changed) {
-			&apache::save_directive("php_value",
-						\@phpv, $vconf, $conf);
-			$any++;
-			}
-		&flush_file_lines();
-		}
-	}
-
 # Find PHP variables from template and from script
 my @todo;
 foreach my $pv (@tmplphpvars) {
@@ -3054,6 +2997,45 @@ if ($phpver) {
 	my $realver = &get_php_version($phpver, $d);
 	if ($realver >= 5.4) {
 		@todo = grep { $_->[0] ne "magic_quotes_gpc" } @todo;
+		}
+	}
+
+if ($p eq "web" && &get_apache_mod_php_version()) {
+	# Add the PHP variables to the domain's <Virtualhost> in Apache config
+	&require_apache();
+	my $conf = &apache::get_config();
+	my @ports;
+	push(@ports, $d->{'web_port'}) if ($d->{'web'});
+	push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+	foreach my $port (@ports) {
+		my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+		next if (!$virt);
+
+		# Find currently set PHP variables
+		my @phpv = &apache::find_directive("php_value", $vconf);
+		my %got;
+		foreach my $p (@phpv) {
+			if ($p =~ /^(\S+)/) {
+				$got{$1}++;
+				}
+			}
+
+		# Update or add PHP variables
+		foreach my $t (@todo) {
+			my ($n, $v, $diff) = @$t;
+			if (!$got{$n}) {
+				push(@phpv, "$n $v");
+				$changed++;
+				}
+			}
+
+		# Update directives if needed
+		if ($changed) {
+			&apache::save_directive("php_value",
+						\@phpv, $vconf, $conf);
+			$any++;
+			}
+		&flush_file_lines();
 		}
 	}
 
