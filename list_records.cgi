@@ -15,8 +15,7 @@ $msg = &domain_in($d);
 if ($d->{'provision_dns'}) {
 	$msg = &text('records_provmsg', $msg);
 	}
-elsif ($cloud = &get_domain_dns_cloud($d) ||
-       &get_domain_dns_cloud(&get_domain($d->{'dns_subof'}))) {
+elsif ($cloud = &get_domain_dns_cloud($d)) {
 	$msg = &text('records_cloudmsg', $msg, $cloud->{'desc'});
 	}
 &ui_print_header($msg, $text{'records_title'}, "", "records");
