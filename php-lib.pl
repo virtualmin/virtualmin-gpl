@@ -2972,10 +2972,8 @@ sub setup_web_for_php
 my ($d, $script, $phpver) = @_;
 $phpver ||= &get_domain_php_version($d);
 my $tmpl = &get_template($d->{'template'});
-my $any = 0;
 my $varstr = &substitute_domain_template($tmpl->{'php_vars'}, $d);
 my @tmplphpvars = $varstr eq 'none' ? ( ) : split(/\t+/, $varstr);
-my $p = &domain_has_website($d);
 
 # Find PHP variables from template and from script
 my @todo;
@@ -3000,6 +2998,18 @@ if ($phpver) {
 		}
 	}
 
+return &set_multiple_php_vars($d, \@todo, $phpver);
+}
+
+# set_multiple_php_vars(&domain, &variable-list, [php-version])
+# Update the appropriate mod_php, php.ini and FPM configs to set variables
+sub set_multiple_php_vars
+{
+my ($d, $todo, $phpver) = @_;
+$phpver ||= &get_domain_php_version($d);
+my $p = &domain_has_website($d);
+my $any = 0;
+
 if ($p eq "web" && &get_apache_mod_php_version()) {
 	# Add the PHP variables to the domain's <Virtualhost> in Apache config
 	&require_apache();
@@ -3021,7 +3031,7 @@ if ($p eq "web" && &get_apache_mod_php_version()) {
 			}
 
 		# Update or add PHP variables
-		foreach my $t (@todo) {
+		foreach my $t (@$todo) {
 			my ($n, $v, $diff) = @$t;
 			if (!$got{$n}) {
 				push(@phpv, "$n $v");
@@ -3049,7 +3059,7 @@ if ($phpini && -r $phpini && &foreign_check("phpini")) {
 
 	# Make any needed changes. Variables can be either forced to a
 	# particular value, or have maximums or minumums
-	foreach my $t (@todo) {
+	foreach my $t (@$todo) {
 		my ($n, $v, $diff) = @$t;
 		my $ov = &phpini::find_value($n, $conf);
 		my $change = $diff eq '' && $ov ne $v ||
@@ -3078,7 +3088,7 @@ if ($phpini && -r $phpini && &foreign_check("phpini")) {
 my $mode = &get_domain_php_mode($d);
 if ($mode eq "fpm") {
 	# Update PHP ini values in FPM config file as well
-	foreach my $t (@todo) {
+	foreach my $t (@$todo) {
 		my ($n, $v, $diff) = @$t;
 		my $ov = &get_php_fpm_ini_value($d, $n);
 		my $change = $diff eq '' && $ov ne $v ||
