@@ -17,14 +17,15 @@ if (!-r $domains && $dom && -d "$backup/$dom") {
 
 if (!$dom) {
 	# Try to work out the default domain
-	local @domdirs = grep { !/^default$/ }
+	local @domdirs = grep { !/^default$/ && -r "$backup/$_/domain.conf" }
 			      split(/\r?\n/, &backquote_command("ls -t $domains"));
 	@domdirs || return ("No domains found in backup");
 	$dom = $domdirs[0];
 	}
 else {
 	# Validate the domain
-	-d "$domains/$dom" || return ("Backup does not contain domain $dom");
+	-d "$domains/$dom" && -r "$backup/$dom/domain.conf" ||
+		return ("Backup does not contain domain $dom");
 	}
 
 # If no username was given, use the default
@@ -511,9 +512,9 @@ if (!$dom{'parent'}) {
 	foreach my $dname (readdir(DOMS)) {
 		next if ($dname eq "." || $dname eq ".." ||
 			 $dname eq "default" || $dname eq $dom);
-		next if ($aliaslist{$dname} || $sublist{$sname});
+		next if ($aliaslist{$dname} || $sublist{$dname});
 		&$first_print("Creating sub-server $dname ..");
-		if (&domain_name_clash($sname)) {
+		if (&domain_name_clash($dname)) {
 			&$second_print(".. the domain $dname already exists");
 			next;
 			}
