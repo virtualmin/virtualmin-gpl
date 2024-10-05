@@ -3090,11 +3090,6 @@ if ($mode eq "fpm") {
 		}
 	}
 
-# Call web plugin specific variable function
-if ($p && $p ne "web") {
-	&plugin_call($p, "feature_setup_web_for_php", $d, $script, $phpver);
-	}
-
 return $any;
 }
 
