@@ -126,7 +126,7 @@ return $ex ? 0 : 1;
 sub unlink_file_as_domain_user
 {
 my ($d, @files) = @_;
-return 1 if (&is_readonly_mode());
+return (wantarray ? (1) : 1) if (&is_readonly_mode());
 while(@files) {
 	my @del;
 	if (@files > 100) {
@@ -139,9 +139,9 @@ while(@files) {
 		}
 	local $cmd = "rm -rf ".join(" ", map { quotemeta($_) } @del)." 2>&1";
 	local ($out, $ex) = &run_as_domain_user($d, $cmd);
-	return 0 if ($ex);
+	return wantarray ? ($ex ? 0 : 1, $out) : $ex ? 0 : 1;
 	}
-return 1;
+return wantarray ? (1) : 1;
 }
 
 # unlink_logged_as_domain_user(&domain, file, ...)

@@ -13,7 +13,7 @@ $script = &get_script($sinfo->{'name'});
 $sinfo && $script || &error($text{'stopscript_egone'});
 
 # Do it and tell the user
-&ui_print_header(&domain_in($d), $text{'restartscript_title'}, "");
+&ui_print_header(&domain_in($d), $text{'scripts_ureload'}, "");
 
 print &text('stopscript_doing', "<i>$script->{'desc'}</i>"),"<br>";
 &{$script->{'stop_server_func'}}($d, $sinfo->{'opts'});

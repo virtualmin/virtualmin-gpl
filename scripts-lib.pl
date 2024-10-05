@@ -103,6 +103,7 @@ $sdir =~ s/\/[^\/]+$//;
 # Read in the .pl file
 (do $spath) || return undef;
 local $dfunc = "script_${name}_desc";
+local $tmdfunc = "script_${name}_tmdesc";
 local $lfunc = "script_${name}_longdesc";
 local $vfunc = "script_${name}_versions";
 local $nvfunc = "script_${name}_numeric_version";
@@ -120,7 +121,7 @@ local $testpathfunc = "script_${name}_testpath";
 local $testargsfunc = "script_${name}_testargs";
 
 # Check for critical functions
-return undef if (!defined(&$dfunc) || !defined(&$vfunc));
+return undef if (!defined(&$dfunc) || !defined(&$vfunc) || !defined(&$tmdfunc));
 
 # Work out availability
 local %unavail;
@@ -144,6 +145,7 @@ if ($access{'allowedscripts'}) {
 # Create script structure
 local $rv = { 'name' => $name,
 	      'desc' => &$dfunc(),
+	      'tmdesc' => &$tmdfunc(),
 	      'longdesc' => defined(&$lfunc) ? &$lfunc() : undef,
 	      'versions' => [ &$vfunc(0) ],
 	      'install_versions' => [ &$vfunc(1) ],
@@ -206,6 +208,9 @@ local $rv = { 'name' => $name,
 	      'testpath_func' => "script_${name}_testpath",
 	      'testinstallpath_func' => "script_${name}_testinstallpath",
 	      'testargs_func' => "script_${name}_testargs",
+	      'kit_func' => "script_${name}_kit",
+	      'kit_login_func' => "script_${name}_kit_login",
+	      'kit_apply_func' => "script_${name}_kit_apply",
 	    };
 if (defined(&$catfunc)) {
 	my @cats = &$catfunc();
@@ -588,7 +593,7 @@ if (!&can_edit_databases()) {
 	}
 
 $cfunc = "check_".$dbtype."_database_clash";
-&$cfunc($d, $dbname) && return "The database $dbname already exists";
+&$cfunc($d, $dbname) && return "The database <tt>$dbname</tt> already exists";
 
 # Work out default creation options
 $ofunc = "default_".$dbtype."_creation_opts";
@@ -696,14 +701,14 @@ my $sdbpass = $sdbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
 return ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass);
 }
 
-# update_all_installed_scripts_database_credentials(&domain, &olddomain, option-record-type, option-record-value, database-type)
+# update_all_installed_scripts_database_credentials(&domain, &olddomain, option-record-type, option-record-value, database-type, $script-info)
 # Updates script's given database related setting option (db-username, db-password, db-name)
 # with a new value for all installed scripts under the given virtual server, considering database type,
 # in case installed script supports it (uses database).
 sub update_all_installed_scripts_database_credentials
 {
-my ($d, $oldd, $type, $value, $dbtype) = @_;
-my @domain_scripts = &list_domain_scripts($d);
+my ($d, $oldd, $type, $value, $dbtype, $sinfo) = @_;
+my @domain_scripts = $sinfo ? ($sinfo) : &list_domain_scripts($d);
 my ($printed_type, @printed_name);
 foreach my $script (@domain_scripts) {
 	my $sname = $script->{'name'};

@@ -24,7 +24,7 @@ elsif ($in{'restart'}) {
 	# Redirect to Rails server restart form
 	&redirect("restart_script.cgi?dom=$in{'dom'}&script=$in{'script'}");
 	}
-elsif ($in{'reinstall-deps'}) {
+elsif ($in{'reinstall_deps'}) {
 	# Redirect to reinstall dependencies form
 	&redirect("script_reinstall_dependencies.cgi?dom=$in{'dom'}&script=$in{'script'}");
 	}
