@@ -3043,7 +3043,8 @@ if ($p eq "web" && &get_apache_mod_php_version()) {
 		if ($changed) {
 			&apache::save_directive("php_value",
 						\@phpv, $vconf, $conf);
-			$any++;
+			&register_post_action(\&restart_apache);
+			$any += $changed;
 			}
 		&flush_file_lines();
 		}
@@ -3078,10 +3079,6 @@ if ($phpini && -r $phpini && &foreign_check("phpini")) {
 
 	if ($anyini) {
 		&write_as_domain_user($d, sub { &flush_file_lines($phpini) });
-		my $p = &domain_has_website($d);
-		if ($p ne "web") {
-			&plugin_call($p, "feature_restart_web_php", $d);
-			}
 		}
 	}
 
@@ -3096,10 +3093,14 @@ if ($mode eq "fpm") {
 				$diff eq '-' && &php_value_diff($ov, $v) > 0;
 		if ($change) {
 			&save_php_fpm_ini_value($d, $n, $v, 1);
+			$any++;
 			}
 		}
 	}
 
+if ($any) {
+	&register_php_restart_action($d);
+	}
 return $any;
 }
 
