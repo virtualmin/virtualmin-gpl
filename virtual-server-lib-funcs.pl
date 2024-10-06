@@ -8569,7 +8569,9 @@ if ($dom->{'alias'} && &domain_has_website($dom)) {
 		my $old_dname = $target->{'letsencrypt_dname'};
 		if ($target->{'letsencrypt_dname'}) {
 			# Add the alias domain's SSL hostnames to the list
-			$target->{'letsencrypt_dname'} = join(" ", split(/\s+/, $target->{'letsencrypt_dname'}), &get_hostnames_for_ssl($d));
+			$target->{'letsencrypt_dname'} =
+			 join(" ", split(/\s+/, $target->{'letsencrypt_dname'}),
+				    &get_hostnames_for_ssl($d));
 			}
 		my ($ok, $err, $dnames) = &renew_letsencrypt_cert($target);
 		if ($ok) {
