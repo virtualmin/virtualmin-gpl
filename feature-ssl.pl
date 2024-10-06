@@ -518,7 +518,7 @@ foreach my $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	}
 
 # Update DANE DNS records
-&sync_domain_tlsa_records($d);
+&sync_domain_tlsa_records($d, 2);
 
 # If this domain was sharing a cert with another, forget about it now
 if ($d->{'ssl_same'}) {

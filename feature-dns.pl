@@ -4796,9 +4796,10 @@ if (!$file) {
 	}
 
 # Find all existing TLSA records (without TTL, for easier comparison)
+my $frecs = &filter_domain_dns_records($d, $recs);
 my @oldrecs = grep { $_->{'type'} =~ /^(TLSA|SSHFP)$/ &&
 		     ($_->{'name'} eq $d->{'dom'}."." ||
-		      $_->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/) } @$recs;
+		      $_->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/) } @$frecs;
 
 # Exit now if TLSA is not enabled globally, unless it's being forced on OR
 # there are already records
@@ -4887,9 +4888,10 @@ sub get_domain_tlsa_records
 my ($d) = @_;
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 return () if (!$file);
+my $frecs = &filter_domain_dns_records($d, $recs);
 my @oldrecs = grep { $_->{'type'} =~ /^(TLSA|SSHFP)$/ &&
 		     ($_->{'name'} eq $d->{'dom'}."." ||
-		      $_->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/) } @$recs;
+		      $_->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/) } @$frecs;
 return @oldrecs;
 }
 
@@ -5035,8 +5037,8 @@ else {
 }
 
 # filter_domain_dns_records(&domain, &recs)
-# Given a domain and a list of DNS records, return only those records that are in the domain and
-# not any sub-domains
+# Given a domain and a list of DNS records, return only those records that are
+# in the domain and not any sub-domains
 sub filter_domain_dns_records
 {
 my ($d, $recs) = @_;
