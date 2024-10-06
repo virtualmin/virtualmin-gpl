@@ -454,7 +454,9 @@ foreach my $adom (keys %aliaslist) {
 # Migrate any sub-domains
 my $sublist = &read_file_lines("$backup/$dom/subdomain.list", 1);
 my %sublist;
+my $phd = &public_html_dir(\%dom);
 foreach my $sdom (@$sublist) {
+	next if (!-d $phd."/".$sdom);
 	my $sname = $sdom.".".$dom{'dom'};
 	$sublist{$sname} = 1;
 	&$first_print("Creating sub-domain $sname ..");
@@ -566,6 +568,9 @@ if (!$dom{'parent'}) {
 
 		# Copy over webalizer and awstats directories
 		&copy_directadmin_stats_dir(\%subd, $domains);
+
+		# Fix permissions on copied files
+		&set_home_ownership(\%subd);
 
 		# Copy custom DNS records
 		&copy_directadmin_dns_records(\%subd, $backup);
@@ -883,7 +888,7 @@ sub directadmin_domain_features
 {
 my ($dom, $domains, $backup, $imap) = @_;
 my %dinfo;
-&read_env_file("$backup/$dom/domain.conf", \%dinfo) || return ();
+&read_env_file("$backup/$dom/domain.conf", \%dinfo);
 my @got = ( "dir", $parent ? () : ("unix"),
 	    &domain_has_website(), "logrotate" );
 push(@got, "webmin") if ($webmin && !$parent);
