@@ -7,12 +7,16 @@ Create a virtual server
 This program can be used to create a new top-level, child or alias virtual
 server. It is typically called with parameters something like :
 
-   virtualmin create-domain --domain foo.com --pass smeg --desc "The server for foo" --unix --dir --webmin --web --dns --mail --limits-from-plan
+   virtualmin create-domain \
+   	--domain foo.com --pass smeg --desc "The server for foo" \
+	--unix --dir --webmin --web --dns --mail --limits-from-plan
 
-This would create a server called foo.com , with the Unix login, home directory, Webmin login, website, DNS domain and email features enabled, and disk quotas
-based on those set in the default plan. If you run this program with the --help option, you can see all of the
-other command-line options that it supports. The most commonly used are those
-for enabling features for the new server, such as --mysql and --logrotate.
+This would create a server called foo.com , with the Unix login, home directory,
+Webmin login, website, DNS domain and email features enabled, and disk quotas
+based on those set in the default plan. If you run this program with the --help
+option, you can see all of the other command-line options that it supports. The
+most commonly used are those for enabling features for the new server, such as
+--mysql and --logrotate.
 
 To create a virtual server with a private IP address, you can use the --ip
 option to specify it explicitly. If your Virtualmin is configured to
@@ -28,7 +32,9 @@ use the C<--allocate-ip6> flag to have Virtualmin select a free address
 automatically.
 
 To create a server that is owned by an existing user, use the --parent option,
-followed by the name of the virtual server to create under. In this case, the --pass , --unix , --webmin and --quota options are not needed, as a user for the new server already exists.
+followed by the name of the virtual server to create under. In this case,
+the --pass , --unix , --webmin and --quota options are not needed, as a
+user for the new server already exists.
 
 To create an alias of an existing virtual server, use the --alias option,
 followed by the domain name of the target server. For alias servers, the
