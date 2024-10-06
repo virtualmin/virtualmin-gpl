@@ -633,7 +633,7 @@ if (!$parent) {
 	if (!$group) {
 		# Select group automatically
 		($group, $gtry1, $gtry2) = &unixgroup_name($domain, $user);
-		$group || &usage(&text('setup_eauto2', $try1, $try2));
+		$group || &usage(&text('setup_eauto2', $gtry1, $gtry2));
 		}
 	else {
 		# Use specified group name
