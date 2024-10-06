@@ -2,7 +2,7 @@ use 5.010;
 use strict;
 use warnings;
 
-our (@OLDARGV, %config, %text, @features, @aliasmail_features, @alias_features,
+our (%config, %text, @features, @aliasmail_features, @alias_features,
      @opt_subdom_features, @banned_usernames, $first_print, $second_print);
 
 # create_domain_cli(&opts)
@@ -1020,7 +1020,6 @@ elsif ($sshmode == 2) {
 		}
 	}
 
-&virtualmin_api_log(\@OLDARGV, \%dom, $dom{'hashpass'} ? [ "pass" ] : [ ]);
 &run_post_actions_silently();
 &unlock_domain_name($domain);
 return \%dom;
