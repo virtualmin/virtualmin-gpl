@@ -8560,18 +8560,23 @@ if ($dom->{'alias'} && &domain_has_website($dom)) {
 	if ($target &&
 	    &domain_has_website($target) &&
 	    &domain_has_ssl_cert($target) &&
-	    !$target->{'letsencrypt_dname'} &&
 	    ($tinfo = &cert_info($target)) &&
 	    &is_letsencrypt_cert($tinfo) &&
 	    !&check_domain_certificate($dom->{'dom'}, $tinfo)) {
 		&$first_print(&text('setup_letsaliases',
 				    &show_domain_name($target),
 				    &show_domain_name($dom)));
+		my $old_dname = $target->{'letsencrypt_dname'};
+		if ($target->{'letsencrypt_dname'}) {
+			# Add the alias domain's SSL hostnames to the list
+			$target->{'letsencrypt_dname'} = join(" ", split(/\s+/, $target->{'letsencrypt_dname'}), &get_hostnames_for_ssl($d));
+			}
 		my ($ok, $err, $dnames) = &renew_letsencrypt_cert($target);
 		if ($ok) {
 			&$second_print($text{'setup_done'});
 			}
 		else {
+			$target->{'letsencrypt_dname'} = $old_dname;
 			&$second_print(&text('setup_eletsaliases', $err));
 			}
 		}
