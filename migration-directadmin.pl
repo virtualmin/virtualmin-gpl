@@ -749,17 +749,13 @@ if ($d->{'dns'} && -r $dnsfile && !$d->{'dns_submode'}) {
 	my $zonefile = &get_domain_dns_file($d);
 	&copy_source_dest($dnsfile, &bind8::make_chroot($zonefile));
 	my ($recs, $zdstfile) = &get_domain_dns_records_and_file($d, 1);
+	my $oldip;
 	foreach my $r (@$recs) {
 		my $change = 0;
-		if (($r->{'name'} eq $d->{'dom'}."." ||
-		     $r->{'name'} eq "www.".$d->{'dom'}."." ||
-		     $r->{'name'} eq "pop.".$d->{'dom'}."." ||
-		     $r->{'name'} eq "smtp.".$d->{'dom'}."." ||
-		     $r->{'name'} eq "cp.".$d->{'dom'}."." ||
-		     $r->{'name'} eq "ftp.".$d->{'dom'}."." ||
-		     $r->{'name'} eq "mail.".$d->{'dom'}.".") &&
-		    $r->{'type'} eq 'A') {
+		if ($r->{'type'} eq 'A' &&
+		    ($r->{'name'} =~ /^(|www\.|pop\.|smtp\.|cp\.|ftp\.|mail\.)\Q$d->{'dom'}\E\.$/ || $r->{'values'}->[0] eq $oldip)) {
 			# Fix IP in domain record
+			$oldip ||= $r->{'values'}->[0];
 			$r->{'values'} = [ $d->{'ip'} ];
 			$change++;
 			}
