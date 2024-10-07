@@ -304,30 +304,38 @@ while($i < @$argv) {
 	}
 }
 
-# extract_params_from_usage()
-# Extracts a hash of command-line parameters (flags) from the output of the
-# usage() function of the current sub-program. This function captures the output
-# of usage(), scans for parameters prefixed with '--', and determines whether
-# each parameter requires a value and whether it can be specified multiple times
-# (indicated by '*'). The function returns a hash where each key is a parameter
-# name (without '--'), and the value indicates:
+# parse_params_from_usage()
+# Extracts an ordered list of command-line parameters (flags) from the output of
+# the usage() function of the given sub-program. This function captures the
+# output of usage(), scans for parameters prefixed with '--', and determines:
 #
-# - 0: Parameter does not require a value.
-# - 1: Parameter requires a value.
-# - 2: Parameter requires a value and can be specified multiple times (indicated
-#   by '*').
+# - The name of each parameter (without '--').
+# - Whether the parameter requires a value.
+# - Whether the parameter can be specified multiple times (indicated by '*').
+# - The name of the value the parameter takes (if any).
 #
-# The function handles the capturing of usage output through a forked process
-# and pipes, allowing it to process the output of the usage() function that
-# prints to STDOUT.
-sub extract_params_from_usage
+# The function returns an array of hash references, where each hash contains:
+#
+# - 'name': The parameter name (without '--').
+# - 'type': An integer indicating the parameter type:
+#     - 0: Parameter does not require a value.
+#     - 1: Parameter requires a value.
+#     - 2: Parameter requires a value and can be specified multiple times
+#       (indicated by '*').
+# - 'value_name': A string representing the name of the value the parameter
+#   takes (if any).
+#
+# The parameters are returned in the order they appear in the usage output,
+# preserving the sequence for dynamic usage reconstruction or ordered
+# processing.
+sub parse_params_from_usage
 {
 my ($usage) = @_;
-my $lines = q{};
+my $lines = '';
 # Capture the output of the usage subroutine
 pipe(my $reader, my $writer) || die("Cannot extract parameters from usage: $!");
 my $pid = fork();
-die "Fork failed: $!" unless defined($pid);
+die "Fork failed: $!" if (!defined($pid));
 if ($pid == 0) {
 	# Child process
 	close($reader);
@@ -345,48 +353,64 @@ while (my $line = <$reader>) {
 close($reader);
 waitpid($pid, 0);
 # Parse the usage output and extract parameters
-my %params;
-my @lines = split(/\n/, $lines);
-foreach my $line (@lines) {
-	# Remove leading and trailing whitespace
-	$line =~ s/^\s+|\s+$//g;
-	# Skip empty lines
-	next unless $line;
-	# Process lines containing parameters
-	next unless $line =~ /--/;
-	# Remove surrounding brackets for easier processing
-	$line =~ s/^\[//;
-	$line =~ s/\]$//;
-	# Handle multiple parameters separated by '|'
-	my @parts = split(/\|/, $line);
+my @params;
+# Concatenate all lines into one string
+my $usage_text = $lines;
+# Remove newlines to simplify parsing
+$usage_text =~ s/\n/ /g;
+# Extract all parameter definitions enclosed in '[]', possibly followed by '*'
+my @param_defs = ();
+while ($usage_text =~ /(\[.*?\]\*?)/g) {
+	push(@param_defs, $1);
+	}
+foreach my $param_def (@param_defs) {
+	# Check for trailing '*' after ']' or within the brackets
+	my $reusable = 0;
+	if ($param_def =~ /\*\s*$/) {
+		$reusable = 1;
+		# Remove the trailing '*'
+		$param_def =~ s/\*\s*$//;
+		}
+	# Remove surrounding brackets
+	$param_def =~ s/^\[//;
+	$param_def =~ s/\]$//;
+	# Split on ' | ' (with spaces around it)
+	my @parts = split(/\s+\|\s+/, $param_def);
 	foreach my $part (@parts) {
 		# Trim whitespace
 		$part =~ s/^\s+|\s+$//g;
+		# Check for '*' at the end of the part
+		my $part_reusable = $reusable;
+		if ($part =~ /\*\s*$/) {
+			$part_reusable = 1;
+			$part =~ s/\*\s*$//;
+			}
 		# Match parameter patterns
-		if ($part =~ /--([^\s\[\]|]+)/) {
+		if ($part =~ /--([^\s]+)(?:\s+(.+))?/) {
 			my $param_name = $1;
+			my $value_name = $2;
 			my $takes_value = 0;
-			my $reusable = 0;
-			# Check if parameter is followed by a value
-			if ($part =~ /--\Q$param_name\E\s+([^\s\[\]|]+)/) {
+			# Check if the parameter takes a value
+			if (defined($value_name)) {
 				$takes_value = 1;
+				# Remove any trailing '*' from the value name
+				if ($value_name =~ /\*\s*$/) {
+					$part_reusable = 1;
+					$value_name =~ s/\*\s*$//;
+					}
+				$value_name =~ s/^\s+|\s+$//g; # Trim whitespace
 				}
-			# Check if parameter or its value is followed by '*'
-			if ($part =~ /\*\s*$/ ||
-			    $part =~ /[^\s\[\]|]+\s*\*\s*$/) {
-				$reusable = 1;
-				}
-			# Determine the value to store in %params
-			my $param_value =
-				$takes_value ? ($reusable ? 2 : 1) : 0;
-			# Store the parameter and its value, unless already
-			# stored
-			$params{$param_name} =
-				$param_value unless exists($params{$param_name});
+			# Determine the parameter type
+			my $param_type = $takes_value ?
+				($part_reusable ? 2 : 1) : 0;
+			# Store the parameter as a hash reference
+			push(@params, { name       => $param_name,
+					type       => $param_type,
+					value_name => $value_name });
 			}
 		}
 	}
-return %params;
+return @params;
 }
 
 # parse_cli_args(&argv, &params_ref)
