@@ -7669,10 +7669,6 @@ if (!$dbtype) {
 	}
 $db = lc($db);
 $db =~ s/[\.\-]/_/g;	# mysql doesn't like . or _
-if (!$dbtype || $dbtype eq "postgres") {
-	# Postgresql doesn't like leading numbers
-	$db = &remove_numeric_prefix($db);
-	}
 if ($db eq "test" || $db eq "mysql" || $db =~ /^template/) {
 	# These names are reserved by MySQL and PostgreSQL
 	$db = "db".$db;
@@ -7691,6 +7687,7 @@ return $db;
 sub remove_numeric_prefix
 {
 my ($db) = @_;
+return $db if ($config{'allow_numbers'});
 $db =~ s/^0/zero/g;
 $db =~ s/^1/one/g;
 $db =~ s/^2/two/g;
