@@ -7687,7 +7687,7 @@ return $db;
 sub remove_numeric_prefix
 {
 my ($db) = @_;
-return $db if ($config{'allow_numbers'});
+return $db if ($config{'allow_numbers'} && $db !~ /^\d+$/);
 $db =~ s/^0/zero/g;
 $db =~ s/^1/one/g;
 $db =~ s/^2/two/g;
