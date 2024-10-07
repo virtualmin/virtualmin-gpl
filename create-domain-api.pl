@@ -5,11 +5,11 @@ use warnings;
 our (%config, %text, @features, @aliasmail_features, @alias_features,
      @opt_subdom_features, @banned_usernames, $first_print, $second_print);
 
-# create_domain_cli(&opts)
+# create_domain_cli(domain-name, &opts)
 # This sub is fully compatible with the ‘create-domain.pl’ API.
 sub create_domain_cli
 {
-my ($opts) = @_;
+my ($domain_name, $opts) = @_;
 
 # Build args used by plugins
 my %plugin_args = ();
@@ -29,7 +29,7 @@ my $anylimits = 0;
 my $email = $config{'contact_email'};
 
 # Set variables from %opts
-my $domain = $opts->{'domain'};
+my $domain = $domain_name;
 $domain || &error($text{'cli_create_domain_missing_domain_name'});
 
 my $owner = $opts->{'desc'};
