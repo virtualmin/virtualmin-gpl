@@ -26,7 +26,6 @@ if (!$module_name) {
 	}
 @OLDARGV = @ARGV;
 
-local @ARGV = @ARGV;
 &parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
         local $a = shift(@ARGV);

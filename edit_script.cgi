@@ -11,13 +11,8 @@ $script = &get_script($sinfo->{'name'});
 $script || &error($text{'scripts_emissing'});
 $opts = $sinfo->{'opts'};
 
-&ui_print_header(&domain_in($d), $text{'scripts_etitle'}, "");
+&ui_print_header(&domain_in($d), &text('scripts_etitle', $script->{'desc'}), "");
 print "$text{'scripts_udesc'}<p>\n";
-
-# Show install options form
-print &ui_form_start("unscript_install.cgi", "post");
-print &ui_hidden("dom", $in{'dom'}),"\n";
-print &ui_hidden("script", $in{'script'}),"\n";
 print &ui_table_start($text{'scripts_uheader'}, undef, 2);
 
 # Show script description
@@ -86,7 +81,7 @@ if ($dbtype && $script->{'name'} !~ /^php(\S+)admin$/i) {
 			"name=$dbname",
 		      $text{'databases_'.$dbtype}, "<tt>$dbname</tt>" . 
 		      ($opts->{'dbtbpref'} ? " $text{'scripts_idbtbpref'} <tt>$opts->{'dbtbpref'}</tt>" : "")).
-		($opts->{'newdb'} ? "<br>".&ui_text_color($text{'scripts_inewdb'}, 'warn') : ""));
+		($opts->{'newdb'} ? &ui_help($text{'scripts_inewdb'}) : ""));
 	}
 
 # Show login, if we have it
@@ -132,10 +127,46 @@ if (defined(&$sfunc)) {
 
 print &ui_table_end();
 
+# Script Kit
+my $kit_func = $script->{'kit_func'};
+my $extra_submits;
+if (defined(&$kit_func)) {
+	my $rows =
+		&{$script->{'kit_func'}}($d, $script, $sinfo);
+	if ($rows) {
+		print &ui_hidden_table_start(
+			&text('scripts_kit', $script->{'tmdesc'}),
+				undef, 4, 'script_kit', 1);
+		if (ref($rows) eq 'ARRAY') {
+			foreach my $td (@$rows) {
+				print &ui_table_row(
+					$td->{'desc'}, $td->{'value'});
+				}
+			}
+		elsif (ref($rows) eq 'HASH') {
+			$extra_submits = $rows->{'extra_submits'};
+			print &ui_table_row(undef, $rows->{'data'}, 2);
+			}
+		else {
+			print &ui_table_row(undef, $rows, 2);
+			}
+		print &ui_hidden_table_end();
+		}
+	}
+# Show install options form
+print &ui_form_start("unscript_install.cgi", "post");
+print &ui_hidden("dom", $in{'dom'}),"\n";
+print &ui_hidden("script", $in{'script'}),"\n";
+if ($extra_submits) {
+	foreach my $submit (@$extra_submits) {
+		print $submit."\n";
+		}
+	}
+
 # Show un-install and upgrade buttons
 print &ui_submit($text{'scripts_uok'}, "uninstall"),"\n";
 # Reinstall dependencies
-print &ui_submit($text{'scripts_rdeps'}, "reinstall-deps"),"\n";
+print &ui_submit($text{'scripts_rdeps'}, "reinstall_deps"),"\n";
 
 if (!script_migrated_disallowed($script->{'migrated'})) {
 	@vers = sort { $a <=> $b }
@@ -168,7 +199,7 @@ if (!$sinfo->{'deleted'}) {
 		if (@pids) {
 			print &ui_submit($text{'scripts_ustop'},
 					 "stop"),"\n";
-			print &ui_submit($text{'scripts_urestart'},
+			print &ui_submit($text{'scripts_ureload'},
 					 "restart"),"\n";
 			}
 		else {

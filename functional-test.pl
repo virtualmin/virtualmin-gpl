@@ -108,7 +108,6 @@ $max_output = 2048;
 $web = 'web';
 $ssl = 'ssl';
 &load_plugin_libraries();
-local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -12031,6 +12030,116 @@ $ftp_tests = [
 	  'cleanup' => 1 },
 	];
 
+$xml_tests = [
+	# Create a domain to run API commands on
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'mysql' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Add a user to the domain to list
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 777*1024 ],
+		      [ 'mail-quota', 777*1024 ] ],
+	},
+
+	# Add an extra database to list
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_db.'_extra' ] ],
+	},
+
+	# Add a test alias
+	{ 'command' => 'create-alias.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'from', $test_alias ],
+		      [ 'to', 'nobody@webmin.com' ],
+		      [ 'to', 'nobody@virtualmin.com' ] ],
+	},
+
+	# List the domain in XML mode
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'xml' ] ],
+	  'grep' => [ '<data name="'.$test_domain.'">',
+		      '<username>'.$test_domain_user.'</username>',
+		      '<features>unix dir dns mail '.$web.' logrotate mysql</features>',
+		    ],
+	},
+
+	# List the domain in JSON mode
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'json' ] ],
+	  'grep' => [ '"name" : "'.$test_domain.'"',
+		      '"username"\\s+:\\s+\\[\\s+"'.$test_domain_user.'"\\s+\]',
+		      '"features"\\s+:\\s+\\[\\s+"unix dir dns mail '.$web.' logrotate mysql"\\s+\]',
+		    ],
+	  'grepall' => 1,
+	},
+
+	# List the users in XML mode
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'xml' ] ],
+	  'grep' => [ '<data name="'.$test_full_user.'">',
+		      '<domain>'.$test_domain.'</domain>',
+		      '<real_name>Test user</real_name>',
+		      '<user>'.$test_user.'</user>',
+		      '<home_byte_quota>'.(777*1024*&quota_bsize("home")).
+			'</home_byte_quota>',
+		    ],
+	},
+
+	# List the users in JSON mode
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'json' ] ],
+	  'grep' => [ '"name" : "'.$test_full_user.'"',
+		      '"domain"\\s+:\\s+\\[\\s+"'.$test_domain.'"\\s+\]',
+		      '"real_name"\\s+:\\s+\\[\\s+"Test user"\\s+\]',
+		      '"user"\\s+:\\s+\\[\\s+"'.$test_user.'"\\s+\]',
+		      '"home_byte_quota"\\s+:\\s+\\[\\s+"'.(777*1024*&quota_bsize("home")).'"\\s+\]',
+		    ],
+	  'grepall' => 1,
+	},
+
+	# List the aliases in XML mode
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'xml' ] ],
+	  'grep' => [ '<data name="'.$test_alias.'@'.$test_domain.'">',
+		      '<to>nobody@webmin.com</to>',
+		      '<to>nobody@virtualmin.com</to>',
+		    ],
+	},
+
+	# List the aliases in JSON
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'json' ] ],
+	  'grep' => [ '"name"\\s+:\\s+"'.$test_alias.'@'.$test_domain.'"',
+		      '"to"\\s+:\\s+\\[\\s+"nobody@webmin.com",\\s+"nobody@virtualmin.com"\\s+\\]',
+		    ],
+	  'grepall' => 1,
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -12131,6 +12240,7 @@ $alltests = { '_config' => $_config_tests,
 	      'transfer' => $transfer_tests,
 	      'ftp' => $ftp_tests,
 	      'scheduled' => $scheduled_tests,
+	      'xml' => $xml_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
@@ -12369,9 +12479,14 @@ if ($t->{'grep'}) {
 	foreach my $grep (@greps) {
 		$grep = &substitute_template($grep, \%saved_vars);
 		local $match = 0;
-		foreach my $l (split(/\r?\n/, $out)) {
-			if ($l =~ /$grep/) {
-				$match = 1;
+		if ($t->{'grepall'}) {
+			$match = ($out =~ /$grep/);
+			}
+		else {
+			foreach my $l (split(/\r?\n/, $out)) {
+				if ($l =~ /$grep/) {
+					$match = 1;
+					}
 				}
 			}
 		if (!$match) {

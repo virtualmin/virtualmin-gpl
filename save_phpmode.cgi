@@ -11,6 +11,7 @@ $canv = &can_edit_phpver($d);
 $can || $canv || &error($text{'phpmode_ecannot'});
 &require_apache();
 $p = &domain_has_website($d);
+$p || &error($text{'phpmode_ewebsite'});
 @modes = &supported_php_modes($d);
 $newmode = $in{'mode'};
 $dom_limits = {};

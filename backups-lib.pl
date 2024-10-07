@@ -6953,5 +6953,29 @@ foreach my $f (@files) {
 return @files;
 }
 
+# sync_directories(source, target, [&rsync_flags], [$d])
+# Runs an rsync command to sync source to target with optional extra parameters.
+# If $d is provided, the command is run as the domain owner. The function
+# returns the output of the rsync command, and in list context, it also returns
+# the exit status and the command run.
+sub sync_directories
+{
+my ($source, $target, $rsync_flags, $d) = @_;
+my $rsync = &has_command("rsync");
+my $emsg = &text('restore_ersync', 'rsync');
+return (wantarray ? ($emsg, 1) : 1) if (!$rsync);
+my $cmd = "$rsync -av ";
+$cmd .= join(' ', @$rsync_flags) . " " if (ref($rsync_flags) && @$rsync_flags);
+$cmd .= quotemeta("$source/") . ' ' . quotemeta("$target/");
+my $out;
+if ($d) {
+	$out = &run_as_domain_user($d, "$cmd 2>&1");
+	}
+else {
+	$out = &backquote_command("$cmd 2>&1");
+	}
+return wantarray ? ($out, $?, $cmd) : $?;
+}
+
 1;
 

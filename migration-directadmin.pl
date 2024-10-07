@@ -17,14 +17,15 @@ if (!-r $domains && $dom && -d "$backup/$dom") {
 
 if (!$dom) {
 	# Try to work out the default domain
-	local @domdirs = grep { !/^default$/ }
+	local @domdirs = grep { !/^default$/ && -r "$backup/$_/domain.conf" }
 			      split(/\r?\n/, &backquote_command("ls -t $domains"));
 	@domdirs || return ("No domains found in backup");
 	$dom = $domdirs[0];
 	}
 else {
 	# Validate the domain
-	-d "$domains/$dom" || return ("Backup does not contain domain $dom");
+	-d "$domains/$dom" && -r "$backup/$dom/domain.conf" ||
+		return ("Backup does not contain domain $dom");
 	}
 
 # If no username was given, use the default
@@ -453,7 +454,9 @@ foreach my $adom (keys %aliaslist) {
 # Migrate any sub-domains
 my $sublist = &read_file_lines("$backup/$dom/subdomain.list", 1);
 my %sublist;
+my $phd = &public_html_dir(\%dom);
 foreach my $sdom (@$sublist) {
+	next if (!-d $phd."/".$sdom);
 	my $sname = $sdom.".".$dom{'dom'};
 	$sublist{$sname} = 1;
 	&$first_print("Creating sub-domain $sname ..");
@@ -511,9 +514,9 @@ if (!$dom{'parent'}) {
 	foreach my $dname (readdir(DOMS)) {
 		next if ($dname eq "." || $dname eq ".." ||
 			 $dname eq "default" || $dname eq $dom);
-		next if ($aliaslist{$dname} || $sublist{$sname});
+		next if ($aliaslist{$dname} || $sublist{$dname});
 		&$first_print("Creating sub-server $dname ..");
-		if (&domain_name_clash($sname)) {
+		if (&domain_name_clash($dname)) {
 			&$second_print(".. the domain $dname already exists");
 			next;
 			}
@@ -565,6 +568,9 @@ if (!$dom{'parent'}) {
 
 		# Copy over webalizer and awstats directories
 		&copy_directadmin_stats_dir(\%subd, $domains);
+
+		# Fix permissions on copied files
+		&set_home_ownership(\%subd);
 
 		# Copy custom DNS records
 		&copy_directadmin_dns_records(\%subd, $backup);
@@ -743,17 +749,13 @@ if ($d->{'dns'} && -r $dnsfile && !$d->{'dns_submode'}) {
 	my $zonefile = &get_domain_dns_file($d);
 	&copy_source_dest($dnsfile, &bind8::make_chroot($zonefile));
 	my ($recs, $zdstfile) = &get_domain_dns_records_and_file($d, 1);
+	my $oldip;
 	foreach my $r (@$recs) {
 		my $change = 0;
-		if (($r->{'name'} eq $d->{'dom'}."." ||
-		     $r->{'name'} eq "www.".$d->{'dom'}."." ||
-		     $r->{'name'} eq "pop.".$d->{'dom'}."." ||
-		     $r->{'name'} eq "smtp.".$d->{'dom'}."." ||
-		     $r->{'name'} eq "cp.".$d->{'dom'}."." ||
-		     $r->{'name'} eq "ftp.".$d->{'dom'}."." ||
-		     $r->{'name'} eq "mail.".$d->{'dom'}.".") &&
-		    $r->{'type'} eq 'A') {
+		if ($r->{'type'} eq 'A' &&
+		    ($r->{'name'} =~ /^(|www\.|pop\.|smtp\.|cp\.|ftp\.|mail\.)\Q$d->{'dom'}\E\.$/ || $r->{'values'}->[0] eq $oldip)) {
 			# Fix IP in domain record
+			$oldip ||= $r->{'values'}->[0];
 			$r->{'values'} = [ $d->{'ip'} ];
 			$change++;
 			}
@@ -882,7 +884,7 @@ sub directadmin_domain_features
 {
 my ($dom, $domains, $backup, $imap) = @_;
 my %dinfo;
-&read_env_file("$backup/$dom/domain.conf", \%dinfo) || return ();
+&read_env_file("$backup/$dom/domain.conf", \%dinfo);
 my @got = ( "dir", $parent ? () : ("unix"),
 	    &domain_has_website(), "logrotate" );
 push(@got, "webmin") if ($webmin && !$parent);

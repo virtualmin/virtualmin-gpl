@@ -29,7 +29,6 @@ if (!$module_name) {
 
 # Parse command-line args
 my $short = 1;
-local @ARGV = @ARGV;
 &parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);

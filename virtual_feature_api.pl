@@ -439,13 +439,6 @@ sub feature_restart_web_command
 {
 }
 
-# feature_setup_web_for_php(&domain, &script, php-version)
-# Called to set any PHP variables needed by a script that are set in the 
-# webserver config.
-sub feature_setup_web_for_php
-{
-}
-
 # feature_get_web_suexec(&domain)
 # Returns 1 if this domain's website runs scripts as the domain owner
 sub feature_get_web_suexec

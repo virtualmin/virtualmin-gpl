@@ -258,3 +258,4 @@ cgimode=suexec
 dynip_update=1
 show_domains_lastlogin=1
 json_pretty=1
+allow_numbers=0

@@ -84,6 +84,7 @@ apache_star=Address format for Apache virtual hosts,1,2-Always use *,1-Always us
 dependent_mail=Send email from domain's IP by default?,1,1-Yes,0-No
 force_email=Contact email address is mandatory?,1,1-Yes,0-No
 contact_email=Default email address for new domains?,3,Domain owner's mailbox
+allow_numbers=Allow user and group names starting with numbers?,1,1-Yes,0-No
 
 line2.1=SSL settings,11
 key_size=Default SSL key size,3,Webmin default (2048 bits),6,,bits

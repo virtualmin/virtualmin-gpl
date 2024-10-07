@@ -506,14 +506,18 @@ return \%flags;
 sub cli_convert_remote_format
 {
 my ($format) = @_;
+return 0 if ($convert_remote_format_pid);
+
 my ($lines, $fh, $ofh);
 # Redirect STDOUT to a variable
 open ($fh, '>', \$lines) || return;
 # Save the original STDOUT
 $ofh = select($fh);
+$convert_remote_format_pid = $$;
 
 # Setup end handler to convert saved output
 END {
+	return if ($$ != $convert_remote_format_pid);
 	no warnings 'closure';
 	# Restore the original STDOUT
 	select($ofh);

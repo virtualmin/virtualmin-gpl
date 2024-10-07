@@ -59,6 +59,9 @@ return $d->{'dns'} && $d->{'dns_cloud'} eq $c->{'name'};
 sub get_domain_dns_cloud
 {
 my ($d) = @_;
+if ($d->{'dns_subof'}) {
+	return &get_domain_dns_cloud(&get_domain($d->{'dns_subof'}));
+	}
 foreach my $c (&list_dns_clouds()) {
 	return $c if (&dns_uses_cloud($d, $c));
 	}

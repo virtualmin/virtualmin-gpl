@@ -7669,10 +7669,6 @@ if (!$dbtype) {
 	}
 $db = lc($db);
 $db =~ s/[\.\-]/_/g;	# mysql doesn't like . or _
-if (!$dbtype || $dbtype eq "postgres") {
-	# Postgresql doesn't like leading numbers
-	$db = &remove_numeric_prefix($db);
-	}
 if ($db eq "test" || $db eq "mysql" || $db =~ /^template/) {
 	# These names are reserved by MySQL and PostgreSQL
 	$db = "db".$db;
@@ -7691,6 +7687,7 @@ return $db;
 sub remove_numeric_prefix
 {
 my ($db) = @_;
+return $db if ($config{'allow_numbers'});
 $db =~ s/^0/zero/g;
 $db =~ s/^1/one/g;
 $db =~ s/^2/two/g;
@@ -8031,7 +8028,8 @@ return 0;
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
-local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass, $content) = @_;
+local ($dom, $parentdom, $parentuser, $noscripts, $nopost,
+       $pass, $content) = @_;
 
 # Sanity checks
 $dom->{'ip'} || return $text{'setup_edefip'};
@@ -8559,18 +8557,25 @@ if ($dom->{'alias'} && &domain_has_website($dom)) {
 	if ($target &&
 	    &domain_has_website($target) &&
 	    &domain_has_ssl_cert($target) &&
-	    !$target->{'letsencrypt_dname'} &&
 	    ($tinfo = &cert_info($target)) &&
 	    &is_letsencrypt_cert($tinfo) &&
 	    !&check_domain_certificate($dom->{'dom'}, $tinfo)) {
 		&$first_print(&text('setup_letsaliases',
 				    &show_domain_name($target),
 				    &show_domain_name($dom)));
+		my $old_dname = $target->{'letsencrypt_dname'};
+		if ($target->{'letsencrypt_dname'}) {
+			# Add the alias domain's SSL hostnames to the list
+			$target->{'letsencrypt_dname'} =
+			 join(" ", split(/\s+/, $target->{'letsencrypt_dname'}),
+				    &get_hostnames_for_ssl($d));
+			}
 		my ($ok, $err, $dnames) = &renew_letsencrypt_cert($target);
 		if ($ok) {
 			&$second_print($text{'setup_done'});
 			}
 		else {
+			$target->{'letsencrypt_dname'} = $old_dname;
 			&$second_print(&text('setup_eletsaliases', $err));
 			}
 		}
@@ -13569,7 +13574,7 @@ if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} &&
 		  });
 	}
 
-if (&can_edit_records($d) && !&copy_alias_records($d)) {
+if (&can_edit_records($d)) {
 	if ($d->{'dns'}) {
 		# DNS edit records button
 		push(@rv, { 'page' => 'list_records.cgi',

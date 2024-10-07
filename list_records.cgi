@@ -9,15 +9,21 @@ $d || &error($text{'edit_egone'});
 &can_edit_records($d) || &error($text{'records_ecannot'});
 ($recs, $file) = &get_domain_dns_records_and_file($d);
 $file || &error($recs);
+$readonly = &copy_alias_records($d);
 
 $msg = &domain_in($d);
 if ($d->{'provision_dns'}) {
 	$msg = &text('records_provmsg', $msg);
 	}
-elsif ($cloud = &get_domain_dns_cloud($d) || &get_domain_dns_cloud(&get_domain($d->{'dns_subof'}))) {
+elsif ($cloud = &get_domain_dns_cloud($d)) {
 	$msg = &text('records_cloudmsg', $msg, $cloud->{'desc'});
 	}
 &ui_print_header($msg, $text{'records_title'}, "", "records");
+
+if ($readonly && ($alias = &get_domain($d->{'alias'}))) {
+	print &ui_alert_box(&text('records_aliasof', &show_domain_name($alias)),
+			    'warn');
+	}
 
 # Warn if DNS records are not valid
 $err = &validate_dns($d, $recs, 1);
@@ -40,21 +46,25 @@ if (&supports_dns_comments($d)) {
 		}
 	}
 
-print &ui_form_start("delete_records.cgi");
-@links = ( &select_all_link("d"), &select_invert_link("d") );
-if (!$d->{'dns_submode'}) {
-	if ($in{'show'}) {
-		push(@links, &ui_link("list_records.cgi?dom=$in{'dom'}&show=0",
-                              $text{'records_show0'}));
-		}
-	else {
-		push(@links, &ui_link("list_records.cgi?dom=$in{'dom'}&show=1",
-		                      $text{'records_show1'}));
-		}
-	}
-print &ui_hidden("dom", $in{'dom'});
 @tds = ( "width=5" );
-print &ui_links_row(\@links);
+if (!$readonly) {
+	print &ui_form_start("delete_records.cgi");
+	@links = ( &select_all_link("d"), &select_invert_link("d") );
+	if (!$d->{'dns_submode'}) {
+		if ($in{'show'}) {
+			push(@links, &ui_link(
+				"list_records.cgi?dom=$in{'dom'}&show=0",
+				$text{'records_show0'}));
+			}
+		else {
+			push(@links, &ui_link(
+				"list_records.cgi?dom=$in{'dom'}&show=1",
+				$text{'records_show1'}));
+			}
+		}
+	print &ui_hidden("dom", $in{'dom'});
+	print &ui_links_row(\@links);
+	}
 print &ui_columns_start([ "", $text{'records_name'},
 			      $text{'records_type'},
 			      $text{'records_value'},
@@ -106,33 +116,37 @@ RECORD: foreach $r (@$recs) {
 			}
 		}
 	print &ui_checked_columns_row([
-		$etype && &can_edit_record($r, $d) ?
+		$etype && &can_edit_record($r, $d) && !$readonly ?
 		    "<a href='edit_record.cgi?dom=$in{'dom'}&id=".
 		      &urlize($r->{'id'})."&show=$in{'show'}'>$name</a>" :
 		    $name,
 		$tdesc,
 		&html_escape($values).$pmsg,
 		$anycomment ? ( &html_escape($r->{'comment'}) ) : ( ),
-		], \@tds, "d", $r->{'id'}, 0, !&can_delete_record($r, $d));
+		],
+		\@tds, "d", $r->{'id'}, 0,
+		$readonly || !&can_delete_record($r, $d));
 	}
 
 print &ui_columns_end();
-print &ui_links_row(\@links);
-@types = map { [ $_->{'type'}, $_->{'type'}." - ".$_->{'desc'} ] }
-	     grep { $_->{'create'} } &list_dns_record_types($d);
-if (!$gotttl && &supports_dns_defttl($d)) {
-	push(@types, [ '$ttl', '$ttl - '.$text{'records_typedefttl'} ]);
+if (!$readonly) {
+	print &ui_links_row(\@links);
+	@types = map { [ $_->{'type'}, $_->{'type'}." - ".$_->{'desc'} ] }
+		     grep { $_->{'create'} } &list_dns_record_types($d);
+	if (!$gotttl && &supports_dns_defttl($d)) {
+		push(@types, [ '$ttl', '$ttl - '.$text{'records_typedefttl'} ]);
+		}
+	print &ui_hidden("show", $in{'show'});
+	print &ui_form_end([ [ 'delete', $text{'records_delete'} ],
+			     undef,
+			     [ 'new', $text{'records_add'},
+			       &ui_select("type", "A", \@types) ],
+			     undef,
+			     &can_edit_templates() ?
+				( [ 'reset', $text{'records_reset'} ] ) : ( ),
+			     &can_manual_dns() ?
+				( [ 'manual', $text{'records_manual'} ] ) : ( ), ]);
 	}
-print &ui_hidden("show", $in{'show'});
-print &ui_form_end([ [ 'delete', $text{'records_delete'} ],
-		     undef,
-		     [ 'new', $text{'records_add'},
-		       &ui_select("type", "A", \@types) ],
-		     undef,
-		     &can_edit_templates() ?
-			( [ 'reset', $text{'records_reset'} ] ) : ( ),
-		     &can_manual_dns() ?
-			( [ 'manual', $text{'records_manual'} ] ) : ( ), ]);
 
 # Make sure the left menu is showing this domain
 if (defined(&theme_select_domain)) {

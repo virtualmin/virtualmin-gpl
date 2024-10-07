@@ -2972,67 +2972,8 @@ sub setup_web_for_php
 my ($d, $script, $phpver) = @_;
 $phpver ||= &get_domain_php_version($d);
 my $tmpl = &get_template($d->{'template'});
-my $any = 0;
 my $varstr = &substitute_domain_template($tmpl->{'php_vars'}, $d);
 my @tmplphpvars = $varstr eq 'none' ? ( ) : split(/\t+/, $varstr);
-my $p = &domain_has_website($d);
-
-if ($p eq "web" && &get_apache_mod_php_version()) {
-	# Add the PHP variables to the domain's <Virtualhost> in Apache config
-	&require_apache();
-	my $conf = &apache::get_config();
-	my @ports;
-	push(@ports, $d->{'web_port'}) if ($d->{'web'});
-	push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
-	foreach my $port (@ports) {
-		my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
-		next if (!$virt);
-
-		# Find currently set PHP variables
-		my @phpv = &apache::find_directive("php_value", $vconf);
-		my %got;
-		foreach my $p (@phpv) {
-			if ($p =~ /^(\S+)/) {
-				$got{$1}++;
-				}
-			}
-
-		# Get PHP variables from template
-		my @oldphpv = @phpv;
-		my $changed;
-		foreach my $pv (@tmplphpvars) {
-			my ($n, $v) = split(/=/, $pv, 2);
-			my $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
-			if (!$got{$n}) {
-				push(@phpv, "$n $v");
-				$changed++;
-				}
-			}
-		if ($script && defined(&{$script->{'php_vars_func'}})) {
-			# Get from script too
-			foreach my $v (&{$script->{'php_vars_func'}}($d)) {
-				if (!$got{$v->[0]}) {
-					if ($v->[1] =~ /\s/) {
-						push(@phpv,
-						     "$v->[0] \"$v->[1]\"");
-						}
-					else {
-						push(@phpv, "$v->[0] $v->[1]");
-						}
-					$changed++;
-					}
-				}
-			}
-
-		# Update if needed
-		if ($changed) {
-			&apache::save_directive("php_value",
-						\@phpv, $vconf, $conf);
-			$any++;
-			}
-		&flush_file_lines();
-		}
-	}
 
 # Find PHP variables from template and from script
 my @todo;
@@ -3057,6 +2998,58 @@ if ($phpver) {
 		}
 	}
 
+return &set_multiple_php_vars($d, \@todo, $phpver);
+}
+
+# set_multiple_php_vars(&domain, &variable-list, [php-version])
+# Update the appropriate mod_php, php.ini and FPM configs to set variables
+sub set_multiple_php_vars
+{
+my ($d, $todo, $phpver) = @_;
+$phpver ||= &get_domain_php_version($d);
+my $p = &domain_has_website($d);
+my $any = 0;
+
+if ($p eq "web" && &get_apache_mod_php_version()) {
+	# Add the PHP variables to the domain's <Virtualhost> in Apache config
+	&require_apache();
+	my $conf = &apache::get_config();
+	my @ports;
+	push(@ports, $d->{'web_port'}) if ($d->{'web'});
+	push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+	foreach my $port (@ports) {
+		my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+		next if (!$virt);
+
+		# Find currently set PHP variables
+		my @phpv = &apache::find_directive("php_value", $vconf);
+		my %got;
+		foreach my $p (@phpv) {
+			if ($p =~ /^(\S+)/) {
+				$got{$1}++;
+				}
+			}
+
+		# Update or add PHP variables
+		foreach my $t (@$todo) {
+			my ($n, $v, $diff) = @$t;
+			if (!$got{$n}) {
+				push(@phpv, "$n $v");
+				$changed++;
+				}
+			}
+
+		# Update directives if needed
+		if ($changed) {
+			&apache::save_directive("php_value",
+						\@phpv, $vconf, $conf);
+			&register_post_action(\&restart_apache);
+			$any += $changed;
+			}
+		&flush_file_lines();
+		}
+	}
+
 my $phpini = &get_domain_php_ini($d, $phpver);
 if ($phpini && -r $phpini && &foreign_check("phpini")) {
 	# Add the variables to the domain's php.ini file. Start by finding
@@ -3067,7 +3060,7 @@ if ($phpini && -r $phpini && &foreign_check("phpini")) {
 
 	# Make any needed changes. Variables can be either forced to a
 	# particular value, or have maximums or minumums
-	foreach my $t (@todo) {
+	foreach my $t (@$todo) {
 		my ($n, $v, $diff) = @$t;
 		my $ov = &phpini::find_value($n, $conf);
 		my $change = $diff eq '' && $ov ne $v ||
@@ -3086,17 +3079,13 @@ if ($phpini && -r $phpini && &foreign_check("phpini")) {
 
 	if ($anyini) {
 		&write_as_domain_user($d, sub { &flush_file_lines($phpini) });
-		my $p = &domain_has_website($d);
-		if ($p ne "web") {
-			&plugin_call($p, "feature_restart_web_php", $d);
-			}
 		}
 	}
 
 my $mode = &get_domain_php_mode($d);
 if ($mode eq "fpm") {
 	# Update PHP ini values in FPM config file as well
-	foreach my $t (@todo) {
+	foreach my $t (@$todo) {
 		my ($n, $v, $diff) = @$t;
 		my $ov = &get_php_fpm_ini_value($d, $n);
 		my $change = $diff eq '' && $ov ne $v ||
@@ -3104,15 +3093,14 @@ if ($mode eq "fpm") {
 				$diff eq '-' && &php_value_diff($ov, $v) > 0;
 		if ($change) {
 			&save_php_fpm_ini_value($d, $n, $v, 1);
+			$any++;
 			}
 		}
 	}
 
-# Call web plugin specific variable function
-if ($p && $p ne "web") {
-	&plugin_call($p, "feature_setup_web_for_php", $d, $script, $phpver);
+if ($any) {
+	&register_php_restart_action($d);
 	}
-
 return $any;
 }
 

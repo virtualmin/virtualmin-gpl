@@ -46,7 +46,6 @@ if (!$module_name) {
 $server = "localhost";
 $from = "nobody\@virtualmin.com";
 $auth = "Plain";
-local @ARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--server") {
