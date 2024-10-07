@@ -30,7 +30,7 @@ my $email = $config{'contact_email'};
 
 # Set variables from %opts
 my $domain = $domain_name;
-$domain || &error($text{'cli_create_domain_missing_domain_name'});
+$domain || &error($text{'api_ndom_missing_domain_name'});
 
 my $owner = $opts->{'desc'};
 if (defined($owner)) {
@@ -40,7 +40,7 @@ if (defined($owner)) {
 if (defined($opts->{'email'})) {
 	$email = $opts->{'email'};
 	&extract_address_parts($email) ||
-		&error($text{'cli_create_domain_invalid_email_address'});
+		&error($text{'api_ndom_invalid_email_address'});
 	}
 
 my $user  = defined($opts->{'user'})  ? lc($opts->{'user'})  : undef;
@@ -78,7 +78,7 @@ my %feature = ();
 foreach my $f (@features) {
 	if ($opts->{$f}) {
 		$config{$f} ||
-		    &error(&text('cli_create_domain_feature_not_enabled', $f));
+		    &error(&text('api_ndom_feature_not_enabled', $f));
 		$feature{$f}++;
 		}
 	}
@@ -135,7 +135,7 @@ if ($opts->{'no-ip6'}) {
 if ($opts->{'default-ip6'} && &supports_ip6()) {
 	# IPv6 on default shared address
 	$ip6 = "default";
-	$ip6 || &error($text{'cli_create_domain_no_default_ipv6'});
+	$ip6 || &error($text{'api_ndom_no_default_ipv6'});
 	$virt6 = 0;
 	$name6 = 1;
 	}
@@ -163,14 +163,14 @@ if (defined($opts->{'shared-ip6'})) {
 	$virt6 = 0;
 	$name6 = 1;
 	&indexof($ip6, &list_shared_ip6s()) >= 0 ||
-		&error(&text('cli_create_domain_ip6_not_in_shared_list', $ip6));
+		&error(&text('api_ndom_ip6_not_in_shared_list', $ip6));
 	}
 
 my $dns_ip;
 if (defined($opts->{'dns-ip'})) {
 	$dns_ip = $opts->{'dns-ip'};
 	&check_ipaddress($dns_ip) ||
-		&error($text{'cli_create_domain_invalid_dns_ip'});
+		&error($text{'api_ndom_invalid_dns_ip'});
 	}
 
 if ($opts->{'no-dns-ip'}) {
@@ -223,7 +223,7 @@ if (defined($opts->{'template'})) {
 			}
 		}
 	$template eq "" &&
-		&error($text{'cli_create_domain_unknown_template_name'});
+		&error($text{'api_ndom_unknown_template_name'});
 	}
 
 my $planid;
@@ -234,7 +234,7 @@ if (defined($opts->{'plan'})) {
 			$planid = $p->{'id'};
 			}
 		}
-	$planid eq "" && &error($text{'cli_create_domain_unknown_plan_name'});
+	$planid eq "" && &error($text{'api_ndom_unknown_plan_name'});
 	}
 
 my $bw;
@@ -261,7 +261,7 @@ my $fwdto;
 if (defined($opts->{'fwdto'})) {
 	$fwdto = $opts->{'fwdto'};
 	$fwdto =~ /^\S+\@\S+$/i ||
-		&error($text{'cli_create_domain_invalid_forwarding_address'});
+		&error($text{'api_ndom_invalid_forwarding_address'});
 	}
 
 my $parentdomain;
@@ -352,7 +352,7 @@ if ($opts->{'use-ssh-key'}) {
 		$sshkey = &read_file_contents($sshkey);
 		}
 	$sshkey =~ /\S/ ||
-		&error($text{'cli_create_domain_ssh_key_option_required'});
+		&error($text{'api_ndom_ssh_key_option_required'});
 	}
 
 my $auto_redirect;
@@ -363,7 +363,7 @@ if (defined $opts->{'append-style'}) {
 	$append_style = $opts->{'append-style'};
 	my ($as) = grep { $_->[0] eq $append_style || $_->[1] eq $append_style }
 			&list_append_styles();
-	$as || &error(&text('cli_create_domain_append_style_not_exist',
+	$as || &error(&text('api_ndom_append_style_not_exist',
 			$append_style));
 	$append_style = $as->[0];
 }
@@ -412,7 +412,7 @@ foreach my $key (keys %{$opts}) {
 		my $fv = $opts->{$key};
 		my @fields = &list_custom_fields();
 		my ($f) = grep { $_->{'name'} eq $fn } @fields;
-		$f || &error(&text('cli_create_domain_custom_field_not_exist',
+		$f || &error(&text('api_ndom_custom_field_not_exist',
 				   $fn));
 		$fields{'field_'.$fn} = $fv;
 	}
@@ -422,7 +422,7 @@ foreach my $key (keys %{$opts}) {
 $template = &get_init_template($parentdomain) if ($template eq "");
 my $tmpl = &get_template($template);
 my $plan = $planid ne '' ? &get_plan($planid) : &get_default_plan();
-$plan || &error($text{'cli_create_domain_plan_not_exist'});
+$plan || &error($text{'api_ndom_plan_not_exist'});
 my $defip = &get_default_ip($resel);
 my $defip6 = &get_default_ip6($resel);
 if ($sharedip) {
@@ -431,51 +431,51 @@ if ($sharedip) {
 		}
 	else {
 		&indexof($sharedip, &list_shared_ips()) >= 0 ||
-			&error(&text('cli_create_domain_shared_ip_not_in_list',
+			&error(&text('api_ndom_shared_ip_not_in_list',
 				     $sharedip));
 		}
 	}
 $clouddns && $remotedns &&
 	&error(
-	    $text{'cli_create_domain_cloud_dns_remote_dns_mutually_exclusive'});
+	    $text{'api_ndom_cloud_dns_remote_dns_mutually_exclusive'});
 
 my $netmask;
 if ($ip eq "allocate") {
 	# Allocate IP now
 	$virtalready && &error(
-		$text{'cli_create_domain_ip_already_allocate_ip_incompatible'});
+		$text{'api_ndom_ip_already_allocate_ip_incompatible'});
 	my %racl = $resel ? &get_reseller_acl($resel) : ();
 	if ($racl{'ranges'}) {
 		# Allocating from reseller's range
 		($ip, $netmask) = &free_ip_address(\%racl);
-		$ip || &error($text{'cli_create_domain_failed_allocate_ip_'.
+		$ip || &error($text{'api_ndom_failed_allocate_ip_'.
 				    'reseller_ranges'});
 		}
 	else {
 		# Allocating from template
-		$tmpl->{'ranges'} ne "none" || &error($text{'cli_create_domain_'.
+		$tmpl->{'ranges'} ne "none" || &error($text{'api_ndom_'.
 			'allocate_ip_option_requires_auto_ip_allocation'});
 		($ip, $netmask) = &free_ip_address($tmpl);
-		$ip || &error($text{'cli_create_domain_failed_allocate_ip_'.
+		$ip || &error($text{'api_ndom_failed_allocate_ip_'.
 				    'from_ranges'});
 		}
 	}
 elsif ($virt) {
 	# Make sure manual IP specification is allowed
-	$tmpl->{'ranges'} eq "none" || &error($text{'cli_create_domain_ip_'.
+	$tmpl->{'ranges'} eq "none" || &error($text{'api_ndom_ip_'.
 			'option_cannot_be_used_with_auto_ip_allocation'});
 	}
 
 my $netmask6;
 if ($ip6 eq "allocate") {
 	# Allocate an IPv6 address now
-	$virt6already && &error($text{'cli_create_domain_ip6_already_allocate_'.
+	$virt6already && &error($text{'api_ndom_ip6_already_allocate_'.
 				      'ip6_incompatible'});
 	my %racl = $resel ? &get_reseller_acl($resel) : ();
 	if ($racl{'ranges6'}) {
 		# Allocating from reseller's range
 		($ip6, $netmask6) = &free_ip6_address(\%racl);
-		$ip6 || &error($text{'cli_create_domain_failed_allocate_ip6_'.
+		$ip6 || &error($text{'api_ndom_failed_allocate_ip6_'.
 				     'reseller_ranges'});
 		}
 	else {
@@ -483,19 +483,19 @@ if ($ip6 eq "allocate") {
 		$tmpl->{'ranges6'} ne "none" || &error($text{'cli_create_domain'.
 			'_allocate_ip6_option_requires_auto_ip6_allocation'});
 		($ip6, $netmask6) = &free_ip6_address($tmpl);
-		$ip6 || &error($text{'cli_create_domain_failed_allocate_ip6_'.
+		$ip6 || &error($text{'api_ndom_failed_allocate_ip6_'.
 				     'from_ranges'});
 		}
 	}
 elsif ($virt6) {
 	# Make sure manual IP specification is allowed
-	$tmpl->{'ranges6'} eq "none" || &error($text{'cli_create_domain_ip6_'.
+	$tmpl->{'ranges6'} eq "none" || &error($text{'api_ndom_ip6_'.
 		'option_cannot_be_used_with_auto_ip6_allocation'});
 	}
 elsif ($ip6 eq "default") {
 	# Use default IP for reseller
 	$ip6 = $defip6;
-	$ip6 || &error($text{'cli_create_domain_no_default_ipv6_address_found'});
+	$ip6 || &error($text{'api_ndom_no_default_ipv6_address_found'});
 	$virt6 = 0;
 	$name6 = 1;
 	}
@@ -514,32 +514,32 @@ if (!$tlimit && !$anylimits) {
 	}
 
 # Make sure all needed args are set
-$parentdomain || $pass || &error($text{'cli_create_domain_missing_password'});
+$parentdomain || $pass || &error($text{'api_ndom_missing_password'});
 if (!defined($jail) && !$parentdomain) {
 	$jail = $tmpl->{'ujail'};
 	}
 if ($jail && $parentdomain) {
-	&error($text{'cli_create_domain_enable_jail_only_for_top_level'});
+	&error($text{'api_ndom_enable_jail_only_for_top_level'});
 	}
 if (&has_home_quotas() && !$parentdomain) {
 	$quota ne '' && $uquota ne '' || $tlimit ||
-	&error($text{'cli_create_domain_no_quota_specified'});
+	&error($text{'api_ndom_no_quota_specified'});
 	}
 if ($parentdomain) {
-	$feature{'unix'} && &error($text{'cli_create_domain_unix_option_not_'.
+	$feature{'unix'} && &error($text{'api_ndom_unix_option_not_'.
 					 'valid_for_subservers'});
 	}
 if ($aliasdomain) {
 	my @af = $aliasmail ? @aliasmail_features : @alias_features;
 	foreach my $f (keys %feature) {
-		&indexof($f, @af) >= 0 || &error(&text('cli_create_domain_'.
+		&indexof($f, @af) >= 0 || &error(&text('api_ndom_'.
 			'feature_not_valid_for_alias_servers', $f));
 		}
 	}
 if ($subdomain) {
 	foreach my $f (keys %feature) {
 		&indexof($f, @opt_subdom_features) >= 0 ||
-			&error(&text('cli_create_domain_feature_not_'.
+			&error(&text('api_ndom_feature_not_'.
 				     'valid_for_subdomains', $f));
 		}
 	}
@@ -559,19 +559,19 @@ my $clashed = &domain_name_clash($domain);
 my ($parent, $alias, $subdom);
 if ($parentdomain) {
 	$parent = &get_domain_by("dom", $parentdomain);
-	$parent || &error($text{'cli_create_domain_parent_domain_not_exist'});
+	$parent || &error($text{'api_ndom_parent_domain_not_exist'});
 	$plan = &get_plan($parent->{'plan'});   # Parent overrides any selection
 	$alias = $parent if ($aliasdomain);
 	$subdom = $parent if ($subdomain);
 	if ($parent->{'parent'}) {
 		# Parent is not actually the top, such as when creating an alias
 		$parent = &get_domain($parent->{'parent'});
-		$parent || &error($text{'cli_create_domain_no_top_'.
+		$parent || &error($text{'api_ndom_no_top_'.
 					'level_parent_domain_found'});
 		}
 	if ($subdomain) {
 		$domain =~ /^(\S+)\.\Q$subdomain\E$/ ||
-			&error(&text('cli_create_domain_subdomain_must_be_'.
+			&error(&text('api_ndom_subdomain_must_be_'.
 				     'under_parent', $domain, $subdomain));
 		$subprefix ||= $1;
 		}
@@ -612,7 +612,7 @@ $owner ||= $domain;
 my $tfl = $plan->{'featurelimits'};
 if ($planfeatures && $tfl) {
 	# From limits on selected plan
-	$tfl eq 'none' && &error($text{'cli_create_domain_selected_'.
+	$tfl eq 'none' && &error($text{'api_ndom_selected_'.
 				       'plan_no_features'});
 	my %flimits = map { $_, 1 } split(/\s+/, $tfl);
 	%feature = ( 'virt' => $feature{'virt'} );
@@ -646,7 +646,7 @@ elsif ($deffeatures || $planfeatures && !$tfl) {
 
 # Check that at least one feature is enabled
 scalar(keys %feature) ||
-	&error($text{'cli_create_domain_no_virtual_server_features_enabled'});
+	&error($text{'api_ndom_no_virtual_server_features_enabled'});
 
 if (!$parent) {
 	# Make sure alias, database, etc limits are set properly
@@ -684,11 +684,11 @@ if (&has_home_quotas() && !$parent && !$tlimit) {
 # Validate reseller
 if (defined($resel)) {
 	# Set on the command line
-	$parent && &error($text{'cli_create_domain_reseller_cannot_be_set_'.
+	$parent && &error($text{'api_ndom_reseller_cannot_be_set_'.
 				'for_subservers'});
 	my @resels = &list_resellers();
 	my ($rinfo) = grep { $_->{'name'} eq $resel } @resels;
-	$rinfo || &error(&text('cli_create_domain_reseller_not_found', $resel));
+	$rinfo || &error(&text('api_ndom_reseller_not_found', $resel));
 	}
 elsif ($parent) {
 	$resel = $parent->{'reseller'};
@@ -702,7 +702,7 @@ if (!$alias) {
 		if ($virtalready) {
 			# Make sure IP is already active
 			$clash || &error(
-				$text{'cli_create_domain_setup_evirtclash2'});
+				$text{'api_ndom_setup_evirtclash2'});
 			if ($virtalready == 1) {
 				# Don't allow clash with another domain
 				my $already = &get_domain_by("ip", $ip);
@@ -718,12 +718,12 @@ if (!$alias) {
 		else {
 			# Make sure the IP isn't assigned yet
 			$clash && &error(
-				$text{'cli_create_domain_setup_evirtclash'});
+				$text{'api_ndom_setup_evirtclash'});
 			}
 		}
 	elsif ($parentip) {
 		# IP comes from parent domain
-		$parent || &error($text{'cli_create_domain_parent_ip_cannot_'.
+		$parent || &error($text{'api_ndom_parent_ip_cannot_'.
 					'be_used_for_top_level_servers'});
 		}
 
@@ -764,10 +764,10 @@ else {
 my $mysql_module;
 if ($myserver) {
 	my $mm = &get_remote_mysql_module($myserver);
-	$mm || &error(&text('cli_create_domain_remote_mysql_server_not_found',
+	$mm || &error(&text('api_ndom_remote_mysql_server_not_found',
 			    $myserver));
 	$mm->{'config'}->{'virtualmin_provision'} &&
-		&error(&text('cli_create_domain_remote_mysql_server_'.
+		&error(&text('api_ndom_remote_mysql_server_'.
 			     'provision_only', $myserver));
 	$mysql_module = $mm->{'minfo'}->{'dir'};
 	}
@@ -775,7 +775,7 @@ my $postgres_module;
 if ($pgserver) {
 	my $mm = &get_remote_postgres_module($pgserver);
 	$mm || &error(
-		&text('cli_create_domain_remote_postgres_server_not_found',
+		&text('api_ndom_remote_postgres_server_not_found',
 		      $pgserver));
 	$postgres_module = $mm->{'minfo'}->{'dir'};
 	}
@@ -784,13 +784,13 @@ if ($pgserver) {
 if ($clouddns) {
 	if ($clouddns eq "services") {
 		$config{'provision_dns'} ||
-			&error($text{'cli_create_domain_cloudmin_'.
+			&error($text{'api_ndom_cloudmin_'.
 				     'services_dns_not_enabled'});
 		}
 	elsif ($clouddns ne "local") {
 		my @cnames = map { $_->{'name'} } &list_dns_clouds();
 		&indexof($clouddns, @cnames) >= 0 ||
-			&error(&text('cli_create_domain_valid_cloud_'.
+			&error(&text('api_ndom_valid_cloud_'.
 				     'dns_providers', join(" ", @cnames)));
 		}
 	}
@@ -798,18 +798,18 @@ if ($clouddns) {
 # Validate the remote DNS server
 if ($remotedns) {
 	defined(&list_remote_dns) ||
-	    &error($text{'cli_create_domain_remote_dns_servers_not_supported'});
+	    &error($text{'api_ndom_remote_dns_servers_not_supported'});
 	my ($r) = grep { $_->{'host'} eq $remotedns } &list_remote_dns();
-	$r || &error(&text('cli_create_domain_remote_dns_'.
+	$r || &error(&text('api_ndom_remote_dns_'.
 			   'server_not_found', $remotedns));
-	$r->{'slave'} && &error(&text('cli_create_domain_remote_dns_'.
+	$r->{'slave'} && &error(&text('api_ndom_remote_dns_'.
 				      'server_not_master', $remotedns));
 	}
 
 # Validate PHP mode
 if ($phpmode) {
 	my @supp = &supported_php_modes();
-	&indexof($phpmode, @supp) >= 0 || &error($text{'cli_create_domain_php_'.
+	&indexof($phpmode, @supp) >= 0 || &error($text{'api_ndom_php_'.
 		'execution_mode_not_supported'});
 	}
 
@@ -917,7 +917,7 @@ $dom{'db'} = $db || &database_name(\%dom);
 # Check SSL redirect flag
 if ($auto_redirect) {
 	&domain_has_ssl(\%dom) ||
-		&error($text{'cli_create_domain_ssl_redirect_requires_ssl'});
+		&error($text{'api_ndom_ssl_redirect_requires_ssl'});
 	$dom{'auto_redirect'} = 1;
 	}
 
@@ -925,12 +925,12 @@ if ($auto_redirect) {
 $dom{'home'} = &server_home_directory(\%dom, $parent);
 if (defined($mysqlpass) && $config{'mysql'}) {
 	$dom{'parent'} &&
-		&error($text{'cli_create_domain_mysql_pass_top_level_only'});
+		&error($text{'api_ndom_mysql_pass_top_level_only'});
 	&set_mysql_pass(\%dom, $mysqlpass);
 	}
 if (defined($postgrespass) && $config{'postgres'}) {
 	$dom{'parent'} &&
-		&error($text{'cli_create_domain_postgres_pass_top_level_only'});
+		&error($text{'api_ndom_postgres_pass_top_level_only'});
 	&set_postgres_pass(\%dom, $postgrespass);
 	}
 &complete_domain(\%dom);
@@ -954,14 +954,14 @@ my $cerr = &virtual_server_clashes(\%dom);
 if (!$skipwarnings) {
 	foreach my $ff (&forbidden_domain_features(\%dom, 1)) {
 		$dom{$ff} && &error(
-			&text('cli_create_domain_feature_not_allowed', $ff));
+			&text('api_ndom_feature_not_allowed', $ff));
 		}
 	}
 
 # Check for warnings, unless overriding
 my @warns = &virtual_server_warnings(\%dom);
 if (!$skipwarnings && @warns) {
-	my $wmsg = $text{'cli_create_domain_possible_problems_detected'} . " ";
+	my $wmsg = $text{'api_ndom_possible_problems_detected'} . " ";
 	foreach my $w (@warns) {
 		$wmsg .= "$w ";
 		}
@@ -972,7 +972,7 @@ if (!$skipwarnings && @warns) {
 if ($parent) {
 	my $err = &check_domain_over_quota($parent);
 	if ($err) {
-		&error(&text('cli_create_domain_overquota_error', $err));
+		&error(&text('api_ndom_overquota_error', $err));
 		}
 	}
 
@@ -984,7 +984,7 @@ my $err = &create_virtual_server(\%dom, $parent,
 				 $parent ? $parent->{'user'} : undef,
 				 0, 1, $parent ? undef : $pass, $content);
 &unlock_domain(\%dom);
-&error(&text('cli_create_domain_creation_failed', $err)) if ($err);
+&error(&text('api_ndom_creation_failed', $err)) if ($err);
 
 if ($fwdto) {
 	&$first_print(&text('setup_fwding', $fwdto));
