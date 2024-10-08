@@ -16,6 +16,29 @@ use the C<--value-only> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    reuse => 1,
+    value => "name"
+  },
+  {
+    param => "names"
+  },
+  {
+    param => "field",
+    value => "name"
+  },
+  {
+    param => "value-only"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the values of custom fields for some or all servers';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

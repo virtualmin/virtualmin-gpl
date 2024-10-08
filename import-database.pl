@@ -16,6 +16,29 @@ like the C<mysql> or C<template0> databases.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "name",
+    req => 1,
+    value => "database-name"
+  },
+  {
+    param => "type",
+    req => 1,
+    value => "mysql|postgres"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Associates an existing database with some virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

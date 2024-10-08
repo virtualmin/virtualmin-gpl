@@ -24,6 +24,32 @@ followed by a setting name, newlines in it's value will B<not> be converted.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "name",
+    req => 1,
+    value => "template-name",
+    values => [
+      {
+        param => "id",
+        value => "template-id"
+      }
+    ]
+  },
+  {
+    param => "setting",
+    value => "name"
+  },
+  {
+    param => "inherited"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Outputs all settings in some virtual server template.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

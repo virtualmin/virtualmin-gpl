@@ -74,6 +74,181 @@ quotas have been corrupted or lost, for example via a filesystem move.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "desc",
+    value => "new-description"
+  },
+  {
+    param => "user",
+    value => "new-username"
+  },
+  {
+    param => "pass",
+    value => "'new-password'"
+  },
+  {
+    param => "passfile",
+    value => "password-file"
+  },
+  {
+    param => "email",
+    value => "new-email"
+  },
+  {
+    param => "protected"
+  },
+  {
+    param => "unprotected"
+  },
+  {
+    param => "quota",
+    value => "new-quota|UNLIMITED"
+  },
+  {
+    param => "uquota",
+    value => "new-unix-quota|UNLIMITED"
+  },
+  {
+    param => "apply-quotas"
+  },
+  {
+    param => "apply-all-quotas"
+  },
+  {
+    param => "newdomain",
+    value => "new-name"
+  },
+  {
+    param => "bw",
+    value => "bytes|NONE"
+  },
+  {
+    param => "bw-disable|--bw-no-disable"
+  },
+  {
+    param => "reseller",
+    value => "reseller|NONE"
+  },
+  {
+    param => "add-reseller",
+    reuse => 1,
+    value => "reseller"
+  },
+  {
+    param => "delete-reseller",
+    reuse => 1,
+    value => "reseller"
+  },
+  {
+    param => "ip",
+    value => "address",
+  },
+  {
+    param => "allocate-ip"
+  },
+  {
+    param => "default-ip"
+  },
+  {
+    param => "shared-ip",
+    value => "address"
+  },
+  {
+    param => "ip6",
+    value => "address"
+  },
+  {
+    param => "allocate-ip6"
+  },
+  {
+    param => "no-ip6"
+  },
+  {
+    param => "default-ip6"
+  },
+  {
+    param => "shared-ip6",
+    value => "address"
+  },
+  {
+    param => "prefix",
+    value => "name"
+  },
+  {
+    param => "template",
+    value => "name|id"
+  },
+  {
+    param => "plan",
+    value => "name|id"
+  },
+  {
+    param => "apply-plan",
+    value => "name|id"
+  },
+  {
+    param => "plan-features"
+  },
+  {
+    param => "add-exclude",
+    reuse => 1,
+    value => "directory"
+  },
+  {
+    param => "remove-exclude",
+    reuse => 1,
+    value => "directory"
+  },
+  {
+    param => "add-db-exclude",
+    reuse => 1,
+    value => "db|db.table"
+  },
+  {
+    param => "remove-db-exclude",
+    reuse => 1,
+    value => "db|db.table"
+  },
+  {
+    param => "dns-ip",
+    value => "address"
+  },
+  {
+    param => "no-dns-ip"
+  },
+  {
+    param => "enable-jail"
+  },
+  {
+    param => "disable-jail"
+  },
+  {
+    param => "mysql-server",
+    value => "hostname"
+  },
+  {
+    param => "link-domain",
+    value => "domain"
+  },
+  {
+    param => "no-link-domain"
+  },
+  {
+    param => "skip-warnings"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Changes the settings for a Virtualmin server, based on the specified command-line parameters.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

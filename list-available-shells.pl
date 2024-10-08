@@ -18,6 +18,38 @@ C<--multiline> parameter. Or to only output shell paths, use C<--name-only>.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "name-only"
+  },
+  {
+    param => "owner"
+  },
+  {
+    param => "mailbox"
+  },
+  {
+    param => "reseller"
+  },
+  {
+    param => "available"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the shells available for mailboxes and domain administrators.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

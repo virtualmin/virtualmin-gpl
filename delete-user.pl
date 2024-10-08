@@ -11,6 +11,24 @@ C<--domain> followed by the domain name, and C<--user> followed by the full or s
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "user",
+    req => 1,
+    value => "username"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Deletes an existing mail, FTP or database user from a Virtualmin domain.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

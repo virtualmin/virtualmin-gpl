@@ -12,6 +12,40 @@ autoreply file.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "all-domains",
+    req => 1,
+    values => [
+      {
+	param => "domain",
+	value => "name"
+      },
+      {
+        param => "user",
+        value => "username"
+      }
+    ]
+  },
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "plugins"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the simple mail aliases in some virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

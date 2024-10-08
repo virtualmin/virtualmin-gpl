@@ -36,6 +36,94 @@ the parent server, use the C<--all-domains> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "name",
+    req => 1,
+    value => "login"
+  },
+  {
+    param => "newname",
+    value => "login"
+  },
+  {
+    param => "pass",
+    value => "password"
+  },
+  {
+    param => "passfile",
+    value => "password-file"
+  },
+  {
+    param => "desc",
+    value => "description"
+  },
+  {
+    param => "email",
+    value => "user\@domain"
+  },
+  {
+    param => "no-email"
+  },
+  {
+    param => "can-create",
+  },
+  {
+    param => "cannot-create"
+  },
+  {
+    param => "can-rename",
+  },
+  {
+    param => "cannot-rename"
+  },
+  {
+    param => "can-features",
+  },
+  {
+    param => "cannot-features"
+  },
+  {
+    param => "can-modules",
+  },
+  {
+    param => "cannot-modules"
+  },
+  {
+    param => "can-edit",
+    reuse => 1,
+    value => "capability"
+  },
+  {
+    param => "cannot-edit",
+    reuse => 1,
+    value => "capability"
+  },
+  {
+    param => "all-domains"
+  },
+  {
+    param => "add-domain",
+    reuse => 1,
+    value => "name"
+  },
+  {
+    param => "remove-domain",
+    reuse => 1,
+    value => "name"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Modifies an extra administrator associated with some virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

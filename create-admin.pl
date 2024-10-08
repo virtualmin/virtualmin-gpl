@@ -32,6 +32,62 @@ more than one virtual server.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "name",
+    req => 1,
+    value => "login"
+  },
+  {
+    param => "pass",
+    value => "password"
+  },
+  {
+    param => "passfile",
+    value => "password-file"
+  },
+  {
+    param => "desc",
+    value => "description"
+  },
+  {
+    param => "email",
+    value => "user\@domain"
+  },
+  {
+    param => "create"
+  },
+  {
+    param => "rename"
+  },
+  {
+    param => "features"
+  },
+  {
+    param => "modules"
+  },
+  {
+    param => "edit",
+    reuse => 1,
+    value => "capability"
+  },
+  {
+    param => "allowed-domain",
+    reuse => 1,
+    value => "domain"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Creates a new extra administrator associated with some virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

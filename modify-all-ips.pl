@@ -17,6 +17,28 @@ the system's current default address.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "old-ip",
+    value => "address"
+  },
+  {
+    param => "default-old-ip"
+  },
+  {
+    param => "new-ip",
+    value => "address"
+  },
+  {
+    param => "detect-new-ip"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Update all virtual servers with a new IP address.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

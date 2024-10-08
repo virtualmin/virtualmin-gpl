@@ -17,6 +17,24 @@ and re-create an alias with new settings.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "from",
+    req => 1,
+    value => "mailbox|'*'"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Deletes a mail alias from a virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

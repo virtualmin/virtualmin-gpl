@@ -25,6 +25,43 @@ by type (A, CNAME, MX, etc) with the C<--type> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "ds-records"
+  },
+  {
+    param => "dnssec-records"
+  },
+  {
+    param => "multiline"
+  },
+  {
+    param => "name-only"
+  },
+  {
+    param => "name",
+    value => "record-name"
+  },
+  {
+    param => "regexp",
+    value => "name-pattern"
+  },
+  {
+    param => "type",
+    value => "A|AAAA|CNAME|MX|NS|TXT"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the DNS records in some domain.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

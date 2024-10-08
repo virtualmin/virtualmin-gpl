@@ -13,6 +13,35 @@ followed by a line count.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "access-log",
+    req => 1,
+    values => [
+      {
+	param => "error-log"
+      },
+      {
+	param => "ftp-log"
+      }
+    ]
+  },
+  {
+    param => "tail",
+    value => "lines"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Output webserver logs for a domain.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

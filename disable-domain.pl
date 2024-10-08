@@ -29,6 +29,35 @@ cancel a scheduled disable, use C<--schedule none>.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "why",
+    value => "'explanation for disable'"
+  },
+  {
+    param => "subservers"
+  },
+  {
+    param => "feature",
+    reuse => 1,
+    value => "name"
+  },
+  {
+    param => "schedule",
+    value => "days|timestamp|none"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Disables all features in the specified virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

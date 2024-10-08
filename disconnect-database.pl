@@ -13,6 +13,29 @@ name.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "name",
+    req => 1,
+    value => "database-name"
+  },
+  {
+    param => "type",
+    req => 1,
+    value => "mysql|postgres"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Removes a database from the control of a virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

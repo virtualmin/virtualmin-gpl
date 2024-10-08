@@ -18,6 +18,29 @@ If you want to login as root, use C<--root> flag only.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    value => "name"
+  },
+  {
+    param => "user",
+    value => "name"
+  },
+  {
+    param => "usermin-user",
+    value => "name"
+  },
+  {
+    param => "root"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Generates a link that can be used to login to Virtualmin.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

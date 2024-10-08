@@ -13,6 +13,25 @@ Virtualmin will merely flag it as deleted and hide it from the plans list.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "name",
+    req => 1,
+    value => "plan-name",
+    values => [
+      {
+        param => "id",
+        value => "plan-id"
+      }
+    ]
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Deletes an existing Virtualmin account plan.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

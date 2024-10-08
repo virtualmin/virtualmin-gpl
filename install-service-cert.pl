@@ -21,6 +21,35 @@ the service, causing the global default to be used instead.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "add-global",
+    req => 1,
+    values => [
+      {
+	param => "add-domain",
+      },
+      {
+	param => "remove-domain",
+      }
+    ]
+  },
+  {
+    param => "service",
+    value => "type"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Copy the cert and key from a virtual server to some other service.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

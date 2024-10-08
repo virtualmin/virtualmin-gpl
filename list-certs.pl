@@ -27,6 +27,28 @@ C<--newkey> - SSL private key matching the CSR, but not yet installed
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "all-domains",
+    req => 1,
+    values => [
+      {
+	param => "domain",
+	value => "name"
+      },
+      {
+        param => "user",
+        value => "username"
+      }
+    ]
+  },
+];
+
+# Program simple description
+my $usagedesc = 'Outputs the certificates and keys for one or more virtual servers.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

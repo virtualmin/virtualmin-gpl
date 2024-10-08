@@ -43,6 +43,58 @@ redirect) will be used.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "path",
+    req => 1,
+    value => "url-path"
+  },
+  {
+    param => "alias",
+    req => 1,
+    value => "directory",
+    values => [
+      {
+        param => "redirect",
+        value => "url"
+      }
+    ]
+  },
+  {
+    param => "regexp"
+  },
+  {
+    param => "exact"
+  },
+  {
+    param => "code",
+    value => "number"
+  },
+  {
+    param => "host",
+    value => "hostname"
+  },
+  {
+    param => "http"
+  },
+  {
+    param => "https"
+  },
+  {
+    param => "fix-wellknown"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Adds redirect or alias to a virtual server\'s website.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

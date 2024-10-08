@@ -12,6 +12,29 @@ it, as the complete contents of the specified database will be removed without a
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "name",
+    req => 1,
+    value => "database-name"
+  },
+  {
+    param => "type",
+    req => 1,
+    value => "mysql|postgres"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Deletes a database associated with some virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

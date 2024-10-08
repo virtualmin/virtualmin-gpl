@@ -19,6 +19,41 @@ given multiple times to list more than one variable.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name",
+    values => [
+      {
+        param => "user",
+        value => "name"
+      },
+      {
+        param => "all-domains"
+      }
+    ]
+  },
+  {
+    param => "php-version",
+    value => "number"
+  },
+  {
+    param => "ini-name",
+    req => 1,
+    repeat => 1,
+    value => "name"
+  },
+  {
+    param => "name-only"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Shows PHP variables for some or all domains.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

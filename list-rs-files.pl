@@ -17,6 +17,39 @@ list of filenames, use the C<--name-only> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "name-only"
+  },
+  {
+    param => "user",
+    value => "username"
+  },
+  {
+    param => "key",
+    value => "api-key"
+  },
+  {
+    param => "container",
+    req => 1,
+    value => "name"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists all files in a container owned by a Rackspace account.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

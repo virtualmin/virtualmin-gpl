@@ -45,6 +45,77 @@ C<--dns> flags.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "host",
+    reuse => 1,
+    value => "hostname"
+  },
+  {
+    param => "default-hosts"
+  },
+  {
+    param => "renew"
+  },
+  {
+    param => "size",
+    value => "bits"
+  },
+  {
+    param => "staging"
+  },
+  {
+    param => "check-first"
+  },
+  {
+    param => "validate-first"
+  },
+  {
+    param => "skip-dns-check"
+  },
+  {
+    param => "dns-check"
+  },
+  {
+    param => "allow-subset"
+  },
+  {
+    param => "email-always"
+  },
+  {
+    param => "email-never"
+  },
+  {
+    param => "email-error"
+  },
+  {
+    param => "web"
+  },
+  {
+    param => "dns"
+  },
+  {
+    param => "rsa"
+  },
+  {
+    param => "ec"
+  },
+  {
+    param => "acme",
+    value => "id|provider"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Requests and installs an SSL cert for a virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

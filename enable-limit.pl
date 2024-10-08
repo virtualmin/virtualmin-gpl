@@ -17,6 +17,27 @@ or C<--can-edit-dbs>.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name",
+    values => [
+      {
+        param => "all-domains"
+      }
+    ]
+  },
+  {
+    param => "dbname"
+  },
+];
+
+# Program simple description
+my $usagedesc = 'Enables limits for one or more domains specified on the command line.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

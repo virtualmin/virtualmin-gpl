@@ -11,6 +11,24 @@ written to locally is set with the C<--dest> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "file",
+    req => 1,
+    value => "source-path"
+  },
+  {
+    param => "dest",
+    req => 1,
+    value => "local-path"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Downloads a single file from a Dropbox.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

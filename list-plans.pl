@@ -14,6 +14,31 @@ use the C<--multiline> option.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "id",
+    value => "number"
+  },
+  {
+    param => "name",
+    value => "'plan"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the available account plans for virtual servers.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

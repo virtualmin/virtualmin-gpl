@@ -12,6 +12,24 @@ C</home/domain/public_html/horde>.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "dir",
+    req => 1,
+    value => "directory|url-path"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Removes any custom PHP version used in some web directory.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

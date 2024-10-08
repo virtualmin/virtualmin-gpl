@@ -14,6 +14,27 @@ have it moved instead.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "source",
+    req => 1,
+    value => "file"
+  },
+  {
+    param => "dest",
+    req => 1,
+    value => "file"
+  },
+  {
+    param => "delete"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Copies or moves mail from one file or directory to another.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

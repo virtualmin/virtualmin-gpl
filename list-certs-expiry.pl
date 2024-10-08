@@ -21,6 +21,41 @@ Required Perl dependencies Text::ASCIITable and Time::Piece will be automaticall
 use POSIX;
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "all-domains",
+    req => 1,
+    values => [
+      {
+	param => "domain",
+	value => "regex"
+      }
+    ]
+  },
+  {
+    param => "sort",
+    value => "expiry|name"
+  },
+  {
+    param => "sort-order",
+    value => "asc|desc"
+  },
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Output the certificates expiry date for matching or all existing virtual servers.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

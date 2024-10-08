@@ -19,6 +19,34 @@ it, use the C<--deregister> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "type",
+    value => "name"
+  },
+  {
+    param => "version",
+    value => "number",
+  },
+  {
+    param => "id",
+    value => "number"
+  },
+  {
+    param => "deregister"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Un-installs a third-party script from some virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

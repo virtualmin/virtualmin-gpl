@@ -28,6 +28,33 @@ creation form in Virtualmin UI.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "from",
+    req => 1,
+    value => "mailbox|'*'"
+  },
+  {
+    param => "to",
+    req => 1,
+    value => "<address>+"
+  },
+  {
+    param => "desc",
+    value => "'Comment text'"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Adds a mail alias to a virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

@@ -16,6 +16,30 @@ in the container first.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "user",
+    value => "name"
+  },
+  {
+    param => "key",
+    value => "key"
+  },
+  {
+    param => "container",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "recursive"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Deletes an existing Rackspace container.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

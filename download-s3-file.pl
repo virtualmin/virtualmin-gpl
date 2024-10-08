@@ -16,6 +16,36 @@ flag to set the source filename.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "access-key",
+    value => "key"
+  },
+  {
+    param => "secret-key",
+    value => "key"
+  },
+  {
+    param => "dest",
+    req => 1,
+    value => "local-file"
+  },
+  {
+    param => "bucket",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "file",
+    value => "remote-file"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Downloads a single file from an S3 bucket.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

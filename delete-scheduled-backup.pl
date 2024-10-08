@@ -14,6 +14,22 @@ remove any existing backup files.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "id",
+    value => "number"
+  },
+  {
+    param => "dest",
+    value => "path"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Delete a scheduled backup for one or more virtual servers.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

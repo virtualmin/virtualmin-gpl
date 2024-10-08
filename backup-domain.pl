@@ -83,6 +83,133 @@ C<tar> or C<zip>.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "dest",
+    value => "file"
+  },
+  {
+    param => "test"
+  },
+  {
+    param => "domain",
+    value => "name",
+    values => [
+      {
+        param => "all-domains"
+      }
+    ]
+  },
+  {
+    param => "parent"
+  },
+  {
+    param => "user",
+    value => "name"
+  },
+  {
+    param => "reseller",
+    value => "name"
+  },
+  {
+    param => "plan",
+    value => "name"
+  },
+  {
+    param => "feature",
+    value => "name",
+    values => [
+      {
+        param => "all-features"
+      }
+    ]
+  },
+  {
+    param => "except-feature",
+    value => "name"
+  },
+  {
+    param => "ignore-errors"
+  },
+  {
+    param => "newformat"
+  },
+  {
+    param => "onebyone"
+  },
+  {
+    param => "strftime"
+  },
+  {
+    param => "purge",
+    value => "days"
+  },
+  {
+    param => "differential",
+    values => [
+      {
+        param => "no-differential"
+      }
+    ]
+  },
+  {
+    param => "all-virtualmin",
+    values => [
+      {
+        param => "virtualmin",
+        value => "config"
+      },
+      {
+        param => "except-virtualmin",
+        value => "config"
+      }
+    ]
+  },
+  {
+    param => "option",
+    value => "'feature"
+  },
+  {
+    param => "as-owner"
+  },
+  {
+    param => "exclude",
+    reuse => 1,
+    value => "file"
+  },
+  {
+    param => "include",
+    reuse => 1,
+    value => "file"
+  },
+  {
+    param => "purge",
+    value => "days"
+  },
+  {
+    param => "purge-debug"
+  },
+  {
+    param => "key",
+    value => "id"
+  },
+  {
+    param => "kill-running"
+  },
+  {
+    param => "wait-running"
+  },
+  {
+    param => "compression",
+    value => "gzip|bzip2|tar|zip"
+  },
+];
+
+# Program simple description
+my $usagedesc = 'Creates a Virtualmin backup, for the domains and features specified on the command line.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

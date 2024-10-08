@@ -11,6 +11,19 @@ writing their own API on top of the Virtualmin remote API.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "command",
+    req => 1,
+    value => "name"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Show information about some command.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

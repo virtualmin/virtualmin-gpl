@@ -18,6 +18,34 @@ execution mode with the C<--mode> flag followed by C<fpm>, C<fcgid> or C<cgi>.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "domain",
+    value => "name"
+  },
+  {
+    param => "mode",
+    value => "fpm|fcgid|cgi"
+  },
+  {
+    param => "full-version"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the available PHP versions on this system.';
+
 if (!$module_name) {
 	$no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

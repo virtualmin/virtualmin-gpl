@@ -17,6 +17,25 @@ either <tt>1</tt> for Yes or <tt>0</tt> for No.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "set",
+    req => 1,
+    reuse => 1,
+    value => "'field value'"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Sets the values of one or more custom fields for a virtual server';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
