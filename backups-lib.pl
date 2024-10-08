@@ -1179,7 +1179,7 @@ local %doneseen;
 # Add all requested Virtualmin config information
 local $vcount = 0;
 if (@$vbs) {
-	&$first_print($text{'backup_global'});
+	&$first_print($text{'backup_global2'});
 	&$indent_print();
 	if ($homefmt) {
 		# Need to make a backup dir, as we cannot use one of the
