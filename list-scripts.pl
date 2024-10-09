@@ -21,6 +21,44 @@ followed by a script code name, like C<phpmyadmin>.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "all-domains",
+    req => 1,
+    values => [
+      {
+	param => "domain",
+	value => "name"
+      },
+      {
+        param => "user",
+        value => "username"
+      }
+    ]
+  },
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "name-only"
+  },
+  {
+    param => "type",
+    value => "script"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the scripts installed on one or more virtual servers.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

@@ -21,6 +21,35 @@ selected is displayed.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name",
+    values => [
+      {
+        param => "all-domains"
+      }
+    ]
+  },
+  {
+    param => "start",
+    value => "yyyy-mm-dd"
+  },
+  {
+    param => "end",
+    value => "yyyy-mm-dd"
+  },
+  {
+    param => "include-subservers"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Shows bandwidth usage by domain, date and feature';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

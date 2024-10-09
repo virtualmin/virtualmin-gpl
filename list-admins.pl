@@ -13,6 +13,28 @@ add the C<--name-only> command line flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the extra administrators associated with some virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

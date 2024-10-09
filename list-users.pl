@@ -34,6 +34,53 @@ parameter to the command line, followed by a full or short username.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "all-domains",
+    req => 1,
+    values => [
+      {
+	param => "domain",
+	value => "name"
+      },
+      {
+        param => "user",
+        value => "username"
+      }
+    ]
+  },
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "name-only"
+  },
+  {
+    param => "email-only"
+  },
+  {
+    param => "include-owner"
+  },
+  {
+    param => "user",
+    value => "name"
+  },
+  {
+    param => "simple-aliases"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the mail, FTP and database users in one or more virtual servers.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

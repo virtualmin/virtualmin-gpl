@@ -10,6 +10,13 @@ and others, and reports it.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [];
+
+# Program simple description
+my $usagedesc = 'Outputs the status of all servers managed by Virtualmin.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

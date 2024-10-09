@@ -14,6 +14,30 @@ GPL detection must be disabled use the C<--force-update> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "serial",
+    req => 1,
+    value => "number"
+  },
+  {
+    param => "key",
+    req => 1,
+    value => "id"
+  },
+  {
+    param => "no-check"
+  },
+  {
+    param => "force-update"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Updates the Virtualmin Pro license for this system.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

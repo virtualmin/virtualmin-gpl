@@ -22,6 +22,42 @@ Virtualmin UI with the C<--fix-wellknown> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "name-only"
+  },
+  {
+    param => "path",
+    value => "/path"
+  },
+  {
+    param => "host",
+    value => "hostname"
+  },
+  {
+    param => "fix-wellknown"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the web aliases and redirects in some virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

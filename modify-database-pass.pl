@@ -17,6 +17,29 @@ configurations are updated with the new username.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "type",
+    req => 1,
+    value => "mysql|postgres"
+  },
+  {
+    param => "pass",
+    req => 1,
+    value => "new-password"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Changes the MySQL or PostgreSQL password for some domain.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

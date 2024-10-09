@@ -23,6 +23,34 @@ C<--opt encoding name> - Sets the text encoding (like LATIN2 or EUC_JP) for the 
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "name",
+    req => 1,
+    value => "database-name"
+  },
+  {
+    param => "type",
+    req => 1,
+    value => "mysql|postgres"
+  },
+  {
+    param => "opt",
+    reuse => 1,
+    value => "'name value'"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Creates a new database associated with some virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

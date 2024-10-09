@@ -13,6 +13,31 @@ the C<--name-only> parameter.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "name-only"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the web proxy balancers in some virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

@@ -18,6 +18,31 @@ a unique folder ID.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "user",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "folder",
+    value => "name|path"
+  },
+  {
+    param => "filesonly"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Dumps the mailbox for some user.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

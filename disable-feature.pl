@@ -23,6 +23,40 @@ removed.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name",
+    values => [
+      {
+        param => "user",
+        value => "name"
+      },
+      {
+        param => "all-domains"
+      }
+    ]
+  },
+  {
+    param => "dns-subdomains"
+  },
+  {
+    param => "disassociate"
+  },
+  {
+    param => "\$f"
+  },
+  {
+    param => "\$f"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Enables features for one or more domains specified on the command line.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

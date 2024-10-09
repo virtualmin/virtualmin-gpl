@@ -28,6 +28,39 @@ use the original databases - this must be done manually.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "newdomain",
+    req => 1,
+    value => "new.name"
+  },
+  {
+    param => "newuser",
+    value => "name"
+  },
+  {
+    param => "newpass",
+    value => "password"
+  },
+  {
+    param => "ip",
+    value => "address"
+  },
+  {
+    param => "ip-already"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Duplicates an existing virtual server with a new name.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

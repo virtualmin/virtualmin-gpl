@@ -17,6 +17,38 @@ use the C<--id-only> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    value => "domain.name"
+  },
+  {
+    param => "user",
+    value => "name"
+  },
+  {
+    param => "reseller",
+    value => "name"
+  },
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "id-only"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists some or all scheduled Virtualmin backups.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

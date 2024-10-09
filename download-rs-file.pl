@@ -16,6 +16,37 @@ flag to set the source filename.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "user",
+    value => "name"
+  },
+  {
+    param => "key",
+    value => "key"
+  },
+  {
+    param => "dest",
+    req => 1,
+    value => "local-file"
+  },
+  {
+    param => "container",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "file",
+    req => 1,
+    value => "remote-file"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Downloads a single file to a Rackspace container.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

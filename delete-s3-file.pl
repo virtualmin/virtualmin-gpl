@@ -14,6 +14,32 @@ in, and the C<--file> flag to choose the filename.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "access-key",
+    value => "key"
+  },
+  {
+    param => "secret-key",
+    value => "key"
+  },
+  {
+    param => "bucket",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "file",
+    req => 1,
+    value => "remote-file"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Deletes a single file from an S3 bucket.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

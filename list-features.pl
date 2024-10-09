@@ -22,6 +22,38 @@ of feature codes, use the C<--name-only> parameter.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "name-only"
+  },
+  {
+    param => "parent",
+    value => "name"
+  },
+  {
+    param => "subdom",
+    value => "name"
+  },
+  {
+    param => "alias",
+    value => "name"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the available features for new virtual servers.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

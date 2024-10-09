@@ -22,6 +22,30 @@ Virtualmin web interface, it will NOT prompt for confirmation!
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    reuse => 1,
+    value => "domain.name"
+  },
+  {
+    param => "user",
+    reuse => 1,
+    value => "username"
+  },
+  {
+    param => "only"
+  },
+  {
+    param => "preserve-remote"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Deletes an existing Virtualmin virtual server and all sub-servers, mailboxes and alias domains.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

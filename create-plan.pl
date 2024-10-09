@@ -36,6 +36,53 @@ C<--no-resellers> to prevent any resellers from seeing it.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "name",
+    req => 1,
+    value => "plan-name"
+  },
+  {
+    param => "owner",
+    value => "reseller"
+  },
+  {
+    param => "quota",
+    value => "blocks"
+  },
+  {
+    param => "admin-quota",
+    value => "blocks"
+  },
+  {
+    param => "features",
+    value => "'web dns mail ...'"
+  },
+  {
+    param => "no-features"
+  },
+  {
+    param => "capabilities",
+    value => "'domain users aliases ...'"
+  },
+  {
+    param => "scripts",
+    value => "'name name ...'"
+  },
+  {
+    param => "no-resellers"
+  },
+  {
+    param => "resellers",
+    value => "'name name ...'"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Creates a new Virtualmin account plan with the given limits.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

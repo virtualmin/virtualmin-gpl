@@ -53,6 +53,77 @@ Virtualmin web interface.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "self",
+    req => 1
+  },
+  {
+    param => "csr",
+    req => 1
+  },
+  {
+    param => "size",
+    value => "bits"
+  },
+  {
+    param => "days",
+    value => "expiry-days"
+  },
+  {
+    param => "cn",
+    value => "domain-name"
+  },
+  {
+    param => "c",
+    value => "country"
+  },
+  {
+    param => "st",
+    value => "state"
+  },
+  {
+    param => "l",
+    value => "city"
+  },
+  {
+    param => "o",
+    value => "organization"
+  },
+  {
+    param => "ou",
+    value => "organization-unit"
+  },
+  {
+    param => "email",
+    value => "email-address"
+  },
+  {
+    param => "alt",
+    reuse => 1,
+    value => "alternate-domain-name"
+  },
+  {
+    param => "sha2"
+  },
+  {
+    param => "sha1"
+  },
+  {
+    param => "ec"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Generates a new self-signed certificate or CSR.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

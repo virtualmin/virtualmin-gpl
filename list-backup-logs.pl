@@ -29,6 +29,49 @@ the following date.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    value => "domain.name"
+  },
+  {
+    param => "user",
+    value => "name"
+  },
+  {
+    param => "failed"
+  },
+  {
+    param => "succeeded"
+  },
+  {
+    param => "mode",
+    value => "'cgi'|'sched'|'api'"
+  },
+  {
+    param => "start",
+    value => "yyyy-mm-dd"
+  },
+  {
+    param => "end",
+    value => "yyyy-mm-dd"
+  },
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Outputs a list of backups that have been run.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

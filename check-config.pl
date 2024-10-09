@@ -14,6 +14,13 @@ configuration, such as Webmin modules granted to domain owners.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [];
+
+# Program simple description
+my $usagedesc = 'Checks the current Virtualmin configuration.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

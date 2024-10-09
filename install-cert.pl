@@ -30,6 +30,45 @@ must be used to create a new certificate.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "cert",
+    value => "file|data"
+  },
+  {
+    param => "key",
+    value => "file|data"
+  },
+  {
+    param => "ca",
+    value => "file|data"
+  },
+  {
+    param => "csr",
+    value => "file|data"
+  },
+  {
+    param => "use-newkey"
+  },
+  {
+    param => "pass",
+    value => "key-password"
+  },
+  {
+    param => "remove-cert"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Installs a certificate, private key, CSR or CA certificate.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

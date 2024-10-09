@@ -11,6 +11,25 @@ servers still using the template will be un-effected.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "name",
+    req => 1,
+    value => "template-name",
+    values => [
+      {
+        param => "id",
+        value => "template-id"
+      }
+    ]
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Removes one virtual server template.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

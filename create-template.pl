@@ -13,6 +13,28 @@ C<--clone> flag followed by a template name.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "name",
+    req => 1,
+    value => "template-name"
+  },
+  {
+    param => "empty",
+    req => 1,
+    values =>
+      {
+        param => "clone",
+        value => "original-name"
+      }
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Adds a new Virtualmin server template, either empty or copied from an existing template.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

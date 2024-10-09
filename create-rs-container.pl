@@ -15,6 +15,27 @@ create.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "user",
+    value => "name"
+  },
+  {
+    param => "key",
+    value => "key"
+  },
+  {
+    param => "container",
+    req => 1,
+    value => "name"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Creates a new empty Rackspace container.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

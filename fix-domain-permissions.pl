@@ -13,6 +13,27 @@ can also add the C<--subservers> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name",
+    values => [
+      {
+        param => "all-domains"
+      }
+    ]
+  },
+  {
+    param => "subservers"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Set correct permissions on a domain\'s home directory.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

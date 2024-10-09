@@ -104,6 +104,217 @@ the default state for this domain with C<--default-dkim>.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name",
+    values => [
+      {
+        param => "all-domains"
+      },
+      {
+	param => "all-nonvirt-domains"
+      }
+    ]
+  },
+  {
+    param => "spf"
+  },
+  {
+    param => "no-spf"
+  },
+  {
+    param => "spf-add-a",
+    reuse => 1,
+    value => "hostname"
+  },
+  {
+    param => "spf-add-mx",
+    reuse => 1,
+    value => "domain"
+  },
+  {
+    param => "spf-add-ip4",
+    reuse => 1,
+    value => "address"
+  },
+  {
+    param => "spf-add-ip6",
+    reuse => 1,
+    value => "address"
+  },
+  {
+    param => "spf-remove-a",
+    reuse => 1,
+    value => "hostname"
+  },
+  {
+    param => "spf-remove-mx",
+    reuse => 1,
+    value => "domain"
+  },
+  {
+    param => "spf-remove-ip4",
+    reuse => 1,
+    value => "address"
+  },
+  {
+    param => "spf-remove-ip6",
+    reuse => 1,
+    value => "address"
+  },
+  {
+    param => "spf-all-disallow"
+  },
+  {
+    param => "spf-all-discourage"
+  },
+  {
+    param => "spf-all-neutral"
+  },
+  {
+    param => "spf-all-allow"
+  },
+  {
+    param => "spf-all-default"
+  },
+  {
+    param => "dmarc"
+  },
+  {
+    param => "no-dmarc"
+  },
+  {
+    param => "dmarc-policy",
+    value => "none|quarantine|reject"
+  },
+  {
+    param => "dmarc-percent",
+    value => "number"
+  },
+  {
+    param => "dmarc-rua",
+    value => "mailto:user\@domain"
+  },
+  {
+    param => "no-dmarc-rua"
+  },
+  {
+    param => "dmarc-ruf",
+    value => "mailto:user\@domain"
+  },
+  {
+    param => "no-dmarc-ruf"
+  },
+  {
+    param => "add-record",
+    value => "'name type value'"
+  },
+  {
+    param => "add-record-with-ttl",
+    value => "'name type TTL value'"
+  },
+  {
+    param => "add-proxy-record",
+    value => "'name type value'"
+  },
+  {
+    param => "remove-record",
+    value => "'name type value'"
+  },
+  {
+    param => "update-record",
+    value => "'oldname oldtype' 'newname newtype newvalue'"
+  },
+  {
+    param => "ttl",
+    value => "seconds"
+  },
+  {
+    param => "all-ttl",
+    value => "seconds"
+  },
+  {
+    param => "add-slave",
+    reuse => 1,
+    value => "hostname"
+  },
+  {
+    param => "add-all-slaves"
+  },
+  {
+    param => "remove-slave",
+    reuse => 1,
+    value => "hostname"
+  },
+  {
+    param => "sync-all-slaves"
+  },
+  {
+    param => "dns-ip",
+    value => "address"
+  },
+  {
+    param => "no-dns-ip"
+  },
+  {
+    param => "enable-dnssec"
+  },
+  {
+    param => "disable-dnssec"
+  },
+  {
+    param => "enable-tlsa"
+  },
+  {
+    param => "disable-tlsa"
+  },
+  {
+    param => "sync-tlsa"
+  },
+  {
+    param => "enable-subdomain"
+  },
+  {
+    param => "disable-subdomain"
+  },
+  {
+    param => "cloud-dns",
+    value => "provider|'local'"
+  },
+  {
+    param => "cloud-dns-import"
+  },
+  {
+    param => "remote-dns",
+    value => "hostname"
+  },
+  {
+    param => "local-dns"
+  },
+  {
+    param => "add-parent-ds"
+  },
+  {
+    param => "remove-parent-ds"
+  },
+  {
+    param => "enable-dkim"
+  },
+  {
+    param => "disable-dkim"
+  },
+  {
+    param => "default-dkim"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Changes DNS settings for one or more domains.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

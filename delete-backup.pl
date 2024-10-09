@@ -12,6 +12,22 @@ C</backups/foo.com.tar.gz>.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "id",
+    value => "backup-id"
+  },
+  {
+    param => "dest",
+    value => "url"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Delete one previous logged backup.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

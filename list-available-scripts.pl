@@ -18,6 +18,38 @@ those from plugins with C<--source plugin>.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "name-only"
+  },
+  {
+    param => "source",
+    value => "core|custom|plugin|latest"
+  },
+  {
+    param => "type",
+    reuse => 1,
+    value => "name"
+  },
+  {
+    param => "available-only"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the third-party scripts available for installation.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

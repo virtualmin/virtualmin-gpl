@@ -16,6 +16,38 @@ list of filenames, use the C<--name-only> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "name-only"
+  },
+  {
+    param => "bucket",
+    value => "name"
+  },
+  {
+    param => "access-key",
+    value => "key"
+  },
+  {
+    param => "secret-key",
+    value => "key"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists all buckets owned by an S3 account.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

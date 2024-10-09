@@ -48,6 +48,83 @@ I<default settings> template will be used.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "source",
+    req => 1,
+    value => "file"
+  },
+  {
+    param => "type",
+    req => 1,
+    value => "cpanel|ensim|psa|plesk|plesk9|lxadmin|directadmin"
+  },
+  {
+    param => "domain",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "user",
+    value => "username"
+  },
+  {
+    param => "pass",
+    value => "'password'"
+  },
+  {
+    param => "webmin"
+  },
+  {
+    param => "template",
+    value => "name"
+  },
+  {
+    param => "parent",
+    value => "domain"
+  },
+  {
+    param => "prefix",
+    value => "string"
+  },
+  {
+    param => "delete-existing"
+  },
+  {
+    param => "shared-ip",
+    value => "address"
+  },
+  {
+    param => "ip",
+    value => "address"
+  },
+  {
+    param => "allocate-ip"
+  },
+  {
+    param => "default-ip6"
+  },
+  {
+    param => "shared-ip6",
+    value => "address"
+  },
+  {
+    param => "ip6",
+    value => "address"
+  },
+  {
+    param => "allocate-ip6"
+  },
+  {
+    param => "test"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Migrates a Virtualmin server from a backup created by another product like cPanel or Plesk.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

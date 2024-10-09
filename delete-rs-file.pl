@@ -14,6 +14,32 @@ stored in, and the C<--file> flag to determine the name of the file to remove.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "user",
+    value => "name"
+  },
+  {
+    param => "key",
+    value => "key"
+  },
+  {
+    param => "container",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "file",
+    req => 1,
+    value => "remote-file"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Deletes a single file from a Rackspace container.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

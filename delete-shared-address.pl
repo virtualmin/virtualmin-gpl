@@ -12,6 +12,22 @@ IP will also be shut down.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "ip",
+    req => 1,
+    value => "address"
+  },
+  {
+    param => "deactivate"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Removes an IP address that was used by multiple virtual servers.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

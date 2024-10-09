@@ -27,6 +27,40 @@ enabled for C</> but want to serve content for some sub-directory locally.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "path",
+    req => 1,
+    value => "url-path"
+  },
+  {
+    param => "url",
+    req => 1,
+    value => "destination"
+  },
+  {
+    param => "balancer",
+    value => "name"
+  },
+  {
+    param => "no-proxy",
+    req => 1
+  },
+  {
+    param => "websockets"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Adds a proxy to a virtual server\'s website.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

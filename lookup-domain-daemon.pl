@@ -20,6 +20,13 @@ typically started by C</etc/init.d/lookup-domain>.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [];
+
+# Program simple description
+my $usagedesc = 'Daemon process for looking up Virtualmin users.';
+
 $main::no_acl_check++;
 $ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
 $ENV{'WEBMIN_VAR'} ||= "/var/webmin";

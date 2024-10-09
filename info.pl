@@ -25,6 +25,18 @@ to sections of the full output, for example:
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "search",
+    value => "cpu|disk_free|disk_fs|disk_total|disk_used|fcount|ftypes|host|io|ips|ips6|kernel|load|maxquota|mem|poss|procs|progs|reboot|status|vpos"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Displays information about this Virtualmin system.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

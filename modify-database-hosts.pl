@@ -24,6 +24,37 @@ removed.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "name",
+    values => [
+      {
+        param => "all-domains",
+        value => "--type"
+      }
+    ]
+  },
+  {
+    param => "add-host",
+    value => "ip"
+  },
+  {
+    param => "remove-host",
+    value => "ip"
+  },
+  {
+    param => "set-host",
+    value => "ip"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Modifies the allowed remote database hosts for some domains.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

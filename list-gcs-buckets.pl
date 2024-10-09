@@ -15,6 +15,30 @@ list of filenames, use the C<--name-only> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "name-only"
+  },
+  {
+    param => "bucket",
+    value => "name"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists all buckets owned by the Google Cloud Storage account.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

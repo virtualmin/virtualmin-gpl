@@ -55,6 +55,70 @@ process as the needed files are downloaded, validated and installed.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "type",
+    req => 1,
+    value => "name"
+  },
+  {
+    param => "version",
+    req => 1,
+    value => "number|'latest'"
+  },
+  {
+    param => "unsupported"
+  },
+  {
+    param => "path",
+    value => "url-path"
+  },
+  {
+    param => "db",
+    value => "'type name'"
+  },
+  {
+    param => "prefix-db"
+  },
+  {
+    param => "opt",
+    value => "'name value'"
+  },
+  {
+    param => "upgrade",
+    value => "id"
+  },
+  {
+    param => "force-dir",
+    value => "directory"
+  },
+  {
+    param => "mongrels",
+    value => "number"
+  },
+  {
+    param => "user",
+    value => "username"
+  },
+  {
+    param => "pass",
+    value => "password"
+  },
+  {
+    param => "log-only"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Installs a third-party script into some virtual server.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

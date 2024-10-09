@@ -91,6 +91,263 @@ another URL, using a hidden frame rather than proxying.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "pass",
+    req => 1,
+    value => "'password-for-new-domain'",
+    values => [
+      {
+        param => "passfile",
+        value => "password-file"
+      }
+    ]
+  },
+  {
+    param => "hashpass"
+  },
+  {
+    param => "parent",
+    value => "domain.name"
+  },
+  {
+    param => "alias",
+    value => "domain.name"
+  },
+  {
+    param => "alias-with-mail",
+    value => "domain.name"
+  },
+  {
+    param => "superdom",
+    value => "domain.name"
+  },
+  {
+    param => "desc",
+    value => "description-for-domain"
+  },
+  {
+    param => "email",
+    value => "contact-email"
+  },
+  {
+    param => "user",
+    value => "new-unix-user"
+  },
+  {
+    param => "group",
+    value => "new-unix-group"
+  },
+  {
+    param => "default-features",
+    values => [
+      {
+        param => "features-from-plan"
+      }
+    ]
+  },
+  {
+    param => "allocate-ip"
+  },
+  {
+    param => "ip",
+    value => "virtual.ip.address"
+  },
+  {
+    param => "shared-ip",
+    value => "existing.ip.address"
+  },
+  {
+    param => "ip-already"
+  },
+  {
+    param => "default-ip6"
+  },
+  {
+    param => "shared-ip6",
+    value => "existing.ip.address"
+  },
+  {
+    param => "allocate-ip6"
+  },
+  {
+    param => "ip6",
+    value => "virtual.ip.address"
+  },
+  {
+    param => "ip6-already"
+  },
+  {
+    param => "dns-ip",
+    value => "address"
+  },
+  {
+    param => "no-dns-ip"
+  },
+  {
+    param => "max-doms",
+    value => "domains|*"
+  },
+  {
+    param => "max-aliasdoms",
+    value => "domains"
+  },
+  {
+    param => "max-realdoms",
+    value => "domains"
+  },
+  {
+    param => "max-mailboxes",
+    value => "boxes"
+  },
+  {
+    param => "max-dbs",
+    value => "databases"
+  },
+  {
+    param => "max-aliases",
+    value => "aliases"
+  },
+  {
+    param => "quota",
+    value => "quota-for-domain|UNLIMITED"
+  },
+  {
+    param => "uquota",
+    value => "quota-for-unix-user|UNLIMITED"
+  },
+  {
+    param => "bandwidth",
+    value => "bytes"
+  },
+  {
+    param => "template",
+    value => "'name'"
+  },
+  {
+    param => "plan",
+    value => "'name'"
+  },
+  {
+    param => "limits-from-plan"
+  },
+  {
+    param => "suffix",
+    value => "username-prefix"
+  },
+  {
+    param => "db",
+    value => "database-name"
+  },
+  {
+    param => "fwdto",
+    value => "email-address"
+  },
+  {
+    param => "reseller",
+    value => "name"
+  },
+  {
+    param => "content",
+    value => "text|filename"
+  },
+  {
+    param => "mysql-pass",
+    value => "password"
+  },
+  {
+    param => "postgres-pass",
+    value => "password"
+  },
+  {
+    param => "skip-warnings"
+  },
+  {
+    param => "acme"
+  },
+  {
+    param => "acme-always"
+  },
+  {
+    param => "field-name",
+    reuse => 1,
+    value => "value"
+  },
+  {
+    param => "enable-jail"
+  },
+  {
+    param => "disable-jail"
+  },
+  {
+    param => "mysql-server",
+    value => "hostname"
+  },
+  {
+    param => "postgres-server",
+    value => "hostname"
+  },
+  {
+    param => "cloud-dns",
+    value => "provider|'services'|'local'"
+  },
+  {
+    param => "separate-dns-subdomain"
+  },
+  {
+    param => "any-dns-subdomain"
+  },
+  {
+    param => "break-ssl-cert"
+  },
+  {
+    param => "link-ssl-cert"
+  },
+  {
+    param => "ssl-redirect"
+  },
+  {
+    param => "generate-ssl-cert"
+  },
+  {
+    param => "generate-ssh-key"
+  },
+  {
+    param => "use-ssh-key",
+    value => "file|data"
+  },
+  {
+    param => "append-style",
+    value => "format"
+  },
+  {
+    param => "shell",
+    value => "command"
+  },
+  {
+    param => "subprefix",
+    value => "directory"
+  },
+  {
+    param => "proxy",
+    value => "url"
+  },
+  {
+    param => "framefwd",
+    value => "url"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Adds a new Virtualmin virtual server, with the settings and features specified on the command line.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

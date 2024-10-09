@@ -89,6 +89,136 @@ C<--desc> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "dest",
+    value => "file"
+  },
+  {
+    param => "domain",
+    value => "name",
+    values => [
+      {
+        param => "all-domains"
+      }
+    ]
+  },
+  {
+    param => "parent"
+  },
+  {
+    param => "reseller",
+    value => "name"
+  },
+  {
+    param => "plan",
+    value => "name"
+  },
+  {
+    param => "feature",
+    value => "name",
+    values => [
+      {
+        param => "all-features"
+      }
+    ]
+  },
+  {
+    param => "except-feature",
+    value => "name"
+  },
+  {
+    param => "ignore-errors"
+  },
+  {
+    param => "newformat"
+  },
+  {
+    param => "onebyone"
+  },
+  {
+    param => "strftime"
+  },
+  {
+    param => "purge",
+    value => "days"
+  },
+  {
+    param => "differential",
+  },
+  {
+    param => "no-differential"
+  },
+  {
+    param => "all-virtualmin",
+    values => [
+      {
+        param => "virtualmin",
+        value => "config"
+      },
+      {
+        param => "except-virtualmin",
+        value => "config"
+      }
+    ]
+  },
+  {
+    param => "option",
+    value => "'feature name value'"
+  },
+  {
+    param => "as-owner"
+  },
+  {
+    param => "exclude",
+    reuse => 1,
+    value => "file"
+  },
+  {
+    param => "include",
+    reuse => 1,
+    value => "file"
+  },
+  {
+    param => "purge",
+    value => "days"
+  },
+  {
+    param => "key",
+    value => "id"
+  },
+  {
+    param => "compression",
+    value => "gzip|bzip2|tar|zip"
+  },
+  {
+    param => "desc",
+    value => "'backup description'"
+  },
+  {
+    param => "disabled"
+  },
+  {
+    param => "schedule",
+    value => "'cron-spec'"
+  },
+  {
+    param => "email",
+    value => "address"
+  },
+  {
+    param => "email-errors"
+  },
+  {
+    param => "email-owners"
+  },
+];
+
+# Program simple description
+my $usagedesc = 'Creates a scheduled Virtualmin backup for the selected domains, features and schedule.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

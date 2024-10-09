@@ -12,6 +12,27 @@ The C<--bucket> flag must be given to specify the bucket to created.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "access-key",
+    value => "key"
+  },
+  {
+    param => "secret-key",
+    value => "key"
+  },
+  {
+    param => "bucket",
+    req => 1,
+    value => "name"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Creates a new S3 bucket.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

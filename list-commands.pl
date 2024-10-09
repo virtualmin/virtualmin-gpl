@@ -12,6 +12,23 @@ but you can switch to a more parsable format with the C<--multiline> flag.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "short"
+  },
+  {
+    param => "multiline"
+  },
+  {
+    param => "name-only"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists available command-line API scripts.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

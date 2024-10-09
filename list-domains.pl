@@ -57,6 +57,130 @@ C<--multiline> mode.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "multiline"
+  },
+  {
+    param => "simple-multiline"
+  },
+  {
+    param => "json"
+  },
+  {
+    param => "xml"
+  },
+  {
+    param => "name-only"
+  },
+  {
+    param => "id-only"
+  },
+  {
+    param => "user-only"
+  },
+  {
+    param => "home-only"
+  },
+  {
+    param => "file-only"
+  },
+  {
+    param => "ip-only"
+  },
+  {
+    param => "domain",
+    reuse => 1,
+    value => "name"
+  },
+  {
+    param => "user",
+    reuse => 1,
+    value => "name"
+  },
+  {
+    param => "mail-user",
+    reuse => 1,
+    value => "name"
+  },
+  {
+    param => "id",
+    reuse => 1,
+    value => "number"
+  },
+  {
+    param => "with-feature",
+    value => "feature"
+  },
+  {
+    param => "without-feature",
+    value => "feature"
+  },
+  {
+    param => "with-web"
+  },
+  {
+    param => "with-ssl"
+  },
+  {
+    param => "alias",
+    value => "domain"
+  },
+  {
+    param => "no-alias"
+  },
+  {
+    param => "subserver"
+  },
+  {
+    param => "toplevel"
+  },
+  {
+    param => "subdomain"
+  },
+  {
+    param => "parent",
+    value => "domain"
+  },
+  {
+    param => "plan",
+    value => "ID|name"
+  },
+  {
+    param => "template",
+    value => "ID|name"
+  },
+  {
+    param => "disabled"
+  },
+  {
+    param => "enabled"
+  },
+  {
+    param => "php-mode",
+    value => "cgi|fcgid|fpm|mod_php"
+  },
+  {
+    param => "ip",
+    value => "address"
+  },
+  {
+    param => "reseller",
+    value => "name"
+  },
+  {
+    param => "no-reseller"
+  },
+  {
+    param => "any-reseller"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Lists the virtual servers on this system.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

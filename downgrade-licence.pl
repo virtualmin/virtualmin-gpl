@@ -13,6 +13,18 @@ this program will not ask for confirmation before performing downgrade.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "perform",
+    req => 1
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Downgrade Virtualmin Pro system to GPL.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

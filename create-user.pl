@@ -67,6 +67,127 @@ the given ID by matching the key's comment.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "domain",
+    req => 1,
+    value => "domain.name"
+  },
+  {
+    param => "user",
+    req => 1,
+    value => "new-username"
+  },
+  {
+    param => "pass",
+    req => 1,
+    value => "'password-for-new-user'",
+    values => [
+      {
+        param => "encpass",
+        value => "encrypted-password"
+      },
+      {
+        param => "random-pass"
+      },
+      {
+        param => "passfile",
+        value => "password-file"
+      }
+    ]
+  },
+  {
+    param => "ssh-pubkey",
+    value => "'key'"
+  },
+  {
+    param => "ssh-pubkey-id",
+    value => "id"
+  },
+  {
+    param => "quota",
+    value => "quota-in-blocks|'UNLIMITED'"
+  },
+  {
+    param => "mail-quota",
+    value => "quota-in-blocks|'UNLIMITED'"
+  },
+  {
+    param => "real",
+    value => "real-name-for-new-user"
+  },
+  {
+    param => "firstname",
+    value => "first-name"
+  },
+  {
+    param => "surname",
+    value => "surname"
+  },
+  {
+    param => "ftp"
+  },
+  {
+    param => "jail-ftp"
+  },
+  {
+    param => "shell",
+    value => "/path/to/shell"
+  },
+  {
+    param => "noemail"
+  },
+  {
+    param => "db-only",
+    reuse => 1,
+    value => "<--mysql db>"
+  },
+  {
+    param => "webserver-only",
+    reuse => 1,
+    value => "<--webserver-dir path>"
+  },
+  {
+    param => "mysql",
+    reuse => 1,
+    value => "db"
+  },
+  {
+    param => "extra",
+    value => "email.address\@some.domain"
+  },
+  {
+    param => "recovery",
+    value => "address\@offsite.com"
+  },
+  {
+    param => "group",
+    reuse => 1,
+    value => "name"
+  },
+  {
+    param => "web"
+  },
+  {
+    param => "no-check-spam"
+  },
+  {
+    param => "no-creation-mail"
+  },
+  {
+    param => "home",
+    value => "directory"
+  },
+  {
+    param => "noappend"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Adds a new mailbox user to an existing Virtualmin domain.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

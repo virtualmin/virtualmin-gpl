@@ -16,6 +16,27 @@ template.
 =cut
 
 package virtual_server;
+
+# Params factory
+my @usage = [
+  {
+    param => "ip",
+    req => 1,
+    value => "address",
+    values => [
+      {
+        param => "allocate-ip"
+      }
+    ]
+  },
+  {
+    param => "activate"
+  }
+];
+
+# Program simple description
+my $usagedesc = 'Adds a new IP address for use by multiple virtual servers.';
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
