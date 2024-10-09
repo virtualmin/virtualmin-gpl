@@ -45,20 +45,16 @@ if (defined($opts->{'email'})) {
 
 my $user  = defined($opts->{'user'})  ? lc($opts->{'user'})  : undef;
 my $group = defined($opts->{'group'}) ? lc($opts->{'group'}) : undef;
-my $pass;
-if (defined($opts->{'pass'})) {
-	$pass = $opts->{'pass'};
-	}
-
+my $pass  = $opts->{'pass'};
 if (defined($opts->{'passfile'})) {
 	$pass = &read_file_contents($opts->{'passfile'});
 	$pass =~ s/\r|\n//g;
 	}
 
 my ($mysqlpass, $postgrespass, $hashpass);
-$mysqlpass    = $opts->{'mysql-pass'}    if (defined($opts->{'mysql-pass'}));
-$postgrespass = $opts->{'postgres-pass'} if (defined($opts->{'postgres-pass'}));
-$hashpass     = 1                        if ($opts->{'hashpass'});
+$mysqlpass    = $opts->{'mysql-pass'};
+$postgrespass = $opts->{'postgres-pass'};
+$hashpass     = 1 if ($opts->{'hashpass'});
 
 my ($quota, $uquota);
 if (defined($opts->{'quota'})) {
@@ -246,10 +242,7 @@ if (defined($opts->{'bandwidth'})) {
 my $tlimit;
 $tlimit = 1 if ($opts->{'limits-from-template'} || $opts->{'limits-from-plan'});
 
-my $prefix;
-if (defined($opts->{'prefix'}) || defined($opts->{'suffix'})) {
-	$prefix = $opts->{'prefix'} || $opts->{'suffix'};
-	}
+my $prefix = $opts->{'prefix'} || $opts->{'suffix'};
 
 my $db;
 if (defined($opts->{'db'})) {
@@ -284,11 +277,9 @@ if (defined($opts->{'subdom'}) || defined($opts->{'superdom'})) {
 					$opts->{'superdom'});
 	}
 
-my $resel;
-$resel = $opts->{'reseller'} if defined($opts->{'reseller'});
+my $resel = $opts->{'reseller'};
 
-my $content;
-$content = $opts->{'content'} if defined($opts->{'content'});
+my $content = $opts->{'content'};
 
 my $nocreationmail;
 $nocreationmail = 1 if $opts->{'no-email'};
@@ -297,10 +288,8 @@ $noslaves       = 1 if $opts->{'no-slaves'};
 my $nosecondaries;
 $nosecondaries  = 1 if $opts->{'no-secondaries'};
 
-my $precommand;
-$precommand  = $opts->{'pre-command'}  if defined($opts->{'pre-command'});
-my $postcommand;
-$postcommand = $opts->{'post-command'} if defined($opts->{'post-command'});
+my $precommand = $opts->{'pre-command'};
+my $postcommand = $opts->{'post-command'};
 
 my $letsencrypt;
 if ($opts->{'letsencrypt'} || $opts->{'acme'}) {
@@ -315,18 +304,15 @@ my $jail;
 $jail = 1 if $opts->{'enable-jail'};
 $jail = 0 if $opts->{'disable-jail'};
 
-my ($myserver, $pgserver);
-$myserver = $opts->{'mysql-server'}     if (defined $opts->{'mysql-server'});
-$pgserver = $opts->{'postgres-server'}  if (defined $opts->{'postgres-server'});
+my $myserver = $opts->{'mysql-server'};
+my $pgserver = $opts->{'postgres-server'};
 
-my $clouddns;
-$clouddns = $opts->{'cloud-dns'} if (defined $opts->{'cloud-dns'});
+my $clouddns = $opts->{'cloud-dns'};
 
 my $clouddns_import;
 $clouddns_import = 1 if ($opts->{'cloud-dns-import'});
 
-my $remotedns;
-$remotedns = $opts->{'remote-dns'} if (defined $opts->{'remote-dns'});
+my $remotedns = $opts->{'remote-dns'};
 
 my ($dns_submode, $dns_subany);
 $dns_submode = 0 if ($opts->{'separate-dns-subdomain'});
@@ -368,14 +354,11 @@ if (defined $opts->{'append-style'}) {
 	$append_style = $as->[0];
 }
 
-my $phpmode;
-$phpmode = $opts->{'mode'} if (defined($opts->{'mode'}));
+my $phpmode = $opts->{'mode'};
 
-my $defaultshell;
-$defaultshell = $opts->{'shell'} if (defined($opts->{'shell'}));
+my $defaultshell = $opts->{'shell'};
 
-my $subprefix;
-$subprefix = $opts->{'subprefix'} if (defined($opts->{'subprefix'}));
+my $subprefix = $opts->{'subprefix'};
 
 my ($proxy_pass_mode, $proxy_pass);
 if ($opts->{'proxy'}) {
