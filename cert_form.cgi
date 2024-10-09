@@ -31,7 +31,7 @@ if ($d->{'ssl_same'}) {
 # Get ACME providers, if there are any
 my @provs;
 if (defined(&list_acme_providers)) {
-	@provs = grep { &can_acme_provider($_) &&
+	@provs = grep { &can_acme_provider($_) ||
 			$d->{'letsencrypt_id'} eq $_->{'id'} }
 		      &list_acme_providers();
 	}
