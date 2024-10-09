@@ -121,7 +121,7 @@ local $testpathfunc = "script_${name}_testpath";
 local $testargsfunc = "script_${name}_testargs";
 
 # Check for critical functions
-return undef if (!defined(&$dfunc) || !defined(&$vfunc) || !defined(&$tmdfunc));
+return undef if (!defined(&$dfunc) || !defined(&$vfunc));
 
 # Work out availability
 local %unavail;
@@ -145,7 +145,7 @@ if ($access{'allowedscripts'}) {
 # Create script structure
 local $rv = { 'name' => $name,
 	      'desc' => &$dfunc(),
-	      'tmdesc' => &$tmdfunc(),
+	      'tmdesc' => defined(&$tmdfunc) ? &$tmdfunc() : undef,
 	      'longdesc' => defined(&$lfunc) ? &$lfunc() : undef,
 	      'versions' => [ &$vfunc(0) ],
 	      'install_versions' => [ &$vfunc(1) ],
