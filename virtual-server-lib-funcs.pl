@@ -6223,6 +6223,7 @@ if (defined(&list_acme_providers)) {
 	}
 
 &$second_print($text{'setup_done'});
+return 1;
 }
 
 # virtualmin_restore_templates(file, &vbs)
@@ -6412,7 +6413,7 @@ return 1;
 sub virtualmin_backup_resellers
 {
 local ($file, $vbs) = @_;
-return undef if (!defined(&list_resellers));
+return 0 if (!defined(&list_resellers));
 &$first_print($text{'backup_vresellers_doing'});
 local $temp = &transname();
 mkdir($temp, 0700);

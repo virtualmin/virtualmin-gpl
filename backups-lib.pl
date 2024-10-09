@@ -1191,8 +1191,9 @@ if (@$vbs) {
 		local $vfile = "$backupdir/virtualmin_".$v;
 		local $vfunc = "virtualmin_backup_".$v;
 		if (defined(&$vfunc)) {
-			&$vfunc($vfile, $vbs);
-			$vcount++;
+			if (&$vfunc($vfile, $vbs)) {
+				$vcount++;
+				}
 			}
 		}
 	&$outdent_print();
