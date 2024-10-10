@@ -21100,6 +21100,22 @@ foreach $f (@sorted_plugins) {
 return @fopts;
 }
 
+# load_api(lib)
+# Load given API
+sub load_api
+{
+my $lib = shift;
+my $apifile = "$virtual_server_root/pro/$lib-api.pl";
+$apifile = "$virtual_server_root/$lib-api.pl" if (!-r $apifile);
+if (-r $apifile) {
+	do $apifile;
+	&error("failed to load $lib-api.pl : $@") if ($@);
+	}
+else {
+	&error("Failed to load $lib-api.pl file not found");
+	}
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;
