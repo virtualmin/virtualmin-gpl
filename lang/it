@@ -149,7 +149,6 @@ index_smail=Mail server
 index_samequ=Stesso genitore
 index_aliasof=Alias di $1
 index_noadd0=Non possono essere aggiunti altri server, hai raggiunto il tuo limite massimo di $1.
-index_noadd1=Non possono essere aggiunti altri server, il tuo reseller ha raggiunto il limite massimo di $1.
 index_noadd2=Non possono essere aggiunti altri server, hai raggiunto il tuo limite di reseller massimo di $1.
 index_noadd3=Non possono essere aggiunti altri server, il sistema ha raggiunto il suo limite massimo di $1 basato sulla licenza.
 index_canadd0=Basandosi sui tuoi limiti, possono essere aggiunti $1 server.

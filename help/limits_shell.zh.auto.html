@@ -1,1 +1,2 @@
-<header>允许的登录类型</header>此设置通过更改其Unix Shell来确定如何允许该域的管理员登录。默认的可用选项是： <p><dl><dt> <b>仅电子邮件</b> <dd> FTP和SSH登录都被阻止，但是POP3和IMAP将起作用。 <dt> <b>电子邮件和FTP</b> <dd>用户可以通过FTP进行连接，但不能通过SSH或telnet进行连接。 <dt> <b>电子邮件，FTP和SSH</b> <dd>允许通过FTP，SSH和telnet登录。 </dl>但是，这些可以由主管理员在“ <b>自定义外壳”</b>页面上<b>自定义</b> 。 <p>由于此功能通过更改虚拟服务器Unix用户的外壳程序而起作用，因此假定您的FTP服务器使用<tt>/etc/shells</tt>文件进行身份验证。 <p><footer>
+<header>允许的登录类型</header>此设置通过修改其 Unix shell 来确定允许此域的管理员如何登录。默认可用选项为：<p><dl><dt><b>仅限电子邮件</b><dd>FTP 和 SSH 登录均被阻止，但 POP3 和 IMAP 可以运行。<dt><b>电子邮件和 FTP</b><dd>用户可以通过 FTP 连接，但不能通过 SSH 或 telnet 连接。<dt><b>电子邮件、FTP 和 SSH</b><dd>允许通过 FTP、SSH 和 telnet 登录。</dl>然而，主管理员可以在<b>自定义 Shell</b>页面上自定义这些内容。<p>由于此功能通过更改虚拟服务器 Unix 用户的 shell 来实现，因此它假定您的 FTP 服务器使用<tt>/etc/shells</tt>文件进行身份验证。<p><footer>
+

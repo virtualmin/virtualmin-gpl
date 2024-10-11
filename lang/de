@@ -2367,7 +2367,6 @@ databases_ilist=Datenbanken im Eigentum des Servers
 databases_import=Jetzt importieren
 databases_ecannot=Sie dürfen keine Datenbanken bearbeiten
 databases_noadd0=Sie können keine weiteren Datenbanken hinzufügen, da die maximale Anzahl von $1 Datenbanken erreicht wurde.
-databases_noadd1=Sie können keine weiteren Datenbanken hinzufügen, da Ihr Reseller die maximale Anzahl von $1 Datenbanken erreicht hat.
 databases_noadd2=Sie können keine weiteren Datenbanken hinzufügen, da Ihre maximale Anzahl von $1 Datenbanken erreicht wurde.
 databases_action=Aktion
 databases_man=Bearbeiten ..

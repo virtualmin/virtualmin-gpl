@@ -1,1 +1,2 @@
-<header>允許的登錄類型</header>此設置通過更改其Unix Shell來確定如何允許該域的管理員登錄。默認的可用選項是： <p><dl><dt> <b>僅電子郵件</b> <dd> FTP和SSH登錄都被阻止，但是POP3和IMAP將起作用。 <dt> <b>電子郵件和FTP</b> <dd>用戶可以通過FTP進行連接，但不能通過SSH或telnet進行連接。 <dt> <b>電子郵件，FTP和SSH</b> <dd>允許通過FTP，SSH和telnet登錄。 </dl>但是，這些可以由主管理員在“ <b>自定義外殼”</b>頁面上<b>自定義</b> 。 <p>由於此功能通過更改虛擬服務器Unix用戶的外殼程序而起作用，因此假定您的FTP服務器使用<tt>/etc/shells</tt>文件進行身份驗證。 <p><footer>
+<header>允許的登入類型</header>此設定透過修改 Unix shell 來決定如何允許該網域的管理員登入。預設可用選項有：<p><dl><dt><b>僅電子郵件</b><dd>FTP 和 SSH 登入均被阻止，但 POP3 和 IMAP 可以使用。<dt><b>電子郵件和FTP</b><dd>使用者可以透過 FTP 進行連接，但不能透過 SSH 或 telnet 進行連接。<dt><b>電子郵件、FTP 和 SSH</b><dd>允許透過 FTP、SSH 和 telnet 登入。</dl>但是，主管理員可以在<b>「自訂 Shell」</b>頁面上自訂這些內容。<p>由於此功能透過更改虛擬伺服器 Unix 使用者的 shell 來運作，因此它假定您的 FTP 伺服器使用<tt>/etc/shells</tt>檔案進行身份驗證。<p><footer>
+

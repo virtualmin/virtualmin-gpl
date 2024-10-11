@@ -636,7 +636,7 @@
 #### Version 3.76
 * Separated the creation of a CSR from a self-signed certificate on the Manage SSL Certificate page.
 * Added a field to the backup form as the backup-domain API command to exclude some files from each domain's backup.
-* When lowering a virtual server's disk quota below the current usage a warning is displayed asking the user if he really wants to do that.
+* When lowering a virtual server's disk quota below the current usage a warning is displayed asking the user if they really wants to do that.
 * Added a 'status' section to the 'info' API command, to get the collected status of servers like Apache and BIND.
 * Added the Website Redirects page, for easily creating aliases from URL paths to directories, and redirects from URL paths to other websites.
 * The MySQL default collation order for new databases can now be set on the database creation form, and in the MySQL section of a server template.
@@ -649,7 +649,7 @@
 
 #### Version 3.75
 * Backups and restores to and from S3 sub-directories are now supported.
-* When a mailbox user is created, make his spam, virus and trash directories under Maildir so that they show up in the IMAP folder list by default.
+* When a mailbox user is created, make their spam, virus and trash directories under Maildir so that they show up in the IMAP folder list by default.
 * If Apache supports SNI, make the warning about clashing certs less dramatic.
 * Added Module Config options to limit the number of concurrent backups, which defaults to 3. This prevents system owners from overloading the machine with their scheduled backups.
 * Backups and restores made by domain owners are now included in their bandwidth usage.
@@ -671,7 +671,7 @@
 * Added a logrotate template-level option for additional files to rotate for new domains.
 * Added the list-php-ini API command for fetching PHP settings from one or more domains.
 * Added a Module Config setting to make collection of all available packages optional.
-* When a mailbox user is delete, his Dovecot index and control files are removed too in order to avoid clashes with future users with the same name.
+* When a mailbox user is delete, their Dovecot index and control files are removed too in order to avoid clashes with future users with the same name.
 * When a virtual server is disabled, all extra admin logins are disabled too.
 * When a sub-server is converted to a top-level server, files from /etc/skel are copied into its home directory.
 * Added a domain owner level capability restriction to prevent editing of external IP addresses.
@@ -679,7 +679,7 @@
 
 #### Version 3.73
 * Removed the 'Bring up virtual interfaces?' module configuration option, as use of an existing interface can now be done on a per-domain basis.
-* Added a button on the Edit Reseller page to clone his settings for a new reseller.
+* Added a button on the Edit Reseller page to clone their settings for a new reseller.
 * Fixed a bug that prevented paths in php.ini from being updated when a domain is renamed or moved.
 * Added a DNS template option to control which A records are added to new domains.
 * Extra administrators can now change their own passwords, via a new link on the left menu.
@@ -868,7 +868,7 @@
 * When setting up clamd, the provided example init script is copied instead of bring modified, so that it can be safely replaced by RPM upgrades.
 * Re-try S3 bucket creation three times if at first it fails, to avoid temporary outages or network problems.
 * When the user or group for a domain is changed, references to the old user or group in lgorotate.conf are updated to the new values.
-* The master administrator can now grant himself access to scripts disabled for regular users, with a new form on the Script Installers page.
+* The master administrator can now grant themselves access to scripts disabled for regular users, with a new form on the Script Installers page.
 * Plugins can now define additional inputs to appear on the Create Virtual Server page and accepted by create-domain.pl, for options specific to the plugin's feature.
 * Ensure that resource limits (CPU, RAM and procesess) are never set for the Apache user, even when it is a member of a domain's group for which limits are set.
 * Added the --source parameter to list-available-scripts.pl, and include script source in full output.
@@ -1222,7 +1222,7 @@
 * Password changes to mail / FTP users from the Users and Groups modules now correctly update all the various passwords maintained by Virtualmin, such as MySQL and SVN - if the option to update in other modules is checked.
 * Updated the Batch Create Servers page to allow alias domains to be created, by specifying an extra field for the alias domain name.
 * Added a page for creating multiple email aliases at once from a batch file, linked from the Mail Aliases list.
-* Added an option to the Edit Reseller page to force all virtual servers he creates to be under a specified parent domain. Also updated the create-reseller.pl, modify-reseller.pl and list-resellers.pl scripts to edit and show this setting.
+* Added an option to the Edit Reseller page to force all virtual servers they create to be under a specified parent domain. Also updated the create-reseller.pl, modify-reseller.pl and list-resellers.pl scripts to edit and show this setting.
 * Added script installers for phpScheduleIt, PHP-Calendar and Plans, and created a new script category for calendars.
 * Added an option to the DNS section of server templates for specifying the hostname to use in the primary NS record for new DNS domains, rather than the system's hostname.
 * Updated the phpMyAdmin script installer to version 2.10.2, WordPress to 2.2.1, SMF to 1.1.3, DokuWiki to 2007-06-26, and Gallery to 2.2.2.
@@ -1341,7 +1341,7 @@
 * Added several new initial website content styles, such as Refresh, Dreamy, Rounded and Integral. All of these create multiple pages which can then be easily edited with the Edit Web Pages feature.
 * Added tabs and more help text to the Script Installers page.
 * Added caching to make lookups of domains by parent and user faster.
-* Added the 'Hide limits from server owners' option to the reseller page, which prevents his customers from seeing the reseller's limits (although they are still enforced). Also updated the create-reseller.pl and modify-reseller.pl programs to all --hide options.
+* Added the 'Hide limits from server owners' option to the reseller page, which prevents their customers from seeing the reseller's limits (although they are still enforced). Also updated the create-reseller.pl and modify-reseller.pl programs to all --hide options.
 * Added the 'User-configured mail forwarding' section to the Edit Mailbox page, to show forwarding setup by the user in their .procmailrc file (using the Mail Filters module in Usermin).
 * Added tabs to the Manage SSL Certificate page.
 * Plugin modules can now have help links on the virtual server creation and editing pages.
@@ -1364,7 +1364,7 @@
 * Added the New Reseller Email page, for setting up a message to be sent to new reseller accounts.
 * Added the Shared IP Addresses page under System Configuration for defining additional shared addresses that can be selected when creating servers without a private IP. Also updated the server creation page to allow selection of one of these shared IPs, and the create-domain.pl program to use one with the --shared-ip parameter.
 * Added the --primary-ip option to create-domain.pl, to create an SSL domain on the primary IP.
-* Added a button to the Edit Extra Administrator page for switching to his Webmin login without needing to know the password.
+* Added a button to the Edit Extra Administrator page for switching to their Webmin login without needing to know the password.
 * Updated DaDaBiK script installer to version 4.2, WordPress to 2.1.1, phpMyAdmin to 2.10.0, phpList to 2.11.3, and MediaWiki to version 1.9.3.
 * Improved detection of multiple scripts being accidentally installed into the same path.
 * Changed pages with tabs and hidden sections to be usable by the mobile device theme.
@@ -1388,7 +1388,7 @@
 * Added a link from the Edit Virtual Server page to show a server's current password.
 * Removed redundant creation buttons from main page, when using the framed theme.
 * Broke the Update Virtual Servers page down into more readable collapsed sections.
-* When a mailbox or domain owner is deleted, all of his Cron jobs will be removed too. Similarly, the owner of any Cron jobs will be correctly updated when a useris renamed.
+* When a mailbox or domain owner is deleted, all of their Cron jobs will be removed too. Similarly, the owner of any Cron jobs will be correctly updated when a useris renamed.
 * Added --spamclear-days, --spamclear-size and --spamclear-none options to modify-spam.pl.
 * Added a new section to the Spam and Virus Delivery page for configuring automatic clearing of mailbox users' spam and virus folders. Also added an option in the server templates for setting the default for new servers, and an input on the page for updating multiple servers.
 * Enhanced the validation for SSL virtual servers to check for the certificate files.
@@ -1447,7 +1447,7 @@
 
 #### Version 3.29
 * The change IP address page can now modify the IP of name-based servers, if more than one possibility is available (such as from a reseller IP). Similar, the modify-domain.pl program now takes a --shared-ip option to do the same thing.
-* Each reseller can have an IP address specified for virtual servers with shared address websites under his ownership to be set up on. All DNS records in the servers' domains will use that IP, which allows resellers to appear to have a dedicated server for their customer domains.
+* Each reseller can have an IP address specified for virtual servers with shared address websites under their ownership to be set up on. All DNS records in the servers' domains will use that IP, which allows resellers to appear to have a dedicated server for their customer domains.
 * Virtual server backups can now be made to Amazon's S3 service, which provides online storage (at a price). Similarly, restores can be made from the same service. Before you can use this feature, you must sign up for an account with S3 and get an access key and secret key.
 * Fixed the osCommerce script installer, so that the admin module works.
 * Added checkboxes and a button on the Server Templates page to delete several at once.
@@ -1459,7 +1459,7 @@
 * The cache file used by the lookup-domain.pl program to determine if a mailbox is close to its disk quota is automatically flushed when a user's or domain's quota is changed, which increases the speed at which such changes are detected.
 
 #### Version 3.28
-* When a virtual server uses spamc for spam processing, mailbox users' quotas are not checked at delivery time, as there is no danger of spamassassin failing if a user is close to his quota.
+* When a virtual server uses spamc for spam processing, mailbox users' quotas are not checked at delivery time, as there is no danger of spamassassin failing if a user is close to their quota.
 * The DNS IP address for an existing virtual server can also be set using the DNS Options page, or the modify-dns.pl program.
 * An SPF record can be added to and configured in an existing virtual server using the DNS Options entry in the left menu, or the modify-dns.pl command-line script.
 * In the virtual server list, servers that are using proxy or frame web forwarding have (P) or (F) next to their names.
@@ -1520,7 +1520,7 @@
 * User mail directory sizes are now displayed correctly.
 * Outgoing address mapping (generics) entries are added for new domain owners.
 * Fixed bugs that prevented suexec PHP from working properly in sub-domains.
-* Bandwidth limits can now be imposed on resellers, which limits the total amount of bandwidth the reseller can allocate to his customer's domains.
+* Bandwidth limits can now be imposed on resellers, which limits the total amount of bandwidth the reseller can allocate to their customer's domains.
 * When removing a secondary mail server, all secondary domains that were created on it will be removed, and all MX records referring to it deleted.
 * When adding a secondary mail server, all existing mail domains can be optionally added to the server. This will update MX records as well.
 * Updated Mambo script installer to 4.6, phpMyAdmin to 2.9.0, and PHP-Nuke to 7.9.
@@ -1565,7 +1565,7 @@
 * Changed the layout of the script installers page to show more information, and added checkboxes and a button for un-installing several at once.
 * Fixed a bug that prevented DNS zones from being added to a file other than named.conf, even if specified in the BIND module.
 * Added script installed for DaDaBiK 4.0 beta 2.
-* When a domain owner is granted access to the Webmin Actions Log module, he can also view actions taken by extra admins.
+* When a domain owner is granted access to the Webmin Actions Log module, they can also view actions taken by extra admins.
 * Added Module Config options for commands to run before and after an alias is created, modified or deleted.
 * When email is set to a new or modified mailbox, the From: address is that of the domain owner.
 * Comments on mail aliases can be edited, and will appear in the list on the Mail Aliases page. The create-alias.pl program has also been updated to allow comments to be set, and the list-aliases.pl program to show them.
@@ -1749,10 +1749,10 @@
 * When restoring a single virtual server, you can select to restore just one mail/FTP user instead of all of them. You can also choose to just re-import a server whose /etc/webmin/virtual-server/domains file is missing.
 * Added a template option to have an alias server under another domain when a server is created. This can be useful when a new domain has not yet been registered, to allow it to be accessed under the provider's domain.
 * Resellers can now have their own IP allocation ranges defined, which will apply to all virtual servers that they create or manage.
-* Virtual server functions that a server own can access (like databases, scripts, users and aliases) can now be individually controlled on the Edit Owner Limits page, rather than being automatically determined based on his ability to create servers.
+* Virtual server functions that a server own can access (like databases, scripts, users and aliases) can now be individually controlled on the Edit Owner Limits page, rather than being automatically determined based on their ability to create servers.
 * Extra Webmin modules can be specified for server owners on the Edit Owner Limits page.
 * Added a form to the Script Installers page for upgrading some script on several virtual servers at once.
-* Added an option to email a mailbox user with his new account details upon saving, and a template page for editing the message sent.
+* Added an option to email a mailbox user with their new account details upon saving, and a template page for editing the message sent.
 
 #### Version 2.90
 * Added support for plugins that define new database types.
@@ -1829,7 +1829,7 @@
 * Added a similar feature for per-domain Virus filtering using ClamAV.
 * Created a new feature - per-domain Spam filtering using SpamAssassin and Procmail. Each server can have its own SpamAssassin settings and spam delivery action.
 * Added support for third-party script installation, such as PHP-Nuke, Formmail and other common web tools. These can be installed and managed using the Install Scripts button on the Edit Server page.
-* Added support for resellers, which are users who can create top-level virtual servers up to limits imposed by the master administrator. Each reseller can be limited in the number of servers, mailboxes and databases he can own, and the total quota he can assign to all owned servers.
+* Added support for resellers, which are users who can create top-level virtual servers up to limits imposed by the master administrator. Each reseller can be limited in the number of servers, mailboxes and databases they can own, and the total quota they can assign to all owned servers.
 * Quotas and bandwidth limits on the templates page now have proper units like kB or MB, rather than being in bytes.
 * Added command-line programs called enable-writelogs.pl and disable-writelogs.pl to turning on or off logging via a program for existing domains, or all domains.
 * When a server's home directory is renamed, any protected web directories within it will be properly updated too.
@@ -1844,7 +1844,7 @@
 * When Webmin 1.201 or later is installed, there is an additional option on the Server Templates page to have Webmin and Usermin per-IP SSL certificates added to match those used for the Apache SSL virtual server.
 * Added an option to the Bandwidth Monitoring page to disable it for selected servers, such as those that have extremely large logs.
 * The Webalizer statistics directory can now be password protected, via an option on the Server Templates page.
-* Added an option on the template page for doing web logging via a program, which silently ignores problems writing to the logs. This prevents Apache from failing to re-start if a user deletes his ~/logs directory.
+* Added an option on the template page for doing web logging via a program, which silently ignores problems writing to the logs. This prevents Apache from failing to re-start if a user deletes their ~/logs directory.
 * The permissions on the public_html directory can now be edited on the server template page.
 * Domain names and usernames can now start with a number.
 * Added an option to the domain creation form to generate a password randomly.

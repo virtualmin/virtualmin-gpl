@@ -820,7 +820,6 @@ edit_htmldesc=Créer et modifier des pages Web HTML pour le site Web de ce serve
 edit_admins=Gérer les administrateurs supplémentaires
 edit_adminsdesc=Afficher et modifier des comptes administrateur supplémentaires pour ce serveur virtuel.
 edit_switch=Passer à l'administrateur du serveur
-edit_switchdesc=Se connecter automatiquement à Webmin comme propriétaire de ce serveur virtuel, sans avoir à entrer son mot de passe.
 edit_spamvirus=Livraison Spam et Virus
 edit_spamvirusdesc=Configurer les méthodes de livraison pour le spam et les virus détectés dans le courrier électronique envoyé à ce serveur virtuel.
 edit_phpver=PHP Versions
