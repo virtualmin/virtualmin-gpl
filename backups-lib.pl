@@ -1954,10 +1954,15 @@ my %doneerrdom;
 
 # Show some status
 if ($ok) {
-	&$first_print(
-	  ($okcount || $errcount ?
-	    &text('backup_finalstatus', $okcount, $errcount) : "")."\n".
-	  ($vcount ? &text('backup_finalstatus2', $vcount) : ""));
+	if ($okcount && $errcount) {
+		&$first_print(&text('backup_finalstatus', $okcount, $errcount));
+		}
+	elsif ($okcount) {
+		&$first_print(&text('backup_finalstatusok', $okcount));
+		}
+	if ($vcount) {
+		&$first_print(&text('backup_finalstatus2', $vcount));
+		}
 	if ($errcount) {
 		&$first_print(&text('backup_errorsites',
 			      join(" ", map { $_->{'dom'} } @errdoms)));
