@@ -645,7 +645,6 @@ other=Altre...
 
 import_group=Gruppo per casella di posta utenti
 
-import_webmin2=Creeremo un utente Webmin $1 per gestire questo dominio.
 import_home=Home directory
 
 acheck_ename=Direttiva ServerName mancante

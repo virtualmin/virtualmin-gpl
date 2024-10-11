@@ -103,7 +103,6 @@ if ($in{'confirm'}) {
 	# Go ahead and do it
 	&lock_domain_name($in{'dom'});
 	&obtain_lock_unix();
-	print "$text{'import_doing'}<p>\n";
 	&require_useradmin();
 
 	if (!$parent) {
@@ -377,8 +376,8 @@ if ($in{'confirm'}) {
 	}
 else {
 	# Just work out what can be done
-	print "$text{'import_idesc'}<p>\n";
-
+	print "$text{'import_rusure'}<p>\n";
+	print "<ul>\n";
 	# Work out the Unix username
 	if (!$parent) {
 		if ($in{'user_def'}) {
@@ -392,37 +391,39 @@ else {
 					&error(&text('setup_eauto', $try1,$try2));
 					}
 				}
-			print "<b>",&text('import_user1',
-					  "<tt>$user</tt>"),"</b><p>\n";
+			print "<li>".&text('import_user1',
+					  "<tt>$user</tt>"),"</li>\n";
 			}
 		else {
 			# Using a specified name, which may or may not exist
 			if (defined(getpwnam($in{'user'}))) {
-				print "<b>",&text('import_user2',
-						  "<tt>$in{'user'}</tt>"),"</b><p>\n";
+				print "<li>".&text('import_user2',
+						  "<tt>$in{'user'}</tt>"),
+						  	"</li>\n";
 				}
 			else {
-				print "<b>",&text('import_user3',
-						  "<tt>$in{'user'}</tt>"),"</b><p>\n";
+				print "<li>".&text('import_user3',
+						  "<tt>$in{'user'}</tt>"),
+						  	"</li>\n";
 				}
 			}
 
 		if ($in{'group_def'}) {
 			# Need to create new group with the same name as user
 			$group = $user || $in{'user'};
-			print "<b>",&text('import_group1',
-					  "<tt>$group</tt>"),"</b><p>\n";
+			print "<li>".&text('import_group1',
+					  "<tt>$group</tt>"),"</li>\n";
 			}
 		elsif (scalar(@ginfo = getgrnam($in{'group'}))) {
 			# Group already exists
-			print "<b>",&text('import_group2',
-				  "<tt>$in{'group'}</tt>"),"</b><p>\n";
+			print "<li>".&text('import_group2',
+				  "<tt>$in{'group'}</tt>"),"</li>\n";
 			$group = $in{'group'};
 			}
 		else {
 			# Group does not exist
-			print "<b>",&text('import_group3',
-				  "<tt>$in{'group'}</tt>"),"</b><p>\n";
+			print "<li>".&text('import_group3',
+				  "<tt>$in{'group'}</tt>"),"</li>\n";
 			}
 
 		if (@ginfo) {
@@ -433,9 +434,8 @@ else {
 				}
 			endpwent();
 			if ($mcount) {
-				print "<b>",&text('import_mailboxes',
-				    $mcount, "<tt>$in{'group'}</tt>"),
-				    "</b><p>\n";
+				print "<li>".&text('import_mailboxes',
+				    $mcount, "<tt>$in{'group'}</tt>"),"</li>\n";
 				}
 			}
 		if (!$in{'regexp_def'}) {
@@ -447,15 +447,15 @@ else {
 				}
 			endpwent();
 			if ($rcount) {
-				print "<b>",&text('import_mailboxes2',
+				print "<li>".&text('import_mailboxes2',
 				    $rcount, "<tt>$in{'regexp'}</tt>"),
-				    "</b><p>\n";
+				    "</li>\n";
 				}
 			}
 		}
 	else {
-		print "<b>",&text('import_under',
-				  "<tt>$parent->{'dom'}</tt>"),"</b><p>\n";
+		print "<li>".&text('import_under',
+				  "<tt>$parent->{'dom'}</tt>"),"</li>\n";
 		}
 
 	# Check for mail domain
@@ -463,12 +463,12 @@ else {
 		&require_mail();
 		$found{'mail'}++ if (&is_local_domain($in{'dom'}));
 		if ($found{'mail'}) {
-			print "<b>",&text('import_mail',
-				"<tt>$in{'dom'}</tt>"),"</b><p>\n";
+			print "<li>".&text('import_mail',
+				"<tt>$in{'dom'}</tt>"),"</li>\n";
 			}
 		else {
-			print &text('import_nomail',
-				"<tt>$in{'dom'}</tt>"),"<p>\n";
+			print "<li>".&text('import_nomail',
+				"<tt>$in{'dom'}</tt>"),"</li>\n";
 			}
 		}
 
@@ -483,12 +483,12 @@ else {
 				"ServerName", $virt->{'members'});
 			$dr = &apache::find_directive(
 				"DocumentRoot", $virt->{'members'});
-			print "<b>",&text('import_web',
-				"<tt>$sn</tt>", "<tt>$dr</tt>"),"</b><p>\n";
+			print "<li>".&text('import_web',
+				"<tt>$sn</tt>", "<tt>$dr</tt>"),"</li>\n";
 			}
 		else {
-			print &text('import_noweb',
-				"<tt>$in{'dom'}</tt>"),"<p>\n";
+			print "<li>".&text('import_noweb',
+				"<tt>$in{'dom'}</tt>"),"</li>\n";
 			}
 		}
 
@@ -503,12 +503,12 @@ else {
 				"ServerName", $svirt->{'members'});
 			$dr = &apache::find_directive(
 				"DocumentRoot", $svirt->{'members'});
-			print "<b>",&text('import_ssl',
-				"<tt>$sn</tt>", "<tt>$dr</tt>"),"</b><p>\n";
+			print "<li>".&text('import_ssl',
+				"<tt>$sn</tt>", "<tt>$dr</tt>"),"</li>\n";
 			}
 		else {
-			print &text('import_nossl',
-				"<tt>$in{'dom'}</tt>"),"<p>\n";
+			print "<li>".&text('import_nossl',
+				"<tt>$in{'dom'}</tt>"),"</li>\n";
 			}
 		}
 
@@ -518,12 +518,12 @@ else {
 		$log = &get_apache_log($in{'dom'});
 		if ($log && -r &webalizer::config_file_name($log)) {
 			$found{'webalizer'}++;
-			print "<b>",&text('import_webalizer',
-				    "<tt>$log</tt>"),"</b><p>\n";
+			print "<li>".&text('import_webalizer',
+				    "<tt>$log</tt>"),"</li>\n";
 			}
 		else {
-			print &text('import_nowebalizer',
-				    "<tt>$log</tt>"),"<p>\n";
+			print "<li>".&text('import_nowebalizer',
+				    "<tt>$log</tt>"),"</li>\n";
 			}
 		}
 
@@ -542,12 +542,12 @@ else {
 				}
 			}
 		if ($found{'dns'}) {
-			print "<b>",&text('import_dns',
-				"<tt>$in{'dom'}</tt>"),"</b><p>\n";
+			print "<li>".&text('import_dns',
+				"<tt>$in{'dom'}</tt>"),"</li>\n";
 			}
 		else {
-			print &text('import_nodns',
-				"<tt>$in{'dom'}</tt>"),"<p>\n";
+			print "<li>".&text('import_nodns',
+				"<tt>$in{'dom'}</tt>"),"</li>\n";
 			}
 		}
 
@@ -559,12 +559,12 @@ else {
 					      $_->{'name'} eq $db } @alldbs;
 			if ($got) {
 				$found{$t}++;
-				print "<b>",&text('import_'.$t,
-					"<tt>$db</tt>"),"</b><p>\n";
+				print "<li>".&text('import_'.$t,
+					"<tt>$db</tt>"),"</li>\n";
 				}
 			else {
-				print &text('import_no'.$t,
-					"<tt>$db</tt>"),"<p>\n";
+				print "<li>".&text('import_no'.$t,
+					"<tt>$db</tt>"),"</li>\n";
 				}
 			push(@{$dbnames{$t}}, $db);
 			}
@@ -577,18 +577,18 @@ else {
 			&get_proftpd_virtual($in{'ip'});
 		if ($virt && $anon) {
 			$found{'ftp'}++;
-			print "<b>",&text('import_ftp',
+			print "<li>".&text('import_ftp',
 				"<tt>$in{'ip'}</tt>",
-				"<tt>$anon->{'value'}</tt>"),"</b><p>\n";
+				"<tt>$anon->{'value'}</tt>"),"</li>\n";
 			}
 		elsif ($virt) {
 			$found{'ftp'}++;
-			print "<b>",&text('import_ftpnoanon',
-				"<tt>$in{'ip'}</tt>"),"</b><p>\n";
+			print "<li>".&text('import_ftpnoanon',
+				"<tt>$in{'ip'}</tt>"),"</li>\n";
 			}
 		else {
-			print &text('import_noftp',
-				"<tt>$in{'ip'}</tt>"),"<p>\n";
+			print "<li>".&text('import_noftp',
+				"<tt>$in{'ip'}</tt>"),"</li>\n";
 			}
 		}
 
@@ -598,16 +598,16 @@ else {
 		$lconf = &get_logrotate_section($log);
 		if ($log && $lconf) {
 			$found{'logrotate'}++;
-			print "<b>",&text('import_logrotate',
-				    "<tt>$log</tt>"),"</b><p>\n";
+			print "<li>".&text('import_logrotate',
+				    "<tt>$log</tt>"),"</li>\n";
 			}
 		elsif ($log) {
-			print &text('import_nologrotate',
-				    "<tt>$log</tt>"),"<p>\n";
+			print "<li>".&text('import_nologrotate',
+				    "<tt>$log</tt>"),"</li>\n";
 			}
 		else {
-			print &text('import_nologrotate2',
-				    "<tt>$in{'dom'}</tt>"),"<p>\n";
+			print "<li>".&text('import_nologrotate2',
+				    "<tt>$in{'dom'}</tt>"),"</li>\n";
 			}
 		}
 
@@ -620,10 +620,10 @@ else {
 				 $user || $in{'user'},
 				 $in{'db'})) {
 			$found{$f}++;
-			print "<b>",&text('import_plugin', $pname),"</b><p>\n";
+			print "<li>".&text('import_plugin', $pname),"</li>\n";
 			}
 		else {
-			print &text('import_noplugin', $pname),"<p>\n";
+			print "<li>".&text('import_noplugin', $pname),"</li>\n";
 			}
 		}
 
@@ -634,27 +634,29 @@ else {
 			($wuser) = grep { $_->{'name'} eq ($user || $in{'user'}) }
 					&acl::list_users();
 			if ($wuser) {
-				print "<b>",&text('import_webmin1',
-					  "<tt>$wuser->{'name'}</tt>"),"</b><p>\n";
+				print "<li>".&text('import_webmin1',
+					  "<tt>$wuser->{'name'}</tt>"),"</li>\n";
 				}
 			else {
-				print "<b>",&text('import_webmin2',
-					  "<tt>$wuser->{'name'}</tt>"),"</b><p>\n";
+				print "<li>".&text('import_webmin2',
+					  "<tt>$wuser->{'name'}</tt>"),"</li>\n";
 				}
 			}
 		else {
-			print "$text{'import_nowebmin'}<p>\n";
+			print "<li>$text{'import_nowebmin'}</li>\n";
 			}
 		}
 
 	# Work out if IP would be assigned
 	if ($in{'virt'}) {
-		print "<b>",&text('import_virt',
-				  "<tt>$iface->{'fullname'}</tt>"),"</b><p>\n";
+		print "<li>".&text('import_virt',
+				  "<tt>$iface->{'fullname'}</tt>"),"</li>\n";
 		}
 	else {
-		print "$text{'import_novirt'}<p>\n";
+		print "<li>$text{'import_novirt'}</li>\n";
 		}
+
+	print "</ul>\n";
 
 	# Output form with confirm button
 	@hiddens = ( );
@@ -671,7 +673,7 @@ else {
 	push(@hiddens, [ "crgroup", $group ]);
 	print &ui_confirmation_form(
 		"import.cgi",
-		$text{'import_rusure'},
+		"",
 		\@hiddens,
 		[ [ "confirm", $text{'import_ok'} ] ]);
 	}
