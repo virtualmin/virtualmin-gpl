@@ -547,6 +547,8 @@ if (!$dom{'parent'}) {
 				);
 		# Set cgi directories to DirectAdmin standard
 		my %got = map { $_, 1 } &directadmin_domain_features($dname, $domains, $backup);
+		my $linkssl = &directadmin_linked_ssl($dname, $backup, \%dom);
+		$got{&domain_has_ssl()} = 1 if ($linkssl);
 		foreach my $f (@features, &list_feature_plugins()) {
 			next if ($f eq "unix" || $f eq "webmin");
 			$subd{$f} = $got{$f} ? 1 : 0;
@@ -842,6 +844,15 @@ if ($dinfo{'force_ssl'} =~ /yes/i && &domain_has_ssl($d)) {
 	# Add redirect to SSL
 	&create_redirect($d, &get_redirect_to_ssl($d));
 	}
+}
+
+# directadmin_linked_ssl(subdomain-name, backup-dir, &parent-domain)
+# Returns 1 if this sub-domain can use the parent domain's SSL cert
+sub directadmin_linked_ssl
+{
+my ($dname, $backup, $parent) = @_;
+return 0 if (!&domain_has_ssl($parent));
+return &check_domain_certificate($dname, $parent);
 }
 
 # copy_directadmin_mail_aliases(&domain, backup-dir)
