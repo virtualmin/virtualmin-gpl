@@ -1093,7 +1093,6 @@ import_ereal=Die angegebene IP-Adresse wird vom Interface $1 benutzt. Diese ist 
 import_egroup=Fehlender oder ungültiger Gruppenname
 import_rusure=Sind Sie sicher, daß sie mit dem Import beginnen (oben fett geschrieben) wollen?
 import_ok=Ja, importiere diese Domain!
-import_idesc=Ermittele Parameter für den Import ...
 import_web=Kann Virtuellen Webserver $1 mit seinem Datenverzeichnis $2 importieren.
 import_noweb=Ich konnte keinen virtuellen Webserver finden, der auf $1 passt.
 import_ssl=Kann virtuellen Apache-SSL host $1 mit dem Dokumentenverzeichnis $2 importieren.

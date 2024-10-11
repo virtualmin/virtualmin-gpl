@@ -977,7 +977,6 @@ import_ereal=Belirtilen IP adresi sanal olmayan $1 arabirimi tarafýndan kullan�
 import_egroup=Eksik veya geçersiz grup ismi
 import_rusure=Yukarýda kalýn olarak belirtilen import iþlemini tamamlamak istediðinizden emin misiniz?
 import_ok=Evet, Alanadýný import et
-import_idesc=Import edilecekler planlanýyor ..
 import_under=$1 sanal sunucusunun altýna import edecek ..
 import_web=Apache sanal host $1'i döküman klasörüyle ($2) birlikte import edebilir.
 import_noweb=$1 'e uyan Apache sanal host bulunamadý.

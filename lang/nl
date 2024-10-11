@@ -1333,7 +1333,6 @@ import_ereal=Het gespecificeerde IP adres is in gebruik door de interface $1, di
 import_egroup=Ontbrekende of ongeldige groep naam
 import_rusure=Weet u zeker dat u de import acties wilt uitvoeren die vetgedrukt in de lijst hierboven staan?
 import_ok=Ja, Importeer Domein
-import_idesc=Ik bekijk nu wat er zal worden geïmporteerd ..
 import_under=Zal importeren onder de virtuele server $1 ..
 import_web=Mag Apache virtuele host $1 met documenten directory $2 importeren.
 import_noweb=Er is geen Apache virtuele host overeenkomend met $1 gevonden.

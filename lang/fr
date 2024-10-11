@@ -1006,7 +1006,6 @@ import_ereal=L'adresse IP spécifiée est utilisée par l'interface $1 qui nrest
 import_egroup=Nom de groupe manquant ou invalide
 import_rusure=Etes vous sûr de vouloir exécuter les importations indiquées ci-dessus en caractères gras?
 import_ok=Oui, importer le domaine
-import_idesc=Recherche de ce qui sera importé ..
 import_web=Peut importer l'hôte virtuel Apache $1 avec le répertoire de documents $2.
 import_noweb=Pas trouvé d'hôte virtuel Apache correspondant à $1.
 import_ftp=Peut importer le serveur virtuel ProFTPd $1 avec le répertoire anonyme $2.

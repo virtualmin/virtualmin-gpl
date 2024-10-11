@@ -1025,7 +1025,6 @@ import_ereal=指定的IP地址已經被非虛擬接口$1使用。
 import_egroup=缺少或無效組名
 import_rusure=你確定要執行下列以粗體顯示的導入動作嗎？
 import_ok=是，導入域
-import_idesc=正在計算將要被導入的內容 ..
 import_under=將要導入在虛擬服務器$1下 ..
 import_web=可以從文檔目錄$2導入Apache虛擬服務器$1。
 import_noweb=沒有找到符合$1的Apache虛擬服務器。

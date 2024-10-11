@@ -1376,7 +1376,6 @@ import_ereal=Den angitte IP adressen brukes av grensesnittet $1, som ikke er vir
 import_egroup=Manglende eller ugyldig gruppenavn
 import_rusure=Er du sikker på at du ønsker å utføre import-handlingene som er uthevet ovenfor?
 import_ok=Ja, importer domene
-import_idesc=Finnet ut hva som vil bli importert ..
 import_under=Vil importere under virtuell tjener $1 ..
 import_web=Kan importere Apache virtuell vert $1 med dokumentkatalog $2.
 import_noweb=Fant ingen Apache virtuell vert som matcher $1.

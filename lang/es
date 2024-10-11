@@ -1181,7 +1181,6 @@ import_ereal=La dirección IP especificada se utiliza por la interfaz $1, que no
 import_egroup=Nombre de grupo no ingresado o no válido
 import_rusure=¿Está Ud. seguro de que desea realizar las acciones de importación listadas más arriba en negrita?
 import_ok=Sí, Importar Dominio
-import_idesc=Preparando lo que se importará ...
 import_under=Se va a importar bajo servidor virtual $1 ..
 import_web=Puedo importar el host virtual Apache $1 con su directorio de documentos $2.
 import_noweb=No se encontró host virtual de Apache asociado a $1.
