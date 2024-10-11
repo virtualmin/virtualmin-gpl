@@ -34,6 +34,12 @@ if (defined(&list_acme_providers)) {
 	@provs = grep { &can_acme_provider($_) ||
 			$d->{'letsencrypt_id'} eq $_->{'id'} }
 		      &list_acme_providers();
+	%known = map { $_->{'id'}, $_ } &list_known_acme_providers();
+	foreach my $p (@provs) {
+		if (!$p->{'desc'} && $p->{'type'}) {
+			$p->{'desc'} = $known{$p->{'type'}}->{'desc'};
+			}
+		}
 	}
 
 # Show tabs
