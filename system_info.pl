@@ -76,7 +76,7 @@ if (!$virtualmin_pro &&
 			        'alert_title' => $text{'scripts_gpl_pro_tip_title_dashboard'},
 			        'alert_body1' => $text{'scripts_gpl_pro_tip_dashboard'} . " ",
 			        'alert_body2' => &text('scripts_gpl_pro_tip_enroll_dashboard',
-			                               'https://www.virtualmin.com/product-category/virtualmin/'),
+			                               $virtualmin_shop_link_cat),
 			        'button_text' => $text{'scripts_gpl_pro_tip_hide2'},
 			        'button_icon' => 'fa fa-fw fa-heartbeat',
 			        'button_text2' => $text{'scripts_gpl_pro_tip_open'},
