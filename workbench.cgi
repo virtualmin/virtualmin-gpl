@@ -16,16 +16,18 @@ my $script = &get_script($sinfo->{'name'});
 $script || &error($text{'scripts_emissing'});
 # Error message
 &error("@{[&text('scripts_gpl_pro_tip_workbench_pro_only', $script->{'tmdesc'})]}
-        @{[&text('scripts_gpl_pro_tip_enroll_single', $virtualmin_shop_link)]}")
-                if (defined($in{'pro'}) && $in{'pro'} ne $virtualmin_pro);
+	@{[&text('scripts_gpl_pro_tip_enroll_single', $virtualmin_shop_link)]}")
+		if (defined($in{'pro'}) && $in{'pro'} ne $virtualmin_pro);
 # Run
 my $lib = "./pro/scripts/workbench-lib.pl";
 do $lib if (-r $lib);
 my $apply_func = $script->{'kit_apply_func'};
 if (defined(&$apply_func)) {
-        &$apply_func($d, \%in, $sinfo, $script);
-        }
+	&$apply_func($d, \%in, $sinfo, $script);
+	}
 else {
-        &error(&text('scripts_gpl_pro_tip_workbench_pro_only',
-                $script->{'tmdesc'}));
-        }
+	&error(&text('scripts_gpl_pro_tip_workbench_pro_only',
+	       $script->{'tmdesc'})." ".
+	       &text('scripts_gpl_pro_tip_enroll_dashboard',
+	             $virtualmin_shop_link_cat));
+	}
