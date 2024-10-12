@@ -340,7 +340,7 @@ else {
 		# Find home
 		if (&can_mailbox_home($user) &&
 		    $d && $d->{'home'} && !$in{'home_def'}) {
-			$in{'home'} =~ /\.\./ && &error($text{'user_ehome'});
+			$in{'home'} =~ /\.\.\// && &error($text{'user_ehome'});
 			$in{'home'} =~ /^\// && &error($text{'user_ehome2'});
 			if ($user->{'webowner'}) {
 				# Custom home directory for web FTP user
