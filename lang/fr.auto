@@ -2648,7 +2648,6 @@ scripts_gpl_pro_tip_extra_web_users=Ce formulaire vous permet de créer et de g�
 scripts_gpl_pro_tip_extra_db_users=Ce formulaire vous permet de créer et de gérer des utilisateurs de base de données de manière indépendante, sans créer de nouveau compte utilisateur Unix.
 scripts_gpl_pro_tip_extra_user_dismiss=Merci pour le conseil! Masquer cette page et son lien
 scripts_gpl_pro_tip_workbench_pro_only=La fonctionnalité $1 Workbench n'est pas disponible dans la version GPL.
-scripts_gpl_pro_tip_workbench_no_apply=La fonction $1 Workbench n'est pas disponible dans la version GPL
 
 scripts_service_ename=Nom de service manquant ou invalide
 scripts_service_eport=Numéro de port de service manquant ou invalide

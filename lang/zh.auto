@@ -2525,7 +2525,6 @@ scripts_gpl_pro_tip_extra_web_users=这种形式允许您独立创建和管理�
 scripts_gpl_pro_tip_extra_db_users=这种形式允许您独立创建和管理数据库用户，而无需创建新的 Unix 用户帐户。
 scripts_gpl_pro_tip_extra_user_dismiss=谢谢你的提示！隐藏此页面及其链接
 scripts_gpl_pro_tip_workbench_pro_only=$1 Workbench 功能在 GPL 版本中不可用。
-scripts_gpl_pro_tip_workbench_no_apply=$1 Workbench 函数在 GPL 版本中不可用
 
 scripts_service_ename=服务名称缺失或无效
 scripts_service_eport=服务端口号缺失或无效

@@ -1547,7 +1547,6 @@ scripts_gpl_pro_tip_extra_web_users=Met dit formulier kunt u onafhankelijk webse
 scripts_gpl_pro_tip_extra_db_users=Met dit formulier kunt u zelfstandig databasegebruikers aanmaken en beheren, zonder een nieuw Unix-gebruikersaccount aan te maken.
 scripts_gpl_pro_tip_extra_user_dismiss=Bedankt voor de tip! Verberg deze pagina en de link ervan
 scripts_gpl_pro_tip_workbench_pro_only=De $1 Workbench-functie is niet beschikbaar in de GPL-versie.
-scripts_gpl_pro_tip_workbench_no_apply=De $1 Workbench-functie is niet beschikbaar in de GPL-versie
 
 scripts_service_ename=Ontbrekende of ongeldige servicenaam
 scripts_service_eport=Ontbrekend of ongeldig servicepoortnummer
