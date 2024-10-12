@@ -2223,7 +2223,6 @@ scripts_gpl_pro_tip_extra_web_users=Mit diesem Formular können Sie Webserver-Be
 scripts_gpl_pro_tip_extra_db_users=Mit diesem Formular können Sie Datenbankbenutzer unabhängig erstellen und verwalten, ohne ein neues Unix-Benutzerkonto erstellen zu müssen.
 scripts_gpl_pro_tip_extra_user_dismiss=Danke für den Tipp! Verstecken Sie diese Seite und ihren Link
 scripts_gpl_pro_tip_workbench_pro_only=Die $1 Workbench-Funktion ist in der GPL-Version nicht verfügbar.
-scripts_gpl_pro_tip_workbench_no_apply=Die Funktion $1 Workbench ist in der GPL-Version nicht verfügbar
 
 scripts_service_ename=Fehlender oder ungültiger Dienstname
 scripts_service_eport=Fehlende oder ungültige Service-Portnummer

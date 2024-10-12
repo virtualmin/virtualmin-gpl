@@ -1324,7 +1324,6 @@ scripts_gpl_pro_tip_extra_web_users=Dette skjemaet lar deg opprette og administr
 scripts_gpl_pro_tip_extra_db_users=Dette skjemaet lar deg opprette og administrere databasebrukere uavhengig, uten å opprette en ny Unix-brukerkonto.
 scripts_gpl_pro_tip_extra_user_dismiss=Takk for tipset! Skjul denne siden og dens link
 scripts_gpl_pro_tip_workbench_pro_only=$1 Workbench-funksjonen er ikke tilgjengelig i GPL-versjonen.
-scripts_gpl_pro_tip_workbench_no_apply=$1 Workbench-funksjonen er ikke tilgjengelig i GPL-versjonen
 
 scripts_service_ename=Manglende eller ugyldig tjenestenavn
 scripts_service_eport=Manglende eller ugyldig tjenesteportnummer

@@ -4764,7 +4764,6 @@ scripts_gpl_pro_tip_extra_web_users=このフォームを使用すると、新�
 scripts_gpl_pro_tip_extra_db_users=このフォームを使用すると、新しい Unix ユーザー アカウントを作成せずに、データベース ユーザーを個別に作成および管理できます。
 scripts_gpl_pro_tip_extra_user_dismiss=ヒントをありがとう！このページとそのリンクを非表示にする
 scripts_gpl_pro_tip_workbench_pro_only=$1 ワークベンチ機能は GPL バージョンでは使用できません。
-scripts_gpl_pro_tip_workbench_no_apply=$1 ワークベンチ機能は GPL バージョンでは使用できません
 
 scripts_service_ename=サービス名が欠落しているか無効です
 scripts_service_eport=サービスポート番号が欠落しているか無効です

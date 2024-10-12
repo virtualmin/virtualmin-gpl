@@ -2704,7 +2704,6 @@ scripts_gpl_pro_tip_extra_web_users=Bu form, yeni bir Unix kullanıcı hesabı o
 scripts_gpl_pro_tip_extra_db_users=Bu form, yeni bir Unix kullanıcı hesabı oluşturmadan veritabanı kullanıcılarını bağımsız olarak oluşturmanıza ve yönetmenize olanak tanır.
 scripts_gpl_pro_tip_extra_user_dismiss=Bahşiş için teşekkürler! Bu sayfayı ve bağlantısını gizle
 scripts_gpl_pro_tip_workbench_pro_only=$1 Workbench özelliği GPL sürümünde mevcut değildir.
-scripts_gpl_pro_tip_workbench_no_apply=$1 Workbench işlevi GPL sürümünde mevcut değildir
 
 scripts_service_ename=Eksik veya geçersiz hizmet adı
 scripts_service_eport=Eksik veya geçersiz hizmet bağlantı noktası numarası

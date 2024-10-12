@@ -4764,7 +4764,6 @@ scripts_gpl_pro_tip_extra_web_users=Tento formulár vám umožňuje vytvárať a
 scripts_gpl_pro_tip_extra_db_users=Tento formulár vám umožňuje vytvárať a spravovať používateľov databázy nezávisle, bez vytvárania nového používateľského účtu Unix.
 scripts_gpl_pro_tip_extra_user_dismiss=Ďakujem za tip! Skryť túto stránku a jej odkaz
 scripts_gpl_pro_tip_workbench_pro_only=Funkcia $1 Workbench nie je dostupná vo verzii GPL.
-scripts_gpl_pro_tip_workbench_no_apply=Funkcia $1 Workbench nie je dostupná vo verzii GPL
 
 scripts_service_ename=Chýbajúci alebo neplatný názov služby
 scripts_service_eport=Chýbajúce alebo neplatné číslo portu služby

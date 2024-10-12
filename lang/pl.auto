@@ -4158,7 +4158,6 @@ scripts_gpl_pro_tip_extra_web_users=Formularz ten umożliwia samodzielne tworzen
 scripts_gpl_pro_tip_extra_db_users=Formularz ten umożliwia samodzielne tworzenie i zarządzanie użytkownikami bazy danych, bez konieczności tworzenia nowego konta użytkownika Uniksa.
 scripts_gpl_pro_tip_extra_user_dismiss=Dzięki za wskazówkę! Ukryj tę stronę i jej link
 scripts_gpl_pro_tip_workbench_pro_only=Funkcja $1 Workbench nie jest dostępna w wersji GPL.
-scripts_gpl_pro_tip_workbench_no_apply=Funkcja $1 Workbench nie jest dostępna w wersji GPL
 
 scripts_service_ename=Brakująca lub nieprawidłowa nazwa usługi
 scripts_service_eport=Brakujący lub nieprawidłowy numer portu usługi
