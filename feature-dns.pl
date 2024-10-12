@@ -777,8 +777,9 @@ sub modify_dns
 my ($d, $oldd) = @_;
 my $tmpl = &get_template($d->{'template'});
 
+my $subof = $d->{'dns_submode'} ? &get_domain($d->{'dns_subof'}) : undef;
 if (!$d->{'subdom'} && $oldd->{'subdom'} && $d->{'dns_submode'} ||
-    !&under_parent_domain($d) && $d->{'dns_submode'}) {
+    !&under_parent_domain($d, $subof) && $d->{'dns_submode'}) {
 	# Converting from a sub-domain to top-level .. first move the records
 	# out into their own file
 	&$first_print($text{'save_dns8'});
