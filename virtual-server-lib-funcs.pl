@@ -2808,6 +2808,7 @@ sub delete_user_home
 {
 local ($user, $d) = @_;
 if (-d $user->{'home'} &&
+    !&same_file($user->{'home'}, $d->{'home'}) &&
     &safe_delete_dir($d, $user->{'home'})) {
 	&system_logged("rm -rf ".quotemeta($user->{'home'}));
 	}
