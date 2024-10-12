@@ -818,11 +818,11 @@ if ($d) {
 	local @subdoms;
 	if ($d->{'parent'}) {
 		# This is a subdomain - exclude parent domain users
-		@users = grep { $_->{'home'} =~ /^$d->{'home'}\// } @users;
+		@users = grep { $_->{'home'} =~ /^$d->{'home'}(\/|$)/ } @users;
 		}
 	elsif (@subdoms = &get_domain_by("parent", $d->{'id'})) {
 		# This domain has subdomains - exclude their users
-		@users = grep { $_->{'home'} !~ /^$d->{'home'}\/domains\// } @users;
+		@users = grep { $_->{'home'} !~ /^$d->{'home'}\/domains(\/|$)/ } @users;
 		}
 	@users = grep { !$_->{'domainowner'} } @users
 		if ($skipunix || $d->{'parent'});
