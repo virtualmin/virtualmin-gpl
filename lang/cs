@@ -410,13 +410,7 @@ import_db_mysql=Názvy MySQL databází
 import_db_postgres=Názvy PostgreSQL databází
 import_ip=IP adresa používaná Apache a DNS
 
-import_enoip=Zadaná IP adresa není aktivní na Vašem systému.
-import_eipclash=Zadaná IP adresa je již používána doménou $1 .
 import_ereal=Zadaná IP adresa je používána rozhraním $1, které není virtuální
-import_nomysql=Nebyla nalezena žádná MySQL databáze $1.
-import_nopostgres=Nebyla nalezena žádná PostgreSQL databáze $1.
-import_novirt=Žádné unikátní virtuální IP adresy pro tuto doménu.
-import_user3=Zada
 import_dirs=Vytvářím adresáře v domovském adresáři
 import_home=Domovský adresář
 import_ehome=Neplatný nebo chybějící domovský adresář

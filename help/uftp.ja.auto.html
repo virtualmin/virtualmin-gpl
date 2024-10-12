@@ -1,1 +1,2 @@
-<header> FTPログインは有効ですか？ </header>このオプションを[はい]に設定すると、ユーザーにシェルが提供されます<exec %c = &foreign_config($module); $c{'ftp_shell'}> 、FTP経由でログインできるようにします。いいえに設定すると、彼のシェルは<exec %c = &foreign_config($module); $c{'shell'}>代わりに、FTPログインは拒否されます。 <p>これは、FTPシェルが<tt>/etc/shells</tt>ファイルにリストされているか、システムで実行されているFTPサーバーによって許可されていることを前提としています。 <p><hr>
+<header>FTP ログインは有効ですか?</header>このオプションを「はい」に設定すると、ユーザーにはシェルが提供されます<exec %c = &foreign_config($module); $c{'ftp_shell'}>FTP経由でログインできるようになります。「いいえ」に設定すると、シェルは次のように設定されます。<exec %c = &foreign_config($module); $c{'shell'}>代わりに、FTP ログインは拒否されます。<p>これは、FTP シェルが<tt>/etc/shells</tt>ファイルにリストされているか、システムで実行されている FTP サーバーによって許可されていることを前提としています。<p><hr>
+
