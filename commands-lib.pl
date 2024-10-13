@@ -327,7 +327,8 @@ while (@params) {
 		# Parameter requires a value and can be specified multiple times
 		$params{$param} = 2;
 		}
-	elsif (exists($item->{'req'}) && $item->{'req'} == 1) {
+	elsif (exists($item->{'req'}) && $item->{'req'} == 1 ||
+	       exists($item->{'value'})) {
 		# Parameter requires a value
 		$params{$param} = 1;
 		}
