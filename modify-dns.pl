@@ -48,10 +48,11 @@ single parameter containing the name and type of the record(s) to delete. You
 can also optionally include the record values, to disambiguate records with
 the same name but different values (like MX records).
 
-You can also update an existing record with the C<--update-record> flag,
-which must be followed by two parameters. First is the current name and type,
-and second is the new name, type and values.  The record addition, modification
-and deletion flags can be given multiple times.
+You can also update an existing record with the C<--update-record> flag, which
+must be followed by five parameters enclosed in quote. First and second are the
+current name and type, third, fourth and fifth are the new name, type and
+values. The record addition, modification and deletion flags can be given
+multiple times.
 
 Similarly, the default TTL for records can be set with the C<--ttl> flag
 followed by a number in seconds. Suffixes like h, m and d are also allowed
@@ -108,8 +109,9 @@ package virtual_server;
 # Params factory
 my $usage = [
   {
-    param => "domain",
     req => 1,
+    reuse => 1,
+    param => "domain",
     value => "name",
     values => [
       {
@@ -227,15 +229,18 @@ my $usage = [
   },
   {
     param => "update-record",
-    value => "'oldname oldtype' 'newname newtype newvalue'"
+    value => "'oldname oldtype newname newtype newvalue'"
   },
   {
     param => "ttl",
-    value => "seconds"
+    value => "s|m|h|d"
   },
   {
     param => "all-ttl",
-    value => "seconds"
+    value => "s|m|h|d"
+  },
+  {
+    param => "increment-soa",
   },
   {
     param => "add-slave",
@@ -334,191 +339,209 @@ if (!$module_name) {
 $config{'dns'} || &usage("The BIND DNS server is not enabled for Virtualmin");
 &set_all_text_print();
 
-# Parse command-line args
-while(@ARGV > 0) {
-	local $a = shift(@ARGV);
-	if ($a eq "--domain") {
-		push(@dnames, shift(@ARGV));
+# Return passed parameters or throw an error
+my $flags = &parse_cli_args(\@ARGV, $usage);
+
+# We have the params, see what needs to be done
+foreach my $a (keys %{$flags}) {
+	if ($a eq "domain") {
+		foreach my $dom (@{$flags->{$a}}) {
+			push(@dnames, $dom);
+			}
 		}
-	elsif ($a eq "--all-domains") {
+	elsif ($a eq "all-domains") {
 		$all_doms = 1;
 		}
-	elsif ($a eq "--all-nonvirt-domains") {
+	elsif ($a eq "all-nonvirt-domains") {
 		$all_doms = 2;
 		}
-	elsif ($a eq "--spf") {
+	elsif ($a eq "spf") {
 		$spf = 1;
 		}
-	elsif ($a eq "--no-spf") {
+	elsif ($a eq "no-spf") {
 		$spf = 0;
 		}
-	elsif ($a =~ /^--spf-add-(a|mx|ip4|ip6|include)$/) {
-		$add = shift(@ARGV);
+	elsif ($a =~ /^spf-add-(a|mx|ip4|ip6|include)$/) {
 		$type = $1;
-		$add =~ /^[a-z0-9\.\-\_:]+$/ ||
-		    &usage("$a must be followed by a hostname or IP address");
-		push(@{$add{$type}}, $add);
+		foreach my $add (@{$flags->{$a}}) {
+			$add =~ /^[a-z0-9\.\-\_:]+$/ ||
+			    &usage($usage, "--$a must be followed by a hostname or IP address");
+			push(@{$add{$type}}, $add);
+			}
 		}
-	elsif ($a =~ /^--spf-remove-(a|mx|ip4|ip6|include)$/) {
-		$rem = shift(@ARGV);
+	elsif ($a =~ /^spf-remove-(a|mx|ip4|ip6|include)$/) {
 		$type = $1;
-		$rem =~ /^[a-z0-9\.\-\_:]+$/ ||
-		    &usage("$a must be followed by a hostname or IP address");
-		push(@{$rem{$type}}, $rem);
+		foreach my $rem (@{$flags->{$a}}) {
+			$rem =~ /^[a-z0-9\.\-\_:]+$/ ||
+			    &usage($usage, "--$a must be followed by a hostname or IP address");
+			push(@{$rem{$type}}, $rem);
+			}
 		}
-	elsif ($a =~ /^--spf-all-(disallow|discourage|neutral|allow|default)$/){
+	elsif ($a =~ /^spf-all-(disallow|discourage|neutral|allow|default)$/){
 		$spfall = $1 eq "disallow" ? 3 :
 			  $1 eq "discourage" ? 2 :
 			  $1 eq "neutral" ? 1 :
 			  $1 eq "allow" ? 0 : -1;
 		}
-	elsif ($a eq "--dmarc") {
+	elsif ($a eq "dmarc") {
 		$dmarc = 1;
 		}
-	elsif ($a eq "--no-dmarc") {
+	elsif ($a eq "no-dmarc") {
 		$dmarc = 0;
 		}
-	elsif ($a eq "--dmarc-policy") {
-		$dmarcp = shift(@ARGV);
+	elsif ($a eq "dmarc-policy") {
+		$dmarcp = $flags->{$a};
 		$dmarcp =~ /^(none|reject|quarantine)$/ ||
 			&usage("--dmarc-policy must be followed by none, ".
 			       "reject or quarantine");
 		}
-	elsif ($a eq "--dmarc-percent") {
-		$dmarcpct = shift(@ARGV);
+	elsif ($a eq "dmarc-percent") {
+		$dmarcpct = $flags->{$a};
 		$dmarcpct =~ /^\d+$/ && $dmarcpct >= 0 && $dmarcpct <= 100 ||
 			&usage("--dmarc-percent must be followed by an ".
 			       "integer between 0 and 100");
 		}
-	elsif ($a eq "--dmarc-rua") {
-		$dmarcrua = shift(@ARGV);
+	elsif ($a eq "dmarc-rua") {
+		$dmarcrua = $flags->{$a};
 		$dmarcrua =~ /^mailto:\S+\@\S+$/ ||
 			&usage("--dmarc-rua must be followed by an address ".
 			       "formatted like mailto:user\@domain");
 		}
-	elsif ($a eq "--no-dmarc-rua") {
+	elsif ($a eq "no-dmarc-rua") {
 		$dmarcrua = "";
 		}
-	elsif ($a eq "--dmarc-ruf") {
-		$dmarcruf = shift(@ARGV);
+	elsif ($a eq "dmarc-ruf") {
+		$dmarcruf = $flags->{$a};
 		$dmarcruf =~ /^mailto:\S+\@\S+$/ ||
 			&usage("--dmarc-ruf must be followed by an address ".
 			       "formatted like mailto:user\@domain");
 		}
-	elsif ($a eq "--no-dmarc-ruf") {
+	elsif ($a eq "no-dmarc-ruf") {
 		$dmarcruf = "";
 		}
-	elsif ($a eq "--dns-ip") {
-		$dns_ip = shift(@ARGV);
+	elsif ($a eq "dns-ip") {
+		$dns_ip = $flags->{$a};
 		&check_ipaddress($dns_ip) ||
 			&usage("--dns-ip must be followed by an IP address");
 		}
-	elsif ($a eq "--no-dns-ip") {
+	elsif ($a eq "no-dns-ip") {
 		$dns_ip = "";
 		}
-	elsif ($a eq "--add-record") {
-		my ($name, $type, @values) = split(/\s+/, shift(@ARGV));
-		$name && $type && @values || &usage("--add-record must be followed by the record name, type and values, all in one parameter");
+	elsif ($a eq "add-record") {
+		my ($name, $type, @values) = split(/\s+/, $flags->{$a});
+		$name && $type && @values ||
+			&usage("--add-record must be followed by the record name, type and values, all in one parameter");
 		push(@addrecs, [ $name, $type, undef, \@values, 0 ]);
 		}
-	elsif ($a eq "--add-record-with-ttl") {
-		my ($name, $type, $ttl, @values) = split(/\s+/, shift(@ARGV));
-		$name && $type && $ttl && @values || &usage("--add-record-with-ttl must be followed by the record name, type, TTL and values, all in one parameter");
+	elsif ($a eq "add-record-with-ttl") {
+		my ($name, $type, $ttl, @values) = split(/\s+/, $flags->{$a});
+		$name && $type && $ttl && @values ||
+			&usage("--add-record-with-ttl must be followed by the record name, type, TTL and values, all in one parameter");
 		push(@addrecs, [ $name, $type, $ttl, \@values, 0 ]);
 		}
-	elsif ($a eq "--add-proxied-record") {
-		my ($name, $type, @values) = split(/\s+/, shift(@ARGV));
-		$name && $type && @values || &usage("--add-proxied-record must be followed by the record name, type and values, all in one parameter");
+	elsif ($a eq "add-proxy-record") {
+		my ($name, $type, @values) = split(/\s+/, $flags->{$a});
+		$name && $type && @values ||
+			&usage("--add-proxy-record must be followed by the record name, type and values, all in one parameter");
 		push(@addrecs, [ $name, $type, undef, \@values, 1 ]);
 		}
-	elsif ($a eq "--remove-record") {
-		my ($name, $type, @values) = split(/\s+/, shift(@ARGV));
-		$name && $type || &usage("--remove-record must be followed by the record name and type, all in one parameter");
+	elsif ($a eq "remove-record") {
+		my ($name, $type, @values) = split(/\s+/, $flags->{$a});
+		$name && $type ||
+			&usage("--remove-record must be followed by the record name and type, all in one parameter");
 		push(@delrecs, [ $name, $type, @values ]);
 		}
-	elsif ($a eq "--update-record") {
-		my ($oldname, $oldtype) = split(/\s+/, shift(@ARGV));
-		my ($name, $type, @values) = split(/\s+/, shift(@ARGV));
-		$oldname && $oldtype || &usage("--update-record must be followed by the original record name and type, all in one parameter");
-		$name && $type && @values || &usage("--update-record must be followed by the new record name, type and values, all in one parameter");
-                push(@uprecs, [ $oldname, $oldtype, $name, $type, undef, \@values, 0 ]);
+	elsif ($a eq "update-record") {
+		my ($oldname, $oldtype, $name, $type, @values) =
+			split(/\s+/, $flags->{$a});
+		$oldname && $oldtype ||
+			&usage("--update-record must be followed by the original record name and type, all in one parameter");
+		$name && $type && @values ||
+			&usage("--update-record must be followed by the new record name, type and values, all in one parameter");
+		push(@uprecs, [ $oldname, $oldtype, $name, $type, undef, \@values, 0 ]);
 		}
-	elsif ($a eq "--ttl") {
-		$ttl = shift(@ARGV);
-		$ttl =~ /^\d+(s|m|h|d)?$/ || &usage("--ttl must be followed by a number with a valid suffix");
+	elsif ($a eq "ttl") {
+		$ttl = $flags->{$a};
+		$ttl =~ /^\d+(s|m|h|d)?$/ ||
+			&usage("--ttl must be followed by a number with a valid suffix");
 		}
-	elsif ($a eq "--all-ttl") {
-		$allttl = shift(@ARGV);
-		$allttl =~ /^\d+(s|m|h|d)?$/ || &usage("--all-ttl must be followed by a number with a valid suffix");
+	elsif ($a eq "all-ttl") {
+		$allttl = $flags->{$a};
+		$allttl =~ /^\d+(s|m|h|d)?$/ ||
+			&usage("--all-ttl must be followed by a number with a valid suffix");
 		$ttl = $allttl;
 		}
-	elsif ($a eq "--increment-soa") {
+	elsif ($a eq "increment-soa") {
 		$bumpsoa = 1;
 		}
-	elsif ($a eq "--add-slave") {
-		push(@addslaves, shift(@ARGV));
+	elsif ($a eq "add-slave") {
+		foreach my $flag (@{$flags->{$a}}) {
+			push(@addslaves, $flag);
+			}
 		}
-	elsif ($a eq "--remove-slave") {
-		push(@delslaves, shift(@ARGV));
+	elsif ($a eq "remove-slave") {
+		foreach my $flag (@{$flags->{$a}}) {
+			push(@delslaves, $flag);
+			}
 		}
-	elsif ($a eq "--add-all-slaves") {
+	elsif ($a eq "add-all-slaves") {
 		$addallslaves = 1;
 		}
-	elsif ($a eq "--sync-all-slaves") {
+	elsif ($a eq "sync-all-slaves") {
 		$syncallslaves = 1;
 		}
-	elsif ($a eq "--enable-dnssec") {
+	elsif ($a eq "enable-dnssec") {
 		$dnssec = 1;
 		}
-	elsif ($a eq "--disable-dnssec") {
+	elsif ($a eq "disable-dnssec") {
 		$dnssec = 0;
 		}
-	elsif ($a eq "--enable-tlsa") {
+	elsif ($a eq "enable-tlsa") {
 		$tlsa = 1;
 		}
-	elsif ($a eq "--disable-tlsa") {
+	elsif ($a eq "disable-tlsa") {
 		$tlsa = 0;
 		}
-	elsif ($a eq "--sync-tlsa") {
+	elsif ($a eq "sync-tlsa") {
 		$tlsa = 2;
 		}
-	elsif ($a eq "--enable-subdomain") {
+	elsif ($a eq "enable-subdomain") {
 		$submode = 1;
 		}
-	elsif ($a eq "--disable-subdomain") {
+	elsif ($a eq "disable-subdomain") {
 		$submode = 0;
 		}
-	elsif ($a eq "--multiline") {
+	elsif ($a eq "multiline") {
 		$multiline = 1;
 		}
-	elsif ($a eq "--cloud-dns") {
-		$clouddns = shift(@ARGV);
+	elsif ($a eq "cloud-dns") {
+		$clouddns = $flags->{$a};
 		}
-	elsif ($a eq "--cloud-dns-import") {
+	elsif ($a eq "cloud-dns-import") {
 		$clouddns_import = 1;
 		}
-	elsif ($a eq "--remote-dns") {
-		$remotedns = shift(@ARGV);
+	elsif ($a eq "remote-dns") {
+		$remotedns = $flags->{$a};
 		}
-	elsif ($a eq "--local-dns") {
+	elsif ($a eq "local-dns") {
 		$remotedns = "";
 		}
-	elsif ($a eq "--add-parent-ds") {
+	elsif ($a eq "add-parent-ds") {
 		$parentds = 1;
 		}
-	elsif ($a eq "--remove-parent-ds") {
+	elsif ($a eq "remove-parent-ds") {
 		$parentds = 0;
 		}
-	elsif ($a eq "--enable-dkim") {
+	elsif ($a eq "enable-dkim") {
 		$dkim_enabled = 1;
 		}
-	elsif ($a eq "--disable-dkim") {
+	elsif ($a eq "disable-dkim") {
 		$dkim_enabled = 0;
 		}
-	elsif ($a eq "--default-dkim") {
+	elsif ($a eq "default-dkim") {
 		$dkim_enabled = 2;
 		}
-	elsif ($a eq "--help") {
+	elsif ($a eq "help") {
 		&usage();
 		}
 	else {
