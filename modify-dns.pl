@@ -106,7 +106,7 @@ the default state for this domain with C<--default-dkim>.
 package virtual_server;
 
 # Params factory
-my @usage = [
+my $usage = [
   {
     param => "domain",
     req => 1,
