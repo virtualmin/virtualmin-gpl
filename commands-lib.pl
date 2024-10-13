@@ -321,7 +321,8 @@ my @params = @{$usage_params_ref};
 while (@params) {
 	my $item = shift(@params);
 	my $param = $item->{'param'};
-	next if (!defined($param)); # Should not happen
+	# Check if an actual param and not metadata
+	next if (!defined($param));
 	# Determine the parameter type based on 'req' and 'reuse' keys
 	if (exists($item->{'reuse'}) && $item->{'reuse'} == 1) {
 		# Parameter requires a value and can be specified multiple times
@@ -349,7 +350,7 @@ for (my $i = 0; $i < @args;) {
 	my $arg = $args[$i];  # Current argument
 	# Handle the '--help' flag separately to display usage information
 	if ($arg eq '--help' || $arg eq '-h') {
-		&usage();  # Display usage and exit
+		&usage($usage_params_ref);  # Display usage and exit
 		}
 	# Check if the argument starts with '--', indicating a parameter
 	elsif ($arg =~ /^--(.+)/) {
@@ -386,8 +387,9 @@ for (my $i = 0; $i < @args;) {
 				elsif ($param_type == 1 || $param_type == 2) {
 					# Parameter requires a value but none
 					# was provided
-					&usage("Error: Parameter '--$param' ".
-					       "requires a value");
+					&usage($usage_params_ref, 
+					       "Error: Parameter '--$param' ".
+					           "requires a value");
 					}
 				elsif ($param_type == 3) {
 					# Parameter may optionally take a value
@@ -425,18 +427,129 @@ for (my $i = 0; $i < @args;) {
 			}
 		else {
 			# Parameter is not recognized; display an error
-			&usage("Unknown parameter '--$param'");
+			&usage($usage_params_ref, 
+			       "Unknown parameter '--$param'");
 			}
 		}
 	else {
 		# Argument does not start with '--' and is not a value for a
 		# parameter This is an unknown or misplaced parameter
-		&usage("Unknown parameter '$arg'");
+		&usage($usage_params_ref, "Unknown parameter '$arg'");
 		}
 	# Move to the next argument
 	$i++;
 	}
 return \%flags;
+}
+
+# usage(&usage_data)
+# Prints the usage information for the current command, including
+# options dynamically
+sub usage
+{
+my ($usage_data, $error_msg) = @_;
+# Compose the base command and padding length
+my ($program) = $0 =~ m|/([^/]+)\.pl$|;
+my ($helper_command) = &get_api_helper_command() =~ m|/([^/]+)$|;
+my ($description) = grep { $_->{'desc'} } @{$usage_data};
+my $base_cmd = "$helper_command $program";
+my $padding_length = length($base_cmd);
+
+# Print the base command
+print "$error_msg\n\n" if ($error_msg);
+print "$description->{'desc'}\n\n";
+print "$base_cmd ";
+
+# Build usage parameters to print
+for (my $i = 0; $i < @$usage_data; $i++) {
+	my $param = $usage_data->[$i];
+	my $param_name = $param->{'param'};
+	# Check if an actual param and not metadata
+	next if (!defined($param_name));
+	# Add dynamic padding based on command length
+	my $param_str = ' ' x $padding_length if ($i > 0);
+	# Grouping logic
+	my $next_param_grouping = 0;
+	{
+		# Group if next parameter is a --no counterpart
+		if ($i + 1 < @$usage_data &&
+		    $usage_data->[$i + 1]->{'param'} =~ /^no-/) {
+			$next_param_grouping = 1;
+			}
+		# Group if next parameter is --disable
+		elsif ($i + 1 < @$usage_data &&
+		       $usage_data->[$i + 1]->{'param'} =~ /^disable-/) {
+			$next_param_grouping = 1;
+			}
+	}
+	# Handle required params (no brackets)
+	if ($param->{'req'}) {
+		$param_str .= '--' . $param->{'param'};
+		}
+	else {
+		$param_str .= '[--' . $param->{'param'};
+		}
+	# If the parameter requires a value
+	if (exists $param->{'value'}) {
+		my $value = $param->{'value'};
+		$value =~ s/'/"/g;
+		$param_str .= ' ' . $value;
+		}
+	# If there's a --no- version following, append it
+	if ($next_param_grouping) {
+		for (my $ii = 1; $ii <= $next_param_grouping; $ii++) {
+			my $grouped_param_name =
+				$usage_data->[$i + $ii]->{'param'};
+			$param_str .= " | --$grouped_param_name";
+			}
+		# Skip the next parameter since it's being handled here
+		$i = $i + $next_param_grouping;
+		}
+	my $values = exists($param->{'values'}) ? $param->{'values'} : 0;
+	# Close the square brackets if the main param is not required and no
+	# values are present
+	$param_str .= ']' if (!$param->{'req'} && !$values);
+	# Add asterisk for reusable parameters
+	$param_str .= '*' if ($param->{'reuse'});
+	# Print the parameter line
+	print "$param_str";
+	# New line unless no more params in values
+	print "\n" if (!$values);
+	# Handle any nested values (e.g., multiple possible values for a parameter)
+	if ($values) {
+		my $values_length = scalar(@$values);
+		my $subparam_str = '';
+		for (my $i = 0; $i < $values_length; $i++) {
+			my $subparam = $values->[$i];
+			# Break line if it exceeds 80 characters
+			my $nl = 0;
+			if (length($base_cmd) +
+			    length($param_str) + length($subparam_str) +
+			    length($subparam->{'param'}) + 2 > 80) {
+				$nl = 1;
+				}
+			if ($nl) {
+				$subparam_str .= "\n".' ' x $padding_length;
+				}
+			else {
+				$subparam_str .= ' | ';
+				}
+			# If the main param is required, the subparam is
+			# also required
+			if ($param->{'req'}) {
+				$subparam_str .= '--' . $subparam->{param};
+				}
+			else {
+				$subparam_str .= '[--' . $subparam->{param} . ']';
+				}
+			# New line unless no more subparams
+			$subparam_str .= "\n" if ($i == $values_length - 1);
+			}
+		# Print the subparameter line
+		print "$subparam_str";
+		}
+	}
+exit(1);
 }
 
 # cli_convert_remote_format(format)

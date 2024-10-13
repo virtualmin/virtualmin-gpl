@@ -314,11 +314,11 @@ my $usage = [
   },
   {
     param => "default-dkim"
+  },
+  {
+    desc => "Changes DNS settings for one or more domains."
   }
 ];
-
-# Program simple description
-my $usagedesc = 'Changes DNS settings for one or more domains.';
 
 if (!$module_name) {
 	$main::no_acl_check++;
@@ -336,7 +336,8 @@ if (!$module_name) {
 	}
 &require_bind();
 @OLDARGV = @ARGV;
-$config{'dns'} || &usage("The BIND DNS server is not enabled for Virtualmin");
+$config{'dns'} ||
+	&usage($usage, "The BIND DNS server is not enabled for Virtualmin");
 &set_all_text_print();
 
 # Return passed parameters or throw an error
@@ -392,19 +393,19 @@ foreach my $a (keys %{$flags}) {
 	elsif ($a eq "dmarc-policy") {
 		$dmarcp = $flags->{$a};
 		$dmarcp =~ /^(none|reject|quarantine)$/ ||
-			&usage("--dmarc-policy must be followed by none, ".
+			&usage($usage, "--dmarc-policy must be followed by none, ".
 			       "reject or quarantine");
 		}
 	elsif ($a eq "dmarc-percent") {
 		$dmarcpct = $flags->{$a};
 		$dmarcpct =~ /^\d+$/ && $dmarcpct >= 0 && $dmarcpct <= 100 ||
-			&usage("--dmarc-percent must be followed by an ".
+			&usage($usage, "--dmarc-percent must be followed by an ".
 			       "integer between 0 and 100");
 		}
 	elsif ($a eq "dmarc-rua") {
 		$dmarcrua = $flags->{$a};
 		$dmarcrua =~ /^mailto:\S+\@\S+$/ ||
-			&usage("--dmarc-rua must be followed by an address ".
+			&usage($usage, "--dmarc-rua must be followed by an address ".
 			       "formatted like mailto:user\@domain");
 		}
 	elsif ($a eq "no-dmarc-rua") {
@@ -413,7 +414,7 @@ foreach my $a (keys %{$flags}) {
 	elsif ($a eq "dmarc-ruf") {
 		$dmarcruf = $flags->{$a};
 		$dmarcruf =~ /^mailto:\S+\@\S+$/ ||
-			&usage("--dmarc-ruf must be followed by an address ".
+			&usage($usage, "--dmarc-ruf must be followed by an address ".
 			       "formatted like mailto:user\@domain");
 		}
 	elsif ($a eq "no-dmarc-ruf") {
@@ -422,7 +423,7 @@ foreach my $a (keys %{$flags}) {
 	elsif ($a eq "dns-ip") {
 		$dns_ip = $flags->{$a};
 		&check_ipaddress($dns_ip) ||
-			&usage("--dns-ip must be followed by an IP address");
+			&usage($usage, "--dns-ip must be followed by an IP address");
 		}
 	elsif ($a eq "no-dns-ip") {
 		$dns_ip = "";
@@ -430,45 +431,45 @@ foreach my $a (keys %{$flags}) {
 	elsif ($a eq "add-record") {
 		my ($name, $type, @values) = split(/\s+/, $flags->{$a});
 		$name && $type && @values ||
-			&usage("--add-record must be followed by the record name, type and values, all in one parameter");
+			&usage($usage, "--add-record must be followed by the record name, type and values, all in one parameter");
 		push(@addrecs, [ $name, $type, undef, \@values, 0 ]);
 		}
 	elsif ($a eq "add-record-with-ttl") {
 		my ($name, $type, $ttl, @values) = split(/\s+/, $flags->{$a});
 		$name && $type && $ttl && @values ||
-			&usage("--add-record-with-ttl must be followed by the record name, type, TTL and values, all in one parameter");
+			&usage($usage, "--add-record-with-ttl must be followed by the record name, type, TTL and values, all in one parameter");
 		push(@addrecs, [ $name, $type, $ttl, \@values, 0 ]);
 		}
 	elsif ($a eq "add-proxy-record") {
 		my ($name, $type, @values) = split(/\s+/, $flags->{$a});
 		$name && $type && @values ||
-			&usage("--add-proxy-record must be followed by the record name, type and values, all in one parameter");
+			&usage($usage, "--add-proxy-record must be followed by the record name, type and values, all in one parameter");
 		push(@addrecs, [ $name, $type, undef, \@values, 1 ]);
 		}
 	elsif ($a eq "remove-record") {
 		my ($name, $type, @values) = split(/\s+/, $flags->{$a});
 		$name && $type ||
-			&usage("--remove-record must be followed by the record name and type, all in one parameter");
+			&usage($usage, "--remove-record must be followed by the record name and type, all in one parameter");
 		push(@delrecs, [ $name, $type, @values ]);
 		}
 	elsif ($a eq "update-record") {
 		my ($oldname, $oldtype, $name, $type, @values) =
 			split(/\s+/, $flags->{$a});
 		$oldname && $oldtype ||
-			&usage("--update-record must be followed by the original record name and type, all in one parameter");
+			&usage($usage, "--update-record must be followed by the original record name and type, all in one parameter");
 		$name && $type && @values ||
-			&usage("--update-record must be followed by the new record name, type and values, all in one parameter");
+			&usage($usage, "--update-record must be followed by the new record name, type and values, all in one parameter");
 		push(@uprecs, [ $oldname, $oldtype, $name, $type, undef, \@values, 0 ]);
 		}
 	elsif ($a eq "ttl") {
 		$ttl = $flags->{$a};
 		$ttl =~ /^\d+(s|m|h|d)?$/ ||
-			&usage("--ttl must be followed by a number with a valid suffix");
+			&usage($usage, "--ttl must be followed by a number with a valid suffix");
 		}
 	elsif ($a eq "all-ttl") {
 		$allttl = $flags->{$a};
 		$allttl =~ /^\d+(s|m|h|d)?$/ ||
-			&usage("--all-ttl must be followed by a number with a valid suffix");
+			&usage($usage, "--all-ttl must be followed by a number with a valid suffix");
 		$ttl = $allttl;
 		}
 	elsif ($a eq "increment-soa") {
@@ -542,13 +543,13 @@ foreach my $a (keys %{$flags}) {
 		$dkim_enabled = 2;
 		}
 	elsif ($a eq "help") {
-		&usage();
+		&usage($usage);
 		}
 	else {
-		&usage("Unknown parameter $a");
+		&usage($usage, "Unknown parameter $a");
 		}
 	}
-@dnames || $all_doms || usage("No domains specified");
+@dnames || $all_doms || usage($usage, "No domains specified");
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   @addrecs || @delrecs || @uprecs ||
   @addslaves || @delslaves || $addallslaves || $ttl ||
@@ -556,7 +557,7 @@ defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   defined($dmarcrua) || defined($dmarcruf) ||
   defined($tlsa) || $syncallslaves || defined($submode) || $clouddns ||
   defined($remotedns) || defined($parentds) || defined($clouddns_import) ||
-  defined($dkim_enabled) || &usage("Nothing to do");
+  defined($dkim_enabled) || &usage($usage, "Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -568,8 +569,8 @@ elsif ($all_doms == 2) {
 else {
 	foreach $n (@dnames) {
 		$d = &get_domain_by("dom", $n);
-		$d || &usage("Domain $n does not exist");
-		$d->{'dns'} || &usage("Virtual server $n does not have a DNS domain");
+		$d || &usage($usage, "Domain $n does not exist");
+		$d->{'dns'} || &usage($usage, "Virtual server $n does not have a DNS domain");
 		push(@doms, $d);
 		}
 	}
@@ -577,41 +578,41 @@ else {
 # Validate slave args
 &require_bind();
 if (@addslaves && $addallslaves) {
-	&usage("Both --add-slave and --add-all-slaves cannot be specified at the same time");
+	&usage($usage, "Both --add-slave and --add-all-slaves cannot be specified at the same time");
 	}
 @slaveservers = &bind8::list_slave_servers();
 if ($addallslaves) {
 	@addslaves = map { $_->{'host'} } @slaveservers;
-	@addslaves || &usage("No slave DNS servers have been setup in Webmin's BIND module");
+	@addslaves || &usage($usage, "No slave DNS servers have been setup in Webmin's BIND module");
 	}
 elsif (@addslaves) {
 	foreach $s (@addslaves) {
 		($ss) = grep { $_->{'host'} eq $s } @slaveservers;
-		$ss || &usage("No slave DNS server with hostname $s exists");
+		$ss || &usage($usage, "No slave DNS server with hostname $s exists");
 		}
 	}
 if (@delslaves) {
 	foreach $s (@delslaves) {
 		($ss) = grep { $_->{'host'} eq $s } @slaveservers;
-		$ss || &usage("No slave DNS server with hostname $s exists");
+		$ss || &usage($usage, "No slave DNS server with hostname $s exists");
 		}
 	}
 
 # Check for remote/cloud conflict
 if ($clouddns && defined($remotedns)) {
-	&usage("Remote and Cloud DNS providers cannot be set at the same time");
+	&usage($usage, "Remote and Cloud DNS providers cannot be set at the same time");
 	}
 
 # Validate the Cloud DNS provider
 if ($clouddns) {
 	if ($clouddns eq "services") {
 		$config{'provision_dns'} ||
-			&usage("Cloudmin Services for DNS is not enabled");
+			&usage($usage, "Cloudmin Services for DNS is not enabled");
 		}
 	elsif ($clouddns ne "local") {
 		my @cnames = map { $_->{'name'} } &list_dns_clouds();
 		&indexof($clouddns, @cnames) >= 0 ||
-			&usage("Valid Cloud DNS providers are : ".
+			&usage($usage, "Valid Cloud DNS providers are : ".
 			       join(" ", @cnames));
 		}
 	}
@@ -619,17 +620,17 @@ if ($clouddns) {
 # Validate remote DNS option
 if (defined($remotedns)) {
 	defined(&list_remote_dns) ||
-		&usage("Remote DNS servers are not supported");
+		&usage($usage, "Remote DNS servers are not supported");
 	my @remote = &list_remote_dns();
 	if ($remotedns eq "") {
 		($rserver) = grep { $_->{'id'} == 0 } @remote;
-		$rserver ||&usage("This system cannot be used as a DNS server");
+		$rserver ||&usage($usage, "This system cannot be used as a DNS server");
 		}
 	else {
 		($rserver) = grep { $_->{'host'} eq $remotedns } @remote;
-		$rserver || &usage("Remote DNS server $remotedns not found");
+		$rserver || &usage($usage, "Remote DNS server $remotedns not found");
 		}
-	$rserver->{'slave'} && &usage("Remote DNS server $rserver->{'host'} ".
+	$rserver->{'slave'} && &usage($usage, "Remote DNS server $rserver->{'host'} ".
 				      "cannot be used for master zones");
 	}
 
@@ -637,7 +638,7 @@ if (defined($remotedns)) {
 my $dkim = &get_dkim_config();
 if (defined($dkim_enabled)) {
 	$dkim && $dkim->{'enabled'} ||
-		&usage("DKIM is not enabled on this system");
+		&usage($usage, "DKIM is not enabled on this system");
 	}
 
 # Do it for all domains
@@ -1097,47 +1098,3 @@ foreach $d (@doms) {
 
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV);
-
-sub usage
-{
-print "$_[0]\n\n" if ($_[0]);
-print "Changes DNS settings for one or more domains.\n";
-print "\n";
-print "virtualmin modify-dns --domain name | --all-domains | --all-nonvirt-domains\n";
-print "                     [--spf | --no-spf]\n";
-print "                     [--spf-add-a hostname]*\n";
-print "                     [--spf-add-mx domain]*\n";
-print "                     [--spf-add-ip4 address]*\n";
-print "                     [--spf-add-ip6 address]*\n";
-print "                     [--spf-remove-a hostname]*\n";
-print "                     [--spf-remove-mx domain]*\n";
-print "                     [--spf-remove-ip4 address]*\n";
-print "                     [--spf-remove-ip6 address]*\n";
-print "                     [--spf-all-disallow | --spf-all-discourage |\n";
-print "                      --spf-all-neutral | --spf-all-allow |\n";
-print "                      --spf-all-default]\n";
-print "                     [--dmarc | --no-dmarc]\n";
-print "                     [--dmarc-policy none|quarantine|reject]\n";
-print "                     [--dmarc-percent number]\n";
-print "                     [--dmarc-rua mailto:user\@domain | --no-dmarc-rua]\n";
-print "                     [--dmarc-ruf mailto:user\@domain | --no-dmarc-ruf]\n";
-print "                     [--add-record \"name type value\"]\n";
-print "                     [--add-record-with-ttl \"name type TTL value\"]\n";
-print "                     [--add-proxy-record \"name type value\"]\n";
-print "                     [--remove-record \"name type value\"]\n";
-print "                     [--update-record \"oldname oldtype\" \"name type value\"]\n";
-print "                     [--ttl seconds | --all-ttl seconds]\n";
-print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
-print "                     [--remove-slave hostname]* | [--sync-all-slaves]\n";
-print "                     [--dns-ip address | --no-dns-ip]\n";
-print "                     [--enable-dnssec | --disable-dnssec]\n";
-print "                     [--enable-tlsa | --disable-tlsa | --sync-tlsa]\n";
-print "                     [--enable-subdomain | --disable-subdomain]\n";
-print "                     [--cloud-dns provider|\"local\"]\n";
-print "                     [--cloud-dns-import]\n";
-print "                     [--remote-dns hostname | --local-dns]\n";
-print "                     [--add-parent-ds | --remove-parent-ds]\n";
-print "                     [--enable-dkim | --disable-dkim | --default-dkim]\n";
-exit(1);
-}
-
