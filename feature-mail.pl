@@ -488,7 +488,7 @@ if ($supports_dependent) {
 
 # Remove cloud mail provider
 my $c = $d->{'smtp_cloud'};
-if ($c && defined(&list_smtp_clouds)) {
+if ($c && defined(&list_smtp_clouds) && !$preserve) {
 	my ($cloud) = grep { $_->{'name'} eq $c } &list_smtp_clouds();
 	&$first_print(&text('delete_mail_smtpcloud',
 			    $cloud ? $cloud->{'desc'} : $c));
