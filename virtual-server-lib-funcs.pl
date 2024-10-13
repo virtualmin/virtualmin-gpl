@@ -846,12 +846,15 @@ if ($d) {
 			$u->{'brokenhome'} = 1;
 			}
 		elsif ($u->{'webowner'} && $u->{'home'} &&
-		       !&is_under_directory($phd, $u->{'home'})) {
+		       !&is_under_directory($phd, $u->{'home'}) &&
+		       $u->{'home'} ne $d->{'home'}) {
 			# Website FTP user's home dir must be under public_html
+			# or domain's home
 			$u->{'brokenhome'} = 1;
                         }
-		elsif ($u->{'home'} eq $d->{'home'}) {
-			# Home dir is equal to domain's dir, which is invalid
+		elsif (!$u->{'webowner'} && $u->{'home'} eq $d->{'home'}) {
+			# Home dir is equal to domain's dir, which is invalid,
+			# unless it is the web owner user (FTP user)
 			$u->{'brokenhome'} = 1;
 			}
 		}

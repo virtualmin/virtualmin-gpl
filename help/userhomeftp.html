@@ -1,9 +1,11 @@
 <header>Home directory</header>
 
 By default, the home directory for a website FTP user is the same as the
-domain’s base web directory. However, you can change it to a subdirectory to
-limit the user’s access to only that directory. This assumes the FTP server is
-configured to restrict clients to their home directories.
+domain’s base web directory. However, you can change it to the domain’s home
+directory (by using an empty value) or to a subdirectory (by using a relative
+path under the web directory). <p>
+This assumes the FTP server is configured to restrict clients to their home
+directories, which should be the default in standard Virtualmin installations.
 <p>
 
 <hr>
