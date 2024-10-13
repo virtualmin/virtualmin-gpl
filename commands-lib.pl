@@ -304,7 +304,7 @@ while($i < @$argv) {
 	}
 }
 
-# parse_cli_args(&argv, &params_ref)
+# parse_cli_args(&argv, &usage_params_ref)
 # Parses command-line arguments based on predefined parameter definitions. It
 # processes an array of arguments, identifies known parameters, handles their
 # values (if required), and detects unknown or improperly formatted parameters.
@@ -314,8 +314,32 @@ while($i < @$argv) {
 # array.
 sub parse_cli_args
 {
-my ($argv, $params_ref) = @_;
-my %params = %$params_ref;
+my ($argv, $usage_params_ref) = @_;
+# Put the usage parameters in a hash for easier lookup
+my %params;
+my @params = @{$usage_params_ref};
+while (@params) {
+	my $item = shift(@params);
+	my $param = $item->{'param'};
+	next if (!defined($param)); # Should not happen
+	# Determine the parameter type based on 'req' and 'reuse' keys
+	if (exists($item->{'reuse'}) && $item->{'reuse'} == 1) {
+		# Parameter requires a value and can be specified multiple times
+		$params{$param} = 2;
+		}
+	elsif (exists($item->{'req'}) && $item->{'req'} == 1) {
+		# Parameter requires a value
+		$params{$param} = 1;
+		}
+	else {
+		# Parameter does not require a value
+		$params{$param} = 0;
+		}
+	# If 'values' key exists add its elements too
+	if (exists($item->{'values'})) {
+		push(@params, @{$item->{'values'}});
+		}
+	}
 my %flags;
 # Create a copy of the argument array to avoid modifying the original
 my @args = @{$argv};
