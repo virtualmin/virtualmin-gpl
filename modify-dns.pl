@@ -455,10 +455,8 @@ foreach my $a (keys %{$flags}) {
 	elsif ($a eq "update-record") {
 		my ($oldname, $oldtype, $name, $type, @values) =
 			split(/\s+/, $flags->{$a});
-		$oldname && $oldtype ||
-			&usage($usage, "--update-record must be followed by the original record name and type, all in one parameter");
-		$name && $type && @values ||
-			&usage($usage, "--update-record must be followed by the new record name, type and values, all in one parameter");
+		$oldname && $oldtype && $name && $type && @values ||
+			&usage($usage, "--update-record must be followed by the original record name and type, the new record name, type and values, all in one parameter");
 		push(@uprecs, [ $oldname, $oldtype, $name, $type, undef, \@values, 0 ]);
 		}
 	elsif ($a eq "ttl") {
