@@ -267,7 +267,13 @@ if (!$d->{'parent'}) {
 # Set domain protection if allowed
 if (&master_admin() || (&reseller_admin() && !$access{'nodelete'}) ||
     $access{'edit_delete'} || $access{'edit_disable'}) {
-	$d->{'protected'} = $in{'protected'} ? 1 : 0;
+	my $protected_status = $in{'protected'} ? 1 : 0;
+	if (defined($d->{'protected'}) &&
+	    $d->{'protected'} ne $in{'protected'}) {
+		&$first_print($text{"save_protected$protected_status"});
+		&$second_print($text{'setup_done'});
+		}
+	$d->{'protected'} = $protected_status;
 	}
 
 # Update quotas in domain object

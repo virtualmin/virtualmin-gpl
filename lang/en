@@ -1623,6 +1623,8 @@ save_installed_scripts_err_file=.. failed : cannot read <tt>$1</tt> file
 save_installed_scripts_err_file_lines=.. failed : could not find strings to replace in <tt>$1</tt> file
 save_installed_scripts_err_file_write=.. failed : could not write <tt>$1</tt> file
 save_installed_scripts_done=.. done for <tt>$1</tt> file
+save_protected0=Disabling safeguard protection ..
+save_protected1=Enabling safeguard protection ..
 
 luser_err=Failed to save local user
 luser_etaken=A user with the same name already exists
