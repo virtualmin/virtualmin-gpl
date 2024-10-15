@@ -235,7 +235,7 @@ if (!$parentdom) {
 	}
 
 # Made domain protected
-print &ui_table_row($text{'edit_protected'},
+print &ui_table_row(&hlink($text{'edit_protected'}, "edit_protected"),
 	&ui_yesno_radio("protected", $d->{'protected'}));
 
 # Show domain for use in links
