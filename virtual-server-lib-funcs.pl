@@ -2982,7 +2982,7 @@ return &can_edit_domain($d) && !$d->{'protected'} &&
 # Only the master admin is allowed to disconnect or connect features
 sub can_associate_domain
 {
-return &master_admin() && !$d->{'protected'};
+return &master_admin();
 }
 
 sub can_move_domain
