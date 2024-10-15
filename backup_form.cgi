@@ -74,7 +74,9 @@ $sched ||= { 'all' => 1,
 	     'onebyone' => 1,
 	     'strftime' => 1,
 	     'email' => $cbmode == 2 ? $d->{'emailto'} :
-			$cbmode == 3 ? $access{'email'} : undef };
+			$cbmode == 3 ? $access{'email'} :
+				       $gconfig{'webmin_email_to'},
+	   };
 @tds = ( "width=30% ");
 
 print &ui_hidden_table_start($text{'backup_headerdoms'}, "width=100%",
