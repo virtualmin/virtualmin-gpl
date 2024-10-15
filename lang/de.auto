@@ -596,6 +596,8 @@ save_installed_scripts_err_file=.. fehlgeschlagen: <tt>$1</tt>-Datei kann nicht 
 save_installed_scripts_err_file_lines=.. fehlgeschlagen: konnte keine zu ersetzenden Zeichenfolgen in der Datei <tt>$1</tt> finden
 save_installed_scripts_err_file_write=.. fehlgeschlagen: <tt>$1</tt>-Datei konnte nicht geschrieben werden
 save_installed_scripts_done=.. fertig für <tt>$1</tt> Datei
+save_protected0=Schutzvorrichtung deaktivieren ..
+save_protected1=Schutzvorrichtung aktivieren ..
 
 acl_migrate=Kann Backups migrieren?
 

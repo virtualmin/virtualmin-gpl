@@ -359,6 +359,8 @@ save_installed_scripts_err_file=.. mislukt : kan <tt>$1</tt> bestand niet lezen
 save_installed_scripts_err_file_lines=.. failed : kon geen strings vinden om te vervangen in <tt>$1</tt> bestand
 save_installed_scripts_err_file_write=.. mislukt : kon <tt>$1</tt> bestand niet schrijven
 save_installed_scripts_done=.. klaar voor <tt>$1</tt> bestand
+save_protected0=Beveiliging uitschakelen ..
+save_protected1=Beveiliging inschakelen ..
 
 acl_migrate=Kunnen back-ups migreren?
 

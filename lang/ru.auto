@@ -1023,6 +1023,8 @@ save_installed_scripts_err_file=.. ошибка: невозможно прочи
 save_installed_scripts_err_file_lines=.. ошибка: не удалось найти строки для замены в файле <tt>$1</tt>
 save_installed_scripts_err_file_write=.. ошибка: не удалось записать файл <tt>$1</tt>
 save_installed_scripts_done=.. выполнено для файла <tt>$1</tt>
+save_protected0=Отключение защитной функции ..
+save_protected1=Включение защитной функции ..
 
 acl_migrate=Можно ли переносить резервные копии?
 

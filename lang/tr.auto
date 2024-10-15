@@ -714,6 +714,8 @@ save_installed_scripts_err_file=.. başarısız oldu : <tt>$1</tt> dosyası okun
 save_installed_scripts_err_file_lines=.. başarısız oldu : <tt>$1</tt> dosyasında değiştirilecek dizeler bulunamadı
 save_installed_scripts_err_file_write=.. başarısız oldu : <tt>$1</tt> dosyası yazılamadı
 save_installed_scripts_done=.. <tt>$1</tt> dosyası için yapıldı
+save_protected0=Güvenlik korumasını devre dışı bırakıyorum ..
+save_protected1=Koruma önlemlerinin etkinleştirilmesi ..
 
 acl_migrate=Yedekleri taşıyabilir mi?
 

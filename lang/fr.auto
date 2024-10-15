@@ -681,6 +681,8 @@ save_installed_scripts_err_file=.. échec : impossible de lire le fichier <tt>$1
 save_installed_scripts_err_file_lines=.. a échoué: impossible de trouver les chaînes à remplacer dans le fichier <tt>$1</tt>
 save_installed_scripts_err_file_write=.. a échoué: impossible d'écrire le fichier <tt>$1</tt>
 save_installed_scripts_done=.. fait pour le fichier <tt>$1</tt>
+save_protected0=Désactivation de la protection de sauvegarde ..
+save_protected1=Activation de la protection de sauvegarde ..
 
 acl_migrate=Peut migrer des sauvegardes?
 

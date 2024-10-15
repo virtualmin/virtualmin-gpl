@@ -1007,6 +1007,8 @@ save_installed_scripts_err_file=.. fallito: impossibile leggere il file <tt>$1</
 save_installed_scripts_err_file_lines=.. fallito: impossibile trovare le stringhe da sostituire nel file <tt>$1</tt>
 save_installed_scripts_err_file_write=.. fallito: impossibile scrivere il file <tt>$1</tt>
 save_installed_scripts_done=.. fatto per il file <tt>$1</tt>
+save_protected0=Disattivazione della protezione di salvaguardia ..
+save_protected1=Abilitazione della protezione di salvaguardia ..
 
 luser_err=Impossibile salvare l'utente locale
 luser_etaken=Un utente con lo stesso nome esiste già

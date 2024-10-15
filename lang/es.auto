@@ -513,6 +513,8 @@ save_installed_scripts_err_file=.. fallido: no se puede leer el archivo <tt>$1</
 save_installed_scripts_err_file_lines=.. falló: no se pudieron encontrar cadenas para reemplazar en el archivo <tt>$1</tt>
 save_installed_scripts_err_file_write=.. fallido: no se pudo escribir el archivo <tt>$1</tt>
 save_installed_scripts_done=.. hecho para el archivo <tt>$1</tt>
+save_protected0=Desactivando la protección de salvaguarda ..
+save_protected1=Habilitando la protección de salvaguarda ..
 
 acl_migrate=¿Se pueden migrar copias de seguridad?
 

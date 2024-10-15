@@ -666,6 +666,8 @@ save_installed_scripts_err_file=.. 失敗：無法讀取 <tt>$1</tt> 文件
 save_installed_scripts_err_file_lines=.. 失敗：在 <tt>$1</tt> 文件中找不到要替換的字符串
 save_installed_scripts_err_file_write=.. 失敗：無法寫入 <tt>$1</tt> 文件
 save_installed_scripts_done=.. 完成 <tt>$1</tt> 文件
+save_protected0=禁用安全防護 ..
+save_protected1=啟用安全保障 ..
 
 acl_migrate=可以遷移備份嗎？
 

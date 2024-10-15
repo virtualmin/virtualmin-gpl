@@ -1246,6 +1246,8 @@ save_installed_scripts_err_file=.. nezdařilo se: nelze přečíst soubor <tt>$1
 save_installed_scripts_err_file_lines=.. nezdařilo se: v souboru <tt>$1</tt> nelze najít řetězce, které je třeba nahradit
 save_installed_scripts_err_file_write=.. selhalo: nelze zapsat soubor <tt>$1</tt>
 save_installed_scripts_done=.. hotovo pro soubor <tt>$1</tt>
+save_protected0=Vypnutí ochranné ochrany ..
+save_protected1=Povolení ochranné ochrany ..
 
 luser_err=Uložení místního uživatele se nezdařilo
 luser_etaken=Uživatel se stejným názvem již existuje

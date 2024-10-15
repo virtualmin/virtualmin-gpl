@@ -1471,6 +1471,8 @@ save_installed_scripts_err_file=.. falhou: não é possível ler o arquivo <tt>$
 save_installed_scripts_err_file_lines=.. falhou: não foi possível encontrar strings para substituir no arquivo <tt>$1</tt>
 save_installed_scripts_err_file_write=.. falhou: não foi possível gravar o arquivo <tt>$1</tt>
 save_installed_scripts_done=.. feito para o arquivo <tt>$1</tt>
+save_protected0=Desabilitando proteção de salvaguarda ..
+save_protected1=Habilitando proteção de salvaguarda ..
 
 luser_err=Falha ao salvar o usuário local
 luser_etaken=Um usuário com o mesmo nome já existe

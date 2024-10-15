@@ -320,6 +320,8 @@ save_installed_scripts_err_file=.. mislyktes: kan ikke lese <tt>$1</tt> filen
 save_installed_scripts_err_file_lines=.. mislyktes: kunne ikke finne strenger som skal erstattes i filen <tt>$1</tt>
 save_installed_scripts_err_file_write=.. mislyktes: kunne ikke skrive <tt>$1</tt> fil
 save_installed_scripts_done=.. gjort for <tt>$1</tt> fil
+save_protected0=Deaktivering av beskyttelsesbeskyttelse ..
+save_protected1=Aktiverer beskyttelsesbeskyttelse ..
 
 acl_migrate=Kan migrere sikkerhetskopier?
 

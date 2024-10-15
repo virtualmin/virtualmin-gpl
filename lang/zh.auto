@@ -666,6 +666,8 @@ save_installed_scripts_err_file=.. 失败：无法读取 <tt>$1</tt> 文件
 save_installed_scripts_err_file_lines=.. 失败：在 <tt>$1</tt> 文件中找不到要替换的字符串
 save_installed_scripts_err_file_write=.. 失败：无法写入 <tt>$1</tt> 文件
 save_installed_scripts_done=.. 完成 <tt>$1</tt> 文件
+save_protected0=禁用安全保护 ..
+save_protected1=启用安全保护 ..
 
 acl_migrate=可以迁移备份吗？
 

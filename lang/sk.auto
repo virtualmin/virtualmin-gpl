@@ -1623,6 +1623,8 @@ save_installed_scripts_err_file=.. zlyhalo: nemôže čítať súbor <tt>$1</tt>
 save_installed_scripts_err_file_lines=.. zlyhalo : v súbore <tt>$1</tt> sa nepodarilo nájsť reťazce na nahradenie
 save_installed_scripts_err_file_write=.. zlyhalo: nepodarilo sa zapísať súbor <tt>$1</tt>
 save_installed_scripts_done=.. hotovo pre súbor <tt>$1</tt>
+save_protected0=Vypnutie ochrannej ochrany ..
+save_protected1=Povolenie bezpečnostnej ochrany ..
 
 luser_err=Lokálneho používateľa sa nepodarilo uložiť
 luser_etaken=Používateľ s rovnakým menom už existuje
