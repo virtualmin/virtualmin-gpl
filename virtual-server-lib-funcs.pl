@@ -13705,7 +13705,7 @@ if (&can_associate_domain($d)) {
 	push(@rv, { 'page' => 'assoc_form.cgi',
 		    'title' => $text{'edit_assoc'},
 		    'desc' => $text{'edit_assocdesc'},
-		    'cat' => 'delete',
+		    'cat' => 'server',
 		  });
 	}
 
