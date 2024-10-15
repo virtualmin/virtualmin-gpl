@@ -387,7 +387,7 @@ edit_elinkdom2=El dominio para usar en enlaces no es un alias de este dominio
 edit_protected=Eliminación y desactivación de la protección
 edit_dbsync=Advertencia: cualquier contraseña de la base de datos también se actualizará si se cambia la contraseña del administrador
 edit_hash=Contraseña hash
-edit_assoc=Desasociar características
+edit_assoc=Editar características Asociación
 edit_assocdesc=Agregue o elimine funciones de un servidor virtual sin crear o eliminar archivos de configuración reales.
 edit_disabled_transfer=Este servidor fue deshabilitado después de la transferencia a otro sistema.
 edit_disabled_schedule=Este servidor se deshabilitó según lo previsto.
@@ -3759,6 +3759,8 @@ right_expiryago=¡Hace $1 días!
 right_vunlimited=Ilimitado
 right_quota10=Solo se muestran los 10 mejores servidores.
 
+assoc_title=Asociar y disociar características
+assoc_desc=Las funciones habilitadas o deshabilitadas en esta página no actualizarán ningún archivo de configuración del sistema. En cambio, solo actualiza la base de datos de Virtualmin de las funciones de dominio esperadas. Esto es útil para importar funciones configuradas manualmente o desconectar configuraciones para conservarlas cuando se elimina un servidor virtual. ¡Úselo con precaución!
 assoc_ecannot=No se le permite asociar características
 
 recovery_title=Recuperar contraseña
