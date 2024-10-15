@@ -234,9 +234,12 @@ if (!$parentdom) {
 		$smsg);
 	}
 
-# Made domain protected
-print &ui_table_row(&hlink($text{'edit_protected'}, "edit_protected"),
-	&ui_yesno_radio("protected", $d->{'protected'}));
+# Made domain protected if allowed
+if (&master_admin() || (&reseller_admin() && !$access{'nodelete'}) ||
+    $access{'edit_delete'} || $access{'edit_disable'}) {
+	print &ui_table_row(&hlink($text{'edit_protected'}, "edit_protected"),
+		&ui_yesno_radio("protected", $d->{'protected'}));
+	}
 
 # Show domain for use in links
 my @aliases = grep { &domain_has_website($_) }

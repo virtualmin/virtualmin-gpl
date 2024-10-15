@@ -264,8 +264,11 @@ if (!$d->{'parent'}) {
 	&compute_emailto($d);
 	}
 
-# Set domain protection
-$d->{'protected'} = $in{'protected'} ? 1 : 0;
+# Set domain protection if allowed
+if (&master_admin() || (&reseller_admin() && !$access{'nodelete'}) ||
+    $access{'edit_delete'} || $access{'edit_disable'}) {
+	$d->{'protected'} = $in{'protected'} ? 1 : 0;
+	}
 
 # Update quotas in domain object
 if (&has_home_quotas() && !$d->{'parent'} && &can_edit_quotas($d)) {
