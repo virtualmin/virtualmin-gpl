@@ -3773,9 +3773,13 @@ elsif ($mode == 3) {
 			}
 		local $tempfile = $si->{'file'};
 		$tempfile =~ s/^(\S+)\///;
-		local $err = &s3_download($user, $pass, $server,
-					  $si->{'file'}, "$temp/$tempfile");
-		return $err if ($err);
+		local $temppath = "$temp/$tempfile";
+
+		if (!-e $temppath) {
+			local $err = &s3_download($user, $pass, $server,
+						  $si->{'file'}, $temppath);
+			return $err if ($err);
+			}
 		}
 	}
 elsif ($mode == 6) {
