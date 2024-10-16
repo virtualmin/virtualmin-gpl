@@ -301,9 +301,8 @@ if ($opts->{'letsencrypt-always'} || $opts->{'acme-always'}) {
 	$letsencrypt = 2;
 	}
 
-my $jail;
-$jail = 1 if $opts->{'enable-jail'};
-$jail = 0 if $opts->{'disable-jail'};
+my $jail = $opts->{'enable-jail'} ? 1 :
+	   $opts->{'disable-jail'} ? 0 : undef;
 
 my $myserver = $opts->{'mysql-server'};
 my $pgserver = $opts->{'postgres-server'};
