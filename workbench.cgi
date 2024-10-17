@@ -19,8 +19,6 @@ $script || &error($text{'scripts_emissing'});
 	@{[&text('scripts_gpl_pro_tip_enroll_single', $virtualmin_shop_link)]}")
 		if (defined($in{'pro'}) && $in{'pro'} ne $virtualmin_pro);
 # Run
-my $lib = "./pro/scripts/workbench-lib-funcs.pl";
-do $lib if (-r $lib);
 my $apply_func = $script->{'kit_apply_func'};
 if (defined(&$apply_func)) {
 	&$apply_func($d, \%in, $sinfo, $script);
