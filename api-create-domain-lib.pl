@@ -292,14 +292,8 @@ $nosecondaries  = 1 if $opts->{'no-secondaries'};
 my $precommand = $opts->{'pre-command'};
 my $postcommand = $opts->{'post-command'};
 
-my $letsencrypt;
-if ($opts->{'letsencrypt'} || $opts->{'acme'}) {
-	$letsencrypt = 1;
-	}
-
-if ($opts->{'letsencrypt-always'} || $opts->{'acme-always'}) {
-	$letsencrypt = 2;
-	}
+my $letsencrypt = $opts->{'acme'} ? 1 :
+		  $opts->{'acme-always'} ? 2 : undef;
 
 my $jail = $opts->{'enable-jail'} ? 1 :
 	   $opts->{'disable-jail'} ? 0 : undef;
