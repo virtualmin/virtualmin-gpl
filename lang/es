@@ -4417,8 +4417,6 @@ right_bw=Uso de Ancho de Banda y límite
 right_of=$1 de $2
 right_sysinfo=información de sistema
 
-assoc_title=Asociar y des-asociar características
-assoc_desc=Características activadas o desactivadas en esta página no actualizarán los archivos de configuración del sistema - en su lugar , solo las características que se esperan tenga un dominio en la base de datos de virtualmin. Esto se puede usar para importar una característica que ha sido configurada manualmente, o para sacar una configuración para que se conserve en caso de que un servidor virtual sea borrado.
 assoc_header=Configuración de la asociación de características
 assoc_features=Características conocidas por Virtualmin
 assoc_validate=Requiere validación exitosa antes de guardar?

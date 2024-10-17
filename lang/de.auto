@@ -441,7 +441,7 @@ edit_dbsync=Warnung - Alle Datenbankkennwörter werden ebenfalls aktualisiert, w
 edit_hash=Hash-Passwort
 edit_allquota=Verwendeter Speicherplatz (einschließlich Subserver)
 edit_allquotam=Verwendeter E-Mail-Speicherplatz (einschließlich Subserver)
-edit_assoc=Funktionen trennen
+edit_assoc=Feature-Zuordnung bearbeiten
 edit_assocdesc=Hinzufügen oder Entfernen von Funktionen zu einem virtuellen Server, ohne dass echte Konfigurationsdateien erstellt oder gelöscht werden.
 edit_disabled_transfer=Dieser Server wurde nach der Übertragung auf ein anderes System deaktiviert.
 edit_disabled_schedule=Dieser Server wurde planmäßig deaktiviert.
@@ -596,6 +596,8 @@ save_installed_scripts_err_file=.. fehlgeschlagen: <tt>$1</tt>-Datei kann nicht 
 save_installed_scripts_err_file_lines=.. fehlgeschlagen: konnte keine zu ersetzenden Zeichenfolgen in der Datei <tt>$1</tt> finden
 save_installed_scripts_err_file_write=.. fehlgeschlagen: <tt>$1</tt>-Datei konnte nicht geschrieben werden
 save_installed_scripts_done=.. fertig für <tt>$1</tt> Datei
+save_protected0=Schutzvorrichtung deaktivieren ..
+save_protected1=Schutzvorrichtung aktivieren ..
 
 acl_migrate=Kann Backups migrieren?
 
@@ -3945,8 +3947,8 @@ right_bw=Bandbreitennutzung und -begrenzung
 right_of=$1 von $2
 right_sysinfo=System Information
 
-assoc_title=Zuordnen und Aufheben der Zuordnung von Funktionen
-assoc_desc=Auf dieser Seite aktivierte oder deaktivierte Funktionen aktualisieren keine Systemkonfigurationsdateien. Stattdessen wird nur die Datenbank von Virtualmin mit Funktionen geändert, die eine Domäne erwartet. Dies kann verwendet werden, um eine Funktion zu importieren, die manuell eingerichtet wurde, oder um eine Konfiguration zu trennen, damit sie beim Löschen eines virtuellen Servers erhalten bleibt.
+assoc_title=Zuordnen und Aufheben der Zuordnung von Features
+assoc_desc=Auf dieser Seite aktivierte oder deaktivierte Funktionen aktualisieren keine Systemkonfigurationsdateien. Stattdessen wird nur die Datenbank der erwarteten Domänenfunktionen von Virtualmin aktualisiert. Dies ist nützlich, um manuell eingerichtete Funktionen zu importieren oder Konfigurationen zu trennen, um sie beizubehalten, wenn ein virtueller Server gelöscht wird. Mit Vorsicht verwenden!
 assoc_header=Einstellungen für die Funktionszuordnung
 assoc_features=Virtualmin bekannte Funktionen
 assoc_validate=Benötigen Sie vor dem Speichern eine erfolgreiche Validierung?

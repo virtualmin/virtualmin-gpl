@@ -281,7 +281,7 @@ edit_elinkdom2=Domein voor gebruik in links is geen alias van dit domein
 edit_protected=Beveiliging verwijderen en uitschakelen
 edit_dbsync=Waarschuwing - eventuele databasewachtwoorden worden ook bijgewerkt als het beheerderswachtwoord wordt gewijzigd
 edit_hash=Hash-wachtwoord
-edit_assoc=Ontkoppelde functies
+edit_assoc=Functies bewerken Associatie
 edit_assocdesc=Voeg functies toe aan of verwijder deze van een virtuele server zonder echte configuratiebestanden te maken of te verwijderen.
 edit_disabled_transfer=Deze server is uitgeschakeld na overdracht naar een ander systeem.
 edit_disabled_schedule=Deze server is volgens schema uitgeschakeld.
@@ -359,6 +359,8 @@ save_installed_scripts_err_file=.. mislukt : kan <tt>$1</tt> bestand niet lezen
 save_installed_scripts_err_file_lines=.. failed : kon geen strings vinden om te vervangen in <tt>$1</tt> bestand
 save_installed_scripts_err_file_write=.. mislukt : kon <tt>$1</tt> bestand niet schrijven
 save_installed_scripts_done=.. klaar voor <tt>$1</tt> bestand
+save_protected0=Beveiliging uitschakelen ..
+save_protected1=Beveiliging inschakelen ..
 
 acl_migrate=Kunnen back-ups migreren?
 
@@ -2791,8 +2793,8 @@ right_bw=Bandbreedte gebruik en limiet
 right_of=$1 van $2
 right_sysinfo=systeem informatie
 
-assoc_title=Associate en Dis-Associate functies
-assoc_desc=Functies die op deze pagina zijn in- of uitgeschakeld, werken geen systeemconfiguratiebestanden bij - in plaats daarvan wordt alleen de Virtualmin-database met functies gewijzigd die naar verwachting een domein zal hebben. Dit kan worden gebruikt om een functie die handmatig is ingesteld te importeren of om een configuratie te verbreken, zodat deze behouden blijft wanneer een virtuele server wordt verwijderd.
+assoc_title=Functies koppelen en ontkoppelen
+assoc_desc=Functies die op deze pagina zijn ingeschakeld of uitgeschakeld, werken geen systeemconfiguratiebestanden bij. In plaats daarvan werkt het alleen de database van Virtualmin met verwachte domeinfuncties bij. Dit is handig voor het importeren van handmatig ingestelde functies of het loskoppelen van configuraties om ze te behouden wanneer een virtuele server wordt verwijderd. Wees voorzichtig!
 assoc_header=Instellingen voor functie-associatie
 assoc_features=Functies bekend bij Virtualmin
 assoc_validate=Succesvolle validatie vereisen voordat u opslaat?

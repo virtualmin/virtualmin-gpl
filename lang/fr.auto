@@ -519,7 +519,7 @@ edit_elinkdom=Le domaine à utiliser dans les liens n'existe pas!
 edit_elinkdom2=Le domaine à utiliser dans les liens n'est pas un alias de ce domaine
 edit_protected=Protection contre la suppression et la désactivation
 edit_hash=Mot de passe haché
-edit_assoc=Dissocier les fonctionnalités
+edit_assoc=Modifier l'association des fonctionnalités
 edit_assocdesc=Ajoutez ou supprimez des fonctionnalités d'un serveur virtuel sans réellement créer ou supprimer des fichiers de configuration réels.
 edit_disabled_schedule=Ce serveur a été désactivé dans les délais.
 edit_dnsip2=$1 en externe
@@ -681,6 +681,8 @@ save_installed_scripts_err_file=.. échec : impossible de lire le fichier <tt>$1
 save_installed_scripts_err_file_lines=.. a échoué: impossible de trouver les chaînes à remplacer dans le fichier <tt>$1</tt>
 save_installed_scripts_err_file_write=.. a échoué: impossible d'écrire le fichier <tt>$1</tt>
 save_installed_scripts_done=.. fait pour le fichier <tt>$1</tt>
+save_protected0=Désactivation de la protection de sauvegarde ..
+save_protected1=Activation de la protection de sauvegarde ..
 
 acl_migrate=Peut migrer des sauvegardes?
 
@@ -5414,8 +5416,8 @@ right_bw=Utilisation et limite de la bande passante
 right_of=$1 sur $2 
 right_sysinfo=informations système
 
-assoc_title=Fonctions d'association et de dissociation
-assoc_desc=Les fonctionnalités activées ou désactivées sur cette page ne mettront pas à jour les fichiers de configuration du système - à la place, seule la base de données de Virtualmin des fonctionnalités attendues d'un domaine sera modifiée. Cela peut être utilisé pour importer une fonctionnalité qui a été configurée manuellement ou pour déconnecter une configuration afin qu'elle soit préservée lorsqu'un serveur virtuel est supprimé.
+assoc_title=Associer et dissocier des fonctionnalités
+assoc_desc=Les fonctionnalités activées ou désactivées sur cette page ne mettront à jour aucun fichier de configuration système. Au lieu de cela, elle met à jour uniquement la base de données de Virtualmin contenant les fonctionnalités de domaine attendues. Cela est utile pour importer des fonctionnalités configurées manuellement ou pour déconnecter des configurations afin de les conserver lorsqu'un serveur virtuel est supprimé. À utiliser avec précaution !
 assoc_header=Paramètres d'association des fonctionnalités
 assoc_features=Fonctionnalités connues de Virtualmin
 assoc_validate=Besoin d'une validation réussie avant d'enregistrer?
