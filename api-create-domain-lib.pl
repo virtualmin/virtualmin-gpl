@@ -95,7 +95,7 @@ $planfeatures = 1 if ($opts->{'features-from-template'} ||
 		      $opts->{'features-from-plan'});
 
 my $ip;
-if (defined($opts->{'ip'})) {
+if ($opts->{'ip'}) {
 	$ip = $opts->{'ip'};
 	$feature{'virt'} = 1;    # for dependency checks
 	$virt = 1;
@@ -112,7 +112,7 @@ my $virtalready;
 $virtalready = 1 if ($opts->{'ip-already'});
 
 my $sharedip;
-if (defined($opts->{'shared-ip'})) {
+if ($opts->{'shared-ip'}) {
 	$sharedip = $opts->{'shared-ip'};
 	$virt = 0;
 	$name = 1;
@@ -164,7 +164,7 @@ if (defined($opts->{'shared-ip6'})) {
 	}
 
 my $dns_ip;
-if (defined($opts->{'dns-ip'})) {
+if ($opts->{'dns-ip'}) {
 	$dns_ip = $opts->{'dns-ip'};
 	&check_ipaddress($dns_ip) ||
 		return $text{'api_ndom_invalid_dns_ip'};
@@ -246,13 +246,13 @@ $tlimit = 1 if ($opts->{'limits-from-template'} || $opts->{'limits-from-plan'});
 my $prefix = $opts->{'prefix'} || $opts->{'suffix'};
 
 my $db;
-if (defined($opts->{'db'})) {
+if ($opts->{'db'}) {
 	$db = $opts->{'db'};
 	$db =~ /^[a-z0-9\-\_]+$/i || return $text{'invalid_database_name'};
 	}
 
 my $fwdto;
-if (defined($opts->{'fwdto'})) {
+if ($opts->{'fwdto'}) {
 	$fwdto = $opts->{'fwdto'};
 	$fwdto =~ /^\S+\@\S+$/i ||
 		return $text{'api_ndom_invalid_forwarding_address'};
