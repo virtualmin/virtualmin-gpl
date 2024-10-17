@@ -24,10 +24,18 @@ do $lib if (-r $lib);
 my $apply_func = $script->{'kit_apply_func'};
 if (defined(&$apply_func)) {
 	&$apply_func($d, \%in, $sinfo, $script);
+	# Print footer
+	my $auid = $in{'uid'} || 1;
+	&ui_print_footer(
+		"edit_script.cgi?dom=$in{'dom'}&".
+			"script=$in{'sid'}&tab=$in{'tab'}&auid=$auid",
+		$text{'scripts_ereturn'},
+		"list_scripts.cgi?dom=$in{'dom'}", $text{'scripts_return'},
+		&domain_footer_link($d));
 	}
 else {
 	&error(&text('scripts_gpl_pro_tip_workbench_pro_only',
 	       $script->{'tmdesc'})." ".
 	       &text('scripts_gpl_pro_tip_enroll_dashboard',
-	             $virtualmin_shop_link_cat));
+		     $virtualmin_shop_link_cat));
 	}
