@@ -21,6 +21,9 @@ $script || &error($text{'scripts_emissing'});
 # Run
 my $apply_func = $script->{'kit_apply_func'};
 if (defined(&$apply_func)) {
+	# Print header
+	&ui_print_unbuffered_header(&domain_in($d),
+		&text("scripts_kit", $script->{'tmdesc'}), "");
 	&$apply_func($d, \%in, $sinfo, $script);
 	# Print footer
 	my $auid = $in{'uid'} || 1;
