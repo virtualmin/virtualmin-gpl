@@ -31,7 +31,7 @@ foreach my $lib ("scripts", "resellers", "admins", "users", "simple", "s3",
 		$libfile = "$virtual_server_root/$lib-lib.pl";
 		}
 	do $libfile;
-	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
+	if ($@ && -r $libfile) {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
 		}
 	}
