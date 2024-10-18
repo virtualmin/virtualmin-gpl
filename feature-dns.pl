@@ -4457,6 +4457,28 @@ return ( { 'type' => 'A',
                          },
                        ],
 	 },
+	 { 'type' => 'CAA',
+	   'desc' => $text{'records_typecaa'},
+	   'domain' => 1,
+	   'create' => 1,
+	   'values' => [ { 'desc' => $text{'records_valuecaa0'},
+			   'opts' => [ [ 0, $text{'records_caanon'} ],
+				       [ 1, $text{'records_caacrit'} ] ],
+			   'dot' => 0,
+                         },
+		  	 { 'desc' => $text{'records_valuecaa1'},
+			   'opts' => [ [ 'issue', $text{'records_caaissue'} ],
+				       [ 'issuewild', $text{'records_caaissuewild'} ],
+				       [ 'iodef', $text{'records_caaiodef'} ] ],
+			   'dot' => 0,
+                         },
+			 { 'desc' => $text{'records_valuecaa2'},
+			   'size' => 60,
+			   'regexp' => '^\S+$',
+			   'dot' => 0,
+                         },
+                       ],
+	 },
 	 { 'type' => 'PTR',
 	   'desc' => $text{'records_typeptr'},
 	   'domain' => 0,
@@ -5077,7 +5099,7 @@ sub filter_generated_dns_records
 my ($d, $recs) = @_;
 my @rv;
 foreach my $r (@$recs) {
-	next if ($r->{'type'} =~ /^(CAA|TLSA|SSHFP)$/);
+	next if ($r->{'type'} =~ /^(TLSA|SSHFP)$/);
 	push(@rv, $r);
 	}
 return \@rv;
