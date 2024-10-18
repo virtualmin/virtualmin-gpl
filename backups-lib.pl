@@ -3766,11 +3766,13 @@ elsif ($mode == 3) {
 	push(@wantdoms, "virtualmin") if (@$vbs);
 	@wantdoms = (keys %$s3b) if (!@wantdoms);
 	&make_dir($temp, 0711);
+	my %done;
 	foreach my $dname (@wantdoms) {
 		local $si = $s3b->{$dname};
 		if (!$si) {
 			return &text('restore_es3info', $dname);
 			}
+		next if ($done{$si->{'file'}}++);
 		local $tempfile = $si->{'file'};
 		$tempfile =~ s/^(\S+)\///;
 		local $err = &s3_download($user, $pass, $server,
