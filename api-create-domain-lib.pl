@@ -175,38 +175,38 @@ if ($opts->{'no-dns-ip'}) {
 	}
 
 my $mailboxlimit;
-if (defined($opts->{'mailboxlimit'}) || defined($opts->{'max-mailboxes'})) {
-	$mailboxlimit = $opts->{'mailboxlimit'} || $opts->{'max-mailboxes'};
+if (defined($opts->{'max-mailboxes'})) {
+	$mailboxlimit = $opts->{'max-mailboxes'};
 	$anylimits = 1;
 	}
 
 my $dbslimit;
-if (defined($opts->{'dbslimit'}) || defined($opts->{'max-dbs'})) {
-	$dbslimit = $opts->{'dbslimit'} || $opts->{'max-dbs'};
+if (defined($opts->{'max-dbs'})) {
+	$dbslimit = $opts->{'max-dbs'};
 	$anylimits = 1;
 }
 
 my $domslimit;
-if (defined($opts->{'domslimit'}) || defined($opts->{'max-doms'})) {
-	$domslimit = $opts->{'domslimit'} || $opts->{'max-doms'};
+if (defined($opts->{'max-doms'})) {
+	$domslimit = $opts->{'max-doms'};
 	$anylimits = 1;
 	}
 
 my $aliaslimit;
-if (defined($opts->{'aliaslimit'}) || defined($opts->{'max-aliases'})) {
-	$aliaslimit = $opts->{'aliaslimit'} || $opts->{'max-aliases'};
+if (defined($opts->{'max-aliases'})) {
+	$aliaslimit = $opts->{'max-aliases'};
 	$anylimits = 1;
 	}
 
 my $aliasdomslimit;
-if (defined($opts->{'aliasdomslimit'}) || defined($opts->{'max-aliasdoms'})) {
-	$aliasdomslimit = $opts->{'aliasdomslimit'} || $opts->{'max-aliasdoms'};
+if (defined($opts->{'max-aliasdoms'})) {
+	$aliasdomslimit = $opts->{'max-aliasdoms'};
 	$anylimits = 1;
 	}
 
 my $realdomslimit;
-if (defined($opts->{'realdomslimit'}) || defined($opts->{'max-realdoms'})) {
-	$realdomslimit = $opts->{'realdomslimit'} || $opts->{'max-realdoms'};
+if (defined($opts->{'max-realdoms'})) {
+	$realdomslimit = $opts->{'max-realdoms'};
 	$anylimits = 1;
 	}
 
