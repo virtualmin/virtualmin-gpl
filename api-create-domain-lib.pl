@@ -60,13 +60,11 @@ $hashpass     = 1 if ($opts->{'hashpass'});
 my ($quota, $uquota);
 if (defined($opts->{'quota'})) {
 	$quota = $opts->{'quota'};
-	$quota = 0 if ($quota =~ /unlimited/i);
 	$anylimits = 1;
 	}
 
 if (defined($opts->{'uquota'})) {
 	$uquota = $opts->{'uquota'};
-	$uquota = 0 if ($uquota =~ /unlimited/i);
 	$anylimits = 1;
 	}
 
