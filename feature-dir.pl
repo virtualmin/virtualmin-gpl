@@ -827,8 +827,8 @@ if ($ex) {
 	return 0;
 	}
 else {
-	# Check for differential restore of newly-created domain, which indicates
-	# that is is not complete
+	# Check for differential restore of newly-created domain, which
+	# indicates that is is not complete
 	my $wasincr = -r $iflag;
 	if ($d->{'wasmissing'} && $wasincr) {
 		&$second_print($text{'restore_wasmissing'});
@@ -874,7 +874,8 @@ else {
 			}
 		}
 
-	# For a non-differential restore, delete files that weren't in the backup
+	# For a non-differential restore, delete files that weren't in
+	# the backup
 	if (!$wasincr && $cf != 4 && $opts->{'delete'}) {
 		# Parse tar output to find files that were restored
 		my %restored;
