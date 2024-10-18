@@ -232,7 +232,8 @@ print &ui_table_row($text{'newscripts_wnotify'},
 		    [ 0, $text{'newscripts_wnotify0'} ] ]));
 
 # Send email to
-%email = map { $_, 1 } split(/\s+/, $config{'scriptwarn_email'});
+%email = map { $_, 1 } split(/\s+/, $config{'scriptwarn_email'} ||
+				    $gconfig{'webmin_email_to'});
 ($other) = grep { /\@/ } (keys %email);
 print &ui_table_row($text{'newscripts_wemail'},
 	    &ui_checkbox("wemail", "owner", $text{'newscripts_wowner'},
