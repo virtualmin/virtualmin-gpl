@@ -4730,6 +4730,7 @@ scripts_kit_wp_apply_clone1=Creating clone under the same virtual server ..
 scripts_kit_wp_apply_clone2=Creating clone under existing <tt>$1</tt> virtual server ..
 scripts_kit_wp_apply_clone3=Creating clone under new <tt>$1</tt> virtual sub-server ..
 scripts_kit_wp_apply_clone4=Creating clone under new <tt>$1</tt> top-level virtual server ..
+scripts_kit_wp_apply_clone_eclonegone=.. failed : target parent domain to clone to does not exist
 scripts_kit_wp_apply_clone_eclone=.. failed : you are not allowed to create this type of clone
 scripts_kit_wp_apply_clone_edir=.. failed : clone directory can only contain letters, numbers, and characters such as a dot, hyphen, or underscore
 scripts_kit_wp_apply_clone_db=Creating database dump for clone ..
