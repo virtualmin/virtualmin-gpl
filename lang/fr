@@ -226,7 +226,6 @@ form_nwgroup=Nom de groupe personnalisé
 form_group=Groupe de l'utilisateur Unix
 form_crgroup=Même groupe que pour les utilisateurs de courrier
 form_exgroup=Groupe existant
-form_mail=Accepter les messages pour le domaine?
 form_unix=Créer l'utilisateur Unix?
 form_dir=Créer le répertoire utilisateur?
 form_ftp=Configurer un serveur FTP virtuel pour le domaine?

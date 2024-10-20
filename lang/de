@@ -233,7 +233,6 @@ form_nwgroup=Benutzerdefinierter Gruppenname
 form_group=Gruppe für Unix-Benutzer
 form_crgroup=Gleiche Gruppe wie die Mailbenutzer-Gruppe
 form_exgroup=Existierende Gruppe
-form_mail=E-Mail für diese Domain akzeptieren?
 form_unix=Erzeuge Unixbenutzer?
 form_dir=Erzeuge Heimat-Verzeichnis?
 form_ftp=Richte einen virtuellen FTP-Server für die Domain ein?
