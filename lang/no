@@ -256,7 +256,6 @@ form_nwgroup=Egendefinert gruppenavn
 form_group=Gruppe for administrasjonsbruker
 form_crgroup=Samme som gruppe for e-post brukere
 form_exgroup=Eksisterende gruppe
-form_mail=Aksepter e-post for domene?
 form_unix=Opprett tjener administrator?
 form_dir=Opprett hjemmekatalog?
 form_ftp=Set opp IP-basert virtuell FTP?

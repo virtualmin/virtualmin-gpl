@@ -45,7 +45,8 @@ print &ui_table_row(&hlink($text{'newbw_owner'}, "bandwidth_bw_owner"),
 
 # Show email to other address
 print &ui_table_row(&hlink($text{'newbw_email'}, "bandwidth_bw_email"),
-		    &ui_textbox("bw_email", $config{'bw_email'}, 30));
+		    &ui_textbox("bw_email",
+		      $config{'bw_email'} || $gconfig{'webmin_email_to'}, 30));
 
 # Show field for notification period
 print &ui_table_row(&hlink($text{'newbw_notify'}, "bandwidth_bw_notify"),

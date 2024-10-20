@@ -797,7 +797,8 @@ if ($d->{'web'}) {
 	my @ports = ( $d->{'web_port'} );
 	push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
 	foreach my $p (@ports) {
-		my ($virt, $vconf, $conf) = &get_apache_virtual($dom, undef);
+		my ($virt, $vconf, $conf) = &get_apache_virtual(
+				$d->{'dom'}, undef);
 		next if (!$virt);
 		my @sa = &apache::find_directive("ScriptAlias", $vconf);
 		next if (!@sa);
@@ -808,7 +809,7 @@ if ($d->{'web'}) {
 		&register_post_action(\&restart_apache);
 		}
 	}
-$dom{'cgi_bin_correct'} = 0;	# So that it is computed from now on
+$d->{'cgi_bin_correct'} = 0;	# So that it is computed from now on
 }
 
 # copy_directadmin_ssl_cert(&domain, backup-dir)

@@ -204,7 +204,6 @@ form_nwgroup=Nome gruppo personalizzato
 form_group=Gruppo per utente amministrazione
 form_crgroup=Stesso gruppo di utenti di posta
 form_exgroup=Gruppo esistente
-form_mail=Accettare mail per dominio?
 form_unix=Creare amministratore server?
 form_dir=Creare directory home?
 form_ftp=Configura FTP virtuale basato sull'IP?

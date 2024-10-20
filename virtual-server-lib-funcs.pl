@@ -31,7 +31,7 @@ foreach my $lib ("scripts", "resellers", "admins", "users", "simple", "s3",
 		$libfile = "$virtual_server_root/$lib-lib.pl";
 		}
 	do $libfile;
-	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
+	if ($@ && -r $libfile) {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
 		}
 	}
@@ -8443,7 +8443,7 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 	}
 
 # Create any redirects or aliases specified in the template
-my @redirs = map { [ split(/\s+/, $_, 3) ] }
+my @redirs = map { [ split(/\s+/, $_, 4) ] }
 		 split(/\t+/, $tmpl->{'web_redirects'});
 if (@redirs && !$dom->{'alias'} &&  &domain_has_website($dom) &&
     !$noscripts && !$dom->{'nocreationscripts'}) {
@@ -8466,6 +8466,10 @@ if (@redirs && !$dom->{'alias'} &&  &domain_has_website($dom) &&
 				 'http' => $protos{'http'},
 				 'https' => $protos{'https'},
 			       };
+		if ($r->[3]) {
+			$redirect->{'host'} =
+				&substitute_domain_template($r->[3], $dom);
+			}
 		$redirect = &add_wellknown_redirect($redirect);
 		my $err = &create_redirect($dom, $redirect);
 		if ($err) {

@@ -2992,16 +2992,19 @@ print &ui_table_row(&hlink($text{'newweb_http2'}, 'template_web_http2'),
 
 # Default redirects
 print &ui_table_hr();
-my @redirs = map { [ split(/\s+/, $_, 3) ] }
+my @redirs = map { [ split(/\s+/, $_, 4) ] }
 		 split(/\t+/, $tmpl->{'web_redirects'});
 push(@redirs, [ "", "", "http,https" ]);
 my $rtable = &ui_columns_start(
-    [ $text{'newweb_rfrom'}, $text{'newweb_rto'}, $text{'newweb_rprotos'} ]);
+    [ $text{'newweb_rfrom'}, $text{'newweb_rto'},
+      $text{'newweb_rhost'}, $text{'newweb_rprotos'} ]);
 for(my $i=0; $i<@redirs; $i++) {
 	my %protos = map { $_, 1 } split(/,/, $redirs[$i]->[2]);
 	$rtable .= &ui_columns_row([
 		&ui_textbox("rfrom_$i", $redirs[$i]->[0], 30),
-		&ui_textbox("rto_$i", $redirs[$i]->[1], 40),
+		&ui_textbox("rto_$i", $redirs[$i]->[1], 30),
+		&ui_opt_textbox("rhost_$i", $redirs[$i]->[3], 20,
+				$text{'newweb_rany'}),
 		&vui_ui_block_no_wrap(
 			&ui_checkbox("rprotos_$i", "http", "HTTP",
 				     $protos{'http'})." ".
@@ -3184,7 +3187,8 @@ for(my $i=0; defined($rfrom = $in{"rfrom_$i"}); $i++) {
 		&error(&text('newweb_eto', $i+1));
 	$rprotos = join(",", split(/\0/, $in{"rprotos_$i"}));
 	$rprotos || &error(&text('newweb_eprotos', $i+1));
-	push(@redirs, [ $rfrom, $rto, $rprotos ]);
+	$rhost = $in{"rhost_${i}_def"} ? "" : $in{"rhost_${i}"};
+	push(@redirs, [ $rfrom, $rto, $rprotos, $rhost ]);
 	}
 $tmpl->{'web_redirects'} = join("\t", map { join(" ", @$_) } @redirs);
 $tmpl->{'web_sslredirect'} = $in{'sslredirect'};

@@ -19,9 +19,9 @@ print &ui_table_start($text{'newquotas_header'}, undef, 2);
 
 # Email results to
 print &ui_table_row($text{'newquotas_email'},
-		    &ui_opt_textbox("email", $config{'quota_email'}, 40,
-				    $text{'newquotas_nobody'},
-				    $text{'newquotas_addr'}));
+		    &ui_opt_textbox("email",
+			$config{'quota_email'} || $gconfig{'webmin_email_to'},
+			40, $text{'newquotas_nobody'},$text{'newquotas_addr'}));
 
 # Email admins too
 print &ui_table_row($text{'newquotas_users'},

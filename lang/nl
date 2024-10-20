@@ -250,7 +250,6 @@ form_nwgroup=Eigen groep naam
 form_group=Groep voor administratie gebruiker
 form_crgroup=Zelfde als de groep voor email gebruikers
 form_exgroup=Bestaande groep
-form_mail=Accepteer email voor domein?
 form_unix=Server administrator aanmaken?
 form_dir=Maak home directory?
 form_ftp=Setup van IP-gebaseerde virtuele FTP?

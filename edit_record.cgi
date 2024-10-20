@@ -127,6 +127,11 @@ else {
 			$field = &ui_textbox("value_$i", $r->{'values'}->[$i],
 					     $vals[$i]->{'size'});
 			}
+		elsif ($vals[$i]->{'opts'}) {
+			$field = &ui_select("value_$i", $r->{'values'}->[$i],
+					    $vals[$i]->{'opts'}, 1, 0,
+					    $in{'type'} ? 0 : 1);
+			}
 		else {
 			$field = &ui_textarea("value_$i", $r->{'values'}->[$i],
 					     $vals[$i]->{'height'},

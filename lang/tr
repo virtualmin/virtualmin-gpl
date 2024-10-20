@@ -184,7 +184,6 @@ form_nwgroup=Özgün grup ismi
 form_group=Unix kullanýcý grubu
 form_crgroup=Posta kullanýcýlarý grubuyla ayný
 form_exgroup=Mevcut grup
-form_mail=Alanadý için posta kabul et?
 form_unix=Unix kullanýcýsý oluþturulsun mu?
 form_dir=Anaklasör oluþturulsun mu?
 form_ftp=IP-tabanlý sabal FTP oluþturulsun mu?

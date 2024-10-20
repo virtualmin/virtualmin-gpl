@@ -190,7 +190,6 @@ form_nwgroup=自定义用户组名
 form_group=管理员用户组
 form_crgroup=和邮件用户组相同
 form_exgroup=已存在的用户组
-form_mail=接收该域的邮件？
 form_unix=创建服务器管理员?
 form_dir=创建主目录？
 form_ftp=设置基于IP的虚拟FTP？
