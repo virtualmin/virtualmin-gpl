@@ -1,6 +1,7 @@
 use 5.010;
 use strict;
 use warnings;
+no warnings 'uninitialized';
 
 our (%config, %text, @features, @aliasmail_features, @alias_features,
      @opt_subdom_features, @banned_usernames, $first_print, $second_print);
