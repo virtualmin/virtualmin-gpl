@@ -4713,6 +4713,7 @@ scripts_kit_wp_apply_backup_rm=Deleting selected backup files ..
 scripts_kit_wp_apply_backup_erm=.. skipped : no files selected
 scripts_kit_wp_apply_backup_rmf=Deleting backup <tt>$1</tt> file ..
 scripts_kit_wp_apply_backup_ermf=.. failed : <tt>$1</tt>
+scripts_kit_wp_apply_backup_ermf0=file does not exist
 scripts_kit_wp_apply_backup_db=Exporting WordPress database ..
 scripts_kit_wp_apply_archive_db=Creating WordPress backup archive for database ..
 scripts_kit_wp_apply_archive_files=Creating WordPress backup archive for files ..
