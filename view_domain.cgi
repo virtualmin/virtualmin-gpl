@@ -106,7 +106,8 @@ if ($d->{'dns_ip'}) {
 	}
 
 # Home directory
-if (!$aliasdom && $d->{'dir'}) {
+if ((!$aliasdom && $d->{'dir'}) ||
+    ($aliasdom && -d $d->{'home'})) {
 	print &ui_table_row($text{'edit_home'}, "<tt>$d->{'home'}</tt>",
 			    3, \@tds);
 	}
