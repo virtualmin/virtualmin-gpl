@@ -124,7 +124,6 @@ form_nwgroup=Własna nazwa grupy
 form_group=Grupa dla administratora
 form_crgroup=Taka sama jak grupa użytkownika poczty
 form_exgroup=Istniejąca grupa
-form_mail=Akceptować pocztę dla domeny?
 form_unix=Utworzyć administratora serwera?
 form_dir=Utworzyć katolog domowy?
 form_dns=Ustawić strefy DNS?
