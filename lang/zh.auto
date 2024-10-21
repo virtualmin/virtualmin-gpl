@@ -2556,6 +2556,7 @@ migrate_plesk9=Plesk 9+备份
 migrate_plesk=Plesk 8备份
 migrate_psa=Plesk 7备份
 migrate_lxadmin=LXadmin（测试版）
+migrate_plan=新服务器规划
 migrate_ip6=新服务器的IPv6地址
 migrate_etmplsub=所选模板不能用于子服务器
 migrate_etmplparent=所选模板不能用于顶级服务器

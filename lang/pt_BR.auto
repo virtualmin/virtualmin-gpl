@@ -4628,6 +4628,7 @@ migrate_user=Nome de usuário para o domínio
 migrate_pass=Senha do administrador
 migrate_webmin=Criar usuário Webmin?
 migrate_template=Modelo para novo servidor?
+migrate_plan=Plano para novo servidor
 migrate_ip=Novo endereço IPv4 do servidor
 migrate_ip6=Novo endereço IPv6 do servidor
 migrate_show=Migrar agora

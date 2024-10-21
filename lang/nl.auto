@@ -1568,6 +1568,7 @@ summary_lastlogin_sec=tweede geleden
 summary_lastlogin_secs=seconden geleden
 
 migrate_directadmin=DirectAdmin-back-up
+migrate_plan=Plan voor nieuwe server
 migrate_ip6=IPv6-adres van nieuwe server
 migrate_ok=$2 virtuele server gemigreerd, <a href='$1'>klik hier</a> om deze te beheren.
 migrate_uploading=Migratiebestand uploaden <tt>$1</tt> ..

@@ -3500,6 +3500,7 @@ migrate_user=Имя пользователя для домена
 migrate_pass=Пароль для администратора
 migrate_webmin=Создать пользователя Webmin?
 migrate_template=Шаблон для нового сервера?
+migrate_plan=План для нового сервера
 migrate_ip=IPv4-адрес нового сервера
 migrate_ip6=IPv6-адрес нового сервера
 migrate_show=Мигрировать сейчас

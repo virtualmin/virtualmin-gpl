@@ -2742,6 +2742,7 @@ migrate_plesk9=Plesk 9+ yedekleme
 migrate_plesk=Plesk 8 yedeklemesi
 migrate_psa=Plesk 7 yedekleme
 migrate_lxadmin=LXadmin (beta)
+migrate_plan=Yeni sunucu için plan
 migrate_ip6=Yeni sunucunun IPv6 adresi
 migrate_etmplsub=Seçilen şablon alt sunucular için kullanılamaz
 migrate_etmplparent=Seçilen şablon üst düzey sunucular için kullanılamaz

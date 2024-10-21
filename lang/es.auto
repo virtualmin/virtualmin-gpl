@@ -1938,6 +1938,7 @@ migrate_directadmin=Copia de seguridad de DirectAdmin
 migrate_plesk9=Copia de seguridad de Plesk 9+
 migrate_psa=Copia de seguridad de Plesk 7
 migrate_lxadmin=LXadmin (beta)
+migrate_plan=Plan para nuevo servidor
 migrate_ip6=Dirección IPv6 del nuevo servidor
 migrate_etmplsub=La plantilla seleccionada no se puede usar para servidores secundarios
 migrate_etmplparent=La plantilla seleccionada no se puede usar para servidores de nivel superior

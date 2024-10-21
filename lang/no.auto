@@ -1342,6 +1342,7 @@ summary_lastlogin_mins=minutter siden
 summary_lastlogin_sec=sekund siden
 summary_lastlogin_secs=sekunder siden
 
+migrate_plan=Plan for ny server
 migrate_ok=Vellykket migrert $2 virtuell server. <a href='$1'>klikk her</a> for å administrere den.
 migrate_uploading=Laster opp migrasjonsfilen <tt>$1</tt> ..
 migrate_uploaded=.. lastet opp $1

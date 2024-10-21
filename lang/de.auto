@@ -2263,6 +2263,7 @@ summary_lastlogin_secs=Sekunden zuvor
 migrate_desc=Auf dieser Seite können Sie einen neuen virtuellen Server erstellen, indem Sie eine Sicherungsdatei migrieren, die vom Produkt eines Mitbewerbers erstellt wurde. Die Konfiguration für alle unterstützten Funktionen wird aus der Sicherung extrahiert und für die Verwendung durch Virtualmin konvertiert. Der gesamte Inhalt des Domänenverzeichnisses wird in das Ausgangsverzeichnis des neuen Benutzers kopiert.
 migrate_file=Quellensicherungsdatei
 migrate_directadmin=DirectAdmin-Sicherung
+migrate_plan=Planen Sie einen neuen Server
 migrate_ip6=IPv6-Adresse des neuen Servers
 migrate_etmplsub=Die ausgewählte Vorlage kann nicht für Subserver verwendet werden
 migrate_etmplparent=Die ausgewählte Vorlage kann nicht für Server der obersten Ebene verwendet werden

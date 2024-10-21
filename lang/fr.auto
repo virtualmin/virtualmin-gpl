@@ -2722,6 +2722,7 @@ migrate_user=Nom d'utilisateur pour le domaine
 migrate_pass=Mot de passe administrateur
 migrate_webmin=Créer un utilisateur Webmin?
 migrate_template=Modèle pour nouveau serveur?
+migrate_plan=Plan pour un nouveau serveur
 migrate_ip=Adresse IPv4 du nouveau serveur
 migrate_ip6=Adresse IPv6 du nouveau serveur
 migrate_show=Migrez maintenant

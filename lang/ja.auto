@@ -4838,6 +4838,7 @@ migrate_user=ドメインのユーザー名
 migrate_pass=管理者のパスワード
 migrate_webmin=Webminユーザーを作成しますか？
 migrate_template=新しいサーバーのテンプレート？
+migrate_plan=新しいサーバーの計画
 migrate_ip=新しいサーバーのIPv4アドレス
 migrate_ip6=新しいサーバーのIPv6アドレス
 migrate_show=今すぐ移行

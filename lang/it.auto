@@ -3853,6 +3853,7 @@ migrate_user=Nome utente per dominio
 migrate_pass=Password per l'amministratore
 migrate_webmin=Creare un utente Webmin?
 migrate_template=Modello per nuovo server?
+migrate_plan=Pianificare un nuovo server
 migrate_ip=Nuovo indirizzo IPv4 del server
 migrate_ip6=Nuovo indirizzo IPv6 del server
 migrate_show=Migrate Now

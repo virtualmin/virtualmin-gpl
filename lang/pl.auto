@@ -4228,6 +4228,7 @@ migrate_lxadmin=LXadmin (beta)
 migrate_user=Nazwa użytkownika dla domeny
 migrate_pass=Hasło dla administratora
 migrate_template=Szablon dla nowego serwera?
+migrate_plan=Plan nowego serwera
 migrate_ip=Adres IPv4 nowego serwera
 migrate_ip6=Adres IPv6 nowego serwera
 migrate_show=Migruj teraz

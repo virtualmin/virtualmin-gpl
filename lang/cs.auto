@@ -3976,6 +3976,7 @@ migrate_user=Uživatelské jméno pro doménu
 migrate_pass=Heslo pro správce
 migrate_webmin=Vytvořit uživatele Webmin?
 migrate_template=Šablona pro nový server?
+migrate_plan=Plán na nový server
 migrate_ip6=IPv6 adresa nového serveru
 migrate_show=Migrovat nyní
 migrate_header=Možnosti migrace virtuálního serveru
