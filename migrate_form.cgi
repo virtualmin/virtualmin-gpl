@@ -35,8 +35,10 @@ if ($can < 3) {
 
 	# Password, if needed
 	print &ui_table_row($text{'migrate_pass'},
-		    &ui_opt_textbox("pass", undef, 20, $text{'migrate_auto2'},
-				    undef, 0, undef, 0, "autocomplete=new-password"));
+		    &ui_radio("pass_def", 1,
+			      [ [ 1, $text{'migrate_auto2'} ],
+			        [ 0, &vui_noauto_password("pass", undef, 20) ]
+			      ]));
 
 	# Create Webmin user?
 	print &ui_table_row($text{'migrate_webmin'},
