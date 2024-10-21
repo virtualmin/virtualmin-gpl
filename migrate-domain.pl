@@ -45,6 +45,10 @@ The C<--template> parameter can be used to specify a Virtualmin template by
 name to use when creating the migrated virtual server. If not given, the
 I<default settings> template will be used.
 
+Similarly the C<--plan> parameter can be used to specify a Virtualmin account
+plan name to use when creating the migrated virtual server, unless it is a
+sub-server. If not given, the default plan will be used.
+
 =cut
 
 package virtual_server;
@@ -108,6 +112,12 @@ while(@ARGV > 0) {
 		$tmpl || &usage("Template $templatename does not exist");
 		$template = $tmpl->{'id'};
 		}
+	elsif ($a eq "--plan") {
+		$planname = shift(@ARGV);
+		($plan) = grep { $_->{'name'} eq $planname }
+			       &list_available_plans();
+		$plan || &usage("Plan $planname does not exist");
+		}
 	elsif ($a eq "--parent") {
 		$parentname = shift(@ARGV);
 		$parent = &get_domain_by("dom", $parentname);
@@ -149,7 +159,7 @@ while(@ARGV > 0) {
 			    'virtalready' => 0, 'mode' => 1 };
 		}
 	elsif ($a eq "--allocate-ip") {
-		$tmpl = &get_template(0);
+		$tmpl ||= &get_template(0);
 		($ip, $netmask) = &free_ip_address($tmpl);
 		$ipinfo = { %$ipinfo,
 			    'virt' => 1, 'ip' => $ip,
@@ -181,7 +191,7 @@ while(@ARGV > 0) {
 			    'virt6already' => 0, 'mode6' => 1 };
 		}
 	elsif ($a eq "--allocate-ip6") {
-		$tmpl = &get_template(0);
+		$tmpl ||= &get_template(0);
 		($ip6, $netmask6) = &free_ip6_address($tmpl);
 		$ipinfo = { %$ipinfo,
 			    'virt6' => 1, 'ip6' => $ip6,
@@ -270,7 +280,7 @@ print "Starting migration of $domain from $nice ..\n\n";
 &lock_domain_name($domain);
 $mfunc = "migration_${type}_migrate";
 @doms = &$mfunc($src, $domain, $user, $webmin, $template,
-		$ipinfo, $pass, $parent, $prefix, $email);
+		$ipinfo, $pass, $parent, $prefix, $email, $plan);
 &unlock_domain_name($domain);
 &run_post_actions();
 
@@ -303,6 +313,7 @@ print "                         [--user username]\n";
 print "                         [--pass \"password\"]\n";
 print "                         [--webmin]\n";
 print "                         [--template name]\n";
+print "                         [--plan name]\n";
 print "                         [--parent domain]\n";
 print "                         [--prefix string]\n";
 print "                         [--delete-existing]\n";

@@ -76,13 +76,13 @@ return (undef, $dom, $user, $pass);
 }
 
 # migration_plesk_migrate(file, domain, username, create-webmin, template-id,
-#			  &ipinfo, pass, [&parent], [prefix], [email])
+#			  &ipinfo, pass, [&parent], [prefix], [email], [&plan])
 # Actually extract the given Plesk backup, and return the list of domains
 # created.
 sub migration_plesk_migrate
 {
 local ($file, $dom, $user, $webmin, $template, $ipinfo, $pass, $parent,
-       $prefix, $email) = @_;
+       $prefix, $email, $plan) = @_;
 
 # Check for prefix clash
 $prefix ||= &compute_prefix($dom, undef, $parent, 1);
@@ -252,7 +252,8 @@ if (!$parent && !$pass) {
 # Create the virtual server object
 local %dom;
 $prefix ||= &compute_prefix($dom, $group, $parent, 1);
-local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
+$plan = $parent ? &get_plan($parent->{'plan'}) :
+        $plan ? $plan : &get_default_plan();
 %dom = ( 'id', &domain_id(),
 	 'dom', $dom,
          'user', $duser,

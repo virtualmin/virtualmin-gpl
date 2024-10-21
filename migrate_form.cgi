@@ -51,6 +51,13 @@ print &ui_table_row($text{'migrate_template'},
 		    &ui_select("template", &get_init_template(0), 
 			[ map { [ $_->{'id'}, $_->{'name'} ] } @tmpls ]));
 
+# Plan to use
+@availplans = sort { $a->{'name'} cmp $b->{'name'} } &list_available_plans();
+$defplan = &get_default_plan();
+print &ui_table_row($text{'migrate_plan'},
+	&ui_select("plan", $defplan ? $defplan->{'id'} : undef,
+		   [ map { [ $_->{'id'}, $_->{'name'} ] } @availplans ]));
+
 # IP to assign
 print &ui_table_row($text{'migrate_ip'}, &virtual_ip_input(\@tmpls));
 

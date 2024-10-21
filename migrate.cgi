@@ -29,6 +29,8 @@ if ($can < 3) {
 	}
 $tmpl = &get_template($in{'template'});
 &can_use_template($tmpl) || &error($text{'setup_etmpl'});
+$plan = &get_plan($in{'plan'});
+&can_use_plan($plan) || &error($text{'setup_eplan'});
 if ($can < 3) {
 	# Parent can be chosen
 	if (!$in{'parent_def'}) {
@@ -118,7 +120,7 @@ elsif (&domain_name_clash($domain)) {
 $mfunc = "migration_$in{'type'}_migrate";
 @doms = &$mfunc($src, $domain, $user, $in{'webmin'}, $in{'template'},
 		$ipinfo, $pass, $parent, $prefix,
-		$in{'email_def'} ? undef : $in{'email'});
+		$in{'email_def'} ? undef : $in{'email'}, $plan);
 &unlock_domain_name($domain);
 &run_post_actions();
 &$outdent_print();
