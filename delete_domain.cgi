@@ -42,6 +42,7 @@ if (!$in{'confirm'}) {
 	my @features_ = @features;
 	features_sort(\@features_, \@features_);
 	foreach $f (@features_) {
+		next if ($f eq 'dir' && $d->{'alias'});
 		if ($d->{$f} && ($config{$f} || $f eq 'unix')) {
 			my $msg = $d->{'parent'} ? $text{"sublosing_$f"}
 						 : undef;
