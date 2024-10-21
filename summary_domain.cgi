@@ -168,7 +168,9 @@ if ((!$aliasdom && $d->{'dir'}) ||
 	my $domhome = "<tt>$d->{'home'}</tt>";
 	if (&domain_has_website($d) && $d->{'dir'} &&
           !$d->{'proxy_pass_mode'} && &foreign_available("filemin")) {
-		my $phd = &public_html_dir($d);
+		my $ophd;
+		my $phd = $ophd = &public_html_dir($d);
+		my $hd = $d->{'home'};
 		my %faccess = &get_module_acl(undef, 'filemin');
 		my @ap = split(/\s+/, $faccess{'allowed_paths'});
 		if (@ap == 1) {
@@ -177,8 +179,12 @@ if ((!$aliasdom && $d->{'dir'}) ||
 				$ap[0] = $d->{'home'};
 				}
 			$phd =~ s/^\Q$ap[0]\E//;
+			$hd =~ s/^\Q$ap[0]\E//;
+			$hd = '/' if (!$hd);
 			}
-		$domhome = "<a href=\"@{[&get_webprefix_safe()]}/filemin/index.cgi?path=@{[&urlize($phd)]}\">$domhome</a>";
+		my $dompath = -d $ophd ? &urlize($phd) : &urlize($hd);
+		$domhome = "<a href=\"@{[&get_webprefix_safe()]}/filemin/index".
+				".cgi?path=$dompath\">$domhome</a>";
 		}
 	print &ui_table_row($text{'edit_home'}, $domhome, 3);
 	}
