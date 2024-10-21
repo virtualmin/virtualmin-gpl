@@ -5083,6 +5083,7 @@ sub count_domain_aliases
 {
 local ($ignore) = @_;
 local %rv;
+return \%rv if (!$config{'mail'});
 
 # Find local users, so we can skip aliases from user@domain -> user.domain
 local %users;
