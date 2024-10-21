@@ -46,7 +46,6 @@ form_email=Kontaktní emailová adresa
 form_user=Administrační jméno
 form_dbname=Implicitní název databáze
 form_group=Skupina administračního uživatele
-form_dir=Vytvořit domovský adresář?
 form_ip=IP adresa pro stránky a doménu
 form_bytes=bytů
 form_template=Šablona nastavení serveru
