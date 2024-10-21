@@ -660,6 +660,7 @@ foreach my $sdom (keys %$subdoms) {
 			'email', $dom{'email'},
 			'name', 1,
 			'ip', $dom{'ip'},
+			'dns_ip', $dom{'dns_ip'},
 			'virt', 0,
 			'source', $dom{'source'},
 			'parent', $dom{'id'},
