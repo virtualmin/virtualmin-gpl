@@ -163,7 +163,8 @@ if ($showphp) {
 	}
 
 # Home directory
-if (!$aliasdom && $d->{'dir'}) {
+if ((!$aliasdom && $d->{'dir'}) ||
+    ($aliasdom && -d $d->{'home'})) {
 	my $domhome = "<tt>$d->{'home'}</tt>";
 	if (&domain_has_website($d) && $d->{'dir'} &&
           !$d->{'proxy_pass_mode'} && &foreign_available("filemin")) {
