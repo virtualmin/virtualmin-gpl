@@ -714,18 +714,46 @@ sub setup_collectinfo_job
 # Work out correct steps
 local $step = $config{'collect_interval'};
 $step = 5 if (!$step || $step eq 'none');
-$step = 60 if ($step > 60);
+# max step is 32 days (46080)
+$step = 46080 if ($step > 46080);
 local $offset = int(rand()*$step);
 local @mins;
-for(my $i=$offset; $i<60; $i+= $step) {
-	push(@mins, $i);
+local @hours;
+local @days;
+
+if ($step < 120) {
+	# 1 - 60 minutes step 
+	for (my $i = $offset; $i < 60; $i += $step) {
+		push(@mins, $i);
 	}
+	@hours = ('*');
+	@days = ('*');
+} elsif ($step < 2880) {
+	# 2 - 24 hours step
+	$hstep = int($step / 60);
+	$offset = int($offset / 60);
+	for (my $i = $offset; $i < 24; $i += $hstep) {
+		push(@hours, $i);
+	}
+	@mins = ($offset % 60);
+	@days = ('*');
+} else {
+	# 2 - 31 days step
+	$dstep = int($step / 1440);
+	$offset = int($offset / 1440);
+	for (my $i = $offset; $i < 32; $i += $dstep) {
+		push(@days, $i);
+	}
+	@mins = ($offset % 60);
+	@hours = (int($offset / 60) % 60);
+}
+
 local $job = &find_cron_script($collect_cron_cmd);
 if (!$job && $config{'collect_interval'} ne 'none') {
 	# Create, and run for the first time
 	$job = { 'mins' => join(',', @mins),
-		 'hours' => '*',
-		 'days' => '*',
+		 'hours' => join(',', @hours),
+		 'days' => join(',', @days),
 		 'months' => '*',
 		 'weekdays' => '*',
 		 'user' => 'root',
@@ -739,8 +767,27 @@ elsif ($job && $config{'collect_interval'} ne 'none') {
 	local $oldstep = $oldmins[0] eq '*' ? 1 :
 			 @oldmins == 1 ? 60 :
 			 $oldmins[1]-$oldmins[0];
+	if ($oldstep == 60) {
+		local @oldhours = split(/,/, $job->{'hours'});
+		local $oldhourstep = $oldhours[0] eq '*' ? 1 :
+				 @oldhours == 1 ? 24 :
+				 $oldhours[1]-$oldhours[0];
+
+		$oldstep = 60 * $oldhourstep
+		}
+	if ($oldstep == 1440) {
+		local @olddays = split(/,/, $job->{'days'});
+		local $olddaystep = $olddays[0] eq '*' ? 1 :
+				 @olddays == 1 ? 30 :
+				 $olddays[1]-$olddays[0];
+
+		$oldstep = 1440 * $olddaystep
+		}
+
 	if ($step != $oldstep) {
 		$job->{'mins'} = join(',', @mins);
+		$job->{'hours'} = join(',', @hours);
+		$job->{'days'} = join(',', @days);
 		&setup_cron_script($job);
 		}
 	}
