@@ -534,9 +534,7 @@ if (!$virt) {
 # Update cached public_html and CGI dirs, re-create PHP wrappers with new home
 &link_apache_logs($d);
 &find_html_cgi_dirs($d);
-if (defined(&create_php_wrappers)) {
-	&create_php_wrappers($d);
-	}
+&create_php_wrappers($d);
 
 # Force FPM port re-allocation and re-setup of PHP mode
 my $mode = &get_domain_php_mode($oldd);
@@ -733,7 +731,7 @@ else {
 		&find_html_cgi_dirs($d);
 
 		# Re-create wrapper scripts, which contain home
-		if (defined(&create_php_wrappers) && !$d->{'alias'}) {
+		if (!$d->{'alias'}) {
 			&create_php_wrappers($d);
 			}
 		&$second_print($text{'setup_done'});
@@ -1814,7 +1812,7 @@ if ($virt) {
 	undef(@apache::get_config_cache);
 
 	# Re-generate PHP wrappers to match this system
-	if (defined(&create_php_wrappers) && !$d->{'alias'}) {
+	if (!$d->{'alias'}) {
 		my $mode = &get_domain_php_mode($d);
 		&create_php_wrappers($d, $mode);
 		}
