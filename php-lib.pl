@@ -716,11 +716,12 @@ foreach my $ini (&list_domain_php_inis($d)) {
 return undef;
 }
 
-# create_php_wrappers(&domain, phpmode)
+# create_php_wrappers(&domain, [phpmode])
 # Creates all phpN.cgi wrappers for some domain
 sub create_php_wrappers
 {
 local ($d, $mode) = @_;
+$mode ||= &get_domain_php_mode($d);
 local $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin" : &cgi_bin_dir($_[0]);
 local $tmpl = &get_template($d->{'template'});
 
