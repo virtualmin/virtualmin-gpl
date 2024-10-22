@@ -265,7 +265,7 @@ if ($p ne 'web') {
 &require_apache();
 
 # Create wrapper scripts
-if ($mode ne "mod_php" && $mode ne "fpm" && $mode ne "none") {
+if (&need_php_wrappers($d, $mode)) {
 	&create_php_wrappers($d, $mode);
 	}
 
@@ -714,6 +714,15 @@ foreach my $ini (&list_domain_php_inis($d)) {
 	return $max if ($max ne '');
 	}
 return undef;
+}
+
+# need_php_wrappers(&domain, [&mode])
+# Returns 1 if this PHP mode needs CGI wrappers
+sub need_php_wrappers
+{
+local ($d, $mode) = @_;
+$mode ||= &get_domain_php_mode($d);
+return $mode ne "mod_php" && $mode ne "fpm" && $mode ne "none";
 }
 
 # create_php_wrappers(&domain, [phpmode])

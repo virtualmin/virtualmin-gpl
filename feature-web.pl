@@ -510,6 +510,7 @@ sub clone_web
 {
 local ($d, $oldd) = @_;
 &$first_print($text{'clone_web'});
+my $mode = &get_domain_php_mode($oldd);
 if ($d->{'alias_mode'}) {
 	# No copying needed for web alias domains
 	&$second_print($text{'clone_webalias'});
@@ -534,7 +535,9 @@ if (!$virt) {
 # Update cached public_html and CGI dirs, re-create PHP wrappers with new home
 &link_apache_logs($d);
 &find_html_cgi_dirs($d);
-&create_php_wrappers($d);
+if (&need_php_wrappers($d, $mode)) {
+	&create_php_wrappers($d, $mode);
+	}
 
 # Force FPM port re-allocation and re-setup of PHP mode
 my $mode = &get_domain_php_mode($oldd);
@@ -731,8 +734,8 @@ else {
 		&find_html_cgi_dirs($d);
 
 		# Re-create wrapper scripts, which contain home
-		if (!$d->{'alias'}) {
-			&create_php_wrappers($d);
+		if (!$d->{'alias'} && &need_php_wrappers($d, $mode)) {
+			&create_php_wrappers($d, $mode);
 			}
 		&$second_print($text{'setup_done'});
 		}
@@ -1814,7 +1817,9 @@ if ($virt) {
 	# Re-generate PHP wrappers to match this system
 	if (!$d->{'alias'}) {
 		my $mode = &get_domain_php_mode($d);
-		&create_php_wrappers($d, $mode);
+		if (&need_php_wrappers($d, $mode)) {
+			&create_php_wrappers($d, $mode);
+			}
 		}
 	&$second_print($text{'setup_done'});
 
