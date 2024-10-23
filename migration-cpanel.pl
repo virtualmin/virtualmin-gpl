@@ -5,6 +5,13 @@
 sub migration_cpanel_validate
 {
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
+
+# Password is needed for cPanel migrations
+if (!$parent && !$pass) {
+	return ("A password must be supplied for cPanel migrations");
+	}
+
+# Extract the backup and find paths inside it
 local ($ok, $root) = &extract_cpanel_dir($file);
 $ok || return ("Not a cPanel tar.gz file : $root");
 local $daily = glob("$root/backup*/cpbackup/daily");
@@ -95,11 +102,6 @@ elsif (-d $homedir) {
 else {
 	# Home-only backup
 	$user || return ("Username must be supplied for this type of cPanel backup");
-	}
-
-# Password is needed for cPanel migrations
-if (!$parent && !$pass) {
-	return ("A password must be supplied for cPanel migrations");
 	}
 
 return (undef, $dom, $user, $pass);
