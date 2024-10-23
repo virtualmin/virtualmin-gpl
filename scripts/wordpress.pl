@@ -554,6 +554,7 @@ if (&domain_has_website($d) eq 'virtualmin-nginx' &&
 # Called after a script is installed, to enable any extra actions needed
 sub script_wordpress_kit
 {
+return; # No kit for now
 my ($d, $script, $sinfo) = @_;
 my $opts = $sinfo->{'opts'};
 my $php = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
@@ -1385,8 +1386,5 @@ EOF
 	&write_file_contents($dir_filename, $fcontents) });
 &redirect($redir_url);
 }
-
-# script_wordpress_kit_apply(&domain, &opts, &sinfo, &script)
-# Called to save changes to WordPress settings
 
 1;
