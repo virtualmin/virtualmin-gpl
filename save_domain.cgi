@@ -183,7 +183,9 @@ if (!$in{'confirm'} && !$d->{'disabled'}) {
 		foreach $f (@losing) {
 			my $msg = $d->{'parent'} ? $text{"sublosing_$f"}
 						 : undef;
-			$msg ||= $text{"losing_$f"};
+			my $msuf = $f eq 'dir' && $d->{'alias'} ? 4 : 
+				   $f eq 'dir' && $d->{'parent'} ? 2 : "";
+			$msg ||= $text{"losing_$f$msuf"};
 			print "<li>",$text{'feature_'.$f}," - ",$msg,"<br>\n";
 			}
 		features_sort(\@plosing, \@plosing) if (@plosing);

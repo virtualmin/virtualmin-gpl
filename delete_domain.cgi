@@ -42,11 +42,12 @@ if (!$in{'confirm'}) {
 	my @features_ = @features;
 	features_sort(\@features_, \@features_);
 	foreach $f (@features_) {
-		next if ($f eq 'dir' && $d->{'alias'});
 		if ($d->{$f} && ($config{$f} || $f eq 'unix')) {
 			my $msg = $d->{'parent'} ? $text{"sublosing_$f"}
 						 : undef;
-			$msg ||= $text{"losing_$f"};
+			my $msuf = $f eq 'dir' && $d->{'alias'} ? 4 : 
+				   $f eq 'dir' && $d->{'parent'} ? 2 : "";
+			$msg ||= $text{"losing_$f$msuf"};
 			print "<li>",$text{'feature_'.$f}," - ",$msg,"<br>\n";
 			}
 		}
