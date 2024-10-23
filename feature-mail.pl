@@ -5748,7 +5748,8 @@ foreach my $k (keys %acl::sessiondb) {
 # System last logins
 &foreign_require('useradmin');
 eval "use Time::Local";
-foreach my $entry (&useradmin::list_last_logins()) {
+my $uaconfig_last_count = $useradmin::config{'last_count'};
+foreach my $entry (&useradmin::list_last_logins(undef, $uaconfig_last_count)) {
 	my ($user, $ltime) = ($entry->[0], $entry->[4] || $entry->[3]);
 	my ($day_of_week, $month, $day, $time, $year) = split(/\s+/, $ltime);
 	my ($hour, $min, $sec) = split(/:/, $time);
