@@ -6,6 +6,13 @@
 sub migration_directadmin_validate
 {
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
+
+# Password is needed for DirectAdmin migrations
+if (!$parent && !$pass) {
+	return ("A password must be supplied for DirectAdmin migrations");
+	}
+
+# Extract the backup and verify it
 local ($ok, $root) = &extract_directadmin_dir($file);
 $ok || return ("Not a DirectAdmin tar.gz file : $root");
 local $domains = "$root/domains";
@@ -34,11 +41,6 @@ if (!$user) {
 	&read_env_file("$backup/user.conf", \%uinfo) ||
 		return ("$backup/user.conf not found!");
 	$user = $uinfo{'username'};
-	}
-
-# Password is needed for DirectAdmin migrations
-if (!$parent && !$pass) {
-	return ("A password must be supplied for DirectAdmin migrations");
 	}
 
 return (undef, $dom, $user, $pass);
