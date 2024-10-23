@@ -1,3 +1,9 @@
+#### Version 7.30.1
+* Added support for multiple ACME-compatible SSL providers in the Pro version, rather than just Let's Encrypt
+* Numerous improvements to the DirectAdmin migration process
+* CAA DNS records can now be manually edited and created
+* Numerous DNS-related bugfixes
+
 #### Version 7.20.1
 * Add support for changing username format to match the local system when restoring a backup
 * Fix a bug that can corrupt the Dovecot config when creation of the default domain fails
