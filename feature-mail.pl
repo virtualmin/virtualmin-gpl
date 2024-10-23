@@ -31,6 +31,7 @@ elsif ($config{'mail_system'} == 0) {
 	&foreign_require("postfix", "postfix-lib.pl");
 	&foreign_require("postfix", "boxes-lib.pl");
 	%pconfig = &foreign_config("postfix");
+	return if (!&has_command($pconfig{'postfix_config_command'}));
 	$virtual_type = $postfix::virtual_maps || "virtual_maps";
 	$virtual_maps = &postfix::get_real_value($virtual_type);
 	@virtual_map_files = &postfix::get_maps_files($virtual_maps);
