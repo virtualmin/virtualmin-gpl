@@ -841,6 +841,10 @@ feature_virt6=IPv6地址
 bandwidth_backup=進行備份
 bandwidth_restore=備份已還原
 
+losing_dir=此虛擬伺服器的主目錄（包含所有網站資料和其他檔案）將被刪除。
+losing_dir2=此虛擬子伺服器的主目錄（包含所有網站資料和其他檔案）將被刪除。
+losing_dir4=該別名的主目錄包含使用者的資料和其他文件，將會被刪除。
+
 check_desc=正在檢查您的系統狀態，以確保所有啟用的功能都可用並正確配置 ..
 check_lowmemory=您的系統只有 $1的內存，低於Virtualmin建議的最小值 $2。
 check_lowgmemory=您的系統是具有 $1內存的VM，但是保證的限制僅為 $2。這低於Virtualmin建議的最小值 $3，並可能導致間歇性的內存分配失敗。

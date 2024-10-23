@@ -508,6 +508,10 @@ newweb_sslredirect=Leid alle HTTP-verzoeken om naar HTTPS
 
 feature_ssl=Apache SSL-website
 
+losing_dir=De thuismap van deze virtuele server, die alle websitegegevens en andere bestanden bevat, wordt verwijderd.
+losing_dir2=De thuismap voor deze virtuele subserver, die alle websitegegevens en andere bestanden bevat, wordt verwijderd.
+losing_dir4=De thuismap van deze alias, die de gegevens en andere bestanden van gebruikers bevat, wordt verwijderd.
+
 check_desc=De status van uw systeem wordt gecontroleerd om er zeker van te zijn dat alle ingeschakelde functies beschikbaar en correct zijn geconfigureerd ..
 check_defip6=Het standaard IPv6-adres voor virtuele servers is $1
 check_dnsip3=Het gedetecteerde externe IPv4-adres is $1

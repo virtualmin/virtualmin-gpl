@@ -1176,7 +1176,6 @@ losing_webalizer=La génération périodique de statistiques d'accès basées su
 losing_mail=Le serveur de courrier n'acceptera plus de courrier pour ce domaine.
 losing_ssl=Toutes les directives Apache dans le serveur virtuel SSL seront effacées.
 losing_unix=L'utilisateur et le groupe Unix pour ce serveur virtuel seront effacés.
-losing_dir=Le répertoire utilisateur de ce serveur virtuel, contenant tous les sites Web et autres, sera effacé.
 losing_webmin=L'utilisateur Webmin de ce serveur virtuel sera effacé.
 losing_ftp=Toutes les directives ProFTPd du serveur virtuel seront effacées.
 losing_logrotate=La configuration de Logrotate pour les fichiers log du serveur virtuel seront effacées.

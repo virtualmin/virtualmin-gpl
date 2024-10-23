@@ -780,6 +780,9 @@ newreseller_desc2=Verwenden Sie dieses Formular, um die Vorlage für die E-Mail-
 
 feature_ssl=Apache SSL-Website
 
+losing_dir=Das Home-Verzeichnis dieses virtuellen Servers, das alle Website-Daten und andere Dateien enthält, wird gelöscht.
+losing_dir2=Das Home-Verzeichnis dieses virtuellen Subservers, das alle Website-Daten und andere Dateien enthält, wird gelöscht.
+losing_dir4=Das Home-Verzeichnis für diesen Alias, das die Daten und andere Dateien der Benutzer enthält, wird gelöscht.
 losing_spam=Die SpamAssassin-Konfiguration für diesen virtuellen Server wird gelöscht.
 losing_virus=Der Procmail-Eintrag zum Filtern von Viren für diesen virtuellen Server wird entfernt.
 losing_status=Der Webmin-Statusmonitor für die Website dieses virtuellen Servers wird gelöscht.

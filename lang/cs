@@ -474,7 +474,6 @@ losing_mysql=Všechny databáze MySQL, všechny tabulky a serverové přihláše
 sublosing_mysql=Všechny databáze MySQL a všechny tabulky budou smazány.
 losing_postgres=Všechny PostgreSQL databáze, tabulky a přihlášení budou smazány.
 sublosing_postgres=Všechny PostgreSQL databáze a tabulky budou smazány.
-losing_dir=Domovský adresář tohoto virtuálního serveru, obsahující všechny stránky a data, bude smazán.
 
 check_defip=Vychozi IP adresa pro virtualni servery je $1
 check_ednsip2=Implicitní IP adresa je nastavena na $1, ale detekovaná veřejná adresa je $2 . Toto zpravidla nastává v případě, kdy jste připojeni přes NAT a mělo by být opraveno na stránce <a href='$3'>nastavení modulů</a>

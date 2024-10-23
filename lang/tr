@@ -1176,7 +1176,6 @@ losing_webalizer=Web sitesi loglarýna dayanan planlanmýþ rapor üretimi kapat
 losing_mail=Bu alanadý için e-posta sunucusu artýk e-posta kabul etmeyecek.
 losing_ssl=SSL Sanal hosttaki tüm Apache direktifleri kaldýrýlacak.
 losing_unix=Bu sanal sunucunun Unix kullanýcý ve grubu silinecek.
-losing_dir=Bu sanal sunucunun anaklasörü (web sitesi dahil) silinecek.
 losing_webmin=Bu sanal sunucunun webmin kullanýcýsý silinecek.
 losing_ftp=Sanal sunucudaki tüm ProFTPd direktifleri kaldýrýlacak.
 losing_logrotate=Sanal sunucunun log dosyalarý için yapýlan Logrotate konfigürasyonu silinecek.

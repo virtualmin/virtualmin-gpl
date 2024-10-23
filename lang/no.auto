@@ -456,6 +456,10 @@ newweb_sslredirect=Omdiriger alle HTTP-forespørsler til HTTPS
 
 feature_ssl=Apache SSL-nettsted
 
+losing_dir=Hjemmekatalogen for denne virtuelle serveren, som inneholder alle nettstedsdata og andre filer, vil bli slettet.
+losing_dir2=Hjemmekatalogen for denne virtuelle underserveren, som inneholder alle nettstedsdata og andre filer, vil bli slettet.
+losing_dir4=Hjemmekatalogen for dette aliaset, som inneholder data og andre filer til brukere, vil bli slettet.
+
 check_desc=Statusen til systemet ditt blir sjekket for å sikre at alle aktiverte funksjoner er tilgjengelige og riktig konfigurert ..
 check_dnsip3=Oppdaget ekstern IPv4-adresse er $1
 check_ednsip3=Kunne ikke oppdage ekstern IPv4-adresse

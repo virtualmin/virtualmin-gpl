@@ -1569,7 +1569,6 @@ losing_webalizer=Het gepland genereren van een rapport op basis van de website's
 losing_mail=De email server zal niet langer email accepteren voor dit domein.
 losing_ssl=Alle Apache richtlijnen in de SSL virtuele host zullen worden verwijdert.
 losing_unix=De administratie gebruikers en groepen voor deze virtuele server zal worden verwijdert.
-losing_dir=De home directory voor deze virtuele server, waarin alle website's en toebehoren zitten zal worden verwijdert.
 losing_webmin=De Webmin gebruiker voor deze virtuele server zal worden verwijdert.
 losing_ftp=Alle ProFTPd richtlijnen in de virtuele server zullen worden verwijdert.
 losing_logrotate=De Logrotatie configuratie voor deze virtuele server's log files zal worden verwijdert.

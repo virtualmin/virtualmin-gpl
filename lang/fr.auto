@@ -912,6 +912,9 @@ feature_status=Surveillance de l'état
 bandwidth_backup=Sauvegardes effectuées
 bandwidth_restore=Sauvegardes restaurées
 
+losing_dir=Le répertoire personnel de ce serveur virtuel, qui contient toutes les données du site Web et d’autres fichiers, sera supprimé.
+losing_dir2=Le répertoire personnel de ce sous-serveur virtuel, qui contient toutes les données du site Web et d’autres fichiers, sera supprimé.
+losing_dir4=Le répertoire personnel de cet alias, qui contient les données et autres fichiers des utilisateurs, sera supprimé.
 losing_spam=La configuration de SpamAssassin pour ce serveur virtuel sera supprimée.
 losing_virus=L'entrée Procmail pour filtrer les virus pour ce serveur virtuel sera supprimée.
 losing_status=Le moniteur d'état Webmin du site Web de ce serveur virtuel sera supprimé.

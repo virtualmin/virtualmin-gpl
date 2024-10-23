@@ -908,6 +908,10 @@ feature_virt6=IPv6 adresi
 bandwidth_backup=Yapılan yedeklemeler
 bandwidth_restore=Yedekler geri yüklendi
 
+losing_dir=Tüm web sitesi verilerini ve diğer dosyaları içeren bu sanal sunucunun ana dizini silinecektir.
+losing_dir2=Tüm web sitesi verilerini ve diğer dosyaları içeren bu sanal alt sunucunun ana dizini silinecektir.
+losing_dir4=Kullanıcıların verilerini ve diğer dosyalarını barındıran bu takma adın ana dizini silinecektir.
+
 check_desc=Etkinleştirilen tüm özelliklerin kullanılabilir olduğundan ve doğru şekilde yapılandırıldığından emin olmak için sisteminizin durumu kontrol ediliyor ..
 check_lowmemory=Sisteminizde yalnızca $1 bellek var, bu da Virtualmin tarafından önerilen minimum $2 değerinin altında
 check_lowgmemory=Sisteminiz $1 belleğe sahip bir sanal makinedir, ancak garanti edilen sınır yalnızca $2 'dir. Bu, Virtualmin tarafından önerilen minimum $3 değerinin altındadır ve aralıklı bellek ayırma hatalarına neden olabilir

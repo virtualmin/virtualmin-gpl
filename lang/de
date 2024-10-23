@@ -1302,7 +1302,6 @@ losing_webalizer=Die via Cron geplante automatische Erzeugung der Webalizer-Webs
 losing_mail=Der E-Mail-Server wird keine E-Mails mehr für diese Domain annehmen.
 losing_ssl=Alle Apache-Direktiven des SSL-Virtuellen Server werden entfernt.
 losing_unix=Der Unix-Benutzer und die -Gruppe für diesen Virtuellen Server werden gelöscht.
-losing_dir=Das Heimat-Verzeichnis für diesen Virtuellen Server wird mit allen darin befindlichen Inhalten (Webseite z.B.) gelöscht.
 losing_webmin=Der Webmin-Benutzer für diesen Virtuellen Server wird gelöscht.
 losing_ftp=Alle ProFTPd-Direktiven des Virtuellen Server werden entfernt.
 losing_logrotate=Die Logrotate-Konfiguration für die Logdateien des Virtuellen Servers wird gelöscht.

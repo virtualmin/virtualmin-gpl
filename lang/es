@@ -1404,7 +1404,6 @@ losing_webalizer=La generación programada de un informe basado en los archivos 
 losing_mail=El servidor de correo ya no aceptará email para este dominio.
 losing_ssl=Todas las directivas de Apache del host virtual SSL serán eliminadas.
 losing_unix=El usuario y grupo Unix de este servidor virtual serán eliminados, junto con todo el sitio web y otros archivos de su directorio base.
-losing_dir=El directorio base de este servidor virtual, que contiene el sitio web y demás, será eliminado.
 losing_webmin=El usuario Webmin de este servidor virtual será eliminado.
 losing_ftp=Todas las directivas ProFTPd de este servidor virtual serán eliminadas.
 losing_logrotate=La configuración de Logrotate para los archivos de bitácora del servidor virtual, será eliminada.

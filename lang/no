@@ -1619,7 +1619,6 @@ losing_webalizer=Tidsplanlagt generering av en rapport basert på nettstedets lo
 losing_mail=E-post tjeneren vil ikke lenger akseptere e--post for dette domenet.
 losing_ssl=Alle Apache direktiver i den virtuelle SSL verten vil bli fjernet.
 losing_unix=Administrasjonsbruker og -gruppe for denne virtuelle tjeneren vil bli slettet.
-losing_dir=Hjemmekatalogen for denne virtuelle tjeneren, som inneholder alle nettsteder og andre data, vil bli slettet.
 losing_webmin=Webmin brukeren for denne virtuelle tjeneren vil bli slettet
 losing_ftp=Alle ProFTPd direktiver i den virtuelle tjeneren vil bli fjernet.
 losing_logrotate=Logrotate konfigurasjonen for den virtuelle tjenerens loggfiler vil bli slettet.

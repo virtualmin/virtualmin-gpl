@@ -1240,7 +1240,6 @@ losing_webalizer=基于网站日志的报告定时生成将被关闭。
 losing_mail=邮件服务器不再接收来自这个域的邮件。
 losing_ssl=SSL虚拟主机中的所有Apache指令都将被删除。
 losing_unix=该虚拟服务器的管理员用户和用户组都将被删除。
-losing_dir=该虚拟服务器的用户主目录，包含所有网站和其他文件，都将被删除。
 losing_webmin=该虚拟服务器的Webmin用户都将被删除。
 losing_ftp=该虚拟服务器的所有ProFTPd指令都将被删除。
 losing_logrotate=该虚拟服务器日志文件的所有Logrotate配置都将被删除。

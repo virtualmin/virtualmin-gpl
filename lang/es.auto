@@ -674,6 +674,10 @@ newdns_enshost=El servidor de nombres adicional $1 no existe
 feature_ssl=Sitio web de Apache SSL
 feature_virt6=Dirección IPv6
 
+losing_dir=Se eliminará el directorio de inicio de este servidor virtual, que contiene todos los datos del sitio web y otros archivos.
+losing_dir2=Se eliminará el directorio de inicio de este subservidor virtual, que contiene todos los datos del sitio web y otros archivos.
+losing_dir4=Se eliminará el directorio de inicio de este alias, que contiene los datos y otros archivos de los usuarios.
+
 check_desc=Se está verificando el estado de su sistema para garantizar que todas las funciones habilitadas estén disponibles y configuradas correctamente ..
 check_lowmemory=Su sistema tiene solo $1 de memoria, que está por debajo del mínimo recomendado de Virtualmin de $2
 check_lowgmemory=Su sistema es una VM con $1 de memoria, pero el límite garantizado es de solo $2. Esto está por debajo del mínimo recomendado de Virtualmin de $3 y puede causar fallas intermitentes en la asignación de memoria
