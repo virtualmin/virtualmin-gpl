@@ -3481,12 +3481,6 @@ if ($tmpl->{'owners'} ne '*' && !&reseller_admin()) {
 return 1;
 }
 
-# Returns 1 if the current user can execute remote commands
-sub can_remote
-{
-return &master_admin();
-}
-
 # Returns 1 if the current user can grant extra modules to server owners
 sub can_webmin_modules
 {
