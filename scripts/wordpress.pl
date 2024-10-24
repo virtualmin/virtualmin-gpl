@@ -1038,7 +1038,7 @@ my $backup_actions_opts =
 	  [ "files", $text{"${_t}selopt_backup_files"} ],
 	  [ "db", $text{"${_t}selopt_backup_db"} ],
 	  [ "restore", $text{"${_t}selopt_backup_restore"} ],
-	  [ "rm", $text{"${_t}selopt_backup_del"} ] ];
+	  [ "delete", $text{"${_t}selopt_backup_del"} ] ];
 $backup_tab_content .=
 	&ui_form_start($save_kit_form, "post", undef,
 		       "$kit_form_main id='kit_backup_form'");
