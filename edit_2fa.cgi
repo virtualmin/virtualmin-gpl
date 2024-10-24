@@ -3,7 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
-&can_2fa() || &error($text{'2fa_ecannot'});
+&can_user_2fa() || &can_master_reseller_2fa() || &error($text{'2fa_ecannot'});
 
 &ui_print_header(undef, $text{'2fa_title'}, "");
 

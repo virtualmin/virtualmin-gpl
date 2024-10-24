@@ -11564,12 +11564,20 @@ return &reseller_admin() || $access{'edit_passwd'};
 }
 
 # Returns 1 if the user can enroll for 2fa
-sub can_2fa
+sub can_user_2fa
+{
+my %miniserv;
+&get_miniserv_config(\%miniserv);
+return $miniserv{'twofactor_provider'} && $access{'edit_passwd'};
+}
+
+# Return 1 if the master admin or reseller can enroll for 2fa
+sub can_master_reseller_2fa
 {
 my %miniserv;
 &get_miniserv_config(\%miniserv);
 return $miniserv{'twofactor_provider'} &&
-       (&reseller_admin() || $access{'edit_passwd'});
+       (&master_admin() || &reseller_admin());
 }
 
 # Returns 1 if the user can change a domain's external IP address
@@ -13722,8 +13730,8 @@ if (&can_passwd()) {
 		  });
 	}
 
-if (&can_2fa()) {
-	# Twofactor enroll button
+if (&can_user_2fa()) {
+	# Twofactor enroll button for the user
 	push(@rv, { 'page' => 'edit_2fa.cgi',
 		    'title' => $text{'edit_change2fa'},
 		    'desc' => $text{'edit_change2fadesc'},
@@ -14072,6 +14080,13 @@ if ($config{'wizard_run'} && &can_edit_templates()) {
 		    'title' => $text{'index_rewizard'},
 		    'cat' => 'setting',
 		    'icon' => 'wizard' });
+	}
+
+# Twofactor enroll button for master admins and resellers
+if (&can_master_reseller_2fa()) {
+	push(@rv, { 'url' => "$vm/edit_2fa.cgi",
+		    'title' => $text{'edit_change2fa'},
+		    'cat' => 'setting' });
 	}
 
 # Add creation-related links

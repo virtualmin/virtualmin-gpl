@@ -8246,7 +8246,8 @@ deftmplt_tmpltpagefooteraboutcont=Contact
 2fa_cancel=Cancel Two-Factor
 2fa_header=Two-Factor Options
 2fa_err=Failed to save two-factor authentication
-2fa_enrolling=Enrolling for two-factor with $1 ...
+2fa_enrolling=Enrolling for two-factor authentication with $1 ..
+2fa_ecannot=You are not allowed to manage two-factor authentication
 
 rcert_err=Failed to delete certificate
 rcert_ecert=Virtual server has no certificate to remove
