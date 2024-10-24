@@ -23,7 +23,7 @@ if ($user->{'twofactor_provider'}) {
 	$msg = $text{'2fa_cancel'};
 	my ($prov) = grep { $_->[0] eq $user->{'twofactor_provider'} } @provs;
 	print &text('2fa_already',
-		    "<i>$prov->[1]</i>",
+		    $prov->[1],
 		    "<tt>$user->{'twofactor_id'}</tt>"),"<p>\n";
 	}
 else {
@@ -32,7 +32,7 @@ else {
 	my %miniserv;
 	&get_miniserv_config(\%miniserv);
 	my ($prov) = grep { $_->[0] eq $miniserv{'twofactor_provider'} } @provs;
-	print &text('2fa_desc', "<i>$prov->[1]</i>", $prov->[2]),"<p>\n";
+	print &text('2fa_desc', $prov->[1], $prov->[2]),"<p>\n";
         my $ffunc = "webmin::show_twofactor_form_".
                     $miniserv{'twofactor_provider'};
         if (defined(&$ffunc)) {

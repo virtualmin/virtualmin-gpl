@@ -8240,7 +8240,7 @@ deftmplt_tmpltpagefooteraboutcont=Contact
 
 2fa_title=Two-Factor Authentication
 2fa_euser=Webmin user does not exist!
-2fa_already=You are already enrolled for two-factor authentication using provider $1 with account ID $2.
+2fa_already=You are already enrolled in two-factor authentication using the $1 provider with account ID $2.
 2fa_desc=This page allows you to enable two-factor authentication for your Virtualmin account using <a href='$2' target=_blank>$1</a>. Once active, an additional authentication token will be required when logging into Virtualmin.
 2fa_ok=Enroll For Two-Factor
 2fa_cancel=Cancel Two-Factor
