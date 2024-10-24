@@ -1784,6 +1784,14 @@ $script_tests = [
 		    ],
 	},
 
+	# Check WP Workbench API
+	{ 'command' => 'configure-script.pl',
+	  'args' => [ [ 'script-type', 'wordpress' ],
+		      [ 'domain', $test_domain ],
+		      [ 'opt', 'blogdescription "Virtualmin Blog"' ] ],
+	  'grep' => 'Updating site tagline',
+	},
+
 	# Un-install
 	{ 'command' => 'delete-script.pl',
 	  'args' => [ [ 'domain', $test_domain ],
