@@ -8,7 +8,7 @@ use Socket;
 $trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &ReadParse();
-&can_remote(\%in) || &api_error($text{'remote_ecannot'});
+&can_remote($in{'program'}) || &api_error($text{'remote_ecannot'});
 
 if (!$in{'program'}) {
 	# Tell the user what needs to be done
