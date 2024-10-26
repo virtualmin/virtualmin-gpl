@@ -529,48 +529,50 @@ if ($got{&domain_has_ssl()}) {
 	}
 
 # Migrate DNS domain
-if ($got{'dns'} && -d $daily) {
-	&$first_print("Copying and fixing DNS records ..");
+my ($zsrc) = glob("$root/backup*/dnszones/$dom.db");
+if (!$zsrc && $got{'dns'} && -d $daily) {
 	&require_bind();
 	local ($ok, $named) = &extract_cpanel_dir(
 				"$daily/dirs/_var_named.tar.gz");
 	local $zsrcfile = &bind8::find_value("file", $zone->{'members'});
 	if (-r "$named/$zsrcfile") {
-		&execute_command("cp ".quotemeta("$named/$zsrcfile")." ".
-			     quotemeta(&bind8::make_chroot($zdstfile)));
-		local ($recs, $zdstfile) =
-			&get_domain_dns_records_and_file(\%dom);
-		foreach my $r (@$recs) {
-			my $change = 0;
-			if (($r->{'name'} eq $dom."." ||
-			     $r->{'name'} eq "www.".$dom."." ||
-			     $r->{'name'} eq "ftp.".$dom."." ||
-			     $r->{'name'} eq "mail.".$dom.".") &&
-			    $r->{'type'} eq 'A') {
-				# Fix IP in domain record
-				$r->{'values'} = [ $dom{'ip'} ];
-				$change++;
-				}
-			elsif ($r->{'name'} eq $dom."." &&
-			       $r->{'type'} eq 'NS') {
-				# Set NS record to this server
-				local $master = $bconfig{'default_prins'} ||
-						&get_system_hostname();
-				$master .= "." if ($master !~ /\.$/);
-				$r->{'values'} = [ $master ];
-				$change++;
-				}
-			if ($change) {
-				&modify_dns_record($recs, $zdstfile, $r);
-				}
+		$zsrc = "$named/$zsrcfile";
+		}
+	}
+if ($zsrc) {
+	&$first_print("Copying and fixing DNS records ..");
+	$zdstfile ||= &get_domain_dns_file_from_bind(\%dom);
+	&copy_source_dest($zsrc, &bind8::make_chroot($zdstfile));
+	local ($recs, $zdstfile) =
+		&get_domain_dns_records_and_file(\%dom);
+	foreach my $r (@$recs) {
+		my $change = 0;
+		if (($r->{'name'} eq $dom."." ||
+		     $r->{'name'} eq "www.".$dom."." ||
+		     $r->{'name'} eq "ftp.".$dom."." ||
+		     $r->{'name'} eq "mail.".$dom.".") &&
+		    $r->{'type'} eq 'A') {
+			# Fix IP in domain record
+			$r->{'values'} = [ $dom{'ip'} ];
+			$change++;
 			}
-		&post_records_change(\%dom, $recs, $zdstfile);
-		&$second_print(".. done");
-		&register_post_action(\&restart_bind);
+		elsif ($r->{'name'} eq $dom."." &&
+		       $r->{'type'} eq 'NS') {
+			# Set NS record to this server
+			local $master = $bconfig{'default_prins'} ||
+					&get_system_hostname();
+			$master .= "." if ($master !~ /\.$/);
+			$r->{'values'} = [ $master ];
+			$change++;
+			}
+		if ($change) {
+			&modify_dns_record($recs, $zdstfile, $r);
+			}
 		}
-	else {
-		&$second_print(".. could not find records file in backup!");
-		}
+	&post_records_change(\%dom, $recs, $zdstfile);
+	&$second_print(".. done");
+	&register_post_action(\&restart_bind);
+	#&$second_print(".. could not find records file in backup!");
 	}
 
 local $out;
