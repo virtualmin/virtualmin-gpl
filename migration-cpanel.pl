@@ -529,51 +529,7 @@ if ($got{&domain_has_ssl()}) {
 	}
 
 # Migrate DNS domain
-my ($zsrc) = glob("$root/backup*/dnszones/$dom.db");
-if (!$zsrc && $got{'dns'} && -d $daily) {
-	&require_bind();
-	local ($ok, $named) = &extract_cpanel_dir(
-				"$daily/dirs/_var_named.tar.gz");
-	local $zsrcfile = &bind8::find_value("file", $zone->{'members'});
-	if (-r "$named/$zsrcfile") {
-		$zsrc = "$named/$zsrcfile";
-		}
-	}
-if ($zsrc) {
-	&$first_print("Copying and fixing DNS records ..");
-	$zdstfile ||= &get_domain_dns_file_from_bind(\%dom);
-	&copy_source_dest($zsrc, &bind8::make_chroot($zdstfile));
-	local ($recs, $zdstfile) =
-		&get_domain_dns_records_and_file(\%dom, 1);
-	foreach my $r (@$recs) {
-		my $change = 0;
-		if (($r->{'name'} eq $dom."." ||
-		     $r->{'name'} eq "www.".$dom."." ||
-		     $r->{'name'} eq "ftp.".$dom."." ||
-		     $r->{'name'} eq "mail.".$dom.".") &&
-		    $r->{'type'} eq 'A') {
-			# Fix IP in domain record
-			$r->{'values'} = [ $dom{'dns_ip'} || $dom{'ip'} ];
-			$change++;
-			}
-		elsif ($r->{'name'} eq $dom."." &&
-		       $r->{'type'} eq 'NS') {
-			# Set NS record to this server
-			local $master = $bconfig{'default_prins'} ||
-					&get_system_hostname();
-			$master .= "." if ($master !~ /\.$/);
-			$r->{'values'} = [ $master ];
-			$change++;
-			}
-		if ($change) {
-			&modify_dns_record($recs, $zdstfile, $r);
-			}
-		}
-	&post_records_change(\%dom, $recs, $zdstfile);
-	&$second_print(".. done");
-	&register_post_action(\&restart_bind);
-	#&$second_print(".. could not find records file in backup!");
-	}
+&cpanel_migrate_dns_zone(\%dom, $dom);
 
 local $out;
 local $ht = &public_html_dir(\%dom);
@@ -1115,7 +1071,6 @@ foreach my $l (@$lref) {
 
 # Create sub-domains again, to catch those for which an addon target exists now
 &create_sub_domains(0);
-
 
 if ($got{'webalizer'}) {
 	# Copy existing Weblizer stats to ~/public_html/stats
@@ -1727,6 +1682,56 @@ while(<VA>) {
 	}
 close(VA);
 return $acount;
+}
+
+# cpanel_migrate_dns_zone(&domain, dname)
+# Migrate DNS records for a cPanel domain
+sub cpanel_migrate_dns_zone
+{
+my ($d, $dom) = @_;
+my ($zsrc) = glob("$root/backup*/dnszones/$dom.db");
+if (!$zsrc && $d->{'dns'} && -d $daily) {
+	&require_bind();
+	my ($ok, $named) = &extract_cpanel_dir(
+				"$daily/dirs/_var_named.tar.gz");
+	my $zsrcfile = &bind8::find_value("file", $zone->{'members'});
+	if (-r "$named/$zsrcfile") {
+		$zsrc = "$named/$zsrcfile";
+		}
+	}
+if ($zsrc) {
+	&$first_print("Copying and fixing DNS records for $dom ..");
+	my $zdstfile = &get_domain_dns_file_from_bind($d);
+	&copy_source_dest($zsrc, &bind8::make_chroot($zdstfile));
+	my ($recs, $zdstfile) = &get_domain_dns_records_and_file($d, 1);
+	foreach my $r (@$recs) {
+		my $change = 0;
+		if (($r->{'name'} eq $dom."." ||
+		     $r->{'name'} eq "www.".$dom."." ||
+		     $r->{'name'} eq "ftp.".$dom."." ||
+		     $r->{'name'} eq "mail.".$dom.".") &&
+		    $r->{'type'} eq 'A') {
+			# Fix IP in domain record
+			$r->{'values'} = [ $d->{'dns_ip'} || $d->{'ip'} ];
+			$change++;
+			}
+		elsif ($r->{'name'} eq $dom."." &&
+		       $r->{'type'} eq 'NS') {
+			# Set NS record to this server
+			local $master = $bconfig{'default_prins'} ||
+					&get_system_hostname();
+			$master .= "." if ($master !~ /\.$/);
+			$r->{'values'} = [ $master ];
+			$change++;
+			}
+		if ($change) {
+			&modify_dns_record($recs, $zdstfile, $r);
+			}
+		}
+	&post_records_change($d, $recs, $zdstfile);
+	&$second_print(".. done");
+	&register_post_action(\&restart_bind);
+	}
 }
 
 # get_cpanel_db_list(file, user, origuser)
