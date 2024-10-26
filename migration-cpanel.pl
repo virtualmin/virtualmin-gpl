@@ -553,7 +553,7 @@ if ($zsrc) {
 		     $r->{'name'} eq "mail.".$dom.".") &&
 		    $r->{'type'} eq 'A') {
 			# Fix IP in domain record
-			$r->{'values'} = [ $dom{'ip'} ];
+			$r->{'values'} = [ $dom{'dns_ip'} || $dom{'ip'} ];
 			$change++;
 			}
 		elsif ($r->{'name'} eq $dom."." &&
