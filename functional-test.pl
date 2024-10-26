@@ -1789,7 +1789,9 @@ $script_tests = [
 	  'args' => [ [ 'script-type', 'wordpress' ],
 		      [ 'domain', $test_domain ],
 		      [ 'opt', 'blogdescription "Virtualmin Blog"' ] ],
-	  'grep' => 'Updating site tagline',
+	  'grep' => [ 'Updating site tagline ..',
+	  	      '.. done'
+	  	    ],
 	},
 
 	# Un-install
