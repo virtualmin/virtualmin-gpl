@@ -544,7 +544,7 @@ if ($zsrc) {
 	$zdstfile ||= &get_domain_dns_file_from_bind(\%dom);
 	&copy_source_dest($zsrc, &bind8::make_chroot($zdstfile));
 	local ($recs, $zdstfile) =
-		&get_domain_dns_records_and_file(\%dom);
+		&get_domain_dns_records_and_file(\%dom, 1);
 	foreach my $r (@$recs) {
 		my $change = 0;
 		if (($r->{'name'} eq $dom."." ||
