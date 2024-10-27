@@ -2487,24 +2487,26 @@ else {
 # Returns the base directory under which user mail files can be found
 sub mail_system_base
 {
-&require_mail();
-if ($config{'mail_system'} == 1) {
-	# Find out from sendmail module config
-	if ($sconfig{'mail_dir'}) {
-		return $sconfig{'mail_dir'};
+if ($config{'mail'}) {
+	&require_mail();
+	if ($config{'mail_system'} == 1) {
+		# Find out from sendmail module config
+		if ($sconfig{'mail_dir'}) {
+			return $sconfig{'mail_dir'};
+			}
 		}
-	}
-elsif ($config{'mail_system'} == 0) {
-	# Find out from postfix
-	local @s = &postfix::postfix_mail_system();
-	if ($s[0] == 0) {
-		return $s[1];
+	elsif ($config{'mail_system'} == 0) {
+		# Find out from postfix
+		local @s = &postfix::postfix_mail_system();
+		if ($s[0] == 0) {
+			return $s[1];
+			}
 		}
-	}
-elsif ($config{'mail_system'} == 2) {
-	# Find out from qmail module config
-	if ($qmconfig{'mail_system'} == 0 && $qmconfig{'mail_dir'}) {
-		return $qmconfig{'mail_dir'};
+	elsif ($config{'mail_system'} == 2) {
+		# Find out from qmail module config
+		if ($qmconfig{'mail_system'} == 0 && $qmconfig{'mail_dir'}) {
+			return $qmconfig{'mail_dir'};
+			}
 		}
 	}
 
