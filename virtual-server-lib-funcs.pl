@@ -16228,6 +16228,8 @@ if ($config{'logrotate'}) {
 
 if ($config{'spam'}) {
 	# Make sure SpamAssassin and procmail are installed
+	$config{'mail'} ||
+		return &text('index_espammail', $clink);
 	&foreign_installed("spam", 1) == 2 ||
 		return &text('index_espam', "/spam/", $clink);
 	&foreign_installed("procmail", 1) == 2 ||
@@ -16317,6 +16319,8 @@ if ($config{'spam'}) {
 
 if ($config{'virus'}) {
 	# Make sure ClamAV is installed and working
+	$config{'mail'} ||
+		return &text('index_evirusmail', $clink);
 	$config{'spam'} || return $text{'check_evirusspam'};
 	&full_clamscan_path() ||
 		return &text('index_evirus',
