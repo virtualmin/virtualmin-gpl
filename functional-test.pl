@@ -492,11 +492,13 @@ $domains_tests = [
 		},
 
 		# Check PHP running via CGI
-		{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
+		{ 'command' => 'echo "<?php system(\'id -a\'); '.
+			       'echo php_sapi_name(),"\\n"; ?>" >~'.
 			       $test_domain_user.'/public_html/test.php',
 		},
 		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
-		  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+			      'cgi-fcgi' ],
 		},
 		) : ( ),
 
@@ -522,11 +524,13 @@ $domains_tests = [
 		},
 
 		# Check PHP running via fCGId
-		{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
+		{ 'command' => 'echo "<?php system(\'id -a\'); '.
+			       'echo php_sapi_name(),"\\n"; ?>" >~'.
 			       $test_domain_user.'/public_html/test.php',
 		},
 		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
-		  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+			      'cgi-fcgi' ],
 		},
 		) : ( ),
 
@@ -552,11 +556,13 @@ $domains_tests = [
 		},
 
 		# Check PHP running via FPM
-		{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
+		{ 'command' => 'echo "<?php system(\'id -a\'); '.
+			       'echo php_sapi_name(),"\\n"; ?>" >~'.
 			       $test_domain_user.'/public_html/test.php',
 		},
 		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
-		  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+			      'fpm-fcgi' ],
 		},
 
 		# Switch to an FPM socket file
@@ -565,7 +571,8 @@ $domains_tests = [
 			      [ 'php-fpm-socket' ] ],
 		},
 		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
-		  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+			      'fpm-fcgi' ],
 		  'sleep' => 1,
 		},
 
@@ -575,7 +582,8 @@ $domains_tests = [
 			      [ 'php-fpm-port' ] ],
 		},
 		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
-		  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+			      'fpm-fcgi' ],
 		  'sleep' => 1,
 		},
 		) : ( ),
