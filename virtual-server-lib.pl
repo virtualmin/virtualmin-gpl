@@ -5,6 +5,7 @@ BEGIN { push(@INC, ".."); };
 use WebminCore;
 
 &init_config();
+$config{'mail_system'} = -1 if (!$config{'mail'});
 if (&indexof($module_root_directory, @INC) < 0) {
 	push(@INC, $module_root_directory);
 	}
