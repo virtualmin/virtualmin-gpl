@@ -2837,7 +2837,7 @@ local ($uf, $user, $home, $group, $d) = @_;
 return if (!$uf);
 
 # Find all files under the skeleton dir
-my @files = &find_skel_files($uf);
+my @files = &find_recursive_files($uf);
 my @copied;
 foreach my $f (@files) {
 	local $src = "$uf/$f";		# Needs to be local, for subs
@@ -2919,12 +2919,12 @@ foreach my $ns (@nosubs) {
 return 0;
 }
 
-# find_skel_files(dir)
+# find_recursive_files(dir, [name])
 # Given a directory, recursively finds all files and directories under it and
 # returns their relative paths
-sub find_skel_files
+sub find_recursive_files
 {
-my ($dir) = @_;
+my ($dir, $name) = @_;
 opendir(SKELDIR, $dir);
 my @files = grep { $_ ne '.' && $_ ne '..' } readdir(SKELDIR);
 closedir(SKELDIR);
@@ -2936,8 +2936,11 @@ foreach my $f (@files) {
 		}
 	elsif (-d $path) {
 		push(@rv, $f);
-		push(@rv, map { "$f/$_" } &find_skel_files($path));
+		push(@rv, map { "$f/$_" } &find_recursive_files($path, $name));
 		}
+	}
+if ($name) {
+	@rv = grep { /\/\Q$name\E$/ } @rv;
 	}
 return @rv;
 }
