@@ -13,9 +13,7 @@ print "$text{'licence_doing'}<br>\n";
 if (defined($status) && $status == 0) {
 	my $suc_text = &text($expiry ? 'licence_ok3' : 'licence_ok2',
 	    $doms > 0 ? $doms : $text{'licence_unlimited'},
-	    $servers > 0 ? $servers : $text{'licence_unlimited'},
-	    $expiry);
-	$suc_text =~ s/<i>(.*?)<\/i>./<b>@{[&ui_text_color("$1.", 'primary')]}<\/b>/;
+	    $servers > 0 ? $servers : $text{'licence_unlimited'}, $expiry);
 	print $suc_text,"<p>\n";
 	if ($licence{'warn'}) {
 		# Most recent check failed
@@ -33,27 +31,31 @@ if (defined($status) && $status == 0) {
 		$days = int(($expirytime - time()) / (24*60*60));
 		$hours = int(($expirytime - time()) / (60*60));
 		if ($days) {
-			print &ui_text_color(&text('licence_soon', $days), 'warn');
+			print &text('licence_soon', $days);
 			}
 		else {
-			print &ui_text_color(&text('licence_soon2', $hours), 'warn');
+			print &text('licence_soon2', $hours);
 			}
 		print "<p>\n";
 		}
 	elsif (!$expirytime) {
-		print &text('licence_goterr2',
-			&ui_text_color($expiry, 'danger')),"<p>\n";
+		print &text('licence_goterr2', $expiry),"<p>\n";
 		}
 	}
 else {
 	my ($err1, $err2) = $err =~ /<span>(.*?)<\/span>(.*)/;
 	if ($err1 || $err2) {
-		print &text('licence_goterr',
-			&ui_text_color($err1, 'danger'))."$err2<p>\n";
+		$err1 =~ s/\s*\.$//;
+		if ($err2) {
+			$err1 = "$err1;";
+			$err2 = lcfirst(&trim($err2));
+			}
+		print &text('licence_goterr', lcfirst($err1))." $err2<p>\n";
 		}
 	else {
-		print &text('licence_goterr',
-			&ui_text_color($err, 'danger')),"<p>\n";
+		$err = lcfirst($err);
+		$err =~ s/\s*\.$//;
+		print &text('licence_goterr', lcfirst($err)),"<p>\n";
 		}
 	}
 

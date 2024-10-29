@@ -4320,14 +4320,14 @@ license_shop_name=Virtualmin Shop
 licence_recheck=Re-check License Status
 licence_title=Re-Check License
 licence_doing=Now re-checking your Virtualmin license ..
-licence_ok2=.. license is <i>valid</i>. It is valid for $1 Virtualmin domains, and for use on $2 systems.
-licence_ok3=.. license is <i>valid</i>. It is valid for $1 Virtualmin domains, and for use on $2 systems until $3.
+licence_ok2=.. license is valid, for $1 Virtualmin domains, and for use on $2 system
+licence_ok3=.. license is valid, for $1 Virtualmin domains, and for use on $2 system until $3
 licence_warn=However, a temporary problem occurred during this license check : $1.
 licence_unlimited=unlimited
 licence_goterr=.. a problem was detected : $1
 licence_goterr2=.. invalid expiry date : $1
 licence_ecannot=You are not allowed to re-check the Virtualmin license
-licence_maxdoms=Your system is licensed for only $1 servers, but you currently have $2.
+licence_maxdoms=Your system is licensed for only $1 server, but it's currently being used on $2.
 licence_maxservers2=Your serial number $3 is licensed for only $1 server, but it's currently being used on $2.
 licence_maxwarn=Unless this serial number is used temporarily in order to migrate to a new server, please purchase an additional license at <a target=_blank href='$1'>$2</a>.
 licence_ipchanged=Your system's primary IP address appears to have changed from $1 to $2. Virtual servers using the old address may be unreachable or serve the wrong web content.
