@@ -25,18 +25,18 @@ $key ||= $serial{'LicenseKey'};
 		"serial=$key&doms=".scalar(@doms)."&vps=$vps",
 	       \$out, \$error, undef, $virtualmin_licence_ssl,
 	       undef, undef, 10, 0, 1);
-return (2, undef, "Failed to contact licence server : $error.") if ($error);
+return (2, undef, "$text{'licence_efailed'} : $error") if ($error);
 return $out =~ /^EXP\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
-	(3, $1, "The licence for this server expired on $1.", $2, $3, $4) :
+	(3, $1, &text("licence_eexp", $1), $2, $3, $4) :
        $out =~ /^ERR\s+(?<err>.*)/ && ($regerr = $+{err}) &&
        	       $regerr !~ /invalid\s+host\s+or\s+serial\s+number/i ?
-	(2, undef, "An error occurred checking the licence : $regerr", undef) :
+	(2, undef, "$text{'licence_echk'} : $regerr", undef) :
        $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d+)/ ?
 	(0, $1, undef, $2, $3, $4, $5) :	# Auto-renewal flag
        $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
 	(0, $1, undef, $2, $3, $4) :
-	(1, undef, "No valid licence was found for your host ID $hostid and ".
-		   "serial number $serial{'SerialNumber'}.", undef);
+	(1, undef, &text("licence_evalid", "<tt>$hostid</tt>",
+		   	 "<tt>$serial{'SerialNumber'}</tt>"));
 }
 
 1;

@@ -4342,6 +4342,10 @@ licence_fixlinksok=Fix Symbolic Link Permissions
 licence_fixlinksignore=Allow Unsafe Symbolic Links
 licence_xfsreboot=Your system must be rebooted to enable XFS quotas on the root filesystem. Until this is done, Virtualmin will not detect quotas as being active, and it will be impossible to apply limits on disk usage to virtual servers or users.
 licence_xfsrebootok=Reboot Now
+licence_efailed=Failed to contact license server
+licence_eexp=The license for this server expired on $1
+licence_echk=An error occurred checking the license
+licence_evalid=No valid license was found for your host ID $1 and serial number $2
 
 config_deftheme=Global Webmin default
 config_oldtheme=Old Webmin theme
