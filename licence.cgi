@@ -10,7 +10,7 @@ print "$text{'licence_doing'}<br>\n";
 &update_licence_from_site(\%licence);
 &write_file($licence_status, \%licence);
 ($status, $expiry, $err, $doms, $servers) = &check_licence_expired();
-if ($status == 0) {
+if (defined($status) && $status == 0) {
 	my $suc_text = &text($expiry ? 'licence_ok3' : 'licence_ok2',
 	    $doms > 0 ? $doms : $text{'licence_unlimited'},
 	    $servers > 0 ? $servers : $text{'licence_unlimited'},

@@ -183,7 +183,7 @@ if ($webmin::config{'upsource'} =~ /\Q$upgrade_virtualmin_host\E/) {
            'LicenseKey' => $key );
 &write_env_file($virtualmin_license_file, \%lfile);
 &unlock_file($virtualmin_license_file);
-if ($status == 0) {
+if (defined($status) && $status == 0) {
 	# Update the status file
 	if (!$nocheck) {
 		&read_file($licence_status, \%licence);

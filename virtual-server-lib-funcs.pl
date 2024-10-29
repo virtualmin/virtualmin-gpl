@@ -11953,7 +11953,7 @@ my %serial;
 
 local ($status, $expiry, $err, $doms, $max_servers, $servers, $autorenew) =
 	&licence_scheduled($id, undef, undef, &get_vps_type());
-if ($status == 0 && $doms) {
+if (defined($status) && $status == 0 && $doms) {
 	# A domains limit exists .. check if we have exceeded it
 	local @doms = grep { !$_->{'alias'} } &list_domains();
 	if (@doms > $doms) {
@@ -11961,7 +11961,7 @@ if ($status == 0 && $doms) {
 		$err = &text('licence_maxdoms', $doms, scalar(@doms));
 		}
 	}
-if ($status == 0 && $max_servers && !$err) {
+if (defined($status) && $status == 0 && $max_servers && !$err) {
 	# A servers limit exists .. check if we have exceeded it
 	if ($servers > $max_servers+1) {
 		$status = 1;
