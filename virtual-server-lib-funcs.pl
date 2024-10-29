@@ -12040,7 +12040,7 @@ if ($status != 0) {
 	$alert_text .= "<b>".$text{'licence_err'}."</b><br>\n";
 	$alert_text .= $err;
 	$alert_text = "$alert_text. " if ($err !~ /\.$/);
-	$alert_text .= &text('licence_renew', $virtualmin_renewal_url,
+	$alert_text .= " ".&text('licence_renew', $virtualmin_renewal_url,
 			     $text{'license_shop_name'})
 		if ($alert_text !~ /$virtualmin_renewal_url/);
 	if (&can_recheck_licence()) {
@@ -12048,6 +12048,7 @@ if ($status != 0) {
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
+	$alert_text =~ s/\s+/ /g;
 	push(@rv, $alert_text);
 	}
 elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
@@ -12060,13 +12061,14 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 	else {
 		$alert_text .= "<b>".&text('licence_soon2', $hours)."</b><br>\n";
 		}
-	$alert_text .= &text('licence_renew', $virtualmin_renewal_url,
+	$alert_text .= " ".&text('licence_renew', $virtualmin_renewal_url,
 			     $text{'license_shop_name'});
 	if (&can_recheck_licence()) {
 		$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
+	$alert_text =~ s/\s+/ /g;
 	push(@rv, $alert_text);
 	}
 
