@@ -15,7 +15,7 @@ $virtualmin_renewal_url = $config{'renewal_url'} ||
 sub licence_scheduled
 {
 local ($hostid, $serial, $key, $vps) = @_;
-local ($out, $error);
+local ($out, $error, $regerr);
 local @doms = grep { !$_->{'alias'} } &list_domains();
 &read_env_file($virtualmin_license_file, \%serial);
 $key ||= $serial{'LicenseKey'};
@@ -25,17 +25,18 @@ $key ||= $serial{'LicenseKey'};
 		"serial=$key&doms=".scalar(@doms)."&vps=$vps",
 	       \$out, \$error, undef, $virtualmin_licence_ssl,
 	       undef, undef, 10, 0, 1);
-return (2, undef, "Failed to contact licence server : $error") if ($error);
+return (2, undef, "Failed to contact licence server : $error.") if ($error);
 return $out =~ /^EXP\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
-	(3, $1, "The licence for this server expired on $1", $2, $3, $4) :
-       $out =~ /^ERR\s+(.*)/ ?
-	(2, undef, "An error occurred checking the licence : $1", undef) :
+	(3, $1, "The licence for this server expired on $1.", $2, $3, $4) :
+       $out =~ /^ERR\s+(?<err>.*)/ && ($regerr = $+{err}) &&
+       	       $regerr !~ /invalid\s+host\s+or\s+serial\s+number/i ?
+	(2, undef, "An error occurred checking the licence : $regerr", undef) :
        $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d+)/ ?
 	(0, $1, undef, $2, $3, $4, $5) :	# Auto-renewal flag
        $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
 	(0, $1, undef, $2, $3, $4) :
 	(1, undef, "No valid licence was found for your host ID $hostid and ".
-		   "serial number $serial{'SerialNumber'}", undef);
+		   "serial number $serial{'SerialNumber'}.", undef);
 }
 
 1;
