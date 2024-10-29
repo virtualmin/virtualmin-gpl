@@ -1793,6 +1793,9 @@ $script_tests = [
 	  	      '.. done'
 	  	    ],
 	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/wordpress',
+	  'grep' => 'Virtualmin Blog',
+	},
 
 	# Un-install
 	{ 'command' => 'delete-script.pl',
