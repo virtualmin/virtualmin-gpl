@@ -12038,10 +12038,11 @@ if ($status != 0) {
 	my $alert_text;
 	# Not valid .. show message
 	$alert_text .= "<b>".$text{'licence_err'}."</b><br>\n";
-	$alert_text .= $err."\n";
-	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n"
+	$alert_text .= $err;
+	$alert_text = "$alert_text. " if ($err !~ /\.$/);
+	$alert_text .= &text('licence_renew', $virtualmin_renewal_url,
+			     $text{'license_shop_name'})
 		if ($alert_text !~ /$virtualmin_renewal_url/);
-	$alert_text =~ s/>\Q$virtualmin_renewal_url\E</>$text{'license_shop_name'}.</;
 	if (&can_recheck_licence()) {
 		$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_recheck'});
@@ -12059,7 +12060,8 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 	else {
 		$alert_text .= "<b>".&text('licence_soon2', $hours)."</b><br>\n";
 		}
-	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n";
+	$alert_text .= &text('licence_renew', $virtualmin_renewal_url,
+			     $text{'license_shop_name'});
 	if (&can_recheck_licence()) {
 		$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_recheck'});

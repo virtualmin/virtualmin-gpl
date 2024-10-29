@@ -4312,10 +4312,10 @@ resel_equnlimit=The virtual server $1 cannot be assigned to this reseller, as it
 resel_ebwunlimit=The virtual server $1 cannot be assigned to this reseller, as it has unlimited bandwidth quota, but the reseller has a limit
 resel_ebefore=Before modification command failed : $1
 
-licence_err=A problem was detected with your Virtualmin license :
-licence_soon=Notice : Your Virtualmin license will expire in $1 days.
-licence_soon2=Notice : Your Virtualmin license will expire in $1 hours.
-licence_renew=A renewal can be purchased at <a target=_blank href='$1'>$1</a>
+licence_err=A problem was detected with your Virtualmin license:
+licence_soon=Your Virtualmin license will expire in $1 days.
+licence_soon2=Your Virtualmin license will expire in $1 hours.
+licence_renew=A renewal can be purchased at <a target=_blank href='$1'>$2</a>.
 license_shop_name=Virtualmin Shop
 licence_recheck=Re-check License Status
 licence_title=Re-Check License
