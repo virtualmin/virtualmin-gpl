@@ -11893,7 +11893,7 @@ if (time() - $licence{'last'} > 3*24*60*60) {
 	&write_file($licence_status, \%licence);
 	}
 return ($licence{'status'}, $licence{'expiry'},
-	$licence{'err'}, $licence{'doms'}, $licence{'servers'},
+	$licence{'err'} || $licence{'warn'}, $licence{'doms'}, $licence{'servers'},
 	$licence{'autorenew'});
 }
 
