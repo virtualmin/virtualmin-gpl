@@ -62,7 +62,7 @@ if (!&get_milter_greylist_path()) {
 
 # Check mail server
 &require_mail();
-if ($config{'mail_system'} > 1) {
+if ($config{'mail_system'} > 1 && $config{'mail_system'} != 3) {
 	return $text{'ratelimit_emailsystem'};
 	}
 elsif ($config{'mail_system'} == 1) {

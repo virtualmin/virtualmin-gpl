@@ -108,7 +108,7 @@ return &text('dkim_einit', "<tt>$init</tt>")
 
 # Check mail server
 &require_mail();
-if ($config{'mail_system'} > 1) {
+if ($config{'mail_system'} > 1 && $config{'mail_system'} != 3) {
 	return $text{'dkim_emailsystem'};
 	}
 elsif ($config{'mail_system'} == 1) {
