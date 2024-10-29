@@ -1231,6 +1231,7 @@ return $found;
 sub list_virtusers
 {
 local ($incall) = @_;
+return () if (!$config{'mail'});
 
 # Build list of unix users, to exclude aliases with same name as users
 # (which are picked up by list_domain_users instead).
