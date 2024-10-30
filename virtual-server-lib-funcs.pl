@@ -14098,6 +14098,13 @@ if (&can_master_reseller_2fa()) {
 		    'cat' => 'setting' });
 	}
 
+# Show lic manager link for master admins
+if (&master_admin() && $virtualmin_pro) {
+	push(@rv, { 'url' => "$vm/pro/licence.cgi",
+		    'title' => $text{'licence_manager_menu'},
+		    'cat' => 'setting' });
+	}
+
 # Add creation-related links
 my ($dleft, $dreason, $dmax, $dhide) = &count_domains("realdoms");
 my ($aleft, $areason, $amax, $ahide) = &count_domains("aliasdoms");

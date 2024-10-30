@@ -4318,6 +4318,7 @@ licence_soon2=Your Virtualmin license will expire in $1 hours.
 licence_renew=A renewal can be purchased at <a target=_blank href='$1'>$2</a>.
 license_shop_name=Virtualmin Shop
 licence_manager=License Manager
+licence_manager_menu=Virtualmin License Manager
 licence_recheck=Re-check License Status
 licence_title=Re-Check License
 licence_doing=Now re-checking your Virtualmin license ..
