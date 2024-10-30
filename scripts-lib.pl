@@ -3460,7 +3460,7 @@ sub script_migrated_status
 {
 my ($status, $migrated, $can_upgrade) = @_;
 return script_migrated_disallowed($script->{'migrated'}) ?
-         &ui_link("https://virtualmin.com/shop/",
+         &ui_link($virtualmin_shop_link,
            $text{'scripts_gpl_to_pro'.($can_upgrade ? "_upgrade" : "").''}, 
              ($can_upgrade ? " text-warning" : ""), " target=_blank") :
            $status;
