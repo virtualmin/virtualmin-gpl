@@ -26,8 +26,8 @@ $key ||= $serial{'LicenseKey'};
 	       \$out, \$error, undef, $virtualmin_licence_ssl,
 	       undef, undef, 10, 0, 1);
 return (2, undef, "$text{'licence_efailed'} : $error") if ($error);
-return $out =~ /^EXP\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
-	(3, $1, &text("licence_eexp", $1), $2, $3, $4) :
+return $out =~ /^EXP\s+(?<exp>\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
+	(3, "$+{exp}", &text("licence_eexp", "$+{exp}"), $2, $3, $4) :
        $out =~ /^ERR\s+(?<err>.*)/ && ($regerr = $+{err}) &&
        	       $regerr !~ /invalid\s+host\s+or\s+serial\s+number/i ?
 	(2, undef, "$text{'licence_echk'} : $regerr", undef) :
