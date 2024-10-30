@@ -340,5 +340,25 @@ END {
 return 1;
 }
 
+# can_remote(program-name)
+# Returns 1 if the current user can execute remote commands
+sub can_remote
+{
+my ($program) = @_;
+return &master_admin() || &can_remote_as_user($program);
+}
+
+# can_remote_as_user(program-name)
+# Returns 1 if given API supports remote commands
+# as the current user (not root)
+sub can_remote_as_user
+{
+my ($program) = @_;
+if ($program eq "configure-script") {
+	return 1;
+	}
+return 0;
+}
+
 1;
 

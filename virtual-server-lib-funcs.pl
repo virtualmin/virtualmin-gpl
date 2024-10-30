@@ -25,7 +25,7 @@ foreach my $lib ("scripts", "resellers", "admins", "users", "simple", "s3",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
 		 "jailkit", "ports", "bb", "dnscloud", "dnscloudpro",
 		 "smtpcloud", "pro-tip", "azure", "remotedns", "drive",
-		 "acme", "api-create-domain") {
+		 "acme", "api-create-domain", "workbench") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
 		$libfile = "$virtual_server_root/$lib-lib.pl";
@@ -3482,12 +3482,6 @@ if ($tmpl->{'owners'} ne '*' && !&reseller_admin()) {
 	return 0 if (!$owners{$base_remote_user});
 	}
 return 1;
-}
-
-# Returns 1 if the current user can execute remote commands
-sub can_remote
-{
-return &master_admin();
 }
 
 # Returns 1 if the current user can grant extra modules to server owners
