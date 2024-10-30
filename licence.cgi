@@ -48,21 +48,9 @@ if (defined($status) && $status == 0) {
 		}
 	}
 else {
-	my ($err1, $err2) = $err =~ /<span>(.*?)<\/span>(.*)/;
-	if ($err1 || $err2) {
-		$err1 =~ s/\s*\.$//;
-		if ($err2) {
-			$err1 = "$err1;";
-			$err2 = lcfirst(&trim($err2));
-			$err2 =~ s/\s*\.$//;
-			}
-		print &text('licence_goterr', lcfirst($err1))." $err2<p>\n";
-		}
-	else {
-		$err = lcfirst($err);
-		$err =~ s/\s*\.$//;
-		print &text('licence_goterr', lcfirst($err)),"<p>\n";
-		}
+	$err = lcfirst($err);
+	$err =~ s/\s*\.$//;
+	print &text('licence_goterr', lcfirst($err)),"<p>\n";
 	}
 
 &ui_print_footer(

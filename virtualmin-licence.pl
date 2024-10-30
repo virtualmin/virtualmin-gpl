@@ -36,7 +36,7 @@ return $out =~ /^EXP\s+(?<exp>\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
        $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
 	(0, $1, undef, $2, $3, $4) :
 	(1, undef, &text("licence_evalid", "<tt>$hostid</tt>",
-		   	 "<tt>$serial{'SerialNumber'}</tt>"));
+		   	 "<tt data-evalid>$serial{'SerialNumber'}</tt>"));
 }
 
 1;
