@@ -54,6 +54,7 @@ else {
 		if ($err2) {
 			$err1 = "$err1;";
 			$err2 = lcfirst(&trim($err2));
+			$err2 =~ s/\s*\.$//;
 			}
 		print &text('licence_goterr', lcfirst($err1))." $err2<p>\n";
 		}

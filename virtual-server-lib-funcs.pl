@@ -11966,7 +11966,7 @@ if (defined($status) && $status == 0 && $max_servers && !$err) {
 	if ($servers > $max_servers+1) {
 		$status = 1;
 		$err = "<span>".&text('licence_maxservers2', $max_servers, $servers, "<tt>$serial{'SerialNumber'}</tt>")."</span>";
-		$err .= " " . &text('licence_maxwarn', "https://virtualmin.com/shop/", $text{'license_shop_name'});
+		$err .= " $text{'licence_maxwarn'}";
 		}
 	}
 return ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew);
@@ -12040,7 +12040,7 @@ if ($status != 0) {
 	$alert_text .= "<b>".$text{'licence_err'}."</b><br>\n";
 	$alert_text .= $err;
 	$alert_text = "$alert_text. " if ($err !~ /\.$/);
-	$alert_text .= " ".&text('licence_renew', $virtualmin_renewal_url,
+	$alert_text .= " ".&text('licence_renew2', $virtualmin_renewal_url,
 			     $text{'license_shop_name'})
 		if ($alert_text !~ /$virtualmin_renewal_url/);
 	if (&can_recheck_licence()) {

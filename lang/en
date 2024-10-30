@@ -4316,6 +4316,7 @@ licence_err=A problem was detected with your Virtualmin license:
 licence_soon=Your Virtualmin license will expire in $1 days.
 licence_soon2=Your Virtualmin license will expire in $1 hours.
 licence_renew=A renewal can be purchased at <a target=_blank href='$1'>$2</a>.
+licence_renew2=An additional license can be purchased at <a target=_blank href='$1'>$2</a>.
 license_shop_name=Virtualmin Shop
 licence_recheck=Re-check License Status
 licence_title=Re-Check License
@@ -4329,7 +4330,7 @@ licence_goterr2=.. invalid expiry date : $1
 licence_ecannot=You are not allowed to re-check the Virtualmin license
 licence_maxdoms=Your system is licensed for only $1 server, but it's currently being used on $2.
 licence_maxservers2=Your serial number $3 is licensed for only $1 server, but it's currently being used on $2.
-licence_maxwarn=Unless this license is being used temporarily for migration to a new server, you need to purchase a separate license for use on this server at <a target=_blank href='$1'>$2</a>.
+licence_maxwarn=Unless this license is being used temporarily for migration to a new server, you must purchase a separate license for use on this server.
 licence_ipchanged=Your system's primary IP address appears to have changed from $1 to $2. Virtual servers using the old address may be unreachable or serve the wrong web content.
 licence_changeip=Update Incorrect IP Addresses
 licence_smallcert=Your system is using an SSL certificate that is only $1 bits long, which is smaller than the recommended size of 2048 bits. This certificate was issued by $4 to $3 for the domain $2.
@@ -4364,7 +4365,8 @@ licence_manager_status3=Expired
 licence_manager_status4=Locked
 licence_manager_statusok=License has no issues
 licence_manager_recom=Recommended actions
-licence_manager_update=Update License
+licence_manager_change=Change License
+licence_manager_deregister=Deregister License
 
 config_deftheme=Global Webmin default
 config_oldtheme=Old Webmin theme
