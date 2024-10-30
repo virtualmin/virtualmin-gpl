@@ -64,5 +64,7 @@ else {
 		}
 	}
 
-&ui_print_footer("", $text{'index_return'});
+&ui_print_footer(
+	"pro/licence.cgi", lc($text{'licence_manager'}),
+	"", $text{'index_return'});
 
