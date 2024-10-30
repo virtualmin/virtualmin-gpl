@@ -4317,8 +4317,6 @@ licence_soon=Your Virtualmin license will expire in $1 days.
 licence_soon2=Your Virtualmin license will expire in $1 hours.
 licence_renew=A renewal can be purchased at <a target=_blank href='$1'>$2</a>.
 license_shop_name=Virtualmin Shop
-licence_manager=License Manager
-licence_manager_menu=Virtualmin License Manager
 licence_recheck=Re-check License Status
 licence_title=Re-Check License
 licence_doing=Now re-checking your Virtualmin license ..
@@ -4331,7 +4329,7 @@ licence_goterr2=.. invalid expiry date : $1
 licence_ecannot=You are not allowed to re-check the Virtualmin license
 licence_maxdoms=Your system is licensed for only $1 server, but it's currently being used on $2.
 licence_maxservers2=Your serial number $3 is licensed for only $1 server, but it's currently being used on $2.
-licence_maxwarn=Unless this serial number is used temporarily in order to migrate to a new server, please purchase an additional license at <a target=_blank href='$1'>$2</a>.
+licence_maxwarn=Unless this license is being used temporarily for migration to a new server, you need to purchase a separate license for use on this server at <a target=_blank href='$1'>$2</a>.
 licence_ipchanged=Your system's primary IP address appears to have changed from $1 to $2. Virtual servers using the old address may be unreachable or serve the wrong web content.
 licence_changeip=Update Incorrect IP Addresses
 licence_smallcert=Your system is using an SSL certificate that is only $1 bits long, which is smaller than the recommended size of 2048 bits. This certificate was issued by $4 to $3 for the domain $2.
@@ -4348,6 +4346,24 @@ licence_efailed=Failed to contact license server
 licence_eexp=The license for this server expired on $1
 licence_echk=An error occurred checking the license
 licence_evalid=No valid license was found for your host ID $1 and serial number $2
+
+licence_manager=License Manager
+licence_manager_desc=This page will display the serial key and status for the current license associated with this machine. It also provides options to check the status and update the license.
+licence_manager_menu=Virtualmin License Manager
+licence_manager_status=License status
+licence_manager_count=Number of domains
+licence_manager_expiry=Expiry date
+licence_manager_ucount=Unlimited
+licence_manager_checked=Last checked
+licence_manager_err=License errors
+licence_manager_err1=No valid license was found for serial number $1 and licence key $2
+licence_manager_status0=Valid
+licence_manager_status1=Invalid
+licence_manager_status2=Unknown
+licence_manager_status3=Expired
+licence_manager_status4=Locked
+licence_manager_statusok=License has no issues
+licence_manager_recom=Recommended actions
 
 config_deftheme=Global Webmin default
 config_oldtheme=Old Webmin theme
