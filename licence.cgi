@@ -3,11 +3,6 @@
 
 require './virtual-server-lib.pl';
 &can_recheck_licence() || &error($text{'licence_ecannot'});
-&ReadParse();
-if ($in{'manager'}) {
-	&redirect("pro/licence.cgi");
-	return;
-	}
 &ui_print_unbuffered_header(undef, $text{'licence_title'}, "");
 
 print "$text{'licence_doing'}<br>\n";

@@ -4349,6 +4349,7 @@ licence_echk=An error occurred checking the license
 licence_evalid=No valid license was found for your host ID $1 and serial number $2
 
 licence_manager=License Manager
+licence_manager_goto=Manage Virtualmin Pro License
 licence_manager_desc=This page will display the serial key and status for the current license associated with this machine. It also provides options to check the status and update the license.
 licence_manager_menu=Virtualmin License Manager
 licence_manager_status=License status
