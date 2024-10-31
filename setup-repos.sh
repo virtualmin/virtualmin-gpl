@@ -1,5 +1,5 @@
 #!/bin/sh
-# shellcheck disable=SC2059 disable=SC2181 disable=SC2154 disable=SC2317
+# shellcheck disable=SC2059 disable=SC2181 disable=SC2154 disable=SC2317 disable=SC2034
 # virtualmin-install.sh
 # Copyright 2005-2024 Virtualmin
 # Simple script to install Virtualmin on a supported OS
@@ -10,136 +10,204 @@
 # License and version
 SERIAL=GPL
 KEY=GPL
-VER=7.4.0
+VER=7.5.0
 vm_version=7
 
 # Server
-upgrade_virtualmin_host=software.virtualmin.com
-upgrade_virtualmin_host_lib="$upgrade_virtualmin_host/lib"
+download_virtualmin_host="${download_virtualmin_host:-software.virtualmin.com}"
+download_virtualmin_host_lib="$download_virtualmin_host/lib"
 
 # Save current working directory
 pwd="$PWD"
 
+# Script name
+if [ "$0" = "--" ] || [ -z "$0" ]; then
+  script_name="virtualmin-install.sh"
+else
+  script_name=$(basename -- "$0")
+fi
+
 # Set log type
-log_type="virtualmin-install"
+log_file_name="${install_log_file_name:-virtualmin-install}"
 
 # Set defaults
 bundle='LAMP' # Other option is LEMP
 mode='full'   # Other option is minimal
 skipyesno=0
-vm6_repos=0
 
 usage() {
   # shellcheck disable=SC2046
-  printf "Usage: %s %s [options]\\n" "${CYAN}" $(basename "$0")
   echo
-  echo "  If called without arguments, installs Virtualmin."
+  printf "Usage: %s [options]\\n" "$(basename "$0")"
   echo
-  printf "  --help|-h                       display this help and exit\\n"
-  printf "  --bundle|-b <LAMP|LEMP>         choose bundle to install (defaults to LAMP)\\n"
-  printf "  --minimal|-m                    install a smaller subset of packages for low-memory/low-resource systems\\n"
-  printf "  --module|-o                     source a custom shell module during the post-installation phase\\n"
-  printf "  --unstable|-e                   enable support for Grade B systems (not recommended, see documentation)\\n"
-  printf "  --insecure-downloads|-i         skip remote server SSL certificate check upon downloads (not recommended)\\n"
-  printf "  --no-package-updates|-x         skip installing system package updates (not recommended)\\n"
-  printf "  --setup|-s                      setup Virtualmin software repositories and exit\\n"
-  printf "  --hostname|-n                   set fully qualified hostname\\n"
-  printf "  --force|-f                      assume \"yes\" as answer to all prompts\\n"
-  printf "  --verbose|-v                    increase verbosity\\n"
-  printf "  --uninstall|-u                  removes all Virtualmin packages (do not use on a production system)\\n"
+  echo "  If called without arguments, installs Virtualmin with default options."
+  echo
+  printf "  --bundle|-b <LAMP|LEMP>  choose bundle to install (defaults to LAMP)\\n"
+  printf "  --minimal|-m             install a minimal package set for low-memory systems\\n"
+  printf "  --unstable|-e            enable Grade B system support (see documentation)\\n"
+  printf "  --module|-o              source custom shell module in post-install phase\\n"
+  echo
+  printf "  --hostname|-n            force hostname during installation\\n"
+  printf "  --no-package-updates|-x  skip package updates during installation\\n"
+  echo
+  printf "  --setup|-s               reconfigure Virtualmin repos without installation\\n"
+  echo
+  printf "  --insecure-downloads|-i  skip SSL certificate check for remote downloads\\n"
+  echo
+  printf "  --uninstall|-u           remove all Virtualmin packages and dependencies\\n"
+  echo
+  printf "  --force|-f|--yes|-y      assume \"yes\" to all prompts\\n"
+  printf "  --force-reinstall|-fr    force reinstall Virtualmin (not recommended)\\n"
+  printf "  --no-banner|-nb          suppress installation messages and warnings\\n"
+  printf "  --verbose|-v             enable verbose mode\\n"
+  printf "  --version|-V             show installer version\\n"
+  printf "  --help|-h                show this help\\n"
   echo
 }
 
-while [ "$1" != "" ]; do
-  case $1 in
-  --help | -h)
-    usage
-    exit 0
-    ;;
-  --bundle | -b)
+# Bind hooks
+bind_hook() {
+    hook="$1"
     shift
-    case "$1" in
-    LAMP)
-      shift
-      bundle='LAMP'
+    pre_hook="pre_hook__$hook"
+    post_hook="post_hook__$hook"
+    # Do we want to completely override the original function?
+    if command -v "hook__$hook" > /dev/null 2>&1; then
+        "hook__$hook" "$@"
+    # Or do we want to run the original function wrapped by third-party functions?
+    else
+        if command -v "$pre_hook" > /dev/null 2>&1; then
+            "$pre_hook" "$@"
+        fi
+        if command -v "$hook" > /dev/null 2>&1; then
+            "$hook" "$@"
+        fi
+        if command -v "$post_hook" > /dev/null 2>&1; then
+            "$post_hook" "$@"
+        fi
+    fi
+}
+
+# Default function to parse arguments
+parse_args() {
+  while [ "$1" != "" ]; do
+    case $1 in
+    --help | -h)
+      bind_hook "usage"
+      exit 0
       ;;
-    LEMP)
+    --bundle | -b)
       shift
-      bundle='LEMP'
+      case "$1" in
+      LAMP)
+        shift
+        bundle='LAMP'
+        ;;
+      LEMP)
+        shift
+        bundle='LEMP'
+        ;;
+      *)
+        printf "Unknown bundle $1: exiting\\n"
+        exit 1
+        ;;
+      esac
+      ;;
+    --minimal | -m)
+      shift
+      mode='minimal'
+      ;;
+    --insecure-downloads | -i)
+      shift
+      insecure_download_wget_flag=' --no-check-certificate'
+      insecure_download_curl_flag=' -k'
+      ;;
+    --no-package-updates | -x)
+      shift
+      noupdates=1
+      ;;
+    --setup | -s)
+      shift
+      setup_only=1
+      mode='setup'
+      unstable='unstable'
+      log_file_name="${setup_log_file_name:-virtualmin-repos-setup}"
+      ;;
+    --unstable | -e)
+      shift
+      unstable='unstable'
+      virtualmin_config_system_excludes=""
+      virtualmin_stack_custom_packages=""
+      ;;
+    --module | -o)
+      shift
+      module_name=$1
+      shift
+      ;;
+    --hostname | -n)
+      shift
+      forcehostname=$1
+      shift
+      ;;
+    --force | -f | --yes | -y)
+      shift
+      skipyesno=1
+      ;;
+    --force-reinstall | -fr)
+      shift
+      forcereinstall=1
+      ;;
+    --no-banner | -nb)
+      shift
+      skipbanner=1
+      ;;
+    --verbose | -v)
+      shift
+      VERBOSE=1
+      ;;
+    --version | -V)
+      shift
+      showversion=1
+      ;;
+    --uninstall | -u)
+      shift
+      mode="uninstall"
+      log_file_name="${uninstall_log_file_name:-virtualmin-uninstall}"
       ;;
     *)
-      printf "Unknown bundle $1: exiting\\n"
+      printf "Unrecognized option: $1\\n"
+      bind_hook "usage"
       exit 1
       ;;
     esac
-    ;;
-  --minimal | -m)
-    shift
-    mode='minimal'
-    ;;
-  --insecure-downloads | -i)
-    shift
-    insecure_download_wget_flag=' --no-check-certificate'
-    insecure_download_curl_flag=' -k'
-    ;;
-  --no-package-updates | -x)
-    shift
-    noupdates=1
-    ;;
-  --setup | -s)
-    shift
-    setup_only=1
-    mode='setup'
-    unstable='unstable'
-    ;;
-  --unstable | -e)
-    shift
-    unstable='unstable'
-    virtualmin_config_system_excludes=""
-    virtualmin_stack_custom_packages=""
-    ;;
-  --module | -o)
-    shift
-    module_name=$1
-    shift
-    ;;
-  --hostname | -n)
-    shift
-    forcehostname=$1
-    shift
-    ;;
-  --force | -f | --yes | -y)
-    shift
-    skipyesno=1
-    ;;
-  --verbose | -v)
-    shift
-    VERBOSE=1
-    ;;
-  --uninstall | -u)
-    shift
-    mode="uninstall"
-    log_type="virtualmin-uninstall"
-    ;;
-  *)
-    printf "Unrecognized option: $1\\n\\n"
-    usage
-    exit 1
-    ;;
-  esac
-done
+  done
+}
+
+# Hook arguments
+bind_hook "parse_args" "$@"
+
+# Default function to show installer version
+show_version() {
+  echo "$VER"
+  exit 0
+}
+
+# Hook version
+if [ -n "$showversion" ]; then
+  bind_hook "show_version"
+fi
 
 # Force setup mode, if script name is `setup-repos.sh` as it
 # is used by Virtualmin API, to make sure users won't run an
 # actuall install script under any circumstances
-if [ "${0##*/}" = "setup-repos.sh" ]; then
+if [ "$script_name" = "setup-repos.sh" ]; then
   setup_only=1
   mode='setup'
   unstable='unstable'
 fi
 
 # Store new log each time
-log="$pwd/$log_type.log"
+log="$pwd/$log_file_name.log"
 if [ -e "$log" ]; then
   while true; do
     logcnt=$((logcnt+1))
@@ -298,7 +366,7 @@ download_slib() {
   else
     # We need HTTP client first
     pre_check_http_client
-    $download "https://$upgrade_virtualmin_host_lib/slib.sh" >>"$log" 2>&1
+    $download "https://$download_virtualmin_host_lib/slib.sh" >>"$log" 2>&1
     if [ $? -ne 0 ]; then
       echo "Error: Failed to download utility function library. Cannot continue. Check your network connection and DNS settings, and verify that your system's time is accurately synchronized."
       exit 1
@@ -307,6 +375,16 @@ download_slib() {
     # shellcheck disable=SC1091
     . ./slib.sh
   fi
+}
+
+# Check if already installed successfully
+already_installed_block() {
+  log_error "Your system already has a successful Virtualmin installation deployed."
+  log_error "Re-installation is neither possible nor necessary. This script must be"
+  log_error "run on a freshly installed supported operating system. It does not fit"
+  log_error "for package updates or license changes. For further assistance, please"
+  log_error "visit the Virtualmin Community forum."
+  exit 100
 }
 
 # Utility function library
@@ -338,7 +416,17 @@ fi
 # Log file output level; catch literally everything.
 LOG_LEVEL_LOG="DEBUG"
 
-log_info "Log will be written to: $LOG_PATH"
+# If already installed successfully, do not allow running again
+if [ -f "/etc/webmin/virtual-server/installed-auto" ] && [ -z "$setup_only" ] && [ -z "$forcereinstall" ]; then
+  bind_hook "already_installed_block"
+fi
+if [ -n "$setup_only" ]; then
+  log_info "Setup log is written to $LOG_PATH"
+elif [ "$mode" = "uninstall" ]; then
+  log_info "Uninstallation log is written to $LOG_PATH"
+else
+  log_info "Installation log is written to $LOG_PATH"
+fi
 log_debug "LOG_ERRORS_FATAL=$RUN_ERRORS_FATAL"
 log_debug "LOG_LEVEL_STDOUT=$LOG_LEVEL_STDOUT"
 log_debug "LOG_LEVEL_LOG=$LOG_LEVEL_LOG"
@@ -419,8 +507,6 @@ is_preconfigured() {
   fi
   if command -pv mariadb 1>/dev/null 2>&1; then
     preconfigured="${preconfigured}${YELLOW}${BOLD}MariaDB${NORMAL} "
-  elif command -pv mysql 1>/dev/null 2>&1; then
-    preconfigured="${preconfigured}${YELLOW}${BOLD}MySQL${NORMAL} "
   fi
   if postconf mail_version 1>/dev/null 2>&1; then
     preconfigured="${preconfigured}${YELLOW}${BOLD}Postfix${NORMAL} "
@@ -469,11 +555,8 @@ uninstall() {
     fi
   fi
 
-  # Log to file and tell the user nicely
-  log_info "Started uninstallation log in $log"
-
   # Always sleep just a bit in case the user changes their mind
-  sleep 1
+  sleep 3
 
   # Go to the temp directory
   goto_tmpdir
@@ -540,8 +623,29 @@ uninstall() {
   run_ok "uninstall_repos" "Uninstalling Virtualmin $vm_version release package"
   exit 0
 }
+
+# Phase control
+phase() {
+    phases_total="${phases_total:-4}"
+    phase_description="$1"
+    phase_number="$2"
+    # Print completed phases (green)
+    printf "${GREEN}"
+    for i in $(seq 1 $(( phase_number - 1 ))); do
+        printf "▣"
+    done
+    # Print current phase (yellow)
+    printf "${YELLOW}▣"
+    # Print remaining phases (cyan)
+    for i in $(seq $(( phase_number + 1 )) "$phases_total"); do
+        printf "${CYAN}◻"
+    done
+    log_debug "Phase ${phase_number} of ${phases_total}: ${phase_description}"
+    printf "${NORMAL} Phase ${YELLOW}${phase_number}${NORMAL} of ${GREEN}${phases_total}${NORMAL}: ${phase_description}\\n"
+}
+
 if [ "$mode" = "uninstall" ]; then
-  uninstall
+  bind_hook "uninstall"
 fi
 
 # Calculate disk space requirements (this is a guess, for now)
@@ -600,17 +704,24 @@ EOF
   The selected package bundle is ${CYAN}${bundle}${NORMAL} and the size of install is
   ${CYAN}${mode}${NORMAL}. It will require up to ${CYAN}${disk_space_required} GB${NORMAL} of disk space.
 
+EOF
+
+  if [ "$skipyesno" -ne 1 ]; then
+  cat <<EOF
   Exit and re-run this script with ${CYAN}--help${NORMAL} flag to see available options.
 
 EOF
-
-  printf " Continue? (y/n) "
-  if ! yesno; then
-    exit
+  fi
+  if [ "$skipyesno" -ne 1 ]; then
+    printf " Continue? (y/n) "
+    if ! yesno; then
+      exit
+    fi
   fi
 }
-if [ "$skipyesno" -ne 1 ] && [ -z "$setup_only" ]; then
-  install_msg
+
+if [ -z "$setup_only" ] && [ -z "$skipbanner" ]; then
+    bind_hook "install_msg"
 fi
 
 os_unstable_pre_check() {
@@ -626,9 +737,11 @@ os_unstable_pre_check() {
   Certain features may not work as intended or might be unavailable on this OS.
 
 EOF
-    printf " Continue? (y/n) "
-    if ! yesno; then
-      exit
+    if [ "$skipyesno" -ne 1 ]; then
+      printf " Continue? (y/n) "
+      if ! yesno; then
+        exit
+      fi
     fi
   fi
 }
@@ -643,15 +756,18 @@ preconfigured_system_msg() {
 
   Pre-installed software detected: $is_preconfigured_rs
 
-  It is highly advised ${BOLD}${RED}not to pre-install or pre-configure${NORMAL} any additional packages on your OS.
-  The installer expects a freshly installed OS, and anything you do differently might cause
-  conflicts or configuration errors. If you need to enable third-party package repositories,
-  do so after installation of Virtualmin, and only with extreme caution.
+  It is highly advised ${BOLD}${RED}not to pre-install${NORMAL} any additional packages on your
+  OS. The installer expects a freshly installed OS, and anything you do
+  differently might cause conflicts or configuration errors. If you need
+  to enable third-party package repositories, do so after installation
+  of Virtualmin, and only with extreme caution.
 
 EOF
-    printf " Continue? (y/n) "
-    if ! yesno; then
-      exit
+    if [ "$skipyesno" -ne 1 ]; then
+      printf " Continue? (y/n) "
+      if ! yesno; then
+        exit
+      fi
     fi
   fi
 }
@@ -669,7 +785,7 @@ already_installed_msg() {
   However, if Virtualmin has already been successfully installed you ${BOLD}${RED}must not${NORMAL}
   run this script again! It will cause breakage to your existing configuration.
 
-  Virtualmin repositories can be fixed using ${WHITEBG}${BLACK}${BOLD}${0##*/} -s${NORMAL} command.
+  Virtualmin repositories can be fixed using ${WHITEBG}${BLACK}${BOLD}$script_name --setup${NORMAL} command.
 
   License details can be changed using ${WHITEBG}${BLACK}${BOLD}virtualmin change-license${NORMAL} command.
   Changing the license never requires re-installation.
@@ -678,18 +794,30 @@ already_installed_msg() {
   system package manager on the command line.
 
 EOF
-    printf " Continue? (y/n) "
-    if ! yesno; then
-      exit
+    if [ "$skipyesno" -ne 1 ]; then
+      printf " Continue? (y/n) "
+      if ! yesno; then
+        exit
+      fi
     fi
   fi
 }
-if [ "$skipyesno" -ne 1 ] && [ -z "$setup_only" ]; then
-  if grade_b_system; then
-    os_unstable_pre_check
+
+post_install_message() {
+  log_success "Installation Complete!"
+  log_success "If there were no errors above, Virtualmin should be ready"
+  log_success "to configure at https://${hostname}:10000 (or https://${address}:10000)."
+  if [ -z "$ssl_host_success" ]; then
+    log_success "You may receive a security warning in your browser on your first visit."
   fi
-  preconfigured_system_msg
-  already_installed_msg
+}
+
+if [ -z "$setup_only" ] && [ -z "$skipbanner" ]; then
+  if grade_b_system; then
+    bind_hook "os_unstable_pre_check"
+  fi
+  bind_hook "preconfigured_system_msg"
+  bind_hook "already_installed_msg"
 fi
 
 # Check memory
@@ -839,8 +967,6 @@ pre_check_all() {
 
   # Check for gpg, debian 10 doesn't install by default!?
   run_ok pre_check_gpg "Checking GPG package"
-
-  echo ""
 }
 
 # download()
@@ -867,30 +993,23 @@ if [ "$(id -u)" -ne 0 ]; then
   fi
 fi
 
-# Force CentOS 7 to get older repos because of custom Apache
-if [ "$os_type" = "centos" ] && [ "$os_major_version" -eq 7 ]; then
-  if [ "$SERIAL" != "GPL" ]; then
-    repopath=""
-  fi
-  vm_version=6
-  vm6_repos=1
-fi
+bind_hook "phases_all_pre"
 
 if [ -n "$setup_only" ]; then
   pre_check_perl
   pre_check_http_client
   pre_check_gpg
   log_info "Started Virtualmin $vm_version $PRODUCT software repositories setup"
-  printf "${YELLOW}▣${NORMAL} Phase ${YELLOW}1${NORMAL} of ${GREEN}1${NORMAL}: Setup\\n"
 else
-  log_info "Started installation log in $log"
-
-  log_debug "Phase 1 of 4: Check"
-  printf "${YELLOW}▣${CYAN}◻◻◻${NORMAL} Phase ${YELLOW}1${NORMAL} of ${GREEN}4${NORMAL}: Check\\n"
+  echo
+  phase "Check" 1
+  bind_hook "phase1_pre"
   pre_check_all
+  bind_hook "phase1_post"
+  echo
 
-  log_debug "Phase 2 of 4: Setup"
-  printf "${GREEN}▣${YELLOW}▣${CYAN}◻◻${NORMAL} Phase ${YELLOW}2${NORMAL} of ${GREEN}4${NORMAL}: Setup\\n"
+  phase "Setup" 2
+  bind_hook "phase2_pre"
 fi
 
 # Print out some details that we gather before logging existed
@@ -989,7 +1108,8 @@ install_virtualmin_release() {
     if command -pv dnf 1>/dev/null 2>&1; then
       install_cmd="dnf"
       install="$install_cmd -y install"
-      update="$install_cmd -y update"
+      upgrade="$install_cmd -y update"
+      update="$install_cmd clean all ; $install_cmd makecache"
       install_group_opts="-y --quiet --skip-broken group install --setopt=group_package_types=mandatory,default"
       install_group="$install_cmd $install_group_opts"
       install_config_manager="$install_cmd config-manager"
@@ -1000,7 +1120,8 @@ install_virtualmin_release() {
     else
       install_cmd="yum"
       install="$install_cmd -y install"
-      update="$install_cmd -y update"
+      upgrade="$install_cmd -y update"
+      update="$install_cmd clean all ; $install_cmd makecache"
       if [ "$os_major_version" -ge 7 ]; then
         # Do not use package manager when fixing repos
         if [ -z "$setup_only" ]; then
@@ -1013,13 +1134,8 @@ install_virtualmin_release() {
     fi
 
     # Download release file
-    if [ "$vm6_repos" -eq 1 ]; then
-      rpm_release_file_download="virtualmin-release-latest.noarch.rpm"
-      download "https://${LOGIN}$upgrade_virtualmin_host/vm/$vm_version/${repopath}${os_type}/${os_major_version}/${arch}/$rpm_release_file_download" "Downloading Virtualmin $vm_version release package"
-    else
-      rpm_release_file_download="virtualmin-$packagetype-release.noarch.rpm"
-      download "https://${LOGIN}$upgrade_virtualmin_host/vm/$vm_version/rpm/$rpm_release_file_download" "Downloading Virtualmin $vm_version release package"
-    fi
+    rpm_release_file_download="virtualmin-$packagetype-release.noarch.rpm"
+    download "https://${LOGIN}$download_virtualmin_host/vm/$vm_version/rpm/$rpm_release_file_download" "Downloading Virtualmin $vm_version release package"
     
     # Remove existing pkg files as they will not
     # be replaced upon replease package upgrade
@@ -1035,7 +1151,7 @@ install_virtualmin_release() {
 
     # Remove releases first, as the system can
     # end up having both GPL and Pro installed
-    rpm -e --nodeps --quiet "$(rpm -qa virtualmin*release)" >> "$RUN_LOG"2>&1
+    rpm -e --nodeps --quiet "$(rpm -qa virtualmin*release 2>/dev/null)" >> "$RUN_LOG" 2>&1
 
     # Install release file
     run_ok "rpm -U --replacepkgs --replacefiles --quiet $rpm_release_file_download" "Installing Virtualmin $vm_version release package"
@@ -1049,13 +1165,13 @@ install_virtualmin_release() {
   debian | ubuntu | kali)
     case "$os_type" in
     ubuntu)
-      if [ "$os_version" != "18.04" ] && [ "$os_version" != "20.04" ] && [ "$os_version" != "22.04" ] && [ "$os_version" != "24.04" ] && [ "$vm6_repos" -eq 0 ]; then
+      if [ "$os_version" != "18.04" ] && [ "$os_version" != "20.04" ] && [ "$os_version" != "22.04" ] && [ "$os_version" != "24.04" ]; then
         printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
         exit 1
       fi
       ;;
     debian)
-      if [ "$os_major_version" -lt 10 ] && [ "$vm6_repos" -eq 0 ]; then
+      if [ "$os_major_version" -lt 10 ]; then
         printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
         exit 1
       fi
@@ -1070,45 +1186,14 @@ install_virtualmin_release() {
     package_type="deb"
     if [ "$os_type" = "ubuntu" ]; then
       deps="$ubudeps"
-      if [ "$vm6_repos" -eq 1 ]; then
-        case "$os_version" in
-        16.04*)
-          repos="virtualmin-xenial virtualmin-universal"
-          ;;
-        18.04*)
-          repos="virtualmin-bionic virtualmin-universal"
-          ;;
-        20.04*)
-          repos="virtualmin-focal virtualmin-universal"
-          ;;
-        22.04*)
-          repos="virtualmin-focal virtualmin-universal"
-          ;;
-        esac
-      else
-        repos="virtualmin"
-      fi
+      repos="virtualmin"
     else
       deps="$debdeps"
-      if [ "$vm6_repos" -eq 1 ]; then
-        case "$os_version" in
-        9*)
-          repos="virtualmin-stretch virtualmin-universal"
-          ;;
-        10*)
-          repos="virtualmin-buster virtualmin-universal"
-          ;;
-        11*)
-          repos="virtualmin-buster virtualmin-universal"
-          ;;
-        esac
-      else
-        repos="virtualmin"
-      fi
+      repos="virtualmin"
     fi
     log_debug "apt-get repos: ${repos}"
     if [ -z "$repos" ]; then # Probably unstable with no version number
-      log_fatal "No repos available for this OS. Are you running unstable/testing?"
+      log_fatal "No repositories available for this OS. Are you running unstable/testing?"
       exit 1
     fi
     # Remove any existing repo config, in case it's a reinstall
@@ -1126,21 +1211,17 @@ install_virtualmin_release() {
     if [ -d "$apt_auth_dir" ]; then
       if [ -n "$LOGIN" ]; then
         LOGINREAL=""
-        printf "machine $upgrade_virtualmin_host login $SERIAL password $KEY\\n" >"$apt_auth_dir/virtualmin.conf"
+        printf "machine $download_virtualmin_host login $SERIAL password $KEY\\n" >"$apt_auth_dir/virtualmin.conf"
       fi
     fi
     for repo in $repos; do
-      printf "deb [signed-by=/usr/share/keyrings/$repoid_debian_like-virtualmin-$vm_version.gpg] https://${LOGINREAL}$upgrade_virtualmin_host/vm/${vm_version}/${repopath}apt ${repo} main\\n" >/etc/apt/sources.list.d/virtualmin.list
+      printf "deb [signed-by=/usr/share/keyrings/$repoid_debian_like-virtualmin-$vm_version.gpg] https://${LOGINREAL}$download_virtualmin_host/vm/${vm_version}/${repopath}apt ${repo} main\\n" >/etc/apt/sources.list.d/virtualmin.list
     done
 
     # Install our keys
     log_debug "Installing Webmin and Virtualmin package signing keys .."
-    download "https://$upgrade_virtualmin_host_lib/RPM-GPG-KEY-virtualmin-$vm_version" "Downloading Virtualmin $vm_version key"
+    download "https://$download_virtualmin_host_lib/RPM-GPG-KEY-virtualmin-$vm_version" "Downloading Virtualmin $vm_version key"
     run_ok "gpg --import RPM-GPG-KEY-virtualmin-$vm_version && cat RPM-GPG-KEY-virtualmin-$vm_version | gpg --dearmor > /usr/share/keyrings/$repoid_debian_like-virtualmin-$vm_version.gpg" "Installing Virtualmin $vm_version key"
-    if [ "$vm6_repos" -eq 1 ]; then
-      download "https://$upgrade_virtualmin_host_lib/RPM-GPG-KEY-webmin" "Downloading Webmin key"
-      run_ok "gpg --import RPM-GPG-KEY-webmin && cat RPM-GPG-KEY-webmin | gpg --dearmor > /usr/share/keyrings/$repoid_debian_like-webmin.gpg" "Installing Webmin key"
-    fi
     run_ok "apt-get update" "Downloading repository metadata"
     # Make sure universe repos are available
     # XXX Test to make sure this run_ok syntax works as expected (with single quotes inside double)
@@ -1156,7 +1237,8 @@ install_virtualmin_release() {
     # XXX Is this still enabled by default on Debian/Ubuntu systems?
     run_ok "sed -ie 's/^deb cdrom:/#deb cdrom:/' /etc/apt/sources.list" "Disabling cdrom: repositories"
     install="DEBIAN_FRONTEND='noninteractive' /usr/bin/apt-get --quiet --assume-yes --install-recommends -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' -o Dpkg::Pre-Install-Pkgs::='/usr/sbin/dpkg-preconfigure --apt' install"
-    update="DEBIAN_FRONTEND='noninteractive' /usr/bin/apt-get --quiet --assume-yes --install-recommends -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' -o Dpkg::Pre-Install-Pkgs::='/usr/sbin/dpkg-preconfigure --apt' upgrade"
+    upgrade="DEBIAN_FRONTEND='noninteractive' /usr/bin/apt-get --quiet --assume-yes --install-recommends -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' -o Dpkg::Pre-Install-Pkgs::='/usr/sbin/dpkg-preconfigure --apt' upgrade"
+    update="/usr/bin/apt-get clean ; /usr/bin/apt-get update"
     #export DEBIAN_FRONTEND=noninteractive
     install_updates="$install $deps"
     run_ok "apt-get clean" "Cleaning up software repo metadata"
@@ -1189,7 +1271,7 @@ fi
 install_with_apt() {
   # Install system package upgrades, if any
   if [ -z "$noupdates" ]; then
-    run_ok "$update" "Checking and installing system package updates"
+    run_ok "$upgrade" "Checking and installing system package updates"
   fi
 
   # Silently purge packages that may cause issues upon installation
@@ -1282,7 +1364,7 @@ install_with_yum() {
 
   # Upgrade system packages first
   if [ -z "$noupdates" ]; then
-    run_ok "$update" "Checking and installing system package updates"
+    run_ok "$upgrade" "Checking and installing system package updates"
   fi
 
   # Install custom stack packages
@@ -1353,9 +1435,10 @@ yum_check_skipped() {
 # name as any, I guess.  Should just be "setup_repositories" or something.
 errors=$((0))
 install_virtualmin_release
+bind_hook "phase2_post"
 echo
-log_debug "Phase 3 of 4: Installation"
-printf "${GREEN}▣▣${YELLOW}▣${CYAN}◻${NORMAL} Phase ${YELLOW}3${NORMAL} of ${GREEN}4${NORMAL}: Installation\\n"
+phase "Installation" 3
+bind_hook "phase3_pre"
 install_virtualmin
 if [ "$?" != "0" ]; then
   errorlist="${errorlist}  ${YELLOW}◉${NORMAL} Package installation returned an error.\\n"
@@ -1370,8 +1453,11 @@ if [ "$?" != "0" ]; then
   errors=$((errors + 1))
 fi
 
+bind_hook "phase3_post"
+
 # Initialize embedded module if any
 if [ -n "$module_name" ]; then
+  bind_hook "modules_pre"
   # If module is available locally in the same directory use it
   if [ -f "$pwd/${module_name}.sh" ]; then
     chmod +x "$pwd/${module_name}.sh"
@@ -1380,6 +1466,7 @@ if [ -n "$module_name" ]; then
   else
     log_warning "Requested module with the filename $pwd/${module_name}.sh does not exist."
   fi
+  bind_hook "modules_post"
 fi
 
 # Reap any clingy processes (like spinner forks)
@@ -1394,23 +1481,26 @@ done
 # problem. XXX This is hacky. I'm not sure what's really causing random fails.
 sleep 1
 echo
-log_debug "Phase 4 of 4: Configuration"
-printf "${GREEN}▣▣▣${YELLOW}▣${NORMAL} Phase ${YELLOW}4${NORMAL} of ${GREEN}4${NORMAL}: Configuration\\n"
+phase "Configuration" 4
+bind_hook "phase4_pre"
 if [ "$mode" = "minimal" ]; then
   bundle="Mini${bundle}"
 fi
 # shellcheck disable=SC2086
-virtualmin-config-system --bundle "$bundle" $virtualmin_config_system_excludes
+virtualmin-config-system --bundle "$bundle" $virtualmin_config_system_excludes --log "$log"
+if [ "$?" != "0" ]; then
+  errorlist="${errorlist}  ${YELLOW}◉${NORMAL} Postinstall configuration returned an error.\\n"
+  errors=$((errors + 1))
+fi
+sleep 1
+# Do we still need to kill stuck spinners?
+kill $! 1>/dev/null 2>&1
+
 # Log SSL request status, if available
 if [ -f "$VIRTUALMIN_INSTALL_TEMPDIR/virtualmin_ssl_host_status" ]; then
   virtualmin_ssl_host_status=$(cat "$VIRTUALMIN_INSTALL_TEMPDIR/virtualmin_ssl_host_status")
   log_debug "$virtualmin_ssl_host_status"
 fi
-if [ "$?" != "0" ]; then
-  errorlist="${errorlist}  ${YELLOW}◉${NORMAL} Postinstall configuration returned an error.\\n"
-  errors=$((errors + 1))
-fi
-config_system_pid=$!
 
 # Functions that are used in the OS specific modifications section
 disable_selinux() {
@@ -1429,11 +1519,46 @@ rhel | fedora | centos | centos_stream | rocky | almalinux | ol | cloudlinux | a
   ;;
 esac
 
-# kill the virtualmin config-system command, if it's still running
-kill "$config_system_pid" 1>/dev/null 2>&1
+bind_hook "phase4_post"
 
-# Make sure the cursor is back (if spinners misbehaved)
-tput cnorm 1>/dev/null 2>&1
+# Process additional phases if set in third-party functions
+if [ -n "$hooks__phases" ]; then
+    # Trim leading and trailing whitespace
+    trim() {
+        echo "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+    }
+    bind_hook "phases_pre"
+    unset current_phase
+    phases_error_occurred=0
+    printf '%s\n' "$hooks__phases" | sed '/^$/d' > hooks__phases_tmp
+    while IFS= read -r line; do
+        # Split the line into components
+        phase_number=$(trim "${line%%	*}")
+        rest="${line#*	}"
+        phase_name=$(trim "${rest%%	*}")
+        rest="${rest#*	}"
+        command=$(trim "${rest%%	*}")
+        description=$(trim "${rest#*	}")
+        # If it's a new phase, display phase progress
+        if [ "$phase_number" != "$current_phase" ]; then
+            echo
+            phase "$phase_name" "$phase_number"
+            current_phase="$phase_number"
+        fi
+        # Run the command
+        if ! run_ok "$command" "$description"; then
+            phases_error_occurred=1
+            break
+        fi
+    done < hooks__phases_tmp
+    # Exit if an error occurred
+    if [ "$phases_error_occurred" -eq 1 ]; then
+        exit 1
+    fi
+    bind_hook "phases_post"
+fi
+
+bind_hook "phases_all_post"
 
 # Was LE SSL for hostname request successful?
 if [ -d "$VIRTUALMIN_INSTALL_TEMPDIR/virtualmin_ssl_host_success" ]; then
@@ -1441,6 +1566,7 @@ if [ -d "$VIRTUALMIN_INSTALL_TEMPDIR/virtualmin_ssl_host_success" ]; then
 fi
 
 # Cleanup the tmp files
+bind_hook "clean_pre"
 printf "${GREEN}▣▣▣${NORMAL} Cleaning up\\n"
 if [ "$VIRTUALMIN_INSTALL_TEMPDIR" != "" ] && [ "$VIRTUALMIN_INSTALL_TEMPDIR" != "/" ]; then
   log_debug "Cleaning up temporary files in $VIRTUALMIN_INSTALL_TEMPDIR."
@@ -1453,6 +1579,7 @@ if [ -n "$QUOTA_FAILED" ]; then
   log_warning "Quotas were not configurable. A reboot may be required. Or, if this is"
   log_warning "a VM, configuration may be required at the host level."
 fi
+bind_hook "clean_post"
 echo
 if [ $errors -eq "0" ]; then
   hostname=$(hostname -f)
@@ -1460,14 +1587,10 @@ if [ $errors -eq "0" ]; then
   if [ "$package_type" = "rpm" ]; then
     yum_check_skipped
   fi
-  log_success "Installation Complete!"
-  log_success "If there were no errors above, Virtualmin should be ready"
-  log_success "to configure at https://${hostname}:10000 (or https://${address}:10000)."
-  if [ -z "$ssl_host_success" ]; then
-    log_success "You may receive a security warning in your browser on your first visit."
-  fi
+  bind_hook "post_install_message"
   TIME=$(date +%s)
   echo "$VER=$TIME" > "/etc/webmin/virtual-server/installed"
+  echo "$VER=$TIME" > "/etc/webmin/virtual-server/installed-auto"
 else
   log_warning "The following errors occurred during installation:"
   echo
