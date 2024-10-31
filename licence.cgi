@@ -3,7 +3,7 @@
 
 require './virtual-server-lib.pl';
 &can_recheck_licence() || &error($text{'licence_ecannot'});
-&ui_print_unbuffered_header(undef, $text{'licence_title'}, "");
+&ui_print_unbuffered_header(undef, $text{'licence_title'}, "", undef, undef, 1);
 
 print "$text{'licence_doing'}<br>\n";
 &read_file($licence_status, \%licence);
@@ -48,7 +48,5 @@ else {
 	print &text('licence_goterr', lcfirst($err)),"<p>\n";
 	}
 
-&ui_print_footer(
-	"pro/licence.cgi", lc($text{'licence_manager'}),
-	"", $text{'index_return'});
+&ui_print_footer("pro/licence.cgi", lc($text{'licence_manager'}));
 
