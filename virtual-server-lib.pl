@@ -70,6 +70,8 @@ $virtualmin_pro = $module_info{'version'} =~ /pro/i ||
 		  -d "$module_root_directory/pro" ? 1 : 0;
 if (!$virtualmin_pro) {
 	$config{'status'} = 0;
+	}
+else {
 	$virtualmin_gpl = 'GPL';
 	}
 
