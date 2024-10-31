@@ -70,6 +70,7 @@ $virtualmin_pro = $module_info{'version'} =~ /pro/i ||
 		  -d "$module_root_directory/pro" ? 1 : 0;
 if (!$virtualmin_pro) {
 	$config{'status'} = 0;
+	$virtualmin_gpl = 'GPL';
 	}
 
 # The virtual IP features are always active
