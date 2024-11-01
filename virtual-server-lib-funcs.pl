@@ -11966,7 +11966,7 @@ if (defined($status) && $status == 0 && $max_servers && !$err) {
 	if ($servers > $max_servers+1) {
 		$status = 1;
 		$err = &text('licence_maxservers2', $max_servers,
-			"<span data-maxservers='$servers'>$servers</span",
+			"<span data-maxservers='$servers'>$servers</span>",
 			"<tt>$serial{'SerialNumber'}</tt>");
 		}
 	}
