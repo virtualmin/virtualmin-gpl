@@ -62,7 +62,7 @@ $key || &usage("No licence key specified");
 
 # Make sure it is valid
 my ($err, $msg) = &change_licence($serial, $key, $nocheck, $force_update);
-&usage($msg) if ($err);
+&usage($msg) if ($err && $msg);
 &run_post_actions_silently();
 &virtualmin_api_log(\@OLDARGV);
 
