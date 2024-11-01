@@ -4349,7 +4349,6 @@ licence_echk=An error occurred checking the license
 licence_evalid=No valid license was found for your serial number $1
 license_esave=Failed to update license information
 licence_change=License Activation
-licence_deregister=Deregister License
 licence_deregister_sure=This action will untie $1 license from this system, placing it in read-only mode. You will need to obtain a new license to continue using Virtualmin Pro on this server. Are you sure you want to deregister the license for this server?
 licence_manager_deregister_yes=Yes, Deregister
 
