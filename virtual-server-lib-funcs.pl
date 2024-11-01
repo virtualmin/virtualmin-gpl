@@ -11904,9 +11904,9 @@ return ($licence{'status'}, $licence{'expiry'},
 sub update_licence_from_site
 {
 local ($licence) = @_;
-local ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew) =
-	&check_licence_site();
-$licence->{'last'} = time();
+local ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew,
+       $state, $subscription) = &check_licence_site();
+$licence->{'last'} = $licence->{'time'} = time();
 delete($licence->{'warn'});
 if ($status == 2) {
 	# Networking / CGI error. Don't treat this as a failure unless we have
@@ -11925,6 +11925,8 @@ else {
 $licence->{'status'} = $status;
 $licence->{'expiry'} = $expiry;
 $licence->{'autorenew'} = $autorenew;
+delete($licence->{'time'}) if ($state !~ /^\QY\E$/);
+$licence->{'subscription'} = $subscription;
 $licence->{'err'} = $err;
 if (defined($doms)) {
 	# Only store the max domains if we got something valid back
@@ -11951,8 +11953,9 @@ local $id = &get_licence_hostid();
 my %serial;
 &read_env_file($virtualmin_license_file, \%serial);
 
-local ($status, $expiry, $err, $doms, $max_servers, $servers, $autorenew) =
-	&licence_scheduled($id, undef, undef, &get_vps_type());
+local ($status, $expiry, $err, $doms, $max_servers, $servers, $autorenew,
+       $state, $subscription) =
+		&licence_scheduled($id, undef, undef, &get_vps_type());
 if (defined($status) && $status == 0 && $doms) {
 	# A domains limit exists .. check if we have exceeded it
 	local @doms = grep { !$_->{'alias'} } &list_domains();
@@ -11970,7 +11973,8 @@ if (defined($status) && $status == 0 && $max_servers && !$err) {
 			"<tt>$serial{'SerialNumber'}</tt>");
 		}
 	}
-return ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew);
+return ($status, $expiry, $err, $doms, $servers, $max_servers,
+        $autorenew, $state, $subscription);
 }
 
 # get_licence_hostid()

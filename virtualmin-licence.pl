@@ -31,10 +31,8 @@ return $out =~ /^EXP\s+(?<exp>\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
        $out =~ /^ERR\s+(?<err>.*)/ && ($regerr = $+{err}) &&
        	       $regerr !~ /invalid\s+host\s+or\s+serial\s+number/i ?
 	(2, undef, "$text{'licence_echk'} : $regerr", undef) :
-       $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d+)/ ?
-	(0, $1, undef, $2, $3, $4, $5) :	# Auto-renewal flag
-       $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
-	(0, $1, undef, $2, $3, $4) :
+       $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\d+)(?:\s+([\w])(?:\s+(\d+))?)?)?/ ?
+	(0, $1, undef, $2, $3, $4, $5, $6, $7) :
 	(1, undef, &text("licence_evalid",
 		   	 "<tt data-evalid>$serial{'SerialNumber'}</tt>"));
 }
