@@ -11923,6 +11923,8 @@ else {
 	delete($licence->{'lastdown'});
 	}
 $licence->{'status'} = $status;
+$licence->{'bind'} = $licence->{'time'} if (!$licence->{'bind'} && $status >= 1);
+delete($licence->{'bind'}) if (defined($status) && $status == 0);
 $licence->{'expiry'} = $expiry;
 $licence->{'autorenew'} = $autorenew;
 delete($licence->{'time'}) if ($state !~ /^\QY\E$/);
