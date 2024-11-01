@@ -20,10 +20,8 @@ if (defined($status) && $status == 0) {
 	    $servers > 0 ? $servers : $text{'licence_unlimited'}, $expiry);
 	print $suc_text,"<p>\n";
 	if ($licence{'warn'}) {
-		# Most recent check failed
-		print &text('licence_warn',
-			              &ui_text_color($licence{'warn'}, 'warn')),
-		      "<p>\n";
+		# Most recent check failed send to stderr
+		&error_stderr(&text('licence_warn', $licence{'warn'}, $serial));
 		}
 	# Check for license close to expiry
 	if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
