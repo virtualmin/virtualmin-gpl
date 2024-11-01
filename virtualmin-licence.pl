@@ -65,7 +65,13 @@ if (!$nocheck) {
 	($status, $exp, $err, $doms, $server) =
 		&licence_scheduled($hostid, $serial, $key, &get_vps_type());
 	if ($status) {
-		&$second_print(".. license is not valid : $err");
+		$err = lcfirst($err);
+		if ($status == 2) {
+			&$second_print(".. license cannot be validated : $err");
+			}
+		else {
+			&$second_print(".. license is not valid : $err");
+			}
 		return (1, undef);
 		}
 	else {
