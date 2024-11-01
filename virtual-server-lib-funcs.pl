@@ -11965,8 +11965,9 @@ if (defined($status) && $status == 0 && $max_servers && !$err) {
 	# A servers limit exists .. check if we have exceeded it
 	if ($servers > $max_servers+1) {
 		$status = 1;
-		$err = &text('licence_maxservers2', $max_servers, $servers,
-			"<tt data-maxservers>$serial{'SerialNumber'}</tt>");
+		$err = &text('licence_maxservers2', $max_servers,
+			"<span data-maxservers='$servers'>$servers</span",
+			"<tt>$serial{'SerialNumber'}</tt>");
 		}
 	}
 return ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew);
