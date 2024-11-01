@@ -45,6 +45,20 @@ sub change_licence
 my ($serial, $key, $nocheck, $force_update) = @_;
 &require_licence($force_update);
 my ($status, $exp, $err, $doms, $server, $hostid);
+# Display a warning to GPL user trying to apply a license instead of
+# properly upgrading. Can be bypassed by using --force-update flag
+if (!$force_update) {
+	my $gpl_repos_warning =
+		"GPL repos detected. Use \"System Settings ⇾ ".
+		"Upgrade to Virtualmin Pro\" in UI to upgrade first!";
+	my $yumrepo = &read_file_lines($virtualmin_yum_repo, 1);
+	my $aptrepo = &read_file_lines($virtualmin_apt_repo, 1);
+	if (($yumrepo && "@{$yumrepo}" =~ /\/gpl\//) ||
+	    ($aptrepo && "@{$aptrepo}" =~ /\/gpl\//)) {
+		return (1, $gpl_repos_warning);
+		}
+	}
+# Validate the new license
 if (!$nocheck) {
 	&$first_print("Validating serial $serial and key $key ..");
 	$hostid = &get_licence_hostid();
@@ -60,19 +74,10 @@ if (!$nocheck) {
 		}
 	}
 
-# Display a warning to GPL user trying to apply a license instead of properly upgrading
-# Can be bypassed by using --force-update flag
-my $gpl_repos_warning =
-	"GPL repos detected. Use \`System Settings ⇾ ".
-	"Upgrade to Virtualmin Pro\` in UI instead to upgrade first!";
-
 # Update RHEL repo
 if (-r $virtualmin_yum_repo) {
 	my $found = 0;
 	my $lref = &read_file_lines($virtualmin_yum_repo);
-	
-	my $gpl_warning = ("@{$lref}" =~ /\/gpl\// && !$force_update);
-	return (1, $gpl_repos_warning) if ($gpl_warning);
 
 	&$first_print("Updating Virtualmin repository ..");
 	&lock_file($virtualmin_yum_repo);
@@ -103,10 +108,7 @@ if (-r $virtualmin_yum_repo) {
 if (-r $virtualmin_apt_repo) {
 	my $found = 0;
 	my $lref = &read_file_lines($virtualmin_apt_repo);
-	
-	my $gpl_warning = ("@{$lref}" =~ /\/gpl\// && !$force_update);
-	return (1, $gpl_repos_warning) if ($gpl_warning);
-	
+
 	&$first_print("Updating Virtualmin repository ..");
 	&lock_file($virtualmin_apt_repo);
 	foreach my $l (@$lref) {
