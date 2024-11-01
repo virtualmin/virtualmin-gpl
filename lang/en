@@ -4349,6 +4349,9 @@ licence_echk=An error occurred checking the license
 licence_evalid=No valid license was found for your serial number $1
 license_esave=Failed to update license information
 licence_change=License Activation
+licence_deregister=Deregister License
+licence_deregister_sure=This action will remove the serial number and license key from this system. You will need to obtain a new license to continue using Virtualmin Pro on this server. Are you sure you want to deregister the license for this server?
+licence_manager_deregister_yes=Yes, Deregister
 
 licence_manager=License Manager
 licence_manager_goto=Manage Virtualmin Pro License
