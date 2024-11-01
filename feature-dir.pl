@@ -1047,12 +1047,7 @@ if ($d->{'dir'}) {
 	local $tmp = "$d->{'home'}/tmp";
 	if (!-d $tmp) {
 		&make_dir_as_domain_user($d, $tmp, 0750, 1);
-		if (&has_command("chcon")) {
-			&execute_command("chcon -t tmp_t ".
-				quotemeta("$tmp").
-				">/dev/null 2>&1");
-			}
-  }
+		}
 	return $tmp;
 	}
 else {
