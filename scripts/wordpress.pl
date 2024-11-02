@@ -1387,4 +1387,45 @@ EOF
 &redirect($redir_url);
 }
 
+# script_wordpress_detect_file(&domain)
+# Returns the file to search for to locate a Wordpress install
+sub script_wordpress_detect_file
+{
+return "wp-config.php";
+}
+
+# script_wordpress_detect(&domain, &files)
+# If a Wordpress install was found, return the script info object
+sub script_wordpress_detect
+{
+my ($d, $files) = @_;
+my @sinfos;
+my $phd = &public_html_dir($d);
+foreach my $wpconfig (@$files) {
+	my $lref = &read_file_lines($wpconfig, 1);
+	my %conf;
+	foreach my $l (@$lref) {
+		if ($l =~ /define\(\s*'(\S+)'\s*,\s*'(.*)'/) {
+			$conf{$1} = $2;
+			}
+		}
+	next if (!$conf{'DB_NAME'});
+	my $wpdir = $wpconfig;
+	$wpdir =~ s/\/wp-config.php$//;
+	my $wppath = $wpdir;
+	$wppath =~ s/^\Q$phd\E//;
+	my $sinfo = {
+		'opts' => {
+			'dir' => $wpdir,
+			'path' => $wppath,
+			'db' => 'mysql_'.$conf{'DB_NAME'},
+			},
+		'user' => $conf{'DB_USER'},
+		'pass' => $conf{'DB_PASSWORD'},
+		};
+	push(@sinfos, $sinfo);
+	}
+return @sinfos;
+}
+
 1;

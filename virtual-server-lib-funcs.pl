@@ -2932,15 +2932,12 @@ my @rv;
 foreach my $f (@files) {
 	my $path = "$dir/$f";
 	if (-l $path || !-d $path) {
-		push(@rv, $f);
+		push(@rv, $f) if (!$name || $f eq $name);
 		}
 	elsif (-d $path) {
-		push(@rv, $f);
+		push(@rv, $f) if (!$name || $f eq $name);
 		push(@rv, map { "$f/$_" } &find_recursive_files($path, $name));
 		}
-	}
-if ($name) {
-	@rv = grep { /\/\Q$name\E$/ } @rv;
 	}
 return @rv;
 }

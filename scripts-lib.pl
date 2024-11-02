@@ -3644,6 +3644,8 @@ sub detect_installed_scripts
 {
 my ($d, $dir) = @_;
 $dir ||= &public_html_dir($d);
+my @rv;
+my %already = map { $_->{'opts'}->{'dir'}, $_ } &list_domain_scripts($d);
 foreach my $sname (&list_scripts()) {
 	my $script = &get_script($sname);
 	next if (!$script);
@@ -3651,11 +3653,26 @@ foreach my $sname (&list_scripts()) {
 	my $dfunc = $script->{'detect_func'};
 	next if (!defined(&$dffunc) || !defined(&$dfunc));
 	my $wantfile = &$dffunc($d);
-	my @dfiles = &find_recursive_files($dir, $wantfile);
+	my @dfiles = map { $dir."/".$_ } &find_recursive_files($dir, $wantfile);
 	next if (!@dfiles);
-	my $sinfo = &$dfunc($d, \@dfiles);
-	if ($sinfo) {
+	my @sinfos = &$dfunc($d, \@dfiles);
+	foreach my $sinfo (@sinfos) {
 		$sinfo->{'name'} = $sname;
+
+		# Populate the PHP version field
+		if (&indexof('php', @{$script->{'uses'}}) >= 0) {
+			$sinfo->{'opts'}->{'phpver'} =
+				&get_domain_php_version_for_directory(
+					$d, $sinfo->{'opts'}->{'dir'});
+			}
+
+		# Populate the URL field based on the path
+		if ($sinfo->{'opts'}->{'path'}) {
+			$sinfo->{'url'} = 'http://'.$d->{'dom'}.
+					  $sinfo->{'opts'}->{'path'};
+			}
+
+		# Fetch real version from the script-specific function
 		my $rfunc = $script->{'realversion_func'};
 		if (defined(&$rfunc) && !$sinfo->{'version'}) {
 			my $realver = &$rfunc($d, $sinfo->{'opts'}, $sinfo);
@@ -3663,9 +3680,12 @@ foreach my $sname (&list_scripts()) {
 				$sinfo->{'version'} = $realver;
 				}
 			}
+
+		$sinfo->{'already'} = $already{$sinfo->{'opts'}->{'dir'}};
 		push(@rv, $sinfo);
 		}
 	}
+return @rv;
 }
 
 1;
