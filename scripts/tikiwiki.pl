@@ -156,7 +156,7 @@ local @files = (
 	  'url' => "https://ubuntu24-pro.virtualmin.dev/tiki-$ver.zip" },
 	{ 'name' => "cli",
 	  'file' => "tiki-manager",
-	  'url' => "https://gitlab.com/api/v4/projects/9558938/packages/generic/tiki-manager/v0.1.0/tiki-manager-v0.1.0.phar",
+	  'url' => "https://gitlab.com/tikiwiki/tiki-manager/-/releases/permalink/latest/downloads/tiki-manager.phar",
 	  'nocache' => 1 } );
 return @files;
 }
