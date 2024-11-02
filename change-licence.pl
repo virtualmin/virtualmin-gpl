@@ -16,6 +16,7 @@ GPL detection must be disabled use the C<--force-update> flag.
 package virtual_server;
 if (!$module_name) {
 	$main::no_acl_check++;
+	$main::readonly_mode = 0;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
 	$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
 	if ($0 =~ /^(.*)\/[^\/]+$/) {
@@ -24,7 +25,6 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$main::readonly_mode = 0;
 	$0 = "$pwd/change-licence.pl";
 	require './virtual-server-lib.pl';
 	require './virtualmin-licence.pl';
