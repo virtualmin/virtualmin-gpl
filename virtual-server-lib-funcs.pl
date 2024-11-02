@@ -11848,7 +11848,7 @@ my %licence_status;
 &read_file($licence_status, \%licence_status);
 my ($bind, $time) = ($licence_status{'bind'}, $licence_status{'time'});
 if ($bind && !$time) {
-	$bind = int(($bind-time())/86400)+21;
+	$bind = int(($bind-time())/86400)+$virtualmin_pro;
 	return 1 if ($bind <= 0);
 	}
 return 0;
