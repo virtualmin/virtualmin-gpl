@@ -47,7 +47,7 @@ sub script_tikiwiki_php_modules
 local ($d, $ver, $phpver, $opts) = @_;
 local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
 local @rv = $dbtype eq "mysql" ? ("mysql") : ("pgsql");
-push(@rv, "xml", "intl", "zip", "gd", "mbstring");
+push(@rv, "xml", "intl", "zip", "gd", "mbstring", "bz2", "sqlite3");
 return @rv;
 }
 
