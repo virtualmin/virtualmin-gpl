@@ -71,7 +71,6 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "list-domains.pl must be run as root";
 	}
-&require_mail();
 
 # Parse command-line args
 $owner = 1;
