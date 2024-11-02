@@ -4317,6 +4317,9 @@ licence_soon=Your Virtualmin license will expire in $1 days.
 licence_soon2=Your Virtualmin license will expire in $1 hours.
 licence_renew=A renewal can be purchased at <a target=_blank href='$1'>$2</a>.
 licence_renew2=An additional license can be purchased at <a target=_blank href='$1'>$2</a>.
+licence_renew3=A grace period of $1 day is left for managing the migration of the license to a new server.
+licence_renew3m=A grace period of $1 days is left for managing the migration of the license to a new server.
+licence_renew4=The grace period for transferring your license has expired, and the system is now in read-only mode.
 license_shop_name=Virtualmin Shop
 licence_recheck=Re-check License Status
 licence_title=Re-Check License
@@ -4329,7 +4332,7 @@ licence_goterr=.. a problem was detected : $1
 licence_goterr2=.. invalid expiry date : $1
 licence_ecannot=You are not allowed to re-check the Virtualmin license
 licence_maxdoms=Your system is licensed for only $1 server, but it's currently being used on $2.
-licence_maxservers2=Your serial number $3 is licensed for only $1 server, but it's currently being used on $2.
+licence_maxservers2=Your serial number $3 is licensed for only $1 server, but it is currently being used on $2 servers.
 licence_maxwarn=Unless this license is being used temporarily for migration to a new server, you must purchase a separate license for use on this server.
 licence_ipchanged=Your system's primary IP address appears to have changed from $1 to $2. Virtual servers using the old address may be unreachable or serve the wrong web content.
 licence_changeip=Update Incorrect IP Addresses

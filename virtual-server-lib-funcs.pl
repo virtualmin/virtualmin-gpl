@@ -11910,7 +11910,8 @@ if (time() - $licence{'last'} > 3*24*60*60) {
 	}
 return ($licence{'status'}, $licence{'expiry'},
 	$licence{'err'} || $licence{'warn'}, $licence{'doms'}, $licence{'servers'},
-	$licence{'autorenew'});
+	$licence{'autorenew'}, $licence{'time'}, $licence{'bind'},
+	$licence{'subscription'});
 }
 
 # update_licence_from_site(&licence)
@@ -12048,7 +12049,7 @@ return () if (!&master_admin());
 my @rv;
 
 # Get licence expiry date
-local ($status, $expiry, $err, undef, undef, $autorenew) =
+local ($status, $expiry, $err, undef, undef, $autorenew, $state, $bind) =
 	&check_licence_expired();
 local $expirytime;
 if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
@@ -12057,16 +12058,32 @@ if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
 		$expirytime = timelocal(59, 59, 23, $3, $2-1, $1);
 		};
 	}
-if ($status != 0) {
+if ($status != 0 && !$state) {
 	my $alert_text;
 	# Not valid .. show message
+	if ($bind) {
+		my $prd = $virtualmin_pro;
+		$bind = int(($bind-time())/86400)+$prd;
+		$bind = 0 if ($bind < 0 || $bind > $prd);
+		}
 	$alert_text .= "<b>".$text{'licence_err'}."</b><br>\n";
 	$alert_text .= $err;
 	$alert_text = "$alert_text. " if ($err !~ /\.$/);
-	$alert_text .= " $text{'licence_maxwarn'}";
-	$alert_text .= " ".&text('licence_renew2', $virtualmin_renewal_url,
-			     $text{'license_shop_name'})
-		if ($alert_text !~ /$virtualmin_renewal_url/);
+	if ($bind) {
+		my $multi = $bind > 1 ? 'm' : '';
+		$alert_text .= " $text{'licence_maxwarn'}";
+		$alert_text .= " ".&text("licence_renew3$multi", $bind); 
+		}
+	elsif ($alert_text !~ /$virtualmin_renewal_url/) {
+		$alert_text .= " $text{'licence_renew4'}" if (defined($bind));
+		$alert_text .= " $text{'licence_maxwarn'}" if (!defined($bind));
+		$alert_text .= " ".&text('licence_renew2', 
+					 $virtualmin_renewal_url,
+					 $text{'license_shop_name'})
+		}
+	else {
+		$alert_text .= " $text{'licence_renew4'}" if (defined($bind));
+		}
 	if (&can_recheck_licence()) {
 		$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/pro/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_manager_goto'});
