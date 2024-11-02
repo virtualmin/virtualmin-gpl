@@ -179,6 +179,12 @@ if (defined($status) && $status == 0) {
 	# Update the status file
 	if (!$nocheck) {
 		&read_file($licence_status, \%licence);
+		# Update the licence status based on the new licence as
+		# Virtualmin server can block on too many requests
+		$licence{'status'} = $status;
+		$licence{'expiry'} = $exp;
+		$licence{'doms'} = $doms;
+		$licence{'servers'} = $server;
 		&update_licence_from_site(\%licence);
 		&write_file($licence_status, \%licence);
 		}
