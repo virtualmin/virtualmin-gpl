@@ -11838,6 +11838,22 @@ foreach my $ls ("$module_root_directory/virtualmin-licence.pl",
 return 0;
 }
 
+# bind_licence_status()
+# Returns 1 if the licence is bound to a server, 0 if not
+sub bind_licence_status
+{
+return 0 if (!$virtualmin_pro);
+return 0 if (!-r $licence_status);
+my %licence_status;
+&read_file($licence_status, \%licence_status);
+my ($bind, $time) = ($licence_status{'bind'}, $licence_status{'time'});
+if ($bind && !$time) {
+	$bind = int(($bind-time())/86400)+21;
+	return 1 if ($bind <= 0);
+	}
+return 0;
+}
+
 # setup_licence_cron()
 # Checks for and sets up the licence checking cron job (if needed)
 sub setup_licence_cron
