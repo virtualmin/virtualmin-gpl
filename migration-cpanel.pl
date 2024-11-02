@@ -203,6 +203,9 @@ else {
 		$datastore = "$homesrc/.cpanel/datastore";
 		}
 	}
+if (&indexof("mail", @got) >= 0 && -e "$homedir/.spamassassinenable") {
+	push(@got, "spam");
+	}
 
 # Work out if the original domain was a sub-server in cPanel
 local $waschild = 0;
