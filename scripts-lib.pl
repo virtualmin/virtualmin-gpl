@@ -211,6 +211,8 @@ local $rv = { 'name' => $name,
 	      'kit_func' => "script_${name}_kit",
 	      'kit_login_func' => "script_${name}_kit_login",
 	      'kit_apply_func' => "script_${name}_kit_apply",
+	      'detect_func' => "script_${name}_detect",
+	      'detect_file_func' => "script_${name}_detect_file",
 	    };
 if (defined(&$catfunc)) {
 	my @cats = &$catfunc();
@@ -3632,6 +3634,37 @@ my $action_name = "$script_name-$d->{'dom'}-$script_port";
 if (&init::action_status($action_name)) {
 	my $status = &init::status_action($action_name);
 	return $status ? ( $status ) : ( );
+	}
+}
+
+# detect_installed_scripts(&domain, [dir])
+# Find all scripts under some domain's home HTML directory, and returns a list
+# of sinfo objects
+sub detect_installed_scripts
+{
+my ($d, $dir) = @_;
+$dir ||= &public_html_dir($d);
+foreach my $sname (&list_scripts()) {
+	my $script = &get_script($sname);
+	next if (!$script);
+	my $dffunc = $script->{'detect_file_func'};
+	my $dfunc = $script->{'detect_func'};
+	next if (!defined(&$dffunc) || !defined(&$dfunc));
+	my $wantfile = &$dffunc($d);
+	my @dfiles = &find_recursive_files($dir, $wantfile);
+	next if (!@dfiles);
+	my $sinfo = &$dfunc($d, \@dfiles);
+	if ($sinfo) {
+		$sinfo->{'name'} = $sname;
+		my $rfunc = $script->{'realversion_func'};
+		if (defined(&$rfunc) && !$sinfo->{'version'}) {
+			my $realver = &$rfunc($d, $sinfo->{'opts'}, $sinfo);
+			if ($realver) {
+				$sinfo->{'version'} = $realver;
+				}
+			}
+		push(@rv, $sinfo);
+		}
 	}
 }
 
