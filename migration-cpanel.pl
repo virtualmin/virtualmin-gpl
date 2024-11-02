@@ -753,6 +753,15 @@ if ($got{'mail'}) {
 	&$second_print(".. done (migrated $acount aliases)");
 	}
 
+if ($got{'spam'}) {
+	# Migrate spam preferences
+	my $up = &read_file_contents("$homedir/.spamassassin/user_prefs");
+	my $spamdir = "$spam_config_dir/$dom{'id'}";
+	&open_tempfile(SPAMFILE, ">>$spamdir/virtualmin.cf");
+	&print_tempfile(SPAMFILE, $up);
+	&close_tempfile(SPAMFILE);
+	}
+
 # Create mailing lists
 if ($got{'virtualmin-mailman'}) {
 	local $lcount = 0;
