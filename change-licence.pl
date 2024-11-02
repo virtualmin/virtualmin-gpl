@@ -24,6 +24,7 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
+	$main::readonly_mode = 0;
 	$0 = "$pwd/change-licence.pl";
 	require './virtual-server-lib.pl';
 	require './virtualmin-licence.pl';
