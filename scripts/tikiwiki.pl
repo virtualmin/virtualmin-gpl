@@ -163,7 +163,7 @@ return @files;
 
 sub script_tikiwiki_commands
 {
-return ("unzip");
+return ("unzip", "composer");
 }
 
 # script_tikiwiki_install(&domain, version, &opts, &files, &upgrade-info)
