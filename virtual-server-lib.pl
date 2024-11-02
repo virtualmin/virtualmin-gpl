@@ -467,5 +467,37 @@ if ($mysql_module_version =~ /mariadb/i) {
 return $htext;
 }
 
+# check_first_print_lock([html])
+# Returns a warning message if set, but only the first time it prints
+our $check_first_print_lock = sub
+{
+my $html = shift;
+# Read-only mode warning
+if ($main::readonly_mode_cache) {
+	my $get_licence_status = &get_licence_status();
+	my $title = $text{'readonly_mode_warning'};
+	my $msg = $get_licence_status ? 
+		  &text('license_manager_readonly',
+				"@{[&get_webprefix_safe()]}/$module_name".
+					"/pro/licence.cgi") :
+		  $text{'readonly_mode'};
+	if ($html) {
+		return &ui_alert_box($msg, "warn", undef, undef,
+			$title);
+		}
+	else {
+		my $chars = 75;
+		my $astrx = "*" x $chars;
+		my $attrx = "*" x 2;
+		$msg = &html_tags_to_text($msg);
+		$title = "$attrx $title $attrx";
+		my $ptitle = ' ' x (int(($chars - length($title)) / 2)).$title;
+		$title .= ' ' x ($chars - length($ptitle));
+		$msg =~ s/(.{1,$chars})(?:\s+|$)/$1\n/g;
+		return "\n$astrx\n$ptitle\n$msg$astrx\n\n";
+		}
+	}
+};
+
 1;
 

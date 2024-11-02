@@ -4132,6 +4132,16 @@ else {
 }
 
 # Print functions for HTML output
+sub first_html_print
+{
+my $first_print_lock = &first_print_lock(1);
+if ($first_print_lock) {
+	print_and_capture($first_print_lock);
+	exit(100);
+	}
+print_and_capture("<span data-first-print>@_</span>","<br>\n");
+	print bottom_scroll_js();
+}
 
 sub second_html_print
 {
@@ -4154,6 +4164,11 @@ print_and_capture("</ul>\n");
 # Print functions for text output
 sub first_text_print
 {
+my $first_print_lock = &first_print_lock();
+if ($first_print_lock) {
+	print_and_capture($first_print_lock);
+	exit(100);
+	}
 print_and_capture($indent_text,
       (map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n");
 }
@@ -4163,6 +4178,12 @@ sub second_text_print
 print_and_capture($indent_text,
       (map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n\n");
 }
+
+sub first_print_lock
+{
+return $check_first_print_lock->(shift);
+}
+
 sub indent_text_print { $indent_text .= "    "; }
 sub outdent_text_print { $indent_text = substr($indent_text, 4); }
 sub html_tags_to_text
