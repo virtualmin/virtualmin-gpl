@@ -11870,9 +11870,9 @@ foreach my $ls ("$module_root_directory/virtualmin-licence.pl",
 return 0;
 }
 
-# bind_licence_status()
+# get_licence_status()
 # Returns 1 if the licence is bound to a server, 0 if not
-sub bind_licence_status
+sub get_licence_status
 {
 return 0 if (!$virtualmin_pro);
 return 0 if (!-r $licence_status);
