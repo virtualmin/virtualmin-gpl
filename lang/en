@@ -4389,6 +4389,15 @@ licence_manager_change=Change License
 licence_manager_setup=Set Up License
 licence_manager_deregister=Deregister License
 licence_manager_subscription=Manage subscription
+licence_gpl_repos_warning=GPL repos detected. Use "System Settings ⇾ Upgrade to Virtualmin Pro" in UI to upgrade first!
+licence_validating=Validating serial $1 and key $2 ..
+licence_evalidating=.. license cannot be validated
+licence_ecanvalidating=.. license is not valid
+licence_valid_unlim=.. valid for unlimited domains until $1
+licence_valid=.. valid for $1 domains until $2
+licence_updating_repo=Updating Virtualmin repository ..
+licence_no_lines=.. no lines for $1 found!
+licence_updfile=Updating Virtualmin license file ..
 
 config_deftheme=Global Webmin default
 config_oldtheme=Old Webmin theme

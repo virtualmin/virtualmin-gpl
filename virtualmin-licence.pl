@@ -46,9 +46,7 @@ my ($status, $exp, $err, $doms, $server, $hostid);
 # Display a warning to GPL user trying to apply a license instead of
 # properly upgrading. Can be bypassed by using --force-update flag
 if (!$force_update) {
-	my $gpl_repos_warning =
-		"GPL repos detected. Use \"System Settings ⇾ ".
-		"Upgrade to Virtualmin Pro\" in UI to upgrade first!";
+	my $gpl_repos_warning = $text{'licence_gpl_repos_warning'};
 	my $yumrepo = &read_file_lines($virtualmin_yum_repo, 1);
 	my $aptrepo = &read_file_lines($virtualmin_apt_repo, 1);
 	if (($yumrepo && "@{$yumrepo}" =~ /\/gpl\//) ||
@@ -58,23 +56,29 @@ if (!$force_update) {
 	}
 # Validate the new license
 if (!$nocheck) {
-	&$first_print("Validating serial $serial and key $key ..");
+	&$first_print(&text("licence_validating", "<tt>$serial</tt>",
+		"<tt>$key</tt>"));
 	$hostid = &get_licence_hostid();
 	($status, $exp, $err, $doms, $server) =
 		&licence_scheduled($hostid, $serial, $key, &get_vps_type());
 	if ($status) {
 		$err = lcfirst($err);
 		if ($status == 2) {
-			&$second_print(".. license cannot be validated : $err");
+			&$second_print("$text{'licence_evalidating'} : $err");
 			}
 		else {
-			&$second_print(".. license is not valid : $err");
+			&$second_print("$text{'licence_ecanvalidating'} : $err");
 			}
 		return (1, undef);
 		}
 	else {
-		&$second_print(".. valid for ".
-		    ($doms <= 0 ? "unlimited" : $doms)." domains until $exp");
+		my $dcount = ($doms <= 0 ? 0 : $doms);
+		if ($dcount == 0) {
+			&$second_print(&text("licence_valid_unlim", $exp));
+			}
+		else {
+			&$second_print(&text("licence_valid", $dcount, $exp));
+			}
 		}
 	}
 
@@ -83,7 +87,7 @@ if (-r $virtualmin_yum_repo) {
 	my $found = 0;
 	my $lref = &read_file_lines($virtualmin_yum_repo);
 
-	&$first_print("Updating Virtualmin repository ..");
+	&$first_print($text{'licence_updating_repo'});
 	&lock_file($virtualmin_yum_repo);
 	foreach my $l (@$lref) {
 		if (
@@ -105,7 +109,8 @@ if (-r $virtualmin_yum_repo) {
 	if ($found) {
 		&execute_command("yum clean all");
 		}
-	&$second_print($found ? ".. done" : ".. no lines for $upgrade_virtualmin_host found!");
+	&$second_print($found ? $text{'setup_done'} :
+		&text("licence_no_lines", "<tt>$upgrade_virtualmin_host</tt>"));
 	}
 
 # Update Debian repo
@@ -113,7 +118,7 @@ if (-r $virtualmin_apt_repo) {
 	my $found = 0;
 	my $lref = &read_file_lines($virtualmin_apt_repo);
 
-	&$first_print("Updating Virtualmin repository ..");
+	&$first_print($text{'licence_updating_repo'});
 	&lock_file($virtualmin_apt_repo);
 	foreach my $l (@$lref) {
 		if (
@@ -148,7 +153,8 @@ if (-r $virtualmin_apt_repo) {
 	if ($found) {
 		&execute_command("apt-get update");
 		}
-	&$second_print($found ? ".. done" : ".. no lines for $upgrade_virtualmin_host found!");
+	&$second_print($found ? $text{'setup_done'} :
+		&text("licence_no_lines", "<tt>$upgrade_virtualmin_host</tt>"));
 	}
 
 # Update Webmin updates file
@@ -165,11 +171,11 @@ if ($webmin::config{'upsource'} =~ /\Q$upgrade_virtualmin_host\E/) {
 	$webmin::config{'upsource'} = join("\t", @upsource);
 	&webmin::save_module_config();
 	&unlock_file($webmin::module_config_file);
-	&$second_print(".. done");
+	&$second_print($text{'setup_done'});
 	}
 
 # Update Virtualmin licence file
-&$first_print("Updating Virtualmin license file ..");
+&$first_print($text{'licence_updfile'});
 &lock_file($virtualmin_license_file);
 %lfile = ( 'SerialNumber' => $serial,
            'LicenseKey' => $key );
@@ -189,7 +195,7 @@ if (defined($status) && $status == 0) {
 		&write_file($licence_status, \%licence);
 		}
 	}
-&$second_print(".. done");
+&$second_print($text{'setup_done'});
 }
 
 1;
