@@ -8,7 +8,8 @@ require './virtual-server-lib.pl';
 print $text{'upgrade_desc1'},"<br>\n";
 print "<ol>\n";
 print "<li>",&text('upgrade_step1', $config{'serials_link'} ||
-				    "https://virtualmin.com/shop/");
+				    $virtualmin_shop_link,
+				    $text{'license_shop_name'});
 print "<li>",&text('upgrade_step2');
 print "<li>",&text('upgrade_step3');
 print "</ol>\n";

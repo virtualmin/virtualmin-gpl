@@ -6,8 +6,7 @@ $virtualmin_licence_port = 443;
 $virtualmin_licence_prog = "/cgi-bin/vlicence.cgi";
 $virtualmin_licence_ssl = 1;
 $virtualmin_renewal_url = $config{'renewal_url'} ||
-			  "https://virtualmin.com/shop/";
-
+			  $virtualmin_shop_link;
 # licence_scheduled(hostid, [serial, key], [vps-type])
 # Returns a status code (0=OK, 1=Invalid, 2=Down, 3=Expired), the expiry date,
 # an error message, the number of domains max, the number of servers max,

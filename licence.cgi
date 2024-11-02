@@ -47,8 +47,14 @@ if ($status == 0) {
 	}
 else {
 	my ($err1, $err2) = $err =~ /<span>(.*?)<\/span>(.*)/;
-	print &text('licence_goterr',
-		&ui_text_color($err1, 'danger'))."$err2<p>\n";
+	if ($err1 || $err2) {
+		print &text('licence_goterr',
+			&ui_text_color($err1, 'danger'))."$err2<p>\n";
+		}
+	else {
+		print &text('licence_goterr',
+			&ui_text_color($err, 'danger')),"<p>\n";
+		}
 	}
 
 &ui_print_footer("", $text{'index_return'});

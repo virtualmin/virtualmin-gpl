@@ -37,7 +37,7 @@ C<--host> flag followed by a hostname. This is useful for redirecting
 www.domain.com to domain.com, for example.
 
 To set a custom HTTP status code for the redirect, you can use the C<--code>
-flag followed by a number. Otherwise the default code of 301 (temporary
+flag followed by a number. Otherwise the default code of 302 (temporary
 redirect) will be used.
 
 =cut
