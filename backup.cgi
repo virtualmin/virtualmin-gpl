@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 # Do an immediate virtual server backup
-
+$main::readonly_mode = 0;
 require './virtual-server-lib.pl';
 &ReadParse();
 &error_setup($text{'backup_err'});
