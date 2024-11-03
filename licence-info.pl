@@ -45,7 +45,7 @@ while(@ARGV > 0) {
 &read_file($licence_status, \%lstatus);
 print "Serial number: $vserial{'SerialNumber'}\n";
 print "License key: $vserial{'LicenseKey'}\n";
-print "Host ID: @{[&get_licence_hostid()]}\n";
+print "Host ID: ",&get_licence_hostid(),"\n"; 
 print "Expiry date: $lstatus{'expiry'}\n" if ($lstatus{'expiry'});
 
 # Allowed domain counts
