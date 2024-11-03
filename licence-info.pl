@@ -4,13 +4,14 @@
 
 Show license counts for this Virtualmin system.
 
-This command simply outputs the serial number and license key of the current
-Virtualmin system, and the number of virtual servers that exist and are allowed
-by the license.
+This command simply outputs the serial number, license key and host id of the
+current Virtualmin system, and the number of virtual servers that exist and are
+allowed by the license.
 
 =cut
 
 package virtual_server;
+$main::readonly_mode = 0;
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
@@ -44,6 +45,7 @@ while(@ARGV > 0) {
 &read_file($licence_status, \%lstatus);
 print "Serial number: $vserial{'SerialNumber'}\n";
 print "License key: $vserial{'LicenseKey'}\n";
+print "Host ID: @{[&get_licence_hostid()]}\n";
 print "Expiry date: $lstatus{'expiry'}\n" if ($lstatus{'expiry'});
 
 # Allowed domain counts
