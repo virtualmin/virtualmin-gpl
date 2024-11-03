@@ -11879,8 +11879,10 @@ return 0 if (!-r $licence_status);
 my %licence_status;
 &read_file($licence_status, \%licence_status);
 my ($bind, $time) = ($licence_status{'bind'}, $licence_status{'time'});
+my $scale = 1;
+$scale = 3 if ($licence_status{'status'} == 3);
 if ($bind && !$time) {
-	$bind = int(($bind-time())/86400)+$virtualmin_pro;
+	$bind = int(($bind-time())/86400)+$virtualmin_pro/$scale;
 	return 1 if ($bind <= 0);
 	}
 return 0;
@@ -12091,10 +12093,12 @@ if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
 		};
 	}
 if ($status != 0 && !$state) {
+	my $scale = 1;
+	$scale = 3 if ($status == 3);
 	my $alert_text;
 	# Not valid .. show message
 	if ($bind) {
-		my $prd = $virtualmin_pro;
+		my $prd = $virtualmin_pro/$scale;
 		$bind = int(($bind-time())/86400)+$prd;
 		$bind = 0 if ($bind < 0 || $bind > $prd);
 		}
