@@ -5,8 +5,7 @@ require './virtual-server-lib.pl';
 &can_recheck_licence() || &error($text{'licence_ecannot'});
 &read_env_file($virtualmin_license_file, \%serial);
 my $serial = $serial{'SerialNumber'};
-($serial =~ /$virtualmin_gpl/i || $serial eq '1234567') &&
-	&error($text{'upgrade_eserial'});
+$serial =~ /$virtualmin_gpl/i && &error($text{'upgrade_eserial'});
 &ui_print_unbuffered_header(undef, $text{'licence_title'}, "", undef, undef, 1);
 
 print "$text{'licence_doing'}<br>\n";
