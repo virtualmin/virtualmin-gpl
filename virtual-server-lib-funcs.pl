@@ -12081,7 +12081,7 @@ sub list_warning_messages
 {
 return () if (!&master_admin());
 my @rv;
-
+my $wp = &get_webprefix_safe();
 # Get licence expiry date
 local ($status, $expiry, $err, undef, undef, $autorenew, $state, $bind) =
 	&check_licence_expired();
@@ -12121,7 +12121,7 @@ if ($status != 0 && !$state) {
 		$alert_text .= " $text{'licence_renew4'}" if (defined($bind));
 		}
 	if (&can_recheck_licence()) {
-		$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/pro/licence.cgi");
+		$alert_text .= &ui_form_start("$wp/$module_name/pro/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_manager_goto'});
 		$alert_text .= &ui_form_end();
 		}
@@ -12141,7 +12141,7 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 	$alert_text .= " ".&text('licence_renew', $virtualmin_renewal_url,
 			     $text{'license_shop_name'});
 	if (&can_recheck_licence()) {
-		$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/pro/licence.cgi");
+		$alert_text .= &ui_form_start("$wp/$module_name/pro/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_manager_goto'});
 		$alert_text .= &ui_form_end();
 		}
@@ -12156,7 +12156,7 @@ if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
 	$alert_text .= "<b>".&text('licence_ipchanged',
 			   "<tt>$config{'old_defip'}</tt>",
 			   "<tt>$defip</tt>")."</b><p>\n";
-	$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/edit_newips.cgi");
+	$alert_text .= &ui_form_start("$wp/$module_name/edit_newips.cgi");
 	$alert_text .= &ui_hidden("old", $config{'old_defip'});
 	$alert_text .= &ui_hidden("new", $defip);
 	$alert_text .= &ui_hidden("setold", 1);
@@ -12191,10 +12191,10 @@ if ($small) {
 			   $small->{'issuer_o'},
 			   $small->{'issuer_cn'},
 			   )."<p>\n";
-	my $formlink = "@{[&get_webprefix_safe()]}/webmin/edit_ssl.cgi";
+	my $formlink = "$wp/webmin/edit_ssl.cgi";
 	my $domid = &get_domain_by('dom', $small->{'cn'});
 	if ($domid) {
-		$formlink = "@{[&get_webprefix_safe()]}/$module_name/cert_form.cgi?dom=$domid";
+		$formlink = "$wp/$module_name/cert_form.cgi?dom=$domid";
 		}
 	$alert_text .= &ui_form_start($formlink);
 	$alert_text .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
@@ -12217,7 +12217,7 @@ if ($config{'allow_symlinks'} eq '') {
 		$alert_text .= "<b>".&text('licence_fixlinks', scalar(@fixdoms))."<p>".
 		             $text{'licence_fixlinks2'}."</b><p>\n";
 		$alert_text .= &ui_form_start(
-			"@{[&get_webprefix_safe()]}/$module_name/fix_symlinks.cgi");
+			"$wp/$module_name/fix_symlinks.cgi");
 		$alert_text .= &ui_submit($text{'licence_fixlinksok'}, undef);
 		$alert_text .= &ui_submit($text{'licence_fixlinksignore'}, 'ignore');
 		$alert_text .= &ui_form_end();
@@ -12239,7 +12239,7 @@ if ($theme && $current_theme !~ /$recommended_theme/ &&
 	$switch_text .= "<b>".&text('index_themeswitch',
 				    $theme->{'desc'})."</b><p>\n";
 	$switch_text .= &ui_form_start(
-		"@{[&get_webprefix_safe()]}/$module_name/switch_theme.cgi");
+		"$wp/$module_name/switch_theme.cgi");
 	$switch_text .= &ui_submit($text{'index_themeswitchok'});
 	$switch_text .= &ui_submit($text{'index_themeswitchnot'}, "cancel");
 	$switch_text .= &ui_form_end();
@@ -12347,7 +12347,7 @@ if (@expired || @nearly) {
 			$gluechar = "";
 			}
 		$expiry_text .= &text('index_expiryexpired',
-			join($gluechar, map { "<a href=\"@{[&get_webprefix_safe()]}/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @expired));
+			join($gluechar, map { "<a href=\"$wp/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @expired));
 		$exp++;
 		}
 	if (@nearly) {
@@ -12357,7 +12357,7 @@ if (@expired || @nearly) {
 			}
 		my $nl = $exp ? "<br>" : "";
 		$expiry_text .= $nl . &text('index_expirynearly',
-			join($gluechar, map { "<a href=\"@{[&get_webprefix_safe()]}/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @nearly));
+			join($gluechar, map { "<a href=\"$wp/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @nearly));
 		}
 	if (@expired || @nearly) {
 		my @edoms;
@@ -12365,7 +12365,7 @@ if (@expired || @nearly) {
 		push(@edoms, map { $_->{'dom'} } @nearly) if (@nearly);
 		@edoms = &unique(@edoms);
 		my $expiry_form .= &ui_form_start(
-			"@{[&get_webprefix_safe()]}/$module_name/recollect_whois.cgi");
+			"$wp/$module_name/recollect_whois.cgi");
 		$expiry_form .= &ui_hidden("doms", join(" ", @edoms))."\n".
 		$expiry_form .= &ui_submit($text{'index_drefresh'});
 		$expiry_form .= &ui_submit($text{'index_dignore'}, "ignore");
@@ -12388,7 +12388,7 @@ if (&master_admin() && !$config{'mod_php_ok'} && $config{'web'} &&
 	if (!$count) {
 		my $mod_text = &text('index_disable_mod_php')."<p>\n";
 		$mod_text .= &ui_form_start(
-			"@{[&get_webprefix_safe()]}/$module_name/disable_mod_php.cgi");
+			"$wp/$module_name/disable_mod_php.cgi");
 		$mod_text .= &ui_submit($text{'index_disable_mod_phpok'});
 		$mod_text .= &ui_submit($text{'index_themeswitchnot'}, "cancel");
 		$mod_text .= &ui_form_end();
