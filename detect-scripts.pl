@@ -77,7 +77,7 @@ if (@sinfos) {
 		foreach $sinfo (@sinfos) {
 			$script = &get_script($sinfo->{'name'});
 			$opts = $sinfo->{'opts'};
-			print "$sinfo->{'name'}\n";
+			print "$sinfo->{'name'}:\n";
 			print "    Description: ",$script->{'desc'},"\n";
 			print "    Version: $sinfo->{'version'}\n";
 			if ($sinfo->{'url'}) {
