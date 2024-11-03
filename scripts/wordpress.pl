@@ -1414,6 +1414,7 @@ foreach my $wpconfig (@$files) {
 	$wpdir =~ s/\/wp-config.php$//;
 	my $wppath = $wpdir;
 	$wppath =~ s/^\Q$phd\E//;
+	$wppath ||= "/";
 	my $sinfo = {
 		'opts' => {
 			'dir' => $wpdir,

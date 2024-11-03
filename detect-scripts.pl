@@ -112,6 +112,17 @@ if (@sinfos) {
 		}
 	}
 
+if (!$testmode) {
+	foreach my $sinfo (@sinfos) {
+		next if ($sinfo->{'already'});
+		&add_domain_script($d, $sinfo->{'name'}, $sinfo->{'version'},
+				   $sinfo->{'opts'}, $sinfo->{'desc'},
+				   $sinfo->{'url'}, $sinfo->{'user'},
+				   $sinfo->{'pass'});
+		}
+	&virtualmin_api_log(\@OLDARGV, $d);
+	}
+
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
