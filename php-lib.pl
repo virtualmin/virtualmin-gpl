@@ -2545,7 +2545,9 @@ my ($conf) = @_;
 $conf ||= &get_php_fpm_config();
 my $action_mode = $conf->{'init'} ? &init::get_action_mode($conf->{'init'})
 				  : $init::init_mode;
-if ($action_mode eq "systemd") {
+my $listen = &get_php_fpm_pool_config_value($conf, "listen");
+if ($action_mode eq "systemd" &&
+    ($listen !~ /^\// || -e $listen)) {
 	&$first_print(&text('php_fpmreload', $conf->{'shortversion'}));
 	}
 else {
