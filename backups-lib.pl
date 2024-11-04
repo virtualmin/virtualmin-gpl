@@ -6710,7 +6710,7 @@ my %hash = %$sched;
 $hash{'pid'} = $$;
 $hash{'scripttype'} = $main::webmin_script_type;
 $hash{'started'} = time();
-if ($main::webmin_script_type eq 'cgi') {
+if ($main::webmin_script_type eq 'web') {
 	$hash{'webminuser'} = $remote_user;
 	}
 &write_file($file, \%hash);
