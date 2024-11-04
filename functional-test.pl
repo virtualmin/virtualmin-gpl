@@ -1741,6 +1741,13 @@ $script_tests = [
 	  'antigrep' => 'partially complete',
 	},
 
+	# Check that it was registered
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'name-only' ] ],
+	  'grep' => 'sugarcrm',
+	},
+
 	# Check that it works
 	{ 'command' => $wget_command.'http://'.$test_domain.'/',
 	  'grep' => 'SugarCRM|modules/Users/login.css',
@@ -1750,6 +1757,13 @@ $script_tests = [
 	{ 'command' => 'delete-script.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'type', 'sugarcrm' ] ],
+	},
+
+	# Check that it's gone
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'name-only' ] ],
+	  'antigrep' => 'sugarcrm',
 	},
 
 	# Upgrade PHP version on the domain if possible
@@ -1850,6 +1864,46 @@ $script_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
 	  'antigrep' => '^'.$test_domain_db.'_wp',
+	},
+
+	# Install Wordpress
+	{ 'command' => 'install-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'wordpress' ],
+		      [ 'path', '/wordpress' ],
+		      [ 'db', 'mysql '.$test_domain_db ],
+		      [ 'version', 'latest' ] ],
+	  'antigrep' => 'partially complete',
+	},
+
+	# Re-register it
+	{ 'command' => 'delete-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'wordpress' ],
+		      [ 'deregister' ], ],
+	},
+
+	# Check that it's gone
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'name-only' ] ],
+	  'antigrep' => 'wordpress',
+	},
+
+	# Re-detect it
+	{ 'command' => 'detect-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'wordpress:', 'Newly detected' ],
+	},
+
+	# Check that it's back
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Type: wordpress',
+		      'Database: '.$test_domain_db.' ',
+		    ],
 	},
 
 	# Cleanup the domain
