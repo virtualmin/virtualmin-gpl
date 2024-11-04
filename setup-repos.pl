@@ -19,7 +19,6 @@ valid, the error will be returned, unless the C<--no-check> param is given.
 package virtual_server;
 if (!$module_name) {
 	$main::no_acl_check++;
-	$main::readonly_mode = 0;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
 	$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
 	if ($0 =~ /^(.*)\/[^\/]+$/) {

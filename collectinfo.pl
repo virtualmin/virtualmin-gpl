@@ -4,7 +4,7 @@
 
 package virtual_server;
 $main::no_acl_check++;
-$main::readonly_mode = 0;
+
 require './virtual-server-lib.pl';
 $start = time();
 

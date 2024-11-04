@@ -138,8 +138,6 @@ $validate_cron_cmd = "$module_config_directory/validate.pl";
 		       $validate_cron_cmd, );
 
 $licence_status = &cache_file_path("licence-status");
-$main::readonly_mode_cache = 1
-	if (!defined($main::readonly_mode) && &get_licence_status());
 
 $custom_fields_file = "$module_config_directory/custom-fields";
 $custom_links_file = "$module_config_directory/custom-links";
@@ -471,15 +469,11 @@ return $htext;
 our $check_first_print_lock = sub
 {
 my $html = shift;
-# Read-only mode warning
-if ($main::readonly_mode_cache) {
-	my $get_licence_status = &get_licence_status();
+my $wp = &get_webprefix_safe();
+if (&get_licence_status()) {
 	my $title = $text{'readonly_mode_warning'};
-	my $msg = $get_licence_status ? 
-		  &text('license_manager_readonly',
-				"@{[&get_webprefix_safe()]}/$module_name".
-					"/pro/licence.cgi") :
-		  $text{'readonly_mode'};
+	my $msg = &text('license_manager_readonly',
+			"$wp/$module_name/pro/licence.cgi");
 	if ($html) {
 		return &ui_alert_box($msg, "warn", undef, undef,
 			$title);
