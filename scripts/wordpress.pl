@@ -79,7 +79,10 @@ return 12; # zip extension has to be installed
 sub script_wordpress_php_fullver
 {
 my ($d, $ver, $sinfo) = @_;
-if (&compare_versions($ver, "6.3") >= 0) {
+if (&compare_versions($ver, "6.6") >= 0) {
+	return "7.2";
+	}
+elsif (&compare_versions($ver, "6.3") >= 0) {
 	return "7.0.0";
 	}
 else {
