@@ -930,7 +930,7 @@ else {
 	&save_php_fpm_config_value($d, "pm.start_servers", &get_php_start_servers($php_max_children));
 	&save_php_fpm_config_value($d, "pm.max_spare_servers", &get_php_max_spare_servers($php_max_children));
 	}
-&register_post_action(\&restart_php_fpm_server, $conf);
+&register_post_action(\&restart_php_fpm_server, $conf, $d->{'id'});
 }
 
 # supported_php_modes([&domain])
@@ -1725,7 +1725,7 @@ elsif ($mode eq "fpm") {
 		}
 	&flush_file_lines($file);
 	&unlock_file($file);
-	&register_post_action(\&restart_php_fpm_server, $conf);
+	&register_post_action(\&restart_php_fpm_server, $conf, $d->{'id'});
 	return 1;
 	}
 else {
@@ -2375,7 +2375,7 @@ if ($socket =~ /^\//) {
 	&save_php_fpm_config_value($d, "listen.owner", $d->{'user'});
 	&save_php_fpm_config_value($d, "listen.group", $d->{'ugroup'});
 	}
-&register_post_action(\&restart_php_fpm_server, $conf);
+&register_post_action(\&restart_php_fpm_server, $conf, $d->{'id'});
 &register_post_action(\&restart_apache);
 
 return undef;
@@ -2508,7 +2508,7 @@ if ($port =~ /^\// && !-e $port) {
 	close(TOUCH);
 	&set_ownership_permissions($d->{'user'}, $d->{'ugroup'}, 0660, $port);
 	}
-&register_post_action(\&restart_php_fpm_server, $conf);
+&register_post_action(\&restart_php_fpm_server, $conf, $d->{'id'});
 return undef;
 }
 
@@ -2530,24 +2530,26 @@ foreach my $conf (@fpms) {
 				my $sock = &get_php_fpm_socket_file($d, 1);
 				&unlink_logged($sock) if (-r $sock);
 				&register_post_action(
-					\&restart_php_fpm_server, $conf);
+					\&restart_php_fpm_server, $conf, $d->{'id'});
 				}
 			}
 		}
 	}
 }
 
-# restart_php_fpm_server([&config])
+# restart_php_fpm_server([&config, domain-id])
 # Post-action script to reload or restart the server
 sub restart_php_fpm_server
 {
-my ($conf) = @_;
+my ($conf, $id) = @_;
 $conf ||= &get_php_fpm_config();
 my $action_mode = $conf->{'init'} ? &init::get_action_mode($conf->{'init'})
 				  : $init::init_mode;
-my $listen = &get_php_fpm_pool_config_value($conf, "listen");
-if ($action_mode eq "systemd" &&
-    ($listen !~ /^\// || -e $listen)) {
+my $listen = $id ? &get_php_fpm_pool_config_value($conf, $id, "listen")
+		 : undef;
+my $reload = $action_mode eq "systemd" &&
+	     ($listen !~ /^\// || -e $listen);
+if ($reload) {
 	&$first_print(&text('php_fpmreload', $conf->{'shortversion'}));
 	}
 else {
@@ -2555,8 +2557,14 @@ else {
 	}
 if ($conf->{'init'}) {
 	&foreign_require("init");
-	my ($ok, $err) = &init::reload_action($conf->{'init'});
-	if (!$ok && $err =~ /Not\s+implemented/i) {
+	my ($ok, $err);
+	if ($reload) {
+		($ok, $err) = &init::reload_action($conf->{'init'});
+		if (!$ok && $err =~ /Not\s+implemented/i) {
+			($ok, $err) = &init::restart_action($conf->{'init'});
+			}
+		}
+	else {
 		($ok, $err) = &init::restart_action($conf->{'init'});
 		}
 	if ($ok) {
@@ -2708,7 +2716,7 @@ elsif ($found < 0 && defined($value)) {
 	}
 &flush_file_lines($file);
 &unlock_file($file);
-&register_post_action(\&restart_php_fpm_server, $conf);
+&register_post_action(\&restart_php_fpm_server, $conf, $id);
 return 1;
 }
 
@@ -2934,7 +2942,7 @@ if ($p eq "web") {
 		}
 	elsif ($mode eq "fpm") {
 		my $conf = &get_php_fpm_config($d);
-		&register_post_action(\&restart_php_fpm_server, $conf);
+		&register_post_action(\&restart_php_fpm_server, $conf, $d->{'id'});
 		}
 	}
 else {
