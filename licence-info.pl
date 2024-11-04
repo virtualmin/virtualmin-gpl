@@ -11,6 +11,7 @@ allowed by the license.
 =cut
 
 package virtual_server;
+$main::virtualmin_essential++;
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";

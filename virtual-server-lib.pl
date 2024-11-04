@@ -138,6 +138,7 @@ $validate_cron_cmd = "$module_config_directory/validate.pl";
 		       $validate_cron_cmd, );
 
 $licence_status = &cache_file_path("licence-status");
+&licence_status();
 
 $custom_fields_file = "$module_config_directory/custom-fields";
 $custom_links_file = "$module_config_directory/custom-links";
@@ -463,34 +464,6 @@ if ($mysql_module_version =~ /mariadb/i) {
 	}
 return $htext;
 }
-
-# check_first_print_lock([html])
-# Returns a warning message if set, but only the first time it prints
-our $check_first_print_lock = sub
-{
-my $html = shift;
-my $wp = &get_webprefix_safe();
-if (&get_licence_status()) {
-	my $title = $text{'readonly_mode_warning'};
-	my $msg = &text('license_manager_readonly',
-			"$wp/$module_name/pro/licence.cgi");
-	if ($html) {
-		return &ui_alert_box($msg, "warn", undef, undef,
-			$title);
-		}
-	else {
-		my $chars = 75;
-		my $astrx = "*" x $chars;
-		my $attrx = "*" x 2;
-		$msg = &html_tags_to_text($msg);
-		$title = "$attrx $title $attrx";
-		my $ptitle = ' ' x (int(($chars - length($title)) / 2)).$title;
-		$title .= ' ' x ($chars - length($ptitle));
-		$msg =~ s/(.{1,$chars})(?:\s+|$)/$1\n/g;
-		return "\n$astrx\n$ptitle\n$msg$astrx\n\n";
-		}
-	}
-};
 
 1;
 

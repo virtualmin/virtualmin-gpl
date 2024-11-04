@@ -4134,11 +4134,7 @@ else {
 # Print functions for HTML output
 sub first_html_print
 {
-my $first_print_lock = &first_print_lock(1);
-if ($first_print_lock) {
-	print_and_capture($first_print_lock);
-	exit(100);
-	}
+&pre_first_print() if (defined(&pre_first_print));
 print_and_capture("<span data-first-print>@_</span>","<br>\n");
 	print bottom_scroll_js();
 }
@@ -4164,11 +4160,7 @@ print_and_capture("</ul>\n");
 # Print functions for text output
 sub first_text_print
 {
-my $first_print_lock = &first_print_lock();
-if ($first_print_lock) {
-	print_and_capture($first_print_lock);
-	exit(100);
-	}
+&pre_first_print() if (defined(&pre_first_print));
 print_and_capture($indent_text,
       (map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n");
 }
@@ -4177,11 +4169,6 @@ sub second_text_print
 {
 print_and_capture($indent_text,
       (map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n\n");
-}
-
-sub first_print_lock
-{
-return $check_first_print_lock->(shift);
 }
 
 sub indent_text_print { $indent_text .= "    "; }
@@ -11870,22 +11857,46 @@ foreach my $ls ("$module_root_directory/virtualmin-licence.pl",
 return 0;
 }
 
-# get_licence_status()
+# licence_status()
 # Returns 1 if the licence is bound to a server, 0 if not
-sub get_licence_status
+sub licence_status
 {
-return 0 if (!$virtualmin_pro);
-return 0 if (!-r $licence_status);
+return if (!$virtualmin_pro);
+return if (!-r $licence_status);
 my %licence_status;
 &read_file($licence_status, \%licence_status);
 my ($bind, $time) = ($licence_status{'bind'}, $licence_status{'time'});
 my $scale = 1;
 $scale = 3 if ($licence_status{'status'} == 3);
-if ($bind && !$time) {
-	$bind = int(($bind-time())/86400)+$virtualmin_pro/$scale;
-	return 1 if ($bind <= 0);
+if (!defined($main::virtualmin_essential) &&
+    $main::webmin_script_type ne 'cron' && !$time && $bind &&
+    int(($bind-time())/86400)+($virtualmin_pro/$scale) <= 0) {
+	my $title = $text{'readonly_mode_warning'};
+	my $body = &text("license_manager_readonly", &get_webprefix_safe().
+				"/$module_name/pro/licence.cgi");
+	*pre_first_print = sub {
+		my $message;
+		if ($main::webmin_script_type eq 'web') {
+			$message = &ui_alert_box(
+				$body, "warn", undef, undef, $title);
+			}
+		else {
+			my $chars = 75;
+			my $astrx = "*" x $chars;
+			my $attrx = "*" x 2;
+			$body = &html_tags_to_text($body);
+			$title = "$attrx $title $attrx";
+			my $ptitle = ' ' x (int(($chars - length($title)) / 2)).
+				$title;
+			$title .= ' ' x ($chars - length($ptitle));
+			$body =~ s/(.{1,$chars})(?:\s+|$)/$1\n/g;
+			$message = "\n$astrx\n$ptitle\n$body$astrx\n\n";
+			}
+		print_and_capture($message);
+		exit(100);
+		};
 	}
-return 0;
+return;
 }
 
 # setup_licence_cron()
