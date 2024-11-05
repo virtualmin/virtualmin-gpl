@@ -11869,8 +11869,7 @@ my %licence_status;
 my ($bind, $time) = ($licence_status{'bind'}, $licence_status{'time'});
 my $scale = 1;
 $scale = 3 if ($licence_status{'status'} == 3);
-if (!defined($main::virtualmin_essential) &&
-    $main::webmin_script_type ne 'cron' && !$time && $bind &&
+if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
     int(($bind-time())/86400)+($virtualmin_pro/$scale) <= 0) {
 	my $title = $text{'readonly_mode_warning'};
 	my $body = &text("license_manager_readonly", &get_webprefix_safe().

@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 # Force a re-check of the licence
-$main::virtualmin_essential++;
+
 require './virtual-server-lib.pl';
 &can_recheck_licence() || &error($text{'licence_ecannot'});
 &read_env_file($virtualmin_license_file, \%serial);

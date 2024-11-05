@@ -85,7 +85,6 @@ C<tar> or C<zip>.
 package virtual_server;
 if (!$module_name) {
 	$main::no_acl_check++;
-	$main::virtualmin_essential++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
 	$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
 	if ($0 =~ /^(.*)\/[^\/]+$/) {
