@@ -61,8 +61,10 @@ if (!$require_useradmin++) {
 		    $ldap_useradmin::config{'md5'} == 4) {
 			$cannot_rehash_password = 1;
 			}
+		$making_changes->('ldap-useradmin');
 		}
 	else {
+		$making_changes->('useradmin');
 		$usermodule = "useradmin";
 		}
 	}

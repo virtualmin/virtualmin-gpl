@@ -371,6 +371,32 @@ $quota_cache_dir = "$module_var_directory/quota-cache";
 
 $acme_providers_dir = "$module_config_directory/acme";
 
+# $making_changes->(module)
+# Injects code into the original making_changes subroutine of a module
+$making_changes = sub
+{
+my ($module) = @_;
+my $module_making_changes = "${module}::making_changes";
+# Backup the original subroutine
+*{"${module}_making_changes"} = \&{$module_making_changes};
+# Redefine module's original subroutine with the injection logic
+*{$module_making_changes} = sub {
+	my $pre_making_changes;
+	$pre_making_changes = &pre_making_changes()
+		if (defined(&pre_making_changes));
+	if ($pre_making_changes) {
+		if ($main::webmin_script_type eq 'cmd') {
+			&usage($pre_making_changes);
+			}
+		elsif ($main::webmin_script_type eq 'web') {
+			&error($pre_making_changes);
+			}
+		}
+	# Call the modified subroutine, including the original logic
+	&{"${module}_making_changes"}();
+	};
+};
+
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config
 # or given space-separated string.
