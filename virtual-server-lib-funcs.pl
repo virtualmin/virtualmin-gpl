@@ -4134,7 +4134,6 @@ else {
 # Print functions for HTML output
 sub first_html_print
 {
-&pre_first_print() if (defined(&pre_first_print));
 print_and_capture("<span data-first-print>@_</span>","<br>\n");
 	print bottom_scroll_js();
 }
@@ -4160,7 +4159,6 @@ print_and_capture("</ul>\n");
 # Print functions for text output
 sub first_text_print
 {
-&pre_first_print() if (defined(&pre_first_print));
 print_and_capture($indent_text,
       (map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n");
 }
@@ -5060,6 +5058,7 @@ foreach my $e (keys %ENV) {
 # pre-change command
 sub making_changes
 {
+return &pre_making_changes() if (defined(&pre_making_changes));
 if ($config{'pre_command'} =~ /\S/) {
 	&clean_changes_environment();
 	local $out = &backquote_logged(
@@ -11874,13 +11873,9 @@ if (!defined($main::virtualmin_essential) &&
 	my $title = $text{'readonly_mode_warning'};
 	my $body = &text("license_manager_readonly", &get_webprefix_safe().
 				"/$module_name/pro/licence.cgi");
-	*pre_first_print = sub {
-		my $message;
-		if ($main::webmin_script_type eq 'web') {
-			$message = &ui_alert_box(
-				$body, "warn", undef, undef, $title);
-			}
-		else {
+	*pre_making_changes = sub {
+		my $message = $body;
+		if ($main::webmin_script_type eq 'cmd') {
 			my $chars = 75;
 			my $astrx = "*" x $chars;
 			my $attrx = "*" x 2;
@@ -11892,8 +11887,7 @@ if (!defined($main::virtualmin_essential) &&
 			$body =~ s/(.{1,$chars})(?:\s+|$)/$1\n/g;
 			$message = "\n$astrx\n$ptitle\n$body$astrx\n\n";
 			}
-		print_and_capture($message);
-		exit(100);
+		return $message;
 		};
 	}
 return;
