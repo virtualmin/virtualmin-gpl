@@ -360,6 +360,14 @@ if ($in{'confirm'}) {
 	&unlock_domain_name($in{'dom'});
 	&run_post_actions();
 
+	# Detect any scripts
+	foreach my $sinfo (&detect_installed_scripts(\%dom)) {
+		&add_domain_script(\%dom, $sinfo->{'name'}, $sinfo->{'version'},
+				   $sinfo->{'opts'}, $sinfo->{'desc'},
+				   $sinfo->{'url'}, $sinfo->{'user'},
+				   $sinfo->{'pass'});
+		}
+
 	# Call any theme post command
 	if (defined(&theme_post_save_domain)) {
 		&theme_post_save_domain(\%dom, 'create');
