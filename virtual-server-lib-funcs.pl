@@ -57,15 +57,15 @@ if (!$require_useradmin++) {
 		&foreign_require("ldap-useradmin");
 		%luconfig = &foreign_config("ldap-useradmin");
 		$usermodule = "ldap-useradmin";
+		$making_changes->('ldap-useradmin');
 		if ($ldap_useradmin::config{'md5'} == 3 ||
 		    $ldap_useradmin::config{'md5'} == 4) {
 			$cannot_rehash_password = 1;
 			}
-		$making_changes->('ldap-useradmin');
 		}
 	else {
-		$making_changes->('useradmin');
 		$usermodule = "useradmin";
+		$making_changes->('useradmin');
 		}
 	}
 if (!&has_quota_commands() && !$_[0] && !$require_useradmin_quota++) {
