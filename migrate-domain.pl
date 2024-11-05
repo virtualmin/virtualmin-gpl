@@ -289,6 +289,16 @@ foreach my $d (@doms) {
 	&fix_script_htaccess_files($d, &public_html_dir($d));
 	}
 
+# Detect migrated scripts
+foreach my $d (@doms) {
+	foreach my $sinfo (&detect_installed_scripts($d)) {
+		&add_domain_script($d, $sinfo->{'name'}, $sinfo->{'version'},
+				   $sinfo->{'opts'}, $sinfo->{'desc'},
+				   $sinfo->{'url'}, $sinfo->{'user'},
+				   $sinfo->{'pass'});
+		}
+	}
+
 # Show the result
 if (@doms) {
 	print "The following servers were successfully migrated : ",join(" ", map { $_->{'dom'} } @doms),"\n";
