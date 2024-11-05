@@ -11887,6 +11887,8 @@ if (!defined($main::virtualmin_essential) &&
 			$body =~ s/(.{1,$chars})(?:\s+|$)/$1\n/g;
 			$message = "\n$astrx\n$ptitle\n$body$astrx\n\n";
 			}
+		$text{'setup_emaking'} = "\$1";
+		$text{'save_emaking'} = "$title : \$1";
 		return $message;
 		};
 	}
