@@ -19,13 +19,14 @@ local ($out, $error, $regerr);
 local @doms = grep { !$_->{'alias'} } &list_domains();
 &read_env_file($virtualmin_license_file, \%serial);
 $key ||= $serial{'LicenseKey'};
+$serial ||= $serial{'SerialNumber'};
 &http_download($virtualmin_licence_host,
 	       $virtualmin_licence_port,
 	       "$virtualmin_licence_prog?id=$hostid&".
 		"serial=$key&doms=".scalar(@doms)."&vps=$vps",
 	       \$out, \$error, undef, $virtualmin_licence_ssl,
 	       undef, undef, 10, 0, 1);
-return (2, undef, "$text{'licence_efailed'} : $error") if ($error);
+return (2, undef, "$text{'licence_efailed'} : @{[lcfirst($error)]}") if ($error);
 return $out =~ /^EXP\s+(?<exp>\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\d+)(?:\s+([\w])(?:\s+(\d+))?)?)?/ ?
 	(3, "$+{exp}", &text("licence_eexp", "$+{exp}"), $2, $3, $4, $5, $6, $7) :
        $out =~ /^ERR\s+(?<err>.*)/ && ($regerr = $+{err}) &&
@@ -33,8 +34,7 @@ return $out =~ /^EXP\s+(?<exp>\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\d+)(?:\s+([\w]
 	(2, undef, "$text{'licence_echk'} : $regerr", undef) :
        $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\d+)(?:\s+([\w])(?:\s+(\d+))?)?)?/ ?
 	(0, $1, undef, $2, $3, $4, $5, $6, $7) :
-	(1, undef, &text("licence_evalid",
-		   	 "<tt data-evalid>$serial{'SerialNumber'}</tt>"));
+	(1, undef, &text("licence_evalid", "<tt data-evalid>$serial</tt>"));
 }
 
 # Change license with a new serial and key
@@ -56,8 +56,7 @@ if (!$force_update) {
 	}
 # Validate the new license
 if (!$nocheck) {
-	&$first_print(&text("licence_validating", "<tt>$serial</tt>",
-		"<tt>$key</tt>"));
+	&$first_print(&text("licence_validating", "<tt>$key</tt>"));
 	$hostid = &get_licence_hostid();
 	($status, $exp, $err, $doms, $server) =
 		&licence_scheduled($hostid, $serial, $key, &get_vps_type());

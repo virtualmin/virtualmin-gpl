@@ -4392,7 +4392,7 @@ licence_manager_subscription=Manage subscription
 licence_manager_support=Contact support
 licence_manager_support_link=The grace period has ended; if you are sure your license is used on this server only, please reach out to <a href='$1' target=_blank>Virtualmin Support</a>, who would provide immediate assistance, or alternatively, it will unlock automatically within 48 hours
 licence_gpl_repos_warning=GPL repos detected. Use "System Settings ⇾ Upgrade to Virtualmin Pro" in UI to upgrade first!
-licence_validating=Validating serial $1 and key $2 ..
+licence_validating=Validating new license key $1 ..
 licence_evalidating=.. license cannot be validated
 licence_ecanvalidating=.. license is not valid
 licence_valid_unlim=.. valid for unlimited domains until $1
