@@ -5047,7 +5047,7 @@ foreach my $e (keys %ENV) {
 # pre-change command
 sub making_changes
 {
-return &pre_making_changes() if (defined(&pre_making_changes));
+&pre_making_changes();
 if ($config{'pre_command'} =~ /\S/) {
 	&clean_changes_environment();
 	local $out = &backquote_logged(
@@ -11857,7 +11857,7 @@ if ($virtualmin_pro && -r $licence_status) {
 	my $scale = 1;
 	$scale = 3 if ($licence_status{'status'} == 3);
 	if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
-	int(($bind-time())/86400)+($virtualmin_pro/$scale) <= 0) {
+	    int(($bind-time())/86400)+($virtualmin_pro/$scale) <= 0) {
 		my $title = $text{'readonly_mode_warning'};
 		my $body = &text("license_manager_readonly", &get_webprefix_safe().
 					"/$module_name/pro/licence.cgi");
