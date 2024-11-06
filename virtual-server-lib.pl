@@ -371,31 +371,47 @@ $quota_cache_dir = "$module_var_directory/quota-cache";
 
 $acme_providers_dir = "$module_config_directory/acme";
 
-# $making_changes->(module)
-# Injects code into the original making_changes subroutine of a module
-$making_changes = sub
+=pod
+=head2 mod_function($module, $func_name, $pre_func, $post_func)
+
+Modifies a module function to add pre and post processing hooks.
+
+@param module - Module name containing the function to modify
+@param func_name - Name of the function to modify 
+@param pre_func - Optional name of function to call before main function
+@param post_func - Optional name of function to call after main function
+
+Pre-function can return a value to skip main function execution.
+Post-function receives main function's result as first parameter.
+
+=cut
+
+sub mod_function
 {
-my ($module) = @_;
-my $module_making_changes = "${module}::making_changes";
-# Backup the original subroutine
-*{"${module}_making_changes"} = \&{$module_making_changes};
-# Redefine module's original subroutine with the injection logic
-*{$module_making_changes} = sub {
-	my $pre_making_changes;
-	$pre_making_changes = &pre_making_changes()
-		if (defined(&pre_making_changes));
-	if ($pre_making_changes) {
-		if ($main::webmin_script_type eq 'cmd') {
-			&usage($pre_making_changes);
-			}
-		elsif ($main::webmin_script_type eq 'web') {
-			&error($pre_making_changes);
-			}
+my ($mod, $func, $pre_func, $post_func) = @_;
+my $mod_func = "${mod}::${func}";
+my $orig_func = \&{$mod_func};
+*{$mod_func} = sub {
+	# Pre-hook if defined
+	my $pre_result;
+	if ($pre_func && defined(&$pre_func)) {
+		$pre_result = &$pre_func(@_);
+		return $pre_result if ($pre_result);
 		}
-	# Call the modified subroutine, including the original logic
-	&{"${module}_making_changes"}();
+
+	# Call original function
+	my $result = &$orig_func(@_);
+
+	# Post-hook if defined
+	if ($post_func && defined(&$post_func)) {
+		my $post_result = &$post_func($result, @_);
+		return $post_result if (defined($post_result));
+		}
+
+	# Return original function result
+	return $result;
 	};
-};
+}
 
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config

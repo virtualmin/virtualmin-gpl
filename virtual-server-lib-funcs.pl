@@ -57,7 +57,8 @@ if (!$require_useradmin++) {
 		&foreign_require("ldap-useradmin");
 		%luconfig = &foreign_config("ldap-useradmin");
 		$usermodule = "ldap-useradmin";
-		$making_changes->('ldap-useradmin');
+		&mod_function('ldap-useradmin', 'making_changes',
+			      \&pre_making_changes);
 		if ($ldap_useradmin::config{'md5'} == 3 ||
 		    $ldap_useradmin::config{'md5'} == 4) {
 			$cannot_rehash_password = 1;
@@ -65,7 +66,8 @@ if (!$require_useradmin++) {
 		}
 	else {
 		$usermodule = "useradmin";
-		$making_changes->('useradmin');
+		&mod_function('useradmin', 'making_changes',
+			      \&pre_making_changes);
 		}
 	}
 if (!&has_quota_commands() && !$_[0] && !$require_useradmin_quota++) {
@@ -11872,10 +11874,11 @@ if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
 			$title .= ' ' x ($chars - length($ptitle));
 			$body =~ s/(.{1,$chars})(?:\s+|$)/$1\n/g;
 			$message = "\n$astrx\n$ptitle\n$body$astrx\n\n";
+			&usage($message);
 			}
-		$text{'setup_emaking'} = "\$1";
-		$text{'save_emaking'} = "$title : \$1";
-		return $message;
+		elsif ($main::webmin_script_type eq 'web') {
+			&error($message);
+			}
 		};
 	}
 return;
