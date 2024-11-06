@@ -3343,9 +3343,9 @@ sub can_edit_exclude
 return !$access{'admin'} && &can_backup_domain();
 }
 
-# can_edit_spf(&domain)
+# can_edit_dns(&domain)
 # Allow master admin, resellers, domain owners with DNS options permissions
-sub can_edit_spf
+sub can_edit_dns
 {
 local ($d) = @_;
 return &master_admin() || &reseller_admin() || $access{'edit_spf'};
@@ -13576,8 +13576,8 @@ if (&domain_has_website($d) && !$d->{'alias'}) {
 	}
 
 if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} &&
-    &can_edit_spf($d)) {
-	# SPF settings button
+    &can_edit_dns($d)) {
+	# DNS settings button
 	push(@rv, { 'page' => 'edit_spf.cgi',
 		    'title' => $text{'edit_spf'},
 		    'desc' => $text{'edit_spfdesc'},
