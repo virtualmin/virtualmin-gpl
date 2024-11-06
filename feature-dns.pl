@@ -73,7 +73,7 @@ my $recserr;
 eval {
 	local $bind8::config{'auto_chroot'} = undef;
 	local $bind8::config{'chroot'} = undef;
-	if ($d->{'alias'}) {
+	if ($d->{'alias'} && !$d->{'aliasdns'}) {
 		$recserr = &create_alias_records($recs, $recstemp, $d, $ip);
 		}
 	else {
@@ -4206,7 +4206,8 @@ elsif ($d->{'dns_remote'}) {
 
 # If this domain has aliases, re-create their DNS records too
 if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
-	local @aliases = grep { $_->{'dns'} && !$_->{'dns_submode'} }
+	local @aliases = grep { $_->{'dns'} && !$_->{'dns_submode'} &&
+				!$_->{'aliasdns'} }
 			      &get_domain_by("alias", $d->{'id'});
 	foreach my $ad (@aliases) {
 		&obtain_lock_dns($ad);
@@ -4342,7 +4343,7 @@ return 1;
 sub copy_alias_records
 {
 my ($d) = @_;
-if ($d->{'alias'}) {
+if ($d->{'alias'} && !$d->{'aliasdns'}) {
 	local $target = &get_domain($d->{'alias'});
 	if ($target && !$target->{'subdom'} &&
 	    !$target->{'dns_submode'}) {
@@ -5581,7 +5582,7 @@ return $c && $c->{'defttl'};
 sub check_reset_dns
 {
 my ($d) = @_;
-return undef if ($d->{'alias'});
+return undef if ($d->{'alias'} && !$d->{'aliasdns'});
 
 # Get the default set of records
 my $temp = &transname();

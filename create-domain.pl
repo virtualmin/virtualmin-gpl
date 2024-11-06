@@ -40,7 +40,9 @@ To create an alias of an existing virtual server, use the --alias option,
 followed by the domain name of the target server. For alias servers, the
 --pass , --unix , --webmin , --dir and --quota options are not needed.
 A variation is the --alias-with-mail option, which creates an alias virtual
-server that can still have mailboxes and email aliases.
+server that can still have mailboxes and email aliases. Or you can use
+C<--alias-with-dns> to create an alias that has it's own independently editable
+DNS records.
 
 To create a sub-domain, use the C<--subdom> flag followed by the parent
 domain, which the domain being created must be under. The optional
@@ -328,10 +330,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--parent") {
 		$parentdomain = lc(shift(@ARGV));
 		}
-	elsif ($a eq "--alias" || $a eq "--alias-with-mail") {
+	elsif ($a eq "--alias" || $a eq "--alias-with-mail" ||
+	       $a eq "--alias-with-dns") {
 		$aliasdomain = $parentdomain = lc(shift(@ARGV));
 		if ($a eq "--alias-with-mail") {
 			$aliasmail = 1;
+			}
+		if ($a eq "--alias-with-dns") {
+			$aliasdns = 1;
 			}
 		}
 	elsif ($a eq "--subdom" || $a eq "--superdom") {
@@ -877,6 +883,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 		     'uquota', $uquota ),
 	 'alias', $alias ? $alias->{'id'} : undef,
 	 'aliasmail', $aliasmail,
+	 'aliasdns', $aliasdns,
 	 'subdom', $subdom ? $subdom->{'id'} : undef,
 	 'source', 'create-domain.pl',
 	 'template', $template,
@@ -1073,6 +1080,7 @@ print "                         --passfile password-file\n";
 print "                        [--hashpass]\n";
 print "                        [--parent domain.name | --alias domain.name |\n";
 print "                         --alias-with-mail domain.name |\n";
+print "                         --alias-with-dns domain.name |\n";
 print "                         --superdom domain.name]\n";
 print "                        [--desc description-for-domain]\n";
 print "                        [--email contact-email]\n";
