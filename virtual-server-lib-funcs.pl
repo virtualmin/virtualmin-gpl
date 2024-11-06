@@ -5069,7 +5069,7 @@ if ($virtualmin_pro && -r $licence_status) {
 	my $scale = 1;
 	$scale = 3 if ($licence_status{'status'} == 3);
 	if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
-	    int(($bind-time())/86400)+(sqrt(441)/$scale) <= 0) {
+	    int(($bind-time())/86400)+(21/$scale) <= 0) {
 		my $title = $text{'licence'.'_'.'expired'};
 		my $body = &text('licence'.'_'.'expired'.'_'.'desc',
 			&get_webprefix_safe()."/$module_name/pro/licence.cgi");
@@ -12088,7 +12088,7 @@ if ($status != 0 && !$state) {
 	my $alert_text;
 	# Not valid .. show message
 	if ($bind) {
-		my $prd = sqrt(441)/$scale;
+		my $prd = 21/$scale;
 		$bind = int(($bind-time())/86400)+$prd;
 		$bind = 0 if ($bind < 0 || $bind > $prd);
 		}
