@@ -8,6 +8,7 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
+&copy_alias_records($d) && &error($text{'records_ecannot2'});
 &can_manual_dns() || &error($text{'mrecords_ecannot'});
 $in{'data'} =~ s/\r//g;
 $in{'data'} =~ /\S/ || &error($text{'mrecords_enone'});

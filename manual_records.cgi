@@ -9,6 +9,7 @@ $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_manual_dns() || &error($text{'mrecords_ecannot'});
+&copy_alias_records($d) && &error($text{'records_ecannot2'});
 
 # Get the zone and records
 ($recs, $file) = &get_domain_dns_records_and_file($d);
