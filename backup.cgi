@@ -189,10 +189,9 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 		$temp = &transname().".".$sfx;
 		}
 	else {
-		my $filename = "virtualmin-all-domains-on-";
 		my $hostname = &get_system_hostname();
 		$hostname =~ s/\./-/g;
-		$filename .= $hostname;
+		my $filename = "$hostname+all-domains";
 		my $time = strftime("%Y-%m-%d-%H-%M", localtime);
 		$filename .= "-".$time;
 		my $filename_dom = "$doms[0]->{'dom'}-$time";
