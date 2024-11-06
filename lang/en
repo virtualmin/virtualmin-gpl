@@ -4400,7 +4400,8 @@ licence_valid=.. valid for $1 domains until $2
 licence_updating_repo=Updating Virtualmin repository ..
 licence_no_lines=.. no lines for $1 found!
 licence_updfile=Updating Virtualmin license file ..
-license_manager_readonly=Your system is currently in read-only mode, meaning you cannot make changes to the system configuration. This mode is enforced as the system license has expired or is being used on multiple servers. Visit the <a href='$1'>Virtualmin License Manager</a> page for more details.
+licence_expired=License Expired
+licence_expired_desc=Your system is currently in read-only mode, meaning you cannot make changes to the system configuration. This mode is enforced as the system license has expired or is being used on multiple servers. Visit the <a href='$1'>Virtualmin License Manager</a> page for more details.
 
 config_deftheme=Global Webmin default
 config_oldtheme=Old Webmin theme
@@ -8518,7 +8519,6 @@ acme_edefault=The default Let's Encrypt provider cannot be edited
 acme_website=SSL provider's website
 
 readonly_mode=Your system is currently in read-only mode, meaning you cannot make changes to the system configuration. This mode is typically enabled manually by an administrator.
-readonly_mode_warning=License Expired
 
 monitor_validate=Validate Virtualmin Domains
 monitor_doms=Domains to check

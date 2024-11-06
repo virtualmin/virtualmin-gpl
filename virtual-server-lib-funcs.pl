@@ -5057,6 +5057,43 @@ if ($config{'pre_command'} =~ /\S/) {
 return undef;
 }
 
+# pre_making_changes()
+# Run pre-change checks
+sub pre_making_changes
+{
+# Licence related checks
+if ($virtualmin_pro && -r $licence_status) {
+	my %licence_status;
+	&read_file($licence_status, \%licence_status);
+	my ($bind, $time) = ($licence_status{'bind'}, $licence_status{'time'});
+	my $scale = 1;
+	$scale = 3 if ($licence_status{'status'} == 3);
+	if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
+	    int(($bind-time())/86400)+(sqrt(441)/$scale) <= 0) {
+		my $title = $text{'licence'.'_'.'expired'};
+		my $body = &text('licence'.'_'.'expired'.'_'.'desc',
+			&get_webprefix_safe()."/$module_name/pro/licence.cgi");
+		if ($main::webmin_script_type eq 'cmd') {
+			my $chars = 75;
+			my $astrx = "*" x $chars;
+			my $attrx = "*" x 2;
+			$body = &html_tags_to_text($body);
+			$title = "$attrx $title $attrx";
+			my $ptitle = ' ' x (int(($chars - length($title)) / 2)).
+				$title;
+			$title .= ' ' x ($chars - length($ptitle));
+			$body =~ s/(.{1,$chars})(?:\s+|$)/$1\n/g;
+			$body = "\n$astrx\n$ptitle\n$body$astrx\n\n";
+			&usage($body);
+			}
+		elsif ($main::webmin_script_type eq 'web') {
+			&error("$title : $body");
+			}
+		}
+	return;
+	}
+}
+
 # made_changes()
 # Called after a domain has been created, modified or deleted to run the
 # post-change command
@@ -11841,44 +11878,6 @@ foreach my $ls ("$module_root_directory/virtualmin-licence.pl",
 return 0;
 }
 
-# pre_making_changes()
-# Run pre-making-changes checks
-sub pre_making_changes
-{
-# License related checks
-if ($virtualmin_pro && -r $licence_status) {
-	my %licence_status;
-	&read_file($licence_status, \%licence_status);
-	my ($bind, $time) = ($licence_status{'bind'}, $licence_status{'time'});
-	my $scale = 1;
-	$scale = 3 if ($licence_status{'status'} == 3);
-	if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
-	    int(($bind-time())/86400)+($virtualmin_pro/$scale) <= 0) {
-		my $title = $text{'readonly_mode_warning'};
-		my $body = &text("license_manager_readonly", &get_webprefix_safe().
-					"/$module_name/pro/licence.cgi");
-		my $message = $body;
-		if ($main::webmin_script_type eq 'cmd') {
-			my $chars = 75;
-			my $astrx = "*" x $chars;
-			my $attrx = "*" x 2;
-			$body = &html_tags_to_text($body);
-			$title = "$attrx $title $attrx";
-			my $ptitle = ' ' x (int(($chars - length($title)) / 2)).
-				$title;
-			$title .= ' ' x ($chars - length($ptitle));
-			$body =~ s/(.{1,$chars})(?:\s+|$)/$1\n/g;
-			$message = "\n$astrx\n$ptitle\n$body$astrx\n\n";
-			&usage($message);
-			}
-		elsif ($main::webmin_script_type eq 'web') {
-			&error($message);
-			}
-		}
-	return;
-	}
-}
-
 # setup_licence_cron()
 # Checks for and sets up the licence checking cron job (if needed)
 sub setup_licence_cron
@@ -12089,7 +12088,7 @@ if ($status != 0 && !$state) {
 	my $alert_text;
 	# Not valid .. show message
 	if ($bind) {
-		my $prd = $virtualmin_pro/$scale;
+		my $prd = sqrt(441)/$scale;
 		$bind = int(($bind-time())/86400)+$prd;
 		$bind = 0 if ($bind < 0 || $bind > $prd);
 		}
