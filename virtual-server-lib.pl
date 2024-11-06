@@ -370,48 +370,6 @@ $quota_cache_dir = "$module_var_directory/quota-cache";
 
 $acme_providers_dir = "$module_config_directory/acme";
 
-=pod
-=head2 mod_function($module, $func_name, $pre_func, $post_func)
-
-Modifies a module function to add pre and post processing hooks.
-
-@param module - Module name containing the function to modify
-@param func_name - Name of the function to modify 
-@param pre_func - Optional name of function to call before main function
-@param post_func - Optional name of function to call after main function
-
-Pre-function can return a value to skip main function execution.
-Post-function receives main function's result as first parameter.
-
-=cut
-
-sub mod_function
-{
-my ($mod, $func, $pre_func, $post_func) = @_;
-my $mod_func = "${mod}::${func}";
-my $orig_func = \&{$mod_func};
-*{$mod_func} = sub {
-	# Pre-hook if defined
-	my $pre_result;
-	if ($pre_func && defined(&$pre_func)) {
-		$pre_result = &$pre_func(@_);
-		return $pre_result if ($pre_result);
-		}
-
-	# Call original function
-	my $result = &$orig_func(@_);
-
-	# Post-hook if defined
-	if ($post_func && defined(&$post_func)) {
-		my $post_result = &$post_func($result, @_);
-		return $post_result if (defined($post_result));
-		}
-
-	# Return original function result
-	return $result;
-	};
-}
-
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config
 # or given space-separated string.
