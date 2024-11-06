@@ -11845,23 +11845,22 @@ foreach my $ls ("$module_root_directory/virtualmin-licence.pl",
 return 0;
 }
 
-# licence_status()
-# Returns 1 if the licence is bound to a server, 0 if not
-sub licence_status
+# pre_making_changes()
+# Run pre-making-changes checks
+sub pre_making_changes
 {
-return if (!$virtualmin_pro);
-return if (!-r $licence_status);
-my %licence_status;
-&read_file($licence_status, \%licence_status);
-my ($bind, $time) = ($licence_status{'bind'}, $licence_status{'time'});
-my $scale = 1;
-$scale = 3 if ($licence_status{'status'} == 3);
-if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
-    int(($bind-time())/86400)+($virtualmin_pro/$scale) <= 0) {
-	my $title = $text{'readonly_mode_warning'};
-	my $body = &text("license_manager_readonly", &get_webprefix_safe().
-				"/$module_name/pro/licence.cgi");
-	*pre_making_changes = sub {
+# License related checks
+if ($virtualmin_pro && -r $licence_status) {
+	my %licence_status;
+	&read_file($licence_status, \%licence_status);
+	my ($bind, $time) = ($licence_status{'bind'}, $licence_status{'time'});
+	my $scale = 1;
+	$scale = 3 if ($licence_status{'status'} == 3);
+	if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
+	int(($bind-time())/86400)+($virtualmin_pro/$scale) <= 0) {
+		my $title = $text{'readonly_mode_warning'};
+		my $body = &text("license_manager_readonly", &get_webprefix_safe().
+					"/$module_name/pro/licence.cgi");
 		my $message = $body;
 		if ($main::webmin_script_type eq 'cmd') {
 			my $chars = 75;
@@ -11879,9 +11878,9 @@ if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
 		elsif ($main::webmin_script_type eq 'web') {
 			&error($message);
 			}
-		};
+		}
+	return;
 	}
-return;
 }
 
 # setup_licence_cron()

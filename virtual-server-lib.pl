@@ -138,7 +138,6 @@ $validate_cron_cmd = "$module_config_directory/validate.pl";
 		       $validate_cron_cmd, );
 
 $licence_status = &cache_file_path("licence-status");
-&licence_status();
 
 $custom_fields_file = "$module_config_directory/custom-fields";
 $custom_links_file = "$module_config_directory/custom-links";
