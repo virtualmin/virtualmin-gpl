@@ -138,7 +138,6 @@ $validate_cron_cmd = "$module_config_directory/validate.pl";
 		       $validate_cron_cmd, );
 
 $licence_status = &cache_file_path("licence-status");
-&licence_status() if (&modifier_script());
 
 $custom_fields_file = "$module_config_directory/custom-fields";
 $custom_links_file = "$module_config_directory/custom-links";
@@ -463,15 +462,6 @@ if ($mysql_module_version =~ /mariadb/i) {
 	$htext =~ s/MySQL/MariaDB/gm;
 	}
 return $htext;
-}
-
-# modifier_script()
-# Returns 1 if the current script is a modifier script
-sub modifier_script
-{
-my $script = $0;
-$script =~ s/^.*\///;
-return $script =~ /^(?:save|delete|change)_|(?:create|modify|delete)-/ ? 1 : 0;
 }
 
 1;
