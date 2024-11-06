@@ -8518,7 +8518,7 @@ acme_edefault=The default Let's Encrypt provider cannot be edited
 acme_website=SSL provider's website
 
 readonly_mode=Your system is currently in read-only mode, meaning you cannot make changes to the system configuration. This mode is typically enabled manually by an administrator.
-readonly_mode_warning=Temporary system lock alert
+readonly_mode_warning=License Expired
 
 monitor_validate=Validate Virtualmin Domains
 monitor_doms=Domains to check
