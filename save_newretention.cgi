@@ -5,6 +5,7 @@ require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'retention_ecannot'});
 &error_setup($text{'retention_err'});
 &ReadParse();
+&licence_status();
 
 # Validate inputs
 if ($in{'policy'} == 1) {

@@ -4,6 +4,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 $d = &get_domain($in{'dom'});
 &can_disable_domain($d) || &error($text{'edit_ecannot'});
 $d->{'disabled'} || &error($text{'enable_ealready'});

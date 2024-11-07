@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'postgrey_ecannot'});
 &ReadParse();
+&licence_status();
 &error_setup($text{'editgrey_err'});
 &obtain_lock_postgrey();
 

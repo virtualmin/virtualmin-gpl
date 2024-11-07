@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 $canplans = &can_edit_plans();
 $canplans || &error($text{'plans_ecannot'});
 &error_setup($text{'plan_err'});

@@ -12,6 +12,7 @@ require './virtual-server-lib.pl';
 &require_postgres() if ($config{'postgres'});
 &require_acl();
 &ReadParse();
+&licence_status();
 &error_setup($text{'setup_err'});
 
 # Get parent settings

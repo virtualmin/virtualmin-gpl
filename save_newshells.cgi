@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 &error_setup($text{'newshells_err'});
 &can_edit_templates() || &error($text{'newshells_ecannot'});
 

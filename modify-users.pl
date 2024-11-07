@@ -39,6 +39,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-users.pl must be run as root";
 	}
+&licence_status();
 
 # Parse command-line args
 my $argvs = "@ARGV";

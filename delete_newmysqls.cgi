@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newmysqls_ecannot'});
 &ReadParse();
+&licence_status();
 &error_setup($in{'default'} ? $text{'newmysqls_derr2'}
 			    : $text{'newmysqls_derr'});
 my @d = split(/\0/, $in{'d'});

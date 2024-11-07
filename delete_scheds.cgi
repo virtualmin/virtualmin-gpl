@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 &error_setup($text{'dsched_err'});
 @d = split(/\0/, $in{'d'});
 @d || &error($text{'dsched_enone'});

@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParseMime();
+&licence_status();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'users_ecannot'});
 &error_setup($text{'umass_err'});

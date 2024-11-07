@@ -94,6 +94,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-user.pl must be run as root";
 	}
+&licence_status();
 @OLDARGV = @ARGV;
 
 # Get shells

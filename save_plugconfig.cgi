@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 require "$root_directory/config-lib.pl";
 &ReadParse();
+&licence_status();
 $m = $in{'module'};
 &error_setup($text{'config_err'});
 

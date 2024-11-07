@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newlinks_ecannot'});
 &ReadParse();
+&licence_status();
 &error_setup($text{'newcats_err'});
 
 for($i=0; defined($in{"desc_$i"}); $i++) {

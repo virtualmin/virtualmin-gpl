@@ -28,6 +28,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-scheduled-backup.pl must be run as root";
 	}
+&licence_status();
 
 # Parse command-line args
 @OLDARGV = @ARGV;

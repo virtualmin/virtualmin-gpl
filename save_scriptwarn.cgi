@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newscripts_ecannot'});
 &ReadParse();
+&licence_status();
 &error_setup($text{'newscripts_werr'});
 
 # Validate and save inputs

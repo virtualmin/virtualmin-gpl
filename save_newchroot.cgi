@@ -6,6 +6,7 @@ require './virtual-server-lib.pl';
 &has_ftp_chroot() || &error($text{'chroot_esupport'});
 &error_setup($text{'chroot_err'});
 &ReadParse();
+&licence_status();
 
 # Validate and store inputs
 @chroots = ( );

@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newmxs_ecannot'});
 &ReadParse();
+&licence_status();
 &error_setup($text{'newmxs_err'});
 
 &ui_print_header(undef, $text{'newmxs_title'}, "");

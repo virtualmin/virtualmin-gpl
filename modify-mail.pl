@@ -79,6 +79,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-mail.pl must be run as root";
 	}
+&licence_status();
 @OLDARGV = @ARGV;
 $config{'mail'} || &usage("Email is not enabled for Virtualmin");
 &require_mail();

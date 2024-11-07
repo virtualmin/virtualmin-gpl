@@ -5,6 +5,7 @@ require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'provision_ecannot'});
 &error_setup($text{'provision_err'});
 &ReadParse();
+&licence_status();
 %oldconfig = %config;
 
 # Validate and store inputs

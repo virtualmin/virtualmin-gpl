@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newfields_ecannot'});
 &ReadParse();
+&licence_status();
 &error_setup($text{'newfields_err'});
 
 for($i=0; defined($in{"name_$i"}); $i++) {

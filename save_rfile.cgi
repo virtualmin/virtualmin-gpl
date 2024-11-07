@@ -4,6 +4,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParseMime();
+&licence_status();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'aliases_ecannot'});
 &can_edit_afiles() || &error($text{'rfile_ecannot'});

@@ -29,6 +29,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-rs-container.pl must be run as root";
 	}
+&licence_status();
 &require_mail();
 
 # Parse command-line args

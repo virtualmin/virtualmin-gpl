@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 $d = &get_domain($in{'dom'});
 $tmpl = &get_template($d->{'template'});
 &can_change_ip($d) && &can_edit_domain($d) || &error($text{'newip_ecannot'});
