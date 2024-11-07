@@ -4401,7 +4401,6 @@ licence_updating_repo=Updating Virtualmin repository ..
 licence_no_lines=.. no lines for $1 found!
 licence_updfile=Updating Virtualmin license file ..
 licence_expired=License Expired
-licence_expiredcgi=Cannot apply the requested change
 licence_expired_desc=Your system is currently in read-only mode, meaning you cannot make changes to the system configuration. This mode is enforced as the system license has expired or is being used on multiple servers. Visit the <a href='$1'>Virtualmin License Manager</a> page for more details.
 
 config_deftheme=Global Webmin default
