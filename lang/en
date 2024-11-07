@@ -5978,6 +5978,8 @@ spf_keytag=Key tag
 spf_alg=Algorithm
 spf_type=Digest type
 spf_digest=Digest string
+spf_aliasdns=Switching alias domain to it's own DNS records ..
+spf_noaliasdns=Switching alias domain to copy DNS records from target ..
 
 s3_emodule=The Perl module $1 needed to communicate with the S3 service is not installed.
 s3_emodule2=The Perl module $1 needed to communicate with the S3 service could not be loaded : $2.
