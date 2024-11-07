@@ -2,6 +2,7 @@
 # Create, update or delete a proxy balancer
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_forward() ||

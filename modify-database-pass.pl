@@ -30,6 +30,7 @@ if (!$module_name) {
 	$0 = "$pwd/modify-database-pass.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-database-pass.pl must be run as root";
+	&licence_status();
 	}
 @OLDARGV = @ARGV;
 &set_all_text_print();

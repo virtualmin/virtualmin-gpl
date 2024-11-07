@@ -45,6 +45,7 @@ if (!$module_name) {
 	$0 = "$pwd/create-admin.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-admin.pl must be run as root";
+	&licence_status();
 	}
 @OLDARGV = @ARGV;
 

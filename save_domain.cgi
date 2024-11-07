@@ -3,6 +3,7 @@
 # Update or delete a domain
 
 require './virtual-server-lib.pl';
+&licence_status();
 &require_bind() if ($config{'dns'});
 &require_useradmin();
 &require_mail() if ($config{'mail'});

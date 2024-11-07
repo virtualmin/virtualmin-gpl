@@ -2,6 +2,7 @@
 # Delete one or more server templates
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 &error_setup($in{'default'} || $in{'defaultsub'} ? $text{'tdelete_err2'}
 						 : $text{'tdelete_err'});

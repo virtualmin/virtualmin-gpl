@@ -2,6 +2,7 @@
 # Update the IP for one server
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 $d = &get_domain($in{'dom'});
 $tmpl = &get_template($d->{'template'});

@@ -2,6 +2,7 @@
 # Set up regular validation
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 &error_setup($text{'newvalidate_err2'});
 &can_use_validation() == 2 || &error($text{'newvalidate_ecannot'});

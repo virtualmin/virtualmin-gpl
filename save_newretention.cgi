@@ -2,6 +2,7 @@
 # Save global cleanup rules
 
 require './virtual-server-lib.pl';
+&licence_status();
 &can_edit_templates() || &error($text{'retention_ecannot'});
 &error_setup($text{'retention_err'});
 &ReadParse();

@@ -2,6 +2,7 @@
 # Save settings for one provider
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 &error_setup($text{'cloud_err'});
 &can_cloud_providers() || &error($text{'clouds_ecannot'});

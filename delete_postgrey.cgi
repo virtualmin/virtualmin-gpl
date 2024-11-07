@@ -2,6 +2,7 @@
 # Delete several greylisting whitelist entries
 
 require './virtual-server-lib.pl';
+&licence_status();
 &can_edit_templates() || &error($text{'postgrey_ecannot'});
 &ReadParse();
 &error_setup($text{'delgrey_err'});

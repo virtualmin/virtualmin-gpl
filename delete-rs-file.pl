@@ -27,6 +27,7 @@ if (!$module_name) {
 	$0 = "$pwd/delete-rs-file.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-rs-file.pl must be run as root";
+	&licence_status();
 	}
 &require_mail();
 

@@ -32,6 +32,7 @@ if (!$module_name) {
 	$0 = "$pwd/delete-script.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-script.pl must be run as root";
+	&licence_status();
 	}
 @OLDARGV = @ARGV;
 &foreign_require("mailboxes");

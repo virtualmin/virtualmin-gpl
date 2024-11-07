@@ -32,6 +32,7 @@ if (!$module_name) {
 	$0 = "$pwd/modify-templates.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-templates.pl must be run as root";
+	&licence_status();
 	}
 @OLDARGV = @ARGV;
 

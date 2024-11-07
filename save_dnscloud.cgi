@@ -2,6 +2,7 @@
 # Save settings for one DNS cloud provider
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 &error_setup($text{'dnscloud_err'});
 &can_cloud_providers() || &error($text{'dnsclouds_ecannot'});

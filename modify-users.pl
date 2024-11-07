@@ -38,6 +38,7 @@ if (!$module_name) {
 	$0 = "$pwd/modify-users.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-users.pl must be run as root";
+	&licence_status();
 	}
 
 # Parse command-line args

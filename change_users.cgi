@@ -2,6 +2,7 @@
 # Just redirect to either delete_users.cgi or mass_form.cgi
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 
 if ($in{'mass'}) {

@@ -2,6 +2,7 @@
 # Remove a MySQL clone module, or change the default
 
 require './virtual-server-lib.pl';
+&licence_status();
 &can_edit_templates() || &error($text{'newmysqls_ecannot'});
 &ReadParse();
 &error_setup($in{'default'} ? $text{'newmysqls_derr2'}

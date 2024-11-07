@@ -28,6 +28,7 @@ if (!$module_name) {
 	$0 = "$pwd/modify-plan.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-plan.pl must be run as root";
+	&licence_status();
 	}
 @OLDARGV = @ARGV;
 

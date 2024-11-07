@@ -28,6 +28,7 @@ if (!$module_name) {
 	$0 = "$pwd/modify-scheduled-backup.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-scheduled-backup.pl must be run as root";
+	&licence_status();
 	}
 @OLDARGV = @ARGV;
 

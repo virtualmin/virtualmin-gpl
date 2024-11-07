@@ -2,6 +2,7 @@
 # Delete several databases from a domain, after asking for confirmation
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});

@@ -87,6 +87,7 @@ if (!$module_name) {
 	$0 = "$pwd/modify-domain.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-domain.pl must be run as root";
+	&licence_status();
 	}
 @OLDARGV = @ARGV;
 &set_all_text_print();

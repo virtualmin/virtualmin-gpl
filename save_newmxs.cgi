@@ -2,6 +2,7 @@
 # Save secondary MX servers
 
 require './virtual-server-lib.pl';
+&licence_status();
 &can_edit_templates() || &error($text{'newmxs_ecannot'});
 &ReadParse();
 &error_setup($text{'newmxs_err'});

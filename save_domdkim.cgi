@@ -2,6 +2,7 @@
 # Save the DKIM key for a virtual server
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 &error_setup($text{'domdkim_err'});
 $d = &get_domain($in{'dom'});

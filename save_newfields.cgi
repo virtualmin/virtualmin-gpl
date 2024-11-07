@@ -2,6 +2,7 @@
 # Update all custom fields for domains
 
 require './virtual-server-lib.pl';
+&licence_status();
 &can_edit_templates() || &error($text{'newfields_ecannot'});
 &ReadParse();
 &error_setup($text{'newfields_err'});

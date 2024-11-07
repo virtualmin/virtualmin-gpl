@@ -40,6 +40,7 @@ if (!$module_name) {
 	$0 = "$pwd/create-proxy.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-proxy.pl must be run as root";
+	&licence_status();
 	}
 @OLDARGV = @ARGV;
 

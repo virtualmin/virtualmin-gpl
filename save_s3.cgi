@@ -2,6 +2,7 @@
 # Create, update or delete an S3 acccount
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 &error_setup($in{'delete'} ? $text{'s3_err2'} : $text{'s3_err'});
 &can_cloud_providers() || &error($text{'s3s_ecannot'});

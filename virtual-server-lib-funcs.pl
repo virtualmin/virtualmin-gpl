@@ -5043,7 +5043,6 @@ foreach my $e (keys %ENV) {
 # pre-change command
 sub making_changes
 {
-&pre_making_changes();
 if ($config{'pre_command'} =~ /\S/) {
 	&clean_changes_environment();
 	local $out = &backquote_logged(
@@ -5055,43 +5054,6 @@ if ($config{'pre_command'} =~ /\S/) {
 	return $? ? $out : undef;
 	}
 return undef;
-}
-
-# pre_making_changes()
-# Run pre-change checks
-sub pre_making_changes
-{
-# Licence related checks
-if ($virtualmin_pro && -r $licence_status) {
-	my %licence_status;
-	&read_file($licence_status, \%licence_status);
-	my ($bind, $time) = ($licence_status{'bind'}, $licence_status{'time'});
-	my $scale = 1;
-	$scale = 3 if ($licence_status{'status'} == 3);
-	if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
-	    int(($bind-time())/86400)+(21/$scale) <= 0) {
-		my $title = $text{'licence'.'_'.'expired'};
-		my $body = &text('licence'.'_'.'expired'.'_'.'desc',
-			&get_webprefix_safe()."/$module_name/pro/licence.cgi");
-		if ($main::webmin_script_type eq 'cmd') {
-			my $chars = 75;
-			my $astrx = "*" x $chars;
-			my $attrx = "*" x 2;
-			$body = &html_tags_to_text($body);
-			$title = "$attrx $title $attrx";
-			my $ptitle = ' ' x (int(($chars - length($title)) / 2)).
-				$title;
-			$title .= ' ' x ($chars - length($ptitle));
-			$body =~ s/(.{1,$chars})(?:\s+|$)/$1\n/g;
-			$body = "\n$astrx\n$ptitle\n$body$astrx\n\n";
-			&usage($body);
-			}
-		elsif ($main::webmin_script_type eq 'web') {
-			&error("$title : $body");
-			}
-		}
-	return;
-	}
 }
 
 # made_changes()
@@ -11915,6 +11877,45 @@ if (&require_licence()) {
 		$job->{'command'} = $licence_cmd;
 		}
 	&setup_cron_script($job);
+	}
+}
+
+# licence_status()
+# Checks license status
+sub licence_status
+{
+# Licence related checks
+if ($virtualmin_pro && -r $licence_status) {
+	my %licence_status;
+	&read_file($licence_status, \%licence_status);
+	my ($bind, $time) = ($licence_status{'bind'}, $licence_status{'time'});
+	my $scale = 1;
+	$scale = 3 if ($licence_status{'status'} == 3);
+	if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
+	    int(($bind-time())/86400)+(21/$scale) <= 0) {
+		my $title = $text{'licence'.'_'.'expired'};
+		my $titlecgi = $text{'licence'.'_'.'expiredcgi'};
+		my $body = &text('licence'.'_'.'expired'.'_'.'desc',
+			&get_webprefix_safe()."/$module_name/pro/licence.cgi");
+		if ($main::webmin_script_type eq 'cmd') {
+			my $chars = 75;
+			my $astrx = "*" x $chars;
+			my $attrx = "*" x 2;
+			$body = &html_tags_to_text($body);
+			$title = "$attrx $title $attrx";
+			my $ptitle = ' ' x (int(($chars - length($title)) / 2)).
+				$title;
+			$title .= ' ' x ($chars - length($ptitle));
+			$body =~ s/(.{1,$chars})(?:\s+|$)/$1\n/g;
+			$body = "\n$astrx\n$ptitle\n$body$astrx\n";
+			print "$body\n";
+			exit(99);
+			}
+		elsif ($main::webmin_script_type eq 'web') {
+			&error("$titlecgi : $body");
+			}
+		}
+	return;
 	}
 }
 

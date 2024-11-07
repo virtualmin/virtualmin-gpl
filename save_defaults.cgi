@@ -2,6 +2,7 @@
 # Save the defaults for new users in this virtual server
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &error_setup($text{'defaults_err'});

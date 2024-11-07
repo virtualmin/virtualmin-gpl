@@ -41,6 +41,7 @@ if (!$module_name) {
 	$0 = "$pwd/create-alias.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-alias.pl must be run as root";
+	&licence_status();
 	}
 @OLDARGV = @ARGV;
 

@@ -35,6 +35,7 @@ if (!$module_name) {
 	$0 = "$pwd/delete-domain.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-domain.pl must be run as root";
+	&licence_status();
 	}
 @OLDARGV = @ARGV;
 

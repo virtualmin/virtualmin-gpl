@@ -2,6 +2,7 @@
 # Create or delete a database
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});

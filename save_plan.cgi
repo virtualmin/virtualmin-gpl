@@ -2,6 +2,7 @@
 # Create, update or delete a plan
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 $canplans = &can_edit_plans();
 $canplans || &error($text{'plans_ecannot'});

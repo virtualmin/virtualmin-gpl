@@ -25,6 +25,7 @@ if (!$module_name) {
 	$0 = "$pwd/create-s3-bucket.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-s3-bucket.pl must be run as root";
+	&licence_status();
 	}
 &require_mail();
 
