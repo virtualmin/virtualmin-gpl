@@ -11893,9 +11893,9 @@ if ($virtualmin_pro && -r $licence_status) {
 	$scale = 3 if ($licence_status{'status'} == 3);
 	if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
 	    int(($bind-time())/86400)+(21/$scale) <= 0) {
-		my $title = $text{'licence'.'_'.'expired'};
-		my $titlecgi = $text{'licence'.'_'.'expiredcgi'};
-		my $body = &text('licence'.'_'.'expired'.'_'.'desc',
+		my $title = $text{'licence_expired'};
+		my $titlecgi = $text{'licence_expiredcgi'};
+		my $body = &text('licence_expired_desc',
 			&get_webprefix_safe()."/$module_name/pro/licence.cgi");
 		if ($main::webmin_script_type eq 'cmd') {
 			my $chars = 75;
