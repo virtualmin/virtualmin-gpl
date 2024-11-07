@@ -101,6 +101,11 @@ If DKIM is enabled on your system, you can enable it for this domain with the
 C<--enable-dkim> flag, or turn it off with C<--disable-dkim>. Or switch to
 the default state for this domain with C<--default-dkim>.
 
+Alias domains in Virtualmin by default have their DNS records copied from
+the target domain, but you can switch to an independent set of records with
+the C<--alias-dns> flag. Or switch back to copying from the target with the
+C<--no-alias-dns> flag.
+
 =cut
 
 package virtual_server;
@@ -307,6 +312,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--default-dkim") {
 		$dkim_enabled = 2;
 		}
+	elsif ($a eq "--alias-dns") {
+		$aliasdns = 1;
+		}
+	elsif ($a eq "--no-alias-dns") {
+		$aliasdns = 0;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -322,7 +333,7 @@ defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   defined($dmarcrua) || defined($dmarcruf) ||
   defined($tlsa) || $syncallslaves || defined($submode) || $clouddns ||
   defined($remotedns) || defined($parentds) || defined($clouddns_import) ||
-  defined($dkim_enabled) || &usage("Nothing to do");
+  defined($dkim_enabled) || defined($aliasdns) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -414,8 +425,25 @@ foreach $d (@doms) {
 	$oldd = { %$d };
 	$cloud = &get_domain_dns_cloud($d);
 
+	if (defined($aliasdns) && $d->{'alias'} &&
+	    $aliasdns && !$d->{'aliasdns'}) {
+		# Enable own DNS records for alias domain
+		&$first_print($text{'spf_aliasdns'});
+		$d->{'aliasdns'} = 1;
+		&save_domain($d);
+		&$second_print($text{'setup_done'});
+		}
+	if (defined($aliasdns) && $d->{'alias'} &&
+	    !$aliasdns && $d->{'aliasdns'}) {
+		# Enable copying DNS records for alias domain
+		&$first_print($text{'spf_noaliasdns'});
+		$d->{'aliasdns'} = 0;
+		&save_domain($d);
+		&$second_print($text{'setup_done'});
+		}
+
 	$currspf = &get_domain_spf($d);
-	if (defined($spf)) {
+	if (defined($spf) && !&copy_alias_records($d)) {
 		# Turn SPF on or off
 		if ($spf == 1 && !$currspf) {
 			# Need to enable, with default settings
@@ -451,7 +479,8 @@ foreach $d (@doms) {
 			}
 		}
 
-	if ((%add || %rem || defined($spfall)) && $currspf) {
+	if ((%add || %rem || defined($spfall)) && $currspf &&
+	    !&copy_alias_records($d)) {
 		# Update a, mx ip4 and ip6 in SPF record
 		&$first_print($text{'spf_change'});
 		foreach $t (keys %add) {
@@ -479,7 +508,7 @@ foreach $d (@doms) {
 		}
 
 	if (($dmarcp || defined($dmarcpct) || defined($dmarcrua) ||
-	     defined($dmarcruf)) && $currdmarc) {
+	     defined($dmarcruf)) && $currdmarc && !&copy_alias_records($d)) {
 		# Update current DMARC record
 		&$first_print($text{'spf_dmarcchange'});
 		if ($dmarcp) {
@@ -514,7 +543,7 @@ foreach $d (@doms) {
 	# Remove records from the domain
 	local ($recs, $file);
 	local $changed;
-	if (@delrecs) {
+	if (@delrecs && !&copy_alias_records($d)) {
 		&$first_print(&text('spf_delrecs', scalar(@delrecs)));
 		if (!$recs) {
 			&pre_records_change($d);
@@ -543,7 +572,7 @@ foreach $d (@doms) {
 		}
 
 	# Add records to the domain
-	if (@addrecs) {
+	if (@addrecs && !&copy_alias_records($d)) {
 		&$first_print(&text('spf_addrecs', scalar(@addrecs)));
 		if (!$recs) {
 			&pre_records_change($d);
@@ -577,7 +606,7 @@ foreach $d (@doms) {
 		}
 
 	# Update records in the domain
-	if (@uprecs) {
+	if (@uprecs && !&copy_alias_records($d)) {
 		&$first_print(&text('spf_uprecs', scalar(@addrecs)));
 		if (!$recs) {
 			&pre_records_change($d);
@@ -612,7 +641,7 @@ foreach $d (@doms) {
 		}
 
 	# Set or modify default TTL
-	if ($ttl && &supports_dns_defttl($d)) {
+	if ($ttl && &supports_dns_defttl($d) && !&copy_alias_records($d)) {
 		&$first_print(&text('spf_ttl', $ttl));
 		if (!$recs) {
 			&pre_records_change($d);
@@ -635,7 +664,7 @@ foreach $d (@doms) {
 		}
 
 	# Change the TTL on any records that have one
-	if ($allttl) {
+	if ($allttl && !&copy_alias_records($d)) {
 		if (!$recs) {
 			&pre_records_change($d);
 			($recs, $file) = &get_domain_dns_records_and_file($d);
@@ -681,7 +710,7 @@ foreach $d (@doms) {
 		}
 
 	# Create or remove TLSA records
-	if (defined($tlsa)) {
+	if (defined($tlsa) && !&copy_alias_records($d)) {
 		&pre_records_change($d);
 		if ($tlsa == 1) {
 			&$first_print($text{'spf_enabletlsa'});
@@ -790,6 +819,15 @@ foreach $d (@doms) {
 
 	if ($changed || $bumpsoa) {
 		my $err = &post_records_change($d, $recs, $file);
+		if ($err) {
+			&$second_print(&text('spf_epostchange', $err));
+			}
+		&reload_bind_records($d);
+		}
+	elsif (defined($aliasdns) && !$aliasdns && $d->{'alias'}) {
+		my $target = &get_domain($d->{'alias'});
+		my ($recs, $file) = &get_domain_dns_records_and_file($target);
+		my $err = &post_records_change($target, $recs, $file);
 		if ($err) {
 			&$second_print(&text('spf_epostchange', $err));
 			}
@@ -904,6 +942,7 @@ print "                     [--cloud-dns-import]\n";
 print "                     [--remote-dns hostname | --local-dns]\n";
 print "                     [--add-parent-ds | --remove-parent-ds]\n";
 print "                     [--enable-dkim | --disable-dkim | --default-dkim]\n";
+print "                     [--alias-dns | --no-alias-dns]\n";
 exit(1);
 }
 
