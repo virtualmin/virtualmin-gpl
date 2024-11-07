@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 &error_setup($text{'dnscloud_err'});
 &can_cloud_providers() || &error($text{'dnsclouds_ecannot'});
 

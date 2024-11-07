@@ -28,6 +28,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-rs-file.pl must be run as root";
 	}
+&licence_status();
 &require_mail();
 
 # Parse command-line args

@@ -4,6 +4,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 &error_setup($text{'alias_err'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_aliases() || &error($text{'aliases_ecannot'});

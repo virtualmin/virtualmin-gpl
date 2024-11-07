@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'autoconfig_ecannot'});
 &ReadParse();
+&licence_status();
 &error_setup($text{'autoconfig_err'});
 
 @doms = grep { $_->{'mail'} && &domain_has_website($_) && !$_->{'alias'} }

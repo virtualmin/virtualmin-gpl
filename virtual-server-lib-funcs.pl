@@ -4138,11 +4138,13 @@ sub first_text_print
 print_and_capture($indent_text,
       (map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n");
 }
+
 sub second_text_print
 {
 print_and_capture($indent_text,
       (map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n\n");
 }
+
 sub indent_text_print { $indent_text .= "    "; }
 sub outdent_text_print { $indent_text = substr($indent_text, 4); }
 sub html_tags_to_text
@@ -11869,6 +11871,48 @@ if (&require_licence()) {
 	}
 }
 
+# licence_status()
+# Checks license status
+sub licence_status
+{
+# Licence related checks
+if ($virtualmin_pro && -r $licence_status) {
+	my %licence_status;
+	&read_file($licence_status, \%licence_status);
+	my ($bind, $time) = ($licence_status{'bind'}, $licence_status{'time'});
+	my $scale = 1;
+	$scale = 3 if ($licence_status{'status'} == 3);
+	if ($main::webmin_script_type ne 'cron' && !$time && $bind &&
+	    int(($bind-time())/86400)+(21/$scale) <= 0) {
+		my $title = $text{'licence_expired'};
+		my $body = &text('licence_expired_desc',
+			&get_webprefix_safe()."/$module_name/pro/licence.cgi");
+		if ($main::webmin_script_type eq 'cmd') {
+			my $chars = 75;
+			my $astrx = "*" x $chars;
+			my $attrx = "*" x 2;
+			$body = &html_tags_to_text($body);
+			$title = "$attrx $title $attrx";
+			my $ptitle = ' ' x (int(($chars - length($title)) / 2)).
+				$title;
+			$title .= ' ' x ($chars - length($ptitle));
+			$body =~ s/(.{1,$chars})(?:\s+|$)/$1\n/g;
+			$body = "\n$astrx\n$ptitle\n$body$astrx\n";
+			print "$body\n";
+			exit(99);
+			}
+		elsif ($main::webmin_script_type eq 'web') {
+			&ui_print_header(undef, $text{'error'}, "");
+			print &ui_alert_box("$body", 'warn', undef, 1, $title);
+			&ui_print_footer("javascript:history.back()",
+				$text{'error_previous'});
+			exit(99);
+			}
+		}
+	return;
+	}
+}
+
 # check_licence_expired()
 # Returns 0 if the licence is valid, 1 if not, or 2 if could not be checked,
 # 3 if expired, the expiry date, error message, number of domain, number
@@ -11884,8 +11928,9 @@ if (time() - $licence{'last'} > 3*24*60*60) {
 	&write_file($licence_status, \%licence);
 	}
 return ($licence{'status'}, $licence{'expiry'},
-	$licence{'err'}, $licence{'doms'}, $licence{'servers'},
-	$licence{'autorenew'});
+	$licence{'err'} || $licence{'warn'}, $licence{'doms'}, $licence{'servers'},
+	$licence{'autorenew'}, $licence{'time'}, $licence{'bind'},
+	$licence{'subscription'});
 }
 
 # update_licence_from_site(&licence)
@@ -11895,9 +11940,9 @@ return ($licence{'status'}, $licence{'expiry'},
 sub update_licence_from_site
 {
 local ($licence) = @_;
-local ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew) =
-	&check_licence_site();
-$licence->{'last'} = time();
+local ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew,
+       $state, $subscription) = &check_licence_site();
+$licence->{'last'} = $licence->{'time'} = time();
 delete($licence->{'warn'});
 if ($status == 2) {
 	# Networking / CGI error. Don't treat this as a failure unless we have
@@ -11914,8 +11959,12 @@ else {
 	delete($licence->{'lastdown'});
 	}
 $licence->{'status'} = $status;
+$licence->{'bind'} = $licence->{'time'} if (!$licence->{'bind'} && $status >= 1);
+delete($licence->{'bind'}) if (defined($status) && $status == 0);
 $licence->{'expiry'} = $expiry;
 $licence->{'autorenew'} = $autorenew;
+delete($licence->{'time'}) if ($state !~ /^\QY\E$/);
+$licence->{'subscription'} = $subscription;
 $licence->{'err'} = $err;
 if (defined($doms)) {
 	# Only store the max domains if we got something valid back
@@ -11942,9 +11991,10 @@ local $id = &get_licence_hostid();
 my %serial;
 &read_env_file($virtualmin_license_file, \%serial);
 
-local ($status, $expiry, $err, $doms, $max_servers, $servers, $autorenew) =
-	&licence_scheduled($id, undef, undef, &get_vps_type());
-if ($status == 0 && $doms) {
+local ($status, $expiry, $err, $doms, $max_servers, $servers, $autorenew,
+       $state, $subscription) =
+		&licence_scheduled($id, undef, undef, &get_vps_type());
+if (defined($status) && $status == 0 && $doms) {
 	# A domains limit exists .. check if we have exceeded it
 	local @doms = grep { !$_->{'alias'} } &list_domains();
 	if (@doms > $doms) {
@@ -11952,15 +12002,17 @@ if ($status == 0 && $doms) {
 		$err = &text('licence_maxdoms', $doms, scalar(@doms));
 		}
 	}
-if ($status == 0 && $max_servers && !$err) {
+if (defined($status) && $status == 0 && $max_servers && !$err) {
 	# A servers limit exists .. check if we have exceeded it
-	if ($servers > $max_servers+1) {
+	if ($servers > $max_servers) {
 		$status = 1;
-		$err = "<span>".&text('licence_maxservers2', $max_servers, $servers, "<tt>$serial{'SerialNumber'}</tt>")."</span>";
-		$err .= " " . &text('licence_maxwarn', "https://virtualmin.com/shop/", $text{'license_shop_name'});
+		$err = &text('licence_maxservers2', $max_servers,
+			"<span data-maxservers='$servers'>$servers</span>",
+			"<tt>$serial{'SerialNumber'}</tt>");
 		}
 	}
-return ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew);
+return ($status, $expiry, $err, $doms, $servers, $max_servers,
+        $autorenew, $state, $subscription);
 }
 
 # get_licence_hostid()
@@ -12014,9 +12066,9 @@ sub list_warning_messages
 {
 return () if (!&master_admin());
 my @rv;
-
+my $wp = &get_webprefix_safe();
 # Get licence expiry date
-local ($status, $expiry, $err, undef, undef, $autorenew) =
+local ($status, $expiry, $err, undef, undef, $autorenew, $state, $bind) =
 	&check_licence_expired();
 local $expirytime;
 if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
@@ -12025,19 +12077,46 @@ if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
 		$expirytime = timelocal(59, 59, 23, $3, $2-1, $1);
 		};
 	}
-if ($status != 0) {
+if ($status != 0 && !$state) {
+	my $license_expired = $status == 3 ? 'e' : undef;
+	my $scale = 1;
+	$scale = 3 if ($license_expired);
 	my $alert_text;
 	# Not valid .. show message
+	if ($bind) {
+		my $prd = 21/$scale;
+		$bind = int(($bind-time())/86400)+$prd;
+		$bind = 0 if ($bind < 0 || $bind > $prd);
+		}
 	$alert_text .= "<b>".$text{'licence_err'}."</b><br>\n";
-	$alert_text .= $err."\n";
-	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n"
-		if ($alert_text !~ /$virtualmin_renewal_url/);
-	$alert_text =~ s/>\Q$virtualmin_renewal_url\E</>$text{'license_shop_name'}</;
+	$alert_text .= $err;
+	$alert_text = "$alert_text. " if ($err && $err !~ /\.$/);
+	my $renew_label = "licence_renew4$license_expired";
+	if ($bind) {
+		my $multi = $bind > 1 ? 'm' : '';
+		if ($license_expired) {
+			$alert_text .= " ".
+			    &text("licence_renew3$license_expired$multi", $bind); 
+			}
+		else {
+			$alert_text .= " $text{'licence_maxwarn'}";
+			$alert_text .= " ".&text("licence_renew3$multi", $bind); 
+			}
+		}
+	else {
+		$alert_text .= " ".$text{$renew_label} if (defined($bind));
+		$alert_text .= " $text{'licence_maxwarn'}" if (!defined($bind));
+		}
+	if ($alert_text !~ /$virtualmin_renewal_url/) {
+		$alert_text .= " ".&text('licence_renew2', 
+			$virtualmin_renewal_url, $text{'license_shop_name'});
+		}
 	if (&can_recheck_licence()) {
-		$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/licence.cgi");
-		$alert_text .= &ui_submit($text{'licence_recheck'});
+		$alert_text .= &ui_form_start("$wp/$module_name/pro/licence.cgi");
+		$alert_text .= &ui_submit($text{'licence_manager_goto'});
 		$alert_text .= &ui_form_end();
 		}
+	$alert_text =~ s/\s+/ /g;
 	push(@rv, $alert_text);
 	}
 elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
@@ -12050,12 +12129,14 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 	else {
 		$alert_text .= "<b>".&text('licence_soon2', $hours)."</b><br>\n";
 		}
-	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n";
+	$alert_text .= " ".&text('licence_renew', $virtualmin_renewal_url,
+			     $text{'license_shop_name'});
 	if (&can_recheck_licence()) {
-		$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/licence.cgi");
-		$alert_text .= &ui_submit($text{'licence_recheck'});
+		$alert_text .= &ui_form_start("$wp/$module_name/pro/licence.cgi");
+		$alert_text .= &ui_submit($text{'licence_manager_goto'});
 		$alert_text .= &ui_form_end();
 		}
+	$alert_text =~ s/\s+/ /g;
 	push(@rv, $alert_text);
 	}
 
@@ -12066,7 +12147,7 @@ if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
 	$alert_text .= "<b>".&text('licence_ipchanged',
 			   "<tt>$config{'old_defip'}</tt>",
 			   "<tt>$defip</tt>")."</b><p>\n";
-	$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/edit_newips.cgi");
+	$alert_text .= &ui_form_start("$wp/$module_name/edit_newips.cgi");
 	$alert_text .= &ui_hidden("old", $config{'old_defip'});
 	$alert_text .= &ui_hidden("new", $defip);
 	$alert_text .= &ui_hidden("setold", 1);
@@ -12101,10 +12182,10 @@ if ($small) {
 			   $small->{'issuer_o'},
 			   $small->{'issuer_cn'},
 			   )."<p>\n";
-	my $formlink = "@{[&get_webprefix_safe()]}/webmin/edit_ssl.cgi";
+	my $formlink = "$wp/webmin/edit_ssl.cgi";
 	my $domid = &get_domain_by('dom', $small->{'cn'});
 	if ($domid) {
-		$formlink = "@{[&get_webprefix_safe()]}/$module_name/cert_form.cgi?dom=$domid";
+		$formlink = "$wp/$module_name/cert_form.cgi?dom=$domid";
 		}
 	$alert_text .= &ui_form_start($formlink);
 	$alert_text .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
@@ -12127,7 +12208,7 @@ if ($config{'allow_symlinks'} eq '') {
 		$alert_text .= "<b>".&text('licence_fixlinks', scalar(@fixdoms))."<p>".
 		             $text{'licence_fixlinks2'}."</b><p>\n";
 		$alert_text .= &ui_form_start(
-			"@{[&get_webprefix_safe()]}/$module_name/fix_symlinks.cgi");
+			"$wp/$module_name/fix_symlinks.cgi");
 		$alert_text .= &ui_submit($text{'licence_fixlinksok'}, undef);
 		$alert_text .= &ui_submit($text{'licence_fixlinksignore'}, 'ignore');
 		$alert_text .= &ui_form_end();
@@ -12149,7 +12230,7 @@ if ($theme && $current_theme !~ /$recommended_theme/ &&
 	$switch_text .= "<b>".&text('index_themeswitch',
 				    $theme->{'desc'})."</b><p>\n";
 	$switch_text .= &ui_form_start(
-		"@{[&get_webprefix_safe()]}/$module_name/switch_theme.cgi");
+		"$wp/$module_name/switch_theme.cgi");
 	$switch_text .= &ui_submit($text{'index_themeswitchok'});
 	$switch_text .= &ui_submit($text{'index_themeswitchnot'}, "cancel");
 	$switch_text .= &ui_form_end();
@@ -12257,7 +12338,7 @@ if (@expired || @nearly) {
 			$gluechar = "";
 			}
 		$expiry_text .= &text('index_expiryexpired',
-			join($gluechar, map { "<a href=\"@{[&get_webprefix_safe()]}/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @expired));
+			join($gluechar, map { "<a href=\"$wp/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @expired));
 		$exp++;
 		}
 	if (@nearly) {
@@ -12267,7 +12348,7 @@ if (@expired || @nearly) {
 			}
 		my $nl = $exp ? "<br>" : "";
 		$expiry_text .= $nl . &text('index_expirynearly',
-			join($gluechar, map { "<a href=\"@{[&get_webprefix_safe()]}/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @nearly));
+			join($gluechar, map { "<a href=\"$wp/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @nearly));
 		}
 	if (@expired || @nearly) {
 		my @edoms;
@@ -12275,7 +12356,7 @@ if (@expired || @nearly) {
 		push(@edoms, map { $_->{'dom'} } @nearly) if (@nearly);
 		@edoms = &unique(@edoms);
 		my $expiry_form .= &ui_form_start(
-			"@{[&get_webprefix_safe()]}/$module_name/recollect_whois.cgi");
+			"$wp/$module_name/recollect_whois.cgi");
 		$expiry_form .= &ui_hidden("doms", join(" ", @edoms))."\n".
 		$expiry_form .= &ui_submit($text{'index_drefresh'});
 		$expiry_form .= &ui_submit($text{'index_dignore'}, "ignore");
@@ -12298,7 +12379,7 @@ if (&master_admin() && !$config{'mod_php_ok'} && $config{'web'} &&
 	if (!$count) {
 		my $mod_text = &text('index_disable_mod_php')."<p>\n";
 		$mod_text .= &ui_form_start(
-			"@{[&get_webprefix_safe()]}/$module_name/disable_mod_php.cgi");
+			"$wp/$module_name/disable_mod_php.cgi");
 		$mod_text .= &ui_submit($text{'index_disable_mod_phpok'});
 		$mod_text .= &ui_submit($text{'index_themeswitchnot'}, "cancel");
 		$mod_text .= &ui_form_end();
@@ -14080,6 +14161,13 @@ if ($config{'wizard_run'} && &can_edit_templates()) {
 if (&can_master_reseller_2fa()) {
 	push(@rv, { 'url' => "$vm/edit_2fa.cgi",
 		    'title' => $text{'edit_change2fa'},
+		    'cat' => 'setting' });
+	}
+
+# Show lic manager link for master admins
+if (&master_admin() && $virtualmin_pro) {
+	push(@rv, { 'url' => "$vm/pro/licence.cgi",
+		    'title' => $text{'licence_manager_menu'},
 		    'cat' => 'setting' });
 	}
 

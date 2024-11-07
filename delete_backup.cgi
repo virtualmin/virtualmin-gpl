@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 &error_setup($text{'dbackup_err'});
 
 # Get the log and check permissions

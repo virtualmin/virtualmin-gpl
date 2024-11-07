@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 &error_setup($text{'users_derr'});
 
 $d = &get_domain($in{'dom'});

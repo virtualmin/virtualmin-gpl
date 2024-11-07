@@ -32,6 +32,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-login-link.pl must be run as root";
 	}
+&licence_status();
 @OLDARGV = @ARGV;
 &set_all_text_print();
 

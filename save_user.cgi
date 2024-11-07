@@ -4,6 +4,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 &error_setup($text{'user_err'});
 if ($in{'dom'}) {
 	$d = &get_domain($in{'dom'});

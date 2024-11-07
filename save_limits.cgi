@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 $d = &get_domain($in{'dom'});
 &can_edit_limits($d) || &error($text{'edit_ecannot'});
 

@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &error_setup($text{'newdynip_err'});
 &ReadParse();
+&licence_status();
 &can_edit_templates() || &error($text{'newdynip_ecannot'});
 
 # Validate inputs

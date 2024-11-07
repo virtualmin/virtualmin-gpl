@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'aliases_ecannot'});
 &ui_print_header(&domain_in($d), $text{'aedit_title'}, "", "aedit");

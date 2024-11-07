@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_redirect() ||
 	&error($text{'redirects_ecannot'});

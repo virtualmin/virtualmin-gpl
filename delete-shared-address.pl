@@ -26,6 +26,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-shared-address.pl must be run as root";
 	}
+&licence_status();
 @OLDARGV = @ARGV;
 
 # Parse command-line args

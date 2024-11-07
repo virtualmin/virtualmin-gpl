@@ -4,6 +4,7 @@
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newips_ecannot'});
 &ReadParse();
+&licence_status();
 
 # Validate inputs
 &error_setup($text{'newips_err'});

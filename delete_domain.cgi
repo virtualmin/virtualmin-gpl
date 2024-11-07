@@ -7,6 +7,7 @@ require './virtual-server-lib.pl';
 &require_useradmin();
 &require_mail() if ($config{'mail'});
 &ReadParse();
+&licence_status();
 $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
 $d->{'dom'} || &error("Domain $in{'dom'} is not valid!");

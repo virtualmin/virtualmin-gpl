@@ -6,6 +6,7 @@ require './virtual-server-lib.pl';
 &error_setup($text{'sharedips_err'});
 &can_edit_templates() || &error($text{'sharedips_ecannot'});
 &ReadParse();
+&licence_status();
 
 # Validate inputs, and check for clashes
 $defip = &get_default_ip();

@@ -4,6 +4,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 &can_edit_templates() || &error($text{'newbw_ecannot'});
 &error_setup($text{'newbw_err'});
 

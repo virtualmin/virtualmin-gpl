@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 &can_backup_buckets() || &error($text{'buckets_ecannot'});
 
 # Get the account

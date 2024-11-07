@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 &error_setup($text{'newquotas_err'});
 &can_edit_templates() || &error($text{'newquotas_ecannot'});
 

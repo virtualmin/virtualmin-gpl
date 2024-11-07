@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&licence_status();
 
 if ($in{'mass'}) {
 	&redirect("mass_form.cgi?$in");
