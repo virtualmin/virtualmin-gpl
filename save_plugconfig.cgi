@@ -2,9 +2,9 @@
 # Save inputs from config.cgi
 
 require './virtual-server-lib.pl';
-&licence_status();
 require "$root_directory/config-lib.pl";
 &ReadParse();
+&licence_status();
 $m = $in{'module'};
 &error_setup($text{'config_err'});
 

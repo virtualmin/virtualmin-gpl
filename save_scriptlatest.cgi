@@ -2,9 +2,9 @@
 # Enable or disable the cron job for downloading the latest script installers
 
 require './virtual-server-lib.pl';
-&licence_status();
 &can_edit_templates() || &error($text{'newscripts_ecannot'});
 &ReadParse();
+&licence_status();
 &error_setup($text{'newscripts_lerr'});
 
 # Update config

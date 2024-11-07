@@ -3,8 +3,8 @@
 # Save an addresses file
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParseMime();
+&licence_status();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'aliases_ecannot'});
 &can_edit_afiles() || &error($text{'afile_ecannot'});

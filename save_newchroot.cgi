@@ -2,11 +2,11 @@
 # Save the list of ProFTPd chroot directories
 
 require './virtual-server-lib.pl';
-&licence_status();
 &can_edit_templates() || &error($text{'chroot_ecannot'});
 &has_ftp_chroot() || &error($text{'chroot_esupport'});
 &error_setup($text{'chroot_err'});
 &ReadParse();
+&licence_status();
 
 # Validate and store inputs
 @chroots = ( );

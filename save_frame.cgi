@@ -2,8 +2,8 @@
 # Update frame-forwarding settings
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParse();
+&licence_status();
 $d = &get_domain($in{'dom'});
 $oldd = {  %$d };
 &can_edit_domain($d) && &can_edit_forward() || &error($text{'edit_ecannot'});

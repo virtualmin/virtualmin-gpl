@@ -2,9 +2,9 @@
 # Actually update the IPs for multiple servers at once
 
 require './virtual-server-lib.pl';
-&licence_status();
 &can_edit_templates() || &error($text{'newips_ecannot'});
 &ReadParse();
+&licence_status();
 
 # Validate inputs
 &error_setup($text{'newips_err'});

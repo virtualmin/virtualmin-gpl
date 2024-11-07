@@ -2,8 +2,8 @@
 # Delete serveral users in a domain, after asking for confirmation
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParse();
+&licence_status();
 &error_setup($text{'users_derr'});
 
 $d = &get_domain($in{'dom'});

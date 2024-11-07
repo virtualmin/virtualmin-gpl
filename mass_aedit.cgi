@@ -2,8 +2,8 @@
 # Create, update or delete multiple aliases from a text file
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParseMime();
+&licence_status();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'aliases_ecannot'});
 ($mleft, $mreason, $mmax, $mhide) = &count_feature("aliases");

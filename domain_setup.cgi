@@ -3,7 +3,6 @@
 # Create a new virtual domain
 
 require './virtual-server-lib.pl';
-&licence_status();
 &can_create_master_servers() || &can_create_sub_servers() ||
 	&error($text{'form_ecannot'});
 &require_bind() if ($config{'dns'});
@@ -13,6 +12,7 @@ require './virtual-server-lib.pl';
 &require_postgres() if ($config{'postgres'});
 &require_acl();
 &ReadParse();
+&licence_status();
 &error_setup($text{'setup_err'});
 
 # Get parent settings

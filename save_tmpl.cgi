@@ -2,9 +2,9 @@
 # Create, update or delete a template
 
 require './virtual-server-lib.pl';
-&licence_status();
 &can_edit_templates() || &error($text{'newtmpl_ecannot'});
 &ReadParse();
+&licence_status();
 @tmpls = &list_templates();
 if (!$in{'new'}) {
 	# Fetch existing template object

@@ -3,8 +3,8 @@
 # Create, update or delete a user
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParse();
+&licence_status();
 &error_setup($text{'user_err'});
 if ($in{'dom'}) {
 	$d = &get_domain($in{'dom'});

@@ -2,10 +2,10 @@
 # Save provisioning settings
 
 require './virtual-server-lib.pl';
-&licence_status();
 &can_edit_templates() || &error($text{'provision_ecannot'});
 &error_setup($text{'provision_err'});
 &ReadParse();
+&licence_status();
 %oldconfig = %config;
 
 # Validate and store inputs

@@ -2,8 +2,8 @@
 # Create, update or delete a record
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParse();
+&licence_status();
 &error_setup($text{'record_err'});
 $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});

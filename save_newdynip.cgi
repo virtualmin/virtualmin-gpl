@@ -2,9 +2,9 @@
 # Update dynamic IP settings
 
 require './virtual-server-lib.pl';
-&licence_status();
 &error_setup($text{'newdynip_err'});
 &ReadParse();
+&licence_status();
 &can_edit_templates() || &error($text{'newdynip_ecannot'});
 
 # Validate inputs

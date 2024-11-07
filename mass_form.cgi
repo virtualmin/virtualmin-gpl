@@ -2,8 +2,8 @@
 # Show a form for changing settings in multiple users at once
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParse();
+&licence_status();
 &error_setup($text{'mass_err'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'users_ecannot'});

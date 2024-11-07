@@ -5,8 +5,8 @@
 # Features are selected on the form itself
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParse();
+&licence_status();
 &can_create_master_servers() || &can_create_sub_servers() ||
 	&error($text{'form_ecannot'});
 &can_create_batch() || &error($text{'cmass_ecannot'});

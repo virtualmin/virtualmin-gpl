@@ -2,9 +2,9 @@
 # Update custom link categories
 
 require './virtual-server-lib.pl';
-&licence_status();
 &can_edit_templates() || &error($text{'newlinks_ecannot'});
 &ReadParse();
+&licence_status();
 &error_setup($text{'newcats_err'});
 
 for($i=0; defined($in{"desc_$i"}); $i++) {

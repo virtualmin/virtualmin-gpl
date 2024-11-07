@@ -2,10 +2,10 @@
 # Update both enabled core features and plugin modules
 
 require './virtual-server-lib.pl';
-&licence_status();
 &error_setup($text{'features_err'});
 &can_edit_templates() || &error($text{'features_ecannot'});
 &ReadParse();
+&licence_status();
 %lastconfig = %config;
 
 # Work out which features and plugins are now active

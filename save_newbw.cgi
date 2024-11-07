@@ -3,8 +3,8 @@
 # Update bandwidth limit settings
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParse();
+&licence_status();
 &can_edit_templates() || &error($text{'newbw_ecannot'});
 &error_setup($text{'newbw_err'});
 

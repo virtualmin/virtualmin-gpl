@@ -2,8 +2,8 @@
 # Save per-domain excluded directories
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParse();
+&licence_status();
 &error_setup($text{'exclude_err'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});

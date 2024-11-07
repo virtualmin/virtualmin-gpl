@@ -2,8 +2,8 @@
 # Create, update or delete an S3 bucket
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParse();
+&licence_status();
 &can_backup_buckets() || &error($text{'buckets_ecannot'});
 
 # Get the account

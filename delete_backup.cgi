@@ -2,8 +2,8 @@
 # Delete one backup, after asking for confirmation
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParse();
+&licence_status();
 &error_setup($text{'dbackup_err'});
 
 # Get the log and check permissions

@@ -2,9 +2,9 @@
 # Update the master admin's allowed scripts flags
 
 require './virtual-server-lib.pl';
-&licence_status();
 &can_edit_templates() || &error($text{'newscripts_ecannot'});
 &ReadParse();
+&licence_status();
 
 &save_script_master_permissions($in{'allowmaster'}, $in{'allowvers'},
 				$in{'denydefault'});

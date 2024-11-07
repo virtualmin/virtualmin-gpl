@@ -2,8 +2,8 @@
 # Upgrade some script on multiple servers at once
 
 require './virtual-server-lib.pl';
-&licence_status();
 &ReadParse();
+&licence_status();
 &error_setup($text{'massscript_err'});
 
 # Parse inputs
