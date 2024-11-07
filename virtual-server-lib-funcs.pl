@@ -11911,7 +11911,7 @@ if ($virtualmin_pro && -r $licence_status) {
 			exit(99);
 			}
 		elsif ($main::webmin_script_type eq 'web') {
-			&header($text{'error'}, "");
+			&ui_print_header(undef, $text{'error'}, "");
 			print &ui_alert_box("$body", 'warn', undef, 1, $title);
 			&ui_print_footer("javascript:history.back()",
 				$text{'error_previous'});
