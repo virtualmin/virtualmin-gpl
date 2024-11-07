@@ -25,8 +25,8 @@ if (!$module_name) {
 	$0 = "$pwd/delete-backup.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-backup.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 @OLDARGV = @ARGV;
 
 # Parse command-line args

@@ -35,8 +35,8 @@ if (!$module_name) {
 	$0 = "$pwd/modify-php-ini.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-php-ini.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 &foreign_require("phpini");
 @OLDARGV = @ARGV;
 &set_all_text_print();

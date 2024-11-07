@@ -80,8 +80,8 @@ if (!$module_name) {
 	$0 = "$pwd/create-user.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-user.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 @OLDARGV = @ARGV;
 
 # Get shells

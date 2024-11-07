@@ -102,8 +102,8 @@ if (!$module_name) {
 	$0 = "$pwd/create-scheduled-backup.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-scheduled-backup.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 
 $first_print = \&first_text_print;
 $second_print = \&second_text_print;

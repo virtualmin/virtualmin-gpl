@@ -29,8 +29,8 @@ if (!$module_name) {
 	$0 = "$pwd/create-shared-address.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-shared-address.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 @OLDARGV = @ARGV;
 
 # Parse command-line args

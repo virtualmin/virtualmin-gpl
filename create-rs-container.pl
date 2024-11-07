@@ -28,8 +28,8 @@ if (!$module_name) {
 	$0 = "$pwd/create-rs-container.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-rs-container.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 &require_mail();
 
 # Parse command-line args

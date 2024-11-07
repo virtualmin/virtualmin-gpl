@@ -49,8 +49,8 @@ if (!$module_name) {
 	$0 = "$pwd/create-plan.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-plan.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 @OLDARGV = @ARGV;
 
 # Parse command-line args

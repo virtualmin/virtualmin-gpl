@@ -109,8 +109,8 @@ if (!$module_name) {
 	$0 = "$pwd/modify-limits.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-limits.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 @OLDARGV = @ARGV;
 
 # Parse command-line args

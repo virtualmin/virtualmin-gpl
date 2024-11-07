@@ -117,8 +117,8 @@ if (!$module_name) {
 	$0 = "$pwd/modify-dns.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-dns.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 &require_bind();
 @OLDARGV = @ARGV;
 $config{'dns'} || &usage("The BIND DNS server is not enabled for Virtualmin");

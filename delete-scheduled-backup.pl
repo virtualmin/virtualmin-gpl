@@ -27,8 +27,8 @@ if (!$module_name) {
 	$0 = "$pwd/delete-scheduled-backup.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-scheduled-backup.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 
 # Parse command-line args
 @OLDARGV = @ARGV;

@@ -24,8 +24,8 @@ if (!$module_name) {
 	$0 = "$pwd/delete-user.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-user.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 @OLDARGV = @ARGV;
 
 # Parse command-line args

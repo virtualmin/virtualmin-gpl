@@ -49,8 +49,8 @@ if (!$module_name) {
 	$0 = "$pwd/modify-admin.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "modify-admin.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 @OLDARGV = @ARGV;
 
 # Parse command-line args

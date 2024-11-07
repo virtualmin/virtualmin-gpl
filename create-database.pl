@@ -36,8 +36,8 @@ if (!$module_name) {
 	$0 = "$pwd/create-database.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "create-database.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 @OLDARGV = @ARGV;
 
 # Parse command-line args

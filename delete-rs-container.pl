@@ -29,8 +29,8 @@ if (!$module_name) {
 	$0 = "$pwd/delete-rs-container.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "delete-rs-container.pl must be run as root";
-	&licence_status();
 	}
+&licence_status();
 &require_mail();
 
 # Parse command-line args
