@@ -3,6 +3,7 @@
 # Undo the disabling of a domain
 
 require './virtual-server-lib.pl';
+&licence_status();
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_disable_domain($d) || &error($text{'edit_ecannot'});
