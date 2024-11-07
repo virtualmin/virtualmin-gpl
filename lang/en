@@ -4319,7 +4319,10 @@ licence_renew=A renewal can be purchased at <a target=_blank href='$1'>$2</a>.
 licence_renew2=An additional license can be purchased at <a target=_blank href='$1'>$2</a>.
 licence_renew3=A grace period of $1 day is left for managing the migration of the license to a new server.
 licence_renew3m=A grace period of $1 days is left for managing the migration of the license to a new server.
+licence_renew3e=A grace period of $1 day is left for renewing the license.
+licence_renew3em=A grace period of $1 days is left for renewing the license.
 licence_renew4=The grace period for transferring your license has expired, and the system is now in read-only mode.
+licence_renew4e=The grace period for renewing your license has expired, and the system is now in read-only mode.
 license_shop_name=Virtualmin Shop
 licence_recheck=Re-check License Status
 licence_title=Re-Check License
@@ -4383,14 +4386,14 @@ licence_manager_recom=Recommended actions
 licence_manager_recom1n=Get a new license for this machine before the grace period ends, or the system will switch to read-only mode
 licence_manager_recom1t=Choose which server to deregister the $1 license from before the grace period ends; keep in mind, after deregistering, the license server might need up to 48 hours to release a license previously used on multiple servers
 licence_manager_recom1tm=Choose which of the $2 servers to deregister the $1 license from before the grace period ends; keep in mind, after deregistering, the license server might need up to 48 hours to release a license previously used on multiple servers
-licence_manager_recom3=Renew your $1 subscription during the grace period to continue using Virtualmin Pro on this server
+licence_manager_recom3=Renew your $1 subscription during the grace period to continue using Virtualmin Pro on this server before it switches to read-only mode
 licence_manager_bind=Days left in grace period
 licence_manager_change=Change License
 licence_manager_setup=Set Up License
 licence_manager_deregister=Deregister License
 licence_manager_subscription=Manage subscription
 licence_manager_support=Contact support
-licence_manager_support_link=The grace period has ended; if you are confident your license is only used on this server but the license server still marks it as active on multiple, reach out to <a href='$1' target=_blank>Virtualmin Support</a> for quicker assistance, or wait for 48 hours to have it automatically unlocked
+licence_manager_support_link=The grace period has ended; if you are confident your license is solely in use on this server, but the license server still shows it as active on multiple after re-checking, reach out to <a href='$1' target=_blank>Virtualmin Support</a> for quicker assistance, or wait for 48 hours to have it automatically unlocked
 licence_gpl_repos_warning=GPL repos detected. Use "System Settings ⇾ Upgrade to Virtualmin Pro" in UI to upgrade first!
 licence_validating=Validating new license key $1 ..
 licence_evalidating=.. license cannot be validated

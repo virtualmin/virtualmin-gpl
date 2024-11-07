@@ -12087,8 +12087,9 @@ if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
 		};
 	}
 if ($status != 0 && !$state) {
+	my $license_expired = $status == 3 ? 'e' : undef;
 	my $scale = 1;
-	$scale = 3 if ($status == 3);
+	$scale = 3 if ($license_expired);
 	my $alert_text;
 	# Not valid .. show message
 	if ($bind) {
@@ -12098,21 +12099,26 @@ if ($status != 0 && !$state) {
 		}
 	$alert_text .= "<b>".$text{'licence_err'}."</b><br>\n";
 	$alert_text .= $err;
-	$alert_text = "$alert_text. " if ($err !~ /\.$/);
+	$alert_text = "$alert_text. " if ($err && $err !~ /\.$/);
+	my $renew_label = "licence_renew4$license_expired";
 	if ($bind) {
 		my $multi = $bind > 1 ? 'm' : '';
-		$alert_text .= " $text{'licence_maxwarn'}";
-		$alert_text .= " ".&text("licence_renew3$multi", $bind); 
-		}
-	elsif ($alert_text !~ /$virtualmin_renewal_url/) {
-		$alert_text .= " $text{'licence_renew4'}" if (defined($bind));
-		$alert_text .= " $text{'licence_maxwarn'}" if (!defined($bind));
-		$alert_text .= " ".&text('licence_renew2', 
-					 $virtualmin_renewal_url,
-					 $text{'license_shop_name'})
+		if ($license_expired) {
+			$alert_text .= " ".
+			    &text("licence_renew3$license_expired$multi", $bind); 
+			}
+		else {
+			$alert_text .= " $text{'licence_maxwarn'}";
+			$alert_text .= " ".&text("licence_renew3$multi", $bind); 
+			}
 		}
 	else {
-		$alert_text .= " $text{'licence_renew4'}" if (defined($bind));
+		$alert_text .= " ".$text{$renew_label} if (defined($bind));
+		$alert_text .= " $text{'licence_maxwarn'}" if (!defined($bind));
+		}
+	if ($alert_text !~ /$virtualmin_renewal_url/) {
+		$alert_text .= " ".&text('licence_renew2', 
+			$virtualmin_renewal_url, $text{'license_shop_name'});
 		}
 	if (&can_recheck_licence()) {
 		$alert_text .= &ui_form_start("$wp/$module_name/pro/licence.cgi");
