@@ -16889,6 +16889,7 @@ if ($virtualmin_pro &&
 			# File exists, but does it contain the right repo line?
 			my $lref = &read_file_lines($virtualmin_apt_repo, 1);
 			my $found = 0;
+			my $check_vconf = 0;
 			foreach my $l (@$lref) {
 				# An old Debian format with login/pass inside
 				# of the repo file
@@ -16905,18 +16906,20 @@ if ($virtualmin_pro &&
 
 				# A new Debian format with auth in a
 				# separate file
-				if ($l =~ /^deb(.*?)(https):(\/)(\/).*($upgrade_virtualmin_host.*)$/ &&
-					-r "$virtualmin_apt_auth_dir/virtualmin.conf") {
-					my $auth_conf_lines = &read_file_contents("$virtualmin_apt_auth_dir/virtualmin.conf");
-					if ($auth_conf_lines =~ /machine\s+$upgrade_virtualmin_host\s+login\s+(\S+)\s+password\s+(\S+)/gmi) {
-						if ($1 eq $vserial{'SerialNumber'} &&
-						    $2 eq $vserial{'LicenseKey'}) {
-							$found = 2;
-							}
-						else {
-							$found = 1;
-							}
-						last;
+				if ($l =~ /^deb(.*?)(https):(\/)(\/).*($upgrade_virtualmin_host.*)$/) {
+					$check_vconf = 1;
+					}
+				}
+			my $vconf = "$virtualmin_apt_auth_dir/virtualmin.conf";
+			if ($check_vconf && -r $vconf) {
+				my $lines = &read_file_contents($vconf);
+				if ($lines =~ /machine\s+$upgrade_virtualmin_host\s+login\s+(\S+)\s+password\s+(\S+)/gmi) {
+					if ($1 eq $vserial{'SerialNumber'} &&
+					    $2 eq $vserial{'LicenseKey'}) {
+						$found = 2;
+						}
+					else {
+						$found = 1;
 						}
 					}
 				}
