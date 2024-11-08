@@ -351,6 +351,23 @@ else {
 		push(@doms, $d);
 		}
 	}
+@doms || &usage("No domains to update found!");
+
+# Are all domains alias domains?
+@nonalias = grep { !&copy_alias_records($_) } @doms;
+if (!@nonalias && (@addrecs || @delrecs || @uprecs)) {
+	&usage("Records cannot be edited in alias domains as their records ".
+	       "are copied from the target");
+	}
+if (!@nonalias && ($spf || %add || %rem)) {
+	&usage("SPF cannot be edited in alias domains as their records ".
+	       "are copied from the target");
+	}
+if (!@nonalias && ($dmarcp || defined($dmarcpct) || defined($dmarcrua) ||
+		   defined($dmarcruf))) {
+	&usage("DMARC cannot be edited in alias domains as their records ".
+	       "are copied from the target");
+	}
 
 # Validate slave args
 &require_bind();
