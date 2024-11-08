@@ -16847,7 +16847,8 @@ if ($virtualmin_pro &&
 	if ($gconfig{'os_type'} eq 'redhat-linux') {
 		# Check the YUM config file
 		if (!-r $virtualmin_yum_repo) {
-			&$second_print(&text('check_eyumrepofile', $virtualmin_yum_repo));
+			&$second_print(&text('check_eyumrepofile',
+					     $virtualmin_yum_repo));
 			}
 		else {
 			# File exists, but does it contain the right repo line?
@@ -16869,24 +16870,28 @@ if ($virtualmin_pro &&
 				&$second_print($text{'check_yumrepook'});
 				}
 			elsif ($found == 1) {
-				&$second_print(&text('check_yumrepowrong', $virtualmin_yum_repo));
+				&$second_print(&text('check_yumrepowrong',
+						     $virtualmin_yum_repo));
 				}
 			else {
-				&$second_print(&text('check_yumrepomissing', $virtualmin_yum_repo));
+				&$second_print(&text('check_yumrepomissing',
+						     $virtualmin_yum_repo));
 				}
 			}
 		}
 	elsif ($gconfig{'os_type'} eq 'debian-linux') {
 		# Check the APT config file
 		if (!-r $virtualmin_apt_repo) {
-			&$second_print(&text('check_eaptrepofile', $virtualmin_apt_repo));
+			&$second_print(&text('check_eaptrepofile',
+					     $virtualmin_apt_repo));
 			}
 		else {
 			# File exists, but does it contain the right repo line?
 			my $lref = &read_file_lines($virtualmin_apt_repo, 1);
 			my $found = 0;
 			foreach my $l (@$lref) {
-				# An old Debian format with login/pass inside of the repo file
+				# An old Debian format with login/pass inside
+				# of the repo file
 				if ($l =~ /^deb(.*?)https?:\/\/([^:]+):([^\@]+)\@$upgrade_virtualmin_host/) {
 					if ($2 eq $vserial{'SerialNumber'} &&
 					    $3 eq $vserial{'LicenseKey'}) {
@@ -16898,7 +16903,8 @@ if ($virtualmin_pro &&
 					last;
 					}
 
-				# A new Debian format with auth in a separate file
+				# A new Debian format with auth in a
+				# separate file
 				if ($l =~ /^deb(.*?)(https):(\/)(\/).*($upgrade_virtualmin_host.*)$/ &&
 					-r "$virtualmin_apt_auth_dir/virtualmin.conf") {
 					my $auth_conf_lines = &read_file_contents("$virtualmin_apt_auth_dir/virtualmin.conf");
@@ -16918,10 +16924,12 @@ if ($virtualmin_pro &&
 				&$second_print($text{'check_aptrepook'});
 				}
 			elsif ($found == 1) {
-				&$second_print(&text('check_aptrepowrong', $virtualmin_apt_repo));
+				&$second_print(&text('check_aptrepowrong',
+						     $virtualmin_apt_repo));
 				}
 			else {
-				&$second_print(&text('check_aptrepomissing', $virtualmin_apt_repo));
+				&$second_print(&text('check_aptrepomissing',
+						     $virtualmin_apt_repo));
 				}
 			}
 		}
