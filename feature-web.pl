@@ -327,7 +327,7 @@ eval {
 			local $pd = $d->{'parent'} ?
 				&get_domain($d->{'parent'}) : $d;
 			local $rv = &get_domain_resource_limits($pd);
-			&save_domain_resource_limits($d, $rv, 1);
+			&save_domain_resource_limits($d, $rv, 1) if (%{$rv});
 			}
 		}
 
