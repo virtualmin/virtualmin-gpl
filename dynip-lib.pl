@@ -45,12 +45,13 @@ else {
 	}
 }
 
-# get_external_ip_address()
+# get_external_ip_address([no-cache])
 # Returns the IP address of this system, as seen by other hosts on the Internet.
 sub get_external_ip_address
 {
+my ($nocache) = @_;
 my $now = time();
-if ($config{'external_ip_cache'} &&
+if (!$nocache && $config{'external_ip_cache'} &&
     $now - $config{'external_ip_cache_time'} < 24*60*60) {
 	# Can use last cached value
 	return $config{'external_ip_cache'};
