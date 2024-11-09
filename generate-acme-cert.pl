@@ -278,8 +278,13 @@ if (!$ok) {
 	}
 else {
 	$info = &cert_file_info($cert);
-	&$second_print(".. done for ".
-		join(", ", &unique($info->{'cn'}, @{$info->{'alt'}})));
+	@gotnames = &unique($info->{'cn'}, @{$info->{'alt'}});
+	if (scalar(@gotnames) == scalar(@dnames)) {
+		&$second_print(".. done for all hostnames");
+		}
+	else {
+		&$second_print(".. done for ".join(", ", @gotnames));
+		}
 
 	# Worked .. copy to the domain
 	&obtain_lock_ssl($d);
