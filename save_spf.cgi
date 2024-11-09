@@ -12,6 +12,12 @@ $d = &get_domain($in{'dom'});
 $oldd = { %$d };
 
 &obtain_lock_dns($d);
+
+# Update alias DNS copy mode
+if ($d->{'alias'} && defined($in{'aliasdns'})) {
+	$d->{'aliasdns'} = $in{'aliasdns'};
+	}
+
 if (!$in{'readonly'}) {
 	$spf = &get_domain_spf($d);
 	if ($in{'enabled'}) {

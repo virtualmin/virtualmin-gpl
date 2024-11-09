@@ -51,6 +51,14 @@ if ($canlocal) {
 print &ui_table_row(&hlink($text{'spf_cloud'}, 'spf_cloud'),
 		    &ui_select("cloud", $cloud, \@opts));
 
+# Alias domain own records?
+if ($d->{'alias'}) {
+	print &ui_table_row(&hlink($text{'spf_aliasdnsmode'}, 'spf_aliasdns'),
+		&ui_radio("aliasdns", $d->{'aliasdns'} || 0,
+			  [ [ 0, $text{'spf_aliasdns0'} ],
+			    [ 1, $text{'spf_aliasdns1'} ] ]));
+	}
+
 if (!$readonly) {
 	# SPF enabled
 	$spf = &get_domain_spf($d);
