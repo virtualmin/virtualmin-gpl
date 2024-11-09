@@ -169,9 +169,14 @@ else {
 		}
 	else {
 		$info = &cert_file_info($cert);
-		&$second_print(&text('letsencrypt_done2',
-			join(", ", map { "<tt>$_</tt>" }
-			     &unique($info->{'cn'}, @{$info->{'alt'}}))));
+		@gotnames = &unique($info->{'cn'}, @{$info->{'alt'}});
+		if (scalar(@gotnames) == scalar(@dnames)) {
+			&$second_print(&text('letsencrypt_done'));
+			}
+		else {
+			&$second_print(&text('letsencrypt_done2',
+				join(", ", map { "<tt>$_</tt>" } @gotnames)));
+			}
 
 		# Figure out which services (webmin, postfix, etc)
 		# were using the old cert
