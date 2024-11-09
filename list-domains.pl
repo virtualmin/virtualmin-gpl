@@ -808,6 +808,12 @@ if ($multiline) {
 			print "    Parent DNS virtual server: ",$dnsparent->{'dom'},"\n";
 			}
 
+		# Alias domain mode
+		if ($d->{'alias'}) {
+			print "    Alias has own DNS records: ",
+				($d->{'aliasdns'} ? "Yes" : "No"),"\n";
+			}
+
 		# DNS registrar expiry date
 		if ($d->{'whois_expiry'}) {
 			print "    Domain registration expiry: ",

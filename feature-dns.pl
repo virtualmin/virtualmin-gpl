@@ -66,6 +66,11 @@ elsif ($dns_submode) {
 	$dnsparent = &find_parent_dns_domain($d);
 	}
 
+# Set alias domain DNS records mode from template
+if ($d->{'alias'} && !defined($d->{'aliasdns'})) {
+	$d->{'aliasdns'} = $tmpl->{'dns_alias'} eq 'yes' ? 1 : 0;
+	}
+
 # Create the list of DNS records
 my $recs = [ ];
 my $recstemp = &transname();
@@ -3072,10 +3077,16 @@ if (@views || $tmpl->{'dns_view'}) {
 			  map { [ $_->{'values'}->[0] ] } @views ]));
 	}
 
-# Add sub-domains to parent domain DNS
+# Add sub-domains to parent domain DNS zone?
 print &ui_table_row(&hlink($text{'tmpl_dns_sub'},
                            "template_dns_sub"),
 	&none_def_input("dns_sub", $tmpl->{'dns_sub'},
+		        $text{'yes'}, 0, 0, $text{'no'}));
+
+# Alias domains can have own DNS records?
+print &ui_table_row(&hlink($text{'tmpl_dns_alias'},
+                           "template_dns_alias"),
+	&none_def_input("dns_alias", $tmpl->{'dns_alias'},
 		        $text{'yes'}, 0, 0, $text{'no'}));
 
 # Where to create zones?
@@ -3400,6 +3411,10 @@ $tmpl->{'dns_dmarcextra'} = $in{'dns_dmarcextra'};
 # Save sub-domain DNS mode
 $tmpl->{'dns_sub'} = $in{'dns_sub_mode'} == 0 ? "none" :
 		     $in{'dns_sub_mode'} == 1 ? undef : "yes";
+
+# Save DNS alias mode
+$tmpl->{'dns_alias'} = $in{'dns_alias_mode'} == 0 ? "none" :
+		       $in{'dns_alias_mode'} == 1 ? undef : "yes";
 
 # Save cloud provider
 $tmpl->{'dns_cloud'} = $in{'dns_cloud'};

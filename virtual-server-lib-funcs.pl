@@ -9704,6 +9704,7 @@ push(@rv, { 'id' => 0,
 	    'dns_dmarcrua' => $config{'bind_dmarcrua'},
 	    'dns_dmarcextra' => $config{'bind_dmarcextra'},
 	    'dns_sub' => $config{'bind_sub'} || "none",
+	    'dns_alias' => $config{'bind_alias'} || "none",
 	    'dns_cloud' => $config{'bind_cloud'},
 	    'dns_cloud_import' => $config{'bind_cloud_import'},
 	    'dns_cloud_proxy' => $config{'bind_cloud_proxy'},
@@ -10071,8 +10072,10 @@ if ($tmpl->{'id'} == 0) {
 	$config{'bind_dmarcruf'} = $tmpl->{'dns_dmarcruf'};
 	$config{'bind_dmarcrua'} = $tmpl->{'dns_dmarcrua'};
 	$config{'bind_dmarcextra'} = $tmpl->{'dns_dmarcextra'};
-	$config{'bind_sub'} = $tmpl->{'dns_sub'} eq 'none' ? undef
-							   : $tmpl->{'dns_sub'};
+	$config{'bind_sub'} = $tmpl->{'dns_sub'} eq 'none' ?
+					undef : $tmpl->{'dns_sub'};
+	$config{'bind_alias'} = $tmpl->{'dns_alias'} eq 'none' ?
+					undef : $tmpl->{'dns_alias'};
 	$config{'bind_cloud'} = $tmpl->{'dns_cloud'};
 	$config{'bind_slaves'} = $tmpl->{'dns_slaves'};
 	$config{'bind_cloud_import'} = $tmpl->{'dns_cloud_import'};
@@ -10351,7 +10354,7 @@ if (!$tmpl->{'default'}) {
 	local $p;
 	local %done;
 	foreach $p ("dns_spf", "dns_sub", "dns_master", "dns_mx", "dns_dmarc",
-		    "dns_cloud", "dns_slaves", "dns_prins",
+		    "dns_cloud", "dns_slaves", "dns_prins", "dns_alias",
 		    "web_acme", "web_webmail", "web_admin", "web_http2",
 		    "web_redirects", "web_sslredirect", "web_php",
 		    "web", "dns", "ftp", "mail", "frame", "user_aliases",
@@ -10387,7 +10390,7 @@ if (!$tmpl->{'default'}) {
 			local $k;
 			foreach $k (keys %$def) {
 				next if ($p eq "dns" &&
-					 $k =~ /^dns_(spf|cloud|slaves|prins)/);
+					 $k =~ /^dns_(spf|cloud|slaves|prins|alias)/);
 				next if ($p eq "php" &&
 					 $k =~ /^php_(fpm|sock)/);
 				next if ($p eq "web" &&
