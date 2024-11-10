@@ -650,7 +650,8 @@ my @dnsdoms = grep { &has_dkim_domain($_, $dkim) } @alldoms;
 
 # Remove from domains that didn't get the DNS records added
 my %dnsdoms = map { $_->{'id'}, $_ } @dnsdoms;
-my @exdoms = grep { !$dnsdoms{$_->{'id'}} && $_->{'dns'} } &list_domains();
+my @exdoms = grep { !$dnsdoms{$_->{'id'}} && $_->{'dns'} &&
+		    !&copy_alias_records($_) } &list_domains();
 if (@exdoms) {
 	&remove_dkim_dns_records(\@exdoms, $dkim);
 	}
@@ -800,7 +801,7 @@ my ($dkim) = @_;
 &foreign_require("init");
 
 # Remove from DNS
-my @doms = grep { $_->{'dns'} } &list_domains();
+my @doms = grep { $_->{'dns'} && !&copy_alias_records($_) } &list_domains();
 &remove_dkim_dns_records(\@doms, $dkim);
 
 &$first_print($text{'dkim_unmailserver'});
@@ -888,6 +889,9 @@ my ($d, $dkim) = @_;
 if (!$d->{'dns'}) {
 	return 0;
 	}
+elsif (&copy_alias_records($d)) {
+	return 0;
+	}
 elsif ($dkim->{'alldns'} == 1) {
 	# Can be enabled even without email
 	return 1;
@@ -908,6 +912,7 @@ sub has_dkim_domain
 {
 my ($d, $dkim) = @_;
 return 0 if (!$d->{'dns'});
+return 0 if (&copy_alias_records($d));
 return 0 if ($d->{'dkim_enabled'} eq '0');
 return 1 if ($d->{'dkim_enabled'} eq '1');
 return &can_dkim_domain($d, $dkim);
@@ -937,7 +942,7 @@ my %done;
 &unlock_file(&get_dkim_config_file());
 
 # Add or remove DNS records
-if ($d->{'dns'} && !$nodns) {
+if ($d->{'dns'} && !&copy_alias_records($d) && !$nodns) {
 	if ($action eq 'setup' || $action eq 'modify') {
 		&add_dkim_dns_records([ $d ], $dkim);
 		}
@@ -1399,7 +1404,7 @@ else {
 	}
 &$second_print($text{'setup_done'});
 
-if ($d->{'dns'}) {
+if ($d->{'dns'} && !&copy_alias_records($d)) {
 	&add_dkim_dns_records([ $d ], $dkim);
 	}
 

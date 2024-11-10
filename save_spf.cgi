@@ -113,27 +113,27 @@ if (!$in{'readonly'}) {
 		$err = &save_domain_dmarc($d, undef);
 		}
 	&error($err) if ($err);
-	}
 
-# Update DKIM records
-my $dkim = &get_dkim_config();
-if ($dkim && defined($in{'dkim'})) {
-	my $olddkim = &has_dkim_domain($d, $dkim);
-	if ($in{'dkim'} eq '1') {
-		$d->{'dkim_enabled'} = 1;
-		}
-	elsif ($in{'dkim'} eq '0') {
-		$d->{'dkim_enabled'} = 0;
-		}
-	else {
-		delete($d->{'dkim_enabled'});
-		}
-	my $newdkim = &has_dkim_domain($d, $dkim);
-	if (!$olddkim && $newdkim) {
-		&update_dkim_domains($d, 'setup');
-		}
-	elsif ($olddkim && !$newdkim) {
-		&update_dkim_domains($d, 'delete');
+	# Update DKIM records
+	my $dkim = &get_dkim_config();
+	if ($dkim && defined($in{'dkim'})) {
+		my $olddkim = &has_dkim_domain($d, $dkim);
+		if ($in{'dkim'} eq '1') {
+			$d->{'dkim_enabled'} = 1;
+			}
+		elsif ($in{'dkim'} eq '0') {
+			$d->{'dkim_enabled'} = 0;
+			}
+		else {
+			delete($d->{'dkim_enabled'});
+			}
+		my $newdkim = &has_dkim_domain($d, $dkim);
+		if (!$olddkim && $newdkim) {
+			&update_dkim_domains($d, 'setup');
+			}
+		elsif ($olddkim && !$newdkim) {
+			&update_dkim_domains($d, 'delete');
+			}
 		}
 	}
 
