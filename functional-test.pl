@@ -2807,6 +2807,49 @@ $aliasdom_tests = [
 	  'grep' => 'Usermin',
 	},
 
+	# Give alias domain it's own DNS records
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'alias-dns' ] ],
+	},
+
+	# Add a DNS record to the alias domain
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-record', 'testing2 A 1.2.3.4' ] ],
+	},
+
+	# Make sure it works, and so does the record copied from the target
+	{ 'command' => 'host -t A testing2.'.$test_domain,
+	  'grep' => '1.2.3.4',
+	},
+	{ 'command' => 'host -t A testing.'.$test_domain,
+	  'grep' => '1.2.3.4',
+	},
+
+	# Add a DNS record to the target domain
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'add-record', 'testing3 A 1.2.3.4' ] ],
+	},
+
+	# Make sure it's not in the alias
+	{ 'command' => 'host -t A testing3.'.$test_domain,
+	  'antigrep' => '1.2.3.4',
+	  'fail' => 1,
+	},
+
+	# Switch alias domain back to copying DNS records
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'no-alias-dns' ] ],
+	},
+
+	# Make sure the record is now in the alias
+	{ 'command' => 'host -t A testing3.'.$test_domain,
+	  'grep' => '1.2.3.4',
+	},
+
 	# Enable aliascopy mode
 	{ 'command' => 'modify-mail.pl',
 	  'args' => [ [ 'domain', $test_domain ],
