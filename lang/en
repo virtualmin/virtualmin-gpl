@@ -6968,6 +6968,7 @@ postgrey_procalready=.. already running
 postgrey_postfix=Configuring Postfix to use Postgrey ..
 postgrey_postfixalready=.. already configured
 postgrey_postfixdone=.. configured to use port $1
+postgrey_postfixdone2=.. configured to use socket file $1
 postgrey_nopostfix=Configuring Postfix to remove Postgrey ..
 postgrey_nopostfixdone=.. removed
 postgrey_nopostfixalready=.. already removed
