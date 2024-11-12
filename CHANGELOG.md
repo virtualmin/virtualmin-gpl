@@ -1,8 +1,13 @@
-#### Version 7.30.1
-* Added support for multiple ACME-compatible SSL providers in the Pro version, rather than just Let's Encrypt
-* Numerous improvements to the DirectAdmin migration process
-* CAA DNS records can now be manually edited and created
-* Numerous DNS-related bugfixes
+#### Version 7.30.0
+* Add support for multiple ACME-compatible SSL providers in the Pro version, like ZeroSSL, Sectigo and many other
+* Add numerous improvements to the DirectAdmin migration process
+* Add ability for CAA DNS records to be manually edited and created
+* Add ability to edit RUA and RUF DMARC DNS fields
+* Add an option in the wizard to configure the system default email address
+* Add an option to enable or disable SSL certificate renewal email notifications
+* Add status monitors for Usermin and Postgrey to the dashboard
+* Fix numerous DNS-related bugs
+* Fix config file to set the correct port/socket for Postgrey in EL derivatives
 
 #### Version 7.20.1
 * Add support for changing username format to match the local system when restoring a backup
