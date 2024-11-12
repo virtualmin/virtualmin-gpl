@@ -998,9 +998,6 @@ dresels_err2=Blocco resellers fallito
 dresels_err3=Sblocco resellers fallito
 dresels_enone=Nessuno selezionato
 
-licence_err=È stato trovato un problema con la tua licenza di Virtualmin:
-licence_soon=Notizia - La tua licenza di Virtualmin scadrà tra $1 giorni.
-licence_soon2=Notizia - La tua licenza di Virtualmin scadrà tra $1 ore.
 licence_recheck=Ricontrolla stato licenza
 licence_title=Ricontrolla licenza
 licence_doing=Ricontrollo della tua licenza di Virtualmin ..

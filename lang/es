@@ -2778,18 +2778,12 @@ resel_linkurl=A URL
 resel_elogo=La URL del logo es inexistente o inválida
 resel_elink=La URL del enlace del logo es inexistente o inválida
 
-licence_err=Se ha detectado un problema con su licencia de Virtualmin :
-licence_soon=Atención - Su licencia de Virtualmin expirará en $1 días.
-licence_soon2=Atención - Su licencia de Virtualmin expirará en $1 horas.
-licence_renew=Una renovación puede comprarse a <a target=_new href='$1'>$1</a>
 licence_recheck=Re-chequear el estado de licencia
 licence_title=Re-chequear licencia
 licence_doing=Ahora re-chequeando su licencia de Virtualmin ..
-licence_warn=Sin embargo, ha ocurrido un problema temporario al chequear la licencia : $1.
 licence_unlimited=ilimitado
 licence_goterr=.. se ha detectado un problema : $1
 licence_ecannot=No está autorizado a re-chequear la licencia de Virtualmin
-licence_maxdoms=La licencia de su sistema es solo para $1 servidores, pero usted tiene $2.
 
 config_deftheme=Webmin global por defecto
 config_oldtheme=Viejo tema del Webmin
@@ -3780,8 +3774,6 @@ upgrade_serial=Número de serie
 upgrade_key=Clave de licencia
 upgrade_ok=Actualizar ahora
 upgrade_err=Falla al actualizar a Virtualmin Pro
-upgrade_eserial=Número de serie inválido o inexistente
-upgrade_ekey=Clave de licencia inválida o inexistente
 upgrade_eamazon=Esta clave de licencia no puede ser utilizada para actualizaciones
 upgrade_elogin=Su número de serie y clave de licencia no ha sido recnocida por el website de Virtuamin Pro
 upgrade_econnect=Ha ocurrido un error conectando al servidor de Virtualmin Pro : $1
@@ -4133,7 +4125,6 @@ res_err=Falla al guardar límites de recursos
 res_eprocs=Número máximo de procesos inexistente o inválido
 res_eprocs2=El número máximo de procesos debe ser 2 o mas
 res_emem=Tamaño de procesos máximo inexistente o inválido
-res_emem2=El tamaño de procesos máximo debe ser por lo menos 1M
 res_mins=minutos
 res_time=Tiempo máximo de CPU por proceso
 res_etime=Tiempo máximo de CPU por proceso inexistente o inválido

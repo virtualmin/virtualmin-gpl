@@ -5,6 +5,8 @@ index_phpv=PHP-versie
 index_ip=IP adres
 index_ssl_expiry=SSL vervalt
 index_ebinderrs=Er zijn fouten gevonden in de BIND-configuratie van uw systeem : $1
+index_espammail=De spamfilterfunctie kan alleen worden ingeschakeld als e-mail is ingeschakeld op de pagina <a href='$1'>functies en plug-ins</a>.
+index_evirusmail=De virusfilterfunctie kan alleen worden ingeschakeld als e-mail is ingeschakeld op de pagina <a href='$1'>functies en plug-ins</a>.
 index_etlsassl=OpenSSL biedt geen ondersteuning voor het parseren van certificaten of SHA-256-hashing
 index_saname=Cyrus SASL-authenticatieserver
 index_sastop=Stop de authenticatieserver
@@ -282,6 +284,7 @@ aliases_indom=$1 aliassen in domein $2
 alias_egone=E-mailalias bestaat niet meer
 alias_etype1f=Je mag geen e-mail doorsturen naar '$1'
 
+edit_ewebappcannot=Het is niet toegestaan om webapplicaties te beheren
 edit_id=Domein-ID
 edit_ssl_exp=Vervaldatum domein SSL
 edit_whois_exp=Vervaldatum domeinregistratie
@@ -1103,6 +1106,7 @@ tmpl_dmarcskip=Geen ingesteld
 tmpl_dmarcyes=Ja, met onderstaand beleid
 tmpl_dmarcextra=Extra DMARC-opties
 tmpl_edmarcpct=Het percentage berichten moet een geheel getal zijn tussen 0 en 100
+tmpl_dns_alias=Hebben alias-DNS-domeinen hun eigen records?
 tmpl_dns_cloud=Maak nieuwe DNS-zones op
 tmpl_dns_remote=Externe DNS $1
 tmpl_dns_cloud_import=Bestaande zone overnemen bij het maken
@@ -1231,12 +1235,25 @@ resel_equnlimit=De virtuele server $1 kan niet worden toegewezen aan deze resell
 resel_ebwunlimit=De virtuele server $1 kan niet worden toegewezen aan deze reseller, omdat deze een onbeperkt bandbreedte-quotum heeft, maar de reseller heeft een limiet
 resel_ebefore=Voordat de wijzigingsopdracht is mislukt : $1
 
+licence_err=Er is een probleem gedetecteerd met uw Virtualmin-licentie:
+licence_soon=Uw Virtualmin-licentie verloopt over $1 dagen.
+licence_soon2=Uw Virtualmin-licentie verloopt over $1 uur.
+licence_renew=U kunt een verlenging aanschaffen bij <a target=_blank href='$1'>$2</a>.
+licence_renew2=Een extra licentie kan worden aangeschaft op <a target=_blank href='$1'>$2</a>.
+licence_renew3=Er is een respijtperiode van $1 dag over voor het beheren van de migratie van de licentie naar een nieuwe server.
+licence_renew3m=Er is een respijtperiode van $1 dagen voor het beheren van de migratie van de licentie naar een nieuwe server.
+licence_renew3e=Er is een respijtperiode van $1 dag voor het verlengen van de licentie.
+licence_renew3em=Er is een respijtperiode van $1 dagen voor het verlengen van de licentie.
+licence_renew4=De respijtperiode voor het overdragen van uw licentie is verlopen en het systeem staat nu in de alleen-lezenmodus.
+licence_renew4e=De respijtperiode voor het verlengen van uw licentie is verlopen en het systeem staat nu in de alleen-lezenmodus.
 license_shop_name=Virtualmin-winkel
-licence_ok2=.. licentie is <i>geldig</i>. Het is geldig voor $1 Virtualmin-domeinen en voor gebruik op $2 -systemen.
-licence_ok3=.. licentie is <i>geldig</i>. Het is geldig voor $1 Virtualmin-domeinen en voor gebruik op $2 -systemen tot $3.
+licence_ok2=.. licentie is geldig voor $1 Virtualmin-domeinen en voor gebruik op $2-systeem
+licence_ok3=.. licentie is geldig voor $1 Virtualmin-domeinen en voor gebruik op $2-systeem tot $3
+licence_warn=Er is een tijdelijk probleem opgetreden tijdens de licentiecontrole $2 : $1 
 licence_goterr2=.. ongeldige vervaldatum : $1
-licence_maxservers2=Uw serienummer $3 heeft alleen een licentie voor $1 server, maar wordt gebruikt op $2.
-licence_maxwarn=Tenzij dit serienummer tijdelijk wordt gebruikt om naar een nieuwe server te migreren, dient u een extra licentie aan te schaffen bij <a target=_blank href='$1'>$2</a>.
+licence_maxdoms=Uw systeem is alleen gelicentieerd voor server $1, maar wordt momenteel gebruikt op server $2.
+licence_maxservers2=Uw serienummer $3 is alleen gelicentieerd voor $1 server, maar wordt momenteel gebruikt op $2 servers.
+licence_maxwarn=Tenzij deze licentie tijdelijk wordt gebruikt voor migratie naar een nieuwe server, moet u een aparte licentie aanschaffen voor gebruik op deze server.
 licence_ipchanged=Het primaire IP-adres van uw systeem lijkt te zijn gewijzigd van $1 in $2. Virtuele servers die het oude adres gebruiken, zijn mogelijk onbereikbaar of geven de verkeerde webinhoud weer.
 licence_changeip=Update onjuiste IP-adressen
 licence_smallcert=Uw systeem gebruikt een SSL-certificaat dat slechts $1 bits lang is, wat kleiner is dan de aanbevolen grootte van 2048 bits. Dit certificaat is uitgegeven door $4 tot $3 voor het domein $2.
@@ -1249,6 +1266,64 @@ licence_fixlinksok=Herstel symbolische koppelingsrechten
 licence_fixlinksignore=Sta onveilige symbolische links toe
 licence_xfsreboot=Uw systeem moet opnieuw worden opgestart om XFS-quota op het rootbestandssysteem mogelijk te maken. Zolang dit niet is gedaan, detecteert Virtualmin geen quota als actief en is het onmogelijk om limieten voor schijfgebruik op virtuele servers of gebruikers toe te passen.
 licence_xfsrebootok=Herstart nu
+licence_efailed=Kan geen contact maken met de licentieserver
+licence_eexp=De licentie voor deze server is verlopen op $1
+licence_echk=Er is een fout opgetreden bij het controleren van de licentie
+licence_evalid=Er is geen geldige licentie gevonden voor uw serienummer $1
+licence_evalidnone=Geen geldige licentie gevonden; uw licentie is uitgeschreven
+license_esave=Licentie-informatie kon niet worden bijgewerkt
+licence_change=Licentie Activering
+licence_deregister_sure=Deze actie zal de $1 licentie loskoppelen van dit systeem, en deze instellen op alleen-lezen modus na een $2-dagen grace periode. U zult een nieuwe licentie moeten verkrijgen om Virtualmin Pro op deze server te kunnen blijven gebruiken. De licentie nu deregistreren?
+licence_deregister_sure_nspan=Deze actie zal de $1 licentie loskoppelen van dit systeem, waardoor deze binnen 48 uur geldig is voor gebruik op een andere server. Er is een nieuwe licentie nodig om Virtualmin Pro op deze server te blijven gebruiken. De licentie nu deregistreren?
+licence_manager_deregister_yes=Ja, uitschrijven
+
+licence_manager=Licentiebeheerder
+licence_manager_goto=Beheer Virtualmin Pro-licentie
+licence_manager_desc=Deze pagina toont de seriële sleutel en status voor de huidige licentie die aan deze machine is gekoppeld. Het biedt ook opties om de status te controleren en de licentie bij te werken.
+licence_manager_menu=Virtualmin Licentie Manager
+licence_manager_status=Licentiestatus
+licence_manager_count=Aantal domeinen
+licence_manager_expiry=Vervaldatum
+licence_manager_ucount=Onbeperkt
+licence_manager_checked=Laatst gecontroleerd
+licence_manager_err=Licentiefout
+licence_manager_err1=Er is geen geldige licentie gevonden voor serienummer $1 en licentiesleutel $2
+licence_manager_err1n=De licentiesleutel en het serienummer zijn niet ingesteld
+licence_manager_status0=Geldig
+licence_manager_status1=Ongeldig
+licence_manager_status1n=Ongeldig
+licence_manager_status1t=Tijdelijk ongeldig
+licence_manager_status2=Onbekend
+licence_manager_status3=Verlopen
+licence_manager_status4=Vergrendeld, met het systeem in de alleen-lezen-modus
+licence_manager_statusok=Licentie heeft geen problemen
+licence_manager_explain=Uitleg licentiefout
+licence_manager_explain1n=Deze fout geeft aan dat het serienummer en de licentie mogelijk niet correct zijn ingesteld, wat soms kan gebeuren als het Virtualmin Pro-pakket op een ongeautoriseerde manier is gedownload en geïnstalleerd
+licence_manager_explain1d=Deze fout geeft aan dat het serienummer en de licentiesleutel nooit zijn ingesteld of van deze server zijn losgekoppeld
+licence_manager_explain1t=U kunt dezelfde Virtualmin Pro-licentie tijdelijk gebruiken om naar een nieuwe server te verhuizen. Als u de licentie echter op meerdere servers wilt gebruiken, heeft elke server zijn eigen licentie nodig. Deregistreer de licentie van de ene server voordat u deze op een andere server gebruikt. Anders worden alle servers die dezelfde licentie gebruiken na de respijtperiode overgeschakeld naar de alleen-lezenmodus
+licence_manager_recom=Aanbevolen acties
+licence_manager_recom1n=Vraag een nieuwe licentie aan voor deze machine voordat de respijtperiode afloopt, anders schakelt het systeem over naar de alleen-lezen-modus
+licence_manager_recom1t=Kies de server waarvan u de $1-licentie wilt afmelden voordat de respijtperiode afloopt. Houd er rekening mee dat de licentieserver na het afmelden tot 48 uur nodig kan hebben om een licentie vrij te geven die eerder op meerdere servers is gebruikt
+licence_manager_recom1tm=Kies welke van de $2 servers u de $1 licentie wilt afmelden voordat de respijtperiode afloopt. Houd er rekening mee dat de licentieserver na het afmelden tot 48 uur nodig kan hebben om een licentie vrij te geven die eerder op meerdere servers is gebruikt
+licence_manager_recom3=Verleng uw $1-abonnement tijdens de respijtperiode om Virtualmin Pro op deze server te blijven gebruiken voordat deze overschakelt naar de alleen-lezenmodus
+licence_manager_bind=Dagen resterend in de respijtperiode
+licence_manager_change=Licentie wijzigen
+licence_manager_setup=Licentie instellen
+licence_manager_deregister=Licentie afmelden
+licence_manager_subscription=Abonnement beheren
+licence_manager_support=Neem contact op met de ondersteuning
+licence_manager_support_link=De respijtperiode is afgelopen. Als u er zeker van bent dat uw licentie alleen op deze server wordt gebruikt, maar de licentieserver deze na hercontrole nog steeds als actief op meerdere servers weergeeft, neem dan contact op met <a href='$1' target=_blank>Virtualmin Support</a> voor snellere hulp, of wacht 48 uur totdat deze automatisch wordt ontgrendeld
+licence_gpl_repos_warning=GPL repo's gedetecteerd. Gebruik "System Settings Upgrade to Virtualmin Pro" in UI om eerst te upgraden!
+licence_validating=Valideren van nieuwe licentiesleutel $1 ..
+licence_evalidating=..licentie kan niet worden gevalideerd
+licence_ecanvalidating=..licentie is niet geldig
+licence_valid_unlim=.. geldig voor onbeperkt aantal domeinen tot $1
+licence_valid=.. geldig voor $1 domeinen tot $2
+licence_updating_repo=Virtualmin-repository bijwerken ..
+licence_no_lines=.. geen regels voor $1 gevonden!
+licence_updfile=Virtualmin-licentie bijwerken ..
+licence_expired=Licentie verlopen
+licence_expired_desc=Uw systeem bevindt zich momenteel in de alleen-lezenmodus, wat betekent dat u geen wijzigingen kunt aanbrengen in de systeemconfiguratie. Deze modus wordt afgedwongen omdat de systeemlicentie is verlopen of op meerdere servers wordt gebruikt. Ga naar de pagina <a href='$1'>Virtualmin License Manager</a> voor meer informatie.
 
 scripts_title=Beheer webapps
 scripts_desc=Dit formulier kan worden gebruikt om eenvoudig verschillende webapps van derden in de webmap van deze virtuele server te installeren of te upgraden.
@@ -1526,6 +1601,7 @@ scripts_kit_wp_apply_backup_rm=Geselecteerde back-upbestanden verwijderen ..
 scripts_kit_wp_apply_backup_erm=.. overgeslagen: geen bestanden geselecteerd
 scripts_kit_wp_apply_backup_rmf=Back-upbestand <tt>$1</tt> verwijderen ..
 scripts_kit_wp_apply_backup_ermf=.. mislukt: <tt>$1</tt>
+scripts_kit_wp_apply_backup_ermf0=bestand bestaat niet
 scripts_kit_wp_apply_backup_db=WordPress-database exporteren ..
 scripts_kit_wp_apply_archive_db=Een WordPress-back-uparchief voor de database maken ..
 scripts_kit_wp_apply_archive_files=Een WordPress-back-uparchief maken voor bestanden ..
@@ -1542,6 +1618,7 @@ scripts_kit_wp_apply_clone1=Een kloon maken onder dezelfde virtuele server ..
 scripts_kit_wp_apply_clone2=Een kloon maken onder de bestaande <tt>$1</tt> virtuele server ..
 scripts_kit_wp_apply_clone3=Een kloon maken onder de nieuwe virtuele subserver <tt>$1</tt> ..
 scripts_kit_wp_apply_clone4=Een kloon maken onder de nieuwe <tt>$1</tt> virtuele server op het hoogste niveau ..
+scripts_kit_wp_apply_clone_eclonegone=.. mislukt: het bovenliggende doeldomein waarnaar gekloond moet worden, bestaat niet
 scripts_kit_wp_apply_clone_eclone=.. mislukt: u mag dit type kloon niet maken
 scripts_kit_wp_apply_clone_edir=.. mislukt: de kloonmap mag alleen letters, cijfers en tekens zoals een punt, koppelteken of onderstrepingsteken bevatten
 scripts_kit_wp_apply_clone_db=Database dump voor kloon maken ..
@@ -1560,6 +1637,11 @@ scripts_kit_wp_apply_clone_sub=Nieuwe subserver voor kloon aanmaken ..
 scripts_kit_wp_apply_clone_esub=.. kon subserver voor kloon niet aanmaken : $1
 scripts_kit_wp_apply_clone_top=Nieuwe top-level server aanmaken voor kloon ..
 scripts_kit_wp_apply_clone_etop=.. kon geen top-level server aanmaken voor kloon : $1
+scripts_kit_edom_name=Virtuele server '$1' bestaat niet
+scripts_kit_estype=Er is nog geen script van het type '$1' geïnstalleerd op deze virtuele server
+scripts_kit_estype_multi=Meerdere scripts van het type '$1' zijn beschikbaar op de volgende paden:
+scripts_kit_estype_multi2=Gebruik de hulpparameter '--script-path' om het exacte script op te geven dat moet worden gebruikt
+scripts_kit_estype_path=Het script van het type '$1' op pad '$2' bestaat niet
 
 scripts_gpl_pro_tip=Pro-functie
 scripts_gpl_pro_tip_hide=Bedankt voor de heads-up
@@ -1913,6 +1995,9 @@ website_ephpcgi=CGI-scripts kunnen niet worden uitgeschakeld terwijl PHP de CGI-
 website_ephpfcgid=CGI-scripts kunnen niet worden uitgevoerd via FCGIwrap terwijl PHP de FCGI-uitvoeringsmodus gebruikt
 
 spf_dmarcchange=DMARC-record bijwerken.
+spf_aliasdnsmode=Alias domein DNS-modus
+spf_aliasdns0=Records kopiëren van doeldomein
+spf_aliasdns1=Eigen records beheren
 spf_ip6=Toegestane IPv6-adressen van afzenders
 spf_eip6='$1' is geen geldig IPv6-adres
 spf_default3=Standaard extern adres
@@ -1969,6 +2054,8 @@ spf_keytag=Sleutelhanger
 spf_alg=Algoritme
 spf_type=Digest-type
 spf_digest=Digest-reeks
+spf_aliasdns=Aliasdomein overzetten naar eigen DNS-records ..
+spf_noaliasdns=Aliasdomein wijzigen om DNS-records van doel te kopiëren ..
 
 s3_emodule2=De Perl-module $1 die nodig is om te communiceren met de S3-service van Amazon kan niet worden geladen : $2
 s3_emodule3=De Perl-modules $1 of $2 die nodig zijn om te communiceren met de S3-service van Amazon, zijn niet geïnstalleerd
@@ -2001,6 +2088,8 @@ dynip_external=Extern script ..
 dynip_none=Update geen enkele dienst
 
 upgrade_epackages=Geen pakketten gevonden om te installeren!
+upgrade_eserial=Ontbrekend of ongeldig serienummer
+upgrade_ekey=Ontbrekende of ongeldige licentiesleutel
 upgrade_success=Upgrade naar Virtualmin Pro is gelukt. Bedankt voor het kiezen van Virtualmin Pro!
 upgrade_eyumlist=Het $1 RPM-pakket is niet gevonden in de lijst met beschikbare pakketten uit de repository. Misschien werkt een van uw huidige repositories niet?
 upgrade_to_pro=Upgraden naar Virtualmin Pro ..
@@ -2087,6 +2176,8 @@ mail_smtp_local=&lt;Geen - rechtstreeks vanuit dit systeem leveren&gt;
 mail_smtp_cloudoff=Cloud SMTP-provider $1 verwijderen ..
 mail_smtp_cloudon=Cloud SMTP-provider $1 configureren ..
 mail_smtp_cloudfailed=.. mislukt  : $1
+
+res_emem3=De maximale procesgrootte moet minimaal 200M zijn
 
 sched_allplan=Op plan $1
 sched_allplans=Op $1 -abonnementen
@@ -2834,7 +2925,7 @@ right_of=$1 van $2
 right_sysinfo=systeem informatie
 
 assoc_title=Functies koppelen en ontkoppelen
-assoc_desc=Functies die op deze pagina zijn ingeschakeld of uitgeschakeld, werken geen systeemconfiguratiebestanden bij. In plaats daarvan werkt het alleen de database van Virtualmin met verwachte domeinfuncties bij. Dit is handig voor het importeren van handmatig ingestelde functies of het loskoppelen van configuraties om ze te behouden wanneer een virtuele server wordt verwijderd. Wees voorzichtig!
+assoc_desc=Functies die op deze pagina zijn ingeschakeld of uitgeschakeld, werken geen systeemconfiguratiebestanden bij. In plaats daarvan wordt alleen de database van Virtualmin met verwachte domeinfuncties bijgewerkt. Dit is handig voor het importeren van handmatig ingestelde functies of het loskoppelen van configuraties om ze te behouden wanneer een virtuele server wordt verwijderd. Wees voorzichtig!
 assoc_header=Instellingen voor functie-associatie
 assoc_features=Functies bekend bij Virtualmin
 assoc_validate=Succesvolle validatie vereisen voordat u opslaat?
@@ -3017,6 +3108,7 @@ deftmplt_tmpltpagefooteraboutcont=Contact
 2fa_header=Twee-factor-opties
 2fa_err=Opslaan van tweefactorauthenticatie is mislukt
 2fa_enrolling=Inschrijven voor twee factoren met $1. ..
+2fa_ecannot=U mag geen tweefactorauthenticatie beheren
 
 rcert_err=Certificaat kan niet worden verwijderd
 rcert_ecert=Virtuele server heeft geen certificaat om te verwijderen
@@ -3224,6 +3316,8 @@ acme_can1=Wederverkopers
 acme_can2=Alleen hoofdbeheerder
 acme_edefault=De standaard Let's Encrypt-provider kan niet worden bewerkt
 acme_website=Website van SSL-provider
+
+readonly_mode=Uw systeem bevindt zich momenteel in de read-only-modus, wat betekent dat u geen wijzigingen kunt aanbrengen in de systeemconfiguratie. Deze modus wordt doorgaans handmatig ingeschakeld door een beheerder.
 
 monitor_validate=Valideer Virtualmin-domeinen
 monitor_doms=Domeinen om te controleren
