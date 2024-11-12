@@ -13726,7 +13726,8 @@ if ($d->{'dir'} && !$d->{'parent'}) {
 	}
 
 # Button to re-send signup email
-if (!$d->{'alias'} && &can_config_domain($d)) {
+if (!$d->{'alias'} && &can_config_domain($d) &&
+    &will_send_domain_email($d)) {
 	push(@rv, { 'page' => 'reemail.cgi',
 		    'title' => $text{'edit_reemail'},
 		    'desc' => &text('edit_reemaildesc',
