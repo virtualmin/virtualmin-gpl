@@ -4355,9 +4355,11 @@ licence_efailed=Failed to contact license server
 licence_eexp=The license for this server expired on $1
 licence_echk=An error occurred checking the license
 licence_evalid=No valid license was found for your serial number $1
+licence_evalidnone=No valid license found; your license has been deregistered
 license_esave=Failed to update license information
 licence_change=License Activation
-licence_deregister_sure=This action will untie $1 license from this system, placing it in read-only mode. You will need to obtain a new license to continue using Virtualmin Pro on this server. Are you sure you want to deregister the license for this server?
+licence_deregister_sure=This action will detach the $1 license from this system, setting it to read-only mode after a $2-day grace period. You will need to obtain a new license to continue using Virtualmin Pro on this server. Deregister the license now?
+licence_deregister_sure_nspan=This action will detach the $1 license from this system, making it valid for use on another server within 48 hours. A new license will be needed to continue using Virtualmin Pro on this server. Deregister the license now?
 licence_manager_deregister_yes=Yes, Deregister
 
 licence_manager=License Manager
@@ -4404,7 +4406,7 @@ licence_valid_unlim=.. valid for unlimited domains until $1
 licence_valid=.. valid for $1 domains until $2
 licence_updating_repo=Updating Virtualmin repository ..
 licence_no_lines=.. no lines for $1 found!
-licence_updfile=Updating Virtualmin license file ..
+licence_updfile=Updating Virtualmin license ..
 licence_expired=License Expired
 licence_expired_desc=Your system is currently in read-only mode, meaning you cannot make changes to the system configuration. This mode is enforced as the system license has expired or is being used on multiple servers. Visit the <a href='$1'>Virtualmin License Manager</a> page for more details.
 
@@ -6308,7 +6310,7 @@ upgrade_modfailed=.. install failed : $1
 upgrade_sched=Configuring Webmin to automatically update Virtualmin Pro modules ..
 upgrade_schedok=.. done. Updates will be automatically installed.
 upgrade_schednot=.. done, but automatic update installation is not enabled. Use the <a href='$1'>$2</a> module to turn them on.
-upgrade_file=Creating Virtualmin license file ..
+upgrade_file=Creating Virtualmin license ..
 upgrade_problems=Some errors occurred while upgrading your system to Virtualmin Pro. Please check the messages above for possible causes.
 upgrade_success=Upgrade to Virtualmin Pro was successful. Thank you choosing Virtualmin Pro!
 upgrade_theme=Enabling theme <i>$1</i> ..
@@ -6966,6 +6968,7 @@ postgrey_procalready=.. already running
 postgrey_postfix=Configuring Postfix to use Postgrey ..
 postgrey_postfixalready=.. already configured
 postgrey_postfixdone=.. configured to use port $1
+postgrey_postfixdone2=.. configured to use socket file $1
 postgrey_nopostfix=Configuring Postfix to remove Postgrey ..
 postgrey_nopostfixdone=.. removed
 postgrey_nopostfixalready=.. already removed

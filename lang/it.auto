@@ -28,6 +28,8 @@ index_eiface=Nessuna interfaccia Ethernet può essere trovata automaticamente su
 index_elogrotate=Il programma Logrotate non sembra essere installato sul tuo sistema o non è stato ancora impostato correttamente nel modulo <a href='$1'>Rotazione del file di log</a> di Webmin. Se il tuo sistema non utilizza Logrotate, dovrebbe essere disabilitato nella pagina <a href='$2'>configurazione del modulo di Virtualmin</a>.
 index_elogrotatever=Il programma Logrotate sembra essere la versione $3, ma Virtualmin richiede la versione $4 o successiva per supportare più file di registro nella stessa sezione.
 index_espam=Il programma SpamAssassin non sembra essere installato sul tuo sistema o non è stato ancora impostato correttamente nel modulo <a href='$1'>Filtro posta SpamAssassin</a> di Webmin. Se il tuo sistema non utilizza il filtro antispam, dovrebbe essere disabilitato nella pagina <a href='$2'>configurazione del modulo di Virtualmin</a>.
+index_espammail=La funzione di filtraggio dello spam non può essere abilitata se non è abilitata la posta elettronica nella pagina <a href='$1'>funzionalità e plugin</a>.
+index_evirusmail=La funzione di filtraggio antivirus non può essere abilitata se non è abilitata la posta elettronica nella pagina <a href='$1'>funzionalità e plugin</a>.
 index_eprocmail=Il programma Procmail necessario per il filtro antispam non sembra essere installato sul tuo sistema o non è stato ancora impostato correttamente nel modulo <a href='$1'>Procmail Mail Filter</a> di Webmin. Se il tuo sistema non utilizza il filtro antispam, dovrebbe essere disabilitato nella pagina <a href='$2'>configurazione del modulo di Virtualmin</a>.
 index_evirus=Il programma ClamAV $1 non sembra essere installato sul tuo sistema. Regola il percorso nella pagina <a href='$2'>configurazione del modulo</a> o disabilita questa funzione.
 index_estatus=Il modulo Stato sistema e server non sembra essere installato sul tuo sistema. Installalo o disabilita il monitoraggio dello stato nella pagina <a href='$2'>configurazione del modulo</a>.
@@ -752,6 +754,7 @@ restart_done=Il servizio per $1 è stato arrestato e riavviato correttamente.
 bstop_epid=Il processo non è più in esecuzione
 mstop_edown=Sendmail non è più in esecuzione
 
+edit_ewebappcannot=Non ti è consentito gestire le applicazioni web
 edit_dbuser=Per $2 : $1 
 edit_suffix=Suffisso nome cassetta postale
 edit_id=ID dominio
@@ -2919,6 +2922,7 @@ tmpl_dmarcextra=Opzioni DMARC extra
 tmpl_edmarcpct=La percentuale di messaggi deve essere un numero intero compreso tra 0 e 100
 tmpl_edns=Nessun record DNS inserito
 tmpl_dns_sub=Aggiungere i record DNS del sottodominio al dominio principale?
+tmpl_dns_alias=I domini DNS alias hanno i propri record?
 tmpl_dns_cloud=Crea nuove zone DNS su
 tmpl_dns_remote=DNS remoto $1
 tmpl_dns_cloud_import=Assumere la zona esistente durante la creazione
@@ -3356,15 +3360,25 @@ resel_equnlimit=Il server virtuale $1 non può essere assegnato a questo rivendi
 resel_ebwunlimit=Il server virtuale $1 non può essere assegnato a questo rivenditore, poiché ha una quota di larghezza di banda illimitata, ma il rivenditore ha un limite
 resel_ebefore=Prima del comando di modifica non riuscito : $1 
 
-licence_renew=Un rinnovo può essere acquistato all'indirizzo <a target=_blank href='$1'>$1</a>
+licence_err=È stato rilevato un problema con la tua licenza Virtualmin:
+licence_soon=La tua licenza Virtualmin scadrà tra $1 giorni.
+licence_soon2=La tua licenza Virtualmin scadrà tra $1 ore.
+licence_renew=Il rinnovo può essere acquistato al prezzo di <a target=_blank href='$1'>$2</a>.
+licence_renew2=È possibile acquistare una licenza aggiuntiva su <a target=_blank href='$1'>$2</a>.
+licence_renew3=È rimasto un periodo di tolleranza di $1 giorno per gestire la migrazione della licenza su un nuovo server.
+licence_renew3m=È rimasto un periodo di tolleranza di $1 giorni per gestire la migrazione della licenza su un nuovo server.
+licence_renew3e=È rimasto un periodo di tolleranza di $1 giorno per rinnovare la licenza.
+licence_renew3em=È rimasto un periodo di tolleranza di $1 giorni per il rinnovo della licenza.
+licence_renew4=Il periodo di tolleranza per il trasferimento della licenza è scaduto e il sistema è ora in modalità di sola lettura.
+licence_renew4e=Il periodo di tolleranza per il rinnovo della licenza è scaduto e il sistema è ora in modalità di sola lettura.
 license_shop_name=Negozio Virtualmin
-licence_ok2=.. la licenza è <i>valida</i>. È valido per i domini $1 Virtualmin e per l'uso sui sistemi $2.
-licence_ok3=.. la licenza è <i>valida</i>. È valido per i domini $1 Virtualmin e per l'uso sui sistemi $2 fino al $3.
-licence_warn=Tuttavia, durante questo controllo della licenza si è verificato un problema temporaneo: $1.
+licence_ok2=.. la licenza è valida per $1 domini Virtualmin e per l'uso sul sistema $2
+licence_ok3=.. la licenza è valida per $1 domini Virtualmin e per l'uso sul sistema $2 fino a $3
+licence_warn=Si è verificato un problema temporaneo durante il controllo della licenza $2 : $1 
 licence_goterr2=.. data di scadenza non valida : $1 
-licence_maxdoms=Il tuo sistema è concesso in licenza solo per server $1, ma hai $2.
-licence_maxservers2=Il tuo numero di serie $3 è concesso in licenza solo per il server $1, ma è utilizzato su $2.
-licence_maxwarn=A meno che questo numero di serie non venga utilizzato temporaneamente per migrare a un nuovo server, acquista una licenza aggiuntiva su <a target=_blank href='$1'>$2</a>.
+licence_maxdoms=Il sistema è concesso in licenza solo per il server $1, ma al momento è utilizzato su $2.
+licence_maxservers2=Il numero di serie $3 è concesso in licenza solo per il server $1, ma al momento è utilizzato sui server $2.
+licence_maxwarn=A meno che questa licenza non venga utilizzata temporaneamente per la migrazione a un nuovo server, è necessario acquistare una licenza separata per l'utilizzo su questo server.
 licence_ipchanged=L'indirizzo IP primario del sistema sembra essere cambiato da $1 a $2. I server virtuali che utilizzano il vecchio indirizzo potrebbero essere irraggiungibili o servire il contenuto Web errato.
 licence_changeip=Aggiorna indirizzi IP errati
 licence_smallcert=Il sistema utilizza un certificato SSL che è lungo solo $1 bit, che è inferiore alla dimensione consigliata di 2048 bit. Questo certificato è stato rilasciato da $4 a $3 per il dominio $2.
@@ -3377,6 +3391,64 @@ licence_fixlinksok=Correggi le autorizzazioni dei collegamenti simbolici
 licence_fixlinksignore=Consenti collegamenti simbolici non sicuri
 licence_xfsreboot=È necessario riavviare il sistema per abilitare le quote XFS sul filesystem di root. Finché ciò non viene fatto, Virtualmin non rileverà le quote come attive e sarà impossibile applicare limiti sull'utilizzo del disco a server o utenti virtuali.
 licence_xfsrebootok=Riavvia ora
+licence_efailed=Impossibile contattare il server delle licenze
+licence_eexp=La licenza per questo server è scaduta il $1
+licence_echk=Si è verificato un errore durante il controllo della licenza
+licence_evalid=Non è stata trovata alcuna licenza valida per il tuo numero di serie $1
+licence_evalidnone=Nessuna licenza valida trovata; la tua licenza è stata annullata
+license_esave=Impossibile aggiornare le informazioni sulla licenza
+licence_change=Attivazione della licenza
+licence_deregister_sure=Questa azione scollegherà la licenza $1 da questo sistema, impostandola in modalità di sola lettura dopo un periodo di tolleranza di $2 giorni. Sarà necessario ottenere una nuova licenza per continuare a usare Virtualmin Pro su questo server. Annullare la registrazione della licenza ora?
+licence_deregister_sure_nspan=Questa azione scollegherà la licenza $1 da questo sistema, rendendola valida per l'uso su un altro server entro 48 ore. Sarà necessaria una nuova licenza per continuare a usare Virtualmin Pro su questo server. Annullare la registrazione della licenza ora?
+licence_manager_deregister_yes=Sì, annulla la registrazione
+
+licence_manager=Gestore delle licenze
+licence_manager_goto=Gestisci licenza Virtualmin Pro
+licence_manager_desc=Questa pagina visualizzerà la chiave seriale e lo stato della licenza corrente associata a questa macchina. Fornisce inoltre opzioni per controllare lo stato e aggiornare la licenza.
+licence_manager_menu=Gestore licenze Virtualmin
+licence_manager_status=Stato della licenza
+licence_manager_count=Numero di domini
+licence_manager_expiry=Data di scadenza
+licence_manager_ucount=Illimitato
+licence_manager_checked=Ultimo controllo
+licence_manager_err=Errore di licenza
+licence_manager_err1=Non è stata trovata alcuna licenza valida per il numero di serie $1 e la chiave di licenza $2
+licence_manager_err1n=La chiave di licenza e il numero di serie non sono stati impostati
+licence_manager_status0=Valido
+licence_manager_status1=Non valido
+licence_manager_status1n=Non valido
+licence_manager_status1t=Temporaneamente non valido
+licence_manager_status2=Sconosciuto
+licence_manager_status3=Scaduto
+licence_manager_status4=Bloccato, con il sistema in modalità di sola lettura
+licence_manager_statusok=La licenza non ha problemi
+licence_manager_explain=Spiegazione dell'errore di licenza
+licence_manager_explain1n=Questo errore suggerisce che il numero di serie e la licenza potrebbero non essere stati impostati correttamente, cosa che a volte può accadere se il pacchetto Virtualmin Pro è stato scaricato e installato in modo non autorizzato
+licence_manager_explain1d=Questo errore indica che il numero di serie e la chiave di licenza non sono mai stati impostati o sono stati scollegati da questo server
+licence_manager_explain1t=Puoi utilizzare la stessa licenza Virtualmin Pro temporaneamente per spostarti su un nuovo server; ma se la desideri su più server, ognuno ha bisogno della propria licenza; annulla la registrazione della licenza da un server prima di utilizzarla su un altro, altrimenti, tutti i server che utilizzano la stessa licenza passeranno alla modalità di sola lettura dopo il periodo di tolleranza
+licence_manager_recom=Azioni consigliate
+licence_manager_recom1n=Ottieni una nuova licenza per questa macchina prima che finisca il periodo di tolleranza, altrimenti il sistema passerà alla modalità di sola lettura
+licence_manager_recom1t=Scegli da quale server annullare la registrazione della licenza $1 prima che termini il periodo di tolleranza; tieni presente che, dopo l'annullamento della registrazione, il server delle licenze potrebbe impiegare fino a 48 ore per rilasciare una licenza precedentemente utilizzata su più server
+licence_manager_recom1tm=Scegli da quale dei server $2 annullare la registrazione della licenza $1 prima che termini il periodo di tolleranza; tieni presente che, dopo l'annullamento della registrazione, il server delle licenze potrebbe impiegare fino a 48 ore per rilasciare una licenza precedentemente utilizzata su più server
+licence_manager_recom3=Rinnova il tuo abbonamento $1 durante il periodo di tolleranza per continuare a utilizzare Virtualmin Pro su questo server prima che passi alla modalità di sola lettura
+licence_manager_bind=Giorni rimanenti nel periodo di grazia
+licence_manager_change=Cambia licenza
+licence_manager_setup=Imposta licenza
+licence_manager_deregister=Annullare la registrazione della licenza
+licence_manager_subscription=Gestisci abbonamento
+licence_manager_support=Contatta il supporto
+licence_manager_support_link=Il periodo di tolleranza è terminato; se sei sicuro che la tua licenza sia in uso solo su questo server, ma il server delle licenze la mostra ancora come attiva su più server dopo averla ricontrollata, contatta il <a href='$1' target=_blank>supporto Virtualmin</a> per un'assistenza più rapida o attendi 48 ore per sbloccarla automaticamente
+licence_gpl_repos_warning=Repository GPL rilevati. Usa "Impostazioni di sistema Aggiorna a Virtualmin Pro" nell'interfaccia utente per effettuare prima l'aggiornamento!
+licence_validating=Convalida della nuova chiave di licenza $1 ..
+licence_evalidating=.. la licenza non può essere convalidata
+licence_ecanvalidating=..la licenza non è valida
+licence_valid_unlim=.. valido per domini illimitati fino al $1
+licence_valid=.. valido per $1 domini fino a $2
+licence_updating_repo=Aggiornamento del repository Virtualmin ..
+licence_no_lines=.. nessuna riga trovata per $1!
+licence_updfile=Aggiornamento della licenza Virtualmin ..
+licence_expired=Licenza scaduta
+licence_expired_desc=Il tuo sistema è attualmente in modalità di sola lettura, il che significa che non puoi apportare modifiche alla configurazione del sistema. Questa modalità è imposta perché la licenza del sistema è scaduta o è utilizzata su più server. Visita la pagina <a href='$1'>Virtualmin License Manager</a> per maggiori dettagli.
 
 config_deftheme=Default Webmin globale
 config_oldtheme=Vecchio tema Webmin
@@ -3755,6 +3827,7 @@ scripts_kit_wp_apply_backup_rm=Eliminazione dei file di backup selezionati ..
 scripts_kit_wp_apply_backup_erm=.. saltato: nessun file selezionato
 scripts_kit_wp_apply_backup_rmf=Eliminazione del file di backup <tt>$1</tt> ..
 scripts_kit_wp_apply_backup_ermf=.. fallito: <tt>$1</tt>
+scripts_kit_wp_apply_backup_ermf0=il file non esiste
 scripts_kit_wp_apply_backup_db=Esportazione del database WordPress ..
 scripts_kit_wp_apply_archive_db=Creazione di un archivio di backup di WordPress per il database ..
 scripts_kit_wp_apply_archive_files=Creazione di un archivio di backup di WordPress per i file ..
@@ -3771,6 +3844,7 @@ scripts_kit_wp_apply_clone1=Creazione di un clone sullo stesso server virtuale .
 scripts_kit_wp_apply_clone2=Creazione di un clone nel server virtuale <tt>$1</tt> esistente ..
 scripts_kit_wp_apply_clone3=Creazione di un clone nel nuovo sottoserver virtuale <tt>$1</tt> ..
 scripts_kit_wp_apply_clone4=Creazione di un clone nel nuovo server virtuale di primo livello <tt>$1</tt> ..
+scripts_kit_wp_apply_clone_eclonegone=.. fallito: il dominio padre di destinazione da clonare non esiste
 scripts_kit_wp_apply_clone_eclone=.. fallito: non ti è consentito creare questo tipo di clone
 scripts_kit_wp_apply_clone_edir=.. non riuscito: la directory clone può contenere solo lettere, numeri e caratteri come un punto, un trattino o un carattere di sottolineatura
 scripts_kit_wp_apply_clone_db=Creazione del dump del database per il clone ..
@@ -3789,6 +3863,11 @@ scripts_kit_wp_apply_clone_sub=Creazione di un nuovo sottoserver per il clone ..
 scripts_kit_wp_apply_clone_esub=.. impossibile creare il sottoserver per il clone : $1
 scripts_kit_wp_apply_clone_top=Creazione di un nuovo server di primo livello per il clone ..
 scripts_kit_wp_apply_clone_etop=.. impossibile creare il server di primo livello per il clone : $1
+scripts_kit_edom_name=Il server virtuale '$1' non esiste
+scripts_kit_estype=Nessuno script di tipo '$1' è stato ancora installato su questo server virtuale
+scripts_kit_estype_multi=Sono disponibili più script di tipo '$1' nei seguenti percorsi:
+scripts_kit_estype_multi2=Utilizzare il parametro ausiliario '--script-path' per specificare lo script esatto da utilizzare
+scripts_kit_estype_path=Lo script di tipo '$1' nel percorso '$2' non esiste
 
 scripts_gpl_pro_tip=Funzionalità professionale
 scripts_gpl_pro_tip_hide=Grazie per il testa a testa
@@ -4740,6 +4819,9 @@ spf_change=Aggiornamento record SPF ..
 spf_dmarcchange=Aggiornamento record DMARC.
 spf_header=Opzioni DNS e mittente Policy Framework
 spf_header2=Chiavi di zona DNSSEC
+spf_aliasdnsmode=Modalità DNS del dominio alias
+spf_aliasdns0=Copia i record dal dominio di destinazione
+spf_aliasdns1=Gestisci i tuoi record
 spf_enabled=Record SPF abilitato?
 spf_a=Nomi host del mittente consentiti
 spf_mx=Domini di posta mittente consentiti
@@ -4816,6 +4898,8 @@ spf_keytag=Etichetta chiave
 spf_alg=Algoritmo
 spf_type=Tipo di raccolta
 spf_digest=Stringa digest
+spf_aliasdns=Sostituzione del dominio alias con i propri record DNS ..
+spf_noaliasdns=Cambio di dominio alias per copiare i record DNS dalla destinazione ..
 
 s3_emodule=Il modulo Perl $1 necessario per comunicare con il servizio S3 di Amazon non è installato
 s3_emodule2=Impossibile caricare il modulo Perl $1 necessario per comunicare con il servizio S3 di Amazon : $2 
@@ -5012,8 +5096,8 @@ upgrade_key=Chiave di licenza
 upgrade_ok=Aggiorna ora
 upgrade_err=Aggiornamento a Virtualmin Pro non riuscito
 upgrade_epackages=Nessun pacchetto da installare trovato!
-upgrade_eserial=Numero seriale mancante o non valido
-upgrade_ekey=Chiave di licenza mancante o dall'aspetto non valido
+upgrade_eserial=Numero di serie mancante o non valido
+upgrade_ekey=Chiave di licenza mancante o non valida
 upgrade_eamazon=Questa chiave di licenza non può essere utilizzata per gli aggiornamenti
 upgrade_elogin=Il numero di serie e la chiave di licenza non sono stati riconosciuti dal sito Web Virtualmin Pro
 upgrade_econnect=Si è verificato un errore durante la connessione al server Virtualmin Pro : $1 
@@ -5422,7 +5506,7 @@ res_err=Impossibile salvare i limiti delle risorse
 res_eprocs=Numero massimo di processi mancante o non valido
 res_eprocs2=Il numero massimo di processi deve essere 2 o più
 res_emem=Dimensione massima del processo mancante o non valida
-res_emem2=La dimensione massima del processo deve essere di almeno 1 milione
+res_emem3=La dimensione massima del processo deve essere di almeno 200 M
 res_mins=minuti
 res_secs=secondi
 res_time=Tempo massimo della CPU per processo
@@ -6697,7 +6781,7 @@ right_of=$1 su $2
 right_sysinfo=informazioni di sistema
 
 assoc_title=Associare e dissociare le funzionalità
-assoc_desc=Le funzionalità abilitate o disabilitate in questa pagina non aggiorneranno alcun file di configurazione di sistema. Invece, aggiorna solo il database Virtualmin delle funzionalità di dominio previste. Questo è utile per importare funzionalità impostate manualmente o per disconnettere configurazioni per conservarle quando un server virtuale viene eliminato. Da usare con cautela!
+assoc_desc=Le funzionalità abilitate o disabilitate in questa pagina non aggiorneranno alcun file di configurazione di sistema. Invece, aggiorna solo il database di Virtualmin delle funzionalità di dominio previste. Ciò è utile per importare funzionalità impostate manualmente o per disconnettere configurazioni per conservarle quando un server virtuale viene eliminato. Da usare con cautela!
 assoc_header=Impostazioni dell'associazione delle funzioni
 assoc_features=Funzionalità note a Virtualmin
 assoc_validate=Richiede una convalida corretta prima di salvare?
@@ -6880,6 +6964,7 @@ deftmplt_tmpltpagefooteraboutcont=Contatto
 2fa_header=Opzioni a due fattori
 2fa_err=Impossibile salvare l'autenticazione a due fattori
 2fa_enrolling=Iscrizione a due fattori con $1. ..
+2fa_ecannot=Non ti è consentito gestire l'autenticazione a due fattori
 
 rcert_err=Impossibile eliminare il certificato
 rcert_ecert=Il server virtuale non ha alcun certificato da rimuovere
@@ -7087,6 +7172,8 @@ acme_can1=Rivenditori
 acme_can2=Solo amministratore principale
 acme_edefault=Il provider Let's Encrypt predefinito non può essere modificato
 acme_website=Sito web del fornitore SSL
+
+readonly_mode=Il tuo sistema è attualmente in modalità di sola lettura, il che significa che non puoi apportare modifiche alla configurazione del sistema. Questa modalità è solitamente abilitata manualmente da un amministratore.
 
 monitor_validate=Convalida domini Virtualmin
 monitor_doms=Domini da controllare

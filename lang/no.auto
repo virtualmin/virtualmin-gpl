@@ -5,6 +5,8 @@ index_phpv=PHP-versjon
 index_ip=IP adresse
 index_ssl_expiry=SSL-utløp
 index_ebinderrs=Det ble funnet feil i systemets BIND-konfigurasjon : $1 
+index_espammail=Spamfiltreringsfunksjonen kan ikke aktiveres med mindre e-post er aktivert på <a href='$1'>funksjoner og plugins</a>-siden.
+index_evirusmail=Virusfiltreringsfunksjonen kan ikke aktiveres med mindre e-post er aktivert på <a href='$1'>funksjoner og plugins</a>-siden.
 index_etlsassl=OpenSSL støtter ikke sertifikat-parsing eller SHA-256-hashing
 index_saname=Cyrus SASL Authentication Server
 index_sastop=Stopp autentiseringsserver
@@ -255,6 +257,7 @@ user_edeletewebuser=Kunne ikke slette nettserverbruker : $1
 
 alias_etype1f=Du har ikke lov til å videresende e-post til '$1'
 
+edit_ewebappcannot=Du har ikke lov til å administrere nettapplikasjoner
 edit_id=Domenenavn
 edit_ssl_exp=Domene SSL utløp
 edit_whois_exp=Domeneregistrering utløper
@@ -929,6 +932,7 @@ tmpl_dmarcskip=Ingen sett
 tmpl_dmarcyes=Ja, med policy nedenfor
 tmpl_dmarcextra=Ekstra DMARC-alternativer
 tmpl_edmarcpct=Prosentdel av meldinger må være et helt tall mellom 0 og 100
+tmpl_dns_alias=Alias DNS-domener har sine egne poster?
 tmpl_dns_cloud=Opprett nye DNS-soner på
 tmpl_dns_remote=Ekstern DNS $1
 tmpl_dns_cloud_import=Ta over eksisterende sone ved opprettelse
@@ -1022,14 +1026,85 @@ resel_create=Kan opprette og redigere forhandlere?
 resel_efrom=Ugyldig e-post fra adresse
 resel_ebefore=Før modifikasjonskommandoen mislyktes : $1 
 
+licence_err=Det ble oppdaget et problem med Virtualmin-lisensen din:
+licence_soon=Virtualmin-lisensen din utløper om $1 dager.
+licence_soon2=Virtualmin-lisensen din utløper om $1 timer.
+licence_renew=En fornyelse kan kjøpes på <a target=_blank href='$1'>$2</a>.
+licence_renew2=En ekstra lisens kan kjøpes på <a target=_blank href='$1'>$2</a>.
+licence_renew3=En utsettelsesperiode på $1 dag er igjen for å administrere migreringen av lisensen til en ny server.
+licence_renew3m=Det gjenstår en utsettelsesperiode på $1 dager for å administrere migreringen av lisensen til en ny server.
+licence_renew3e=En utsettelsesperiode på $1 dag er igjen for fornyelse av lisensen.
+licence_renew3em=En utsettelsesperiode på $1 dager er igjen for å fornye lisensen.
+licence_renew4=Utsettelsesperioden for å overføre lisensen din er utløpt, og systemet er nå i skrivebeskyttet modus.
+licence_renew4e=Utsettelsesperioden for å fornye lisensen din har utløpt, og systemet er nå i skrivebeskyttet modus.
 license_shop_name=Virtualmin butikk
-licence_ok2=.. lisensen er <i>gyldig</i>. Den er gyldig for $1 Virtualmin-domener, og for bruk på $2 -systemer.
-licence_ok3=.. lisensen er <i>gyldig</i>. Den er gyldig for $1 Virtualmin-domener, og for bruk på $2 -systemer til $3.
+licence_ok2=.. lisensen er gyldig for $1 Virtualmin-domener og for bruk på $2-systemet
+licence_ok3=.. lisensen er gyldig, for $1 Virtualmin-domener, og for bruk på $2-systemet frem til $3
+licence_warn=Det oppsto et midlertidig problem under lisenskontrollen $2 : $1 
 licence_goterr2=.. ugyldig utløpsdato : $1 
-licence_maxservers2=Serienummeret ditt $3 er lisensiert for bare $1 server, men brukes på $2.
-licence_maxwarn=Med mindre dette serienummeret brukes midlertidig for å migrere til en ny server, vennligst kjøp en ekstra lisens på <a target=_blank href='$1'>$2</a>.
+licence_maxdoms=Systemet ditt er lisensiert for bare $1 server, men det brukes for øyeblikket på $2.
+licence_maxservers2=Serienummeret ditt $3 er lisensiert for bare $1 server, men det brukes for øyeblikket på $2 servere.
+licence_maxwarn=Med mindre denne lisensen brukes midlertidig for migrering til en ny server, må du kjøpe en separat lisens for bruk på denne serveren.
 licence_xfsreboot=Systemet ditt må startes på nytt for å aktivere XFS-kvoter i rotfilsystemet. Inntil dette er gjort, vil Virtualmin ikke oppdage kvoter som aktive, og det vil være umulig å anvende grenser for diskbruk på virtuelle servere eller brukere.
 licence_xfsrebootok=Starte på nytt nå
+licence_efailed=Kunne ikke kontakte lisensserveren
+licence_eexp=Lisensen for denne serveren utløp $1
+licence_echk=Det oppstod en feil under kontroll av lisensen
+licence_evalid=Ingen gyldig lisens ble funnet for serienummeret $1
+licence_evalidnone=Ingen gyldig lisens funnet; lisensen din er avregistrert
+license_esave=Kunne ikke oppdatere lisensinformasjon
+licence_change=Lisensaktivering
+licence_deregister_sure=Denne handlingen vil koble $1-lisensen fra dette systemet, og sette den til skrivebeskyttet modus etter en $2-dagers utsettelsesperiode. Du må få en ny lisens for å fortsette å bruke Virtualmin Pro på denne serveren. Avregistrere lisensen nå?
+licence_deregister_sure_nspan=Denne handlingen vil frakoble $1-lisensen fra dette systemet, noe som gjør den gyldig for bruk på en annen server innen 48 timer. En ny lisens vil være nødvendig for å fortsette å bruke Virtualmin Pro på denne serveren. Avregistrere lisensen nå?
+licence_manager_deregister_yes=Ja, avregistrer deg
+
+licence_manager=Lisensansvarlig
+licence_manager_goto=Administrer Virtualmin Pro-lisens
+licence_manager_desc=Denne siden vil vise serienøkkelen og status for gjeldende lisens knyttet til denne maskinen. Den gir også alternativer for å sjekke status og oppdatere lisensen.
+licence_manager_menu=Virtualmin License Manager
+licence_manager_status=Lisensstatus
+licence_manager_count=Antall domener
+licence_manager_expiry=Utløpsdato
+licence_manager_ucount=Ubegrenset
+licence_manager_checked=Sist sjekket
+licence_manager_err=Lisensfeil
+licence_manager_err1=Ingen gyldig lisens ble funnet for serienummer $1 og lisensnøkkel $2
+licence_manager_err1n=Lisensnøkkelen og serienummeret er ikke angitt
+licence_manager_status0=Gyldig
+licence_manager_status1=Ugyldig
+licence_manager_status1n=Ugyldig
+licence_manager_status1t=Midlertidig ugyldig
+licence_manager_status2=Ukjent
+licence_manager_status3=Utløpt
+licence_manager_status4=Låst, med systemet i skrivebeskyttet modus
+licence_manager_statusok=Lisensen har ingen problemer
+licence_manager_explain=Lisensfeilforklaring
+licence_manager_explain1n=Denne feilen antyder at serien og lisensen kanskje ikke er satt opp riktig, noe som noen ganger kan skje hvis Virtualmin Pro-pakken ble lastet ned og installert på en uautorisert måte
+licence_manager_explain1d=Denne feilen indikerer at serienummeret og lisensnøkkelen aldri ble satt eller har blitt koblet fra denne serveren
+licence_manager_explain1t=Du kan bruke den samme Virtualmin Pro-lisensen midlertidig for å flytte til en ny server; men hvis du vil ha det på flere servere, trenger hver sin lisens; avregistrer lisensen fra en server før du bruker den på en annen, ellers vil alle servere som bruker samme lisens byttes til skrivebeskyttet modus etter utsettelsesperioden
+licence_manager_recom=Anbefalte handlinger
+licence_manager_recom1n=Skaff deg en ny lisens for denne maskinen før fristen utløper, ellers vil systemet bytte til skrivebeskyttet modus
+licence_manager_recom1t=Velg hvilken server du vil avregistrere $1-lisensen fra før utsettelsesperioden slutter; Husk at etter avregistrering kan lisensserveren trenge opptil 48 timer for å frigi en lisens som tidligere ble brukt på flere servere
+licence_manager_recom1tm=Velg hvilken av $2-serverne du vil avregistrere $1-lisensen fra før utsettelsesperioden utløper; Husk at etter avregistrering kan lisensserveren trenge opptil 48 timer for å frigi en lisens som tidligere ble brukt på flere servere
+licence_manager_recom3=Forny ditt $1-abonnement i løpet av utsettelsesperioden for å fortsette å bruke Virtualmin Pro på denne serveren før den går over til skrivebeskyttet modus
+licence_manager_bind=Dager igjen i utsettelsesperioden
+licence_manager_change=Endre lisens
+licence_manager_setup=Sett opp lisens
+licence_manager_deregister=Avregistrer lisensen
+licence_manager_subscription=Administrer abonnement
+licence_manager_support=Kontakt support
+licence_manager_support_link=Utsettelsesperioden er over; hvis du er sikker på at lisensen din utelukkende er i bruk på denne serveren, men lisensserveren fortsatt viser den som aktiv på flere etter en ny kontroll, ta kontakt med <a href='$1' target=_blank>Virtualmin Support</a> for raskere hjelp, eller vent i 48 timer for å få den låst opp automatisk
+licence_gpl_repos_warning=GPL-repos oppdaget. Bruk "System Settings Upgrade to Virtualmin Pro" i UI for å oppgradere først!
+licence_validating=Validerer ny lisensnøkkel $1 ..
+licence_evalidating=.. lisens kan ikke valideres
+licence_ecanvalidating=.. lisensen er ikke gyldig
+licence_valid_unlim=.. gyldig for ubegrensede domener til $1
+licence_valid=.. gyldig for $1 domener til $2
+licence_updating_repo=Oppdaterer Virtualmin-depotet ..
+licence_no_lines=.. ingen linjer for $1 funnet!
+licence_updfile=Oppdaterer Virtualmin-lisens ..
+licence_expired=Lisens utløpt
+licence_expired_desc=Systemet ditt er for øyeblikket i skrivebeskyttet modus, noe som betyr at du ikke kan gjøre endringer i systemkonfigurasjonen. Denne modusen håndheves ettersom systemlisensen har utløpt eller brukes på flere servere. Besøk siden <a href='$1'>Virtualmin License Manager</a> for mer informasjon.
 
 scripts_title=Administrer nettapper
 scripts_desc=Dette skjemaet kan brukes til å enkelt installere eller oppgradere ulike tredjeparts webapper i denne virtuelle serverens nettkatalog.
@@ -1302,6 +1377,7 @@ scripts_kit_wp_apply_backup_rm=Sletter valgte sikkerhetskopifiler ..
 scripts_kit_wp_apply_backup_erm=.. hoppet over: ingen filer er valgt
 scripts_kit_wp_apply_backup_rmf=Sletter sikkerhetskopifilen <tt>$1</tt> ..
 scripts_kit_wp_apply_backup_ermf=.. mislyktes: <tt>$1</tt>
+scripts_kit_wp_apply_backup_ermf0=filen eksisterer ikke
 scripts_kit_wp_apply_backup_db=Eksporterer WordPress-database ..
 scripts_kit_wp_apply_archive_db=Opprette WordPress backup-arkiv for database ..
 scripts_kit_wp_apply_archive_files=Opprette WordPress backup-arkiv for filer ..
@@ -1318,6 +1394,7 @@ scripts_kit_wp_apply_clone1=Oppretter klon under samme virtuelle server ..
 scripts_kit_wp_apply_clone2=Oppretter klon under eksisterende <tt>$1</tt> virtuell server ..
 scripts_kit_wp_apply_clone3=Oppretter klon under ny <tt>$1</tt> virtuell undertjener ..
 scripts_kit_wp_apply_clone4=Oppretter klon under ny <tt>$1</tt> virtuell server på toppnivå ..
+scripts_kit_wp_apply_clone_eclonegone=.. mislyktes: måloverordnet domene som skal klones til eksisterer ikke
 scripts_kit_wp_apply_clone_eclone=.. mislyktes: du har ikke lov til å lage denne typen klone
 scripts_kit_wp_apply_clone_edir=.. mislyktes : klonekatalog kan bare inneholde bokstaver, tall og tegn som prikk, bindestrek eller understrek
 
@@ -1337,6 +1414,11 @@ scripts_kit_wp_apply_clone_sub=Oppretter ny underserver for klone ..
 scripts_kit_wp_apply_clone_esub=.. mislyktes i å opprette underserver for klon : $1
 scripts_kit_wp_apply_clone_top=Oppretter ny toppnivåserver for klone ..
 scripts_kit_wp_apply_clone_etop=.. kunne ikke opprette toppnivåserver for klon : $1
+scripts_kit_edom_name=Virtuell server '$1' eksisterer ikke
+scripts_kit_estype=Ingen skript av typen '$1' er installert ennå på denne virtuelle serveren
+scripts_kit_estype_multi=Flere skript av typen '$1' er tilgjengelig på følgende stier:
+scripts_kit_estype_multi2=Bruk hjelpeparameteren '--script-path' for å spesifisere det eksakte skriptet som skal brukes
+scripts_kit_estype_path=Skriptet av typen '$1' ved banen '$2' eksisterer ikke
 
 scripts_gpl_pro_tip=Pro -funksjon
 scripts_gpl_pro_tip_hide=Takk for advarselen
@@ -1663,6 +1745,9 @@ website_ephpcgi=CGI-skript kan ikke deaktiveres mens PHP bruker CGI- eller FCGI-
 website_ephpfcgid=CGI-skript kan ikke kjøres via FCGIwrap mens PHP bruker FCGI-utførelsesmodus
 
 spf_dmarcchange=Oppdaterer DMARC-posten ..
+spf_aliasdnsmode=Alias domene DNS-modus
+spf_aliasdns0=Kopier poster fra måldomene
+spf_aliasdns1=Behandle egne poster
 spf_default3=Standard ekstern adresse
 spf_custom=Egendefinert IP-adresse
 spf_dsrecs=DS poster for registrar
@@ -1717,6 +1802,8 @@ spf_keytag=Nøkkelbrikke
 spf_alg=Algoritme
 spf_type=Digest type
 spf_digest=Digest streng
+spf_aliasdns=Bytter aliasdomene til sine egne DNS-poster ..
+spf_noaliasdns=Bytter aliasdomene for å kopiere DNS-poster fra målet ..
 
 s3_emodule2=Perl-modulen $1 som trengs for å kommunisere med Amazons S3-tjeneste, kunne ikke lastes : $2 
 s3_emodule3=Perl-modulene $1 eller $2 som trengs for å kommunisere med Amazons S3-tjeneste er ikke installert
@@ -1741,6 +1828,8 @@ dynip_external=Eksternt manus ..
 dynip_none=Ikke oppdater noen tjeneste
 
 upgrade_epackages=Fant ingen pakker å installere!
+upgrade_eserial=Manglende eller ugyldig serienummer
+upgrade_ekey=Manglende eller ugyldig lisensnøkkel
 upgrade_success=Oppgraderingen til Virtualmin Pro var vellykket. Takk for at du valgte Virtualmin Pro!
 upgrade_eyumlist=$1 RPM -pakken ble ikke funnet i listen over tilgjengelige pakker fra depotet. Kanskje en av de nåværende depotene dine ikke fungerer?
 upgrade_to_pro=Oppgraderer til Virtualmin Pro ..
@@ -1806,6 +1895,8 @@ mail_smtp_local=&lt;Ingen - lever direkte fra dette systemet&gt;
 mail_smtp_cloudoff=Fjerner sky-SMTP-leverandør $1 ..
 mail_smtp_cloudon=Konfigurerer sky-SMTP-leverandør $1 ..
 mail_smtp_cloudfailed=.. mislyktes : $1
+
+res_emem3=Maksimal prosessstørrelse må være minst 200M
 
 sched_allplan=På plan $1 
 sched_allplans=På $1 planer
@@ -2468,6 +2559,7 @@ deftmplt_tmpltpagefooteraboutcont=Kontakt
 2fa_header=To-faktor alternativer
 2fa_err=Kunne ikke lagre tofaktorautentisering
 2fa_enrolling=Registrerer deg for to-faktor med $1. ..
+2fa_ecannot=Du har ikke lov til å administrere tofaktorautentisering
 
 rcert_err=Kunne ikke slette sertifikatet
 rcert_ecert=Virtuell server har ikke noe sertifikat å fjerne
@@ -2675,6 +2767,8 @@ acme_can1=Forhandlere
 acme_can2=Kun hovedadministrator
 acme_edefault=Standard Let's Encrypt-leverandør kan ikke redigeres
 acme_website=SSL-leverandørens nettsted
+
+readonly_mode=Systemet ditt er for øyeblikket i skrivebeskyttet modus, noe som betyr at du ikke kan gjøre endringer i systemkonfigurasjonen. Denne modusen aktiveres vanligvis manuelt av en administrator.
 
 monitor_validate=Valider Virtualmin-domener
 monitor_doms=Domener å sjekke

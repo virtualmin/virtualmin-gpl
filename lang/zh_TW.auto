@@ -18,6 +18,8 @@ index_ebindmod=您的系統上未安裝BIND DNS服務器Webmin模塊。
 index_emysql2=MySQL客戶端程序似乎未安裝，或者尚未在Webmin的<a href='$1'>MySQL數據庫</a>模塊中正確設置。如果您的系統不使用MySQL，則應在Virtualmin的<a href='$2'>模塊配置</a>頁面中將其禁用。
 index_ewebalizerfile=在系統上找不到模板Webalizer配置文件 $1。可能需要在<a href='$2'>Webalizer日誌文件分析</a>模塊中進行更改。
 index_emailboxessystem=未將“讀取用戶郵件”模塊設置為使用 $3郵件服務器。調整其<a href='$1'>模塊配置</a>以匹配，或者更改<a href='$2'>Virtualmin配置</a>。
+index_espammail=除非在<a href='$1'>功能和外掛程式</a>頁面上啟用電子郵件，否則無法啟用垃圾郵件過濾功能。
+index_evirusmail=除非在<a href='$1'>功能和外掛程式</a>頁面上啟用電子郵件，否則無法啟用病毒過濾功能。
 index_evirusrun2=ClamAV程序 $1似乎無法正常運行： $2。在<a href='$3'>垃圾郵件和病毒掃描程序</a>頁上更改程序，或禁用此功能。
 index_etlsassl=OpenSSL不支持證書解析或SHA-256哈希
 index_amanage=管理Apache
@@ -500,6 +502,7 @@ alias_estart=自動回復開始日期無效
 alias_eend=自動回复結束日期無效
 alias_aopts=自動回複選項
 
+edit_ewebappcannot=您無權管理 Web 應用程式
 edit_xndomain=真實DNS域名
 edit_dbuser=對於 $2 : $1
 edit_id=域ID
@@ -1889,6 +1892,7 @@ tmpl_dmarcskip=沒有設置
 tmpl_dmarcyes=是的，下面有政策
 tmpl_dmarcextra=額外的DMARC選項
 tmpl_edmarcpct=郵件百分比必須為0到100之間的整數
+tmpl_dns_alias=別名 DNS 網域有自己的記錄嗎？
 tmpl_dns_cloud=在上創建新的DNS區域
 tmpl_dns_remote=遠程 DNS $1
 tmpl_dns_cloud_import=創建時接管現有區域
@@ -2141,18 +2145,26 @@ resel_equnlimit=無法將虛擬服務器 $1分配給該代理商，因為它具�
 resel_ebwunlimit=無法將虛擬服務器 $1分配給該代理商，因為它具有無限的帶寬配額，但是代理商具有限制
 resel_ebefore=修改命令失敗之前： $1
 
-licence_soon=注意-您的Virtualmin許可證將在 $1天內過期。
-licence_soon2=注意-您的Virtualmin許可證將在 $1小時後過期。
-licence_renew=可以在<a target=_blank href='$1'>$1</a>購買續訂
+licence_err=偵測到您的 Virtualmin 許可證有問題：
+licence_soon=您的 Virtualmin 許可證將在 $1 天後過期。
+licence_soon2=您的 Virtualmin 許可證將在 $1 小時後過期。
+licence_renew=可在 <a target=_blank href='$1'>$2</a> 購買續約。
+licence_renew2=可以在<a target=_blank href='$1'>$2</a>處購買額外的許可證。
+licence_renew3=還留有 $1 天的寬限期，用於管理許可證到新伺服器的遷移。
+licence_renew3m=還留有 $1 天的寬限期，用於管理許可證到新伺服器的遷移。
+licence_renew3e=續約許可證還有 $1 天的寬限期。
+licence_renew3em=續約許可證還有 $1 天的寬限期。
+licence_renew4=轉移許可證的寬限期已過期，系統現在處於唯讀模式。
+licence_renew4e=續訂許可證的寬限期已到期，系統現在處於唯讀模式。
 license_shop_name=虛擬商店
-licence_ok2=..許可證<i>有效</i>。它對 $1 Virtualmin域有效，並在 $2系統上使用。
-licence_ok3=..許可證<i>有效</i>。它對 $1 Virtualmin域有效，並且可在 $2系統上使用，直到 $3。
-licence_warn=但是，此許可證檢查期間發生了一個臨時問題： $1。
+licence_ok2=..許可證對於 $1 Virtualmin 域有效，並可在 $2 系統上使用
+licence_ok3=..許可證對於 $1 Virtualmin 域有效，並可在 $2 系統上使用，直至 $3
+licence_warn=$2 許可證檢查期間出現臨時問題 : $1
 licence_unlimited=無限
 licence_goterr2=..無效的到期日期： $1
-licence_maxdoms=您的系統僅許可用於 $1服務器，但是您具有 $2。
-licence_maxservers2=您的序列號 $3 僅授權用於 $1 服務器，但正在 $2 上使用。
-licence_maxwarn=除非此序列號臨時用於遷移到新服務器，否則請在 <a target=_blank href='$1'>$2</a> 購買額外的許可證。
+licence_maxdoms=您的系統僅獲得 $1 伺服器的許可，但目前正在 $2 上使用。
+licence_maxservers2=您的序號 $3 僅獲得 $1 伺服器的許可，但目前正在 $2 伺服器上使用。
+licence_maxwarn=除非該許可證暫時用於遷移到新伺服器，否則您必須購買單獨的許可證才能在此伺服器上使用。
 licence_ipchanged=系統的主IP地址似乎已從 $1更改為 $2。使用舊地址的虛擬服務器可能無法訪問或提供了錯誤的Web內容。
 licence_changeip=更新不正確的IP地址
 licence_smallcert=您的系統使用的SSL證書長度僅為 $1位，小於建議的2048位。此證書是由 $4頒發給 $3的域 $2的。
@@ -2165,6 +2177,64 @@ licence_fixlinksok=修復符號鏈接權限
 licence_fixlinksignore=允許不安全的符號鏈接
 licence_xfsreboot=必須重新引導系統才能在根文件系統上啟用XFS配額。在完成此操作之前，Virtualmin將不會檢測到配額處於活動狀態，並且不可能將磁盤使用限制應用於虛擬服務器或用戶。
 licence_xfsrebootok=馬上重啟
+licence_efailed=無法聯繫許可證伺服器
+licence_eexp=該伺服器的許可證已於 $1 過期
+licence_echk=檢查許可證時發生錯誤
+licence_evalid=找不到您的序號 $1 的有效許可證
+licence_evalidnone=未找到有效許可證；您的授權已被註銷
+license_esave=更新許可證資訊失敗
+licence_change=許可證啟動
+licence_deregister_sure=此操作將從該系統中分離 $1 許可證，並在 $2 天的寬限期後將其設定為唯讀模式。您將需要獲得新的許可證才能繼續在此伺服器上使用 Virtualmin Pro。現在註銷許可證嗎？
+licence_deregister_sure_nspan=此操作將從該系統中分離 $1 許可證，使其在 48 小時內可在另一台伺服器上使用。需要新的許可證才能繼續在此伺服器上使用 Virtualmin Pro。現在註銷許可證嗎？
+licence_manager_deregister_yes=是的，註銷
+
+licence_manager=許可證管理器
+licence_manager_goto=管理 Virtualmin Pro 許可證
+licence_manager_desc=此頁面將顯示與該機器關聯的目前許可證的序號和狀態。它還提供檢查狀態和更新許可證的選項。
+licence_manager_menu=Virtualmin 許可證管理器
+licence_manager_status=許可證狀態
+licence_manager_count=域名數量
+licence_manager_expiry=到期日
+licence_manager_ucount=無限
+licence_manager_checked=最後檢查
+licence_manager_err=許可證錯誤
+licence_manager_err1=未找到序號 $1 和許可證金鑰 $2 的有效許可證
+licence_manager_err1n=尚未設定許可證密鑰和序號
+licence_manager_status0=有效的
+licence_manager_status1=無效的
+licence_manager_status1n=無效的
+licence_manager_status1t=暫時無效
+licence_manager_status2=未知
+licence_manager_status3=已到期
+licence_manager_status4=鎖定，系統處於唯讀模式
+licence_manager_statusok=許可證沒有問題
+licence_manager_explain=許可證錯誤說明
+licence_manager_explain1n=此錯誤表明序號和許可證可能未正確設置，如果以未經授權的方式下載並安裝 Virtualmin Pro 軟體包，有時會發生這種情況
+licence_manager_explain1d=此錯誤表示序號和許可證密鑰從未設定或已與該伺服器分離
+licence_manager_explain1t=您可以暫時使用相同的 Virtualmin Pro 許可證移至新伺服器；但如果您希望在多個伺服器上使用它，則每個伺服器都需要自己的許可證；在一台伺服器上取消註冊許可證，然後再在另一台伺服器上使用它，否則，使用相同許可證的所有伺服器將在寬限期後切換為唯讀模式
+licence_manager_recom=建議採取的行動
+licence_manager_recom1n=在寬限期結束之前為本機取得新的許可證，否則系統將切換到唯讀模式
+licence_manager_recom1t=選擇在寬限期結束之前從哪一台伺服器取消註冊 $1 許可證；請記住，取消註冊後，許可證伺服器可能需要長達 48 小時才能釋放先前在多個伺服器上使用的許可證
+licence_manager_recom1tm=選擇在寬限期結束之前從 $2 伺服器取消註冊 $1 許可證；請記住，取消註冊後，許可證伺服器可能需要長達 48 小時才能釋放先前在多個伺服器上使用的許可證
+licence_manager_recom3=在寬限期內續訂 $1 訂閱，以便在該伺服器切換到唯讀模式之前繼續在此伺服器上使用 Virtualmin Pro
+licence_manager_bind=寬限期剩餘天數
+licence_manager_change=變更許可證
+licence_manager_setup=設定許可證
+licence_manager_deregister=註銷許可證
+licence_manager_subscription=管理訂閱
+licence_manager_support=聯繫支援人員
+licence_manager_support_link=寬限期已結束；如果您確信您的許可證僅在此伺服器上使用，但重新檢查後許可證伺服器在多個伺服器上仍顯示其處於活動狀態，請聯絡<a href='$1' target=_blank>Virtualmin 支援</a>如需更快的協助，或等待 48 小時自動解鎖
+licence_gpl_repos_warning=偵測到 GPL 儲存庫。首先使用UI中的「系統設定升級到Virtualmin Pro」進行升級！
+licence_validating=正在驗證新的許可證金鑰 $1 ..
+licence_evalidating=..許可證無法驗證
+licence_ecanvalidating=..許可證無效
+licence_valid_unlim=..對無限域有效，直到 $1
+licence_valid=..對 $1 域有效，直到 $2
+licence_updating_repo=正在更新 Virtualmin 儲存庫 ..
+licence_no_lines=..未找到 $1 的行！
+licence_updfile=更新 Virtualmin 許可證 ..
+licence_expired=許可證已過期
+licence_expired_desc=您的系統目前處於唯讀模式，這表示您無法變更系統配置。當系統許可證已過期或正在多個伺服器上使用時，會強制執行此模式。請造訪 <a href='$1'>Virtualmin License Manager</a> 頁面以了解更多詳細資訊。
 
 scripts_title=管理網頁應用程式
 scripts_desc=這種形式可以用來輕鬆地安裝或升級該虛擬伺服器的Web目錄中的各種第三方Web應用程式。
@@ -2504,6 +2574,7 @@ scripts_kit_wp_apply_backup_rm=刪除選定的備份檔 ..
 scripts_kit_wp_apply_backup_erm=.. 跳過：未選擇文件
 scripts_kit_wp_apply_backup_rmf=正在刪除備份 <tt>$1</tt> 檔案 ..
 scripts_kit_wp_apply_backup_ermf=..失敗：<tt>$1</tt>
+scripts_kit_wp_apply_backup_ermf0=文件不存在
 scripts_kit_wp_apply_backup_db=正在匯出 WordPress 資料庫 ..
 scripts_kit_wp_apply_archive_db=為資料庫建立 WordPress 備份存檔 ..
 scripts_kit_wp_apply_archive_files=為文件建立 WordPress 備份存檔 ..
@@ -2520,6 +2591,7 @@ scripts_kit_wp_apply_clone1=在同一台虛擬伺服器下建立克隆 ..
 scripts_kit_wp_apply_clone2=正在現有 <tt>$1</tt> 虛擬伺服器下建立複製 ..
 scripts_kit_wp_apply_clone3=正在新的<tt>$1</tt>虛擬子伺服器下建立複製 ..
 scripts_kit_wp_apply_clone4=正在新的<tt>$1</tt>頂級虛擬伺服器下建立複製 ..
+scripts_kit_wp_apply_clone_eclonegone=..失敗：要複製到的目標父域不存在
 scripts_kit_wp_apply_clone_eclone=..失敗：不允許您建立此類克隆
 scripts_kit_wp_apply_clone_edir=.. failed : 複製目錄只能包含字母、數字和點、連字符或底線等字符
 scripts_kit_wp_apply_clone_db=為克隆建立資料庫轉儲 ..
@@ -2538,6 +2610,11 @@ scripts_kit_wp_apply_clone_sub=為克隆建立新的子伺服器 ..
 scripts_kit_wp_apply_clone_esub=.. 無法為克隆建立子伺服器 : $1
 scripts_kit_wp_apply_clone_top=為克隆創建新的頂級伺服器 ..
 scripts_kit_wp_apply_clone_etop=.. 無法為克隆創建頂級伺服器 : $1
+scripts_kit_edom_name=虛擬伺服器「$1」不存在
+scripts_kit_estype=該虛擬伺服器上尚未安裝「$1」類型的腳本
+scripts_kit_estype_multi=「$1」類型的多個腳本可在以下路徑中取得：
+scripts_kit_estype_multi2=使用輔助“--script-path”參數指定要使用的確切腳本
+scripts_kit_estype_path=路徑「$2」處類型「$1」的腳本不存在
 
 scripts_gpl_pro_tip=專業功能
 scripts_gpl_pro_tip_hide=感謝您的提醒
@@ -3141,6 +3218,9 @@ website_ephpfcgid=當 PHP 使用 FCGI 執行模式時，CGI 腳本無法透過 F
 spf_ecannot=您無權編輯DNS選項
 spf_dmarcchange=正在更新DMARC記錄 ..
 spf_header2=DNSSEC區域密鑰
+spf_aliasdnsmode=別名網域 DNS 模式
+spf_aliasdns0=從目標網域複製記錄
+spf_aliasdns1=管理自己的記錄
 spf_ip6=允許的發件人IPv6地址
 spf_include=包含的域允許
 spf_eip6='$1'不是有效的IPv6地址
@@ -3202,6 +3282,8 @@ spf_keytag=鑰匙標籤
 spf_alg=演算法
 spf_type=摘要型
 spf_digest=摘要字串
+spf_aliasdns=將別名網域切換到它自己的 DNS 記錄 ..
+spf_noaliasdns=切換別名網域以從目標複製 DNS 記錄 ..
 
 s3_emodule2=無法加載與Amazon的S3服務通信所需的Perl模塊 $1 : $2
 s3_emodule3=未安裝與Amazon的S3服務通信所需的Perl模塊 $1或 $2
@@ -3285,6 +3367,8 @@ newstyles_del=立即刪除
 newstyles_edelete=選定的內容樣式不再存在！
 
 upgrade_epackages=找不到要安裝的軟件包！
+upgrade_eserial=序號缺失或無效
+upgrade_ekey=許可證密鑰遺失或無效
 upgrade_eamazon=此許可證密鑰不能用於升級
 upgrade_success=升級到 Virtualmin Pro 已成功。感謝您選擇 Virtualmin Pro！
 upgrade_eyumrepo=Virtualmin已從RPM安裝，但未使用Virtualmin GPL存儲庫。目前無法升級。
@@ -3688,7 +3772,7 @@ res_err=保存資源限制失敗
 res_eprocs=最大進程數缺失或無效
 res_eprocs2=最大進程數必須為2個或更多
 res_emem=最大進程大小丟失或無效
-res_emem2=最大進程大小必須至少為1M
+res_emem3=最大進程大小必須至少為 200M
 res_mins=分鐘
 res_secs=秒
 res_time=每個進程的最大CPU時間
@@ -5224,6 +5308,7 @@ deftmplt_tmpltpagefooteraboutcont=接觸
 2fa_header=兩因素選擇
 2fa_err=保存兩因素身份驗證失敗
 2fa_enrolling=正在使用 $1報名參加雙重因素. ..
+2fa_ecannot=您無權管理雙重認證
 
 rcert_err=刪除證書失敗
 rcert_ecert=虛擬服務器沒有要刪除的證書
@@ -5431,6 +5516,8 @@ acme_can1=經銷商
 acme_can2=限主管理員
 acme_edefault=無法編輯預設的 Let's Encrypt 提供者
 acme_website=SSL 提供者的網站
+
+readonly_mode=您的系統目前處於唯讀模式，這表示您無法變更系統配置。此模式通常由管理員手動啟用。
 
 monitor_validate=驗證 Virtualmin 域
 monitor_doms=要檢查的網域

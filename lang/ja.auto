@@ -64,6 +64,8 @@ index_eiface=システムでイーサネットインターフェイスが自動�
 index_elogrotate=Logrotateプログラムがシステムにインストールされていないか、Webminの<a href='$1'>ログファイルローテーション</a>モジュールでまだ正しく設定されていません。システムがLogrotateを使用していない場合は、Virtualminの<a href='$2'>モジュール構成</a>ページで無効にする必要があります。
 index_elogrotatever=Logrotateプログラムはバージョン $3のようですが、Virtualminは同じセクションで複数のログファイルをサポートするためにバージョン $4以上が必要です。
 index_espam=SpamAssassinプログラムがシステムにインストールされていないか、Webminの<a href='$1'>SpamAssassin Mail Filter</a>モジュールでまだ正しく設定されていないようです。システムがスパムフィルタリングを使用していない場合は、Virtualminの<a href='$2'>モジュール構成</a>ページで無効にする必要があります。
+index_espammail=<a href='$1'>機能とプラグイン</a>ページで電子メールが有効になっていない限り、スパム フィルタリング機能を有効にすることはできません。
+index_evirusmail=<a href='$1'>機能とプラグイン</a> ページで電子メールが有効になっていない限り、ウイルス フィルタリング機能を有効にすることはできません。
 index_eprocmail=スパムフィルタリングに必要なProcmailプログラムがシステムにインストールされていないか、Webminの<a href='$1'>Procmail Mail Filter</a>モジュールでまだ正しく設定されていないようです。システムがスパムフィルタリングを使用していない場合は、Virtualminの<a href='$2'>モジュール構成</a>ページで無効にする必要があります。
 index_evirus=ClamAVプログラム $1がシステムにインストールされていないようです。 <a href='$2'>モジュール構成</a>ページでパスを調整するか、この機能を無効にします。
 index_estatus=システムとサーバーのステータスモジュールがシステムにインストールされていないようです。インストールするか、<a href='$2'>モジュール構成</a>ページでステータス監視を無効にします。
@@ -1169,6 +1171,7 @@ edit_title2=仮想サブサーバーを編集
 edit_title3=エイリアスサーバーの編集
 edit_title4=仮想サブドメインを編集
 edit_ecannot=この仮想サーバーの編集は許可されていません
+edit_ewebappcannot=ウェブアプリケーションを管理する権限がありません
 edit_egone=サーバーはもう存在しません！
 edit_header=仮想サーバーの詳細
 edit_headerc=構成可能な設定
@@ -3787,6 +3790,7 @@ tmpl_dmarcextra=追加のDMARCオプション
 tmpl_edmarcpct=メッセージのパーセンテージは0から100までの整数でなければなりません
 tmpl_edns=DNSレコードが入力されていません
 tmpl_dns_sub=親ドメインにサブドメインDNSレコードを追加しますか？
+tmpl_dns_alias=エイリアス DNS ドメインには独自のレコードがありますか?
 tmpl_dns_cloud=に新しいDNSゾーンを作成する
 tmpl_dns_remote=リモート DNS $1
 tmpl_dns_cloud_import=作成時に既存のゾーンを引き継ぎます
@@ -4310,24 +4314,31 @@ resel_equnlimit=仮想サーバー $1は無制限のディスククォータを�
 resel_ebwunlimit=仮想サーバー $1には帯域幅の割り当てが無制限であるため、このリセラーに割り当てることはできませんが、リセラーには制限があります
 resel_ebefore=変更コマンドが失敗する前： $1
 
-licence_err=Virtualminライセンスで問題が検出されました：
-licence_soon=注意-Virtualminライセンスは $1日で期限切れになります。
-licence_soon2=注意-Virtualminライセンスは $1時間後に期限切れになります。
-licence_renew=更新は<a target=_blank href='$1'>$1</a>で購入できます
+licence_err=Virtualmin ライセンスに問題が検出されました:
+licence_soon=Virtualmin ライセンスは $1 日後に期限切れになります。
+licence_soon2=Virtualmin ライセンスは $1 時間後に期限切れになります。
+licence_renew=更新は <a target=_blank href='$1'>$2</a> で購入できます。
+licence_renew2=追加ライセンスは <a target=_blank href='$1'>$2</a> で購入できます。
+licence_renew3=ライセンスを新しいサーバーに移行するための猶予期間は $1 日残っています。
+licence_renew3m=ライセンスを新しいサーバーに移行するための猶予期間は $1 日残っています。
+licence_renew3e=ライセンスの更新には $1 日の猶予期間が残っています。
+licence_renew3em=ライセンスの更新には $1 日の猶予期間が残っています。
+licence_renew4=ライセンスの譲渡の猶予期間が終了し、システムは読み取り専用モードになりました。
+licence_renew4e=ライセンスの更新の猶予期間が終了し、システムは読み取り専用モードになりました。
 license_shop_name=バーチャルミンショップ
 licence_recheck=ライセンスステータスの再確認
 licence_title=ライセンスを再確認
 licence_doing=Virtualminライセンスを再確認します。
-licence_ok2=..ライセンスは<i>有効</i>です。これは、 $1 Virtualminドメイン、および $2システムでの使用に有効です。
-licence_ok3=..ライセンスは<i>有効</i>です。これは、 $1 Virtualminドメイン、および $3までの $2システムでの使用に有効です。
-licence_warn=ただし、このライセンスチェック中に一時的な問題が発生しました： $1。
+licence_ok2=.. ライセンスは有効で、$1 Virtualmin ドメインで、$2 システムで使用できます
+licence_ok3=.. ライセンスは $1 Virtualmin ドメインに対して有効であり、$3 まで $2 システムで使用できます。
+licence_warn=$2 ライセンス チェック中に一時的な問題が発生しました : $1
 licence_unlimited=無制限
 licence_goterr=..問題が検出されました： $1
 licence_goterr2=..有効期限が無効です： $1
 licence_ecannot=Virtualminライセンスを再確認することはできません
-licence_maxdoms=システムには $1サーバーのみのライセンスがありますが、 $2があります。
-licence_maxservers2=シリアル番号 $3は $1サーバーに対してのみライセンスされていますが、 $2で使用されています。
-licence_maxwarn=新しいサーバーに移行するためにこのシリアル番号を一時的に使用する場合を除き、<a target=_blank href='$1'>$2</a> で追加のライセンスを購入してください。
+licence_maxdoms=システムは $1 サーバーに対してのみライセンスされていますが、現在は $2 で使用されています。
+licence_maxservers2=シリアル番号 $3 は $1 サーバーのみにライセンスされていますが、現在は $2 サーバーで使用されています。
+licence_maxwarn=このライセンスが新しいサーバーへの移行のために一時的に使用されている場合を除き、このサーバーで使用するために別のライセンスを購入する必要があります。
 licence_ipchanged=システムのプライマリIPアドレスが $1から $2に変更されたようです。古いアドレスを使用している仮想サーバーに到達できないか、間違ったWebコンテンツを提供している可能性があります。
 licence_changeip=正しくないIPアドレスを更新する
 licence_smallcert=システムで使用されているSSL証明書の長さは $1ビットのみで、推奨サイズの2048ビットよりも小さいです。この証明書は、ドメイン $2に対して $4から $3に発行されました。
@@ -4340,6 +4351,64 @@ licence_fixlinksok=シンボリックリンクのアクセス許可を修正す�
 licence_fixlinksignore=安全でないシンボリックリンクを許可する
 licence_xfsreboot=ルートファイルシステムでXFSクォータを有効にするには、システムを再起動する必要があります。これが完了するまで、Virtualminはクォータがアクティブであることを検出せず、ディスク使用量に制限を仮想サーバーまたはユーザーに適用することは不可能です。
 licence_xfsrebootok=今すぐ再起動
+licence_efailed=ライセンスサーバーに接続できませんでした
+licence_eexp=このサーバーのライセンスは $1 に期限切れになりました
+licence_echk=ライセンスの確認中にエラーが発生しました
+licence_evalid=シリアル番号 $1 に有効なライセンスが見つかりませんでした
+licence_evalidnone=有効なライセンスが見つかりません。ライセンスは登録解除されました
+license_esave=ライセンス情報の更新に失敗しました
+licence_change=ライセンスのアクティベーション
+licence_deregister_sure=このアクションにより、$1 ライセンスがこのシステムから切り離され、$2 日間の猶予期間後に読み取り専用モードに設定されます。このサーバーで Virtualmin Pro を引き続き使用するには、新しいライセンスを取得する必要があります。今すぐライセンスを登録解除しますか?
+licence_deregister_sure_nspan=このアクションにより、$1 ライセンスがこのシステムから切り離され、48 時間以内に別のサーバーで使用できるようになります。このサーバーで Virtualmin Pro を引き続き使用するには、新しいライセンスが必要になります。今すぐライセンスを登録解除しますか?
+licence_manager_deregister_yes=はい、登録解除します
+
+licence_manager=ライセンス マネージャー
+licence_manager_goto=Virtualmin Proライセンスの管理
+licence_manager_desc=このページには、このマシンに関連付けられている現在のライセンスのシリアル キーとステータスが表示されます。また、ステータスの確認やライセンスの更新を行うオプションも提供されます。
+licence_manager_menu=Virtualmin ライセンス マネージャー
+licence_manager_status=ライセンスステータス
+licence_manager_count=ドメイン数
+licence_manager_expiry=有効期限
+licence_manager_ucount=無制限
+licence_manager_checked=最終確認日
+licence_manager_err=ライセンスエラー
+licence_manager_err1=シリアル番号 $1 およびライセンス キー $2 の有効なライセンスが見つかりませんでした
+licence_manager_err1n=ライセンスキーとシリアル番号が設定されていません
+licence_manager_status0=有効
+licence_manager_status1=無効
+licence_manager_status1n=無効
+licence_manager_status1t=一時的に無効
+licence_manager_status2=未知
+licence_manager_status3=期限切れ
+licence_manager_status4=ロックされており、システムは読み取り専用モードです
+licence_manager_statusok=ライセンスに問題はありません
+licence_manager_explain=ライセンスエラーの説明
+licence_manager_explain1n=このエラーは、シリアルとライセンスが正しく設定されていない可能性があることを示唆しています。これは、Virtualmin Proパッケージが不正な方法でダウンロードおよびインストールされた場合に発生することがあります。
+licence_manager_explain1d=このエラーは、シリアル番号とライセンスキーが設定されていないか、このサーバーから切り離されていることを示します。
+licence_manager_explain1t=同じ Virtualmin Pro ライセンスを一時的に新しいサーバーに移動するために使用できますが、複数のサーバーで使用する場合は、それぞれに独自のライセンスが必要です。別のサーバーで使用する前に、1 つのサーバーからライセンスを登録解除してください。そうしないと、同じライセンスを使用しているすべてのサーバーが猶予期間後に読み取り専用モードに切り替わります。
+licence_manager_recom=推奨されるアクション
+licence_manager_recom1n=猶予期間が終了する前にこのマシンの新しいライセンスを取得してください。そうしないと、システムは読み取り専用モードに切り替わります。
+licence_manager_recom1t=猶予期間が終了する前に、$1 ライセンスを登録解除するサーバーを選択してください。登録解除後、ライセンス サーバーが複数のサーバーで以前に使用されていたライセンスを解放するのに最大 48 時間かかる場合があることに注意してください。
+licence_manager_recom1tm=猶予期間が終了する前に、$1 ライセンスを登録解除する $2 サーバーのどれかを選択します。登録解除後、ライセンス サーバーが複数のサーバーで以前に使用されていたライセンスを解放するのに最大 48 時間かかる場合があることに注意してください。
+licence_manager_recom3=猶予期間中に $1 サブスクリプションを更新して、読み取り専用モードに切り替わる前にこのサーバーで Virtualmin Pro を引き続き使用してください
+licence_manager_bind=猶予期間の残り日数
+licence_manager_change=ライセンスの変更
+licence_manager_setup=ライセンスの設定
+licence_manager_deregister=ライセンスの登録解除
+licence_manager_subscription=サブスクリプションの管理
+licence_manager_support=サポートに問い合わせる
+licence_manager_support_link=猶予期間は終了しました。ライセンスがこのサーバーでのみ使用されていると確信しているのに、ライセンス サーバーが再確認後もライセンスが複数のサーバーでアクティブであると表示している場合は、<a href='$1' target=_blank>Virtualmin サポート</a> に連絡して迅速なサポートを受けるか、48 時間待って自動的にロックが解除されるのを待ちます。
+licence_gpl_repos_warning=GPL リポジトリが検出されました。まず UI の「システム設定の Virtualmin Pro へのアップグレード」を使用してアップグレードしてください。
+licence_validating=新しいライセンス キー $1 を検証しています。
+licence_evalidating=.. ライセンスを検証できません
+licence_ecanvalidating=.. ライセンスが無効です
+licence_valid_unlim=.. $1 まで無制限のドメインで有効
+licence_valid=.. $2 まで $1 ドメインで有効
+licence_updating_repo=Virtualmin リポジトリを更新しています。
+licence_no_lines=.. $1 の行が見つかりません。
+licence_updfile=Virtualmin ライセンスを更新しています。
+licence_expired=ライセンスの有効期限が切れました
+licence_expired_desc=システムは現在読み取り専用モードになっており、システム構成を変更することはできません。このモードは、システム ライセンスの有効期限が切れているか、複数のサーバーで使用されているために適用されています。詳細については、<a href='$1'>Virtualmin License Manager</a> ページをご覧ください。
 
 config_deftheme=グローバルWebminデフォルト
 config_oldtheme=古いWebminテーマ
@@ -4717,6 +4786,7 @@ scripts_kit_wp_apply_backup_rm=選択したバックアップ ファイルを削
 scripts_kit_wp_apply_backup_erm=.. スキップ: ファイルが選択されていません
 scripts_kit_wp_apply_backup_rmf=バックアップ <tt>$1</tt> ファイルを削除しています。
 scripts_kit_wp_apply_backup_ermf=.. 失敗しました: <tt>$1</tt>
+scripts_kit_wp_apply_backup_ermf0=ファイルが存在しません
 scripts_kit_wp_apply_backup_db=WordPress データベースをエクスポートしています。
 scripts_kit_wp_apply_archive_db=データベースの WordPress バックアップ アーカイブを作成しています。
 scripts_kit_wp_apply_archive_files=ファイルの WordPress バックアップ アーカイブを作成しています。
@@ -4733,6 +4803,7 @@ scripts_kit_wp_apply_clone1=同じ仮想サーバーの下にクローンを作�
 scripts_kit_wp_apply_clone2=既存の <tt>$1</tt> 仮想サーバーの下にクローンを作成しています。
 scripts_kit_wp_apply_clone3=新しい <tt>$1</tt> 仮想サブサーバーの下にクローンを作成しています。
 scripts_kit_wp_apply_clone4=新しい <tt>$1</tt> トップレベル仮想サーバーの下にクローンを作成しています。
+scripts_kit_wp_apply_clone_eclonegone=.. 失敗: クローン先のターゲット親ドメインが存在しません
 scripts_kit_wp_apply_clone_eclone=.. 失敗: このタイプのクローンを作成することはできません
 scripts_kit_wp_apply_clone_edir=.. 失敗: クローンディレクトリには、文字、数字、およびドット、ハイフン、アンダースコアなどの記号のみを含めることができます
 scripts_kit_wp_apply_clone_db=クローンのデータベース ダンプを作成しています。
@@ -4751,6 +4822,11 @@ scripts_kit_wp_apply_clone_sub=クローン用の新しいサブサーバーを�
 scripts_kit_wp_apply_clone_esub=.. クローンのサブサーバーの作成に失敗しました : $1
 scripts_kit_wp_apply_clone_top=クローン用の新しいトップレベル サーバーを作成しています。
 scripts_kit_wp_apply_clone_etop=.. クローンのトップレベル サーバーの作成に失敗しました : $1
+scripts_kit_edom_name=仮想サーバー '$1' は存在しません
+scripts_kit_estype=この仮想サーバーにはまだ「$1」タイプのスクリプトはインストールされていません
+scripts_kit_estype_multi=タイプ '$1' の複数のスクリプトが次のパスで利用可能です:
+scripts_kit_estype_multi2=使用するスクリプトを正確に指定するには、補助パラメータ「--script-path」を使用します。
+scripts_kit_estype_path=パス '$2' にタイプ '$1' のスクリプトが存在しません
 
 scripts_gpl_pro_tip=プロ機能
 scripts_gpl_pro_tip_hide=ヘッドアップをありがとう
@@ -5892,6 +5968,9 @@ spf_change=SPFレコードを更新しています ..
 spf_dmarcchange=DMARCレコードを更新しています ..
 spf_header=DNSおよび送信者ポリシーフレームワークオプション
 spf_header2=DNSSECゾーンキー
+spf_aliasdnsmode=エイリアスドメインDNSモード
+spf_aliasdns0=ターゲットドメインからレコードをコピーする
+spf_aliasdns1=自分の記録を管理する
 spf_enabled=SPFレコードは有効ですか？
 spf_a=許可された送信者のホスト名
 spf_mx=許可された送信者メールドメイン
@@ -5968,6 +6047,8 @@ spf_keytag=キータグ
 spf_alg=アルゴリズム
 spf_type=ダイジェストタイプ
 spf_digest=ダイジェスト文字列
+spf_aliasdns=エイリアス ドメインを独自の DNS レコードに切り替えます。
+spf_noaliasdns=エイリアス ドメインを切り替えて、ターゲットから DNS レコードをコピーします。
 
 s3_emodule=AmazonのS3サービスとの通信に必要なPerlモジュール $1がインストールされていません
 s3_emodule2=AmazonのS3サービスとの通信に必要なPerlモジュール $1をロードできませんでした： $2
@@ -6214,8 +6295,8 @@ upgrade_key=ライセンスキー
 upgrade_ok=今すぐアップグレード
 upgrade_err=Virtualmin Proへのアップグレードに失敗しました
 upgrade_epackages=インストールするパッケージが見つかりません！
-upgrade_eserial=シリアル番号が見つからないか、無効に見える
-upgrade_ekey=見当たらない、または無効に見えるライセンスキー
+upgrade_eserial=シリアル番号が見つからないか無効です
+upgrade_ekey=ライセンスキーが見つからないか無効です
 upgrade_eamazon=このライセンスキーはアップグレードには使用できません
 upgrade_elogin=シリアル番号とライセンスキーがVirtualmin Pro Webサイトで認識されませんでした
 upgrade_econnect=Virtualmin Proサーバーへの接続中にエラーが発生しました： $1
@@ -6710,7 +6791,7 @@ res_err=リソース制限を保存できませんでした
 res_eprocs=プロセスの最大数がないか無効です
 res_eprocs2=プロセスの最大数は2以上である必要があります
 res_emem=最大プロセスサイズがないか、無効です
-res_emem2=最大プロセスサイズは少なくとも1Mである必要があります
+res_emem3=最大プロセスサイズは少なくとも200Mである必要があります
 res_mins=分
 res_secs=秒
 res_time=プロセスあたりの最大CPU時間
@@ -8246,6 +8327,7 @@ deftmplt_tmpltpagefooteraboutcont=接触
 2fa_header=2要素オプション
 2fa_err=二要素認証の保存に失敗しました
 2fa_enrolling=$1で2要素に登録しています. ..
+2fa_ecannot=2要素認証を管理することはできません
 
 rcert_err=証明書の削除に失敗しました
 rcert_ecert=仮想サーバーに削除する証明書がありません
@@ -8453,6 +8535,8 @@ acme_can1=再販業者
 acme_can2=マスター管理者のみ
 acme_edefault=デフォルトのLet's Encryptプロバイダーは編集できません
 acme_website=SSLプロバイダーのウェブサイト
+
+readonly_mode=システムは現在読み取り専用モードになっており、システム構成を変更することはできません。このモードは通常、管理者によって手動で有効にされます。
 
 monitor_validate=Virtualminドメインの検証
 monitor_doms=確認するドメイン

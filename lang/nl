@@ -3121,18 +3121,12 @@ resel_clone=Kloon Reseller
 resel_domsopts=Domeinen zonder eigenaar
 resel_domssel=In bezit van deze reseller
 
-licence_err=Er is een probleem ontdekt met uw Virtualmin licentie :
-licence_soon=Opgelet - Uw Virtualmin licentie zal expireren in $1 dagen.
-licence_soon2=Opgelet - Uw Virtualmin licentie zal expireren in $1 uren.
-licence_renew=Een verlenging kan worden aangeschaft bij <a target=_new href='$1'>$1</a>
 licence_recheck=Her-controleer Licentie Status
 licence_title=Her-Controleer Licentie
 licence_doing=Nu uw Virtualmin licentie opnieuw controleren ..
-licence_warn=Maar er was een tijdelijk probleem tijdens deze licentie controle : $1.
 licence_unlimited=Ongelimiteerd
 licence_goterr=.. er is een probleem ontdekt : $1
 licence_ecannot=U bent niet bevoegd om de Virtualmin licentie te controleren
-licence_maxdoms=Uw systeem licentie is geldig voor $1 servers, maar u heeft er $2.
 
 config_deftheme=Globale Webmin standaard
 config_oldtheme=Oude Webmin thema
@@ -4290,8 +4284,6 @@ upgrade_serial=Serie nummer
 upgrade_key=Licentie sleutel
 upgrade_ok=Nu Upgraden
 upgrade_err=Mislukt om Virtualmin Pro te upgraden
-upgrade_eserial=Ontbrekende of ongeldig-lijkend serie nummer
-upgrade_ekey=Ontbrekende of ongeldig-lijkende licentie sleutel
 upgrade_eamazon=Deze licentie sleutel kan niet worden gebruikt voor upgraden
 upgrade_elogin=Uw serie nummer en licentie sleutel werden niet herkend door de Virtualmin Pro website
 upgrade_econnect=Er ontstond een fout tijdens verbinden met de Virtualmin Pro server : $1
@@ -4713,7 +4705,6 @@ res_err=Mislukt om bron limieten op te slaan
 res_eprocs=Ontbrekende of ongeldige maximum aantal processen
 res_eprocs2=Maximum aantal processen moet 2 of meer zijn
 res_emem=Ontbrekende of ongeldig maximum proces grote
-res_emem2=Maximum proces grote moet op zijn minst 1M zijn
 res_mins=minuten
 res_secs=seconden
 res_time=Maximum CPU tijd per proces

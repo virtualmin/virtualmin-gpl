@@ -223,7 +223,9 @@ else {
 		}
 	&postfix::set_current_value("smtpd_recipient_restrictions", $rr);
 	&postfix::reload_postfix();
-	&$second_print(&text('postgrey_postfixdone', $port));
+	my $donetext = ($port =~ /^\//) ?
+		'postgrey_postfixdone2' : 'postgrey_postfixdone';
+	&$second_print(&text($donetext, "<tt>$port</tt>"));
 	}
 
 return 1;

@@ -2060,7 +2060,6 @@ resel_defip=Ýsim-tabanlý sunucular için IP adresi
 resel_edefip=Hatalý ya da geçersiz IP address'i
 resel_edefip2=Bu sistemde ,IP adressi henüz aktif olmamýþtýr
 
-licence_err=Virtualmin lisansýnýzla ilgili bir problem tespit edildi :
 licence_recheck=Lisans Durumunu Yeniden Kontrol Et
 licence_title=Lisansý Yeniden Kontrol Et
 licence_doing=Virtualmin lisansýnýz yeniden kontrol ediliyor ..

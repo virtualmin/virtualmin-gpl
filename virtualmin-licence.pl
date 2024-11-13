@@ -33,7 +33,10 @@ return $out =~ /^EXP\s+(?<exp>\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\d+)(?:\s+([\w]
 	(2, undef, "$text{'licence_echk'} : $regerr", undef) :
        $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\d+)(?:\s+([\w])(?:\s+(\d+))?)?)?/ ?
 	(0, $1, undef, $2, $3, $4, $5, $6, $7) :
-	(1, undef, &text("licence_evalid", "<tt data-evalid>$serial</tt>"));
+	(1, undef,
+	 	(!$serial || uc($serial) eq 'GPL') ? 
+		    $text{"licence_evalidnone"} :
+		    &text("licence_evalid", "<tt data-evalid>$serial</tt>"));
 }
 
 # Change license with a new serial and key

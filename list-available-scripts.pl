@@ -82,8 +82,9 @@ if ($multiline) {
 			}
 		print "    Available: ",$script->{'avail'} ? "Yes" : "No","\n";
 		print "    Versions: ",join(" ", @{$script->{'versions'}}),"\n";
-		if ($script->{'release'}) {
-			print "    Release: ",$script->{'release'},"\n";
+		if ($script->{'release'} || $script->{'release_version'}) {
+			print "    Installer version: $script->{'release'}.".
+			      "$script->{'release_version'}\n";
 			}
 		print "    Available versions: ",
 			join(" ", grep { &can_script_version($script, $_) }

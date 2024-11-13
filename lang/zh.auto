@@ -18,6 +18,8 @@ index_ebindmod=您的系统上未安装BIND DNS服务器Webmin模块。
 index_emysql2=MySQL客户端程序似乎未安装，或者尚未在Webmin的<a href='$1'>MySQL数据库</a>模块中正确设置。如果您的系统不使用MySQL，则应在Virtualmin的<a href='$2'>模块配置</a>页面中将其禁用。
 index_ewebalizerfile=在系统上找不到模板Webalizer配置文件 $1。可能需要在<a href='$2'>Webalizer日志文件分析</a>模块中进行更改。
 index_emailboxessystem=未将“读取用户邮件”模块设置为使用 $3邮件服务器。调整其<a href='$1'>模块配置</a>以匹配，或者更改<a href='$2'>Virtualmin配置</a>。
+index_espammail=除非在<a href='$1'>功能和插件</a>页面上启用电子邮件，否则无法启用垃圾邮件过滤功能。
+index_evirusmail=除非在<a href='$1'>功能和插件</a>页面上启用电子邮件，否则无法启用病毒过滤功能。
 index_evirusrun2=ClamAV程序 $1似乎无法正常运行： $2。在<a href='$3'>垃圾邮件和病毒扫描程序</a>页上更改程序，或禁用此功能。
 index_etlsassl=OpenSSL不支持证书解析或SHA-256哈希
 index_amanage=管理Apache
@@ -500,6 +502,7 @@ alias_estart=自动回复开始日期无效
 alias_eend=自动回复结束日期无效
 alias_aopts=自动回复选项
 
+edit_ewebappcannot=您无权管理 Web 应用程序
 edit_xndomain=真实DNS域名
 edit_dbuser=对于 $2 : $1
 edit_id=域ID
@@ -1889,6 +1892,7 @@ tmpl_dmarcskip=没有设置
 tmpl_dmarcyes=是的，下面有政策
 tmpl_dmarcextra=额外的DMARC选项
 tmpl_edmarcpct=邮件百分比必须为0到100之间的整数
+tmpl_dns_alias=别名 DNS 域名有自己的记录吗？
 tmpl_dns_cloud=在上创建新的DNS区域
 tmpl_dns_remote=远程 DNS $1
 tmpl_dns_cloud_import=创建时接管现有区域
@@ -2141,18 +2145,26 @@ resel_equnlimit=无法将虚拟服务器 $1分配给该代理商，因为它具�
 resel_ebwunlimit=无法将虚拟服务器 $1分配给该代理商，因为它具有无限的带宽配额，但是代理商具有限制
 resel_ebefore=修改命令失败之前： $1
 
-licence_soon=注意-您的Virtualmin许可证将在 $1天内过期。
-licence_soon2=注意-您的Virtualmin许可证将在 $1小时后过期。
-licence_renew=可以在<a target=_blank href='$1'>$1</a>购买续订
+licence_err=检测到您的 Virtualmin 许可证存在问题：
+licence_soon=您的 Virtualmin 许可证将在 $1 天后到期。
+licence_soon2=您的 Virtualmin 许可证将在 $1 小时后过期。
+licence_renew=可以在<a target=_blank href='$1'>$2</a>购买续订。
+licence_renew2=您可以在<a target=_blank href='$1'>$2</a>购买额外的许可证。
+licence_renew3=还剩下 $1 天的宽限期来管理许可证到新服务器的迁移。
+licence_renew3m=还剩下 $1 天的宽限期来管理许可证到新服务器的迁移。
+licence_renew3e=许可证续订宽限期还剩 $1 天。
+licence_renew3em=许可证续订宽限期还剩 $1 天。
+licence_renew4=您的许可证转移宽限期已过期，系统现在处于只读模式。
+licence_renew4e=您的许可证续订宽限期已过期，系统现在处于只读模式。
 license_shop_name=虚拟商店
-licence_ok2=..许可证<i>有效</i>。它对 $1 Virtualmin域有效，并在 $2系统上使用。
-licence_ok3=..许可证<i>有效</i>。它对 $1 Virtualmin域有效，并且可在 $2系统上使用，直到 $3。
-licence_warn=但是，此许可证检查期间发生了一个临时问题： $1。
+licence_ok2=.. 许可证有效，适用于 $1 Virtualmin 域，并可在 $2 系统上使用
+licence_ok3=.. 许可证有效，适用于 $1 Virtualmin 域，并可在 $2 系统上使用，直至 $3
+licence_warn=$2 许可证检查期间出现临时问题：$1
 licence_unlimited=无限
 licence_goterr2=..无效的到期日期： $1
-licence_maxdoms=您的系统仅许可用于 $1服务器，但是您具有 $2。
-licence_maxservers2=您的序列号 $3 仅授权用于 $1 服务器，但正在 $2 上使用。
-licence_maxwarn=除非此序列号临时用于迁移到新服务器，否则请在 <a target=_blank href='$1'>$2</a> 购买额外的许可证。
+licence_maxdoms=您的系统仅适用于 $1 服务器，但目前正在 $2 上使用。
+licence_maxservers2=您的序列号 $3 仅授权用于 $1 服务器，但当前正在 $2 服务器上使用。
+licence_maxwarn=除非临时使用此许可证来迁移到新服务器，否则您必须购买单独的许可证才能在此服务器上使用。
 licence_ipchanged=系统的主IP地址似乎已从 $1更改为 $2。使用旧地址的虚拟服务器可能无法访问或提供了错误的Web内容。
 licence_changeip=更新不正确的IP地址
 licence_smallcert=您的系统使用的SSL证书长度仅为 $1位，小于建议的2048位。此证书由 $4颁发给 $3的域 $2。
@@ -2165,6 +2177,64 @@ licence_fixlinksok=修复符号链接权限
 licence_fixlinksignore=允许不安全的符号链接
 licence_xfsreboot=必须重新引导系统才能在根文件系统上启用XFS配额。在完成此操作之前，Virtualmin不会将配额检测为活动状态，并且不可能将磁盘使用限制应用于虚拟服务器或用户。
 licence_xfsrebootok=马上重启
+licence_efailed=无法联系许可证服务器
+licence_eexp=此服务器的许可证已于 $1 到期
+licence_echk=检查许可证时发生错误
+licence_evalid=未找到适合您的序列号 $1 的有效许可证
+licence_evalidnone=未找到有效许可证；您的许可证已被注销
+license_esave=更新许可信息失败
+licence_change=许可证激活
+licence_deregister_sure=此操作将从此系统分离 $1 许可证，并在 $2 天的宽限期后将其设置为只读模式。您需要获取新许可证才能继续在此服务器上使用 Virtualmin Pro。立即注销许可证？
+licence_deregister_sure_nspan=此操作将从此系统分离 $1 许可证，使其在 48 小时内可在另一台服务器上使用。需要新许可证才能继续在此服务器上使用 Virtualmin Pro。立即注销许可证？
+licence_manager_deregister_yes=是的，注销
+
+licence_manager=许可证管理器
+licence_manager_goto=管理 Virtualmin Pro 许可证
+licence_manager_desc=此页面将显示与此机器关联的当前许可证的序列号和状态。它还提供检查状态和更新许可证的选项。
+licence_manager_menu=Virtualmin 许可证管理器
+licence_manager_status=许可证状态
+licence_manager_count=域名数量
+licence_manager_expiry=到期日
+licence_manager_ucount=无限
+licence_manager_checked=上次检查
+licence_manager_err=许可证错误
+licence_manager_err1=未找到序列号 $1 和许可证密钥 $2 的有效许可证
+licence_manager_err1n=尚未设置许可证密钥和序列号
+licence_manager_status0=有效的
+licence_manager_status1=无效的
+licence_manager_status1n=无效的
+licence_manager_status1t=暂时无效
+licence_manager_status2=未知
+licence_manager_status3=已到期
+licence_manager_status4=已锁定，系统处于只读模式
+licence_manager_statusok=许可证没有问题
+licence_manager_explain=许可证错误解释
+licence_manager_explain1n=此错误表明序列号和许可证可能未正确设置，如果 Virtualmin Pro 包是以未经授权的方式下载和安装的，则有时会发生这种情况
+licence_manager_explain1d=此错误表示序列号和许可证密钥从未设置或已从此服务器分离
+licence_manager_explain1t=您可以暂时使用相同的 Virtualmin Pro 许可证移动到新服务器；但如果您想要在多台服务器上使用它，则每台服务器都需要自己的许可证；在另一台服务器上使用许可证之前，请先从一台服务器上注销该许可证，否则，所有使用相同许可证的服务器将在宽限期后切换为只读模式
+licence_manager_recom=建议的操作
+licence_manager_recom1n=在宽限期结束之前为这台机器获取新的许可证，否则系统将切换到只读模式
+licence_manager_recom1t=选择在宽限期结束之前从哪个服务器注销 $1 许可证；请记住，注销后，许可证服务器可能需要最多 48 小时才能释放之前在多台服务器上使用的许可证
+licence_manager_recom1tm=选择在宽限期结束之前从哪 $2 服务器取消注册 $1 许可证；请记住，取消注册后，许可证服务器可能需要最多 48 小时才能释放之前在多台服务器上使用的许可证
+licence_manager_recom3=在宽限期内续订您的 $1 订阅，以便在该服务器上继续使用 Virtualmin Pro，然后才能切换到只读模式
+licence_manager_bind=宽限期剩余天数
+licence_manager_change=更改许可证
+licence_manager_setup=设置许可证
+licence_manager_deregister=注销许可证
+licence_manager_subscription=管理订阅
+licence_manager_support=联系支持
+licence_manager_support_link=宽限期已结束；如果您确信您的许可证仅在此服务器上使用，但许可证服务器在重新检查后仍将其在多个服务器上显示为活动状态，请联系 <a href='$1' target=_blank>Virtualmin 支持</a> 以获得更快的帮助，或等待 48 小时以自动解锁
+licence_gpl_repos_warning=检测到 GPL 存储库。首先使用 UI 中的“系统设置升级至 Virtualmin Pro”进行升级！
+licence_validating=验证新许可证密钥 $1 ..
+licence_evalidating=.. 无法验证许可证
+licence_ecanvalidating=.. 许可证无效
+licence_valid_unlim=.. 对无限域名有效，直至 $1
+licence_valid=.. 对 $1 个域有效，直至 $2
+licence_updating_repo=正在更新 Virtualmin 存储库 ..
+licence_no_lines=.. 没有找到 $1 的行！
+licence_updfile=正在更新 Virtualmin 许可证 ..
+licence_expired=许可证已过期
+licence_expired_desc=您的系统目前处于只读模式，这意味着您无法更改系统配置。由于系统许可证已过期或正在多台服务器上使用，因此强制采用此模式。请访问 <a href='$1'>Virtualmin 许可证管理器</a> 页面了解更多详细信息。
 
 scripts_title=管理 Web 应用程序
 scripts_desc=该表单可用于轻松地安装或升级此虚拟服务器的 Web 目录中的各种第三方 Web 应用程序。
@@ -2504,6 +2574,7 @@ scripts_kit_wp_apply_backup_rm=删除选定的备份文件 ..
 scripts_kit_wp_apply_backup_erm=.. 跳过：未选择文件
 scripts_kit_wp_apply_backup_rmf=删除备份 <tt>$1</tt> 文件 ..
 scripts_kit_wp_apply_backup_ermf=.. 失败：<tt>$1</tt>
+scripts_kit_wp_apply_backup_ermf0=文件不存在
 scripts_kit_wp_apply_backup_db=正在导出 WordPress 数据库 ..
 scripts_kit_wp_apply_archive_db=为数据库创建 WordPress 备份档案 ..
 scripts_kit_wp_apply_archive_files=为文件创建 WordPress 备份档案 ..
@@ -2520,6 +2591,7 @@ scripts_kit_wp_apply_clone1=在同一个虚拟服务器下创建克隆 ..
 scripts_kit_wp_apply_clone2=在现有的 <tt>$1</tt> 虚拟服务器下创建克隆 ..
 scripts_kit_wp_apply_clone3=在新的 <tt>$1</tt> 虚拟子服务器下创建克隆 ..
 scripts_kit_wp_apply_clone4=在新的 <tt>$1</tt> 顶级虚拟服务器下创建克隆 ..
+scripts_kit_wp_apply_clone_eclonegone=.. 失败：要克隆的目标父域不存在
 scripts_kit_wp_apply_clone_eclone=.. 失败：您无权创建此类克隆
 scripts_kit_wp_apply_clone_edir=.. 失败：克隆目录只能包含字母、数字和字符（例如点、连字符或下划线）
 scripts_kit_wp_apply_clone_db=正在为克隆创建数据库转储 ..
@@ -2538,6 +2610,11 @@ scripts_kit_wp_apply_clone_sub=为克隆创建新的子服务器 ..
 scripts_kit_wp_apply_clone_esub=.. 无法为克隆创建子服务器：$1
 scripts_kit_wp_apply_clone_top=为克隆创建新的顶级服务器 ..
 scripts_kit_wp_apply_clone_etop=.. 无法为克隆创建顶级服务器：$1
+scripts_kit_edom_name=虚拟服务器‘$1’不存在
+scripts_kit_estype=此虚拟服务器上尚未安装类型为“$1”的脚本
+scripts_kit_estype_multi=以下路径中提供了多个类型为“$1”的脚本：
+scripts_kit_estype_multi2=使用辅助“--script-path”参数指定要使用的确切脚本
+scripts_kit_estype_path=路径“$2”处类型为“$1”的脚本不存在
 
 scripts_gpl_pro_tip=专业功能
 scripts_gpl_pro_tip_hide=感谢您的提醒
@@ -3141,6 +3218,9 @@ website_ephpfcgid=当 PHP 使用 FCGI 执行模式时，CGI 脚本无法通过 F
 spf_ecannot=您无权编辑DNS选项
 spf_dmarcchange=正在更新DMARC记录 ..
 spf_header2=DNSSEC区域密钥
+spf_aliasdnsmode=别名域 DNS 模式
+spf_aliasdns0=从目标域复制记录
+spf_aliasdns1=管理自己的记录
 spf_ip6=允许的发件人IPv6地址
 spf_include=包含的域允许
 spf_eip6='$1'不是有效的IPv6地址
@@ -3202,6 +3282,8 @@ spf_keytag=钥匙扣
 spf_alg=算法
 spf_type=摘要型
 spf_digest=摘要字符串
+spf_aliasdns=将别名域切换到其自己的 DNS 记录 ..
+spf_noaliasdns=切换别名域以从目标复制 DNS 记录 ..
 
 s3_emodule2=无法加载与Amazon的S3服务通信所需的Perl模块 $1 : $2
 s3_emodule3=未安装与Amazon的S3服务进行通信所需的Perl模块 $1或 $2
@@ -3285,6 +3367,8 @@ newstyles_del=立即删除
 newstyles_edelete=选定的内容样式不再存在！
 
 upgrade_epackages=找不到要安装的软件包！
+upgrade_eserial=序列号缺失或无效
+upgrade_ekey=许可证密钥缺失或无效
 upgrade_eamazon=此许可证密钥不能用于升级
 upgrade_success=升级到 Virtualmin Pro 已成功。感谢您选择 Virtualmin Pro！
 upgrade_eyumrepo=Virtualmin已从RPM安装，但未使用Virtualmin GPL存储库。目前无法升级。
@@ -3688,7 +3772,7 @@ res_err=保存资源限制失败
 res_eprocs=最大进程数缺失或无效
 res_eprocs2=最大进程数必须为2个或更多
 res_emem=最大进程大小丢失或无效
-res_emem2=最大进程大小必须至少为1M
+res_emem3=最大进程大小必须至少为 200M
 res_mins=分钟
 res_secs=秒
 res_time=每个进程的最大CPU时间
@@ -5041,7 +5125,7 @@ right_of=$2中的 $1
 right_sysinfo=系统信息
 
 assoc_title=关联和取消关联特征
-assoc_desc=此页面上启用或禁用的功能不会更新任何系统配置文件。相反，它仅更新 Virtualmin 的预期域功能数据库。这对于导入手动设置的功能或断开配置以在删除虚拟服务器时保留它们很有用。请谨慎使用！
+assoc_desc=此页面上启用或禁用的功能不会更新任何系统配置文件。相反，它只会更新 Virtualmin 的预期域功能数据库。这对于导入手动设置的功能或断开配置以在删除虚拟服务器时保留它们很有用。请谨慎使用！
 assoc_header=功能关联设置
 assoc_features=Virtualmin已知的功能
 assoc_validate=需要成功验证才能保存？
@@ -5224,6 +5308,7 @@ deftmplt_tmpltpagefooteraboutcont=接触
 2fa_header=两因素选择
 2fa_err=保存两因素身份验证失败
 2fa_enrolling=正在使用 $1报名参加双重因素. ..
+2fa_ecannot=您无权管理双重身份验证
 
 rcert_err=删除证书失败
 rcert_ecert=虚拟服务器没有要删除的证书
@@ -5431,6 +5516,8 @@ acme_can1=经销商
 acme_can2=仅限主管理员
 acme_edefault=默认的 Let's Encrypt 提供程序无法编辑
 acme_website=SSL 提供商的网站
+
+readonly_mode=您的系统当前处于只读模式，这意味着您无法更改系统配置。此模式通常由管理员手动启用。
 
 monitor_validate=验证 Virtualmin 域
 monitor_doms=要检查的域名

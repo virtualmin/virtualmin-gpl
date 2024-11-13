@@ -64,6 +64,8 @@ index_eiface=Vo vašom systéme nebolo možné automaticky nájsť žiadne ether
 index_elogrotate=Zdá sa, že program Logrotate nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>Otočenie súboru denníka</a> Webmin. Ak váš systém nepoužíva Logrotate, mal by byť vypnutý na stránke <a href='$2'>modulu</a> Virtualmin.
 index_elogrotatever=Zdá sa, že program Logrotate je verzie $3, ale Virtualmin vyžaduje verziu $4 alebo vyššiu, aby podporovala viacero protokolových súborov v tej istej sekcii.
 index_espam=Zdá sa, že program SpamAssassin nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>SpamAssassin Mail Filter</a> Webmin. Ak váš systém nepoužíva filtrovanie spamu, malo by byť vypnuté na stránke <a href='$2'>konfigurácie modulu</a> Virtualminu.
+index_espammail=Funkciu filtrovania spamu nie je možné povoliť, pokiaľ nie je povolený e-mail na stránke <a href='$1'>funkcie a doplnky</a>.
+index_evirusmail=Funkciu filtrovania vírusov nie je možné povoliť, pokiaľ nie je povolený e-mail na stránke <a href='$1'>funkcie a doplnky</a>.
 index_eprocmail=Zdá sa, že program Procmail potrebný na filtrovanie spamu nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>Procmail Mail Filter</a> Webmin. Ak váš systém nepoužíva filtrovanie spamu, malo by byť vypnuté na stránke <a href='$2'>konfigurácie modulu</a> Virtualminu.
 index_evirus=Zdá sa, že program ClamAV $1 nie je nainštalovaný vo vašom systéme. Buď upravte cestu na stránke <a href='$2'>Konfigurácia modulu</a>, alebo túto funkciu vypnite.
 index_estatus=Zdá sa, že modul Stav systému a servera nie je nainštalovaný vo vašom systéme. Buď ho nainštalujte, alebo zakážte monitorovanie stavu na stránke <a href='$2'>konfigurácie modulu</a>.
@@ -1169,6 +1171,7 @@ edit_title2=Upraviť virtuálny podserver
 edit_title3=Upraviť alias server
 edit_title4=Upraviť virtuálnu subdoménu
 edit_ecannot=Nemáte povolenie upravovať tento virtuálny server
+edit_ewebappcannot=Nemáte povolené spravovať webové aplikácie
 edit_egone=Server už neexistuje!
 edit_header=Podrobnosti o virtuálnom serveri
 edit_headerc=Konfigurovateľné nastavenia
@@ -3787,6 +3790,7 @@ tmpl_dmarcextra=Extra možnosti DMARC
 tmpl_edmarcpct=Percento správ musí byť celé číslo od 0 do 100
 tmpl_edns=Nie sú zadané žiadne záznamy DNS
 tmpl_dns_sub=Pridať záznamy DNS subdomény do nadradenej domény?
+tmpl_dns_alias=Alias DNS domény majú svoje vlastné záznamy?
 tmpl_dns_cloud=Vytvorte nové zóny DNS na
 tmpl_dns_remote=Vzdialený DNS $1
 tmpl_dns_cloud_import=Pri vytváraní prevezmite existujúcu zónu
@@ -4310,24 +4314,31 @@ resel_equnlimit=Virtuálny server $1 nemožno priradiť tomuto predajcovi, preto
 resel_ebwunlimit=Virtuálny server $1 nemožno priradiť tomuto predajcovi, pretože má neobmedzenú kvótu šírky pásma, ale predajca má limit
 resel_ebefore=Pred zlyhaním príkazu úpravy : $1
 
-licence_err=Bol zistený problém s vašou licenciou Virtualmin :
-licence_soon=Upozornenie: Vaša licencia Virtualmin vyprší o $1 dní.
-licence_soon2=Upozornenie: Vaša licencia Virtualmin vyprší o $1 hodín.
-licence_renew=Obnovenie je možné zakúpiť za <a target=_blank href='$1'>$1</a>
+licence_err=Bol zistený problém s vašou licenciou Virtualmin:
+licence_soon=Vaša licencia Virtualmin vyprší o $1 dní.
+licence_soon2=Vaša licencia Virtualmin vyprší o $1 hodín.
+licence_renew=Obnovenie je možné zakúpiť za <a target=_blank href='$1'>$2</a>.
+licence_renew2=Dodatočnú licenciu je možné zakúpiť na <a target=_blank href='$1'>$2</a>.
+licence_renew3=Na spravovanie migrácie licencie na nový server zostáva obdobie odkladu $1 dňa.
+licence_renew3m=Na spravovanie migrácie licencie na nový server zostáva doba odkladu $1 dní.
+licence_renew3e=Na obnovenie licencie zostáva doba odkladu $1 dňa.
+licence_renew3em=Na obnovenie licencie zostáva doba odkladu $1 dní.
+licence_renew4=Doba odkladu na prenos vašej licencie uplynula a systém je teraz v režime iba na čítanie.
+licence_renew4e=Doba odkladu na obnovenie vašej licencie uplynula a systém je teraz v režime len na čítanie.
 license_shop_name=Obchod Virtualmin
 licence_recheck=Znova skontrolujte stav licencie
 licence_title=Znova skontrolujte licenciu
 licence_doing=Teraz znova skontrolujte svoju licenciu Virtualmin ..
-licence_ok2=.. licencia je <i>platná</i>. Je platný pre domény $1 Virtualmin a na použitie v systémoch $2.
-licence_ok3=.. licencia je <i>platná</i>. Je platný pre domény $1 Virtualmin a na použitie v systémoch $2 do $3.
-licence_warn=Počas tejto kontroly licencie sa však vyskytol dočasný problém: $1.
+licence_ok2=.. licencia je platná pre domény $1 Virtualmin a na použitie v systéme $2
+licence_ok3=.. licencia je platná pre domény $1 Virtualmin a na použitie v systéme $2 do $3
+licence_warn=Počas kontroly licencie $2 sa vyskytol dočasný problém : $1
 licence_unlimited=neobmedzené
 licence_goterr=.. bol zistený problém : $1
 licence_goterr2=.. neplatný dátum vypršania platnosti : $1
 licence_ecannot=Nie je dovolené znova skontrolovať licenciu Virtualmin
-licence_maxdoms=Váš systém je licencovaný len pre servery $1, ale máte $2.
-licence_maxservers2=Vaše sériové číslo $3 je licencované iba pre server $1, ale používa sa na $2.
-licence_maxwarn=Ak sa toto sériové číslo dočasne nepoužíva na migráciu na nový server, zakúpte si ďalšiu licenciu na <a target=_blank href='$1'>$2</a>.
+licence_maxdoms=Váš systém je licencovaný iba pre server $1, ale momentálne sa používa na $2.
+licence_maxservers2=Vaše sériové číslo $3 je licencované iba pre server $1, ale momentálne sa používa na serveroch $2.
+licence_maxwarn=Pokiaľ sa táto licencia dočasne nepoužíva na migráciu na nový server, musíte si zakúpiť samostatnú licenciu na používanie na tomto serveri.
 licence_ipchanged=Zdá sa, že primárna IP adresa vášho systému sa zmenila z $1 na $2. Virtuálne servery používajúce starú adresu môžu byť nedostupné alebo môžu poskytovať nesprávny webový obsah.
 licence_changeip=Aktualizujte nesprávne IP adresy
 licence_smallcert=Váš systém používa certifikát SSL, ktorý je dlhý iba $1 bitov, čo je menej ako odporúčaná veľkosť 2048 bitov. Tento certifikát bol vydaný $4 až $3 pre doménu $2.
@@ -4340,6 +4351,64 @@ licence_fixlinksok=Opravte povolenia pre symbolické odkazy
 licence_fixlinksignore=Povoliť nebezpečné symbolické odkazy
 licence_xfsreboot=Váš systém musí byť reštartovaný, aby ste povolili kvóty XFS v koreňovom súborovom systéme. Kým sa tak nestane, Virtualmin nezistí, že kvóty sú aktívne, a nebude možné aplikovať limity na využitie disku na virtuálne servery alebo používateľov.
 licence_xfsrebootok=Reštartuj teraz
+licence_efailed=Nepodarilo sa kontaktovať licenčný server
+licence_eexp=Licencia pre tento server vypršala $1
+licence_echk=Pri kontrole licencie sa vyskytla chyba
+licence_evalid=Pre vaše sériové číslo $1 sa nenašla platná licencia
+licence_evalidnone=Nenašla sa žiadna platná licencia; vaša licencia bola zrušená
+license_esave=Aktualizácia informácií o licencii zlyhala
+licence_change=Aktivácia licencie
+licence_deregister_sure=Táto akcia odpojí licenciu $1 od tohto systému a po uplynutí $2-dňovej doby odkladu ju nastaví do režimu len na čítanie. Ak chcete pokračovať v používaní Virtualmin Pro na tomto serveri, budete musieť získať novú licenciu. Chcete teraz odhlásiť licenciu?
+licence_deregister_sure_nspan=Táto akcia odpojí licenciu $1 z tohto systému, čím sa stane platnou na použitie na inom serveri do 48 hodín. Na pokračovanie používania Virtualmin Pro na tomto serveri bude potrebná nová licencia. Chcete teraz zrušiť registráciu?
+licence_manager_deregister_yes=Áno, zrušte registráciu
+
+licence_manager=Správca licencií
+licence_manager_goto=Spravovať licenciu Virtualmin Pro
+licence_manager_desc=Táto stránka zobrazí sériový kľúč a stav pre aktuálnu licenciu spojenú s týmto strojom. Poskytuje tiež možnosti na kontrolu stavu a aktualizáciu licencie.
+licence_manager_menu=Správca licencií Virtualmin
+licence_manager_status=Stav licencie
+licence_manager_count=Počet domén
+licence_manager_expiry=Dátum vypršania platnosti
+licence_manager_ucount=Neobmedzené
+licence_manager_checked=Posledná kontrola
+licence_manager_err=Chyba licencie
+licence_manager_err1=Pre sériové číslo $1 a licenčný kľúč $2 sa nenašla platná licencia
+licence_manager_err1n=Licenčný kľúč a sériové číslo nie sú nastavené
+licence_manager_status0=Platné
+licence_manager_status1=Neplatné
+licence_manager_status1n=Neplatné
+licence_manager_status1t=Dočasne neplatné
+licence_manager_status2=Neznámy
+licence_manager_status3=Platnosť vypršala
+licence_manager_status4=Zamknuté, so systémom v režime iba na čítanie
+licence_manager_statusok=Licencia nemá žiadne problémy
+licence_manager_explain=Vysvetlenie chyby licencie
+licence_manager_explain1n=Táto chyba naznačuje, že sériové číslo a licencia možno neboli správne nastavené, čo sa niekedy môže stať, ak bol balík Virtualmin Pro stiahnutý a nainštalovaný neoprávneným spôsobom
+licence_manager_explain1d=Táto chyba znamená, že sériové číslo a licenčný kľúč neboli nikdy nastavené alebo boli odpojené od tohto servera
+licence_manager_explain1t=Rovnakú licenciu Virtualmin Pro môžete dočasne použiť na prechod na nový server; ale ak to chcete na viacerých serveroch, každý potrebuje svoju vlastnú licenciu; zrušte registráciu licencie z jedného servera pred jej použitím na inom serveri, inak sa všetky servery používajúce rovnakú licenciu po uplynutí ochrannej lehoty prepnú do režimu len na čítanie
+licence_manager_recom=Odporúčané akcie
+licence_manager_recom1n=Získajte novú licenciu pre tento počítač pred uplynutím doby odkladu, inak sa systém prepne do režimu len na čítanie
+licence_manager_recom1t=Vyberte server, na ktorom chcete zrušiť registráciu licencie $1 pred koncom obdobia odkladu; majte na pamäti, že po zrušení registrácie môže licenčný server potrebovať až 48 hodín na uvoľnenie licencie predtým používanej na viacerých serveroch
+licence_manager_recom1tm=Vyberte, na ktorom zo serverov $2 chcete zrušiť registráciu licencie $1 pred uplynutím doby odkladu; majte na pamäti, že po zrušení registrácie môže licenčný server potrebovať až 48 hodín na uvoľnenie licencie predtým používanej na viacerých serveroch
+licence_manager_recom3=Obnovte si predplatné $1 počas ochrannej lehoty, aby ste mohli pokračovať v používaní Virtualmin Pro na tomto serveri predtým, ako sa prepne do režimu len na čítanie
+licence_manager_bind=Počet zostávajúcich dní v ochrannej lehote
+licence_manager_change=Zmeniť licenciu
+licence_manager_setup=Nastaviť licenciu
+licence_manager_deregister=Zrušte registráciu licencie
+licence_manager_subscription=Spravovať predplatné
+licence_manager_support=Kontaktujte podporu
+licence_manager_support_link=Doba odkladu sa skončila; ak ste si istí, že vaša licencia sa používa výhradne na tomto serveri, ale licenčný server ju po opätovnej kontrole stále zobrazuje ako aktívnu na viacerých, obráťte sa na <a href='$1' target=_blank>podporu virtuálneho servera</a> pre rýchlejšiu pomoc alebo počkajte 48 hodín, kým sa automaticky odomkne
+licence_gpl_repos_warning=Zistené repozitáre GPL. Najprv použite "Inovácia nastavení systému na Virtualmin Pro" v používateľskom rozhraní!
+licence_validating=Overuje sa nový licenčný kľúč $1 ..
+licence_evalidating=.. licenciu nie je možné overiť
+licence_ecanvalidating=.. licencia nie je platná
+licence_valid_unlim=.. platné pre neobmedzené domény do $1
+licence_valid=.. platné pre $1 domény do $2
+licence_updating_repo=Aktualizácia úložiska Virtualmin ..
+licence_no_lines=.. nenašli sa žiadne riadky pre $1!
+licence_updfile=Aktualizácia licencie Virtualmin ..
+licence_expired=Platnosť licencie vypršala
+licence_expired_desc=Váš systém je momentálne v režime len na čítanie, čo znamená, že nemôžete vykonávať zmeny v konfigurácii systému. Tento režim je vynútený, pretože platnosť systémovej licencie vypršala alebo sa používa na viacerých serveroch. Ďalšie podrobnosti nájdete na stránke <a href='$1'>Správca licencií Virtualmin</a>.
 
 config_deftheme=Predvolená hodnota Global Webmin
 config_oldtheme=Stará téma Webmin
@@ -4717,6 +4786,7 @@ scripts_kit_wp_apply_backup_rm=Odstraňujú sa vybrané záložné súbory ..
 scripts_kit_wp_apply_backup_erm=.. preskočené: nie sú vybraté žiadne súbory
 scripts_kit_wp_apply_backup_rmf=Odstraňuje sa záložný súbor <tt>$1</tt> ..
 scripts_kit_wp_apply_backup_ermf=.. zlyhalo: <tt>$1</tt>
+scripts_kit_wp_apply_backup_ermf0=súbor neexistuje
 scripts_kit_wp_apply_backup_db=Exportovanie databázy WordPress ..
 scripts_kit_wp_apply_archive_db=Vytvára sa záložný archív WordPress pre databázu ..
 scripts_kit_wp_apply_archive_files=Vytvára sa záložný archív WordPress pre súbory ..
@@ -4733,6 +4803,7 @@ scripts_kit_wp_apply_clone1=Vytvára sa klon pod rovnakým virtuálnym serverom 
 scripts_kit_wp_apply_clone2=Vytvára sa klon pod existujúcim virtuálnym serverom <tt>$1</tt> ..
 scripts_kit_wp_apply_clone3=Vytvára sa klon pod novým virtuálnym podserverom <tt>$1</tt> ..
 scripts_kit_wp_apply_clone4=Vytvára sa klon pod novým virtuálnym serverom najvyššej úrovne <tt>$1</tt> ..
+scripts_kit_wp_apply_clone_eclonegone=.. zlyhalo : cieľová nadradená doména na klonovanie neexistuje
 scripts_kit_wp_apply_clone_eclone=.. neúspešné : nemáte povolené vytvoriť tento typ klonu
 scripts_kit_wp_apply_clone_edir=.. zlyhalo : klonovaný adresár môže obsahovať iba písmená, čísla a znaky ako bodka, spojovník alebo podčiarkovník
 scripts_kit_wp_apply_clone_db=Vytvára sa výpis databázy pre klon ..
@@ -4751,6 +4822,11 @@ scripts_kit_wp_apply_clone_sub=Vytvára sa nový podserver pre klon ..
 scripts_kit_wp_apply_clone_esub=.. nepodarilo sa vytvoriť podserver pre klon : $1
 scripts_kit_wp_apply_clone_top=Vytvára sa nový server najvyššej úrovne pre klon ..
 scripts_kit_wp_apply_clone_etop=.. nepodarilo sa vytvoriť server najvyššej úrovne pre klon : $1
+scripts_kit_edom_name=Virtuálny server '$1' neexistuje
+scripts_kit_estype=Na tomto virtuálnom serveri ešte nebol nainštalovaný žiadny skript typu '$1'
+scripts_kit_estype_multi=Viacero skriptov typu '$1' je dostupných na nasledujúcich cestách:
+scripts_kit_estype_multi2=Pomocou pomocného parametra '--script-path' špecifikujte presný skript, ktorý sa má použiť
+scripts_kit_estype_path=Skript typu '$1' na ceste '$2' neexistuje
 
 scripts_gpl_pro_tip=Profesionálna funkcia
 scripts_gpl_pro_tip_hide=Ďakujem za upozornenie
@@ -5892,6 +5968,9 @@ spf_change=Aktualizácia SPF záznamu ..
 spf_dmarcchange=Aktualizuje sa záznam DMARC ..
 spf_header=Možnosti DNS a Sender Policy Framework
 spf_header2=kľúče zóny DNSSEC
+spf_aliasdnsmode=Režim DNS domény aliasu
+spf_aliasdns0=Skopírujte záznamy z cieľovej domény
+spf_aliasdns1=Spravovať vlastné záznamy
 spf_enabled=SPF záznam povolený?
 spf_a=Povolené názvy hostiteľov odosielateľov
 spf_mx=Povolené poštové domény odosielateľa
@@ -5968,6 +6047,8 @@ spf_keytag=Kľúčový štítok
 spf_alg=Algoritmus
 spf_type=Typ trávenia
 spf_digest=Stráviť reťazec
+spf_aliasdns=Prepínanie alias domény na vlastné DNS záznamy ..
+spf_noaliasdns=Prepínanie alias domény na kopírovanie DNS záznamov z cieľového ..
 
 s3_emodule=Perl modul $1 potrebný na komunikáciu so službou Amazon S3 nie je nainštalovaný
 s3_emodule2=Modul Perl $1 potrebný na komunikáciu so službou Amazon S3 sa nepodarilo načítať : $2
@@ -6214,8 +6295,8 @@ upgrade_key=Licenčný kľúč
 upgrade_ok=Vylepšiť teraz
 upgrade_err=Nepodarilo sa upgradovať na Virtualmin Pro
 upgrade_epackages=Nenašli sa žiadne balíčky na inštaláciu!
-upgrade_eserial=Chýbajúce alebo neplatne vyzerajúce sériové číslo
-upgrade_ekey=Chýbajúci alebo neplatne vyzerajúci licenčný kľúč
+upgrade_eserial=Chýbajúce alebo neplatné sériové číslo
+upgrade_ekey=Chýbajúci alebo neplatný licenčný kľúč
 upgrade_eamazon=Tento licenčný kľúč nemožno použiť na inovácie
 upgrade_elogin=Webová stránka Virtualmin Pro nerozpoznala vaše sériové číslo a licenčný kľúč
 upgrade_econnect=Vyskytla sa chyba pri pripájaní k serveru Virtualmin Pro : $1
@@ -6710,7 +6791,7 @@ res_err=Limity zdrojov sa nepodarilo uložiť
 res_eprocs=Chýbajúci alebo neplatný maximálny počet procesov
 res_eprocs2=Maximálny počet procesov musí byť 2 alebo viac
 res_emem=Chýbajúca alebo neplatná maximálna veľkosť procesu
-res_emem2=Maximálna veľkosť procesu musí byť aspoň 1 m
+res_emem3=Maximálna veľkosť procesu musí byť aspoň 200 miliónov
 res_mins=minút
 res_secs=sekúnd
 res_time=Maximálny čas CPU na proces
@@ -8063,7 +8144,7 @@ right_of=$1 z $2
 right_sysinfo=systémové informácie
 
 assoc_title=Priradiť a zrušiť priradenie funkcií
-assoc_desc=Funkcie povolené alebo zakázané na tejto stránke neaktualizujú žiadne konfiguračné súbory systému. Namiesto toho aktualizuje iba databázu očakávaných funkcií domény Virtualmin. Je to užitočné pri importovaní manuálne nastavených funkcií alebo pri odpájaní konfigurácií, aby sa zachovali pri odstránení virtuálneho servera. Používajte opatrne!
+assoc_desc=Funkcie povolené alebo zakázané na tejto stránke neaktualizujú žiadne konfiguračné súbory systému. Namiesto toho aktualizuje iba databázu očakávaných doménových funkcií spoločnosti Virtualmin. Je to užitočné pri importovaní manuálne nastavených funkcií alebo pri odpájaní konfigurácií, aby sa zachovali pri odstránení virtuálneho servera. Používajte opatrne!
 assoc_header=Nastavenia asociácie funkcií
 assoc_features=Funkcie známe pre Virtualmin
 assoc_validate=Vyžaduje sa pred uložením úspešné overenie?
@@ -8246,6 +8327,7 @@ deftmplt_tmpltpagefooteraboutcont=Kontakt
 2fa_header=Dvojfaktorové možnosti
 2fa_err=Nepodarilo sa uložiť dvojfaktorové overenie
 2fa_enrolling=Registrácia pre dvojfaktorový program s $1...
+2fa_ecannot=Nie je povolené spravovať dvojfaktorové overenie
 
 rcert_err=Certifikát sa nepodarilo odstrániť
 rcert_ecert=Virtuálny server nemá žiadny certifikát na odstránenie
@@ -8453,6 +8535,8 @@ acme_can1=predajcovia
 acme_can2=Iba hlavný správca
 acme_edefault=Predvoleného poskytovateľa Let's Encrypt nie je možné upraviť
 acme_website=Webová stránka poskytovateľa SSL
+
+readonly_mode=Váš systém je momentálne v režime len na čítanie, čo znamená, že nemôžete vykonávať zmeny v konfigurácii systému. Tento režim zvyčajne povoľuje manuálne správca.
 
 monitor_validate=Overte domény Virtualmin
 monitor_doms=Domény na kontrolu

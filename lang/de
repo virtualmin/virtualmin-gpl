@@ -2476,7 +2476,6 @@ resel_edefns=Nameserver '$1' ist ungültig
 
 licence_unlimited=unlimitiert
 licence_goterr=.. ein Problem wurde erkannt : $1
-licence_maxdoms=Ihr System ist für nur $1 Server lizenziert, aber Sie haben $2.
 licence_changeip=Update nicht korrekte IP-Adressen
 licence_newcert=Generiere neues Zertifikat
 licence_newcsr=Neues Zertifikat anfordern
@@ -3310,8 +3309,6 @@ upgrade_serial=Seriennummer
 upgrade_key=Lizenzschlüssel
 upgrade_ok=Upgrade jetzt
 upgrade_err=Fehlgeschlagen nach Virtualmin Pro upzugraden
-upgrade_eserial=Fehlende oder ungültig ausschauene Seriennummer
-upgrade_ekey=Fehlender oder ungültig ausschauender Lizenzschlüssel
 upgrade_eamazon=Dieser Lizenzschlüssel kann nicht für Upgrades verwendet werden
 upgrade_elogin=Ihre Seriennummer und Lizenzschlüssel wurde nicht durch die Virtualmin Pro Webseite erkannt
 upgrade_econnect=Ein Fehler ist beim Verbinden zum Virtualmin Pro Server : $1 aufgetreten
