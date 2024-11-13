@@ -15,6 +15,12 @@
 * Fix an issue with MySQL user creation in certain edge cases
 * Fix config file to set the correct port/socket for Postgrey in EL derivatives
 
+#### Version 7.20.2
+* Fix external DNS filter to consider CNAME and IPv6 records
+* Fix not to trigger DNS filter for existing Let’s Encrypt renewals
+* Fix false positive message to move SSL certificate to default location
+* Fix old documentation links
+
 #### Version 7.20.1
 * Add support for changing username format to match the local system when restoring a backup
 * Fix a bug that can corrupt the Dovecot config when creation of the default domain fails
