@@ -4725,7 +4725,7 @@ if ($mode == -1) {
 	}
 if ($mode == 0 && defined($fmt) && $fmt == 0) {
 	# For a single-file backup, make sure the filename makes sense
-	$in{$name."_file"} =~ /\.(gz|zip|tar|bz2|Z)$/i ||
+	$in{$name."_file"} =~ /\.(gz|zip|tar|bz2|Z|tgz|tbz2)$/i ||
 		&error($text{'backup_edestext'});
 	}
 if ($mode == 0 && $d) {
