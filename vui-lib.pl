@@ -49,7 +49,7 @@ return &ui_radio_table($name, $mode,
 			    ('hourly', 'daily', 'weekly', 'monthly', 'yearly')
 		      ]) ] ) : ( ),
 	   [ 2, $text{'cron_complex'},
-		   &ui_textbox($name."_complex", $complex, 40, 0, undef,
+		   &ui_textbox($name."_complex", $complex, 30, 0, undef,
 				  "readonly=true")." ".$button ],
 	 ]).&ui_hidden($name."_hidden", $hidden);
 }
