@@ -3254,7 +3254,8 @@ res_err=Ressourcenlimits konnten nicht gespeichert werden
 res_eprocs=Fehlende oder ungültige maximale Anzahl von Prozessen
 res_eprocs2=Die maximale Anzahl von Prozessen muss 2 oder mehr betragen
 res_emem=Fehlende oder ungültige maximale Prozessgröße
-res_emem3=Die maximale Prozessgröße muss mindestens 200 MB betragen
+res_emem2=Die maximale Größe pro Prozess muss auf mindestens 1 M eingestellt werden
+res_wmem=Die empfohlene Mindestgröße beträgt 200 M
 res_etime=Fehlende oder ungültige maximale CPU-Zeit pro Prozess
 res_etime2=Die maximale CPU-Zeit pro Prozess muss 1 Minute oder mehr betragen
 
@@ -3355,6 +3356,7 @@ postgrey_epostfix=Postgrey kann nur in Verbindung mit dem Postfix-Mailserver ver
 postgrey_ecmd=Der Postgrey-Befehl $1 wurde nicht gefunden
 postgrey_installdesc=Virtualmin kann jedoch versuchen, das Postgrey-Greylisting-Paket automatisch für Sie zu installieren.
 postgrey_procdone=.. angefangen fertig
+postgrey_postfixdone2=.. konfiguriert zur Verwendung der Socketdatei $1
 postgrey_noprocdone=.. Herunterfahren erledigt
 postgrey_title2=Greylisting aktivieren
 postgrey_failed=Greylisting ist für dieses System nicht verfügbar : $1
