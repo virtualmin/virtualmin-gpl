@@ -13661,7 +13661,7 @@ if (!$d->{'alias'} && &can_config_domain($d)) {
 	}
 
 # Button to show mail logs
-if ($virtualmin_pro && $config{'mail'} && $config{'mail_system'} <= 1 &&
+if ($virtualmin_pro && $config{'mail'} && $config{'mail_system'} =~ /^0|1$/ &&
     &can_view_maillog($d) && $d->{'mail'}) {
 	push(@rv, { 'page' => 'pro/maillog.cgi',
 		    'title' => $text{'edit_maillog'},

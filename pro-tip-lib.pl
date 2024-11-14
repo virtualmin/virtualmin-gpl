@@ -287,7 +287,7 @@ foreach my $pro_demo_feature
 	  'cat' => 'logs',
 	  'url' => "https://virtualmin.com/professional/#edit_maillog",
 	  'skip' => !($config{'mail'} &&
-	              $config{'mail_system'} <= 1 &&
+	              $config{'mail_system'} =~ /^0|1$/ &&
 	              $d->{'mail'}),
 	},
 

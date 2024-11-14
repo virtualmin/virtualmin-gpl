@@ -1,5 +1,5 @@
 line1=Server settings,11
-mail_system=Mail server to configure,4,1-Sendmail,0-Postfix,2-Qmail,3-Detect automatically
+mail_system=Mail server to configure,4,-1-None,3-Detect automatically,0-Postfix,1-Sendmail,2-Qmail
 generics=Also update outgoing addresses for mailboxes?,1,1-Yes,0-No
 bccs=Allow automatic BCCing of outgoing email?,1,1-Yes,0-No
 quotas=Set quotas for domain and mail users?,1,1-Yes (if enabled),0-No
