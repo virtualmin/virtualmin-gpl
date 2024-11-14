@@ -4482,6 +4482,7 @@ return %hash;
 sub will_send_user_email
 {
 local ($d, $isnew) = @_;
+return 0 if ($d->{'domainowner'});
 local $tmpl = &get_template($d ? $d->{'template'} : 0);
 local $tmode = !$d || $isnew ? "newuser" : "updateuser";
 if ($tmpl->{$tmode.'_on'} eq 'none' ||
