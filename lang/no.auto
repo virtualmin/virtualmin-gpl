@@ -1896,7 +1896,8 @@ mail_smtp_cloudoff=Fjerner sky-SMTP-leverandør $1 ..
 mail_smtp_cloudon=Konfigurerer sky-SMTP-leverandør $1 ..
 mail_smtp_cloudfailed=.. mislyktes : $1
 
-res_emem3=Maksimal prosessstørrelse må være minst 200M
+res_emem2=Maksimal størrelse per prosessgrense må settes til minst 1 M
+res_wmem=Minste anbefalte størrelse er 200 M
 
 sched_allplan=På plan $1 
 sched_allplans=På $1 planer
@@ -1920,6 +1921,7 @@ plan_scriptssel=Tillatt
 dplans_err2=Kunne ikke endre standardplanen
 
 postgrey_procdone=.. begynt ferdig
+postgrey_postfixdone2=.. konfigurert til å bruke socketfilen $1
 postgrey_noprocdone=.. avstengning utført
 
 editgrey_eregexp=Ugyldig vanlig uttrykk : $1 

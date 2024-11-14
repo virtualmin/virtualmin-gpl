@@ -114,12 +114,16 @@ foreach my $d (@doms) {
 			}
 
 		# Update settings in each one
+		my ($inifile, $ininame, $inivalue);
 		eval {
 			local $main::error_must_die = 1;
 			foreach $ini (@inis) {
+				$inifile = $ini->[1];
 				&lock_file($ini->[1]);
 				$conf = &phpini::get_config($ini->[1]);
 				for(my $i=0; $i<@ini_names; $i++) {
+					$ininame = $ini_names[$i];
+					$inivalue = $ini_values[$i];
 					&phpini::save_directive(
 						$conf, $ini_names[$i],
 						$ini_values[$i]);
@@ -129,7 +133,8 @@ foreach my $d (@doms) {
 				}
 			};
 		if ($@) {
-			&$second_print(".. failed to update $ini : $@");
+			&$second_print(".. failed to update \"$inifile\" with ".
+				"setting \"$ininame\" to \"$inivalue\": $@");
 			next;
 			}
 		}

@@ -2177,7 +2177,8 @@ mail_smtp_cloudoff=Cloud SMTP-provider $1 verwijderen ..
 mail_smtp_cloudon=Cloud SMTP-provider $1 configureren ..
 mail_smtp_cloudfailed=.. mislukt  : $1
 
-res_emem3=De maximale procesgrootte moet minimaal 200M zijn
+res_emem2=De maximale grootte per proceslimiet moet worden ingesteld op minimaal 1 M
+res_wmem=De minimale aanbevolen grootte is 200 M
 
 sched_allplan=Op plan $1
 sched_allplans=Op $1 -abonnementen
@@ -2203,6 +2204,7 @@ plan_scriptssel=Toegestaan
 dplans_err2=Kan het standaardabonnement niet wijzigen
 
 postgrey_procdone=.. begonnen klaar
+postgrey_postfixdone2=.. geconfigureerd om socketbestand $1 te gebruiken
 postgrey_noprocdone=.. afsluiten gedaan
 
 editgrey_eregexp=Ongeldige reguliere expressie : $1

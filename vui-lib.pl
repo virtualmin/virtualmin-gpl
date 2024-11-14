@@ -49,7 +49,7 @@ return &ui_radio_table($name, $mode,
 			    ('hourly', 'daily', 'weekly', 'monthly', 'yearly')
 		      ]) ] ) : ( ),
 	   [ 2, $text{'cron_complex'},
-		   &ui_textbox($name."_complex", $complex, 40, 0, undef,
+		   &ui_textbox($name."_complex", $complex, 30, 0, undef,
 				  "readonly=true")." ".$button ],
 	 ]).&ui_hidden($name."_hidden", $hidden);
 }
@@ -348,6 +348,18 @@ sub vui_hidden
 {
 my ($content) = @_;
 return "<div class='vui_hidden' style='display: none'>$content</div>";
+}
+
+=head2 vui_note(text)
+
+Returns a note as a small font size text
+
+=cut
+sub vui_note
+{
+my ($text) = @_;
+return "<font style='font-size:92%;opacity:0.66'>&nbsp;&nbsp;ⓘ&nbsp;&nbsp;".
+	"$text</font>";
 }
 
 1;
