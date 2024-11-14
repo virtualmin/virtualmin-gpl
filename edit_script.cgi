@@ -17,10 +17,10 @@ print &ui_table_start($text{'scripts_uheader'}, undef, 2);
 
 # Show script description
 print &ui_table_row($text{'scripts_iinstver'},
-		"$script->{'release'}.$script->{'release_version'}&nbsp;".
+		"$script->{'release'}&nbsp;".
 			&ui_help("$text{'scripts_iinstdate'}: ".
 				&filetimestamp_to_date($script->{'filename'})))
-	if ($script->{'release'} || $script->{'release_version'});
+	if ($script->{'release'});
 print &ui_table_row($text{'scripts_iname'}, $script->{'desc'});
 print &ui_table_row($text{'scripts_iversion2'},
 	$script->{'vdesc'}->{$sinfo->{'version'}} || $sinfo->{'version'});
