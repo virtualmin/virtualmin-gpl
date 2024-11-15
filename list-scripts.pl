@@ -86,11 +86,9 @@ foreach my $d (@doms) {
 			print "    Description: ".($script->{'desc'} ||
 			                          "$sinfo->{'name'} ($text{'scripts_discontinued'})")."\n";
 			print "    Version: $sinfo->{'version'}\n";
-			if ($script->{'release'} ||
-			    $script->{'release_version'}) {
+			if ($script->{'release'}) {
 				print "    Installer version: ".
-				      "$script->{'release'}.".
-				      "$script->{'release_version'}\n";
+				      "$script->{'release'}\n";
 				}
 			print "    Installed: ",&make_date($sinfo->{'time'}),"\n";
 			print "    Manually deleted: ",

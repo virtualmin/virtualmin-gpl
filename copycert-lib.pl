@@ -782,7 +782,10 @@ $miniserv{'keyfile'} = $keyfile;
 $miniserv{'extracas'} = $chainfile;
 &usermin::put_usermin_miniserv_config(\%miniserv);
 &unlock_file($usermin::usermin_miniserv_config);
-&usermin::restart_usermin_miniserv();
+eval {
+	local $main::error_must_die = 1;
+	&usermin::restart_usermin_miniserv();
+	};
 &$second_print($text{'setup_done'});
 
 # Tell the user if not in SSL mode
