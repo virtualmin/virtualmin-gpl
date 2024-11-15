@@ -376,7 +376,8 @@ if (!$virtualmin_pro) {
 		$h = &$d(&$f($h), "$n-elem");
 		$h .= &$d("&nbsp;&nbsp;<small><a target='_blank' ".
 		            "href='$virtualmin_docs_pro/#${n}' ".
-			    "data-pro='$n'>&#128274;&nbsp;&nbsp;<span>Pro</span></a></small>", "$n-link");
+			    "data-pro='$n'>&#128274;&nbsp;&nbsp;".
+			    	"<span>Pro</span></a></small>", "$n-link");
 		return $h;
 		}
 	return undef;
