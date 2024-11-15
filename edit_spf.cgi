@@ -107,8 +107,15 @@ if (!$readonly) {
 	# DMARC enabled
 	$dmarc = &get_domain_dmarc($d);
 	$defdmarc = &default_domain_dmarc($d);
+	@dinputs = ("dp", "dpct", "dmarcruf_def", "dmarcruf",
+		    "dmarcrua_def", "dmarcrua");
+	my $dis0 = &js_disable_inputs(\@dinputs, []);
+	my $dis1 = &js_disable_inputs([], \@dinputs);
+	my $ddis = $dmarc ? 0 : 1;
 	print &ui_table_row(&hlink($text{'spf_denabled'}, 'spf_denabled'),
-			    &ui_yesno_radio("denabled", $dmarc ? 1 : 0));
+		    &ui_radio("denabled", $dmarc ? 1 : 0,
+			      [ [ 1, $text{'yes'}, "onClick='$dis1'" ],
+				[ 0, $text{'no'}, "onClick='$dis0'" ] ]));
 
 	# DMARC policy
 	$eddmarc = $dmarc || $defdmarc;
@@ -116,11 +123,12 @@ if (!$readonly) {
 		&ui_select("dp", $eddmarc->{'p'},
 			  [ [ "none", $text{'tmpl_dmarcnone'} ],
 			    [ "quarantine", $text{'tmpl_dmarcquar'} ],
-			    [ "reject", $text{'tmpl_dmarcreject'} ] ]));
+			    [ "reject", $text{'tmpl_dmarcreject'} ] ],
+			  1, 0, 0, $ddis));
 
 	# DMARC percent
 	print &ui_table_row(&hlink($text{'spf_dpct'}, 'spf_dpct'),
-		&ui_textbox("dpct", $eddmarc->{'pct'} || 100, 5)."%");
+		&ui_textbox("dpct", $eddmarc->{'pct'} || 100, 5, $ddis)."%");
 
 	# DMARC email addresses
 	foreach my $r ('ruf', 'rua') {
@@ -130,7 +138,8 @@ if (!$readonly) {
 				  $eddmarc->{$r} eq "" ? 1 : 0,
 				  [ [ 1, $text{'tmpl_dmarcskip'} ],
 				    [ 0, &ui_textbox('dmarc'.$r,
-						$eddmarc->{$r}, 40) ] ]));
+					    $eddmarc->{$r}, 40, $ddis) ] ],
+				  $ddis));
 		}
 	}
 
