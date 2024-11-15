@@ -218,7 +218,19 @@ foreach my $pro_demo_feature
 	{ 'name' => 'newlinks',
 	  'title' => $text{'newlinks_title'},
 	  'cat' => 'custom',
-	  'url' => "https://virtualmin.com/professional/#newlinks",
+
+	# Add demo Remote DNS
+	{ 'name' => 'remotedns',
+	  'title' => $text{'remotedns_title'},
+	  'cat' => 'ip',
+	  'url' => "https://www.virtualmin.com/docs/professional-features/#remotedns",
+	},
+
+	# Add demo SSL Providers
+	{ 'name' => 'newacmes',
+	  'title' => $text{'newacmes_title'},
+	  'cat' => 'ip',
+	  'url' => "https://www.virtualmin.com/docs/professional-features/#newacmes",
 	},
 
 	# Add demo Secondary Mail Servers link for GPL users 
