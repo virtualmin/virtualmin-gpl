@@ -246,6 +246,7 @@ $virtualmin_link = "https://www.virtualmin.com";
 $virtualmin_account_subscriptions = "$virtualmin_link/account/subscriptions/";
 $virtualmin_shop_link = "$virtualmin_link/shop/";
 $virtualmin_shop_link_cat = "$virtualmin_link/product-category/virtualmin/";
+$virtualmin_docs_pro = "$virtualmin_link/docs/professional-features";
 
 $script_download_host = "scripts.virtualmin.com";
 $script_download_port = 80;
