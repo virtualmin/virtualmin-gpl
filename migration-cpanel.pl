@@ -448,7 +448,7 @@ else {
 	}
 local @rvdoms = ( \%dom );
 
-# Extra homedir.tar if needed
+# Extract homedir.tar if needed
 local $hometar = "$userdir/homedir.tar";
 if (-r $hometar) {
 	&$first_print("Extracting home directory TAR file ..");
