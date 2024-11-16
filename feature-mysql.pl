@@ -2166,6 +2166,26 @@ sub start_service_mysql
 return &mysql::start_mysql();
 }
 
+# restart_mysql_server()
+# Called from post-actions to restart MySQL and print stuff
+sub restart_mysql_server
+{
+&$first_print($text{'mysql_restarting'});
+if (&mysql::is_mysql_running() <= 0) {
+	&$second_print($text{'mysql_erestarting'});
+	}
+else {
+	&mysql::stop_mysql();
+	my $err = &mysql::start_mysql();
+	if ($err) {
+		&$second_print(&text('copycert_emysqlstart', $err));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	}
+}
+
 # unquote_mysql_database(name)
 # Returns a MySQL escaped database name like \% and \_ unescaped
 sub unquote_mysql_database

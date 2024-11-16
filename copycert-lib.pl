@@ -878,14 +878,9 @@ if (&mysql::is_mysql_running() > 0) {
 			}
 		}
 
-	# Fall back to restarting MySQL
+	# Fall back to restarting MySQL later
 	if ($failed) {
-		&mysql::stop_mysql();
-		my $err = &mysql::start_mysql();
-		if ($err) {
-			&$second_print(&text('copycert_emysqlstart', $err));
-			return;
-			}
+		&register_post_action(\&restart_mysql_server);
 		}
 	}
 &$second_print($text{'setup_done'});
