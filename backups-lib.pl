@@ -1292,12 +1292,24 @@ if ($ok) {
 		}
 	else {
 		# Tar up the directory into the final file
-		local $comp = "cat";
+		local $comp;
 		if ($dest =~ /\.(gz|tgz)$/i) {
 			$comp = &get_gzip_command();
 			}
 		elsif ($dest =~ /\.(bz2|tbz2)$/i) {
 			$comp = &get_bzip2_command();
+			}
+		elsif ($dest =~ /\.tar$/i) {
+			$comp = "cat";
+			}
+		elsif ($compression == 0) {
+			$comp = &get_gzip_command();
+			}
+		elsif ($compression == 3) {
+			$comp = &get_bzip2_command();
+			}
+		else {
+			$comp = "cat";
 			}
 
 		# Create writer command, which may run as the domain user
