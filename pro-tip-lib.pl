@@ -183,56 +183,70 @@ foreach my $pro_demo_feature
 	{ 'name' => 'newresels',
 	  'title' => $text{'newresels_title'},
 	  'cat' => 'setting',
-	  'url' => "https://virtualmin.com/professional/#newresels",
+	  'url' => "$virtualmin_docs_pro/#newresels",
 	},
 
 	# Add demo Cloud Mail Delivery Providers link for GPL users 
 	{ 'name' => 'smtpclouds',
 	  'title' => $text{'smtpclouds_title'},
 	  'cat' => 'email',
-	  'url' => "https://virtualmin.com/professional/#smtpclouds",
+	  'url' => "$virtualmin_docs_pro/#smtpclouds",
 	},
 
 	# Add demo Email Server Owners link for GPL users 
 	{ 'name' => 'newnotify',
 	  'title' => $text{'newnotify_title'},
 	  'cat' => 'email',
-	  'url' => "https://virtualmin.com/professional/#newnotify",
+	  'url' => "$virtualmin_docs_pro/#newnotify",
 	},
 
 	# Add demo Email Server Owners link for GPL users 
 	{ 'name' => 'newretention',
 	  'title' => $text{'newretention_title'},
 	  'cat' => 'email',
-	  'url' => "https://virtualmin.com/professional/#newretention",
+	  'url' => "$virtualmin_docs_pro/#newretention",
 	},
 
 	# Add demo New Reseller Email link for GPL users 
 	{ 'name' => 'newreseller',
 	  'title' => $text{'newreseller_title'},
 	  'cat' => 'email',
-	  'url' => "https://virtualmin.com/professional/#newreseller",
+	  'url' => "$virtualmin_docs_pro/#newreseller",
 	},
 
 	# Add demo Custom Links link for GPL users 
 	{ 'name' => 'newlinks',
 	  'title' => $text{'newlinks_title'},
 	  'cat' => 'custom',
-	  'url' => "https://virtualmin.com/professional/#newlinks",
+	  'url' => "$virtualmin_docs_pro/#newlinks",
+	},
+
+	# Add demo Remote DNS
+	{ 'name' => 'remotedns',
+	  'title' => $text{'remotedns_title'},
+	  'cat' => 'ip',
+	  'url' => "$virtualmin_docs_pro/#remotedns",
+	},
+
+	# Add demo SSL Providers
+	{ 'name' => 'newacmes',
+	  'title' => $text{'newacmes_title'},
+	  'cat' => 'ip',
+	  'url' => "$virtualmin_docs_pro/#newacmes",
 	},
 
 	# Add demo Secondary Mail Servers link for GPL users 
 	{ 'name' => 'newmxs',
 	  'title' => $text{'newmxs_title'},
 	  'cat' => 'email',
-	  'url' => "https://virtualmin.com/professional/#newmxs",
+	  'url' => "$virtualmin_docs_pro/#newmxs",
 	},
 
 	# Add demo Disk Quota Monitoring link for GPL users 
 	{ 'name' => 'newquotas',
 	  'title' => $text{'newquotas_title'},
 	  'cat' => 'check',
-	  'url' => "https://virtualmin.com/professional/#newquotas",
+	  'url' => "$virtualmin_docs_pro/#newquotas",
 	  'skip' => !&has_home_quotas()
 	},
 
@@ -240,21 +254,21 @@ foreach my $pro_demo_feature
 	{ 'name' => 'newcmass',
 	  'title' => $text{'cmass_title'},
 	  'cat' => 'add',
-	  'url' => "https://virtualmin.com/professional/#newcmass",
+	  'url' => "$virtualmin_docs_pro/#newcmass",
 	},
 
 	# Add demo Backup Encryption Keys link for GPL users 
 	{ 'name' => 'bkeys',
 	  'title' => $text{'bkeys_title'},
 	  'cat' => 'backup',
-	  'url' => "https://virtualmin.com/professional/#bkeys",
+	  'url' => "$virtualmin_docs_pro/#bkeys",
 	},
 
 	# Add demo System Statistics link for GPL users 
 	{ 'name' => 'history',
 	  'icon' => 'graph',
 	  'title' => $text{'edit_history'},
-	  'url' => "https://virtualmin.com/professional/#demo_history",
+	  'url' => "$virtualmin_docs_pro/#demo_history",
 	},
 )
 {
@@ -277,7 +291,7 @@ foreach my $pro_demo_feature
 	{ 'name' => 'edit_res',
 	  'title' => $text{'edit_res'},
 	  'cat' => 'server',
-	  'url' => "https://virtualmin.com/professional/#edit_res",
+	  'url' => "$virtualmin_docs_pro/#edit_res",
 	  'skip' => !($d->{'unix'} && &can_edit_res($d))
 	},
 
@@ -285,7 +299,7 @@ foreach my $pro_demo_feature
 	{ 'name' => 'edit_maillog',
 	  'title' => $text{'edit_maillog'},
 	  'cat' => 'logs',
-	  'url' => "https://virtualmin.com/professional/#edit_maillog",
+	  'url' => "$virtualmin_docs_pro/#edit_maillog",
 	  'skip' => !($config{'mail'} &&
 	              $config{'mail_system'} <= 1 &&
 	              $d->{'mail'}),
@@ -295,14 +309,14 @@ foreach my $pro_demo_feature
 	{ 'name' => 'edit_connect',
 	  'title' => $text{'edit_connect'},
 	  'cat' => 'logs',
-	  'url' => "https://virtualmin.com/professional/#edit_connect",
+	  'url' => "$virtualmin_docs_pro/#edit_connect",
 	},
 
 	# Add demo Edit Web Pages link for GPL users 
 	{ 'name' => 'edit_html',
 	  'title' => $text{'edit_html'},
 	  'cat' => 'web',
-	  'url' => "https://virtualmin.com/professional/#edit_html",
+	  'url' => "$virtualmin_docs_pro/#edit_html",
 	  'skip' => !(&domain_has_website($d) &&
 	              $d->{'dir'} &&
 	              !$d->{'alias'} &&
@@ -361,8 +375,9 @@ if (!$virtualmin_pro) {
 	if ($config{'hide_pro_tips'} != 1 || $a) {
 		$h = &$d(&$f($h), "$n-elem");
 		$h .= &$d("&nbsp;&nbsp;<small><a target='_blank' ".
-		            "href='https://virtualmin.com/professional/#${n}' ".
-			    "data-pro='$n'>&#128274;&nbsp;&nbsp;<span>Pro</span></a></small>", "$n-link");
+		            "href='$virtualmin_docs_pro/#${n}' ".
+			    "data-pro='$n'>&#128274;&nbsp;&nbsp;".
+			    	"<span>Pro</span></a></small>", "$n-link");
 		return $h;
 		}
 	return undef;
