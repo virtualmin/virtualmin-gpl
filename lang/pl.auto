@@ -364,6 +364,7 @@ balancer_eg2=np. $1 lub $2
 
 nf_date=(zainstalowano $1)
 
+res_emem3=Maksymalny rozmiar na limit procesu musi być ustawiony na co najmniej 200 M
 res_wmem=Minimalny zalecany rozmiar to 200 M
 
 unsub_failed=..konwersja nieudana!

@@ -1896,7 +1896,7 @@ mail_smtp_cloudoff=Fjerner sky-SMTP-leverandør $1 ..
 mail_smtp_cloudon=Konfigurerer sky-SMTP-leverandør $1 ..
 mail_smtp_cloudfailed=.. mislyktes : $1
 
-res_emem2=Maksimal størrelse per prosessgrense må settes til minst 1 M
+res_emem3=Maksimal størrelse per prosessgrense må settes til minst 200 M
 res_wmem=Minste anbefalte størrelse er 200 M
 
 sched_allplan=På plan $1 

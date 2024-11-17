@@ -2771,7 +2771,7 @@ mail_smtp_cloudfailed=... falló : $1
 
 nf_ver=(Versión $1)
 
-res_emem2=El tamaño máximo por límite de proceso debe establecerse en al menos 1 M
+res_emem3=El tamaño máximo por límite de proceso debe establecerse en al menos 200 M
 res_wmem=El tamaño mínimo recomendado es 200 M
 res_secs=segundos
 

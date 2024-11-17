@@ -6454,7 +6454,6 @@ res_err=Nie udało się zapisać limitów zasobów
 res_eprocs=Brak lub nieprawidłowa maksymalna liczba procesów
 res_eprocs2=Maksymalna liczba procesów musi wynosić co najmniej 2
 res_emem=Brak lub nieprawidłowy maksymalny rozmiar procesu
-res_emem2=Maksymalny rozmiar procesu musi wynosić co najmniej 1M
 res_mins=minuty
 res_secs=sekundy
 res_time=Maksymalny czas CPU na proces

@@ -2177,7 +2177,7 @@ mail_smtp_cloudoff=Cloud SMTP-provider $1 verwijderen ..
 mail_smtp_cloudon=Cloud SMTP-provider $1 configureren ..
 mail_smtp_cloudfailed=.. mislukt  : $1
 
-res_emem2=De maximale grootte per proceslimiet moet worden ingesteld op minimaal 1 M
+res_emem3=De maximale grootte per proceslimiet moet worden ingesteld op minimaal 200 M
 res_wmem=De minimale aanbevolen grootte is 200 M
 
 sched_allplan=Op plan $1
