@@ -21145,11 +21145,11 @@ sub list_script_plugins
 return grep { &plugin_defined($_, "scripts_list") } @plugins;
 }
 
-# Returns a list of all plugins that define new script installers extension
-sub list_script_plugins_extensions
+# Checks if any plugins define script extension
+sub check_script_plugins_extensions
 {
 &load_plugin_libraries();
-return grep { &plugin_defined($_, "scripts_list_extension") } @plugins;
+return grep { &plugin_defined($_, "check_scripts_extension") } @plugins;
 }
 
 # update_domains_last_login_times()
