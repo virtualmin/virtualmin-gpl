@@ -72,12 +72,21 @@ foreach my $s ($coreonly ? "$module_root_directory/scripts"
 		}
 	}
 if (!$coreonly) {
+	# Get script from plugins
 	foreach my $p (&list_script_plugins()) {
 		local $spath = &module_root_directory($p)."/$name.pl";
 		local @st = stat($spath);
 		if (@st) {
 			push(@sfiles, [ $spath, $st[9],
 				&guess_script_version($spath), 'plugin' ]);
+			}
+		}
+	# Get script extension from plugins
+	if (@sfiles) {
+		foreach my $p (&list_script_plugins_extensions()) {
+			local $sepath = &module_root_directory($p).
+				     "/$name-extension.pl";
+			$sfiles[0]->[4] = $sepath if (-r $sepath);
 			}
 		}
 	}
@@ -102,6 +111,7 @@ $sdir =~ s/\/[^\/]+$//;
 
 # Read in the .pl file
 (do $spath) || return undef;
+(do $sfiles[0]->[4]) if ($sfiles[0]->[4]);
 local $dfunc = "script_${name}_desc";
 local $tmdfunc = "script_${name}_tmdesc";
 local $lfunc = "script_${name}_longdesc";
