@@ -81,12 +81,13 @@ if (!$coreonly) {
 				&guess_script_version($spath), 'plugin' ]);
 			}
 		}
-	# Get script extension from plugins
+	# Load script extension from plugins
 	if (@sfiles) {
-		foreach my $p (&list_script_plugins_extensions()) {
-			local $sepath = &module_root_directory($p).
-				     "/$name-extension.pl";
-			$sfiles[0]->[4] = $sepath if (-r $sepath);
+		foreach my $p (&check_script_plugins_extensions()) {
+			my @efiles =
+				&plugin_call($p, "get_scripts_extension_files",
+					     $name);
+			$sfiles[0]->[4] = \@efiles if (@efiles);
 			}
 		}
 	}
@@ -111,7 +112,12 @@ $sdir =~ s/\/[^\/]+$//;
 
 # Read in the .pl file
 (do $spath) || return undef;
-(do $sfiles[0]->[4]) if ($sfiles[0]->[4]);
+# Read in any extension files from plugins
+if ($sfiles[0]->[4]) {
+	foreach my $efile (@{$sfiles[0]->[4]}) {
+		(do $efile) if (-r $efile);
+		}
+	}
 local $dfunc = "script_${name}_desc";
 local $tmdfunc = "script_${name}_tmdesc";
 local $lfunc = "script_${name}_longdesc";
