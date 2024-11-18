@@ -1106,7 +1106,7 @@ tmpl_dmarcskip=Geen ingesteld
 tmpl_dmarcyes=Ja, met onderstaand beleid
 tmpl_dmarcextra=Extra DMARC-opties
 tmpl_edmarcpct=Het percentage berichten moet een geheel getal zijn tussen 0 en 100
-tmpl_dns_alias=Hebben alias-DNS-domeinen hun eigen records?
+tmpl_dns_alias=Afzonderlijk bewerkbare DNS-records voor aliasdomeinen?
 tmpl_dns_cloud=Maak nieuwe DNS-zones op
 tmpl_dns_remote=Externe DNS $1
 tmpl_dns_cloud_import=Bestaande zone overnemen bij het maken
@@ -2177,7 +2177,7 @@ mail_smtp_cloudoff=Cloud SMTP-provider $1 verwijderen ..
 mail_smtp_cloudon=Cloud SMTP-provider $1 configureren ..
 mail_smtp_cloudfailed=.. mislukt  : $1
 
-res_emem2=De maximale grootte per proceslimiet moet worden ingesteld op minimaal 1 M
+res_emem3=De maximale grootte per proceslimiet moet worden ingesteld op minimaal 200 M
 res_wmem=De minimale aanbevolen grootte is 200 M
 
 sched_allplan=Op plan $1
