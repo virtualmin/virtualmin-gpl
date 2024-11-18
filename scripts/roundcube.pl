@@ -304,7 +304,7 @@ my $installtype = $upgrade ? 'upgrade' : 'installation';
 return (1, "RoundCube $installtype complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $url);
 }
 
-# script_wordpress_db_conn_desc()
+# script_roundcube_db_conn_desc()
 # Returns a list of options for config file to update
 sub script_roundcube_db_conn_desc
 {
