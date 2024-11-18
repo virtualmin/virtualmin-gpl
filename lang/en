@@ -8263,6 +8263,8 @@ mysql_rlocal=Local server
 mysql_movebackup=Backing up users and databases on original host ..
 mysql_moverestore=Restoring users and databases on new host ..
 mysql_movedelete=Removing users and databases from original host ..
+mysql_restarting=Restarting MySQL server ..
+mysql_erestarting=.. not running!
 
 dbpass_title=Update Database Password
 dbname_title=Update Database Name
