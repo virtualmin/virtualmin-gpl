@@ -9251,17 +9251,24 @@ local @only = @_;
 local %only = map { $_, 1 } @only;
 local $a;
 
-# Check if we are restarting Apache, and if so don't reload it
-local $restarting;
+# Check if we are restarting Apache or Webmin, and if so don't reload it
+my ($apache, $webmin);
 foreach $a (@main::post_actions) {
 	if ($a->[0] eq \&restart_apache) {
 		$a->[1] ||= 0;
-		$restarting = 1 if ($a->[1] == 1);
+		$apache = 1 if ($a->[1] == 1);
+		}
+	if ($a->[0] eq \&restart_webmin_fully) {
+		$webmin = 1;
 		}
 	}
-if ($restarting) {
+if ($apache) {
 	@main::post_actions = grep { $_->[0] ne \&restart_apache ||
 				     $_->[1] != 0 } @main::post_actions;
+	}
+if ($webmin) {
+	@main::post_actions = grep { $_->[0] ne \&restart_webmin }
+				   @main::post_actions;
 	}
 
 # Run unique actions

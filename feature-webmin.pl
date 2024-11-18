@@ -255,20 +255,16 @@ return 1;
 # Send a signal to Webmin to re-read its config
 sub restart_webmin
 {
-my $restarted = &getvar('webmin-restarted', undef, 1);
-&$first_print($text{'setup_webminpid2'})
-	if (!$restarted);
+&$first_print($text{'setup_webminpid2'});
 eval {
 	local $main::error_must_die = 1;
 	&reload_miniserv();
 	};
 if ($@) {
-	&$second_print(&text('setup_webmindown2', "$@"))
-		if (!$restarted);
+	&$second_print(&text('setup_webmindown2', "$@"));
 	}
 else {
-	&$second_print($text{'setup_done'})
-		if (!$restarted);
+	&$second_print($text{'setup_done'});
 	}
 }
 
@@ -276,7 +272,6 @@ else {
 # Send a signal to Webmin to make it fully restart and re-read its config
 sub restart_webmin_fully
 {
-&setvar('webmin-restarted',	1);
 &$first_print($text{'setup_webminpid'});
 eval {
 	local $main::error_must_die = 1;
