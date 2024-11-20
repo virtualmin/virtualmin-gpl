@@ -108,10 +108,10 @@ return &text('dkim_einit', "<tt>$init</tt>")
 
 # Check mail server
 &require_mail();
-if ($config{'mail_system'} > 1) {
+if ($mail_system > 1) {
 	return $text{'dkim_emailsystem'};
 	}
-elsif ($config{'mail_system'} == 1) {
+elsif ($mail_system == 1) {
 	-r $sendmail::config{'sendmail_mc'} ||
 		return $text{'dkim_esendmailmc'};
 	}
@@ -287,7 +287,7 @@ elsif (&get_dkim_type() eq 'centos') {
 
 # Check mail server
 &require_mail();
-if ($config{'mail_system'} == 0) {
+if ($mail_system == 0) {
 	# Postfix config
 	my $wantmilter = $rv{'port'} ? "inet:(localhost|127\.0\.0\.1):$rv{'port'}" :
 			 $rv{'socket'} ? "local:$rv{'socket'}" : "";
@@ -296,7 +296,7 @@ if ($config{'mail_system'} == 0) {
 		$rv{'enabled'} = 0;
 		}
 	}
-elsif ($config{'mail_system'} == 1) {
+elsif ($mail_system == 1) {
 	# Sendmail config
 	my $wantmilter = $rv{'port'} ? "inet:$rv{'port'}\@(localhost|127\.0\.0\.1)" :
 			 $rv{'socket'} ? "local:$rv{'socket'}" : "";
@@ -521,7 +521,7 @@ if ($dkim_config) {
 		if (!$conf->{'Socket'} ||
 		    $conf->{'Socket'} =~ /^inet:port/ ||
 		    $conf->{'Socket'} =~ /^local:/ &&
-		      $config{'mail_system'} == 0) {
+		      $mail_system == 0) {
 		        # Set socket if not set, or if a local file
 		        # and Postfix is in use
 		        &save_open_dkim_config($dkim_config,
@@ -569,7 +569,7 @@ if (&get_dkim_type() eq 'debian' || &get_dkim_type() eq 'ubuntu') {
 	my %def;
 	&read_env_file($dkim_defaults, \%def);
 	if (!$def{'SOCKET'} ||
-	    $def{'SOCKET'} =~ /^local:/ && $config{'mail_system'} == 0) {
+	    $def{'SOCKET'} =~ /^local:/ && $mail_system == 0) {
 		# Set socket in defaults file if missing, or if a local file
 		# and Postfix is in use
 		$def{'SOCKET'} = "inet:8891\@127.0.0.1";
@@ -625,7 +625,7 @@ elsif (&get_dkim_type() eq 'redhat') {
 	&lock_file($dkim_defaults);
 	my %def;
 	&read_env_file($dkim_defaults, \%def);
-	if ($config{'mail_system'} == 0 && $dkim->{'socket'}) {
+	if ($mail_system == 0 && $dkim->{'socket'}) {
 		# Force use of tcp socket in defaults file for postfix
 		$def{'SOCKET'} = "inet:8891\@127.0.0.1";
 		$dkim->{'port'} = 8891;
@@ -675,7 +675,7 @@ if (!$ok) {
 
 &$first_print($text{'dkim_mailserver'});
 &require_mail();
-if ($config{'mail_system'} == 0) {
+if ($mail_system == 0) {
 	# Configure Postfix to use filter
 	my $wantmilter = $dkim->{'port'} ? "inet:(localhost|127\.0\.0\.1):$dkim->{'port'}"
 					 : "local:$dkim->{'socket'}";
@@ -697,7 +697,7 @@ if ($config{'mail_system'} == 0) {
 	# Apply Postfix config
 	&postfix::reload_postfix();
 	}
-elsif ($config{'mail_system'} == 1) {
+elsif ($mail_system == 1) {
 	# Configure Sendmail to use filter
 	my $wantmilter = $dkim->{'port'} ? "inet:$dkim->{'port'}\@(localhost|127\.0\.0\.1)"
 					 : "local:$dkim->{'socket'}";
@@ -806,7 +806,7 @@ my @doms = grep { $_->{'dns'} && !&copy_alias_records($_) } &list_domains();
 
 &$first_print($text{'dkim_unmailserver'});
 &require_mail();
-if ($config{'mail_system'} == 0) {
+if ($mail_system == 0) {
 	# Configure Postfix to not use filter
 	my $oldmilter = $dkim->{'port'} ? "inet:(localhost|127\.0\.0\.1):$dkim->{'port'}"
 					: "local:$dkim->{'socket'}";
@@ -823,7 +823,7 @@ if ($config{'mail_system'} == 0) {
 	# Apply Postfix config
 	&postfix::reload_postfix();
 	}
-elsif ($config{'mail_system'} == 1) {
+elsif ($mail_system == 1) {
 	# Configure Sendmail to not use filter
 	my $oldmilter = $dkim->{'port'} ? "inet:$dkim->{'port'}\@(localhost|127\.0\.0\.1)"
 					: "local:$dkim->{'socket'}";

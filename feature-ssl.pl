@@ -2509,7 +2509,7 @@ return @rv;
 # Returns 1 if the installed version of Postfix supports name-based SSL certs
 sub postfix_supports_sni
 {
-return 0 if ($config{'mail_system'} != 0);
+return 0 if ($mail_system != 0);
 &foreign_require("postfix");
 return $postfix::postfix_version >= 3.4;
 }
@@ -2522,7 +2522,7 @@ local ($d, $enable) = @_;
 local $tmpl = &get_template($d->{'template'});
 
 # Check if Postfix is in use
-return -1 if ($config{'mail_system'} != 0);
+return -1 if ($mail_system != 0);
 
 local $changed = 0;
 &foreign_require("postfix");
@@ -2780,7 +2780,7 @@ return 1;
 sub get_postfix_ssl_cert
 {
 my ($d) = @_;
-return ( ) if ($config{'mail_system'} != 0);
+return ( ) if ($mail_system != 0);
 &foreign_require("postfix");
 
 # First check for a per-domain cert

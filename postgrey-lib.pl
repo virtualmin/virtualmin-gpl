@@ -7,7 +7,7 @@ use Socket;
 # Returns undef if Postgrey is installed, or an error message if not
 sub check_postgrey
 {
-if ($config{'mail_system'} != 0) {
+if ($mail_system != 0) {
 	return $text{'postgrey_epostfix'};
 	}
 elsif (!&has_command("postgrey")) {

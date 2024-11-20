@@ -408,7 +408,7 @@ foreach my $mailuser (@mailusers) {
 	if ($mailuser->{'services'}->{'postbox'} eq 'true') {
 		# Add delivery to user's mailbox
 		local $escuser = $muinfo->{'user'};
-		if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
+		if ($mail_system == 0 && $escuser =~ /\@/) {
 			$escuser = &escape_replace_atsign_if_exists($escuser);
 			}
 		else {

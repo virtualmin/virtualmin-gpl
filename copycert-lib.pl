@@ -28,7 +28,7 @@ if (&foreign_installed("dovecot")) {
 		   'virt' => 1,
 		   'short' => 'd' });
 	}
-if ($config{'mail'} && $config{'mail_system'} == 0) {
+if ($config{'mail'} && $mail_system == 0) {
 	push(@rv, {'id' => 'postfix',
 		   'dom' => &postfix_supports_sni() ? 1 : 0,
 		   'virt' => 1,
@@ -179,7 +179,7 @@ if (&foreign_installed("dovecot")) {
 		}
 	}
 
-if ($config{'mail_system'} == 0) {
+if ($mail_system == 0) {
 	# Check Postfix certificate
 	if ($perip) {
 		# Try per-IP cert first

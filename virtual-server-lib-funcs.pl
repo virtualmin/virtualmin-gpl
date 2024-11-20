@@ -750,12 +750,12 @@ local ($d, $skipunix, $novirts, $noquotas, $nodbs, $includeextra) = @_;
 local (%aliases, %generics);
 if ($config{'mail'} && !$novirts) {
 	&require_mail();
-	if ($config{'mail_system'} == 1) {
+	if ($mail_system == 1) {
 		# Find Sendmail aliases for users
 		%aliases = map { $_->{'name'}, $_ } grep { $_->{'enabled'} }
 			       &sendmail::list_aliases($sendmail_afiles);
 		}
-	elsif ($config{'mail_system'} == 0) {
+	elsif ($mail_system == 0) {
 		# Find Postfix aliases for users
 		%aliases = map { $_->{'name'}, $_ }
 			       &$postfix_list_aliases($postfix_afiles);
@@ -829,7 +829,7 @@ if ($d) {
 
 	# Remove users with @ in their names for whom a user with the @ replace
 	# already exists (for Postfix)
-	if ($config{'mail_system'} == 0) {
+	if ($mail_system == 0) {
 		local %umap = map { &replace_atsign($_->{'user'}), $_ }
 				grep { $_->{'user'} =~ /\@/ } @users;
 		@users = grep { !$umap{$_->{'user'}} } @users;
@@ -999,7 +999,7 @@ if (!$novirts) {
 			$u->{'valias'} = $va;
 			$u->{'to'} = $va->{'to'};
 			}
-		elsif ($config{'mail_system'} == 2) {
+		elsif ($mail_system == 2) {
 			# Find .qmail file
 			local $alias = &get_dotqmail(&dotqmail_file($u));
 			if ($alias) {
@@ -1421,7 +1421,7 @@ sub need_extra_user
 {
 &require_mail();
 my $needextra = 0;
-if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/ &&
+if ($mail_system == 0 && $_[0]->{'user'} =~ /\@/ &&
     !$_[0]->{'webowner'}) {
 	if ($config{'nopostfix_extra_user'} == 2) {
 		# Explicitly enabled by the admin
@@ -1516,18 +1516,18 @@ if (@to) {
 			 'values' => $_[0]->{'to'} };
 	&check_alias_clash($_[0]->{'user'}) &&
 		&error(&text('alias_eclash2', $_[0]->{'user'}));
-	if ($config{'mail_system'} == 1) {
+	if ($mail_system == 1) {
 		&sendmail::lock_alias_files($sendmail_afiles);
 		&sendmail::create_alias($alias, $sendmail_afiles);
 		&sendmail::unlock_alias_files($sendmail_afiles);
 		}
-	elsif ($config{'mail_system'} == 0) {
+	elsif ($mail_system == 0) {
 		&postfix::lock_alias_files($postfix_afiles);
 		&$postfix_create_alias($alias, $postfix_afiles);
 		&postfix::unlock_alias_files($postfix_afiles);
 		&postfix::regenerate_aliases();
 		}
-	elsif ($config{'mail_system'} == 2) {
+	elsif ($mail_system == 2) {
 		# Set up user's .qmail file
 		local $dqm = &dotqmail_file($_[0]);
 		&lock_file($dqm);
@@ -1708,7 +1708,7 @@ if ($config{'ldap_mail'}) {
 &foreign_call($usermodule, "modify_user", $olduser, $user);
 &foreign_call($usermodule, "made_changes");
 
-if ($config{'mail_system'} == 0 && $olduser->{'user'} =~ /\@/) {
+if ($mail_system == 0 && $olduser->{'user'} =~ /\@/) {
 	local $esc = &replace_atsign($olduser->{'user'});
 	local @allusers = &list_all_users_quotas(1);
 	local ($oldextrauser) = grep { $_->{'user'} eq $esc } @allusers;
@@ -1821,20 +1821,20 @@ if (@to && !@oldto) {
 			 'values' => $user->{'to'} };
 	&check_alias_clash($user->{'user'}) &&
 		&error(&text('alias_eclash2', $user->{'user'}));
-	if ($config{'mail_system'} == 1) {
+	if ($mail_system == 1) {
 		# Create Sendmail alias with same name as user
 		&sendmail::lock_alias_files($sendmail_afiles);
 		&sendmail::create_alias($alias, $sendmail_afiles);
 		&sendmail::unlock_alias_files($sendmail_afiles);
 		}
-	elsif ($config{'mail_system'} == 0) {
+	elsif ($mail_system == 0) {
 		# Create Postfix alias with same name as user
 		&postfix::lock_alias_files($postfix_afiles);
 		&$postfix_create_alias($alias, $postfix_afiles);
 		&postfix::unlock_alias_files($postfix_afiles);
 		&postfix::regenerate_aliases();
 		}
-	elsif ($config{'mail_system'} == 2) {
+	elsif ($mail_system == 2) {
 		# Set up user's .qmail file
 		local $dqm = &dotqmail_file($user);
 		&lock_file($dqm);
@@ -1845,20 +1845,20 @@ if (@to && !@oldto) {
 	}
 elsif (!@to && @oldto) {
 	# Need to delete alias
-	if ($config{'mail_system'} == 1) {
+	if ($mail_system == 1) {
 		# Delete Sendmail alias
 		&lock_file($user->{'alias'}->{'file'});
 		&sendmail::delete_alias($user->{'alias'});
 		&unlock_file($user->{'alias'}->{'file'});
 		}
-	elsif ($config{'mail_system'} == 0) {
+	elsif ($mail_system == 0) {
 		# Delete Postfix alias
 		&lock_file($user->{'alias'}->{'file'});
 		&$postfix_delete_alias($user->{'alias'});
 		&unlock_file($user->{'alias'}->{'file'});
 		&postfix::regenerate_aliases();
 		}
-	elsif ($config{'mail_system'} == 2) {
+	elsif ($mail_system == 2) {
 		# Remove user's .qmail file
 		local $dqm = &dotqmail_file($user);
 		&unlink_logged($dqm);
@@ -1869,20 +1869,20 @@ elsif (@to && @oldto && join(" ", @to) ne join(" ", @oldto)) {
 	local $alias = { 'name' => &escape_alias($user->{'user'}),
 			 'enabled' => 1,
 			 'values' => $user->{'to'} };
-	if ($config{'mail_system'} == 1) {
+	if ($mail_system == 1) {
 		# Update Sendmail alias
 		&lock_file($olduser->{'alias'}->{'file'});
 		&sendmail::modify_alias($olduser->{'alias'}, $alias);
 		&unlock_file($olduser->{'alias'}->{'file'});
 		}
-	elsif ($config{'mail_system'} == 0) {
+	elsif ($mail_system == 0) {
 		# Update Postfix alias
 		&lock_file($olduser->{'alias'}->{'file'});
 		&$postfix_modify_alias($olduser->{'alias'}, $alias);
 		&unlock_file($olduser->{'alias'}->{'file'});
 		&postfix::regenerate_aliases();
 		}
-	elsif ($config{'mail_system'} == 2) {
+	elsif ($mail_system == 2) {
 		# Set up user's .qmail file
 		local $dqm = &dotqmail_file($user);
 		&lock_file($dqm);
@@ -2133,7 +2133,7 @@ $_[0]->{'uid'} == 0 && &error("Cannot delete UID 0 user!");
 # Record the old UID to prevent re-use
 &record_old_uid($_[0]->{'uid'});
 
-if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
+if ($mail_system == 0 && $_[0]->{'user'} =~ /\@/) {
 	# Find the Unix user with the @ escaped and delete it too
 	local $esc = &replace_atsign_if_exists($_[0]->{'user'});
 	local @allusers = &list_all_users_quotas(1);
@@ -2156,7 +2156,7 @@ foreach $e (@{$_[0]->{'extravirt'}}) {
 
 # Delete his alias (for forwarding), if any
 if ($_[0]->{'alias'}) {
-	if ($config{'mail_system'} == 1) {
+	if ($mail_system == 1) {
 		# Delete Sendmail alias with same name as user
 		if (!$_[0]->{'alias'}->{'deleted'}) {
 			&lock_file($_[0]->{'alias'}->{'file'});
@@ -2165,7 +2165,7 @@ if ($_[0]->{'alias'}) {
 			$_[0]->{'alias'}->{'deleted'} = 1;
 			}
 		}
-	elsif ($config{'mail_system'} == 0) {
+	elsif ($mail_system == 0) {
 		# Delete Postfix alias with same name as user
 		if (!$_[0]->{'alias'}->{'deleted'}) {
 			&lock_file($_[0]->{'alias'}->{'file'});
@@ -2175,7 +2175,7 @@ if ($_[0]->{'alias'}) {
 			$_[0]->{'alias'}->{'deleted'} = 1;
 			}
 		}
-	elsif ($config{'mail_system'} == 2) {
+	elsif ($mail_system == 2) {
 		# .qmail will be deleted when user is
 		}
 	}
@@ -4910,8 +4910,8 @@ sub set_alias_programs
 
 # Copy autoresponder
 local $mailmod = &foreign_check("sendmail") ? "sendmail" :
-		 $config{'mail_system'} == 1 ? "sendmail" :
-		 $config{'mail_system'} == 0 ? "postfix" :
+		 $mail_system == 1 ? "sendmail" :
+		 $mail_system == 0 ? "postfix" :
 					       "qmailadmin";
 &copy_source_dest("$root_directory/$mailmod/autoreply.pl",
 		  $module_config_directory);
@@ -5225,7 +5225,7 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 		}
 	elsif ($t == 10) {
 		# Alias to self .. may need to used at-escaped name
-		if ($config{'mail_system'} == 0 && $_[1] =~ /\@/) {
+		if ($mail_system == 0 && $_[1] =~ /\@/) {
 			push(@values, "\\".&escape_user(&replace_atsign_if_exists($_[1])));
 			}
 		else {
@@ -6697,11 +6697,11 @@ else {
 # Save mail server type
 &$first_print($text{'backup_vmailserver_doing'});
 &open_tempfile(MS, ">$file", 0, 1);
-&print_tempfile(MS, $config{'mail_system'},"\n");
+&print_tempfile(MS, $mail_system,"\n");
 &close_tempfile(MS);
 
 # Save general mail server settings
-if ($config{'mail_system'} == 0) {
+if ($mail_system == 0) {
 	# Save main.cf and master.cf
 	&copy_source_dest($postfix::config{'postfix_config_file'},
 			  $file."_maincf");
@@ -6716,7 +6716,7 @@ if ($config{'mail_system'} == 0) {
 		}
 	&$second_print($text{'setup_done'});
 	}
-elsif ($config{'mail_system'} == 1) {
+elsif ($mail_system == 1) {
 	# Save sendmail.cf and sendmail.mc
 	&copy_source_dest($sendmail::config{'sendmail_cf'},
 			  $file."_sendmailcf");
@@ -6724,7 +6724,7 @@ elsif ($config{'mail_system'} == 1) {
 			  $file."_sendmailmc");
 	&$second_print($text{'setup_done'});
 	}
-elsif ($config{'mail_system'} == 2) {
+elsif ($mail_system == 2) {
 	# Save Qmail dir
 	&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
 			 &make_tar_command("cf", $file, "."));
@@ -6909,8 +6909,8 @@ $bms =~ s/\n//g;
 # greylisting might be detected as disabled if done earlier.
 &$first_print($text{'restore_vmailserver_doing'});
 &obtain_lock_mail();
-if ($bms eq $config{'mail_system'}) {
-	if ($config{'mail_system'} == 0) {
+if ($bms eq $mail_system) {
+	if ($mail_system == 0) {
 		# Restore main.cf and master.cf
 		&lock_file($postfix::config{'postfix_config_file'});
 		&lock_file($postfix::config{'postfix_master'});
@@ -6930,7 +6930,7 @@ if ($bms eq $config{'mail_system'}) {
 			}
 		&$second_print($text{'setup_done'});
 		}
-	elsif ($config{'mail_system'} == 1) {
+	elsif ($mail_system == 1) {
 		# Restore sendmail.cf and .mc
 		&lock_file($sendmail::config{'sendmail_cf'});
 		&lock_file($sendmail::config{'sendmail_mc'});
@@ -6943,7 +6943,7 @@ if ($bms eq $config{'mail_system'}) {
 		undef(@sendmail::sendmailcf_cache);
 		&$second_print($text{'setup_done'});
 		}
-	elsif ($config{'mail_system'} == 2) {
+	elsif ($mail_system == 2) {
 		# Un-tar qmail dir
 		&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
 				 &make_tar_command("xf", $file));
@@ -6956,7 +6956,7 @@ if ($bms eq $config{'mail_system'}) {
 else {
 	&$second_print(&text('restore_vmailserver_wrong',
 			     $text{'mail_system_'.$bms},
-			     $text{'mail_system_'.$config{'mail_system'}}));
+			     $text{'mail_system_'.$mail_system}));
 	}
 &release_lock_mail();
 
@@ -12901,7 +12901,7 @@ sub need_config_check
 {
 local @cst = stat($module_config_file);
 return 0 if ($cst[9] <= $config{'last_check'});
-return 1 if ($config{'mail_system'} == 5 || $config{'mail_system'} == 6);
+return 1 if ($mail_system == 5 || $mail_system == 6);
 local %lastconfig;
 &read_file("$module_config_directory/last-config", \%lastconfig) || return 1;
 foreach my $f (@features) {
@@ -13745,7 +13745,7 @@ if (!$d->{'alias'} && &can_config_domain($d) &&
 	}
 
 # Button to show mail logs
-if ($virtualmin_pro && $config{'mail'} && $config{'mail_system'} <= 1 &&
+if ($virtualmin_pro && $config{'mail'} && $mail_system <= 1 &&
     &can_view_maillog($d) && $d->{'mail'}) {
 	push(@rv, { 'page' => 'pro/maillog.cgi',
 		    'title' => $text{'edit_maillog'},
@@ -14007,7 +14007,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'bw',
    &has_ftp_chroot() ? ( 'chroot' ) : ( ),
    'global',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
-   $config{'mail_system'} == 0 ? ( 'postgrey' ) : ( ),
+   $mail_system == 0 ? ( 'postgrey' ) : ( ),
    'dkim', 'ratelimit', 'provision',
    $config{'mail'} ? ( 'autoconfig' ) : ( ),
    $config{'mail'} && $virtualmin_pro ? ( 'retention' ) : ( ),
@@ -14103,7 +14103,7 @@ local $v = [ 'plugins' => \@plugins,
 	     'spam' => $config{'spam'},
 	     'virus' => $config{'virus'},
 	     'quotas' => &has_home_quotas(),
-	     'mail_system' => $config{'mail_system'},
+	     'mail_system' => $mail_system,
 	     'pro' => $virtualmin_pro ];
 
 # Add template pages
@@ -15645,25 +15645,25 @@ if ($config{'dns'}) {
 	}
 
 if ($config{'mail'}) {
-	if ($config{'mail_system'} == 5) {
+	if ($mail_system == 5) {
 		return $text{'check_evpopmail'};
 		}
-	if ($config{'mail_system'} == 6) {
+	if ($mail_system == 6) {
 		return $text{'check_eexim'};
 		}
-	if ($config{'mail_system'} == 4) {
+	if ($mail_system == 4) {
 		return $text{'check_eqmailldap'};
 		}
-	if ($config{'mail_system'} == 3) {
+	if ($mail_system == 3) {
 		# Work out which mail server we have
 		if (&postfix_installed()) {
-			$config{'mail_system'} = 0;
+			$mail_system = 0;
 			}
 		elsif (&qmail_installed()) {
-			$config{'mail_system'} = 2;
+			$mail_system = 2;
 			}
 		elsif (&sendmail_installed()) {
-			$config{'mail_system'} = 1;
+			$mail_system = 1;
 			}
 		else {
 			return &text('index_email');
@@ -15672,7 +15672,7 @@ if ($config{'mail'}) {
 		&save_module_config();
 		}
 	local $expected_mailboxes;
-	if ($config{'mail_system'} == 1) {
+	if ($mail_system == 1) {
 		# Make sure sendmail is installed
 		if (!&sendmail_installed()) {
 			return &text('index_esendmail', '/sendmail/',
@@ -15731,7 +15731,7 @@ if ($config{'mail'}) {
 		&$second_print($text{'check_sendmailok'});
 		$expected_mailboxes = 1;
 		}
-	elsif ($config{'mail_system'} == 0) {
+	elsif ($mail_system == 0) {
 		# Make sure postfix is installed
 		if (!&postfix_installed()) {
 			return &text('index_epostfix', '/postfix/',
@@ -15800,7 +15800,7 @@ if ($config{'mail'}) {
 			&$second_print(&text('check_dependentesupport', $l));
 			}
 		}
-	elsif ($config{'mail_system'} == 2) {
+	elsif ($mail_system == 2) {
 		# Make sure qmail is installed
 		if (!&qmail_installed()) {
 			return &text('index_eqmail', '/qmailadmin/',
@@ -16366,7 +16366,7 @@ if ($config{'spam'}) {
 		}
 
 	# If using Postfix, procmail-wrapper must be used and setuid root
-	if ($hasprocmail && $config{'mail_system'} == 0) {
+	if ($hasprocmail && $mail_system == 0) {
 		&require_mail();
 		local $mbc = &postfix::get_real_value("mailbox_command");
 		local @mbc = &split_quoted_string($mbc);
@@ -18337,7 +18337,7 @@ foreach my $u (&list_all_users_quotas(1)) {
 		# If THAT still doesn't work, look by GID
 		$did = $gidmap{$u->{'gid'}};
 		}
-	if ($config{'mail_system'} == 0) {
+	if ($mail_system == 0) {
 		# Don't double-count Postfix @ and - users
 		local $noat = &replace_atsign($u->{'user'});
 		next if ($doneuser{$noat}++);

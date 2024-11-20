@@ -25,7 +25,7 @@ foreach my $v (@{$a->{'to'}}) {
 		$simple->{'local'} = $aval;
 		push(@{$simple->{'local-all'}}, $aval)
 			if ($allow_merge &&
-			    $config{'mail_system'} == 0 &&
+			    $mail_system == 0 &&
 			    $aval =~ /\@/ &&
 			    getpwnam(&unescape_user($aval)));
 		}
@@ -147,7 +147,7 @@ if ($simple->{'local'} &&
    (!$simple->{'local-all'} ||
    	&indexof($simple->{'local'}, @{$simple->{'local-all'}}) == -1)) {
 	local $escuser = $simple->{'local'};
-	if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
+	if ($mail_system == 0 && $escuser =~ /\@/) {
 		$escuser = &escape_replace_atsign_if_exists($escuser);
 		}
 	else {
@@ -157,7 +157,7 @@ if ($simple->{'local'} &&
 	}
 if ($simple->{'tome'}) {
 	local $escuser = $alias->{'user_extra'} || $alias->{'user'};
-	if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
+	if ($mail_system == 0 && $escuser =~ /\@/) {
 		$escuser = &escape_replace_atsign_if_exists($escuser);
 		}
 	else {
@@ -438,7 +438,7 @@ if ($in->{'forward'} && $mb_or_alias) {
 			&error(&text('alias_etype1', $f));
 		# If saved forward email is a local user, escape it properly!
 		$f = "\\".&escape_user($f)
-			if ($config{'mail_system'} == 0 && $f =~ /\@/ && getpwnam($f));
+			if ($mail_system == 0 && $f =~ /\@/ && getpwnam($f));
 		&can_forward_alias($f) || &error(&text('alias_etype1f', $f));
 		}
 	}

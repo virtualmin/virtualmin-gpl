@@ -529,7 +529,7 @@ foreach my $name (keys %$mailusers) {
 	if ($mailuser->{'mailbox'}->{'enabled'} eq 'true') {
 		# Add delivery to user's mailbox
 		local $escuser = $uinfo->{'user'};
-		if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
+		if ($mail_system == 0 && $escuser =~ /\@/) {
 			$escuser = &escape_replace_atsign_if_exists($escuser);
 			}
 		else {
