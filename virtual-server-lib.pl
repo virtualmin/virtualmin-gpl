@@ -370,7 +370,7 @@ $quota_cache_dir = "$module_var_directory/quota-cache";
 
 $acme_providers_dir = "$module_config_directory/acme";
 
-$mail_system = $config{'mail_system'};
+$mail_system = $config{'mail_system'} == 99 ? -1 : $config{'mail_system'};
 
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config
