@@ -15528,6 +15528,21 @@ local ($lastconfig) = @_;
 local $clink = "edit_newfeatures.cgi";
 local $mclink = "../config.cgi?$module_name";
 
+# Check for disabled features that were just turned off
+if ($lastconfig) {
+	my @doms = &list_domains();
+	foreach my $f (@features) {
+		if (!$config{$f} && $lastconfig->{$f}) {
+			my @lost = grep { $_->{$f} } @doms;
+			if (@lost) {
+				return &text('check_lostfeature',
+					$text{'feature_'.$f},
+					join(" ", map { $_->{'dom'} } @lost));
+				}
+			}
+		}
+	}
+
 # Make sure networking is supported
 if (!&foreign_check("net")) {
 	&foreign_require("net");
@@ -16975,21 +16990,6 @@ if ($gconfig{'os_type'} =~ /^(redhat-linux|debian-linux)$/) {
 			&$second_print(&ui_text_color(
 				&text('check_repoeoutdate',
 					"$virtualmin_link/docs/installation/troubleshooting-repositories/"), 'warn'));
-			}
-		}
-	}
-
-# Check for disabled features that were just turned off
-if ($lastconfig) {
-	my @doms = &list_domains();
-	foreach my $f (@features) {
-		if (!$config{$f} && $lastconfig->{$f}) {
-			my @lost = grep { $_->{$f} } @doms;
-			if (@lost) {
-				return &text('check_lostfeature',
-					$text{'feature_'.$f},
-					join(" ", map { $_->{'dom'} } @lost));
-				}
 			}
 		}
 	}
