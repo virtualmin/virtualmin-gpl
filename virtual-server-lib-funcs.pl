@@ -15657,18 +15657,19 @@ if ($config{'mail'}) {
 	if ($mail_system == 3) {
 		# Work out which mail server we have
 		if (&postfix_installed()) {
-			$mail_system = 0;
+			$config{'mail_system'} = 0;
 			}
 		elsif (&qmail_installed()) {
-			$mail_system = 2;
+			$config{'mail_system'} = 2;
 			}
 		elsif (&sendmail_installed()) {
-			$mail_system = 1;
+			$config{'mail_system'} = 1;
 			}
 		else {
 			return &text('index_email');
 			}
 		&$second_print(&text('check_detected', &mail_system_name()));
+		$mail_system = $config{'mail_system'};
 		&save_module_config();
 		}
 	local $expected_mailboxes;
