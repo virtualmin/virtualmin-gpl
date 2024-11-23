@@ -15541,6 +15541,16 @@ if ($lastconfig) {
 				}
 			}
 		}
+	foreach my $f (split(/\s+/, $lastconfig->{'plugins'})) {
+		if (&indexof($f, @plugins) < 0) {
+			my @lost = grep { $_->{$f} } @doms;
+			if (@lost) {
+				return &text('check_lostplugin',
+					&plugin_call($f, "feature_name"),
+					join(" ", map { $_->{'dom'} } @lost));
+				}
+			}
+		}
 	}
 
 # Make sure networking is supported
