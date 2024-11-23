@@ -1235,6 +1235,7 @@ scripts_kit_clone_target2=Eksisterende domene
 scripts_kit_clone_target3=Nytt underdomene
 scripts_kit_clone_target4=Nytt toppdomene
 scripts_kit_apply=Søke
+scripts_kit_wp_login=Logg inn på WordPress
 scripts_kit_updcache=Sjekk oppdateringer
 scripts_kit_openin_fm=Åpne i filbehandling
 scripts_kit_backups_location=Sikkerhetskopier plassering
@@ -1275,6 +1276,7 @@ scripts_gpl_pro_tip_extra_web_users=Dette skjemaet lar deg opprette og administr
 scripts_gpl_pro_tip_extra_db_users=Dette skjemaet lar deg opprette og administrere databasebrukere uavhengig, uten å opprette en ny Unix-brukerkonto.
 scripts_gpl_pro_tip_extra_user_dismiss=Takk for tipset! Skjul denne siden og dens link
 scripts_gpl_pro_tip_workbench_pro_only=$1 Workbench-funksjonen er ikke tilgjengelig i GPL-versjonen.
+scripts_gpl_pro_tip_workbench_enot=$1 Workbench-funksjonen er ikke tilgjengelig for denne nettappen
 
 scripts_service_ename=Manglende eller ugyldig tjenestenavn
 scripts_service_eport=Manglende eller ugyldig tjenesteportnummer
@@ -2332,6 +2334,8 @@ mysql_rlocal=Lokal server
 mysql_movebackup=Sikkerhetskopiere brukere og databaser på original vert ..
 mysql_moverestore=Gjenopprette brukere og databaser på ny vert ..
 mysql_movedelete=Fjerne brukere og databaser fra den opprinnelige verten ..
+mysql_restarting=Starter MySQL-serveren på nytt ..
+mysql_erestarting=.. løper ikke!
 
 dbpass_title=Oppdater databasepassord
 dbname_title=Oppdater databasens navn

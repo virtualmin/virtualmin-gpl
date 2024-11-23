@@ -2433,6 +2433,7 @@ scripts_kit_clone_target2=现有域
 scripts_kit_clone_target3=新子域名
 scripts_kit_clone_target4=新的顶级域名
 scripts_kit_apply=申请
+scripts_kit_wp_login=登录到 WordPress
 scripts_kit_updcache=检查更新
 scripts_kit_openin_fm=在文件管理器中打开
 scripts_kit_backups_location=备份位置
@@ -2473,6 +2474,7 @@ scripts_gpl_pro_tip_extra_web_users=这种形式允许您独立创建和管理�
 scripts_gpl_pro_tip_extra_db_users=这种形式允许您独立创建和管理数据库用户，而无需创建新的 Unix 用户帐户。
 scripts_gpl_pro_tip_extra_user_dismiss=谢谢你的提示！隐藏此页面及其链接
 scripts_gpl_pro_tip_workbench_pro_only=$1 Workbench 功能在 GPL 版本中不可用。
+scripts_gpl_pro_tip_workbench_enot=$1 Workbench 功能不适用于此 Web 应用
 
 scripts_service_ename=服务名称缺失或无效
 scripts_service_eport=服务端口号缺失或无效
@@ -5082,6 +5084,8 @@ mysql_rlocal=本地服务器
 mysql_movebackup=在原始主机上备份用户和数据库。
 mysql_moverestore=在新主机上还原用户和数据库。
 mysql_movedelete=从原始主机中删除用户和数据库。
+mysql_restarting=重新启动 MySQL 服务器 ..
+mysql_erestarting=.. 不跑！
 
 dbpass_title=更新数据库密码
 dbname_title=更新数据库名称

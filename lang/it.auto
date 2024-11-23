@@ -3685,6 +3685,7 @@ scripts_kit_clone_target2=Dominio esistente
 scripts_kit_clone_target3=Nuovo sottodominio
 scripts_kit_clone_target4=Nuovo dominio di primo livello
 scripts_kit_apply=Fare domanda a
+scripts_kit_wp_login=Accedi a WordPress
 scripts_kit_updcache=Controlla gli aggiornamenti
 scripts_kit_openin_fm=Apri in File Manager
 scripts_kit_backups_location=Posizione dei backup
@@ -3725,6 +3726,7 @@ scripts_gpl_pro_tip_extra_web_users=Questo modulo consente di creare e gestire g
 scripts_gpl_pro_tip_extra_db_users=Questo modulo consente di creare e gestire gli utenti del database in modo indipendente, senza creare un nuovo account utente Unix.
 scripts_gpl_pro_tip_extra_user_dismiss=Grazie per il consiglio! Nascondi questa pagina e il relativo collegamento
 scripts_gpl_pro_tip_workbench_pro_only=La funzionalità $1 Workbench non è disponibile nella versione GPL.
+scripts_gpl_pro_tip_workbench_enot=La funzionalità $1 Workbench non è disponibile per questa app Web
 
 scripts_service_ename=Nome del servizio mancante o non valido
 scripts_service_eport=Numero di porta del servizio mancante o non valido
@@ -6737,6 +6739,8 @@ mysql_rlocal=Server locale
 mysql_movebackup=Backup di utenti e database sull'host originale.
 mysql_moverestore=Ripristino di utenti e database sul nuovo host.
 mysql_movedelete=Rimozione di utenti e database dall'host originale.
+mysql_restarting=Riavvio del server MySQL ..
+mysql_erestarting=..non corre!
 
 dbpass_title=Aggiorna la password del database
 dbname_title=Aggiorna nome database

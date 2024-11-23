@@ -4645,6 +4645,7 @@ scripts_kit_clone_target2=既存のドメイン
 scripts_kit_clone_target3=新しいサブドメイン
 scripts_kit_clone_target4=新しいトップレベルドメイン
 scripts_kit_apply=適用する
+scripts_kit_wp_login=WordPressにログイン
 scripts_kit_updcache=アップデートを確認する
 scripts_kit_openin_fm=ファイルマネージャーで開く
 scripts_kit_backups_location=バックアップの場所
@@ -4685,6 +4686,7 @@ scripts_gpl_pro_tip_extra_web_users=このフォームを使用すると、新�
 scripts_gpl_pro_tip_extra_db_users=このフォームを使用すると、新しい Unix ユーザー アカウントを作成せずに、データベース ユーザーを個別に作成および管理できます。
 scripts_gpl_pro_tip_extra_user_dismiss=ヒントをありがとう！このページとそのリンクを非表示にする
 scripts_gpl_pro_tip_workbench_pro_only=$1 ワークベンチ機能は GPL バージョンでは使用できません。
+scripts_gpl_pro_tip_workbench_enot=$1 ワークベンチ機能はこの Web アプリでは利用できません
 
 scripts_service_ename=サービス名が欠落しているか無効です
 scripts_service_eport=サービスポート番号が欠落しているか無効です
@@ -8101,6 +8103,8 @@ mysql_rlocal=ローカルサーバー
 mysql_movebackup=元のホスト上のユーザーとデータベースのバックアップ ..
 mysql_moverestore=新しいホストでのユーザーとデータベースの復元 ..
 mysql_movedelete=元のホストからユーザーとデータベースを削除しています ..
+mysql_restarting=MySQL サーバーを再起動しています。
+mysql_erestarting=.. 走ってないよ！
 
 dbpass_title=データベースパスワードの更新
 dbname_title=データベース名を更新

@@ -3325,6 +3325,7 @@ scripts_kit_clone_target2=Существующий домен
 scripts_kit_clone_target3=Новый поддомен
 scripts_kit_clone_target4=Новый домен верхнего уровня
 scripts_kit_apply=Применять
+scripts_kit_wp_login=Войти в WordPress
 scripts_kit_updcache=Проверить обновления
 scripts_kit_openin_fm=Открыть в файловом менеджере
 scripts_kit_backups_location=Расположение резервных копий
@@ -3365,6 +3366,7 @@ scripts_gpl_pro_tip_extra_web_users=Эта форма позволяет вам 
 scripts_gpl_pro_tip_extra_db_users=Эта форма позволяет самостоятельно создавать пользователей базы данных и управлять ими, без создания новой учетной записи пользователя Unix.
 scripts_gpl_pro_tip_extra_user_dismiss=Спасибо за совет! Скрыть эту страницу и ссылку на нее
 scripts_gpl_pro_tip_workbench_pro_only=Функция $1 Workbench недоступна в версии GPL.
+scripts_gpl_pro_tip_workbench_enot=Функция $1 Workbench недоступна для этого веб-приложения
 
 scripts_service_ename=Отсутствует или неверное имя службы
 scripts_service_eport=Отсутствует или недействителен номер сервисного порта
@@ -6782,6 +6784,8 @@ mysql_rlocal=Локальный сервер
 mysql_movebackup=Резервное копирование пользователей и баз данных на оригинальном хосте.
 mysql_moverestore=Восстановление пользователей и баз данных на новом хосте.
 mysql_movedelete=Удаление пользователей и баз данных с оригинального хоста.
+mysql_restarting=Перезапуск сервера MySQL ..
+mysql_erestarting=.. не бежит!
 
 dbpass_title=Обновить пароль базы данных
 dbname_title=Обновить имя базы данных
