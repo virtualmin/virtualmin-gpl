@@ -2550,6 +2550,7 @@ scripts_kit_clone_target2=Domaine existant
 scripts_kit_clone_target3=Nouveau sous-domaine
 scripts_kit_clone_target4=Nouveau domaine de premier niveau
 scripts_kit_apply=Appliquer
+scripts_kit_wp_login=Connectez-vous à WordPress
 scripts_kit_updcache=Vérifier les mises à jour
 scripts_kit_openin_fm=Ouvrir dans le gestionnaire de fichiers
 scripts_kit_backups_location=Emplacement des sauvegardes
@@ -2590,6 +2591,7 @@ scripts_gpl_pro_tip_extra_web_users=Ce formulaire vous permet de créer et de g�
 scripts_gpl_pro_tip_extra_db_users=Ce formulaire vous permet de créer et de gérer des utilisateurs de base de données de manière indépendante, sans créer de nouveau compte utilisateur Unix.
 scripts_gpl_pro_tip_extra_user_dismiss=Merci pour le conseil! Masquer cette page et son lien
 scripts_gpl_pro_tip_workbench_pro_only=La fonctionnalité $1 Workbench n'est pas disponible dans la version GPL.
+scripts_gpl_pro_tip_workbench_enot=La fonctionnalité $1 Workbench n'est pas disponible pour cette application Web
 
 scripts_service_ename=Nom de service manquant ou invalide
 scripts_service_eport=Numéro de port de service manquant ou invalide
@@ -5490,6 +5492,8 @@ mysql_rlocal=Serveur local
 mysql_movebackup=Sauvegarde des utilisateurs et des bases de données sur l'hôte d'origine.
 mysql_moverestore=Restauration des utilisateurs et des bases de données sur un nouvel hôte ..
 mysql_movedelete=Suppression d'utilisateurs et de bases de données de l'hôte d'origine.
+mysql_restarting=Redémarrage du serveur MySQL ..
+mysql_erestarting=..ne court pas !
 
 dbpass_title=Mettre à jour le mot de passe de la base de données
 dbname_title=Mettre à jour le nom de la base de données
