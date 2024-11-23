@@ -335,45 +335,70 @@ my $tab = $in{'tab'};
 # Validate if passed tab in URL is in
 # tabs list or fall back to default
 $tab = $tabs[1]->[0] if (!$tab || !grep { $_->[0] eq $tab } @tabs);
-# Actions tab content
-my $actions_tab_content;
-# Setttings tab content
-my $settings_tab_content;
-# Crons tab content
-my $crons_tab_content;
-# Update tab content
-my $update_tab_content;
+# Form
+my $form = sub {
+	my ($tab) = @_;
+	my $form = &ui_form_start("workbench.cgi", "post", undef,
+		   "data-form-nested='apply' id='kit_${tab}_form'");
+	return $form;
+	};
+# Form definitions
+my $form_defs = sub {
+	my ($tab) = @_;
+	my $form_defs = &ui_hidden("dom", $d->{'id'});
+	$form_defs .= &ui_hidden("tab", $tab);
+	$form_defs .= &ui_hidden("sid", $sinfo->{'id'});
+	return $form_defs;
+	};
 
-#### 
+# Settings tab content
+my $settings_tab_content .= $form->("settings");
+$settings_tab_content .= $form_defs->("settings");
+$settings_tab_content .= '"Settings" tab content';
+$settings_tab_content .= &ui_form_end();
+# Actions tab content
+my $actions_tab_content .= $form->("actions");
+$actions_tab_content .= $form_defs->("actions");
+$actions_tab_content .= '"Actions" tab content';
+$actions_tab_content .= &ui_form_end();
+# Crons tab content
+my $crons_tab_content .= $form->("crons");
+$crons_tab_content .= $form_defs->("crons");
+$crons_tab_content .= '"Crons" tab content';
+$crons_tab_content .= &ui_form_end();
+# Update tab content
+my $update_tab_content .= $form->("update");
+$update_tab_content .= $form_defs->("update");
+$update_tab_content .= '"Update" tab content';
+$update_tab_content .= &ui_form_end();
 
 # All tabs start
 my $data = &ui_tabs_start(\@tabs, "tab", $tab, 0);
-# Actions tab content
-my @data_submits;
-$data .= &ui_tabs_start_tab("tab", "actions");
-$data .= &vui_ui_block($text{'actions_desc'});
-$data .= 'actions';
-$data .= &ui_tabs_end_tab();
 # Settings tab content
 $data .= &ui_tabs_start_tab("tab", "settings");
 $data .= &vui_ui_block($text{'settings_desc'});
-$data .= 'settings';
+$data .= $settings_tab_content;
+$data .= &ui_tabs_end_tab();
+# Actions tab content
+$data .= &ui_tabs_start_tab("tab", "actions");
+$data .= &vui_ui_block($text{'actions_desc'});
+$data .= $actions_tab_content;
 $data .= &ui_tabs_end_tab();
 # Crons tab content
 $data .= &ui_tabs_start_tab("tab", "crons");
 $data .= &vui_ui_block($text{'crons_desc'});
-$data .= 'crons';
+$data .= $crons_tab_content;
 $data .= &ui_tabs_end_tab();
 # Update tab content
 $data .= &ui_tabs_start_tab("tab", "update");
 $data .= &vui_ui_block($text{'update_desc'});
-$data .= 'update';
+$data .= $update_tab_content;
 $data .= &ui_tabs_end_tab();
-
 # All tabs end
 $data .= &ui_tabs_end();
 
 # Extra submits
+my @data_submits;
 push(@data_submits, &ui_submit($text{'scripts_kit_apply'},
 	"kit_form_apply", undef,
 	"data-submit-nested='apply' form='kit_${tab}_form'"));
@@ -381,4 +406,12 @@ push(@data_submits, &ui_submit($text{'scripts_kit_apply'},
 # Return data
 return { data => $data, extra_submits => \@data_submits };
 }
+
+sub script_tikiwiki_kit_apply
+{
+my ($domain, $in, $sinfo, $script) = @_;
+&$first_print("Applying for tab \"@{[ucfirst($in->{'tab'})]}\"");
+&$second_print($text{'setup_done'});
+}
+
 1;
