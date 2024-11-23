@@ -4645,6 +4645,7 @@ scripts_kit_clone_target2=Existujúca doména
 scripts_kit_clone_target3=Nová subdoména
 scripts_kit_clone_target4=Nová doména najvyššej úrovne
 scripts_kit_apply=Použiť
+scripts_kit_wp_login=Prihláste sa do WordPress
 scripts_kit_updcache=Skontrolujte aktualizácie
 scripts_kit_openin_fm=Otvorte v Správcovi súborov
 scripts_kit_backups_location=Umiestnenie záloh
@@ -4685,6 +4686,7 @@ scripts_gpl_pro_tip_extra_web_users=Tento formulár vám umožňuje vytvárať a
 scripts_gpl_pro_tip_extra_db_users=Tento formulár vám umožňuje vytvárať a spravovať používateľov databázy nezávisle, bez vytvárania nového používateľského účtu Unix.
 scripts_gpl_pro_tip_extra_user_dismiss=Ďakujem za tip! Skryť túto stránku a jej odkaz
 scripts_gpl_pro_tip_workbench_pro_only=Funkcia $1 Workbench nie je dostupná vo verzii GPL.
+scripts_gpl_pro_tip_workbench_enot=Funkcia $1 Workbench nie je pre túto webovú aplikáciu dostupná
 
 scripts_service_ename=Chýbajúci alebo neplatný názov služby
 scripts_service_eport=Chýbajúce alebo neplatné číslo portu služby
@@ -8101,6 +8103,8 @@ mysql_rlocal=Lokálny server
 mysql_movebackup=Zálohovanie používateľov a databáz na pôvodnom hostiteľovi ..
 mysql_moverestore=Obnova používateľov a databáz na novom hostiteľovi ..
 mysql_movedelete=Odstraňovanie používateľov a databáz z pôvodného hostiteľa ..
+mysql_restarting=Reštartovanie servera MySQL ..
+mysql_erestarting=.. nebeží!
 
 dbpass_title=Aktualizácia hesla databázy
 dbname_title=Aktualizovať názov databázy

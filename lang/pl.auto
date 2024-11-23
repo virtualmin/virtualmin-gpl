@@ -149,6 +149,7 @@ scripts_kit_clone_target2=Istniejąca domena
 scripts_kit_clone_target3=Nowa subdomena
 scripts_kit_clone_target4=Nowa domena najwyższego poziomu
 scripts_kit_apply=Stosować
+scripts_kit_wp_login=Zaloguj się do WordPressa
 scripts_kit_updcache=Sprawdź aktualizacje
 scripts_kit_openin_fm=Otwórz w Menedżerze plików
 scripts_kit_backups_location=Lokalizacja kopii zapasowych
@@ -173,6 +174,7 @@ scripts_kit_estype_path=Skrypt typu „$1” na ścieżce „$2” nie istnieje
 
 scripts_gpl_pro_tip_enroll_single=Prosimy o rozważenie zakupu licencji <a target=_blank href='$1'>Virtualmin Pro</a>, aby wesprzeć rozwój i odblokować tę oraz wiele innych fajnych funkcji
 scripts_gpl_pro_tip_workbench_pro_only=Funkcja $1 Workbench nie jest dostępna w wersji GPL.
+scripts_gpl_pro_tip_workbench_enot=Funkcja $1 Workbench nie jest dostępna dla tej aplikacji internetowej
 
 migrate_plan=Plan nowego serwera
 
@@ -250,6 +252,9 @@ letsencrypt_eacme=Wybrany dostawca SSL nie istnieje!
 letsencrypt_eacme2=Nie masz uprawnień do korzystania z wybranego dostawcy SSL
 
 php_fpmreload=Ponowne ładowanie serwera PHP-FPM $1 ..
+
+mysql_restarting=Ponowne uruchomienie serwera MySQL ..
+mysql_erestarting=.. nie działa!
 
 2fa_ecannot=Nie masz uprawnień do zarządzania uwierzytelnianiem dwuskładnikowym
 

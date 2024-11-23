@@ -1459,6 +1459,7 @@ scripts_kit_clone_target2=Bestaand domein
 scripts_kit_clone_target3=Nieuw subdomein
 scripts_kit_clone_target4=Nieuw topleveldomein
 scripts_kit_apply=Toepassen
+scripts_kit_wp_login=Inloggen op WordPress
 scripts_kit_updcache=Controleer updates
 scripts_kit_openin_fm=Openen in Bestandsbeheer
 scripts_kit_backups_location=Locatie van back-ups
@@ -1499,6 +1500,7 @@ scripts_gpl_pro_tip_extra_web_users=Met dit formulier kunt u onafhankelijk webse
 scripts_gpl_pro_tip_extra_db_users=Met dit formulier kunt u zelfstandig databasegebruikers aanmaken en beheren, zonder een nieuw Unix-gebruikersaccount aan te maken.
 scripts_gpl_pro_tip_extra_user_dismiss=Bedankt voor de tip! Verberg deze pagina en de link ervan
 scripts_gpl_pro_tip_workbench_pro_only=De $1 Workbench-functie is niet beschikbaar in de GPL-versie.
+scripts_gpl_pro_tip_workbench_enot=De $1 Workbench-functie is niet beschikbaar voor deze web-app
 
 scripts_service_ename=Ontbrekende of ongeldige servicenaam
 scripts_service_eport=Ontbrekend of ongeldig servicepoortnummer
@@ -2881,6 +2883,8 @@ mysql_rlocal=Lokale server
 mysql_movebackup=Een back-up maken van gebruikers en databases op de oorspronkelijke host.
 mysql_moverestore=Gebruikers en databases herstellen op nieuwe host.
 mysql_movedelete=Gebruikers en databases verwijderen van de oorspronkelijke host.
+mysql_restarting=MySQL-server opnieuw opstarten ..
+mysql_erestarting=.. niet rennen!
 
 dbpass_title=Database-wachtwoord bijwerken
 dbname_title=Databasenaam bijwerken

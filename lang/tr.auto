@@ -2612,6 +2612,7 @@ scripts_kit_clone_target2=Mevcut alan adı
 scripts_kit_clone_target3=Yeni alt alan adı
 scripts_kit_clone_target4=Yeni üst düzey alan adı
 scripts_kit_apply=Uygula
+scripts_kit_wp_login=WordPress'e giriş yapın
 scripts_kit_updcache=Güncellemeleri Kontrol Edin
 scripts_kit_openin_fm=Dosya Yöneticisi'nde açın
 scripts_kit_backups_location=Yedekleme konumu
@@ -2652,6 +2653,7 @@ scripts_gpl_pro_tip_extra_web_users=Bu form, yeni bir Unix kullanıcı hesabı o
 scripts_gpl_pro_tip_extra_db_users=Bu form, yeni bir Unix kullanıcı hesabı oluşturmadan veritabanı kullanıcılarını bağımsız olarak oluşturmanıza ve yönetmenize olanak tanır.
 scripts_gpl_pro_tip_extra_user_dismiss=Bahşiş için teşekkürler! Bu sayfayı ve bağlantısını gizle
 scripts_gpl_pro_tip_workbench_pro_only=$1 Workbench özelliği GPL sürümünde mevcut değildir.
+scripts_gpl_pro_tip_workbench_enot=$1 Workbench özelliği bu web uygulaması için kullanılamaz
 
 scripts_service_ename=Eksik veya geçersiz hizmet adı
 scripts_service_eport=Eksik veya geçersiz hizmet bağlantı noktası numarası
@@ -5572,6 +5574,8 @@ mysql_rlocal=Yerel sunucu
 mysql_movebackup=Orijinal ana bilgisayarda kullanıcıları ve veritabanlarını yedekleme.
 mysql_moverestore=Yeni ana bilgisayarda kullanıcıları ve veritabanlarını geri yükleme.
 mysql_movedelete=Kullanıcıları ve veritabanlarını orijinal ana bilgisayardan kaldırma.
+mysql_restarting=MySQL sunucusunu yeniden başlatıyorum ..
+mysql_erestarting=..koşmuyorum!
 
 dbpass_title=Veritabanı Parolasını Güncelleyin
 dbname_title=Veritabanı Adını Güncelle
