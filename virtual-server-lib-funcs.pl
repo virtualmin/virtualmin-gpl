@@ -15534,21 +15534,19 @@ if ($lastconfig) {
 	foreach my $f (@features) {
 		if (!$config{$f} && $lastconfig->{$f}) {
 			my @lost = grep { $_->{$f} } @doms;
-			if (@lost) {
-				return &text('check_lostfeature',
-					$text{'feature_'.$f},
-					join(" ", map { $_->{'dom'} } @lost));
-				}
+			return &text('check_lostfeature',
+				$text{'feature_'.$f},
+				join(", ", map { &show_domain_name($_) } @lost))
+				if (@lost);
 			}
 		}
 	foreach my $f (split(/\s+/, $lastconfig->{'plugins'})) {
 		if (&indexof($f, @plugins) < 0) {
 			my @lost = grep { $_->{$f} } @doms;
-			if (@lost) {
-				return &text('check_lostplugin',
-					&plugin_call($f, "feature_name"),
-					join(" ", map { $_->{'dom'} } @lost));
-				}
+			return &text('check_lostplugin',
+				&plugin_call($f, "feature_name"),
+				join(", ", map { &show_domain_name($_) } @lost))
+				if (@lost);
 			}
 		}
 	}
