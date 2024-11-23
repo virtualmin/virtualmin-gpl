@@ -1,3 +1,6 @@
+#### Version 7.30.1
+* Fix the bug to properly check for disabling in-use features and prevent breaking the system
+
 #### Version 7.30.0
 * Add support for multiple ACME-compatible SSL providers in the Pro version, like ZeroSSL, Sectigo and many other
 * Add comprehensive page for license management in Virtualmin Pro
