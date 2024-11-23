@@ -15,13 +15,14 @@ my $d = &get_domain($in{'dom'});
 my ($sinfo) = grep { $_->{'id'} eq $in{'sid'} } &list_domain_scripts($d);
 my $script = &get_script($sinfo->{'name'});
 $script || &error($text{'scripts_emissing'});
+my $desc = $script->{'tmdesc'} || $script->{'desc'};
 
 # Run
 my $apply_func = $script->{'kit_apply_func'};
 if (defined(&$apply_func)) {
 	# Print header
 	&ui_print_unbuffered_header(&domain_in($d),
-		&text("scripts_kit", $script->{'tmdesc'}), "");
+		&text("scripts_kit", $desc), "");
 	&$apply_func($d, \%in, $sinfo, $script);
 	# Print footer
 	&ui_print_footer(
@@ -32,5 +33,5 @@ if (defined(&$apply_func)) {
 		&domain_footer_link($d));
 	}
 else {
-	&error(&text('scripts_gpl_pro_tip_workbench_enot', $script->{'tmdesc'}));
+	&error(&text('scripts_gpl_pro_tip_workbench_enot', $desc));
 	}
