@@ -1,3 +1,6 @@
+#### Version 7.30.2
+* Fix to ensure the mail log is not read when the mail feature is disabled globally
+
 #### Version 7.30.1
 * Fix the bug to properly check for disabling in-use features and prevent breaking the system
 
