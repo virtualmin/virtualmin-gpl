@@ -5664,6 +5664,8 @@ return lc($dn0) eq lc($dn1);
 # or SMTP.
 sub update_last_login_times
 {
+return 0 if (!$config{'mail'});
+
 # Read the file tracking the mail log position
 &lock_file($mail_login_file);
 my %logins;
