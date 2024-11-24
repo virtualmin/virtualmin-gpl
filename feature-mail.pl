@@ -3648,7 +3648,7 @@ local %max_ltime = %$starts;
 # Find the mail log
 local %max_updated;
 local $maillog = $config{'bw_maillog'};
-$maillog = &get_mail_log(time() - $min_ltime) if ($maillog eq "auto");
+$maillog = &get_mail_log($min_ltime) if ($maillog eq "auto");
 return $starts if (!$maillog);
 
 # Build a map from domain names to objects, and from Unix usernames to objects
@@ -3996,11 +3996,12 @@ elsif ($mail_system == 2) {
 return 0;
 }
 
-# get_mail_log([max-age])
+# get_mail_log([start-time])
 # Returns the default mail log file for this system
 sub get_mail_log
 {
-my ($maxage) = @_;
+my ($starttime) = @_;
+my $maxage = $starttime ? time() - $starttime : undef;
 if (&foreign_installed("syslog")) {
 	# Try syslog first
 	&foreign_require("syslog");
@@ -5670,7 +5671,7 @@ my %logins;
 
 # Find the mail log
 my $maillog = $config{'bw_maillog'};
-$maillog = &get_mail_log(time() - $logins{'lasttime'}) if ($maillog eq "auto");
+$maillog = &get_mail_log($logins{'lasttime'}) if ($maillog eq "auto");
 if (!$maillog) {
 	&unlock_file($mail_login_file);
 	return 0;

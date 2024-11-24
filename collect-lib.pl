@@ -389,7 +389,7 @@ if (defined($lastinfo)) {
 	($lastpos, $lastinode, $lasttime) = split(/\s+/, $lastinfo);
 	}
 local $mail_log_file = $config{'bw_maillog'};
-$mail_log_file = &get_mail_log(time() - $lasttime)
+$mail_log_file = &get_mail_log($lasttime)
 	if ($mail_log_file eq "auto");
 
 if ($mail_log_file && $config{'mail'}) {
