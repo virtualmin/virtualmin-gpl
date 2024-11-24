@@ -392,7 +392,7 @@ local $mail_log_file = $config{'bw_maillog'};
 $mail_log_file = &get_mail_log(time() - $lasttime)
 	if ($mail_log_file eq "auto");
 
-if ($mail_log_file) {
+if ($mail_log_file && $config{'mail'}) {
 	# Get last seek position
 	local ($spamcount, $mailcount) = (0, 0);
 	local @st = stat($mail_log_file);
