@@ -55,7 +55,7 @@ elsif ($mail_system == 0) {
 	$can_alias_types{9} = 0;	# bounce not yet supported for postfix
 	$can_alias_comments = $virtualmin_pro;
 	if ($can_alias_comments &&
-	    $virtual_maps !~ /^hash:/ &&
+	    $virtual_maps !~ /^(hash|dbm|lmdb):/ &&
 	    !&postfix::can_map_comments($virtual_type)) {
 		# Comments not supported by map backend, such as MySQL
 		$can_alias_comments = 0;
@@ -4321,7 +4321,8 @@ elsif ($mail_system == 0) {
 	if (!$rrm) {
 		my $cdir = $postfix::config{'postfix_config_file'};
 		$cdir =~ s/\/[^\/]+$//;
-		$rrm = "hash:$cdir/relay_recipient_maps";
+		$rrm = &default_postfix_map_type().
+		       ":$cdir/relay_recipient_maps";
 		&postfix::set_current_value("relay_recipient_maps", $rrm);
 		&postfix::ensure_map("relay_recipient_maps");
 		&postfix::regenerate_relay_recipient_table();
@@ -5457,7 +5458,8 @@ if (!$dependent_maps) {
 	&lock_file($postfix::config{'postfix_config_file'});
 	my $cdir = $postfix::config{'postfix_config_file'};
 	$cdir =~ s/\/[^\/]+$//;
-	$dependent_maps = "hash:$cdir/sender_dependent_default_transport_maps";
+	$dependent_maps = &default_postfix_map_type().
+			  ":$cdir/sender_dependent_default_transport_maps";
 	&postfix::set_current_value("sender_dependent_default_transport_maps",
 				    $dependent_maps);
 	&postfix::ensure_map("sender_dependent_default_transport_maps");
@@ -6727,6 +6729,19 @@ if ($mail_system == 0) {
 		&postfix::reload_postfix();
 		}
 	}
+}
+
+# default_postfix_map_type()
+# Returns the default Postfix map type, such as 'hash' or 'db'
+sub default_postfix_map_type
+{
+&require_mail();
+if ($mail_system == 0) {
+	foreach my $t ('hash', 'lmdb', 'dbm') {
+		return $t if (&postfix::supports_map_type($t));
+		}
+	}
+return 'hash';	# Should never happen
 }
 
 $done_feature_script{'mail'} = 1;
