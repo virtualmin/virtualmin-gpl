@@ -2664,7 +2664,7 @@ elsif (&postfix_supports_sni()) {
 	if (!$maphash) {
 		# No, so add it
 		$mapfile = &postfix::guess_config_dir()."/sni_map";
-		$maphash = "hash:".$mapfile;
+		$maphash = &default_postfix_map_type().":".$mapfile;
 		&postfix::set_current_value("tls_server_sni_maps", $maphash);
 		&postfix::ensure_map("tls_server_sni_maps");
 		$changed++;
