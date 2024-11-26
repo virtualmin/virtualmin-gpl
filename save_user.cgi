@@ -58,7 +58,15 @@ if ($in{'switch'}) {
 elsif ($in{'remailbut'}) {
 	# Re-send signup email
 	&error_setup($text{'user_err2'});
-	@erv = &send_user_email($d, $user, $user->{'email'}, 0);
+	if ($user->{'domainowner'}) {
+		&push_all_print();
+		&set_all_null_print();
+		@erv = &send_domain_email($d, $d->{'emailto'});
+		&pop_all_print();
+		}
+	else {
+		@erv = &send_user_email($d, $user, $user->{'email'}, 0);
+		}
 	if (!$erv[0]) {
 		&error($erv[1]);
 		}

@@ -1181,21 +1181,31 @@ else {
 	}
 # Form create/delete buttons
 if ($form_end) {
+	my @buts;
 	if ($in{'new'}) {
-		print &ui_form_end(
-		[ [ "create", $text{'create'} ] ]);
+		push(@buts, [ "create", $text{'create'} ]);
 		}
 	else {
-		print &ui_form_end(
-		[ [ "save", $text{'save'} ],
-		$usermin ? ( [ "switch", $text{'user_switch'}, undef, undef,
-				"onClick='form.target = \"_blank\"'" ] ) : ( ),
-		&will_send_user_email($d) && $user->{'email'} ?
-			( [ "remailbut", $text{'user_remailbut'} ] ) : ( ),
-		$user->{'recovery'} ?
-			( [ "recoverybut", $text{'user_sendrecover'} ] ) : ( ),
-		$mailbox ? ( ) : ( [ "delete", $text{'delete'} ] ) ]);
+		push(@buts, [ "save", $text{'save'} ]);
+		if ($usermin) {
+			push(@buts, [ "switch", $text{'user_switch'}, undef,
+				undef, "onClick='form.target = \"_blank\"'" ]);
+			}
+		if ($user->{'domainowner'} && &will_send_domain_email($d)) {
+			push(@buts, [ "remailbut", $text{'user_remailbut2'} ]);
+			}
+		elsif (!$user->{'domainowner'} &&
+		       &will_send_user_email($d) && $user->{'email'}) {
+			push(@buts, [ "remailbut", $text{'user_remailbut'} ] );
+			}
+		if ($user->{'recovery'}) {
+			push(@buts, [ "recoverybut",$text{'user_sendrecover'} ]);
+			}
+		if (!$mailbox) {
+			push(@buts, [ "delete", $text{'delete'} ]);
+			}
 		}
+	print &ui_form_end(\@buts);
 	}
 
 # Link back to user list and/or main menu

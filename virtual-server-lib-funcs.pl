@@ -4282,6 +4282,7 @@ if ($erv[0]) {
 else {
 	&$second_print(&text('setup_emailfailed', $erv[1]));
 	}
+return @erv;
 }
 
 # make_domain_substitions(&domain, [nice-sizes])
@@ -13730,17 +13731,6 @@ if ($d->{'dir'} && !$d->{'parent'}) {
 		    'title' => $text{'edit_usage'},
 		    'desc' => $text{'edit_usagehdesc'},
 		    'cat' => 'logs',
-		  });
-	}
-
-# Button to re-send signup email
-if (!$d->{'alias'} && &can_config_domain($d) &&
-    &will_send_domain_email($d)) {
-	push(@rv, { 'page' => 'reemail.cgi',
-		    'title' => $text{'edit_reemail'},
-		    'desc' => &text('edit_reemaildesc',
-                                    "<tt>$d->{'emailto_addr'}</tt>"),
-		    'cat' => 'mail',
 		  });
 	}
 
