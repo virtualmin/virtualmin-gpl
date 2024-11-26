@@ -481,7 +481,7 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 			&$second_print($text{'setup_done'});
 
 			# Update all installed scripts database password which are using MySQL
-			&update_all_installed_scripts_database_credentials($d, $oldd, 'dbpass', &mysql_pass($d), 'mysql');
+			&update_scripts_creds($d, $oldd, 'dbpass', &mysql_pass($d), 'mysql');
 			}
 		$rv++;
 		}
@@ -496,7 +496,7 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 			&$second_print($text{'setup_done'});
 
 			# Update all installed scripts database password which are using MySQL
-			&update_all_installed_scripts_database_credentials($d, $oldd, 'dbpass', &mysql_pass($d), 'mysql');
+			&update_scripts_creds($d, $oldd, 'dbpass', &mysql_pass($d), 'mysql');
 
 			$rv++;
 			}
@@ -680,7 +680,7 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 			&$second_print($text{'setup_done'});
 
 			# Update all installed scripts database username which are using MySQL
-			&update_all_installed_scripts_database_credentials($d, $oldd, 'dbuser', $user, 'mysql');
+			&update_scripts_creds($d, $oldd, 'dbuser', $user, 'mysql');
 			}
 		$rv++;
 		}
@@ -696,7 +696,7 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 			&$second_print($text{'setup_done'});
 
 			# Update all installed scripts database username which are using MySQL
-			&update_all_installed_scripts_database_credentials($d, $oldd, 'dbuser', $user, 'mysql');
+			&update_scripts_creds($d, $oldd, 'dbuser', $user, 'mysql');
 
 			$rv++;
 			}
@@ -3734,7 +3734,7 @@ foreach my $ad (@doms) {
 	}
 # Update all installed scripts database host which are using MySQL
 $newhost ||= 'localhost';
-&update_all_installed_scripts_database_credentials(
+&update_scripts_creds(
 	$d, $oldd, 'dbhost', $newhost, 'mysql');
 foreach my $sd (@doms) {
 	&save_domain($sd);

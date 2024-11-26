@@ -157,7 +157,7 @@ if (!&check_jailkit_support()) {
 	if ($jailupd) {
 		&modify_webmin($d, $d);
 		foreach my $dbt ('mysql', 'psql') {
-			&update_all_installed_scripts_database_credentials($d, $d, 'dbhost', undef, $dbt);
+			&update_scripts_creds($d, $d, 'dbhost', undef, $dbt);
 			}
 		}
 	}

@@ -719,14 +719,175 @@ my $sdbpass = $sdbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
 return ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass);
 }
 
-# update_all_installed_scripts_database_credentials(&domain, &olddomain, option-record-type, option-record-value, database-type, $script-info)
-# Updates script's given database related setting option (db-username, db-password, db-name)
-# with a new value for all installed scripts under the given virtual server, considering database type,
-# in case installed script supports it (uses database).
+# update_all_installed_scripts_database_credentials(&@_)
+# Shall be removed after Virtualmin 7.40.0 release
 sub update_all_installed_scripts_database_credentials
+{
+&update_scripts_creds(@_);
+}
+
+# update_scripts_creds(&domain, &olddomain, option-record-type,
+#                      option-record-value, database-type, $script-info)
+# Updates script's given database credentials like (db-username,
+# db-password, db-name) with a new value for all installed scripts under the 
+# given virtual server, considering database type, in case installed script
+# supports it (uses database).
+sub update_scripts_creds
 {
 my ($d, $oldd, $type, $value, $dbtype, $sinfo) = @_;
 my @domain_scripts = $sinfo ? ($sinfo) : &list_domain_scripts($d);
+my $do_wapp_conf_file = sub
+{
+my ($wapp_conf_file, $wapp_conf_types, $sdata,
+    $sproject, $d, $sdir, $type, $value, $wapp_conf_files_cnt,
+    $wapp_conf_file_cnt_ref) = @_;
+# Check if described type in a script file equals the one from the caller
+my ($wapp_conf_type_curr) = grep {$_ eq $type} keys %{$wapp_conf_types};
+if ($wapp_conf_type_curr) {
+	&$indent_print() if(!${$wapp_conf_file_cnt_ref}++);
+	unless (grep { $_ eq $sdata->{'desc'} } @printed_name) {
+		&$first_print("$sdata->{'desc'} ..");
+		push(@printed_name, $sdata->{'desc'});
+		}
+	my $wapp_opts_to_upd = $wapp_conf_types->{$wapp_conf_type_curr};
+	my ($replace_target, $replace_with, $value_func, @value_func_params,
+	    $script_opt_multi, $script_opt_after, %opts_mult);
+	foreach my $script_opt (keys %{$wapp_opts_to_upd}) {
+		# Parse replace
+		if ($script_opt eq 'replace') {
+			$replace_target = $wapp_opts_to_upd->{$script_opt}->[0];
+			$replace_with = $wapp_opts_to_upd->{$script_opt}->[1];
+			}
+		# Parse optional function to run on the replacement
+		$value_func = $wapp_opts_to_upd->{$script_opt}
+			if ($script_opt eq 'func');
+		# Parse optional function params
+		@value_func_params = split(',', $wapp_opts_to_upd->{$script_opt})
+			if ($script_opt eq 'func_params');
+		# Check if multi params must be replaced (complex replacement)
+		$script_opt_multi++ if ($script_opt eq 'multi');
+		# Include after regexp type (e.g. Drupal multi 
+		# array (multi and single line))
+		$script_opt_after++ if ($script_opt eq 'after');
+		}
+
+	# If value is not set, use existing data to just update
+	if (!$value) {
+		my ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass) =
+			&get_script_database_credentials($d, $script->{'opts'});
+		if ($type =~ /host$/) {
+			$value = $sdbhost;
+			}
+		elsif ($type =~ /name$/) {
+			$value = $sdbname;
+			}
+		elsif ($type =~ /user$/) {
+			$value = $sdbuser;
+			}
+		elsif ($type =~ /pass$/) {
+			$value = $sdbpass;
+			}
+		}
+
+	# Pass new value through optional function if defined
+	$value = &$value_func($value, @value_func_params)
+		if (defined(&$value_func));
+
+	# Prepare substitution for complex replacement for multiple
+	# options by getting other credentials from current config
+	if ($script_opt_multi) {
+		my ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass) =
+		&get_script_database_credentials($d, $script->{'opts'});
+		%opts_mult = ( 'sdbhost' => $sdbhost,
+			       'sdbtype' => $sdbtype,
+			       'sdbname' => $sdbname,
+			       'sdbuser' => $sdbuser,
+			       'sdbpass' => $sdbpass );
+		}
+	else {
+		# Construct simple replacement based on type
+		$replace_with =~ s/\$\$s$type/$value/;
+		}
+
+	# Run substitution if target and replacement are fine
+	my ($error, $success);
+
+	# Config file to run replacements on
+	my $wapp_conf_file_path = "$sdir/$wapp_conf_file";
+
+	# If script project is set, change config file path accordingly
+	if ($sproject) {
+		if (-r "$sdir/$sproject/$sproject/$wapp_conf_file") {
+			$wapp_conf_file_path = "$sdir/$sproject/$sproject/".
+					       $wapp_conf_file;
+			}
+		elsif (-r "$sdir/$sproject/$wapp_conf_file") {
+			$wapp_conf_file_path = "$sdir/$sproject/".
+					       $wapp_conf_file;
+			}
+		}
+	if (-w $wapp_conf_file_path) {
+		my $wapp_conf_file_lns =
+		      &read_file_lines_as_domain_user($d, $wapp_conf_file_path);
+		if ($replace_target && $replace_with) {
+			foreach my $wapp_conf_file_ln (@{$wapp_conf_file_lns}) {
+				if ($wapp_conf_file_ln =~ /
+				    (?<before>.*)
+				    (?<replace_target>
+					$replace_target
+				    )(?<after>.*) /x) {
+					my $include_after = $script_opt_after ?
+							    $+{after} : "";
+					if ($script_opt_multi) {
+						# Construct replacement first
+						foreach my $o (keys %opts_mult) {
+							# Substitute with new
+							# value
+							my $v = $opts_mult{$o};
+							$v = $value
+							    if ($o eq "s$type");
+							$replace_with =~
+							    s/\$\$$o/$v/;
+							}
+						# Perform complex
+						# replacement (multi)
+						$wapp_conf_file_ln = $+{before}.
+						      $+{replace_target}.
+						      $replace_with.
+						      $include_after;
+						}
+					else {
+						# Perform simple replacement
+						$wapp_conf_file_ln = $+{before}.
+						      $replace_with.
+						      $include_after;
+						}
+					$success++;
+					}
+				}
+			}
+		&make_file_writable_as_domain_user($d, $wapp_conf_file_path);
+		&flush_file_lines_as_domain_user($d, $wapp_conf_file_path);
+		if ($success) {
+			$success = $text{'setup_done'};
+			$success = 
+			  &text('save_installed_scripts_done', $wapp_conf_file)
+			  	if ($wapp_conf_files_cnt > 1);
+			}
+		else {
+			$error = &text('save_installed_scripts_err_file_lines',
+			               $wapp_conf_file);
+			}
+		}
+	else {
+		$error = &text('save_installed_scripts_err_file',
+		               $wapp_conf_file);
+		}
+	&$first_print($error || $success);
+	&$outdent_print() if(${$wapp_conf_file_cnt_ref} == $wapp_conf_files_cnt);
+	}
+};
+
 my ($printed_type, @printed_name);
 foreach my $script (@domain_scripts) {
 	my $sname = $script->{'name'};
@@ -743,145 +904,24 @@ foreach my $script (@domain_scripts) {
 		# Check if a script has a description sub
 		my $db_conn_desc = &$db_conn_func($d, $script->{'opts'});
 		if (ref($db_conn_desc)) {
-			&$first_print($text{"save_installed_scripts_${type}_${dbtype}"}) if (!$printed_type++);
+			&$first_print($text{"save_installed_scripts_${type}_".
+				      "${dbtype}"}) if (!$printed_type++);
 			# Extract script config file(s) to operate on
-			my @script_config_files = keys %{$db_conn_desc};
-			my $script_config_files_count = scalar(@script_config_files);
-			my $script_config_file_count;
-			foreach my $script_config_file (@script_config_files) {
-				my $script_config_types = $db_conn_desc->{$script_config_file};
-				if (ref($script_config_types)) {
-					# Check if described type in a script file equals the one from the caller
-					my ($config_type_current) = grep {$_ eq $type} keys %{$script_config_types};
-					if ($config_type_current) {
-						&$indent_print() if(!$script_config_file_count++);
-						&$first_print("$sdata->{'desc'} ..") if (!$printed_name[$sdata->{'desc'}]), push(@printed_name, $sdata->{'desc'});
-						my $script_options_to_update = $script_config_types->{$config_type_current};
-						my ($replace_target, $replace_with, $value_func, @value_func_params, $script_option_multi, $script_option_after, %options_multi);
-						foreach my $script_option (keys %{$script_options_to_update}) {
-							# Parse repalce
-							if ($script_option eq 'replace') {
-								$replace_target = $script_options_to_update->{$script_option}->[0];
-								$replace_with = $script_options_to_update->{$script_option}->[1];
-								}
-							# Parse optional function to run on the replacement
-							if ($script_option eq 'func') {
-								$value_func = $script_options_to_update->{$script_option};
-								}
-							# Parse optional function params
-							if ($script_option eq 'func_params') {
-								@value_func_params = split(',', $script_options_to_update->{$script_option});
-								}
-							# Check if multi params must be replaced (complex replacement)
-							if ($script_option eq 'multi') {
-								$script_option_multi++;
-								}
-							# Include after regexp type (e.g. Drupal multiformat array (multi and single line))
-							if ($script_option eq 'after') {
-								$script_option_after++;
-								}
-							}
-
-						# If value is not set, use existing data to just update
-						if (!$value) {
-							my ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass) =
-							    &get_script_database_credentials($d, $script->{'opts'});
-							if ($type =~ /host$/) {
-								$value = $sdbhost;
-								}
-							elsif ($type =~ /name$/) {
-								$value = $sdbname;
-								}
-							elsif ($type =~ /user$/) {
-								$value = $sdbuser;
-								}
-							elsif ($type =~ /pass$/) {
-								$value = $sdbpass;
-								}
-							}
-
-						# Pass new value through optional function if defined
-						if (defined(&$value_func)) {
-							$value = &$value_func($value, @value_func_params);
-						}
-						
-						# Prepare substitution for complex replacement for multiple
-						# options by getting other credentials from current config
-						if ($script_option_multi) {
-							my ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass) =
-							    &get_script_database_credentials($d, $script->{'opts'});
-							%options_multi = ('sdbhost' => $sdbhost,
-							                  'sdbtype' => $sdbtype,
-							                  'sdbname' => $sdbname,
-							                  'sdbuser' => $sdbuser,
-							                  'sdbpass' => $sdbpass
-							                 );
-							}
-						else {
-							# Construct simple replacement based on type
-							$replace_with =~ s/\$\$s$type/$value/;
-							}
-
-						# Run substitution if target and replacement are fine
-						my ($error, $success);
-
-						# Config file to run replacements on
-						my $script_config_file_path = "$sdir/$script_config_file";
-
-						# If script project is set, change config file path accordingly
-						if ($sproject) {
-							if (-r "$sdir/$sproject/$sproject/$script_config_file") {
-								$script_config_file_path = "$sdir/$sproject/$sproject/$script_config_file";
-								}
-							elsif (-r "$sdir/$sproject/$script_config_file") {
-								$script_config_file_path = "$sdir/$sproject/$script_config_file";
-								}
-							}
-						if (-w $script_config_file_path) {
-							my $script_config_file_lines = &read_file_lines_as_domain_user($d, $script_config_file_path);
-							if ($replace_target && $replace_with) {
-								foreach my $config_file_line (@{$script_config_file_lines}) {
-									if ($config_file_line =~ /(?<before>.*)(?<replace_target>$replace_target)(?<after>.*)/) {
-										my $include_after = $script_option_after ? "$+{after}" : "";
-										if ($script_option_multi) {
-											# Construct replacement first
-											foreach my $option_multi (keys %options_multi) {
-												# Substitute with new value
-												my $option_multi_value = $options_multi{$option_multi};
-												if ($option_multi eq "s$type") {
-													$option_multi_value = $value;
-													}
-												$replace_with =~ s/\$\$$option_multi/$option_multi_value/;
-												}
-											# Perform complex replacement (multi)
-											$config_file_line = "$+{before}$+{replace_target}$replace_with$include_after";
-											}
-										else {
-											# Perform simple replacement
-											$config_file_line = "$+{before}$replace_with$include_after";
-											}
-										$success++;
-										}
-									}
-								}
-							&make_file_writable_as_domain_user($d, $script_config_file_path);
-							&flush_file_lines_as_domain_user($d, $script_config_file_path);
-							if ($success) {
-								$success = 
-									$script_config_files_count > 1 ?
-									   &text('save_installed_scripts_done', $script_config_file) :
-									   $text{'setup_done'};
-								}
-							else {
-								$error = &text('save_installed_scripts_err_file_lines', $script_config_file);
-								}
-						}
-						else {
-							$error = &text('save_installed_scripts_err_file', $script_config_file);
-							}
-						&$first_print($error || $success);
-						&$outdent_print() if($script_config_file_count == $script_config_files_count);
-						}
+			my @wapp_conf_files = keys %{$db_conn_desc};
+			my $wapp_conf_files_cnt =
+				scalar(@wapp_conf_files);
+			my $wapp_conf_file_count;
+			foreach my $wapp_conf_file (@wapp_conf_files) {
+				my $wapp_conf_types =
+					$db_conn_desc->{$wapp_conf_file};
+				if (ref($wapp_conf_types)) {
+					$do_wapp_conf_file->(
+						$wapp_conf_file,
+						$wapp_conf_types,
+						$sdata, $sproject, $d, $sdir,
+						$type, $value,
+						$wapp_conf_files_cnt,
+						\$wapp_conf_file_count);
 					}
 				}
 			}
