@@ -160,7 +160,7 @@ form_mongrelslimit=Rails的最大Mongrel服务器进程
 form_origip=原始IP地址
 form_iface6=IPv6网络接口
 form_allocmaybe=如果服务器原来有一个，则分配IP，否则共享
-form_content2=是的，使用默认着陆页模板
+form_content2=是的，使用网站默认页面模板
 form_content0=是的，内容如下
 form_ipsect=IP地址和接口
 form_inputssect=其他功能选项
@@ -453,6 +453,7 @@ user_awl=管理自动白名单
 user_eloop=用户无法将电子邮件转发到他们自己的地址
 user_switch=登录到Usermin
 user_remailbut=重新发送注册电子邮件
+user_remailbut2=重新发送域名创建电子邮件
 user_sendrecover=恢复密码
 user_eswitch=您无权登录Usermin
 user_emysqlprov=无法更新服务主机上的用户： $1
@@ -2038,10 +2039,6 @@ database_collate=新数据库的整理顺序
 database_encoding=编码新数据库
 database_opts=$1的其他选项
 database_edbdef=您不允许删除域的默认数据库
-
-reemail_desc=此页面可用于重新发送创建虚拟服务器时最初发送的电子邮件。
-reemail_to=服务器所有者的电子邮件地址：
-reemail_ok=现在发送
 
 newips_old6=要更新的服务器的IPv6地址
 newips_new6=新的IPv6地址

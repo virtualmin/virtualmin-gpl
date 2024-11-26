@@ -931,8 +931,6 @@ edit_restore=Restaurar servidor virtual
 edit_restoredesc=Restaurar solo este servidor virtual desde un archivo local o remoto.
 edit_exclude=Directorios excluidos
 edit_excludedesc=Especificar directorios que no estarán incluídos en los backups de este servidor virtual.
-edit_reemail=Reenviar mail de registro
-edit_reemaildesc=Reenviar el mail de cuando fue creado este servidor a $1.
 edit_newip=Cambiar dirección de IP
 edit_newipdesc=Abrir un formulario para cambiar la dirección IP privada virtual para este servidor o su puerto de servicio web.
 edit_reseller=Administrado por reseller
@@ -2654,12 +2652,6 @@ database_title4=Desasociar base de datos
 database_rusure=Está seguro que desea eliminar la base de datos $1? Se perderá toda la información que contiene.
 database_ok=Borrar ahora
 database_charset=Tabla de caracterer para la base de datos MsSQL
-
-reemail_title=Volver a enviar el mail de registro
-reemail_dis=El mnail de registro no puede ser enviado al dueo de este servidor ya que fue deshabilitado en template del servidor.
-reemail_desc=Esta página puede ser utilizada para volver a enviar el mail que fue enviado originalmente cuando el servidor virtual fue creado.
-reemail_to=Dirección de mail del dueo del servidor:
-reemail_ok=Enviar ahora
 
 newips_title=Cambiar direcciones IP
 newips_ecannot=No está autorizado a cambiar direcciones IP

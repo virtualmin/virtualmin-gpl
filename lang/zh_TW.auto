@@ -160,7 +160,7 @@ form_mongrelslimit=Rails的最大Mongrel服務器進程
 form_origip=原始IP地址
 form_iface6=IPv6網絡接口
 form_allocmaybe=如果服務器原來有一個，則分配IP，否則共享
-form_content2=是的，使用預設著陸頁模板
+form_content2=是的，使用網站預設頁面模板
 form_content0=是的，內容如下
 form_ipsect=IP地址和接口
 form_inputssect=其他功能選項
@@ -453,6 +453,7 @@ user_awl=管理自動白名單
 user_eloop=用戶無法將電子郵件轉發到他們自己的地址
 user_switch=登錄到Usermin
 user_remailbut=重新發送註冊電子郵件
+user_remailbut2=重新發送網域名稱建立電子郵件
 user_sendrecover=恢復密碼
 user_eswitch=您無權登錄Usermin
 user_emysqlprov=無法更新服務主機上的用戶： $1
@@ -2038,10 +2039,6 @@ database_collate=新數據庫的整理順序
 database_encoding=編碼新數據庫
 database_opts=$1的其他選項
 database_edbdef=您不允許刪除域的默認數據庫
-
-reemail_desc=此頁面可用於重新發送創建虛擬服務器時最初發送的電子郵件。
-reemail_to=服務器所有者的電子郵件地址：
-reemail_ok=現在發送
 
 newips_old6=要更新的服務器的IPv6地址
 newips_new6=新的IPv6地址

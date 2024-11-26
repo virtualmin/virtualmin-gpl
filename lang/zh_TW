@@ -799,8 +799,6 @@ edit_backupdesc=將該虛擬服務器備份到本地或遠端的一個文件。
 edit_backupdesc2=將該虛擬服務器備份到遠端的FTP或者SSH服務器。
 edit_restore=恢複虛擬服務器
 edit_restoredesc=從本地或遠端的一個文件恢複該虛擬服務器。
-edit_reemail=重新發送注冊郵件
-edit_reemaildesc=重新發送該服務器創建到$1時所發送的郵件信息。
 edit_newip=修改IP地址
 edit_newipdesc=打開一個表單修改該服務器的私有虛擬IP地址或者其web服務器端口。
 edit_reseller=由分銷商管理
@@ -2119,10 +2117,6 @@ database_title4=斷開數據庫關聯
 database_rusure=你確定要刪除數據庫$1嗎？它所包含的所有數據將丟失。
 database_ok=立即刪除
 database_charset=MySQL數據庫的字符集
-
-reemail_title=重新發送注冊通知郵件
-
-reemail_dis=無法給該服務器所有者發送注冊通知郵件，該功能已在服務器模板中被禁用。
 
 newips_title=修改IP地址
 newips_ecannot=你不允許修改IP地址

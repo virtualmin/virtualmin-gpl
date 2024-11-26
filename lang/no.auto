@@ -88,7 +88,7 @@ form_sshkey1=Generer private og offentlige nøkler
 form_sshkey2=Bruk offentlig nøkkel nedenfor ..
 form_passf=Nytt passord
 form_passa=Gjenta passord
-form_content2=Ja, med standard landingssidemal
+form_content2=Ja, med nettsidens standardsidemal
 form_content0=Ja, med innholdet nedenfor
 
 setup_edomain3=Domenenavn kan ikke inneholde påfølgende prikker
@@ -239,6 +239,7 @@ user_charset=Tegn satt for svarmelding
 user_charset_def=Samme som original e-post
 user_echarset=Tegnsett må være som UTF-8 eller iso-8859-1
 user_ehomeexists=Hjemmekatalog $1 må være en eksisterende katalog for FTP-brukere på nettstedet
+user_remailbut2=Send domeneoppretting på nytt
 user_sendrecover=Gjenopprett passord
 user_lastlogin_webmin=Webmin
 user_lastlogin_usermin=Brukermin

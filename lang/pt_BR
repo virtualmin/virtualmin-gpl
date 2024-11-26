@@ -140,7 +140,6 @@ edit_redirectsdesc=Edite redirecionamentos para caminhos de URL sob o site do se
 edit_spamvirus=Entrega de Spam e Vírus
 edit_spf=DNS Opções
 edit_recordsdesc=Criar, editar e excluir registros de DNS para este servidor virtual.
-edit_reemail=Re-enviar dados do e-mail
 edit_changepass=Trocar senha
 edit_changeadminpass=Alterar sua senha
 edit_usage=Estaço usado

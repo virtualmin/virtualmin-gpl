@@ -13,6 +13,8 @@ index_usrestart=Uruchom ponownie serwer Usermin
 index_usstopdesc=Serwer internetowy Usermin jest obecnie aktywny, co pozwala użytkownikom skrzynek pocztowych czytać ich pocztę przez sieć. Kliknij ten przycisk, aby go zatrzymać.
 index_usstartdesc=Serwer internetowy Usermin jest obecnie wyłączony, co uniemożliwi użytkownikom skrzynek pocztowych odczytywanie ich poczty za pośrednictwem sieci. Kliknij ten przycisk, aby go uruchomić.
 
+form_content2=Tak, z domyślnym szablonem strony internetowej
+
 setup_bind_erecs=.. nie udało się wygenerować rekordów : $1
 setup_ednsns=Nie znaleziono rekordów NS w szablonie!
 
@@ -20,6 +22,7 @@ user_firstname=Imię
 user_surname=Nazwisko
 user_efirstname=Nieprawidłowe imię
 user_esurname=Nieprawidłowe nazwisko
+user_remailbut2=Wyślij ponownie e-mail dotyczący utworzenia domeny
 
 edit_ewebappcannot=Nie masz uprawnień do zarządzania aplikacjami internetowymi
 

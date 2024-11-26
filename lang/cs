@@ -302,7 +302,6 @@ edit_databases=Konfigurovat databáze
 edit_databasesdesc=Zobrazit, vytvořit nebo odstranit databáze přidělené tomuto virtuálnímu serveru.
 edit_spf=Možnosti DNS
 edit_exclude=Vyloučené adresáře
-edit_reemail=Znovu odeslat přihlašovací email
 edit_newipdesc=Otevřít formulář pro změnu privátní IP adresy tohoto serveru, nebo jeho port webového serveru.
 edit_changepass=Změnit heslo
 edit_created=Vytvořeno
@@ -864,12 +863,6 @@ database_ok=Odstranit
 database_charset=Znaková sada pro novou databázi
 database_encoding=Kódování pro novou databázi
 database_opts=Další nastavení pro $1
-
-reemail_title=Znovu odeslat přihlašovací email
-reemail_dis=Registrační email nemohl být odeslán, protože nebyl povolen v šabloně serveru.
-reemail_desc=Tato stránka může být použita k znovu odeslání emailu, který byl zaslán při vytvoření virtuálního serveru.
-reemail_to=Emailová adresa vlastníka serveru:
-reemail_ok=Odeslat
 
 newips_title=Změna IP adres
 newips_ecannot=Nemáte oprávnění změnit IP adresy

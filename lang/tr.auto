@@ -172,7 +172,7 @@ form_advanced=Gelişmiş seçenekler
 form_park=İlk web sitesi içeriği
 form_content=İlk web sayfası oluşturulsun mu?
 form_content1=Hayır
-form_content2=Evet, varsayılan açılış sayfası şablonuyla
+form_content2=Evet, web sitesinin varsayılan sayfa şablonuyla
 form_content0=Evet, aşağıdaki içerikle
 form_limits=Kotalar ve limitler
 form_proxysect=IP adresi ve yönlendirme
@@ -479,6 +479,7 @@ user_awl=Otomatik beyaz listeyi yönet
 user_eloop=Bir kullanıcı e-postayı kendi adresine yönlendiremez
 user_switch=Usermin'e giriş yapın
 user_remailbut=Kayıt E-postasını Tekrar Gönder
+user_remailbut2=Alan Adı Oluşturma E-postasını Yeniden Gönder
 user_sendrecover=Şifre kurtarma
 user_eswitch=Usermin'e giriş yapmanıza izin verilmiyor
 user_emysqlprov=Hizmetler ana bilgisayarındaki kullanıcı güncellenemedi : $1 
@@ -843,6 +844,7 @@ enable_disabled=engelli
 enable_return=sunucu formunu devre dışı bırak
 
 mail_rsubject=Bayi hesabı oluşturuldu
+
 newweb_userdef=Evet, Apache kullanıcısını otomatik olarak bul
 newweb_urlport=Sanal ana makineler için harici bağlantı noktası numarası
 newweb_urlsslport=SSL sanal ana bilgisayarları için harici bağlantı noktası numarası
@@ -2201,10 +2203,6 @@ database_collate=Yeni veritabanı için harmanlama sırası
 database_encoding=Yeni veritabanı için kodlama
 database_opts=$1 için ek seçenekler
 database_edbdef=Bir alan adı için varsayılan veritabanını silme izniniz yok
-
-reemail_desc=Bu sayfa, sanal sunucu oluşturulduğunda orijinal olarak gönderilen e-postayı yeniden göndermek için kullanılabilir.
-reemail_to=Sunucu sahibinin e-posta adresi:
-reemail_ok=Şimdi gönder
 
 newips_old6=Güncellenecek sunucuların IPv6 adresi
 newips_new6=Yeni IPv6 adresi

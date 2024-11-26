@@ -799,8 +799,6 @@ edit_backupdesc=将该虚拟服务器备份到本地或远端的一个文件。
 edit_backupdesc2=将该虚拟服务器备份到远端的FTP或者SSH服务器。
 edit_restore=恢复虚拟服务器
 edit_restoredesc=从本地或远端的一个文件恢复该虚拟服务器。
-edit_reemail=重新发送注册邮件
-edit_reemaildesc=重新发送该服务器创建到$1时所发送的邮件信息。
 edit_newip=修改IP地址
 edit_newipdesc=打开一个表单修改该服务器的私有虚拟IP地址或者其web服务器端口。
 edit_reseller=由分销商管理
@@ -2119,10 +2117,6 @@ database_title4=断开数据库关联
 database_rusure=你确定要删除数据库$1吗？它所包含的所有数据将丢失。
 database_ok=立即删除
 database_charset=MySQL数据库的字符集
-
-reemail_title=重新发送注册通知邮件
-
-reemail_dis=无法给该服务器所有者发送注册通知邮件，该功能已在服务器模板中被禁用。
 
 newips_title=修改IP地址
 newips_ecannot=你不允许修改IP地址

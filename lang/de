@@ -870,8 +870,6 @@ edit_restore=Virtuellen Server zurückschreiben
 edit_restoredesc=Schreibe nur diesen Virtuellen Server aus einer lokalen oder remoten Datei zurück.
 edit_exclude=Ausgeschlossenen Verzeichnisse
 edit_excludedesc=Geben Sie hier die Verzeichnisse an, die nicht in den Sicherungen dieses virtuellen Servers enthalten sein sollen.
-edit_reemail=Anmeldemail erneut senden
-edit_reemaildesc=Sende die Mailnachricht, die bei der Erzeugung versandt wurde, an $1.
 edit_newip=Ändere IP-Adresse
 edit_newipdesc=Öffnen Sie hier ein Formular, um die private vituelle IP-Adresse für diesen Server oder den Webserver-Port zu ändern.
 edit_reseller=Verwaltet durch Reseller
@@ -2390,8 +2388,6 @@ database_charset=Zeichensatz für neue Datenbank
 database_encoding=Codierung für neue Datenbank
 database_opts=Zusätzliche Optionen für $1
 database_edbdef=Sie sind nicht berechtigt, die Standard-Datenbank für eine Domain zu löschen
-
-reemail_ok=Sende jetzt
 
 newips_title=Ändern der IP-Adressen
 newips_ecannot=Es ist Ihnen nicht erlaubt IP-Adressen zu ändern

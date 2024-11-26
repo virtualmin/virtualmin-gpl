@@ -1072,8 +1072,6 @@ edit_restore=Gjenopprett virtuell tjener
 edit_restoredesc=Gjenopprett bare denne virtuelle tjeneren fra en lokal eller ekstern fil.
 edit_exclude=Ekskluderte kataloger
 edit_excludedesc=Angi kataloger som ikke skal tas med ved sikkerhetskopiering av denne virtuelle tjeneren.
-edit_reemail=Send registrerings e-post på nytt
-edit_reemaildesc=Send på nytt til $1 e-post meldingen som ble sendt når denne tjeneren ble opprettet.
 edit_newip=Endre IP adresse
 edit_newipdesc=Åpne et skjema for å endre den private virtuelle IP adressen for denne tjeneren, eller dens web-tjener port.
 edit_reseller=Administrert av forhandler
@@ -3154,12 +3152,6 @@ database_collate=Sorteringsoppsett for nye databaser
 database_encoding=Tegnkoding for ny database
 database_opts=Ekstra innstillinger for $1
 database_edbdef=Du har ikke lov til å slette standard databasen for domenet
-
-reemail_title=Send registrerings e-post på nytt
-reemail_dis=Registrerings e-post kan ikke sendes til denne tjenerens eier, siden den er deaktivert i tjenerens mal.
-reemail_desc=Denne siden kan brukes til å sende på nytt den meldingen som opprinnelig ble sendt når den virtuelle tjeneren ble opprettet.
-reemail_to=Tjener-eiers e-post adresse:
-reemail_ok=Send nå
 
 newips_title=Endre IP adresser
 newips_ecannot=Du har ikke lov til å endre IP adresser

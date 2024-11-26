@@ -1040,8 +1040,6 @@ edit_restore=Herstel Virtuele Server
 edit_restoredesc=Herstel alleen deze virtuele server van een locale of remote file.
 edit_exclude=Uitgesloten Directory's
 edit_excludedesc=Specificeer de directory's die niet moeten worden meegenomen in de backups van deze virtuele server.
-edit_reemail=Opnieuw versturen van Signup Email
-edit_reemaildesc=Verstuur opnieuw het email bericht toen deze server werd aangemaakt naar $1.
 edit_newip=Verander IP adres
 edit_newipdesc=Open een formulier om het privé virtuele IP adres voor deze server te veranderen, of de webserver poort.
 edit_reseller=Beheert door reseller
@@ -2965,12 +2963,6 @@ database_collate=Vergelijking volgorde voor nieuwe database
 database_encoding=Coderen voor een nieuwe database
 database_opts=Extra opties voor $1
 database_edbdef=U bent niet bevoegd om de standaard database te verwijderen voor een domein.
-
-reemail_title=Verstuur Opnieuw Inschrijf Email
-reemail_dis=De inschrijvings email kan niet verstuurd worden naar deze server eigenaar omdat dit uitgeschakeld is in de server's template.
-reemail_desc=Deze pagina kan gebruikt worden om opnieuw de email te sturen die origineel verstuurd was toen de virtuele server werd gemaakt.
-reemail_to=Server eigenaars email adres :
-reemail_ok=Verstuur Nu
 
 newips_title=Verander IP Adressen
 newips_ecannot=U bent niet bevoegd om de IP adressen te veranderen

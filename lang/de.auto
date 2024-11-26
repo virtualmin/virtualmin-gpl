@@ -118,7 +118,7 @@ form_aliasdomslimit0=Maximal
 form_realdomslimit=Maximal zulässige Nicht-Alias-Server
 form_esubdom=Der übergeordnete Domain Virtualmin Server $1 wurde nicht gefunden!
 form_allocmaybe=Weisen Sie die IP zu, wenn der Server ursprünglich eine hatte, andernfalls freigegeben
-form_content2=Ja, mit der Standard-Landingpage-Vorlage
+form_content2=Ja, mit der Standardseitenvorlage der Website
 form_content0=Ja, mit Inhalt unten
 
 setup_eplan=Der ausgewählte Plan existiert nicht oder ist nicht verfügbar
@@ -395,6 +395,7 @@ user_ehomeexists=Das Home-Verzeichnis $1 muss ein vorhandenes Verzeichnis für W
 user_awl=Verwalten Sie die automatische Whitelist
 user_eloop=Ein Benutzer kann E-Mails nicht an seine eigene Adresse weiterleiten
 user_remailbut=Senden Sie die Anmelde-E-Mail erneut
+user_remailbut2=E-Mail zur Domänenerstellung erneut senden
 user_sendrecover=Passwort wiederherstellen
 user_emysqllist=Fehler beim Abrufen der Benutzer vom Diensthost : $1
 user_lastlogin_webmin=Webmin
@@ -1769,11 +1770,6 @@ databases_subwarn2=Um den mit diesem virtuellen Subserver verknüpften Datenbank
 database_count=Dateien auf der Festplatte
 database_scripts=Wird von Webanwendungen verwendet
 database_collate=Sortierreihenfolge für neue Datenbank
-
-reemail_title=Senden Sie die Anmelde-E-Mail erneut
-reemail_dis=Die Anmelde-E-Mail kann nicht an diesen Serverbesitzer gesendet werden, da sie in der Servervorlage deaktiviert ist.
-reemail_desc=Auf dieser Seite können Sie die E-Mail erneut senden, die ursprünglich beim Erstellen des virtuellen Servers gesendet wurde.
-reemail_to=E-Mail-Adresse des Serverbesitzers:
 
 newips_desc=Auf dieser Seite können Sie die IP-Adresse aller nicht dedizierten virtuellen IP-Server ändern, die eine bestimmte Adresse verwenden. Dies sollte erfolgen, wenn Sie gerade die primäre IP-Adresse auf dem System aktualisiert haben.
 newips_old6=IPv6-Adresse der zu aktualisierenden Server

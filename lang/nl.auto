@@ -94,7 +94,7 @@ form_sshkey1=Genereer privé- en openbare sleutels
 form_sshkey2=Gebruik onderstaande openbare sleutel. ..
 form_passf=Nieuw paswoord
 form_passa=herhaal wachtwoord
-form_content2=Ja, met de standaard landingspaginasjabloon
+form_content2=Ja, met de standaardpaginasjabloon van de website
 form_content0=Ja, met onderstaande inhoud
 
 setup_edomain3=Domeinnamen mogen geen opeenvolgende punten bevatten
@@ -263,6 +263,7 @@ user_charset_def=Hetzelfde als de originele e-mail
 user_echarset=Tekenset moet lijken op UTF-8 of iso-8859-1
 user_ehomeexists=Thuismap $1 moet een bestaande map zijn voor FTP-gebruikers van websites
 user_remailbut=Verzend aanmeldings-e-mail opnieuw
+user_remailbut2=E-mail voor domeincreatie opnieuw verzenden
 user_sendrecover=Wachtwoord herstellen
 user_lastlogin_webmin=Webmin
 user_lastlogin_usermin=Gebruikersmin

@@ -816,8 +816,6 @@ edit_restore=Restaurer Serveur Virtuel
 edit_restoredesc=Restaurer uniquement ce serveur virtuel à partir d'un fichier local ou distant.
 edit_exclude=Répertoires exclus
 edit_excludedesc=Spécifier des répertoires qui ne seront pas incluses dans les sauvegardes de ce serveur virtuel.
-edit_reemail=Renvoyer le courriel d'inscription
-edit_reemaildesc=Renvoyez le courriel envoyé lorsque ce serveur a été créé à $1.
 edit_newip=Changement d'adresse IP
 edit_newipdesc=Ouvrez un formulaire de changement d'adresse IP privé virtuel pour ce serveur, ou son port de serveur Web.
 edit_reseller=Géré par revendeur
@@ -2035,12 +2033,6 @@ database_collate=Ordre de collation pour la nouvelle base de données
 database_encoding=Encodage pour la nouvelle base de données
 database_opts=Des options supplémentaires pour $1
 database_edbdef=Vous n'êtes pas autorisé à supprimer la base de données par défaut pour un domaine
-
-reemail_title=Renvoyer Inscription Email
-reemail_dis=Le courriel d'inscription ne peut être envoyé à ce propriétaire du serveur, comme il est désactivé dans le modèle du serveur.
-reemail_desc=Cette page peut être utilisée pour ré-envoyer le courriel qui a été envoyé à l'origine lorsque le serveur virtuel a été créé.
-reemail_to=Adresse courriel du propriétaire :
-reemail_ok=Envoyer maintenant
 
 resel_none=Aucun
 resel_logonone=Aucun

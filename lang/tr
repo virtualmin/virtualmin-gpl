@@ -758,8 +758,6 @@ edit_backupdesc=Sadece bu sanal sunucuyu lokal ya da uzak bir dosyaya yedekle.
 edit_backupdesc2=Sadece bu sanal sunucuyu uzak bir FTP ya da SSH sunucuya yedekle.
 edit_restore=Sanal Sunucuyu Geri Yükle
 edit_restoredesc=Sadece bu sanal sunucuyu lokal ya da uzak bir dosyadan geri yükle
-edit_reemail=Hoþgeldin e-postasýný tekrar yolla
-edit_reemaildesc=Bu sunucu oluþturulduðunda $1'e yollanan e-posta mesajýný tekrar yollar.
 edit_newip=IP Adres Deðiþtir
 edit_newipdesc=Bu sunucunun özel sanal IP adresini veya web sunucu portunu deðiþtirmek için form aç.
 edit_reseller=Yöneten bayi
@@ -1959,10 +1957,6 @@ database_title4=Disassociate Veritabaný
 database_rusure=$1 veritabnýný silmek istediðinizden emin misiniz?? Ýçerdiði tüm veriler kaybedilecektir
 database_ok=Þimdi Sil
 database_charset=MySQL veritabaný için karakter seti ayarlanmasý
-
-reemail_title=Kaydolma e-postasýný yeniden yolla
-
-reemail_dis=Sunucu þablonunda engellendiði için kaydolma e-postasý bu sunucunun sahibine gönderilemedi.
 
 newips_title=IP Adreslerini Deðiþtir
 newips_ecannot=IP adreslerini deðiþtirmeye izniniz yok
