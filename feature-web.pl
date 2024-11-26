@@ -2949,6 +2949,20 @@ foreach my $r ('webmail', 'admin') {
 				$text{'newweb_webmailsame'}));
 	}
 
+# Website default HTML
+print &ui_table_row(&hlink($text{'tmpl_content_web'},
+	'tmpl_content_web'.($virtualmin_pro ? '_pro' : '')),
+  &ui_radio('content_web', $tmpl->{'content_web'},
+	      [ [ 1, $text{'tmpl_content_web_dis'} ],
+	        $virtualmin_pro ? [ 3, $text{'tmpl_content_web_later'} ] : ( ),
+	        [ 2, $text{'form_content2'} ],
+		$virtualmin_pro ? [ 0, $text{'form_content0'} ] : ( ) ]).
+  ($virtualmin_pro ? ("<br>\n".
+    &ui_textarea("content_web_html",
+      $tmpl->{'content_web'} ne "0" ? undef :
+        join("\n", split(/\t/, $tmpl->{'content_web_html'})), # XXXX read/save from/to file
+      5, 50)) : ""));
+
 # Disabled website HTML
 print &ui_table_row(&hlink($text{'tmpl_disabled_web'},
 		    'disabled_web'),
@@ -3163,6 +3177,10 @@ foreach my $r ('webmail', 'admin') {
 		$tmpl->{'web_'.$r.'dom'} = $in{$r.'dom'};
 		}
 	}
+
+$tmpl->{'content_web'} = $in{'content_web'};
+$tmpl->{'content_web_html'} =
+	$tmpl->{'content_web'} eq "0" ? $in{'content_web_html'} : undef;
 
 $tmpl->{'disabled_web'} = &parse_none_def("disabled_web");
 if ($in{'disabled_url_mode'} == 2) {

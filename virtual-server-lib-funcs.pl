@@ -9696,6 +9696,8 @@ push(@rv, { 'id' => 0,
 	    'web_redirects' => $config{'web_redirects'},
 	    'web_sslredirect' => $config{'auto_redirect'},
 	    'webalizer' => $config{'def_webalizer'} || "none",
+	    'content_web' => $config{'content_web'} // 2,
+	    'content_web_html' => $config{'content_web_html'},
 	    'disabled_web' => $config{'disabled_web'} || "none",
 	    'disabled_url' => $config{'disabled_url'} || "none",
 	    'dns' => $config{'bind_config'} || "none",
@@ -10060,6 +10062,10 @@ if ($tmpl->{'id'} == 0) {
 	$config{'php_noedit'} = $tmpl->{'web_php_noedit'};
 	$config{'def_webalizer'} = $tmpl->{'webalizer'} eq "none" ? "" :
 					$tmpl->{'webalizer'};
+	$config{'content_web'} = $tmpl->{'content_web'};
+	delete($config{'content_web_html'});
+	$config{'content_web_html'} = $tmpl->{'content_web_html'}
+		if ($config{'content_web'} eq "0");
 	$config{'disabled_web'} = $tmpl->{'disabled_web'} eq "none" ? "" :
 					$tmpl->{'disabled_web'};
 	$config{'disabled_url'} = $tmpl->{'disabled_url'} eq "none" ? "" :
