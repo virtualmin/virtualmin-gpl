@@ -2949,6 +2949,25 @@ foreach my $r ('webmail', 'admin') {
 				$text{'newweb_webmailsame'}));
 	}
 
+# Website default HTML
+my $content_web_html;
+if ($virtualmin_pro) { # Virtualmin Pro only feature as it was before
+	my $content_web_file =
+		"$module_var_directory/website-default-page-$tmpl->{'id'}";
+	$content_web_html = &read_file_contents($content_web_file)
+		if (-r $content_web_file);
+	}
+$tmpl->{'content_web'} = 2 if $tmpl->{'content_web'} eq '';
+print &ui_table_row(&hlink($text{'tmpl_content_web'},
+	'tmpl_content_web'.($virtualmin_pro ? '_pro' : '')),
+  &ui_radio('content_web', $tmpl->{'content_web'},
+	      [ [ 1, $text{'tmpl_content_web_dis'} ],
+	        $virtualmin_pro ? [ 3, $text{'tmpl_content_web_later'} ] : ( ),
+	        [ 2, $text{'form_content2'} ],
+		$virtualmin_pro ? [ 0, $text{'form_content0'} ] : ( ) ]).
+  ($virtualmin_pro ? ("<br>\n".
+    &ui_textarea("content_web_html", $content_web_html, 5, 50)) : ""));
+
 # Disabled website HTML
 print &ui_table_row(&hlink($text{'tmpl_disabled_web'},
 		    'disabled_web'),
@@ -3164,6 +3183,26 @@ foreach my $r ('webmail', 'admin') {
 		}
 	}
 
+# Save default website HTML
+my $content_web_file =
+	"$module_var_directory/website-default-page-$tmpl->{'id'}";
+if ($in{'content_web'} eq "0") {
+	my $data = $in{'content_web_html'};
+	$data =~ s/\r\n/\n/g;
+	$data || &error($text{'tmpl_content_web_html_eempty'});
+	my $fh;
+	if (!&open_tempfile($fh, ">$content_web_file")) {
+		&error($text{'tmpl_content_web_html_esave'} . " : " .
+			&html_escape("$!"));
+		}
+	&print_tempfile($fh, $data);
+	&close_tempfile($fh);
+	}
+$tmpl->{'content_web'} = $in{'content_web'};
+$tmpl->{'content_web_html'} =
+	$tmpl->{'content_web'} eq "0" ? $content_web_file : undef;
+
+# Save disabled website HTML
 $tmpl->{'disabled_web'} = &parse_none_def("disabled_web");
 if ($in{'disabled_url_mode'} == 2) {
 	$in{'disabled_url'} =~ /^(http|https):\/\/\S+/ ||

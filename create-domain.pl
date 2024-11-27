@@ -49,6 +49,10 @@ domain, which the domain being created must be under. The optional
 C<--subprefix> flag can be used to set the directory under public_html
 of the parent domain for the sub-domains's HTML files.
 
+To create a website's initial page, use the C<--content> parameter, followed by
+the path to a file containing the HTML content or the content itself. If no
+content is provided, a Virtualmin default website page will be created.
+
 You can specify limits on the number of aliases, sub-servers, mailboxes and
 databases for the new domain owner using the --max-aliases, --max-doms,
 --max-mailboxes and --max-dbs options. Alternately, you can choose to have
@@ -1014,6 +1018,21 @@ if ($parent) {
 	if ($err) {
 		print &text('setup_overquota', $err),"\n";
 		exit(6);
+		}
+	}
+
+# Content can come from template
+if (!defined($content)) {
+	my $content_web_tmpl = $tmpl->{'content_web'};
+	my $content_web_tmpl_html_file = $tmpl->{'content_web_html'};
+	# Default HTML page
+	if ($content_web_tmpl == 2) {
+		$content = "";
+		}
+	# Want to set content to the given from file
+	elsif (!$content_web_tmpl && $virtualmin_pro &&
+		-r $content_web_tmpl_html_file) {
+		$content = &read_file_contents($content_web_tmpl_html_file);
 		}
 	}
 

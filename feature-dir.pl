@@ -1159,11 +1159,29 @@ while(@srcs) {
 				&open_tempfile_as_domain_user(
 					$d, DATA, ">".$destfile);
 				if ($f =~ /\.(html|htm|txt|php|php4|php5)$/i) {
-					local %hash = %$d;
-					$hash{uc('tmpltpageheadtitle')} = $content if ($content);
-					%hash = &populate_default_index_page($d, %hash);
-					$data = &replace_default_index_page($d, $data);
-					$data = &substitute_virtualmin_template($data, \%hash);
+					my %hash = %$d;
+					# Use default Virtualmin index.html page
+					if (!$content) {
+						%hash = &populate_default_index_page($d, %hash);
+						$data = &replace_default_index_page($d, $data);
+						$data = &substitute_virtualmin_template($data, \%hash);
+						}
+					# Use provided content
+					else {
+						# If content is a file
+						if (-f $content && -r $content) {
+							if (&master_admin()) {
+								$data = &read_file_contents($content);
+								}
+							else {
+								$data = &read_file_contents_as_domain_user($d, $content);
+								}
+							}
+						else {
+							$data = $content;
+							}
+						$data = &substitute_virtualmin_template($data, \%hash);
+						}
 					}
 				&print_tempfile(DATA, $data);
 				&close_tempfile_as_domain_user($d, DATA);

@@ -60,8 +60,9 @@ set with the C<--ruby-mode> flag, followed by either C<--mod_ruby>, C<--cgi> or
 C<--fcgid>. This has no effect on scripts using the Rails framework though,
 as they always run via a Mongrel proxy.
 
-You can also replace a website's pages using Virtualmin's content style, 
-If C<--content> parameter is given, it will be used in default style web page.
+To replace the website's default page, use the C<--content> parameter, followed
+by the path to a file containing the HTML content or the content itself. If no
+content is provided, a Virtualmin default website page will be created.
 
 To enable the webmail and admin DNS entries for the selected domains
 (which redirect to Usermin and Webmin by default), the C<--webmail> flag
@@ -391,7 +392,7 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage("No domains to modify specified");
 $mode || defined($proxy) || defined($framefwd) || $tlsa || $rubymode ||
-  $content || defined($children) || defined($phplog) ||
+  defined($content) || defined($children) || defined($phplog) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
@@ -645,7 +646,7 @@ foreach $d (@doms) {
 		&$second_print($text{'setup_done'});
 		}
 
-	if (!$d->{'alias'} && $content) {
+	if (!$d->{'alias'} && defined($content)) {
 		# Just create index.html page with content
 		&$first_print($text{'setup_contenting'});
 		&create_index_content($d, 
