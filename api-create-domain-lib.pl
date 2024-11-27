@@ -4,7 +4,8 @@ use warnings;
 no warnings 'uninitialized';
 
 our (%config, %text, @features, @aliasmail_features, @alias_features,
-     @opt_subdom_features, @banned_usernames, $first_print, $second_print);
+     @opt_subdom_features, @banned_usernames, $first_print, $second_print,
+     $virtualmin_pro);
 
 # create_domain_cli(domain-name, &opts)
 # This sub is fully compatible with the ‘create-domain.pl’ API. Returns an error
@@ -945,6 +946,21 @@ if ($parent) {
 	my $err = &check_domain_over_quota($parent);
 	if ($err) {
 		return &text('api_ndom_overquota_error', $err);
+		}
+	}
+
+# Content can come from template
+if (!defined($content)) {
+	my $content_web_tmpl = $tmpl->{'content_web'};
+	my $content_web_tmpl_html_file = $tmpl->{'content_web_html'};
+	# Default HTML page
+	if ($content_web_tmpl == 2) {
+		$content = "";
+		}
+	# Want to set content to the given from file
+	elsif (!$content_web_tmpl && $virtualmin_pro &&
+		-r $content_web_tmpl_html_file) {
+		$content = &read_file_contents($content_web_tmpl_html_file);
 		}
 	}
 

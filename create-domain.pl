@@ -1017,6 +1017,21 @@ if ($parent) {
 		}
 	}
 
+# Content can come from template
+if (!defined($content)) {
+	my $content_web_tmpl = $tmpl->{'content_web'};
+	my $content_web_tmpl_html_file = $tmpl->{'content_web_html'};
+	# Default HTML page
+	if ($content_web_tmpl == 2) {
+		$content = "";
+		}
+	# Want to set content to the given from file
+	elsif (!$content_web_tmpl && $virtualmin_pro &&
+		-r $content_web_tmpl_html_file) {
+		$content = &read_file_contents($content_web_tmpl_html_file);
+		}
+	}
+
 # Do it
 print "Beginning server creation ..\n\n";
 &lock_domain(\%dom);
