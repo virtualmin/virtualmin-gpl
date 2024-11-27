@@ -49,6 +49,10 @@ domain, which the domain being created must be under. The optional
 C<--subprefix> flag can be used to set the directory under public_html
 of the parent domain for the sub-domains's HTML files.
 
+To create a website's initial page, use the C<--content> parameter, followed by
+the path to a file containing the HTML content or the content itself. If no
+content is provided, a Virtualmin default website page will be created.
+
 You can specify limits on the number of aliases, sub-servers, mailboxes and
 databases for the new domain owner using the --max-aliases, --max-doms,
 --max-mailboxes and --max-dbs options. Alternately, you can choose to have
