@@ -2957,6 +2957,7 @@ if ($virtualmin_pro) { # Virtualmin Pro only feature as it was before
 	$content_web_html = &read_file_contents($content_web_file)
 		if (-r $content_web_file);
 	}
+$tmpl->{'content_web'} = 2 if $tmpl->{'content_web'} eq '';
 print &ui_table_row(&hlink($text{'tmpl_content_web'},
 	'tmpl_content_web'.($virtualmin_pro ? '_pro' : '')),
   &ui_radio('content_web', $tmpl->{'content_web'},
