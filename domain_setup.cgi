@@ -505,7 +505,8 @@ if (!defined($in{'content_def'})) {
 else {
 	# Checking caller's input
 	$default_content = $in{'content_def'} == 2;
-	if (!$in{'content_def'}) { # Content is given (set to "0" in caller)
+	if (!$in{'content_def'} &&  # Content is given (set to "0" in caller)
+	    $virtualmin_pro && $in{'content'}) {
 		$content_web = $in{'content'};
 		$content_web =~ s/\r\n/\n/g;
 		}
@@ -521,32 +522,6 @@ if ($add_fwdto) {
 	&$first_print(&text('setup_fwding', $in{'fwdto'}));
 	&create_domain_forward(\%dom, $in{'fwdto'});
 	&$second_print($text{'setup_done'});
-	}
-
-# Write totally custom site content
-if (!$dom{'alias'} && &domain_has_website(\%dom) && 
-		(defined($in{'content_def'}) && $in{'content_def'} == 0)) {
-	# Create index.html file 
-	&$first_print($text{'setup_contenting'});
-	my $home = &public_html_dir(\%dom);
-	eval {
-		local $main::error_must_die = 1;
-		&open_tempfile_as_domain_user(
-			\%dom, DATA, ">$home/index.html");
-		$content =~ s/\n/<br>\n/g if ($content);
-		my %hashtmp = %dom;
-		%hashtmp = &populate_default_index_page(\%dom, %hashtmp);
-		$content = &replace_default_index_page(\%dom, $content);
-		$content = &substitute_virtualmin_template($content, \%hashtmp);
-		&print_tempfile(DATA, $content);
-		&close_tempfile_as_domain_user(\%dom, DATA);
-		};
-	if ($@) {
-		&$second_print(&text('setup_econtenting', "$@"));
-		}
-	else {
-		&$second_print($text{'setup_done'});
-		}
 	}
 
 # Setup SSH public key if one was given
