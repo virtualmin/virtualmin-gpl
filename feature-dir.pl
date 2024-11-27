@@ -1168,7 +1168,14 @@ while(@srcs) {
 						}
 					# Use provided content
 					else {
-						$data = $content;
+						# If content is a file
+						if (&master_admin() &&
+						    -f $content && -r $content) {
+							$data = &read_file_contents($content);
+							}
+						else {
+							$data = $content;
+							}
 						$data = &substitute_virtualmin_template($data, \%hash);
 						}
 					}
