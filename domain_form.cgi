@@ -691,7 +691,8 @@ if (&can_dnsip()) {
 
 print &ui_hidden_table_end();
 
-if ($can_website && !$aliasdom && $virtualmin_pro) {
+if ($can_website && !$aliasdom && $virtualmin_pro &&
+    $deftmpl->{'content_web'} == 3) {
 	# Show field for initial content
 	print &ui_hidden_table_start($text{'form_park'}, "width=100%", 2,
 				     "park", 0);
