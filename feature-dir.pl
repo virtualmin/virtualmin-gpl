@@ -1169,13 +1169,13 @@ while(@srcs) {
 					# Use provided content
 					else {
 						# If content is a file
-						if (&master_admin() &&
-						    -f $content && -r $content) {
-							$data = &read_file_contents($content);
-							}
-						elsif (-f $content && -r $content &&
-						       (defined(my $file_data = &read_file_contents_as_domain_user($d, $content)) || $file_data eq '')) {
-							$data = $file_data;
+						if (-f $content && -r $content) {
+							if (&master_admin()) {
+								$data = &read_file_contents($content);
+								}
+							else {
+								$data = &read_file_contents_as_domain_user($d, $content);
+								}
 							}
 						else {
 							$data = $content;
