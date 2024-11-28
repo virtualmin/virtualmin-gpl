@@ -62,12 +62,12 @@ if (!&get_milter_greylist_path()) {
 
 # Check mail server
 &require_mail();
-if ($mail_system > 1) {
-	return $text{'ratelimit_emailsystem'};
-	}
-elsif ($mail_system == 1) {
+if ($mail_system == 1) {
 	-r $sendmail::config{'sendmail_mc'} ||
 		return $text{'ratelimit_esendmailmc'};
+	}
+elsif ($mail_system != 0) {
+	return $text{'ratelimit_emailsystem'};
 	}
 return undef;
 }
