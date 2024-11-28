@@ -108,12 +108,12 @@ return &text('dkim_einit', "<tt>$init</tt>")
 
 # Check mail server
 &require_mail();
-if ($mail_system == 0 || $mail_system == 1) {
-	return $text{'dkim_emailsystem'};
-	}
-elsif ($mail_system == 1) {
+if ($mail_system == 1) {
 	-r $sendmail::config{'sendmail_mc'} ||
 		return $text{'dkim_esendmailmc'};
+	}
+elsif ($mail_system != 0) {
+	return $text{'dkim_emailsystem'};
 	}
 return undef;
 }
