@@ -159,7 +159,7 @@ foreach my $port (@ports) {
 		$wsurl =~ s/\/$//;
 		$wsurl = "$wsprot://$wsurl/\$1";
 		my @rwc = &apache::find_directive("RewriteCond", $vconf);
-		push(@rwc, &websockets_rewriteconds());
+		push(@rwc, &websockets_rewriteconds(1));
 		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf, 1);
 		my @rwr = &apache::find_directive("RewriteRule", $vconf);
 		push(@rwr, "^$balancer->{'path'}?(.*) \"$wsurl\" [P]");
@@ -189,10 +189,15 @@ if ($ssl) {
 return undef;
 }
 
+# websockets_rewriteconds(add)
+# Returns the RewriteCond lines to either remove or add
 sub websockets_rewriteconds
 {
-return ("%{HTTP:UPGRADE} ^WebSocket\$ [NC]",
-	"%{HTTP:CONNECTION} ^Upgrade\$ [NC]");
+my ($add) = @_;
+my @rv = ("%{HTTP:UPGRADE} ^WebSocket\$ [NC]",
+	  "%{HTTP:CONNECTION} Upgrade [NC]");
+push(@rv, "%{HTTP:CONNECTION} ^Upgrade\$ [NC]") if (!$add);
+return @rv;
 }
 
 # delete_proxy_balancer(&domain, &balancer)
@@ -245,7 +250,7 @@ foreach my $port (@ports) {
 		# There is one, delete it
 		@rwr = grep { $_ ne $rwr } @rwr;
 		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf);
-		@rwc = grep { &indexof($_, &websockets_rewriteconds()) < 0 } @rwc;
+		@rwc = grep { &indexof($_, &websockets_rewriteconds(0)) < 0 } @rwc;
 		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf);
 		}
 
@@ -336,7 +341,7 @@ foreach my $port (@ports) {
 		# Need to remove entirely
 		@rwr = grep { $_ ne $rwr } @rwr;
                 &apache::save_directive("RewriteRule", \@rwr, $vconf, $conf);
-		@rwc = grep { &indexof($_, &websockets_rewriteconds()) < 0 } @rwc;
+		@rwc = grep { &indexof($_, &websockets_rewriteconds(0)) < 0 } @rwc;
 		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf);
 		}
 	elsif (!$b->{'none'} && $b->{'websockets'} && $rwr) {
@@ -347,7 +352,7 @@ foreach my $port (@ports) {
 		}
 	elsif (!$b->{'none'} && $b->{'websockets'} && !$rwr) {
 		# Need to add
-		push(@rwc, &websockets_rewriteconds());
+		push(@rwc, &websockets_rewriteconds(1));
 		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf, 1);
 		push(@rwr, "^$b->{'path'}?(.*) \"$wsurl\" [P]");
 		&apache::save_directive("RewriteRule", \@rwr, $vconf, $conf, 1);
