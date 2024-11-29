@@ -40,6 +40,8 @@ log_create_acme=Dodano dostawcę SSL dla $1
 log_delete_acme=Usunięto dostawcę SSL dla $1
 log_update_acme=Zaktualizowano dostawcę SSL dla $1
 
+backup_mode44=Pobierz w przeglądarce
+
 backup_finalstatusok=$1 serwerów wirtualnych zostało pomyślnie utworzonych kopii zapasowych
 
 restore_ersync=Polecenie synchronizacji <tt>$1</tt> nie jest zainstalowane
@@ -63,6 +65,11 @@ newbw_graphdesc=Kliknij ten przycisk, aby wyświetlić wykres wykorzystania pasm
 tmpl_edmarcruf=Adres URI raportowania dla raportów kryminalistycznych musi być sformatowany w następujący sposób: mailto:user@domain
 tmpl_edmarcrua=Adres URI raportowania dla raportów zbiorczych musi być sformatowany w następujący sposób: mailto:user@domain
 tmpl_dns_alias=Osobno edytowalne rekordy DNS dla domen aliasowych?
+tmpl_content_web=Domyślna strona HTML witryny
+tmpl_content_web_dis=Wyłączony
+tmpl_content_web_later=Zapytaj w momencie tworzenia
+tmpl_content_web_html_esave=Nie udało się zapisać domyślnego pliku strony HTML witryny
+tmpl_content_web_html_eempty=Domyślna zawartość strony HTML witryny jest pusta
 
 licence_renew2=Dodatkową licencję można zakupić za <a target=_blank href='$1'>$2</a>.
 
