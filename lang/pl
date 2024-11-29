@@ -2538,7 +2538,6 @@ backup_mode0a=Plik w katalogu <tt>virtualmin-backup/</tt>
 backup_mode1=Serwer FTP
 backup_mode2=Serwer SSH
 backup_mode3=S3 bucket
-backup_mode44=Pobierz przez link
 backup_mode5=Wgraj do serwera
 backup_mode6=Rackspace Cloud Files
 backup_mode7=Google Cloud Storage
