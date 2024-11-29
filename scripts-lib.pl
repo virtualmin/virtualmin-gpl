@@ -1219,7 +1219,6 @@ foreach my $m (@mods) {
 		my $fullphpver = &get_php_version($phpverall, $d);
 		my $nodotphpver = $phpverall;
 		$nodotphpver =~ s/\.//;
-		my $phpverdistrobased = $software::update_system eq "apt" ? $phpverall : $nodotphpver;
 		if ($software::update_system eq "csw") {
 			# On Solaris, packages are named like php52_mysql
 			push(@poss, "php".$nodotphpver."_".$m);
@@ -1229,11 +1228,17 @@ foreach my $m (@mods) {
 			push(@poss, "php".$nodotphpver."-".$m);
 			}
 		else {
-			push(@poss, "php".$phpverdistrobased."-".$m, "php-".$m);
+			if ($software::update_system eq "apt") {
+				push(@poss, "php".$phpverall."-".$m);
+				}
+			else {
+				push(@poss, "php".$nodotphpver."-".$m);
+				}
+			push(@poss, "php-".$m);
 			if ($software::update_system eq "apt" &&
 				$m eq "pdo_mysql") {
 				# On Debian, the pdo_mysql module is in the mysql module
-				push(@poss, "php".$phpverdistrobased."-mysql", "php-mysql");
+				push(@poss, "php".$phpverall."-mysql", "php-mysql");
 				}
 			elsif ($software::update_system eq "yum" &&
 				   ($m eq "domxml" || $m eq "dom") && $phpverall >= 5) {
