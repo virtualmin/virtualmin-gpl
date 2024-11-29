@@ -1195,6 +1195,8 @@ if ($form_end) {
 			push(@buts, [ "remailbut", $text{'user_remailbut2'} ]);
 			}
 		elsif (!$user->{'domainowner'} &&
+		       $user->{'extra'} ne 'db' &&
+		       $user->{'extra'} ne 'web' &&
 		       &will_send_user_email($d) && $user->{'email'}) {
 			push(@buts, [ "remailbut", $text{'user_remailbut'} ] );
 			}
