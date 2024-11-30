@@ -463,7 +463,6 @@ elsif ($user_type eq 'db') {
 		$din, $text{$in{'new'} ? 'user_createdb' : 'user_edit'}, "",
 		$in{'new'} ? 'users_explain_user_db' : undef);
 
-	$user = &create_initial_user($d);
 	&list_extra_user_pro_tip('db', "list_users.cgi?dom=$in{'dom'}");
 	print &ui_form_start("pro/save_user_db.cgi", "post");
 	print &ui_hidden("new", $in{'new'});
@@ -513,6 +512,8 @@ elsif ($user_type eq 'db') {
 	# Show allowed databases
 	my @dbs = grep { $_->{'users'} } &domain_databases($d) if ($d);
 	if (@dbs) {
+		my $user;
+		$user = &create_initial_user($d) if ($in{'new'});
 		print &ui_table_hr();
 		my @idbs = $in{'new'} ? @{$user->{'dbs'}} : @{$dbuser->{'dbs'}};
 		@userdbs = map { [ $_->{'type'}."_".$_->{'name'},
@@ -1195,8 +1196,6 @@ if ($form_end) {
 			push(@buts, [ "remailbut", $text{'user_remailbut2'} ]);
 			}
 		elsif (!$user->{'domainowner'} &&
-		       $user->{'extra'} ne 'db' &&
-		       $user->{'extra'} ne 'web' &&
 		       &will_send_user_email($d) && $user->{'email'}) {
 			push(@buts, [ "remailbut", $text{'user_remailbut'} ] );
 			}
