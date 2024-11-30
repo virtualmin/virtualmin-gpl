@@ -8,6 +8,9 @@ This command deletes one redirect from the virtual server identified
 by the C<--domain> flag. The redirect to remove must be identified by the 
 C<--path> parameter.
 
+If there are multiple redirects for the same path but with different hostnames,
+you can select the one to remove with the C<--host> flag.
+
 =cut
 
 package virtual_server;
@@ -62,9 +65,13 @@ $d || usage("Virtual server $domain does not exist");
 &obtain_lock_web($d);
 @redirects = &list_redirects($d);
 @r = grep { $_->{'path'} eq $path } @redirects;
+if ($host) {
+	@r = grep { $_->{'host'} eq $host } @r;
+	}
 @r || &usage("No redirect for path $path".
 	     ($host ? " and host $host" : "")." was found");
-@r > 1 && &usage("Multiple redirects for path $path found!");
+@r > 1 && &usage("Multiple redirects for path $path".
+		 ($host ? " and host $host" : "")." found!");
 $r = $r[0];
 
 # Delete it
@@ -78,7 +85,8 @@ else {
 	&set_all_null_print();
 	&run_post_actions();
 	&virtualmin_api_log(\@OLDARGV, $d);
-	print "Redirect for $path deleted successfully\n";
+	print "Redirect for $path".
+	      ($host ? " and host $host" : "")." deleted successfully\n";
 	}
 
 sub usage
