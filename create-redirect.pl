@@ -34,7 +34,9 @@ other.
 
 To limit the redirect to requests to a specific URL host, use the 
 C<--host> flag followed by a hostname. This is useful for redirecting 
-www.domain.com to domain.com, for example.
+www.domain.com to domain.com, for example. Or if you want the host match
+to be a regular expression, use C<--host-regexp> followed by a pattern like
+(www|ftp|mail).domain.com.
 
 To set a custom HTTP status code for the redirect, you can use the C<--code>
 flag followed by a number. Otherwise the default code of 302 (temporary
@@ -93,6 +95,10 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--host") {
 		$host = shift(@ARGV);
+		}
+	elsif ($a eq "--host-regexp") {
+		$host = shift(@ARGV);
+		$hostregexp = 1;
 		}
 	elsif ($a eq "--code") {
 		$code = shift(@ARGV);
@@ -155,6 +161,7 @@ $r = { 'path' => $path,
        'https' => $https,
        'code' => $code,
        'host' => $host,
+       'hostregexp' => $hostregexp,
      };
 if ($wellknown) {
 	$r = &add_wellknown_redirect($r);
@@ -182,7 +189,7 @@ print "                           --path url-path\n";
 print "                           --alias directory | --redirect url\n";
 print "                          [--regexp | --exact]\n";
 print "                          [--code number]\n";
-print "                          [--host hostname]\n";
+print "                          [--host hostname | --host-regexp hostname]\n";
 print "                          [--http | --https]\n";
 print "                          [--fix-wellknown]\n";
 exit(1);

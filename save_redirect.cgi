@@ -9,12 +9,12 @@ $d = &get_domain($in{'dom'});
 	&error($text{'redirects_ecannot'});
 &has_web_redirects($d) || &error($text{'redirects_eweb'});
 &error_setup($text{'redirect_err'});
+&obtain_lock_web($d);
 if (!$in{'new'}) {
 	($r) = grep { $_->{'id'} eq $in{'old'} } &list_redirects($d);
 	$r || &error($text{'redirect_egone'});
 	$oldr = { %$r };
 	}
-&obtain_lock_web($d);
 
 if ($in{'delete'}) {
 	# Just delete it
@@ -96,9 +96,16 @@ else {
 			delete($r->{'host'});
 			}
 		else {
-			$in{'host'} =~ /^[a-z0-9\.\_\-]+$/i ||
-				&error($text{'redirect_ehost'});
+			if ($in{'hostregexp'}) {
+				$in{'host'} =~ /^\S+$/ ||
+					&error($text{'redirect_ehost2'});
+				}
+			else {
+				$in{'host'} =~ /^[a-z0-9\.\_\-]+$/i ||
+					&error($text{'redirect_ehost'});
+				}
 			$r->{'host'} = $in{'host'};
+			$r->{'hostregexp'} = $in{'hostregexp'};
 			}
 		}
 	$r = &add_wellknown_redirect($r);

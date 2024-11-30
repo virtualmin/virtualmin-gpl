@@ -160,13 +160,18 @@ foreach my $p (@ports) {
 				}
 			}
 		else {
-			# All protocols match
-			$rd->{'https'} = $rd->{'http'} = 1;
+			# Protocol comes from port
+			$rd->{$proto} = 1;
 			}
 		if ($rwh) {
 			# Has hostname condition
 			if ($rwh->{'words'}->[1] =~ /^=(.*)$/) {
 				$rd->{'host'} = $1;
+				$rd->{'hostregexp'} = 0;
+				}
+			elsif ($rwh->{'words'}->[1] =~ /\S/) {
+				$rd->{'host'} = $rwh->{'words'}->[1];
+				$rd->{'hostregexp'} = 1;
 				}
 			else {
 				next;
@@ -242,7 +247,9 @@ foreach my $p (@ports) {
 				    ($proto eq 'http' ? 'off' : 'on'));
 			}
 		if ($redirect->{'host'}) {
-			push(@rwcs, "%{HTTP_HOST} =".$redirect->{'host'});
+			push(@rwcs, "%{HTTP_HOST} ".
+			     ($redirect->{'hostregexp'} ? "" : "=").
+			     $redirect->{'host'});
 			}
 		my $path = $redirect->{'path'};
 		$path .= "(\.\*)\$" if ($redirect->{'regexp'});
@@ -437,7 +444,7 @@ return 0;
 
 # is_www_redirect(&domain, &redirect)
 # Returns 1 if a redirect is from www.domain to domain, 2 if from domain to
-# www.domain, and 0 otherwise
+# www.domain, 3 if from any sub-domain to domain. and 0 otherwise
 sub is_www_redirect
 {
 my ($d, $r) = @_;
@@ -453,10 +460,17 @@ foreach my $ad ($d, &get_domain_by("alias", $d->{'id'})) {
 	    $r->{'dest'} =~ /^(http|https):\/\/www\.\Q$ad->{'dom'}\E\//) {
 		return 2;
 		}
+	if ($r->{'host'} eq '[a-z0-9_-]+.'.$ad->{'dom'} &&
+	    $r->{'dest'} =~ /^(http|https):\/\/\Q$ad->{'dom'}\E\//) {
+		return 3;
+		}
 	}
 return 0;
 }
 
+# get_www_redirect(&domain)
+# Returns the objects for a redirect from domain to www.domain, for passing to
+# create_redirect
 sub get_www_redirect
 {
 my ($d) = @_;
@@ -475,7 +489,8 @@ return @rv;
 }
 
 # get_non_www_redirect(&domain)
-# Returns the objects for a redirect from www.domain to domain
+# Returns the objects for a redirect from www.domain to domain, for passing to
+# create_redirect
 sub get_non_www_redirect
 {
 my ($d) = @_;
@@ -483,6 +498,27 @@ my @rv;
 foreach my $ad ($d, &get_domain_by("alias", $d->{'id'})) {
 	push(@rv, { 'path' => '/',
 		    'host' => 'www.'.$ad->{'dom'},
+		    'http' => 1,
+		    'https' => 1,
+		    'regexp' => 1,
+		    'dest' => (&domain_has_ssl($ad) ? 'https://' : 'http://').
+			      $ad->{'dom'}.'/$1',
+		  });
+	}
+return @rv;
+}
+
+# get_non_canonical_redirect(&domain)
+# Returns the objects for a redirect from any sub-domain to domain, for passing
+# to create_redirect
+sub get_non_canonical_redirect
+{
+my ($d) = @_;
+my @rv;
+foreach my $ad ($d, &get_domain_by("alias", $d->{'id'})) {
+	push(@rv, { 'path' => '/',
+		    'host' => '[a-z0-9_-]+.'.$ad->{'dom'},
+		    'hostregexp' => 1,
 		    'http' => 1,
 		    'https' => 1,
 		    'regexp' => 1,

@@ -94,6 +94,8 @@ if ($multiline) {
 		print "    Protocols: ",join(" ", grep { $r->{$_} } ("http", "https")),"\n";
 		if ($r->{'host'}) {
 			print "    Limit to hostname: $r->{'host'}\n";
+			print "    Regexp hostname: ",
+				($r->{'hostregexp'} ? "Yes" : "No"),"\n";
 			}
 		if ($r->{'dirs'}) {
 			print "    Directives: ",

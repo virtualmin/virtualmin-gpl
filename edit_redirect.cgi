@@ -110,7 +110,9 @@ if (&has_web_host_redirects($d)) {
 		&ui_opt_textbox("host", $r->{'host'}, 35,
 				$text{'redirect_host_def'}, undef, 0, undef, 0,
 				"placeholder=\"$text{'index_global_eg'} ".
-				"www.$d->{'dom'}\""));
+				"www.$d->{'dom'}\"")."<br>\n".
+		&ui_checkbox("hostregexp", 1, $text{'redirect_hostregexp'},
+			     $r->{'hostregexp'}));
 	}
 
 print &ui_table_end();
