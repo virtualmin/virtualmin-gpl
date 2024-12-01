@@ -236,49 +236,17 @@ if (!$d->{'alias'} && &can_edit_redirect() &&
 	my @r = grep { &is_www_redirect($d, $_) } &list_redirects($d);
 	my $oldredir = @r ? &is_www_redirect($d, $r[0]) : undef;
 	my $err;
-	if ($in{'wwwredir'} == 0 && $oldredir != 0) {
-		# Turn off the www redirect
-		&$first_print($text{'phpmode_wwwrediroff'});
+	if ($in{'wwwredir'} != $oldredir) {
+		&$first_print(
+			$in{'wwwredir'} == 0 ? $text{'phpmode_wwwrediroff'} :
+			$in{'wwwredir'} == 1 ? $text{'phpmode_wwwredirnon'} :
+			$in{'wwwredir'} == 2 ? $text{'phpmode_wwwredirwww'} :
+					       $text{'phpmode_wwwredirsub'});
 		foreach my $r (@r) {
-			$err ||= &delete_redirect($d, $r);
-			last if ($err);
-			}
-		&$second_print($err ? $err : $text{'setup_done'});
-		$anything++;
-		}
-	elsif ($in{'wwwredir'} == 1 && $oldredir != 1) {
-		# Redirect www to non-www
-		&$first_print($text{'phpmode_wwwredirnon'});
-		foreach my $r (@r) {
-			&delete_redirect($d, $r);
-			}
-		foreach my $r (&get_non_www_redirect($d)) {
-			$err ||= &create_redirect($d, $r);
-			last if ($err);
-			}
-		&$second_print($err ? $err : $text{'setup_done'});
-		$anything++;
-		}
-	elsif ($in{'wwwredir'} == 2 && $oldredir != 2) {
-		# Redirect non-www to www
-		&$first_print($text{'phpmode_wwwredirwww'});
-		foreach my $r (@r) {
-			&delete_redirect($d, $r);
-			}
-		foreach my $r (&get_www_redirect($d)) {
-			$err ||= &create_redirect($d, $r);
-			last if ($err);
-			}
-		&$second_print($err ? $err : $text{'setup_done'});
-		$anything++;
-		}
-	elsif ($in{'wwwredir'} == 3 && $oldredir != 3) {
-		# Redirect subdomains to non-www
-		&$first_print($text{'phpmode_wwwredirsub'});
-		foreach my $r (@r) {
-			&delete_redirect($d, $r);
-			}
-		foreach my $r (&get_non_canonical_redirect($d)) {
+                        $err ||= &delete_redirect($d, $r);
+                        last if ($err);
+                        }
+		foreach my $r (&get_redirect_by_mode($d, $in{'wwwredir'})) {
 			$err ||= &create_redirect($d, $r);
 			last if ($err);
 			}

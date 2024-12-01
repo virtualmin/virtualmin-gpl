@@ -529,4 +529,15 @@ foreach my $ad ($d, &get_domain_by("alias", $d->{'id'})) {
 return @rv;
 }
 
+# get_redirect_by_mode(&domain, mode)
+# Returns the redirect objects based on the same mode number returned by
+# is_www_redirect
+sub get_redirect_by_mode
+{
+my ($d, $mode) = @_;
+return $mode == 1 ? &get_non_www_redirect($d) :
+       $mode == 2 ? &get_www_redirect($d) :
+       $mode == 3 ? &get_non_canonical_redirect($d) : ( );
+}
+
 1;
