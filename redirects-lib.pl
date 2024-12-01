@@ -460,7 +460,7 @@ foreach my $ad ($d, &get_domain_by("alias", $d->{'id'})) {
 	    $r->{'dest'} =~ /^(http|https):\/\/www\.\Q$ad->{'dom'}\E\//) {
 		return 2;
 		}
-	if ($r->{'host'} eq '[a-z0-9_-]+.'.$ad->{'dom'} &&
+	if ($r->{'host'} eq '[a-z0-9_\-]+.'.$ad->{'dom'} &&
 	    $r->{'dest'} =~ /^(http|https):\/\/\Q$ad->{'dom'}\E\//) {
 		return 3;
 		}
@@ -517,7 +517,7 @@ my ($d) = @_;
 my @rv;
 foreach my $ad ($d, &get_domain_by("alias", $d->{'id'})) {
 	push(@rv, { 'path' => '/',
-		    'host' => '[a-z0-9_-]+.'.$ad->{'dom'},
+		    'host' => '[a-z0-9_\-]+.'.$ad->{'dom'},
 		    'hostregexp' => 1,
 		    'http' => 1,
 		    'https' => 1,

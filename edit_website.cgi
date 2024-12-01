@@ -39,13 +39,15 @@ if (&domain_has_ssl($d) && &can_edit_redirect() && &has_web_redirects($d)) {
 # Redirect www to non-www or vice-versa
 if (!$d->{'alias'} && &can_edit_redirect() &&
     &has_web_redirects($d) && &has_web_host_redirects($d)) {
-	my ($r) = grep { &is_www_redirect($d, $_) } &list_redirects($d);
+	my ($r) = grep { $_ } map { &is_www_redirect($d, $_) }
+				  &list_redirects($d);
+	$r ||= 0;
 	print &ui_table_row(
 		&hlink($text{'phpmode_wwwredir'}, "wwwredir"),
-		&ui_radio("wwwredir",
-			  !$r ? 0 : $r->{'host'} =~ /^www\./ ? 1 : 2,
+		&ui_radio("wwwredir", $r,
 			  [ [ 0, $text{'phpmode_wwwredir0'} ],
 			    [ 1, $text{'phpmode_wwwredir1'} ],
+			    [ 3, $text{'phpmode_wwwredir3'} ],
 			    [ 2, $text{'phpmode_wwwredir2'} ] ]));
 	}
 

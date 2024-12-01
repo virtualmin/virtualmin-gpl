@@ -272,6 +272,19 @@ if (!$d->{'alias'} && &can_edit_redirect() &&
 		&$second_print($err ? $err : $text{'setup_done'});
 		$anything++;
 		}
+	elsif ($in{'wwwredir'} == 3 && $oldredir != 3) {
+		# Redirect subdomains to non-www
+		&$first_print($text{'phpmode_wwwredirsub'});
+		foreach my $r (@r) {
+			&delete_redirect($d, $r);
+			}
+		foreach my $r (&get_non_canonical_redirect($d)) {
+			$err ||= &create_redirect($d, $r);
+			last if ($err);
+			}
+		&$second_print($err ? $err : $text{'setup_done'});
+		$anything++;
+		}
 	}
 
 # Change HTML directory
