@@ -5644,7 +5644,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		&ui_text_color($pop3.&vui_inline_label('users_disabled_label', undef, 'disabled'), 'danger');
 	$pop3 = &html_escape($pop3);
 	local @cols;
-	local $filetype = $u->{'extra'} ? "&type=@{[&urlize($u->{'type'})]}" : "";
+	local $filetype = $u->{'extra'} ? "&type=".&urlize($u->{'type'}) : "";
 	my $col_text =
 	  ($u->{'domainowner'} ?
 	   "<b>$pop3</b>".&vui_inline_label('users_owner_label') :
