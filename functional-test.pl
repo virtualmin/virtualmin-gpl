@@ -9347,6 +9347,7 @@ $redirect_tests = [
 		      [ 'multiline' ] ],
 	  'grep' => [ '^/$', 'Destination: http://'.$test_domain,
 		      'Limit to hostname: www.'.$test_domain,
+		      'Regexp hostname: No',
 		      'Type: Redirect', 'Match sub-paths: No' ],
 	},
 
@@ -9375,6 +9376,41 @@ $redirect_tests = [
 	# Check that it no longer works
 	{ 'command' => $wget_command.'http://www.'.$test_domain,
 	  'antigrep' => 'http://'.$test_domain,
+	},
+
+	# Create a redirect using a regexp
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/' ],
+		      [ 'host-regexp', '"(ftp|www).'.$test_domain.'"' ],
+		      [ 'redirect', 'http://'.$test_domain ] ],
+	},
+
+	# Make sure the redirect appears
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/$', 'Destination: http://'.$test_domain,
+		      'Limit to hostname: \(ftp\|www\).'.$test_domain,
+		      'Regexp hostname: Yes',
+		      'Type: Redirect', 'Match sub-paths: No' ],
+	},
+
+	# Check that it works
+	{ 'command' => $wget_command.'http://www.'.$test_domain,
+	  'grep' => 'http://'.$test_domain,
+	},
+
+	# Check that there is no redirect for another domain
+	{ 'command' => $wget_command.'http://mail.'.$test_domain,
+	  'antigrep' => 'http://'.$test_domain,
+	},
+
+	# Delete the redirect
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/' ],
+		      [ 'host', '"(ftp|www).'.$test_domain.'"' ] ],
 	},
 
 	# Create an HTTP-only redirect
