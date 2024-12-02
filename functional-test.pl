@@ -9504,13 +9504,19 @@ $redirect_tests = [
 		      'Destination: '.$webmin_proto.'://'.$test_domain.':'.$webmin_port ],
 	},
 
-	# Test HTTP get to webmail alias
+	# Test HTTP and HTTPS get to webmail alias
 	{ 'command' => $wget_command.'http://webmail.'.$test_domain,
 	  'grep' => 'Usermin',
 	},
+	{ 'command' => $wget_command.'https://webmail.'.$test_domain,
+	  'grep' => 'Usermin',
+	},
 
-	# Test HTTP get to admin alias
+	# Test HTTP and HTTPS get to admin alias
 	{ 'command' => $wget_command.'http://admin.'.$test_domain,
+	  'grep' => 'Webmin',
+	},
+	{ 'command' => $wget_command.'https://admin.'.$test_domain,
 	  'grep' => 'Webmin',
 	},
 
