@@ -2084,7 +2084,8 @@ check_defip6=Default IPv6 address for virtual servers is $1
 check_dnsip1=External IP address for DNS records is set to $1, which matches the detected external address
 check_dnsip2=Default IP address is set to $1, which matches the detected external address
 check_dnsip3=Detected external IPv4 address is $1
-check_ednsip3=Could not detect external IPv4 address
+check_dnsip3v6=Detected external IPv6 address is $1
+check_ednsip3=Could not detect external IP address
 check_ednsip1=External IP address for DNS records is set to $1, but the detected external address is actually $2. This may cause DNS records for Virtualmin domains to point to the wrong system
 check_ednsip2=Default IP address is set to $1, but the detected external address is actually $2. This is typically the result of being behind a NAT firewall, and should be corrected on the <a href='$3'>module configuration</a> page
 check_ewebsuexecbin=The <tt>suexec</tt> command was not found on your system
@@ -2139,6 +2140,7 @@ check_postgresnopass=PostgreSQL is installed and running, but does not have any 
 check_webalizerok=Webalizer is installed
 check_ifaceok=Using network interface $1 for virtual IPs
 check_enetmask6=IPv6 netmask $1 is not valid - it should be a number, like 64
+check_iface4=IPv4 addresses are not available on this system
 check_iface6=IPv6 addresses are available, using interface $1
 check_ifacezone=Network interface will be detected automatically at virtual server creation time
 check_sendmailok=Mail server Sendmail is installed and configured

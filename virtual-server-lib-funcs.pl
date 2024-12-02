@@ -8035,7 +8035,7 @@ local ($dom, $parentdom, $parentuser, $noscripts, $nopost,
        $pass, $content) = @_;
 
 # Sanity checks
-$dom->{'ip'} || return $text{'setup_edefip'};
+$dom->{'ip'} || $dom->{'ip6'} || return $text{'setup_edefip'};
 
 # Run the before command
 &set_domain_envs($dom, "CREATE_DOMAIN");
@@ -16526,6 +16526,15 @@ if (!&running_in_zone()) {
 	&$second_print(&text('check_ifaceok', "<tt>$config{'iface'}</tt>"));
 	}
 
+# Get the default IP address
+my $defip = &get_default_ip();
+my $defip6;
+
+# Tell user if IPv4 is not enabled
+if (!$defip) {
+	&$second_print($text{'check_iface4'})
+	}
+
 # Tell the user that IPv6 is available
 if ($config{'ip6enabled'} && &supports_ip6()) {
 	!$config{'netmask6'} || $config{'netmask6'} =~ /^\d+$/ ||
@@ -16537,23 +16546,23 @@ if ($config{'ip6enabled'} && &supports_ip6()) {
 	}
 
 # Show the default IPv4 address
-local $defip = &get_default_ip();
-if (!$defip) {
+if ($config{'ip6enabled'} && &supports_ip6()) {
+	$defip6 = &get_default_ip6();
+	}
+if (!$defip && !$defip6) {
 	return &text('index_edefip', "../config.cgi?$module_name");
 	}
 else {
-	&$second_print(&text('check_defip', $defip));
+	&$second_print(&text('check_defip', $defip))
+		if (!$defip6);
 	}
 $config{'old_defip'} ||= $defip;
 
 # Show the default IPv6 address
-if ($config{'ip6enabled'} && &supports_ip6()) {
-	local $defip6 = &get_default_ip6();
-	if ($defip6) {
-		&$second_print(&text('check_defip6', $defip6));
-		}
-	$config{'old_defip6'} ||= $defip6;
+if ($defip6) {
+	&$second_print(&text('check_defip6', $defip6));
 	}
+$config{'old_defip6'} ||= $defip6;
 
 # Make sure the external IP is set if needed
 if ($config{'dns_ip'} ne '*') {
@@ -16574,7 +16583,8 @@ if ($config{'dns_ip'} ne '*') {
 else {
 	my $ext_ip = &get_external_ip_address(1);
 	if ($ext_ip) {
-		&$second_print(&text('check_dnsip3', $ext_ip));
+		my $ipv6 = $ext_ip =~ /:/ ? "v6" : "";
+		&$second_print(&text("check_dnsip3$ipv6", $ext_ip));
 		}
 	else {
 		&$second_print(&ui_text_color($text{'check_ednsip3'}, 'warn'));
