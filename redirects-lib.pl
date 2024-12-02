@@ -242,10 +242,6 @@ foreach my $p (@ports) {
 		my @rwrs = &apache::find_directive("RewriteRule", $vconf);
 		my $flag = $redirect->{'code'} ? "[R=".$redirect->{'code'}."]"
 					       : "[R]";
-		if (!$redirect->{'http'} || !$redirect->{'https'}) {
-			push(@rwcs, "%{HTTPS} ".
-				    ($proto eq 'http' ? 'off' : 'on'));
-			}
 		if ($redirect->{'host'}) {
 			push(@rwcs, "%{HTTP_HOST} ".
 			     ($redirect->{'hostregexp'} ? "" : "=").
