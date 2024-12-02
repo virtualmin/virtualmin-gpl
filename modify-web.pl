@@ -133,6 +133,14 @@ C<--protocols> flag to choose which are enabled for the website. This flag must
 be followed by some combination of C<http/1.1>, C<h2> and C<h2c>. To revert to
 the default protocols for your webserver, use the C<--default-protocols> flag.
 
+Although the C<create-redirect> API command can be used to create arbitrary
+redirects, you can use this command to setup some canonical domain redirects.
+To redirect all requests from www.domain.com to domain.com, use the 
+C<--www-to-domain> flag. Or to go in the other direction, use the flag
+C<--domain-to-www>. Or to redirect all sub-domains to domain.com you can use
+C<--subdomain-to-domain>. Finally to turn off canonical domain redirects,
+use C<--no-redirect>.
+
 =cut
 
 package virtual_server;
@@ -383,6 +391,18 @@ while(@ARGV > 0) {
 	elsif ($a eq "--php-mail") {
 		$phpmail = 1;
 		}
+	elsif ($a eq "--no-redirect") {
+		$wwwredir = 0;
+		}
+	elsif ($a eq "--www-to-domain") {
+		$wwwredir = 1;
+		}
+	elsif ($a eq "--domain-to-www") {
+		$wwwredir = 2;
+		}
+	elsif ($a eq "--subdomain-to-domain") {
+		$wwwredir = 3;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -399,7 +419,7 @@ $mode || defined($proxy) || defined($framefwd) || $tlsa || $rubymode ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
   $fpmsock || $fpmtype || $defmode || defined($cgimode) || $subprefix ||
   @add_dirs || @remove_dirs || $protocols || $fix_mod_php ||
-  $ssl_cert || $ssl_key || $ssl_ca || defined($phpmail) ||
+  $ssl_cert || $ssl_key || $ssl_ca || defined($phpmail) || defined($wwwredir) ||
 	&usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
@@ -1085,6 +1105,31 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Update www redirect
+	if (defined($wwwredir)) {
+		my @r = grep { &is_www_redirect($d, $_) } &list_redirects($d);
+		my $oldredir = @r ? &is_www_redirect($d, $r[0]) : undef;
+		if ($oldredir != $wwwredir) {
+			&$first_print(
+			    $wwwredir == 0 ?
+			      "Disabling redirect to canonical domain .." :
+			    $wwwredir == 1 ?
+			      "Adding redirect to non-www domain .." :
+			    $wwwredir == 2 ?
+			      "Adding redirect to www domain .." :
+			      "Adding redirect from sub-domains to domain ..");
+			foreach my $r (@r) {
+				$err ||= &delete_redirect($d, $r);
+				last if ($err);
+				}
+			foreach my $r (&get_redirect_by_mode($d, $wwwredir)) {
+				$err ||= &create_redirect($d, $r);
+				last if ($err);
+				}
+			&$second_print($err ? ".. failed : $err" : ".. done");
+			}
+		}
+
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($children_no_check) || defined($renew) || $breakcert ||
@@ -1163,6 +1208,8 @@ print "                     [--ssl-cert file | --default-ssl-cert]\n";
 print "                     [--ssl-key file | --default-ssl-key]\n";
 print "                     [--ssl-ca file | --default-ssl-ca]\n";
 print "                     [--default-ssl-paths]\n";
+print "                     [--www-to-domain | --domain-to-www |\n";
+print "                      --subdomain-to-domain | --no-redirect]\n";
 exit(1);
 }
 
