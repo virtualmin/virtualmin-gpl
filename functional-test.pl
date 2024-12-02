@@ -9444,6 +9444,37 @@ $redirect_tests = [
 	  'antigrep' => 'http://'.$test_domain,
 	},
 
+	# Create an HTTPS-only redirect
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/' ],
+		      [ 'host', 'www.'.$test_domain ],
+		      [ 'https' ],
+		      [ 'redirect', 'http://'.$test_domain ] ],
+	},
+
+	# Check that it works
+	{ 'command' => $wget_command.'https://www.'.$test_domain,
+	  'grep' => 'http://'.$test_domain,
+	},
+
+	# Check that it doesn't work for SSL
+	{ 'command' => $wget_command.'http://www.'.$test_domain,
+	  'antigrep' => 'http://'.$test_domain,
+	},
+
+	# Delete the redirect
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/' ],
+		      [ 'host', 'www.'.$test_domain ] ],
+	},
+
+	# Check that it no longer works
+	{ 'command' => $wget_command.'https://www.'.$test_domain,
+	  'antigrep' => 'http://'.$test_domain,
+	},
+
 	# Create a redirect that excludes well-known
 	{ 'command' => 'create-redirect.pl',
 	  'args' => [ [ 'domain', $test_domain ],
