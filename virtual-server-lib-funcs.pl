@@ -16583,8 +16583,8 @@ if ($config{'dns_ip'} ne '*') {
 else {
 	my $ext_ip = &get_external_ip_address(1);
 	if ($ext_ip) {
-		my $ipv6 = $ext_ip =~ /:/ ? "v6" : "";
-		&$second_print(&text("check_dnsip3$ipv6", $ext_ip));
+		my $msg = $ext_ip =~ /:/ ? "check_dnsip3v6" : "check_dnsip3";
+		&$second_print(&text($msg, $ext_ip));
 		}
 	else {
 		&$second_print(&ui_text_color($text{'check_ednsip3'}, 'warn'));
