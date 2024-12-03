@@ -45,10 +45,8 @@ if (!$d->{'alias'} && &can_edit_redirect() &&
 	print &ui_table_row(
 		&hlink($text{'phpmode_wwwredir'}, "wwwredir"),
 		&ui_radio("wwwredir", $r,
-			  [ [ 0, $text{'phpmode_wwwredir0'} ],
-			    [ 1, $text{'phpmode_wwwredir1'} ],
-			    [ 3, $text{'phpmode_wwwredir3'} ],
-			    [ 2, $text{'phpmode_wwwredir2'} ] ]));
+			  [ map { [ $_, &text('phpmode_wwwredir'.$_,
+					$d->{'dom'})."<br>" ] } (0.. 3) ]));
 	}
 
 # Match all sub-domains
