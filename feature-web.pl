@@ -3843,7 +3843,6 @@ return if (!$config{'web'});
 local $file = &get_website_file($d);
 if ($main::got_lock_web_file{$file} == 0) {
 	&lock_file($file);
-	undef(@apache::get_config_cache);
 	}
 $main::got_lock_web_file{$file}++;
 $main::got_lock_web_path{$d->{'id'}} = $file;
