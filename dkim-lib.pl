@@ -95,6 +95,9 @@ return &get_dkim_type() eq 'ubuntu' ? 'opendkim' :
 sub check_dkim
 {
 &foreign_require("init");
+if (!$config{'mail'}) {
+	return $text{'dkim_email'};
+	}
 if (!&get_dkim_type()) {
 	# Not supported on this OS
 	return $text{'dkim_eos'};
