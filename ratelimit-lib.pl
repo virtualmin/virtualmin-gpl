@@ -44,6 +44,9 @@ return $type eq 'redhat' ? 'grmilter' :
 sub check_ratelimit
 {
 &foreign_require("init");
+if (!$config{'mail'}) {
+	return $text{'ratelimit_email'};
+	}
 if (!&get_ratelimit_type()) {
 	# Not supported on this OS
 	return $text{'ratelimit_eos'};

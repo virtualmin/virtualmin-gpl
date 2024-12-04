@@ -7142,6 +7142,7 @@ dkim_title2=Disable DomainKeys Identified Mail
 dkim_ecannot=You are not allowed to configure DKIM
 dkim_econfig=The DKIM configuration file $1 does not exist
 dkim_einit=The DKIM filter server boot script $1 does not exist
+dkim_email=DKIM cannot be enabled unless email is enabled
 dkim_eos=Management of DKIM is not supported on this operating system
 dkim_failed=DomainKeys identified mail is not available on this system : $1
 dkim_installdesc=However, Virtualmin can attempt to automatically install the DKIM filter package for you.
@@ -7669,6 +7670,7 @@ bucket_elyear=Missing or non-numeric year in lifecycle $1
 bucket_eacls=ACLs for new buckets must be enabled on the AWS Console.
 
 ratelimit_title=Mail Rate Limiting
+ratelimit_email=Email rate limiting cannot be enabled unless email is enabled
 ratelimit_eos=Email rate limiting is not supported on this operating system
 ratelimit_econfig=The milter-greylist configuration file $1 does not exist
 ratelimit_ecmd=The command $1 was not found on this system
