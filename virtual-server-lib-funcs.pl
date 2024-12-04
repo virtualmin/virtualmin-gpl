@@ -15666,10 +15666,6 @@ if ($config{'dns'}) {
 	}
 
 if ($config{'mail'}) {
-	if ($mail_system == 99) {
-		return &text('check_enomailserver',
-			     "../config.cgi?$module_name");
-		}
 	if ($mail_system == 5) {
 		return $text{'check_evpopmail'};
 		}
