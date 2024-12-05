@@ -45,26 +45,55 @@ else {
 	}
 }
 
-# get_external_ip_address([no-cache])
+# get_external_ip_address([no-cache], [type])
 # Returns the IP address of this system, as seen by other hosts on the Internet.
+# If the no-cache flag is set, the IP is always fetched from the network. If the
+# type is set to 6 ("ipv6"), an IPv6 address is returned. Default is 4 (IPv4).
+# For DNS resolver to work, the config option "dns_resolver" must be set to a
+# string like "myip.opendns.com resolver1.opendns.com".
 sub get_external_ip_address
 {
-my ($nocache) = @_;
+my ($nocache, $type) = @_;
+my ($out, $error);
+my $timeout = 5;
+# Validate type
+$type = 4 if (!$type || ($type != 4 && $type != 6));
+# Internal sub to validate an IP address of the correct type
+my $ip = sub {
+	my $ipaddr = shift;
+	return undef if (!$ipaddr);
+	$ipaddr =~ s/\r|\n//g;
+	return $ipaddr if ($type == 4 && $ipaddr =~ /^(\d+\.\d+\.\d+\.\d+)$/);
+	return $ipaddr if ($type == 6 && $ipaddr =~ /^([0-9a-fA-F:]+)$/);
+	return undef;
+	};
 my $now = time();
 if (!$nocache && $config{'external_ip_cache'} &&
     $now - $config{'external_ip_cache_time'} < 24*60*60) {
 	# Can use last cached value
-	return $config{'external_ip_cache'};
+	return $ip->($config{'external_ip_cache'});
 	}
-my $url = "http://software.virtualmin.com/cgi-bin/ip.cgi";
-my ($host, $port, $page, $ssl) = &parse_http_url($url);
-my ($out, $error);
-&http_download($host, $port, $page, \$out, \$error, undef, $ssl,
-	       undef, undef, 5, 0, 1);
-$out =~ s/\r|\n//g;
+# Fetch IP using DNS
+if ((my $dig = &has_command("dig")) &&
+    $config{'dns_resolver'} =~ /^(?<qname>\S+)\s+(?<nserv>\S+)$/) {
+	my $qname = $+{qname};
+	my $nserv    = $+{nserv};
+	my $dig_cmd = "$dig +time=$timeout +short -".($type == 6 ? "6" : "4").
+		      " $qname \@" . $nserv;
+	&execute_command($dig_cmd, undef, \$out, \$error);
+	$out = $ip->($out);
+	}
+# Fetch IP using http
+if ($error || !$out) {
+	my $url = "http://software.virtualmin.com/cgi-bin/ip.cgi";
+	my ($host, $port, $page, $ssl) = &parse_http_url($url);
+	&http_download($host, $port, $page, \$out, \$error, undef, $ssl,
+		undef, undef, $timeout, 0, 1);
+	$out = $ip->($out);
+	}
 if ($error) {
 	# Fall back to last cached value
-	return $config{'external_ip_cache'};
+	return $ip->($config{'external_ip_cache'});
 	}
 # Cache it for future calls
 &lock_file($module_config_file);
