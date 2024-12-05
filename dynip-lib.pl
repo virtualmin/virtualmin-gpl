@@ -85,7 +85,12 @@ if ((my $dig = &has_command("dig")) &&
 	}
 # Fetch IP using http
 if ($error || !$out) {
-	my $url = "http://software.virtualmin.com/cgi-bin/ip.cgi";
+	my $url = $config{'ip_lookup_url'} || 
+		"http://software.virtualmin.com/cgi-bin/ip.cgi";
+	my $url4 = $url;
+	my $url6 = $url;
+	($url4, $url6) = split(/ /, $url) if ($url =~ / /);
+	$url = $type == 4 ? $url4 : $url6;
 	my ($host, $port, $page, $ssl) = &parse_http_url($url);
 	&http_download($host, $port, $page, \$out, \$error, undef, $ssl,
 		undef, undef, $timeout, 0, 1);
