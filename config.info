@@ -18,6 +18,7 @@ defip6=Default virtual server IPv6 address,3,From network interface
 iface6=Network interface for IPv6 addresses,3,Same as IPv4
 netmask6=Netmask size for IPv6 addresses,3,Default (64)
 ip6enabled=Use default IPv6 address for new virtual servers?,1,1-Yes,0-No
+dns_resolver=Detect system external IP address using DNS,3,No,50
 
 line1.4=User interface settings,11
 display_max=Maximum number of domains to display,3,Unlimited

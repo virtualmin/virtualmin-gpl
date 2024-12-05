@@ -1,0 +1,14 @@
+<header>Detect system external IP address using DNS</header>
+
+This option uses the <tt>dig</tt> command to query a DNS server and detect the
+system's external IP address. For instance, you can set this field to
+<tt>myip.opendns.com resolver1.opendns.com</tt> (a space-separated query name
+and nameserver). This avoids relying on HTTP-based method and retrieves the IP
+address directly from the DNS server.<p>
+
+However, DNS method should be used with care if the system is behind a NAT,
+proxy, or VPN, as the detected IP may not reflect the actual public IP of the
+machine. It may instead show the external IP of the NAT gateway, proxy, or VPN
+endpoint.<p>
+
+<footer>
