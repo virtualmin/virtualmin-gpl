@@ -193,6 +193,13 @@ move_esame=Wybrano ten sam serwer nadrzędny
 usage_max=Wyświetlono tylko $1.
 
 phpmode_ewebsite=Opcji PHP nie można edytować w domenie, która nie posiada witryny internetowej!
+phpmode_wwwredir1=Przekieruj <tt>www.$1</tt> do <tt>$1</tt>
+phpmode_wwwredir2=Przekieruj <tt>$1</tt> do <tt>www.$1</tt>
+phpmode_wwwredir3=Poddomeny od <tt>$1</tt> do <tt>$1</tt>
+phpmode_wwwredirdo0=Wyłączanie przekierowania do domeny kanonicznej ..
+phpmode_wwwredirdo1=Dodanie przekierowania z <tt>www.$1</tt> do <tt>$1</tt> ..
+phpmode_wwwredirdo2=Dodanie przekierowania z <tt>$1</tt> do <tt>www.$1</tt> ..
+phpmode_wwwredirdo3=Dodanie przekierowania z subdomen <tt>$1</tt> do <tt>$1</tt> ..
 phpmode_esendmode=W tym trybie PHP nie można zmienić wysyłania wiadomości e-mail
 phpmode_ephpinis=Nie znaleziono plików php.ini do aktualizacji
 phpmode_mail=Czy skrypty PHP mogą wysyłać e-maile?
@@ -226,6 +233,9 @@ wizard_email_desc=Powiadomienia e-mail wysyłane przez Virtualmin będą przycho
 wizard_from_addr=Adres e-mail głównego administratora
 wizard_from_addr2=Twój adres
 wizard_efrom_addr=Adres e-mail musi być w formacie użytkownik@domena
+
+redirect_hostregexp=Nazwa hosta jest wyrażeniem regularnym?
+redirect_ehost2=Brak wyrażenia regularnego nazwy hosta
 
 provision_return=opcje klienta usług
 

@@ -5614,11 +5614,6 @@ phpmode_phpinfo_dir_ecannot_dir=Ten wirtualny serwer nie ma żądanego katalogu 
 phpmode_fixport=Naprawa konfiguracji punktu końcowego PHP-FPM ..
 phpmode_wwwredir=Przekierować na kanoniczną domenę
 phpmode_wwwredir0=Wyłączone
-phpmode_wwwredir1=www na non-www
-phpmode_wwwredir2=non-www na www
-phpmode_wwwrediroff=Wyłączanie przekierowania na kanoniczną domenę ..
-phpmode_wwwredirnon=Dodawanie przekierowania na domenę bez www ..
-phpmode_wwwredirwww=Dodawanie przekierowania na domenę z www ..
 
 website_header=Opcje strony internetowej
 website_ephpcgi=CGI skrypty nie mogą zostać wyłączone podczas używania PHP w trybie przetwarzania CGI lub FCGI
