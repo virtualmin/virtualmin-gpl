@@ -92,6 +92,17 @@ $config{$cache_time_optname} = $now;
 return $out;
 }
 
+# get_any_external_ip_address([no-cache], [prefer-ip-type])
+# Returns the IP address of this system, as seen by other hosts on the Internet,
+# either IPv4 or IPv6, preferring IPv4 by default.
+sub get_any_external_ip_address
+{
+my ($nocache, $prefer) = shift;
+my $ip4 = &get_external_ip_address($nocache, 4) if (!$prefer || $prefer != 6);
+my $ip6 = &get_external_ip_address($nocache, 6) if (!$prefer || $prefer != 4);
+return $prefer == 4 ? $ip4 : $ip6 || $ip4;
+}
+
 # update_dynip_service(new-ip, old-ip)
 # Talk to the configured dynamic DNS service, and return the set IP address
 # and an error message (if any)
