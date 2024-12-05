@@ -683,43 +683,44 @@ return $t;
 # just update users.
 sub modify_mail
 {
-local $tmpl = &get_template($_[0]->{'template'});
+my ($d, $oldd) = @_;
+my $tmpl = &get_template($d->{'template'});
 &require_useradmin();
-local $our_mail_locks = 0;
-local $our_unix_locks = 0;
+my $our_mail_locks = 0;
+my $our_unix_locks = 0;
 
 # Special case - conversion of an alias domain to non-alias
-local $isalias = $_[0]->{'alias'} && !$_[0]->{'aliasmail'};
-local $wasalias = $_[1]->{'alias'} && !$_[1]->{'aliasmail'};
+my $isalias = $d->{'alias'} && !$d->{'aliasmail'};
+my $wasalias = $oldd->{'alias'} && !$oldd->{'aliasmail'};
 if ($wasalias && !$isalias) {
-	&obtain_lock_mail($_[0]);
-	if ($_[0]->{'aliascopy'}) {
+	&obtain_lock_mail($d);
+	if ($d->{'aliascopy'}) {
 		# Stop copying mail aliases
 		&$first_print($text{'save_mailunalias1'});
-		$_[0]->{'aliascopy'} = 0;
-		&delete_alias_virtuals($_[0]);
+		$d->{'aliascopy'} = 0;
+		&delete_alias_virtuals($d);
 		}
 	else {
 		# Remove catchall
 		&$first_print($text{'save_mailunalias2'});
-		local ($catchall) = grep { $_->{'from'} eq '@'.$_[0]->{'dom'} }
+		my ($catchall) = grep { $_->{'from'} eq '@'.$d->{'dom'} }
 					 &list_virtusers();
 		if ($catchall) {
 			&delete_virtuser($catchall);
 			}
 		}
 	&$second_print($text{'setup_done'});
-	&release_lock_mail($_[0]);
+	&release_lock_mail($d);
 	return 1;
 	}
 
 # Second special case - changing of alias target (for a real alias domain)
-if ($_[0]->{'alias'} && $_[1]->{'alias'} &&
-    $_[0]->{'alias'} != $_[1]->{'alias'} &&
-    !$_[0]->{'aliasmail'} &&
-    $_[0]->{'mail'}) {
-	&delete_mail($_[1]);
-	&setup_mail($_[0]);
+if ($d->{'alias'} && $oldd->{'alias'} &&
+    $d->{'alias'} != $oldd->{'alias'} &&
+    !$d->{'aliasmail'} &&
+    $d->{'mail'}) {
+	&delete_mail($oldd);
+	&setup_mail($d);
 	return 1;
 	}
 
@@ -728,77 +729,77 @@ if ($_[0]->{'alias'} && $_[1]->{'alias'} &&
 # as part of the domain's directory.
 # No need to do this for VPOPMail users.
 # Also, any users in the user@domain name format need to be renamed
-local %renamed = ( $_[1]->{'user'} => $_[0]->{'user'} );
-if (($_[0]->{'home'} ne $_[1]->{'home'} ||
-     $_[0]->{'dom'} ne $_[1]->{'dom'} ||
-     $_[0]->{'gid'} != $_[1]->{'gid'} ||
-     $_[0]->{'prefix'} ne $_[1]->{'prefix'}) && !$isalias) {
-	&obtain_lock_mail($_[0]); $our_mail_locks++;
-	&obtain_lock_unix($_[0]); $our_unix_locks++;
+my %renamed = ( $oldd->{'user'} => $d->{'user'} );
+if (($d->{'home'} ne $oldd->{'home'} ||
+     $d->{'dom'} ne $oldd->{'dom'} ||
+     $d->{'gid'} != $oldd->{'gid'} ||
+     $d->{'prefix'} ne $oldd->{'prefix'}) && !$isalias) {
+	&obtain_lock_mail($d); $our_mail_locks++;
+	&obtain_lock_unix($d); $our_unix_locks++;
 	&$first_print($text{'save_mailrename'});
-	local $u;
-	local $domhack = { %{$_[0]} };		# This hack is needed to find
-	$domhack->{'home'} = $_[1]->{'home'};	# users under the old home dir
-	$domhack->{'gid'} = $_[1]->{'gid'};	# and GID and parent
-	$domhack->{'parent'} = $_[1]->{'parent'};
+	my $u;
+	my $domhack = { %{$d} };		# This hack is needed to find
+	$domhack->{'home'} = $oldd->{'home'};	# users under the old home dir
+	$domhack->{'gid'} = $oldd->{'gid'};	# and GID and parent
+	$domhack->{'parent'} = $oldd->{'parent'};
 	foreach $u (&list_domain_users($domhack, 1)) {
-		local %oldu = %$u;
-		if ($_[0]->{'home'} ne $_[1]->{'home'}) {
+		my %oldu = %$u;
+		if ($d->{'home'} ne $oldd->{'home'}) {
 			# Change home directory
-			$u->{'home'} =~ s/$_[1]->{'home'}/$_[0]->{'home'}/;
+			$u->{'home'} =~ s/$oldd->{'home'}/$d->{'home'}/;
 			}
-		local $olddom = $_[1]->{'dom'};
-		if ($_[0]->{'dom'} ne $_[1]->{'dom'} &&
+		my $olddom = $oldd->{'dom'};
+		if ($d->{'dom'} ne $oldd->{'dom'} &&
 		    $tmpl->{'append_style'} == 6 &&
 		    $u->{'user'} =~ /^(.*)\@\Q$olddom\E$/) {
 			# Rename this guy, as he is using an @domain name
-			local $pop3 = $1;
-			$u->{'user'} = &userdom_name($pop3, $_[0]);
+			my $pop3 = $1;
+			$u->{'user'} = &userdom_name($pop3, $d);
 			if ($u->{'email'}) {
-				$u->{'email'} = "$pop3\@$_[0]->{'dom'}";
+				$u->{'email'} = "$pop3\@$d->{'dom'}";
 				}
 			}
-		elsif ($_[0]->{'prefix'} ne $_[1]->{'prefix'}) {
+		elsif ($d->{'prefix'} ne $oldd->{'prefix'}) {
 			# Username prefix has changed, so user may need to be
 			# renamed.
-			$u->{'user'} =~ s/^\Q$_[1]->{'prefix'}\E([\.\-])/$_[0]->{'prefix'}$1/ ||
-				$u->{'user'} =~ s/([\.\-])\Q$_[1]->{'prefix'}\E$/$1$_[0]->{'prefix'}/;
+			$u->{'user'} =~ s/^\Q$oldd->{'prefix'}\E([\.\-])/$d->{'prefix'}$1/ ||
+				$u->{'user'} =~ s/([\.\-])\Q$oldd->{'prefix'}\E$/$1$d->{'prefix'}/;
 			}
-		if ($_[0]->{'gid'} != $_[1]->{'gid'}) {
+		if ($d->{'gid'} != $oldd->{'gid'}) {
 			# Domain owner has changed, so user's GID must too ..
 			# and so must the GID on his files
-			$u->{'gid'} = $_[0]->{'gid'};
+			$u->{'gid'} = $d->{'gid'};
 			&useradmin::recursive_change($u->{'home'},
-				$u->{'uid'}, $_[1]->{'gid'},
-				$u->{'uid'}, $_[0]->{'gid'});
+				$u->{'uid'}, $oldd->{'gid'},
+				$u->{'uid'}, $d->{'gid'});
 			}
-		if ($_[0]->{'uid'} != $_[1]->{'uid'} &&
- 		    $u->{'uid'} == $_[1]->{'uid'}) {
+		if ($d->{'uid'} != $oldd->{'uid'} &&
+ 		    $u->{'uid'} == $oldd->{'uid'}) {
 			# Website FTP access user's UID and GID needs to change
-			$u->{'uid'} = $_[0]->{'uid'};
-			$u->{'gid'} = $_[0]->{'gid'};
+			$u->{'uid'} = $d->{'uid'};
+			$u->{'gid'} = $d->{'gid'};
 			}
 
-		if ($_[0]->{'mail'}) {
+		if ($d->{'mail'}) {
 			# Update email address attributes for the user, as these
 			# are used in LDAP
 			if ($u->{'email'}) {
 				$u->{'email'} =~
-				    s/\@\Q$_[1]->{'dom'}\E$/\@$_[0]->{'dom'}/;
+				    s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
 				}
-			local @newextra;
+			my @newextra;
 			foreach my $extra (@{$u->{'extraemail'}}) {
 				my $newextra = $extra;
 				$newextra =~
-				    s/\@\Q$_[1]->{'dom'}\E$/\@$_[0]->{'dom'}/;
+				    s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
 				push(@newextra, $newextra);
 				}
 			$u->{'extraemail'} = \@newextra;
 			}
 
 		# Save the user
-		&modify_user($u, \%oldu, $_[0], 1);
-		if (!$u->{'nomailfile'} && $_[0]->{'mail'}) {
+		&modify_user($u, \%oldu, $d, 1);
+		if (!$u->{'nomailfile'} && $d->{'mail'}) {
 			&rename_mail_file($u, \%oldu);
 			}
 		if ($oldu{'user'} ne $u->{'user'}) {
@@ -811,11 +812,11 @@ if (($_[0]->{'home'} ne $_[1]->{'home'} ||
 if ($isalias && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
 	# This is an alias, and the domain it is aliased to has changed ..
 	# update the catchall alias or virtuser copies
-	&obtain_lock_mail($_[0]); $our_mail_locks++;
-	if (!$_[0]->{'aliascopy'}) {
+	&obtain_lock_mail($d); $our_mail_locks++;
+	if (!$d->{'aliascopy'}) {
 		# Fixup dest in catchall
-		local @virts = &list_virtusers();
-		local ($catchall) = grep {
+		my @virts = &list_virtusers();
+		my ($catchall) = grep {
 			$_->{'to'}->[0] eq '%1@'.$_[3]->{'dom'} } @virts;
 		if ($catchall) {
 			&$first_print($text{'save_mailalias'});
@@ -826,37 +827,37 @@ if ($isalias && $_[2] && $_[2]->{'dom'} ne $_[3]->{'dom'}) {
 		}
 	else {
 		# Re-write all copied virtuals
-		&copy_alias_virtuals($_[0], $_[2]);
+		&copy_alias_virtuals($d, $_[2]);
 		}
 	}
-elsif ($isalias && $_[0]->{'dom'} ne $_[1]->{'dom'} &&
-       $_[0]->{'aliascopy'}) {
+elsif ($isalias && $d->{'dom'} ne $oldd->{'dom'} &&
+       $d->{'aliascopy'}) {
 	# This is an alias and the domain name has changed - fix all virtuals
-	&obtain_lock_mail($_[0]); $our_mail_locks++;
-	&delete_alias_virtuals($_[1]);
-	local $alias = &get_domain($_[0]->{'alias'});
-	&copy_alias_virtuals($_[0], $alias);
+	&obtain_lock_mail($d); $our_mail_locks++;
+	&delete_alias_virtuals($oldd);
+	my $alias = &get_domain($d->{'alias'});
+	&copy_alias_virtuals($d, $alias);
 	}
 
-if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
+if ($d->{'dom'} ne $oldd->{'dom'} && $d->{'mail'}) {
 	# Delete the old mail domain and add the new
-	local $no_restart_mail = 1;
-	local ($oldbcc, $oldrbcc);
+	my $no_restart_mail = 1;
+	my ($oldbcc, $oldrbcc);
 	if ($supports_bcc) {
-		$oldbcc = &get_domain_sender_bcc($_[1]);
+		$oldbcc = &get_domain_sender_bcc($oldd);
 		}
 	if ($supports_bcc == 2) {
-		$oldrbcc = &get_domain_recipient_bcc($_[1]);
+		$oldrbcc = &get_domain_recipient_bcc($oldd);
 		}
-	&delete_mail($_[1], 0, 1, 1);
-	&setup_mail($_[0], 1, 1);
+	&delete_mail($oldd, 0, 1, 1);
+	&setup_mail($d, 1, 1);
 	if ($supports_bcc) {
-		$oldbcc =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
-		&save_domain_sender_bcc($_[0], $oldbcc);
+		$oldbcc =~ s/\Q$oldd->{'dom'}\E/$d->{'dom'}/g;
+		&save_domain_sender_bcc($d, $oldbcc);
 		}
 	if ($supports_bcc == 2) {
-		$oldrbcc =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
-		&save_domain_recipient_bcc($_[0], $oldrbcc);
+		$oldrbcc =~ s/\Q$oldd->{'dom'}\E/$d->{'dom'}/g;
+		&save_domain_recipient_bcc($d, $oldrbcc);
 		}
 	&require_mail();
 	if (&is_mail_running()) {
@@ -875,20 +876,20 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 			}
 		}
 
-	if (!$_[0]->{'aliascopy'}) {
+	if (!$d->{'aliascopy'}) {
 		# Update any virtusers with addresses in the old domain
 		&$first_print($text{'save_fixvirts'});
 		foreach $v (&list_virtusers()) {
 			if ($v->{'from'} =~ /^(\S*)\@(\S+)$/ &&
-			    lc($2) eq $_[1]->{'dom'}) {
-				local $oldv = { %$v };
-				local $u = $1;
-				if ($u eq $_[1]->{'user'}) {
+			    lc($2) eq $oldd->{'dom'}) {
+				my $oldv = { %$v };
+				my $u = $1;
+				if ($u eq $oldd->{'user'}) {
 					# For admin user, who has changed
-					$u = $_[0]->{'user'};
+					$u = $d->{'user'};
 					}
-				$v->{'from'} = "$u\@$_[0]->{'dom'}";
-				&fix_alias_when_renaming($v, $_[0], $_[1]);
+				$v->{'from'} = "$u\@$d->{'dom'}";
+				&fix_alias_when_renaming($v, $d, $oldd);
 				&modify_virtuser($oldv, $v);
 				}
 			}
@@ -897,16 +898,16 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 	if (!$isalias) {
 		# Update any generics/sender canonical entries in the old domain
 		if ($config{'generics'}) {
-			local %ghash = &get_generics_hash();
+			my %ghash = &get_generics_hash();
 			foreach my $g (values %ghash) {
 				if ($g->{'to'} =~ /^(.*)\@(\S+)$/ &&
-				    $2 eq $_[1]->{'dom'}) {
-					local $oldg = { %$g };
-					local $u = $1;
-					if ($u eq $_[1]->{'user'}) {
+				    $2 eq $oldd->{'dom'}) {
+					my $oldg = { %$g };
+					my $u = $1;
+					if ($u eq $oldd->{'user'}) {
 						# For admin user, who has
 						# changed name
-						$u = $_[0]->{'user'};
+						$u = $d->{'user'};
 						}
 					if ($renamed{$g->{'from'}}) {
 						# Username has been changed by
@@ -914,7 +915,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 						$g->{'from'} =
 						  $renamed{$g->{'from'}};
 						}
-					$g->{'to'} = "$u\@$_[0]->{'dom'}";
+					$g->{'to'} = "$u\@$d->{'dom'}";
 					&modify_generic($g, $oldg);
 					}
 				}
@@ -922,10 +923,10 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 
 		# Make a second pass through users to fix aliases
 		#&flush_virtualmin_caches();
-		foreach my $u (&list_domain_users($_[0])) {
-			local $oldu = { %$u };
-			if (&fix_alias_when_renaming($u, $_[0], $_[1])) {
-				&modify_user($u, $oldu, $_[0]);
+		foreach my $u (&list_domain_users($d)) {
+			my $oldu = { %$u };
+			if (&fix_alias_when_renaming($u, $d, $oldd)) {
+				&modify_user($u, $oldu, $d);
 				}
 			}
 		}
@@ -935,74 +936,74 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 
 # Re-write the file containing all users' addresses, in case the domain changed 
 if (!$isalias) {
-	&create_everyone_file($_[0]);
+	&create_everyone_file($d);
 	}
 
 # If domain was re-named and had a private DKIM key, update it
-if (!$_[0]->{'alias'} && $config{'dkim_enabled'} &&
-    $_[0]->{'dom'} ne $_[1]->{'dom'}) {
-	my $keyfile = &get_domain_dkim_key($_[1]);
+if (!$d->{'alias'} && $config{'dkim_enabled'} &&
+    $d->{'dom'} ne $oldd->{'dom'}) {
+	my $keyfile = &get_domain_dkim_key($oldd);
 	if ($keyfile) {
 		my $key = &read_file_contents($keyfile);
 		if ($key) {
-			&save_domain_dkim_key($_[0], $key);
+			&save_domain_dkim_key($d, $key);
 			}
 		}
 	}
 
 # Update domain in DKIM list, if DNS was enabled or disabled
-if ($_[0]->{'dns'} && !$_[1]->{'dns'}) {
-	&update_dkim_domains($_[0], 'setup');
+if ($d->{'dns'} && !$oldd->{'dns'}) {
+	&update_dkim_domains($d, 'setup');
 	}
-elsif (!$_[0]->{'dns'} && $_[1]->{'dns'}) {
-	&update_dkim_domains($_[0], 'delete');
+elsif (!$d->{'dns'} && $oldd->{'dns'}) {
+	&update_dkim_domains($d, 'delete');
 	}
 
 # Add autoconfig DNS entry if re-enabling DNS
 if ($config{'mail_autoconfig'} &&
-    &domain_has_website($_[0]) && !$_[0]->{'alias'} &&
-    $_[0]->{'dns'} && !$_[1]->{'dns'}) {
-	foreach my $autoconfig (&get_autoconfig_hostname($_[0])) {
-		&enable_dns_autoconfig($_[0], $autoconfig);
+    &domain_has_website($d) && !$d->{'alias'} &&
+    $d->{'dns'} && !$oldd->{'dns'}) {
+	foreach my $autoconfig (&get_autoconfig_hostname($d)) {
+		&enable_dns_autoconfig($d, $autoconfig);
 		}
 	}
 
 # Update any outgoing IP mapping
-if (($_[0]->{'dom'} ne $_[1]->{'dom'} ||
-     $_[0]->{'ip'} ne $_[1]->{'ip'} ||
-     $_[0]->{'ip6'} ne $_[1]->{'ip6'}) && $supports_dependent) {
-	local $old_dependent = &get_domain_dependent($_[1]);
+if (($d->{'dom'} ne $oldd->{'dom'} ||
+     $d->{'ip'} ne $oldd->{'ip'} ||
+     $d->{'ip6'} ne $oldd->{'ip6'}) && $supports_dependent) {
+	my $old_dependent = &get_domain_dependent($oldd);
 	if ($old_dependent) {
-		&save_domain_dependent($_[1], 0);
-		&save_domain_dependent($_[0], 1);
+		&save_domain_dependent($oldd, 0);
+		&save_domain_dependent($d, 1);
 		}
 	}
 
 # If contact email changed, update aliases to it
-if ($_[0]->{'emailto'} ne $_[1]->{'emailto'}) {
+if ($d->{'emailto'} ne $oldd->{'emailto'}) {
 	&$first_print($text{'save_mailto'});
-	local @tmplaliases = split(/\t+/, $tmpl->{'dom_aliases'});
-	local @aliases = &list_domain_aliases($_[0]);
+	my @tmplaliases = split(/\t+/, $tmpl->{'dom_aliases'});
+	my @aliases = &list_domain_aliases($d);
 	foreach $a (@tmplaliases) {
-                local ($from, $to) = split(/=/, $a, 2);
-		local ($virt) = grep { $_->{'from'} eq
-				       $from."\@".$_[0]->{'dom'} } @aliases;
+                my ($from, $to) = split(/=/, $a, 2);
+		my ($virt) = grep { $_->{'from'} eq
+				       $from."\@".$d->{'dom'} } @aliases;
 		next if (!$virt);
-		next if ($virt->{'to'}->[0] ne $_[1]->{'emailto'});
-		local $oldvirt = { %$virt };
-		$virt->{'to'}->[0] = $_[0]->{'emailto'};
+		next if ($virt->{'to'}->[0] ne $oldd->{'emailto'});
+		my $oldvirt = { %$virt };
+		$virt->{'to'}->[0] = $d->{'emailto'};
 		&modify_virtuser($oldvirt, $virt);
 		}
-	&sync_alias_virtuals($_[0]);
+	&sync_alias_virtuals($d);
 	&$second_print($text{'setup_done'});
 	}
 
 # Unlock mail and unix DBs the same number of times we locked them
 while($our_mail_locks--) {
-	&release_lock_mail($_[0]);
+	&release_lock_mail($d);
 	}
 while($our_unix_locks--) {
-	&release_lock_unix($_[0]);
+	&release_lock_unix($d);
 	}
 }
 
