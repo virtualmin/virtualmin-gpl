@@ -998,6 +998,21 @@ if ($d->{'emailto'} ne $oldd->{'emailto'}) {
 	&$second_print($text{'setup_done'});
 	}
 
+# If the domain changed and rate limiting is enabled, update any domains
+# in the config
+if ($d->{'dom'} ne $oldd->{'dom'} && !&check_ratelimit()) {
+	&lock_file(&get_ratelimit_config_file());
+	my $conf = &get_ratelimit_config();
+	foreach my $racl (grep { $_->{'name'} eq 'racl' } @$conf) {
+		if ($racl->{'values'}->[2] =~ /\@\Q$oldd->{'dom'}\E/) {
+			$racl->{'values'}->[2] =~ s/\@$oldd->{'dom'}/\@$d->{'dom'}/;
+			&save_ratelimit_directive($conf, $racl, $racl);
+			}
+		}
+	&flush_file_lines();
+	&unlock_file(&get_ratelimit_config_file());
+	}
+
 # Unlock mail and unix DBs the same number of times we locked them
 while($our_mail_locks--) {
 	&release_lock_mail($d);
