@@ -15642,7 +15642,7 @@ if ($config{'dns'}) {
 				$mastermsg ||= &text('check_dnsmaster2',
 						     "<tt>$master</tt>");
 				}
-			elsif ($masterip ne &get_external_ip_address(1) &&
+			elsif ($masterip ne &get_any_external_ip_address(1) &&
 			       $masterip ne &get_dns_ip() &&
 			       &indexof($masterip, &active_ip_addresses()) < 0) {
 				$mastermsg ||= &text('check_dnsmaster2',
@@ -16567,7 +16567,7 @@ $config{'old_defip6'} ||= $defip6;
 # Make sure the external IP is set if needed
 if ($config{'dns_ip'} ne '*') {
 	local $dns_ip = $config{'dns_ip'} || $defip;
-	local $ext_ip = &get_external_ip_address(1);
+	local $ext_ip = &get_any_external_ip_address(1);
 	if ($ext_ip && $ext_ip eq $dns_ip) {
 		# Looks OK
 		&$second_print(&text($config{'dns_ip'} ? 'check_dnsip1' :
@@ -16581,7 +16581,7 @@ if ($config{'dns_ip'} ne '*') {
 		}
 	}
 else {
-	my $ext_ip = &get_external_ip_address(1);
+	my $ext_ip = &get_any_external_ip_address(1);
 	if ($ext_ip) {
 		my $msg = $ext_ip =~ /:/ ? "check_dnsip3v6" : "check_dnsip3";
 		&$second_print(&text($msg, $ext_ip));
@@ -19098,7 +19098,7 @@ if (defined(&get_reseller)) {
 		}
 	}
 if ($config{'dns_ip'} eq '*') {
-	local $rv = &get_external_ip_address();
+	local $rv = &get_any_external_ip_address();
 	$rv || &error($text{'newdynip_eext'});
 	return $rv;
 	}
