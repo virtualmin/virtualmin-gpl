@@ -76,8 +76,8 @@ if (!$nocache && $config{'external_ip_cache'} &&
 # Fetch IP using DNS
 if ((my $dig = &has_command("dig")) &&
     $config{'dns_resolver'} =~ /^(?<qname>\S+)\s+(?<nserv>\S+)$/) {
-	my $qname = $+{qname};
-	my $nserv    = $+{nserv};
+	my $qname = quotemeta($+{qname});
+	my $nserv    = quotemeta($+{nserv});
 	my $dig_cmd = "$dig +time=$timeout +short -".($type == 6 ? "6" : "4").
 		      " $qname \@" . $nserv;
 	&execute_command($dig_cmd, undef, \$out, \$error);
