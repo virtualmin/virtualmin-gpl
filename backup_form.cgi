@@ -271,76 +271,12 @@ if (@allkeys) {
 	}
 
 # Single/multiple file mode
-my $fmt_script = <<EOF;
-<script>
-(function () {
-	try {
-		setTimeout(function() {
-			let extension;
-			const modes = document.querySelectorAll('[name="fmt"]'),
-				nameFields = document.querySelectorAll('[data-backup-path]'),
-				compressions = document.querySelectorAll('[name="compression"]'),
-				inputFields = document.querySelectorAll('[name\$="path"], [name\$="file"]'),
-				strfTime = document.querySelectorAll('[name="strftime"]'),
-				strfTimeFn = function() { return strfTime && strfTime[0] && strfTime[0].checked },
-				modes_check = function() {
-					Array.from(modes).find(radio => radio.checked).dispatchEvent(new Event('input'));
-				},
-				compressions_check = function() {
-					Array.from(compressions).find(radio => radio.checked).dispatchEvent(new Event('input'));
-				},
-				updateNameFields = function(directory) {
-					if (nameFields && nameFields.length) {
-						nameFields.forEach(function(td) {
-							const filetext = td.dataset.backupPathFile,
-							      dirtext = td.dataset.backupPathDir;
-							if (directory) {
-								td.innerHTML = dirtext;
-							} else {
-								td.innerHTML = filetext;
-							}
-						});
-					}
-				};
-			modes.forEach(function(radio) {
-				radio.addEventListener('input', function() {
-					const placeholdertype = this.value,
-						filename = strfTimeFn() ? 'domains-%Y-%m-%d-%H-%M' : 'domains';
-						inputFields.forEach(function(input) {
-						if (placeholdertype == '0') {
-							input.placeholder = \`e.g. /backups/\$\{filename\}.\$\{extension\}\`;
-							updateNameFields();
-						} else {
-							const backupPlaceHolder = strfTimeFn() ? 'backups/backup-%Y-%m-%d' : 'backups';
-							input.placeholder = \`e.g. /\$\{backupPlaceHolder\}/\`;
-							updateNameFields('dir');
-						}
-					});
-				});
-			});
-			(strfTime && strfTime[0]) && strfTime[0].addEventListener('input', modes_check);
-			compressions.forEach(function(compression) {
-				compression.addEventListener('input', function() {
-					const v = parseInt(this.value || $config{'compression'}),
-						a = {3: 'zip', 2: 'tar', 1: 'tar.bz2', 0: 'tar.gz'};
-					extension = a[v];
-					modes_check();
-				});
-			});
-			compressions_check();
-			modes_check();
-		}, 300);
-	} catch(e) {}
-})();
-</script>
-EOF
-
 print &ui_table_row(&hlink($text{'backup_fmt'}, "backup_fmt"),
 	&ui_radio("fmt", int($sched->{'fmt'}),
 		  [ [ 0, $text{'backup_fmt0'} ],
 		    $sched->{'fmt'} == 1 ?
 			( [ 1, $text{'backup_fmt1'} ] ) : ( ),
-		    [ 2, $text{'backup_fmt2'} ] ])."$fmt_script<br>".
+		    [ 2, $text{'backup_fmt2'} ] ])."<br>\n".
 	&ui_checkbox("mkdir", 1, $text{'backup_mkdir'},
 		     int($sched->{'mkdir'})));
 
@@ -459,6 +395,7 @@ else {
 					   : ( ) ]);
 	}
 
+print &backup_fmt_javascript();
 &ui_print_footer(
 	$in{'sched'} || $in{'new'} ?
 		( "list_sched.cgi", $text{'sched_return'} ) : ( ),
