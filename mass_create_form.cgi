@@ -70,6 +70,11 @@ if (@resels && &master_admin()) {
 	    	    1, \@tds);
 	}
 
+# Creation detail to show
+print &ui_table_row($text{'cmass_detail'},
+	&ui_radio("detail", 0, [ [ 0, $text{'cmass_detail0'} ],
+				 [ 1, $text{'cmass_detail1'} ] ]));
+
 # Show checkboxes for features
 print &ui_table_hr();
 @grid = ( );

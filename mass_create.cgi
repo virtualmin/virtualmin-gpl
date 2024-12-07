@@ -399,19 +399,39 @@ foreach $line (@lines) {
 		}
 
 	# Actually do it!
-	&set_all_null_print();
+	if ($in{'detail'}) {
+		&$first_print(&text('cmass_creating', $dom{'dom'}));
+		&$indent_print();
+		}
+	else {
+		&set_all_null_print();
+		}
 	local $err = &create_virtual_server(\%dom, $parentdom,
 			      $parentdom ? $parentdom->{'user'} : undef, 0, 1,
 			      $parentdom ? undef : $pass);
-	if ($err) {
-		&line_error($err);
-		next;
+
+	# Show the results
+	if ($in{'detail'}) {
+		&$outdent_print();
+		if ($err) {
+			&$second_print(&text('cmass_failed', $err));
+			next;
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		}
 	else {
-		print "<font color=#00aa00>",
-		      &text('cmass_done', "<tt>$dname</tt>"),"</font><br>\n";
-		$count++;
+		if ($err) {
+			&line_error($err);
+			next;
+			}
+		else {
+			print "<font color=#00aa00>",
+			      &text('cmass_done', "<tt>$dname</tt>"),"</font><br>\n";
+			}
 		}
+	$count++ if (!$err);
 
 	# Call any theme post command
 	if (defined(&theme_post_save_domain) &&
