@@ -63,8 +63,8 @@ my $ip = sub {
 	my $ipaddr = shift;
 	return undef if (!$ipaddr);
 	$ipaddr =~ s/\r|\n//g;
-	return $ipaddr if ($type == 4 && $ipaddr =~ /^(\d+\.\d+\.\d+\.\d+)$/);
-	return $ipaddr if ($type == 6 && $ipaddr =~ /^([0-9a-fA-F:]+)$/);
+	return $ipaddr if ($type == 4 && &check_ipaddress($ipaddr));
+	return $ipaddr if ($type == 6 && &check_ip6address($ipaddr));
 	return undef;
 	};
 my $now = time();
