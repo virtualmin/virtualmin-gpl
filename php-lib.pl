@@ -1159,7 +1159,7 @@ if ($cmd !~ /^\//) {
                              &list_available_php_versions($d);
 		}
 	if (!$phpn) {
-		$get_php_version_cache{$cmd} = undef;
+		delete($get_php_version_cache{$cmd});
 		return undef;
 		}
 	$cmd = $phpn->[1] || &has_command("php$cmd") || &has_command("php");
@@ -1171,7 +1171,7 @@ if ($out =~ /PHP\s+([0-9\.]+)/) {
 	$get_php_version_cache{$cmd} = $1;
 	return $1;
 	}
-$get_php_version_cache{$cmd} = undef;
+delete($get_php_version_cache{$cmd});
 return undef;
 }
 
