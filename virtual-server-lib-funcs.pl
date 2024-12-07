@@ -8317,7 +8317,7 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			}
 		local $perr = &validate_script_path($opts, $script, $dom);
 		if ($perr) {
-			&$second_print($perr);
+			&$second_print(&text('setup_scriptpath', $perr));
 			next;
 			}
 
@@ -8330,7 +8330,8 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			($phpver, $phperr) = &setup_php_version(
 				$dom, $script, $ver, $opts->{'path'});
 			if (!$phpver) {
-				&$second_print($phperr);
+				&$second_print(
+				    &text('setup_scriptphpverset', $phperr));
 				next;
 				}
 			$opts->{'phpver'} = $phpver;
@@ -8357,8 +8358,10 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			}
 
 		# Install needed PHP modules
-		&setup_script_requirements($d, $script, $ver, $phpver, $opts) ||
+		if (!&setup_script_requirements($d, $script, $ver, $phpver, $opts)) {
+			&$second_print($text{'setup_scriptreqs'});
 			next;
+			}
 
 		# Find the database, if requested
 		if ($sinfo->{'db'}) {
