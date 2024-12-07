@@ -1,0 +1,13 @@
+<header>HTTP service URL for system external IP detection</header>
+
+This option specifies the HTTP service URL used to detect the system’s external
+IP address. It queries a web service to retrieve the public IP of this system.
+By default, the URL is set to
+<tt>https://software.virtualmin.com/cgi-bin/ip.cgi</tt>.<p>
+
+You can also use other services like <tt>https://ifconfig.me</tt> or
+<tt>https://icanhazip.com</tt>. Furthermore, you can specify separate URLs for
+IPv4 and IPv6 detection by separating them with a space, such as
+<tt>https://api.ipify.org https://api6.ipify.org</tt>.<p>
+
+<footer>
