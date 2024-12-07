@@ -237,11 +237,8 @@ if (!$d->{'alias'} && &can_edit_redirect() &&
 	my $oldredir = @r ? &is_www_redirect($d, $r[0]) : undef;
 	my $err;
 	if ($in{'wwwredir'} != $oldredir) {
-		&$first_print(
-			$in{'wwwredir'} == 0 ? $text{'phpmode_wwwrediroff'} :
-			$in{'wwwredir'} == 1 ? $text{'phpmode_wwwredirnon'} :
-			$in{'wwwredir'} == 2 ? $text{'phpmode_wwwredirwww'} :
-					       $text{'phpmode_wwwredirsub'});
+		&$first_print(&text('phpmode_wwwredirdo'.$in{'wwwredir'},
+				    $d->{'dom'}));
 		foreach my $r (@r) {
                         $err ||= &delete_redirect($d, $r);
                         last if ($err);
