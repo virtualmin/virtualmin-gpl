@@ -113,7 +113,8 @@ if (&can_edit_plans()) {
 			  [ [ 1, $text{'backup_anyplan'} ],
 			    [ 0, $text{'backup_selplan'} ] ])."<br>\n".
 		&ui_select("plan", [ split(/\s+/, $sched->{'plan'}) ],
-			   [ map { [ $_->{'id'}, &html_escape($_->{'name'}) ] } @plans ],
+			   [ map { [ $_->{'id'}, &html_escape($_->{'name'}) ] }
+				 @plans ],
 			   5, 1));
 	}
 
