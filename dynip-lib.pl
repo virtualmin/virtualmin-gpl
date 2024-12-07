@@ -68,10 +68,14 @@ my $ip = sub {
 	return undef;
 	};
 my $now = time();
-if (!$nocache && $config{'external_ip_cache'} &&
-    $now - $config{'external_ip_cache_time'} < 24*60*60) {
+my $cache_optname = $type == 4 ?
+	'external_ip_cache' : 'external_ipv6_cache';
+my $cache_time_optname = $type == 4 ?
+	'external_ip_cache_time' : 'external_ipv6_cache_time';
+if (!$nocache && $config{$cache_optname} &&
+    $now - $config{$cache_time_optname} < 24*60*60) {
 	# Can use last cached value
-	return $ip->($config{'external_ip_cache'});
+	return $ip->($config{$cache_optname});
 	}
 # Fetch IP using DNS
 if ((my $dig = &has_command("dig")) &&
@@ -98,12 +102,12 @@ if ($error || !$out) {
 	}
 if ($error) {
 	# Fall back to last cached value
-	return $ip->($config{'external_ip_cache'});
+	return $ip->($config{$cache_optname});
 	}
 # Cache it for future calls
 &lock_file($module_config_file);
-$config{'external_ip_cache'} = $out;
-$config{'external_ip_cache_time'} = $now;
+$config{$cache_optname} = $out;
+$config{$cache_time_optname} = $now;
 &save_module_config();
 &unlock_file($module_config_file);
 return $out;
