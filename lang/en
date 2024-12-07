@@ -2506,6 +2506,7 @@ backup_odom=For domain owner $1
 backup_oresel=For reseller $1
 backup_headerdoms=Virtual servers
 backup_headerfeatures=Features and settings
+backup_headerfeatures2=Global settings
 backup_headerdest=Destination and format
 backup_headersched=Schedule and reporting
 backup_doms=Servers to save

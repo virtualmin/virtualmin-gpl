@@ -177,6 +177,11 @@ foreach $f (&list_backup_plugins()) {
 	}
 print &ui_table_row(&hlink($text{'backup_features'}, "backup_features"),
 		    $ftable);
+print &ui_hidden_table_end("features");
+
+# Show global features and plugins boxes
+print &ui_hidden_table_start($text{'backup_headerfeatures2'}, "width=100%", 2,
+			     "features2", 0, \@tds);
 
 # Show virtualmin object backup options
 if (&can_backup_virtualmin()) {
@@ -200,7 +205,7 @@ print &ui_table_row(&hlink($text{'backup_exclude'}, 'backup_exclude'),
 	&ui_checkbox("include", 1, $text{'backup_include'},
 		     $sched->{'include'}));
 
-print &ui_hidden_table_end("features");
+print &ui_hidden_table_end("features2");
 
 # Build destination field inputs
 if ($in{'sched'} || $in{'new'} || $in{'oneoff'}) {
