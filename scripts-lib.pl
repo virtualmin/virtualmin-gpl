@@ -1070,6 +1070,8 @@ if (!$bestdir) {
 	}
 
 my $bestver = &get_php_version($bestdir->{'version'});
+$bestver || return (undef, &text('scripts_enophpbestver',
+				 $bestdir->{'version'}));
 if (&indexof($bestdir->{'version'}, @vers) >= 0 ||
     &indexof($bestver, @vers) >= 0) {
 	# The best match dir supports one of the PHP versions .. so we are OK!
@@ -1085,6 +1087,7 @@ if (!$candirs) {
 # is supported.
 my ($setver) = sort { &compare_versions($a, $b) } @vers;
 $setver = $vmap{$setver} || $setver;
+$setver || return (undef, "No versions found!");
 local $err = &save_domain_php_directory($d, $dirpath, $setver);
 if ($err) {
 	return (undef, &text('scripts_ephpverchange', $dirpath, $vers[0]));
