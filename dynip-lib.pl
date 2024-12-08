@@ -74,7 +74,8 @@ my $cache_time_optname = $cache_optname.'_time';
 if (!$nocache && $config{$cache_optname} &&
     $now - $config{$cache_time_optname} < 24*60*60) {
 	# Can use last cached value
-	return $ip->($config{$cache_optname});
+	my $ipaddr = $ip->($config{$cache_optname});
+	return $ipaddr if ($ipaddr);
 	}
 # Fetch IP using DNS
 if ((my $dig = &has_command("dig")) &&
