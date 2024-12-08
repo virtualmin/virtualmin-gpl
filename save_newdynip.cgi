@@ -55,7 +55,7 @@ elsif (!$in{'enabled'} && $job) {
 &ui_print_header(undef, $text{'newdynip_title'}, "");
 
 if ($in{'enabled'}) {
-	$ip = $in{'auto'} ? &get_external_ip_address() : &get_default_ip();
+	$ip = $in{'auto'} ? &get_any_external_ip_address() : &get_default_ip();
 	print &text('newdynip_on', "<tt>$ip</tt>"),"<p>\n";
 	}
 else {

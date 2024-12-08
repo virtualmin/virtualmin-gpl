@@ -673,7 +673,7 @@ else {
 
 # Show DNS IP address field
 if (&can_dnsip()) {
-	my $def_dns_ip = $config{'external_ip_cache'} || &get_dns_ip($resel);
+	my $def_dns_ip = &get_any_external_ip_address() || &get_dns_ip($resel);
 	my $dns_ip = $parentdom ? $parentdom->{'dns_ip'} : undef;
 	my @opts;
 	if ($def_dns_ip) {
