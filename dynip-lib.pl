@@ -70,8 +70,7 @@ my $ip = sub {
 my $now = time();
 my $cache_optname = $type == 4 ?
 	'external_ip_cache' : 'external_ipv6_cache';
-my $cache_time_optname = $type == 4 ?
-	'external_ip_cache_time' : 'external_ipv6_cache_time';
+my $cache_time_optname = $cache_optname.'_time';
 if (!$nocache && $config{$cache_optname} &&
     $now - $config{$cache_time_optname} < 24*60*60) {
 	# Can use last cached value
