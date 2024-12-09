@@ -3544,6 +3544,7 @@ return { 'mailuser' => $in->{'mail_mailuser'},
 sub check_clash
 {
 &require_mail();
+return 0 if (!$config{'mail'});
 local @virts = &list_virtusers();
 local ($clash) = grep { $_->{'from'} eq $_[0]."\@".$_[1] } @virts;
 return 1 if ($clash);
