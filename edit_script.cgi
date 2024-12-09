@@ -201,7 +201,7 @@ if (!$sinfo->{'deleted'}) {
 		if (@pids) {
 			print &ui_submit($text{'scripts_ustop'},
 					 "stop"),"\n";
-			print &ui_submit($text{'scripts_ureload'},
+			print &ui_submit($text{'scripts_urestart'},
 					 "restart"),"\n";
 			}
 		else {
