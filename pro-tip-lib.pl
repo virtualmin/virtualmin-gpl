@@ -400,7 +400,7 @@ foreach my $script (@scripts) {
 	next if ($script->{'dir'} !~ /$scripts_directories[3]/ &&
 	        !$script->{'migrated'});
 	push(@scripts_pro_list,
-	    { 'version' => $vers[0],
+	    { 'version' => 'latest',
 	      'name' => $script->{'name'},
 	      'desc' => $script->{'desc'},
 	      'longdesc' => $script->{'longdesc'},
