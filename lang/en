@@ -6807,6 +6807,7 @@ dplans_eall=At least one plan must exist
 
 postgrey_title=Email Greylisting
 newpostgrey_title=Email Greylisting
+postgrey_emailfeat=Greylisting can only be used when email is enabled globally.
 postgrey_epostfix=Postgrey can only be used in conjunction with the Postfix mail server
 postgrey_ecmd=The Postgrey command $1 was not found
 postgrey_euser=The Postgrey user $1 does not exist
