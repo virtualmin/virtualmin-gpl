@@ -7057,7 +7057,7 @@ setTimeout(function() {
 	});
 	compressions_check();
 	modes_check();
-}, 300);
+});
 </script>
 EOF
 }

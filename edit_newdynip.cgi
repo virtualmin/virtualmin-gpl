@@ -66,7 +66,7 @@ print &ui_table_row($text{'newdynip_iface'},
 
 # External IP
 print &ui_table_row($text{'newdynip_external'},
-		    "<tt>".&get_external_ip_address()."</tt>");
+		    "<tt>".&get_any_external_ip_address()."</tt>");
 
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'newdynip_ok'} ] ]);
