@@ -4513,19 +4513,22 @@ else {
 # is shared with other domains.
 sub get_apache_vhost_ips
 {
-local ($d, $nvstar, $nvstar6, $port) = @_;
-local $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+my ($d, $nvstar, $nvstar6, $port) = @_;
+my $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 $port ||= $d->{'web_port'};
 &require_apache();
-local $vip = $config{'apache_star'} == 2 ? "*" :
-	     $config{'apache_star'} == 1 ? $d->{'ip'} :
-	     $d->{'name'} &&
-	       $apache::httpd_modules{'core'} >= 1.312 &&
-	       &is_shared_ip($d->{'ip'}) &&
-	       $nvstar ? "*" : $d->{'ip'};
-local @vips = ( "$vip:$port" );
+my @vips;
+if ($d->{'ip'}) {
+	my $vip = $config{'apache_star'} == 2 ? "*" :
+		     $config{'apache_star'} == 1 ? $d->{'ip'} :
+		     $d->{'name'} &&
+		       $apache::httpd_modules{'core'} >= 1.312 &&
+		       &is_shared_ip($d->{'ip'}) &&
+		       $nvstar ? "*" : $d->{'ip'};
+	push(@vips, "$vip:$port");
+	}
 if ($d->{'ip6'}) {
-	local $vip6 = $config{'apache_star'} == 2 ? "*" :
+	my $vip6 = $config{'apache_star'} == 2 ? "*" :
 		      $config{'apache_star'} == 1 ? $d->{'ip6'} :
 		      $d->{'name'} &&
 		        &is_shared_ip($d->{'ip6'}) &&
