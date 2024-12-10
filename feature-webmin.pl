@@ -1136,7 +1136,7 @@ sub backup_webmin
 {
 local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
 local $compression = $allopts->{'dir'}->{'compression'};
-local $destfile = $file.".".&compression_to_suffix($compression);
+local $destfile = $file.".".&compression_to_suffix_inner($compression);
 &$first_print($text{'backup_webmin'});
 &require_acl();
 

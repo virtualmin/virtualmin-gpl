@@ -479,7 +479,7 @@ local $out;
 local $cmd;
 local $destfile = $file;
 if (!$homefmt) {
-	$destfile .= ".".&compression_to_suffix($compression);
+	$destfile .= ".".&compression_to_suffix_inner($compression);
 	}
 
 # Create an indicator file in the home directory showing where this backup
