@@ -305,7 +305,7 @@ foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 		}
 	elsif (!$tmpl->{'web_cgimode'}) {
 		# If no CGI nodes are available and no mode was set,
-		# explicity disable CGIs
+		# explicitly disable CGIs
 		$tmpl->{'web_cgimode'} = 'none';
 		&save_template($tmpl);
 		}
