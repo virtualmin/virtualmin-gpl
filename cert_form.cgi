@@ -195,6 +195,20 @@ if (&domain_has_ssl_cert($d)) {
 
 	print &ui_table_row($text{'cert_def'},
 		(@gmissing && &can_webmin_cert()) ? $text{'no'} : $text{'yes'}, 3);
+
+	# CA cert details
+	if ($chain) {
+		print &ui_table_hr();
+		my $info = &cert_file_info($chain, $d);
+		foreach $i (@cert_attributes) {
+			next if ($i eq 'modulus' || $i eq 'exponent');
+			if ($info->{$i} && !ref($info->{$i})) {
+				print &ui_table_row($text{'cert_c'.$i} ||
+					    $text{'cert_'.$i}, $info->{$i});
+				}
+			}
+		}
+
 	print &ui_table_end();
 
 	my $ui_hr;
@@ -342,6 +356,7 @@ print &ui_table_row($text{'cert_cert'},
 
 # Use saved key from when CSR was generated
 print &ui_hidden("newkey_mode", 4);
+print &ui_hidden("newca_mode", 3);
 
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'cert_newok'} ] ]);
@@ -349,7 +364,7 @@ print &ui_tabs_end_tab();
 
 ##########################
 
-# New key and cert form
+# New key, cert and CA form
 print &ui_tabs_start_tab("mode", "new");
 print "$text{'cert_desc3'}<p>\n";
 
@@ -365,24 +380,38 @@ print &ui_table_row($text{'cert_cert'},
 		  [ 1, $text{'cert_cert1'},
 		    &ui_upload("certupload") ],
 		  [ 2, $text{'cert_cert2'},
-		    &ui_textbox("certfile", undef, 70)." ".
-		    &file_chooser_button("certfile") ] ]));
+		    &ui_filebox("certfile", $d->{'ssl_cert'}, 70) ] ]));
 
 # Key
+my $gotkey = $d->{'ssl_key'} && -r $d->{'ssl_key'};
 print &ui_table_row($text{'cert_newkey'},
-	&ui_radio_table("newkey_mode", -r $d->{'ssl_key'} ? 3 : 0,
-		[ -r $d->{'ssl_key'} ? ( [ 3, $text{'cert_newkeykeep'} ] ) : ( ),
+	&ui_radio_table("newkey_mode",
+		$gotkey ? 3 : 0,
+		[ $gotkey ? ( [ 3, $text{'cert_newkeykeep'} ] ) : ( ),
 		  [ 0, $text{'cert_cert0'},
 		    &ui_textarea("newkey", undef, 8, 70) ],
 		  [ 1, $text{'cert_cert1'},
 		    &ui_upload("newkeyupload") ],
 		  [ 2, $text{'cert_cert2'},
-		    &ui_textbox("newkeyfile", undef, 70)." ".
-		    &file_chooser_button("newkeyfile") ] ]));
+		    &ui_filebox("newkeyfile", $d->{'ssl_key'}, 70) ] ]));
 
 # Passphrase on key
 print &ui_table_row($text{'cert_pass'},
 		    &ui_opt_textbox("pass", undef, 20, $text{'cert_nopass'}));
+
+# CA cert
+my $gotca = $d->{'ssl_chain'} && -r $d->{'ssl_chain'};
+print &ui_table_row($text{'cert_newca'},
+	&ui_radio_table("newca_mode",
+		$gotca ? 3 : 4,
+		[ $gotca ? ( [ 3, $text{'cert_newcakeep'} ] ) : ( ),
+		  [ 4, $text{'cert_chain0'} ],
+		  [ 0, $text{'cert_cert0'},
+		    &ui_textarea("newca", undef, 8, 70) ],
+		  [ 1, $text{'cert_cert1'},
+		    &ui_upload("newcaupload") ],
+		  [ 2, $text{'cert_cert2'},
+		    &ui_filebox("newcafile", $d->{'ssl_chain'}, 70) ] ]));
 
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'cert_newok'} ] ]);
