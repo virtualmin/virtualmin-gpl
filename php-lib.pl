@@ -1287,8 +1287,8 @@ if ($mode eq "fpm") {
 		my $confs = &list_php_fpm_config_values($d);
 		my @phpvs = &copyable_fpm_configs($confs);
 		&delete_php_fpm_pool($d);
-		$d->{'php_fpm_version'} = $ver;
 		&lock_domain($d);
+		$d->{'php_fpm_version'} = $ver;
 		&save_domain($d);
 		&unlock_domain($d);
 		&create_php_fpm_pool($d, $oldlisten);
