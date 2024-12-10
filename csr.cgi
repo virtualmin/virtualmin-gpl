@@ -126,6 +126,7 @@ else {
 	# Make sure Apache is setup to use the right key files
 	&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
 	&save_website_ssl_file($d, "key", $d->{'ssl_key'});
+	&save_website_ssl_file($d, "ca", undef);
 
 	# Remove any SSL passphrase
 	$d->{'ssl_pass'} = undef;

@@ -317,7 +317,7 @@ print &ui_tabs_start_tab("mode", "self");
 print "$text{'cert_desc6'}<p>\n";
 
 # Show warning if there is an existing key
-if ($d->{'ssl_key'} && -r $d->{'ssl_key'}) {
+if ($d->{'ssl_key'} && -r $d->{'ssl_key'} && !&self_signed_cert($d)) {
 	print &ui_alert_box(&text('cert_keywarn',
 		"<tt>".&home_relative_path($d, $d->{'ssl_cert'})."</tt>",
 		"<tt>".&home_relative_path($d, $d->{'ssl_key'})."</tt>"), 'warn');

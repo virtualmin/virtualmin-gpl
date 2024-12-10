@@ -166,6 +166,9 @@ if ($self) {
 	$d->{'ssl_pass'} = undef;
 	&save_domain_passphrase($d);
 	&save_domain($d);
+	&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
+	&save_website_ssl_file($d, "key", $d->{'ssl_key'});
+	&save_website_ssl_file($d, "ca", undef);
 	&unlock_domain($d);
 	&release_lock_ssl($d);
 	&unlock_file($d->{'ssl_key'});
