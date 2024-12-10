@@ -6884,6 +6884,15 @@ return $c == 0 ? "tar.gz" :
        $c == 3 ? "zip" : "tar";
 }
 
+# compression_to_suffix_inner(format)
+# Converts a compressioin format integer to a filename suffix for interal
+# archive files
+sub compression_to_suffix_inner
+{
+my ($c) = @_;
+return $c == 3 ? "zip" : 'tar';
+}
+
 # suffix_to_compression(filename)
 # Use the suffix of a filename to determine the compression format number
 sub suffix_to_compression
