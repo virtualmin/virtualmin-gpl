@@ -51,7 +51,6 @@ $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 		( [ "savecsr", $text{'cert_tabsavecsr'}, $prog."savecsr" ] ) :
 		( ),
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
-	  [ "chain", $text{'cert_tabchain'}, $prog."chain" ],
 	  &can_edit_letsencrypt() &&
 	  (@provs || !defined(&list_acme_providers)) &&
 	  (&domain_has_website($d) || $d->{'dns'}) ?
@@ -367,6 +366,7 @@ print &ui_tabs_end_tab();
 # New key, cert and CA form
 print &ui_tabs_start_tab("mode", "new");
 print "$text{'cert_desc3'}<p>\n";
+print "$text{'cert_desc3a'}<p>\n";
 
 print &ui_form_start("newkey.cgi", "form-data");
 print &ui_hidden("dom", $in{'dom'});
@@ -415,48 +415,6 @@ print &ui_table_row($text{'cert_newca'},
 
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'cert_newok'} ] ]);
-print &ui_tabs_end_tab();
-
-##########################
-
-# CA certificate form
-print &ui_tabs_start_tab("mode", "chain");
-print "$text{'cert_desc5'}<p>\n";
-print "$text{'cert_desc5a'}<p>\n";
-
-print &ui_form_start("newchain.cgi", "form-data");
-print &ui_hidden("dom", $in{'dom'});
-print &ui_table_start($text{'cert_header4'}, undef, 2);
-
-# Where cert is stored
-print &ui_table_row($text{'cert_chain'},
-	&ui_radio("mode", $chain ? 1 : 0,
-	  [ [ 0, $text{'cert_chain0'}."<br>" ],
-	    &can_chained_cert_path() ?
-		  ( [ 1, &text('cert_chain1',
-			       &ui_textbox("file", $chain, 50)." ".
-			       &file_chooser_button("file"))."<br>" ] ) :
-	    $chain ? ( [ 1, &text('cert_chain1', "<tt>$chain</tt>")."<br>" ] ) :
-		     ( ),
-	    [ 2, &text('cert_chain2',
-		       &ui_upload("upload", 50))."<br>" ],
-	    [ 3, $text{'cert_chain3'}."<br>\n".
-		 &ui_textarea("paste", undef, 8, 70) ] ]));
-
-# Current details
-if ($chain) {
-	$info = &cert_file_info($chain, $d);
-	foreach $i (@cert_attributes) {
-		next if ($i eq 'modulus' || $i eq 'exponent');
-		if ($info->{$i} && !ref($info->{$i})) {
-			print &ui_table_row($text{'cert_c'.$i} ||
-					    $text{'cert_'.$i}, $info->{$i});
-			}
-		}
-	}
-
-print &ui_table_end();
-print &ui_form_end([ [ "ok", $text{'cert_chainok'} ] ]);
 print &ui_tabs_end_tab();
 
 # Let's encrypt tab
