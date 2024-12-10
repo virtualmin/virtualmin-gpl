@@ -376,67 +376,68 @@ my $readdir = sub {
     my @hdirs;
     return @hdirs if (!-d $dir);
     opendir(my $udir, $dir);
-    @hdirs = map {&simplify_path("$dir/$_")}
-      grep {$_ ne '.' && $_ ne '..'} readdir($udir);
+    @hdirs = map { &simplify_path("$dir/$_") }
+	         grep {$_ ne '.' && $_ ne '..'} readdir($udir);
     closedir($udir);
     return @hdirs;
     };
 foreach my $d (@doms) {
 	my $dpubdir = $d->{'public_html_path'};
-	if (-d $dpubdir) {
-		my @dpubifiles = &$readdir($dpubdir);
-		@dpubifiles = grep (/^$dpubdir\/(index\.html|disabled_by_virtualmin\.html)$/, @dpubifiles);
-		foreach my $dpubifile (@dpubifiles) {
-			my $dpubifilelines = &read_file_lines($dpubifile, 1);
-			my $lims           = 256;
-			my $efix;
-			my $line;
-			foreach my $l (@{$dpubifilelines}) {
-				# If the file is larger than 256 lines, skip the rest
-				last if ($line++ > $lims);
+	next if (!-d $dpubdir);
+	my @dpubifiles = &$readdir($dpubdir);
+	@dpubifiles = grep { /^$dpubdir\/(index\.html|disabled_by_virtualmin\.html)$/ } @dpubifiles;
+	foreach my $dpubifile (@dpubifiles) {
+		my $dpubifilelines = &read_file_lines($dpubifile, 1);
+		my $lims           = 256;
+		my $efix;
+		my $line;
+		foreach my $l (@{$dpubifilelines}) {
+			# If the file is larger than 256 lines, skip the rest
+			last if ($line++ > $lims);
 
-				# Get beginning of the string for speed and run
-				# extra check to make sure we have a needed file
-				$l = substr($l, 0, $lims);
+			# Get beginning of the string for speed and run
+			# extra check to make sure we have a needed file
+			$l = substr($l, 0, $lims);
 
-				# Test to make sure that given file is Virtualmin website default page
-				$efix++ if (!$efix && $l =~ /iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/);
-				if ($efix == 1 &&
-					$l =~ /\*\s(Virtualmin\sLanding|Website\sDefault\sPage|Virtualmin\s+Default\s+Page)\sv([\d+\.]+)$/) {
-					my $tmplver = $2;
-					$efix++ if ($tmplver && &compare_version_numbers($tmplver, '<=', '3.2'));
-					}
-				$efix++ if ($efix == 2 && $l =~ /\*\sCopyright\s+[\d]{4}\sVirtualmin(?:,\s+Inc\.)?$/);
-				$efix++ if ($efix == 3 && $l =~ /\*\sLicensed\sunder\sMIT$/);
+			# Test to make sure that given file is Virtualmin website default page
+			$efix++ if (!$efix && $l =~ /iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/);
+			if ($efix == 1 &&
+				$l =~ /\*\s(Virtualmin\sLanding|Website\sDefault\sPage|Virtualmin\s+Default\s+Page)\sv([\d+\.]+)$/) {
+				my $tmplver = $2;
+				$efix++ if ($tmplver && &compare_version_numbers($tmplver, '<=', '3.2'));
 				}
+			$efix++ if ($efix == 2 && $l =~ /\*\sCopyright\s+[\d]{4}\sVirtualmin(?:,\s+Inc\.)?$/);
+			$efix++ if ($efix == 3 && $l =~ /\*\sLicensed\sunder\sMIT$/);
+			}
 
-			# After existing file is read and verified to be old
-			# Virtualmin default page replace it with new one
-			if ($efix == 4) {
-				my $domtmplfile = "$default_content_dir/index.html";
-				if (-r $domtmplfile) {
-					my $domtmplfilecontent = &read_file_contents($domtmplfile);
-					my %hashtmp            = %$d;
-					my %domtmp             = %$d;
+		# After existing file is read and verified to be old
+		# Virtualmin default page replace it with new one
+		if ($efix == 4) {
+			my $domtmplfile = "$default_content_dir/index.html";
+			next if (!-r $domtmplfile);
+			my $cont = &read_file_contents($domtmplfile);
+			my %hashtmp = %$d;
+			my %domtmp = %$d;
 
-					# Preserve page type
-					$domtmp{'disabled_time'} = $dpubifile =~ /index\.html/ ? 0 : 1;
+			# Preserve page type
+			$domtmp{'disabled_time'} =
+				$dpubifile =~ /index\.html/ ? 0 : 1;
 
-					# Substitute and replace
-					%hashtmp            = &populate_default_index_page(\%domtmp, %hashtmp);
-					$domtmplfilecontent = &replace_default_index_page(\%domtmp, $domtmplfilecontent);
-					$domtmplfilecontent = &substitute_virtualmin_template($domtmplfilecontent, \%hashtmp);
-					my $fh;
-					&open_tempfile_as_domain_user($d, $fh, ">$dpubifile", 1);
-					&print_tempfile($fh, $domtmplfilecontent);
-					&close_tempfile_as_domain_user($d, $fh);
-					&set_permissions_as_domain_user($d, 0644, $dpubifile);
-					}
-				}
+			# Substitute and replace
+			%hashtmp = &populate_default_index_page(
+					\%domtmp, %hashtmp);
+			$cont = &replace_default_index_page(
+					\%domtmp, $cont);
+			$cont = &substitute_virtualmin_template(
+					$cont, \%hashtmp);
+			my $fh;
+			&open_tempfile_as_domain_user($d, $fh, ">$dpubifile",1);
+			&print_tempfile($fh, $cont);
+			&close_tempfile_as_domain_user($d, $fh);
+			&set_permissions_as_domain_user($d, 0644, $dpubifile);
 			}
 		}
 	}
-
 
 # Create API helper script /usr/bin/virtualmin
 &create_virtualmin_api_helper_command();
