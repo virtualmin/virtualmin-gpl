@@ -3005,7 +3005,7 @@ foreach my $d (&list_domains()) {
 	else {
 		# Tell the user it worked
 		delete($d->{'letsencrypt_last_err'});
-		$subject = $text{'letsencrypt_sdone'};
+		$subject = $text{'letsencrypt_sdonea'};
 		$body = &text('letsencrypt_bdonea',
 			      join(", ", @$dnames), $pname);
 		}
