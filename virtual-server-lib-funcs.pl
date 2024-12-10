@@ -16059,23 +16059,45 @@ if (&domain_has_website()) {
 
 		# Check for invalid FPM versions, in case one has been
 		# upgraded to a new release
-		local @fpmfixed;
-		@fpms = sort { &compare_versions($a->{'shortversion'}, $b->{'shortversion'}) } @fpms;
+		my @fpmfixed;
+		# Sort to have highest version first
+		@fpms = sort { &compare_versions($b->{'shortversion'}, $a->{'shortversion'}) } @fpms;
 		foreach my $d (grep { &domain_has_website($_) &&
 				      !$_->{'alias'} } &list_domains()) {
-			# Check if an FPM version is stored, but doesn't exist
-			next if (!$d->{'php_fpm_version'});
-			local $mode = &get_domain_php_mode($d);
+			# Check if an FPM version is stored, but doesn't exist,
+			# or isn't set on the domain config
+			my $mode = &get_domain_php_mode($d);
 			next if ($mode ne "fpm");
-			local ($f) = grep { $_->{'shortversion'} eq $d->{'php_fpm_version'} } @fpms;
+			# Version set in domain config exists in the list of
+			# FPMs, so skip it, all good
+			my ($f) = grep { $_->{'shortversion'} eq
+					 $d->{'php_fpm_version'} } @fpms;
 			next if ($f);
 
+			my $nf;
 			# Find the existing version just above the one that
 			# was stored, or alternately the highest available
-			local ($nf) = grep { &compare_versions($_->{'shortversion'}, $d->{'php_fpm_version'}) > 0 } @fpms;
-			$nf ||= $fpms[$#fpms];
+			my $phpver = $d->{'php_fpm_version'};
+			# If none exists, check template if anything is preferred
+			if (!$phpver) {
+				my $tmpl = &get_template($d->{'template'});
+				# If set in templates use it, or fall back to
+				# highest available later in the code below
+				if ($tmpl->{'web_phpver'}) {
+					$phpver = $tmpl->{'web_phpver'};
+					($nf) = grep { $_->{'shortversion'} eq
+					 	       $phpver } @fpms
+					}
+				}
+			# Get highest version if none found in template
+			($nf) = grep { &compare_versions(
+				    $_->{'shortversion'}, $phpver) > 0 } @fpms
+					if (!$nf);
+			$nf ||= $fpms[-1];
+			&lock_domain($d);
 			$d->{'php_fpm_version'} = $nf->{'shortversion'};
 			&save_domain($d);
+			&unlock_domain($d);
 			push(@fpmfixed, $d);
 			}
 		if (@fpmfixed) {
