@@ -5624,6 +5624,7 @@ if (!$d->{'alias'}) {
 	# Put back per-domain PHP versions
 	if ($mode ne "none" && $mode ne "mod_php") {
 		foreach my $dir (@dirs) {
+			next if (!$dir->{'version'});
 			&save_domain_php_directory($d, $dir->{'dir'},
 						   $dir->{'version'});
 			}
