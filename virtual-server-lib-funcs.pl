@@ -16083,19 +16083,22 @@ if (&domain_has_website()) {
 		# Check for invalid FPM versions, in case one has been
 		# upgraded to a new release
 		local @fpmfixed;
-		@fpms = sort { &compare_versions($a->{'shortversion'}, $b->{'shortversion'}) } @fpms;
+		@fpms = sort { &compare_versions(
+				$a->{'version'}, $b->{'version'}) } @fpms;
 		foreach my $d (grep { &domain_has_website($_) &&
 				      !$_->{'alias'} } &list_domains()) {
 			# Check if an FPM version is stored, but doesn't exist
-			next if (!$d->{'php_fpm_version'});
+			my $dv = $d->{'php_fpm_version'};
+			next if (!$dv);
 			local $mode = &get_domain_php_mode($d);
 			next if ($mode ne "fpm");
-			local ($f) = grep { $_->{'shortversion'} eq $d->{'php_fpm_version'} } @fpms;
+			local ($f) = grep { $_->{'shortversion'} eq $dv ||
+					    $_->{'version'} eq $dv } @fpms;
 			next if ($f);
 
 			# Find the existing version just above the one that
 			# was stored, or alternately the highest available
-			local ($nf) = grep { &compare_versions($_->{'shortversion'}, $d->{'php_fpm_version'}) > 0 } @fpms;
+			local ($nf) = grep { &compare_versions($_->{'shortversion'}, $dv) > 0 } @fpms;
 			$nf ||= $fpms[$#fpms];
 			$d->{'php_fpm_version'} = $nf->{'shortversion'};
 			&save_domain($d);
