@@ -146,7 +146,7 @@ if (defined($phpmail)) {
 	}
 
 # PHP versions
-if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
+if ($canv && !$d->{'alias'} && $mode ne "mod_php" && $mode ne "none") {
 	# Build versions list
 	my @avail = &list_available_php_versions($d, $mode);
 	my @vlist = ( );
@@ -168,15 +168,16 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 		# System has only one version
 		$fullver = $avail[0]->[1] ? &get_php_version($avail[0]->[1], $d)
 					  : $avail[0]->[0];
-		print &ui_table_row($text{'phpmode_version'}, $fullver . &get_php_info_link($d->{'id'}, 'label'))
-		    if ($mode ne 'none');
+		print &ui_table_row($text{'phpmode_version'},
+			$fullver.&get_php_info_link($d->{'id'}, 'label'));
 		}
 	elsif ($mode eq "fpm" && @dirs == 1 ||
 	       $mode eq "fcgid" && $p ne "web") {
 		# Only one version can be set
 		print &ui_table_row(
 			&hlink($text{'phpmode_version'}, "phpmode_version"),
-			&ui_select("ver_0", $dirs[0]->{'version'}, \@vlist) . &get_php_info_link($d->{'id'}, 'label'));
+			&ui_select("ver_0", $dirs[0]->{'version'}, \@vlist).
+			&get_php_info_link($d->{'id'}, 'label'));
 		print &ui_hidden("dir_0", $dirs[0]->{'dir'});
 		print &ui_hidden("d", $dirs[0]->{'dir'});
 		}
@@ -197,7 +198,8 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 					  'value' => $i,
 					  'disabled' => 1,
 					  'checked' => 1, },
-					"<i>$text{'phpver_pub'}</i>" . &get_php_info_link($d->{'id'}),
+					"<i>$text{'phpver_pub'}</i>".
+					  &get_php_info_link($d->{'id'}),
 					$sel
 					]);
 				}
@@ -208,7 +210,8 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 					{ 'type' => 'checkbox', 'name' => 'd',
 					  'value' => $i,
 					  'checked' => 1, },
-					"<tt>$subdir</tt>" . &get_php_info_link($d->{'id'}, 'cell', $subdir),
+					"<tt>$subdir</tt>".
+					  &get_php_info_link($d->{'id'}, 'cell', $subdir),
 					$sel
 					]);
 				$anydelete++;
@@ -235,13 +238,15 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 			   $text{'phpver_ver'} );
 		print &ui_table_row(
 			&hlink($text{'phpmode_versions'}, "phpmode_versions"),
-			&ui_columns_table(\@heads, 100, \@table), undef, undef, ["data-table-id='php-multi'"]);
+			&ui_columns_table(\@heads, 100, \@table), undef, undef,
+			["data-table-id='php-multi'"]);
 
 		# Warn if changing mode would remove per-dir versions
 		if ($mode eq "cgi" || $mode eq "fcgid") {
 			@dirs = &list_domain_php_directories($d);
 			if (@dirs > 1) {
-				print &ui_table_row("", &ui_text_color($text{'phpmode_dirswarn'}, 'warn'));
+				print &ui_table_row("", &ui_text_color(
+					$text{'phpmode_dirswarn'}, 'warn'));
 				}
 			}
 		}
