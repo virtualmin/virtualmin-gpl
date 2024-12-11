@@ -2171,8 +2171,6 @@ check_allwebmin=Updating all Webmin users with new settings..
 check_allresel=Updating all resellers with new settings..
 check_needupdate=Some of the module configuration settings that effect which modules Webmin users have access to have changed. Click the button below to update all users with the new permissions
 check_updatenow=Update Webmin Users
-check_current=In Webalizer's global configuration, the <b>Webalizer incremental file</b> is set to an absolute path. Use the <a href='$1'>Webalizer</a> module to change it to a relative path, like just <tt>webalizer.current</tt>
-check_history=In Webalizer's global configuration, the <b>Webalizer history file</b> is set to an absolute path. Use the <a href='$1'>Webalizer</a> module to change it to a relative path, like just <tt>webalizer.hist</tt>
 check_proftpd=An error was found in the ProFTPD configuration template : $1. This must be fixed by editing the Default Settings on the Server Templates page
 check_enamevirt=The <b>All Apache virtual servers are name-based</b> and <b>Default IP address for DNS records</b> options cannot both be enabled on the <a href='$1'>Virtualmin Configuration</a> page
 check_logrotateok=Logrotate is installed

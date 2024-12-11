@@ -16182,17 +16182,6 @@ if ($config{'webalizer'}) {
 		return &text('index_ewebalizer', "/webalizer/", $clink);
 	&foreign_require("webalizer");
 
-	# This is not needed
-	#local $conf = &webalizer::get_config();
-	#$current = &webalizer::find_value("IncrementalName", $conf);
-	#$history = &webalizer::find_value("HistoryName", $conf);
-	#if ($current =~ /^\//) {
-	#	&check_error(&text('check_current', "/webalizer/"));
-	#	}
-	#elsif ($history =~ /^\//) {
-	#	&check_error(&text('check_history', "/webalizer/"));
-	#	}
-
 	# Make sure template config file exists
 	local $wfile = $tmpl->{'webalizer'} ||
 		       $webalizer::config{'webalizer_conf'};
