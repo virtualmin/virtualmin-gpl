@@ -87,9 +87,9 @@ if ($can) {
 
 # Switch off FPM mode and back again to re-allocate port
 if ($in{'fixport'} && $mode eq "fpm") {
-	&$first_print($text{'phpmode_fixport'});
 	# Toggle mode off PHP-FPM and back on again
-	&save_domain_php_mode($d, "cgi");
+	&$first_print($text{'phpmode_fixport'});
+	&save_domain_php_mode($d, "none");
 	&save_domain_php_mode($d, "fpm");
 	&$second_print($text{'setup_done'});
 	}
