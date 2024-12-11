@@ -156,7 +156,7 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php" && $mode ne "none") {
 			push(@vlist, [ $v->[0], $fullver ]);
 			}
 		else {
-			push(@vlist, $v->[0]);
+			push(@vlist, [ $v->[0], $v->[0] ]);
 			}
 		}
 
@@ -174,10 +174,16 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php" && $mode ne "none") {
 	elsif ($mode eq "fpm" && @dirs == 1 ||
 	       $mode eq "fcgid" && $p ne "web") {
 		# Only one version can be set
+		my $v = $dirs[0]->{'version'};
+		my ($got) = grep { $_->[0] eq $v } @vlist;
 		print &ui_table_row(
 			&hlink($text{'phpmode_version'}, "phpmode_version"),
-			&ui_select("ver_0", $dirs[0]->{'version'}, \@vlist).
+			&ui_select("ver_0", $v, \@vlist, 1, 0, 1).
 			&get_php_info_link($d->{'id'}, 'label'));
+		if (!$got) {
+			print &ui_table_row("", &ui_text_color(
+				$text{'phpmode_verswarn'}, 'warn'));
+			}
 		print &ui_hidden("dir_0", $dirs[0]->{'dir'});
 		print &ui_hidden("d", $dirs[0]->{'dir'});
 		}

@@ -5691,6 +5691,7 @@ phpmode_short_fcgid=FCGI
 phpmode_short_fpm=FPM
 phpmode_short_none=Disabled
 phpmode_dirswarn=Warning! Switching away from <tt>CGI</tt> or <tt>FCGI</tt> modes will remove any per-directory PHP version selections.
+phpmode_verswarn=Warning! The current PHP version does not exist!
 phpmode_err=Failed to save website options
 phpmode_err2=Failed to save PHP options
 phpmode_suexec=Run CGI scripts as domain owner?
