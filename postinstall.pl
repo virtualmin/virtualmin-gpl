@@ -9,6 +9,10 @@ sub module_install
 local $need_restart;
 &lock_file($module_config_file);
 
+# Update last post-install time
+$config{'lastpost'} = time();
+&save_module_config();
+
 # Convert all existing cron jobs to WebminCron, except existing backups
 foreach my $script (@all_cron_commands) {
 	if ($script ne $backup_cron_cmd) {

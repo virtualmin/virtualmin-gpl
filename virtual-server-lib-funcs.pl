@@ -11950,16 +11950,19 @@ return ($licence{'status'}, $licence{'expiry'},
 # error message.
 sub update_licence_from_site
 {
-local ($licence) = @_;
-local ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew,
-       $state, $subscription) = &check_licence_site();
+my ($licence) = @_;
+my $lastpost = $config{'lastpost'};
+return if (defined($licence->{'last'}) &&
+	   $lastpost && time() - $lastpost < 60*60*60);
+my ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew,
+    $state, $subscription) = &check_licence_site();
 $licence->{'last'} = $licence->{'time'} = time();
 delete($licence->{'warn'});
 if ($status == 2) {
 	# Networking / CGI error. Don't treat this as a failure unless we have
 	# seen it for at least 2 days
 	$licence->{'lastdown'} ||= time();
-	local $diff = time() - $licence->{'lastdown'};
+	my $diff = time() - $licence->{'lastdown'};
 	if ($diff < 2*24*60*60) {
 		# A short-term failure - don't change anything
 		$licence->{'warn'} = $err;
