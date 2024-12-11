@@ -11960,16 +11960,19 @@ return ($licence{'status'}, $licence{'expiry'},
 # error message.
 sub update_licence_from_site
 {
-local ($licence) = @_;
-local ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew,
-       $state, $subscription) = &check_licence_site();
+my ($licence) = @_;
+my $lastpost = $config{'lastpost'};
+return if (defined($licence->{'last'}) &&
+	   $lastpost && time() - $lastpost < 60*60*60);
+my ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew,
+    $state, $subscription) = &check_licence_site();
 $licence->{'last'} = $licence->{'time'} = time();
 delete($licence->{'warn'});
 if ($status == 2) {
 	# Networking / CGI error. Don't treat this as a failure unless we have
 	# seen it for at least 2 days
 	$licence->{'lastdown'} ||= time();
-	local $diff = time() - $licence->{'lastdown'};
+	my $diff = time() - $licence->{'lastdown'};
 	if ($diff < 2*24*60*60) {
 		# A short-term failure - don't change anything
 		$licence->{'warn'} = $err;
@@ -12041,7 +12044,18 @@ return ($status, $expiry, $err, $doms, $servers, $max_servers,
 # MAC address or hostname
 sub get_licence_hostid
 {
-local $id;
+my $id;
+my $product_uuid_file = "/sys/class/dmi/id/product_uuid";
+my $product_serial_file = "/sys/class/dmi/id/product_serial";
+my $product_file = -f $product_uuid_file ? $product_uuid_file : 
+           	  (-f $product_serial_file ? $product_serial_file : undef);
+if ($product_file) {
+	$id = &read_file_contents($product_file);
+	$id =~ /(?<id>([0-9a-fA-F]\s*){8})/;
+	$id = $+{id};
+	$id =~ s/\s+//g;
+	return lc($id) if ($id);
+	}
 if (&has_command("hostid")) {
 	$id = &backquote_command("hostid 2>/dev/null");
 	chop($id);
