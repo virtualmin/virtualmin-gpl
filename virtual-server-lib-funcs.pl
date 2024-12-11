@@ -12041,7 +12041,18 @@ return ($status, $expiry, $err, $doms, $servers, $max_servers,
 # MAC address or hostname
 sub get_licence_hostid
 {
-local $id;
+my $id;
+my $product_uuid_file = "/sys/class/dmi/id/product_uuid";
+my $product_serial_file = "/sys/class/dmi/id/product_serial";
+my $product_file = -f $product_uuid_file ? $product_uuid_file : 
+           	  (-f $product_serial_file ? $product_serial_file : undef);
+if ($product_file) {
+	$id = &read_file_contents($product_file);
+	$id =~ /(?<id>([0-9a-fA-F]\s*){8})/;
+	$id = $+{id};
+	$id =~ s/\s+//g;
+	return lc($id) if ($id);
+	}
 if (&has_command("hostid")) {
 	$id = &backquote_command("hostid 2>/dev/null");
 	chop($id);
