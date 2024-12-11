@@ -1,6 +1,7 @@
 #### Version 7.30.3
 * Fix missing button text when restarting a script’s service (Node.js, etc.)
 * Fix advertised installable web apps always show the version as “latest”
+* Fix system ID check to address incorrect license identification
 
 #### Version 7.30.2
 * Fix to ensure the mail log is not read when the mail feature is disabled globally
