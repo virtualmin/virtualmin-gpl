@@ -19,6 +19,7 @@ elsif ($in{'cert_mode'} == 1) {
 	}
 else {
 	&is_under_directory($homed->{'home'}, $in{'certfile'}) ||
+	   $in{'certfile'} eq &default_certificate_file($d, "cert") ||
 		&error(&text('newkey_ecertfilehome', $in{'certfile'}));
 	$cert = &read_file_contents_as_domain_user($d, $in{'certfile'});
 	$cert || &error(&text('newkey_ecertfile', $in{'certfile'}));
@@ -36,6 +37,7 @@ elsif ($in{'newkey_mode'} == 1) {
 elsif ($in{'newkey_mode'} == 2) {
 	# File on server
 	&is_under_directory($homed->{'home'}, $in{'newkeyfile'}) ||
+	   $in{'newkeyfile'} eq &default_certificate_file($d, "key") ||
 		&error(&text('newkey_enewkeyfilehome', $in{'newkeyfile'}));
 	$d->{'ssl_newkey'} && $in{'newkeyfile'} eq $d->{'ssl_newkey'} &&
 		&error($text{'newkey_ekeysame'});
@@ -64,6 +66,7 @@ elsif ($in{'newca_mode'} == 1) {
 elsif ($in{'newca_mode'} == 2) {
 	# File on server
 	&is_under_directory($homed->{'home'}, $in{'newcafile'}) ||
+	   $in{'newcafile'} eq &default_certificate_file($d, "ca") ||
 		&error(&text('newkey_enewcafilehome', $in{'newcafile'}));
 	$newca = &read_file_contents_as_domain_user($d, $in{'newcafile'});
 	$newca || &error(&text('newkey_enewcafile', $in{'newcafile'}));
