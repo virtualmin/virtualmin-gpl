@@ -11960,16 +11960,19 @@ return ($licence{'status'}, $licence{'expiry'},
 # error message.
 sub update_licence_from_site
 {
-local ($licence) = @_;
-local ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew,
-       $state, $subscription) = &check_licence_site();
+my ($licence) = @_;
+my $lastpost = $config{'lastpost'};
+return if (defined($licence->{'last'}) &&
+	   $lastpost && time() - $lastpost < 60*60*60);
+my ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew,
+    $state, $subscription) = &check_licence_site();
 $licence->{'last'} = $licence->{'time'} = time();
 delete($licence->{'warn'});
 if ($status == 2) {
 	# Networking / CGI error. Don't treat this as a failure unless we have
 	# seen it for at least 2 days
 	$licence->{'lastdown'} ||= time();
-	local $diff = time() - $licence->{'lastdown'};
+	my $diff = time() - $licence->{'lastdown'};
 	if ($diff < 2*24*60*60) {
 		# A short-term failure - don't change anything
 		$licence->{'warn'} = $err;
@@ -12041,7 +12044,18 @@ return ($status, $expiry, $err, $doms, $servers, $max_servers,
 # MAC address or hostname
 sub get_licence_hostid
 {
-local $id;
+my $id;
+my $product_uuid_file = "/sys/class/dmi/id/product_uuid";
+my $product_serial_file = "/sys/class/dmi/id/product_serial";
+my $product_file = -f $product_uuid_file ? $product_uuid_file : 
+           	  (-f $product_serial_file ? $product_serial_file : undef);
+if ($product_file) {
+	$id = &read_file_contents($product_file);
+	$id =~ /(?<id>([0-9a-fA-F]\s*){8})/;
+	$id = $+{id};
+	$id =~ s/\s+//g;
+	return lc($id) if ($id);
+	}
 if (&has_command("hostid")) {
 	$id = &backquote_command("hostid 2>/dev/null");
 	chop($id);
@@ -16095,7 +16109,7 @@ if (&domain_has_website()) {
 			($nf) = grep { &compare_versions(
 					$_->{'shortversion'}, $dv) > 0 } @fpms
 						if (!$nf);
-			$nf ||= $fpms[-1];
+			$nf ||= $fpms[$#fpms];
 			&lock_domain($d);
 			$d->{'php_fpm_version'} = $nf->{'shortversion'};
 			&save_domain($d);
@@ -16202,17 +16216,6 @@ if ($config{'webalizer'}) {
 	&foreign_installed("webalizer", 1) == 2 ||
 		return &text('index_ewebalizer', "/webalizer/", $clink);
 	&foreign_require("webalizer");
-
-	# This is not needed
-	#local $conf = &webalizer::get_config();
-	#$current = &webalizer::find_value("IncrementalName", $conf);
-	#$history = &webalizer::find_value("HistoryName", $conf);
-	#if ($current =~ /^\//) {
-	#	&check_error(&text('check_current', "/webalizer/"));
-	#	}
-	#elsif ($history =~ /^\//) {
-	#	&check_error(&text('check_history', "/webalizer/"));
-	#	}
 
 	# Make sure template config file exists
 	local $wfile = $tmpl->{'webalizer'} ||
@@ -19244,7 +19247,14 @@ my ($d) = @_;
 my $host = $d->{'dom'};
 foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
 	my $ip = &to_ipaddress($h);
+	my $ip6 = &to_ip6address($h);
+	# IPv4
 	if ($ip && $ip eq $d->{'ip'}) {
+		$host = $h;
+		last;
+		}
+	# IPv6
+	elsif ($ip6 && $ip6 eq $d->{'ip6'}) {
 		$host = $h;
 		last;
 		}
