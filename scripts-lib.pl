@@ -2051,7 +2051,7 @@ sub get_http_connection
 {
 local ($d, $page, $dest, $error, $cbfunc, $ssl, $user, $pass,
        $timeout, $osdn, $nocache, $headers) = @_;
-local $ip = $d->{'ip'};
+local $ip = $d->{'ip'} || $d->{'ip6'};
 local $host = &get_domain_http_hostname($d);
 my $usessl = &domain_has_ssl($d);
 my $port = $usessl ? $d->{'web_sslport'} : $d->{'web_port'}  || 80;
