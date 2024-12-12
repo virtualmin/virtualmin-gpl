@@ -11999,7 +11999,6 @@ if (defined($servers)) {
 	$licence->{'used_servers'} = $servers;
 	$licence->{'servers'} = $max_servers;
 	}
-return ($status, $err);
 }
 
 # check_licence_site()
