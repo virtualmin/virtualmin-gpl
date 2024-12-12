@@ -586,6 +586,12 @@ foreach my $p (@ports) {
 
 # Update PHP mode cache
 $d->{'php_mode'} = $mode;
+foreach my $ad (&get_domain_by("alias", $d->{'id'})) {
+	$ad->{'php_mode'} = $mode;
+	&lock_domain($ad);
+	&save_domain($ad);
+	&unlock_domain($ad);
+	}
 
 local @vlist = map { $_->[0] } &list_available_php_versions($d);
 if ($mode !~ /mod_php|none/ && $oldmode =~ /mod_php|none/ &&
