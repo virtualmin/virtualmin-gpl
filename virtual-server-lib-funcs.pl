@@ -19226,7 +19226,14 @@ my ($d) = @_;
 my $host = $d->{'dom'};
 foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
 	my $ip = &to_ipaddress($h);
+	my $ip6 = &to_ip6address($h);
+	# IPv4
 	if ($ip && $ip eq $d->{'ip'}) {
+		$host = $h;
+		last;
+		}
+	# IPv6
+	elsif ($ip6 && $ip6 eq $d->{'ip6'}) {
 		$host = $h;
 		last;
 		}
