@@ -16084,7 +16084,7 @@ if (&domain_has_website()) {
 			my $mode = &get_domain_php_mode($d);
 			next if ($mode ne "fpm");
 			my ($f) = grep { $_->{'shortversion'} eq $dv ||
-					    $_->{'version'} eq $dv } @fpms;
+					 $_->{'version'} eq $dv } @fpms;
 			next if ($f);
 
 			# Find the existing version just above the one that
