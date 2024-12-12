@@ -2038,7 +2038,7 @@ if ($file =~ m{/php/(\d+)\.(\d+)/fpm} ||     # Debian and derivatives
 		return $version;
 		}
 	}
-return $avail[0] if @avail;
+return $avail[0] if (@avail && @avail == 1); # Return the only available version
 return undef;
 }
 
