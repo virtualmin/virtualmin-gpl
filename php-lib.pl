@@ -2006,6 +2006,42 @@ if (($ver = &get_domain_php_version($d, $mode)) &&
 	}
 }
 
+# find_php_fpm_config(&domain)
+# Find PHP-FPM config pool file for a domain
+sub find_php_fpm_config
+{
+my ($d) = @_;
+my @fpmconfs = &list_php_fpm_configs();
+my $fpmconf_file;
+foreach my $fpmconf (@fpmconfs) {
+	my $file = $fpmconf->{'dir'}."/".$d->{'id'}.".conf";
+	if (-r $file) {
+		# More than one file found, return undef (error)
+		return undef if ($fpmconf_file);
+		$fpmconf_file = $file;
+		}
+	}
+return $fpmconf_file;
+}
+
+# detect_php_fpm_version(&domain, [file])
+# Returns the PHP-FPM version used by a domain, based on the config file name
+sub detect_php_fpm_version
+{
+my ($d, $file) = @_;
+$file ||= &find_php_fpm_config($d);
+my @avail = map { $_->[0] } &list_available_php_versions($d, 'fpm');
+if ($file =~ m{/php/(\d+)\.(\d+)/fpm} ||     # Debian and derivatives
+    $file =~ m{/php(\d{1,2})(\d)/.*-fpm}) {  # RHEL and derivatives
+	my $version = "$1.$2";
+	if (&indexof($version, @avail) >= 0) {
+		return $version;
+		}
+	}
+return $avail[0] if @avail;
+return undef;
+}
+
 # get_php_fpm_config([version|&domain])
 # Returns the first valid FPM config for a domain
 sub get_php_fpm_config

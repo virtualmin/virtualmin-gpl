@@ -16079,8 +16079,7 @@ if (&domain_has_website()) {
 				$b->{'version'}, $a->{'version'}) } @fpms;
 		foreach my $d (grep { &domain_has_website($_) &&
 				      !$_->{'alias'} } &list_domains()) {
-			# Check if an FPM version is stored, but doesn't exist,
-			# or isn't set on the domain config
+			# Check if an FPM version is stored in domain config
 			my $dv = $d->{'php_fpm_version'};
 			my $mode = &get_domain_php_mode($d);
 			next if ($mode ne "fpm");
@@ -16090,28 +16089,31 @@ if (&domain_has_website()) {
 					 $_->{'version'} eq $dv } @fpms;
 			next if ($f);
 
-			# Find the existing version just above the one that
-			# was stored, or alternately the highest available
-			my $nf;
-			# If none exists, check template if anything is preferred
+			# Try to detect actually configured version
+			$dv = &detect_php_fpm_version($d);
+			# If still none exists, check template if anything
+			# is preferred otherwise fall back to highest available
 			if (!$dv) {
-				# XXX try detecting first from FPM config
+				my $nf;
 				my $tmpl = &get_template($d->{'template'});
 				# If set in templates use it, or fall back to
 				# highest available later in the code below
+				my $tdv;
 				if ($tmpl->{'web_phpver'}) {
-					$dv = $tmpl->{'web_phpver'};
+					$tdv = $tmpl->{'web_phpver'};
 					($nf) = grep { $_->{'shortversion'} eq
-						       $dv } @fpms
+						       $tdv } @fpms
 					}
+				# Otherwise, get highest version if none found
+				# in template and domain config
+				($nf) = grep { &compare_versions(
+						$_->{'shortversion'}, $tdv) > 0 } 
+							@fpms if (!$nf);
+				$nf ||= $fpms[$#fpms];
+				$dv = $nf->{'shortversion'};
 				}
-			# Get highest version if none found in template
-			($nf) = grep { &compare_versions(
-					$_->{'shortversion'}, $dv) > 0 } @fpms
-						if (!$nf);
-			$nf ||= $fpms[$#fpms];
 			&lock_domain($d);
-			$d->{'php_fpm_version'} = $nf->{'shortversion'};
+			$d->{'php_fpm_version'} = $dv;
 			&save_domain($d);
 			&unlock_domain($d);
 			push(@fpmfixed, $d);
