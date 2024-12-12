@@ -16061,38 +16061,40 @@ if (&domain_has_website()) {
 		# upgraded to a new release
 		my @fpmfixed;
 		# Sort to have highest version first
-		@fpms = sort { &compare_versions($b->{'shortversion'}, $a->{'shortversion'}) } @fpms;
+		@fpms = sort { &compare_versions(
+				$b->{'version'}, $a->{'version'}) } @fpms;
 		foreach my $d (grep { &domain_has_website($_) &&
 				      !$_->{'alias'} } &list_domains()) {
 			# Check if an FPM version is stored, but doesn't exist,
 			# or isn't set on the domain config
+			my $dv = $d->{'php_fpm_version'};
 			my $mode = &get_domain_php_mode($d);
 			next if ($mode ne "fpm");
 			# Version set in domain config exists in the list of
 			# FPMs, so skip it, all good
-			my ($f) = grep { $_->{'shortversion'} eq
-					 $d->{'php_fpm_version'} } @fpms;
+			my ($f) = grep { $_->{'shortversion'} eq $dv ||
+					 $_->{'version'} eq $dv } @fpms;
 			next if ($f);
 
-			my $nf;
 			# Find the existing version just above the one that
 			# was stored, or alternately the highest available
-			my $phpver = $d->{'php_fpm_version'};
+			my $nf;
 			# If none exists, check template if anything is preferred
-			if (!$phpver) {
+			if (!$dv) {
+				# XXX try detecting first from FPM config
 				my $tmpl = &get_template($d->{'template'});
 				# If set in templates use it, or fall back to
 				# highest available later in the code below
 				if ($tmpl->{'web_phpver'}) {
-					$phpver = $tmpl->{'web_phpver'};
+					$dv = $tmpl->{'web_phpver'};
 					($nf) = grep { $_->{'shortversion'} eq
-					 	       $phpver } @fpms
+						       $dv } @fpms
 					}
 				}
 			# Get highest version if none found in template
 			($nf) = grep { &compare_versions(
-				    $_->{'shortversion'}, $phpver) > 0 } @fpms
-					if (!$nf);
+					$_->{'shortversion'}, $dv) > 0 } @fpms
+						if (!$nf);
 			$nf ||= $fpms[-1];
 			&lock_domain($d);
 			$d->{'php_fpm_version'} = $nf->{'shortversion'};
