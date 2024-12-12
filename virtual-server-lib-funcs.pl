@@ -11946,8 +11946,7 @@ return ($licence{'status'}, $licence{'expiry'},
 
 # update_licence_from_site(&licence)
 # Attempts to validate the license, and updates the given hash ref with
-# license details. Returns the status code (0=OK, 1=Invalid, 2=Down, 3=Expired) and
-# error message.
+# license details.
 sub update_licence_from_site
 {
 my ($licence) = @_;
