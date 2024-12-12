@@ -16091,8 +16091,10 @@ if (&domain_has_website()) {
 			# was stored, or alternately the highest available
 			local ($nf) = grep { &compare_versions($_->{'shortversion'}, $dv) > 0 } @fpms;
 			$nf ||= $fpms[$#fpms];
+			&lock_domain($d);
 			$d->{'php_fpm_version'} = $nf->{'shortversion'};
 			&save_domain($d);
+			&unlock_domain($d);
 			push(@fpmfixed, $d);
 			}
 		if (@fpmfixed) {
