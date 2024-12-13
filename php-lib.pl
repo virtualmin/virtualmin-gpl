@@ -270,10 +270,10 @@ if (&need_php_wrappers($d, $mode)) {
 	}
 
 # Setup PHP-FPM pool
-if ($mode eq "fpm") {
+if ($mode eq "fpm" && $oldmode ne "fpm") {
 	&create_php_fpm_pool($d);
 	}
-else {
+elsif ($mode ne "fpm") {
 	&delete_php_fpm_pool($d);
 	}
 
@@ -2516,7 +2516,7 @@ if ($port =~ /^\// && !-e $port) {
 	close(TOUCH);
 	&set_ownership_permissions($d->{'user'}, $d->{'ugroup'}, 0660, $port);
 	}
-&register_post_action(\&restart_php_fpm_server, $conf, $d->{'id'});
+&register_post_action(\&restart_php_fpm_server, $conf, $d->{'id'}, 1);
 return undef;
 }
 
@@ -2530,32 +2530,31 @@ my $found = 0;
 foreach my $conf (@fpms) {
 	my @pools = &list_php_fpm_pools($conf);
 	foreach my $p (@pools) {
-		if ($p eq $d->{'id'}) {
-			my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-			if (-r $file) {
-				&unlink_logged($file);
-				&unflush_file_lines($file);
-				my $sock = &get_php_fpm_socket_file($d, 1);
-				&unlink_logged($sock) if (-r $sock);
-				&register_post_action(
-					\&restart_php_fpm_server, $conf, $d->{'id'});
-				}
-			}
+		next if ($p ne $d->{'id'});
+		my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+		next if (!-r $file);
+		&unlink_logged($file);
+		&unflush_file_lines($file);
+		my $sock = &get_php_fpm_socket_file($d, 1);
+		&unlink_logged($sock) if (-r $sock);
+		&register_post_action(
+			\&restart_php_fpm_server, $conf, $d->{'id'}, 1);
 		}
 	}
 }
 
-# restart_php_fpm_server([&config, domain-id])
+# restart_php_fpm_server([&config, domain-id, force-restart])
 # Post-action script to reload or restart the server
 sub restart_php_fpm_server
 {
-my ($conf, $id) = @_;
+my ($conf, $id, $restart) = @_;
 $conf ||= &get_php_fpm_config();
 my $action_mode = $conf->{'init'} ? &init::get_action_mode($conf->{'init'})
 				  : $init::init_mode;
 my $listen = $id ? &get_php_fpm_pool_config_value($conf, $id, "listen")
 		 : undef;
-my $reload = $action_mode eq "systemd" &&
+my $reload = !$restart &&
+	     $action_mode eq "systemd" &&
 	     ($listen !~ /^\// || -e $listen);
 if ($reload) {
 	&$first_print(&text('php_fpmreload', $conf->{'shortversion'}));
