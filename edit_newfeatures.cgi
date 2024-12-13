@@ -28,6 +28,7 @@ foreach $f (@features) {
 	push(@acts, ui_link("search.cgi?field=$f&what=1",
 		                $text{'features_used'}));
 	my $vital = &indexof($f, @vital_features) >= 0;
+	my $deprecated = &indexof($f, @deprecated_features) >= 0;
 	my $always = &indexof($f, @can_always_features) >= 0;
 	if ($vital) {
 		# Some features are *never* disabled, but may be not checked
@@ -43,6 +44,10 @@ foreach $f (@features) {
 			  'value' => $f, 'checked' => $config{$f} == 3 },
 			&ui_links_row(\@acts)
 			]);
+		}
+	elsif ($deprecated && !$config{$f}) {
+		# Some features are now hidden unless already enabled
+		next;
 		}
 	else {
 		# Other features can be disabled
