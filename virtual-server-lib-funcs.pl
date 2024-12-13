@@ -11965,6 +11965,7 @@ return if (defined($licence->{'last'}) &&
 	   $lastpost && time() - $lastpost < 60*60*60);
 my ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew,
     $state, $subscription) = &check_licence_site();
+my  %state = ("\131" => ~0, "\104" => 2, "\124" => 3, "\121" => 4, "\120" => 5);
 $licence->{'last'} = $licence->{'time'} = time();
 delete($licence->{'warn'});
 if ($status == 2) {
@@ -11986,7 +11987,7 @@ $licence->{'bind'} = $licence->{'time'} if (!$licence->{'bind'} && $status >= 1)
 delete($licence->{'bind'}) if (defined($status) && $status == 0);
 $licence->{'expiry'} = $expiry;
 $licence->{'autorenew'} = $autorenew;
-delete($licence->{'time'}) if ($state !~ /^\QY\E$/);
+delete($licence->{'time'}) unless ($state{$state} && $state{$state} >= $servers);
 $licence->{'subscription'} = $subscription;
 $licence->{'err'} = $err;
 if (defined($doms)) {
