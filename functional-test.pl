@@ -11661,6 +11661,14 @@ $reset_tests = [
 		      'PHP version: '.$max_php_version ],
 	},
 
+	# Check PHP execution
+	{ 'command' => 'echo "<?php phpinfo(); ?>" >~'.
+		       $test_domain_user.'/public_html/test.php',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+	  'grep' => 'PHP Version',
+	},
+
 	# Add a DNS record that will be lost
 	{ 'command' => 'modify-dns.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -11766,6 +11774,37 @@ $reset_tests = [
 	{ 'command' => 'validate-domains.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
 		      [ 'all-features' ] ],
+	},
+
+	# Switch PHP mode to FPM
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'mode', 'fpm' ] ],
+	},
+
+	# Reset the website feature again
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'web' ] ],
+	},
+
+	# Validate to ensure that the config is now OK
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'feature', 'web' ],
+		      [ 'feature', 'ssl' ], ],
+	},
+
+	# Check that the PHP mode is correct
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'PHP execution mode: fpm' ],
+	},
+
+	# Check PHP execution again
+	{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+	  'grep' => 'PHP Version',
 	},
 
 	# Cleanup the domain
