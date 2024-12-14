@@ -61,15 +61,25 @@ if (&need_config_check() && &can_check_config()) {
 # Suggest to GPL user to get Virtualmin Pro
 if (!$virtualmin_pro &&
     &should_show_pro_tip('dashboard', 'force')) {
-	# Do not show dashboard alert within first three days, until things settle down
-	&foreign_require("webmin");
-	my $uptime = &webmin::get_system_uptime();
-	$uptime = (!$uptime || $uptime > 60*60*24 * 4);
+	# Do not show Pro advertisement on the dashboard within first three days
+	my $goodtime;
+	my $lastpost = $config{'lastpost'};
+	if ($lastpost) {
+		# Use last update time instead, i.e. don't nag potentially right
+		# after first installation
+		$goodtime = (time() - $lastpost > 60*60*24 * 3);
+		}
+	else {
+		# Use system uptime as a fallback
+		&foreign_require("webmin");
+		my $uptime = &webmin::get_system_uptime();
+		$goodtime = (!$uptime || $uptime > 60*60*24 * 3);
+		}
 	# Show alert in another five days if reminder been set
 	my ($remind) = &should_show_pro_tip('dashboard_reminder', 'force');
-	my $futureremind = (int($remind) + (60*60*24 * 5));
+	my $futureremind = (int($remind) + (60*60*24 * 7));
 	my $doremind = ($remind && $futureremind < time());
-	if (($uptime && !$remind) || ($uptime && $doremind)) {
+	if (($goodtime && !$remind) || ($goodtime && $doremind)) {
 		push(@rv, { 'type' => 'warning',
 			    'level' => 'info',
 			    'warning' => { 'alert' => &alert_pro_tip('dashboard', {
