@@ -2,6 +2,8 @@
 * Fix missing button text when restarting a script’s service (Node.js, etc.)
 * Fix advertised installable web apps always show the version as “latest”
 * Fix system ID check to address incorrect license identification
+* Fix to ensure files inside backups have the correct extensions
+* Fix to clean up the code that adjusts FPM versions during the config check
 
 #### Version 7.30.2
 * Fix to ensure the mail log is not read when the mail feature is disabled globally
