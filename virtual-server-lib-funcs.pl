@@ -11882,6 +11882,18 @@ if (&require_licence()) {
 	}
 }
 
+# licence_state()
+# Returns license state as hash
+sub licence_state
+{
+my @keys = qw(Y D T Q P H);
+my %hash;
+for my $i (0 .. $#keys) {
+	$hash{$keys[$i]} = $i == 0 ? 0 + ~0 : $i + 1;
+	}
+return %hash;
+}
+
 # licence_status()
 # Checks license status
 sub licence_status
@@ -11955,7 +11967,7 @@ return if (defined($licence->{'last'}) &&
 	   $lastpost && time() - $lastpost < 60*60*60);
 my ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew,
     $state, $subscription) = &check_licence_site();
-my  %state = ("\131" => ~0, "\104" => 2, "\124" => 3, "\121" => 4, "\120" => 5);
+my  %state = &licence_state();
 $licence->{'last'} = $licence->{'time'} = time();
 delete($licence->{'warn'});
 if ($status == 2) {
