@@ -21272,12 +21272,13 @@ sub validation_select_features
 my @fopts;
 my @sorted_features = @validate_features;
 features_sort(\@sorted_features, \@sorted_features);
-foreach $f (@sorted_features) {
+foreach my $f (@sorted_features) {
+	next if (!$config{$f} && defined($config{$f}));
 	push(@fopts, [ $f, $text{'feature_'.$f} ]);
 	}
 my @sorted_plugins = &list_feature_plugins();
 features_sort(\@sorted_plugins, \@sorted_plugins);
-foreach $f (@sorted_plugins) {
+foreach my $f (@sorted_plugins) {
 	if (&plugin_defined($f, "feature_validate")) {
 		push(@fopts, [ $f, &plugin_call($f, "feature_name") ]);
 		}
