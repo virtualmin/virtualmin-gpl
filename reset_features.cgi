@@ -15,7 +15,7 @@ my @dom_features = grep { $d->{$_} && $sel{$_} }
 		 &list_ordered_features($d);
 @dom_features || &error($text{'reset_efeatures2'});
 my %feature = map { $_, 1 } grep { $sel{$_} } @features;
-my %plugins = map { $_, 1 } grep { $sel{$_} } &list_feature_plugins();
+my %plugin = map { $_, 1 } grep { $sel{$_} } &list_feature_plugins();
 
 # Can each be reset?
 my %canmap;
