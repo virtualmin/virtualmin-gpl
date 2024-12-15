@@ -4708,7 +4708,7 @@ newnotify_done=The specified email message has been sent to the following addres
 newnotify_edoms=No servers selected
 newnotify_attach=Optional attached file
 newnotify_admins=Also email extra administrators in selected domains?
-newnotify_users=Also email userd in selected domains?
+newnotify_users=Also email users in selected domains?
 newnotify_nomany=Only email each domain owner once
 
 mailusers_title=Email All Mailboxes
