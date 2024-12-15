@@ -237,6 +237,9 @@ setup_domaliasbad=.. no es un nombre de dominio válido!
 setup_statussslcert=Crear monitor de estado para certificado SSL.
 setup_scripts=Instalación de aplicaciones web de terceros ..
 setup_scriptgone=¡La aplicación web $1 no existe!
+setup_scriptreqs=.. no se pudieron configurar los requisitos del script
+setup_scriptpath=.. la ruta del script no es válida : $1
+setup_scriptphpverset=.. no se pudo configurar la versión de PHP : $1
 setup_scriptclash=.. la aplicación web necesita crear una base de datos llamada $1, pero ya existe
 setup_redirects=Agregar redireccionamientos a sitios web ..
 setup_redirecting=Crear redirección de $1 a $2 ..
@@ -687,6 +690,7 @@ check_lowgmemory=Su sistema es una VM con $1 de memoria, pero el límite garanti
 check_okmemory=Su sistema tiene $1 de memoria, que es igual o superior al mínimo recomendado de Virtualmin de $2
 check_okgmemory=Su sistema es una máquina virtual con un máximo de $1 de memoria, pero un límite garantizado de solo $2. Ambos son iguales o superiores al mínimo recomendado de Virtualmin de $3
 check_dnsip3=La dirección IPv4 externa detectada es $1
+check_dnsip3v6=La dirección IPv6 externa detectada es $1
 check_ednsip3=No se pudo detectar la dirección IPv4 externa
 check_ednsip1=La dirección IP externa para los registros DNS se establece en $1, pero la dirección externa detectada es en realidad $2. Esto puede hacer que los registros DNS de los dominios de Virtualmin apunten al sistema incorrecto
 check_ednsip2=La dirección IP predeterminada se establece en $1, pero la dirección externa detectada es en realidad $2. Esto suele ser el resultado de estar detrás de un firewall NAT, y debe corregirse en la página de <a href='$3'>configuración</a> del <a href='$3'>módulo</a>
@@ -733,6 +737,7 @@ check_mysqlnopass=MySQL $1 está instalado y ejecutándose, pero no tiene ningun
 check_mysqlnopasssocket=MySQL $1 está instalado y ejecutándose, usando autenticación de socket Unix
 check_postgresok3=Virtualmin está usando un servidor PostgreSQL remoto
 check_enetmask6=La máscara de red IPv6 $1 no es válida; debe ser un número, como 64
+check_iface4=Las direcciones IPv4 no están disponibles en este sistema
 check_iface6=Las direcciones IPv6 están disponibles, usando la interfaz $1
 check_emysqlsync=La sincronización entre los usuarios de Unix y MySQL está habilitada en el módulo de <a href='$1'>base de datos MySQL</a>. Esto no es necesario, ya que Virtualmin crea cuentas MySQL para propietarios de dominios cuando sea necesario, por lo que debe desactivarse
 check_equotasync=Las cuotas de disco predeterminadas para nuevos usuarios están habilitadas en los sistemas de archivos: $1. Esto no es necesario, ya que Virtualmin establece cuotas para nuevos usuarios, por lo que debe deshabilitarse en el módulo <a href='$2'>Cuotas de disco</a>
@@ -916,6 +921,7 @@ log_delete_acme=Se eliminó el proveedor SSL para $1
 log_update_acme=Proveedor SSL actualizado para $1
 
 backup_desc=Descripción de respaldo
+backup_headerfeatures2=Configuración global
 backup_reseller=Límite a los servidores propiedad del revendedor
 backup_anyreseller=Cualquier revendedor
 backup_selreseller=Revendedores seleccionados.
@@ -1182,6 +1188,9 @@ rename_eparentuser=El nombre de usuario solo se puede cambiar para servidores de
 
 cert_hasnossl=Advertencia: este servidor virtual aún no tiene habilitado un sitio web SSL. Cualquier certificado SSL solo se puede utilizar para otros servicios.
 cert_noneyet=Este servidor virtual aún no tiene certificado SSL. Utilice una de las pestañas de esta página para generar un certificado y una clave.
+cert_desc3a=Si el nuevo certificado proviene de una CA que tiene su propio certificado, también debe instalarlo aquí al mismo tiempo.
+cert_newca=Certificado CA
+cert_newcakeep=Mantener el certificado existente
 cert_tabacme=Proveedores de SSL
 cert_tabperip=Certificados de servicio
 cert_etime=Tiempo hasta el vencimiento
@@ -1255,17 +1264,19 @@ csr_csring=Generando solicitud de firma y clave privada.
 
 newkey_ecert2=Certificado SSL firmado faltante o no válido : $1
 newkey_enewkey2=Clave privada SSL faltante o no válida : $1
+newkey_eca2=Certificado CA faltante o no válido : $1
 newkey_savingcert=Guardando certificado ..
 newkey_savingkey=Guardando clave privada ..
-newkey_checkingca=Validando que el certificado de CA coincida con el nuevo certificado. ..
-newkey_echeckingca=.. CA no coincide y se eliminó.
-newkey_echeckingca2=.. ¡No se pudo leer el certificado CA!
+newkey_savingca=Guardando certificado CA ..
 newkey_epass=La clave privada está protegida con contraseña, pero no se ingresó ninguna o la contraseña era incorrecta
 newkey_ematch=Problema de certificado detectado : $1
+newkey_ecamatch=El certificado de CA no coincide con el firmante del certificado de dominio
 newkey_ecertfile=Error al leer el archivo del certificado $1
 newkey_ecertfilehome=El archivo de certificado $1 debe estar en el directorio de inicio del servidor virtual
 newkey_enewkeyfile=Error al leer el archivo de clave privada $1
+newkey_enewcafile=No se pudo leer el archivo de certificado CA $1
 newkey_enewkeyfilehome=El archivo de clave privada $1 debe estar en el directorio de inicio del servidor virtual
+newkey_enewcafilehome=El archivo de certificado CA $1 debe estar en el directorio de inicio del servidor virtual
 newkey_apache=Configuración del servidor web para usar un nuevo certificado y clave.
 newkey_enewkeycsr=¡No se encontró ninguna clave SSL al mismo tiempo que se encontró una solicitud de firma!
 newkey_ekeysame=No ingrese la ruta a la clave generada con una CSR; en su lugar, use la pestaña <b>Aplicar certificado firmado</b>.
@@ -1700,6 +1711,7 @@ scripts_emissing=¡La aplicación web no existe!
 scripts_ephpvers2=Esta aplicación web no se puede instalar porque no se encontraron versiones de PHP compatibles
 scripts_enophpvers=¡No se encontraron versiones de PHP!
 scripts_enophpdir=No se pudo encontrar la versión de PHP para $1
+scripts_enophpbestver=No se pudo encontrar la versión completa de PHP para $1
 scripts_ephpverchange=No se pudo cambiar el directorio $1 para usar la versión de PHP $2
 scripts_ephpminmax=Ninguna de las versiones de PHP disponibles ($1) está entre $2 y $3
 scripts_ephpmin=Ninguna de las versiones de PHP disponibles ($1) es igual o superior a $2
@@ -1869,7 +1881,7 @@ scripts_service_eport=Número de puerto de servicio faltante o no válido
 scripts_service_estartcmd=Falta el comando de inicio del servicio
 
 newnotify_admins=¿También enviar correos electrónicos a administradores adicionales en dominios seleccionados?
-newnotify_users=¿También enviar correo electrónico a userd en dominios seleccionados?
+newnotify_users=¿Enviar correos electrónicos también a usuarios de dominios seleccionados?
 newnotify_nomany=Solo envíe un correo electrónico a cada propietario de dominio una vez
 
 summary_title2=Resumen del servidor secundario virtual
@@ -2169,6 +2181,11 @@ pass_hashpass=¿Solo almacenar contraseña hash para este dominio?
 
 cmass_plan=Plan para dominios principales
 cmass_ealias=El servidor de destino de alias $1 no existe
+cmass_detail=Salida de creación de lotes
+cmass_detail0=Mostrar solo resúmenes
+cmass_detail1=Mostrar detalles completos de cada servidor
+cmass_creating=Creando servidor virtual $1 ..
+cmass_failed=.. creación fallida : $1
 
 umass_formatftp=Las opciones posibles para <tt>ftp-flag</tt> son: <br> 0 - No se permite inicio de sesión FTP <br> 1 - Inicio de sesión FTP regular <br> 2 - Inicio de sesión FTP encarcelado <br> 3 - Usuario FTP del sitio web
 umass_formatemail=Las opciones posibles para la marca de <tt>email-flag</tt> son: <br> 0: sin dirección de correo electrónico <br> 1 - Correo electrónico habilitado
@@ -2209,6 +2226,7 @@ phpmode_short_fcgid=FCGI
 phpmode_short_fpm=FPM
 phpmode_short_none=Discapacitado
 phpmode_dirswarn=¡Advertencia! Al abandonar los modos <tt>CGI</tt> o <tt>FCGI</tt> se eliminarán las selecciones de versión de PHP por directorio.
+phpmode_verswarn=¡Atención! ¡La versión actual de PHP no existe!
 phpmode_err2=No se pudieron guardar las opciones de PHP
 phpmode_esuexec=La opción <b>CGI</b> no se puede seleccionar a menos que se seleccione <b>Ejecutar scripts CGI como propietario del dominio</b>
 phpmode_fpmtype=Modo de administrador de procesos PHP
@@ -2746,6 +2764,7 @@ dplans_eall=Al menos un plan debe existir
 
 postgrey_title=Email Greylisting
 newpostgrey_title=Email Greylisting
+postgrey_emailfeat=Las listas grises solo se pueden utilizar cuando el correo electrónico está habilitado globalmente.
 postgrey_epostfix=Postgrey solo se puede usar junto con el servidor de correo Postfix
 postgrey_ecmd=El comando Postgrey $1 no se encontró
 postgrey_euser=El usuario de Postgrey $1 no existe
@@ -3064,6 +3083,7 @@ dkim_title1=Habilitar el correo identificado de DomainKeys
 dkim_title2=Deshabilitar DomainKeys Identified Mail
 dkim_econfig=El archivo de configuración DKIM $1 no existe
 dkim_einit=El script de arranque del servidor de filtro DKIM $1 no existe
+dkim_email=No se puede habilitar DKIM a menos que esté habilitado el correo electrónico
 dkim_eos=La administración de DKIM no es compatible con este sistema operativo
 dkim_failed=El correo identificado de DomainKeys no está disponible en este sistema : $1
 dkim_installdesc=Sin embargo, Virtualmin puede intentar instalar automáticamente el paquete de filtro DKIM por usted.
@@ -3450,6 +3470,7 @@ bucket_account2=cuenta S3
 bucket_eacls=ACLs for new buckets must be enabled on the AWS Console.
 
 ratelimit_title=Limitación de tarifa de correo
+ratelimit_email=La limitación de velocidad de correo electrónico no se puede habilitar a menos que el correo electrónico esté habilitado
 ratelimit_eos=La limitación de velocidad de correo electrónico no es compatible con este sistema operativo
 ratelimit_econfig=El archivo de configuración milter-greylist $1 no existe
 ratelimit_ecmd=El comando $1 no se encontró en este sistema

@@ -1625,8 +1625,6 @@ check_allwebmin=Updaten van alle Webmin gebruikers met de nieuwe instellingen ..
 check_allresel=Updaten van alle resellers met de nieuwe instellingen ..
 check_needupdate=Sommige van de module configuratie instellingen die effect hebben op de modules waar Webmin gebruikers toegang hebben zijn verandert. Klik op de knop hieronder om alle gebruikers te updaten met de nieuwe permissies
 check_updatenow=Update Webmin Gebruikers
-check_current=In Webalizer's globale configuratie, is de <b>Webalizer incremental file</b> gezet naar een absoluut pad. Gebruik de <a href='$1'>Webalizer</a> module om dit te veranderen naar een relatief pad, zoiets als <tt>webalizer.current</tt>
-check_history=In de Webalizer's globale configuratie, is de <b>Webalizer historie file</b> ingesteld naar een absoluut pad. Gebruik de <a href='$1'>Webalizer</a> module om dit te veranderen naar een relatief pad, zoals <tt>webalizer.hist</tt>
 check_proftpd=Er is een fout gevonden in de ProFTPd configuratie template : $1. Dit moet gerepareerd worden door de Standaard Instellingen te bewerken op de Server Templates pagina
 check_enamevirt=De <b>Alle Apache virtuele servers op naam-gebaseerd</b> en <b>Standaard IP adres voor DNS records</b> opties kunnen niet beide aangezet staan op de <a href='$1'>Virtualmin Configuratie</a> pagina
 check_logrotateok=Log rotatie is geinstalleerd
@@ -2379,7 +2377,6 @@ cert_tabcurrent=Huidig Certificaat
 cert_tabcsr=Ondertekenen Aanvraag
 cert_tabself=Zelf Ondertekend Certificaat
 cert_tabnew=Nieuw Certificaat
-cert_tabchain=CA Certificaat
 cert_download=Download certificaat
 cert_kdownload=Download prive sleutel
 cert_pem=PEM formaat
@@ -2389,14 +2386,7 @@ cert_also=Ook gebruikt zijn bij domeinen
 cert_edownload=Geen SSL certificaat gevonden!
 cert_edownload2=Geen SSL sleutel gevonden!
 cert_eformat=Kon het aangevraagde certificaat formaat niet uitwerken
-cert_header4=Certificaat autoriteit details
-cert_chain=CA certificaat file
 cert_chain0=Niets nodig
-cert_chain1=In file op server $1
-cert_chain2=Ge-uploaden file $1
-cert_chain3=Geplakte certificaat tekst
-cert_desc5=Indien uw virtuele server's SSL certificaat van een certificaat autoriteit is die niet direct bekend is bij alle belangrijk browsers, moet U dit CA's certificaat uploaden met gebruik van dit formulier.
-cert_chainok=Certificaat Opslaan
 cert_esubject=Certificaat lijkt geen algemene naam te hebben
 cert_same=Deze virtuele server deelt zijn SSL certificaat met <tt>$1</tt>, en kan daarom niet bewerkt worden op deze pagina.
 cert_samelink=Gebruik de <a href='$1'>Beheer SSL Certificaat</a> pagina om SSL instellingen te veranderen.
@@ -4591,13 +4581,6 @@ spamd_startfailed=.. mislukt om te starten : $1
 spamd_unboot=SpamAssassin server uitzetten tijdens booten ..
 spamd_unbootact=.. geen boot actie gevonden!
 spamd_stop=Stoppen van SpamAssassin server ..
-
-chain_err=Mislukt om CA certificaat op te slaan
-chain_efile=Certificaat file bestaat niet
-chain_ecert=Ongeldige certificaat file : $1
-chain_emode1=U bent niet bevoegd om een een andere file op de server te selecteren!
-chain_eupload=Geen certificaat file geselecteerd om te uploaden
-chain_epaste=Er is geen certificaten tekst ingevuld
 
 stopscript_title=Stop Rails Server
 stopscript_doing=Rails server proces uitschakelen voor $1 ..

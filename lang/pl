@@ -2139,8 +2139,6 @@ check_allwebmin=Aktualizacja wszystkich użytkowników Webmina z nowymi ustawien
 check_allresel=Aktualizacja wszystkich resellerów z nowymi ustawieniami..
 check_needupdate=Niektóre ustawienia konfiguracji modułu, które wpływają na dostępność modułów dla użytkowników Webmina, zostały zmienione. Kliknij przycisk poniżej, aby zaktualizować wszystkich użytkowników z nowymi uprawnieniami
 check_updatenow=Zaktualizuj użytkowników Webmina
-check_current=W globalnej konfiguracji Webalizera plik <b>Webalizer incremental file</b> jest ustawiony na ścieżkę absolutną. Użyj modułu <a href='$1'>Webalizer</a>, aby zmienić ją na ścieżkę względną, np. <tt>webalizer.current</tt>check_history=W globalnej konfiguracji Webalizera, <b>plik historii Webalizera</b> jest ustawiony na ścieżkę bezwzględną. Użyj modułu <a href='$1'>Webalizer</a>, aby zmienić ją na ścieżkę względną, na przykład <tt>webalizer.hist</tt>
-check_history=W globalnej konfiguracji Webalizera plik <b>historii Webalizera</b> jest ustawiony na ścieżkę bezwzględną. Użyj modułu <a href='$1'>Webalizer</a>, aby zmienić go na ścieżkę względną, np. po prostu <tt>webalizer.hist</tt>
 check_proftpd=Znaleziono błąd w szablonie konfiguracji ProFTPD: $1. Należy to naprawić, edytując Ustawienia Domyślne na stronie Szablonów Serwerów
 check_enamevirt=Opcje <b>Wszystkie wirtualne serwery Apache są oparte na nazwach</b> i <b>Domyślny adres IP dla rekordów DNS</b> nie mogą być jednocześnie włączone na stronie <a href='$1'>Konfiguracja Virtualmina</a>
 check_logrotateok=Logrotate jest zainstalowany
@@ -3259,7 +3257,6 @@ cert_tabcsr=Utwórz żądanie podpisania
 cert_tabself=Utwórz certyfikat samopodpisany
 cert_tabsavecsr=Zastosuj podpisany certyfikat
 cert_tabnew=Zaktualizuj certyfikat i klucz
-cert_tabchain=Certyfikat CA
 cert_tabperip=Certyfikaty usług
 cert_download=Pobierz certyfikat
 cert_kdownload=Pobierz klucz prywatny
@@ -3286,15 +3283,7 @@ cert_svcs=Używany przez usługi
 cert_edownload=Nie znaleziono certyfikatu SSL!
 cert_edownload2=Nie znaleziono klucza SSL!
 cert_eformat=Nie udało się rozpoznać żądanego formatu certyfikatu
-cert_header4=Szczegóły urzędu certyfikacji
-cert_chain=Plik certyfikatu CA
 cert_chain0=Nie jest wymagany
-cert_chain1=W pliku na serwerze $1
-cert_chain2=Załadowany plik $1
-cert_chain3=Wklejony tekst certyfikatu
-cert_desc5=Jeśli certyfikat SSL Twojego wirtualnego serwera pochodzi od urzędu certyfikacji, który nie jest bezpośrednio rozpoznawany przez główne przeglądarki, może być konieczne przesłanie certyfikatu CA za pomocą tego formularza.
-cert_desc5a=Wybrany plik może zawierać wiele certyfikatów CA w formacie PEM, jeden po drugim.
-cert_chainok=Zapisz certyfikat
 cert_ecerts=Certyfikat nie zawiera żadnych bloków BEGIN/END
 cert_eoutside=Certyfikat zawiera blok END bez odpowiadającego mu bloku BEGIN
 cert_einside=Certyfikat zawiera blok BEGIN bez odpowiadającego mu bloku END
@@ -3384,9 +3373,6 @@ newkey_ecert2=Brakujący lub niepoprawnie podpisany certyfikat SSL : $1
 newkey_enewkey2=Brakujący lub nieprawidłowy klucz prywatny SSL : $1
 newkey_savingcert=Zapisuję ceryfikat ..
 newkey_savingkey=Zapisuję klucz prywatny ..
-newkey_checkingca=Waliduję czy certyfikat CA jest zgodny z nowy certyfikatem ..
-newkey_echeckingca=.. CA nie jest zgodny, oraz został usunięty.
-newkey_echeckingca2=.. nie można odczytać certyfikatu CA!
 newkey_epass=Klucz prywatny jest zabezpieczony hasłem, ale nie został podany lub hasło jest nie poprawne
 newkey_ematch=Wykryto problem w Certyfikacie : $1
 newkey_ecertfile=Nie udało się odczytać pliku certyfikatu $1
@@ -4549,7 +4535,6 @@ newnotify_done=Wiadomość e-mail została wysłana do następujących adresów:
 newnotify_edoms=Nie wybrano żadnych serwerów
 newnotify_attach=Opcjonalnie załączony plik
 newnotify_admins=Wysłać również e-mail do ekstra administratorów w wybranych domenach?
-newnotify_users=Wysłać również e-mail do użytkowników w wybranych domenach?
 newnotify_nomany=Wysyłaj e-mail do każdego właściciela domeny tylko raz
 
 mailusers_title=Wyślij wiadomość na wszystkie skrzynki pocztowe
@@ -6311,13 +6296,6 @@ spamd_startfailed=.. Nie udało się uruchromić : $1
 spamd_unboot=Wyłączam SpamAssasin serwer podczas uruchomienia systemu ..
 spamd_unbootact=.. nie istnieje akcja $1 na uruchomieniu!
 spamd_stop=Zatrzymuję serwer SpamAssassin ..
-
-chain_err=Nie udało się zapisać CA certyfikatu
-chain_efile=Plik certyfikatu nie istnieje
-chain_ecert=Nieprawidłowy plik certyfikatu : $1
-chain_emode1=Nie masz pozwolenia aby wybrać inny plik na serwerze!
-chain_eupload=Nie wybrano wgranego pliku certyfikatu
-chain_epaste=Nie wprowadzono tekstu certyfikatu
 
 stopscript_title=Zatrzymaj serwer
 stopscript_egone=Aplikacja webowa nie istnieje!

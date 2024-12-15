@@ -1350,8 +1350,6 @@ check_eftpshell=Die Shell $1 für FTP-Benutzer ist nicht in $2 enthalten, welche
 check_allwebmin=Alle Webmin-Benutzer mit den neuen Einstellungen aktualisieren..
 check_needupdate=Einige der Modul-Konfigurations-Einstellungen steuern auf welche Module Webmin-Benutzer Zugriff haben. Die generelle Konfiguration hat sich geändert. Bitte klicken Sie hier um alle Benutzer mit neuen Berechtigungen auszustatten
 check_updatenow=Update de Webmin-Benutzer
-check_current=In der globalen Konfiguration wurde der Pfad zur inkrementellen Datei absolut gesetzt. Benutzen Sie bitte das <a href='$1'>Webalizer-Modul</a>, um dies in einen relativen Pfad zu ändern (wie dies für die Datei <tt>webalizer.current</tt> getan wurde)
-check_history=In der globalen Webalizer-Konfiguration ist die <b>Historien-Datei</b> mit einem abolutem Pfad konfiguriert. Benutzen Sie die <a href='$1'>Modulkonfiguration</a> von Webalizer um einen relativen Pfad einzustellen, z.B. <tt>webalizer.hist</tt>
 check_proftpd=Ein Fehler wurde in der ProFTPd-Konfigurationsvorlage gefunden : $1
 check_enamevirt=Die Optionen <b>Alle Vituellen Apache-Hosts sind namen-basierend</b> und <b>Standard-IP-Adresse für DNS-Records</b> können nicht gleichzeitig in der <a href='$1'>Modulkonfiguration</a> aktiviert sein
 check_logrotateok=Logrotate ist installiert
@@ -1872,7 +1870,6 @@ cert_tabcsr=Neue Signierungsanfrage
 cert_tabself=Erstelle selbstsigniertes Zertifikat
 cert_tabsavecsr=Wende signiertes Zertifikat an
 cert_tabnew=Update Zertifikat und Schlüssel
-cert_tabchain=CA Zertifikat
 cert_download=Zertifikat herunterladen
 cert_kdownload=Privaten Schlüssel herunterladen
 cert_pem=PEM Format
@@ -1881,10 +1878,6 @@ cert_pkcs7=PKCS7 Format
 cert_also=Auch von Domains benutzt
 cert_edownload=Kein SSL Zertifikat gefunden!
 cert_edownload2=Kein SSL Schlüssel gefunden!
-cert_chain=CA Zertifikatsdatei
-cert_chain1=In Datei auf Server $1
-cert_chain2=Hochgeladene Datei $1
-cert_chainok=Speichere Zertifikat
 cert_same=Dieser Virtueller Server teilt sein SSL-Zertifikat mit <tt>$1</tt>, so kann es auf dieser Seite nicht bearbeitet werden kann.
 cert_samelink=Benutze die <a href='$1'>Verwalte SSL-Zertifikat</a> Seite um SSL Einstellungen zu ändern.
 cert_already_dovecot=Dovecot
@@ -3564,13 +3557,6 @@ spamd_startfailed=.. fehlgeschlagen zu starten : $1
 spamd_unboot=Deaktiviere SpamAssassin Server beim Booten ..
 spamd_unbootact=.. keine Bootzeit Aktion gefunden!
 spamd_stop=Stoppe SpamAssassin Server ..
-
-chain_err=Fehlgeschlagen CA-Zertifikat zu speichern
-chain_efile=Zertifikatsdatei existiert nicht
-chain_ecert=Ungültige Zertifikatsdatei : $1
-chain_emode1=Sie sind nicht berechtigt, eine andere Datei auf dem Server auszuwählen!
-chain_eupload=Keine hochgeladene Zertifikatsdatei ausgewählt
-chain_epaste=Kein Zertifikatstext eingegeben
 
 stopscript_title=Stoppe Rails Server
 stopscript_doing=Fahre den Rails Server Prozess für $1 herunter ..

@@ -1449,8 +1449,6 @@ check_allwebmin=Actualizando todos los usuarios Webmin con las nuevas configurac
 check_allresel=Actualizando todos los resellers con la nueva configuración ..
 check_needupdate=Han cambiado algunos de los parámetros de la configuración de módulo que efectan a cuáles módulos los usuarios de Webmin tienen acceso. Presione el botón que se encuentra debajo para actualizar a todos los usuarios con los nuevos permisos
 check_updatenow=Actualizar Usuarios Webmin
-check_current=En la configuración global de Webalizer, el <b>archivo incremental Webalizer</b> se establece a una trayectoria absoluta. Utilice el módulo <a href='$1'>Webalizer</a> para cambiarlo a una trayectoria relativa, tal como <tt>webalizer.current</tt>
-check_history=En la configuración global de Wabalizer, el <b>archivo histórico de Webalizer</b> se estableció a una trayectoria absoluta. Utilice el módulo <a href='$1'>Webalizer</a> para cambiarlo a una trayectoria relativa, tal como <tt>webalizer.hist</tt>
 check_proftpd=Se encontró un error en la plantilla de configuración de ProFTPd : $1
 check_enamevirt=Las opciones <b>Todos los servidores virtuales Apache son basados en nombres</b> y <b>Direcciones por omisión para los registros DNS</b> no pueden estar habilitadas a la vez en la página de <a href='$1'>Configuración del módulo</a>
 check_logrotateok=Logrotate está instalado
@@ -2144,7 +2142,6 @@ cert_tabcsr=Solicitud de registro
 cert_tabself=Crear certificado autofirmado
 cert_tabsavecsr=Aplicar certificado firmado
 cert_tabnew=Nuevo certificado
-cert_tabchain=Certificado CA
 cert_download=Bajar certificado
 cert_kdownload=Descargar llave privada
 cert_pem=Formato PEM
@@ -2154,15 +2151,7 @@ cert_also=También usado por los dominios
 cert_edownload=Ningún certificado SSL encontrado!
 cert_edownload2=No se encontró una llave de SSL!
 cert_eformat=No puedo hacer funcionar el formato de certificado requerido
-cert_header4=Detalles de la autoridad del certificado
-cert_chain=Archivo de certificación CA
 cert_chain0=Ninguno necesitado
-cert_chain1=En archivo en servidor $1
-cert_chain2=Archivo subido $1
-cert_chain3=Texto del certificado pegado
-cert_desc5=Si el certificado SSL de su servidor virtual es de una autoridad certificante no conocida por la mayoría de los navegadores, va a necesitar subir el CA del certificado utilizando este formulario.
-cert_desc5a=El archivo seleccionado puede contener múltiples certificados CA en formato PEM, uno después del otro.
-cert_chainok=Guardar certificado
 cert_esubject=El certificado no parece tener un nombre común
 cert_same=Este servidor virtual comparte el certificado SSL con <tt>$1</tt> por lo que no se puede editar en esta página.
 cert_samelink=Usar <a href='$1'>Administrar certificado SSL</a> para cambiar la configuración de SSL.
@@ -4014,13 +4003,6 @@ clamd_lognone=..
 clamd_estartmsg=El servidor de escaneo de virus ClamAV no pudo ser iniciado
 clamd_estopmsg=El servidor de escaneo de virus ClamAV no está funcionando
 clamd_ekillmsg=Falla a querer matar los procesos de escaneo de virus del ClamAV :$1
-
-chain_err=Falla al guardar el certificado CA
-chain_efile=No existe el archivo del certificado
-chain_ecert=Archivo del certificado inválido : $1
-chain_emode1=Ud. no está autorizado a seleccionar un archivo diferente en el servidor!
-chain_eupload=No se ha seleccionado un archivo de certificado
-chain_epaste=No se ingresó un texto de certificado.
 
 stopscript_title=Detener el servidor Rails
 stopscript_doing=Apagando los procesos del servidor Rails para $1 ..

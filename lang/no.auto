@@ -143,6 +143,9 @@ setup_esshnopub=Ingen offentlige nøkkelfiler ble opprettet!
 setup_esshkey=.. nøkkelgenerering mislyktes : $1 
 setup_scripts=Installere tredjeparts webapper ..
 setup_scriptgone=Webappen $1 eksisterer ikke!
+setup_scriptreqs=.. klarte ikke å sette opp skriptkrav
+setup_scriptpath=.. skriptbanen er ugyldig : $1
+setup_scriptphpverset=.. mislyktes i å konfigurere PHP-versjon : $1
 setup_scriptclash=.. webapp må opprette en database kalt $1, men den eksisterer allerede
 setup_redirects=Legger til nettstedviderekoblinger ..
 setup_redirecting=Opprett omdirigering fra $1 til $2 ..
@@ -465,6 +468,7 @@ losing_dir4=Hjemmekatalogen for dette aliaset, som inneholder data og andre file
 
 check_desc=Statusen til systemet ditt blir sjekket for å sikre at alle aktiverte funksjoner er tilgjengelige og riktig konfigurert ..
 check_dnsip3=Oppdaget ekstern IPv4-adresse er $1
+check_dnsip3v6=Oppdaget ekstern IPv6-adresse er $1
 check_ednsip3=Kunne ikke oppdage ekstern IPv4-adresse
 check_ewebsuexechome=<tt>suexec</tt> kommandoen på systemet ditt er konfigurert til å bare kjøre skript under <tt>$2</tt>, men Virtualmins virtuelle serverhjemmekatalog er <tt>$1</tt>. CGI-skript som kjøres som domeneeiere vil ikke bli kjørt
 check_ewebdefphpmode2=PHP-utførelsesmodus <tt>$1</tt> ble valgt i standardmalen, men støttes ikke på dette systemet, og vil nå endres til <tt>$2</tt>
@@ -499,6 +503,7 @@ check_mysqlok3=Virtualmin bruker en ekstern MySQL-server
 check_mysqlnopass=MySQL $1 er installert og kjører, men har ikke angitt noe <tt>root</tt>-passord. Dette bør fikses umiddelbart i modulen <a href='$1'>MySQL Database</a>
 check_mysqlnopasssocket=MySQL $1 er installert og kjører med Unix-socket-autentisering
 check_postgresok3=Virtualmin bruker en ekstern PostgreSQL-server
+check_iface4=IPv4-adresser er ikke tilgjengelige på dette systemet
 check_plugin=Plugin $1 er installert
 check_eplugin=Plugin $1 kan ikke brukes : $2
 check_evpopmail=Støtte for VPOPMail-postserveren er fjernet fra Virtualmin!
@@ -579,6 +584,7 @@ log_delete_acme=Fjernet SSL-leverandør for $1
 log_update_acme=Oppdatert SSL-leverandør for $1
 
 backup_desc=Beskrivelse av sikkerhetskopien
+backup_headerfeatures2=Globale innstillinger
 backup_reseller=Begrens til servere som eies av forhandleren
 backup_anyreseller=Enhver forhandler
 backup_selreseller=Valgte forhandlere ..
@@ -801,6 +807,9 @@ rename_eparentuser=Brukernavnet kan bare endres for servere på toppnivå
 
 cert_hasnossl=Advarsel - denne virtuelle serveren har ikke et SSL-nettsted aktivert ennå. Ethvert SSL-sertifikat kan bare brukes til andre tjenester.
 cert_noneyet=Denne virtuelle serveren har ikke et SSL-sertifikat ennå. Bruk en av fanene på denne siden for å generere et sertifikat og en nøkkel.
+cert_desc3a=Hvis det nye sertifikatet er fra en CA som har sitt eget sertifikat, bør du også installere det her samtidig.
+cert_newca=CA-sertifikat
+cert_newcakeep=Behold eksisterende sertifikat
 cert_tabacme=SSL-leverandører
 cert_tabperip=Tjenestesertifikater
 cert_etime=Tid til utløpet
@@ -881,9 +890,11 @@ cert_type_combined=kombinert SSL-sertifikat og nøkkel
 cert_type_everything=kombinert SSL-sertifikat, CA og nøkkel
 cert_updatesvcs=Oppdaterer tjenestesertifikater ..
 
-newkey_checkingca=Validerer at CA-sertifikatet samsvarer med nytt sertifikat ..
-newkey_echeckingca=.. CA samsvarer ikke, og har blitt fjernet.
-newkey_echeckingca2=.. CA-sertifikatet kunne ikke leses!
+newkey_eca2=Manglende eller ugyldig CA-sertifikat : $1
+newkey_savingca=Lagrer CA-sertifikat ..
+newkey_ecamatch=CA-sertifikatet samsvarer ikke med underskriveren av domenesertifikatet
+newkey_enewcafile=Kunne ikke lese CA-sertifikatfilen $1
+newkey_enewcafilehome=CA-sertifikatfilen $1 må være under den virtuelle serverens hjemmekatalog
 
 newtmpl_tdoms=Brukes av servere
 newtmpl_useby=Til bruk av
@@ -1131,6 +1142,7 @@ scripts_emissing=Webapp eksisterer ikke!
 scripts_ephpvers2=Denne webappen kan ikke installeres, siden ingen kompatible PHP-versjoner ble funnet
 scripts_enophpvers=Ingen PHP-versjoner funnet!
 scripts_enophpdir=Finner ikke PHP-versjonen for $1
+scripts_enophpbestver=Kunne ikke finne full PHP-versjon for $1
 scripts_ephpverchange=Kunne ikke endre katalogen $1 til å bruke PHP-versjon $2
 scripts_ephpminmax=Ingen av de tilgjengelige PHP-versjonene ($1) er mellom $2 og $3
 scripts_ephpmin=Ingen av de tilgjengelige PHP-versjonene ($1) er på eller over $2
@@ -1281,6 +1293,8 @@ scripts_gpl_pro_tip_workbench_enot=$1 Workbench-funksjonen er ikke tilgjengelig 
 scripts_service_ename=Manglende eller ugyldig tjenestenavn
 scripts_service_eport=Manglende eller ugyldig tjenesteportnummer
 scripts_service_estartcmd=Mangler tjenestestartkommando
+
+newnotify_users=Sender du også e-post til brukere i utvalgte domener?
 
 summary_phpvermode=$1 ($2-modus)
 summary_lastlogin_hour=time siden
@@ -1489,6 +1503,12 @@ cat_dnsreg=Domeneregistrering
 
 pass_dbsync=Advarsel - å endre dette domenets administrasjonspassord vil også oppdatere passordet som trengs for å koble til databasene.
 
+cmass_detail=Utgang for batchoppretting
+cmass_detail0=Vis kun sammendrag
+cmass_detail1=Vis alle detaljer om hver server
+cmass_creating=Oppretter virtuell server $1 ..
+cmass_failed=.. opprettelsen mislyktes : $1
+
 massu_title=Avinstaller webapper
 massu_err=Kunne ikke avinstallere webapper
 massu_rusure=Er du sikker på at du vil avinstallere de $1 valgte webappene, som bruker $2 diskplass?
@@ -1519,6 +1539,7 @@ phpmode_short_fcgid=FCGI
 phpmode_short_fpm=FPM
 phpmode_short_none=Funksjonshemmet
 phpmode_dirswarn=Advarsel! Hvis du bytter bort fra <tt>CGI</tt> eller <tt>FCGI</tt> modus, fjernes eventuelle PHP-versjonsvalg per katalog.
+phpmode_verswarn=Advarsel! Den gjeldende PHP-versjonen eksisterer ikke!
 phpmode_err2=Kunne ikke lagre PHP-alternativer
 phpmode_esuexec=Alternativet <b>CGI</b> kan ikke velges med mindre <b>Kjør CGI-skript som domeneeier</b> er valgt
 phpmode_fpmtype=PHP prosessleder modus
@@ -1759,6 +1780,7 @@ plan_scriptssel=Tillatt
 
 dplans_err2=Kunne ikke endre standardplanen
 
+postgrey_emailfeat=Grålisting kan bare brukes når e-post er aktivert globalt.
 postgrey_procdone=.. begynt ferdig
 postgrey_postfixdone2=.. konfigurert til å bruke socketfilen $1
 postgrey_noprocdone=.. avstengning utført
@@ -1881,6 +1903,7 @@ redirect_eurlpath=Manglende eller ugyldig bane for destinasjonsadresse
 redirect_eurlpath2=En omdirigering fra / til en lokal URL vil forårsake en uendelig sløyfe
 redirect_ecode=Ugyldig HTTP-statuskode
 
+dkim_email=DKIM kan ikke aktiveres med mindre e-post er aktivert
 dkim_header2=Nøkler og poster for offsite hosting
 dkim_header3=Domener som for øyeblikket er signert for
 dkim_alldns=Domener å signere for
@@ -1988,6 +2011,8 @@ bkey_download=Last ned nøkkel
 
 bucket_account2=S3 konto
 bucket_eacls=ACLs for new buckets must be enabled on the AWS Console.
+
+ratelimit_email=Begrensning av e-posthastighet kan ikke aktiveres med mindre e-post er aktivert
 
 transfer_eoldhost=Gammel vert eksisterer ikke!
 transfer_subs=inkludert underservere

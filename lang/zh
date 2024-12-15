@@ -1275,8 +1275,6 @@ check_eftpshell=FTP用户的Shell $1没有被包含在$2中，可能无法进行
 check_allwebmin=正在更新所有Webmin用户的设置 .. 
 check_needupdate=影响Webmin用户模块访问的模块配置发生改变。点击下面的按钮为所有用户更新权限。
 check_updatenow=更新Webmin用户
-check_current=在Webalizer的全局配置中，<b>Webalizer增量文件</b>被设置成绝对路径。使用<a href='$1'>Webalizer</a>模块可将其改为相对路径，例如：<tt>webalizer.current</tt>。
-check_history=在Webalizer的全局配置中，<b>Webalizer历史文件</b>被设置成绝对路径。使用<a href='$1'>Webalizer</a>模块可将其改为相对路径，例如：<tt>webalizer.hist</tt>。
 check_proftpd=在ProFTPd配置模板中发现一个错误：$1。必须通过编辑服务器模板页面中的缺省设置来修复。
 check_enamevirt=<b>所有Apache虚拟服务器都基于名字</b>和<b>DNS记录使用缺省IP地址</b>不能在<a href='$1'>模块配置</a>页面中同时启用。
 check_logrotateok=Logrotate已安装。
