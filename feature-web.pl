@@ -5578,6 +5578,21 @@ foreach my $p (@ports) {
 return $found ? undef : "No Apache virtualhost found!";
 }
 
+# can_reset_web()
+# The Apache website can be reset
+sub can_reset_web
+{
+return 1;
+}
+
+# reset_also_web(&domain)
+# When doing a full reset of a website, do SSL first
+sub reset_also_web
+{
+my ($d) = @_;
+return $d->{'ssl'} ? ('ssl') : ( );
+}
+
 # reset_web(&domain)
 # Turn the website feature off and on again, but preserve redirects
 sub reset_web
