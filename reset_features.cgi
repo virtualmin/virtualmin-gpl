@@ -79,6 +79,7 @@ foreach $f (@dom_features) {
 	if ($feature{$f}) {
 		# Core feature of Virtualmin
 		my $rfunc = "reset_".$f;
+		my $afunc = "reset_also_".$f;
 		if (defined(&$rfunc) &&
 		    (!$in{'fullreset'} || $canmap{$f} == 2)) {
 			# A reset function exists
@@ -86,14 +87,20 @@ foreach $f (@dom_features) {
 			}
 		else {
 			# Turn on and off via delete and setup calls
-			$d->{$f} = 0;
-			&call_feature_func($f, $d, $oldd);
-			my $newoldd = { %$d };
-			$d->{$f} = 1;
-			&call_feature_func($f, $d, $newoldd);
+			my @allf = ($f);
+			push(@allf, &$afunc($d)) if (defined(&$afunc));
+			foreach my $ff (reverse(@allf)) {
+				$d->{$ff} = 0;
+				&call_feature_func($ff, $d, $oldd);
+				}
+			foreach my $ff (@allf) {
+				my $newoldd = { %$d };
+				$d->{$ff} = 1;
+				&call_feature_func($ff, $d, $newoldd);
+				}
 			}
 		}
-	if ($plugin{$f}) {
+	elsif ($plugin{$f}) {
 		# Defined by a plugin
 		if (&plugin_defined($f, "feature_reset") &&
 		    (!$in{'fullreset'} || $canmap{$f} == 2)) {
