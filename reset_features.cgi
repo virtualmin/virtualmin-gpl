@@ -109,10 +109,18 @@ foreach $f (@dom_features) {
 			}
 		else {
 			# Turn off and on again
-			$d->{$f} = 0;
-			&plugin_call($f, "feature_delete", $d);
-			$d->{$f} = 1;
-			&plugin_call($f, "feature_setup", $d);
+			my @allf = ($f);
+			if (&plugin_defined($f, "feature_reset_also")) {
+				push(@allf, &plugin_call($f, "feature_reset_also", $d));
+				}
+			foreach my $ff (reverse(@allf)) {
+				$d->{$ff} = 0;
+				&plugin_call($ff, "feature_delete", $d);
+				}
+			foreach my $ff (@allf) {
+				$d->{$ff} = 1;
+				&plugin_call($ff, "feature_setup", $d);
+				}
 			}
 		}
 	&$outdent_print();
