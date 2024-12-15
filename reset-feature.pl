@@ -214,10 +214,14 @@ print "Reset some virtual server feature back to it's default.\n";
 print "\n";
 print "virtualmin reset-feature --domain name | --user name\n";
 foreach $f (@features) {
-	print "                         [--$f]\n" if ($config{$f});
+	my $crfunc = "can_reset_".$f;
+	$can = defined(&$crfunc) ? &$crfunc() : 1;
+	print "                         [--$f]\n" if ($config{$f} && $can);
 	}
 foreach $f (&list_feature_plugins()) {
-	print "                         [--$f]\n";
+	$can = &plugin_defined($f, "feature_can_reset") ?
+		&plugin_call($f, "feature_can_reset") : 1;
+	print "                         [--$f]\n" if ($can);
 	}
 print "                         [--skip-warnings]\n";
 print "                         [--full-reset]\n";
