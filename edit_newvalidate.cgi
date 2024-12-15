@@ -126,7 +126,7 @@ if (&can_use_validation() == 2) {
 	# Features to reset
 	my @rfopts;
 	foreach my $f (@fopts) {
-		if (&indexof($f->[0], @list_feature_plugins) >= 0) {
+		if (&indexof($f->[0], &list_feature_plugins()) >= 0) {
 			$can = &plugin_defined($f->[0], "feature_can_reset") ?
 				&plugin_call($f->[0], "feature_can_reset") : 1;
 			}
