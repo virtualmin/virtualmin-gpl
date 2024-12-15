@@ -17,6 +17,9 @@ form_content2=Tak, z domyślnym szablonem strony internetowej
 
 setup_bind_erecs=.. nie udało się wygenerować rekordów : $1
 setup_ednsns=Nie znaleziono rekordów NS w szablonie!
+setup_scriptreqs=.. nie udało się skonfigurować wymagań skryptu
+setup_scriptpath=..ścieżka skryptu jest nieprawidłowa : $1
+setup_scriptphpverset=.. nie udało się skonfigurować wersji PHP : $1
 
 user_firstname=Imię
 user_surname=Nazwisko
@@ -36,10 +39,14 @@ newweb_rany=Każdy
 losing_dir2=Katalog domowy tego wirtualnego podserwera, zawierający wszystkie dane witryny i inne pliki, zostanie usunięty.
 losing_dir4=Katalog domowy tego aliasu, zawierający dane i inne pliki użytkowników, zostanie usunięty.
 
+check_dnsip3v6=Wykryto zewnętrzny adres IPv6: $1
+check_iface4=Adresy IPv4 nie są dostępne w tym systemie
+
 log_create_acme=Dodano dostawcę SSL dla $1
 log_delete_acme=Usunięto dostawcę SSL dla $1
 log_update_acme=Zaktualizowano dostawcę SSL dla $1
 
+backup_headerfeatures2=Ustawienia globalne
 backup_mode44=Pobierz w przeglądarce
 
 backup_finalstatusok=$1 serwerów wirtualnych zostało pomyślnie utworzonych kopii zapasowych
@@ -48,6 +55,9 @@ restore_ersync=Polecenie synchronizacji <tt>$1</tt> nie jest zainstalowane
 restore_eacme=..oryginalny dostawca SSL określony w kopii zapasowej nie istnieje
 restore_eacme2=..oryginalny dostawca SSL określony w kopii zapasowej nie istnieje - przełączenie na domyślny
 
+cert_desc3a=Jeśli nowy certyfikat pochodzi od urzędu certyfikacji posiadającego własny certyfikat, należy go także jednocześnie zainstalować tutaj.
+cert_newca=Certyfikat CA
+cert_newcakeep=Zachowaj istniejący certyfikat
 cert_tabacme=Dostawcy SSL
 cert_desc9=Dostawcy certyfikatów SSL, np. Let's Encrypt, mogą być wykorzystywani do automatycznego żądania ważnego certyfikatu do użytku przez Virtualmin.
 cert_acmedesc=Ta strona może zostać użyta do żądania nowego certyfikatu, który nadpisze każdy inny, który aktualnie skonfigurowałeś dla tej domeny. Jednak dostawcy certyfikatów SSL wymagają, aby Twoje prawo własności do domeny certyfikatu zostało zweryfikowane poprzez sprawdzenie, czy ten system hostuje witrynę dla tej domeny. Odbywa się to poprzez umieszczenie małego pliku tymczasowego w katalogu dokumentów witryny $1.
@@ -57,6 +67,12 @@ cert_letsemail=Wysłać e-mail z informacją o odnowieniu?
 cert_letsemailerr=Tylko w przypadku awarii
 cert_subset=Pominąć niemożliwe do zweryfikowania nazwy hostów?
 cert_updatesvcs=Aktualizacja certyfikatów serwisowych ..
+
+newkey_eca2=Brak lub nieprawidłowy certyfikat CA : $1
+newkey_savingca=Zapisywanie certyfikatu CA ..
+newkey_ecamatch=Certyfikat CA nie pasuje do podpisującego certyfikat domeny
+newkey_enewcafile=Nie udało się odczytać pliku certyfikatu CA $1
+newkey_enewcafilehome=Plik certyfikatu CA $1 musi znajdować się w katalogu domowym serwera wirtualnego
 
 newbw_period=Okres rozliczeniowy
 newbw_enable=Czy ponownie włączyć serwery, których wydajność spadła poniżej limitu?
@@ -139,6 +155,7 @@ licence_updfile=Aktualizowanie licencji Virtualmin ..
 licence_expired=Licencja wygasła
 licence_expired_desc=Twój system jest obecnie w trybie tylko do odczytu, co oznacza, że nie możesz wprowadzać zmian w konfiguracji systemu. Ten tryb jest wymuszany, ponieważ licencja systemu wygasła lub jest używana na wielu serwerach. Odwiedź stronę <a href='$1'>Virtualmin License Manager</a>, aby uzyskać więcej szczegółów.
 
+scripts_enophpbestver=Nie można znaleźć pełnej wersji PHP dla $1
 scripts_kit=$1 Warsztat
 scripts_ekit=Nie udało się zastosować środowiska roboczego aplikacji internetowej
 scripts_kit_elog=PHP: Nie udało się uruchomić polecenia $1. Zobacz plik dziennika w $2
@@ -186,13 +203,22 @@ scripts_gpl_pro_tip_enroll_single=Prosimy o rozważenie zakupu licencji <a targe
 scripts_gpl_pro_tip_workbench_pro_only=Funkcja $1 Workbench nie jest dostępna w wersji GPL.
 scripts_gpl_pro_tip_workbench_enot=Funkcja $1 Workbench nie jest dostępna dla tej aplikacji internetowej
 
+newnotify_users=Czy wysyłać e-maile także do użytkowników w wybranych domenach?
+
 migrate_plan=Plan nowego serwera
 
 move_esame=Wybrano ten sam serwer nadrzędny
 
+cmass_detail=Wyjście tworzenia partii
+cmass_detail0=Pokaż tylko podsumowania
+cmass_detail1=Pokaż pełne szczegóły każdego serwera
+cmass_creating=Tworzenie serwera wirtualnego $1 ..
+cmass_failed=.. tworzenie nie powiodło się : $1
+
 usage_max=Wyświetlono tylko $1.
 
 phpmode_ewebsite=Opcji PHP nie można edytować w domenie, która nie posiada witryny internetowej!
+phpmode_verswarn=Ostrzeżenie! Obecna wersja PHP nie istnieje!
 phpmode_wwwredir1=Przekieruj <tt>www.$1</tt> do <tt>$1</tt>
 phpmode_wwwredir2=Przekieruj <tt>$1</tt> do <tt>www.$1</tt>
 phpmode_wwwredir3=Poddomeny od <tt>$1</tt> do <tt>$1</tt>
@@ -224,6 +250,7 @@ res_wmem=Minimalny zalecany rozmiar to 200 M
 
 unsub_failed=..konwersja nieudana!
 
+postgrey_emailfeat=Szarą listę można stosować tylko wtedy, gdy poczta e-mail jest włączona globalnie.
 postgrey_postfixdone2=.. skonfigurowano do użycia pliku gniazda $1
 
 wizard_memory2=Virtualmin można dostroić, aby poprawić wydajność przetwarzania poczty e-mail, ale kosztem zwiększonego wykorzystania pamięci. Najlepszy wybór zależy od tego, jak będzie używany system.
@@ -236,6 +263,8 @@ wizard_efrom_addr=Adres e-mail musi być w formacie użytkownik@domena
 
 redirect_hostregexp=Nazwa hosta jest wyrażeniem regularnym?
 redirect_ehost2=Brak wyrażenia regularnego nazwy hosta
+
+dkim_email=Nie można włączyć DKIM, jeśli nie włączono poczty e-mail
 
 provision_return=opcje klienta usług
 
@@ -257,6 +286,8 @@ records_caacrit=Krytyczny
 records_caaissue=Zezwalaj na certyfikaty dla domeny
 records_caaissuewild=Zezwalaj na certyfikaty wieloznaczne dla domeny
 records_caaiodef=Adres URL umożliwiający zgłaszanie problemów
+
+ratelimit_email=Ograniczenie szybkości poczty e-mail nie może zostać włączone, jeśli nie włączono poczty e-mail
 
 right_vmax=Domeny licencjonowane
 right_smax=Licencjonowane systemy Virtualmin

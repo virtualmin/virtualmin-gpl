@@ -1209,8 +1209,6 @@ check_eftpshell=FTP kullanýcýlarý için shell $1 $2'de dahil edilmemiþ, bu y
 check_allwebmin=Tüm Webmin kullanýcýlarý yeni ayarlarla güncelleniyor..
 check_needupdate=Webmin kullanýcýlarýnýn hangi modüllere eriþebileceklerini etkileyen bazý modül konfigürasyonu ayarlarý deðiþtirildi. Tüm kullanýcýlarý yeni haklarla güncellemek için aþaðýdaki düðmeye basýn
 check_updatenow=Webmin Kullanýcýlarýný Güncelle
-check_current=Webalizer'ýn genel konfigürasyonunda, the <b>Webalizer artýmlý dosyasý</b> kati dosyayoluna ayarlanmýþ. <a href='$1'>Webalizer</a> modülü aracýlýðýyla <tt>webalizer.current</tt>'de olduðu gibi göreli dosyayoluna deðiþtirin
-check_history=Webalizer'ýn genel konfigürasyonunda, the <b>Webalizer geçmiþ kayýtlarý dosyasý</b> kati dosyayoluna ayarlanmýþ. <a href='$1'>Webalizer</a> modülü aracýlýðýyla <tt>webalizer.hist</tt>'de olduðu gibi göreli dosyayoluna deðiþtirin
 check_proftpd=ProFTPd konfigürasyon þablonunda bir hata bulundu : $1. Sunucu Þablonlarý sayfasýndaki varsayýlan ayarlar düzenlenerek bu hata giderilmeli
 check_enamevirt=<a href='$1'>Modül Yapýlandýrmasý</a> sayfasýndaki <b>Tüm Apache sanal sunucularý isim tabanlýdýr</b> ve <b>DNS kayýtlarý için varsayýlan IP adresi</b> seçeneklerinin ikisi birden etkinleþtirilemez
 check_logrotateok=Logrotate kurulu

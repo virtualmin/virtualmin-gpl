@@ -1204,8 +1204,6 @@ check_eftpshell=Le shell $1 pour les utilisateurs FTP n'est pas inclus dans $2, 
 check_allwebmin=Mise à jour de tous les utilisateurs Webmin avec les nouveaux paramètres en cours ..
 check_needupdate=Certaines des options de configuration  qui affectent l'accès des modules Webmin par les utilisateurs ont changé. Cliquez sur le bouton ci-dessous pour mettre à jour les permissions utilisateur
 check_updatenow=Mise à jour des utilisateurs Webmin
-check_current=Dans la configuration globale de Webalizer, le chemin du <b>fichier incrémental Webalizer</b> est un chemin absolu. Utilisez le module <a href='$1'>Webalizer</a> pour le changer en chemin relatif, comme par exemple <tt>webalizer.current</tt>
-check_history=Dans la configuration globale de Webalizer, le <b>fichier historique de Webalizer</b> est indiqué comme un chemin absolu. Utilisez le module <a href='$1'>Webalizer</a> pour le transformer en chemin relatif, comme par exemple <tt>webalizer.hist</tt>
 check_proftpd=Une erreur a été trouvée dans le template de configuration de ProFTPd : $1
 check_enamevirt=Les options <b>Tous les serveurs virtuels Apache sont basés sur des noms</b> et <b>Adresse IP par défaut pour les enregistrements DNS</b> ne peuvent pas être activées simultanément dans la page de <a href='$1'>Configuration du module</a>
 check_logrotateok=Logrotate est installé

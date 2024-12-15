@@ -486,7 +486,6 @@ check_eftpshell=Shell $1 pro FTP uzivatele neni zahrnut v $2, coz muze zabranit 
 check_emysqlsync=Synchronizace mezi Unixovými a MySQL uživateli je zapnuta v modulu <a href='$1'>Databáze MySQL</a>. To ovšem není potřeba, protože Virtualmin vytváří MySQL účty pro vlastníka domény až když jsou potřeba, takže důrazně doporučujeme tuto možnost vypnout
 check_allwebmin=Aktualizuju vsechny uzivatele Webmin s novym nastavenim ..
 check_allresel=Aktualizuju vsechny distributory s novym nastavenim
-check_current=V globalni konfiguraci Webalizeru, je polozka <b>Prirustkocy soubor Webalizeru</b> nastaven jako absollutni cesta. Pouzijte <a href='$1'>Webalizer</a> pokud jej chcete zmenit na relativni jako soucasny <tt>webalizer.current</tt>
 check_detected=DEtekovan postovni server $1
 check_emysqlplugin=Modul uzivatelu MySQL jiz neni potrebny. Jeho funkce byly implementovany v jadre Virtualmin
 check_ebcmd=Prikaz $1 potrebny k vytvoreni ci obnovy ze zalohy neni instalovan
@@ -766,19 +765,13 @@ cert_self=Generuj samopodepsany klic
 cert_tabcurrent=Soucasny certifikat
 cert_tabcsr=Pozadavek na podpis
 cert_tabnew=Novy certifikat
-cert_tabchain=Certifikat CA
 cert_download=Stahnout certifikat
 cert_pem=Format PEM
 cert_pkcs12=Format PKCS12
 cert_pkcs7=Format PKCS&
 cert_edownload=Nebyl nalezen certifikat SSL!
 cert_eformat=Nelze docilit pozadovaneho formatu certifikatu
-cert_header4=Podrobnosti certifikacni autority
-cert_chain=Soubor s CA certifikatem
 cert_chain0=Nevybran zadny
-cert_chain1=Neni potreba zadny
-cert_chain2=Nacteny soubor $1
-cert_chainok=Ulozit Certifikat
 cert_esubject=Certifikat pravdepodobne nobsahuje CN
 
 newbw_unlim=Neomezeno
@@ -1273,12 +1266,6 @@ scriptwarn_dom=Název domény
 
 features_ecannot=Nemáte oprávnění nastavovat povolené součásti
 features_err=Nepodařilo se uložit povolené součásti
-
-chain_err=Chyba behem ukladani CA certifikatu
-chain_efile=Soubor certifikatu neexistuje
-chain_ecert=Chybny soubor certifikatu : $1
-chain_emode1=Nejste opravnen zvolit jiny soubor na serveru!
-chain_eupload=Nebyl zvolen zadny uploadovany certifikat
 
 newshells_desc=Popis
 newshells_edesc=Chybí popis na řádku $1

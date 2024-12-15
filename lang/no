@@ -1682,8 +1682,6 @@ check_allwebmin=Oppdaterer alle Webmin brukere med nye innstillinger..
 check_allresel=Oppdaterer alle forhandlere med nye innstillinger..
 check_needupdate=Noen av modulkonfigurasjonsinnstillingene som påvirker hvilke moduler Webmnin brukerne har tilgang til, er endret. Klikk på knappen nedenfor for å oppdatere alle brukere med de nye tillatelsene
 check_updatenow=Oppdater Webmin brukere
-check_current=I Webalizers globale konfigurasjon er <b>Webalizer inkrementell fil</b> satt til en absolutt sti. Bruke <a href='$1'>Weablizer</a> modulen til å endre den til en relativ sti, akkurat som <tt>webalizer.current</tt>
-check_history=I Webalizers globale konfigurasjon peker <b>Webalizer history file</b> til en absolutt sti. Bruk <a href='$1'>Webalizer</a> til å endre denne til en relativ sti, som f.eks. <tt>webalizer.hist</tt>
 check_proftpd=Fant en feil i ProFTPd konfigurasjonsmalen : $1. Dette må rettes opp ved å redigere Standard innstillinger på siden for Tjenermaler
 check_enamevirt=Du kan ikke aktivere både <b>Alle Apache tjenere er navne-basert</b> og <b>Standard IP adresse for DNS oppføringer</b> på <a href='$1'>Virtualmins konfigurasjonsside</a>
 check_logrotateok=Logrotate er installert
@@ -2519,7 +2517,6 @@ cert_tabcsr=Signeringsforespørsel
 cert_tabself=Selv-signert sertifikat
 cert_tabsavecsr=Bruk signert sertifikat
 cert_tabnew=Nytt sertifikat
-cert_tabchain=CA sertifikat
 cert_download=Last ned sertifikat
 cert_kdownload=Lat ned privat nøkkel
 cert_pem=PEM format
@@ -2529,15 +2526,7 @@ cert_also=Brukes også av domenene
 cert_edownload=Fant ingen SSL sertifikat!
 cert_edownload2=Fant ingen SSL nøkkel!
 cert_eformat=Klarte ikke å finne ut format for forespurt sertifikat
-cert_header4=Detaljer fort sertifikat autoritet
-cert_chain=CA sertifikat fil
 cert_chain0=Ingen nødvendig
-cert_chain1=I fil på tjener $1
-cert_chain2=Lastet opp fil $1
-cert_chain3=Limte inn sertifikat-tekst
-cert_desc5=Dersom SSL sertifikatet for din virtuelle tjener kommer fra en sertifikat-autoritet som ikke er kjent for de fleste nettlesere, bør du laste opp CA sertifikatet med dette skjemaet.
-cert_desc5a=Den valgte filen kan inneholde flere CA sertifikater i PEM format, etter hverandre.
-cert_chainok=Lagre sertifikat
 cert_esubject=Sertifikatet ser ikke ut til å ha et " common name"
 cert_same=Denne virtuelle tjeneren deler SSL sertifikatet sitt med <tt>$1</tt>, så det kan ikke redigeres på denne siden.
 cert_samelink=Bruk siden <a href='$1'>Administrer SSL sertifikat</a for å endre SSL innstillinger.
@@ -3461,7 +3450,6 @@ newnotify_done=Den angitte e-postmeldingen er sendt til følgende adresser :
 newnotify_edoms=Ingen tjenere valgt
 newnotify_attach=Valgfri vedlagt fil
 newnotify_admins=Send også e-post til ekstra administratorer i valgte domener?
-newnotify_users=Send også e-post til postbokser i valgte domener?
 newnotify_nomany=Bare send e-post til hver domene-eier en gang
 
 mailusers_title=E-post til alle postbokser
@@ -4846,13 +4834,6 @@ spamd_startfailed=.. kunne ikke starte : $1
 spamd_unboot=Deaktiverer  SpamAssassin tjener ved oppstart ..
 spamd_unbootact=.. ingen oppstartshandling funnet!
 spamd_stop=Stopper  SpamAssassin tjener ..
-
-chain_err=Kunne ikke lagre CA sertifikat
-chain_efile=Sertifikatfil finnes ikke
-chain_ecert=Ugyldig sertifikatfil : $1
-chain_emode1=Du har ikke lov til å velge en annen fil på tjeneren!
-chain_eupload=Ingen opplastet sertifikatfil valgt
-chain_epaste=Det ble ikke skrevet inn noen sertifikat tekst
 
 stopscript_title=Stopp Rails tjener
 stopscript_doing=Stopper Rails tjenerprosess for $1 ..
