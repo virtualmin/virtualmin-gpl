@@ -259,7 +259,10 @@ foreach my $ver (@vers) {
 if ($p ne 'web') {
 	my $err = &plugin_call($p, "feature_save_web_php_mode",
 			       $d, $mode, $port, $newdom);
-	$d->{'php_mode'} = $mode if (!$err);
+	if (!$err) {
+		$d->{'php_mode'} = $mode;
+		&sync_alias_domain_php_mode($d);
+		}
 	return $err;
 	}
 &require_apache();
@@ -586,12 +589,7 @@ foreach my $p (@ports) {
 
 # Update PHP mode cache
 $d->{'php_mode'} = $mode;
-foreach my $ad (&get_domain_by("alias", $d->{'id'})) {
-	$ad->{'php_mode'} = $mode;
-	&lock_domain($ad);
-	&save_domain($ad);
-	&unlock_domain($ad);
-	}
+&sync_alias_domain_php_mode($d);
 
 local @vlist = map { $_->[0] } &list_available_php_versions($d);
 if ($mode !~ /mod_php|none/ && $oldmode =~ /mod_php|none/ &&
@@ -620,6 +618,19 @@ if (defined($oldmail)) {
 $pfound || return "Apache virtual host was not found";
 
 return undef;
+}
+
+# sync_alias_domain_php_mode(&domain)
+# If a domain has an aliases, update their PHP modes to match this one
+sub sync_alias_domain_php_mode
+{
+my ($d) = @_;
+foreach my $ad (&get_domain_by("alias", $d->{'id'})) {
+	&lock_domain($ad);
+	$ad->{'php_mode'} = $mode;
+	&save_domain($ad);
+	&unlock_domain($ad);
+	}
 }
 
 # set_fcgid_max_execution_time(&domain, value, [mode], [port])
