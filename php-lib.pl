@@ -399,7 +399,7 @@ foreach my $p (@ports) {
 		if ($mode eq "cgi") {
 			push(@types, "application/x-httpd-php$ver .php");
 			}
-		elsif ($mode eq "mod_php" || $mode eq "fcgid") {
+		elsif ($mode eq "mod_php") {
 			push(@types, "application/x-httpd-php .php");
 			}
 		@types = &unique(@types);
