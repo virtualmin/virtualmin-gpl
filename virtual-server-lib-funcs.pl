@@ -16199,19 +16199,8 @@ if (&domain_has_website()) {
 	}
 
 if ($config{'webalizer'}) {
-	# Make sure Webalizer is installed, and that global directives are OK
-	&domain_has_website() || return &text('check_edepwebalizer', $clink);
-	&foreign_installed("webalizer", 1) == 2 ||
-		return &text('index_ewebalizer', "/webalizer/", $clink);
-	&foreign_require("webalizer");
-
-	# Make sure template config file exists
-	local $wfile = $tmpl->{'webalizer'} ||
-		       $webalizer::config{'webalizer_conf'};
-	if (!-r $wfile) {
-		return &text('index_ewebalizerfile', $wfile, "/webalizer/");
-		}
-
+	my $err = &feature_depends_webalizer();
+	return $err if ($err);
 	&$second_print($text{'check_webalizerok'});
 	}
 
@@ -21263,6 +21252,17 @@ foreach my $f (@sorted_plugins) {
 		}
 	}
 return @fopts;
+}
+
+# check_feature_depends(feature)
+# If a feature's dependencies are available, return undef. Otherwise return
+# an error message
+sub check_feature_depends
+{
+my ($f) = @_;
+my $dfunc = "feature_depends_".$f;
+return undef if (!defined(&$dfunc));
+return &$dfunc();
 }
 
 $done_virtual_server_lib_funcs = 1;
