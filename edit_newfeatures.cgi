@@ -45,7 +45,8 @@ foreach $f (@features) {
 			&ui_links_row(\@acts)
 			]);
 		}
-	elsif ($deprecated && !$config{$f}) {
+	elsif ($deprecated && !$config{$f} &&
+	       &check_feature_depends($f)) {
 		# Some features are now hidden unless already enabled
 		next;
 		}

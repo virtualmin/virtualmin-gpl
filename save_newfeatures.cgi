@@ -39,8 +39,8 @@ foreach $f (@features) {
 		# to be not selected by default
 		$config{$f} = $factive{$f} ? 3 : 1;
 		}
-	elsif (&indexof($f, @deprecated_features) >= 0 &&
-	       !$config{$f}) {
+	elsif (&indexof($f, @deprecated_features) >= 0 && !$config{$f} &&
+	       &check_feature_depends($f)) {
 		# Some features are now hidden unless already enabled
 		next;
 		}

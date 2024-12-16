@@ -15,6 +15,25 @@ if (!&domain_has_website($d)) {
 return undef;
 }
 
+# Make sure Webalizer is installed, and that global directives are OK
+sub feature_depends_webalizer
+{
+my $clink = "edit_newfeatures.cgi";
+my $tmpl = &get_template(0);
+&domain_has_website() || return &text('check_edepwebalizer', $clink);
+&foreign_installed("webalizer", 1) == 2 ||
+	return &text('index_ewebalizer', "/webalizer/", $clink);
+&foreign_require("webalizer");
+
+# Make sure template config file exists
+my $wfile = ($tmpl->{'webalizer'} eq "none" ? "" : $tmpl->{'webalizer'}) ||
+	    $webalizer::config{'webalizer_conf'};
+if (!-r $wfile) {
+	return &text('index_ewebalizerfile', $wfile, "/webalizer/");
+	}
+return undef;
+}
+
 # setup_webalizer(&domain)
 # Setup the Webalizer module for this domain, and create a Cron job to run it
 sub setup_webalizer
