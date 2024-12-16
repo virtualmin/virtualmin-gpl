@@ -77,6 +77,7 @@ if ($d->{'alias'} && $tmpl->{'web_alias'} == 1) {
 		&flush_file_lines($pvirt->{'file'});
 		}
 	$d->{'alias_mode'} = 1;
+	$d->{'php_mode'} = $alias->{'php_mode'};
 
 	# If the target domain had redirects enabled, also do it for the alias
 	if (&has_webmail_rewrite($d) &&
