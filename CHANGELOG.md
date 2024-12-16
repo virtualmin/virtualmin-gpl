@@ -4,6 +4,7 @@
 * Fix system ID check to address incorrect license identification
 * Fix to ensure files inside backups have the correct extensions
 * Fix to clean up the code that adjusts FPM versions during the config check
+* Fix to remove Webalizer as an option unless it is already installed
 
 #### Version 7.30.2
 * Fix to ensure the mail log is not read when the mail feature is disabled globally
