@@ -16091,27 +16091,9 @@ if (&domain_has_website()) {
 
 			# Try to detect actually configured version
 			$dv = &detect_php_fpm_version($d);
-			# If still none exists, check template if anything
-			# is preferred otherwise fall back to highest available
-			if (!$dv) {
-				my $nf;
-				my $tmpl = &get_template($d->{'template'});
-				# If set in templates use it, or fall back to
-				# highest available later in the code below
-				my $tdv;
-				if ($tmpl->{'web_phpver'}) {
-					$tdv = $tmpl->{'web_phpver'};
-					($nf) = grep { $_->{'shortversion'} eq
-						       $tdv } @fpms
-					}
-				# Otherwise, get highest version if none found
-				# in template and domain config
-				($nf) = grep { &compare_versions(
-						$_->{'shortversion'}, $tdv) > 0 } 
-							@fpms if (!$nf);
-				$nf ||= $fpms[$#fpms];
-				$dv = $nf->{'shortversion'};
-				}
+			# If still none exists do nothing
+			next if (!$dv);
+			
 			&lock_domain($d);
 			$d->{'php_fpm_version'} = $dv;
 			&save_domain($d);
