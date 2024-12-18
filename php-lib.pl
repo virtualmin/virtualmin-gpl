@@ -627,7 +627,7 @@ sub sync_alias_domain_php_mode
 my ($d) = @_;
 foreach my $ad (&get_domain_by("alias", $d->{'id'})) {
 	&lock_domain($ad);
-	$ad->{'php_mode'} = $mode;
+	$ad->{'php_mode'} = $d->{'php_mode'};
 	&save_domain($ad);
 	&unlock_domain($ad);
 	}
