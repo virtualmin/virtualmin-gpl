@@ -2007,38 +2007,36 @@ if (($ver = &get_domain_php_version($d, $mode)) &&
 }
 
 # find_php_fpm_config(&domain)
-# Find PHP-FPM config pool file for a domain
+# Find known PHP-FPM pools for a domain
 sub find_php_fpm_config
 {
 my ($d) = @_;
 my @fpmconfs = &list_php_fpm_configs();
-my $fpmconf_file;
+my @rv;
 foreach my $fpmconf (@fpmconfs) {
 	my $file = $fpmconf->{'dir'}."/".$d->{'id'}.".conf";
 	if (-r $file) {
-		# More than one file found, return undef (error)
-		return undef if ($fpmconf_file);
-		$fpmconf_file = $file;
+		$fpmconf->{'file'} = $file;
+		push(@rv, $fpmconf);
 		}
 	}
-return $fpmconf_file;
+return @rv;
 }
 
-# detect_php_fpm_version(&domain, [file])
-# Returns the PHP-FPM version used by a domain, based on the config file name
+# detect_php_fpm_version(&domain)
+# Returns PHP-FPM version used by domain or undef if not found or on error
 sub detect_php_fpm_version
-{
-my ($d, $file) = @_;
-$file ||= &find_php_fpm_config($d);
-my @avail = map { $_->[0] } &list_available_php_versions($d, 'fpm');
-if ($file =~ m{/php/(\d+)\.(\d+)/fpm} ||     # Debian and derivatives
-    $file =~ m{/php(\d{1,2})(\d)/.*-fpm}) {  # RHEL and derivatives
-	my $version = "$1.$2";
-	if (&indexof($version, @avail) >= 0) {
-		return $version;
+{ 
+my ($d) = @_;
+my @dom_vers = map { $_->{'shortversion'} } &find_php_fpm_config($d);
+return undef if (@dom_vers > 1); # Return error if more than one version found
+my @vers = map { $_->[0] } &list_available_php_versions($d, 'fpm');
+foreach $dom_ver (@dom_vers) {
+	if (&indexof($dom_ver, @vers) >= 0) {
+		return $dom_ver;
 		}
 	}
-return $avail[0] if (@avail && @avail == 1); # Return the only available version
+return $vers[0] if (@vers && @vers == 1); # Return the only available version
 return undef;
 }
 
