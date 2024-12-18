@@ -10,13 +10,7 @@ $readonly = &copy_alias_records($d);
 
 &ui_print_header(&domain_in($d), $text{'spf_title'}, "", "spf");
 
-print &ui_form_start("save_spf.cgi");
-print &ui_hidden("dom", $d->{'id'});
-print &ui_hidden("readonly", $readonly);
-@tds = ( "width=30%" );
-print &ui_table_start($text{'spf_header'}, "width=100%", 2, \@tds);
-
-# DNS cloud host or remote DNS provider
+# Build a list of Cloud providers or remote DNS servers
 my $cloud = $d->{'dns_cloud'} ? $d->{'dns_cloud'} :
 	    $d->{'dns_remote'} ? "remote_".$d->{'dns_remote'} :
 	    $d->{'provision_dns'} ? 'services' : 'local';
@@ -48,6 +42,21 @@ else {
 if ($canlocal) {
 	splice(@opts, 0, 0, [ 'local', $text{'dns_cloud_local'} ]);
 	}
+my ($found) = grep { $_->[0] eq $cloud } @opts;
+if (!$found) {
+	print &ui_alert_box(&text('spf_ecloudprov', $cloud), 'warn');
+	&ui_print_footer(&domain_footer_link($d),
+			 "", $text{'index_return'});
+	return;
+	}
+
+print &ui_form_start("save_spf.cgi");
+print &ui_hidden("dom", $d->{'id'});
+print &ui_hidden("readonly", $readonly);
+@tds = ( "width=30%" );
+print &ui_table_start($text{'spf_header'}, "width=100%", 2, \@tds);
+
+# Show DNS cloud host or remote DNS provider
 print &ui_table_row(&hlink($text{'spf_cloud'}, 'spf_cloud'),
 		    &ui_select("cloud", $cloud, \@opts));
 
