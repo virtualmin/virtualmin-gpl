@@ -41,7 +41,7 @@ if ($canlocal) {
 	splice(@opts, 0, 0, [ 'local', $text{'dns_cloud_local'} ]);
 	}
 my ($found) = grep { $_->[0] eq $cloud } @opts;
-&error(&text('spf_ecloudprov', "'$cloud'")) if (!$found);
+&error(&text('spf_ecloudprov', $cloud)) if (!$found);
 
 &ui_print_header(&domain_in($d), $text{'spf_title'}, "", "spf");
 
