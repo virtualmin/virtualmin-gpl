@@ -2016,7 +2016,6 @@ my @rv;
 foreach my $fpmconf (@fpmconfs) {
 	my $file = $fpmconf->{'dir'}."/".$d->{'id'}.".conf";
 	if (-r $file) {
-		$fpmconf->{'file'} = $file;
 		push(@rv, $fpmconf);
 		}
 	}
