@@ -3777,7 +3777,7 @@ if ($d->{'dns_cloud'}) {
 	my $ctype = $d->{'dns_cloud'};
 	my $gfunc = "dnscloud_".$ctype."_get_records";
 	if (!defined(&$gfunc)) {
-		return (&text('spf_ecloudprov', "'$ctype'"));
+		return (&text('spf_ecloudprov', $ctype));
 		}
 	my $info = { 'domain' => $d->{'dom'},
 		     'id' => $d->{'dns_cloud_id'},
