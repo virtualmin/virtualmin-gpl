@@ -4846,6 +4846,7 @@ spf_type=Typ digestu
 spf_digest=Řetězec trávení
 spf_aliasdns=Přepínání aliasové domény na vlastní DNS záznamy ..
 spf_noaliasdns=Přepínání aliasové domény pro kopírování DNS záznamů z cíle ..
+spf_ecloudprov=Cloudový poskytovatel DNS s identifikátorem <tt>$1</tt> není podporován licencí Virtualmin GPL
 
 s3_emodule2=Modul Perl $1 potřebný pro komunikaci se službou Amazon S3 nelze načíst : $2 
 s3_emodule3=Moduly Perl $1 nebo $2 potřebné pro komunikaci se službou Amazon S3 nejsou nainstalovány

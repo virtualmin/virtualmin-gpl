@@ -2828,6 +2828,7 @@ spf_type=Digest-Typ
 spf_digest=Digest-String
 spf_aliasdns=Umstellung der Aliasdomäne auf eigene DNS-Einträge ..
 spf_noaliasdns=Wechseln der Aliasdomäne, um DNS-Einträge vom Ziel zu kopieren ..
+spf_ecloudprov=Der Cloud-DNS-Anbieter mit der Kennung <tt>$1</tt> wird in der Virtualmin GPL nicht unterstützt
 
 s3_emodule=Das Perl-Modul $1, das für die Kommunikation mit dem S3-Dienst von Amazon benötigt wird, ist nicht installiert
 s3_emodule2=Das Perl-Modul $1, das für die Kommunikation mit dem S3-Dienst von Amazon benötigt wird, konnte nicht geladen werden : $2

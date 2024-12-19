@@ -3138,6 +3138,7 @@ spf_type=摘要型
 spf_digest=摘要字符串
 spf_aliasdns=将别名域切换到其自己的 DNS 记录 ..
 spf_noaliasdns=切换别名域以从目标复制 DNS 记录 ..
+spf_ecloudprov=Virtualmin GPL 不支持带有 <tt>$1</tt> 标识符的云 DNS 提供商
 
 s3_emodule2=无法加载与Amazon的S3服务通信所需的Perl模块 $1 : $2
 s3_emodule3=未安装与Amazon的S3服务进行通信所需的Perl模块 $1或 $2

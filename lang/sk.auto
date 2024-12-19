@@ -5897,6 +5897,7 @@ spf_type=Typ trávenia
 spf_digest=Stráviť reťazec
 spf_aliasdns=Prepínanie alias domény na vlastné DNS záznamy ..
 spf_noaliasdns=Prepínanie alias domény na kopírovanie DNS záznamov z cieľového ..
+spf_ecloudprov=Cloudový poskytovateľ DNS s identifikátorom <tt>$1</tt> nie je podporovaný v licencii Virtualmin GPL
 
 s3_emodule=Perl modul $1 potrebný na komunikáciu so službou Amazon S3 nie je nainštalovaný
 s3_emodule2=Modul Perl $1 potrebný na komunikáciu so službou Amazon S3 sa nepodarilo načítať : $2

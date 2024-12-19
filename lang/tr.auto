@@ -3383,6 +3383,7 @@ spf_type=Özet türü
 spf_digest=Özet dizesi
 spf_aliasdns=Alias domain'i kendi DNS kayıtlarına geçirmek ..
 spf_noaliasdns=Hedef alandan DNS kayıtlarını kopyalamak için takma alan adı değiştiriliyor ..
+spf_ecloudprov=<tt>$1</tt> tanımlayıcısına sahip bulut DNS sağlayıcısı Virtualmin GPL'de desteklenmiyor
 
 s3_emodule2=Amazon'un S3 hizmetiyle iletişim kurmak için gereken $1 Perl modülü yüklenemedi : $2 
 s3_emodule3=Amazon'un S3 hizmetiyle iletişim kurmak için gereken $1 veya $2 Perl modülleri kurulu değil
