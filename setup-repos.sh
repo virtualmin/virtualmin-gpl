@@ -1,7 +1,7 @@
 #!/bin/sh
 # shellcheck disable=SC2059 disable=SC2181 disable=SC2154 disable=SC2317 disable=SC2034
 # virtualmin-install.sh
-# Copyright 2005-2024 Virtualmin
+# Copyright 2005-2025 Virtualmin
 # Simple script to install Virtualmin on a supported OS
 
 # Different installation guides are available at:
@@ -10,7 +10,7 @@
 # License and version
 SERIAL=GPL
 KEY=GPL
-VER=7.5.0
+VER=7.5.2
 vm_version=7
 
 # Server
@@ -51,6 +51,7 @@ usage() {
   printf "  --no-package-updates|-x  skip package updates during installation\\n"
   echo
   printf "  --setup|-s               reconfigure Virtualmin repos without installation\\n"
+  printf "  --connect|-C <ipv4|ipv6> test connectivity to the repos without installation\\n"
   echo
   printf "  --insecure-downloads|-i  skip SSL certificate check for remote downloads\\n"
   echo
@@ -86,6 +87,77 @@ bind_hook() {
             "$post_hook" "$@"
         fi
     fi
+}
+
+test_connection() {
+  input="$1"
+  ip_version="$2"
+  ip_version_nice=$(echo "$ip_version" | sed 's/ip/IP/')
+  timeout=5
+  http_protocol="http"
+  http_protocol_nice=$(echo "$http_protocol" | tr '[:lower:]' '[:upper:]')
+
+  # Setup colors for messages
+  GREEN="" BLACK="" RED="" RESET="" BOLD="" GRBG="" REDBG=""
+  if command -pv 'tput' > /dev/null; then
+    GREEN=$(tput setaf 2)
+    BLACK=$(tput setaf 0)
+    RED=$(tput setaf 1)
+    RESET=$(tput sgr0)
+    BOLD=$(tput bold)
+    GRBG=$(tput setab 22; tput setaf 10)
+    REDBG=$(tput setab 52; tput setaf 9)
+  fi
+
+  # Extract the domain from the input
+  domain=$(echo "$input" | awk -F[/:] '{print $4}')
+  [ -z "$domain" ] && domain="$input"
+
+  # Validate parameters
+  if [ -z "$domain" ] || [ -z "$ip_version" ]; then
+    echo "${RED}[ERROR]  ${RESET} Domain and IP version are required" >&2
+    return 1
+  fi
+
+  # Setup protocol-specific flags
+  case "$ip_version" in
+    ipv4)
+      if ! getent ahostsv4 "$domain" >/dev/null 2>&1; then
+        echo "${RED}[ERROR]  ${RESET} ${BOLD}$domain${RESET} — cannot find IPv4 address" >&2
+        return 1
+      fi
+      ping_cmd="ping -c 1 -W $timeout $domain"
+      http_cmd="curl -sS --ipv4 --max-time $timeout --head $http_protocol://$domain \
+        || wget --spider -4 -T $timeout $http_protocol://$domain"
+      ;;
+    ipv6)
+      if ! getent ahostsv6 "$domain" >/dev/null 2>&1; then
+        echo "${RED}[ERROR]  ${RESET} ${BOLD}$domain${RESET} — cannot find IPv6 address" >&2
+        return 1
+      fi
+      ping_cmd="ping6 -c 1 -W $timeout $domain"
+      http_cmd="curl -sS --ipv6 --max-time $timeout --head $http_protocol://$domain \
+        || wget --spider -6 -T $timeout $http_protocol://$domain"
+      ;;
+  esac
+
+  # Try ping first
+  if eval "$ping_cmd" >/dev/null 2>&1; then
+    echo "${GREEN}[SUCCESS]${RESET} ${GRBG}[$ip_version_nice]${RESET} ${GRBG}[ICMP]${RESET} ${BOLD}$domain${RESET}"
+  else
+    echo "${RED}[ERROR]  ${RESET} ${REDBG}[$ip_version_nice]${RESET} ${REDBG}[ICMP]${RESET} ${BOLD}$domain${RESET}"
+  fi
+
+  # HTTP test as well
+  if command -v 'curl' > /dev/null || command -v 'wget' > /dev/null; then
+    if eval "$http_cmd" >/dev/null 2>&1; then
+      echo "${GREEN}[SUCCESS]${RESET} ${GRBG}[$ip_version_nice]${RESET} ${GRBG}[$http_protocol_nice]${RESET} ${BOLD}$domain${RESET}"
+      return 0
+    else
+      echo "${RED}[ERROR]  ${RESET} ${REDBG}[$ip_version_nice]${RESET} ${REDBG}[$http_protocol_nice]${RESET} ${BOLD}$domain${RESET}"
+      return 1
+    fi
+  fi
 }
 
 # Default function to parse arguments
@@ -132,6 +204,21 @@ parse_args() {
       mode='setup'
       unstable='unstable'
       log_file_name="${setup_log_file_name:-virtualmin-repos-setup}"
+      ;;
+    --connect | -C)
+      shift
+      if [ -z "$1" ]; then
+        test_connection "$download_virtualmin_host" "ipv4"
+        test_connection "$download_virtualmin_host" "ipv6"
+        exit 0
+      else
+        if [ "$1" != "ipv4" ] && [ "$1" != "ipv6" ]; then
+          usage
+          exit 1
+        fi
+        test_connection "$download_virtualmin_host" "$1"
+        exit 0
+      fi
       ;;
     --unstable | -e)
       shift
@@ -417,7 +504,9 @@ fi
 LOG_LEVEL_LOG="DEBUG"
 
 # If already installed successfully, do not allow running again
-if [ -f "/etc/webmin/virtual-server/installed-auto" ] && [ -z "$setup_only" ] && [ -z "$forcereinstall" ]; then
+if [ -f "/etc/webmin/virtual-server/installed-auto" ] && 
+   [ -z "$setup_only" ] && [ -z "$forcereinstall" ] &&
+   [ "$mode" != "uninstall" ]; then
   bind_hook "already_installed_block"
 fi
 if [ -n "$setup_only" ]; then
@@ -439,23 +528,35 @@ log_fatal() {
 # Test if grade B system
 grade_b_system() {
   case "$os_type" in
-  rhel | centos | rocky | almalinux | debian | ubuntu)
-    return 1
-    ;;
+    rhel | centos | rocky | almalinux | debian)
+      return 1
+      ;;
+    ubuntu)
+      case "$os_version" in
+        *\.10|*[13579].04) # non-LTS versions are unstable
+          return 0
+          ;;
+        *)
+          return 1
+          ;;
+      esac
+      ;;
+    *)
+      return 0
+      ;;
   esac
-  return 0
 }
 
 if grade_b_system && [ "$unstable" != 'unstable' ]; then
   log_error "Unsupported operating system detected. You may be able to install with"
-  log_error "${YELLOW}--unstable${NORMAL} flag, but this is not recommended. Consult the installation"
+  log_error "${BOLD}--unstable${NORMAL} flag, but this is not recommended. Consult the installation"
   log_error "documentation."
   exit 1
 fi
 
 remove_virtualmin_release() {
   case "$os_type" in
-  rhel | fedora | centos | centos_stream | rocky | almalinux | ol | cloudlinux | amzn )
+  rhel | fedora | centos | centos_stream | rocky | almalinux | openEuler | ol | cloudlinux | amzn )
     rm -f /etc/yum.repos.d/virtualmin.repo
     rm -f /etc/pki/rpm-gpg/RPM-GPG-KEY-virtualmin*
     rm -f /etc/pki/rpm-gpg/RPM-GPG-KEY-webmin
@@ -566,7 +667,7 @@ uninstall() {
   {
     # Detect the package manager
     case "$os_type" in
-    rhel | fedora | centos | centos_stream | rocky | almalinux | ol | cloudlinux | amzn )
+    rhel | fedora | centos | centos_stream | rocky | almalinux | openEuler | ol | cloudlinux | amzn )
       package_type=rpm
       if command -pv dnf 1>/dev/null 2>&1; then
         uninstall_cmd="dnf remove -y"
@@ -591,7 +692,8 @@ uninstall() {
       ;;
     deb)
       $uninstall_cmd "virtualmin*" "webmin*" "usermin*"
-      apt-get autoremove --assume-yes
+      uninstall_cmd_auto="apt-get autoremove --assume-yes"
+      $uninstall_cmd_auto
       os_type="debian"
       return 0
       ;;
@@ -618,10 +720,13 @@ uninstall() {
     echo "Virtualmin uninstallation complete."
   }
   
-  printf "${YELLOW}▣${NORMAL} Phase ${YELLOW}1${NORMAL} of ${GREEN}1${NORMAL}: Uninstall\\n"
+  phase_number=${phase_number:-1}
+  phases_total=${phases_total:-1}
+  uninstall_phase_description=${uninstall_phase_description:-"Uninstall"}
+  echo
+  phase "$uninstall_phase_description" "$phase_number"
   run_ok "uninstall_packages" "Uninstalling Virtualmin $vm_version and all stack packages"
   run_ok "uninstall_repos" "Uninstalling Virtualmin $vm_version release package"
-  exit 0
 }
 
 # Phase control
@@ -646,6 +751,7 @@ phase() {
 
 if [ "$mode" = "uninstall" ]; then
   bind_hook "uninstall"
+  exit 0
 fi
 
 # Calculate disk space requirements (this is a guess, for now)
@@ -680,13 +786,15 @@ install_msg() {
 EOF
   supported_all=$supported
   if [ -n "$unstable" ]; then
-    unstable_rhel="${YELLOW}- Fedora Server 38 and above on x86_64\\n \
+    unstable_rhel="${YELLOW}- Fedora Server 40 and above on x86_64\\n \
      - CentOS Stream 8 and 9 on x86_64\\n \
+     - Amazon Linux 2023 and above on x86_64\\n \
      - Oracle Linux 8 and 9 on x86_64\\n \
      - CloudLinux 8 and 9 on x86_64\\n \
-     - Amazon Linux 2023 and above on x86_64\\n \
+     - openEuler 24.03 and above on x86_64\\n \
           ${NORMAL}"
     unstable_deb="${YELLOW}- Kali Linux Rolling 2023 and above on x86_64\\n \
+     - Ubuntu interim (non-LTS) on i386 and amd64\\n \
           ${NORMAL}"
     supported_all=$(echo "$supported_all" | sed "s/UNSTABLERHEL/$unstable_rhel/")
     supported_all=$(echo "$supported_all" | sed "s/UNSTABLEDEB/$unstable_deb/")
@@ -730,11 +838,13 @@ os_unstable_pre_check() {
 
   ${YELLOWBG}${BLACK}${BOLD} INSTALLATION WARNING! ${NORMAL}
 
-  You are about to install Virtualmin $PRODUCT on a ${BOLD}Grade B${NORMAL} operating system. Please
-  be advised that this OS version is not recommended for servers, and may have
-  bugs that could affect the performance and stability of the system.
+  You are about to install Virtualmin $PRODUCT on a ${BOLD}Grade B${NORMAL} operating
+  system. Be advised that this OS version is not recommended for servers,
+  and may have bugs that could affect the performance and stability of
+  the system.
 
-  Certain features may not work as intended or might be unavailable on this OS.
+  Certain features may not work as intended or might be unavailable on
+  this OS.
 
 EOF
     if [ "$skipyesno" -ne 1 ]; then
@@ -779,19 +889,21 @@ already_installed_msg() {
 
   ${WHITEBG}${RED}${BOLD} WARNING! ${NORMAL}
 
-  Virtualmin may already be installed. This can happen if an installation failed,
-  and can be ignored in that case.
+  Virtualmin may already be installed. This can happen if an installation
+  failed, and can be ignored in that case.
 
-  However, if Virtualmin has already been successfully installed you ${BOLD}${RED}must not${NORMAL}
-  run this script again! It will cause breakage to your existing configuration.
+  However, if Virtualmin has already been successfully installed you
+  ${BOLD}${RED}must not${NORMAL} run this script again! It will cause breakage to your
+  existing configuration.
 
-  Virtualmin repositories can be fixed using ${WHITEBG}${BLACK}${BOLD}$script_name --setup${NORMAL} command.
+  Virtualmin repositories can be fixed using ${WHITEBG}${BLACK}${BOLD}$script_name --setup${NORMAL}
+  command.
 
-  License details can be changed using ${WHITEBG}${BLACK}${BOLD}virtualmin change-license${NORMAL} command.
+  License can be changed using ${WHITEBG}${BLACK}${BOLD}virtualmin change-license${NORMAL} command.
   Changing the license never requires re-installation.
 
-  Updates and upgrades must be performed from within either Virtualmin or using
-  system package manager on the command line.
+  Updates and upgrades must be performed from within either Virtualmin or
+  using system package manager on the command line.
 
 EOF
     if [ "$skipyesno" -ne 1 ]; then
@@ -1052,7 +1164,7 @@ install_virtualmin_release() {
   # Grab virtualmin-release from the server
   log_debug "Configuring package manager for ${os_real} ${os_version} .."
   case "$os_type" in
-  rhel | fedora | centos | centos_stream | rocky | almalinux | ol | cloudlinux | amzn )
+  rhel | fedora | centos | centos_stream | rocky | almalinux | openEuler | ol | cloudlinux | amzn )
     case "$os_type" in
     rhel | centos | centos_stream)
       if [ "$os_type" = "centos_stream" ]; then
@@ -1067,7 +1179,7 @@ install_virtualmin_release() {
         fi
       fi
       ;;
-    rocky | almalinux | ol)
+    rocky | almalinux | openEuler | ol)
       if [ "$os_major_version" -lt 8 ]; then
         printf "${RED}${os_real} ${os_version}${NORMAL} is not supported by this installer.\\n"
         exit 1
@@ -1087,7 +1199,7 @@ install_virtualmin_release() {
       ;;
     amzn)
       if [ "$os_major_version" -lt 2023 ] && [ "$os_type" = "amzn" ]  ; then
-        printf "${RED}${os_real} ${os_version}${NORMAL} is not supported by stable installer.\\n"
+        printf "${RED}${os_real} ${os_version}${NORMAL} is not supported by this installer.\\n"
         exit 1
       fi
       ;;
@@ -1165,10 +1277,14 @@ install_virtualmin_release() {
   debian | ubuntu | kali)
     case "$os_type" in
     ubuntu)
-      if [ "$os_version" != "18.04" ] && [ "$os_version" != "20.04" ] && [ "$os_version" != "22.04" ] && [ "$os_version" != "24.04" ]; then
-        printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
-        exit 1
-      fi
+      case "$os_version:$unstable" in
+        18.04:*|20.04:*|22.04:*|24.04:*|*\.10:unstable|*[13579].04:unstable)
+          : ;; # Do nothing for supported or allowed unstable versions
+        *)
+          printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
+          exit 1
+          ;;
+      esac
       ;;
     debian)
       if [ "$os_major_version" -lt 10 ]; then
@@ -1514,7 +1630,7 @@ disable_selinux() {
 
 # Changes that are specific to OS
 case "$os_type" in
-rhel | fedora | centos | centos_stream | rocky | almalinux | ol | cloudlinux | amzn)
+rhel | fedora | centos | centos_stream | rocky | almalinux | openEuler | ol | cloudlinux | amzn)
   disable_selinux
   ;;
 esac
