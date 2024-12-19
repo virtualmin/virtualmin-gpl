@@ -6037,8 +6037,9 @@ else {
 # Record webserver type
 $d->{'backup_web_type'} = &domain_has_website($d);
 $d->{'backup_ssl_type'} = &domain_has_ssl($d);
-
+&lock_domain($d);
 &save_domain($d);
+&unlock_domain($d);
 
 # Save the domain's data file
 &copy_source_dest($d->{'file'}, $file);
@@ -6156,7 +6157,9 @@ $config{'last_check'} = $oldconfig{'last_check'};
 # Remove plugins that aren't on the new system
 &generate_plugins_list($config{'plugins'});
 $config{'plugins'} = join(' ', @plugins);
+&lock_file($module_config_file);
 &save_module_config();
+&unlock_file($module_config_file);
 &$second_print($text{'setup_done'});
 
 # Apply any new config settings
@@ -7005,7 +7008,9 @@ if (!$allopts->{'fix'}) {
 			$d->{$f} = 0;
 			}
 		}
+	&lock_domain($d);
 	&save_domain($d);
+	&unlock_domain($d);
 	if (-r $file."_initial") {
 		# Also restore user defaults file
 		&copy_source_dest($file."_initial",
@@ -8747,7 +8752,9 @@ else {
 
 	# Inject initial SSL expiry to avoid wrong "until expiry"
 	&refresh_ssl_cert_expiry($d);
+	&lock_domain($d);
 	&save_domain($d);
+	&unlock_domain($d);
 
 	# Update other services using the cert
 	&update_all_domain_service_ssl_certs($d, \@beforecerts);
@@ -9108,14 +9115,12 @@ my @disdoms = grep {
 foreach my $d (@disdoms) {
 	&push_all_print();
 	&set_all_null_print();
-	&lock_domain($d);
 	eval {
 		local $main::error_must_die = 1;
 		my $disabled_auto = &make_date($d->{'disabled_auto'});
 		&disable_virtual_server($d, 'schedule',
 			&text('disable_autodisabledone', $disabled_auto));
 		};
-	&unlock_domain($d);
 	&pop_all_print();
 	&error_stderr_local("Disabling domain on schedule failed : $@") if ($@);
 	}
@@ -9173,8 +9178,10 @@ foreach my $f (&list_feature_plugins()) {
 
 # Save new domain details
 &$first_print($text{'save_domain'});
+&lock_domain($d);
 $d->{'disabled'} = join(",", @disabled);
 &save_domain($d);
+&unlock_domain($d);
 &$second_print($text{'setup_done'});
 
 # Run the after command
@@ -9227,8 +9234,10 @@ foreach my $f (&list_feature_plugins()) {
 
 # Save new domain details
 &$first_print($text{'save_domain'});
+&lock_domain($d);
 delete($d->{'disabled'});
 &save_domain($d);
+&unlock_domain($d);
 &$second_print($text{'setup_done'});
 
 # Run the after command
@@ -11187,6 +11196,7 @@ return if (!@$all);		# If no DBs were found on the system, do nothing
 				# to avoid mass dis-association
 local %all = map { ("$_->{'type'} $_->{'name'}", $_) } @$all;
 local $removed = 0;
+&lock_domain($d);
 foreach my $k (keys %$d) {
 	if ($k =~ /^db_(\S+)$/) {
 		local $t = $1;
@@ -11209,6 +11219,7 @@ if (!$defdb && @domdbs) {
 	$d->{'db'} = $domdbs[0]->{'name'};
 	&save_domain($d);
 	}
+&unlock_domain($d);
 }
 
 # get_database_host(type, [&domain])
@@ -11810,11 +11821,12 @@ if ($p eq 'web') {
 	elsif ($mode eq 'fcgiwrap') {
 		$err = &enable_apache_fcgiwrap($d);
 		}
+	&lock_domain($d);
 	if (!$err) {
 		$d->{'last_cgimode'} = $mode;
-		&save_domain($d);
 		}
 	&save_domain($d);
+	&unlock_domain($d);
 	&release_lock_web($d);
 	return $err;
 	}
@@ -11822,8 +11834,10 @@ elsif ($p) {
 	my $err = &plugin_call($p, "feature_web_save_domain_cgi_mode",
 			       $d, $mode);
 	if (!$err) {
+		&lock_domain($d);
 		$d->{'last_cgimode'} = $mode;
 		&save_domain($d);
+		&unlock_domain($d);
 		}
 	return $err;
 	}
@@ -12263,7 +12277,9 @@ if ($config{'allow_symlinks'} eq '') {
 	else {
 		# All OK already, don't check again
 		$config{'allow_symlinks'} = 0;
+		&lock_file($module_config_file);
 		&save_module_config();
+		&unlock_file($module_config_file);
 		}
 	}
 
@@ -14532,7 +14548,9 @@ local ($servers) = @_;
 $config{'mx_servers'} =
     join(" ", map { $_->{'mxname'} ? $_->{'id'}."=".$_->{'mxname'}
 				   : $_->{'id'} } @$servers);
+&lock_file($module_config_file);
 &save_module_config();
+&unlock_file($module_config_file);
 }
 
 # change_home_directory(&domain, newhome)
@@ -14758,7 +14776,9 @@ for(my $i=0; $i<@doms; $i++) {
 # Save the domain objects
 &$first_print($text{'save_domain'});
 for(my $i=0; $i<@doms; $i++) {
+	&lock_domain($doms[$i]);
         &save_domain($doms[$i]);
+	&unlock_domain($doms[$i]);
         }
 &$second_print($text{'setup_done'});
 
@@ -14986,7 +15006,9 @@ if (defined(&list_domain_scripts)) {
 # Save the domain objects
 &$first_print($text{'save_domain'});
 for(my $i=0; $i<@doms; $i++) {
+	&lock_domain($doms[$i]);
         &save_domain($doms[$i]);
+	&unlock_domain($doms[$i]);
         }
 &$second_print($text{'setup_done'});
 
@@ -15082,7 +15104,9 @@ foreach my $f (&list_feature_plugins(1)) {
 
 # Save the domain object
 &$first_print($text{'save_domain'});
+&lock_domain($d);
 &save_domain($d);
+&unlock_domain($d);
 &$second_print($text{'setup_done'});
 
 # Update parent Webmin user
@@ -15169,7 +15193,9 @@ foreach my $f (&list_feature_plugins(1)) {
 
 # Save the domain object
 &$first_print($text{'save_domain'});
+&lock_domain($d);
 &save_domain($d);
+&unlock_domain($d);
 &$second_print($text{'setup_done'});
 
 # Update parent Webmin user
@@ -15178,8 +15204,10 @@ foreach my $f (&list_feature_plugins(1)) {
 &run_post_actions();
 
 # Turn off aliascopy for future
+&lock_domain($d);
 delete($d->{'aliascopy'});
 &save_domain($d);
+&unlock_domain($d);
 
 # Run the after command
 &set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
@@ -15719,7 +15747,9 @@ if ($config{'mail'}) {
 			}
 		&$second_print(&text('check_detected', &mail_system_name()));
 		$mail_system = $config{'mail_system'};
+		&lock_file($module_config_file);
 		&save_module_config();
+		&unlock_file($module_config_file);
 		}
 	local $expected_mailboxes;
 	if ($mail_system == 1) {
@@ -16526,7 +16556,9 @@ if (!$config{'iface'}) {
 			return &text('index_eiface',
 				     "../config.cgi?$module_name");
 			}
+		&lock_file($module_config_file);
 		&save_module_config();
+		&unlock_file($module_config_file);
 		}
 	else {
 		# In a zone, it is worked out as needed, as it changes!
@@ -18128,8 +18160,10 @@ return split(/\s+/, $config{'sharedips'});
 # Updates the list of extra IP addresses that can be used by virtual servers
 sub save_shared_ips
 {
+&lock_file($module_config_file);
 $config{'sharedips'} = join(" ", @_);
 &save_module_config();
+&unlock_file($module_config_file);
 }
 
 # list_shared_ip6s()
@@ -18143,8 +18177,10 @@ return split(/\s+/, $config{'sharedip6s'});
 # Updates the list of extra IPv6 addresses that can be used by virtual servers
 sub save_shared_ip6s
 {
+&lock_file($module_config_file);
 $config{'sharedip6s'} = join(" ", @_);
 &save_module_config();
+&unlock_file($module_config_file);
 }
 
 # is_shared_ip(ip)
@@ -18422,8 +18458,10 @@ return split(/\t+/, $d->{'backup_excludes'});
 sub save_backup_excludes
 {
 local ($d, $excludes) = @_;
+&lock_domain($d);
 $d->{'backup_excludes'} = join("\t", @$excludes);
 &save_domain($d);
+&unlock_domain($d);
 }
 
 # get_backup_db_excludes(&domain)
@@ -18439,8 +18477,10 @@ return split(/\t+/, $d->{'backup_db_excludes'});
 sub save_backup_db_excludes
 {
 local ($d, $excludes) = @_;
+&lock_domain($d);
 $d->{'backup_db_excludes'} = join("\t", @$excludes);
 &save_domain($d);
+&unlock_domain($d);
 }
 
 # list_plugin_sections(level)
@@ -19089,7 +19129,9 @@ foreach my $ad (@aliases) {
 		&plugin_call($f, "feature_always_modify", $ad, $oldad);
 		}
 	&$outdent_print();
+	&lock_domain($ad);
 	&save_domain($ad);
+	&unlock_domain($ad);
 	&$second_print($text{'setup_done'});
 	}
 }
@@ -19503,7 +19545,9 @@ foreach my $f (@plugins) {
 		&try_plugin_call($f, "feature_clone", $d, $oldd);
 		}
 	}
+&lock_domain($d);
 &save_domain($d);
+&unlock_domain($d);
 
 # Copy across script logs, and then fix paths
 # Fix script installer paths in all domains
