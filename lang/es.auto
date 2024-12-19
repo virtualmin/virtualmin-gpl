@@ -2394,6 +2394,7 @@ spf_type=tipo de resumen
 spf_digest=cadena de resumen
 spf_aliasdns=Cambiar el dominio alias a sus propios registros DNS ..
 spf_noaliasdns=Cambiar el dominio de alias para copiar registros DNS del destino ..
+spf_ecloudprov=El proveedor de DNS en la nube con el identificador <tt>$1</tt> no es compatible con Virtualmin GPL
 
 s3_emodule2=No se pudo cargar el módulo Perl $1 necesario para comunicarse con el servicio S3 de Amazon : $2
 s3_emodule3=Los módulos Perl $1 o $2 necesarios para comunicarse con el servicio S3 de Amazon no están instalados

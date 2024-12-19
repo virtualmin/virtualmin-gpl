@@ -1914,6 +1914,7 @@ spf_type=Digest-type
 spf_digest=Digest-reeks
 spf_aliasdns=Aliasdomein overzetten naar eigen DNS-records ..
 spf_noaliasdns=Aliasdomein wijzigen om DNS-records van doel te kopiëren ..
+spf_ecloudprov=De cloud-DNS-provider met de <tt>$1</tt>-identificatie wordt niet ondersteund in Virtualmin GPL
 
 s3_emodule2=De Perl-module $1 die nodig is om te communiceren met de S3-service van Amazon kan niet worden geladen : $2
 s3_emodule3=De Perl-modules $1 of $2 die nodig zijn om te communiceren met de S3-service van Amazon, zijn niet geïnstalleerd

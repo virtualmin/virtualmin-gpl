@@ -229,6 +229,7 @@ spf_dmarcruf=Raportowanie URI dla raportów kryminalistycznych
 spf_dmarcrua=Raportowanie URI dla raportów zbiorczych
 spf_aliasdns=Zmiana aliasu domeny na własne rekordy DNS ..
 spf_noaliasdns=Zmiana aliasu domeny w celu skopiowania rekordów DNS z domeny docelowej ..
+spf_ecloudprov=Dostawca usługi Cloud DNS o identyfikatorze <tt>$1</tt> nie jest obsługiwany w ramach licencji Virtualmin GPL
 
 upgrade_addrepo=Dodawanie repozytorium Virtualmin Pro ..
 

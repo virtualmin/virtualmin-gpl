@@ -4747,6 +4747,7 @@ spf_type=Tipo di raccolta
 spf_digest=Stringa digest
 spf_aliasdns=Sostituzione del dominio alias con i propri record DNS ..
 spf_noaliasdns=Cambio di dominio alias per copiare i record DNS dalla destinazione ..
+spf_ecloudprov=Il provider DNS cloud con l'identificatore <tt>$1</tt> non è supportato in Virtualmin GPL
 
 s3_emodule=Il modulo Perl $1 necessario per comunicare con il servizio S3 di Amazon non è installato
 s3_emodule2=Impossibile caricare il modulo Perl $1 necessario per comunicare con il servizio S3 di Amazon : $2 

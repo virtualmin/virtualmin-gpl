@@ -1664,6 +1664,7 @@ spf_type=Digest type
 spf_digest=Digest streng
 spf_aliasdns=Bytter aliasdomene til sine egne DNS-poster ..
 spf_noaliasdns=Bytter aliasdomene for å kopiere DNS-poster fra målet ..
+spf_ecloudprov=Sky-DNS-leverandøren med <tt>$1</tt>-identifikatoren støttes ikke i Virtualmin GPL
 
 s3_emodule2=Perl-modulen $1 som trengs for å kommunisere med Amazons S3-tjeneste, kunne ikke lastes : $2 
 s3_emodule3=Perl-modulene $1 eller $2 som trengs for å kommunisere med Amazons S3-tjeneste er ikke installert
