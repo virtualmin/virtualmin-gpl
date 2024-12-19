@@ -5,6 +5,7 @@
 * Fix to ensure files inside backups have the correct extensions
 * Fix to clean up the code that adjusts FPM versions during the config check
 * Fix to remove Webalizer as an option unless it is already installed
+* Fix file locking to prevent disruption of configuration files in rare cases
 * Add a new ClassicPress web app installer 
 
 #### Version 7.30.2
