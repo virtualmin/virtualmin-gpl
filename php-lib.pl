@@ -2023,6 +2023,39 @@ if (($ver = &get_domain_php_version($d, $mode)) &&
 	}
 }
 
+# find_php_fpm_config(&domain)
+# Find known PHP-FPM pools for a domain
+sub find_php_fpm_config
+{
+my ($d) = @_;
+my @fpmconfs = &list_php_fpm_configs();
+my @rv;
+foreach my $fpmconf (@fpmconfs) {
+	my $file = $fpmconf->{'dir'}."/".$d->{'id'}.".conf";
+	if (-r $file) {
+		push(@rv, $fpmconf);
+		}
+	}
+return @rv;
+}
+
+# detect_php_fpm_version(&domain)
+# Returns PHP-FPM version used by domain or undef if not found or on error
+sub detect_php_fpm_version
+{ 
+my ($d) = @_;
+my @dom_vers = map { $_->{'shortversion'} } &find_php_fpm_config($d);
+return undef if (@dom_vers > 1); # Return error if more than one version found
+my @vers = map { $_->[0] } &list_available_php_versions($d, 'fpm');
+foreach $dom_ver (@dom_vers) {
+	if (&indexof($dom_ver, @vers) >= 0) {
+		return $dom_ver;
+		}
+	}
+return $vers[0] if (@vers && @vers == 1); # Return the only available version
+return undef;
+}
+
 # get_php_fpm_config([version|&domain])
 # Returns the first valid FPM config for a domain
 sub get_php_fpm_config
