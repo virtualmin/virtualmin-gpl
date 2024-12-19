@@ -3021,7 +3021,9 @@ foreach my $d (&list_domains()) {
 	}
 
 $config{'last_letsencrypt_mass_renewal'} = $now;
+&lock_file($module_config_file);
 &save_module_config();
+&unlock_file($module_config_file);
 }
 
 # renew_letsencrypt_cert(&domain)
@@ -3086,10 +3088,12 @@ my @beforecerts = &get_all_domain_service_ssl_certs($d);
 # Copy into place
 &obtain_lock_ssl($d);
 &install_letsencrypt_cert($d, $cert, $key, $chain);
+&lock_domain($d);
 $d->{'letsencrypt_last'} = time();
 $d->{'letsencrypt_last_success'} = time();
 delete($d->{'letsencrypt_last_err'});
 &save_domain($d);
+&unlock_domain($d);
 &release_lock_ssl($d);
 
 # Update DANE DNS records
