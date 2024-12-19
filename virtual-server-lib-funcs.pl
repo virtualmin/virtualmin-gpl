@@ -16074,9 +16074,6 @@ if (&domain_has_website()) {
 		# Check for invalid FPM versions, in case one has been
 		# upgraded to a new release
 		my @fpmfixed;
-		# Sort to have highest version first
-		@fpms = sort { &compare_versions(
-				$b->{'version'}, $a->{'version'}) } @fpms;
 		foreach my $d (grep { &domain_has_website($_) &&
 				      !$_->{'alias'} } &list_domains()) {
 			# Check if an FPM version is stored in domain config
