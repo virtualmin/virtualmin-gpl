@@ -2,7 +2,7 @@
 # script_tikiwiki_desc()
 sub script_tikiwiki_desc
 {
-return "TikiWiki";
+return "Tiki Wiki CMS Groupware";
 }
 
 sub script_tikiwiki_uses
