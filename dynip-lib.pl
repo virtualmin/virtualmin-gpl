@@ -71,6 +71,7 @@ my $now = time();
 my $cache_optname = $type == 4 ?
 	'external_ip_cache' : 'external_ipv6_cache';
 my $cache_time_optname = $cache_optname.'_time';
+$nocache = 1 if ($config{"no_$cache_optname"});
 if (!$nocache && $config{$cache_optname} &&
     $now - $config{$cache_time_optname} < 24*60*60) {
 	# Can use last cached value
@@ -122,6 +123,16 @@ my ($nocache, $prefer) = shift;
 my $ip4 = &get_external_ip_address($nocache, 4) if (!$prefer || $prefer != 6);
 my $ip6 = &get_external_ip_address($nocache, 6) if (!$prefer || $prefer != 4);
 return $prefer == 4 ? $ip4 : $ip6 || $ip4;
+}
+
+# get_any_external_ip_address_cached()
+# Returns the cached IP address of this system unless caching is disabled.
+sub get_any_external_ip_address_cached
+{
+my ($ip4txt, $ip6txt) = ('external_ip_cache', 'external_ipv6_cache');
+return $config{$ip4txt} if ($config{$ip4txt} && !$config{"no_$ip4txt"});
+return $config{$ip6txt} if ($config{$ip6txt} && !$config{"no_$ip6txt"});
+return undef;
 }
 
 # update_dynip_service(new-ip, old-ip)
