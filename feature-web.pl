@@ -2480,7 +2480,8 @@ sub add_listen
 {
 local ($d, $conf, $web_port) = @_;
 &require_apache();
-foreach my $dip ($d->{'ip'}, $d->{'ip6'} ? ( $d->{'ip6'} ) : ( )) {
+foreach my $dip ($d->{'ip'} ? ( $d->{'ip'} ) : ( ),
+		 $d->{'ip6'} ? ( $d->{'ip6'} ) : ( )) {
 	local $defport = &apache::find_directive("Port", $conf) || 80;
 	local @listen = &apache::find_directive("Listen", $conf);
 	local $lfound;
