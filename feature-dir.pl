@@ -954,6 +954,21 @@ foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 		}
 	}
 
+# Track changed files
+my @changed_files;
+my $change_files = sub {
+	my ($f, $uid, $gid, $changed_files) = @_;
+	my ($curr_uid, $curr_gid) = (stat($f))[4,5];
+	my $curr_user = getpwuid($curr_uid) || $curr_uid;
+	my $curr_group = getgrgid($curr_gid) || $curr_gid;
+	my $new_user = getpwuid($uid) || $uid;
+	my $new_group = getgrgid($gid) || $gid;
+	if ($curr_uid != $uid || $curr_gid != $gid) {
+		push(@$changed_files, 
+			[$f, "$curr_user:$curr_group", "$new_user:$new_group"]);
+		}
+};
+
 # Build list of dirs to skip (sub-domain homes and user homes)
 my @subhomes;
 if (!$d->{'parent'}) {
@@ -973,9 +988,11 @@ LOOP: while(my $f = <FIND>) {
 	foreach my $s (@subhomes) {
 		next LOOP if ($f =~ /^\Q$s\E/);
 		}
+	$change_files->($f, $d->{'uid'}, $gid, \@changed_files);
 	&set_ownership_permissions($d->{'uid'}, $gid, undef, $f);
 	}
 close(FIND);
+$change_files->($d->{'home'}."/".$hd, $d->{'uid'}, $gid, \@changed_files);
 &set_ownership_permissions($d->{'uid'}, $gid, undef, $d->{'home'}."/".$hd);
 foreach my $dir (&virtual_server_directories($d)) {
 	&set_ownership_permissions(undef, undef, oct($dir->[1]),
@@ -985,6 +1002,8 @@ foreach my $user (@users) {
 	next if ($user->{'nocreatehome'});
 	next if (!&is_under_directory("$d->{'home'}/$hd", $user->{'home'}));
 	next if ("$d->{'home'}/$hd" eq $user->{'home'});
+	$change_files->($user->{'home'}, $user->{'uid'},
+		$user->{'gid'}, \@changed_files);
 	&system_logged("chown -R $user->{'uid'}:$user->{'gid'} ".
 		       quotemeta($user->{'home'}));
 	}
@@ -993,7 +1012,7 @@ foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 		&set_php_wrappers_writable($sd, 0);
 		}
 	}
-return undef;
+return @changed_files;
 }
 
 # set_mailbox_homes_ownership(&domain)
