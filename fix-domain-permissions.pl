@@ -81,12 +81,23 @@ foreach $d (@doms) {
 		&$second_print(".. does not have a home directory");
 		}
 	else {
-		$err = &set_home_ownership($d);
-		if ($err) {
-			&$second_print(".. failed : $err");
+		my (@changed_files) = &set_home_ownership($d);
+		if (@changed_files) {
+			my $details_body;
+			foreach my $changed (@changed_files) {
+				$changed->[0] =~ s/^$d->{'home'}\///;
+				$details_body .= "     ".
+					&text('fixperms_details',
+						$changed->[1],
+						$changed->[2],
+						$changed->[0]). "\n";
+				}
+			&$second_print(
+				$text{'fixperms_oklist2'}. "\n".
+				$details_body);
 			}
 		else {
-			&$second_print(".. done");
+			&$second_print($text{'setup_done'});
 			}
 		}
 	}

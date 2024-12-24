@@ -7526,8 +7526,10 @@ fixperms_err=Failed to fix permissions
 fixperms_edoms=No virtual servers selected
 fixperms_title=Fixing Permissions
 fixperms_dom=Fixing file ownership and permissions for $1 ..
-fixperms_edir=.. does not have a home directory
-fixperms_failed=.. failed : $1
+fixperms_edirmiss=.. domain does not have a home directory
+fixperms_oklist=.. done for the enclosed list of files
+fixperms_oklist2=.. done for the list of files below:
+fixperms_details=From <tt>$1</tt> to <tt>$2</tt> for file <tt>$3</tt>
 
 bkeys_title=Backup Encryption Keys
 bkeys_key=GPG key ID
