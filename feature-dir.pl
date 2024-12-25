@@ -979,9 +979,9 @@ if (!$d->{'parent'}) {
 foreach my $user (@users) {
 	push(@subhomes, $user->{'home'});
 	}
-
-&open_execute_command(FIND, "find ".quotemeta($d->{'home'})." ! -type l", 1);
-LOOP: while(my $f = <FIND>) {
+my $find = "FIND";
+&open_execute_command($find, "find ".quotemeta($d->{'home'})." ! -type l", 1);
+LOOP: while(my $f = <$find>) {
 	$f =~ s/\r|\n//;
 	next LOOP if ($f =~ /\/\.nodelete$/);
 	next LOOP if ($f =~ /^\Q$d->{'home'}\/$hd\/\E/);
@@ -991,7 +991,7 @@ LOOP: while(my $f = <FIND>) {
 	$check_file_change->($f, $d->{'uid'}, $gid, \@changed_files);
 	&set_ownership_permissions($d->{'uid'}, $gid, undef, $f);
 	}
-close(FIND);
+close($find);
 $check_file_change->($d->{'home'}."/".$hd, $d->{'uid'}, $gid, \@changed_files);
 &set_ownership_permissions($d->{'uid'}, $gid, undef, $d->{'home'}."/".$hd);
 foreach my $dir (&virtual_server_directories($d)) {
@@ -1002,10 +1002,17 @@ foreach my $user (@users) {
 	next if ($user->{'nocreatehome'});
 	next if (!&is_under_directory("$d->{'home'}/$hd", $user->{'home'}));
 	next if ("$d->{'home'}/$hd" eq $user->{'home'});
-	$check_file_change->($user->{'home'}, $user->{'uid'},
-		$user->{'gid'}, \@changed_files);
-	&system_logged("chown -R $user->{'uid'}:$user->{'gid'} ".
-		       quotemeta($user->{'home'}));
+	my $find = "FIND";
+	&open_execute_command($find, "find ".
+		quotemeta($user->{'home'})." ! -type l", 1);
+	while (my $f = <$find>) {
+		$f =~ s/\r|\n//;
+		$check_file_change->($f, $user->{'uid'}, $user->{'gid'},
+				     \@changed_files);
+		&set_ownership_permissions($user->{'uid'}, $user->{'gid'},
+					   undef, $f);
+		}
+	close($find);
 	}
 foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 	if (defined(&set_php_wrappers_writable)) {
