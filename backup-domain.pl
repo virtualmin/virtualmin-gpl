@@ -78,7 +78,7 @@ to delay the backup until the first one completes.
 
 To override the default compression format set on the Virtualmin Configuration
 page, use the C<--compression> flag followed by one of C<gzip>, C<bzip2>, 
-C<tar> or C<zip>.
+C<tar>, C<zstd> or C<zip>.
 
 =cut
 
@@ -251,7 +251,8 @@ while(@ARGV > 0) {
 		$compression = $c eq "gzip" ? 0 :
 			       $c eq "bzip2" ? 1 :
 			       $c eq "tar" ? 2 :
-			       $c eq "zip" ? 3 : -1;
+			       $c eq "zip" ? 3 :
+			       $c eq "zstd" ? 4 : -1;
 		&usage("Invalid compression format $c") if ($compression < 0);
 		}
 	elsif ($a eq "--help") {
@@ -493,7 +494,7 @@ if (defined(&list_backup_keys)) {
 	print "                         [--key id]\n";
 	}
 print "                         [--kill-running | --wait-running]\n";
-print "                         [--compression gzip|bzip2|tar|zip]\n";
+print "                         [--compression gzip|bzip2|tar|zip|zstd]\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";

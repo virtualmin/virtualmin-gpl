@@ -307,7 +307,9 @@ print &ui_table_row(
 		    [ 0, $text{'backup_compression0'} ],
 		    [ 1, $text{'backup_compression1'} ],
 		    [ 2, $text{'backup_compression2'} ],
-		    [ 3, $text{'backup_compression3'} ] ]));
+		    [ 3, $text{'backup_compression3'} ],
+		    [ 4, $text{'backup_compression4'} ],
+		  ]));
 
 # Show differential option
 if (&has_incremental_tar()) {

@@ -631,6 +631,11 @@ elsif ($compression == 3) {
 	# ZIP archive
 	$cmd = &make_zip_command("-x\@".quotemeta($xtemp), "-", @ilist);
 	}
+elsif ($homefmt && $compression == 4) {
+	# With zstd
+	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, @ilist).
+	       " | ".&get_zstd_command();
+	}
 else {
 	# Plain tar
 	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, @ilist);
@@ -804,7 +809,8 @@ if ($cf == 4) {
 else {
 	local $comp = $cf == 1 ? &get_gunzip_command()." -c" :
 		      $cf == 2 ? "uncompress -c" :
-		      $cf == 3 ? &get_bunzip2_command()." -c" : "cat";
+		      $cf == 3 ? &get_bunzip2_command()." -c" :
+		      $cf == 6 ? &get_unzstd_command() : "cat";
 	local $tarcmd = &make_tar_command("xvfX", "-", $xtemp);
 	local $reader = $catter." | ".$comp;
 	if ($asd) {

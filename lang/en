@@ -2546,6 +2546,7 @@ backup_compression0=<tt>tar+gzip</tt>
 backup_compression1=<tt>tar+bzip2</tt>
 backup_compression2=<tt>tar</tt>
 backup_compression3=<tt>zip</tt>
+backup_compression4=<tt>zstd</tt>
 backup_email=Email backup report to
 backup_email_err=Only send email on failure
 backup_email_doms=Also send email to owners of backed-up servers

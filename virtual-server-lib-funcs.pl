@@ -13115,13 +13115,14 @@ my ($file, $dir, $d) = @_;
 my $format = &compression_format($file);
 my $tar = &get_tar_command();
 my $bunzip2 = &get_bunzip2_command();
+my $unzstd = &get_unstd_command();
 my @needs = ( undef,
 		 [ "gunzip", $tar ],
 		 [ "uncompress", $tar ],
 		 [ $bunzip2, $tar ],
 		 [ "unzip" ],
 		 [ "tar" ],
-		 [ "unzstd" ],
+		 [ $unzstd ],
 		);
 foreach my $n (@{$needs[$format]}) {
 	my ($noargs) = split(/\s+/, $n);
@@ -13141,7 +13142,7 @@ if ($dir) {
 		  "cd $qdir && unzip $qfile",
 		  "cd $qdir && ".
 		    &make_tar_command("xf", $file),
-		  "cd $qdir && unzstd -d -c $qfile | ".
+		  "cd $qdir && $unzstd -d -c $qfile | ".
 		    &make_tar_command("xf", "-")
 		  );
 	}
@@ -13156,7 +13157,7 @@ else {
 		    &make_tar_command("tf", "-"),
 		  "unzip -l $qfile",
 		  &make_tar_command("tf", $file),
-		  "unzstd --test $qfile",
+		  "$unzstd --test $qfile",
 		  );
 	}
 $cmds[$format] || return "Unknown compression format";
@@ -16865,6 +16866,7 @@ if (!&has_command("tar")) {
 	}
 local @bcmds = $config{'compression'} == 0 ? ( "gzip", "gunzip" ) :
 	       $config{'compression'} == 3 ? ( "zip", "unzip" ) :
+	       $config{'compression'} == 4 ? ( "zstd", "unzstd" ) :
 	       $config{'compression'} == 1 && $config{'pbzip2'} ? ( "pbzip2" ) :
 	       $config{'compression'} == 1 ? ( "bzip2", "bunzip2" ) :
 					     ( );

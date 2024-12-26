@@ -1236,6 +1236,10 @@ if ($ok) {
 			elsif ($compression == 3) {
 				$destfile =~ s/\.tar$/\.zip/;
 				}
+			elsif ($compression == 4) {
+				$destfile .= ".zst";
+				$comp = &get_zstd_command();
+				}
 
 			# Create command that writes to the final file
 			local $qf = quotemeta("$dest/$destfile");
@@ -1299,6 +1303,9 @@ if ($ok) {
 		elsif ($dest =~ /\.(bz2|tbz2)$/i) {
 			$comp = &get_bzip2_command();
 			}
+		elsif ($dest =~ /\.(zst|zstd)$/i) {
+			$comp = &get_zstd_command();
+			}
 		elsif ($dest =~ /\.tar$/i) {
 			$comp = "cat";
 			}
@@ -1307,6 +1314,9 @@ if ($ok) {
 			}
 		elsif ($compression == 3) {
 			$comp = &get_bzip2_command();
+			}
+		elsif ($compression == 4) {
+			$comp = &get_zstd_command();
 			}
 		else {
 			$comp = "cat";
@@ -2181,6 +2191,7 @@ if ($ok) {
 			local $comp = $cf == 1 ? &get_gunzip_command()." -c" :
 				      $cf == 2 ? "uncompress -c" :
 				      $cf == 3 ? &get_bunzip2_command()." -c" :
+				      $cf == 6 ? &get_unzstd_command() :
 						 "cat";
 			local ($compcmd) = &split_quoted_string($comp);
 			if (!&has_command($compcmd)) {
@@ -3470,6 +3481,7 @@ else {
 		$comp = $cf == 1 ? &get_gunzip_command()." -c" :
 			$cf == 2 ? "uncompress -c" :
 			$cf == 3 ? &get_bunzip2_command()." -c" :
+			$cf == 4 ? &get_unzstd_command() :
 				   "cat";
 		local ($compcmd) = &split_quoted_string($comp);
 		if (!&has_command($compcmd)) {
@@ -5166,6 +5178,20 @@ else {
 	# Fall back to using -d option
 	return (&has_command('pigz') || 'pigz').' -d';
 	}
+}
+
+# get_zstd_command()
+# Returns the full path to the zstd command in compression mode
+sub get_zstd_command
+{
+return &has_command("zstd")." -c";
+}
+
+# get_unzstd_command()
+# Returns the full path to the zstd command in de-compression mode
+sub get_unzstd_command
+{
+return &has_command("zstd")." -c -d";
 }
 
 # get_backup_actions()
@@ -6875,18 +6901,22 @@ return undef;
 }
 
 # compression_to_suffix(format)
-# Converts a compressioin format integer to a filename suffix
+# Converts a compression format integer to a filename suffix. Supported formats
+# are 0 (gzipped tar), 1 (bzipped tar), 2 (plain tar), 3 (ZIP), 4 (zstd tar)
 sub compression_to_suffix
 {
 my ($c) = @_;
 return $c == 0 ? "tar.gz" :
        $c == 1 ? "tar.bz2" :
-       $c == 3 ? "zip" : "tar";
+       $c == 2 ? "tar" :
+       $c == 3 ? "zip" :
+       $c == 4 ? "tar.zst" :
+		 "unknown";
 }
 
 # compression_to_suffix_inner(format)
 # Converts a compressioin format integer to a filename suffix for interal
-# archive files
+# archive files.
 sub compression_to_suffix_inner
 {
 my ($c) = @_;
@@ -6894,11 +6924,14 @@ return $c == 3 ? "zip" : 'tar';
 }
 
 # suffix_to_compression(filename)
-# Use the suffix of a filename to determine the compression format number
+# Use the suffix of a filename to determine the compression format number.
+# Supported formats are 0 (gzipped tar), 1 (bzipped tar), 2 (plain tar),
+# 3 (ZIP), 4 (zstd tar)
 sub suffix_to_compression
 {
 my ($file) = @_;
 return $file =~ /\.zip$/i ? 3 :
+       $file =~ /\.tar\.zst$/i ? 4 :
        $file =~ /\.tar\.gz$/i ? 0 :
        $file =~ /\.tar\.bz2$/i ? 1 :
        $file =~ /\.tar$/i ? 2 : -1;
