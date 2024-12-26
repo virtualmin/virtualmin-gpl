@@ -82,7 +82,7 @@ $config{'virt6'} = 1;
 		  $virtualmin_pro ? ( 'status' ) : ( ),
 		  'webmin' );
 @vital_features = ( 'dir', 'unix' );
-@deprecated_features = ( 'webalizer' );
+@deprecated_features = ( 'webalizer', 'ftp' );
 @features = ( @opt_features );
 @backup_features = ( 'virtualmin', @features );
 @safe_backup_features = ( 'dir', 'mysql', 'postgres' );

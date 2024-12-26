@@ -21,6 +21,14 @@ if (!$d->{'virt'} && !&supports_namebased_ftp()) {
 return undef;
 }
 
+# feature_depends_ftp()
+# Checks for dependencies for the FTP feature
+sub feature_depends_ftp
+{
+# Feature has no explicit dependencies
+return 1;
+}
+
 # setup_ftp(&domain)
 # Setup a virtual FTP server for some domain
 sub setup_ftp

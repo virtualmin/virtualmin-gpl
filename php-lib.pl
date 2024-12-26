@@ -2823,12 +2823,21 @@ return $major;
 sub cleanup_php_sessions
 {
 my ($d, $dryrun) = @_;
+my $tmp;
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "fpm") {
+	# Find the session files dir from PHP-FPM config
+	$tmp = &get_php_fpm_ini_value($d, "session.save_path");
+	}
+else {
+	# Find the session files dir from PHP ini config
+	my $etc = "$d->{'home'}/etc";
+	&foreign_require("phpini");
+	my $pconf = &phpini::get_config("$etc/php.ini");
+	$tmp = &phpini::find_value("session.save_path", $pconf);
+	}
 
-# Find the session files dir from php config
-my $etc = "$d->{'home'}/etc";
-&foreign_require("phpini");
-my $pconf = &phpini::get_config("$etc/php.ini");
-my $tmp = &phpini::find_value("session.save_path", $pconf);
+# Default to ~/tmp
 $tmp ||= $d->{'home'}."/tmp";
 
 # Look for session files that are too old
