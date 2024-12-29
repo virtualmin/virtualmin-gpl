@@ -64,7 +64,8 @@ if ($in{'generic'}) {
 		# Sub-server under parent's user
 		($rdleft, $rdreason, $rdmax) = &count_domains("realdoms");
 		if ($rdleft) {
-			push(@generics, [ $text{'form_generic_subserver'},
+			push(@generics, [ &text('form_generic_subserverof',
+						$gparent->{'dom'}),
 				  'add1=1&parentuser1='.$gparent->{'user'} ]);
 			}
 		($adleft, $adreason, $admax) = &count_domains("aliasdoms");
