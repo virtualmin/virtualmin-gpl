@@ -55,7 +55,7 @@ elsif ($in{'newkey_mode'} == 3) {
 elsif ($in{'newkey_mode'} == 4) {
 	# Use key from CSR
 	-r $d->{'ssl_newkey'} || &error($text{'newkey_enewkeycsr'});
-	$newkey =  &read_file_contents_as_domain_user($d, $d->{'ssl_newkey'});
+	$newkey = &read_file_contents_as_domain_user($d, $d->{'ssl_newkey'});
 	}
 
 # Validate CA cert
