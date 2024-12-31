@@ -13115,7 +13115,7 @@ my ($file, $dir, $d) = @_;
 my $format = &compression_format($file);
 my $tar = &get_tar_command();
 my $bunzip2 = &get_bunzip2_command();
-my $unzstd = &get_unstd_command();
+my $unzstd = &get_unzstd_command();
 my @needs = ( undef,
 		 [ "gunzip", $tar ],
 		 [ "uncompress", $tar ],
