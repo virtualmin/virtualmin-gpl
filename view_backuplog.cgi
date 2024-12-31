@@ -23,8 +23,13 @@ if ($log->{'desc'}) {
 	}
 
 # Destination
-print &ui_table_row($text{'viewbackup_dest'},
-	&nice_backup_url($log->{'dest'}, 1), 3);
+my ($proto, $user, $pass, $host, $path, $port) =
+	&parse_backup_url($log->{'dest'});
+my $nice = &nice_backup_url($log->{'dest'}, 1);
+if ($proto == 0 && &foreign_check("filemin")) {
+	$nice = &ui_link("../filemin/index.cgi?path=".&urlize($path), $nice);
+	}
+print &ui_table_row($text{'viewbackup_dest'}, $nice, 3);
 
 # Domains included
 @alldnames = split(/\s+/, $log->{'doms'});
