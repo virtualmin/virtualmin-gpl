@@ -506,7 +506,6 @@ local (%taken, %utaken);
 &foreign_require("mailboxes");
 $mailboxes::no_permanent_index = 1;
 local $mcount = 0;
-# Linux mailboxes
 foreach my $name (keys %$mailusers) {
 	next if ($windows);
 	local $mailuser = $mailusers->{$name};
@@ -539,7 +538,7 @@ foreach my $name (keys %$mailusers) {
 		}
 	if (&has_home_quotas()) {
 		local $q = $mailuser->{'mailbox-quota'} < 0 ? undef :
-				$mailuser->{'mailbox-quota'}*1024;
+				$mailuser->{'mailbox-quota'};
 		$uinfo->{'quota'} = $q / &quota_bsize("home");
 		$uinfo->{'mquota'} = $q / &quota_bsize("home");
 		}
