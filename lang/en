@@ -298,6 +298,7 @@ form_enomore=You are not allowed to create any more virtual servers of any type
 form_genericmode=New virtual server type:
 form_generic_master=Top-level server
 form_generic_subserver=Sub-server
+form_generic_subserverof=Sub-server of $1
 form_generic_alias=Alias of $1
 form_generic_aliasshort=Alias
 form_generic_aliasmail=Alias of $1, with own email
