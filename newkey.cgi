@@ -17,6 +17,10 @@ if ($in{'cert_mode'} == 0) {
 elsif ($in{'cert_mode'} == 1) {
 	$cert = $in{'certupload'};
 	}
+elsif ($in{'cert_mode'} == 3) {
+	# Use existing cert
+	$cert = &read_file_contents($d->{'ssl_cert'});
+	}
 else {
 	&is_under_directory($homed->{'home'}, $in{'certfile'}) ||
 	   $in{'certfile'} eq &default_certificate_file($d, "cert") ||

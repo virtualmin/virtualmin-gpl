@@ -373,9 +373,11 @@ print &ui_hidden("dom", $in{'dom'});
 print &ui_table_start($text{'cert_header3'}, undef, 2);
 
 # Cert
+my $gotcert = $d->{'ssl_cert'} && -r $d->{'ssl_cert'};
 print &ui_table_row($text{'cert_cert'},
-	&ui_radio_table("cert_mode", 0,
-		[ [ 0, $text{'cert_cert0'},
+	&ui_radio_table("cert_mode", $gotcert ? 3 : 0,
+		[ $gotcert ? ( [ 3, $text{'cert_newcertkeep'} ] ) : ( ),
+		  [ 0, $text{'cert_cert0'},
 		    &ui_textarea("cert", undef, 8, 70) ],
 		  [ 1, $text{'cert_cert1'},
 		    &ui_upload("certupload") ],

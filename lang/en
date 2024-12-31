@@ -3285,6 +3285,7 @@ cert_desc3=This form allows you to install a new SSL certificate and key, or a r
 cert_desc3a=If the new certificate is from a CA that has it's own certificate, you should also install it here at the same time.
 cert_header3=New certificate details
 cert_cert=Signed SSL certificate
+cert_newcertkeep=Keep existing certificate
 cert_cert0=Pasted text
 cert_cert1=Uploaded file
 cert_cert2=File on server
