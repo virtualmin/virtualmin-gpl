@@ -30,12 +30,26 @@ else {
 foreach $d (@doms) {
 	&$first_print(&text('fixperms_dom', &show_domain_name($d)));
 	if (!$d->{'dir'}) {
-		&$second_print($text{'fixperms_edir'});
+		&$second_print($text{'fixperms_edirmiss'});
 		}
 	else {
-		$err = &set_home_ownership($d);
-		if ($err) {
-			&$second_print(&text('fixperms_failed', $err));
+		my (@changed_files) = &set_home_ownership($d);
+		if (@changed_files) {
+			my $details_body;
+			foreach my $changed (@changed_files) {
+				$changed->[0] =~ s/^$d->{'home'}\///;
+				$details_body .= &text('fixperms_details',
+					&html_escape($changed->[1]),
+					&html_escape($changed->[2]),
+					&html_escape($changed->[0])). "<br>";
+				}
+			&$second_print(
+				&ui_details({
+					'title' => $text{'fixperms_oklist'},
+					'content' => $details_body,
+					'class' =>'inline',
+					'html' => 1})
+				);
 			}
 		else {
 			&$second_print($text{'setup_done'});
