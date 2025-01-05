@@ -27,6 +27,9 @@ my ($proto, $user, $pass, $host, $path, $port) =
 	&parse_backup_url($log->{'dest'});
 my $nice = &nice_backup_url($log->{'dest'}, 1);
 if ($proto == 0 && &foreign_check("filemin")) {
+	if (&suffix_to_compression($path) >= 0) {
+		$path =~ s/\/[^\/]+$//;
+		}
 	$nice = &ui_link("../filemin/index.cgi?path=".&urlize($path), $nice);
 	}
 print &ui_table_row($text{'viewbackup_dest'}, $nice, 3);
