@@ -65,17 +65,18 @@ return $_[0]->{'pass'} ? &acl::encrypt_password($_[0]->{'pass'})
 # Delete the webmin user for the domain, and all his permissions
 sub delete_webmin
 {
+my ($d) = @_;
 &$first_print($text{'delete_webmin'});
-&obtain_lock_webmin($_[0]);
+&obtain_lock_webmin($d);
 &require_acl();
 
 # Delete the user
-&acl::delete_user($_[0]->{'user'});
-&update_extra_webmin($_[0]);
+&acl::delete_user($d->{'user'});
+&update_extra_webmin($d);
 
 # Delete from any groups
 foreach my $group (&acl::list_groups()) {
-	local $idx = &indexof($_[0]->{'user'}, @{$group->{'members'}});
+	my $idx = &indexof($d->{'user'}, @{$group->{'members'}});
 	if ($idx >= 0) {
 		splice(@{$group->{'members'}}, $idx, 1);
 		&acl::modify_group($group->{'name'}, $group);
@@ -83,11 +84,11 @@ foreach my $group (&acl::list_groups()) {
 	}
 
 # Clear Webmin sessions
-local %miniserv;
+my %miniserv;
 &get_miniserv_config(\%miniserv);
-&acl::delete_session_user(\%miniserv, $_[0]->{'user'});
+&acl::delete_session_user(\%miniserv, $d->{'user'});
 
-&release_lock_webmin($_[0]);
+&release_lock_webmin($d);
 &register_post_action(\&restart_webmin);
 &$second_print($text{'setup_done'});
 return 1;
