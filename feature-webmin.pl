@@ -97,84 +97,85 @@ return 1;
 # modify_webmin(&domain, &olddomain)
 sub modify_webmin
 {
-if ($_[0]->{'home'} ne $_[1]->{'home'} && &foreign_check("htaccess-htpasswd")) {
+my ($d, $oldd) = @_;
+if ($d->{'home'} ne $oldd->{'home'} && &foreign_check("htaccess-htpasswd")) {
 	# If home has changed, update protected web directories that
 	# referred to old dir
 	&$first_print($text{'save_htaccess'});
 	&foreign_require("htaccess-htpasswd");
-	local @dirs = &htaccess_htpasswd::list_directories(1);
-	foreach $d (@dirs) {
-		if ($d->[0] eq $_[1]->{'home'}) {
-			$d->[0] = $_[0]->{'home'};
+	my @dirs = &htaccess_htpasswd::list_directories(1);
+	foreach my $dir (@dirs) {
+		if ($dir->[0] eq $oldd->{'home'}) {
+			$dir->[0] = $d->{'home'};
 			}
 		else {
-			$d->[0] =~ s/^$_[1]->{'home'}\//$_[0]->{'home'}\//;
+			$dir->[0] =~ s/^$oldd->{'home'}\//$d->{'home'}\//;
 			}
-		if ($d->[1] =~ /^$_[1]->{'home'}\/(.*)$/) {
+		if ($dir->[1] =~ /^$oldd->{'home'}\/(.*)$/) {
 			# Need to update file too!
-			$d->[1] = "$_[0]->{'home'}/$1";
+			$dir->[1] = "$d->{'home'}/$1";
 			&require_apache();
-			local $f = $d->[0]."/".
+			my $f = $dir->[0]."/".
 				   $htaccess_htpasswd::config{'htaccess'};
-			local $conf = &apache::get_htaccess_config($f);
+			my $conf = &apache::get_htaccess_config($f);
 			&apache::save_directive(
-				"AuthUserFile", [ $d->[1] ], $conf, $conf);
-			&write_as_domain_user($_[0],
+				"AuthUserFile", [ $dir->[1] ], $conf, $conf);
+			&write_as_domain_user($d,
 				sub { &flush_file_lines($f) });
 			}
 		}
 	&htaccess_htpasswd::save_directories(\@dirs);
 	&$second_print($text{'setup_done'});
 	}
-if (!$_[0]->{'parent'}) {
+if (!$d->{'parent'}) {
 	# Update the Webmin user
-	&obtain_lock_webmin($_[0]);
+	&obtain_lock_webmin($d);
 	&require_acl();
-	local ($wuser) = grep { $_->{'name'} eq $_[1]->{'user'} }
+	my ($wuser) = grep { $_->{'name'} eq $oldd->{'user'} }
 			      &acl::list_users();
-	if ($_[0]->{'unix'} ne $_[1]->{'unix'}) {
+	if ($d->{'unix'} ne $oldd->{'unix'}) {
 		# Turn on or off password synchronization
-		$wuser->{'pass'} = $_[0]->{'unix'} ? 'x' :
-					&webmin_password($_[0]);
-		&acl::modify_user($_[1]->{'user'}, $wuser);
+		$wuser->{'pass'} = $d->{'unix'} ? 'x' :
+					&webmin_password($d);
+		&acl::modify_user($oldd->{'user'}, $wuser);
 		}
-	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+	if ($d->{'user'} ne $oldd->{'user'}) {
 		# Need to re-name user
 		&$first_print($text{'save_webminuser'});
-		$wuser->{'real'} = $_[0]->{'owner'};
-		$wuser->{'name'} = $_[0]->{'user'};
-		&acl::modify_user($_[1]->{'user'}, $wuser);
+		$wuser->{'real'} = $d->{'owner'};
+		$wuser->{'name'} = $d->{'user'};
+		&acl::modify_user($oldd->{'user'}, $wuser);
 
 		# Rename in groups too
 		foreach my $group (&acl::list_groups()) {
-			local $idx = &indexof($_[1]->{'user'},
+			my $idx = &indexof($oldd->{'user'},
 					      @{$group->{'members'}});
 			if ($idx >= 0) {
-				$group->{'members'}->[$idx] = $_[0]->{'user'};
+				$group->{'members'}->[$idx] = $d->{'user'};
 				&acl::modify_group($group->{'name'}, $group);
 				}
 			}
 		}
-	elsif ($_[0]->{'owner'} ne $_[1]->{'owner'}) {
+	elsif ($d->{'owner'} ne $oldd->{'owner'}) {
 		# Need to update owner
 		&$first_print($text{'save_webminreal'});
-		$wuser->{'real'} = $_[0]->{'owner'};
-		&acl::modify_user($_[0]->{'user'}, $wuser);
+		$wuser->{'real'} = $d->{'owner'};
+		&acl::modify_user($d->{'user'}, $wuser);
 		}
 	else {
 		# Leave name unchanged
 		&$first_print($text{'save_webmin'});
 		}
-	&set_user_modules($_[0], $wuser) if ($wuser);
-	&update_extra_webmin($_[0]);
-	&release_lock_webmin($_[0]);
+	&set_user_modules($d, $wuser) if ($wuser);
+	&update_extra_webmin($d);
+	&release_lock_webmin($d);
 	&register_post_action(\&restart_webmin);
 	&$second_print($text{'setup_done'});
 	return 1;
 	}
-elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
+elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 	# Webmin feature has been turned off .. so delete the user
-	&delete_webmin($_[1]);
+	&delete_webmin($oldd);
 	}
 return 0;
 }
@@ -183,11 +184,11 @@ return 0;
 # Copy Webmin user settings to the new domain
 sub clone_webmin
 {
-local ($oldd, $d) = @_;
+my ($oldd, $d) = @_;
 &obtain_lock_webmin($d);
 &require_acl();
-local ($olduser) = grep { $_->{'name'} eq $oldd->{'user'} } &acl::list_users();
-local ($user) = grep { $_->{'name'} eq $d->{'user'} } &acl::list_users();
+my ($olduser) = grep { $_->{'name'} eq $oldd->{'user'} } &acl::list_users();
+my ($user) = grep { $_->{'name'} eq $d->{'user'} } &acl::list_users();
 if ($olduser && $user) {
 	$user->{'theme'} = $olduser->{'theme'};
 	$user->{'lang'} = $olduser->{'lang'};
