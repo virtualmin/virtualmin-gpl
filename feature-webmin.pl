@@ -1258,6 +1258,28 @@ else {
 return $rv;
 }
 
+# get_webmin_database_url([&domain])
+# Returns the URL to the LDAP server in which Webmin users are stored
+sub get_webmin_database_url
+{
+my ($d) = @_;
+&require_webmin();
+my %miniserv;
+&get_miniserv_config(\%miniserv);
+return undef if (!$miniserv{'userdb'});
+my ($proto, $user, $pass, $host, $prefix, $args) =
+	&webmin::split_userdb_string($miniserv{'userdb'});
+if ($d) {
+	my ($wuser) = grep { $_->{'name'} eq $d->{'user'} }
+			     &acl::list_users();
+	if ($wuser) {
+		return undef if (!$wuser->{'proto'});
+		$proto = $wuser->{'proto'};
+		}
+	}
+return $proto."://".$host."/".$prefix.($args ? "?".$args : "");
+}
+
 # links_always_webmin(&domain)
 # Returns a link to the Webmin Actions Log module
 sub links_always_webmin
