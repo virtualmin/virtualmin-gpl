@@ -9,44 +9,44 @@ return if ($require_acl++);
 # modules with the right permissions
 sub setup_webmin
 {
+my ($d) = @_;
 &$first_print($text{'setup_webmin'});
-&obtain_lock_webmin($_[0]);
+&obtain_lock_webmin($d);
 &require_acl();
-local $tmpl = &get_template($_[0]->{'template'});
-local ($wuser) = grep { $_->{'name'} eq $_[0]->{'user'} }
-		      &acl::list_users();
+my $tmpl = &get_template($d->{'template'});
+my ($wuser) = grep { $_->{'name'} eq $d->{'user'} }
+		   &acl::list_users();
 if ($wuser) {
 	# Update the modules for existing Webmin user
-	&set_user_modules($_[0], $wuser);
+	&set_user_modules($d, $wuser);
 	}
 else {
 	# Create a new user
-	local @modules;
-	local %wuser = ( 'name' => $_[0]->{'user'},
-			 'pass' => $_[0]->{'unix'} ? 'x' :
-					&webmin_password($_[0]),
-			 'notabs' => !$config{'show_tabs'},
-			 'modules' => [ ],
-			 'theme' => $config{'webmin_theme'} eq '*' ? undef :
-				    $config{'webmin_theme'} eq '' ? '' :
+	my @modules;
+	my %wuser = ( 'name' => $d->{'user'},
+		      'pass' => $d->{'unix'} ? 'x' : &webmin_password($d),
+		      'notabs' => !$config{'show_tabs'},
+		      'modules' => [ ],
+		      'theme' => $config{'webmin_theme'} eq '*' ? undef :
+				 $config{'webmin_theme'} eq '' ? '' :
 				     $config{'webmin_theme'},
-			 'real' => $_[0]->{'owner'},
-			 );
+		      'real' => $d->{'owner'},
+		    );
 	&acl::create_user(\%wuser);
-	&set_user_modules($_[0], \%wuser);
+	&set_user_modules($d, \%wuser);
 
 	# Add to Webmin group
 	if ($tmpl->{'webmin_group'} ne 'none') {
-		local ($group) = grep { $_->{'name'} eq
-				$tmpl->{'webmin_group'} } &acl::list_groups();
+		my ($group) = grep { $_->{'name'} eq $tmpl->{'webmin_group'} }
+				   &acl::list_groups();
 		if ($group) {
 			push(@{$group->{'members'}}, $wuser{'name'});
 			&acl::modify_group($group->{'name'}, $group);
 			}
 		}
 	}
-&update_extra_webmin($_[0]);
-&release_lock_webmin($_[0]);
+&update_extra_webmin($d);
+&release_lock_webmin($d);
 &register_post_action(\&restart_webmin);
 &$second_print($text{'setup_done'});
 return 1;
