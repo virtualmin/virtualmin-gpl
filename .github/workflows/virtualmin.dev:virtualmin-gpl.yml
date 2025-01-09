@@ -2,13 +2,10 @@ name: "virtualmin.dev: virtualmin/virtualmin-gpl"
 
 on:
   push:
-    branches:
-      - master
-    tags:
-      - '*'
-    
+
 jobs:
   build:
+    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master'
     uses: webmin/webmin-ci-cd/.github/workflows/master-workflow.yml@main
     with:
       build-type: module
