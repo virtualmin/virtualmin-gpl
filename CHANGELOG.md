@@ -1,3 +1,6 @@
+#### Version 7.30.4
+* Fix conditional logic for license re-check
+
 #### Version 7.30.3
 * Fix missing button text when restarting a script’s service (Node.js, etc.)
 * Fix advertised installable web apps always show the version as “latest”
