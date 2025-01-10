@@ -593,6 +593,7 @@ return undef;
 }
 
 # check_unix_clash(&domain, [field])
+# Returns 1 if a Unix user or group with this name already exists
 sub check_unix_clash
 {
 my ($d, $field) = @_;
@@ -1274,7 +1275,7 @@ foreach my $u ($d ? ( $d->{'user'} ) : ( ), 'root') {
 sub remote_unix
 {
 my ($d) = @_;
-return &get_user_database_url();
+return &get_user_database_url() ? 1 : 0;
 }
 
 sub can_reset_unix

@@ -18,7 +18,9 @@ my ($wuser) = grep { $_->{'name'} eq $d->{'user'} }
 		   &acl::list_users();
 if ($wuser) {
 	# Update the modules for existing Webmin user
-	&set_user_modules($d, $wuser);
+	if (!&remote_webmin()) {
+		&set_user_modules($d, $wuser);
+		}
 	}
 else {
 	# Create a new user
@@ -65,21 +67,23 @@ return $_[0]->{'pass'} ? &acl::encrypt_password($_[0]->{'pass'})
 # Delete the webmin user for the domain, and all his permissions
 sub delete_webmin
 {
-my ($d) = @_;
+my ($d, $preserve) = @_;
 &$first_print($text{'delete_webmin'});
 &obtain_lock_webmin($d);
 &require_acl();
 
-# Delete the user
-&acl::delete_user($d->{'user'});
-&update_extra_webmin($d);
+if (!$preserve || !&remote_webmin($d)) {
+	# Delete the user
+	&acl::delete_user($d->{'user'});
+	&update_extra_webmin($d);
 
-# Delete from any groups
-foreach my $group (&acl::list_groups()) {
-	my $idx = &indexof($d->{'user'}, @{$group->{'members'}});
-	if ($idx >= 0) {
-		splice(@{$group->{'members'}}, $idx, 1);
-		&acl::modify_group($group->{'name'}, $group);
+	# Delete from any groups
+	foreach my $group (&acl::list_groups()) {
+		my $idx = &indexof($d->{'user'}, @{$group->{'members'}});
+		if ($idx >= 0) {
+			splice(@{$group->{'members'}}, $idx, 1);
+			&acl::modify_group($group->{'name'}, $group);
+			}
 		}
 	}
 
@@ -969,16 +973,17 @@ $wuser->{'readonly'} = $module_name;
 }
 
 # check_webmin_clash(&domain, [field])
-# Returns 1 if a user or group with this name already exists
+# Returns 1 if a Webmin user with this name already exists
 sub check_webmin_clash
 {
-if (!$_[1] || $_[1] eq 'user') {
+my ($d, $field) = @_; 
+if (!$field || $field eq 'user') {
 	&require_acl();
-	return 1 if ($_[0]->{'user'} eq 'webmin');
-	return 0 if ($_[0]->{'webmin_overwrite'});
-	local $u;
-	foreach $u (&acl::list_users()) {
-		return 1 if ($u->{'name'} eq $_[0]->{'user'});
+	return 1 if ($d->{'user'} eq 'webmin');
+	return 0 if ($d->{'webmin_overwrite'});
+	return 0 if (&remote_webmin() && $d->{'wasmissing'});
+	foreach my $u (&acl::list_users()) {
+		return 1 if ($u->{'name'} eq $d->{'user'});
 		}
 	}
 return 0;
@@ -1294,6 +1299,13 @@ if ($d) {
 		}
 	}
 return $proto."://".$host."/".$prefix.($args ? "?".$args : "");
+}
+
+# remote_webmin()
+# Returns true if Webmin users are stored on a remote system
+sub remote_webmin
+{
+return &get_webmin_database_url() ? 1 : 0;
 }
 
 # links_always_webmin(&domain)
