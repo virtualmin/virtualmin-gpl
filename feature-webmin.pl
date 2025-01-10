@@ -1305,7 +1305,8 @@ return $proto."://".$host."/".$prefix.($args ? "?".$args : "");
 # Returns true if Webmin users are stored on a remote system
 sub remote_webmin
 {
-return &get_webmin_database_url() ? 1 : 0;
+my ($d) = @_;
+return &get_webmin_database_url($d) ? 1 : 0;
 }
 
 # links_always_webmin(&domain)
