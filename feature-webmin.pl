@@ -1206,23 +1206,36 @@ if ($ex) {
 	&$second_print(&text('backup_webminfailed', "<pre>$out</pre>"));
 	return 0;
 	}
-else {
-	&$second_print($text{'setup_done'});
-	return 1;
-	}
+
+# Save the Webmin database URL
+my $url = &get_webmin_database_url() || "";
+&write_as_domain_user($d, sub { &uncat_file($file."_url", $url."\n") });
+
+&$second_print($text{'setup_done'});
+return 1;
 }
 
 # restore_webmin(&domain, file, &options)
 # Extract all .acl files from the backup
 sub restore_webmin
 {
-local ($d, $file, $opts) = @_;
+local ($d, $file, $opts, $allopts) = @_;
 local $srcfile = $file;
 if (!-r $srcfile) {
 	($srcfile) = glob("$file.*");
 	}
 &$first_print($text{'restore_webmin'});
 &require_acl();
+
+# Check if users are being stored in the same remote storage, if replicating
+my $url = &get_webmin_database_url();
+my $burl = &read_file_contents($file."_url");
+chop($burl);
+if ($url && $burl && $url eq $burl && $allopts->{'repl'}) {
+	$url =~ s/^\S+:\/\///g;
+	&$second_print(&text('restore_webminsame', $url));
+	return 1;
+	}
 
 &obtain_lock_webmin($_[0]);
 local $out = &backquote_command(
@@ -1265,7 +1278,8 @@ return $rv;
 sub get_webmin_database_url
 {
 my ($d) = @_;
-&require_webmin();
+&require_acl();
+&foreign_require("webmin");
 my %miniserv;
 &get_miniserv_config(\%miniserv);
 return undef if (!$miniserv{'userdb'});

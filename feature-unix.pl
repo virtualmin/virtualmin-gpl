@@ -712,7 +712,7 @@ else {
 	}
 
 # Save backup source
-my $url = &get_user_database_url();
+my $url = &get_user_database_url() || "";
 &write_as_domain_user($d, sub { &uncat_file($file."_url", $url."\n") });
 
 return 1;

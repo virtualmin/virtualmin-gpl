@@ -3033,6 +3033,7 @@ restore_scriptstarted=.. started $1 servers
 
 restore_unixuser=Updating administration password and quotas ..
 restore_unixsame=.. skipping restore to original LDAP server $1 in replication mode
+restore_webminsame=.. skipping restore to original Webmin user database $1 in replication mode
 restore_dirtar=Extracting TAR file of home directory ..
 restore_dirzip=Extracting ZIP file of home directory ..
 restore_dirsame=.. skipping restore to original NFS server $1 in replication mode
