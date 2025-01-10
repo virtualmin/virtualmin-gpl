@@ -5,7 +5,7 @@ on:
     branches:
       - master
   release:
-    types: [published]
+    types: [published, edited]
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
     with:
       build-type: module
       project-name: ${{ github.event.repository.name }}
-      is-release: ${{ github.event_name == 'release' && github.event.action == 'published' }}
+      is-release: ${{ github.event_name == 'release' && (github.event.action == 'published' || github.event.action == 'edited') }}
     secrets:
       DEV_GPG_PH: ${{ secrets.DEV_GPG_PH }}
       DEV_IP_ADDR: ${{ secrets.DEV_IP_ADDR }}
