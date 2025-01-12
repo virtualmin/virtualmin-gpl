@@ -530,6 +530,8 @@ else {
 
 		# Now we have the username, check the password
 		if ($need_password_check) {
+			$user->{'plainpass'} eq '' &&
+				&error($text{'setup_eemptypass'});
 			$perr = &check_password_restrictions($user, 0, $d);
 			&error($perr) if ($perr);
 			}
