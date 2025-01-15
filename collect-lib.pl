@@ -186,6 +186,7 @@ $info->{'vposs'} = \@vposs;
 
 # SSL certificate expiries
 foreach my $d (@doms_all) {
+	&lock_domain($d);
 	if (!&domain_has_ssl_cert($d)) {
 		# Doesn't even have SSL, so clear cache fields
 		if ($d->{'ssl_cert_expiry'}) {
@@ -204,6 +205,7 @@ foreach my $d (@doms_all) {
 	my $notafter = &parse_notafter_date($info->{'notafter'});
 	$d->{'ssl_cert_expiry'} = $notafter;
 	&save_domain($d);
+	&unlock_domain($d);
 	}
 
 # Domain registration expiries
@@ -217,12 +219,14 @@ foreach my $d (@doms_all) {
 	# disabled allow updating records on manual run to prevent
 	# leaving stale records
 	next if ($manual && $config{'collect_interval'} ne 'none');
+	&lock_domain($d);
 	my ($exp, $err) = &get_whois_expiry($d);
 	$d->{'whois_next'} = $now + 7*24*60*60 + int(rand(24*60*60));
 	$d->{'whois_last'} = $now;
 	$d->{'whois_err'} = $err;
 	$d->{'whois_expiry'} = $exp;
 	&save_domain($d);
+	&unlock_domain($d);
 	}
 
 return $info;
