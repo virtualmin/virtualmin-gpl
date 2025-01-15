@@ -82,7 +82,9 @@ if ($in{'confirm'} || $in{'confirm_auto'}) {
 				}
 			}
 		print $text{'save_domain'},"<br>\n";
+		&lock_domain($d);
 		&save_domain($d);
+		&unlock_domain($d);
 		&$second_print($text{'setup_done'});
 		# Add link to show domain schedule
 		@auto_disable_link =
