@@ -145,10 +145,23 @@ else {
 			&set_limits_from_plan($d, $plan);
 			&set_featurelimits_from_plan($d, $plan);
 			&set_capabilities_from_plan($d, $plan);
+
+			# Run the before command
+			&set_domain_envs($d, "MODIFY_DOMAIN", $d, $oldd);
+			my $merr = &making_changes();
+			&reset_domain_envs($d);
+			&error(&text('save_emaking', "<tt>$merr</tt>"))
+				if (defined($merr));
+
 			foreach $f (&list_ordered_features($d)) {
 				&call_feature_func($f, $d, $oldd);
 				}
 			&save_domain($d);
+
+			# Run the after command
+			&set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
+			&made_changes();
+			&reset_domain_envs($d);
 			}
 		&run_post_actions();
 		}
