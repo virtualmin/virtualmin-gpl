@@ -10958,7 +10958,8 @@ if ($d) {
 	local %init;
 	&read_file("$initial_users_dir/$d->{'id'}", \%init);
 	foreach my $a ("email", "quota", "mquota", "shell") {
-		$user->{$a} = $init{$a} if (defined($init{$a}));
+		$user->{$a} = $init{$a} if (defined($init{$a}) &&
+					    $init{$a} eq "none");
 		}
 	foreach my $a ("secs", "to") {
 		if (defined($init{$a})) {

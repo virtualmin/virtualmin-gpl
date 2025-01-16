@@ -13,7 +13,7 @@ $user = &create_initial_user($d, 1);
 # Save disk quotas
 if (&has_home_quotas()) {
 	if ($in{'quota_def'} == 1) {
-		delete($user->{'quota'});
+		$user->{'quota'} = 0;
 		}
 	elsif ($in{'quota_def'} == 2) {
 		$user->{'quota'} = "none";
@@ -26,7 +26,7 @@ if (&has_home_quotas()) {
 	}
 if (&has_mail_quotas()) {
 	if ($in{'mquota_def'} == 1) {
-		delete($user->{'mquota'});
+		$user->{'mquota'} = 0;
 		}
 	elsif ($in{'mquota_def'} == 2) {
 		$user->{'mquota'} = "none";
