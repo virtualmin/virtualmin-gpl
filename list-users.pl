@@ -75,6 +75,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--simple-aliases") {
 		$simplemode = 1;
 		}
+	elsif ($a eq "--email-only") {
+		$emailonly = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
