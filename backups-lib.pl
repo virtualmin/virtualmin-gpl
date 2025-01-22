@@ -6953,12 +6953,15 @@ if ($sched->{'strftime'}) {
             }
         }
     }
-	$ENV{'BACKUP_DOMAIN_NAMES'} = join(" ", map { $_->{'dom'} } @$doms);
-	if (defined($status)) {
-		$ENV{'BACKUP_STATUS'} = $status eq 'ok' ? 1 :
-									$status eq 'partial' ? 2 : 0;
-	}
+$ENV{'BACKUP_DOMAIN_NAMES'} = join(" ", map { $_->{'dom'} } @$doms);
+if (defined($status)) {
+    # Set both text and numeric status
+    $ENV{'BACKUP_STATUS'} = $status;
+    $ENV{'BACKUP_STATUS_CODE'} = $status eq 'ok' ? 1 :
+                                $status eq 'partial' ? 2 : 0;
 }
+}
+
 
 # reset_backup_envs()
 # Clear variables set by set_backup_envs
