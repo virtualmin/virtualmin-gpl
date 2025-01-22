@@ -4645,10 +4645,35 @@ else {
 	# Force re-read of records from file, since dnssec-tools will have
 	# changed them
 	&get_domain_dns_records_and_file($d, 1);
+
+	&enable_dnssec_resign_cron($d);
 	}
 &release_lock_dns($d);
 &add_parent_dnssec_ds_records($d);
 return undef;
+}
+
+# enable_dnssec_resign_cron(&domain)
+# Setup the cron job to re-sign DNSSEC zones
+sub enable_dnssec_resign_cron
+{
+my ($d) = @_;
+my $r = &require_bind($d);
+my $job = &remote_foreign_call($r, "bind8", "get_dnssec_cron_job");
+if (!$job) {
+	&remote_foreign_require($r, "cron");
+	$job = { 'user' => 'root',
+                 'active' => 1,
+                 'command' => $bind8::dnssec_cron_cmd,
+                 'mins' => int(rand()*60),
+                 'hours' => int(rand()*24),
+                 'days' => '*',
+                 'months' => '*',
+                 'weekdays' => '*' };
+	&remote_foreign_call($r, "cron", "create_wrapper", $dnssec_cron_cmd,
+			     "bind8", "resign.pl");
+	&remote_foreign_call($r, "cron", "create_cron_job", $job);
+	}
 }
 
 # add_parent_dnssec_ds_records(&domain)
