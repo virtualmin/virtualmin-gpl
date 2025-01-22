@@ -173,6 +173,17 @@ if ($@) {
 	$output .= $@;
 	}
 
+# Determine backup status for environment variable
+if ($ok && !@$errdoms) {
+    $backup_status = "ok";  # Complete success
+}
+elsif ($ok && @$errdoms) {
+    $backup_status = "partial";  # Partial success
+}
+else {
+    $backup_status = "failed";  # Complete failure
+}	
+
 # If purging old backups, do that now
 @purges = &get_scheduled_backup_purges($sched);
 @perrs = ( );
@@ -196,8 +207,8 @@ if ($ok || $sched->{'errors'} == 1) {
 
 # Run any after command
 if ($sched->{'after'}) {
-	&$first_print("Running post-backup command ..");
-	&set_backup_envs($sched, \@doms, $ok);
+    &$first_print("Running post-backup command ..");
+    &set_backup_envs($sched, \@doms, $backup_status);
 	$out = &backquote_command("($sched->{'after'}) 2>&1 </dev/null");
 	&reset_backup_envs();
 	print $out;

@@ -6937,24 +6937,27 @@ return $file =~ /\.zip$/i ? 3 :
        $file =~ /\.tar$/i ? 2 : -1;
 }
 
-# set_backup_envs(&backup, &doms, [ok|failed])
+# set_backup_envs(&backup, &doms, [ok|failed|partial])
 # Set environment variables from a backup object
 sub set_backup_envs
 {
 my ($sched, $doms, $status) = @_;
 foreach my $k (keys %$sched) {
-	$ENV{'BACKUP_'.uc($k)} = $sched->{$k};
-	}
+    $ENV{'BACKUP_'.uc($k)} = $sched->{$k};
+    }
 if ($sched->{'strftime'}) {
-	# Expand out date-based paths
-	foreach my $k (keys %$sched) {
-		if ($k eq 'dest' || $k =~ /^dest\d+$/) {
-			$ENV{'BACKUP_'.uc($k)} = &backup_strftime($sched->{$k});
-			}
-		}
+    # Expand out date-based paths
+    foreach my $k (keys %$sched) {
+        if ($k eq 'dest' || $k =~ /^dest\d+$/) {
+            $ENV{'BACKUP_'.uc($k)} = &backup_strftime($sched->{$k});
+            }
+        }
+    }
+	$ENV{'BACKUP_DOMAIN_NAMES'} = join(" ", map { $_->{'dom'} } @$doms);
+	if (defined($status)) {
+		$ENV{'BACKUP_STATUS'} = $status eq 'ok' ? 1 :
+									$status eq 'partial' ? 2 : 0;
 	}
-$ENV{'BACKUP_DOMAIN_NAMES'} = join(" ", map { $_->{'dom'} } @$doms);
-$ENV{'BACKUP_STATUS'} = $status if (defined($status));
 }
 
 # reset_backup_envs()
