@@ -197,7 +197,7 @@ if ($ok || $sched->{'errors'} == 1) {
 # Run any after command
 if ($sched->{'after'}) {
 	&$first_print("Running post-backup command ..");
-	&set_backup_envs($sched, \@doms, $ok);
+	&set_backup_envs($sched, \@doms, $ok, $errdoms);
 	$out = &backquote_command("($sched->{'after'}) 2>&1 </dev/null");
 	&reset_backup_envs();
 	print $out;

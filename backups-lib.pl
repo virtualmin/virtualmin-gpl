@@ -6937,11 +6937,11 @@ return $file =~ /\.zip$/i ? 3 :
        $file =~ /\.tar$/i ? 2 : -1;
 }
 
-# set_backup_envs(&backup, &doms, [ok|failed])
+# set_backup_envs(&backup, &doms, ok-flag, &error-doms)
 # Set environment variables from a backup object
 sub set_backup_envs
 {
-my ($sched, $doms, $status) = @_;
+my ($sched, $doms, $status, $errdoms) = @_;
 foreach my $k (keys %$sched) {
 	$ENV{'BACKUP_'.uc($k)} = $sched->{$k};
 	}
@@ -6954,6 +6954,8 @@ if ($sched->{'strftime'}) {
 		}
 	}
 $ENV{'BACKUP_DOMAIN_NAMES'} = join(" ", map { $_->{'dom'} } @$doms);
+$ENV{'BACKUP_ERROR_NAMES'} = join(" ", map { $_->{'dom'} } @$errdoms)
+	if ($errdoms);
 $ENV{'BACKUP_STATUS'} = $status if (defined($status));
 }
 

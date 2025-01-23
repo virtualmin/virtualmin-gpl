@@ -335,7 +335,7 @@ else {
 	# Run any after command
 	if ($in{'oneoff'} && $sched->{'after'}) {
 		&$first_print($text{'backup_arun'});
-		&set_backup_envs($sched, \@doms, $ok);
+		&set_backup_envs($sched, \@doms, $ok, $errdoms);
 		$out = &backquote_command(
 			"($sched->{'after'}) 2>&1 </dev/null");
 		&reset_backup_envs();
