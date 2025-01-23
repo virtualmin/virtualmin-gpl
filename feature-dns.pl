@@ -4670,7 +4670,7 @@ if (!$job) {
                  'days' => '*',
                  'months' => '*',
                  'weekdays' => '*' };
-	&remote_foreign_call($r, "cron", "create_wrapper", $dnssec_cron_cmd,
+	&remote_foreign_call($r, "cron", "create_wrapper", $bind8::dnssec_cron_cmd,
 			     "bind8", "resign.pl");
 	&remote_foreign_call($r, "cron", "create_cron_job", $job);
 	}
