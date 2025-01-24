@@ -4661,16 +4661,17 @@ my ($d) = @_;
 my $r = &require_bind($d);
 my $job = &remote_foreign_call($r, "bind8", "get_dnssec_cron_job");
 if (!$job) {
+	my $r_cron_cmd = &remote_eval($r, "bind8", 'return $dnssec_cron_cmd');
 	&remote_foreign_require($r, "cron");
 	$job = { 'user' => 'root',
                  'active' => 1,
-                 'command' => $bind8::dnssec_cron_cmd,
+                 'command' => $r_cron_cmd,
                  'mins' => int(rand()*60),
                  'hours' => int(rand()*24),
                  'days' => '*',
                  'months' => '*',
                  'weekdays' => '*' };
-	&remote_foreign_call($r, "cron", "create_wrapper", $bind8::dnssec_cron_cmd,
+	&remote_foreign_call($r, "cron", "create_wrapper", $r_cron_cmd,
 			     "bind8", "resign.pl");
 	&remote_foreign_call($r, "cron", "create_cron_job", $job);
 	}
