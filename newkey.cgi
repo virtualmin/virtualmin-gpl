@@ -17,11 +17,13 @@ if ($in{'cert_mode'} == 0) {
 elsif ($in{'cert_mode'} == 1) {
 	$cert = $in{'certupload'};
 	}
-elsif ($in{'cert_mode'} == 3) {
+elsif ($in{'cert_mode'} == 3 ||
+       $in{'cert_mode'} == 2 && $d->{'ssl_cert'} eq $in{'certfile'}) {
 	# Use existing cert
 	$cert = &read_file_contents($d->{'ssl_cert'});
 	}
 else {
+	# File on server
 	&is_under_directory($homed->{'home'}, $in{'certfile'}) ||
 	   $in{'certfile'} eq &default_certificate_file($d, "cert") ||
 		&error(&text('newkey_ecertfilehome', $in{'certfile'}));
@@ -38,6 +40,11 @@ elsif ($in{'newkey_mode'} == 1) {
 	# Uploaded file
 	$newkey = $in{'newkeyupload'};
 	}
+elsif ($in{'newkey_mode'} == 3 ||
+       $in{'newkey_mode'} == 2 && $d->{'ssl_key'} eq $in{'newkeyfile'}) {
+	# Use existing key
+	$newkey = &read_file_contents($d->{'ssl_key'});
+	}
 elsif ($in{'newkey_mode'} == 2) {
 	# File on server
 	&is_under_directory($homed->{'home'}, $in{'newkeyfile'}) ||
@@ -47,10 +54,6 @@ elsif ($in{'newkey_mode'} == 2) {
 		&error($text{'newkey_ekeysame'});
 	$newkey = &read_file_contents_as_domain_user($d, $in{'newkeyfile'});
 	$newkey || &error(&text('newkey_enewkeyfile', $in{'newkeyfile'}));
-	}
-elsif ($in{'newkey_mode'} == 3) {
-	# Use existing key
-	$newkey = &read_file_contents($d->{'ssl_key'});
 	}
 elsif ($in{'newkey_mode'} == 4) {
 	# Use key from CSR
@@ -67,6 +70,11 @@ elsif ($in{'newca_mode'} == 1) {
 	# Uploaded file
 	$newca = $in{'newcaupload'};
 	}
+elsif ($in{'newca_mode'} == 3 ||
+       $in{'newca_mode'} == 2 && $d->{'ssl_chain'} eq $in{'newcafile'}) {
+	# Use existing CA cert
+	$newca = &read_file_contents($d->{'ssl_chain'});
+	}
 elsif ($in{'newca_mode'} == 2) {
 	# File on server
 	&is_under_directory($homed->{'home'}, $in{'newcafile'}) ||
@@ -74,10 +82,6 @@ elsif ($in{'newca_mode'} == 2) {
 		&error(&text('newkey_enewcafilehome', $in{'newcafile'}));
 	$newca = &read_file_contents_as_domain_user($d, $in{'newcafile'});
 	$newca || &error(&text('newkey_enewcafile', $in{'newcafile'}));
-	}
-elsif ($in{'newca_mode'} == 3) {
-	# Use existing CA cert
-	$newca = &read_file_contents($d->{'ssl_chain'});
 	}
 elsif ($in{'newca_mode'} == 4) {
 	# No CA cert needed
