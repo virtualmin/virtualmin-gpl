@@ -16235,6 +16235,7 @@ if (&domain_has_website()) {
 	}
 
 if ($config{'webalizer'}) {
+	# Make sure Webalizer is installed
 	my $err = &feature_depends_webalizer();
 	return $err if ($err);
 	&$second_print($text{'check_webalizerok'});
@@ -16356,10 +16357,8 @@ if ($config{'postgres'}) {
 
 if ($config{'ftp'}) {
 	# Make sure ProFTPd is installed, and that the ftp user exists
-	&foreign_installed("proftpd", 1) == 2 ||
-		return &text('index_eproftpd', "/proftpd/", $clink);
-	local $err = &check_proftpd_template();
-	$err && return &text('check_proftpd', $err);
+	my $err = &feature_depends_ftp();
+	return $err if ($err);
 	&$second_print($text{'check_ftpok'});
 	}
 

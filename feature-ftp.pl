@@ -748,6 +748,17 @@ else {
 return @ips;
 }
 
+# feature_depends_ftp()
+# Return undef if the requirements for virtual FTP are met, or an error message
+sub feature_depends_ftp
+{
+my $mclink = "../config.cgi?$module_name";
+&foreign_installed("proftpd", 1) == 2 ||
+	return &text('index_eproftpd', "/proftpd/", $clink);
+my $err = &check_proftpd_template();
+return $err ? &text('check_proftpd', $err) : undef;
+}
+
 $done_feature_script{'ftp'} = 1;
 
 1;
