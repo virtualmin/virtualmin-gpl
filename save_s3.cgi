@@ -59,7 +59,8 @@ else {
 	# Validate that it works
 	my $buckets = &s3_list_buckets($s3);
 	if (!ref($buckets)) {
-		my $files = &s3_list_files($s3, undef, &random_password(128));
+		my $files = &s3_list_files(
+			$s3, undef, &substitute_pattern('[a-f0-9]{48}'));
 		if (!ref($files) && $files !~ /does\s+not\s+exist/i) {
 			&delete_s3_account($s3) if ($in{'new'});
 			&error(&text('s3_echeck', $buckets));
