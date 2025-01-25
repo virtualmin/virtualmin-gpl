@@ -627,7 +627,7 @@ return undef;
 # is being used
 sub has_ftp_chroot
 {
-return $config{'ftp'};
+return $config{'ftp'} || !&feature_depends_ftp();
 }
 
 # list_ftp_chroots()
