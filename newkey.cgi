@@ -146,10 +146,10 @@ if ($in{'cert_mode'} == 2) {
 else {
 	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 	}
-if ($in{'ca_mode'} == 2) {
+if ($in{'newca_mode'} == 2) {
 	$d->{'ssl_chain'} = $in{'cafile'};
 	}
-elsif ($in{'ca_mode'} == 4) {
+elsif ($in{'newca_mode'} == 4) {
 	$d->{'ssl_chain'} = undef;
 	}
 else {
