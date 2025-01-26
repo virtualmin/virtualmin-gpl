@@ -12450,6 +12450,20 @@ if (&master_admin() && !$config{'mod_php_ok'} && $config{'web'} &&
 		}
 	}
 
+# Check for S3 backups when there is no S3 command
+if (&master_admin() && !&has_aws_cmd()) {
+	my $s3 = 0;
+	foreach my $sched (&list_scheduled_backups()) {
+		foreach my $dest (&get_scheduled_backup_dests($sched)) {
+			my ($proto) = &parse_backup_url($dest);
+			$s3++ if ($proto == 3);
+			}
+		}
+	if ($s3) {
+		push(@rv, $text{'s3_need_cli'});
+		}
+	}
+
 return @rv;
 }
 
