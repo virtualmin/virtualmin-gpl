@@ -44,11 +44,7 @@ if (!$err) {
 
 # Offer to install the aws command, even if other dependencies are available
 if (!&has_aws_cmd()) {
-	$warn = $text{'cloud_s3_noawscli'};
-	if (&foreign_available("software")) {
-		$warn .= " ".&text('cloud_s3_noawscli_install',
-				  'install_awscli.cgi');
-		}
+	$warn = &text('s3_need_cli', 'install_awscli.cgi');
 	}
 
 return ($err, $warn);

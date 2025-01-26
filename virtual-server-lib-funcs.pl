@@ -12460,7 +12460,7 @@ if (&master_admin() && !&has_aws_cmd()) {
 			}
 		}
 	if ($s3) {
-		push(@rv, $text{'s3_need_cli'});
+		push(@rv, &text('s3_need_cli', 'install_awscli.cgi'));
 		}
 	}
 
