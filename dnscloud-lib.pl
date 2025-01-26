@@ -135,6 +135,12 @@ if (&get_ec2_aws_region()) {
 $rv .= &ui_table_row($text{'dnscloud_route53_location'},
 	&ui_select("route53_location", $config{'route53_location'}, \@locs));
 
+# Delegation set ID
+$rv .= &ui_table_row($text{'dnscloud_route53_dset'},
+	&ui_opt_textbox("dset", $config{'route53_dset'}, 32,
+			$text{'dnscloud_route53_nodset'},
+			$text{'dnscloud_route53_iddset'}));
+
 return $rv;
 }
 
@@ -170,6 +176,26 @@ delete($can_use_aws_cmd_cache{$in->{'route53_akey'}});
 my ($ok, $err) = &can_use_aws_route53_cmd(
     $in->{'route53_akey'}, $in->{'route53_skey'}, $in->{'route53_location'});
 $ok || &error(&text('dnscloud_eawscreds', $err));
+
+# Parse delegation set
+if ($in{'dset_def'}) {
+	delete($config{'route53_dset'});
+	}
+else {
+	$in{'dset'} =~ /^\S+$/ || &error($text{'dnscloud_route53_edset'});
+	my $rv = &call_route53_cmd(
+		$config{'route53_akey'},
+		[ 'list-reusable-delegation-sets' ],
+		$config{'route53_location'}, 1);
+	ref($rv) || &error(&text('dnscloud_eawsdset', $err));
+	my $found = 0;
+	foreach my $ds (@{$rv->{'DelegationSets'}}) {
+		$found++ if ($ds->{'Id'} eq $in{'dset'} ||
+			     $ds->{'Id'} eq "/delegationset/".$in{'dset'});
+		}
+	$found || return &text('dnscloud_eawsdset2', $in{'dset'});
+	$config{'route53_dset'} = $in{'dset'};
+	}
 
 &lock_file($module_config_file);
 &save_module_config();
@@ -214,10 +240,12 @@ if ($already) {
 	return (1, $already->{'Id'}, $location);
 	}
 
+my $dset = $d->{'dns_dset'} eq 'none' ? '' : $config{'route53_dset'};
 my $rv = &call_route53_cmd(
 	$config{'route53_akey'},
 	[ 'create-hosted-zone',
-	  '--name', $info->{'domain'}, '--caller-reference', $ref ],
+	  '--name', $info->{'domain'}, '--caller-reference', $ref,
+	  $dset ? ( "--delegation-set-id", $dset ) : ( ) ],
 	undef, 1);
 return (0, $rv) if (!ref($rv));
 $info->{'id'} = $rv->{'HostedZone'}->{'Id'};

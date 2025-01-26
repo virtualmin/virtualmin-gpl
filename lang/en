@@ -8212,8 +8212,13 @@ dnscloud_route53_longdesc=The credentials on this page can be found on the Secur
 dnscloud_err=Failed to save cloud DNS provider
 dnscloud_egone=Provider does not exist!
 dnscloud_eawscreds=AWS credentials are not valid : $1
+dnscloud_eawsdset=Failed to list delegation sets : $1
+dnscloud_eawsdset2=Delegation set $1 does not exist
 dnscloud_clear=Delete Credentials
 dnscloud_eawsregion=No AWS region selected!
+dnscloud_route53_dset=Nameserver delegation set
+dnscloud_route53_nodset=None (use random nameservers)
+dnscloud_route53_iddset=Delegation set ID
 
 dnscloud_cloudflare_mode=Authentication type
 dnscloud_cloudflare_mode0=Email and API key
