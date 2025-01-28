@@ -236,7 +236,7 @@ foreach my $z (@{$rv->{'HostedZones'}}) {
 	}
 if ($already) {
 	# Yes .. just take it over but leave the records
-	$info->{'id'} = $already>{'Id'};
+	$info->{'id'} = $already->{'Id'};
 	$info->{'location'} = $location;
 	return (1, $already->{'Id'}, $location);
 	}
