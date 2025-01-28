@@ -139,7 +139,7 @@ $rv .= &ui_table_row($text{'dnscloud_route53_location'},
 $rv .= &ui_table_row($text{'dnscloud_route53_dset'},
 	&ui_opt_textbox("dset", $config{'route53_dset'}, 32,
 			$text{'dnscloud_route53_nodset'},
-			$text{'dnscloud_route53_iddset'})."<br>\".
+			$text{'dnscloud_route53_iddset'})."<br>".
 	$text{'dnscloud_route53_dsetdesc'});
 
 return $rv;
@@ -236,7 +236,7 @@ foreach my $z (@{$rv->{'HostedZones'}}) {
 	}
 if ($already) {
 	# Yes .. just take it over but leave the records
-	$info->{'id'} = $already>{'Id'};
+	$info->{'id'} = $already->{'Id'};
 	$info->{'location'} = $location;
 	return (1, $already->{'Id'}, $location);
 	}
