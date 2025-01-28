@@ -139,7 +139,8 @@ $rv .= &ui_table_row($text{'dnscloud_route53_location'},
 $rv .= &ui_table_row($text{'dnscloud_route53_dset'},
 	&ui_opt_textbox("dset", $config{'route53_dset'}, 32,
 			$text{'dnscloud_route53_nodset'},
-			$text{'dnscloud_route53_iddset'}));
+			$text{'dnscloud_route53_iddset'})."<br>\".
+	$text{'dnscloud_route53_dsetdesc'});
 
 return $rv;
 }
