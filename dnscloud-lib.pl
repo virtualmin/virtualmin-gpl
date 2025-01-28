@@ -490,7 +490,7 @@ return time().$$.(++$generate_route53_ref_count);
 sub can_use_aws_route53_cmd
 {
 my ($akey, $skey, $region) = @_;
-return &can_use_aws_cmd($akey, $skey, $zone, \&call_route53_cmd, [ "list-hosted-zones" ], $region);
+return &can_use_aws_cmd($akey, $skey, $region, \&call_route53_cmd, [ "list-hosted-zones" ], $region);
 }
 
 # can_use_aws_route53_creds()
