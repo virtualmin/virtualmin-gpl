@@ -716,11 +716,16 @@ else {
 			}
 		else {
 			# For an existing user, offer to change password
-			$pwfield = &ui_opt_textbox("mailpass", undef, 13,
-				$text{'user_passdef'}."\n".
-				(defined($user->{'plainpass'}) ?
-				&show_password_popup($d, $user) : ""),
-				$text{'user_passset'});
+			$popup = defined($user->{'plainpass'}) ?
+					&show_password_popup($d, $user) : "";
+			$mode = $user->{'pass'} eq '*' ? 2 : 1;
+			my @opts;
+			push(@opts, [ 1, $text{'user_passdef'}.$popup."<br>" ])
+				if ($mode != 2);
+			push(@opts, [ 2, $text{'user_passnone'}."<br>" ],
+				    [ 0, $text{'user_passset'}." ".
+				         &ui_textbox("mailpass", undef, 20) ]);
+			$pwfield = &ui_radio("mailpass_def", $mode, \@opts);
 			if ($user->{'change'}) {
 				local $tm = timelocal(gmtime($user->{'change'} *
 							     60*60*24));

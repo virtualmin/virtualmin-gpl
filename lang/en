@@ -871,6 +871,7 @@ user_surname=Surname
 user_real=Real name
 user_pass=Password
 user_passdef=Leave unchanged
+user_passnone=No password accepted
 user_passset=Set to ..
 user_recovery=Password recovery address
 user_norecovery=None set

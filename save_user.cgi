@@ -199,9 +199,16 @@ else {
 		$in{'real'} =~ /^[^:\r\n]*$/ ||
 			&error($text{'user_ereal'});
 		$user->{'real'} = $in{'real'};
-		if (!$in{'new'} && $in{'mailpass_def'}) {
+		if (!$in{'new'} && $in{'mailpass_def'} == 1) {
 			# Password not being changed
 			$user->{'passmode'} = 4;
+			}
+		elsif ($in{'mailpass_def'} == 2) {
+			# No passwored accepted
+			$need_password_check = 0;
+			delete($user->{'plainpass'});
+			$user->{'pass'} = '*';
+			$user->{'passmode'} = 1;
 			}
 		else {
 			# Either password is being changed, or this is new user
