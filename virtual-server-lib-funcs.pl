@@ -5648,9 +5648,9 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	my $col_text =
 	  ($u->{'domainowner'} ?
 	   "<b>$pop3</b>".&vui_inline_label('users_owner_label') :
-	    $u->{'webowner'} && $u->{'pass'} =~ /^\!/ ? $pop3_dis :
+	    $u->{'webowner'} && $u->{'pass'} =~ /^(\!|\*)/ ? $pop3_dis :
 	    $u->{'webowner'} ? $pop3 :
-	    $u->{'pass'} =~ /^\!/ ? $pop3_dis : $pop3);
+	    $u->{'pass'} =~ /^(\!|\*)/ ? $pop3_dis : $pop3);
 	my $col_val = "<a href='edit_user.cgi?dom=$did$filetype&amp;".
 		      "user=".&urlize($u->{'user'})."'>$col_text</a>";
 	if (!$virtualmin_pro && $u->{'extra'}) {

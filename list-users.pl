@@ -127,6 +127,8 @@ foreach $d (@doms) {
 				print "    SSH public key: $existing_key\n";
 				}
 			print "    Disabled: ",($disable ? "Yes" : "No"),"\n";
+			print "    No password accepted: ",
+				($pass eq "*" ? "Yes" : "No"),"\n";
 			print "    Home directory: ",$u->{'home'},"\n";
 			if ($u->{'domainowner'}) {
 				$u->{'shell'} = &get_domain_shell($d, $u);
