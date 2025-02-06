@@ -2252,7 +2252,7 @@ $proxy_tests = [
 
 	# Test that it works with the new URL
 	{ 'command' => $wget_command.'http://'.$test_domain.'/google/',
-	  'grep' => '<title>Bing',
+	  'grep' => 'Microsoft Bing',
 	},
 
 	# Check the proxy list for the new URL
