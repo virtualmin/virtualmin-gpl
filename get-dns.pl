@@ -124,7 +124,8 @@ elsif ($multiline) {
 			print "    Proxied: ",
 			      ($r->{'proxied'} ? "Yes" : "No"),"\n";
 			}
-                if ($r->{'file'}) {
+                if ($r->{'file'} && !$d->{'dns_cloud'} &&
+		    !$d->{'provision_dns'}) {
                         print "    File: $r->{'file'}\n";
                         }  
 		}
