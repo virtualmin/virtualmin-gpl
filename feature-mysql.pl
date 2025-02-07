@@ -1236,6 +1236,16 @@ if (!$d->{'parent'} && $info{'hosts'}) {
 		}
 	}
 
+# Work out which databases are in backup
+my @dbs;
+foreach my $dbfile (glob($file."_*")) {
+	if (-r $dbfile) {
+		$dbfile =~ /\Q$file\E_(.*)\.gz$/ ||
+			$dbfile =~ /\Q$file\E_(.*)$/;
+		push(@dbs, [ $1, $dbfile ]);
+		}
+	}
+
 # If in replication mode, AND the remote MySQL system is the same on both
 # systems, do nothing
 my $mymod = &get_domain_mysql_module($d);
@@ -1243,6 +1253,10 @@ if ($allopts->{'repl'} && $mymod->{'config'}->{'host'} && $info{'remote'} &&
     $mymod->{'config'}->{'host'} eq $info{'remote'}) {
 	&$first_print($text{'restore_mysqldummy'});
 	&$second_print(&text('restore_mysqlsameremote', $info{'remote'}));
+	if ($d->{'wasmissing'}) {
+		# Re-creating in replication mode, so the DBs can be assumed to exist
+		$d->{'db_mysql'} = join(" ", map { $_->[0] } @dbs);
+		}
 	return 1;
 	}
 
@@ -1279,16 +1293,6 @@ if (!$d->{'wasmissing'}) {
 # Re-grant allowed hosts, as deleting and re-creating DBs may have cleared them
 if (@lhosts) {
 	&save_mysql_allowed_hosts($d, \@lhosts);
-	}
-
-# Work out which databases are in backup
-local ($dbfile, @dbs);
-foreach $dbfile (glob($file."_*")) {
-	if (-r $dbfile) {
-		$dbfile =~ /\Q$file\E_(.*)\.gz$/ ||
-			$dbfile =~ /\Q$file\E_(.*)$/;
-		push(@dbs, [ $1, $dbfile ]);
-		}
 	}
 
 # Turn off quotas for the domain, to prevent the import failing
