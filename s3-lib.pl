@@ -1118,6 +1118,8 @@ return ( "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1",
 sub can_use_aws_s3_creds
 {
 return 0 if (!&has_aws_cmd());
+my $conf = &get_aws_credentials_config("default", "credentials");
+return 0 if (!$conf || !$conf->{'role_arn'});
 my $ok = &can_use_aws_cmd(undef, undef, undef, \&call_aws_s3_cmd, "ls");
 return 0 if (!$ok);
 return &has_aws_ec2_creds() ? 1 : 0;
