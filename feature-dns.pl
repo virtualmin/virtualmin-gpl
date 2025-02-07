@@ -2130,8 +2130,7 @@ return join("<br>\n", @recerrs) if (@recerrs);
 
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
-    !$d->{'provision_dns'} && !$d->{'dns_cloud'} && !$d->{'dns_submode'} &&
-    !$recsonly) {
+    !$d->{'provision_dns'} && !$d->{'dns_cloud'} && !$d->{'dns_submode'}) {
 	local $z = &get_bind_zone($d->{'dom'}, undef, $d);
 	if ($z) {
 		local @errs = &remote_foreign_call(
