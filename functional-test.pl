@@ -99,7 +99,7 @@ $test_ssh_public_key = "/tmp/functional-test.key.pub";
 			'newip_form', 'pro/edit_res', 'list_admins',
 			'list_balancers', 'list_redirects',
 			'list_records', 'view_records', 'usage',
-			'reemail', 'pro/maillog', 'disable_domain',
+			'pro/maillog', 'disable_domain',
 			'assoc_form', 'pro/edit_html' );
 
 $max_output = 2048;
