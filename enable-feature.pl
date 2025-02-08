@@ -18,7 +18,9 @@ step will be shown as it runs.
 If the C<--associate> flag is given, this command will simply make Virtualmin
 assume that the underlying configuration changes or databases have been
 already created. This reverses the effect of the C<--disassociate> flag to
-the C<disable-feature> API command.
+the C<disable-feature> API command. The optional flag C<--validate> will
+require that all validation checks for the feature pass before the association
+is saved.
 
 =cut
 
@@ -66,6 +68,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--skip-warnings") {
 		$skipwarnings = 1;
+		}
+	elsif ($a eq "--validate") {
+		$validate = 1;
 		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
@@ -176,6 +181,19 @@ foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 			&call_feature_func($f, $d, $oldd);
 			}
 		}
+	if ($associate && $validate) {
+		foreach $f (&list_ordered_features(\%newdom)) {
+			if ($feature{$f} || $plugin{$f}) {
+				$vfunc = "validate_$f";
+				$err = defined(&$vfunc) ? &$vfunc($d) : undef;
+				if ($err) {
+					&$second_print(".. validation failed : $err");
+					$failed = 1;
+					next;
+					}
+				}
+			}
+		}
 
 	# Save new domain details
 	&save_domain($d);
@@ -213,6 +231,7 @@ foreach $f (&list_feature_plugins()) {
 	print "                         [--$f]\n";
 	}
 print "                         [--skip-warnings]\n";
+print "                         [--validate]\n";
 exit(1);
 }
 
