@@ -462,11 +462,14 @@ if ($d->{'ip'} ne $oldd->{'ip'} ||
     $d->{'virt'} != $oldd->{'virt'} ||
     $d->{'dom'} ne $oldd->{'dom'} ||
     $d->{'home'} ne $oldd->{'home'}) {
+	print STDERR "Updating service SSL certs\n";
 	my %types = map { $_->{'id'}, $_ } &list_service_ssl_cert_types();
 	foreach my $svc (&get_all_domain_service_ssl_certs($oldd)) {
+		print STDERR "syncing svc=$svc->{'id'} d=$svc->{'d'}\n";
 		next if (!$svc->{'d'});
 		my $t = $types{$svc->{'id'}};
 		my $func = "sync_".$svc->{'id'}."_ssl_cert";
+		print STDERR "calling $func\n";
 		next if (!defined(&$func));
 		&$func($oldd, 0);
 		if ($t->{'dom'} || $d->{'virt'}) {
@@ -1553,10 +1556,11 @@ if ($d->{'virt'}) {
 	push(@ips, $d->{'ip'});
 	}
 push(@ips, @dnames);
+my $chain = &get_website_ssl_file($d, 'ca');
 push(@ipkeys, { 'ips' => \@ips,
 		'key' => $d->{'ssl_key'},
 		'cert' => $d->{'ssl_cert'},
-		'extracas' => $d->{'ssl_chain'}, });
+		'extracas' => $chain, });
 &webmin::save_ipkeys(\%miniserv, \@ipkeys);
 &$putfunc(\%miniserv);
 &register_post_action($postfunc);
