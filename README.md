@@ -34,6 +34,32 @@ Virtualmin includes the following features (and more):
 
 Virtualmin has been under consistent development since ~2003, averaging a new release every couple of months.
 
+### Contributing Translations
+
+If you'd like to help improve Virtualmin translations, please see our [translation contribution guide](https://www.virtualmin.com/docs/development/translations/) first.
+
+The following languages are currently supported for Virtualmin:
+
+| Language | Human | Machine | Missing | Coverage (Human vs. Total) |
+|----------|-------|---------|---------|----------------------------|
+| cs       | 1198  | 6992    | 18      |  14.6%   /   99.8%         |
+| de       | 4025  | 4165    | 18      |  49.0%   /   99.8%         |
+| en       | 8207  | 0       | 0       |  100.0%  /  100.0%         |
+| es       | 4188  | 4002    | 18      |  51.0%   /   99.8%         |
+| fr       | 2581  | 5609    | 18      |  31.4%   /   99.8%         |
+| it       | 1356  | 6834    | 18      |  16.5%   /   99.8%         |
+| ja       | 0     | 8190    | 18      |   0.0%   /   99.8%         |
+| nl       | 5110  | 3080    | 18      |  62.3%   /   99.8%         |
+| no       | 5641  | 2549    | 18      |  68.7%   /   99.8%         |
+| pl       | 7815  | 375     | 18      |  95.2%   /   99.8%         |
+| pt_BR    | 270   | 7920    | 18      |   3.3%   /   99.8%         |
+| ru       | 1303  | 6887    | 18      |  15.9%   /   99.8%         |
+| sk       | 0     | 8190    | 18      |   0.0%   /   99.8%         |
+| tr       | 2496  | 5694    | 18      |  30.4%   /   99.8%         |
+| zh       | 2970  | 5220    | 18      |  36.2%   /   99.8%         |
+| zh_TW    | 2970  | 5220    | 18      |  36.2%   /   99.8%         |
+
+
 ### Getting Support
 
 Virtualmin has active forums at https://forum.virtualmin.com
