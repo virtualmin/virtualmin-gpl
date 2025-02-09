@@ -190,11 +190,11 @@ return 0;
 }
 
 # virtual_ip_input(&templates, [reseller-name-list], [show-original],
-# 		   [default-mode])
+# 		   [default-mode], [default-ip])
 # Returns HTML for selecting a virtual IP mode for a new server, or not
 sub virtual_ip_input
 {
-local ($tmpls, $resel, $orig, $mode) = @_;
+local ($tmpls, $resel, $orig, $mode, $ip) = @_;
 $mode ||= 0;
 local $defip = &get_default_ip($resel);
 local ($t, $anyalloc, $anychoose, $anyzone);
@@ -222,7 +222,7 @@ local @shared = sort { $a cmp $b } &list_shared_ips();
 if (@shared && &can_edit_sharedips()) {
 	# Can select from extra shared list
 	push(@opts, [ 3, $text{'form_shared2'},
-			 &ui_select("sharedip", undef,
+			 &ui_select("sharedip", $mode == 3 ? $ip : undef,
 				[ map { [ $_ ] } @shared ]) ]);
 	}
 if ($anyalloc) {
@@ -232,7 +232,7 @@ if ($anyalloc) {
 if ($anychoose) {
 	# Can enter arbitrary IP
 	push(@opts, [ 1, $text{'form_vip'},
-		 &ui_textbox("ip", undef, 20)." ".
+		 &ui_textbox("ip", $mode == 1 ? $ip : undef, 20)." ".
 		 &ui_checkbox("virtalready", 1,
 			      $text{'form_virtalready'}) ]);
 	}
@@ -243,12 +243,12 @@ if ($anyzone) {
 			  &net::active_interfaces();
 	if (@act) {
 		push(@opts, [ 4, $text{'form_activeip'},
-			 &ui_select("zoneip", undef,
+			 &ui_select("zoneip", $mode == 4 ? $ip : undef,
 			  [ map { [ $_->{'address'} ] } @act ]) ]);
 		}
 	else {
 		push(@opts, [ 4, $text{'form_activeip'},
-				 &ui_textbox("zoneip", undef, 20) ]);
+			 &ui_textbox("zoneip", $mode == 4 ? $ip : undef, 20) ]);
 		}
 	}
 if ($mode == 5 && $anyalloc) {

@@ -641,8 +641,13 @@ elsif (!&can_select_ip()){
 						  : $defip);
 	}
 else {
+	my ($imode, $iip);
+	if ($parentdom && &indexof($parentdom->{'ip'}, &list_shared_ips()) >= 0) {
+		$imode = 3;
+		$iip = $parentdom->{'ip'};
+		}
 	print &ui_table_row(&hlink($text{'form_iface'}, "iface"),
-		&virtual_ip_input(\@cantmpls, $resel),
+		&virtual_ip_input(\@cantmpls, $resel, undef, $imode, $iip),
 		undef, \@tds);
 	}
 
