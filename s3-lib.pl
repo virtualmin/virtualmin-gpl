@@ -1143,7 +1143,7 @@ if ($akey_or_id) {
 		$zone ||= $s3->{'location'};
 		}
 	else {
-		$profile = $akey = akey_or_id;
+		$profile = $akey = $akey_or_id;
 		}
 	}
 my $acachekey = $akey || "none";
@@ -1213,7 +1213,7 @@ if ($akey_or_id) {
 		$zone ||= $s3->{'location'};
 		}
 	else {
-		$profile = $akey = akey_or_id;
+		$profile = $akey = $akey_or_id;
 		}
 	}
 
