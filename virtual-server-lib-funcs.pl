@@ -275,12 +275,12 @@ if (!defined($dom->{'template'})) {
 	# assume default parent or sub-server template
 	$dom->{'template'} = $dom->{'parent'} ? 1 : 0;
 	}
-if (!defined($dom->{'web_port'}) && $dom->{'web'}) {
+if (!$dom->{'web_port'} && $dom->{'web'}) {
 	# compat - assume web port is current setting
 	my $tmpl = &get_template($dom->{'template'});
 	$dom->{'web_port'} = $tmpl->{'web_port'} || $default_web_port;
 	}
-if (!defined($dom->{'web_sslport'}) && $dom->{'ssl'}) {
+if (!$dom->{'web_sslport'} && $dom->{'ssl'}) {
 	# compat - assume SSL port is current setting
 	my $tmpl = &get_template($dom->{'template'});
 	$dom->{'web_sslport'} = $tmpl->{'web_sslport'} || $web_sslport;
