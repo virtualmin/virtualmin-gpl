@@ -153,7 +153,15 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 	# Do it!
 	&$indent_print();
 	foreach $f (reverse(&list_ordered_features($oldd))) {
-		$d->{$f} = $newdom{$f};
+		if ($d->{$f} && !$newdom{$f}) {
+			$d->{$f} = 0;
+			my $dafunc = "disassociate_".$f;
+			if ($disassociate && defined(&$dafunc)) {
+				my $err = &$dafunc($d);
+				&error(&text('assoc_edassoc', $fname, $err))
+					if ($err);
+				}
+			}
 		}
 	if (!$disassociate) {
 		# Only actually turn off feature if not just

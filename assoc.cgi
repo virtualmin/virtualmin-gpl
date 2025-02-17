@@ -12,13 +12,25 @@ $d || &error($text{'edit_egone'});
 &obtain_lock_everything($d);
 foreach my $f (&list_possible_domain_features($d),
 	       &list_possible_domain_plugins($d)) {
+	$fname = $text{'feature_'.$f} ||
+		 &plugin_call($f, "feature_name") || $f;
 	if ($d->{$f} && !$in{$f}) {
 		$d->{$f} = 0;
 		push(@disabled, $f);
+		my $dafunc = "disassociate_".$f;
+		if (defined(&$dafunc)) {
+			my $err = &$dafunc($d);
+			&error(&text('assoc_edassoc', $fname, $err)) if ($err);
+			}
 		}
 	elsif (!$d->{$f} && $in{$f}) {
 		$d->{$f} = 1;
 		push(@enabled, $f);
+		my $afunc = "associate_".$f;
+		if (defined(&$afunc)) {
+			my $err = &$afunc($d);
+			&error(&text('assoc_eassoc', $fname, $err)) if ($err);
+			}
 		}
 	}
 
