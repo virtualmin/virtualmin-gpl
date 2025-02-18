@@ -7999,6 +7999,8 @@ assoc_validate=Require successful validation before saving?
 assoc_err=Failed to associate features
 assoc_evalidate=Validation failed for $1 : $2
 assoc_ecannot=You are not allowed to associate features
+assoc_eassoc=Failed to associate $1 : $2
+assoc_edassoc=Failed to disassociate $1 : $2
 
 running_title=Running Backups
 running_stop=Stop Selected Backups

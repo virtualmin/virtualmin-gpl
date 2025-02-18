@@ -3691,6 +3691,20 @@ else {
 	}
 }
 
+# associate_ssl(&domain)
+# Called after the SSL feature is associated to setup the various ssl_ fields
+sub associate_ssl
+{
+my ($d) = @_;
+$d->{'ssl_cert'} = &get_website_ssl_file($d, 'cert') || $d->{'ssl_cert'};
+$d->{'ssl_key'} = &get_website_ssl_file($d, 'key') || $d->{'ssl_key'};
+$d->{'ssl_chain'} = &get_website_ssl_file($d, 'ca') || $d->{'ssl_chain'};
+if (!$d->{'ssl_combined'} || !$d->{'ssl_everything'}) {
+	&sync_combined_ssl_cert($d);
+	}
+return undef;
+}
+
 # can_chained_ssl()
 # Returns the web feature because the SSL feature will be enabled if a
 # website is
