@@ -12357,6 +12357,83 @@ $xml_tests = [
 	  'cleanup' => 1 },
 	];
 
+$assoc_tests = [
+	# Create a domain with a website and SSL
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ $ssl ],
+		      [ 'logrotate' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Generate a new self-signed cert
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'self' ],
+		      [ 'size', 1024 ],
+		      [ 'days', 365 ],
+		      [ 'cn', $test_domain ],
+		      [ 'c', 'US' ],
+		      [ 'st', 'California' ],
+		      [ 'l', 'Santa Clara' ],
+		      [ 'o', 'Virtualmin' ],
+		      [ 'ou', 'Testing' ],
+		      [ 'email', 'example@'.$test_domain ] ],
+	},
+
+	# Disassociate the website and SSL
+	{ 'command' => 'disable-feature.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'disassociate' ],
+		      [ $ssl ],
+		      [ $web ] ],
+	},
+
+	# Make sure validation passes
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Make sure the website still works
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test home page',
+	},
+	{ 'command' => $wget_command.'https://'.$test_domain,
+	  'grep' => 'Test home page',
+	},
+
+	# Re-associate the features, with validation
+	{ 'command' => 'enable-feature.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'associate' ],
+		      [ 'validate' ],
+		      [ $web ],
+		      [ $ssl ] ],
+	},
+
+	# Make sure validation passes
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Make sure the SSL cert is valid
+	{ 'command' => 'get-ssl.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'cn: '.$test_domain, 'o: Virtualmin' ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -12458,6 +12535,7 @@ $alltests = { '_config' => $_config_tests,
 	      'ftp' => $ftp_tests,
 	      'scheduled' => $scheduled_tests,
 	      'xml' => $xml_tests,
+	      'assoc' => $assoc_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
