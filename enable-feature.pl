@@ -177,13 +177,15 @@ foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 		$fname = $text{'feature_'.$f} ||
 			 &plugin_call($f, "feature_name") || $f;
 		if (!$d->{$f} && $newdom{$f}) {
-			$d->{$f} = 1;
 			my $afunc = "associate_".$f;
 			if ($associate && defined(&$afunc)) {
 				my $err = &$afunc($d);
-				&error(&text('assoc_eassoc', $fname, $err))
-					if ($err);
+				if ($err) {
+					&$second_print(" .. could not associate $fname : $err");
+					next;
+					}
 				}
+			$d->{$f} = 1;
 			}
 		}
 	if (!$associate) {

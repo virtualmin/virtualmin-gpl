@@ -154,13 +154,15 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 	&$indent_print();
 	foreach $f (reverse(&list_ordered_features($oldd))) {
 		if ($d->{$f} && !$newdom{$f}) {
-			$d->{$f} = 0;
 			my $dafunc = "disassociate_".$f;
 			if ($disassociate && defined(&$dafunc)) {
 				my $err = &$dafunc($d);
-				&error(&text('assoc_edassoc', $fname, $err))
-					if ($err);
+				if ($err) {
+					&$second_print(" .. could not disassociate $fname : $err");
+					next;
+					}
 				}
+			$d->{$f} = 0;
 			}
 		}
 	if (!$disassociate) {
