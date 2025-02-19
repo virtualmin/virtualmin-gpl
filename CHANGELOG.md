@@ -1,3 +1,6 @@
+#### Version 7.30.5
+* Fix to exclude the default domain from license count
+
 #### Version 7.30.4
 * Fix conditional logic for license re-check
 
