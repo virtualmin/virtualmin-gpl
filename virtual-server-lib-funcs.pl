@@ -12038,7 +12038,8 @@ local ($status, $expiry, $err, $doms, $max_servers, $servers, $autorenew,
 		&licence_scheduled($id, undef, undef, &get_vps_type());
 if (defined($status) && $status == 0 && $doms) {
 	# A domains limit exists .. check if we have exceeded it
-	local @doms = grep { !$_->{'alias'} } &list_domains();
+	local @doms = grep { !$_->{'alias'} &&
+			     !$_->{'defaultdomain'} } &list_domains();
 	if (@doms > $doms) {
 		$status = 1;
 		$err = &text('licence_maxdoms', $doms, scalar(@doms));

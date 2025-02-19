@@ -15,7 +15,7 @@ sub licence_scheduled
 {
 local ($hostid, $serial, $key, $vps) = @_;
 local ($out, $error, $regerr);
-local @doms = grep { !$_->{'alias'} } &list_domains();
+local @doms = grep { !$_->{'alias'} && !$_->{'defaultdomain'} } &list_domains();
 &read_env_file($virtualmin_license_file, \%serial);
 $key ||= $serial{'LicenseKey'};
 $serial ||= $serial{'SerialNumber'};

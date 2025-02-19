@@ -48,7 +48,7 @@ print "Host ID: ",&get_licence_hostid(),"\n";
 print "Expiry date: $lstatus{'expiry'}\n" if ($lstatus{'expiry'});
 
 # Allowed domain counts
-@realdoms = grep { !$_->{'alias'} } &list_domains();
+@realdoms = grep { !$_->{'alias'} && !$_->{'defaultdomain'} } &list_domains();
 ($dleft, $dreason, $dmax, $dhide) = &count_domains("realdoms");
 print "Virtual servers: ",scalar(@realdoms),"\n";
 print "Maximum servers: ",($dmax > 0 ? $dmax : "Unlimited"),"\n";
