@@ -1849,8 +1849,10 @@ if ($ctype =~ /^ec/) {
 else {
 	$out = &backquote_logged(
 		"openssl req $ctypeflag -reqexts v3_req -newkey rsa:$size ".
-		"-x509 -nodes -out ".quotemeta($certtemp)." -keyout ".quotemeta($keytemp)." ".
-		"-days $days -config ".quotemeta($conf)." -subj ".quotemeta($subject)." $addtextsup -utf8 2>&1");
+		"-x509 -nodes -out ".quotemeta($certtemp).
+		" -keyout ".quotemeta($keytemp)." ".
+		"-days $days -config ".quotemeta($conf).
+		" -subj ".quotemeta($subject)." $addtextsup -utf8 2>&1");
 	}
 my $rv = $?;
 if (!-r $certtemp || !-r $keytemp || $rv) {
