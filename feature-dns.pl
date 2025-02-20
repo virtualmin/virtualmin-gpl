@@ -2249,7 +2249,7 @@ else {
 		local ($recs, $file) = &get_domain_dns_records_and_file($d);
 		local $rootfile = &remote_foreign_call(
 			$r, "bind8", "make_chroot", $z->{'file'});
-		$z->{'values'}->[0] = $d->{'dom'}.".disabled";
+		$z->{'value'} = $z->{'values'}->[0] = $d->{'dom'}.".disabled";
 		my $pconf = &remote_foreign_call($r, "bind8",
 						 "get_config_parent");
 		&remote_foreign_call($r, "bind8", "save_directive", $pconf,
@@ -2347,7 +2347,7 @@ else {
 		local ($recs, $file) = &get_domain_dns_records_and_file($d);
 		local $rootfile = &remote_foreign_call(
 			$r, "bind8", "make_chroot", $z->{'file'});
-		$z->{'values'}->[0] = $d->{'dom'};
+		$z->{'value'} = $z->{'values'}->[0] = $d->{'dom'};
 		my $pconf = &remote_foreign_call($r, "bind8",
 						 "get_config_parent");
 		&remote_foreign_call($r, "bind8", "save_directive", $pconf,
