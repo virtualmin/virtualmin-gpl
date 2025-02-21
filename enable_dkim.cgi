@@ -15,7 +15,7 @@ $dkim->{'enabled'} = $in{'enabled'};
 $dkim->{'verify'} = $in{'verify'};
 $dkim->{'alldns'} = $in{'alldns'};
 $dkim->{'sign'} = 1;
-@extra = split(/\s+/, $in{'extra'});
+@extra = map { lc } split(/\s+/, $in{'extra'});
 foreach $e (@extra) {
 	$e =~ /^[a-z0-9\-\_\.\*]+$/ || &error(&text('dkim_eextra', $e));
 	}
