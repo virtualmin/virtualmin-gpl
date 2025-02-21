@@ -176,6 +176,7 @@ foreach my $url (@{$balancer->{'urls'}}) {
 if ($ssl) {
 	foreach my $port (@ports) {
 		my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+		next if (!$virt);
 		my @spe = &apache::find_directive("SSLProxyEngine", $vconf);
 		if (!@spe && lc($spe[0]) ne "on") {
 			&apache::save_directive("SSLProxyEngine", [ "on" ],
