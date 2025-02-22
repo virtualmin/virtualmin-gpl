@@ -5036,11 +5036,13 @@ foreach my $e (keys %ENV) {
 # pre-change command
 sub making_changes
 {
-if ($config{'pre_command'} =~ /\S/) {
+my $cmd = $ENV{'VIRTUALMIN_PRE_COMMAND'} || $config{'pre_command'};
+my $output = $ENV{'VIRTUALMIN_OUTPUT_COMMAND'} || $config{'output_command'};
+if ($cmd =~ /\S/) {
 	&clean_changes_environment();
 	local $out = &backquote_logged(
-		"($config{'pre_command'}) 2>&1 </dev/null");
-	if ($config{'output_command'} && !$? && $out =~ /\S/) {
+		"($cmd) 2>&1 </dev/null");
+	if ($output && !$? && $out =~ /\S/) {
 		&$second_print($out);
 		}
 	&reset_changes_environment();
@@ -5054,11 +5056,13 @@ return undef;
 # post-change command
 sub made_changes
 {
-if ($config{'post_command'} =~ /\S/) {
+my $cmd = $ENV{'VIRTUALMIN_POST_COMMAND'} || $config{'post_command'};
+my $output = $ENV{'VIRTUALMIN_OUTPUT_COMMAND'} || $config{'output_command'};
+if ($cmd =~ /\S/) {
 	&clean_changes_environment();
 	local $out = &backquote_logged(
-		"($config{'post_command'}) 2>&1 </dev/null");
-	if ($config{'output_command'} && !$? && $out =~ /\S/) {
+		"($cmd) 2>&1 </dev/null");
+	if ($output && !$? && $out =~ /\S/) {
 		&$second_print($out);
 		}
 	&reset_changes_environment();
