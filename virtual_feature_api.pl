@@ -816,6 +816,13 @@ sub database_user
 {
 }
 
+# template_section()
+# If defined, returns a ID and description for the template section this
+# plugin's inputs should appear in
+sub template_section
+{
+}
+
 # template_input(&template)
 # Returns HTML for editing per-template options for this plugin
 sub template_input

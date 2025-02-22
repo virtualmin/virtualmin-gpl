@@ -39,7 +39,7 @@ $in{'editmode'} ||= 'basic';
 if (!$in{'new'}) {
 	# Work out template section to edit
 	@editmodes = &list_template_editmodes($tmpl);
-	$idx = &indexof($in{'editmode'}, @editmodes);
+	$idx = &indexof($in{'editmode'}, map { $_->[0] } @editmodes);
 	if ($in{'nprev'}) {
 		$idx--;
 		$idx = @editmodes-1 if ($idx < 0);
@@ -48,7 +48,7 @@ if (!$in{'new'}) {
 		$idx++;
 		$idx = 0 if ($idx >= @editmodes);
 		}
-	$in{'editmode'} = $editmodes[$idx];
+	$in{'editmode'} = $editmodes[$idx]->[0];
 
 	# Can only edit basic settings for new template!
 	print &ui_form_start("edit_tmpl.cgi");
@@ -57,10 +57,8 @@ if (!$in{'new'}) {
 	print $text{'tmpl_editmode'},"\n";
 	%isfeature = map { $_, 1 } @features;
 	print &ui_select("editmode", $in{'editmode'},
-		 [ map { [ $_, $text{'tmpl_editmode_'.$_} ||
-			       $text{'feature_'.$_} ] }
-		       @editmodes ],
-		 1, 0, 0, 0, "onChange='form.submit()'" );
+			 \@editmodes,
+			 1, 0, 0, 0, "onChange='form.submit()'" );
 	print &ui_submit($text{'tmpl_switch'});
 	print "&nbsp;&nbsp;\n";
 	print &ui_submit($text{'tmpl_nprev'}, "nprev");

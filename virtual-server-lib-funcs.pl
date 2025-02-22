@@ -17776,7 +17776,17 @@ if ($tmpl && ($tmpl->{'id'} == 1 || !$tmpl->{'for_parent'})) {
 	@rv = grep { $_ ne 'resources' && $_ ne 'unix' && $_ ne 'webmin' &&
 		     $_ ne 'avail' } @rv;
 	}
-return @rv;
+my @rvdesc = map { [ $_, $text{'tmpl_editmode_'.$_} ||
+			 $text{'feature_'.$_} ] } @rv;
+foreach my $f (@plugins) {
+	if (&plugin_defined($f, "template_section")) {
+		my ($sid, $sdesc) = &plugin_call($f, "template_section", $tmpl);
+		if ($sid) {
+			push(@rvdesc, [ "plugin_".$sid, $sdesc ]);
+			}
+		}
+	}
+return @rvdesc;
 }
 
 # substitute_domain_template(string, &domain, [&extra-hash], [html-escape])
