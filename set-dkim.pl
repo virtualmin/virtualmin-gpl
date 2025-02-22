@@ -63,13 +63,13 @@ if (@ARGV > 0) {
 			$verify = 0;
 			}
 		elsif ($a eq "--add-extra") {
-			$extra = shift(@ARGV);
+			$extra = lc(shift(@ARGV));
 			$err = &valid_domain_name($extra);
 			$err && &usage("Invalid extra domain name : $err");
 			push(@addextra, $extra);
 			}
 		elsif ($a eq "--remove-extra") {
-			$extra = shift(@ARGV);
+			$extra = lc(shift(@ARGV));
 			push(@delextra, $extra);
 			}
 		elsif ($a eq "--multiline") {
