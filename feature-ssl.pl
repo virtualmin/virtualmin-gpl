@@ -1419,8 +1419,8 @@ if ($data =~ /^\//) {
 	$data = &read_file_contents($data);
 	}
 local %headers = ( 'key' => '(RSA |EC )?PRIVATE KEY',
-		   'cert' => 'CERTIFICATE',
-		   'ca' => 'CERTIFICATE',
+		   'cert' => '(CERTIFICATE|PUBLIC KEY)',
+		   'ca' => '(CERTIFICATE|PUBLIC KEY)',
 		   'csr' => 'CERTIFICATE REQUEST',
 		   'newkey' => '(RSA |EC )?PRIVATE KEY' );
 local $h = $headers{$type};
