@@ -5999,15 +5999,15 @@ $prepost_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ],
 		      [ 'logrotate' ],
-		      [ 'pre-command' => 'echo BEFORE $VIRTUALSERVER_DOM >/tmp/prepost-test.out' ],
-		      [ 'post-command' => 'echo AFTER $VIRTUALSERVER_DOM >>/tmp/prepost-test.out' ],
+		      [ 'pre-command' => 'echo BEFORE $VIRTUALSERVER_DOM $VIRTUALSERVER_USER >/tmp/prepost-test.out' ],
+		      [ 'post-command' => 'echo AFTER $VIRTUALSERVER_DOM $VIRTUALSERVER_USER $VIRTUALSERVER_UID $VIRTUALSERVER_GID >>/tmp/prepost-test.out' ],
 		      @create_args, ],
 	},
 
 	# Make sure pre and post creation scripts run
 	{ 'command' => 'cat /tmp/prepost-test.out',
-	  'grep' => [ 'BEFORE '.$test_domain,
-		      'AFTER '.$test_domain ],
+	  'grep' => [ 'BEFORE '.$test_domain.' '.$test_domain_user,
+		      'AFTER '.$test_domain.' '.$test_domain_user.' [0-9]+ [0-9]+' ],
 	},
 	{ 'command' => 'rm -f /tmp/prepost-test.out' },
 
