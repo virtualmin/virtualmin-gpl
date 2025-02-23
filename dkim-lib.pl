@@ -647,8 +647,9 @@ elsif (&get_dkim_type() eq 'redhat') {
 	}
 &$second_print($text{'setup_done'});
 
-# Add public key to DNS zones for all domains that have DNS and email enabled,
-my @dnsdoms = grep { &has_dkim_domain($_, $dkim) } @alldoms;
+# Add public key to DNS zones for all domains that have DNS enabled,
+my @dnsdoms = grep { &has_dkim_domain($_, $dkim) &&
+		     $_->{'dns'} && !&copy_alias_records($_) } @alldoms;
 &add_dkim_dns_records(\@dnsdoms, $dkim);
 
 # Remove from domains that didn't get the DNS records added
@@ -889,7 +890,11 @@ return 1;
 sub can_dkim_domain
 {
 my ($d, $dkim) = @_;
-if (!$d->{'dns'}) {
+if ($dkim->{'alldns'} == 3) {
+	# Can be enabled even without DNS
+	return 2;
+	}
+elsif (!$d->{'dns'}) {
 	return 0;
 	}
 elsif (&copy_alias_records($d)) {
@@ -914,11 +919,14 @@ else {
 sub has_dkim_domain
 {
 my ($d, $dkim) = @_;
-return 0 if (!$d->{'dns'});
-return 0 if (&copy_alias_records($d));
-return 0 if ($d->{'dkim_enabled'} eq '0');
-return 1 if ($d->{'dkim_enabled'} eq '1');
-return &can_dkim_domain($d, $dkim);
+my $can = &can_dkim_domain($d, $dkim);
+if ($can != 2) {
+	return 0 if (!$d->{'dns'});
+	return 0 if (&copy_alias_records($d));
+	}
+return 0 if (defined($d->{'dkim_enabled'}) && $d->{'dkim_enabled'} eq '0');
+return 1 if (defined($d->{'dkim_enabled'}) && $d->{'dkim_enabled'} eq '1');
+return $can;
 }
 
 # update_dkim_domains(&domain, action, [no-dns])

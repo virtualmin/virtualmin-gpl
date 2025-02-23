@@ -63,6 +63,7 @@ print &ui_table_row($text{'dkim_alldns'},
 	&ui_radio("alldns", $dkim->{'alldns'},
 		   [ [ 0, $text{'dkim_alldns0'}."<br>" ],
 		     [ 1, $text{'dkim_alldns1'}."<br>" ],
+		     [ 3, $text{'dkim_alldns3'}."<br>" ],
 		     [ 2, $text{'dkim_alldns2'} ] ]));
 
 # Additional domains to sign for, defaulting to local hostname
