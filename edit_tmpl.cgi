@@ -78,8 +78,14 @@ print &ui_table_start($emode, "width=100%", 2,
 		      [ "width=30%" ]);
 
 # Show selected options type
-$sfunc = "show_template_".$in{'editmode'};
-&$sfunc($tmpl);
+if ($in{'editmode'} =~ /^plugin_(.*)$/) {
+	my $p = $1;
+	print &plugin_call($p, "template_input", $tmpl);
+	}
+else {
+	$sfunc = "show_template_".$in{'editmode'};
+	&$sfunc($tmpl);
+	}
 
 print &ui_table_end();
 

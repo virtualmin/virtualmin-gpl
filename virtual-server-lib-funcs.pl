@@ -17478,7 +17478,8 @@ sub show_template_plugins
 # Show plugin-specific template options
 my $plugtmpl = "";
 foreach my $f (@plugins) {
-	if (&plugin_defined($f, "template_input")) {
+	if (&plugin_defined($f, "template_input") &&
+	    !&plugin_defined($f, "template_section")) {
 		$plugtmpl .= &plugin_call($f, "template_input", $tmpl);
 		}
 	}
@@ -17496,7 +17497,8 @@ sub parse_template_plugins
 {
 local ($tmpl) = @_;
 foreach my $f (@plugins) {
-        if (&plugin_defined($f, "template_parse")) {
+        if (&plugin_defined($f, "template_parse") &&
+	    !&plugin_defined($f, "template_section")) {
 		&plugin_call($f, "template_parse", $tmpl, \%in);
 		}
 	}
@@ -17782,7 +17784,7 @@ foreach my $f (@plugins) {
 	if (&plugin_defined($f, "template_section")) {
 		my ($sid, $sdesc) = &plugin_call($f, "template_section", $tmpl);
 		if ($sid) {
-			push(@rvdesc, [ "plugin_".$sid, $sdesc ]);
+			push(@rvdesc, [ "plugin_".$f, $sdesc ]);
 			}
 		}
 	}

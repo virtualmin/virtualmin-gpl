@@ -67,8 +67,14 @@ elsif ($in{'clone'}) {
 # Validate and store all inputs
 $oldname = $tmpl->{'name'};
 &error_setup($text{'tmpl_err'});
-$pfunc = "parse_template_".$in{'editmode'};
-&$pfunc($tmpl);
+if ($in{'editmode'} =~ /^plugin_(.*)$/) {
+        my $p = $1;
+	&plugin_call($p, "template_parse", $tmpl, \%in);
+	}
+else {
+	$pfunc = "parse_template_".$in{'editmode'};
+	&$pfunc($tmpl);
+	}
 
 # Check for name clash
 if ($in{'new'} || lc($tmpl->{'name'}) ne lc($oldname)) {
