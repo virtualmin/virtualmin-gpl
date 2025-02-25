@@ -894,7 +894,11 @@ foreach $d (@doms) {
 			my @sames = &find_matching_certificate_domain($d);
 
 			# Determine if different owner linking is allowed
-			my $diff_owner_allowed = $d->{'link_certs'} == 2;
+			my $diff_owner_allowed = 2 == (
+				defined $d->{'link_certs'} ?
+				$d->{'link_certs'} :
+				$config{'nolink_certs'}
+				);
 
 			# Initialize priority stack
 			my @priorities = (
