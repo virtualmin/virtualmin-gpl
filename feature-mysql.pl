@@ -1254,7 +1254,8 @@ if ($allopts->{'repl'} && $mymod->{'config'}->{'host'} && $info{'remote'} &&
 	&$first_print($text{'restore_mysqldummy'});
 	&$second_print(&text('restore_mysqlsameremote', $info{'remote'}));
 	if ($d->{'wasmissing'}) {
-		# Re-creating in replication mode, so the DBs can be assumed to exist
+		# Re-creating in replication mode, so the DBs can be assumed
+		# to exist
 		$d->{'db_mysql'} = join(" ", map { $_->[0] } @dbs);
 		}
 	return 1;
