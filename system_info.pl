@@ -75,9 +75,9 @@ if (!$virtualmin_pro &&
 		my $uptime = &webmin::get_system_uptime();
 		$goodtime = (!$uptime || $uptime > 60*60*24 * 3);
 		}
-	# Show alert in another five days if reminder been set
+	# Show alert in another 21 days if reminder been set
 	my ($remind) = &should_show_pro_tip('dashboard_reminder', 'force');
-	my $futureremind = (int($remind) + (60*60*24 * 7));
+	my $futureremind = (int($remind) + (60*60*24 * 21));
 	my $doremind = ($remind && $futureremind < time());
 	if (($goodtime && !$remind) || ($goodtime && $doremind)) {
 		push(@rv, { 'type' => 'warning',
@@ -86,7 +86,7 @@ if (!$virtualmin_pro &&
 			        'alert_title' => $text{'scripts_gpl_pro_tip_title_dashboard'},
 			        'alert_body1' => $text{'scripts_gpl_pro_tip_dashboard'} . " ",
 			        'alert_body2' => &text('scripts_gpl_pro_tip_enroll_dashboard',
-			                               $virtualmin_shop_link_cat),
+			                               $virtualmin_docs_pro),
 			        'button_text' => $text{'scripts_gpl_pro_tip_hide2'},
 			        'button_icon' => 'fa fa-fw fa-heartbeat',
 			        'button_text2' => $text{'scripts_gpl_pro_tip_open'},
