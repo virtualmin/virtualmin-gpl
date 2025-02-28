@@ -1124,6 +1124,7 @@ my %exclude = map { $_, 1 } @exclude;
 @dbs = grep { !$exclude{$_} } @dbs;
 
 # Create base backup file with meta-information
+&$first_print($text{'backup_mysqlinfo'});
 local @hosts = &get_mysql_allowed_hosts($d);
 my $mymod = &get_domain_mysql_module($d);
 local %info = ( 'hosts' => join(' ', @hosts),
@@ -1139,6 +1140,7 @@ foreach $db (@dbs) {
 		}
 	}
 &write_as_domain_user($d, sub { &write_file($file, \%info) });
+&$second_print($text{'setup_done'});
 
 # Back them all up
 local $db;

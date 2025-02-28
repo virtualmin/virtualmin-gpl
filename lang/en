@@ -2767,6 +2767,7 @@ backup_apachecp=Copying Apache virtual host configuration ..
 backup_apachecp2=Copying Apache aliases ..
 backup_apachelog=Copying Apache log files ..
 backup_proftpdcp=Copying ProFTPD virtual server configuration ..
+backup_mysqlinfo=Copying MySQL user details ..
 backup_mysqldump=Dumping MySQL database $1 ..
 backup_mysqldumpfailed=.. dump failed! $1
 backup_mysqlgzipfailed=.. gzip failed! $1
