@@ -64,16 +64,19 @@ elsif ($in{'clone'}) {
 	exit;
 	}
 
+# Get the editing mode in use
+@editmodes = &list_template_editmodes($tmpl);
+($editmode) = grep { $_->[0] eq $in{'editmode'} } @editmodes;
+
 # Validate and store all inputs
 $oldname = $tmpl->{'name'};
 &error_setup($text{'tmpl_err'});
-if ($in{'editmode'} =~ /^plugin_(.*)$/) {
-        my $p = $1;
-	&plugin_call($p, "template_parse", $tmpl, \%in);
-	}
-else {
-	$pfunc = "parse_template_".$in{'editmode'};
+$pfunc = "parse_template_".$editmode->[0];
+if (defined(&$pfunc)) {
 	&$pfunc($tmpl);
+	}
+foreach my $p (@{$editmode->[2]}) {
+	&plugin_call($p, "template_parse", $tmpl, \%in);
 	}
 
 # Check for name clash
@@ -111,15 +114,14 @@ if (!$in{'new'} &&
 
 if ($in{'next'}) {
 	# And go to next section
-	@editmodes = map { $_->[0] } &list_template_editmodes($tmpl);
-	$idx = &indexof($in{'editmode'}, @editmodes);
+	$idx = &indexof($editmode, @editmodes);
 	if ($idx == @editmodes-1) {
 		$nextmode = $editmodes[0];
 		}
 	else {
 		$nextmode = $editmodes[$idx+1];
 		}
-	&redirect("edit_tmpl.cgi?id=$tmpl->{'id'}&editmode=$nextmode");
+	&redirect("edit_tmpl.cgi?id=$tmpl->{'id'}&editmode=$nextmode->[0]");
 	}
 else {
 	# Return to template list

@@ -9711,6 +9711,8 @@ push(@rv, { 'id' => 0,
 	    'web_http2' => $config{'web_http2'},
 	    'web_redirects' => $config{'web_redirects'},
 	    'web_sslredirect' => $config{'auto_redirect'},
+	    'ssl_key_size' => $config{'key_size'},
+	    'ssl_combined_cert' => $config{'combined_cert'},
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'content_web' => $config{'content_web'} // 2,
 	    'content_web_html' => $config{'content_web_html'},
@@ -17764,7 +17766,8 @@ if ($config{'mail_autoconfig'}) {
 }
 
 # list_template_editmodes([&template])
-# Returns a list of available template sections for editing
+# Returns a list of available template sections for editing, as array refs
+# containing : code, description, &source-plugins
 sub list_template_editmodes
 {
 local ($tmpl) = @_;
@@ -17778,13 +17781,19 @@ if ($tmpl && ($tmpl->{'id'} == 1 || !$tmpl->{'for_parent'})) {
 	@rv = grep { $_ ne 'resources' && $_ ne 'unix' && $_ ne 'webmin' &&
 		     $_ ne 'avail' } @rv;
 	}
-my @rvdesc = map { [ $_, $text{'tmpl_editmode_'.$_} ||
-			 $text{'feature_'.$_} ] } @rv;
+my @rvdesc = map { [ $_,
+		     $text{'tmpl_editmode_'.$_} || $text{'feature_'.$_},
+		     [ ] ] } @rv;
 foreach my $f (@plugins) {
 	if (&plugin_defined($f, "template_section")) {
 		my ($sid, $sdesc) = &plugin_call($f, "template_section", $tmpl);
-		if ($sid) {
-			push(@rvdesc, [ "plugin_".$f, $sdesc ]);
+		next if (!$sid);
+		my ($got) = grep { $_->[0] eq $sid } @rvdesc;
+		if ($got) {
+			push(@{$got->[2]}, $f);
+			}
+		else {
+			push(@rvdesc, [ $sid, $sdesc, [$f] ]);
 			}
 		}
 	}

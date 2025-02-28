@@ -35,11 +35,12 @@ else {
 	}
 
 # Show section selector form
+@editmodes = &list_template_editmodes($tmpl);
 $in{'editmode'} ||= 'basic';
+($editmode) = grep { $_->[0] eq $in{'editmode'} } @editmodes;
 if (!$in{'new'}) {
 	# Work out template section to edit
-	@editmodes = &list_template_editmodes($tmpl);
-	$idx = &indexof($in{'editmode'}, map { $_->[0] } @editmodes);
+	$idx = &indexof($editmode, @editmodes);
 	if ($in{'nprev'}) {
 		$idx--;
 		$idx = @editmodes-1 if ($idx < 0);
@@ -48,7 +49,7 @@ if (!$in{'new'}) {
 		$idx++;
 		$idx = 0 if ($idx >= @editmodes);
 		}
-	$in{'editmode'} = $editmodes[$idx]->[0];
+	$editmode = $editmodes[$idx];
 
 	# Can only edit basic settings for new template!
 	print &ui_form_start("edit_tmpl.cgi");
@@ -56,8 +57,8 @@ if (!$in{'new'}) {
 	print &ui_hidden("new", $in{'new'}),"\n";
 	print $text{'tmpl_editmode'},"\n";
 	%isfeature = map { $_, 1 } @features;
-	print &ui_select("editmode", $in{'editmode'},
-			 \@editmodes,
+	print &ui_select("editmode", $editmode->[0],
+			 [ map { [ $_->[0], $_->[1] ] } @editmodes ],
 			 1, 0, 0, 0, "onChange='form.submit()'" );
 	print &ui_submit($text{'tmpl_switch'});
 	print "&nbsp;&nbsp;\n";
@@ -71,20 +72,23 @@ print &ui_hidden("id", $in{'id'}),"\n";
 print &ui_hidden("new", $in{'new'}),"\n";
 print &ui_hidden("cloneof", $in{'clone'}),"\n";
 print &ui_hidden("cp", $in{'cp'}),"\n";
-print &ui_hidden("editmode", $in{'editmode'}),"\n";
-$emode = $text{'tmpl_editmode_'.$in{'editmode'}} ||
-	 $text{'feature_'.$in{'editmode'}};
+print &ui_hidden("editmode", $editmode->[0]),"\n";
+$emode = $text{'tmpl_editmode_'.$editmode->[0]} ||
+	 $text{'feature_'.$editmode->[0]};
 print &ui_table_start($emode, "width=100%", 2,
 		      [ "width=30%" ]);
 
 # Show selected options type
-if ($in{'editmode'} =~ /^plugin_(.*)$/) {
-	my $p = $1;
-	print &plugin_call($p, "template_input", $tmpl);
+$sfunc = "show_template_".$editmode->[0];
+if (defined(&$sfunc)) {
+	&$sfunc($tmpl);
 	}
 else {
-	$sfunc = "show_template_".$in{'editmode'};
-	&$sfunc($tmpl);
+	$donehr = 1;
+	}
+foreach my $p (@{$editmode->[2]}) {
+	print &ui_table_hr() if (!$donehr++);
+	print &plugin_call($p, "template_input", $tmpl);
 	}
 
 print &ui_table_end();
