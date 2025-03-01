@@ -105,9 +105,9 @@ if (!$d->{'mysql_module'}) {
 $d->{'mysql_user'} = &mysql_user($d);
 local $user = $d->{'mysql_user'};
 
-if ($d->{'provision_mysql'}) {
-	# Create the user on provisioning server
-	if (!$d->{'parent'}) {
+if (!$d->{'parent'}) {
+	if ($d->{'provision_mysql'}) {
+		# Create the user on provisioning server
 		&$first_print($text{'setup_mysqluser_provision'});
 		my $info = { 'user' => $user,
 			     'any-host' => '',
@@ -157,18 +157,19 @@ if ($d->{'provision_mysql'}) {
 		&$second_print(&text('setup_mysqluser_provisioned',
 				     $mysql_host));
 		}
-	}
-else {
-	# Create the user
-	local @hosts = &get_mysql_hosts($d, 1);
-	if (&indexof("%", @hosts) >= 0 &&
-	    &indexof("localhost", @hosts) < 0 &&
-	    &indexof("127.0.0.1", @hosts) < 0) {
-		# Always add localhost if % was allowed
-		push(@hosts, "localhost");
-		}
-	local $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $d);
-	if (!$d->{'parent'}) {
+	else {
+		# Create the user
+		my @oldhosts = &get_mysql_hosts($d, 3);
+		my @olddbs = &list_db_table($d, $user);
+		my @hosts = &get_mysql_hosts($d, 0);
+		if (&indexof("%", @hosts) >= 0 &&
+		    &indexof("localhost", @hosts) < 0 &&
+		    &indexof("127.0.0.1", @hosts) < 0) {
+			# Always add localhost if % was allowed
+			push(@hosts, "localhost");
+			}
+		my $wild = &substitute_domain_template(
+			$tmpl->{'mysql_wild'}, $d);
 		if ($d->{'mysql_module'} ne 'mysql') {
 			my $host = &get_database_host_mysql($d);
 			&$first_print(&text('setup_mysqluser2', $host));
@@ -187,6 +188,17 @@ else {
 					}
 				&set_mysql_user_connections($d, $h, $user, 0);
 				}
+			# If there were any granted hosts before the user
+			# was created (like during a restore on a system sharing
+			# the same MySQL server), re-grant access to them
+			foreach my $h (@oldhosts) {
+				next if (&indexof($h, @hosts) >= 0);
+				&execute_user_creation_sql($d, $h, $user,
+						   $encpass, &mysql_pass($d));
+				foreach my $olddb (@olddbs) {
+					&add_db_table($d, $h, $olddb->[0], $user);
+					}
+				}
 			};
 		&execute_for_all_mysql_servers($cfunc);
 		&$second_print($text{'setup_done'});
@@ -194,7 +206,7 @@ else {
 	}
 
 # Create the initial DB (if requested)
-local $ok;
+my $ok;
 if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
 	local $opts = &default_mysql_creation_opts($d);
 	$ok = &create_mysql_database($d, $d->{'db'}, $opts);
@@ -315,6 +327,21 @@ else {
 	&execute_dom_sql($d, $mysql::master_db, "delete from db where ".join(" and ", @c));
 	&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
 	}
+}
+
+# list_db_table(&domain, user)
+# Returns a list of databases and hosts granted to the given user
+sub list_db_table
+{
+my ($db, $user) = @_;
+my $rv = &execute_dom_sql($d, $mysql::master_db,
+	"select db,host from db where user = ?", $user);
+my %dbs;
+foreach my $r (@{$rv->{'data'}}) {
+	$dbs{$r->[0]} ||= [ ];
+	push(@{$dbs{$r->[0]}}, $r->[1]);
+	}
+return map { [ $_, $dbs{$_} ] } sort { $a cmp $b } keys %dbs;
 }
 
 # delete_mysql(&domain, [preserve-remote])
@@ -1830,10 +1857,13 @@ else {
 # get_mysql_hosts(&domain, [always-from-template])
 # Returns the allowed MySQL hosts for some domain, to be used when creating.
 # Uses hosts the user has currently by default, or those from the template.
+# If always-from-template == 0, then hosts already granted will be used if
+#   there are any, otherwise the template hosts will be used
 # If always-from-template == 1, then hosts already granted will never be used.
-# Instead, those from the template will be used.
+#   Instead, those from the template will be used.
 # If always-from-template == 2, then template hosts will be used AND we will
-# assume that we're connecting to a remote system.
+#   assume that we're connecting to a remote system.
+# If always-from-template == 3, then only existing hosts will be used
 sub get_mysql_hosts
 {
 local ($d, $always) = @_;
@@ -1933,7 +1963,8 @@ else {
 	}
 }
 
-# create_mysql_database_user(&domain, &dbs, username, plain-pass, [enc-pass], [enable-access-to-all-domain-dbs])
+# create_mysql_database_user(&domain, &dbs, username, plain-pass, [enc-pass],
+# 			     [enable-access-to-all-domain-dbs])
 # Adds one mysql user, who can access multiple databases
 sub create_mysql_database_user
 {
@@ -1963,7 +1994,7 @@ if ($d->{'provision_mysql'}) {
 else {
 	# Create locally
 	local $myuser = &mysql_username($user);
-	local @hosts = &get_mysql_hosts($d);
+	local @hosts = &get_mysql_hosts($d, 1);
 	local $h;
 	local $cfunc = sub {
 		foreach $h (@hosts) {
