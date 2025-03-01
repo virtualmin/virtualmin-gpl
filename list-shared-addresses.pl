@@ -11,6 +11,9 @@ Output is in table format by default, but you can switch to a more detailed
 and easily parsed list with the C<--multiline> flag. Or to just get a list
 of addresses, use the C<--name-only> parameter.
 
+By default only shared IPv4 addresses are shown, but you can use the C<--ipv6>
+flag to also include IPv6 addresses.
+
 =cut
 
 package virtual_server;
@@ -32,24 +35,59 @@ if (!$module_name) {
 # Parse command-line args
 $owner = 1;
 &parse_common_cli_flags(\@ARGV);
+$ipv4 = 1;
+$ipv6 = 0;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
-	&usage("Unknown parameter $a");
+	if ($a eq "--ipv6") {
+		$ipv6 = 1;
+		}
+	elsif ($a eq "--no-ipv6") {
+		$ipv6 = 0;
+		}
+	elsif ($a eq "--ipv4") {
+		$ipv4 = 1;
+		}
+	elsif ($a eq "--no-ipv4") {
+		$ipv4 = 0;
+		}
+	else {
+		&usage("Unknown parameter $a");
+		}
 	}
+$ipv4 || $ipv6 || &usage("At least one of IPv4 or IPv6 mode must be enabled");
+!$ipv6 || &supports_ip6() || &usage("This system does not support IPv6");
 
 # Get the IPs
-push(@ips, { 'ip' => &get_default_ip(), 'type' => 'default' });
+if ($ipv4) {
+	push(@ips, { 'ip' => &get_default_ip(), 'type' => 'default' });
+	}
+if ($ipv4) {
+	push(@ips, { 'ip' => &get_default_ip6(), 'type' => 'default' });
+	}
 if (defined(&list_resellers)) {
 	foreach $r (&list_resellers()) {
-		if ($r->{'acl'}->{'defip'}) {
+		if ($ipv4 && $r->{'acl'}->{'defip'}) {
 			push(@ips, { 'ip' => $r->{'acl'}->{'defip'},
+				     'type' => 'reseller',
+				     'reseller' => $r->{'name'} });
+			}
+		if ($ipv6 && $r->{'acl'}->{'defip6'}) {
+			push(@ips, { 'ip' => $r->{'acl'}->{'defip6'},
 				     'type' => 'reseller',
 				     'reseller' => $r->{'name'} });
 			}
 		}
 	}
-foreach $ip (&list_shared_ips()) {
-	push(@ips, { 'ip' => $ip, 'type' => 'shared' });
+if ($ipv4) {
+	foreach $ip (&list_shared_ips()) {
+		push(@ips, { 'ip' => $ip, 'type' => 'shared' });
+		}
+	}
+if ($ipv6) {
+	foreach $ip (&list_shared_ip6s()) {
+		push(@ips, { 'ip' => $ip, 'type' => 'shared' });
+		}
 	}
 
 if ($multiline) {
@@ -60,7 +98,8 @@ if ($multiline) {
 		if ($ip->{'reseller'}) {
 			print "    Reseller: $ip->{'reseller'}\n"
 			}
-		@doms = &get_domain_by("ip", $ip->{'ip'});
+		@doms = (&get_domain_by("ip", $ip->{'ip'}),
+			 &get_domain_by("ip6", $ip->{'ip'}));
 		foreach $d (@doms) {
 			print "    Virtual server: $d->{'dom'}\n";
 			}
@@ -94,6 +133,8 @@ print "Lists the available shared IP addresses for new virtual servers.\n";
 print "\n";
 print "virtualmin list-shared-addresses [--multiline | --json | --xml |\n";
 print "                                  --name-only]\n";
+print "                                 [--ipv4 | --no-ipv4]\n";
+print "                                 [--ipv6 | --no-ipv6]\n";
 exit(1);
 }
 
