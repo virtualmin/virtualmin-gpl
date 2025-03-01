@@ -230,18 +230,27 @@ else {
 # Update any virtual servers using some old IP to the new one. May print stuff.
 sub update_all_domain_ip_addresses
 {
-local ($ip, $oldip) = @_;
-local $dc = 0;
+my ($ip, $oldip) = @_;
+my $dc = 0;
 foreach my $d (&list_domains()) {
-	if (($d->{'ip'} eq $oldip ||
-	     $d->{'dns_ip'} eq $oldip) && !$d->{'virt'}) {
-		# Need to fix this server ..
-
-		# Update the object
-		local $oldd = { %$d };
+	my $oldd = { %$d };
+	my $changed;
+	if (($d->{'ip'} eq $oldip || $d->{'dns_ip'} eq $oldip) &&
+	    !$d->{'virt'}) {
+		# Need to fix this server's IPv4 address
 		$d->{'ip'} = $ip if ($d->{'ip'} eq $oldip);
 		$d->{'dns_ip'} = $ip if ($d->{'dns_ip'} eq $oldip);
+		$changed++;
+		}
+	if (($d->{'ip6'} eq $oldip || $d->{'dns_ip6'} eq $oldip) &&
+	    !$d->{'virt6'}) {
+		# Need to fix this server's IPv6 address
+		$d->{'ip6'} = $ip if ($d->{'ip6'} eq $oldip);
+		$d->{'dns_ip6'} = $ip if ($d->{'dns_ip6'} eq $oldip);
+		$changed++;
+		}
 
+	if ($changed) {
 		# Run the before command
 		&set_domain_envs(\%oldd, "MODIFY_DOMAIN", $d);
 		$merr = &making_changes();
