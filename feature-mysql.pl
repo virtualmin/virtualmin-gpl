@@ -160,7 +160,7 @@ if (!$d->{'parent'}) {
 	else {
 		# Create the user
 		my @oldhosts = &get_mysql_hosts($d, 3);
-		my @olddbs = &list_db_table($d, $user);
+		my @olddbs = &list_mysql_db_grants($d, $user);
 		my @hosts = &get_mysql_hosts($d, 0);
 		if (&indexof("%", @hosts) >= 0 &&
 		    &indexof("localhost", @hosts) < 0 &&
@@ -183,7 +183,7 @@ if (!$d->{'parent'}) {
 			&execute_user_creation_sql($d, $h, $user,
 					   $encpass, &mysql_pass($d));
 			if ($wild && $wild ne $d->{'db'}) {
-				&add_db_table($d, $h, $wild, $user);
+				&create_mysql_db_grant($d, $h, $wild, $user);
 				}
 			&set_mysql_user_connections($d, $h, $user, 0);
 			}
@@ -195,7 +195,7 @@ if (!$d->{'parent'}) {
 			&execute_user_creation_sql($d, $h, $user,
 					   $encpass, &mysql_pass($d));
 			foreach my $olddb (@olddbs) {
-				&add_db_table($d, $h, $olddb->[0], $user);
+				&create_mysql_db_grant($d, $h, $olddb->[0], $user);
 				}
 			}
 		&$second_print($text{'setup_done'});
@@ -228,9 +228,9 @@ if ($tmpl->{'mysql_nopass'}) {
 return $ok;
 }
 
-# add_db_table(&domain, host, db, user, [enable-access-to-all-domain-dbs])
+# create_mysql_db_grant(&domain, host, db, user, [enable-access-to-all-domain-dbs])
 # Adds an entry to the db table, with all permission columns set to Y
-sub add_db_table
+sub create_mysql_db_grant
 {
 local ($d, $host, $db, $user, $dbs_enall) = @_;
 local $mod = &require_dom_mysql($d);
@@ -274,9 +274,9 @@ else {
 	}
 }
 
-# remove_db_table(&domain, db, user)
+# delete_mysql_db_grant(&domain, db, user)
 # Removes an existing entry from the database table
-sub remove_db_table
+sub delete_mysql_db_grant
 {
 local ($d, $db, $user) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
@@ -320,15 +320,15 @@ else {
 	my @c;
 	push(@c, "(db = '$db' or db = '$qdb')") if ($db);
 	push(@c, "user = '$user'") if ($user);
-	@c || &error("remove_db_table called with no db or user");
+	@c || &error("delete_mysql_db_grant called with no db or user");
 	&execute_dom_sql($d, $mysql::master_db, "delete from db where ".join(" and ", @c));
 	&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
 	}
 }
 
-# list_db_table(&domain, user)
+# list_mysql_db_grants(&domain, user)
 # Returns a list of databases and hosts granted to the given user
-sub list_db_table
+sub list_mysql_db_grants
 {
 my ($db, $user) = @_;
 my $rv = &execute_dom_sql($d, $mysql::master_db,
@@ -440,7 +440,7 @@ else {
 	if ($wild && $wild ne $d->{'db'}) {
 		# Remove any wildcard entry for the user
 		# XXX doesn't work on MariaDB 10.4
-		&remove_db_table($d, $wild, undef);
+		&delete_mysql_db_grant($d, $wild, undef);
 		}
 	# Remove any other users. This has to be done here, as when
 	# users in the domain are deleted they won't be able to find
@@ -599,7 +599,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 			&execute_user_creation_sql($d, $h, $user,
 					   $encpass, &mysql_pass($d));
 			if ($wild && $wild ne $d->{'db'}) {
-				&add_db_table($d, $h, $wild, $user);
+				&create_mysql_db_grant($d, $h, $wild, $user);
 				}
 			&set_mysql_user_connections($d, $h, $user, 0);
 			}
@@ -667,7 +667,7 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 		    "select host,db from db where user = ?", $olduser);
 		&execute_user_deletion_sql($d, undef, $olduser);
 		foreach my $r (@{$rv->{'data'}}) {
-			&add_db_table($d, $r->[0], &unquote_mysql_database($r->[1]), $user);
+			&create_mysql_db_grant($d, $r->[0], &unquote_mysql_database($r->[1]), $user);
 			}
 		&$second_print($text{'setup_done'});
 		$rv++;
@@ -1664,7 +1664,7 @@ else {
 	local @hosts = &get_mysql_hosts($d);
 	local $user = &mysql_user($d);
 	foreach my $h (@hosts) {
-		&add_db_table($d, $h, $dbname, $user);
+		&create_mysql_db_grant($d, $h, $dbname, $user);
 		}
 
 	# Set group ownership of database directory, to enforce quotas
@@ -1757,7 +1757,7 @@ local @unames = ( &mysql_user($d),
 
 # Take away MySQL permissions for users in this domain
 foreach my $uname (@unames) {
-	&remove_db_table($d, $dbname, $uname);
+	&delete_mysql_db_grant($d, $dbname, $uname);
 	}
 
 # If any users had access to this DB only, remove them too
@@ -1964,7 +1964,7 @@ else {
 		      $pass);
 		local $db;
 		foreach $db (@$dbs) {
-			&add_db_table($d, $h, $db, $myuser, $dbs_enall);
+			&create_mysql_db_grant($d, $h, $db, $myuser, $dbs_enall);
 			}
 		&set_mysql_user_connections($d, $h, $myuser, 1);
 		}
@@ -2050,12 +2050,12 @@ else {
 	if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
 		# Update accessible database list
 		local @hosts = &get_mysql_hosts($d);
-		&remove_db_table($d, undef, $myuser);
+		&delete_mysql_db_grant($d, undef, $myuser);
 		local $h;
 		foreach $h (@hosts) {
 			local $db;
 			foreach $db (@$dbs) {
-				&add_db_table($d, $h, $db, $myuser);
+				&create_mysql_db_grant($d, $h, $db, $myuser);
 				}
 			}
 		}
@@ -2489,7 +2489,7 @@ else {
 		&execute_user_creation_sql($d, $h, $user, $encpass,
 					   &mysql_pass($d));
 		foreach my $db (@dbs) {
-			&add_db_table($d, $h, $db->{'name'}, $user);
+			&create_mysql_db_grant($d, $h, $db->{'name'}, $user);
 			}
 		&set_mysql_user_connections($d, $h, $user, 0);
 		}
@@ -2505,9 +2505,9 @@ else {
 			next if ($u->[0] eq $user ||
 				 $u->[0] eq 'root' ||
 				 $u->[0] eq $mymod->{'config'}->{'login'});
-			&remove_db_table($d, $db->{'name'}, $u->[0]);
+			&delete_mysql_db_grant($d, $db->{'name'}, $u->[0]);
 			foreach my $h (@$hosts) {
-				&add_db_table($d, $h, $db->{'name'},
+				&create_mysql_db_grant($d, $h, $db->{'name'},
 					      $u->[0]);
 				}
 			$allusers{$u->[0]} = $u;
