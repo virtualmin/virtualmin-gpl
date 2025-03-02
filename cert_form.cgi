@@ -610,7 +610,7 @@ if ($showdays) {
 	}
 
 print &ui_table_row($text{'cert_hash'},
-		    &ui_select("hash", $config{'cert_type'},
+		    &ui_select("hash", $tmpl->{'ssl_cert_type'},
 			       [ [ "sha1", "SHA1" ],
 				 [ "sha2", "SHA2" ],
 				 [ "ecdsa", $text{'cert_type_ec'} ] ]));

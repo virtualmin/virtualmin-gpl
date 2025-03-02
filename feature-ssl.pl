@@ -1878,7 +1878,8 @@ sub generate_certificate_request
 {
 my ($csrfile, $keyfile, $size, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames, $d, $ctype) = @_;
-$ctype ||= $config{'cert_type'};
+my $tmpl = &get_template($d->{'template'});
+$ctype ||= $tmpl->{'ssl_cert_type'};
 &foreign_require("webmin");
 $size ||= $webmin::default_key_size;
 
@@ -3578,13 +3579,22 @@ sub show_template_ssl
 {
 local ($tmpl) = @_;
 
-# SSL certificate settings
+# SSL cert size
 print &ui_table_row(
 	&hlink($text{'newweb_ssl_key_size'}, "config_key_size"),
 	&ui_opt_textbox("ssl_key_size", $tmpl->{'ssl_key_size'}, 6,
 			$tmpl->{'default'} ? $text{'newweb_ssl_key_def'}
 					   : $text{'tmpl_default'}).
 		" ".$text{'dkim_bits'});
+
+# SSL cert type
+print &ui_table_row(
+	&hlink($text{'newweb_cert_type'}, "config_cert_type"),
+	&ui_radio("ssl_cert_type", $tmpl->{'ssl_cert_type'},
+	  [ $tmpl->{'default'} ? ( ) : ( [ '', $text{'tmpl_default'} ] ),
+	    [ 'sha1', 'SHA1' ],
+	    [ 'sha2', 'SHA2' ],
+	    [ 'ec', 'ECC' ] ]));
 
 # Default SSL key and cert file paths
 foreach my $t ("key", "cert", "ca", "combined", "everything") {
@@ -3654,6 +3664,9 @@ else {
 	$in{'ssl_key_size'} =~ /^\d+$/ || &error($text{'newweb_essl_key_size'});
 	$tmpl->{'ssl_key_size'} = $in{'ssl_key_size'};
 	}
+
+# Save cert hash
+$tmpl->{'ssl_cert_type'} = $in{'ssl_cert_type'};
 
 # Save key file templates
 foreach my $t ("key", "cert", "ca", "combined", "everything") {

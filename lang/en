@@ -1961,6 +1961,7 @@ newweb_sslredirect=Redirect all HTTP requests to HTTPS
 newweb_ssl_key_size=Default SSL key size
 newweb_essl_key_size=SSL key size must be a number of bits
 newweb_ssl_key_def=Virtualmin default (2048 bits)
+newweb_cert_type=Default SSL certificate hash
 
 newftp_title=ProFTPD Server Template
 newftp_ecannot=You are not allowed to edit the ProFTPD template
