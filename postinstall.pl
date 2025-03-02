@@ -119,22 +119,6 @@ if ($config{'spam'}) {
 # Enable logging in Procmail, if we are using it
 if ($config{'spam'}) {
 	&enable_procmail_logging();
-
-	# And setup cron job to periodically process mail logs
-	# Disabled, as it is generating too much load on big sites
-	#local $job = &find_module_cron_job($maillog_cron_cmd);
-	#if (!$job) {
-	#	# Create, and run for the first time
-	#	$job = { 'mins' => int(rand()*60),
-	#		 'hours' => '0',
-	#		 'days' => '*',
-	#		 'months' => '*',
-	#		 'weekdays' => '*',
-	#		 'user' => 'root',
-	#		 'active' => 1,
-	#		 'command' => $maillog_cron_cmd };
-	#	&setup_cron_script($job);
-	#	}
 	}
 
 # Setup Cron job to periodically re-sync links in domains' spamassassin config
