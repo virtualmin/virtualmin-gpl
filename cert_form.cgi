@@ -6,6 +6,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
+$tmpl = &get_template($d->{'template'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
 &foreign_require("webmin");
 &ui_print_header(&domain_in($d), $text{'cert_title'}, "");
@@ -596,7 +597,7 @@ print &ui_table_row($webmin::text{'ca_sp'},
 print &ui_table_row($webmin::text{'ca_c'},
 		    &ui_textbox("countryName", undef, 2));
 
-$key_size = $config{'key_size'};
+$key_size = $tmpl->{'ssl_key_size'};
 $key_size = undef if ($key_size == $webmin::default_key_size);
 print &ui_table_row($webmin::text{'ssl_size'},
 		    &ui_opt_textbox("size", $key_size, 6,

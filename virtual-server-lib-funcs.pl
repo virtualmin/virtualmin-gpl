@@ -9712,6 +9712,11 @@ push(@rv, { 'id' => 0,
 	    'web_redirects' => $config{'web_redirects'},
 	    'web_sslredirect' => $config{'auto_redirect'},
 	    'ssl_key_size' => $config{'key_size'},
+	    'ssl_cert_type' => $config{'cert_type'},
+	    'ssl_auto_letsencrypt' => $config{'auto_letsencrypt'},
+	    'ssl_letsencrypt_wild' => $config{'letsencrypt_wild'},
+	    'ssl_always_ssl' => $config{'always_ssl'},
+	    'ssl_tlsa_records' => $config{'tlsa_records'},
 	    'ssl_combined_cert' => $config{'combined_cert'},
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'content_web' => $config{'content_web'} // 2,
@@ -10056,6 +10061,13 @@ if ($tmpl->{'id'} == 0) {
 	$config{'web_http2'} = $tmpl->{'web_http2'};
 	$config{'web_redirects'} = $tmpl->{'web_redirects'};
 	$config{'auto_redirect'} = $tmpl->{'web_sslredirect'};
+	$config{'key_size'} = $tmpl->{'ssl_key_size'};
+	$config{'cert_type'} = $tmpl->{'ssl_cert_type'};
+	$config{'auto_letsencrypt'} = $tmpl->{'ssl_auto_letsencrypt'};
+	$config{'letsencrypt_wild'} = $tmpl->{'ssl_letsencrypt_wild'};
+	$config{'always_ssl'} = $tmpl->{'ssl_always_ssl'};
+	$config{'tlsa_records'} = $tmpl->{'ssl_tlsa_records'};
+	$config{'combined_cert'} = $tmpl->{'ssl_combined_cert'};
 	$config{'php_vars'} = $tmpl->{'php_vars'} eq "none" ? "" :
 				$tmpl->{'php_vars'};
 	$config{'php_fpm'} = $tmpl->{'php_fpm'} eq "none" ? "" :
@@ -10409,6 +10421,9 @@ if (!$tmpl->{'default'}) {
 		    "nodbname", "norename", "forceunder", "safeunder",
 		    "ipfollow", "exclude", "cert_key_tmpl", "cert_cert_tmpl",
 		    "cert_ca_tmpl", "cert_combined_tmpl","cert_everything_tmpl",
+		    "ssl_key_size", "ssl_cert_type", "ssl_auto_letsencrypt",
+		    "ssl_letsencrypt_wild", "ssl_always_ssl",
+		    "ssl_tlsa_records", "ssl_combined_cert",
 		    "aliascopy", "bccto", "resources", "dnssec", "avail",
 		    @plugins,
 		    &list_php_wrapper_templates(),

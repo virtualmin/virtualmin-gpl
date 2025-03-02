@@ -88,7 +88,6 @@ contact_email=Default email address for new domains?,3,Domain owner's mailbox
 allow_numbers=Allow user and group names starting with numbers?,1,1-Yes,0-No
 
 line2.1=SSL settings,11
-key_size=Default SSL key size,3,Webmin default (2048 bits),6,,bits
 openssl_cnf=Location of OpenSSL configuration file,3,Work out automatically
 cert_type=Default SSL certificate hash,1,sha1-SHA1,sha2-SHA2,ec-ECC
 can_letsencrypt=Who can request SSL certificates?,1,0-All users,1-Resellers,2-Only master admin

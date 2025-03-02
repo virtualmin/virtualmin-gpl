@@ -63,7 +63,6 @@ if (!$module_name) {
 &set_all_text_print();
 
 # Parse command-line args
-$size = $config{'key_size'};
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {

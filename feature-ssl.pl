@@ -3327,6 +3327,7 @@ return \@rv;
 sub request_domain_letsencrypt_cert
 {
 my ($d, $dnames, $staging, $size, $mode, $ctype, $acme, $subset) = @_;
+my $tmpl = &get_template($d->{'template'});
 my ($server, $keytype, $hmac);
 if ($acme) {
 	defined(&list_acme_providers) ||
@@ -3346,7 +3347,7 @@ if ($acme) {
 	}
 my ($ok, $cert, $key, $chain, @errs);
 $dnames = &filter_ssl_wildcards($dnames);
-$size ||= $config{'key_size'};
+$size ||= $tmpl->{'ssl_key_size'};
 &foreign_require("webmin");
 my $phd = &public_html_dir($d);
 my $actype = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
@@ -3577,6 +3578,14 @@ sub show_template_ssl
 {
 local ($tmpl) = @_;
 
+# SSL certificate settings
+print &ui_table_row(
+	&hlink($text{'newweb_ssl_key_size'}, "config_key_size"),
+	&ui_opt_textbox("ssl_key_size", $tmpl->{'ssl_key_size'}, 6,
+			$tmpl->{'default'} ? $text{'newweb_ssl_key_def'}
+					   : $text{'tmpl_default'}).
+		" ".$text{'dkim_bits'});
+
 # Default SSL key and cert file paths
 foreach my $t ("key", "cert", "ca", "combined", "everything") {
 	my $v = $tmpl->{'cert_'.$t.'_tmpl'};
@@ -3636,6 +3645,15 @@ print &ui_table_row(&hlink($text{'newweb_proftpd'},
 sub parse_template_ssl
 {
 local ($tmpl) = @_;
+
+# Save key size
+if ($in{'ssl_key_size_def'}) {
+	delete($tmpl->{'ssl_key_size'});
+	}
+else {
+	$in{'ssl_key_size'} =~ /^\d+$/ || &error($text{'newweb_essl_key_size'});
+	$tmpl->{'ssl_key_size'} = $in{'ssl_key_size'};
+	}
 
 # Save key file templates
 foreach my $t ("key", "cert", "ca", "combined", "everything") {
