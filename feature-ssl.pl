@@ -3621,6 +3621,15 @@ if (defined(&list_acme_providers)) {
 				 &list_acme_providers() ]));
 	}
 
+# Request cert from provider at domain creation time?
+print &ui_table_row(
+	&hlink($text{'newweb_auto_letsencrypt'}, "config_auto_letsencrypt"),
+	&ui_radio("ssl_auto_letsencrypt", $tmpl->{'ssl_auto_letsencrypt'},
+	  [ $tmpl->{'default'} ? ( ) : ( [ '', $text{'tmpl_default'} ] ),
+	    [ 2, $text{'newweb_auto_letsencrypt2'} ],
+	    [ 1, $text{'yes'} ],
+	    [ 0, $text{'no'} ] ]));
+
 print &ui_table_hr();
 
 # Setup matching Webmin/Usermin SSL certs
@@ -3684,6 +3693,7 @@ foreach my $t ("key", "cert", "ca", "combined", "everything") {
 if (defined($in{'web_acme'})) {
 	$tmpl->{'web_acme'} = $in{'web_acme'};
 	}
+$tmpl->{'ssl_auto_letsencrypt'} = $in{'ssl_auto_letsencrypt'};
 
 # Save options to setup per-service SSL certs
 $tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};

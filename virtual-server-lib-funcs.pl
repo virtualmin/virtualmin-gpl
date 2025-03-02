@@ -8538,7 +8538,7 @@ if (!&domain_has_ssl($dom) && $always_ssl && !$dom->{'alias'}) {
 # initial setup and when Apache has been restarted, so that it can serve the
 # new website.
 if (!defined($dom->{'auto_letsencrypt'})) {
-	$dom->{'auto_letsencrypt'} = $config{'auto_letsencrypt'};
+	$dom->{'auto_letsencrypt'} = $tmpl->{'ssl_auto_letsencrypt'};
 	if ($dom->{'dns'}) {
 		$dom->{'letsencrypt_dwild'} = $config{'letsencrypt_wild'};
 		}

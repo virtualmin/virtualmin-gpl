@@ -91,7 +91,6 @@ line2.1=SSL settings,11
 openssl_cnf=Location of OpenSSL configuration file,3,Work out automatically
 can_letsencrypt=Who can request SSL certificates?,1,0-All users,1-Resellers,2-Only master admin
 default_domain_ssl=Setup SSL certificate from provider for hostname?,1,2-Yes&#44; and have it configurable,1-Yes,0-No
-auto_letsencrypt=Request SSL certificate from provider at domain creation time?,1,2-Yes&#44; and skip connectivity check,1-Yes,0-No
 err_letsencrypt=Show SSL provider error at domain creation time?,1,1-Yes,0-No
 letsencrypt_wild=Request wildcard SSL certificate from provider?,1,1-Yes,0-No
 renew_letsencrypt=Days before expiry to renew SSL certificates,3,Default (21 days)
