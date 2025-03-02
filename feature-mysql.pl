@@ -177,30 +177,27 @@ if (!$d->{'parent'}) {
 		else {
 			&$first_print($text{'setup_mysqluser'});
 			}
-		local $cfunc = sub {
-			local $encpass = &encrypted_mysql_pass($d);
-			foreach my $h (@hosts) {
-				&execute_user_deletion_sql($d, $h, $user);
-				&execute_user_creation_sql($d, $h, $user,
-						   $encpass, &mysql_pass($d));
-				if ($wild && $wild ne $d->{'db'}) {
-					&add_db_table($d, $h, $wild, $user);
-					}
-				&set_mysql_user_connections($d, $h, $user, 0);
+		local $encpass = &encrypted_mysql_pass($d);
+		foreach my $h (@hosts) {
+			&execute_user_deletion_sql($d, $h, $user);
+			&execute_user_creation_sql($d, $h, $user,
+					   $encpass, &mysql_pass($d));
+			if ($wild && $wild ne $d->{'db'}) {
+				&add_db_table($d, $h, $wild, $user);
 				}
-			# If there were any granted hosts before the user
-			# was created (like during a restore on a system sharing
-			# the same MySQL server), re-grant access to them
-			foreach my $h (@oldhosts) {
-				next if (&indexof($h, @hosts) >= 0);
-				&execute_user_creation_sql($d, $h, $user,
-						   $encpass, &mysql_pass($d));
-				foreach my $olddb (@olddbs) {
-					&add_db_table($d, $h, $olddb->[0], $user);
-					}
+			&set_mysql_user_connections($d, $h, $user, 0);
+			}
+		# If there were any granted hosts before the user
+		# was created (like during a restore on a system sharing
+		# the same MySQL server), re-grant access to them
+		foreach my $h (@oldhosts) {
+			next if (&indexof($h, @hosts) >= 0);
+			&execute_user_creation_sql($d, $h, $user,
+					   $encpass, &mysql_pass($d));
+			foreach my $olddb (@olddbs) {
+				&add_db_table($d, $h, $olddb->[0], $user);
 				}
-			};
-		&execute_for_all_mysql_servers($cfunc);
+			}
 		&$second_print($text{'setup_done'});
 		}
 	}
@@ -432,36 +429,33 @@ if ($d->{'provision_mysql'}) {
 else {
 	# Remove the main user locally
 	&$first_print($text{'delete_mysqluser'}) if (!$d->{'parent'});
-	local $dfunc = sub { 
-		local $user = &mysql_user($d);
-		local $tmpl = &get_template($d->{'template'});
-		local $wild = &substitute_domain_template(
-				$tmpl->{'mysql_wild'}, $d);
-		if (!$d->{'parent'}) {
-			# Delete the user and any database permissions
-			&execute_user_deletion_sql($d, undef, $user, 1);
-			}
-		if ($wild && $wild ne $d->{'db'}) {
-			# Remove any wildcard entry for the user
-			# XXX doesn't work on MariaDB 10.4
-			&remove_db_table($d, $wild, undef);
-			}
-		# Remove any other users. This has to be done here, as when
-		# users in the domain are deleted they won't be able to find
-		# their database privileges anymore.
-		foreach my $u (@users) {
-			foreach my $udb (@{$u->{'dbs'}}) {
-				if ($udb->{'type'} eq 'mysql') {
-					local $myuser =
-						&mysql_username($u->{'user'});
-					&execute_user_deletion_sql(
-						$d, undef, $myuser, 1);
-					}
+	local $user = &mysql_user($d);
+	local $tmpl = &get_template($d->{'template'});
+	local $wild = &substitute_domain_template(
+			$tmpl->{'mysql_wild'}, $d);
+	if (!$d->{'parent'}) {
+		# Delete the user and any database permissions
+		&execute_user_deletion_sql($d, undef, $user, 1);
+		}
+	if ($wild && $wild ne $d->{'db'}) {
+		# Remove any wildcard entry for the user
+		# XXX doesn't work on MariaDB 10.4
+		&remove_db_table($d, $wild, undef);
+		}
+	# Remove any other users. This has to be done here, as when
+	# users in the domain are deleted they won't be able to find
+	# their database privileges anymore.
+	foreach my $u (@users) {
+		foreach my $udb (@{$u->{'dbs'}}) {
+			if ($udb->{'type'} eq 'mysql') {
+				local $myuser =
+					&mysql_username($u->{'user'});
+				&execute_user_deletion_sql(
+					$d, undef, $myuser, 1);
 				}
 			}
-		&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
-		};
-	&execute_for_all_mysql_servers($dfunc);
+		}
+	&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
 	&$second_print($text{'setup_done'}) if (!$d->{'parent'});
 	}
 return 1;
@@ -516,10 +510,7 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 		# Change locally
 		&$first_print($text{'save_mysqlpass'});
 		if (&mysql_user_exists($d)) {
-			local $pfunc = sub {
-				&execute_password_change_sql($d, $olduser, $encpass, &mysql_pass($d));
-				};
-			&execute_for_all_mysql_servers($pfunc);
+			&execute_password_change_sql($d, $olduser, $encpass, &mysql_pass($d));
 			&$second_print($text{'setup_done'});
 
 			# Update all installed scripts database password which are using MySQL
@@ -604,22 +595,18 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 		local $wild = &substitute_domain_template(
 				$tmpl->{'mysql_wild'}, $d);
 		local $encpass = &encrypted_mysql_pass($d);
-		local $pfunc = sub {
-			local $h;
-			foreach $h (@hosts) {
-				&execute_user_creation_sql($d, $h, $user,
-						   $encpass, &mysql_pass($d));
-				if ($wild && $wild ne $d->{'db'}) {
-					&add_db_table($d, $h, $wild, $user);
-					}
-				&set_mysql_user_connections($d, $h, $user, 0);
+		foreach my $h (@hosts) {
+			&execute_user_creation_sql($d, $h, $user,
+					   $encpass, &mysql_pass($d));
+			if ($wild && $wild ne $d->{'db'}) {
+				&add_db_table($d, $h, $wild, $user);
 				}
-			foreach my $db (@dbnames) {
-				&execute_database_reassign_sql(
-					$d, $db, $olduser, $user);
-				}
-			};
-		&execute_for_all_mysql_servers($pfunc);
+			&set_mysql_user_connections($d, $h, $user, 0);
+			}
+		foreach my $db (@dbnames) {
+			&execute_database_reassign_sql(
+				$d, $db, $olduser, $user);
+			}
 		&$second_print($text{'setup_done'});
 		}
 	$rv++;
@@ -676,15 +663,12 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 	else {
 		# Update locally
 		&$first_print($text{'save_mysqluser'});
-		local $pfunc = sub {
-			my $rv = &execute_dom_sql($d, $mysql::master_db,
-			    "select host,db from db where user = ?", $olduser);
-			&execute_user_deletion_sql($d, undef, $olduser);
-			foreach my $r (@{$rv->{'data'}}) {
-				&add_db_table($d, $r->[0], &unquote_mysql_database($r->[1]), $user);
-				}
-			};
-		&execute_for_all_mysql_servers($pfunc);
+		my $rv = &execute_dom_sql($d, $mysql::master_db,
+		    "select host,db from db where user = ?", $olduser);
+		&execute_user_deletion_sql($d, undef, $olduser);
+		foreach my $r (@{$rv->{'data'}}) {
+			&add_db_table($d, $r->[0], &unquote_mysql_database($r->[1]), $user);
+			}
 		&$second_print($text{'setup_done'});
 		$rv++;
 		}
@@ -716,10 +700,7 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 		&$first_print($text{'save_mysqluser'});
 		if (&mysql_user_exists($oldd)) {
 			$d->{'mysql_user'} = $user;
-			local $pfunc = sub {
-				&execute_user_rename_sql($d, $olduser, $user);
-				};
-			&execute_for_all_mysql_servers($pfunc);
+			&execute_user_rename_sql($d, $olduser, $user);
 			&$second_print($text{'setup_done'});
 
 			# Update all installed scripts database username which are using MySQL
@@ -767,13 +748,10 @@ elsif ($user ne $olduser && $d->{'parent'} && @dbnames) {
 	else {
 		# Change locally
 		&$first_print($text{'save_mysqluser2'});
-		local $pfunc = sub {
-			foreach my $db (@dbnames) {
-				&execute_database_reassign_sql(
-					$d, $db, $olduser, $user);
-				}
-			};
-		&execute_for_all_mysql_servers($pfunc);
+		foreach my $db (@dbnames) {
+			&execute_database_reassign_sql(
+				$d, $db, $olduser, $user);
+			}
 		$rv++;
 		&$second_print($text{'setup_done'});
 		}
@@ -975,11 +953,8 @@ else {
 	&$first_print($text{'disable_mysqluser'});
 	local $user = &mysql_user($d);
 	if ($oldpass = &mysql_user_exists($d)) {
-		local $dfunc = sub {
-			&execute_password_change_sql(
-				$d, $user, "'".("0" x 41)."'", &random_password(16));
-			};
-		&execute_for_all_mysql_servers($dfunc);
+		&execute_password_change_sql(
+			$d, $user, "'".("0" x 41)."'", &random_password(16));
 		$d->{'disabled_oldmysql'} = $oldpass;
 		&$second_print($text{'setup_done'});
 		return 1;
@@ -1024,22 +999,19 @@ else {
 	&$first_print($text{'enable_mysql'});
 	local $user = &mysql_user($d);
 	if (&mysql_user_exists($d)) {
-		local $efunc = sub {
-			local $pass = &mysql_pass($d);
-			if ($pass) {
-				# Need to re-set plaintext password
-				&execute_password_change_sql(
-					$d, $user, undef, &mysql_pass($d));
-				}
-			else {
-				# Can put back old hashed password
-				local $qpass = &mysql_escape(
-					$d->{'disabled_oldmysql'});
-				&execute_password_change_sql(
-					$d, $user, "'$qpass'");
-				}
-			};
-		&execute_for_all_mysql_servers($efunc);
+		local $pass = &mysql_pass($d);
+		if ($pass) {
+			# Need to re-set plaintext password
+			&execute_password_change_sql(
+				$d, $user, undef, &mysql_pass($d));
+			}
+		else {
+			# Can put back old hashed password
+			local $qpass = &mysql_escape(
+				$d->{'disabled_oldmysql'});
+			&execute_password_change_sql(
+				$d, $user, "'$qpass'");
+			}
 		delete($d->{'disabled_oldmysql'});
 		&$second_print($text{'setup_done'});
 		return 1;
@@ -1689,15 +1661,11 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Add db entries for the user for each host
-	local $pfunc = sub {
-		local $h;
-		local @hosts = &get_mysql_hosts($d);
-		local $user = &mysql_user($d);
-		foreach $h (@hosts) {
-			&add_db_table($d, $h, $dbname, $user);
-			}
-		};
-	&execute_for_all_mysql_servers($pfunc);
+	local @hosts = &get_mysql_hosts($d);
+	local $user = &mysql_user($d);
+	foreach my $h (@hosts) {
+		&add_db_table($d, $h, $dbname, $user);
+		}
 
 	# Set group ownership of database directory, to enforce quotas
 	local $dd = &get_mysql_database_dir($d, $dbname);
@@ -1788,24 +1756,18 @@ local @unames = ( &mysql_user($d),
 		  map { &mysql_username($_->{'user'}) } @users );
 
 # Take away MySQL permissions for users in this domain
-local $dfunc = sub {
-	foreach my $uname (@unames) {
-		&remove_db_table($d, $dbname, $uname);
-		}
-	};
-&execute_for_all_mysql_servers($dfunc);
+foreach my $uname (@unames) {
+	&remove_db_table($d, $dbname, $uname);
+	}
 
 # If any users had access to this DB only, remove them too
-local $dfunc = sub {
-	local $duser = &mysql_user($d);
-	foreach my $up (grep { $_->[0] ne $duser } @oldusers) {
-		local $o = &execute_dom_sql($d, $mysql::master_db, "select db from db where user = '$up->[0]'");
-		if (!@{$o->{'data'}}) {
-			&execute_user_deletion_sql($d, undef, $up->[0]);
-			}
+local $duser = &mysql_user($d);
+foreach my $up (grep { $_->[0] ne $duser } @oldusers) {
+	local $o = &execute_dom_sql($d, $mysql::master_db, "select db from db where user = '$up->[0]'");
+	if (!@{$o->{'data'}}) {
+		&execute_user_deletion_sql($d, undef, $up->[0]);
 		}
-	};
-&execute_for_all_mysql_servers($dfunc);
+	}
 
 # Fix group owner, if the DB still exists, by setting to the owner of the
 # 'mysql' database
@@ -1995,21 +1957,17 @@ else {
 	# Create locally
 	local $myuser = &mysql_username($user);
 	local @hosts = &get_mysql_hosts($d, 1);
-	local $h;
-	local $cfunc = sub {
-		foreach $h (@hosts) {
-			&execute_user_deletion_sql($d, $h, $user);
-			&execute_user_creation_sql($d, $h, $myuser, 
-			      $encpass ? "'".&mysql_escape($encpass)."'" :undef,
-			      $pass);
-			local $db;
-			foreach $db (@$dbs) {
-				&add_db_table($d, $h, $db, $myuser, $dbs_enall);
-				}
-			&set_mysql_user_connections($d, $h, $myuser, 1);
+	foreach my $h (@hosts) {
+		&execute_user_deletion_sql($d, $h, $user);
+		&execute_user_creation_sql($d, $h, $myuser, 
+		      $encpass ? "'".&mysql_escape($encpass)."'" :undef,
+		      $pass);
+		local $db;
+		foreach $db (@$dbs) {
+			&add_db_table($d, $h, $db, $myuser, $dbs_enall);
 			}
-		};
-	&execute_for_all_mysql_servers($cfunc);
+		&set_mysql_user_connections($d, $h, $myuser, 1);
+		}
 	}
 &release_lock_mysql($d);
 }
@@ -2033,10 +1991,7 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Delete locally
-	local $dfunc = sub {
-		&execute_user_deletion_sql($d, undef, $myuser, 1);
-		};
-	&execute_for_all_mysql_servers($dfunc);
+	&execute_user_deletion_sql($d, undef, $myuser, 1);
 	}
 &release_lock_mysql($d);
 }
@@ -2077,36 +2032,33 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Update locally
-	local $mfunc = sub {
-		if ($olduser ne $user) {
-			# Change the username
-			&execute_user_rename_sql($d, $myolduser, $myuser);
+	if ($olduser ne $user) {
+		# Change the username
+		&execute_user_rename_sql($d, $myolduser, $myuser);
+		}
+	if (defined($pass)) {
+		# Change the password
+		if ($encpass && !$pass) {
+			&execute_password_change_sql(
+				$d, $myuser, "'".&mysql_escape($encpass)."'");
 			}
-		if (defined($pass)) {
-			# Change the password
-			if ($encpass && !$pass) {
-				&execute_password_change_sql(
-					$d, $myuser, "'".&mysql_escape($encpass)."'");
-				}
-			else {
-				&execute_password_change_sql(
-				    $d, $myuser, undef, $pass);
-				}
+		else {
+			&execute_password_change_sql(
+			    $d, $myuser, undef, $pass);
 			}
-		if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
-			# Update accessible database list
-			local @hosts = &get_mysql_hosts($d);
-			&remove_db_table($d, undef, $myuser);
-			local $h;
-			foreach $h (@hosts) {
-				local $db;
-				foreach $db (@$dbs) {
-					&add_db_table($d, $h, $db, $myuser);
-					}
+		}
+	if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
+		# Update accessible database list
+		local @hosts = &get_mysql_hosts($d);
+		&remove_db_table($d, undef, $myuser);
+		local $h;
+		foreach $h (@hosts) {
+			local $db;
+			foreach $db (@$dbs) {
+				&add_db_table($d, $h, $db, $myuser);
 				}
 			}
-		};
-	&execute_for_all_mysql_servers($mfunc);
+		}
 	}
 &release_lock_mysql($d);
 }
@@ -2530,56 +2482,50 @@ else {
 		push(@dbs, &domain_databases($sd, [ 'mysql' ]));
 		}
 
-	local $ufunc = sub {
-		# Update the user table entry for the main user
-		local $encpass = &encrypted_mysql_pass($d);
-		&execute_user_deletion_sql($d, undef, $user, 1);
-		foreach my $h (@$hosts) {
-			&execute_user_creation_sql($d, $h, $user, $encpass,
-						   &mysql_pass($d));
-			foreach my $db (@dbs) {
-				&add_db_table($d, $h, $db->{'name'}, $user);
-				}
-			&set_mysql_user_connections($d, $h, $user, 0);
+	# Update the user table entry for the main user
+	local $encpass = &encrypted_mysql_pass($d);
+	&execute_user_deletion_sql($d, undef, $user, 1);
+	foreach my $h (@$hosts) {
+		&execute_user_creation_sql($d, $h, $user, $encpass,
+					   &mysql_pass($d));
+		foreach my $db (@dbs) {
+			&add_db_table($d, $h, $db->{'name'}, $user);
 			}
-		};
-	&execute_for_all_mysql_servers($ufunc);
+		&set_mysql_user_connections($d, $h, $user, 0);
+		}
 
 	# Add db table entries for all users, and user table entries
 	# for mailboxes
 	my $mymod = &get_domain_mysql_module($d);
-	local $ufunc = sub {
-		my %allusers;
-		foreach my $db (@dbs) {
-			foreach my $u (&list_mysql_database_users(
-					$d, $db->{'name'})) {
-				# Re-populate db table for this db and user
-				next if ($u->[0] eq $user ||
-					 $u->[0] eq 'root' ||
-					 $u->[0] eq $mymod->{'config'}->{'login'});
-				&remove_db_table($d, $db->{'name'}, $u->[0]);
-				foreach my $h (@$hosts) {
-					&add_db_table($d, $h, $db->{'name'},
-						      $u->[0]);
-					}
-				$allusers{$u->[0]} = $u;
-				}
-			}
-		# Re-populate user table
-		local %pmap = map { $_->{'mysql_user'}, $_->{'mysql_pass'} }
-				grep { $_->{'mysql_user'} }
-				  &list_domain_users($d, 1, 1, 1, 1);
-		foreach my $u (values %allusers) {
-			&execute_user_deletion_sql($d, undef, $u->[0]);
+	my %allusers;
+	foreach my $db (@dbs) {
+		foreach my $u (&list_mysql_database_users(
+				$d, $db->{'name'})) {
+			# Re-populate db table for this db and user
+			next if ($u->[0] eq $user ||
+				 $u->[0] eq 'root' ||
+				 $u->[0] eq $mymod->{'config'}->{'login'});
+			&remove_db_table($d, $db->{'name'}, $u->[0]);
 			foreach my $h (@$hosts) {
-				&execute_user_creation_sql($d, $h, $u->[0],
-					"'".&mysql_escape($u->[1])."'",
-					$pmap{$u->[0]});
-				&set_mysql_user_connections($d, $h, $u->[0], 1);
+				&add_db_table($d, $h, $db->{'name'},
+					      $u->[0]);
 				}
+			$allusers{$u->[0]} = $u;
 			}
-		};
-	&execute_for_all_mysql_servers($ufunc);
+		}
+	# Re-populate user table
+	local %pmap = map { $_->{'mysql_user'}, $_->{'mysql_pass'} }
+			grep { $_->{'mysql_user'} }
+			  &list_domain_users($d, 1, 1, 1, 1);
+	foreach my $u (values %allusers) {
+		&execute_user_deletion_sql($d, undef, $u->[0]);
+		foreach my $h (@$hosts) {
+			&execute_user_creation_sql($d, $h, $u->[0],
+				"'".&mysql_escape($u->[1])."'",
+				$pmap{$u->[0]});
+			&set_mysql_user_connections($d, $h, $u->[0], 1);
+			}
+		}
 	}
 &release_lock_mysql($d);
 
@@ -2654,32 +2600,6 @@ if ($err) {
 	return $err;
 	}
 return undef;
-}
-
-# execute_for_all_mysql_servers(code)
-# Calls some code multiple times, once for each MySQL server on which users
-# need to be created or managed.
-sub execute_for_all_mysql_servers
-{
-local ($code) = @_;
-&require_mysql();
-local @repls = split(/\s+/, $config{'mysql_replicas'});
-if (!@repls) {
-	# Just do for this system
-	&$code;
-	}
-else {
-	# Call for this system and all replicas
-	local $thishost = $mysql::config{'host'};
-	local %done;
-	foreach my $host ($thishost, @repls) {
-		local $ip = &to_ipaddress($host);
-		next if ($ip && $done{$ip}++);
-		$mysql::config{'host'} = $host;
-		&$code;
-		}
-	$mysql::config{'host'} = $thishost;
-	}
 }
 
 # list_mysql_collation_orders($d)
