@@ -3630,6 +3630,14 @@ print &ui_table_row(
 	    [ 1, $text{'yes'} ],
 	    [ 0, $text{'no'} ] ]));
 
+# Request wildcard cert from provider?
+print &ui_table_row(
+	&hlink($text{'newweb_letsencrypt_wild'}, "config_letsencrypt_wild"),
+	&ui_radio("ssl_letsencrypt_wild", $tmpl->{'ssl_letsencrypt_wild'},
+	  [ $tmpl->{'default'} ? ( ) : ( [ '', $text{'tmpl_default'} ] ),
+	    [ 1, $text{'yes'} ],
+	    [ 0, $text{'no'} ] ]));
+
 print &ui_table_hr();
 
 # Setup matching Webmin/Usermin SSL certs
@@ -3690,10 +3698,13 @@ foreach my $t ("key", "cert", "ca", "combined", "everything") {
 		}
 	$tmpl->{'cert_'.$t.'_tmpl'} = $v;
 	}
+
+# Save SSL provider options
 if (defined($in{'web_acme'})) {
 	$tmpl->{'web_acme'} = $in{'web_acme'};
 	}
 $tmpl->{'ssl_auto_letsencrypt'} = $in{'ssl_auto_letsencrypt'};
+$tmpl->{'ssl_letsencrypt_wild'} = $in{'ssl_letsencrypt_wild'};
 
 # Save options to setup per-service SSL certs
 $tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};

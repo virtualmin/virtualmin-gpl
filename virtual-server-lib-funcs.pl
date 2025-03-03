@@ -8540,7 +8540,7 @@ if (!&domain_has_ssl($dom) && $always_ssl && !$dom->{'alias'}) {
 if (!defined($dom->{'auto_letsencrypt'})) {
 	$dom->{'auto_letsencrypt'} = $tmpl->{'ssl_auto_letsencrypt'};
 	if ($dom->{'dns'}) {
-		$dom->{'letsencrypt_dwild'} = $config{'letsencrypt_wild'};
+		$dom->{'letsencrypt_dwild'} = $tmpl->{'ssl_letsencrypt_wild'};
 		}
 	}
 if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
