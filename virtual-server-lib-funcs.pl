@@ -8528,7 +8528,7 @@ if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
 
 # If an SSL cert wasn't generated because SSL wasn't enabled, do one now
 my $always_ssl = defined($dom->{'always_ssl'}) ? $dom->{'always_ssl'}
-					       : $config{'always_ssl'};
+					       : $tmpl->{'ssl_always_ssl'};
 my $generated = 0;
 if (!&domain_has_ssl($dom) && $always_ssl && !$dom->{'alias'}) {
 	$generated = &generate_default_certificate($dom) ? 1 : 0;

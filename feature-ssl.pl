@@ -3596,6 +3596,14 @@ print &ui_table_row(
 	    [ 'sha2', 'SHA2' ],
 	    [ 'ec', 'ECC' ] ]));
 
+# Generate SSL certificate for domains without SSL website?
+print &ui_table_row(
+	&hlink($text{'newweb_always_ssl'}, "config_always_ssl"),
+	&ui_radio("ssl_always_ssl", $tmpl->{'ssl_always_ssl'},
+	  [ $tmpl->{'default'} ? ( ) : ( [ '', $text{'tmpl_default'} ] ),
+	    [ 1, $text{'yes'} ],
+	    [ 0, $text{'no'} ] ]));
+
 # Default SSL key and cert file paths
 foreach my $t ("key", "cert", "ca", "combined", "everything") {
 	my $v = $tmpl->{'cert_'.$t.'_tmpl'};
@@ -3705,6 +3713,7 @@ if (defined($in{'web_acme'})) {
 	}
 $tmpl->{'ssl_auto_letsencrypt'} = $in{'ssl_auto_letsencrypt'};
 $tmpl->{'ssl_letsencrypt_wild'} = $in{'ssl_letsencrypt_wild'};
+$tmpl->{'ssl_always_ssl'} = $in{'ssl_always_ssl'};
 
 # Save options to setup per-service SSL certs
 $tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
