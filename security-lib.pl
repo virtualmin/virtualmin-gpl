@@ -1,6 +1,7 @@
 
 use feature 'state';
 use Fcntl ':mode';
+use IO::Handle;
 
 # Functions for accessing files and running commands as a domain owner
 
@@ -291,6 +292,16 @@ if (!$pid) {
 			exit(2);
 			}
 		}
+	# Add flush and sync before closing
+	unless (IO::Handle::flush(*FILE)) {
+		print $readin "Flush of $realfile failed : $!\n";
+		exit(4);
+		}
+	unless (IO::Handle::sync(*FILE)) {
+		print $readin "Sync of $realfile failed : $!\n";
+		exit(5);
+		}
+	# Close the file
 	my $ex = close(FILE);
 	if ($ex) {
 		exit(0);
@@ -350,7 +361,9 @@ if ($pid) {
 	$rv = !$ex;
 	}
 else {
-	# Just close the file
+	# Just close the file, but flush and sync first
+	$fh->flush();
+	$fh->sync();
 	$rv = close($fh);
 	}
 delete($main::open_tempfile_as_domain_user_pid{$fh});
