@@ -68,8 +68,6 @@ else {
 	&clear_links_cache();
 
 	&run_post_actions();
-
-	print "OK\n";
 	}
 
 &virtualmin_api_log(\@OLDARGV, $doms[0]);
