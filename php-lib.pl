@@ -2801,39 +2801,53 @@ $apache_mod_php_version_cache = $major;
 return $major;
 }
 
-# cleanup_php_sessions(&domain, dry-run)
+# cleanup_php_sessions(&domain)
 # Remove old PHP session files for some domain
 sub cleanup_php_sessions
 {
-my ($d, $dryrun) = @_;
+my ($d) = @_;
+my $tmp;
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "fpm") {
+	# Find the session files dir from PHP-FPM config
+	$tmp = &get_php_fpm_ini_value($d, "session.save_path");
+	}
+else {
+	# Find the session files dir from PHP ini config
+	my $etc = "$d->{'home'}/etc";
+	&foreign_require("phpini");
+	my $pconf = &phpini::get_config("$etc/php.ini");
+	$tmp = &phpini::find_value("session.save_path", $pconf);
+	}
 
-# Find the session files dir from php config
-my $etc = "$d->{'home'}/etc";
-&foreign_require("phpini");
-my $pconf = &phpini::get_config("$etc/php.ini");
-my $tmp = &phpini::find_value("session.save_path", $pconf);
+# Default to ~/tmp
 $tmp ||= $d->{'home'}."/tmp";
 
 # Look for session files that are too old
 my $days = $config{'php_session_age'} || 7;
 my $cutoff = time() - $days * 24 * 60 * 60;
-my @rv;
-opendir(DIR, $tmp) || return ();
-foreach my $f (readdir(DIR)) {
+my @batch = ();
+opendir(*DIR, $tmp) || return;
+while(my $f = readdir(*DIR)) {
 	next if ($f !~ /^sess_/);
 	my @st = stat($tmp."/".$f);
 	next if (!@st);
 	if ($st[9] < $cutoff) {
-		push(@rv, $tmp."/".$f);
+		push(@batch, $tmp."/".$f);
+		# Delete in small batches to not pass too many files to the
+		# shell or place too many files in the memory
+		if (@batch >= 512) {
+			&unlink_file_as_domain_user($d, @batch);
+			@batch = ();
+			}
 		}
 	}
-closedir(DIR);
+closedir(*DIR);
 
-# Delete any found
-if (!$dryrun) {
-	&unlink_file_as_domain_user($d, @rv);
-	}
-return @rv;
+# Delete any remaining files in the final batch
+&unlink_file_as_domain_user($d, @batch) if (@batch);
+
+return;
 }
 
 # get_php_max_childred_allowed()
