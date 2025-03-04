@@ -1,3 +1,8 @@
+#### Version 7.30.6
+* Fix to improve file saving operations for greater reliability
+* Fix to optimize PHP session cleanup for directories with large numbers of files
+* Add the `virtual-server` package provide `virtualmin`
+
 #### Version 7.30.5
 * Fix to exclude the default domain from license count
 * Add AWS-CLI and WP Workbench as recommended packages
