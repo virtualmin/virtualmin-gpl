@@ -11,7 +11,7 @@ jobs:
     with:
       build-type: module
       project-name: ${{ github.event.repository.name }}
-      is-release: 1
+      is-release: true
     secrets:
       DEV_GPG_PH: ${{ secrets.DEV_GPG_PH }}
       DEV_IP_ADDR: ${{ secrets.DEV_IP_ADDR }}
