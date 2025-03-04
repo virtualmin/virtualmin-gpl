@@ -102,6 +102,8 @@ $test_ssh_public_key = "/tmp/functional-test.key.pub";
 			'pro/maillog', 'disable_domain',
 			'assoc_form', 'pro/edit_html' );
 
+%skip_by_default = ( 'allscript' => 1 );
+
 $max_output = 2048;
 
 # Parse command-line args
@@ -12547,7 +12549,8 @@ if (!$virtualmin_pro) {
 
 # Find tests to run
 if (!@tests) {
-	@tests = sort { $a cmp $b } (keys %$alltests);
+	@tests = sort { $a cmp $b }
+		      grep { !$skip_by_default{$_} } (keys %$alltests);
 	}
 else {
 	for($i=0; $i<@tests; $i++) {
