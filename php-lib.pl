@@ -2846,7 +2846,7 @@ my $days = $config{'php_session_age'} || 7;
 my $cutoff = time() - $days * 24 * 60 * 60;
 my @batch = ();
 opendir(*DIR, $tmp) || return;
-foreach my $f (readdir(*DIR)) {
+while(my $f = readdir(*DIR)) {
 	next if ($f !~ /^sess_/);
 	my @st = stat($tmp."/".$f);
 	next if (!@st);
