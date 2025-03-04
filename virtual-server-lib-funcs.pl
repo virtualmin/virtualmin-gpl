@@ -15743,17 +15743,6 @@ if ($config{'dns'}) {
 			}
 		$mastermsg = ", $mastermsg" if ($mastermsg);
 		&$second_print($text{'check_dnsok2'}.$mastermsg);
-
-		# Make sure TLSA records can be created
-		if ($config{'tlsa_records'}) {
-			my $err = &check_tlsa_support();
-			if ($err) {
-				&$second_print(&text('check_etlsa', $err));
-				}
-			else {
-				&$second_print($text{'check_tlsaok'});
-				}
-			}
 		}
 	}
 

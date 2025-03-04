@@ -1966,6 +1966,7 @@ newweb_auto_letsencrypt=Request SSL certificate from provider at domain creation
 newweb_auto_letsencrypt2=Yes, and skip connectivity check
 newweb_letsencrypt_wild=Request wildcard SSL certificate for new domains?
 newweb_always_ssl=Generate SSL certificate for domains without SSL website?
+newweb_tlsa_records=Create TLSA DNS records for SSL certificates?
 
 newftp_title=ProFTPD Server Template
 newftp_ecannot=You are not allowed to edit the ProFTPD template
@@ -2139,7 +2140,6 @@ check_ftpok=ProFTPD is installed
 check_dnsok2=BIND DNS server is installed
 check_dnsok3=BIND DNS domains will be hosted on a services host
 check_etlsa=TLSA DNS records cannot be created on your system : $1
-check_tlsaok=TLSA DNS records will be added to new domains
 check_dnsmaster=however, the default primary DNS server $1 is not a fully qualified domain name
 check_dnsmaster2=however, the default primary DNS server $1 does not resolve to an IP address
 check_dnsmaster3=however, the default primary DNS server $1 resolves to IP address $2 which does not appear to belong to this system.

@@ -4855,6 +4855,7 @@ return { 'name' => $host.".",
 sub sync_domain_tlsa_records
 {
 my ($d, $force) = @_;
+my $tmpl = &get_template($d->{'template'});
 &pre_records_change($d);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 if (!$file) {
@@ -4870,7 +4871,7 @@ my @oldrecs = grep { $_->{'type'} =~ /^(TLSA|SSHFP)$/ &&
 
 # Exit now if TLSA is not enabled globally, unless it's being forced on OR
 # there are already records
-if (!$config{'tlsa_records'} && !$force && !@oldrecs) {
+if (!$tmpl->{'ssl_tlsa_records'} && !$force && !@oldrecs) {
 	&after_records_change($d);
 	return undef;
 	}

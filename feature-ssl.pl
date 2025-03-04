@@ -3646,6 +3646,14 @@ print &ui_table_row(
 	    [ 1, $text{'yes'} ],
 	    [ 0, $text{'no'} ] ]));
 
+# Generate TLSA DNS records?
+print &ui_table_row(
+	&hlink($text{'newweb_tlsa_records'}, "config_tlsa_records"),
+	&ui_radio("ssl_tlsa_records", $tmpl->{'ssl_tlsa_records'},
+	  [ $tmpl->{'default'} ? ( ) : ( [ '', $text{'tmpl_default'} ] ),
+	    [ 1, $text{'yes'} ],
+	    [ 0, $text{'no'} ] ]));
+
 print &ui_table_hr();
 
 # Setup matching Webmin/Usermin SSL certs
@@ -3714,6 +3722,13 @@ if (defined($in{'web_acme'})) {
 $tmpl->{'ssl_auto_letsencrypt'} = $in{'ssl_auto_letsencrypt'};
 $tmpl->{'ssl_letsencrypt_wild'} = $in{'ssl_letsencrypt_wild'};
 $tmpl->{'ssl_always_ssl'} = $in{'ssl_always_ssl'};
+
+if ($in{'ssl_tlsa_records'}) {
+	# Make sure TLSA records can be created
+	my $err = &check_tlsa_support();
+	&error(&text('check_etlsa', $err)) if ($err);
+	}
+$tmpl->{'ssl_tlsa_records'} = $in{'ssl_tlsa_records'};
 
 # Save options to setup per-service SSL certs
 $tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};

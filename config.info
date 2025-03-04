@@ -93,7 +93,6 @@ can_letsencrypt=Who can request SSL certificates?,1,0-All users,1-Resellers,2-On
 default_domain_ssl=Setup SSL certificate from provider for hostname?,1,2-Yes&#44; and have it configurable,1-Yes,0-No
 err_letsencrypt=Show SSL provider error at domain creation time?,1,1-Yes,0-No
 renew_letsencrypt=Days before expiry to renew SSL certificates,3,Default (21 days)
-tlsa_records=Create TLSA DNS records for SSL certificates?,1,1-Yes,0-No
 nolink_certs=Share SSL certificates between domains where possible?,1,2-Yes&#44; even when owner is different,0-Yes,1-No
 combined_cert=Configure Apache to use,1,2-Combined cert and CA file,1-Cert file only,0-Decide automatically
 
