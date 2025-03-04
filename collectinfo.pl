@@ -13,14 +13,15 @@ if (&test_lock($collected_info_file)) {
 	exit(0);
 	}
 
+# Lock the file
+&lock_file($collected_info_file);
+
 # Don't diff collected file
 $gconfig{'logfiles'} = 0;
 $gconfig{'logfullfiles'} = 0;
 $WebminCore::gconfig{'logfiles'} = 0;
 $WebminCore::gconfig{'logfullfiles'} = 0;
 $no_log_file_changes = 1;
-&lock_file($collected_info_file);
-
 $info = &collect_system_info();
 if ($info) {
 	if ($config{'collect_restart'}) {
@@ -29,7 +30,6 @@ if ($info) {
 	&save_collected_info($info);
 	&add_historic_collected_info($info, $start);
 	}
-&unlock_file($collected_info_file);
 
 # Update IP list cache
 &build_local_ip_list();
@@ -64,8 +64,11 @@ if ($config{'check_ports'} == 2) {
 # Cleanup session files for domains with a website
 if ($config{'php_session_age'}) {
 	foreach my $d (grep { &domain_has_website($_) } &list_domains()) {
-		my @f = &cleanup_php_sessions($d, 0);
+		&cleanup_php_sessions($d);
 		}
 	}
 
 &run_post_actions_silently();
+
+# Unlock the file
+&unlock_file($collected_info_file);
