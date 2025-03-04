@@ -150,7 +150,7 @@ my ($ptitle, $btncls, $alertcls);
 if ($tinfo{'bootstrap'}) {
 	$ptitle = "&mdash;&nbsp;";
 	$btncls = "btn btn-tiny btn-success";
-	$alertcls = " fa2 fa2-virtualmin";
+	$alertcls = $opts->{'main_icon'} || " fa2 fa2-virtualmin";
 	}
 else {
 	$alert_body1 = "<b>$alert_body1</b>";
