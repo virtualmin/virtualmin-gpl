@@ -900,22 +900,22 @@ foreach $d (@doms) {
 				$config{'nolink_certs'}
 				);
 
-			# Initialize priority stack
-			my @priorities = (
-				sub { grep { $_->{'user'} eq $d->{'user'} && $_->{'parent'} } @sames },
-				sub { grep { $_->{'user'} eq $d->{'user'} } @sames },
-			);
+			# Pre-filter certificates by user
+			my @same_user = grep { $_->{'user'} eq $d->{'user'} } @sames;
 
-			# Add additional filters if different owner linking is allowed
+			# Priority stack
+			my @priorities;
+			push @priorities, [ grep { $_->{'parent'} } @same_user ];
+			push @priorities, [ @same_user ];
+
 			if ($diff_owner_allowed) {
-				push @priorities,
-					sub { grep { !$_->{'parent'} } @sames },
-					sub { @sames };
+				push @priorities, [ grep { !$_->{'parent'} } @sames ];
+				push @priorities, [ @sames ];
 				}
 
-			my ($same);
-			for my $filter (@priorities) {
-				($same) = $filter->();
+			my $same;
+			for my $list (@priorities) {
+				($same) = @$list;
 				last if $same;
 				}
 
@@ -925,7 +925,7 @@ foreach $d (@doms) {
 			elsif (!$same) {
 				&$second_print(".. no domain with the same owner to link with found");
 				}
-			elsif ($same) {
+			else {
 				&link_matching_certificate($d, $same, 1);
 				&$second_print(".. linked to ". &show_domain_name($same));
 				}
