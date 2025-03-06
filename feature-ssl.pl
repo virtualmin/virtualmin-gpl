@@ -2959,7 +2959,8 @@ foreach my $d (&list_domains()) {
 
 	# Is it time? Either the user-chosen number of months has passed, or
 	# the cert is within 30 days of expiry
-	my $before = $config{'renew_letsencrypt'} || 30;
+	my $tmpl = &get_template($d->{'template'});
+	my $before = $tmpl->{'ssl_renew_letsencrypt'} || 30;
 	my $day = 24 * 60 * 60;
 	my $age = time() - $ltime;
 	my $rf = rand() * 3600;
@@ -3648,6 +3649,14 @@ print &ui_table_row(
 	    [ 1, $text{'yes'} ],
 	    [ 0, $text{'no'} ] ]));
 
+# Days before expiry to auto-renew?
+print &ui_table_row(
+	&hlink($text{'newweb_renew_letsencrypt'}, "config_renew_letsencrypt"),
+	&ui_opt_textbox("ssl_renew_letsencrypt",
+		$tmpl->{'ssl_renew_letsencrypt'},
+		6, $tmpl->{'default'} ? $text{'newweb_renew_letsencrypt_def'}
+				      : $text{'tmpl_default'}));
+
 # Generate TLSA DNS records?
 print &ui_table_row(
 	&hlink($text{'newweb_tlsa_records'}, "config_tlsa_records"),
@@ -3732,6 +3741,14 @@ if (defined($in{'web_acme'})) {
 	}
 $tmpl->{'ssl_auto_letsencrypt'} = $in{'ssl_auto_letsencrypt'};
 $tmpl->{'ssl_letsencrypt_wild'} = $in{'ssl_letsencrypt_wild'};
+if ($in{'ssl_renew_letsencrypt_def'}) {
+	delete($tmpl->{'ssl_renew_letsencrypt'});
+	}
+else {
+	$in{'ssl_renew_letsencrypt'} =~ /^\d+$/ ||
+		&error($text{'newweb_erenew_letsencrypt'});
+	$tmpl->{'ssl_renew_letsencrypt'} = $in{'ssl_renew_letsencrypt'};
+	}
 $tmpl->{'ssl_always_ssl'} = $in{'ssl_always_ssl'};
 
 if ($in{'ssl_tlsa_records'}) {

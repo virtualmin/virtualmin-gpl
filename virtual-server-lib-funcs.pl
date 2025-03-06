@@ -9715,6 +9715,7 @@ push(@rv, { 'id' => 0,
 	    'ssl_cert_type' => $config{'cert_type'},
 	    'ssl_auto_letsencrypt' => $config{'auto_letsencrypt'},
 	    'ssl_letsencrypt_wild' => $config{'letsencrypt_wild'},
+	    'ssl_renew_letsencrypt' => $config{'renew_letsencrypt'},
 	    'ssl_always_ssl' => $config{'always_ssl'},
 	    'ssl_tlsa_records' => $config{'tlsa_records'},
 	    'ssl_combined_cert' => $config{'combined_cert'},
@@ -10065,6 +10066,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'cert_type'} = $tmpl->{'ssl_cert_type'};
 	$config{'auto_letsencrypt'} = $tmpl->{'ssl_auto_letsencrypt'};
 	$config{'letsencrypt_wild'} = $tmpl->{'ssl_letsencrypt_wild'};
+	$config{'renew_letsencrypt'}= $tmpl->{'ssl_renew_letsencrypt'};
 	$config{'always_ssl'} = $tmpl->{'ssl_always_ssl'};
 	$config{'tlsa_records'} = $tmpl->{'ssl_tlsa_records'};
 	$config{'combined_cert'} = $tmpl->{'ssl_combined_cert'};
@@ -10424,6 +10426,7 @@ if (!$tmpl->{'default'}) {
 		    "ssl_key_size", "ssl_cert_type", "ssl_auto_letsencrypt",
 		    "ssl_letsencrypt_wild", "ssl_always_ssl",
 		    "ssl_tlsa_records", "ssl_combined_cert",
+		    "ssl_renew_letsencrypt",
 		    "aliascopy", "bccto", "resources", "dnssec", "avail",
 		    @plugins,
 		    &list_php_wrapper_templates(),
