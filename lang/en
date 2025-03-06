@@ -1967,6 +1967,10 @@ newweb_auto_letsencrypt2=Yes, and skip connectivity check
 newweb_letsencrypt_wild=Request wildcard SSL certificate for new domains?
 newweb_always_ssl=Generate SSL certificate for domains without SSL website?
 newweb_tlsa_records=Create TLSA DNS records for SSL certificates?
+newweb_combined_cert=Configure Apache to use
+newweb_combined_cert2=Combined cert and CA file
+newweb_combined_cert1=Cert file only
+newweb_combined_cert0=Decide automatically
 
 newftp_title=ProFTPD Server Template
 newftp_ecannot=You are not allowed to edit the ProFTPD template

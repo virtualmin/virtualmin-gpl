@@ -1596,15 +1596,17 @@ if (@ipkeys != @newipkeys) {
 return $text{'delete_esslnoips'};
 }
 
-# apache_combined_cert()
+# apache_combined_cert(&domain)
 # Returns 1 if Apache should be pointed to the combined SSL cert file
 sub apache_combined_cert
 {
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
 &require_apache();
-if ($config{'combined_cert'} == 2) {
+if ($tmpl->{'ssl_combined_cert'} == 2) {
 	return 1;
 	}
-elsif ($config{'combined_cert'} == 1) {
+elsif ($tmpl->{'ssl_combined_cert'} == 1) {
 	return 0;
 	}
 else {
@@ -1620,7 +1622,7 @@ local ($d, $tmpl) = @_;
 &require_apache();
 local @dirs;
 push(@dirs, "SSLEngine on");
-if (&apache_combined_cert()) {
+if (&apache_combined_cert($d)) {
 	push(@dirs, "SSLCertificateFile $d->{'ssl_combined'}");
 	}
 else {
@@ -2129,7 +2131,7 @@ delete($d->{'ssl_same'});
 # Update webserver config
 my $p = &domain_has_website($d);
 if ($p) {
-	if ($p eq 'web' && &apache_combined_cert()) {
+	if ($p eq 'web' && &apache_combined_cert($d)) {
 		&save_website_ssl_file($d, "cert", $d->{'ssl_combined'});
 		}
 	else {
@@ -3654,6 +3656,15 @@ print &ui_table_row(
 	    [ 1, $text{'yes'} ],
 	    [ 0, $text{'no'} ] ]));
 
+# Combined SSL cert file?
+print &ui_table_row(
+	&hlink($text{'newweb_combined_cert'}, "config_combined_cert"),
+	&ui_radio("ssl_combined_cert", $tmpl->{'ssl_combined_cert'},
+	  [ $tmpl->{'default'} ? ( ) : ( [ '', $text{'tmpl_default'} ] ),
+	    [ 2, $text{'newweb_combined_cert2'} ],
+	    [ 1, $text{'newweb_combined_cert1'} ],
+	    [ 0, $text{'newweb_combined_cert0'} ] ]));
+
 print &ui_table_hr();
 
 # Setup matching Webmin/Usermin SSL certs
@@ -3729,6 +3740,7 @@ if ($in{'ssl_tlsa_records'}) {
 	&error(&text('check_etlsa', $err)) if ($err);
 	}
 $tmpl->{'ssl_tlsa_records'} = $in{'ssl_tlsa_records'};
+$tmpl->{'ssl_combined_cert'} = $in{'ssl_combined_cert'};
 
 # Save options to setup per-service SSL certs
 $tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
