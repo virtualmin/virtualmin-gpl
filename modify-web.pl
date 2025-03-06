@@ -892,12 +892,34 @@ foreach $d (@doms) {
 		else {
 			# Find a cert to link with, ideally a parent with the same owner
 			my @sames = &find_matching_certificate_domain($d);
-			my ($same) = grep { $_->{'user'} eq $d->{'user'} &&
-					    !$_->{'parent'} } @sames;
-			if (!$same) {
-				($same) = grep { $_->{'user'} eq $d->{'user'} } @sames;
+
+			# Determine if different owner linking is allowed
+			my $diff_owner_allowed = 2 == (
+				defined $d->{'link_certs'} ?
+				$d->{'link_certs'} :
+				$config{'nolink_certs'}
+				);
+
+			# Pre-filter certificates by user
+			my @same_user = grep { $_->{'user'} eq $d->{'user'} } @sames;
+
+			# Priority stack
+			my @priorities;
+			push @priorities, [ grep { $_->{'parent'} } @same_user ];
+			push @priorities, [ @same_user ];
+
+			if ($diff_owner_allowed) {
+				push @priorities, [ grep { !$_->{'parent'} } @sames ];
+				push @priorities, [ @sames ];
 				}
-			if (!@sames) {
+
+			my $same;
+			for my $list (@priorities) {
+				($same) = @$list;
+				last if $same;
+				}
+
+			if (!@sames || (!$same && $diff_owner_allowed)) {
 				&$second_print(".. no domain to link with found");
 				}
 			elsif (!$same) {
@@ -905,8 +927,7 @@ foreach $d (@doms) {
 				}
 			else {
 				&link_matching_certificate($d, $same, 1);
-				&$second_print(".. linked to ".
-					&show_domain_name($same));
+				&$second_print(".. linked to ". &show_domain_name($same));
 				}
 			}
 		}

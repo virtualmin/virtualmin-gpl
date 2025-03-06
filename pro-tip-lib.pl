@@ -150,12 +150,14 @@ my ($ptitle, $btncls, $alertcls);
 if ($tinfo{'bootstrap'}) {
 	$ptitle = "&mdash;&nbsp;";
 	$btncls = "btn btn-tiny btn-success";
-	$alertcls = " fa2 fa2-virtualmin";
+	$alertcls = $opts->{'main_icon'} || " fa2 fa2-virtualmin";
 	}
 else {
 	$alert_body1 = "<b>$alert_body1</b>";
 	$alert_body2 = "<b>$alert_body2</b>";
 	}
+my $target_link = $virtualmin_shop_link_cat;
+$target_link = $opts->{'target_link'} if ($opts->{'target_link'});
 my $form = $ptitle .
     &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/set_seen_pro_tip.cgi", "post") .
         $alert_body1 .
@@ -164,7 +166,7 @@ my $form = $ptitle .
         ($return_url ? &ui_hidden("return_url", $return_url) : "") .
         &ui_form_end([
             $hide_button_text2 ? [ undef, $hide_button_text2, undef, undef,
-                "onclick=\"window.open('$virtualmin_shop_link_cat','_blank');event.preventDefault();event.stopPropagation();\"",
+                "onclick=\"window.open('$target_link','_blank');event.preventDefault();event.stopPropagation();\"",
                 $hide_button_icon2, $btncls ] : undef,
             $hide_button_text3 ? [ 'remind', $hide_button_text3, undef, undef, undef, $hide_button_icon3 ] : undef,
             $hide_button_text ? [ undef, $hide_button_text, undef, undef, undef, $hide_button_icon ] : undef ], undef, 1);
