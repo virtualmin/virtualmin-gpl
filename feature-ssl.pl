@@ -2958,9 +2958,9 @@ foreach my $d (&list_domains()) {
 	next if (time() - $d->{'letsencrypt_last'} < 60*60);
 
 	# Is it time? Either the user-chosen number of months has passed, or
-	# the cert is within 30 days of expiry
+	# the cert is within 7 days of expiry
 	my $tmpl = &get_template($d->{'template'});
-	my $before = $tmpl->{'ssl_renew_letsencrypt'} || 30;
+	my $before = $tmpl->{'ssl_renew_letsencrypt'} || 7;
 	my $day = 24 * 60 * 60;
 	my $age = time() - $ltime;
 	my $rf = rand() * 3600;
