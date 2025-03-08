@@ -280,7 +280,11 @@ sub script_tikiwiki_check_latest
 {
 local ($ver) = @_;
 local @vers;
-if ($ver >= 27) {
+if ($ver >= 28) {
+	@vers = &osdn_package_versions("tikiwiki/Tiki_28.x_Castor",
+				       "tiki-(28\.[0-9\\.]+)\\.zip");
+	}
+elsif ($ver >= 27) {
 	@vers = &osdn_package_versions("tikiwiki/Tiki_27.x_Miaplacidus",
 				       "tiki-(27\.[0-9\\.]+)\\.zip");
 	}
