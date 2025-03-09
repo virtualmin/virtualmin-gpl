@@ -44,9 +44,21 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 else {
 	# Just over-write the records file
 	$rootfile = &bind8::make_chroot($file);
+	$temp = &transname();
+	&copy_source_dest($rootfile, $temp);
 	&open_tempfile(RECS, ">$rootfile");
 	&print_tempfile(RECS, $in{'data'});
 	&close_tempfile(RECS);
+
+	# Check format one more time, so that named-checkconf can see the new
+	# zone file
+	if ($in{'validate'}) {
+		$err = &validate_dns($d, $recs, 1);
+		if ($err) {
+			&copy_source_dest($temp, $rootfile);
+			&error(&text('mrecords_evalidate', $err));
+			}
+		}
 	}
 
 # Save records
