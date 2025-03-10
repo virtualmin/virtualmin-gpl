@@ -291,7 +291,7 @@ index_global_eg=e.g.
 
 form_title=Create Virtual Server
 form_title2=Create Sub-Server
-form_title3=Create Alias Server
+form_title3=Create Server Alias
 form_title4=Create Virtual Sub-Domain
 form_ecannot=You are not allowed to create virtual servers
 form_enomore=You are not allowed to create any more virtual servers of any type
@@ -1175,7 +1175,7 @@ fstart_eup=Already running
 
 edit_title=Edit Virtual Server
 edit_title2=Edit Virtual Sub-Server
-edit_title3=Edit Alias Server
+edit_title3=Edit Server Alias
 edit_title4=Edit Virtual Sub-Domain
 edit_ecannot=You are not allowed to edit this virtual server
 edit_ewebappcannot=You are not allowed to manage web applications
@@ -1300,7 +1300,7 @@ edit_renamedesc=Display a form for changing the domain name for this virtual ser
 edit_cert=SSL Certificate
 edit_catcert=Setup SSL Certificate
 edit_certdesc=Display a page for requesting a new SSL certificate for this virtual server, and installing a signed certificate from a CA.
-edit_alias=Create Alias Server
+edit_alias=Create Server Alias
 edit_aliasdesc=Add a virtual server that is just an alias for this existing server, so that it can be accessed using a different domain name.
 edit_subserv=Create Sub-Server
 edit_subservdesc=Add a new virtual server that is owned by the same administrator as this domain.
