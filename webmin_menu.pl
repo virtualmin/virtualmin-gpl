@@ -142,7 +142,7 @@ if (&can_create_master_servers() || &can_create_sub_servers()) {
 			    "desc" => $text{'form_title3'},
 			    "link" => "/$module_name".
 			        "/domain_form.cgi?to=$gparent->{'id'}&".
-			        "aliasmail=".($config{'mail'} ? 1 : 0),
+				"nofeat=mail",
 			  });
 		}
 	}

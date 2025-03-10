@@ -498,7 +498,8 @@ foreach $f (@dom_features) {
 	local $txt = $parentdom ? $text{'form_sub'.$f} : undef;
 	$txt ||= $text{'form_'.$f};
 	push(@grid_order_initial, $f);
-	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1,
+	push(@grid, &ui_checkbox($f, 1, "",
+		$config{$f} == 1 && $in{'nofeat'} ne $f,
 		&feature_check_chained_javascript($f)).
 		    " <b>".&hlink($txt, $f)."</b>");
 	}
