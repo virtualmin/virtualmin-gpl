@@ -81,15 +81,15 @@ if ($in{'subdom'}) {
 	$subdom = &get_domain($in{'subdom'});
 	$subdom || &error(&text('form_esubdom', $in{'subdom'}));
 	}
-
-&ui_print_header(undef, $aliasdom ? $text{'form_title3'} :
-			$subdom ? $text{'form_title4'} :
-			$parentdom ? $text{'form_title2'} :
-				     $text{'form_title'}, "",
-			$aliasdom ? "create_alias" :
-			$subdom ? "create_subdom" :
-			$parentdom ? "create_subserver" :
-				  "create_form");
+my $subhead = $aliasdom || $parentdom;
+$subhead = &domain_in($aliasdom || $parentdom) if ($subhead);
+&ui_print_header($subhead, $aliasdom ? $text{'form_title3'} :
+			   $subdom ? $text{'form_title4'} :
+			   $parentdom ? $text{'form_title2'} :
+				        $text{'form_title'}, "",
+			   $aliasdom ? "create_alias" :
+			   $subdom ? "create_subdom" :
+			   $parentdom ? "create_subserver" : "create_form");
 # Show user friendly info
 my ($tdleft, $tdreason, $tdmax) = &count_domains("topdoms");
 if (!$tdleft && $tdreason == 3) {
