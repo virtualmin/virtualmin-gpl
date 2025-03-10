@@ -50,57 +50,6 @@ elsif ($in{'enable'}) {
 &can_create_master_servers() || &can_create_sub_servers() ||
 	&error($text{'form_ecannot'});
 
-# If we are in generic mode, work out all possible modes for the current user
-if ($in{'generic'}) {
-	$gparent = &get_domain($in{'gparent'}) if ($in{'gparent'});
-	($tdleft, $tdreason, $tdmax) = &count_domains("topdoms");
-	if (&can_create_master_servers()) {
-		# Top-level server
-		if ($tdleft) {
-			push(@generics, [ $text{'form_generic_master'}, '' ]);
-			}
-		}
-	if (&can_create_sub_servers() && $gparent) {
-		# Sub-server under parent's user
-		($rdleft, $rdreason, $rdmax) = &count_domains("realdoms");
-		if ($rdleft) {
-			push(@generics, [ &text('form_generic_subserverof',
-						$gparent->{'dom'}),
-				  'add1=1&parentuser1='.$gparent->{'user'} ]);
-			}
-		($adleft, $adreason, $admax) = &count_domains("aliasdoms");
-		if (!$gparent->{'alias'} && $adleft) {
-			# Alias domain
-			push(@generics, [ &text('form_generic_alias',
-						&show_domain_name($gparent)),
-					  'to='.$gparent->{'id'} ]);
-
-			# Alias domain with mail
-			push(@generics, [ &text('form_generic_aliasmail',
-						&show_domain_name($gparent)),
-					  'to='.$gparent->{'id'}.
-					  '&aliasmail=1' ]);
-			}
-		if (!$gparent->{'alias'} && !$gparent->{'subdom'} &&
-		    &can_create_sub_domains() && $rdleft) {
-			# Sub-domain
-			push(@generics, [ &text('form_generic_subdom',
-						&show_domain_name($gparent)),
-					  'add1=1&parentuser1='.
-					  $gparent->{'user'}.'&subdom='.
-					  $gparent->{'id'} ]);
-			}
-		}
-	if (!defined($in{'genericmode'})) {
-		$in{'genericmode'} = 0;
-		}
-	@generics || &error($text{'form_enomore'});
-
-	# Force inputs to match selected generic type
-	$generic = $generics[$in{'genericmode'}];
-	%in = ( %in, map { split(/=/, $_, 2) } split(/\&/, $generic->[1]) );
-	}
-
 # Get parent settings
 if ($in{'to'}) {
 	# Creating an alias domain
@@ -142,27 +91,11 @@ if ($in{'subdom'}) {
 			$parentdom ? "create_subserver" :
 				  "create_form");
 # Show user friendly info
+my ($tdleft, $tdreason, $tdmax) = &count_domains("topdoms");
 if (!$tdleft && $tdreason == 3) {
 	print &ui_alert_box(
 		&text('setup_emax', $tdmax, $virtualmin_account_subscriptions),
 		'warn', undef, undef, '');
-	}
-# Show generic mode selector
-if ($in{'generic'} && @generics > 1) {
-	print "<b>$text{'form_genericmode'}</b>\n";
-	@links = ( );
-	for($i=0; $i<@generics; $i++) {
-		$g = $generics[$i];
-		if ($i == $in{'genericmode'}) {
-			push(@links, $g->[0]);
-			}
-		else {
-			push(@links, "<a href='domain_form.cgi?generic=1&".
-				     "genericmode=$i&gparent=$in{'gparent'}&".
-				     "$g->[1]'>$g->[0]</a>");
-			}
-		}
-	print &ui_links_row(\@links),"<p>\n";
 	}
 
 # Form header
