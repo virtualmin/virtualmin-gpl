@@ -334,7 +334,7 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 		( 'pass', $parentdom->{'pass'} ) :
 		( 'pass', $pass ),
 	 'alias', $aliasdom ? $aliasdom->{'id'} : undef,
-	 'aliasmail', $in{'aliasmail'},
+	 'aliasmail', $in{'mail'},
 	 'subdom', $subdom ? $subdom->{'id'} : undef,
 	 'subprefix', $subprefix,
 	 'uid', $uid,

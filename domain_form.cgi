@@ -103,7 +103,6 @@ if (!$tdleft && $tdreason == 3) {
 print &ui_form_start("domain_setup.cgi", "post");
 print &ui_hidden("parentuser", $parentuser),"\n";
 print &ui_hidden("to", $in{'to'}),"\n";
-print &ui_hidden("aliasmail", $in{'aliasmail'}),"\n";
 print &ui_hidden("subdom", $in{'subdom'}),"\n";
 print &ui_hidden_table_start($text{'form_header'}, "width=100%", 2,
 			     "basic", 1);
