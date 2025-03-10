@@ -288,5 +288,40 @@ foreach my $d (&list_domains()) {
 return $dc;
 }
 
+# is_local_ip(ip)
+# Returns 1 if the given IP address is in a private or local range, 0 if not,
+# or undef if the format is unknown.
+sub is_local_ip
+{
+my $ip = shift;
+
+# Check for IPv4 format
+if ($ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
+	my ($a, $b) = ($1, $2);
+	# Private IP ranges
+	return 1 if ($a == 10);                           # 10.0.0.0/8
+	return 1 if ($a == 192 && $b == 168);             # 192.168.0.0/16
+	return 1 if ($a == 172 && $b >= 16 && $b <= 31);  # 172.16.0.0/12
+	# Loopback & Link-local
+	return 1 if ($a == 127);                          # 127.0.0.0/8
+	return 1 if ($a == 169 && $b == 254);             # 169.254.0.0/16
+
+	return &check_ipaddress($ip) ? 1 : 0;
+	}
+# Check for IPv6 format
+elsif ($ip =~ /:/) {
+	my $lower_ip = lc($ip);
+	# Loopback
+	return 1 if ($lower_ip eq '::1');                 # ::1 (IPv6 loopback)
+	# Link-local
+	return 1 if ($lower_ip =~ /^fe80:/);              # fe80::/10
+	# Unique local addresses (fc00::/8, fd00::/8)
+	return 1 if ($lower_ip =~ /^fc00:/ || $lower_ip =~ /^fd00:/);
+
+	return &check_ip6address($ip) ? 1 : 0;
+	}
+return undef; # If format is unknown
+}
+
 1;
 
