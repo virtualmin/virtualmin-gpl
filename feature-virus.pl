@@ -398,9 +398,9 @@ if ($config{'clamscan_cmd_global'}) {
 	}
 else {
 	# Find the most used one for all domains
-	local (%cmdcount, $maxcmd);
+	my (%cmdcount, $maxcmd);
 	foreach my $d (grep { $_->{'virus'} } &list_domains()) {
-		local $cmd = &get_domain_virus_scanner($d);
+		my $cmd = &get_domain_virus_scanner($d);
 		if ($cmd) {
 			$cmdcount{$cmd}++;
 			if (!$maxcmd || $cmdcount{$cmd} > $cmdcount{$maxcmd}) {
