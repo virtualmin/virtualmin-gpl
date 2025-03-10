@@ -495,7 +495,7 @@ if (!&check_dkim()) {
 		my @newextra;
 		foreach my $e (@{$dkim->{'extra'}}) {
 			my $d = &get_domain_by("dom", $e);
-			if ($d) {
+			if ($d && $d->{'dns'} eq '1') {
 				&lock_domain($d);
 				$d->{'dkim_enabled'} = 1;
 				&save_domain($d);
