@@ -369,20 +369,23 @@ if (!$d->{'disabled'}) {
 			next;
 			}
 
-		local $txt = $parentdom ? $text{'edit_sub'.$f} : undef;
-		$txt ||= $text{'edit_'.$f};
+		my $ftxt = $aliasdom ? $text{'form_alias'.$f} :
+			   $parentdom ? $text{'edit_sub'.$f} : undef;
+		my $fhelp = $f;
+		$fhelp = $f."_alias" if ($aliasdom && $ftxt);
+		$ftxt ||= $text{'edit_'.$f};
 		if (!&can_use_feature($f)) {
 			push(@grid_order_initial, $f);
 			push(@grid, &ui_checkbox($f."_dis", 1, undef,
 						$d->{$f}, undef, 1).
 				    &ui_hidden($f, $d->{$f}).
-				    " <b>".&hlink($txt, $f)."</b>");
+				    " <b>".&hlink($ftxt, $fhelp)."</b>");
 			}
 		else {
 			push(@grid_order_initial, $f);
 			push(@grid, &ui_checkbox($f, 1, "", $d->{$f},
 					&feature_check_chained_javascript($f)).
-				    " <b>".&hlink($txt, $f)."</b>");
+				    " <b>".&hlink($ftxt, $fhelp)."</b>");
 			}
 		}
 

@@ -495,13 +495,16 @@ foreach $f (@dom_features) {
 		next;
 		}
 
-	local $txt = $parentdom ? $text{'form_sub'.$f} : undef;
-	$txt ||= $text{'form_'.$f};
+	my $ftxt = $aliasdom ? $text{'form_alias'.$f} :
+		   $parentdom ? $text{'form_sub'.$f} : undef;
+	my $fhelp = $f;
+	$fhelp = $f."_alias" if ($aliasdom && $ftxt);
+	$ftxt ||= $text{'form_'.$f};
 	push(@grid_order_initial, $f);
 	push(@grid, &ui_checkbox($f, 1, "",
 		$config{$f} == 1 && $in{'nofeat'} ne $f,
 		&feature_check_chained_javascript($f)).
-		    " <b>".&hlink($txt, $f)."</b>");
+		    " <b>".&hlink($ftxt, $fhelp)."</b>");
 	}
 
 # Show checkboxes for plugins
