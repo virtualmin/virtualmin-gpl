@@ -81,8 +81,7 @@ if ($in{'subdom'}) {
 	$subdom = &get_domain($in{'subdom'});
 	$subdom || &error(&text('form_esubdom', $in{'subdom'}));
 	}
-my $subhead = $aliasdom || $parentdom;
-$subhead = &domain_in($aliasdom || $parentdom) if ($subhead);
+my $subhead = $aliasdom || $parentdom ? &domain_in($aliasdom || $parentdom) : "";
 &ui_print_header($subhead, $aliasdom ? $text{'form_title3'} :
 			   $subdom ? $text{'form_title4'} :
 			   $parentdom ? $text{'form_title2'} :
