@@ -129,19 +129,18 @@ else {
 
 # Create sub-server and/or alias links
 if (&can_create_master_servers() || &can_create_sub_servers()) {
-	my $gparent = &get_domain($did);
-	if (&can_create_sub_servers() && $gparent && !$gparent->{'parent'}) {
+	if (&can_create_sub_servers() && $d && !$d->{'parent'}) {
 		push(@rv, { "type" => "item",
 			    "desc" => $text{'form_title2'},
 			    "link" => "/$module_name/domain_form.cgi?".
-			              "add1=1&parentuser1=$gparent->{'user'}",
+			              "add1=1&parentuser1=$d->{'user'}",
 			  });
 		}
-	if (ref($gparent) && !$gparent->{'alias'}) {
+	if (ref($d) && !$d->{'alias'}) {
 		push(@rv, { "type" => "item",
 			    "desc" => $text{'form_title3'},
 			    "link" => "/$module_name".
-			        "/domain_form.cgi?to=$gparent->{'id'}&".
+			        "/domain_form.cgi?to=$d->{'id'}&".
 				"nofeat=mail",
 			  });
 		}
