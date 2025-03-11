@@ -12489,6 +12489,17 @@ if (&master_admin() && !&has_aws_cmd()) {
 		}
 	}
 
+# If virus scanning is enabled, make sure clamdscan is being used
+if ($config{'virus'} && !$config{'provision_virus_host'} &&
+    &get_global_virus_scanner() eq 'clamscan') {
+	my $clam_text = $text{'index_warn_clamscan'}."<p>\n";
+	$clam_text .= &ui_form_start(
+		"$wp/$module_name/edit_newsv.cgi");
+	$clam_text .= &ui_submit($text{'index_disable_clamscan'});
+	$clam_text .= &ui_form_end();
+	push(@rv, $clam_text);
+	}
+
 return @rv;
 }
 
