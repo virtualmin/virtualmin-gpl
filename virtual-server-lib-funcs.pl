@@ -13976,9 +13976,19 @@ local @rv;
 # Always start with edit/view link
 my $canconfig = &can_config_domain($d);
 local $vm = "/$module_name";
+my $edit_title = $text{'edit_title'};
+my $view_title = $text{'view_title'};
+if ($d->{'parent'} && !$d->{'alias'}) {
+	$edit_title = $text{'edit_title2'};
+	$view_title = $text{'view_title2'};
+	}
+elsif ($d->{'parent'} && $d->{'alias'}) {
+	$edit_title = $text{'edit_title3'};
+	$view_title = $text{'view_title3'}
+	}
 push(@rv, { 'url' => $canconfig ? "$vm/edit_domain.cgi?dom=$d->{'id'}"
 				: "$vm/view_domain.cgi?dom=$d->{'id'}",
-	    'title' => $canconfig ? $text{'edit_title'} : $text{'view_title'},
+	    'title' => $canconfig ? $edit_title : $view_title,
 	    'cat' => 'objects',
 	    'icon' => $canconfig ? 'edit' : 'view' });
 

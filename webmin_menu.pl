@@ -80,6 +80,18 @@ $d ||= &get_domain_by("user", $remote_user, "parent", "");
 $d ||= $doms[0];
 $did ||= ($d ? $d->{'id'} : undef);
 
+# Create top-level domain link
+push(@rv, { 'format' => 'new' });
+if (&can_create_master_servers() || &can_create_sub_servers()) {
+	# Domain creation item
+	push(@rv, { "type" => "item",
+		    "desc" => $text{'left_generic'},
+		    "format" => "link-new",
+		    "link" => "/$module_name/domain_form.cgi",
+		  });
+	push(@rv, { 'type' => 'hr' });
+	}
+
 if (@doms > $config{'display_max'} && $config{'display_max'}) {
 	# Domain text box
 	my $dfield = { 'type' => 'input',
@@ -115,20 +127,21 @@ else {
 				       : $text{'left_nodoms'} });
 	}
 
-# Domain creation item
+# Create sub-server and/or alias links
 if (&can_create_master_servers() || &can_create_sub_servers()) {
-	($rdleft, $rdreason, $rdmax) = &count_domains("realdoms");
-	($adleft, $adreason, $admax) = &count_domains("aliasdoms");
-	if ($rdleft || $adleft) {
-		push(@rv, { 'type' => 'item',
-			    'desc' => $text{'left_generic'},
-			    'link' => '/'.$module_name.
-			     '/domain_form.cgi?generic=1&amp;gparent='.$did,
+	if (&can_create_sub_servers() && $d && !$d->{'parent'}) {
+		push(@rv, { "type" => "item",
+			    "desc" => $text{'form_title2'},
+			    "link" => "/$module_name/domain_form.cgi?".
+			              "add1=1&parentuser1=$d->{'user'}",
 			  });
 		}
-	else {
-		push(@rv, { 'type' => 'html',
-			    'html' => "<b>".$text{'left_nomore'}."</b>",
+	if (ref($d) && !$d->{'alias'}) {
+		push(@rv, { "type" => "item",
+			    "desc" => $text{'form_title3'},
+			    "link" => "/$module_name".
+			        "/domain_form.cgi?to=$d->{'id'}&".
+				"nofeat=mail",
 			  });
 		}
 	}

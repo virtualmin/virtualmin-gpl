@@ -354,6 +354,9 @@ else {
 		}
 	}
 
+# Update alias domain mail-related flag
+$d->{'aliasmail'} = $d->{'mail'} if ($d->{'alias'});
+
 # Update the parent user
 &refresh_webmin_user($d);
 

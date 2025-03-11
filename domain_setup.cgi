@@ -334,7 +334,7 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 		( 'pass', $parentdom->{'pass'} ) :
 		( 'pass', $pass ),
 	 'alias', $aliasdom ? $aliasdom->{'id'} : undef,
-	 'aliasmail', $in{'aliasmail'},
+	 'aliasmail', $in{'mail'},
 	 'subdom', $subdom ? $subdom->{'id'} : undef,
 	 'subprefix', $subprefix,
 	 'uid', $uid,
@@ -407,8 +407,7 @@ if ($config{'mysql'} && &can_edit_templates() && !$aliasdom && !$parentdom) {
 # Special magic - if the dir feature is enabled by default and this is an alias
 # domain, don't set it
 foreach my $f (@features, &list_feature_plugins()) {
-	next if ($f eq 'dir' && $config{$f} == 3 && $aliasdom &&
-                 $tmpl->{'aliascopy'} && !$dom{'aliasmail'});
+	next if ($f eq 'dir' && $aliasdom);
 	$dom{$f} = &can_use_feature($f) && int($in{$f});
 	}
 
