@@ -107,7 +107,7 @@ if ($d->{'provision_dns'}) {
 	delete($info->{'recs'});
 	&$first_print($text{'setup_bind_provision'});
 	if ($recserr) {
-		&$second_print(&text('setup_bind_erecs', $err));
+		&$second_print(&text('setup_bind_erecs', $recserr));
 		return 0;
 		}
 	my ($ok, $msg) = &provision_api_call(
@@ -131,7 +131,7 @@ elsif ($d->{'dns_cloud'} && !$dnsparent) {
 		&$first_print(&text('setup_bind_cloud', $cloud->{'desc'}));
 		}
 	if ($recserr) {
-		&$second_print(&text('setup_bind_erecs', $err));
+		&$second_print(&text('setup_bind_erecs', $recserr));
 		return 0;
 		}
 	my $vfunc = "dnscloud_".$ctype."_valid_domain";
@@ -170,7 +170,7 @@ elsif (!$dnsparent) {
 		&$first_print(&text('setup_bindremote', $r->{'host'}));
 		}
 	if ($recserr) {
-		&$second_print(&text('setup_bind_erecs', $err));
+		&$second_print(&text('setup_bind_erecs', $recserr));
 		return 0;
 		}
 	my $conf = &remote_foreign_call($r, "bind8", "get_config");
@@ -2187,6 +2187,21 @@ if (!$d->{'dns_submode'} && $superdom && &can_domain_dnssec($d)) {
 	}
 
 return undef;
+}
+
+# validate_dns_records(&domain, [warnings-too])
+# Return either an array ref of DNS record validation errors, or a string
+# explaining why it couldn't be done
+sub validate_dns_records
+{
+my ($d, $warns) = @_;
+my $r = &require_bind($d);
+return "Record validation not supported when using Cloudmin Services"
+	if ($d->{'provision_dns'});
+return "Record validation not supported when using a Cloud DNS provider"
+	if ($d->{'dns_cloud'});
+return "Record validation not supported for sub-domains"
+	if ($d->{'dns_submode'});
 }
 
 # disable_dns(&domain)
