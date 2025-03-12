@@ -2209,7 +2209,11 @@ return "Could not find DNS zone for $d->{'dom'}" if (!$z);
 my @errs = &remote_foreign_call($r, "bind8", "check_zone_records", $z);
 return \@errs if (@errs);
 if ($warns) {
-	my @warns = &remote_foreign_call($r, "bind8", "check_zone_warnings",$z);
+	my @warns;
+	eval {
+		local $main::error_must_die = 1;
+		@warns = &remote_foreign_call($r, "bind8", "check_zone_warnings",$z);
+		};
 	return \@warns if (@warns);
 	}
 return [ ];
