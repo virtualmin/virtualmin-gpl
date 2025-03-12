@@ -22,13 +22,9 @@ if ($in{'validate'}) {
 	$olderr = &validate_dns($d, $oldrecs);
 	}
 
-# Parse the newly entered records and validate
+# Parse the newly entered records
 $recs = [ &text_to_dns_records($in{'data'}, $d->{'dom'}) ];
 &set_record_ids($recs);
-if ($in{'validate'}) {
-	$err = &validate_dns($d, $recs, 1);
-	&error(&text('mrecords_evalidate', $err)) if ($err);
-	}
 
 if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	# Merge in any proxy bits set on old records
@@ -53,10 +49,11 @@ else {
 	# Check format one more time, so that named-checkconf can see the new
 	# zone file
 	if ($in{'validate'}) {
-		$err = &validate_dns($d, $recs, 1);
-		if ($err) {
+		$errs = &validate_dns_records($d, 1);
+		if (ref($errs) && @$errs) {
 			&copy_source_dest($temp, $rootfile);
-			&error(&text('mrecords_evalidate', $err));
+			&error(&text('mrecords_evalidate',
+				join("<br>", map { &html_escape($_) } @$errs)));
 			}
 		}
 	}
