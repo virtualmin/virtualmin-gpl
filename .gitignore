@@ -19,3 +19,4 @@ nytprof.out
 *.bs
 /_eumm/
 .vscode/settings.json
+.DS_Store
