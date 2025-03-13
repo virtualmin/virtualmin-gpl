@@ -31,8 +31,8 @@ foreach $r (@redirects) {
 			&ui_link("edit_redirect.cgi?dom=$in{'dom'}&".
 				 "id=$r->{'id'}", $r->{'path'}) :
 			$r->{'path'},
-		$iswebmail == 2 ? $text{'redirects_webmin'} :
-		$iswebmail == 1 ? $text{'redirects_usermin'} :
+		$iswebmail == 2 ? $text{'redirects_usermin'} :
+		$iswebmail == 1 ? $text{'redirects_webmin'} :
 		$iswww ? $text{'redirects_canon'} :
 		$r->{'alias'} ? $text{'redirects_alias'}
 			      : $text{'redirects_redirect'},
