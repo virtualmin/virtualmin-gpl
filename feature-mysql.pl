@@ -194,7 +194,12 @@ if (!$d->{'parent'}) {
 			next if (&indexof($h, @hosts) >= 0);
 			&execute_user_creation_sql($d, $h, $user,
 					   $encpass, &mysql_pass($d));
-			foreach my $olddb (@olddbs) {
+			}
+		# Similarly, if there were any granted hosts for DBs before
+		# the user was created, re-add them
+		foreach my $olddb (@olddbs) {
+			foreach my $h (@{$olddb->[1]}) {
+				next if (&indexof($h, @hosts) >= 0);
 				&create_mysql_db_grant($d, $h, $olddb->[0], $user);
 				}
 			}
