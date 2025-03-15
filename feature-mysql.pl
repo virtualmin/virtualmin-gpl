@@ -500,11 +500,14 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 		# Change locally
 		&$first_print($text{'save_mysqlpass'});
 		if (&mysql_user_exists($d)) {
-			&execute_password_change_sql($d, $olduser, $encpass, &mysql_pass($d));
+			&execute_password_change_sql(
+				$d, $olduser, $encpass, &mysql_pass($d));
 			&$second_print($text{'setup_done'});
 
-			# Update all installed scripts database password which are using MySQL
-			&update_scripts_creds($d, $oldd, 'dbpass', &mysql_pass($d), 'mysql');
+			# Update all installed scripts database password which
+			# are using MySQL
+			&update_scripts_creds(
+				$d, $oldd, 'dbpass', &mysql_pass($d), 'mysql');
 
 			$rv++;
 			}
@@ -3038,7 +3041,8 @@ else {
 return @rv;
 }
 
-# execute_password_change_sql(&domain, user, password-sql, [plaintext-pass], [direct])
+# execute_password_change_sql(&domain, user, password-sql, [plaintext-pass],
+# 			      [direct])
 # Update a MySQL user's password for all hosts. Plainpass is the unencrypted
 # password, and encpass is an SQL expression for the hashed password like
 # 'fda2343243a' or password('foo')
@@ -3076,7 +3080,8 @@ my $gsql = sub {
 	};
 
 if ($direct) {
-	# Get the right SQL query first
+	# Run the SQL directly using the "mysql" command rather than via any
+	# DBI connection
 	my $sql;
 	($sql) = &$gsql('localhost');
 	my $cmd = $mysql::config{'mysql'} || 'mysql';
@@ -3234,7 +3239,9 @@ if ($ver !~ /mariadb/i) {
 				}
 			}
 		}
-	$cmd = "mkdir -p $mysockdir && chown $myusergrp:$myusergrp $mysockdir && $cmd";
+	$cmd = "mkdir -p ".quotemeta($mysockdir)." && ".
+	       "chown ".quotemeta("$myusergrp:$myusergrp")." ".
+		quotemeta($mysockdir)." && $cmd";
 	}
 my ($pty, $pid) = &proc::pty_process_exec($cmd, 0, 0);
 my $rv = undef;
