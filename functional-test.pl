@@ -172,6 +172,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--max-output") {
 		$max_output = shift(@ARGV);
 		}
+	elsif ($a eq "--timeout") {
+		$timeout = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -12840,6 +12843,7 @@ print "                           [--skip-test type]*\n";
 print "                           [--no-cleanup | --skip-cleanup]\n";
 print "                           [--output]\n";
 print "                           [--max-output bytes]\n";
+print "                           [--timeout seconds]\n";
 print "                           [--migrate $mig]\n";
 print "                           [--user webmin-login --pass password]\n";
 print "                           [--script name]*\n";
