@@ -247,10 +247,8 @@ foreach $s (@str) {
 		push(@yeses, "'Y'");
 		}
 	}
-my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my $qdb = &quote_mysql_database($db);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
-    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
+if (&mysql_supports_grants($d)) {
 	# Use the grant command
 	&execute_dom_sql($d, $mysql::master_db, "grant all privileges on `$qdb`.* to '$user'\@'$host'");
 	}
@@ -267,10 +265,8 @@ else {
 sub delete_mysql_db_grant
 {
 local ($d, $db, $user) = @_;
-my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my $qdb = &quote_mysql_database($db);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
-    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
+if (&mysql_supports_grants($d)) {
 	# Use the revoke command
 	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $user);
@@ -2742,9 +2738,7 @@ sub set_mysql_user_connections
 local ($d, $host, $user, $mailbox) = @_;
 local $conns = &get_mysql_user_connections($d, $mailbox);
 if ($conns) {
-	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-	if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
-	    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
+	if (&mysql_supports_grants($d)) {
 		# Need to use the alter user command
 		&execute_dom_sql($d, $mysql::master_db,
 			"alter user '$user'\@'$host' ".
@@ -2901,9 +2895,7 @@ foreach my $sql (&get_user_deletion_sql($d, $host, $user, $dbtoo)) {
 sub execute_user_rename_sql
 {
 my ($d, $olduser, $user) = @_;
-my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
-    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
+if (&mysql_supports_grants($d)) {
 	# Need to alter user
 	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $olduser);
@@ -2927,9 +2919,7 @@ else {
 sub execute_database_reassign_sql
 {
 my ($d, $db, $olduser, $user) = @_;
-my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
-    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
+if (&mysql_supports_grants($d)) {
 	# Revoke access from the old user on all hosts
 	my $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $olduser);
@@ -2970,8 +2960,7 @@ my $plugin = &get_mysql_plugin($d, 1);
 if (!$encpass && $plainpass) {
 	$encpass = &encrypt_plain_mysql_pass($d, $plainpass) 
 	}
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
-    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
+if (&mysql_supports_grants($d, $ver, $variant)) {
 	# Need to use new 'create user' command
 	return ("create user '$user'\@'$host' identified $plugin by ".
 		($plainpass ? "'".&mysql_escape($plainpass)."'"
@@ -3008,10 +2997,8 @@ else {
 sub get_user_deletion_sql
 {
 my ($d, $host, $user, $dbtoo) = @_;
-my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my @rv;
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
-    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
+if (&mysql_supports_grants($d)) {
 	if ($host) {
 		# Host is known
 		@rv = ("drop user if exists '$user'\@'$host'");
@@ -3718,6 +3705,19 @@ sub mysql_single_transaction
 {
 my ($d, $db) = @_;
 return $config{'single_tx'};
+}
+
+# mysql_supports_grants(&domain, [version, variant])
+# Returns 1 if grant commands can be used to manage MySQL users and permissions,
+# or 0 if direct updates to permissions tables should be used.
+sub mysql_supports_grants
+{
+my ($d, $ver, $variant) = @_;
+if (!$ver) {
+	($ver, $variant) = &get_dom_remote_mysql_version($d);
+	}
+return $variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+       $variant eq "mysql" && &compare_versions($ver, 8) >= 0;
 }
 
 $done_feature_script{'mysql'} = 1;
