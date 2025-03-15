@@ -3486,7 +3486,6 @@ sub execute_dom_sql
 {
 my ($d, $db, $sql, @params) = @_;
 my $mod = &require_dom_mysql($d);
-print STDERR "sql=$sql\n";
 if ($sql =~ /^(select|show)\s+/i) {
 	return &foreign_call($mod, "execute_sql", $db, $sql, @params);
 	}
