@@ -3707,7 +3707,7 @@ my ($d, $db) = @_;
 return $config{'single_tx'};
 }
 
-# mysql_supports_grants(&domain, [version, variant])
+# mysql_supports_grants(&domain, [version], [variant])
 # Returns 1 if grant commands can be used to manage MySQL users and permissions,
 # or 0 if direct updates to permissions tables should be used.
 sub mysql_supports_grants
