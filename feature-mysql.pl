@@ -252,10 +252,7 @@ my $qdb = &quote_mysql_database($db);
 if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
     $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Use the grant command
-	eval {
-		local $main::error_must_die = 1;
-		&execute_dom_sql($d, $mysql::master_db, "grant all privileges on `$qdb`.* to '$user'\@'$host'");
-		}
+	&execute_dom_sql($d, $mysql::master_db, "grant all privileges on `$qdb`.* to '$user'\@'$host'");
 	}
 else {
 	# Can update the DB table directly
