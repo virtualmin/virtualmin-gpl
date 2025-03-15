@@ -190,19 +190,19 @@ if (!$d->{'parent'}) {
 		# If there were any granted hosts before the user
 		# was created (like during a restore on a system sharing
 		# the same MySQL server), re-grant access to them
-		foreach my $h (@oldhosts) {
-			next if (&indexof($h, @hosts) >= 0);
-			&execute_user_creation_sql($d, $h, $user,
-					   $encpass, &mysql_pass($d));
-			}
+		#foreach my $h (@oldhosts) {
+		#	next if (&indexof($h, @hosts) >= 0);
+		#	&execute_user_creation_sql($d, $h, $user,
+		#			   $encpass, &mysql_pass($d));
+		#	}
 		# Similarly, if there were any granted hosts for DBs before
 		# the user was created, re-add them
-		foreach my $olddb (@olddbs) {
-			foreach my $h (@{$olddb->[1]}) {
-				next if (&indexof($h, @hosts) >= 0);
-				&create_mysql_db_grant($d, $h, $olddb->[0], $user);
-				}
-			}
+		#foreach my $olddb (@olddbs) {
+		#	foreach my $h (@{$olddb->[1]}) {
+		#		next if (&indexof($h, @hosts) >= 0);
+		#		&create_mysql_db_grant($d, $h, $olddb->[0], $user);
+		#		}
+		#	}
 		&$second_print($text{'setup_done'});
 		}
 	}
@@ -292,6 +292,8 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 		}
 	foreach my $dbs (@dbs) {
 		foreach my $r (@{$rv->{'data'}}) {
+			# Use eval here because the revoke function may fail
+			# if there are no permissions to revoke
 			eval {
 				local $main::error_must_die = 1;
 				&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbs from '$user'\@'$r->[0]'");
@@ -2931,6 +2933,8 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 	my $qdb = &quote_mysql_database($db);
 	my $dbs = "`$qdb`.*";
 	foreach my $r (@{$rv->{'data'}}) {
+		# Use eval here, because the revoke operation will fail if there
+		# aren't any privileges to revoke
 		eval {
 			local $main::error_must_die = 1;
 			&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbs from '$olduser'\@'$r->[0]'");
@@ -2939,10 +2943,7 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 			local $main::error_must_die = 1;
 			&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$olduser'\@'$r->[0]'");
 			};
-		eval {
-			local $main::error_must_die = 1;
-			&execute_dom_sql($d, $mysql::master_db, "grant all privileges on $dbs to '$user'\@'$r->[0]'");
-			};
+		&execute_dom_sql($d, $mysql::master_db, "grant all privileges on $dbs to '$user'\@'$r->[0]'");
 		}
 	}
 else {
@@ -3263,7 +3264,7 @@ if (!$rv) {
 		# Update root password now for other
 		# hosts, using regular database connection
 		eval {
-			&execute_password_change_sql(undef, $user, undef, $pass);
+			&execute_password_change_sql(undef, $user, undef,$pass);
 			};
 		if ($@) {
 			$rv = &text('mysqlpass_echange', "$err");
@@ -3491,6 +3492,7 @@ sub execute_dom_sql
 {
 my ($d, $db, $sql, @params) = @_;
 my $mod = &require_dom_mysql($d);
+print STDERR "sql=$sql\n";
 if ($sql =~ /^(select|show)\s+/i) {
 	return &foreign_call($mod, "execute_sql", $db, $sql, @params);
 	}
