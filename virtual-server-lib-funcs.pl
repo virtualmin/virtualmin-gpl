@@ -11402,7 +11402,7 @@ sub random_password
 &seed_random();
 &require_useradmin();
 my $random_password;
-my $len = $_[0] || $config{'passwd_length'} || 15;
+my $len = $_[0] || $config{'passwd_length'} || 25;
 eval "utf8::decode(\$config{'passwd_chars'})"
 	if ($config{'passwd_chars'});
 my @passwd_chars = split(//, $config{'passwd_chars'});
