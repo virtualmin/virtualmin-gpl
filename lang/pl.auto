@@ -13,7 +13,14 @@ index_usrestart=Uruchom ponownie serwer Usermin
 index_usstopdesc=Serwer internetowy Usermin jest obecnie aktywny, co pozwala użytkownikom skrzynek pocztowych czytać ich pocztę przez sieć. Kliknij ten przycisk, aby go zatrzymać.
 index_usstartdesc=Serwer internetowy Usermin jest obecnie wyłączony, co uniemożliwi użytkownikom skrzynek pocztowych odczytywanie ich poczty za pośrednictwem sieci. Kliknij ten przycisk, aby go uruchomić.
 
+index_warn_clamscan=Ten system używa samodzielnego skanera antywirusowego <tt>clamscan</tt>, który został wycofany przez Virtualmin ze względu na wydajność i wykorzystanie pamięci RAM. Zamiast niego należy używać skanera antywirusowego <tt>clamd</tt> opartego na serwerze.
+index_disable_clamscan=Zmień skaner antywirusowy
+
+form_generic_subserverof=Podserwer $1
+form_aliasmail=Poczta na alias?
 form_content2=Tak, z domyślnym szablonem strony internetowej
+
+setup_eemptypass=Nie podano hasła!
 
 setup_bind_erecs=.. nie udało się wygenerować rekordów : $1
 setup_ednsns=Nie znaleziono rekordów NS w szablonie!
@@ -23,6 +30,7 @@ setup_scriptphpverset=.. nie udało się skonfigurować wersji PHP : $1
 
 user_firstname=Imię
 user_surname=Nazwisko
+user_passnone=Nie zaakceptowano hasła
 user_efirstname=Nieprawidłowe imię
 user_esurname=Nieprawidłowe nazwisko
 user_remailbut2=Wyślij ponownie e-mail dotyczący utworzenia domeny
@@ -35,6 +43,22 @@ save_protected1=Włączanie ochrony zabezpieczającej ..
 newweb_acme=Domyślny dostawca certyfikatu SSL
 newweb_rhost=Dla nazwy hosta
 newweb_rany=Każdy
+newweb_ssl_key_size=Domyślny rozmiar klucza SSL
+newweb_essl_key_size=Rozmiar klucza SSL musi być liczbą bitów
+newweb_ssl_key_def=Domyślna wartość Virtualmin (2048 bitów)
+newweb_cert_type=Domyślny skrót certyfikatu SSL
+newweb_auto_letsencrypt=Czy podczas tworzenia domeny należy zażądać od dostawcy certyfikatu SSL?
+newweb_auto_letsencrypt2=Tak, i pomiń sprawdzanie łączności
+newweb_letsencrypt_wild=Czy chcesz poprosić o certyfikat SSL typu wildcard dla nowych domen?
+newweb_renew_letsencrypt=Dni przed wygaśnięciem, aby odnowić certyfikaty SSL
+newweb_renew_letsencrypt_def=Domyślne (7 dni)
+newweb_erenew_letsencrypt=Liczba dni przed wygaśnięciem musi być liczbą
+newweb_always_ssl=Jak wygenerować certyfikat SSL dla domen bez witryny SSL?
+newweb_tlsa_records=Jak utworzyć rekordy DNS TLSA dla certyfikatów SSL?
+newweb_combined_cert=Skonfiguruj Apache do użycia
+newweb_combined_cert2=Połączony plik certyfikatu i urzędu certyfikacji
+newweb_combined_cert1=Tylko plik certyfikatu
+newweb_combined_cert0=Podejmuj decyzję automatycznie
 
 losing_dir2=Katalog domowy tego wirtualnego podserwera, zawierający wszystkie dane witryny i inne pliki, zostanie usunięty.
 losing_dir4=Katalog domowy tego aliasu, zawierający dane i inne pliki użytkowników, zostanie usunięty.
@@ -47,15 +71,21 @@ log_delete_acme=Usunięto dostawcę SSL dla $1
 log_update_acme=Zaktualizowano dostawcę SSL dla $1
 
 backup_headerfeatures2=Ustawienia globalne
+backup_compression4=<tt>zstd</tt>
 backup_mode44=Pobierz w przeglądarce
 
 backup_finalstatusok=$1 serwerów wirtualnych zostało pomyślnie utworzonych kopii zapasowych
+
+backup_mysqlinfo=Kopiowanie danych użytkownika MySQL ..
 
 restore_ersync=Polecenie synchronizacji <tt>$1</tt> nie jest zainstalowane
 restore_eacme=..oryginalny dostawca SSL określony w kopii zapasowej nie istnieje
 restore_eacme2=..oryginalny dostawca SSL określony w kopii zapasowej nie istnieje - przełączenie na domyślny
 
+restore_webminsame=.. pominięcie przywracania do oryginalnej bazy danych użytkowników Webmin $1 w trybie replikacji
+
 cert_desc3a=Jeśli nowy certyfikat pochodzi od urzędu certyfikacji posiadającego własny certyfikat, należy go także jednocześnie zainstalować tutaj.
+cert_newcertkeep=Zachowaj istniejący certyfikat
 cert_newca=Certyfikat CA
 cert_newcakeep=Zachowaj istniejący certyfikat
 cert_tabacme=Dostawcy SSL
@@ -239,6 +269,8 @@ spf_aliasdns=Zmiana aliasu domeny na własne rekordy DNS ..
 spf_noaliasdns=Zmiana aliasu domeny w celu skopiowania rekordów DNS z domeny docelowej ..
 spf_ecloudprov=Dostawca usługi Cloud DNS o identyfikatorze <tt>$1</tt> nie jest obsługiwany w ramach licencji Virtualmin GPL
 
+s3_need_cli=Polecenie AWS CLI potrzebne do niezawodnego tworzenia kopii zapasowych S3 nie zostało znalezione w Twoim systemie. Przyszłe wersje Virtualmin będą go wymagać, aby przesyłać kopie zapasowe do S3. <a href='$1'>Kliknij tutaj</a>, aby zainstalować je automatycznie, lub pobierz je ze strony <a href='https://aws.amazon.com/cli/' target=_blank>https://aws.amazon.com/cli/</a>.
+
 upgrade_addrepo=Dodawanie repozytorium Virtualmin Pro ..
 
 balancer_eg=np. $1
@@ -266,7 +298,9 @@ redirect_hostregexp=Nazwa hosta jest wyrażeniem regularnym?
 redirect_ehost2=Brak wyrażenia regularnego nazwy hosta
 
 dkim_email=Nie można włączyć DKIM, jeśli nie włączono poczty e-mail
+dkim_alldns3=Wszystkie domeny
 
+smtpcloud_evaltok3=Weryfikacja Amazon SES nie zwróciła żadnych informacji o tej domenie!
 provision_return=opcje klienta usług
 
 provision_emysqldbcheck=Błąd usług sprawdzania bazy danych MySQL : $1
@@ -288,11 +322,19 @@ records_caaissue=Zezwalaj na certyfikaty dla domeny
 records_caaissuewild=Zezwalaj na certyfikaty wieloznaczne dla domeny
 records_caaiodef=Adres URL umożliwiający zgłaszanie problemów
 
+fixperms_edirmiss=..domena nie posiada katalogu domowego
+fixperms_oklist=.. zrobione dla załączonej listy plików
+fixperms_oklist2=.. zrobione dla listy plików poniżej:
+fixperms_details=Od <tt>$1</tt> do <tt>$2</tt> za plik <tt>$3</tt>
+
 ratelimit_email=Ograniczenie szybkości poczty e-mail nie może zostać włączone, jeśli nie włączono poczty e-mail
 
 right_vmax=Domeny licencjonowane
 right_smax=Licencjonowane systemy Virtualmin
 right_aliases=Serwery aliasów
+
+assoc_eassoc=Nie udało się skojarzyć $1 : $2 
+assoc_edassoc=Nie udało się rozłączyć $1 : $2 
 
 letsencrypt_doing2a=Żądanie certyfikatu dla $1 z $2 ..
 letsencrypt_done2=.. żądanie dla $1 powiodło się!
@@ -309,6 +351,13 @@ mysql_restarting=Ponowne uruchomienie serwera MySQL ..
 mysql_erestarting=.. nie działa!
 
 2fa_ecannot=Nie masz uprawnień do zarządzania uwierzytelnianiem dwuskładnikowym
+
+dnscloud_eawsdset=Nie udało się wyświetlić zestawu delegacji : $1
+dnscloud_eawsdset2=Zestaw delegacji $1 nie istnieje
+dnscloud_route53_dset=Zestaw delegacji serwera nazw
+dnscloud_route53_nodset=Brak (użyj losowych serwerów nazw)
+dnscloud_route53_iddset=Identyfikator zestawu delegacji
+dnscloud_route53_dsetdesc=Zestawy delegacji to grupa serwerów nazw, które będą używane dla wszystkich domen utworzonych za pomocą Route 53. Należy je utworzyć za pomocą polecenia <tt>aws route53 create-reusable-delegation-set</tt>.
 
 newacmes_title=Dostawcy SSL
 newacmes_ecannot=Nie masz uprawnień do zarządzania dostawcami SSL

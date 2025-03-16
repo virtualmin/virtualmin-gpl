@@ -416,7 +416,6 @@ setup_edomain3=Domainnamen dürfen keine aufeinanderfolgenden Punkte enthalten
 setup_esubdomain=Ungültiger Sub-Domainname – Punkte sind nicht erlaubt
 setup_eforceunder=Sie dürfen nur Domains unter $1 erstellen
 setup_edomain4=Diese Domain wird bereits gehostet
-setup_edomain5=Sie können keine neue Domain mit dem Namen $1 erstellen, es sei denn, die Option "ACME-SSL-Zertifikat für Hostnamen einrichten" ist zuerst in der Virtualmin-Konfiguration ⇾ SSL-Einstellungen deaktiviert
 setup_edomainstar=Ein Domainname darf nicht mit * beginnen. Um eine Wildcard-Domain zu erstellen, erstellen Sie sie zuerst ohne das * und gehen Sie dann zur Seite Web-Konfiguration ⇾ Website-Optionen
 setup_edomainip=Ein Domainname darf keine IP-Adresse sein
 setup_eip=Fehlende oder ungültige IP-Adresse
@@ -2348,7 +2347,6 @@ log_newip_domain=IP-Adresse für Server $1 geändert
 log_newipshared_domain=IP-Adresse für Server $1 auf Shared konvertiert
 log_style_domain=Neuen Website-Inhalt-Stil auf Server $1 angewendet
 log_exclude_domain=Ausgeschlossene Backup-Verzeichnisse für Server $1 aktualisiert
-log_domdkim=DomainKey für Server $1 geändert
 log_assoc_domain=Assoziierte Funktionen für Server $1 geändert
 log_mail_domain=E-Mail-Einstellungen für Server $1 geändert
 log_proxy_domain=Proxy-Einstellungen für Server $1 geändert
@@ -2570,7 +2568,6 @@ backup_compression4=<tt>zstd</tt>
 backup_email=Backup-Bericht per E-Mail senden an
 backup_email_err=Nur E-Mail bei Fehler senden
 backup_email_doms=Auch E-Mail an Besitzer:innen der gesicherten Server senden
-backup_strftime>Do <tt>strftime</tt>-ähnliche Zeitersetzungen auf Datei- oder Verzeichnisnamen anwenden
 backup_onebyone=Jeden virtuellen Server nach dem Backup übertragen
 backup_kill=Aktion, wenn Ziel in Benutzung
 backup_kill0=Dieses Backup abbrechen
@@ -5877,7 +5874,6 @@ spf_dnssec=DNSSEC-Signatur aktiviert?
 spf_dp=DMARC-Policy für E-Mails, die SPF oder DKIM nicht bestehen
 spf_dpct=Prozentanteil der Nachrichten, auf die die Policy angewendet wird
 spf_dmarcruf=Reporting-URI für forensische Berichte
-spf_dmarcua=Reporting-URI für aggregierte Berichte
 spf_dkim=DomainKeys Identified Mail-Einträge hinzufügen?
 spf_dkim1=Immer DKIM-Einträge hinzufügen
 spf_dkim0=Niemals DKIM-Einträge hinzufügen
@@ -6103,6 +6099,7 @@ newdynip_off=Dynamisches IP-Update wurde deaktiviert. Änderungen an der IP-Adre
 newdynip_never=Noch nicht aktualisiert
 newdynip_notify=IP-Update-Benachrichtigungen per E-Mail an
 newdynip_none=Niemand
+
 newdynip_eext=Fehler beim Ermitteln der extern sichtbaren IP-Adresse
 newdynip_eexternal=Im externen Skriptmodus muss der vollständige Pfad zu einem Skript eingegeben werden
 
@@ -6110,7 +6107,6 @@ dynip_dyndns=DynDNS
 dynip_webmin=Virtualmin-System ..
 dynip_external=Externes Skript ausführen ..
 dynip_none=Keinen Dienst aktualisieren
-
 style_title=Verwende Inhaltsstil
 style_rusure=Sind Sie sicher, dass Sie die Webseiten für diesen virtuellen Server mit denen ersetzen möchten, die vom Inhaltsstil $1 generiert wurden?
 style_overwrite=Die folgenden Dateien werden überschrieben:

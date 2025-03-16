@@ -180,7 +180,6 @@ form_title3=Creare alias server
 form_title4=Creare sotto dominio virtuale
 form_ecannot=Non hai i permessi per creare server virtuali
 form_enomore=Non hai i permessi per creare altri server di alcun tipo
-form_genericmode=Tipo nuovo server virtuale:
 form_generic_subserver=Sub-server
 form_generic_alias=Alias di $1
 form_generic_subdom=Sub-dominio di $1
