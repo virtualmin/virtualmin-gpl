@@ -260,23 +260,35 @@ else {
 	}
 }
 
-# delete_mysql_db_grant(&domain, db, user)
-# Removes an existing entry from the database table
+# delete_mysql_db_grant(&domain, db, user, [host])
+# Removes a grant to a specific MySQL DB for a user, for all hosts
 sub delete_mysql_db_grant
 {
-local ($d, $db, $user) = @_;
+local ($d, $db, $user, $host) = @_;
 my $qdb = &quote_mysql_database($db);
+
+# Get all the hosts this user or DB has access from
+my @hosts;
+if ($host) {
+	@hosts = ($host);
+	}
+else {
+	my $rv = &execute_dom_sql($d, $mysql::master_db,
+		"select host from user where user = ?", $user);
+	push(@hosts, map { $_->[0] } @{$rv->{'data'}});
+	}
+
 if (&mysql_supports_grants($d)) {
 	# Use the revoke command
-	local $rv = &execute_dom_sql($d, $mysql::master_db,
-		"select host from user where user = ?", $user);
-	
-	# Specific database that was passed
-	my @dbs = ("`$qdb`.*");
-
-	# All databases belonging to the given user because
-	# *.* simply won't work without deleting the user
-	if (!$db) {
+	my @dbs;
+	if ($db) {
+		# Specific database that was passed
+		@dbs = ("`$qdb`.*");
+		}
+	else {
+		# All databases belonging to the given user because
+		# *.* simply won't work without deleting the user
+		# XXX when is this needed?
 		@dbs = ();
 		my @user_dbs = &list_domain_users($d, 1, 1, 1, 0);
 		my ($dbuser) = grep { $_->{'user'} eq $user } @user_dbs;
@@ -287,16 +299,16 @@ if (&mysql_supports_grants($d)) {
 			}
 		}
 	foreach my $dbs (@dbs) {
-		foreach my $r (@{$rv->{'data'}}) {
+		foreach my $h (@hosts) {
 			# Use eval here because the revoke function may fail
 			# if there are no permissions to revoke
 			eval {
 				local $main::error_must_die = 1;
-				&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbs from '$user'\@'$r->[0]'");
+				&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbs from '$user'\@'$h'");
 				};
 			eval {
 				local $main::error_must_die = 1;
-				&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
+				&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$h'");
 				};
 			}
 		}
@@ -306,6 +318,7 @@ else {
 	my @c;
 	push(@c, "(db = '$db' or db = '$qdb')") if ($db);
 	push(@c, "user = '$user'") if ($user);
+	push(@c, "(".join(" or ", map { "host='$_'" } @hosts).")");
 	@c || &error("delete_mysql_db_grant called with no db or user");
 	&execute_dom_sql($d, $mysql::master_db, "delete from db where ".join(" and ", @c));
 	&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
@@ -1255,6 +1268,7 @@ if ($allopts->{'repl'} && $mymod->{'config'}->{'host'} && $info{'remote'} &&
 local (%userdbs, %userpasses);
 foreach my $db (&domain_databases($d, [ 'mysql' ])) {
 	foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
+		print STDERR "user=$u->[0]\n";
 		if ($u->[0] ne $d->{'user'} &&
 		    $u->[0] ne 'root' &&
 		    $u->[0] ne $mymod->{'config'}->{'login'}) {
@@ -1368,9 +1382,10 @@ if ($d->{'wasmissing'}) {
 # previously
 foreach my $uname (keys %userdbs) {
 	my @grant = grep { $created{$_} } @{$userdbs{$uname}};
+	print STDERR "uname=$uname grant=",join(" ", @grant),"\n";
 	if (@grant) {
 		&create_mysql_database_user($d, \@grant, $uname, undef,
-					    $userpasses{$uname}, 1);
+					    $userpasses{$uname});
 		}
 	}
 
@@ -1752,6 +1767,7 @@ foreach my $uname (@unames) {
 # If any users had access to this DB only, remove them too
 local $duser = &mysql_user($d);
 foreach my $up (grep { $_->[0] ne $duser } @oldusers) {
+	# XXX why is this query needed when we already know the DB?
 	local $o = &execute_dom_sql($d, $mysql::master_db, "select db from db where user = '$up->[0]'");
 	if (!@{$o->{'data'}}) {
 		&execute_user_deletion_sql($d, undef, $up->[0]);
@@ -1848,7 +1864,9 @@ return &unique(@hosts);
 }
 
 # list_mysql_database_users(&domain, db)
-# Returns a list of MySQL users and passwords who can access some database
+# Returns a list of MySQL users and passwords who can access some database. Each
+# value in the returned array is a hash ref containing the username, hashed
+# password, a list of allowed hosts
 sub list_mysql_database_users
 {
 local ($d, $db) = @_;
@@ -1874,19 +1892,27 @@ else {
 	eval {
 		# Try old password column first
 		local $main::error_must_die = 1;
-		$rv = &execute_dom_sql($d, $mysql::master_db, "select user.user,user.password from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
+		$rv = &execute_dom_sql($d, $mysql::master_db, "select user.user,user.password,db.host from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
 		};
 	if ($@ || @{$rv->{'data'}} && $rv->{'data'}->[0]->[1] eq '') {
 		# Try new mysql user table format if the password query failed,
 		# or if the password was empty
 		eval {
 			local $main::error_must_die = 1;
-			$rv = &execute_dom_sql($d, $mysql::master_db, "select user.user,user.authentication_string from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
+			$rv = &execute_dom_sql($d, $mysql::master_db, "select user.user,user.authentication_string,db.host from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
 			};
 		}
 	local (@rv, %done);
-	foreach my $u (@{$rv->{'data'}}) {
-		push(@rv, $u) if (!$done{$u->[0]}++);
+	foreach my $r (@{$rv->{'data'}}) {
+		my $u = $done{$r->[0]};
+		if (!$u) {
+			$u = [ $r->[0], $r->[1], [ $r->[2] ] ];
+			push(@rv, $u);
+			$done{$r->[0]} = $u;
+			}
+		else {
+			$u->[2] = [ &unique(@{$u->[2]}, $r->[2]) ];
+			}
 		}
 	return @rv;
 	}
@@ -2425,12 +2451,21 @@ return $opts;
 sub get_mysql_allowed_hosts
 {
 local ($d) = @_;
+return &get_mysql_user_allowed_hosts($d, &mysql_user($d));
+}
+
+# get_mysql_allowed_hosts(&domain, username)
+# Returns a list of hostnames or IP addresses from which a specific MySQL user
+# is allowed to connect.
+sub get_mysql_user_allowed_hosts
+{
+my ($d, $user) = @_;
 &require_mysql();
 if ($d->{'provision_mysql'}) {
 	# Query provisioning server
 	my $mymod = &get_domain_mysql_module($d);
 	my $info = { 'host' => $mymod->{'config'}->{'host'},
-		     'user' => &mysql_user($d) };
+		     'user' => $user };
 	my ($ok, $msg) = &provision_api_call(
 		"list-provision-mysql-users", $info, 1);
 	&error(&text('user_emysqllist', $msg)) if (!$ok);
@@ -2439,7 +2474,7 @@ if ($d->{'provision_mysql'}) {
 else {
 	# Get from local DB
 	local $data = &execute_dom_sql($d, $mysql::master_db,
-	    "select distinct host from user where user = ?", &mysql_user($d));
+	    "select distinct host from user where user = ?", $user);
 	return map { $_->[0] } @{$data->{'data'}};
 	}
 }
@@ -2465,53 +2500,48 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Update MySQL permissions locally
+
+	# First get all the DBs owned by this domain, and sub-domains
 	local @dbs = &domain_databases($d, [ 'mysql' ]);
 	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
 		push(@dbs, &domain_databases($sd, [ 'mysql' ]));
 		}
 
-	# Update the user table entry for the main user
-	local $encpass = &encrypted_mysql_pass($d);
-	&execute_user_deletion_sql($d, undef, $user, 1);
-	foreach my $h (@$hosts) {
-		&execute_user_creation_sql($d, $h, $user, $encpass,
-					   &mysql_pass($d));
-		foreach my $db (@dbs) {
-			&create_mysql_db_grant($d, $h, $db->{'name'}, $user);
+	# For each DB, get all the users who have access and all their hosts.
+	# Then check the diff between what we want, and what we have.
+	my (@allusers, %doneuser);
+	foreach my $db (@dbs) {
+                foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
+			# Are there hosts we have currently but should remove?
+			my $gothosts = $u->[2];
+			foreach my $h (@$gothosts) {
+				next if (&indexof($h, @$hosts) >= 0);
+				&delete_mysql_db_grant(
+					$d, $db->{'name'}, $u->[0], $h);
+				}
+			# Are there hosts we don't have but should add?
+			foreach my $h (@$hosts) {
+				next if (&indexof($h, @$gothosts) >= 0);
+				&create_mysql_db_grant(
+					$d, $h, $db->{'name'}, $u->[0]);
+				}
+			push(@allusers, $u) if (!$doneuser{$u->[0]}++);
 			}
-		&set_mysql_user_connections($d, $h, $user, 0);
 		}
 
-	# Add db table entries for all users, and user table entries
-	# for mailboxes
-	my $mymod = &get_domain_mysql_module($d);
-	my %allusers;
-	foreach my $db (@dbs) {
-		foreach my $u (&list_mysql_database_users(
-				$d, $db->{'name'})) {
-			# Re-populate db table for this db and user
-			next if ($u->[0] eq $user ||
-				 $u->[0] eq 'root' ||
-				 $u->[0] eq $mymod->{'config'}->{'login'});
-			&delete_mysql_db_grant($d, $db->{'name'}, $u->[0]);
-			foreach my $h (@$hosts) {
-				&create_mysql_db_grant($d, $h, $db->{'name'},
-					      $u->[0]);
-				}
-			$allusers{$u->[0]} = $u;
+	# Now do a similar update to the list of hosts that the users themselves
+	# have access from. In MySQL, users have different host permissions from
+	# domains potentially.
+	foreach my $u (@allusers) {
+		my $gothosts = [ &get_mysql_user_allowed_hosts($d, $u->[0]) ];
+		foreach my $h (@$gothosts) {
+			next if (&indexof($h, @$hosts) >= 0);
+			&execute_user_deletion_sql($d, $h, $u->[0], 0);
 			}
-		}
-	# Re-populate user table
-	local %pmap = map { $_->{'mysql_user'}, $_->{'mysql_pass'} }
-			grep { $_->{'mysql_user'} }
-			  &list_domain_users($d, 1, 1, 1, 1);
-	foreach my $u (values %allusers) {
-		&execute_user_deletion_sql($d, undef, $u->[0]);
 		foreach my $h (@$hosts) {
+			next if (&indexof($h, @$gothosts) >= 0);
 			&execute_user_creation_sql($d, $h, $u->[0],
-				"'".&mysql_escape($u->[1])."'",
-				$pmap{$u->[0]});
-			&set_mysql_user_connections($d, $h, $u->[0], 1);
+				"'".&mysql_escape($u->[1])."'");
 			}
 		}
 	}
