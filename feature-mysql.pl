@@ -190,19 +190,19 @@ if (!$d->{'parent'}) {
 		# If there were any granted hosts before the user
 		# was created (like during a restore on a system sharing
 		# the same MySQL server), re-grant access to them
-		#foreach my $h (@oldhosts) {
-		#	next if (&indexof($h, @hosts) >= 0);
-		#	&execute_user_creation_sql($d, $h, $user,
-		#			   $encpass, &mysql_pass($d));
-		#	}
+		foreach my $h (@oldhosts) {
+			next if (&indexof($h, @hosts) >= 0);
+			&execute_user_creation_sql($d, $h, $user,
+					   $encpass, &mysql_pass($d));
+			}
 		# Similarly, if there were any granted hosts for DBs before
 		# the user was created, re-add them
-		#foreach my $olddb (@olddbs) {
-		#	foreach my $h (@{$olddb->[1]}) {
-		#		next if (&indexof($h, @hosts) >= 0);
-		#		&create_mysql_db_grant($d, $h, $olddb->[0], $user);
-		#		}
-		#	}
+		foreach my $olddb (@olddbs) {
+			foreach my $h (@{$olddb->[1]}) {
+				next if (&indexof($h, @hosts) >= 0);
+				&create_mysql_db_grant($d, $h, $olddb->[0], $user);
+				}
+			}
 		&$second_print($text{'setup_done'});
 		}
 	}
