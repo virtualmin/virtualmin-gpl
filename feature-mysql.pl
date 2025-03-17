@@ -318,7 +318,7 @@ else {
 	my @c;
 	push(@c, "(db = '$db' or db = '$qdb')") if ($db);
 	push(@c, "user = '$user'") if ($user);
-	push(@c, "(".join(" or ", map { "host='$_'" } @hosts).")");
+	push(@c, "(".join(" or ", map { "host='$_'" } @hosts).")") if (@hosts);
 	@c || &error("delete_mysql_db_grant called with no db or user");
 	&execute_dom_sql($d, $mysql::master_db, "delete from db where ".join(" and ", @c));
 	&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
@@ -2507,9 +2507,31 @@ else {
 		push(@dbs, &domain_databases($sd, [ 'mysql' ]));
 		}
 
+	# First get all the users across all DBs
+	my (@allusers, %doneuser);
+	foreach my $db (@dbs) {
+                foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
+			push(@allusers, $u) if (!$doneuser{$u->[0]}++);
+                        }
+                }
+
+	# For each user, get all the hosts they have access from and fix the
+	# diff between that and the hosts we want
+	foreach my $u (@allusers) {
+		my $gothosts = [ &get_mysql_user_allowed_hosts($d, $u->[0]) ];
+		foreach my $h (@$gothosts) {
+			next if (&indexof($h, @$hosts) >= 0);
+			&execute_user_deletion_sql($d, $h, $u->[0], 0);
+			}
+		foreach my $h (@$hosts) {
+			next if (&indexof($h, @$gothosts) >= 0);
+			&execute_user_creation_sql($d, $h, $u->[0],
+				"'".&mysql_escape($u->[1])."'");
+			}
+		}
+
 	# For each DB, get all the users who have access and all their hosts.
 	# Then check the diff between what we want, and what we have.
-	my (@allusers, %doneuser);
 	foreach my $db (@dbs) {
                 foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
 			# Are there hosts we have currently but should remove?
@@ -2525,23 +2547,6 @@ else {
 				&create_mysql_db_grant(
 					$d, $h, $db->{'name'}, $u->[0]);
 				}
-			push(@allusers, $u) if (!$doneuser{$u->[0]}++);
-			}
-		}
-
-	# Now do a similar update to the list of hosts that the users themselves
-	# have access from. In MySQL, users have different host permissions from
-	# domains potentially.
-	foreach my $u (@allusers) {
-		my $gothosts = [ &get_mysql_user_allowed_hosts($d, $u->[0]) ];
-		foreach my $h (@$gothosts) {
-			next if (&indexof($h, @$hosts) >= 0);
-			&execute_user_deletion_sql($d, $h, $u->[0], 0);
-			}
-		foreach my $h (@$hosts) {
-			next if (&indexof($h, @$gothosts) >= 0);
-			&execute_user_creation_sql($d, $h, $u->[0],
-				"'".&mysql_escape($u->[1])."'");
 			}
 		}
 	}
