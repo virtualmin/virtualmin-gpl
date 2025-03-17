@@ -1,5 +1,0 @@
-log_domdkim_domain=Domänenschlüssel für Server $1 geändert
-
-backup_strftime=Führen Sie Zeitsubstitutionen im <tt>strftime</tt>-Stil für Datei- oder Verzeichnisnamen durch
-
-spf_dmarcrua=Berichts-URI für aggregierte Berichte
