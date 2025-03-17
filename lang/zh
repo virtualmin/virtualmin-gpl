@@ -27,7 +27,6 @@ index_return2=模块索引
 index_list=列表..
 index_enet=在你的操作系统上，网络配置模块没有被支持。Virtualmin需要该模块来管理虚拟网络接口。
 index_edefip=Virtualmin无法计算出你系统上虚拟服务器的缺省IP地址。你必须在<a href='$1'>模块配置</a>页面上更新<b>虚拟地址的网络接口</b>或者<b>缺省虚拟服务器IP地址</b>。
-
 index_eapache=你的系统没有安装Apache web服务器，或者没有在Webmin的<a href='$1'>Apache Web服务器</a>模块中正确配置。如果你的系统不使用Apache，你必须在Virtualmin的<a href='$2'>模块配置</a>页面中禁用它。
 index_eproftpd=你的系统没有安装ProFTPd服务器，或者没有在Webmin的<a href='$1'>ProFTPd 服务器</a>模块中正确配置。如果你的系统不使用ProFTPd，你必须在Virtualmin的<a href='$2'>模块配置</a>页面中禁用它。
 index_ebind=你的系统没有安装BIND DNS服务器第8版或第9版，或者没有在Webmin的<a href='$1'>BIND DNS服务器</a>模块中正确配置。如果你的系统不使用BIND，你必须在Virtualmin的<a href='$2'>模块配置</a>页面中禁用它。
@@ -167,7 +166,6 @@ form_title2=创建虚拟子服务器
 form_title3=创建别名服务器
 form_title4=创建虚拟子域
 form_ecannot=你不能创建任何虚拟服务器
-form_genericmode=新虚拟服务器类型：
 form_generic_master=根服务器
 form_generic_subserver=子服务器
 form_generic_alias=$1的别名

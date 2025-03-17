@@ -397,6 +397,7 @@ foreach my $r (@$oldrecs) {
 	next if ($keep{&dns_record_key($r)});
 	my $v = join(" ", @{$r->{'values'}});
 	$v = &normalize_route53_txt($r) if ($r->{'type'} =~ /TXT|SPF/);
+	$v = &format_caa_record($r) if ($r->{'type'} eq "CAA");
 	push(@{$js->{'Changes'}},
 	     { 'Action' => 'DELETE',
 	       'ResourceRecordSet' => {
@@ -416,6 +417,7 @@ foreach my $r (@$recs) {
 	$type = $r->{'type'};
 	$type = "TXT" if ($type eq "SPF" || $type eq "DMARC");
 	$v = &normalize_route53_txt($r) if ($type eq "TXT");
+	$v = &format_caa_record($r) if ($type eq "CAA");
 	push(@{$js->{'Changes'}},
 	     { 'Action' => 'UPSERT',
 	       'ResourceRecordSet' => {

@@ -38,7 +38,6 @@ index_return2=índice del modulo
 index_list=Lista..
 index_enet=Su sistema operativo no soporta el Módulo de Configuración de Red. Virtualmin necesita este módulo para gestionar las interfaces de red virtual.
 index_edefip=Virtualmin no puede encontrar la IP por defecto de los servidores virtuales en su sistema. Va a necesitar actualizar los campos <b>Interfaz de red para direcciones virtuales</b> o <b>Direcciones IP virtuales por defecto</b> en la página <a href='$1'>Configuración de módulo</a>.
-
 index_eapache=El servidor de web Apache no parece estar instalado en su sistema, o bien no ha sido configurado adecuadamente en el módulo <a href='$1'>Apache Webserver</a> de Webmin. Si su sistema no utiliza Apache, éste debe ser deshabilitado en la página de <a href='$2'>configuración de módulo</a> de Virtualmin.
 index_eproftpd=El servidor ProFTPd no parece estar instalado en su sistema, o bien no ha sido configurado adecuadamente en el módulo <a href='$1'>Servidor ProFTPd</a> de Webmin. Si su sistema no utiliza ProFTPd, éste debe ser desactivado en la página de <a href='$2'>configuración de módulo</a> de Virtualmin.
 index_ebind=El servidor BIND DNS versión 8 o 9  no parece estar instalado en su sistema, o bien no ha sido configurado apropiadamente en el módulo <a href='$1'>Servidor BIND DNS</a>. Si su sistema no utiliza BIND, deberá ser desactivado en la página de <a href='$2'>configuración de módulo</a> de Virtualmin.
@@ -210,7 +209,6 @@ form_title3=Crear Servidor Alias
 form_title4=Crear subdomino virtual
 form_ecannot=Ud. no está autorizado para crear servidores virtuales
 form_enomore=No está autorizado a crear mas servidores virtuales de ningún tipo
-form_genericmode=Nuevo tipo de servidor virtual:
 form_generic_master=Servidor top-level
 form_generic_subserver=Sub-servidor
 form_generic_alias=Alias de $1

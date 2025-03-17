@@ -34,7 +34,6 @@ index_return2=index du module
 index_list=Liste..
 index_enet=Le module de configuration du réseau n'est pas supporté pour votre système d'exploitation. Virtualmin a besoin de ce module pour gérer les interfaces réseau virtuelles.
 index_edefip=Virtualmin ne pouvait pas résoudre l'adresse IPv4 par défaut pour les serveurs virtuels sur votre système. Vous aurez besoin de mettre à jour soit le champs <b>Interface réseau pour les adresses virtuelles</b> ou <b>L'adresse IP par défaut du serveur virtuel</b> de la <a href='$1'>configuration du module</a>.
-
 index_eapache=Le serveur web Apache ne semble pas etre installé sur votre systeme, ou n'a pas été correctement configuré dans le module Webmin <a href='$1'>Serveur web Apache</a>. Si votre système n'utilise pas Apache, il doit etre désactivé dans la page de configuration du <a href='$2'>module Virtualmin</a>.
 index_eproftpd=Le serveur ProFTPd ne semble pas installé sur votre système, ou n'a pas encore été configuré dans le module Webmin de <a href='$1'>Serveur ProFTPd</a>. Si votre système n'utilise pas ProFTPd, cette fonctionnalité doit être désactivée dans la page de <a href='$2'>configuration du module</a> Virtualmin.
 index_ebind=Le serveur DNS BIND version 8 ou 9 ne semble pas etre installé sur votre systeme, ou n'a pas été correctement configuré dans le module Webmin <a href='$1'>Serveur DNS BIND</a>. Si votre système n'utilise pas BIND, il doit être désactivé dans la page de configuration du <a href='$2'>module Virtualmin</a>.

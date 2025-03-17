@@ -5042,6 +5042,21 @@ foreach my $ln (@lines) {
 return join("\n", @recs);
 }
 
+# format_caa_record(&record)
+# Formats a CAA record
+sub format_caa_record
+{
+my ($r) = @_;
+my @v = @{$r->{'values'}};
+my $v = join(" ", @v);
+$v =~ s/\s+/ /g;
+# Flag is integer, tag is unquoted, value is quoted (unless already quoted)
+if ($v =~ /^(\d+)\s+(\S+)\s+([^"].*[^"])$/) {
+	$v = "$1 $2 \"$3\"";
+	}
+return $v;
+}
+
 # obtain_lock_dns(&domain, [named-conf-too])
 # Lock a domain's zone file and named.conf file
 sub obtain_lock_dns
