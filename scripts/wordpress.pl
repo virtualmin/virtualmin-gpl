@@ -581,6 +581,16 @@ foreach my $wpconfig (@$files) {
 	my $wppath = $wpdir;
 	$wppath =~ s/^\Q$phd\E//;
 	$wppath ||= "/";
+	my @version = &find_recursive_files($wpdir, 'version.php');
+	next if (!@version);
+	my $wpok = 1;
+	foreach my $l (@{&read_file_lines("$wpdir/$version[0]", 1)}) {
+		if ($l =~ /\$(cp_version)/) { # WP clone, not WordPress
+			$wpok = 0;
+			last;
+			}
+		}
+	next if (!$wpok);
 	my $sinfo = {
 		'opts' => {
 			'dir' => $wpdir,
