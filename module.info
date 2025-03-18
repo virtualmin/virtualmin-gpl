@@ -3,6 +3,6 @@ category=servers
 depends=net useradmin quota webmin mount init acl cron mailboxes phpini procmail 2.014
 recommends=awscli virtualmin-wp-workbench
 os_support=*-linux macos freebsd openbsd solaris
-version=7.30.7
+version=7.30.8
 readonly=1
 feedback=feedback@webmin.com

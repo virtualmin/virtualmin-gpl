@@ -1,3 +1,10 @@
+#### Version 7.30.8
+* Add an ad for WP Workbench to the dashboard
+* Fix Backblaze backups to work with new API
+
+#### Version 7.30.7
+* Add missing string for WP Workbench
+
 #### Version 7.30.6
 * Fix to improve file saving operations for greater reliability
 * Fix to optimize PHP session cleanup for directories with large numbers of files

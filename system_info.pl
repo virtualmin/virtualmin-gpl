@@ -97,6 +97,37 @@ if (&should_show_pro_tip('dashboard', 1)) {
 		}
 	}
 
+# Tell GPL users about WP Workbench
+if (&should_show_pro_tip('wp_workbench_ad', 1)) {
+	# Show WP Workbench notice on the dashboard
+	my $goodtime = 1;
+	# Show alert in another 21 days if reminder been set
+	my ($remind) = &should_show_pro_tip('wp_workbench_ad_reminder', 1);
+	my $futureremind = (int($remind) + (60*60*24 * 21));
+	my $doremind = ($remind && $futureremind < time());
+	my $target_link = "https://www.virtualmin.com/docs/plugins/wp-workbench/";
+	my $pref = 'scripts_gpl_pro_tip_';
+	push(@rv,
+		{ 'type' => 'warning',
+		  'level' => 'info',
+		  'warning' => {
+		    'alert' => &alert_pro_tip('wp_workbench_ad',
+		    { 'main_icon' => ' fa-exclamation-circle inline-text',
+		      'alert_title' => $text{"${pref}plugin_dashboard"},
+		      'alert_body1' => $text{"${pref}workbench_desc_dashboard"},
+		      'alert_body2' => " ",
+		      'target_link' => $target_link,
+		      'button_text2' => $text{"${pref}learn_more"},
+		      'button_icon2' => 'fa fa-fw fa-question-circle',
+		      'button_text3' => $text{"${pref}remind"},
+		      'button_icon3' => 'fa fa-fw fa-clock',
+		      'button_text' => $text{"${pref}hide"},
+		      'button_icon' => 'fa fa-fw fa-times-circle-o',
+		    })
+		  },
+		}) if (($goodtime && !$remind) || ($goodtime && $doremind));
+	}
+
 # Show a domain owner info about his domain, but NOT info about the system
 if (!&master_admin() && !&reseller_admin()) {
 	my @table;

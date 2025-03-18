@@ -4692,7 +4692,7 @@ scripts_kit_estype_multi2=Use the auxiliary '--script-path' parameter to specify
 scripts_kit_estype_path=The script of type '$1' at path '$2' does not exist
 
 scripts_gpl_pro_tip=Pro Feature
-scripts_gpl_pro_tip_hide=Thanks for the heads-up
+scripts_gpl_pro_tip_hide=Dismiss
 scripts_gpl_pro_tip_hide2=Thanks, I will think about it
 scripts_gpl_pro_tip_open=Purchase Virtualmin Pro
 scripts_gpl_pro_tip_remind=Remind Me Later
@@ -4710,6 +4710,9 @@ scripts_gpl_pro_tip_extra_db_users=This form allows you to create and manage dat
 scripts_gpl_pro_tip_extra_user_dismiss=Thanks for the tip! Hide this page and its link
 scripts_gpl_pro_tip_workbench_pro_only=The $1 Workbench feature is not available in the GPL version.
 scripts_gpl_pro_tip_workbench_enot=The $1 Workbench feature is not available for this web app
+scripts_gpl_pro_tip_plugin_dashboard=New plugin available
+scripts_gpl_pro_tip_learn_more=Learn More
+scripts_gpl_pro_tip_workbench_desc_dashboard=WP Workbench is a new plugin for Virtualmin Pro designed to simplify WordPress site management. It offers a clear, centralized interface for managing WordPress plugins, themes, backups, cloning, and development settings.
 
 scripts_service_ename=Missing or invalid service name
 scripts_service_eport=Missing or invalid service port number
