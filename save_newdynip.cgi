@@ -22,7 +22,7 @@ if ($in{'service'} eq 'external') {
 	}
 elsif ($in{'service'} eq 'webmin') {
 	&to_ipaddress($in{'external'}) ||
-	   $in{'external'} =~ /^\S+:\d+$/ && &to_ipaddress($1) ||
+	   $in{'external'} =~ /^(\S+):\d+$/ && &to_ipaddress($1) ||
 	     &error($text{'newdynip_eexternal2'});
 	}
 $config{'dynip_external'} = $in{'external'};
