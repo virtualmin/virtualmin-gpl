@@ -60,7 +60,7 @@ if (&need_config_check() && &can_check_config()) {
 
 # Suggest to GPL user to get Virtualmin Pro
 if (!$virtualmin_pro &&
-    &should_show_pro_tip('dashboard', 'force')) {
+    &should_show_pro_tip('dashboard', 1)) {
 	# Do not show Pro advertisement on the dashboard within first three days
 	my $goodtime;
 	my $lastpost = $config{'lastpost'};
@@ -76,7 +76,7 @@ if (!$virtualmin_pro &&
 		$goodtime = (!$uptime || $uptime > 60*60*24 * 3);
 		}
 	# Show alert in another 21 days if reminder been set
-	my ($remind) = &should_show_pro_tip('dashboard_reminder', 'force');
+	my ($remind) = &should_show_pro_tip('dashboard_reminder', 1);
 	my $futureremind = (int($remind) + (60*60*24 * 21));
 	my $doremind = ($remind && $futureremind < time());
 	if (($goodtime && !$remind) || ($goodtime && $doremind)) {
