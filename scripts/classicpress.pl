@@ -570,10 +570,8 @@ foreach my $wpconfig (@$files) {
 	my $wppath = $wpdir;
 	$wppath =~ s/^\Q$phd\E//;
 	$wppath ||= "/";
-	my @version = &find_recursive_files($wpdir, 'version.php');
-	next if (!@version);
 	my $cpok = 0;
-	foreach my $l (@{&read_file_lines("$wpdir/$version[0]", 1)}) {
+	foreach my $l (@{&read_file_lines("$wpdir/wp-includes/version.php", 1)}) {
 		if ($l =~ /\$cp_version/) { # Found ClassicPress
 			$cpok = 1;
 			last;
