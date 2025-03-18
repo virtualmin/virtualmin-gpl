@@ -2184,6 +2184,20 @@ $database_tests = [
 	  'grep' => 'Allowed mysql hosts:.*1\\.2\\.3\\.4',
 	},
 
+	# Remove the allowed database host
+	{ 'command' => 'modify-database-hosts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'remove-host', '1.2.3.4' ] ],
+	},
+
+	# Make sure the allowed DB is gone
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => 'Allowed mysql hosts:.*1\\.2\\.3\\.4',
+	},
+
 	$config{'postgres'} ?
 	(
 		# Create a PostgreSQL database
@@ -12867,7 +12881,7 @@ return (
 
 	# Check PostgreSQL login
 	{ 'command' => 'su - '.$user.' -c '.
-		quotemeta('psql -U '.$user.' -h localhost '.
+		quotemeta('psql -U '.$user.' '.
 			  '-c "'.($sql || 'select 666').'" '.$db),
 	  $sql ? ( ) : $failmode ? ( 'antigrep' => 666 ) : ( 'grep' => 666 ),
 	  'ignorefail' => $failmode,
