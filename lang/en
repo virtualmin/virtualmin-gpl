@@ -4671,7 +4671,7 @@ scripts_kit_estype_multi2=Use the auxiliary '--script-path' parameter to specify
 scripts_kit_estype_path=The script of type '$1' at path '$2' does not exist
 
 scripts_gpl_pro_tip=Pro Feature
-scripts_gpl_pro_tip_hide=Thanks for the heads-up
+scripts_gpl_pro_tip_hide=Dismiss
 scripts_gpl_pro_tip_hide2=Thanks, I will think about it
 scripts_gpl_pro_tip_open=Purchase Virtualmin Pro
 scripts_gpl_pro_tip_remind=Remind Me Later
