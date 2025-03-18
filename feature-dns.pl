@@ -1243,7 +1243,7 @@ else {
 }
 
 # split_long_txt_record(string, [no-brackets])
-# Split a TXT record at 80 char boundaries
+# Split a TXT record at 255 char boundaries
 sub split_long_txt_record
 {
 local ($str, $nobrackets) = @_;
@@ -1251,8 +1251,8 @@ $str =~ s/^"//;
 $str =~ s/"$//;
 local @rv;
 while($str) {
-	local $first = substr($str, 0, 80);
-	$str = substr($str, 80);
+	local $first = substr($str, 0, 255);
+	$str = substr($str, 255);
 	push(@rv, $first);
 	}
 return @rv == 1 ? '"'.$rv[0].'"' :
