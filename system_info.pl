@@ -59,8 +59,7 @@ if (&need_config_check() && &can_check_config()) {
 	}
 
 # Suggest to GPL user to get Virtualmin Pro
-if (!$virtualmin_pro &&
-    &should_show_pro_tip('dashboard', 1)) {
+if (&should_show_pro_tip('dashboard', 1)) {
 	# Do not show Pro advertisement on the dashboard within first three days
 	my $goodtime;
 	my $lastpost = $config{'lastpost'};
