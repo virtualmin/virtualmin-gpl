@@ -95,7 +95,7 @@ if (&should_show_pro_tip('dashboard', 1)) {
 			    	}) },
 			  });
 		}
-	} 
+	}
 
 # Show a domain owner info about his domain, but NOT info about the system
 if (!&master_admin() && !&reseller_admin()) {
