@@ -159,9 +159,8 @@ if (!$d->{'parent'}) {
 		}
 	else {
 		# Create the user
-		my @oldhosts = &get_mysql_hosts($d, 3);
+		my @hosts = &get_mysql_hosts($d, 1);
 		my @olddbs = &list_mysql_db_grants($d, $user);
-		my @hosts = &get_mysql_hosts($d, 0);
 		if (&indexof("%", @hosts) >= 0 &&
 		    &indexof("localhost", @hosts) < 0 &&
 		    &indexof("127.0.0.1", @hosts) < 0) {
@@ -179,6 +178,8 @@ if (!$d->{'parent'}) {
 			}
 		local $encpass = &encrypted_mysql_pass($d);
 		foreach my $h (@hosts) {
+			# Create the user with access from each of the hosts
+			# from the template
 			&execute_user_deletion_sql($d, $h, $user);
 			&execute_user_creation_sql($d, $h, $user,
 					   $encpass, &mysql_pass($d));
@@ -186,21 +187,13 @@ if (!$d->{'parent'}) {
 				&create_mysql_db_grant($d, $h, $wild, $user);
 				}
 			&set_mysql_user_connections($d, $h, $user, 0);
-			}
-		# If there were any granted hosts before the user
-		# was created (like during a restore on a system sharing
-		# the same MySQL server), re-grant access to them
-		foreach my $h (@oldhosts) {
-			next if (&indexof($h, @hosts) >= 0);
-			&execute_user_creation_sql($d, $h, $user,
-					   $encpass, &mysql_pass($d));
-			}
-		# Similarly, if there were any granted hosts for DBs before
-		# the user was created, re-add them
-		foreach my $olddb (@olddbs) {
-			foreach my $h (@{$olddb->[1]}) {
-				next if (&indexof($h, @hosts) >= 0);
-				&create_mysql_db_grant($d, $h, $olddb->[0], $user);
+
+			# If some databases were already granted to the user,
+			# such as for a restore onto a new system that is using
+			# the same MySQL replica, grant them to the new host
+			foreach my $db (@olddbs) {
+				next if (&indexof($h, @{$db->[1]}) >= 0);
+				&create_mysql_db_grant($d, $h, $db->[0], $user);
 				}
 			}
 		&$second_print($text{'setup_done'});
