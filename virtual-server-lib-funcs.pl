@@ -15761,7 +15761,7 @@ if ($config{'dns'}) {
 			elsif ($masterip ne &get_any_external_ip_address(1) &&
 			       $masterip ne &get_dns_ip() &&
 			       &indexof($masterip, &active_ip_addresses()) < 0) {
-				$mastermsg ||= &text('check_dnsmaster2',
+				$mastermsg ||= &text('check_dnsmaster3',
 					     "<tt>$master</tt>", "<tt>$masterip</tt>");
 				}
 			}
