@@ -404,11 +404,8 @@ return undef;
 sub script_classicpress_latest
 {
 my ($ver) = @_;
-if (&compare_versions($ver, 6) >= 0) {
-	return ( "https://github.com/ClassicPress/ClassicPress-release/tags",
-		 "ClassicPress/ClassicPress-release/releases/tag/([\\d\\.]+)" );
-	}
-return ( );
+return ( 'https://github.com/ClassicPress/ClassicPress-release/tags',
+	 'ClassicPress/ClassicPress-release/releases/tag/([\\d\\.]+)"' );
 }
 
 sub script_classicpress_site
