@@ -570,6 +570,14 @@ foreach my $wpconfig (@$files) {
 	my $wppath = $wpdir;
 	$wppath =~ s/^\Q$phd\E//;
 	$wppath ||= "/";
+	my $cpok = 0;
+	foreach my $l (@{&read_file_lines("$wpdir/wp-includes/version.php", 1)}) {
+		if ($l =~ /\$cp_version/) { # Found ClassicPress
+			$cpok = 1;
+			last;
+			}
+		}
+	next if (!$cpok);
 	my $sinfo = {
 		'opts' => {
 			'dir' => $wpdir,
