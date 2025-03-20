@@ -4668,7 +4668,6 @@ scripts_kit_clone_target2=Existing domain
 scripts_kit_clone_target3=New sub-domain
 scripts_kit_clone_target4=New top-level domain
 scripts_kit_apply=Apply
-scripts_kit_wp_login=Login to WordPress
 scripts_kit_updcache=Check Updates
 scripts_kit_openin_fm=Open in File Manager
 scripts_kit_backups_location=Backups location
