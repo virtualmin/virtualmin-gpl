@@ -4668,7 +4668,6 @@ scripts_kit_clone_target2=Vorhandene Domain
 scripts_kit_clone_target3=Neue Sub-Domain
 scripts_kit_clone_target4=Neue Top-Level-Domain
 scripts_kit_apply=Anwenden
-scripts_kit_wp_login=Anmeldung bei WordPress
 scripts_kit_updcache=Updates prüfen
 scripts_kit_openin_fm=Im Dateimanager öffnen
 scripts_kit_backups_location=Backup-Standort
@@ -4692,7 +4691,7 @@ scripts_kit_estype_multi2=Verwenden Sie den Hilfsparameter '--script-path', um d
 scripts_kit_estype_path=Das Script des Typs '$1' am Pfad '$2' existiert nicht
 
 scripts_gpl_pro_tip=Pro-Feature
-scripts_gpl_pro_tip_hide=Danke für den Hinweis
+scripts_gpl_pro_tip_hide=Ausblenden
 scripts_gpl_pro_tip_hide2=Danke, ich werde darüber nachdenken
 scripts_gpl_pro_tip_open=Virtualmin Pro kaufen
 scripts_gpl_pro_tip_remind=Erinnere mich später
@@ -4710,6 +4709,9 @@ scripts_gpl_pro_tip_extra_db_users=Mit diesem Formular können Sie Datenbank-Ben
 scripts_gpl_pro_tip_extra_user_dismiss=Danke für den Tipp! Diese Seite und ihren Link ausblenden
 scripts_gpl_pro_tip_workbench_pro_only=Die $1 Workbench-Funktion ist in der GPL-Version nicht verfügbar.
 scripts_gpl_pro_tip_workbench_enot=Die $1 Workbench-Funktion ist für diese Web-App nicht verfügbar
+scripts_gpl_pro_tip_plugin_dashboard=Neues Plugin verfügbar
+scripts_gpl_pro_tip_learn_more=Mehr erfahren
+scripts_gpl_pro_tip_workbench_desc_dashboard=WP Workbench ist ein neues Plugin für Virtualmin Pro, das die Verwaltung von WordPress-Websites erleichtert. Es bietet eine übersichtliche, zentrale Oberfläche zur Verwaltung von WordPress-Plugins, -Themes, -Backups, zum Klonen sowie zur Konfiguration von Entwicklungseinstellungen.
 
 scripts_service_ename=Fehlender oder ungültiger Dienstname
 scripts_service_eport=Fehlende oder ungültige Dienstportnummer
@@ -6105,6 +6107,7 @@ newdynip_notify=IP-Update-Benachrichtigungen per E-Mail an
 newdynip_none=Niemand
 newdynip_eext=Fehler beim Ermitteln der extern sichtbaren IP-Adresse
 newdynip_eexternal=Im externen Skriptmodus muss der vollständige Pfad zu einem Skript eingegeben werden
+newdynip_eexternal2=Im Webmin-Modus muss der Hostname oder Hostname:Port eines Webmin-Servers eingegeben werden.
 
 dynip_dyndns=DynDNS
 dynip_webmin=Virtualmin-System ..
