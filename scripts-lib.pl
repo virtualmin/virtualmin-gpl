@@ -81,17 +81,21 @@ if (!$coreonly) {
 				&guess_script_version($spath), 'plugin' ]);
 			}
 		}
-	# Load script extension from plugins
-	if (@sfiles) {
-		foreach my $p (&check_script_plugins_extensions()) {
-			my @efiles =
-				&plugin_call($p, "get_scripts_extension_files",
-					     $name);
-			$sfiles[0]->[4] = \@efiles if (@efiles);
+	}
+
+# No such script
+return undef if (!@sfiles);
+
+# Load script extension from plugins for each file
+foreach my $p (&check_script_plugins_extensions()) {
+	my @efiles = &plugin_call($p, "get_scripts_extension_files", $name);
+	if (@efiles) {
+		foreach my $sfile (@sfiles) {
+			$sfile->[4] ||= [];
+			push(@{$sfile->[4]}, @efiles);
 			}
 		}
 	}
-return undef if (!@sfiles);
 
 # Work out the newest one, so that plugins can override Virtualmin and
 # vice-versa
