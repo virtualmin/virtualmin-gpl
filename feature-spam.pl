@@ -1397,13 +1397,14 @@ sub setup_lookup_domain_daemon
 &foreign_require("init");
 local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
 local $helper = &get_api_helper_command();
+local $killcmd = &has_command('kill');
 if (!&init::action_status("lookup-domain")) {
 	# Need to create and start the action
 	&init::enable_at_boot(
 	      "lookup-domain",
 	      "Daemon for quickly looking up Virtualmin servers from procmail",
 	      "$helper lookup-domain-daemon",
-	      "@{[&has_command('kill')]} `cat $pidfile`",
+	      "test -s $pidfile && $killcmd `cat $pidfile`",
 	      undef,
 	      { 'fork' => 1, 'pidfie' => $pidfile });
 	&init::start_action("lookup-domain");
