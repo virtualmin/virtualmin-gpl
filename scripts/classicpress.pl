@@ -26,7 +26,7 @@ return "A lightweight, stable, instantly familiar free open-source content manag
 # script_classicpress_versions()
 sub script_classicpress_versions
 {
-return ( "2.3.1", "2.2.0", "2.1.1", "1.4.0" );
+return ( "2.4.1", "2.3.1", "2.2.0", "2.1.1", "1.4.0" );
 }
 
 sub script_classicpress_category
@@ -210,12 +210,17 @@ return (0, "Database connection failed : $dberr") if ($dberr);
 
 my $dom_php_bin = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
 $dom_php_bin || return (0, "Could not find PHP CLI command");
-my $wp = "cd $opts->{'dir'} && $dom_php_bin $opts->{'dir'}/wp-cli.phar";
+my $homebin = "$d->{'home'}/bin";
+&make_dir_as_domain_user($d, $homebin, 0755) if (!-d $homebin);
+my $wpcli = "$homebin/wp";
+my $wpcli_old = "$opts->{'dir'}/wp-cli.phar";
+&unlink_file_as_domain_user($d, $wpcli_old) if (-f $wpcli_old);
+my $wp = "cd $opts->{'dir'} && $dom_php_bin $wpcli --path=\"$opts->{'dir'}\"";
 
 # Copy WP-CLI
 &make_dir_as_domain_user($d, $opts->{'dir'}, 0755) if (!-d $opts->{'dir'});
-&copy_source_dest($files->{'cli'}, "$opts->{'dir'}/wp-cli.phar");
-&set_permissions_as_domain_user($d, 0750, "$opts->{'dir'}/wp-cli.phar");
+&copy_source_dest($files->{'cli'}, $wpcli);
+&set_permissions_as_domain_user($d, 0750, $wpcli);
 
 # Source URL
 my $download_server =
@@ -399,11 +404,8 @@ return undef;
 sub script_classicpress_latest
 {
 my ($ver) = @_;
-if (&compare_versions($ver, 6) >= 0) {
-	return ( "https://github.com/ClassicPress/ClassicPress-release/tags",
-		 "ClassicPress/ClassicPress-release/releases/tag/([\\d\\.]+)" );
-	}
-return ( );
+return ( 'https://github.com/ClassicPress/ClassicPress-release/tags',
+	 'ClassicPress/ClassicPress-release/releases/tag/([\\d\\.]+)"' );
 }
 
 sub script_classicpress_site

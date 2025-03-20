@@ -215,12 +215,17 @@ return (0, "Database connection failed : $dberr") if ($dberr);
 
 my $dom_php_bin = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
 $dom_php_bin || return (0, "Could not find PHP CLI command");
-my $wp = "cd $opts->{'dir'} && $dom_php_bin $opts->{'dir'}/wp-cli.phar";
+my $homebin = "$d->{'home'}/bin";
+&make_dir_as_domain_user($d, $homebin, 0755) if (!-d $homebin);
+my $wpcli = "$homebin/wp";
+my $wpcli_old = "$opts->{'dir'}/wp-cli.phar";
+&unlink_file_as_domain_user($d, $wpcli_old) if (-f $wpcli_old);
+my $wp = "cd $opts->{'dir'} && $dom_php_bin $wpcli --path=\"$opts->{'dir'}\"";
 
-# Copy wordpress-cli
+# Copy WP-CLI
 &make_dir_as_domain_user($d, $opts->{'dir'}, 0755) if (!-d $opts->{'dir'});
-&copy_source_dest($files->{'cli'}, "$opts->{'dir'}/wp-cli.phar");
-&set_permissions_as_domain_user($d, 0750, "$opts->{'dir'}/wp-cli.phar");
+&copy_source_dest($files->{'cli'}, $wpcli);
+&set_permissions_as_domain_user($d, 0750, $wpcli);
 
 # Source URL
 my $aux_download_server = "http://scripts.virtualmin.com";
