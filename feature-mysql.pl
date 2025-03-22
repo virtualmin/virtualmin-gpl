@@ -2536,7 +2536,6 @@ else {
 				}
 			# Are there hosts we don't have but should add?
 			foreach my $h (@$hosts) {
-				next if (&indexof($h, @$gothosts) >= 0);
 				&create_mysql_db_grant(
 					$d, $h, $db->{'name'}, $u->[0]);
 				}
