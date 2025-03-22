@@ -82,7 +82,7 @@ $did ||= ($d ? $d->{'id'} : undef);
 
 # Create top-level domain link
 push(@rv, { 'format' => 'new' });
-if (&can_create_master_servers() || &can_create_sub_servers()) {
+if (&can_create_master_servers()) {
 	# Domain creation item
 	push(@rv, { "type" => "item",
 		    "desc" => $text{'left_generic'},
@@ -128,7 +128,7 @@ else {
 	}
 
 # Create sub-server and/or alias links
-if (&can_create_master_servers() || &can_create_sub_servers()) {
+if (&can_create_sub_servers()) {
 	if (&can_create_sub_servers() && $d && !$d->{'parent'}) {
 		push(@rv, { "type" => "item",
 			    "desc" => $text{'form_title2'},
