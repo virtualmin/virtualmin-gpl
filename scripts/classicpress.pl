@@ -26,7 +26,7 @@ return "A lightweight, stable, instantly familiar free open-source content manag
 # script_classicpress_versions()
 sub script_classicpress_versions
 {
-return ( "2.4.1", "2.3.1", "2.2.0", "2.1.1", "1.4.0" );
+return ( "2.4.1", "1.7.3" );
 }
 
 sub script_classicpress_category
@@ -73,7 +73,7 @@ return ( "mysql" );
 
 sub script_classicpress_release
 {
-return 12; # zip extension has to be installed
+return 13; # Fix to simplify versions for ClassicPress
 }
 
 sub script_classicpress_php_fullver
