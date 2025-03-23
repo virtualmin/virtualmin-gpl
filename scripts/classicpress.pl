@@ -407,12 +407,6 @@ my ($ver) = @_;
 return ( 'https://github.com/ClassicPress/ClassicPress-release/tags',
 	 $ver >= 2.4 ?
 	   'ClassicPress/ClassicPress-release/releases/tag/([\\d\\.]+)"' :
-	 $ver >= 2.3 ?
-	   'ClassicPress/ClassicPress-release/releases/tag/(2\\.3\\.[\\d\\.]+)"' :
-	 $ver >= 2.2 ?
-	   'ClassicPress/ClassicPress-release/releases/tag/(2\\.2\\.[\\d\\.]+)"' :
-	 $ver >= 2.1 ?
-	   'ClassicPress/ClassicPress-release/releases/tag/(2\\.1\\.[\\d\\.]+)"' :
 	   'ClassicPress/ClassicPress-release/releases/tag/(1\\.[\\d\\.]+)"'
 	);
 }
