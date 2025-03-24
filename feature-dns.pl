@@ -1621,10 +1621,16 @@ $aliasfile || return "No zone file for alias target $aliasd->{'dom'} found";
 local $olddom = $aliasd->{'dom'};
 local $dom = $d->{'dom'};
 local $oldip = $aliasd->{'ip'};
+
+# Find sub-domains of the source, and sub-domains of this alias
 local @sublist = grep { $_->{'dns'} &&
 			$_->{'id'} ne $aliasd->{'id'} &&
 			$_->{'dom'} =~ /\.\Q$aliasd->{'dom'}\E$/ }
 		      &list_domains();
+local @sublist2 = grep { $_->{'dns'} &&
+			 $_->{'id'} ne $d->{'id'} &&
+			 $_->{'dom'} =~ /\.\Q$d->{'dom'}\E$/ }
+		       &list_domains();
 
 # Find records we already have
 local %already;
@@ -1742,10 +1748,17 @@ RECORD: foreach my $r (@$aliasrecs) {
 # Delete records that are missing now, if diffing
 if ($diff) {
 	my @delrecs;
-	foreach my $r (@$recs) {
+	RECORD: foreach my $r (@$recs) {
 		next if ($r->{'type'} eq 'SOA');
 		next if (&is_dnssec_record($r));
 		next if ($keep{&dns_record_key($r, 1)});
+		foreach my $sd (@sublist2) {
+			if ($r->{'name'} eq $sd->{'dom'}."." ||
+			    $r->{'name'} =~ /\.\Q$sd->{'dom'}\E\.$/) {
+				# Skip records in sub-domains of the target for deletion
+				next RECORD;
+				}
+			}
 		push(@delrecs, $r);
 		}
 	foreach my $r (@delrecs) {
