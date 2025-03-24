@@ -5334,21 +5334,24 @@ sub find_parent_dns_domain
 {
 my ($d) = @_;
 if ($d->{'parent'}) {
+	# First check for server with the same owner to see if they
+	# are possible sub-domains
 	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
 			     (&get_domain_by("parent", $d->{'parent'}),
 			      &get_domain($d->{'parent'}))) {
 		if ($pd->{'id'} ne $d->{'id'} && !$pd->{'dns_submode'} &&
-		    &under_parent_domain($d, $pd)) {
+		    !$pd->{'alias'} && &under_parent_domain($d, $pd)) {
 			return $pd;
 			}
 		}
 	}
 if ($d->{'dns_subany'} || $config{'dns_secany'}) {
-	# Allow any domain to be the DNS parent 
+	# Fallback to servers with any owner to see if they are
+	# possible sub-domains
 	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
 			     &list_domains()) {
 		if ($pd->{'id'} ne $d->{'id'} && !$pd->{'dns_submode'} &&
-		    &under_parent_domain($d, $pd)) {
+		    !$pd->{'alias'} && &under_parent_domain($d, $pd)) {
 			return $pd;
 			}
 		}
