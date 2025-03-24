@@ -3760,8 +3760,11 @@ elsif ($mode == 2) {
 		if (@$domnames) {
 			&unlink_file($temp);
 			&make_dir($temp, 0711);
-			local $domfiles = "{".join(",", @$domnames,
-							"virtualmin")."}";
+			local @wantdoms;
+			push(@wantdoms, @$domnames) if (@$domnames);
+			push(@wantdoms, "virtualmin") if (@$vbs);
+			local $domfiles = @wantdoms > 1 ?
+				"{".join(",", @wantdoms)."}" : $wantdoms[0];
 			&scp_copy(($user ? "$user\@" : "").
 				  "$qserver:$path/$domfiles.*",
 				  $temp, $pass, \$err, $port, $asuser);
