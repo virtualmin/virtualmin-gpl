@@ -1,3 +1,4 @@
+use feature 'state';
 
 sub init_web
 {
@@ -2422,16 +2423,24 @@ sub add_name_virtual
 {
 local ($d, $conf, $web_port, $no_star_match, $ip) = @_;
 &require_apache();
+state $no_virt;
 if ($apache::httpd_modules{'core'} >= 2.4) {
 	# Apache 2.4 doesn't need NameVirtualHost any more.
 	# However, check if all existing <VirtualHost>s uses *, which means that
 	# subsequent ones should as well. Otherwise, they can just use IPs.
 	local @virt = &apache::find_directive_struct("VirtualHost", $conf);
+	if (!@virt) {
+		# If adding the very first VirtualHost on the system, remember
+		# that to correctly add SSL VirtualHost later
+		$no_virt = 1;
+		return 1;
+		}
 	local $starcount = 0;
 	local $ipcount = 0;
 	foreach my $v (@virt) {
 		if ($v->{'words'}->[0] =~ /^(\*|_DEFAULT_)(:(\d+))?/i &&
-		    (!$3 || $3 == $web_port)) {
+		    (!$3 || $3 == $web_port ||
+		    ($3 == $default_web_port && $no_virt))) {
 			$starcount++;
 			}
 		elsif ($v->{'words'}->[0] =~ /^(\S+)(:(\d+))?/i && $1 eq $ip &&
