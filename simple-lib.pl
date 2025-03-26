@@ -144,8 +144,8 @@ if ($simple->{'bounce'}) {
 	push(@v, "BOUNCE");
 	}
 if ($simple->{'local'} &&
-   (!$simple->{'local-all'} ||
-   	&indexof($simple->{'local'}, @{$simple->{'local-all'}}) == -1)) {
+    (!$simple->{'local-all'} ||
+     &indexof($simple->{'local'}, @{$simple->{'local-all'}}) == -1)) {
 	local $escuser = $simple->{'local'};
 	if ($mail_system == 0 && $escuser =~ /\@/) {
 		$escuser = &escape_replace_atsign_if_exists($escuser);
