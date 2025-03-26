@@ -2,7 +2,7 @@
 
 =head1 restore-config.pl
 
-Restores configuration file backups from a Git repository in F</etc/>.
+Restores configuration file backups from a Git repository in F</etc/> directory.
 
 By default, this program operates on the entire F</etc/> directory. However,
 you can limit which files it handles by specifying a single Webmin module with
@@ -199,7 +199,7 @@ sub usage
 my ($msg) = @_;
 print "$msg\n\n" if ($msg);
 print <<'EOF';
-Restores configuration file backups from a Git repository in F</etc/>.
+Restores configuration file backups from a Git repository in /etc/ directory.
 
 virtualmin restore-config --target-dir <dir> [--dry-run]
                           [--depth <n>]
