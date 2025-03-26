@@ -11,7 +11,7 @@ C<--file> flag, which must be relative to the module directory or F</etc/>.
 
 =head2 Restoring files
 
-To restore files to your filesystem, use the C<--target-dir> flag. This retrieves
+To restore files to your filesystem, use the C<--target> flag. This retrieves
 all matching files from the most recent backups, as controlled by the C<--depth>
 flag, and writes them into date-stamped directories. This allows you to browse
 or compare multiple saved versions simultaneously, without overwriting your
@@ -20,7 +20,7 @@ current system configuration.
 For example, to restore all module configuration files from the latest backup
 to the F</root/backups> directory, run:
 
-  virtualmin restore-config --module virtual-server --target-dir /root/backups
+  virtualmin restore-config --module virtual-server --target /root/backups
 
 You can also restore files directly to the F</etc/> directory, overwriting the
 live system configuration if needed, which can be helpful for quickly reverting
@@ -30,13 +30,13 @@ For example, to restore both the main module config file and all domain config
 files from the latest backup directly to the live system, run:
 
   virtualmin restore-config --module virtual-server --file config --file domains \
-			    --target-dir /etc/
+			    --target /etc/
 
 To simulate (dry run) restoring the last five versions of the main module config
 file into a target directory, add the C<--dry-run> flag:
 
   virtualmin restore-config --depth 5 --module virtual-server --file config \
-                            --target-dir /root/backups --dry-run
+                            --target /root/backups --dry-run
 
 When the target directory is set to F</etc/> and C<--depth> is used, only the
 files from the oldest (deepest) record will be restored. For example, to restore
@@ -44,7 +44,7 @@ the main module config file from ten backups ago directly to the live system,
 run:
 
   virtualmin restore-config --depth 10 --module virtual-server --file config \
-                            --target-dir /etc/
+                            --target /etc/
 
 =head2 Restricting by module or specific files
 
@@ -56,7 +56,7 @@ under that module directory.
 
 =over 4
 
-=item B<--target-dir <dir>>
+=item B<--target <dir>>
 
 Required flag. Directory where restored files should be written. Created if it
 does not exist. If set to F</etc/>, files will be restored directly into the
@@ -121,9 +121,9 @@ my $git_repo = "/etc/.git";
 
 while(@ARGV > 0) {
 	my $a = shift(@ARGV);
-	if ($a eq "--target-dir") {
+	if ($a eq "--target") {
 		$target_dir = shift(@ARGV) ||
-			&usage("Missing directory after --target-dir");
+			&usage("Missing directory after --target");
 		$target_dir =~ s|/+$||;
 		}
 	elsif ($a eq "--dry-run") {
@@ -152,9 +152,9 @@ while(@ARGV > 0) {
 		}
 	}
 
-# Require --target-dir
+# Require --target
 if (!$target_dir) {
-	&usage("For restore to work --target-dir <dir> must be specified");
+	&usage("For restore to work --target <dir> must be specified");
 }
 
 # Check that Git repo directory exists
@@ -201,7 +201,7 @@ print "$msg\n\n" if ($msg);
 print <<'EOF';
 Restores configuration file backups from a Git repository in /etc/ directory.
 
-virtualmin restore-config --target-dir <dir> [--dry-run]
+virtualmin restore-config --target <dir> [--dry-run]
                           [--depth <n>]
                           [--file file]*
                           [--module module]
@@ -279,7 +279,7 @@ foreach my $relp (@rel_paths) {
 		next;
 		}
 
-	# If --target-dir is /etc, restore only the oldest commit
+	# If --target is /etc, restore only the oldest commit
 	my @use_commits = @commits;
 	my $latest_commit = "";
 	if ($target_dir eq '/etc' && @commits > 1) {
