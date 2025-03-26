@@ -207,7 +207,6 @@ my $depth_str = $depth > 1 ? "last $depth backups" : "latest backup";
 foreach my $pp (@$paths) {
 	&$first_print("— $pp");
 	}
-&$first_print();
 &$outdent_print();
 
 # Indent for the overall list operation
@@ -231,13 +230,13 @@ foreach my $path (@paths) {
 	my $out;
 	my $rs = &execute_command($log_cmd, undef, \$out);
 	if ($rs != 0 || !$out) {
-		&$second_print("No backups found for \"$original_path\" $type!");
+		&$first_print("No backups found for \"$original_path\" $type!");
 		next;
 		}
 
 	my @commits = split(/\n/, $out);
 	if (!@commits) {
-		&$second_print("No backups found for \"$original_path\" $type!");
+		&$first_print("No backups found for \"$original_path\" $type!");
 		next;
 		}
 
@@ -246,7 +245,7 @@ foreach my $path (@paths) {
 	my $original_path_last = $original_path;
 	$original_path_last =~ s/(.*)\///;
 	my $original_path_dir = $1;
-	&$second_print("Found ".scalar(@commits).
+	&$first_print("Found ".scalar(@commits).
 		" $backups_text in \"$original_path_dir\" directory ..");
 
 	# Increase indentation for commits
@@ -263,8 +262,7 @@ foreach my $path (@paths) {
 		my $path_wildcard = $path =~ /\*/;
 		my $content_text = $path_wildcard ?
 			"Files matching pattern" : "Content of the";
-		my $print_func = $path_wildcard ? \&$second_print : \&$first_print;
-		$print_func->("$content_text \"$original_path_last\" $type as ".
+		&$first_print("$content_text \"$original_path_last\" $type as ".
 				"of $date_out (\@$commit_short) ..");
 		&$indent_print();
 
@@ -315,7 +313,7 @@ foreach my $path (@paths) {
 					}
 				
 				&$outdent_print();
-				&$second_print(".. end of file");
+				&$first_print(".. end of file");
 				}
 			&$first_print("No files match the pattern") if (!@files);
 			}
@@ -346,7 +344,7 @@ foreach my $path (@paths) {
 
 		&$outdent_print();
 		my $end_text = $path_wildcard ? "end of pattern" : "end of $type";
-		&$second_print(".. $end_text");
+		&$first_print(".. $end_text");
 		}
 
 	&$outdent_print();

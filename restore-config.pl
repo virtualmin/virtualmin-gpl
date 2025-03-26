@@ -269,17 +269,13 @@ foreach my $relp (@rel_paths) {
 	my $out;
 	my $rs = &execute_command($log_cmd, undef, \$out);
 	if ($rs != 0 || !$out) {
-		&$first_print();
-		&$first_print("No commits found for \"$display_path_last\" $type!");
-		&$outdent_print();
+		&$first_print("No backups found for \"$display_path_last\" $type!");
 		next;
 		}
 
 	my @commits = split(/\n/, $out);
 	if (!@commits) {
-		&$first_print();
-		&$first_print("No commits found for \"$display_path_last\" $type!");
-		&$outdent_print();
+		&$first_print("No backups found for \"$display_path_last\" $type!");
 		next;
 		}
 
@@ -289,11 +285,10 @@ foreach my $relp (@rel_paths) {
 	if ($target_dir eq '/etc' && @commits > 1) {
 		# The commits array is newest first. The oldest is at the end.
 		@use_commits = ( $commits[-1] );
-		$latest_commit = ", however using only oldest backup in the given depth";
+		$latest_commit = ", yet only the oldest one at depth $depth is used";
 		}
 	
 	# Print an overview (like do_list)
-	&$first_print();
 	my $backups_text = scalar(@commits) == 1 ? "backup" : "backups";
 	&$first_print("Found ".scalar(@commits)." $backups_text$latest_commit ..");
 
@@ -342,15 +337,15 @@ foreach my $relp (@rel_paths) {
 			}
 
 		my $file_text = scalar(@files) == 1 ? "file" : "files";
-		&$first_print("Found ".scalar(@files)." $file_text to be restored ".
-			"from this backup dated $date_out (\@$commit_short) ..");
+		&$first_print("Found ".scalar(@files)." $file_text to restore ".
+			"from backup \@$commit_short dated $date_out to ..");
 		&$indent_print();
 
 		# Extract or imitate each file
 		foreach my $f (@files) {
 			my $target_full = "$dest_dir/$f";
 			if ($dry_run) {
-				&$first_print("Restored $target_full$dry_run_txt");
+				&$first_print("=> $target_full");
 				}
 			else {
 				# Recursively create subdirectories
@@ -374,24 +369,23 @@ foreach my $relp (@rel_paths) {
 					\$content, \$show_err, 0, 1);
 				if ($rs == 0) {
 					&write_file_contents($target_full, $content);
-					&$first_print($target_full);
+					&$first_print("=> $target_full");
 					}
 				else {
-					&$second_print("Failed to extract $f ".
+					&$first_print("Failed to extract $f ".
 						"from commit \@$commit_short : $show_err");
 					}
 				}
 			}
-
 		&$outdent_print();
+		&$first_print(".. restored$dry_run_txt");
 		}
 
 	&$outdent_print();
 	}
 
 &$outdent_print();
-&$first_print();
-&$first_print(".. restored$dry_run_txt");
+&$first_print(".. done");
 }
 
 1;
