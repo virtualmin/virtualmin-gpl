@@ -3755,7 +3755,7 @@ foreach my $port (@ports) {
 			if ($dir) {
 				local @req = &apache::find_directive("Require",
 							$dir->{'members'});
-				local ($g) = grep { /granted/i } @req;
+				local ($g) = grep { /granted|valid-user/i } @req;
 				if (!$g) {
 					push(@req, "all granted");
 					&apache::save_directive("Require",\@req,
