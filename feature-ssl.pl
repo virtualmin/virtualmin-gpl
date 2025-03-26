@@ -179,7 +179,8 @@ if ($err) {
 local $f = $virt->{'file'};
 local $lref = &read_file_lines($f);
 local @ssldirs = &apache_ssl_directives($d, $tmpl);
-push(@$lref, "<VirtualHost ".&get_apache_vhost_ips($d, $nvstar, $nvstar6, $web_sslport).">");
+push(@$lref, "<VirtualHost ".&get_apache_vhost_ips($d, $nvstar, $nvstar6,
+     $web_sslport).">");
 push(@$lref, @$srclref[$virt->{'line'}+1 .. $virt->{'eline'}-1]);
 push(@$lref, @ssldirs);
 push(@$lref, "</VirtualHost>");
