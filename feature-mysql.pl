@@ -104,6 +104,7 @@ if (!$d->{'mysql_module'}) {
 &require_mysql();
 $d->{'mysql_user'} = &mysql_user($d);
 local $user = $d->{'mysql_user'};
+my @olddbs;
 
 if (!$d->{'parent'}) {
 	if ($d->{'provision_mysql'}) {
@@ -160,7 +161,7 @@ if (!$d->{'parent'}) {
 	else {
 		# Create the user
 		my @hosts = &get_mysql_hosts($d, 1);
-		my @olddbs = &list_mysql_db_grants($d, $user);
+		@olddbs = &list_mysql_db_grants($d, $user);
 		if (&indexof("%", @hosts) >= 0 &&
 		    &indexof("localhost", @hosts) < 0 &&
 		    &indexof("127.0.0.1", @hosts) < 0) {
@@ -203,6 +204,7 @@ if (!$d->{'parent'}) {
 # Create the initial DB (if requested)
 my $ok;
 if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
+	# Create the one initial DB
 	local $opts = &default_mysql_creation_opts($d);
 	$ok = &create_mysql_database($d, $d->{'db'}, $opts);
 	if (!$ok) {
@@ -211,6 +213,12 @@ if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
 		$d->{'db_mysql'} = "";
 		$ok = 1;
 		}
+	}
+elsif (@olddbs) {
+	# Databases already exist for this user, so record that we already have
+	# them when in replication mode
+	$ok = 1;
+	$d->{'db_mysql'} = join(" ", map { $_->[0] } @olddbs);
 	}
 else {
 	# No DBs can exist
