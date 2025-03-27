@@ -2168,6 +2168,7 @@ check_iface6=IPv6 addresses are available, using interface $1
 check_ifacezone=Network interface will be detected automatically at virtual server creation time
 check_sendmailok=Mail server Sendmail is installed and configured
 check_postfixok=Mail server Postfix is installed and configured
+check_postfixok2=Mail server Postfix is installed and configured as relay host
 check_dependentok=Postfix is configured to support per-domain outgoing IP addresses
 check_dependentever=Your Postfix version does not support per-domain outgoing IP addresses
 check_dependentesupport=Postfix can support per-domain outgoing IP addresses, but is not currently configured to do so. This can be setup in the <a href='$1'>Postfix Mailserver</a> module
