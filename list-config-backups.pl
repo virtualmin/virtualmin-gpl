@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-=head1 list-config.pl
+=head1 list-config-backups.pl
 
 Lists configuration file backups from a Git repository in F</etc/> directory.
 
@@ -17,17 +17,17 @@ backups under the Virtualmin C<virtual-server> module configuration directory.
 For example, to view all configuration files from the latest backup for the
 Virtualmin C<virtual-server> module, run:
 
-  virtualmin list-config
+  virtualmin list-config-backups
 
 To view the content of the last backup of the main configuration file for the
 Virtualmin C<virtual-server> module, run:
 
-  virtualmin list-config --module virtual-server --file config
+  virtualmin list-config-backups --module virtual-server --file config
 
 To see the last backup of all domain configuration files for the Virtualmin 
 C<virtual-server> module, run:
 
-  virtualmin list-config --module virtual-server --file "domains/*"
+  virtualmin list-config-backups --module virtual-server --file "domains/*"
 
 By default, only the most recent backup is shown, but you can use the C<--depth>
 flag to view more historic versions.
@@ -35,7 +35,7 @@ flag to view more historic versions.
 For example, to view the backups of the F</etc/hosts> and F</etc/fstab> files
 from the last two backups, run:
 
-  virtualmin list-config --file hosts --file fstab --depth 2
+  virtualmin list-config-backups --file hosts --file fstab --depth 2
 
 =head2 Restricting by module or specific files
 
@@ -82,9 +82,9 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/list-config.pl";
+	$0 = "$pwd/list-config-backups.pl";
 	require './virtual-server-lib.pl';
-	$< == 0 || die "list-config.pl must be run as root";
+	$< == 0 || die "list-config-backups.pl must be run as root";
 	}
 
 # Disable HTML output
@@ -167,10 +167,10 @@ print "$msg\n\n" if ($msg);
 print <<'EOF';
 Lists configuration file backups from a Git repository in /etc/ directory.
 
-virtualmin list-config [--depth <n>]
-                       [--file file]*
-                       [--module module]
-                       [--git-repo </path/to/.git>]
+virtualmin list-config-backups [--depth <n>]
+                               [--file file]*
+                               [--module module]
+                               [--git-repo </path/to/.git>]
 EOF
 exit(1);
 }
