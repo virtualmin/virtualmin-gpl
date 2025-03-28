@@ -85,7 +85,8 @@ sub dnscloud_route53_get_state
 if ($config{'route53_akey'}) {
 	return { 'ok' => 1,
 		 'desc' => &text('dnscloud_53account',
-                                 "<tt>$config{'route53_akey'}</tt>"),
+		                 "<tt>".substr($config{'route53_akey'}, 0, 7).
+				 	"***</tt>"),
 	       };
 	}
 elsif (&can_use_aws_s3_creds()) {
