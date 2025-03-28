@@ -335,8 +335,9 @@ my $rv = &execute_dom_sql($d, $mysql::master_db,
 	"select db,host from db where user = ?", $user);
 my %dbs;
 foreach my $r (@{$rv->{'data'}}) {
-	$dbs{$r->[0]} ||= [ ];
-	push(@{$dbs{$r->[0]}}, $r->[1]);
+	my $dbname = &mysql::unquote_mysql_database($r->[0]);
+	$dbs{$dbname} ||= [ ];
+	push(@{$dbs{$dbname}}, $r->[1]);
 	}
 return map { [ $_, $dbs{$_} ] } sort { $a cmp $b } keys %dbs;
 }
