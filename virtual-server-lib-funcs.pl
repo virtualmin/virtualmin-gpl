@@ -15911,10 +15911,18 @@ if ($config{'mail'}) {
 		if ($myhost &&
 		    &indexoflc($myhost, @mydest) < 0 &&
 		    &indexoflc('$myhostname', @mydest) < 0) {
-			return &text('check_emydest', $myhost, join(", ", @mydest));
+			if (&postfix::get_real_value("relayhost")) {
+				&$second_print($text{'check_postfixok2'});
+				}
+			else {
+				return &text('check_emydest', $myhost,
+					     join(", ", @mydest));
+				}
+			}
+		else {
+			&$second_print($text{'check_postfixok'});
 			}
 
-		&$second_print($text{'check_postfixok'});
 		$expected_mailboxes = 0;
 
 		# Report on outgoing IP option

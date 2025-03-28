@@ -2168,6 +2168,7 @@ check_iface6=IPv6-Adressen sind verfügbar, es wird das Interface $1 verwendet
 check_ifacezone=Das Netzwerkinterface wird bei der Erstellung des virtuellen Servers automatisch erkannt
 check_sendmailok=Mail-Server Sendmail ist installiert und konfiguriert
 check_postfixok=Mail-Server Postfix ist installiert und konfiguriert
+check_postfixok2=Mail-Server Postfix ist installiert und als Relay-Host konfiguriert
 check_dependentok=Postfix ist so konfiguriert, dass es pro-Domain ausgehende IP-Adressen unterstützt
 check_dependentever=Ihre Postfix-Version unterstützt keine pro-Domain ausgehenden IP-Adressen
 check_dependentesupport=Postfix kann pro-Domain ausgehende IP-Adressen unterstützen, ist jedoch derzeit nicht dafür konfiguriert. Dies kann im <a href='$1'>Postfix-Mailserver</a>-Modul eingerichtet werden
