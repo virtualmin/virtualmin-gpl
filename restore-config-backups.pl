@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-=head1 restore-config.pl
+=head1 restore-config-backups.pl
 
 Restores configuration file backups from a Git repository in F</etc/> directory.
 
@@ -20,7 +20,7 @@ current system configuration.
 For example, to restore all module configuration files from the latest backup
 to the F</root/backups> directory, run:
 
-  virtualmin restore-config --module virtual-server --target /root/backups
+  virtualmin restore-config-backups --module virtual-server --target /root/backups
 
 You can also restore files directly to the F</etc/> directory, overwriting the
 live system configuration if needed, which can be helpful for quickly reverting
@@ -29,22 +29,22 @@ to a previous state of a module or a single configuration file.
 For example, to restore both the main module config file and all domain config 
 files from the latest backup directly to the live system, run:
 
-  virtualmin restore-config --module virtual-server --file config --file domains \
-			    --target /etc/
+  virtualmin restore-config-backups --module virtual-server --file config \
+                                    --file domains --target /etc/
 
 To simulate (dry run) restoring the last five versions of the main module config
 file into a target directory, add the C<--dry-run> flag:
 
-  virtualmin restore-config --depth 5 --module virtual-server --file config \
-                            --target /root/backups --dry-run
+  virtualmin restore-config-backups --depth 5 --module virtual-server \
+                                    --file config --target /root/backups --dry-run
 
 When the target directory is set to F</etc/> and C<--depth> is used, only the
 files from the oldest (deepest) record will be restored. For example, to restore
 the main module config file from ten backups ago directly to the live system,
 run:
 
-  virtualmin restore-config --depth 10 --module virtual-server --file config \
-                            --target /etc/
+  virtualmin restore-config-backups --depth 10 --module virtual-server \
+                                    --file config --target /etc/
 
 =head2 Restricting by module or specific files
 
@@ -101,9 +101,9 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/restore-config.pl";
+	$0 = "$pwd/restore-config-backups.pl";
 	require './virtual-server-lib.pl';
-	$< == 0 || die "restore-config.pl must be run as root";
+	$< == 0 || die "restore-config-backups.pl must be run as root";
 	}
 
 # Disable HTML output
@@ -201,11 +201,11 @@ print "$msg\n\n" if ($msg);
 print <<'EOF';
 Restores configuration file backups from a Git repository in /etc/ directory.
 
-virtualmin restore-config --target <dir> [--dry-run]
-                          [--depth <n>]
-                          [--file file]*
-                          [--module module]
-                          [--git-repo </path/to/.git>]
+virtualmin restore-config-backups --target <dir> [--dry-run]
+                                  [--depth <n>]
+                                  [--file file]*
+                                  [--module module]
+                                  [--git-repo </path/to/.git>]
 EOF
 exit(1);
 }
