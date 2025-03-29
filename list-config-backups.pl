@@ -87,6 +87,10 @@ if (!$module_name) {
 	$< == 0 || die "list-config-backups.pl must be run as root";
 	}
 
+# Get /etc from environment
+my $etcdir = $ENV{'WEBMIN_CONFIG'};
+$etcdir =~ s/\/[^\/]+$//;
+
 # Disable HTML output
 &set_all_text_print();
 
@@ -96,7 +100,7 @@ if (!$module_name) {
 my $depth = 1;
 my @module_files;
 my $module;
-my $git_repo = "/etc/.git";
+my $git_repo = "$etcdir/.git";
 
 while(@ARGV > 0) {
 	my $a = shift(@ARGV);
@@ -145,12 +149,12 @@ else {
 	# If no module, but we de have --file, treat them as absolute
 	if (@module_files) {
 		foreach my $mf (@module_files) {
-			$mf = "/etc/$mf" if ($mf !~ m|^/|);
+			$mf = "$etcdir/$mf" if ($mf !~ m|^/|);
 			push(@source_paths, $mf);
 			}
 		}
 	else {
-		@source_paths = ("/etc");
+		@source_paths = ($etcdir);
 		}
 	}
 
@@ -164,8 +168,8 @@ sub usage
 {
 my ($msg) = @_;
 print "$msg\n\n" if ($msg);
-print <<'EOF';
-Lists configuration file backups from a Git repository in /etc/ directory.
+print <<"EOF";
+Lists configuration file backups from a Git repository in $etcdir/ directory.
 
 virtualmin list-config-backups [--depth <n>]
                                [--file file]*
@@ -182,11 +186,11 @@ sub normalize_paths
 my (@inpaths) = @_;
 my @outpaths;
 foreach my $p (@inpaths) {
-	if ($p eq '/etc') {
+	if ($p eq $etcdir) {
 		# Default to module config directory in list mode
 		push(@outpaths, 'webmin/virtual-server');
 		}
-	elsif ($p =~ m|^/etc/(.*)|) {
+	elsif ($p =~ m|^\Q$etcdir\E/(.*)|) {
 		# e.g. /etc/webmin/virtual-server => webmin/virtual-server
 		push(@outpaths, $1);
 		}
@@ -213,11 +217,11 @@ foreach my $pp (@$paths) {
 &$indent_print();
 
 # Common Git prefix to specify the repo and work-tree
-my $git_prefix = "git --git-dir=".quotemeta($git_repo)." --work-tree=/etc";
+my $git_prefix = "git --git-dir=".quotemeta($git_repo)." --work-tree=$etcdir";
 
 # For each path we want to list
 foreach my $path (@paths) {
-	my $original_path = ($path eq '.') ? '/etc' : "/etc/$path";
+	my $original_path = ($path eq '.') ? $etcdir : "$etcdir/$path";
 	my $type = (-d $original_path) ? "directory" : "file";
 
 	# Build a command that returns up to the given number of commits

@@ -106,6 +106,10 @@ if (!$module_name) {
 	$< == 0 || die "restore-config-backups.pl must be run as root";
 	}
 
+# Get /etc from environment
+my $etcdir = $ENV{'WEBMIN_CONFIG'};
+$etcdir =~ s/\/[^\/]+$//;
+
 # Disable HTML output
 &set_all_text_print();
 
@@ -117,7 +121,7 @@ my $dry_run;
 my $depth = 1;
 my @module_files;
 my $module;
-my $git_repo = "/etc/.git";
+my $git_repo = "$etcdir/.git";
 
 while(@ARGV > 0) {
 	my $a = shift(@ARGV);
@@ -179,12 +183,12 @@ else {
 	# If no module, but we de have --file, treat them as absolute
 	if (@module_files) {
 		foreach my $mf (@module_files) {
-			$mf = "/etc/$mf" if ($mf !~ m|^/|);
+			$mf = "$etcdir/$mf" if ($mf !~ m|^/|);
 			push(@source_paths, $mf);
 			}
 		}
 	else {
-		@source_paths = ("/etc");
+		@source_paths = ($etcdir);
 		}
 	}
 
@@ -198,8 +202,8 @@ sub usage
 {
 my ($msg) = @_;
 print "$msg\n\n" if ($msg);
-print <<'EOF';
-Restores configuration file backups from a Git repository in /etc/ directory.
+print <<"EOF";
+Restores configuration file backups from a Git repository in $etcdir/ directory.
 
 virtualmin restore-config-backups --target <dir> [--dry-run]
                                   [--depth <n>]
@@ -217,11 +221,11 @@ sub normalize_paths
 my (@inpaths) = @_;
 my @outpaths;
 foreach my $p (@inpaths) {
-	if ($p eq '/etc') {
+	if ($p eq $etcdir) {
 		# Restore everything under /etc/
 		push(@outpaths, '.');
 		}
-	elsif ($p =~ m|^/etc/(.*)|) {
+	elsif ($p =~ m|^\Q$etcdir\E/(.*)|) {
 		# e.g. /etc/webmin/virtual-server => webmin/virtual-server
 		push(@outpaths, $1);
 		}
@@ -250,11 +254,11 @@ my $dry_run_txt = $dry_run ? " (dry-run)" : "";
 my @rel_paths = &normalize_paths(@$paths);
 
 # Prepare the Git command prefix
-my $git_prefix = "git --git-dir=".quotemeta($git_repo)." --work-tree=/etc";
+my $git_prefix = "git --git-dir=".quotemeta($git_repo)." --work-tree=$etcdir";
 
 # For each path to restore
 foreach my $relp (@rel_paths) {
-	my $display_path = ($relp eq '.') ? '/etc' : "/etc/$relp";
+	my $display_path = ($relp eq '.') ? $etcdir : "$etcdir/$relp";
 	my $display_path_last = $display_path;
 	$display_path_last =~ s/.*\///;
 
@@ -282,7 +286,7 @@ foreach my $relp (@rel_paths) {
 	# If --target is /etc, restore only the oldest commit
 	my @use_commits = @commits;
 	my $latest_commit = "";
-	if ($target_dir eq '/etc' && @commits > 1) {
+	if ($target_dir eq $etcdir && @commits > 1) {
 		# The commits array is newest first. The oldest is at the end.
 		@use_commits = ( $commits[-1] );
 		$latest_commit = ", yet only the oldest one at depth $depth is used";
@@ -309,7 +313,7 @@ foreach my $relp (@rel_paths) {
 
 		# If target_dir is /etc, do not create date subdir
 		my $dest_dir = $target_dir;
-		if ($target_dir ne '/etc') {
+		if ($target_dir ne $etcdir) {
 			$dest_dir .= "/$date_out_path";
 			if (!$dry_run && !-d $dest_dir) {
 				mkdir($dest_dir, 0755) ||
