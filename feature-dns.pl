@@ -79,7 +79,7 @@ eval {
 	local $bind8::config{'auto_chroot'} = undef;
 	local $bind8::config{'chroot'} = undef;
 	if ($d->{'alias'} && !$d->{'aliasdns'}) {
-		$recserr = &create_alias_records($recs, $recstemp, $d, $ip);
+		$recserr = &sync_alias_records($recs, $recstemp, $d, $ip);
 		}
 	else {
 		$recserr = &create_standard_records($recs, $recstemp, $d, $ip);
@@ -1608,9 +1608,9 @@ my $soa = { 'name' => $d->{'dom'}.'.',
 return $soa;
 }
 
-# create_alias_records(&records, file, &domain, ip, [diff-mode])
-# For a domain that is an alias, copy records from its target
-sub create_alias_records
+# sync_alias_records(&records, file, &domain, ip, [diff-mode])
+# For a domain that is an alias, sync records from its target
+sub sync_alias_records
 {
 local ($recs, $file, $d, $ip, $diff) = @_;
 local $tmpl = &get_template($d->{'template'});
@@ -4273,7 +4273,7 @@ if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
 		&obtain_lock_dns($ad);
 		&pre_records_change($d);
 		local ($recs, $file) = &get_domain_dns_records_and_file($ad);
-		&create_alias_records($recs, $file, $ad,
+		&sync_alias_records($recs, $file, $ad,
 				      $ad->{'dns_ip'} || $ad->{'ip'}, 1);
 		&post_records_change($ad, $recs, $file);
 		&reload_bind_records($ad);
