@@ -436,6 +436,9 @@ if (!@{$js->{'Changes'}}) {
 	return (1, undef);
 	}
 
+# Merge the records with the same name into sets
+&group_route53_records($js, !%keep);
+
 # Write the JSON to a temp file for calling the API
 my $temp = &transname();
 eval "use JSON::PP";
@@ -460,6 +463,47 @@ $v =~ s/^\(\s*//;
 $v =~ s/\s*\)$//;
 $v =~ s/[\n\t]+/ /g;
 return $v;
+}
+
+# group_route53_records(json, [delete])
+# Combines multiple MX and TXT DNS records with the same name into
+# single record sets for Route 53 API compatibility
+sub group_route53_records
+{
+my ($js, $delete) = @_;
+return if (!ref($js) || !$js->{'Changes'});
+my $pattern = $delete ? 'UPSERT|DELETE' : 'UPSERT';
+my (%merged, @others);
+foreach my $change (@{ $js->{'Changes'} }) {
+	my $rrset = $change->{'ResourceRecordSet'};
+        next unless($rrset);
+	my ($type, $name)  = ($rrset->{'Type'}, $rrset->{'Name'});
+	unless ($change->{'Action'} =~ /^$pattern$/ &&
+	        ($type eq 'TXT' || $type eq 'MX' || $type eq 'CAA')) {
+		# Keep other records as-is
+		push(@others, $change);
+		next;
+		}
+	# Check if we have already merged this record
+	my $key = "$name|$type";
+	if (!exists($merged{$key})) {
+		$merged{$key} = {
+			'Action' => $change->{'Action'},
+			'ResourceRecordSet' => {
+				'Name' => $name,
+				'Type' => $type,
+				'TTL'  => $rrset->{'TTL'} || 86400,
+				'ResourceRecords' => [],
+				}
+			};
+		}
+	# Add the record to the merged set
+	push(@{ $merged{$key}{'ResourceRecordSet'}{'ResourceRecords'} },
+	     @{ $rrset->{'ResourceRecords'} });
+	}
+
+# Combine existing records and merged sets
+$js->{'Changes'} = [ @others, values(%merged) ];
 }
 
 # call_route53_cmd(akey, params, [region], [parse-json])
