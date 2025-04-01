@@ -1,4 +1,3 @@
-
 sub init_web
 {
 $default_web_port = $config{'web_port'} || 80;
@@ -2427,11 +2426,12 @@ if ($apache::httpd_modules{'core'} >= 2.4) {
 	# However, check if all existing <VirtualHost>s uses *, which means that
 	# subsequent ones should as well. Otherwise, they can just use IPs.
 	local @virt = &apache::find_directive_struct("VirtualHost", $conf);
+	return 1 if (!@virt);
 	local $starcount = 0;
 	local $ipcount = 0;
 	foreach my $v (@virt) {
 		if ($v->{'words'}->[0] =~ /^(\*|_DEFAULT_)(:(\d+))?/i &&
-		    (!$3 || $3 == $web_port)) {
+		    (!$3 || $3 == $web_port || $3 == $default_web_port)) {
 			$starcount++;
 			}
 		elsif ($v->{'words'}->[0] =~ /^(\S+)(:(\d+))?/i && $1 eq $ip &&
