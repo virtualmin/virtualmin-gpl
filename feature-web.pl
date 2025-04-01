@@ -2439,7 +2439,7 @@ if ($apache::httpd_modules{'core'} >= 2.4) {
 			$ipcount++;
 			}
 		}
-	return $ipcount || !$starcount ? 0 : 1;
+	return $ipcount ? 0 : 1;
 	}
 local $nvstar;
 if ($d->{'name'}) {
