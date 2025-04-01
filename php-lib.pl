@@ -487,6 +487,29 @@ foreach my $p (@ports) {
 						$files->{'members'}, $conf);
 			}
 		}
+	elsif ($mode eq "none") {
+		# When PHP is disabled, a FilesMatch block is needed to make
+		# sure any global PHP configs are overridden
+		if ($files) {
+			&apache::save_directive_struct(
+				$files, undef, $vconf, $conf);
+			}
+		$files = { 'name' => 'FilesMatch',
+			   'type' => 1,
+			   'value' => '\.php$',
+			   'words' => ['\.php$'],
+			   'members' => [
+			     { 'name' => 'SetHandler',
+			       'value' => 'None',
+			     },
+			     { 'name' => 'AddType',
+			       'value' => 'text/plain .php',
+			     },
+			   ],
+			 };
+		&apache::save_directive_struct(
+			undef, $files, $vconf, $conf);
+		}
 	else {
 		# For non-FPM mode, remove the whole files block,
 		# and forget about any ports or sockets
