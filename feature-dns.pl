@@ -4224,7 +4224,7 @@ if ($d->{'provision_dns'}) {
 			'host' => $d->{'provision_dns_host'} };
 	$info->{'record'} = [ &records_to_text($d, $recs) ];
 	my ($ok, $msg) = &provision_api_call("modify-dns-records", $info, 0);
-	if (!ok) {
+	if (!$ok) {
 		return "Error from provisioning server updating records : $msg";
 		}
 	}
