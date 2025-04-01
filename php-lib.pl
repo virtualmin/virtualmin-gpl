@@ -601,6 +601,14 @@ if ($mode !~ /mod_php|none/ && $oldmode =~ /mod_php|none/ &&
 	return $err if ($err);
 	}
 
+# Update PHP version cache
+if ($mode eq "cgi" || $mode eq "fcgid") {
+	$d->{'php_version'} = &get_domain_php_version($d, $mode);
+	}
+else {
+	delete($d->{'php_version'});
+	}
+
 if (defined($oldplog)) {
 	# Restore the old PHP error log
 	&save_domain_php_error_log($d, $oldplog);
@@ -1294,10 +1302,10 @@ local $mode = &get_domain_php_mode($d);
 return "PHP versions cannot be set in mod_php mode" if ($mode eq "mod_php");
 local $oldlog = &get_domain_php_error_log($d);
 
+my $phd = &public_html_dir($d);
 if ($mode eq "fpm") {
 	# Remove the old version pool and create a new one if needed.
 	# Since it will be on the same port, no Apache changes are needed.
-	my $phd = &public_html_dir($d);
 	$dir eq $phd || return "FPM version can only be changed for the top-level directory";
 	if ($ver ne $d->{'php_fpm_version'}) {
 		my $oldlisten = &get_php_fpm_config_value($d, "listen");
@@ -1415,6 +1423,9 @@ else {
 		$any++;
 		}
 	return "No Apache virtualhosts found" if (!$any);
+	if ($dir eq $phd) {
+		$d->{'php_version'} = $ver;
+		}
 	}
 
 # Make sure we have all the wrapper scripts
