@@ -499,7 +499,8 @@ foreach my $desturl (@$desturls) {
 				next;
 				}
 			my ($already) =
-			  grep { $_->{'path_display'} eq "/".$server } @$files;
+			  grep { lc($_->{'path_display'}) eq lc("/".$server) }
+			       @$files;
 			if (!$already) {
 				my $err = &create_dropbox_dir("/".$server);
 				if ($err) {
