@@ -299,7 +299,7 @@ foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 		}
 	}
 
-# Cache current PHP modes and error log files
+# Cache current PHP modes, versions and error log files
 foreach my $d (grep { &domain_has_website($_) && !$_->{'alias'} }
 		    &list_domains()) {
 	&lock_domain($d);
@@ -309,6 +309,14 @@ foreach my $d (grep { &domain_has_website($_) && !$_->{'alias'} }
 		}
 	if (!defined($d->{'php_error_log'})) {
 		$d->{'php_error_log'} = &get_domain_php_error_log($d) || "";
+		&save_domain($d);
+		}
+	if (!defined($d->{'php_version'}) &&
+	    ($d->{'php_mode'} eq 'cgi' || $d->{'php_mode'} eq 'fcgid')) {
+		my @dirs = &list_domain_php_directories($d);
+		if (@dirs) {
+			$d->{'php_version'} = $dirs[0]->{'version'};
+			}
 		&save_domain($d);
 		}
 	&unlock_domain($d);
