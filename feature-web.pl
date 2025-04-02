@@ -2434,8 +2434,14 @@ if ($apache::httpd_modules{'core'} >= 2.4) {
 		    (!$3 || $3 == $web_port)) {
 			$starcount++;
 			}
-		elsif ($v->{'words'}->[0] =~ /^(\S+)(:(\d+))?/i && $1 eq $ip &&
-		       (!$3 || $3 == $web_port)) {
+		elsif ($v->{'words'}->[0] =~ /^([0-9\.]+)(:(\d+))?/i &&
+		       $1 eq $ip && (!$3 || $3 == $web_port)) {
+			# Match on IPv4 address and optionally port
+			$ipcount++;
+			}
+		elsif ($v->{'words'}->[0] =~ /^\[([0-9a-f:]+)\](:(\d+))?/i &&
+		       $1 eq $ip && (!$3 || $3 == $web_port)) {
+			# Match on IPv6 address and optionally port
 			$ipcount++;
 			}
 		}
