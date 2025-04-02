@@ -498,9 +498,18 @@ foreach my $desturl (@$desturls) {
 				&$first_print($files);
 				next;
 				}
-			my ($already) =
-			  grep { lc($_->{'path_display'}) eq lc("/".$server) }
-			       @$files;
+			my $already;
+			if ($server) {
+				# If backing up to a folder, list contents to
+				# see if it already exists
+				my $contents = &list_dropbox_files("/".$server);
+				$already = 1 if (ref($contents));
+				}
+			if (!$already) {
+				# Fall back to listing the parent dir to look
+				# for the destination folder
+				($already) = grep { lc($_->{'path_display'}) eq							    lc("/".$server) } @$files;
+				}
 			if (!$already) {
 				my $err = &create_dropbox_dir("/".$server);
 				if ($err) {
