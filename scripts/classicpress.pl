@@ -314,11 +314,6 @@ else {
 		}
 	}
 
-# Delete default config
-if (!$opts->{'noauto'} || $upgrade) {
-	unlink_file("$opts->{'dir'}/wp-config-sample.php");
-	}
-
 # Install is all done, return the base URL
 my $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
