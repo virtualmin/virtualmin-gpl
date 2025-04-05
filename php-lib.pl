@@ -482,8 +482,11 @@ foreach my $p (@ports) {
 				undef, $files, $vconf, $conf);
 			}
 		else {
-			# Add the SetHandler directive to the FilesMatch block
+			# Add the SetHandler directive to the FilesMatch block,
+			# and remove the AddType
 			&apache::save_directive("SetHandler", [$wanth],
+						$files->{'members'}, $conf);
+			&apache::save_directive("AddType", [],
 						$files->{'members'}, $conf);
 			}
 		}
@@ -2138,8 +2141,8 @@ my @pkgnames = ("php-fpm",
 		(map { "php${_}-fpm" } @all_possible_short_php_versions),
 		(map { my $v = $_; $v =~ s/\.//g;
 		     ("php${v}-php-fpm", "php${v}-fpm", "php${v}w-fpm",
-			   "rh-php${v}-php-fpm", "php${_}-fpm",
-			   "php${v}u-fpm") } @all_possible_php_versions));
+		      "rh-php${v}-php-fpm", "php${_}-fpm",
+		      "php${v}u-fpm") } @all_possible_php_versions));
 if (&get_webmin_version() >= 1.985 ||
     $software::config{'package_system'} eq 'debian') {
 	&software::list_packages(@pkgnames);
