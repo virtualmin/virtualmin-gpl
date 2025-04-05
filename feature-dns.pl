@@ -1421,7 +1421,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			if ($tmpl->{'dns_indom'}) {
 				@created_ns = grep { &to_ipaddress($_) } @created_ns;
 				}
-			if (!@created_ns) {
+			if (!@created_ns && !$d->{'dns_cloud'}) {
 				return $text{'setup_ednsns'};
 				}
 
