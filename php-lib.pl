@@ -406,6 +406,7 @@ foreach my $p (@ports) {
 			push(@types, "application/x-httpd-php .php");
 			}
 		@types = &unique(@types);
+		@actions = &unique(@actions);
 		&apache::save_directive("Action", \@actions, $phpconf, $conf);
 		&apache::save_directive("AddType", \@types, $phpconf, $conf);
 		&apache::save_directive("AddHandler", \@handlers,
@@ -1369,13 +1370,15 @@ else {
 			if ($mode eq "cgi") {
 				local @types = &apache::find_directive(
 					"AddType", $dirstr->{'members'});
-				@types = grep { $_ !~ /^application\/x-httpd-php[57]/ }
-					      @types;
+				@types = grep {
+					$_ !~ /^application\/x-httpd-php[0-9]/
+					} @types;
 				foreach my $v (&list_available_php_versions($d)) {
 					push(@types, "application/x-httpd-php$v->[0] ".
 						     ".php$v->[0]");
 					}
 				push(@types, "application/x-httpd-php$ver .php");
+				@types = &unique(@types);
 				&apache::save_directive("AddType", \@types,
 							$dirstr->{'members'}, $conf);
 				&flush_file_lines($dirstr->{'file'});
