@@ -28,7 +28,11 @@ if ($readonly && ($alias = &get_domain($d->{'alias'}))) {
 # Warn if DNS records are not valid
 $err = &validate_dns($d, $recs, 1);
 if ($err) {
-	print ui_alert_box(&text('records_evalid', $err), 'warn');
+	my @errs = split /<br>\s*/, $err;
+	my $html = "<ul>\n";
+	$html .= "  <li>$_</li>\n" for @errs;
+	$html .= "</ul>\n";
+	print &ui_alert_box(&text('records_evalid', $html), 'warn');
 	}
 
 # Exclude sub-domains and parent domains
