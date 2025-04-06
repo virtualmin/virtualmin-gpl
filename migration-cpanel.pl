@@ -374,6 +374,7 @@ $dom{'db'} = &database_name(\%dom);
 foreach my $f (@features, &list_feature_plugins()) {
 	$dom{$f} = $got{$f} ? 1 : 0;
 	}
+&set_chained_features(\%dom, undef);
 &set_featurelimits_from_plan(\%dom, $plan);
 
 # Work out the master admin MySQL password
