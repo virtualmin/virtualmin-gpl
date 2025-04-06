@@ -378,6 +378,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--letsencrypt-always" || $a eq "--acme-always") {
 		$letsencrypt = 2;
 		}
+	elsif ($a eq "--letsencrypt-never" || $a eq "--acme-never") {
+		$letsencrypt = 0;
+		}
 	elsif ($a eq "--enable-jail") {
 		$jail = 1;
 		}
