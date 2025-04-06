@@ -514,6 +514,26 @@ foreach my $p (@ports) {
 		&apache::save_directive_struct(
 			undef, $files, $vconf, $conf);
 		}
+	elsif ($mode eq "cgi") {
+		# When PHP is disabled, a FilesMatch block is needed to override
+		# any global config that would add a handler for .php files
+		if ($files) {
+			&apache::save_directive_struct(
+				$files, undef, $vconf, $conf);
+			}
+		$files = { 'name' => 'FilesMatch',
+			   'type' => 1,
+			   'value' => '\.php$',
+			   'words' => ['\.php$'],
+			   'members' => [
+			     { 'name' => 'SetHandler',
+			       'value' => 'None',
+			     },
+			   ],
+			 };
+		&apache::save_directive_struct(
+			undef, $files, $vconf, $conf);
+		}
 	else {
 		# For non-FPM mode, remove the whole files block,
 		# and forget about any ports or sockets
