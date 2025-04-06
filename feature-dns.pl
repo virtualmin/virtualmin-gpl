@@ -2072,12 +2072,12 @@ if (&domain_has_website($d)) {
 			       grep { $_->{'type'} eq 'AAAA' &&
 				      $_->{'name'} eq $n } @$recs;
 		if (@nips && &indexof($ip, @nips) < 0) {
-			push(@recerrs, &text('validate_ednsip', "<tt>$n</tt>",
-			    "<tt>".join(' or ', @nips)."</tt>", "<tt>$ip</tt>"));
+			push(@recerrs, &text('validate_ednsip', $n,
+			    join(' or ', @nips), $ip));
 			}
 		if ($d->{'virt6'} && @nips6 && &indexof($ip6, @nips6) < 0) {
-			push(@recerrs, &text('validate_ednsip6', "<tt>$n</tt>",
-			  "<tt>".join(' or ', @nips6)."</tt>", "<tt>$ip6</tt>"));
+			push(@recerrs, &text('validate_ednsip6', $n,
+			  join(' or ', @nips6), $ip6));
 			}
 		}
 	}
