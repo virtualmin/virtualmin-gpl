@@ -78,6 +78,10 @@ To add TLSA records (for publishing SSL certs) to selected domains, use the
 C<--enable-tlsa> flag. Similarly the C<--disable-tlsa> removes them, and the
 C<--sync-tlsa> updates them in domains where they already exist.
 
+When TLSA is enabled, you can force records to include the full certficate
+with the C<--tlsa-full> flag, or just the public key with C<--tlsa-pubkey>.
+These correspond to the `3 0 1` and `3 1 1` DNS record types respectively.
+
 If a virtual server is a sub-domain of another server, you can move it's DNS
 records out into a separate zone file with the C<--disable-subdomain> flag.
 Or if eligible, you can combine the zones with C<--enable-subdomain>.
@@ -276,6 +280,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--sync-tlsa") {
 		$tlsa = 2;
+		}
+	elsif ($a eq "--tlsa-pubkey") {
+		$tlsa_sel = 1;
+		}
+	elsif ($a eq "--tlsa-full") {
+		$tlsa_sel = 0;
 		}
 	elsif ($a eq "--enable-subdomain") {
 		$submode = 1;
@@ -737,14 +747,14 @@ foreach $d (@doms) {
 				&$second_print(&text('spf_etlsa', $err));
 				}
 			else {
-				&sync_domain_tlsa_records($d, 1);
+				&sync_domain_tlsa_records($d, 1, $tlsa_sel);
 				&$second_print($text{'setup_done'});
 				$changed++;
 				}
 			}
 		elsif ($tlsa == 0) {
 			&$first_print($text{'spf_disabletlsa'});
-			&sync_domain_tlsa_records($d, 2);
+			&sync_domain_tlsa_records($d, 2, $tlsa_sel);
 			&$second_print($text{'setup_done'});
 			$changed++;
 			}
@@ -752,7 +762,7 @@ foreach $d (@doms) {
 			&$first_print($text{'spf_synctlsa'});
 			my @recs = &get_domain_tlsa_records($d);
 			if (@recs) {
-				&sync_domain_tlsa_records($d, 1);
+				&sync_domain_tlsa_records($d, 1, $tlsa_sel);
 				&$second_print($text{'setup_done'});
 				}
 			else {
@@ -954,6 +964,7 @@ print "                     [--remove-slave hostname]* | [--sync-all-slaves]\n";
 print "                     [--dns-ip address | --no-dns-ip]\n";
 print "                     [--enable-dnssec | --disable-dnssec]\n";
 print "                     [--enable-tlsa | --disable-tlsa | --sync-tlsa]\n";
+print "                     [--tlsa-full | --tlsa-pubkey]\n";
 print "                     [--enable-subdomain | --disable-subdomain]\n";
 print "                     [--cloud-dns provider|\"local\"]\n";
 print "                     [--cloud-dns-import]\n";

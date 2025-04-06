@@ -4848,12 +4848,13 @@ my $out = &backquote_command(
 return $? || $out =~ /invalid\s+command/i ? $text{'index_etlsassl'} : undef;
 }
 
-# create_tlsa_dns_record(cert-file, chain-file, port, hostname)
+# create_tlsa_dns_record(cert-file, chain-file, port, hostname, selector)
 # Given an SSL cert file, port number (assumed TCP) and hostname, returns a
 # BIND record structure for it
 sub create_tlsa_dns_record
 {
-my ($file, $chain, $port, $host) = @_;
+my ($file, $chain, $port, $host, $selector) = @_;
+$selector ||= 0;
 my $temp = &transname();
 &open_tempfile(TEMP, ">$temp");
 &print_tempfile(TEMP, &read_file_contents($file));
@@ -4861,16 +4862,26 @@ if ($chain) {
 	&print_tempfile(TEMP, &read_file_contents($chain));
 	}
 &close_tempfile(TEMP);
-my $hash = &backquote_command(
-	"openssl x509 -in ".quotemeta($temp)." -outform DER 2>/dev/null | ".
-	"openssl sha256 2>/dev/null");
+my $hash;
+if ($selector) {
+	$hash = &backquote_command(
+	    "openssl x509 -in ".quotemeta($temp).
+	      " -pubkey -outform DER 2>/dev/null | ".
+	    "openssl rsa -pubin -outform DER 2> /dev/null | ".
+	    "openssl sha256 2>/dev/null");
+	}
+else {
+	$hash = &backquote_command(
+	    "openssl x509 -in ".quotemeta($temp)." -outform DER 2>/dev/null | ".
+	    "openssl sha256 2>/dev/null");
+	}
 return undef if ($?);
 $hash =~ /=\s*([0-9a-f]+)/ || return undef;
 return { 'name' => "_".$port."._tcp.".$host.".",
 	 'class' => "IN",
 	 'type' => "TLSA",
          'ttl' => 3600,
-	 'values' => [ 3, 0, 1, $1 ] };
+	 'values' => [ 3, $selector, 1, $1 ] };
 }
 
 # create_sshfp_dns_record(key-file, key-type, hostname)
@@ -4892,12 +4903,12 @@ return { 'name' => $host.".",
 	 'values' => [ $tn, 1, $1 ] };
 }
 
-# sync_domain_tlsa_records(&domain, [force-mode])
+# sync_domain_tlsa_records(&domain, [force-mode], [force-selector])
 # Replace all TLSA records for a domain with its actual SSL certs (if enabled)
 # force-mode 0 = use config, 1 = enable, 2 = disable
 sub sync_domain_tlsa_records
 {
-my ($d, $force) = @_;
+my ($d, $force, $force_sel) = @_;
 my $tmpl = &get_template($d->{'template'});
 &pre_records_change($d);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
@@ -4919,6 +4930,18 @@ if (!$tmpl->{'ssl_tlsa_records'} && !$force && !@oldrecs) {
 	return undef;
 	}
 
+# Work out what the selector mode should be
+my $sel;
+if (defined($force_sel)) {
+	$sel = $force_sel;
+	}
+elsif (@oldrecs) {
+	$sel = $oldrecs[0]->{'values'}->[1];
+	}
+else {
+	$sel = $tmpl->{'ssl_tlsa_records'} == 2 ? 1 : 0;
+	}
+
 # Work out which TLSA records are needed
 my @need;
 if (&domain_has_website($d) && &domain_has_ssl_cert($d)) {
@@ -4928,7 +4951,8 @@ if (&domain_has_website($d) && &domain_has_ssl_cert($d)) {
 		if ($hn eq $d->{'dom'} ||
 		    $hn =~ /\.\Q$d->{'dom'}\E$/) {
 			push(@need, &create_tlsa_dns_record(
-				$d->{'ssl_cert'}, $chain, $d->{'web_sslport'}, $hn));
+				$d->{'ssl_cert'}, $chain, $d->{'web_sslport'},
+				$hn, $sel));
 			}
 		}
 	}
@@ -4939,9 +4963,9 @@ foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 	push(@ports, @{$svc->{'sslports'}}) if ($svc->{'sslports'});
 	foreach my $p (@ports) {
 		push(@need, &create_tlsa_dns_record($cfile, $chain, $p,
-			$svc->{'prefix'}.'.'.$d->{'dom'}));
+			$svc->{'prefix'}.'.'.$d->{'dom'}, $sel));
 		push(@need, &create_tlsa_dns_record($cfile, $chain, $p,
-			$d->{'dom'}));
+			$d->{'dom'}, $sel));
 		}
 	}
 

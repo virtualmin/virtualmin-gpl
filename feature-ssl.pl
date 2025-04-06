@@ -3662,7 +3662,8 @@ print &ui_table_row(
 	&hlink($text{'newweb_tlsa_records'}, "config_tlsa_records"),
 	&ui_radio("ssl_tlsa_records", $tmpl->{'ssl_tlsa_records'},
 	  [ $tmpl->{'default'} ? ( ) : ( [ '', $text{'tmpl_default'} ] ),
-	    [ 1, $text{'yes'} ],
+	    [ 1, $text{'newweb_tlsa_records1'} ],
+	    [ 2, $text{'newweb_tlsa_records2'} ],
 	    [ 0, $text{'no'} ] ]));
 
 # Combined SSL cert file?
