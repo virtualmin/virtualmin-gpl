@@ -2141,11 +2141,6 @@ my ($d) = @_;
 my $conf = &get_php_fpm_config($d);
 return undef if (!$conf);
 return $conf->{'dir'}."/".$d->{'id'}.".conf";
-}
-
-# list_php_fpm_configs()
-# Returns hash refs with details of the system's php-fpm configurations. Assumes
-# use of standard packages.
 sub list_php_fpm_configs
 {
 if ($php_fpm_config_cache) {
@@ -2293,6 +2288,7 @@ foreach my $pname (@pkgnames) {
 # If FPM was setup without a package or init script, also allow it
 if ($config{'php_fpm_cmd'} && -x $config{'php_fpm_cmd'} &&
     $config{'php_fpm_pool'} && -d $config{'php_fpm_pool'}) {
+	&foreign_require("init");
 	my $rv = { 'cmd' => $config{'php_fpm_cmd'},
 		   'fromconfig' => 1,
 		   'init' => $config{'php_fpm_init'},
