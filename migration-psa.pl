@@ -223,6 +223,7 @@ $dom{'emailto'} = $dom{'email'} ||
 foreach my $f (@features, &list_feature_plugins()) {
 	$dom{$f} = $got{$f} ? 1 : 0;
 	}
+&set_chained_features(\%dom, undef);
 &set_featurelimits_from_plan(\%dom, $plan);
 $dom{'home'} = &server_home_directory(\%dom, $parent);
 $dom{'public_html_dir'} = 'httpdocs';			# Plesk 7 style
