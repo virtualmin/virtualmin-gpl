@@ -1110,6 +1110,12 @@ foreach my $admin (@admins) {
 			$wuser->{'pass'} = $pass;
 			&acl::modify_user($wuser->{'name'}, $wuser);
 			}
+
+		# Update email
+		if ($wuser->{'email'} ne $admin->{'email'}) {
+			$wuser->{'email'} = $admin->{'email'};
+			&acl::modify_user($wuser->{'name'}, $wuser);
+			}
 		}
 	else {
 		# Need to create user
@@ -1119,7 +1125,8 @@ foreach my $admin (@admins) {
 			   'modules' => [ ],
 			   'theme' => $config{'webmin_theme'} eq '*' ? undef :
 				      $config{'webmin_theme'} eq '' ? '' :
-				       $config{'webmin_theme'}
+				       $config{'webmin_theme'},
+			   'email' => $admin->{'email'},
 			};
 		&acl::create_user($wuser);
 		}
