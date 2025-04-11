@@ -1104,16 +1104,27 @@ foreach my $admin (@admins) {
 			}
 
 		# Update password (if changed)
+		my $save = 0;
 		if ($pass eq "*LK*" ||
 		    &acl::encrypt_password($admin->{'pass'}, $wuser->{'pass'})
 		     ne $wuser->{'pass'}) {
 			$wuser->{'pass'} = $pass;
-			&acl::modify_user($wuser->{'name'}, $wuser);
+			$save = 1;
 			}
 
 		# Update email
 		if ($wuser->{'email'} ne $admin->{'email'}) {
 			$wuser->{'email'} = $admin->{'email'};
+			$save = 1;
+			}
+
+		# Make sure readonly flag is set
+		if (!$wuser->{'readonly'}) {
+			$wuser->{'readonly'} = $module_name;
+			$save = 1;
+			}
+
+		if ($save) {
 			&acl::modify_user($wuser->{'name'}, $wuser);
 			}
 		}
@@ -1127,6 +1138,7 @@ foreach my $admin (@admins) {
 				      $config{'webmin_theme'} eq '' ? '' :
 				       $config{'webmin_theme'},
 			   'email' => $admin->{'email'},
+			   'readonly' => $module_name,
 			};
 		&acl::create_user($wuser);
 		}
