@@ -314,7 +314,7 @@ return $ver eq $vers[0] ? undef : $vers[0];
 
 sub script_tikiwiki_site
 {
-return 'http://www.tikiwiki.org/';
+return 'http://tiki.org/';
 }
 
 1;
