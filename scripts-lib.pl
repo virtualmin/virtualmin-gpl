@@ -397,12 +397,13 @@ foreach my $script (@$scripts) {
 &unlock_file($scripts_unavail_file);
 }
 
-# fetch_script_files(&domain, version, opts, &old-info, &gotfiles, [nocallback])
+# fetch_script_files(&script, &domain, version, opts, &old-info, &gotfiles,
+#		     [nocallback])
 # Downloads or otherwise fetches all files needed by some script. Returns undef
 # on success, or an error message on failure. Also prints out download progress.
 sub fetch_script_files
 {
-local ($d, $ver, $opts, $sinfo, $gotfiles, $nocallback) = @_;
+local ($script, $d, $ver, $opts, $sinfo, $gotfiles, $nocallback) = @_;
 local %serial;
 &read_env_file($virtualmin_license_file, \%serial);
 

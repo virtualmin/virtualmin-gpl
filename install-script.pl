@@ -390,7 +390,7 @@ else {
 
 # First fetch needed files
 &$first_print("Fetching required files ..");
-$ferr = &fetch_script_files($d, $ver, $opts, $sinfo, \%gotfiles, 1);
+$ferr = &fetch_script_files($script, $d, $ver, $opts, $sinfo, \%gotfiles, 1);
 if ($ferr) {
 	&$second_print(".. failed : $ferr");
 	exit(1);

@@ -81,8 +81,8 @@ if ($in{'confirm'}) {
 					   $opts) || next;
 
 		# Fetch needed files
-		$ferr = &fetch_script_files($sinfo->{'dom'}, $ver,$opts,
-					    $sinfo, \%gotfiles);
+		$ferr = &fetch_script_files($script, $sinfo->{'dom'}, $ver,
+					    $opts, $sinfo, \%gotfiles);
 		&error($ferr) if ($ferr);
 
 		# Work out username and password

@@ -8415,7 +8415,8 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 
 		# Fetch needed files
 		local %gotfiles;
-		local $ferr = &fetch_script_files($dom, $ver, $opts, undef, \%gotfiles, 1);
+		local $ferr = &fetch_script_files($script, $dom, $ver, $opts,
+						  undef, \%gotfiles, 1);
 		if ($derr) {
 			&$second_print(&text('setup_scriptfetch', $ferr));
 			next;

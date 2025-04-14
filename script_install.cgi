@@ -159,7 +159,7 @@ $derr = &check_script_depends($script, $d, $ver, $sinfo, $phpver);
 &error(&text('scripts_edep', $derr)) if ($derr);
 
 # First fetch needed files
-$ferr = &fetch_script_files($d, $ver, $opts, $sinfo, \%gotfiles);
+$ferr = &fetch_script_files($script, $d, $ver, $opts, $sinfo, \%gotfiles);
 &error($ferr) if ($ferr);
 print "<br>\n";
 

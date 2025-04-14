@@ -59,7 +59,8 @@ if ($in{'confirm'}) {
 
 		# Fetch needed files
 		my %gotfiles;
-		$ferr = &fetch_script_files($sinfos[0]->{'dom'}, $ver,
+		$ferr = &fetch_script_files($script,
+					    $sinfos[0]->{'dom'}, $ver,
 					    $sinfos[0]->{'opts'},
 					    $sinfos[0], \%gotfiles, 1);
 		if ($ferr) {
