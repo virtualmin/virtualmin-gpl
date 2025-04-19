@@ -563,6 +563,12 @@ if ($config{'mysql_user_size_auto'} != 1) {
 	&save_module_config();
 	}
 
+# Fix old Rackspace cloud provider if URL has changed
+if ($config{'rs_endpoint'} eq 'https://lon.auth.api.rackspacecloud.com/v1.0') {
+	$config{'rs_endpoint'} = 'https://lon.identity.api.rackspacecloud.com/v1.0';
+	&save_module_config();
+	}
+
 # Create S3 account entries from scheduled backups
 &create_s3_accounts_from_backups();
 
