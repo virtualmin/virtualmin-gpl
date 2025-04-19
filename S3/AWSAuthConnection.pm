@@ -311,7 +311,6 @@ sub _make_request {
 	$self->{SERVER} = $1;
 	$self->{SERVER_REDIRECTS} ||= 0;
 	$self->{SERVER_REDIRECTS}++;
-	print STDERR "location=$1\n";
 	my $newpath = $path;
 	if ($self->{'SERVER_REDIRECTS'} == 1) {
 		# Redirecting from default to new endpoint. Remove the leading
