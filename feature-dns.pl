@@ -5474,6 +5474,8 @@ if (!$ok) {
 	return "Failed to remove existing DNS zone : $print_output";
 	}
 my $oldcloud = $d->{'dns_cloud'};
+my $oldremote = $d->{'dns_remote'};
+my $oldprov = $d->{'provision_dns'};
 delete($d->{'dns_cloud'});
 delete($d->{'dns_remote'});
 delete($d->{'provision_dns'});
@@ -5488,9 +5490,15 @@ elsif ($server) {
 	}
 $print_output = "";
 $ok = &setup_dns($d);
+my $setup_err;
 if (!$ok) {
-	$d->{'dns_cloud'} = $oldcloud if ($oldcloud);
-	return "Failed to setup new DNS zone : $print_output";
+	# Setup failed! Try to put everything back so we don't end up in a
+	# state where records were lost.
+	$d->{'dns_cloud'} = $oldcloud;
+	$d->{'dns_remote'} = $oldremote;
+	$d->{'provision_dns'} = $oldprov;
+	$setup_err = "Failed to setup new DNS zone : $print_output";
+	&setup_dns($d);
 	}
 &save_domain($d);
 &pop_all_print();
@@ -5516,7 +5524,8 @@ my $err = &post_records_change($d, $recs, $file);
 &release_lock_dns($d);
 return $err if ($err);
 &reload_bind_records($d);
-return undef;
+
+return $setup_err;
 }
 
 # list_public_dns_suffixes()
