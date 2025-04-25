@@ -15,6 +15,8 @@ $d = &get_domain($in{'dom'});
 @hosts || &error($text{'dbhosts_enone'});
 foreach $h (@hosts) {
 	$h =~ /^[a-z0-9\.\-\_\%\\:]+$/i ||
+	    $h =~ /^([0-9\.]+)\/([0-9\.]+)$/ &&
+	    &check_ipaddress("$1") && &check_ipaddress("$2") ||
 		&error(&text('dbhosts_ehost', $h));
 	}
 
