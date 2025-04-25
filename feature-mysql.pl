@@ -2525,10 +2525,13 @@ else {
 			next if (&indexof($h, @$hosts) >= 0);
 			&execute_user_deletion_sql($d, $h, $u->[0], 0);
 			}
+		my $plainpass = $u->[0] eq &mysql_user($d) ?
+					&mysql_pass($d) : undef;
 		foreach my $h (@$hosts) {
 			next if (&indexof($h, @$gothosts) >= 0);
 			&execute_user_creation_sql($d, $h, $u->[0],
-				"'".&mysql_escape($u->[1])."'");
+				"'".&mysql_escape($u->[1])."'",
+				$plainpass);
 			}
 		}
 
