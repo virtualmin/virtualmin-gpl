@@ -586,7 +586,7 @@ if ($gconfig{'forgot_pass'} && &foreign_check("virtualmin-password-recovery")) {
 	# Make sure the old password recovery module is disabled
 	my %clang;
 	&read_file("$config_directory/custom-lang", \%clang);
-	delete($clang{'session_postfix'});
+	$clang{'session_postfix'} = ' ';
 	&write_file("$config_directory/custom-lang", \%clang);
 	&foreign_require("acl");
 	&acl::remove_anonymous_access("/virtualmin-password-recovery",
