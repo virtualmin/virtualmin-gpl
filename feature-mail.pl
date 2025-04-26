@@ -2280,24 +2280,26 @@ if (&foreign_check("dovecot")) {
 # Rename a user's mail files, if they change due to a user rename
 sub rename_mail_file
 {
+my ($user, $olduser) = @_;
+
 &require_mail();
 if (!&mail_under_home()) {
 	if ($mail_system == 1) {
 		# Just rename the Sendmail mail file (if necessary)
-		local $of = &sendmail::user_mail_file($_[1]->{'user'});
-		local $nf = &sendmail::user_mail_file($_[0]->{'user'});
+		local $of = &sendmail::user_mail_file($olduser->{'user'});
+		local $nf = &sendmail::user_mail_file($user->{'user'});
 		&rename_logged($of, $nf) if ($of ne $nf);
 		}
 	elsif ($mail_system == 0) {
 		# Find out from Postfix which file to rename (if necessary)
-		local $nf = &postfix::postfix_mail_file($_[0]->{'user'});
-		local $of = &postfix::postfix_mail_file($_[1]->{'user'});
+		local $nf = &postfix::postfix_mail_file($user->{'user'});
+		local $of = &postfix::postfix_mail_file($olduser->{'user'});
 		&rename_logged($of, $nf) if ($of ne $nf);
 		}
 	elsif ($mail_system == 2) {
 		# Just rename the Qmail mail file (if necessary)
-		local $of = &qmailadmin::user_mail_file($_[1]->{'user'});
-		local $nf = &qmailadmin::user_mail_file($_[0]->{'user'});
+		local $of = &qmailadmin::user_mail_file($olduser->{'user'});
+		local $nf = &qmailadmin::user_mail_file($user->{'user'});
 		&rename_logged($of, $nf) if ($of ne $nf);
 		}
 	}
@@ -2316,12 +2318,37 @@ if (&foreign_check("dovecot")) {
 		push(@doves, $1);
 		}
 	foreach my $dove (@doves) {
-		&rename_file($dove."/".$_[1]->{'user'},
-			     $dove."/".$_[0]->{'user'});
-		&rename_file($dove."/".&replace_atsign($_[1]->{'user'}),
-			     $dove."/".&replace_atsign($_[0]->{'user'}));
+		&rename_file($dove."/".$olduser->{'user'},
+			     $dove."/".$user->{'user'});
+		&rename_file($dove."/".&replace_atsign($olduser->{'user'}),
+			     $dove."/".&replace_atsign($user->{'user'}));
 		}
 	}
+
+# Update any email autoreply files
+my $homescan = -d $olduser->{'home'} ? $olduser->{'home'} : $user->{'home'};
+my $userscan = defined(getpwnam($olduser->{'user'})) ? $olduser->{'user'}
+						     : $user->{'user'};
+opendir(DIR, $user->{'home'});
+foreach my $f (readdir(DIR)) {
+	next if ($f !~ /^autoreply.*\.txt$/);
+	my $path = $homescan."/".$f;
+	my $lref = &read_file_lines_as_domain_user($userscan, $path);
+	my $changed = 0;
+	foreach my $l (@$lref) {
+		if ($l =~ /^Reply-Tracking:/i) {
+			$l =~ s/\Q$olduser->{'home'}\E\//$user->{'home'}\//;
+			$changed++;
+			}
+		}
+	if ($changed) {
+		&flush_file_lines_as_domain_user($userscan, $path);
+		}
+	else {
+		&unflush_file_lines($path);
+		}
+	}
+closedir(DIR);
 }
 
 # mail_under_home()
