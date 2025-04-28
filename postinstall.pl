@@ -576,7 +576,9 @@ if ($config{'rs_endpoint'} eq 'https://lon.auth.api.rackspacecloud.com/v1.0') {
 &unlock_file($module_config_file);
 
 # Enable Webmin forgotten password recovery, if supported
-if (&get_webmin_version() >= 2.304 && !defined($gconfig{'forgot_pass'})) {
+my $webmin_version = &get_webmin_version();
+$webmin_version =~ s/^(\d+\.\d+).*/$1/;
+if ($webmin_version >= 2.304 && !defined($gconfig{'forgot_pass'})) {
 	&lock_file("$config_directory/config");
 	$gconfig{'forgot_pass'} = 1;
 	&write_file("$config_directory/config", \%gconfig);
