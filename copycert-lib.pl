@@ -46,6 +46,15 @@ if ($config{'mysql'}) {
 		   'virt' => 0,
 		   'short' => 'm' });
 	}
+if ($config{'dns'} && !&is_dns_remote()) {
+	&require_bind();
+	if (defined(&bind8::supports_tls) && &bind8::supports_tls()) {
+		push(@rv, {'id' => 'bind',
+			   'dom' => 0,
+			   'virt' => 0,
+			   'short' => 'b' });
+		}
+	}
 foreach my $rv (@rv) {
 	$rv->{'desc'} ||= $text{'cert_service_'.$rv->{'id'}};
 	}
@@ -279,6 +288,38 @@ if ($config{'mysql'}) {
 			      'ca' => $ca,
 			      'prefix' => 'mysql',
 			      'port' => 3306, });
+		}
+	}
+
+if ($config{'dns'} && !&is_dns_remote()) {
+	# Check BIND DNS certificate
+	&require_bind();
+	my $conf = &bind8::get_config();
+	my $tls = &bind8::find("tls", $conf);
+	my $opts = &bind8::find("options", $conf);
+	if ($tls) {
+		my $key = &bind8::find_value("key-file", $tls->{'members'});
+		my $cert = &bind8::find_value("cert-file", $tls->{'members'});
+		my $ca = &bind8::find_value("ca-file", $tls->{'members'});
+
+		# Find the port using this TLS key
+		my @listen = &bind8::find("listen-on", $opts->{'members'});
+		my $port;
+		foreach my $l (@listen) {
+			my $i = &indexof("tls", @{$l->{'values'}});
+			if ($i >= 0 && $l->{'values'}->[$i+1] eq
+				       $tls->{'values'}->[0]) {
+				$i = &indexof("port", @{$l->{'values'}});
+				$port = $i >=0 ? $l->{'values'}->[$i+1] : 53;
+				last;
+				}
+			}
+		push(@svcs, { 'id' => 'bind',
+			      'cert' => $cert,
+			      'key' => $key,
+			      'ca' => $ca,
+			      'prefix' => 'bind',
+			      'port' => $port, });
 		}
 	}
 

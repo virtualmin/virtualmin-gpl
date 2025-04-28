@@ -3384,6 +3384,7 @@ cert_service_postfix=Postfix
 cert_service_dovecot=Dovecot
 cert_service_proftpd=ProFTPD
 cert_service_mysql=MySQL
+cert_service_bind=BIND
 cert_copymsg=The buttons below will copy this domain's SSL certificate as the default for the chosen service. This will be used if no per-domain or per-IP certificate is configured.
 cert_copy=Copy to Webmin
 cert_copydesc=Use this certificate in Webmin, so that it is the default presented to admins accessing the Virtualmin web user interface on port $1.
