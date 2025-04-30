@@ -20,6 +20,7 @@ form_generic_subserverof=Podserwer $1
 form_aliasmail=Poczta na alias?
 form_content2=Tak, z domyślnym szablonem strony internetowej
 
+setup_edomain5=Nie można utworzyć nowej domeny o nazwie <tt>$1</tt>, chyba że opcja „Skonfiguruj certyfikat SSL od dostawcy dla nazwy hosta” zostanie najpierw wyłączona na stronie „Ustawienia konfiguracji SSL Virtualmin”
 setup_eemptypass=Nie podano hasła!
 
 setup_bind_erecs=.. nie udało się wygenerować rekordów : $1
@@ -55,6 +56,8 @@ newweb_renew_letsencrypt_def=Domyślne (7 dni)
 newweb_erenew_letsencrypt=Liczba dni przed wygaśnięciem musi być liczbą
 newweb_always_ssl=Jak wygenerować certyfikat SSL dla domen bez witryny SSL?
 newweb_tlsa_records=Jak utworzyć rekordy DNS TLSA dla certyfikatów SSL?
+newweb_tlsa_records1=Tak, z pełnym certyfikatem
+newweb_tlsa_records2=Tak, tylko z kluczem publicznym
 newweb_combined_cert=Skonfiguruj Apache do użycia
 newweb_combined_cert2=Połączony plik certyfikatu i urzędu certyfikacji
 newweb_combined_cert1=Tylko plik certyfikatu
@@ -65,6 +68,7 @@ losing_dir4=Katalog domowy tego aliasu, zawierający dane i inne pliki użytkown
 
 check_dnsip3v6=Wykryto zewnętrzny adres IPv6: $1
 check_iface4=Adresy IPv4 nie są dostępne w tym systemie
+check_postfixok2=Serwer pocztowy Postfix jest zainstalowany i skonfigurowany jako host przekaźnikowy
 
 log_create_acme=Dodano dostawcę SSL dla $1
 log_delete_acme=Usunięto dostawcę SSL dla $1
@@ -89,6 +93,7 @@ cert_newcertkeep=Zachowaj istniejący certyfikat
 cert_newca=Certyfikat CA
 cert_newcakeep=Zachowaj istniejący certyfikat
 cert_tabacme=Dostawcy SSL
+cert_service_bind=WIĄZAĆ
 cert_desc9=Dostawcy certyfikatów SSL, np. Let's Encrypt, mogą być wykorzystywani do automatycznego żądania ważnego certyfikatu do użytku przez Virtualmin.
 cert_acmedesc=Ta strona może zostać użyta do żądania nowego certyfikatu, który nadpisze każdy inny, który aktualnie skonfigurowałeś dla tej domeny. Jednak dostawcy certyfikatów SSL wymagają, aby Twoje prawo własności do domeny certyfikatu zostało zweryfikowane poprzez sprawdzenie, czy ten system hostuje witrynę dla tej domeny. Odbywa się to poprzez umieszczenie małego pliku tymczasowego w katalogu dokumentów witryny $1.
 cert_acmelink=Możesz dodawać i zarządzać dodatkowymi dostawcami na stronie <a href='$1'>Dostawcy SSL</a>.
@@ -123,8 +128,8 @@ licence_renew3=Pozostał okres karencji wynoszący $1 dnia na zarządzanie migra
 licence_renew3m=Pozostał okres karencji wynoszący $1 dni na zarządzanie migracją licencji na nowy serwer.
 licence_renew3e=Pozostał $1 dzień okresu karencji na odnowienie licencji.
 licence_renew3em=Pozostał okres karencji $1 dni na odnowienie licencji.
-licence_renew4=Okres karencji na przeniesienie licencji wygasł i system znajduje się w trybie tylko do odczytu.
-licence_renew4e=Okres karencji na odnowienie licencji wygasł i system znajduje się w trybie tylko do odczytu.
+licence_renew4=Okres karencji na przeniesienie licencji wygasł, a funkcje umożliwiające wprowadzanie zmian w systemie będą niedostępne.
+licence_renew4e=Okres karencji na odnowienie licencji wygasł, a funkcje umożliwiające wprowadzanie zmian w systemie nie będą dostępne do czasu odnowienia licencji.
 licence_efailed=Nie udało się nawiązać połączenia z serwerem licencji
 licence_eexp=Licencja dla tego serwera wygasła $1
 licence_echk=Wystąpił błąd podczas sprawdzania licencji
@@ -132,7 +137,7 @@ licence_evalid=Nie znaleziono ważnej licencji dla Twojego numeru seryjnego $1
 licence_evalidnone=Nie znaleziono ważnej licencji; Twoja licencja została wyrejestrowana
 license_esave=Nie udało się zaktualizować informacji o licencji
 licence_change=Aktywacja licencji
-licence_deregister_sure=Ta akcja odłączy licencję $1 od tego systemu, ustawiając ją w trybie tylko do odczytu po $2-dniowym okresie karencji. Będziesz musiał uzyskać nową licencję, aby kontynuować korzystanie z Virtualmin Pro na tym serwerze. Wyrejestrować licencję teraz?
+licence_deregister_sure=Ta akcja odłączy licencję $1 od tego systemu, a funkcje wprowadzania zmian zostaną wyłączone po $2-dniowym okresie karencji. Będziesz musiał uzyskać nową licencję, aby kontynuować korzystanie z Virtualmin Pro na tym serwerze. Wyrejestrować licencję teraz?
 licence_deregister_sure_nspan=Ta akcja odłączy licencję $1 od tego systemu, dzięki czemu będzie ona ważna do użycia na innym serwerze w ciągu 48 godzin. Nowa licencja będzie potrzebna do dalszego korzystania z Virtualmin Pro na tym serwerze. Czy wyrejestrować licencję teraz?
 licence_manager_deregister_yes=Tak, wyrejestruj
 
@@ -154,17 +159,17 @@ licence_manager_status1n=Nieważny
 licence_manager_status1t=Tymczasowo nieważne
 licence_manager_status2=Nieznany
 licence_manager_status3=Wygasły
-licence_manager_status4=Zablokowany, a system jest w trybie tylko do odczytu
+licence_manager_status4=Zablokowano, wprowadzanie zmian wyłączone
 licence_manager_statusok=Licencja nie ma żadnych problemów
 licence_manager_explain=Wyjaśnienie błędu licencji
 licence_manager_explain1n=Ten błąd sugeruje, że numer seryjny i licencja mogły zostać nieprawidłowo skonfigurowane, co czasami może się zdarzyć, jeśli pakiet Virtualmin Pro został pobrany i zainstalowany w sposób nieautoryzowany
 licence_manager_explain1d=Ten błąd oznacza, że numer seryjny i klucz licencyjny nigdy nie zostały ustawione lub zostały odłączone od tego serwera
-licence_manager_explain1t=Możesz tymczasowo użyć tej samej licencji Virtualmin Pro, aby przenieść się na nowy serwer. Jeśli jednak chcesz używać jej na wielu serwerach, każdy z nich wymaga własnej licencji. Przed użyciem licencji na innym serwerze wyrejestruj ją z jednego serwera. W przeciwnym razie wszystkie serwery korzystające z tej samej licencji zostaną przełączone w tryb tylko do odczytu po upływie okresu karencji
+licence_manager_explain1t=Możesz tymczasowo użyć tej samej licencji Virtualmin Pro, aby przenieść się na nowy serwer. Jeśli jednak chcesz używać jej na wielu serwerach, każdy z nich potrzebuje własnej licencji. Przed użyciem licencji na innym serwerze wyrejestruj ją z jednego serwera. W przeciwnym razie wszystkie serwery korzystające z tej samej licencji utracą możliwość wprowadzania zmian w systemie po zakończeniu okresu karencji
 licence_manager_recom=Zalecane działania
-licence_manager_recom1n=Uzyskaj nową licencję dla tego komputera przed upływem okresu karencji, w przeciwnym razie system przełączy się w tryb tylko do odczytu
+licence_manager_recom1n=Uzyskaj nową licencję dla tego komputera przed upływem okresu karencji, w przeciwnym razie możliwość wprowadzania zmian zostanie wyłączona
 licence_manager_recom1t=Wybierz serwer, z którego chcesz wyrejestrować licencję $1 przed zakończeniem okresu karencji; pamiętaj, że po wyrejestrowaniu serwer licencji może potrzebować do 48 godzin na zwolnienie licencji wcześniej używanej na wielu serwerach
 licence_manager_recom1tm=Wybierz, z którego z serwerów $2 chcesz wyrejestrować licencję $1 przed upływem okresu karencji; pamiętaj, że po wyrejestrowaniu serwer licencji może potrzebować do 48 godzin na zwolnienie licencji wcześniej używanej na wielu serwerach
-licence_manager_recom3=Odnów subskrypcję $1 w okresie karencji, aby nadal korzystać z Virtualmin Pro na tym serwerze, zanim przełączy się on w tryb tylko do odczytu
+licence_manager_recom3=Odnów subskrypcję $1 w okresie karencji, aby nadal korzystać z Virtualmin Pro na tym serwerze, zanim możliwość wprowadzania zmian zostanie wyłączona
 licence_manager_bind=Dni pozostałe w okresie karencji
 licence_manager_change=Zmień licencję
 licence_manager_setup=Skonfiguruj licencję
@@ -183,7 +188,7 @@ licence_updating_repo=Aktualizowanie repozytorium Virtualmin ..
 licence_no_lines=.. nie znaleziono wierszy dla $1!
 licence_updfile=Aktualizowanie licencji Virtualmin ..
 licence_expired=Licencja wygasła
-licence_expired_desc=Twój system jest obecnie w trybie tylko do odczytu, co oznacza, że nie możesz wprowadzać zmian w konfiguracji systemu. Ten tryb jest wymuszany, ponieważ licencja systemu wygasła lub jest używana na wielu serwerach. Odwiedź stronę <a href='$1'>Virtualmin License Manager</a>, aby uzyskać więcej szczegółów.
+licence_expired_desc=Możliwość wprowadzania zmian jest obecnie wyłączona dla Twojego systemu. Ten tryb włącza się po okresie karencji, jeśli Twoja licencja wygasła lub jest używana na więcej niż jednym serwerze. Odwiedź stronę <a href='$1'>Virtualmin License Manager</a>, aby uzyskać więcej szczegółów.
 
 scripts_enophpbestver=Nie można znaleźć pełnej wersji PHP dla $1
 scripts_kit=$1 Warsztat
@@ -206,7 +211,6 @@ scripts_kit_clone_target2=Istniejąca domena
 scripts_kit_clone_target3=Nowa subdomena
 scripts_kit_clone_target4=Nowa domena najwyższego poziomu
 scripts_kit_apply=Stosować
-scripts_kit_wp_login=Zaloguj się do WordPressa
 scripts_kit_updcache=Sprawdź aktualizacje
 scripts_kit_openin_fm=Otwórz w Menedżerze plików
 scripts_kit_backups_location=Lokalizacja kopii zapasowych
@@ -232,6 +236,9 @@ scripts_kit_estype_path=Skrypt typu „$1” na ścieżce „$2” nie istnieje
 scripts_gpl_pro_tip_enroll_single=Prosimy o rozważenie zakupu licencji <a target=_blank href='$1'>Virtualmin Pro</a>, aby wesprzeć rozwój i odblokować tę oraz wiele innych fajnych funkcji
 scripts_gpl_pro_tip_workbench_pro_only=Funkcja $1 Workbench nie jest dostępna w wersji GPL.
 scripts_gpl_pro_tip_workbench_enot=Funkcja $1 Workbench nie jest dostępna dla tej aplikacji internetowej
+scripts_gpl_pro_tip_plugin_dashboard=Dostępna nowa wtyczka
+scripts_gpl_pro_tip_learn_more=Dowiedz się więcej
+scripts_gpl_pro_tip_workbench_desc_dashboard=WP Workbench to nowa wtyczka do Virtualmin Pro zaprojektowana w celu uproszczenia zarządzania witryną WordPress. Oferuje przejrzysty, scentralizowany interfejs do zarządzania wtyczkami WordPress, motywami, kopiami zapasowymi, klonowaniem i ustawieniami rozwoju.
 
 newnotify_users=Czy wysyłać e-maile także do użytkowników w wybranych domenach?
 
@@ -270,6 +277,8 @@ spf_noaliasdns=Zmiana aliasu domeny w celu skopiowania rekordów DNS z domeny do
 spf_ecloudprov=Dostawca usługi Cloud DNS o identyfikatorze <tt>$1</tt> nie jest obsługiwany w ramach licencji Virtualmin GPL
 
 s3_need_cli=Polecenie AWS CLI potrzebne do niezawodnego tworzenia kopii zapasowych S3 nie zostało znalezione w Twoim systemie. Przyszłe wersje Virtualmin będą go wymagać, aby przesyłać kopie zapasowe do S3. <a href='$1'>Kliknij tutaj</a>, aby zainstalować je automatycznie, lub pobierz je ze strony <a href='https://aws.amazon.com/cli/' target=_blank>https://aws.amazon.com/cli/</a>.
+
+newdynip_eexternal2=W trybie Webmin należy wprowadzić nazwę hosta lub nazwę hosta:port serwera Webmin
 
 upgrade_addrepo=Dodawanie repozytorium Virtualmin Pro ..
 
@@ -407,7 +416,7 @@ acme_can2=Tylko administrator główny
 acme_edefault=Domyślnego dostawcy Let's Encrypt nie można edytować
 acme_website=Strona internetowa dostawcy SSL
 
-readonly_mode=Twój system jest obecnie w trybie tylko do odczytu, co oznacza, że nie możesz wprowadzać zmian w konfiguracji systemu. Ten tryb jest zazwyczaj włączany ręcznie przez administratora.
+readonly_mode=Możliwość wprowadzania zmian jest obecnie wyłączona dla Twojego systemu. Ten tryb jest zazwyczaj włączany ręcznie przez administratora.
 
 monitor_validate=Sprawdź domeny Virtualmin
 monitor_doms=Domeny do sprawdzenia
