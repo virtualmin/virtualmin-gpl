@@ -163,7 +163,8 @@ $default_content_dir = "$module_root_directory/default";
 @plan_restrictions = ('nodbname', 'norename', 'forceunder', 'safeunder',
 		      'migrate');
 
-@reseller_modules = ("webminlog", "mailboxes", "bind8", "logviewer", "filemin");
+@reseller_modules = ("webminlog", "mailboxes", "bind8", "logviewer", "filemin",
+		     "xterm");
 
 $reseller_group_name = "resellers";
 
