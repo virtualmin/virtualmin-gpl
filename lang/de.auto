@@ -1,0 +1,13 @@
+cert_service_bind=BINDEN
+
+licence_renew4=Die Übergangsfrist für die Übertragung Ihrer Lizenz ist abgelaufen und die Funktionen zum Vornehmen von Änderungen am System sind nicht verfügbar.
+licence_renew4e=Die Nachfrist für die Erneuerung Ihrer Lizenz ist abgelaufen und Funktionen zum Vornehmen von Änderungen am System sind erst nach der Erneuerung der Lizenz verfügbar.
+licence_deregister_sure=Diese Aktion trennt die $1-Lizenz von diesem System. Die Änderungsfunktionen werden nach einer Frist von $2 Tagen deaktiviert. Sie benötigen eine neue Lizenz, um Virtualmin Pro auf diesem Server weiterhin nutzen zu können. Möchten Sie die Lizenz jetzt abmelden?
+
+licence_manager_status4=Gesperrt, Änderungen sind deaktiviert
+licence_manager_explain1t=Sie können dieselbe Virtualmin Pro-Lizenz vorübergehend verwenden, um auf einen neuen Server zu wechseln. Wenn Sie sie jedoch auf mehreren Servern verwenden möchten, benötigt jeder eine eigene Lizenz. Melden Sie die Lizenz von einem Server ab, bevor Sie sie auf einem anderen verwenden. Andernfalls verlieren alle Server, die dieselbe Lizenz verwenden, nach Ablauf der Nachfrist die Möglichkeit, Änderungen am System vorzunehmen
+licence_manager_recom1n=Holen Sie sich vor Ablauf der Nachfrist eine neue Lizenz für diesen Computer, andernfalls wird die Möglichkeit, Änderungen vorzunehmen, deaktiviert
+licence_manager_recom3=Erneuern Sie Ihr $1-Abonnement während der Nachfrist, um Virtualmin Pro auf diesem Server weiterhin zu verwenden, bevor die Möglichkeit zum Vornehmen von Änderungen deaktiviert wird
+licence_expired_desc=Die Möglichkeit, Änderungen vorzunehmen, ist für Ihr System derzeit deaktiviert. Dieser Modus wird nach der Nachfrist aktiviert, wenn Ihre Lizenz abgelaufen ist oder auf mehreren Servern verwendet wird. Weitere Informationen finden Sie auf der Seite <a href='$1'>Virtualmin License Manager</a>.
+
+readonly_mode=Die Möglichkeit, Änderungen vorzunehmen, ist für Ihr System derzeit deaktiviert. Dieser Modus wird normalerweise manuell von einem Administrator aktiviert.

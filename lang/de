@@ -4348,8 +4348,6 @@ licence_renew3=Ein Nachfrist von $1 Tag bleibt für die Migration der Lizenz auf
 licence_renew3m=Ein Nachfrist von $1 Tagen bleibt für die Migration der Lizenz auf einen neuen Server.
 licence_renew3e=Ein Nachfrist von $1 Tag bleibt für die Verlängerung der Lizenz.
 licence_renew3em=Ein Nachfrist von $1 Tagen bleibt für die Verlängerung der Lizenz.
-licence_renew4=Die Nachfrist für die Übertragung Ihrer Lizenz ist abgelaufen, und das System ist jetzt im Nur-Lese-Modus.
-licence_renew4e=Die Nachfrist für die Verlängerung Ihrer Lizenz ist abgelaufen, und das System ist jetzt im Nur-Lese-Modus.
 license_shop_name=Virtualmin-Shop
 licence_recheck=Lizenzstatus erneut prüfen
 licence_title=Lizenz erneut prüfen
@@ -4383,7 +4381,6 @@ licence_evalid=Keine gültige Lizenz für Ihre Seriennummer $1 gefunden
 licence_evalidnone=Keine gültige Lizenz gefunden; Ihre Lizenz wurde abgemeldet
 license_esave=Fehler beim Aktualisieren der Lizenzinformationen
 licence_change=Lizenzaktivierung
-licence_deregister_sure=Diese Aktion wird die $1 Lizenz von diesem System trennen und es nach einer $2-tägigen Nachfrist in den Nur-Lese-Modus versetzen. Sie müssen eine neue Lizenz erwerben, um Virtualmin Pro auf diesem Server weiter zu verwenden. Lizenz jetzt abmelden?
 licence_deregister_sure_nspan=Diese Aktion wird die $1 Lizenz von diesem System trennen und sie innerhalb von 48 Stunden für die Nutzung auf einem anderen Server gültig machen. Eine neue Lizenz wird benötigt, um Virtualmin Pro auf diesem Server weiter zu verwenden. Lizenz jetzt abmelden?
 licence_manager_deregister_yes=Ja, abmelden
 
@@ -4405,17 +4402,13 @@ licence_manager_status1n=Ungültig
 licence_manager_status1t=Vorübergehend ungültig
 licence_manager_status2=Unbekannt
 licence_manager_status3=Abgelaufen
-licence_manager_status4=Gesperrt, mit System im Nur-Lese-Modus
 licence_manager_statusok=Lizenz hat keine Probleme
 licence_manager_explain=Erklärung des Lizenzfehlers
 licence_manager_explain1n=Dieser Fehler deutet darauf hin, dass die Seriennummer und Lizenz möglicherweise nicht korrekt eingerichtet wurden, was manchmal passieren kann, wenn das Virtualmin Pro-Paket auf nicht autorisierte Weise heruntergeladen und installiert wurde
 licence_manager_explain1d=Dieser Fehler weist darauf hin, dass die Seriennummer und der Lizenzschlüssel nie festgelegt wurden oder vom Server getrennt wurden
-licence_manager_explain1t=Sie können die gleiche Virtualmin Pro-Lizenz vorübergehend verwenden, um zu einem neuen Server zu wechseln, aber wenn Sie sie auf mehreren Servern verwenden möchten, benötigt jeder Server eine eigene Lizenz; deregistrieren Sie die Lizenz von einem Server, bevor Sie sie auf einem anderen verwenden, andernfalls werden alle Server, die dieselbe Lizenz verwenden, nach Ablauf der Nachfrist in den Nur-Lese-Modus versetzt
 licence_manager_recom=Empfohlene Maßnahmen
-licence_manager_recom1n=Erwerben Sie eine neue Lizenz für dieses System, bevor die Nachfrist endet, oder das System wird in den Nur-Lese-Modus versetzt
 licence_manager_recom1t=Wählen Sie, von welchem Server die $1 Lizenz vor Ablauf der Nachfrist deregistriert werden soll; beachten Sie, dass der Lizenzserver möglicherweise bis zu 48 Stunden benötigt, um eine zuvor auf mehreren Servern verwendete Lizenz freizugeben
 licence_manager_recom1tm=Wählen Sie, von welchem der $2 Server die $1 Lizenz vor Ablauf der Nachfrist deregistriert werden soll; beachten Sie, dass der Lizenzserver möglicherweise bis zu 48 Stunden benötigt, um eine zuvor auf mehreren Servern verwendete Lizenz freizugeben
-licence_manager_recom3=Verlängern Sie Ihr $1-Abonnement während der Nachfrist, um Virtualmin Pro auf diesem Server zu nutzen, bevor es in den Nur-Lese-Modus wechselt
 licence_manager_bind=Verbleibende Tage in der Nachfrist
 licence_manager_change=Lizenz ändern
 licence_manager_setup=Lizenz einrichten
@@ -4433,7 +4426,6 @@ licence_updating_repo=Virtualmin-Repository wird aktualisiert ..
 licence_no_lines=.. keine Zeilen für $1 gefunden!
 licence_updfile=Virtualmin-Lizenz wird aktualisiert ..
 licence_expired=Lizenz abgelaufen
-licence_expired_desc=Ihr System befindet sich derzeit im Nur-Lese-Modus, was bedeutet, dass Sie keine Änderungen an der Systemkonfiguration vornehmen können. Dieser Modus wird durch das Ablaufdatum der Lizenz oder durch die Nutzung auf mehreren Servern erzwungen. Besuchen Sie die <a href='$1'>Virtualmin Lizenz-Manager</a>-Seite für weitere Details.
 
 config_deftheme=Globaler Webmin-Standard
 config_oldtheme=Altes Webmin-Theme
@@ -6108,6 +6100,7 @@ newdynip_off=Dynamisches IP-Update wurde deaktiviert. Änderungen an der IP-Adre
 newdynip_never=Noch nicht aktualisiert
 newdynip_notify=IP-Update-Benachrichtigungen per E-Mail an
 newdynip_none=Niemand
+
 newdynip_eext=Fehler beim Ermitteln der extern sichtbaren IP-Adresse
 newdynip_eexternal=Im externen Skriptmodus muss der vollständige Pfad zu einem Skript eingegeben werden
 newdynip_eexternal2=Im Webmin-Modus muss der Hostname oder Hostname:Port eines Webmin-Servers eingegeben werden.
@@ -6116,7 +6109,6 @@ dynip_dyndns=DynDNS
 dynip_webmin=Virtualmin-System ..
 dynip_external=Externes Skript ausführen ..
 dynip_none=Keinen Dienst aktualisieren
-
 style_title=Verwende Inhaltsstil
 style_rusure=Sind Sie sicher, dass Sie die Webseiten für diesen virtuellen Server mit denen ersetzen möchten, die vom Inhaltsstil $1 generiert wurden?
 style_overwrite=Die folgenden Dateien werden überschrieben:
@@ -8418,8 +8410,6 @@ acme_can1=Reseller:in
 acme_can2=Nur Master-Administrator:in
 acme_edefault=Der Standard-SSL-Anbieter Let's Encrypt kann nicht bearbeitet werden
 acme_website=Website des SSL-Anbieters
-
-readonly_mode=Dein System befindet sich derzeit im Nur-Lese-Modus, was bedeutet, dass Sie keine Änderungen an der Systemkonfiguration vornehmen können. Dieser Modus wird normalerweise manuell von einem:r Administrator:in aktiviert.
 
 monitor_validate=Virtualmin-Domains validieren
 monitor_doms=Zu prüfende Domains
