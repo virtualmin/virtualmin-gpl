@@ -14368,6 +14368,13 @@ if (&can_use_validation() && !&can_edit_templates()) {
 		    'title' => $text{'newvalidate_title'},
 		    'icon' => 'validate' });
 	}
+foreach my $f (@plugins) {
+	# Add global link from plugins
+	if (&plugin_defined($f, "feature_global_links")) {
+		my $global_links = &plugin_call($f, "feature_global_links");
+		push(@rv, $global_links) if ($global_links);
+		}
+	}
 
 # Set category names
 foreach my $l (@rv) {
