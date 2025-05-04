@@ -869,5 +869,13 @@ sub feature_sysinfo
 {
 }
 
+# feature_global_links()
+# If defined, should return a list of additional links in the left-hand menu for
+# this plugin that are placed in the global section. Each element must be a hash
+# ref containing url, title, and optionally icon.
+sub feature_global_links
+{
+}
+
 1;
 

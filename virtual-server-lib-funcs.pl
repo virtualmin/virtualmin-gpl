@@ -11564,7 +11564,7 @@ my $opts = [ map { [ $_->{'id'}, &show_domain_name($_) ] }
 my $vals = [ ];
 foreach my $id (@$ids) {
 	my $d = &get_domain($id);
-	push(@$vals, [ $id, $d ? &show_domain_name($d) : $id ]);
+	push(@$vals, ( $id, $d ? &show_domain_name($d) : $id ));
 	}
 if ($ms) {
 	return &ui_multi_select($name, $vals, $opts, $sz, 1, $dis);
@@ -14367,6 +14367,13 @@ if (&can_use_validation() && !&can_edit_templates()) {
 	push(@rv, { 'url' => $vm."/edit_newvalidate.cgi",
 		    'title' => $text{'newvalidate_title'},
 		    'icon' => 'validate' });
+	}
+foreach my $f (@plugins) {
+	# Add global link from plugins
+	if (&plugin_defined($f, "feature_global_links")) {
+		my $global_links = &plugin_call($f, "feature_global_links");
+		push(@rv, $global_links) if ($global_links);
+		}
 	}
 
 # Set category names
