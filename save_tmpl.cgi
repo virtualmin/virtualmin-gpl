@@ -109,6 +109,9 @@ if (!$in{'new'} &&
     &indexof($in{'editmode'}, @template_features_effecting_webmin) >= 0) {
 	&set_all_null_print();
 	&modify_all_webmin($tmpl->{'standard'} ? undef : $tmpl->{'id'});
+	if (defined(&modify_all_resellers)) {
+		&modify_all_resellers();
+		}
 	&run_post_actions();
 	}
 
