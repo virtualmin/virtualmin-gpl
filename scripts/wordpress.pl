@@ -246,7 +246,7 @@ if (!$upgrade) {
 	if (!$opts->{'noauto'}) {
 		# Configure the database
 		$out = &run_as_domain_user($d,
-			"$wp config create --skip-check".
+			"$wp config create".
 			" --dbname=".quotemeta($dbname).
 			" --dbprefix=".quotemeta($opts->{'dbtbpref'}).
 			" --dbuser=".quotemeta($dbuser).
