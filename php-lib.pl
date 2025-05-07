@@ -6,8 +6,8 @@
 # Action lines in httpd.conf.
 sub get_domain_php_mode
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_get_web_php_mode", $d);
 	}
@@ -15,11 +15,11 @@ elsif (!$p) {
 	return "Virtual server does not have a website";
 	}
 &require_apache();
-local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-						   $d->{'web_port'});
+my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+						$d->{'web_port'});
 if ($virt) {
 	# First check for FPM socket, using a single ProxyPassMatch
-	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
+	my @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
 	foreach my $ppm (@ppm) {
 		if ($ppm =~ /unix:([^\|]+)/ ||
 		    $ppm =~ /fcgi:\/\/(localhost|127\.0\.0\.1):\d+/) {
@@ -40,9 +40,9 @@ if ($virt) {
 
 	# Look for an action, possibly in a directory, that runs the FCGI
 	# wrapper for PHP scripts
-	local @actions = &apache::find_directive("Action", $vconf);
-	local $pdir = &public_html_dir($d);
-	local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
+	my @actions = &apache::find_directive("Action", $vconf);
+	my $pdir = &public_html_dir($d);
+	my ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
 			      $_->{'words'}->[0] eq $pdir."/" ||
 			      &path_glob_match($_->{'words'}->[0], $pdir) }
 		    &apache::find_directive_struct("Directory", $vconf);
@@ -66,7 +66,7 @@ if ($virt) {
 
 	# Look for a mapping from PHP scripts to plain text for 'none' mode
 	if ($dir) {
-		local @types = &apache::find_directive(
+		my @types = &apache::find_directive(
 				"AddType", $dir->{'members'});
 		foreach my $t (@types) {
 			if ($t =~ /text\/plain\s+\.php/) {
@@ -88,17 +88,17 @@ return 'none';
 # success or an error message on failure.
 sub save_domain_php_mode
 {
-local ($d, $mode, $port, $newdom) = @_;
-local $p = &domain_has_website($d);
+my ($d, $mode, $port, $newdom) = @_;
+my $p = &domain_has_website($d);
 $p || return "Virtual server does not have a website";
-local $tmpl = &get_template($d->{'template'});
-local $oldmode = &get_domain_php_mode($d);
-local @vers = sort { &compare_version_numbers($a->[0], $b->[0]) }
+my $tmpl = &get_template($d->{'template'});
+my $oldmode = &get_domain_php_mode($d);
+my @vers = sort { &compare_version_numbers($a->[0], $b->[0]) }
 		   &list_available_php_versions($d, $mode);
 
 # Work out the default PHP version for FPM
 if ($mode eq "fpm") {
-	local @fpms = grep { !$_->{'err'} } &list_php_fpm_configs();
+	my @fpms = grep { !$_->{'err'} } &list_php_fpm_configs();
 	@fpms || return "No FPM versions found!";
 	my $curr = &get_php_fpm_config($d->{'php_fpm_version'});
 	if (!$curr) {
@@ -129,7 +129,7 @@ if ($mode eq "fpm") {
 
 if ($mode =~ /mod_php|none/ && $oldmode !~ /mod_php|none/) {
 	# Save the PHP version for later recovery
-	local $oldver = &get_domain_php_version($d, $oldmode);
+	my $oldver = &get_domain_php_version($d, $oldmode);
 	$d->{'last_php_version'} = $oldver;
 	}
 
@@ -142,11 +142,11 @@ if ($mode ne $oldmode) {
 	}
 
 # Work out source php.ini files
-local (%srcini, %subs_ini);
+my (%srcini, %subs_ini);
 $mode eq "none" || @vers || return "No PHP versions found for mode $mode";
 foreach my $ver (@vers) {
 	$subs_ini{$ver->[0]} = 0;
-	local $srcini = $tmpl->{'web_php_ini_'.$ver->[0]};
+	my $srcini = $tmpl->{'web_php_ini_'.$ver->[0]};
 	if (!$srcini || $srcini eq "none" || !-r $srcini) {
 		$srcini = &get_global_php_ini($ver->[0], $mode);
 		}
@@ -155,18 +155,18 @@ foreach my $ver (@vers) {
 		}
 	$srcini{$ver->[0]} = $srcini;
 	}
-local @srcinis = &unique(values %srcini);
+my @srcinis = &unique(values %srcini);
 
 # Copy php.ini file into etc directory, for later per-site modification
-local $etc = "$d->{'home'}/etc";
+my $etc = "$d->{'home'}/etc";
 if (!-d $etc) {
 	&make_dir_as_domain_user($d, $etc, 0755);
 	}
 foreach my $ver (@vers) {
 	# Create separate .ini file for each PHP version, if missing
-	local $subs_ini = $subs_ini{$ver->[0]};
-	local $srcini = $srcini{$ver->[0]};
-	local $inidir = "$etc/php$ver->[0]";
+	my $subs_ini = $subs_ini{$ver->[0]};
+	my $srcini = $srcini{$ver->[0]};
+	my $inidir = "$etc/php$ver->[0]";
 	if ($srcini && !-r "$inidir/php.ini") {
 		# Copy file, set permissions, fix session.save_path, and
 		# clear out extension_dir (because it can differ between
@@ -184,7 +184,7 @@ foreach my $ver (@vers) {
 			}
 		elsif ($subs_ini) {
 			# Perform substitions on config file
-			local $inidata = &read_file_contents($srcini);
+			my $inidata = &read_file_contents($srcini);
 			$inidata || return "Failed to read $srcini, ".
 					   "or file is empty";
 			$inidata = &substitute_virtualmin_template($inidata,$d);
@@ -195,7 +195,7 @@ foreach my $ver (@vers) {
 			}
 		else {
 			# Just copy verbatim
-			local ($ok, $err) = &copy_source_dest_as_domain_user(
+			my ($ok, $err) = &copy_source_dest_as_domain_user(
 				$d, $srcini, "$inidir/php.ini");
 			$ok || return "Failed to copy $srcini to ".
 				      "$inidir/php.ini : $err";
@@ -205,7 +205,7 @@ foreach my $ver (@vers) {
 		&unflush_file_lines("$inidir/php.ini");
 		undef($phpini::get_config_cache{"$inidir/php.ini"});
 
-		local ($uid, $gid) = (0, 0);
+		my ($uid, $gid) = (0, 0);
 		if (!$tmpl->{'web_php_noedit'}) {
 			($uid, $gid) = ($d->{'uid'}, $d->{'ugid'});
 			}
@@ -213,8 +213,8 @@ foreach my $ver (@vers) {
 			# Fix up session save path, extension_dir and
 			# gc_probability / gc_divisor
 			&foreign_require("phpini");
-			local $pconf = &phpini::get_config("$inidir/php.ini");
-			local $tmp = &create_server_tmp($d);
+			my $pconf = &phpini::get_config("$inidir/php.ini");
+			my $tmp = &create_server_tmp($d);
 			&phpini::save_directive($pconf, "session.save_path",
 						$tmp);
 			&phpini::save_directive($pconf, "upload_tmp_dir", $tmp);
@@ -227,9 +227,9 @@ foreach my $ver (@vers) {
 
 			# On some systems, these are not set and so sessions are
 			# never cleaned up.
-			local $prob = &phpini::find_value(
+			my $prob = &phpini::find_value(
 				"session.gc_probability", $pconf);
-			local $div = &phpini::find_value(
+			my $div = &phpini::find_value(
 				"session.gc_divisor", $pconf);
 			&phpini::save_directive($pconf,
 				"session.gc_probability", 1) if (!$prob);
@@ -237,7 +237,7 @@ foreach my $ver (@vers) {
 				"session.gc_divisor", 100) if (!$div);
 
 			# Set timezone to match system
-			local $tz;
+			my $tz;
 			if (&foreign_check("time")) {
 				&foreign_require("time");
 				if (&time::has_timezone()) {
@@ -281,27 +281,27 @@ elsif ($mode ne "fpm") {
 	}
 
 # Add the appropriate directives to the Apache config
-local $conf = &apache::get_config();
-local @ports = ( $d->{'web_port'},
+my $conf = &apache::get_config();
+my @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 @ports = ( $port ) if ($port);	# Overridden to just do SSL or non-SSL
-local $fdest = "$d->{'home'}/fcgi-bin";
-local $pfound = 0;
+my $fdest = "$d->{'home'}/fcgi-bin";
+my $pfound = 0;
 foreach my $p (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
 	next if (!$vconf);
 	$pfound++;
 
 	# Find <directory> sections containing PHP directives.
 	# If none exist, add them in either the directory for
 	# public_html, or the <virtualhost> if it already has them
-	local @phpconfs;
-	local @dirstrs = &apache::find_directive_struct("Directory",
+	my @phpconfs;
+	my @dirstrs = &apache::find_directive_struct("Directory",
 							$vconf);
 	foreach my $dirstr (@dirstrs) {
-		local @wrappers = &apache::find_directive("FCGIWrapper",
+		my @wrappers = &apache::find_directive("FCGIWrapper",
 					$dirstr->{'members'});
-		local @actions =
+		my @actions =
 			grep { $_ =~ /^application\/x-httpd-php/ }
 			&apache::find_directive("Action",
 						$dirstr->{'members'});
@@ -314,11 +314,11 @@ foreach my $p (@ports) {
 		# already directives for cgi, the <directory> otherwise.
 		# Unless we are using fcgid, in which case it must always be
 		# added to the directory.
-		local @pactions =
+		my @pactions =
 		    grep { $_ =~ /^application\/x-httpd-php\d+/ }
 			&apache::find_directive("Action", $vconf);
-		local $pdir = &public_html_dir($d);
-		local ($dirstr) = grep { $_->{'words'}->[0] eq $pdir ||
+		my $pdir = &public_html_dir($d);
+		my ($dirstr) = grep { $_->{'words'}->[0] eq $pdir ||
 					 $_->{'words'}->[0] eq $pdir."/" }
 		    &apache::find_directive_struct("Directory", $vconf);
 		if ($mode eq "fcgid") {
@@ -335,32 +335,32 @@ foreach my $p (@ports) {
 		}
 
 	# Work out which PHP version each directory uses currently
-	local %pdirs;
+	my %pdirs;
 	if (!$newdom) {
 		%pdirs = map { $_->{'dir'}, $_->{'version'} }
 			     &list_domain_php_directories($d);
 		}
 
 	# Update all of the directories
-	local @avail = map { $_->[0] }
+	my @avail = map { $_->[0] }
 			   &list_available_php_versions($d, $mode);
-	local %allvers = map { $_, 1 } @all_possible_php_versions;
+	my %allvers = map { $_, 1 } @all_possible_php_versions;
 	foreach my $phpstr (@phpconfs) {
 		# Remove all Action and AddType directives for suexec PHP
-		local $phpconf = $phpstr->{'members'};
-		local @actions = &apache::find_directive("Action", $phpconf);
+		my $phpconf = $phpstr->{'members'};
+		my @actions = &apache::find_directive("Action", $phpconf);
 		@actions = grep { !/^application\/x-httpd-php\d+/ }
 				@actions;
-		local @types = &apache::find_directive("AddType", $phpconf);
+		my @types = &apache::find_directive("AddType", $phpconf);
 		@types = grep { !/^application\/x-httpd-php\d+/ &&
 				!/\.php[0-9\.]*$/ } @types;
 
 		# Remove all AddHandler and FCGIWrapper directives for fcgid
-		local @handlers = &apache::find_directive("AddHandler",
+		my @handlers = &apache::find_directive("AddHandler",
 							  $phpconf);
 		@handlers = grep { !(/^fcgid-script\s+\.php(.*)$/ &&
 				     ($1 eq '' || $allvers{$1})) } @handlers;
-		local @wrappers = &apache::find_directive("FCGIWrapper",
+		my @wrappers = &apache::find_directive("FCGIWrapper",
 							  $phpconf);
 		@wrappers = grep {
 			!(/^\Q$fdest\E\/php[0-9\.]+\.fcgi\s+\.php(.*)$/ &&
@@ -368,7 +368,7 @@ foreach my $p (@ports) {
 
 		# Add needed Apache directives. Don't add the AddHandler,
 		# Alias and Directory if already there.
-		local $ver = $pdirs{$phpstr->{'words'}->[0]} ||
+		my $ver = $pdirs{$phpstr->{'words'}->[0]} ||
 			     $tmpl->{'web_phpver'} ||
 			     $avail[$#avail];
 		$ver = $avail[$#avail] if (&indexof($ver, @avail) < 0);
@@ -415,7 +415,7 @@ foreach my $p (@ports) {
 					$phpconf, $conf);
 
 		# For fcgid mode, the directory needs to have Options ExecCGI
-		local ($opts) = &apache::find_directive("Options", $phpconf);
+		my ($opts) = &apache::find_directive("Options", $phpconf);
 		if ($opts && $mode eq "fcgid" && $opts !~ /ExecCGI/) {
 			$opts .= " +ExecCGI";
 			&apache::save_directive("Options", [ $opts ],
@@ -424,27 +424,27 @@ foreach my $p (@ports) {
 		}
 
 	# For FPM mode, we need a proxy directive at the top level
-	local $fsock = &get_php_fpm_socket_file($d, 1);
-	local $fport = $d->{'php_fpm_port'};
-	local $fmode = $fport ? 'port' :
+	my $fsock = &get_php_fpm_socket_file($d, 1);
+	my $fport = $d->{'php_fpm_port'};
+	my $fmode = $fport ? 'port' :
 		       -r $fsock ? 'socket' :
 		       $tmpl->{'php_sock'} ? 'socket' : 'port';
-	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
-	local @oldppm = grep { /unix:([^\|]+)/ || /fcgi:\/\/(localhost|127\.0\.0\.1):\d+/ } @ppm;
+	my @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
+	my @oldppm = grep { /unix:([^\|]+)/ || /fcgi:\/\/(localhost|127\.0\.0\.1):\d+/ } @ppm;
 	if ($fsock) {
 		@ppm = grep { !/unix:([^\|]+)/ } @ppm;
 		}
 	if ($fport) {
 		@ppm = grep { !/fcgi:\/\/(localhost|127\.0\.0\.1):\d+/ } @ppm;
 		}
-	local $files;
+	my $files;
 	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
 		$files = $f if ($f->{'words'}->[0] eq '\.php$');
 		}
 	if ($mode eq "fpm" && ($apache::httpd_modules{'core'} < 2.4 || @oldppm)) {
 		# Use a proxy directive for older Apache or if this is what's
 		# already in use
-		local $phd = $phpconfs[0]->{'words'}->[0];
+		my $phd = $phpconfs[0]->{'words'}->[0];
 		if ($fmode eq 'socket') {
 			# Use socket file
 			push(@ppm, "^/(.*\.php(/.*)?)\$ unix:${fsock}|fcgi://127.0.0.1${phd}/\$1");
@@ -548,7 +548,7 @@ foreach my $p (@ports) {
 
 	# For non-mod_php mode, we need a RemoveHandler .php directive at
 	# the <virtualhost> level to supress mod_php which may still be active
-	local @remove = &apache::find_directive("RemoveHandler", $vconf);
+	my @remove = &apache::find_directive("RemoveHandler", $vconf);
 	@remove = grep { !(/^\.php(.*)$/ && ($1 eq '' || $allvers{$1})) }
 		       @remove;
 	if ($mode ne "mod_php") {
@@ -563,7 +563,7 @@ foreach my $p (@ports) {
 	# For non-mod_php mode, use php_admin_value to turn off mod_php in
 	# case it gets enabled in a .htaccess file
 	if (&get_apache_mod_php_version()) {
-		local @admin = &apache::find_directive("php_admin_value",
+		my @admin = &apache::find_directive("php_admin_value",
 						       $vconf);
 		@admin = grep { !/^engine\s+/ } @admin;
 		if ($mode ne "mod_php") {
@@ -577,17 +577,17 @@ foreach my $p (@ports) {
 	# or the PHP max execution time + 1, so that scripts run via fastCGI
 	# aren't disconnected
 	if ($mode eq "fcgid") {
-		local $maxex;
+		my $maxex;
 		if ($config{'fcgid_max'} eq "*") {
 			# Don't set
 			$maxex = undef;
 			}
 		elsif ($config{'fcgid_max'} eq "") {
 			# From PHP config
-			local $inifile = &get_domain_php_ini($d, $ver);
+			my $inifile = &get_domain_php_ini($d, $ver);
 			if (-r $inifile) {
 				&foreign_require("phpini");
-				local $iniconf = &phpini::get_config($inifile);
+				my $iniconf = &phpini::get_config($inifile);
 				$maxex = &phpini::find_value(
 					"max_execution_time", $iniconf);
 				}
@@ -609,7 +609,7 @@ foreach my $p (@ports) {
 	# For fcgid mode, set max request size to 1GB, which is the default
 	# in older versions of mod_fcgid but is smaller in versions 2.3.6 and
 	# later.
-	local $setmax;
+	my $setmax;
 	if ($mode eq "fcgid") {
 		if ($gconfig{'os_type'} eq 'debian-linux' &&
                     $gconfig{'os_version'} >= 6) {
@@ -621,7 +621,7 @@ foreach my $p (@ports) {
 		       &foreign_check("software")) {
 			# CentOS 6 and Fedora 14+ may have it..
 			&foreign_require("software");
-			local @pinfo = &software::package_info("mod_fcgid");
+			my @pinfo = &software::package_info("mod_fcgid");
 			if (&compare_versions($pinfo[4], "2.3.6") >= 0) {
 				$setmax = 1;
 				}
@@ -638,7 +638,7 @@ foreach my $p (@ports) {
 $d->{'php_mode'} = $mode;
 &sync_alias_domain_php_mode($d);
 
-local @vlist = map { $_->[0] } &list_available_php_versions($d);
+my @vlist = map { $_->[0] } &list_available_php_versions($d);
 if ($mode !~ /mod_php|none/ && $oldmode =~ /mod_php|none/ &&
     $d->{'last_php_version'} &&
     &indexof($d->{'last_php_version'}, @vlist) >= 0) {
