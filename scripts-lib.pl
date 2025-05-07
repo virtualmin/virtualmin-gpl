@@ -3599,6 +3599,7 @@ my $path = $sinfo->{'opts'}->{'path_real'} ||
 my $surl = $sinfo->{'url'} ? $sinfo->{'url'} :
 	((&domain_has_ssl($d) ? 'https://' : 'http://') ."$d->{'dom'}${path}/");
 my $slabel = $fullurl ? $surl : $path;
+$slabel =~ s/\/+$/\//;
 my $slink = "<a href='$surl' target=_blank>$slabel</a>";
 return $sinfo->{'url'} ? $slink : "<i>$slink</i>";
 }
