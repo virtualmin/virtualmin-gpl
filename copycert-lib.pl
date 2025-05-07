@@ -295,9 +295,8 @@ if ($config{'dns'} && !&is_dns_remote()) {
 	# Check BIND DNS certificate
 	&require_bind();
 	my $conf = &bind8::get_config();
-	my $tls = &bind8::find("tls", $conf);
 	my $opts = &bind8::find("options", $conf);
-	if ($tls) {
+	foreach my $tls (&bind8::find("tls", $conf)) {
 		my $key = &bind8::find_value("key-file", $tls->{'members'});
 		my $cert = &bind8::find_value("cert-file", $tls->{'members'});
 		my $ca = &bind8::find_value("ca-file", $tls->{'members'});
@@ -314,12 +313,15 @@ if ($config{'dns'} && !&is_dns_remote()) {
 				last;
 				}
 			}
-		push(@svcs, { 'id' => 'bind',
-			      'cert' => $cert,
-			      'key' => $key,
-			      'ca' => $ca,
-			      'prefix' => 'bind',
-			      'port' => $port, });
+		if ($port) {
+			push(@svcs, { 'id' => 'bind',
+				      'cert' => $cert,
+				      'key' => $key,
+				      'ca' => $ca,
+				      'prefix' => 'bind',
+				      'port' => $port, });
+			last;
+			}
 		}
 	}
 
@@ -923,6 +925,120 @@ if (&mysql::is_mysql_running() > 0) {
 		}
 	}
 &$second_print($text{'setup_done'});
+}
+
+# copy_bind_ssl_service(&domain)
+# Copy a domain's SSL cert to BIND for DNS over TLS
+sub copy_bind_ssl_service
+{
+my ($d) = @_;
+
+&$first_print($text{'copycert_bind'});
+&require_bind();
+&lock_file(&bind8::make_chroot($bind8::config{'named_conf'}));
+my $parent = &bind8::get_config_parent();
+my $conf = &bind8::get_config();
+my $opts = &bind8::find("options", $conf);
+
+# First off, is there already a TLS block for the domain's key?
+my $tlsname = $d->{'dom'};
+$tlsname =~ s/\./_/g;
+my $found;
+foreach my $tls (&bind8::find("tls", $conf)) {
+	$found = $tls if ($tls->{'values'}->[0] eq $tlsname);
+	}
+if (!$found) {
+	# No, so we need to add it and copy across the key files
+	my $dir = &bind8::base_directory($conf, 1);
+	my $cert = $dir."/".$tlsname.".cert";
+	&lock_file($cert);
+	&copy_source_dest($d->{'ssl_cert'}, $cert);
+	&bind8::set_ownership($cert);
+	&unlock_file($cert);
+
+	my $key = $dir."/".$tlsname.".key";
+	&lock_file($key);
+	&copy_source_dest($d->{'ssl_key'}, $key);
+	&bind8::set_ownership($key);
+	&unlock_file($key);
+
+	my $ca;
+	if ($d->{'ssl_chain'}) {
+		$ca = $dir."/".$tlsname.".ca";
+		&lock_file($ca);
+		&copy_source_dest($d->{'ssl_chain'}, $ca);
+		&bind8::set_ownership($ca);
+		&unlock_file($ca);
+		}
+
+	# Add the TLS directive
+	my $tls = { 'name' => 'tls',
+		    'values' => [ $tlsname ],
+		    'type' => 1,
+		    'members' => [
+			   { 'name' => 'key-file',
+			     'values' => [ $key ]
+			   },
+			   { 'name' => 'cert-file',
+			     'values' => [ $cert ]
+			   },
+			]
+		  };
+	if ($ca) {
+		push(@{$tls->{'members'}},
+		     { 'name' => 'ca-file',
+		       'values' => [ $ca ]
+		     });
+		}
+	&bind8::save_directive($parent, [ ], [ $tls ]);
+	&$second_print($text{'setup_done'});
+	}
+else {
+	&$second_print($text{'copycert_bind2'});
+	}
+
+# Now check for a listen-on block config on port 863 for IPv4 and v6
+DIRNAME: foreach my $dirname ("listen-on", "listen-on-v6") {
+	&$first_print(&text('copycert_bind3',
+			    $dirname eq 'listen-on' ? 'IPv4' : 'IPv6'));
+	my @listen = &bind8::find($dirname, $opts->{'members'});
+	my ($found_tls, $found_port);
+	foreach my $l (@listen) {
+		my $v = $l->{'values'};
+		for(my $j=0; $j<@$v; $j++) {
+			if ($v->[$j] eq "tls" && $v->[$j+1] eq $tlsname) {
+				$found_tls++;
+				}
+			if ($v->[$j] eq "port" && $v->[$j+1] == 853) {
+				$found_port++;
+				}
+			}
+		if ($found_port && !$found_tls) {
+			# Wrong TLS name?
+			&$second_print($text{'copycert_bind4'});
+			next DIRNAME;
+			}
+		last if ($found_port);
+		}
+	if (!$found_port) {
+		# Add a listen on port 853
+		my $l = { 'name' => $dirname,
+			  'values' => [ 'port', 853, 'tls', $tlsname ],
+			  'type' => 1,
+			  'members' => [
+				{ 'name' => 'any' },
+				],
+			};
+		&bind8::save_directive($opts, [ ], [ $l ], 1);
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print($text{'copycert_bind2'});
+		}
+	}
+
+&flush_file_lines();
+&unlock_file(&bind8::make_chroot($bind8::config{'named_conf'}));
 }
 
 1;
