@@ -246,9 +246,11 @@ if (!$upgrade) {
 	if (!$opts->{'noauto'}) {
 		# Configure the database
 		$out = &run_as_domain_user($d,
-			"$wp config create --dbname=".quotemeta($dbname).
+			"$wp config create --skip-check".
+			" --dbname=".quotemeta($dbname).
 			" --dbprefix=".quotemeta($opts->{'dbtbpref'}).
-			" --dbuser=".quotemeta($dbuser)." --dbpass=".quotemeta($dbpass).
+			" --dbuser=".quotemeta($dbuser).
+			" --dbpass=".quotemeta($dbpass).
 			" --dbhost=".quotemeta($dbhost)." 2>&1");
 		if ($?) {
 			return (-1, "\`wp config create\` failed : $out$err_continue");
