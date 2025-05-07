@@ -1267,8 +1267,8 @@ return $mode eq "fpm" ? 0 : 1;
 # been configured.
 sub list_domain_php_directories
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_list_web_php_directories", $d);
 	}
@@ -1276,13 +1276,13 @@ elsif (!$p) {
 	return "Virtual server does not have a website";
 	}
 &require_apache();
-local $conf = &apache::get_config();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my $conf = &apache::get_config();
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return ( ) if (!$virt);
-local $mode = &get_domain_php_mode($d);
+my $mode = &get_domain_php_mode($d);
 if ($mode eq "mod_php") {
 	# All are run as version from Apache module
-	local @avail = &list_available_php_versions($d, $mode);
+	my @avail = &list_available_php_versions($d, $mode);
 	if (@avail) {
 		return ( { 'dir' => &public_html_dir($d),
 			   'version' => $avail[0]->[0],
@@ -1305,13 +1305,13 @@ elsif ($mode eq "none") {
 
 # Find directories with either FCGIWrapper or AddType directives, and check
 # which version they specify for .php files
-local @dirs = &apache::find_directive_struct("Directory", $vconf);
-local @rv;
+my @dirs = &apache::find_directive_struct("Directory", $vconf);
+my @rv;
 foreach my $dir (@dirs) {
-	local $n = $mode eq "cgi" ? "AddType" :
+	my $n = $mode eq "cgi" ? "AddType" :
 		   $mode eq "fcgid" ? "FCGIWrapper" : undef;
 	foreach my $v (&apache::find_directive($n, $dir->{'members'})) {
-		local $w = &apache::wsplit($v);
+		my $w = &apache::wsplit($v);
 		if (&indexof(".php", @$w) > 0) {
 			# This is for .php files .. look at the php version
 			if ($w->[0] =~ /php([0-9\.]+)\.(cgi|fcgi)/ ||
@@ -1335,8 +1335,8 @@ return @rv;
 # be found, or the PHP mode was wrong)
 sub save_domain_php_directory
 {
-local ($d, $dir, $ver, $noini) = @_;
-local $p = &domain_has_website($d);
+my ($d, $dir, $ver, $noini) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_save_web_php_directory",
 			    $d, $dir, $ver);
@@ -1345,9 +1345,9 @@ elsif (!$p) {
 	return "Virtual server does not have a website!";
 	}
 &require_apache();
-local $mode = &get_domain_php_mode($d);
+my $mode = &get_domain_php_mode($d);
 return "PHP versions cannot be set in mod_php mode" if ($mode eq "mod_php");
-local $oldlog = &get_domain_php_error_log($d);
+my $oldlog = &get_domain_php_error_log($d);
 
 my $phd = &public_html_dir($d);
 if ($mode eq "fpm") {
@@ -1371,24 +1371,24 @@ if ($mode eq "fpm") {
 	}
 else {
 	# Config needs to be updated for each Apache virtualhost
-	local $any = 0;
-	local @ports = ( $d->{'web_port'},
+	my $any = 0;
+	my @ports = ( $d->{'web_port'},
 			 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-	local %allvers = map { $_, 1 } @all_possible_php_versions;
+	my %allvers = map { $_, 1 } @all_possible_php_versions;
 	foreach my $p (@ports) {
-		local $conf = &apache::get_config();
-		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
+		my $conf = &apache::get_config();
+		my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
 		next if (!$virt);
 
 		# Check for an existing <Directory> block
-		local @dirs = &apache::find_directive_struct("Directory", $vconf);
-		local ($dirstr) = grep { $_->{'words'}->[0] eq $dir } @dirs;
+		my @dirs = &apache::find_directive_struct("Directory", $vconf);
+		my ($dirstr) = grep { $_->{'words'}->[0] eq $dir } @dirs;
 		if ($dirstr) {
 			# Update the AddType or FCGIWrapper directives, so that
 			# .php scripts use the specified version, and all other
 			# .phpN use version N.
 			if ($mode eq "cgi") {
-				local @types = &apache::find_directive(
+				my @types = &apache::find_directive(
 					"AddType", $dirstr->{'members'});
 				@types = grep {
 					$_ !~ /^application\/x-httpd-php[0-9]/
@@ -1404,8 +1404,8 @@ else {
 				&flush_file_lines($dirstr->{'file'});
 				}
 			elsif ($mode eq "fcgid") {
-				local $dest = "$d->{'home'}/fcgi-bin";
-				local @wrappers = &apache::find_directive(
+				my $dest = "$d->{'home'}/fcgi-bin";
+				my @wrappers = &apache::find_directive(
 					"FCGIWrapper", $dirstr->{'members'});
 				@wrappers = grep {
 					!(/^\Q$dest\E\/php\S+\.fcgi\s+\.php(\S*)$/ &&
@@ -1423,7 +1423,7 @@ else {
 			}
 		else {
 			# Add the directory
-			local @phplines;
+			my @phplines;
 			if ($mode eq "cgi") {
 				# Directives for plain CGI
 				foreach my $v (&list_available_php_versions($d)) {
@@ -1439,7 +1439,7 @@ else {
 				}
 			elsif ($mode eq "fcgid") {
 				# Directives for fcgid
-				local $dest = "$d->{'home'}/fcgi-bin";
+				my $dest = "$d->{'home'}/fcgi-bin";
 				push(@phplines, "AddHandler fcgid-script .php");
 				push(@phplines, "FCGIWrapper $dest/php$ver.fcgi .php");
 				foreach my $v (&list_available_php_versions($d)) {
@@ -1456,7 +1456,7 @@ else {
 			if ($apache::httpd_modules{'core'} < 2.4) {
 				$granteddir = "Allow from all";
 				}
-			local @lines = (
+			my @lines = (
 				"    <Directory $dir>",
 				"        Options +IncludesNOEXEC +SymLinksifOwnerMatch +ExecCGI",
 				"        $granteddir",
@@ -1464,7 +1464,7 @@ else {
 				(map { "        ".$_ } @phplines),
 				"    </Directory>"
 				);
-			local $lref = &read_file_lines($virt->{'file'});
+			my $lref = &read_file_lines($virt->{'file'});
 			splice(@$lref, $virt->{'eline'}, 0, @lines);
 			&flush_file_lines($virt->{'file'});
 			undef(@apache::get_config_cache);
@@ -1504,8 +1504,8 @@ return undef;
 # Delete the <Directory> section for a custom PHP version in some directory
 sub delete_domain_php_directory
 {
-local ($d, $dir) = @_;
-local $p = &domain_has_website($d);
+my ($d, $dir) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_delete_web_php_directory", $d, $dir);
 	}
@@ -1513,15 +1513,15 @@ elsif (!$p) {
 	return "Virtual server does not have a website";
 	}
 &require_apache();
-local $conf = &apache::get_config();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my $conf = &apache::get_config();
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return 0 if (!$virt);
-local $mode = &get_domain_php_mode($d);
+my $mode = &get_domain_php_mode($d);
 
-local @dirs = &apache::find_directive_struct("Directory", $vconf);
-local ($dirstr) = grep { $_->{'words'}->[0] eq $dir } @dirs;
+my @dirs = &apache::find_directive_struct("Directory", $vconf);
+my ($dirstr) = grep { $_->{'words'}->[0] eq $dir } @dirs;
 if ($dirstr) {
-	local $lref = &read_file_lines($dirstr->{'file'});
+	my $lref = &read_file_lines($dirstr->{'file'});
 	splice(@$lref, $dirstr->{'line'},
 	       $dirstr->{'eline'}-$dirstr->{'line'}+1);
 	&flush_file_lines($dirstr->{'file'});
