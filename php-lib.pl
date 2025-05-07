@@ -1424,50 +1424,65 @@ else {
 		else {
 			# Add the directory
 			my @phplines;
+			my @mems;
+			push(@mems, { 'name' => 'Options',
+				      'value' => '+IncludesNOEXEC +SymLinksifOwnerMatch +ExecCGI',
+				    });
+			if ($apache::httpd_modules{'core'} < 2.4) {
+				push(@mems, { 'name' => 'Allow',
+					      'value' => 'from all',
+					    });
+				}
+			else {
+				push(@mems, { 'name' => 'Require',
+					      'value' => 'all granted',
+					    });
+				}
+			my $olist = $apache::httpd_modules{'core'} >= 2.2 ?
+					" ".&get_allowed_options_list() : "";
+			push(@mems, { 'name' => 'AllowOverride',
+				      'value' => 'All'.$olist });
+
 			if ($mode eq "cgi") {
 				# Directives for plain CGI
 				foreach my $v (&list_available_php_versions($d)) {
-					push(@phplines,
-					     "Action application/x-httpd-php$v->[0] ".
-					     "/cgi-bin/php$v->[0].cgi");
-					push(@phplines,
-					     "AddType application/x-httpd-php$v->[0] ".
-					     ".php$v->[0]");
+					push(@mems, { 'name' => 'Action',
+						      'value' => "application/x-httpd-php$v->[0] ".
+								 "/cgi-bin/php$v->[0].cgi",
+						    });
+					push(@mems, { 'name' => 'AddType',
+						      'value' => "application/x-httpd-php$v->[0] .php$v->[0]",
+						    });
 					}
-				push(@phplines,
-				     "AddType application/x-httpd-php$ver .php");
+				push(@mems, { 'name' => 'AddType',
+					      'value' => "application/x-httpd-php$ver .php",
+					    });
 				}
 			elsif ($mode eq "fcgid") {
 				# Directives for fcgid
 				my $dest = "$d->{'home'}/fcgi-bin";
-				push(@phplines, "AddHandler fcgid-script .php");
-				push(@phplines, "FCGIWrapper $dest/php$ver.fcgi .php");
+				push(@mems, { 'name' => 'AddHandler',
+					      'value' => "fcgid-script .php",
+					    });
+				push(@mems, { 'name' => 'FCGIWrapper',
+					      'value' => "$dest/php$ver.fcgi .php",
+					    });
 				foreach my $v (&list_available_php_versions($d)) {
-					push(@phplines,
-					     "AddHandler fcgid-script .php$v->[0]");
-					push(@phplines,
-					     "FCGIWrapper $dest/php$v->[0].fcgi ".
-					     ".php$v->[0]");
+					push(@mems, { 'name' => 'AddHandler',
+						      'value' => "fcgid-script .php$v->[0]",
+						    });
+					push(@mems, { 'name' => 'FCGIWrapper',
+						      'value' => "$dest/php$v->[0].fcgi .php$v->[0]",
+						    });
 					}
 				}
-			my $olist = $apache::httpd_modules{'core'} >= 2.2 ?
-					" ".&get_allowed_options_list() : "";
-			my $granteddir = "Require all granted";
-			if ($apache::httpd_modules{'core'} < 2.4) {
-				$granteddir = "Allow from all";
-				}
-			my @lines = (
-				"    <Directory $dir>",
-				"        Options +IncludesNOEXEC +SymLinksifOwnerMatch +ExecCGI",
-				"        $granteddir",
-				"        AllowOverride All".$olist,
-				(map { "        ".$_ } @phplines),
-				"    </Directory>"
-				);
-			my $lref = &read_file_lines($virt->{'file'});
-			splice(@$lref, $virt->{'eline'}, 0, @lines);
+
+			my $dir = { 'name' => 'Directory',
+				    'value' => $dir,
+				    'type' => 1,
+				    'members' => \@mems };
+			&apache::save_directive_struct(undef, $dir, $vconf, $conf);
 			&flush_file_lines($virt->{'file'});
-			undef(@apache::get_config_cache);
 			}
 		$any++;
 		}
