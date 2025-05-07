@@ -595,6 +595,26 @@ if ($gconfig{'forgot_pass'} && &foreign_check("virtualmin-password-recovery")) {
 				      "virtualmin-password-recovery");
 	}
 
+# Add custom branding for login page
+my $brand_info = "$config_directory/brand.info";
+my $brand_update = 1;
+if (-r $brand_info) {
+	my %brand_info;
+	&read_file($brand_info, \%brand_info);
+	$brand_update = 0 if (!$brand_info{'update'});
+	}
+if ($brand_update) {
+	my %minfo = &get_module_info($module_name);
+	my $title = $minfo{'shortdesc'} || 'Virtualmin';
+	&lock_file($brand_info);
+	my %brand;
+	$brand{'update'} = 1;
+	$brand{'icon'} = "fa2 fa2-virtualmin";
+	$brand{'title'} = $title;
+	&write_file($brand_info, \%brand);
+	&unlock_file($brand_info);
+	}
+
 # Run any needed actions, like server restarts
 &run_post_actions_silently();
 
