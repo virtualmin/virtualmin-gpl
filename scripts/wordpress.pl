@@ -232,8 +232,6 @@ my $aux_download_server = "http://scripts.virtualmin.com";
 
 # Install using cli
 if (!$upgrade) {
-	my $err_continue = "<br>Installation can be continued manually at <a target=_blank href='${url}wp-admin'>$url</a>.";
-
 	# Start installation
 	my $out = &run_as_domain_user($d, "$wp core download --version=$version 2>&1");
 	if ($? && $out !~ /Success:\s+WordPress\s+downloaded/i) {
@@ -246,12 +244,14 @@ if (!$upgrade) {
 	if (!$opts->{'noauto'}) {
 		# Configure the database
 		$out = &run_as_domain_user($d,
-			"$wp config create --dbname=".quotemeta($dbname).
+			"$wp config create".
+			" --dbname=".quotemeta($dbname).
 			" --dbprefix=".quotemeta($opts->{'dbtbpref'}).
-			" --dbuser=".quotemeta($dbuser)." --dbpass=".quotemeta($dbpass).
+			" --dbuser=".quotemeta($dbuser).
+			" --dbpass=".quotemeta($dbpass).
 			" --dbhost=".quotemeta($dbhost)." 2>&1");
 		if ($?) {
-			return (-1, "\`wp config create\` failed : $out$err_continue");
+			return (-1, "\`wp config create\` failed : $out");
 			}
 
 		# Set db prefix, if given
@@ -262,7 +262,7 @@ if (!$upgrade) {
 				" --type=variable".
 				" --path=".$opts->{'dir'}." 2>&1");
 			if ($?) {
-				return (-1, "\`wp config set table_prefix\` failed : $out$err_continue");
+				return (-1, "\`wp config set table_prefix\` failed : $out");
 				}
 			}
 		
@@ -275,7 +275,7 @@ if (!$upgrade) {
 			" --admin_password=".quotemeta($dompass).
 			" --admin_email=".quotemeta($d->{'emailto'})." 2>&1");
 		if ($?) {
-			return (-1, "\`wp core install\` failed : $out$err_continue");
+			return (-1, "\`wp core install\` failed : $out");
 			}
 
 		# Force update site URL manually as suggested by the installer

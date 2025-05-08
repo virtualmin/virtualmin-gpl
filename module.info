@@ -1,3 +1,4 @@
+shortdesc=Virtualmin
 desc=Virtualmin Virtual Servers
 category=servers
 depends=net useradmin quota webmin mount init acl cron mailboxes phpini procmail 2.014
