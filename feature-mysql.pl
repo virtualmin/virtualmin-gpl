@@ -1855,6 +1855,11 @@ if (!@hosts) {
 		# Add this host too, as we are talking to a remote server
 		local $myhost = &get_system_hostname();
 		local $myip = &to_ipaddress($myhost);
+		if ($myip eq "127.0.0.1") {
+			# Try again to get an actual IP address
+			($myip) = grep { &check_ipaddress($_) }
+				       &active_ip_addresses();
+			}
 		push(@hosts, $myip || $myhost);
 		}
 	if (&indexof("%", @hosts) >= 0) {
