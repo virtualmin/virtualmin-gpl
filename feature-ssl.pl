@@ -505,14 +505,13 @@ local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 			    $d->{'web_sslport'} || $default_web_sslport);
 local $tmpl = &get_template($d->{'template'});
 if ($virt) {
-	&delete_web_virtual_server($virt);
+	&delete_web_virtual_server($virt, $conf);
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_apache, &ssl_needs_apache_restart());
 	}
 else {
 	&$second_print($text{'delete_noapache'});
 	}
-undef(@apache::get_config_cache);
 
 # If any other domains were using this one's SSL cert or key, break the linkage
 foreach my $od (&get_domain_by("ssl_same", $d->{'id'})) {
