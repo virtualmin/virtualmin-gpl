@@ -265,10 +265,7 @@ if ($lconf) {
 		# Remove the whole logrotate block
 		&logrotate::save_directive($parent, $lconf, undef);
 		&flush_file_lines($lconf->{'file'});
-		undef($logrotate::get_config_parent_cache);
-		undef(%logrotate::get_config_cache);
-		undef(%logrotate::get_config_lnum_cache);
-		undef(%logrotate::get_config_files_cache);
+		&clear_logrotate_caches();
 		&logrotate::delete_if_empty($lconf->{'file'});
 		}
 	&$second_print($text{'setup_done'});
@@ -279,6 +276,16 @@ else {
 delete($d->{'logrotate_shared'});
 &release_lock_logrotate($d);
 return 1;
+}
+
+# clear_logrotate_caches()
+# Clear any in-memory caches of the logrotate config
+sub clear_logrotate_caches
+{
+undef($logrotate::get_config_parent_cache);
+undef(%logrotate::get_config_cache);
+undef(%logrotate::get_config_lnum_cache);
+undef(%logrotate::get_config_files_cache);
 }
 
 # clone_logrotate(&domain, &old-domain)
@@ -307,10 +314,7 @@ my @lines = @$olref[$olconf->{'line'}+1 .. $olconf->{'eline'}-1];
 splice(@$lref, $lconf->{'line'}+1,
        $lconf->{'eline'}-$lconf->{'line'}-1, @lines);
 &flush_file_lines($lconf->{'file'});
-undef($logrotate::get_config_parent_cache);
-undef(%logrotate::get_config_cache);
-undef(%logrotate::get_config_lnum_cache);
-undef(%logrotate::get_config_files_cache);
+&clear_logrotate_caches();
 
 # Fix username if changed
 if ($d->{'user'} ne $oldd->{'user'}) {
@@ -436,8 +440,7 @@ if ($lconf) {
 		}
 
 	&flush_file_lines($lconf->{'file'});
-	undef($logrotate::get_config_parent_cache);
-	undef($logrotate::get_config_cache);
+	&clear_logrotate_caches();
 	&$second_print($text{'setup_done'});
 	$rv = 1;
 	}
@@ -594,7 +597,6 @@ if ($main::got_lock_logrotate == 0) {
 	&lock_file($logrotate::config{'add_file'})
 		if ($logrotate::config{'add_file'});
 	&lock_file($logrotate::config{'logrotate_conf'});
-	undef($logrotate::get_config_cache);
 	}
 $main::got_lock_logrotate++;
 }
