@@ -409,36 +409,6 @@ if ($d->{'alias_mode'}) {
 	&register_post_action(\&restart_apache);
 	&$second_print($text{'setup_done'});
 	}
-elsif ($config{'delete_indom'}) {
-	# Delete all matching virtual servers
-	&$first_print($text{'delete_apache'});
-	&obtain_lock_web($d);
-	local $conf = &apache::get_config();
-	if (!$d->{'alias_mode'}) {
-		# Remove the custom Listen directive added for the domain
-		&remove_listen($d, $conf, $d->{'web_port'});
-		}
-	local @virt = reverse(&apache::find_directive_struct("VirtualHost",
-							     $conf));
-	foreach $v (@virt) {
-		local $sn = &apache::find_directive("ServerName",
-						    $v->{'members'});
-		local $vp = $v->{'words'}->[0] =~ /:(\d+)$/ ? $1 :
-				$default_web_port;
-		if ($sn =~ /\Q$d->{'dom'}\E$/ &&
-		    $vp != $d->{'web_sslport'}) {
-			# Check if a real sub-domain corresponds to this
-			# virtualhost
-			local $real = &get_domain_by("dom", $sn);
-			if (!$real || $real->{'id'} == $d->{'id'}) {
-				&delete_web_virtual_server($v, $conf);
-				}
-			}
-		}
-	&release_lock_web($d);
-	&register_post_action(\&restart_apache);
-	&$second_print($text{'setup_done'});
-	}
 else {
 	# Just delete one virtual server
 	&$first_print($text{'delete_apache'});
