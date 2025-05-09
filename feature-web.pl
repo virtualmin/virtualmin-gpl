@@ -431,7 +431,7 @@ elsif ($config{'delete_indom'}) {
 			# virtualhost
 			local $real = &get_domain_by("dom", $sn);
 			if (!$real || $real->{'id'} == $d->{'id'}) {
-				&delete_web_virtual_server($v);
+				&delete_web_virtual_server($v, $conf);
 				}
 			}
 		}
@@ -455,7 +455,7 @@ else {
 					      $d->{'web_port'}, 0);
 		local $elog = &get_apache_log($d->{'dom'},
 					      $d->{'web_port'}, 1);
-		&delete_web_virtual_server($virt);
+		&delete_web_virtual_server($virt, $conf);
 		&$second_print($text{'setup_done'});
 
 		# Delete logs too, if outside home dir and if not a sub-domain
@@ -483,18 +483,16 @@ if ($d->{'fcgiwrap_port'}) {
 	&delete_fcgiwrap_server($d);
 	delete($d->{'fcgiwrap_port'});
 	}
-undef(@apache::get_config_cache);
 return 1;
 }
 
-# delete_web_virtual_server(&vhost)
+# delete_web_virtual_server(&vhost, &conf)
 # Delete a single virtual server from the Apache config
 sub delete_web_virtual_server
 {
-local ($vhost) = @_;
+local ($vhost, $conf) = @_;
 &require_apache();
-local $lref = &read_file_lines($vhost->{'file'});
-splice(@$lref, $vhost->{'line'}, $vhost->{'eline'} - $vhost->{'line'} + 1);
+&apache::save_directive_struct($vhost, undef, $conf, $conf);
 &flush_file_lines($vhost->{'file'});
 if (&is_empty($vhost->{'file'})) {
 	# Don't keep around empty web files
