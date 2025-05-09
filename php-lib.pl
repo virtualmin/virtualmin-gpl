@@ -1528,20 +1528,15 @@ elsif (!$p) {
 	return "Virtual server does not have a website";
 	}
 &require_apache();
-my $conf = &apache::get_config();
-my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return 0 if (!$virt);
 my $mode = &get_domain_php_mode($d);
 
 my @dirs = &apache::find_directive_struct("Directory", $vconf);
 my ($dirstr) = grep { $_->{'words'}->[0] eq $dir } @dirs;
 if ($dirstr) {
-	my $lref = &read_file_lines($dirstr->{'file'});
-	splice(@$lref, $dirstr->{'line'},
-	       $dirstr->{'eline'}-$dirstr->{'line'}+1);
-	&flush_file_lines($dirstr->{'file'});
-	undef(@apache::get_config_cache);
-
+	&apache::save_directive_struct($dirstr, undef, $vconf, $conf);
+	&flush_file_lines($virt->{'file'});
 	&register_post_action(\&restart_apache);
 	return 1;
 	}
