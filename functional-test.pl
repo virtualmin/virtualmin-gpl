@@ -475,6 +475,24 @@ $domains_tests = [
 		      [ 'feature' => 'logrotate' ] ],
 	},
 
+	# Create a test PHP script
+	{ 'command' => 'echo "<?php system(\'id -a\'); '.
+		       'echo php_sapi_name(),\' \'; '.
+		       'echo phpversion(); ?>" >~'.
+		       $test_domain_user.'/public_html/test.php',
+	},
+
+	# Create a test sub-directory
+	{ 'command' => 'su -s /bin/sh '.$test_domain_user.' -c "mkdir ~/public_html/foo"',
+	},
+
+	# Create a test PHP script in the sub-directory
+	{ 'command' => 'echo "<?php system(\'id -a\'); '.
+		       'echo php_sapi_name(),\' \'; '.
+		       'echo phpversion(); ?>" >~'.
+		       $test_domain_user.'/public_html/foo/test.php',
+	},
+
 	$supports_cgi ? (
 		# Switch PHP mode to CGI
 		{ 'command' => 'modify-web.pl',
@@ -497,10 +515,6 @@ $domains_tests = [
 		},
 
 		# Check PHP running via CGI
-		{ 'command' => 'echo "<?php system(\'id -a\'); '.
-			       'echo php_sapi_name(),"\\n"; ?>" >~'.
-			       $test_domain_user.'/public_html/test.php',
-		},
 		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
 		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
 			      'cgi-fcgi' ],
@@ -529,10 +543,6 @@ $domains_tests = [
 		},
 
 		# Check PHP running via fCGId
-		{ 'command' => 'echo "<?php system(\'id -a\'); '.
-			       'echo php_sapi_name(),"\\n"; ?>" >~'.
-			       $test_domain_user.'/public_html/test.php',
-		},
 		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
 		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
 			      'cgi-fcgi' ],
@@ -551,6 +561,13 @@ $domains_tests = [
 			      [ 'multiline' ] ],
 		  'grep' => [ '/foo$',
 			      'PHP version: '.$max_php_version ],
+		},
+
+		# Make sure it really worked
+		{ 'command' => $wget_command.'http://'.$test_domain.'/foo/test.php',
+		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+			      $max_php_version,
+			      'cgi-fcgi' ],
 		},
 
 		# Delete the custom PHP directory
@@ -589,10 +606,6 @@ $domains_tests = [
 		},
 
 		# Check PHP running via FPM
-		{ 'command' => 'echo "<?php system(\'id -a\'); '.
-			       'echo php_sapi_name(),"\\n"; ?>" >~'.
-			       $test_domain_user.'/public_html/test.php',
-		},
 		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
 		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
 			      'fpm-fcgi' ],
