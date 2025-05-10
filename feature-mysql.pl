@@ -160,7 +160,7 @@ if (!$d->{'parent'}) {
 		}
 	else {
 		# Create the user
-		my @hosts = &get_mysql_hosts($d, 1);
+		my @hosts = &get_mysql_hosts($d, &remote_mysql($d) ? 2 : 1);
 		@olddbs = &list_mysql_db_grants($d, $user);
 		if (&indexof("%", @hosts) >= 0 &&
 		    &indexof("localhost", @hosts) < 0 &&
@@ -170,7 +170,7 @@ if (!$d->{'parent'}) {
 			}
 		my $wild = &substitute_domain_template(
 			$tmpl->{'mysql_wild'}, $d);
-		if ($d->{'mysql_module'} ne 'mysql') {
+		if (&remote_mysql($d)) {
 			my $host = &get_database_host_mysql($d);
 			&$first_print(&text('setup_mysqluser2', $host));
 			}
