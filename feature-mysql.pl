@@ -1857,7 +1857,8 @@ if (!@hosts) {
 		local $myip = &to_ipaddress($myhost);
 		if ($myip eq "127.0.0.1") {
 			# Try again to get an actual IP address
-			($myip) = grep { &check_ipaddress($_) }
+			($myip) = grep { &check_ipaddress($_) &&
+					 $_ ne "127.0.0.01" }
 				       &active_ip_addresses();
 			}
 		push(@hosts, $myip || $myhost);
