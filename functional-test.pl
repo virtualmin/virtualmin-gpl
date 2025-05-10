@@ -519,6 +519,41 @@ $domains_tests = [
 		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
 			      'cgi-fcgi' ],
 		},
+
+		# Set the PHP version for a sub-directory
+		{ 'command' => 'set-php-directory.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'dir' => 'foo' ],
+			      [ 'version' => $max_php_version ] ],
+		},
+
+		# Make sure it worked
+		{ 'command' => 'list-php-directories.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'multiline' ] ],
+		  'grep' => [ '/foo$',
+			      'PHP version: '.$max_php_version ],
+		},
+
+		# Make sure it really worked
+		{ 'command' => $wget_command.'http://'.$test_domain.'/foo/test.php',
+		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+			      $max_php_version,
+			      'cgi-fcgi' ],
+		},
+
+		# Delete the custom PHP directory
+		{ 'command' => 'delete-php-directory.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'dir' => 'foo' ] ],
+		},
+
+		# Make sure it is gone
+		{ 'command' => 'list-php-directories.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'multiline' ] ],
+		  'antigrep' => [ '/foo$' ],
+		},
 		) : ( ),
 
 	$supports_fcgid ? (
