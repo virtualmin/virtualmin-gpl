@@ -172,6 +172,8 @@ if (!$d->{'parent'}) {
 			$tmpl->{'mysql_wild'}, $d);
 		if (&remote_mysql($d)) {
 			my $host = &get_database_host_mysql($d);
+			push(@hosts, $host)
+				if ($host && &indexof($host, @hosts) < 0);
 			&$first_print(&text('setup_mysqluser2', $host));
 			}
 		else {
