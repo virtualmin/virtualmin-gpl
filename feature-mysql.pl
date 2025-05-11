@@ -1849,7 +1849,7 @@ if (!@hosts) {
 	@hosts = $tmpl->{'mysql_hosts'} eq "none" ? ( ) :
 	    split(/\s+/, &substitute_domain_template(
 				$tmpl->{'mysql_hosts'}, $d));
-	@hosts = ( 'localhost' ) if (!@hosts);
+	@hosts = ( 'localhost', '127.0.0.1' ) if (!@hosts);
 	local $mymod = &require_dom_mysql($d);
 	local %myconfig = &foreign_config($mymod);
 	if ($always == 2 ||
