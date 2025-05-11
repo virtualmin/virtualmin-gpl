@@ -2606,6 +2606,13 @@ $move_tests = [
 	  'antigrep' => 'partially complete',
 	},
 
+	# Place the logs under the domain to be moved's home
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'access-log', $test_domain_home.'/logs/access_log' ],
+		      [ 'error-log', $test_domain_home.'/logs/error_log' ] ],
+	},
+
 	# Move under the target
 	{ 'command' => 'move-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -2686,6 +2693,17 @@ $move_tests = [
 			'/domains/'.$test_domain.'/public_html/roundcube',
 		      'Database: '.$test_domain_db.' ',
 		      'URL: http(s?)://'.$test_domain.'/roundcube',
+		    ],
+	},
+
+	# Make sure the Apache logs were moved
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'Access log: /home/'.$test_target_domain_user.
+                        '/domains/'.$test_domain.'/.*',
+		      'Error log: /home/'.$test_target_domain_user.
+                        '/domains/'.$test_domain.'/.*',
 		    ],
 	},
 
