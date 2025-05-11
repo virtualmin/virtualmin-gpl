@@ -674,16 +674,9 @@ else {
 		&add_listen($d, $conf, $d->{'web_port'});
 
 		# Change the virtualhost IPs
-		my $lref = &read_file_lines($virt->{'file'});
-		$lref->[$virt->{'line'}] =
-			"<VirtualHost ".
-			&get_apache_vhost_ips($d, $nvstar, $nvstar6).
-			">";
+		$virt->{'value'} = &get_apache_vhost_ips($d, $nvstar, $nvstar6);
+		&apache::save_directive_struct($virt, $virt, $conf, $conf, 1);
 		&flush_file_lines($virt->{'file'});
-
-		undef(@apache::get_config_cache);
-		($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
-						      $oldd->{'web_port'});
 		$rv++;
 		$need_restart = 1;
 		&$second_print($text{'setup_done'});
@@ -727,24 +720,11 @@ else {
 						 $oldd->{'web_port'}, 1);
 		my $alogdst = &get_apache_template_log($d, 0);
 		my $elogdst = &get_apache_template_log($d, 1);
-		for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-			if ($phsrc && $phdst) {
-				$lref->[$i] =~ s/\Q$phsrc\E/$phdst/g;
-				}
-			if ($cgisrc && $cgidst) {
-				$lref->[$i] =~ s/\Q$cgisrc\E/$cgidst/g;
-				}
-			if ($alogsrc && $alogdst) {
-				$lref->[$i] =~ s/\Q$alogsrc\E/$alogdst/g;
-				}
-			if ($elogsrc && $elogdst) {
-				$lref->[$i] =~ s/\Q$elogsrc\E/$elogdst/g;
-				}
-			}
+		&recursive_fix_apache_config($vconf, $conf, $phsrc, $phdst);
+		&recursive_fix_apache_config($vconf, $conf, $cgisrc, $cgidst);
+		&recursive_fix_apache_config($vconf, $conf, $alogsrc, $alogdst);
+		&recursive_fix_apache_config($vconf, $conf, $elogsrc, $elogdst);
 		&flush_file_lines($virt->{'file'});
-		undef(@apache::get_config_cache);
-		($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
-						      $oldd->{'web_port'});
 		&setup_apache_logs($d, $alogdst, $elogdst);
 		&link_apache_logs($d, $alogdst, $elogdst);
 		$rv++;
@@ -5754,6 +5734,26 @@ elsif ($d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'} &&
 		}
 	}
 return undef;
+}
+
+# recursive_fix_apache_config(&parent, &config, old-regexp, new-value,
+# 			      [&directives])
+# Recursively update any Apache directives whose value matches the old regexp
+sub recursive_fix_apache_config
+{
+my ($pconf, $conf, $oldv, $newv, $dirnames) = @_;
+return if (!$oldv || !$newv);
+foreach my $c (@$pconf) {
+	if ($c->{'value'} =~ /$oldv/ &&
+	    !$dirnames || &indexoflc($c->{'name'}, @$dirnames) >= 0) {
+		$c->{'value'} =~ s/$oldv/$newv/g;
+		&apache::save_directive_struct($c, $c, $pconf, $conf, 1);
+		}
+	if ($c->{'type'}) {
+		&recursive_fix_apache_config(
+			$c->{'members'}, $conf, $oldv, $newv, $dirnames);
+		}
+	}
 }
 
 $done_feature_script{'web'} = 1;
