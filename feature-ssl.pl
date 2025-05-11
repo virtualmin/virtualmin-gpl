@@ -286,16 +286,13 @@ if ($d->{'ip'} ne $oldd->{'ip'} ||
 			"[".$d->{'ip6'}."]");
 		}
 	&add_listen($d, $conf, $d->{'web_sslport'});
-	local $lref = &read_file_lines($virt->{'file'});
-	$lref->[$virt->{'line'}] =
-		"<VirtualHost ".
-		&get_apache_vhost_ips($d, $nvstar, $nvstar6,
-				      $d->{'web_sslport'}).">";
-	&flush_file_lines();
+
+	# Change the virtualhost IPs
+	$virt->{'value'} = &get_apache_vhost_ips($d, $nvstar, $nvstar6,
+						 $d->{'web_sslport'});
+	&apache::save_directive_struct($virt, $virt, $conf, $conf, 1);
+	&flush_file_lines($virt->{'file'});
 	$rv++;
-	undef(@apache::get_config_cache);
-	($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
-					      	     $oldd->{'web_sslport'});
 	&$second_print($text{'setup_done'});
 	}
 if ($d->{'home'} ne $oldd->{'home'}) {
@@ -306,15 +303,10 @@ if ($d->{'home'} ne $oldd->{'home'}) {
 		&$second_print($text{'delete_noapache'});
 		goto VIRTFAILED;
 		}
-	local $lref = &read_file_lines($virt->{'file'});
-	for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-		$lref->[$i] =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
-		}
-	&flush_file_lines();
+	&recursive_fix_apache_config(
+		$vconf, $conf, $oldd->{'home'}, $d->{'home'});
+	&flush_file_lines($virt->{'file'});
 	$rv++;
-	undef(@apache::get_config_cache);
-	($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
-					      	     $oldd->{'web_sslport'});
 	&$second_print($text{'setup_done'});
 	}
 if ($d->{'user'} ne $oldd->{'user'}) {

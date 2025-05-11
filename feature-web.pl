@@ -547,9 +547,7 @@ undef(@apache::get_config_cache);
 ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 
 # Fix home dir
-&modify_web_home_directory($d, $oldd, $virt);
-local ($vconf, $conf);
-($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+&modify_web_home_directory($d, $oldd, $virt, $vconf, $conf);
 
 # Fix username in suexec, if needed
 if ($d->{'user'} ne $oldd->{'user'}) {
@@ -689,9 +687,8 @@ else {
 			&$second_print($text{'delete_noapache'});
 			goto VIRTFAILED;
 			}
-		&modify_web_home_directory($d, $oldd, $virt, $vconf, $conf, $mode);
-		($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
-						      $oldd->{'web_port'});
+		&modify_web_home_directory(
+			$d, $oldd, $virt, $vconf, $conf, $mode);
 		$rv++;
 		&find_html_cgi_dirs($d);
 
@@ -724,7 +721,7 @@ else {
 		&recursive_fix_apache_config($vconf, $conf, $cgisrc, $cgidst);
 		&recursive_fix_apache_config($vconf, $conf, $alogsrc, $alogdst);
 		&recursive_fix_apache_config($vconf, $conf, $elogsrc, $elogdst);
-		&flush_file_lines($virt->{'file'});
+		&flush_file_lines($virt->{'file'}, undef, 1);
 		&setup_apache_logs($d, $alogdst, $elogdst);
 		&link_apache_logs($d, $alogdst, $elogdst);
 		$rv++;
@@ -4620,13 +4617,9 @@ return undef;
 sub modify_web_home_directory
 {
 local ($d, $oldd, $virt, $vconf, $conf, $mode) = @_;
-local $lref = &read_file_lines($virt->{'file'});
-for(my $i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-	$lref->[$i] =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
-	$lref->[$i] =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/g;
-	}
-&flush_file_lines($virt->{'file'});
-undef(@apache::get_config_cache);
+&recursive_fix_apache_config(
+	$vconf, $conf, $oldd->{'home'}, $d->{'home'});
+&flush_file_lines($virt->{'file'}, undef, 1);
 
 # Fix all php.ini files that use old path
 $mode ||= &get_domain_php_mode($d);
@@ -5742,18 +5735,21 @@ return undef;
 sub recursive_fix_apache_config
 {
 my ($pconf, $conf, $oldv, $newv, $dirnames) = @_;
-return if (!$oldv || !$newv);
+return 0 if (!$oldv || !$newv);
+my $rv = 0;
 foreach my $c (@$pconf) {
-	if ($c->{'value'} =~ /$oldv/ &&
-	    !$dirnames || &indexoflc($c->{'name'}, @$dirnames) >= 0) {
-		$c->{'value'} =~ s/$oldv/$newv/g;
+	if ($c->{'value'} =~ /\Q$oldv\E/ &&
+	    (!$dirnames || &indexoflc($c->{'name'}, @$dirnames) >= 0)) {
+		$c->{'value'} =~ s/\Q$oldv\E/$newv/g;
 		&apache::save_directive_struct($c, $c, $pconf, $conf, 1);
+		$rv++;
 		}
 	if ($c->{'type'}) {
-		&recursive_fix_apache_config(
+		$rv += &recursive_fix_apache_config(
 			$c->{'members'}, $conf, $oldv, $newv, $dirnames);
 		}
 	}
+return $rv;
 }
 
 $done_feature_script{'web'} = 1;
