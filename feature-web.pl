@@ -827,9 +827,8 @@ else {
 			&apache::delete_webfile_link($virt->{'file'});
 			&rename_logged($virt->{'file'}, $newfile);
 			&apache::create_webfile_link($newfile);
-			undef(@apache::get_config_cache);
-			($virt, $vconf, $conf) = &get_apache_virtual(
-				$d->{'dom'}, $d->{'web_port'});
+			&recursive_fix_apache_filename(
+				$conf, $oldfile, $newfile);
 			}
 
 		# Re-link Apache logs
@@ -5744,6 +5743,25 @@ foreach my $c (@$pconf) {
 	if ($c->{'type'}) {
 		$rv += &recursive_fix_apache_config(
 			$c->{'members'}, $conf, $oldv, $newv, $dirnames);
+		}
+	}
+return $rv;
+}
+
+# recursive_fix_apache_filename(&parent, old-file, new-file)
+# Update any Apache config objects with an old filename to a new one
+sub recursive_fix_apache_filename
+{
+my ($pconf, $oldfile, $newfile) = @_;
+my $rv = 0;
+foreach my $c (@$pconf) {
+	if ($c->{'file'} eq $oldfile) {
+		$c->{'file'} = $newfile;
+		$rv++;
+		}
+	if ($c->{'type'}) {
+		$rv += &recursive_fix_apache_filename(
+			$c->{'members'}, $oldfile, $newfile);
 		}
 	}
 return $rv;
