@@ -172,8 +172,6 @@ if (!$d->{'parent'}) {
 			$tmpl->{'mysql_wild'}, $d);
 		if (&remote_mysql($d)) {
 			my $host = &get_database_host_mysql($d);
-			push(@hosts, $host)
-				if ($host && &indexof($host, @hosts) < 0);
 			&$first_print(&text('setup_mysqluser2', $host));
 			}
 		else {
@@ -1854,16 +1852,19 @@ if (!@hosts) {
 	local %myconfig = &foreign_config($mymod);
 	if ($always == 2 ||
 	    $myconfig{'host'} && $myconfig{'host'} ne 'localhost') {
+		# Remove localhost from hosts as we are creating on the remote
+		@hosts = grep { $_ ne 'localhost' } @hosts;
 		# Add this host too, as we are talking to a remote server
 		local $myhost = &get_system_hostname();
 		local $myip = &to_ipaddress($myhost);
-		if ($myip eq "127.0.0.1") {
+		if ($myip =~ /^127\./) {
 			# Try again to get an actual IP address
 			($myip) = grep { &check_ipaddress($_) &&
-					 $_ ne "127.0.0.01" }
+					 $_ !~ /^127\./ }
 				       &active_ip_addresses();
 			}
-		push(@hosts, $myip || $myhost);
+		push(@hosts, $myip) if ($myip);
+		push(@hosts, $myhost) if ($myhost);
 		}
 	if (&indexof("%", @hosts) >= 0) {
 		# All hosts allowed - no need for other entries
