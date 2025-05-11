@@ -1853,7 +1853,8 @@ if (!@hosts) {
 	if ($always == 2 ||
 	    $myconfig{'host'} && $myconfig{'host'} ne 'localhost') {
 		# Remove localhost from hosts as we are creating on the remote
-		@hosts = grep { $_ ne 'localhost' } @hosts;
+		@hosts = grep { $_ ne 'localhost' && !/^127\./ } @hosts;
+
 		# Add this host too, as we are talking to a remote server
 		local $myhost = &get_system_hostname();
 		local $myip = &to_ipaddress($myhost);
