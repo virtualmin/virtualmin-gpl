@@ -5741,6 +5741,9 @@ foreach my $c (@$pconf) {
 	if ($c->{'value'} =~ /\Q$oldv\E/ &&
 	    (!$dirnames || &indexoflc($c->{'name'}, @$dirnames) >= 0)) {
 		$c->{'value'} =~ s/\Q$oldv\E/$newv/g;
+		foreach my $w (@{$c->{'words'}}) {
+			$w =~ s/\Q$oldv\E/$newv/g;
+			}
 		&apache::save_directive_struct($c, $c, $pconf, $conf, 1);
 		$rv++;
 		}
