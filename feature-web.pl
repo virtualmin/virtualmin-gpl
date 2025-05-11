@@ -735,17 +735,11 @@ else {
 			&$second_print($text{'delete_noapache'});
 			goto VIRTFAILED;
 			}
-		my $lref = &read_file_lines($virt->{'file'});
-		for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-			if ($lref->[$i] =~
-			    /^\s*(Proxy|Redirect\s|RedirectPermanent\s)/) {
-				$lref->[$i] =~ s/$oldalias->{'dom'}/$alias->{'dom'}/g;
-				}
-			}
+		&recursive_fix_apache_config(
+			$vconf, $conf, $oldalias->{'dom'}, $alias->{'dom'},
+			[ "ProxyPass", "ProxyPassReverse",
+			  "Redirect", "RedirectPermanent" ]);
 		&flush_file_lines($virt->{'file'});
-		undef(@apache::get_config_cache);
-		($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
-						      $oldd->{'web_port'});
 		$rv++;
 		&$second_print($text{'setup_done'});
 		}
