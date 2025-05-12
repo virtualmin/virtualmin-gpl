@@ -1653,7 +1653,8 @@ sub restore_web
 {
 my ($d, $file, $opts, $allopts, $homefmt, $oldd) = @_;
 if ($d->{'alias'} && $d->{'alias_mode'}) {
-	# Just re-add ServerAlias entries if missing
+	# Just re-add ServerAlias entries if missing (Backup file contains only
+	# ServerAlias values)
 	&$first_print($text{'restore_apachecp2'});
 	my $alias = &get_domain($d->{'alias'});
 	my ($pvirt, $pconf, $conf) = &get_apache_virtual($alias->{'dom'},
@@ -1684,45 +1685,40 @@ if ($virt) {
 	# Extract old logging-based directives before we change them, so they
 	# can be restored later to match *this* system
 	my %lmap;
-	foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
-		if ($dstlref->[$i] =~
-		    /^\s*(CustomLog|ErrorLog|TransferLog)\s+(.*)/i) {
-			$lmap{lc($1)} = $2;
-			}
+	foreach my $dirname ("CustomLog", "ErrorLog", "TransferLog") {
+		$lmap{$dirname} = &apache::find_directive($dirname, $vconf);
 		}
 
+	# Copy across directives from the backup
 	splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
+	&flush_file_lines($virt->{'file'});
+	undef(@apache::get_config_cache);
+	($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+						     $d->{'web_port'});
 
 	if ($allopts->{'reuid'}) {
 		# Fix up any UID or GID in suexec lines
-		my $i;
-		foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
-			if ($dstlref->[$i] =~ /^\s*SuexecUserGroup\s/) {
-				$dstlref->[$i] = "SuexecUserGroup ".
-				  "\"#$d->{'uid'}\" \"#$d->{'ugid'}\"";
-				}
+		my @sa = &apache::find_directive("SuexecUserGroup", $vconf);
+		if (@sa) {
+			&apache::save_directive("SuexecUserGroup",
+				[ "\"#$d->{'uid'}\" \"#$d->{'ugid'}\"" ],
+				$vconf, $conf);
 			}
 		}
 
 	# Fix up any DocumentRoot or other file-related directives
 	if ($oldd->{'home'} && $oldd->{'home'} ne $d->{'home'}) {
-		my $i;
-		foreach $i ($virt->{'line'} ..
-			    $virt->{'line'}+scalar(@$srclref)-1) {
-			$dstlref->[$i] =~
-				s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
-			}
+		&recursive_fix_apache_config(
+			$vconf, $conf, $oldd->{'home'}, $d->{'home'});
 		}
 
 	# Change and CustomLog, ErrorLog or TransferLog directives to match
-	# this system
-	foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
-		if ($dstlref->[$i] =~
-		    /^\s*(CustomLog|ErrorLog|TransferLog)\s/i &&
-		    $lmap{lc($1)}) {
-			$dstlref->[$i] = $1." ".$lmap{lc($1)};
-			}
+	# the original values for this system
+	foreach my $dirname (keys %lmap) {
+		&apache::save_directive(
+			$dirname, $lmap{$dirname} ? [ $lmap{$dirname} ] : [ ],
+			$vconf, $conf);
 		}
 
 	# Fix up AuthDigestFile / AuthUserFile change between Apache 2.0 and 2.2
@@ -1733,25 +1729,23 @@ if ($virt) {
 	else {
 		($oldn, $newn) = ('AuthUserFile', 'AuthDigestFile');
 		}
-	my $i;
-	foreach $i ($virt->{'line'} ..  $virt->{'line'}+scalar(@$srclref)-1) {
-		if ($dstlref->[$i] =~ /^\s*\Q$oldn\E\s+(.*)$/) {
-			$dstlref->[$i] = "$newn $1";
-			}
+	my @oldv = &apache::find_directive($oldn, $vconf);
+	my @newv = &apache::find_directive($newn, $vconf);
+	if (@oldv) {
+		&apache::save_directive($newv, [ @oldv, @newv ], $vconf, $conf);
 		}
 
 	# If this system doesn't support mod_perl, remove any Perl directives
 	# as set by virtualmin-google-analytics
 	if (!$apache::httpd_modules{'mod_perl'}) {
-		foreach $i ($virt->{'line'} ..  $virt->{'line'}+scalar(@$srclref)-1) {
-			if ($dstlref->[$i] =~ /^\s*Perl/) {
-				$dstlref->[$i] =~ s/^/#/g;
-				}
+		my @dirnames = &unique(
+			grep { /^Perl/ } map { $_->{'name'} } @$vconf);
+		foreach my $dirname (@dirnames) {
+			&apache::save_directive($dirname, [ ], $vconf, $conf);
 			}
 		}
 
 	&flush_file_lines($virt->{'file'});
-	undef(@apache::get_config_cache);
 
 	# Re-generate PHP wrappers to match this system
 	if (!$d->{'alias'}) {
