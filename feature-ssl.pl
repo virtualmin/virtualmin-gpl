@@ -184,15 +184,6 @@ push(@$lref, @$srclref[$virt->{'line'}+1 .. $virt->{'eline'}-1]);
 push(@$lref, @ssldirs);
 push(@$lref, "</VirtualHost>");
 &flush_file_lines($f);
-
-# Update the non-SSL virtualhost to include the port number, to fix old
-# hosts that were missing the :80
-local $lref = &read_file_lines($virt->{'file'});
-if (!$d->{'name'} && $lref->[$virt->{'line'}] !~ /:\d+/) {
-	$lref->[$virt->{'line'}] =
-		"<VirtualHost $d->{'ip'}:$d->{'web_port'}>";
-	&flush_file_lines($virt->{'file'});
-	}
 undef(@apache::get_config_cache);
 
 # Copy chained CA cert in from domain with same IP, if any
