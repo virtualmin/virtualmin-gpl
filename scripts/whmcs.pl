@@ -227,6 +227,9 @@ elsif ($gconfig{'os_type'} eq 'macos' && $arch =~ /64/) {
 elsif ($gconfig{'os_type'} eq 'macos' && $arch !~ /64/) {
 	$io = "dar_x86";
 	}
+elsif ($gconfig{'os_type'} =~ /-linux/ && $arch =~ /aarch64/) {
+	$io = "lin_aarch64";
+	}
 elsif ($gconfig{'os_type'} =~ /-linux/ && $arch =~ /x86_64/) {
 	$io = "lin_x86-64";
 	}
