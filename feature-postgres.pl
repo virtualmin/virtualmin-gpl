@@ -1270,6 +1270,7 @@ foreach my $minfo (&get_all_module_infos()) {
 	    $minfo->{'dir'} eq 'postgresql') {
 		# If PostgreSQL even installed locally?
 		next if (!&foreign_installed('postgresql'));
+		next if (!$config{'postgres'});
 		}
 	my $mm = { 'minfo' => $minfo,
 		   'dbtype' => 'postgres',
