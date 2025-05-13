@@ -21204,12 +21204,15 @@ elsif ($config{'default_domain_ssl'}) {
 	my $old_default_domain = &get_domain_by("defaultdomain", 1);
 
 	&$first_print(&text('check_hostdefaultdomain_enable', $system_host_name));
-	if ($old_default_domain->{'dom'} && !$old_default_domain->{'defaulthostdomain'}) {
-		&$second_print(&text('check_hostdefaultdomain_errold', $old_default_domain->{'dom'}));
+	if ($old_default_domain->{'dom'} &&
+	    !$old_default_domain->{'defaulthostdomain'}) {
+		&$second_print(&text('check_hostdefaultdomain_errold',
+			$old_default_domain->{'dom'}));
 		}
 	else {
 		&$remove_default_host_domain(1);
-		my ($defdom_status, $defdom_msg) = &setup_virtualmin_default_hostname_ssl();
+		my ($defdom_status, $defdom_msg) =
+			&setup_virtualmin_default_hostname_ssl();
 		if ($defdom_status == 2) {
 			&$second_print($text{'check_defhost_sharedsucc2'});
 			}
