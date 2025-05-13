@@ -1266,6 +1266,11 @@ foreach my $minfo (&get_all_module_infos()) {
 	next if ($minfo->{'dir'} ne 'postgresql' &&
 		 $minfo->{'cloneof'} ne 'postgresql');
 	my %mconfig = &foreign_config($minfo->{'dir'});
+	if (!$mconfig{'host'} && !$mconfig{'port'} &&
+	    $minfo->{'dir'} eq 'postgresql') {
+		# If PostgreSQL even installed locally?
+		next if (!&foreign_installed('postgresql'));
+		}
 	my $mm = { 'minfo' => $minfo,
 		   'dbtype' => 'postgres',
 		   'master' => $minfo->{'cloneof'} ? 0 : 1,

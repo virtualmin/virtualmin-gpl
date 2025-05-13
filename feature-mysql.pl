@@ -1270,7 +1270,6 @@ if ($allopts->{'repl'} && $mymod->{'config'}->{'host'} && $info{'remote'} &&
 local (%userdbs, %userpasses);
 foreach my $db (&domain_databases($d, [ 'mysql' ])) {
 	foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
-		print STDERR "user=$u->[0]\n";
 		if ($u->[0] ne $d->{'user'} &&
 		    $u->[0] ne 'root' &&
 		    $u->[0] ne $mymod->{'config'}->{'login'}) {
@@ -1295,11 +1294,6 @@ if (!$d->{'wasmissing'}) {
 		&setup_mysql($d, 1);
 		}
 	&$second_print($text{'setup_done'});
-	}
-
-# Re-grant allowed hosts, as deleting and re-creating DBs may have cleared them
-if (@lhosts) {
-	&save_mysql_allowed_hosts($d, \@lhosts);
 	}
 
 # Turn off quotas for the domain, to prevent the import failing
@@ -1374,6 +1368,11 @@ foreach my $db (@dbs) {
 		}
 	}
 
+# Re-grant allowed hosts, as deleting and re-creating DBs may have cleared them
+if (@lhosts) {
+	&save_mysql_allowed_hosts($d, \@lhosts);
+	}
+
 # If the restore re-created a domain, the list of databases should be synced
 # to those in the backup
 if ($d->{'wasmissing'}) {
@@ -1384,7 +1383,6 @@ if ($d->{'wasmissing'}) {
 # previously
 foreach my $uname (keys %userdbs) {
 	my @grant = grep { $created{$_} } @{$userdbs{$uname}};
-	print STDERR "uname=$uname grant=",join(" ", @grant),"\n";
 	if (@grant) {
 		&create_mysql_database_user($d, \@grant, $uname, undef,
 					    $userpasses{$uname});
