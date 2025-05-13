@@ -20844,7 +20844,7 @@ if ($system_host_name !~ /\./) {
 
 # Hostname should be FQDN
 return &$err(&text('check_defhost_nok', $system_host_name))
-	if ($system_host_name !~ /(\.[^.]+){2,}/);
+	if ($system_host_name !~ /^.+\.\p{L}{2,}$/);
 
 # Check if domain already exist for some reason
 return &$err(&text('check_defhost_clash', $system_host_name))
