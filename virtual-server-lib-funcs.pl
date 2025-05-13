@@ -21183,32 +21183,16 @@ if ($new_default_domain->{'dom'}) {
 	if ($config{'default_domain_ssl'}) {
 		my $known_default_domain = $config{'defaultdomain_name'};
 		my $hostname_changed = $known_default_domain ne $system_host_name;
-		my $failed_le = !$new_default_domain->{'letsencrypt_last'} && !$new_default_domain->{'ssl_same'};
-		my $text_msg = $hostname_changed ?
-			'check_hostdefaultdomain_change' : 'check_hostdefaultdomain_enable';
-		if ($hostname_changed || $failed_le) {
-			&$first_print(&text($text_msg, $known_default_domain, $system_host_name));
-			my ($defdom_status, $defdom_msg);
-			if ($hostname_changed) {
-				$defdom_status = &rename_default_domain_ssl($new_default_domain, $system_host_name);
-				}
-			else {
-				&$remove_default_host_domain(1);
-				($defdom_status, $defdom_msg) = &setup_virtualmin_default_hostname_ssl();
-				}
-			if ($defdom_status == 2) {
-				&$second_print($text{'check_defhost_sharedsucc2'});
-				}
-			elsif ($defdom_status == 1) {
+		if ($hostname_changed) {
+			&$first_print(&text('check_hostdefaultdomain_change',
+				      $known_default_domain, $system_host_name));
+			my $defdom_status = &rename_default_domain_ssl(
+				$new_default_domain, $system_host_name);
+			if ($defdom_status == 1) {
 				&$second_print($text{'setup_done'});
 				}
 			else {
-				# Remove on failure unless host
-				# default domain set to be visible
-				&$remove_default_host_domain(1)
-					if ($config{'default_domain_ssl'} != 2 &&
-					    !$hostname_changed);
-				&$second_print(&text('check_apicmderr', $defdom_msg));
+				&$second_print($text{'setup_failed'});
 				}
 			}
 		}
