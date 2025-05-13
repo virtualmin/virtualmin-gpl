@@ -314,7 +314,8 @@ if (!&can_create_master_servers() && &can_create_sub_servers()) {
 elsif (&can_create_master_servers()) {
 	# Can add either master or sub-server
 	if (!$cannot_add) {
-		print "<b>$limit_reason</b><br><br data-x-br><p>\n" if ($limit_reason);
+		print "<b>$limit_reason</b><br>".&vui_brh()."<p>\n"
+			if ($limit_reason);
 		print &ui_submit($text{'index_add2'}, "add".$num);
 		print &ui_select("parentuser".$num, undef,
 			[ [ "", $text{'index_newuser'} ],

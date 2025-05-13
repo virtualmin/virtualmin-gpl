@@ -18,7 +18,7 @@ $cerr = &check_virtual_server_config(\%lastconfig);
 &check_error($cerr) if ($cerr);
 &$outdent_print();
 
-print "<p></p>$text{'check_done'}<br data-x-br><p>\n";
+print "<p></p>$text{'check_done'}".&vui_brh()."<p>\n";
 
 # See if any options effecting Webmin users have changed
 if (&need_update_webmin_users_post_config(\%lastconfig)) {
