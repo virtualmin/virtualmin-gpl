@@ -1295,7 +1295,7 @@ foreach my $minfo (&get_all_module_infos()) {
 	}
 @rv = sort { $a->{'minfo'}->{'dir'} cmp $b->{'minfo'}->{'dir'} } @rv;
 my ($def) = grep { $_->{'config'}->{'virtualmin_default'} } @rv;
-if (!$def) {
+if (!$def && @rv) {
 	# Assume core module is the default
 	$rv[0]->{'config'}->{'virtualmin_default'} = 1;
 	}
