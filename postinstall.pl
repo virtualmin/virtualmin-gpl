@@ -166,6 +166,16 @@ if ($config{'spam'}) {
 	&setup_quota_full_bounce();
 	}
 
+# Disable writelogs for any domains that have it installed, as we have dropped
+# this feature
+foreach my $d (&list_domains()) {
+	if ($d->{'web'} && &get_writelogs_status($d)) {
+		&obtain_lock_web($d);
+		&disable_writelogs($d);
+		&release_lock_web($d);
+		}
+	}
+
 # Force a restart of Apache, to apply writelogs.pl changes
 if ($config{'web'}) {
 	&require_apache();
