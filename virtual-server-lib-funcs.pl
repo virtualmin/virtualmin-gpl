@@ -9670,7 +9670,6 @@ push(@rv, { 'id' => 0,
 	    'default' => 1,
 	    'web' => $config{'apache_config'},
 	    'web_ssl' => $config{'apache_ssl_config'},
-	    'web_writelogs' => $config{'web_writelogs'},
 	    'web_user' => $config{'web_user'},
 	    'web_fcgiwrap' => $config{'fcgiwrap'},
 	    'web_cgimode' => $config{'cgimode'},
@@ -10039,7 +10038,6 @@ if ($tmpl->{'id'} == 0) {
 		}
 	$config{'apache_config'} = $tmpl->{'web'};
 	$config{'apache_ssl_config'} = $tmpl->{'web_ssl'};
-	$config{'web_writelogs'} = $tmpl->{'web_writelogs'};
 	$config{'web_user'} = $tmpl->{'web_user'};
 	delete($config{'fcgiwrap'});
 	$config{'cgimode'} = $tmpl->{'web_cgimode'};

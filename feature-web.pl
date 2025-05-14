@@ -302,9 +302,6 @@ eval {
 				 quotemeta($logdir));
 		}
 
-	# Setup the writelogs wrapper
-	&setup_writelogs($d);
-
 	# Create a root-owned file in ~/logs to prevent deletion of directory
 	local $logsdir = "$d->{'home'}/logs";
 	local $log = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
@@ -1367,17 +1364,17 @@ if ($virt) {
 		$log = &apache::find_directive("TransferLog", $vconf) ||
 		       &apache::find_directive("CustomLog", $vconf);
 		}
-	return &extract_writelogs_path($log, $dname);
+	return &extract_logfile_path($log, $dname);
 	}
 else {
 	return undef;
 	}
 }
 
-# extract_writelogs_path(log-command, domain-name)
+# extract_logfile_path(log-command, domain-name)
 # Given a log destination, which may be input to a command, return the
 # real log file path.
-sub extract_writelogs_path
+sub extract_logfile_path
 {
 local ($log, $dom) = @_;
 my $log_ = $log;
@@ -2181,54 +2178,6 @@ return &ui_table_row($label,
 			$text{'form_plocal'}, $text{'form_purl'}), 3);
 }
 
-# setup_writelogs(&domain)
-# Creates the writelogs wrapper
-sub setup_writelogs
-{
-my ($d) = @_;
-&foreign_require("cron");
-&cron::create_wrapper($writelogs_cmd, $module_name, "writelogs.pl");
-if (&has_command("chcon")) {
-	&execute_command("chcon -t httpd_sys_script_exec_t ".
-		quotemeta($writelogs_cmd).
-		">/dev/null 2>&1");
-	&execute_command("chcon -t httpd_sys_script_exec_t ".
-	       quotemeta("$module_root_directory/writelogs.pl").
-	       ">/dev/null 2>&1");
-	}
-}
-
-# enable_writelogs(&domain)
-# Enables logging via a program for some server
-sub enable_writelogs
-{
-my ($d) = @_;
-&require_apache();
-my $conf = &apache::get_config();
-my @ports = ( $d->{'web_port'},
-	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-my $any = 0;
-foreach my $p (@ports) {
-	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
-	foreach my $ld ("CustomLog", "ErrorLog") {
-		my $custom = &apache::find_directive($ld, $vconf);
-		if ($custom !~ /$writelogs_cmd/ && $custom =~ /(\S+)(\s*\S*)/) {
-			# Fix logging directive
-			&$first_print($text{'save_fix'.lc($ld)});
-			$custom = "\"|$writelogs_cmd $d->{'id'} $1\"$2";
-			&apache::save_directive($ld, [ $custom ],
-						$vconf, $conf);
-			&$second_print($text{'setup_done'});
-			$any++;
-			}
-		}
-	}
-if ($any) {
-	&flush_file_lines();
-	&register_post_action(\&restart_apache);
-	}
-}
-
 # disable_writelogs(&domain)
 # Disables logging via a program for some server
 sub disable_writelogs
@@ -2697,7 +2646,6 @@ my @cgimodes = &has_cgi_support();
 if ($config{'web'}) {
 	# Work out fields to disable when Apache is in default mode
 	local @webfields = ( "web", "web_ssl", "user_def",
-			     $tmpl->{'writelogs'} ? ( "writelogs" ) : ( ),
 			     "html_dir", "html_dir_def", "html_perms",
 			     "alias_mode", "web_port", "web_sslport",
 			     "web_ssi", "web_ssi_suffix");
@@ -2727,13 +2675,6 @@ if ($config{'web'}) {
 		&ui_textarea("web_ssl",
 			     join("\n", split(/\t/, $tmpl->{'web_ssl'})),
 			     5, 60));
-
-	# Input for logging via program. Deprecated so don't show unless enabled
-	if ($tmpl->{'web_writelogs'}) {
-		print &ui_table_row(&hlink($text{'newweb_writelogs'},
-					   "template_writelogs"),
-			&ui_yesno_radio("writelogs", $tmpl->{'web_writelogs'}));
-		}
 
 	# Input for Apache user to add to domain's group
 	print &ui_table_row(&hlink($text{'newweb_user'}, "template_user_def"),
@@ -2997,9 +2938,6 @@ if ($config{'web'}) {
 		&error($err) if ($err);
 		$in{'web_ssl'} =~ s/\r?\n/\t/g;
 		$tmpl->{'web_ssl'} = $in{'web_ssl'};
-		if (defined($in{'writelogs'})) {
-			$tmpl->{'web_writelogs'} = $in{'writelogs'};
-			}
 		if ($in{'html_dir_def'}) {
 			delete($tmpl->{'web_html_dir'});
 			}
@@ -4560,7 +4498,7 @@ foreach my $p (@ports) {
 	next if (!$virt);
 	local $oldlog = &apache::find_directive($dir, $vconf);
 	next if (!$oldlog);
-	local $oldlogfile = &extract_writelogs_path($oldlog, $d->{'dom'});
+	local $oldlogfile = &extract_logfile_path($oldlog, $d->{'dom'});
 	$oldlog =~ s/\Q$oldlogfile\E/$log/;
 	$movelog ||= $oldlogfile;
 	&apache::save_directive($dir, [ $oldlog ], $vconf, $conf);

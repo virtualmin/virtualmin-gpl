@@ -1896,7 +1896,6 @@ newweb_ecannot=You are not allowed to edit the website template
 newweb_desc=Use this form to edit the template Apache directives that will be used for websites created by Virtualmin. The following substitutions will be done when the site is created from the template :
 newweb_undo=Undo
 newweb_err=Failed to save website template
-newweb_writelogs=Write logs via program?<br>(<font size=-1>Handles missing log directory</font>)
 newweb_user=Add Apache user to Unix group for new servers?
 newweb_useryes=Yes, Apache user is
 newweb_userdef=Yes, find Apache user automatically

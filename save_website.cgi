@@ -67,20 +67,6 @@ if (defined($in{'rubymode'}) && &get_domain_ruby_mode($d) ne $in{'rubymode'} &&
 	$anything++;
 	}
 
-# Save log writing mode
-if (defined($in{'writelogs'}) && $can == 2) {
-	$wl = &get_writelogs_status($d);
-	if ($in{'writelogs'} && !$wl) {
-		&setup_writelogs($d);
-		&enable_writelogs($d);
-		$anything++;
-		}
-	elsif (!$in{'writelogs'} && $wl) {
-		&disable_writelogs($d);
-		$anything++;
-		}
-	}
-
 # Save HTTP2 support
 if (defined($in{'http2'})) {
 	my $canprots = &get_domain_supported_http_protocols($d);
