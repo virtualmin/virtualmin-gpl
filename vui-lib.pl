@@ -362,4 +362,13 @@ return "<font style='font-size:92%;opacity:0.66'>&nbsp;&nbsp;ⓘ&nbsp;&nbsp;".
 	"$text</font>";
 }
 
+=head2 vui_brh
+Returns an HTML break with ability to control height
+=cut
+sub vui_brh
+{
+return &ui_brh() if (defined(&ui_brh));
+return "<br data-x-br>";
+}
+
 1;

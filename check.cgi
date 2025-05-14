@@ -18,7 +18,7 @@ $cerr = &check_virtual_server_config(\%lastconfig);
 &check_error($cerr) if ($cerr);
 &$outdent_print();
 
-print "<p></p>$text{'check_done'}<br data-x-br><p>\n";
+print "<p></p>$text{'check_done'}".&vui_brh()."<p></p>\n";
 
 # See if any options effecting Webmin users have changed
 if (&need_update_webmin_users_post_config(\%lastconfig)) {
@@ -33,7 +33,7 @@ if (&need_update_webmin_users_post_config(\%lastconfig)) {
 	else {
 		# Just offer to update
 		my $form = &ui_form_start("all_webmin.cgi");
-		$form .= "$text{'check_needupdate'}<p>\n";
+		$form .= "$text{'check_needupdate'}<p></p>\n";
 		$form .= &ui_form_end([ [ "now", $text{'check_updatenow'} ] ]);
 		print &ui_alert_box($form, 'warn');
 		}

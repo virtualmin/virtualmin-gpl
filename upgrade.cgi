@@ -202,7 +202,7 @@ elsif ($itype eq "deb") {
 		&$second_print($text{'setup_failed'});
 		print "<pre>";
 		print $upgrade_update_pkgs_output;
-		print "</pre><br data-x-br>";
+		print "</pre>".&vui_brh();
 		}
 	else {
 		&$second_print($text{'setup_done'});

@@ -4125,7 +4125,8 @@ else {
 # Print functions for HTML output
 sub first_html_print { print_and_capture("<span data-first-print>@_</span>","<br>\n");
 		       print bottom_scroll_js(); }
-sub second_html_print { print_and_capture("<span data-second-print>@_</span>","<br><br data-x-br>\n");
+sub second_html_print { print_and_capture("<span data-second-print>@_</span>",
+					  "<br>".&vui_brh()."\n");
 		        print bottom_scroll_js(); }
 sub indent_html_print { print_and_capture("<ul data-indent-print>\n");
 		        print bottom_scroll_js(); }
