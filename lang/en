@@ -7659,6 +7659,7 @@ bucket_title2=Edit S3 Bucket
 bucket_eagone=Account does not exist!
 bucket_elist=Failed to list buckets : $1
 bucket_egone=Bucket no longer exists!
+bucket_einfo=Failed to fetch bucket details : $1
 bucket_header=S3 bucket details
 bucket_account=S3 account key
 bucket_account2=S3 account

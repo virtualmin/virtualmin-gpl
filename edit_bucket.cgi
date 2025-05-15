@@ -22,6 +22,7 @@ else {
 	($bucket) = grep { $_->{'Name'} eq $in{'name'} } @$buckets;
 	$bucket || &error($text{'bucket_egone'});
 	$info = &s3_get_bucket($account->[0], $account->[1], $in{'name'});
+	ref($info) || &error(&text('bucket_einfo', $info));
 	}
 
 print &ui_form_start("save_bucket.cgi", "post");
