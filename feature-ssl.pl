@@ -843,52 +843,50 @@ else {
 # change the actual <Virtualhost> lines!
 sub restore_ssl
 {
-local ($d, $file, $opts) = @_;
+my ($d, $file, $opts, $allopts, $homefmt, $oldd) = @_;
 &$first_print($text{'restore_sslcp'});
 &obtain_lock_web($d);
 my $rv = 1;
 
 # Restore the Apache directives
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-					    $d->{'web_sslport'});
+my ($virt, $vconf, $conf) = &get_apache_virtual(
+				$d->{'dom'}, $d->{'web_sslport'});
 if ($virt) {
-	local $srclref = &read_file_lines($file, 1);
-	local $dstlref = &read_file_lines($virt->{'file'});
+	my $srclref = &read_file_lines($file, 1);
+	my $dstlref = &read_file_lines($virt->{'file'});
+
+	# Copy across directives from the backup
 	splice(@$dstlref, $virt->{'line'}+1,
 	       $virt->{'eline'}-$virt->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
-
-	if ($_[5]->{'home'} && $_[5]->{'home'} ne $d->{'home'}) {
-		# Fix up any DocumentRoot or other file-related directives
-		local $i;
-		foreach $i ($virt->{'line'} ..
-			    $virt->{'line'}+scalar(@$srclref)-1) {
-			$dstlref->[$i] =~
-			    s/\Q$_[5]->{'home'}\E/$d->{'home'}/g;
-			}
-		}
 	&flush_file_lines($virt->{'file'});
 	undef(@apache::get_config_cache);
+	($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+					      	     $d->{'web_sslport'});
+
+	# Fix up any DocumentRoot or other file-related directives
+	if ($oldd->{'home'} && $oldd->{'home'} ne $d->{'home'}) {
+		&recursive_fix_apache_config(
+			$vconf, $conf, $oldd->{'home'}, $d->{'home'});
+		}
 
 	# Copy suexec-related directives from non-SSL virtual host
-	($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-					      $d->{'web_sslport'});
-	local ($nvirt, $nvconf) = &get_apache_virtual($d->{'dom'},
-						      $d->{'web_port'});
+	my ($nvirt, $nvconf) = &get_apache_virtual($d->{'dom'},
+						   $d->{'web_port'});
 	if ($nvirt && $virt) {
-		local @vals = &apache::find_directive("SuexecUserGroup",
-						      $nvconf);
+		my @vals = &apache::find_directive("SuexecUserGroup", $nvconf);
 		if (@vals) {
 			&apache::save_directive("SuexecUserGroup", \@vals,
 						$vconf, $conf);
 			&flush_file_lines($virt->{'file'});
 			}
 		}
+	&flush_file_lines($virt->{'file'}, undef, 1);
 
 	if (!$d->{'ssl_same'}) {
 		# Restore the cert and key, if any and if saved and if not
 		# shared with another domain
-		local $cert = $d->{'ssl_cert'} ||
+		my $cert = $d->{'ssl_cert'} ||
 		      &apache::find_directive("SSLCertificateFile", $vconf, 1);
 		if ($cert && -r $file."_cert") {
 			&lock_file($cert);
@@ -896,7 +894,7 @@ if ($virt) {
 			&unlock_file($cert);
 			&save_website_ssl_file($d, "cert", $cert);
 			}
-		local $key = $d->{'ssl_key'} ||
+		my $key = $d->{'ssl_key'} ||
 		     &apache::find_directive("SSLCertificateKeyFile", $vconf,1);
 		if ($key && -r $file."_key" && $key ne $cert) {
 			&lock_file($key);
@@ -904,7 +902,7 @@ if ($virt) {
 			&unlock_file($key);
 			&save_website_ssl_file($d, "key", $key);
 			}
-		local $ca = $d->{'ssl_chain'} ||
+		my $ca = $d->{'ssl_chain'} ||
 		    &apache::find_directive("SSLCACertificateFile", $vconf,1) ||
 		    &apache::find_directive("SSLCertificateChainFile", $vconf, 1);
 		if ($ca && -r $file."_ca") {
@@ -2940,9 +2938,9 @@ foreach my $d (&list_domains()) {
 	next if (time() - $d->{'letsencrypt_last'} < 60*60);
 
 	# Is it time? Either the user-chosen number of months has passed, or
-	# the cert is within 7 days of expiry
+	# the cert is within 21 days of expiry
 	my $tmpl = &get_template($d->{'template'});
-	my $before = $tmpl->{'ssl_renew_letsencrypt'} || 7;
+	my $before = $tmpl->{'ssl_renew_letsencrypt'} || 21;
 	my $day = 24 * 60 * 60;
 	my $age = time() - $ltime;
 	my $rf = rand() * 3600;
