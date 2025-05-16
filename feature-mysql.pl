@@ -104,7 +104,6 @@ if (!$d->{'mysql_module'}) {
 &require_mysql();
 $d->{'mysql_user'} = &mysql_user($d);
 local $user = $d->{'mysql_user'};
-my @olddbs;
 
 if (!$d->{'parent'}) {
 	if ($d->{'provision_mysql'}) {
@@ -161,7 +160,6 @@ if (!$d->{'parent'}) {
 	else {
 		# Create the user
 		my @hosts = &get_mysql_hosts($d, &remote_mysql($d) ? 2 : 1);
-		@olddbs = &list_mysql_db_grants($d, $user);
 		if (&indexof("%", @hosts) >= 0 &&
 		    &indexof("localhost", @hosts) < 0 &&
 		    &indexof("127.0.0.1", @hosts) < 0) {
@@ -188,7 +186,9 @@ if (!$d->{'parent'}) {
 				&create_mysql_db_grant($d, $h, $wild, $user);
 				}
 			&set_mysql_user_connections($d, $h, $user, 0);
-
+			}
+		my @olddbs = &list_mysql_db_grants($d, $user);
+		foreach my $h (@hosts) {
 			# If some databases were already granted to the user,
 			# such as for a restore onto a new system that is using
 			# the same MySQL replica, grant them to the new host
@@ -867,7 +867,7 @@ if (%dbmap) {
 
 if (!$d->{'parent'}) {
 	# Duplicate allowed hosts
-	local @allowed = &get_mysql_allowed_hosts($oldd);
+	my @allowed = &get_mysql_allowed_hosts($oldd);
 	&save_mysql_allowed_hosts($d, \@allowed);
 	}
 }
