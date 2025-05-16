@@ -145,7 +145,7 @@ while(<OUT>) {
 		}
 	}
 close(OUT);
-return sort { $b cmp $a } @rv;
+return sort { &compare_versions($b, $a) } @rv;
 }
 
 sub usage
