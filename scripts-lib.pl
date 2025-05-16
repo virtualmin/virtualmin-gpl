@@ -3759,5 +3759,18 @@ foreach my $sname (&list_scripts()) {
 return @rv;
 }
 
+# script_find_kit_func(name, suffix)
+# Returns a reference to a function in the script kit package if it exists
+sub script_find_kit_func
+{
+my ($name, $suffix) = @_;
+my $func = "script_${name}_kit_${suffix}";
+for my $pkg (grep { /::$/ } keys %main::) {
+	my $full = "${pkg}${func}";
+	return \&{$full} if (defined(&{$full}));
+	}
+return;
+}
+
 1;
 
