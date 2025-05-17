@@ -62,16 +62,16 @@ else {
 	&error_setup($text{'bucket_err'});
 
 	# Get current bucket ACL
-	$acl = { 'AccessControlList' => [ { 'Grant' => [ ] } ] };
+	$acl = { 'Grants' => [ ] };
 	if (!$in{'new'}) {
 		$oldinfo = &s3_get_bucket($account->[0], $account->[1], $in{'name'});
 		ref($oldinfo) || &error(&text('bucket_einfo', $oldinfo));
 		$oldacl = $oldinfo->{'acl'};
-		foreach my $g (@{$oldacl->{'AccessControlList'}->[0]->{'Grant'}}) {
-			$grantee = $g->{'Grantee'}->[0];
-			if ($grantee->{'xsi:type'} eq 'CanonicalUser') {
-				$useridmap{$grantee->{'DisplayName'}->[0]} =
-					$grantee->{'ID'}->[0];
+		foreach my $g (@{$oldacl->{'Grants'}}) {
+			$grantee = $g->{'Grantee'};
+			if ($grantee->{'Type'} eq 'CanonicalUser') {
+				$useridmap{$grantee->{'DisplayName'}} =
+					$grantee->{'ID'};
 				}
 			}
 		$acl->{'Owner'} = $oldacl->{'Owner'};
@@ -82,42 +82,40 @@ else {
 		next if (!$in{"type_$i"});
 		$in{"grantee_$i"} =~ /^\S+$/ ||
 			&error(&text('bucket_egrantee', $i+1));
-		$obj = { 'Permission' => [ $in{"perm_$i"} ],
-			 'Grantee' => [ {
-				'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance', 
-				} ],
+		$obj = { 'Permission' => $in{"perm_$i"},
+			 'Grantee' => { },
 		       };
 		if ($in{"type_$i"} eq "CanonicalUser") {
 			# Granting to a user
 			if ($useridmap{$in{"grantee_$i"}}) {
 				# We have the ID already
-				$obj->{'Grantee'}->[0]->{'xsi:type'} =
+				$obj->{'Grantee'}->{'Type'} =
 					'CanonicalUser';
-				$obj->{'Grantee'}->[0]->{'ID'} = 
-					[ $useridmap{$in{"grantee_$i"}} ];
-				$obj->{'Grantee'}->[0]->{'DisplayName'} = 
-					[ $in{"grantee_$i"} ];
+				$obj->{'Grantee'}->{'ID'} = 
+					$useridmap{$in{"grantee_$i"}};
+				$obj->{'Grantee'}->{'DisplayName'} = 
+					$in{"grantee_$i"};
 				}
 			else {
 				# Grant by email
-				$obj->{'Grantee'}->[0]->{'xsi:type'} =
+				$obj->{'Grantee'}->{'Type'} =
 					'AmazonCustomerByEmail';
-				$obj->{'Grantee'}->[0]->{'EmailAddress'} = 
-					[ $in{"grantee_$i"} ];
+				$obj->{'Grantee'}->{'EmailAddress'} = 
+					$in{"grantee_$i"};
 				}
 			}
 		else {
 			# Granting to a group
-			$obj->{'Grantee'}->[0]->{'xsi:type'} = 'Group';
+			$obj->{'Grantee'}->{'Type'} = 'Group';
 			$uri = $in{"grantee_$i"};
 			if ($uri !~ /^(http|https):/) {
 				$uri = $s3_groups_uri.$uri;
 				}
-			$obj->{'Grantee'}->[0]->{'URI'} = [ $uri ];
+			$obj->{'Grantee'}->{'URI'} = $uri;
 			}
-		push(@{$acl->{'AccessControlList'}->[0]->{'Grant'}}, $obj);
+		push(@{$acl->{'Grants'}}, $obj);
 		}
-	@{$acl->{'AccessControlList'}} || &error($text{'bucket_enogrants'});
+	$in{'new'} || @{$acl->{'Grants'}} || &error($text{'bucket_enogrants'});
 
 	# Validate expiry policy
 	$lifecycle = { 'Rule' => [ ] };
@@ -156,8 +154,8 @@ else {
 		$clash && &error($text{'bucket_eeclash'});
 
 		# Create the bucket
-		$err = &init_s3_bucket($account->[0], $account->[1], $in{'name'}, 1,
-				       $in{'location'});
+		$err = &init_s3_bucket($account->[0], $account->[1],
+				       $in{'name'}, 1, $in{'location'});
 		&error($err) if ($err);
 		}
 
@@ -167,8 +165,7 @@ else {
 			$account->[0], $account->[1], $in{'name'});
 		$oldacl = $oldinfo->{'acl'};
 		$acl->{'Owner'} = $oldacl->{'Owner'};
-		if (@{$acl->{'AccessControlList'}} > 1 ||
-		    @{$acl->{'AccessControlList'}->[0]->{'Grant'}} > 0) {
+		if (@{$acl->{'Grants'}}) {
 			$err = &s3_put_bucket_acl(
 			    $account->[0], $account->[1], $in{'name'}, $acl);
 			}
@@ -182,8 +179,8 @@ else {
 		}
 
 	# Apply expiry policy
-	$err = &s3_put_bucket_lifecycle($account->[0], $account->[1], $in{'name'}, $lifecycle);
-	&error($err) if ($err);
+	#$err = &s3_put_bucket_lifecycle($account->[0], $account->[1], $in{'name'}, $lifecycle);
+	#&error($err) if ($err);
 
 	&webmin_log($in{'new'} ? "create" : "modify", "bucket", $in{'name'});
 	&redirect("list_buckets.cgi");

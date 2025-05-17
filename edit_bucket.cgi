@@ -38,15 +38,16 @@ print &ui_table_start($text{'bucket_header'}, "width=100%", 2);
 if ($in{'new'}) {
 	# Can select account, enter a bucket name and choose a location
 	print &ui_table_row($text{'bucket_account'},
-		&ui_select("account", undef, [ map { [ $_->[0], $_->[3]->{'desc'} ] } @accounts ]));
+		&ui_select("account", undef,
+		   [ map { [ $_->[0], $_->[3]->{'desc'} ] } @accounts ]));
 
 	print &ui_table_row($text{'bucket_name'},
 		&ui_textbox("name", undef, 40));
 
 	print &ui_table_row($text{'bucket_location'},
 		&ui_select("location", $config{'s3_location'},
-			   [ [ "", $text{'default'} ],
-			     &s3_list_locations($account->[0], $account->[1]) ]));
+		   [ [ "", $text{'default'} ],
+		     &s3_list_locations($account->[0], $account->[1]) ]));
 	}
 else {
 	# Account, bucket and location are fixed
@@ -67,8 +68,8 @@ else {
 				    : $text{'default'});
 
 	print &ui_table_row($text{'bucket_owner'},
-	    "<tt>".($info->{'acl'}->{'Owner'}->[0]->{'DisplayName'}->[0] ||
-		    $info->{'acl'}->{'Owner'}->[0]->{'ID'}->[0])."</tt>");
+	    "<tt>".($info->{'acl'}->{'Owner'}->{'DisplayName'} ||
+		    $info->{'acl'}->{'Owner'}->{'ID'})."</tt>");
 
 	# Show file count and size
 	$files = &s3_list_files($account->[0], $account->[1], $in{'name'});
@@ -88,22 +89,21 @@ else {
 $ptable = &ui_columns_start([ $text{'bucket_type'},
 			      $text{'bucket_grantee'},
 			      $text{'bucket_perm'} ]);
-$grant = $in{'new'} ? [ ] :
-	    $info->{'acl'}->{'AccessControlList'}->[0]->{'Grant'};
+$grant = $in{'new'} ? [ ] : $info->{'acl'}->{'Grants'};
 $i = 0;
 foreach my $g (@$grant, { }) {
-	$grantee = $g->{'Grantee'}->[0]->{'DisplayName'}->[0] ||
-		   $g->{'Grantee'}->[0]->{'ID'}->[0] ||
-		   $g->{'Grantee'}->[0]->{'URI'}->[0];
+	$grantee = $g->{'Grantee'}->{'DisplayName'} ||
+		   $g->{'Grantee'}->{'ID'} ||
+		   $g->{'Grantee'}->{'URI'};
 	$grantee =~ s/^\Q$s3_groups_uri\E//;
 	$ptable .= &ui_columns_row([
 		&ui_select("type_$i",
-			   $g->{'Grantee'}->[0]->{'xsi:type'},
+			   $g->{'Grantee'}->{'Type'},
 			   [ [ "", "&nbsp;" ],
 			     [ "CanonicalUser", $text{'bucket_user'} ],
 			     [ "Group", $text{'bucket_group'} ] ]),
 		&ui_textbox("grantee_$i", $grantee, 30),
-		&ui_select("perm_$i", $g->{'Permission'}->[0] || "READ",
+		&ui_select("perm_$i", $g->{'Permission'} || "READ",
 			   [ "FULL_CONTROL", "READ", "WRITE", "READ_ACP",
 			     "WRITE_ACP" ]),
 		]);
@@ -121,7 +121,7 @@ $lifecycle = !$in{'new'} && $info->{'lifecycle'} ?
 		$info->{'lifecycle'}->{'Rule'} : [ ];
 $i = 0;
 foreach my $l (@$lifecycle, { }) {
-	$prefix = $l->{'Prefix'} ? $l->{'Prefix'}->[0] : undef;
+	$prefix = $l->{'Prefix'};
 	$prefix = undef if (ref($prefix));
 	$mode = !(keys %$l) ? 2 : $prefix ? 0 : 1;
 	$ltable .= &ui_columns_row([
@@ -131,9 +131,9 @@ foreach my $l (@$lifecycle, { }) {
 			    [ 0, $text{'bucket_lstart'}." ".
 				 &ui_textbox("lprefix_$i", $prefix, 10) ] ]),
 		&ui_checkbox("lstatus_$i", 1, "",
-			     $l->{'Status'}->[0] eq 'Enabled'),
-		&days_date_field("lglacier_$i", $l->{'Transition'}->[0]),
-		&days_date_field("ldelete_$i", $l->{'Expiration'}->[0]),
+			     $l->{'Status'} eq 'Enabled'),
+		&days_date_field("lglacier_$i", $l->{'Transition'}),
+		&days_date_field("ldelete_$i", $l->{'Expiration'}),
 		]);
 	$i++;
 	}
@@ -157,12 +157,12 @@ sub days_date_field
 {
 local ($name, $obj) = @_;
 local $mode = $obj->{'Days'} ? 1 : $obj->{'Date'} ? 2 : 0;
-local ($y, $m, $d) = $obj->{'Date'}->[0] =~ /^(\d+)\-(\d+)\-(\d+)/ ?
+local ($y, $m, $d) = $obj->{'Date'} =~ /^(\d+)\-(\d+)\-(\d+)/ ?
 			($1, $2, $3) : ( );
 return &ui_radio($name, $mode,
 	[ [ 0, $text{'bucket_lnever'}."<br>" ],
 	  [ 1, &text('bucket_ldays',
-	          &ui_textbox($name."_days", $obj->{'Days'}->[0], 5))."<br>" ],
+	          &ui_textbox($name."_days", $obj->{'Days'}, 5))."<br>" ],
 	  [ 2, &text('bucket_ldate',
 		  &ui_date_input($d, $m, $y, $name."_day", $name."_month",
 				 $name."_year")) ] ]);

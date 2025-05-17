@@ -411,7 +411,6 @@ for(my $i=0; $i<$tries; $i++) {
 					     &serialise_variable($info),
 					     $rrsheaders);
 		if ($response->http_response->code != 200) {
-		        print STDERR "reply = ",$response->body(),"\n";
 			$err = &text('s3_einfo',
                                      &extract_s3_message($response));
 			}
@@ -656,7 +655,7 @@ if (&has_aws_cmd()) {
 	return $err if ($err);
 	my $out = &call_aws_s3api_cmd($akey,
                 [ "get-bucket-location", "--bucket", $bucket ], undef, 1);
-	return ref($out) ? $out->{'LocationConstraint'} : undef;
+	return ref($out) ? $out->{'LocationConstraint'} || 'us-east-1' : undef;
 	}
 else {
 	my $conn = &make_s3_connection($akey, $skey);
@@ -675,13 +674,18 @@ sub s3_put_bucket_acl
 {
 &require_s3();
 my ($akey, $skey, $bucket, $acl) = @_;
-my $location = &s3_get_bucket_location($akey, $skey, $bucket);
-my $conn = &make_s3_connection($akey, $skey, undef, $location);
-my $xs = XML::Simple->new(KeepRoot => 1);
-my $xml = $xs->XMLout({ 'AccessControlPolicy' => [ $acl ] });
-my $response = $conn->put_bucket_acl($bucket, $xml);
-return $response->http_response->code == 200 ? undef : 
-	&text('s3_eputacl', &extract_s3_message($response));
+eval "use JSON::PP";
+my $coder = JSON::PP->new->pretty;
+my $json = $coder->encode($acl);
+my @regionflag = &s3_region_flag($akey, $skey, $bucket);
+my $tempfile = &transname();
+&uncat_file($tempfile, $json);
+my $out = &call_aws_s3api_cmd($akey,
+	[ @regionflag,
+	  "put-bucket-acl", "--bucket", $bucket,
+	  "--access-control-policy", "file://".$tempfile ], undef, 1);
+&unlink_file($tempname);
+return ref($out) ? undef : $out;
 }
 
 # s3_put_bucket_lifecycle(access-key, secret-key, bucket, &acl)
