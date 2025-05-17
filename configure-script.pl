@@ -32,9 +32,9 @@ if (!$module_name) {
 	}
 
 # Load all modules that can configure web app scripts
-my @modules = grep { $_->{'config_script'} } &get_all_module_infos();
-foreach my $module (@modules) {
-	&foreign_require($module->{'dir'});
+my @mods = grep { $_->{'config_script'} } &get_all_module_infos();
+foreach my $mod (@mods) {
+	&foreign_require($mod->{'dir'});
 	}
 
 # Pre-process args to get web app name
@@ -52,8 +52,8 @@ if (!$web_app_name) {
 	}
 
 # Locate the usage and CLI handlers for this script type
-my $script_usage_func = &script_find_kit_func($web_app_name, 'usage');
-my $script_cli        = &script_find_kit_func($web_app_name, 'cli');
+my $script_usage_func = &script_find_kit_func(\@mods, $web_app_name, 'usage');
+my $script_cli        = &script_find_kit_func(\@mods, $web_app_name, 'cli');
 
 # Bail out if there’s no CLI handler
 if (!$script_cli) {
