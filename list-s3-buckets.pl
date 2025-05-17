@@ -71,28 +71,31 @@ if ($multiline) {
 		local $ctime = &s3_parse_date($f->{'CreationDate'});
 		print "    Created: ",&make_date($ctime),"\n";
 		print "    Created time: ",$ctime,"\n";
-		$info = &s3_get_bucket($akey, $skey, $f->{'Name'});
-		if ($info && $info->{'location'}) {
-			print "    Location: $info->{'location'}\n";
+		$loc = &s3_get_bucket_location($akey, $skey, $f->{'Name'});
+		if ($loc) {
+			print "    Location: $loc\n";
 			}
-		if ($info && $info->{'acl'}) {
+		$info = &s3_get_bucket($akey, $skey, $f->{'Name'});
+		if (ref($info) && $info->{'acl'}) {
 			print "    Owner: ",
-			      ($info->{'acl'}->{'Owner'}->[0]->{'DisplayName'}->[0] || $info->{'acl'}->{'Owner'}->[0]->{'ID'}->[0]),"\n";
-			$acl = $info->{'acl'}->{'AccessControlList'}->[0];
-			@grant = @{$acl->{'Grant'}};
+			      ($info->{'acl'}->{'Owner'}->{'DisplayName'} ||
+			       $info->{'acl'}->{'Owner'}->{'ID'}),"\n";
+			@grant = @{$info->{'acl'}->{'Grants'}};
 			foreach my $g (@grant) {
-				print "    Grant: $g->{'Permission'}->[0] to ",
-				      ($g->{'Grantee'}->[0]->{'DisplayName'}->[0] || $g->{'Grantee'}->[0]->{'ID'}->[0]),"\n";
+				print "    Grant: $g->{'Permission'} to ",
+				      ($g->{'Grantee'}->{'DisplayName'} ||
+				       $g->{'Grantee'}->{'ID'} ||
+				       $g->{'Grantee'}->{'URI'}),"\n";
 				}
 			}
-		if ($info && $info->{'lifecycle'}) {
+		if (ref($info) && $info->{'lifecycle'}) {
 			foreach my $r (@{$info->{'lifecycle'}->{'Rule'}}) {
 				print "    Lifecycle ID: ",
-				      $r->{'ID'}->[0],"\n";
+				      $r->{'ID'},"\n";
 				print "    Lifecycle status: ",
-				      $r->{'Status'}->[0],"\n";
+				      $r->{'Status'},"\n";
 				print "    Lifecycle prefix: ",
-				      $r->{'Prefix'}->[0],"\n";
+				      $r->{'Prefix'},"\n";
 				&show_lifecycle_period($r, "Transition",
 					"move to glacier");
 				&show_lifecycle_period($r, "Expiration",
@@ -121,13 +124,13 @@ else {
 sub show_lifecycle_period
 {
 local ($r, $name, $txt) = @_;
-if ($r->{$name} && $r->{$name}->[0]) {
-	my $obj = $r->{$name}->[0];
-	if ($obj->{'Date'} && $obj->{'Date'}->[0]) {
-		print "    Lifecycle ${txt}: On date $obj->{'Date'}->[0]\n";
+if ($r->{$name}) {
+	my $obj = $r->{$name};
+	if ($obj->{'Date'} && $obj->{'Date'}) {
+		print "    Lifecycle ${txt}: On date $obj->{'Date'}\n";
 		}
-	if ($obj->{'Days'} && $obj->{'Days'}->[0]) {
-		print "    Lifecycle ${txt}: After $obj->{'Days'}->[0] days\n";
+	if ($obj->{'Days'} && $obj->{'Days'}) {
+		print "    Lifecycle ${txt}: After $obj->{'Days'} days\n";
 		}
 	}
 }

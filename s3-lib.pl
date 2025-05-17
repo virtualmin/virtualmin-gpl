@@ -619,25 +619,29 @@ sub s3_get_bucket
 {
 &require_s3();
 my ($akey, $skey, $bucket) = @_;
-# Always make an HTTP call becase the s3api command doesn't do consistent JSON
+if (!&has_aws_cmd() ||
+    &compare_version_numbers(&get_aws_cmd_version(), 2) < 0) {
+	return "S3 bucket details require version 2.0 or later ".
+	       "of the aws CLI command";
+	}
+
+my $err = &setup_aws_cmd($akey, $skey);
+return $err if ($err);
 my %rv;
-my $conn = &make_s3_connection($akey, $skey);
-my $response = $conn->get_bucket_location($bucket);
-if ($response->http_response->code == 200) {
-	$rv{'location'} = $response->{'LocationConstraint'};
-	$conn->{REGION} = $rv{'location'};
+my $out = &call_aws_s3api_cmd($akey,
+	[ "get-bucket-acl", "--bucket", $bucket ], undef, 1);
+return $out if (!ref($out));
+$rv{'acl'} = $out;
+$rv{'location'} = &s3_get_bucket_location($akey, $skey, $bucket);
+my $out = &call_aws_s3api_cmd($akey,
+	[ "get-bucket-logging", "--bucket", $bucket ], undef, 1);
+if (ref($out)) {
+	$rv{'logging'} = $out->{'BucketLoggingStatus'};
 	}
-$response = $conn->get_bucket_logging($bucket);
-if ($response->http_response->code == 200) {
-	$rv{'logging'} = $response->{'BucketLoggingStatus'};
-	}
-$response = $conn->get_bucket_acl($bucket);
-if ($response->http_response->code == 200) {
-	$rv{'acl'} = $response->{'AccessControlPolicy'};
-	}
-$response = $conn->get_bucket_lifecycle($bucket);
-if ($response->http_response->code == 200) {
-	$rv{'lifecycle'} = $response->{'LifecycleConfiguration'};
+my $out = &call_aws_s3api_cmd($akey,
+	[ "get-bucket-lifecycle", "--bucket", $bucket ], undef, 1);
+if (ref($out)) {
+	$rv{'lifecycle'} = $out;
 	}
 return \%rv;
 }
@@ -1317,6 +1321,16 @@ sub has_aws_cmd
 return undef if ($ENV{'NO_AWS_CMD'});
 my ($cmd) = &split_quoted_string($config{'aws_cmd'} || "aws");
 return &has_command($cmd);
+}
+
+# get_aws_cmd_version()
+# Returns the version number of the aws command, if installed
+sub get_aws_cmd_version
+{
+my $cmd = &has_aws_cmd();
+return undef if (!$cmd);
+my $out = &backquote_command("$cmd --version 2>/dev/null </dev/null");
+return $out =~ /aws-cli\/([0-9\.]+)/ ? $1 : undef;
 }
 
 # has_aws_ec2_creds([&options])
