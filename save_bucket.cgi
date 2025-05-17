@@ -65,6 +65,7 @@ else {
 	$acl = { 'AccessControlList' => [ { 'Grant' => [ ] } ] };
 	if (!$in{'new'}) {
 		$oldinfo = &s3_get_bucket($account->[0], $account->[1], $in{'name'});
+		ref($oldinfo) || &error(&text('bucket_einfo', $oldinfo));
 		$oldacl = $oldinfo->{'acl'};
 		foreach my $g (@{$oldacl->{'AccessControlList'}->[0]->{'Grant'}}) {
 			$grantee = $g->{'Grantee'}->[0];
