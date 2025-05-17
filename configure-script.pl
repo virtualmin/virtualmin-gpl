@@ -34,7 +34,8 @@ if (!$module_name) {
 # Load all modules that can configure web app scripts
 my @mods = grep { $_->{'config_script'} } &get_all_module_infos();
 foreach my $mod (@mods) {
-	&foreign_require($mod->{'dir'});
+	my $dir = $mod->{'dir'};
+	&foreign_require($dir) if (&indexof($dir, @plugins) >= 0);
 	}
 
 # Pre-process args to get web app name
