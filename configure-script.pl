@@ -37,7 +37,7 @@ foreach my $p (@plugins) {
 	my %mod = &get_module_info($p);
 	if ($mod{'config_script'}) {
 		push(@mods, \%mod);
-		&load_plugin_libraries(($mod{'dir'}));
+		&load_plugin_libraries($mod{'dir'});
 		}
 	}
 
