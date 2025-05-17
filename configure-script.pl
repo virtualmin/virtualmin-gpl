@@ -41,6 +41,9 @@ foreach my $p (@plugins) {
 		}
 	}
 
+# Parse common command-line flags
+&parse_common_cli_flags(\@ARGV);
+
 # Pre-process args to get web app name
 my ($web_app_name, $massapi);
 for (my $i=0; $i<@ARGV; $i++) {
@@ -68,9 +71,6 @@ my $script_cli        = &script_find_kit_func(\@mods, $web_app_name, $capi);
 if (!$script_cli) {
 	&usage("Script '$web_app_name' does not support $tapi API");
 	}
-
-# Parse common command-line flags
-&parse_common_cli_flags(\@ARGV);
 
 # Call the script-specific CLI function
 $script_cli->(\@ARGV);
