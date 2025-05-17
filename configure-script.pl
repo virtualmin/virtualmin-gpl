@@ -5,11 +5,11 @@ use File::Basename;
 
 =head1 configure-script.pl
 
-Configure web app script
+Configure web app scripts
 
-This command can be used to modify web application settings, perform backups,
-make clones and carry out other administrative tasks, if supported by the
-application.
+This command can be used to modify settings, perform backups, create clones, and
+carry out other administrative tasks for one or more web app scripts, if
+supported by the applications.
 
 See the usage by calling the C<--help> flag with the script function for more
 information on how to use this command, as it's specific to the web app
@@ -38,11 +38,14 @@ foreach my $mod (@mods) {
 	}
 
 # Pre-process args to get web app name
-our $web_app_name;
+my ($web_app_name, $massapi);
 for (my $i=0; $i<@ARGV; $i++) {
 	if ($ARGV[$i] eq '--script-type' && $i+1 < @ARGV) {
 		$web_app_name = $ARGV[$i+1];
-		last;
+		}
+	elsif ($ARGV[$i] eq '--mass') {
+		# boolean flag—no argument expected
+		$massapi = 1;
 		}
 	}
 
@@ -52,12 +55,14 @@ if (!$web_app_name) {
 	}
 
 # Locate the usage and CLI handlers for this script type
-my $script_usage_func = &script_find_kit_func(\@mods, $web_app_name, 'usage');
-my $script_cli        = &script_find_kit_func(\@mods, $web_app_name, 'cli');
+my ($uapi, $capi, $tapi) = ('usage', 'cli', 'configure');
+$uapi = 'usage_mass', $capi = 'cli_mass', $tapi = 'mass configure' if ($massapi);
+my $script_usage_func = &script_find_kit_func(\@mods, $web_app_name, $uapi);
+my $script_cli        = &script_find_kit_func(\@mods, $web_app_name, $capi);
 
 # Bail out if there’s no CLI handler
 if (!$script_cli) {
-	usage("Script '$web_app_name' does not support configure API");
+	&usage("Script '$web_app_name' does not support $tapi API");
 	}
 
 # Parse common command-line flags
@@ -70,7 +75,7 @@ $script_cli->(\@ARGV);
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
-print "Configure web app script\n\n";
+print "Configure web app scripts\n\n";
 print "virtualmin configure-script --script-type name";
 if (defined(&$script_usage_func)) {
 	$script_usage_func->($web_app_name);
