@@ -611,7 +611,7 @@ else {
 # s3_get_bucket(access-key, secret-key, bucket)
 # Returns a hash ref with details of a bucket. Keys are :
 # location - A location like us-west-1, if any is set
-# logging - XXX
+# logging - A LoggingEnabled hash ref
 # acl - An array ref of ACL objects
 # lifecycle - An array ref of lifecycle rule objects
 sub s3_get_bucket
@@ -637,7 +637,7 @@ my $out = &call_aws_s3api_cmd($akey,
 	[ "get-bucket-logging",
 	  "--bucket", $bucket ], undef, 1);
 if (ref($out)) {
-	$rv{'logging'} = $out->{'BucketLoggingStatus'};
+	$rv{'logging'} = $out->{'LoggingEnabled'};
 	}
 my $out = &call_aws_s3api_cmd($akey,
 	[ "get-bucket-lifecycle-configuration",
@@ -721,6 +721,28 @@ else {
 	return ref($out) ? undef : $out;
 	}
 }
+
+# s3_put_bucket_logging(access-key, secret-key, bucket, &logging)
+# Updates the logging for a bucket, based on the structure in the format
+# returned # by s3_get_bucket->{'logging'}
+sub s3_put_bucket_logging
+{
+&require_s3();
+my ($akey, $skey, $bucket, $logging) = @_;
+eval "use JSON::PP";
+my $coder = JSON::PP->new->pretty;
+my $json = $coder->encode($logging || { });
+my @regionflag = &s3_region_flag($akey, $skey, $bucket);
+my $tempfile = &transname();
+&uncat_file($tempfile, $json);
+my $out = &call_aws_s3api_cmd($akey,
+	[ @regionflag,
+	  "put-bucket-logging", "--bucket", $bucket,
+	  "--access-control-policy", "file://".$tempfile ], undef, 1);
+&unlink_file($tempname);
+return ref($out) ? undef : $out;
+}
+
 
 # s3_list_files(access-key, secret-key, bucket)
 # Returns a list of all files in an S3 bucket as an array ref, or an error

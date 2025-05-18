@@ -89,18 +89,28 @@ if ($multiline) {
 				}
 			}
 		if (ref($info) && $info->{'lifecycle'}) {
-			foreach my $r (@{$info->{'lifecycle'}->{'Rule'}}) {
+			foreach my $r (@{$info->{'lifecycle'}->{'Rules'}}) {
 				print "    Lifecycle ID: ",
 				      $r->{'ID'},"\n";
 				print "    Lifecycle status: ",
 				      $r->{'Status'},"\n";
 				print "    Lifecycle prefix: ",
-				      $r->{'Prefix'},"\n";
-				&show_lifecycle_period($r, "Transition",
-					"move to glacier");
-				&show_lifecycle_period($r, "Expiration",
-					"delete");
+				      $r->{'Filter'}->{'Prefix'},"\n";
+				if ($r->{'Transitions'} &&
+				    @{$r->{'Transitions'}}) {
+					&show_lifecycle_period(
+						$r->{'Transitions'}->[0],
+						"move to storage");
+					}
+				&show_lifecycle_period(
+					$r->{'Expiration'}, "delete");
 				}
+			}
+		if (ref($info) && $info->{'logging'}) {
+			print "    Logging target: ",
+			      $info->{'logging'}->{'TargetBucket'},"\n";
+			print "    Logging prefix: ",
+			      $info->{'logging'}->{'TargetPrefix'},"\n";
 			}
 		}
 	}
@@ -123,15 +133,12 @@ else {
 
 sub show_lifecycle_period
 {
-local ($r, $name, $txt) = @_;
-if ($r->{$name}) {
-	my $obj = $r->{$name};
-	if ($obj->{'Date'} && $obj->{'Date'}) {
-		print "    Lifecycle ${txt}: On date $obj->{'Date'}\n";
-		}
-	if ($obj->{'Days'} && $obj->{'Days'}) {
-		print "    Lifecycle ${txt}: After $obj->{'Days'} days\n";
-		}
+local ($obj, $txt) = @_;
+if ($obj && $obj->{'Date'}) {
+	print "    Lifecycle ${txt}: On date $obj->{'Date'}\n";
+	}
+if ($obj && $obj->{'Days'}) {
+	print "    Lifecycle ${txt}: After $obj->{'Days'} days\n";
 	}
 }
 
