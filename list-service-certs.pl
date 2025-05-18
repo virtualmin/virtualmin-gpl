@@ -56,6 +56,7 @@ if ($multiline) {
 		print "    Key file: ",$svc->{'key'},"\n" if ($svc->{'key'});
 		print "    CA file: ",$svc->{'ca'},"\n" if ($svc->{'ca'});
 		print "    IP address: ",$svc->{'ip'},"\n" if ($svc->{'ip'});
+		print "    IPv6 address: ",$svc->{'ip6'},"\n" if ($svc->{'ip6'});
 		print "    Domain name: ",$svc->{'dom'},"\n" if ($svc->{'dom'});
 		print "    Service port: ",$svc->{'port'},"\n" if ($svc->{'port'});
 		}

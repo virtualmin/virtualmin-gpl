@@ -2472,6 +2472,19 @@ my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, $mems{'ssl_ca'},
 foreach my $r (@rv) {
 	$r =~ s/^<//;
 	}
+if ($d->{'ip6'}) {
+	# Also check if there's an IPv6 specific block
+	my ($l) = grep { $_->{'value'} eq "[".$d->{'ip6'}."]" } @loc;
+	my ($imap) = grep { $_->{'name'} eq 'protocol' &&
+			    $_->{'value'} eq 'imap' &&
+			    $_->{'enabled'} &&
+			    $_->{'sectionname'} eq 'local' &&
+			    $_->{'sectionvalue'} eq "[".$d->{'ip6'}."]"} @$conf;
+	if ($l && $imap) {
+		# Yes, so assume that it's for the same cert and key
+		push(@rv, $d->{'ip6'});
+		}
+	}
 return @rv;
 }
 

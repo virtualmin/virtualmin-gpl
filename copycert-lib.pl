@@ -143,7 +143,7 @@ if (&foreign_installed("dovecot")) {
 	# Check Dovecot certificate
 	if ($perip) {
 		# Try per-IP cert first
-		my ($cfile, $kfile, $cafile, $ip, $dom) =
+		my ($cfile, $kfile, $cafile, $ip, $dom, $ip6) =
 			&get_dovecot_ssl_cert($d);
 		if ($cfile) {
 			if (!$cafile && &cert_file_split($cfile) > 1) {
@@ -158,6 +158,7 @@ if (&foreign_installed("dovecot")) {
 				      'port' => 993,
 				      'sslports' => [ 995 ],
 				      'ip' => $ip,
+				      'ip6' => $ip6,
 				      'dom' => $dom,
 				      'd' => $d, });
 			}
