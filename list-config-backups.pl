@@ -2,7 +2,7 @@
 
 =head1 list-config-backups.pl
 
-Lists configuration file backups from a Git repository in F</etc/> directory.
+Lists configuration file backups from Git
 
 By default, this program operates on the entire F</etc/> directory. However,
 you can limit which files it handles by specifying a single Webmin module with
