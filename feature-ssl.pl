@@ -443,16 +443,15 @@ if ($d->{'dom'} ne $oldd->{'dom'} &&
 # with the new settings
 if ($d->{'ip'} ne $oldd->{'ip'} ||
     $d->{'virt'} != $oldd->{'virt'} ||
+    $d->{'ip6'} ne $oldd->{'ip6'} ||
+    $d->{'virt6'} ne $oldd->{'virt6'} ||
     $d->{'dom'} ne $oldd->{'dom'} ||
     $d->{'home'} ne $oldd->{'home'}) {
-	print STDERR "Updating service SSL certs\n";
 	my %types = map { $_->{'id'}, $_ } &list_service_ssl_cert_types();
 	foreach my $svc (&get_all_domain_service_ssl_certs($oldd)) {
-		print STDERR "syncing svc=$svc->{'id'} d=$svc->{'d'}\n";
 		next if (!$svc->{'d'});
 		my $t = $types{$svc->{'id'}};
 		my $func = "sync_".$svc->{'id'}."_ssl_cert";
-		print STDERR "calling $func\n";
 		next if (!defined(&$func));
 		&$func($oldd, 0);
 		if ($t->{'dom'} || $d->{'virt'}) {
@@ -2193,8 +2192,8 @@ else {
 # If supported, configure Dovecot to use this domain's SSL cert for its IP
 sub sync_dovecot_ssl_cert
 {
-local ($d, $enable) = @_;
-local $tmpl = &get_template($d->{'template'});
+my ($d, $enable) = @_;
+my $tmpl = &get_template($d->{'template'});
 
 # Check if dovecot is installed and supports this feature
 return -1 if (!&foreign_installed("dovecot"));
@@ -2223,34 +2222,39 @@ if (!$d->{'ssl_combined'} && !-r $d->{'ssl_combined'}) {
 	&sync_combined_ssl_cert($d);
 	}
 
-local $chain = &get_website_ssl_file($d, "ca");
-local $nochange = 0;
-if ($d->{'virt'}) {
-	# Domain has it's own IP
+my $chain = &get_website_ssl_file($d, "ca");
+my $nochange = 0;
 
+my @ips;
+if ($d->{'virt'}) {
+	# Domain has it's own IPv4, and maybe v6
+	push(@ips, $d->{'ip'});
+	push(@ips, "[".$d->{'ip6'}."]") if ($d->{'virt6'} && $d->{'ip6'});
+	}
+foreach my $ip (@ips) {
 	# Find the existing block for the IP
 	my @loc = grep { $_->{'name'} eq 'local' &&
 			 $_->{'section'} } @$conf;
-	my ($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;
+	my ($l) = grep { $_->{'value'} eq $ip } @loc;
 	my ($imap, $pop3);
 	if ($l) {
 		($imap) = grep { $_->{'name'} eq 'protocol' &&
 				 $_->{'value'} eq 'imap' &&
 				 $_->{'enabled'} &&
 				 $_->{'sectionname'} eq 'local' &&
-				 $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
+				 $_->{'sectionvalue'} eq $ip } @$conf;
 		($pop3) = grep { $_->{'name'} eq 'protocol' &&
 				 $_->{'value'} eq 'pop3' &&
 				 $_->{'enabled'} &&
 				 $_->{'sectionname'} eq 'local' &&
-				 $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
+				 $_->{'sectionvalue'} eq $ip } @$conf;
 		}
 
 	if ($enable) {
 		# Needs a cert for the IP
 		if (!$l) {
 			$l = { 'name' => 'local',
-			       'value' => $d->{'ip'},
+			       'value' => $ip,
 			       'enabled' => 1,
 			       'section' => 1,
 			       'members' => [],
@@ -2273,7 +2277,7 @@ if ($d->{'virt'}) {
 				  'indent' => 1,
 				  'enabled' => 1,
 				  'sectionname' => 'local',
-				  'sectionvalue' => $d->{'ip'},
+				  'sectionvalue' => $ip,
 				  'file' => $l->{'file'} };
 			&dovecot::create_section($conf, $imap, $l);
 			push(@{$l->{'members'}}, $imap);
@@ -2300,7 +2304,7 @@ if ($d->{'virt'}) {
 				  'indent' => 1,
 				  'enabled' => 1,
 				  'sectionname' => 'local',
-				  'sectionvalue' => $d->{'ip'},
+				  'sectionvalue' => $ip,
 				  'file' => $l->{'file'} };
 			&dovecot::create_section($conf, $pop3, $l);
 			push(@{$l->{'members'}}, $pop3);
@@ -2342,7 +2346,8 @@ if ($d->{'virt'}) {
 			}
 		}
 	}
-else {
+
+if (!$d->{'virt'}) {
 	# Domain has no IP, but Dovecot supports SNI in version 2
 	my @loc = grep { $_->{'name'} eq 'local_name' &&
 			 $_->{'section'} } @$conf;
@@ -2430,7 +2435,6 @@ else {
 	}
 &unlock_file($cfile);
 &dovecot::apply_configuration() if (!$nochange);
-#undef(@dovecot::get_config_cache);
 return 1;
 }
 
