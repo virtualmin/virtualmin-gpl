@@ -2324,20 +2324,10 @@ foreach my $ip (@ips) {
 		# Doesn't need one, either because SSL isn't enabled or the
 		# domain doesn't have a private IP. So remove the local block.
 		if ($l) {
-			if (defined(&dovecot::delete_section)) {
-				&dovecot::delete_section($conf, $l);
-				@$conf = grep { $_ ne $l } @$conf;
-				@$conf = grep { $_->{'sectionname'} ne $l->{'name'} ||
-						$_->{'sectionvalue'} ne $l->{'value'} } @$conf;
-				}
-			else {
-				# XXX remove this when delete_section
-				# is available
-				my $lref = &read_file_lines($l->{'file'});
-				splice(@$lref, $l->{'line'},
-				       $l->{'eline'}-$l->{'line'}+1);
-				undef(@dovecot::get_config_cache);
-				}
+			&dovecot::delete_section($conf, $l);
+			@$conf = grep { $_ ne $l } @$conf;
+			@$conf = grep { $_->{'sectionname'} ne $l->{'name'} ||
+					$_->{'sectionvalue'} ne $l->{'value'} } @$conf;
 			&flush_file_lines($l->{'file'});
 			}
 		else {
@@ -2412,24 +2402,12 @@ if (!$d->{'virt'}) {
 		}
 	if (@delloc) {
 		# Remove those to delete
-		if (defined(&dovecot::delete_section)) {
-			foreach my $l (@delloc) {
-				&dovecot::delete_section($conf, $l);
-				@$conf = grep { $_ ne $l } @$conf;
-				@$conf = grep { $_->{'sectionname'} ne $l->{'name'} ||
-						$_->{'sectionvalue'} ne $l->{'value'} } @$conf;
-				&flush_file_lines($l->{'file'});
-				}
-			}
-		else {
-			# Remove when delete_section is available
-			foreach my $l (reverse(@delloc)) {
-				my $lref = &read_file_lines($l->{'file'});
-				splice(@$lref, $l->{'line'},
-				       $l->{'eline'}-$l->{'line'}+1);
-				&flush_file_lines($l->{'file'});
-				}
-			undef(@dovecot::get_config_cache);
+		foreach my $l (@delloc) {
+			&dovecot::delete_section($conf, $l);
+			@$conf = grep { $_ ne $l } @$conf;
+			@$conf = grep { $_->{'sectionname'} ne $l->{'name'} ||
+					$_->{'sectionvalue'} ne $l->{'value'} } @$conf;
+			&flush_file_lines($l->{'file'});
 			}
 		}
 	}
