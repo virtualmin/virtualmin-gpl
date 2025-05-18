@@ -3401,8 +3401,7 @@ foreach my $try (0, 1) {
 			$server, $keytype, $hmac, $subset);
 		push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
 		}
-	if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
-		(!$mode || $mode eq "dns")) {
+	if (!$ok && $d->{'dns'} && (!$mode || $mode eq "dns")) {
 		# Fall back to DNS
 		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 			$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
@@ -3480,15 +3479,13 @@ my ($d, $enable) = @_;
 my %miniserv;
 &get_miniserv_config(\%miniserv);
 return -1 if (!$miniserv{'ssl'});
-my $rfunc = &get_webmin_version() >= 2.001 ? \&restart_webmin
-					   : \&restart_webmin_fully;
 if ($enable) {
-	return &setup_ipkeys(
-		$d, \&get_miniserv_config, \&put_miniserv_config, $rfunc);
+	return &setup_ipkeys($d, \&get_miniserv_config,
+			     \&put_miniserv_config, \&restart_webmin);
 	}
 else {
-	return &delete_ipkeys(
-		$d, \&get_miniserv_config, \&put_miniserv_config, $rfunc);
+	return &delete_ipkeys($d, \&get_miniserv_config,
+			      \&put_miniserv_config, \&restart_webmin);
 	}
 }
 
