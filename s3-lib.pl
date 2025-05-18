@@ -628,17 +628,20 @@ my $err = &setup_aws_cmd($akey, $skey);
 return $err if ($err);
 my %rv;
 my $out = &call_aws_s3api_cmd($akey,
-	[ "get-bucket-acl", "--bucket", $bucket ], undef, 1);
+	[ "get-bucket-acl",
+	  "--bucket", $bucket ], undef, 1);
 return $out if (!ref($out));
 $rv{'acl'} = $out;
 $rv{'location'} = &s3_get_bucket_location($akey, $skey, $bucket);
 my $out = &call_aws_s3api_cmd($akey,
-	[ "get-bucket-logging", "--bucket", $bucket ], undef, 1);
+	[ "get-bucket-logging",
+	  "--bucket", $bucket ], undef, 1);
 if (ref($out)) {
 	$rv{'logging'} = $out->{'BucketLoggingStatus'};
 	}
 my $out = &call_aws_s3api_cmd($akey,
-	[ "get-bucket-lifecycle", "--bucket", $bucket ], undef, 1);
+	[ "get-bucket-lifecycle-configuration",
+	  "--bucket", $bucket ], undef, 1);
 if (ref($out)) {
 	$rv{'lifecycle'} = $out;
 	}
@@ -688,30 +691,35 @@ my $out = &call_aws_s3api_cmd($akey,
 return ref($out) ? undef : $out;
 }
 
-# s3_put_bucket_lifecycle(access-key, secret-key, bucket, &acl)
+# s3_put_bucket_lifecycle(access-key, secret-key, bucket, &lifecycle)
 # Updates the lifecycle for a bucket, based on the structure in the format
-# returned by s3_get_bucket->{'acl'}
+# returned by s3_get_bucket->{'lifecycle'}
 sub s3_put_bucket_lifecycle
 {
 &require_s3();
 my ($akey, $skey, $bucket, $lifecycle) = @_;
-my $location = &s3_get_bucket_location($akey, $skey, $bucket);
-my $conn = &make_s3_connection($akey, $skey, undef, $location);
-my $response;
-if (@{$lifecycle->{'Rule'}}) {
-	# Update lifecycle config
-	my $xs = XML::Simple->new(KeepRoot => 1);
-	my $xml = $xs->XMLout(
-		{ 'LifecycleConfiguration' => [ $lifecycle ] });
-	$response = $conn->put_bucket_lifecycle($bucket, $xml);
+my @regionflag = &s3_region_flag($akey, $skey, $bucket);
+if (@{$lifecycle->{'Rules'}}) {
+	# Update the lifecycle config
+	eval "use JSON::PP";
+	my $coder = JSON::PP->new->pretty;
+	my $json = $coder->encode($lifecycle);
+	my $tempfile = &transname();
+	&uncat_file($tempfile, $json);
+	my $out = &call_aws_s3api_cmd($akey,
+		[ @regionflag,
+		  "put-bucket-lifecycle-configuration", "--bucket", $bucket,
+		  "--lifecycle-configuration", "file://".$tempfile ], undef, 1);
+	&unlink_file($tempname);
+	return ref($out) ? undef : $out;
 	}
 else {
-	# Delete lifecycle config
-	$response = $conn->delete_bucket_lifecycle($bucket, $xml);
+	# Just delete the lifecycle config
+	my $out = &call_aws_s3api_cmd($akey,
+		[ @regionflag,
+		  "delete-bucket-lifecycle", "--bucket", $bucket ], undef, 1);
+	return ref($out) ? undef : $out;
 	}
-return $response->http_response->code == 200 ||
-       $response->http_response->code == 204 ? undef : 
-	&text('s3_eputlifecycle', &extract_s3_message($response));
 }
 
 # s3_list_files(access-key, secret-key, bucket)

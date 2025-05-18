@@ -118,32 +118,33 @@ else {
 	$in{'new'} || @{$acl->{'Grants'}} || &error($text{'bucket_enogrants'});
 
 	# Validate expiry policy
-	$lifecycle = { 'Rule' => [ ] };
+	$lifecycle = { 'Rules' => [ ] };
 	if (!$in{'new'}) {
-		@oldrules = @{$oldinfo->{'lifecycle'}->{'Rule'}};
+		@oldrules = @{$oldinfo->{'lifecycle'}->{'Rules'}};
 		}
 	for(my $i=0; defined($in{"lprefix_def_$i"}); $i++) {
 		next if ($in{"lprefix_def_$i"} == 2);
 		$obj = { };
 		if ($in{'new'} || $i >= @oldrules) {
 			# Generate a new ID
-			$obj->{'ID'} = [ &domain_id() ];
+			$obj->{'ID'} = &domain_id();
 			}
 		else {
 			# Use old ID for this row
 			$obj->{'ID'} = $oldrules[$i]->{'ID'};
 			}
 		if (!$in{"lprefix_${i}_def"}) {
-			$obj->{'Prefix'} = [ $in{"lprefix_$i"} ];
+			$obj->{'Filter'}->{'Prefix'} = $in{"lprefix_$i"};
 			}
-		$obj->{'Status'} = [ $in{"lstatus_$i"} ? "Enabled"
-						       : "Disabled" ];
-		&days_date_parse("lglacier_$i", $obj, "Transition");
-		&days_date_parse("ldelete_$i", $obj, "Expiration");
-		if ($obj->{'Transition'}) {
-			$obj->{'Transition'}->{'StorageClass'} = [ 'GLACIER' ];
+		$obj->{'Status'} = $in{"lstatus_$i"} ? "Enabled" : "Disabled";
+		if ($trans = &days_date_parse("lglacier_$i", $obj)) {
+			$trans->{'StorageClass'} = $in{"class_$i"};
+			$obj->{'Transitions'} = [ $trans ];
 			}
-		push(@{$lifecycle->{'Rule'}}, $obj);
+		if ($exp = &days_date_parse("ldelete_$i", $obj)) {
+			$obj->{'Expiration'} = $exp;
+			}
+		push(@{$lifecycle->{'Rules'}}, $obj);
 		}
 
 	if ($in{'new'}) {
@@ -179,8 +180,9 @@ else {
 		}
 
 	# Apply expiry policy
-	#$err = &s3_put_bucket_lifecycle($account->[0], $account->[1], $in{'name'}, $lifecycle);
-	#&error($err) if ($err);
+	$err = &s3_put_bucket_lifecycle($account->[0], $account->[1],
+					$in{'name'}, $lifecycle);
+	&error($err) if ($err);
 
 	&webmin_log($in{'new'} ? "create" : "modify", "bucket", $in{'name'});
 	&redirect("list_buckets.cgi");
@@ -188,11 +190,12 @@ else {
 
 sub days_date_parse
 {
-local ($name, $obj, $section) = @_;
+my ($name, $obj, $section) = @_;
+my $rv;
 if ($in{$name} == 1) {
 	# Parse days field
 	$in{$name."_days"} =~ /^\d+$/ || &error(&text('bucket_eldays', $i+1));
-	$obj->{$section}->{'Days'} = [ $in{$name."_days"} ];
+	$rv->{'Days'} = int($in{$name."_days"});
 	}
 elsif ($in{$name} == 2) {
 	# Parse date field
@@ -202,10 +205,10 @@ elsif ($in{$name} == 2) {
 		&error(&text('bucket_elmonth', $i+1));
 	$in{$name."_day"} =~ /^[0-9]{1,2}$/ ||
 		&error(&text('bucket_elday', $i+1));
-	$obj->{$section}->{'Date'} = [
-		sprintf("%4.4d-%2.2d-%2.2dT00:00:00.000Z",
-		       $in{$name."_year"},
-		       $in{$name."_month"},
-		       $in{$name."_day"}) ];
+	$rv->{'Date'} = sprintf("%4.4d-%2.2d-%2.2dT00:00:00.000Z",
+				$in{$name."_year"},
+				$in{$name."_month"},
+				$in{$name."_day"});
 	}
+return $rv;
 }

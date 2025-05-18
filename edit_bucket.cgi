@@ -34,7 +34,7 @@ else {
 	print &ui_hidden("name", $in{'name'});
 	}
 
-print &ui_table_start($text{'bucket_header'}, "width=100%", 2);
+print &ui_table_start($text{'bucket_header'}, "width=100%", 4);
 if ($in{'new'}) {
 	# Can select account, enter a bucket name and choose a location
 	print &ui_table_row($text{'bucket_account'},
@@ -110,7 +110,7 @@ foreach my $g (@$grant, { }) {
 	$i++;
 	}
 $ptable .= &ui_columns_end();
-print &ui_table_row($text{'bucket_grant'}, $ptable);
+print &ui_table_row($text{'bucket_grant'}, $ptable, 3);
 
 # Lifecycle policies
 $ltable = &ui_columns_start([ $text{'bucket_lprefix'},
@@ -118,12 +118,13 @@ $ltable = &ui_columns_start([ $text{'bucket_lprefix'},
 			      $text{'bucket_lglacier'},
 			      $text{'bucket_ldelete'} ]);
 $lifecycle = !$in{'new'} && $info->{'lifecycle'} ?
-		$info->{'lifecycle'}->{'Rule'} : [ ];
+		$info->{'lifecycle'}->{'Rules'} : [ ];
 $i = 0;
 foreach my $l (@$lifecycle, { }) {
-	$prefix = $l->{'Prefix'};
-	$prefix = undef if (ref($prefix));
+	$prefix = $l->{'Filter'} ? $l->{'Filter'}->{'Prefix'} : undef;
 	$mode = !(keys %$l) ? 2 : $prefix ? 0 : 1;
+	my $trans = $l->{'Transitions'} && @{$l->{'Transitions'}} ?
+			$l->{'Transitions'}->[0] : undef;
 	$ltable .= &ui_columns_row([
 		&ui_radio("lprefix_def_$i", $mode,
 			  [ [ 2, $text{'bucket_lnone'}."<br>" ],
@@ -132,13 +133,17 @@ foreach my $l (@$lifecycle, { }) {
 				 &ui_textbox("lprefix_$i", $prefix, 10) ] ]),
 		&ui_checkbox("lstatus_$i", 1, "",
 			     $l->{'Status'} eq 'Enabled'),
-		&days_date_field("lglacier_$i", $l->{'Transition'}),
+		&ui_select("class_$i", $trans->{'StorageClass'},
+			[ "GLACIER", "STANDARD_IA", "ONEZONE_IA",
+			  "INTELLIGENT_TIERING", "DEEP_ARCHIVE", "GLACIER_IR"]).
+		"<br>\n".
+		&days_date_field("lglacier_$i", $trans),
 		&days_date_field("ldelete_$i", $l->{'Expiration'}),
 		]);
 	$i++;
 	}
 $ltable .= &ui_columns_end();
-print &ui_table_row($text{'bucket_lifecycle'}, $ltable);
+print &ui_table_row($text{'bucket_lifecycle'}, $ltable, 3);
 
 print &ui_table_end();
 if ($in{'new'}) {
