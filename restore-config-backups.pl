@@ -2,7 +2,7 @@
 
 =head1 restore-config-backups.pl
 
-Restores configuration file backups from a Git repository in F</etc/> directory.
+Restores configuration file backups from Git
 
 By default, this program operates on the entire F</etc/> directory. However,
 you can limit which files it handles by specifying a single Webmin module with

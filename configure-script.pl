@@ -5,15 +5,16 @@ use File::Basename;
 
 =head1 configure-script.pl
 
-Configure web app scripts
+Configure or mass-configure web app scripts
 
-This command can be used to modify settings, perform backups, create clones, and
-carry out other administrative tasks for one or more web app scripts, if
-supported by the applications.
+This command enables you to modify settings, perform backups, create clones, and
+execute other administrative tasks for one or more web app scripts, provided the
+supported applications have a dedicated workbench plugin. Use the C<--mass> flag
+to leverage the API for executing actions on multiple local and remote web apps
+at once.
 
-See the usage by calling the C<--help> flag with the script function for more
-information on how to use this command, as it's specific to the web app
-script type.
+For detailed usage instructions and specific options for each script type and
+mode, run the command with the C<--help> flag.
 
 =cut
 
@@ -41,9 +42,6 @@ foreach my $p (@plugins) {
 		}
 	}
 
-# Parse common command-line flags
-&parse_common_cli_flags(\@ARGV);
-
 # Pre-process args to get web app name
 my ($web_app_name, $massapi);
 for (my $i=0; $i<@ARGV; $i++) {
@@ -62,8 +60,12 @@ if (!$web_app_name) {
 	}
 
 # Locate the usage and CLI handlers for this script type
+my $tapi_desc = 'Configure web app script';
 my ($uapi, $capi, $tapi) = ('usage', 'cli', 'configure');
-$uapi = 'usage_mass', $capi = 'cli_mass', $tapi = 'mass configure' if ($massapi);
+if ($massapi) {
+	$tapi_desc = 'Mass-configure web app scripts';
+	$uapi = 'usage_mass', $capi = 'cli_mass', $tapi = 'mass-configure';
+	}
 my $script_usage_func = &script_find_kit_func(\@mods, $web_app_name, $uapi);
 my $script_cli        = &script_find_kit_func(\@mods, $web_app_name, $capi);
 
@@ -72,6 +74,9 @@ if (!$script_cli) {
 	&usage("Script '$web_app_name' does not support $tapi API");
 	}
 
+# Parse common command-line flags
+&parse_common_cli_flags(\@ARGV);
+
 # Call the script-specific CLI function
 $script_cli->(\@ARGV);
 
@@ -79,7 +84,7 @@ $script_cli->(\@ARGV);
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
-print "Configure web app scripts\n\n";
+print "$tapi_desc\n\n";
 print "virtualmin configure-script --script-type name";
 if (defined(&$script_usage_func)) {
 	$script_usage_func->($web_app_name);
