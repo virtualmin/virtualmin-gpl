@@ -2524,33 +2524,33 @@ return $postfix::postfix_version >= 3.4;
 # Configure Postfix to use a domain's SSL cert for connections on its IP
 sub sync_postfix_ssl_cert
 {
-local ($d, $enable) = @_;
-local $tmpl = &get_template($d->{'template'});
+my ($d, $enable) = @_;
+my $tmpl = &get_template($d->{'template'});
 
 # Check if Postfix is in use
 return -1 if ($mail_system != 0);
 
-local $changed = 0;
+my $changed = 0;
 &foreign_require("postfix");
 if ($d->{'virt'}) {
 	# Setup per-IP cert in master.cf
 
 	# Check if using SSL globally
-	local $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
-	local $kfile = &postfix::get_real_value("smtpd_tls_key_file");
-	local $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
+	my $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
+	my $kfile = &postfix::get_real_value("smtpd_tls_key_file");
+	my $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
 	return 0 if ($enable && (!$cfile || !$kfile) &&
 		     !&domain_has_ssl_cert($d));
 
 	# Find the existing master file entry
 	&lock_file($postfix::config{'postfix_master'});
-	local $master = &postfix::get_master_config();
-	local $defip = &get_default_ip();
+	my $master = &postfix::get_master_config();
+	my $defip = &get_default_ip();
 
 	# Work out which flags are needed
-	local $chain = &domain_has_ssl_cert($d) ?
+	my $chain = &domain_has_ssl_cert($d) ?
 			&get_website_ssl_file($d, 'ca') : $cafile;
-	local @flags = ( [ "smtpd_tls_cert_file",
+	my @flags = ( [ "smtpd_tls_cert_file",
 			   &domain_has_ssl_cert($d) ?
 				$d->{'ssl_cert'} : $cfile ],
 			 [ "smtpd_tls_key_file",
@@ -2562,16 +2562,23 @@ if ($d->{'virt'}) {
 
 	foreach my $pfx ('smtp', 'submission', 'smtps') {
 		# Find the existing entry for the IP and for the default service
-		local $already;
-		local $smtp;
-		local @others;
-		local $lsmtp;
+		my $already;
+		my $already6;
+		my $smtp;
+		my @others;
+		my $lsmtp;
 		foreach my $m (@$master) {
 			if ($m->{'name'} eq $d->{'ip'}.':'.$pfx &&
 			    $m->{'enabled'} &&
 			    $d->{'ip'} ne $defip) {
-				# Entry for service for the domain
+				# Entry for service for the IP
 				$already = $m;
+				}
+			if ($d->{'virt6'} &&
+			    $m->{'name'} eq '['.$d->{'ip6'}.']:'.$pfx &&
+			    $m->{'enabled'}) {
+				# Entry for service for the IPv6
+				$already6 = $m;
 				}
 			if (($m->{'name'} eq $pfx ||
 			     $m->{'name'} eq $defip.':'.$pfx) &&
@@ -2597,15 +2604,8 @@ if ($d->{'virt'}) {
 			# Create or update the entry
 			if (!$already) {
 				# Create based on smtp inet entry
-				$already = { %$smtp };
-				delete($already->{'line'});
-				delete($already->{'uline'});
-				$already->{'name'} = $d->{'ip'}.':'.$pfx;
-				foreach my $f (@flags) {
-					$already->{'command'} .=
-						" -o ".$f->[0]."=".$f->[1];
-					}
-				$already->{'command'} =~ s/-o smtpd_(client|helo|sender)_restrictions=\$mua_client_restrictions\s+//g;
+				$already = &create_ssl_postfix_service(
+					$smtp, $d, $pfx, $d->{'ip'}, \@flags);
 				&postfix::create_master($already);
 				$changed = 1;
 
@@ -2629,15 +2629,28 @@ if ($d->{'virt'}) {
 				}
 			else {
 				# Update cert file paths
-				local $oldcommand = $already->{'command'};
-				foreach my $f (@flags) {
-					($already->{'command'} =~
-					  s/-o\s+\Q$f->[0]\E=(\S+)/-o $f->[0]=$f->[1]/)
-					||
-					  ($already->{'command'} .=
-					   " -o ".$f->[0]."=".$f->[1]);
-					}
+				&update_ssl_postfix_service($already, \@flags);
 				&postfix::modify_master($already);
+				$changed = 1;
+				}
+
+			# Apply the same fixes for IPv6
+			if (!$already6 && $d->{'virt6'}) {
+				$already = &create_ssl_postfix_service(
+					$smtp, $d, $pfx, "[".$d->{'ip6'}."]",
+					\@flags);
+				&postfix::create_master($already);
+				$changed = 1;
+				}
+			elsif ($already6 && $d->{'virt6'}) {
+				# Update cert file paths
+				&update_ssl_postfix_service($already, \@flags);
+				&postfix::modify_master($already);
+				$changed = 1;
+				}
+			elsif ($already6 && !$d->{'virt6'}) {
+				# Remove special IPv6 entry
+				&postfix::delete_master($already6);
 				$changed = 1;
 				}
 			}
@@ -2645,6 +2658,10 @@ if ($d->{'virt'}) {
 			# Remove the entry
 			if ($already) {
 				&postfix::delete_master($already);
+				$changed = 1;
+				}
+			if ($already6) {
+				&postfix::delete_master($already6);
 				$changed = 1;
 				}
 			if (!@others && $smtp && $smtp->{'name'} ne $pfx) {
@@ -2740,6 +2757,34 @@ else {
 return 1;
 }
 
+# create_ssl_postfix_service(&base-smtp, &domain, name, ip, &flags)
+# Returns a new Postfix master.cf entry setup for SSL
+sub create_ssl_postfix_service
+{
+my ($smtp, $d, $pfx, $ip, $flags) = @_;
+my $svc = { %$smtp };
+delete($svc->{'line'});
+delete($svc->{'uline'});
+$svc->{'name'} = $ip.':'.$pfx;
+foreach my $f (@$flags) {
+	$svc->{'command'} .= " -o ".$f->[0]."=".$f->[1];
+	}
+$svc->{'command'} =~ s/-o smtpd_(client|helo|sender)_restrictions=\$mua_client_restrictions\s+//g;
+return $svc;
+}
+
+# update_ssl_postfix_service(&service, &flags)
+# Update existing flags to match new values, or add if missing
+sub update_ssl_postfix_service
+{
+my ($svc, $flags) = @_;
+foreach my $f (@$flags) {
+	if ($already->{'command'} !~ s/-o\s+\Q$f->[0]\E=(\S+)/-o $f->[0]=$f->[1]/) {
+		$already->{'command'} .= " -o ".$f->[0]."=".$f->[1];
+		}
+	}
+}
+
 # sync_proftpd_ssl_cert(&domain, enable)
 # Configure ProFTPd to use a domain's SSL cert for connections on its IP
 sub sync_proftpd_ssl_cert
@@ -2801,21 +2846,28 @@ if (&postfix::get_current_value("tls_server_sni_maps")) {
 	}
 
 # Fall back to checking for a per-IP cert
-local $master = &postfix::get_master_config();
+my $master = &postfix::get_master_config();
+my @rv;
 foreach my $m (@$master) {
-	if ($m->{'name'} eq $d->{'ip'}.':smtp' && $m->{'enabled'}) {
-		if ($m->{'command'} =~ /smtpd_tls_cert_file=(\S+)/) {
-			my @rv = ( $1 );
-			push(@rv, $m->{'command'} =~ /smtpd_tls_key_file=(\S+)/
-					? $1 : undef);
-			push(@rv, $m->{'command'} =~ /smtpd_tls_CAfile=(\S+)/
-					? $1 : undef);
-			push(@rv, $d->{'ip'});
-			return @rv;
-			}
+	if ($m->{'name'} eq $d->{'ip'}.':smtp' && $m->{'enabled'} &&
+	    $m->{'command'} =~ /smtpd_tls_cert_file=(\S+)/) {
+		@rv = ( $1 );
+		push(@rv, $m->{'command'} =~ /smtpd_tls_key_file=(\S+)/
+				? $1 : undef);
+		push(@rv, $m->{'command'} =~ /smtpd_tls_CAfile=(\S+)/
+				? $1 : undef);
+		push(@rv, $d->{'ip'});
+		push(@rv, undef);
 		}
 	}
-return ( );
+foreach my $m (@$master) {
+	if ($m->{'name'} eq '['.$d->{'ip6'}.']:smtp' && $m->{'enabled'} &&
+	    @rv && $m->{'command'} =~ /smtpd_tls_cert_file=(\S+)/ &&
+	    $1 eq $rv[0]) {
+		push(@rv, $d->{'ip6'});
+		}
+	}
+return @rv;
 }
 
 # get_hostnames_for_ssl(&domain)

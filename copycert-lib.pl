@@ -193,7 +193,7 @@ if ($mail_system == 0) {
 	# Check Postfix certificate
 	if ($perip) {
 		# Try per-IP cert first
-		my ($cfile, $kfile, $cafile, $ip, $dom) =
+		my ($cfile, $kfile, $cafile, $ip, $dom, $ip6) =
 			&get_postfix_ssl_cert($d);
 		if ($cfile) {
 			push(@svcs, { 'id' => 'postfix',
@@ -204,6 +204,7 @@ if ($mail_system == 0) {
 				      'port' => 587,
 				      'sslports' => [ 25 ],
 				      'ip' => $ip,
+				      'ip6' => $ip6,
 				      'dom' => $dom,
 				      'd' => $d, });
 			}
