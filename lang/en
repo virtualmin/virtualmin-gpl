@@ -7701,6 +7701,11 @@ bucket_elday=Missing or non-numeric day in lifecycle $1
 bucket_elmonth=Missing or non-numeric month in lifecycle $1
 bucket_elyear=Missing or non-numeric year in lifecycle $1
 bucket_eacls=ACLs for new buckets must be enabled on the AWS Console.
+bucket_logging=Bucket access logging
+bucket_logging_def=Logging disabled
+bucket_logging_target=Log to bucket $1 with prefix $2
+bucket_eltarget=Missing or invalid-looking logging bucket name
+bucket_elprefix=Missing logging filename prefix
 
 ratelimit_title=Mail Rate Limiting
 ratelimit_email=Email rate limiting cannot be enabled unless email is enabled

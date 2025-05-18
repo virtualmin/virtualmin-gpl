@@ -145,6 +145,17 @@ foreach my $l (@$lifecycle, { }) {
 $ltable .= &ui_columns_end();
 print &ui_table_row($text{'bucket_lifecycle'}, $ltable, 3);
 
+# Logging settings
+print &ui_table_row($text{'bucket_logging'},
+	&ui_radio_table("logging_def", $info->{'logging'} ? 0 : 1,
+		[ [ 1, $text{'bucket_logging_def'} ],
+		  [ 0, &text('bucket_logging_target',
+			&ui_textbox("ltarget",
+			  $info->{'logging'}->{'TargetBucket'}, 20),
+			&ui_textbox("lprefix",
+			  $info->{'logging'}->{'TargetPrefix'}, 10)) ],
+		]), 3);
+
 print &ui_table_end();
 if ($in{'new'}) {
 	print &ui_form_end([ [ undef, $text{'create'} ] ]);

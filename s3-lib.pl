@@ -653,21 +653,28 @@ return \%rv;
 sub s3_get_bucket_location
 {
 my ($akey, $skey, $bucket) = @_;
+my $s3 = &get_s3_account($akey) || $akey;
+my $cachekey = $s3->{'id'}."/".$bucket;
+if (exists($s3_get_bucket_location_cache{$cachekey})) {
+	return $s3_get_bucket_location_cache{$cachekey};
+	}
+my $rv;
 if (&has_aws_cmd()) {
 	my $err = &setup_aws_cmd($akey, $skey);
 	return $err if ($err);
 	my $out = &call_aws_s3api_cmd($akey,
                 [ "get-bucket-location", "--bucket", $bucket ], undef, 1);
-	return ref($out) ? $out->{'LocationConstraint'} || 'us-east-1' : undef;
+	$rv = ref($out) ? $out->{'LocationConstraint'} || 'us-east-1' : undef;
 	}
 else {
 	my $conn = &make_s3_connection($akey, $skey);
         my $response = $conn->get_bucket_location($bucket);
 	if ($response->http_response->code == 200) {
-		return $response->{'LocationConstraint'};
+		$rv = $response->{'LocationConstraint'};
 		}
-	return undef;
 	}
+$s3_get_bucket_location_cache{$cachekey} = $rv;
+return $rv;
 }
 
 # s3_put_bucket_acl(access-key, secret-key, bucket, &acl)
@@ -731,14 +738,14 @@ sub s3_put_bucket_logging
 my ($akey, $skey, $bucket, $logging) = @_;
 eval "use JSON::PP";
 my $coder = JSON::PP->new->pretty;
-my $json = $coder->encode($logging || { });
+my $json = $coder->encode($logging ? { 'LoggingEnabled' => $logging } : { });
 my @regionflag = &s3_region_flag($akey, $skey, $bucket);
 my $tempfile = &transname();
 &uncat_file($tempfile, $json);
 my $out = &call_aws_s3api_cmd($akey,
 	[ @regionflag,
 	  "put-bucket-logging", "--bucket", $bucket,
-	  "--access-control-policy", "file://".$tempfile ], undef, 1);
+	  "--bucket-logging-status", "file://".$tempfile ], undef, 1);
 &unlink_file($tempname);
 return ref($out) ? undef : $out;
 }

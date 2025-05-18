@@ -147,6 +147,22 @@ else {
 		push(@{$lifecycle->{'Rules'}}, $obj);
 		}
 
+	# Validate logging settings
+	my $logging;
+	if (!$in{'logging_def'}) {
+		$logging = $oldinfo ? $oldinfo->{'logging'} : undef;
+		$logging ||= { 'TargetObjectKeyFormat' => {
+					'SimplePrefix' => { }
+				}
+			     };
+		$in{'ltarget'} =~ /^[a-z0-9\-\_\-]+$/i ||
+                        &error($text{'bucket_eltarget'});
+		$in{'lprefix'} =~ /^\S+$/i ||
+                        &error($text{'bucket_elprefix'});
+		$logging->{'TargetBucket'} = $in{'ltarget'};
+		$logging->{'TargetPrefix'} = $in{'lprefix'};
+		}
+
 	if ($in{'new'}) {
 		# Validate inputs
 		$in{'name'} =~ /^[a-z0-9\-\_\-]+$/i ||
@@ -182,6 +198,11 @@ else {
 	# Apply expiry policy
 	$err = &s3_put_bucket_lifecycle($account->[0], $account->[1],
 					$in{'name'}, $lifecycle);
+	&error($err) if ($err);
+
+	# Apply logging
+	$err = &s3_put_bucket_logging($account->[0], $account->[1],
+					$in{'name'}, $logging);
 	&error($err) if ($err);
 
 	&webmin_log($in{'new'} ? "create" : "modify", "bucket", $in{'name'});
