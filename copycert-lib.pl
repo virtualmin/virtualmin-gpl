@@ -76,7 +76,7 @@ if ($miniserv{'ssl'}) {
 	if ($perip) {
 		# Check for per-IP or per-domain cert first
 		my @ipkeys = &webmin::get_ipkeys(\%miniserv);
-		my ($cfile, $chain, $ip, $dom, $kfile) =
+		my ($cfile, $chain, $ip, $dom, $kfile, $ip6) =
 			&ipkeys_to_domain_cert($d, \@ipkeys);
 		if ($cfile) {
 			push(@svcs, { 'id' => 'webmin',
@@ -84,6 +84,7 @@ if ($miniserv{'ssl'}) {
 				      'key' => $kfile,
 				      'ca' => $chain,
 				      'ip' => $ip,
+				      'ip6' => $ip6,
 				      'dom' => $dom,
 				      'd' => $d,
 				      'prefix' => 'admin',
@@ -112,7 +113,7 @@ if (&foreign_installed("usermin")) {
 		if ($perip) {
 			# Check for per-IP or per-domain cert first
 			my @ipkeys = &webmin::get_ipkeys(\%uminiserv);
-			my ($cfile, $chain, $ip, $dom, $kfile) =
+			my ($cfile, $chain, $ip, $dom, $kfile, $ip6) =
 				&ipkeys_to_domain_cert($d, \@ipkeys);
 			if ($cfile) {
 				push(@svcs, { 'id' => 'usermin',
@@ -120,6 +121,7 @@ if (&foreign_installed("usermin")) {
 					      'key' => $kfile,
 					      'ca' => $chain,
 					      'ip' => $ip,
+					      'ip6' => $ip6,
 					      'dom' => $dom,
 					      'd' => $d,
 					      'prefix' => 'webmail',
@@ -420,14 +422,15 @@ sub ipkeys_to_domain_cert
 {
 my ($d, $ipkeys) = @_;
 foreach my $k (@$ipkeys) {
-	if (&indexof($d->{'dom'}, @{$k->{'ips'}}) >= 0) {
-		return ($k->{'cert'}, $k->{'extracas'}, undef, $d->{'dom'},
-			$k->{'key'});
-		}
-	if ($d->{'virt'} &&
-	    &indexof($d->{'ip'}, @{$k->{'ips'}}) >= 0) {
-		return ($k->{'cert'}, $k->{'extracas'}, $d->{'ip'}, undef,
-			$k->{'key'});
+	my $md = &indexof($d->{'dom'}, @{$k->{'ips'}}) >= 0;
+	my $m = $d->{'virt'} && &indexof($d->{'ip'}, @{$k->{'ips'}}) >= 0;
+	my $m6 = $d->{'virt6'} && &indexof($d->{'ip6'}, @{$k->{'ips'}}) >= 0;
+	if ($m || $m6) {
+		return ($k->{'cert'}, $k->{'extracas'},
+			$m ? $d->{'ip'} : undef,
+			$md ? $d->{'dom'} : undef,
+			$k->{'key'},
+			$m6 ? $d->{'ip6'} : undef);
 		}
 	}
 return ( );

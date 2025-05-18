@@ -1534,6 +1534,9 @@ local @ips;
 if ($d->{'virt'}) {
 	push(@ips, $d->{'ip'});
 	}
+if ($d->{'virt6'}) {
+	push(@ips, $d->{'ip6'});
+	}
 push(@ips, @dnames);
 my $chain = &get_website_ssl_file($d, 'ca');
 push(@ipkeys, { 'ips' => \@ips,
@@ -1560,6 +1563,9 @@ foreach my $ipk (@ipkeys) {
 	my $del = &indexof($d->{'dom'}, @{$ipk->{'ips'}}) >= 0;
 	if ($d->{'virt'} && !$del) {
 		$del = &indexof($d->{'ip'}, @{$ipk->{'ips'}}) >= 0;
+		}
+	if ($d->{'virt6'} && !$del) {
+		$del = &indexof($d->{'ip6'}, @{$ipk->{'ips'}}) >= 0;
 		}
 	if (!$del) {
 		push(@newipkeys, $ipk);
