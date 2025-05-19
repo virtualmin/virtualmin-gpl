@@ -3,13 +3,14 @@ package virtual_server;
 
 use File::Basename;
 
-=head1 configure-script.pl
+=head1 configure-all-scripts.pl
 
-Configure web app script
+Mass-configure web app scripts
 
 This command allows you to modify settings, perform backups, create clones, and
-execute other administrative tasks for a web app script on a local system, as
-long as the app has a dedicated workbench plugin available and installed.
+execute other administrative tasks for multiple web app scripts on various local
+or remote systems, as long as the app has a dedicated workbench plugin
+available and installed.
 
 For detailed usage instructions and specific options, run the command with the
 C<--help> flag.
@@ -26,7 +27,7 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/configure-script.pl";
+	$0 = "$pwd/configure-all-scripts.pl";
 	require './virtual-server-lib.pl';
 	}
 
@@ -54,12 +55,14 @@ if (!$web_app_name) {
 	}
 
 # Locate the usage and CLI handlers for this script type
-my $script_usage_func = &script_find_kit_func(\@mods, $web_app_name, 'usage');
-my $script_cli        = &script_find_kit_func(\@mods, $web_app_name, 'cli');
+my $script_usage_func =
+	&script_find_kit_func(\@mods, $web_app_name, 'usage_mass');
+my $script_cli =
+	&script_find_kit_func(\@mods, $web_app_name, 'cli_mass');
 
 # Bail out if there’s no CLI handler
 if (!$script_cli) {
-	&usage("Script '$web_app_name' does not support configure API");
+	&usage("Script '$web_app_name' does not support mass-configure API");
 	}
 
 # Parse common command-line flags
@@ -72,8 +75,8 @@ $script_cli->(\@ARGV);
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
-print "Configure web app script\n\n";
-print "virtualmin configure-script --script-type name";
+print "Mass-configure web app scripts\n\n";
+print "virtualmin configure-all-scripts --script-type name";
 if (defined(&$script_usage_func)) {
 	$script_usage_func->($web_app_name);
 	}
