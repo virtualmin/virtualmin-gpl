@@ -197,6 +197,7 @@ $file ||= "$domains_dir/$id";
 $dom{'file'} = "$domains_dir/$id";
 $dom{'id'} ||= $id;
 $dom{'lastread_time'} = time();
+delete($dom{'deleting'});
 &complete_domain(\%dom);
 if (!defined($dom->{'created'})) {
 	# compat - creation date can be inferred from ID
