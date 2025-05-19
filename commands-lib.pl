@@ -377,7 +377,8 @@ return &master_admin() || &can_remote_as_user($program);
 sub can_remote_as_user
 {
 my ($program) = @_;
-if ($program eq "configure-script") {
+if ($program eq "configure-script" ||
+    $program eq "configure-all-scripts") {
 	return 1;
 	}
 return 0;
