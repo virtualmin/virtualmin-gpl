@@ -36,7 +36,8 @@ return ([ "Backup and restore", "backup-domain.pl", "*-scheduled-backup*.pl",
 			       "install-script.pl", "delete-script.pl",
 			       "list-scripts.pl", "list-available-scripts.pl",
 			       "detect-scripts.pl", "start-stop-script.pl",
-			       "configure-script.pl", "configure-scripts.pl" ],
+			       "configure-script.pl",
+			       "configure-all-scripts.pl" ],
 	[ "Proxies and balancers", "*-proxy.pl", "*-proxies.pl" ],
 	[ "PHP versions", "*-php-directory.pl", "*-php-directories.pl",
 			  "list-php-versions.pl", "list-php-ini.pl",
@@ -376,7 +377,8 @@ return &master_admin() || &can_remote_as_user($program);
 sub can_remote_as_user
 {
 my ($program) = @_;
-if ($program eq "configure-script") {
+if ($program eq "configure-script" ||
+    $program eq "configure-all-scripts") {
 	return 1;
 	}
 return 0;
