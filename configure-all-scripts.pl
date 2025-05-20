@@ -44,7 +44,7 @@ foreach my $p (@plugins) {
 # Pre-process args to get web app name
 my $web_app_name;
 for (my $i=0; $i<@ARGV; $i++) {
-	if ($ARGV[$i] eq '--script-type' && $i+1 < @ARGV) {
+	if ($ARGV[$i] eq '--app' && $i+1 < @ARGV) {
 		$web_app_name = $ARGV[$i+1];
 		}
 	}
@@ -76,7 +76,7 @@ sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
 print "Mass-configure web app scripts\n\n";
-print "virtualmin configure-all-scripts --script-type name";
+print "virtualmin configure-all-scripts --app name";
 if (defined(&$script_usage_func)) {
 	$script_usage_func->($web_app_name);
 	}
