@@ -15,6 +15,9 @@ mailbox.
 
 If you want to login as root, use C<--root> flag only.
 
+By default a login link will last for 1 hour, but you can adjust this
+with the C<--lifetime> flag followed by a number of seconds.
+
 =cut
 
 package virtual_server;
@@ -37,6 +40,7 @@ if (!$module_name) {
 &set_all_text_print();
 
 # Parse command-line args
+$lifetime = 3600;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -54,6 +58,11 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--help") {
 		&usage();
+		}
+	elsif ($a eq "--lifetime") {
+		$lifetime = shift(@ARGV);
+		$lifetime =~ /^\d+$/ ||
+		  &usage("--lifetime must be followed by a number of seconds");
 		}
 	else {
 		&usage("Unknown parameter $a");
@@ -97,7 +106,7 @@ if ($usermin) {
 	&foreign_require("usermin");
 	my %miniserv;
 	&usermin::get_usermin_miniserv_config(\%miniserv);
-	my $sid = &acl::create_session_user(\%miniserv, $uname);
+	my $sid = &acl::create_session_user(\%miniserv, "-".$uname, $lifetime);
 	$sid || &usage("Failed to create login session");
 	&usermin::restart_usermin_miniserv();
 	my $dom = $d ? $d->{'dom'} : undef;
@@ -112,7 +121,7 @@ else {
 	&get_miniserv_config(\%miniserv);
 	($uinfo) = grep { $_->{'name'} eq $uname } &acl::list_users();
 	$uinfo || &usage("Webmin user $uname does not exist");
-	my $sid = &acl::create_session_user(\%miniserv, $uname);
+	my $sid = &acl::create_session_user(\%miniserv, "-".$uname, $lifetime);
 	$sid || &usage("Failed to create login session");
 	&reload_miniserv();
 	$url = &get_virtualmin_url($d)."/session_login.cgi?session=".&urlize($sid);
@@ -126,6 +135,7 @@ print "Generates a link that can be used to login to Virtualmin.\n";
 print "\n";
 print "virtualmin create-login-link [--domain name | --user name |\n";
 print "                              --usermin-user name | --root]\n";
+print "                             [--lifetime seconds]\n";
 exit(1);
 }
 
