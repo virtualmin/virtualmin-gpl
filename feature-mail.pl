@@ -2557,7 +2557,7 @@ if ($config{'mail'}) {
 
 # If we get here, assume that mail is under home dirs
 local %uconfig = &foreign_config("useradmin");
-return $uconfig{'home_base'};
+return $config{'home_base'} || $uconfig{'home_base'};
 }
 
 # mail_domain_base(&domain)
