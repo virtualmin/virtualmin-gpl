@@ -91,8 +91,8 @@ if (!$d->{'virt6already'}) {
 	local ($boot) = grep { &canonicalize_ip6($_->{'address'}) eq
 			       &canonicalize_ip6($d->{'ip6'}) }
 			     &boot_ip6_interfaces();
-	&deactivate_ip6_interface($active) if ($active);
 	&delete_ip6_interface($boot) if ($boot);
+	&deactivate_ip6_interface($active) if ($active);
 	local $any = $active || $boot;
 	if ($any) {
 		&$second_print(&text('delete_virt6done', $any->{'name'}));
