@@ -76,8 +76,11 @@ sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
 print "Mass-configure web app scripts\n\n";
-print "virtualmin configure-all-scripts --app name";
-if (defined(&$script_usage_func)) {
+my $has_script_usage_func = defined(&$script_usage_func);
+my $name = 'name';
+$name = $web_app_name if ($has_script_usage_func && $web_app_name);
+print "virtualmin configure-all-scripts --app $name";
+if ($has_script_usage_func) {
 	$script_usage_func->($web_app_name);
 	}
 else {
