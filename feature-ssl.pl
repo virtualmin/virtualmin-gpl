@@ -2680,7 +2680,7 @@ elsif (&postfix_supports_sni()) {
 		($mapfile) = &postfix::get_maps_files($maphash);
 		}
 
-	# Is there an entra for this domain already?
+	# Is there an entry for this domain already?
 	&lock_file($mapfile);
 	my $map = &postfix::get_maps("tls_server_sni_maps");
 	my @certs = ( $d->{'ssl_key'}, $d->{'ssl_cert'} );

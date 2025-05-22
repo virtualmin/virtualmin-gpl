@@ -425,7 +425,7 @@ foreach my $k (@$ipkeys) {
 	my $md = &indexof($d->{'dom'}, @{$k->{'ips'}}) >= 0;
 	my $m = $d->{'virt'} && &indexof($d->{'ip'}, @{$k->{'ips'}}) >= 0;
 	my $m6 = $d->{'virt6'} && &indexof($d->{'ip6'}, @{$k->{'ips'}}) >= 0;
-	if ($m || $m6) {
+	if ($md || $m || $m6) {
 		return ($k->{'cert'}, $k->{'extracas'},
 			$m ? $d->{'ip'} : undef,
 			$md ? $d->{'dom'} : undef,
