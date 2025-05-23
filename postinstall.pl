@@ -619,8 +619,9 @@ if ($brand_update) {
 	&lock_file($brand_info);
 	my %brand;
 	$brand{'update'} = 1;
-	$brand{'icon'} = "fa2 fa2-virtualmin";
+	$brand{'file'} = "$root_directory/$module_name/brand.svg";
 	$brand{'title'} = $title;
+	$brand{'mode'} = 'full';
 	&write_file($brand_info, \%brand);
 	&unlock_file($brand_info);
 	}
