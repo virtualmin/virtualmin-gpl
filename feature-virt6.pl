@@ -92,6 +92,7 @@ if (!$d->{'virt6already'}) {
 			       &canonicalize_ip6($d->{'ip6'}) }
 			     &boot_ip6_interfaces();
 	&delete_ip6_interface($boot) if ($boot);
+	&deactivate_ip6_interface($active) if ($active);
 	local $any = $active || $boot;
 	if ($any) {
 		&$second_print(&text('delete_virt6done', $any->{'name'}));
@@ -99,7 +100,6 @@ if (!$d->{'virt6already'}) {
 	else {
 		&$second_print(&text('delete_noiface6', $d->{'ip6'}));
 		}
-	&deactivate_ip6_interface($any);
 	}
 &release_lock_virt($d);
 
