@@ -619,7 +619,7 @@ if ($brand_update) {
 	&lock_file($brand_info);
 	my %brand;
 	$brand{'update'} = 1;
-	$brand{'file'} = "$root_directory/$module_name/brand.svg";
+	$brand{'file'} = "$root_directory/$module_name/images/brand.svg";
 	$brand{'title'} = $title;
 	$brand{'mode'} = 'full';
 	&write_file($brand_info, \%brand);
