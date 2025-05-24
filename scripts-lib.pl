@@ -1320,8 +1320,8 @@ foreach my $m (@mods) {
 		else { return 0; }
 		}
 	else {
-
-		# On success configure the domain's php.ini to load it, if needed
+		# On success configure the domain's php.ini to load it,
+		# if needed
 		local $pconf = &phpini::get_config($inifile);
 		local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
 		local @exts = grep { $_->{'enabled'} } @allexts;
