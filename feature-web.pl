@@ -36,8 +36,7 @@ local ($f, $newfile) = &get_website_file($d);
 local $nvstar = &add_name_virtual($d, $conf, $web_port, 1, $d->{'ip'});
 local $nvstar6;
 if ($d->{'ip6'}) {
-	$nvstar6 = &add_name_virtual($d, $conf, $web_port, 1,
-				     "[".$d->{'ip6'}."]");
+	$nvstar6 = &add_name_virtual($d, $conf, $web_port, 1, $d->{'ip6'});
 	}
 
 # We use a * for the address for name-based servers under Apache 2,
@@ -664,7 +663,7 @@ else {
 		if ($d->{'ip6'}) {
 			$nvstar6 = &add_name_virtual(
 				$d, $conf, $d->{'web_port'}, 0,
-				"[".$d->{'ip6'}."]");
+				$d->{'ip6'});
 			}
 		&add_listen($d, $conf, $d->{'web_port'});
 
@@ -2311,19 +2310,21 @@ if ($apache::httpd_modules{'core'} >= 2.4) {
 	local $starcount = 0;
 	local $ipcount = 0;
 	foreach my $v (@virt) {
-		if ($v->{'words'}->[0] =~ /^(\*|_DEFAULT_)(:(\d+))?/i &&
-		    (!$3 || $3 == $web_port)) {
-			$starcount++;
-			}
-		elsif ($v->{'words'}->[0] =~ /^([0-9\.]+)(:(\d+))?/i &&
-		       $1 eq $ip && (!$3 || $3 == $web_port)) {
-			# Match on IPv4 address and optionally port
-			$ipcount++;
-			}
-		elsif ($v->{'words'}->[0] =~ /^\[([0-9a-f:]+)\](:(\d+))?/i &&
-		       $1 eq $ip && (!$3 || $3 == $web_port)) {
-			# Match on IPv6 address and optionally port
-			$ipcount++;
+		foreach my $w (@{$v->{'words'}}) {
+			if ($w =~ /^(\*|_DEFAULT_)(:(\d+))?/i &&
+			    (!$3 || $3 == $web_port)) {
+				$starcount++;
+				}
+			elsif ($w =~ /^([0-9\.]+)(:(\d+))?/i &&
+			       $1 eq $ip && (!$3 || $3 == $web_port)) {
+				# Match on IPv4 address and optionally port
+				$ipcount++;
+				}
+			elsif ($w =~ /^\[([0-9a-f:]+)\](:(\d+))?/i &&
+			       $1 eq $ip && (!$3 || $3 == $web_port)) {
+				# Match on IPv6 address and optionally port
+				$ipcount++;
+				}
 			}
 		}
 	return $ipcount ? 0 : 1;
@@ -2336,18 +2337,21 @@ if ($d->{'name'}) {
 	local @nv = &apache::find_directive("NameVirtualHost", $conf);
 	local $canstar = $apache::httpd_modules{'core'} < 2.2;
 	foreach my $nv (@nv) {
-		$found++ if ($nv =~ /^(\S+):(\S+)/ &&   # Like x.x.x.x:80
+		$found++ if ($nv =~ /^([0-9\.]+):(\S+)/ &&   # Like x.x.x.x:80
 			      $1 eq $ip &&
-			      $2 == $web_port ||
-			     $nv eq '*' && $canstar &&	# Like *
-			      $defport == $web_port ||
-			     $nv =~ /^\*:(\d+)$/	# Like *:80
-			      && $1 == $web_port
-			      && !$no_star_match);
+			      $2 == $web_port);
+		$found++ if ($nv =~ /^\[([0-9a-f:]+)\]:(\S+)/ &&   # Like v6:80
+			      $1 eq $ip &&
+			      $2 == $web_port);
+		$found++ if ($nv eq '*' && $canstar &&	# Like *
+			      $defport == $web_port);
+		$found++ if ($nv =~ /^\*:(\d+)$/ &&	# Like *:80
+			     $1 == $web_port &&
+			     !$no_star_match);
 		$found_no_port++ if ($nv eq $ip);
 		$nvstar++ if ($nv eq '*' && $canstar && # Like *
-			       $defport == $web_port ||
-			      $nv =~ /^\*:(\d+)$/ &&    # Like *:80
+			       $defport == $web_port);
+		$nvstar++ if ($nv =~ /^\*:(\d+)$/ &&    # Like *:80
 			       $1 == $web_port);
 		}
 	if (!$found) {
