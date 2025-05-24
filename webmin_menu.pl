@@ -127,6 +127,17 @@ else {
 				       : $text{'left_nodoms'} });
 	}
 
+# Add virtual server summary link
+if ($did) {
+	my $canconfig = &can_config_domain($d);
+	if ($canconfig) {
+		push(@rv,
+		    { 'type' => 'item',
+		      'desc' => $text{'summary_title'},
+		      'link' => "/$module_name/summary_domain.cgi?dom=$did" });
+		}
+	}
+
 # Create sub-server and/or alias links
 if (&can_create_sub_servers()) {
 	if (&can_create_sub_servers() && $d && !$d->{'parent'}) {
