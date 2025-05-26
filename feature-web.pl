@@ -171,31 +171,36 @@ else {
 	# Work out where in the file to add.
 	# If this domain is foo.bar.com and a virtual host for *.bar.com exists
 	# in the same file, we need to add before it.
-	local $lref = &read_file_lines($f);
-	local $pos = scalar(@$lref);
-	if ($d->{'dom'} =~ /^([^\.]+)\.(\S+)$/) {
-		local ($dsuffix, $dprefix) = ($1, $2);
-		local ($starvirt, undef) = &get_apache_virtual("*.$dprefix",
-							       $web_port);
-		if ($starvirt && &same_file($starvirt->{'file'}, $f)) {
-			# Insert before
-			$pos = $starvirt->{'line'};
-			}
-		}
+	#local $lref = &read_file_lines($f);
+	#local $pos = scalar(@$lref);
+	#if ($d->{'dom'} =~ /^([^\.]+)\.(\S+)$/) {
+	#	local ($dsuffix, $dprefix) = ($1, $2);
+	#	local ($starvirt, undef) = &get_apache_virtual("*.$dprefix",
+	#						       $web_port);
+	#	if ($starvirt && &same_file($starvirt->{'file'}, $f)) {
+	#		# Insert before
+	#		$pos = $starvirt->{'line'};
+	#		}
+	#	}
 
 	# Add to the file
-	splice(@$lref, $pos, 0, "<VirtualHost $vips>",
-				(map { "    ".$_ } @dirs),
-				"</VirtualHost>");
+	&lock_file($f);
+	my @mems = &apache_lines_to_config(\@dirs);
+	my $newvirt = { 'name' => 'VirtualHost',
+			'value' => $vips,
+			'file' => $f,
+			'type' => 1,
+			'members' => \@mems };
+	&apache::save_directive_struct(undef, $newvirt, $conf, $conf);
 	&flush_file_lines($f);
 	$d->{'web_port'} = $web_port;
 	$d->{'web_urlport'} = $tmpl->{'web_urlport'};
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 
 	# Create a link from another Apache dir
 	if ($newfile) {
 		&apache::create_webfile_link($f);
 		}
-	undef(@apache::get_config_cache);
 
 	# Set the public HTML directory based on the template or domain config
 	if (!$d->{'alias'} && !$d->{'subdom'}) {
@@ -231,6 +236,7 @@ else {
 					$conf, $conf);
 		&flush_file_lines();
 		}
+	&unlock_file($f);
 
 	# Create empty access and error log files, owned by the domain's user.
 	# Apache opens them as root, so it will be able to write.
@@ -5701,6 +5707,27 @@ foreach my $c (@$pconf) {
 		}
 	}
 return $rv;
+}
+
+# apache_lines_to_config(&lines)
+# Turn a list of Apache directive lines into a list of config structures
+sub apache_lines_to_config
+{
+my ($lines) = @_;
+my $temp = &transname();
+&uncat_file($temp, join("\n", @$lines)."\n");
+&open_readfile(TEMP, $temp);
+my $lnum = 0;
+my @conf = &apache::parse_config_file(*TEMP, $lnum, $temp);
+close(TEMP);
+&unlink_file($temp);
+unshift(@conf);	# Remove dummy record
+foreach my $c (@conf) {
+	delete($c->{'line'});
+	delete($c->{'eline'});
+	delete($c->{'file'});
+	}
+return @conf;
 }
 
 $done_feature_script{'web'} = 1;
