@@ -168,21 +168,6 @@ else {
 			}
 		}
 
-	# Work out where in the file to add.
-	# If this domain is foo.bar.com and a virtual host for *.bar.com exists
-	# in the same file, we need to add before it.
-	#local $lref = &read_file_lines($f);
-	#local $pos = scalar(@$lref);
-	#if ($d->{'dom'} =~ /^([^\.]+)\.(\S+)$/) {
-	#	local ($dsuffix, $dprefix) = ($1, $2);
-	#	local ($starvirt, undef) = &get_apache_virtual("*.$dprefix",
-	#						       $web_port);
-	#	if ($starvirt && &same_file($starvirt->{'file'}, $f)) {
-	#		# Insert before
-	#		$pos = $starvirt->{'line'};
-	#		}
-	#	}
-
 	# Add to the file
 	&lock_file($f);
 	my @mems = &apache_lines_to_config(\@dirs);
