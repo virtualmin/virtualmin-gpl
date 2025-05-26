@@ -182,16 +182,16 @@ if (!script_migrated_disallowed($script->{'migrated'})) {
 			}
 		if (@vers) {
 			# Upgrade button
-			print "&nbsp;&nbsp;\n";
+			print "&nbsp;&nbsp;<span data-button-group>\n";
 			print &ui_submit($text{'scripts_upok'}, "upgrade"),"\n";
 			print &ui_select("version", $vers[$#vers],
-					 [ map { [ $_ ] } @vers ]),"\n";
+					 [ map { [ $_ ] } @vers ]),"</span>\n";
 			}
 		elsif (&can_unsupported_scripts()) {
 			# Upgrade to un-supported version
-			print "&nbsp;&nbsp;\n";
+			print "&nbsp;&nbsp;<span data-button-group>\n";
 			print &ui_submit($text{'scripts_upok2'}, "upgrade"),"\n";
-			print &ui_textbox("version", undef, 15),"\n";
+			print &ui_textbox("version", undef, 15),"</span>\n";
 			}
 		}
 	}
