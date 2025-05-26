@@ -180,7 +180,6 @@ else {
 	&flush_file_lines($f);
 	$d->{'web_port'} = $web_port;
 	$d->{'web_urlport'} = $tmpl->{'web_urlport'};
-	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 
 	# Create a link from another Apache dir
 	if ($newfile) {
