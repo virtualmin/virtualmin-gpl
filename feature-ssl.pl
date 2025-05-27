@@ -177,14 +177,17 @@ if ($err) {
 
 # Add the actual <VirtualHost>
 local $f = $virt->{'file'};
-local $lref = &read_file_lines($f);
-local @ssldirs = &apache_ssl_directives($d, $tmpl);
-push(@$lref, "<VirtualHost ".&get_apache_vhost_ips($d, $nvstar, $nvstar6, $web_sslport).">");
-push(@$lref, @$srclref[$virt->{'line'}+1 .. $virt->{'eline'}-1]);
-push(@$lref, @ssldirs);
-push(@$lref, "</VirtualHost>");
+my @mems = &clone_apache_config($virt->{'members'});
+my @ssldirs = &apache_ssl_directives($d, $tmpl);
+push(@mems, &apache_lines_to_config(\@ssldirs));
+my $vips = &get_apache_vhost_ips($d, $nvstar, $nvstar6, $web_sslport);
+my $newvirt = { 'name' => 'VirtualHost',
+		'value' => $vips,
+		'file' => $f,
+		'type' => 1,
+		'members' => \@mems };
+&apache::save_directive_struct(undef, $newvirt, $conf, $conf);
 &flush_file_lines($f);
-undef(@apache::get_config_cache);
 
 # Copy chained CA cert in from domain with same IP, if any
 $d->{'web_sslport'} = $web_sslport;

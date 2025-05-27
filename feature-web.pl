@@ -5705,13 +5705,32 @@ my $lnum = 0;
 my @conf = &apache::parse_config_file(*TEMP, $lnum, $temp);
 close(TEMP);
 &unlink_file($temp);
-unshift(@conf);	# Remove dummy record
 foreach my $c (@conf) {
 	delete($c->{'line'});
 	delete($c->{'eline'});
 	delete($c->{'file'});
 	}
 return @conf;
+}
+
+# clone_apache_config(&directives)
+# Given a list of Apache directives, returns a deep cloned structure with no
+# line or file elements
+sub clone_apache_config
+{
+my ($dirs) = @_;
+my @rv;
+foreach my $d (@$dirs) {
+	my $c = { %$d };
+	delete($c->{'line'});
+	delete($c->{'eline'});
+	delete($c->{'file'});
+	if ($c->{'type'}) {
+		$c->{'members'} = [ &clone_apache_config($d->{'members'}) ];
+		}
+	push(@rv, $c);
+	}
+return @rv;
 }
 
 $done_feature_script{'web'} = 1;
