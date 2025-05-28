@@ -526,12 +526,13 @@ return 1;
 # its directives and add SSL-specific options.
 sub clone_ssl
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 local $tmpl = &get_template($d->{'template'});
 &$first_print($text{'clone_ssl'});
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_sslport'});
-local ($ovirt, $ovconf) = &get_apache_virtual($oldd->{'dom'},
-					      $oldd->{'web_sslport'});
+my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+						$d->{'web_sslport'});
+my ($ovirt, $ovconf) = &get_apache_virtual($oldd->{'dom'},
+					   $oldd->{'web_sslport'});
 if (!$ovirt) {
 	&$second_print($text{'clone_webold'});
 	return 0;
@@ -542,7 +543,7 @@ if (!$virt) {
 	}
 
 # Fix up all the Apache directives
-&clone_web_domain($oldd, $d, $ovirt, $virt, $d->{'web_sslport'});
+&clone_web_domain($oldd, $d, $ovirt, $virt, $conf);
 
 # Is the linked SSL cert still valid for the new domain? If not, break the
 # linkage by copying over the cert.

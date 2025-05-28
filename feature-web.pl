@@ -463,7 +463,7 @@ if (&is_empty($vhost->{'file'})) {
 # Copy all Apache directives to a new domain
 sub clone_web
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 &$first_print($text{'clone_web'});
 my $mode = &get_domain_php_mode($oldd);
 if ($d->{'alias_mode'}) {
@@ -471,9 +471,8 @@ if ($d->{'alias_mode'}) {
 	&$second_print($text{'clone_webalias'});
 	return 1;
 	}
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-local ($ovirt, $ovconf) = &get_apache_virtual($oldd->{'dom'},
-					      $oldd->{'web_port'});
+my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($ovirt, $ovconf) = &get_apache_virtual($oldd->{'dom'}, $oldd->{'web_port'});
 if (!$ovirt) {
 	&$second_print($text{'clone_webold'});
 	return 0;
@@ -485,7 +484,7 @@ if (!$virt) {
 &obtain_lock_web($d);
 
 # Fix up all the Apache directives
-&clone_web_domain($oldd, $d, $ovirt, $virt, $d->{'web_port'});
+&clone_web_domain($oldd, $d, $ovirt, $virt, $conf);
 
 # Update cached public_html and CGI dirs, re-create PHP wrappers with new home
 &link_apache_logs($d);
@@ -496,8 +495,10 @@ if (&need_php_wrappers($d, $mode)) {
 
 # Force FPM port re-allocation and re-setup of PHP mode
 my $mode = &get_domain_php_mode($oldd);
-delete($d->{'php_fpm_port'});
-&save_domain_php_mode($d, $mode);
+if ($mode eq "fpm") {
+	delete($d->{'php_fpm_port'});
+	&save_domain_php_mode($d, $mode);
+	}
 
 # Update session dir and upload path in php.ini files
 local @fixes = (
@@ -512,25 +513,18 @@ local @fixes = (
 return 1;
 }
 
-# clone_web_domain(&old-vhost, &vhost, &old-domain, &domain, port)
+# clone_web_domain(&old-domain, &domain, &old-vhost, &vhost, &conf)
 # Copies across and fixes Apache directives for some vhost when cloning
 sub clone_web_domain
 {
-local ($oldd, $d, $ovirt, $virt, $port) = @_;
+local ($oldd, $d, $ovirt, $virt, $conf) = @_;
 
-# Splice across directives, fixing ServerName so that get_apache_virtual works
-local $olref = &read_file_lines($ovirt->{'file'});
-local $lref = &read_file_lines($virt->{'file'});
-local @lines = @$olref[$ovirt->{'line'}+1 .. $ovirt->{'eline'}-1];
-foreach my $l (@lines) {
-	if ($l =~ /^(\s*)ServerName/) {
-		$l = $1."ServerName ".$d->{'dom'};
-		}
-	}
-splice(@$lref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1, @lines);
-&flush_file_lines($virt->{'file'});
-undef(@apache::get_config_cache);
-($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+# Copy directives from the original vhost into the new one
+my @mems = &clone_apache_config($ovirt->{'members'});
+$virt->{'members'} = \@mems;
+&apache::save_directive_struct($virt, $virt, $conf, $conf);
+my $vconf = $virt->{'members'};
+&apache::save_directive("ServerName", [ $d->{'dom'} ], $vconf, $conf);
 
 # Fix home dir
 &modify_web_home_directory($d, $oldd, $virt, $vconf, $conf);
