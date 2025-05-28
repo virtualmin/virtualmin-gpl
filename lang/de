@@ -7031,10 +7031,6 @@ wizard_efrom_addr=Die E-Mail-Adresse muss im Format user@domain sein
 backuplog_title=Backup-Protokolle
 backuplog_ecannot=Sie sind nicht berechtigt, Virtualmin-Backup-Protokolle anzuzeigen
 backuplog_search=Protokolle finden, die passen
-backuplog_ok=Suche
-backuplog_match=Zeige Protokolle an, die mit $1 übereinstimmen ..
-backuplog_days=Zeige Protokolle der letzten $1 Tage an ..
-backuplog_sched=Zeige Protokolle vom geplanten Backup an $1 ..
 backuplog_desc=Beschreibung
 backuplog_when=Gestartet
 backuplog_who=Erstellt von
@@ -8430,6 +8426,8 @@ acme_can2=Nur Master-Administrator
 acme_edefault=Der Standard-SSL-Anbieter Let's Encrypt kann nicht bearbeitet werden
 acme_website=Website des SSL-Anbieters
 
+readonly_mode=Die Möglichkeit zur Durchführung von Änderungen ist für Ihr System derzeit deaktiviert. Dieser Modus wird in der Regel manuell von eine Administrator aktiviert.
+
 monitor_validate=Virtualmin-Domains validieren
 monitor_doms=Zu prüfende Domains
 monitor_edoms=Keine Domains zum Prüfen ausgewählt
@@ -8438,8 +8436,6 @@ monitor_efeats=Keine Funktionen zum Prüfen ausgewählt
 monitor_nodoms=Keine Domains zum Prüfen gefunden!
 monitor_nofeats=Keine Funktionen zum Prüfen gefunden!
 monitor_done=Erfolgreich $2 Funktionen in $1 Domains geprüft
-
-readonly_mode=Die Möglichkeit zur Durchführung von Änderungen ist für Ihr System derzeit deaktiviert. Dieser Modus wird in der Regel manuell von eine Administrator aktiviert.
 
 api_ndom_missing_domain_name=Fehlender Domainname
 api_ndom_invalid_email_address=Die Option 'email' muss mit einer gültigen E-Mail-Adresse gefolgt werden

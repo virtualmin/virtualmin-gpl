@@ -1,0 +1,3 @@
+backuplog_match=Es werden Protokolle angezeigt, die mit $1 übereinstimmen
+backuplog_days=Es werden jetzt die Protokolle der letzten $1 Tage angezeigt
+backuplog_sched=Protokolle der geplanten Sicherung auf $1 werden angezeigt

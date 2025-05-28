@@ -913,6 +913,7 @@ log_copycert_usermin=Certificado SSL copiado a Usermin
 log_copycert_dovecot=Certificado SSL copiado a Dovecot
 log_copycert_postfix=Certificado SSL copiado a Postfix
 log_copycert_proftpd=Certificado SSL copiado a ProFTPD
+log_copycert_bind=Certificado SSL copiado a BIND
 log_copycert_all=Certificado SSL copiado a todos los servicios
 log_enable_dkim=Correo identificado de DomainKeys
 log_disable_dkim=Correo de identificación de DomainKeys deshabilitado
@@ -2897,6 +2898,10 @@ copycert_fenabling=Habilitar SSL en la configuración de ProFTPD.
 copycert_mysql=Copiando certificado y clave a MySQL ..
 copycert_emysqld=.. ¡Configuración de MySQL no encontrada!
 copycert_emysqlstart=.. no se pudo reiniciar MySQL : $1
+copycert_bind=Copiando certificado y clave a BIND ..
+copycert_bind2=..ya configurado
+copycert_bind3=Configurando BIND para usar la clave para DNS sobre TLS para $1 ..
+copycert_bind4=.. ¡ya está configurada otra clave para el puerto TLS!
 
 defaultcert_title=Pasar a la ruta de certificado predeterminada
 defaultcert_ecannot=No tienes permiso para gestionar certificados SSL
@@ -2996,6 +3001,9 @@ wizard_from_addr=Dirección de correo electrónico del administrador principal
 wizard_from_addr2=Su dirección
 wizard_efrom_addr=La dirección de correo electrónico debe tener el formato usuario@dominio
 
+backuplog_match=Mostrando registros que coinciden con $1
+backuplog_days=Ahora se muestran registros de los últimos $1 días
+backuplog_sched=Mostrando registros de la copia de seguridad programada a $1
 backuplog_desc=Descripción
 backuplog_incr=Tipo
 backuplog_status=Estado
@@ -3505,8 +3513,14 @@ fixmodphp_ecannot=No tienes permiso para arreglar permisos PHP
 fixmodphp_doing=Actualización de todos los servidores virtuales para evitar el uso de mod_php cuando está deshabilitado.
 fixmodphp_done=.. dominios fijos de $1
 
+bucket_einfo=No se pudieron obtener los detalles del depósito : $1
 bucket_account2=cuenta S3
 bucket_eacls=ACLs for new buckets must be enabled on the AWS Console.
+bucket_logging=Registro de acceso al depósito
+bucket_logging_def=Registro deshabilitado
+bucket_logging_target=Registrarse en el depósito $1 con el prefijo $2
+bucket_eltarget=Nombre del depósito de registro faltante o no válido
+bucket_elprefix=Falta el prefijo del nombre del archivo de registro
 
 ratelimit_title=Limitación de tarifa de correo
 ratelimit_email=La limitación de velocidad de correo electrónico no se puede habilitar a menos que el correo electrónico esté habilitado

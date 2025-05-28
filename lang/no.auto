@@ -594,6 +594,7 @@ log_uninstall_scripts=Avinstallerte $1 webapper
 log_warn_scripts=Lagrede nettappoppgraderingsvarslingsalternativer
 log_latest_scripts=Lagrede oppdateringsalternativer for webapp-installasjon
 log_copycert_proftpd=Kopiert SSL-sertifikat til ProFTPD
+log_copycert_bind=Kopierte SSL-sertifikat til BIND
 log_copycert_all=Kopierte SSL -sertifikat til alle tjenester
 log_retention=Oppdaterte innstillinger for oppretting av postkasse
 log_wizard=Install Wizard trinn : $1 
@@ -1836,6 +1837,10 @@ copycert_fenabling=Aktiverer SSL i ProFTPD-konfigurasjon ..
 copycert_mysql=Kopierer sertifikat og nøkkel til MySQL ..
 copycert_emysqld=.. MySQL-konfigurasjon ikke funnet!
 copycert_emysqlstart=.. mislyktes i å starte MySQL på nytt : $1
+copycert_bind=Kopierer sertifikat og nøkkel til BIND ..
+copycert_bind2=.. allerede konfigurert
+copycert_bind3=Konfigurerer BIND til å bruke nøkkelen for DNS over TLS for $1 ..
+copycert_bind4=... en annen nøkkel er allerede konfigurert for TLS-porten!
 
 defaultcert_title=Flytter til standard sertifikatbane
 defaultcert_ecannot=Du har ikke lov til å administrere SSL-sertifikater
@@ -1885,7 +1890,9 @@ wizard_from_addr=Hovedadministrators e-postadresse
 wizard_from_addr2=Din adresse
 wizard_efrom_addr=E-postadressen må være i formatet bruker@domene
 
-backuplog_sched=Viser logger fra planlagt sikkerhetskopi til $1 ..
+backuplog_match=Viser logger som samsvarer med $1
+backuplog_days=Viser nå logger fra de siste $1 dagene
+backuplog_sched=Viser logger fra planlagt sikkerhetskopiering til $1
 backuplog_desc=Beskrivelse
 backuplog_incr=Type
 backuplog_status=Status
@@ -2052,8 +2059,14 @@ fixperms_details=Fra <tt>$1</tt> til <tt>$2</tt> for fil <tt>$3</tt>
 bkey_extra=Eksisterende nøkkel
 bkey_download=Last ned nøkkel
 
+bucket_einfo=Klarte ikke å hente detaljer om bøtte : $1
 bucket_account2=S3 konto
 bucket_eacls=ACLs for new buckets must be enabled on the AWS Console.
+bucket_logging=Logging av tilgang til bøtte
+bucket_logging_def=Logging deaktivert
+bucket_logging_target=Logg til bøtte $1 med prefikset $2
+bucket_eltarget=Manglende eller ugyldig navn på loggbøtte
+bucket_elprefix=Mangler prefiks for loggfilnavn
 
 ratelimit_email=Begrensning av e-posthastighet kan ikke aktiveres med mindre e-post er aktivert
 

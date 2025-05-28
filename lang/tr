@@ -1060,7 +1060,6 @@ newweb_ecannot=Web sitesi þablonunu düzenlemye izniniz yok
 newweb_desc=Virtualmin tarafýndan oluþturulan web sitelerinde kullanýlacak Apache direktif þablonlarýný düzenlemek için bu formu kullanýn. Site þablondan oluþturulunca takip eden yerdeðiþtirmeler yapýlacaktýr :
 newweb_undo=Geri Al
 newweb_err=Web sitesi þablonu kaydedilemedi
-newweb_writelogs=Loglar program üzerinden yazýlsýn mý?<br>(<font size=-1>Log klasörünün var olmamasý durumunda</font>)
 newweb_user=Yeni sunucular için Apache kullanýcýsý Unix grubuna eklensin mi?
 newweb_useryes=Evet, Apache kullanýcýsý
 newweb_htmldir=Oluþturulacak kullanýcý web sitesi altklasörü

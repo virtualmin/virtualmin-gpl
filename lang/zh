@@ -1108,7 +1108,6 @@ newweb_ecannot=你不允许编辑网站模板
 newweb_desc=使用该表单编辑Apache指令模板，该模板将用于Virtualmin创建的网站。当使用模板生成网站时，将进行下列替换：
 newweb_undo=撤消
 newweb_err=保存网站模板失败
-newweb_writelogs=使用程序写日志吗？<br>（<font size=-1>处理缺少的日志目录</font>）
 newweb_user=为新服务器添加Apache用户到Unix组吗？
 newweb_useryes=是，为Apache用户添加
 newweb_userdef=是，自动找到Apache用户

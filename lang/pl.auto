@@ -70,6 +70,7 @@ check_dnsip3v6=Wykryto zewnętrzny adres IPv6: $1
 check_iface4=Adresy IPv4 nie są dostępne w tym systemie
 check_postfixok2=Serwer pocztowy Postfix jest zainstalowany i skonfigurowany jako host przekaźnikowy
 
+log_copycert_bind=Skopiowano certyfikat SSL do BIND
 log_create_acme=Dodano dostawcę SSL dla $1
 log_delete_acme=Usunięto dostawcę SSL dla $1
 log_update_acme=Zaktualizowano dostawcę SSL dla $1
@@ -295,6 +296,11 @@ unsub_failed=..konwersja nieudana!
 postgrey_emailfeat=Szarą listę można stosować tylko wtedy, gdy poczta e-mail jest włączona globalnie.
 postgrey_postfixdone2=.. skonfigurowano do użycia pliku gniazda $1
 
+copycert_bind=Kopiowanie certyfikatu i klucza do BIND ..
+copycert_bind2=..już skonfigurowane
+copycert_bind3=Konfigurowanie BIND w celu użycia klucza dla DNS przez TLS dla $1 ..
+copycert_bind4=..inny klucz jest już skonfigurowany dla portu TLS!
+
 wizard_memory2=Virtualmin można dostroić, aby poprawić wydajność przetwarzania poczty e-mail, ale kosztem zwiększonego wykorzystania pamięci. Najlepszy wybór zależy od tego, jak będzie używany system.
 wizard_done=Konfiguracja Virtualmin po instalacji została ukończona!
 wizard_title_email=Adres e-mail systemu
@@ -302,6 +308,10 @@ wizard_email_desc=Powiadomienia e-mail wysyłane przez Virtualmin będą przycho
 wizard_from_addr=Adres e-mail głównego administratora
 wizard_from_addr2=Twój adres
 wizard_efrom_addr=Adres e-mail musi być w formacie użytkownik@domena
+
+backuplog_match=Pokazywanie dzienników pasujących do $1
+backuplog_days=Teraz wyświetlane są logi z ostatnich $1 dni
+backuplog_sched=Wyświetlanie dzienników z zaplanowanej kopii zapasowej do $1
 
 redirect_hostregexp=Nazwa hosta jest wyrażeniem regularnym?
 redirect_ehost2=Brak wyrażenia regularnego nazwy hosta
@@ -335,6 +345,13 @@ fixperms_edirmiss=..domena nie posiada katalogu domowego
 fixperms_oklist=.. zrobione dla załączonej listy plików
 fixperms_oklist2=.. zrobione dla listy plików poniżej:
 fixperms_details=Od <tt>$1</tt> do <tt>$2</tt> za plik <tt>$3</tt>
+
+bucket_einfo=Nie udało się pobrać szczegółów dotyczących kontenera : $1
+bucket_logging=Rejestrowanie dostępu do kontenera
+bucket_logging_def=Rejestrowanie wyłączone
+bucket_logging_target=Zaloguj się do kontenera $1 z prefiksem $2
+bucket_eltarget=Brak nazwy kontenera rejestrowania lub nazwa wyglądająca na nieprawidłową
+bucket_elprefix=Brak prefiksu nazwy pliku dziennika
 
 ratelimit_email=Ograniczenie szybkości poczty e-mail nie może zostać włączone, jeśli nie włączono poczty e-mail
 

@@ -1308,5 +1308,4 @@ wizard_db_mysql=Spustit databázový server MySQL?
 wizard_db_postgres=Spustit databázový server PostgreSQL?
 wizard_mysql=Aby jste zabránili ostatním uživatelům na Vašem systému spravovat MySQL databázi, mělo by být nastaveno <tt>root</tt> uživatelské heslo.
 
-backuplog_ok=Hledat
 backuplog_nomatch=Nebyly nalezeny žádné záznamy o zálohách vyhovující Vašemu hledání.
