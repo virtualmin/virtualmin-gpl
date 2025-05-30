@@ -594,6 +594,16 @@ if ($webmin_version >= 2.304 && !defined($gconfig{'forgot_pass'})) {
 	&write_file("$config_directory/config", \%gconfig);
 	&unlock_file("$config_directory/config");
 	}
+if ($gconfig{'forgot_pass'} && &foreign_check("virtualmin-password-recovery")) {
+	# Make sure the old password recovery module is disabled
+	my %clang;
+	&read_file("$config_directory/custom-lang", \%clang);
+	$clang{'session_postfix'} = ' ';
+	&write_file("$config_directory/custom-lang", \%clang);
+	&foreign_require("acl");
+	&acl::remove_anonymous_access("/virtualmin-password-recovery",
+				      "virtualmin-password-recovery");
+	}
 
 # Add custom branding for login page
 my $brand_info = "$config_directory/brand.info";
