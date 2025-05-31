@@ -1656,11 +1656,10 @@ if ($d->{'alias'} && $d->{'alias_mode'}) {
 &$first_print($text{'restore_apachecp'});
 &obtain_lock_web($d);
 my $rv;
-my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 my $tmpl = &get_template($d->{'template'});
 if ($virt) {
 	my $srclref = &read_file_lines($file);
-	my $dstlref = &read_file_lines($virt->{'file'});
 
 	# Extract old logging-based directives before we change them, so they
 	# can be restored later to match *this* system
@@ -1669,13 +1668,13 @@ if ($virt) {
 		$lmap{$dirname} = &apache::find_directive($dirname, $vconf);
 		}
 
-	# Copy across directives from the backup
-	splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
-	       @$srclref[1 .. @$srclref-2]);
-	&flush_file_lines($virt->{'file'});
-	undef(@apache::get_config_cache);
-	($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-						     $d->{'web_port'});
+	# Turn the saved virtualhost into config directives
+	my @mems = &apache_lines_to_config([ @$srclref[1 .. @$srclref-2] ]);
+	my $newvirt = { 'name' => 'VirtualHost',
+			'value' => $virt->{'value'},
+			'type' => 1,
+			'members' => \@mems };
+	&apache::save_directive_struct($virt, $newvirt, $conf, $conf);
 
 	if ($allopts->{'reuid'}) {
 		# Fix up any UID or GID in suexec lines
