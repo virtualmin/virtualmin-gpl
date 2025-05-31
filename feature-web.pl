@@ -4268,34 +4268,42 @@ return @onip ? @{$onip[0]} : ( );
 # entries in httpd.conf
 sub set_default_website
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p ne 'web') {
 	return &plugin_call($p, "feature_set_web_default", $d);
 	}
 &require_apache();
 foreach my $port ($d->{'web_port'},
 		  $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( )) {
-	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	$virt || return "No Apache virtualhost found for $d->{'dom'}:$port";
-	local ($oldvirt, $oldd) = &get_default_apache_website($d, $port);
+	my ($oldvirt, $oldd) = &get_default_apache_website($d, $port);
 	if ($virt && $oldvirt && $virt ne $oldvirt) {
 		if ($virt->{'file'} eq $oldvirt->{'file'}) {
-			# Need to move up in file
-			local $lref = &read_file_lines($virt->{'file'});
-			local @oldl = @$lref[$virt->{'line'} .. $virt->{'eline'}];
-			splice(@$lref, $virt->{'line'},
-			       $virt->{'eline'} - $virt->{'line'} + 1);
-			splice(@$lref, $oldvirt->{'line'}, 0, @oldl);
+			# Swap virtualhosts in the file
+			my $oldvirtcopy = { %$oldvirt };
+			$oldvirtcopy->{'members'} =
+				[ &clone_apache_config($oldvirt->{'members'}) ];
+			my $virtcopy = { %$virt };
+			$virtcopy->{'members'} =
+				[ &clone_apache_config($virt->{'members'}) ];
+			delete($oldvirtcopy->{'file'});
+			delete($oldvirtcopy->{'line'});
+			delete($oldvirtcopy->{'eline'});
+			&apache::save_directive_struct(
+				$oldvirt, $virtcopy, $conf, $conf);
+			&apache::save_directive_struct(
+				$virt, $oldvirtcopy, $conf, $conf);
 			&flush_file_lines($virt->{'file'});
 			}
 		else {
 			# Swap file order
 			$virt->{'file'} =~ /^(.*)\/([^\/]+)$/;
-			local ($dir, $file) = ($1, $2);
+			my ($dir, $file) = ($1, $2);
 			$oldvirt->{'file'} =~ /^(.*)\/([^\/]+)$/;
-			local ($olddir, $oldfile) = ($1, $2);
-			local $adddir = $apache::config{'virt_file'} ?
+			my ($olddir, $oldfile) = ($1, $2);
+			my $adddir = $apache::config{'virt_file'} ?
 			  &apache::server_root($apache::config{'virt_file'}) :
 			  undef;
 			if ($dir eq $olddir && $dir eq $adddir) {
@@ -4303,12 +4311,20 @@ foreach my $port ($d->{'web_port'},
 				&apache::delete_webfile_link("$dir/$file");
 				&rename_logged("$dir/$file", "$dir/0-$file");
 				&apache::create_webfile_link("$dir/0-$file");
+				&apache::recursive_set_lines_files(
+					$virt->{'members'},
+					$virt->{'line'}+1,
+					"$dir/0-$file");
 				if ($oldfile =~ /^0-(.*)$/) {
 					&apache::delete_webfile_link(
 							"$dir/$oldfile");
 					&rename_logged("$dir/$oldfile",
 						       "$dir/$1");
 					&apache::create_webfile_link("$dir/$1");
+					&apache::recursive_set_lines_files(
+						$oldvirt->{'members'},
+						$oldvirt->{'line'}+1,
+						"$dir/$1");
 					}
 				}
 			else {
@@ -4316,7 +4332,6 @@ foreach my $port ($d->{'web_port'},
 				return "Cannot handle swap between $virt->{'file'} and $oldvirt->{'file'}";
 				}
 			}
-		undef(@apache::get_config_cache);
 		&register_post_action(\&restart_apache);
 		}
 	}
