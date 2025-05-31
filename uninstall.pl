@@ -31,7 +31,7 @@ if (-r $brand_file) {
 	&read_file($brand_file, \%brand_info);
 	if ($brand_info{'update'} &&
 	    $brand_info{'file'} &&
-	    $brand_info{'file'} =~ /$module_root_directory/) {
+	    $brand_info{'file'} =~ /\Q$module_root_directory\E/) {
 		&unlink_file($brand_file);
 		}
 	}
