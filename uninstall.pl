@@ -29,7 +29,8 @@ my $brand_file = "$config_directory/brand.info";
 if (-r $brand_file) {
 	my %brand_info;
 	&read_file($brand_file, \%brand_info);
-	if ($brand_info{'file'} &&
+	if ($brand_info{'update'} &&
+	    $brand_info{'file'} &&
 	    $brand_info{'file'} =~ /$module_root_directory/) {
 		&unlink_file($brand_file);
 		}
