@@ -23,7 +23,6 @@ local $api_helper_command = &get_api_helper_command();
 if (-r $api_helper_command && !-d $api_helper_command) {
 	&unlink_file($api_helper_command);
 	}
-}
 
 # Delete custom branding logo
 my $brand_file = "$config_directory/brand.info";
@@ -35,5 +34,7 @@ if (-r $brand_file) {
 		&unlink_file($brand_file);
 		}
 	}
+}
+
 1;
 
