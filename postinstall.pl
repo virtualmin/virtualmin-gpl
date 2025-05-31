@@ -621,7 +621,7 @@ if ($brand_update) {
 	$brand{'update'} = 1;
 	$brand{'file'} = "$root_directory/$module_name/images/brand.svg";
 	$brand{'title'} = $title;
-	$brand{'mode'} = 'full';
+	$brand{'enabled'} = 1;
 	&write_file($brand_info, \%brand);
 	&unlock_file($brand_info);
 	}
