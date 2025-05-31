@@ -25,5 +25,15 @@ if (-r $api_helper_command && !-d $api_helper_command) {
 	}
 }
 
+# Delete custom branding logo
+my $brand_file = "$config_directory/brand.info";
+if (-r $brand_file) {
+	my %brand_info;
+	&read_file($brand_file, \%brand_info);
+	if ($brand_info{'file'} &&
+	    $brand_info{'file'} =~ /$module_root_directory/) {
+		&unlink_file($brand_file);
+		}
+	}
 1;
 
