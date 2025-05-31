@@ -856,16 +856,14 @@ my ($virt, $vconf, $conf) = &get_apache_virtual(
 				$d->{'dom'}, $d->{'web_sslport'});
 if ($virt) {
 	my $srclref = &read_file_lines($file, 1);
-	my $dstlref = &read_file_lines($virt->{'file'});
 
 	# Copy across directives from the backup
-	splice(@$dstlref, $virt->{'line'}+1,
-	       $virt->{'eline'}-$virt->{'line'}-1,
-	       @$srclref[1 .. @$srclref-2]);
-	&flush_file_lines($virt->{'file'});
-	undef(@apache::get_config_cache);
-	($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-					      	     $d->{'web_sslport'});
+	my @mems = &apache_lines_to_config([ @$srclref[1 .. @$srclref-2] ]);
+	my $newvirt = { 'name' => 'VirtualHost',
+			'value' => $virt->{'value'},
+			'type' => 1,
+			'members' => \@mems };
+	&apache::save_directive_struct($virt, $newvirt, $conf, $conf);
 
 	# Fix up any DocumentRoot or other file-related directives
 	if ($oldd->{'home'} && $oldd->{'home'} ne $d->{'home'}) {

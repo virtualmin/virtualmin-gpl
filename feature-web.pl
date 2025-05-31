@@ -1659,7 +1659,7 @@ my $rv;
 my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 my $tmpl = &get_template($d->{'template'});
 if ($virt) {
-	my $srclref = &read_file_lines($file);
+	my $srclref = &read_file_lines($file, 1);
 
 	# Extract old logging-based directives before we change them, so they
 	# can be restored later to match *this* system
