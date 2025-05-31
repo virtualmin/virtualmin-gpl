@@ -945,6 +945,7 @@ if ($extramods{'webminlog'} && $d->{'webmin'}) {
 		}
 	local %acl = ( 'users' => join(" ", @users),
 		       'mods' => join(" ", @mods),
+		       'notify' => 0,
 		       'rollback' => 0 );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "webminlog")
 		if (!$hasmods{'webminlog'});
