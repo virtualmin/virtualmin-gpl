@@ -6,16 +6,22 @@ require './virtual-server-lib.pl';
 &can_backup_log() || &error($text{'backuplg_ecannot'});
 &ui_print_header(undef, $text{'backuplog_title'}, "");
 
-# Show search form
-print &ui_form_start("backuplog.cgi");
-print "<b>$text{'backuplog_search'}</b>\n";
-print &ui_textbox("search", $in{'search'}, 30);
-print &ui_submit($text{'backuplog_ok'});
-print &ui_form_end(),"<p>\n";
-
 # Get backups to list
 $days = $in{'sched'} ? 365 : ($config{'backuplog_days'} || 7);
 @logs = &list_backup_logs($in{'search'} ? undef : time()-24*60*60*$days);
+
+$anylogs = scalar(@logs);
+@logs = grep { &can_backup_log($_) } @logs;
+
+if (!@logs) {
+	# None found
+	print $in{'search'} ? $text{'backuplog_nomatch'} :
+		   $anylogs ? $text{'backuplog_none2'} :
+			      $text{'backuplog_none'},"\n";
+	return;
+	}
+
+# Show search form
 if ($in{'search'}) {
 	@logs = grep { $_->{'user'} eq $in{'search'} ||
 		       $_->{'doms'} =~ /\Q$in{'search'}\E/i ||
@@ -27,22 +33,35 @@ elsif ($in{'sched'}) {
 	$sched || &error($text{'backuplg_esched'});
 	@logs = grep { $_->{'sched'} eq $in{'sched'} } @logs;
 	}
-$anylogs = scalar(@logs);
-@logs = grep { &can_backup_log($_) } @logs;
+else {
+	$placeholder = &text('backuplog_days', $days);
+	}
 
 # Tell the user what he is searching for
 if ($in{'search'}) {
-	print &text('backuplog_match',
-		    "<i>".&html_escape($in{'search'})."</i>"),"<br>\n";
+	my $msg;
+	if (!@logs) {
+		$msg =  &text('backuplog_nomatch',
+			      "<tt>".&html_escape($in{'search'})."</tt>");
+		print &ui_alert_box($msg, 'warn', undef, undef, '');
+		}
+	else {
+		$placeholder = &text('backuplog_match',
+			     &html_escape($in{'search'}));
+		}
 	}
 elsif ($in{'sched'}) {
 	@dests = &get_scheduled_backup_dests($sched);
 	@nices = map { &nice_backup_url($_, 1) } @dests;
-	print &text('backuplog_sched', $nices[0]),"<br>\n";
+	my $msg = &text('backuplog_sched', "<tt>$nices[0]</tt>");
+	print &ui_alert_box($msg, 'info', undef, undef, '');
 	}
-else {
-	print &text('backuplog_days', $days),"<br>\n";
-	}
+
+print &ui_form_start("backuplog.cgi");
+print "$text{'backuplog_search'}&nbsp;\n";
+print &ui_textbox("search", $in{'search'}, 35, undef, undef, "placeholder='$placeholder'");
+print &ui_submit($text{'ui_searchok'});
+print &ui_form_end(),"<p>\n";
 
 if (@logs) {
 	# Show in a table
@@ -89,12 +108,3 @@ if (@logs) {
 				100, \@table);
 				  
 	}
-else {
-	# None found
-	print "<b>",($in{'search'} ? $text{'backuplog_nomatch'} :
-		     $anylogs ? $text{'backuplog_none2'} :
-				$text{'backuplog_none'}),"</b><p>\n";
-	}
-
-&ui_print_footer("", $text{'index'});
-

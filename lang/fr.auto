@@ -839,7 +839,6 @@ enable_return=désactiver le formulaire du serveur
 mail_upsubject=Boîte aux lettres mise à jour
 mail_rsubject=Compte revendeur créé
 
-newweb_writelogs=Écrire des journaux via un programme? <br>(<font size=-1> Gère le répertoire des journaux manquant </font>)
 newweb_userdef=Oui, trouvez automatiquement l'utilisateur Apache
 newweb_htmlperms=Autorisations sur le sous-répertoire du site Web
 newweb_ehtmlperms=Autorisations manquantes ou non valides pour le sous-répertoire du site Web
@@ -1269,6 +1268,7 @@ log_copycert_usermin=Certificat SSL copié vers Usermin
 log_copycert_dovecot=Certificat SSL copié sur Dovecot
 log_copycert_postfix=Certificat SSL copié dans Postfix
 log_copycert_proftpd=Certificat SSL copié sur ProFTPD
+log_copycert_bind=Certificat SSL copié sur BIND
 log_copycert_all=Certificat SSL copié à tous les services
 log_enable_dkim=Courrier identifié DomainKeys activé
 log_disable_dkim=Messagerie identifiée DomainKeys désactivée
@@ -4484,6 +4484,10 @@ copycert_fenabling=Activation de SSL dans la configuration ProFTPD.
 copycert_mysql=Copie du certificat et de la clé vers MySQL ..
 copycert_emysqld=.. Configuration MySQL introuvable !
 copycert_emysqlstart=.. échec du redémarrage de MySQL  : $1
+copycert_bind=Copie du certificat et de la clé vers BIND ..
+copycert_bind2=.. déjà configuré
+copycert_bind3=Configuration de BIND pour utiliser la clé DNS sur TLS pour $1 ..
+copycert_bind4=.. une autre clé est déjà configurée pour le port TLS !
 
 defaultcert_title=Passage au chemin de certificat par défaut
 defaultcert_ecannot=Vous n'êtes pas autorisé à gérer les certificats SSL
@@ -4583,7 +4587,9 @@ wizard_from_addr=Adresse e-mail de l'administrateur principal
 wizard_from_addr2=Votre adresse
 wizard_efrom_addr=L'adresse e-mail doit être au format utilisateur@domaine
 
-backuplog_sched=Affichage des journaux de la sauvegarde planifiée vers $1 ..
+backuplog_match=Affichage des journaux correspondant à $1
+backuplog_days=Affichage désormais des journaux des $1 derniers jours
+backuplog_sched=Affichage des journaux de la sauvegarde planifiée vers $1
 backuplog_desc=La description
 backuplog_incr=Type
 backuplog_status=Statut
@@ -5057,6 +5063,7 @@ bucket_title2=Modifier le compartiment S3
 bucket_eagone=Le compte n'existe pas!
 bucket_elist=Échec de la liste des compartiments : $1 
 bucket_egone=Le seau n'existe plus!
+bucket_einfo=Échec de la récupération des détails du bucket  : $1
 bucket_header=Détails du compartiment Amazon S3
 bucket_account=Clé de compte S3
 bucket_account2=Compte S3
@@ -5097,6 +5104,11 @@ bucket_elday=Jour manquant ou non numérique dans le cycle de vie $1
 bucket_elmonth=Mois manquant ou non numérique dans le cycle de vie $1 
 bucket_elyear=Année manquante ou non numérique dans le cycle de vie $1 
 bucket_eacls=ACLs for new buckets must be enabled on the AWS Console.
+bucket_logging=Journalisation des accès aux buckets
+bucket_logging_def=Journalisation désactivée
+bucket_logging_target=Connectez-vous au bucket $1 avec le préfixe $2
+bucket_eltarget=Nom du bucket de journalisation manquant ou non valide
+bucket_elprefix=Préfixe de nom de fichier de journalisation manquant
 
 ratelimit_title=Limitation du taux de messagerie
 ratelimit_email=La limitation du débit de courrier électronique ne peut pas être activée à moins que le courrier électronique ne soit activé
