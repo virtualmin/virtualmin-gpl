@@ -446,7 +446,7 @@ return 1;
 # Delete a single virtual server from the Apache config
 sub delete_web_virtual_server
 {
-local ($vhost, $conf) = @_;
+my ($vhost, $conf) = @_;
 &require_apache();
 &apache::save_directive_struct($vhost, undef, $conf, $conf);
 &flush_file_lines($vhost->{'file'});
@@ -517,7 +517,7 @@ return 1;
 # Copies across and fixes Apache directives for some vhost when cloning
 sub clone_web_domain
 {
-local ($oldd, $d, $ovirt, $virt, $conf) = @_;
+my ($oldd, $d, $ovirt, $virt, $conf) = @_;
 
 # Copy directives from the original vhost into the new one
 my @mems = &clone_apache_config($ovirt->{'members'});
@@ -539,8 +539,8 @@ if ($d->{'user'} ne $oldd->{'user'}) {
 
 # Remove ServerAlias directives not for this domain, such as for an alias of
 # the cloned source
-local @sa = &apache::find_directive("ServerAlias", $vconf);
-local @newsa;
+my @sa = &apache::find_directive("ServerAlias", $vconf);
+my @newsa;
 foreach my $sa (@sa) {
 	push(@newsa, $sa) if ($sa eq $d->{'dom'} || $sa =~ /\.\Q$d->{'dom'}\E/);
 	}
@@ -851,23 +851,23 @@ return $rv;
 # Returns an error message if no Apache virtual host exists
 sub validate_web
 {
-local ($d) = @_;
+my ($d) = @_;
 if ($d->{'alias_mode'}) {
 	# Find alias target, unless disabled
 	if ($d->{'disabled'}) {
 		return undef;
 		}
-	local $target = &get_domain($d->{'alias'});
+	my $target = &get_domain($d->{'alias'});
 	if ($target->{'disabled'}) {
 		return undef;
 		}
-	local ($pvirt, $pconf) = &get_apache_virtual($d->{'dom'},
+	my ($pvirt, $pconf) = &get_apache_virtual($d->{'dom'},
 						     $target->{'web_port'});
 	return &text('validate_eweb', "<tt>$d->{'dom'}</tt>") if (!$pvirt);
 	}
 else {
 	# Find real domain
-	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 						    $d->{'web_port'});
 	return &text('validate_eweb', "<tt>$d->{'dom'}</tt>") if (!$virt);
 
@@ -891,25 +891,25 @@ else {
 
 	# Check private IP addresses
 	if ($d->{'virt'}) {
-		local $ipp = $d->{'ip'}.":".$d->{'web_port'};
+		my $ipp = $d->{'ip'}.":".$d->{'web_port'};
 		&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
 			return &text('validate_ewebip', $ipp);
 		}
 	if ($d->{'virt6'}) {
-		local $ipp = "[".$d->{'ip6'}."]:".$d->{'web_port'};
+		my $ipp = "[".$d->{'ip6'}."]:".$d->{'web_port'};
 		&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
 			return &text('validate_ewebip6', $ipp);
 		}
 
 	# If using php via CGI or fcgi, check for wrappers
-	local $need_suexec = 0;
-	local $mode = &get_domain_php_mode($d);
+	my $need_suexec = 0;
+	my $mode = &get_domain_php_mode($d);
 	if ($mode eq "cgi" || $mode eq "fcgid") {
-		local $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin"
+		my $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin"
 					       : &cgi_bin_dir($_[0]);
-		local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
+		my $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
 		foreach my $dir (&list_domain_php_directories($d)) {
-			local $path = "$dest/php".
+			my $path = "$dest/php".
 				      $dir->{'version'}.".$suffix";
 			if (!-x $path) {
 				return &text('validate_ewebphp',
@@ -920,9 +920,9 @@ else {
 		$need_suexec = 1;
 		}
 
-	# Validate the local PHP configuration
+	# Validate the my PHP configuration
 	if ($mode ne "mod_php") {
-		local @dirvers = &unique(map { $_->{'version'} }
+		my @dirvers = &unique(map { $_->{'version'} }
 					     &list_domain_php_directories($d));
 		foreach my $ver (&list_available_php_versions($d)) {
 			next if (&indexof($ver->[0], @dirvers) < 0);
@@ -942,7 +942,7 @@ else {
 		}
 
 	# If there are suexec directives, validate them
-	local ($suexec) = &apache::find_directive_struct(
+	my ($suexec) = &apache::find_directive_struct(
 		"SuexecUserGroup", $vconf);
 	if ($suexec) {
 		# Has suexec line - validate it
@@ -976,14 +976,14 @@ else {
 	# Make sure a <Directory> exists for the document root, and that
 	# DocumentRoot is valid
 	if (!$d->{'alias'}) {
-		local $pdir = &public_html_dir($d);
-		local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
+		my $pdir = &public_html_dir($d);
+		my ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
 				      $_->{'words'}->[0] eq $pdir."/" }
 			    &apache::find_directive_struct("Directory", $vconf);
 		if (!$dir) {
 			return &text('validate_ewebdir', $pdir);
 			}
-		local $root = &apache::find_directive("DocumentRoot", $vconf);
+		my $root = &apache::find_directive("DocumentRoot", $vconf);
 		if ($root ne $pdir && $root ne $pdir."/") {
 			return &text('validate_ewebroot', $pdir);
 			}
@@ -1029,7 +1029,7 @@ else {
 		if (!$d->{'ip6'}) {
 			return &text('validate_ewebipv6', $ip6addr, $ip6name);
 			}
-		local $ipp = "[".$d->{'ip6'}."]:".$d->{'web_port'};
+		my $ipp = "[".$d->{'ip6'}."]:".$d->{'web_port'};
 		if (&indexof($ipp, @{$virt->{'words'}}) < 0 &&
 		    &indexof("*:".$d->{'web_port'}, @{$virt->{'words'}}) < 0) {
 			return &text('validate_ewebipv6virt', $ip6addr);
@@ -1076,25 +1076,25 @@ return ();
 # Adds a directive to force all requests to show an error page
 sub disable_web
 {
-if ($_[0]->{'alias'} && $_[0]->{'alias_mode'} == 1) {
+my ($d) = @_;
+if ($d->{'alias'} && $d->{'alias_mode'} == 1) {
 	# Just a ServerAlias in a real domain, so disabling is the same as
 	# deletion. Unless the parent has already been disabled, in which case
 	# nothing needs to be done.
-	local $alias = &get_domain($_[0]->{'alias'});
+	my $alias = &get_domain($d->{'alias'});
 	if ($alias->{'disabled'}) {
 		return 1;
 		}
-	$_[0]->{'disable_alias_web_delete'} = 1;
-	return &delete_web($_[0]);
+	$d->{'disable_alias_web_delete'} = 1;
+	return &delete_web($d);
 	}
 &$first_print($text{'disable_apache'});
 &require_apache();
-&obtain_lock_web($_[0]);
-local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-					    $_[0]->{'web_port'});
+&obtain_lock_web($d);
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 local $ok;
 if ($virt) {
-	&create_disable_directives($virt, $vconf, $_[0]);
+	&create_disable_directives($virt, $vconf, $d);
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_apache);
 	$ok = 1;
@@ -1103,41 +1103,42 @@ else {
 	&$second_print($text{'delete_noapache'});
 	$ok = 0;
 	}
-&release_lock_web($_[0]);
+&release_lock_web($d);
 return $ok;
 }
 
 # create_disable_directives(&virt, &vconf, &domain)
+# Update a virtualhost to disable it via a redirect or fixed HTML page
 sub create_disable_directives
 {
-local ($virt, $vconf, $d) = @_;
-local $tmpl = &get_template($d->{'template'});
-local $conf = &apache::get_config();
+my ($virt, $vconf, $d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my $conf = &apache::get_config();
 if ($tmpl->{'disabled_url'} eq 'none') {
-	# Disable is done via alias to local HTML
-	local @am = &apache::find_directive("AliasMatch", $vconf);
-	local $dis = &disabled_website_html($d);
+	# Disable is done via alias to my HTML
+	my @am = &apache::find_directive("AliasMatch", $vconf);
+	my $dis = &disabled_website_html($d);
 	&apache::save_directive("AliasMatch",
 				[ "^/.*\$ $dis", @am ], $vconf, $conf);
 
 	# Also prevent undoing this via .htaccess
-	local $pdir = &public_html_dir($d);
-	local ($dir) = grep { $_->{'words'}->[0] eq $pdir }
+	my $pdir = &public_html_dir($d);
+	my ($dir) = grep { $_->{'words'}->[0] eq $pdir }
 			    &apache::find_directive_struct("Directory", $vconf);
 	if ($dir) {
-		local @ao = &apache::find_directive(
+		my @ao = &apache::find_directive(
 			"AllowOverride", $dir->{'members'});
 		&apache::save_directive("AllowOverride",
 			[ @ao, "None" ], $dir->{'members'}, $conf);
 		}
 
 	&flush_file_lines($virt->{'file'});
-	local $def_tpl = &read_file_contents("$default_content_dir/index.html");
-	local %hashtmp = %$d;
+	my $def_tpl = &read_file_contents("$default_content_dir/index.html");
+	my %hashtmp = %$d;
 	%hashtmp = &populate_default_index_page($d, %hashtmp);
 	$def_tpl = &replace_default_index_page($d, $def_tpl);
 	$def_tpl = &substitute_virtualmin_template($def_tpl, \%hashtmp);
-	local $msg = $tmpl->{'disabled_web'} eq 'none' ?
+	my $msg = $tmpl->{'disabled_web'} eq 'none' ?
 		$def_tpl :
 		join("\n", split(/\t/, $tmpl->{'disabled_web'}));
 	$msg = &substitute_domain_template($msg, $d);
@@ -1159,8 +1160,8 @@ if ($tmpl->{'disabled_url'} eq 'none') {
 	}
 else {
 	# Disable is done via redirect
-	local @rm = &apache::find_directive("RedirectMatch", $vconf);
-	local $url = &substitute_domain_template($tmpl->{'disabled_url'}, $d);
+	my @rm = &apache::find_directive("RedirectMatch", $vconf);
+	my $url = &substitute_domain_template($tmpl->{'disabled_url'}, $d);
 	&apache::save_directive("RedirectMatch",
 			[ "^/.*\$ $url", @rm ], $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
@@ -1171,7 +1172,7 @@ else {
 # Returns the file for storing the disabled site file for some domain
 sub disabled_website_html
 {
-local ($d, $mode) = @_;
+my ($d, $mode) = @_;
 &require_apache();
 $mode = $apache::httpd_modules{'core'} >= 2.4 ? 1 : 0 if (!defined($mode));
 if ($mode) {
@@ -1194,23 +1195,23 @@ else {
 # Deletes the special error page directive
 sub enable_web
 {
-if ($_[0]->{'alias'} && $_[0]->{'alias_mode'} == 1) {
+my ($d) = @_;
+if ($d->{'alias'} && $d->{'alias_mode'} == 1) {
 	# Just a ServerAlias in a real domain, so enabling is the same as
 	# creating.
-	if ($_[0]->{'disable_alias_web_delete'}) {
-		delete($_[0]->{'disable_alias_web_delete'});
-		return &setup_web($_[0]);
+	if ($d->{'disable_alias_web_delete'}) {
+		delete($d->{'disable_alias_web_delete'});
+		return &setup_web($d);
 		}
 	return 1;
 	}
 &$first_print($text{'enable_apache'});
 &require_apache();
-&obtain_lock_web($_[0]);
-local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-					    $_[0]->{'web_port'});
-local $ok;
+&obtain_lock_web($d);
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my $ok;
 if ($virt) {
-	&remove_disable_directives($virt, $vconf, $_[0]);
+	&remove_disable_directives($virt, $vconf, $d);
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_apache);
 	$ok = 1;
@@ -1219,46 +1220,46 @@ else {
 	&$second_print($text{'delete_noapache'});
 	$ok = 0;
 	}
-&release_lock_web($_[0]);
+&release_lock_web($d);
 
 # Remove disabled template file
-local $dis_file = &public_html_dir($_[0])."/disabled_by_virtualmin.html";
+my $dis_file = &public_html_dir($d)."/disabled_by_virtualmin.html";
 &unlink_file($dis_file) if (-r $dis_file);
 return $ok;
 }
 
 # remove_disable_directives(&virt, &vconf, &domain)
+# Undo what was done by add_disable_directives
 sub remove_disable_directives
 {
-local ($virt, $vconf, $d) = @_;
+my ($virt, $vconf, $d) = @_;
 
-# Remove local disables
-local @am = &apache::find_directive("AliasMatch", $vconf);
-local $olddis = &disabled_website_html($d, 0);
-local $newdis = &disabled_website_html($d, 1);
+# Remove my disables
+my @am = &apache::find_directive("AliasMatch", $vconf);
+my $olddis = &disabled_website_html($d, 0);
+my $newdis = &disabled_website_html($d, 1);
 @am = grep { $_ ne "^/.*\$ $disabled_website" &&
 	     $_ ne "^/.*\$ $olddis" &&
 	     $_ ne "^/.*\$ $newdis" } @am;
-local $conf = &apache::get_config();
+my $conf = &apache::get_config();
 &apache::save_directive("AliasMatch", \@am, $vconf, $conf);
 
 # Remove remote disables
-local @rm = &apache::find_directive("RedirectMatch", $vconf);
+my @rm = &apache::find_directive("RedirectMatch", $vconf);
 @rm = grep { substr($_, 0, 5) ne "^/.*\$" } @rm;
 &apache::save_directive("RedirectMatch", \@rm, $vconf, $conf);
 
 # Remove AllowOverride None
-local $pdir = &public_html_dir($d);
-local ($dir) = grep { $_->{'words'}->[0] eq $pdir }
+my $pdir = &public_html_dir($d);
+my ($dir) = grep { $_->{'words'}->[0] eq $pdir }
 		    &apache::find_directive_struct("Directory", $vconf);
 if ($dir) {
-	local @ao = &apache::find_directive(
+	my @ao = &apache::find_directive(
 		"AllowOverride", $dir->{'members'});
 	@ao = grep { $_ ne "None" } @ao;
 	&apache::save_directive("AllowOverride",
 		\@ao, $dir->{'members'}, $conf);
 	}
-
 
 &flush_file_lines($virt->{'file'}, undef, 1);
 }
@@ -1267,16 +1268,17 @@ if ($dir) {
 # Returns 1 if an Apache webserver already exists for some domain
 sub check_web_clash
 {
-local $tmpl = &get_template($_[0]->{'template'});
-local $web_port = $tmpl->{'web_port'} || 80;
-if (!$_[1] || $_[1] eq 'dom') {
+my ($d, $field) = @_;
+my $tmpl = &get_template($d->{'template'});
+my $web_port = $tmpl->{'web_port'} || 80;
+if (!$field || $field eq 'dom') {
 	# Check for <virtualhost> clash by domain name
-	local ($cvirt, $cconf) = &get_apache_virtual($_[0]->{'dom'}, $web_port);
+	my ($cvirt, $cconf) = &get_apache_virtual($d->{'dom'}, $web_port);
 	return 1 if ($cvirt);
 	}
-if (!$_[1] || $_[1] eq 'ip') {
+if (!$field || $field eq 'ip') {
 	# Check for clash by IP and port with Webmin or Usermin
-	local $err = &check_webmin_port_clash($_[0], $web_port);
+	my $err = &check_webmin_port_clash($d, $web_port);
 	return $err if ($err);
 	}
 return 0;
@@ -1286,7 +1288,7 @@ return 0;
 # Tell Apache to re-read its config file
 sub restart_apache
 {
-local ($restart) = @_;
+my ($restart) = @_;
 &require_apache();
 if ($restart && $apache::httpd_modules{'core'} >= 2.2) {
 	# Apache 2.2 doesn't need a full restart to open ports on new IPs
@@ -1295,7 +1297,7 @@ if ($restart && $apache::httpd_modules{'core'} >= 2.2) {
 &$first_print($restart ? $text{'setup_webpid2'} : $text{'setup_webpid'});
 if ($config{'check_apache'}) {
 	# Do a config check first
-	local $err = &apache::test_config();
+	my $err = &apache::test_config();
 	if ($err) {
 		&$second_print(&text('setup_webfailed', "<pre>$err</pre>"));
 		return 0;
@@ -1303,9 +1305,9 @@ if ($config{'check_apache'}) {
 	}
 &apache::format_modifed_config_files()
 	if (defined(&apache::format_modifed_config_files));
-local $apachelock = "$module_config_directory/apache-restart";
+my $apachelock = "$module_config_directory/apache-restart";
 &lock_file($apachelock);
-local $pid = &get_apache_pid();
+my $pid = &get_apache_pid();
 if (!$pid || !kill(0, $pid)) {
 	&$second_print($text{'setup_notrun'});
 	return 0;
@@ -1333,9 +1335,9 @@ return 1;
 # Given a domain name, returns the path to its log file
 sub get_apache_log
 {
-local ($dname, $port, $errorlog) = @_;
+my ($dname, $port, $errorlog) = @_;
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($dname, $port);
+my ($virt, $vconf) = &get_apache_virtual($dname, $port);
 if ($virt) {
 	local $log;
 	if ($errorlog) {
@@ -1359,18 +1361,18 @@ else {
 # real log file path.
 sub extract_logfile_path
 {
-local ($log, $dom) = @_;
+my ($log, $dom) = @_;
 my $log_ = $log;
-local $w = &apache::wsplit($log);	# Extract first word
+my $w = &apache::wsplit($log);	# Extract first word
 $log = $w->[0];
 if ($log =~ /^\|\Q$writelogs_cmd\E\s+(\S+)\s+(\S+)/) {
 	# Via writelogs .. return real path
-	local $file = $2;
+	my $file = $2;
 	if ($file =~ /^\//) {
 		$log = $file;
 		}
 	else {
-		local $d = &get_domain_by("dom", $_[0]);
+		my $d = &get_domain_by("dom", $_[0]);
 		if ($d) {
 			$log = "$d->{'home'}/$file";
 			}
@@ -1397,10 +1399,10 @@ return $log;
 # Returns the log file path that a domain's template would use
 sub get_apache_template_log
 {
-local ($dom, $error) = @_;
-local $tmpl = &get_template($dom->{'template'});
-local @dirs = &apache_template($tmpl->{'web'}, $dom);
-local $log;
+my ($dom, $error) = @_;
+my $tmpl = &get_template($dom->{'template'});
+my @dirs = &apache_template($tmpl->{'web'}, $dom);
+my $log;
 foreach my $l (@dirs) {
 	if ($error && $l =~ /^\s*ErrorLog\s+(\S+)/) {
 		$log = $1;
@@ -1423,30 +1425,30 @@ return $log;
 # directives with in, for some domain
 sub get_apache_virtual
 {
+my ($dname, $sp, $file) = @_;
 &require_apache();
-local $conf;
-if ($_[2]) {
+my $conf;
+if ($file) {
 	# Looking in specified file
-	$conf = [ &apache::get_config_file($_[2]) ];
+	$conf = [ &apache::get_config_file($file) ];
 	}
 else {
 	# Looking in global Apache config
 	$conf = &apache::get_config();
 	}
-local $sp = $_[1] || $default_web_port;
+$sp ||= $default_web_port;
 foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
-	local $vp = $v->{'words'}->[0] =~ /:(\d+)$/ ? $1 : $default_web_port;
+	my $vp = $v->{'words'}->[0] =~ /:(\d+)$/ ? $1 : $default_web_port;
 	next if ($vp != $sp);
-        local $sn = &apache::find_directive("ServerName", $v->{'members'});
-	return ($v, $v->{'members'}, $conf) if (lc($sn) eq $_[0] ||
-					        lc($sn) eq "www.$_[0]");
-	local $n;
-	foreach $n (&apache::find_directive_struct(
+        my $sn = &apache::find_directive("ServerName", $v->{'members'});
+	return ($v, $v->{'members'}, $conf) if (lc($sn) eq $dname ||
+					        lc($sn) eq "www.$dname");
+	foreach my $n (&apache::find_directive_struct(
 			"ServerAlias", $v->{'members'})) {
 		local @lcw = map { lc($_) } @{$n->{'words'}};
 		return ($v, $v->{'members'}, $conf)
-			if (&indexof($_[0], @lcw) >= 0 ||
-			    &indexof("www.$_[0]", @lcw) >= 0);
+			if (&indexof($dname, @lcw) >= 0 ||
+			    &indexof("www.$dname", @lcw) >= 0);
 		}
         }
 return ();
@@ -1468,13 +1470,13 @@ sub apache_template
 my ($dirs, $d) = @_;
 $dirs =~ s/\t/\n/g;
 $dirs = &substitute_domain_template($dirs, $d);
-local @dirs = split(/\n/, $dirs);
-local $sudir;
+my @dirs = split(/\n/, $dirs);
+my $sudir;
 foreach (@dirs) {
 	$sudir++ if (/^\s*SuexecUserGroup\s/i);
 	}
-local $tmpl = &get_template($d->{'template'});
-local $pdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+my $tmpl = &get_template($d->{'template'});
+my $pdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 if (!$sudir && $pdom->{'unix'}) {
 	# Automatically add suexec directives if missing
 	unshift(@dirs, "SuexecUserGroup \"#$pdom->{'uid'}\" ".
