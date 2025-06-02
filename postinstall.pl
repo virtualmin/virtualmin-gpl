@@ -603,6 +603,16 @@ if ($gconfig{'forgot_pass'} && &foreign_check("virtualmin-password-recovery")) {
 	&foreign_require("acl");
 	&acl::remove_anonymous_access("/virtualmin-password-recovery",
 				      "virtualmin-password-recovery");
+	if (&foreign_installed("usermin")) {
+		# Also disable in Usermin
+		&foreign_require("usermin");
+		my %clang;
+		&read_file("$usermin::config{'usermin_dir'}/custom-lang",
+			   \%clang);
+		$clang{'session_postfix'} = ' ';
+		&write_file("$usermin::config{'usermin_dir'}/custom-lang",
+			    \%clang);
+		}
 	}
 
 # Add custom branding for login page
