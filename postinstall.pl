@@ -596,12 +596,12 @@ if (!defined($gconfig{'forgot_pass'})) {
 if (&foreign_installed("usermin")) {
 	# Enable Usermin forgotten password recovery
 	&foreign_require("usermin");
-	if (!defined($usermin::gconfig{'forgot_pass'})) {
-		&lock_file("$usermin::gconfig{'usermin_dir'}/config");
-		$usermin::gconfig{'forgot_pass'} = 1;
-		&write_file("$usermin::gconfig{'usermin_dir'}/config",
-			\%usermin::gconfig);
-		&unlock_file("$usermin::gconfig{'usermin_dir'}/config");
+	if (!defined($usermin::config{'forgot_pass'})) {
+		&lock_file("$usermin::config{'usermin_dir'}/config");
+		$usermin::config{'forgot_pass'} = 1;
+		&write_file("$usermin::config{'usermin_dir'}/config",
+			\%usermin::config);
+		&unlock_file("$usermin::config{'usermin_dir'}/config");
 		}
 	}
 
