@@ -592,6 +592,19 @@ if (!defined($gconfig{'forgot_pass'})) {
 	&write_file("$config_directory/config", \%gconfig);
 	&unlock_file("$config_directory/config");
 	}
+
+if (&foreign_installed("usermin")) {
+	# Enable Usermin forgotten password recovery
+	&foreign_require("usermin");
+	if (!defined($usermin::gconfig{'forgot_pass'})) {
+		&lock_file("$usermin::gconfig{'usermin_dir'}/config");
+		$usermin::gconfig{'forgot_pass'} = 1;
+		&write_file("$usermin::gconfig{'usermin_dir'}/config",
+			\%usermin::gconfig);
+		&unlock_file("$usermin::gconfig{'usermin_dir'}/config");
+		}
+	}
+
 if ($gconfig{'forgot_pass'} && &foreign_check("virtualmin-password-recovery")) {
 	# Make sure the old password recovery module is disabled
 	my %clang;
