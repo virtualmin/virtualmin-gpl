@@ -3719,6 +3719,10 @@ foreach my $ad (@doms) {
 		&modify_user($u, $beforeu, $ad);
 		}
 	}
+
+# Update access
+&update_dom_mysql_access($d, $newmod, $newhost);
+
 # Update all installed scripts database host which are using MySQL
 $newhost ||= 'localhost';
 &update_scripts_creds(
@@ -3727,6 +3731,33 @@ foreach my $sd (@doms) {
 	&save_domain($sd);
 	}
 return 1;
+}
+
+# update_dom_mysql_access(&domain, [new-module], [new-host])
+# Re-grants access to MySQL databases for a domain, and updates the allowed
+sub update_dom_mysql_access
+{
+my ($d, $newmod, $newhost) = @_;
+# Make the DB accessible to the domain owner
+my @dbs = &domain_databases($d, ["mysql"]);
+foreach my $db (@dbs) {
+	&grant_mysql_database($d, $db->{'name'});
+	}
+# Re-grant allowed hosts, as deleting and re-creating DBs may have cleared them
+my @hosts = &get_mysql_hosts($d, &remote_mysql($d) ? 2 : 1);
+if (&indexof("%", @hosts) >= 0 &&
+	&indexof("localhost", @hosts) < 0 &&
+	&indexof("127.0.0.1", @hosts) < 0) {
+	# Always add localhost if % was allowed
+	push(@hosts, "localhost");
+	}
+if (@hosts) {
+	&save_mysql_allowed_hosts($d, \@hosts);
+	}
+@dbs = &domain_databases($d, ["mysql"]);
+foreach my $db (@dbs) {
+	&grant_mysql_database($d, $db->{'name'});
+	}
 }
 
 # check_reset_mysql(&domain)
