@@ -2886,6 +2886,7 @@ foreach my $full ("www.".$d->{'dom'},
 		  ($d->{'mail'} ? ("mail.".$d->{'dom'}) : ()),
 		  "admin.".$d->{'dom'},
 		  "webmail.".$d->{'dom'},
+		  "mta-sts.".$d->{'dom'},
 		  &get_autoconfig_hostname($d)) {
 	# Is the webserver configured to serve this hostname?
 	my $virt;
