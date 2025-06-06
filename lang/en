@@ -1977,6 +1977,7 @@ newweb_combined_cert=Configure Apache to use
 newweb_combined_cert2=Combined cert and CA file
 newweb_combined_cert1=Cert file only
 newweb_combined_cert0=Decide automatically
+newweb_allow_subset=Allow SSL certificate request for a subset of hostnames?
 
 newftp_title=ProFTPD Server Template
 newftp_ecannot=You are not allowed to edit the ProFTPD template

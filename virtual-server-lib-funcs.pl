@@ -8546,6 +8546,9 @@ if (!defined($dom->{'auto_letsencrypt'})) {
 		$dom->{'letsencrypt_dwild'} = $tmpl->{'ssl_letsencrypt_wild'};
 		}
 	}
+if (!defined($dom->{'letsencrypt_subset'})) {
+	$dom->{'letsencrypt_subset'} = $tmpl->{'ssl_allow_subset'};
+	}
 if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
     !$dom->{'disabled'} && !$dom->{'alias'} && !$dom->{'ssl_same'} &&
     &under_public_dns_suffix($dom->{'dom'})) {
@@ -9721,6 +9724,7 @@ push(@rv, { 'id' => 0,
 	    'ssl_always_ssl' => $config{'always_ssl'},
 	    'ssl_tlsa_records' => $config{'tlsa_records'},
 	    'ssl_combined_cert' => $config{'combined_cert'},
+	    'ssl_allow_subset' => $config{'allow_subset'},
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'content_web' => $config{'content_web'} // 2,
 	    'content_web_html' => $config{'content_web_html'},
@@ -10071,6 +10075,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'always_ssl'} = $tmpl->{'ssl_always_ssl'};
 	$config{'tlsa_records'} = $tmpl->{'ssl_tlsa_records'};
 	$config{'combined_cert'} = $tmpl->{'ssl_combined_cert'};
+	$config{'allow_subset'} = $tmpl->{'ssl_allow_subset'};
 	$config{'php_vars'} = $tmpl->{'php_vars'} eq "none" ? "" :
 				$tmpl->{'php_vars'};
 	$config{'php_fpm'} = $tmpl->{'php_fpm'} eq "none" ? "" :
@@ -10427,7 +10432,7 @@ if (!$tmpl->{'default'}) {
 		    "ssl_key_size", "ssl_cert_type", "ssl_auto_letsencrypt",
 		    "ssl_letsencrypt_wild", "ssl_always_ssl",
 		    "ssl_tlsa_records", "ssl_combined_cert",
-		    "ssl_renew_letsencrypt",
+		    "ssl_renew_letsencrypt", "ssl_allow_subset",
 		    "aliascopy", "bccto", "resources", "dnssec", "avail",
 		    @plugins,
 		    &list_php_wrapper_templates(),

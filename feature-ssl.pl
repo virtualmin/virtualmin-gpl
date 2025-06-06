@@ -3690,6 +3690,14 @@ print &ui_table_row(
 		6, $tmpl->{'default'} ? $text{'newweb_renew_letsencrypt_def'}
 				      : $text{'tmpl_default'}));
 
+# Allow request for a subset of hostnames?
+print &ui_table_row(
+	&hlink($text{'newweb_allow_subset'}, "config_allow_subset"),
+	&ui_radio("ssl_allow_subset", $tmpl->{'ssl_allow_subset'},
+	  [ $tmpl->{'default'} ? ( ) : ( [ '', $text{'tmpl_default'} ] ),
+	    [ 1, $text{'yes'} ],
+	    [ 0, $text{'no'} ] ]));
+
 # Generate TLSA DNS records?
 print &ui_table_row(
 	&hlink($text{'newweb_tlsa_records'}, "config_tlsa_records"),
@@ -3775,6 +3783,7 @@ if (defined($in{'web_acme'})) {
 	}
 $tmpl->{'ssl_auto_letsencrypt'} = $in{'ssl_auto_letsencrypt'};
 $tmpl->{'ssl_letsencrypt_wild'} = $in{'ssl_letsencrypt_wild'};
+$tmpl->{'ssl_allow_subset'} = $in{'ssl_allow_subset'};
 if ($in{'ssl_renew_letsencrypt_def'}) {
 	delete($tmpl->{'ssl_renew_letsencrypt'});
 	}
