@@ -23,8 +23,8 @@ if ($mymod->{'minfo'}->{'dir'} eq $newmod->{'minfo'}->{'dir'}) {
 # Do the move
 &ui_print_unbuffered_header(&domain_in($d), $text{'databases_title'}, "");
 
-print "<b>",&text('databases_moving',
-		  $mymod->{'desc'}, $newmod->{'desc'}),"</b><p>\n";
+print &text('databases_moving',
+		  $mymod->{'desc'}, $newmod->{'desc'}),"<p>\n";
 
 &move_mysql_server($d, $newmod->{'minfo'}->{'dir'},
 		   $newmod->{'config'}->{'host'});

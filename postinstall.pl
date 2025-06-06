@@ -585,15 +585,28 @@ if ($config{'rs_endpoint'} eq 'https://lon.auth.api.rackspacecloud.com/v1.0') {
 # Unlock config now we're done with it
 &unlock_file($module_config_file);
 
-# Enable Webmin forgotten password recovery, if supported
-my $webmin_version = &get_webmin_version();
-$webmin_version =~ s/^(\d+\.\d+).*/$1/;
-if ($webmin_version >= 2.304 && !defined($gconfig{'forgot_pass'})) {
+if (!defined($gconfig{'forgot_pass'})) {
+	# Enable Webmin forgotten password recovery
 	&lock_file("$config_directory/config");
 	$gconfig{'forgot_pass'} = 1;
 	&write_file("$config_directory/config", \%gconfig);
 	&unlock_file("$config_directory/config");
 	}
+
+if (&foreign_installed("usermin")) {
+	# Enable Usermin forgotten password recovery
+	&foreign_require("usermin");
+	my %uconfig;
+	&usermin::get_usermin_config(\%uconfig);
+	if (!defined($uconfig{'forgot_pass'})) {
+		my $uconfig = "$usermin::config{'usermin_dir'}/config";
+		&lock_file($uconfig);
+		$uconfig{'forgot_pass'} = 1;
+		&write_file($uconfig, \%uconfig);
+		&unlock_file($uconfig);
+		}
+	}
+
 if ($gconfig{'forgot_pass'} && &foreign_check("virtualmin-password-recovery")) {
 	# Make sure the old password recovery module is disabled
 	my %clang;
