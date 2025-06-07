@@ -1062,11 +1062,15 @@ sub extract_plesk9_cid
 {
 local ($basedir, $cids, $type) = @_;
 local ($cid) = grep { $_->{'type'} eq $type } @$cids;
-return undef if (ref($cid) ne 'HASH' || !defined($cid->{'content-file'}->{'content'}));
-local $file = $basedir."/".$cid->{'path'}."/".$cid->{'content-file'}->{'content'};
+return undef if (!$cid || ref($cid) ne 'HASH');
+my $cf = $cid->{'content-file'};
+if (ref($cf) eq 'ARRAY') {
+	$cf = $cf->[0];
+	}
+my $file = $basedir."/".$cid->{'path'}."/".$cf->{'content'};
 if (!-r $file) {
 	# Try path as seen on Plesk 11
-	$file = $basedir."/".$cid->{'content-file'}->{'content'};
+	$file = $basedir."/".$cf->{'content'};
 	}
 -r $file || return undef;
 local $dir = $main::extract_plesk9_cid_cache{$file};
@@ -1074,11 +1078,11 @@ if (!$dir) {
 	# Need to extract
 	$dir = &transname();
 	&make_dir($dir, 0700);
-	local $err = &extract_compressed_file($file, $dir);
+	my $err = &extract_compressed_file($file, $dir);
 	return undef if ($err);
 	$main::extract_plesk9_cid_cache{$file} = $dir;
 	}
-return $dir."/".$cid->{'offset'};
+return $cid->{'offset'} ? $dir."/".$cid->{'offset'} : $dir;
 }
 
 1;
