@@ -6788,6 +6788,177 @@ if ($mail_system == 0) {
 return 'hash';	# Should never happen
 }
 
+# enable_mta_sts(&domain)
+# Add DNS records and .well-know file for MTA-STS for this domain. Returns undef
+# on success or an error message on failure.
+sub enable_mta_sts
+{
+my ($d) = @_;
+$d->{'dns'} || return $text{'mta_edns'};
+my $p = &domain_has_website($d);
+$p || return $text{'mta_eweb'};
+
+# Add the DNS records, if missing
+&obtain_lock_dns($d);
+&pre_records_change($d);
+my ($recs, $file) = &get_domain_dns_records_and_file($d);
+my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'} &&
+		    $_->{'type'} eq 'TXT' } @$recs;
+my $id = &domain_id();
+if ($mtsr) {
+	if ($mtsr->{'values'}->[0] =~ /id=([0-9]+)/) {
+		$id = $1;
+		}
+	$mtsr->{'values'} = [ "v=STSv1; id=$id" ];
+	&modify_dns_record($recs, $file, $mtsr);
+	}
+else {
+	$mtsr = { 'name' => '_mta-sts.'.$d->{'dom'},
+		  'type' => 'TXT',
+		  'values' => [ "v=STSv1; id=$id" ] };
+	&create_dns_record($recs, $file, $mtsr);
+	}
+my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'} &&
+                     $_->{'type'} eq 'TXT' } @$recs;
+if ($smtpr) {
+	$smtpr->{'values'} = [ "v=TLSRPTv1; rua=mailto:$d->{'emailto'}" ];
+	&modify_dns_record($recs, $file, $smtpr);
+	}
+else {
+	$smtpr = { 'name' => '_smtp._tls.'.$d->{'dom'},
+		   'type' => 'TXT',
+		   'values' => [ "v=TLSRPTv1; rua=mailto:$d->{'emailto'}" ] };
+	&create_dns_record($recs, $file, $smtpr);
+	}
+&post_records_change($d, $recs, $file);
+&release_lock_dns($d);
+
+# Setup the webserver to serve mta-sts sub-domain
+if ($p eq "web") {
+	# Add Apache ServerAlias
+	&obtain_lock_web($d);                   
+        &require_apache();
+	my @ports = ( $d->{'web_port'},
+		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+	foreach my $p (@ports) {
+                my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},$p);
+		next if (!$virt);
+		my @sa = &apache::find_directive("ServerAlias", $vconf);
+		@sa = &unique(@sa, "mta-sts.".$d->{'dom'});
+		&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
+		&flush_file_lines($virt->{'file'});
+		}
+	&release_lock_web($d);                   
+	}
+else {
+	# What about Nginx??
+	# XXX
+	}
+
+# Create the magic verification file
+my $wkdir = &public_html_dir($d)."/.well-known";
+if (!-d $wkdir) {
+	&make_dir_as_domain_user($d, $wkdir, 0755);
+	}
+my $wkfile = $wkdir."/mta-sts.txt";
+&open_tempfile_as_domain_user($d, MTA, ">$wkfile");
+&print_tempfile(MTA, "version: STSv1\n",
+		     "mode: enforce\n",
+		     "mx: *.$d->{'dom'}\n",
+		     "max_age: 86400\n");
+&close_tempfile_as_domain_user($d, MTA);
+
+return undef;
+}
+
+# disable_mta_sts(&domain)
+# Remove the MTA-STS DNS records, ServerAlias and file
+sub disable_mta_sts
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+
+# Remove DNS records
+&obtain_lock_dns($d);
+&pre_records_change($d);
+my ($recs, $file) = &get_domain_dns_records_and_file($d);
+my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'} &&
+                    $_->{'type'} eq 'TXT' } @$recs;
+if ($mstr) {
+	&delete_dns_record($d, $mstr);
+	}
+my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'} &&
+                     $_->{'type'} eq 'TXT' } @$recs;
+if ($smtpr) {
+	&delete_dns_record($d, $smtpr);
+	}
+&post_records_change($d, $recs, $file);
+&release_lock_dns($d);
+
+# Update webserver config
+if ($p eq "web") {
+	&obtain_lock_web($d);                   
+        &require_apache();
+	my @ports = ( $d->{'web_port'},
+		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+	foreach my $p (@ports) {
+                my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},$p);
+		next if (!$virt);
+		my @sa = &apache::find_directive("ServerAlias", $vconf);
+		@sa = grep { $_ ne "mta-sts.".$d->{'dom'} } @sa;
+		&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
+		&flush_file_lines($virt->{'file'}, undef, 1);
+		}
+	&release_lock_web($d);     
+	}
+elsif ($p) {
+	# XXX
+	}
+
+# Delete the magic verification file
+my $wkdir = &public_html_dir($d)."/.well-known";
+my $wkfile = $wkdir."/mta-sts.txt";
+&unlink_file_as_domain_user($d, $wkfile);
+
+return undef;
+}
+
+# get_mta_sts(&domain)
+# Returns undef if MTA-STS is setup correctly, or an error message if not
+sub get_mta_sts
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+$p || return "Virtual server has no website!";
+
+my ($recs, $file) = &get_domain_dns_records_and_file($d);
+my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'} &&
+		    $_->{'type'} eq 'TXT' } @$recs;
+$mtsr || return "Missing _mta-sts DNS record";
+my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'} &&
+                     $_->{'type'} eq 'TXT' } @$recs;
+$smtpr || return "Missing _smtp._tls DNS record";
+
+# Check for ServerAlias
+if ($p eq "web") {
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+	my @sa = &apache::find_directive("ServerAlias", $vconf);
+	&indexof('_mta-sts.'.$d->{'dom'}, @sa) >= 0 ||
+		return "Apache is not configured to use _mta-sts subdomain";
+	}
+else {
+	# XXX check nginx
+	}
+
+
+# Check for special file
+my $wkdir = &public_html_dir($d)."/.well-known";
+my $wkfile = $wkdir."/mta-sts.txt";
+-r $wkfile || return "Well-known file $wkfile does not exist";
+
+return undef;
+}
+
 $done_feature_script{'mail'} = 1;
 
 1;
