@@ -2009,7 +2009,16 @@ if ($d->{'dns_submode'}) {
 	}
 if (!$recs) {
 	($recs, $file) = &get_domain_dns_records_and_file($d);
-	return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$file);
+	if (!$file) {
+		if ($d->{'dns_cloud'}) {
+			my $cloud = &get_domain_dns_cloud($d);
+			return &text('validate_ednsc', "<tt>$d->{'dom'}</tt>",
+				$cloud->{'desc'}, $recs);
+			}
+		else {
+			return &text('validate_edns', "<tt>$d->{'dom'}</tt>");
+			}
+		}
 	}
 return &text('validate_ednsfile', "<tt>$d->{'dom'}</tt>") if (!@$recs);
 local $absfile;
