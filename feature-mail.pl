@@ -6861,12 +6861,36 @@ if (!-d $wkdir) {
 	&make_dir_as_domain_user($d, $wkdir, 0755);
 	}
 my $wkfile = $wkdir."/mta-sts.txt";
+&lock_file($wkfile);
 &open_tempfile_as_domain_user($d, MTA, ">$wkfile");
 &print_tempfile(MTA, "version: STSv1\n",
 		     "mode: enforce\n",
 		     "mx: *.$d->{'dom'}\n",
 		     "max_age: 86400\n");
 &close_tempfile_as_domain_user($d, MTA);
+&unlock_file($wkfile);
+
+# Re-generate Lets' Encrypt cert if possible
+my $info;
+if (&domain_has_ssl_cert($d) &&
+    ($info = &cert_info($d)) &&
+    &is_letsencrypt_cert($info) &&
+    !&check_domain_certificate('_mta-sts.'.$d->{'dom'}, $info)) {
+	my $old_dname = $d->{'letsencrypt_dname'};
+	if ($old_dname) {
+		$d->{'letsencrypt_dname'} = join(" ",
+			split(/\s+/, $d->{'letsencrypt_dname'}),
+			'_mta-sts.'.$d->{'dom'});
+		}
+	my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
+	if (!$ok) {
+		$d->{'letsencrypt_dname'} = $old_dname;
+		return &text('letsencrypt_emtasts', '_mta-sts.'.$d->{'dom'}, $err);
+		}
+	if (&indexof('_mta-sts.'.$d->{'dom'}, @$dnames) < 0) {
+		return &text('letsencrypt_emtasts2', '_mta-sts.'.$d->{'dom'});
+		}
+	}
 
 return undef;
 }
@@ -6918,7 +6942,9 @@ elsif ($p) {
 # Delete the magic verification file
 my $wkdir = &public_html_dir($d)."/.well-known";
 my $wkfile = $wkdir."/mta-sts.txt";
+&lock_file($wkfile);
 &unlink_file_as_domain_user($d, $wkfile);
+&unlock_file($wkfile);
 
 return undef;
 }

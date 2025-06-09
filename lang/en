@@ -5340,6 +5340,7 @@ validate_euquota=Unix user <tt>$1</tt>'s quota of <tt>$2</tt> does not match the
 validate_egquota=Unix group <tt>$1</tt>'s quota of <tt>$2</tt> does not match the virtual server's quota of <tt>$3</tt>
 validate_eport=Port <tt>$1</tt> is being used by <tt>$2</tt> to run unexpected server <tt>$3</tt>
 validate_edns=No DNS zone found for domain <tt>$1</tt>
+validate_ednsc=Failed to fetch records for $1 from cloud DNS provider $2 : $3
 validate_ednsfile=No DNS zone file set for domain <tt>$1</tt>
 validate_ednsfile2=DNS zone file <tt>$1</tt> does not exist
 validate_ednssoa2=DNS zone is missing an SOA record
@@ -8093,6 +8094,8 @@ letsencrypt_dnscheckbad=.. some hostnames were removed : $1
 letsencrypt_dnscheckall=.. none of the hostnames could be resolved!
 letsencrypt_eacme=Selected SSL provider does not exist!
 letsencrypt_eacme2=You are not allowed to use the selected SSL provider
+letsencrypt_emtasts=SSL certificate request for $1 failed : $2
+letsencrypt_emtasts2=SSL certificate request did not include $1
 
 php_fpmrestart=Restarting PHP-FPM $1 server ..
 php_fpmreload=Reloading PHP-FPM $1 server ..

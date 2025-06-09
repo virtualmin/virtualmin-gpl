@@ -62,6 +62,10 @@ flag followed by a provider name like C<ses>. The selected provider must have
 already been configured in the Virtualmin UI. To revert to direct email 
 delivery, use the C<--no-cloud-smtp> flag.
 
+To enable MTA-STS support for this domain if it has a website and DNS enabled,
+use the C<--enable-mta-sts> flag to create the required DNS records and
+website config. Or to disable it instead, use the C<--disable-mta-sts> flag.
+
 =cut
 
 package virtual_server;
@@ -159,6 +163,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-cloud-smtp") {
 		$cloudsmtp = "";
 		}
+	elsif ($a eq "--enable-mta-sts") {
+		$mta_sts = 1;
+		}
+	elsif ($a eq "--disable-mta-sts") {
+		$mta_sts = 0;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -172,7 +182,7 @@ while(@ARGV > 0) {
 @dnames || $all_doms || @users || usage("No domains or users specified");
 defined($bcc) || defined($rbcc) || defined($aliascopy) || defined($dependent) ||
     defined($autoconfig) || defined($key) || defined($cloud) ||
-    defined($cloudsmtp) || &usage("Nothing to do");
+    defined($cloudsmtp) || defined($mta_sts) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -399,6 +409,22 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Enable or disable MTA-STS
+	if (defined($mta_sts)) {
+		if ($mta_sts) {
+			# Enable MTA-STS
+			&$first_print("Enabling MTA-STS ..");
+			my $err = &enable_mta_sts($d);
+			&$second_print($err ? ".. failed : $err" : ".. done");
+			}
+		else {
+			# Disable MTA-STS
+			&$first_print("Disabling MTA-STS ..");
+			my $err = &disable_mta_sts($d);
+			&$second_print($err ? ".. failed : $err" : ".. done");
+			}
+		}
+
 	&save_domain($d);
 
 	&$outdent_print();
@@ -427,6 +453,7 @@ print "                      [--cloud-mail-filter name |\n";
 print "                       --no-cloud-mail-filter]\n";
 print "                      [--cloud-mail-filter-id number]\n";
 print "                      [--cloud-smtp name | --no-cloud-smtp]\n";
+print "                      [--enable-mta-sts | --disable-mta-sts]\n";
 exit(1);
 }
 
