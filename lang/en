@@ -6621,6 +6621,9 @@ mail_smtp_local=&lt;None - deliver directly from this system&gt;
 mail_smtp_cloudoff=Removing cloud SMTP provider $1 ..
 mail_smtp_cloudon=Configuring cloud SMTP provider $1 ..
 mail_smtp_cloudfailed=.. failed : $1
+mail_mta_edns=MTA-STS cannot be enabled without a DNS domain
+mail_mta_eweb=MTA-STS cannot be enabled without a website
+mail_mta_essl=MTA-STS cannot be enabled without an SSL website
 
 nf_header=The following new features are available in $1 ..
 nf_desc=Feature

@@ -6788,15 +6788,26 @@ if ($mail_system == 0) {
 return 'hash';	# Should never happen
 }
 
+# can_mta_sts(&domain)
+# Can this domain have MTA-STS enabled?
+sub can_mta_sts
+{
+my ($d) = @_;
+return $d->{'mail'} && $d->{'dns'} &&
+       &domain_has_website($d) && &domain_has_ssl($d);
+}
+
 # enable_mta_sts(&domain)
 # Add DNS records and .well-know file for MTA-STS for this domain. Returns undef
 # on success or an error message on failure.
 sub enable_mta_sts
 {
 my ($d) = @_;
-$d->{'dns'} || return $text{'mta_edns'};
+$d->{'dns'} || return $text{'mail_mta_edns'};
 my $p = &domain_has_website($d);
-$p || return $text{'mta_eweb'};
+$p || return $text{'mail_mta_eweb'};
+my $s = &domain_has_ssl($d);
+$s || return $text{'mail_mta_essl'};
 
 # Add the DNS records, if missing
 &obtain_lock_dns($d);
@@ -6917,26 +6928,28 @@ my ($d) = @_;
 my $p = &domain_has_website($d);
 
 # Remove DNS records
-&obtain_lock_dns($d);
-&pre_records_change($d);
-my ($recs, $file) = &get_domain_dns_records_and_file($d);
-my ($mtsa) = grep { $_->{'name'} eq 'mta-sts.'.$d->{'dom'}.'.' &&
-                    $_->{'type'} eq 'A' } @$recs;
-if ($mtsa) {
-	&delete_dns_record($recs, $file, $mtsa);
+if ($d->{'dns'}) {
+	&obtain_lock_dns($d);
+	&pre_records_change($d);
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	my ($mtsa) = grep { $_->{'name'} eq 'mta-sts.'.$d->{'dom'}.'.' &&
+			    $_->{'type'} eq 'A' } @$recs;
+	if ($mtsa) {
+		&delete_dns_record($recs, $file, $mtsa);
+		}
+	my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'}.'.' &&
+			    $_->{'type'} eq 'TXT' } @$recs;
+	if ($mtsr) {
+		&delete_dns_record($recs, $file, $mtsr);
+		}
+	my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'}.'.' &&
+			     $_->{'type'} eq 'TXT' } @$recs;
+	if ($smtpr) {
+		&delete_dns_record($recs, $file, $smtpr);
+		}
+	&post_records_change($d, $recs, $file);
+	&release_lock_dns($d);
 	}
-my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'}.'.' &&
-                    $_->{'type'} eq 'TXT' } @$recs;
-if ($mtsr) {
-	&delete_dns_record($recs, $file, $mtsr);
-	}
-my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'}.'.' &&
-                     $_->{'type'} eq 'TXT' } @$recs;
-if ($smtpr) {
-	&delete_dns_record($recs, $file, $smtpr);
-	}
-&post_records_change($d, $recs, $file);
-&release_lock_dns($d);
 
 # Update webserver config
 if ($p eq "web") {
@@ -6976,7 +6989,10 @@ sub get_mta_sts
 my ($d) = @_;
 my $p = &domain_has_website($d);
 $p || return "Virtual server has no website!";
+my $s = &domain_has_ssl($d);
+$s || return "Virtual server has no SSL website!";
 
+$d->{'dns'} || return "Virtual server does not have DNS enabled";
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 my ($mtsa) = grep { $_->{'name'} eq 'mta-sts.'.$d->{'dom'}.'.' &&
 		    $_->{'type'} eq 'A' } @$recs;
