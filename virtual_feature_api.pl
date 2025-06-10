@@ -231,6 +231,15 @@ sub feature_backup
 {
 }
 
+# feature_always_backup(&domain, file, &opts, homeformat?, differential?,
+#                       as-owner, &all-opts)
+# Called to backup this feature for the domain to the given file, regardless of
+# whether this feature is enabled or not. Must return 1 on success or 0 on
+# failure
+sub feature_always_backup
+{
+}
+
 # feature_backup_opts(&opts)
 # Returns HTML for selecting options for a backup of this feature
 sub feature_backup_opts

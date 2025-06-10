@@ -1,10 +1,6 @@
-<header>Exclude unverifiable hostnames?</header>
+<header>Exclude unverifiable domain names?</header>
 
-By default when this option is set to <b>No</b>, a request for an SSL
-certificate from an ACME provider like Let's Encrypt will only succeed if
-all hostnames could be validated. However, changing it to <b>Yes</b> allows
-requests to partially succeed, but excluding from the certificate hostnames
-that cannot be verified. <p>
-
-<footer>
-
+By default, when this option is set to "No", an SSL certificate request from an
+ACME provider like Let's Encrypt will only succeed if all domain names can be
+validated. Changing it to "Yes" allows the request to partially succeed by
+excluding domain names from the certificate that cannot be verified.
