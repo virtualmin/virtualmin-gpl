@@ -8095,7 +8095,7 @@ letsencrypt_dnscheckall=.. none of the hostnames could be resolved!
 letsencrypt_eacme=Selected SSL provider does not exist!
 letsencrypt_eacme2=You are not allowed to use the selected SSL provider
 letsencrypt_emtasts=SSL certificate request for $1 failed : $2
-letsencrypt_emtasts2=SSL certificate request did not include $1
+letsencrypt_emtasts2=SSL certificate response did not include $1
 
 php_fpmrestart=Restarting PHP-FPM $1 server ..
 php_fpmreload=Reloading PHP-FPM $1 server ..

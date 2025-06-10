@@ -6802,7 +6802,15 @@ $p || return $text{'mta_eweb'};
 &obtain_lock_dns($d);
 &pre_records_change($d);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
-my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'} &&
+my ($mtsa) = grep { $_->{'name'} eq 'mta-sts.'.$d->{'dom'}.'.' &&
+		    $_->{'type'} eq 'A' } @$recs;
+if (!$mtsa) {
+	$mtsa = { 'name' => 'mta-sts.'.$d->{'dom'}.'.',
+		  'type' => 'A',
+		  'values' => [ $d->{'dns_ip'} || $d->{'ip'} ] };
+	&create_dns_record($recs, $file, $mtsa);
+	}
+my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'}.'.' &&
 		    $_->{'type'} eq 'TXT' } @$recs;
 my $id = &domain_id();
 if ($mtsr) {
@@ -6813,19 +6821,19 @@ if ($mtsr) {
 	&modify_dns_record($recs, $file, $mtsr);
 	}
 else {
-	$mtsr = { 'name' => '_mta-sts.'.$d->{'dom'},
+	$mtsr = { 'name' => '_mta-sts.'.$d->{'dom'}.'.',
 		  'type' => 'TXT',
 		  'values' => [ "v=STSv1; id=$id" ] };
 	&create_dns_record($recs, $file, $mtsr);
 	}
-my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'} &&
+my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'}.'.' &&
                      $_->{'type'} eq 'TXT' } @$recs;
 if ($smtpr) {
 	$smtpr->{'values'} = [ "v=TLSRPTv1; rua=mailto:$d->{'emailto'}" ];
 	&modify_dns_record($recs, $file, $smtpr);
 	}
 else {
-	$smtpr = { 'name' => '_smtp._tls.'.$d->{'dom'},
+	$smtpr = { 'name' => '_smtp._tls.'.$d->{'dom'}.'.',
 		   'type' => 'TXT',
 		   'values' => [ "v=TLSRPTv1; rua=mailto:$d->{'emailto'}" ] };
 	&create_dns_record($recs, $file, $smtpr);
@@ -6849,6 +6857,12 @@ if ($p eq "web") {
 		&flush_file_lines($virt->{'file'});
 		}
 	&release_lock_web($d);                   
+
+	# Restart Apache now so that the LE request works
+	&push_all_print();
+	&set_all_null_print();
+	&restart_apache();
+	&pop_all_print();
 	}
 else {
 	# What about Nginx??
@@ -6875,20 +6889,20 @@ my $info;
 if (&domain_has_ssl_cert($d) &&
     ($info = &cert_info($d)) &&
     &is_letsencrypt_cert($info) &&
-    !&check_domain_certificate('_mta-sts.'.$d->{'dom'}, $info)) {
+    !&check_domain_certificate('mta-sts.'.$d->{'dom'}, $info)) {
 	my $old_dname = $d->{'letsencrypt_dname'};
 	if ($old_dname) {
 		$d->{'letsencrypt_dname'} = join(" ",
 			split(/\s+/, $d->{'letsencrypt_dname'}),
-			'_mta-sts.'.$d->{'dom'});
+			'mta-sts.'.$d->{'dom'});
 		}
 	my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
 	if (!$ok) {
 		$d->{'letsencrypt_dname'} = $old_dname;
-		return &text('letsencrypt_emtasts', '_mta-sts.'.$d->{'dom'}, $err);
+		return &text('letsencrypt_emtasts', 'mta-sts.'.$d->{'dom'}, $err);
 		}
-	if (&indexof('_mta-sts.'.$d->{'dom'}, @$dnames) < 0) {
-		return &text('letsencrypt_emtasts2', '_mta-sts.'.$d->{'dom'});
+	if (&indexof('mta-sts.'.$d->{'dom'}, @$dnames) < 0) {
+		return &text('letsencrypt_emtasts2', 'mta-sts.'.$d->{'dom'});
 		}
 	}
 
@@ -6906,15 +6920,20 @@ my $p = &domain_has_website($d);
 &obtain_lock_dns($d);
 &pre_records_change($d);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
-my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'} &&
-                    $_->{'type'} eq 'TXT' } @$recs;
-if ($mstr) {
-	&delete_dns_record($d, $mstr);
+my ($mtsa) = grep { $_->{'name'} eq 'mta-sts.'.$d->{'dom'}.'.' &&
+                    $_->{'type'} eq 'A' } @$recs;
+if ($mtsa) {
+	&delete_dns_record($recs, $file, $mtsa);
 	}
-my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'} &&
+my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'}.'.' &&
+                    $_->{'type'} eq 'TXT' } @$recs;
+if ($mtsr) {
+	&delete_dns_record($recs, $file, $mtsr);
+	}
+my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'}.'.' &&
                      $_->{'type'} eq 'TXT' } @$recs;
 if ($smtpr) {
-	&delete_dns_record($d, $smtpr);
+	&delete_dns_record($recs, $file, $smtpr);
 	}
 &post_records_change($d, $recs, $file);
 &release_lock_dns($d);
@@ -6934,6 +6953,7 @@ if ($p eq "web") {
 		&flush_file_lines($virt->{'file'}, undef, 1);
 		}
 	&release_lock_web($d);     
+	&register_post_action(\&restart_apache);
 	}
 elsif ($p) {
 	# XXX
@@ -6958,10 +6978,13 @@ my $p = &domain_has_website($d);
 $p || return "Virtual server has no website!";
 
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
-my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'} &&
+my ($mtsa) = grep { $_->{'name'} eq 'mta-sts.'.$d->{'dom'}.'.' &&
+		    $_->{'type'} eq 'A' } @$recs;
+$mtsa || return "Missing mta-sts DNS address record";
+my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'}.'.' &&
 		    $_->{'type'} eq 'TXT' } @$recs;
-$mtsr || return "Missing _mta-sts DNS record";
-my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'} &&
+$mtsr || return "Missing _mta-sts DNS TXT record";
+my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'}.'.' &&
                      $_->{'type'} eq 'TXT' } @$recs;
 $smtpr || return "Missing _smtp._tls DNS record";
 
