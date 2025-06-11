@@ -849,6 +849,13 @@ if ($multiline) {
 					       @servers),"\n";
 			}
 
+		# Show MTA-STS status
+		if (&can_mta_sts($d)) {
+			$err = &get_mta_sts($d);
+			print "    MTA-STS status: ",
+				($err ? "Disabled ($err)" : "Enabled"),"\n";
+			}
+
 		# Show owner limits
 		if (!$d->{'parent'}) {
 			print "    Maximum sub-servers: ",
