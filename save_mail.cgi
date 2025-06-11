@@ -164,6 +164,27 @@ if (defined($cloudsmtp) && $oldsmtp ne $cloudsmtp) {
 		}
 	}
 
+# Update MTA-STS setting
+if (&can_mta_sts($d) && defined($in{'mta_sts'})) {
+	my $mtaerr = &get_mta_sts($d);
+	if ($in{'mta_sts'} && $mtaerr) {
+		# Enable MTA-STS
+		&$first_print($text{'mail_mta_sts_on'});
+		$err = &enable_mta_sts($d);
+		&$second_print($err ? &text('mail_mta_sts_err', $err)
+				    : $text{'setup_done'});
+		$changed++;
+		}
+	elsif (!$in{'mta_sts'} && !$mtaerr) {
+		# Disable MTA-STS
+		&$first_print($text{'mail_mta_sts_off'});
+		$err = &disable_mta_sts($d);
+		&$second_print($err ? &text('mail_mta_sts_err', $err)
+				    : $text{'setup_done'});
+		$changed++;
+		}
+	}
+
 if (!$changed) {
 	&$first_print($text{'mail_nothing'});
 	}

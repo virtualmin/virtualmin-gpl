@@ -7008,8 +7008,8 @@ $smtpr || return "Missing _smtp._tls DNS record";
 if ($p eq "web") {
 	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 	my @sa = &apache::find_directive("ServerAlias", $vconf);
-	&indexof('_mta-sts.'.$d->{'dom'}, @sa) >= 0 ||
-		return "Apache is not configured to use _mta-sts subdomain";
+	&indexof('mta-sts.'.$d->{'dom'}, @sa) >= 0 ||
+		return "Apache is not configured to use mta-sts subdomain";
 	}
 else {
 	# XXX check nginx

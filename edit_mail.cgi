@@ -95,6 +95,13 @@ if (@okclouds) {
 			  map { [ $_->{'name'}, $_->{'desc'} ] } @okclouds ]));
 	}
 
+# MTA-STS option
+if (&can_mta_sts($d)) {
+	my $mtaerr = &get_mta_sts($d);
+	print &ui_table_row($text{'mail_mta_sts'},
+		&ui_yesno_radio("mta_sts", $mtaerr ? 0 : 1));
+	}
+
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
