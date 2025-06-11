@@ -245,9 +245,9 @@ else {
 	&init::disable_at_boot("mysql");
 	}
 
-&require_postgres();
 if ($in->{'postgres'}) {
 	# Enable and start PostgreSQL
+	&require_postgres();
 	if (!&foreign_installed("postgresql", 0)) {
 		return $text{'wizard_epostgresinst'};
 		}
@@ -265,8 +265,9 @@ if ($in->{'postgres'}) {
 		return &text('wizard_epostgresconf', '../postgresql/');
 		}
 	}
-else {
+elsif (&foreign_available("postgresql")) {
 	# Disable and shut down PostgreSQL
+	&require_postgres();
 	$config{'postgres'} = 0;
 	&postgresql::stop_postgresql();
 	&init::disable_at_boot("postgresql");
