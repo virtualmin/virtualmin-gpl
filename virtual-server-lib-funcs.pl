@@ -8529,6 +8529,14 @@ if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
 		}
 	}
 
+# Setup MTA-STS if defined in the template
+if (&can_mta_sts($dom) && $tmpl->{'mail_mta_sts'}) {
+	&$first_print($text{'mail_mta_sts_on'});
+	my $err = &enable_mta_sts($dom);
+	&$second_print($err ? &text('mail_mta_sts_err', $err)
+			    : $text{'setup_done'});
+	}
+
 # If an SSL cert wasn't generated because SSL wasn't enabled, do one now
 my $always_ssl = defined($dom->{'always_ssl'}) ? $dom->{'always_ssl'}
 					       : $tmpl->{'ssl_always_ssl'};
@@ -9786,6 +9794,7 @@ push(@rv, { 'id' => 0,
 	    'mail_cc' => $config{'newdom_cc'},
 	    'mail_bcc' => $config{'newdom_bcc'},
 	    'mail_cloud' => $config{'mail_cloud'},
+	    'mail_mta_sts' => $config{'mail_mta_sts'},
 	    'newuser_on' => $config{'user_template'} eq "none" ? "none" : "yes",
 	    'newuser' => $config{'user_template'} eq "none" ||
 		         $config{'user_template'} eq "" ||
@@ -10219,6 +10228,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'newupdate_to_owner'} = $tmpl->{'updateuser_to_owner'};
 	$config{'newupdate_to_reseller'} = $tmpl->{'updateuser_to_reseller'};
 	$config{'mail_cloud'} = $tmpl->{'mail_cloud'};
+	$config{'mail_mta_sts'} = $tmpl->{'mail_mta_sts'};
 	$config{'aliascopy'} = $tmpl->{'aliascopy'};
 	$config{'bccto'} = $tmpl->{'bccto'};
 	$config{'spamclear'} = $tmpl->{'spamclear'};

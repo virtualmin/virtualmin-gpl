@@ -4753,6 +4753,15 @@ if (defined(&list_smtp_clouds)) {
 		&ui_select("mail_cloud", $tmpl->{'mail_cloud'}, \@clouds));
 	}
 
+# Enable MTA-STS?
+print &ui_table_row(&hlink($text{'tmpl_mail_mta_sts'},
+			   "template_mail_mta_sts"),
+		&ui_radio("mail_mta_sts", $tmpl->{'mail_mta_sts'},
+			  [ $tmpl->{'default'} ? ( )
+                                               : ( [ "", $text{'default'} ] ),
+                            [ 1, $text{'yes'} ],
+                            [ 0, $text{'no'} ] ]));
+
 print &ui_table_hr();
 
 # Default mailbox quota
@@ -4806,6 +4815,7 @@ $tmpl->{'mail_bcc'} = $in{'bcc'};
 if (defined($in{'mail_cloud'})) {
 	$tmpl->{'mail_cloud'} = $in{'mail_cloud'};
 	}
+$tmpl->{'mail_mta_sts'} = $in{'mail_mta_sts'};
 
 # Save new user aliases
 if ($in{'aliases_mode'} == 0) {
