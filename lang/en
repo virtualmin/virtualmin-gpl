@@ -6627,7 +6627,9 @@ mail_mta_essl=MTA-STS cannot be enabled without an SSL website
 mail_mta_sts=Enable MTA-STS for this domain?
 mail_mta_sts_on=Enabling MTA-STS ..
 mail_mta_sts_off=Disabling MTA-STS ..
+mail_mta_sts_update=Updating SSL certificate for MTA-STS ..
 mail_mta_sts_err=.. failed : $1
+mail_mta_sts_cert=Yes (but missing SSL certificate hostname)
 
 nf_header=The following new features are available in $1 ..
 nf_desc=Feature

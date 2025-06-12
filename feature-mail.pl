@@ -6896,11 +6896,8 @@ my $wkfile = $wkdir."/mta-sts.txt";
 &unlock_file($wkfile);
 
 # Re-generate Lets' Encrypt cert if possible
-my $info;
-if (&domain_has_ssl_cert($d) &&
-    ($info = &cert_info($d)) &&
-    &is_letsencrypt_cert($info) &&
-    !&check_domain_certificate('mta-sts.'.$d->{'dom'}, $info)) {
+# XXX what if from other provider?
+if (!&has_mta_sts_cert($d) && &is_letsencrypt_cert($d)) {
 	my $old_dname = $d->{'letsencrypt_dname'};
 	if ($old_dname) {
 		$d->{'letsencrypt_dname'} = join(" ",
@@ -6918,6 +6915,20 @@ if (&domain_has_ssl_cert($d) &&
 	}
 
 return undef;
+}
+
+# has_mta_sts_cert(&domain)
+# Returns 1 if the SSL cert for this domain contains the mta-sts hostname
+sub has_mta_sts_cert
+{
+my ($d) = @_;
+my $info;
+if (&domain_has_ssl_cert($d) &&
+    ($info = &cert_info($d)) &&
+    !&check_domain_certificate('mta-sts.'.$d->{'dom'}, $info)) {
+	return 0;
+	}
+return 1;
 }
 
 # disable_mta_sts(&domain)

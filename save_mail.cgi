@@ -183,6 +183,14 @@ if (&can_mta_sts($d) && defined($in{'mta_sts'})) {
 				    : $text{'setup_done'});
 		$changed++;
 		}
+	elsif ($in{'mta_sts'} && !$mtaerr && !&has_mta_sts_cert($d)) {
+		# Re-enable to update cert
+		&$first_print($text{'mail_mta_sts_update'});
+		$err = &enable_mta_sts($d);
+		&$second_print($err ? &text('mail_mta_sts_err', $err)
+				    : $text{'setup_done'});
+		$changed++;
+		}
 	}
 
 if (!$changed) {

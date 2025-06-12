@@ -98,8 +98,11 @@ if (@okclouds) {
 # MTA-STS option
 if (&can_mta_sts($d)) {
 	my $mtaerr = &get_mta_sts($d);
+	my $msg = !$mtaerr && !&has_mta_sts_cert($d) ?
+		$text{'mail_mta_sts_cert'} : $text{'yes'};
 	print &ui_table_row($text{'mail_mta_sts'},
-		&ui_yesno_radio("mta_sts", $mtaerr ? 0 : 1));
+		&ui_radio("mta_sts", $mtaerr ? 0 : 1,
+			  [ [ 1, $msg ], [ 0, $text{'no'} ] ]));
 	}
 
 print &ui_table_end();
