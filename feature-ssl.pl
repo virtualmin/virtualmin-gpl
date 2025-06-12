@@ -1017,7 +1017,7 @@ local $info = &cert_file_info($temp);
 return $info;
 }
 
-# cert_file_info(file, &domain)
+# cert_file_info(file, [&domain])
 # Returns a hash of details of a cert in some file
 sub cert_file_info
 {
@@ -1782,8 +1782,16 @@ return &unique(@rv);
 # Returns 1 if some domain has a self-signed certificate
 sub self_signed_cert
 {
-local ($d) = @_;
-local $info = &cert_info($d);
+my ($d) = @_;
+my $info = &cert_info($d);
+return &self_signed_cert_info($info);
+}
+
+# self_signed_cert_info(&info)
+# Returns 1 if some cert is self-signed
+sub self_signed_cert_info
+{
+my ($info) = @_;
 return $info->{'issuer_cn'} eq $info->{'cn'} &&
        $info->{'issuer_o'} eq $info->{'o'};
 }

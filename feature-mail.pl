@@ -6819,6 +6819,16 @@ $p || return $text{'mail_mta_eweb'};
 my $s = &domain_has_ssl($d);
 $s || return $text{'mail_mta_essl'};
 
+# Make sure the mail server has SSL enabled
+my @svcs = &get_all_service_ssl_certs($d, 0);
+my ($svc) = grep { $_->{'id'} eq 'postfix' && $_->{'d'} } @svcs;
+if (!$svc) {
+	($svc) = grep { $_->{'id'} eq 'postfix' } @svcs;
+	}
+$svc || return $text{'mail_mta_epostfix'};
+my $info = &cert_file_info($svc->{'cert'});
+&self_signed_cert_info($info) && return $text{'mail_mta_eself'};
+
 # Add the DNS records, if missing
 &obtain_lock_dns($d);
 &pre_records_change($d);

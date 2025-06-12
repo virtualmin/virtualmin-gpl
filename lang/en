@@ -6631,6 +6631,8 @@ mail_mta_sts_off=Disabling MTA-STS email encryption ..
 mail_mta_sts_update=Updating SSL certificate for MTA-STS ..
 mail_mta_sts_err=.. failed : $1
 mail_mta_sts_cert=Yes (but missing SSL certificate hostname)
+mail_mta_epostfix=The Postfix mail server is not configured to accept SSL connections
+mail_mta_eself=The Postfix SSL certificate is self-signed, and will not be accepted by other mail servers
 
 nf_header=The following new features are available in $1 ..
 nf_desc=Feature
