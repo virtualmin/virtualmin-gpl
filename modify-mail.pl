@@ -64,7 +64,9 @@ delivery, use the C<--no-cloud-smtp> flag.
 
 To enable MTA-STS support for this domain if it has a website and DNS enabled,
 use the C<--enable-mta-sts> flag to create the required DNS records and
-website config. Or to disable it instead, use the C<--disable-mta-sts> flag.
+website config. If possible, this will also update the SSL certificate for the
+domain to include the C<mta-sts> sub-domain. Or to disable it instead, use the
+C<--disable-mta-sts> flag.
 
 =cut
 
