@@ -650,6 +650,18 @@ sub feature_save_http_protocols
 {
 }
 
+# feature_get_web_server_names(&domain)
+# Returns a list of HTTP hostnames that the webserver accepts for this domain
+sub feature_get_web_server_names
+{
+}
+
+# feature_save_web_server_names(&domain, &hostnames)
+# Updates the list of HTTP hostnames that the webserver accepts for this domain
+sub feature_save_web_server_names
+{
+}
+
 # feature_startstop()
 # If this feature has a server process, this function should return a hash
 # with 'status', 'desc' and 'links' keys.
