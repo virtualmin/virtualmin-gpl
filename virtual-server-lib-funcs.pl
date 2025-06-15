@@ -12517,6 +12517,33 @@ if ($config{'virus'} && !$config{'provision_virus_host'} &&
 	push(@rv, $clam_text);
 	}
 
+# If Apache is in use, make sure the config is valid
+if ($config{'web'}) {
+	&require_apache();
+	my $err = &apache::test_config();
+	if ($err) {
+		my @elines = split(/\r?\n/, $err);
+		@elines = grep { !/\[warn\]/ } @elines;
+		$err = join("\n", @elines);
+		}
+	if ($err) {
+		my $err_text = $text{'index_warn_apacheconf'}."<p>\n";
+		$err_text .= "<pre>".&html_escape($err)."</pre>\n";
+		push(@rv, $err_text);
+		}
+	}
+
+# If BIND is in use, make sure the config is valid
+if ($config{'dns'}) {
+	&require_bind();
+	my @errs = &bind8::check_bind_config();
+	if (@errs) {
+		my $err_text = $text{'index_warn_bindconf'}."<p>\n";
+		$err_text .= "<pre>".&html_escape(join("\n", @errs))."</pre>\n";
+		push(@rv, $err_text);
+		}
+	}
+
 return @rv;
 }
 
