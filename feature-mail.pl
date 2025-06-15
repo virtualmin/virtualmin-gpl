@@ -6819,6 +6819,14 @@ $p || return $text{'mail_mta_eweb'};
 my $s = &domain_has_ssl($d);
 $s || return $text{'mail_mta_essl'};
 
+if (&copy_alias_records($d)) {
+	# If alias records are copied, the target domain must
+	# have MTA-STS enabled
+	my $aliasd = &get_domain($d->{'alias'});
+	my $aerr = &get_mta_sts($aliasd);
+	!$aerr || return return $text{'mail_mta_ealias'};
+	}
+
 # Make sure the mail server has SSL enabled
 my @svcs = &get_all_service_ssl_certs($d, 0);
 my ($svc) = grep { $_->{'id'} eq 'postfix' && $_->{'d'} } @svcs;
@@ -6830,47 +6838,50 @@ my $info = &cert_file_info($svc->{'cert'});
 &self_signed_cert_info($info) && return $text{'mail_mta_eself'};
 
 # Add the DNS records, if missing
-&obtain_lock_dns($d);
-&pre_records_change($d);
-my ($recs, $file) = &get_domain_dns_records_and_file($d);
-my ($mtsa) = grep { $_->{'name'} eq 'mta-sts.'.$d->{'dom'}.'.' &&
-		    $_->{'type'} eq 'A' } @$recs;
-if (!$mtsa) {
-	$mtsa = { 'name' => 'mta-sts.'.$d->{'dom'}.'.',
-		  'type' => 'A',
-		  'values' => [ $d->{'dns_ip'} || $d->{'ip'} ] };
-	&create_dns_record($recs, $file, $mtsa);
-	}
-my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'}.'.' &&
-		    $_->{'type'} eq 'TXT' } @$recs;
-my $id = &domain_id();
-if ($mtsr) {
-	if ($mtsr->{'values'}->[0] =~ /id=([0-9]+)/) {
-		$id = $1;
+if (!&copy_alias_records($d)) {
+	&obtain_lock_dns($d);
+	&pre_records_change($d);
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	$file || return $recs;
+	my ($mtsa) = grep { $_->{'name'} eq 'mta-sts.'.$d->{'dom'}.'.' &&
+			    $_->{'type'} eq 'A' } @$recs;
+	if (!$mtsa) {
+		$mtsa = { 'name' => 'mta-sts.'.$d->{'dom'}.'.',
+			  'type' => 'A',
+			  'values' => [ $d->{'dns_ip'} || $d->{'ip'} ] };
+		&create_dns_record($recs, $file, $mtsa);
 		}
-	$mtsr->{'values'} = [ "v=STSv1; id=$id" ];
-	&modify_dns_record($recs, $file, $mtsr);
+	my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'}.'.' &&
+			    $_->{'type'} eq 'TXT' } @$recs;
+	my $id = &domain_id();
+	if ($mtsr) {
+		if ($mtsr->{'values'}->[0] =~ /id=([0-9]+)/) {
+			$id = $1;
+			}
+		$mtsr->{'values'} = [ "v=STSv1; id=$id" ];
+		&modify_dns_record($recs, $file, $mtsr);
+		}
+	else {
+		$mtsr = { 'name' => '_mta-sts.'.$d->{'dom'}.'.',
+			  'type' => 'TXT',
+			  'values' => [ "v=STSv1; id=$id" ] };
+		&create_dns_record($recs, $file, $mtsr);
+		}
+	my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'}.'.' &&
+			     $_->{'type'} eq 'TXT' } @$recs;
+	if ($smtpr) {
+		$smtpr->{'values'} = [ "v=TLSRPTv1; rua=mailto:$d->{'emailto'}" ];
+		&modify_dns_record($recs, $file, $smtpr);
+		}
+	else {
+		$smtpr = { 'name' => '_smtp._tls.'.$d->{'dom'}.'.',
+			   'type' => 'TXT',
+			   'values' => [ "v=TLSRPTv1; rua=mailto:$d->{'emailto'}" ] };
+		&create_dns_record($recs, $file, $smtpr);
+		}
+	&post_records_change($d, $recs, $file);
+	&release_lock_dns($d);
 	}
-else {
-	$mtsr = { 'name' => '_mta-sts.'.$d->{'dom'}.'.',
-		  'type' => 'TXT',
-		  'values' => [ "v=STSv1; id=$id" ] };
-	&create_dns_record($recs, $file, $mtsr);
-	}
-my ($smtpr) = grep { $_->{'name'} eq '_smtp._tls.'.$d->{'dom'}.'.' &&
-                     $_->{'type'} eq 'TXT' } @$recs;
-if ($smtpr) {
-	$smtpr->{'values'} = [ "v=TLSRPTv1; rua=mailto:$d->{'emailto'}" ];
-	&modify_dns_record($recs, $file, $smtpr);
-	}
-else {
-	$smtpr = { 'name' => '_smtp._tls.'.$d->{'dom'}.'.',
-		   'type' => 'TXT',
-		   'values' => [ "v=TLSRPTv1; rua=mailto:$d->{'emailto'}" ] };
-	&create_dns_record($recs, $file, $smtpr);
-	}
-&post_records_change($d, $recs, $file);
-&release_lock_dns($d);
 
 my $need_cert_host = !&has_mta_sts_cert($d) &&
 		     (&is_letsencrypt_cert($d) || $d->{'letsencrypt_last_id'});

@@ -6625,6 +6625,7 @@ mail_smtp_cloudfailed=.. failed : $1
 mail_mta_edns=MTA-STS cannot be enabled without a DNS domain
 mail_mta_eweb=MTA-STS cannot be enabled without a website
 mail_mta_essl=MTA-STS cannot be enabled without an SSL website
+mail_mta_ealias=MTA-STS cannot be enabled on an alias domain unless enabled on the target
 mail_mta_evirt=Apache config not found for this domain!
 mail_mta_sts=Enable MTA-STS for this domain?
 mail_mta_sts_on=Enabling MTA-STS email encryption ..
