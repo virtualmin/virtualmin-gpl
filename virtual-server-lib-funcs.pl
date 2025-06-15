@@ -19901,6 +19901,32 @@ else {
 	}
 }
 
+# get_website_hostnames(&domain)
+# Returns a list of the hostnames this domain's webserver is serving
+sub get_website_hostnames
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+if ($p eq "web") {
+	my ($virt, $vconf, $conf) =
+		&get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+	my @rv;
+	my $sn = &apache::find_directive("ServerName", $vconf);
+	push(@rv, $sn) if ($sn);
+	foreach my $sa (&apache::find_directive_struct("ServerAlias", $vconf)) {
+		push(@rv, @{$sa->{'words'}});
+		}
+	return &unique(@rv);
+	}
+elsif ($p) {
+	if (&plugin_defined($p, "feature_get_web_server_names")) {
+		my $hn = &plugin_call($p, "feature_get_web_server_names", $d);
+		return @$hn if (ref($hn));
+		}
+	}
+return ();
+}
+
 # list_ordered_features(&domain, [include-always-features])
 # Returns a list of features or plugins possibly relevant to some domain,
 # in dependency order for creation.

@@ -686,6 +686,15 @@ if ($multiline) {
 				(&is_default_website($d) ? "Yes" : "No"),"\n";
 			}
 
+		# Show all website hostnames
+		if (&domain_has_website($d) && $multiline == 1) {
+			my @h = &get_website_hostnames($d);
+			if (@h) {
+				print "    Website hostnames: ",
+				      join(" ", @h),"\n";
+				}
+			}
+
 		# Show SSL cert
 		if ($d->{'ssl_key'}) {
 			print "    SSL key file: $d->{'ssl_key'}\n";
