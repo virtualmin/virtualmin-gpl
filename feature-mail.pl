@@ -6872,32 +6872,66 @@ else {
 &post_records_change($d, $recs, $file);
 &release_lock_dns($d);
 
+# XXX what if not LE?
+my $need_cert_host = !&has_mta_sts_cert($d) && &is_letsencrypt_cert($d);
+
 # Setup the webserver to serve mta-sts sub-domain
+my $mta_host = "mta-sts.".$d->{'dom'};
 if ($p eq "web") {
 	# Add Apache ServerAlias
 	&obtain_lock_web($d);                   
         &require_apache();
 	my @ports = ( $d->{'web_port'},
 		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+	my $found = 0;
+	my $changed = 0;
 	foreach my $p (@ports) {
                 my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},$p);
 		next if (!$virt);
 		my @sa = &apache::find_directive("ServerAlias", $vconf);
-		@sa = &unique(@sa, "mta-sts.".$d->{'dom'});
-		&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
-		&flush_file_lines($virt->{'file'});
+		if (&indexof($mta_host, @sa) < 0) {
+			@sa = &unique(@sa, $mta_host);
+			&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
+			&flush_file_lines($virt->{'file'});
+			$changed = 1;
+			}
+		else {
+			&unflush_file_lines($virt->{'file'});
+			}
+		$found++;
 		}
 	&release_lock_web($d);                   
+	$found || return $text{'mail_mta_evirt'};
 
-	# Restart Apache now so that the LE request works
-	&push_all_print();
-	&set_all_null_print();
-	&restart_apache();
-	&pop_all_print();
+	if ($changed) {
+		if ($need_cert_host) {
+			# Restart Apache now so that the LE request works
+			&push_all_print();
+			&set_all_null_print();
+			&restart_apache();
+			&pop_all_print();
+			}
+		else {
+			&register_post_action(\&restart_apache);
+			}
+		}
 	}
 else {
-	# What about Nginx??
-	# XXX
+	# Update Nginx or other server
+	if (!&plugin_defined($p, "feature_get_web_servernames")) {
+		return $text{'mail_mta_eplugin'};
+		}
+	my $sa = &plugin_call($p, "feature_get_web_servernames", $d);
+	ref($sa) || return $sa;
+	if (&indexof($mta_host, @$sa) < 0) {
+		$sa = [ &unique(@$sa, $mta_host) ];
+		my $err = &plugin_call($p, "feature_save_web_servernames", $d, $sa);
+		return $err if ($err);
+		if ($need_cert_host) {
+			# Restart webserver now so that the LE request works
+			&plugin_call($p, "feature_restart_web");
+			}
+		}
 	}
 
 # Create the magic verification file
@@ -6916,8 +6950,7 @@ my $wkfile = $wkdir."/mta-sts.txt";
 &unlock_file($wkfile);
 
 # Re-generate Lets' Encrypt cert if possible
-# XXX what if from other provider?
-if (!&has_mta_sts_cert($d) && &is_letsencrypt_cert($d)) {
+if ($need_cert_host) {
 	my $old_dname = $d->{'letsencrypt_dname'};
 	if ($old_dname) {
 		$d->{'letsencrypt_dname'} = join(" ",
@@ -6983,11 +7016,14 @@ if ($d->{'dns'}) {
 	}
 
 # Update webserver config
+my $err;
 if ($p eq "web") {
+	# Remove from Apache config
 	&obtain_lock_web($d);                   
         &require_apache();
 	my @ports = ( $d->{'web_port'},
 		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+	my $found = 0;
 	foreach my $p (@ports) {
                 my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},$p);
 		next if (!$virt);
@@ -6995,22 +7031,36 @@ if ($p eq "web") {
 		@sa = grep { $_ ne "mta-sts.".$d->{'dom'} } @sa;
 		&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
 		&flush_file_lines($virt->{'file'}, undef, 1);
+		$found++;
 		}
 	&release_lock_web($d);     
 	&register_post_action(\&restart_apache);
+	$err = $text{'mail_mta_evirt'} if (!$found);
 	}
 elsif ($p) {
-	# XXX
+	# Remove from other webserver config
+	if (&plugin_defined($p, "feature_get_web_servernames")) {
+		my $sa = &plugin_call($p, "feature_get_web_servernames", $d);
+		if (ref($sa)) {
+			$sa = [ grep { $_ ne $mta_host } @$sa ];
+			$err = &plugin_call($p, "feature_save_web_servernames", $d, $sa);
+			}
+		else {
+			$err = $sa;
+			}
+		}
 	}
 
 # Delete the magic verification file
 my $wkdir = &public_html_dir($d)."/.well-known";
 my $wkfile = $wkdir."/mta-sts.txt";
-&lock_file($wkfile);
-&unlink_file_as_domain_user($d, $wkfile);
-&unlock_file($wkfile);
+if (-r $wkfile) {
+	&lock_file($wkfile);
+	&unlink_file_as_domain_user($d, $wkfile);
+	&unlock_file($wkfile);
+	}
 
-return undef;
+return $err;
 }
 
 # get_mta_sts(&domain)
