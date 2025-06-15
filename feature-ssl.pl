@@ -2164,12 +2164,14 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 }
 
 # disable_letsencrypt_renewal(&domain)
-# If Let's Encrypt renewal is enabled for a domain, turn it off
+# If Let's Encrypt renewal is enabled for a domain, turn it off on
+# the assumption that a new cert type has been installed
 sub disable_letsencrypt_renewal
 {
 local ($d) = @_;
-if ($d->{'letsencrypt_renew'}) {
+if ($d->{'letsencrypt_renew'} || $d->{'letsencrypt_last_id'}) {
 	delete($d->{'letsencrypt_renew'});
+	delete($d->{'letsencrypt_last_id'});
 	&save_domain($d);
 	}
 }
