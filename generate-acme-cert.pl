@@ -298,6 +298,7 @@ else {
 	$d->{'letsencrypt_ctype'} = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
 	$d->{'letsencrypt_size'} = $size;
 	$d->{'letsencrypt_id'} = $acme ? $acme->{'id'} : undef;
+	$d->{'letsencrypt_last_id'} = $d->{'letsencrypt_id'};
 	$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
 	$d->{'letsencrypt_subset'} = $subset;
 	$d->{'letsencrypt_email'} = $email;

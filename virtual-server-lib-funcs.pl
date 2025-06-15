@@ -8767,6 +8767,7 @@ else {
 	$d->{'letsencrypt_dwild'} = 0;
 	$d->{'letsencrypt_last'} = time();
 	$d->{'letsencrypt_renew'} = 1 if ($d->{'letsencrypt_renew'} eq '');
+	$d->{'letsencrypt_last_id'} = $d->{'letsencrypt_id'};
 
 	# Inject initial SSL expiry to avoid wrong "until expiry"
 	&refresh_ssl_cert_expiry($d);

@@ -3023,7 +3023,7 @@ foreach my $d (&list_domains()) {
 			}
 		}
 
-	# Find the SSL proivider name
+	# Find the SSL provider name
 	my $pname;
 	if (defined(&list_acme_providers)) {
 		my ($acme) = grep { $_->{'id'} eq $d->{'letsencrypt_id'} }
@@ -3145,6 +3145,7 @@ my @beforecerts = &get_all_domain_service_ssl_certs($d);
 &lock_domain($d);
 $d->{'letsencrypt_last'} = time();
 $d->{'letsencrypt_last_success'} = time();
+$d->{'letsencrypt_last_id'} = $d->{'letsencrypt_id'};
 delete($d->{'letsencrypt_last_err'});
 &save_domain($d);
 &unlock_domain($d);
