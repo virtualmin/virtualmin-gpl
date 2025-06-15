@@ -268,7 +268,36 @@ else {
 $script_latest_file = "scripts.txt";
 $script_latest_key = "latest-scripts\@virtualmin.com";
 
+$virtualmin_license_file = "/etc/virtualmin-license";
+$upgrade_virtualmin_host_unstable = "software.virtualmin.dev";
+$upgrade_virtualmin_host_rc = "rc.software.virtualmin.dev";
 $upgrade_virtualmin_host = "software.virtualmin.com";
+$upgrade_virtualmin_host_all = join("|", map { quotemeta($_) } (
+	$upgrade_virtualmin_host_unstable,
+	$upgrade_virtualmin_host_rc,
+	$upgrade_virtualmin_host,
+	));
+$virtualmin_apt_auth_dir = "/etc/apt/auth.conf.d";
+($virtualmin_apt_auth_file) =
+	grep { -r $_ } (
+		"$virtualmin_apt_auth_dir/virtualmin-unstable.conf",
+		"$virtualmin_apt_auth_dir/virtualmin-prerelease.conf",
+		"$virtualmin_apt_auth_dir/virtualmin.conf",
+	);
+($virtualmin_yum_repo) =
+	grep { -r $_ } (
+		"/etc/yum.repos.d/virtualmin-unstable.repo",
+		"/etc/yum.repos.d/virtualmin-prerelease.repo",
+		"/etc/yum.repos.d/virtualmin.repo",
+	);
+($virtualmin_apt_repo) =
+	grep { -r $_ } (
+		"/etc/apt/sources.list.d/virtualmin-unstable.list",
+		"/etc/apt/sources.list.d/virtualmin-prerelease.list",
+		"/etc/apt/sources.list.d/virtualmin.list",
+		"/etc/apt/sources.list",
+	);
+
 $upgrade_virtualmin_port = 443;
 $upgrade_virtualmin_testpage = "/licence-test.txt";
 $upgrade_virtualmin_updates = "/wbm/updates.txt";
@@ -280,13 +309,6 @@ $connectivity_check_page = "/cgi-bin/connectivity.cgi";
 $resolve_check_host = "software.virtualmin.com";
 $resolve_check_port = 80;
 $resolve_check_page = "/cgi-bin/resolve.cgi";
-
-$virtualmin_license_file = "/etc/virtualmin-license";
-$virtualmin_yum_repo = "/etc/yum.repos.d/virtualmin.repo";
-$virtualmin_apt_auth_dir = "/etc/apt/auth.conf.d";
-$virtualmin_apt_repo = -r "/etc/apt/sources.list.d/virtualmin.list" ?
-                          "/etc/apt/sources.list.d/virtualmin.list" :
-                          "/etc/apt/sources.list";
 
 $collected_info_file = &cache_file_path("collected");
 $historic_info_dir = &cache_file_path("history");
