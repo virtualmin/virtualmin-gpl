@@ -6996,6 +6996,7 @@ if ($d->{'dns'}) {
 	&obtain_lock_dns($d);
 	&pre_records_change($d);
 	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	return $recs if (!$file);
 	my ($mtsa) = grep { $_->{'name'} eq 'mta-sts.'.$d->{'dom'}.'.' &&
 			    $_->{'type'} eq 'A' } @$recs;
 	if ($mtsa) {
