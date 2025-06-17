@@ -572,7 +572,7 @@ return $rv;
 sub cloud_bb_parse_inputs
 {
 $in{'bb_keyid'} =~ /^[A-Za-z0-9\/]+$/ || &error($text{'cloud_bb_ekeyid'});
-$in{'bb_key'} =~ /^[A-Za-z0-9\/]+$/ || &error($text{'cloud_bb_ekey'});
+$in{'bb_key'} =~ /^[A-Za-z0-9\/\+]+$/ || &error($text{'cloud_bb_ekey'});
 
 # If key changed, re-login using the b2 command
 if ($in{'bb_keyid'} ne $config{'bb_keyid'} ||
