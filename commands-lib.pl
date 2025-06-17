@@ -253,7 +253,7 @@ if [ "\$COMMAND" = "help" ]; then
 	COMMAND=\$1
 	shift
 fi
-echo \$COMMAND | fgrep .pl >/dev/null
+echo \$COMMAND | grep '\\.pl' > /dev/null
 if [ "\$?" != "0" ]; then
 	COMMAND="\$COMMAND.pl"
 fi
