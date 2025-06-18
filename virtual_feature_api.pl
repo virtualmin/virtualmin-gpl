@@ -259,6 +259,14 @@ sub feature_restore
 {
 }
 
+# feature_always_restore(&domain, file, &opts, &all-opts)
+# Called to restore this feature for the domain from the given file, regardless
+# of whether this feature is enabled or not. Must return 1 on success or 0 on
+# failure
+sub feature_always_restore
+{
+}
+
 # feature_restore_opts(&opts)
 # Returns HTML for selecting options for a restore of this feature
 sub feature_restore_opts
