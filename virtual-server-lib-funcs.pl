@@ -14507,6 +14507,15 @@ foreach my $f (@startstop_features) {
 			}
 		}
 	}
+foreach my $f (@startstop_always_features) {
+	local $sfunc = "startstop_".$f;
+	if (defined(&$sfunc)) {
+		foreach my $status (&$sfunc()) {
+			$status->{'feature'} ||= $f;
+			push(@rv, $status);
+			}
+		}
+	}
 foreach my $f (&list_startstop_plugins()) {
 	local $status = &plugin_call($f, "feature_startstop");
 	$status->{'feature'} ||= $f;

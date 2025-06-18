@@ -80,6 +80,18 @@ foreach my $f (@startstop_features) {
 			}
 		}
 	}
+foreach my $f (@startstop_always_features) {
+	my $sfunc = "startstop_".$f;
+	if (defined(&$sfunc)) {
+		foreach my $s (&$sfunc()) {
+			my $sf = $s->{'feature'} || $f;
+			if ($sf eq $sname) {
+				$found = 1;
+				}
+			push(@slist, $sf);
+			}
+		}
+	}
 foreach my $f (&list_startstop_plugins()) {
 	if ($f eq $sname) {
 		$found = 2;

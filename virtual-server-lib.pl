@@ -109,6 +109,7 @@ foreach my $fname (@features, "virt", "virt6") {
 		     "directadmin" );
 @startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus", "spam",
 		       "mysql", "postgres");
+@startstop_always_features = ("phpfpm");
 @bandwidth_features = ( @features, "backup", "restore" );
 @config_features = grep { $config{$_} } @features;
 @banned_usernames = ( 'root', 'resellers' );
