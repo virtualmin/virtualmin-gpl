@@ -3376,5 +3376,42 @@ return "&nbsp;&nbsp;" .
 			undef, "target=_blank data-placement=\"$placement\"");
 }
 
+# startstop_phpfpm()
+# Returns a hash containing the current status of the PHP-FPM services and short
+# and long descriptions for the action to switch statuses
+sub startstop_phpfpm
+{
+my @rv;
+foreach my $fpm (&list_php_fpm_configs()) {
+	&foreign_require("init");
+	next if (!$fpm->{'init'});
+	next if (!defined(&init::status_action));
+	my $st = &init::status_action($fpm->{'init'});
+	next if ($st < 0);
+	if ($st) {
+		# Running, show buttons to stop and restart
+		push(@rv, { 'status' => 1,
+			    'feature' => 'fpm',
+			    'id' => $fpm->{'version'},
+			    'name' => &text('index_fpmname', $fpm->{'version'}),
+			    'desc' => $text{'index_fpmstop'},
+			    'restartdesc' => $text{'index_fpmrestart'},
+			    'longdesc' => &text('index_fpmstopdesc',
+					        $fpm->{'version'}) });
+		}
+	else {
+		# Down, show button to start
+		push(@rv, { 'status' => 0,
+			    'feature' => 'fpm',
+			    'id' => $fpm->{'version'},
+			    'name' => &text('index_fpmname', $fpm->{'version'}),
+			    'desc' => $text{'index_fpmstart'},
+			    'longdesc' => &text('index_fpmstartdesc',
+					        $fpm->{'version'}) });
+		}
+	}
+return @rv;
+}
+
 1;
 
