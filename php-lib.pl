@@ -3381,6 +3381,7 @@ return "&nbsp;&nbsp;" .
 # and long descriptions for the action to switch statuses
 sub startstop_phpfpm
 {
+return () if (!&domain_has_website());	# No website feature enabled
 my @rv;
 foreach my $fpm (&list_php_fpm_configs()) {
 	&foreign_require("init");
