@@ -4592,21 +4592,29 @@ foreach my $file (split(/\r?\n/, $out)) {
 # rename actual log files if changed.
 sub modify_web_domain
 {
-local ($d, $oldd, $virt, $vconf, $conf, $rlogs) = @_;
+my ($d, $oldd, $virt, $vconf, $conf, $rlogs) = @_;
 &apache::save_directive("ServerName", [ $d->{'dom'} ],
 			$vconf, $conf);
-local @sa = map { s/\Q$oldd->{'dom'}\E/$d->{'dom'}/g; $_ }
-		&apache::find_directive("ServerAlias", $vconf);
+my @sa;
+my @others = map { $_->{'dom'} } &get_domain_by("alias", $d->{'id'});
+foreach my $sa (&apache::find_directive("ServerAlias", $vconf)) {
+	my $other = 0;
+	foreach my $o (@others) {
+		$other++ if ($sa =~ /\Q$o\E$/);
+		}
+	$sa =~ s/\Q$oldd->{'dom'}\E$/$d->{'dom'}/ if (!$other);
+	push(@sa, $sa);
+	}
 &apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
 
 # Update log paths
 foreach my $ld ("ErrorLog", "TransferLog", "CustomLog") {
-	local @ldv = &apache::find_directive($ld, $vconf);
+	my @ldv = &apache::find_directive($ld, $vconf);
 	next if (!@ldv);
 	foreach my $l (@ldv) {
 		my $oldl = $l;
 		if ($l =~ /\/[^\/]*\Q$oldd->{'dom'}\E[^\/]*$/ &&
-		    !$_[0]->{'subdom'}) {
+		    !$d->{'subdom'}) {
 			$l =~ s/\Q$oldd->{'dom'}\E/$d->{'dom'}/g;
 			}
 		if ($l ne $oldl && $rlogs) {
