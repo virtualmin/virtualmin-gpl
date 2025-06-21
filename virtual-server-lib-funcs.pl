@@ -740,7 +740,8 @@ if ($usermodule eq "ldap-useradmin") {
 return 0;
 }
 
-# list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs], [include-extra])
+# list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs],
+# 		    [include-extra])
 # List all Unix users who are in the domain's primary group.
 # If domain is omitted, returns local users.
 sub list_domain_users

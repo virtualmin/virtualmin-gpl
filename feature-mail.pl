@@ -3664,13 +3664,14 @@ return $text{'mail_system_'.$num} || "???";
 # Add or replace a Postfix mapping
 sub create_replace_mapping
 {
-local $maps = &postfix::get_maps($_[0], $_[2]);
-local ($clash) = grep { $_->{'name'} eq $_[1]->{'name'} } @$maps;
+my ($mapname, $map, $file) = @_;
+my $maps = &postfix::get_maps($mapname, $file);
+my ($clash) = grep { $_->{'name'} eq $map->{'name'} } @$maps;
 if ($clash) {
-	&postfix::modify_mapping($_[0], $clash, $_[1]);
+	&postfix::modify_mapping($mapname, $clash, $map);
 	}
 else {
-	&postfix::create_mapping($_[0], $_[1], $_[2]);
+	&postfix::create_mapping($mapname, $map, $file);
 	}
 }
 
