@@ -18,7 +18,7 @@ return "A full featured free software Wiki/CMS/Groupware written in PHP";
 # script_tikiwiki_versions()
 sub script_tikiwiki_versions
 {
-return ( "28.3", "27.2", "24.8" );
+return ( "28.4", "27.3", "24.9" );
 }
 
 sub script_tikiwiki_release
