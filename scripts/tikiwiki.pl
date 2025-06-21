@@ -149,6 +149,11 @@ return undef;
 sub script_tikiwiki_files
 {
 local ($d, $ver, $opts, $upgrade) = @_;
+my $phpversion = &virtual_server::get_domain_php_version($d);
+my $minPhpVersion = $ver > 25 ? '8.1' : '7.4';
+if ($ver > 25 && $phpversion < '8.0') {
+	return (0, "You ca not install this tiki-$ver this version, you are on php version $phpversion, it required php version $minPhpVersion");
+}
 local @files = ( { 'name' => "source",
 	   'file' => "tikiwiki-$ver.zip",
 	   'url' => "http://osdn.dl.sourceforge.net/sourceforge/tikiwiki/tiki-$ver.zip" } );
@@ -253,8 +258,8 @@ else {
 
 sub script_tikiwiki_db_conn_desc
 {
-my $db_conn_desc = 
-    { 'db/local.php' => 
+my $db_conn_desc =
+    { 'db/local.php' =>
         {
            'dbpass' =>
            {
@@ -303,7 +308,7 @@ elsif ($ver >= 24) {
 elsif ($ver >= 21) {
 	@vers = &osdn_package_versions("tikiwiki/Tiki_21.x_UY_Scuti",
 				       "tiki-(21\.[0-9\\.]+)\\.zip");
-	}
+}
 elsif ($ver >= 18) {
 	@vers = &osdn_package_versions("tikiwiki/Tiki_18.x_Alcyone",
 				       "tiki-(18\.[0-9\\.]+)\\.zip");
