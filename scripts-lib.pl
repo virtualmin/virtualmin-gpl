@@ -750,7 +750,7 @@ my $do_wapp_conf_file = sub
 {
 my ($wapp_conf_file, $wapp_conf_types, $sdata,
     $sproject, $d, $sdir, $type, $value, $wapp_conf_files_cnt,
-    $wapp_conf_file_cnt_ref) = @_;
+    $wapp_conf_file_cnt_ref, $script) = @_;
 # Check if described type in a script file equals the one from the caller
 my ($wapp_conf_type_curr) = grep {$_ eq $type} keys %{$wapp_conf_types};
 if ($wapp_conf_type_curr) {
@@ -931,7 +931,8 @@ foreach my $script (@domain_scripts) {
 						$sdata, $sproject, $d, $sdir,
 						$type, $value,
 						$wapp_conf_files_cnt,
-						\$wapp_conf_file_count);
+						\$wapp_conf_file_count,
+						$script);
 					}
 				}
 			}
