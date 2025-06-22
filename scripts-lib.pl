@@ -345,6 +345,11 @@ foreach my $k (keys %$sinfo) {
 	}
 delete($sinfo->{'opts'});
 &write_file("$script_log_directory/$d->{'id'}/$sinfo->{'id'}.script", \%info);
+&load_plugin_libraries();
+my @fs = grep { &plugin_defined($_, "feature_save_domain_script") } @plugins;
+foreach my $f (@fs) {
+	&plugin_call($f, "feature_save_domain_script", $d, \%info);
+	}
 }
 
 # remove_domain_script(&domain, &script-info)
@@ -353,6 +358,11 @@ sub remove_domain_script
 {
 local ($d, $info) = @_;
 &unlink_file($info->{'file'});
+&load_plugin_libraries();
+my @fs = grep { &plugin_defined($_, "feature_remove_domain_script") } @plugins;
+foreach my $f (@fs) {
+	&plugin_call($f, "feature_remove_domain_script", $d, $info);
+	}
 }
 
 # find_database_table([&domain], dbtype, dbname, table|regexp)
