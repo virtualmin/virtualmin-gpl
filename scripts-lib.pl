@@ -315,6 +315,11 @@ foreach $o (keys %$opts) {
 &make_dir($script_log_directory, 0700);
 &make_dir("$script_log_directory/$d->{'id'}", 0700);
 &write_file("$script_log_directory/$d->{'id'}/$info{'id'}.script", \%info);
+&load_plugin_libraries();
+my @fs = grep { &plugin_defined($_, "feature_add_domain_script") } @plugins;
+foreach my $f (@fs) {
+	&plugin_call($f, "feature_add_domain_script", $d, \%info, $name);
+	}
 return \%info;
 }
 
