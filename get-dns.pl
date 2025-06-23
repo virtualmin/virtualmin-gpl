@@ -62,6 +62,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--dnssec-records") {
 		$dnssecmode = 1;
 		}
+	elsif ($a eq "--cloud-nameservers") {
+		$cloudns = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -74,7 +77,16 @@ $d || &usage("Virtual server $dname does not exist");
 $d->{'dns'} || &usage("Virtual server $dname does not have DNS enabled");
 $cloud = &get_domain_dns_cloud($d);
 
-if ($dsmode) {
+if ($cloudns) {
+	$cloud || &usage("--cloud-nameservers can only be used for domains ".
+			 "hosted on a Cloud DNS provider");
+	$cnsrecs = &get_domain_cloud_ns_records($d);
+	ref($cnsrecs) || &usage($cnsrecs);
+	@$cnsrecs || &usage("Cloud DNS provider $cloud->{'name'} does not ".
+			    "supply any nameservers");
+	@recs = @$cnsrecs;
+	}
+elsif ($dsmode) {
 	$dsrecs = &get_domain_dnssec_ds_records($d);
 	ref($dsrecs) || &usage($dsrecs);
 	@recs = @$dsrecs;

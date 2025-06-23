@@ -5913,6 +5913,7 @@ spf_enablesub=Moving DNS records into parent zone ..
 spf_enablesubalready=.. already there
 spf_eenablesub=.. failed : $1
 spf_cloud=Hosting for DNS records
+spf_cloudns=Cloud provider NS records
 spf_disablesub=Moving DNS records out of parent zone ..
 spf_dnscloud=Moving DNS records to cloud provider $1 ..
 spf_dnslocal=Moving DNS records to local hosting ..

@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Show SPF settings for this virtual server
+# Show DNS settings for this virtual server
 
 require './virtual-server-lib.pl';
 &ReadParse();
@@ -54,6 +54,20 @@ print &ui_table_start($text{'spf_header'}, "width=100%", 2, \@tds);
 # Show DNS cloud host or remote DNS provider
 print &ui_table_row(&hlink($text{'spf_cloud'}, 'spf_cloud'),
 		    &ui_select("cloud", $cloud, \@opts));
+
+# Show nameservers recommended by Cloud provider
+if ($d->{'dns_cloud'}) {
+	$cns = &get_domain_cloud_ns_records($d);
+	if (!ref($cns)) {
+		print &ui_table_row($text{'spf_cloudns'},
+			&html_escape($cns));
+		}
+	elsif (@$cns > 0) {
+		print &ui_table_row(
+		  &hlink($text{'spf_cloudns'}, 'spf_cloudns'),
+	    	  join(" ", map { "<tt>$_->{'values'}->[0]</tt><br>" } @$cns));
+		}
+	}
 
 # Alias domain own records?
 if ($d->{'alias'}) {

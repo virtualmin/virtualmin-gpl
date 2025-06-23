@@ -368,6 +368,7 @@ my $rv = &call_route53_cmd(
 return (0, $rv) if (!ref($rv));
 my @recs;
 foreach my $rrs (@{$rv->{'ResourceRecordSets'}}) {
+	next if ($rrs->{'Type'} eq 'NS');
 	foreach my $rr (@{$rrs->{'ResourceRecords'}}) {
 		push(@recs, { 'name' => $rrs->{'Name'},
 			      'realname' => $rrs->{'Name'},
@@ -378,6 +379,28 @@ foreach my $rrs (@{$rv->{'ResourceRecordSets'}}) {
 		}
 	}
 return (1, \@recs);
+}
+
+# dnscloud_route53_get_nameservers(&domain, &info)
+# Returns only nameserver hostnames for this domain on Route53
+sub dnscloud_route53_get_nameservers
+{
+my ($d, $info) = @_;
+my $rv = &call_route53_cmd(
+	$config{'route53_akey'},
+	[ 'list-resource-record-sets',
+	  '--hosted-zone-id', $info->{'id'} ],
+	$info->{'location'}, 1);
+return $rv if (!ref($rv));
+my @recs;
+foreach my $rrs (@{$rv->{'ResourceRecordSets'}}) {
+	foreach my $rr (@{$rrs->{'ResourceRecords'}}) {
+		if ($rrs->{'Type'} eq 'NS') {
+			push(@ns, $rr->{'Value'});
+			}
+		}
+	}
+return \@ns;
 }
 
 # dnscloud_route53_put_records(&domain, &info, [ignore-fail])

@@ -4843,6 +4843,29 @@ local @dsrecs = &bind8::read_zone_file($dstemp, $d->{'dom'}, undef, undef, 1);
 return \@dsrecs;
 }
 
+# get_domain_cloud_ns_records(&domain)
+# Return an array ref of NS records from the Cloud DNS provider, an empty
+# array if none are provided, or an error message.
+sub get_domain_cloud_ns_records
+{
+my ($d) = @_;
+my $cnsfunc = "dnscloud_".$d->{'dns_cloud'}."_get_nameservers";
+return [] if (!defined(&$cnsfunc));
+my $info = { 'domain' => $d->{'dom'},
+	     'id' => $d->{'dns_cloud_id'},
+	     'location' => $d->{'dns_cloud_location'} };
+my $cns = &$cnsfunc($d, $info);
+return $cns if (!ref($cns));
+my @rv;
+foreach my $ns (@$cns) {
+	push(@rv, { 'name' => $d->{'dom'}.".",
+		    'class' => 'IN',
+		    'type' => 'NS',
+		    'values' => [ $ns ] });
+	}
+return \@rv;
+}
+
 # check_tlsa_support()
 # Returns undef if TLSA is supported on the system, or an error message if not
 sub check_tlsa_support
