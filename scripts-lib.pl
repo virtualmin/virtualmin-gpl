@@ -315,6 +315,11 @@ foreach $o (keys %$opts) {
 &make_dir($script_log_directory, 0700);
 &make_dir("$script_log_directory/$d->{'id'}", 0700);
 &write_file("$script_log_directory/$d->{'id'}/$info{'id'}.script", \%info);
+&load_plugin_libraries();
+my @fs = grep { &plugin_defined($_, "feature_add_domain_script") } @plugins;
+foreach my $f (@fs) {
+	&plugin_call($f, "feature_add_domain_script", $d, \%info, $name);
+	}
 return \%info;
 }
 
@@ -340,6 +345,11 @@ foreach my $k (keys %$sinfo) {
 	}
 delete($sinfo->{'opts'});
 &write_file("$script_log_directory/$d->{'id'}/$sinfo->{'id'}.script", \%info);
+&load_plugin_libraries();
+my @fs = grep { &plugin_defined($_, "feature_save_domain_script") } @plugins;
+foreach my $f (@fs) {
+	&plugin_call($f, "feature_save_domain_script", $d, \%info);
+	}
 }
 
 # remove_domain_script(&domain, &script-info)
@@ -348,6 +358,11 @@ sub remove_domain_script
 {
 local ($d, $info) = @_;
 &unlink_file($info->{'file'});
+&load_plugin_libraries();
+my @fs = grep { &plugin_defined($_, "feature_remove_domain_script") } @plugins;
+foreach my $f (@fs) {
+	&plugin_call($f, "feature_remove_domain_script", $d, $info);
+	}
 }
 
 # find_database_table([&domain], dbtype, dbname, table|regexp)
@@ -745,7 +760,7 @@ my $do_wapp_conf_file = sub
 {
 my ($wapp_conf_file, $wapp_conf_types, $sdata,
     $sproject, $d, $sdir, $type, $value, $wapp_conf_files_cnt,
-    $wapp_conf_file_cnt_ref) = @_;
+    $wapp_conf_file_cnt_ref, $script) = @_;
 # Check if described type in a script file equals the one from the caller
 my ($wapp_conf_type_curr) = grep {$_ eq $type} keys %{$wapp_conf_types};
 if ($wapp_conf_type_curr) {
@@ -926,7 +941,8 @@ foreach my $script (@domain_scripts) {
 						$sdata, $sproject, $d, $sdir,
 						$type, $value,
 						$wapp_conf_files_cnt,
-						\$wapp_conf_file_count);
+						\$wapp_conf_file_count,
+						$script);
 					}
 				}
 			}
