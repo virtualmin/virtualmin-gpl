@@ -25,7 +25,7 @@ if ($pro_scripts && scalar(@{$pro_scripts}) > 0) {
 }
 
 # dnsclouds_pro_tip
-# Displays an alert for Cloud DNS Providers page
+# Displays an alert for cloud DNS Providers page
 # with providers available in Pro version only,
 # and if not previously dismissed by a user
 sub dnsclouds_pro_tip

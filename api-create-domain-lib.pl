@@ -754,7 +754,7 @@ if ($pgserver) {
 	$postgres_module = $mm->{'minfo'}->{'dir'};
 	}
 
-# Validate the Cloud DNS provider
+# Validate the cloud DNS provider
 if ($clouddns) {
 	if ($clouddns eq "services") {
 		$config{'provision_dns'} ||

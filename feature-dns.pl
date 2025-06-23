@@ -121,7 +121,7 @@ if ($d->{'provision_dns'}) {
 			     $d->{'provision_dns_host'}));
 	}
 elsif ($d->{'dns_cloud'} && !$dnsparent) {
-	# Create on Cloud DNS service
+	# Create on cloud DNS service
 	my $ctype = $d->{'dns_cloud'};
 	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
 	if ($cloud->{'import'}) {
@@ -403,7 +403,7 @@ sub delete_dns
 local ($d) = @_;
 &require_bind();
 if ($d->{'dns_cloud'} && !$d->{'dns_submode'}) {
-	# Delete from Cloud DNS provider
+	# Delete from cloud DNS provider
 	my $ctype = $d->{'dns_cloud'};
 	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
 	&$first_print(&text('delete_bind_cloud', $cloud->{'desc'}));
@@ -2220,7 +2220,7 @@ my ($d, $warns) = @_;
 my $r = &require_bind($d);
 return "Record validation not supported when using Cloudmin Services"
 	if ($d->{'provision_dns'});
-return "Record validation not supported when using a Cloud DNS provider"
+return "Record validation not supported when using a cloud DNS provider"
 	if ($d->{'dns_cloud'});
 return "Record validation not supported for sub-domains"
 	if ($d->{'dns_submode'});
@@ -4211,7 +4211,7 @@ sub post_records_change
 local ($d, $recs, $fn) = @_;
 if ($d->{'dns_submode'}) {
 	# Apply change in the parent zone, which is actually connected to the
-	# Cloud DNS provider
+	# cloud DNS provider
 	my $parent = &get_domain($d->{'dns_subof'});
 	return &post_records_change($parent, $recs, $fn);
 	}
@@ -4844,7 +4844,7 @@ return \@dsrecs;
 }
 
 # get_domain_cloud_ns_records(&domain)
-# Return an array ref of NS records from the Cloud DNS provider, an empty
+# Return an array ref of NS records from the cloud DNS provider, an empty
 # array if none are provided, or an error message.
 sub get_domain_cloud_ns_records
 {
@@ -5469,7 +5469,7 @@ else {
 }
 
 # modify_dns_cloud(&domain, cloud-name|"local"|"services", &remote-server)
-# Update the Cloud DNS provider or remote server for a domain, while preserving
+# Update the cloud DNS provider or remote server for a domain, while preserving
 # the original records
 sub modify_dns_cloud
 {

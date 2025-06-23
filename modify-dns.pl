@@ -92,7 +92,7 @@ required DNSSEC DS records to the parent. Alternately you can use
 C<--remove-parent-ds> to delete them, but this is not recommended as it may
 break DNSSEC validation.
 
-If you have Cloud DNS providers setup, you can move the domain to one
+If you have cloud DNS providers setup, you can move the domain to one
 with the C<--cloud-dns> flag followed by a provider name like C<cloudflare>
 or C<route53>. Alternately the domain can be moved back to local hosting
 with the flag C<--cloud-dns local>.
@@ -404,10 +404,10 @@ if (@delslaves) {
 
 # Check for remote/cloud conflict
 if ($clouddns && defined($remotedns)) {
-	&usage("Remote and Cloud DNS providers cannot be set at the same time");
+	&usage("Remote and cloud DNS providers cannot be set at the same time");
 	}
 
-# Validate the Cloud DNS provider
+# Validate the cloud DNS provider
 if ($clouddns) {
 	if ($clouddns eq "services") {
 		$config{'provision_dns'} ||
@@ -416,7 +416,7 @@ if ($clouddns) {
 	elsif ($clouddns ne "local") {
 		my @cnames = map { $_->{'name'} } &list_dns_clouds();
 		&indexof($clouddns, @cnames) >= 0 ||
-			&usage("Valid Cloud DNS providers are : ".
+			&usage("Valid cloud DNS providers are : ".
 			       join(" ", @cnames));
 		}
 	}

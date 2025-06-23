@@ -79,7 +79,7 @@ $cloud = &get_domain_dns_cloud($d);
 
 if ($cloudns) {
 	$cloud || &usage("--cloud-nameservers can only be used for domains ".
-			 "hosted on a Cloud DNS provider");
+			 "hosted on a cloud DNS provider");
 	$cnsrecs = &get_domain_cloud_ns_records($d);
 	ref($cnsrecs) || &usage($cnsrecs);
 	@$cnsrecs || &usage("Cloud DNS provider $cloud->{'name'} does not ".

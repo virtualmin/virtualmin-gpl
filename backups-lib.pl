@@ -2568,7 +2568,7 @@ if ($ok) {
 					}
 				}
 
-			# Is the Cloud DNS provider valid? If not, forget it
+			# Is the cloud DNS provider valid? If not, forget it
 			if ($d->{'dns_cloud'}) {
 				my ($c) = &get_domain_dns_cloud($d);
 				if (!$c) {

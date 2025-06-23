@@ -79,7 +79,7 @@ select which one this domain will use with the C<--mysql-server> flag followed
 by a hostname, hostname:port or socket file. Similarly, a remote PostgreSQL
 server can be selected with the C<--postgres-server> flag.
 
-By default, the Cloud DNS provider chosen in the specified template will be
+By default, the cloud DNS provider chosen in the specified template will be
 used. However, you can override this with the C<--cloud-dns> flag followed by
 either C<local> to host locally, C<services> to use Cloudmin services, or
 the ID of one of the supported providers like C<route53> or C<google>.
@@ -822,7 +822,7 @@ if ($pgserver) {
 	$postgres_module = $mm->{'minfo'}->{'dir'};
 	}
 
-# Validate the Cloud DNS provider
+# Validate the cloud DNS provider
 if ($clouddns) {
 	if ($clouddns eq "services") {
 		$config{'provision_dns'} ||
@@ -831,7 +831,7 @@ if ($clouddns) {
 	elsif ($clouddns ne "local") {
 		my @cnames = map { $_->{'name'} } &list_dns_clouds();
 		&indexof($clouddns, @cnames) >= 0 ||
-			&usage("Valid Cloud DNS providers are : ".
+			&usage("Valid cloud DNS providers are : ".
 			       join(" ", @cnames));
 		}
 	}
