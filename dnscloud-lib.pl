@@ -368,7 +368,8 @@ my $rv = &call_route53_cmd(
 return (0, $rv) if (!ref($rv));
 my @recs;
 foreach my $rrs (@{$rv->{'ResourceRecordSets'}}) {
-	next if ($rrs->{'Type'} eq 'NS');
+	next if ($rrs->{'Type'} eq 'NS' &&
+		 $rrs->{'Name'} eq $d->{'dom'}.'.');
 	foreach my $rr (@{$rrs->{'ResourceRecords'}}) {
 		push(@recs, { 'name' => $rrs->{'Name'},
 			      'realname' => $rrs->{'Name'},
@@ -395,7 +396,8 @@ return $rv if (!ref($rv));
 my @recs;
 foreach my $rrs (@{$rv->{'ResourceRecordSets'}}) {
 	foreach my $rr (@{$rrs->{'ResourceRecords'}}) {
-		if ($rrs->{'Type'} eq 'NS') {
+		if ($rrs->{'Type'} eq 'NS' &&
+		    $rrs->{'Name'} eq $d->{'dom'}.'.') {
 			push(@ns, $rr->{'Value'});
 			}
 		}
@@ -417,7 +419,8 @@ return ($ok, $oldrecs) if (!$ok);
 my $js = { 'Changes' => [] };
 my %keep = map { &dns_record_key($_), 1 } @$recs;
 foreach my $r (@$oldrecs) {
-	next if ($r->{'type'} eq 'NS' || $r->{'type'} eq 'SOA');
+	next if ($r->{'type'} eq 'NS' && $r->{'name'} eq $d->{'dom'}.'.' ||
+		 $r->{'type'} eq 'SOA');
 	next if ($keep{&dns_record_key($r)});
 	my $v = join(" ", @{$r->{'values'}});
 	$v = &normalize_route53_txt($r) if ($r->{'type'} =~ /TXT|SPF/);

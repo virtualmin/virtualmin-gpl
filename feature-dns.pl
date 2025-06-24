@@ -334,6 +334,9 @@ elsif (!$dnsparent) {
 	&remote_foreign_call($r, "bind8", "set_ownership", $rootfile);
 	&$second_print($text{'setup_done'});
 
+	# Add NS records to parent zone
+	&add_parent_ns_records($d);
+
 	# If DNSSEC was requested, set it up
 	if ($tmpl->{'dnssec'} eq 'yes' && &can_domain_dnssec($d)) {
 		&$first_print($text{'setup_dnssec'});
@@ -4812,6 +4815,45 @@ if ($parent) {
 	return $deleted ? undef : "No DS records to remove found";
 	}
 return "No parent DNS domain found";
+}
+
+# add_parent_ns_records(&domain)
+# If a domain's DNS parent is managed by Virtualmin, add the appropriate NS
+# records to it for the sub-domain
+sub add_parent_ns_records
+{
+my ($d) = @_;
+my $pname = $d->{'dom'};
+$pname =~ s/^([^\.]+)\.//;
+my $parent = &get_domain_by("dom", $pname);
+if ($parent && !$d->{'dns_submode'}) {
+	&obtain_lock_dns($parent);
+	&pre_records_change($parent);
+	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
+	my @ns;
+	if ($d->{'dns_cloud'}) {
+		# Nameservers come from cloud provider
+		@ns = &get_domain_cloud_ns_records($d);
+		}
+	else {
+		# Nameservers are in this zone
+		my ($recs, $file) = &get_domain_dns_records_and_file($d);
+		@ns = grep { $_->{'name'} eq $d->{'dom'}."." &&
+			     $_->{'type'} eq 'NS' } @$recs;
+		}
+	my @oldns = grep { $_->{'name'} eq $d->{'dom'}."." &&
+                           $_->{'type'} eq 'NS' } @$precs;
+	if (@ns) {
+		foreach my $o (@oldns) {
+			&delete_dns_record($precs, $pfile, $o);
+			}
+		foreach my $r (@ns) {
+			&create_dns_record($precs, $pfile, $r);
+			}
+		}
+	&post_records_change($parent, $precs, $pfile);
+	&release_lock_dns($parent);
+	}
 }
 
 # get_domain_dnssec_ds_records(&domain)
