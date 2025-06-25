@@ -56,11 +56,14 @@ sub script_tikiwiki_dbs
 return ("mysql", "postgres");
 }
 
+# script_tikiwiki_php_fullver(&domain, version, &sinfo)
+# Returns the PHP version to use for this script, or undef if it is not supported
 sub script_tikiwiki_php_fullver
 {
 local ($d, $ver, $sinfo) = @_;
-return &compare_versions($ver, 13) < 0 ? undef :
-       &compare_versions($ver, 22) >= 0 ? 7.4 : 5.5;
+return &compare_versions($ver, 17) <= 0 ? undef :
+       &compare_versions($ver, 22) <= 0 ? "7.2" :
+       &compare_versions($ver, 25) <= 0 ? "7.4" : "8.1";
 }
 
 sub script_tikiwiki_can_upgrade
