@@ -278,36 +278,34 @@ return $db_conn_desc;
 # a newer one. Otherwise returns undef.
 sub script_tikiwiki_check_latest
 {
+use LWP::Simple;
+use XML::Simple;
 local ($ver) = @_;
 local @vers;
-if ($ver >= 28) {
-	@vers = &osdn_package_versions("tikiwiki/Tiki_28.x_Castor",
-				       "tiki-(28\.[0-9\\.]+)\\.zip");
+
+# Fetch the RSS feed from SourceForge for TikiWiki
+my $rss_url = 'https://sourceforge.net/projects/tikiwiki/rss?limit=200';
+my $content = get($rss_url) or die "Failed to fetch RSS feed";
+
+my $rss = XMLin($content);
+my %seen;
+
+foreach my $item (@{ $rss->{channel}->{item} }) {
+	my $title = $item->{title} // '';
+	next unless $title =~ /\.zip$/i;
+	next if $title =~ m{^/Old Stuff/}i;
+	# Extract series and major version from the path
+	if ($link =~ m{/([^/]+)/(\d+)\.\d+/tiki-\d+\.\d+\.zip$}) {
+		my ($series, $version) = ($1, $2);
+		my $key = "$series-$version";
+		next if $seen{$key}++;
+		if ($version eq $ver) {
+			@vers = &osdn_package_versions("tikiwiki/$series",
+				"tiki-($ver\.[0-9\\.]+)\\.zip");
+			last;
+		}
 	}
-elsif ($ver >= 27) {
-	@vers = &osdn_package_versions("tikiwiki/Tiki_27.x_Miaplacidus",
-				       "tiki-(27\.[0-9\\.]+)\\.zip");
-	}
-elsif ($ver >= 26) {
-	@vers = &osdn_package_versions("tikiwiki/Tiki_26.x_Alnilam",
-				       "tiki-(26\.[0-9\\.]+)\\.zip");
-	}
-elsif ($ver >= 25) {
-	@vers = &osdn_package_versions("tikiwiki/Tiki_25.x_Sagittarius_A",
-				       "tiki-(25\.[0-9\\.]+)\\.zip");
-	}
-elsif ($ver >= 24) {
-	@vers = &osdn_package_versions("tikiwiki/Tiki_24.x_Wolf_359",
-				       "tiki-(24\.[0-9\\.]+)\\.zip");
-	}
-elsif ($ver >= 21) {
-	@vers = &osdn_package_versions("tikiwiki/Tiki_21.x_UY_Scuti",
-				       "tiki-(21\.[0-9\\.]+)\\.zip");
-	}
-elsif ($ver >= 18) {
-	@vers = &osdn_package_versions("tikiwiki/Tiki_18.x_Alcyone",
-				       "tiki-(18\.[0-9\\.]+)\\.zip");
-	}
+}
 return "Failed to find versions" if (!@vers);
 return $ver eq $vers[0] ? undef : $vers[0];
 }
