@@ -368,12 +368,12 @@ if ($multiline) {
 		foreach my $f (grep { $d->{$_} } @database_features) {
 			my $ufunc = "${f}_user";
 			if (defined(&$ufunc)) {
-				my $u = &$ufunc($d, 1);
+				my $u = &$ufunc($d);
 				print "    Username for ${f}: $u\n";
 				}
 			my $pfunc = "${f}_pass";
 			if (defined(&$pfunc)) {
-				my $p = &$pfunc($d, 1);
+				my $p = &$pfunc($d);
 				print "    Password for ${f}: $p\n";
 				}
 			}
