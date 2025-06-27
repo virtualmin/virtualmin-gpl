@@ -438,7 +438,8 @@ foreach my $r (@$oldrecs) {
 	     });
 	}
 foreach my $r (@$recs) {
-	next if ($r->{'type'} eq 'NS' || $r->{'type'} eq 'SOA');
+	next if ($r->{'type'} eq 'NS' && $r->{'name'} eq $d->{'dom'}.'.' ||
+		 $r->{'type'} eq 'SOA');
 	next if (!$r->{'name'} || !$r->{'type'});	# $ttl or similar
 	my $v = join(" ", @{$r->{'values'}});
 	$type = $r->{'type'};
@@ -505,7 +506,8 @@ foreach my $change (@{ $js->{'Changes'} }) {
         next unless($rrset);
 	my ($type, $name)  = ($rrset->{'Type'}, $rrset->{'Name'});
 	unless ($change->{'Action'} =~ /^$pattern$/ &&
-	        ($type eq 'TXT' || $type eq 'MX' || $type eq 'CAA')) {
+	        ($type eq 'TXT' || $type eq 'MX' || $type eq 'CAA' ||
+		 $type eq 'NS')) {
 		# Keep other records as-is
 		push(@others, $change);
 		next;

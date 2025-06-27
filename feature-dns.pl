@@ -4840,6 +4840,16 @@ if ($parent && !$d->{'dns_submode'}) {
 		my ($recs, $file) = &get_domain_dns_records_and_file($d);
 		@ns = grep { $_->{'name'} eq $d->{'dom'}."." &&
 			     $_->{'type'} eq 'NS' } @$recs;
+		foreach my $r (@$recs) {
+			if ($r->{'name'} eq $d->{'dom'}."." &&
+			    $r->{'type'} eq 'NS') {
+				push(@ns, { 'name' => $r->{'name'},
+					    'type' => $r->{'type'},
+					    'class' => $r->{'class'},
+					    'ttl' => $r->{'ttl'},
+					    'values' => $r->{'values'} });
+				}
+			}
 		}
 	my @oldns = grep { $_->{'name'} eq $d->{'dom'}."." &&
                            $_->{'type'} eq 'NS' } @$precs;
