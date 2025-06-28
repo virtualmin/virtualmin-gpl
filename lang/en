@@ -6199,7 +6199,7 @@ upgrade_schedok=.. done. Updates will be automatically installed.
 upgrade_schednot=.. done, but automatic update installation is not enabled. Use the <a href='$1'>$2</a> module to turn them on.
 upgrade_file=Creating Virtualmin license ..
 upgrade_problems=Some errors occurred while upgrading your system to Virtualmin Pro. Please check the messages above for possible causes.
-upgrade_success=Upgrade to Virtualmin Pro was successful. Thank you choosing Virtualmin Pro!
+upgrade_success=Upgrade to Virtualmin Pro was successful. Thank you for choosing Virtualmin Pro!
 upgrade_theme=Enabling theme <i>$1</i> ..
 upgrade_esharedroot=Your Webmin root directory $1 is shared between multiple systems - module updates are not allowed
 upgrade_eyumrepo=Virtualmin has been installed from an RPM, but not using the Virtualmin GPL repository. Upgrading is not possible at this time.
