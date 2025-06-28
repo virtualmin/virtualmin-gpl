@@ -4838,8 +4838,6 @@ if ($parent && !$d->{'dns_submode'}) {
 	else {
 		# Nameservers are in this zone
 		my ($recs, $file) = &get_domain_dns_records_and_file($d);
-		@ns = grep { $_->{'name'} eq $d->{'dom'}."." &&
-			     $_->{'type'} eq 'NS' } @$recs;
 		foreach my $r (@$recs) {
 			if ($r->{'name'} eq $d->{'dom'}."." &&
 			    $r->{'type'} eq 'NS') {
@@ -4861,7 +4859,7 @@ if ($parent && !$d->{'dns_submode'}) {
 			&create_dns_record($precs, $pfile, $r);
 			}
 		}
-	&post_records_change($parent, $precs, $pfile);
+	my $err = &post_records_change($parent, $precs, $pfile);
 	&release_lock_dns($parent);
 	}
 }
