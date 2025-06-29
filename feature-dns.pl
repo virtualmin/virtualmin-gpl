@@ -152,6 +152,10 @@ elsif ($d->{'dns_cloud'} && !$dnsparent) {
 		}
 	$d->{'dns_cloud_id'} = $msg;
 	$d->{'dns_cloud_location'} = $location;
+
+	# Add NS records to parent zone
+	&add_parent_ns_records($d);
+
 	if ($ok == 1) {
 		&$second_print($text{'setup_done'});
 		}
@@ -422,6 +426,10 @@ if ($d->{'dns_cloud'} && !$d->{'dns_submode'}) {
 	delete($d->{'dns_cloud_id'});
 	delete($d->{'dns_cloud_location'});
 	delete($domain_dns_records_cache{$d->{'id'}});
+
+	# Delete NS records in parent
+	&delete_parent_ns_records($d);
+
 	&$second_print($text{'setup_done'});
 	}
 elsif ($d->{'provision_dns'}) {
@@ -458,6 +466,9 @@ elsif (!$d->{'dns_submode'}) {
 	if ($z) {
 		# Delete DS records in parent
 		&delete_parent_dnssec_ds_records($d);
+
+		# Delete NS records in parent
+		&delete_parent_ns_records($d);
 
 		# Delete any dnssec key
 		if (&remote_foreign_call($r, "bind8", "supports_dnssec")) {
@@ -4703,6 +4714,7 @@ else {
 	&enable_dnssec_resign_cron($d);
 	}
 &release_lock_dns($d);
+&add_parent_ns_records($d);
 &add_parent_dnssec_ds_records($d);
 return undef;
 }
@@ -4756,17 +4768,6 @@ if ($parent) {
 			&create_dns_record($prec, $pfile, $dsr);
 			}
 		}
-	if (!$already{$d->{'dom'}.".","NS"} && !$d->{'dns_submode'}) {
-		# Also need to add an NS record, or else signing will fail
-		my $tmpl = &get_template($d->{'template'});
-		my $master = &get_master_nameserver($tmpl, $d);
-		my $r = { 'name' => $d->{'dom'}.".",
-			  'type' => 'NS',
-			  'values' => [ $master ] };
-		if (!$already{$r->{'name'},$r->{'type'}}) {
-			&create_dns_record($precs, $pfile, $r);
-			}
-		}
 	&post_records_change($parent, $precs, $pfile);
 	&release_lock_dns($parent);
 	return undef;
@@ -4802,10 +4803,6 @@ if ($parent) {
 				last DS;
 				}
 			}
-		if ($rec->{'name'} eq $d->{'dom'}."." &&
-		    $rec->{'type'} eq 'NS') {
-			push(@delrecs, $rec);
-			}
 		}
 	foreach my $rec (@delrecs) {
 		&delete_dns_record($precs, $pfile, $rec);
@@ -4833,7 +4830,9 @@ if ($parent && !$d->{'dns_submode'}) {
 	my @ns;
 	if ($d->{'dns_cloud'}) {
 		# Nameservers come from cloud provider
-		@ns = &get_domain_cloud_ns_records($d);
+		my $cns = &get_domain_cloud_ns_records($d);
+		return $cns if (!ref($cns));
+		@ns = @$cns;
 		}
 	else {
 		# Nameservers are in this zone
@@ -4851,16 +4850,46 @@ if ($parent && !$d->{'dns_submode'}) {
 		}
 	my @oldns = grep { $_->{'name'} eq $d->{'dom'}."." &&
                            $_->{'type'} eq 'NS' } @$precs;
+	my $changed = 0;
 	if (@ns) {
 		foreach my $o (@oldns) {
 			&delete_dns_record($precs, $pfile, $o);
+			$changed++;
 			}
 		foreach my $r (@ns) {
 			&create_dns_record($precs, $pfile, $r);
+			$changed++;
 			}
 		}
-	my $err = &post_records_change($parent, $precs, $pfile);
+	&post_records_change($parent, $precs, $pfile) if ($changed);
 	&release_lock_dns($parent);
+	}
+}
+
+# delete_parent_ns_records(&domain)
+# Delete NS records for this domain from the DNS parent
+sub delete_parent_ns_records
+{
+my ($d) = @_;
+my $pname = $d->{'dom'};
+$pname =~ s/^([^\.]+)\.//;
+my $parent = &get_domain_by("dom", $pname);
+if ($parent && !$d->{'dns_submode'}) {
+	&obtain_lock_dns($parent);
+        &pre_records_change($parent);
+        my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
+	foreach my $r (@$precs) {
+		if ($r->{'type'} eq 'NS' && $r->{'name'} eq $d->{'dom'}.'.') {
+			push(@oldns, $r);
+			}
+		}
+	my $changed = 0;
+	foreach my $o (@oldns) {
+		&delete_dns_record($precs, $pfile, $o);
+		$changed++;
+		}
+	&post_records_change($parent, $precs, $pfile) if ($changed);
+        &release_lock_dns($parent);
 	}
 }
 
