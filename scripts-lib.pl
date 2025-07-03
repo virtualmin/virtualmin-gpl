@@ -3789,5 +3789,92 @@ foreach my $mod (@{$mods}) {
 return;
 }
 
+# script_ppi_get_file($path)
+# Returns a PPI document object for the given file path or an error message
+sub script_ppi_get_file
+{
+my ($path) = @_;
+eval { require PPI; PPI->import; 1 };
+return (undef, "PPI not installed: $@") if ($@);
+return (undef, "File '$path' does not exist") if (!-e $path);
+
+my $doc = PPI::Document->new(
+	$path,
+	readonly => 0,
+	encoding => 'UTF-8',
+	);
+
+return $doc ? ($doc, undef) : (undef, "Could not parse '$path'");
+}
+
+# script_ppi_get_sub_content($doc, $sub_name)
+# Returns the content of a subroutine in a PPI document
+sub script_ppi_get_sub_content
+{
+my ($doc, $sub_name) = @_;
+return (undef, 'Undefined PPI document') unless (ref($doc) eq 'PPI::Document');
+
+my $sub = $doc->find_first(sub {
+	$_[1]->isa('PPI::Statement::Sub') && $_[1]->name eq $sub_name;});
+return (undef, "Sub '$sub_name' not found") unless ($sub);
+
+my $block = $sub->find_first('PPI::Structure::Block');
+return (undef, "No block found for sub '$sub_name'") unless ($block);
+
+my $content = $block->content;
+$content =~ s/^\{|\}$//g;
+return ($content, undef);
+}
+
+# script_ppi_set_sub_content($doc, $path, $sub_name, $new_content)
+# Sets the content of a subroutine in a PPI document
+sub script_ppi_set_sub_content
+{
+my ($doc, $path, $sub_name, $new_content) = @_;
+return (undef, 'Undefined PPI document') unless (ref($doc) eq 'PPI::Document');
+
+my $sub = $doc->find_first(sub {
+	$_[1]->isa('PPI::Statement::Sub') && $_[1]->name eq $sub_name;});
+return (undef, "Sub '$sub_name' not found") unless ($sub);
+
+my $block = $sub->find_first('PPI::Structure::Block');
+return (undef, "No block found for sub '$sub_name'") unless ($block);
+
+# Remove all content between curly braces
+my @children = $block->children;
+$_->delete for grep { $_ != $block->start && $_ != $block->finish } @children;
+
+# Ensure content has proper newlines
+$new_content = "\n" . $new_content unless ($new_content =~ /^\n/);
+$new_content .= "\n" unless ($new_content =~ /\n$/);
+
+# Create a new token with the content
+my $token = PPI::Token::Whitespace->new($new_content);
+$block->start->insert_after($token);
+
+$doc->save($path) or return (undef, "Write failed to '$path'");
+return 1;
+}
+
+# script_ppi_update_sub_content($path, $sub_name, $find_re, $replace_with)
+# Updates the content of a subroutine in a Perl file with regex
+sub script_ppi_update_sub_content
+{
+my ($path, $sub_name, $find_re, $replace_with) = @_;
+
+my ($doc,  $err1) = &script_ppi_get_file($path);
+return (undef, $err1) unless ($doc);
+
+my ($body, $err2) = &script_ppi_get_sub_content($doc, $sub_name);
+return (undef, $err2) unless (defined($body));
+
+$body =~ s/$find_re/$replace_with/;
+
+my ($ok, $err3) = &script_ppi_set_sub_content($doc, $path, $sub_name, $body);
+return (undef, $err3) unless ($ok);
+
+return (1, undef);
+}
+
 1;
 
