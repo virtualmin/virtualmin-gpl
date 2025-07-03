@@ -2990,8 +2990,9 @@ foreach my $d (&list_domains()) {
 	next if (!$info);
 	my $expiry = &parse_notafter_date($info->{'notafter'});
 
-	# Is the current cert even from Let's Encrypt?
-	next if (!&is_letsencrypt_cert($info));
+	# Is the current cert even from an SSL provider?
+	next if (!&is_letsencrypt_cert($info) &&
+		 !$d->{'letsencrypt_last_id'});
 
 	# Figure out when the cert was last renewed. This is the max of the
 	# date in the cert and the time recorded in Virtualmin
