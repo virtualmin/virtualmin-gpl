@@ -2961,8 +2961,18 @@ if ($info->{'dom'} && $info->{'id'}) {
 	# Looks like a virtual server
 	$info = &cert_info($info);
 	}
-return $info && ($info->{'issuer_cn'} =~ /Let's\s+Encrypt/i ||
-		 $info->{'issuer_o'} =~ /Let's\s+Encrypt/i);
+
+# Check all provider names (if list fn exists)
+my @patterns = ("Let's\\s+Encrypt");
+if (defined &list_known_acme_providers) {
+	push(@patterns, map { quotemeta($_->{'name'}) }
+		&list_known_acme_providers());
+	}
+
+# Check the issuer name
+my $re = join('|', @patterns);
+return $info && ($info->{'issuer_cn'} =~ /$re/i ||
+		 $info->{'issuer_o'}  =~ /$re/i);
 }
 
 # apply_letsencrypt_cert_renewals()
@@ -2991,8 +3001,7 @@ foreach my $d (&list_domains()) {
 	my $expiry = &parse_notafter_date($info->{'notafter'});
 
 	# Is the current cert even from an SSL provider?
-	next if (!&is_letsencrypt_cert($info) &&
-		 !$d->{'letsencrypt_last_id'});
+	next if (!&is_letsencrypt_cert($info));
 
 	# Figure out when the cert was last renewed. This is the max of the
 	# date in the cert and the time recorded in Virtualmin
