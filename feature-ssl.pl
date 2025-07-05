@@ -2962,10 +2962,10 @@ if ($info->{'dom'} && $info->{'id'}) {
 	$info = &cert_info($info);
 	}
 
-# Check all provider names (if list fn exists)
+# Check all issuer names (if the list sub exists)
 my @patterns = ("Let's\\s+Encrypt");
 if (defined &list_known_acme_providers) {
-	push(@patterns, map { quotemeta($_->{'name'}) }
+	push(@patterns, map { quotemeta($_->{'issuer'}) }
 		&list_known_acme_providers());
 	}
 
