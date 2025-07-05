@@ -6885,7 +6885,7 @@ if (!&copy_alias_records($d)) {
 	}
 
 my $need_cert_host = !&has_mta_sts_cert($d) &&
-		     (&is_letsencrypt_cert($d) || $d->{'letsencrypt_last_id'});
+		     (&is_acme_cert($d) || $d->{'letsencrypt_last_id'});
 
 # Setup the webserver to serve mta-sts sub-domain
 my $mta_host = "mta-sts.".$d->{'dom'};

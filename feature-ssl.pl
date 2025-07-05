@@ -419,7 +419,7 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
 
 if ($d->{'dom'} ne $oldd->{'dom'} &&
     !$d->{'ssl_same'} &&
-    &is_letsencrypt_cert($d) &&
+    &is_acme_cert($d) &&
     !&check_domain_certificate($d->{'dom'}, $d)) {
 	# Domain name has changed ... re-request let's encrypt cert
 	&$first_print($text{'save_ssl12'});
@@ -2952,9 +2952,9 @@ push(@rv, @{$info->{'alt'}}) if ($info->{'alt'});
 return @rv;
 }
 
-# is_letsencrypt_cert(&info|&domain)
-# Returns 1 if a cert info looks like it comes from Let's Encrypt
-sub is_letsencrypt_cert
+# is_acme_cert(&info|&domain)
+# Returns 1 if a cert info looks like it comes from supported ACME provider
+sub is_acme_cert
 {
 my ($info) = @_;
 if ($info->{'dom'} && $info->{'id'}) {
@@ -3001,7 +3001,7 @@ foreach my $d (&list_domains()) {
 	my $expiry = &parse_notafter_date($info->{'notafter'});
 
 	# Is the current cert even from an SSL provider?
-	next if (!&is_letsencrypt_cert($info));
+	next if (!&is_acme_cert($info));
 
 	# Figure out when the cert was last renewed. This is the max of the
 	# date in the cert and the time recorded in Virtualmin
@@ -3239,7 +3239,7 @@ my @caa = grep { $_->{'type'} eq 'CAA' } @$recs;
 my $lets = $letsencrypt_cert;
 if (!$lets) {
 	my $info = &cert_info($d);
-	$lets = &is_letsencrypt_cert($info) ? 1 : 0;
+	$lets = &is_acme_cert($info) ? 1 : 0;
 	}
 # Need delay for DNS propagation
 if (!@caa && $lets) {
@@ -3413,7 +3413,7 @@ $size ||= $tmpl->{'ssl_key_size'};
 my $phd = &public_html_dir($d);
 my $actype = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
 my $dcinfo = &cert_info($d);
-my $dclets = &is_letsencrypt_cert($d);
+my $dclets = &is_acme_cert($d);
 my $dcalgo = $dcinfo->{'algo'};
 my $dctype = $dcalgo =~ /^ec/ ? "ecdsa" : "rsa";
 my $actype_reuse = $actype eq $dctype ? 1 : 0;
