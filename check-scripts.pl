@@ -253,8 +253,8 @@ print "Patching installer file with newer version ..\n";
 my ($ok, $err) = &script_ppi_update_sub_content(
 	$script_file,
 	"script_${script_name}_versions",
-	qr/"\Q$ver_curr\E"/,
-	qq{"$ver_new"} );
+	qr/\Q$ver_curr\E/,
+	$ver_new );
 if ($ok) {
 	print ".. file patched successfully\n";
 	}
