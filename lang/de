@@ -4690,8 +4690,6 @@ scripts_kit_loginkit=Login-Kit
 scripts_kit_php_memory=Ändere PHP-Speichergrenze für virtuellen Server ..
 scripts_kit_edom_name=Virtueller Server '$1' existiert nicht
 scripts_kit_estype=Kein Script des Typs '$1' wurde bisher auf diesem virtuellen Server installiert
-scripts_kit_estype_multi=Mehrere Skripte des Typs '$1' sind an den folgenden Pfaden verfügbar:
-scripts_kit_estype_multi2=Verwenden Sie den Hilfsparameter '--script-path', um das genaue Script anzugeben, das verwendet werden soll
 scripts_kit_estype_path=Das Script des Typs '$1' am Pfad '$2' existiert nicht
 
 scripts_gpl_pro_tip=Pro-Feature

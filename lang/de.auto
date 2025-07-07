@@ -5,6 +5,9 @@ newweb_allow_subset=Nicht überprüfbare Domänennamen ausschließen?
 
 tmpl_mail_mta_sts=MTA-STS für neue Domänen aktivieren?
 
+scripts_kit_estype_multi=Mehrere Instanzen des Typs „$1“ sind unter den folgenden Pfaden verfügbar:
+scripts_kit_estype_multi2=Verwenden Sie den Hilfsparameter „--app-path“, um die genaue zu verwendende Instanz anzugeben
+
 migrate_plesk=Plesk-Backup
 
 validate_ednsc=Das Abrufen der Datensätze für $1 vom Cloud-DNS-Anbieter $2 ist fehlgeschlagen : $3

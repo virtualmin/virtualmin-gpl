@@ -4694,8 +4694,8 @@ scripts_kit_loginkit=Prihlasovacia súprava
 scripts_kit_php_memory=Zmena limitu pamäte PHP pre virtuálny server ..
 scripts_kit_edom_name=Virtuálny server '$1' neexistuje
 scripts_kit_estype=Na tomto virtuálnom serveri ešte nebol nainštalovaný žiadny skript typu '$1'
-scripts_kit_estype_multi=Viacero skriptov typu '$1' je dostupných na nasledujúcich cestách:
-scripts_kit_estype_multi2=Pomocou pomocného parametra '--script-path' špecifikujte presný skript, ktorý sa má použiť
+scripts_kit_estype_multi=Viaceré inštancie typu '$1' sú k dispozícii na nasledujúcich cestách:
+scripts_kit_estype_multi2=Na určenie presnej inštancie, ktorá sa má použiť, použite pomocný parameter „--app-path“
 scripts_kit_estype_path=Skript typu '$1' na ceste '$2' neexistuje
 
 scripts_gpl_pro_tip=Profesionálna funkcia

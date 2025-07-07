@@ -2609,8 +2609,8 @@ scripts_kit_loginkit=Kit de connexion
 scripts_kit_php_memory=Modification de la limite de mémoire PHP pour le serveur virtuel ..
 scripts_kit_edom_name=Le serveur virtuel « $1 » n'existe pas
 scripts_kit_estype=Aucun script de type « $1 » n'a encore été installé sur ce serveur virtuel
-scripts_kit_estype_multi=Plusieurs scripts de type « $1 » sont disponibles aux chemins suivants :
-scripts_kit_estype_multi2=Utilisez le paramètre auxiliaire '--script-path' pour spécifier le script exact à utiliser
+scripts_kit_estype_multi=Plusieurs instances de type « $1 » sont disponibles aux chemins suivants :
+scripts_kit_estype_multi2=Utilisez le paramètre auxiliaire '--app-path' pour spécifier l'instance exacte à utiliser
 scripts_kit_estype_path=Le script de type '$1' au chemin '$2' n'existe pas
 
 scripts_gpl_pro_tip=Fonctionnalité professionnelle

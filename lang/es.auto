@@ -1891,8 +1891,8 @@ scripts_kit_loginkit=Kit de inicio de sesión
 scripts_kit_php_memory=Cambiar el límite de memoria PHP para el servidor virtual ..
 scripts_kit_edom_name=El servidor virtual '$1' no existe
 scripts_kit_estype=Todavía no se ha instalado ningún script del tipo '$1' en este servidor virtual
-scripts_kit_estype_multi=Hay varios scripts del tipo '$1' disponibles en las siguientes rutas:
-scripts_kit_estype_multi2=Utilice el parámetro auxiliar '--script-path' para especificar el script exacto a utilizar
+scripts_kit_estype_multi=Hay varias instancias del tipo '$1' disponibles en las siguientes rutas:
+scripts_kit_estype_multi2=Utilice el parámetro auxiliar '--app-path' para especificar la instancia exacta a utilizar
 scripts_kit_estype_path=El script del tipo '$1' en la ruta '$2' no existe
 
 scripts_gpl_pro_tip=Característica profesional

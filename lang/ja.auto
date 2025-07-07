@@ -4694,8 +4694,8 @@ scripts_kit_loginkit=ログインキット
 scripts_kit_php_memory=仮想サーバーの PHP メモリ制限を変更します。
 scripts_kit_edom_name=仮想サーバー '$1' は存在しません
 scripts_kit_estype=この仮想サーバーにはまだ「$1」タイプのスクリプトはインストールされていません
-scripts_kit_estype_multi=タイプ '$1' の複数のスクリプトが次のパスで利用可能です:
-scripts_kit_estype_multi2=使用するスクリプトを正確に指定するには、補助パラメータ「--script-path」を使用します。
+scripts_kit_estype_multi=タイプ '$1' の複数のインスタンスが次のパスで利用可能です:
+scripts_kit_estype_multi2=使用するインスタンスを正確に指定するには、補助パラメータ「--app-path」を使用します。
 scripts_kit_estype_path=パス '$2' にタイプ '$1' のスクリプトが存在しません
 
 scripts_gpl_pro_tip=プロ機能

@@ -234,8 +234,8 @@ scripts_kit_loginkit=Zestaw do logowania
 scripts_kit_php_memory=Zmiana limitu pamięci PHP dla serwera wirtualnego ..
 scripts_kit_edom_name=Serwer wirtualny „$1” nie istnieje
 scripts_kit_estype=Na tym serwerze wirtualnym nie zainstalowano jeszcze żadnego skryptu typu „$1”
-scripts_kit_estype_multi=Wiele skryptów typu „$1” jest dostępnych w następujących ścieżkach:
-scripts_kit_estype_multi2=Użyj pomocniczego parametru „--script-path”, aby określić dokładny skrypt, który ma zostać użyty
+scripts_kit_estype_multi=Wiele wystąpień typu „$1” jest dostępnych w następujących ścieżkach:
+scripts_kit_estype_multi2=Użyj pomocniczego parametru „--app-path”, aby określić dokładną instancję, która ma zostać użyta
 scripts_kit_estype_path=Skrypt typu „$1” na ścieżce „$2” nie istnieje
 
 scripts_gpl_pro_tip_enroll_single=Prosimy o rozważenie zakupu licencji <a target=_blank href='$1'>Virtualmin Pro</a>, aby wesprzeć rozwój i odblokować tę oraz wiele innych fajnych funkcji

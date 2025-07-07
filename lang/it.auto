@@ -3735,8 +3735,8 @@ scripts_kit_loginkit=Kit di accesso
 scripts_kit_php_memory=Modifica del limite di memoria PHP per il server virtuale ..
 scripts_kit_edom_name=Il server virtuale '$1' non esiste
 scripts_kit_estype=Nessuno script di tipo '$1' è stato ancora installato su questo server virtuale
-scripts_kit_estype_multi=Sono disponibili più script di tipo '$1' nei seguenti percorsi:
-scripts_kit_estype_multi2=Utilizzare il parametro ausiliario '--script-path' per specificare lo script esatto da utilizzare
+scripts_kit_estype_multi=Sono disponibili più istanze del tipo '$1' nei seguenti percorsi:
+scripts_kit_estype_multi2=Utilizzare il parametro ausiliario '--app-path' per specificare l'istanza esatta da utilizzare
 scripts_kit_estype_path=Lo script di tipo '$1' nel percorso '$2' non esiste
 
 scripts_gpl_pro_tip=Funzionalità professionale

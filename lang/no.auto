@@ -1305,8 +1305,8 @@ scripts_kit_loginkit=Innloggingssett
 scripts_kit_php_memory=Endring av PHP-minnegrense for virtuell server ..
 scripts_kit_edom_name=Virtuell server '$1' eksisterer ikke
 scripts_kit_estype=Ingen skript av typen '$1' er installert ennå på denne virtuelle serveren
-scripts_kit_estype_multi=Flere skript av typen '$1' er tilgjengelig på følgende stier:
-scripts_kit_estype_multi2=Bruk hjelpeparameteren '--script-path' for å spesifisere det eksakte skriptet som skal brukes
+scripts_kit_estype_multi=Flere forekomster av typen '$1' er tilgjengelige på følgende stier:
+scripts_kit_estype_multi2=Bruk tilleggsparameteren '--app-path' for å angi nøyaktig hvilken instans som skal brukes
 scripts_kit_estype_path=Skriptet av typen '$1' ved banen '$2' eksisterer ikke
 
 scripts_gpl_pro_tip=Pro -funksjon

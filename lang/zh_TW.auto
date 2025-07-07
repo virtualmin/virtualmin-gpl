@@ -2490,8 +2490,8 @@ scripts_kit_loginkit=登入套件
 scripts_kit_php_memory=更改虛擬伺服器的 PHP 記憶體限制 ..
 scripts_kit_edom_name=虛擬伺服器「$1」不存在
 scripts_kit_estype=該虛擬伺服器上尚未安裝「$1」類型的腳本
-scripts_kit_estype_multi=「$1」類型的多個腳本可在以下路徑中取得：
-scripts_kit_estype_multi2=使用輔助“--script-path”參數指定要使用的確切腳本
+scripts_kit_estype_multi=以下路徑中提供了類型「$1」的多個實例：
+scripts_kit_estype_multi2=使用輔助“--app-path”參數指定要使用的確切實例
 scripts_kit_estype_path=路徑「$2」處類型「$1」的腳本不存在
 
 scripts_gpl_pro_tip=專業功能

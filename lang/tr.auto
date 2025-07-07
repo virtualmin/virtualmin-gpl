@@ -2669,8 +2669,8 @@ scripts_kit_loginkit=Giriş Kiti
 scripts_kit_php_memory=Sanal sunucu için PHP bellek sınırını değiştirme ..
 scripts_kit_edom_name=Sanal sunucu '$1' mevcut değil
 scripts_kit_estype=Bu sanal sunucuya henüz '$1' türünde bir betik yüklenmedi
-scripts_kit_estype_multi='$1' türünde birden fazla betik aşağıdaki yollarda mevcuttur:
-scripts_kit_estype_multi2=Kullanılacak tam betiği belirtmek için yardımcı '--script-path' parametresini kullanın
+scripts_kit_estype_multi='$1' türünün birden fazla örneği aşağıdaki yollarda mevcuttur:
+scripts_kit_estype_multi2=Kullanılacak tam örneği belirtmek için yardımcı '--app-path' parametresini kullanın
 scripts_kit_estype_path='$2' yolundaki '$1' türündeki betik mevcut değil
 
 scripts_gpl_pro_tip=Profesyonel Özellik

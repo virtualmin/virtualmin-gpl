@@ -1528,8 +1528,8 @@ scripts_kit_loginkit=Inlogkit
 scripts_kit_php_memory=PHP-geheugenlimiet voor virtuele server wijzigen ..
 scripts_kit_edom_name=Virtuele server '$1' bestaat niet
 scripts_kit_estype=Er is nog geen script van het type '$1' geïnstalleerd op deze virtuele server
-scripts_kit_estype_multi=Meerdere scripts van het type '$1' zijn beschikbaar op de volgende paden:
-scripts_kit_estype_multi2=Gebruik de hulpparameter '--script-path' om het exacte script op te geven dat moet worden gebruikt
+scripts_kit_estype_multi=Er zijn meerdere exemplaren van het type '$1' beschikbaar op de volgende paden:
+scripts_kit_estype_multi2=Gebruik de hulpparameter '--app-path' om het exacte exemplaar op te geven dat moet worden gebruikt
 scripts_kit_estype_path=Het script van het type '$1' op pad '$2' bestaat niet
 
 scripts_gpl_pro_tip=Pro-functie
