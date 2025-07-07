@@ -14,6 +14,8 @@ index_usstopdesc=Serwer internetowy Usermin jest obecnie aktywny, co pozwala uż
 index_usstartdesc=Serwer internetowy Usermin jest obecnie wyłączony, co uniemożliwi użytkownikom skrzynek pocztowych odczytywanie ich poczty za pośrednictwem sieci. Kliknij ten przycisk, aby go uruchomić.
 
 index_warn_clamscan=Ten system używa samodzielnego skanera antywirusowego <tt>clamscan</tt>, który został wycofany przez Virtualmin ze względu na wydajność i wykorzystanie pamięci RAM. Zamiast niego należy używać skanera antywirusowego <tt>clamd</tt> opartego na serwerze.
+index_warn_apacheconf=Konfiguracja Apache w Twoim systemie zawiera błędy! To uniemożliwi Virtualmin pełne dodanie nowych domen, dopóki błędy nie zostaną naprawione.
+index_warn_bindconf=Konfiguracja serwera DNS BIND w Twoim systemie zawiera błędy! Zapobiegnie to dodaniu nowych domen przez Virtualmin do momentu naprawienia błędów.
 index_disable_clamscan=Zmień skaner antywirusowy
 
 form_generic_subserverof=Podserwer $1
@@ -62,6 +64,7 @@ newweb_combined_cert=Skonfiguruj Apache do użycia
 newweb_combined_cert2=Połączony plik certyfikatu i urzędu certyfikacji
 newweb_combined_cert1=Tylko plik certyfikatu
 newweb_combined_cert0=Podejmuj decyzję automatycznie
+newweb_allow_subset=Wykluczyć niemożliwe do zweryfikowania nazwy domen?
 
 losing_dir2=Katalog domowy tego wirtualnego podserwera, zawierający wszystkie dane witryny i inne pliki, zostanie usunięty.
 losing_dir4=Katalog domowy tego aliasu, zawierający dane i inne pliki użytkowników, zostanie usunięty.
@@ -114,6 +117,7 @@ newbw_period=Okres rozliczeniowy
 newbw_enable=Czy ponownie włączyć serwery, których wydajność spadła poniżej limitu?
 newbw_graphdesc=Kliknij ten przycisk, aby wyświetlić wykres wykorzystania pasma i limitów dla wszystkich serwerów wirtualnych. Wykorzystanie można również wyświetlić według daty lub miesiąca, wracając do liczby dni przechowywania danych skonfigurowanych powyżej.
 
+tmpl_mail_mta_sts=Włączyć MTA-STS dla nowych domen?
 tmpl_edmarcruf=Adres URI raportowania dla raportów kryminalistycznych musi być sformatowany w następujący sposób: mailto:user@domain
 tmpl_edmarcrua=Adres URI raportowania dla raportów zbiorczych musi być sformatowany w następujący sposób: mailto:user@domain
 tmpl_dns_alias=Osobno edytowalne rekordy DNS dla domen aliasowych?
@@ -243,9 +247,12 @@ scripts_gpl_pro_tip_workbench_desc_dashboard=WP Workbench to nowa wtyczka do Vir
 
 newnotify_users=Czy wysyłać e-maile także do użytkowników w wybranych domenach?
 
+migrate_plesk=Kopia zapasowa Plesk
 migrate_plan=Plan nowego serwera
 
 move_esame=Wybrano ten sam serwer nadrzędny
+
+validate_ednsc=Nie udało się pobrać rekordów dla $1 od dostawcy usługi Cloud DNS $2 : $3 
 
 cmass_detail=Wyjście tworzenia partii
 cmass_detail0=Pokaż tylko podsumowania
@@ -273,6 +280,7 @@ spf_aliasdns0=Kopiuj rekordy z domeny docelowej
 spf_aliasdns1=Zarządzaj własnymi rekordami
 spf_dmarcruf=Raportowanie URI dla raportów kryminalistycznych
 spf_dmarcrua=Raportowanie URI dla raportów zbiorczych
+spf_cloudns=Rekordy NS dostawcy chmury
 spf_aliasdns=Zmiana aliasu domeny na własne rekordy DNS ..
 spf_noaliasdns=Zmiana aliasu domeny w celu skopiowania rekordów DNS z domeny docelowej ..
 spf_ecloudprov=Dostawca usługi Cloud DNS o identyfikatorze <tt>$1</tt> nie jest obsługiwany w ramach licencji Virtualmin GPL
@@ -285,6 +293,20 @@ upgrade_addrepo=Dodawanie repozytorium Virtualmin Pro ..
 
 balancer_eg=np. $1
 balancer_eg2=np. $1 lub $2
+
+mail_mta_edns=MTA-STS nie może zostać włączony bez domeny DNS
+mail_mta_eweb=MTA-STS nie można włączyć bez witryny internetowej
+mail_mta_essl=MTA-STS nie może zostać włączony bez witryny SSL
+mail_mta_ealias=Nie można włączyć MTA-STS na aliasie, chyba że włączono go na wirtualnym serwerze źródłowym
+mail_mta_evirt=Nie znaleziono konfiguracji Apache dla tej domeny!
+mail_mta_sts=Czy włączyć MTA-STS dla tej domeny?
+mail_mta_sts_on=Włączanie szyfrowania wiadomości e-mail MTA-STS ..
+mail_mta_sts_off=Wyłączanie szyfrowania wiadomości e-mail MTA-STS ..
+mail_mta_sts_update=Aktualizacja certyfikatu SSL dla MTA-STS ..
+mail_mta_sts_err=.. nie powiodło się : $1
+mail_mta_sts_cert=Tak (ale brakuje nazwy hosta certyfikatu SSL)
+mail_mta_epostfix=Serwer pocztowy Postfix nie jest skonfigurowany do akceptowania połączeń SSL
+mail_mta_eself=Certyfikat SSL Postfix jest podpisany przez samego siebie i nie zostanie zaakceptowany przez inne serwery pocztowe
 
 nf_date=(zainstalowano $1)
 
@@ -370,6 +392,8 @@ letsencrypt_sdonea=Odnowienie certyfikatu SSL ukończone
 letsencrypt_bdonea=Pomyślnie zażądano nowego certyfikatu dla $2 i zainstalowano go dla $1.
 letsencrypt_eacme=Wybrany dostawca SSL nie istnieje!
 letsencrypt_eacme2=Nie masz uprawnień do korzystania z wybranego dostawcy SSL
+letsencrypt_emtasts=Żądanie certyfikatu SSL dla $1 nie powiodło się : $2
+letsencrypt_emtasts2=Odpowiedź certyfikatu SSL nie zawierała $1
 
 php_fpmreload=Ponowne ładowanie serwera PHP-FPM $1 ..
 

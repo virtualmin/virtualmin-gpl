@@ -48,6 +48,8 @@ index_themeswitchnot=Ikke spør meg igjen
 index_disable_mod_php=Den utdaterte Apache <tt>mod_php</tt> modulen er aktivert på systemet ditt, men er ikke i bruk av noen virtuelle servere. Deaktivering vil forhindre at denne PHP-kjøringsmodusen blir valgt for virtuelle servere i fremtiden.
 index_disable_mod_phpok=Deaktiver det
 index_warn_clamscan=Dette systemet bruker den frittstående <tt>clamscan</tt> virusskanneren, som har blitt avviklet av Virtualmin på grunn av ytelsen og RAM-bruken. Den serverbaserte <tt>clamd</tt> virusskanneren bør brukes i stedet.
+index_warn_apacheconf=Apache-konfigurasjonen på systemet ditt inneholder feil! Dette vil forhindre at nye domener legges til fullstendig av Virtualmin før feilene er rettet.
+index_warn_bindconf=BIND DNS-serverkonfigurasjonen på systemet ditt har feil! Dette vil forhindre at nye domener legges til fullstendig av Virtualmin før feilene er rettet.
 index_disable_clamscan=Bytt virusskanner
 index_edisable_mod_php_cannot=Du har ikke lov til å deaktivere mod_php
 index_edisable_mod_php_mods=Ingen PHP Apache-moduler funnet!
@@ -484,6 +486,7 @@ newweb_combined_cert=Konfigurer Apache til bruk
 newweb_combined_cert2=Kombinert sertifikat og CA-fil
 newweb_combined_cert1=Kun sertifikatfil
 newweb_combined_cert0=Bestem deg automatisk
+newweb_allow_subset=Ekskludere ikke-verifiserbare domenenavn?
 
 feature_ssl=Apache SSL-nettsted
 
@@ -955,6 +958,7 @@ tmpl_ename2=Ugyldig malnavn
 tmpl_jail=Chroot fengsel nytt domene Unix brukere?
 tmpl_mail_cloud=Standard leverandør av levering av sky -e -post
 tmpl_mail_cloud_local=& lt; Ingen - lever direkte & gt;
+tmpl_mail_mta_sts=Aktiver MTA-STS for nye domener?
 tmpl_owners_none=Ingen eiere
 tmpl_dnsindom=Opprette NS-poster i serverens domene?
 
@@ -1342,6 +1346,7 @@ summary_lastlogin_mins=minutter siden
 summary_lastlogin_sec=sekund siden
 summary_lastlogin_secs=sekunder siden
 
+migrate_plesk=Plesk-sikkerhetskopiering
 migrate_plan=Plan for ny server
 migrate_ok=Vellykket migrert $2 virtuell server. <a href='$1'>klikk her</a> for å administrere den.
 migrate_uploading=Laster opp migrasjonsfilen <tt>$1</tt> ..
@@ -1482,6 +1487,7 @@ newvalidate_resetonoff=Fullt tilbakestilt ved å slå funksjoner på og av?
 validate_esslfile=SSL $1 -fil er ikke gyldig : $2 
 validate_euserhome=Administrasjonsbruker $1 har hjemmekatalog $3, men den skal være $2 
 validate_eport=Port $1 brukes av $2 for å kjøre uventet server '$3'
+validate_ednsc=Klarte ikke å hente poster for $1 fra sky-DNS-leverandøren $2 : $3 
 validate_ednsa6=DNS-sone har ingen AAAA-poster
 validate_ednsns2=DNS-sone har ingen NS-poster
 validate_ednsns=NS-post $1 kan ikke løses til en IP-adresse
@@ -1685,6 +1691,7 @@ spf_enablesub=Flytter DNS -poster til foreldresonen ..
 spf_enablesubalready=.. allerede der
 spf_eenablesub=.. mislyktes : $1
 spf_cloud=Hosting for DNS -poster
+spf_cloudns=NS-oppføringer for skyleverandører
 spf_disablesub=Flytter DNS -poster fra foreldresonen ..
 spf_dnscloud=Flytter DNS -poster til skyleverandør $1 ..
 spf_dnslocal=Flytter DNS -poster til lokal hosting ..
@@ -1798,6 +1805,19 @@ mail_smtp_local=&lt;Ingen - lever direkte fra dette systemet&gt;
 mail_smtp_cloudoff=Fjerner sky-SMTP-leverandør $1 ..
 mail_smtp_cloudon=Konfigurerer sky-SMTP-leverandør $1 ..
 mail_smtp_cloudfailed=.. mislyktes : $1
+mail_mta_edns=MTA-STS kan ikke aktiveres uten et DNS-domene
+mail_mta_eweb=MTA-STS kan ikke aktiveres uten et nettsted
+mail_mta_essl=MTA-STS kan ikke aktiveres uten et SSL-nettsted
+mail_mta_ealias=MTA-STS kan ikke aktiveres på et alias med mindre det er aktivert på den opprinnelige virtuelle serveren
+mail_mta_evirt=Apache-konfigurasjonen ble ikke funnet for dette domenet!
+mail_mta_sts=Vil du aktivere MTA-STS for dette domenet?
+mail_mta_sts_on=Aktiverer MTA-STS e-postkryptering ..
+mail_mta_sts_off=Deaktiverer MTA-STS e-postkryptering ..
+mail_mta_sts_update=Oppdaterer SSL-sertifikat for MTA-STS ..
+mail_mta_sts_err=.. mislyktes : $1
+mail_mta_sts_cert=Ja (men mangler SSL-sertifikatvertsnavn)
+mail_mta_epostfix=Postfix-e-postserveren er ikke konfigurert til å godta SSL-tilkoblinger
+mail_mta_eself=Postfix SSL-sertifikatet er selvsignert og vil ikke bli akseptert av andre e-postservere
 
 res_emem3=Maksimal størrelse per prosessgrense må settes til minst 200 M
 res_wmem=Minste anbefalte størrelse er 200 M
@@ -2362,6 +2382,8 @@ letsencrypt_dnscheckbad=.. noen vertsnavn ble fjernet : $1
 letsencrypt_dnscheckall=Ingen av vertsnavnene kunne løses!
 letsencrypt_eacme=Valgt SSL-leverandør eksisterer ikke!
 letsencrypt_eacme2=Du har ikke lov til å bruke den valgte SSL-leverandøren
+letsencrypt_emtasts=SSL-sertifikatforespørsel for $1 mislyktes : $2
+letsencrypt_emtasts2=SSL-sertifikatsvaret inkluderte ikke $1
 
 php_fpmrestart=Start PHP-FPM server på nytt ..
 php_fpmreload=Laster inn PHP-FPM $1 server på nytt ..

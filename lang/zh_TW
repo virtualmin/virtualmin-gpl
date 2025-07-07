@@ -2296,7 +2296,6 @@ migrate_file0=上傳的文件$1
 migrate_file1=服務器$1上的文件
 migrate_type=備份文件類型
 migrate_cpanel=cPanel備份
-migrate_ensim=Ensim備份
 migrate_user=域的用戶名
 migrate_pass=管理員密碼
 migrate_webmin=創建Webmin用戶？
