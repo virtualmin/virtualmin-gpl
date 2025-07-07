@@ -260,3 +260,5 @@ show_domains_lastlogin=1
 json_pretty=1
 allow_numbers=0
 mail_mta_sts=0
+dns_default_ip4=8.8.8.8
+dns_default_ip6=2001:4860:4860::8888
