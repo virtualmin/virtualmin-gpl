@@ -6930,14 +6930,14 @@ if ($p eq "web") {
 	}
 else {
 	# Update Nginx or other server
-	if (!&plugin_defined($p, "feature_get_web_servernames")) {
+	if (!&plugin_defined($p, "feature_get_web_server_names")) {
 		return $text{'mail_mta_eplugin'};
 		}
-	my $sa = &plugin_call($p, "feature_get_web_servernames", $d);
+	my $sa = &plugin_call($p, "feature_get_web_server_names", $d);
 	ref($sa) || return $sa;
 	if (&indexof($mta_host, @$sa) < 0) {
 		$sa = [ &unique(@$sa, $mta_host) ];
-		my $err = &plugin_call($p, "feature_save_web_servernames", $d, $sa);
+		my $err = &plugin_call($p, "feature_save_web_server_names", $d, $sa);
 		return $err if ($err);
 		if ($need_cert_host) {
 			# Restart webserver now so that the LE request works
@@ -7052,11 +7052,11 @@ if ($p eq "web") {
 	}
 elsif ($p) {
 	# Remove from other webserver config
-	if (&plugin_defined($p, "feature_get_web_servernames")) {
-		my $sa = &plugin_call($p, "feature_get_web_servernames", $d);
+	if (&plugin_defined($p, "feature_get_web_server_names")) {
+		my $sa = &plugin_call($p, "feature_get_web_server_names", $d);
 		if (ref($sa)) {
 			$sa = [ grep { $_ ne $mta_host } @$sa ];
-			$err = &plugin_call($p, "feature_save_web_servernames", $d, $sa);
+			$err = &plugin_call($p, "feature_save_web_server_names", $d, $sa);
 			}
 		else {
 			$err = $sa;
