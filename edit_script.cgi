@@ -22,6 +22,14 @@ if (defined(&$kit_func)) {
 		&{$script->{'kit_func'}}($d, $script, $sinfo);
 	if ($rows) {
 		$have_kit = 1;
+		my $kit_func_desc = $script->{'kit_func_desc'};
+		if (defined &$kit_func_desc) {
+			$kit_desc = &{$kit_func_desc}($d, $script, $sinfo);
+			if ($kit_desc) {
+				print &ui_tag('p', $kit_desc,
+					      { class => 'kit-func-desc' });
+				}
+			}
 		print &ui_hidden_table_start(
 			&text('scripts_kit',
 				$script->{'tmdesc'} || $script->{'desc'}),
