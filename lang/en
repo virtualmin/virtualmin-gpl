@@ -4694,8 +4694,8 @@ scripts_kit_loginkit=Login Kit
 scripts_kit_php_memory=Changing PHP memory limit for virtual server ..
 scripts_kit_edom_name=Virtual server '$1' does not exist
 scripts_kit_estype=No script of type '$1' has been installed yet on this virtual server
-scripts_kit_estype_multi=Multiple scripts of type '$1' are available at the following paths:
-scripts_kit_estype_multi2=Use the auxiliary '--script-path' parameter to specify the exact script to use
+scripts_kit_estype_multi=Multiple instances of type '$1' are available at the following paths:
+scripts_kit_estype_multi2=Use the auxiliary '--app-path' parameter to specify the exact instance to use
 scripts_kit_estype_path=The script of type '$1' at path '$2' does not exist
 
 scripts_gpl_pro_tip=Pro Feature

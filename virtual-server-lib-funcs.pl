@@ -8592,7 +8592,7 @@ if ($dom->{'alias'} && &domain_has_website($dom)) {
 	    &domain_has_website($target) &&
 	    &domain_has_ssl_cert($target) &&
 	    ($tinfo = &cert_info($target)) &&
-	    &is_letsencrypt_cert($tinfo) &&
+	    &is_acme_cert($tinfo) &&
 	    !&check_domain_certificate($dom->{'dom'}, $tinfo)) {
 		&$first_print(&text('setup_letsaliases',
 				    &show_domain_name($target),
@@ -12293,7 +12293,7 @@ if ($small) {
 		}
 	$alert_text .= &ui_form_start($formlink);
 	$alert_text .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
-					'create' : &is_letsencrypt_cert($small) ?
+					'create' : &is_acme_cert($small) ?
 							'lets' : 'csr');
 	$alert_text .= &ui_submit($msg eq 'licence_smallself' ?
 				$text{'licence_newcert'} :
@@ -21157,7 +21157,7 @@ sub check_external_dns
 my ($host, $wantrec) = @_;
 if (&has_command("dig")) {
 	my $out = &backquote_command(
-		"dig ".quotemeta($host)." \@8.8.8.8 2>/dev/null");
+		"dig ".quotemeta($host)." \@$config{'dns_default_ip4'} 2>/dev/null");
 	return -1 if ($?);
 	return 0 if ($out !~ /ANSWER\s+SECTION/i);
 	# IPv4 and CNAME
@@ -21168,7 +21168,7 @@ if (&has_command("dig")) {
 		}
 	# IPv6 only
 	$out = &backquote_command(
-		"dig AAAA ".quotemeta($host)." \@8.8.8.8 2>/dev/null");
+		"dig -6 AAAA ".quotemeta($host)." \@$config{'dns_default_ip6'} 2>/dev/null");
 	if ($out =~ /\Q$host\E\.?.*\s+AAAA\s+(\S+)/) {
 		# Found an IP
 		return !$wantrec || $wantrec eq $1;
@@ -21178,7 +21178,7 @@ if (&has_command("dig")) {
 elsif (&has_command("host")) {
 	&clean_environment();
 	my $out = &backquote_command(
-		"host ".quotemeta($host)." 8.8.8.8 2>/dev/null");
+		"host ".quotemeta($host)." $config{'dns_default_ip4'} 2>/dev/null");
 	&reset_environment();
 	return 0 if ($out =~ /Host\s+\S+\s+not\s+found/i);
 	return -1 if ($?);

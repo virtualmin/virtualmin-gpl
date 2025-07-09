@@ -35,6 +35,9 @@ while(@ARGV) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--write-updates") {
+		$write_updates = 1;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -170,6 +173,12 @@ foreach $s (@scripts) {
 					push(@errs, [ $script, $v, $url,
 						"Version $lver is available" ]);
 					print ".. found newer version $lver\n";
+					if ($write_updates) {
+						patch_file(
+							$script->{'filename'},
+							$script->{'name'},
+							$v, $lver);
+						}
 					}
 				elsif (&compare_versions($lver, $v, $script) < 0) {
 					push(@errs, [ $script, $v, $url,
@@ -198,6 +207,12 @@ foreach $s (@scripts) {
 				push(@errs, [ $script, $v, $url,
 					"Latest version is $lver" ]);
 				print ".. found newer version : $lver\n";
+				if ($write_updates) {
+					patch_file(
+						$script->{'filename'},
+						$script->{'name'},
+						$v, $lver);
+					}
 				}
 			else {
 				print ".. OK\n";
@@ -230,6 +245,23 @@ if (@errs) {
 					   $body);
 		}
 	}
+
+sub patch_file
+{
+my ($script_file, $script_name, $ver_curr, $ver_new) = @_;
+print "Patching installer file with newer version ..\n";
+my ($ok, $err) = &script_ppi_update_sub_content(
+	$script_file,
+	"script_${script_name}_versions",
+	qr/\Q$ver_curr\E/,
+	$ver_new );
+if ($ok) {
+	print ".. file patched successfully\n";
+	}
+else {
+	print ".. file patch failed: $err\n";
+	}
+}
 
 sub ftp_size
 {

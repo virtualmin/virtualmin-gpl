@@ -1,3 +1,36 @@
+index_warn_apacheconf=Die Apache-Konfiguration auf Ihrem System weist Fehler auf! Dadurch wird verhindert, dass neue Domänen vollständig von Virtualmin hinzugefügt werden, bis die Fehler behoben sind.
+index_warn_bindconf=Die BIND DNS-Serverkonfiguration auf Ihrem System weist Fehler auf! Dadurch wird verhindert, dass neue Domänen vollständig von Virtualmin hinzugefügt werden, bis die Fehler behoben sind.
+
+newweb_allow_subset=Nicht überprüfbare Domänennamen ausschließen?
+
+tmpl_mail_mta_sts=MTA-STS für neue Domänen aktivieren?
+
+scripts_kit_estype_multi=Mehrere Instanzen des Typs „$1“ sind unter den folgenden Pfaden verfügbar:
+scripts_kit_estype_multi2=Verwenden Sie den Hilfsparameter „--app-path“, um die genaue zu verwendende Instanz anzugeben
+
+migrate_plesk=Plesk-Backup
+
+validate_ednsc=Das Abrufen der Datensätze für $1 vom Cloud-DNS-Anbieter $2 ist fehlgeschlagen : $3
+
+spf_cloudns=NS-Einträge des Cloud-Anbieters
+
+mail_mta_edns=MTA-STS kann ohne eine DNS-Domäne nicht aktiviert werden
+mail_mta_eweb=MTA-STS kann ohne eine Website nicht aktiviert werden
+mail_mta_essl=MTA-STS kann ohne eine SSL-Website nicht aktiviert werden
+mail_mta_ealias=MTA-STS kann auf einem Alias nur aktiviert werden, wenn es auf dem virtuellen Ursprungsserver aktiviert ist
+mail_mta_evirt=Für diese Domäne wurde keine Apache-Konfiguration gefunden!
+mail_mta_sts=MTA-STS für diese Domäne aktivieren?
+mail_mta_sts_on=MTA-STS-E-Mail-Verschlüsselung aktivieren ..
+mail_mta_sts_off=Deaktivieren der MTA-STS-E-Mail-Verschlüsselung ..
+mail_mta_sts_update=SSL-Zertifikat für MTA-STS wird aktualisiert ..
+mail_mta_sts_err=.. fehlgeschlagen : $1
+mail_mta_sts_cert=Ja (aber Hostname des SSL-Zertifikats fehlt)
+mail_mta_epostfix=Der Postfix-Mailserver ist nicht für die Annahme von SSL-Verbindungen konfiguriert
+mail_mta_eself=Das Postfix-SSL-Zertifikat ist selbstsigniert und wird von anderen Mailservern nicht akzeptiert
+
 backuplog_match=Es werden Protokolle angezeigt, die mit $1 übereinstimmen
 backuplog_days=Es werden jetzt die Protokolle der letzten $1 Tage angezeigt
 backuplog_sched=Protokolle der geplanten Sicherung auf $1 werden angezeigt
+
+letsencrypt_emtasts=SSL-Zertifikatsanforderung für $1 fehlgeschlagen : $2
+letsencrypt_emtasts2=Die Antwort des SSL-Zertifikats enthielt nicht $1
