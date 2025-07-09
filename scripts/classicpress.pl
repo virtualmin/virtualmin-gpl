@@ -10,7 +10,7 @@ return "ClassicPress";
 # script_classicpress_tmdesc()
 sub script_classicpress_tmdesc
 {
-return "ClassicPress";
+return "CP";
 }
 
 sub script_classicpress_uses
