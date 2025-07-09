@@ -897,9 +897,6 @@ if ($dkim->{'alldns'} == 3) {
 elsif (!$d->{'dns'}) {
 	return 0;
 	}
-elsif (&copy_alias_records($d)) {
-	return 0;
-	}
 elsif ($dkim->{'alldns'} == 1) {
 	# Can be enabled even without email
 	return 1;
@@ -922,7 +919,6 @@ my ($d, $dkim) = @_;
 my $can = &can_dkim_domain($d, $dkim);
 if ($can != 2) {
 	return 0 if (!$d->{'dns'});
-	return 0 if (&copy_alias_records($d));
 	}
 return 0 if (defined($d->{'dkim_enabled'}) && $d->{'dkim_enabled'} eq '0');
 return 1 if (defined($d->{'dkim_enabled'}) && $d->{'dkim_enabled'} eq '1');
