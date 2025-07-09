@@ -10,8 +10,9 @@ which will create a new server in Virtualmin with all the same settings and
 content as the original server.
 
 The C<--source> parameter must be followed by the name of the backup or export
-file to migrate from. The C<--type> parameter must be followed by the short name of the product that originally created the backup, such as C<cpanel>,
-C<ensim>, C<plesk> or C<psa> (for Plesk 7).
+file to migrate from. The C<--type> parameter must be followed by the short name
+of the product that originally created the backup, such as C<cpanel>, C<plesk> or
+C<directadmin>.
 
 By default, Virtualmin will attempt to work out the domain name from the
 backup automatically. However, this can be overridden with the C<--domain>
@@ -313,7 +314,7 @@ sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
 print "Migrates a Virtualmin server from a backup created by another product\n";
-print "like cPanel, Ensim or Plesk.\n";
+print "like cPanel, Plesk or DirectAdmin.\n";
 print "\n";
 $types = join("|", @migration_types);
 print "virtualmin migrate-domain --source file\n";
