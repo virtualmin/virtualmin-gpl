@@ -3604,17 +3604,18 @@ return &text($lang, $shref, $slname) if ($lang);
 return &ui_link($shref, $slname, undef, "target=_blank");
 }
 
-# get_script_link(&dom, &script-info, [full-url])
+# get_script_link(&dom, &script-info, [full-url], [get-link])
 # Returns script link, if partially installed
 # still returns a link in italic
 sub get_script_link
 {
-my ($d, $sinfo, $fullurl) = @_;
+my ($d, $sinfo, $fullurl, $get_link) = @_;
 my $path = $sinfo->{'opts'}->{'path_real'} ||
            $sinfo->{'opts'}->{'path'} ||
            $sinfo->{'path'};
 my $surl = $sinfo->{'url'} ? $sinfo->{'url'} :
 	((&domain_has_ssl($d) ? 'https://' : 'http://') ."$d->{'dom'}${path}/");
+return $surl if ($get_link);
 my $slabel = $fullurl ? $surl : $path;
 $slabel =~ s/\/+$/\//;
 my $slink = "<a href='$surl' target=_blank>$slabel</a>";
