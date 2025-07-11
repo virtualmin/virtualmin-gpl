@@ -3223,8 +3223,23 @@ if ($chain) {
 &update_caa_record($d);
 }
 
+# get_caa_for_cert(&info)
+# Returns the CAA domain that matches the cert's issuer, falling back to
+# letsencrypt.org if no match
+sub get_caa_for_cert
+{
+my ($info) = @_;
+return 'letsencrypt.org' unless defined &list_known_acme_providers;
+foreach my $p (&list_known_acme_providers()) {
+	return $p->{'caa'}
+	  if ( $info->{'issuer_cn'} =~ /\Q$p->{'issuer'}\E/i ||
+	       $info->{'issuer_o'}  =~ /\Q$p->{'issuer'}\E/i );
+	}
+return 'letsencrypt.org';
+}
+
 # update_caa_record(&domain, [force-letsencrypt])
-# Update the CAA record for Let's Encrypt if needed
+# Update the CAA record for the active ACME provider if needed
 sub update_caa_record
 {
 my ($d, $letsencrypt_cert) = @_;
@@ -3237,27 +3252,43 @@ my @caa = grep { $_->{'type'} eq 'CAA' } @$recs;
 # At this stage the cert is always self-signed,
 # so we need to force it for Let's Encrypt
 my $lets = $letsencrypt_cert;
+my $info = &cert_info($d) || {};
+my $caa_value = &get_caa_for_cert($info);
 if (!$lets) {
-	my $info = &cert_info($d);
 	$lets = &is_acme_cert($info) ? 1 : 0;
 	}
 # Need delay for DNS propagation
 if (!@caa && $lets) {
-	# Need to add a Let's Encrypt record
+	# Need to add the record
 	&pre_records_change($d);
-	my $caa = { 'name' => '@',
-		    'type' => 'CAA',
-		    'values' => [ "0", "issuewild", "letsencrypt.org" ] };
+	my $caa = { 'name'   => '@',
+		    'type'   => 'CAA',
+		    'values' => [ "0", "issuewild", $caa_value ] };
 	&create_dns_record($recs, $file, $caa);
 	&post_records_change($d, $recs, $file);
 	&reload_bind_records($d);
 	}
-elsif (@caa == 1 &&
-       $caa[0]->{'values'}->[1] eq 'issuewild' &&
-       $caa[0]->{'values'}->[2] eq 'letsencrypt.org' && !$lets) {
-	# Need to remove the record
-	&pre_records_change($d);
-	&delete_dns_record($recs, $file, $caa[0]);
+elsif (@caa == 1 && $caa[0]->{'values'}->[1] eq 'issuewild') {
+	my $current_val = $caa[0]->{'values'}->[2];
+	if (!$lets) {
+		# Need to remove the record
+		&pre_records_change($d);
+		&delete_dns_record($recs, $file, $caa[0]);
+		}
+	elsif ($current_val ne $caa_value) {
+		# Provider changed, need to update
+		&pre_records_change($d);
+		&delete_dns_record($recs, $file, $caa[0]);
+		&create_dns_record($recs, $file,
+			{ 'name'   => '@',
+			  'type'   => 'CAA',
+			  'values' => [ 0, 'issuewild', $caa_value ] } );
+		}
+	else {
+		return;
+		}
+	
+	# Apply changes
 	&post_records_change($d, $recs, $file);
 	&reload_bind_records($d);
 	}
