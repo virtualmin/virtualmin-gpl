@@ -1279,7 +1279,7 @@ if ($ok) {
 			if ($compression == 3) {
 				# ZIP does both archiving and compression
 				&execute_command("cd $backupdir && ".
-				    &make_zip_command("", "-", @dfiles)." | ".
+				    &make_zip_command("-9", "-", @dfiles)." | ".
 				    $writer,
 				    undef, \$out, \$err);
 				}
@@ -1358,7 +1358,7 @@ if ($ok) {
 		if ($dest =~ /\.zip$/i) {
 			# Use zip command to archive and compress
 			&execute_command("cd $backupdir && ".
-				 &make_zip_command("", "-", ".")." | $writer",
+				 &make_zip_command("-9", "-", ".")." | $writer",
 				 undef, \$out, \$err);
 			}
 		else {
@@ -5101,11 +5101,11 @@ sub make_zip_command
 {
 my ($flags, $output, @files) = @_; 
 my $zip = &has_command("zip") || "zip";
-my $cmd = $zip." -r ".quotemeta($output).
-	  " ".join(" ", map { quotemeta($_) } @files);
+my $cmd = $zip;
 if ($flags) {
 	$cmd .= " ".$flags;
 	}
+$cmd .= " -r ".quotemeta($output)." ".join(" ", map { quotemeta($_) } @files);
 return $cmd;
 }
 

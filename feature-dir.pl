@@ -629,7 +629,7 @@ elsif ($homefmt && $compression == 1) {
 	}
 elsif ($compression == 3) {
 	# ZIP archive
-	my $store = !$homefmt ? "-0 " : "";
+	my $store = !$homefmt ? "-0 " : "-9 ";
 	$cmd = &make_zip_command($store."-x\@".quotemeta($xtemp), "-", @ilist);
 	}
 elsif ($homefmt && $compression == 4) {
