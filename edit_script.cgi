@@ -19,7 +19,7 @@ my $extra_submits;
 my $have_kit = 0;
 if (defined(&$kit_func)) {
 	my $rows =
-		&{$script->{'kit_func'}}($d, $script, $sinfo);
+		&{$script->{'kit_func'}}($d, $script, $sinfo, 1);
 	if ($rows) {
 		$have_kit = 1;
 		my $kit_func_desc = $script->{'kit_func_desc'};
