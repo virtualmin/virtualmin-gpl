@@ -5116,7 +5116,7 @@ sub make_archive_command
 my ($compression, $dir, $out, @files) = @_;
 if ($compression == 3) {
 	return "cd ".quotemeta($dir)." && ".
-	       &make_zip_command("", $out, @files);
+	       &make_zip_command("-0", $out, @files);
 	}
 else {
 	return "cd ".quotemeta($dir)." && ".
