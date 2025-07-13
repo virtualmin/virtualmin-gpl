@@ -61,18 +61,6 @@ for(my $i=0; $i<$tries; $i++) {
 return $err;
 }
 
-sub extract_s3_message
-{
-my ($response) = @_;
-if ($response->body() =~ /<Message>(.*)<\/Message>/i) {
-	return $1;
-	}
-elsif ($response->http_response->code) {
-	return "HTTP status ".$response->http_response->code;
-	}
-return undef;
-}
-
 # s3_upload(access-key, secret-key, bucket, source-file, dest-filename, [&info],
 #           [&domains], attempts, [reduced-redundancy], [multipart])
 # Upload some file to S3, and return undef on success or an error message on
@@ -1002,34 +990,6 @@ foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
 	}
 local %done;
 return grep { !$done{$_->[0]}++ } @rv;
-}
-
-# s3_sha256_file_digest(file, [start, len])
-# Returns the SHA256 digest in hex of the contents of a file
-sub s3_sha256_file_digest
-{
-my ($file, $start, $len) = @_;
-$start ||= 0;
-if (!$len) {
-	my @st = stat($file);
-	$len = $st[7];
-	}
-eval "use Digest::SHA";
-$@ && &error("Missing Digest::SHA perl module");
-my $sha = Digest::SHA->new("sha256");
-open(my $fh, $file) || return undef;
-seek($fh, $start, 0);
-my $bufsz = &get_buffer_size();
-for(my $got=0; $got<$len; $got+=$bufsz) {
-	my $buf;
-	my $want = $bufsz;
-	if ($len - $got < $want) {
-		$want = $len - $got;
-		}
-	read($fh, $buf, $bufsz);
-	$sha->add($buf);
-	}
-return $sha->hexdigest();
 }
 
 1;
