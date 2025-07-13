@@ -5946,7 +5946,9 @@ s3_elist2=Failed to list S3 bucket : $1
 s3_einfo2=Failed to read $1 : $2
 s3_eputacl=Failed to save bucket ACL : $1
 s3_eputlifecycle=Failed to save bucket lifecycle : $1
-s3_need_cli=The AWS CLI command needed to reliablily create S3 backups was not found on your system. Future Virtualmin releases will require it in order to upload backups to S3. <a href='$1'>Click here</a> to have it installed automatically, or download it from <a href='https://aws.amazon.com/cli/' target=_blank>https://aws.amazon.com/cli/</a>.
+s3_need_cli2=The AWS CLI command needed to reate S3 backups was not found on your system.
+s3_need_cli3=<a href='$1'>Click here</a> to have it installed automatically, or download it from <a href='https://aws.amazon.com/cli/' target=_blank>https://aws.amazon.com/cli/</a>.
+s3_missing_cli=The AWS CLI command is not installed on this system
 
 az_ecmd=The Azure CLI command <tt>az</tt> was not found
 az_elogin=The Azure CLI command has not authenticated yet. SSH into your Virtualmin system and run the command <tt>az login --use-device-code</tt> to login to Azure.
