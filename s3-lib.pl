@@ -683,7 +683,6 @@ return $err || $out;
 # Returns 1 if the configured "aws" command is installed, minus flags
 sub has_aws_cmd
 {
-return undef if ($ENV{'NO_AWS_CMD'});
 my ($cmd) = &split_quoted_string($config{'aws_cmd'} || "aws");
 return &has_command($cmd);
 }
