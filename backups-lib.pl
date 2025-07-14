@@ -3085,20 +3085,31 @@ if ($ok) {
 						}
 					}
 				elsif (&indexof($f, @bplugins) >= 0 &&
-				       $d->{$f} && -r $ffile) {
+				       $d->{$f}) {
 					# Restoring a plugin feature
-					$fok = &plugin_call($f,
-						"feature_restore", $d,
-						$ffile, $opts->{$f}, $opts,
-						$hft, \%oldd, $asowner);
+					my $gffile = $ffile;
+					# Feature file may be in the archive
+					($gffile) = glob("$ffile.*")
+						if (!-r $gffile);
+					if (-r $gffile) {
+						$fok = &plugin_call($f,
+						  "feature_restore", $d,
+						  $gffile, $opts->{$f}, $opts,
+						  $hft, \%oldd, $asowner);
+						}
 					}
-				elsif (&indexof($f, @bplugins) >= 0 &&
-				       -r $ffile) {
+				elsif (&indexof($f, @bplugins) >= 0) {
 					# Restoring a plugin
-					$fok = &plugin_call($f,
-						"feature_always_restore", $d,
-						$ffile, $opts->{$f}, $opts,
-						$hft, \%oldd, $asowner);
+					my $gffile = $ffile;
+					# Feature file may be in the archive
+					($gffile) = glob("$ffile.*")
+						if (!-r $gffile);
+					if (-r $gffile) {
+						$fok = &plugin_call($f,
+						  "feature_always_restore", $d,
+						  $gffile, $opts->{$f}, $opts,
+						  $hft, \%oldd, $asowner);
+						}
 					}
 				if (defined($fok) && !$fok) {
 					# Handle feature failure
@@ -3508,7 +3519,7 @@ else {
 	# Look for a home-format backup first
 	local ($l, %done, $dotbackup, @virtfiles);
 	foreach $l (split(/\n/, $out)) {
-		if ($l =~ /(^|\s)(.\/)?.backup\/([^_ ]+)_([a-z0-9\-]+)$/) {
+		if ($l =~ /(^|\s)(.\/)?.backup\/([^_ ]+)_([a-z0-9\-]+)(\.(?:\S+))?$/) {
 			# Found a .backup/domain_feature file
 			push(@{$rv{$3}}, $4) if (!$done{$3,$4}++);
 			push(@{$rv{$3}}, "dir") if (!$done{$3,"dir"}++);
@@ -3521,7 +3532,7 @@ else {
 	if (!$dotbackup) {
 		# Look for an old-format backup
 		foreach $l (split(/\n/, $out)) {
-			if ($l =~ /(^|\s)(.\/)?([^_ ]+)_([a-z0-9\-]+)$/) {
+			if ($l =~ /(^|\s)(.\/)?([^_ ]+)_([a-z0-9\-]+)(\.(?:\S+))?$/) {
 				# Found a domain_feature file
 				push(@{$rv{$3}}, $4) if (!$done{$3,$4}++);
 				if ($4 eq 'virtualmin') {
