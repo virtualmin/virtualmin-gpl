@@ -1,3 +1,6 @@
+#### Version 7.99.0
+# Replaced IDNA::Punycode with the actively maintained Net::LibIDN2 for full IDNA2008 support
+
 #### Version 7.30.8
 * Add an ad for WP Workbench to the dashboard
 * Fix Backblaze backups to work with new API
