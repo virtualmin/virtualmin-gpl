@@ -69,13 +69,9 @@ if (($name =~ /^xn--/ || $name =~ /\.xn--/) && $convert) {
 	# Convert xn-- parts to unicode
 	push(@INC, $module_root_directory)
 		if (&indexof($module_root_directory, @INC) < 0);
-	eval "use IDNA::Punycode";
+	eval "use Net::LibIDN2";
 	if (!$@) {
-		$name = join(".",
-			  map { decode_punycode($_) } split(/\./, $name));
-		if ($ENV{'MINISERV_CONFIG'} && &get_charset() eq 'UTF-8') {
-			eval "utf8::encode(\$name)";
-			}
+		$name = Net::LibIDN2::idn2_to_unicode_88($name);
 		if ($ENV{'MINISERV_CONFIG'}) {
 			# In browser, so convert to entity format for HTML
 			my $ename;
@@ -99,15 +95,8 @@ $name =~ s/^\s+//;	# Strip leading and trailing spaces from user input
 $name =~ s/\s+$//;
 if ($name !~ /^[a-z0-9\.\-\_]+$/i) {
 	# Convert unicode to xn-- format
-	eval "use IDNA::Punycode";
-	eval "utf8::decode(\$name)";
-	if (!$@) {
-		$name = join(".",
-			  map { encode_punycode($_) } split(/\./, $name));
-		# IDNA::Punycode gets this wrong
-		$name =~ s/^xn---([^\-])/xn--$1/g;
-		$name =~ s/\.xn---([^\-])/\.xn--$1/g;
-		}
+	eval "use Net::LibIDN2";
+	$name = Net::LibIDN2::idn2_lookup_u8($name) if (!$@);
 	}
 return $name;
 }
