@@ -2473,15 +2473,18 @@ else {
 	}
 }
 
-# recursive_disk_usage_mtime(directory, [only-gid], [levels], [&inodes-map])
+# recursive_disk_usage_mtime(directory, [only-gid], [levels],
+# 			     [&inodes-map], [exclude])
 # Returns the number of bytes taken up by all files in some directory,
 # the most recent modification time, and the file and directory counts.
 # The size is based on the filesystem's block size, not the file lengths
 # in bytes.
 sub recursive_disk_usage_mtime
 {
-local ($dir, $gid, $levels, $inodes) = @_;
+local ($dir, $gid, $levels, $inodes, $exclude) = @_;
+$exclude = [ map { &translate_filename($_) } @$exclude ] if ($exclude);
 local $dir = &translate_filename($dir);
+return (0, undef, 0, 0) if $exclude && grep { index($dir, $_) == 0 } @$exclude;
 local $bs = &quota_bsize("mail", 1);
 $inodes ||= { };
 if (-l $dir) {
@@ -2517,7 +2520,7 @@ else {
 			local ($ss, $st, $c, $dc) = &recursive_disk_usage_mtime(
 				"$dir/$f", $gid,
 				defined($levels) ? $levels - 1 : undef,
-				$inodes);
+				$inodes, $exclude);
 			$rv += $ss;
 			$rt = $st if ($st > $rt);
 			$ct += $c;
