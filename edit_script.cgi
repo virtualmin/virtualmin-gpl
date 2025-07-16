@@ -17,6 +17,7 @@ $opts = $sinfo->{'opts'};
 my $kit_func = $script->{'kit_func'};
 my $extra_submits;
 my $have_kit = 0;
+my $can_upgrade = 0;
 if (defined(&$kit_func)) {
 	my $rows =
 		&{$script->{'kit_func'}}($d, $script, $sinfo, 1);
@@ -42,6 +43,7 @@ if (defined(&$kit_func)) {
 			}
 		elsif (ref($rows) eq 'HASH') {
 			$extra_submits = $rows->{'extra_submits'};
+			$can_upgrade = $rows->{'can_upgrade'};
 			print &ui_table_row(undef, $rows->{'data'}, 2);
 			}
 		else {
@@ -186,7 +188,8 @@ print &ui_submit($text{'scripts_uok'}, "uninstall"),"\n";
 # Reinstall dependencies
 print &ui_submit($text{'scripts_rdeps'}, "reinstall_deps"),"\n";
 
-if (!script_migrated_disallowed($script->{'migrated'})) {
+# Show upgrade options
+if (!$can_upgrade && !script_migrated_disallowed($script->{'migrated'})) {
 	@vers = sort { $a <=> $b }
 		     grep { &compare_versions($_, $sinfo->{'version'}, $script) > 0 &&
 			    &can_script_version($script, $_) }
