@@ -3788,7 +3788,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 				}
 			}
 		elsif ($c eq "lastlogin") {
-			my $lt = &human_readable_time(
+			my $lt = &human_time_delta(
 				$d->{'last_login_timestamp'});
 			push(@cols, $lt || $text{'users_ll_never'});
 			}
@@ -5730,7 +5730,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		foreach $k (sort { $a cmp $b } keys %$ll) {
 			$llbest = $ll->{$k} if ($ll->{$k} > $llbest);
 			}
-		push(@cols, $llbest ? &human_readable_time($llbest)
+		push(@cols, $llbest ? &human_time_delta($llbest)
 				    : $text{'users_ll_never'});
 		}
 
@@ -18980,7 +18980,17 @@ return @files ? 0 : 1;
 sub is_timestamp
 {
 my ($t) = @_;
-return $t =~ /^\d{10}$/ ? 1 : 0;
+return $t =~ /^\d{10}(?:\.\d+)?$/ ? 1 : 0;
+}
+
+# is_epochish(value)
+# Accept signed epoch seconds with optional fractional part.
+# Returns normalized numeric value on success, undef on failure.
+sub is_epochish
+{
+my ($t) = @_;
+return undef unless(defined($t) && $t =~ /^-?\d+(?:\.\d+)?$/);
+return 0 + $t; # numericize
 }
 
 # update_miniserv_preloads(mode)
@@ -21407,41 +21417,42 @@ foreach my $d (&list_domains()) {
 	}
 }
 
-# human_readable_time(timestamp)
-# Returns a string representing the time since the given timestamp
-# if within 24 hours, otherwise returns a human-readable date
-sub human_readable_time
+# human_time_delta(timestamp)
+# Return localized relative time from now or to the future
+# for a given timestamp, or undef if not a valid timestamp
+sub human_time_delta
 {
 my $ts = shift;
-return undef if (!&is_timestamp($ts));
+return undef if (!&is_epochish($ts));
 my $last_login;
-my $last = &make_date($ts, { '_' }); # XXXX rm '_' later
-if (ref($last) eq 'HASH' &&
-    $last->{'ago'} && !$last->{'ago'}->{'days'}) {
-	my $hours = $last->{'ago'}->{'hours'};
-	my $minutes = $last->{'ago'}->{'minutes'};
-	if ($hours) {
-		$last_login = $hours . " " .
-			($hours == 1 ?
-				$text{'summary_lastlogin_hour'} :
-				$text{'summary_lastlogin_hours'});
-		}
-	elsif ($minutes) {
-		$last_login = $minutes . " " .
-			($minutes == 1 ?
-				$text{'summary_lastlogin_min'} :
-				$text{'summary_lastlogin_mins'});
-		}
-	else {
-		my $seconds = $last->{'ago'}->{'seconds'};
-		$last_login = $seconds . " " .
-			($seconds == 1 ?
-				$text{'summary_lastlogin_sec'} :
-				$text{'summary_lastlogin_secs'});
-		}
+my $now = time();
+my $diff = $ts - $now; # >0 future, <0 past
+my $abs = abs($diff);
+return $text{'summary_now'} if ($abs < 10); # within ±10 seconds is now
+my @units = (
+    [ 31536000, 'year',  'years'  ],
+    [ 2592000,  'month', 'months' ],
+    [ 604800,   'week',  'weeks'  ],
+    [ 86400,    'day',   'days'   ],
+    [ 3600,     'hour',  'hours'  ],
+    [ 60,       'min',   'mins'   ],
+    [ 1,        'sec',   'secs'   ],
+);
+my ($val, $sing, $plur);
+foreach my $unit (@units) {
+	my ($secs, $s, $p) = @$unit;
+	next if ($abs < $secs);
+	$val = int($abs / $secs);
+	($sing, $plur) = ($s, $p);
+	last;
+	}
+if (defined($val) && $val > 0) {
+	my $key = ($diff > 0 ? 'summary_in_' : 'summary_ago_').
+		  ($val == 1 ? $sing : $plur);
+	$last_login = &text($key, $val);
 	}
 else {
-	$last_login = &make_date($ts);
+	$last_login = $text{'summary_now'};
 	}
 return $last_login;
 }
