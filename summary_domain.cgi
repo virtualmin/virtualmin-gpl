@@ -43,9 +43,15 @@ print &ui_table_row($text{'edit_created'},
 
 # Last login
 if ($config{'show_domains_lastlogin'}) {
-	print &ui_table_row($text{'users_ll'},
-		&human_time_delta($d->{'last_login_timestamp'}) ||
-		$text{'users_ll_never'});
+	my $last = $d->{'last_login_timestamp'};
+	if ($last && $last > 0) {
+		$last = &human_time_delta($last)." ".
+				&ui_help(&make_date($last));
+		}
+	else {
+		$last = $text{'users_ll_never'};
+		}
+	print &ui_table_row($text{'users_ll'}, $last);
 	}
 
 # Owner
@@ -211,7 +217,8 @@ if (&master_admin()) {
 
 	# Show SSL cert expiry date and add color based on time
 	if ($exptime = &get_ssl_cert_expiry($d)) {
-		my $exp = &make_date($exptime);
+		my $exp = &human_time_delta($exptime)." ".
+				&ui_help(&make_date($exptime));
 		if ($now > $exptime) {
 			$exp = &ui_text_color($exp, 'danger');
 			}

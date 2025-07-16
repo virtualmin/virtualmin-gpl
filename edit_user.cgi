@@ -808,7 +808,8 @@ else {
 		@grid = ( );
 		foreach $k (sort { $a cmp $b } keys %$ll) {
 			push(@grid, $text{'user_lastlogin_'.$k},
-				&make_date($ll->{$k}));
+				&human_time_delta($ll->{$k})." ".
+					&ui_help(&make_date($ll->{$k})));
 			}
 		print &ui_table_row(
 			&hlink($text{'user_lastlogin'}, "lastlogin"),

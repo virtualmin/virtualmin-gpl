@@ -3781,16 +3781,24 @@ foreach my $d (&sort_indent_domains($doms)) {
 				push(@cols, "");
 				}
 			elsif ($d->{'ssl_cert_expiry'}) {
-				push(@cols, &make_date($d->{'ssl_cert_expiry'}, 1));
+				my $exp = $d->{'ssl_cert_expiry'};
+				push(@cols, &human_time_delta($exp)." ".
+						&ui_help(&make_date($exp)));
 				}
 			else {
 				push(@cols, "<i>$text{'maillog_unknown'}</i>");
 				}
 			}
 		elsif ($c eq "lastlogin") {
-			my $lt = &human_time_delta(
-				$d->{'last_login_timestamp'});
-			push(@cols, $lt || $text{'users_ll_never'});
+			my $last = $d->{'last_login_timestamp'};
+			if ($last && $last > 0) {
+				$last = &human_time_delta($last)." ".
+						&ui_help(&make_date($last));
+				}
+			else {
+				$last = $text{'users_ll_never'};
+				}
+			push(@cols, $last);
 			}
 		elsif ($c =~ /^field_/) {
 			# Some custom field
