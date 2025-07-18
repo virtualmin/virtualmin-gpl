@@ -3376,10 +3376,10 @@ return "&nbsp;&nbsp;" .
 			undef, "target=_blank data-placement=\"$placement\"");
 }
 
-# startstop_phpfpm()
+# startstop_fpm()
 # Returns a hash containing the current status of the PHP-FPM services and short
 # and long descriptions for the action to switch statuses
-sub startstop_phpfpm
+sub startstop_fpm
 {
 return () if (!&domain_has_website());	# No website feature enabled
 my @rv;
