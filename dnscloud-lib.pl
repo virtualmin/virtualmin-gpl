@@ -340,13 +340,16 @@ return (0, "New domain name $info->{'domain'} already exists on Route53")
 	if ($exists);
 
 # Get current records, and fix them
-my ($ok, $recs) = &dnscloud_route53_get_records($d, $info);
+my $oldinfo = { %$info };
+$oldinfo->{'domain'} = $oldinfo->{'olddomain'};
+delete($oldinfo->{'olddomain'});
+my ($ok, $recs) = &dnscloud_route53_get_records($d, $oldinfo);
 return (0, $recs) if (!$ok);
 &modify_records_domain_name(
 	$recs, undef, $info->{'olddomain'}, $info->{'domain'});
 
 # Delete the old domain
-my ($ok, $err) = &dnscloud_route53_delete_domain($d, $info);
+my ($ok, $err) = &dnscloud_route53_delete_domain($d, $oldinfo);
 return (0, $err) if (!$ok);
 
 # Create the new one with the original records
@@ -369,7 +372,7 @@ return (0, $rv) if (!ref($rv));
 my @recs;
 foreach my $rrs (@{$rv->{'ResourceRecordSets'}}) {
 	next if ($rrs->{'Type'} eq 'NS' &&
-		 &expand_dns_record($rrs->{'Name'}, $d) eq $d->{'dom'}.'.');
+		 &expand_dns_record($rrs->{'Name'}, $d) eq $info->{'domain'}.'.');
 	foreach my $rr (@{$rrs->{'ResourceRecords'}}) {
 		push(@recs, { 'name' => $rrs->{'Name'},
 			      'realname' => $rrs->{'Name'},
@@ -397,7 +400,7 @@ my @recs;
 foreach my $rrs (@{$rv->{'ResourceRecordSets'}}) {
 	foreach my $rr (@{$rrs->{'ResourceRecords'}}) {
 		if ($rrs->{'Type'} eq 'NS' &&
-		    &expand_dns_record($rrs->{'Name'}, $d) eq $d->{'dom'}.'.') {
+		    &expand_dns_record($rrs->{'Name'}, $d) eq $info->{'domain'}.'.') {
 			push(@ns, $rr->{'Value'});
 			}
 		}
@@ -420,7 +423,7 @@ my $js = { 'Changes' => [] };
 my %keep = map { &dns_record_key($_), 1 } @$recs;
 foreach my $r (@$oldrecs) {
 	next if ($r->{'type'} eq 'NS' &&
-	 	   &expand_dns_record($r->{'name'}, $d) eq $d->{'dom'}.'.' ||
+	 	   &expand_dns_record($r->{'name'}, $d) eq $info->{'domain'}.'.' ||
 		 $r->{'type'} eq 'SOA');
 	next if ($keep{&dns_record_key($r)});
 	my $v = join(" ", @{$r->{'values'}});
@@ -440,7 +443,7 @@ foreach my $r (@$oldrecs) {
 	}
 foreach my $r (@$recs) {
 	next if ($r->{'type'} eq 'NS' &&
-		  &expand_dns_record($r->{'name'}, $d) eq $d->{'dom'}.'.' ||
+		  &expand_dns_record($r->{'name'}, $d) eq $info->{'domain'}.'.' ||
 		 $r->{'type'} eq 'SOA');
 	next if (!$r->{'name'} || !$r->{'type'});	# $ttl or similar
 	my $v = join(" ", @{$r->{'values'}});
