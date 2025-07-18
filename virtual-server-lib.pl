@@ -108,7 +108,7 @@ foreach my $fname (@features, "virt", "virt6") {
 @migration_types = ( "cpanel", "plesk", "directadmin" );
 @startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus", "spam",
 		       "mysql", "postgres");
-@startstop_always_features = ("phpfpm");
+@startstop_always_features = ("fpm");
 @bandwidth_features = ( @features, "backup", "restore" );
 @config_features = grep { $config{$_} } @features;
 @banned_usernames = ( 'root', 'resellers' );
