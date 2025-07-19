@@ -2352,6 +2352,12 @@ if ($ok) {
 		else {
 			# We will be re-creating the server
 			$d->{'missing'} = 1;
+			my $idclash = &get_domain($d->{'id'});
+			if ($idclash) {
+				# A domain with the old ID but a new name
+				# exists, so pick a new ID
+				$d->{'id'} = &domain_id();
+				}
 			}
 		}
 
