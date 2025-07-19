@@ -211,14 +211,14 @@ return 1;
 # Make sure all Webmin users exist
 sub validate_webmin
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_acl();
-local @users = &acl::list_users();
-local ($wuser) = grep { $_->{'name'} eq $d->{'user'} } @users;
+my @users = &acl::list_users();
+my ($wuser) = grep { $_->{'name'} eq $d->{'user'} } @users;
 return &text('validate_ewebmin', $d->{'user'}) if (!$wuser);
 foreach my $admin (&list_extra_admins($d)) {
-	local ($wuser) = grep { $_->{'name'} eq $admin->{'name'} }
-			      @users;
+	my ($wuser) = grep { $_->{'name'} eq $admin->{'name'} }
+			   @users;
 	return &text('validate_ewebminextra', $admin->{'name'})
 		if (!$wuser);
 	}
@@ -232,7 +232,7 @@ sub disable_webmin
 &$first_print($text{'disable_webmin'});
 &obtain_lock_webmin($_[0]);
 &require_acl();
-local ($wuser) = grep { $_->{'name'} eq $_[0]->{'user'} } &acl::list_users();
+my ($wuser) = grep { $_->{'name'} eq $_[0]->{'user'} } &acl::list_users();
 if ($wuser) {
 	$wuser->{'pass'} = "*LK*";
 	&acl::modify_user($wuser->{'name'}, $wuser);
@@ -250,7 +250,7 @@ sub enable_webmin
 &$first_print($text{'enable_webmin'});
 &obtain_lock_webmin($_[0]);
 &require_acl();
-local ($wuser) = grep { $_->{'name'} eq $_[0]->{'user'} } &acl::list_users();
+my ($wuser) = grep { $_->{'name'} eq $_[0]->{'user'} } &acl::list_users();
 if ($wuser) {
 	$wuser->{'pass'} = "x";
 	&acl::modify_user($wuser->{'name'}, $wuser);
@@ -313,24 +313,24 @@ else {
 	}
 }
 
-# set_user_modules(&domain, &webminuser, [&acs-for-this-module], [no-features],
+# set_user_modules(&domain, &webminuser, [&acls-for-this-module], [no-features],
 #		   [no-extra], [is-extra-admin], [&only-domain-ids])
 sub set_user_modules
 {
-local ($d, $wuser, $acls, $nofeatures, $noextras, $isextra, $onlydoms) = @_;
-local @mods;
-local $tmpl = &get_template($d->{'template'});
-local $chroot = &get_domain_jailkit($d);
+my ($d, $wuser, $acls, $nofeatures, $noextras, $isextra, $onlydoms) = @_;
+my @mods;
+my $tmpl = &get_template($d->{'template'});
+my $chroot = &get_domain_jailkit($d);
 
 # Work out which module's ACLs to leave alone
-local %hasmods = map { $_, 1 } @{$wuser->{'modules'}};
+my %hasmods = map { $_, 1 } @{$wuser->{'modules'}};
 %hasmods = ( ) if (!$config{'leave_acl'});
 
 # Work out which domains and features exist
-local @doms = ( $d, &get_domain_by("parent", $d->{'id'}) );
-local %doneid;
+my @doms = ( $d, &get_domain_by("parent", $d->{'id'}) );
+my %doneid;
 @doms = grep { !$doneid{$_->{'id'}}++ } @doms;
-local (%features, $sd, $f);
+my (%features, $sd, $f);
 if (!$nofeatures) {
 	foreach $sd (@doms) {
 		foreach $f (@features) {
@@ -339,26 +339,25 @@ if (!$nofeatures) {
 		}
 	}
 if ($onlydoms) {
-	local %onlydoms = map { $_, 1 } @$onlydoms;
+	my %onlydoms = map { $_, 1 } @$onlydoms;
 	@doms = grep { $onlydoms{$_->{'id'}} } @doms;
 	}
 
 # Work out which extra (non feature-related) modules are available
-local %avail = map { split(/=/, $_, 2) } split(/\s+/, $tmpl->{'avail'});
-local @extramods = grep { $avail{$_} } keys %avail;
+my %avail = map { split(/=/, $_, 2) } split(/\s+/, $tmpl->{'avail'});
+my @extramods = grep { $avail{$_} } keys %avail;
 if ($noextras) {
 	@extramods = ( );
 	}
-local %extramods = map { $_, $avail{$_} }
-		       grep { my $m=$_; { local $_; &foreign_check($m) } }
-			@extramods;
+my %extramods = map { $_, $avail{$_} }
+		       grep { my $m = $_; &foreign_check($m) } @extramods;
 
 # Grant access to BIND module if needed
 if ($features{'dns'} && $avail{'dns'} && !$d->{'provision_dns'} &&
     !$d->{'dns_cloud'}) {
 	# Allow user to manage just their domains
 	push(@mods, "bind8");
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'zones' => join(" ",
 				    map { $_->{'dom'} }
 				     grep { $_->{'dns'} &&
@@ -397,7 +396,7 @@ if ($features{'mysql'} && $avail{'mysql'}) {
 	# Allow user to manage just the domain's DB
 	my $mymod = &require_dom_mysql($d);
 	push(@mods, $mymod);
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'dbs' => join(" ", map { split(/\s+/, $_->{'db_mysql'}) }
 					      grep { $_->{'mysql'} } @doms),
 		       'create' => 0,
@@ -420,7 +419,7 @@ else {
 if ($features{'postgres'} && $avail{'postgres'}) {
 	# Allow user to manage just the domain's DB
 	push(@mods, "postgresql");
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'dbs' => join(" ",
 				   map { split(/\s+/, $_->{'db_postgres'}) }
 				       grep { $_->{'postgres'} } @doms),
@@ -445,9 +444,9 @@ if ($features{'web'} && $avail{'web'} && $d->{'edit_phpmode'}) {
 	# Allow user to manage just this website
 	&require_apache();
 	push(@mods, "apache");
-	local @webdoms = grep { $_->{'web'} &&
+	my @webdoms = grep { $_->{'web'} &&
 				(!$_->{'alias'} || !$_->{'alias_mode'}) } @doms;
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'virts' => join(" ",
 			  map { $_->{'dom'}, "$_->{'dom'}:$_->{'web_port'}" }
 			      @webdoms),
@@ -472,7 +471,7 @@ if ($features{'web'} && $avail{'web'} && $d->{'edit_phpmode'}) {
 		# directives in Apache too
 		$acl{'dirs'} .= ' php_value php_flag php_admin_value php_admin_flag';
 		}
-	local @ssldoms = grep { $_->{'ssl'} } @webdoms;
+	my @ssldoms = grep { $_->{'ssl'} } @webdoms;
 	if (@ssldoms) {
 		$acl{'virts'} .= " ".join(" ",
 			map { $_->{'dom'}, "$_->{'dom'}:$_->{'web_sslport'}" }
@@ -488,13 +487,13 @@ else {
 # Grant access to Webalizer module if needed
 if ($features{'webalizer'} && $avail{'webalizer'}) {
 	push(@mods, "webalizer");
-	local @logs;
-	local $d;
+	my @logs;
+	my $d;
 	foreach $d (grep { $_->{'webalizer'} } @doms) {
 		push(@logs, &resolve_links(&get_website_log($d)));
 		}
 	@logs = &unique(@logs);
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'view' => $tmpl->{'web_stats_noedit'},
 		       'global' => 0,
 		       'add' => 0,
@@ -509,15 +508,15 @@ else {
 
 # Grant access to SpamAssassin module if needed, and if per-domain spamassassin
 # configs are available
-local @spamassassin_doms;
+my @spamassassin_doms;
 if (defined(&get_domain_spam_client)) {
 	@spamassassin_doms = grep { &get_domain_spam_client($_) ne 'spamc' }
 				  grep { $_->{'spam'} } @doms;
 	}
 if ($features{'spam'} && $avail{'spam'} && @spamassassin_doms) {
 	push(@mods, "spam");
-	local $sd = $spamassassin_doms[0];
-	local %acl = ( 'noconfig' => 1,
+	my $sd = $spamassassin_doms[0];
+	my %acl = ( 'noconfig' => 1,
 		       'avail' => 'white,score,report,user,header,awl',
 		       'procmailrc' => "$procmail_spam_dir/$sd->{'id'}",
 		       'file' => "$spam_config_dir/$sd->{'id'}/virtualmin.cf",
@@ -537,10 +536,10 @@ else {
 	}
 
 # All users get access to virtualmin at least
-local $can_create = $d->{'domslimit'} && !$d->{'no_create'} &&
+my $can_create = $d->{'domslimit'} && !$d->{'no_create'} &&
 		    $d->{'unix'};
 push(@mods, $module_name);
-local %acl = ( 'noconfig' => 1,
+my %acl = ( 'noconfig' => 1,
 	       'edit' => $d->{'edit_domain'} ? 2 : 0,
 	       'create' => $can_create ? 2 : 0,
 	       'import' => 0,
@@ -571,7 +570,7 @@ if ($acls) {
 %uaccess = %acl;
 
 # Set global ACL options
-local %acl = ( 'feedback' => 0,
+my %acl = ( 'feedback' => 0,
 	       'rpc' => 0,
 	       'negative' => 1,
 	       'readonly' => $d->{'demo'},
@@ -600,7 +599,7 @@ if (!$d->{'domslimit'}) {
 
 if ($extramods{'file'} && $d->{'unix'}) {
 	# Limit old Java file manager to user's directory, as unix user
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'uid' => $d->{'uid'},
 		       'follow' => 0,
 		       'root' => &resolve_links($d->{'home'}),
@@ -622,7 +621,7 @@ if ($extramods{'filemin'} && $d->{'unix'}) {
 	else {
 		$homedir = $d->{'home'};
 		}
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'work_as_root' => 0,
 		       'work_as_user', $d->{'user'},
 		       'allowed_paths' => &resolve_links($homedir),
@@ -635,7 +634,7 @@ if ($extramods{'filemin'} && $d->{'unix'}) {
 if ($d->{'unix'}) {
 	if ($extramods{'passwd'} == 1 && !$isextra) {
 		# Can only change domain owners password
-		local %acl = ( 'noconfig' => 1,
+		my %acl = ( 'noconfig' => 1,
 			       'mode' => 1,
 			       'users' => $d->{'user'},
 			       'repeat' => 1,
@@ -649,7 +648,7 @@ if ($d->{'unix'}) {
 	elsif ($extramods{'passwd'} == 2) {
 		# Can change all mailbox passwords (except for the domain
 		# owner, if this is an extra admin)
-		local %acl = ( 'noconfig' => 1,
+		my %acl = ( 'noconfig' => 1,
 			       'mode' => 5,
 			       'users' => $d->{'group'},
 			       'notusers' => $d->{'user'},
@@ -665,7 +664,7 @@ if ($d->{'unix'}) {
 
 if ($extramods{'proc'} && $d->{'unix'} && !$chroot) {
 	# Can only manage and see his own processes
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'uid' => $d->{'uid'},
 		       'edit' => 1,
 		       'run' => 1,
@@ -678,7 +677,7 @@ if ($extramods{'proc'} && $d->{'unix'} && !$chroot) {
 
 if ($extramods{'cron'} && $d->{'unix'} && !$chroot) {
 	# Can only manage his cron jobs
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'mode' => 1,
 		       'users' => $d->{'user'},
 		       'allow' => 0 );
@@ -689,7 +688,7 @@ if ($extramods{'cron'} && $d->{'unix'} && !$chroot) {
 
 if ($extramods{'at'} && $d->{'unix'} && !$chroot) {
 	# Can only manage his at jobs
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'mode' => 1,
 		       'users' => $d->{'user'},
 		       'allow' => 0,
@@ -701,7 +700,7 @@ if ($extramods{'at'} && $d->{'unix'} && !$chroot) {
 
 if ($extramods{'telnet'} && $d->{'unix'}) {
 	# Cannot configure telnet module
-	local %acl = ( 'noconfig' => 1 );
+	my %acl = ( 'noconfig' => 1 );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "telnet")
 		if (!$hasmods{'telnet'});
 	push(@mods, "telnet");
@@ -709,7 +708,7 @@ if ($extramods{'telnet'} && $d->{'unix'}) {
 
 if ($extramods{'xterm'} && $d->{'unix'}) {
 	# Cannot configure module xterm module, and shell opens as domain user
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'user' => $d->{'user'} );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "xterm")
 		if (!$hasmods{'xterm'});
@@ -718,7 +717,7 @@ if ($extramods{'xterm'} && $d->{'unix'}) {
 
 if ($extramods{'custom'}) {
 	# Cannot edit or create commands
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'cmd' => '*',
 		       'edit' => 0 );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "custom")
@@ -728,7 +727,7 @@ if ($extramods{'custom'}) {
 
 if ($extramods{'shell'} && $d->{'unix'}) {
 	# Can only run commands as server owner
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'user' => $d->{'user'},
 		       'chroot' => $chroot || '/' );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "shell")
@@ -738,7 +737,7 @@ if ($extramods{'shell'} && $d->{'unix'}) {
 
 if ($extramods{'updown'} && $d->{'unix'}) {
 	# Can upload and download to home dir only
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'dirs' => $d->{'home'},
 		       'home' => 0,
 		       'mode' => 3, );
@@ -752,8 +751,8 @@ if ($extramods{'updown'} && $d->{'unix'}) {
 	push(@mods, "updown");
 
 	# Set defaults for upload and download directories for this user
-	local %udconfig;
-	local $udfile = "$config_directory/updown/config";
+	my %udconfig;
+	my $udfile = "$config_directory/updown/config";
 	&lock_file($udfile);
 	&read_file($udfile, \%udconfig);
 	$udconfig{'dir_'.$wuser->{'name'}} ||= &resolve_links($d->{'home'});
@@ -769,7 +768,7 @@ if ($extramods{'change-user'}) {
 
 if ($extramods{'htaccess-htpasswd'} && $d->{'unix'}) {
 	# Can create .htaccess files in home dir, as user
-        local %acl = ( 'noconfig' => 1,
+        my %acl = ( 'noconfig' => 1,
                        'home' => 0,
                        'dirs' => $d->{'home'},
                        'sync' => 0,
@@ -779,10 +778,10 @@ if ($extramods{'htaccess-htpasswd'} && $d->{'unix'}) {
         push(@mods, "htaccess-htpasswd");
         }
 
-local @maildoms = grep { $_->{'mail'} } @doms;
+my @maildoms = grep { $_->{'mail'} } @doms;
 if ($extramods{'mailboxes'} && @maildoms) {
 	# Can read mailboxes of users
-	local %acl = ( 'noconfig' => 1,
+	my %acl = ( 'noconfig' => 1,
 		       'fmode' => 1,
 		       'from' => join(" ", map { $_->{'dom'} } @maildoms),
 		       'canattach' => 0,
@@ -801,13 +800,13 @@ else {
 
 if ($extramods{'logviewer'} && $d->{'webmin'}) {
 	# Can view log files for Apache and ProFTPd
-	local @extras;
-	local %done;
+	my @extras;
+	my %done;
 	foreach my $sd (@doms) {
 		# Add Apache logs, for domains with websites and separate logs
 		if (&domain_has_website($sd) && !$sd->{'alias_mode'}) {
-			local $alog = &get_website_log($sd, 0);
-			local $elog = &get_website_log($sd, 1);
+			my $alog = &get_website_log($sd, 0);
+			my $elog = &get_website_log($sd, 1);
 			push(@extras, $alog." ".&text('webmin_alog',
 						      $sd->{'dom'}))
 				if ($alog && !$done{$alog}++);
@@ -817,7 +816,7 @@ if ($extramods{'logviewer'} && $d->{'webmin'}) {
 			}
 		# Add FTP logs
 		if ($sd->{'ftp'}) {
-			local $flog = &get_proftpd_log($sd);
+			my $flog = &get_proftpd_log($sd);
 			if ($flog && !$done{$flog}++) {
 				push(@extras, $flog." ".&text('webmin_flog',
 							     $sd->{'dom'}))
@@ -831,7 +830,7 @@ if ($extramods{'logviewer'} && $d->{'webmin'}) {
 			}
 		}
 	if (@extras) {
-		local %acl = ( 'extras' => join("\t", @extras),
+		my %acl = ( 'extras' => join("\t", @extras),
 			       'any' => 0,
 			       'noconfig' => 1,
 			       'noedit' => 1,
@@ -851,7 +850,7 @@ else {
 	@mods = grep { $_ ne "syslog" && $_ ne "logviewer" } @mods;
 	}
 
-local @pconfs;
+my @pconfs;
 if ($extramods{'phpini'} && $d->{'edit_phpmode'}) {
 	# Can edit PHP configuration files
 	foreach my $sd (grep { $_->{'web'} } @doms) {
@@ -859,7 +858,7 @@ if ($extramods{'phpini'} && $d->{'edit_phpmode'}) {
 		if ($mode ne "mod_php" && $mode ne "fpm" && $mode ne "none") {
 			# Allow access to .ini files
 			foreach my $ini (&list_domain_php_inis($sd)) {
-				local @st = stat($ini->[1]);
+				my @st = stat($ini->[1]);
 				if (@st && $st[4] == $sd->{'uid'}) {
 					if ($ini->[0]) {
 						push(@pconfs, "$ini->[1]=".
@@ -887,7 +886,7 @@ if ($extramods{'phpini'} && $d->{'edit_phpmode'}) {
 		}
 	}
 if (@pconfs) {
-	local %acl = ( 'php_inis' => join("\t", @pconfs),
+	my %acl = ( 'php_inis' => join("\t", @pconfs),
 		       'noconfig' => 1,
 		       'global' => 0,
 		       'anyfile' => 0,
@@ -906,10 +905,10 @@ if (!$noextras) {
 	push(@mods, split(/\s+/, $d->{'webmin_modules'}));
 
 	# Add any extra modules specified in global config
-	local @wmods = split(/\s+/, $config{'webmin_modules'});
-	local $m;
+	my @wmods = split(/\s+/, $config{'webmin_modules'});
+	my $m;
 	foreach $m (@wmods) {
-		local %acl = ( 'noconfig' => 1 );
+		my %acl = ( 'noconfig' => 1 );
 		&save_module_acl_logged(\%acl, $wuser->{'name'}, $m)
 			if (!$hasmods{$m});
 		}
@@ -919,11 +918,11 @@ if (!$noextras) {
 if (!$nofeatures) {
 	# Add plugin-specified modules, except those that have been disabled
 	# for domain owners in the template
-	local $p;
+	my $p;
 	foreach $p (@plugins) {
-		local @pmods = &plugin_call($p, "feature_webmin", $d,
+		my @pmods = &plugin_call($p, "feature_webmin", $d,
 					    \@doms);
-		local $pm;
+		my $pm;
 		foreach $pm (@pmods) {
 			next if ($avail{$pm->[0]} ne '' &&
 				 !$avail{$pm->[0]});
@@ -939,11 +938,11 @@ if (!$nofeatures) {
 if ($extramods{'webminlog'} && $d->{'webmin'}) {
 	# Can view own actions, and those of extra admins. This has to be
 	# done last, to have access to the list of modules.
-	local @users = ( $d->{'user'} );
+	my @users = ( $d->{'user'} );
 	if ($virtualmin_pro) {
 		push(@users, map { $_->{'name'} } &list_extra_admins($d));
 		}
-	local %acl = ( 'users' => join(" ", @users),
+	my %acl = ( 'users' => join(" ", @users),
 		       'mods' => join(" ", @mods),
 		       'notify' => 0,
 		       'rollback' => 0 );
@@ -956,9 +955,9 @@ else {
 	}
 
 # Finally, override in settings from template Webmin group
-local @ownmods = @mods;
+my @ownmods = @mods;
 if ($tmpl->{'webmin_group'} ne 'none') {
-	local ($group) = grep { $_->{'name'} eq $tmpl->{'webmin_group'} }
+	my ($group) = grep { $_->{'name'} eq $tmpl->{'webmin_group'} }
 			      &acl::list_groups();
 	if ($group) {
 		# Add modules from group to list
@@ -998,7 +997,7 @@ return 0;
 # Updates the Webmin users for all domains (or just those on some template)
 sub modify_all_webmin
 {
-local ($tid) = @_;
+my ($tid) = @_;
 &$first_print($text{'check_allwebmin'});
 &obtain_lock_webmin();
 &push_all_print();
@@ -1021,11 +1020,11 @@ foreach my $d (&list_domains()) {
 # admins, and possibly update the reseller too.
 sub refresh_webmin_user
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 my $has_oldd = $oldd ? 1 : 0;
 $oldd ||= $d;
-local $wd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
-local $oldwd = $oldd->{'parent'} ? &get_domain($oldd->{'parent'}) : $oldd;
+my $wd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+my $oldwd = $oldd->{'parent'} ? &get_domain($oldd->{'parent'}) : $oldd;
 if ($wd->{'webmin'}) {
 	&modify_webmin($wd, $oldwd);
 	}
@@ -1066,19 +1065,19 @@ my $afile = "$config_directory/$mod/$user.acl";
 # virtual server.
 sub update_extra_webmin
 {
-local ($d, $forcedis) = @_;
-local @admins = &list_extra_admins($d);
-local %admins = map { $_->{'name'}, $_ } @admins;
-local %webmins;
-local @dis = split(/,/, $d->{'disabled'});
-local $dis = !defined($forcedis) ? &indexof("webmin", @dis) >= 0
+my ($d, $forcedis) = @_;
+my @admins = &list_extra_admins($d);
+my %admins = map { $_->{'name'}, $_ } @admins;
+my %webmins;
+my @dis = split(/,/, $d->{'disabled'});
+my $dis = !defined($forcedis) ? &indexof("webmin", @dis) >= 0
 			         : $forcedis;
 
 # Get current users
 &require_acl();
 foreach my $u (&acl::list_users()) {
 	if (&indexof($module_name, @{$u->{'modules'}}) >= 0) {
-		local %acl = &get_reseller_acl($u->{'name'});
+		my %acl = &get_reseller_acl($u->{'name'});
 		if ($acl{'admin'} && $acl{'admin'} eq $d->{'id'}) {
 			# Found an admin for this domain
 			if ($admins{$u->{'name'}}) {
@@ -1094,12 +1093,12 @@ foreach my $u (&acl::list_users()) {
 
 # Create or update users
 foreach my $admin (@admins) {
-	local $wuser = $webmins{$admin->{'name'}};
-	local $pass = $forcedis ? "*LK*" :
+	my $wuser = $webmins{$admin->{'name'}};
+	my $pass = $forcedis ? "*LK*" :
 			&acl::encrypt_password($admin->{'pass'});
 	if ($wuser) {
 		# User already exists .. make sure he's an extra admin
-		local %aacl = &get_module_acl($admin->{'name'}, $module_name);
+		my %aacl = &get_module_acl($admin->{'name'}, $module_name);
 		if (!$aacl{'admin'}) {
 			next;
 			}
@@ -1143,7 +1142,7 @@ foreach my $admin (@admins) {
 			};
 		&acl::create_user($wuser);
 		}
-	local %acl;
+	my %acl;
 	foreach my $ed (@edit_limits) {
 		if ($d->{'edit_'.$ed}) {
 			$acl{'edit_'.$ed} = $admin->{'edit_'.$ed};
@@ -1165,9 +1164,9 @@ foreach my $admin (@admins) {
 # Create a tar file of all .acl files, for the server owner and extra admins
 sub backup_webmin
 {
-local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
-local $compression = $allopts->{'dir'}->{'compression'};
-local $destfile = $file.".".&compression_to_suffix_inner($compression);
+my ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
+my $compression = $allopts->{'dir'}->{'compression'};
+my $destfile = $file.".".&compression_to_suffix_inner($compression);
 &$first_print($text{'backup_webmin'});
 &require_acl();
 
@@ -1195,11 +1194,11 @@ foreach my $u (@nonlocal) {
 	}
 
 # Add .acl files for domain owner
-local @files;
+my @files;
 if (-r "$config_directory/$d->{'user'}.acl") {
 	push(@files, "$d->{'user'}.acl");
 	}
-local @otheracls = glob("$config_directory/*/$d->{'user'}.acl");
+my @otheracls = glob("$config_directory/*/$d->{'user'}.acl");
 @otheracls = grep { !/\*/ } @otheracls;
 if (@otheracls) {
 	push(@files, "*/$d->{'user'}.acl");
@@ -1208,7 +1207,7 @@ if (@otheracls) {
 # Add .acl files for extra admins
 foreach my $admin (&list_extra_admins($d)) {
 	push(@files, "$admin->{'name'}.acl");
-	local @otheracls = glob("$config_directory/*/$admin->{'name'}.acl");
+	my @otheracls = glob("$config_directory/*/$admin->{'name'}.acl");
 	@otheracls = grep { !/\*/ } @otheracls;
 	if (@otheracls) {
 		push(@files, "*/$admin->{'name'}.acl");
@@ -1221,9 +1220,9 @@ if (!@files) {
 	}
 
 # Tar them all up
-local $temp = &transname();
+my $temp = &transname();
 @files = &expand_glob_to_files($config_directory, @files);
-local $out = &backquote_command(&make_archive_command(
+my $out = &backquote_command(&make_archive_command(
 		$compression, $config_directory, $temp, @files)." 2>&1");
 my $ex = $?;
 if (!$ex) {
@@ -1248,8 +1247,8 @@ return 1;
 # Extract all .acl files from the backup
 sub restore_webmin
 {
-local ($d, $file, $opts, $allopts) = @_;
-local $srcfile = $file;
+my ($d, $file, $opts, $allopts) = @_;
+my $srcfile = $file;
 if (!-r $srcfile) {
 	($srcfile) = glob("$file.*");
 	}
@@ -1267,9 +1266,9 @@ if ($url && $burl && $url eq $burl && $allopts->{'repl'}) {
 	}
 
 &obtain_lock_webmin($_[0]);
-local $out = &backquote_command(
+my $out = &backquote_command(
 	&make_unarchive_command($config_directory, $srcfile)." 2>&1");
-local $rv;
+my $rv;
 if ($?) {
 	&$second_print(&text('backup_webminfailed', "<pre>$out</pre>"));
 	$rv = 0;
@@ -1358,14 +1357,14 @@ return ( );
 # Outputs HTML for editing webmin-user-related template options
 sub show_template_webmin
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Global ACL on or off
 if (!$tmpl->{'default'}) {
-	local @gacl_fields = ( "gacl_umode", "gacl_uusers", "gacl_ugroups",
+	my @gacl_fields = ( "gacl_umode", "gacl_uusers", "gacl_ugroups",
 			       "gacl_groups", "gacl_root" );
-	local $dis1 = &js_disable_inputs(\@gacl_fields, [ ]);
-	local $dis2 = &js_disable_inputs([ ], \@gacl_fields);
+	my $dis1 = &js_disable_inputs(\@gacl_fields, [ ]);
+	my $dis2 = &js_disable_inputs([ ], \@gacl_fields);
 	print &ui_table_row(&hlink($text{'tmpl_gacl'}, "template_gacl"),
 		&ui_radio("gacl", int($tmpl->{'gacl'}),
 		   [ [ 0, $text{'default'}, "onClick='$dis1'" ],
@@ -1402,7 +1401,7 @@ print &ui_table_row(
 
 # Webmin group for domain owner
 &require_acl();
-local @groups = &acl::list_groups();
+my @groups = &acl::list_groups();
 if (@groups) {
 	print &ui_table_row(
 	  &hlink($text{'tmpl_wgroup'}, "template_webmin_group"),
@@ -1418,7 +1417,7 @@ if (@groups) {
 # Updates webmin-user-related template options from %in
 sub parse_template_webmin
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Save global ACL
 $tmpl->{'gacl'} = $in{'gacl'};
@@ -1430,7 +1429,7 @@ $tmpl->{'gacl_root'} = $in{'gacl_root'};
 $tmpl->{'extra_prefix'} = &parse_none_def("extra_prefix");
 if ($in{'webmin_group'} && $in{'webmin_group'} ne "none") {
 	&require_acl();
-	local ($group) = grep { $_->{'name'} eq $in{'webmin_group'} }
+	my ($group) = grep { $_->{'name'} eq $in{'webmin_group'} }
 			      &acl::list_groups();
 	&indexof($module_name, @{$group->{'members'}}) < 0 ||
 		&error($text{'tmpl_ewgroup'});
