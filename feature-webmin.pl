@@ -217,8 +217,7 @@ my @users = &acl::list_users();
 my ($wuser) = grep { $_->{'name'} eq $d->{'user'} } @users;
 return &text('validate_ewebmin', $d->{'user'}) if (!$wuser);
 foreach my $admin (&list_extra_admins($d)) {
-	my ($wuser) = grep { $_->{'name'} eq $admin->{'name'} }
-			   @users;
+	my ($wuser) = grep { $_->{'name'} eq $admin->{'name'} } @users;
 	return &text('validate_ewebminextra', $admin->{'name'})
 		if (!$wuser);
 	}
