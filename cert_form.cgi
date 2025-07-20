@@ -136,8 +136,16 @@ if (&domain_has_ssl_cert($d)) {
 			push(@links, "<a href='${l}?dom=$d->{'id'}'>".
 				     &show_domain_name($d)."</a>");
 			}
-		print &ui_table_row($text{'cert_also'},
-				    &ui_links_row(\@links));
+		my $lnum = scalar(@links);
+		my $ldesc = $lnum == 1 ?
+			$text{'cert_also_desc1'} :
+			&text('cert_also_desc2', $lnum);
+		my $others = &ui_details({
+				html => 1,
+				class => 'inline',
+				title => $ldesc,
+				content => join('<br>', @links) });
+		print &ui_table_row($text{'cert_also_title'}, $others, 3);
 		}
 
 	# Current usage
