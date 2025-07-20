@@ -93,8 +93,17 @@ if (&domain_has_ssl_cert($d)) {
 		next if ($i eq 'modulus' || $i eq 'exponent');
 		$v = $info->{$i};
 		if (ref($v)) {
-			print &ui_table_row($text{'cert_'.$i},
-				&ui_links_row($v), 3);
+			my @opart = splice(@$v, 0, 5);
+			my $ofirst = join(', ', @opart);
+			my $orest  = join(', <br>', @$v);
+			$others = $orest
+				? &ui_details({
+					html => 1,
+					class => 'inline fit',
+					title => $ofirst,
+					content => $orest }) 
+				: $ofirst;
+			print &ui_table_row($text{'cert_'.$i}, $others, 3);
 			}
 		elsif ($v) {
 			print &ui_table_row($text{'cert_'.$i}, $v);
