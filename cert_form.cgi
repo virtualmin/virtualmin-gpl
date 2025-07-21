@@ -93,8 +93,17 @@ if (&domain_has_ssl_cert($d)) {
 		next if ($i eq 'modulus' || $i eq 'exponent');
 		$v = $info->{$i};
 		if (ref($v)) {
-			print &ui_table_row($text{'cert_'.$i},
-				&ui_links_row($v), 3);
+			my @opart = splice(@$v, 0, 5);
+			my $ofirst = join(', ', @opart);
+			my $orest  = join(', <br>', @$v);
+			$others = $orest
+				? &ui_details({
+					html => 1,
+					class => 'inline fit',
+					title => $ofirst,
+					content => $orest }) 
+				: $ofirst;
+			print &ui_table_row($text{'cert_'.$i}, $others, 3);
 			}
 		elsif ($v) {
 			print &ui_table_row($text{'cert_'.$i}, $v);
@@ -127,29 +136,92 @@ if (&domain_has_ssl_cert($d)) {
 			push(@links, "<a href='${l}?dom=$d->{'id'}'>".
 				     &show_domain_name($d)."</a>");
 			}
-		print &ui_table_row($text{'cert_also'},
-				    &ui_links_row(\@links));
+		my $lnum = scalar(@links);
+		my $ldesc = $lnum == 1 ?
+			$text{'cert_also_desc1'} :
+			&text('cert_also_desc2', $lnum);
+		my $others = &ui_details({
+				html => 1,
+				class => 'inline',
+				title => $ldesc,
+				content => join('<br>', @links) });
+		print &ui_table_row($text{'cert_also_title'}, $others, 3);
 		}
 
 	# Current usage
 	if (@already) {
-		my @msgs;
+		my @msgall;
+		my @msgsglob;
+		my %msgsdom;
+		my %msgsip;
 		foreach my $svc (@already) {
-			my $m;
+			my $m = &text('cert_service_'.$svc->{'id'});
+			push(@msgall, $m);
 			if ($svc->{'ip'}) {
-				$m = &text('cert_already_'.$svc->{'id'}.'_ip',
-					   $svc->{'ip'});
+				$msgsip{$svc->{'ip'}} ||= [];
+				push(@{$msgsip{$svc->{'ip'}}}, $m);
 				}
 			elsif ($svc->{'dom'}) {
-				$m = &text('cert_already_'.$svc->{'id'}.'_dom',
-					   $svc->{'dom'});
+				$msgsdom{$svc->{'dom'}} ||= [];
+				push(@{$msgsdom{$svc->{'dom'}}}, $m);
 				}
 			else {
-				$m = $text{'cert_already_'.$svc->{'id'}};
+				push(@msgsglob, $m);
 				}
-			push(@msgs, $m);
 			}
-		print &ui_table_row($text{'cert_svcs'}, join(", ", @msgs), 3);
+		# Always show all seen services as title
+		my $already = join(", ", &unique(@msgall));
+		# The rest show in details with indentation for readability
+		my $pad   = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+		my $label = sub {
+			my ($lbl, $val) = @_;
+			return "<b>$lbl</b><br><span>$val</span><br>";
+			};
+		my $spanwrap = sub {
+			my ($val, $pad) = @_;
+			$pad ||= 1;
+			return "<span style='padding-left:".(32/$pad).
+				"px;display: inline-block;'>$val</span>";
+			};
+		my $already_details = '';
+		# Globally
+		if (@msgsglob) {
+			$already_details .= $label->(
+				$text{'cert_svcsglob'},
+				$spanwrap->(join(", ", @msgsglob), 2)
+				);
+			}
+		# By domain
+		if (%msgsdom) {
+			my @doms = map {
+			    $pad . "<b>" . &show_domain_name($_) . "</b><br>" .
+			    $spanwrap->(join(", ", @{ $msgsdom{$_} }))
+			} sort keys %msgsdom;
+			$already_details .= $label->(
+				$text{'cert_svcsbydom'},
+				join("<br>", @doms)
+				);
+			}
+		# By IP
+		if (%msgsip) {
+			my @ips = map {
+				$pad . "<b>$_</b><br>" .
+				$spanwrap->(join(", ", @{ $msgsip{$_} }))
+			} sort keys %msgsip;
+			$already_details .= $label->(
+				$text{'cert_svcsbyip'},
+				join("<br>", @ips)
+				);
+			}
+		# Show the details with all the services nicely formatted
+		# and indented
+		$already = &ui_details({
+			html => 1,
+			class => 'inline fit',
+			title => $already,
+			content => $already_details
+			});
+		print &ui_table_row($text{'cert_svcs'}, $already, 3);
 		}
 
 	# Links to download
