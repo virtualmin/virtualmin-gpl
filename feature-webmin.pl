@@ -343,17 +343,18 @@ if ($onlydoms) {
 	@doms = grep { $onlydoms{$_->{'id'}} } @doms;
 	}
 
-# Work out which extra (non feature-related) modules are available
-my %avail = map { split(/=/, $_, 2) } split(/\s+/, $tmpl->{'avail'});
-my @extramods = grep { $avail{$_} } keys %avail;
-if ($noextras) {
-	@extramods = ( );
+# Modules that this user should be granted access to, and exist
+# on this system
+my %mods;
+foreach my $avail (split(/\s+/, $tmpl->{'avail'})) {
+	my ($m, $a) = split(/=/, $avail, 2);
+	if ($a && &foreign_check($a)) {
+		$mods{$m} = $a;
+		}
 	}
-my %extramods = map { $_, $avail{$_} }
-		       grep { my $m = $_; &foreign_check($m) } @extramods;
 
 # Grant access to BIND module if needed
-if ($features{'dns'} && $avail{'dns'} && !$d->{'provision_dns'} &&
+if ($features{'dns'} && $mods{'dns'} && !$d->{'provision_dns'} &&
     !$d->{'dns_cloud'}) {
 	# Allow user to manage just their domains
 	push(@mods, "bind8");
@@ -392,7 +393,7 @@ else {
 	}
 
 # Grant access to MySQL module if needed
-if ($features{'mysql'} && $avail{'mysql'}) {
+if ($features{'mysql'} && $mods{'mysql'}) {
 	# Allow user to manage just the domain's DB
 	my $mymod = &require_dom_mysql($d);
 	push(@mods, $mymod);
@@ -416,7 +417,7 @@ else {
 	}
 
 # Grant access to PostgreSQL module if needed
-if ($features{'postgres'} && $avail{'postgres'}) {
+if ($features{'postgres'} && $mods{'postgres'}) {
 	# Allow user to manage just the domain's DB
 	push(@mods, "postgresql");
 	my %acl = ( 'noconfig' => 1,
@@ -440,7 +441,7 @@ else {
 	}
 
 # Grant access to Apache module if needed
-if ($features{'web'} && $avail{'web'} && $d->{'edit_phpmode'}) {
+if ($features{'web'} && $mods{'web'} && $d->{'edit_phpmode'}) {
 	# Allow user to manage just this website
 	&require_apache();
 	push(@mods, "apache");
@@ -464,13 +465,10 @@ if ($features{'web'} && $avail{'web'} && $d->{'edit_phpmode'}) {
 				(0 .. 7, 9 .. 16,
 				 18 .. $apache::directive_type_count)),
 		       'dirsmode' => 2,
-		       'dirs' => 'ServerName ServerAlias SSLEngine SSLCertificateFile SSLCertificateKeyFile SSLCACertificateFile',
+		       'dirs' => 'ServerName ServerAlias SSLEngine SSLCertificateFile '.
+				 'SSLCertificateKeyFile SSLCACertificateFile '.
+				 'php_value php_flag php_admin_value php_admin_flag',
 		      );
-	if (!$extramods{'phpini'}) {
-		# If cannot access the php.ini module, deny access to PHP
-		# directives in Apache too
-		$acl{'dirs'} .= ' php_value php_flag php_admin_value php_admin_flag';
-		}
 	my @ssldoms = grep { $_->{'ssl'} } @webdoms;
 	if (@ssldoms) {
 		$acl{'virts'} .= " ".join(" ",
@@ -485,7 +483,7 @@ else {
 	}
 
 # Grant access to Webalizer module if needed
-if ($features{'webalizer'} && $avail{'webalizer'}) {
+if ($features{'webalizer'} && $mods{'webalizer'}) {
 	push(@mods, "webalizer");
 	my @logs;
 	my $d;
@@ -513,7 +511,7 @@ if (defined(&get_domain_spam_client)) {
 	@spamassassin_doms = grep { &get_domain_spam_client($_) ne 'spamc' }
 				  grep { $_->{'spam'} } @doms;
 	}
-if ($features{'spam'} && $avail{'spam'} && @spamassassin_doms) {
+if ($features{'spam'} && $mods{'spam'} && @spamassassin_doms) {
 	push(@mods, "spam");
 	my $sd = $spamassassin_doms[0];
 	my %acl = ( 'noconfig' => 1,
@@ -597,20 +595,7 @@ if (!$d->{'domslimit'}) {
 	}
 &save_module_acl_logged(\%acl, $wuser->{'name'}, ".");
 
-if ($extramods{'file'} && $d->{'unix'}) {
-	# Limit old Java file manager to user's directory, as unix user
-	my %acl = ( 'noconfig' => 1,
-		       'uid' => $d->{'uid'},
-		       'follow' => 0,
-		       'root' => &resolve_links($d->{'home'}),
-		       'home' => 0,
-		       'goto' => 1 );
-	&save_module_acl_logged(\%acl, $wuser->{'name'}, "file")
-		if (!$hasmods{'file'});
-	push(@mods, "file");
-	}
-
-if ($extramods{'filemin'} && $d->{'unix'}) {
+if ($mods{'filemin'} && !$noextra && $d->{'unix'}) {
 	# Limit new HTML file manager to user's directory, as unix user
 	my $modname = &foreign_check("file-manager") ?
 				"file-manager" : "filemin";
@@ -631,8 +616,8 @@ if ($extramods{'filemin'} && $d->{'unix'}) {
 	push(@mods, $modname);
 	}
 
-if ($d->{'unix'}) {
-	if ($extramods{'passwd'} == 1 && !$isextra) {
+if ($d->{'unix'} && !$noextra) {
+	if ($mods{'passwd'} == 1 && !$isextra) {
 		# Can only change domain owners password
 		my %acl = ( 'noconfig' => 1,
 			       'mode' => 1,
@@ -645,7 +630,7 @@ if ($d->{'unix'}) {
 			if (!$hasmods{'passwd'});
 		push(@mods, "passwd");
 		}
-	elsif ($extramods{'passwd'} == 2) {
+	elsif ($mods{'passwd'} == 2) {
 		# Can change all mailbox passwords (except for the domain
 		# owner, if this is an extra admin)
 		my %acl = ( 'noconfig' => 1,
@@ -662,20 +647,20 @@ if ($d->{'unix'}) {
 		}
 	}
 
-if ($extramods{'proc'} && $d->{'unix'} && !$chroot) {
+if ($mods{'proc'} && !$noextra && $d->{'unix'} && !$chroot) {
 	# Can only manage and see his own processes
 	my %acl = ( 'noconfig' => 1,
 		       'uid' => $d->{'uid'},
 		       'edit' => 1,
 		       'run' => 1,
 		       'users' => $d->{'user'},
-		       'only' => ($extramods{'proc'} == 2) );
+		       'only' => ($mods{'proc'} == 2) );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "proc")
 		if (!$hasmods{'proc'});
 	push(@mods, "proc");
 	}
 
-if ($extramods{'cron'} && $d->{'unix'} && !$chroot) {
+if ($mods{'cron'} && !$noextra && $d->{'unix'} && !$chroot) {
 	# Can only manage his cron jobs
 	my %acl = ( 'noconfig' => 1,
 		       'mode' => 1,
@@ -686,7 +671,7 @@ if ($extramods{'cron'} && $d->{'unix'} && !$chroot) {
 	push(@mods, "cron");
 	}
 
-if ($extramods{'at'} && $d->{'unix'} && !$chroot) {
+if ($mods{'at'} && !$noextra && $d->{'unix'} && !$chroot) {
 	# Can only manage his at jobs
 	my %acl = ( 'noconfig' => 1,
 		       'mode' => 1,
@@ -698,7 +683,7 @@ if ($extramods{'at'} && $d->{'unix'} && !$chroot) {
 	push(@mods, "at");
 	}
 
-if ($extramods{'telnet'} && $d->{'unix'}) {
+if ($mods{'telnet'} && !$noextra && $d->{'unix'}) {
 	# Cannot configure telnet module
 	my %acl = ( 'noconfig' => 1 );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "telnet")
@@ -706,7 +691,7 @@ if ($extramods{'telnet'} && $d->{'unix'}) {
 	push(@mods, "telnet");
 	}
 
-if ($extramods{'xterm'} && $d->{'unix'}) {
+if ($mods{'xterm'} && !$noextra && $d->{'unix'}) {
 	# Cannot configure module xterm module, and shell opens as domain user
 	my %acl = ( 'noconfig' => 1,
 		       'user' => $d->{'user'} );
@@ -715,7 +700,7 @@ if ($extramods{'xterm'} && $d->{'unix'}) {
 	push(@mods, "xterm");
 	}
 
-if ($extramods{'custom'}) {
+if ($mods{'custom'} && !$noextra) {
 	# Cannot edit or create commands
 	my %acl = ( 'noconfig' => 1,
 		       'cmd' => '*',
@@ -725,7 +710,7 @@ if ($extramods{'custom'}) {
 	push(@mods, "custom");
 	}
 
-if ($extramods{'shell'} && $d->{'unix'}) {
+if ($mods{'shell'} && !$noextra && $d->{'unix'}) {
 	# Can only run commands as server owner
 	my %acl = ( 'noconfig' => 1,
 		       'user' => $d->{'user'},
@@ -735,13 +720,13 @@ if ($extramods{'shell'} && $d->{'unix'}) {
 	push(@mods, "shell");
 	}
 
-if ($extramods{'updown'} && $d->{'unix'}) {
+if ($mods{'updown'} && !$noextra && $d->{'unix'}) {
 	# Can upload and download to home dir only
 	my %acl = ( 'noconfig' => 1,
 		       'dirs' => $d->{'home'},
 		       'home' => 0,
 		       'mode' => 3, );
-	if ($extramods{'updown'} == 2) {
+	if ($mods{'updown'} == 2) {
 		# Can only upload
 		$acl{'download'} = 0;
 		$acl{'fetch'} = 0;
@@ -761,12 +746,12 @@ if ($extramods{'updown'} && $d->{'unix'}) {
 	&unlock_file($udfile);
 	}
 
-if ($extramods{'change-user'}) {
+if ($mods{'change-user'} && !$noextra) {
 	# This module is always safe, so no ACL needs to be set
 	push(@mods, "change-user");
 	}
 
-if ($extramods{'htaccess-htpasswd'} && $d->{'unix'}) {
+if ($mods{'htaccess-htpasswd'} && !$noextra && $d->{'unix'}) {
 	# Can create .htaccess files in home dir, as user
         my %acl = ( 'noconfig' => 1,
                        'home' => 0,
@@ -779,7 +764,7 @@ if ($extramods{'htaccess-htpasswd'} && $d->{'unix'}) {
         }
 
 my @maildoms = grep { $_->{'mail'} } @doms;
-if ($extramods{'mailboxes'} && @maildoms) {
+if ($mods{'mailboxes'} && !$noextra && @maildoms) {
 	# Can read mailboxes of users
 	my %acl = ( 'noconfig' => 1,
 		       'fmode' => 1,
@@ -798,7 +783,7 @@ else {
 	@mods = grep { $_ ne "mailboxes" } @mods;
 	}
 
-if ($extramods{'logviewer'} && $d->{'webmin'}) {
+if ($mods{'logviewer'} && !$noextra && $d->{'webmin'}) {
 	# Can view log files for Apache and ProFTPd
 	my @extras;
 	my %done;
@@ -851,7 +836,7 @@ else {
 	}
 
 my @pconfs;
-if ($extramods{'phpini'} && $d->{'edit_phpmode'}) {
+if ($mods{'phpini'} && !$noextra && $d->{'edit_phpmode'}) {
 	# Can edit PHP configuration files
 	foreach my $sd (grep { $_->{'web'} } @doms) {
 		my $mode = &get_domain_php_mode($sd);
@@ -924,8 +909,8 @@ if (!$nofeatures) {
 					    \@doms);
 		my $pm;
 		foreach $pm (@pmods) {
-			next if ($avail{$pm->[0]} ne '' &&
-				 !$avail{$pm->[0]});
+			next if ($mods{$pm->[0]} ne '' &&
+				 !$mods{$pm->[0]});
 			push(@mods, $pm->[0]);
 			if ($pm->[1]) {
 				&save_module_acl_logged(
@@ -935,7 +920,7 @@ if (!$nofeatures) {
 		}
 	}
 
-if ($extramods{'webminlog'} && $d->{'webmin'}) {
+if ($mods{'webminlog'} && !$noextra && $d->{'webmin'}) {
 	# Can view own actions, and those of extra admins. This has to be
 	# done last, to have access to the list of modules.
 	my @users = ( $d->{'user'} );
