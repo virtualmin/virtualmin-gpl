@@ -175,36 +175,9 @@ while(@ARGV > 0) {
 		&usage("Unknown parameter $a");
 		}
 	}
-$webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$webmin_user --http-passwd=$webmin_pass --user-agent=Webmin ";
-$admin_webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$test_admin --http-passwd=smeg --user-agent=Webmin ";
+
 if ($tmplname) {
 	push(@create_args, [ 'template', $tmplname ]);
-	}
-
-&get_miniserv_config(\%miniserv);
-$webmin_proto = "http";
-if ($miniserv{'ssl'}) {
-	eval "use Net::SSLeay";
-	$webmin_proto = "https" if (!$@);
-	}
-$webmin_port = $miniserv{'port'};
-$webmin_url = "$webmin_proto://localhost:$webmin_port";
-if ($webmin_proto eq "https") {
-	$webmin_wget_command .= "--no-check-certificate ";
-	$admin_webmin_wget_command .= "--no-check-certificate ";
-	}
-$normal_agent_wget_command = $webmin_wget_command;
-$normal_agent_wget_command =~ s/--user-agent=\S+//;
-
-if (&foreign_installed("usermin")) {
-	&foreign_require("usermin");
-	&usermin::get_usermin_miniserv_config(\%uminiserv);
-	$usermin_port = $uminiserv{'port'};
-	$usermin_proto = "http";
-	if ($uminiserv{'ssl'}) {
-		eval "use Net::SSLeay";
-		$usermin_proto = "https" if (!$@);
-		}
 	}
 
 ($test_domain_user) = &unixuser_name($test_domain);
@@ -267,6 +240,38 @@ $test_full_clone_user_mysql = &mysql_username($test_full_clone_user);
 		        'template' => &get_init_template() );
 $test_ssl_subdomain_home = $test_ssl_subdomain{'home'} =
 	&server_home_directory(\%test_ssl_subdomain);
+
+# Create various wget commands
+$webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$webmin_user --http-passwd=$webmin_pass --user-agent=Webmin ";
+$admin_webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$test_admin --http-passwd=smeg --user-agent=Webmin ";
+$owner_webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$test_domain_user --http-passwd=smeg --user-agent=Webmin ";
+
+&get_miniserv_config(\%miniserv);
+$webmin_proto = "http";
+if ($miniserv{'ssl'}) {
+	eval "use Net::SSLeay";
+	$webmin_proto = "https" if (!$@);
+	}
+$webmin_port = $miniserv{'port'};
+$webmin_url = "$webmin_proto://localhost:$webmin_port";
+if ($webmin_proto eq "https") {
+	$webmin_wget_command .= "--no-check-certificate ";
+	$admin_webmin_wget_command .= "--no-check-certificate ";
+	$owner_webmin_wget_command .= "--no-check-certificate ";
+	}
+$normal_agent_wget_command = $webmin_wget_command;
+$normal_agent_wget_command =~ s/--user-agent=\S+//;
+
+if (&foreign_installed("usermin")) {
+	&foreign_require("usermin");
+	&usermin::get_usermin_miniserv_config(\%uminiserv);
+	$usermin_port = $uminiserv{'port'};
+	$usermin_proto = "http";
+	if ($uminiserv{'ssl'}) {
+		eval "use Net::SSLeay";
+		$usermin_proto = "https" if (!$@);
+		}
+	}
 
 # Create PostgreSQL password file for root logins
 $pg_pass_file = "/tmp/pgpass.txt";
@@ -6486,6 +6491,233 @@ if (!$webmin_user || !$webmin_pass) {
 	$remote_tests = [ { 'command' => 'echo Missing user or password ; false' } ];
 	}
 
+$owner_tests = [
+	# Create a test domain
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
+			( [ 'virtualmin-awstats' ] ) : ( ),
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Increase owner limits
+	{ 'command' => 'modify-limits.pl',
+          'args' => [ [ 'domain', $test_domain ],
+		      [ 'max-dbs', 'UNLIMITED' ],
+		      [ 'can-edit', 'scripts' ],
+		    ],
+	},
+
+	# Get the domain ID
+	{ 'command' => 'list-domains.pl --id-only --domain '.$test_domain,
+	  'save' => 'DOMAIN_ID',
+	},
+
+	# Check Webmin login as domain owner
+	{ 'command' => $owner_webmin_wget_command.
+		       $webmin_proto.'://localhost:'.$webmin_port.'/',
+	},
+
+	# List users in the domain
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/list_users.cgi?dom=\$DOMAIN_ID",
+	  'grep' => [ '<body', '</body>', 'Edit Users',
+		      '<b>'.$test_domain_user.'</b>' ],
+	},
+
+	# Add a user to the domain
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_user.cgi?dom=\$DOMAIN_ID\\&new=1\\&mailuser=bob\\&real=Bob+Smeg\\&mailpass=smeg\\&quota_def=1\\&mquota_def=1\\&home_def=1\\&mailbox=1\\&tome=1\\&newmail_def=1\\&shell=/dev/null\\&recovery_def=1",
+	  'antigrep' => 'Failed to save user',
+	},
+
+	# Verify the new user exists
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ] ],
+	  'grep' => "bob",
+	},
+
+	# Open the page to edit the user
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/edit_user.cgi?dom=\$DOMAIN_ID\\&user=bob\\&unix=1",
+	  'grep' => [ '<body', '</body>', 'Edit User', 'Save', 'Delete' ],
+	},
+
+	# Modify the user to enable forwarding
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_user.cgi?dom=\$DOMAIN_ID\\&old=bob\\&unix=1\\&mailuser=bob\\&oldpop3=bob\\&real=Bob+Smeg\\&mailpass_def=1\\&quota_def=1\\&mquota_def=1\\&home_def=1\\&mailbox=1\\&forward=1\\&forwardto=nobody\@$test_domain\\&shell=/dev/null\\&remail_def=1\\&simplemode=simple\\&recovery_def=1",
+	  'antigrep' => 'Failed to save user',
+	},
+
+	# Check that forwarding is set
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'multiline' ],
+		      [ 'simple-aliases' ] ],
+	  'grep' => 'Forward: nobody@'.$test_domain,
+	},
+
+	# Delete the user
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_user.cgi?dom=\$DOMAIN_ID\\&old=bob\\&unix=1\\&delete=1\\&confirm=1",
+	  'antigrep' => 'Failed to save user',
+	},
+
+	# List mail aliases in the domain
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/list_aliases.cgi?dom=\$DOMAIN_ID",
+	  'grep' => [ '<body', '</body>', 'Mail Aliases',
+		      'Delete Selected Aliases' ],
+	},
+
+	# Create a new alias
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_alias.cgi?dom=\$DOMAIN_ID\\&new=1\\&simplename=sales\\&simplemode=simple\\&forward=1\\&forwardto=nobody\@$test_domain",
+	  'antigrep' => 'Failed to save alias',
+	},
+
+	# Verify that the new alias exists
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^sales@'.$test_domain,
+		      'To: nobody@'.$test_domain ],
+	},
+
+	# Open the page to edit the alias
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/edit_alias.cgi?dom=\$DOMAIN_ID\\&from=sales\@${test_domain}",
+	  'grep' => [ '<body', '</body>', 'Edit Mail Alias', 'Save', 'Delete' ],
+	},
+
+	# Re-save the alias
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_alias.cgi?dom=\$DOMAIN_ID\\&old=sales\@${test_domain}\\&simplename=sales\\&simplemode=simple\\&forward=1\\&forwardto=nobody2\@$test_domain",
+	  'antigrep' => 'Failed to save alias',
+	},
+
+	# Verify that the change happened
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^sales@'.$test_domain,
+		      'To: nobody2@'.$test_domain ],
+	},
+
+	# Delete the alias
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_alias.cgi?dom=\$DOMAIN_ID\\&old=sales\@${test_domain}\\&delete=1",
+	  'antigrep' => 'Failed to save alias',
+	},
+
+	# List databases in the domain
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/list_databases.cgi?dom=\$DOMAIN_ID",
+	  'grep' => [ '<body', '</body>', 'Edit Databases',
+		      'Delete Selected' ],
+	},
+
+	# Create a new database
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_database.cgi?dom=\$DOMAIN_ID\\&new=1\\&name=${test_domain_db}_junk\\&type=mysql",
+	  'antigrep' => 'Failed to create database',
+	},
+
+	# Verify that it was created
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => '^'.$test_domain_db.'_junk',
+	},
+
+	# Check MySQL login to the database
+	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.'_junk -e "select version()"',
+	},
+
+	# Edit that same database
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/edit_database.cgi?dom=\$DOMAIN_ID\\&type=mysql\\&name=${test_domain_db}_junk",
+	  'grep' => [ '<body', '</body>', 'Delete This Database',
+		      'Manage Database' ],
+	},
+
+	# Delete the database
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_database.cgi?dom=\$DOMAIN_ID\\&delete=1\\&confirm=1\\&name=${test_domain_db}_junk\\&type=mysql",
+	},
+
+	# Verify that it is gone
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => '^'.$test_domain_db.'_junk',
+	},
+
+	# Verify that list of scripts works
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/list_scripts.cgi?dom=\$DOMAIN_ID",
+	  'grep' => [ '<body', '</body>', 'Manage Web Apps',
+		      'phpMyAdmin', 'Installed Web Apps','Available Web Apps' ],
+	},
+
+	# Install a script via the web UI
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.3.17\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
+	  'grep' => [ '<body', '</body>', 'Install Web App', 
+		      'Now installing RoundCube' ],
+	  'antigrep' => [ 'Failed to install' ],
+	},
+
+	# Make sure it worked
+	{ 'command' => 'list-scripts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Type: roundcube',
+		      'Database: '.$test_domain_db.' ',
+		      'URL: http(s?)://'.$test_domain.'/roundcube',
+		    ],
+	},
+
+	# Verify that list of scripts contains roundcube
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/list_scripts.cgi?dom=\$DOMAIN_ID",
+	  'grep' => [ '/roundcube' ],
+	},
+
+	# Get the script ID
+	{ 'command' => 'list-scripts.pl --id-only --domain '.$test_domain,
+	  'save' => 'SCRIPT_ID',
+	},
+
+	# Un-install the script
+	{ 'command' => $owner_webmin_wget_command.
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/unscript_install.cgi?dom=\$DOMAIN_ID\\&confirm=1\\&script=\$SCRIPT_ID",
+	  'grep' => [ '<body', '</body>', 'RoundCube directory and tables deleted' ],
+	  'antigrep' => [ 'Failed to uninstall script' ],
+	},
+
+	# Test other per-domain pages
+	(map {
+		my $page = $_.".cgi";
+		{ 'command' => $owner_webmin_wget_command.
+			       "${webmin_proto}://localhost:${webmin_port}/virtual-server/${page}?dom=\$DOMAIN_ID",
+		  'antigrep' => [ '>Failed to' ],
+		}
+		} @other_webmin_pages),
+
+	# Delete the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $ssl_tests = [
 	# Create a domain with SSL and a private IP
 	{ 'command' => 'create-domain.pl',
@@ -12575,6 +12807,7 @@ $alltests = { '_config' => $_config_tests,
 	      'scheduled' => $scheduled_tests,
 	      'xml' => $xml_tests,
 	      'assoc' => $assoc_tests,
+	      'owner' => $owner_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
