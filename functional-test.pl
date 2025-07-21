@@ -98,6 +98,10 @@ $test_ssh_public_key = "/tmp/functional-test.key.pub";
 			'pro/maillog', 'disable_domain',
 			'assoc_form', 'pro/edit_html' );
 
+@other_webmin_modules = ( 'bind8', 'apache', 'phpini', 'mysql', 'postgresql',
+			  'passwd', 'filemin', 'proc', 'cron', 'at', 'xterm',
+			  'updown', 'change-user', 'mailboxes', 'logviewer', );
+
 %skip_by_default = ( 'allscript' => 1 );
 
 $max_output = 2048;
@@ -6711,6 +6715,32 @@ $owner_tests = [
 		  'antigrep' => [ '>Failed to' ],
 		}
 		} @other_webmin_pages),
+
+	# Test other modules that the domain owner should have access to
+	(map {
+		my $page = $_;
+		{ 'command' => $owner_webmin_wget_command.
+			       "${webmin_proto}://localhost:${webmin_port}/${page}/",
+		  'antigrep' => [ '>Failed to' ],
+		}
+		} @other_webmin_modules),
+
+	# Check a module that they should not have access to ever
+	{ 'command' => $owner_webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}/acl/",
+	  'grep' => [ '>Failed to' ],
+	},
+
+	# Turn off a feature, and validate that the corresponding module can no longer
+	# be accessed
+	{ 'command' => 'disable-feature.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'mysql' ] ],
+	},
+	{ 'command' => $owner_webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}/mysql/",
+	  'grep' => [ '>Failed to' ],
+	},
 
 	# Delete the domain
 	{ 'command' => 'delete-domain.pl',
