@@ -1808,7 +1808,8 @@ elsif ($mode eq "fpm") {
 			$l = "pm.max_children = $children";
 			}
 		if ($l =~ /pm\.start_servers\s*=\s*(\d+)/) {
-			$l = "pm.start_servers = " . get_php_start_servers($children) . "";
+			$l = "pm.start_servers = " .
+				&get_php_start_servers($children) . "";
 			}
 		if ($children != $children_curr &&
 		    $l =~ /pm\.max_spare_servers\s*=\s*(\d+)/) {
