@@ -739,7 +739,8 @@ else {
 				}
 
 			# Update shell
-			if (defined($in{'shell'})) {
+			if (defined($in{'shell'}) && 
+			    $in{'shell'} ne $user->{'shell'}) {
 				&check_available_shell($in{'shell'}, 'mailbox',
 						       $user->{'shell'}) ||
 					&error($text{'user_eshell'});
@@ -761,7 +762,8 @@ else {
 		elsif (&master_admin()) {
 			# Update shell if called in master admin mode, and
 			# only if available 
-			if (defined($in{'shell'})) {
+			if (defined($in{'shell'}) && 
+			    $in{'shell'} ne $user->{'shell'}) {
 				&check_available_shell($in{'shell'}, 'mailbox',
 						       $user->{'shell'}) ||
 					&error($text{'user_eshell'});
