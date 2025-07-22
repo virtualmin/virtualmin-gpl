@@ -1026,7 +1026,7 @@ user_epasswebnotset=Webserver user password is not set!
 user_eaddwebuser=Failed to add webserver user : $1
 user_edeletewebuser=Failed to delete webserver user : $1
 
-aliases_ecannot=You are not allowed to edit aliases in this domain
+aliases_ecannot=You are not allowed to edit mail aliases in this domain
 aliases_indom=$1 aliases in domain $2
 aliases_title=Mail Aliases
 aliases_name=Name
@@ -3195,7 +3195,7 @@ limits_modules=Extra Webmin modules
 limits_etable=Allowed functions for servers
 limits_edit_domain=Can edit virtual server
 limits_edit_users=Can manage users
-limits_edit_aliases=Can manage aliases
+limits_edit_aliases=Can manage mail aliases
 limits_edit_dbs=Can manage databases
 limits_edit_scripts=Can manage web apps
 limits_edit_rename=Can rename virtual servers
