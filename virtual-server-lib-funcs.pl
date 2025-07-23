@@ -12772,7 +12772,7 @@ $nodbs = $novirts if (!defined($nodbs));
 if ($d->{'parent'}) {
 	local $parent = &get_domain($d->{'parent'});
 	if ($parent) {
-		return &get_domain_owner($parent, $noinfo);
+		return &get_domain_owner($parent, $novirts, $noquotas, $nodbs);
 		}
 	return undef;
 	}
