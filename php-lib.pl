@@ -2624,9 +2624,8 @@ else {
 			}
 		}
 	}
-my $parent = $d->{'parent'} ? &get_domain_by($d->{'parent'}) : $d;
-if ($parent->{'jail'}) {
-	my $dir = &get_domain_jailkit($parent);
+if (&is_domain_jailed($d)) {
+	my $dir = &get_domain_jailkit($d);
 	&save_php_fpm_config_value($d, "chroot", $dir);
 	}
 &unlock_file($file);

@@ -245,7 +245,7 @@ if (!$d->{'parent'}) {
 			&obtain_lock_cron($d);
 			&rename_unix_cron_jobs($d->{'user'},
 					       $oldd->{'user'});
-			if ($d->{'jail'}) {
+			if (&is_domain_jailed($d)) {
 				&rename_jailkit_passwd_file(
 				    $d, $oldd->{'user'}, $d->{'user'});
 				}

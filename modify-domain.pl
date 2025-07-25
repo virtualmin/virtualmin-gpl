@@ -720,10 +720,12 @@ if (defined($jail)) {
 	}
 if ($copyjail) {
 	print "Copying files into chroot jail ..\n";
-	if ($d->{'jail'}) {
+	if (&is_domain_jailed($dom)) {
+		&lock_domain($dom);
 		my $err = &copy_jailkit_files($dom);
-		$d->{'jail_last_copy'} = time();
-		&save_domain($d);
+		$dom->{'jail_last_copy'} = time();
+		&save_domain($dom);
+		&unlock_domain($dom);
 		print $err ? ".. failed : $err\n\n" : ".. done\n\n";
 		}
 	else {

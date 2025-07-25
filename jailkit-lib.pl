@@ -14,10 +14,12 @@ return undef;
 }
 
 # domain_jailkit_dir(&domain)
-# Returns the jailkit directory for a domain
+# Returns the jailkit directory for a domain. If the domain is a sub-domain,
+# then the parent domain's jail directory is returned.
 sub domain_jailkit_dir
 {
 my ($d) = @_;
+$d = &get_domain($d->{'parent'}) if ($d->{'parent'});
 return $config{'jailkit_root'}."/".$d->{'id'};
 }
 
@@ -69,7 +71,7 @@ foreach $f (&mount::files_to_lock()) {
 
 # Modify the domain user's home dir and shell
 &require_useradmin();
-foreach my $uinfo (&list_domain_users($d, 0, 0, 1, 1, 0)) {
+foreach my $uinfo (&list_all_domains_users($d, 0, 0, 1, 1, 0)) {
 	my $duser = $uinfo->{'user'};
 	my $olduinfo = { %$uinfo };
 	if ($uinfo->{'shell'} !~ /\/jk_chrootsh$/) {
@@ -152,7 +154,7 @@ foreach my $pd ($d, &get_domain_by("parent", $d->{'id'})) {
 
 # Switch back the user's shell and home dir
 &require_useradmin();
-foreach my $uinfo (&list_domain_users($d, 0, 0, 1, 1, 0)) {
+foreach my $uinfo (&list_all_domains_users($d, 0, 0, 1, 1, 0)) {
 	my $duser = $uinfo->{'user'};
 	my $olduinfo = { %$uinfo };
 	if ($uinfo->{'shell'} =~ /\/jk_chrootsh$/) {
@@ -220,6 +222,9 @@ my $dir = &domain_jailkit_dir($d);
 return undef if (!-d $dir);		# Jailing isn't enabled
 return undef if (!-d "$dir/etc");	# Jail directory is invalid
 
+# Switch to parent domain if this is a sub-domain
+$d = &get_domain($d->{'parent'}) if ($d->{'parent'});
+
 # Build a list of users and groups that are either system-related, or
 # associated with this domain
 &require_useradmin();
@@ -232,6 +237,7 @@ foreach my $g (&list_all_groups()) {
 			       $g->{'group'} eq $d->{'group'} ||
                                $g->{'group'} eq $d->{'ugroup'});
 	}
+# Add users and groups from this and all sub-domains
 foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 	push(@ucreate, &list_domain_users($sd, 0, 1, 1, 1));
 	}
@@ -295,7 +301,7 @@ foreach my $file ($dir."/etc/passwd", $dir."/etc/shadow") {
 sub modify_jailkit_user
 {
 my ($d, $user) = @_;
-return if (!$d->{'jail'});	# Jailing isn't enabled
+return unless (&is_domain_jailed($d));	# Jailing isn't enabled
 my $dir = &domain_jailkit_dir($d);
 return if (!-d $dir);		# Jailing isn't enabled
 return if (!-d "$dir/etc");	# Jail directory is invalid
@@ -393,12 +399,38 @@ foreach my $d (&list_domains()) {
 sub get_domain_jailed_users_shell
 {
 my ($d) = @_;
-return if (!$d->{'jail'});
+return unless (&is_domain_jailed($d));
 my $dir = &domain_jailkit_dir($d);
 my $pfile = $dir."/etc/passwd";
 return if (!-r $pfile);
 my $sfile = $dir."/etc/shadow";
 return &list_users_from($pfile, $sfile);
+}
+
+# is_domain_jailed(&domain)
+# Returns 1 if the domain is jailed, 0 if not, automatically checking
+# parent domains if this is a sub-domain
+sub is_domain_jailed
+{
+my ($d) = @_;
+return 1 if ($d->{'jail'});
+if ($d->{'parent'}) {
+	my $pd = &get_domain($d->{'parent'});
+	return 1 if ($pd->{'jail'});
+	}
+return 0;
+}
+
+# list_jail_domain_users(&domain)
+# Returns a list of all users in a domain, including sub-domains
+sub list_all_domains_users
+{
+my ($d, @perms) = @_;
+my @all_users = &list_domain_users($d, @perms);
+foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
+	push(@all_users, &list_domain_users($sd, @perms));
+	}
+return @all_users;
 }
 
 1;

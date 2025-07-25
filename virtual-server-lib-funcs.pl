@@ -819,12 +819,16 @@ if ($d) {
 		}
 	local @subdoms;
 	if ($d->{'parent'}) {
-		# This is a subdomain - exclude parent domain users
-		@users = grep { $_->{'home'} =~ /^$d->{'home'}(\/|$)/ } @users;
+		# This is a subdomain - exclude parent domain users, including
+		# jailed users
+		@users = grep { $_->{'home'} =~ 
+		    /(^|\/.*?\/\d{10,}\/\.)$d->{'home'}(\/|$)/ } @users;
 		}
 	elsif (@subdoms = &get_domain_by("parent", $d->{'id'})) {
-		# This domain has subdomains - exclude their users
-		@users = grep { $_->{'home'} !~ /^$d->{'home'}\/domains(\/|$)/ } @users;
+		# This domain has subdomains - exclude their users, including
+		# jailed users
+		@users = grep { $_->{'home'} !~
+		    /(^|\/.*?\/\d{10,}\/\.)$d->{'home'}\/domains(\/|$)/ } @users;
 		}
 	@users = grep { !$_->{'domainowner'} } @users
 		if ($skipunix || $d->{'parent'});
@@ -1139,7 +1143,7 @@ if ($d) {
 	}
 
 # Add jailed user info for each user
-if ($d && $d->{'jail'}) {
+if ($d && &is_domain_jailed($d)) {
 	my @jusers = &get_domain_jailed_users_shell($d);
 	foreach my $juser (@jusers) {
 		my ($user) = grep { $_->{'user'} eq $juser->{'user'} } @users;
@@ -8628,7 +8632,7 @@ if ($dom->{'alias'} && &domain_has_website($dom)) {
 &save_domain($dom);
 
 # Put the user in a jail if possible
-if ($dom->{'jail'} && !&check_jailkit_support()) {
+if (&is_domain_jailed($dom) && !&check_jailkit_support()) {
 	&$first_print($text{'setup_jail'});
 	my $err = &enable_domain_jailkit($dom);
 	if ($err) {
@@ -12790,6 +12794,8 @@ else {
 sub get_domain_shell
 {
 my ($d, $user) = @_;
+# Switch to parent domain if this is a sub-server
+$d = &get_domain($d->{'parent'}) if ($d->{'parent'});
 $user ||= &get_domain_owner($d, 1, 1, 1);
 if ($user->{'shell'} =~ /\/jk_chrootsh$/) {
 	return $user->{'jailed'}->{'shell'};
