@@ -145,7 +145,7 @@ while(@ARGV > 0) {
 		$newdomain = shift(@ARGV);
 		$newdomain =~ /^[A-Za-z0-9\.\-]+$/ || &usage("Invalid new domain name");
 		$newdomain = lc($newdomain);
-		foreach $d (&list_domains()) {
+		foreach my $d (&list_domains()) {
 			if (lc($d->{'dom'}) eq $newdomain) {
 				&usage("A domain called $newdomain already exists");
 				}
@@ -358,7 +358,7 @@ if ($dom->{'virt'} && $ip eq "allocate") {
 	&usage("An IP address cannot be allocated when one is already active");
 	}
 elsif (!$dom->{'virt'} && $ip eq "allocate") {
-	%racl = $d->{'reseller'} ? &get_reseller_acl($d->{'reseller'}) : ( );
+	%racl = $dom->{'reseller'} ? &get_reseller_acl($dom->{'reseller'}) : ( );
 	if ($racl{'ranges'}) {
 		# Allocating IP from reseller's ranges
 		($ip, $netmask) = &free_ip_address(\%racl);
@@ -429,15 +429,15 @@ if (defined($template)) {
 
 # Plans can only be used with top-level servers
 if ($plan) {
-	$d->{'parent'} && &usage("--plan can only be used with top ".
+	$dom->{'parent'} && &usage("--plan can only be used with top ".
 				 "level virtual servers");
 	}
 
 # Make sure plan specifies features
 if ($planfeatures) {
-	$d->{'parent'} && &usage("--plan-features can only be used with top ".
+	$dom->{'parent'} && &usage("--plan-features can only be used with top ".
 				 "level virtual servers");
-	$plan ||= &get_plan($d->{'plan'});
+	$plan ||= &get_plan($dom->{'plan'});
 	$plan->{'featurelimits'} eq 'none' &&
 		&usage("--plan-features cannot be used if the plan has ".
 		       "no features");
@@ -486,7 +486,7 @@ if (defined($prefix)) {
 	$dom->{'prefix'} = $prefix;
 	}
 if (defined($pass)) {
-	foreach $d (@doms) {
+	foreach my $d (@doms) {
 		if ($d->{'disabled'}) {
 			# Clear any saved passwords, as they should
 			# be reset at this point
@@ -501,7 +501,7 @@ if (defined($pass)) {
 if (defined($email)) {
 	&extract_address_parts($email) ||
 		&usage("Invalid email address $email");
-	foreach $d (@doms) {
+	foreach my $d (@doms) {
 		$d->{'email'} = $email;
 		&compute_emailto($d);
 		}
@@ -518,14 +518,13 @@ if (defined($uquota)) {
 	$dom->{'uquota'} = $uquota;
 	}
 if (defined($user)) {
-	foreach $d (@doms) {
+	foreach my $d (@doms) {
 		$d->{'user'} = $user;
 		}
 	}
 if (defined($home)) {
-	foreach $d (@doms) {
-		local $k;
-		foreach $k (keys %$d) {
+	foreach my $d (@doms) {
+		foreach my $k (keys %$d) {
 			$d->{$k} =~ s/$old->{'home'}/$home/g;
 			}
 		}
@@ -720,10 +719,10 @@ if (defined($jail)) {
 	}
 if ($copyjail) {
 	print "Copying files into chroot jail ..\n";
-	if ($d->{'jail'}) {
+	if ($dom->{'jail'}) {
 		my $err = &copy_jailkit_files($dom);
-		$d->{'jail_last_copy'} = time();
-		&save_domain($d);
+		$dom->{'jail_last_copy'} = time();
+		&save_domain($dom);
 		print $err ? ".. failed : $err\n\n" : ".. done\n\n";
 		}
 	else {
@@ -740,11 +739,11 @@ if ($planfeatures) {
 	else {
 		# Plan is using default features
 		%flimits = ( );
-		my $parent = $d->{'parent'} ? &get_domain($d->{'parent'})
+		my $parent = $dom->{'parent'} ? &get_domain($dom->{'parent'})
 					   : undef;
-		my $alias = $d->{'alias'} ? &get_domain($d->{'alias'})
+		my $alias = $dom->{'alias'} ? &get_domain($dom->{'alias'})
 					  : undef;
-		my $subdom = $d->{'subdom'} ? &get_domain($d->{'subdom'})
+		my $subdom = $dom->{'subdom'} ? &get_domain($dom->{'subdom'})
 					    : undef;
 		foreach my $f (&list_available_features($parent, $alias,
 							$subdom)) {
@@ -821,8 +820,8 @@ if ($planfeatures) {
 
 # Call the modify function for enabled features on the domain and sub-servers
 for(my $i=0; $i<@doms; $i++) {
-	$d = $doms[$i];
-	$od = $olddoms[$i];
+	my $d = $doms[$i];
+	my $od = $olddoms[$i];
 	print "Updating virtual server $d->{'dom'} ..\n\n";
 	foreach $f (@features) {
 		if ($config{$f} && $d->{$f}) {
@@ -886,7 +885,7 @@ if ($mysql_module) {
 	}
 
 # Re-apply filesystem quotas
-if (&has_home_quotas() && $applyquotas && $d->{'unix'}) {
+if (&has_home_quotas() && $applyquotas && $dom->{'unix'}) {
 	&$first_print("Re-applying virtual server quotas ..");
 	&set_server_quotas($dom);
 	&$second_print(".. done");
