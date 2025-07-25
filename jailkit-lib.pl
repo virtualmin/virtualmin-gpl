@@ -56,7 +56,7 @@ if (!$already) {
 foreach $f (&mount::files_to_lock()) {
 	&lock_file($f);
 	}
-my ($already) = grep { $_->[0] eq $jailhome } &mount::list_mounts();
+($already) = grep { $_->[0] eq $jailhome } &mount::list_mounts();
 if (!$already) {
 	&mount::create_mount($jailhome, $d->{'home'}, "bind", "defaults");
 	}
