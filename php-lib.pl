@@ -1796,6 +1796,7 @@ if ($mode eq "fcgid") {
 elsif ($mode eq "fpm") {
 	# Update in FPM pool file
 	my $conf = &get_php_fpm_config($d);
+	my $children_curr = &get_domain_php_children($d);
 	return 0 if (!$conf);
 	my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 	return 0 if (!-r $file);
@@ -1807,10 +1808,13 @@ elsif ($mode eq "fpm") {
 			$l = "pm.max_children = $children";
 			}
 		if ($l =~ /pm\.start_servers\s*=\s*(\d+)/) {
-			$l = "pm.start_servers = " . get_php_start_servers($children) . "";
+			$l = "pm.start_servers = " .
+				&get_php_start_servers($children) . "";
 			}
-		if ($l =~ /pm\.max_spare_servers\s*=\s*(\d+)/) {
-			$l = "pm.max_spare_servers = " . get_php_max_spare_servers($children) . "";
+		if ($children != $children_curr &&
+		    $l =~ /pm\.max_spare_servers\s*=\s*(\d+)/) {
+			$l = "pm.max_spare_servers = " .
+				&get_php_max_spare_servers($children) . "";
 			}
 		}
 	&flush_file_lines($file);
