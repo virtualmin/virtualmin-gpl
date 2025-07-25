@@ -2048,7 +2048,9 @@ if (defined(&clear_lookup_domain_cache) && $d) {
 	}
 
 # Set the user's Usermin IMAP password
-if ($user->{'email'} || @{$user->{'extraemail'}}) {
+if (($user->{'email'} || @{$user->{'extraemail'}}) &&
+    $user->{'plainpass'} && $olduser->{'plainpass'} &&
+    $user->{'plainpass'} ne $olduser->{'plainpass'}) {
 	&set_usermin_imap_password($user);
 	}
 
