@@ -6516,6 +6516,7 @@ $owner_tests = [
           'args' => [ [ 'domain', $test_domain ],
 		      [ 'max-dbs', 'UNLIMITED' ],
 		      [ 'can-edit', 'scripts' ],
+		      [ 'can-edit', 'phpmode' ],
 		    ],
 	},
 
@@ -6721,14 +6722,14 @@ $owner_tests = [
 		my $page = $_;
 		{ 'command' => $owner_webmin_wget_command.
 			       "${webmin_proto}://localhost:${webmin_port}/${page}/",
-		  'antigrep' => [ '>Failed to' ],
+		  'antigrep' => [ '>Failed to|is not allowed' ],
 		}
 		} @other_webmin_modules),
 
 	# Check a module that they should not have access to ever
 	{ 'command' => $owner_webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/acl/",
-	  'grep' => [ '>Failed to' ],
+	  'grep' => [ '>Failed to|is not allowed' ],
 	},
 
 	# Turn off a feature, and validate that the corresponding module can no longer
@@ -6739,7 +6740,7 @@ $owner_tests = [
 	},
 	{ 'command' => $owner_webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/mysql/",
-	  'grep' => [ '>Failed to' ],
+	  'grep' => [ '>Failed to|is not allowed' ],
 	},
 
 	# Delete the domain
