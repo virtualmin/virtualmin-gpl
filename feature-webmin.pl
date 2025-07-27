@@ -445,7 +445,7 @@ if ($features{'web'} && $mods{'web'} && $d->{'edit_phpmode'}) {
 	&require_apache();
 	push(@mods, "apache");
 	my @webdoms = grep { $_->{'web'} &&
-				(!$_->{'alias'} || !$_->{'alias_mode'}) } @doms;
+			     (!$_->{'alias'} || !$_->{'alias_mode'}) } @doms;
 	my %acl = ( 'noconfig' => 1,
 		       'virts' => join(" ",
 			  map { $_->{'dom'}, "$_->{'dom'}:$_->{'web_port'}" }
