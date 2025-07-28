@@ -824,6 +824,7 @@ if ($planfeatures) {
 for(my $i=0; $i<@doms; $i++) {
 	my $d = $doms[$i];
 	my $od = $olddoms[$i];
+	&$indent_print();
 	print "Updating virtual server $d->{'dom'} ..\n\n";
 	foreach $f (@features) {
 		if ($config{$f} && $d->{$f}) {
@@ -840,6 +841,8 @@ for(my $i=0; $i<@doms; $i++) {
 	# Save new domain details
 	&$first_print($text{'save_domain'});
 	&save_domain($d);
+	&$second_print($text{'setup_done'});
+	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	}
 
