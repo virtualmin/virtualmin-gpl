@@ -235,6 +235,9 @@ $merr = &making_changes();
 &reset_domain_envs($d);
 &error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
+# Lock the domain
+&lock_domain($d);
+
 # Update description, password and quotas in domain object
 $d->{'owner'} = $in{'owner'};
 if (!$in{'passwd_def'}) {
@@ -366,7 +369,12 @@ $d->{'aliasmail'} = $d->{'mail'} if ($d->{'alias'});
 # Save new domain details
 print $text{'save_domain'},"<br>\n";
 &save_domain($d);
+
+# Unlock the domain
+&unlock_domain($d);
+
 &$second_print($text{'setup_done'});
+
 
 # If the IP has changed, update any alias domains too
 if ($d->{'ip'} ne $oldd->{'ip'} ||
