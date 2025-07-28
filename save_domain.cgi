@@ -241,25 +241,34 @@ $merr = &making_changes();
 # Update description, password and quotas in domain object
 $d->{'owner'} = $in{'owner'};
 if (!$in{'passwd_def'}) {
-	if ($d->{'disabled'}) {
-		# Clear any saved passwords, as they should
-		# be reset at this point
-		$d->{'disabled_mysqlpass'} = undef;
-		$d->{'disabled_postgrespass'} = undef;
-		}
-	
-	# Password was changed and we need to
-	# check if passwords should be hashed
-	my $hashmode = $in{'hashpass_enable'} ? 1 : 0;
-	my $updated_domain_hashpass = &update_domain_hashpass($d, $hashmode);
+	# Update with new password in this parent and all subdomains
+	foreach $dom ($d, &get_domain_by("parent", $d->{'id'})) {
+		if ($dom->{'disabled'}) {
+			# Clear any saved passwords, as they should
+			# be reset at this point
+			$dom->{'disabled_mysqlpass'} = undef;
+			$dom->{'disabled_postgrespass'} = undef;
+			}
+		
+		# Password was changed and we need to
+		# check if passwords should be hashed
+		my $hashmode = $in{'hashpass_enable'} ? 1 : 0;
+		my $updated_domain_hashpass = &update_domain_hashpass($dom, $hashmode);
 
-	$d->{'pass'} = $in{'passwd'};
-	$d->{'pass_set'} = 1;	# indicates that the password has been changed
-	&generate_domain_password_hashes($d, 0);
+		$dom->{'pass'} = $in{'passwd'};
+		$dom->{'pass_set'} = 1;	# indicates that the password has been changed
+		&generate_domain_password_hashes($dom, 0);
 
-	# Clean after hashpass switch
-	if ($updated_domain_hashpass) {
-		&post_update_domain_hashpass($d, $hashmode, $in{'passwd'});
+		# Clean after hashpass switch
+		if ($updated_domain_hashpass) {
+			&post_update_domain_hashpass($dom, $hashmode, $in{'passwd'});
+			}
+		
+		# Save only subdomains
+		next if (!$dom->{'parent'});
+		&lock_domain($dom);
+		&save_domain($dom);
+		&unlock_domain($dom);
 		}
 	}
 else {
