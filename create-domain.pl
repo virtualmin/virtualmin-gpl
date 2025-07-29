@@ -1086,6 +1086,14 @@ elsif ($sshmode == 2) {
 		}
 	}
 
+# Update the IMAP password
+my %u;
+$u{'user'} = $dom{'user'};
+$u{'home'} = $dom{'home'};
+$u{'plainpass'} = $pass;
+&set_usermin_imap_password(\%u);
+
+# Log the API call and run post actions
 &virtualmin_api_log(\@OLDARGV, \%dom, $dom{'hashpass'} ? [ "pass" ] : [ ]);
 &run_post_actions_silently();
 &unlock_domain_name($domain);

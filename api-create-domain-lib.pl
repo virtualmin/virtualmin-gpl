@@ -1008,6 +1008,14 @@ elsif ($sshmode == 2) {
 		}
 	}
 
+# Update the IMAP password
+my %u;
+$u{'user'} = $dom{'user'};
+$u{'home'} = $dom{'home'};
+$u{'plainpass'} = $pass;
+&set_usermin_imap_password(\%u);
+
+# Run post actions
 &run_post_actions_silently();
 &unlock_domain_name($domain);
 return \%dom;
