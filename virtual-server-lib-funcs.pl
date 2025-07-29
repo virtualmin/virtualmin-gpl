@@ -2366,6 +2366,7 @@ local ($user) = @_;
 return 0 if (!$user->{'home'});
 my $plainpass = $user->{'plainpass'};
 $plainpass = $in{'passwd'} if (!defined $plainpass); # fetch for domain owner
+$plainpass = $in{'vpass'} if (!defined $plainpass); # fetch for new virtual server
 return 0 if (!$plainpass);
 # Make sure Usermin is installed, and the mailbox module is setup for IMAP
 return 0 if (!&foreign_check("usermin"));
