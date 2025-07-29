@@ -2052,9 +2052,7 @@ if (defined(&clear_lookup_domain_cache) && $d) {
 	}
 
 # Set the user's Usermin IMAP password
-if (($user->{'email'} || @{$user->{'extraemail'}}) &&
-    $user->{'plainpass'} && $olduser->{'plainpass'} &&
-    $user->{'plainpass'} ne $olduser->{'plainpass'}) {
+if (($user->{'email'} || @{$user->{'extraemail'}}) && $user->{'plainpass'}) {
 	&set_usermin_imap_password($user);
 	}
 
@@ -2366,8 +2364,9 @@ sub set_usermin_imap_password
 {
 local ($user) = @_;
 return 0 if (!$user->{'home'});
-return 0 if (!$user->{'plainpass'});
-
+my $plainpass = $user->{'plainpass'};
+$plainpass = $in{'passwd'} if (!defined $plainpass); # fetch for domain owner
+return 0 if (!$plainpass);
 # Make sure Usermin is installed, and the mailbox module is setup for IMAP
 return 0 if (!&foreign_check("usermin"));
 &foreign_require("usermin");
@@ -2392,7 +2391,7 @@ if (-d "$user->{'home'}/.usermin/mailbox") {
 	else {
 		$inbox{'user'} = $user->{'user'};
 		}
-	$inbox{'pass'} = $user->{'plainpass'};
+	$inbox{'pass'} = $plainpass;
 	$inbox{'nologout'} = 1;
 	eval {
 		# Ignore errors here, in case user is over quota
