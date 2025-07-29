@@ -224,6 +224,7 @@ if (!$d->{'parent'}) {
 			else {
 				# Set password now
 				$uinfo->{'pass'} = $enc;
+				$uinfo->{'pass_unix'} = $enc;
 				}
 			$uinfo->{'plainpass'} = $d->{'pass'};
 			&set_pass_change($uinfo);
