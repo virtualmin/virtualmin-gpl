@@ -496,6 +496,14 @@ if (defined($pass)) {
 		$d->{'pass'} = $pass;
 		$d->{'pass_set'} = 1;
 		&generate_domain_password_hashes($d, 0);
+
+		# Update password for IMAP domain owner user
+		next if ($d->{'parent'});
+		my %u;
+		$u{'user'} = $d->{'user'};
+		$u{'home'} = $d->{'home'};
+		$u{'plainpass'} = $pass;
+		&set_usermin_imap_password(\%u);
 		}
 	}
 if (defined($email)) {
