@@ -3736,6 +3736,7 @@ tmpl_ealiaslimit=Missing or invalid default limit on number of aliases
 tmpl_edbslimit=Missing or invalid default limit on number of databases
 tmpl_edomslimit=Missing or invalid default limit on number of virtual servers
 tmpl_ealiasdomslimit=Missing or invalid default limit on number of alias servers
+tmpl_erealdomslimit=Missing or invalid default limit on number of non-alias servers
 tmpl_ebwlimit=Missing or invalid default limit on bandwidth
 tmpl_emongrelslimit=Missing or invalid limit on number of Rails server instances
 tmpl_mysql_mkdb=Create database as well as login?
