@@ -907,13 +907,13 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 			# Call plugin backup function
 			$fok = &plugin_call($f, "feature_backup",
 					  $d, $ffile, $opts->{$f}, $homefmt,
-					  $increment, $asd, $opts);
+					  $increment, $asd, $opts, $desturls);
 			}
 		elsif (&indexof($f, @bplugins) >= 0) {
 			# Call plugin always backup function
 			$fok = &plugin_call($f, "feature_always_backup",
 					  $d, $ffile, $opts->{$f}, $homefmt,
-					  $increment, $asd, $opts);
+					  $increment, $asd, $opts, $desturls);
 			}
 		if (defined($fok)) {
 			# See if it worked or not
