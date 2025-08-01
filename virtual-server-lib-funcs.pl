@@ -11595,7 +11595,7 @@ my $opts = [ map { [ $_->{'id'}, &show_domain_name($_) ] }
 my $vals = [ ];
 foreach my $id (@$ids) {
 	my $d = &get_domain($id);
-	push(@$vals, ( $id, $d ? &show_domain_name($d) : $id ));
+	push(@$vals, [$id, $d ? &show_domain_name($d) : $id]);
 	}
 if ($ms) {
 	return &ui_multi_select($name, $vals, $opts, $sz, 1, $dis);

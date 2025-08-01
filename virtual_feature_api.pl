@@ -224,7 +224,7 @@ sub feature_always_links
 }
 
 # feature_backup(&domain, file, &opts, homeformat?, differential?, as-owner,
-#                &all-opts)
+#                &all-opts, &destinations)
 # Called to backup this feature for the domain to the given file. Must return 1
 # on success or 0 on failure
 sub feature_backup
@@ -232,7 +232,7 @@ sub feature_backup
 }
 
 # feature_always_backup(&domain, file, &opts, homeformat?, differential?,
-#                       as-owner, &all-opts)
+#                       as-owner, &all-opts, &destinations)
 # Called to backup this feature for the domain to the given file, regardless of
 # whether this feature is enabled or not. Must return 1 on success or 0 on
 # failure
