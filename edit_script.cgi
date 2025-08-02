@@ -241,8 +241,8 @@ if (!$sinfo->{'deleted'}) {
 $content .= &ui_form_end();
 
 # Print head and content
-&ui_print_header(&domain_in($d), &text('scripts_etitle', $script->{'desc'}), "")
-	if (!$has_header);
+&ui_print_header(&domain_in($d), &text('scripts_etitle', $script->{'desc'}),
+		"", undef, undef, $have_kit) if (!$has_header);
 print $content;
 
 # Make sure the left menu is showing this domain
