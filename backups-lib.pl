@@ -825,6 +825,16 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 	local $dok = 1;
 	local @donefeatures;
 
+	# Run the before command
+	&set_domain_envs($dom, "BACKUP_DOMAIN");
+	my $merr = &making_changes();
+	&reset_domain_envs($d);
+	if ($err) {
+		&$second_print($merr);
+		$dok = 0;
+		goto DOMAINFAILED_NOQUOTAS;
+		}
+
 	if ($homefmt && !-d $d->{'home'}) {
 		# Create home directory
 		if (&has_domain_user($d) && $d->{'parent'}) {
@@ -951,6 +961,14 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 	if ($homefmt && $backupdir &&
 	    &is_under_directory($d->{'home'}, $backupdir)) {
 		&execute_command("rm -rf ".quotemeta($backupdir));
+		}
+
+	# Run the post-backup command
+	&set_domain_envs($d, "BACKUP_DOMAIN", undef, undef);
+	my $merr = &made_changes();
+	if ($merr) {
+		&$second_print($merr);
+		$ok = 0;
 		}
 
 	DOMAINFAILED:
