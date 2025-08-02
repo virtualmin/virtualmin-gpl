@@ -18,6 +18,7 @@ my $content = '';
 my $kit_func = $script->{'kit_func'};
 my $extra_submits;
 my $have_kit = 0;
+my @kit_footer = ();
 my $has_header = 0;
 my $can_upgrade = 0;
 if (defined(&$kit_func)) {
@@ -47,6 +48,9 @@ if (defined(&$kit_func)) {
 			$extra_submits = $rows->{'extra_submits'};
 			$can_upgrade = $rows->{'can_upgrade'};
 			$has_header = $rows->{'has_header'};
+			@kit_footer = @{ ref $rows->{'footer_links'} eq 'ARRAY'
+				? $rows->{'footer_links'}
+				: [] };
 			$content .= &ui_table_row(undef, $rows->{'data'}, 2);
 			}
 		else {
@@ -241,8 +245,8 @@ if (!$sinfo->{'deleted'}) {
 $content .= &ui_form_end();
 
 # Print head and content
-&ui_print_header(&domain_in($d), &text('scripts_etitle', $script->{'desc'}), "")
-	if (!$has_header);
+&ui_print_header(&domain_in($d), &text('scripts_etitle', $script->{'desc'}),
+		"", undef, undef, $have_kit) if (!$has_header);
 print $content;
 
 # Make sure the left menu is showing this domain
@@ -250,6 +254,7 @@ if (defined(&theme_select_domain)) {
 	&theme_select_domain($d);
 	}
 
-&ui_print_footer("list_scripts.cgi?dom=$in{'dom'}", $text{'scripts_return'},
+&ui_print_footer(@kit_footer,
+		 ( "list_scripts.cgi?dom=$in{'dom'}", $text{'scripts_return'} ),
 		 &domain_footer_link($d));
 

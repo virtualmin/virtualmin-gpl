@@ -1,5 +1,6 @@
-#### Version 7.99.0
-# Replaced IDNA::Punycode with the actively maintained Net::LibIDN2 for full IDNA2008 support
+#### Version 7.40.0
+* Replaced IDNA::Punycode with the actively maintained Net::LibIDN2 for full IDNA2008 support
+* Fix jailkit support for sub-servers [#1082](https://github.com/virtualmin/virtualmin-gpl/issues/1082)
 
 #### Version 7.30.8
 * Add an ad for WP Workbench to the dashboard
