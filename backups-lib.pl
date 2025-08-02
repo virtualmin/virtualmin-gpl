@@ -771,6 +771,7 @@ local %donefeatures;				# Map from domain name->features
 local @cleanuphomes;				# Temporary homes
 local %donedoms;				# Map from domain name->hash
 local $failalldoms;
+my @bplugins;
 DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 	# Force lock and re-read the domain in case it has changed
 	&obtain_lock_everything($d);
@@ -884,7 +885,7 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 		}
 
 	&$indent_print();
-	my @bplugins = &list_backup_plugins();
+	@bplugins = &list_backup_plugins();
 	foreach $f (@backupfeatures) {
 		my $bfunc = "backup_$f";
 		my $fok;
@@ -1447,6 +1448,18 @@ elsif (!$onebyone) {
 			&lock_file($backupdir);
 			&execute_command("rm -rf ".quotemeta($backupdir));
 			&unlock_file($backupdir);
+			}
+		}
+	}
+
+# Run plugin's post-backup function for enabled features
+foreach my $f (@backupfeatures) {
+	foreach my $p (grep { $_ eq $f } @bplugins) {
+		if (&plugin_defined($p, "feature_always_postbackup")) {
+			# Call plugin always post-backup function
+			&plugin_call($p, "feature_always_postbackup",
+				\@donedoms, $opts->{$p}, $homefmt,
+				$increment, $asd, $opts, $desturls);
 			}
 		}
 	}

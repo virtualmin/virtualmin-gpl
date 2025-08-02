@@ -240,6 +240,14 @@ sub feature_always_backup
 {
 }
 
+# feature_always_postbackup(&domains, &opts, homeformat?, differential?,
+#                           as-owner, &all-opts, &destinations)
+# Called after creating a full backup, regardless of this feature is enabled or
+# not, but only if it was included in the list of features to backup.
+sub feature_always_postbackup
+{
+}
+
 # feature_backup_opts(&opts)
 # Returns HTML for selecting options for a backup of this feature
 sub feature_backup_opts
