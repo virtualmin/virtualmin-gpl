@@ -508,7 +508,8 @@ foreach my $desturl (@$desturls) {
 			if (!$already) {
 				# Fall back to listing the parent dir to look
 				# for the destination folder
-				($already) = grep { lc($_->{'path_display'}) eq							    lc("/".$server) } @$files;
+				($already) = grep { lc($_->{'path_display'}) eq
+						    lc("/".$server) } @$files;
 				}
 			if (!$already) {
 				my $err = &create_dropbox_dir("/".$server);
