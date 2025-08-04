@@ -1456,7 +1456,7 @@ elsif (!$onebyone) {
 # Run plugin's post-backup function for enabled features
 foreach my $f (@backupfeatures) {
 	if (&indexof($f, @bplugins) >= 0 &&
-	    &plugin_defined($f, "feature_always_postbackup") ) {
+	    &plugin_defined($f, "feature_always_postbackup")) {
 		# Call plugin always post-backup function
 		&plugin_call($f, "feature_always_postbackup",
 			\@donedoms, $opts->{$f}, $homefmt,
