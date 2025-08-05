@@ -2394,6 +2394,7 @@ return 0 if (!&usermin::get_usermin_module_info("mailbox"));
 local %mconfig;
 &read_file("$usermin::config{'usermin_dir'}/mailbox/config", \%mconfig);
 return 0 if ($mconfig{'mail_system'} != 4);
+return 0 if ($mconfig{'pop3_server'} eq '*');	# Via Dovecot IMAP command
 return 0 if ($mconfig{'pop3_server'} ne '' &&
              $mconfig{'pop3_server'} ne 'localhost' &&
 	     $mconfig{'pop3_server'} ne '127.0.0.1' &&

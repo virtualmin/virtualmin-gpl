@@ -628,6 +628,25 @@ if ($gconfig{'forgot_pass'} && &foreign_check("virtualmin-password-recovery")) {
 		}
 	}
 
+# Fix Usermin Mailbox module to use Dovecot command if it was previously making
+# a localhost connection
+if (&foreign_installed("usermin") &&
+    &foreign_installed("dovecot")) {
+	&foreign_require("usermin");
+	if (&usermin::get_usermin_version() >= 2.303) {
+		my %mconfig;
+		&read_file("$usermin::config{'usermin_dir'}/mailbox/config",
+			   \%mconfig);
+		if ($mconfig{'pop3_server'} eq '' ||
+		    $mconfig{'pop3_server'} eq 'localhost') {
+			$mconfig{'pop3_server'} = '*';
+			&write_file(
+			    "$usermin::config{'usermin_dir'}/mailbox/config",
+			    \%mconfig);
+			}
+		}
+	}
+
 # Add custom branding for login page
 my $brand_info = "$config_directory/brand.info";
 my $brand_update = 1;
