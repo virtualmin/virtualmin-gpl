@@ -218,5 +218,5 @@ $what = $sched->{'all'} ? 'all' :
 	$sched->{'virtualmin'} ? 'virtualmin' : 'none';
 &webmin_log($in{'new'} ? 'create' : $in{'delete'} ? 'delete' : 'modify',
 	    'sched', $what, $sched);
-&redirect("list_sched.cgi");
+&redirect($in{'return'} || "list_sched.cgi");
 
