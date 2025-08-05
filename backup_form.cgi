@@ -76,22 +76,11 @@ $sched ||= { 'all' => 1,
 	     'email' => $cbmode == 2 ? $d->{'emailto'} :
 			$cbmode == 3 ? $access{'email'} :
 				       $gconfig{'webmin_email_to'},
-	     # Some can be pre-defined by passed params for new schedules
-	     (defined($in{'special'}) ?
-	     	('special' => $in{'special'}, 'enabled' => 2) : ()),
-	     map { defined($in{$_})
-	     		? ($_ => ($in{$_} =~ /^\d+\z/ ? int($in{$_}) : $in{$_}))
-	     		: () }
-	     	qw(
-	     		all parent feature_all compression increment
-	     		fmt purge mkdir strftime email_err ownrestore
-	     		desc dest
-	     	),
 	   };
 @tds = ( "width=30% ");
 
 print &ui_hidden_table_start($text{'backup_headerdoms'}, "width=100%",
-			     2, "doms", $in{'show_doms'} // 1, \@tds);
+			     2, "doms", 1, \@tds);
 
 # Backup description
 if ($in{'new'} || $in{'sched'}) {
@@ -100,9 +89,7 @@ if ($in{'new'} || $in{'sched'}) {
 	}
 
 # Fields to select domains
-@bak = length $in{'doms'}
-	? split(/\0/, $in{'doms'})
-	: split(/\s+/, $sched->{'doms'});
+@bak = split(/\s+/, $sched->{'doms'});
 @doms = grep { &can_backup_domain($_) } &list_visible_domains();
 @dlist = ( "doms_opts", "doms_vals", "doms_add", "doms_remove" );
 $dis1 = &js_disable_inputs(\@dlist, [ ], "onClick");
@@ -148,7 +135,7 @@ print &ui_hidden_table_end("doms");
 
 # Show feature and plugin selection boxes
 print &ui_hidden_table_start($text{'backup_headerfeatures'}, "width=100%", 2,
-			     "features", $in{'show_features'} // 0, \@tds);
+			     "features", 0, \@tds);
 $ftable = "";
 $ftable .= &ui_radio("feature_all", int($sched->{'feature_all'}),
 		[ [ 1, $text{'backup_allfeatures'} ],
@@ -159,8 +146,7 @@ $ftable .= &ui_links_row(\@links);
 foreach $f (&get_available_backup_features()) {
 	$ftable .= &ui_checkbox("feature", $f,
 		$text{'backup_feature_'.$f} || $text{'feature_'.$f},
-		((&indexof($f, @schedfeats) >= 0) ||
-		 (&indexof($f, split(/\0/, $in{'feature'})) >= 0)),
+		&indexof($f, @schedfeats) >= 0,
 		"onClick='form.feature_all[1].checked = true'")."\n";
 	local $ofunc = "show_backup_$f";
 	local %opts = map { split(/=/, $_) }
@@ -181,8 +167,7 @@ foreach $f (&list_backup_plugins()) {
 	$ftable .= &ui_checkbox("feature", $f,
 		&plugin_call($f, "feature_backup_name") ||
 		    &plugin_call($f, "feature_name"),
-		((&indexof($f, @schedfeats) >= 0) ||
-		 (&indexof($f, split(/\0/, $in{'feature'})) >= 0)),
+		&indexof($f, @schedfeats) >= 0,
 		"onClick='form.feature_all[1].checked = true'")."\n";
 	if (&plugin_defined($f, "feature_backup_opts")) {
 		local %opts = map { split(/=/, $_) }
@@ -197,7 +182,7 @@ print &ui_hidden_table_end("features");
 
 # Show global features and plugins boxes
 print &ui_hidden_table_start($text{'backup_headerfeatures2'}, "width=100%", 2,
-			     "features2", $in{'show_features2'} // 0, \@tds);
+			     "features2", 0, \@tds);
 
 # Show virtualmin object backup options
 if (&can_backup_virtualmin()) {
@@ -215,9 +200,7 @@ if (&can_backup_virtualmin()) {
 	}
 
 # Show files to exclude from each domain
-@exclude = length $in{'exclude'}
-        ? split(/\0/, $in{'exclude'})
-        : split(/\t+/, $sched->{'exclude'});
+@exclude = split(/\t+/, $sched->{'exclude'});
 print &ui_table_row(&hlink($text{'backup_exclude'}, 'backup_exclude'),
 	&ui_textarea("exclude", join("\n", @exclude), 5, 80)."<br>\n".
 	&ui_checkbox("include", 1, $text{'backup_include'},
@@ -271,7 +254,7 @@ foreach $dest (@dests) {
 
 # Show destination fields
 print &ui_hidden_table_start($text{'backup_headerdest'}, "width=100%", 2,
-			     "dest", $in{'show_dest'} // 0, \@tds);
+			     "dest", 0, \@tds);
 print &ui_table_row(&hlink($text{'backup_dest'}, "backup_dest"),
 	    join("<hr>\n", @dfields));
 
@@ -355,7 +338,7 @@ print &ui_hidden_table_end("dest");
 if ($in{'sched'} || $in{'new'}) {
 	# Show schedule inputs
 	print &ui_hidden_table_start($text{'backup_headersched'}, "width=100%",
-				     2, "sched", $in{'show_sched'} // 0, \@tds);
+				     2, "sched", 0, \@tds);
 
 	# Email input
 	print &ui_table_row(&hlink($text{'backup_email'}, "backup_email"),
