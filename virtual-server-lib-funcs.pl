@@ -143,8 +143,10 @@ if ($sortfield eq 'dom' || $sortfield eq 'sub') {
 else {
 	%sortkey = map { $_->{'id'}, $_->{$sortfield} } @doms;
 	}
-@doms = sort { $sortkey{$a->{'id'}} cmp $sortkey{$b->{'id'}} ||
-               $a->{'created'} <=> $b->{'created'} } @doms;
+@doms = sort {
+        	&natural_sort_domains($sortkey{$a->{'id'}},
+				      $sortkey{$b->{'id'}}) ||
+		$a->{'created'} <=> $b->{'created'} } @doms;
 foreach my $d (@doms) {
 	$d->{'indent'} = 0;
 	}
@@ -180,6 +182,23 @@ if ($sortfield eq 'user' || $sortfield eq 'sub') {
 	@doms = @catdoms;
 	}
 return @doms;
+}
+
+# natural_sort_domains(a, b)
+# Sort domains based on their names and numeric parts
+sub natural_sort_domains
+{
+my ($x, $y) = @_;
+my @ax = split(/(\d+)/, lc $x);
+my @bx = split(/(\d+)/, lc $y);
+for (my $i=0; $i<@ax && $i<@bx; $i++) {
+	my ($a, $b) = ($ax[$i], $bx[$i]);
+	my $cmp = ($a =~ /^\d+$/ && $b =~ /^\d+$/)
+		? $a <=> $b
+		: $a cmp $b;
+	return $cmp if ($cmp);
+	}
+return @ax <=> @bx;
 }
 
 # get_domain(id, [file], [force-reread])

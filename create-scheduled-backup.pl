@@ -394,13 +394,14 @@ if ($_[0]) {
 print "Creates a scheduled Virtualmin backup for the selected domains,\n";
 print "features and schedule.\n";
 print "\n";
-print "virtualmin create-scheduled-backup [--dest file]+\n";
-print "                         [--domain name] | [--all-domains]\n";
+print "virtualmin create-scheduled-backup\n";
+print "                         --dest file+\n";
+print "                         --domain name  | --all-domains\n";
+print "                         --feature name | --all-features\n";
+print "                                          [--except-feature name]\n";
 print "                         [--parent]\n";
 print "                         [--reseller name]\n";
 print "                         [--plan name]\n";
-print "                         [--feature name] | [--all-features]\n";
-print "                                            [--except-feature name]\n";
 print "                         [--ignore-errors]\n";
 print "                         [--newformat]\n";
 print "                         [--onebyone]\n";

@@ -1455,13 +1455,12 @@ elsif (!$onebyone) {
 
 # Run plugin's post-backup function for enabled features
 foreach my $f (@backupfeatures) {
-	foreach my $p (grep { $_ eq $f } @bplugins) {
-		if (&plugin_defined($p, "feature_always_postbackup")) {
-			# Call plugin always post-backup function
-			&plugin_call($p, "feature_always_postbackup",
-				\@donedoms, $opts->{$p}, $homefmt,
-				$increment, $asd, $opts, $desturls);
-			}
+	if (&indexof($f, @bplugins) >= 0 &&
+	    &plugin_defined($f, "feature_always_postbackup")) {
+		# Call plugin always post-backup function
+		&plugin_call($f, "feature_always_postbackup",
+			\@donedoms, $opts->{$f}, $homefmt,
+			$increment, $asd, $opts, $desturls);
 		}
 	}
 
