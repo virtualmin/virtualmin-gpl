@@ -148,10 +148,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--all-features") {
 		$all_bfeats = 1;
 		}
-	elsif ($a eq "--except-feature") {
-		local $f = shift(@ARGV);
-		@bfeats = grep { $_ ne $f } @bfeats;
-		}
 	elsif ($a eq "--all-domains") {
 		$all_doms = 1;
 		}
@@ -398,7 +394,6 @@ print "virtualmin create-scheduled-backup\n";
 print "                         --dest file+\n";
 print "                         --domain name  | --all-domains\n";
 print "                         --feature name | --all-features\n";
-print "                                          [--except-feature name]\n";
 print "                         [--parent]\n";
 print "                         [--reseller name]\n";
 print "                         [--plan name]\n";
