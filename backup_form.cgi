@@ -76,17 +76,35 @@ $sched ||= { 'all' => 1,
 	     'email' => $cbmode == 2 ? $d->{'emailto'} :
 			$cbmode == 3 ? $access{'email'} :
 				       $gconfig{'webmin_email_to'},
-	     # Some can be pre-defined by passed params for new schedules
-	     (defined($in{'special'}) ?
-	     	('special' => $in{'special'}, 'enabled' => 2) : ()),
-	     map { defined($in{$_})
-	     		? ($_ => ($in{$_} =~ /^\d+\z/ ? int($in{$_}) : $in{$_}))
-	     		: () }
-	     	qw(
-	     		all parent feature_all compression increment
-	     		fmt purge mkdir strftime email_err ownrestore
-	     		desc dest
-	     	),
+	    # Defined by possibly passed params
+	    (defined $in{'desc'} ?
+	    	('desc' => $in{'desc'}) : ()),
+	    (defined $in{'all'} ?
+	    	('all' => int($in{'all'})) : ()),
+	    (defined $in{'parent'} ?
+	    	('parent' => int($in{'parent'})) : ()),
+	    (defined $in{'feature_all'} ?
+	    	('feature_all' => int($in{'feature_all'})) : ()),
+	    (defined $in{'compression'} ?
+	    	('compression' => int($in{'compression'})) : ()),
+	    (defined $in{'increment'} ?
+	    	('increment' => int($in{'increment'})) : ()),
+	    (defined $in{'fmt'} ?
+	    	('fmt' => int($in{'fmt'})) : ()),
+	    (defined $in{'purge'} ?
+	    	('purge' => int($in{'purge'})) : ()),
+	    (defined $in{'mkdir'} ?
+	    	('mkdir' => int($in{'mkdir'})) : ()),
+	    (defined $in{'strftime'} ?
+	    	('strftime' => int($in{'strftime'})) : ()),
+	    (defined $in{'dest'} ?
+	    	('dest' => $in{'dest'}) : ()),
+	    (defined $in{'special'} ?
+	    	('special' => $in{'special'}, 'enabled' => 2) : ()),
+	    (defined $in{'email_err'} ?
+	    	('email_err' => int($in{'email_err'})) : ()),
+	    (defined $in{'ownrestore'} ?
+	    	('ownrestore' => int($in{'ownrestore'})) : ()),
 	   };
 @tds = ( "width=30% ");
 
