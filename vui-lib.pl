@@ -36,7 +36,8 @@ local ($name, $job, $offmsg) = @_;
 local $rv;
 local $mode = !$job ? 0 : $job->{'special'} ? 1 : 2;
 local $complex = $mode == 2 ? &cron::when_text($job, 1) : undef;
-local $button = "<input type=button onClick='cfield = form.${name}_complex; hfield = form.${name}_hidden; chooser = window.open(\"cron_chooser.cgi?complex=\"+escape(hfield.value), \"cronchooser\", \"toolbar=no,menubar=no,scrollbars=no,resizable=yes,width=800,height=400\"); chooser.cfield = cfield; window.cfield = cfield; chooser.hfield = hfield; window.hfield = hfield;' value=\"...\">\n";
+my $modpref = &get_webprefix()."/".$module_name;
+local $button = "<input type=button onClick='cfield = form.${name}_complex; hfield = form.${name}_hidden; chooser = window.open(\"$modpref/cron_chooser.cgi?complex=\"+escape(hfield.value), \"cronchooser\", \"toolbar=no,menubar=no,scrollbars=no,resizable=yes,width=800,height=400\"); chooser.cfield = cfield; window.cfield = cfield; chooser.hfield = hfield; window.hfield = hfield;' value=\"...\">\n";
 local $hidden = $mode == 2 ?
 	join(" ", $job->{'mins'}, $job->{'hours'},
 		  $job->{'days'}, $job->{'months'}, $job->{'weekdays'}) : "";

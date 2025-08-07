@@ -18,7 +18,8 @@ else {
 	}
 
 # Show it
-print &ui_form_start("cron_select.cgi");
+my $modpref = &get_webprefix()."/".$module_name;
+print &ui_form_start("$modpref/cron_select.cgi");
 print "<table border width=100% class='ui_table'>\n";
 &cron::show_times_input($job, 1);
 print "</table>\n";
