@@ -558,7 +558,6 @@ backup_purgeno=Nikdy
 backup_purgeyes=Ano, po
 backup_disabled=Zakazano
 backup_mode0=Mistni soubor nebo adresar
-backup_mode0a=Soubor nebo adresar v <tt>virtualmin-backup/</tt>
 backup_mode1=FTP server
 backup_mode3=Kos Amazon S3
 backup_mode5=Nahrat na server
@@ -1134,7 +1133,6 @@ s3_edeletefile=Chyba behem mazani souboru S3 : $1
 s3_ecreate=Chyba vytvoreni schranky S3 : $1
 s3_einfo=Chyba uploadu informaci o souboru : $1
 s3_elist2=Chyba vypsani schranky S3 : $1
-
 postsave_databases=Spravovat a vytvářet databáze.
 
 showpass_useru=IMAP/FTP přihlášení

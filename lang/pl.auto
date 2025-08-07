@@ -80,6 +80,7 @@ log_update_acme=Zaktualizowano dostawcę SSL dla $1
 
 backup_headerfeatures2=Ustawienia globalne
 backup_compression4=<tt>zstd</tt>
+backup_mode0a=Plik pod <tt>~/$1/</tt>
 backup_mode44=Pobierz w przeglądarce
 
 backup_finalstatusok=$1 serwerów wirtualnych zostało pomyślnie utworzonych kopii zapasowych
@@ -97,6 +98,12 @@ cert_newcertkeep=Zachowaj istniejący certyfikat
 cert_newca=Certyfikat CA
 cert_newcakeep=Zachowaj istniejący certyfikat
 cert_tabacme=Dostawcy SSL
+cert_also_title=Używane również przez
+cert_also_desc1=1 domena
+cert_also_desc2=$1 domen
+cert_svcsglob=Globalnie według
+cert_svcsbydom=Według domeny
+cert_svcsbyip=Według IP
 cert_service_bind=WIĄZAĆ
 cert_desc9=Dostawcy certyfikatów SSL, np. Let's Encrypt, mogą być wykorzystywani do automatycznego żądania ważnego certyfikatu do użytku przez Virtualmin.
 cert_acmedesc=Ta strona może zostać użyta do żądania nowego certyfikatu, który nadpisze każdy inny, który aktualnie skonfigurowałeś dla tej domeny. Jednak dostawcy certyfikatów SSL wymagają, aby Twoje prawo własności do domeny certyfikatu zostało zweryfikowane poprzez sprawdzenie, czy ten system hostuje witrynę dla tej domeny. Odbywa się to poprzez umieszczenie małego pliku tymczasowego w katalogu dokumentów witryny $1.
@@ -117,6 +124,7 @@ newbw_period=Okres rozliczeniowy
 newbw_enable=Czy ponownie włączyć serwery, których wydajność spadła poniżej limitu?
 newbw_graphdesc=Kliknij ten przycisk, aby wyświetlić wykres wykorzystania pasma i limitów dla wszystkich serwerów wirtualnych. Wykorzystanie można również wyświetlić według daty lub miesiąca, wracając do liczby dni przechowywania danych skonfigurowanych powyżej.
 
+tmpl_erealdomslimit=Brak lub nieprawidłowy domyślny limit liczby serwerów innych niż alias
 tmpl_mail_mta_sts=Włączyć MTA-STS dla nowych domen?
 tmpl_edmarcruf=Adres URI raportowania dla raportów kryminalistycznych musi być sformatowany w następujący sposób: mailto:user@domain
 tmpl_edmarcrua=Adres URI raportowania dla raportów zbiorczych musi być sformatowany w następujący sposób: mailto:user@domain
@@ -247,6 +255,36 @@ scripts_gpl_pro_tip_workbench_desc_dashboard=WP Workbench to nowa wtyczka do Vir
 
 newnotify_users=Czy wysyłać e-maile także do użytkowników w wybranych domenach?
 
+summary_ago_year=$1 rok temu
+summary_ago_years=$1 lat temu
+summary_ago_month=$1 miesiąc temu
+summary_ago_months=$1 miesięcy temu
+summary_ago_week=$1 tydzień temu
+summary_ago_weeks=$1 tygodni temu
+summary_ago_day=$1 dzień temu
+summary_ago_days=$1 dni temu
+summary_ago_hour=$1 godzinę temu
+summary_ago_hours=$1 godziny temu
+summary_ago_min=$1 minutę temu
+summary_ago_mins=$1 minut temu
+summary_ago_sec=$1 sekundę temu
+summary_ago_secs=$1 sekundy temu
+summary_in_year=Za $1 rok
+summary_in_years=Za $1 lat
+summary_in_month=Za $1 miesiąc
+summary_in_months=Za $1 miesięcy
+summary_in_week=Za $1 tydzień
+summary_in_weeks=Za $1 tygodni
+summary_in_day=Za $1 dzień
+summary_in_days=Za $1 dni
+summary_in_hour=Za $1 godzinę
+summary_in_hours=Za $1 godzin
+summary_in_min=Za $1 minutę
+summary_in_mins=Za $1 minut
+summary_in_sec=Za $1 sekundy
+summary_in_secs=Za $1 sekund
+summary_now=Właśnie
+
 migrate_plesk=Kopia zapasowa Plesk
 migrate_plan=Plan nowego serwera
 
@@ -285,7 +323,9 @@ spf_aliasdns=Zmiana aliasu domeny na własne rekordy DNS ..
 spf_noaliasdns=Zmiana aliasu domeny w celu skopiowania rekordów DNS z domeny docelowej ..
 spf_ecloudprov=Dostawca usługi Cloud DNS o identyfikatorze <tt>$1</tt> nie jest obsługiwany w ramach licencji Virtualmin GPL
 
-s3_need_cli=Polecenie AWS CLI potrzebne do niezawodnego tworzenia kopii zapasowych S3 nie zostało znalezione w Twoim systemie. Przyszłe wersje Virtualmin będą go wymagać, aby przesyłać kopie zapasowe do S3. <a href='$1'>Kliknij tutaj</a>, aby zainstalować je automatycznie, lub pobierz je ze strony <a href='https://aws.amazon.com/cli/' target=_blank>https://aws.amazon.com/cli/</a>.
+s3_need_cli2=Polecenie AWS CLI potrzebne do utworzenia kopii zapasowych S3 nie zostało znalezione w systemie.
+s3_need_cli3=<a href='$1'>Kliknij tutaj</a>, aby zainstalować ją automatycznie, lub pobierz ją ze strony <a href='https://aws.amazon.com/cli/' target=_blank>https://aws.amazon.com/cli/</a>.
+s3_missing_cli=Polecenie AWS CLI nie jest zainstalowane w tym systemie
 
 newdynip_eexternal2=W trybie Webmin należy wprowadzić nazwę hosta lub nazwę hosta:port serwera Webmin
 

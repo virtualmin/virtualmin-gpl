@@ -3,16 +3,61 @@ index_warn_bindconf=Die BIND DNS-Serverkonfiguration auf Ihrem System weist Fehl
 
 newweb_allow_subset=Nicht überprüfbare Domänennamen ausschließen?
 
+backup_mode0a=Ablage unter <tt>~/$1/</tt>
+
+cert_also_title=Wird auch verwendet von
+cert_also_desc1=1 Domäne
+cert_also_desc2=$1 Domänen
+cert_svcsglob=Weltweit von
+cert_svcsbydom=Nach Domäne
+cert_svcsbyip=Nach IP
+
+tmpl_erealdomslimit=Fehlende oder ungültige Standardbegrenzung für die Anzahl der Nicht-Alias-Server
 tmpl_mail_mta_sts=MTA-STS für neue Domänen aktivieren?
 
 scripts_kit_estype_multi=Mehrere Instanzen des Typs „$1“ sind unter den folgenden Pfaden verfügbar:
 scripts_kit_estype_multi2=Verwenden Sie den Hilfsparameter „--app-path“, um die genaue zu verwendende Instanz anzugeben
+
+summary_ago_year=%vor 1 Jahr
+summary_ago_years=$1 vor Jahren
+summary_ago_month=%vor 1 Monat
+summary_ago_months=$1 vor Monaten
+summary_ago_week=%vor 1 Woche
+summary_ago_weeks=$1 vor Wochen
+summary_ago_day=%vor 1 Tag
+summary_ago_days=$1 Tage her
+summary_ago_hour=%vor 1 Stunde
+summary_ago_hours=vor $1 Stunden
+summary_ago_min=$1 Minute vor
+summary_ago_mins=vor $1 Minuten
+summary_ago_sec=vor $1 Sekunde
+summary_ago_secs=vor $1 Sekunden
+summary_in_year=In $1 Jahr
+summary_in_years=In $1 Jahren
+summary_in_month=In $1 Monat
+summary_in_months=In $1 Monaten
+summary_in_week=In $1 Woche
+summary_in_weeks=In $1 Wochen
+summary_in_day=In $1 Tag
+summary_in_days=In $1 Tagen
+summary_in_hour=In $1 Stunde
+summary_in_hours=In $1 Stunden
+summary_in_min=In $1 Minute
+summary_in_mins=In $1 Minuten
+summary_in_sec=In $1 Sekunde
+summary_in_secs=In $1 Sekunden
+summary_now=Soeben
 
 migrate_plesk=Plesk-Backup
 
 validate_ednsc=Das Abrufen der Datensätze für $1 vom Cloud-DNS-Anbieter $2 ist fehlgeschlagen : $3
 
 spf_cloudns=NS-Einträge des Cloud-Anbieters
+
+s3_need_cli2=Der zum Erstellen von S3-Backups erforderliche AWS CLI-Befehl wurde auf Ihrem System nicht gefunden.
+s3_need_cli3=<a href='$1'>Klicken Sie hier</a>, um es automatisch installieren zu lassen, oder laden Sie es von <a href='https://aws.amazon.com/cli/' target=_blank>https://aws.amazon.com/cli/</a> herunter.
+
+s3_missing_cli=Der AWS CLI-Befehl ist auf diesem System nicht installiert
 
 mail_mta_edns=MTA-STS kann ohne eine DNS-Domäne nicht aktiviert werden
 mail_mta_eweb=MTA-STS kann ohne eine Website nicht aktiviert werden

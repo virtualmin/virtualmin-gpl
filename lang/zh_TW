@@ -27,6 +27,7 @@ index_return2=模塊索引
 index_list=列表..
 index_enet=在你的操作系統上，網絡配置模塊沒有被支持。Virtualmin需要該模塊來管理虛擬網絡接口。
 index_edefip=Virtualmin無法計算出你系統上虛擬服務器的缺省IP地址。你必須在<a href='$1'>模塊配置</a>頁面上更新<b>虛擬地址的網絡接口</b>或者<b>缺省虛擬服務器IP地址</b>。
+
 index_eapache=你的系統沒有安裝Apache web服務器，或者沒有在Webmin的<a href='$1'>Apache Web服務器</a>模塊中正確配置。如果你的系統不使用Apache，你必須在Virtualmin的<a href='$2'>模塊配置</a>頁面中禁用它。
 index_eproftpd=你的系統沒有安裝ProFTPd服務器，或者沒有在Webmin的<a href='$1'>ProFTPd 服務器</a>模塊中正確配置。如果你的系統不使用ProFTPd，你必須在Virtualmin的<a href='$2'>模塊配置</a>頁面中禁用它。
 index_ebind=你的系統沒有安裝BIND DNS服務器第8版或第9版，或者沒有在Webmin的<a href='$1'>BIND DNS服務器</a>模塊中正確配置。如果你的系統不使用BIND，你必須在Virtualmin的<a href='$2'>模塊配置</a>頁面中禁用它。
@@ -1413,7 +1414,6 @@ backup_onebyone=虛擬服務器備份完後傳送
 backup_now=立刻備份
 backup_save=保存並應用
 backup_mode0=本地文件或目錄
-backup_mode0a=<tt>virtualmin-backup/</tt>下的文件或目錄
 backup_mode1=FTP服務器
 backup_mode3=Amazon S3 bucket
 backup_ftpserver=FTP 服務器
@@ -2844,7 +2844,6 @@ s3_elist=列出S3 buckets失敗：$1
 s3_ecreate=創建S3 bucket失敗：$1
 s3_einfo=上傳信息文件失敗：$1
 s3_elist2=列出S3 bucket失敗：$1 
-
 tdelete_err=刪除模板失敗
 tdelete_enone=沒有選擇模板
 

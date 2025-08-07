@@ -38,6 +38,7 @@ index_return2=índice del modulo
 index_list=Lista..
 index_enet=Su sistema operativo no soporta el Módulo de Configuración de Red. Virtualmin necesita este módulo para gestionar las interfaces de red virtual.
 index_edefip=Virtualmin no puede encontrar la IP por defecto de los servidores virtuales en su sistema. Va a necesitar actualizar los campos <b>Interfaz de red para direcciones virtuales</b> o <b>Direcciones IP virtuales por defecto</b> en la página <a href='$1'>Configuración de módulo</a>.
+
 index_eapache=El servidor de web Apache no parece estar instalado en su sistema, o bien no ha sido configurado adecuadamente en el módulo <a href='$1'>Apache Webserver</a> de Webmin. Si su sistema no utiliza Apache, éste debe ser deshabilitado en la página de <a href='$2'>configuración de módulo</a> de Virtualmin.
 index_eproftpd=El servidor ProFTPd no parece estar instalado en su sistema, o bien no ha sido configurado adecuadamente en el módulo <a href='$1'>Servidor ProFTPd</a> de Webmin. Si su sistema no utiliza ProFTPd, éste debe ser desactivado en la página de <a href='$2'>configuración de módulo</a> de Virtualmin.
 index_ebind=El servidor BIND DNS versión 8 o 9  no parece estar instalado en su sistema, o bien no ha sido configurado apropiadamente en el módulo <a href='$1'>Servidor BIND DNS</a>. Si su sistema no utiliza BIND, deberá ser desactivado en la página de <a href='$2'>configuración de módulo</a> de Virtualmin.
@@ -1658,7 +1659,6 @@ backup_after=Comando para correr después del backup
 backup_none=No se seteó ninguno
 backup_disabled=Desactivado
 backup_mode0=Archivo local
-backup_mode0a=Archivo o directorio bajo <tt>virtualmin-backup/</tt>
 backup_mode1=Servidor FTP
 backup_mode3=Amazon S3 bucket
 backup_mode5=Subir al server
@@ -2142,7 +2142,6 @@ cert_kdownload=Descargar llave privada
 cert_pem=Formato PEM
 cert_pkcs12=Formato PKCS12
 cert_pkcs7=Formato PKCS7
-cert_also=También usado por los dominios
 cert_edownload=Ningún certificado SSL encontrado!
 cert_edownload2=No se encontró una llave de SSL!
 cert_eformat=No puedo hacer funcionar el formato de certificado requerido
@@ -2150,12 +2149,6 @@ cert_chain0=Ninguno necesitado
 cert_esubject=El certificado no parece tener un nombre común
 cert_same=Este servidor virtual comparte el certificado SSL con <tt>$1</tt> por lo que no se puede editar en esta página.
 cert_samelink=Usar <a href='$1'>Administrar certificado SSL</a> para cambiar la configuración de SSL.
-cert_already=Este certificado de SSL ya está siendo usado por : $1
-cert_already_webmin=Webmin
-cert_already_usermin=Usermin
-cert_already_postfix=Postfix
-cert_already_dovecot=Dovecot
-cert_already_proftpd=ProFTPD
 cert_copy=Copiar a Webmin
 cert_copydesc=Utilizar este certificado en Webmin , para que se le presente al administrador principal y a los dueños de dominio accediendo a la interfaz de usuario web Virtualmin en el puerto $1.
 cert_ucopy=Copiar a Usermin
@@ -3575,7 +3568,6 @@ s3_elist=Falla al listar S3 buckets : $1
 s3_ecreate=Falla al crear S3 bucket : $1
 s3_einfo=Falla al subir archivo de información : $1
 s3_elist2=Falla al listar S3 bucket : $1
-
 tdelete_err=Falla al borrar templates
 tdelete_enone=Ninguno seleccionado
 tdelete_users2=Están siendo usados por servidores virtuales : $1
