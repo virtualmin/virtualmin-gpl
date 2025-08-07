@@ -4573,11 +4573,11 @@ else {
 }
 
 # show_backup_destination(name, value, no-local, [&domain], [no-download],
-#			  [no-upload], [show-remove-option])
+#			  [no-upload], [show-remove-option], [&opts])
 # Returns HTML for fields for selecting a local or FTP file
 sub show_backup_destination
 {
-local ($name, $value, $nolocal, $d, $nodownload, $noupload, $remove) = @_;
+local ($name, $value, $nolocal, $d, $nodownload, $noupload, $remove, $opts) = @_;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($value);
 $mode = 1 if (!$value && $nolocal);	# Default to FTP
 local $defport = $mode == 1 ? 21 :
@@ -4595,13 +4595,25 @@ if ($remove) {
 
 if ($d && $d->{'dir'}) {
 	# Limit local file to under virtualmin-backups
-	local $bdir = "$d->{'home'}/$home_virtualmin_backup";
+	my $user_backup_dir = $home_virtualmin_backup;
+	if ($opts && $opts->{'backup_plugin'} &&
+	    &plugin_defined($opts->{'backup_plugin'}, 'feature_backup_dir')) {
+		my $user_backup_plugin_dir = &plugin_call(
+			$opts->{'backup_plugin'}, 'feature_backup_dir',
+			$opts->{'backup_plugin_dir_name'});
+		$user_backup_dir = $user_backup_plugin_dir
+			if ($user_backup_plugin_dir =~ /^\S+$/ && 
+			    $user_backup_plugin_dir !~ /\//);
+		}
+	local $bdir = "$d->{'home'}/$user_backup_dir";
 	$bdir =~ s/\.\///g;	# Fix /./ in directory path
-	push(@opts, [ 0, $text{'backup_mode0a'},
+	my $file_chooser = &file_chooser_button($name."_file", 0, 0, $bdir);
+	$file_chooser = '' if ($opts && $opts->{'opts'} &&
+			       $opts->{'opts'}{'no_file_chooser'});
+	push(@opts, [ 0, &text('backup_mode0a', $user_backup_dir),
 	       &ui_textbox($name."_file",
-		  $mode == 0 && $path =~ /\Q$home_virtualmin_backup\E\/(.*)$/ ? $1 : "",
-		  50)." ".
-	       &file_chooser_button($name."_file", 0, 0, $bdir)."<br>\n" ]);
+		  $mode == 0 && $path =~ /\Q$user_backup_dir\E\/(.*)$/ ? $1 : "",
+		  50)." ".$file_chooser."<br>\n" ]);
 	}
 elsif (!$nolocal) {
 	# Local file field (can be anywhere)
@@ -4819,7 +4831,16 @@ if ($mode == 0 && $d) {
 	$in{$name."_file"} =~ /\.\./ && &error($text{'backup_edest3'});
 	$in{$name."_file"} =~ s/\/+$//;
 	$in{$name."_file"} =~ s/^\/+//;
-	return "$d->{'home'}/$home_virtualmin_backup/".$in{$name."_file"};
+	my $user_backup_dir = $home_virtualmin_backup;
+	if ($in{'backup_plugin'} &&
+	    &plugin_defined($in{'backup_plugin'}, 'feature_backup_dir')) {
+		my $user_backup_plugin_dir = &plugin_call($in{'backup_plugin'},
+			'feature_backup_dir', $in{'backup_plugin_dir_name'});
+		$user_backup_dir = $user_backup_plugin_dir
+			if ($user_backup_plugin_dir =~ /^\S+$/ && 
+			    $user_backup_plugin_dir !~ /\//);
+		}
+	return "$d->{'home'}/$user_backup_dir/".$in{$name."_file"};
 	}
 elsif ($mode == 0 && !$nolocal) {
 	# Any local file
