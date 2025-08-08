@@ -47,5 +47,4 @@ else {
 	&error("No button clicked");
 	}
 
-&redirect("list_sched.cgi");
-
+&redirect($in{'return'} || "list_sched.cgi");
