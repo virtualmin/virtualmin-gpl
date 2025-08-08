@@ -2705,6 +2705,7 @@ backup_edoms=No domains selected to backup
 backup_efeatures=No features selected to backup
 backup_eonebyone1=The option to transfer each server after it is backed up can only be used with remote backups
 backup_eonebyone2=The option to transfer each server after it is backed up can only be used with new-format backups
+backup_eplugin_domain=You are not allowed to back up this domain
 backup_edest=Missing or invalid absolute local file
 backup_edest2=Missing or invalid backup file
 backup_edest3=Backup file path cannot use ..

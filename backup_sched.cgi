@@ -25,8 +25,21 @@ if ($in{'clone'}) {
 	return;
 	}
 
-# Work out the current user's main domain, if needed
-if ($cbmode == 2) {
+# Plugin can enforce domain, if domain is allowed for this user
+if ($in{'backup_plugin'} && $in{'backup_plugin_domain'} &&
+    &plugin_defined($in{'backup_plugin'}, 'feature_can_domain')) {
+	my $plugin_d = &plugin_call($in{'backup_plugin'},
+		'feature_can_domain', $in{'backup_plugin_domain'});
+	if (!$plugin_d) {
+		&error($text{'backup_eplugin_domain'});
+		}
+	$d = $plugin_d;
+	$sched->{'owner'} = $d->{'parent'} 
+		? &get_domain($d->{'parent'})->{'user'}
+		: $d->{'user'};
+	}
+elsif ($cbmode == 2) {
+	# Work out the current user's main domain, if needed
 	$d = &get_domain_by_user($base_remote_user);
 	}
 elsif ($cbmode == 3 && $in{'dest_mode'} == 0 && !$in{'new'}) {
@@ -204,6 +217,9 @@ else {
 			&error($text{'backup_einconly'});
 			}
 		}
+
+	# Bind this scheduled backup to a plugin
+	$sched->{'bind_plugin'} = $in{'bind_plugin'} if ($in{'bind_plugin'});
 
 	# Save the schedule and thus the cron job
 	&save_scheduled_backup($sched);
