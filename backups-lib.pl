@@ -95,6 +95,14 @@ foreach my $j (@jobs) {
 return @rv;
 }
 
+# list_visible_scheduled_backups
+# Returns a list of all scheduled backups that should be visible except
+# those created by plugins
+sub list_visible_scheduled_backups
+{
+return grep { !$_->{'bind_plugin'} } &list_scheduled_backups();
+}
+
 # save_scheduled_backup(&backup)
 # Create or update a scheduled backup. Also creates any needed cron job.
 sub save_scheduled_backup

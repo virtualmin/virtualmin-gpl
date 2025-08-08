@@ -5,7 +5,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $cbmode = &can_backup_domain();
 $cbmode || &error($text{'backup_ecannot'});
-@scheds = grep { &can_backup_sched($_) } &list_scheduled_backups();
+@scheds = grep { &can_backup_sched($_) } &list_visible_scheduled_backups();
 
 # Work out the current user's main domain, if needed
 if ($cbmode == 2) {

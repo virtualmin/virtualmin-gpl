@@ -7,7 +7,7 @@ require './virtual-server-lib.pl';
 &can_backup_domain() || &error($text{'backup_ecannot'});
 &ui_print_header(undef, $text{'sched_title'}, "", "sched");
 
-@scheds = &list_scheduled_backups();
+@scheds = &list_visible_scheduled_backups();
 @scheds = grep { &can_backup_sched($_) } @scheds;
 
 # Work out what to show
