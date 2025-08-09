@@ -35,8 +35,8 @@ if ($in{'backup_plugin'} && $in{'backup_plugin_domain'} &&
 		}
 	$d = $plugin_d;
 	$sched->{'owner'} = $d->{'parent'} 
-		? &get_domain($d->{'parent'})->{'user'}
-		: $d->{'user'};
+		? &get_domain($d->{'parent'})->{'id'}
+		: $d->{'id'};
 	}
 elsif ($cbmode == 2) {
 	# Work out the current user's main domain, if needed
