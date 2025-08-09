@@ -15,7 +15,8 @@ if ($in{'oneoff'} || $in{'bg'}) {
 
 if ($in{'bg'}) {
 	# Background backup of previous scheduled request .. launch it
-	&ui_print_unbuffered_header(undef, $text{'backup_title'}, "");
+	&ui_print_unbuffered_header(undef, $text{'backup_title'}, "",
+				    undef, undef, $in{'return'});
 
 	@dests = &get_scheduled_backup_dests($sched);
 	$nice = join(", ", map { &nice_backup_url($_) } @dests);
@@ -31,7 +32,8 @@ if ($in{'bg'}) {
 		&$second_print($text{'backup_started2'});
 		}
 
-	&ui_print_footer("/$module_name/list_sched.cgi", $text{'sched_return'});
+	&ui_print_footer($in{'return'} || 
+			 "/$module_name/list_sched.cgi", $text{'sched_return'});
 	exit;
 	}
 
@@ -226,7 +228,8 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 		}
 	else {
 		# Show backup progress
-		&ui_print_unbuffered_header(undef, $text{'backup_title'}, "");
+		&ui_print_unbuffered_header(undef, $text{'backup_title'}, "",
+					    undef, undef, $in{'return'});
 		}
 	($ok, $size) = &backup_domains([ $temp ], \@doms, \@do_features,
 				       $in{'fmt'}, $in{'errors'}, \%options,
@@ -244,7 +247,8 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 			&error($text{'backup_edownloadfailed'});
 			}
 		else {
-			&ui_print_footer("/$module_name/list_sched.cgi",
+			&ui_print_footer($in{'return'} ||
+						"/$module_name/list_sched.cgi",
 					 $text{'sched_return'});
 			}
 		}
@@ -270,12 +274,14 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 				&urlize($temp),
 			       &text('backup_downloadfile', $tempfile) . " ($fsizen)" ),
 		      "</b><p>\n";
-		&ui_print_footer("/$module_name/list_sched.cgi",
+		&ui_print_footer($in{'return'} ||
+					"/$module_name/list_sched.cgi",
 				 $text{'sched_return'});
 		}
 	}
 else {
-	&ui_print_unbuffered_header(undef, $text{'backup_title'}, "");
+	&ui_print_unbuffered_header(undef, $text{'backup_title'}, "",
+				    undef, undef, $in{'return'});
 
 	# Run any before command
 	$start_time = time();
@@ -364,7 +370,9 @@ else {
 		      'failed' => !$ok,
 		      'sched' => 0, });
 
-	&ui_print_footer("/$module_name/list_sched.cgi", $text{'sched_return'});
+	&ui_print_footer($in{'return'} ||
+				"/$module_name/list_sched.cgi",
+			 $text{'sched_return'});
 	}
 
 # Flag backup as done
