@@ -4624,7 +4624,11 @@ if ($d && $d->{'dir'}) {
 			       $sched->{'opts'}{'no_file_chooser'});
 	push(@opts, [ 0, &text('backup_mode0a', $user_backup_dir),
 	       &ui_textbox($name."_file",
-		  $mode == 0 && $path =~ /\Q$user_backup_dir\E\/(.*)$/ ? $1 : "",
+		  (!$sched || !$sched->{'strftime'} ||
+		   $sched->{'strftime'} && $sched->{'dest'} !~ /\%/) &&
+		  $mode == 0 && $path =~ /\Q$user_backup_dir\E\/(.*)$/
+		  	? $1
+			: "",
 		  50)." ".$file_chooser."<br>\n$bind_plugin" ]);
 	}
 elsif (!$nolocal) {
