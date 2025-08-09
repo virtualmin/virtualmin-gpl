@@ -4604,10 +4604,10 @@ if ($remove) {
 if ($d && $d->{'dir'}) {
 	# Limit local file to under virtualmin-backups
 	my $user_backup_dir = $home_virtualmin_backup;
-	if ($opts && $opts->{'backup_plugin'} &&
-	    &plugin_defined($opts->{'backup_plugin'}, 'feature_backup_dir')) {
+	if ($opts && $opts->{'bind_plugin'} &&
+	    &plugin_defined($opts->{'bind_plugin'}, 'feature_backup_dir')) {
 		my $user_backup_plugin_dir = &plugin_call(
-			$opts->{'backup_plugin'}, 'feature_backup_dir',
+			$opts->{'bind_plugin'}, 'feature_backup_dir',
 			$opts->{'backup_plugin_dir_name'});
 		$user_backup_dir = $user_backup_plugin_dir
 			if ($user_backup_plugin_dir =~ /^\S+$/ && 
@@ -4840,9 +4840,9 @@ if ($mode == 0 && $d) {
 	$in{$name."_file"} =~ s/\/+$//;
 	$in{$name."_file"} =~ s/^\/+//;
 	my $user_backup_dir = $home_virtualmin_backup;
-	if ($in{'backup_plugin'} &&
-	    &plugin_defined($in{'backup_plugin'}, 'feature_backup_dir')) {
-		my $user_backup_plugin_dir = &plugin_call($in{'backup_plugin'},
+	if ($in{'bind_plugin'} &&
+	    &plugin_defined($in{'bind_plugin'}, 'feature_backup_dir')) {
+		my $user_backup_plugin_dir = &plugin_call($in{'bind_plugin'},
 			'feature_backup_dir', $in{'backup_plugin_dir_name'});
 		$user_backup_dir = $user_backup_plugin_dir
 			if ($user_backup_plugin_dir =~ /^\S+$/ && 

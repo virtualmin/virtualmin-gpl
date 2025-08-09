@@ -85,8 +85,18 @@ if ($in{'reseller'} && !$in{'reseller_def'} && &can_edit_resellers()) {
 	@doms = grep { $_->{'reseller'} && $resels{$_->{'reseller'}} } @doms;
 	}
 
-# Work out the current user's main domain, if needed
-if ($cbmode == 2) {
+# Plugin can enforce domain, if domain is allowed for this user
+if ($in{'bind_plugin'} &&
+    &plugin_defined($in{'bind_plugin'}, 'feature_can_domain')) {
+	my ($plugin_d, $plugin_cbmode) =
+		&plugin_call($in{'bind_plugin'},
+				 'feature_can_domain', $in{'doms'});
+	&error($text{'backup_eplugin_domain'}) if (!$plugin_d);
+	$d = $plugin_d;
+	$cbmode = $plugin_cbmode;
+	}
+elsif ($cbmode == 2) {
+	# Work out the current user's main domain, if needed
 	$d = &get_domain_by_user($base_remote_user);
 	}
 elsif ($cbmode == 3 && $in{'dest_mode'} == 0) {
