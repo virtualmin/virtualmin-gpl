@@ -74,7 +74,8 @@ if ($in{'log'}) {
 else {
 	# Can select restore source
 	print &ui_table_row($text{'restore_src'},
-		&show_backup_destination("src", $dest, $crmode == 2, $d, 1, 0));
+		&show_backup_destination("src", $dest, $crmode == 2, $d, 1, 0,
+					 undef, $sched));
 	}
 
 # Show decryption key field
