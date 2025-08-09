@@ -4581,11 +4581,12 @@ else {
 }
 
 # show_backup_destination(name, value, no-local, [&domain], [no-download],
-#			  [no-upload], [show-remove-option], [&opts])
+#			  [no-upload], [show-remove-option], [&plugin-opts])
 # Returns HTML for fields for selecting a local or FTP file
 sub show_backup_destination
 {
-local ($name, $value, $nolocal, $d, $nodownload, $noupload, $remove, $opts) = @_;
+local ($name, $value, $nolocal, $d, $nodownload, $noupload, $remove,
+       $plugin_opts) = @_;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($value);
 $mode = 1 if (!$value && $nolocal);	# Default to FTP
 local $defport = $mode == 1 ? 21 :
@@ -4605,21 +4606,22 @@ if ($d && $d->{'dir'}) {
 	# Limit local file to under virtualmin-backups
 	my $user_backup_dir = $home_virtualmin_backup;
 	my $bind_plugin = "";
-	if ($opts && $opts->{'bind_plugin'} &&
-	    &plugin_defined($opts->{'bind_plugin'}, 'feature_backup_dir')) {
+	if ($plugin_opts && $plugin_opts->{'bind_plugin'} &&
+	    &plugin_defined($plugin_opts->{'bind_plugin'},
+	    		    'feature_backup_dir')) {
 		my $user_backup_plugin_dir = &plugin_call(
-			$opts->{'bind_plugin'}, 'feature_backup_dir');
+			$plugin_opts->{'bind_plugin'}, 'feature_backup_dir');
 		$user_backup_dir = $user_backup_plugin_dir
 			if ($user_backup_plugin_dir =~ /^\S+$/ && 
 			    $user_backup_plugin_dir !~ /\//);
 		$bind_plugin = &ui_hidden('bind_plugin',
-					  $opts->{'bind_plugin'});
+					  $plugin_opts->{'bind_plugin'});
 		}
 	local $bdir = "$d->{'home'}/$user_backup_dir";
 	$bdir =~ s/\.\///g;	# Fix /./ in directory path
 	my $file_chooser = &file_chooser_button($name."_file", 0, 0, $bdir);
-	$file_chooser = '' if ($opts && $opts->{'opts'} &&
-			       $opts->{'opts'}{'no_file_chooser'});
+	$file_chooser = '' if ($plugin_opts && $plugin_opts->{'opts'} &&
+			       $plugin_opts->{'opts'}{'no_file_chooser'});
 	push(@opts, [ 0, &text('backup_mode0a', $user_backup_dir),
 	       &ui_textbox($name."_file",
 		  $mode == 0 && $path =~ /\Q$user_backup_dir\E\/(.*)$/ ? $1 : "",
