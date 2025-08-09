@@ -4608,8 +4608,7 @@ if ($d && $d->{'dir'}) {
 	if ($opts && $opts->{'bind_plugin'} &&
 	    &plugin_defined($opts->{'bind_plugin'}, 'feature_backup_dir')) {
 		my $user_backup_plugin_dir = &plugin_call(
-			$opts->{'bind_plugin'}, 'feature_backup_dir',
-			$opts->{'backup_plugin_dir_name'});
+			$opts->{'bind_plugin'}, 'feature_backup_dir');
 		$user_backup_dir = $user_backup_plugin_dir
 			if ($user_backup_plugin_dir =~ /^\S+$/ && 
 			    $user_backup_plugin_dir !~ /\//);
