@@ -4604,6 +4604,7 @@ if ($remove) {
 if ($d && $d->{'dir'}) {
 	# Limit local file to under virtualmin-backups
 	my $user_backup_dir = $home_virtualmin_backup;
+	my $bind_plugin = "";
 	if ($opts && $opts->{'bind_plugin'} &&
 	    &plugin_defined($opts->{'bind_plugin'}, 'feature_backup_dir')) {
 		my $user_backup_plugin_dir = &plugin_call(
@@ -4612,6 +4613,8 @@ if ($d && $d->{'dir'}) {
 		$user_backup_dir = $user_backup_plugin_dir
 			if ($user_backup_plugin_dir =~ /^\S+$/ && 
 			    $user_backup_plugin_dir !~ /\//);
+		$bind_plugin = &ui_hidden('bind_plugin',
+					  $opts->{'bind_plugin'});
 		}
 	local $bdir = "$d->{'home'}/$user_backup_dir";
 	$bdir =~ s/\.\///g;	# Fix /./ in directory path
@@ -4621,7 +4624,7 @@ if ($d && $d->{'dir'}) {
 	push(@opts, [ 0, &text('backup_mode0a', $user_backup_dir),
 	       &ui_textbox($name."_file",
 		  $mode == 0 && $path =~ /\Q$user_backup_dir\E\/(.*)$/ ? $1 : "",
-		  50)." ".$file_chooser."<br>\n" ]);
+		  50)." ".$file_chooser."<br>\n$bind_plugin" ]);
 	}
 elsif (!$nolocal) {
 	# Local file field (can be anywhere)
