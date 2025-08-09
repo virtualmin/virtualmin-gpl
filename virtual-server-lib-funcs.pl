@@ -21526,6 +21526,27 @@ return undef if (!defined(&$dfunc));
 return &$dfunc();
 }
 
+# split_path_file(path)
+# Splits a path into directory and file parts
+sub split_path_file
+{
+my ($path) = @_;
+return ('', '') unless (defined $path && length $path);
+my $p = $path;
+if ($p =~ m{[\\/]\z} && $p !~ m{\A(?:[A-Za-z]:)?[\\/]\z}) {
+	$p =~ s{[\\/]+\z}{};
+	return ($p, '');
+	}
+(my $trim = $p) =~ s{[\\/]+\z}{};
+if ($trim =~ m{^(.*?)[\\/]+([^/\\]+)\z}) {
+	my ($dir, $file) = ($1, $2);
+	return ($dir, $file);
+	}
+else {
+	return ('', $trim);
+	}
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

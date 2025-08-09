@@ -262,3 +262,4 @@ allow_numbers=0
 mail_mta_sts=0
 dns_default_ip4=8.8.8.8
 dns_default_ip6=2001:4860:4860::8888
+filepath_trunc=32

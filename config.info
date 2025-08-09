@@ -169,6 +169,7 @@ aws_cmd=Full path to <tt>aws</tt> command for S3 operations,3,Find automatically
 b2_cmd=Full path to <tt>b2</tt> command for Backblaze,3,Find automatically
 delete_logs=Remove logs when deleting scheduled backups?,1,1-Yes,0-No
 home_backup=Users' backup directory under home,0
+filepath_trunc=Backup file path length limit,3,No limit
 
 line9=PHP options,11
 fcgid_max=Maximum fcgid execution time,10,-From PHP configuration,*-Don't set,Time in seconds
