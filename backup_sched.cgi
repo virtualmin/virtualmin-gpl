@@ -30,9 +30,7 @@ if ($in{'backup_plugin'} && $in{'backup_plugin_domain'} &&
     &plugin_defined($in{'backup_plugin'}, 'feature_can_domain')) {
 	my $plugin_d = &plugin_call($in{'backup_plugin'},
 		'feature_can_domain', $in{'backup_plugin_domain'});
-	if (!$plugin_d) {
-		&error($text{'backup_eplugin_domain'});
-		}
+	&error($text{'backup_eplugin_domain'}) if (!$plugin_d);
 	$d = $plugin_d;
 	$sched->{'owner'} = $d->{'parent'} 
 		? &get_domain($d->{'parent'})->{'id'}
