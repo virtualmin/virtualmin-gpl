@@ -4450,7 +4450,10 @@ sub nice_backup_url
 {
 local ($url, $caps) = @_;
 local ($proto, $user, $pass, $host, $path, $port) = &parse_backup_url($url);
-if ($main::webmin_script_type eq 'web' &&
+if ($main::webmin_script_type eq 'web' && $config{'filepath_trunc'} == -1) {
+	$path = "";
+	}
+elsif ($main::webmin_script_type eq 'web' &&
     $path && $config{'filepath_trunc'} &&
     length($path) > $config{'filepath_trunc'}) {
 	my ($pdir, $pfile) = &split_path_file($path);
