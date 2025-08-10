@@ -4624,8 +4624,7 @@ if ($d && $d->{'dir'}) {
 			if ($user_backup_plugin_dir =~ /^\S+$/ && 
 			    $user_backup_plugin_dir !~ /\//);
 		$bind_plugin = &ui_hidden('bind_plugin', $sched->{'bind_plugin'})
-			if ($name eq 'src' ||
-			    ($name =~ /^dest(\d+)\z/ && $1 == 0));
+			if ($name =~ /\A(?:src|dest0)\z/);
 		}
 	local $bdir = "$d->{'home'}/$user_backup_dir";
 	$bdir =~ s/\.\///g;	# Fix /./ in directory path
