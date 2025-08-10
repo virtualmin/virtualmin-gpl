@@ -28,6 +28,7 @@ name_max=Maximum domain name length to display,0,5
 name_mode=Shorten long domain names at,1,1-End,0-Middle
 index_cols=Columns to show,2,dom-Domain name,type-Domain type,user-Username,owner-Description,emailto-Email address<br>,reseller-Reseller,admins-Extra admins,users-User count,aliases-Alias count<br>,quota-Disk quota,uquota-Quota used,created-Creation date,plan-Account plan,phpv-PHP version,ip-IP address,ssl_expiry-SSL cert expiry,lastlogin-Last login time
 index_fcols=Feature columns to show,2,web-Website,ssl-SSL website,dns-DNS domain,mail-Email<br>,mysql-MySQL,postgres-PostgreSQL,spam-Spam filtering,virus-Virus filtering<br>,webalizer-Webalizer,webmin-Webmin login
+filepath_trunc=Backup destination display options,10,-1-Show provider name only,-No limit,No more than characters
 show_mailsize=Show mailbox size in users list?,1,1-Yes,0-No
 show_mailuser=Show mailbox size when editing users?,1,1-Yes,0-No
 show_domains_lastlogin=Record most recent user logins?,1,1-Yes,0-No
@@ -169,7 +170,6 @@ aws_cmd=Full path to <tt>aws</tt> command for S3 operations,3,Find automatically
 b2_cmd=Full path to <tt>b2</tt> command for Backblaze,3,Find automatically
 delete_logs=Remove logs when deleting scheduled backups?,1,1-Yes,0-No
 home_backup=Users' backup directory under home,0
-filepath_trunc=Backup file path length limit,10,-No limit,-1-Do not show at all,No more than characters
 
 line9=PHP options,11
 fcgid_max=Maximum fcgid execution time,10,-From PHP configuration,*-Don't set,Time in seconds

@@ -4450,8 +4450,9 @@ sub nice_backup_url
 {
 local ($url, $caps) = @_;
 local ($proto, $user, $pass, $host, $path, $port) = &parse_backup_url($url);
+my $name_only;
 if ($main::webmin_script_type eq 'web' && $config{'filepath_trunc'} == -1) {
-	$path = "";
+	$name_only = 1;
 	}
 elsif ($main::webmin_script_type eq 'web' &&
     $path && $config{'filepath_trunc'} &&
@@ -4461,25 +4462,49 @@ elsif ($main::webmin_script_type eq 'web' &&
 	}
 local $rv;
 if ($proto == 1) {
-	$rv = &text('backup_niceftp', "<tt>$path</tt>", "<tt>$host</tt>");
+	if ($name_only) {
+		$rv = $text{'backup_niceftpt'};
+		}
+	else {
+		$rv = &text('backup_niceftp', "<tt>$path</tt>", "<tt>$host</tt>");
+		}
 	}
 elsif ($proto == 2) {
-	$rv = &text('backup_nicescp', "<tt>$path</tt>", "<tt>$host</tt>");
+	if ($name_only) {
+		$rv = $text{'backup_nicescpt'};
+		}
+	else {
+		$rv = &text('backup_nicescp', "<tt>$path</tt>", "<tt>$host</tt>");
+		}
 	}
 elsif ($proto == 3) {
-	my $s3 = $user ? &get_s3_account($user) : &get_default_s3_account();
-	my $desc = $s3 ? $s3->{'desc'} ||
-			 &text('backup_nices3akey',
-				substr($s3->{'access'}, 0, 3)."***") : undef;
-	$desc ||= &text('backup_nices3akey', $user) if ($user);
-	$desc ||= $text{'backup_nices3unknown'};
-	$rv = $path ?
-		&text('backup_nices3pa',
-		      "<tt>$host</tt>", "<tt>$path</tt>", $desc) :
-		&text('backup_nices3a', "<tt>$host</tt>", $desc);
+	if ($name_only) {
+		$rv = $text{'backup_nices3at'};
+		}
+	else {
+		my $s3 = $user
+			? &get_s3_account($user)
+			: &get_default_s3_account();
+		my $desc = $s3
+			? $s3->{'desc'} ||
+				&text('backup_nices3akey',
+				      substr($s3->{'access'}, 0, 3)."***")
+			: undef;
+		$desc ||= &text('backup_nices3akey', $user) if ($user);
+		$desc ||= $text{'backup_nices3unknown'};
+		$rv = $path ?
+			&text('backup_nices3pa',
+			"<tt>$host</tt>", "<tt>$path</tt>", $desc) :
+			&text('backup_nices3a', "<tt>$host</tt>", $desc);
+		}
 	}
 elsif ($proto == 0) {
-	$rv = &text('backup_nicefile', "<tt>$path</tt>");
+	if ($name_only) {
+		$rv = $text{'backup_nicefilet'};
+		}
+	else {
+		$rv = &text('backup_nicefile', "<tt>$path</tt>");
+		}
 	}
 elsif ($proto == 4) {
 	$rv = $text{'backup_nicedownload'};
@@ -4491,46 +4516,89 @@ elsif ($proto == 5) {
 	$rv = $text{'backup_niceupload'};
 	}
 elsif ($proto == 6) {
-	$rv = $path ?
-		&text('backup_nicersp', "<tt>$host</tt>", "<tt>$path</tt>") :
-		&text('backup_nicers', "<tt>$host</tt>");
+	if ($name_only) {
+		$rv = $text{'backup_nicerst'};
+		}
+	else {	
+		$rv = $path
+			? &text('backup_nicersp', "<tt>$host</tt>",
+				"<tt>$path</tt>")
+			: &text('backup_nicers', "<tt>$host</tt>");
+		}
 	}
 elsif ($proto == 7) {
-	$rv = $path ?
-		&text('backup_nicegop', "<tt>$host</tt>", "<tt>$path</tt>") :
-		&text('backup_nicego', "<tt>$host</tt>");
+	if ($name_only) {
+		$rv = $text{'backup_nicegot'};
+		}
+	else {
+		$rv = $path
+			? &text('backup_nicegop', "<tt>$host</tt>",
+				"<tt>$path</tt>")
+			: &text('backup_nicego', "<tt>$host</tt>");
+		}
 	}
 elsif ($proto == 8) {
-	$rv = $path ?
-		&text('backup_nicedbp', "<tt>$host</tt>", "<tt>$path</tt>") :
-		&text('backup_nicedb', "<tt>$host</tt>");
+	if ($name_only) {
+		$rv = $text{'backup_nicedbt'};
+		}
+	else {
+		$rv = $path
+			? &text('backup_nicedbp', "<tt>$host</tt>",
+				"<tt>$path</tt>")
+			: &text('backup_nicedb', "<tt>$host</tt>");
+		}
 	}
 elsif ($proto == 9) {
-	$rv = &text('backup_nicewebmin', "<tt>$path</tt>", "<tt>$host</tt>");
+	if ($name_only) {
+		$rv = $text{'backup_nicewebmint'};
+		}
+	else {
+		$rv = &text('backup_nicewebmin', "<tt>$path</tt>",
+			   "<tt>$host</tt>");
+		}
 	}
 elsif ($proto == 10) {
-	$rv = $path ?
-		&text('backup_nicebbp', "<tt>$host</tt>", "<tt>$path</tt>") :
-	      $host ?
-		&text('backup_nicebb', "<tt>$host</tt>") :
-		&text('backup_nicebbt');
+	if ($name_only) {
+		$rv = $text{'backup_nicebbn'};
+		}
+	else {
+		$rv = $path
+			? &text('backup_nicebbp', "<tt>$host</tt>",
+				"<tt>$path</tt>")
+			: $host
+				? &text('backup_nicebb', "<tt>$host</tt>")
+				: &text('backup_nicebbt');
+		}
 	}
 elsif ($proto == 11) {
-	$rv = $path ?
-		&text('backup_niceazp', "<tt>$host</tt>", "<tt>$path</tt>") :
-		&text('backup_niceaz', "<tt>$host</tt>");
+	if ($name_only) {
+		$rv = $text{'backup_niceazt'};
+		}
+	else {
+		$rv = $path
+			? &text('backup_niceazp', "<tt>$host</tt>",
+				"<tt>$path</tt>")
+			: &text('backup_niceaz', "<tt>$host</tt>");
+		}
 	}
 elsif ($proto == 12) {
-	$rv = $path ?
-		&text('backup_nicedrivep', "<tt>$host</tt>", "<tt>$path</tt>") :
-	      $host ?
-		&text('backup_nicedrive', "<tt>$host</tt>") :
-		&text('backup_nicedrivet');
+	if ($name_only) {
+		$rv = $text{'backup_nicedrivet'};
+		}
+	else {
+		$rv = $path
+			? &text('backup_nicedrivep', "<tt>$host</tt>",
+				"<tt>$path</tt>")
+			: $host
+				? &text('backup_nicedrive', "<tt>$host</tt>")
+				: &text('backup_nicedrivet');
+		}
 	}
 else {
 	$rv = $url;
 	}
-if ($caps && (!$current_lang_info->{'charset'} || $current_lang =~ /^en/) &&
+if (!$name_only && $caps &&
+    (!$current_lang_info->{'charset'} || $current_lang =~ /^en/) &&
     $rv ne $url) {
 	# Make first letter upper case
 	$rv = ucfirst($rv);
