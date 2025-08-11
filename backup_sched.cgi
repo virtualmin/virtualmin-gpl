@@ -186,7 +186,10 @@ else {
 	if (&can_backup_virtualmin()) {
 		$sched->{'virtualmin'} = join(" ", @vbs);
 		}
-	$sched->{'enabled'} = $in{'enabled'};
+	$sched->{enabled} =
+		defined $in{enable_schedule}  ? 1 :
+		defined $in{disable_schedule} ? 0 :
+		$in{enabled};
 	$sched->{'kill'} = $in{'kill'};
 	if (&master_admin()) {
 		if ($in{'ownrestore'} && !$key) {
