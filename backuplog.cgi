@@ -134,7 +134,7 @@ if ($in{'search'}) {
 	}
 elsif ($in{'sched'}) {
 	@dests = &get_scheduled_backup_dests($sched);
-	@nices = map { &nice_backup_url($_, 1) } @dests;
+	@nices = map { &nice_backup_url($_, 1, 1) } @dests;
 	my $msg = &text('backuplog_sched', "<tt>$nices[0]</tt>");
 	print &ui_alert_box($msg, 'info', undef, undef, '');
 	}
@@ -163,7 +163,7 @@ if (@logs) {
 		push(@table, [
 			"<a href='view_backuplog.cgi?id=".&urlize($log->{'id'}).
 			 "&search=".&urlize($in{'search'})."'>".
-			 &nice_backup_url($log->{'dest'}, 1)."</a>",
+			 &nice_backup_url($log->{'dest'}, 1, 1)."</a>",
 			$ddesc,
 			$hasdesc ? ( &html_escape($log->{'desc'}) ) : ( ),
 		        $log->{'user'} || "<i>root</i>",
