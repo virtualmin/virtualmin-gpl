@@ -226,7 +226,8 @@ foreach $dest (@strfdests) {
 			  $size, $ok, "sched", $output, $errdoms,
 			  $asd ? $asd->{'user'} : undef, $key, $sched->{'id'},
 			  $sched->{'fmt'}, $sched->{'ownrestore'},
-			  $sched->{'compression'}, $sched->{'desc'});
+			  $sched->{'compression'}, $sched->{'desc'},
+			  $sched->{'bind_plugin'});
 	}
 
 PREFAILED:
