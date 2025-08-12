@@ -44,16 +44,12 @@ return ( 5 );
 
 sub script_tikiwiki_php_modules
 {
-local ($d, $ver, $phpver, $opts) = @_;
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local @rv = $dbtype eq "mysql" ? ("mysql") : ("pgsql");
-push(@rv, "xml", "intl", "zip", "gd", "mbstring");
-return @rv;
+return ("mysql", "xml", "intl", "zip", "gd", "mbstring");
 }
 
 sub script_tikiwiki_dbs
 {
-return ("mysql", "postgres");
+return ("mysql");
 }
 
 # script_tikiwiki_php_fullver(&domain, version, &sinfo)
@@ -100,7 +96,7 @@ if ($upgrade) {
 	}
 else {
 	# Show editable install options
-	local @dbs = &domain_databases($d, [ "mysql", "postgres" ]);
+	local @dbs = &domain_databases($d, [ "mysql" ]);
 	$rv .= &ui_table_row("Database for TikiWiki tables",
 		     &ui_database_select("db", undef, \@dbs, $d, "tikiwiki"));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",

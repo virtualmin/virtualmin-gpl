@@ -25,15 +25,16 @@ if ($in{'clone'}) {
 	return;
 	}
 
-# Plugin can enforce domain, if domain is allowed for this user
+# Plugin can enforce a domain if the domain is allowed when the user is a
+# master admin or when passes ACL access check otherwise (owner/reseller)
 if ($in{'bind_plugin'} &&
     &plugin_defined($in{'bind_plugin'}, 'feature_can_domain')) {
 	my ($plugin_d, $plugin_cbmode) =
-		&plugin_call($in{'bind_plugin'},
-				 'feature_can_domain', $in{'doms'});
+		&plugin_call($in{'bind_plugin'}, 'feature_can_domain', \%in);
 	&error($text{'backup_eplugin_domain'}) if (!$plugin_d);
-	$d = $plugin_d;
 	$cbmode = $plugin_cbmode;
+	&error($text{'backup_eplugin_domain'}) if (!$cbmode);
+	$d = $plugin_d;
 	$sched->{'owner'} = $d->{'parent'} 
 		? &get_domain($d->{'parent'})->{'id'}
 		: $d->{'id'};

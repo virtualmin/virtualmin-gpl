@@ -82,7 +82,18 @@ if ($sched->{'reseller'}) {
 	}
 
 # Work out who the schedule is being run for
-if ($sched->{'owner'}) {
+if ($sched->{'bind_plugin'} &&
+    &plugin_defined($sched->{'bind_plugin'}, 'feature_can_domain')) {
+	# Plugin can enforce a domain if the domain is allowed when the user is a
+	# master admin or when passes ACL access check otherwise (owner/reseller)
+	my ($plugin_d, $plugin_cbmode) = &plugin_call($sched->{'bind_plugin'},
+		'feature_can_domain', $sched);
+	$cbmode = $plugin_cbmode;
+	@doms = ();
+	push(@doms, $plugin_d) if ($cbmode);
+	}
+elsif ($sched->{'owner'}) {
+	# Domain owner
 	$asd = &get_domain($sched->{'owner'});
 	$owner = $asd ? $asd->{'user'} : $sched->{'owner'};
 	$cbmode = &can_backup_domain(undef, $owner);
@@ -215,7 +226,8 @@ foreach $dest (@strfdests) {
 			  $size, $ok, "sched", $output, $errdoms,
 			  $asd ? $asd->{'user'} : undef, $key, $sched->{'id'},
 			  $sched->{'fmt'}, $sched->{'ownrestore'},
-			  $sched->{'compression'}, $sched->{'desc'});
+			  $sched->{'compression'}, $sched->{'desc'},
+			  $sched->{'bind_plugin'});
 	}
 
 PREFAILED:

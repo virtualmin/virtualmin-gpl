@@ -106,7 +106,7 @@ if ($log->{'sched'}) {
 			&list_scheduled_backups();
 	if ($sched) {
 		@dests = &get_scheduled_backup_dests($sched);
-		@nices = map { &nice_backup_url($_, 1) } @dests;
+		@nices = map { &nice_backup_url($_, 1, 1) } @dests;
 		print &ui_table_row($text{'viewbackup_sched'},
 			&ui_link("backup_form.cgi?sched=".&urlize($log->{'sched'}), $nices[0]), 3);
 		}

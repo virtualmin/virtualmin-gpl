@@ -4,7 +4,7 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 &can_backup_log() || &error($text{'backuplg_ecannot'});
-&ui_print_header(undef, $text{'backuplog_title'}, "");
+&ui_print_header(undef, $text{'backuplog_title'}, "", 'backup_logs');
 
 # Get backups to list
 $days = $in{'sched'} ? 365 : ($config{'backuplog_days'} || 7);
@@ -23,9 +23,91 @@ if (!@logs) {
 
 # Show search form
 if ($in{'search'}) {
-	@logs = grep { $_->{'user'} eq $in{'search'} ||
-		       $_->{'doms'} =~ /\Q$in{'search'}\E/i ||
-		       $_->{'dest'} =~ /\Q$in{'search'}\E/i } @logs;
+	my $search = $in{'search'} // '';
+	my %by = (
+		user   => sub { ($_[0]{'user'}         // '') =~ /$_[1]/i },
+		domain => sub { ($_[0]{'doms'}         // '') =~ /$_[1]/i },
+		dest   => sub { ($_[0]{'dest'}         // '') =~ /$_[1]/i },
+		desc   => sub { ($_[0]{'desc'}         // '') =~ /$_[1]/i },
+		time   => sub { (&make_date($_[0]{'start'}) // '') =~ /$_[1]/i },
+		type => sub {
+			my $label = $_[0]{increment}
+				? $text{"viewbackup_inc1"}
+				: $text{"viewbackup_inc0"};
+			return $label =~ /$_[1]/i;
+		},
+		size => sub {
+			my ($log) = @_;
+			my $sz = $log->{size} // 0;
+			my @conds;
+			# Parse one or few comparisons: >10M or <1G >512K
+			while ($_[1] =~ /([<>]=?)\s*([0-9]+(?:\.[0-9]+)?)\s*([kmg])?b?/ig) {
+				my ($op, $num, $u) = ($1, $2+0, lc($3 // ''));
+				my $mult = $u eq 'k' ? 1024
+					: $u eq 'm' ? 1024*1024
+					: $u eq 'g' ? 1024*1024*1024
+					: 1;
+				push @conds, [$op, $num * $mult];
+				}
+			
+			return 1 unless (@conds);
+			
+			foreach my $c (@conds) {
+				my ($op, $bytes) = @$c;
+				return 0 if ($op eq '>'  && !($sz >  $bytes));
+				return 0 if ($op eq '>=' && !($sz >= $bytes));
+				return 0 if ($op eq '<'  && !($sz <  $bytes));
+				return 0 if ($op eq '<=' && !($sz <= $bytes));
+				}
+			return 1;
+			},
+		status => sub {
+			my $ok   = $_[0]{'ok'} // 0;
+			my $errs = $_[0]{'errdoms'};
+			my $key  = $ok ? ($errs ? 'partial' : 'ok') : 'failed';
+			my $txt  = $ok
+				? ($errs
+					? $text{'backuplog_status_partial'}
+					: $text{'backuplog_status_ok'})
+				: $text{'backuplog_status_failed'};
+			lc($_[1]) eq $key || $txt =~ /\Q$_[1]\E/i;
+			},
+		plugin => sub { ($_[0]{'bind_plugin'}  // '') =~ /$_[1]/i },
+	);
+
+	if ($search =~ /[a-z_]+\s*[:=]/i) {
+		# Support multi field terms search separated by commas
+		my @terms = grep length, map { s/^\s+|\s+$//gr }
+					 split /,/, $search;
+
+		# Build anded filters
+		my @filters;
+		foreach my $t (@terms) {
+			next unless $t =~ /\A([a-z_]+)\s*[:=]\s*(.+)\z/i;
+			my ($k, $v) = (lc $1, $2);
+			push @filters, sub {
+				my ($log) = @_;
+				$by{$k} ? $by{$k}->($log, $v) : 0
+				};
+			}
+		if (@filters) {
+			@logs = grep {
+					my $log = $_;
+					my $ok = 1;
+					for my $f (@filters) {
+						$ok &&= $f->($log);
+						last unless ($ok);
+						}
+					$ok;
+				} @logs;
+			}
+		}
+	else {
+		@logs = grep { $_->{'user'} eq $in{'search'} ||
+			       $_->{'doms'} =~ /\Q$in{'search'}\E/i ||
+			       $_->{'dest'} =~ /\Q$in{'search'}\E/i } @logs;
+
+		}
 	}
 elsif ($in{'sched'}) {
 	($sched) = grep { $_->{'id'} eq $in{'sched'} }
@@ -52,7 +134,7 @@ if ($in{'search'}) {
 	}
 elsif ($in{'sched'}) {
 	@dests = &get_scheduled_backup_dests($sched);
-	@nices = map { &nice_backup_url($_, 1) } @dests;
+	@nices = map { &nice_backup_url($_, 1, 1) } @dests;
 	my $msg = &text('backuplog_sched', "<tt>$nices[0]</tt>");
 	print &ui_alert_box($msg, 'info', undef, undef, '');
 	}
@@ -81,7 +163,7 @@ if (@logs) {
 		push(@table, [
 			"<a href='view_backuplog.cgi?id=".&urlize($log->{'id'}).
 			 "&search=".&urlize($in{'search'})."'>".
-			 &nice_backup_url($log->{'dest'}, 1)."</a>",
+			 &nice_backup_url($log->{'dest'}, 1, 1)."</a>",
 			$ddesc,
 			$hasdesc ? ( &html_escape($log->{'desc'}) ) : ( ),
 		        $log->{'user'} || "<i>root</i>",

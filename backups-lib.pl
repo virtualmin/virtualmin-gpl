@@ -4444,19 +4444,18 @@ elsif ($mode == 5) {
 return $rv;
 }
 
-# nice_backup_url(string, [caps-first])
+# nice_backup_url(string, [caps-first], [allow-file-trunc])
 # Converts a backup URL to a nice human-readable format
 sub nice_backup_url
 {
-local ($url, $caps) = @_;
+local ($url, $caps, $ftrunc) = @_;
 local ($proto, $user, $pass, $host, $path, $port) = &parse_backup_url($url);
 my $name_only;
-if ($main::webmin_script_type eq 'web' && $config{'filepath_trunc'} == -1) {
+if ($ftrunc && $config{'filepath_trunc'} == -1) {
 	$name_only = 1;
 	}
-elsif ($main::webmin_script_type eq 'web' &&
-    $path && $config{'filepath_trunc'} &&
-    length($path) > $config{'filepath_trunc'}) {
+elsif ($ftrunc && $path && $config{'filepath_trunc'} &&
+       length($path) > $config{'filepath_trunc'}) {
 	my ($pdir, $pfile) = &split_path_file($path);
 	$path = $pfile || $pdir;
 	}
@@ -4684,8 +4683,7 @@ if ($d && $d->{'dir'}) {
 	my $user_backup_dir = $home_virtualmin_backup;
 	my $bind_plugin = "";
 	if ($sched && $sched->{'bind_plugin'} &&
-	    &plugin_defined($sched->{'bind_plugin'},
-	    		    'feature_backup_dir')) {
+	    &plugin_defined($sched->{'bind_plugin'}, 'feature_backup_dir')) {
 		my $user_backup_plugin_dir = &plugin_call(
 			$sched->{'bind_plugin'}, 'feature_backup_dir');
 		$user_backup_dir = $user_backup_plugin_dir
@@ -4927,8 +4925,8 @@ if ($mode == 0 && $d) {
 	my $user_backup_dir = $home_virtualmin_backup;
 	if ($in{'bind_plugin'} &&
 	    &plugin_defined($in{'bind_plugin'}, 'feature_backup_dir')) {
-		my $user_backup_plugin_dir = &plugin_call($in{'bind_plugin'},
-			'feature_backup_dir', $in{'backup_plugin_dir_name'});
+		my $user_backup_plugin_dir = &plugin_call(
+			$in{'bind_plugin'}, 'feature_backup_dir');
 		$user_backup_dir = $user_backup_plugin_dir
 			if ($user_backup_plugin_dir =~ /^\S+$/ && 
 			    $user_backup_plugin_dir !~ /\//);
@@ -6615,12 +6613,13 @@ return $ok;
 # write_backup_log(&domains, dest, differential?, start, size, ok?,
 # 		   "cgi"|"sched"|"api", output, &errordoms, [user], [&key],
 # 		   [schedule-id], [separate-format], [allow-owner-restore],
-# 		   [compression], [description])
+# 		   [compression], [description], [bind_plugin])
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
 local ($doms, $dest, $increment, $start, $size, $ok, $mode, $output, $errdoms,
-       $user, $key, $schedid, $separate, $ownrestore, $compression, $desc) = @_;
+       $user, $key, $schedid, $separate, $ownrestore, $compression, $desc,
+       $bind_plugin) = @_;
 $compression = $config{'compression'}
 	if (!defined($compression) || $compression eq '');
 if (!-d $backups_log_dir) {
@@ -6642,6 +6641,7 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'separate' => $separate,
 	       'ownrestore' => $ownrestore,
 	       'desc' => $desc,
+	       'bind_plugin' => $bind_plugin,
 	     );
 $main::backup_log_id_count++;
 $log{'id'} = $log{'end'}."-".$$."-".$main::backup_log_id_count;
