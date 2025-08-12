@@ -6874,12 +6874,6 @@ local $owner = $d->{'parent'} ? &get_domain($d->{'parent'})->{'user'}
 local $oldowner = $oldd->{'parent'} ? &get_domain($oldd->{'parent'})->{'user'}
 			            : $oldd->{'user'};
 if ($owner ne $oldowner) {
-	foreach my $sched (&list_scheduled_backups()) {
-		if ($sched->{'owner'} eq $oldowner) {
-			$sched->{'owner'} = $owner;
-			&save_scheduled_backup($sched);
-			}
-		}
 	if (defined(&list_backup_keys)) {
 		foreach my $key (&list_backup_keys()) {
 			if ($key->{'owner'} eq $oldowner) {
