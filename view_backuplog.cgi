@@ -112,7 +112,8 @@ if ($log->{'sched'}) {
 		print &ui_table_row($text{'viewbackup_sched'},
 			&ui_link($plugin_sched.
 				 "backup_form.cgi?sched=".
-				 	&urlize($log->{'sched'}), $nices[0]), 3);
+				 	&urlize($log->{'sched'}),
+					$log->{'desc'} || $nices[0]), 3);
 		}
 	else {
 		print &ui_table_row($text{'viewbackup_sched'},
