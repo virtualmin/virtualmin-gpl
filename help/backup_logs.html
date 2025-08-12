@@ -1,0 +1,62 @@
+<header>Backup Logs</header>
+
+When searching, you can use "field:value" terms to filter backup logs precisely,
+combining multiple field terms with commas.<p>
+
+<table style="table-layout: fixed; width: 100%;">
+        <caption>Supported fields</caption>
+        <thead>
+                <tr>
+                        <th style="width: 15%; padding-right: 5px;">Field</th>
+                        <th style="width: 40%; padding-right: 5px;">Description</th>
+                        <th style="width: 35%; padding-right: 5px;">Example</th>
+                </tr>
+        </thead>
+        <tbody>
+                <tr>
+                        <td><tt>user</tt></td>
+                        <td>match on user</td>
+                        <td><tt>user:^username$</tt></td>
+                </tr>
+                <tr>
+                        <td><tt>domain</tt></td>
+                        <td>match against domain list</td>
+                        <td><tt>domain:^parent.tld</tt></td>
+                </tr>
+                <tr>
+                        <td><tt>dest</tt></td>
+                        <td>match destination path</td>
+                        <td><tt>dest:/path/to/file</tt></td>
+                </tr>
+                <tr>
+                        <td><tt>desc</tt></td>
+                        <td>match schedule description</td>
+                        <td><tt>desc:wild echo</tt></td>
+                </tr>
+                <tr>
+                        <td><tt>time</tt></td>
+                        <td>matches formatted date</td>
+                        <td><tt>time:06:00 PM</tt></td>
+                </tr>
+                <tr>
+                        <td><tt>type</tt></td>
+                        <td><tt>incremental</tt> or <tt>full</tt></td>
+                        <td><tt>type:incremental</tt></td>
+                </tr>
+                <tr>
+                        <td><tt>size</tt></td>
+                        <td>comparisons with units</td>
+                        <td><tt>size:&gt;40m&lt;55m</tt></td>
+                </tr>
+                <tr>
+                        <td><tt>status</tt></td>
+                        <td>check status label text</td>
+                        <td><tt>status:failed</tt></td>
+                </tr>
+                <tr>
+                        <td><tt>plugin</tt></td>
+                        <td>plugin name</td>
+                        <td><tt>plugin:plugin-name</tt></td>
+                </tr>
+        </tbody>
+</table>

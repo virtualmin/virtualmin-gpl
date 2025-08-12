@@ -4,7 +4,7 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 &can_backup_log() || &error($text{'backuplg_ecannot'});
-&ui_print_header(undef, $text{'backuplog_title'}, "");
+&ui_print_header(undef, $text{'backuplog_title'}, "", 'backup_logs');
 
 # Get backups to list
 $days = $in{'sched'} ? 365 : ($config{'backuplog_days'} || 7);
