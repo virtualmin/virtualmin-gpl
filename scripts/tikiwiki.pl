@@ -44,11 +44,7 @@ return ( 5 );
 
 sub script_tikiwiki_php_modules
 {
-local ($d, $ver, $phpver, $opts) = @_;
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local @rv = $dbtype eq "mysql" ? ("mysql") : return undef;
-push(@rv, "xml", "intl", "zip", "gd", "mbstring");
-return @rv;
+return ("mysql", "xml", "intl", "zip", "gd", "mbstring");
 }
 
 sub script_tikiwiki_dbs
@@ -253,8 +249,8 @@ else {
 
 sub script_tikiwiki_db_conn_desc
 {
-my $db_conn_desc =
-    { 'db/local.php' =>
+my $db_conn_desc = 
+    { 'db/local.php' => 
         {
            'dbpass' =>
            {
