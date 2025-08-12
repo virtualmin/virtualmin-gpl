@@ -19,6 +19,7 @@ if ($in{'bg'}) {
 				    undef, undef, $in{'return'});
 
 	@dests = &get_scheduled_backup_dests($sched);
+	@dests = map { &backup_strftime($_) } @dests if ($sched->{'strftime'});
 	$nice = join(", ", map { &nice_backup_url($_) } @dests);
 	&$first_print(&text('backup_starting', $nice));
 	$cmd = "$backup_cron_cmd --id $sched->{'id'} --force-email";
