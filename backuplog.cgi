@@ -23,9 +23,70 @@ if (!@logs) {
 
 # Show search form
 if ($in{'search'}) {
-	@logs = grep { $_->{'user'} eq $in{'search'} ||
-		       $_->{'doms'} =~ /\Q$in{'search'}\E/i ||
-		       $_->{'dest'} =~ /\Q$in{'search'}\E/i } @logs;
+	my $search = $in{'search'} // '';
+	$search =~ s/^\s+|\s+$//g;
+
+	if ($search =~ /\A([a-z]+)\s*:\s*(.+)\z/i) {
+		my ($key, $val) = (lc $1, $2);
+		my %by = (
+		    user   => sub { ($_[0]{'user'}         // '') =~ /$val/i },
+		    domain => sub { ($_[0]{'doms'}         // '') =~ /$val/i },
+		    dest   => sub { ($_[0]{'dest'}         // '') =~ /$val/i },
+		    desc   => sub { ($_[0]{'desc'}         // '') =~ /$val/i },
+		    time   => sub { (&make_date($_[0]{'start'}) // '')
+		    	=~ /$val/i },
+		    type => sub {
+			my $label = $_[0]{increment}
+				? $text{"viewbackup_inc1"}
+				: $text{"viewbackup_inc0"};
+			return $label =~ /$val/i;
+		    },
+		    size => sub {
+			my ($log) = @_;
+			my $sz = $log->{size} // 0;
+			my @conds;
+			# Parse one or few comparisons: >10M or <1G >512K
+			while ($val =~ /([<>]=?)\s*([0-9]+(?:\.[0-9]+)?)\s*([kmg])?b?/ig) {
+				my ($op, $num, $u) = ($1, $2+0, lc($3 // ''));
+				my $mult = $u eq 'k' ? 1024
+					: $u eq 'm' ? 1024*1024
+					: $u eq 'g' ? 1024*1024*1024
+					: 1;
+				push @conds, [$op, $num * $mult];
+				}
+			
+			return 1 unless (@conds);
+			
+			foreach my $c (@conds) {
+				my ($op, $bytes) = @$c;
+				return 0 if ($op eq '>'  && !($sz >  $bytes));
+				return 0 if ($op eq '>=' && !($sz >= $bytes));
+				return 0 if ($op eq '<'  && !($sz <  $bytes));
+				return 0 if ($op eq '<=' && !($sz <= $bytes));
+				}
+			return 1;
+		    },
+		    status => sub {
+			my $ok   = $_[0]{'ok'} // 0;
+			my $errs = $_[0]{'errdoms'};
+			my $key  = $ok ? ($errs ? 'partial' : 'ok') : 'failed';
+			my $txt  = $ok
+				? ($errs
+					? $text{'backuplog_status_partial'}
+					: $text{'backuplog_status_ok'})
+				: $text{'backuplog_status_failed'};
+			lc($val) eq $key || $txt =~ /\Q$val\E/i;
+		    },
+		    plugin => sub { ($_[0]{'bind_plugin'}  // '') =~ /$val/i },
+		);
+		@logs = grep { $by{$key} ? $by{$key}->($_) : 0 } @logs;
+		}
+	else {
+		@logs = grep { $_->{'user'} eq $in{'search'} ||
+			       $_->{'doms'} =~ /\Q$in{'search'}\E/i ||
+			       $_->{'dest'} =~ /\Q$in{'search'}\E/i } @logs;
+
+		}
 	}
 elsif ($in{'sched'}) {
 	($sched) = grep { $_->{'id'} eq $in{'sched'} }
