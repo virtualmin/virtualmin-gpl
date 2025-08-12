@@ -24,29 +24,24 @@ if (!@logs) {
 # Show search form
 if ($in{'search'}) {
 	my $search = $in{'search'} // '';
-	$search =~ s/^\s+|\s+$//g;
-
-	if ($search =~ /\A([a-z]+)\s*:\s*(.+)\z/i) {
-		my ($key, $val) = (lc $1, $2);
-		my %by = (
-		    user   => sub { ($_[0]{'user'}         // '') =~ /$val/i },
-		    domain => sub { ($_[0]{'doms'}         // '') =~ /$val/i },
-		    dest   => sub { ($_[0]{'dest'}         // '') =~ /$val/i },
-		    desc   => sub { ($_[0]{'desc'}         // '') =~ /$val/i },
-		    time   => sub { (&make_date($_[0]{'start'}) // '')
-		    	=~ /$val/i },
-		    type => sub {
+	my %by = (
+		user   => sub { ($_[0]{'user'}         // '') =~ /$_[1]/i },
+		domain => sub { ($_[0]{'doms'}         // '') =~ /$_[1]/i },
+		dest   => sub { ($_[0]{'dest'}         // '') =~ /$_[1]/i },
+		desc   => sub { ($_[0]{'desc'}         // '') =~ /$_[1]/i },
+		time   => sub { (&make_date($_[0]{'start'}) // '') =~ /$_[1]/i },
+		type => sub {
 			my $label = $_[0]{increment}
 				? $text{"viewbackup_inc1"}
 				: $text{"viewbackup_inc0"};
-			return $label =~ /$val/i;
-		    },
-		    size => sub {
+			return $label =~ /$_[1]/i;
+		},
+		size => sub {
 			my ($log) = @_;
 			my $sz = $log->{size} // 0;
 			my @conds;
 			# Parse one or few comparisons: >10M or <1G >512K
-			while ($val =~ /([<>]=?)\s*([0-9]+(?:\.[0-9]+)?)\s*([kmg])?b?/ig) {
+			while ($_[1] =~ /([<>]=?)\s*([0-9]+(?:\.[0-9]+)?)\s*([kmg])?b?/ig) {
 				my ($op, $num, $u) = ($1, $2+0, lc($3 // ''));
 				my $mult = $u eq 'k' ? 1024
 					: $u eq 'm' ? 1024*1024
@@ -65,8 +60,8 @@ if ($in{'search'}) {
 				return 0 if ($op eq '<=' && !($sz <= $bytes));
 				}
 			return 1;
-		    },
-		    status => sub {
+			},
+		status => sub {
 			my $ok   = $_[0]{'ok'} // 0;
 			my $errs = $_[0]{'errdoms'};
 			my $key  = $ok ? ($errs ? 'partial' : 'ok') : 'failed';
@@ -75,11 +70,37 @@ if ($in{'search'}) {
 					? $text{'backuplog_status_partial'}
 					: $text{'backuplog_status_ok'})
 				: $text{'backuplog_status_failed'};
-			lc($val) eq $key || $txt =~ /\Q$val\E/i;
-		    },
-		    plugin => sub { ($_[0]{'bind_plugin'}  // '') =~ /$val/i },
-		);
-		@logs = grep { $by{$key} ? $by{$key}->($_) : 0 } @logs;
+			lc($_[1]) eq $key || $txt =~ /\Q$_[1]\E/i;
+			},
+		plugin => sub { ($_[0]{'bind_plugin'}  // '') =~ /$_[1]/i },
+	);
+
+	if ($search =~ /[a-z_]+\s*[:=]/i) {
+		# Support multi field terms search separated by commas
+		my @terms = grep length, map { s/^\s+|\s+$//gr }
+					 split /,/, $search;
+
+		# Build anded filters
+		my @filters;
+		foreach my $t (@terms) {
+			next unless $t =~ /\A([a-z_]+)\s*[:=]\s*(.+)\z/i;
+			my ($k, $v) = (lc $1, $2);
+			push @filters, sub {
+				my ($log) = @_;
+				$by{$k} ? $by{$k}->($log, $v) : 0
+				};
+			}
+		if (@filters) {
+			@logs = grep {
+					my $log = $_;
+					my $ok = 1;
+					for my $f (@filters) {
+						$ok &&= $f->($log);
+						last unless ($ok);
+						}
+					$ok;
+				} @logs;
+			}
 		}
 	else {
 		@logs = grep { $_->{'user'} eq $in{'search'} ||
