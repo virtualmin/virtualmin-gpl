@@ -125,7 +125,7 @@ $outdent_print = \&outdent_save_print;
 $start_time = time();
 if ($sched->{'before'}) {
 	&$first_print("Running pre-backup command ..");
-	&set_backup_envs($sched, \@doms);
+	&set_backup_envs($sched, \@doms, undef, undef, $start_time);
 	$out .= &backquote_command("($sched->{'before'}) 2>&1 </dev/null");
 	&reset_backup_envs();
 	print $out;
@@ -143,8 +143,8 @@ if ($sched->{'before'}) {
 
 # Execute the backup
 @dests = &get_scheduled_backup_dests($sched);
-@strfdests = $sched->{'strftime'} ? map { &backup_strftime($_) } @dests
-				  : @dests;
+@strfdests = $sched->{'strftime'} ?
+		map { &backup_strftime($_, $start_time) } @dests : @dests;
 $current_id = undef;
 eval {
 	local $main::error_must_die = 1;
@@ -197,7 +197,7 @@ if ($ok || $sched->{'errors'} == 1) {
 # Run any after command
 if ($sched->{'after'}) {
 	&$first_print("Running post-backup command ..");
-	&set_backup_envs($sched, \@doms, $ok, $errdoms);
+	&set_backup_envs($sched, \@doms, $ok, $errdoms, $start_time);
 	$out = &backquote_command("($sched->{'after'}) 2>&1 </dev/null");
 	&reset_backup_envs();
 	print $out;

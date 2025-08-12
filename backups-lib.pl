@@ -4159,14 +4159,14 @@ $main::download_backup_cache{$url} = $temp if (!$infoonly);
 return undef;
 }
 
-# backup_strftime(path)
+# backup_strftime(path, [force-timestamp])
 # Replaces stftime-style % codes in a path with the current time
 sub backup_strftime
 {
-local ($dest) = @_;
-local @tm = localtime(time());
+my ($dest, $timestamp) = @_;
+my @tm = localtime($timestamp || time());
 &clear_time_locale() if (defined(&clear_time_locale));
-local $rv;
+my $rv;
 if ($dest =~ /^(.*)\@([^\@]+)$/) {
 	# Only modify hostname and path part
 	$rv = $1."\@".strftime($2, @tm);
@@ -7106,11 +7106,11 @@ return $file =~ /\.zip$/i ? 3 :
        $file =~ /\.tar$/i ? 2 : -1;
 }
 
-# set_backup_envs(&backup, &doms, ok-flag, &error-doms)
+# set_backup_envs(&backup, &doms, ok-flag, &error-doms, [force-timestamp])
 # Set environment variables from a backup object
 sub set_backup_envs
 {
-my ($sched, $doms, $status, $errdoms) = @_;
+my ($sched, $doms, $status, $errdoms, $timestamp) = @_;
 foreach my $k (keys %$sched) {
 	$ENV{'BACKUP_'.uc($k)} = $sched->{$k};
 	}
@@ -7118,7 +7118,8 @@ if ($sched->{'strftime'}) {
 	# Expand out date-based paths
 	foreach my $k (keys %$sched) {
 		if ($k eq 'dest' || $k =~ /^dest\d+$/) {
-			$ENV{'BACKUP_'.uc($k)} = &backup_strftime($sched->{$k});
+			$ENV{'BACKUP_'.uc($k)} =
+				&backup_strftime($sched->{$k}, $timestamp);
 			}
 		}
 	}
