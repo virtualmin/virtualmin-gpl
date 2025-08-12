@@ -4684,8 +4684,7 @@ if ($d && $d->{'dir'}) {
 	my $user_backup_dir = $home_virtualmin_backup;
 	my $bind_plugin = "";
 	if ($sched && $sched->{'bind_plugin'} &&
-	    &plugin_defined($sched->{'bind_plugin'},
-	    		    'feature_backup_dir')) {
+	    &plugin_defined($sched->{'bind_plugin'}, 'feature_backup_dir')) {
 		my $user_backup_plugin_dir = &plugin_call(
 			$sched->{'bind_plugin'}, 'feature_backup_dir');
 		$user_backup_dir = $user_backup_plugin_dir
@@ -4927,8 +4926,8 @@ if ($mode == 0 && $d) {
 	my $user_backup_dir = $home_virtualmin_backup;
 	if ($in{'bind_plugin'} &&
 	    &plugin_defined($in{'bind_plugin'}, 'feature_backup_dir')) {
-		my $user_backup_plugin_dir = &plugin_call($in{'bind_plugin'},
-			'feature_backup_dir', $in{'backup_plugin_dir_name'});
+		my $user_backup_plugin_dir = &plugin_call(
+			$in{'bind_plugin'}, 'feature_backup_dir');
 		$user_backup_dir = $user_backup_plugin_dir
 			if ($user_backup_plugin_dir =~ /^\S+$/ && 
 			    $user_backup_plugin_dir !~ /\//);
