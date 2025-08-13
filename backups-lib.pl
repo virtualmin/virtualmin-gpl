@@ -100,7 +100,7 @@ return @rv;
 # those created by plugins
 sub list_visible_scheduled_backups
 {
-return grep { !$_->{'bind_plugin'} } &list_scheduled_backups();
+return grep { !$_->{'plugged'} } &list_scheduled_backups();
 }
 
 # save_scheduled_backup(&backup)
@@ -4680,15 +4680,15 @@ if ($remove) {
 if ($d && $d->{'dir'}) {
 	# Limit local file to under virtualmin-backups
 	my $user_backup_dir = $home_virtualmin_backup;
-	my $bind_plugin = "";
-	if ($sched && $sched->{'bind_plugin'} &&
-	    &plugin_defined($sched->{'bind_plugin'}, 'feature_backup_dir')) {
+	my $plugged = "";
+	if ($sched && $sched->{'plugged'} &&
+	    &plugin_defined($sched->{'plugged'}, 'feature_backup_dir')) {
 		my $user_backup_plugin_dir = &plugin_call(
-			$sched->{'bind_plugin'}, 'feature_backup_dir');
+			$sched->{'plugged'}, 'feature_backup_dir');
 		$user_backup_dir = $user_backup_plugin_dir
 			if ($user_backup_plugin_dir =~ /^\S+$/ && 
 			    $user_backup_plugin_dir !~ /\//);
-		$bind_plugin = &ui_hidden('bind_plugin', $sched->{'bind_plugin'})
+		$plugged = &ui_hidden('plugged', $sched->{'plugged'})
 			if ($name =~ /\A(?:src|dest0)\z/);
 		}
 	local $bdir = "$d->{'home'}/$user_backup_dir";
@@ -4703,7 +4703,7 @@ if ($d && $d->{'dir'}) {
 		  $mode == 0 && $path =~ /\Q$user_backup_dir\E\/(.*)$/
 		  	? $1
 			: "",
-		  50)." ".$file_chooser."<br>\n$bind_plugin" ]);
+		  50)." ".$file_chooser."<br>\n$plugged" ]);
 	}
 elsif (!$nolocal) {
 	# Local file field (can be anywhere)
@@ -4922,10 +4922,10 @@ if ($mode == 0 && $d) {
 	$in{$name."_file"} =~ s/\/+$//;
 	$in{$name."_file"} =~ s/^\/+//;
 	my $user_backup_dir = $home_virtualmin_backup;
-	if ($in{'bind_plugin'} &&
-	    &plugin_defined($in{'bind_plugin'}, 'feature_backup_dir')) {
+	if ($in{'plugged'} &&
+	    &plugin_defined($in{'plugged'}, 'feature_backup_dir')) {
 		my $user_backup_plugin_dir = &plugin_call(
-			$in{'bind_plugin'}, 'feature_backup_dir');
+			$in{'plugged'}, 'feature_backup_dir');
 		$user_backup_dir = $user_backup_plugin_dir
 			if ($user_backup_plugin_dir =~ /^\S+$/ && 
 			    $user_backup_plugin_dir !~ /\//);
@@ -6612,13 +6612,13 @@ return $ok;
 # write_backup_log(&domains, dest, differential?, start, size, ok?,
 # 		   "cgi"|"sched"|"api", output, &errordoms, [user], [&key],
 # 		   [schedule-id], [separate-format], [allow-owner-restore],
-# 		   [compression], [description], [bind_plugin])
+# 		   [compression], [description], [plugged])
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
 local ($doms, $dest, $increment, $start, $size, $ok, $mode, $output, $errdoms,
        $user, $key, $schedid, $separate, $ownrestore, $compression, $desc,
-       $bind_plugin) = @_;
+       $plugged) = @_;
 $compression = $config{'compression'}
 	if (!defined($compression) || $compression eq '');
 if (!-d $backups_log_dir) {
@@ -6640,7 +6640,7 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'separate' => $separate,
 	       'ownrestore' => $ownrestore,
 	       'desc' => $desc,
-	       'bind_plugin' => $bind_plugin,
+	       'plugged' => $plugged,
 	     );
 $main::backup_log_id_count++;
 $log{'id'} = $log{'end'}."-".$$."-".$main::backup_log_id_count;
@@ -7215,7 +7215,7 @@ return wantarray ? ($out, $?, $cmd) : $?;
 sub get_backup_form_link
 {
 my ($sched) = @_;
-my $prefix = $sched->{'bind_plugin'} ? "../$sched->{'bind_plugin'}/" : "";
+my $prefix = $sched->{'plugged'} ? "../$sched->{'plugged'}/" : "";
 return $prefix."backup_form.cgi";
 }
 

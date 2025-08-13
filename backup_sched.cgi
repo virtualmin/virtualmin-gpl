@@ -27,10 +27,9 @@ if ($in{'clone'}) {
 
 # Plugin can enforce a domain if the domain is allowed when the user is a
 # master admin or when passes ACL access check otherwise (owner/reseller)
-if ($in{'bind_plugin'} &&
-    &plugin_defined($in{'bind_plugin'}, 'feature_can_domain')) {
+if ($in{'plugged'} && &plugin_defined($in{'plugged'}, 'feature_can_domain')) {
 	my ($plugin_d, $plugin_cbmode) =
-		&plugin_call($in{'bind_plugin'}, 'feature_can_domain', \%in);
+		&plugin_call($in{'plugged'}, 'feature_can_domain', \%in);
 	&error($text{'backup_eplugin_domain'}) if (!$plugin_d);
 	$cbmode = $plugin_cbmode;
 	&error($text{'backup_eplugin_domain'}) if (!$cbmode);
@@ -223,7 +222,7 @@ else {
 		}
 
 	# Bind this scheduled backup to a plugin for this schedule
-	$sched->{'bind_plugin'} = $in{'bind_plugin'} if ($in{'bind_plugin'});
+	$sched->{'plugged'} = $in{'plugged'} if ($in{'plugged'});
 
 	# Save the schedule and thus the cron job
 	&save_scheduled_backup($sched);

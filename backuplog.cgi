@@ -72,7 +72,7 @@ if ($in{'search'}) {
 				: $text{'backuplog_status_failed'};
 			lc($_[1]) eq $key || $txt =~ /\Q$_[1]\E/i;
 			},
-		plugin => sub { ($_[0]{'bind_plugin'}  // '') =~ /$_[1]/i },
+		plugin => sub { ($_[0]{'plugged'}  // '') =~ /$_[1]/i },
 	);
 
 	if ($search =~ /[a-z_]+\s*[:=]/i) {
