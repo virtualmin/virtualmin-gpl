@@ -28,7 +28,7 @@ foreach $s (@scheds) {
 	push(@row, { 'type' => 'checkbox', 'name' => 'd',
 	     	     'value' => $s->{'id'}."-".$s->{'pid'} });
 	@dests = &get_scheduled_backup_dests($s);
-	@nices = map { &nice_backup_url($_, 1) } @dests;
+	@nices = map { &nice_backup_url($_, 1, 1) } @dests;
 	push(@row, &ui_link("backup_form.cgi?sched=$s->{'id'}",
 			    join("<br>\n", @nices)));
 	push(@row, &nice_backup_doms($s));
