@@ -6612,17 +6612,22 @@ return $ok;
 # write_backup_log(&domains, dest, differential?, start, size, ok?,
 # 		   "cgi"|"sched"|"api", output, &errordoms, [user], [&key],
 # 		   [schedule-id], [separate-format], [allow-owner-restore],
-# 		   [compression], [description], [plugged])
+# 		   [compression], [description], [&sched])
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
 local ($doms, $dest, $increment, $start, $size, $ok, $mode, $output, $errdoms,
        $user, $key, $schedid, $separate, $ownrestore, $compression, $desc,
-       $plugged) = @_;
+       $sched) = @_;
 $compression = $config{'compression'}
 	if (!defined($compression) || $compression eq '');
 if (!-d $backups_log_dir) {
 	&make_dir($backups_log_dir, 0700);
+	}
+my ($plugged, $plugged_opts);
+if ($sched && $sched->{'plugged'}) {
+	$plugged = $sched->{'plugged'};
+	$plugged_opts = "backup_opts_$plugged";
 	}
 local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'errdoms' => join(' ', map { $_->{'dom'} } @$errdoms),
@@ -6640,7 +6645,10 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'separate' => $separate,
 	       'ownrestore' => $ownrestore,
 	       'desc' => $desc,
-	       'plugged' => $plugged,
+	       (defined $plugged
+	       		? ( 'plugged' => $plugged,
+			    'plugged_opts' => $plugged_opts )
+	       		: ( )),
 	     );
 $main::backup_log_id_count++;
 $log{'id'} = $log{'end'}."-".$$."-".$main::backup_log_id_count;
