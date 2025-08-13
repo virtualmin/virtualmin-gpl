@@ -112,7 +112,11 @@ if ($in{'search'}) {
 elsif ($in{'sched'}) {
 	($sched) = grep { $_->{'id'} eq $in{'sched'} }
 			&list_scheduled_backups();
-	$sched || &error($text{'backuplg_esched'});
+	unless ($sched) {
+		print &ui_alert_box($text{'backuplg_esched'}, 'danger',
+			undef, undef, '');
+		return;
+		}
 	@logs = grep { $_->{'sched'} eq $in{'sched'} } @logs;
 	}
 else {

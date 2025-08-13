@@ -7094,7 +7094,7 @@ backuplog_none2=No backups that you have access to have been logged
 backuplog_doms=$1 domains
 backuplog_nodoms=No domains
 backuplog_return=backup log listing
-backuplg_esched=Scheduled backup does not exist!
+backuplg_esched=Scheduled backup does not exist
 
 viewbackup_title=View Backup Log
 viewbackup_eid=Missing or invalid backup ID!
