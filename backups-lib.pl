@@ -6627,7 +6627,7 @@ if (!-d $backups_log_dir) {
 my ($plugged, $plugged_opts);
 if ($sched && $sched->{'plugged'}) {
 	$plugged = $sched->{'plugged'};
-	$plugged_opts = "backup_opts_$plugged";
+	$plugged_opts = $sched->{"backup_opts_$plugged"};
 	}
 local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'errdoms' => join(' ', map { $_->{'dom'} } @$errdoms),
