@@ -41,6 +41,7 @@ local $button = "<input type=button onClick='cfield = form.${name}_complex; hfie
 local $hidden = $mode == 2 ?
 	join(" ", $job->{'mins'}, $job->{'hours'},
 		  $job->{'days'}, $job->{'months'}, $job->{'weekdays'}) : "";
+my $complex_title = &quote_escape($complex || '', "'");
 return &ui_radio_table($name, $mode,
 	 [ $offmsg ? ( [ 0, $offmsg ] ) : ( ),
 	   $cron::config{'vixie_cron'} ? (
@@ -50,8 +51,11 @@ return &ui_radio_table($name, $mode,
 			    ('hourly', 'daily', 'weekly', 'monthly', 'yearly')
 		      ]) ] ) : ( ),
 	   [ 2, $text{'cron_complex'},
-		   &ui_textbox($name."_complex", $complex, 30, 0, undef,
-				  "readonly=true")." ".$button ],
+		   &ui_textbox($name."_complex",
+		   	"$text{'cron_cron_complex'}  ⏱  ", 13, 0,
+		   	undef, "readonly=true title='$complex_title'",
+			'field-sizing-content').
+			" ".$button ],
 	 ]).&ui_hidden($name."_hidden", $hidden);
 }
 

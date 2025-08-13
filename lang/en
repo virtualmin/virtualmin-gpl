@@ -6750,6 +6750,7 @@ sched_logs=Backup logs..
 cron_special=Simple schedule
 cron_complex=Complex schedule
 cron_cron=Cron specification
+cron_cron_complex=At cron time
 cron_title=Select Schedule
 cron_ok=OK
 cron_ehidden=No complex schedule was selected

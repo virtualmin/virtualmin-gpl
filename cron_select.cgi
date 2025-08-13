@@ -9,6 +9,7 @@ require './virtual-server-lib.pl';
 $job = { };
 &cron::parse_times_input($job, \%in);
 $when = &cron::when_text($job, 1);
+$when_title = &quote_escape($when || '', '"');
 
 # Output Javascript to set main fields
 &popup_header($text{'cron_title'});
@@ -17,7 +18,8 @@ print "top.opener.hfield.value = \"",
 	&quote_escape(join(" ", $job->{'mins'}, $job->{'hours'}, $job->{'days'},
 		  		$job->{'months'}, $job->{'weekdays'}), '"'),
 	"\";\n";
-print "top.opener.cfield.value = \"$when\";\n";
+print "top.opener.cfield.value = \"$text{'cron_cron_complex'}  ⏱  \";\n";
+print "top.opener.cfield.title = \"$when_title\";\n";
 print "window.close();\n";
 print "</script>\n";
 
