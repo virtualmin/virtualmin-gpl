@@ -7210,6 +7210,15 @@ else {
 return wantarray ? ($out, $?, $cmd) : $?;
 }
 
+# get_backup_form_link(&schedule)
+# Returns the link for the backup form file depending on the plugin used
+sub get_backup_form_link
+{
+my ($sched) = @_;
+my $prefix = $sched->{'bind_plugin'} ? "../$sched->{'bind_plugin'}/" : "";
+return $prefix."backup_form.cgi";
+}
+
 # backup_fmt_javascript()
 # Returns JS for use inside backup_form.cgi to update the recommended path
 sub backup_fmt_javascript

@@ -68,8 +68,9 @@ if (@users) {
 	foreach my $s (@users) {
 		@dests = &get_scheduled_backup_dests($s);
 		@nices = map { &nice_backup_url($_, 1) } @dests;
+		my $backup_form_link = &get_backup_form_link($s);
 		$utable .= &ui_columns_row([
-			&ui_link("backup_form.cgi?sched=$s->{'id'}",
+			&ui_link($backup_form_link."?sched=$s->{'id'}",
 				 join("<br>\n", @nices)),
 			&nice_backup_doms($s),
 			]);

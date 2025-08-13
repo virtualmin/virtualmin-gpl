@@ -107,13 +107,11 @@ if ($log->{'sched'}) {
 	if ($sched) {
 		@dests = &get_scheduled_backup_dests($sched);
 		@nices = map { &nice_backup_url($_, 1, 1) } @dests;
-		my $plugin_sched = $sched->{'bind_plugin'} ?
-			"../$sched->{'bind_plugin'}/" : "";
+		my $backup_form_link = &get_backup_form_link($log);
 		print &ui_table_row($text{'viewbackup_sched'},
-			&ui_link($plugin_sched.
-				 "backup_form.cgi?sched=".
+			&ui_link($backup_form_link."?sched=".
 				 	&urlize($log->{'sched'}),
-					$log->{'desc'} || $nices[0]), 3);
+				 	$log->{'desc'} || $nices[0]), 3);
 		}
 	else {
 		print &ui_table_row($text{'viewbackup_sched'},
