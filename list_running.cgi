@@ -50,7 +50,7 @@ print &ui_form_columns_table(
 	],
 	100, \@table, [ '', 'string', 'string' ],
 	0, undef,
-	$text{'running_none'});
+	&ui_alert_box($text{'running_none'}, 'info', undef, undef, ''));
 if (!@table) {
 	print &text('running_link', 'list_sched.cgi', 'backuplog.cgi'),"<p>\n";
 	}
