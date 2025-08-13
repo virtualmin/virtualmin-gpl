@@ -133,9 +133,16 @@ if ($in{'search'}) {
 		}
 	}
 elsif ($in{'sched'}) {
-	@dests = &get_scheduled_backup_dests($sched);
-	@nices = map { &nice_backup_url($_, 1, 1) } @dests;
-	my $msg = &text('backuplog_sched', "<tt>$nices[0]</tt>");
+	my $msg;
+	if ($sched->{desc}) {
+		$msg = &text('backuplog_scheddesc', $sched->{'desc'});
+		}
+	else {
+		@dests = &get_scheduled_backup_dests($sched);
+		@nices = map { &nice_backup_url($_, 1) } @dests;
+		$msg = &text('backuplog_sched', "<tt>$nices[0]</tt>");
+		}
+		
 	print &ui_alert_box($msg, 'info', undef, undef, '');
 	}
 
