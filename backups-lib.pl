@@ -4444,18 +4444,17 @@ elsif ($mode == 5) {
 return $rv;
 }
 
-# nice_backup_url(string, [caps-first], [allow-file-trunc])
+# nice_backup_url(string, [caps-first], [show-backup-path-opts])
 # Converts a backup URL to a nice human-readable format
 sub nice_backup_url
 {
-local ($url, $caps, $ftrunc) = @_;
+local ($url, $caps, $show) = @_;
 local ($proto, $user, $pass, $host, $path, $port) = &parse_backup_url($url);
 my $name_only;
-if ($ftrunc && $config{'filepath_trunc'} == -1) {
+if ($show && $config{'show_backuppath'} == 2) {
 	$name_only = 1;
 	}
-elsif ($ftrunc && $path && $config{'filepath_trunc'} &&
-       length($path) > $config{'filepath_trunc'}) {
+elsif ($show && $path && $config{'show_backuppath'} == 1) {
 	my ($pdir, $pfile) = &split_path_file($path);
 	$path = $pfile || $pdir;
 	}
