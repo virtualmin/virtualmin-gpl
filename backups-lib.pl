@@ -7218,13 +7218,14 @@ else {
 return wantarray ? ($out, $?, $cmd) : $?;
 }
 
-# get_backup_form_link(&schedule)
-# Returns the link for the backup form file depending on the plugin used
-sub get_backup_form_link
+# has_feature_link(&hash, [key], [absolute])
+# Returns feature link based on the given object
+sub has_feature_link
 {
-my ($sched) = @_;
-my $prefix = $sched->{'plugged'} ? "../$sched->{'plugged'}/" : "";
-return $prefix."backup_form.cgi";
+my ($sched, $key, $abs) = @_;
+$key //= 'plugged';
+return '' unless ($sched && $sched->{$key});
+return ($abs ? &get_webprefix() : '..')."/$sched->{$key}/";
 }
 
 # backup_fmt_javascript()
