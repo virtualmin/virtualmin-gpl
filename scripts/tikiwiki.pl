@@ -64,13 +64,6 @@ return &compare_versions($ver, 17) <= 0 ? undef :
 
 sub script_tikiwiki_can_upgrade
 {
-local ($sinfo, $newver) = @_;
-if ($newver >= 26 &&
-    $sinfo->{'version'} <= 25) {
-	# Upgrades not yet working correctly
-	# https://tiki.org/forumthread79198-Isssue-with-upgrade-from-Ver-25-to-26-1
-	return 0;
-	}
 return 1;
 }
 
@@ -252,8 +245,8 @@ else {
 
 sub script_tikiwiki_db_conn_desc
 {
-my $db_conn_desc = 
-    { 'db/local.php' => 
+my $db_conn_desc =
+    { 'db/local.php' =>
         {
            'dbpass' =>
            {
