@@ -6752,7 +6752,7 @@ cron_complex=Complex schedule
 cron_cron=Cron specification
 cron_cron_complex=At cron time
 cron_title=Select Schedule
-cron_ok=OK
+cron_save=Apply Schedule
 cron_ehidden=No complex schedule was selected
 
 dsched_err=Failed to delete scheduled backups
