@@ -7128,6 +7128,7 @@ viewbackup_success=Succeeded
 viewbackup_failure=Failed
 viewbackup_partial=Partially completed
 viewbackup_restore=Restore This Backup
+viewbackup_quick_restore=Quick Restore This Backup
 viewbackup_delete=Delete This Backup
 viewbackup_ecannot=You are not allowed to view this backup log
 viewbackup_enc=Encrypted backup?

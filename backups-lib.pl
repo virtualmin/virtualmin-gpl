@@ -7227,6 +7227,49 @@ return '' unless ($sched && $sched->{$key});
 return ($abs ? &get_webprefix() : '..')."/$sched->{$key}/";
 }
 
+# check_backup_pluging(\%sched, [key-name])
+# Build a normalized plugin hash
+sub check_backup_pluging
+{
+my ($sched, $name_key) = @_;
+$name_key //= 'plugged';
+return () unless ($sched && ref $sched && exists $sched->{$name_key});
+my %sched = map { $_ => $sched->{$_} } grep { /^$name_key/i } keys %$sched;
+my %plugged;
+
+# Plugin name
+if (my $name = delete $sched{plugged}) {
+	$plugged{name} = $name;
+	}
+
+# Plugin opts
+my $opts_src;
+$opts_src = $sched->{"backup_opts_$plugged{$name_key}"}
+	if (defined $plugged{$name_key});
+$opts_src = delete $sched{plugged_opts} if (!defined $opts_src);
+
+if (defined $opts_src) {
+	if (ref $opts_src) {
+		$plugged{opts} = $opts_src;
+		}
+	else {
+		my %opts = map {
+			my ($k, $v) = split /=/, $_, 2;
+			$k => (defined $v ? $v : '')
+		} grep { length } split /,/, $opts_src;
+		$plugged{opts} = \%opts;
+		}
+	}
+
+# Plugin flags
+foreach my $k (keys %sched) {
+	next unless $k =~ /^plugged_(.+)/i;
+	$plugged{ lc $1 } = $sched{$k};
+	}
+
+return %plugged;
+}
+
 # backup_fmt_javascript()
 # Returns JS for use inside backup_form.cgi to update the recommended path
 sub backup_fmt_javascript
