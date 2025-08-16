@@ -4,14 +4,39 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 &can_backup_log() || &error($text{'backuplg_ecannot'});
-&ui_print_header(undef, $text{'backuplog_title'}, "", 'backup_logs');
 
-# Get backups to list
+# Get days to show logs for
 $days = $in{'sched'} ? 365 : ($config{'backuplog_days'} || 7);
+
+# Get all logs
 @logs = &list_backup_logs($in{'search'} ? undef : time()-24*60*60*$days);
+
+# Get backups function for listing depending on plugin
+my $plugin = $in{'plugin'};
+($plugin) = $in{'search'} =~ /plugin:(\S+)/ if (!$plugin && $in{'search'});
+if (@logs) {
+	if ($plugin) {
+		@logs = grep { $_->{'plugged'} eq $plugin } @logs;
+		}
+	else {
+		@logs = grep { !$_->{'plugged'} } @logs;
+		}
+	}
 
 $anylogs = scalar(@logs);
 @logs = grep { &can_backup_log($_) } @logs;
+
+if ($plugin && &plugin_defined($plugin, 'feature_backup_safe')) {
+	# Plugin specific header
+	%ptext = &load_language($plugin);
+	&ui_print_header(undef, $ptext{'feat_backuplog_title'}, "",
+		'backup_logs', undef, 1);
+	}
+else {
+	# Default header
+	$plugin = undef;
+	&ui_print_header(undef, $text{'backuplog_title'}, "", 'backup_logs');
+	}
 
 if (!@logs) {
 	# None found
@@ -153,8 +178,12 @@ elsif ($in{'sched'}) {
 
 print &ui_form_start("backuplog.cgi");
 print "$text{'backuplog_search'}&nbsp;\n";
-print &ui_textbox("search", $in{'search'}, 35, undef, undef, "placeholder='$placeholder'");
-print &ui_hidden("return", $in{'return'}) if ($in{'return'});
+my $search = $in{'search'} || '';
+$search =~ s/(,?plugin:[^,]+)//g;
+print &ui_textbox("search", $search, 40, undef, undef,
+		  "placeholder='$placeholder'");
+print &ui_hidden("plugin", $plugin) if ($plugin);
+print &ui_hidden("return", $in{'return'});
 print &ui_submit($text{'ui_searchok'});
 print &ui_form_end(),"<p>\n";
 
@@ -205,3 +234,5 @@ if (@logs) {
 				100, \@table);
 				  
 	}
+
+&ui_print_footer($in{'return'}, $ptext{'index_return'}) if ($plugin);

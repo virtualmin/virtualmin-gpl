@@ -7,7 +7,9 @@ require './virtual-server-lib.pl';
 if ($in{'delete'}) {
 	# Redirect to backup deletion page
 	&redirect("delete_backup.cgi?id=".&urlize($in{'log'}).
-		  "&search=".&urlize($in{'search'}));
+		  "&search=".&urlize($in{'search'}).
+		  "&plugin=".&urlize($in{'plugin'}).
+		  "&return=".&urlize($in{'return'}));
 	return;
 	}
 

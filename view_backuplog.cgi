@@ -178,6 +178,7 @@ print &ui_form_start("restore_form.cgi");
 print &ui_hidden("log", $in{'id'});
 print &ui_hidden("return", $in{'return'});
 print &ui_hidden("search", $in{'search'});
+print &ui_hidden("plugin", $in{'plugin'});
 
 # Can we restore?
 my $restore = 0;

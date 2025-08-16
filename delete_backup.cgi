@@ -39,7 +39,8 @@ else {
 		&text('dbackup_rusure', &nice_size($log->{'size'}),
 					scalar(@alldnames),
 					&nice_backup_url($log->{'dest'})),
-		[ [ "id", $in{'id'} ], [ "search", $in{'search'} ] ],
+		[ [ "id", $in{'id'} ], [ "search", $in{'search'} ],
+		  [ "plugin", $in{'plugin'} ], [ "return", $in{'return'} ] ],
 		[ [ "confirm", $text{'dbackup_delnow'} ] ],
 		);
 	}
