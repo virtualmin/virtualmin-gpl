@@ -18,9 +18,25 @@ my %backup_plugin = &check_backup_pluging($log);
 print &ui_table_start($text{'viewbackup_header'}, "width=100%", 4,
 		      [ "nowrap" ]);
 
-# Description, if any
-if ($log->{'desc'}) {
-	print &ui_table_row($text{'viewbackup_desc'}, $log->{'desc'}, 3);
+# Original scheduled backup
+if ($log->{'sched'}) {
+	($sched) = grep { $_->{'id'} eq $log->{'sched'} }
+			&list_scheduled_backups();
+	if ($sched) {
+		@dests = &get_scheduled_backup_dests($sched);
+		@nices = map { &nice_backup_url($_, 1, 1) } @dests;
+		my $feature_link = &has_feature_link($log);
+		print &ui_table_row($text{'viewbackup_sched'},
+			&ui_link($feature_link."backup_form.cgi?sched=".
+				 	&urlize($log->{'sched'}),
+				 $log->{'desc'} || $nices[0]),
+			3);
+		}
+	else {
+		print &ui_table_row($text{'viewbackup_sched'},
+				    &text('viewbackup_gone', $log->{'sched'}), 
+			3);
+		}
 	}
 
 # Destination
