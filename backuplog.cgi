@@ -153,6 +153,7 @@ elsif ($in{'sched'}) {
 print &ui_form_start("backuplog.cgi");
 print "$text{'backuplog_search'}&nbsp;\n";
 print &ui_textbox("search", $in{'search'}, 35, undef, undef, "placeholder='$placeholder'");
+print &ui_hidden("return", $in{'return'}) if ($in{'return'});
 print &ui_submit($text{'ui_searchok'});
 print &ui_form_end(),"<p>\n";
 
@@ -173,7 +174,8 @@ if (@logs) {
 				&text('backuplog_doms', scalar(@dnames));
 		push(@table, [
 			"<a href='view_backuplog.cgi?id=".&urlize($log->{'id'}).
-			 "&search=".&urlize($in{'search'})."'>".
+			 "&search=".&urlize($in{'search'}).
+			 "&return=".&urlize($in{'return'})."'>".
 			 &nice_backup_url($log->{'dest'}, 1, 1)."</a>",
 			$ddesc,
 			$hasdesc ? ( &html_escape($log->{'desc'}) ) : ( ),
