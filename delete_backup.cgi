@@ -40,7 +40,7 @@ else {
 					scalar(@alldnames),
 					&nice_backup_url($log->{'dest'})),
 		[ [ "id", $in{'id'} ], [ "search", $in{'search'} ] ],
-		[ [ "confirm", $text{'dbackup_confirm'} ] ],
+		[ [ "confirm", $text{'dbackup_delnow'} ] ],
 		);
 	}
 
