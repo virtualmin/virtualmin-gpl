@@ -197,6 +197,5 @@ else {
 	print &ui_form_end();
 	}
 
-&ui_print_footer("backuplog.cgi?search=".&urlize($in{'search'}).
-			      "&return=".&urlize($in{'return'}),
+&ui_print_footer(&make_link('backuplog.cgi', 'search', 'plugin', 'return'),
 		 $text{'backuplog_return'});

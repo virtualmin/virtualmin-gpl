@@ -21547,6 +21547,35 @@ else {
 	}
 }
 
+# make_link([file], [@params])
+# Build a URL with query params, escaping values and skipping unset ones
+# Each item in @params can be:
+#   - ['key', $value]  # explicit pair
+#   - 'key'            # pull from %in
+sub make_link
+{
+my ($file, @params) = @_;
+$file //= '';
+my @pairs;
+foreach my $p (@params) {
+	if (ref($p) eq 'ARRAY') {
+		my ($k, $v) = @$p;
+		next unless defined($k) && length($k);
+		push @pairs, $k.'='. &urlize(defined($v) ? $v : '');
+		}
+	else {
+		my $k = $p;
+		next unless defined($k) && length($k);
+		next unless defined($in{$k}) && length($in{$k});
+		push @pairs, $k.'='. &urlize($in{$k});
+		}
+	}
+
+return @pairs ? '?'.join('&', @pairs) : '' if $file eq '';
+return @pairs ? $file . ( ($file =~ /\?/) ? '&' : '?' ) . join('&', @pairs)
+	      : $file;
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

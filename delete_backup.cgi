@@ -44,5 +44,5 @@ else {
 		);
 	}
 
-&ui_print_footer("backuplog.cgi?search=".&urlize($in{'search'}),
+&ui_print_footer(&make_link('backuplog.cgi', 'search', 'plugin', 'return'),
 		 $text{'backuplog_return'});

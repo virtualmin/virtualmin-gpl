@@ -173,10 +173,11 @@ if (@logs) {
 			 scalar(@dnames) <= 2 ?
 				join(", ", @dnames) :
 				&text('backuplog_doms', scalar(@dnames));
+		my $link = &make_link('view_backuplog.cgi',
+				      ['id', $log->{'id'}], 'search', 'plugin',
+				      'return');
 		push(@table, [
-			"<a href='view_backuplog.cgi?id=".&urlize($log->{'id'}).
-			 "&search=".&urlize($in{'search'}).
-			 "&return=".&urlize($in{'return'})."'>".
+			"<a href='$link'>".
 			 &nice_backup_url($log->{'dest'}, 1, 1)."</a>",
 			$ddesc,
 			$hasdesc ? ( &html_escape($log->{'desc'}) ) : ( ),
