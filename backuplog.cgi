@@ -25,11 +25,12 @@ if (!@logs) {
 if ($in{'search'}) {
 	my $search = $in{'search'} // '';
 	my %by = (
-		user   => sub { ($_[0]{'user'}         // '') =~ /$_[1]/i },
-		domain => sub { ($_[0]{'doms'}         // '') =~ /$_[1]/i },
-		dest   => sub { ($_[0]{'dest'}         // '') =~ /$_[1]/i },
-		desc   => sub { ($_[0]{'desc'}         // '') =~ /$_[1]/i },
-		time   => sub { (&make_date($_[0]{'start'}) // '') =~ /$_[1]/i },
+		schedule  => sub { ($_[0]{'sched'}        // '') =~ /$_[1]/i },
+		user      => sub { ($_[0]{'user'}         // '') =~ /$_[1]/i },
+		domain    => sub { ($_[0]{'doms'}         // '') =~ /$_[1]/i },
+		dest      => sub { ($_[0]{'dest'}         // '') =~ /$_[1]/i },
+		desc      => sub { ($_[0]{'desc'}         // '') =~ /$_[1]/i },
+		time => sub { (&make_date($_[0]{'start'}) // '') =~ /$_[1]/i },
 		type => sub {
 			my $label = $_[0]{increment}
 				? $text{"viewbackup_inc1"}
