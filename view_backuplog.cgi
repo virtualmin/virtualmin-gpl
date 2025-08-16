@@ -35,6 +35,16 @@ if ($proto == 0 && &foreign_available("filemin")) {
 	}
 print &ui_table_row($text{'viewbackup_dest'}, $nice, 3);
 
+# Encryption key
+print &ui_table_row($text{'viewbackup_enc'},
+	!$log->{'key'} ? $text{'no'} :
+	!defined(&get_backup_key) ?
+		"<font color=#ff0000>$text{'viewbackup_nopro'}</font>" :
+	!($key = &get_backup_key($log->{'key'})) ?
+		"<font color=#ffaa00>".
+		  &text('viewbackup_nokey', $log->{'key'})."</font>" :
+		&text('viewbackup_key', "<i>$key->{'desc'}</i>"), 3);
+
 # Backup plugin options if any
 if ($backup_plugin{opts}) {
 	my $opts  = $backup_plugin{opts};
@@ -140,16 +150,6 @@ if ($log->{'sched'}) {
 				    &text('viewbackup_gone', $log->{'sched'}));
 		}
 	}
-
-# Encryption key
-print &ui_table_row($text{'viewbackup_enc'},
-	!$log->{'key'} ? $text{'no'} :
-	!defined(&get_backup_key) ?
-		"<font color=#ff0000>$text{'viewbackup_nopro'}</font>" :
-	!($key = &get_backup_key($log->{'key'})) ?
-		"<font color=#ffaa00>".
-		  &text('viewbackup_nokey', $log->{'key'})."</font>" :
-		&text('viewbackup_key', "<i>$key->{'desc'}</i>"));
 
 print &ui_table_end();
 
