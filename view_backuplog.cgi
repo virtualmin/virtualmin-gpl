@@ -147,26 +147,6 @@ print &ui_table_row($text{'viewbackup_ok'},
 		"<font color=#ffaa00>$text{'viewbackup_partial'}</font>" :
 		"<font color=#ff0000>$text{'viewbackup_failure'}</font>");
 
-# Original scheduled backup
-if ($log->{'sched'}) {
-	($sched) = grep { $_->{'id'} eq $log->{'sched'} }
-			&list_scheduled_backups();
-	if ($sched) {
-		@dests = &get_scheduled_backup_dests($sched);
-		@nices = map { &nice_backup_url($_, 1, 1) } @dests;
-		my $feature_link = &has_feature_link($log);
-		print &ui_table_row($text{'viewbackup_sched'},
-			&ui_link($feature_link."backup_form.cgi?sched=".
-				 	&urlize($log->{'sched'}),
-				 $log->{'desc'} || $nices[0]),
-			3);
-		}
-	else {
-		print &ui_table_row($text{'viewbackup_sched'},
-				    &text('viewbackup_gone', $log->{'sched'}));
-		}
-	}
-
 print &ui_table_end();
 
 if (@dnames == @alldnames) {
