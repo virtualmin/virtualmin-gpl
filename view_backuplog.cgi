@@ -176,6 +176,8 @@ if ($quick_restore && &can_restore_domain() &&
 # Main form to submit
 print &ui_form_start("restore_form.cgi");
 print &ui_hidden("log", $in{'id'});
+print &ui_hidden("return", $in{'return'});
+print &ui_hidden("search", $in{'search'});
 
 # Can we restore?
 my $restore = 0;
