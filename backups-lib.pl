@@ -6624,10 +6624,12 @@ $compression = $config{'compression'}
 if (!-d $backups_log_dir) {
 	&make_dir($backups_log_dir, 0700);
 	}
-my ($plugged, $plugged_opts);
-if ($sched && $sched->{'plugged'}) {
-	$plugged = $sched->{'plugged'};
-	$plugged_opts = $sched->{"backup_opts_$plugged"};
+my @plugged;
+if ($sched && $sched->{plugged}) {
+	my %plugged = map { $_ => $sched->{$_} }
+		      grep { /^plugged/ } keys %$sched;
+	$plugged{plugged_opts} = $sched->{"backup_opts_$sched->{plugged}"};
+	@plugged = %plugged;
 	}
 local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'errdoms' => join(' ', map { $_->{'dom'} } @$errdoms),
@@ -6645,10 +6647,7 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'separate' => $separate,
 	       'ownrestore' => $ownrestore,
 	       'desc' => $desc,
-	       (defined $plugged
-	       		? ( 'plugged' => $plugged,
-			    'plugged_opts' => $plugged_opts )
-	       		: ( )),
+	       @plugged,
 	     );
 $main::backup_log_id_count++;
 $log{'id'} = $log{'end'}."-".$$."-".$main::backup_log_id_count;

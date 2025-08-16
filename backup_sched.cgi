@@ -221,8 +221,17 @@ else {
 			}
 		}
 
-	# Bind this scheduled backup to a plugin for this schedule
-	$sched->{'plugged'} = $in{'plugged'} if ($in{'plugged'});
+	# Bind this scheduled backup to a plugin for this schedule, and
+	# copy safely all plugin's config fields into the schedule
+	foreach (grep { /^plugged/i } keys %in) {
+		my $k = lc($_);
+		my $v = $in{$_} // '';
+		$k =~ s/[^a-z_]+/_/g;
+		$k =~ s/^_+|_+$//g;
+		$v =~ tr/\r\n//d;
+		$v =~ s/[^A-Za-z0-9_,.=-]//g;
+		$sched->{$k} = $v;
+		}
 
 	# Save the schedule and thus the cron job
 	&save_scheduled_backup($sched);
