@@ -22,7 +22,8 @@ if ($in{'bg'}) {
 	@dests = map { &backup_strftime($_) } @dests if ($sched->{'strftime'});
 	$nice = join(", ", map { &nice_backup_url($_) } @dests);
 	&$first_print(&text('backup_starting', $nice));
-	$cmd = "$backup_cron_cmd --id $sched->{'id'} --force-email";
+	$cmd = "$backup_cron_cmd --id $sched->{'id'} --force-email ".
+				"--manual-mode";
 	&clean_environment();
 	&execute_command("$cmd >/dev/null 2>&1 </dev/null &");
 	&reset_environment();
