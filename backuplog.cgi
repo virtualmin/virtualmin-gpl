@@ -43,7 +43,7 @@ if (!@logs) {
 	print $in{'search'} ? $text{'backuplog_nomatch'} :
 		   $anylogs ? $text{'backuplog_none2'} :
 			      $text{'backuplog_none'},"\n";
-	return;
+	goto print_footer;
 	}
 
 # Show search form
@@ -141,7 +141,7 @@ elsif ($in{'sched'}) {
 	unless ($sched) {
 		print &ui_alert_box($text{'backuplg_esched'}, 'danger',
 			undef, undef, '');
-		return;
+		goto print_footer;
 		}
 	@logs = grep { $_->{'sched'} eq $in{'sched'} } @logs;
 	}
@@ -235,4 +235,5 @@ if (@logs) {
 				  
 	}
 
+print_footer:
 &ui_print_footer($in{'return'}, $ptext{'index_return'}) if ($plugin);
