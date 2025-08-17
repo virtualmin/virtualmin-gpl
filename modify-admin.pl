@@ -5,16 +5,22 @@
 Updates an extra administrator for a virtual server
 
 This program can be used to change the details of an extra administrator.
-The required parameters are C<--domain> followed by the domain name, and C<--name>
-followed by the administrator account name, which specify the account to
-change.
+The required parameters are C<--domain> followed by the domain name, and
+C<--name> followed by the administrator account name, which specify the
+account to change.
 
-You can then use the C<--pass> parameter to set a new password, C<--desc> to change
-the description, and C<--newname> to change the login name. The admin can be
-allowed to denied the ability to create servers, rename domains, manage
-features and use other Webmin modules with the C<--can-create>, C<--cannot-create>,
-C<--can-rename>, C<--cannot-rename>, C<--can-features>, C<--cannot-features>,
-C<--can-modules> and C<--cannot-modules> options respectively.
+You can then use the C<--pass> parameter to set a new password, C<--desc> to
+change the description, and C<--newname> to change the login name. The admin
+can be allowed to denied the ability to create servers, rename domains, manage
+features and use other Webmin modules with the C<--can-create>,
+C<--cannot-create>, C<--can-rename>, C<--cannot-rename>, C<--can-features>,
+C<--cannot-features>, C<--can-modules> and C<--cannot-modules> options
+respectively.
+
+When renaming C<--append> flag can be used to add the domain name, prefix or
+suffix to the final admin username. Similarly, C<--no-append> can be used to
+prevent this from happening. If neither flag is given, the default behavior
+set in the Virtualmin configuration will be used.
 
 The extra admin's contact email address can be set or changed with the 
 C<--email> flag (followed by an address), or removed with the C<--no-email>
@@ -54,6 +60,7 @@ if (!$module_name) {
 @OLDARGV = @ARGV;
 
 # Parse command-line args
+$append = $config{'appendadmin'};
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -121,6 +128,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--remove-domain") {
 		push(@deniednames, shift(@ARGV));
 		}
+	elsif ($a eq "--append") {
+		$append = 1;
+		}
+	elsif ($a eq "--no-append") {
+		$append = 0;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -139,15 +152,23 @@ $d || usage("Virtual server $domain does not exist");
 # Find the admin
 &obtain_lock_webmin();
 @admins = &list_extra_admins($d);
-($admin) = grep { $_->{'name'} eq $name } @admins;
+($admin) = grep { $_->{'name'} eq $name ||
+		  $_->{'origname'} eq $name } @admins;
 $admin || &usage("Extra administrator $name does not exist in this virtual server");
 $old = { %$admin };
 
 # Update the object
 if (defined($newname)) {
+	# Changing username, perhaps updating to match the domain
+	($clash) = grep { $_->{'origname'} eq $newname } @admins;
+	$clash && &usage("An extra admin named $newname already exists");
+	if ($admin->{'name'} ne $admin->{'origname'} && $append) {
+		$admin->{'origname'} = $newname;
+		$newname = &userdom_name($newname, $d);
+		}
 	&require_acl();
 	($clash) = grep { $_->{'name'} eq $newname } &acl::list_users();
-	$clash && &usage("The login name $newname is already in use");
+	$clash && &usage("The Webmin username $newname is already in use");
 	$admin->{'name'} = $newname;
 	}
 if (defined($pass)) {
@@ -235,6 +256,7 @@ print "                       [--can-edit capability]*\n";
 print "                       [--cannot-edit capability]*\n";
 print "                       [--all-domains]\n";
 print "                       [--add-domain name]* [--remove-domain name]*\n";
+print "                       [--append | --no-append]\n";
 exit(1);
 }
 

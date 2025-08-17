@@ -132,13 +132,13 @@ $name eq "webmin" && &usage("The login name webmin is reserved");
 &obtain_lock_webmin();
 &require_acl();
 $origname = $name;
+($clash) = grep { $_->{'origname'} eq $name } @admins;
+$clash && &usage("An extra admin named $name already exists");
 if ($append) {
 	$name = &userdom_name($name, $d);
 	}
 ($clash) = grep { $_->{'name'} eq $name } &acl::list_users();
 $clash && &usage("The Webmin username $name is already in use");
-($clash) = grep { $_->{'origname'} eq $name } @admins;
-$clash && &usage("An extra admin named $name already exists");
 
 # Validate allowed domains
 @allowed = ( );
