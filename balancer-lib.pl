@@ -326,6 +326,7 @@ foreach my $port (@ports) {
 		}
 
 	# Fix any RewriteRule for websockets
+	my @rwes = &apache::find_directive("RewriteEngine", $vconf);
 	my @rwc = &apache::find_directive("RewriteCond", $vconf);
 	my @rwr = &apache::find_directive("RewriteRule", $vconf);
 	my ($rwr) = grep { /^\Q^$oldb->{'path'}?(.*)\E\s+"ws?s:/ } @rwr;
@@ -353,6 +354,10 @@ foreach my $port (@ports) {
 		}
 	elsif (!$b->{'none'} && $b->{'websockets'} && !$rwr) {
 		# Need to add
+		if (!@rwes) {
+			&apache::save_directive(
+				"RewriteEngine", ["on"], $vconf, $conf);
+			}
 		push(@rwc, &websockets_rewriteconds(1));
 		&apache::save_directive("RewriteCond", \@rwc, $vconf, $conf, 1);
 		push(@rwr, "^$b->{'path'}?(.*) \"$wsurl\" [P]");
