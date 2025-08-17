@@ -30,8 +30,9 @@ foreach $s (@scheds) {
 	@dests = &get_scheduled_backup_dests($s);
 	@nices = map { &nice_backup_url($_, 1, 1) } @dests;
 	my $feature_link = &has_feature_link($s);
-	push(@row, &ui_link($feature_link."backup_form.cgi?sched=$s->{'id'}",
-			    join("<br>\n", @nices)));
+	my $flink = &make_link($feature_link.'backup_form.cgi',
+			       ['sched', $s->{'id'}]);
+	push(@row, &ui_link($flink, join("<br>\n", @nices)));
 	push(@row, &nice_backup_doms($s));
 	push(@row, &make_date($s->{'started'}));
 	push(@row, $text{'running_'.$s->{'scripttype'}} || $s->{'scripttype'});
