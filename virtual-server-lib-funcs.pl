@@ -16443,7 +16443,7 @@ if ($config{'mysql'}) {
 			$_->{'config'}->{'virtualmin_default'} &&
 			$_->{'dbtype'} eq 'mysql'
 			} &list_remote_mysql_modules();
-		if ($defmysql && $defmysql->{'host'}) {
+		if ($defmysql && $defmysql->{'config'}->{'host'}) {
 			&$second_print($text{'check_mysqlok3'});
 			}
 		elsif ($mysql_server_status != 2) {
