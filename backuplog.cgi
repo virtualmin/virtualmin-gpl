@@ -4,14 +4,39 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 &can_backup_log() || &error($text{'backuplg_ecannot'});
-&ui_print_header(undef, $text{'backuplog_title'}, "", 'backup_logs');
 
-# Get backups to list
+# Get days to show logs for
 $days = $in{'sched'} ? 365 : ($config{'backuplog_days'} || 7);
+
+# Get all logs
 @logs = &list_backup_logs($in{'search'} ? undef : time()-24*60*60*$days);
+
+# Get backups function for listing depending on plugin
+my $plugin = $in{'plugin'};
+($plugin) = $in{'search'} =~ /plugin:(\S+)/ if (!$plugin && $in{'search'});
+if (@logs) {
+	if ($plugin) {
+		@logs = grep { $_->{'plugged'} eq $plugin } @logs;
+		}
+	else {
+		@logs = grep { !$_->{'plugged'} } @logs;
+		}
+	}
 
 $anylogs = scalar(@logs);
 @logs = grep { &can_backup_log($_) } @logs;
+
+if ($plugin && &plugin_defined($plugin, 'feature_backup_safe')) {
+	# Plugin specific header
+	%ptext = &load_language($plugin);
+	&ui_print_header(undef, $ptext{'feat_backuplog_title'}, "",
+		'backup_logs', undef, 1);
+	}
+else {
+	# Default header
+	$plugin = undef;
+	&ui_print_header(undef, $text{'backuplog_title'}, "", 'backup_logs');
+	}
 
 if (!@logs) {
 	# None found
@@ -25,11 +50,12 @@ if (!@logs) {
 if ($in{'search'}) {
 	my $search = $in{'search'} // '';
 	my %by = (
-		user   => sub { ($_[0]{'user'}         // '') =~ /$_[1]/i },
-		domain => sub { ($_[0]{'doms'}         // '') =~ /$_[1]/i },
-		dest   => sub { ($_[0]{'dest'}         // '') =~ /$_[1]/i },
-		desc   => sub { ($_[0]{'desc'}         // '') =~ /$_[1]/i },
-		time   => sub { (&make_date($_[0]{'start'}) // '') =~ /$_[1]/i },
+		schedule  => sub { ($_[0]{'sched'}        // '') =~ /$_[1]/i },
+		user      => sub { ($_[0]{'user'}         // '') =~ /$_[1]/i },
+		domain    => sub { ($_[0]{'doms'}         // '') =~ /$_[1]/i },
+		dest      => sub { ($_[0]{'dest'}         // '') =~ /$_[1]/i },
+		desc      => sub { ($_[0]{'desc'}         // '') =~ /$_[1]/i },
+		time => sub { (&make_date($_[0]{'start'}) // '') =~ /$_[1]/i },
 		type => sub {
 			my $label = $_[0]{increment}
 				? $text{"viewbackup_inc1"}
@@ -152,7 +178,12 @@ elsif ($in{'sched'}) {
 
 print &ui_form_start("backuplog.cgi");
 print "$text{'backuplog_search'}&nbsp;\n";
-print &ui_textbox("search", $in{'search'}, 35, undef, undef, "placeholder='$placeholder'");
+my $search = $in{'search'} || '';
+$search =~ s/(,?plugin:[^,]+)//g;
+print &ui_textbox("search", $search, 40, undef, undef,
+		  "placeholder='$placeholder'");
+print &ui_hidden("plugin", $plugin) if ($plugin);
+print &ui_hidden("return", $in{'return'});
 print &ui_submit($text{'ui_searchok'});
 print &ui_form_end(),"<p>\n";
 
@@ -171,9 +202,11 @@ if (@logs) {
 			 scalar(@dnames) <= 2 ?
 				join(", ", @dnames) :
 				&text('backuplog_doms', scalar(@dnames));
+		my $link = &make_link('view_backuplog.cgi',
+				      ['id', $log->{'id'}], 'search', 'plugin',
+				      'return');
 		push(@table, [
-			"<a href='view_backuplog.cgi?id=".&urlize($log->{'id'}).
-			 "&search=".&urlize($in{'search'})."'>".
+			"<a href='$link'>".
 			 &nice_backup_url($log->{'dest'}, 1, 1)."</a>",
 			$ddesc,
 			$hasdesc ? ( &html_escape($log->{'desc'}) ) : ( ),
@@ -201,3 +234,5 @@ if (@logs) {
 				100, \@table);
 				  
 	}
+
+&ui_print_footer($in{'return'}, $ptext{'index_return'}) if ($plugin);

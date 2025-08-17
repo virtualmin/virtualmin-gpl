@@ -11,15 +11,32 @@ $can || &error($text{'viewbackup_ecannot'});
 
 &ui_print_header(undef, $text{'viewbackup_title'}, "");
 
+# Extract backup plugin options if any
+my %backup_plugin = &check_backup_pluging($log);
+
 # Basic details
-print &ui_form_start("restore_form.cgi");
-print &ui_hidden("log", $in{'id'});
 print &ui_table_start($text{'viewbackup_header'}, "width=100%", 4,
 		      [ "nowrap" ]);
 
-# Description, if any
-if ($log->{'desc'}) {
-	print &ui_table_row($text{'viewbackup_desc'}, $log->{'desc'}, 3);
+# Original scheduled backup
+if ($log->{'sched'}) {
+	($sched) = grep { $_->{'id'} eq $log->{'sched'} }
+			&list_scheduled_backups();
+	if ($sched) {
+		@dests = &get_scheduled_backup_dests($sched);
+		@nices = map { &nice_backup_url($_, 1, 1) } @dests;
+		my $feature_link = &has_feature_link($log);
+		print &ui_table_row($text{'viewbackup_sched'},
+			&ui_link($feature_link."backup_form.cgi?sched=".
+				 	&urlize($log->{'sched'}),
+				 $log->{'desc'} || $nices[0]),
+			3);
+		}
+	else {
+		print &ui_table_row($text{'viewbackup_sched'},
+				    &text('viewbackup_gone', $log->{'sched'}), 
+			3);
+		}
 	}
 
 # Destination
@@ -34,12 +51,35 @@ if ($proto == 0 && &foreign_available("filemin")) {
 	}
 print &ui_table_row($text{'viewbackup_dest'}, $nice, 3);
 
+# Encryption key
+print &ui_table_row($text{'viewbackup_enc'},
+	!$log->{'key'} ? $text{'no'} :
+	!defined(&get_backup_key) ?
+		"<font color=#ff0000>$text{'viewbackup_nopro'}</font>" :
+	!($key = &get_backup_key($log->{'key'})) ?
+		"<font color=#ffaa00>".
+		  &text('viewbackup_nokey', $log->{'key'})."</font>" :
+		&text('viewbackup_key', "<i>$key->{'desc'}</i>"), 3);
+
+# Backup plugin options if any
+if ($backup_plugin{opts}) {
+	my $opts  = $backup_plugin{opts};
+	my %ptext = load_language($backup_plugin{name});
+	for my $k (sort keys %$opts) {
+		my $label = $ptext{"feat_${k}_opts"} // $k;
+		my $val   = $ptext{"feat_${k}_opts_$opts->{$k}"} // $opts->{$k};
+		next unless ($label && $val);
+		print &ui_table_row($label, $val, 3);
+		}
+	}
+
 # Domains included
 @alldnames = split(/\s+/, $log->{'doms'});
 @dnames = &backup_log_own_domains($log);
 $msg = @alldnames > @dnames ? " , <b>".&text('viewbackup_extra',
 					   @alldnames - @dnames)."</b>" : "";
-print &ui_table_row($text{'viewbackup_doms'},
+print &ui_table_row($backup_plugin{indom} ?
+		$text{'user_domain'} : $text{'viewbackup_doms'},
 	join(" , ", @dnames).$msg || $text{'backuplog_nodoms'}, 3);
 
 # Domains that failed, if any
@@ -71,26 +111,33 @@ print &ui_table_row($text{'viewbackup_size'},
 print &ui_table_row($text{'viewbackup_time'},
 	&nice_hour_mins_secs($log->{'end'} - $log->{'start'}));
 
-# Differential?
-print &ui_table_row($text{'viewbackup_inc'},
-	$log->{'increment'} == 1 ? $text{'viewbackup_inc1'} :
-	$log->{'increment'} == 2 ? $text{'viewbackup_inc2'} :
-			    	   $text{'viewbackup_inc0'});
-
-# Can be restored by owners?
-print &ui_table_row($text{'viewbackup_ownrestore'},
-	$log->{'ownrestore'} ? $text{'yes'} : $text{'no'});
-
-# Compression format?
-if (defined($log->{'compression'})) {
-	print &ui_table_row($text{'viewbackup_compression'},
-		$text{'backup_compression'.$log->{'compression'}});
+if (!$backup_plugin{noincrement}) {
+	# Differential?
+	print &ui_table_row($text{'viewbackup_inc'},
+		$log->{'increment'} == 1 ? $text{'viewbackup_inc1'} :
+		$log->{'increment'} == 2 ? $text{'viewbackup_inc2'} :
+					   $text{'viewbackup_inc0'});
+	}
+if (!$backup_plugin{noownrestore}) {
+	# Can be restored by owners?
+	print &ui_table_row($text{'viewbackup_ownrestore'},
+		$log->{'ownrestore'} ? $text{'yes'} : $text{'no'});
 	}
 
-# File format
-if (defined($log->{'separate'})) {
-	print &ui_table_row($text{'viewbackup_separate'},
-		$text{'backup_fmt'.$log->{'separate'}});
+if (!$backup_plugin{nocompression}) {
+	# Compression format?
+	if (defined($log->{'compression'})) {
+		print &ui_table_row($text{'viewbackup_compression'},
+			$text{'backup_compression'.$log->{'compression'}});
+		}
+	}
+
+if (!$backup_plugin{noseparate}) {
+	# File format
+	if (defined($log->{'separate'})) {
+		print &ui_table_row($text{'viewbackup_separate'},
+			$text{'backup_fmt'.$log->{'separate'}});
+		}
 	}
 
 # Final result
@@ -99,35 +146,6 @@ print &ui_table_row($text{'viewbackup_ok'},
 	$log->{'ok'} && $log->{'errdoms'} ?
 		"<font color=#ffaa00>$text{'viewbackup_partial'}</font>" :
 		"<font color=#ff0000>$text{'viewbackup_failure'}</font>");
-
-# Original scheduled backup
-if ($log->{'sched'}) {
-	($sched) = grep { $_->{'id'} eq $log->{'sched'} }
-			&list_scheduled_backups();
-	if ($sched) {
-		@dests = &get_scheduled_backup_dests($sched);
-		@nices = map { &nice_backup_url($_, 1, 1) } @dests;
-		my $backup_form_link = &get_backup_form_link($log);
-		print &ui_table_row($text{'viewbackup_sched'},
-			&ui_link($backup_form_link."?sched=".
-				 	&urlize($log->{'sched'}),
-				 	$log->{'desc'} || $nices[0]), 3);
-		}
-	else {
-		print &ui_table_row($text{'viewbackup_sched'},
-				    &text('viewbackup_gone', $log->{'sched'}));
-		}
-	}
-
-# Encryption key
-print &ui_table_row($text{'viewbackup_enc'},
-	!$log->{'key'} ? $text{'no'} :
-	!defined(&get_backup_key) ?
-		"<font color=#ff0000>$text{'viewbackup_nopro'}</font>" :
-	!($key = &get_backup_key($log->{'key'})) ?
-		"<font color=#ffaa00>".
-		  &text('viewbackup_nokey', $log->{'key'})."</font>" :
-		&text('viewbackup_key', "<i>$key->{'desc'}</i>"));
 
 print &ui_table_end();
 
@@ -141,11 +159,34 @@ if (@dnames == @alldnames) {
 	print &ui_hidden_table_end();
 	}
 
+# Quick restore form
+my $quick_restore = $backup_plugin{quick_restore};
+if ($quick_restore && &can_restore_domain() &&
+    ($log->{'ok'} || scalar(@alldnames) != scalar(@errdnames))) {
+	print &ui_form_start("restore.cgi", "form-data");
+	print &ui_hidden("log", $in{'id'});
+	print &ui_hidden('features_all', 0);
+	print &ui_hidden('feature', $backup_plugin{name});
+	print &ui_hidden("origsrc", $log->{'dest'});
+	print &ui_hidden("dom", $log->{'doms'});
+	print &ui_hidden("return", $in{'return'});
+	print &ui_form_end([ [ 'confirm', $text{'viewbackup_quick_restore'} ] ]);
+	}
+
+# Main form to submit
+print &ui_form_start("restore_form.cgi");
+print &ui_hidden("log", $in{'id'});
+print &ui_hidden("return", $in{'return'});
+print &ui_hidden("search", $in{'search'});
+print &ui_hidden("plugin", $in{'plugin'});
+
 # Can we restore?
 my $restore = 0;
 if ($log->{'ok'} || scalar(@alldnames) != scalar(@errdnames)) {
 	$restore = 1;
 	}
+
+$restore = 0 if ($quick_restore);
 
 if ($log->{'ok'} || $log->{'errdoms'}) {
 	print &ui_form_end([
@@ -157,5 +198,5 @@ else {
 	print &ui_form_end();
 	}
 
-&ui_print_footer("backuplog.cgi?search=".&urlize($in{'search'}),
+&ui_print_footer(&make_link('backuplog.cgi', 'search', 'plugin', 'return'),
 		 $text{'backuplog_return'});

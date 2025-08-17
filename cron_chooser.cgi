@@ -23,7 +23,7 @@ print &ui_form_start("$modpref/cron_select.cgi");
 print "<table border width=100% class='ui_table'>\n";
 &cron::show_times_input($job, 1);
 print "</table>\n";
-print &ui_form_end([ [ undef, $text{'cron_ok'} ] ]);
+print &ui_form_end([ [ undef, $text{'cron_save'} ] ]);
 
 &popup_footer();
 

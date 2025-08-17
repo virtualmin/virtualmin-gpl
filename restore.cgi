@@ -385,6 +385,6 @@ if (defined($in{'onedom'})) {
 	&ui_print_footer(&domain_footer_link(&get_domain($in{'onedom'})));
 	}
 else {
-	&ui_print_footer("", $text{'index_return'});
+	&ui_print_footer($in{'return'} || "", $text{'index_return'});
 	}
 

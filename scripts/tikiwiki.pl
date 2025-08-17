@@ -64,13 +64,6 @@ return &compare_versions($ver, 17) <= 0 ? undef :
 
 sub script_tikiwiki_can_upgrade
 {
-local ($sinfo, $newver) = @_;
-if ($newver >= 26 &&
-    $sinfo->{'version'} <= 25) {
-	# Upgrades not yet working correctly
-	# https://tiki.org/forumthread79198-Isssue-with-upgrade-from-Ver-25-to-26-1
-	return 0;
-	}
 return 1;
 }
 
@@ -101,6 +94,8 @@ else {
 		     &ui_database_select("db", undef, \@dbs, $d, "tikiwiki"));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			     &ui_opt_textbox("dir", &substitute_scriptname_template("tikiwiki", $d), 30, "At top level"));
+	$rv .= &ui_table_row("Setup automatically",
+		&ui_radio("install", 'y', [ [ "n", "No" ], [ "y", "Yes" ]]));
 	}
 return $rv;
 }
@@ -120,10 +115,13 @@ else {
 		return "Missing or invalid installation directory";
 	local $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
 	local ($newdb) = ($in->{'db'} =~ s/^\*//);
+	my $password = &virtual_server::random_password(8);
 	return { 'db' => $in->{'db'},
 		 'newdb' => $newdb,
 		 'dir' => $dir,
-		 'path' => $in{'dir_def'} ? "/" : "/$in{'dir'}", };
+		 'path' => $in{'dir_def'} ? "/" : "/$in{'dir'}",
+		 'install' => $in{'install'},
+		 'password' => $password };
 	}
 }
 
@@ -184,41 +182,50 @@ local $err = &extract_script_archive($files->{'source'}, $temp, $d,
                                      $opts->{'dir'}, "tiki-$ver");
 $err && return (0, "Failed to extract source : $err");
 local $cfile = "$opts->{'dir'}/db/local.php";
-
+my $post_install  = $opts->{'install'} == 'y';
 if (!$upgrade) {
 	# Create the config file
 	&open_tempfile_as_domain_user($d, CONFIG, ">$cfile");
 	&print_tempfile(CONFIG,
 		"<?php\n".
 		"\$db_tiki = 'mysql';\n".
-		"\$dbversion_tiki = '8.0';\n".
+		"\$dbversion_tiki = '$version';\n".
 		"\$host_tiki = '$dbhost';\n".
 		"\$user_tiki = '$dbuser';\n".
 		"\$pass_tiki = '$dbpass';\n".
 		"\$dbs_tiki = '$dbname';\n".
-		"\$client_charset = 'utf8';\n"
+		"\$client_charset = 'utf8mb4';\n"
 		);
 	&close_tempfile_as_domain_user($d, CONFIG);
-
+	# Setup instance
+	if ($post_install) {
+		&tikiwiki_postinstallation($d, undef, $opts);
+	}
 	# Rename _htaccess to .htaccess
 	if (&domain_has_website($d) eq 'web') {
 		&run_as_domain_user(
 			$d, "mv $opts->{'dir'}/_htaccess $opts->{'dir'}/.htaccess");
 		}
-	}
+} else {
+	&tikiwiki_postinstallation($d, $upgrade, $opts);
+}
 
-# Delete install lock file
-&unlink_file_as_domain_user($d, "$opts->{'dir'}/db/lock");
+my $password = $opts->{'password'};
+if (! $post_install && !$upgrade) {
+	# Delete install lock file
+	&unlink_file_as_domain_user($d, "$opts->{'dir'}/db/lock");
+	$password = "";
+}
 
 local $url = &script_path_url($d, $opts);
-local $adminurl = $url."tiki-install.php";
+local $adminurl = $url.($post_install ? "" : "tiki-install.php");
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
 if ($upgrade) {
-	return (1, "Initial TikiWiki upgrade complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to complete the upgrade process.", "Under $rp using $dbtype database $dbname", $url, "admin", "admin");
+	return (1, "Initial TikiWiki upgrade complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to complete the upgrade process.", "Under $rp using $dbtype database $dbname", $url, "admin", "$password");
 	}
 else {
-	return (1, "Initial TikiWiki installation complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to finish installing it.", "Under $rp using $dbtype database $dbname", $url, "admin", "admin");
+	return (1, "Initial TikiWiki installation complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to finish installing it.", "Under $rp using $dbtype database $dbname", $url, "admin", "$password");
 	}
 }
 
@@ -252,8 +259,8 @@ else {
 
 sub script_tikiwiki_db_conn_desc
 {
-my $db_conn_desc = 
-    { 'db/local.php' => 
+my $db_conn_desc =
+    { 'db/local.php' =>
         {
            'dbpass' =>
            {
@@ -314,6 +321,39 @@ return $ver eq $vers[0] ? undef : $vers[0];
 sub script_tikiwiki_site
 {
 return 'http://tiki.org/';
+}
+
+# tikiwiki_postinstallation(&domain,upgrade, &opts)
+# setup instance configuration after an fresh installation or an upgrade.
+sub tikiwiki_postinstallation
+{
+local ($d, $upgrade, $opts) = @_;
+my $dom_php_bin = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
+$dom_php_bin || return (0, "Could not find PHP CLI command");
+my $cmd_prefix = "$dom_php_bin $opts->{'dir'}/console.php";
+my $email = $d->{'emailto'};
+my $password = $opts->{'password'};
+my @steps = (
+	["Installing database... [may take a while]", "-q database:install"],
+	["Setup user password", "users:password 'admin' '$password'"],
+	["Setup sender_email preference", "preferences:set 'sender_email' '$email'"]
+);
+# Instance datebase need to be update after an upgrade.
+if ($upgrade) {
+	@steps = (
+		["Update database... [may take a while]", "database:update"]
+	);
+}
+push @steps, ["Rebuild index ", "index:rebuild"];
+
+foreach my $step (@steps) {
+	my ($description, $command) = @$step;
+	print "$description<br>";
+	my $out = &run_as_domain_user($d, "$cmd_prefix $command 2>&1");
+	if ($?) {
+		return (-1, "\`tikiwiki $description \` failed : $out");
+	}
+}
 }
 
 1;

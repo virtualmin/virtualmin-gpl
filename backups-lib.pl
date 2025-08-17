@@ -6624,10 +6624,12 @@ $compression = $config{'compression'}
 if (!-d $backups_log_dir) {
 	&make_dir($backups_log_dir, 0700);
 	}
-my ($plugged, $plugged_opts);
-if ($sched && $sched->{'plugged'}) {
-	$plugged = $sched->{'plugged'};
-	$plugged_opts = $sched->{"backup_opts_$plugged"};
+my @plugged;
+if ($sched && $sched->{plugged}) {
+	my %plugged = map { $_ => $sched->{$_} }
+		      grep { /^plugged/ } keys %$sched;
+	$plugged{plugged_opts} = $sched->{"backup_opts_$sched->{plugged}"};
+	@plugged = %plugged;
 	}
 local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'errdoms' => join(' ', map { $_->{'dom'} } @$errdoms),
@@ -6645,10 +6647,7 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'separate' => $separate,
 	       'ownrestore' => $ownrestore,
 	       'desc' => $desc,
-	       (defined $plugged
-	       		? ( 'plugged' => $plugged,
-			    'plugged_opts' => $plugged_opts )
-	       		: ( )),
+	       @plugged,
 	     );
 $main::backup_log_id_count++;
 $log{'id'} = $log{'end'}."-".$$."-".$main::backup_log_id_count;
@@ -7218,13 +7217,57 @@ else {
 return wantarray ? ($out, $?, $cmd) : $?;
 }
 
-# get_backup_form_link(&schedule)
-# Returns the link for the backup form file depending on the plugin used
-sub get_backup_form_link
+# has_feature_link(&hash, [key], [absolute])
+# Returns feature link based on the given object
+sub has_feature_link
 {
-my ($sched) = @_;
-my $prefix = $sched->{'plugged'} ? "../$sched->{'plugged'}/" : "";
-return $prefix."backup_form.cgi";
+my ($sched, $key, $abs) = @_;
+$key //= 'plugged';
+return '' unless ($sched && $sched->{$key});
+return ($abs ? &get_webprefix() : '..')."/$sched->{$key}/";
+}
+
+# check_backup_pluging(\%sched, [key-name])
+# Build a normalized plugin hash
+sub check_backup_pluging
+{
+my ($sched, $name_key) = @_;
+$name_key //= 'plugged';
+return () unless ($sched && ref $sched && exists $sched->{$name_key});
+my %sched = map { $_ => $sched->{$_} } grep { /^$name_key/i } keys %$sched;
+my %plugged;
+
+# Plugin name
+if (my $name = delete $sched{plugged}) {
+	$plugged{name} = $name;
+	}
+
+# Plugin opts
+my $opts_src;
+$opts_src = $sched->{"backup_opts_$plugged{$name_key}"}
+	if (defined $plugged{$name_key});
+$opts_src = delete $sched{plugged_opts} if (!defined $opts_src);
+
+if (defined $opts_src) {
+	if (ref $opts_src) {
+		$plugged{opts} = $opts_src;
+		}
+	else {
+		my %opts = map {
+			my ($k, $v) = split /=/, $_, 2;
+			$k => (defined $v ? $v : '')
+		} grep { length } split /,/, $opts_src;
+		$plugged{opts} = \%opts;
+		}
+	}
+
+# Plugin flags
+foreach my $k (keys %sched) {
+	next unless $k =~ /^plugged_(.+)/i;
+	$plugged{ lc $1 } = $sched{$k};
+	}
+
+return %plugged;
 }
 
 # backup_fmt_javascript()

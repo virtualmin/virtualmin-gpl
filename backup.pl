@@ -11,6 +11,7 @@ if (&foreign_check("mailboxes")) {
 	}
 
 # Get the schedule being used
+$mode = 'sched';
 $id = 1;
 $backup_debug = 0;
 while(@ARGV > 0) {
@@ -27,6 +28,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--force-email") {
 		$force_email = 1;
+		}
+	elsif ($a eq "--manual-mode") {
+		$mode = 'manual';
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -223,7 +227,7 @@ if ($sched->{'after'}) {
 &cleanup_backup_limits(0, 1);
 foreach $dest (@strfdests) {
 	&write_backup_log(\@doms, $dest, $sched->{'increment'}, $start_time,
-			  $size, $ok, "sched", $output, $errdoms,
+			  $size, $ok,  $mode, $output, $errdoms,
 			  $asd ? $asd->{'user'} : undef, $key, $sched->{'id'},
 			  $sched->{'fmt'}, $sched->{'ownrestore'},
 			  $sched->{'compression'}, $sched->{'desc'},

@@ -39,9 +39,11 @@ else {
 		&text('dbackup_rusure', &nice_size($log->{'size'}),
 					scalar(@alldnames),
 					&nice_backup_url($log->{'dest'})),
-		[ [ "id", $in{'id'} ] ],
-		[ [ "confirm", $text{'dbackup_confirm'} ] ],
+		[ [ "id", $in{'id'} ], [ "search", $in{'search'} ],
+		  [ "plugin", $in{'plugin'} ], [ "return", $in{'return'} ] ],
+		[ [ "confirm", $text{'dbackup_delnow'} ] ],
 		);
 	}
 
-&ui_print_footer("backuplog.cgi", $text{'backuplog_return'});
+&ui_print_footer(&make_link('backuplog.cgi', 'search', 'plugin', 'return'),
+		 $text{'backuplog_return'});
