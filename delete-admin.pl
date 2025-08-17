@@ -56,7 +56,8 @@ $d || usage("Virtual server $domain does not exist");
 # Find the admin, and delete him
 &obtain_lock_webmin();
 @admins = &list_extra_admins($d);
-($admin) = grep { $_->{'name'} eq $name } @admins;
+($admin) = grep { $_->{'name'} eq $name ||
+		  $_->{'origname'} eq $name } @admins;
 $admin || &usage("Extra administrator $name does not exist in this virtual server");
 &delete_extra_admin($admin, $d);
 &release_lock_webmin();

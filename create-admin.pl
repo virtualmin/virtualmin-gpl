@@ -11,8 +11,15 @@ C<--desc> options should also be given, to specify the initial password and
 a description for the account respectively. To specify a contact email address
 for the admin, use the C<--email> flag followed by the address.
 
-Basic permissions for the account can be added using the C<--create>, C<--rename>, C<--features> and C<--modules> parameters. These allow the admin to create new
-servers, rename servers, use Webmin modules for server features, and use other Webmin modules, respectively.
+The C<--append> flag can be used to add the domain name, prefix or suffix
+to the final admin username. Similarly, C<--no-append> can be used to prevent
+this from happening. If neither flag is given, the default behavior set in the
+Virtualmin configuration will be used.
+
+Basic permissions for the account can be added using the C<--create>,
+C<--rename>, C<--features> and C<--modules> parameters. These allow the admin
+to create new servers, rename servers, use Webmin modules for server features,
+and use other Webmin modules, respectively.
 
 The extra admin's editing capabilities for virtual servers can be set using
 the C<--edit> parameter, followed by a capability name (like users or aliases).
@@ -51,6 +58,7 @@ if (!$module_name) {
 
 # Parse command-line args
 $norename = 1;
+$append = $config{'appendadmin'};
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -95,6 +103,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--allowed-domain") {
 		push(@allowednames, shift(@ARGV));
 		}
+	elsif ($a eq "--append") {
+		$append = 1;
+		}
+	elsif ($a eq "--no-append") {
+		$append = 0;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -117,8 +131,14 @@ $d->{'webmin'} || &usage("Virtual server $domain does not have a Webmin login en
 $name eq "webmin" && &usage("The login name webmin is reserved");
 &obtain_lock_webmin();
 &require_acl();
+$origname = $name;
+if ($append) {
+	$name = &userdom_name($name, $d);
+	}
 ($clash) = grep { $_->{'name'} eq $name } &acl::list_users();
-$clash && &usage("The login name $name is already in use");
+$clash && &usage("The Webmin username $name is already in use");
+($clash) = grep { $_->{'origname'} eq $name } @admins;
+$clash && &usage("An extra admin named $name already exists");
 
 # Validate allowed domains
 @allowed = ( );
@@ -133,6 +153,7 @@ foreach $aname (@allowednames) {
 
 # Create the object
 $admin = { 'name' => $name,
+	   'origname' => $origname,
 	   'desc' => $desc,
 	   'pass' => $pass,
 	   'create' => $create,
@@ -169,6 +190,7 @@ print "                       [--create] [--rename]\n";
 print "                       [--features] [--modules]\n";
 print "                       [--edit capability]*\n";
 print "                       [--allowed-domain domain]*\n";
+print "                       [--append | --no-append]\n";
 exit(1);
 }
 

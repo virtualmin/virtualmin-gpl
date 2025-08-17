@@ -12,6 +12,7 @@ foreach my $f (readdir(DIR)) {
 		local %admin;
 		&read_file("$extra_admins_dir/$d->{'id'}/$f", \%admin);
 		$admin{'file'} = "$extra_admins_dir/$d->{'id'}/$f";
+		$admin{'origname'} ||= $admin{'name'};
 		push(@rv, \%admin);
 		}
 	}
