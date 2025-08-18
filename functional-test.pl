@@ -9881,6 +9881,7 @@ $admin_tests = [
 	{ 'command' => 'create-admin.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'name', $test_admin ],
+		      [ 'no-append' ],
 		      [ 'desc', 'Test extra admin' ],
 		      [ 'email', 'admin@'.$test_domain ],
 		      [ 'pass', 'smeg' ],
