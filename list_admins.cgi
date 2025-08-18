@@ -33,7 +33,8 @@ foreach $a (sort { $a->{'name'} cmp $b->{'name'} } @admins) {
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $a->{'name'} },
 		"<a href='edit_admin.cgi?dom=$in{'dom'}&name=".
-		&urlize($a->{'name'})."'>".&html_escape($a->{'name'})."</a>",
+			&urlize($a->{'name'})."'>".
+			&html_escape($a->{'origname'})."</a>",
 		&html_escape($a->{'desc'}),
 		$domsdesc,
 		]);

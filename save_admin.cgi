@@ -29,7 +29,8 @@ if ($in{'switch'}) {
 	print "<script>\n";
 	print "var w = window;\n";
 	print "while(w.parent && w.parent != w) { w = w.parent; }\n";
-	print "w.location = \"switch_user.cgi?dom=$in{'dom'}&admin=$in{'old'}\";\n";
+	print "w.location = \"switch_user.cgi?dom=".
+		&urlize($in{'dom'})."&admin=".&urlize($in{'old'})."\";\n";
 	print "</script>\n";
 	&ui_print_footer();
 	exit;
