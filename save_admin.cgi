@@ -13,7 +13,8 @@ $d = &get_domain($in{'dom'});
 &require_acl();
 
 if (!$in{'new'}) {
-	($admin) = grep { $_->{'name'} eq $in{'old'} } @admins;
+	($admin) = grep { $_->{'name'} eq $in{'old'} ||
+			  $_->{'origname'} eq $in{'old'} } @admins;
 	$admin || &error($text{'admin_egone'});
 	$oldadmin = { %$admin };
 	}
@@ -43,7 +44,6 @@ else {
 	$tmpl = &get_template($d->{'template'});
 	$in{'name'} =~ /^[a-z0-9\.\_\-]+$/i || &error($text{'admin_ename'});
 	$in{'name'} eq 'webmin' && &error($text{'resel_ewebmin'});
-	$admin->{'origname'} = $in{'name'};
 	if ($tmpl->{'extra_prefix'} ne "none") {
 		# Force-prepend prefix
 		$pfx = &substitute_domain_template($tmpl->{'extra_prefix'}, $d);
@@ -54,7 +54,7 @@ else {
 			$admin->{'name'} = $in{'name'};
 			}
 		}
-	elaif ($config{'appendadmin'}) {
+	elsif ($in{'append'}) {
 		# Add domain name prefix or suffix
 		$admin->{'name'} = &userdom_name($in{'name'}, $d);
 		}
@@ -69,6 +69,7 @@ else {
 		($clash) = grep { $_->{'origname'} eq $in{'name'} } @admins;
 		$clash && &error($text{'admin_eclash2'});
 		}
+	$admin->{'origname'} = $in{'name'};
 	if (!$in{'pass_def'}) {
 		$admin->{'pass'} = $in{'pass'};
 		}

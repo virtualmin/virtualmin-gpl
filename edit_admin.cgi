@@ -22,7 +22,6 @@ $tmpl = &get_template($d->{'template'});
 print &ui_form_start("save_admin.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_hidden("new", $in{'new'}),"\n";
-print &ui_hidden("old", $in{'name'}),"\n";
 print &ui_hidden_table_start($text{'admin_header'}, "width=100%", 2, "main", 1);
 
 # Show general user information
@@ -32,12 +31,14 @@ if ($tmpl->{'extra_prefix'} ne "none") {
 		# Show input for suffix only
 		print &ui_table_row(&hlink($text{'admin_name'}, "admin_name"),
 				    $pfx.&ui_textbox("name", $1, 20), 2);
+		print &ui_hidden("old", $1),"\n";
 		}
 	elsif (&master_admin()) {
 		# A prefix is set but the user doesn't match .. allow editing
 		# of the whole name
 		print &ui_table_row(&hlink($text{'admin_name'}, "admin_name"),
 			    &ui_textbox("name", $admin->{'name'}, 20), 2);
+		print &ui_hidden("old", $admin->{'name'}),"\n";
 		}
 	else {
 		# A prefix is set but the user doesn't match it! Don't allow
@@ -45,12 +46,31 @@ if ($tmpl->{'extra_prefix'} ne "none") {
 		print &ui_table_row(&hlink($text{'admin_name'}, "admin_name"),
 				    "<tt>$admin->{'name'}</tt>");
 		print &ui_hidden("name", $admin->{'name'}),"\n";
+		print &ui_hidden("old", $admin->{'name'}),"\n";
 		}
+	}
+elsif (!$in{'new'} && $admin->{'name'} ne $admin->{'origname'}) {
+	# Username has a prefix or suffix
+	print &ui_table_row(&hlink($text{'admin_origname'}, "admin_origname"),
+			    &ui_textbox("name", $admin->{'origname'}, 20), 2);
+	print &ui_table_row($text{'admin_fullname'},
+			    "<tt>".&html_escape($admin->{'name'})."</tt>");
+	print &ui_hidden("old", $admin->{'origname'}),"\n";
+	print &ui_hidden("append", 1);
+	}
+elsif ($config{'appendadmin'} && $in{'new'}) {
+	# Username will have a precfix or suffix added on save
+	print &ui_table_row(&hlink($text{'admin_origname'}, "admin_origname"),
+			    &ui_textbox("name", undef, 20), 2);
+	print &ui_hidden("old", ""),"\n";
+	print &ui_hidden("append", 1);
 	}
 else {
 	# Username can be anything
 	print &ui_table_row(&hlink($text{'admin_name'}, "admin_name"),
 			    &ui_textbox("name", $admin->{'name'}, 20), 2);
+	print &ui_hidden("old", $admin->{'name'}),"\n";
+	print &ui_hidden("append", 0);
 	}
 
 # Password
