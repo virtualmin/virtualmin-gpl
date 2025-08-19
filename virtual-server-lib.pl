@@ -222,7 +222,6 @@ $extra_admins_dir = "$module_config_directory/admins";
                               "8.0", 8.1, 8.2, 8.3, 8.4 );
 @all_possible_short_php_versions =
 	&unique(map { int($_) } @all_possible_php_versions);
-@s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
 $max_php_fcgid_children = $config{'max_php_fcgi_children'} || int(&get_php_max_childred_allowed() * 5) || 5;
 $max_php_fcgid_timeout = $config{'max_php_fcgi_timeout'} || 9999;
 $s3_upload_tries = $config{'upload_tries'} || 3;
