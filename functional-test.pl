@@ -9942,7 +9942,7 @@ $admin_tests = [
 		       "/virtual-server/list_aliases.cgi\\?dom=".
 		       "`virtualmin list-domains.pl --domain $test_domain --id-only`",
 	  'antigrep' => 'Mail Aliases',
-	  'grep' => 'You are not allowed to edit aliases in this domain',
+	  'grep' => 'You are not allowed to edit mail aliases in this domain',
 	},
 
 	# Check he can no longer list users
