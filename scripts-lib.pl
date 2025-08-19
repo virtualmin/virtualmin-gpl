@@ -1485,9 +1485,6 @@ if (&foreign_installed("software")) {
 foreach my $m (@mods) {
 	next if (&check_perl_module($m, $d) == 1);
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
-	&$first_print(&text($opt ? 'scripts_optperlmod' : 'scripts_needperlmod',
-			    "<tt>$m</tt>"));
-
 	local $pkg;
 	local $done = 0;
 	if ($canpkgs) {
@@ -1530,15 +1527,25 @@ foreach my $m (@mods) {
 
 	if ($pkg) {
 		# Install the RPM, Debian or CSW package
-		&$first_print(&text('scripts_softwaremod', "<tt>$pkg</tt>"));
-		&$indent_print();
-		&software::update_system_install($pkg);
-		&$outdent_print();
+		&$first_print(&text($opt
+			? 'scripts_softwaremodperlrec'
+			: 'scripts_softwaremodperlreq', "<tt>$pkg</tt>"));
+		# No noise
+		{
+			local *STDOUT; open STDOUT, '>', '/dev/null';
+			local *STDERR; open STDERR, '>', '/dev/null';
+			&software::update_system_install($pkg);
+		}
+		# Check if installed
 		@pinfo = &software::package_info($pkg);
 		if (@pinfo && $pinfo[0] eq $pkg) {
 			# Yep, it worked
 			&$second_print($text{'setup_done'});
 			$done = 1;
+			}
+		else {
+			# Nope, it failed
+			&$second_print($text{'scripts_phpmodfailed'});
 			}
 		}
 
