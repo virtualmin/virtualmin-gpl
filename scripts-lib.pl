@@ -1543,36 +1543,8 @@ foreach my $m (@mods) {
 		}
 
 	if (!$done) {
-		# Fall back to CPAN
-		&$first_print(&text('scripts_perlmod', "<tt>$m</tt>"));
-		eval "use CPAN";
-		if ($@) {
-			# Cpan is missing??
-			&$second_print($text{'scripts_ecpan'});
-			if ($opt) { next; }
-			else { return 0; }
-			}
-		else {
-			local $perl = &get_perl_path();
-			&open_execute_command(CPAN,
-			    "echo n | $perl -MCPAN -e 'install $m' 2>&1", 1);
-			&$indent_print();
-			print "<pre>";
-			while(<CPAN>) {
-				print &html_escape($_);
-				}
-			print "</pre>";
-			close(CPAN);
-			&$outdent_print();
-			if ($?) {
-				&$second_print($text{'scripts_eperlmod'});
-				if ($opt) { next; }
-				else { return 0; }
-				}
-			else {
-				&$second_print($text{'setup_done'});
-				}
-			}
+		# No CPAN on production system, just fail
+		return 0 if (!$canpkgs);
 		}
 	}
 return 1;
