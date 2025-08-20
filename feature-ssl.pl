@@ -2466,8 +2466,11 @@ my ($imap) = grep { $_->{'name'} eq 'protocol' &&
 		    $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
 return ( ) if (!$imap);
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$imap->{'members'}};
-return ( ) if (!$mems{'ssl_cert'});
-my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, $mems{'ssl_ca'},
+my $ssl_cert = &dovecot_param("ssl_cert");
+return ( ) if (!$mems{$ssl_cert});
+my $ssl_key = &dovecot_param("ssl_key");
+my $ssl_ca = &dovecot_param("ssl_ca");
+my @rv = ( $mems{$ssl_cert}, $mems{$ssl_key}, $mems{$ssl_ca},
 	   $d->{'ip'}, undef );
 foreach my $r (@rv) {
 	$r =~ s/^<//;
@@ -2498,8 +2501,11 @@ my @loc = grep { $_->{'name'} eq 'local_name' &&
 my ($l) = grep { &hostname_under_domain($d, $_->{'value'}) } @loc;
 return ( ) if (!$l);
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$l->{'members'}};
-return ( ) if (!$mems{'ssl_cert'});
-my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, $mems{'ssl_ca'},
+my $ssl_cert = &dovecot_param("ssl_cert");
+return ( ) if (!$mems{$ssl_cert});
+my $ssl_key = &dovecot_param("ssl_key");
+my $ssl_ca = &dovecot_param("ssl_ca");
+my @rv = ( $mems{$ssl_cert}, $mems{$ssl_key}, $mems{$ssl_ca},
 	   undef, $d->{'dom'} );
 foreach my $r (@rv) {
 	$r =~ s/^<//;

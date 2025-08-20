@@ -7121,6 +7121,15 @@ my $wkfile = $wkdir."/mta-sts.txt";
 return undef;
 }
 
+# dovecot_param(param)
+# Returns the parameter depending on the version
+sub dovecot_param
+{
+my $param = shift;
+return $param unless (defined &dovecot::params);
+return &dovecot::params($param);
+}
+
 $done_feature_script{'mail'} = 1;
 
 1;
