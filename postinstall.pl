@@ -405,7 +405,7 @@ foreach my $d (@doms) {
 			# extra check to make sure we have a needed file
 			$l = substr($l, 0, $lims);
 
-			# Test to make sure that given file is Virtualmin website default page
+			# Test to make sure that given file is Virtualmin website welcome page
 			$efix++ if (!$efix && $l =~ /iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/);
 			if ($efix == 1 &&
 				$l =~ /\*\s(Virtualmin\sLanding|Website\sDefault\sPage|Virtualmin\s+Default\s+Page|Virtualmin\s+Welcome\s+Page)\sv([\d+\.]+)$/) {
@@ -417,7 +417,7 @@ foreach my $d (@doms) {
 			}
 
 		# After existing file is read and verified to be old
-		# Virtualmin default page replace it with new one
+		# Virtualmin welcome page replace it with new one
 		if ($efix == 4) {
 			my $domtmplfile = "$default_content_dir/index.html";
 			next if (!-r $domtmplfile);
