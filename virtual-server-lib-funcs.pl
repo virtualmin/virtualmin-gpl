@@ -21075,8 +21075,7 @@ return &$err(join(" ", @warns)) if (@warns);
 # Create the server
 &push_all_print();
 &set_all_null_print();
-my ($rs) = &create_virtual_server(
-	\%dom, undef, undef, 1, 0, $pass, $dom{'owner'});
+my ($rs) = &create_virtual_server(\%dom, undef, undef, 1, 0, $pass, "");
 &pop_all_print();
 if ($rs && ref($rs) ne 'HASH') {
 	&unlock_domain(\%dom);
