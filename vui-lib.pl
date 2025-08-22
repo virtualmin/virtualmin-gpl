@@ -49,7 +49,8 @@ return &ui_radio_table($name, $mode,
 		   &ui_select($name."_special", $job->{'special'},
 		      [ map { [ $_, $cron::text{'edit_special_'.$_} ] }
 			    ('hourly', 'daily', 'weekly', 'monthly', 'yearly')
-		      ]) ] ) : ( ),
+		      ], 1, 0, 0, 0,
+		      "onChange='form.$name.value = 1'") ] ) : ( ),
 	   [ 2, $text{'cron_complex'},
 		   &ui_textbox($name."_complex",
 		   	"$text{'cron_cron_complex'}  ⏱  ", 13, 0,
