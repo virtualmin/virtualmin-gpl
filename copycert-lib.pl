@@ -24,13 +24,10 @@ if (&foreign_installed("usermin")) {
 	}
 if (&foreign_installed("dovecot")) {
 	&foreign_require("dovecot");
-	my $ver = &dovecot::get_dovecot_version();
-	if (&compare_version_numbers($ver, 2) >= 0) {
-		push(@rv, {'id' => 'dovecot',
-			   'dom' => 1,
-			   'virt' => 1,
-			   'short' => 'd' });
-		}
+	push(@rv, {'id' => 'dovecot',
+		   'dom' => 1,
+		   'virt' => 1,
+		   'short' => 'd' });
 	}
 if ($config{'mail'} && $mail_system == 0) {
 	push(@rv, {'id' => 'postfix',
