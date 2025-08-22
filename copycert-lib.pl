@@ -23,10 +23,14 @@ if (&foreign_installed("usermin")) {
 		   'short' => 'u' });
 	}
 if (&foreign_installed("dovecot")) {
-	push(@rv, {'id' => 'dovecot',
-		   'dom' => 1,
-		   'virt' => 1,
-		   'short' => 'd' });
+	&foreign_require("dovecot");
+	my $ver = &dovecot::get_dovecot_version();
+	if (&compare_version_numbers($ver, 2) >= 0) {
+		push(@rv, {'id' => 'dovecot',
+			   'dom' => 1,
+			   'virt' => 1,
+			   'short' => 'd' });
+		}
 	}
 if ($config{'mail'} && $mail_system == 0) {
 	push(@rv, {'id' => 'postfix',
@@ -449,9 +453,6 @@ my $configfile = &dovecot::get_config_file();
 my $dovedir = $configfile;
 $dovedir =~ s/\/([^\/]+)$//;
 my $conf = &dovecot::get_config();
-my $v2 = &dovecot::find_value("ssl_cert", $conf, 2, "") ? 1 :
-         &dovecot::find_value("ssl_cert_file", $conf, 2, "") ? 0 :
-	 &dovecot::get_dovecot_version() >= 2 ? 1 : 0;
 my $cfile = &dovecot::find_value("ssl_cert_file", $conf, 0, "") ||
 	 &dovecot::find_value("ssl_cert", $conf, 0, "");
 my $kfile = &dovecot::find_value("ssl_key_file", $conf, 0, "") ||
@@ -469,12 +470,12 @@ $kfile ||= "$dovedir/dovecot.key.pem";
 
 # Break possible linkage to snakeoil cert and key
 foreach my $file ($cfile, $kfile) {
-    my $file_link = &resolve_links($file);
-    if ($file ne $file_link) {
-        &unlink_file($file);
-        &copy_source_dest($file_link, $file);
-        }
-    }
+	my $file_link = &resolve_links($file);
+	if ($file ne $file_link) {
+		&unlink_file($file);
+		&copy_source_dest($file_link, $file);
+		}
+	}
 
 # Copy cert into those files
 &$first_print($text{'copycert_dsaving'});
@@ -507,18 +508,10 @@ if ($cafile && $cadata) {
 	}
 
 # Update config with correct files
-if ($v2) {
-	# 2.0 and later format
-	&dovecot::save_directive($conf, "ssl_cert", "<".$cfile, "");
-	&dovecot::save_directive($conf, "ssl_key", "<".$kfile, "");
-	if ($cafile) {
-		&dovecot::save_directive($conf, "ssl_ca", "<".$cafile, "");
-		}
-	}
-else {
-	# Pre-2.0 format
-	&dovecot::save_directive($conf, "ssl_cert_file", $cfile, "");
-	&dovecot::save_directive($conf, "ssl_key_file", $kfile, "");
+&dovecot::save_directive($conf, "ssl_cert", "<".$cfile, "");
+&dovecot::save_directive($conf, "ssl_key", "<".$kfile, "");
+if ($cafile) {
+	&dovecot::save_directive($conf, "ssl_ca", "<".$cafile, "");
 	}
 &$second_print(&text($cadata ? 'copycert_dsaved2' : 'copycert_dsaved',
 		     "<tt>$cfile</tt>", "<tt>$kfile</tt>"));
@@ -530,15 +523,6 @@ if (&dovecot::find("ssl_disable", $conf, 2)) {
 	}
 else {
 	&dovecot::save_directive($conf, "ssl", "yes", "");
-	}
-if (&dovecot::get_dovecot_version() < 2) {
-	# Add imaps and pop3s protocols ..
-	$protos = &dovecot::find_value("protocols", $conf, 0, "");
-	@protos = split(/\s+/, $protos);
-	%protos = map { $_, 1 } @protos;
-	push(@protos, "imaps") if (!$protos{'imaps'} && $protos{'imap'});
-	push(@protos, "pop3s") if (!$protos{'pop3s'} && $protos{'pop3'});
-	&dovecot::save_directive($conf, "protocols", join(" ", @protos), "");
 	}
 
 # Enable PCI-compliant ciphers
