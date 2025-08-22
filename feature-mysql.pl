@@ -1550,6 +1550,9 @@ else {
 			$count++;
 			}
 		};
+	if ($@) {
+		$size = $count = undef;
+		}
 	}
 local @tables;
 if (!$sizeonly) {
