@@ -2216,6 +2216,8 @@ my $tmpl = &get_template($d->{'template'});
 # Check if dovecot is installed and supports this feature
 return -1 if (!&foreign_installed("dovecot"));
 &foreign_require("dovecot");
+my $ver = &dovecot::get_dovecot_version();
+return -1 if ($ver < 2);
 
 my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
@@ -2440,6 +2442,8 @@ sub get_dovecot_ssl_cert
 my ($d) = @_;
 return ( ) if (!&foreign_installed("dovecot"));
 &foreign_require("dovecot");
+my $ver = &dovecot::get_dovecot_version();
+return ( ) if ($ver < 2);
 my $conf = &dovecot::get_config();
 my @rv = &get_dovecot_ssl_cert_name($d, $conf);
 @rv = &get_dovecot_ssl_cert_ip($d, $conf) if (!@rv);
