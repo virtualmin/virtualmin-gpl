@@ -325,7 +325,7 @@ else {
 		&write_backup_log(\@doms, $dest, $in{'increment'}, $start_time,
 				  $size, $ok, "cgi", $output, $errdoms,
 				  undef, $key, $sched ? $sched->{'id'} : undef,
-				  $in{'fmt'}, 0);
+				  $in{'fmt'}, 0, undef, $sched->{'desc'});
 		}
 	&run_post_actions();
 	if (!$ok) {

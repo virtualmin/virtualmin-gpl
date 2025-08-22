@@ -9,7 +9,7 @@ return &ui_select($name, $value,
 		  [ [ "*", $text{'config_deftheme'} ],
 		    [ "", $text{'config_oldtheme'} ],
 		    map { [ $_->{'dir'}, $_->{'desc'} ] }
-			  &webmin::list_themes() ]);
+			  &webmin::list_visible_themes() ]);
 }
 
 sub parse_theme

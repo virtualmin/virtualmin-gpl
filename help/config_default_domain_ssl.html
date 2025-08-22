@@ -1,10 +1,11 @@
-<header>Setup Let's Encrypt certificate for hostname?</header>
+<header>Setup SSL certificate from provider for hostname?</header>
 
-When enabled, Virtualmin will attempt to automatically set up a valid Let's
-Encrypt SSL certificate for the hostname during the next configuration
-check.
-<p>
-If successful, this SSL certificate will be used as the default for all
+When enabled, Virtualmin will try to automatically set up a valid SSL
+certificate with the default SSL provider for the hostname during the next
+configuration check.<p>
+
+If successful, this SSL certificate will be used as the fallback for all
 services that do not have their own SSL certificate configured. <p>
 
-If the system's hostname changes, it will be automatically detected and updated.
+If the system's hostname changes, it will be automatically detected and updated
+upon configuration check.

@@ -20982,13 +20982,13 @@ my $setup_source = $0;
 
 # Work out username / etc
 my ($user, $try1, $try2);
-$user = "_default_hostname";
+$user = "_hostname";
 if (defined(getpwnam($user))) {
 	($user, $try1, $try2) = &unixuser_name($system_host_name);
 	}
 $user || return &$err(&text('setup_eauto', $try1, $try2));
 my ($group, $gtry1, $gtry2);
-$group = "_default_hostname";
+$group = "_hostname";
 if (defined(getgrnam($group))) {
 	($group, $gtry1, $gtry2) = &unixgroup_name($system_host_name, $user);
 	}
@@ -21075,8 +21075,7 @@ return &$err(join(" ", @warns)) if (@warns);
 # Create the server
 &push_all_print();
 &set_all_null_print();
-my ($rs) = &create_virtual_server(
-	\%dom, undef, undef, 1, 0, $pass, $dom{'owner'});
+my ($rs) = &create_virtual_server(\%dom, undef, undef, 1, 0, $pass, "");
 &pop_all_print();
 if ($rs && ref($rs) ne 'HASH') {
 	&unlock_domain(\%dom);

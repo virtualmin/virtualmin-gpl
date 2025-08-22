@@ -375,8 +375,8 @@ foreach my $m ("mysql", "postgresql", "ldap-client", "ldap-server",
 		}
 	}
 
-# Always update outdated (lower than v3.3)
-# Virtualmin default default page
+# Always update outdated (lower than v8.0)
+# Virtualmin Welcome Page
 my $readdir = sub {
     my ($dir) = @_;
     my @hdirs;
@@ -405,19 +405,19 @@ foreach my $d (@doms) {
 			# extra check to make sure we have a needed file
 			$l = substr($l, 0, $lims);
 
-			# Test to make sure that given file is Virtualmin website default page
+			# Test to make sure that given file is Virtualmin website welcome page
 			$efix++ if (!$efix && $l =~ /iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/);
 			if ($efix == 1 &&
-				$l =~ /\*\s(Virtualmin\sLanding|Website\sDefault\sPage|Virtualmin\s+Default\s+Page)\sv([\d+\.]+)$/) {
+				$l =~ /\*\s(Virtualmin\sLanding|Website\sDefault\sPage|Virtualmin\s+Default\s+Page|Virtualmin\s+Welcome\s+Page)\sv([\d+\.]+)$/) {
 				my $tmplver = $2;
-				$efix++ if ($tmplver && &compare_version_numbers($tmplver, '<=', '3.2'));
+				$efix++ if ($tmplver && &compare_version_numbers($tmplver, '<', '8.0'));
 				}
 			$efix++ if ($efix == 2 && $l =~ /\*\sCopyright\s+[\d]{4}\sVirtualmin(?:,\s+Inc\.)?$/);
 			$efix++ if ($efix == 3 && $l =~ /\*\sLicensed\sunder\sMIT$/);
 			}
 
 		# After existing file is read and verified to be old
-		# Virtualmin default page replace it with new one
+		# Virtualmin welcome page replace it with new one
 		if ($efix == 4) {
 			my $domtmplfile = "$default_content_dir/index.html";
 			next if (!-r $domtmplfile);
