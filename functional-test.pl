@@ -6364,7 +6364,7 @@ $webmin_tests = [
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/edit_database.cgi?dom=\$DOMAIN_ID\\&type=mysql\\&name=${test_domain_db}_junk",
 	  'grep' => [ '<body', '</body>', 'Delete This Database',
-		      'Manage Database' ],
+		      'Edit Database' ],
 	},
 
 	# Delete the database
@@ -6650,7 +6650,7 @@ $owner_tests = [
 	{ 'command' => $owner_webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/edit_database.cgi?dom=\$DOMAIN_ID\\&type=mysql\\&name=${test_domain_db}_junk",
 	  'grep' => [ '<body', '</body>', 'Delete This Database',
-		      'Manage Database' ],
+		      'Edit Database' ],
 	},
 
 	# Delete the database
