@@ -2261,6 +2261,7 @@ if (&foreign_check("dovecot")) {
 	&foreign_require("dovecot");
 	local $conf = &dovecot::get_config();
 	local $loc = &dovecot::find_value("mail_location", $conf);
+	$loc ||= &dovecot::find_value("mail_path", $conf);
 	$loc ||= &dovecot::find_value("default_mail_env", $conf);
 	local @doves;
 	if ($loc =~ /INDEX=([^:]+)\/%u/) {
@@ -2309,6 +2310,7 @@ if (&foreign_check("dovecot")) {
 	&foreign_require("dovecot");
 	local $conf = &dovecot::get_config();
 	local $loc = &dovecot::find_value("mail_location", $conf);
+	$loc ||= &dovecot::find_value("mail_path", $conf);
 	$loc ||= &dovecot::find_value("default_mail_env", $conf);
 	local @doves;
 	if ($loc =~ /INDEX=([^:]+)\/%u/) {
@@ -2855,6 +2857,8 @@ if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 	local $conf = &dovecot::get_config();
 	local $env = &dovecot::find("mail_location", $conf, 2) ?
 			&dovecot::find_value("mail_location", $conf) :
+		     &dovecot::find("mail_path", $conf, 2) ?
+			&dovecot::find_value("mail_path", $conf) :
 			&dovecot::find_value("default_mail_env", $conf);
 	if ($env =~ /:CONTROL=([^:]+)\/%u/) {
 		local $control = $1;
@@ -3492,6 +3496,8 @@ if (-r $file."_control" && &foreign_check("dovecot") &&
         local $conf = &dovecot::get_config();
 	local $env = &dovecot::find("mail_location", $conf, 2) ?
                         &dovecot::find_value("mail_location", $conf) :
+		     &dovecot::find("mail_path", $conf, 2) ?
+                        &dovecot::find_value("mail_path", $conf) :
                         &dovecot::find_value("default_mail_env", $conf);
 	if ($env =~ /:CONTROL=([^:]+)\/%u/) {
 		# Local dovecot specifies a control file location
