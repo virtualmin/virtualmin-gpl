@@ -347,7 +347,7 @@ if ($onlydoms) {
 my %mods;
 foreach my $avail (split(/\s+/, $tmpl->{'avail'})) {
 	my ($m, $a) = split(/=/, $avail, 2);
-	if ($a && &foreign_check($a)) {
+	if ($a) {
 		$mods{$m} = $a;
 		}
 	}
@@ -939,6 +939,7 @@ else {
 	}
 
 # Finally, override in settings from template Webmin group
+@mods = grep { &foreign_check($_) } @mods;
 my @ownmods = @mods;
 if ($tmpl->{'webmin_group'} ne 'none') {
 	my ($group) = grep { $_->{'name'} eq $tmpl->{'webmin_group'} }
