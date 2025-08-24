@@ -33,13 +33,27 @@ push(@dnames, "*.".$d->{'dom'}) if ($in{'dwild'});
 my $fdnames = &filter_ssl_wildcards(\@dnames);
 @dnames = @$fdnames;
 
+# Work out filtering mode
+if ($in{'hostfilter'} == 0) {
+	$nodnscheck = 1;
+	$subset = 0;
+	}
+elsif ($in{'hostfilter'} == 1) {
+	$nodnscheck = 0;
+	$subset = 0;
+	}
+else {
+	$nodnscheck = 1;
+	$subset = 1;
+	}
+
 if ($in{'only'}) {
 	# Just update renewal date and domains
 	$d->{'letsencrypt_dname'} = $custom_dname;
 	$d->{'letsencrypt_dwild'} = $in{'dwild'};
 	$d->{'letsencrypt_renew'} = $in{'renew'};
-	$d->{'letsencrypt_nodnscheck'} = !$in{'dnscheck'};
-	$d->{'letsencrypt_subset'} = $in{'subset'};
+	$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
+	$d->{'letsencrypt_subset'} = $subset;
 	$d->{'letsencrypt_email'} = $in{'email'};
 	$d->{'letsencrypt_id'} = $in{'acme'} if (defined($in{'acme'}));
 	&save_domain($d);
@@ -155,7 +169,7 @@ else {
 	$before = &before_letsencrypt_website($d);
 	($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 					$d, \@dnames, 0, undef, undef,
-					$in{'ctype'}, $acme, $in{'subset'});
+					$in{'ctype'}, $acme, $subset);
 	&after_letsencrypt_website($d, $before);
 	if (!$ok) {
 		# Always store last Certbot error
@@ -194,8 +208,8 @@ else {
 		$d->{'letsencrypt_ctype'} = $in{'ctype'} =~ /^ec/ ? "ecdsa" : "rsa";
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_success'} = time();
-		$d->{'letsencrypt_nodnscheck'} = !$in{'dnscheck'};
-		$d->{'letsencrypt_subset'} = $in{'subset'};
+		$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
+		$d->{'letsencrypt_subset'} = $subset;
 		$d->{'letsencrypt_email'} = $in{'email'};
 		$d->{'letsencrypt_id'} = $acme->{'id'} if ($acme);
 		$d->{'letsencrypt_last_id'} = $d->{'letsencrypt_id'};
