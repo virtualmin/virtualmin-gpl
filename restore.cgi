@@ -376,6 +376,7 @@ else {
 			&theme_post_save_domain($d,
 				$d->{'missing'} ? 'create' : 'modify');
 			}
+		last; # No need to call for each domain
 		}
 	}
 
