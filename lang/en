@@ -6278,7 +6278,11 @@ maillog_ok0=No mail server log file was found on your system! Searches of the lo
 maillog_ok1=Virtualmin has not yet initialized your mail server log cache file. The first search may be slow.
 maillog_showspam=Show spam?
 maillog_showvirus=Show viruses?
-maillog_bad=Exclusions
+maillog_bad=Verdicts to show
+maillog_cls=Verdict
+maillog_cspam=Spam
+maillog_cvirus=Virus
+maillog_cok=OK
 
 viewmaillog_err=Failed to display logged message
 viewmaillog_egone=No longer in log!
