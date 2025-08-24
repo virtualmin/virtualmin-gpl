@@ -8929,7 +8929,7 @@ foreach my $dd (@alldoms) {
 		# Stop any processes belonging to installed scripts, such
 		# as Ruby on Rails mongrels
 		local $done_stopscripts;
-		if (!$dd->{'alias'} && defined(&list_domain_scripts)) {
+		if (!$dd->{'alias'}) {
 			foreach my $sinfo (&list_domain_scripts($dd)) {
 				local $script = &get_script($sinfo->{'name'});
 				local $sfunc = $script->{'stop_func'};
@@ -14896,7 +14896,7 @@ foreach my $f (&list_feature_plugins(1)) {
 $first_print = $old_first_print if ($old_first_print);
 
 # Fix script installer paths in all domains
-if (defined(&list_domain_scripts) && !$d->{'alias'}) {
+if (!$d->{'alias'}) {
 	&$first_print($text{'rename_scripts'});
 	for(my $i=0; $i<@doms; $i++) {
 		local ($olddir, $newdir) =
@@ -15141,24 +15141,22 @@ foreach $f (&list_feature_plugins(1)) {
 $first_print = $old_first_print if ($old_first_print);
 
 # Fix script installer paths in all domains
-if (defined(&list_domain_scripts)) {
-	&$first_print($text{'rename_scripts'});
-	for(my $i=0; $i<@doms; $i++) {
-		local ($olddir, $newdir) =
-		    ($olddoms[$i]->{'home'}, $doms[$i]->{'home'});
-		foreach $sinfo (&list_domain_scripts($doms[$i])) {
-			$changed = 0;
-			if ($olddir ne $newdir) {
-				# Fix directory
-				$changed++
-				   if ($sinfo->{'opts'}->{'dir'} =~
-				       s/^\Q$olddir\E\//$newdir\//);
-				}
-			&save_domain_script($doms[$i], $sinfo) if ($changed);
+&$first_print($text{'rename_scripts'});
+for(my $i=0; $i<@doms; $i++) {
+	local ($olddir, $newdir) =
+	    ($olddoms[$i]->{'home'}, $doms[$i]->{'home'});
+	foreach $sinfo (&list_domain_scripts($doms[$i])) {
+		$changed = 0;
+		if ($olddir ne $newdir) {
+			# Fix directory
+			$changed++
+			   if ($sinfo->{'opts'}->{'dir'} =~
+			       s/^\Q$olddir\E\//$newdir\//);
 			}
+		&save_domain_script($doms[$i], $sinfo) if ($changed);
 		}
-	&$second_print($text{'setup_done'});
 	}
+&$second_print($text{'setup_done'});
 
 # Save the domain objects
 &$first_print($text{'save_domain'});
@@ -15669,37 +15667,35 @@ foreach $f (&list_feature_plugins(1)) {
 	}
 
 # Fix script installer paths in all domains
-if (defined(&list_domain_scripts)) {
-	&$first_print($text{'rename_scripts'});
-	for(my $i=0; $i<@doms; $i++) {
-		my ($olddir, $newdir) =
-		    ($olddoms[$i]->{'home'}, $doms[$i]->{'home'});
-		my ($olddname, $newdname) =
-		    ($olddoms[$i]->{'dom'}, $doms[$i]->{'dom'});
-		foreach my $sinfo (&list_domain_scripts($doms[$i])) {
-			my $changed = 0;
-			if ($olddir ne $newdir) {
-				# Fix directory
-				$changed++ if ($sinfo->{'opts'}->{'dir'} =~
-				       	       s/^\Q$olddir\E\//$newdir\//);
-				}
-			if ($olddname ne $newdname) {
-				# Fix domain in URL
-				$changed++ if ($sinfo->{'url'} =~
-					       s/\Q$olddname\E/$newdname/);
-				}
-			if (!$info{'opts'}->{'dir'} ||
-			    -d $info{'opts'}->{'dir'}) {
-				# list_domain_scripts will set deleted flag
-				# due to home directory move, so fix it now that
-				# script dir has been corrected
-				$sinfo->{'deleted'} = 0;
-				}
-			&save_domain_script($doms[$i], $sinfo) if ($changed);
+&$first_print($text{'rename_scripts'});
+for(my $i=0; $i<@doms; $i++) {
+	my ($olddir, $newdir) =
+	    ($olddoms[$i]->{'home'}, $doms[$i]->{'home'});
+	my ($olddname, $newdname) =
+	    ($olddoms[$i]->{'dom'}, $doms[$i]->{'dom'});
+	foreach my $sinfo (&list_domain_scripts($doms[$i])) {
+		my $changed = 0;
+		if ($olddir ne $newdir) {
+			# Fix directory
+			$changed++ if ($sinfo->{'opts'}->{'dir'} =~
+				       s/^\Q$olddir\E\//$newdir\//);
 			}
+		if ($olddname ne $newdname) {
+			# Fix domain in URL
+			$changed++ if ($sinfo->{'url'} =~
+				       s/\Q$olddname\E/$newdname/);
+			}
+		if (!$info{'opts'}->{'dir'} ||
+		    -d $info{'opts'}->{'dir'}) {
+			# list_domain_scripts will set deleted flag
+			# due to home directory move, so fix it now that
+			# script dir has been corrected
+			$sinfo->{'deleted'} = 0;
+			}
+		&save_domain_script($doms[$i], $sinfo) if ($changed);
 		}
-	&$second_print($text{'setup_done'});
 	}
+&$second_print($text{'setup_done'});
 
 # Fix backup schedule and key owners
 if (!$oldd{'parent'}) {
@@ -19735,7 +19731,7 @@ foreach my $f (@plugins) {
 # Fix script installer paths in all domains
 local $scriptsrc = "$script_log_directory/$oldd->{'id'}";
 local $scriptdest = "$script_log_directory/$d->{'id'}";
-if (defined(&list_domain_scripts) && -d $scriptsrc) {
+if (-d $scriptsrc) {
 	&$first_print($text{'clone_scripts'});
 	&copy_source_dest($scriptsrc, $scriptdest);
 	local ($olddir, $newdir) = ($oldd->{'home'}, $d->{'home'});

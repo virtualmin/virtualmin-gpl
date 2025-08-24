@@ -52,9 +52,7 @@ if ($type) {
 	}
 if ($multiline) {
 	# Show each database on a separate line
-	if (defined(&list_domain_scripts)) {
-		@scripts = &list_domain_scripts($d);
-		}
+	@scripts = &list_domain_scripts($d);
 	foreach $db (@dbs) {
 		print "$db->{'name'}\n";
 		print "    Type: $db->{'type'}\n";
