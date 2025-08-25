@@ -372,10 +372,11 @@ else {
 
 	# Call any theme post command
 	foreach my $d (@doms) {
-		if (defined(&theme_post_save_domain)) {
+		if (!$log->{'plugged'} && defined(&theme_post_save_domain)) {
 			&theme_post_save_domain($d,
 				$d->{'missing'} ? 'create' : 'modify');
 			}
+		last; # No need to call for each domain
 		}
 	}
 

@@ -55,8 +55,8 @@ $curl_command = "curl --fail ";
 $migration_dir = "/usr/local/webadmin/virtualmin/migration";
 $migration_cpanel_domain = "hyccchina.com";
 $migration_cpanel = "$migration_dir/$migration_cpanel_domain.cpanel.tar.gz";
-$migration_plesk_domain = "requesttosend.com";
-$migration_plesk = "$migration_dir/$migration_plesk_domain.plesk.txt";
+$migration_plesk_domain = "urbaman.it";
+$migration_plesk = "$migration_dir/$migration_plesk_domain.plesk.tar";
 $test_backup_file = "/tmp/$test_domain.tar.gz";
 $test_zip_backup_file = "/tmp/$test_domain.zip";
 $test_tar_backup_file = "/tmp/$test_domain.tar";
@@ -2454,9 +2454,9 @@ $migrate_tests = [
 		      [ 'domain', $migration_plesk_domain ],
 		      [ 'pass', 'smeg' ] ],
 	  'grep' => [ 'successfully migrated\s+:\s+'.$migration_plesk_domain,
-		      'migrated\s+3\s+users',
+		      'migrated\s+22\s+users',
 		      'migrated\s+1\s+alias',
-		      'migrated\s+1\s+databases,\s+and\s+created\s+1\s+user',
+		      'migrated\s+2\s+databases,\s+and\s+created\s+2\s+user',
 		    ],
 	  'migrate' => 'plesk',
 	  'timeout' => 360,
@@ -2467,8 +2467,8 @@ $migrate_tests = [
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'domain', $migration_plesk_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ 'Username: rtsadmin',
-		      'Features: unix dir dns mail web webalizer logrotate mysql spam virus',
+	  'grep' => [ 'Username: urbaman',
+		      'Features: unix dir dns mail web webalizer logrotate mysql',
 		    ],
 	  'migrate' => 'plesk',
 	},
@@ -6364,7 +6364,7 @@ $webmin_tests = [
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/edit_database.cgi?dom=\$DOMAIN_ID\\&type=mysql\\&name=${test_domain_db}_junk",
 	  'grep' => [ '<body', '</body>', 'Delete This Database',
-		      'Manage Database' ],
+		      'Edit Database' ],
 	},
 
 	# Delete the database
@@ -6650,7 +6650,7 @@ $owner_tests = [
 	{ 'command' => $owner_webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/edit_database.cgi?dom=\$DOMAIN_ID\\&type=mysql\\&name=${test_domain_db}_junk",
 	  'grep' => [ '<body', '</body>', 'Delete This Database',
-		      'Manage Database' ],
+		      'Edit Database' ],
 	},
 
 	# Delete the database

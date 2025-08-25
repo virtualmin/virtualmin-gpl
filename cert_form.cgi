@@ -578,14 +578,14 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 				    [ 0, $text{'cert_connectivity0'} ] ]));
 			}
 
-		# Check DNS lookup?
-		print &ui_table_row($text{'cert_dnscheck'},
-			&ui_yesno_radio("dnscheck",
-					!$d->{'letsencrypt_nodnscheck'}));
-
-		# Skip unverifiable hostnames?
-		print &ui_table_row($text{'cert_subset'},
-			&ui_yesno_radio("subset", $d->{'letsencrypt_subset'}));
+		# Hostname filter mode
+		my $filter = $d->{'letsencrypt_subset'} ? 2 :
+			     !$d->{'letsencrypt_nodnscheck'} ? 1 : 0;
+		print &ui_table_row($text{'cert_hostfilter'},
+			&ui_radio("hostfilter", $filter,
+				  [ [ 0, $text{'cert_hostfilter0'}."<br>" ],
+				    [ 1, $text{'cert_hostfilter1'}."<br>" ],
+				    [ 2, $text{'cert_hostfilter2'} ] ]));
 
 		# Certificate type, if supported
 		if (&letsencrypt_supports_ec()) {
