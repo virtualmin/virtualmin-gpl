@@ -2224,12 +2224,12 @@ my $cfile = &dovecot::get_config_file();
 
 # Check if dovecot is using SSL globally
 my $conf = &dovecot::get_config();
-my $sslyn = &dovecot::find_value("ssl", $conf);
+my $sslyn = &dovecot_find_value("ssl", $conf);
 if ($sslyn !~ /yes|required/i) {
 	&unlock_file($cfile);
 	return 0;
 	}
-my $ssldis = &dovecot::find_value("ssl_disable", $conf);
+my $ssldis = &dovecot_find_value("ssl_disable", $conf);
 if ($ssldis =~ /yes/i) {
 	&unlock_file($cfile);
 	return 0;
@@ -2277,7 +2277,7 @@ foreach my $ip (@ips) {
 			       'section' => 1,
 			       'members' => [],
 			       'file' => $cfile };
-			&dovecot::create_section($conf, $l);
+			&dovecot_create_section($conf, $l);
 			push(@$conf, $l);
 			&flush_file_lines($l->{'file'}, undef, 1);
 			}
@@ -2297,17 +2297,17 @@ foreach my $ip (@ips) {
 				  'sectionname' => 'local',
 				  'sectionvalue' => $ip,
 				  'file' => $l->{'file'} };
-			&dovecot::create_section($conf, $imap, $l);
+			&dovecot_create_section($conf, $imap, $l);
 			push(@{$l->{'members'}}, $imap);
 			push(@$conf, $imap);
 			$l->{'eline'} = $imap->{'eline'}+1;
 			}
 		else {
-			&dovecot::save_directive($imap->{'members'},
+			&dovecot_save_directive($imap->{'members'},
 				"ssl_cert", "<".$d->{'ssl_combined'});
-			&dovecot::save_directive($imap->{'members'},
+			&dovecot_save_directive($imap->{'members'},
 				"ssl_key", "<".$d->{'ssl_key'});
-			&dovecot::save_directive($imap->{'members'},
+			&dovecot_save_directive($imap->{'members'},
 				"ssl_ca", undef);
 			}
 		if (!$pop3) {
@@ -2324,16 +2324,16 @@ foreach my $ip (@ips) {
 				  'sectionname' => 'local',
 				  'sectionvalue' => $ip,
 				  'file' => $l->{'file'} };
-			&dovecot::create_section($conf, $pop3, $l);
+			&dovecot_create_section($conf, $pop3, $l);
 			push(@{$l->{'members'}}, $pop3);
 			push(@$conf, $pop3);
 			}
 		else {
-			&dovecot::save_directive($pop3->{'members'},
+			&dovecot_save_directive($pop3->{'members'},
 				"ssl_cert", "<".$d->{'ssl_combined'});
-			&dovecot::save_directive($pop3->{'members'},
+			&dovecot_save_directive($pop3->{'members'},
 				"ssl_key", "<".$d->{'ssl_key'});
-			&dovecot::save_directive($pop3->{'members'},
+			&dovecot_save_directive($pop3->{'members'},
 				"ssl_ca", undef);
 			}
 		&flush_file_lines($imap->{'file'}, undef, 1);
@@ -2378,11 +2378,11 @@ if (!$d->{'virt'}) {
 			my ($l) = grep { $_->{'value'} eq $n } @loc;
 			if ($l) {
 				# Already exists, so update paths
-				&dovecot::save_directive($l->{'members'},
+				&dovecot_save_directive($l->{'members'},
 					"ssl_cert", "<".$d->{'ssl_combined'});
-				&dovecot::save_directive($l->{'members'},
+				&dovecot_save_directive($l->{'members'},
 					"ssl_key", "<".$d->{'ssl_key'});
-				&dovecot::save_directive($l->{'members'},
+				&dovecot_save_directive($l->{'members'},
 					"ssl_ca", undef);
 				&flush_file_lines($l->{'file'}, undef, 1);
 				}
@@ -2404,7 +2404,7 @@ if (!$d->{'virt'}) {
 						],
 					  'file' => $cfile };
 				my ($plocal) = grep { $_->{'value'} eq $pdname } @loc;
-				&dovecot::create_section($conf, $l, undef,
+				&dovecot_create_section($conf, $l, undef,
 							 $plocal);
 				push(@$conf, $l);
 				&flush_file_lines($l->{'file'}, undef, 1);
@@ -2466,8 +2466,11 @@ my ($imap) = grep { $_->{'name'} eq 'protocol' &&
 		    $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
 return ( ) if (!$imap);
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$imap->{'members'}};
-return ( ) if (!$mems{'ssl_cert'});
-my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, $mems{'ssl_ca'},
+my $ssl_cert = &dovecot_param("ssl_cert");
+return ( ) if (!$mems{$ssl_cert});
+my $ssl_key = &dovecot_param("ssl_key");
+my $ssl_ca = &dovecot_param("ssl_ca");
+my @rv = ( $mems{$ssl_cert}, $mems{$ssl_key}, $mems{$ssl_ca},
 	   $d->{'ip'}, undef );
 foreach my $r (@rv) {
 	$r =~ s/^<//;
@@ -2498,8 +2501,11 @@ my @loc = grep { $_->{'name'} eq 'local_name' &&
 my ($l) = grep { &hostname_under_domain($d, $_->{'value'}) } @loc;
 return ( ) if (!$l);
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$l->{'members'}};
-return ( ) if (!$mems{'ssl_cert'});
-my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, $mems{'ssl_ca'},
+my $ssl_cert = &dovecot_param("ssl_cert");
+return ( ) if (!$mems{$ssl_cert});
+my $ssl_key = &dovecot_param("ssl_key");
+my $ssl_ca = &dovecot_param("ssl_ca");
+my @rv = ( $mems{$ssl_cert}, $mems{$ssl_key}, $mems{$ssl_ca},
 	   undef, $d->{'dom'} );
 foreach my $r (@rv) {
 	$r =~ s/^<//;

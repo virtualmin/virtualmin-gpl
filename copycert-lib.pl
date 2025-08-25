@@ -172,13 +172,13 @@ if (&foreign_installed("dovecot")) {
 	# Also add global Dovecot cert
 	&foreign_require("dovecot");
 	my $conf = &dovecot::get_config();
-	my $cfile = &dovecot::find_value("ssl_cert_file", $conf, 0, "") ||
-		    &dovecot::find_value("ssl_cert", $conf, 0, "");
+	my $cfile = &dovecot_find_value("ssl_cert_file", $conf, 0, "") ||
+		    &dovecot_find_value("ssl_cert", $conf, 0, "");
 	$cfile =~ s/^<//;
-	my $kfile = &dovecot::find_value("ssl_key_file", $conf, 0, "") ||
-		    &dovecot::find_value("ssl_key", $conf, 0, "");
+	my $kfile = &dovecot_find_value("ssl_key_file", $conf, 0, "") ||
+		    &dovecot_find_value("ssl_key", $conf, 0, "");
 	$kfile =~ s/^<//;
-	$cafile = &dovecot::find_value("ssl_ca", $conf, 0, "");
+	$cafile = &dovecot_find_value("ssl_ca", $conf, 0, "");
 	$cafile =~ s/^<//;
 	if ($cfile) {
 		if (!$cafile && &cert_file_split($cfile) > 1) {
@@ -453,11 +453,11 @@ my $configfile = &dovecot::get_config_file();
 my $dovedir = $configfile;
 $dovedir =~ s/\/([^\/]+)$//;
 my $conf = &dovecot::get_config();
-my $cfile = &dovecot::find_value("ssl_cert_file", $conf, 0, "") ||
-	 &dovecot::find_value("ssl_cert", $conf, 0, "");
-my $kfile = &dovecot::find_value("ssl_key_file", $conf, 0, "") ||
-	 &dovecot::find_value("ssl_key", $conf, 0, "");
-my $cafile = &dovecot::find_value("ssl_ca", $conf, 0, "");
+my $cfile = &dovecot_find_value("ssl_cert_file", $conf, 0, "") ||
+	 &dovecot_find_value("ssl_cert", $conf, 0, "");
+my $kfile = &dovecot_find_value("ssl_key_file", $conf, 0, "") ||
+	 &dovecot_find_value("ssl_key", $conf, 0, "");
+my $cafile = &dovecot_find_value("ssl_ca", $conf, 0, "");
 $cfile =~ s/^<//;
 $kfile =~ s/^<//;
 $cafile =~ s/^<//;
@@ -508,21 +508,21 @@ if ($cafile && $cadata) {
 	}
 
 # Update config with correct files
-&dovecot::save_directive($conf, "ssl_cert", "<".$cfile, "");
-&dovecot::save_directive($conf, "ssl_key", "<".$kfile, "");
+&dovecot_save_directive($conf, "ssl_cert", "<".$cfile, "");
+&dovecot_save_directive($conf, "ssl_key", "<".$kfile, "");
 if ($cafile) {
-	&dovecot::save_directive($conf, "ssl_ca", "<".$cafile, "");
+	&dovecot_save_directive($conf, "ssl_ca", "<".$cafile, "");
 	}
 &$second_print(&text($cadata ? 'copycert_dsaved2' : 'copycert_dsaved',
 		     "<tt>$cfile</tt>", "<tt>$kfile</tt>"));
 
 # Make sure SSL is enabled
 &$first_print($text{'copycert_denabling'});
-if (&dovecot::find("ssl_disable", $conf, 2)) {
-	&dovecot::save_directive($conf, "ssl_disable", "no", "");
+if (&dovecot_find("ssl_disable", $conf, 2)) {
+	&dovecot_save_directive($conf, "ssl_disable", "no", "");
 	}
 else {
-	&dovecot::save_directive($conf, "ssl", "yes", "");
+	&dovecot_save_directive($conf, "ssl", "yes", "");
 	}
 
 # Enable PCI-compliant ciphers

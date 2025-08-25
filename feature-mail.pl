@@ -5955,10 +5955,10 @@ local $pop3_ssl = "no";
 if (&foreign_installed("dovecot")) {
 	&foreign_require("dovecot");
 	local $conf = &dovecot::get_config();
-	local $sslopt = &dovecot::find("ssl_disable", $conf, 2) ?
+	local $sslopt = &dovecot_find("ssl_disable", $conf, 2) ?
 			"ssl_disable" : "ssl";
 	if ($sslopt eq "ssl" &&
-	    &dovecot::find_value($sslopt, $conf) ne "no") {
+	    &dovecot_find_value($sslopt, $conf) ne "no") {
 		$imap_port = 993;
 		$pop3_port = 995;
 		$imap_type = "SSL";
@@ -5966,7 +5966,7 @@ if (&foreign_installed("dovecot")) {
 		$pop3_ssl = "yes";
 		}
 	elsif ($sslopt eq "ssl_disable" &&
-	       &dovecot::find_value($sslopt, $conf) ne "yes") {
+	       &dovecot_find_value($sslopt, $conf) ne "yes") {
 		$imap_port = 993;
 		$pop3_port = 995;
 		$imap_type = "SSL";
@@ -7118,6 +7118,48 @@ my $wkfile = $wkdir."/mta-sts.txt";
 -r $wkfile || return "Well-known file $wkfile does not exist";
 
 return undef;
+}
+
+# dovecot_param(param)
+# Returns the parameter depending on the version
+sub dovecot_param
+{
+my $param = shift;
+return $param unless (defined &dovecot::params);
+return &dovecot::params($param);
+}
+
+# dovecot_find(&@)
+# Version aware Dovecot find
+sub dovecot_find
+{
+return &dovecot::find_mapped(@_) if (defined &dovecot::find_mapped);
+return &dovecot::find(@_);
+}
+
+# dovecot_find_value(&@)
+# Version aware Dovecot find value
+sub dovecot_find_value
+{
+return &dovecot::find_value_mapped(@_) if (defined &dovecot::find_value_mapped);
+return &dovecot::find_value(@_);
+}
+
+# dovecot_save_directive(&@)
+# Version aware Dovecot save directive
+sub dovecot_save_directive
+{
+return &dovecot::save_directive_mapped(@_) if (defined &dovecot::save_directive_mapped);
+return &dovecot::save_directive(@_);
+}
+
+# dovecot_create_section(&@)
+# Version aware Dovecot section create
+sub dovecot_create_section
+{
+return &dovecot::create_section_mapped(@_)
+	if (defined &dovecot::create_section_mapped);
+return &dovecot::create_section(@_);
 }
 
 # get_dovecot_mail_location(&conf)
