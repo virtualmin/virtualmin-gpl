@@ -2259,11 +2259,9 @@ closedir(TEMP);
 # Remove Dovecot index files
 if (&foreign_check("dovecot")) {
 	&foreign_require("dovecot");
-	local $conf = &dovecot::get_config();
-	local $loc = &dovecot::find_value("mail_location", $conf);
-	$loc ||= &dovecot::find_value("mail_path", $conf);
-	$loc ||= &dovecot::find_value("default_mail_env", $conf);
-	local @doves;
+	my $conf = &dovecot::get_config();
+	my $loc = &get_dovecot_mail_location($conf);
+	my @doves;
 	if ($loc =~ /INDEX=([^:]+)\/%u/) {
 		push(@doves, $1);
 		}
@@ -2308,11 +2306,9 @@ if (!&mail_under_home()) {
 # Rename Dovecot index files
 if (&foreign_check("dovecot")) {
 	&foreign_require("dovecot");
-	local $conf = &dovecot::get_config();
-	local $loc = &dovecot::find_value("mail_location", $conf);
-	$loc ||= &dovecot::find_value("mail_path", $conf);
-	$loc ||= &dovecot::find_value("default_mail_env", $conf);
-	local @doves;
+	my $conf = &dovecot::get_config();
+	my $loc = &get_dovecot_mail_location($conf);
+	my @doves;
 	if ($loc =~ /INDEX=([^:]+)\/%u/) {
 		push(@doves, $1);
 		}
@@ -2854,12 +2850,8 @@ else {
 # Backup Dovecot control files, if in custom location
 if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 	&foreign_require("dovecot");
-	local $conf = &dovecot::get_config();
-	local $env = &dovecot::find("mail_location", $conf, 2) ?
-			&dovecot::find_value("mail_location", $conf) :
-		     &dovecot::find("mail_path", $conf, 2) ?
-			&dovecot::find_value("mail_path", $conf) :
-			&dovecot::find_value("default_mail_env", $conf);
+	my $conf = &dovecot::get_config();
+	my $loc = &get_dovecot_mail_location($conf);
 	if ($env =~ /:CONTROL=([^:]+)\/%u/) {
 		local $control = $1;
 		&$first_print($text{'backup_mailcontrol'});
@@ -3493,12 +3485,8 @@ if (-r $file."_cron") {
 if (-r $file."_control" && &foreign_check("dovecot") &&
 			  &foreign_installed("dovecot")) {
 	&foreign_require("dovecot");
-        local $conf = &dovecot::get_config();
-	local $env = &dovecot::find("mail_location", $conf, 2) ?
-                        &dovecot::find_value("mail_location", $conf) :
-		     &dovecot::find("mail_path", $conf, 2) ?
-                        &dovecot::find_value("mail_path", $conf) :
-                        &dovecot::find_value("default_mail_env", $conf);
+        my $conf = &dovecot::get_config();
+	my $loc = &get_dovecot_mail_location($conf);
 	if ($env =~ /:CONTROL=([^:]+)\/%u/) {
 		# Local dovecot specifies a control file location
 		local $control = $1;
@@ -7126,6 +7114,17 @@ my $wkfile = $wkdir."/mta-sts.txt";
 -r $wkfile || return "Well-known file $wkfile does not exist";
 
 return undef;
+}
+
+# get_dovecot_mail_location(&conf)
+# Returns the full mail location, including any options, from the Dovecot config
+sub get_dovecot_mail_location
+{
+my ($conf) = @_;
+my $loc = &dovecot::find_value("mail_location", $conf);
+$loc ||= &dovecot::find_value("mail_path", $conf);
+$loc ||= &dovecot::find_value("default_mail_env", $conf);
+return $loc;
 }
 
 $done_feature_script{'mail'} = 1;
