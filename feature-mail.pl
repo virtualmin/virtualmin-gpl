@@ -7103,10 +7103,14 @@ if ($p eq "web") {
 	&indexof('mta-sts.'.$d->{'dom'}, @sa) >= 0 ||
 		return "Apache is not configured to use mta-sts subdomain";
 	}
-else {
-	# XXX check nginx
+elsif ($p) {
+	if (!&plugin_defined($p, "feature_get_web_server_names")) {
+		return "Webserver plugin cannot supply list of hostnames";
+		}
+	my $sa = &plugin_call($p, "feature_get_web_server_names", $d);
+	&indexof('mta-sts.'.$d->{'dom'}, @$sa) >= 0 ||
+		return "Webserver is not configured to use mta-sts subdomain";
 	}
-
 
 # Check for special file
 my $wkdir = &public_html_dir($d)."/.well-known";
