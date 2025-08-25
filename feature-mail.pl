@@ -5986,7 +5986,8 @@ if (&foreign_installed("dovecot")) {
 		$pop3_ssl = "yes";
 		}
 	if ($imap_type ne "SSL" &&
-	    &dovecot::find_value("disable_plaintext_auth", $conf) ne "no") {
+	    (&dovecot::find_value("disable_plaintext_auth", $conf) ne "no" ||
+	     &dovecot::find_value("auth_allow_cleartext", $conf) eq "no")) {
 		# Force use of hashed passwords
 		$imap_enc = "password-encrypted";
 		}
