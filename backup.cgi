@@ -212,8 +212,8 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 		my $name;
 		if ($numb == 1) {
 			my $dom = $doms[0]->{'dom'};
-			$dom =~ s/[.-]+/_/g;
-			$name = "${time}_${dom}${feat}";
+			$dom =~ s/\./-/g;
+			$name = "${time}_${dom}${feat}_$host";
 			}
 		else {
 			my $scope;
@@ -223,7 +223,7 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 			else {
 				$scope = "${numb}-domains${feat}";
 				}
-			$host =~ s/[.-]+/_/g;
+			$host =~ s/\./-/g;
 			$name = "${time}_${scope}_$host";
 			}
 		$tempfile = $name . "." . $sfx;
