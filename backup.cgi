@@ -50,13 +50,14 @@ else {
 	}
 if ($in{'all'} == 1) {
 	# All domains
-	@doms = grep { &can_backup_domain($_, $acluser) } &list_domains();
+	@doms = grep { &can_backup_domain($_, $acluser) }
+		&list_visible_domains();
 	}
 elsif ($in{'all'} == 2) {
 	# All except selected
 	%exc = map { $_, 1 } split(/\s+/, $in{'doms'});
 	@doms = grep { &can_backup_domain($_, $acluser) &&
-		       !$exc{$_->{'id'}} } &list_domains();
+		       !$exc{$_->{'id'}} } &list_visible_domains();
 	if ($in{'parent'}) {
 		@doms = grep { !$_->{'parent'} || !$exc{$_->{'parent'}} } @doms;
 		}
