@@ -203,17 +203,30 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 		$temp = &transname().".".$sfx;
 		}
 	else {
-		my $hostname = &get_system_hostname();
-		$hostname =~ s/\./-/g;
-		my $filename = "$hostname+all-domains";
-		my $time = strftime("%Y-%m-%d-%H-%M", localtime);
-		$filename .= "-".$time;
-		my $filename_dom = "$doms[0]->{'dom'}-$time";
-		$filename_dom =~ s/\./-/g;
-		$tempfile = @doms == 1 ? $filename_dom
-				       : $filename;
-		$tempfile .= ".".$sfx;
-		$temp = &tempname($remote_user.":".$tempfile);
+		my $host = &get_system_hostname(1);
+		my $time = strftime("%Y%m%d-%H%M", localtime);
+		my $numb = scalar @doms;
+		my $feat = @vbs ? '+settings' : '';
+		var_dump(\@doms, 'doms');
+		my $name;
+		if ($numb == 1) {
+			my $dom = $doms[0]->{'dom'};
+			$dom =~ s/[.-]+/_/g;
+			$name = "${time}_${dom}${feat}";
+			}
+		else {
+			my $scope;
+			if ($in{'all'} == 1) {
+				$scope = "all-domains${feat}";
+				}
+			else {
+				$scope = "${numb}-domains${feat}";
+				}
+			$host =~ s/[.-]+/_/g;
+			$name = "${time}_${scope}_$host";
+			}
+		$tempfile = $name . "." . $sfx;
+		$temp = &tempname($remote_user . ":" . $tempfile);
 		}
 	if (@doms) {
 		# Pre-create temp file with correct permissions
