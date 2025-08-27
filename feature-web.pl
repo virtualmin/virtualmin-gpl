@@ -3097,7 +3097,7 @@ sub show_template_php
 my ($tmpl) = @_;
 my @fields = ( "web_phpver", "web_phpchildren", "web_phpchildren_def",
 	       "web_php_noedit",
-	       "php_fpm", "php_sock", "web_phpfpmtype",
+	       "php_fpm", "php_sock", "php_fpmtype",
 	       "php_log", "php_log_path", "php_log_path_def" );
 my $dis1 = &js_disable_inputs(\@fields, [ ]);
 my $dis2 = &js_disable_inputs([ ], \@fields);
