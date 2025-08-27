@@ -3897,6 +3897,7 @@ tmpl_php_vars=PHP configuration variables
 tmpl_ephp_var='$1' is not a valid PHP variable name
 tmpl_php_fpm=Additional PHP-FPM pool options
 tmpl_php_sock=PHP-FPM server connection
+tmpl_php_fpmtype=Default PHP-FPM process manager mode
 tmpl_php_sock0=TCP port
 tmpl_php_sock1=Unix socket file
 tmpl_php_log=Enable PHP logging?

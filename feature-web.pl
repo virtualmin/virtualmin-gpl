@@ -3096,8 +3096,9 @@ sub show_template_php
 {
 my ($tmpl) = @_;
 my @fields = ( "web_phpver", "web_phpchildren", "web_phpchildren_def",
-	       "web_php_noedit", "php_fpm", "php_sock", "php_log",
-	       "php_log_path", "php_log_path_def" );
+	       "web_php_noedit",
+	       "php_fpm", "php_sock", "web_phpfpmtype",
+	       "php_log", "php_log_path", "php_log_path_def" );
 my $dis1 = &js_disable_inputs(\@fields, [ ]);
 my $dis2 = &js_disable_inputs([ ], \@fields);
 
@@ -3161,6 +3162,14 @@ if (&indexof("fpm", &supported_php_modes()) >= 0) {
 		  [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ),
 		    [ 0, $text{'tmpl_php_sock0'} ],
 		    [ 1, $text{'tmpl_php_sock1'} ] ]));
+
+	# Default PHP-FPM process manager mode
+	print &ui_table_row(
+		&hlink($text{'tmpl_php_fpmtype'}, "phpmode_fpmtype"),
+		&ui_radio("php_fpmtype", $tmpl->{'php_fpmtype'},
+			  [ ['dynamic', '<tt>dynamic</tt>'],
+			    ['static', '<tt>static</tt>'],
+			    ['ondemand', '<tt>ondemand</tt>'] ]));
 	}
 
 # Default PHP log file
@@ -3264,6 +3273,7 @@ if ($in{'web_php_suexec'} ne '') {
 			$tmpl->{'php_fpm'} = 'none';
 			}
 		$tmpl->{'php_sock'} = $in{'php_sock'};
+		$tmpl->{'php_fpmtype'} = $in{'php_fpmtype'};		
 		}
 	$tmpl->{'php_log'} = $in{'php_log'};
 	$tmpl->{'php_log_path'} = $in{'php_log_path_def'} ? undef : $in{'php_log_path'};
