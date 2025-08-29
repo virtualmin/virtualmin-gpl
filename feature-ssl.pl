@@ -2450,9 +2450,12 @@ my ($imap) = grep { $_->{'name'} eq 'protocol' &&
 		    $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
 return ( ) if (!$imap);
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$imap->{'members'}};
-return ( ) if (!$mems{'ssl_cert'});
-my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, $mems{'ssl_ca'},
-	   $d->{'ip'}, undef );
+my @rv = ( $mems{'ssl_cert'} || $mems{'ssl_server_cert_file'},
+           $mems{'ssl_key'} || $mems{'ssl_server_key_file'},
+           $mems{'ssl_ca'},
+           $d->{'ip'},
+	   undef );
+return () if (!$rv[0]);
 foreach my $r (@rv) {
 	$r =~ s/^<//;
 	}
@@ -2482,9 +2485,12 @@ my @loc = grep { $_->{'name'} eq 'local_name' &&
 my ($l) = grep { &hostname_under_domain($d, $_->{'value'}) } @loc;
 return ( ) if (!$l);
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$l->{'members'}};
-return ( ) if (!$mems{'ssl_cert'});
-my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, $mems{'ssl_ca'},
-	   undef, $d->{'dom'} );
+my @rv = ( $mems{'ssl_cert'} || $mems{'ssl_server_cert_file'},
+	   $mems{'ssl_key'} || $mems{'ssl_server_key_file'},
+	   $mems{'ssl_ca'},
+	   undef,
+	   $d->{'dom'} );
+return () if (!$rv[0]);
 foreach my $r (@rv) {
 	$r =~ s/^<//;
 	}
