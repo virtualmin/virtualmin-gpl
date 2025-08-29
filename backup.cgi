@@ -50,13 +50,14 @@ else {
 	}
 if ($in{'all'} == 1) {
 	# All domains
-	@doms = grep { &can_backup_domain($_, $acluser) } &list_domains();
+	@doms = grep { &can_backup_domain($_, $acluser) }
+		&list_visible_domains();
 	}
 elsif ($in{'all'} == 2) {
 	# All except selected
 	%exc = map { $_, 1 } split(/\s+/, $in{'doms'});
 	@doms = grep { &can_backup_domain($_, $acluser) &&
-		       !$exc{$_->{'id'}} } &list_domains();
+		       !$exc{$_->{'id'}} } &list_visible_domains();
 	if ($in{'parent'}) {
 		@doms = grep { !$_->{'parent'} || !$exc{$_->{'parent'}} } @doms;
 		}
@@ -203,17 +204,30 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 		$temp = &transname().".".$sfx;
 		}
 	else {
-		my $hostname = &get_system_hostname();
-		$hostname =~ s/\./-/g;
-		my $filename = "$hostname+all-domains";
-		my $time = strftime("%Y-%m-%d-%H-%M", localtime);
-		$filename .= "-".$time;
-		my $filename_dom = "$doms[0]->{'dom'}-$time";
-		$filename_dom =~ s/\./-/g;
-		$tempfile = @doms == 1 ? $filename_dom
-				       : $filename;
-		$tempfile .= ".".$sfx;
-		$temp = &tempname($remote_user.":".$tempfile);
+		my $host = &get_system_hostname(1);
+		my $time = strftime("%Y%m%d-%H%M", localtime);
+		my $numb = scalar @doms;
+		my $feat = @vbs ? '+settings' : '';
+		var_dump(\@doms, 'doms');
+		my $name;
+		if ($numb == 1) {
+			my $dom = $doms[0]->{'dom'};
+			$dom =~ s/\./-/g;
+			$name = "${time}_${dom}${feat}_$host";
+			}
+		else {
+			my $scope;
+			if ($in{'all'} == 1) {
+				$scope = "all-domains${feat}";
+				}
+			else {
+				$scope = "${numb}-domains${feat}";
+				}
+			$host =~ s/\./-/g;
+			$name = "${time}_${scope}_$host";
+			}
+		$tempfile = $name . "." . $sfx;
+		$temp = &tempname($remote_user . ":" . $tempfile);
 		}
 	if (@doms) {
 		# Pre-create temp file with correct permissions

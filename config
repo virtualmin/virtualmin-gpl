@@ -244,6 +244,7 @@ phpchildren=
 combined_cert=0
 fcgiwrap=0
 php_sock=1
+php_fpmtype=dynamic
 bind_cloud_import=1
 bind_cloud_proxy=0
 letsencrypt_wild=0
