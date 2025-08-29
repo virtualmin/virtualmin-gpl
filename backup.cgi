@@ -208,7 +208,6 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 		my $time = strftime("%Y%m%d-%H%M", localtime);
 		my $numb = scalar @doms;
 		my $feat = @vbs ? '+settings' : '';
-		var_dump(\@doms, 'doms');
 		my $name;
 		if ($numb == 1) {
 			my $dom = $doms[0]->{'dom'};
