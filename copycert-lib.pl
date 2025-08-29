@@ -512,16 +512,10 @@ if ($cafile && $cadata) {
 	}
 
 # Update config with correct files
-if (&dovecot::version_atleast(2.4)) {
-	&dovecot::save_directive($conf, "ssl_server_cert_file", $cfile, "");
-	&dovecot::save_directive($conf, "ssl_server_key_file", $kfile, "");
-	}
-else {
-	&dovecot::save_directive($conf, "ssl_cert", "<".$cfile, "");
-	&dovecot::save_directive($conf, "ssl_key", "<".$kfile, "");
-	if ($cafile) {
-		&dovecot::save_directive($conf, "ssl_ca", "<".$cafile, "");
-		}
+&dovecot::save_directive($conf, &get_dovecot_ssl_dir("cert", $cfile), "");
+&dovecot::save_directive($conf, &get_dovecot_ssl_dir("key", $kfile), "");
+if ($cafile) {
+	&dovecot::save_directive($conf, &get_dovecot_ssl_dir("ca", $cafile),"");
 	}
 &$second_print(&text($cadata ? 'copycert_dsaved2' : 'copycert_dsaved',
 		     "<tt>$cfile</tt>", "<tt>$kfile</tt>"));

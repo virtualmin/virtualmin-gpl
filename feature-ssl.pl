@@ -2249,6 +2249,8 @@ if ($d->{'virt'}) {
 	push(@ips, $d->{'ip'});
 	push(@ips, "[".$d->{'ip6'}."]") if ($d->{'virt6'} && $d->{'ip6'});
 	}
+my ($cname, $cvalue) = &get_dovecot_ssl_dir("cert", $d->{'ssl_combined'});
+my ($kname, $kvalue) = &get_dovecot_ssl_dir("key", $d->{'ssl_key'});
 foreach my $ip (@ips) {
 	# Find the existing block for the IP
 	my @loc = grep { $_->{'name'} eq 'local' &&
@@ -2285,12 +2287,10 @@ foreach my $ip (@ips) {
 			$imap = { 'name' => 'protocol',
 				  'value' => 'imap',
 				  'members' => [
-					{ 'name' => 'ssl_cert',
-					  'value' => "<".$d->{'ssl_combined'},
-					},
-					{ 'name' => 'ssl_key',
-					  'value' => "<".$d->{'ssl_key'},
-					},
+					{ 'name' => $cname,
+					  'value' => $cvalue, },
+					{ 'name' => $kname,
+					  'value' => $kvalue, },
 					],
 				  'indent' => 1,
 				  'enabled' => 1,
@@ -2303,21 +2303,17 @@ foreach my $ip (@ips) {
 			$l->{'eline'} = $imap->{'eline'}+1;
 			}
 		else {
-			&dovecot::save_directive($imap->{'members'},
-				"ssl_cert", "<".$d->{'ssl_combined'});
-			&dovecot::save_directive($imap->{'members'},
-				"ssl_key", "<".$d->{'ssl_key'});
-			&dovecot::save_directive($imap->{'members'},
-				"ssl_ca", undef);
+			&dovecot::save_directive($imap->{'members'}, $cname, $cvalue);
+			&dovecot::save_directive($imap->{'members'}, $kname, $kvalue);
 			}
 		if (!$pop3) {
 			$pop3 = { 'name' => 'protocol',
 				  'value' => 'pop3',
 				  'members' => [
-					{ 'name' => 'ssl_cert',
-					  'value' => "<".$d->{'ssl_combined'} },
-					{ 'name' => 'ssl_key',
-					  'value' => "<".$d->{'ssl_key'} },
+					{ 'name' => $cname,
+					  'value' => $cvalue, },
+					{ 'name' => $kname,
+					  'value' => $kvalue, },
 					],
 				  'indent' => 1,
 				  'enabled' => 1,
@@ -2329,12 +2325,8 @@ foreach my $ip (@ips) {
 			push(@$conf, $pop3);
 			}
 		else {
-			&dovecot::save_directive($pop3->{'members'},
-				"ssl_cert", "<".$d->{'ssl_combined'});
-			&dovecot::save_directive($pop3->{'members'},
-				"ssl_key", "<".$d->{'ssl_key'});
-			&dovecot::save_directive($pop3->{'members'},
-				"ssl_ca", undef);
+			&dovecot::save_directive($pop3->{'members'}, $cname, $cvalue);
+			&dovecot::save_directive($pop3->{'members'}, $kname, $kvalue);
 			}
 		&flush_file_lines($imap->{'file'}, undef, 1);
 		}
@@ -2378,12 +2370,8 @@ if (!$d->{'virt'}) {
 			my ($l) = grep { $_->{'value'} eq $n } @loc;
 			if ($l) {
 				# Already exists, so update paths
-				&dovecot::save_directive($l->{'members'},
-					"ssl_cert", "<".$d->{'ssl_combined'});
-				&dovecot::save_directive($l->{'members'},
-					"ssl_key", "<".$d->{'ssl_key'});
-				&dovecot::save_directive($l->{'members'},
-					"ssl_ca", undef);
+				&dovecot::save_directive($l->{'members'}, $cname, $cvalue);
+				&dovecot::save_directive($l->{'members'}, $kname, $kvalue);
 				&flush_file_lines($l->{'file'}, undef, 1);
 				}
 			else {
@@ -2393,14 +2381,10 @@ if (!$d->{'virt'}) {
 					  'enabled' => 1,
 					  'section' => 1,
 					  'members' => [
-						{ 'name' => 'ssl_cert',
-						  'value' => "<".$d->{'ssl_combined'},
-						  'enabled' => 1,
-						  'file' => $cfile, },
-						{ 'name' => 'ssl_key',
-						  'value' => "<".$d->{'ssl_key'},
-						  'enabled' => 1,
-						  'file' => $cfile, },
+						{ 'name' => $cname,
+						  'value' => $cvalue, },
+						{ 'name' => $kname,
+						  'value' => $kvalue, },
 						],
 					  'file' => $cfile };
 				my ($plocal) = grep { $_->{'value'} eq $pdname } @loc;
@@ -3940,6 +3924,20 @@ else {
 	&print_tempfile(KEY, $contents);
 	&close_tempfile(KEY);
 	&set_ownership_permissions(undef, undef, 0600, $file);
+	}
+}
+
+# get_dovecot_ssl_dir(cert|key, file)
+# Returns the name and value of the correct Dovecot SSL directive for
+# this version
+sub get_dovecot_ssl_dir
+{
+my ($type, $file) = @_;
+if (&dovecot::version_atleast(2.4)) {
+	return ("ssl_server_".$type."_file", $file);
+	}
+else {
+	return ("ssl_".$type, "<".$file);
 	}
 }
 
