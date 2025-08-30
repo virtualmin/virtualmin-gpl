@@ -2503,7 +2503,7 @@ sub postfix_supports_sni
 {
 return 0 if ($mail_system != 0);
 &foreign_require("postfix");
-return $postfix::postfix_version >= 3.4;
+return &compare_versions($postfix::postfix_version, 3.4) >= 0;
 }
 
 # sync_postfix_ssl_cert(&domain, enable)
