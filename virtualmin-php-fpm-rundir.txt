@@ -1,0 +1,11 @@
+[Unit]
+Description=Create /run/php-fpm
+DefaultDependencies=no
+Before=sysinit.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/install -d -m 0755 /run/php-fpm
+
+[Install]
+WantedBy=sysinit.target

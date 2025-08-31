@@ -18,6 +18,14 @@ if (&check_pid_file($pidfile)) {
 	}
 &init::disable_at_boot("lookup-domain");
 
+# Remove PHP-FPM custom systemd-related configs
+if ($init::init_mode eq "systemd" && $gconfig{'os_type'} eq 'redhat-linux') {
+	&init::delete_at_boot('virtualmin-php-fpm-rundir.service');
+	my $sysd_phpfpm_dir = &init::get_systemd_root()."/php-fpm.service.d";
+	&unlink_file("$sysd_phpfpm_dir/00-virtualmin.conf");
+	&init::restart_systemd();
+	}
+
 # Delete API helper
 local $api_helper_command = &get_api_helper_command();
 if (-r $api_helper_command && !-d $api_helper_command) {
