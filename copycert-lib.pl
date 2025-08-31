@@ -180,7 +180,8 @@ if (&foreign_installed("dovecot")) {
 		    &dovecot::find_value("ssl_key_file", $conf, 0, "") ||
 		    &dovecot::find_value("ssl_key", $conf, 0, "");
 	$kfile =~ s/^<//;
-	$cafile = &dovecot::find_value("ssl_ca", $conf, 0, "");
+	$cafile = &dovecot::find_value("ssl_server_ca_file", $conf, 0, "") ||
+		  &dovecot::find_value("ssl_ca", $conf, 0, "");
 	$cafile =~ s/^<//;
 	if ($cfile) {
 		if (!$cafile && &cert_file_split($cfile) > 1) {
@@ -461,7 +462,8 @@ my $cfile = &dovecot::find_value("ssl_server_cert_file", $conf, 0, "") ||
 my $kfile = &dovecot::find_value("ssl_server_key_file", $conf, 0, "") ||
 	    &dovecot::find_value("ssl_key_file", $conf, 0, "") ||
 	    &dovecot::find_value("ssl_key", $conf, 0, "");
-my $cafile = &dovecot::find_value("ssl_ca", $conf, 0, "");
+my $cafile = &dovecot::find_value("ssl_server_ca_file", $conf, 0, "") ||
+	     &dovecot::find_value("ssl_ca", $conf, 0, "");
 $cfile =~ s/^<//;
 $kfile =~ s/^<//;
 $cafile =~ s/^<//;
