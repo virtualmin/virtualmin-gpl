@@ -5969,11 +5969,18 @@ if (&foreign_installed("dovecot")) {
 		$imap_ssl = "yes";
 		$pop3_ssl = "yes";
 		}
-	if ($imap_type ne "SSL" &&
-	    (&dovecot::find_value("disable_plaintext_auth", $conf) ne "no" ||
-	     &dovecot::find_value("auth_allow_cleartext", $conf) eq "no")) {
-		# Force use of hashed passwords
-		$imap_enc = "password-encrypted";
+	
+	# Force use of hashed passwords
+	if ($imap_type ne "SSL") {
+		if (&dovecot::version_atleast(2.4)) {
+			$imap_enc = "password-encrypted"
+				if (&dovecot::find_value(
+					"auth_allow_cleartext", $conf) ne "yes");
+			}
+		elsif (&dovecot::find_value(
+		       "disable_plaintext_auth", $conf) ne "no") {
+			$imap_enc = "password-encrypted";
+			}
 		}
 	}
 return ($imap_host, $imap_port, $imap_type, $imap_ssl, $imap_enc,
