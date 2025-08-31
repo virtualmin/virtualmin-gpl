@@ -48,6 +48,7 @@
 * Fix to limit lifetime of sessions to one hour by default when using CLI to create a login link
 * Fix to set `-all` as the default in DNS SPF records
 * Fix to make sure that in PHP disabled mode, PHP files are not processed
+* Fix the sporadic PHP-FPM service going down unexpectedly on EL systems
 * Fix to not force re-generation of MySQL/MariaDB username when just listing using CLI
 * Fix to prevent mail users from setting up email notifications
 * Fix to roll config back when the DNS move fails, by setting it up again on the old host or locally
