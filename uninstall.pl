@@ -19,11 +19,12 @@ if (&check_pid_file($pidfile)) {
 &init::disable_at_boot("lookup-domain");
 
 # Remove PHP-FPM custom systemd-related configs
-if ($init::init_mode eq "systemd" && $gconfig{'os_type'} eq 'redhat-linux') {
-	&init::delete_at_boot('virtualmin-php-fpm-rundir.service');
+if ($init::init_mode eq 'systemd' && $gconfig{'os_type'} eq 'redhat-linux') {
 	my $sysd_phpfpm_dir = &init::get_systemd_root()."/php-fpm.service.d";
 	&unlink_file("$sysd_phpfpm_dir/00-virtualmin.conf");
 	rmdir($sysd_phpfpm_dir);
+	my $sysd_tmpfilesd = "/etc/tmpfiles.d";
+	&unlink_file("$sysd_tmpfilesd/virtualmin-php-fpm.conf");
 	&init::restart_systemd();
 	}
 
