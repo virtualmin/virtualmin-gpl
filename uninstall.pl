@@ -23,6 +23,7 @@ if ($init::init_mode eq "systemd" && $gconfig{'os_type'} eq 'redhat-linux') {
 	&init::delete_at_boot('virtualmin-php-fpm-rundir.service');
 	my $sysd_phpfpm_dir = &init::get_systemd_root()."/php-fpm.service.d";
 	&unlink_file("$sysd_phpfpm_dir/00-virtualmin.conf");
+	rmdir($sysd_phpfpm_dir);
 	&init::restart_systemd();
 	}
 
