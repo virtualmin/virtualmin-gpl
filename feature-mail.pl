@@ -7126,7 +7126,7 @@ $loc ||= &dovecot::find_value("default_mail_env", $conf);
 return $loc;
 }
 
-# get_dovecot_file_path()
+# get_dovecot_file_path(type)
 # Returns the file path for index or control files
 sub get_dovecot_file_path
 {
