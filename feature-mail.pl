@@ -2259,14 +2259,11 @@ closedir(TEMP);
 # Remove Dovecot index files
 if (&foreign_check("dovecot")) {
 	&foreign_require("dovecot");
-	my $loc = &get_dovecot_mail_location();
 	my @doves;
-	if ($loc =~ /INDEX=([^:]+)\/%u/) {
-		push(@doves, $1);
-		}
-	if ($loc =~ /CONTROL=([^:]+)\/%u/) {
-		push(@doves, $1);
-		}
+	my $envindexfile = &get_dovecot_file_path("index");
+	push(@doves, $envindexfile) if ($envindexfile);
+	my $envcontrolfile = &get_dovecot_file_path("control");
+	push(@doves, $envcontrolfile) if ($envcontrolfile);
 	foreach my $dove (@doves) {
 		&unlink_file($dove."/".$_[0]->{'user'});
 		&unlink_file($dove."/".&replace_atsign($_[0]->{'user'}));
@@ -2305,14 +2302,11 @@ if (!&mail_under_home()) {
 # Rename Dovecot index files
 if (&foreign_check("dovecot")) {
 	&foreign_require("dovecot");
-	my $loc = &get_dovecot_mail_location();
 	my @doves;
-	if ($loc =~ /INDEX=([^:]+)\/%u/) {
-		push(@doves, $1);
-		}
-	if ($loc =~ /CONTROL=([^:]+)\/%u/) {
-		push(@doves, $1);
-		}
+	my $envindexfile = &get_dovecot_file_path("index");
+	push(@doves, $envindexfile) if ($envindexfile);
+	my $envcontrolfile = &get_dovecot_file_path("control");
+	push(@doves, $envcontrolfile) if ($envcontrolfile);
 	foreach my $dove (@doves) {
 		&rename_file($dove."/".$olduser->{'user'},
 			     $dove."/".$user->{'user'});
@@ -2848,9 +2842,8 @@ else {
 # Backup Dovecot control files, if in custom location
 if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 	&foreign_require("dovecot");
-	my $env = &get_dovecot_mail_location();
-	if ($env =~ /:CONTROL=([^:]+)\/%u/) {
-		local $control = $1;
+	if (my $envfile = get_dovecot_file_path('control')) {
+		local $control = $envfile;
 		&$first_print($text{'backup_mailcontrol'});
 		local @names;
 		foreach $u (&list_domain_users($d, 0, 1, 1, 1)) {
@@ -3482,10 +3475,9 @@ if (-r $file."_cron") {
 if (-r $file."_control" && &foreign_check("dovecot") &&
 			  &foreign_installed("dovecot")) {
 	&foreign_require("dovecot");
-	my $env = &get_dovecot_mail_location();
-	if ($env =~ /:CONTROL=([^:]+)\/%u/) {
+	if (my $envfile = get_dovecot_file_path('control')) {
 		# Local dovecot specifies a control file location
-		local $control = $1;
+		local $control = $envfile;
 		&$first_print($text{'restore_mailcontrol'});
 		local @onefiles;
 		if ($opts->{'mailuser'}) {
@@ -7132,6 +7124,21 @@ my $loc = &dovecot::find_value("mail_location", $conf);
 $loc ||= &dovecot::find_value("mail_path", $conf);
 $loc ||= &dovecot::find_value("default_mail_env", $conf);
 return $loc;
+}
+
+# get_dovecot_file_path()
+# Returns the file path for index or control files
+sub get_dovecot_file_path
+{
+my $type = shift;
+my $typere = uc($type);
+my $env = &get_dovecot_mail_location();
+my ($envfile) = $env =~ /:\Q$typere\E=([^:]+)\/%u/;
+if (!$envfile && &dovecot::version_atleast(2.4)) {
+	my $conf = &dovecot::get_config();
+	$envfile = &dovecot::find_value("mail_${type}_path", $conf);
+	}
+return $envfile || "";
 }
 
 $done_feature_script{'mail'} = 1;
