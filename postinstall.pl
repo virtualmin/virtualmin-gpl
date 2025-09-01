@@ -668,6 +668,21 @@ if ($brand_update) {
 	&unlock_file($brand_info);
 	}
 
+# Add PHP-FPM custom systemd-related configs
+if ($gconfig{'os_type'} eq 'redhat-linux' &&
+    &foreign_require("init") && $init::init_mode eq "systemd") {
+	my $modroot = "$root_directory/$module_name";
+	my $sysd_phpfpm_dir = &init::get_systemd_root()."/php-fpm.service.d";
+	&make_dir($sysd_phpfpm_dir, 0755) unless (-d $sysd_phpfpm_dir);
+	my $sysd_tmpfilesd = "/etc/tmpfiles.d";
+	&make_dir($sysd_tmpfilesd, 0755) unless (-d $sysd_tmpfilesd);
+	&copy_source_dest("$modroot/virtualmin-php-fpm.txt",
+			  "$sysd_phpfpm_dir/00-virtualmin.conf");
+	&copy_source_dest("$modroot/virtualmin-php-fpm-tmpfiles.txt",
+			  "$sysd_tmpfilesd/virtualmin-php-fpm.conf");
+	&init::restart_systemd();
+	}
+
 # Run any needed actions, like server restarts
 &run_post_actions_silently();
 
