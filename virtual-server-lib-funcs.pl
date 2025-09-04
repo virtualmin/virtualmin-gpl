@@ -10470,7 +10470,7 @@ if (!$tmpl->{'default'}) {
 		    "othergroups", "defmquota", "quotatype", "append_style",
 		    "domalias", "logrotate_files", "logrotate_shared",
 		    "logrotate", "disabled_web", "disabled_url", "php_sock",
-		    "php_fpm", "php_log", "php", "newuser", "updateuser",
+		    "php_fpmtype", "php_fpm", "php_log", "php", "newuser", "updateuser",
 		    "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "trashclear",
 		    "spamtrap", "namedconf",
@@ -10497,7 +10497,7 @@ if (!$tmpl->{'default'}) {
 				next if ($p eq "dns" &&
 					 $k =~ /^dns_(spf|cloud|slaves|prins|alias)/);
 				next if ($p eq "php" &&
-					 $k =~ /^php_(fpm|sock)/);
+					 $k =~ /^php_(fpm|fpmtype|sock)/);
 				next if ($p eq "web" &&
 					 $k =~ /^web_(webmail|admin|http2|redirects|sslredirect|php|acme)/);
 				next if ($p eq "mysql" &&
