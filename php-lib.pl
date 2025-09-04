@@ -2605,7 +2605,7 @@ else {
 		   "listen.group = ".$d->{'ugroup'},
 		   "listen.mode = 0660",
 		   "listen = ".$port,
-		   "pm = ".$tmpl->{php_fpmtype} || "dynamic",
+		   "pm = ".($tmpl->{'php_fpmtype'} || "dynamic"),
 		   "pm.max_children = $defchildren",
 		   "pm.start_servers = $defstartservers",
 		   "pm.min_spare_servers = 1",
