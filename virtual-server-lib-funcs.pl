@@ -10471,7 +10471,7 @@ if (!$tmpl->{'default'}) {
 		    "domalias", "logrotate_files", "logrotate_shared",
 		    "logrotate", "disabled_web", "disabled_url", "php_sock",
 		    "php_fpmtype", "php_fpm", "php_log", "php", "newuser", 
-		    "updateuser",
+		    "updateuser", "content_web",
 		    "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "trashclear",
 		    "spamtrap", "namedconf",
