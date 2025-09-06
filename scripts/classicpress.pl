@@ -26,7 +26,7 @@ return "A lightweight, stable, instantly familiar free open-source content manag
 # script_classicpress_versions()
 sub script_classicpress_versions
 {
-return ( "2.4.1", "1.7.3" );
+return ( "2.5.0", "1.7.3" );
 }
 
 sub script_classicpress_category
