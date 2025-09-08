@@ -628,6 +628,9 @@ foreach $d (@doms) {
 			elsif ($proxied && (!$cloud || !$cloud->{'proxy'})) {
 				&$second_print(&text('spf_eaddproxy', $r->{'name'}));
 				}
+			elsif ($name !~ /^(\S+\.|)\Q$d->{'dom'}\E\.$/) {
+				&$second_print(&text('spf_eaddrecsdom', $r->{'name'}));
+				}
 			else {
 				&create_dns_record($recs, $file, $r);
 				$changed++;
