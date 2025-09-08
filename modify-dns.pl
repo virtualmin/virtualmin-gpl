@@ -218,17 +218,17 @@ while(@ARGV > 0) {
 	elsif ($a eq "--add-record") {
 		my ($name, $type, @values) = split(/\s+/, shift(@ARGV));
 		$name && $type && @values || &usage("--add-record must be followed by the record name, type and values, all in one parameter");
-		push(@addrecs, [ $name, $type, undef, \@values, 0 ]);
+		push(@addrecs, [ $name, uc($type), undef, \@values, 0 ]);
 		}
 	elsif ($a eq "--add-record-with-ttl") {
 		my ($name, $type, $ttl, @values) = split(/\s+/, shift(@ARGV));
 		$name && $type && $ttl && @values || &usage("--add-record-with-ttl must be followed by the record name, type, TTL and values, all in one parameter");
-		push(@addrecs, [ $name, $type, $ttl, \@values, 0 ]);
+		push(@addrecs, [ $name, uc($type), $ttl, \@values, 0 ]);
 		}
 	elsif ($a eq "--add-proxied-record") {
 		my ($name, $type, @values) = split(/\s+/, shift(@ARGV));
 		$name && $type && @values || &usage("--add-proxied-record must be followed by the record name, type and values, all in one parameter");
-		push(@addrecs, [ $name, $type, undef, \@values, 1 ]);
+		push(@addrecs, [ $name, uc($type), undef, \@values, 1 ]);
 		}
 	elsif ($a eq "--remove-record") {
 		my ($name, $type, @values) = split(/\s+/, shift(@ARGV));
@@ -608,6 +608,9 @@ foreach $d (@doms) {
 			}
 		foreach my $rn (@addrecs) {
 			my ($name, $type, $ttl, $values, $proxied) = @$rn;
+			if ($type eq "TXT") {
+				$values = [ join(" ", @$values) ];
+				}
 			if ($name !~ /\.$/ && $name ne "\@") {
 				$name .= ".".$d->{'dom'}.".";
 				}
