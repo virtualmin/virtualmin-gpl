@@ -11228,6 +11228,31 @@ $dns_tests = [
 	{ 'command' => 'host -t A testing2.'.$test_dns_subdomain.' '.$dnsserver,
 	},
 
+	# Add some different types of records
+	{ 'command' => 'modify-dns.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'add-record', 'cname1 CNAME www.google.com.' ] ],
+        },
+	{ 'command' => 'modify-dns.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'add-record', 'txt1 TXT hello world' ] ],
+        },
+	{ 'command' => 'modify-dns.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'add-record', 'mx1 MX 5 mail.google.com.' ] ],
+        },
+
+	# Validate that they can be looked up
+	{ 'command' => 'dig CNAME cname1.'.$test_domain,
+	  'grep' => 'www.google.com.',
+	},
+	{ 'command' => 'dig TXT txt1.'.$test_domain,
+	  'grep' => 'hello world',
+	},
+	{ 'command' => 'dig MX mx1.'.$test_domain,
+	  'grep' => '5 mail.google.com.',
+	},
+
 	# Backup and restore the DNS feature for all domains
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
