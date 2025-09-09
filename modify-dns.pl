@@ -596,7 +596,12 @@ foreach $d (@doms) {
 			&delete_dns_record($recs, $file, $r);
 			$changed++;
 			}
-		&$second_print($text{'setup_done'});
+		if (@alld) {
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			&$second_print($text{'spf_nodelrecs'});
+			}
 		}
 
 	# Add records to the domain
