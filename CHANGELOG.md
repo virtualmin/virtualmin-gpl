@@ -1,3 +1,7 @@
+#### Version 7.40.1
+* Fix not to smoosh DNS TXT records together when using CLI [#1104](https://github.com/virtualmin/virtualmin-gpl/issues/1104)
+* Fix to disallow out-of-domain DNS records when using CLI
+
 #### Version 7.40.0
 * Add built-in password recovery support for the login page
 * Add advanced search for backup logs with fielded queries and multi-field terms
