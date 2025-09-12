@@ -8355,6 +8355,7 @@ dnscloud_namecheap_erename=Namecheap does not support domain renames
 dnscloud_bunny_apikey=Bunny DNS API key
 dnscloud_bunny_eapikey=Missing or invalid-looking Bunny API key
 dnscloud_bunny_ecreds=Bunny DNS API key is incorrect : $1
+bunny_edomainavail=DNS domain is already in use
 
 install_mod_perl_link=Use the <a href='$1'>Perl Modules</a> page in Webmin to install it.
 
