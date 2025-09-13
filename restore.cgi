@@ -83,11 +83,11 @@ if (defined(&get_backup_key)) {
 # Parse features
 if ($in{'feature_all'}) {
 	# All features usable by current user
-	@do_features = &get_available_backup_features(!$safe_backup);
+	@do_features = &get_available_backup_features($safe_backup);
 	foreach my $f (&list_backup_plugins()) {
 		push(@do_features, $f);
 		}
-	if (!$safe_backup) {
+	if ($safe_backup) {
 		@do_features = grep {
 			&indexof($_, @safe_backup_features) >= 0 ||
 			&plugin_call($_, "feature_backup_safe") } @do_features;
@@ -97,7 +97,7 @@ else {
 	# Selected features
 	@do_features = split(/\0/, $in{'feature'});
 	@do_features || &error($text{'restore_efeatures'});
-	if (!$safe_backup) {
+	if ($safe_backup) {
 		# Make sure they are all safe
 		foreach my $f (@do_features) {
 			&indexof($f, @safe_backup_features) >= 0 ||
