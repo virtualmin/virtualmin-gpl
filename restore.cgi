@@ -20,10 +20,7 @@ if ($in{'log'}) {
 	$log || &error($text{'viewbackup_egone'});
 	&can_backup_log($log) || &error($text{'viewbackup_ecannot'});
 	$src = $log->{'dest'};
-
-	# Can all features of this backup be restored? Only true for backups
-	# created by root
-	$safe_backup = $log->{'user'} ne $remote_user || $log->{'ownrestore'};
+	$safe_backup = &can_trust_backup($log);
 	}
 elsif ($in{'src'}) {
 	$src = $in{'src'};

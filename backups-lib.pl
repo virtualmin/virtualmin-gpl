@@ -7335,5 +7335,17 @@ setTimeout(function() {
 EOF
 }
 
+# can_trust_backup(&log)
+# Returns 1 if a backup can be safely restored by the current user. This is true
+# if the backup was created by root, or by the usewr currently logged in.
+sub can_trust_backup
+{
+my ($log) = @_;
+return $log->{'user'} eq $remote_user ||
+       $log->{'user'} eq 'root' ||
+       !$log->{'user'} ||
+       $log->{'ownrestore'};
+}
+
 1;
 
