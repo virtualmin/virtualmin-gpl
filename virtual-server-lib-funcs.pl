@@ -21288,14 +21288,15 @@ my $remove_default_host_domain = sub {
 		&push_all_print();
 		&set_all_null_print();
 		}
-	&$first_print(&text('check_hostdefaultdomain_disable', $system_host_name));
-		my ($ok, $rsmsg) = &delete_virtualmin_default_hostname_ssl();
-		if (!$ok) {
-			&$second_print(&text('check_apicmderr', $rsmsg));
-			}
-		else {
-			&$second_print($text{'setup_done'});
-			}
+	&$first_print(&text('check_hostdefaultdomain_disable',
+			    $system_host_name));
+	my ($ok, $rsmsg) = &delete_virtualmin_default_hostname_ssl();
+	if (!$ok) {
+		&$second_print(&text('check_apicmderr', $rsmsg));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
 	if ($silent_print) {
 		&pop_all_print();
 		}
@@ -21304,10 +21305,11 @@ my $new_default_domain = &get_domain_by("defaulthostdomain", 1);
 if ($new_default_domain->{'dom'}) {
 	if ($config{'default_domain_ssl'}) {
 		my $known_default_domain = $config{'defaultdomain_name'};
-		my $hostname_changed = $known_default_domain ne $system_host_name;
+		my $hostname_changed = $known_default_domain ne
+				       $system_host_name;
 		if ($hostname_changed) {
 			&$first_print(&text('check_hostdefaultdomain_change',
-				      $known_default_domain, $system_host_name));
+				$known_default_domain, $system_host_name));
 			my $defdom_status = &rename_default_domain_ssl(
 				$new_default_domain, $system_host_name);
 			if ($defdom_status == 1) {
@@ -21319,13 +21321,14 @@ if ($new_default_domain->{'dom'}) {
 			}
 		}
 	else {
-		&$remove_default_host_domain();
+		&$remove_default_host_domain(0);
 		}
 	}
 elsif ($config{'default_domain_ssl'}) {
 	my $old_default_domain = &get_domain_by("defaultdomain", 1);
 
-	&$first_print(&text('check_hostdefaultdomain_enable', $system_host_name));
+	&$first_print(&text('check_hostdefaultdomain_enable',
+			    $system_host_name));
 	if ($old_default_domain->{'dom'} &&
 	    !$old_default_domain->{'defaulthostdomain'}) {
 		&$second_print(&text('check_hostdefaultdomain_errold',
