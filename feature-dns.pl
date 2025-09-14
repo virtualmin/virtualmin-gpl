@@ -541,6 +541,7 @@ else {
 	&release_lock_dns($dnsparent);
 	&$second_print($text{'setup_done'});
 	delete($d->{'dns_submode'});
+	delete($d->{'dns_subof'});
 	}
 &register_post_action(\&restart_bind, $d);
 return 1;
