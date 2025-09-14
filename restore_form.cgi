@@ -15,7 +15,7 @@ if ($in{'delete'}) {
 
 $crmode = &can_restore_domain();
 $crmode || &error($text{'restore_ecannot'});
-$safe_backup = $crmode == 1 ? 1 : 0;
+$safe_backup = $crmode == 1 ? 1 : 0;	# 1 means this backup can be trusted
 &ui_print_header(undef, $text{'restore_title'}, "");
 
 if ($in{'sched'}) {
@@ -32,7 +32,7 @@ elsif ($in{'log'}) {
 	$sched = { 'feature_all' => 1,
 		   'key' => $log->{'key'},
 		   'dest' => $log->{'dest'} };
-	$safe_backup = $log->{'user'} eq $remote_user ? 0 : 1;
+	$safe_backup = &can_trust_backup($log);
 	}
 else {
 	# Sensible defaults
