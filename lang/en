@@ -6983,7 +6983,7 @@ copycert_mysql=Copying certificate and key to MySQL ..
 copycert_emysqld=.. MySQL configuration not found!
 copycert_emysqlstart=.. failed to restart MySQL : $1
 copycert_bind=Copying certificate and key to BIND ..
-copycert_bind2=.. already configured
+copycert_bind2=.. updating existing configuration
 copycert_bind3=Configuring BIND to use the key for DNS over TLS for $1 ..
 copycert_bind4=.. another key is already configured for the TLS port!
 

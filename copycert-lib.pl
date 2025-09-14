@@ -938,13 +938,13 @@ my $opts = &bind8::find("options", $conf);
 # First off, is there already a TLS block for the domain's key?
 my $tlsname = $d->{'dom'};
 $tlsname =~ s/\./_/g;
-my $found;
-foreach my $tls (&bind8::find("tls", $conf)) {
-	$found = $tls if ($tls->{'values'}->[0] eq $tlsname);
+my $tls;
+foreach my $t (&bind8::find("tls", $conf)) {
+	$tls = $t if ($t->{'values'}->[0] eq $tlsname);
 	}
-if (!$found) {
+my $dir = &bind8::base_directory($conf, 1);
+if (!$tls) {
 	# No, so we need to add it and copy across the key files
-	my $dir = &bind8::base_directory($conf, 1);
 	my $cert = $dir."/".$tlsname.".cert";
 	&lock_file($cert);
 	&copy_source_dest($d->{'ssl_cert'}, $cert);
@@ -989,6 +989,38 @@ if (!$found) {
 	&$second_print($text{'setup_done'});
 	}
 else {
+	# Need to potentially update files
+	my $key = &bind8::find_value("key-file", $tls->{'members'});
+	my $cert = &bind8::find_value("cert-file", $tls->{'members'});
+	my $ca = &bind8::find_value("ca-file", $tls->{'members'});
+
+	&lock_file($cert);
+	&copy_source_dest($d->{'ssl_cert'}, $cert);
+	&bind8::set_ownership($cert);
+	&unlock_file($cert);
+
+	&lock_file($key);
+        &copy_source_dest($d->{'ssl_key'}, $key);
+        &bind8::set_ownership($key);
+        &unlock_file($key);
+
+	if ($d->{'ssl_chain'} && !$ca) {
+		# No CA before, but there is one now!
+		$ca = $dir."/".$tlsname.".ca";
+		&bind8::save_directive($tls, "ca-file", [ $ca ]);
+		}
+	elsif (!$d->{'ssl_chain'} && $ca) {
+		# CA exists in the BIND config, but no longer needed
+		&bind8::save_directive($tls, "ca-file", []);
+		$ca = undef;
+		}
+	if ($ca) {
+		&lock_file($ca);
+		&copy_source_dest($d->{'ssl_chain'}, $ca);
+		&bind8::set_ownership($ca);
+		&unlock_file($ca);
+		}
+
 	&$second_print($text{'copycert_bind2'});
 	}
 
