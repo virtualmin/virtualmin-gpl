@@ -73,7 +73,7 @@ return ( "mysql" );
 
 sub script_wordpress_release
 {
-return 12; # zip extension has to be installed
+return 13; # single quotes aren't the only valid syntax
 }
 
 sub script_wordpress_php_fullver
@@ -571,7 +571,7 @@ foreach my $wpconfig (@$files) {
 	my $lref = &read_file_lines($wpconfig, 1);
 	my %conf;
 	foreach my $l (@$lref) {
-		if ($l =~ /define\(\s*'(\S+)'\s*,\s*'(.*)'/) {
+		if ($l =~ /define\(\s*['"](\S+)['"]\s*,\s*['"](.*)['"]/) {
 			$conf{$1} = $2;
 			}
 		}
