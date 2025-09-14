@@ -1586,7 +1586,8 @@ if ($virt) {
 		&$first_print($text{'backup_apachelog'});
 		my ($ok, $err) = &copy_write_as_domain_user(
 			$d, $alog, $file."_alog");
-		if ($config{'backup_rotated'} || $opts->{'rotated'}) {
+		if (&foreign_installed("syslog") &&
+		    ($config{'backup_rotated'} || $opts->{'rotated'})) {
 			# Included rotated access log files
 			&foreign_require("syslog");
 			foreach my $l (&syslog::all_log_files($alog)) {
@@ -1825,13 +1826,15 @@ if ($virt) {
 		&set_apache_log_permissions($d, $alog);
 
 		# If the backup contained any rotated log files, restore them
-		&foreign_require("syslog");
-		my @alogs = grep { $_ ne $file }
-				 &syslog::all_log_files($file."_alog");
-		foreach my $l (@alogs) {
-			$l =~ /^.*_alog_(.*)$/ || next;
-			my $sfx = $1;
-			&copy_source_dest($l, $alog.$sfx);
+		if (&foreign_installed("syslog")) {
+			&foreign_require("syslog");
+			my @alogs = grep { $_ ne $file }
+					 &syslog::all_log_files($file."_alog");
+			foreach my $l (@alogs) {
+				$l =~ /^.*_alog_(.*)$/ || next;
+				my $sfx = $1;
+				&copy_source_dest($l, $alog.$sfx);
+				}
 			}
 
 		if (-r $file."_elog") {
