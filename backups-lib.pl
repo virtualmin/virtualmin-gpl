@@ -5762,7 +5762,7 @@ elsif ($mode == 2) {
 	# Use ls -l via SSH to list the directory
 	local $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 			$config{'ssh_args'}." ".
-			$user."\@".$host;
+			($user ? $user."\@" : "").$host;
 	local $err;
 	local $lscmd = $sshcmd." LANG=C ls -l ".quotemeta($base);
 	local $lsout = &run_ssh_command($lscmd, $pass, \$err, $asuser);
