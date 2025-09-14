@@ -21302,7 +21302,7 @@ my $remove_default_host_domain = sub {
 		}
 	};
 my $new_default_domain = &get_domain_by("defaulthostdomain", 1);
-if ($new_default_domain->{'dom'}) {
+if ($new_default_domain) {
 	if ($config{'default_domain_ssl'}) {
 		my $known_default_domain = $config{'defaultdomain_name'};
 		my $hostname_changed = $known_default_domain ne
@@ -21329,7 +21329,7 @@ elsif ($config{'default_domain_ssl'}) {
 
 	&$first_print(&text('check_hostdefaultdomain_enable',
 			    $system_host_name));
-	if ($old_default_domain->{'dom'} &&
+	if ($old_default_domain &&
 	    !$old_default_domain->{'defaulthostdomain'}) {
 		&$second_print(&text('check_hostdefaultdomain_errold',
 			$old_default_domain->{'dom'}));
