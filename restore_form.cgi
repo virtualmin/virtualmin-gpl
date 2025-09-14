@@ -32,7 +32,7 @@ elsif ($in{'log'}) {
 	$sched = { 'feature_all' => 1,
 		   'key' => $log->{'key'},
 		   'dest' => $log->{'dest'} };
-	$safe_backup = $log->{'user'} eq $remote_user ? 0 : 1;
+	$safe_backup = $log->{'user'} ne $remote_user || $log->{'ownrestore'};
 	}
 else {
 	# Sensible defaults
@@ -112,7 +112,7 @@ $ftable .= &ui_radio("feature_all", int($sched->{'feature_all'}),
 		  [ 0, $text{'backup_selfeatures'} ] ])."<br>\n";
 @links = ( &select_all_link("feature"), &select_invert_link("feature") );
 $ftable .= &ui_links_row(\@links);
-foreach $f (&get_available_backup_features(!$safe_backup)) {
+foreach $f (&get_available_backup_features($safe_backup)) {
 	$ftable .= &ui_checkbox("feature", $f,
 		$text{'backup_feature_'.$f} || $text{'feature_'.$f},
 		$sched->{'feature_'.$f},
