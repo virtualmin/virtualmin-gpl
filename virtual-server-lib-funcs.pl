@@ -20078,7 +20078,7 @@ if ($host =~ s/:(\d+)$//) {
 	}
 my $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 	     $config{'ssh_args'}." ".
-	     $user."\@".$host." ".
+	     ($user ? $user."\@" : "").$host." ".
 	     $cmd;
 my $err;
 my $out = &run_ssh_command($sshcmd, $pass, \$err);
