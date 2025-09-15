@@ -7034,7 +7034,7 @@ foreach my $sfx ("", ".info", ".dom") {
 		# SSH server
 		my $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 			     $config{'ssh_args'}." ".
-			     $user."\@".$host;
+			     ($user ? $user."\@" : "").$host;
 		my $rmcmd = $sshcmd." rm -rf ".quotemeta($spath);
 		&run_ssh_command($rmcmd, $pass, \$err);
 		}
