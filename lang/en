@@ -8321,6 +8321,7 @@ dnscloud_route53_dset=Nameserver delegation set
 dnscloud_route53_nodset=None (use random nameservers)
 dnscloud_route53_iddset=Delegation set ID
 dnscloud_route53_dsetdesc=Delegation sets are a group of nameservers that will be used for all domains created with Route 53. They must be created with the <tt>aws route53 create-reusable-delegation-set</tt> command.
+dnscloud_bunny_longdesc=The Bunny API key on this page can be found on the Account settings page of your <a href=https://dash.bunny.net/account/settings target=_blank>Bunny console</a>.
 
 dnscloud_cloudflare_mode=Authentication type
 dnscloud_cloudflare_mode0=Email and API key
