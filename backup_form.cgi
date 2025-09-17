@@ -163,18 +163,48 @@ foreach $f (&get_available_backup_features()) {
 		$ftable .= "<br>\n";
 		}
 	}
-foreach $f (&list_backup_plugins()) {
+my $hasbackupplugin = 0;
+foreach my $f (&list_backup_plugins()) {
+	my $dis = 0;
+	my $noall = 0;
+	if (&plugin_defined($f, "feature_backup_no_all_features") &&
+	    &plugin_call($f, "feature_backup_no_all_features")) {
+		$noall = $dis = 1;
+		$dis = 0 if (!$sched->{'feature_all'});
+		$hasbackupplugin++;
+		}
 	$ftable .= &ui_checkbox("feature", $f,
 		&plugin_call($f, "feature_backup_name") ||
 		    &plugin_call($f, "feature_name"),
 		&indexof($f, @schedfeats) >= 0,
-		"onClick='form.feature_all[1].checked = true'")."\n";
+		"onClick='form.feature_all[1].checked = true' ".
+		"data-feature-noall='$noall'", $dis)."\n";
 	if (&plugin_defined($f, "feature_backup_opts")) {
 		local %opts = map { split(/=/, $_) }
 				 split(/,/, $sched->{'backup_opts_'.$f});
-		$ftable .= &plugin_call($f, "feature_backup_opts", \%opts);
+		$ftable .= &plugin_call($f, "feature_backup_opts",
+					\%opts, $dis);
 		}
 	$ftable .= "<br>\n";
+	}
+if ($hasbackupplugin) {
+	print <<EOF;
+<script>
+(function() {
+	const radios  = document.querySelectorAll('input[name="feature_all"]'),
+	      targets = document.querySelectorAll('[data-feature-noall="1"]');
+	function syncLimitedFeatures() {
+		const checked = document.querySelector('input[name="feature_all"]:checked'),
+		      enable = checked && checked.value === '0';
+		targets.forEach(el => {
+			el.disabled = !enable;
+		});
+	}
+	radios.forEach(r => r.addEventListener('change', syncLimitedFeatures));
+	document.addEventListener('DOMContentLoaded', syncLimitedFeatures);
+})();
+</script>
+EOF
 	}
 print &ui_table_row(&hlink($text{'backup_features'}, "backup_features"),
 		    $ftable);
