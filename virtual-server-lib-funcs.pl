@@ -21301,6 +21301,7 @@ my $remove_default_host_domain = sub {
 		&pop_all_print();
 		}
 	};
+# New host domain flag
 my $new_default_domain = &get_domain_by("defaulthostdomain", 1);
 if ($new_default_domain) {
 	if ($config{'default_domain_ssl'}) {
@@ -21325,6 +21326,8 @@ if ($new_default_domain) {
 		}
 	}
 elsif ($config{'default_domain_ssl'}) {
+	# We used to configure it differently; keep it for backward
+	# compatibility
 	my $old_default_domain = &get_domain_by("defaultdomain", 1);
 
 	&$first_print(&text('check_hostdefaultdomain_enable',
