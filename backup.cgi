@@ -117,6 +117,7 @@ elsif ($cbmode == 3 && $in{'dest_mode'} == 0) {
 
 if ($in{'feature_all'}) {
 	@do_features = ( &get_available_backup_features(), &list_backup_plugins() );
+	@do_features = &prune_all_features_for_backup(@do_features);
 	}
 else {
 	@do_features = split(/\0/, $in{'feature'});

@@ -117,6 +117,7 @@ if ($sched->{'key'} && defined(&get_backup_key)) {
 if ($sched->{'feature_all'}) {
 	@do_features = ( &get_available_backup_features(),
 			 &list_backup_plugins() );
+	@do_features = &prune_all_features_for_backup(@do_features);
 	}
 else {
 	@do_features = split(/\s+/, $sched->{'features'});
