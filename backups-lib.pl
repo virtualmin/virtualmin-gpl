@@ -7348,16 +7348,15 @@ return $log->{'user'} eq $remote_user ||
 }
 
 # prune_all_features_for_backup(&features)
-# Remove features whose plugin does not support backup for all features. Mutates
-# the features array in place.
+# Remove features whose plugin does not support backup for all features.
 sub prune_all_features_for_backup
 {
-my ($features) = @_;
+my @features = @_;
 my %rm = map { $_, 1 }
 	 grep { &plugin_defined($_, 'feature_backup_no_all_features') &&
 		&plugin_call($_, 'feature_backup_no_all_features')
 	 } &list_backup_plugins();
-@$features = grep { !$rm{$_} } @$features;
+return grep { !$rm{$_} } @features;
 }
 
 1;
