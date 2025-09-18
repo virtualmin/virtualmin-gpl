@@ -1,3 +1,10 @@
+#### Version 7.41.0
+* Add support for Bunny DNS for Virtualmin Pro users
+* Fix not to smoosh DNS TXT records together when using CLI [#1104](https://github.com/virtualmin/virtualmin-gpl/issues/1104)
+* Fix to disallow out-of-domain DNS records when using CLI
+* Fix to handle cases where no username is entered for SSH in backup destination
+* Fix and factor out check for safety when restoring a logged backup
+
 #### Version 7.40.0
 * Add built-in password recovery support for the login page
 * Add advanced search for backup logs with fielded queries and multi-field terms

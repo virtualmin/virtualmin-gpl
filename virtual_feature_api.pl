@@ -261,6 +261,13 @@ sub feature_backup_opts
 {
 }
 
+# feature_backup_excludes()
+# If defined, should return a list of home-relative directories that should be
+# excluded from backups for this feature.
+sub feature_backup_excludes
+{
+}
+
 # feature_backup_parse(&in)
 # Return a hash reference of backup options, based on the given HTML inputs
 sub feature_backup_parse

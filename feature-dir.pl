@@ -535,6 +535,14 @@ else {
 	push(@xlist, split(/\t+/, $opts->{'exclude'}));
 	push(@xlist, "backup.lock");
 
+	# Plugins specific excludes
+	foreach my $f (&list_backup_plugins()) {
+		if (&plugin_defined($f, "feature_backup_excludes")) {
+			my @pxlist = &plugin_call($f, "feature_backup_excludes");
+			push(@xlist, @pxlist);
+			}
+		}
+
 	# Exclude all .zfs files, for Solaris
 	if ($gconfig{'os_type'} eq 'solaris') {
 		open(FIND, "find ".quotemeta($d->{'home'})." -name .zfs |");
