@@ -223,6 +223,13 @@ sub feature_always_links
 {
 }
 
+# feature_backup_no_all_features()
+# Returns 1 if this feature should be excluded from scheduled backups by default
+# when all features are selected to avoid overhead since features could overlap
+sub feature_backup_no_all_features
+{
+}
+
 # feature_backup(&domain, file, &opts, homeformat?, differential?, as-owner,
 #                &all-opts, &destinations)
 # Called to backup this feature for the domain to the given file. Must return 1
@@ -248,7 +255,7 @@ sub feature_always_postbackup
 {
 }
 
-# feature_backup_opts(&opts)
+# feature_backup_opts(&opts, [disabled])
 # Returns HTML for selecting options for a backup of this feature
 sub feature_backup_opts
 {
