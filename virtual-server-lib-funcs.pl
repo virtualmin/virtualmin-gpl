@@ -16738,25 +16738,23 @@ if ($config{'ip6enabled'} && &supports_ip6()) {
 		&$second_print(&text('check_iface6',
 		    "<tt>".($config{'iface6'} || $config{'iface'})."</tt>"));
 		}
-	}
-
-# Show the default IPv4 address
-if ($config{'ip6enabled'} && &supports_ip6()) {
+	# Get the default IPv6 address
 	$defip6 = &get_default_ip6();
 	}
+
+# Make sure at least one default IP is available or show error
 if (!$defip && !$defip6) {
 	return &text('index_edefip', "../config.cgi?$module_name");
 	}
-else {
-	&$second_print(&text('check_defip', $defip))
-		if (!$defip6);
-	}
-$config{'old_defip'} ||= $defip;
 
-# Show the default IPv6 address
-if ($defip6) {
-	&$second_print(&text('check_defip6', $defip6));
+# Show the default IPv4 and/or IPv6 address
+if ($defip || $defip6) {
+	&$second_print(&text('check_defip', $defip)) if ($defip);
+	&$second_print(&text('check_defip6', $defip6)) if ($defip6);
 	}
+
+# Remember old default IPs if not already set
+$config{'old_defip'} ||= $defip;
 $config{'old_defip6'} ||= $defip6;
 
 # Make sure the external IP is set if needed
@@ -16776,10 +16774,11 @@ if ($config{'dns_ip'} ne '*') {
 		}
 	}
 else {
-	my $ext_ip = &get_any_external_ip_address(1);
-	if ($ext_ip) {
-		my $msg = $ext_ip =~ /:/ ? "check_dnsip3v6" : "check_dnsip3";
-		&$second_print(&text($msg, $ext_ip));
+	my $ext_ip4 = &get_external_ip_address(1, 4);
+	my $ext_ip6 = &get_external_ip_address(1, 6);
+	if ($ext_ip4 || $ext_ip6) {
+		&$second_print(&text('check_dnsip3', $ext_ip4)) if ($ext_ip4);
+		&$second_print(&text('check_dnsip3v6', $ext_ip6)) if ($ext_ip6);
 		}
 	else {
 		&$second_print(&ui_text_color($text{'check_ednsip3'}, 'warn'));
