@@ -82,9 +82,10 @@ if (!$nocache && $config{$cache_optname} &&
 if ((my $dig = &has_command("dig")) &&
     $config{'dns_resolver'} =~ /^(?<qname>\S+)\s+(?<nserv>\S+)$/) {
 	my $qname = quotemeta($+{qname});
-	my $nserv    = quotemeta($+{nserv});
+	my $nserv = quotemeta($+{nserv});
+	my $rtype = $type == 6 ? 'AAAA' : 'A';
 	my $dig_cmd = "$dig +time=$timeout +short -".($type == 6 ? "6" : "4").
-		      " $qname \@" . $nserv;
+		      " $rtype " . "$qname \@" . $nserv;
 	&execute_command($dig_cmd, undef, \$out, \$error);
 	$out = $ip->($out);
 	}
