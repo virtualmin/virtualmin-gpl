@@ -16744,7 +16744,8 @@ if ($config{'ip6enabled'} && &supports_ip6()) {
 
 # Make sure at least one default IP is available or show error
 if (!$defip && !$defip6) {
-	return &text('index_edefip', "../config.cgi?$module_name");
+	return &text('index_edefip', "../config.cgi?module=".
+				     "$module_name&section=line1.3");
 	}
 
 # Show the default IPv4 and/or IPv6 address
