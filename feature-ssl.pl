@@ -131,8 +131,7 @@ local $chained = $d->{'ssl_chain'};
 local $nvstar = &add_name_virtual($d, $conf, $web_sslport, 1, $d->{'ip'});
 local $nvstar6; 
 if ($d->{'ip6'}) {                                
-        $nvstar6 = &add_name_virtual($d, $conf, $web_sslport, 1,
-                                     "[".$d->{'ip6'}."]");
+        $nvstar6 = &add_name_virtual($d, $conf, $web_sslport, 1, $d->{'ip6'});
         }       
 
 # Add a Listen directive if needed
@@ -277,7 +276,7 @@ if ($d->{'ip'} ne $oldd->{'ip'} ||
 	if ($d->{'ip6'}) {
 		$nvstar6 = &add_name_virtual(
 			$d, $conf, $d->{'web_sslport'}, 0,
-			"[".$d->{'ip6'}."]");
+			$d->{'ip6'});
 		}
 	&add_listen($d, $conf, $d->{'web_sslport'});
 

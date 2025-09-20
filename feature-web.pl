@@ -36,7 +36,8 @@ my ($f, $newfile) = &get_website_file($d);
 my $nvstar = &add_name_virtual($d, $conf, $web_port, 1, $d->{'ip'});
 my $nvstar6;
 if ($d->{'ip6'}) {
-	$nvstar6 = &add_name_virtual($d, $conf, $web_port, 1, $d->{'ip6'});
+	$nvstar6 = &add_name_virtual($d, $conf, $web_port, 1,
+				     $d->{'ip6'});
 	}
 
 # We use a * for the address for name-based servers under Apache 2,
