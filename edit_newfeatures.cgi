@@ -100,7 +100,10 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 			&plugin_call($m->{'dir'}, "feature_name") ||
 			  $m->{'dir'},
 			$text{'features_plugin'},
-			$m->{'version'},
+			$m->{'version'}.
+				(defined $m->{'edition'}
+				    ? " ". &get_module_edition($m->{'edition'})
+				    : ""),
 			$fcount{$m->{'dir'}} ? $fcount{$m->{'dir'}} :
 			  &plugin_defined($m->{'dir'}, "feature_setup") ? 0
 									: "-",
