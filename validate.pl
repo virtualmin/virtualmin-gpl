@@ -81,7 +81,7 @@ if ($config{'validate_config'}) {
 		$out .= "------------------------------\n";
 		$out .= $print_output;
 		if ($err) {
-			$out .= $err,"\n";
+			$out .= $err."\n";
 			$out .= "Configuration errors found\n";
 			}
 		else {
