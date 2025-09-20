@@ -16758,7 +16758,7 @@ if ($defip || $defip6) {
 $config{'old_defip'} ||= $defip;
 $config{'old_defip6'} ||= $defip6;
 
-# Make sure the external IP is set if needed
+# Make sure the external IPv4 is set if needed
 if ($config{'dns_ip'} ne '*') {
 	local $dns_ip = $config{'dns_ip'} || $defip;
 	local $ext_ip = &get_any_external_ip_address(1);
@@ -16769,20 +16769,52 @@ if ($config{'dns_ip'} ne '*') {
 		}
 	elsif ($ext_ip && $ext_ip ne $dns_ip) {
 		# Mis-match .. warn user
-		&$second_print(&ui_text_color(&text($config{'dns_ip'} ? 'check_ednsip1' :
-				'check_ednsip2', $dns_ip, $ext_ip,
-				"../config.cgi?$module_name"), 'warn'));
+		&$second_print(&ui_text_color(
+			&text($config{'dns_ip'} ? 'check_ednsip1' :
+			'check_ednsip2', $dns_ip, $ext_ip,
+			"../config.cgi?$module_name"), 'warn'));
 		}
 	}
 else {
 	my $ext_ip4 = &get_external_ip_address(1, 4);
-	my $ext_ip6 = &get_external_ip_address(1, 6);
-	if ($ext_ip4 || $ext_ip6) {
-		&$second_print(&text('check_dnsip3', $ext_ip4)) if ($ext_ip4);
-		&$second_print(&text('check_dnsip3v6', $ext_ip6)) if ($ext_ip6);
+	if ($ext_ip4) {
+		&$second_print(&text('check_dnsip3', $ext_ip4));
 		}
 	else {
 		&$second_print(&ui_text_color($text{'check_ednsip3'}, 'warn'));
+		}
+	}
+
+# Make sure the external IPv6 is set if needed
+if ($config{'dns_ip6'} ne '*') {
+	local $dns_ip6 = $config{'dns_ip6'} || $defip6;
+	local $ext_ip6 = &get_any_external_ip_address(1, 6);
+	if (!$dns_ip6) {
+		# No IPv6 address configured or detected locally
+		&$second_print(&ui_text_color(
+			&text('check_ednsipnonev6',
+			"../config.cgi?$module_name"), 'warn'));
+		}
+	elsif ($ext_ip6 && $ext_ip6 eq $dns_ip6) {
+		# Looks OK
+		&$second_print(&text($config{'dns_ip6'} ? 'check_dnsip1v6' :
+				'check_dnsip2v6', $dns_ip6));
+		}
+	elsif ($ext_ip6 && $ext_ip6 ne $dns_ip6) {
+		# Mis-match .. warn user
+		&$second_print(&ui_text_color(
+			&text($config{'dns_ip6'} ? 'check_ednsip1v6' :
+			'check_ednsip2v6', $dns_ip6, $ext_ip6,
+			"../config.cgi?$module_name"), 'warn'));
+		}
+	}
+else {
+	my $ext_ip6 = &get_external_ip_address(1, 6);
+	if ($ext_ip6) {
+		&$second_print(&text('check_dnsip3v6', $ext_ip6));
+		}
+	else {
+		&$second_print(&ui_text_color($text{'check_ednsip3v6'},'warn'));
 		}
 	}
 
@@ -19321,22 +19353,24 @@ foreach my $ad (@aliases) {
 	}
 }
 
-# get_dns_ip([reseller-name-list])
+# get_dns_ip([reseller-name-list], [prefer-protocol])
 # Returns the IP address for use in DNS records, or undef to use the domain's IP
 sub get_dns_ip
 {
-local ($reselname) = @_;
+my ($reselname, $prefer) = @_;
+$prefer ||= 4;
+my $suffix = $prefer == 6 ? 6 : "";
 if (defined(&get_reseller)) {
 	# Check if the reseller has an external IP
 	foreach my $r (split(/\s+/, $reselname)) {
 		local $resel = &get_reseller($r);
-		if ($resel && $resel->{'acl'}->{'defdnsip'}) {
-			return $resel->{'acl'}->{'defdnsip'};
+		if ($resel && $resel->{'acl'}->{'defdnsip'.$suffix}) {
+			return $resel->{'acl'}->{'defdnsip'.$suffix};
 			}
 		}
 	}
 if ($config{'dns_ip'} eq '*') {
-	local $rv = &get_any_external_ip_address();
+	local $rv = &get_any_external_ip_address(0, $prefer);
 	$rv || &error($text{'newdynip_eext'});
 	return $rv;
 	}

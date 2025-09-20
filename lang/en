@@ -2109,13 +2109,19 @@ check_okmemory=Your system has $1 of memory, which is at or above the Virtualmin
 check_okgmemory=Your system is a VM with at most $1 of memory, but a guaranteed limit of only $2. These are both at or above the Virtualmin recommended minimum of $3
 check_defip=Default IPv4 address for virtual servers is $1
 check_defip6=Default IPv6 address for virtual servers is $1
-check_dnsip1=External IP address for DNS records is set to $1, which matches the detected external address
-check_dnsip2=Default IP address is set to $1, which matches the detected external address
+check_dnsip1=External IPv4 address for DNS records is set to $1, which matches the detected external address
+check_dnsip2=Default IPv4 address is set to $1, which matches the detected external address
+check_dnsip1v6=External IPv6 address for DNS records is set to $1, which matches the detected external address
+check_dnsip2v6=Default IPv6 address is set to $1, which matches the detected external address
 check_dnsip3=Detected external IPv4 address is $1
 check_dnsip3v6=Detected external IPv6 address is $1
-check_ednsip3=Could not detect external IP address
-check_ednsip1=External IP address for DNS records is set to $1, but the detected external address is actually $2. This may cause DNS records for Virtualmin domains to point to the wrong system
-check_ednsip2=Default IP address is set to $1, but the detected external address is actually $2. This is typically the result of being behind a NAT firewall, and should be corrected on the <a href='$3'>module configuration</a> page
+check_ednsip3=Could not detect external IPv4 address
+check_ednsip3v6=Could not detect external IPv6 address
+check_ednsip1=External IPv4 address for DNS records is set to $1, but the detected external address is actually $2. This may cause DNS records for Virtualmin domains to point to the wrong system
+check_ednsip2=Default IPv4 address is set to $1, but the detected external address is actually $2. This is typically the result of being behind a NAT firewall, and should be corrected on the <a href='$3'>module configuration</a> page
+check_ednsip1v6=External IPv6 address for DNS records is set to $1, but the detected external address is actually $2. This may cause DNS records for Virtualmin domains to point to the wrong system
+check_ednsip2v6=Default IPv6 address is set to $1, but the detected external address is actually $2. This is typically the result of being behind a NAT firewall, and should be corrected on the <a href='$3'>module configuration</a> page
+check_ednsipnonev6=No local IPv6 address was found, and none is set on the <a href='$1'>module configuration</a> page
 check_ewebsuexecbin=The <tt>suexec</tt> command was not found on your system
 check_ewebsuexechome=The <tt>suexec</tt> command on your system is configured to only run scripts under <tt>$2</tt>, but the Virtualmin virtual server home directory is <tt>$1</tt>. CGI scripts run as domain owners will not be executed
 check_ewebactions=The Apache module <tt>mod_actions</tt> is either not installed or not enabled
