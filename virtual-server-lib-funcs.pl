@@ -17315,7 +17315,7 @@ if ($config{'collect_interval'} ne $lastconfig{'collect_interval'}) {
 # Re-collect system info
 &$first_print($text{'check_sysinfo'});
 &$indent_print(); # in case it prints something, do it nicely
-local $info = &collect_system_info();
+my $info = &collect_system_info(undef, 1);
 &$outdent_print();
 if ($info) {
         &save_collected_info($info);
