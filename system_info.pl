@@ -437,9 +437,12 @@ if (!$data->{'noquotas'} && @quota && (&master_admin() || &reseller_admin())) {
 	foreach my $q (@quota) {
 		my $cmd = &can_edit_domain($q->[0]) ? "edit_domain.cgi"
 						    : "view_domain.cgi";
+		my $dn = &show_domain_name($q->[0]);
+		$qn = "<i>$dn</i>" if ($q->[0]->{'disabled'});
 		my $chart = { 'desc' => &ui_link(
-			&get_webprefix_safe() . '/'.$module_name.'/'.$cmd.'?dom='.$q->[0]->{'id'},
-			 &show_domain_name($q->[0])) };
+			&get_webprefix_safe().'/'.$module_name.
+			  '/'.$cmd.'?dom='.$q->[0]->{'id'},
+			$dn) };
 		if ($qshow) {
 			# By percent used
 			my $qpc = int($q->[1]*100 / $q->[2]);
@@ -521,9 +524,12 @@ if (!$data->{'nobw'} && $config{'bw_active'} && @bwdoms && $maxbw) {
 	foreach my $d (@doms) {
 		my $cmd = &can_edit_domain($d) ? "edit_domain.cgi"
 					       : "view_domain.cgi";
+		my $dn = &show_domain_name($d);
+		$qn = "<i>$dn</i>" if ($d->{'disabled'});
 		my $chart = { 'desc' => &ui_link(
-			&get_webprefix_safe() . '/'.$module_name.'/'.$cmd.'?dom='.$d->{'id'},
-			 &show_domain_name($d)) };
+			&get_webprefix_safe().'/'.$module_name.'/'.
+			  $cmd.'?dom='.$d->{'id'},
+			$dn) };
 		my $pc = $d->{'bw_limit'} ?
 			int($d->{'bw_usage'}*100 / $d->{'bw_limit'}) : undef;
 		if ($qshow) {
