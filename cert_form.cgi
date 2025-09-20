@@ -572,7 +572,8 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 		# Test connectivity first?
 		if (defined(&check_domain_connectivity)) {
 			print &ui_table_row($text{'cert_connectivity'},
-				&ui_radio("connectivity", 1,
+				&ui_radio("connectivity",
+				  $d->{'letsencrypt_connectivity'} // 1,
 				  [ [ 2, $text{'cert_connectivity2'} ],
 				    [ 1, $text{'cert_connectivity1'} ],
 				    [ 0, $text{'cert_connectivity0'} ] ]));

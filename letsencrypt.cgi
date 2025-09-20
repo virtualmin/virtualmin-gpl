@@ -56,6 +56,7 @@ if ($in{'only'}) {
 	$d->{'letsencrypt_subset'} = $subset;
 	$d->{'letsencrypt_email'} = $in{'email'};
 	$d->{'letsencrypt_id'} = $in{'acme'} if (defined($in{'acme'}));
+	$d->{'letsencrypt_connectivity'} = $in{'connectivity'};
 	&save_domain($d);
 	&redirect("cert_form.cgi?dom=$d->{'id'}");
 	}
@@ -119,6 +120,7 @@ else {
 			}
 
 		}
+	$d->{'letsencrypt_connectivity'} = $in{'connectivity'};
 
 	# Filter down hostnames to those that can be resolved
 	if ($in{'dnscheck'}) {
