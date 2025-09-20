@@ -2,6 +2,7 @@
 * Add support for Bunny DNS for Virtualmin Pro users
 * Fix not to smoosh DNS TXT records together when using CLI [#1104](https://github.com/virtualmin/virtualmin-gpl/issues/1104)
 * Fix to disallow out-of-domain DNS records when using CLI
+* Fix to correctly add IPv6 to SSL virtual hosts
 
 #### Version 7.40.1
 * Add an API for plugins to exclude specific directories from backups
