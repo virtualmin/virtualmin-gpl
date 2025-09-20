@@ -105,7 +105,7 @@ else {
 }
 
 # get_base_module_version()
-# Returns the Virtualmin version, rounded to 2 decimals
+# Returns the Virtualmin version, rounded to 2 or 3 decimals
 sub get_base_module_version
 {
 my $ver = $module_info{'version'};

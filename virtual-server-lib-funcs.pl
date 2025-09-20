@@ -12959,7 +12959,7 @@ if ($main::sysinfo_virtualmin_self) {
 
 	# Add Virtualmin version
 	push(@sysinfo_virtualmin,
-	    [ $text{'right_virtualmin'}, &get_module_version_and_type() ] );
+	    [ $text{'right_virtualmin'}, scalar get_module_version() ]);
 
 	# Add Cloudmin version, if installed
 	if (&foreign_installed("server-manager")) {
@@ -20831,39 +20831,27 @@ if (!$ssh_keytest_err) {
 return wantarray ? ($ssh_keytest_err, $ssh_keytest_out) : $ssh_keytest_err;
 }
 
-sub get_module_version_and_type
+sub get_module_edition
 {
-my ($list, $gpl, $ver) = @_;
-my $mver = $ver || $module_info{'version'};
-my ($v_major, $v_minor, $v_build, $v_type);
-if ($mver =~ /(?<major>\d+)\.(?<minor>\d+)\.(?<build>\d+).*?(?<type>[a-z]+)/i) {
-	($v_major, $v_minor, $v_build, $v_type) = ($+{major}, $+{minor}, $+{build}, $+{type});
+return (( defined $_[0]
+		? $_[0] eq 'pro'
+		: $virtualmin_pro )
+			? 'Professional'
+			: 'GPL');
+}
+
+sub get_module_version
+{
+my $mver = $module_info{'version'};
+my $edit = &get_module_edition();
+return wantarray ? (0, 0, 0, $edit) : "0.0.0 $edit" if (!$mver);
+if ($mver =~ /\A(\d+)\.(\d+)(?:\.(\d+))?/) {
+	my ($maj, $min, $bug) = ($1, $2, $3);
+	return wantarray
+		? ($maj, $min, $bug, $edit)
+		: ($maj . '.' . $min . (defined $bug ? ".$bug" : '') . " ".
+		   $edit);
 	}
-elsif ($mver =~ /(?<major>\d+)\.(?<minor>\d+).*?(?<type>[a-z]+)/i) {
-	($v_major, $v_minor, $v_build, $v_type) = ($+{major}, $+{minor}, undef, $+{type});
-	}
-elsif ($mver =~ /(?<major>\d+)\.(?<minor>\d+)\.(?<build>\d+)/) {
-	($v_major, $v_minor, $v_build) = ($+{major}, $+{minor}, $+{build});
-	}
-elsif ($mver =~ /(?<major>\d+)\.(?<minor>\d+)/) {
-	($v_major, $v_minor) = ($+{major}, $+{minor});
-	}
-else {
-	return $mver;
-	}
-if ($v_type =~ /pro/i) {
-	$v_type = " Pro";
-	} 
-else {
-	if ($gpl) {
-		$v_type = " GPL";
-		}
-	else {
-		$v_type = "";
-		}
-	}
-return $list ? ($v_major, $v_minor, $v_build, &trim($v_type)) : 
-	  "$v_major.$v_minor".(defined($v_build) ? ".$v_build" : "")."$v_type";
 }
 
 # set_provision_features(&domain)
