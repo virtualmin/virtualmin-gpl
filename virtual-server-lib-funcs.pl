@@ -17313,10 +17313,14 @@ if ($config{'collect_interval'} ne $lastconfig{'collect_interval'}) {
 	}
 
 # Re-collect system info
+&$first_print($text{'check_sysinfo'});
+&$indent_print(); # in case it prints something, do it nicely
 local $info = &collect_system_info();
+&$outdent_print();
 if ($info) {
         &save_collected_info($info);
         }
+&$second_print($text{'setup_done'});
 
 # Update spamassassin lock files
 if ($config{'spam_lock'} != $lastconfig{'spam_lock'}) {

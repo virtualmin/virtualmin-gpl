@@ -2231,6 +2231,7 @@ check_eclamd=You have selected to use <tt>clamdscan</tt> for virus scanning, but
 check_evirusspam=Virus scanning cannot be enabled without spam filtering
 check_preload=Updating Virtualmin library pre-load settings ..
 check_collect=Updating status collection job ..
+check_sysinfo=Updating system information ..
 check_collectoff=Disabling status collection job ..
 check_esendmailbccs=Automatic BCCing of outgoing email is not supported by the Sendmail mail server, and so must be turned off on the <a href='$1'>module configuration</a> page
 check_eqmailbccs=Automatic BCCing of outgoing email is not supported by the Qmail mail server, and so must be turned off on the <a href='$1'>module configuration</a> page
