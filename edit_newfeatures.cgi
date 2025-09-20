@@ -38,7 +38,7 @@ foreach $f (@features) {
 			{ 'type' => 'checkbox', 'checked' => 1, 'disabled' => 1 },
 			$text{'feature_'.$f},
 			$text{'features_feature'},
-			get_module_version_and_type(),
+			scalar get_module_version(),
 			$fcount{$f} || 0,
 			{ 'type' => 'checkbox', 'name' => 'factive',
 			  'value' => $f, 'checked' => $config{$f} == 3 },
@@ -60,7 +60,7 @@ foreach $f (@features) {
 			},
 			$text{'feature_'.$f},
 			$text{'features_feature'},
-			get_module_version_and_type(),
+			scalar get_module_version(),
 			$fcount{$f} || 0,
 			{ 'type' => 'checkbox', 'name' => 'factive',
 			  'value' => $f, 'checked' => $config{$f} != 2,
@@ -100,7 +100,10 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 			&plugin_call($m->{'dir'}, "feature_name") ||
 			  $m->{'dir'},
 			$text{'features_plugin'},
-			$m->{'version'},
+			$m->{'version'}.
+				(defined $m->{'edition'}
+				    ? " ". &get_module_edition($m->{'edition'})
+				    : ""),
 			$fcount{$m->{'dir'}} ? $fcount{$m->{'dir'}} :
 			  &plugin_defined($m->{'dir'}, "feature_setup") ? 0
 									: "-",

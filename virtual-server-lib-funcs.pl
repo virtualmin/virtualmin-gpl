@@ -12959,7 +12959,7 @@ if ($main::sysinfo_virtualmin_self) {
 
 	# Add Virtualmin version
 	push(@sysinfo_virtualmin,
-	    [ $text{'right_virtualmin'}, &get_module_version_and_type() ] );
+	    [ $text{'right_virtualmin'}, scalar get_module_version() ]);
 
 	# Add Cloudmin version, if installed
 	if (&foreign_installed("server-manager")) {
@@ -16738,25 +16738,24 @@ if ($config{'ip6enabled'} && &supports_ip6()) {
 		&$second_print(&text('check_iface6',
 		    "<tt>".($config{'iface6'} || $config{'iface'})."</tt>"));
 		}
-	}
-
-# Show the default IPv4 address
-if ($config{'ip6enabled'} && &supports_ip6()) {
+	# Get the default IPv6 address
 	$defip6 = &get_default_ip6();
 	}
-if (!$defip && !$defip6) {
-	return &text('index_edefip', "../config.cgi?$module_name");
-	}
-else {
-	&$second_print(&text('check_defip', $defip))
-		if (!$defip6);
-	}
-$config{'old_defip'} ||= $defip;
 
-# Show the default IPv6 address
-if ($defip6) {
-	&$second_print(&text('check_defip6', $defip6));
+# Make sure at least one default IP is available or show error
+if (!$defip && !$defip6) {
+	return &text('index_edefip', "../config.cgi?module=".
+				     "$module_name&section=line1.3");
 	}
+
+# Show the default IPv4 and/or IPv6 address
+if ($defip || $defip6) {
+	&$second_print(&text('check_defip', $defip)) if ($defip);
+	&$second_print(&text('check_defip6', $defip6)) if ($defip6);
+	}
+
+# Remember old default IPs if not already set
+$config{'old_defip'} ||= $defip;
 $config{'old_defip6'} ||= $defip6;
 
 # Make sure the external IP is set if needed
@@ -16776,10 +16775,11 @@ if ($config{'dns_ip'} ne '*') {
 		}
 	}
 else {
-	my $ext_ip = &get_any_external_ip_address(1);
-	if ($ext_ip) {
-		my $msg = $ext_ip =~ /:/ ? "check_dnsip3v6" : "check_dnsip3";
-		&$second_print(&text($msg, $ext_ip));
+	my $ext_ip4 = &get_external_ip_address(1, 4);
+	my $ext_ip6 = &get_external_ip_address(1, 6);
+	if ($ext_ip4 || $ext_ip6) {
+		&$second_print(&text('check_dnsip3', $ext_ip4)) if ($ext_ip4);
+		&$second_print(&text('check_dnsip3v6', $ext_ip6)) if ($ext_ip6);
 		}
 	else {
 		&$second_print(&ui_text_color($text{'check_ednsip3'}, 'warn'));
@@ -17313,10 +17313,14 @@ if ($config{'collect_interval'} ne $lastconfig{'collect_interval'}) {
 	}
 
 # Re-collect system info
-local $info = &collect_system_info();
+&$first_print($text{'check_sysinfo'});
+&$indent_print(); # in case it prints something, do it nicely
+my $info = &collect_system_info(undef, 1);
+&$outdent_print();
 if ($info) {
         &save_collected_info($info);
         }
+&$second_print($text{'setup_done'});
 
 # Update spamassassin lock files
 if ($config{'spam_lock'} != $lastconfig{'spam_lock'}) {
@@ -20831,39 +20835,27 @@ if (!$ssh_keytest_err) {
 return wantarray ? ($ssh_keytest_err, $ssh_keytest_out) : $ssh_keytest_err;
 }
 
-sub get_module_version_and_type
+sub get_module_edition
 {
-my ($list, $gpl, $ver) = @_;
-my $mver = $ver || $module_info{'version'};
-my ($v_major, $v_minor, $v_build, $v_type);
-if ($mver =~ /(?<major>\d+)\.(?<minor>\d+)\.(?<build>\d+).*?(?<type>[a-z]+)/i) {
-	($v_major, $v_minor, $v_build, $v_type) = ($+{major}, $+{minor}, $+{build}, $+{type});
+return (( defined $_[0]
+		? $_[0] eq 'pro'
+		: $virtualmin_pro )
+			? 'Professional'
+			: 'GPL');
+}
+
+sub get_module_version
+{
+my $mver = $module_info{'version'};
+my $edit = &get_module_edition();
+return wantarray ? (0, 0, 0, $edit) : "0.0.0 $edit" if (!$mver);
+if ($mver =~ /\A(\d+)\.(\d+)(?:\.(\d+))?/) {
+	my ($maj, $min, $bug) = ($1, $2, $3);
+	return wantarray
+		? ($maj, $min, $bug, $edit)
+		: ($maj . '.' . $min . (defined $bug ? ".$bug" : '') . " ".
+		   $edit);
 	}
-elsif ($mver =~ /(?<major>\d+)\.(?<minor>\d+).*?(?<type>[a-z]+)/i) {
-	($v_major, $v_minor, $v_build, $v_type) = ($+{major}, $+{minor}, undef, $+{type});
-	}
-elsif ($mver =~ /(?<major>\d+)\.(?<minor>\d+)\.(?<build>\d+)/) {
-	($v_major, $v_minor, $v_build) = ($+{major}, $+{minor}, $+{build});
-	}
-elsif ($mver =~ /(?<major>\d+)\.(?<minor>\d+)/) {
-	($v_major, $v_minor) = ($+{major}, $+{minor});
-	}
-else {
-	return $mver;
-	}
-if ($v_type =~ /pro/i) {
-	$v_type = " Pro";
-	} 
-else {
-	if ($gpl) {
-		$v_type = " GPL";
-		}
-	else {
-		$v_type = "";
-		}
-	}
-return $list ? ($v_major, $v_minor, $v_build, &trim($v_type)) : 
-	  "$v_major.$v_minor".(defined($v_build) ? ".$v_build" : "")."$v_type";
 }
 
 # set_provision_features(&domain)
@@ -21301,6 +21293,7 @@ my $remove_default_host_domain = sub {
 		&pop_all_print();
 		}
 	};
+# New host domain flag
 my $new_default_domain = &get_domain_by("defaulthostdomain", 1);
 if ($new_default_domain) {
 	if ($config{'default_domain_ssl'}) {
@@ -21325,6 +21318,8 @@ if ($new_default_domain) {
 		}
 	}
 elsif ($config{'default_domain_ssl'}) {
+	# We used to configure it differently; keep it for backward
+	# compatibility
 	my $old_default_domain = &get_domain_by("defaultdomain", 1);
 
 	&$first_print(&text('check_hostdefaultdomain_enable',

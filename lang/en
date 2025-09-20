@@ -41,7 +41,7 @@ index_return=virtual servers list
 index_return2=module index
 index_list=List..
 index_enet=The Network Configuration module is not supported on your operating system. Virtualmin needs this module to manage virtual network interfaces
-index_edefip=Virtualmin could not work out the default IPv4 address for virtual servers on your system. You will need to update either the <b>Network interface for virtual addresses</b> or <b>Default virtual server IP address</b> fields on the <a href='$1'>module configuration</a> page
+index_edefip=Virtualmin could not work out the default IP address for virtual servers on your system. You need to update either the network interface for virtual addresses or the default virtual server IP address fields on the <a href='$1'>module configuration</a> page
 index_eapache=The Apache webserver does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>Apache Webserver</a> module. If your system does not use Apache, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page
 index_eproftpd=The ProFTPD server does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>ProFTPD Server</a> module. If your system does not use ProFTPD, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page
 index_ebind=The BIND DNS server version 8 or 9 does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>BIND DNS Server</a> module. If your system does not use BIND, it should be disabled in Virtualmin's <a href='$2'>module configuration</a> page
@@ -2231,6 +2231,7 @@ check_eclamd=You have selected to use <tt>clamdscan</tt> for virus scanning, but
 check_evirusspam=Virus scanning cannot be enabled without spam filtering
 check_preload=Updating Virtualmin library pre-load settings ..
 check_collect=Updating status collection job ..
+check_sysinfo=Updating system information ..
 check_collectoff=Disabling status collection job ..
 check_esendmailbccs=Automatic BCCing of outgoing email is not supported by the Sendmail mail server, and so must be turned off on the <a href='$1'>module configuration</a> page
 check_eqmailbccs=Automatic BCCing of outgoing email is not supported by the Qmail mail server, and so must be turned off on the <a href='$1'>module configuration</a> page

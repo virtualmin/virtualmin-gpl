@@ -82,19 +82,20 @@ if (!$nocache && $config{$cache_optname} &&
 if ((my $dig = &has_command("dig")) &&
     $config{'dns_resolver'} =~ /^(?<qname>\S+)\s+(?<nserv>\S+)$/) {
 	my $qname = quotemeta($+{qname});
-	my $nserv    = quotemeta($+{nserv});
+	my $nserv = quotemeta($+{nserv});
+	my $rtype = $type == 6 ? 'AAAA' : 'A';
 	my $dig_cmd = "$dig +time=$timeout +short -".($type == 6 ? "6" : "4").
-		      " $qname \@" . $nserv;
+		      " $rtype " . "$qname \@" . $nserv;
 	&execute_command($dig_cmd, undef, \$out, \$error);
 	$out = $ip->($out);
 	}
 # Fetch IP using http
 if ($error || !$out) {
+	$error = undef;
 	my $url = $config{'ip_lookup_url'} || 
 		"http://software.virtualmin.com/cgi-bin/ip.cgi";
-	my $url4 = $url;
-	my $url6 = $url;
-	($url4, $url6) = split(/ /, $url) if ($url =~ / /);
+	my ($url4, $url6) = split(/\s+/, $url, 2);
+	$url6 ||= $url4;
 	$url = $type == 4 ? $url4 : $url6;
 	my ($host, $port, $page, $ssl) = &parse_http_url($url);
 	&http_download($host, $port, $page, \$out, \$error, undef, $ssl,
@@ -119,19 +120,35 @@ return $out;
 # either IPv4 or IPv6, preferring IPv4 by default.
 sub get_any_external_ip_address
 {
-my ($nocache, $prefer) = shift;
-my $ip4 = &get_external_ip_address($nocache, 4) if (!$prefer || $prefer != 6);
-my $ip6 = &get_external_ip_address($nocache, 6) if (!$prefer || $prefer != 4);
-return $prefer == 4 ? $ip4 : $ip6 || $ip4;
+my ($nocache, $prefer) = @_;
+$prefer = ($prefer && $prefer == 6) ? 6 : 4;   # default to IPv4
+if ($prefer == 4) {
+	my $ip4 = &get_external_ip_address($nocache, 4);
+	return $ip4 if ($ip4);
+	return &get_external_ip_address($nocache, 6);
+	}
+else {
+	my $ip6 = &get_external_ip_address($nocache, 6);
+	return $ip6 if ($ip6);
+	return &get_external_ip_address($nocache, 4);
+	}
 }
 
 # get_any_external_ip_address_cached()
 # Returns the cached IP address of this system unless caching is disabled.
 sub get_any_external_ip_address_cached
 {
-my ($ip4txt, $ip6txt) = ('external_ip_cache', 'external_ipv6_cache');
-return $config{$ip4txt} if ($config{$ip4txt} && !$config{"no_$ip4txt"});
-return $config{$ip6txt} if ($config{$ip6txt} && !$config{"no_$ip6txt"});
+my ($prefer) = @_;
+$prefer = ($prefer && $prefer == 6) ? 6 : 4;
+my ($k4, $k6) = ('external_ip_cache', 'external_ipv6_cache');
+if ($prefer == 4) {
+	return $config{$k4} if ($config{$k4} && !$config{"no_$k4"});
+	return $config{$k6} if ($config{$k6} && !$config{"no_$k6"});
+	}
+else {
+	return $config{$k6} if ($config{$k6} && !$config{"no_$k6"});
+	return $config{$k4} if ($config{$k4} && !$config{"no_$k4"});
+	}
 return undef;
 }
 
