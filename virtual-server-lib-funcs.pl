@@ -16772,7 +16772,8 @@ if ($config{'dns_ip'} ne '*') {
 		&$second_print(&ui_text_color(
 			&text($config{'dns_ip'} ? 'check_ednsip1' :
 			'check_ednsip2', $dns_ip, $ext_ip,
-			"../config.cgi?$module_name"), 'warn'));
+			"../config.cgi?module=$module_name&section=line1.3"),
+			'warn'));
 		}
 	}
 else {
@@ -16804,7 +16805,8 @@ if ($config{'dns_ip6'} ne '*') {
 		&$second_print(&ui_text_color(
 			&text($config{'dns_ip6'} ? 'check_ednsip1v6' :
 			'check_ednsip2v6', $dns_ip6, $ext_ip6,
-			"../config.cgi?$module_name"), 'warn'));
+			"../config.cgi?module=$module_name&section=line1.3"),
+			'warn'));
 		}
 	else {
 		&$second_print(&ui_text_color($text{'check_ednsip3v6'},'warn'));
