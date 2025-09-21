@@ -2835,7 +2835,7 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d) && $tmpl->{'dnssec_alg'}) {
 		}
 	}
 
-# Need to update IP addresses
+# Need to update IPv4 addresses
 my $r;
 my ($baserec) = grep { $_->{'type'} eq "A" &&
 			  ($_->{'name'} eq $d->{'dom'}."." ||
@@ -2857,9 +2857,14 @@ if ($baseip) {
 my ($baserec6) = grep { $_->{'type'} eq "AAAA" &&
 			   ($_->{'name'} eq $d->{'dom'}."." ||
 			    $_->{'name'} eq '@') } @$recs;
-my $ip6 = $d->{'ip6'};
-my $baseip6 = $d->{'old_ip6'} ? $d->{'old_ip6'} :
-			$baserec6 ? $baserec6->{'values'}->[0] : undef;
+my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
+my $baseip6 = $d->{'old_dns_ip6'}
+		? $d->{'old_dns_ip6'}
+		: $d->{'old_ip6'}
+			? $d->{'old_ip6'}
+			: $baserec6
+				? $baserec6->{'values'}->[0]
+				: undef;
 if ($baseip6 && $ip6) {
 	# Update to new v6 address
 	&modify_records_ip_address($recs, $zonefile, $baseip6, $ip6);
