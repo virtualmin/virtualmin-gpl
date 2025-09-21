@@ -273,7 +273,7 @@ elsif ($virt6 && $d->{'virt6'} && $d->{'ip6'} ne $ip6) {
 	}
 
 # Update DNS IPv6
-if (&can_dnsip() && defined($in{'dns_ip6_def'})) {
+if (&can_dnsip() && defined($in{'dns_ip6_def'}) && &supports_ip6()) {
 	if ($in{'dns_ip6_def'}) {
 		delete($d->{'dns_ip6'});
 		}
