@@ -841,6 +841,8 @@ else {
 	}
 my $oldip = $oldd->{'dns_ip'} || $oldd->{'ip'};
 my $newip = $d->{'dns_ip'} || $d->{'ip'};
+my $oldip6 = $oldd->{'dns_ip6'} || $oldd->{'ip6'};
+my $newip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 my $rv = 0;
 
 # Zone file name and records, if we read them
@@ -1005,7 +1007,8 @@ if ($check_submode) {
 		}
 	}
 
-if ($oldip ne $newip) {
+# Update IPv4 or IPv6 address, if changed
+if ($oldip ne $newip || $oldip6 ne $newip6) {
 	# IP address has changed .. need to update any records that use
 	# the old IP
 	&$first_print($text{'save_dns'});
@@ -1015,8 +1018,10 @@ if ($oldip ne $newip) {
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
-	&modify_records_ip_address($recs, $file, $oldip, $newip,
-				   $d->{'dom'});
+	&modify_records_ip_address($recs, $file, $oldip, $newip, $d->{'dom'})
+		if ($oldip ne $newip); # Update IPv4
+	&modify_records_ip_address($recs, $file, $oldip6, $newip6, $d->{'dom'})
+		if ($oldip6 ne $newip6); # Update IPv6
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
