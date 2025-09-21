@@ -1212,7 +1212,7 @@ elsif ($d->{'ip6'} && $oldd->{'ip6'} &&
 
 # Update SOA and upload records to provisioning server
 if ($file) {
-	&post_records_change($d, $recs, $file);
+	my $err = &post_records_change($d, $recs, $file);
 	}
 else {
 	&after_records_change($d);
@@ -1962,7 +1962,9 @@ local ($d, $file, $recs) = @_;
 &require_bind();
 my $withdot = $d->{'dom'}.".";
 foreach my $r (@$recs) {
-	if ($r->{'type'} eq 'AAAA' && $r->{'values'}->[0] eq $d->{'ip6'} &&
+	if ($r->{'type'} eq 'AAAA' &&
+	    ($r->{'values'}->[0] eq $d->{'ip6'} ||
+	     $r->{'values'}->[0] eq $d->{'dns_ip6'}) &&
 	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
 		push(@delrecs, $r);
 		}
@@ -4057,6 +4059,7 @@ sub clone_dns_record
 {
 my ($r) = @_;
 my $nr = { %$r };
+delete($nr->{'bunny_id'});
 $nr->{'values'} = [ @{$r->{'values'}} ];
 return $nr;
 }
