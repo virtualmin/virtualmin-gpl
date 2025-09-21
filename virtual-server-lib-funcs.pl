@@ -8297,6 +8297,7 @@ if ($aliasname && $aliasname ne $dom->{'dom'}) {
 				 'name', 1,
 				 'ip', $dom->{'ip'},
 				 'dns_ip', $dom->{'dns_ip'},
+				 'dns_ip6', $dom->{'dns_ip6'},
 				 'virt', 0,
 				 'source', $dom->{'source'},
 				 'parent', $parentdom->{'id'},
@@ -19370,13 +19371,13 @@ if (defined(&get_reseller)) {
 			}
 		}
 	}
-if ($config{'dns_ip'} eq '*') {
+if ($config{'dns_ip'.$suffix} eq '*') {
 	my $rv = &get_external_ip_address(0, $prefer);
 	$rv || &error($text{'newdynip_eext'});
 	return $rv;
 	}
-elsif ($config{'dns_ip'}) {
-	return $config{'dns_ip'};
+elsif ($config{'dns_ip'.$suffix}) {
+	return $config{'dns_ip'.$suffix};
 	}
 return undef;
 }
@@ -21035,7 +21036,8 @@ my %dom;
 	'name', 1,
 	'name6', 1,
 	'ip', $defip,
-	'dns_ip', &get_dns_ip(),
+	'dns_ip', &get_dns_ip(undef, 4),
+	'dns_ip6', &get_dns_ip(undef, 6),
 	'virt', 0,
 	'virtalready', 0,
 	'ip6', $defip6,
