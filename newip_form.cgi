@@ -73,7 +73,7 @@ if (&can_use_feature("virt")) {
 		&ui_radio_table("mode", $d->{'virt'} ? 1 : 0, \@opts, 1));
 	}
 
-# Show the external IP
+# Show the external IPv4 address
 if (&can_dnsip()) {
 	print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
 		&ui_opt_textbox("dns_ip", $d->{'dns_ip'}, 20,
@@ -134,6 +134,15 @@ if (&supports_ip6() && &can_use_feature("virt6")) {
 	$mode = $d->{'virt6'} ? 1 : $d->{'ip6'} && @canips ? 0 : -1;
 	print &ui_table_row($text{'newips_new6'},
 		&ui_radio_table("mode6", $mode, \@opts, 1));
+	}
+
+# Show the external IPv6 address
+if (&can_dnsip()) {
+	print &ui_table_row(&hlink($text{'edit_dnsip6'}, "edit_dnsip6"),
+		&ui_opt_textbox("dns_ip6", $d->{'dns_ip6'}, 40,
+				$d->{'ip6'} ?
+					&text('spf_default', $d->{'ip6'}) :
+					$text{'edit_nodnsip6'}));
 	}
 
 # HTTP and HTTPS ports

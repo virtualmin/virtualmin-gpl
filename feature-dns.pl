@@ -1903,7 +1903,9 @@ return 0 if (!$file);
 # Work out which AAAA records we already have
 local %already;
 foreach my $r (@$recs) {
-	if ($r->{'type'} eq 'AAAA' && $r->{'values'}->[0] eq $d->{'ip6'}) {
+	if ($r->{'type'} eq 'AAAA' &&
+	    ($r->{'values'}->[0] eq $d->{'ip6'} ||
+	     $r->{'values'}->[0] eq $d->{'dns_ip6'})) {
 		$already{$r->{'name'}}++;
 		}
 	}
@@ -1911,7 +1913,8 @@ foreach my $r (@$recs) {
 # Find all possible sub-domains, so we don't clone IPs for them
 my @dnames;
 foreach my $od (&list_domains()) {
-	if ($od->{'dns'} && $od->{'id'} ne $d->{'id'} &&
+	if ($od->{'dns'} &&
+	    $od->{'id'} ne $d->{'id'} &&
 	    $od->{'dom'} =~ /\.\Q$d->{'dom'}\E$/) {
 		push(@dnames, $od->{'dom'});
 		}

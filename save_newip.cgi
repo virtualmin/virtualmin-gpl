@@ -115,6 +115,10 @@ if (&can_dnsip()) {
 	$in{'dns_ip_def'} || &check_ipaddress($in{'dns_ip'}) ||
 		&error($text{'save_ednsip'});
 	}
+if (&can_dnsip() && defined($in{'dns_ip6_def'})) {
+	$in{'dns_ip6_def'} || &check_ip6address($in{'dns_ip6'}) ||
+		&error($text{'save_ednsip6'});
+	}
 
 if (!&supports_ip6() || !&can_use_feature("virt6")) {
 	# Cannot use or change IPv6, so no validation needed
@@ -225,7 +229,7 @@ elsif ($virt && $d->{'virt'} && $d->{'ip'} ne $ip) {
 	$d->{'virtalready'} = $virtalready;
 	}
 
-# Update DNS IP
+# Update DNS IPv4
 if (&can_dnsip()) {
 	if ($in{'dns_ip_def'}) {
 		delete($d->{'dns_ip'});
@@ -246,6 +250,7 @@ elsif ($virt6 && !$d->{'virt6'}) {
 	$d->{'virt6'} = 1;
 	$d->{'name6'} = 0;
 	$d->{'virt6already'} = $virt6already;
+	delete($d->{'dns_ip6'});
 	}
 elsif (!$virt6 && $d->{'virt6'}) {
 	# Taking down IPv6 interface, revert to shared
@@ -254,6 +259,7 @@ elsif (!$virt6 && $d->{'virt6'}) {
 	$d->{'virt6'} = 0;
 	$d->{'name6'} = 1;
 	$d->{'virt6already'} = 0;
+	delete($d->{'dns_ip6'});
 	}
 elsif (!$virt6 && !$d->{'virt6'} && $d->{'ip6'} ne $ip6) {
 	# Changing shared IPv6 address
@@ -264,6 +270,16 @@ elsif ($virt6 && $d->{'virt6'} && $d->{'ip6'} ne $ip6) {
 	$d->{'ip6'} = $ip6;
 	$d->{'netmask6'} = $netmask6;
 	$d->{'virt6already'} = $virt6already;
+	}
+
+# Update DNS IPv6
+if (&can_dnsip() && defined($in{'dns_ip6_def'})) {
+	if ($in{'dns_ip6_def'}) {
+		delete($d->{'dns_ip6'});
+		}
+	else {
+		$d->{'dns_ip6'} = $in{'dns_ip6'};
+		}
 	}
 
 # Update for web ports

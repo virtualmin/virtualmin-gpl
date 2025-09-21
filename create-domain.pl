@@ -266,6 +266,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-dns-ip") {
 		$dns_ip = "";
 		}
+	elsif ($a eq "--dns-ip6") {
+		$dns_ip6 = shift(@ARGV);
+		&check_ip6address($dns_ip6) ||
+			&usage("--dns-ip6 must be followed by an IPv6 address");
+		}
+	elsif ($a eq "--no-dns-ip6") {
+		$dns_ip6 = "";
+		}
 	elsif ($a eq "--mailboxlimit" || $a eq "--max-mailboxes") {
 		$mailboxlimit = shift(@ARGV);
 		$anylimits = 1;
@@ -878,7 +886,10 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'netmask', $netmask,
 	 'dns_ip', defined($dns_ip) ? $dns_ip :
 		   $alias ? $alias->{'dns_ip'} :
-		   $virt ? undef : &get_dns_ip($resel),
+		   $virt ? undef : &get_dns_ip($resel, 4),
+	 'dns_ip6', defined($dns_ip6) ? $dns_ip6 :
+		    $alias ? $alias->{'dns_ip6'} :
+		    $virt ? undef : &get_dns_ip($resel, 6),
          'virt', $virt,
          'virtalready', $virtalready,
 	 'ip6', $parentip ? $parent->{'ip6'} : $ip6,
@@ -1127,6 +1138,7 @@ if (&supports_ip6()) {
 	print "                        [--ip6-already]\n";
 	}
 print "                        [--dns-ip address | --no-dns-ip]\n";
+print "                        [--dns-ip6 address | --no-dns-ip6]\n";
 print "                        [--max-doms domains|*]\n";
 print "                        [--max-aliasdoms domains]\n";
 print "                        [--max-realdoms domains]\n";
