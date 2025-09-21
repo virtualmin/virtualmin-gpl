@@ -632,6 +632,26 @@ if (&can_dnsip()) {
 		&ui_radio_table("dns_ip_def", $dns_ip4 ? 0 : 1, \@opts));
 	}
 
+# Show DNS IPv6 address field
+if (&can_dnsip() && &supports_ip6()) {
+	my $def_dns_ip6 =
+		&get_any_external_ip_address_cached(6) ||
+		&get_any_external_ip_address(6) || &get_dns_ip($resel, 6);
+	my $dns_ip6 = $parentdom ? $parentdom->{'dns_ip6'} : undef;
+	my @opts;
+	if ($def_dns_ip6) {
+		push(@opts, [ 1, $text{'spf_default3'}, $def_dns_ip6 ]);
+		push(@opts, [ 2, $text{'spf_default2'} ]);
+		}
+	else {
+		push(@opts, [ 1, $text{'spf_default2'} ]);
+		}
+	push(@opts, [ 0, $text{'spf_custom'},
+		      &ui_textbox("dns_ip6", $dns_ip6, 40) ]);
+	print &ui_table_row($text{'edit_dnsip6'},
+		&ui_radio_table("dns_ip6_def", $dns_ip6 ? 0 : 1, \@opts));
+	}
+
 print &ui_hidden_table_end();
 
 if ($can_website && !$aliasdom && $virtualmin_pro &&
