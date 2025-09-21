@@ -32,6 +32,10 @@ if (!$config{'first_version'} && !$config{'dns_ip'}) {
 	$config{'dns_ip'} = '*';
 	&save_module_config();
 	}
+if (!$config{'first_version'} && !$config{'dns_ip6'}) {
+	$config{'dns_ip6'} = '*';
+	&save_module_config();
+	}
 
 # If this is a new install, use the new SSL cert paths
 if (!$config{'first_version'}) {
