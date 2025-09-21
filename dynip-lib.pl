@@ -125,13 +125,12 @@ $prefer ||= 4;	# default to IPv4
 if ($prefer == 4) {
 	my $ip4 = &get_external_ip_address($nocache, 4);
 	return $ip4 if ($ip4);
-	return &get_external_ip_address($nocache, 6);
 	}
 else {
 	my $ip6 = &get_external_ip_address($nocache, 6);
 	return $ip6 if ($ip6);
-	return &get_external_ip_address($nocache, 4);
 	}
+return undef;
 }
 
 # get_any_external_ip_address_cached([prefer-ip-type])
@@ -143,11 +142,9 @@ $prefer ||= 4;	# default to IPv4
 my ($k4, $k6) = ('external_ip_cache', 'external_ipv6_cache');
 if ($prefer == 4) {
 	return $config{$k4} if ($config{$k4} && !$config{"no_$k4"});
-	return $config{$k6} if ($config{$k6} && !$config{"no_$k6"});
 	}
 else {
 	return $config{$k6} if ($config{$k6} && !$config{"no_$k6"});
-	return $config{$k4} if ($config{$k4} && !$config{"no_$k4"});
 	}
 return undef;
 }
