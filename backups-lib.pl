@@ -2985,7 +2985,7 @@ if ($ok) {
 					       : &get_dns_ip($d->{'reseller'});
 			if (&supports_ip6()) {
 				$d->{'old_dns_ip6'} = $d->{'dns_ip6'};
-				$d->{'dns_ip6'} = 
+				$d->{'dns_ip6'} = $d->{'virt6'} ? undef :
 					&get_dns_ip($d->{'reseller'}, 6);
 				}
 
