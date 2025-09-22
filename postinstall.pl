@@ -32,8 +32,8 @@ if (!$config{'first_version'} && !$config{'dns_ip'}) {
 	$config{'dns_ip'} = '*';
 	&save_module_config();
 	}
-if (!defined($config{'dns_ip6'}) && $config{'dns_ip'} eq '*') {
-	$config{'dns_ip6'} = '*';
+if (!defined($config{'dns_ip6'})) {
+	$config{'dns_ip6'} = $config{'dns_ip'};
 	&save_module_config();
 	}
 
