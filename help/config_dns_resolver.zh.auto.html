@@ -1,0 +1,1 @@
+<header>使用 DNS 检测系统外部 IP 地址</header>此选项使用<tt>dig</tt>命令查询 DNS 服务器并检测系统的外部 IP 地址。例如，您可以将此字段设置为<tt>myip.opendns.com resolver1.opendns.com</tt> （以空格分隔的查询名称和名称服务器）。这样可以避免依赖基于 HTTP 的方法，并直接从 DNS 服务器检索 IP 地址。<p>但是，如果系统位于 NAT、代理或 VPN 之后，则应谨慎使用 DNS 方法，因为检测到的 IP 可能无法反映计算机的实际公共 IP。它可能会显示 NAT 网关、代理或 VPN 端点的外部 IP。<p><footer>

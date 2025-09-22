@@ -39,7 +39,10 @@ user_esurname=Nieprawidłowe nazwisko
 user_remailbut2=Wyślij ponownie e-mail dotyczący utworzenia domeny
 
 edit_ewebappcannot=Nie masz uprawnień do zarządzania aplikacjami internetowymi
+edit_dnsip6=Zewnętrzny adres IPv6
+edit_nodnsip6=IPv6 nie jest włączony
 
+save_ednsip6=Brakujący lub nieprawidłowy zewnętrzny adres IPv6
 save_protected0=Wyłączanie ochrony zabezpieczającej ..
 save_protected1=Włączanie ochrony zabezpieczającej ..
 
@@ -69,9 +72,16 @@ newweb_allow_subset=Wykluczyć niemożliwe do zweryfikowania nazwy domen?
 losing_dir2=Katalog domowy tego wirtualnego podserwera, zawierający wszystkie dane witryny i inne pliki, zostanie usunięty.
 losing_dir4=Katalog domowy tego aliasu, zawierający dane i inne pliki użytkowników, zostanie usunięty.
 
+check_dnsip1v6=Zewnętrzny adres IPv6 dla rekordów DNS jest ustawiony na $1, co odpowiada wykrytemu adresowi zewnętrznemu
+check_dnsip2v6=Domyślny adres IPv6 jest ustawiony na $1, co odpowiada wykrytemu adresowi zewnętrznemu
 check_dnsip3v6=Wykryto zewnętrzny adres IPv6: $1
+check_ednsip3v6=Nie można wykryć zewnętrznego adresu IPv6
+check_ednsip1v6=Zewnętrzny adres IPv6 dla rekordów DNS jest ustawiony na $1, ale wykryty adres zewnętrzny to w rzeczywistości $2. Może to spowodować, że rekordy DNS dla domen Virtualmin będą wskazywać na niewłaściwy system
+check_ednsip2v6=Domyślny adres IPv6 jest ustawiony na $1, ale wykryty adres zewnętrzny to w rzeczywistości $2. Jest to zazwyczaj spowodowane korzystaniem z zapory NAT i należy to poprawić na stronie <a href='$3'>konfiguracji modułu</a>
+check_ednsipnonev6=Nie znaleziono lokalnego adresu IPv6 i nie ustawiono go na stronie <a href='$1'>konfiguracji modułu</a>
 check_iface4=Adresy IPv4 nie są dostępne w tym systemie
 check_postfixok2=Serwer pocztowy Postfix jest zainstalowany i skonfigurowany jako host przekaźnikowy
+check_sysinfo=Aktualizowanie informacji o systemie ..
 
 log_copycert_bind=Skopiowano certyfikat SSL do BIND
 log_create_acme=Dodano dostawcę SSL dla $1
@@ -82,7 +92,18 @@ backup_headerfeatures2=Ustawienia globalne
 backup_compression4=<tt>zstd</tt>
 backup_mode0a=Plik pod <tt>~/$1/</tt>
 backup_mode44=Pobierz w przeglądarce
+backup_niceftpt=Serwer FTP
+backup_nicescpt=Serwer SSH
+backup_nicewebmint=Serwer Webmin
+backup_nicefilet=Plik lokalny
+backup_nices3at=S3
+backup_nicerst=Pliki w chmurze Rackspace
+backup_nicegot=Przechowywanie w chmurze Google
+backup_nicedbt=Dropbox
+backup_nicebbn=Backblaze B2
+backup_niceazt=Magazyn obiektów blob platformy Azure
 
+backup_eplugin_domain=Nie masz uprawnień do tworzenia kopii zapasowej tej domeny
 backup_finalstatusok=$1 serwerów wirtualnych zostało pomyślnie utworzonych kopii zapasowych
 
 backup_mysqlinfo=Kopiowanie danych użytkownika MySQL ..
@@ -111,7 +132,10 @@ cert_acmelink=Możesz dodawać i zarządzać dodatkowymi dostawcami na stronie <
 cert_acmes=Dostawca certyfikatu SSL
 cert_letsemail=Wysłać e-mail z informacją o odnowieniu?
 cert_letsemailerr=Tylko w przypadku awarii
-cert_subset=Pominąć niemożliwe do zweryfikowania nazwy hostów?
+cert_hostfilter=Weryfikacja nazwy hosta
+cert_hostfilter0=Podjęto próbę zażądania wszystkich nazw hostów i zakończono niepowodzeniem, jeśli którejkolwiek z nich nie udało się zweryfikować
+cert_hostfilter1=Pomiń nierozwiązywalne nazwy hostów, ale zakończ operację niepowodzeniem, jeśli nie uda się zweryfikować pozostałych nazw
+cert_hostfilter2=Wyklucz nazwy hostów, których nie można zweryfikować z certyfikatu
 cert_updatesvcs=Aktualizacja certyfikatów serwisowych ..
 
 newkey_eca2=Brak lub nieprawidłowy certyfikat CA : $1
@@ -134,9 +158,9 @@ tmpl_content_web_dis=Wyłączony
 tmpl_content_web_later=Zapytaj w momencie tworzenia
 tmpl_content_web_html_esave=Nie udało się zapisać domyślnego pliku strony HTML witryny
 tmpl_content_web_html_eempty=Domyślna zawartość strony HTML witryny jest pusta
+tmpl_php_fpmtype=Domyślny tryb menedżera procesów PHP-FPM
 
 licence_renew2=Dodatkową licencję można zakupić za <a target=_blank href='$1'>$2</a>.
-
 licence_renew3=Pozostał okres karencji wynoszący $1 dnia na zarządzanie migracją licencji na nowy serwer.
 licence_renew3m=Pozostał okres karencji wynoszący $1 dni na zarządzanie migracją licencji na nowy serwer.
 licence_renew3e=Pozostał $1 dzień okresu karencji na odnowienie licencji.
@@ -204,6 +228,8 @@ licence_expired=Licencja wygasła
 licence_expired_desc=Możliwość wprowadzania zmian jest obecnie wyłączona dla Twojego systemu. Ten tryb włącza się po okresie karencji, jeśli Twoja licencja wygasła lub jest używana na więcej niż jednym serwerze. Odwiedź stronę <a href='$1'>Virtualmin License Manager</a>, aby uzyskać więcej szczegółów.
 
 scripts_enophpbestver=Nie można znaleźć pełnej wersji PHP dla $1
+scripts_softwaremodperlreq=Instalowanie wymaganego pakietu Perl $1 ..
+scripts_softwaremodperlrec=Instalowanie zalecanego pakietu Perl $1 ..
 scripts_kit=$1 Warsztat
 scripts_ekit=Nie udało się zastosować środowiska roboczego aplikacji internetowej
 scripts_kit_elog=PHP: Nie udało się uruchomić polecenia $1. Zobacz plik dziennika w $2
@@ -288,6 +314,10 @@ summary_now=Właśnie
 migrate_plesk=Kopia zapasowa Plesk
 migrate_plan=Plan nowego serwera
 
+admin_origname=Podstawowa nazwa użytkownika administratora
+admin_fullname=Pełna nazwa użytkownika
+admin_eclash2=Dodatkowy administrator o tej samej nazwie już istnieje
+
 move_esame=Wybrano ten sam serwer nadrzędny
 
 validate_ednsc=Nie udało się pobrać rekordów dla $1 od dostawcy usługi Cloud DNS $2 : $3 
@@ -318,6 +348,8 @@ spf_aliasdns0=Kopiuj rekordy z domeny docelowej
 spf_aliasdns1=Zarządzaj własnymi rekordami
 spf_dmarcruf=Raportowanie URI dla raportów kryminalistycznych
 spf_dmarcrua=Raportowanie URI dla raportów zbiorczych
+spf_nodelrecs=.. nie znaleziono pasujących rekordów!
+spf_eaddrecsdom=.. rekord $1 nie znajduje się w tej domenie
 spf_cloudns=Rekordy NS dostawcy chmury
 spf_aliasdns=Zmiana aliasu domeny na własne rekordy DNS ..
 spf_noaliasdns=Zmiana aliasu domeny w celu skopiowania rekordów DNS z domeny docelowej ..
@@ -330,6 +362,11 @@ s3_missing_cli=Polecenie AWS CLI nie jest zainstalowane w tym systemie
 newdynip_eexternal2=W trybie Webmin należy wprowadzić nazwę hosta lub nazwę hosta:port serwera Webmin
 
 upgrade_addrepo=Dodawanie repozytorium Virtualmin Pro ..
+
+maillog_cls=Werdykt
+maillog_cspam=Spam
+maillog_cvirus=Wirus
+maillog_cok=OK
 
 balancer_eg=np. $1
 balancer_eg2=np. $1 lub $2
@@ -353,6 +390,9 @@ nf_date=(zainstalowano $1)
 res_emem3=Maksymalny rozmiar na limit procesu musi być ustawiony na co najmniej 200 M
 res_wmem=Minimalny zalecany rozmiar to 200 M
 
+cron_cron_complex=W czasie cron
+cron_save=Zastosuj harmonogram
+
 unsub_failed=..konwersja nieudana!
 
 postgrey_emailfeat=Szarą listę można stosować tylko wtedy, gdy poczta e-mail jest włączona globalnie.
@@ -374,6 +414,12 @@ wizard_efrom_addr=Adres e-mail musi być w formacie użytkownik@domena
 backuplog_match=Pokazywanie dzienników pasujących do $1
 backuplog_days=Teraz wyświetlane są logi z ostatnich $1 dni
 backuplog_sched=Wyświetlanie dzienników z zaplanowanej kopii zapasowej do $1
+backuplog_scheddesc=Wyświetlanie dzienników dla zaplanowanej kopii zapasowej „$1”
+
+viewbackup_mode_manual=Ręcznie w tle
+viewbackup_quick_restore=Szybkie przywracanie tej kopii zapasowej
+
+dbackup_delnow=Usuń kopię zapasową teraz
 
 redirect_hostregexp=Nazwa hosta jest wyrażeniem regularnym?
 redirect_ehost2=Brak wyrażenia regularnego nazwy hosta
@@ -448,6 +494,13 @@ dnscloud_route53_dset=Zestaw delegacji serwera nazw
 dnscloud_route53_nodset=Brak (użyj losowych serwerów nazw)
 dnscloud_route53_iddset=Identyfikator zestawu delegacji
 dnscloud_route53_dsetdesc=Zestawy delegacji to grupa serwerów nazw, które będą używane dla wszystkich domen utworzonych za pomocą Route 53. Należy je utworzyć za pomocą polecenia <tt>aws route53 create-reusable-delegation-set</tt>.
+dnscloud_bunny_longdesc=Klucz API Bunny na tej stronie można znaleźć na stronie Ustawienia konta w <a href=https://dash.bunny.net/account/settings target=_blank>konsoli Bunny</a>.
+
+dnscloud_btoken=Korzystanie z klucza API $1
+dnscloud_bunny_apikey=Klucz API Bunny DNS
+dnscloud_bunny_eapikey=Brakujący lub wyglądający na nieprawidłowy klucz API Bunny
+dnscloud_bunny_ecreds=Klucz API Bunny DNS jest nieprawidłowy : $1
+bunny_edomainavail=Domena DNS jest już używana
 
 newacmes_title=Dostawcy SSL
 newacmes_ecannot=Nie masz uprawnień do zarządzania dostawcami SSL

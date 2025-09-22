@@ -1,0 +1,1 @@
+<header>使用 DNS 偵測系統外部 IP 位址</header>此選項使用<tt>dig</tt>命令查詢 DNS 伺服器並偵測系統的外部 IP 位址。例如，您可以將此欄位設定為<tt>myip.opendns.com resolver1.opendns.com</tt> （以空格分隔的查詢名稱和名稱伺服器）。這樣可以避免依賴基於 HTTP 的方法，並直接從 DNS 伺服器檢索 IP 位址。<p>但是，如果系統位於 NAT、代理或 VPN 之後，則應謹慎使用 DNS 方法，因為偵測到的 IP 可能無法反映電腦的實際公用 IP。它可能會顯示 NAT 閘道、代理或 VPN 端點的外部 IP。<p><footer>

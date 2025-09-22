@@ -4701,7 +4701,6 @@ cron_special=Simpele planning
 cron_complex=Complexe planning
 cron_cron=Cron specificatie
 cron_title=Selecteer planning
-cron_ok=OK
 cron_ehidden=Er is geen complexe planning geselecteerd
 
 dsched_err=Mislukt om geplande backups te verwijderen

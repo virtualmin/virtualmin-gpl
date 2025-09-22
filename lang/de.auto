@@ -1,9 +1,34 @@
 index_warn_apacheconf=Die Apache-Konfiguration auf Ihrem System weist Fehler auf! Dadurch wird verhindert, dass neue Domänen vollständig von Virtualmin hinzugefügt werden, bis die Fehler behoben sind.
 index_warn_bindconf=Die BIND DNS-Serverkonfiguration auf Ihrem System weist Fehler auf! Dadurch wird verhindert, dass neue Domänen vollständig von Virtualmin hinzugefügt werden, bis die Fehler behoben sind.
 
+edit_dnsip6=Externe IPv6-Adresse
+edit_nodnsip6=IPv6 nicht aktiviert
+
+save_ednsip6=Fehlende oder ungültige externe IPv6-Adresse
+
 newweb_allow_subset=Nicht überprüfbare Domänennamen ausschließen?
 
+check_dnsip1v6=Die externe IPv6-Adresse für DNS-Einträge ist auf $1 eingestellt, was mit der erkannten externen Adresse übereinstimmt
+check_dnsip2v6=Die Standard-IPv6-Adresse ist auf $1 eingestellt, was der erkannten externen Adresse entspricht
+check_ednsip3v6=Externe IPv6-Adresse konnte nicht erkannt werden
+check_ednsip1v6=Die externe IPv6-Adresse für DNS-Einträge ist auf $1 eingestellt, die erkannte externe Adresse ist jedoch tatsächlich $2. Dies kann dazu führen, dass DNS-Einträge für Virtualmin-Domänen auf das falsche System verweisen
+check_ednsip2v6=Die Standard-IPv6-Adresse ist auf $1 eingestellt, die erkannte externe Adresse ist jedoch tatsächlich $2. Dies ist typischerweise das Ergebnis einer NAT-Firewall und sollte auf der Seite <a href='$3'>Modulkonfiguration</a> korrigiert werden
+check_ednsipnonev6=Es wurde keine lokale IPv6-Adresse gefunden und auf der Seite <a href='$1'>Modulkonfiguration</a> ist keine festgelegt
+check_sysinfo=Systeminformationen werden aktualisiert ..
+
 backup_mode0a=Ablage unter <tt>~/$1/</tt>
+backup_niceftpt=FTP-Server
+backup_nicescpt=SSH-Server
+backup_nicewebmint=Webmin-Server
+backup_nicefilet=Lokale Datei
+backup_nices3at=S3
+backup_nicerst=Rackspace Cloud-Dateien
+backup_nicegot=Google Cloud-Speicher
+backup_nicedbt=Dropbox
+backup_nicebbn=Backblaze B2
+backup_niceazt=Azure Blob Storage
+
+backup_eplugin_domain=Sie dürfen diese Domäne nicht sichern
 
 cert_also_title=Wird auch verwendet von
 cert_also_desc1=1 Domäne
@@ -11,9 +36,17 @@ cert_also_desc2=$1 Domänen
 cert_svcsglob=Weltweit von
 cert_svcsbydom=Nach Domäne
 cert_svcsbyip=Nach IP
+cert_hostfilter=Hostnamenüberprüfung
+cert_hostfilter0=Versuchen Sie, alle Hostnamen anzufordern, und schlagen Sie fehl, wenn einer nicht validiert werden kann
+cert_hostfilter1=Nicht auflösbare Hostnamen überspringen, aber fehlschlagen, wenn die verbleibenden nicht validiert werden können
+cert_hostfilter2=Hostnamen ausschließen, die nicht vom Zertifikat validiert werden können
 
 tmpl_erealdomslimit=Fehlende oder ungültige Standardbegrenzung für die Anzahl der Nicht-Alias-Server
 tmpl_mail_mta_sts=MTA-STS für neue Domänen aktivieren?
+tmpl_php_fpmtype=Standardmäßiger PHP-FPM-Prozessmanagermodus
+
+scripts_softwaremodperlreq=Das erforderliche Perl-Paket $1 wird installiert ..
+scripts_softwaremodperlrec=Empfohlenes Perl-Paket $1 wird installiert ..
 
 scripts_kit_estype_multi=Mehrere Instanzen des Typs „$1“ sind unter den folgenden Pfaden verfügbar:
 scripts_kit_estype_multi2=Verwenden Sie den Hilfsparameter „--app-path“, um die genaue zu verwendende Instanz anzugeben
@@ -50,14 +83,24 @@ summary_now=Soeben
 
 migrate_plesk=Plesk-Backup
 
+admin_origname=Basisbenutzername des Administrators
+admin_fullname=Vollständiger Benutzername
+admin_eclash2=Ein zusätzlicher Administrator mit demselben Namen ist bereits vorhanden
+
 validate_ednsc=Das Abrufen der Datensätze für $1 vom Cloud-DNS-Anbieter $2 ist fehlgeschlagen : $3
 
+spf_nodelrecs=.. keine passenden Datensätze gefunden!
+spf_eaddrecsdom=.. Datensatz $1 ist nicht in dieser Domäne
 spf_cloudns=NS-Einträge des Cloud-Anbieters
 
 s3_need_cli2=Der zum Erstellen von S3-Backups erforderliche AWS CLI-Befehl wurde auf Ihrem System nicht gefunden.
 s3_need_cli3=<a href='$1'>Klicken Sie hier</a>, um es automatisch installieren zu lassen, oder laden Sie es von <a href='https://aws.amazon.com/cli/' target=_blank>https://aws.amazon.com/cli/</a> herunter.
-
 s3_missing_cli=Der AWS CLI-Befehl ist auf diesem System nicht installiert
+
+maillog_cls=Urteil
+maillog_cspam=Spam
+maillog_cvirus=Virus
+maillog_cok=OK
 
 mail_mta_edns=MTA-STS kann ohne eine DNS-Domäne nicht aktiviert werden
 mail_mta_eweb=MTA-STS kann ohne eine Website nicht aktiviert werden
@@ -73,9 +116,26 @@ mail_mta_sts_cert=Ja (aber Hostname des SSL-Zertifikats fehlt)
 mail_mta_epostfix=Der Postfix-Mailserver ist nicht für die Annahme von SSL-Verbindungen konfiguriert
 mail_mta_eself=Das Postfix-SSL-Zertifikat ist selbstsigniert und wird von anderen Mailservern nicht akzeptiert
 
+cron_cron_complex=Zur Cron-Zeit
+cron_save=Zeitplan anwenden
+
 backuplog_match=Es werden Protokolle angezeigt, die mit $1 übereinstimmen
 backuplog_days=Es werden jetzt die Protokolle der letzten $1 Tage angezeigt
 backuplog_sched=Protokolle der geplanten Sicherung auf $1 werden angezeigt
+backuplog_scheddesc=Protokolle für geplante Sicherung „$1“ werden angezeigt
+
+viewbackup_mode_manual=Manuell im Hintergrund
+viewbackup_quick_restore=Schnelle Wiederherstellung dieser Sicherung
+
+dbackup_delnow=Backup jetzt löschen
 
 letsencrypt_emtasts=SSL-Zertifikatsanforderung für $1 fehlgeschlagen : $2
 letsencrypt_emtasts2=Die Antwort des SSL-Zertifikats enthielt nicht $1
+
+dnscloud_bunny_longdesc=Den Bunny-API-Schlüssel auf dieser Seite finden Sie auf der Seite mit den Kontoeinstellungen Ihrer <a href=https://dash.bunny.net/account/settings target=_blank>Bunny-Konsole</a>.
+
+dnscloud_btoken=API-Schlüssel $1 wird verwendet
+dnscloud_bunny_apikey=Bunny DNS API-Schlüssel
+dnscloud_bunny_eapikey=Fehlender oder ungültig aussehender Bunny-API-Schlüssel
+dnscloud_bunny_ecreds=Der Bunny DNS API-Schlüssel ist falsch : $1
+bunny_edomainavail=Die DNS-Domäne wird bereits verwendet

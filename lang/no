@@ -4970,7 +4970,6 @@ cron_special=Enkel tidsplan
 cron_complex=Kompleks tidsplan
 cron_cron=Cron spesifikasjon
 cron_title=Velg tidsplan
-cron_ok=OK
 cron_ehidden=Fant ingen kompleks tidsplan
 
 dsched_err=Kunne ikke slette tidsplanlagte sikkerhetskopier
