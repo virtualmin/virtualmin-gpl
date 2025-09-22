@@ -137,7 +137,7 @@ if (&supports_ip6() && &can_use_feature("virt6")) {
 	}
 
 # Show the external IPv6 address
-if (&can_dnsip()) {
+if (&can_dnsip() && &supports_ip6()) {
 	print &ui_table_row(&hlink($text{'edit_dnsip6'}, "edit_dnsip6"),
 		&ui_opt_textbox("dns_ip6", $d->{'dns_ip6'}, 40,
 				$d->{'ip6'} ?

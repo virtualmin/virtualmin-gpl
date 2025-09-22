@@ -2983,6 +2983,11 @@ if ($ok) {
 			$d->{'old_dns_ip'} = $d->{'dns_ip'};
 			$d->{'dns_ip'} = $d->{'virt'} ? undef
 					       : &get_dns_ip($d->{'reseller'});
+			if (&supports_ip6()) {
+				$d->{'old_dns_ip6'} = $d->{'dns_ip6'};
+				$d->{'dns_ip6'} = $d->{'virt6'} ? undef :
+					&get_dns_ip($d->{'reseller'}, 6);
+				}
 
 			# Change provisioning settings to match this system
 			foreach my $f (&list_provision_features()) {
