@@ -21170,9 +21170,6 @@ my $d = &get_domain_by("defaulthostdomain", 1);
 return if (!$d || !$d->{'dom'});
 return if (!&can_delete_domain($d));
 
-# Clear Apache config cache
-undef(@apache::get_config_cache);
-
 # Delete hostname domain
 &lock_domain_name($d->{'dom'});
 &push_all_print();
