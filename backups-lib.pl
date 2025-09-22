@@ -2981,7 +2981,7 @@ if ($ok) {
 			# DNS external IP is always reset to match this system,
 			# as the old setting is unlikely to be correct.
 			$d->{'old_dns_ip'} = $d->{'dns_ip'};
-			$d->{'dns_ip'} = $virt ? undef
+			$d->{'dns_ip'} = $d->{'virt'} ? undef
 					       : &get_dns_ip($d->{'reseller'});
 
 			# Change provisioning settings to match this system
