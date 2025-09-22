@@ -73,7 +73,9 @@ return undef;
 sub dnscloud_route53_check
 {
 return $text{'dnscloud_eaws'} if (!&has_aws_cmd());
-eval "use JSON::PP";
+eval {
+	&convert_to_json({ 'test' => 1});
+	};
 return &text('dnscloud_eperl', 'JSON::PP') if ($@);
 return undef;
 }
@@ -473,10 +475,8 @@ if (!@{$js->{'Changes'}}) {
 
 # Write the JSON to a temp file for calling the API
 my $temp = &transname();
-eval "use JSON::PP";
-my $coder = JSON::PP->new->pretty;
 &open_tempfile(JSON, ">$temp");
-&print_tempfile(JSON, $coder->encode($js));
+&print_tempfile(JSON, &convert_to_json($js, 1));
 &close_tempfile(JSON);
 my $rv = &call_route53_cmd(
 	$config{'route53_akey'},
@@ -550,11 +550,9 @@ $params ||= [];
 unshift(@$params, "--region", $region);
 my $out = &call_aws_cmd($akey, "route53", $params, undef);
 if (!$? && $json) {
-	eval "use JSON::PP";
-	my $coder = JSON::PP->new->pretty;
 	eval {
-		$out = $coder->decode($out);
-		};
+		$out = &convert_from_json($out);
+		}
 	}
 return $out;
 }
