@@ -1016,9 +1016,139 @@ local $info = &cert_file_info($temp);
 return $info;
 }
 
-# cert_file_info(file, [&domain])
+
+# cert_file_info_perl(file)
+# Returns a hash ref with info about the cert in file, or undef on error using
+# pure Perl which is literally fifty times faster than using OpenSSL command
+sub cert_file_info_perl
+{
+my ($file) = @_;
+return undef if (!$file || !-r $file);
+
+my ($cert, $pkey, $x509, %rv);
+
+# Cleanup and return
+my $shutdown = sub {
+	Net::SSLeay::EVP_PKEY_free($pkey) if $pkey; # Free pkey before returning
+	Net::SSLeay::X509_free($cert) if $cert;     # Free cert before returning
+	return undef;
+};
+
+# Always expect PEM
+my $bio = Net::SSLeay::BIO_new_file($file, 'r') or return undef;
+$cert = Net::SSLeay::PEM_read_bio_X509($bio);
+Net::SSLeay::BIO_free($bio);
+return undef if !$cert;
+
+# Get issuer
+my $issuer = Net::SSLeay::X509_get_issuer_name($cert);
+if ($issuer) {
+	my $C  = Net::SSLeay::X509_NAME_get_text_by_NID($issuer, 14);
+	my $O  = Net::SSLeay::X509_NAME_get_text_by_NID($issuer, 17);
+	my $CN = Net::SSLeay::X509_NAME_get_text_by_NID($issuer, 13);
+	$rv{issuer_c}  = $C  if defined $C  && $C  ne '' && $C  ne '-1';
+	$rv{issuer_o}  = $O  if defined $O  && $O  ne '' && $O  ne '-1';
+	$rv{issuer_cn} = $CN if defined $CN && $CN ne '' && $CN ne '-1';
+	}
+
+# Validity period begin
+my $nb = Net::SSLeay::X509_get_notBefore($cert);
+if ($nb) {
+	my $s = Net::SSLeay::P_ASN1_TIME_put2string($nb);
+	$rv{notbefore} = $s if $s;
+	}
+
+# Validity period end
+my $na = Net::SSLeay::X509_get_notAfter($cert);
+if ($na) {
+	my $s = Net::SSLeay::P_ASN1_TIME_put2string($na);
+	$rv{notafter} = $s if $s;
+	}
+
+# Subject
+my $subject = Net::SSLeay::X509_get_subject_name($cert);
+if ($subject) {
+	my $O     = Net::SSLeay::X509_NAME_get_text_by_NID($subject, 17);
+	my $CN    = Net::SSLeay::X509_NAME_get_text_by_NID($subject, 13);
+	my $Email = Net::SSLeay::X509_NAME_get_text_by_NID($subject, 48);
+	$rv{o}     = $O     if defined $O     && $O     ne '' && $O     ne '-1';
+	$rv{cn}    = $CN    if defined $CN    && $CN    ne '' && $CN    ne '-1';
+	$rv{email} = $Email if defined $Email && $Email ne '' && $Email ne '-1';
+	}
+
+# Public key
+$pkey = Net::SSLeay::X509_get_pubkey($cert);
+return $shutdown->() if (!$pkey);
+my $type_nid = Net::SSLeay::EVP_PKEY_id($pkey);
+my $type_sn  = Net::SSLeay::OBJ_nid2sn($type_nid) || '';
+my $algo = $type_sn =~ /rsa/i
+		? 'rsa'
+		: $type_sn =~ /^(?:ec|id-ecPublicKey)$/i
+			? 'ec'
+			: undef;
+$rv{algo} = $algo;
+return $shutdown->() if !$algo;	# unsupported algo
+
+# Key size
+my $size = Net::SSLeay::EVP_PKEY_bits($pkey);
+$rv{size} = "$size" if $size && $size > 0;
+
+# Modulus and exponent
+eval { require Crypt::OpenSSL::X509; };
+return $shutdown->() if ($@);
+
+# Parse certificate to get modulus and exponent
+my $pem = Net::SSLeay::PEM_get_string_X509($cert);
+return $shutdown->() if (!$pem);
+$x509 = Crypt::OpenSSL::X509->new_from_string($pem);
+return $shutdown->() if (!$x509);
+if ($algo eq 'rsa') {
+	my $mod = $x509->modulus;               # hex (no colons)
+	return $shutdown->() if (!$mod);
+	$mod = "0$mod" if length($mod) % 2;     # byte-align
+	$rv{'modulus'} = join ':', unpack '(A2)*', lc($mod);
+	my $e = $x509->exponent;
+	$rv{'exponent'} = "$e" if defined $e && $e ne '';
+	}
+elsif ($algo eq 'ec') {
+	my $pub = $x509->modulus;               # hex (no colons)
+	return $shutdown->() if (!$pub);
+	$pub = "0$pub" if length($pub) % 2;     # byte-align
+	$rv{'modulus'} = join ':', unpack '(A2)*', lc($pub);
+	if (my $curve = $x509->curve) {
+		my %nist = ( prime256v1 => 'P-256', secp224r1 => 'P-224',
+			     secp384r1 => 'P-384',  secp521r1 => 'P-521' );
+		my @p = ("ASN1 OID: $curve");
+		push @p, "NIST CURVE: $nist{$curve}" if exists $nist{$curve};
+		$rv{'exponent'} = join(', ', @p);
+		}
+	}
+
+# Subject alt names
+my @alts = Net::SSLeay::X509_get_subjectAltNames($cert);
+if (@alts) {
+	my @dns;
+	while (my ($type, $val) = splice(@alts, 0, 2)) {
+		push @dns, $val if $type == 2;	# dNSName
+		}
+	$rv{alt} = \@dns if @dns;
+	}
+
+# Self-signed or not
+$rv{self} = $x509->can('is_selfsigned')
+	? ($x509->is_selfsigned ? 1 : 0)
+	: (Net::SSLeay::X509_NAME_cmp($subject, $issuer) == 0 ? 1 : 0);
+
+# Cleanup
+$shutdown->();
+
+# Return info
+return \%rv;
+}
+
+# cert_file_info_openssl(file, [&domain])
 # Returns a hash of details of a cert in some file
-sub cert_file_info
+sub cert_file_info_openssl
 {
 local ($file, $d) = @_;
 return undef if (!-r $file);
@@ -1137,6 +1267,21 @@ foreach my $k (keys %rv) {
 $rv{'self'} = $rv{'o'} eq $rv{'issuer_o'} ? 1 : 0;
 $rv{'type'} = $rv{'self'} ? $text{'cert_typeself'} : $text{'cert_typereal'};
 return \%rv;
+}
+
+# cert_file_info(file, [&domain])
+# Returns a hash of details of a cert in some file using either Perl or OpenSSL
+sub cert_file_info
+{
+my ($file, $d) = @_;
+my $info;
+eval {
+	$info = &cert_file_info_perl($file);
+	};
+if ($@ || !$info) {
+	$info = &cert_file_info_openssl($file, $d);
+	}
+return $info;
 }
 
 # convert_ssl_key_format(&domain, file, "pkcs1"|"pkcs8", [outfile])
