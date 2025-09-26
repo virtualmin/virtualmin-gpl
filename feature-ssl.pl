@@ -1025,6 +1025,10 @@ sub cert_file_info_perl
 my ($file) = @_;
 return undef if (!$file || !-r $file);
 
+# Load required modules and return if missing
+eval { require Crypt::OpenSSL::X509; };
+return undef if ($@);
+
 my ($cert, $pkey, $x509, %rv);
 
 # Cleanup and return
@@ -1094,8 +1098,6 @@ my $size = Net::SSLeay::EVP_PKEY_bits($pkey);
 $rv{size} = "$size" if $size && $size > 0;
 
 # Modulus and exponent
-eval { require Crypt::OpenSSL::X509; };
-return $shutdown->() if ($@);
 
 # Parse certificate to get modulus and exponent
 my $pem = Net::SSLeay::PEM_get_string_X509($cert);
