@@ -3402,7 +3402,7 @@ my $err;
 my $mode = $d->{'default_php_mode'} || &template_to_php_mode($tmpl);
 delete($d->{'default_php_mode'});
 my @supp = &supported_php_modes();
-if (&indexof($mode, @supp) < 0) {
+if ($mode && &indexof($mode, @supp) < 0) {
 	if (@supp) {
 		$mode = $supp[0];
 		}
