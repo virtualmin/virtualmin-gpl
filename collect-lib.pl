@@ -1,10 +1,10 @@
 # Functions for collecting general system info
 
-# collect_system_info([manual-refresh-no-cache], [executed-from-other-function])
+# collect_system_info([manual-refresh-no-cache], [from-config-check])
 # Returns a hash reference containing system information
 sub collect_system_info
 {
-my ($manual, $subfunc) = @_;
+my ($manual, $confchk) = @_;
 &foreign_require("system-status");
 local $info = &system_status::get_collected_info($manual);
 
@@ -174,7 +174,7 @@ foreach my $f ("virtualmin", @features) {
 	}
 foreach my $f (@plugins) {
 	if (&plugin_defined($f, "feature_sysinfo")) {
-		my @rs = &plugin_call($f, "feature_sysinfo", $manual, $subfunc);
+		my @rs = &plugin_call($f, "feature_sysinfo", $manual, $confchk);
 		push(@progs, @rs) if (@rs);
 		}
 	}
