@@ -41,6 +41,7 @@ while(@ARGV > 0) {
 	}
 ($sched) = grep { $_->{'id'} == $id } &list_scheduled_backups();
 $sched || &usage("No scheduled backup with ID $id exists");
+&obtain_lock_anything();
 &start_running_backup($sched);
 
 # Work out what will be backed up
