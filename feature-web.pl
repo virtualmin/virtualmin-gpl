@@ -3119,6 +3119,7 @@ my @opts = grep { $cannums{$_->[0]} }
 	         [ 1, $text{'phpmode_cgi'}, undef, "onClick='$dis2'" ],
 		 [ 0, &ui_text_color($text{'phpmode_mod_php'}, 'danger'),
 		      undef, "onClick='$dis2'" ],
+		 [ 5, $text{'phpmode_skip'}, undef, "onClick='$dis2'" ],
 		);
 if (!$tmpl->{'default'}) {
 	unshift(@opts, [ '', $text{'tmpl_default'}, undef, "onClick='$dis1'" ]);

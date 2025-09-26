@@ -1029,7 +1029,8 @@ return { 'mod_php' => 0,
 	 'cgi' => 1,
 	 'fcgid' => 2,
 	 'fpm' => 3,
-	 'none' => 4, };
+	 'none' => 4,
+	 '' => 5, };
 }
 
 # list_available_php_versions([&domain], [forcemode|"all"])
