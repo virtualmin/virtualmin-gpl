@@ -61,7 +61,8 @@ elsif ($in{'remailbut'}) {
 	if ($user->{'domainowner'}) {
 		&push_all_print();
 		&set_all_null_print();
-		@erv = &send_domain_email($d, $d->{'emailto'});
+		my $rd = $in{'remaildom'} ? &get_domain($in{'remaildom'}) : $d;
+		@erv = &send_domain_email($rd, $rd->{'emailto'});
 		&pop_all_print();
 		}
 	else {

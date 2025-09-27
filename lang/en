@@ -1000,6 +1000,7 @@ user_eloop=A user cannot forward email to their own address
 user_switch=Login to Usermin
 user_remailbut=Re-Send Signup Email
 user_remailbut2=Re-Send Domain Creation Email
+user_remailbut3=Re-Send Creation Email For :
 user_sendrecover=Recover Password
 user_eswitch=You are not allowed to login to Usermin
 user_emysqlprov=Failed to update user on services host : $1

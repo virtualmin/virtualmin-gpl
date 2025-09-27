@@ -1199,7 +1199,22 @@ if ($form_end) {
 				undef, "onClick='form.target = \"_blank\"'" ]);
 			}
 		if ($user->{'domainowner'} && &will_send_domain_email($d)) {
-			push(@buts, [ "remailbut", $text{'user_remailbut2'} ]);
+			my @rdoms = &get_domain_by("user", $user->{'user'});
+			my $dsel;
+			if (@rdoms > 1) {
+				@rdoms = sort { $a->{'dom'} cmp $b->{'dom'} } 
+					      @rdoms;
+				$dsel = &ui_select("remaildom", $d->{'id'},
+				  [ map { [ $_->{'id'}, &show_domain_name($_)] }
+					@rdoms ]);
+				push(@buts, [ "remailbut",
+					      $text{'user_remailbut3'},
+					      $dsel ]);
+				}
+			else {
+				push(@buts, [ "remailbut",
+					      $text{'user_remailbut2'} ]);
+				}
 			}
 		elsif (!$user->{'domainowner'} &&
 		       &will_send_user_email($d) && $user->{'email'}) {
