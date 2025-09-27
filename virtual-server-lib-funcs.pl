@@ -19194,8 +19194,8 @@ local ($d) = @_;
 &lock_domain($d) if ($d && $d->{'id'});
 # Assume that we are about to do something important, and so don't want to be
 # killed by a SIGPIPE triggered by a browser cancel.
-$SIG{'PIPE'} = 'ignore';
-$SIG{'TERM'} = 'ignore';
+$SIG{'PIPE'} = 'IGNORE';
+$SIG{'TERM'} = 'IGNORE';
 }
 
 # release_lock_anything(&domain)

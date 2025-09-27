@@ -195,6 +195,7 @@ if (!$runsched) {
 		}
 	$runsched->{'virtualmin'} = join(" ", @vbs);
 	}
+&obtain_lock_anything();
 &start_running_backup($runsched);
 
 if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
