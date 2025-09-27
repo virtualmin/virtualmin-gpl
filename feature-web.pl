@@ -3109,17 +3109,18 @@ my $dis2 = &js_disable_inputs([ ], \@fields);
 # Run PHP scripts using mode
 my $mmap = &php_mode_numbers_map();
 my %cannums = map { $mmap->{$_}, 1 } &supported_php_modes();
+$cannums{5} = 1; # Skip PHP
 if ($tmpl->{'web_php_suexec'} ne '') {
 	$cannums{int($tmpl->{'web_php_suexec'})} = 1;
 	}
 my @opts = grep { $cannums{$_->[0]} }
-		([ 4, $text{'phpmode_none'}, undef, "onClick='$dis2'" ],
-	         [ 3, $text{'phpmode_fpm'}, undef, "onClick='$dis2'" ],
-	         [ 2, $text{'phpmode_fcgid'}, undef, "onClick='$dis2'" ],
-	         [ 1, $text{'phpmode_cgi'}, undef, "onClick='$dis2'" ],
-		 [ 0, &ui_text_color($text{'phpmode_mod_php'}, 'danger'),
-		      undef, "onClick='$dis2'" ],
-		 [ 5, $text{'phpmode_skip'}, undef, "onClick='$dis2'" ],
+		( [ 5, $text{'phpmode_skip'}, undef, "onClick='$dis2'" ],
+		  [ 4, $text{'phpmode_none'}, undef, "onClick='$dis2'" ],
+	          [ 3, $text{'phpmode_fpm'}, undef, "onClick='$dis2'" ],
+	          [ 2, $text{'phpmode_fcgid'}, undef, "onClick='$dis2'" ],
+	          [ 1, $text{'phpmode_cgi'}, undef, "onClick='$dis2'" ],
+		  [ 0, &ui_text_color($text{'phpmode_mod_php'}, 'danger'),
+		       undef, "onClick='$dis2'" ],
 		);
 if (!$tmpl->{'default'}) {
 	unshift(@opts, [ '', $text{'tmpl_default'}, undef, "onClick='$dis1'" ]);
