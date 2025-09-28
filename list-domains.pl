@@ -456,6 +456,9 @@ if ($multiline) {
 		if ($d->{'dns_ip'}) {
 			print "    External IP address: $d->{'dns_ip'}\n";
 			}
+		if ($d->{'dns_ip6'}) {
+			print "    External IPv6 address: $d->{'dns_ip6'}\n";
+			}
 		print "    Features: ",
 			join(" ", grep { $d->{$_} } @features),"\n";
 		print "    Plugins: ",

@@ -142,7 +142,9 @@ $plan = $parent ? &get_plan($parent->{'plan'}) :
 		  $parent ? $parent->{'email'} :
 			    $uinfo{'email'},
 	 'dns_ip', $ipinfo->{'virt'} ? undef :
-		   &get_dns_ip($parent ? $parent->{'id'} : undef),
+		   &get_dns_ip($parent ? $parent->{'resel'} : undef, 4),
+	 'dns_ip6', $ipinfo->{'virt6'} ? undef :
+		    &get_dns_ip($parent ? $parent->{'resel'} : undef, 6),
 	 $parent ? ( 'pass', $parent->{'pass'} )
 		 : ( 'pass', $pass ),
 	 'source', 'migrate.cgi',
