@@ -1025,10 +1025,6 @@ sub cert_file_info_perl
 my ($file) = @_;
 return undef if (!$file || !-r $file);
 
-# Load required modules and return if missing
-eval { require Crypt::OpenSSL::X509; };
-return undef if ($@);
-
 my ($cert, $pkey, $x509, %rv);
 
 # Cleanup and return
@@ -1084,12 +1080,12 @@ if ($subject) {
 $pkey = Net::SSLeay::X509_get_pubkey($cert);
 return $shutdown->() if (!$pkey);
 my $type_nid = Net::SSLeay::EVP_PKEY_id($pkey);
-my $type_sn  = Net::SSLeay::OBJ_nid2sn($type_nid) || '';
-my $algo = $type_sn =~ /rsa/i
-		? 'rsa'
-		: $type_sn =~ /^(?:ec|id-ecPublicKey)$/i
-			? 'ec'
-			: undef;
+my $type_sn  = Net::SSLeay::OBJ_nid2sn($type_nid);
+return $shutdown->() if (!$type_sn);
+my $algo = $type_sn =~ /rsa/                      ? 'rsa'     :
+	   $type_sn =~ /^(?:ec|id-ecpublickey)$/i ? 'ec'      :
+	   $type_sn =~ /ed25519/                  ? 'ed25519' : undef;
+
 $rv{algo} = $algo;
 return $shutdown->() if !$algo;	# unsupported algo
 
@@ -1097,34 +1093,216 @@ return $shutdown->() if !$algo;	# unsupported algo
 my $size = Net::SSLeay::EVP_PKEY_bits($pkey);
 $rv{size} = "$size" if $size && $size > 0;
 
-# Modulus and exponent
+# Modulus and exponent parsing SPKI manually
+{
+	# Manually parse one ASN.1 DER tag-length-value structure from data,
+	# starting at a given offset; this is equivalent to how low-level
+	# decoders in Convert::ASN1 modules unpack
+	my $tlv = sub {
+		my ($data, $iref) = @_;
+		
+		# Initialize cursor
+		my $i = $$iref // 0;
+		return if $i >= length $data;
 
-# Parse certificate to get modulus and exponent
-my $pem = Net::SSLeay::PEM_get_string_X509($cert);
-return $shutdown->() if (!$pem);
-$x509 = Crypt::OpenSSL::X509->new_from_string($pem);
-return $shutdown->() if (!$x509);
-if ($algo eq 'rsa') {
-	my $mod = $x509->modulus;               # hex (no colons)
-	return $shutdown->() if (!$mod);
-	$mod = "0$mod" if length($mod) % 2;     # byte-align
-	$rv{'modulus'} = join ':', unpack '(A2)*', lc($mod);
-	my $e = $x509->exponent;
-	$rv{'exponent'} = "$e" if defined $e && $e ne '';
-	}
-elsif ($algo eq 'ec') {
-	my $pub = $x509->modulus;               # hex (no colons)
-	return $shutdown->() if (!$pub);
-	$pub = "0$pub" if length($pub) % 2;     # byte-align
-	$rv{'modulus'} = join ':', unpack '(A2)*', lc($pub);
-	if (my $curve = $x509->curve) {
-		my %nist = ( prime256v1 => 'P-256', secp224r1 => 'P-224',
-			     secp384r1 => 'P-384',  secp521r1 => 'P-521' );
-		my @p = ("ASN1 OID: $curve");
-		push @p, "NIST CURVE: $nist{$curve}" if exists $nist{$curve};
-		$rv{'exponent'} = join(', ', @p);
+		# Need at least one byte for the tag
+		my $tag = ord substr($data, $i++, 1);
+		return if $i >= length $data;
+
+		# Need at least one byte for the length
+		my $len = ord substr($data, $i++, 1);
+
+		# If high bit is set, long-form length follows, DER forbids 0x80
+		# (indefinite length), so n must be >= 1
+		if ($len & 0x80) {
+			my $n = $len & 0x7F; # how many bytes follow
+			return if $n == 0;   # 0x80 (indef.) not allowed in DER
+			return if $i + $n > length $data; # bounds check
+
+			# Parse big-endian length across n bytes
+			$len = 0;
+			for (1..$n) { $len = ($len << 8) + 
+				      ord substr($data, $i++, 1) }
+			}
+
+		# Value must fit in remaining buffer
+		return if $i + $len > length $data;
+
+		# Slice out the value, then advance cursor past it
+		my $val = substr($data, $i, $len);
+		$i += $len;
+
+		# Publish new cursor
+		$$iref = $i;
+
+		# Return the tag byte and the raw value bytes
+		return ($tag, $val);
+	};
+
+	# Decode a DER-encoded object identifier into a dotted-decimal
+	# string; follows the same base-128 decoding rules used in
+	# Convert::ASN1 and when interpreting OID values
+	my $oid_from_der = sub {
+		my ($s) = @_;
+		# Split to bytes; must have at least one byte for the combined
+		# (a0,a1)
+		my @b = unpack 'C*', $s;
+		return unless @b;
+
+		# First byte encodes a0 and a1: x = 40*a0 + a1
+		my $first = shift @b;
+		my $a0 = int($first / 40);
+		my $a1 = $first - 40 * $a0;
+		my @arcs = ($a0, $a1);
+
+		# Decode remaining arcs as base-128 varints. v accumulates 7-bit
+		# chunks until we hit a byte with MSB=0 (end of arc)
+		my $v = 0;
+		for my $c (@b) {
+			$v = ($v << 7) | ($c & 0x7F);
+			if (($c & 0x80) == 0) {
+				push @arcs, $v; $v = 0
+				}
+			}
+		return join '.', @arcs;
+	};
+
+	# Map OIDs to human-readable short names (curve names)
+	my $oid_sn = sub {
+		my ($oid) = @_;
+		return {
+			'1.2.840.10045.3.1.7'  => 'prime256v1',
+			'1.3.132.0.33'         => 'secp224r1',
+			'1.3.132.0.34'         => 'secp384r1',
+			'1.3.132.0.35'         => 'secp521r1',
+			 # Note: an algorithm OID, not a curve param
+			'1.3.101.112'          => 'ed25519',
+		}->{$oid};
+	};
+
+	# From the full cert DER, extract subjectPublicKey bytes and curve OID.
+	# Basically a low-level DER walker to extract the BIT STRING of the
+	# subjectPublicKey and the named curve OID in case of EC keys; similar
+	# to Crypt::OpenSSL::X509 internals
+	my $find_spki_bytes_and_curve = sub {
+		my ($der) = @_;
+
+		# Parse outer certificate SEQUENCE
+		my $i = 0;
+		my ($t_cert, $v_cert) = $tlv->($der, \$i) or return;
+		return if $t_cert != 0x30;
+
+		# Parse tbsCertificate SEQUENCE
+		my $j = 0;
+		my ($t_tbs, $v_tbs) = $tlv->($v_cert, \$j) or return;
+		return if $t_tbs != 0x30;
+
+		# Optional version field [0] EXPLICIT
+		my $k = 0;
+		my $tag = $k < length($v_tbs)
+			? ord substr($v_tbs, $k, 1)
+			: undef;
+		$tlv->($v_tbs, \$k) if (defined $tag && ($tag & 0xE0) == 0xA0);
+
+		# Skip fixed serial, signature, issuer, validity and subject
+		for (1..5) { $tlv->($v_tbs, \$k) or return }
+
+		# subjectPublicKeyInfo ::= SEQUENCE
+		my ($t_spki, $v_spki) = $tlv->($v_tbs, \$k) or return;
+		return if $t_spki != 0x30;
+
+		# AlgorithmIdentifier ::= SEQUENCE
+		my $m = 0;
+		my ($t_ai, $v_ai) = $tlv->($v_spki, \$m) or return;
+		return if $t_ai != 0x30;
+
+		# Algorithm OID
+		my $n = 0;
+		my ($t_oid, $v_oid) = $tlv->($v_ai, \$n) or return;
+		return if $t_oid != 0x06;
+
+		# Optional curve OID as algorithm parameter
+		my $curve_oid;
+		if ($n < length $v_ai) {
+			my ($t_par, $v_par) = $tlv->($v_ai, \$n) or return;
+			$curve_oid = $oid_from_der->($v_par) if $t_par == 0x06;
+			}
+
+		# subjectPublicKey BIT STRING drop the unused bits prefix
+		my ($t_spk, $v_spk) = $tlv->($v_spki, \$m) or return;
+		return if $t_spk != 0x03;
+
+		substr($v_spk, 0, 1, '');	# drop unused-bits byte
+		return ($v_spk, $curve_oid);
+	};
+
+	# Get the PEM text from the already-loaded cert, decode to DER
+	my $pem = Net::SSLeay::PEM_get_string_X509($cert)
+		or return $shutdown->();
+
+	# Extract the base64 part of the PEM
+	$pem =~ /
+	  (-----BEGIN\s+CERTIFICATE-----\n
+	   (?<pem>[A-Za-z0-9+\/=\n\r]+)
+	   -----END\s+CERTIFICATE-----) /sx or return $shutdown->();
+	my $der = &decode_base64($+{pem});
+	return $shutdown->() if !$der;
+
+	# Find SPKI
+	my ($spk_bytes, $curve_oid) = $find_spki_bytes_and_curve->($der)
+		or return $shutdown->();
+	
+	# Parse SPKI based on algorithm
+	if ($algo eq 'rsa') {
+		# RSAPublicKey SEQUENCE { n INTEGER, e INTEGER }
+		my $r = 0;
+		my ($t_seq, $v_seq) = $tlv->($spk_bytes, \$r)
+			or return $shutdown->();
+
+		# Expect a SEQUENCE tag (0x30) at the start of RSAPublicKey
+		return $shutdown->() if $t_seq != 0x30;
+
+		# Parse modulus and exponent
+		my $s = 0;
+		my ($t_n, $v_n) = $tlv->($v_seq, \$s) or return $shutdown->();
+		my ($t_e, $v_e) = $tlv->($v_seq, \$s) or return $shutdown->();
+
+		# Both modulus and exponent must be INTEGER tags (0x02)
+		return $shutdown->() if $t_n != 0x02 || $t_e != 0x02;
+
+		# Convert modulus to colon-separated hex
+		my $mod_hex = unpack 'H*', $v_n;
+		$mod_hex = "0$mod_hex" if length($mod_hex) % 2;	# byte-align
+		$rv{modulus} = join(':', unpack '(A2)*', lc $mod_hex);
+
+		# Convert exponent to decimal string
+		my $e_hex = unpack('H*', $v_e);
+		my $e_dec = hex($e_hex);
+		$rv{exponent} = "$e_dec" if $e_dec > 0;
 		}
-	}
+	elsif ($algo eq 'ec') {
+		# Bit string value is the uncompressed point
+		my $pub = unpack('H*', $spk_bytes);
+		$pub = "0$pub" if length($pub) % 2;     # byte-align
+		$rv{modulus} = join(':', unpack '(A2)*', lc($pub));
+
+		if ($curve_oid) {
+			# Map curve short names to standard NIST names
+			my %nist = ( prime256v1 => 'P-256',
+				     secp224r1  => 'P-224',
+				     secp384r1  => 'P-384',
+				     secp521r1  => 'P-521' );
+			my $curve_sn = $oid_sn->($curve_oid) || $curve_oid;
+
+			# Build the exponent field to show both the OID and NIST
+			# name
+			my @p = ( "ASN1 OID: $curve_sn" );
+			push @p,  "NIST CURVE: $nist{$curve_sn}"
+				if exists $nist{$curve_sn};
+			$rv{exponent} = join(', ', @p);
+			}
+		}
+}
 
 # Subject alt names
 my @alts = Net::SSLeay::X509_get_subjectAltNames($cert);
@@ -1137,9 +1315,8 @@ if (@alts) {
 	}
 
 # Self-signed or not
-$rv{self} = $x509->can('is_selfsigned')
-	? ($x509->is_selfsigned ? 1 : 0)
-	: (Net::SSLeay::X509_NAME_cmp($subject, $issuer) == 0 ? 1 : 0);
+$rv{self} = $subject && $issuer && 
+	    Net::SSLeay::X509_NAME_cmp($subject, $issuer) == 0 ? 1 : 0;
 
 # Cleanup
 $shutdown->();
