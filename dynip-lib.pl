@@ -54,7 +54,6 @@ else {
 sub get_external_ip_address
 {
 my ($nocache, $type) = @_;
-var_dump("Getting external IP address, no-cache=$nocache, type=$type");
 my ($out, $error);
 my $timeout = 5;
 # Validate type
@@ -97,7 +96,6 @@ if ($error || !$out) {
 		"http://v4.software.virtualmin.com/cgi-bin/ip.cgi ".
 		"http://v6.software.virtualmin.com/cgi-bin/ip.cgi";
 	my ($url4, $url6) = split(/\s+/, $url, 2);
-	var_dump("IP lookup URLs: $url4 and $url6");
 	$url6 ||= $url4;
 	$url = $type == 4 ? $url4 : $url6;
 	my ($host, $port, $page, $ssl) = &parse_http_url($url);
@@ -115,7 +113,6 @@ $config{$cache_optname} = $out;
 $config{$cache_time_optname} = $now;
 &save_module_config();
 &unlock_file($module_config_file);
-var_dump("Got external IP address $out");
 return $out;
 }
 
