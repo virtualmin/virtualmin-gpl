@@ -1458,6 +1458,7 @@ eval {
 	$info = &cert_file_info_perl($file);
 	};
 if ($@ || !$info) {
+	&error_stderr("SSL certificate parsing using Perl failed : $@");
 	$info = &cert_file_info_openssl($file, $d);
 	}
 return $info;
