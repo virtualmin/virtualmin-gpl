@@ -1444,7 +1444,6 @@ foreach my $k (keys %rv) {
 	$rv{$k} =~ s/http:\|\|/http:\/\//g;
 	}
 $rv{'self'} = $rv{'o'} eq $rv{'issuer_o'} ? 1 : 0;
-$rv{'type'} = $rv{'self'} ? $text{'cert_typeself'} : $text{'cert_typereal'};
 return \%rv;
 }
 
@@ -1461,6 +1460,9 @@ if ($@ || !$info) {
 	&error_stderr("SSL certificate parsing using Perl failed : $@");
 	$info = &cert_file_info_openssl($file, $d);
 	}
+
+# Type string
+$info->{type} = $info->{self} ? $text{cert_typeself} : $text{cert_typereal};
 return $info;
 }
 
