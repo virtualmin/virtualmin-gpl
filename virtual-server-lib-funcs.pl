@@ -12583,6 +12583,17 @@ if ($config{'dns'}) {
 		}
 	}
 
+# Hunt message from a log file that need attention to show to the user
+if (defined &list_logs_messages) {
+	my $file;
+	my $log = { file => $file,      # if empty, check default miniserv.error
+		    msg  => [
+			'SSL certificate parsing using Perl failed',
+		    ] };
+	my @msgs = &list_logs_messages($log);
+	push(@rv, \@msgs);
+	}
+
 return @rv;
 }
 
