@@ -58,25 +58,20 @@ $ffunc = "wizard_show_".$step;
 
 print &ui_table_end();
 if ($wizard_steps[$in{'step'}] eq 'done') {
-	$cmsg = $text{'wizard_end'};
-	$ctags = "style=\"font-weight: bold\"";
-	}
-else {
-	$cmsg = $text{'wizard_cancel'};
-	}
-if ($wizard_steps[$in{'step'}] eq 'alldone') {
 	$cmsg = undef;
 	$nmsg = $text{'wizard_finish'};
 	$mtags = "style=\"font-weight: bold\"";
 	}
 else {
+	$cmsg = $text{'wizard_cancel'};
 	$nmsg = $text{'wizard_next'};
 	}
 print &ui_form_end([
-		     [ "prev", $text{'wizard_prev'}, undef, !$in{'step'} ],
-		     undef,
-		     $cmsg ? [ "cancel", $cmsg, undef, undef, $ctags ] : undef,
-		     undef,
+		     $wizard_steps[$in{'step'}] ne 'intro'
+		     	? $wizard_steps[$in{'step'}] ne 'done'
+				? [ "prev", $text{'wizard_prev'} ]
+				: undef
+			: [ "cancel", $cmsg, undef, undef, $ctags ],
 		     [ "parse", $nmsg, undef, undef, $mtags ],
 		   ], "100%");
 
