@@ -6346,7 +6346,7 @@ if (!$cr) {
 	my ($r) = grep { $_->{'name'} eq $autoconfig &&
 			    $_->{'type'} eq 'AAAA' } @$recs;
 	if (!$r && $d->{'ip6'}) {
-		my $ip = $d->{'ip6'};
+		my $ip = $d->{'dns_ip6'} || $d->{'ip6'};
 		my $cr = { 'name' => $autoconfig,
 			   'type' => 'AAAA',
 			   'values' => [ $ip ] };

@@ -72,7 +72,9 @@ via a router doing NAT, the IP address of a domain in DNS may be different
 from it's IP on the actual system. To set this, the C<--dns-ip> flag can
 be given, followed by the external IP address to use. To revert to using the
 real IP in DNS, use C<--no-dns-ip> instead. In both cases, the actual
-DNS records managed by Virtualmin will be updated.
+DNS records managed by Virtualmin will be updated. Similarly, the C<--dns-ip6>
+and C<--no-dns-ip6> flags can be used to set the externally visible IPv6
+address.
 
 To add TLSA records (for publishing SSL certs) to selected domains, use the 
 C<--enable-tlsa> flag. Similarly the C<--disable-tlsa> removes them, and the
@@ -215,6 +217,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-dns-ip") {
 		$dns_ip = "";
 		}
+	elsif ($a eq "--dns-ip6") {
+		$dns_ip6 = shift(@ARGV);
+		&check_ip6address($dns_ip6) ||
+			&usage("--dns-ip6 must be followed by an IPv6 address");
+		}
+	elsif ($a eq "--no-dns-ip6") {
+		$dns_ip6 = "";
+		}
 	elsif ($a eq "--add-record") {
 		my ($name, $type, @values) = split(/\s+/, shift(@ARGV));
 		$name && $type && @values || &usage("--add-record must be followed by the record name, type and values, all in one parameter");
@@ -338,7 +348,7 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage("No domains specified");
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
-  @addrecs || @delrecs || @uprecs ||
+  defined($dns_ip6) || @addrecs || @delrecs || @uprecs ||
   @addslaves || @delslaves || $addallslaves || $ttl ||
   defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
   defined($dmarcrua) || defined($dmarcruf) ||
@@ -564,6 +574,18 @@ foreach $d (@doms) {
 			# Resetting DNS IP address to default
 			delete($d->{'dns_ip'});
 			}
+		}
+	if (defined($dns_ip6)) {
+		if ($dns_ip6) {
+			# Changing IP address for DNS
+			$d->{'dns_ip6'} = $dns_ip6;
+			}
+		else {
+			# Resetting DNS IP address to default
+			delete($d->{'dns_ip6'});
+			}
+		}
+	if (defined($dns_ip) || defined($dns_ip6)) {
 		&modify_dns($d, $oldd);
 		&save_domain($d);
 		}
@@ -983,6 +1005,8 @@ print "                     [--remote-dns hostname | --local-dns]\n";
 print "                     [--add-parent-ds | --remove-parent-ds]\n";
 print "                     [--enable-dkim | --disable-dkim | --default-dkim]\n";
 print "                     [--alias-dns | --no-alias-dns]\n";
+print "                     [--dns-ip address | --no-dns-ip]\n";
+print "                     [--dns-ip6 address | --no-dns-ip6]\n";
 exit(1);
 }
 
