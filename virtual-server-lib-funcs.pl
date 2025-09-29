@@ -19375,6 +19375,7 @@ if (defined(&get_reseller)) {
 	}
 if ($config{'dns_ip'.$suffix} eq '*') {
 	my $rv = &get_external_ip_address(0, $prefer);
+	$rv = &get_external_ip_address(1, $prefer) if !$rv;
 	$rv || &error($text{'newdynip_eext'});
 	return $rv;
 	}
