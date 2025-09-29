@@ -141,6 +141,7 @@ $ftable .= &ui_radio("feature_all", int($sched->{'feature_all'}),
 		[ [ 1, $text{'backup_allfeatures'} ],
 		  [ 0, $text{'backup_selfeatures'} ] ])."<br>\n";
 @links = ( &select_all_link("feature"), &select_invert_link("feature") );
+$ftable .= &ui_links_row(\@links);
 @schedfeats = split(/\s+/, $sched->{'features'});
 foreach $f (&get_available_backup_features()) {
 	$ftable .= &ui_checkbox("feature", $f,
@@ -205,7 +206,6 @@ if ($hasbackupplugin) {
 </script>
 EOF
 	}
-$ftable .= &ui_links_row(\@links);
 print &ui_table_row(&hlink($text{'backup_features'}, "backup_features"),
 		    $ftable);
 print &ui_hidden_table_end("features");
@@ -224,7 +224,7 @@ if (&can_backup_virtualmin()) {
 		}
 	@links = ( &select_all_link("virtualmin"),
 		   &select_invert_link("virtualmin") );
-	$vtable .= &ui_links_row(\@links);
+	$vtable = &ui_links_row(\@links) . $vtable;
 	print &ui_table_row(&hlink($text{'backup_virtualmin'},
 				   "backup_virtualmin"), $vtable);
 	}
