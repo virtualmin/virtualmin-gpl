@@ -135,7 +135,7 @@ return undef;
 }
 
 # get_any_external_ip_address_cached([prefer-ip-type])
-# Returns the cached IP address of this system unless caching is disabled.
+# Returns the cached IP address of this system, if it is cached
 sub get_any_external_ip_address_cached
 {
 my ($prefer) = @_;
