@@ -4499,6 +4499,26 @@ else {
 	$hash{'dns_slave'} = '';
 	}
 
+# Add sub-domain names
+if (!$d->{'parent'}) {
+	my @sds = grep { !$_->{'alias'} } &get_domain_by("parent", $d->{'id'});
+	if (@sds) {
+		$hash{'sub_domains'} = join(" ", map { $_->{'dom'} } @sds);
+		}
+	else {
+		$hash{'sub_domains'} = '';
+		}
+	}
+if (!$d->{'alias'}) {
+	my @ads = &get_domain_by("alias", $d->{'id'});
+	if (@ads) {
+		$hash{'alias_domains'} = join(" ", map { $_->{'dom'} } @ads);
+		}
+	else {
+		$hash{'alias_domains'} = '';
+		}
+	}
+
 # If any website feature is enabled (like Nginx), set the web variable
 if (&domain_has_website($d)) {
 	$hash{'web'} = 1;
