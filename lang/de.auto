@@ -1,6 +1,8 @@
 index_warn_apacheconf=Die Apache-Konfiguration auf Ihrem System weist Fehler auf! Dadurch wird verhindert, dass neue Domänen vollständig von Virtualmin hinzugefügt werden, bis die Fehler behoben sind.
 index_warn_bindconf=Die BIND DNS-Serverkonfiguration auf Ihrem System weist Fehler auf! Dadurch wird verhindert, dass neue Domänen vollständig von Virtualmin hinzugefügt werden, bis die Fehler behoben sind.
 
+user_remailbut3=Erstellungs-E-Mail erneut senden für :
+
 edit_dnsip6=Externe IPv6-Adresse
 edit_nodnsip6=IPv6 nicht aktiviert
 
@@ -44,6 +46,9 @@ cert_hostfilter2=Hostnamen ausschließen, die nicht vom Zertifikat validiert wer
 tmpl_erealdomslimit=Fehlende oder ungültige Standardbegrenzung für die Anzahl der Nicht-Alias-Server
 tmpl_mail_mta_sts=MTA-STS für neue Domänen aktivieren?
 tmpl_php_fpmtype=Standardmäßiger PHP-FPM-Prozessmanagermodus
+
+resel_defdnsip6=Externe IPv6-Adresse für namensbasierte Server
+resel_edefdnsip6=Fehlende oder ungültige externe IPv6-Adresse
 
 scripts_softwaremodperlreq=Das erforderliche Perl-Paket $1 wird installiert ..
 scripts_softwaremodperlrec=Empfohlenes Perl-Paket $1 wird installiert ..
@@ -89,6 +94,8 @@ admin_eclash2=Ein zusätzlicher Administrator mit demselben Namen ist bereits vo
 
 validate_ednsc=Das Abrufen der Datensätze für $1 vom Cloud-DNS-Anbieter $2 ist fehlgeschlagen : $3
 
+phpmode_skip=Vorlagenkonfiguration beibehalten
+
 spf_nodelrecs=.. keine passenden Datensätze gefunden!
 spf_eaddrecsdom=.. Datensatz $1 ist nicht in dieser Domäne
 spf_cloudns=NS-Einträge des Cloud-Anbieters
@@ -118,6 +125,18 @@ mail_mta_eself=Das Postfix-SSL-Zertifikat ist selbstsigniert und wird von andere
 
 cron_cron_complex=Zur Cron-Zeit
 cron_save=Zeitplan anwenden
+
+wizard_cancel=Überspringen
+wizard_intro=Dieser Assistent nach der Installation unterstützt Sie bei der Einrichtung von Virtualmin auf Ihrem System basierend auf Ihrem Anwendungsfall. Um fortzufahren, fahren Sie mit dem nächsten Schritt fort oder überspringen Sie den Vorgang, um die Standardeinstellungen zu verwenden.
+wizard_title_memory=E-Mail-Leistung
+wizard_memory2=Optimieren Sie Virtualmin für eine bessere E-Mail-Verarbeitung, indem Sie einen Domänen-Lookup-Daemon mit etwas höherer Speichernutzung ausführen, oder überspringen Sie ihn, um RAM zu sparen.
+wizard_virusnew=Wenn Ihr System Domänen hostet, die ein hohes E-Mail-Volumen empfangen, kann die Virenprüfung eingehender Nachrichten erhebliche Ressourcen beanspruchen. Da die Virenprüfung auf dem ClamAV-Server-Daemon <tt>clamd</tt> basiert, benötigt dieser auch im Leerlauf zusätzlichen RAM. Wenn Ihr System keine E-Mails verarbeiten kann oder nicht genügend RAM zur Verfügung steht, sollten Sie die Virenprüfung deaktivieren.
+wizard_title_virus=Virenscan
+wizard_virus0=Nein, E-Mails werden nicht gescannt
+wizard_spam=Wenn Ihr System Domänen hostet, die ein großes E-Mail-Volumen empfangen, wird der SpamAssassin-Server-Daemon <tt>spamd</tt> zum Filtern eingehender Nachrichten verwendet. Die Ausführung dieses Dienstes im Hintergrund verbraucht zwar zusätzlichen RAM, beschleunigt aber die E-Mail-Verarbeitung.
+wizard_spamd1=Ja, schnellere E-Mail-Verarbeitung mit mehr RAM-Nutzung und ohne Domäneneinstellungen
+wizard_db=Virtualmin unterstützt MySQL und PostgreSQL, aber Sie benötigen fast nie beide. Beide Systeme verbrauchen auch im Leerlauf RAM. Für die meisten Websites reicht MySQL allein aus, da nur wenige Anwendungen PostgreSQL benötigen. Wenn das System nur für E-Mail oder DNS verwendet wird, benötigen Sie keines von beiden.
+wizard_email_desc=E-Mail-Benachrichtigungen von diesem Virtualmin-System verwenden die hier angegebene Adresse. Wählen Sie am besten eine Adresse, die E-Mails an eine Person weiterleitet oder zustellt, damit Antworten auf Systemnachrichten gelesen werden.
 
 backuplog_match=Es werden Protokolle angezeigt, die mit $1 übereinstimmen
 backuplog_days=Es werden jetzt die Protokolle der letzten $1 Tage angezeigt

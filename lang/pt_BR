@@ -281,7 +281,6 @@ dbhosts_doing=Definir permissão $1 banco de dados $1 para US $2 ..
 wizard_next=Próximo
 wizard_prev=Anterior
 wizard_title_intro=Introdução
-wizard_title_memory=Uso de memória
 wizard_title_spam=Filtragem de Spam
 wizard_spamd=Executar filtro SpamAssassin no servidor ?
 wizard_title_db=Servidor de banco de dados

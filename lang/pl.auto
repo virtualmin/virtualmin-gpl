@@ -37,6 +37,7 @@ user_passnone=Nie zaakceptowano hasła
 user_efirstname=Nieprawidłowe imię
 user_esurname=Nieprawidłowe nazwisko
 user_remailbut2=Wyślij ponownie e-mail dotyczący utworzenia domeny
+user_remailbut3=Wyślij ponownie wiadomość e-mail z informacją o utworzeniu :
 
 edit_ewebappcannot=Nie masz uprawnień do zarządzania aplikacjami internetowymi
 edit_dnsip6=Zewnętrzny adres IPv6
@@ -159,6 +160,9 @@ tmpl_content_web_later=Zapytaj w momencie tworzenia
 tmpl_content_web_html_esave=Nie udało się zapisać domyślnego pliku strony HTML witryny
 tmpl_content_web_html_eempty=Domyślna zawartość strony HTML witryny jest pusta
 tmpl_php_fpmtype=Domyślny tryb menedżera procesów PHP-FPM
+
+resel_defdnsip6=Zewnętrzny adres IPv6 dla serwerów opartych na nazwach
+resel_edefdnsip6=Brakujący lub nieprawidłowy zewnętrzny adres IPv6
 
 licence_renew2=Dodatkową licencję można zakupić za <a target=_blank href='$1'>$2</a>.
 licence_renew3=Pozostał okres karencji wynoszący $1 dnia na zarządzanie migracją licencji na nowy serwer.
@@ -331,6 +335,7 @@ cmass_failed=.. tworzenie nie powiodło się : $1
 usage_max=Wyświetlono tylko $1.
 
 phpmode_ewebsite=Opcji PHP nie można edytować w domenie, która nie posiada witryny internetowej!
+phpmode_skip=Zachowaj konfigurację szablonu
 phpmode_verswarn=Ostrzeżenie! Obecna wersja PHP nie istnieje!
 phpmode_wwwredir1=Przekieruj <tt>www.$1</tt> do <tt>$1</tt>
 phpmode_wwwredir2=Przekieruj <tt>$1</tt> do <tt>www.$1</tt>
@@ -403,10 +408,19 @@ copycert_bind2=..już skonfigurowane
 copycert_bind3=Konfigurowanie BIND w celu użycia klucza dla DNS przez TLS dla $1 ..
 copycert_bind4=..inny klucz jest już skonfigurowany dla portu TLS!
 
-wizard_memory2=Virtualmin można dostroić, aby poprawić wydajność przetwarzania poczty e-mail, ale kosztem zwiększonego wykorzystania pamięci. Najlepszy wybór zależy od tego, jak będzie używany system.
+wizard_cancel=Pominąć
+wizard_intro=Ten kreator poinstalacyjny pomoże Ci skonfigurować Virtualmin w systemie, dostosowując go do Twojego przypadku użycia. Aby kontynuować, przejdź do następnego kroku lub pomiń i użyj ustawień domyślnych.
+wizard_title_memory=Wydajność poczty
+wizard_memory2=Aby usprawnić przetwarzanie wiadomości e-mail, dostosuj program Virtualmin, uruchamiając demona wyszukiwania domen z nieco większym wykorzystaniem pamięci, lub pomiń tę opcję, aby zaoszczędzić pamięć RAM.
+wizard_virusnew=Jeśli Twój system będzie hostował domeny odbierające dużą liczbę wiadomości e-mail, skanowanie wiadomości przychodzących w poszukiwaniu wirusów może zużywać znaczne zasoby. Ponieważ skanowanie opiera się na demonie serwera ClamAV <tt>clamd</tt>, wymaga ono dodatkowej pamięci RAM nawet w stanie bezczynności. Jeśli Twój system nie obsługuje wiadomości e-mail lub brakuje mu wystarczającej ilości pamięci RAM, skanowanie antywirusowe powinno być wyłączone.
+wizard_title_virus=Skanowanie w poszukiwaniu wirusów
+wizard_virus0=Nie, e-mail nie będzie skanowany
+wizard_spam=Jeśli Twój system będzie hostował domeny odbierające dużą ilość wiadomości e-mail, filtrowanie wiadomości przychodzących pod kątem spamu opiera się na demona serwera SpamAssassin <tt>spamd</tt>. Uruchomienie tej usługi w tle zużywa dodatkową pamięć RAM, ale przyspiesza i usprawnia przetwarzanie poczty.
+wizard_spamd1=Tak, szybsze przetwarzanie poczty z wykorzystaniem większej ilości pamięci RAM i bez ustawień dla poszczególnych domen
+wizard_db=Virtualmin obsługuje MySQL i PostgreSQL, ale prawie nigdy nie potrzebujesz obu. Każdy z nich zużywa pamięć RAM nawet w stanie bezczynności. W przypadku większości stron internetowych wystarczy sam MySQL, ponieważ niewiele aplikacji potrzebuje PostgreSQL. Jeśli system służy tylko do obsługi poczty lub DNS, nie potrzebujesz żadnego z nich.
 wizard_done=Konfiguracja Virtualmin po instalacji została ukończona!
 wizard_title_email=Adres e-mail systemu
-wizard_email_desc=Powiadomienia e-mail wysyłane przez Virtualmin będą przychodzić z adresu ustawionego na tej stronie. Zaleca się, aby ten adres przekazywał lub dostarczał e-maile do osoby, aby odpowiedzi na wiadomości e-mail systemu były czytane.
+wizard_email_desc=Powiadomienia e-mail z systemu Virtualmin będą korzystać z adresu, który tutaj ustawisz. Najlepiej wybrać adres, który przekierowuje lub dostarcza pocztę do osoby, aby odpowiedzi na wiadomości systemowe były odczytywane.
 wizard_from_addr=Adres e-mail głównego administratora
 wizard_from_addr2=Twój adres
 wizard_efrom_addr=Adres e-mail musi być w formacie użytkownik@domena

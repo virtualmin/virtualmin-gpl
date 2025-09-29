@@ -1299,9 +1299,7 @@ postgrey_cmts=Popis
 
 editgrey_valueclients=IP adresa nebo hostname mailového serveru
 
-wizard_intro=Tento instalační průvodce Vám pomůže nastavit Virtualmin optimálně pro Váš systém. Můžete udělat rozhodnutí na základě toho, chcete-li hostovat stránky, emaily nebo databáze, v závislosti na paměti a procesoru v systému.<p>Chcete-li pokračovat, klikněte na tlačítko <b>Další</b> níže. V opačném případě a použití implicitní konfigurace zvolte <b>Zrušit</b>.
 wizard_title_spam=Filtrování spamu
-wizard_db=Virtualmin podporuje jak MySQL tak i PostgreSQL databázový server, ale pravděpodobně budete chtít pouze jeden z nich (nebo žádný). Každý z nich, když běží, využívá část paměti RAM, i když není zrovna využíván.<p>V závislosti na stránkcách a aplikacích, které hodláte provozovat, většinou postačí pouze MySQL, protože většina webových aplikací nepodporuje nebo nevyžaduje PostgreSQL. Jestliže bude Váš systém použit pouze na provoz emailového nebo DNS serveru, není potřeba ani jeden z nich.
 wizard_db_mysql=Spustit databázový server MySQL?
 wizard_db_postgres=Spustit databázový server PostgreSQL?
 wizard_mysql=Aby jste zabránili ostatním uživatelům na Vašem systému spravovat MySQL databázi, mělo by být nastaveno <tt>root</tt> uživatelské heslo.
