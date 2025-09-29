@@ -50,6 +50,7 @@ my ($d) = @_;
 &require_bind();
 my $tmpl = &get_template($d->{'template'});
 my $ip = $d->{'dns_ip'} || $d->{'ip'};
+my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 my @extra_slaves = split(/\s+/, &substitute_domain_template(
 					$tmpl->{'dns_ns'}, $d));
 
@@ -79,7 +80,7 @@ eval {
 	local $bind8::config{'auto_chroot'} = undef;
 	local $bind8::config{'chroot'} = undef;
 	if ($d->{'alias'} && !$d->{'aliasdns'}) {
-		$recserr = &sync_alias_records($recs, $recstemp, $d, $ip);
+		$recserr = &sync_alias_records($recs, $recstemp, $d, $ip, $ip6);
 		}
 	else {
 		$recserr = &create_standard_records($recs, $recstemp, $d, $ip);
@@ -386,7 +387,6 @@ else {
 		# don't want to delete this later
 		$d->{'dns_subalready'} = 1;
 		}
-	my $ip = $d->{'dns_ip'} || $d->{'ip'};
 	&create_standard_records($recs, $file, $d, $ip);
 	&post_records_change($dnsparent, $recs, $file);
 
@@ -592,8 +592,10 @@ local $newip = $d->{'dns_ip'} || $d->{'ip'};
 if ($oldip ne $newip) {
 	&modify_records_ip_address($recs, $file, $oldip, $newip);
 	}
-if ($d->{'ip6'} && $d->{'ip6'} ne $oldd->{'ip6'}) {
-	&modify_records_ip_address($recs, $file, $oldd->{'ip6'}, $d->{'ip6'});
+local $oldip6 = $oldd->{'dns_ip6'} || $oldd->{'ip6'};
+local $newip6 = $d->{'dns_ip6'} || $d->{'ip6'};
+if ($oldip6 && $oldip6 ne $newip6) {
+	&modify_records_ip_address($recs, $file, $oldip6, $newip6);
 	}
 
 # Find and delete sub-domain records, plus any DNSSEC records (since we need
@@ -1050,7 +1052,7 @@ if ($d->{'mail'} && !$oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 		}
 	&$first_print($text{'save_dns4'});
 	my $ip = $d->{'dns_ip'} || $d->{'ip'};
-	my $ip6 = $d->{'ip6'};
+	my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 	&create_mail_records($recs, $file, $d, $ip, $ip6);
 	&$second_print($text{'setup_done'});
 	$rv++;
@@ -1065,7 +1067,7 @@ elsif (!$d->{'mail'} && $oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 		return 0;
 		}
 	my $ip = $d->{'dns_ip'} || $d->{'ip'};
-	my $ip6 = $d->{'ip6'};
+	my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 	my %ids = map { $_, 1 }
 		split(/\s+/, $d->{'mx_servers'});
 	my @slaves = grep { $ids{$_->{'id'}} } &list_mx_servers();
@@ -1628,11 +1630,11 @@ my $soa = { 'name' => $d->{'dom'}.'.',
 return $soa;
 }
 
-# sync_alias_records(&records, file, &domain, ip, [diff-mode])
+# sync_alias_records(&records, file, &domain, ip, ip6, [diff-mode])
 # For a domain that is an alias, sync records from its target
 sub sync_alias_records
 {
-local ($recs, $file, $d, $ip, $diff) = @_;
+local ($recs, $file, $d, $ip, $ip6, $diff) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $aliasd = &get_domain($d->{'alias'});
 local ($aliasrecs, $aliasfile) = &get_domain_dns_records_and_file($aliasd);
@@ -1640,7 +1642,8 @@ $aliasfile || return "No zone file for alias target $aliasd->{'dom'} found";
 @$aliasrecs || return "No records for alias target $aliasd->{'dom'} found";
 local $olddom = $aliasd->{'dom'};
 local $dom = $d->{'dom'};
-local $oldip = $aliasd->{'ip'};
+local $oldip = $aliasd->{'dns_ip'} || $aliasd->{'ip'};
+local $oldip6 = $aliasd->{'dns_ip6'} || $aliasd->{'ip6'};
 
 # Find sub-domains of the source, and sub-domains of this alias
 local @sublist = grep { $_->{'dns'} &&
@@ -1755,6 +1758,7 @@ RECORD: foreach my $r (@$aliasrecs) {
 		foreach my $v (@{$nr->{'values'}}) {
 			$v =~ s/\Q$olddom\E/$dom/i;
 			$v =~ s/\Q$oldip\E$/$ip/i;
+			$v =~ s/\Q$oldip6\E$/$ip6/i;
 			}
 		}
 	$keep{&dns_record_key($nr, 1)} = 1;
@@ -4120,6 +4124,9 @@ if ($d->{'ip'} ne $defip && $d->{'ip'} !~ /^(10\.|192\.168\.)/ &&
 if ($d->{'ip6'} && $d->{'ip6'} ne $defip6 && !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip6:'}}, $d->{'ip6'});
 	}
+if ($d->{'dns_ip6'} && !$tmpl->{'dns_spfonly'}) {
+	push(@{$spf->{'ip6:'}}, $d->{'dns_ip6'});
+	}
 @{$spf->{'ip4:'}} = &unique(@{$spf->{'ip4:'}});
 @{$spf->{'ip6:'}} = &unique(@{$spf->{'ip6:'}});
 $spf->{'all'} = $tmpl->{'dns_spfall'} + 1;
@@ -4314,7 +4321,9 @@ if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
 		&pre_records_change($d);
 		local ($recs, $file) = &get_domain_dns_records_and_file($ad);
 		&sync_alias_records($recs, $file, $ad,
-				      $ad->{'dns_ip'} || $ad->{'ip'}, 1);
+				    $ad->{'dns_ip'} || $ad->{'ip'},
+				    $ad->{'dns_ip6'} || $ad->{'ip6'},
+				    1);
 		&post_records_change($ad, $recs, $file);
 		&reload_bind_records($ad);
 		&release_lock_dns($ad);
