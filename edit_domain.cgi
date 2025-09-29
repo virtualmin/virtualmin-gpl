@@ -95,11 +95,16 @@ if (!$aliasdom && $d->{'dir'}) {
 
 # Show IP addresses
 @ips = ( $d->{'ip'} );
+if ($d->{'dns_ip'}) {
+	push(@ips, &text('edit_dnsip2', $d->{'dns_ip'}));
+	}
 if ($d->{'ip6'}) {
 	push(@ips, $d->{'ip6'});
+	if ($d->{'dns_ip6'}) {
+		push(@ips, &text('edit_dnsip2', $d->{'dns_ip6'}));
+		}
 	}
-my $ip = join(", ", @ips).
-	($d->{'dns_ip'} ? " (".&text('edit_dnsip2', $d->{'dns_ip'}).")" : "");
+my $ip = join(", ", @ips);
 if (&can_change_ip($d) && &can_edit_domain($d)) {
 	$ip = &ui_link("newip_form.cgi?dom=$d->{'id'}", $ip);
 	}

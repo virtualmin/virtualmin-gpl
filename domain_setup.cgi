@@ -290,6 +290,9 @@ if (&can_dnsip()) {
 	if ($in{'dns_ip_def'} == 0) {
 		&check_ipaddress($in{'dns_ip'}) || &error($text{'save_ednsip'});
 		}
+	if (defined($in{'dns_ip6_def'}) && $in{'dns_ip6_def'} == 0) {
+		&check_ip6address($in{'dns_ip6'}) || &error($text{'save_ednsip6'});
+		}
 	}
 
 # Make sure domain is under parent, if required
