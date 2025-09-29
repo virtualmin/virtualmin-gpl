@@ -174,6 +174,18 @@ if ($opts->{'no-dns-ip'}) {
 	$dns_ip = "";
 	}
 
+my $dns_ip6;
+if ($opts->{'dns-ip6'}) {
+	$dns_ip6 = $opts->{'dns-ip6'};
+	&check_ip6address($dns_ip6) ||
+		return $text{'api_ndom_invalid_dns_ip6'};
+	}
+
+if ($opts->{'no-dns-ip6'}) {
+	$dns_ip6 = "";
+	}
+
+
 my $mailboxlimit;
 if (defined($opts->{'max-mailboxes'})) {
 	$mailboxlimit = $opts->{'max-mailboxes'};
@@ -813,7 +825,9 @@ my %dom =
 	       $sharedip ? $sharedip : $defip,
 	 'netmask', $netmask,
 	 'dns_ip', defined($dns_ip) ? $dns_ip : $alias ? $alias->{'dns_ip'} :
-				      $virt ? undef : &get_dns_ip($resel),
+				      $virt ? undef : &get_dns_ip($resel, 4),
+	 'dns_ip6', defined($dns_ip6) ? $dns_ip6 : $alias ? $alias->{'dns_ip6'} :
+				        $virt6 ? undef : &get_dns_ip($resel, 6),
 	 'virt', $virt,
 	 'virtalready', $virtalready,
 	 'ip6', $parentip ? $parent->{'ip6'} : $ip6,

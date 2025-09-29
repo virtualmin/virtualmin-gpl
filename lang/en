@@ -8528,6 +8528,7 @@ api_ndom_feature_not_enabled=The '$1' option cannot be used unless the feature i
 api_ndom_no_default_ipv6=System does not have a default IPv6 address
 api_ndom_ip6_not_in_shared_list='$1' is not in the shared IP addresses list
 api_ndom_invalid_dns_ip='dns-ip' option must be followed by an IP address
+api_ndom_invalid_dns_ip6='dns-ip6' option must be followed by an IPv6 address
 api_ndom_invalid_database_name=Invalid database name
 api_ndom_invalid_forwarding_address=Invalid forwarding address
 api_ndom_unknown_template_name=Unknown template name
