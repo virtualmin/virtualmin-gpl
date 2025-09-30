@@ -9197,7 +9197,7 @@ foreach my $d (@disdoms) {
 			&text('disable_autodisabledone', $disabled_auto));
 		};
 	&pop_all_print();
-	&error_stderr_local("Disabling domain on schedule failed : $@") if ($@);
+	&error_stderr("Disabling domain on schedule failed : $@") if ($@);
 	}
 }
 
@@ -20631,7 +20631,7 @@ foreach my $pname (@load) {
 				my $err = $@;
 				$err = &html_strip($err);
 				$err =~ s/[\n\r]+/ /g;
-				&error_stderr_local($err);
+				&error_stderr($err);
 				}
 			}
 		}
@@ -21407,25 +21407,6 @@ elsif ($config{'default_domain_ssl'}) {
 			&$second_print(&text('check_apicmderr', $defdom_msg));
 			}
 		}
-	}
-}
-
-# error_stderr_local(err, [dont-print-return-as-string]]])
-# Print an error message to STDERR,
-# or call error_stderr if defined
-sub error_stderr_local
-{
-my ($err, $noprint) = @_;
-if (defined(&error_stderr)) {
-	if ($noprint) {
-		return &error_stderr($err, $noprint);
-		}
-	else {
-		&error_stderr($err);
-		}
-	}
-else {
-	print STDERR "$err\n";
 	}
 }
 
