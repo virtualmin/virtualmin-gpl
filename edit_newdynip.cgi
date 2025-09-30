@@ -67,7 +67,8 @@ print &ui_table_row($text{'newdynip_iface'},
 # Primary interface IPv6
 if (!&supports_ip6()) {
 	# Not supported
-	print &ui_table_row($text{'edit_ip6'}, $text{'edit_noip6support'});
+	print &ui_table_row($text{'edit_ip6'},
+			    "<i>$text{'edit_noip6support'}</i>");
 	}
 else {
 	# Supported
@@ -87,7 +88,8 @@ my $eip4 = &get_external_ip_address(0, 4);
 # External IPv6
 if (!&supports_ip6()) {
 	# Not supported
-	print &ui_table_row($text{'edit_ip6'}, $text{'edit_noip6support'});
+	print &ui_table_row($text{'edit_ip6'},
+			    "<i>$text{'edit_noip6support'}</i>");
 	}
 else {
 	# Supported
