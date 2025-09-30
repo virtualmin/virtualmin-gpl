@@ -18495,6 +18495,19 @@ $a->{'virtual'} eq '' && return $text{'sharedips_ebootreal'};
 return undef;
 }
 
+# activate_shared_ip6(address, netmask)
+# Bring up and save a new shared IPv6 address
+sub activate_shared_ip6
+{
+my ($ip, $netmask) = @_;
+my $virt = { 'name' => $config{'iface6'} || $config{'iface'},
+	     'netmask' => $netmask || $d->{'netmask6'} ||
+			  $config{'netmask6'} || 64,
+	     'address' => $ip };
+&save_ip6_interface($virt);
+&activate_ip6_interface($virt);
+}
+
 # get_available_backup_features([safe-only])
 # Returns a list of features for which backups are possible
 sub get_available_backup_features
