@@ -6,8 +6,10 @@
 sub supports_ip6
 {
 if (!defined($supports_ip6_cache)) {
-	&foreign_require("net");
 	$supports_ip6_cache = 0;
+	eval "use Socket6";
+	return 0 if ($@);
+	&foreign_require("net");
 	if (&net::supports_address6()) {
 		foreach my $a (&net::active_interfaces(1)) {
 			if (&best_ip6_address($a)) {
