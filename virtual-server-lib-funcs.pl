@@ -16802,7 +16802,8 @@ else {
 		&$second_print(&text('check_dnsip3', $ext_ip));
 		}
 	else {
-		&$second_print(&ui_text_color($text{'check_ednsip3'}, 'warn'));
+		&$second_print(&ui_text_color("⚠ ".$text{'check_ednsip3'},
+					      'warn'));
 		}
 	}
 
@@ -16830,7 +16831,8 @@ if ($config{'dns_ip6'} ne '*') {
 			'warn'));
 		}
 	else {
-		&$second_print(&ui_text_color($text{'check_ednsip3v6'},'warn'));
+		&$second_print(&ui_text_color("⚠ ".$text{'check_ednsip3v6'},
+					      'warn'));
 		}
 	}
 else {
@@ -16838,7 +16840,8 @@ else {
 		&$second_print(&text('check_dnsip3v6', $ext_ip6));
 		}
 	else {
-		&$second_print(&ui_text_color($text{'check_ednsip3v6'},'warn'));
+		&$second_print(&ui_text_color("⚠ ".$text{'check_ednsip3v6'},
+					      'warn'));
 		}
 	}
 
