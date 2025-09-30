@@ -62,7 +62,7 @@ $ipv4 || $ipv6 || &usage("At least one of IPv4 or IPv6 mode must be enabled");
 if ($ipv4) {
 	push(@ips, { 'ip' => &get_default_ip(), 'type' => 'default' });
 	}
-if ($ipv4) {
+if ($ipv6) {
 	push(@ips, { 'ip' => &get_default_ip6(), 'type' => 'default' });
 	}
 if (defined(&list_resellers)) {
