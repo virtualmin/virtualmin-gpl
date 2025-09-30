@@ -38,7 +38,7 @@ if ($mleft != 0) {
 					$text{'users_add_ssh'} ]);
 		}
 	my $webinit = &create_initial_user($d, undef, 1);
-	if ($webinit->{'webowner'} && !$d->{'aliasmail'}) {
+	if ($webinit->{'webowner'}) {
 		push(@links, [ "edit_user.cgi?new=1&type=ftp&dom=$in{'dom'}",
 				$text{'users_add_ftp'} ]);
 		}
@@ -51,7 +51,7 @@ if ($mleft != 0) {
 		push(@links, [ "edit_user.cgi?new=1&type=db&dom=$in{'dom'}",
 			$text{'users_add_db'} ]);
 		}
-	if (&domain_has_website($d) && !$d->{'aliasmail'} &&
+	if (&domain_has_website($d) &&
 	    ($virtualmin_pro || &should_show_pro_tip('extra_web_users', 1))) {
 		if (&indexof('virtualmin-htpasswd', @plugins) >= 0) {
 			push(@links, [ "edit_user.cgi?new=1&type=web&dom=$in{'dom'}",
