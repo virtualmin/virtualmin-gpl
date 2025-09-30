@@ -614,9 +614,8 @@ else {
 
 # Show DNS IPv4 address field
 if (&can_dnsip()) {
-	my $def_dns_ip4 =
-		&get_any_external_ip_address_cached(4) ||
-		&get_any_external_ip_address(4) || &get_dns_ip($resel, 4);
+	my $def_dns_ip4 = &get_external_ip_address(0, 4) ||
+			  &get_dns_ip($resel, 4);
 	my $dns_ip4 = $parentdom ? $parentdom->{'dns_ip'} : undef;
 	my @opts;
 	if ($def_dns_ip4) {
@@ -634,9 +633,8 @@ if (&can_dnsip()) {
 
 # Show DNS IPv6 address field
 if (&can_dnsip() && &supports_ip6()) {
-	my $def_dns_ip6 =
-		&get_any_external_ip_address_cached(6) ||
-		&get_any_external_ip_address(6) || &get_dns_ip($resel, 6);
+	my $def_dns_ip6 = &get_external_ip_address(undef, 6) ||
+			  &get_dns_ip($resel, 6);
 	my $dns_ip6 = $parentdom ? $parentdom->{'dns_ip6'} : undef;
 	my @opts;
 	if ($def_dns_ip6) {
