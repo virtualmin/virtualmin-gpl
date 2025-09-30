@@ -668,7 +668,7 @@ if ($info && $info->{'notafter'} && !$d->{'disabled'}) {
 # Make sure the CA matches the cert
 my $cafile = &get_website_ssl_file($d, "ca");
 if ($cafile && !&self_signed_cert($d)) {
-	my $cainfo = &cert_file_info($cafile, $d);
+	my $cainfo = &cert_file_info($cafile);
 	if (!$cainfo || !$cainfo->{'cn'}) {
 		return &text('validate_esslcainfo', "<tt>$cafile</tt>");
 		}
@@ -972,7 +972,7 @@ return $rv;
 sub cert_info
 {
 local ($d) = @_;
-return &cert_file_info($d->{'ssl_cert'}, $d);
+return &cert_file_info($d->{'ssl_cert'});
 }
 
 # cert_file_split(file|data)
@@ -1019,7 +1019,7 @@ return $info;
 
 # cert_file_info_perl(file)
 # Returns a hash ref with info about the cert in file, or undef on error using
-# pure Perl which is literally fifty times faster than using OpenSSL command
+# pure Perl
 sub cert_file_info_perl
 {
 my ($file) = @_;
@@ -1325,141 +1325,14 @@ $shutdown->();
 return \%rv;
 }
 
-# cert_file_info_openssl(file, [&domain])
+# cert_file_info(file)
 # Returns a hash of details of a cert in some file
-sub cert_file_info_openssl
-{
-local ($file, $d) = @_;
-return undef if (!-r $file);
-local %rv;
-local $_;
-local $cmd = "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate -startdate -text";
-if ($d && &is_under_directory($d->{'home'}, $file)) {
-	open(OUT, &command_as_user($d->{'user'}, 0, $cmd)." 2>/dev/null |");
-	}
-else {
-	open(OUT, $cmd." 2>/dev/null |");
-	}
-while(<OUT>) {
-	s/\r|\n//g;
-	s/http:\/\//http:\|\|/g;	# So we can parse with regexp
-	if (/subject=.*C\s*=\s*([^\/,]+)/) {
-		$rv{'c'} = $1;
-		}
-	if (/subject=.*ST\s*=\s*([^\/,]+)/) {
-		$rv{'st'} = $1;
-		}
-	if (/subject=.*L\s*=\s*([^\/,]+)/) {
-		$rv{'l'} = $1;
-		}
-	if (/subject=.*O\s*=\s*"(.*?)"/ || /subject=.*O\s*=\s*([^\/,]+)/) {
-		$rv{'o'} = $1;
-		}
-	if (/subject=.*OU\s*=\s*([^\/,]+)/) {
-		$rv{'ou'} = $1;
-		}
-	if (/subject=.*CN\s*=\s*([^\/,]+)/) {
-		$rv{'cn'} = $1;
-		}
-	if (/subject=.*emailAddress\s*=\s*([^\/,]+)/) {
-		$rv{'email'} = $1;
-		}
-
-	if (/issuer=.*C\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_c'} = $1;
-		}
-	if (/issuer=.*ST\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_st'} = $1;
-		}
-	if (/issuer=.*L\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_l'} = $1;
-		}
-	if (/issuer=.*O\s*=\s*"(.*?)"/ || /issuer=.*O\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_o'} = $1;
-		}
-	if (/issuer=.*OU\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_ou'} = $1;
-		}
-	if (/issuer=.*CN\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_cn'} = $1;
-		}
-	if (/issuer=.*emailAddress\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_email'} = $1;
-		}
-	if (/notAfter\s*=\s*(.*)/) {
-		$rv{'notafter'} = $1;
-		}
-	if (/notBefore\s*=\s*(.*)/) {
-		$rv{'notbefore'} = $1;
-		}
-	if (/Subject\s+Alternative\s+Name/i) {
-		local $alts = <OUT>;
-		$alts =~ s/^\s+//;
-		foreach my $a (split(/[, ]+/, $alts)) {
-			if ($a =~ /^DNS:(\S+)/) {
-				push(@{$rv{'alt'}}, $1);
-				}
-			}
-		}
-	# Try to detect key algorithm
-	if (/Key\s+Algorithm:.*?(rsa|ec)[EP]/) {
-		$rv{'algo'} = $1;
-		}
-	if (/RSA\s+Public\s+Key:\s+\((\d+)\s*bit/) {
-		$rv{'size'} = $1;
-		}
-	elsif (/EC\s+Public\s+Key:\s+\((\d+)\s*bit/) {
-		$rv{'size'} = $1;
-		}
-	elsif (/Public-Key:\s+\((\d+)\s*bit/) {
-		$rv{'size'} = $1;
-		}
-	if (/Modulus\s*\(.*\):/ || /Modulus:/) {
-		$inmodulus = 1;
-		# RSA algo
-		$rv{'algo'} = "rsa" if (!$rv{'algo'});
-		}
-	elsif (/pub:/) {
-		$inmodulus = 1;
-		# ECC algo
-		$rv{'algo'} = 'ec' if (!$rv{'algo'});
-		}
-	if (/^\s+([0-9a-f:]+)\s*$/ && $inmodulus) {
-		$rv{'modulus'} .= $1;
-		}
-	# RSA exponent
-	if (/Exponent:\s*(\d+)/) {
-		$rv{'exponent'} = $1;
-		$inmodulus = 0;
-		}
-	# ECC properties
-	elsif (/(ASN1\s+OID):\s*(\S+)/ || /(NIST\s+CURVE):\s*(\S+)/) {
-		$inmodulus = 0;
-		my $comma = $rv{'exponent'} ? ", " : "";
-		$rv{'exponent'} .= "$comma$1: $2";
-		}
-	}
-close(OUT);
-foreach my $k (keys %rv) {
-	$rv{$k} =~ s/http:\|\|/http:\/\//g;
-	}
-$rv{'self'} = $rv{'o'} eq $rv{'issuer_o'} ? 1 : 0;
-return \%rv;
-}
-
-# cert_file_info(file, [&domain])
-# Returns a hash of details of a cert in some file using either Perl or OpenSSL
 sub cert_file_info
 {
-my ($file, $d) = @_;
-my $info;
-eval {
-	$info = &cert_file_info_perl($file);
-	};
-if ($@ || !$info) {
-	&error_stderr("SSL certificate parsing using Perl failed : $@");
-	$info = &cert_file_info_openssl($file, $d);
-	}
+my $file = shift;
+
+# Read cert info using Perl modules
+my $info = &cert_file_info_perl($file);
 
 # Type string
 $info->{type} = $info->{self} ? $text{cert_typeself} : $text{cert_typereal};

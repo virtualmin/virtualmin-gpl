@@ -59,7 +59,7 @@ $d || &usage("Virtual server $dname does not exist");
 $cafile = &get_website_ssl_file($d, "ca");
 if ($chain) {
 	$cafile || &usage("Virtual server does not have a CA certificate");
-	$info = &cert_file_info($cafile, $d);
+	$info = &cert_file_info($cafile);
 	}
 else {
 	$info = &cert_info($d);
