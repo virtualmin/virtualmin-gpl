@@ -6163,7 +6163,8 @@ newdynip_off=Dynamic IP updating has been disabled. Changes to the system's IP a
 newdynip_never=Not updated yet
 newdynip_notify=Email IP update notifications to
 newdynip_none=Nobody
-newdynip_eext=Failed to work out externally visible IP address
+newdynip_eext=Failed to work out externally visible IPv4 address
+newdynip_eext6=Failed to work out externally visible IPv6 address
 newdynip_eexternal=In external script mode, the full path to a script to run must be entered
 newdynip_eexternal2=In Webmin mode, the hostname or hostname:port of a Webmin server must be entered
 
