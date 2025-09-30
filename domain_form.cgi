@@ -614,7 +614,7 @@ else {
 
 # Show DNS IPv4 address field
 if (&can_dnsip()) {
-	my $def_dns_ip4 = &get_external_ip_address(0, 4) ||
+	my $def_dns_ip4 = &get_external_ip_address(undef, 4) ||
 			  &get_dns_ip($resel, 4);
 	my $dns_ip4 = $parentdom ? $parentdom->{'dns_ip'} : undef;
 	my @opts;
