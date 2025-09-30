@@ -60,13 +60,43 @@ if ($config{'dynip_service'}) {
 				: "<i>$text{'newdynip_never'}</i>");
 	}
 
-# Primary interface IP
+# Primary interface IPv4
 print &ui_table_row($text{'newdynip_iface'},
 		    "<tt>".&get_default_ip()."</tt>");
 
-# External IP
-print &ui_table_row($text{'newdynip_external'},
-		    "<tt>".&get_any_external_ip_address()."</tt>");
+# Primary interface IPv6
+if (!&supports_ip6()) {
+	# Not supported
+	print &ui_table_row($text{'edit_ip6'}, $text{'edit_noip6support'});
+	}
+else {
+	# Supported
+	my $ip6 = &get_default_ip6();
+	print &ui_table_row($text{'newdynip_iface6'},
+			    $ip6 ? "<tt>$ip6</tt>"
+				: "<i>$text{'newdynip_none'}</i>");
+	}
+
+# External IPv4
+my $eip4 = &get_external_ip_address(0, 4);
+	print &ui_table_row($text{'newdynip_external'},
+			    $eip4
+				? "<tt>$eip4</tt>"
+				: "⚠ ".$text{'newdynip_eext'});
+
+# External IPv6
+if (!&supports_ip6()) {
+	# Not supported
+	print &ui_table_row($text{'edit_ip6'}, $text{'edit_noip6support'});
+	}
+else {
+	# Supported
+	my $eip6 = &get_external_ip_address(0, 6);
+	print &ui_table_row($text{'newdynip_external6'},
+			    $eip6
+				? "<tt>$eip6</tt>"
+				: "⚠ ".$text{'newdynip_eext6'});
+	}
 
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'newdynip_ok'} ] ]);
