@@ -6820,6 +6820,7 @@ $ssl_tests = [
 
 	# Test SSL cert
 	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -6872,6 +6873,7 @@ $ssl_tests = [
 
 	# Test SSL cert to subdomain (should be the same)
 	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
+		       ' -servername '.$test_ssl_subdomain.
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -6925,6 +6927,7 @@ $ssl_tests = [
 
 	# Test SSL cert to the second subdomain (should be the same)
 	{ 'command' => 'openssl s_client -host '.$test_ssl2_subdomain.
+		       ' -servername '.$test_ssl2_subdomain.
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -6972,6 +6975,7 @@ $ssl_tests = [
 
 	# Test generated SSL cert
 	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'C=US', 'ST=California', 'L=Santa Clara',
 		      'O=Virtualmin', 'OU=Testing', 'CN='.$test_domain ],
@@ -6994,6 +6998,7 @@ $ssl_tests = [
 
 	# Test new SSL cert via HTTP
 	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'O=Virtualmin', 'CN='.$test_domain ],
 	},
