@@ -6141,6 +6141,7 @@ sharedips_missing=Parent interface $1 does not exist!
 sharedips_eboot=Failed to find boot-time configuration for IP address
 sharedips_ebootreal=IP address is not virtual
 sharedips_eactives=Failed to find active configuration for IP address
+sharedips_eboot6=Failed to find boot-time or active active configuration for IPv6 address
 
 newdynip_title=Dynamic IP Update
 newdynip_enabled=Dynamic update enabled?

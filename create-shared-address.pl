@@ -113,13 +113,14 @@ if ($ip eq "allocate") {
 
 # Try to allocate the IPv6 addresss if required
 if ($ip6 eq "allocate") {
-	$tmpl->{'ranges6'} || &usage("The --allocate-ip6 flag cannot be used ".
-				     "unless IPv6 allocation ranges are configured");
+	$tmpl->{'ranges6'} ||
+		&usage("The --allocate-ip6 flag cannot be used ".
+		       "unless IPv6 allocation ranges are configured");
 	($ip6, $netmask6) = &free_ip6_address($tmpl);
 	$ip6 || &usage("Failed to find a free IPv6 address in ".
 		       "range $tmpl->{'ranges6'}");
 	&indexof($ip6, @ip6s) < 0 ||
-		&usage("Allocated IPv6 address $ip6 is already a shared address");
+	    &usage("Allocated IPv6 address $ip6 is already a shared address");
 	}
 
 # Activate if required, otherwise ensure it is on the system
