@@ -57,15 +57,26 @@ foreach $ip6 (@oldip6s) {
 		}
 	}
 
-# If requested, allocate a new one and bring it up
+# If requested, allocate a new IPv4 address and bring it up
+$tmpl = &get_template(&get_init_template(0));
 if ($in{'alloc'}) {
 	&obtain_lock_virt();
-	$tmpl = &get_template(&get_init_template(0));
 	($newip, $newnetmask) = &free_ip_address($tmpl);
 	$newip || &error(&text('sharedips_ealloc', $tmpl->{'ranges'}));
 	$err = &activate_shared_ip($newip, $newnetmask);
 	&error($err) if ($err);
 	push(@ips, $newip);
+	&release_lock_virt();
+	}
+
+# Also optionally allocate a new IPv6 address
+if ($in{'alloc6'}) {
+	&obtain_lock_virt();
+	($newip6, $newnetmask6) = &free_ip6_address($tmpl);
+	$newip6 || &error(&text('sharedips_ealloc6', $tmpl->{'ranges6'}));
+	$err = &activate_shared_ip6($newip6, $newnetmask6);
+	&error($err) if ($err);
+	push(@ips6, $newip6);
 	&release_lock_virt();
 	}
 

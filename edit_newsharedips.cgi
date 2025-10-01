@@ -41,6 +41,7 @@ if ($tmpl->{'ranges'}) {
 
 if (&supports_ip6()) {
 	print &ui_table_hr();
+
 	# Default IPv6 address
 	print &ui_table_row($text{'sharedips_def6'},
 		    &get_default_ip6() || "<i>$text{'sharedips_def6none'}</i>");
@@ -49,6 +50,10 @@ if (&supports_ip6()) {
 	print &ui_table_row($text{'sharedips_ip6s'},
 		    &ui_textarea("ip6s", join("\n", &list_shared_ip6s()),
 				 5, 40));
+	if ($tmpl->{'ranges6'}) {
+		print &ui_table_row(" ",
+			&ui_checkbox("alloc6", 1, $text{'sharedips_alloc6'},0));
+		}
 	}
 
 print &ui_table_end();

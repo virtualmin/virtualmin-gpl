@@ -2,6 +2,7 @@
 use Time::Local;
 use POSIX;
 use feature 'state';
+use Net::SSLeay;
 
 ## Work out where our extra -lib.pl files are, and load them
 $virtual_server_root = $module_root_directory;
@@ -18506,6 +18507,24 @@ my $virt = { 'name' => $config{'iface6'} || $config{'iface'},
 	     'address' => $ip };
 &save_ip6_interface($virt);
 &activate_ip6_interface($virt);
+}
+
+# deactivate_shared_ip6(address)
+# Removes the virtual interface using some IPv6 address. Returns undef on success
+# or an error message on failure.
+sub deactivate_shared_ip6
+{
+my ($ip) = @_;
+my ($active) = grep { &canonicalize_ip6($_->{'address'}) eq
+			 &canonicalize_ip6($ip) }
+		       &active_ip6_interfaces();
+my ($boot) = grep { &canonicalize_ip6($_->{'address'}) eq
+		       &canonicalize_ip6($ip) }
+		     &boot_ip6_interfaces();
+$active || $boot || return $text{'sharedips_eboot6'};
+&delete_ip6_interface($boot) if ($boot);
+&deactivate_ip6_interface($active) if ($active);
+return undef;
 }
 
 # get_available_backup_features([safe-only])
