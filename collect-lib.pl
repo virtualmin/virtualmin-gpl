@@ -194,17 +194,20 @@ foreach my $d (@doms_all) {
 			delete($d->{'ssl_cert_expiry'});
 			&save_domain($d);
 			}
-		next;
 		}
-	my @st = stat($d->{'ssl_cert'});
-	next if (!@st);		# Should never happen
-	next if ($d->{'ssl_cert_expiry_cache'} == $st[9]);
-	my $info = &cert_info($d);
-	next if (!$info);
-	$d->{'ssl_cert_expiry_cache'} = $st[9];
-	my $notafter = &parse_notafter_date($info->{'notafter'});
-	$d->{'ssl_cert_expiry'} = $notafter;
-	&save_domain($d);
+	else {
+		# Updated cached expiry date, if cert file has changed
+		my @st = stat($d->{'ssl_cert'});
+		my $info;
+		if (@st && $d->{'ssl_cert_expiry_cache'} != $st[9] &&
+		    ($info = &cert_info($d))) {
+			$d->{'ssl_cert_expiry_cache'} = $st[9];
+			my $notafter = &parse_notafter_date(
+					$info->{'notafter'});
+			$d->{'ssl_cert_expiry'} = $notafter;
+			&save_domain($d);
+			}
+		}
 	&unlock_domain($d);
 	}
 
