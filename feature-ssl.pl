@@ -668,7 +668,7 @@ if ($info && $info->{'notafter'} && !$d->{'disabled'}) {
 # Make sure the CA matches the cert
 my $cafile = &get_website_ssl_file($d, "ca");
 if ($cafile && !&self_signed_cert($d)) {
-	my $cainfo = &cert_file_info($cafile, $d);
+	my $cainfo = &cert_file_info($cafile);
 	if (!$cainfo || !$cainfo->{'cn'}) {
 		return &text('validate_esslcainfo', "<tt>$cafile</tt>");
 		}
@@ -972,7 +972,7 @@ return $rv;
 sub cert_info
 {
 local ($d) = @_;
-return &cert_file_info($d->{'ssl_cert'}, $d);
+return &cert_file_info($d->{'ssl_cert'});
 }
 
 # cert_file_split(file|data)
@@ -1016,127 +1016,327 @@ local $info = &cert_file_info($temp);
 return $info;
 }
 
-# cert_file_info(file, [&domain])
+
+# cert_file_info_perl(file)
+# Returns a hash ref with info about the cert in file, or undef on error using
+# pure Perl
+sub cert_file_info_perl
+{
+my ($file) = @_;
+return undef if (!$file || !-r $file);
+
+my ($cert, $pkey, $x509, %rv);
+
+# Cleanup and return
+my $shutdown = sub {
+	Net::SSLeay::EVP_PKEY_free($pkey) if $pkey; # Free pkey before returning
+	Net::SSLeay::X509_free($cert) if $cert;     # Free cert before returning
+	return undef;
+};
+
+# Always expect PEM
+my $bio = Net::SSLeay::BIO_new_file($file, 'r') or return undef;
+$cert = Net::SSLeay::PEM_read_bio_X509($bio);
+Net::SSLeay::BIO_free($bio);
+return undef if !$cert;
+
+# Get issuer
+my $issuer = Net::SSLeay::X509_get_issuer_name($cert);
+if ($issuer) {
+	my $C  = Net::SSLeay::X509_NAME_get_text_by_NID($issuer, 14);
+	my $O  = Net::SSLeay::X509_NAME_get_text_by_NID($issuer, 17);
+	my $CN = Net::SSLeay::X509_NAME_get_text_by_NID($issuer, 13);
+	$rv{issuer_c}  = $C  if defined $C  && $C  ne '' && $C  ne '-1';
+	$rv{issuer_o}  = $O  if defined $O  && $O  ne '' && $O  ne '-1';
+	$rv{issuer_cn} = $CN if defined $CN && $CN ne '' && $CN ne '-1';
+	}
+
+# Validity period begin
+my $nb = Net::SSLeay::X509_get_notBefore($cert);
+if ($nb) {
+	my $s = Net::SSLeay::P_ASN1_TIME_put2string($nb);
+	$rv{notbefore} = $s if $s;
+	}
+
+# Validity period end
+my $na = Net::SSLeay::X509_get_notAfter($cert);
+if ($na) {
+	my $s = Net::SSLeay::P_ASN1_TIME_put2string($na);
+	$rv{notafter} = $s if $s;
+	}
+
+# Subject
+my $subject = Net::SSLeay::X509_get_subject_name($cert);
+if ($subject) {
+	my $O     = Net::SSLeay::X509_NAME_get_text_by_NID($subject, 17);
+	my $CN    = Net::SSLeay::X509_NAME_get_text_by_NID($subject, 13);
+	my $Email = Net::SSLeay::X509_NAME_get_text_by_NID($subject, 48);
+	$rv{o}     = $O     if defined $O     && $O     ne '' && $O     ne '-1';
+	$rv{cn}    = $CN    if defined $CN    && $CN    ne '' && $CN    ne '-1';
+	$rv{email} = $Email if defined $Email && $Email ne '' && $Email ne '-1';
+	}
+
+# Public key
+$pkey = Net::SSLeay::X509_get_pubkey($cert);
+return $shutdown->() if (!$pkey);
+my $type_nid = Net::SSLeay::EVP_PKEY_id($pkey);
+my $type_sn  = Net::SSLeay::OBJ_nid2sn($type_nid);
+return $shutdown->() if (!$type_sn);
+my $algo = $type_sn =~ /rsa/                      ? 'rsa'     :
+	   $type_sn =~ /^(?:ec|id-ecpublickey)$/i ? 'ec'      :
+	   $type_sn =~ /ed25519/                  ? 'ed25519' : undef;
+
+$rv{algo} = $algo;
+return $shutdown->() if !$algo;	# unsupported algo
+
+# Key size
+my $size = Net::SSLeay::EVP_PKEY_bits($pkey);
+$rv{size} = "$size" if $size && $size > 0;
+
+# Modulus and exponent parsing SPKI manually
+{
+	# Manually parse one ASN.1 DER tag-length-value structure from data,
+	# starting at a given offset; this is equivalent to how low-level
+	# decoders in Convert::ASN1 modules unpack
+	my $tlv = sub {
+		my ($data, $iref) = @_;
+		
+		# Initialize cursor
+		my $i = $$iref // 0;
+		return if $i >= length $data;
+
+		# Need at least one byte for the tag
+		my $tag = ord substr($data, $i++, 1);
+		return if $i >= length $data;
+
+		# Need at least one byte for the length
+		my $len = ord substr($data, $i++, 1);
+
+		# If high bit is set, long-form length follows, DER forbids 0x80
+		# (indefinite length), so n must be >= 1
+		if ($len & 0x80) {
+			my $n = $len & 0x7F; # how many bytes follow
+			return if $n == 0;   # 0x80 (indef.) not allowed in DER
+			return if $i + $n > length $data; # bounds check
+
+			# Parse big-endian length across n bytes
+			$len = 0;
+			for (1..$n) { $len = ($len << 8) + 
+				      ord substr($data, $i++, 1) }
+			}
+
+		# Value must fit in remaining buffer
+		return if $i + $len > length $data;
+
+		# Slice out the value, then advance cursor past it
+		my $val = substr($data, $i, $len);
+		$i += $len;
+
+		# Publish new cursor
+		$$iref = $i;
+
+		# Return the tag byte and the raw value bytes
+		return ($tag, $val);
+	};
+
+	# Decode a DER-encoded object identifier into a dotted-decimal
+	# string; follows the same base-128 decoding rules used in
+	# Convert::ASN1 and when interpreting OID values
+	my $oid_from_der = sub {
+		my ($s) = @_;
+		# Split to bytes; must have at least one byte for the combined
+		# (a0,a1)
+		my @b = unpack 'C*', $s;
+		return unless @b;
+
+		# First byte encodes a0 and a1: x = 40*a0 + a1
+		my $first = shift @b;
+		my $a0 = int($first / 40);
+		my $a1 = $first - 40 * $a0;
+		my @arcs = ($a0, $a1);
+
+		# Decode remaining arcs as base-128 varints. v accumulates 7-bit
+		# chunks until we hit a byte with MSB=0 (end of arc)
+		my $v = 0;
+		for my $c (@b) {
+			$v = ($v << 7) | ($c & 0x7F);
+			if (($c & 0x80) == 0) {
+				push @arcs, $v; $v = 0
+				}
+			}
+		return join '.', @arcs;
+	};
+
+	# Map OIDs to human-readable short names (curve names)
+	my $oid_sn = sub {
+		my ($oid) = @_;
+		return {
+			'1.2.840.10045.3.1.7'  => 'prime256v1',
+			'1.3.132.0.33'         => 'secp224r1',
+			'1.3.132.0.34'         => 'secp384r1',
+			'1.3.132.0.35'         => 'secp521r1',
+			 # Note: an algorithm OID, not a curve param
+			'1.3.101.112'          => 'ed25519',
+		}->{$oid};
+	};
+
+	# From the full cert DER, extract subjectPublicKey bytes and curve OID.
+	# Basically a low-level DER walker to extract the BIT STRING of the
+	# subjectPublicKey and the named curve OID in case of EC keys; similar
+	# to Crypt::OpenSSL::X509 internals
+	my $find_spki_bytes_and_curve = sub {
+		my ($der) = @_;
+
+		# Parse outer certificate SEQUENCE
+		my $i = 0;
+		my ($t_cert, $v_cert) = $tlv->($der, \$i) or return;
+		return if $t_cert != 0x30;
+
+		# Parse tbsCertificate SEQUENCE
+		my $j = 0;
+		my ($t_tbs, $v_tbs) = $tlv->($v_cert, \$j) or return;
+		return if $t_tbs != 0x30;
+
+		# Optional version field [0] EXPLICIT
+		my $k = 0;
+		my $tag = $k < length($v_tbs)
+			? ord substr($v_tbs, $k, 1)
+			: undef;
+		$tlv->($v_tbs, \$k) if (defined $tag && ($tag & 0xE0) == 0xA0);
+
+		# Skip fixed serial, signature, issuer, validity and subject
+		for (1..5) { $tlv->($v_tbs, \$k) or return }
+
+		# subjectPublicKeyInfo ::= SEQUENCE
+		my ($t_spki, $v_spki) = $tlv->($v_tbs, \$k) or return;
+		return if $t_spki != 0x30;
+
+		# AlgorithmIdentifier ::= SEQUENCE
+		my $m = 0;
+		my ($t_ai, $v_ai) = $tlv->($v_spki, \$m) or return;
+		return if $t_ai != 0x30;
+
+		# Algorithm OID
+		my $n = 0;
+		my ($t_oid, $v_oid) = $tlv->($v_ai, \$n) or return;
+		return if $t_oid != 0x06;
+
+		# Optional curve OID as algorithm parameter
+		my $curve_oid;
+		if ($n < length $v_ai) {
+			my ($t_par, $v_par) = $tlv->($v_ai, \$n) or return;
+			$curve_oid = $oid_from_der->($v_par) if $t_par == 0x06;
+			}
+
+		# subjectPublicKey BIT STRING drop the unused bits prefix
+		my ($t_spk, $v_spk) = $tlv->($v_spki, \$m) or return;
+		return if $t_spk != 0x03;
+
+		substr($v_spk, 0, 1, '');	# drop unused-bits byte
+		return ($v_spk, $curve_oid);
+	};
+
+	# Get the PEM text from the already-loaded cert, decode to DER
+	my $pem = Net::SSLeay::PEM_get_string_X509($cert)
+		or return $shutdown->();
+
+	# Extract the base64 part of the PEM
+	$pem =~ /
+	  (-----BEGIN\s+CERTIFICATE-----\n
+	   (?<pem>[A-Za-z0-9+\/=\n\r]+)
+	   -----END\s+CERTIFICATE-----) /sx or return $shutdown->();
+	my $der = &decode_base64($+{pem});
+	return $shutdown->() if !$der;
+
+	# Find SPKI
+	my ($spk_bytes, $curve_oid) = $find_spki_bytes_and_curve->($der)
+		or return $shutdown->();
+	
+	# Parse SPKI based on algorithm
+	if ($algo eq 'rsa') {
+		# RSAPublicKey SEQUENCE { n INTEGER, e INTEGER }
+		my $r = 0;
+		my ($t_seq, $v_seq) = $tlv->($spk_bytes, \$r)
+			or return $shutdown->();
+
+		# Expect a SEQUENCE tag (0x30) at the start of RSAPublicKey
+		return $shutdown->() if $t_seq != 0x30;
+
+		# Parse modulus and exponent
+		my $s = 0;
+		my ($t_n, $v_n) = $tlv->($v_seq, \$s) or return $shutdown->();
+		my ($t_e, $v_e) = $tlv->($v_seq, \$s) or return $shutdown->();
+
+		# Both modulus and exponent must be INTEGER tags (0x02)
+		return $shutdown->() if $t_n != 0x02 || $t_e != 0x02;
+
+		# Convert modulus to colon-separated hex
+		my $mod_hex = unpack 'H*', $v_n;
+		$mod_hex = "0$mod_hex" if length($mod_hex) % 2;	# byte-align
+		$rv{modulus} = join(':', unpack '(A2)*', lc $mod_hex);
+
+		# Convert exponent to decimal string
+		my $e_hex = unpack('H*', $v_e);
+		my $e_dec = hex($e_hex);
+		$rv{exponent} = "$e_dec" if $e_dec > 0;
+		}
+	elsif ($algo eq 'ec') {
+		# Bit string value is the uncompressed point
+		my $pub = unpack('H*', $spk_bytes);
+		$pub = "0$pub" if length($pub) % 2;     # byte-align
+		$rv{modulus} = join(':', unpack '(A2)*', lc($pub));
+
+		if ($curve_oid) {
+			# Map curve short names to standard NIST names
+			my %nist = ( prime256v1 => 'P-256',
+				     secp224r1  => 'P-224',
+				     secp384r1  => 'P-384',
+				     secp521r1  => 'P-521' );
+			my $curve_sn = $oid_sn->($curve_oid) || $curve_oid;
+
+			# Build the exponent field to show both the OID and NIST
+			# name
+			my @p = ( "ASN1 OID: $curve_sn" );
+			push @p,  "NIST CURVE: $nist{$curve_sn}"
+				if exists $nist{$curve_sn};
+			$rv{exponent} = join(', ', @p);
+			}
+		}
+}
+
+# Subject alt names
+my @alts = Net::SSLeay::X509_get_subjectAltNames($cert);
+if (@alts) {
+	my @dns;
+	while (my ($type, $val) = splice(@alts, 0, 2)) {
+		push @dns, $val if $type == 2;	# dNSName
+		}
+	$rv{alt} = \@dns if @dns;
+	}
+
+# Self-signed or not
+$rv{self} = $subject && $issuer && 
+	    Net::SSLeay::X509_NAME_cmp($subject, $issuer) == 0 ? 1 : 0;
+
+# Cleanup
+$shutdown->();
+
+# Return info
+return \%rv;
+}
+
+# cert_file_info(file)
 # Returns a hash of details of a cert in some file
 sub cert_file_info
 {
-local ($file, $d) = @_;
-return undef if (!-r $file);
-local %rv;
-local $_;
-local $cmd = "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate -startdate -text";
-if ($d && &is_under_directory($d->{'home'}, $file)) {
-	open(OUT, &command_as_user($d->{'user'}, 0, $cmd)." 2>/dev/null |");
-	}
-else {
-	open(OUT, $cmd." 2>/dev/null |");
-	}
-while(<OUT>) {
-	s/\r|\n//g;
-	s/http:\/\//http:\|\|/g;	# So we can parse with regexp
-	if (/subject=.*C\s*=\s*([^\/,]+)/) {
-		$rv{'c'} = $1;
-		}
-	if (/subject=.*ST\s*=\s*([^\/,]+)/) {
-		$rv{'st'} = $1;
-		}
-	if (/subject=.*L\s*=\s*([^\/,]+)/) {
-		$rv{'l'} = $1;
-		}
-	if (/subject=.*O\s*=\s*"(.*?)"/ || /subject=.*O\s*=\s*([^\/,]+)/) {
-		$rv{'o'} = $1;
-		}
-	if (/subject=.*OU\s*=\s*([^\/,]+)/) {
-		$rv{'ou'} = $1;
-		}
-	if (/subject=.*CN\s*=\s*([^\/,]+)/) {
-		$rv{'cn'} = $1;
-		}
-	if (/subject=.*emailAddress\s*=\s*([^\/,]+)/) {
-		$rv{'email'} = $1;
-		}
+my $file = shift;
 
-	if (/issuer=.*C\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_c'} = $1;
-		}
-	if (/issuer=.*ST\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_st'} = $1;
-		}
-	if (/issuer=.*L\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_l'} = $1;
-		}
-	if (/issuer=.*O\s*=\s*"(.*?)"/ || /issuer=.*O\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_o'} = $1;
-		}
-	if (/issuer=.*OU\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_ou'} = $1;
-		}
-	if (/issuer=.*CN\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_cn'} = $1;
-		}
-	if (/issuer=.*emailAddress\s*=\s*([^\/,]+)/) {
-		$rv{'issuer_email'} = $1;
-		}
-	if (/notAfter\s*=\s*(.*)/) {
-		$rv{'notafter'} = $1;
-		}
-	if (/notBefore\s*=\s*(.*)/) {
-		$rv{'notbefore'} = $1;
-		}
-	if (/Subject\s+Alternative\s+Name/i) {
-		local $alts = <OUT>;
-		$alts =~ s/^\s+//;
-		foreach my $a (split(/[, ]+/, $alts)) {
-			if ($a =~ /^DNS:(\S+)/) {
-				push(@{$rv{'alt'}}, $1);
-				}
-			}
-		}
-	# Try to detect key algorithm
-	if (/Key\s+Algorithm:.*?(rsa|ec)[EP]/) {
-		$rv{'algo'} = $1;
-		}
-	if (/RSA\s+Public\s+Key:\s+\((\d+)\s*bit/) {
-		$rv{'size'} = $1;
-		}
-	elsif (/EC\s+Public\s+Key:\s+\((\d+)\s*bit/) {
-		$rv{'size'} = $1;
-		}
-	elsif (/Public-Key:\s+\((\d+)\s*bit/) {
-		$rv{'size'} = $1;
-		}
-	if (/Modulus\s*\(.*\):/ || /Modulus:/) {
-		$inmodulus = 1;
-		# RSA algo
-		$rv{'algo'} = "rsa" if (!$rv{'algo'});
-		}
-	elsif (/pub:/) {
-		$inmodulus = 1;
-		# ECC algo
-		$rv{'algo'} = 'ec' if (!$rv{'algo'});
-		}
-	if (/^\s+([0-9a-f:]+)\s*$/ && $inmodulus) {
-		$rv{'modulus'} .= $1;
-		}
-	# RSA exponent
-	if (/Exponent:\s*(\d+)/) {
-		$rv{'exponent'} = $1;
-		$inmodulus = 0;
-		}
-	# ECC properties
-	elsif (/(ASN1\s+OID):\s*(\S+)/ || /(NIST\s+CURVE):\s*(\S+)/) {
-		$inmodulus = 0;
-		my $comma = $rv{'exponent'} ? ", " : "";
-		$rv{'exponent'} .= "$comma$1: $2";
-		}
-	}
-close(OUT);
-foreach my $k (keys %rv) {
-	$rv{$k} =~ s/http:\|\|/http:\/\//g;
-	}
-$rv{'self'} = $rv{'o'} eq $rv{'issuer_o'} ? 1 : 0;
-$rv{'type'} = $rv{'self'} ? $text{'cert_typeself'} : $text{'cert_typereal'};
-return \%rv;
+# Read cert info using Perl modules
+my $info = &cert_file_info_perl($file);
+
+# Type string
+$info->{type} = $info->{self} ? $text{cert_typeself} : $text{cert_typereal};
+return $info;
 }
 
 # convert_ssl_key_format(&domain, file, "pkcs1"|"pkcs8", [outfile])

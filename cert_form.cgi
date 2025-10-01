@@ -111,7 +111,7 @@ if (&domain_has_ssl_cert($d)) {
 
 		# Warn if the CA is wrong
 		if ($i eq 'type' && $chain) {
-			my $cainfo = &cert_file_info($chain, $d);
+			my $cainfo = &cert_file_info($chain);
 			if ($cainfo &&
 			    ($cainfo->{'o'} ne $info->{'issuer_o'} ||
 			     $cainfo->{'cn'} ne $info->{'issuer_cn'})) {
@@ -271,7 +271,7 @@ if (&domain_has_ssl_cert($d)) {
 	# CA cert details
 	if ($chain) {
 		print &ui_table_hr();
-		my $info = &cert_file_info($chain, $d);
+		my $info = &cert_file_info($chain);
 		foreach $i (@cert_attributes) {
 			next if ($i eq 'modulus' || $i eq 'exponent');
 			if ($info->{$i} && !ref($info->{$i})) {
