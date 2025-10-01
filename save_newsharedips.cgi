@@ -76,7 +76,7 @@ if ($in{'alloc6'}) {
 	$newip6 || &error(&text('sharedips_ealloc6', $tmpl->{'ranges6'}));
 	$err = &activate_shared_ip6($newip6, $newnetmask6);
 	&error($err) if ($err);
-	push(@ips6, $newip6);
+	push(@ip6s, $newip6);
 	&release_lock_virt();
 	}
 
