@@ -104,6 +104,10 @@ if ($d->{'dns_ip'}) {
 	print &ui_table_row($text{'edit_dnsip'},
 		"<tt>$d->{'dns_ip'}</tt>");
 	}
+if ($d->{'dns_ip6'}) {
+	print &ui_table_row($text{'edit_dnsip6'},
+		"<tt>$d->{'dns_ip6'}</tt>");
+	}
 
 # Home directory
 if ((!$aliasdom && $d->{'dir'}) ||
