@@ -11639,7 +11639,7 @@ my $optdis = " style='font-style:italic; color:#a94442'".
 	     " title='$text{enable_tooltip}'";
 my $opts = [ map { [ $_->{'id'}, &show_domain_name($_),
 		     $_->{'disabled'} ? $optdis : undef ] }
-		 sort { $a->{'dom'} cmp $b->{'dom'} } @$doms ];
+	     sort { &natural_sort_domains($a->{'dom'}, $b->{'dom'}) } @$doms ];
 my $vals = [ ];
 foreach my $id (@$ids) {
 	my $d = &get_domain($id);
