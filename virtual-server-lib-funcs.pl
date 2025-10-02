@@ -11637,9 +11637,10 @@ my ($name, $ids, $doms, $dis, $ms) = @_;
 my $sz = scalar(@$doms) > 10 ? 10 : scalar(@$doms) < 5 ? 5 : scalar(@$doms);
 my $optdis = " style='font-style:italic; color:#a94442'".
 	     " title='$text{enable_tooltip}'";
-my $opts = [ map { [ $_->{'id'}, &show_domain_name($_),
+my $opts = [ map { [ $_->{'id'}, 
+		    ($_->{'parent'} ? "&nbsp;&nbsp;" : "").&show_domain_name($_),
 		     $_->{'disabled'} ? $optdis : undef ] }
-	     sort { &natural_sort_domains($a->{'dom'}, $b->{'dom'}) } @$doms ];
+	     &sort_indent_domains($doms) ];
 my $vals = [ ];
 foreach my $id (@$ids) {
 	my $d = &get_domain($id);
