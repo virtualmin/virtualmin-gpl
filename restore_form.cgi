@@ -152,7 +152,7 @@ if (&can_backup_virtualmin()) {
 	# Show virtualmin object backup options
 	print &ui_hidden_table_start($text{'backup_headerfeatures2'},
 		"width=100%", 2, "features2", 0, \@tds);
-	$vtable = "";
+	$vtable = &ui_links_row(\@links);
 	%virts = map { $_, 1 } split(/\s+/, $sched->{'virtualmin'});
 	foreach $vo (@virtualmin_backups) {
 		$vtable .= &ui_checkbox("virtualmin", $vo,
@@ -160,7 +160,6 @@ if (&can_backup_virtualmin()) {
 		}
 	@links = ( &select_all_link("virtualmin"),
 		   &select_invert_link("virtualmin") );
-	$vtable .= &ui_links_row(\@links);
 	print &ui_table_row($text{'restore_virtualmin'}, $vtable);
 	print &ui_hidden_table_end("features2");
 	}
