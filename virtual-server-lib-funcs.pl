@@ -11635,12 +11635,17 @@ sub servers_input
 {
 my ($name, $ids, $doms, $dis, $ms) = @_;
 my $sz = scalar(@$doms) > 10 ? 10 : scalar(@$doms) < 5 ? 5 : scalar(@$doms);
-my $opts = [ map { [ $_->{'id'}, &show_domain_name($_) ] }
-		 sort { $a->{'dom'} cmp $b->{'dom'} } @$doms ];
+my $optdis = " style='font-style:italic; color:#a94442'".
+	     " title='$text{enable_tooltip}'";
+my $opts = [ map { [ $_->{'id'}, 
+		    ($_->{'parent'} ? "&nbsp;&nbsp;" : "").&show_domain_name($_),
+		     $_->{'disabled'} ? $optdis : undef ] }
+	     &sort_indent_domains($doms) ];
 my $vals = [ ];
 foreach my $id (@$ids) {
 	my $d = &get_domain($id);
-	push(@$vals, [$id, $d ? &show_domain_name($d) : $id]);
+	push(@$vals, [ $id, $d ? &show_domain_name($d) : $id,
+		       $d && $d->{'disabled'} ? $optdis : undef ]);
 	}
 if ($ms) {
 	return &ui_multi_select($name, $vals, $opts, $sz, 1, $dis);

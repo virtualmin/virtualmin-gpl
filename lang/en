@@ -1847,6 +1847,7 @@ enable_bind_cloud=Enabling DNS zone on $1 ..
 enable_ebind_cloud=.. failed : $1
 enable_disabled=disabled
 enable_return=disable server form
+enable_tooltip=Virtual server is disabled
 
 mail_usubject=Mailbox created
 mail_dsubject=Virtual server created
