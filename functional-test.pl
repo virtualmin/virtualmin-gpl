@@ -369,7 +369,7 @@ $domains_tests = [
 	},
 
 	# Check FTP login
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain_user.':smeg@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -748,7 +748,7 @@ $domains_tests = [
 	},
 
 	# Check new FTP login
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain_user.':newpass@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -1108,7 +1108,7 @@ $disable_tests = [
 	},
 
 	# Check FTP login fails
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain_user.':smeg@localhost/',
 	  'grep' => 'Login incorrect',
 	  'fail' => 1,
@@ -1152,7 +1152,7 @@ $disable_tests = [
 		: ( ),
 
 	# Check FTP login as the mailbox fails
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_full_user.':smeg@localhost/',
 	  'grep' => 'Login incorrect',
 	  'fail' => 1,
@@ -1278,7 +1278,7 @@ $mailbox_tests = [
 	},
 
 	# Check FTP login
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_full_user.':smeg@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -1585,7 +1585,7 @@ $reseller_tests = [
 	},
 
 	# Check FTP login
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_reseller.':smeg@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -1624,7 +1624,7 @@ $reseller_tests = [
 	},
 
 	# Check FTP login again
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_reseller.':smeg2@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -1636,7 +1636,7 @@ $reseller_tests = [
 	},
 
 	# Check FTP login again, which should now fail
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_reseller.':smeg2@localhost/',
 	  'grep' => 'Login incorrect',
 	  'ignorefail' => 1,
@@ -1649,7 +1649,7 @@ $reseller_tests = [
 	},
 
 	# Check FTP login again, which should now work
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_reseller.':smeg2@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -3001,7 +3001,7 @@ $aliasdom_tests = [
 	},
 
 	# Check FTP login
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain_user.':smeg@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -3158,7 +3158,7 @@ $scheduled_tests = [
 	},
 
 	# Check FTP login
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain_user.':smeg@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -8982,7 +8982,7 @@ $bw_tests = [
 	},
 
 	# Fetch 1 time with FTP
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_bw_domain_user.':smeg@localhost/public_html/huge >/dev/null',
 	},
 
@@ -9112,7 +9112,7 @@ $bw_tests = [
 	},
 
 	# Fetch 1 time with FTP
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_full_user.':smeg@localhost/huge >/dev/null',
 	},
 
@@ -10310,7 +10310,7 @@ $clone_tests = [
 	},
 
 	# Check FTP login
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_clone_domain_user.':foo@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -10602,7 +10602,7 @@ $hashpass_tests = [
 	},
 
 	# Check FTP login
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain_user.':smeg@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -10659,7 +10659,7 @@ $hashpass_tests = [
 	},
 
 	# Check FTP login with new password
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain_user.':newpass@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -10702,7 +10702,7 @@ $hashpass_tests = [
 	},
 
 	# Check FTP login
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_full_user.':smeg@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -10726,7 +10726,7 @@ $hashpass_tests = [
 	},
 
 	# Check FTP login with new password
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_full_user.':newpass@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -12088,7 +12088,7 @@ $reset_tests = [
 	},
 
 	# Check FTP login fails
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain_user.':smeg@localhost/',
 	  'grep' => 'Login incorrect',
 	  'ignorefail' => 1,
@@ -12101,7 +12101,7 @@ $reset_tests = [
 	},
 
 	# Check FTP login works now
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain_user.':smeg@localhost/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -12531,7 +12531,7 @@ $ftp_tests = [
 	},
 
 	# Check that anonymous FTP to it works
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain.'/',
 	  'antigrep' => 'Login incorrect',
 	},
@@ -12542,13 +12542,13 @@ $ftp_tests = [
 	},
 
 	# Try to fetch it
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain.'/foo.txt',
 	  'grep' => 'bar',
 	},
 
 	# Test that encrypted FTP works and serves the right cert
-	{ 'command' => $curl_command.' --ftp-ssl --insecure -v '.
+	{ 'command' => $curl_command.' --ftp-ssl --insecure -v --ipv4 '.
 		       'ftp://'.$test_domain.'/foo.txt',
 	  'grep' => [ 'bar', 'O=Test FTP domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -12560,7 +12560,7 @@ $ftp_tests = [
 	},
 
 	# FTP should fail now
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain.'/',
 	  'grep' => 'Login incorrect',
 	  'fail' => 1,
@@ -12572,7 +12572,7 @@ $ftp_tests = [
 	},
 
 	# FTP should work again
-	{ 'command' => $wget_command.
+	{ 'command' => $wget_command.' --inet4 '.
 		       'ftp://'.$test_domain.'/',
 	  'antigrep' => 'Login incorrect',
 	},
