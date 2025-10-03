@@ -800,14 +800,13 @@ else {
 # Save the SSL virtual server's Apache config as a separate file
 sub backup_ssl
 {
-local ($d, $file) = @_;
+my ($d, $file) = @_;
 &$first_print($text{'backup_sslcp'});
 
 # Save the apache directives
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-					    $d->{'web_sslport'});
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_sslport'});
 if ($virt) {
-	local $lref = &read_file_lines($virt->{'file'});
+	my $lref = &read_file_lines($virt->{'file'});
 	&open_tempfile_as_domain_user($d, FILE, ">$file");
 	foreach my $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
 		&print_tempfile(FILE, "$l\n");
@@ -815,18 +814,15 @@ if ($virt) {
 	&close_tempfile_as_domain_user($d, FILE);
 
 	# Save the cert and key, if any
-	local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
+	my $cert = &get_website_ssl_file($d, "cert");
 	if ($cert) {
 		&copy_write_as_domain_user($d, $cert, $file."_cert");
 		}
-	local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf,1);
+	my $key = &get_website_ssl_file($d, "key");
 	if ($key && $key ne $cert) {
 		&copy_write_as_domain_user($d, $key, $file."_key");
 		}
-	local $ca = &apache::find_directive("SSLCACertificateFile", $vconf,1);
-	if (!$ca) {
-		$ca = &apache::find_directive("SSLCertificateChainFile", $vconf,1);
-		}
+	my $ca = &get_website_ssl_file($d, "ca");
 	if ($ca) {
 		&copy_write_as_domain_user($d, $ca, $file."_ca");
 		}
@@ -886,31 +882,35 @@ if ($virt) {
 	if (!$d->{'ssl_same'}) {
 		# Restore the cert and key, if any and if saved and if not
 		# shared with another domain
-		my $cert = $d->{'ssl_cert'} ||
-		      &apache::find_directive("SSLCertificateFile", $vconf, 1);
+		my $cert = &get_website_ssl_file($d, "cert");
 		if ($cert && -r $file."_cert") {
 			&lock_file($cert);
 			&write_ssl_file_contents($d, $cert, $file."_cert");
 			&unlock_file($cert);
 			&save_website_ssl_file($d, "cert", $cert);
 			}
-		my $key = $d->{'ssl_key'} ||
-		     &apache::find_directive("SSLCertificateKeyFile", $vconf,1);
+		my $key = &get_website_ssl_file($d, "key");
 		if ($key && -r $file."_key" && $key ne $cert) {
 			&lock_file($key);
 			&write_ssl_file_contents($d, $key, $file."_key");
 			&unlock_file($key);
 			&save_website_ssl_file($d, "key", $key);
 			}
-		my $ca = $d->{'ssl_chain'} ||
-		    &apache::find_directive("SSLCACertificateFile", $vconf,1) ||
-		    &apache::find_directive("SSLCertificateChainFile", $vconf, 1);
-		if ($ca && -r $file."_ca") {
+		my $ca = &get_website_ssl_file($d, "ca");
+		if (-r $file."_ca") {
+			# CA in the backup, so add one if needed
+			if (!$ca) {
+				$ca = &default_certificate_file($d, "ca");
+				}
 			&lock_file($ca);
 			&write_ssl_file_contents($d, $ca, $file."_ca");
 			&unlock_file($ca);
-			&save_website_ssl_file($d, "ca", $ca);
 			}
+		else {
+			# No CA in the backup, so clear current setting
+			$ca = undef;
+			}
+		&save_website_ssl_file($d, "ca", $ca);
 		&refresh_ssl_cert_expiry($d);
 		&sync_combined_ssl_cert($d);
 		}
