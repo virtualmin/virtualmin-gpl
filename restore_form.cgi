@@ -160,7 +160,7 @@ if (&can_backup_virtualmin()) {
 		}
 	@links = ( &select_all_link("virtualmin"),
 		   &select_invert_link("virtualmin") );
-	$vtable .= &ui_links_row(\@links);
+	$vtable = &ui_links_row(\@links) . $vtable;
 	print &ui_table_row($text{'restore_virtualmin'}, $vtable);
 	print &ui_hidden_table_end("features2");
 	}
