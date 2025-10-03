@@ -8586,4 +8586,6 @@ api_ndom_possible_problems_detected=The following possible problems were detecte
 api_ndom_overquota_error=$1
 api_ndom_creation_failed=Creation failed: $1
 
+syslog_procmail=Procmail log file
+
 __norefs=1

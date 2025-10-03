@@ -12,3 +12,4 @@ version=7.40.0
 readonly=1
 feedback=feedback@webmin.com
 hidden=1
+syslog=1
