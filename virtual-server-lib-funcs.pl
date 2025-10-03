@@ -7154,9 +7154,10 @@ if (!$allopts->{'fix'}) {
 		my $changed = 0;
 		&create_ssl_certificate_directories($d);
 		foreach my $ssltype ('cert', 'key', 'ca') {
-			my $sslfile = &get_website_ssl_file($d, $ssltype);
+			my $sslfile = &get_website_ssl_file($d, $ssltype) ||
+				      &default_certificate_file($d, $ssltype);
 			my $bfile = $file."_ssl_".$ssltype;
-			if ($sslfile && -r $bfile) {
+			if (-r $bfile) {
 				&lock_file($sslfile);
 				&write_ssl_file_contents($d, $sslfile, $bfile);
 				&unlock_file($sslfile);
