@@ -20,7 +20,7 @@ return ( "intro",
 	 "db",
 	 $config{'mysql'} ? ( "mysql" ) : ( ),
 	 $config{'dns'} ? ( "dns" ) : ( ),
-	 "email",
+	 $mail_system == 99 ? ( ) : "email",
 	 "done" );
 }
 
