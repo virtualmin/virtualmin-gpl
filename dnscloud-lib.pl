@@ -374,7 +374,8 @@ return (0, $rv) if (!ref($rv));
 my @recs;
 foreach my $rrs (@{$rv->{'ResourceRecordSets'}}) {
 	next if ($rrs->{'Type'} eq 'NS' &&
-		 &expand_dns_record($rrs->{'Name'}, $d) eq $info->{'domain'}.'.');
+		 &expand_dns_record($rrs->{'Name'}, $info->{'domain'}) eq
+		   $info->{'domain'}.'.');
 	foreach my $rr (@{$rrs->{'ResourceRecords'}}) {
 		push(@recs, { 'name' => $rrs->{'Name'},
 			      'realname' => $rrs->{'Name'},
@@ -402,7 +403,8 @@ my @recs;
 foreach my $rrs (@{$rv->{'ResourceRecordSets'}}) {
 	foreach my $rr (@{$rrs->{'ResourceRecords'}}) {
 		if ($rrs->{'Type'} eq 'NS' &&
-		    &expand_dns_record($rrs->{'Name'}, $d) eq $info->{'domain'}.'.') {
+		    &expand_dns_record($rrs->{'Name'}, $info->{'domain'}) eq
+		      $info->{'domain'}.'.') {
 			push(@ns, $rr->{'Value'});
 			}
 		}
@@ -425,7 +427,8 @@ my $js = { 'Changes' => [] };
 my %keep = map { &dns_record_key($_), 1 } @$recs;
 foreach my $r (@$oldrecs) {
 	next if ($r->{'type'} eq 'NS' &&
-	 	   &expand_dns_record($r->{'name'}, $d) eq $info->{'domain'}.'.' ||
+	 	   &expand_dns_record($r->{'name'}, $info->{'domain'}) eq
+		     $info->{'domain'}.'.' ||
 		 $r->{'type'} eq 'SOA');
 	next if ($keep{&dns_record_key($r)});
 	my $v = join(" ", @{$r->{'values'}});
@@ -445,7 +448,8 @@ foreach my $r (@$oldrecs) {
 	}
 foreach my $r (@$recs) {
 	next if ($r->{'type'} eq 'NS' &&
-		  &expand_dns_record($r->{'name'}, $d) eq $info->{'domain'}.'.' ||
+		  &expand_dns_record($r->{'name'}, $info->{'domain'}) eq
+		    $info->{'domain'}.'.' ||
 		 $r->{'type'} eq 'SOA');
 	next if (!$r->{'name'} || !$r->{'type'});	# $ttl or similar
 	my $v = join(" ", @{$r->{'values'}});
