@@ -113,7 +113,8 @@ RECORD: foreach $r (@$recs) {
 			}
 		else {
 			$pmsg = "<span data-type='not-proxied' ".
-		                "data-text='$text{'records_typenoprox'}'>".
+				"data-provider='$cloud->{'name'}' ".
+				"data-text='$text{'records_typenoprox'}'>".
 				"</span>";
 			}
 		}
