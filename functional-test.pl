@@ -37,8 +37,9 @@ $test_clone_domain = "exampleclone.com";
 $test_subdomain = "example.net";
 $test_parallel_domain1 = "example1.net";
 $test_parallel_domain2 = "example2.net";
-$test_cloud_domain = "cloudexample.com";
-$test_cloud_subdomain = "dns.cloudexample.com";
+$test_cloud_domain = "webmincloudexample.com";
+$test_cloud_rename_domain = "webmincloudrename.com";
+$test_cloud_subdomain = "dns.webmincloudexample.com";
 $test_ip_address = &get_default_ip();
 $test_user = "testy";
 $test_alias = "testing";
@@ -11709,19 +11710,19 @@ $googledns_tests = [
 	# Rename the domain
 	{ 'command' => 'rename-domain.pl',
 	  'args' => [ [ 'domain', $test_cloud_domain ],
-		      [ 'new-domain', $test_rename_domain ] ],
+		      [ 'new-domain', $test_cloud_rename_domain ] ],
 	},
 
 	# Validate that records still exist
 	{ 'command' => 'get-dns.pl',
 	  'args' => [ [ 'multiline' ],
-		      [ 'domain', $test_rename_domain ] ],
+		      [ 'domain', $test_cloud_rename_domain ] ],
 	  'grep' => [ 'testing1' ],
 	},
 
 	# Validate all features after the rename
 	{ 'command' => 'validate-domains.pl',
-	  'args' => [ [ 'domain' => $test_rename_domain ],
+	  'args' => [ [ 'domain' => $test_cloud_rename_domain ],
 		      [ 'all-features' ] ],
 	},
 
@@ -11732,6 +11733,7 @@ $googledns_tests = [
 	];
 
 $route53_tests = &convert_to_dnscloud($googledns_tests, "route53");
+$bunny_tests = &convert_to_dnscloud($googledns_tests, "bunny");
 
 $htpasswd_tests = [
 	# Create a domain with a website
@@ -12858,6 +12860,7 @@ $alltests = { '_config' => $_config_tests,
 	      'dnssub' => $dnssub_tests,
 	      'googledns' => $googledns_tests,
 	      'route53' => $route53_tests,
+	      'bunny' => $bunny_tests,
 	      'htpasswd' => $htpasswd_tests,
 	      'htpasswd_extra' => $htpasswd_tests_extra,
 	      'reset' => $reset_tests,
