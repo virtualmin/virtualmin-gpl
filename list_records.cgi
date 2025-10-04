@@ -106,8 +106,9 @@ RECORD: foreach $r (@$recs) {
 	if ($r->{'type'} =~ /^(A|AAAA|CNAME)$/ && $cloud && $cloud->{'proxy'}) {
 		if ($r->{'proxied'}) {
 			$pmsg = "<span data-type='proxied' ".
-		           	"data-text='$text{'records_typeprox'}'> ".
-		                "($text{'records_typeprox'})</span>";
+				"data-provider='$cloud->{'name'}' ".
+				"data-text='$text{'records_typeprox'}'> ".
+				"($text{'records_typeprox'})</span>";
 			}
 		else {
 			$pmsg = "<span data-type='not-proxied' ".
