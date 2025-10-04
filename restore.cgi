@@ -355,10 +355,10 @@ else {
 			       $in{'delete_existing'});
 	&run_post_actions();
 	if ($ok) {
-		print &text('restore_done'),"<p>\n";
+		print &text('restore_done');
 		}
 	else {
-		print &text('restore_failed'),"<p>\n";
+		print &text('restore_failed');
 		}
 	if ($origsrc eq "upload:") {
 		# Delete uploaded temp file
