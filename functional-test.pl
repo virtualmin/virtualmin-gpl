@@ -7569,6 +7569,13 @@ $nossl_tests = [
 		      @create_args, ],
         },
 
+	# Get the IP address
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'ip-only' ],
+		      [ 'domain', $test_domain ] ],
+	  'save' => 'PRIVATE_IP',
+	},
+
 	# Test SSL cert info
 	{ 'command' => 'get-ssl.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -7630,13 +7637,13 @@ $nossl_tests = [
 		       $webmin_proto.'://'.$test_domain.':'.
 		       $webmin_port.'/',
 	},
-	{ 'command' => 'openssl s_client -host '.$test_domain.
+	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
 		       ' -port '.$webmin_port.' </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
 	# Validate that Usermin cert works
-	{ 'command' => 'openssl s_client -host '.$test_domain.
+	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
 		       ' -port '.$usermin_port.' </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -7648,7 +7655,7 @@ $nossl_tests = [
 		      [ 'server', 'mail.'.$test_domain ],
 		      [ 'ssl' ] ],
 	},
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
 		       ' -port 993 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -7659,7 +7666,7 @@ $nossl_tests = [
 		      [ 'server', 'mail.'.$test_domain ],
 		      [ 'ssl' ] ],
 	},
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
 		       ' -port 465 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -7732,7 +7739,7 @@ $nossl_tests = [
 	},
 
 	# Test generated SSL cert
-	{ 'command' => 'openssl s_client -host '.$test_domain.
+	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'C=US', 'ST=California', 'L=Santa Clara',
 		      'O=Virtualmin', 'OU=Testing', 'CN='.$test_domain ],
