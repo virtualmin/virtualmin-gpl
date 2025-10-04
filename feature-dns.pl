@@ -5557,19 +5557,20 @@ else {
 return join("/", @r);
 }
 
-# expand_dns_record(name, &domain)
+# expand_dns_record(name, &domain|dname)
 # If a DNS record name is relative, expand it to the full domain name
 sub expand_dns_record
 {
 my ($name, $d) = @_;
+my $dom = ref($d) ? $d->{'dom'} : $d;
 if ($name eq '@') {
-	return $d->{'dom'}.'.';
+	return $dom.'.';
 	}
 elsif ($name =~ /\.$/) {
 	return $name;
 	}
 else {
-	return $name.'.'.$d->{'dom'}.'.';
+	return $name.'.'.$dom.'.';
 	}
 }
 
