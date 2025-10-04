@@ -1761,6 +1761,7 @@ RECORD: foreach my $r (@$aliasrecs) {
 			$v =~ s/\Q$oldip6\E$/$ip6/i;
 			}
 		}
+	next if ($nr->{'type'} eq 'AAAA' && !$ip6);	# Alias has no V6
 	$keep{&dns_record_key($nr, 1)} = 1;
 
 	# Create unless it already exists
