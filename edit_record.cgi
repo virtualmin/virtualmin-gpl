@@ -139,7 +139,8 @@ else {
 			}
 		$field .= " ".$vals[$i]->{'suffix'};
 		if ($cloud && $cloud->{'proxy'} &&
-		    $t->{'type'} =~ /^(A|AAAA|CNAME)$/) {
+		    $t->{'type'} =~ /^(A|AAAA|CNAME)$/ &&
+		    !grep { defined && (/^127\./ || /^::1/) } @{$r->{values}}) {
 			$pc = $in{'type'} ? $tmpl->{'dns_cloud_proxy'}
 					  : $r->{'proxied'};
 			$field .= "&nbsp;&nbsp;".&ui_checkbox("proxyit", 1,
