@@ -104,7 +104,7 @@ RECORD: foreach $r (@$recs) {
 		}
 	my $pmsg = "";
 	if ($r->{'type'} =~ /^(A|AAAA|CNAME)$/ && $cloud && $cloud->{'proxy'} &&
-	    !grep { defined && (/^127\./ || /^::1/) } @{ $r->{values} }) {
+	    $r->{'values'}->[0] !~ /^(127\.|::1)/) {
 		if ($r->{'proxied'}) {
 			$pmsg = "<span data-type='proxied' ".
 				"data-provider='$cloud->{'name'}' ".
