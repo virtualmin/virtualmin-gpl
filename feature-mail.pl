@@ -6324,6 +6324,8 @@ return undef;
 sub create_dns_autoconfig_records
 {
 my ($d, $autoconfig, $file, $recs) = @_;
+my $tmpl = &get_template($d->{'template'});
+my $proxied = $tmpl->{'dns_cloud_proxy'};
 $autoconfig .= ".";
 
 # Add A record for IPv4
@@ -6337,6 +6339,7 @@ if (!$cr) {
 		my $ip = $d->{'dns_ip'} || $d->{'ip'};
 		my $cr = { 'name' => $autoconfig,
 			   'type' => 'A',
+			   'proxied' => $proxied ? 1 : 0,
 			   'values' => [ $ip ] };
 		&create_dns_record($recs, $file, $cr);
 		$changed++;
@@ -6349,6 +6352,7 @@ if (!$cr) {
 		my $ip = $d->{'dns_ip6'} || $d->{'ip6'};
 		my $cr = { 'name' => $autoconfig,
 			   'type' => 'AAAA',
+			   'proxied' => $proxied ? 1 : 0,
 			   'values' => [ $ip ] };
 		&create_dns_record($recs, $file, $cr);
 		$changed++;
