@@ -4392,7 +4392,6 @@ if ($d->{'ip'}) {
 	my $vip = $config{'apache_star'} == 2 ? "*" :
 		     $config{'apache_star'} == 1 ? $d->{'ip'} :
 		     $d->{'name'} &&
-		       $apache::httpd_modules{'core'} >= 1.312 &&
 		       &is_shared_ip($d->{'ip'}) &&
 		       $nvstar ? "*" : $d->{'ip'};
 	push(@vips, "$vip:$port");
