@@ -7763,6 +7763,16 @@ $shared_tests = [
 	  'save' => 'SHARED_IP',
 	},
 
+	# Allocate a shared IPv6
+	{ 'command' => 'create-shared-address.pl',
+	  'args' => [ [ 'allocate-ip6' ], [ 'activate' ] ],
+	},
+
+	# Get the IPv6
+	{ 'command' => 'list-shared-addresses.pl --ipv6 --no-ipv4 --name-only | tail -1',
+	  'save' => 'SHARED_IP6',
+	},
+
 	# Create a domain on the shared IP
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -7800,11 +7810,42 @@ $shared_tests = [
 	# Remove the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Create a domain on the shared IPv6
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test shared domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
+		      [ 'logrotate' ],
+		      [ 'shared-ip6', '$SHARED_IP6' ],
+		      [ 'content' => 'Test shared home page' ],
+		      @create_args, ],
+        },
+
+	# Test DNS and website
+	{ 'command' => 'host -t AAAA '.$test_domain,
+	  'grep' => '$SHARED_IP6',
+	},
+	{ 'command' => $wget_command.' -6 http://'.$test_domain,
+	  'grep' => 'Test shared home page',
+	},
+
+	# Remove the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1 },
 
 	# Remove the shared IP
 	{ 'command' => 'delete-shared-address.pl',
 	  'args' => [ [ 'ip', '$SHARED_IP' ], [ 'deactivate' ] ],
+	  'cleanup' => 1,
+	},
+
+	# Remove the shared IPv6
+	{ 'command' => 'delete-shared-address.pl',
+	  'args' => [ [ 'ip6', '$SHARED_IP6' ], [ 'deactivate' ] ],
 	  'cleanup' => 1,
 	},
 	];
