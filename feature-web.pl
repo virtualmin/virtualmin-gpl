@@ -4384,6 +4384,11 @@ else {
 sub get_apache_vhost_ips
 {
 my ($d, $nvstar, $nvstar6, $port) = @_;
+if (!$nvstar || !$nvstar6) {
+	# If either of the IPv4 or v6 addresses is in the Virtualhost, then
+	# both of them need to be
+	$nvstar = $nvstar6 = 0;
+	}
 my $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 $port ||= $d->{'web_port'};
 &require_apache();
