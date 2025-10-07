@@ -189,7 +189,7 @@ if ($crmode == 1) {
 	# Create new domains with only selected features?
 	print &ui_table_row(
 		&hlink($text{'restore_onlyfeats'}, "restore_onlyfeats"),
-		&ui_yesno_radio("onlyfeats", 1));
+		&ui_yesno_radio("onlyfeats", 0));
 
 	# IP address for restored domains
 	@cantmpls = ( &get_template(0) );
