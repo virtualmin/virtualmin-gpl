@@ -186,6 +186,11 @@ if ($crmode == 1) {
 	print &ui_table_row(&hlink($text{'restore_delete'}, "restore_delete"),
 			    &ui_yesno_radio("delete_existing", 0));
 
+	# Create new domains with only selected features?
+	print &ui_table_row(
+		&hlink($text{'restore_onlyfeats'}, "restore_onlyfeats"),
+		&ui_yesno_radio("onlyfeats", 1));
+
 	# IP address for restored domains
 	@cantmpls = ( &get_template(0) );
 	if (&can_select_ip()) {

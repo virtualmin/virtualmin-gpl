@@ -350,7 +350,7 @@ else {
 		print &text('restore_doing2', scalar(@vbs), $nice),"<p>\n";
 		}
 	$ok = &restore_domains($src, \@doms, \@do_features, \%options, \@vbs,
-			       0, $ipinfo, !$safe_backup,
+			       $in{'onlyfeats'}, $ipinfo, !$safe_backup,
 			       $in{'skipwarnings'}, $key, $in{'continue'},
 			       $in{'delete_existing'});
 	&run_post_actions();
