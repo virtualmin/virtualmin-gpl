@@ -1852,11 +1852,7 @@ if ($virt) {
 	&link_apache_logs($d);
 
 	# Fix Options lines
-	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-							$d->{'web_port'});
-	if ($virt) {
-		&fix_options_directives($vconf, $conf, 0);
-		}
+	&fix_options_directives($vconf, $conf, 0);
 
 	# Handle case where there are DAV directives, but it isn't enabled
 	&remove_dav_directives($d, $virt, $vconf, $conf);
