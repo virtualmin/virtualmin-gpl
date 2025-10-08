@@ -451,6 +451,7 @@ my ($d) = @_;
 
 # Get the Dovecot config and cert files
 &foreign_require("dovecot");
+undef(@dovecot::get_config_cache); 
 my $configfile = &dovecot::get_config_file();
 &lock_file($configfile);
 my $dovedir = $configfile;
