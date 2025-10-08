@@ -859,6 +859,8 @@ if ($virt) {
 			'type' => 1,
 			'members' => \@mems };
 	&apache::save_directive_struct($virt, $newvirt, $conf, $conf);
+	$virt = $newvirt;
+	$vconf = $virt->{'members'};
 
 	# Fix up any DocumentRoot or other file-related directives
 	if ($oldd->{'home'} && $oldd->{'home'} ne $d->{'home'}) {

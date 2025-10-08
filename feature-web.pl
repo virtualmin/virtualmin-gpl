@@ -1679,6 +1679,8 @@ if ($virt) {
 			'type' => 1,
 			'members' => \@mems };
 	&apache::save_directive_struct($virt, $newvirt, $conf, $conf);
+	$virt = $newvirt;
+	$vconf = $virt->{'members'};
 
 	if ($allopts->{'reuid'}) {
 		# Fix up any UID or GID in suexec lines
