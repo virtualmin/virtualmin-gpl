@@ -2416,6 +2416,7 @@ return -1 if (!&foreign_installed("dovecot"));
 my $ver = &dovecot::get_dovecot_version();
 return -1 if ($ver < 2);
 
+undef(@dovecot::get_config_cache); 
 my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
 
