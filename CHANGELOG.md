@@ -1,9 +1,14 @@
 #### Version 7.50.0
 * Add support for Bunny DNS for Virtualmin Pro users
+* Add improvements to external IPv4 and IPv6 address detection
 * Add improvements and simplifications to the post-installation wizard
+* Add pure-Perl implementation for retrieving SSL certificate information
+* Fix to significantly improve support for IPv6 across different services
+* Fix Apache and Dovecot config issues when restoring the backup
 * Fix not to smoosh DNS TXT records together when using CLI [#1104](https://github.com/virtualmin/virtualmin-gpl/issues/1104)
 * Fix to disallow out-of-domain DNS records when using CLI
 * Fix to correctly add IPv6 to SSL virtual hosts
+* Fix incorrect logic when checking IPv4 and IPv6 addresses in the config check
 
 #### Version 7.40.1
 * Add an API for plugins to exclude specific directories from backups
