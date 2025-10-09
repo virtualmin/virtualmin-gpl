@@ -407,4 +407,5 @@ local $merr = &made_changes();
 &reset_domain_envs($d);
 &webmin_log("newip", "domain", $d->{'dom'}, $d);
 
-&ui_print_footer(&domain_footer_link($d));
+&ui_print_footer("newip_form.cgi?dom=$in{'dom'}", $text{'newip_return'},
+		 &domain_footer_link($d));
