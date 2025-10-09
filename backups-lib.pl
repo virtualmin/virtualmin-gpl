@@ -3280,12 +3280,12 @@ if (@wasmissing) {
 	if (@phpbad) {
 		# Some scripts needed missing PHP versions!
 		my $badlist = "⚠ ".$text{'restore_phpbad'}."<br>\n";
-		foreach my $b (@phpbad) {
-			$badlist .= "&nbsp;• ".&text(
-				'restore_phpbad2',
-				    "<tt>".&show_domain_name($b->[0])."</tt>",
-				$b->[2]->{'desc'}, $b->[3])."\n";
-			}
+		$badlist .= join "<br>\n",
+			map { "&nbsp;• ".
+				&text('restore_phpbad2',
+				      "<tt>".&show_domain_name($_->[0])."</tt>",
+				      $_->[2]->{'desc'}, $_->[3] ) 
+			} @phpbad;
 		&$second_print($badlist);
 		}
 	}
