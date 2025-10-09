@@ -4199,6 +4199,7 @@ newips6_eold=Old IPv6 address is not in the correct format
 newips6_enew=New IPv6 address is not in the correct format
 
 newip_title=Change IP Address
+newip_return=change IP address
 newip_header=New virtual IP address
 newip_ecannot=You are not allowed to change the IP address for this server
 newip_desc=This page allows you to change the dedicate virtual IP address for this server, if it has one. The virtual interface will also be updated, so be sure to enter an address that is on the same subnet as the system's primary interface. You can also use this page to update the ports that the website for this virtual server uses.

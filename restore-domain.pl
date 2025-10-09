@@ -54,8 +54,9 @@ C<--virtualmin config> would only restore the module configuration.
 When restoring a virtual server that originally had a private IP address,
 the same address will be used by default. However, this may not be what you
 want if you are restoring a domain on a different system that is not on the
-same network. To use a different IP address, the C<--ip> flag can be given
-followed by an address. Or you can use the C<--allocate-ip> flag to have
+same network. To use the system's default shared IP address the C<--default-ip>
+flag should be given. To use a different IP address, the C<--ip> flag can be
+given followed by an address. Or you can use the C<--allocate-ip> flag to have
 Virtualmin select one automatically, assuming that an allocation range is
 defined in the template used.
 
@@ -71,7 +72,7 @@ shared addresses, a different one can be selected with the C<--shared-ip>
 flag followed by an address.
 
 Flags similar to all those above also exist for IPv6, if your system supports
-it. The equivalent flags are named C<--ip6>, C<--allocate-ip6>,
+it. The equivalent flags are named C<--default-ip6>, C<--ip6>, C<--allocate-ip6>,
 C<--original-ip6> and C<--shared-ip6> respectively. You can also use C<--no-ip6>
 to turn off IPv6 for the domain entirely, even if it was enabled when the
 backup was taken.
@@ -217,6 +218,11 @@ while(@ARGV > 0) {
 		}
 
 	# Alternate IPv4 options
+	elsif ($a eq "--default-ip") {
+		$ipinfo = { %$ipinfo,
+			    'virt' => 0, 'ip' => &get_default_ip(),
+			    'virtalready' => 0, 'mode' => 0 };
+		}
 	elsif ($a eq "--shared-ip") {
 		$sharedip = shift(@ARGV);
 		&indexof($sharedip, &list_shared_ips()) >= 0 ||
@@ -492,7 +498,8 @@ print "                         [--fix]\n";
 print "                         [--option \"feature name value\"]\n";
 print "                         [--all-virtualmin] | [--virtualmin config]\n";
 print "                         [--only-features]\n";
-print "                         [--shared-ip address | --ip address |\n";
+print "                         [--default-ip |\n";
+print "                          --shared-ip address | --ip address |\n";
 print "                          --allocate-ip | --original-ip]\n";
 print "                         [--default-ip6 |\n";
 print "                          --shared-ip6 address | --ip6 address |\n";
