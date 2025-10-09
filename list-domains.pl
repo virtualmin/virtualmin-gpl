@@ -760,6 +760,13 @@ if ($multiline) {
 			print "    SSL provider type: ",
 			      ($acme->{'type'} || $acme->{'url'}),"\n";
 			}
+		if (defined($d->{'letsencrypt_connectivity'})) {
+			print "    SSL provider connectivity check: ",
+			    ($d->{'letsencrypt_connectivity'} == 2 ?
+				"Check connectivity" :
+			     $d->{'letsencrypt_connectivity'} == 1 ?
+				"Validate domain" : "None"),"\n";
+			}
 
 		# Show SSL cert usage by other services
 		if ($multiline == 1) {
