@@ -23,10 +23,13 @@ with C<--email-error>, or never with C<--email-never>.
 To have Virtualmin attempt to verify external Internet connectivity to your
 domain before requesting the certificate, use the C<--check-first> flag. This
 will detect common errors before your ACME provider service quota is consumed.
+Or to prevent a connectivity check if it is enabled by default for the domain,
+use the C<--no-check-first> flag.
 
 To have Virtualmin perform a local validation check of the domain, use the
 C<--validate-first> flag. This is automatically enabled when C<--check-first>
-is set.
+is set. To prevent validation if it is enabled by default for the domain,
+use the C<--no-validate-first> flag.
 
 By default Virtualmin will attempt to perform an external DNS lookup of all
 domain names that the certificate is requested for, to make sure they can be
@@ -95,8 +98,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--check-first") {
 		$connectivity = 1;
 		}
+	elsif ($a eq "--no-check-first") {
+		$connectivity = 0;
+		}
 	elsif ($a eq "--validate-first") {
 		$validation = 1;
+		}
+	elsif ($a eq "--no-validate-first") {
+		$validation = 0;
 		}
 	elsif ($a eq "--skip-dns-check") {
 		$nodnscheck = 1;
@@ -187,6 +196,14 @@ my @cdoms = ( $d );
 if (!$d->{'alias'} && !$custom_dname) {
 	push(@cdoms, grep { &domain_has_website($_) }
 			  &get_domain_by("alias", $d->{'id'}));
+	}
+
+# Check saved connectivity mode for this domain, unless over-ridden
+if (!defined($connectivity)) {
+	$connectivity = $d->{'letsencrypt_connectivity'} == 2 ? 1 : 0;
+	}
+if (!defined($validation)) {
+	$validation = $d->{'letsencrypt_connectivity'} ? 1 : 0;
 	}
 
 # Check for external connectivity first
@@ -302,6 +319,8 @@ else {
 	$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
 	$d->{'letsencrypt_subset'} = $subset;
 	$d->{'letsencrypt_email'} = $email;
+	$d->{'letsencrypt_connectivity'} = $connectivity ? 2 :
+					   $validation ? 1 : 0;
 	delete($d->{'letsencrypt_last_err'});
 	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);
@@ -355,7 +374,8 @@ print "                             [--default-hosts]\n";
 print "                             [--renew]\n";
 print "                             [--size bits]\n";
 print "                             [--staging]\n";
-print "                             [--check-first | --validate-first]\n";
+print "                             [--check-first | --validate-first |\n";
+print "                              --no-check-first | --no-validate-first]\n";
 print "                             [--skip-dns-check | --dns-check]\n";
 print "                             [--allow-subset]\n";
 print "                             [--email-always |\n";
