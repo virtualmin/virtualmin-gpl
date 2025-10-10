@@ -1182,6 +1182,7 @@ foreach $f (&list_feature_plugins()) {
 print "                        [--skip-warnings]\n";
 print "                        [--acme]\n";
 print "                        [--acme-always]\n";
+print "                        [--acme-never]\n";
 print "                        [--field-name value]*\n";
 print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
