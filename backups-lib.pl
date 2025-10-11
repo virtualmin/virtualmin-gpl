@@ -2156,17 +2156,25 @@ else {
 
 # If re-creating with only some features, drop those that are chained from
 # inactive features
-my %unchained;
+my (%unchained, %rechained);
 my @bplugins = &list_backup_plugins();
 if ($onlyfeats) {
 	foreach my $f (@backup_features, @bplugins) {
 		foreach my $c (&can_chained_feature($f)) {
+			print STDERR "f=$f c=$c\n";
 			if (&indexof($f, @$features) >= 0 &&
 			    &indexof($c, @$features) < 0) {
 				# A feature like logrotate depends on a feature
 				# like web that is not enabled
 				@$features = grep { $_ ne $f } @$features;
 				$unchained{$f} = 1;
+				}
+			elsif (&indexof($f, @$features) < 0 &&
+			       &indexof($c, @$features) >= 0) {
+				# A feature like ssl which was not enabled
+				# depends on a feature like web which is
+				push(@$features, $f);
+				$rechained{$f} = 1;
 				}
 			}
 		}
@@ -2474,6 +2482,9 @@ if ($ok) {
 						}
 					if ($unchained{$f}) {
 						$d->{$f} = 0;
+						}
+					if ($rechained{$f}) {
+						$d->{$f} = 1;
 						}
 					}
 				}
