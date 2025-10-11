@@ -199,11 +199,13 @@ if (!$d->{'alias'} && !$custom_dname) {
 	}
 
 # Check saved connectivity mode for this domain, unless over-ridden
+my $dconn = $d->{'letsencrypt_connectivity'} //
+	    $tmpl->{'ssl_connectivity'};
 if (!defined($connectivity)) {
-	$connectivity = $d->{'letsencrypt_connectivity'} == 2 ? 1 : 0;
+	$connectivity = $dconn == 2 ? 1 : 0;
 	}
 if (!defined($validation)) {
-	$validation = $d->{'letsencrypt_connectivity'} ? 1 : 0;
+	$validation = $dconn ? 1 : 0;
 	}
 
 # Check for external connectivity first

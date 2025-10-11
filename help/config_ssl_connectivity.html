@@ -1,0 +1,14 @@
+<header>Check before certificate request</header>
+
+This option determines what connectivity checks are performed by default
+when requesting an SSL certificate from a provider, to avoid failed requests
+for domains that are not properly configured. The options are : <p>
+
+<ul>
+<li><b>Test connectivity</b> - Test that the domain can accept HTTP connections from the rest of the internet, using Virtualmin's connectivity check service.
+<li><b>Validate domain</b> - Run Virtualmin's config validation checks for the website and DNS records.
+<li><b>Skip tests</b> - No testing is done.
+</ul>
+
+<footer>
+

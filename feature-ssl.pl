@@ -3938,6 +3938,18 @@ print &ui_table_row(
 	    [ 1, $text{'yes'} ],
 	    [ 0, $text{'no'} ] ]));
 
+# Default validation mode before SSL cert request
+if (defined(&check_domain_connectivity)) {
+	print &ui_table_row(
+	    &hlink($text{'newweb_ssl_connectivity'}, "config_ssl_connectivity"),
+	    &ui_radio("ssl_connectivity",
+	      $tmpl->{'ssl_connectivity'},
+	      [ $tmpl->{'default'} ? ( ) : ( [ '', $text{'tmpl_default'} ] ),
+	        [ 2, $text{'cert_connectivity2'} ],
+	        [ 1, $text{'cert_connectivity1'} ],
+	        [ 0, $text{'cert_connectivity0'} ] ]));
+	}
+
 # Generate TLSA DNS records?
 print &ui_table_row(
 	&hlink($text{'newweb_tlsa_records'}, "config_tlsa_records"),
@@ -4024,6 +4036,9 @@ if (defined($in{'web_acme'})) {
 $tmpl->{'ssl_auto_letsencrypt'} = $in{'ssl_auto_letsencrypt'};
 $tmpl->{'ssl_letsencrypt_wild'} = $in{'ssl_letsencrypt_wild'};
 $tmpl->{'ssl_allow_subset'} = $in{'ssl_allow_subset'};
+if (defined($in{'ssl_connectivity'})) {
+	$tmpl->{'ssl_connectivity'} = $in{'ssl_connectivity'};
+	}
 if ($in{'ssl_renew_letsencrypt_def'}) {
 	delete($tmpl->{'ssl_renew_letsencrypt'});
 	}
