@@ -293,15 +293,20 @@ foreach $as (sort { $a->[0]->{'dom'} cmp $b->[0]->{'dom'} } @all_scripts) {
 	$path = $sinfo->{'opts'}->{'path'};
 	($status, $canup) = &describe_script_status($sinfo, $script);
 	push(@all_table,
-	     [ &show_domain_name($d),
-	       $desc_full,
-	       $script->{'vdesc'}->{$sinfo->{'version'}} ||
-		  $sinfo->{'version'},
-	       $sinfo->{'url'} && !$sinfo->{'deleted'} ? 
-		  "<a href='$sinfo->{'url'}' target=_blank>$path</a>" :
-		  $path,
-	       !$script->{'desc'} ? &ui_text_color($text{'scripts_discontinued'}, 'danger') :
-	                            script_migrated_status($status, $script->{'migrated'}, $canup),
+	     [
+		&show_domain_name($d),
+		$desc_full,
+		$script->{'vdesc'}->{$sinfo->{'version'}} || $sinfo->{'version'},
+		$sinfo->{'url'} && !$sinfo->{'deleted'}
+			? "<a href='$sinfo->{'url'}' target=_blank>$path</a>"
+			: $path,
+		!$script->{'desc'}
+			? &ui_text_color(
+			      $text{'scripts_discontinued'}."&nbsp;".
+			          &ui_help($text{'scripts_discontinued_desc'}),
+			      'danger')
+			: &script_migrated_status($status,
+				$script->{'migrated'}, $canup),
 	     ]);
 	}
 print &ui_columns_table(

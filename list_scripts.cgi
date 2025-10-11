@@ -60,16 +60,22 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 		 "script=$sinfo->{'id'}'>$desc</a>" : $sinfo->{'name'};
 	my $sversion = $script->{'vdesc'}->{$sinfo->{'version'}} || $sinfo->{'version'};
 	$sversion =~ s/\.$//;
-	push(@table, [
+	push(@table,
+	    [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $sinfo->{'id'}, 'disabled' => !$script->{'desc'} },
 		$desc_full,
 		$sversion,
 		!$sinfo->{'deleted'} ? &get_script_link($d, $sinfo) : $path,
 		$dbdesc,
-		!$script->{'desc'} ? &ui_text_color($text{'scripts_discontinued'}, 'danger') :
-		                     script_migrated_status($status, $script->{'migrated'}, $canup),
-		]);
+		!$script->{'desc'}
+			? &ui_text_color(
+				$text{'scripts_discontinued'}."&nbsp;".
+				   &ui_help($text{'scripts_discontinued_desc'}),
+				'danger')
+			: &script_migrated_status($status,
+				$script->{'migrated'}, $canup),
+	    ]);
 	}
 
 # Show table of scripts
