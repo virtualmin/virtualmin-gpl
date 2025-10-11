@@ -308,6 +308,7 @@ else {
 	&install_letsencrypt_cert($d, $cert, $key, $chain);
 
 	# Save renewal state
+	&lock_domain($d);
 	$d->{'letsencrypt_dname'} = $custom_dname;
 	$d->{'letsencrypt_last'} = time();
 	$d->{'letsencrypt_last_success'} = time();
@@ -324,6 +325,7 @@ else {
 	delete($d->{'letsencrypt_last_err'});
 	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);
+	&unlock_domain($d);
 
 	# Update other services using the cert
 	&update_all_domain_service_ssl_certs($d, \@beforecerts);
