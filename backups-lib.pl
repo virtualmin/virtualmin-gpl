@@ -2154,6 +2154,24 @@ else {
 	$backup = $file;
 	}
 
+# If re-creating with only some features, drop those that are chained from
+# inactive features
+my %unchained;
+my @bplugins = &list_backup_plugins();
+if ($onlyfeats) {
+	foreach my $f (@backup_features, @bplugins) {
+		foreach my $c (&can_chained_feature($f)) {
+			if (&indexof($f, @$features) >= 0 &&
+			    &indexof($c, @$features) < 0) {
+				# A feature like logrotate depends on a feature
+				# like web that is not enabled
+				@$features = grep { $_ ne $f } @$features;
+				$unchained{$f} = 1;
+				}
+			}
+		}
+	}
+
 local $restoredir;
 local %homeformat;
 if ($ok) {
@@ -2402,7 +2420,6 @@ if ($ok) {
 
 	# Now restore each of the domain/feature files
 	local $d;
-	local @bplugins = &list_backup_plugins();
 	DOMAIN: foreach $d (sort { $a->{'parent'} <=> $b->{'parent'} ||
 				   $a->{'alias'} <=> $b->{'alias'} } @$doms) {
 
@@ -2453,6 +2470,9 @@ if ($ok) {
 				foreach my $f (@backup_features, @bplugins) {
 					if ($d->{$f} &&
 					    &indexof($f, @$features) < 0) {
+						$d->{$f} = 0;
+						}
+					if ($unchained{$f}) {
 						$d->{$f} = 0;
 						}
 					}
