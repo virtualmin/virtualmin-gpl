@@ -2158,7 +2158,8 @@ else {
 # inactive features
 my (%unchained, %rechained);
 my @bplugins = &list_backup_plugins();
-if ($onlyfeats) {
+my @anymissing = grep { $_->{'missing'} } @$doms;
+If ($onlyfeats && @anymissing) {
 	foreach my $f (@backup_features, @bplugins) {
 		foreach my $c (&can_chained_feature($f)) {
 			if (&indexof($f, @$features) >= 0 &&
