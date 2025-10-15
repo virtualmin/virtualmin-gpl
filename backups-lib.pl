@@ -2161,7 +2161,6 @@ my @bplugins = &list_backup_plugins();
 if ($onlyfeats) {
 	foreach my $f (@backup_features, @bplugins) {
 		foreach my $c (&can_chained_feature($f)) {
-			print STDERR "f=$f c=$c\n";
 			if (&indexof($f, @$features) >= 0 &&
 			    &indexof($c, @$features) < 0) {
 				# A feature like logrotate depends on a feature
