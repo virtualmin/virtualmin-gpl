@@ -361,6 +361,7 @@ sub delete_web
 {
 my ($d) = @_;
 &require_apache();
+undef(@apache::get_config_cache) if $d->{'defaulthostdomain'};
 if ($d->{'alias_mode'}) {
 	# Just delete ServerAlias directives from parent
 	&$first_print($text{'delete_apachealias'});
