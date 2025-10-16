@@ -479,6 +479,7 @@ local ($d) = @_;
 &require_apache();
 &$first_print($text{'delete_ssl'});
 &obtain_lock_web($d);
+undef(@apache::get_config_cache) if $d->{'defaulthostdomain'};
 local $conf = &apache::get_config();
 
 # Remove the custom Listen directive added for the domain, if any

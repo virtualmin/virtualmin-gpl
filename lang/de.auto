@@ -8,7 +8,10 @@ edit_nodnsip6=IPv6 nicht aktiviert
 
 save_ednsip6=Fehlende oder ungültige externe IPv6-Adresse
 
+enable_tooltip=Virtueller Server ist deaktiviert
+
 newweb_allow_subset=Nicht überprüfbare Domänennamen ausschließen?
+newweb_ssl_connectivity=Prüfung vor Zertifikatsanforderung
 
 check_dnsip1v6=Die externe IPv6-Adresse für DNS-Einträge ist auf $1 eingestellt, was mit der erkannten externen Adresse übereinstimmt
 check_dnsip2v6=Die Standard-IPv6-Adresse ist auf $1 eingestellt, was der erkannten externen Adresse entspricht
@@ -32,6 +35,8 @@ backup_niceazt=Azure Blob Storage
 
 backup_eplugin_domain=Sie dürfen diese Domäne nicht sichern
 
+restore_onlyfeats=Nur ausgewählte Funktionen wiederherstellen?
+
 cert_also_title=Wird auch verwendet von
 cert_also_desc1=1 Domäne
 cert_also_desc2=$1 Domänen
@@ -47,11 +52,17 @@ tmpl_erealdomslimit=Fehlende oder ungültige Standardbegrenzung für die Anzahl 
 tmpl_mail_mta_sts=MTA-STS für neue Domänen aktivieren?
 tmpl_php_fpmtype=Standardmäßiger PHP-FPM-Prozessmanagermodus
 
+newip_return=IP-Adresse ändern
+
 resel_defdnsip6=Externe IPv6-Adresse für namensbasierte Server
 resel_edefdnsip6=Fehlende oder ungültige externe IPv6-Adresse
 
+licence_manager_hostid=Host-ID
+licence_manager_hostid_desc=Diese eindeutige Serverkennung basiert auf der Hardware und dem Betriebssystem Ihres Systems. Sie bindet Ihre Virtualmin Pro-Lizenz an diesen Rechner und kann daher nicht auf mehreren Servern verwendet werden. Bei größeren Änderungen an der Hardware oder dem Betriebssystem kann es bis zu 48 Stunden dauern, bis der Lizenzserver die Änderung erkennt und Ihre Lizenz erneut validiert.
+
 scripts_softwaremodperlreq=Das erforderliche Perl-Paket $1 wird installiert ..
 scripts_softwaremodperlrec=Empfohlenes Perl-Paket $1 wird installiert ..
+scripts_discontinued_desc=Diese Web-App kann nicht mehr installiert werden. Sie wurde entweder eingestellt oder ist in der Virtualmin GPL-Version nicht verfügbar
 
 scripts_kit_estype_multi=Mehrere Instanzen des Typs „$1“ sind unter den folgenden Pfaden verfügbar:
 scripts_kit_estype_multi2=Verwenden Sie den Hilfsparameter „--app-path“, um die genaue zu verwendende Instanz anzugeben
@@ -103,6 +114,14 @@ spf_cloudns=NS-Einträge des Cloud-Anbieters
 s3_need_cli2=Der zum Erstellen von S3-Backups erforderliche AWS CLI-Befehl wurde auf Ihrem System nicht gefunden.
 s3_need_cli3=<a href='$1'>Klicken Sie hier</a>, um es automatisch installieren zu lassen, oder laden Sie es von <a href='https://aws.amazon.com/cli/' target=_blank>https://aws.amazon.com/cli/</a> herunter.
 s3_missing_cli=Der AWS CLI-Befehl ist auf diesem System nicht installiert
+
+sharedips_alloc6=Zuweisen einer neuen gemeinsamen IPv6-Adresse
+sharedips_ealloc6=Im Zuordnungsbereich $1 wurden keine freien IPv6-Adressen gefunden
+sharedips_eboot6=Bootzeit oder aktive Konfiguration für IPv6-Adresse konnte nicht gefunden werden
+
+newdynip_iface6=IPv6-Adresse der primären Schnittstelle
+newdynip_external6=Extern sichtbare IPv6-Adresse
+newdynip_eext6=Die extern sichtbare IPv6-Adresse konnte nicht ermittelt werden
 
 maillog_cls=Urteil
 maillog_cspam=Spam
@@ -158,3 +177,7 @@ dnscloud_bunny_apikey=Bunny DNS API-Schlüssel
 dnscloud_bunny_eapikey=Fehlender oder ungültig aussehender Bunny-API-Schlüssel
 dnscloud_bunny_ecreds=Der Bunny DNS API-Schlüssel ist falsch : $1
 bunny_edomainavail=Die DNS-Domäne wird bereits verwendet
+
+api_ndom_invalid_dns_ip6=Auf die Option „dns-ip6“ muss eine IPv6-Adresse folgen
+
+syslog_procmail=Procmail-Protokolldatei

@@ -441,6 +441,7 @@ enable_bind_cloud=Aktiverer DNS-sone på $1 ..
 enable_ebind_cloud=.. mislyktes : $1 
 enable_disabled=funksjonshemmet
 enable_return=deaktiver serverskjema
+enable_tooltip=Virtuell server er deaktivert
 
 newweb_sslprotos=Apache SSL-protokoller å tillate
 newweb_sslprotos_def=Ikke tillat alle usikre protokoller
@@ -491,6 +492,7 @@ newweb_combined_cert2=Kombinert sertifikat og CA-fil
 newweb_combined_cert1=Kun sertifikatfil
 newweb_combined_cert0=Bestem deg automatisk
 newweb_allow_subset=Ekskludere ikke-verifiserbare domenenavn?
+newweb_ssl_connectivity=Sjekk før sertifikatforespørsel
 
 feature_ssl=Apache SSL-nettsted
 
@@ -771,6 +773,7 @@ backup_purgecan=.. samsvarer med mønsteret $1 og er $2 dager gammelt
 
 restore_reuser=Vil du tildele bruker- og gruppenavn på nytt?
 restore_reuser2=Genererer du fullstendige brukernavn på nytt?
+restore_onlyfeats=Gjenopprette bare valgte funksjoner?
 restore_contents=Kontrollerer innholdet i sikkerhetskopien ..
 restore_gotcontents2=.. fant $1 virtuelle servere og $2 globale virtualmin-innstillinger
 restore_gotcontents=.. fant $1 virtuelle servere
@@ -1080,6 +1083,8 @@ newips_mode1=Ekstern adresse brukt i DNS-poster
 newips6_eold=Den gamle IPv6-adressen er ikke i riktig format
 newips6_enew=Ny IPv6-adresse er ikke i riktig format
 
+newip_return=endre IP-adresse
+
 newresels_email=Ny forhandler e-post
 newresels_emaildesc=Rediger e-postmeldingen som eventuelt kan sendes til den nye forhandlerens e-postadresse etter opprettelse.
 
@@ -1141,6 +1146,8 @@ licence_manager_desc=Denne siden vil vise serienøkkelen og status for gjeldende
 licence_manager_menu=Virtualmin License Manager
 licence_manager_status=Lisensstatus
 licence_manager_count=Antall domener
+licence_manager_hostid=Verts-ID
+licence_manager_hostid_desc=Denne unike serveridentifikatoren er basert på systemets maskinvare og operativsystem. Den knytter Virtualmin Pro-lisensen din til denne maskinen, slik at den ikke kan brukes på flere servere. Hvis du gjør store endringer i maskinvare eller operativsystem, kan det ta opptil 48 timer før lisensserveren gjenkjenner endringen og validerer lisensen din på nytt.
 licence_manager_expiry=Utløpsdato
 licence_manager_ucount=Ubegrenset
 licence_manager_checked=Sist sjekket
@@ -1291,6 +1298,7 @@ scripts_failedpackage=.. mislyktes. Senere trinn i installasjonen av denne webap
 scripts_abandoned2=Denne webappen støttes ikke lenger og vil ikke motta sikkerhetsoppdateringer.
 scripts_abandoned1=Versjon $1 av denne webappen støttes ikke lenger og vil ikke motta sikkerhetsoppdateringer.
 scripts_discontinued=Utgått
+scripts_discontinued_desc=Denne nettappen er ikke lenger tilgjengelig for installasjon. Den er enten avviklet eller ikke tilgjengelig i Virtualmin GPL-versjonen
 scripts_can=Tilgjengelig i
 scripts_gpl_to_pro=Nå bare tilgjengelig i Pro
 scripts_gpl_to_pro_upgrade=Oppgradering for denne webappen er nå bare tilgjengelig i Pro
@@ -1789,7 +1797,14 @@ tdelete_edeftop=Standardmalen kan ikke være standard for underservere
 showpass_dbmysql=MySQL-bruker
 showpass_dbpostgres=PostgreSQL-bruker
 
+sharedips_alloc6=Tildel en ny delt IPv6-adresse
+sharedips_ealloc6=Ingen ledige IPv6-adresser ble funnet i allokeringsområdet $1
+sharedips_eboot6=Finner ikke oppstartstid eller aktiv konfigurasjon for IPv6-adressen
+
 newdynip_update=Oppdatere virtuelle servere ved endring av IP?
+newdynip_iface6=Primær grensesnitts IPv6-adresse
+newdynip_external6=Eksternt synlig IPv6-adresse
+newdynip_eext6=Klarte ikke å finne ut den eksternt synlige IPv6-adressen
 newdynip_eexternal=I ekstern skriptmodus må hele banen til et skript som skal kjøres legges inn
 newdynip_eexternal2=I Webmin-modus må vertsnavnet eller vertsnavn:porten til en Webmin-server angis
 
@@ -2819,6 +2834,7 @@ api_ndom_feature_not_enabled=Alternativet '$1' kan ikke brukes med mindre funksj
 api_ndom_no_default_ipv6=Systemet har ikke en standard IPv6-adresse
 api_ndom_ip6_not_in_shared_list='$1' er ikke i den delte IP-adresselisten
 api_ndom_invalid_dns_ip='dns-ip'-alternativet må følges av en IP-adresse
+api_ndom_invalid_dns_ip6=Alternativet «dns-ip6» må etterfølges av en IPv6-adresse
 api_ndom_invalid_database_name=Ugyldig databasenavn
 api_ndom_invalid_forwarding_address=Ugyldig videresendingsadresse
 api_ndom_unknown_template_name=Ukjent malnavn
@@ -2869,3 +2885,5 @@ api_ndom_feature_not_allowed=Funksjonen '$1' er ikke tillatt for virtuell server
 api_ndom_possible_problems_detected=Følgende mulige problemer ble oppdaget:
 api_ndom_overquota_error=$1
 api_ndom_creation_failed=Opprettelsen mislyktes: $1
+
+syslog_procmail=Procmail-loggfil

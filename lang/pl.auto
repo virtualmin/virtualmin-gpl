@@ -47,6 +47,8 @@ save_ednsip6=Brakujący lub nieprawidłowy zewnętrzny adres IPv6
 save_protected0=Wyłączanie ochrony zabezpieczającej ..
 save_protected1=Włączanie ochrony zabezpieczającej ..
 
+enable_tooltip=Serwer wirtualny jest wyłączony
+
 newweb_acme=Domyślny dostawca certyfikatu SSL
 newweb_rhost=Dla nazwy hosta
 newweb_rany=Każdy
@@ -69,6 +71,7 @@ newweb_combined_cert2=Połączony plik certyfikatu i urzędu certyfikacji
 newweb_combined_cert1=Tylko plik certyfikatu
 newweb_combined_cert0=Podejmuj decyzję automatycznie
 newweb_allow_subset=Wykluczyć niemożliwe do zweryfikowania nazwy domen?
+newweb_ssl_connectivity=Sprawdź przed żądaniem certyfikatu
 
 losing_dir2=Katalog domowy tego wirtualnego podserwera, zawierający wszystkie dane witryny i inne pliki, zostanie usunięty.
 losing_dir4=Katalog domowy tego aliasu, zawierający dane i inne pliki użytkowników, zostanie usunięty.
@@ -108,6 +111,8 @@ backup_eplugin_domain=Nie masz uprawnień do tworzenia kopii zapasowej tej domen
 backup_finalstatusok=$1 serwerów wirtualnych zostało pomyślnie utworzonych kopii zapasowych
 
 backup_mysqlinfo=Kopiowanie danych użytkownika MySQL ..
+
+restore_onlyfeats=Przywrócić tylko wybrane funkcje?
 
 restore_ersync=Polecenie synchronizacji <tt>$1</tt> nie jest zainstalowane
 restore_eacme=..oryginalny dostawca SSL określony w kopii zapasowej nie istnieje
@@ -161,6 +166,8 @@ tmpl_content_web_html_esave=Nie udało się zapisać domyślnego pliku strony HT
 tmpl_content_web_html_eempty=Domyślna zawartość strony HTML witryny jest pusta
 tmpl_php_fpmtype=Domyślny tryb menedżera procesów PHP-FPM
 
+newip_return=zmień adres IP
+
 resel_defdnsip6=Zewnętrzny adres IPv6 dla serwerów opartych na nazwach
 resel_edefdnsip6=Brakujący lub nieprawidłowy zewnętrzny adres IPv6
 
@@ -188,6 +195,8 @@ licence_manager_desc=Ta strona wyświetli klucz seryjny i status bieżącej lice
 licence_manager_menu=Menedżer licencji Virtualmin
 licence_manager_status=Status licencji
 licence_manager_count=Liczba domen
+licence_manager_hostid=Identyfikator hosta
+licence_manager_hostid_desc=Ten unikalny identyfikator serwera jest oparty na sprzęcie i systemie operacyjnym Twojego systemu. Powiązuje on licencję Virtualmin Pro z tym komputerem, więc nie można jej używać na wielu serwerach. W przypadku wprowadzenia istotnych zmian w sprzęcie lub systemie operacyjnym, serwer licencji może potrzebować do 48 godzin na rozpoznanie zmiany i ponowną walidację licencji.
 licence_manager_expiry=Data ważności
 licence_manager_ucount=Nieograniczony
 licence_manager_checked=Ostatnio sprawdzono
@@ -234,6 +243,8 @@ licence_expired_desc=Możliwość wprowadzania zmian jest obecnie wyłączona dl
 scripts_enophpbestver=Nie można znaleźć pełnej wersji PHP dla $1
 scripts_softwaremodperlreq=Instalowanie wymaganego pakietu Perl $1 ..
 scripts_softwaremodperlrec=Instalowanie zalecanego pakietu Perl $1 ..
+scripts_discontinued_desc=Ta aplikacja internetowa nie jest już dostępna do zainstalowania; została wycofana lub nie jest dostępna w wersji Virtualmin GPL
+
 scripts_kit=$1 Warsztat
 scripts_ekit=Nie udało się zastosować środowiska roboczego aplikacji internetowej
 scripts_kit_elog=PHP: Nie udało się uruchomić polecenia $1. Zobacz plik dziennika w $2
@@ -364,6 +375,13 @@ s3_need_cli2=Polecenie AWS CLI potrzebne do utworzenia kopii zapasowych S3 nie z
 s3_need_cli3=<a href='$1'>Kliknij tutaj</a>, aby zainstalować ją automatycznie, lub pobierz ją ze strony <a href='https://aws.amazon.com/cli/' target=_blank>https://aws.amazon.com/cli/</a>.
 s3_missing_cli=Polecenie AWS CLI nie jest zainstalowane w tym systemie
 
+sharedips_alloc6=Przydziel nowy współdzielony adres IPv6
+sharedips_ealloc6=Nie znaleziono wolnych adresów IPv6 w zakresie alokacji $1
+sharedips_eboot6=Nie udało się znaleźć konfiguracji rozruchowej ani aktywnej dla adresu IPv6
+
+newdynip_iface6=Adres IPv6 głównego interfejsu
+newdynip_external6=Adres IPv6 widoczny zewnętrznie
+newdynip_eext6=Nie udało się ustalić widocznego zewnętrznie adresu IPv6
 newdynip_eexternal2=W trybie Webmin należy wprowadzić nazwę hosta lub nazwę hosta:port serwera Webmin
 
 upgrade_addrepo=Dodawanie repozytorium Virtualmin Pro ..
@@ -581,6 +599,7 @@ api_ndom_feature_not_enabled=Opcji „$1” nie można użyć, jeśli funkcja ta
 api_ndom_no_default_ipv6=System nie ma domyślnego adresu IPv6
 api_ndom_ip6_not_in_shared_list=„$1” nie znajduje się na liście współdzielonych adresów IP
 api_ndom_invalid_dns_ip=opcja „dns-ip” musi być poprzedzona adresem IP
+api_ndom_invalid_dns_ip6=Opcja „dns-ip6” musi być poprzedzona adresem IPv6
 api_ndom_invalid_database_name=Nieprawidłowa nazwa bazy danych
 
 api_ndom_invalid_forwarding_address=Nieprawidłowy adres przekierowujący
@@ -633,3 +652,5 @@ api_ndom_feature_not_allowed=Funkcja „$1” nie jest dozwolona w przypadku ser
 api_ndom_possible_problems_detected=Wykryto następujące możliwe problemy:
 api_ndom_overquota_error=$1
 api_ndom_creation_failed=Tworzenie nie powiodło się: $1
+
+syslog_procmail=Plik dziennika procmaila
