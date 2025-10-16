@@ -490,6 +490,7 @@ enable_bind_cloud=DNS-zone inschakelen op $1 ..
 enable_ebind_cloud=.. mislukt : $1
 enable_disabled=gehandicapt
 enable_return=serverformulier uitschakelen
+enable_tooltip=Virtuele server is uitgeschakeld
 
 newweb_urlport=Extern poortnummer voor virtuele hosts
 newweb_urlsslport=Extern poortnummer voor virtuele SSL-hosts
@@ -543,6 +544,7 @@ newweb_combined_cert2=Gecombineerd certificaat- en CA-bestand
 newweb_combined_cert1=Alleen certificaatbestand
 newweb_combined_cert0=Automatisch beslissen
 newweb_allow_subset=Niet-verifieerbare domeinnamen uitsluiten?
+newweb_ssl_connectivity=Controleer vóór certificaataanvraag
 
 feature_ssl=Apache SSL-website
 
@@ -894,6 +896,7 @@ restore_dirdelete=Verwijder bestanden die niet in de back-up staan
 restore_reuser=Gebruikers- en groepsnamen opnieuw toewijzen?
 restore_reuser2=Volledige gebruikersnamen opnieuw genereren?
 restore_delete=Virtuele servers verwijderen en opnieuw maken?
+restore_onlyfeats=Alleen geselecteerde functies herstellen?
 restore_newip6=IPv6-adres voor herstelde servers
 restore_contents=Inhoud van de back-up controleren. ..
 restore_gotcontents2=.. $1 virtuele servers en $2 globale virtualmin-instellingen gevonden
@@ -1269,6 +1272,7 @@ newips_mode1=Extern adres gebruikt in DNS-records
 newips6_eold=Oud IPv6-adres heeft niet de juiste indeling
 newips6_enew=Nieuw IPv6-adres heeft niet de juiste indeling
 
+newip_return=IP-adres wijzigen
 newip_urlport=Poort voor gebruik in HTTP-URL's
 newip_urlsslport=Poort voor gebruik in HTTPS-URL's
 newip_sameport=Hetzelfde als echte poort
@@ -1354,6 +1358,8 @@ licence_manager_desc=Deze pagina toont de seriële sleutel en status voor de hui
 licence_manager_menu=Virtualmin Licentie Manager
 licence_manager_status=Licentiestatus
 licence_manager_count=Aantal domeinen
+licence_manager_hostid=Host-ID
+licence_manager_hostid_desc=Deze unieke server-ID is gebaseerd op de hardware en het besturingssysteem van uw systeem. Het koppelt uw Virtualmin Pro-licentie aan deze machine, waardoor deze niet op meerdere servers kan worden gebruikt. Als u grote wijzigingen aanbrengt in de hardware of het besturingssysteem, kan het tot 48 uur duren voordat de licentieserver de wijziging herkent en uw licentie opnieuw valideert.
 licence_manager_expiry=Vervaldatum
 licence_manager_ucount=Onbeperkt
 licence_manager_checked=Laatst gecontroleerd
@@ -1509,6 +1515,7 @@ scripts_packageall=.. alle pakketten zijn al geïnstalleerd
 scripts_abandoned2=Deze webapp wordt niet langer ondersteund en ontvangt geen beveiligingsupdates.
 scripts_abandoned1=Versie $1 van deze webapp wordt niet langer ondersteund en ontvangt geen beveiligingsupdates.
 scripts_discontinued=Stopgezet
+scripts_discontinued_desc=Deze web-app is niet langer beschikbaar voor installatie; deze is stopgezet of niet beschikbaar in de Virtualmin GPL-versie
 scripts_can=Beschikbaar in
 scripts_gpl_to_pro=Nu alleen beschikbaar in Pro
 scripts_gpl_to_pro_upgrade=Upgrade voor deze webapp is nu alleen beschikbaar in Pro
@@ -2038,11 +2045,17 @@ showpass_dbmysql=MySQL-gebruiker
 showpass_dbpostgres=PostgreSQL-gebruiker
 
 sharedips_def6=Standaard gedeeld IPv6-adres
+sharedips_alloc6=Een nieuw gedeeld IPv6-adres toewijzen
 sharedips_ip6s=Gedeelde IPv6-adressen voor alle servers
 sharedips_def6none=Geen geconfigureerd op dit systeem
 sharedips_eip6='$1' is geen geldig IPv6-adres
+sharedips_ealloc6=Er zijn geen vrije IPv6-adressen gevonden in het toewijzingsbereik $1
+sharedips_eboot6=Het is niet gelukt om de opstart- of actieve configuratie voor het IPv6-adres te vinden
 
 newdynip_update=Virtuele servers bijwerken bij IP-wijziging?
+newdynip_iface6=Primair interface IPv6-adres
+newdynip_external6=Extern zichtbaar IPv6-adres
+newdynip_eext6=Het is niet gelukt om een extern zichtbaar IPv6-adres te achterhalen
 newdynip_eexternal=In de externe scriptmodus moet het volledige pad naar een uit te voeren script worden ingevoerd
 newdynip_eexternal2=In de Webmin-modus moet de hostnaam of hostnaam:poort van een Webmin-server worden ingevoerd
 
@@ -3359,6 +3372,7 @@ api_ndom_feature_not_enabled=De optie '$1' kan niet worden gebruikt, tenzij de f
 api_ndom_no_default_ipv6=Systeem heeft geen standaard IPv6-adres
 api_ndom_ip6_not_in_shared_list='$1' staat niet in de lijst met gedeelde IP-adressen
 api_ndom_invalid_dns_ip=De optie 'dns-ip' moet worden gevolgd door een IP-adres
+api_ndom_invalid_dns_ip6=De optie 'dns-ip6' moet worden gevolgd door een IPv6-adres
 api_ndom_invalid_database_name=Ongeldige databasenaam
 api_ndom_invalid_forwarding_address=Ongeldig doorstuuradres
 api_ndom_unknown_template_name=Onbekende sjabloonnaam
@@ -3409,3 +3423,5 @@ api_ndom_feature_not_allowed=De functie '$1' is niet toegestaan voor een virtuel
 api_ndom_possible_problems_detected=De volgende mogelijke problemen werden gedetecteerd:
 api_ndom_overquota_error=$1
 api_ndom_creation_failed=Aanmaak mislukt: $1
+
+syslog_procmail=Procmail-logbestand
