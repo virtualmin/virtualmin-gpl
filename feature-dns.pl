@@ -3126,7 +3126,7 @@ if (!@add_records || $add_records[0] eq 'none') {
 	}
 my @grid = map { &ui_checkbox("dns_records", $_, $text{'tmpl_dns_record_'.$_},
 			      &indexof($_, @add_records) >= 0) }
-	       @automatic_dns_records;
+	       &unique(@automatic_dns_records, @add_records);
 print &ui_table_row(&hlink($text{'tmpl_dnsrecords'}, "template_dns_records"),
 	&ui_grid_table(\@grid, scalar(@grid)));
 
