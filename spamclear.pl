@@ -269,7 +269,7 @@ if ($days) {
 	# Find mail older than some number of days
 	my $cutoff = time() - $days*24*60*60;
 	foreach my $m (@$mail) {
-		my $time = $m->{'time'};
+		my $time = $m->{'ctime'} || $m->{'time'};
 		if ($time && $time < $cutoff) {
 			#print STDERR "deleting $m->{'header'}->{'subject'} dated $time\n";
 			push(@delmail, $m);
