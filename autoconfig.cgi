@@ -16,6 +16,7 @@ $SMTP_SSL2 = '';	# on or off
 $SMTP_ENC = '';		# password-cleartext
 $IMAP_HOST = '';	# mail.bob.com
 $IMAP_PORT = '';	# 143
+$POP3_PORT = '';	# 110
 $IMAP_TYPE = '';	# plain or SSL
 $IMAP_SSL = '';		# yes or no
 $IMAP_ENC = '';		# password-cleartext or password-encrypted
