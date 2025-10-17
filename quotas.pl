@@ -123,6 +123,7 @@ if ($config{'quota_email'}) {
 sub send_domain_quota_email
 {
 local ($msgs, $email) = @_;
+$email = $gconfig{'webmin_email_to'} if ($email eq '*');
 
 local $fmt = "%-20.20s %-15.15s %-15.15s %-20.20s\n";
 local $body = "$text{'quotawarn_body'}\n\n";
