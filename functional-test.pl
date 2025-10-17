@@ -7329,13 +7329,15 @@ $sslserv_tests = [
 		       $webmin_proto.'://'.$test_domain.':'.
 		       $webmin_port.'/',
 	},
-	{ 'command' => 'openssl s_client -host '.$test_domain.
+	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
+		       ' -servername '.$test_domain.
 		       ' -port '.$webmin_port.' </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
 	# Validate that Usermin cert works
-	{ 'command' => 'openssl s_client -host '.$test_domain.
+	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
+		       ' -servername '.$test_domain.
 		       ' -port '.$usermin_port.' </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -7347,7 +7349,8 @@ $sslserv_tests = [
 		      [ 'server', 'mail.'.$test_domain ],
 		      [ 'ssl' ] ],
 	},
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
+		       ' -servername mail.'.$test_domain.
 		       ' -port 993 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -7358,7 +7361,8 @@ $sslserv_tests = [
 		      [ 'server', 'mail.'.$test_domain ],
 		      [ 'ssl' ] ],
 	},
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
+		       ' -servername mail.'.$test_domain.
 		       ' -port 465 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -7371,13 +7375,15 @@ $sslserv_tests = [
 	},
 
 	# Validate that new Dovecot cert works
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
+		       ' -servername mail.'.$test_domain.
 		       ' -port 993 </dev/null',
 	  'grep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
 	# Validate that new Postfix cert works
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
+		       ' -servername mail.'.$test_domain.
 		       ' -port 465 </dev/null',
 	  'grep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
