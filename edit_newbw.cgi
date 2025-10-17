@@ -44,9 +44,16 @@ print &ui_table_row(&hlink($text{'newbw_owner'}, "bandwidth_bw_owner"),
 		    &ui_yesno_radio("bw_owner", $config{'bw_owner'}));
 
 # Show email to other address
+if ($gconfig{'webmin_email_to'}) {
+	$efield = &ui_opt_textbox("bw_email",
+		$config{'bw_email'} eq '*' ? undef : $config{'bw_email'}, 30,
+		&text('newbw_email_def', "<tt>$gconfig{'webmin_email_to'}</tt>"));
+	}
+else {
+	$efield = &ui_textbox("bw_email", $config{'bw_email'}, 30);
+	}
 print &ui_table_row(&hlink($text{'newbw_email'}, "bandwidth_bw_email"),
-		    &ui_textbox("bw_email",
-		      $config{'bw_email'} || $gconfig{'webmin_email_to'}, 30));
+		    $efield);
 
 # Show field for notification period
 print &ui_table_row(&hlink($text{'newbw_notify'}, "bandwidth_bw_notify"),

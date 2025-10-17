@@ -3496,6 +3496,7 @@ newbw_step=Hours between collection
 newbw_owner=Send email to server owners when over limit?
 newbw_backup=Include backup transfers in usage?
 newbw_email=Also send email to
+newbw_email_def=Webmin default ($1)
 newbw_period=Accounting period
 newbw_past_week=Weekly
 newbw_past_month=Monthly

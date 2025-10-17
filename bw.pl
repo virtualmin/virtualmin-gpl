@@ -158,7 +158,13 @@ foreach $d (@doms) {
 			push(@addrs, $d->{'email'} ||
 				   $d->{'user'}.'@'.&get_system_hostname() )
 				if ($config{'bw_owner'});
-			push(@addrs, split(/\s+,\s+/, $config{'bw_email'}));
+			if ($config{'bw_email'} eq '*') {
+				push(@addrs, $gconfig{'webmin_email_to'});
+				}
+			else {
+				push(@addrs, split(/\s+,\s+/,
+						   $config{'bw_email'}));
+				}
 			@erv = &send_template_email(
 				&cat_file($tmpl),
 				join(", ", @addrs),
