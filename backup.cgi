@@ -207,25 +207,25 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 		}
 	else {
 		my $host = &get_system_hostname(1);
-		my $time = strftime("%Y%m%d-%H%M", localtime);
+		my $time = strftime("%Y%m%d_%H%M", localtime);
 		my $numb = scalar @doms;
 		my $feat = @vbs ? '+settings' : '';
 		my $name;
 		if ($numb == 1) {
 			my $dom = $doms[0]->{'dom'};
-			$dom =~ s/\./-/g;
-			$name = "${time}_${dom}${feat}_$host";
+			$dom =~ s/\./_/g;
+			$name = "${time}-${dom}${feat}-$host";
 			}
 		else {
 			my $scope;
 			if ($in{'all'} == 1) {
-				$scope = "all-domains${feat}";
+				$scope = "all_domains${feat}";
 				}
 			else {
-				$scope = "${numb}-domains${feat}";
+				$scope = "${numb}_domains${feat}";
 				}
-			$host =~ s/\./-/g;
-			$name = "${time}_${scope}_$host";
+			$host =~ s/\./_/g;
+			$name = "${time}-${scope}-$host";
 			}
 		$tempfile = $name . "." . $sfx;
 		$temp = &tempname($remote_user . ":" . $tempfile);

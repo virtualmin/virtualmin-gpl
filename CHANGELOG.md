@@ -1,3 +1,6 @@
+#### Version 7.50.1
+* Fix to improve formatting of downloaded backup file names #1137
+
 #### Version 7.50.0
 * Add support for Bunny DNS for Virtualmin Pro users
 * Add improvements to external IPv4 and IPv6 address detection
