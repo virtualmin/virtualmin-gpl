@@ -2998,7 +2998,7 @@ foreach my $r (@$recs) {
 	elsif ($r->{'name'} eq $olddom.".disabled.") {
 		$r->{'name'} = $newdom.".disabled.";
 		}
-	elsif ($r->{'name'} !~ /(\.|^)$newdom(\.disabled)?\.$/) {
+	else {
 		$r->{'name'} =~ s/\.$olddom(\.disabled)?\.$/\.$newdom$1\./;
 		}
 	if ($r->{'realname'} eq $olddom.".") {
@@ -3007,7 +3007,7 @@ foreach my $r (@$recs) {
 	elsif ($r->{'realname'} eq $olddom.".disabled.") {
 		$r->{'realname'} = $newdom.".";
 		}
-	elsif ($r->{'realname'} !~ /(\.|^)$newdom(\.disabled)?\.$/) {
+	else {
 		$r->{'realname'} =~ s/\.$olddom(\.disabled)?\.$/\.$newdom$1\./;
 		}
 	if ($r->{'type'} eq 'SPF' ||
