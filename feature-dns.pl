@@ -2993,7 +2993,7 @@ local ($recs, $fn, $olddom, $newdom) = @_;
 foreach my $r (@$recs) {
 	next if (!$r->{'name'});	# TTL or generator
 	if ($r->{'realname'} eq '@') {
-		$r->{'name'} = '@';     # Keep name as @
+		# No change to name needed, only to possible values
 		}
 	elsif ($r->{'name'} eq $olddom.".") {
 		$r->{'name'} = $newdom.".";
