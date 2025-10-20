@@ -3457,7 +3457,7 @@ if (!@caa && $lets) {
 	&post_records_change($d, $recs, $file);
 	&reload_bind_records($d);
 	}
-elsif (@caa == 1 && $caa[0]->{'values'}->[1] eq 'issuewild') {
+elsif (@caa == 1 && $caa[0]->{'values'}->[1] =~ /^issue(wild)?$/) {
 	my $current_val = $caa[0]->{'values'}->[2];
 	if (!$lets) {
 		# Need to remove the record
@@ -3467,11 +3467,12 @@ elsif (@caa == 1 && $caa[0]->{'values'}->[1] eq 'issuewild') {
 	elsif ($current_val ne $caa_value) {
 		# Provider changed, need to update
 		&pre_records_change($d);
+		my $oldwild = $caa[0]->{'values'}->[1];
 		&delete_dns_record($recs, $file, $caa[0]);
 		&create_dns_record($recs, $file,
 			{ 'name'   => '@',
 			  'type'   => 'CAA',
-			  'values' => [ 0, 'issuewild', $caa_value ] } );
+			  'values' => [ 0, $oldwild, $caa_value ] } );
 		}
 	else {
 		return;
