@@ -379,7 +379,7 @@ foreach my $m ("mysql", "postgresql", "ldap-client", "ldap-server",
 		}
 	}
 
-# Always update outdated (lower than v8.0)
+# Always update outdated (lower than v8.1)
 # Virtualmin Welcome Page
 my $readdir = sub {
     my ($dir) = @_;
@@ -414,7 +414,7 @@ foreach my $d (@doms) {
 			if ($efix == 1 &&
 				$l =~ /\*\s(Virtualmin\sLanding|Website\sDefault\sPage|Virtualmin\s+Default\s+Page|Virtualmin\s+Welcome\s+Page)\sv([\d+\.]+)$/) {
 				my $tmplver = $2;
-				$efix++ if ($tmplver && &compare_version_numbers($tmplver, '<', '8.0'));
+				$efix++ if ($tmplver && &compare_version_numbers($tmplver, '<', '8.1'));
 				}
 			$efix++ if ($efix == 2 && $l =~ /\*\sCopyright\s+[\d]{4}\sVirtualmin(?:,\s+Inc\.)?$/);
 			$efix++ if ($efix == 3 && $l =~ /\*\sLicensed\sunder\sMIT$/);

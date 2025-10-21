@@ -2992,22 +2992,28 @@ sub modify_records_domain_name
 local ($recs, $fn, $olddom, $newdom) = @_;
 foreach my $r (@$recs) {
 	next if (!$r->{'name'});	# TTL or generator
-	if ($r->{'name'} eq $olddom.".") {
+	if ($r->{'realname'} eq '@') {
+		# No change to name needed, only to possible values
+		}
+	elsif ($r->{'name'} eq $olddom.".") {
 		$r->{'name'} = $newdom.".";
 		}
 	elsif ($r->{'name'} eq $olddom.".disabled.") {
 		$r->{'name'} = $newdom.".disabled.";
 		}
-	elsif ($r->{'name'} !~ /(\.|^)$newdom(\.disabled)?\.$/) {
+	else {
 		$r->{'name'} =~ s/\.$olddom(\.disabled)?\.$/\.$newdom$1\./;
 		}
-	if ($r->{'realname'} eq $olddom.".") {
+	if ($r->{'realname'} eq '@') {
+		# No change to realname needed, only to possible values
+		}
+	elsif ($r->{'realname'} eq $olddom.".") {
 		$r->{'realname'} = $newdom.".";
 		}
 	elsif ($r->{'realname'} eq $olddom.".disabled.") {
 		$r->{'realname'} = $newdom.".";
 		}
-	elsif ($r->{'realname'} !~ /(\.|^)$newdom(\.disabled)?\.$/) {
+	else {
 		$r->{'realname'} =~ s/\.$olddom(\.disabled)?\.$/\.$newdom$1\./;
 		}
 	if ($r->{'type'} eq 'SPF' ||
