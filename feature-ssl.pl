@@ -3452,7 +3452,7 @@ if (!@caa && $lets) {
 	&pre_records_change($d);
 	my $caa = { 'name'   => '@',
 		    'type'   => 'CAA',
-		    'values' => [ "0", "issuewild", $caa_value ] };
+		    'values' => [ "0", "issue", $caa_value ] };
 	&create_dns_record($recs, $file, $caa);
 	&post_records_change($d, $recs, $file);
 	&reload_bind_records($d);
