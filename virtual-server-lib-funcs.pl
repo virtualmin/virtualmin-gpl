@@ -6694,6 +6694,8 @@ return 1;
 sub virtualmin_backup_mailserver
 {
 local ($file, $vbs) = @_;
+my $donecount = 0;
+
 &require_mail();
 
 # Save DKIM settings
@@ -6713,6 +6715,7 @@ if (!&check_dkim()) {
 		&copy_source_dest($conf->{'keyfile'}, $file."_dkimkey");
 		}
 	&$second_print($text{'setup_done'});
+	$donecount++;
 	}
 else {
 	$dkim{'support'} = 0;
@@ -6736,6 +6739,7 @@ if (!&check_postgrey()) {
 		&copy_source_dest($rfile, $file."_greyrecipients");
 		}
 	&$second_print($text{'setup_done'});
+	$donecount++;
 	}
 else {
 	$grey{'support'} = 0;
@@ -6753,6 +6757,7 @@ if (!&check_ratelimit()) {
 	&copy_source_dest(&get_ratelimit_config_file(),
 			  $file."_ratelimitconfig");
 	&$second_print($text{'setup_done'});
+	$donecount++;
 	}
 else {
 	$ratelimit{'support'} = 0;
@@ -6781,6 +6786,7 @@ if ($mail_system == 0) {
 			}
 		}
 	&$second_print($text{'setup_done'});
+	$donecount++;
 	}
 elsif ($mail_system == 1) {
 	# Save sendmail.cf and sendmail.mc
@@ -6789,17 +6795,19 @@ elsif ($mail_system == 1) {
 	&copy_source_dest($sendmail::config{'sendmail_mc'},
 			  $file."_sendmailmc");
 	&$second_print($text{'setup_done'});
+	$donecount++;
 	}
 elsif ($mail_system == 2) {
 	# Save Qmail dir
 	&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
 			 &make_tar_command("cf", $file, "."));
 	&$second_print($text{'setup_done'});
+	$donecount++;
 	}
 else {
 	&$second_print($text{'backup_vmailserver_supp'});
 	}
-return 1;
+return $donecount;
 }
 
 # virtualmin_restore_mailserver(file, &vbs)
