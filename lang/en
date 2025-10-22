@@ -3427,7 +3427,7 @@ cert_acmedesc=This page can be used to request a new certificate, which will ove
 cert_acmelink=You can add and manage additional providers on the <a href='$1'>SSL Providers</a> page.
 cert_elets=However, it cannot be used on your system : $1
 cert_dnamefor=Request certificate for
-cert_dnamedef=Domains associated with this server
+cert_dnamedef=Domains linked to this server
 cert_dnamesel=Domain names listed here
 cert_acmes=SSL certificate provider
 cert_dwild=Also request wildcard certificate?
