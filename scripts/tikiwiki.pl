@@ -346,6 +346,9 @@ if ($upgrade) {
 }
 push @steps, ["Rebuild index ", "index:rebuild"];
 
+unless ($upgrade) {
+	push @steps, ["Lock the installer ", "installer:lock "];
+}
 foreach my $step (@steps) {
 	my ($description, $command) = @$step;
 	print "$description<br>";
