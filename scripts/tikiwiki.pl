@@ -18,7 +18,7 @@ return "A full featured free software Wiki/CMS/Groupware written in PHP";
 # script_tikiwiki_versions()
 sub script_tikiwiki_versions
 {
-return ( "28.4", "27.3", "24.9" );
+return ( "29.0", "28.4", "27.3", "24.9" );
 }
 
 sub script_tikiwiki_release
@@ -286,7 +286,11 @@ sub script_tikiwiki_check_latest
 {
 local ($ver) = @_;
 local @vers;
-if ($ver >= 28) {
+if ($ver >= 29) {
+	@vers = &osdn_package_versions("tikiwiki/Tiki_29.x_Bellatrix",
+				       "tiki-(29\.[0-9\\.]+)\\.zip");
+	}
+elsif ($ver >= 28) {
 	@vers = &osdn_package_versions("tikiwiki/Tiki_28.x_Castor",
 				       "tiki-(28\.[0-9\\.]+)\\.zip");
 	}
