@@ -69,7 +69,7 @@ else {
 
 	print &ui_table_row($text{'bucket_owner'},
 	    "<tt>".($info->{'acl'}->{'Owner'}->{'DisplayName'} ||
-		    $info->{'acl'}->{'Owner'}->{'ID'})."</tt>");
+		    $info->{'acl'}->{'Owner'}->{'ID'})."</tt>", 3);
 
 	# Show file count and size
 	$files = &s3_list_files($account->[0], $account->[1], $in{'name'});
