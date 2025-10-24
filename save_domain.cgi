@@ -139,6 +139,9 @@ if ($d->{'reseller'} && defined(&get_reseller)) {
 		}
 	}
 
+# Check mail alias dir feature
+$newdom{'dir'} = $in{'mail'} ? 1 : 0 if ($d->{'alias'} && $config{'dir'} == 3);
+
 # Check if any features are being deleted, and if so ask the user if
 # he is sure
 if (!$in{'confirm'} && !$d->{'disabled'}) {
