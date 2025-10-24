@@ -50,8 +50,8 @@ print &ui_table_row($text{'s3_endpoint'},
 			       [ [ "", $text{'default'} ],
 				 @locs ], 1, 0, 1) ],
 		  [ 0, $text{'s3_endpoint_hp'},
-		    &ui_textbox("endpoint", $s3->{'endpoint'}, 18)." ".
-		    $text{'s3_location'}." ".
+		    &ui_textbox("endpoint", $s3->{'endpoint'}, 18)." &nbsp;".
+		    $text{'s3_location'}." &nbsp;".
 		    &ui_textbox("location2", $s3->{'location'}, 8) ] ]));
 
 if (!$in{'new'}) {
