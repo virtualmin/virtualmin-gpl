@@ -129,10 +129,12 @@ elsif (@doms) {
 else {
 	# No domains, so show buttons to create some
 	if (@alldoms) {
-		print "<b>$text{'index_none2'}</b><p>\n";
+		print &ui_alert_box($text{'index_none2'}, 'warn', undef,
+		undef, "");
 		}
 	else {
-		print "<b>$text{'index_none'}</b><p>\n";
+		print &ui_alert_box($text{'index_none'}, 'success', undef,
+		undef, "");
 		}
 	print &ui_form_start("domain_form.cgi", "post");
 	&create_links(1);
