@@ -617,6 +617,7 @@ if (&can_dnsip()) {
 	my $def_dns_ip4 = &get_external_ip_address(undef, 4) ||
 			  &get_dns_ip($resel, 4);
 	my $dns_ip4 = $parentdom ? $parentdom->{'dns_ip'} : undef;
+	$dns_ip4 = undef if ($dns_ip4 eq $def_dns_ip4);
 	my @opts;
 	if ($def_dns_ip4) {
 		push(@opts, [ 1, $text{'spf_default3'}, $def_dns_ip4 ]);
@@ -636,6 +637,7 @@ if (&can_dnsip() && &supports_ip6()) {
 	my $def_dns_ip6 = &get_external_ip_address(undef, 6) ||
 			  &get_dns_ip($resel, 6);
 	my $dns_ip6 = $parentdom ? $parentdom->{'dns_ip6'} : undef;
+	$dns_ip6 = undef if ($dns_ip6 eq $def_dns_ip6);
 	my @opts;
 	if ($def_dns_ip6) {
 		push(@opts, [ 1, $text{'spf_default3'}, $def_dns_ip6 ]);
