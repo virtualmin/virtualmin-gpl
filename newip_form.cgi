@@ -81,9 +81,9 @@ if (&can_dnsip()) {
 	}
 
 my $ipv6hr;
-if (&supports_ip6() && $d->{'virt6'}) {
+if ($d->{'ip6'}) {
 	print &ui_table_hr() if !$ipv6hr++;
-	# Current IPv6 addres
+	# Current IPv6 address
 	print &ui_table_row($text{'newip_old6'},
 			    "<tt>$d->{'ip6'}</tt>");
 	}
