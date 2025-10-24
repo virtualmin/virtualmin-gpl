@@ -80,8 +80,10 @@ if (&can_dnsip()) {
 				&text('spf_default', $d->{'ip'})));
 	}
 
-if (&supports_ip6() && $d->{'virt6'}) {
-	# Current IPv6 addres
+my $ipv6hr;
+if ($d->{'ip6'}) {
+	print &ui_table_hr() if !$ipv6hr++;
+	# Current IPv6 address
 	print &ui_table_row($text{'newip_old6'},
 			    "<tt>$d->{'ip6'}</tt>");
 	}
