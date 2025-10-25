@@ -223,6 +223,18 @@ sub feature_always_links
 {
 }
 
+# feature_pre_delete_domain(&domain, [disassociate-only])
+# Called before a domain is deleted to perform any additional actions needed
+sub feature_pre_delete_domain
+{
+}
+
+# feature_post_delete_domain(&domain, [disassociate-only])
+# Called after a domain is deleted to perform any additional actions needed
+sub feature_post_delete_domain
+{
+}
+
 # feature_backup_no_all_features()
 # Returns 1 if this feature should be excluded from scheduled backups by default
 # when all features are selected to avoid overhead since features could overlap

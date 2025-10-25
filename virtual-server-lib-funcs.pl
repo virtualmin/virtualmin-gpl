@@ -8923,6 +8923,14 @@ foreach my $dd (@alldoms) {
 	&lock_domain($dd);
 	}
 
+# Pre-delete hook for plugins
+&load_plugin_libraries();
+for my $alldom (@alldoms) {
+	&plugin_call($_, "feature_pre_delete_domain", $alldom, $only)
+		for grep { &plugin_defined($_, "feature_pre_delete_domain") }
+			@plugins;
+	}
+
 # Delete any jail
 if (!&check_jailkit_support() && !$d->{'parent'}) {
 	&disable_domain_jailkit($d, 1);
@@ -9151,6 +9159,13 @@ if ($d->{'dom'} eq $config{'defaultdomain_name'}) {
 # Run the after deletion command
 if (!$nopost) {
 	&run_post_actions();
+	}
+
+# Post-delete hook for plugins
+for my $alldom (@alldoms) {
+	&plugin_call($_, "feature_post_delete_domain", $alldom, $only)
+		for grep { &plugin_defined($_, "feature_post_delete_domain") }
+			@plugins;
 	}
 
 # Unlock now we're done
