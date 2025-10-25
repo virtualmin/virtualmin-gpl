@@ -777,6 +777,7 @@ sub get_dkim_pubkey
 my ($dkim, $d) = @_;
 my $keyfile = &get_domain_dkim_key($d) ||
 	      $dkim->{'keyfile'};
+return undef if (!$keyfile);
 my $type = &get_ssl_key_type($keyfile, $d->{'ssl_pass'});
 my $pubkey = &backquote_command(
         "openssl $type -in ".quotemeta($keyfile).
