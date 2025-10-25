@@ -8924,11 +8924,9 @@ foreach my $dd (@alldoms) {
 	}
 
 # Pre-delete hook for plugins
-&load_plugin_libraries();
-for my $alldom (@alldoms) {
-	&plugin_call($_, "feature_pre_delete_domain", $alldom, $only)
-		for grep { &plugin_defined($_, "feature_pre_delete_domain") }
-			@plugins;
+foreach my $p (@plugins) {
+	next unless &plugin_defined($p, 'feature_pre_delete_domain');
+	&plugin_call($p, 'feature_pre_delete_domain', \@alldoms, $only);
 	}
 
 # Delete any jail
@@ -9162,10 +9160,9 @@ if (!$nopost) {
 	}
 
 # Post-delete hook for plugins
-for my $alldom (@alldoms) {
-	&plugin_call($_, "feature_post_delete_domain", $alldom, $only)
-		for grep { &plugin_defined($_, "feature_post_delete_domain") }
-			@plugins;
+foreach my $p (@plugins) {
+	next unless &plugin_defined($p, 'feature_post_delete_domain');
+	&plugin_call($p, 'feature_post_delete_domain', \@alldoms, $only);
 	}
 
 # Unlock now we're done
