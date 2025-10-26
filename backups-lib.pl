@@ -1116,6 +1116,8 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 				local $w = &dest_to_webmin($desturl);
 				eval {
 					local $main::error_must_die = 1;
+					&remote_finished();
+					&remote_foreign_require($w, "webmin");
 					&remote_write($w, "$dest/$df",
 							  "$path/$df");
 					&remote_write($w, $infotemp,
@@ -1862,6 +1864,8 @@ foreach my $desturl (@$desturls) {
 			local $tstart = time();
 			eval {
 				local $main::error_must_die = 1;
+				&remote_finished();
+				&remote_foreign_require($w, "webmin");
 				foreach my $df (@destfiles) {
 					&remote_write($w, "$dest/$df","$path/$df");
 					}
@@ -1911,6 +1915,8 @@ foreach my $desturl (@$desturls) {
 				    &serialise_variable(\%donedoms));
 			eval {
 				local $main::error_must_die = 1;
+				&remote_finished();
+				&remote_foreign_require($w, "webmin");
 				&remote_write($w, $dest, $path);
 				&remote_write($w, $infotemp, $path.".info");
 				&remote_write($w, $domtemp, $path.".dom");
