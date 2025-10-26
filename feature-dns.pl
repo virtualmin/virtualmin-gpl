@@ -3128,7 +3128,7 @@ print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 # Address records to add
 my @add_records = split(/\s+/, $tmpl->{'dns_records'});
 if (!@add_records || $add_records[0] eq 'none') {
-	@add_records = @automatic_dns_records;
+	@add_records = @default_automatic_dns_records;
 	}
 my @grid = map { &ui_checkbox("dns_records", $_, $text{'tmpl_dns_record_'.$_},
 			      &indexof($_, @add_records) >= 0) }

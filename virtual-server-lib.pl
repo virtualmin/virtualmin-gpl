@@ -367,7 +367,8 @@ $ham_alias_dir = "$trap_base_dir/ham";
 $user_quota_warnings_file = "$module_config_directory/quotas-warnings";
 $user_quota_msg_file = "$module_config_directory/quotas-template";
 
-@automatic_dns_records = ( "@", "www", "ftp");
+@automatic_dns_records = ( "@", "www", "ftp", "localhost", "m" );
+@default_automatic_dns_records = ( "@", "www" );
 
 $links_cache_dir = &cache_file_path("links-cache");
 
