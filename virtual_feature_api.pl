@@ -223,15 +223,10 @@ sub feature_always_links
 {
 }
 
-# feature_pre_delete_domain(&domain, [disassociate-only])
-# Called before a domain is deleted to perform any additional actions needed
-sub feature_pre_delete_domain
-{
-}
-
-# feature_post_delete_domain(&domain, [disassociate-only])
-# Called after a domain is deleted to perform any additional actions needed
-sub feature_post_delete_domain
+# features_always_delete(&domain, only)
+# Called when a domain is being deleted, regardless of whether this feature
+# is enabled or not
+sub features_always_delete
 {
 }
 

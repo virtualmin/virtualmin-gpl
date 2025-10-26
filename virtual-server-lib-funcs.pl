@@ -9088,6 +9088,12 @@ foreach my $dd (@alldoms) {
 			}
 		}
 
+	# Always try to delete features even if not enabled
+	foreach my $p (@plugins) {
+		next unless &plugin_defined($p, 'features_always_delete');
+		&plugin_call($p, 'features_always_delete', $dd, $only);
+		}
+
 	# Delete any FPM or FCGIwrap servers, just in case they
 	# were disassociated
 	&delete_php_fpm_pool($d);
