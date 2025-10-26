@@ -223,6 +223,13 @@ sub feature_always_links
 {
 }
 
+# features_always_delete(&domain, only)
+# Called when a domain is being deleted, regardless of whether this feature
+# is enabled or not
+sub features_always_delete
+{
+}
+
 # feature_backup_no_all_features()
 # Returns 1 if this feature should be excluded from scheduled backups by default
 # when all features are selected to avoid overhead since features could overlap
