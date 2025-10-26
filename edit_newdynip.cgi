@@ -21,7 +21,7 @@ print &ui_table_row($text{'newdynip_service'},
 			 &list_dynip_services() ],
 		   1, 0, 0, 0,
 		   "onChange='form.external.disabled = (value != \"external\" && value != \"webmin\")'")." ".
-	&ui_textbox("external", $config{'dynip_external'}, 50,
+	&ui_textbox("external", $config{'dynip_external'}, 30,
 		    $config{'dynip_service'} !~ /^(external|webmin)$/));
 
 # Hostname to update

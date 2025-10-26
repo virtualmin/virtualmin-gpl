@@ -177,7 +177,7 @@ if (@opts) {
 	}
 else {
 	# No upgrade possible
-	print "<b>$text{'newscripts_noup'}</b><p>\n";
+	print &ui_alert_box($text{'newscripts_noup'}, 'warn', undef, undef, "");
 	}
 print &ui_tabs_end_tab();
 
@@ -318,7 +318,7 @@ print &ui_columns_table(
 	undef,
 	0,
 	undef,
-	$text{'newscripts_noneyet'},
+	&ui_alert_box($text{'newscripts_noneyet'}, 'warn', undef, undef, ""),
 	);
 
 print &ui_tabs_end_tab();

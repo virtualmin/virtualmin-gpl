@@ -80,13 +80,16 @@ if (&can_dnsip()) {
 				&text('spf_default', $d->{'ip'})));
 	}
 
-if (&supports_ip6() && $d->{'virt6'}) {
-	# Current IPv6 addres
+my $ipv6hr;
+if ($d->{'ip6'}) {
+	print &ui_table_hr() if !$ipv6hr++;
+	# Current IPv6 address
 	print &ui_table_row($text{'newip_old6'},
 			    "<tt>$d->{'ip6'}</tt>");
 	}
 
 if (&supports_ip6() && &can_use_feature("virt6")) {
+	print &ui_table_hr() if !$ipv6hr++;
 	# Build list of possible shared IPv6 addresses
 	@canips = ( );
 	$defip6 = &get_default_ip6();
@@ -138,6 +141,7 @@ if (&supports_ip6() && &can_use_feature("virt6")) {
 
 # Show the external IPv6 address
 if (&can_dnsip() && &supports_ip6()) {
+	print &ui_table_hr() if !$ipv6hr++;
 	print &ui_table_row(&hlink($text{'edit_dnsip6'}, "edit_dnsip6"),
 		&ui_opt_textbox("dns_ip6", $d->{'dns_ip6'}, 40,
 				$d->{'ip6'} ?
@@ -148,6 +152,7 @@ if (&can_dnsip() && &supports_ip6()) {
 # HTTP and HTTPS ports
 $p = &domain_has_website($d);
 if ($p) {
+	print &ui_table_hr();
 	$d->{'web_port'} ||= $tmpl->{'web_port'} || 80;
 	$d->{'web_sslport'} ||= $tmpl->{'web_sslport'} || 443;
 

@@ -413,9 +413,10 @@ if ($config{'mysql'} && &can_edit_templates() && !$aliasdom && !$parentdom) {
 
 # Set selected features in domain object
 # Special magic - if the dir feature is enabled by default and this is an alias
-# domain, don't set it
+# domain without mail, don't set it
 foreach my $f (@features, &list_feature_plugins()) {
-	next if ($f eq 'dir' && $aliasdom);
+	next if ($f eq 'dir' && $config{$f} == 3 &&
+		 $tmpl->{'aliascopy'} && $aliasdom && !$in{'mail'});
 	$dom{$f} = &can_use_feature($f) && int($in{$f});
 	}
 
