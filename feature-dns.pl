@@ -1498,7 +1498,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		@addrecs = split(/\s+/, $d->{'dns_initial_records'});
 		}
 	if (!@addrecs || $addrecs[0] eq 'none') {
-		@addrecs = @automatic_dns_records;
+		@addrecs = @default_automatic_dns_records;
 		}
 	local %addrecs = map { $_ eq "@" ? $withdot : $_.".".$withdot, 1 }
 			     @addrecs;
