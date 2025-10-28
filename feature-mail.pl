@@ -3232,9 +3232,11 @@ if ($supports_dependent && -r $file."_dependent") {
 	}
 
 # Restore custom DKIM key
+my $dkim;
 if ($d->{'mail'} && !$d->{'alias'} && $config{'dkim_enabled'} &&
-    -r $file."_domdkim") {
-	local $key = &read_file_contents($file."_domdkim");
+    -r $file."_domdkim" && ($dkim = &get_dkim_config()) &&
+    $dkim->{'keyfile'}) {
+	my $key = &read_file_contents($file."_domdkim");
 	&push_all_print();
 	&set_all_null_print();
 	&save_domain_dkim_key($d, $key);
