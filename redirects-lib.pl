@@ -110,7 +110,8 @@ foreach my $p (@ports) {
 			}
 		}
 
-	# Find rewrite rules used for redirects that preserve the hostname.
+	# Find rewrite rules with or without conditions used for redirects
+	# that preserve the hostname
 	# We expect that the config be formatted like :
 	# RewriteCond ...
 	# RewriteCond ...
@@ -119,6 +120,43 @@ foreach my $p (@ports) {
 		   &apache::find_directive_struct("RewriteRule", $vconf));
 	@rws = sort { $a->{'line'} <=> $b->{'line'} } @rws;
 	for(my $i=0; $i<@rws; $i++) {
+		# Handle a standalone RewriteRule with no preceding RewriteCond
+		if ($rws[$i]->{'name'} eq 'RewriteRule') {
+			next if ($i > 0 &&
+				 $rws[$i-1]->{'name'} eq 'RewriteCond');
+			my $rwr = $rws[$i];
+			next if ($rwr->{'words'}->[2] !~ /^\[R(=\d+)?\]$/);
+			my @dirs = ( $rwr );
+			my $rd = { 'alias' => 0, 'dirs' => \@dirs };
+			$rd->{$proto} = 1;
+			$rd->{'path'} = $rwr->{'words'}->[0];
+			$rd->{'dest'} = $rwr->{'words'}->[1];
+			if ($rd->{'path'} =~ /^(.*)\.\*\$$/ ||
+			    $rd->{'path'} =~ /^(.*)\(\.\*\)\$$/) {
+				$rd->{'path'} = $1;
+				$rd->{'regexp'} = 1;
+				}
+			elsif ($rd->{'path'} =~ /^\^(.*)\$$/) {
+			       $rd->{'path'} = $1;
+				$rd->{'exact'} = 1;
+				}
+			if ($rwr->{'words'}->[2] =~ /^\[R=(\d+)\]$/) {
+				$rd->{'code'} = $1;
+				}
+			$rd->{'id'} = $rwr->{'name'}.'_'.$rd->{'path'};
+			my ($already) = 
+				grep { $_->{'path'} eq $rd->{'path'} &&
+				       $_->{'host'} eq $rd->{'host'} } @rv;
+			if ($already) {
+				$already->{$proto} = 1;
+				push(@{$already->{'dirs'}}, @{$rd->{'dirs'}});
+				}
+			else {
+				push(@rv, $rd);
+				}
+			next;
+			}
+		# Handle RewriteCond + RewriteRule
 		next if ($rws[$i]->{'name'} ne 'RewriteCond');
 		my $j = $i;
 		my $rwr;
@@ -305,7 +343,19 @@ foreach my $port (@ports) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
 	my $changed = 0;
-	if ($redirect->{'dirs'}->[0]->{'name'} =~ /^Rewrite/i) {
+	if ($redirect->{'dirs'}->[0]->{'name'} eq 'RewriteRule' && 
+	    @{$redirect->{'dirs'}} == 1) {
+		# Standalone RewriteRule without preceding RewriteCond
+		my $target = $redirect->{'dirs'}->[0];
+		my @rwr = &apache::find_directive_struct("RewriteRule", $vconf);
+		my ($found) = grep { $_->{'line'} == $target->{'line'} } @rwr;
+		if ($found) {
+			&apache::save_directive_struct($found, undef,
+						       $vconf, $conf);
+			$changed++;
+			}
+		}
+	elsif ($redirect->{'dirs'}->[0]->{'name'} =~ /^Rewrite/i) {
 		# Remove RewriteCond and RewriteRule
 		my @rwcs = &apache::find_directive_struct("RewriteCond",$vconf);
 		my @rwrs = &apache::find_directive_struct("RewriteRule",$vconf);
@@ -411,6 +461,17 @@ if (($redir->{'path'} eq '^/(?!.well-known)' ||
 	$redir->{'regexp'} = 0;
 	}
 return $redir;
+}
+
+# is_redirect_to_ssl(&domain, &redirect)
+# Returns 1 if a redirect rule to SSL exists
+sub is_redirect_to_ssl
+{
+my ($d, $r) = @_;
+return 0 if (!$r || $r->{'alias'});
+return 0 if (!$r->{'http'} || $r->{'https'});
+my $exp = &get_redirect_to_ssl($d);
+return $r->{'dest'} eq $exp->{'dest'} ? 1 : 0;
 }
 
 # get_redirect_to_ssl(&domain)
