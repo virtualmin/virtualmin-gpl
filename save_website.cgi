@@ -197,10 +197,8 @@ if (defined($in{'alog'}) && !$d->{'alias'} && &can_log_paths()) {
 
 # Update SSL redirect
 if (&domain_has_ssl($d) && &can_edit_redirect() && &has_web_redirects($d)) {
-	my @redirects = map { &remove_wellknown_redirect($_) }
-			    &list_redirects($d);
-	my ($defredir) = grep { $_->{'path'} eq '/' &&
-			        $_->{'http'} && !$_->{'https'} } @redirects;
+	my ($defredir) = grep { &is_redirect_to_ssl($d, $_) }
+		&list_redirects($d);
 	if ($defredir && !$in{'sslredir'}) {
 		&$first_print($text{'phpmode_ssloff'});
 		$defredir = &add_wellknown_redirect($defredir);
