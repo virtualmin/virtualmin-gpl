@@ -3802,6 +3802,7 @@ foreach my $p (@ports) {
 		$done++;
 		}
 	if ($done) {
+		@sa = grep { /\S/ } @sa; # always drop empty ones
 		&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
 		&flush_file_lines($virt->{'file'});
 		$any++;
