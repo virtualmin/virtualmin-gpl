@@ -2666,8 +2666,8 @@ if (@cgimodes > 0) {
 print &ui_table_row(&hlink($text{'newweb_htmldir'}, "template_html_dir_def"),
 	&ui_opt_textbox("html_dir", $tmpl->{'web_html_dir'}, 20,
 			"$text{'default'} (<tt>public_html</tt>)<br>",
-			$text{'newweb_htmldir0'})."<br>\n".
-	("&nbsp;" x 3).$text{'newweb_htmldir0suf'});
+			$text{'newweb_htmldir0'})."<wbr>\n".
+			&vui_note($text{'newweb_htmldir0suf'}));
 local $hdir = $tmpl->{'web_html_dir'} || "public_html";
 
 # HTML directory permissions

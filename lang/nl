@@ -1431,7 +1431,7 @@ newweb_useryes=Ja, Apache gebruiker is
 newweb_userdef=Ja, vind Apache gebruiker automatisch
 newweb_htmldir=Gebruikers website subdirectory om aan te maken
 newweb_htmldir0=Directory onder de home
-newweb_htmldir0suf=(Moet overeenkomen met de DocumentRoot hierboven)
+newweb_htmldir0suf=Moet overeenkomen met de DocumentRoot hierboven
 newweb_htmlperms=Permissies op website subdirectory
 newweb_ehtmlperms=Ontbrekende of ongeldige permissies voor website subdirectory
 newweb_ehtml=Ontbrekende of ongeldige website subdirectory
@@ -1464,7 +1464,7 @@ newftp_undo=Ongedaan maken
 newftp_err=Mislukt om de ProFTPd template op te slaan
 newftp_dir=Anonieme FTP subdirectory maken
 newftp_dir0=Directory onder de home
-newftp_dir0suf=(Moet overeenkomen met de &lt;Anoniem&gt; sectie hierboven)
+newftp_dir0suf=Moet overeenkomen met de &lt;Anoniem&gt; sectie hierboven
 newftp_edir=Ontbrekende of ongeldige anonieme FTP subdirectory
 
 newdns_title=BIND DNS Template

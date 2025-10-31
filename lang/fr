@@ -1082,7 +1082,7 @@ newweb_user=Ajouter l'utilisateur Apache au groupe Unix des nouveaux serveurs ?
 newweb_useryes=Oui, l'utilisateur Apache est
 newweb_htmldir=Sous-répertoire à créer pour les utilisateurs du site
 newweb_htmldir0=Répertoire sous le répertoire utilisateur (home)
-newweb_htmldir0suf=(Doit correspondre à DocumentRoot ci-dessus)
+newweb_htmldir0suf=Doit correspondre à DocumentRoot ci-dessus
 newweb_ehtml=Sous-répertoire du site Web manquant ou incorrect
 newweb_statsdir=Sous-répertoire des statistiques Webalizer
 newweb_statsdir0=Répertoire sous $1
@@ -1102,7 +1102,7 @@ newftp_undo=Défaire
 newftp_err=La sauvegarde du template ProFTPd a échoué
 newftp_dir=Sous-répertoires FTP anonymes à créer
 newftp_dir0=Répertoire sous le répertoire utilisateur
-newftp_dir0suf=(doit correspondre à la section &lt;Anonyme&gt; ci-dessus)
+newftp_dir0suf=doit correspondre à la section &lt;Anonyme&gt; ci-dessus
 newftp_edir=Sous-répertoire FTP anonyme manquant ou incorrect
 
 newdns_title=Template DNS Bind

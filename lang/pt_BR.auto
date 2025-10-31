@@ -1750,7 +1750,7 @@ newweb_useryes=Sim, o usuário do Apache é
 newweb_userdef=Sim, encontre o usuário Apache automaticamente
 newweb_htmldir=Subdiretório do site dos usuários para criar
 newweb_htmldir0=Diretório em casa
-newweb_htmldir0suf=(Deve corresponder ao DocumentRoot acima)
+newweb_htmldir0suf=Deve corresponder ao DocumentRoot acima
 newweb_htmlperms=Permissões no subdiretório do site
 newweb_ehtmlperms=Permissões ausentes ou inválidas para o subdiretório do site
 newweb_ehtml=Subdiretório de site ausente ou inválido
@@ -1836,7 +1836,7 @@ newftp_undo=Desfazer
 newftp_err=Falha ao salvar o modelo ProFTPD
 newftp_dir=Subdiretório FTP anônimo para criar
 newftp_dir0=Diretório em casa
-newftp_dir0suf=(Deve corresponder à seção &lt;Anônimo&gt; acima)
+newftp_dir0suf=Deve corresponder à seção &lt;Anônimo&gt; acima
 newftp_edir=Subdiretório FTP anônimo ausente ou inválido
 
 newdns_title=Modelo DNS BIND
