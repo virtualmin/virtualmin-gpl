@@ -1482,7 +1482,7 @@ newweb_useryes=Ano, uživatel Apache je
 newweb_userdef=Ano, najděte uživatele Apache automaticky
 newweb_htmldir=Vytvoření podadresáře webových stránek uživatelů
 newweb_htmldir0=Adresář pod domovem
-newweb_htmldir0suf=(Musí odpovídat DocumentRoot výše)
+newweb_htmldir0suf=Musí odpovídat DocumentRoot výše
 newweb_htmlperms=Oprávnění v podadresáři webové stránky
 newweb_ehtmlperms=Chybějící nebo neplatná oprávnění pro podadresář webových stránek
 newweb_ehtml=Chybějící nebo neplatný podadresář webových stránek
@@ -1568,7 +1568,7 @@ newftp_undo=vrátit
 newftp_err=Uložení šablony ProFTPD se nezdařilo
 newftp_dir=Vytvořit anonymní podadresář FTP
 newftp_dir0=Adresář pod domovem
-newftp_dir0suf=(Musí odpovídat části &lt;Anonymous&gt; výše)
+newftp_dir0suf=Musí odpovídat části &lt;Anonymous&gt; výše
 newftp_edir=Chybějící nebo neplatný anonymní podadresář FTP
 
 newdns_title=Šablona BIND DNS

@@ -1276,7 +1276,7 @@ newweb_useryes=Sí, el usuario Apache es
 newweb_userdef=Si, buscar usuario de Apache automáticamente
 newweb_htmldir=Subdirectorio de sitio web de usuario a crear
 newweb_htmldir0=Directorio debajo del base
-newweb_htmldir0suf=(Debe coincidir con el DocumentRoot de más arriba)
+newweb_htmldir0suf=Debe coincidir con el DocumentRoot de más arriba
 newweb_htmlperms=Permisos en subdirectorio de website
 newweb_ehtmlperms=Permisos para subdirectorios de website inexistentes o inválidos
 newweb_ehtml=Subdirectorio de sitio web no ingresado o no válido
@@ -1302,7 +1302,7 @@ newftp_undo=Deshacer
 newftp_err=Falla al salvar la plantilla ProFTPd
 newftp_dir=Subdirectorio de FTP anónimo a crear
 newftp_dir0=Directorio dentro del base
-newftp_dir0suf=(Debe coincidir con la sección &lt;Anónimo&gt; de más arriba)
+newftp_dir0suf=Debe coincidir con la sección &lt;Anónimo&gt; de más arriba
 newftp_edir=Subdirectorio de FTP anónimo no ingresado o no válido
 
 newdns_title=Plantilla BIND DNS

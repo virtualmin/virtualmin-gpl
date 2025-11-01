@@ -1908,7 +1908,7 @@ newweb_useryes=Áno, používateľ Apache je
 newweb_userdef=Áno, nájsť používateľa Apache automaticky
 newweb_htmldir=Vytvoriť podadresár webových stránok používateľov
 newweb_htmldir0=Adresár pod domovom
-newweb_htmldir0suf=(Musí zodpovedať DocumentRoot vyššie)
+newweb_htmldir0suf=Musí zodpovedať DocumentRoot vyššie
 newweb_htmlperms=Povolenia v podadresári webovej stránky
 newweb_ehtmlperms=Chýbajúce alebo neplatné povolenia pre podadresár webových stránok
 newweb_ehtml=Chýbajúci alebo neplatný podadresár webových stránok
@@ -1994,7 +1994,7 @@ newftp_undo=Vrátenie späť
 newftp_err=Šablónu ProFTPD sa nepodarilo uložiť
 newftp_dir=Vytvoriť anonymný podadresár FTP
 newftp_dir0=Adresár pod domovom
-newftp_dir0suf=(Musí zodpovedať sekcii &lt;Anonymný&gt; vyššie)
+newftp_dir0suf=Musí zodpovedať sekcii &lt;Anonymný&gt; vyššie
 newftp_edir=Chýbajúci alebo neplatný anonymný podadresár FTP
 
 newdns_title=BIND DNS šablóna

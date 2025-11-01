@@ -558,8 +558,8 @@ print &ui_table_row(&hlink($text{'tmpl_ftp'}, "template_ftp"),
 print &ui_table_row(&hlink($text{'newftp_dir'}, "template_ftp_dir_def"),
 	&ui_opt_textbox("ftp_dir", $tmpl->{'ftp_dir'}, 20,
 			"$text{'default'} (<tt>ftp</tt>)",
-			$text{'newftp_dir0'}).
-	("&nbsp;" x 3).$text{'newftp_dir0suf'});
+			$text{'newftp_dir0'})."<wbr> \n".
+			&vui_note($text{'newftp_dir0suf'}));
 }
 
 # parse_template_ftp(&tmpl)

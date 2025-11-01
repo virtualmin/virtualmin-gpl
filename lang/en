@@ -1908,7 +1908,7 @@ newweb_useryes=Yes, Apache user is
 newweb_userdef=Yes, find Apache user automatically
 newweb_htmldir=Users' website subdirectory to create
 newweb_htmldir0=Directory under home
-newweb_htmldir0suf=(Must match DocumentRoot above)
+newweb_htmldir0suf=Must match DocumentRoot above
 newweb_htmlperms=Permissions on website subdirectory
 newweb_ehtmlperms=Missing or invalid permissions for website subdirectory
 newweb_ehtml=Missing or invalid website subdirectory
@@ -1994,7 +1994,7 @@ newftp_undo=Undo
 newftp_err=Failed to save ProFTPD template
 newftp_dir=Anonymous FTP subdirectory to create
 newftp_dir0=Directory under home
-newftp_dir0suf=(Must match <tt>&lt;Anonymous&gt;</tt> section above)
+newftp_dir0suf=Must match <tt>&lt;Anonymous&gt;</tt> section above
 newftp_edir=Missing or invalid anonymous FTP subdirectory
 
 newdns_title=BIND DNS Template

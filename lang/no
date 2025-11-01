@@ -1478,7 +1478,7 @@ newweb_useryes=Ja, Apache bruker er
 newweb_userdef=Ja, finn Apache bruker automatisk
 newweb_htmldir=Brukers nettsted-underkatalog som skal opprettes
 newweb_htmldir0=Katalog under hjemmekatalog
-newweb_htmldir0suf=(Må stemme med DocumentRoot ovenfor)
+newweb_htmldir0suf=Må stemme med DocumentRoot ovenfor
 newweb_htmlperms=Tillatelser på underkatalog for nettsted
 newweb_ehtmlperms=Manglende eller ugyldige tillatelser for nettsted underkatalog
 newweb_ehtml=Manglende eller ugyldig nettsted underkatalog
@@ -1514,7 +1514,7 @@ newftp_undo=Angre
 newftp_err=Kunne ikke lagre ProFTPd mal
 newftp_dir=Anonym FTP underkatalog som skal opprettes
 newftp_dir0=Katalog under hjemmekatalog
-newftp_dir0suf=(Må stemme med &lt;Anonym&gt; seksjonen ovenfor)
+newftp_dir0suf=Må stemme med &lt;Anonym&gt; seksjonen ovenfor
 newftp_edir=Manglende eller ugyldig underkatalog for anonym FTP
 
 newdns_title=BIND DNS mal

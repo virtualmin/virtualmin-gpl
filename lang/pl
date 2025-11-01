@@ -1866,7 +1866,7 @@ newweb_useryes=Tak, użytkownik Apache to
 newweb_userdef=Tak, znajdź użytkownika Apache automatycznie
 newweb_htmldir=Podkatalog strony użytkowników do utworzenia
 newweb_htmldir0=Katalog w katalogu domowym
-newweb_htmldir0suf=(Musi zgadzać się z DocumentRoot powyżej)
+newweb_htmldir0suf=Musi zgadzać się z DocumentRoot powyżej
 newweb_htmlperms=Uprawnienia do podkatalogu strony
 newweb_ehtmlperms=Brak lub nieprawidłowe uprawnienia dla podkatalogu strony
 newweb_ehtml=Brak lub nieprawidłowy podkatalog strony
@@ -1929,7 +1929,7 @@ newftp_undo=Cofnij
 newftp_err=Nie udało się zapisać szablonu ProFTPD
 newftp_dir=Podkatalog dla anonimowego FTP do utworzenia
 newftp_dir0=Katalog w katalogu domowym
-newftp_dir0suf=(Musi zgadzać się z sekcją <tt>&lt;Anonymous&gt;</tt> powyżej)
+newftp_dir0suf=Musi zgadzać się z sekcją <tt>&lt;Anonymous&gt;</tt> powyżej
 newftp_edir=Brak lub nieprawidłowy podkatalog dla anonimowego FTP
 
 newdns_title=Szablon DNS BIND

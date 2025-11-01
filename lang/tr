@@ -1065,7 +1065,7 @@ newweb_user=Yeni sunucular için Apache kullanýcýsý Unix grubuna eklensin mi?
 newweb_useryes=Evet, Apache kullanýcýsý
 newweb_htmldir=Oluþturulacak kullanýcý web sitesi altklasörü
 newweb_htmldir0=anaklasörün altýndaki klasör
-newweb_htmldir0suf=(Yukardaki DökümanKlasörüne eþlenmeli)
+newweb_htmldir0suf=Yukardaki DökümanKlasörüne eþlenmeli
 newweb_htmlperms=Web sitesi altklasöründeki izinler
 newweb_ehtmlperms=Web sitesi altklasör için eksik veya geçersiz izinler
 newweb_ehtml=Eksik veya geçersiz web sitesi altklasörü
@@ -1091,7 +1091,7 @@ newftp_undo=Geri Al
 newftp_err=ProFTPd þablonu kaydedilemedi
 newftp_dir=Oluþturulacak anonim FTP altklasörü
 newftp_dir0=anaklasörün altýndaki klasör
-newftp_dir0suf=(Yukardaki &lt;Anonim&gt; kýsmýyla eþlenmeli)
+newftp_dir0suf=Yukardaki &lt;Anonim&gt; kýsmýyla eþlenmeli
 newftp_edir=Eksik veya geçersiz anonim FTP altklasörü
 
 newdns_title=BIND DNS Þablonu

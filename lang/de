@@ -1901,7 +1901,7 @@ newweb_useryes=Ja, Apache-Benutzer ist
 newweb_userdef=Ja, Apache-Benutzer automatisch finden
 newweb_htmldir=Unterverzeichnis der Website der Benutzer erstellen
 newweb_htmldir0=Verzeichnis unter Home
-newweb_htmldir0suf=(Muss mit DocumentRoot oben übereinstimmen)
+newweb_htmldir0suf=Muss mit DocumentRoot oben übereinstimmen
 newweb_htmlperms=Berechtigungen für das Website-Unterverzeichnis
 newweb_ehtmlperms=Fehlende oder ungültige Berechtigungen für das Website-Unterverzeichnis
 newweb_ehtml=Fehlendes oder ungültiges Website-Unterverzeichnis
@@ -1985,7 +1985,7 @@ newftp_undo=Rückgängig
 newftp_err=Fehler beim Speichern der ProFTPD-Vorlage
 newftp_dir=Anonymes FTP-Unterverzeichnis erstellen
 newftp_dir0=Verzeichnis unter Home
-newftp_dir0suf=(Muss mit <tt>&lt;Anonymous&gt;</tt> Abschnitt oben übereinstimmen)
+newftp_dir0suf=Muss mit <tt>&lt;Anonymous&gt;</tt> Abschnitt oben übereinstimmen
 newftp_edir=Fehlendes oder ungültiges anonymes FTP-Unterverzeichnis
 
 newdns_title=BIND DNS-Vorlage

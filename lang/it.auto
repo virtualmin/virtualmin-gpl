@@ -1254,7 +1254,7 @@ newweb_desc=Utilizza questo modulo per modificare il modello delle direttive Apa
 newweb_err=Impossibile salvare il modello del sito Web
 newweb_user=Aggiungi l'utente Apache al gruppo Unix per i nuovi server?
 newweb_htmldir=Sottodirectory del sito Web degli utenti da creare
-newweb_htmldir0suf=(Deve corrispondere a DocumentRoot sopra)
+newweb_htmldir0suf=Deve corrispondere a DocumentRoot sopra
 newweb_ehtmlperms=Autorizzazioni mancanti o non valide per la sottodirectory del sito Web
 newweb_ehtml=Sottodirectory del sito Web mancante o non valida
 newweb_statsdir=Sottodirectory per le statistiche di Webalizer
@@ -1328,7 +1328,7 @@ newweb_ssl_connectivity=Controllare prima di richiedere il certificato
 newftp_ecannot=Non è consentito modificare il modello ProFTPD
 newftp_desc=Utilizzare questo modulo per modificare le direttive ProFTPD del modello che verranno utilizzate per i server FTP virtuali creati da Virtualmin. Le seguenti sottostazioni verranno eseguite quando il sito viene creato dal modello :
 newftp_dir=Sottodirectory FTP anonima da creare
-newftp_dir0suf=(Deve corrispondere alla sezione &lt;Anonimo&gt; sopra)
+newftp_dir0suf=Deve corrispondere alla sezione &lt;Anonimo&gt; sopra
 newftp_edir=Sottodirectory FTP anonima mancante o non valida
 
 newdns_title=Modello DNS BIND
