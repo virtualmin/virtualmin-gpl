@@ -4394,19 +4394,13 @@ $port ||= $d->{'web_port'};
 &require_apache();
 my @vips;
 if ($d->{'ip'}) {
-	my $vip = $config{'apache_star'} == 2 ? "*" :
-		     $config{'apache_star'} == 1 ? $d->{'ip'} :
-		     $d->{'name'} &&
-		       &is_shared_ip($d->{'ip'}) &&
-		       $nvstar ? "*" : $d->{'ip'};
+	my $vip = $d->{'name'} && &is_shared_ip($d->{'ip'}) && $nvstar ?
+			"*" : $d->{'ip'};
 	push(@vips, "$vip:$port");
 	}
 if ($d->{'ip6'}) {
-	my $vip6 = $config{'apache_star'} == 2 ? "*" :
-		      $config{'apache_star'} == 1 ? $d->{'ip6'} :
-		      $d->{'name'} &&
-		        &is_shared_ip($d->{'ip6'}) &&
-		        $nvstar6 ? "*" : $d->{'ip6'};
+	my $vip6 = $d->{'name'} && &is_shared_ip($d->{'ip6'}) && $nvstar6 ?
+			"*" : $d->{'ip6'};
 	if ($vip6 ne "*") {
 		# If already matching *:port for the IPv4 part, no need to
 		# repeat it for IPv6
