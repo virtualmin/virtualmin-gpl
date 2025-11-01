@@ -27,10 +27,16 @@ if ($virt) {
 			}
 		}
 
-	# Also check for FPM socket in a FilesMatch block
+	# Also check for FPM socket in a FilesMatch block (possibly inside
+	# an If)
 	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
 		next if ($f->{'words'}->[0] ne '\.php$');
-		foreach my $h (&apache::find_directive("SetHandler", $f->{'members'})) {
+		my @shm = @{$f->{'members'}};
+		foreach my $i (&apache::find_directive_struct(
+				"If", $f->{'members'})) {
+			push(@shm, @{$i->{'members'}});
+			}
+		foreach my $h (&apache::find_directive("SetHandler", \@shm)) {
 			if ($h =~ /proxy:fcgi:\/\/(localhost|127\.0\.0\.1)/ ||
 			    $h =~ /proxy:unix:/) {
 				return 'fpm';
