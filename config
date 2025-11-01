@@ -208,7 +208,6 @@ postfix_ssl=1
 mysql_ssl=1
 proftpd_ssl=1
 cert_type=sha2
-apache_star=0
 gzip_mysql=1
 show_preview=2
 show_uquotas=0
