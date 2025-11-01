@@ -8524,6 +8524,9 @@ acme_can1=Resellers
 acme_can2=Master admin only
 acme_edefault=The default Let's Encrypt provider cannot be edited
 acme_website=SSL provider's website
+acme_email=Email for new provider account
+acme_email_def=Virtualmin default ($1)
+acme_eemail=Missing or invalid-looking email address
 
 readonly_mode=The ability to make changes is disabled for your system at the moment. This mode is typically enabled manually by an administrator.
 

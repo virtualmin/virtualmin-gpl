@@ -3642,13 +3642,15 @@ $actype_reuse = -1 if (!$dcalgo || !$dclets);
 my @wilds = grep { /^\*\./ } @$dnames;
 &lock_file($ssl_letsencrypt_lock);
 &disable_quotas($d);
+my $acme_email = $acme ? $acme->{'email'} : undef;
+$acme_email ||= &get_global_from_address();
 foreach my $try (0, 1) {
 	@errs = ();
 	if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
 		# Try using website first
 		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 			$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
-			&get_global_from_address(), $actype, $actype_reuse,
+			$acme_email, $actype, $actype_reuse,
 			$server, $keytype, $hmac, $subset);
 		push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
 		}
@@ -3656,7 +3658,7 @@ foreach my $try (0, 1) {
 		# Fall back to DNS
 		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 			$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
-			&get_global_from_address(), $actype, $actype_reuse,
+			$acme_email, $actype, $actype_reuse,
 			$server, $keytype, $hmac, $subset);
 		push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
 		}
