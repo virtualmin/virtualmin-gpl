@@ -3953,7 +3953,6 @@ tmpl_editmode_resources=CPU and memory resource limits
 tmpl_editmode_avail=Administrator's Webmin modules
 tmpl_editmode_newuser=New mailbox email
 tmpl_editmode_updateuser=Updated mailbox email
-tmpl_noplugins=No plugins have defined any template options.
 tmpl_editmode_scripts=Default web app installers
 tmpl_cnext=Create and Next
 tmpl_snext=Save and Next

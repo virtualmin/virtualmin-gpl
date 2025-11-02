@@ -94,6 +94,8 @@ $config{'virt6'} = 1;
 @template_features = ( 'basic', 'resources', @features, 'virt', 'virtualmin',
 		       'plugins', 'scripts', 'autoconfig', 'php', 'avail',
 		       'newuser', 'updateuser', );
+@template_features = grep { $_ ne 'plugins' } @template_features
+	if (!&get_template_plugins());
 @template_features_effecting_webmin = ( 'web', 'webmin', 'avail' );
 @can_always_features = ( 'dir', 'unix', 'logrotate' );
 @validate_features = ( @features, "virt", "virt6" );
