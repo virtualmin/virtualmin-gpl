@@ -159,6 +159,8 @@ foreach $script (@scripts_sorted) {
 					   $vers[0]);
 			}
 		}
+	my $title = join(", ", @{$script->{'categories'}}) ||
+		    $text{'scripts_nocat'};
 	my @script_data = (
 	    $script->{'pro'} ? undef :
 	    { 'type' => 'radio', 'name' => 'script',
@@ -173,8 +175,14 @@ foreach $script (@scripts_sorted) {
 	      "value=\"".&quote_escape($script->{'name'})."\" ".
 	      "src=images/ok.gif ".
 	      "onClick='form.fhidden.value=\"$script->{'name'}\"'>",
-	    $script->{'longdesc'},
-	    join(", ", @{$script->{'categories'}})
+	    $script->{'longdesc'}
+	    	? 
+	    	    &ui_details({
+			class => 'inline',
+			html => 1,
+			title => $title."&nbsp;&nbsp;",
+			content => $script->{'longdesc'} })
+		: $title
 	    );
 	push(@script_data, ($script->{'pro'} ? 'Pro' : 'GPL'))
 		if ($show_list_of_pro_scripts_to_gpl);
@@ -184,7 +192,7 @@ foreach $script (@scripts_sorted) {
 
 # Show table of available scripts
 my @cols = ( "", $text{'scripts_name'}, $text{'scripts_ver'},
-	      $text{'scripts_longdesc'}, $text{'scripts_cats'});
+	     $text{'scripts_cats_longdesc'});
 push(@cols, $text{'scripts_can'})
 	if ($show_list_of_pro_scripts_to_gpl);
 
