@@ -17691,19 +17691,18 @@ else {
 	}
 }
 
-# get_template_plugins(&tmpl)
-# Returns HTML for plugin-specific template options or empty string
-sub get_template_plugins
+# has_template_plugins(&tmpl)
+# Returns 1 if show_template_plugins would display anything
+sub has_template_plugins
 {
 my ($tmpl) = @_;
-my $plugtmpl = "";
 foreach my $f (@plugins) {
 	if (&plugin_defined($f, "template_input") &&
 	    !&plugin_defined($f, "template_section")) {
-		$plugtmpl .= &plugin_call($f, "template_input", $tmpl);
+		return 1;
 		}
 	}
-return $plugtmpl;
+return 0;
 }
 
 # show_template_plugins(&tmpl)
@@ -17711,9 +17710,12 @@ return $plugtmpl;
 sub show_template_plugins
 {
 my ($tmpl) = @_;
-# Show plugin-specific template options
-my $plugtmpl = &get_template_plugins($tmpl);
-print $plugtmpl if ($plugtmpl);
+foreach my $f (@plugins) {
+	if (&plugin_defined($f, "template_input") &&
+	    !&plugin_defined($f, "template_section")) {
+		print &plugin_call($f, "template_input", $tmpl);
+		}
+	}
 }
 
 # parse_template_plugins(&tmpl)
@@ -17993,12 +17995,16 @@ if ($config{'mail_autoconfig'}) {
 # containing : code, description, &source-plugins
 sub list_template_editmodes
 {
-local ($tmpl) = @_;
-local @rv = grep { $sfunc = "show_template_".$_;
-                   defined(&$sfunc) &&
-                    ($config{$_} || !$isfeature{$_} || $_ eq 'mail' ||
-		     $_ eq 'web' || $_ eq 'ssl') }
-                 @template_features;
+my ($tmpl) = @_;
+foreach my $t (@template_features) {
+	my $sfunc = "show_template_".$t;
+	next if (!defined(&$sfunc));
+	next if ($t eq 'plugins' && !&has_template_plugins());
+	if ($config{$t} || !$isfeature{$t} ||
+	    $t eq 'mail' || $t eq 'web' || $t eq 'ssl') {
+		push(@rv, $t);
+		}
+	}
 if ($tmpl && ($tmpl->{'id'} == 1 || !$tmpl->{'for_parent'})) {
 	# For sub-servers only
 	@rv = grep { $_ ne 'resources' && $_ ne 'unix' && $_ ne 'webmin' &&
