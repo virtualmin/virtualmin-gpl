@@ -1049,7 +1049,20 @@ DIRNAME: foreach my $dirname ("listen-on", "listen-on-v6") {
 		last if ($found_port);
 		}
 	if (!$found_port) {
-		# Add a listen on port 853
+		if (!@listen) {
+			# Since no listen-on directives exist yet, if we just
+			# add one for port 853 the default of 53 will no longer
+			# be used! So we need to add one for port 53 explicity.
+			my $l = { 'name' => $dirname,
+				  'values' => [ 'port', 53 ],
+				  'type' => 1,
+				  'members' => [
+					{ 'name' => 'any' },
+					],
+				};
+			&bind8::save_directive($opts, [ ], [ $l ], 1);
+			}
+		# Add a listen on port 853 with the TLS cert
 		my $l = { 'name' => $dirname,
 			  'values' => [ 'port', 853, 'tls', $tlsname ],
 			  'type' => 1,
