@@ -20089,6 +20089,17 @@ if (&domain_has_ssl($d)) {
 		# Check for the alternate directive
 		$dir = "SSLCertificateChainFile";
 		($file) = &apache::find_directive($dir, $vconf);
+		if (!$file) {
+			# CA cert may be in the combined file
+			($file) = &apache::find_directive(
+					"SSLCertificateFile", $vconf);
+			if ($file) {
+				my @ccerts = &cert_file_split($file);
+				if (@ccerts > 1) {
+					return $d->{'ssl_ca'};
+					}
+				}
+			}
 		}
 	if ($type eq "cert" && $file eq $d->{'ssl_combined'} &&
 	    $d->{'ssl_cert'}) {
