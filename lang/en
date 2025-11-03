@@ -4575,6 +4575,7 @@ scripts_tabunsup=Install Un-Supported Version
 scripts_name=Web app
 scripts_ver=Version
 scripts_cats=Categories
+scripts_cats_longdesc=Categories and description
 scripts_path=Install path
 scripts_db=Using database
 scripts_nodb=None
