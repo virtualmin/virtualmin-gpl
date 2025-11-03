@@ -130,7 +130,7 @@ foreach my $ed (@edit_limits) {
 				 "&nbsp;".($text{'limits_edit_'.$ed} || $ed),
 				 $caps{$ed}, undef, $dis));
 	}
-$etable .= &ui_grid_table(\@grid, 2).
+$etable .= &vui_features_sorted_grid(\@grid).
 	   &ui_links_row([ &select_all_link("capabilities"),
 			   &select_invert_link("capabilities") ]);
 print &ui_table_row(&hlink($text{'tmpl_capabilities'},

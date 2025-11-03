@@ -17691,11 +17691,11 @@ else {
 	}
 }
 
-# show_template_plugins(&tmpl)
-# Outputs HTML for editing emplate options from plugins
-sub show_template_plugins
+# get_template_plugins(&tmpl)
+# Returns HTML for plugin-specific template options or empty string
+sub get_template_plugins
 {
-# Show plugin-specific template options
+my ($tmpl) = @_;
 my $plugtmpl = "";
 foreach my $f (@plugins) {
 	if (&plugin_defined($f, "template_input") &&
@@ -17703,12 +17703,17 @@ foreach my $f (@plugins) {
 		$plugtmpl .= &plugin_call($f, "template_input", $tmpl);
 		}
 	}
-if ($plugtmpl) {
-	print $plugtmpl;
-	}
-else {
-	print &ui_table_row(undef, "<b>$text{'tmpl_noplugins'}</b>");
-	}
+return $plugtmpl;
+}
+
+# show_template_plugins(&tmpl)
+# Outputs HTML for editing emplate options from plugins
+sub show_template_plugins
+{
+my ($tmpl) = @_;
+# Show plugin-specific template options
+my $plugtmpl = &get_template_plugins($tmpl);
+print $plugtmpl if ($plugtmpl);
 }
 
 # parse_template_plugins(&tmpl)
