@@ -438,8 +438,7 @@ print &ui_tabs_end_tab();
 
 # New key, cert and CA form
 print &ui_tabs_start_tab("mode", "new");
-print "$text{'cert_desc3'}<p>\n";
-print "$text{'cert_desc3a'}<p>\n";
+print "$text{'cert_desc3'} $text{'cert_desc3a'}<p>\n";
 
 print &ui_form_start("newkey.cgi", "form-data");
 print &ui_hidden("dom", $in{'dom'});
