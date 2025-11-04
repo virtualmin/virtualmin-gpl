@@ -4295,24 +4295,23 @@ foreach my $port ($d->{'web_port'},
 			  &apache::server_root($apache::config{'virt_file'}) :
 			  undef;
 			if ($dir eq $olddir && $dir eq $adddir) {
-				# Separate files in the add-to dir
+				# Rename the domain's file from xyz.com to
+				# 0-xyz.com to put it first
 				&apache::delete_webfile_link("$dir/$file");
 				&rename_logged("$dir/$file", "$dir/0-$file");
 				&apache::create_webfile_link("$dir/0-$file");
-				&apache::recursive_set_lines_files(
-					$virt->{'members'},
-					$virt->{'line'}+1,
-					"$dir/0-$file");
+				&recursive_set_apache_filename($conf,
+					"$dir/$file", "$dir/0-$file");
 				if ($oldfile =~ /^0-(.*)$/) {
+					# Rename any previous 0-xyz.com file
+					# to just xyz.com
 					&apache::delete_webfile_link(
 							"$dir/$oldfile");
 					&rename_logged("$dir/$oldfile",
 						       "$dir/$1");
 					&apache::create_webfile_link("$dir/$1");
-					&apache::recursive_set_lines_files(
-						$oldvirt->{'members'},
-						$oldvirt->{'line'}+1,
-						"$dir/$1");
+					&recursive_set_apache_filename($conf,
+						"$dir/$oldfile", "$dir/$1");
 					}
 				}
 			else {
@@ -4324,6 +4323,21 @@ foreach my $port ($d->{'web_port'},
 		}
 	}
 return undef;
+}
+
+# recursive_set_apache_filename(&conf, old-filename, new-filename)
+# Update all references to an old filename in the configs with a new filename,
+# after an Apache config file has been renamed
+sub recursive_set_apache_filename
+{
+my ($conf, $oldfile, $newfile) = @_;
+foreach my $dir (@$conf) {
+	$dir->{'file'} = $newfile if ($dir->{'file'} eq $oldfile);
+	if ($dir->{'type'}) {
+		&recursive_set_apache_filename(
+			$dir->{'members'}, $oldfile, $newfile);
+		}
+	}
 }
 
 # is_default_website(&domain)
