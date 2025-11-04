@@ -73,15 +73,23 @@ if (&domain_has_ssl_cert($d)) {
 
 	# Cert files
 	my @cert_files;
-	my @certs = ( ['cert_incert', 'ssl_cert'],
-		      ['cert_inkey', 'ssl_key'],
-		      ['cert_inca', 'ssl_chain'] );
+	my @certs = ( ['cert_incert', 'ssl_cert', 'cert'],
+		      ['cert_inkey', 'ssl_key', 'key'],
+		      ['cert_inca', 'ssl_chain', undef] );
 	foreach (@certs) {
-		my ($label_key, $field) = @$_;
+		my ($label_key, $field, $dtype) = @$_;
 		my $val = $d->{$field} or next;
-		push @cert_files,
-			&ui_tag('strong', $text{$label_key}).&ui_tag('br').
-			"&nbsp;<tt>$val</tt>";
+		my $line = &ui_tag('strong', $text{$label_key}).&ui_tag('br').
+			   "&nbsp;<tt>$val</tt>";
+		if ($dtype) {
+			my @dlinks = (
+				&ui_link("download_${dtype}.cgi/$dtype.pem?dom".
+					 "=$in{'dom'}", $text{'cert_pem'}),
+				&ui_link("download_${dtype}.cgi/$dtype.p12?dom".
+					 "=$in{'dom'}", $text{'cert_pkcs12'}));
+			$line .= &ui_tag('br')."&nbsp;".&ui_links_row(\@dlinks);
+			}
+		push(@cert_files, $line);
 		}
 	if (@cert_files) {
 		print &ui_table_row(
@@ -240,21 +248,6 @@ if (&domain_has_ssl_cert($d)) {
 			});
 		print &ui_table_row($text{'cert_svcs'}, $already, 3);
 		}
-
-	# Links to download
-	@dlinks = ( &ui_link("download_cert.cgi/cert.pem?dom=$in{'dom'}",
-			     $text{'cert_pem'}),
-		    &ui_link("download_cert.cgi/cert.p12?dom=$in{'dom'}",
-			     $text{'cert_pkcs12'}),
-		  );
-	print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
-	@dlinks = ( &ui_link("download_key.cgi/key.pem?dom=$in{'dom'}",
-			     $text{'cert_pem'}),
-		    &ui_link("download_key.cgi/key.p12?dom=$in{'dom'}",
-			     $text{'cert_pkcs12'}),
-		  );
-	print &ui_table_row($text{'cert_kdownload'},
-			    &ui_links_row(\@dlinks), 3);
 
 	# Can copy as global
 	my @gmissing;
