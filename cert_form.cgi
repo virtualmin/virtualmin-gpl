@@ -72,10 +72,27 @@ if (&domain_has_ssl_cert($d)) {
 	print &ui_table_start($text{'cert_header2'}, undef, 4);
 
 	# Cert files
-	print &ui_table_row($text{'cert_incert'},
-			    "<tt>$d->{'ssl_cert'}</tt>", 3);
-	print &ui_table_row($text{'cert_inkey'},
-			    "<tt>$d->{'ssl_key'}</tt>", 3);
+	my @cert_files;
+	my @certs = ( ['cert_incert', 'ssl_cert'],
+		      ['cert_inkey', 'ssl_key'],
+		      ['cert_inca', 'ssl_chain'] );
+	foreach (@certs) {
+		my ($label_key, $field) = @$_;
+		my $val = $d->{$field} or next;
+		push @cert_files,
+			&ui_tag('strong', $text{$label_key}).&ui_tag('br').
+			"&nbsp;<tt>$val</tt>";
+		}
+	if (@cert_files) {
+		print &ui_table_row(
+			$text{'cert_files'},
+			&ui_details({
+				html => 1,
+				class => 'inline fit',
+				title => &text('cert_filescnt',
+					scalar(@cert_files)),
+				content => join("<br>", @cert_files) }));
+		}
 
 	# Cert hash type
 	$type = &get_ssl_key_type($d->{'ssl_key'}, $d->{'ssl_pass'});
