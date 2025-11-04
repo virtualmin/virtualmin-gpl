@@ -692,7 +692,6 @@ else {
 		my $phdst = &public_html_dir($d);
 		my $cgisrc = &cgi_bin_dir($oldd);
 		my $cgidst = &cgi_bin_dir($d);
-		my $lref = &read_file_lines($virt->{'file'});
 		my $alogsrc = &get_apache_log($oldd->{'dom'},
 						 $oldd->{'web_port'}, 0);
 		my $elogsrc = &get_apache_log($oldd->{'dom'},

@@ -145,7 +145,6 @@ if (!$virt) {
 	&$second_print($text{'setup_esslcopy'});
 	return 0;
 	}
-local $srclref = &read_file_lines($virt->{'file'});
 
 # Double-check cert and key
 local $certdata = &read_file_contents($d->{'ssl_cert'});
@@ -1795,7 +1794,7 @@ elsif ($tmpl->{'ssl_combined_cert'} == 1) {
 	return 0;
 	}
 else {
-	return &compare_versions($apache::httpd_modules{'core'}, "2.4.8") >= 0;
+	return &compare_versions($apache::httpd_modules{'core'}, "2.4.6") >= 0;
 	}
 }
 
@@ -1812,11 +1811,11 @@ if (&apache_combined_cert($d)) {
 	}
 else {
 	push(@dirs, "SSLCertificateFile $d->{'ssl_cert'}");
+	if ($d->{'ssl_chain'}) {
+		push(@dirs, "SSLCACertificateFile $d->{'ssl_chain'}");
+		}
 	}
 push(@dirs, "SSLCertificateKeyFile $d->{'ssl_key'}");
-if ($d->{'ssl_chain'}) {
-	push(@dirs, "SSLCACertificateFile $d->{'ssl_chain'}");
-	}
 if ($tmpl->{'web_sslprotos'}) {
 	push(@dirs, "SSLProtocol ".$tmpl->{'web_sslprotos'});
 	}
@@ -2326,12 +2325,13 @@ my $p = &domain_has_website($d);
 if ($p) {
 	if ($p eq 'web' && &apache_combined_cert($d)) {
 		&save_website_ssl_file($d, "cert", $d->{'ssl_combined'});
+		&save_website_ssl_file($d, "ca", undef);
 		}
 	else {
 		&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
+		&save_website_ssl_file($d, "ca", $d->{'ssl_chain'});
 		}
 	&save_website_ssl_file($d, "key", $d->{'ssl_key'});
-	&save_website_ssl_file($d, "ca", $d->{'ssl_chain'});
 	}
 
 # Update any service certs for this domain
@@ -3637,7 +3637,8 @@ my $dcinfo = &cert_info($d);
 my $dclets = &is_acme_cert($d);
 my $dcalgo = $dcinfo->{'algo'};
 my $dctype = $dcalgo =~ /^ec/ ? "ecdsa" : "rsa";
-my $actype_reuse = $actype eq $dctype ? 1 : 0;
+my $actype_reuse = $actype eq $dctype &&
+		   $size == $dcinfo->{'size'} ? 1 : 0;
 $actype_reuse = -1 if (!$dcalgo || !$dclets);
 my @wilds = grep { /^\*\./ } @$dnames;
 &lock_file($ssl_letsencrypt_lock);
