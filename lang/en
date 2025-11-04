@@ -3331,6 +3331,7 @@ cert_ccn=Certificate authority name
 cert_o=Organization
 cert_city=City or locality
 cert_notafter=Expiry date
+cert_canotafter=CA certificate expiry date
 cert_type=Certificate type
 cert_typeself=Self-signed
 cert_typereal=Signed by CA
