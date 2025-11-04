@@ -316,7 +316,7 @@ if (&domain_has_ssl_cert($d)) {
 
 	# CA cert details
 	if ($chain) {
-		print &ui_table_hr();
+		my $ui_table_hr;
 		my $info = &cert_file_info($chain);
 		my @ca_cert_attributes = ('cn', 'notafter',
 		      grep { $_ ne 'cn' && $_ ne 'notafter' } @cert_attributes);
@@ -324,6 +324,7 @@ if (&domain_has_ssl_cert($d)) {
 			next if ($i eq 'modulus' || $i eq 'exponent');
 			if ($info->{$i} && !ref($info->{$i})) {
 				next if ($i eq 'type');
+				print &ui_table_hr() if (!$ui_table_hr++);
 				print &ui_table_row($text{'cert_c'.$i} ||
 					    $text{'cert_ca'.$i} ||
 					    $text{'cert_'.$i}, $info->{$i});
