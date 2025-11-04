@@ -1703,7 +1703,6 @@ cert_tabcurrent=当前证书
 cert_tabcsr=签名请求
 cert_tabnew=新证书
 cert_download=下载证书
-cert_pem=PEM格式..
 cert_edownload=没有找到任何SSL证书！
 
 csr_title=正在生成CSR

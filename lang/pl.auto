@@ -120,11 +120,17 @@ restore_eacme2=..oryginalny dostawca SSL określony w kopii zapasowej nie istnie
 
 restore_webminsame=.. pominięcie przywracania do oryginalnej bazy danych użytkowników Webmin $1 w trybie replikacji
 
+cert_files=Ścieżki certyfikatów i pobieranie
+cert_filescnt=$1 plików
+cert_inca=Plik urzędu certyfikacji SSL
+cert_canotafter=Data wygaśnięcia certyfikatu CA
 cert_desc3a=Jeśli nowy certyfikat pochodzi od urzędu certyfikacji posiadającego własny certyfikat, należy go także jednocześnie zainstalować tutaj.
 cert_newcertkeep=Zachowaj istniejący certyfikat
 cert_newca=Certyfikat CA
 cert_newcakeep=Zachowaj istniejący certyfikat
 cert_tabacme=Dostawcy SSL
+cert_pem=Pobierz PEM
+cert_pkcs12=Pobierz PKCS12
 cert_also_title=Używane również przez
 cert_also_desc1=1 domena
 cert_also_desc2=$1 domen

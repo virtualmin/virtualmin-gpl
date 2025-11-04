@@ -37,6 +37,12 @@ backup_eplugin_domain=Sie dürfen diese Domäne nicht sichern
 
 restore_onlyfeats=Nur ausgewählte Funktionen wiederherstellen?
 
+cert_files=Zertifikatspfade und Downloads
+cert_filescnt=$1 Dateien
+cert_inca=SSL-Zertifikatsdatei
+cert_canotafter=Ablaufdatum des CA-Zertifikats
+cert_pem=PEM herunterladen
+cert_pkcs12=PKCS12 herunterladen
 cert_also_title=Wird auch verwendet von
 cert_also_desc1=1 Domäne
 cert_also_desc2=$1 Domänen
