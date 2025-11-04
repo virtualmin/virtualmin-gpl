@@ -3422,8 +3422,8 @@ cert_type_ec=ECC
 cert_type_rsa=RSA
 cert_letsok=Request Certificate
 cert_letsonly=Only Update Renewal
-cert_desc9=SSL certificate providers like Let's Encrypt can be used to automatically request a valid cert for use by Virtualmin.
-cert_acmedesc=This page can be used to request a new certificate, which will overwrite any other you currently have configured for this domain. However, SSL certificate providers require that your ownership of the certificate domain be validated by checking that this system hosts the website for the domain. This is done by placing a small temporary file under the website's document directory $1.
+cert_desc9=This form lets you request a new SSL certificate from a trusted certificate authority, which will replace any other that are currently configured for this domain.
+cert_acmedesc=SSL certificate providers (authorities) like Let's Encrypt or ZeroSSL can automatically issue valid SSL certificates for use with this domain. Keep in mind that domain ownership verification is required, which is done automatically by placing a temporary file in the website's document directory $1 or, if DNS is managed by this system, by adding a DNS TXT record to confirm that this system hosts the domain.
 cert_acmelink=You can add and manage additional providers on the <a href='$1'>SSL Providers</a> page.
 cert_elets=However, it cannot be used on your system : $1
 cert_dnamefor=Request certificate for

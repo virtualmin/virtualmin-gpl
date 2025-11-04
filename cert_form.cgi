@@ -497,26 +497,30 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 	&foreign_require("webmin");
 	$err = &webmin::check_letsencrypt();
 	print &ui_tabs_start_tab("mode", "lets");
-	print "$text{'cert_desc9'}\n";
-	if  (defined(&can_acme_providers) && &can_acme_providers()) {
-		print &text('cert_acmelink',
-			    'pro/edit_newacmes.cgi'),"\n";
-		}
-	print "<p>\n";
-
 	if ($err) {
-		print &text('cert_elets', $err),"<p>\n";
+		print $text{'cert_desc9'}.&ui_tag('p');
+		print &ui_alert_box(&text('cert_elets', $err), 'warn',
+			undef, undef, "");
 		if (&master_admin() &&
 		    defined(&webmin::get_letsencrypt_install_message)) {
 			my $msg = &webmin::get_letsencrypt_install_message(
-				"/$module_name/cert_form.cgi?dom=$d->{'id'}&mode=$in{'mode'}",
-				$text{'cert_title'});
+				"/$module_name/cert_form.cgi?dom=$d->{'id'}".
+				"&mode=$in{'mode'}", $text{'cert_title'});
 			print $msg,"<p>\n";
 			}
 		}
 	else {
 		$phd = &public_html_dir($d);
-		print &text('cert_acmedesc', "<tt>$phd</tt>"),"<p>\n";
+		my $catexts = &text('cert_acmedesc', "<tt>$phd</tt>");
+		if  (defined(&can_acme_providers) && &can_acme_providers()) {
+			$catexts .= &ui_tag('br').&text('cert_acmelink',
+				'pro/edit_newacmes.cgi');
+			}
+		print &ui_details({
+			class => 'inline',
+			html => 1,
+			title => $text{'cert_desc9'},
+			content => $catexts });
 
 		print &ui_form_start("letsencrypt.cgi");
 		print &ui_hidden("dom", $in{'dom'});
