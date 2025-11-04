@@ -73,21 +73,57 @@ if (&domain_has_ssl_cert($d)) {
 
 	# Cert files
 	my @cert_files;
+	my $filemin_prefix;
+	my @filemin_allowed;
+	my %filemin_acls;
+	if (&foreign_available("filemin")) {
+		$filemin_prefix = &get_webprefix_safe().
+			"/filemin/index.cgi?path=";
+		&foreign_require("filemin");
+		&filemin::get_paths();
+		@filemin_allowed = @filemin::allowed_paths;
+		%filemin_acls = %filemin::access;
+		}
+
 	my @certs = ( ['cert_incert', 'ssl_cert', 'cert'],
 		      ['cert_inkey', 'ssl_key', 'key'],
 		      ['cert_inca', 'ssl_chain', undef] );
 	foreach (@certs) {
 		my ($label_key, $field, $dtype) = @$_;
-		my $val = $d->{$field} or next;
-		my $line = &ui_tag('strong', $text{$label_key}).&ui_tag('br').
-			   "&nbsp;<tt>$val</tt>";
+		my $val = $d->{$field} or next;		
+		my $file = &ui_tag('tt', $val);
+		
+		# File name for file manager if available
+		if ($filemin_prefix && @filemin_allowed) {
+			my $dir = $val;
+			$dir =~ s{/[^/]*$}{};
+			my $rel;
+			for my $root (@filemin_allowed) {
+				if (&is_under_directory($root, $dir)) {
+					$rel = $dir;
+					if ($filemin_acls{'work_as_user'} eq
+					    $d->{'user'}) {
+						$rel =~ s/^\Q$root\E//;
+						}
+					last;
+					}
+				}
+			if (defined $rel) {
+				my $p = &urlize($rel);
+				$file = &ui_link("$filemin_prefix$p", $file,
+						 'text-link');
+				}
+			}
+		
+		my $line = &ui_tag('strong',
+			$text{$label_key}).&ui_tag('br').$file;
 		if ($dtype) {
 			my @dlinks = (
 				&ui_link("download_${dtype}.cgi/$dtype.pem?dom".
 					 "=$in{'dom'}", $text{'cert_pem'}),
 				&ui_link("download_${dtype}.cgi/$dtype.p12?dom".
 					 "=$in{'dom'}", $text{'cert_pkcs12'}));
-			$line .= &ui_tag('br')."&nbsp;".&ui_links_row(\@dlinks);
+			$line .= &ui_tag('br').&ui_links_row(\@dlinks);
 			}
 		push(@cert_files, $line);
 		}
