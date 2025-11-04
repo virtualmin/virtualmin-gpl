@@ -1052,7 +1052,7 @@ DIRNAME: foreach my $dirname ("listen-on", "listen-on-v6") {
 		if (!@listen) {
 			# Since no listen-on directives exist yet, if we just
 			# add one for port 853 the default of 53 will no longer
-			# be used! So we need to add one for port 53 explicity.
+			# be used! So we need to add one for port 53 explicitly.
 			my $l = { 'name' => $dirname,
 				  'values' => [ 'port', 53 ],
 				  'type' => 1,
