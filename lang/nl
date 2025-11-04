@@ -2771,7 +2771,6 @@ tmpl_editmode_limits=Standaard domein eigenaar limieten
 tmpl_editmode_phpwrappers=PHP wrapper scripts
 tmpl_editmode_resources=CPU en geheugen bron limieten
 tmpl_editmode_avail=Administrator's Webmin modules
-tmpl_noplugins=Er zijn geen plugins gedefinieerd bij de template opties.
 tmpl_cnext=Maken en Volgende
 tmpl_snext=Opslaan en Volgende
 tmpl_bouncealias=Email afketsen naar een ongeldig adres
@@ -3109,7 +3108,6 @@ licence_ecannot=U bent niet bevoegd om de Virtualmin licentie te controleren
 config_deftheme=Globale Webmin standaard
 config_oldtheme=Oude Webmin thema
 
-scripts_longdesc=Omschrijving
 scripts_overall=Waardering
 scripts_ok=Installatie Opties Tonen
 scripts_un=Bekijk Opties

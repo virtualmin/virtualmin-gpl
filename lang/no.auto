@@ -914,8 +914,8 @@ cert_type_ec=Elliptisk kurve
 cert_type_rsa=RSA
 cert_letsok=Be om sertifikat
 cert_letsonly=Bare oppdater fornyelse
-cert_desc9=SSL-sertifikatleverandører som Let's Encrypt kan brukes til automatisk å be om et gyldig sertifikat for bruk av Virtualmin.
-cert_acmedesc=Denne siden kan brukes til å be om et nytt sertifikat, som vil overskrive alle andre du har konfigurert for dette domenet. SSL-sertifikatleverandører krever imidlertid at ditt eierskap av sertifikatdomenet valideres ved å sjekke at dette systemet er vert for nettstedet for domenet. Dette gjøres ved å plassere en liten midlertidig fil under nettsidens dokumentkatalog $1.
+cert_desc9=Dette skjemaet lar deg be om et nytt SSL-sertifikat fra en klarert sertifiseringsinstans, som vil erstatte alle andre som for øyeblikket er konfigurert for dette domenet.
+cert_acmedesc=SSL-sertifikatleverandører (myndigheter) som Let's Encrypt eller ZeroSSL kan automatisk utstede gyldige SSL-sertifikater for bruk med dette domenet. Husk at verifisering av domeneeierskap er nødvendig, noe som gjøres automatisk ved å plassere en midlertidig fil i nettstedets dokumentkatalog $1, eller, hvis DNS administreres av dette systemet, ved å legge til en DNS TXT-post for å bekrefte at dette systemet er vert for domenet.
 cert_acmelink=Du kan legge til og administrere flere leverandører på <a href='$1'>SSL-leverandører</a>-siden.
 cert_elets=Den kan imidlertid ikke brukes på systemet ditt : $1 
 cert_dnamefor=Be om attest for
@@ -954,6 +954,8 @@ newkey_savingca=Lagrer CA-sertifikat ..
 newkey_ecamatch=CA-sertifikatet samsvarer ikke med underskriveren av domenesertifikatet
 newkey_enewcafile=Kunne ikke lese CA-sertifikatfilen $1
 newkey_enewcafilehome=CA-sertifikatfilen $1 må være under den virtuelle serverens hjemmekatalog
+
+newbw_email_def=Webmin-standard ($1)
 
 newtmpl_tdoms=Brukes av servere
 newtmpl_useby=Til bruk av
@@ -1252,7 +1254,7 @@ scripts_tabexisting=Installerte webapper
 scripts_tabnew=Tilgjengelige webapper
 scripts_tabunsup=Installer ikke-støttet versjon
 scripts_name=Webapp
-scripts_cats=kategorier
+scripts_cats_longdesc=Kategorier og beskrivelse
 scripts_uninstalls=Avinstaller utvalgte webapper
 scripts_upgrades=Oppgrader utvalgte nettapper
 scripts_needmod=Installerer nødvendig PHP $1-modul ..
@@ -2816,6 +2818,9 @@ acme_can1=Forhandlere
 acme_can2=Kun hovedadministrator
 acme_edefault=Standard Let's Encrypt-leverandør kan ikke redigeres
 acme_website=SSL-leverandørens nettsted
+acme_email=E-post for ny leverandørkonto
+acme_email_def=Virtualmin-standard ($1)
+acme_eemail=Manglende eller ugyldig e-postadresse
 
 readonly_mode=Muligheten til å gjøre endringer er deaktivert for systemet ditt for øyeblikket. Denne modusen aktiveres vanligvis manuelt av en administrator.
 

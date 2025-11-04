@@ -1751,8 +1751,8 @@ cert_type_ec=橢圓曲線
 cert_type_rsa=RSA
 cert_letsok=索取證書
 cert_letsonly=僅更新續訂
-cert_desc9=像 Let's Encrypt 這樣的 SSL 憑證提供者可用於自動要求有效的憑證以供 Virtualmin 使用。
-cert_acmedesc=此頁面可用於要求新證書，該證書將覆蓋您目前為此網域配置的任何其他證書。但是，SSL 憑證提供者要求透過檢查該系統是否託管該網域的網站來驗證您對憑證網域的所有權。這是透過在網站的文檔目錄 $1 下放置一個小的臨時檔案來完成的。
+cert_desc9=此表單可讓您向受信任的憑證授權單位申請新的 SSL 證書，該證書將取代目前為此網域配置的任何其他證書。
+cert_acmedesc=像 Let's Encrypt 或 ZeroSSL 這樣的 SSL 憑證提供者（機構）可以自動為該網域頒發有效的 SSL 憑證。請注意，需要進行網域名稱所有權驗證，驗證會自動完成：在網站的文件目錄 $1 中放置一個臨時檔案；或者，如果 DNS 由該系統管理，則會新增 DNS TXT 記錄來確認系統託管了該網域名稱。
 cert_acmelink=您可以在<a href='$1'>SSL 提供者</a>頁面上新增和管理其他提供者。
 cert_elets=但是，它不能在您的系統上使用： $1
 cert_dnamefor=申請證書
@@ -1810,6 +1810,7 @@ newkey_ekeysame=不要輸入CSR生成的密鑰的路徑-而是使用<b>“應用
 
 newbw_step=收集之間的小時數
 newbw_backup=在使用中包括備份傳輸嗎？
+newbw_email_def=Webmin 預設值 ($1)
 newbw_estep=收集之間的小時數必須為1到24之間的數字
 newbw_allunder=所有虛擬服務器都在其帶寬限制內。
 newbw_mailout=在帶寬使用情況中包括傳出電子郵件？
@@ -2388,7 +2389,7 @@ scripts_tabexisting=已安裝的網路應用程式
 scripts_tabnew=可用的網路應用程式
 scripts_tabunsup=安裝不支援的版本
 scripts_name=網路應用程式
-scripts_cats=分類目錄
+scripts_cats_longdesc=類別和描述
 scripts_db=使用數據庫
 scripts_nodb=沒有
 scripts_uninstalls=解除安裝選定的 Web 應用程式
@@ -5514,6 +5515,9 @@ acme_can1=經銷商
 acme_can2=限主管理員
 acme_edefault=無法編輯預設的 Let's Encrypt 提供者
 acme_website=SSL 提供者的網站
+acme_email=新供應商帳戶的電子郵件
+acme_email_def=Virtualmin 預設設定 ($1)
+acme_eemail=缺少或無效的電子郵件地址
 
 readonly_mode=您的系統目前無法進行更改。此模式通常由管理員手動啟用。
 

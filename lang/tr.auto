@@ -1873,8 +1873,8 @@ cert_type_ec=eliptik eğri
 cert_type_rsa=RSA
 cert_letsok=Sertifika İste
 cert_letsonly=Yalnızca Güncelleme Yenileme
-cert_desc9=Let's Encrypt gibi SSL sertifika sağlayıcıları, Virtualmin tarafından kullanılmak üzere geçerli bir sertifikanın otomatik olarak talep edilmesi için kullanılabilir.
-cert_acmedesc=Bu sayfa, bu etki alanı için şu anda yapılandırdığınız diğer tüm sertifikaları geçersiz kılacak yeni bir sertifika talep etmek için kullanılabilir. Ancak, SSL sertifika sağlayıcıları, sertifika etki alanının sahipliğinin, bu sistemin etki alanı için web sitesini barındırdığını kontrol ederek doğrulanmasını gerektirir. Bu, web sitesinin belge dizini $1 altına küçük bir geçici dosya yerleştirilerek yapılır.
+cert_desc9=Bu form, bu etki alanı için şu anda yapılandırılmış olan diğerlerinin yerine geçecek, güvenilir bir sertifika yetkilisinden yeni bir SSL sertifikası talep etmenize olanak tanır.
+cert_acmedesc=Let's Encrypt veya ZeroSSL gibi SSL sertifika sağlayıcıları (yetkilileri), bu alan adıyla kullanılmak üzere otomatik olarak geçerli SSL sertifikaları verebilir. Alan adı sahipliğinin doğrulanması gerektiğini unutmayın. Bu doğrulama, web sitesinin belge dizinine $1 geçici bir dosya yerleştirilerek veya DNS bu sistem tarafından yönetiliyorsa, bu sistemin alan adını barındırdığını doğrulamak için bir DNS TXT kaydı eklenerek otomatik olarak yapılır.
 cert_acmelink=<a href='$1'>SSL Sağlayıcıları</a> sayfasında ek sağlayıcılar ekleyebilir ve yönetebilirsiniz.
 cert_elets=Ancak, sisteminizde kullanılamaz : $1 
 cert_dnamefor=İçin sertifika isteyin
@@ -1932,6 +1932,7 @@ newkey_ekeysame=CSR ile oluşturulan anahtarın yolunu girmeyin; bunun yerine <b
 
 newbw_step=Koleksiyon saatleri
 newbw_backup=Yedek aktarımlar kullanıma dahil edilsin mi?
+newbw_email_def=Webmin varsayılanı ($1)
 newbw_maxdays=Bant genişliği verilerinin saklanacağı gün sayısı
 newbw_maxdaysdef=Varsayılan (1 yıl)
 newbw_estep=Toplama arasındaki saatler 1'den 24'e kadar bir sayı olmalıdır
@@ -2554,7 +2555,7 @@ scripts_tabexisting=Yüklü Web Uygulamaları
 scripts_tabnew=Mevcut Web Uygulamaları
 scripts_tabunsup=Desteklenmeyen Sürümü Yükle
 scripts_name=İnternet uygulaması
-scripts_cats=Kategoriler
+scripts_cats_longdesc=Kategoriler ve açıklamalar
 scripts_db=Veritabanını kullanma
 scripts_nodb=Yok
 scripts_uninstalls=Seçilen Web Uygulamalarını Kaldırma
@@ -6003,6 +6004,9 @@ acme_can1=Bayiler
 acme_can2=Yalnızca ana yönetici
 acme_edefault=Varsayılan Let's Encrypt sağlayıcısı düzenlenemez
 acme_website=SSL sağlayıcının web sitesi
+acme_email=Yeni sağlayıcı hesabı için e-posta
+acme_email_def=Virtualmin varsayılanı ($1)
+acme_eemail=Eksik veya geçersiz görünen e-posta adresi
 
 readonly_mode=Şu anda sisteminiz için değişiklik yapma yeteneği devre dışıdır. Bu mod genellikle bir yönetici tarafından manuel olarak etkinleştirilir.
 

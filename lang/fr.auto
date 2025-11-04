@@ -1660,8 +1660,8 @@ cert_type_ec=Courbe elliptique
 cert_type_rsa=RSA
 cert_letsok=Demander un certificat
 cert_letsonly=Renouveler uniquement la mise à jour
-cert_desc9=Les fournisseurs de certificats SSL comme Let's Encrypt peuvent être utilisés pour demander automatiquement un certificat valide à utiliser par Virtualmin.
-cert_acmedesc=Cette page peut être utilisée pour demander un nouveau certificat, qui remplacera tout autre certificat actuellement configuré pour ce domaine. Cependant, les fournisseurs de certificats SSL exigent que votre propriété du domaine de certificat soit validée en vérifiant que ce système héberge le site Web du domaine. Pour ce faire, il suffit de placer un petit fichier temporaire dans le répertoire de documents $1 du site Web.
+cert_desc9=Ce formulaire vous permet de demander un nouveau certificat SSL auprès d'une autorité de certification de confiance, qui remplacera tout autre certificat actuellement configuré pour ce domaine.
+cert_acmedesc=Les fournisseurs de certificats SSL (autorités de certification) tels que Let's Encrypt ou ZeroSSL peuvent délivrer automatiquement des certificats SSL valides pour ce domaine. Veuillez noter que la vérification de la propriété du domaine est requise. Cette vérification est effectuée automatiquement par le placement d'un fichier temporaire dans le répertoire $1 du site web ou, si le DNS est géré par ce système, par l'ajout d'un enregistrement TXT DNS confirmant que ce système héberge bien le domaine.
 cert_acmelink=Vous pouvez ajouter et gérer des fournisseurs supplémentaires sur la page <a href='$1'>Fournisseurs SSL</a>.
 cert_elets=Cependant, il ne peut pas être utilisé sur votre système : $1 
 cert_dnamefor=Demander un certificat pour
@@ -1720,6 +1720,7 @@ newkey_ekeysame=N'entrez pas le chemin d'accès à la clé générée avec une C
 
 newbw_step=Heures entre la collecte
 newbw_backup=Inclure les transferts de sauvegarde dans l'utilisation?
+newbw_email_def=Par défaut de Webmin ($1)
 newbw_maxdays=Nombre de jours pour conserver les données de bande passante
 newbw_maxdaysdef=Par défaut (1 an)
 newbw_estep=Les heures entre la collecte doivent être un nombre de 1 à 24
@@ -2075,7 +2076,6 @@ tmpl_editmode_resources=Limites de ressources CPU et mémoire
 tmpl_editmode_avail=Modules Webmin de l'administrateur
 tmpl_editmode_newuser=Nouvel e-mail de boîte aux lettres
 tmpl_editmode_updateuser=E-mail de boîte aux lettres mis à jour
-tmpl_noplugins=Aucun plugin n'a défini d'options de modèle.
 tmpl_editmode_scripts=Installateurs d'applications Web par défaut
 tmpl_cnext=Créer et suivant
 tmpl_snext=Enregistrer et suivant
@@ -2549,7 +2549,7 @@ scripts_tabexisting=Applications Web installées
 scripts_tabnew=Applications Web disponibles
 scripts_tabunsup=Installer une version non prise en charge
 scripts_name=Application Web
-scripts_cats=Les catégories
+scripts_cats_longdesc=Catégories et description
 scripts_uninstalls=Désinstaller les applications Web sélectionnées
 scripts_upgrades=Mettre à niveau les applications Web sélectionnées
 scripts_needmod=Installation du module PHP $1 requis ..
@@ -5927,6 +5927,9 @@ acme_can1=Revendeurs
 acme_can2=Administrateur principal uniquement
 acme_edefault=Le fournisseur Let's Encrypt par défaut ne peut pas être modifié
 acme_website=Site Web du fournisseur SSL
+acme_email=Adresse e-mail pour le nouveau compte fournisseur
+acme_email_def=Par défaut de Virtualmin ($1)
+acme_eemail=Adresse e-mail manquante ou invalide
 
 readonly_mode=La possibilité d'effectuer des modifications est actuellement désactivée sur votre système. Ce mode est généralement activé manuellement par un administrateur.
 

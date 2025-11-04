@@ -1060,8 +1060,8 @@ cert_type_ec=Elliptische kromme
 cert_type_rsa=RSA
 cert_letsok=Certificaat aanvragen
 cert_letsonly=Alleen vernieuwing bijwerken
-cert_desc9=SSL-certificaataanbieders zoals Let's Encrypt kunnen worden gebruikt om automatisch een geldig certificaat aan te vragen voor gebruik door Virtualmin.
-cert_acmedesc=Deze pagina kan worden gebruikt om een nieuw certificaat aan te vragen, dat alle andere certificaten die u momenteel voor dit domein hebt geconfigureerd, zal overschrijven. SSL-certificaatproviders vereisen echter dat uw eigenaarschap van het certificaatdomein wordt gevalideerd door te controleren of dit systeem de website voor het domein host. Dit wordt gedaan door een klein tijdelijk bestand onder de documentdirectory $1 van de website te plaatsen.
+cert_desc9=Met dit formulier kunt u een nieuw SSL-certificaat aanvragen bij een vertrouwde certificeringsinstantie. Dit certificaat vervangt alle andere certificaten die momenteel voor dit domein zijn geconfigureerd.
+cert_acmedesc=SSL-certificaataanbieders (autoriteiten) zoals Let's Encrypt of ZeroSSL kunnen automatisch geldige SSL-certificaten uitgeven voor gebruik met dit domein. Houd er rekening mee dat domeineigendomsverificatie vereist is. Dit gebeurt automatisch door een tijdelijk bestand in de documentdirectory $1 van de website te plaatsen of, als DNS door dit systeem wordt beheerd, door een DNS TXT-record toe te voegen om te bevestigen dat dit systeem het domein host.
 cert_acmelink=U kunt extra providers toevoegen en beheren op de pagina <a href='$1'>SSL-providers</a>.
 cert_elets=Het kan echter niet worden gebruikt op uw systeem : $1
 cert_dnamefor=Certificaat aanvragen voor
@@ -1109,6 +1109,8 @@ newkey_enewcafilehome=CA-certificaatbestand $1 moet zich in de thuismap van de v
 newkey_apache=Webserver configureren om een nieuw certificaat en nieuwe sleutel te gebruiken.
 newkey_enewkeycsr=Geen SSL-sleutel gegenereerd op hetzelfde moment dat een ondertekeningsverzoek werd gevonden!
 newkey_ekeysame=Voer niet het pad in naar de sleutel die is gegenereerd met een CSR - gebruik in plaats daarvan het tabblad <b>Ondertekend certificaat toepassen</b>.
+
+newbw_email_def=Webmin-standaard ($1)
 
 newtmpl_tdoms=Gebruikt door servers
 newtmpl_useby=Voor gebruik door
@@ -1464,7 +1466,7 @@ scripts_tabexisting=Geïnstalleerde webapps
 scripts_tabnew=Beschikbare webapps
 scripts_tabunsup=Installeer een niet-ondersteunde versie
 scripts_name=Web applicatie
-scripts_cats=Categorieën
+scripts_cats_longdesc=Categorieën en beschrijving
 scripts_uninstalls=De-installeer geselecteerde webapps
 scripts_upgrades=Upgrade geselecteerde webapps
 scripts_needmod=Benodigde PHP $1 module installeren ..
@@ -3354,6 +3356,9 @@ acme_can1=Wederverkopers
 acme_can2=Alleen hoofdbeheerder
 acme_edefault=De standaard Let's Encrypt-provider kan niet worden bewerkt
 acme_website=Website van SSL-provider
+acme_email=E-mailadres voor nieuw provideraccount
+acme_email_def=Standaardwaarde Virtualmin ($1)
+acme_eemail=Ontbrekend of ongeldig ogend e-mailadres
 
 readonly_mode=De mogelijkheid om wijzigingen aan te brengen is momenteel uitgeschakeld voor uw systeem. Deze modus wordt meestal handmatig ingeschakeld door een beheerder.
 

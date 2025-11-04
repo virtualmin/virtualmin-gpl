@@ -1986,7 +1986,6 @@ tmpl_editmode_basic=基本設置和使用
 tmpl_editmode_virtualmin=虛擬服務器創建
 tmpl_editmode_plugins=插件選項
 tmpl_editmode_limits=缺省域所有者權限
-tmpl_noplugins=沒有任何插件定義了模板選項
 tmpl_cnext=創建和下一步
 tmpl_snext=保存和下一步
 tmpl_bouncealias=退信郵件地址無效
@@ -2220,7 +2219,6 @@ licence_ecannot=你不運行重新檢查Virtualmin許可証
 config_deftheme=全局Webmin缺省主題
 config_oldtheme=以前的Webmin主題
 
-scripts_longdesc=描述
 scripts_overall=評分
 scripts_ok=顯示安裝選項
 scripts_un=顯示選項

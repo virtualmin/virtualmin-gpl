@@ -132,8 +132,8 @@ cert_svcsglob=Globalnie według
 cert_svcsbydom=Według domeny
 cert_svcsbyip=Według IP
 cert_service_bind=WIĄZAĆ
-cert_desc9=Dostawcy certyfikatów SSL, np. Let's Encrypt, mogą być wykorzystywani do automatycznego żądania ważnego certyfikatu do użytku przez Virtualmin.
-cert_acmedesc=Ta strona może zostać użyta do żądania nowego certyfikatu, który nadpisze każdy inny, który aktualnie skonfigurowałeś dla tej domeny. Jednak dostawcy certyfikatów SSL wymagają, aby Twoje prawo własności do domeny certyfikatu zostało zweryfikowane poprzez sprawdzenie, czy ten system hostuje witrynę dla tej domeny. Odbywa się to poprzez umieszczenie małego pliku tymczasowego w katalogu dokumentów witryny $1.
+cert_desc9=Ten formularz umożliwia złożenie wniosku o nowy certyfikat SSL od zaufanego urzędu certyfikacji. Zastąpi on wszystkie inne certyfikaty aktualnie skonfigurowane dla tej domeny.
+cert_acmedesc=Dostawcy certyfikatów SSL (urzędy certyfikacji), tacy jak Let's Encrypt lub ZeroSSL, mogą automatycznie wystawiać ważne certyfikaty SSL do użytku z tą domeną. Należy pamiętać, że wymagana jest weryfikacja własności domeny, która odbywa się automatycznie poprzez umieszczenie pliku tymczasowego w katalogu dokumentów witryny $1 lub, jeśli DNS jest zarządzany przez ten system, poprzez dodanie rekordu DNS TXT w celu potwierdzenia, że to ten system hostuje domenę.
 cert_acmelink=Możesz dodawać i zarządzać dodatkowymi dostawcami na stronie <a href='$1'>Dostawcy SSL</a>.
 cert_acmes=Dostawca certyfikatu SSL
 cert_letsemail=Wysłać e-mail z informacją o odnowieniu?
@@ -150,6 +150,7 @@ newkey_ecamatch=Certyfikat CA nie pasuje do podpisującego certyfikat domeny
 newkey_enewcafile=Nie udało się odczytać pliku certyfikatu CA $1
 newkey_enewcafilehome=Plik certyfikatu CA $1 musi znajdować się w katalogu domowym serwera wirtualnego
 
+newbw_email_def=Domyślny Webmin ($1)
 newbw_period=Okres rozliczeniowy
 newbw_enable=Czy ponownie włączyć serwery, których wydajność spadła poniżej limitu?
 newbw_graphdesc=Kliknij ten przycisk, aby wyświetlić wykres wykorzystania pasma i limitów dla wszystkich serwerów wirtualnych. Wykorzystanie można również wyświetlić według daty lub miesiąca, wracając do liczby dni przechowywania danych skonfigurowanych powyżej.
@@ -241,6 +242,7 @@ licence_expired=Licencja wygasła
 licence_expired_desc=Możliwość wprowadzania zmian jest obecnie wyłączona dla Twojego systemu. Ten tryb włącza się po okresie karencji, jeśli Twoja licencja wygasła lub jest używana na więcej niż jednym serwerze. Odwiedź stronę <a href='$1'>Virtualmin License Manager</a>, aby uzyskać więcej szczegółów.
 
 scripts_enophpbestver=Nie można znaleźć pełnej wersji PHP dla $1
+scripts_cats_longdesc=Kategorie i opis
 scripts_softwaremodperlreq=Instalowanie wymaganego pakietu Perl $1 ..
 scripts_softwaremodperlrec=Instalowanie zalecanego pakietu Perl $1 ..
 scripts_discontinued_desc=Ta aplikacja internetowa nie jest już dostępna do zainstalowania; została wycofana lub nie jest dostępna w wersji Virtualmin GPL
@@ -581,6 +583,9 @@ acme_can1=Sprzedawcy
 acme_can2=Tylko administrator główny
 acme_edefault=Domyślnego dostawcy Let's Encrypt nie można edytować
 acme_website=Strona internetowa dostawcy SSL
+acme_email=E-mail dla nowego konta dostawcy
+acme_email_def=Domyślny Virtualmin ($1)
+acme_eemail=Brakujący lub wyglądający na nieprawidłowy adres e-mail
 
 readonly_mode=Możliwość wprowadzania zmian jest obecnie wyłączona dla Twojego systemu. Ten tryb jest zazwyczaj włączany ręcznie przez administratora.
 
