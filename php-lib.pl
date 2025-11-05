@@ -2417,8 +2417,11 @@ foreach my $p (&apache::find_directive("ProxyPassMatch", $vconf)) {
 	}
 foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
 	next if ($f->{'words'}->[0] ne '\.php$');
-	foreach my $h (&apache::find_directive("SetHandler",
-					       $f->{'members'})) {
+	my @shm = @{$f->{'members'}};
+	foreach my $i (&apache::find_directive_struct("If", $f->{'members'})) {
+	        push(@shm, @{$i->{'members'}});
+		}
+	foreach my $h (&apache::find_directive("SetHandler", \@shm)) {
 		if ($h =~ /proxy:fcgi:\/\/localhost:(\d+)/ ||
 		    $h =~ /proxy:fcgi:\/\/127\.0\.0\.1:(\d+)/ ||
 		    $h =~ /proxy:unix:([^\|]+)/) {
