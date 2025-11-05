@@ -765,9 +765,6 @@ cert_tabcurrent=Soucasny certifikat
 cert_tabcsr=Pozadavek na podpis
 cert_tabnew=Novy certifikat
 cert_download=Stahnout certifikat
-cert_pem=Format PEM
-cert_pkcs12=Format PKCS12
-cert_pkcs7=Format PKCS&
 cert_edownload=Nebyl nalezen certifikat SSL!
 cert_eformat=Nelze docilit pozadovaneho formatu certifikatu
 cert_chain0=Nevybran zadny
@@ -885,7 +882,6 @@ resel_edefip2=IP adresa není na tomto systému zatím aktivní
 
 licence_unlimited=neomezená
 
-scripts_longdesc=Popis
 mailusers_title=Poslat Vsem
 mailusers_all=Vse
 

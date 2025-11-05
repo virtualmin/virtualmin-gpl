@@ -1799,9 +1799,6 @@ cert_self=Générer une clé auto-signée
 cert_tabcurrent=Certficat courant
 cert_tabnew=Nouveau certificat
 cert_download=Téléchargement certificat
-cert_pem=format PEM
-cert_pkcs12=format PKCS12
-cert_pkcs7=format PKCS7
 cert_edownload=Aucun certificat SSL trouvé!
 
 csr_title=Génération du CSR en cours
@@ -2035,7 +2032,6 @@ resel_none=Aucun
 resel_logonone=Aucun
 resel_linknone=Aucun
 
-scripts_longdesc=Description
 scripts_overall=Classement
 scripts_ok=Voir les options d'installation
 scripts_un=Afficher les options

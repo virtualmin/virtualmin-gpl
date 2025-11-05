@@ -72,10 +72,71 @@ if (&domain_has_ssl_cert($d)) {
 	print &ui_table_start($text{'cert_header2'}, undef, 4);
 
 	# Cert files
-	print &ui_table_row($text{'cert_incert'},
-			    "<tt>$d->{'ssl_cert'}</tt>", 3);
-	print &ui_table_row($text{'cert_inkey'},
-			    "<tt>$d->{'ssl_key'}</tt>", 3);
+	my @cert_files;
+	my $filemin_prefix;
+	my @filemin_allowed;
+	my %filemin_acls;
+	if (&foreign_available("filemin")) {
+		$filemin_prefix = &get_webprefix_safe().
+			"/filemin/index.cgi?path=";
+		&foreign_require("filemin");
+		&filemin::get_paths();
+		@filemin_allowed = @filemin::allowed_paths;
+		%filemin_acls = %filemin::access;
+		}
+
+	my @certs = ( ['cert_incert', 'ssl_cert', 'cert'],
+		      ['cert_inkey', 'ssl_key', 'key'],
+		      ['cert_inca', 'ssl_chain', undef] );
+	foreach (@certs) {
+		my ($label_key, $field, $dtype) = @$_;
+		my $val = $d->{$field} or next;		
+		my $file = &ui_tag('tt', $val);
+		
+		# File name for file manager if available
+		if ($filemin_prefix && @filemin_allowed) {
+			my $dir = $val;
+			$dir =~ s{/[^/]*$}{};
+			my $rel;
+			for my $root (@filemin_allowed) {
+				if (&is_under_directory($root, $dir)) {
+					$rel = $dir;
+					if ($filemin_acls{'work_as_user'} eq
+					    $d->{'user'}) {
+						$rel =~ s/^\Q$root\E//;
+						}
+					last;
+					}
+				}
+			if (defined $rel) {
+				my $p = &urlize($rel);
+				$file = &ui_link("$filemin_prefix$p", $file,
+						 'text-link');
+				}
+			}
+		
+		my $line = &ui_tag('strong',
+			$text{$label_key}).&ui_tag('br').$file;
+		if ($dtype) {
+			my @dlinks = (
+				&ui_link("download_${dtype}.cgi/$dtype.pem?dom".
+					 "=$in{'dom'}", $text{'cert_pem'}),
+				&ui_link("download_${dtype}.cgi/$dtype.p12?dom".
+					 "=$in{'dom'}", $text{'cert_pkcs12'}));
+			$line .= &ui_tag('br').&ui_links_row(\@dlinks);
+			}
+		push(@cert_files, $line);
+		}
+	if (@cert_files) {
+		print &ui_table_row(
+			$text{'cert_files'},
+			&ui_details({
+				html => 1,
+				class => 'inline fit',
+				title => &text('cert_filescnt',
+					scalar(@cert_files)),
+				content => join("<br>", @cert_files) }));
+		}
 
 	# Cert hash type
 	$type = &get_ssl_key_type($d->{'ssl_key'}, $d->{'ssl_pass'});
@@ -224,21 +285,6 @@ if (&domain_has_ssl_cert($d)) {
 		print &ui_table_row($text{'cert_svcs'}, $already, 3);
 		}
 
-	# Links to download
-	@dlinks = ( &ui_link("download_cert.cgi/cert.pem?dom=$in{'dom'}",
-			     $text{'cert_pem'}),
-		    &ui_link("download_cert.cgi/cert.p12?dom=$in{'dom'}",
-			     $text{'cert_pkcs12'}),
-		  );
-	print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
-	@dlinks = ( &ui_link("download_key.cgi/key.pem?dom=$in{'dom'}",
-			     $text{'cert_pem'}),
-		    &ui_link("download_key.cgi/key.p12?dom=$in{'dom'}",
-			     $text{'cert_pkcs12'}),
-		  );
-	print &ui_table_row($text{'cert_kdownload'},
-			    &ui_links_row(\@dlinks), 3);
-
 	# Can copy as global
 	my @gmissing;
 	foreach my $st (&list_service_ssl_cert_types()) {
@@ -270,12 +316,17 @@ if (&domain_has_ssl_cert($d)) {
 
 	# CA cert details
 	if ($chain) {
-		print &ui_table_hr();
+		my $ui_table_hr;
 		my $info = &cert_file_info($chain);
-		foreach $i (@cert_attributes) {
+		my @ca_cert_attributes = ('cn', 'notafter',
+		      grep { $_ ne 'cn' && $_ ne 'notafter' } @cert_attributes);
+		foreach $i (@ca_cert_attributes) {
 			next if ($i eq 'modulus' || $i eq 'exponent');
 			if ($info->{$i} && !ref($info->{$i})) {
+				next if ($i eq 'type');
+				print &ui_table_hr() if (!$ui_table_hr++);
 				print &ui_table_row($text{'cert_c'.$i} ||
+					    $text{'cert_ca'.$i} ||
 					    $text{'cert_'.$i}, $info->{$i});
 				}
 			}
@@ -438,8 +489,7 @@ print &ui_tabs_end_tab();
 
 # New key, cert and CA form
 print &ui_tabs_start_tab("mode", "new");
-print "$text{'cert_desc3'}<p>\n";
-print "$text{'cert_desc3a'}<p>\n";
+print "$text{'cert_desc3'} $text{'cert_desc3a'}<p>\n";
 
 print &ui_form_start("newkey.cgi", "form-data");
 print &ui_hidden("dom", $in{'dom'});
@@ -497,26 +547,30 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 	&foreign_require("webmin");
 	$err = &webmin::check_letsencrypt();
 	print &ui_tabs_start_tab("mode", "lets");
-	print "$text{'cert_desc9'}\n";
-	if  (defined(&can_acme_providers) && &can_acme_providers()) {
-		print &text('cert_acmelink',
-			    'pro/edit_newacmes.cgi'),"\n";
-		}
-	print "<p>\n";
-
 	if ($err) {
-		print &text('cert_elets', $err),"<p>\n";
+		print $text{'cert_desc9'}.&ui_tag('p');
+		print &ui_alert_box(&text('cert_elets', $err), 'warn',
+			undef, undef, "");
 		if (&master_admin() &&
 		    defined(&webmin::get_letsencrypt_install_message)) {
 			my $msg = &webmin::get_letsencrypt_install_message(
-				"/$module_name/cert_form.cgi?dom=$d->{'id'}&mode=$in{'mode'}",
-				$text{'cert_title'});
+				"/$module_name/cert_form.cgi?dom=$d->{'id'}".
+				"&mode=$in{'mode'}", $text{'cert_title'});
 			print $msg,"<p>\n";
 			}
 		}
 	else {
 		$phd = &public_html_dir($d);
-		print &text('cert_acmedesc', "<tt>$phd</tt>"),"<p>\n";
+		my $catexts = &text('cert_acmedesc', "<tt>$phd</tt>");
+		if  (defined(&can_acme_providers) && &can_acme_providers()) {
+			$catexts .= &ui_tag('br').&text('cert_acmelink',
+				'pro/edit_newacmes.cgi');
+			}
+		print &ui_details({
+			class => 'inline',
+			html => 1,
+			title => $text{'cert_desc9'},
+			content => $catexts });
 
 		print &ui_form_start("letsencrypt.cgi");
 		print &ui_hidden("dom", $in{'dom'});

@@ -37,16 +37,26 @@ backup_eplugin_domain=Sie dürfen diese Domäne nicht sichern
 
 restore_onlyfeats=Nur ausgewählte Funktionen wiederherstellen?
 
+cert_files=Zertifikatspfade und Downloads
+cert_filescnt=$1 Dateien
+cert_inca=SSL-Zertifikatsdatei
+cert_canotafter=Ablaufdatum des CA-Zertifikats
+cert_pem=PEM herunterladen
+cert_pkcs12=PKCS12 herunterladen
 cert_also_title=Wird auch verwendet von
 cert_also_desc1=1 Domäne
 cert_also_desc2=$1 Domänen
 cert_svcsglob=Weltweit von
 cert_svcsbydom=Nach Domäne
 cert_svcsbyip=Nach IP
+cert_desc9=Mit diesem Formular können Sie ein neues SSL-Zertifikat von einer vertrauenswürdigen Zertifizierungsstelle anfordern, das alle anderen derzeit für diese Domain konfigurierten Zertifikate ersetzen wird.
+cert_acmedesc=SSL-Zertifikatsanbieter (Zertifizierungsstellen) wie Let's Encrypt oder ZeroSSL können automatisch gültige SSL-Zertifikate für diese Domain ausstellen. Beachten Sie, dass die Domaininhaberschaft verifiziert werden muss. Dies geschieht automatisch durch das Ablegen einer temporären Datei im Dokumentenverzeichnis $1 der Website oder, falls das DNS von diesem System verwaltet wird, durch das Hinzufügen eines DNS-TXT-Eintrags, um zu bestätigen, dass dieses System die Domain hostet.
 cert_hostfilter=Hostnamenüberprüfung
 cert_hostfilter0=Versuchen Sie, alle Hostnamen anzufordern, und schlagen Sie fehl, wenn einer nicht validiert werden kann
 cert_hostfilter1=Nicht auflösbare Hostnamen überspringen, aber fehlschlagen, wenn die verbleibenden nicht validiert werden können
 cert_hostfilter2=Hostnamen ausschließen, die nicht vom Zertifikat validiert werden können
+
+newbw_email_def=Webmin-Standard ($1)
 
 tmpl_erealdomslimit=Fehlende oder ungültige Standardbegrenzung für die Anzahl der Nicht-Alias-Server
 tmpl_mail_mta_sts=MTA-STS für neue Domänen aktivieren?
@@ -60,6 +70,7 @@ resel_edefdnsip6=Fehlende oder ungültige externe IPv6-Adresse
 licence_manager_hostid=Host-ID
 licence_manager_hostid_desc=Diese eindeutige Serverkennung basiert auf der Hardware und dem Betriebssystem Ihres Systems. Sie bindet Ihre Virtualmin Pro-Lizenz an diesen Rechner und kann daher nicht auf mehreren Servern verwendet werden. Bei größeren Änderungen an der Hardware oder dem Betriebssystem kann es bis zu 48 Stunden dauern, bis der Lizenzserver die Änderung erkennt und Ihre Lizenz erneut validiert.
 
+scripts_cats_longdesc=Kategorien und Beschreibung
 scripts_softwaremodperlreq=Das erforderliche Perl-Paket $1 wird installiert ..
 scripts_softwaremodperlrec=Empfohlenes Perl-Paket $1 wird installiert ..
 scripts_discontinued_desc=Diese Web-App kann nicht mehr installiert werden. Sie wurde entweder eingestellt oder ist in der Virtualmin GPL-Version nicht verfügbar
@@ -177,6 +188,10 @@ dnscloud_bunny_apikey=Bunny DNS API-Schlüssel
 dnscloud_bunny_eapikey=Fehlender oder ungültig aussehender Bunny-API-Schlüssel
 dnscloud_bunny_ecreds=Der Bunny DNS API-Schlüssel ist falsch : $1
 bunny_edomainavail=Die DNS-Domäne wird bereits verwendet
+
+acme_email=E-Mail für neues Provider-Konto
+acme_email_def=Virtualmin-Standard ($1)
+acme_eemail=Fehlende oder ungültig aussehende E-Mail-Adresse
 
 api_ndom_invalid_dns_ip6=Auf die Option „dns-ip6“ muss eine IPv6-Adresse folgen
 

@@ -1703,7 +1703,6 @@ cert_tabcurrent=当前证书
 cert_tabcsr=签名请求
 cert_tabnew=新证书
 cert_download=下载证书
-cert_pem=PEM格式..
 cert_edownload=没有找到任何SSL证书！
 
 csr_title=正在生成CSR
@@ -1986,7 +1985,6 @@ tmpl_editmode_basic=基本设置和使用
 tmpl_editmode_virtualmin=虚拟服务器创建
 tmpl_editmode_plugins=插件选项
 tmpl_editmode_limits=缺省域所有者权限
-tmpl_noplugins=没有任何插件定义了模板选项
 tmpl_cnext=创建和下一步
 tmpl_snext=保存和下一步
 tmpl_bouncealias=退信邮件地址无效
@@ -2220,7 +2218,6 @@ licence_ecannot=你不运行重新检查Virtualmin许可证
 config_deftheme=全局Webmin缺省主题
 config_oldtheme=以前的Webmin主题
 
-scripts_longdesc=描述
 scripts_overall=评分
 scripts_ok=显示安装选项
 scripts_un=显示选项

@@ -1246,6 +1246,10 @@ rename_eparentuser=El nombre de usuario solo se puede cambiar para servidores de
 
 cert_hasnossl=Advertencia: este servidor virtual aún no tiene habilitado un sitio web SSL. Cualquier certificado SSL solo se puede utilizar para otros servicios.
 cert_noneyet=Este servidor virtual aún no tiene certificado SSL. Utilice una de las pestañas de esta página para generar un certificado y una clave.
+cert_files=Rutas y descargas de certificados
+cert_filescnt=$1 archivos
+cert_inca=archivo de autoridad de certificado SSL
+cert_canotafter=fecha de vencimiento del certificado CA
 cert_desc3a=Si el nuevo certificado proviene de una CA que tiene su propio certificado, también debe instalarlo aquí al mismo tiempo.
 cert_newcertkeep=Mantener el certificado existente
 cert_newca=Certificado CA
@@ -1267,6 +1271,8 @@ cert_copyall2=Establecer como certificado de servicios predeterminado
 cert_copyall2desc=Utilice este certificado SSL como predeterminado en $1 
 cert_defaultpath=Usar ruta de certificado predeterminada
 cert_defaultpathdesc=Mueva el certificado SSL y la clave a la ubicación predeterminada de Virtualmin en $1, para que coincida con la plantilla del servidor actual
+cert_pem=Descargar PEM
+cert_pkcs12=Descargar PKCS12
 cert_also_title=También utilizado por
 cert_also_desc1=1 dominio
 cert_also_desc2=$1 dominios
@@ -1290,8 +1296,8 @@ cert_service_bind=UNIR
 cert_copymsg=Los botones a continuación copiarán el certificado SSL de este dominio como el predeterminado para el servicio elegido. Esto se usará si no se configura ningún certificado por dominio o por IP.
 cert_type_ec=curva elíptica
 cert_type_rsa=RSA
-cert_desc9=Se pueden utilizar proveedores de certificados SSL como Let's Encrypt para solicitar automáticamente un certificado válido para que lo utilice Virtualmin.
-cert_acmedesc=Esta página se puede utilizar para solicitar un nuevo certificado, que sobrescribirá cualquier otro que tenga configurado actualmente para este dominio. Sin embargo, los proveedores de certificados SSL requieren que se valide su propiedad del dominio del certificado comprobando que este sistema aloja el sitio web del dominio. Esto se hace colocando un pequeño archivo temporal en el directorio de documentos del sitio web $1.
+cert_desc9=Este formulario le permite solicitar un nuevo certificado SSL de una autoridad certificadora de confianza, que reemplazará cualquier otro que esté configurado actualmente para este dominio.
+cert_acmedesc=Los proveedores de certificados SSL (autoridades) como Let's Encrypt o ZeroSSL pueden emitir automáticamente certificados SSL válidos para este dominio. Tenga en cuenta que se requiere la verificación de la propiedad del dominio, la cual se realiza automáticamente colocando un archivo temporal en el directorio de documentos del sitio web $1 o, si este sistema gestiona el DNS, agregando un registro TXT de DNS para confirmar que este sistema aloja el dominio.
 cert_acmelink=Puede agregar y administrar proveedores adicionales en la página <a href='$1'>Proveedores SSL</a>.
 cert_acmes=Proveedor de certificados SSL
 cert_dwild=¿Solicitar también el certificado comodín?
@@ -1343,6 +1349,7 @@ newkey_ekeysame=No ingrese la ruta a la clave generada con una CSR; en su lugar,
 
 newbw_step=Horas entre recogida
 newbw_backup=¿Incluye transferencias de respaldo en el uso?
+newbw_email_def=Valor predeterminado de Webmin ($1)
 newbw_estep=Las horas entre la recolección deben ser un número del 1 al 24
 newbw_allunder=Todos los servidores virtuales están por debajo de sus límites de ancho de banda.
 newbw_mailall=¿Incluye correo electrónico retransmitido en el uso de ancho de banda?
@@ -1823,7 +1830,7 @@ scripts_tabexisting=Aplicaciones web instaladas
 scripts_tabnew=Aplicaciones web disponibles
 scripts_tabunsup=Instalar una versión no compatible
 scripts_name=Aplicación Web
-scripts_cats=Categorias
+scripts_cats_longdesc=Categorías y descripción
 scripts_uninstalls=Desinstalar aplicaciones web seleccionadas
 scripts_upgrades=Actualizar aplicaciones web seleccionadas
 scripts_needmod=Instalando el módulo PHP $1 requerido ..
@@ -4295,6 +4302,9 @@ acme_can1=Distribuidores
 acme_can2=Solo administrador maestro
 acme_edefault=El proveedor de Let's Encrypt predeterminado no se puede editar
 acme_website=Sitio web del proveedor de SSL
+acme_email=Correo electrónico para la nueva cuenta de proveedor
+acme_email_def=Virtualmin por defecto ($1)
+acme_eemail=Dirección de correo electrónico faltante o que parece no ser válida
 
 readonly_mode=Actualmente, la posibilidad de realizar cambios está deshabilitada en su sistema. Este modo suele ser habilitado manualmente por un administrador.
 

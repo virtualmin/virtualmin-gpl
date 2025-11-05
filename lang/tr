@@ -1843,7 +1843,6 @@ tmpl_editmode_basic=Temel Ayarlar ve Kullaným
 tmpl_editmode_virtualmin=Sanal sunucu oluþturma
 tmpl_editmode_plugins=Plugin seçenekleri
 tmpl_editmode_limits=Varsayýlan alanadý sahibi limitleri
-tmpl_noplugins=Pluginler herhangi bir þablon seçeneði tanýmlamamýþlar.
 tmpl_cnext=Oluþtur ve Devam Et
 tmpl_snext=Kaydet ve Devam Et
 tmpl_bouncealias=Geçersiz adreslere sekme e-postasý
@@ -2059,7 +2058,6 @@ licence_ecannot=Virtualmin lisansýnýz yeniden kontrol etmeye izniniz yok
 config_deftheme=Genel Webmin varsayýlaný
 config_oldtheme=Eski Webmin temasý
 
-scripts_longdesc=Açýklama
 scripts_ok=Kurma Seçeneklerini Göster
 scripts_un=Gösterme Seçenekleri
 scripts_iversion=Kurulacak versiyon
