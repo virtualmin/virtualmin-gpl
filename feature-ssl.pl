@@ -3700,7 +3700,8 @@ $feats ||= ["web", "dns"];
 foreach my $f (@$feats) {
 	if ($d->{$f} && $config{$f}) {
 		my $vfunc = "validate_$f";
-		my $err = &$vfunc($d);
+		my $err = $f eq "dns" ? &$vfunc($d, undef, 1)
+				      : &$vfunc($d);
 		if ($err) {
 			push(@rv, { 'desc' => $text{'feature_'.$f},
 				    'error' => $err });
