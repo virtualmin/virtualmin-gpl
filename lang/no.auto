@@ -990,6 +990,7 @@ tmpl_dnsnone=Ingen ekstra poster
 tmpl_ename2=Ugyldig malnavn
 tmpl_jail=Chroot fengsel nytt domene Unix brukere?
 tmpl_erealdomslimit=Manglende eller ugyldig standardgrense for antall ikke-aliasservere
+tmpl_mysql_mkdb=Opprette en første database?
 tmpl_mail_cloud=Standard leverandør av levering av sky -e -post
 tmpl_mail_cloud_local=& lt; Ingen - lever direkte & gt;
 tmpl_mail_mta_sts=Aktiver MTA-STS for nye domener?

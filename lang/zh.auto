@@ -1911,6 +1911,7 @@ tmpl_mongrelslimit=限制Rails服务器实例的数量
 tmpl_ealiasdomslimit=别名服务器数量的默认限制缺失或无效
 tmpl_erealdomslimit=非别名服务器数量的默认限制缺失或无效
 tmpl_emongrelslimit=缺少或无效的Rails服务器实例数量限制
+tmpl_mysql_mkdb=创建初始数据库？
 tmpl_aliascopy=别名域的邮件别名模式
 tmpl_aliascopy1=从目标复制别名
 tmpl_aliascopy0=赶集转发

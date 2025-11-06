@@ -59,6 +59,7 @@ cert_hostfilter2=Hostnamen ausschließen, die nicht vom Zertifikat validiert wer
 newbw_email_def=Webmin-Standard ($1)
 
 tmpl_erealdomslimit=Fehlende oder ungültige Standardbegrenzung für die Anzahl der Nicht-Alias-Server
+tmpl_mysql_mkdb=Erstellen Sie eine initiale Datenbank?
 tmpl_mail_mta_sts=MTA-STS für neue Domänen aktivieren?
 tmpl_php_fpmtype=Standardmäßiger PHP-FPM-Prozessmanagermodus
 

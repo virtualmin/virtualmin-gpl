@@ -1433,6 +1433,7 @@ tmpl_hashtypes0=Solo seleccionado ..
 tmpl_ushelldef=Predeterminado de la página de shells personalizados
 tmpl_realdomslimit=Límite en el número de servidores sin alias
 tmpl_erealdomslimit=Límite predeterminado faltante o no válido en la cantidad de servidores que no sean alias
+tmpl_mysql_mkdb=¿Crear la base de datos inicial?
 tmpl_mail_cloud=Proveedor de entrega de correo en la nube predeterminado
 tmpl_mail_cloud_local=& lt; Ninguno: entregar directamente & gt;
 tmpl_mail_mta_sts=¿Habilitar MTA-STS para nuevos dominios?

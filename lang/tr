@@ -1767,7 +1767,6 @@ tmpl_ealiaslimit=Eksik veya geçersiz varsayýlan limit on number of aliases
 tmpl_edbslimit=Eksik veya geçersiz varsayýlan limit on number of veritabanlarý
 tmpl_edomslimit=Eksik veya geçersiz varsayýlan limit on number of domains
 tmpl_ebwlimit=Eksik veya geçersiz varsayýlan limit on Bantgeniþliði
-tmpl_mysql_mkdb=Veritabaný ve yanýnda login oluþturulsun mu?
 tmpl_webalizer=Webalizer konfigürasyon þablonu
 tmpl_webalizersel=Seçili dosya
 tmpl_webalizernone=Genel konfigürasyon

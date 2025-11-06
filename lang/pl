@@ -3628,7 +3628,6 @@ tmpl_edomslimit=Brak lub nieprawidłowy domyślny limit liczby wirtualnych serwe
 tmpl_ealiasdomslimit=Brak lub nieprawidłowy domyślny limit liczby serwerów aliasów
 tmpl_ebwlimit=Brak lub nieprawidłowy domyślny limit transferu
 tmpl_emongrelslimit=Brak lub nieprawidłowy limit liczby instancji serwera Rails
-tmpl_mysql_mkdb=Utworzyć bazę danych oraz login?
 tmpl_webalizer=Szablon konfiguracji Webalizer
 tmpl_webalizersel=Wybrany plik
 tmpl_webalizernone=Globalny konfig

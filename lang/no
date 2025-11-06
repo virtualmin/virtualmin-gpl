@@ -2812,7 +2812,6 @@ tmpl_edomslimit=Manglende eller ugyldig standard begrensing på antall virtuelle
 tmpl_ealiasdomslimit=Manglende eller ugyldig standard grense for antall alias-.tjenere
 tmpl_ebwlimit=Manglende eller ugyldig standard grense på båndbredde
 tmpl_emongrelslimit=Manglende eller ugyldig standard grense på antall Mongrel instanser
-tmpl_mysql_mkdb=Opprett database i tillegg til bruker?
 tmpl_webalizer=Malkonfigurasjon for Webalizer
 tmpl_webalizersel=Valgt fil
 tmpl_webalizernone=Global konfig

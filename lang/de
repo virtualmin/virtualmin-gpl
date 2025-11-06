@@ -3721,7 +3721,6 @@ tmpl_edomslimit=Fehlendes oder ungültiges Standard-Limit für die Anzahl an vir
 tmpl_ealiasdomslimit=Fehlendes oder ungültiges Standard-Limit für die Anzahl an Alias-Server
 tmpl_ebwlimit=Fehlendes oder ungültiges Standard-Limit für Bandbreite
 tmpl_emongrelslimit=Fehlendes oder ungültiges Limit für die Anzahl an Rails-Server-Instanzen
-tmpl_mysql_mkdb=Datenbank sowie Login erstellen?
 tmpl_webalizer=Template für Webalizer-Konfiguration
 tmpl_webalizersel=Ausgewählte Datei
 tmpl_webalizernone=Globale Konfiguration

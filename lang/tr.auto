@@ -2046,6 +2046,7 @@ tmpl_mongrelslimit=Rails sunucu örneği sayısı sınırı
 tmpl_ealiasdomslimit=Takma ad sunucusu sayısında eksik veya geçersiz varsayılan sınır
 tmpl_erealdomslimit=Takma ad olmayan sunucuların sayısındaki varsayılan sınır eksik veya geçersiz
 tmpl_emongrelslimit=Rails sunucusu örneği sayısında eksik veya geçersiz sınır
+tmpl_mysql_mkdb=Başlangıç veritabanını oluştur?
 tmpl_aliascopy=Takma ad alanları için posta takma adı modu
 tmpl_aliascopy1=Takma adları hedeften kopyala
 tmpl_aliascopy0=Catchall yönlendirme

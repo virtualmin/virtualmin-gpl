@@ -1898,7 +1898,6 @@ tmpl_ealiaslimit=缺少或无效的别名数缺省上限
 tmpl_edbslimit=缺少或无效的数据库数缺省上限
 tmpl_edomslimit=缺少或无效的域数缺省上限
 tmpl_ebwlimit=缺少或无效的缺省带宽上限
-tmpl_mysql_mkdb=登录时创建数据库？
 tmpl_webalizer=Webalizer模板配置
 tmpl_webalizersel=选中的文件
 tmpl_webalizernone=全局配置

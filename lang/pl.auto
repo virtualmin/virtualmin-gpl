@@ -162,6 +162,7 @@ newbw_enable=Czy ponownie włączyć serwery, których wydajność spadła poni�
 newbw_graphdesc=Kliknij ten przycisk, aby wyświetlić wykres wykorzystania pasma i limitów dla wszystkich serwerów wirtualnych. Wykorzystanie można również wyświetlić według daty lub miesiąca, wracając do liczby dni przechowywania danych skonfigurowanych powyżej.
 
 tmpl_erealdomslimit=Brak lub nieprawidłowy domyślny limit liczby serwerów innych niż alias
+tmpl_mysql_mkdb=Utworzyć początkową bazę danych?
 tmpl_mail_mta_sts=Włączyć MTA-STS dla nowych domen?
 tmpl_edmarcruf=Adres URI raportowania dla raportów kryminalistycznych musi być sformatowany w następujący sposób: mailto:user@domain
 tmpl_edmarcrua=Adres URI raportowania dla raportów zbiorczych musi być sformatowany w następujący sposób: mailto:user@domain

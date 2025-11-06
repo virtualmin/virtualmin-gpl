@@ -2374,7 +2374,6 @@ tmpl_edomslimit=Límite por default de número de servidores virtuales inexisten
 tmpl_ealiasdomslimit=Límite por default de número de servidores alias inexistente o inválido
 tmpl_ebwlimit=Límite de ancho de banda por default inexistente o inválido
 tmpl_emongrelslimit=Límite por default de número de instancias Mongrel inexistente o inválido
-tmpl_mysql_mkdb=Crear bases de datos, así como login?
 tmpl_webalizer=Configuración del template de Webalizer
 tmpl_webalizersel=Archivo seleccionado
 tmpl_webalizernone=Configuración global
