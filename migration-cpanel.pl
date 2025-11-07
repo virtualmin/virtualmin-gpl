@@ -1744,6 +1744,10 @@ if ($zsrc) {
 			}
 		}
 	&post_records_change($d, $recs, $zdstfile);
+	my $dkim = &get_dkim_config();
+	if ($dkim && $dkim->{'enabled'}) {
+		&add_dkim_dns_records([ $d ], $dkim);
+		}
 	&$second_print(".. done");
 	&register_post_action(\&restart_bind);
 	}
