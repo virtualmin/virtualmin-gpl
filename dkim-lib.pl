@@ -1100,7 +1100,6 @@ foreach my $d (@$doms) {
 		}
 	&release_lock_dns($d);
 	}
-&register_post_action(\&restart_bind) if ($anychanged);
 }
 
 # add_domain_dkim_record(&domain, &dkim, &recs, file)
@@ -1165,7 +1164,6 @@ foreach my $d (@$doms) {
 		}
 	&release_lock_dns($d);
 	}
-&register_post_action(\&restart_bind) if ($anychanged);
 }
 
 # remove_domain_dkim_record(&domain, &dkim, &recs, file)
