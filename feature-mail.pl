@@ -3067,11 +3067,11 @@ while(<UFILE>) {
 		if ($uinfo->{'fixedhome'}) {
 			# Home directory is fixed, so don't set
 			}
-		elsif ($old->{'home'} && $oldd->{'home'} ne $d->{'home'}) {
+		elsif ($oldd->{'home'} && $oldd->{'home'} ne $d->{'home'}) {
 			# Restoring under different domain home, so need to fix
 			# user's home
 			$uinfo->{'home'} = $user[5];
-			$uinfo->{'home'} =~s/^$oldd->{'home'}/$d->{'home'}/g;
+			$uinfo->{'home'} =~s/^\Q$oldd->{'home'}\E/$d->{'home'}/g;
 			}
 		else {
 			# Use home from original
