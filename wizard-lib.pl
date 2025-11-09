@@ -473,7 +473,9 @@ $tmpl->{'dns_ns'} = join(" ", @secns);
 
 # Save skip option
 $config{'prins_skip'} = $in{'prins_skip'};
+&lock_file($module_config_file);
 &save_module_config();
+&unlock_file($module_config_file);
 }
 
 sub wizard_show_email
@@ -481,23 +483,43 @@ sub wizard_show_email
 &foreign_require("mailboxes");
 print &ui_table_row(undef, $text{'wizard_email_desc'}, 2);
 
+# From address for email notifications
 print &ui_table_row($text{'wizard_from_addr'},
 	&ui_opt_textbox("from_addr", $config{'from_addr'}, 50,
 		$text{'default'}." (".&mailboxes::get_from_address().")<br>",
 		$text{'wizard_from_addr2'}));
+
+# Default to address for notifications
+print &ui_table_row($text{'wizard_to_addr'},
+	&ui_opt_textbox("to_addr", $gconfig{'webmin_email_to'}, 50,
+			$text{'wizard_to_addr_none'}));
 }
 
 sub wizard_parse_email
 {
 local ($in) = @_;
+
+&lock_file($module_config_file);
 if ($in->{'from_addr_def'}) {
 	delete($config{'from_addr'});
 	}
 else {
 	$in->{'from_addr'} =~ /\S+\@\S+/ || return $text{'wizard_efrom_addr'};
 	$config{'from_addr'} = $in->{'from_addr'};
-	&save_module_config();
 	}
+&save_module_config();
+&unlock_file($module_config_file);
+
+&lock_file("$config_directory/config");
+if ($in->{'to_addr_def'}) {
+	delete($gconfig{'webmin_email_to'});
+	}
+else {
+	$in->{'to_addr'} =~ /\S+\@\S+/ || return $text{'wizard_efrom_addr'};
+	$gconfig{'webmin_email_to'} = $in->{'to_addr'};
+	}
+&write_file("$config_directory/config", \%gconfig);
+&unlock_file("$config_directory/config");
 }
 
 sub wizard_show_done

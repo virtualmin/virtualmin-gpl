@@ -7113,6 +7113,8 @@ wizard_email_desc=Email notifications from this Virtualmin system will use the a
 wizard_from_addr=Master administrator's email address
 wizard_from_addr2=Your address
 wizard_efrom_addr=Email address must be in user@domain format
+wizard_to_addr=Default addresss for notifications
+wizard_to_addr_none=None set
 
 backuplog_title=Backup Logs
 backuplog_ecannot=You are not allowed to view Virtualmin backup logs
