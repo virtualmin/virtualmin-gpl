@@ -792,6 +792,7 @@ if ($d->{'dns'} && -r $dnsfile && !$d->{'dns_submode'}) {
 			}
 		}
 	&post_records_change($d, $recs, $zdstfile);
+	&refresh_dkim_dns($d);
 	&$second_print(".. done");
 	&register_post_action(\&reload_bind_records, $d);
 	}

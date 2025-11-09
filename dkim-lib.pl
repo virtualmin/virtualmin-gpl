@@ -1475,5 +1475,16 @@ my @tm = localtime(time());
 return sprintf "%4.4d%2.2d", $tm[5] + 1900, $tm[4];
 }
 
+# refresh_dkim_dns(&domain)
+# If DKIM is enabled globally, add or update the DNS records for this domain
+sub refresh_dkim_dns
+{
+my $dkim = &get_dkim_config();
+if ($dkim && $dkim->{'enabled'} && &has_dkim_domain($d, $dkim) &&
+    $d->{'dns'} && !&copy_alias_records($d)) {
+	&add_dkim_dns_records([ $d ], $dkim);
+	}
+}
+
 1;
 

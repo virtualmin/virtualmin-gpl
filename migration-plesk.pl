@@ -460,6 +460,7 @@ if ($got{'dns'}) {
 			}
 		if ($rcount) {
 			&post_records_change(\%dom, $recs, $file);
+			&refresh_dkim_dns($d);
 			&register_post_action(\&restart_bind);
 			}
 		&$second_print(".. done (added $rcount records)");

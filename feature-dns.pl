@@ -2926,6 +2926,7 @@ foreach my $t (@types) {
 	}
 
 &post_records_change($d, $recs, $zonefile);
+&refresh_dkim_dns($d);
 &register_post_action(\&restart_bind, $d);
 &release_lock_dns($d, 1);
 
