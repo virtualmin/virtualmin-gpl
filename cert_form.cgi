@@ -617,11 +617,17 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 					$d->{'letsencrypt_renew'} ? 1 : 0));
 
 		# Renewal email option
+		my $mmsg = "";
+		if (&master_admin() && $gconfig{'webmin_email_to'}) {
+			$mmsg = "<br>".&ui_checkbox("email_master", 1,
+					$text{'cert_letsemail_master'},
+					$d->{'letsencrypt_email_master'});
+			}
 		print &ui_table_row($text{'cert_letsemail'},
 			&ui_radio("email", $d->{'letsencrypt_email'} || 0,
 				  [ [ 0, $text{'yes'} ],
 				    [ 1, $text{'cert_letsemailerr'} ],
-				    [ 2, $text{'no'} ] ]));
+				    [ 2, $text{'no'} ] ]).$mmsg);
 
 		# Test connectivity first?
 		if (defined(&check_domain_connectivity)) {

@@ -20,6 +20,10 @@ to occur when the certificate is close to expiry. You can also choose if email
 is sent on every renewal with the C<--email-always> flag, only if renewal failed
 with C<--email-error>, or never with C<--email-never>.
 
+Related to this, you can choose to have the master admin also notified for
+certificate renewals with the C<--email-master> flag. Or disable this in future
+with C<--no-email-master>.
+
 To have Virtualmin attempt to verify external Internet connectivity to your
 domain before requesting the certificate, use the C<--check-first> flag. This
 will detect common errors before your ACME provider service quota is consumed.
@@ -130,6 +134,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--email-error") {
 		$email = 1;
+		}
+	elsif ($a eq "--email-master") {
+		$email_master = 1;
+		}
+	elsif ($a eq "--no-email-master") {
+		$email_master = 0;
 		}
 	elsif ($a eq "--acme") {
 		$acmeid = shift(@ARGV);
@@ -322,6 +332,7 @@ else {
 	$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
 	$d->{'letsencrypt_subset'} = $subset;
 	$d->{'letsencrypt_email'} = $email;
+	$d->{'letsencrypt_email_master'} = $email_master;
 	$d->{'letsencrypt_connectivity'} = $connectivity ? 2 :
 					   $validation ? 1 : 0;
 	delete($d->{'letsencrypt_last_err'});
@@ -385,6 +396,7 @@ print "                             [--allow-subset]\n";
 print "                             [--email-always |\n";
 print "                              --email-never |\n";
 print "                              --email-error]\n";
+print "                             [--email-master | --no-email-master]\n";
 print "                             [--web | --dns]\n";
 print "                             [--rsa | --ec]\n";
 print "                             [--acme id|provider]\n";

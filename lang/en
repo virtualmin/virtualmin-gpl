@@ -3437,6 +3437,7 @@ cert_dwild=Also request wildcard certificate?
 cert_letsrenew2=Automatically renew certificate?
 cert_letsemail=Send email on renewal?
 cert_letsemailerr=Only on failure
+cert_letsemail_master=Also CC master admin email
 cert_connectivity=Check connectivity first?
 cert_connectivity2=Test connectivity
 cert_connectivity1=Validate domain

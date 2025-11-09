@@ -55,6 +55,9 @@ if ($in{'only'}) {
 	$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
 	$d->{'letsencrypt_subset'} = $subset;
 	$d->{'letsencrypt_email'} = $in{'email'};
+	if (&master_admin() && $gconfig{'webmin_email_to'}) {
+		$d->{'letsencrypt_email_master'} = $in{'email_master'};
+		}
 	$d->{'letsencrypt_id'} = $in{'acme'} if (defined($in{'acme'}));
 	$d->{'letsencrypt_connectivity'} = $in{'connectivity'};
 	&save_domain($d);
@@ -213,6 +216,9 @@ else {
 		$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
 		$d->{'letsencrypt_subset'} = $subset;
 		$d->{'letsencrypt_email'} = $in{'email'};
+		if (&master_admin() && $gconfig{'webmin_email_to'}) {
+			$d->{'letsencrypt_email_master'} = $in{'email_master'};
+			}
 		$d->{'letsencrypt_id'} = $acme->{'id'} if ($acme);
 		$d->{'letsencrypt_last_id'} = $d->{'letsencrypt_id'};
 		delete($d->{'letsencrypt_last_err'});

@@ -4792,13 +4792,13 @@ else {
 
 # send_notify_email(from, &doms|&users, [&dom], subject, body,
 #		    [attach, attach-filename, attach-type], [extra-admins],
-#		    [send-many], [charset])
+#		    [send-many], [charset], [also-email])
 # Sends a single email to multiple recipients. These can be Virtualmin domains
 # or users.
 sub send_notify_email
 {
 local ($from, $recips, $d, $subject, $body, $attach, $attachfile, $attachtype,
-       $admins, $many, $charset) = @_;
+       $admins, $many, $charset, $also) = @_;
 &foreign_require("mailboxes");
 local %done;
 foreach my $r (@$recips) {
@@ -4820,6 +4820,7 @@ foreach my $r (@$recips) {
 		push(@emails, $r->{'email'} || $r->{'user'});
 		%hash = &make_user_substitutions($r, $d);
 		}
+	push(@emails, $also) if ($also);
 
 	# Send to them
 	foreach my $email (@emails) {
