@@ -12622,7 +12622,7 @@ if ($config{'web'}) {
 	}
 
 # If BIND is in use, make sure the config is valid
-if ($config{'dns'}) {
+if ($config{'dns'} && !&is_dns_remote()) {
 	&require_bind();
 	my @errs = &bind8::check_bind_config();
 	if (@errs) {
