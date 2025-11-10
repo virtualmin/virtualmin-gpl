@@ -3904,6 +3904,8 @@ foreach my $t ("key", "cert", "ca", "combined", "everything") {
 		&ui_radio_table("web_certmode_".$t, $mode, \@opts));
 	}
 
+print &ui_table_hr();
+
 # SSL cert provider
 if (defined(&list_acme_providers)) {
 	print &ui_table_row(
@@ -3958,6 +3960,18 @@ if (defined(&check_domain_connectivity)) {
 	        [ 1, $text{'cert_connectivity1'} ],
 	        [ 0, $text{'cert_connectivity0'} ] ]));
 	}
+
+# Default email notification mode
+print &ui_table_row(
+	&hlink($text{'newweb_ssl_email'}, "config_ssl_email"),
+	&ui_radio("ssl_email", $tmpl->{'ssl_email'},
+	     [ $tmpl->{'default'} ? ( ) : ( [ '', $text{'tmpl_default'} ] ),
+	       [ 0, $text{'yes'} ],
+	       [ 1, $text{'cert_letsemailerr'} ],
+	       [ 2, $text{'no'} ] ])."<br>\n".
+	&ui_checkbox("ssl_email_master", 1,
+		     $text{'cert_letsemail_master'},
+                     $tmpl->{'ssl_email_master'}));
 
 # Generate TLSA DNS records?
 print &ui_table_row(
@@ -4048,6 +4062,8 @@ $tmpl->{'ssl_allow_subset'} = $in{'ssl_allow_subset'};
 if (defined($in{'ssl_connectivity'})) {
 	$tmpl->{'ssl_connectivity'} = $in{'ssl_connectivity'};
 	}
+$tmpl->{'ssl_email'} = $in{'ssl_email'};
+$tmpl->{'ssl_email_master'} = $in{'ssl_email_master'};
 if ($in{'ssl_renew_letsencrypt_def'}) {
 	delete($tmpl->{'ssl_renew_letsencrypt'});
 	}

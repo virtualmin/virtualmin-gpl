@@ -9809,6 +9809,8 @@ push(@rv, { 'id' => 0,
 	    'ssl_combined_cert' => $config{'combined_cert'},
 	    'ssl_allow_subset' => $config{'allow_subset'},
 	    'ssl_connectivity' => $config{'ssl_connectivity'} // 1,
+	    'ssl_email' => $config{'ssl_email'} // 0,
+	    'ssl_email_master' => $config{'ssl_email_master'} // 0,
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'content_web' => $config{'content_web'} // 2,
 	    'content_web_html' => $config{'content_web_html'},
@@ -10162,6 +10164,8 @@ if ($tmpl->{'id'} == 0) {
 	$config{'combined_cert'} = $tmpl->{'ssl_combined_cert'};
 	$config{'allow_subset'} = $tmpl->{'ssl_allow_subset'};
 	$config{'ssl_connectivity'} = $tmpl->{'ssl_connectivity'};
+	$config{'ssl_email'} = $tmpl->{'ssl_email'};
+	$config{'ssl_email_master'} = $tmpl->{'ssl_email_master'};
 	$config{'php_vars'} = $tmpl->{'php_vars'} eq "none" ? "" :
 				$tmpl->{'php_vars'};
 	$config{'php_fpm'} = $tmpl->{'php_fpm'} eq "none" ? "" :
@@ -10522,7 +10526,7 @@ if (!$tmpl->{'default'}) {
 		    "ssl_letsencrypt_wild", "ssl_always_ssl",
 		    "ssl_tlsa_records", "ssl_combined_cert",
 		    "ssl_renew_letsencrypt", "ssl_allow_subset",
-		    "ssl_connectivity",
+		    "ssl_connectivity", "ssl_email",
 		    "aliascopy", "bccto", "resources", "dnssec", "avail",
 		    @plugins,
 		    &list_php_wrapper_templates(),

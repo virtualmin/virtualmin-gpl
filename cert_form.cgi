@@ -621,10 +621,13 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 		if (&master_admin() && $gconfig{'webmin_email_to'}) {
 			$mmsg = "<br>".&ui_checkbox("email_master", 1,
 					$text{'cert_letsemail_master'},
-					$d->{'letsencrypt_email_master'});
+					$d->{'letsencrypt_email_master'} //
+					  $tmpl->{'ssl_email_master'});
 			}
+		my  $email = $d->{'letsencrypt_email'} //
+			     $tmpl->{'ssl_email'} // 0;
 		print &ui_table_row($text{'cert_letsemail'},
-			&ui_radio("email", $d->{'letsencrypt_email'} || 0,
+			&ui_radio("email", $email,
 				  [ [ 0, $text{'yes'} ],
 				    [ 1, $text{'cert_letsemailerr'} ],
 				    [ 2, $text{'no'} ] ]).$mmsg);

@@ -1986,6 +1986,7 @@ newweb_combined_cert1=Cert file only
 newweb_combined_cert0=Decide automatically
 newweb_allow_subset=Exclude unverifiable domain names?
 newweb_ssl_connectivity=Check before certificate request
+newweb_ssl_email=Default for sending email on renewal?
 
 newftp_title=ProFTPD Server Template
 newftp_ecannot=You are not allowed to edit the ProFTPD template
