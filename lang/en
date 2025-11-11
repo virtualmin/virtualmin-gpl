@@ -7113,11 +7113,11 @@ wizard_ssldir_mode2=Custom key file template
 wizard_ssldir_mode3=Existing custom location
 wizard_essldir=Missing custom key file template
 wizard_title_email=System email address
-wizard_email_desc=Email notifications from this Virtualmin system will use the address you set here. It is best to choose an address that forwards or delivers mail to a person, so replies to system messages are read.
-wizard_from_addr=Master administrator's email address
+wizard_email_desc=Email notifications from this Virtualmin system will use the sender and destination addresses you set here. It is best to choose an address that forwards or delivers mail to a person, so replies to system messages are read.
+wizard_from_addr=Email sender address
 wizard_from_addr2=Your address
 wizard_efrom_addr=Email address must be in user@domain format
-wizard_to_addr=Default addresss for notifications
+wizard_to_addr=Default email destination address
 wizard_to_addr_none=None set
 
 backuplog_title=Backup Logs
