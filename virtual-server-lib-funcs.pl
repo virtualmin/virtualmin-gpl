@@ -15865,11 +15865,14 @@ if (&foreign_check("proc")) {
 
 if ($config{'dns'}) {
 	# Make sure BIND is installed
-	if (&is_dns_remote()) {
+	my $dnsremote;
+	if ($dnsremote = &is_dns_remote()) {
 		# Only BIND module is needed
 		&foreign_check("bind8") ||
 			return $text{'index_ebindmod'};
-		&$second_print($text{'check_dnsok3'});
+		&$second_print($dnsremote == 1 ? $text{'check_dnsok3'} :
+			       $dnsremote == 2 ? $text{'check_dnsok3cloud'} :
+						 $text{'check_dnsok3webmin'});
 		}
 	else {
 		# BIND server must be installed and usable

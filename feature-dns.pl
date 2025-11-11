@@ -5318,16 +5318,21 @@ if ($conftoo && !$prov) {
 }
 
 # is_dns_remote([&domain])
-# Returns 1 if DNS is hosted remotely for a domain, or globally
+# Returns 1 if DNS is hosted on Cloudmin Services, 2 if hosted on a Cloud
+# provider, 3 if on a remote DNS server, of 0 if local. If a domain is
+# given, checks the hosting of that specific domain.
 sub is_dns_remote
 {
 my ($d) = @_;
 if ($d) {
-	return $d->{'provision_dns'} || $d->{'dns_cloud'} || $d->{'dns_remote'};
+	return $d->{'provision_dns'} ? 1 :
+	       $d->{'dns_cloud'} ? 2 :
+	       $d->{'dns_remote'} ? 3 : 0;
 	}
 else {
-	return $config{'provision_dns'} || &default_dns_cloud() ||
-	       $config{'dns_nolocal'};
+	return $config{'provision_dns'} ? 1 :
+	       &default_dns_cloud() ? 2 :
+	       $config{'dns_nolocal'} ? 3 : 0;
 	}
 }
 
