@@ -19,6 +19,12 @@ given multiple times to change more than one variable. The new values are
 set either with the C<--ini-value> flag (followed by a number or string),
 or the C<--no-ini-value> flag to completely remove a setting.
 
+When updating PHP-FPM configuration, the C<--fpm-admin-value> flag can be used
+to force a setting to be written as an admin-level directive (C<php_admin_value>),
+and the C<--fpm-value> flag can be used to force a regular user-level directive
+(C<php_value>). If neither flag is given, the existing directive type is
+preserved where possible.
+
 =cut
 
 package virtual_server;
@@ -61,6 +67,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--no-ini-value") {
 		push(@ini_values, undef);
+		}
+	elsif ($a eq "--fpm-admin-value") {
+		$type = 1;
+		}
+	elsif ($a eq "--fpm-value") {
+		$type = 0;
 		}
 	elsif ($a eq "--php-version") {
 		$php_ver = shift(@ARGV);
@@ -187,7 +199,7 @@ foreach my $d (@doms) {
 	if ($mode eq "fpm") {
 		for(my $i=0; $i<@ini_names; $i++) {
 			&save_php_fpm_ini_value($d, $ini_names[$i],
-						$ini_values[$i]);
+						$ini_values[$i], undef, $type);
 			}
 		}
 
