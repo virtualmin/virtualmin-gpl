@@ -16862,7 +16862,7 @@ if ($config{'dns_ip6'} ne '*') {
 			"../config.cgi?module=$module_name&section=line1.3"),
 			'warn'));
 		}
-	else {
+	elsif ($config{'ip6enabled'} && &supports_ip6()) {
 		&$second_print(&ui_text_color("⚠ ".$text{'check_ednsip3v6'},
 					      'warn'));
 		}
@@ -16871,7 +16871,7 @@ else {
 	if ($ext_ip6) {
 		&$second_print(&text('check_dnsip3v6', $ext_ip6));
 		}
-	else {
+	elsif ($config{'ip6enabled'} && &supports_ip6()) {
 		&$second_print(&ui_text_color("⚠ ".$text{'check_ednsip3v6'},
 					      'warn'));
 		}
