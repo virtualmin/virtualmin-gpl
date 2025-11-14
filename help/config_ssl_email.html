@@ -2,7 +2,13 @@
 
 This option determines the default email notification mode for SSL certificate
 renewals for new virtual servers. You can select if the domain owner is notified
-always, never, or only if renewal fails. You can also select if the master
-admin will be CC'd as well. <p>
+always, never, or only if renewal fails. You can also choose if the master
+administrator will be notified as well. <p>
 
+Note that these settings only control email messages sent by your Virtualmin
+system. Certificate authorities (CAs) such as Let's Encrypt or ZeroSSL may also
+send their own renewal or expiry emails based on the contact details and
+notification settings in your account with them. Those CA emails cannot be
+configured or disabled from within Virtualmin. To change them, you must update
+the notification options on your CA provider's website.
 <footer>

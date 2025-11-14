@@ -2856,13 +2856,23 @@ elsif ($found < 0 && defined($value)) {
 return 1;
 }
 
-# save_php_fpm_ini_value(&domain, name, value, [admin?])
-# Adds, updates or deletes an ini setting in the domain's pool file
+# save_php_fpm_ini_value(&domain, name, value, [admin?], [force-type?])
+# Adds, updates or deletes an ini setting in the domain's pool file.
+# If force-type is undef, keep existing type (or use admin? to choose).
+# If force-type is 1, always use php_admin_value; if 0, always use php_value.
 sub save_php_fpm_ini_value
 {
-my ($d, $name, $value, $admin) = @_;
-my (undef, $k) = &get_php_fpm_ini_value($d, $name);
-$k ||= ($admin ? "php_admin_value" : "php_value");
+my ($d, $name, $value, $admin, $force_type) = @_;
+my $k;
+if (!defined($force_type)) {
+	# Keep existing type if present, otherwise pick by '$admin'
+	(undef, $k) = &get_php_fpm_ini_value($d, $name);
+	$k ||= ($admin ? "php_admin_value" : "php_value");
+	}
+else {
+	# Override with 1 = admin, 0 = user
+	$k = $force_type ? "php_admin_value" : "php_value";
+	}
 return &save_php_fpm_config_value($d, $k."[".$name."]", $value);
 }
 
