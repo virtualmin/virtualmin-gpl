@@ -167,6 +167,7 @@ else {
 
 	# Save backup key
 	$sched->{'key'} = $key ? $key->{'id'} : undef;
+	$sched->{'nosign'} = !$in{'sign'};
 
 	$sched->{'fmt'} = $in{'fmt'};
 	$sched->{'mkdir'} = $in{'mkdir'};

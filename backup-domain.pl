@@ -68,7 +68,9 @@ which files were consisered for purging, add the C<--purge-debug> flag.
 
 On a Virtualmin Pro system, you can use the C<--key> flag followed by
 a backup key ID or description to select the key to encrypt this backup with.
-Keys can be found using the C<list-backup-keys> API call.
+Keys can be found using the C<list-backup-keys> API call. By default encrypted
+backups will also be signed, but if you want to remove the CPU overhead of
+creating a signature you can add the C<--no-sign> flag.
 
 By default, only one backup to the same destination can be running at the
 same time - the second backup will immediately fail. You can invert this
@@ -228,6 +230,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--key") {
 		$keyid = shift(@ARGV);
+		}
+	elsif ($a eq "--no-sign") {
+		$nosign = 1;
+		}
+	elsif ($a eq "--sign") {
+		$nosign = 0;
 		}
 	elsif ($a eq "--exclude") {
 		$exclude = shift(@ARGV);
@@ -410,7 +418,8 @@ if ($sched->{'doms'} || $sched->{'all'} || $sched->{'virtualmin'}) {
 					0,
 					$key,
 					$kill,
-					$compression);
+					$compression,
+					$nosign);
 	if ($ok && !@$errdoms) {
 		&$second_print("Backup completed successfully. Final size was ".
 			       &nice_size($size));
@@ -452,7 +461,7 @@ foreach $dest (@strfdests) {
 			  $size, $ok, "api", $output, $errdoms, undef, $key,
 			  undef,
 			  $separate && $newformat ? 2 : $separate ? 1 : 0,
-			  undef, $compression);
+			  undef, $compression, $nosign);
 	}
 &stop_running_backup($sched);
 &virtualmin_api_log(\@OLDARGV, $doms[0]);
@@ -492,6 +501,7 @@ print "                         [--purge days]\n";
 print "                         [--purge-debug]\n";
 if (defined(&list_backup_keys)) {
 	print "                         [--key id]\n";
+	print "                         [--sign | --no-sign]\n";
 	}
 print "                         [--kill-running | --wait-running]\n";
 print "                         [--compression gzip|bzip2|tar|zip|zstd]\n";

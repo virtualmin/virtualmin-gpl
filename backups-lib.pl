@@ -261,7 +261,7 @@ return $asd;
 # backup_domains(file, &domains, &features, dir-format, skip-errors, &options,
 #		 home-format, &virtualmin-backups, mkdir, onebyone, as-owner,
 #		 &callback-func, differential, on-schedule, &key, kill-running,
-#		 compression-format)
+#		 compression-format, skip-signing)
 # Perform a backup of one or more domains into a single tar.gz file. Returns
 # an OK flag, the size of the backup file, and a list of domains for which
 # something went wrong.
@@ -269,7 +269,7 @@ sub backup_domains
 {
 local ($desturls, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
        $mkdir, $onebyone, $asowner, $cbfunc, $increment, $onsched, $key,
-       $kill, $compression) = @_;
+       $kill, $compression, $nosign) = @_;
 $opts->{'skip'} = $skip;
 $desturls = [ $desturls ] if (!ref($desturls));
 local $backupdir;
@@ -913,7 +913,7 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 				local $main::error_must_die = 1;
 				$fok = &$bfunc(
 					$d, $ffile, $opts->{$f}, $homefmt,
-					$increment, $asd, $opts, $key);
+					$increment, $asd, $opts, $key, $nosign);
 				};
 			if ($@) {
 				my $err = $@;
@@ -1291,8 +1291,8 @@ if ($ok) {
 
 			# If encrypting, add gpg to the pipeline
 			if ($key) {
-				$writer = &backup_encryption_command($key).
-					  " | ".$writer;
+				$writer = &backup_encryption_command(
+						$key, $nosign)." | ".$writer;
 				}
 
 			# Create the dest file with strict permissions
@@ -1379,7 +1379,7 @@ if ($ok) {
 
 		# If encrypting, add gpg to the pipeline
 		if ($key) {
-			$writer = &backup_encryption_command($key).
+			$writer = &backup_encryption_command($key, $nosign).
 				  " | ".$writer;
 			}
 
@@ -1425,7 +1425,7 @@ if (@$vbs && ($homefmt || $dirfmt)) {
 		}
 	# If encrypting, add gpg to the pipeline
 	if ($key) {
-		$comp = $comp." | ".&backup_encryption_command($key);
+		$comp = $comp." | ".&backup_encryption_command($key, $nosign);
 		}
 	my @vfiles = &expand_glob_to_files($backupdir, "virtualmin_*");
 	&execute_command(
@@ -6655,13 +6655,13 @@ return $ok;
 # write_backup_log(&domains, dest, differential?, start, size, ok?,
 # 		   "cgi"|"sched"|"api", output, &errordoms, [user], [&key],
 # 		   [schedule-id], [separate-format], [allow-owner-restore],
-# 		   [compression], [description], [&sched])
+# 		   [compression], [skipped-signing], [description], [&sched])
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
 local ($doms, $dest, $increment, $start, $size, $ok, $mode, $output, $errdoms,
-       $user, $key, $schedid, $separate, $ownrestore, $compression, $desc,
-       $sched) = @_;
+       $user, $key, $schedid, $separate, $ownrestore, $compression, $nosign,
+       $desc, $sched) = @_;
 $compression = $config{'compression'}
 	if (!defined($compression) || $compression eq '');
 if (!-d $backups_log_dir) {
@@ -6685,6 +6685,7 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'user' => $user || $remote_user,
 	       'mode' => $mode,
 	       'key' => $key->{'id'},
+	       'nosign' => $nosign,
 	       'sched' => $schedid,
 	       'compression' => $compression,
 	       'separate' => $separate,

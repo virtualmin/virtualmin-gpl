@@ -333,14 +333,15 @@ else {
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
 				       $in{'onebyone'}, $cbmode == 2,
 				       undef, $in{'increment'}, undef, $key, 0,
-				       $in{'compression'});
+				       $in{'compression'}, !$in{'sign'});
 	$output = &stop_print_capture();
 	&cleanup_backup_limits(0, 1);
 	foreach $dest (@strfdests) {
 		&write_backup_log(\@doms, $dest, $in{'increment'}, $start_time,
 				  $size, $ok, "cgi", $output, $errdoms,
 				  undef, $key, $sched ? $sched->{'id'} : undef,
-				  $in{'fmt'}, 0, undef, $sched->{'desc'});
+				  $in{'fmt'}, 0, !$in{'sign'}, undef,
+				  $sched->{'desc'});
 		}
 	&run_post_actions();
 	if (!$ok) {

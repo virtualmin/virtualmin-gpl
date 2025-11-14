@@ -2714,6 +2714,7 @@ backup_senabled0=Virtualmin's scheduled backup has been enabled for $1 virtual s
 backup_sdisabled=Virtualmin's scheduled backup has been disabled.
 backup_key=Encrypt backup with key
 backup_nokey=Don't sign or encrypt
+backup_sign=Also sign encrypted backup?
 backup_downloadfile=Download backup file $1
 backup_edownloadfile=Missing backup file to download
 backup_edownloadfile2=Backup file to download is not an absolute path

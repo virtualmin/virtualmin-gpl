@@ -184,6 +184,8 @@ if ($multiline) {
 				print "    Encryption key description: ",
 				      $key->{'desc'},"\n";
 				}
+			print "    Signed: ",
+			      ($l->{'nosign'} ? "No" : "Yes"),"\n";
 			}
 		else {
 			print "    Encrypted: No\n";

@@ -303,7 +303,10 @@ if (@allkeys) {
 		&ui_select("key", $sched->{'key'},
 			   [ [ "", "&lt;$text{'backup_nokey'}&gt;" ],
 		 	     map { [ $_->{'id'}, $_->{'desc'} ] } @allkeys ],
-			   1, 0, 1));
+			   1, 0, 1)."<br>\n".
+		&ui_checkbox("sign", 1,
+			&hlink($text{'backup_sign'}, "backup_sign"),
+			!$sched->{'nosign'}));
 	}
 
 # Single/multiple file mode

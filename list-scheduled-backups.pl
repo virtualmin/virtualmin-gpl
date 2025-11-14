@@ -94,6 +94,8 @@ if ($multiline) {
 				$key->{'desc'},"\n";
 			print "    Encryption key ID: ",
 				$key->{'id'},"\n";
+			print "    Signed backup: ",
+				($sched->{'nosign'} ? "No" : "Yes"),"\n";
 			}
 		if ($s->{'owner'}) {
 			my $o = &get_domain($s->{'owner'});
