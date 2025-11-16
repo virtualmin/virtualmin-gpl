@@ -2828,8 +2828,10 @@ sub setup_noproxy_path
 {
 local ($d, $script, $ver, $opts, $forceadd) = @_;
 
-# Check if the script doesn't use proxying, and if Apache supports negatives
-return 1 if (&indexof("proxy", @{$script->{'uses'}}) >= 0);
+# Check if the script doesn't use proxying
+return 1 if (&indexof("proxy", @{$script->{'uses'}}) == -1);
+
+# Check if Apache supports negative proxy balancers
 return 1 if (!&has_proxy_balancer($d) || !&has_proxy_none($d));
 
 # Check if a proxy exists for a parent path
