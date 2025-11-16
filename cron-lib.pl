@@ -19,21 +19,21 @@ print &read_file_contents($temp);
 &unlink_file($temp);
 }
 
-# setup_cron_script(&cron-spec)
+# setup_cron_script(&cron-spec, [script-module])
 # Creates a Webmin Cron entry for some cron job, converting any
 # existing matching regular Cron job if it exists. If the Webmin Cron
 # entry already exists for the command, do nothing
 sub setup_cron_script
 {
-local ($job) = @_;
+my ($job, $mod) = @_;
+$mod ||= $module_name;
 &foreign_require("cron");
 &foreign_require("webmincron");
 local $cronjob = &find_module_cron_job($job->{'command'});
-if ($job->{'command'} =~ /(\Q$module_config_directory\E\/([^ \|\&><;]+))/) {
+if ($job->{'command'} =~ /(\Q$config_directory\E\/\E$mod\E\/([^ \|\&><;]+))/) {
 	# Run from this module
 	local ($wrapper, $script) = ($1, $2);
-	&cron::create_wrapper($wrapper, $module_name,
-			      $script);
+	&cron::create_wrapper($wrapper, $mod, $script);
 
 	# Find existing classic cron job, and remove it
 	if ($cronjob) {
@@ -50,7 +50,7 @@ if ($job->{'command'} =~ /(\Q$module_config_directory\E\/([^ \|\&><;]+))/) {
 		$args = $1;
 		}
 	local @wcrons = &webmincron::list_webmin_crons();
-	local ($wjob) = grep { $_->{'module'} eq $module_name &&
+	local ($wjob) = grep { $_->{'module'} eq $mod &&
 			       $_->{'func'} eq "run_cron_script" &&
 			       $_->{'args'}->[0] eq $script &&
 			       $_->{'args'}->[1] eq $args } @wcrons;
@@ -62,7 +62,7 @@ if ($job->{'command'} =~ /(\Q$module_config_directory\E\/([^ \|\&><;]+))/) {
 	if (!$wjob) {
 		# Need to create
 		$job->{'func'} = "run_cron_script";
-		$job->{'module'} = $module_name;
+		$job->{'module'} = $mod;
 		$job->{'args'} = [ $script ];
 		push(@{$job->{'args'}}, $args) if ($args);
 		&webmincron::save_webmin_cron($job);
@@ -88,11 +88,12 @@ else {
 	}
 }
 
-# delete_cron_script(script|&job)
+# delete_cron_script(script|&job, [script-module])
 # Deletes the classic or WebminCron job that runs some script
 sub delete_cron_script
 {
-local ($script_or_job) = @_;
+my ($script_or_job, $mod) = @_;
+$mod ||= $module_name;
 if (ref($script_or_job)) {
 	# Delete a specific classic or webmincron job
 	local $job = $script_or_job;
@@ -125,7 +126,7 @@ else {
 	# Webmin cron
 	&foreign_require("webmincron");
 	local @wcrons = &webmincron::list_webmin_crons();
-	foreach my $wjob (grep { $_->{'module'} eq $module_name &&
+	foreach my $wjob (grep { $_->{'module'} eq $mod &&
 				 $_->{'func'} eq "run_cron_script" &&
 				 $_->{'args'}->[0] eq $shortscript } @wcrons) {
 		&webmincron::delete_webmin_cron($wjob);
@@ -133,11 +134,12 @@ else {
 	}
 }
 
-# convert_cron_script(script)
+# convert_cron_script(script, [script-module])
 # If a classic cron job exists that runs some script, convert to webmin cron
 sub convert_cron_script
 {
-local ($script) = @_;
+my ($script, $mod) = @_;
+$mod ||= $module_name;
 local $shortscript = $script;
 $shortscript =~ s/^.*\///;
 
@@ -153,14 +155,14 @@ foreach my $job (&find_module_cron_job($script)) {
 		# Has command-line args 
 		$args = $1;
 		}
-	local ($wjob) = grep { $_->{'module'} eq $module_name &&
+	local ($wjob) = grep { $_->{'module'} eq $mod &&
 			       $_->{'func'} eq "run_cron_script" &&
 			       $_->{'args'}->[0] eq $shortscript &&
 			       $_->{'args'}->[1] eq $args }
 			     &webmincron::list_webmin_crons();
 	if (!$wjob) {
 		$job->{'func'} = "run_cron_script";
-		$job->{'module'} = $module_name;
+		$job->{'module'} = $mod;
 		$job->{'args'} = [ $shortscript ];
 		push(@{$job->{'args'}}, $args) if ($args);
 		delete($job->{'command'});
@@ -170,13 +172,14 @@ foreach my $job (&find_module_cron_job($script)) {
 	}
 }
 
-# find_cron_script(script)
+# find_cron_script(script, [script-module])
 # Finds the classic or Webmin cron job that runs some script
 sub find_cron_script
 {
-local ($fullscript) = @_;
-local ($script, @wantargs) = split(/\s+/, $fullscript);
-local $shortscript = $script;
+my ($fullscript, $mod) = @_;
+$mod ||= $module_name;
+my ($script, @wantargs) = split(/\s+/, $fullscript);
+my $shortscript = $script;
 $shortscript =~ s/^.*\///;
 
 # Classic cron
@@ -185,7 +188,7 @@ push(@rv, &find_module_cron_job($fullscript));
 
 # Webmin cron
 &foreign_require("webmincron");
-foreach my $wjob (grep { $_->{'module'} eq $module_name &&
+foreach my $wjob (grep { $_->{'module'} eq $mod &&
 			 $_->{'func'} eq "run_cron_script" &&
 		         $_->{'args'}->[0] eq $shortscript }
 		       &webmincron::list_webmin_crons()) {
