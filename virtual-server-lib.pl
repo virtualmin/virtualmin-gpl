@@ -163,7 +163,7 @@ $default_content_dir = "$module_root_directory/default";
 		      'migrate');
 
 @reseller_modules = ("webminlog", "mailboxes", "bind8", "logviewer", "filemin",
-		     "xterm");
+		     "xterm", "phpini");
 
 $reseller_group_name = "resellers";
 
