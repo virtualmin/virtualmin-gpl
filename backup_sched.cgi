@@ -193,7 +193,7 @@ else {
 		$in{enabled};
 	$sched->{'kill'} = $in{'kill'};
 	if (&master_admin()) {
-		if ($in{'ownrestore'} && !$key) {
+		if ($in{'ownrestore'} && (!$key || !$in{'sign'})) {
 			&error($text{'backup_eownrestore'});
 			}
 		$sched->{'ownrestore'} = $in{'ownrestore'};
