@@ -340,8 +340,10 @@ else {
 		&write_backup_log(\@doms, $dest, $in{'increment'}, $start_time,
 				  $size, $ok, "cgi", $output, $errdoms,
 				  undef, $key, $sched ? $sched->{'id'} : undef,
-				  $in{'fmt'}, 0, !$in{'sign'}, undef,
-				  $sched->{'desc'});
+				  $in{'fmt'},
+				  $sched ? $sched->{'ownrestore'} : 0,
+				  $in{'compression'},
+				  !$in{'sign'}, $sched->{'desc'}, undef);
 		}
 	&run_post_actions();
 	if (!$ok) {

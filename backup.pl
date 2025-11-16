@@ -89,8 +89,9 @@ if ($sched->{'reseller'}) {
 # Work out who the schedule is being run for
 if ($sched->{'plugged'} &&
     &plugin_defined($sched->{'plugged'}, 'feature_can_domain')) {
-	# Plugin can enforce a domain if the domain is allowed when the user is a
-	# master admin or when passes ACL access check otherwise (owner/reseller)
+	# Plugin can enforce a domain if the domain is allowed when the user
+	# is a master admin or when passes ACL access check otherwise
+	# (owner/reseller)
 	my ($plugin_d, $plugin_cbmode) = &plugin_call($sched->{'plugged'},
 		'feature_can_domain', $sched);
 	$cbmode = $plugin_cbmode;

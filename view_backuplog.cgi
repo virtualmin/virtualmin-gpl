@@ -61,6 +61,12 @@ print &ui_table_row($text{'viewbackup_enc'},
 		  &text('viewbackup_nokey', $log->{'key'})."</font>" :
 		&text('viewbackup_key', "<i>$key->{'desc'}</i>"), 3);
 
+# Signed or not?
+if ($log->{'key'}) {
+	print &ui_table_row($text{'viewbackup_sign'},
+		$log->{'nosign'} ? $text{'no'} : $text{'yes'});
+	}
+
 # Backup plugin options if any
 if ($backup_plugin{opts}) {
 	my $opts  = $backup_plugin{opts};

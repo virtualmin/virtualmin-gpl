@@ -7185,6 +7185,7 @@ viewbackup_enc=Encrypted backup?
 viewbackup_nopro=Yes, but encryption is not supported
 viewbackup_nokey=Yes, but with missing key $1
 viewbackup_key=Yes, with key $1
+viewbackup_sign=Signed backup?
 viewbackup_sched=From scheduled backup
 viewbackup_gone=ID $1 (deleted)
 viewbackup_ownrestore=Owners can restore?
