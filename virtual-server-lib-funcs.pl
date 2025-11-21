@@ -3958,7 +3958,7 @@ local ($name) = @_;
 &require_useradmin();
 local $err = &valid_alias_name($name);
 return $err if ($err);
-if ($name eq "domains" || $name eq "logs" || $name eq $home_virtualmin_backup) {
+if ($name eq "domains" || $name eq $home_virtualmin_backup) {
 	return &text('user_ereserved', $name);
 	}
 if ($name =~ /^\d+/) {
