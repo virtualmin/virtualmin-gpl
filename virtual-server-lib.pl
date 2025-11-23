@@ -216,9 +216,10 @@ $plans_dir = "$module_config_directory/plans";
 $extra_users_dir = "$module_config_directory/users";
 
 $extra_admins_dir = "$module_config_directory/admins";
-@all_possible_php_versions = ( 5, 5.2, 5.3, 5.4, 5.5, 5.6,
-                              "7.0", 7.1, 7.2, 7.3, 7.4,
-                              "8.0", 8.1, 8.2, 8.3, 8.4 );
+@all_possible_php_versions = (
+	5, 5.2, 5.3, 5.4, 5.5, 5.6,
+	"7.0", 7.1, 7.2, 7.3, 7.4,
+	"8.0", 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9 );
 @all_possible_short_php_versions =
 	&unique(map { int($_) } @all_possible_php_versions);
 $max_php_fcgid_children = $config{'max_php_fcgi_children'} || int(&get_php_max_childred_allowed() * 5) || 5;
