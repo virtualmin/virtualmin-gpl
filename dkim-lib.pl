@@ -1137,11 +1137,11 @@ elsif ($selrec && join("", @{$selrec->{'values'}}) !~ /p=\Q$pubkey\E/) {
 return $changed;
 }
 
-# remove_dkim_dns_records(&domains, &dkim)
+# remove_dkim_dns_records(&domains, &dkim, [all-selectors])
 # Delete all DKIM TXT records from the given DNS domains
 sub remove_dkim_dns_records
 {
-my ($doms, $dkim) = @_;
+my ($doms, $dkim, $all) = @_;
 my $anychanged = 0;
 foreach my $d (@$doms) {
 	&$first_print(&text('dkim_undns', "<tt>$d->{'dom'}</tt>"));
@@ -1153,7 +1153,7 @@ foreach my $d (@$doms) {
 		next;
 		}
 	&obtain_lock_dns($d);
-	my $changed = &remove_domain_dkim_record($d, $dkim, $recs, $file);
+	my $changed = &remove_domain_dkim_record($d, $dkim, $recs, $file, $all);
 	if ($changed) {
 		&post_records_change($d, $recs, $file);
 		&$second_print($text{'dkim_dnsremoved'});
@@ -1168,20 +1168,27 @@ foreach my $d (@$doms) {
 &register_post_action(\&restart_bind, $d) if ($anychanged);
 }
 
-# remove_domain_dkim_record(&domain, &dkim, &recs, file)
+# remove_domain_dkim_record(&domain, &dkim, &recs, file, [all-selectors])
 # Remove the DKIM records for a single domain from its zone file
 sub remove_domain_dkim_record
 {
-my ($d, $dkim, $recs, $file) = @_;
+my ($d, $dkim, $recs, $file, $all) = @_;
 my $withdot = $d->{'dom'}.'.';
 my $dkname = '_domainkey.'.$withdot;
 my ($dkrec) = grep { $_->{'name'} eq $dkname &&
 		     $_->{'type'} eq 'TXT' } @$recs;
-my $selname = $dkim->{'selector'}.'.'.$dkname;
-my ($selrec) = grep { $_->{'name'} eq $selname &&
-		      $_->{'type'} eq 'TXT' } @$recs;
+my @selrecs;
+if ($all) {
+	@selrecs = grep { $_->{'name'} =~ /^([^\.]+)\.\Q$dkname\E$/ &&
+			  $_->{'type'} eq 'TXT' } @$recs;
+	}
+else {
+	my $selname = $dkim->{'selector'}.'.'.$dkname;
+	@selrecs = grep { $_->{'name'} eq $selname &&
+			  $_->{'type'} eq 'TXT' } @$recs;
+	}
 my $changed = 0;
-if ($selrec) {
+foreach my $selrec (@selrecs) {
 	&delete_dns_record($recs, $selrec->{'file'}, $selrec);
 	$changed++;
 	}
@@ -1481,9 +1488,11 @@ return sprintf "%4.4d%2.2d", $tm[5] + 1900, $tm[4];
 # If DKIM is enabled globally, add or update the DNS records for this domain
 sub refresh_dkim_dns
 {
+my ($d) = @_;
 my $dkim = &get_dkim_config();
 if ($dkim && $dkim->{'enabled'} && &has_dkim_domain($d, $dkim) &&
     $d->{'dns'} && !&copy_alias_records($d)) {
+	&remove_dkim_dns_records([ $d ], $dkim, 1);
 	&add_dkim_dns_records([ $d ], $dkim);
 	}
 }
