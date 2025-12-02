@@ -33,8 +33,10 @@ my $conf = &apache::get_config();
 my ($f, $newfile) = &get_website_file($d);
 
 # Add NameVirtualHost if needed
-my $nvstar = &add_name_virtual($d, $conf, $web_port, 1, $d->{'ip'});
-my $nvstar6;
+my ($nvstar, $nvstar6);
+if ($d->{'ip'}) {
+	&add_name_virtual($d, $conf, $web_port, 1, $d->{'ip'});
+	}
 if ($d->{'ip6'}) {
 	$nvstar6 = &add_name_virtual($d, $conf, $web_port, 1,
 				     $d->{'ip6'});
@@ -4384,7 +4386,7 @@ else {
 sub get_apache_vhost_ips
 {
 my ($d, $nvstar, $nvstar6, $port) = @_;
-if (!$nvstar || !$nvstar6) {
+if (defined($nvstar) && !$nvstar || defined($nvstar6) && !$nvstar6) {
 	# If either of the IPv4 or v6 addresses is in the Virtualhost, then
 	# both of them need to be
 	$nvstar = $nvstar6 = 0;
