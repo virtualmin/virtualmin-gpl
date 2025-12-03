@@ -18,6 +18,7 @@ download_virtualmin_host="${download_virtualmin_host:-download.virtualmin.com}"
 download_virtualmin_host_lib="$download_virtualmin_host"
 download_virtualmin_host_dev="${download_virtualmin_host_dev:-software.virtualmin.dev}"
 download_virtualmin_host_rc="${download_virtualmin_host_rc:-rc.software.virtualmin.dev}"
+download_webmin_host="${download_webmin_host:-download.webmin.com}"
 download_webmin_host_dev="${download_webmin_host_dev:-download.webmin.dev}"
 download_webmin_host_rc="${download_webmin_host_rc:-rc.download.webmin.dev}"
 
@@ -365,13 +366,15 @@ fi
 # If connectivity test is requested
 if [ -n "$test_connection_type" ]; then
   for test_type in $test_connection_type; do
-    test_connection "$download_virtualmin_host" "$test_type"
     if [ "$branch" = "unstable" ]; then
       test_connection "$download_webmin_host_dev" "$test_type"
       test_connection "$download_virtualmin_host_dev" "$test_type"
     elif [ "$branch" = "prerelease" ]; then
       test_connection "$download_webmin_host_rc" "$test_type"
       test_connection "$download_virtualmin_host_rc" "$test_type"
+    else
+      test_connection "$download_webmin_host" "$test_type"
+      test_connection "$download_virtualmin_host" "$test_type"
     fi
   done
   exit 0
@@ -623,6 +626,18 @@ log_fatal() {
   log_error "$1"
 }
 
+# Write chosen branch to file for future reference
+write_virtualmin_branch() {
+  branch_dir=/etc/webmin/virtual-server
+  branch_file="$branch_dir/branch"
+
+  # If directory doesn't exist, do nothing
+  [ -d "$branch_dir" ] || return 0
+
+  # Write current $branch value
+  printf '%s\n' "$branch" >"$branch_file" 2>/dev/null || :
+}
+
 # Configure Virtualmin repositories (stable, prerelease, or unstable) and keep
 # matching Webmin repositories in sync.
 manage_virtualmin_branch_repos() {
@@ -708,38 +723,39 @@ manage_virtualmin_branch_repos() {
     fi
   fi
 
-  # Setup new branch if requested
-  if [ -n "$branch" ]; then
-    if [ "$reinstalling" -eq 1 ]; then
-      install_pre_msg="Reinstalling Virtualmin $vm_version"
-    else
-      install_pre_msg="Installing Virtualmin $vm_version"
-    fi
-    case "$branch" in
-      unstable)
-        down_cmd="$download https://$download_virtualmin_host_dev/install"
-        cmd="$down_cmd && sh install webmin unstable && \
-             sh install virtualmin unstable"
-        msg="$install_pre_msg unstable repository"
-        ;;
-      prerelease)
-        down_cmd="$download https://$download_virtualmin_host_rc/install"
-        cmd="$down_cmd && sh install webmin prerelease && \
-             sh install virtualmin prerelease"
-        msg="$install_pre_msg prerelease repository"
-        ;;
-      stable)
-        down_cmd="$download https://$download_virtualmin_host/install"
-        cmd="$down_cmd && sh install webmin stable && \
-             sh install virtualmin stable"
-        msg="$install_pre_msg stable repository"
-        ;;
-      *)
-        return 1
-        ;;
-    esac
-    run_ok "$cmd" "$msg"
+  # Save branch name
+  write_virtualmin_branch
+  
+  # Configure repo based on requested branch
+  if [ "$reinstalling" -eq 1 ]; then
+    install_pre_msg="Reinstalling Virtualmin $vm_version"
+  else
+    install_pre_msg="Installing Virtualmin $vm_version"
   fi
+  case "$branch" in
+    unstable)
+      down_cmd="$download https://$download_virtualmin_host_dev/install"
+      cmd="$down_cmd && sh install webmin unstable && \
+            sh install virtualmin unstable"
+      msg="$install_pre_msg unstable repository"
+      ;;
+    prerelease)
+      down_cmd="$download https://$download_virtualmin_host_rc/install"
+      cmd="$down_cmd && sh install webmin prerelease && \
+            sh install virtualmin prerelease"
+      msg="$install_pre_msg prerelease repository"
+      ;;
+    stable)
+      down_cmd="$download https://$download_virtualmin_host/install"
+      cmd="$down_cmd && sh install webmin stable && \
+            sh install virtualmin stable"
+      msg="$install_pre_msg stable repository"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+  run_ok "$cmd" "$msg"
 }
 
 # Test if grade B system
@@ -1978,6 +1994,7 @@ if [ $errors -eq "0" ]; then
   TIME=$(date +%s)
   echo "$VER=$TIME" > "/etc/webmin/virtual-server/installed"
   echo "$VER=$TIME" > "/etc/webmin/virtual-server/installed-auto"
+  write_virtualmin_branch
 else
   log_warning "The following errors occurred during installation:"
   echo
