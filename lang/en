@@ -534,7 +534,7 @@ setup_evirtnoshared=Selected IP address is not shared!
 setup_evirt6clash=The virtual interface IPv6 address is already in use
 setup_evirt6clash2=No interface for the IPv6 address exists
 setup_evirt6clash4=The IPv6 address is already used by virtual server $1
-setup_emax=Your current license allows you to create up to <tt>$1</tt> top-level and sub-servers combined. For the ability to create more top-level or sub-servers, consider upgrading your license by visiting your <a target=_blank href='$2'>virtualmin.com ⇾ My Account ⇾ Subscriptions</a> page.
+setup_emax=Your current license allows you to create up to <tt>$1</tt> top-level and sub-servers combined. For the ability to create more top-level or sub-servers, consider upgrading your license by visiting your <a target=_blank href='$2'>Virtualmin ⇾ My Account ⇾ Subscriptions</a> page.
 setup_emaxnone=You are not allowed to create any virtual servers
 setup_eprefix=Missing or invalid mail username prefix
 setup_eprefix2=The specified username prefix is already in use
