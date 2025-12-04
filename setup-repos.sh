@@ -743,8 +743,7 @@ manage_virtualmin_branch_repos() {
       ;;
     stable)
       down_cmd="$download https://$download_virtualmin_host/install"
-      cmd="$down_cmd && sh install webmin stable && \
-            sh install virtualmin stable"
+      cmd="$down_cmd && sh install virtualmin stable"
       msg="$install_pre_msg stable repository"
       ;;
     *)
