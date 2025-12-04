@@ -69,8 +69,10 @@ if ($itype eq "rpm") {
 		&$second_print($text{'setup_done'});
 		}
 
-	# Update Virtualmin to Pro, and install support module
-	my @packages = ('wbm-virtual-server', 'wbm-virtualmin-support');
+	# Update Virtualmin to Pro, and install support and
+	# WP Workbench packages
+	my @packages = ('wbm-virtual-server', 'wbm-virtualmin-support',
+		        'wbm-virtualmin-wp-workbench');
 
 	# Run the upgrade
 	my $upgrade_to_pro_output;
@@ -147,8 +149,9 @@ elsif ($itype eq "deb") {
 		goto PAGEEND;
 		} 
 
-	# Add Virtualmin support module
-	push(@packages, 'webmin-virtualmin-support');
+	# Add Virtualmin support and WP Workbench packages
+	push(@packages, 'webmin-virtualmin-support',
+			'webmin-virtualmin-wp-workbench');
 
 	# Run the upgrade
 	my $upgrade_to_pro_output;
