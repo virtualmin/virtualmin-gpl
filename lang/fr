@@ -2147,8 +2147,8 @@ sysinfo_php=Versions de PHP
 newquotas_whenno=Désactivé
 
 links_web=Configurer le site
-links_website=Aperçu du site
 links_ssl=Configurer le site SSL
+links_website=Aperçu du site
 links_alog=Journaux d'accès
 links_elog=Journaux d'erreurs
 
