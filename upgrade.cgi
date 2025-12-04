@@ -2,6 +2,7 @@
 # Upgrade from Virtualmin GPL to Pro
 
 require './virtual-server-lib.pl';
+require './virtualmin-licence.pl';
 &foreign_require("webmin");
 &foreign_require("cron");
 &can_edit_templates() || &error($text{'upgrade_ecannot'});
@@ -30,33 +31,11 @@ if (&webmin::shared_root_directory()) {
 chop($itype = &read_file_contents("$module_root_directory/install-type"));
 $witype = &webmin::get_install_type() || "tar.gz";
 if ($itype eq "rpm") {
-	# Check for repo file
-	-r $virtualmin_yum_repo || &error($text{'upgrade_eyumrepo'});
-
 	# Make sure Webmin was also from an RPM
 	$witype eq "rpm" ||
 		&error(&text('upgrade_etypematch', $itype, $witype));
-
-	# Make sure YUM works
-	&foreign_require("software");
-	($wvs) = grep { $_->{'name'} eq 'wbm-virtual-server' }
-		      &software::update_system_available();
-	if (!$wvs) {
-		&error(&text('upgrade_eyumlist',
-		 	     '<tt>wbm-virtual-server</tt>'));
-		}
 	}
 elsif ($itype eq "deb") {
-	# Check for Virtualmin repo in sources.list
-	$lref = &read_file_lines($virtualmin_apt_repo);
-	$found = 0;
-	foreach $l (@$lref) {
-		if ($l =~ /^deb(.*?)(http|https):\/\/$upgrade_virtualmin_host/) {
-			$found = 1;
-			}
-		}
-	$found || $text{'upgrade_edebrepo'};
-
 	# Make sure Webmin was also from a Debian package
 	$witype eq "deb" ||
 		&error(&text('upgrade_etypematch', $itype, $witype));
@@ -79,45 +58,15 @@ $SIG{'TERM'} = 'IGNORE';	# Stop process from being killed on upgrade
 # Work out how we were installed. Possible sources are from the wbm.gz files,
 # from the GPL YUM repo, and from the GPL Debian repo
 if ($itype eq "rpm") {
+	# Set up Webmin and Virtualmin repositories
 	&$first_print($text{'upgrade_addrepo'});
-	# GPL YUM repo. Replace it with the Pro version
-	local $found;
-	local $lref = &read_file_lines($virtualmin_yum_repo);
-	foreach my $l (@$lref) {
-		# New repos have GPL in title too
-		if ($l =~ /^name=/ && $l =~ /Virtualmin\s+\d+\s+GPL/) {
-			$l =~ s/(GPL)/Professional/;
+	my ($st, $err, $out) = &setup_virtualmin_repos();
+	if ($st) {
+		&error(&text('setup_postfailure',
+			     &setup_repos_error($err || $out)));
 		}
-		# New repo format such as /vm/7/gpl/rpm/noarch/
-		elsif ($l =~ /noarch/ && $l =~ /^baseurl=.*\/(vm\/(?|([7-9])|([0-9]{2,4}))\/(gpl)(\/.*))/) {
-			my $path = $1;
-			$path =~ s/(gpl)/pro/;
-			$l = "baseurl=https://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host/$path";
-			$found++;
-			}
-		elsif ($l =~ /^baseurl=.*\.com(\/.*)\/gpl(\/.*)/ || 
-			$l =~ /^baseurl=.*\/gpl(\/.*)/) {
-			$l = "baseurl=https://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host$1$2";
-			$found++;
-			}
-
-		# If restarting upgrade which failed before for whatever reason
-		elsif ($l =~ /^baseurl=https:\/\/$in{'serial'}:$in{'key'}/) {
-			$found++;
-			}
-		}
-	&flush_file_lines($virtualmin_yum_repo);
-	&$second_print($text{'setup_done'});
-	$found || &error(&text('upgrade_eyumfile',
-			       "<tt>$virtualmin_yum_repo</tt>"));
-
-	# Clean package manager cache
-	if (&foreign_available("package-updates")) {
-		&foreign_require("package-updates");
-		&$first_print($package_updates::text{'refresh_clearing'});
-		&package_updates::flush_package_caches();
-		&package_updates::clear_repository_cache();
-		&$second_print($package_updates::text{'refresh_done'});
+	else {
+		&$second_print($text{'setup_done'});
 		}
 
 	# Update Virtualmin to Pro, and install support module
@@ -146,47 +95,15 @@ if ($itype eq "rpm") {
 		}
 	}
 elsif ($itype eq "deb") {
-	# GPL APT repo .. change to use the Pro one
+	# Set up Webmin and Virtualmin repositories
 	&$first_print($text{'upgrade_addrepo'});
-	my $apt_old_auth = !-d $virtualmin_apt_auth_dir ? "$in{'serial'}:$in{'key'}\@" : "";
-	$lref = &read_file_lines($virtualmin_apt_repo);
-	foreach $l (@$lref) {
-		# New Virtualmin 7 repos
-		if ($l =~ /^deb(.*?)(http|https):\/\/$upgrade_virtualmin_host\/(vm\/(?|([7-9])|([0-9]{2,4}))\/(gpl)(\/.*))/) {
-			my $gpgkey = $1;
-			my $rrepo = $3;
-			$rrepo =~ s/(gpl)/pro/;
-			$l = "deb${gpgkey}https://$apt_old_auth$upgrade_virtualmin_host/$rrepo";
+	my ($st, $err, $out) = &setup_virtualmin_repos();
+	if ($st) {
+		&error(&text('setup_postfailure',
+			     &setup_repos_error($err || $out)));
 		}
-		elsif ($l =~ /^deb(.*?)(http|https):\/\/$upgrade_virtualmin_host\/gpl\/(.*)/) {
-			my $gpgkey = $1;
-			my $rrepo = $3;
-			$l = "deb${gpgkey}https://$apt_old_auth$upgrade_virtualmin_host/$rrepo";
-			}
-		elsif ($l =~ /^deb(.*?)(http|https):\/\/$upgrade_virtualmin_host\/vm\/(\d)\/gpl\/(.*)/) {
-			my $gpgkey = $1;
-			my $vmver = $3;
-			my $rrepo = $4;
-			$l = "deb${gpgkey}https://$apt_old_auth$upgrade_virtualmin_host/vm/$vmver/$rrepo";
-			}
-		}
-	&flush_file_lines($virtualmin_apt_repo);
-
-	# Add auth credentials for Pro repos in a separate dedicated file
-	if (-d $virtualmin_apt_auth_dir) {
-		&write_file_contents(
-		    "$virtualmin_apt_auth_dir/virtualmin.conf",
-		    "machine $upgrade_virtualmin_host login $in{'serial'} password $in{'key'}\n");
-		}
-	&$second_print($text{'setup_done'});
-
-	# Clean package manager cache
-	if (&foreign_available("package-updates")) {
-		&foreign_require("package-updates");
-		&$first_print($package_updates::text{'refresh_clearing'});
-		&package_updates::flush_package_caches();
-		&package_updates::clear_repository_cache();
-		&$second_print($package_updates::text{'refresh_done'});
+	else {
+		&$second_print($text{'setup_done'});
 		}
 
 	# Force refresh of packages
