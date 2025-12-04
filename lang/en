@@ -2290,15 +2290,15 @@ check_ehomeformat=The home directory format $1 does not contain the username or 
 check_ehomestyle=The home directory style is set to "Just base directory", which is unusable with Virtualmin. This can be corrected on the <a href='$2'>Users and Groups module configuration</a> page
 check_jailkitok=Chroot jails are available
 check_jailkiterr=Chroot jails are not available : $1
-check_eyumrepofile=The Virtualmin repository config file $1 does not exist!
-check_yumrepook=The Virtualmin repository is configured correctly
-check_yumrepowrong=The Virtualmin repository config file $1 contains the wrong serial number of license key!
-check_yumrepomissing=The Virtualmin repository configuration file $1 does not reference any known Virtualmin repositories!
-check_eaptrepofile=The APT repository config file $1 does not exist!
-check_aptrepook=The Virtualmin APT repository is configured correctly
-check_aptrepowrong=The APT repository config file $1 contains the wrong serial number of license key!
-check_aptrepomissing=The Virtualmin APT repository configuration file $1 does not reference any known Virtualmin repositories!
-check_repoeoutdate=The Virtualmin repositories on your system are outdated—check our tutorial for <a target="_blank" href='$1'>upgrading</a> your repositories.
+check_erepofile=The Virtualmin repository config file $1 does not exist
+check_repo_stable=stable
+check_repo_prerelease=pre-release
+check_repo_unstable=unstable
+check_repook=The Virtualmin $1 $2 repository is configured correctly
+check_repoeoutdate=however it is from another major version of Virtualmin, which can cause problems when installing or updating packages; use the Virtualmin CLI command $1 to reconfigure your repositories
+check_repowrong=The Virtualmin $2 $3 repository config file $1 has inconsistent license details
+check_repomissing=The Virtualmin $3 $4 repository configuration file $1 does not reference any known Virtualmin repositories; use the Virtualmin CLI command $2 to reconfigure your repositories
+check_repoupdatelink=go to the <a href='$1'>Virtualmin License Manager</a> page to fix it
 
 checkmap_enone=No map sources were found in the <a href='$1'>Postfix configuration</a>
 checkmap_esupport=The map source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile

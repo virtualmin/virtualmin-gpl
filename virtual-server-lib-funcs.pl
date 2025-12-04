@@ -11976,6 +11976,57 @@ else {
 	}
 }
 
+# detect_virtualmin_repo_branch()
+# Detects which Virtualmin repository branch is currently configured and
+# which major version was installed
+sub detect_virtualmin_repo_branch
+{
+my $branch;
+my $major_version;
+if (-r "$module_config_directory/branch") {
+	my $lines = &read_file_lines("$module_config_directory/branch", 1);
+	$branch = $lines->[0];
+	$major_version = $lines->[1];
+	}
+$branch = undef if ($branch !~ /^(stable|prerelease|unstable)$/);
+return wantarray ? ($branch, $major_version) : $branch;
+}
+
+# setup_virtualmin_repos([branch])
+# Sets up the Virtualmin repositories for the given branch (stable,
+# prerelease, unstable)
+sub setup_virtualmin_repos
+{
+my $branch = shift;
+$branch = &detect_virtualmin_repo_branch() if (!$branch);
+$branch ||= 'stable';
+$branch = 'stable' if ($branch !~ /^(stable|prerelease|unstable)$/);
+my $shcmd = &has_command('sh');
+my ($out, $err);
+&execute_command("INTERACTIVE_MODE=off ".
+		 "$shcmd $module_root_directory/setup-repos.sh ".
+		 "--setup --branch $branch", undef, \$out, \$err);
+return ($?, $err, $out);
+}
+
+# setup_repos_error(error)
+# Cleans up error messages from setup-repos.sh
+sub setup_repos_error
+{
+my ($e) = @_;
+$e =~ s/Error:\s*//;
+$e =~ s/[\s\n]+/ /gm;
+$e =~ s/\[INFO\].*?(Hit:|Err:|Get:|E:)/$1/;
+$e =~ s/\[ERROR\].*?/ /g;
+$e =~ s/\s*\.\./. /g;
+$e =~ s/\.\.\s*//g;
+$e =~ s/\.\s\.\s+/. /g;
+$e =~ s/\s+/ /g;
+$e =~ s/(Exiting\.).*/$1/g;
+$e = &trim($e);
+return $e;
+}
+
 # require_licence()
 # Reads in the file containing the licence_scheduled function.
 # Returns 1 if OK, 0 if not
@@ -17170,15 +17221,44 @@ else {
 	&$second_print(&text('check_jailkitok'));
 	}
 
-# If using the Pro version, make sure the repo licence matches
-my %vserial;
-if ($virtualmin_pro &&
+# Check any repos and provide guidance on fixing them if needed
+my (%vserial, $itype);
+chop($itype = &read_file_contents("$module_root_directory/install-type"));
+if ($itype =~ /^(rpm|deb)$/ &&
     &read_env_file($virtualmin_license_file, \%vserial) &&
-    $vserial{'SerialNumber'} ne 'GPL') {
+    ($vserial{'SerialNumber'} || $vserial{'LicenseKey'})) {
+	my $is_pro = $virtualmin_pro &&
+		     $vserial{'SerialNumber'} ne "GPL" &&
+		     $vserial{'LicenseKey'} ne "GPL";
+	my $edition = $is_pro ? "Pro" : "GPL";
+
+	# Determine repo branch
+	my ($repo_branch, $branch_version) = &detect_virtualmin_repo_branch();
+	$repo_branch ||= 'stable';
+
+	# Even if repo configured correctly, warn if old repo branch in use,
+	# but only after a certain date of a new major release to give time for
+	# potential unforseen issues to be ironed out.
+	my $vcmd = &get_api_helper_command() || "virtualmin";
+	my $outdated_message = '';
+	my $outdated_warning_icon = '';
+	my $date_trigger_warning = 1775001599;        # March 31, 2026
+	if (time() > $date_trigger_warning) {         # cool-off period for devs
+		my ($prod_major) = &get_module_version();
+		$prod_major = 8 if ($prod_major < 8); # for new installer only
+		if (!$branch_version ||               # never used new installer
+		    $prod_major != $branch_version) { # old major repo in use
+			$outdated_message =
+				&text("check_repoeoutdate",
+				      "<tt>$vcmd setup-repos</tt>");
+			$outdated_warning_icon = "⚠ ";
+			}
+		}
+	
 	if ($gconfig{'os_type'} eq 'redhat-linux') {
 		# Check the YUM config file
 		if (!-r $virtualmin_yum_repo) {
-			&$second_print(&text('check_eyumrepofile',
+			&$second_print(&text('check_erepofile',
 					     "<tt>$virtualmin_yum_repo</tt>"));
 			}
 		else {
@@ -17186,7 +17266,8 @@ if ($virtualmin_pro &&
 			my $lref = &read_file_lines($virtualmin_yum_repo, 1);
 			my $found = 0;
 			foreach my $l (@$lref) {
-				if ($l =~ /baseurl=https?:\/\/([^:]+):([^\@]+)\@(?:$upgrade_virtualmin_host_all)/) {
+				# Repo with auth
+				if ($l =~ /baseurl=https?:\/\/([^:]+):([^\@]+)\@(?:$upgrade_virtualmin_host_all)/i) {
 					if ($1 eq $vserial{'SerialNumber'} &&
 					    $2 eq $vserial{'LicenseKey'}) {
 						$found = 2;
@@ -17196,24 +17277,42 @@ if ($virtualmin_pro &&
 						}
 					last;
 					}
+				# Repo with no auth
+				elsif ($l =~ m{baseurl=https?://(?:$upgrade_virtualmin_host_all)}i) {
+					$found = 3;
+					last;
+					}
 				}
-			if ($found == 2) {
-				&$second_print($text{'check_yumrepook'});
+			if ($found >= 2) {
+				&$second_print("$outdated_warning_icon".
+					&text('check_repook',
+					$edition,
+					$text{'check_repo_'.$repo_branch}).
+						($outdated_message
+							? ", ".$outdated_message
+							: ""));
 				}
 			elsif ($found == 1) {
-				&$second_print(&text('check_yumrepowrong',
-					"<tt>$virtualmin_yum_repo</tt>"));
+				&$second_print("⚠ ".&text('check_repowrong',
+					"<tt>$virtualmin_yum_repo</tt>",
+					$edition,
+					$text{'check_repo_'.$repo_branch}).", ".
+					&text('check_repoupdatelink',
+					      "pro/licence.cgi?repos=1"));
 				}
 			else {
-				&$second_print(&text('check_yumrepomissing',
-					"<tt>$virtualmin_yum_repo</tt>"));
+				&$second_print("⚠ ".&text('check_repomissing',
+					"<tt>$virtualmin_yum_repo</tt>",
+					"<tt>$vcmd setup-repos</tt>",
+					$edition,
+					$text{'check_repo_'.$repo_branch}));
 				}
 			}
 		}
 	elsif ($gconfig{'os_type'} eq 'debian-linux') {
 		# Check the APT config file
 		if (!-r $virtualmin_apt_repo) {
-			&$second_print(&text('check_eaptrepofile',
+			&$second_print(&text('check_erepofile',
 					     "<tt>$virtualmin_apt_repo</tt>"));
 			}
 		else {
@@ -17241,7 +17340,8 @@ if ($virtualmin_pro &&
 					$check_vconf = 1;
 					}
 				}
-			if ($check_vconf && -r $virtualmin_apt_auth_file) {
+			if ($is_pro &&
+			    $check_vconf && -r $virtualmin_apt_auth_file) {
 				my $lines = &read_file_contents($virtualmin_apt_auth_file);
 				if ($lines =~ /machine\s+(?:$upgrade_virtualmin_host_all)\s+login\s+(\S+)\s+password\s+(\S+)/gmi) {
 					if ($1 eq $vserial{'SerialNumber'} &&
@@ -17253,46 +17353,30 @@ if ($virtualmin_pro &&
 						}
 					}
 				}
-			if ($found == 2) {
-				&$second_print($text{'check_aptrepook'});
+			if ($found == 2 || $check_vconf && !$is_pro) {
+				&$second_print("$outdated_warning_icon".
+					&text('check_repook',
+					$edition,
+					$text{'check_repo_'.$repo_branch}).
+						($outdated_message
+							? ", ".$outdated_message
+							: ""));
 				}
 			elsif ($found == 1) {
-				&$second_print(&text('check_aptrepowrong',
-					"<tt>$virtualmin_apt_auth_file</tt>"));
+				&$second_print("⚠ ".&text('check_repowrong',
+					"<tt>$virtualmin_apt_auth_file</tt>",
+					$edition,
+					$text{'check_repo_'.$repo_branch}).", ".
+					&text('check_repoupdatelink',
+					      "pro/licence.cgi?repos=1"));
 				}
 			else {
-				&$second_print(&text('check_aptrepomissing',
-					"<tt>$virtualmin_apt_repo</tt>"));
+				&$second_print("⚠ ".&text('check_repomissing',
+					"<tt>$virtualmin_apt_repo</tt>",
+					"<tt>$vcmd setup-repos</tt>",
+					$edition,
+					$text{'check_repo_'.$repo_branch}));
 				}
-			}
-		}
-	}
-
-# Display a message about deprecated repos
-if ($gconfig{'os_type'} =~ /^(redhat-linux|debian-linux)$/) {
-	my $repolines;
-	if ($gconfig{'os_type'} eq 'redhat-linux') {
-		# File exists, but does it contain correct repo links
-		$repolines = &read_file_lines($virtualmin_yum_repo, 1)
-			if (-r $virtualmin_yum_repo);
-		}
-	elsif ($gconfig{'os_type'} eq 'debian-linux') {
-		# File exists, but does it contain correct repo links
-		$repolines = &read_file_lines($virtualmin_apt_repo, 1)
-			if (-r $virtualmin_apt_repo);
-		}
-	# Does repo file has correct links?
-	my $repofound;
-	if (defined($repolines)) {
-		foreach my $repoline (@$repolines) {
-			$repofound++
-				# If repo references the upgrade host
-				if ($repoline =~ /(?:$upgrade_virtualmin_host_all)/);
-			}
-		if (!$repofound) {
-			&$second_print(&text('check_repoeoutdate',
-				       "$virtualmin_link/docs/installation/".
-				       	"troubleshooting-repositories/"));
 			}
 		}
 	}

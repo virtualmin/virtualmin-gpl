@@ -141,53 +141,5 @@ if (defined($status) && $status == 0) {
 	}
 }
 
-# detect_virtualmin_repo_branch()
-# Detects which Virtualmin repository branch is currently configured
-sub detect_virtualmin_repo_branch
-{
-my $branch;
-if (-r "$module_config_directory/branch") {
-	my $lines = &read_file_lines("$module_config_directory/branch", 1);
-	$branch = $lines->[0];
-	}
-$branch = undef if ($branch !~ /^(stable|prerelease|unstable)$/);
-return $branch;
-}
-
-# setup_virtualmin_repos([branch])
-# Sets up the Virtualmin repositories for the given branch (stable,
-# prerelease, unstable)
-sub setup_virtualmin_repos
-{
-my $branch = shift;
-$branch = &detect_virtualmin_repo_branch() if (!$branch);
-$branch ||= 'stable';
-$branch = 'stable' if ($branch !~ /^(stable|prerelease|unstable)$/);
-my $shcmd = &has_command('sh');
-my ($out, $err);
-&execute_command("INTERACTIVE_MODE=off ".
-		 "$shcmd $module_root_directory/setup-repos.sh ".
-		 "--setup --branch $branch", undef, \$out, \$err);
-return ($?, $err, $out);
-}
-
-# setup_repos_error(error)
-# Cleans up error messages from setup-repos.sh
-sub setup_repos_error
-{
-my ($e) = @_;
-$e =~ s/Error:\s*//;
-$e =~ s/[\s\n]+/ /gm;
-$e =~ s/\[INFO\].*?(Hit:|Err:|Get:|E:)/$1/;
-$e =~ s/\[ERROR\].*?/ /g;
-$e =~ s/\s*\.\./. /g;
-$e =~ s/\.\.\s*//g;
-$e =~ s/\.\s\.\s+/. /g;
-$e =~ s/\s+/ /g;
-$e =~ s/(Exiting\.).*/$1/g;
-$e = &trim($e);
-return $e;
-}
-
 1;
 
