@@ -630,6 +630,8 @@ write_virtualmin_branch() {
 
   # Write current $branch value
   printf '%s\n' "$branch" >"$branch_file" 2>/dev/null || :
+  # Write major version
+  printf '%s\n' "$vm_version" >>"$branch_file" 2>/dev/null || :
 }
 
 # Configure Virtualmin repositories (stable, prerelease, or unstable) and keep
