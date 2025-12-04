@@ -420,15 +420,9 @@ if [ "$arch" = "i686" ]; then
   arch="i386"
 fi
 if [ "$SERIAL" = "GPL" ]; then
-  LOGIN=""
   PRODUCT="GPL"
-  repopath="gpl/"
-  packagetype="gpl"
 else
-  LOGIN="$SERIAL:$KEY@"
   PRODUCT="Professional"
-  packagetype="pro"
-  repopath="pro/"
 fi
 
 # Virtualmin-provided packages
