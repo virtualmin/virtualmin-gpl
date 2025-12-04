@@ -65,7 +65,7 @@ print "\n";
 # Downgrade Virtualmin license file
 &lock_file($virtualmin_license_file);
 my %lfile = ( 'SerialNumber' => "GPL",
-	   'LicenseKey' => "GPL" );
+	      'LicenseKey' => "GPL" );
 &write_env_file($virtualmin_license_file, \%lfile);
 &unlock_file($virtualmin_license_file);
 
@@ -89,7 +89,7 @@ else {
 
 # Downgrade Debian/Ubuntu repo and the package
 if (&has_command("apt-get")) {
-	&lock_all_resellers;
+	eval { &lock_all_resellers; };
 	&$first_print($gpl_downgrading_package);
 	&execute_command("apt-get clean && apt-get update");
 	my $rv = &execute_command("apt-get -y install --allow-downgrades --reinstall webmin-virtual-server");
@@ -100,7 +100,7 @@ if (&has_command("apt-get")) {
 
 # Downgrade RHEL repo and the package
 elsif (&has_command("rpm")) {
-	&lock_all_resellers;
+	eval { &lock_all_resellers; };
 	&$first_print($gpl_downgrading_package);
 	&execute_command("yum clean all");
 	my $rv = &execute_command("yum -y downgrade wbm-virtual-server");
