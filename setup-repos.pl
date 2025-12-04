@@ -79,7 +79,14 @@ if ($serial && $key) {
 my $repo_branch;
 $repo_branch = &detect_virtualmin_repo_branch() if (!$branch);
 $repo_branch ||= $branch;
-&$first_print("Setting up Virtualmin $repo_branch repositories ..");
+$repo_branch ||= 'stable';
+my %vserial;
+&read_env_file($virtualmin_license_file, \%vserial);
+my $repo_type = 'gpl';
+if ($vserial{'SerialNumber'} ne 'GPL' && $vserial{'LicenseKey'} ne 'GPL') {
+	$repo_type = 'pro';
+	}
+&$first_print($text{"licence_updating_repo_${repo_branch}_$repo_type"});
 my ($st, $err, $out) = &setup_virtualmin_repos($repo_branch);
 if ($st) {
 	&$first_print(".. error : @{[setup_repos_error($err || $out)]}");

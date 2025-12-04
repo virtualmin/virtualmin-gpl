@@ -114,7 +114,7 @@ if ($webmin::config{'upsource'} =~ /\Q$upgrade_virtualmin_host\E/) {
 elsif (!$no_repos) {
 	my $repo_branch = &detect_virtualmin_repo_branch();
 	$repo_branch ||= 'stable';
-	&$first_print($text{"licence_updating_repo_$repo_branch"});
+	&$first_print($text{"licence_updating_repo_${repo_branch}_pro"});
 	my ($st, $err, $out) = &setup_virtualmin_repos($repo_branch);
 	if (!$st) {
 		&$second_print($text{'setup_done'});
