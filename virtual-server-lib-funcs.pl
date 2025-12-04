@@ -17258,7 +17258,7 @@ if ($virtualmin_pro &&
 				}
 			elsif ($found == 1) {
 				&$second_print(&text('check_aptrepowrong',
-					"<tt>$virtualmin_apt_repo</tt>"));
+					"<tt>$virtualmin_apt_auth_file</tt>"));
 				}
 			else {
 				&$second_print(&text('check_aptrepomissing',
