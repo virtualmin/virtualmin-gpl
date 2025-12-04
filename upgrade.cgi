@@ -55,11 +55,15 @@ $SIG{'TERM'} = 'IGNORE';	# Stop process from being killed on upgrade
 &unlock_file($virtualmin_license_file);
 &$second_print($text{'setup_done'});
 
+# Determine repo branch
+my $repo_branch = &detect_virtualmin_repo_branch();
+$repo_branch ||= 'stable';
+
 # Work out how we were installed. Possible sources are from the wbm.gz files,
 # from the GPL YUM repo, and from the GPL Debian repo
 if ($itype eq "rpm") {
 	# Set up Webmin and Virtualmin repositories
-	&$first_print($text{'upgrade_addrepo'});
+	&$first_print($text{"licence_updating_repo_${repo_branch}_pro"});
 	my ($st, $err, $out) = &setup_virtualmin_repos();
 	if ($st) {
 		&error(&text('setup_postfailure',
@@ -98,7 +102,7 @@ if ($itype eq "rpm") {
 	}
 elsif ($itype eq "deb") {
 	# Set up Webmin and Virtualmin repositories
-	&$first_print($text{'upgrade_addrepo'});
+	&$first_print($text{"licence_updating_repo_${repo_branch}_pro"});
 	my ($st, $err, $out) = &setup_virtualmin_repos();
 	if ($st) {
 		&error(&text('setup_postfailure',
