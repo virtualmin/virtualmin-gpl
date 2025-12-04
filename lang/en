@@ -4457,6 +4457,8 @@ licence_manager_recom3=Renew your $1 subscription during the grace period to kee
 licence_manager_bind=Days left in grace period
 licence_manager_change=Change License
 licence_manager_setup=Set Up License
+licence_manager_reposissue=Sync License Configuration
+licence_manager_reposissue_desc=The Virtualmin repository configuration on this system does not match the type of license that is currently active. Check that your license information is correct based on what is shown on your <a href='$1' target=_blank>Virtualmin ⇾ My Account</a> page, then click the "<strong>Sync License Configuration</strong>" button below to update the repository settings to match your license type.
 licence_manager_deregister=Deregister License
 licence_manager_subscription=Manage subscription
 licence_manager_support=Contact support
