@@ -1,3 +1,13 @@
+#### Version 7.50.1
+* Fix DNS NS record update correctly when renaming domain
+* Fix to set a custom DNS address for a subdomain only if it really differs from the primary one
+* Fix mail alias domains to manage users expectedly
+* Fix to improve formatting of downloaded backup file names [#1137](https://github.com/virtualmin/virtualmin-gpl/issues/1137)
+* Fix system settings feature count upon backup and restore [#1136](https://github.com/virtualmin/virtualmin-gpl/issues/1136)
+* Fix to correctly show current IPv6 address in the form when changing it
+* Fix migration issue with DKIM when a type of key does not exist
+* Fix issues with DNS CAA records
+
 #### Version 7.50.0
 * Add support for Bunny DNS for Virtualmin Pro users
 * Add improvements to external IPv4 and IPv6 address detection
