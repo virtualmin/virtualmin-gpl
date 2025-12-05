@@ -1,4 +1,5 @@
 #### Version 7.50.1
+* Fix to correctly add new virtual servers in Apache config to prevent wrong site being served
 * Fix DNS NS record update correctly when renaming domain
 * Fix to set a custom DNS address for a subdomain only if it really differs from the primary one
 * Fix mail alias domains to manage users expectedly
@@ -7,6 +8,9 @@
 * Fix to correctly show current IPv6 address in the form when changing it
 * Fix migration issue with DKIM when a type of key does not exist
 * Fix issues with DNS CAA records
+* Fix the default BIND to listen on port 53 unless already configured
+* Fix redirect all requests to SSL site option work correctly
+* Fix support to manage PHP 8.5 versions
 
 #### Version 7.50.0
 * Add support for Bunny DNS for Virtualmin Pro users
