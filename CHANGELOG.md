@@ -6,6 +6,7 @@
 * Fix to correctly show current IPv6 address in the form when changing it
 * Fix the default BIND to listen on port 53 unless already configured
 * Fix redirect all requests to SSL site option work correctly
+* Fix support to manage PHP 8.5 versions
 
 #### Version 7.50.0
 * Add support for Bunny DNS for Virtualmin Pro users
