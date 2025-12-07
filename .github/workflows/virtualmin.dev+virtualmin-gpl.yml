@@ -6,8 +6,8 @@ on:
       - master
   release:
     types:
-      - published
-      - edited
+      - prereleased
+      - released
 
 jobs:
   build:
