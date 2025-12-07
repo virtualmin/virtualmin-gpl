@@ -14114,8 +14114,7 @@ if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
 		  });
 	}
 
-if ($d->{'dir'} && !$d->{'alias'} &&
-    !$d->{'proxy_pass_mode'} && &foreign_available("filemin")) {
+if ($d->{'dir'} && !$d->{'alias'} && &foreign_available("filemin")) {
 	# Link to file manager for HTML directory
 	my $phd = &public_html_dir($d);
 	my %faccess = &get_module_acl(undef, 'filemin');
