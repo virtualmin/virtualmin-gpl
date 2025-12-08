@@ -103,7 +103,7 @@ elsif (&has_command("rpm")) {
 	eval { &lock_all_resellers; };
 	&$first_print($gpl_downgrading_package);
 	&execute_command("yum clean all");
-	my $rv = &execute_command("yum -y downgrade wbm-virtual-server");
+	my $rv = &execute_command("yum -y downgrade webmin-virtual-server wbm-virtual-server");
 	&$second_print(!$rv ? $gpl_downgrading_done : "$gpl_downgrading_failed : $rv");
 	$gpl_downgrading_failed_status++ if ($rv);
 	&execute_command("yum -y remove wbm-virtualmin-support wbm-virtualmin-wp-workbench webmin-virtualmin-support webmin-virtualmin-wp-workbench");
