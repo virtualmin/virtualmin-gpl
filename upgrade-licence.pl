@@ -59,8 +59,8 @@ my ($out, $err);
 my $vmcmd = &get_api_helper_command();
 $vmcmd || &usage('Cannot find Virtualmin helper command');
 &execute_command("$vmcmd setup-repos ".
-	"--serial @{[quotemeta($serial)]} --key @{[quotemeta($key)]} ".
-	"--force-update", undef, \$out, \$err);
+	"--serial @{[quotemeta($serial)]} --key @{[quotemeta($key)]}",
+	undef, \$out, \$err);
 if ($?) {
 	&$second_print($err || $out);
 	exit(2);
