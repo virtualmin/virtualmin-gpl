@@ -390,7 +390,8 @@ if [ "$script_name" = "setup-repos.sh" ]; then
 fi
 
 # Store new log each time
-log="$pwd/$log_file_name.log"
+logpath=${log_dir_path:-"$pwd"}
+log="$logpath/$log_file_name.log"
 if [ -e "$log" ]; then
   while true; do
     logcnt=$((logcnt+1))

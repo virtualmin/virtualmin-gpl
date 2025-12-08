@@ -12004,6 +12004,8 @@ $branch = 'stable' if ($branch !~ /^(stable|prerelease|unstable)$/);
 my $shcmd = &has_command('sh');
 my ($out, $err);
 &execute_command("INTERACTIVE_MODE=off ".
+		 "log_dir_path=$module_var_directory ".
+		 "setup_log_file_name=repos-setup ".
 		 "$shcmd $module_root_directory/setup-repos.sh ".
 		 "--setup --branch $branch", undef, \$out, \$err);
 return ($?, $err, $out);
