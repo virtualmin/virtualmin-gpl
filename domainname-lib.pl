@@ -96,7 +96,9 @@ $name =~ s/\s+$//;
 if ($name !~ /^[a-z0-9\.\-\_]+$/i) {
 	# Convert unicode to xn-- format
 	eval "use Net::LibIDN2";
-	$name = Net::LibIDN2::idn2_lookup_u8($name) if (!$@);
+	my $err = $@;
+	$name = Net::LibIDN2::idn2_lookup_u8($name) if (!$err);
+	&error_stderr("IDN conversion failed : $err") if ($err);
 	}
 return $name;
 }
