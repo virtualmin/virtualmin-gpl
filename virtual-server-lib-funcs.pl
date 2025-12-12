@@ -12169,9 +12169,6 @@ return ($licence{'status'}, $licence{'expiry'},
 sub update_licence_from_site
 {
 my ($licence) = @_;
-my $lastpost = $config{'lastpost'};
-return if (defined($licence->{'last'}) && $licence->{'status'} == 0 &&
-	   $lastpost && time() - $lastpost < 60*60*60);
 my ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew,
     $state, $subscription) = &check_licence_site();
 my  %state = &licence_state();
