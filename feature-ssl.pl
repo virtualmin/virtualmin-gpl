@@ -3665,6 +3665,7 @@ foreach my $try (0, 1) {
 			$acme_email, $actype, $actype_reuse,
 			$server, $keytype, $hmac, $subset);
 		push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
+		&clear_domain_dns_records_and_file($d);
 		}
 	elsif (!$ok) {
 		if (!$cert) {
