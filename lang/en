@@ -534,7 +534,7 @@ setup_evirtnoshared=Selected IP address is not shared!
 setup_evirt6clash=The virtual interface IPv6 address is already in use
 setup_evirt6clash2=No interface for the IPv6 address exists
 setup_evirt6clash4=The IPv6 address is already used by virtual server $1
-setup_emax=Your current license allows you to create up to <tt>$1</tt> top-level and sub-servers combined. For the ability to create more top-level or sub-servers, consider upgrading your license by visiting your <a target=_blank href='$2'>virtualmin.com ⇾ My Account ⇾ Subscriptions</a> page.
+setup_emax=Your current license allows you to create up to <tt>$1</tt> top-level and sub-servers combined. For the ability to create more top-level or sub-servers, consider upgrading your license by visiting your <a target=_blank href='$2'>Virtualmin ⇾ My Account ⇾ Subscriptions</a> page.
 setup_emaxnone=You are not allowed to create any virtual servers
 setup_eprefix=Missing or invalid mail username prefix
 setup_eprefix2=The specified username prefix is already in use
@@ -2290,15 +2290,15 @@ check_ehomeformat=The home directory format $1 does not contain the username or 
 check_ehomestyle=The home directory style is set to "Just base directory", which is unusable with Virtualmin. This can be corrected on the <a href='$2'>Users and Groups module configuration</a> page
 check_jailkitok=Chroot jails are available
 check_jailkiterr=Chroot jails are not available : $1
-check_eyumrepofile=The Virtualmin repository config file $1 does not exist!
-check_yumrepook=The Virtualmin repository is configured correctly
-check_yumrepowrong=The Virtualmin repository config file $1 contains the wrong serial number of license key!
-check_yumrepomissing=The Virtualmin repository configuration file $1 does not reference any known Virtualmin repositories!
-check_eaptrepofile=The APT repository config file $1 does not exist!
-check_aptrepook=The Virtualmin APT repository is configured correctly
-check_aptrepowrong=The APT repository config file $1 contains the wrong serial number of license key!
-check_aptrepomissing=The Virtualmin APT repository configuration file $1 does not reference any known Virtualmin repositories!
-check_repoeoutdate=The Virtualmin repositories on your system are outdated—check our tutorial for <a target="_blank" href='$1'>upgrading</a> your repositories.
+check_erepofile=The Virtualmin repository config file $1 does not exist
+check_repo_stable=stable
+check_repo_prerelease=pre-release
+check_repo_unstable=unstable
+check_repook=The Virtualmin $1 $2 repository is configured correctly
+check_repoeoutdate=however it is from another major version of Virtualmin, which can cause problems when installing or updating packages; use the Virtualmin CLI command $1 to reconfigure your repositories
+check_repowrong=The Virtualmin $2 $3 repository config file $1 has inconsistent license details
+check_repomissing=The Virtualmin $3 $4 repository configuration file $1 does not reference any known Virtualmin repositories; use the Virtualmin CLI command $2 to reconfigure your repositories
+check_repoupdatelink=go to the <a href='$1'>Virtualmin License Manager</a> page to fix it
 
 checkmap_enone=No map sources were found in the <a href='$1'>Postfix configuration</a>
 checkmap_esupport=The map source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile
@@ -4461,17 +4461,25 @@ licence_manager_recom3=Renew your $1 subscription during the grace period to kee
 licence_manager_bind=Days left in grace period
 licence_manager_change=Change License
 licence_manager_setup=Set Up License
+licence_manager_reposissue=Sync License Configuration
+licence_manager_reposissue_desc=The Virtualmin repository configuration on this system does not match the type of license that is currently active. Check that your license information is correct based on what is shown on your <a href='$1' target=_blank>Virtualmin ⇾ My Account</a> page, then click the "<strong>Sync License Configuration</strong>" button below to update the repository settings to match your license type.
 licence_manager_deregister=Deregister License
 licence_manager_subscription=Manage subscription
 licence_manager_support=Contact support
 licence_manager_support_link=The grace period has ended; if you are confident your license is solely in use on this server, but the license server still shows it as active on multiple after re-checking, reach out to <a href='$1' target=_blank>Virtualmin Support</a> for quicker assistance, or wait for 48 hours to have it automatically unlocked
-licence_gpl_repos_warning=GPL repos detected. Use "System Settings ⇾ Upgrade to Virtualmin Pro" in UI to upgrade first!
+licence_gpl_repos_warning=GPL license detected. Upgrade to Virtualmin Pro first.
 licence_validating=Validating new license key $1 ..
 licence_evalidating=.. license cannot be validated
 licence_ecanvalidating=.. license is not valid
 licence_valid_unlim=.. valid for unlimited domains until $1
 licence_valid=.. valid for $1 domains until $2
 licence_updating_repo=Updating Virtualmin repository ..
+licence_updating_repo_stable_gpl=Configuring Virtualmin GPL stable repositories ..
+licence_updating_repo_stable_pro=Configuring Virtualmin Pro stable repositories ..
+licence_updating_repo_prerelease_gpl=Configuring Virtualmin GPL pre-release repositories ..
+licence_updating_repo_prerelease_pro=Configuring Virtualmin Pro pre-release repositories ..
+licence_updating_repo_unstable_gpl=Configuring Virtualmin GPL unstable repositories ..
+licence_updating_repo_unstable_pro=Configuring Virtualmin Pro unstable repositories ..
 licence_no_lines=.. no lines for $1 found!
 licence_updfile=Updating Virtualmin license ..
 licence_expired=License Expired
@@ -5844,7 +5852,7 @@ phpmode_ssioff=Disabling server-side includes ..
 phpmode_ssierr=.. failed : $1
 phpmode_essisuffix=Invalid server-side includes suffix - should be like <tt>.shtml</tt>
 phpmode_defweb=Default website for IP address?
-phpmode_defwebsort=Yes (but only because it is alphabetically first)
+phpmode_defwebsort=Yes, only because it is alphabetically first
 phpmode_defno=No, default is $1
 phpmode_defwebon=Making website the default ..
 phpmode_defweberr=.. failed : $1
@@ -6247,7 +6255,7 @@ newupgrade_title=Upgrade to Virtualmin Pro
 upgrade_desc1=If you have enjoyed using Virtualmin GPL and want to take the next step to the Pro version, this page can be used to perform the upgrade process automatically. The steps to do this are:
 upgrade_step1=Go to <a target='_blank' href='$1'>$2</a> and purchase a license for Virtualmin Pro
 upgrade_step2=Enter your serial number and license key in the form below
-upgrade_step3=Click the "Upgrade Now" button to download and install the latest Virtualmin Pro package; all of your existing settings will be left un-changed, and no other software installed
+upgrade_step3=Click the "Upgrade Now" button to upgrade while keeping all your existing settings unchanged
 upgrade_header=Virtualmin Pro license
 upgrade_serial=Serial number
 upgrade_key=License key
@@ -6271,18 +6279,13 @@ upgrade_schedok=.. done, updates will be automatically installed
 upgrade_schednot=.. done, but automatic update installation is not enabled, enable it in the <a href='$1'>$2</a> module
 upgrade_file=Creating Virtualmin license ..
 upgrade_problems=Some errors occurred while upgrading your system to Virtualmin Pro. Please check the messages above for possible causes.
-upgrade_success=Upgrade to Virtualmin Pro was successful. Thank you for choosing Virtualmin Pro!
+upgrade_success=Upgrade was successful. Thank you for choosing Virtualmin Pro!
 upgrade_theme=Enabling theme <i>$1</i> ..
 upgrade_esharedroot=Your Webmin root directory $1 is shared between multiple systems - module updates are not allowed
-upgrade_eyumrepo=Virtualmin has been installed from an RPM, but not using the Virtualmin GPL repository. Upgrading is not possible at this time.
-upgrade_eyumlist=The $1 RPM package was not found in the list of available packages from repository. Perhaps one of your current repositories is not working?
-upgrade_edebrepo=Virtualmin has been installed from a Debian package, but not using the Virtualmin GPL repository. Upgrading is not possible at this time.
 upgrade_to_pro=Upgrading to Virtualmin Pro ..
-upgrade_eyumfile=No Virtualmin GPL repository was found in $1
 upgrade_update_pkgs=Updating available packages ..
 upgrade_yumclear=Clearing repository caches ..
 upgrade_etypematch=Upgrading is not possible as Virtualmin's install type is <tt>$1</tt> but Webmin's is <tt>$2</tt>
-upgrade_addrepo=Adding Virtualmin Pro repository ..
 
 maillog_title=Search Mail Log
 maillog_desc=This form can be used to search the mail logs for messages matching some conditions, to find out what happened to them. All fields are optional, and will be skipped for comparison purposes if left empty.

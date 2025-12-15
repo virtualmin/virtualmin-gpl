@@ -244,6 +244,7 @@ $s3_accounts_dir = "$module_config_directory/s3accounts";
 $denied_ssh_group = "deniedssh";
 
 $virtualmin_link = "https://www.virtualmin.com";
+$virtualmin_account_link = "$virtualmin_link/account/";
 $virtualmin_account_subscriptions = "$virtualmin_link/account/subscriptions/";
 $virtualmin_shop_link = "$virtualmin_link/shop/";
 $virtualmin_shop_link_cat = "$virtualmin_link/product-category/virtualmin/";
@@ -268,33 +269,41 @@ $script_latest_file = "scripts.txt";
 $script_latest_key = "latest-scripts\@virtualmin.com";
 
 $virtualmin_license_file = "/etc/virtualmin-license";
-$upgrade_virtualmin_host_unstable = "software.virtualmin.dev";
-$upgrade_virtualmin_host_rc = "rc.software.virtualmin.dev";
 $upgrade_virtualmin_host = "software.virtualmin.com";
+$upgrade_virtualmin_host_new = "download.virtualmin.com";
+$upgrade_virtualmin_host_rc = "rc.software.virtualmin.dev";
+$upgrade_virtualmin_host_rc_new = "rc.download.virtualmin.dev";
+$upgrade_virtualmin_host_unstable = "software.virtualmin.dev";
+$upgrade_virtualmin_host_unstable_new = "download.virtualmin.dev";
 $upgrade_virtualmin_host_all = join("|", map { quotemeta($_) } (
-	$upgrade_virtualmin_host_unstable,
-	$upgrade_virtualmin_host_rc,
 	$upgrade_virtualmin_host,
+	$upgrade_virtualmin_host_new,
+	$upgrade_virtualmin_host_rc,
+	$upgrade_virtualmin_host_rc_new,
+	$upgrade_virtualmin_host_unstable,
+	$upgrade_virtualmin_host_unstable_new,
 	));
-$virtualmin_apt_auth_dir = "/etc/apt/auth.conf.d";
+
 ($virtualmin_apt_auth_file) =
 	grep { -r $_ } (
-		"$virtualmin_apt_auth_dir/virtualmin-unstable.conf",
-		"$virtualmin_apt_auth_dir/virtualmin-prerelease.conf",
-		"$virtualmin_apt_auth_dir/virtualmin.conf",
+		"/etc/apt/auth.conf.d/virtualmin-unstable.conf",
+		"/etc/apt/auth.conf.d/virtualmin-prerelease.conf",
+		"/etc/apt/auth.conf.d/virtualmin-stable.conf",
+		"/etc/apt/auth.conf.d/virtualmin.conf",
 	);
 ($virtualmin_yum_repo) =
 	grep { -r $_ } (
 		"/etc/yum.repos.d/virtualmin-unstable.repo",
 		"/etc/yum.repos.d/virtualmin-prerelease.repo",
+		"/etc/yum.repos.d/virtualmin-stable.repo",
 		"/etc/yum.repos.d/virtualmin.repo",
 	);
 ($virtualmin_apt_repo) =
 	grep { -r $_ } (
 		"/etc/apt/sources.list.d/virtualmin-unstable.list",
 		"/etc/apt/sources.list.d/virtualmin-prerelease.list",
+		"/etc/apt/sources.list.d/virtualmin-stable.list",
 		"/etc/apt/sources.list.d/virtualmin.list",
-		"/etc/apt/sources.list",
 	);
 
 $upgrade_virtualmin_port = 443;

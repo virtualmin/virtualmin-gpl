@@ -12,6 +12,7 @@ enable_tooltip=Virtueller Server ist deaktiviert
 
 newweb_allow_subset=Nicht überprüfbare Domänennamen ausschließen?
 newweb_ssl_connectivity=Prüfung vor Zertifikatsanforderung
+newweb_ssl_email=Standardeinstellung für den E-Mail-Versand bei Vertragsverlängerung?
 
 check_dnsip1v6=Die externe IPv6-Adresse für DNS-Einträge ist auf $1 eingestellt, was mit der erkannten externen Adresse übereinstimmt
 check_dnsip2v6=Die Standard-IPv6-Adresse ist auf $1 eingestellt, was der erkannten externen Adresse entspricht
@@ -19,6 +20,8 @@ check_ednsip3v6=Externe IPv6-Adresse konnte nicht erkannt werden
 check_ednsip1v6=Die externe IPv6-Adresse für DNS-Einträge ist auf $1 eingestellt, die erkannte externe Adresse ist jedoch tatsächlich $2. Dies kann dazu führen, dass DNS-Einträge für Virtualmin-Domänen auf das falsche System verweisen
 check_ednsip2v6=Die Standard-IPv6-Adresse ist auf $1 eingestellt, die erkannte externe Adresse ist jedoch tatsächlich $2. Dies ist typischerweise das Ergebnis einer NAT-Firewall und sollte auf der Seite <a href='$3'>Modulkonfiguration</a> korrigiert werden
 check_ednsipnonev6=Es wurde keine lokale IPv6-Adresse gefunden und auf der Seite <a href='$1'>Modulkonfiguration</a> ist keine festgelegt
+check_dnsok3cloud=DNS-Domains werden von einem Cloud-Anbieter gehostet
+check_dnsok3webmin=BIND-DNS-Domains werden auf einem entfernten Webmin-System gehostet
 check_sysinfo=Systeminformationen werden aktualisiert ..
 
 backup_mode0a=Ablage unter <tt>~/$1/</tt>
@@ -32,6 +35,7 @@ backup_nicegot=Google Cloud-Speicher
 backup_nicedbt=Dropbox
 backup_nicebbn=Backblaze B2
 backup_niceazt=Azure Blob Storage
+backup_sign=Auch verschlüsselte Backups signieren?
 
 backup_eplugin_domain=Sie dürfen diese Domäne nicht sichern
 
@@ -51,6 +55,7 @@ cert_svcsbydom=Nach Domäne
 cert_svcsbyip=Nach IP
 cert_desc9=Mit diesem Formular können Sie ein neues SSL-Zertifikat von einer vertrauenswürdigen Zertifizierungsstelle anfordern, das alle anderen derzeit für diese Domain konfigurierten Zertifikate ersetzen wird.
 cert_acmedesc=SSL-Zertifikatsanbieter (Zertifizierungsstellen) wie Let's Encrypt oder ZeroSSL können automatisch gültige SSL-Zertifikate für diese Domain ausstellen. Beachten Sie, dass die Domaininhaberschaft verifiziert werden muss. Dies geschieht automatisch durch das Ablegen einer temporären Datei im Dokumentenverzeichnis $1 der Website oder, falls das DNS von diesem System verwaltet wird, durch das Hinzufügen eines DNS-TXT-Eintrags, um zu bestätigen, dass dieses System die Domain hostet.
+cert_letsemail_master=Benachrichtigen Sie auch den Hauptadministrator
 cert_hostfilter=Hostnamenüberprüfung
 cert_hostfilter0=Versuchen Sie, alle Hostnamen anzufordern, und schlagen Sie fehl, wenn einer nicht validiert werden kann
 cert_hostfilter1=Nicht auflösbare Hostnamen überspringen, aber fehlschlagen, wenn die verbleibenden nicht validiert werden können
@@ -70,6 +75,10 @@ resel_edefdnsip6=Fehlende oder ungültige externe IPv6-Adresse
 
 licence_manager_hostid=Host-ID
 licence_manager_hostid_desc=Diese eindeutige Serverkennung basiert auf der Hardware und dem Betriebssystem Ihres Systems. Sie bindet Ihre Virtualmin Pro-Lizenz an diesen Rechner und kann daher nicht auf mehreren Servern verwendet werden. Bei größeren Änderungen an der Hardware oder dem Betriebssystem kann es bis zu 48 Stunden dauern, bis der Lizenzserver die Änderung erkennt und Ihre Lizenz erneut validiert.
+licence_gpl_repos_warning=GPL-Lizenz erkannt. Bitte aktualisieren Sie zuerst auf Virtualmin Pro.
+licence_updating_repo_stable=Konfiguration der stabilen Virtualmin-Repositories ..
+licence_updating_repo_prerelease=Konfiguration der Virtualmin-Vorabversions-Repositories ..
+licence_updating_repo_unstable=Konfiguration instabiler Virtualmin-Repositories ..
 
 scripts_cats_longdesc=Kategorien und Beschreibung
 scripts_softwaremodperlreq=Das erforderliche Perl-Paket $1 wird installiert ..
@@ -168,6 +177,8 @@ wizard_spam=Wenn Ihr System Domänen hostet, die ein großes E-Mail-Volumen empf
 wizard_spamd1=Ja, schnellere E-Mail-Verarbeitung mit mehr RAM-Nutzung und ohne Domäneneinstellungen
 wizard_db=Virtualmin unterstützt MySQL und PostgreSQL, aber Sie benötigen fast nie beide. Beide Systeme verbrauchen auch im Leerlauf RAM. Für die meisten Websites reicht MySQL allein aus, da nur wenige Anwendungen PostgreSQL benötigen. Wenn das System nur für E-Mail oder DNS verwendet wird, benötigen Sie keines von beiden.
 wizard_email_desc=E-Mail-Benachrichtigungen von diesem Virtualmin-System verwenden die hier angegebene Adresse. Wählen Sie am besten eine Adresse, die E-Mails an eine Person weiterleitet oder zustellt, damit Antworten auf Systemnachrichten gelesen werden.
+wizard_to_addr=E-Mail-Adresse des Empfängers
+wizard_to_addr_none=Keine Einstellung
 
 backuplog_match=Es werden Protokolle angezeigt, die mit $1 übereinstimmen
 backuplog_days=Es werden jetzt die Protokolle der letzten $1 Tage angezeigt
@@ -176,6 +187,7 @@ backuplog_scheddesc=Protokolle für geplante Sicherung „$1“ werden angezeigt
 
 viewbackup_mode_manual=Manuell im Hintergrund
 viewbackup_quick_restore=Schnelle Wiederherstellung dieser Sicherung
+viewbackup_sign=Signiertes Backup?
 
 dbackup_delnow=Backup jetzt löschen
 

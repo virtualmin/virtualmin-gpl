@@ -39,21 +39,21 @@ return $out =~ /^EXP\s+(?<exp>\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\d+)(?:\s+([\w]
 		    &text("licence_evalid", "<tt data-evalid>$serial</tt>"));
 }
 
-# Change license with a new serial and key
+# Changes license with a new serial and key, and performs repo setup unless
+# disabled
 sub change_licence
 {
-my ($serial, $key, $nocheck, $force_update) = @_;
+my ($serial, $key, $nocheck, $force_update, $no_repos) = @_;
 &require_licence($force_update);
 my ($status, $exp, $err, $doms, $server, $hostid);
 # Display a warning to GPL user trying to apply a license instead of
 # properly upgrading. Can be bypassed by using --force-update flag
 if (!$force_update) {
-	my $gpl_repos_warning = $text{'licence_gpl_repos_warning'};
-	my $yumrepo = &read_file_lines($virtualmin_yum_repo, 1);
-	my $aptrepo = &read_file_lines($virtualmin_apt_repo, 1);
-	if (($yumrepo && "@{$yumrepo}" =~ /\/gpl\//) ||
-	    ($aptrepo && "@{$aptrepo}" =~ /\/gpl\//)) {
-		return (1, $gpl_repos_warning);
+	my %vserial;
+	&read_env_file($virtualmin_license_file, \%vserial);
+	if ($vserial{'SerialNumber'} eq 'GPL' ||
+	    $vserial{'LicenseKey'} eq 'GPL') {
+		return (1, $text{'licence_gpl_repos_warning'});
 		}
 	}
 # Validate the new license
@@ -83,80 +83,15 @@ if (!$nocheck) {
 		}
 	}
 
-# Update RHEL repo
-if (-r $virtualmin_yum_repo) {
-	my $found = 0;
-	my $lref = &read_file_lines($virtualmin_yum_repo);
-
-	&$first_print($text{'licence_updating_repo'});
-	&lock_file($virtualmin_yum_repo);
-	foreach my $l (@$lref) {
-		if (
-			# Pro license
-			$l =~ /^baseurl=(https?):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/ ||
-			# GPL license
-			($force_update && $l =~ /^baseurl=(https?):(\/)(\/)($upgrade_virtualmin_host.*)$/)
-			) {
-				my $host = $4;
-				if ($force_update && $l =~ /\/gpl\//) {
-					$host =~ s/gpl\//pro\//;
-				}
-				$l = "baseurl=https://".$serial.":".$key."\@".$host;
-				$found++;
-			}
-		}
-	&flush_file_lines($virtualmin_yum_repo);
-	&unlock_file($virtualmin_yum_repo);
-	if ($found) {
-		&execute_command("yum clean all");
-		}
-	&$second_print($found ? $text{'setup_done'} :
-		&text("licence_no_lines", "<tt>$upgrade_virtualmin_host</tt>"));
-	}
-
-# Update Debian repo
-if (-r $virtualmin_apt_repo) {
-	my $found = 0;
-	my $lref = &read_file_lines($virtualmin_apt_repo);
-
-	&$first_print($text{'licence_updating_repo'});
-	&lock_file($virtualmin_apt_repo);
-	foreach my $l (@$lref) {
-		if (
-			# Pro license old format
-			$l =~ /^deb(.*?)(https?):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/ ||
-			# Pro license new format and GPL license
-			(-d $virtualmin_apt_auth_dir && $l =~ /^deb(.*?)(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/) ||
-			# GPL license on old systems
-			($force_update && $l =~ /^deb(.*?)(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/)
-			) {
-				my $gpgkey = $1;
-				my $host = $5;
-				if ($force_update && $l =~ /\/gpl\//) {
-					$host =~ s/gpl\//pro\//;
-					}
-				if (-d $virtualmin_apt_auth_dir) {
-					$l = "deb${gpgkey}https://".$host;
-					}
-				else {
-					$l = "deb${gpgkey}https://".$serial.":".$key."\@".$host;
-					}
-				$found++;
-			}
-		}
-	&flush_file_lines($virtualmin_apt_repo);
-	&unlock_file($virtualmin_apt_repo);
-	if (-d $virtualmin_apt_auth_dir) {
-		&write_file_contents(
-		    "$virtualmin_apt_auth_dir/virtualmin.conf",
-		    "machine $upgrade_virtualmin_host login $serial password $key\n");
-		}
-	if ($found) {
-		&execute_command("apt-get update");
-		}
-	&$second_print($found ? $text{'setup_done'} :
-		&text("licence_no_lines", "<tt>$upgrade_virtualmin_host</tt>"));
-	}
+# Update Virtualmin license file before running repo setup which relies on it
+# to perform automatic repo setup
+&$first_print($text{'licence_updfile'});
+&lock_file($virtualmin_license_file);
+%lfile = ( 'SerialNumber' => $serial,
+           'LicenseKey' => $key );
+&write_env_file($virtualmin_license_file, \%lfile);
+&unlock_file($virtualmin_license_file);
+&$second_print($text{'setup_done'});
 
 # Update Webmin updates file
 &foreign_require("webmin");
@@ -174,14 +109,22 @@ if ($webmin::config{'upsource'} =~ /\Q$upgrade_virtualmin_host\E/) {
 	&unlock_file($webmin::module_config_file);
 	&$second_print($text{'setup_done'});
 	}
+# Update DEB or RPM repos, and preserve the correct branch previously chosen
+# by the user
+elsif (!$no_repos) {
+	my $repo_branch = &detect_virtualmin_repo_branch();
+	$repo_branch ||= 'stable';
+	&$first_print($text{"licence_updating_repo_${repo_branch}_pro"});
+	my ($st, $err, $out) = &setup_virtualmin_repos($repo_branch);
+	if (!$st) {
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print(&text('setup_postfailure',
+			       &setup_repos_error($err || $out)));
+		}
+	}
 
-# Update Virtualmin licence file
-&$first_print($text{'licence_updfile'});
-&lock_file($virtualmin_license_file);
-%lfile = ( 'SerialNumber' => $serial,
-           'LicenseKey' => $key );
-&write_env_file($virtualmin_license_file, \%lfile);
-&unlock_file($virtualmin_license_file);
 if (defined($status) && $status == 0) {
 	# Update the status file
 	if (!$nocheck) {
@@ -196,7 +139,6 @@ if (defined($status) && $status == 0) {
 		&write_file($licence_status, \%licence);
 		}
 	}
-&$second_print($text{'setup_done'});
 }
 
 1;

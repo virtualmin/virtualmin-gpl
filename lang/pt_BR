@@ -233,8 +233,8 @@ defaults_quota=Espaço em disco
 defaults_equota=Cota de diretório ausente ou inválido
 
 links_web=Configurar site
-links_website=Pré visualizar site
 links_ssl=Configurar SSL para site
+links_website=Pré visualizar site
 
 massdomains_quota=Espaço total do servidor
 massdomains_phpver=Versão do PHP

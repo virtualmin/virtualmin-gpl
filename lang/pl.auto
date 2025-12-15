@@ -72,6 +72,7 @@ newweb_combined_cert1=Tylko plik certyfikatu
 newweb_combined_cert0=Podejmuj decyzję automatycznie
 newweb_allow_subset=Wykluczyć niemożliwe do zweryfikowania nazwy domen?
 newweb_ssl_connectivity=Sprawdź przed żądaniem certyfikatu
+newweb_ssl_email=Co jest domyślnym ustawieniem wysyłania wiadomości e-mail przy odnowieniu?
 
 losing_dir2=Katalog domowy tego wirtualnego podserwera, zawierający wszystkie dane witryny i inne pliki, zostanie usunięty.
 losing_dir4=Katalog domowy tego aliasu, zawierający dane i inne pliki użytkowników, zostanie usunięty.
@@ -83,6 +84,8 @@ check_ednsip3v6=Nie można wykryć zewnętrznego adresu IPv6
 check_ednsip1v6=Zewnętrzny adres IPv6 dla rekordów DNS jest ustawiony na $1, ale wykryty adres zewnętrzny to w rzeczywistości $2. Może to spowodować, że rekordy DNS dla domen Virtualmin będą wskazywać na niewłaściwy system
 check_ednsip2v6=Domyślny adres IPv6 jest ustawiony na $1, ale wykryty adres zewnętrzny to w rzeczywistości $2. Jest to zazwyczaj spowodowane korzystaniem z zapory NAT i należy to poprawić na stronie <a href='$3'>konfiguracji modułu</a>
 check_ednsipnonev6=Nie znaleziono lokalnego adresu IPv6 i nie ustawiono go na stronie <a href='$1'>konfiguracji modułu</a>
+check_dnsok3cloud=Domeny DNS będą hostowane przez dostawcę usług w chmurze
+check_dnsok3webmin=Domeny DNS BIND będą hostowane w zdalnym systemie Webmin
 check_iface4=Adresy IPv4 nie są dostępne w tym systemie
 check_postfixok2=Serwer pocztowy Postfix jest zainstalowany i skonfigurowany jako host przekaźnikowy
 check_sysinfo=Aktualizowanie informacji o systemie ..
@@ -106,6 +109,7 @@ backup_nicegot=Przechowywanie w chmurze Google
 backup_nicedbt=Dropbox
 backup_nicebbn=Backblaze B2
 backup_niceazt=Magazyn obiektów blob platformy Azure
+backup_sign=Czy podpisać również zaszyfrowaną kopię zapasową?
 
 backup_eplugin_domain=Nie masz uprawnień do tworzenia kopii zapasowej tej domeny
 backup_finalstatusok=$1 serwerów wirtualnych zostało pomyślnie utworzonych kopii zapasowych
@@ -144,6 +148,7 @@ cert_acmelink=Możesz dodawać i zarządzać dodatkowymi dostawcami na stronie <
 cert_acmes=Dostawca certyfikatu SSL
 cert_letsemail=Wysłać e-mail z informacją o odnowieniu?
 cert_letsemailerr=Tylko w przypadku awarii
+cert_letsemail_master=Powiadom również administratora głównego
 cert_hostfilter=Weryfikacja nazwy hosta
 cert_hostfilter0=Podjęto próbę zażądania wszystkich nazw hostów i zakończono niepowodzeniem, jeśli którejkolwiek z nich nie udało się zweryfikować
 cert_hostfilter1=Pomiń nierozwiązywalne nazwy hostów, ale zakończ operację niepowodzeniem, jeśli nie uda się zweryfikować pozostałych nazw
@@ -236,13 +241,16 @@ licence_manager_subscription=Zarządzaj subskrypcją
 licence_manager_support=Skontaktuj się z pomocą techniczną
 licence_manager_support_link=Okres karencji dobiegł końca. Jeśli masz pewność, że licencja jest używana wyłącznie na tym serwerze, ale serwer licencji po ponownym sprawdzeniu nadal wyświetla ją jako aktywną na wielu serwerach, skontaktuj się z <a href='$1' target=_blank>pomocą techniczną Virtualmin</a>, aby uzyskać szybszą pomoc, lub poczekaj 48 godzin, aż zostanie ona automatycznie odblokowana
 
-licence_gpl_repos_warning=Wykryto repozytoria GPL. Użyj „System Settings Upgrade to Virtualmin Pro” w interfejsie użytkownika, aby dokonać aktualizacji!
+licence_gpl_repos_warning=Wykryto licencję GPL. Najpierw zaktualizuj do Virtualmin Pro.
 licence_validating=Sprawdzanie poprawności nowego klucza licencyjnego $1 ..
 licence_evalidating=.. licencji nie można zweryfikować
 licence_ecanvalidating=.. licencja jest nieważna
 licence_valid_unlim=.. ważne dla nieograniczonej liczby domen do $1
 licence_valid=.. ważne dla domen $1 do $2
 licence_updating_repo=Aktualizowanie repozytorium Virtualmin ..
+licence_updating_repo_stable=Konfigurowanie stabilnych repozytoriów Virtualmin ..
+licence_updating_repo_prerelease=Konfigurowanie repozytoriów przedpremierowych Virtualmin ..
+licence_updating_repo_unstable=Konfigurowanie niestabilnych repozytoriów Virtualmin ..
 licence_no_lines=.. nie znaleziono wierszy dla $1!
 licence_updfile=Aktualizowanie licencji Virtualmin ..
 licence_expired=Licencja wygasła
@@ -451,6 +459,8 @@ wizard_email_desc=Powiadomienia e-mail z systemu Virtualmin będą korzystać z 
 wizard_from_addr=Adres e-mail głównego administratora
 wizard_from_addr2=Twój adres
 wizard_efrom_addr=Adres e-mail musi być w formacie użytkownik@domena
+wizard_to_addr=Adres e-mail odbiorcy
+wizard_to_addr_none=Żaden zestaw
 
 backuplog_match=Pokazywanie dzienników pasujących do $1
 backuplog_days=Teraz wyświetlane są logi z ostatnich $1 dni
@@ -459,6 +469,7 @@ backuplog_scheddesc=Wyświetlanie dzienników dla zaplanowanej kopii zapasowej �
 
 viewbackup_mode_manual=Ręcznie w tle
 viewbackup_quick_restore=Szybkie przywracanie tej kopii zapasowej
+viewbackup_sign=Podpisana kopia zapasowa?
 
 dbackup_delnow=Usuń kopię zapasową teraz
 

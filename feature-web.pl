@@ -35,7 +35,7 @@ my ($f, $newfile) = &get_website_file($d);
 # Add NameVirtualHost if needed
 my ($nvstar, $nvstar6);
 if ($d->{'ip'}) {
-	&add_name_virtual($d, $conf, $web_port, 1, $d->{'ip'});
+	$nvstar = &add_name_virtual($d, $conf, $web_port, 1, $d->{'ip'});
 	}
 if ($d->{'ip6'}) {
 	$nvstar6 = &add_name_virtual($d, $conf, $web_port, 1,

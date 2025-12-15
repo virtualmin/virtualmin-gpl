@@ -937,8 +937,8 @@ links_mysqls=Databáze MySQL
 links_postgres=Databáze PostgreSQL
 links_postgress=Databáze PostgreSQL
 links_web=Konfigurovat web
-links_website=Náhled stránky
 links_ssl=Konfigurovat SSL web
+links_website=Náhled stránky
 links_webalizer2=Zobrazit záznamy Webalizeru
 
 massdelete_title=Smazat virtualni servery
