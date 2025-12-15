@@ -7206,7 +7206,43 @@ local $cmd = "scp -r ".($port ? "-P $port " : "").
 	     $config{'ssh_args'}." ".
 	     $config{'scp_args'}." ".
 	     quotemeta($src)." ".quotemeta($dest);
-&run_ssh_command($cmd, $pass, $err, $asuser);
+return &run_ssh_command($cmd, $pass, $err, $asuser);
+}
+
+# sftp_commands(dest, password, port, &commands, &err, [as-user])
+# Runs a series of ftp operations via the sftp command to a destination
+# like user@host, and returns the output
+sub sftp_commands
+{
+my ($dest, $pass, $port, $cmds, $err, $asuser) = @_;
+if (!&has_command("sftp")) {
+	$$err = "Missing sftp command";
+	return undef;
+	}
+my $temp = &transname();
+&open_tempfile(TEMP, ">$temp");
+foreach my $c (@$cmds) {
+	&print_tempfile(TEMP, $c,"\n");
+	}
+&close_tempfile(TEMP);
+if ($asuser) {
+	&set_ownership_permissions($asuser, undef, undef, $temp);
+	}
+my $cmd = "sftp -b ".quotemeta($temp).
+	  ($port ? "-P $port " : "").
+	  " ".quotemeta($dest);
+return &run_ssh_command($cmd, $pass, $err, $asuser);
+}
+
+# sftp_upload(file, dest, password, &error, port, [as-user])
+# Uploads a file with the sftp command to a remote destination,
+# formatted like user@foo:/path/to/bar
+sub sftp_upload
+{
+my ($file, $dest, $pass, $err, $port, $asuser) = @_;
+my ($desthost, $destfile) = split(/:/, $dest);
+my $out = &sftp_commands($desthost, $pass, $port,
+			 [ "put $file $destfile" ], $err, $asuser);
 }
 
 # run_ssh_command(command, pass, &error, [as-user])

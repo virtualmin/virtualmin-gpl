@@ -4226,8 +4226,8 @@ return $rv;
 # Converts a URL like ftp:// or a filename into its components. These will be
 # protocol (1 for FTP, 2 for SSH, 0 for local, 3 for S3, 4 for download,
 # 5 for upload, 6 for rackspace, 7 for GCS, 8 for Dropbox, 9 for Webmin,
-# 10 for Backblaze, 11 for Azure, 12 for Drive), login, password, host, path
-# and port
+# 10 for Backblaze, 11 for Azure, 12 for Drive, 13 for SFTP), login, password,
+# host, path and port
 sub parse_backup_url
 {
 my ($url) = @_;
@@ -4246,6 +4246,17 @@ elsif ($url =~ /^ssh:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
        $url =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
 	# SSH url with no @ in password
 	@rv = (2, $1, $2, $3, $5, $4 ? substr($4, 1) : 22);
+	if ($rv[2] =~ /^\|/) {
+		# Actually a path with / escaped to |
+		$rv[2] =~ s/\|/\//g;
+		}
+	}
+elsif ($url =~ /^sftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
+       $url =~ /^sftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
+       $url =~ /^sftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
+       $url =~ /^sftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
+	# SFTP url with no @ in password
+	@rv = (13, $1, $2, $3, $5, $4 ? substr($4, 1) : 22);
 	if ($rv[2] =~ /^\|/) {
 		# Actually a path with / escaped to |
 		$rv[2] =~ s/\|/\//g;
@@ -4413,6 +4424,20 @@ elsif ($mode == 2) {
 		}
 	$rv .= $path;
 	}
+elsif ($mode == 13) {
+	# SFTP server
+	$rv .= "ssh://".$user.":".$pass."\@";
+	if (&check_ip6address($host)) {
+		$rv .= "[".$host."]";
+		}
+	else {
+		$rv .= $host;
+		}
+	if ($port != 22) {
+		$rv .= ":".$port;
+		}
+	$rv .= $path;
+	}
 elsif ($mode == 9) {
 	# Webmin URL
 	$rv .= "webmin://";
@@ -4503,6 +4528,7 @@ elsif ($show && $path && $config{'show_backuppath'} == 1) {
 	}
 local $rv;
 if ($proto == 1) {
+	# FTP server
 	if ($name_only) {
 		$rv = $text{'backup_niceftpt'};
 		}
@@ -4511,6 +4537,7 @@ if ($proto == 1) {
 		}
 	}
 elsif ($proto == 2) {
+	# SSH server
 	if ($name_only) {
 		$rv = $text{'backup_nicescpt'};
 		}
@@ -4518,7 +4545,17 @@ elsif ($proto == 2) {
 		$rv = &text('backup_nicescp', "<tt>$path</tt>", "<tt>$host</tt>");
 		}
 	}
+elsif ($proto == 13) {
+	# SFTP server
+	if ($name_only) {
+		$rv = $text{'backup_nicesftpt'};
+		}
+	else {
+		$rv = &text('backup_nicesftp', "<tt>$path</tt>", "<tt>$host</tt>");
+		}
+	}
 elsif ($proto == 3) {
+	# Amazon S3
 	if ($name_only) {
 		$rv = $text{'backup_nices3at'};
 		}
@@ -4540,6 +4577,7 @@ elsif ($proto == 3) {
 		}
 	}
 elsif ($proto == 0) {
+	# Local file
 	if ($name_only) {
 		$rv = $text{'backup_nicefilet'};
 		}
@@ -4548,15 +4586,19 @@ elsif ($proto == 0) {
 		}
 	}
 elsif ($proto == 4) {
+	# Download in browser
 	$rv = $text{'backup_nicedownload'};
 	}
 elsif ($proto == 44) {
+	# Download via link
 	$rv = $text{'backup_nicedownloadlink'};
 	}
 elsif ($proto == 5) {
+	# Upload from browser
 	$rv = $text{'backup_niceupload'};
 	}
 elsif ($proto == 6) {
+	# Rackspace Cloud files
 	if ($name_only) {
 		$rv = $text{'backup_nicerst'};
 		}
@@ -4568,6 +4610,7 @@ elsif ($proto == 6) {
 		}
 	}
 elsif ($proto == 7) {
+	# Google Cloud storage
 	if ($name_only) {
 		$rv = $text{'backup_nicegot'};
 		}
@@ -4579,6 +4622,7 @@ elsif ($proto == 7) {
 		}
 	}
 elsif ($proto == 8) {
+	# Dropbox
 	if ($name_only) {
 		$rv = $text{'backup_nicedbt'};
 		}
@@ -4590,6 +4634,7 @@ elsif ($proto == 8) {
 		}
 	}
 elsif ($proto == 9) {
+	# Webmin server
 	if ($name_only) {
 		$rv = $text{'backup_nicewebmint'};
 		}
@@ -4599,6 +4644,7 @@ elsif ($proto == 9) {
 		}
 	}
 elsif ($proto == 10) {
+	# Backblaze
 	if ($name_only) {
 		$rv = $text{'backup_nicebbn'};
 		}
@@ -4612,6 +4658,7 @@ elsif ($proto == 10) {
 		}
 	}
 elsif ($proto == 11) {
+	# Azure
 	if ($name_only) {
 		$rv = $text{'backup_niceazt'};
 		}
@@ -4623,6 +4670,7 @@ elsif ($proto == 11) {
 		}
 	}
 elsif ($proto == 12) {
+	# Google Drive
 	if ($name_only) {
 		$rv = $text{'backup_nicedrivet'};
 		}
@@ -4800,6 +4848,29 @@ $st .= "<tr> <td>$text{'backup_pass4'}</td> <td>".
        "</td> </tr>\n";
 $st .= "</table>\n";
 push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
+
+# SFTP file fields
+local $st = &$tablestart('sftp');
+$st .= "<tr> <td>$text{'backup_sftpserver'}</td> <td>".
+       &ui_textbox($name."_sfserver", $mode == 13 ? $serverport :
+                     undef, 20, undef, undef, "placeholder='example.com:22'").
+       "</td> </tr>\n";
+$st .= "<tr> <td data-backup-path data-backup-path-file=\"$text{'backup_path'}\" data-backup-path-dir=\"$text{'backup_path2'}\">$text{'backup_path'}</td> <td>".
+       &ui_textbox($name."_sfpath", $mode == 13 ? $path : undef, 50).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_login'}</td> <td>".
+       &ui_textbox($name."_sfuser", $mode == 13 ? $user : undef, 15,
+		   0, undef, $noac).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_pass4'}</td> <td>".
+       "<span style='white-space: nowrap;'>" .
+       &ui_password($name."_sfpass", $mode == 13 && $pass !~ /\// ? $pass : undef,
+                    25, 0, undef, "$noac placeholder=\"$text{'backup_pass41_desc'}\""). "&nbsp;$text{'backup_pass4_or'} &nbsp;" .
+       &ui_filebox($name."_sftpkey", $mode == 13 && $pass =~ /\// ? $pass : undef,
+                    25, 0, undef, "$noac placeholder=\"$text{'backup_pass42_desc'}\"")."</span>".
+       "</td> </tr>\n";
+$st .= "</table>\n";
+push(@opts, [ 13, $text{'backup_mode13'}, $st ]);
 
 # Webmin RPC fields
 local $wt = &$tablestart('webmin');
