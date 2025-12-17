@@ -318,20 +318,14 @@ if ($d->{'user'} ne $oldd->{'user'}) {
 	&$second_print($text{'setup_done'});
 	}
 if ($d->{'dom'} ne $oldd->{'dom'}) {
-        # Domain name has changed .. fix up Apache config by copying relevant
-        # directives from the real domain
+        # Domain name has changed .. update any directives that contain
+        # the old domain name
         &$first_print($text{'save_ssl2'});
-	if (!$virt || !$nonvirt) {
+	if (!$virt) {
 		&$second_print($text{'delete_noapache'});
 		goto VIRTFAILED;
 		}
-	foreach my $dir ("ServerName", "ServerAlias",
-			 "ErrorLog", "TransferLog", "CustomLog",
-			 "RewriteCond", "RewriteRule") {
-		local @vals = &apache::find_directive($dir, $nonvconf);
-		&apache::save_directive($dir, \@vals, $vconf, $conf);
-		}
-        &flush_file_lines($virt->{'file'});
+	&modify_web_domain($d, $oldd, $virt, $vconf, $conf, 1);
         $rv++;
         &$second_print($text{'setup_done'});
         }
