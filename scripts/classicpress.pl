@@ -399,11 +399,14 @@ return undef;
 sub script_classicpress_latest
 {
 my ($ver) = @_;
-return ( 'https://github.com/ClassicPress/ClassicPress-release/tags',
-	 $ver >= 2.4 ?
-	   'ClassicPress/ClassicPress-release/releases/tag/([\\d\\.]+)"' :
-	   'ClassicPress/ClassicPress-release/releases/tag/(1\\.[\\d\\.]+)"'
-	);
+if (&compare_versions($ver, 2.4) >= 0) {
+	return ( 'https://github.com/ClassicPress/ClassicPress-release/tags',
+		 'ClassicPress/ClassicPress-release/releases/tag/([\\d\\.]+)"' );
+	}
+else {
+	return ( 'https://github.com/ClassicPress/ClassicPress-release/tags?after=2.1.0',
+		 'ClassicPress/ClassicPress-release/releases/tag/(1\\.[\\d\\.]+)"' );
+	}
 }
 
 sub script_classicpress_site
