@@ -598,6 +598,29 @@ foreach my $desturl (@$desturls) {
 				}
 			}
 		}
+	elsif ($mode == 13) {
+		# Try listing the destination with sftp
+		my $err;
+		my $out;
+		if ($dirfmt) {
+			# Directory should already exist
+			if ($mkdir) {
+				my $mkdirerr;
+				&sftp_commands($user.'@'.$server, $pass, $port, ["mkdir $path"], \$mkdirerr);
+				}
+			$out = &sftp_commands($user.'@'.$server, $pass, $port, ["ls $path"], \$err);
+			}
+		else {
+			# Parent should exist
+			my $ppath = $path;
+			$ppath =~ s/\/[^\/]+$//;
+			$out = &sftp_commands($user.'@'.$server, $pass, $port, ["ls $path"], \$err);
+			}
+		if ($err || $out =~ /not\s+found/) {
+			&$second_print(&text('backup_esftpdir', &html_escape($err || $out)));
+			next;
+			}
+		}
 	elsif ($mode == 0) {
 		# Make sure target is / is not a directory
 		if ($dirfmt && !-d $desturl) {
@@ -1093,20 +1116,20 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 						if (!$err);
 				$err =~ s/\Q$pass\E/$starpass/g;
 				}
-			elsif ($mode == 2) {
-				# Via SCP
-				&$first_print(&text('backup_upload2',
+			elsif ($mode == 2 || $mode == 13) {
+				# Via SCP or SFTP
+				&$first_print(&text('backup_upload'.$mode,
 						    "<tt>$server</tt>"));
-				local $qserver = &check_ip6address($server) ?
-							"[$server]" : $server;
-				local $r = ($user ? "$user\@" : "").
-					   "$qserver:$path";
-				&scp_copy("$dest/$df", $r, $pass, \$err, $port,
-					  $asuser);
-				&scp_copy($infotemp, "$r/$df.info", $pass,
-					  \$err, $port, $asuser) if (!$err);
-				&scp_copy($domtemp, "$r/$df.dom", $pass,
-					  \$err, $port, $asuser) if (!$err);
+				my $qserver = &check_ip6address($server) ?
+						"[$server]" : $server;
+				my $r = ($user ? "$user\@" : "")."$qserver:$path";
+				my $cfunc = $mode == 2 ? \&scp_copy : \&sftp_upload;
+				&$cfunc("$dest/$df", $r, $pass, \$err, $port,
+					$asuser);
+				&$cfunc($infotemp, "$r/$df.info", $pass,
+					\$err, $port, $asuser) if (!$err);
+				&$cfunc($domtemp, "$r/$df.dom", $pass,
+					\$err, $port, $asuser) if (!$err);
 				$err =~ s/\Q$pass\E/$starpass/g;
 				}
 			elsif ($mode == 9) {
@@ -1572,21 +1595,22 @@ foreach my $desturl (@$desturls) {
 		&unlink_file($domtemp);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
-	elsif ($ok && $mode == 2 && (@destfiles || !$dirfmt)) {
-		# Upload to SSH server with scp
-		&$first_print(&text('backup_upload2', "<tt>$server</tt>"));
+	elsif ($ok && ($mode == 2 || $mode == 13) && (@destfiles || !$dirfmt)) {
+		# Upload to SSH server with scp or SFTP server with sftp
+		&$first_print(&text('backup_upload'.$mode, "<tt>$server</tt>"));
 		local $err;
 		local $qserver = &check_ip6address($server) ?
 					"[$server]" : $server;
 		local $r = ($user ? "$user\@" : "")."$qserver:$path";
 		local $infotemp = &transname();
 		local $domtemp = &transname();
+		my $cfunc = $mode == 2 ? \&scp_copy : \&sftp_upload;
 		if ($dirfmt) {
 			# Need to upload all backup files in the directory
 			$err = undef;
 			local $tstart = time();
 			foreach my $df (@destfiles) {
-				&scp_copy("$dest/$df", "$r/$df",
+				&$cfunc("$dest/$df", "$r/$df",
 					  $pass, \$err, $port, $asuser);
 				last if ($err);
 				}
@@ -1594,7 +1618,7 @@ foreach my $desturl (@$desturls) {
 				# Target dir didn't exist, so scp just the
 				# directory and all files
 				$err = undef;
-				&scp_copy($dest, $r, $pass, \$err, $port,
+				&$cfunc($dest, $r, $pass, \$err, $port,
 					  $asuser);
 				}
 			# Upload each domain's .info and .dom files
@@ -1608,9 +1632,9 @@ foreach my $desturl (@$desturls) {
 					    &serialise_variable($binfo));
 				&uncat_file($domtemp,
 					    &serialise_variable($bdom));
-				&scp_copy($infotemp, $r."/$df.info", $pass,
+				&$cfunc($infotemp, $r."/$df.info", $pass,
 					  \$err, $port, $asuser) if (!$err);
-				&scp_copy($domtemp, $r."/$df.dom", $pass,
+				&$cfunc($domtemp, $r."/$df.dom", $pass,
 					  \$err, $port, $asuser) if (!$err);
 				}
 			$err =~ s/\Q$pass\E/$starpass/g;
@@ -1634,10 +1658,10 @@ foreach my $desturl (@$desturls) {
 				    &serialise_variable(\%donefeatures));
 			&uncat_file($domtemp,
 				    &serialise_variable(\%donedoms));
-			&scp_copy($dest, $r, $pass, \$err, $port, $asuser);
-			&scp_copy($infotemp, $r.".info", $pass, \$err, $port,
+			&$cfunc($dest, $r, $pass, \$err, $port, $asuser);
+			&$cfunc($infotemp, $r.".info", $pass, \$err, $port,
 				  $asuser) if (!$err);
-			&scp_copy($domtemp, $r.".dom", $pass, \$err, $port,
+			&$cfunc($domtemp, $r.".dom", $pass, \$err, $port,
 				  $asuser) if (!$err);
 			$err =~ s/\Q$pass\E/$starpass/g;
 			if ($asd && !$err) {
