@@ -147,7 +147,7 @@ if (defined($status) && $status == 0) {
 	# Update the status file
 	if (!$nocheck) {
 		&read_file($licence_status, \%licence);
-		# Update the licence status based on the new licence as
+		# Update the license status based on the new license as
 		# Virtualmin server can block on too many requests
 		$licence{'status'} = $status;
 		$licence{'expiry'} = $exp;
