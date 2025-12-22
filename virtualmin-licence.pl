@@ -1,5 +1,5 @@
-# Defines the function for validating the Virtualmin licence, by making an
-# HTTP request to the licence CGI.
+# Defines the function for validating the Virtualmin license, by making an
+# HTTP request to the license CGI.
 
 $virtualmin_licence_host = "software.virtualmin.com";
 $virtualmin_licence_port = 443;
