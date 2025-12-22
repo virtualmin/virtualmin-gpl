@@ -243,7 +243,8 @@ $s3_accounts_dir = "$module_config_directory/s3accounts";
 
 $denied_ssh_group = "deniedssh";
 
-$virtualmin_link = "https://www.virtualmin.com";
+$virtualmin_host_domain = "www.virtualmin.com";
+$virtualmin_link = "https://$virtualmin_host_domain";
 $virtualmin_account_link = "$virtualmin_link/account/";
 $virtualmin_account_subscriptions = "$virtualmin_link/account/subscriptions/";
 $virtualmin_shop_link = "$virtualmin_link/shop/";
