@@ -1,30 +1,48 @@
-# Defines the function for validating the Virtualmin licence, by making an
-# HTTP request to the licence CGI.
+# Defines the function for validating the Virtualmin license, by making an
+# HTTP request to the license CGI.
 
 $virtualmin_licence_host = "software.virtualmin.com";
 $virtualmin_licence_port = 443;
-$virtualmin_licence_prog = "/cgi-bin/vlicence.cgi";
 $virtualmin_licence_ssl = 1;
+$virtualmin_licence_prog = "/cgi-bin/vlicence.cgi";
+$virtualmin_licence_page = "/api/license/client";
 $virtualmin_renewal_url = $config{'renewal_url'} ||
 			  $virtualmin_shop_link;
-# licence_scheduled(hostid, [serial, key], [vps-type])
+
+# licence_scheduled(hostid, serial, key)
 # Returns a status code (0=OK, 1=Invalid, 2=Down, 3=Expired), the expiry date,
 # an error message, the number of domains max, the number of servers max,
 # the number of servers used, and the auto-renewal flag
 sub licence_scheduled
 {
-local ($hostid, $serial, $key, $vps) = @_;
-local ($out, $error, $regerr);
-local @doms = grep { !$_->{'alias'} && !$_->{'defaultdomain'} } &list_domains();
-&read_env_file($virtualmin_license_file, \%serial);
-$key ||= $serial{'LicenseKey'};
-$serial ||= $serial{'SerialNumber'};
-&http_download($virtualmin_licence_host,
-	       $virtualmin_licence_port,
-	       "$virtualmin_licence_prog?id=$hostid&".
-		"serial=$key&doms=".scalar(@doms)."&vps=$vps",
-	       \$out, \$error, undef, $virtualmin_licence_ssl,
-	       undef, undef, 10, 0, 1);
+my ($hostid, $serial, $key) = @_;
+my ($out, $error, $regerr, %serial);
+if (!$serial || !$key) {
+	# Read from license file only if not provided
+	&read_env_file($virtualmin_license_file, \%serial);
+	$serial = $serial{'SerialNumber'};
+	$key = $serial{'LicenseKey'};
+	}
+# New API call using POST
+my $post_details = {
+	'domain' => $virtualmin_host_domain,
+	'dom' => $virtualmin_host_domain,
+	'ip' => $virtualmin_host_domain,
+	'web_sslport' => $virtualmin_licence_port,
+	'web_port' => $virtualmin_licence_port,
+	'ssl' => $virtualmin_licence_ssl };
+my $params = 'id='.&urlize($hostid).'&serial='.&urlize($key);
+&post_http_connection($post_details, $virtualmin_licence_page, $params,
+		      \$out, \$error, undef, undef, undef, undef, 10);
+if ($error) {
+	# Try the old API if the new fails (why would it?)
+	$error = undef;
+	&http_download($virtualmin_licence_host,
+		       $virtualmin_licence_port,
+		       "$virtualmin_licence_prog?id=$hostid&serial=$key",
+		       \$out, \$error, undef, $virtualmin_licence_ssl,
+		       undef, undef, 10, 0, 1);
+	}
 return (2, undef, "$text{'licence_efailed'} : @{[lcfirst($error)]}") if ($error);
 return $out =~ /^EXP\s+(?<exp>\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\d+)(?:\s+([\w])(?:\s+(\d+))?)?)?/ ?
 	(3, "$+{exp}", &text("licence_eexp", "$+{exp}"), $2, $3, $4, $5, $6, $7) :
@@ -61,7 +79,7 @@ if (!$nocheck) {
 	&$first_print(&text("licence_validating", "<tt>$key</tt>"));
 	$hostid = &get_licence_hostid();
 	($status, $exp, $err, $doms, $server) =
-		&licence_scheduled($hostid, $serial, $key, &get_vps_type());
+		&licence_scheduled($hostid, $serial, $key);
 	if ($status) {
 		$err = lcfirst($err);
 		if ($status == 2) {
