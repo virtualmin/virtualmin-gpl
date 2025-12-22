@@ -1352,7 +1352,7 @@ if ($ok) {
 		elsif ($compression == 0) {
 			$comp = &get_gzip_command();
 			}
-		elsif ($compression == 3) {
+		elsif ($compression == 1) {
 			$comp = &get_bzip2_command();
 			}
 		elsif ($compression == 4) {
