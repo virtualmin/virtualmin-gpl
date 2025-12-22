@@ -7219,19 +7219,9 @@ if (!&has_command("sftp")) {
 	$$err = "Missing sftp command";
 	return undef;
 	}
-my $temp = &transname();
-&open_tempfile(TEMP, ">$temp");
-foreach my $c (@$cmds) {
-	&print_tempfile(TEMP, $c,"\n");
-	}
-&close_tempfile(TEMP);
-if ($asuser) {
-	&set_ownership_permissions($asuser, undef, undef, $temp);
-	}
-my $cmd = "sftp -b ".quotemeta($temp).
-	  ($port ? "-P $port " : "").
+my $cmd = "sftp".($port ? " -P $port " : "").
 	  " ".quotemeta($dest);
-return &run_ssh_command($cmd, $pass, $err, $asuser);
+return &run_ssh_command($cmd, $pass, $err, $asuser, $cmds);
 }
 
 # sftp_upload(file, dest, password, &error, port, [as-user])
@@ -7245,12 +7235,12 @@ my $out = &sftp_commands($desthost, $pass, $port,
 			 [ "put $file $destfile" ], $err, $asuser);
 }
 
-# run_ssh_command(command, pass, &error, [as-user])
+# run_ssh_command(command, pass, &error, [as-user], [&sftp-commands])
 # Attempt to run some command that uses ssh or scp, feeding in a password.
 # Returns the output, and sets the error variable ref if failed.
 sub run_ssh_command
 {
-my ($cmd, $pass, $err, $asuser) = @_;
+my ($cmd, $pass, $err, $asuser, $sftp) = @_;
 if ($pass =~ /^\// && -r $pass) {
 	# Using a key file
 	my ($bin, $args) = split(/\s+/, $cmd, 2);
@@ -7264,10 +7254,13 @@ if ($asuser) {
 my ($fh, $fpid) = &proc::pty_process_exec($cmd);
 my $out;
 my $nopass = 0;
+my $idx = 0;
 while(1) {
-	my $rv = &wait_for($fh, "password:", "yes\\/no", ".*\n");
+	my $rv = &wait_for($fh, "password:", "yes\\/no", ".*\n",
+				$sftp ? ( "sftp>" ): ( ));
 	$out .= $wait_for_input;
 	if ($rv == 0) {
+		# Request for a password
 		if (!defined($pass) || $pass eq "") {
 			$nopass = 1;
 			last;
@@ -7275,7 +7268,17 @@ while(1) {
 		syswrite($fh, "$pass\n");
 		}
 	elsif ($rv == 1) {
+		# Key verification request
 		syswrite($fh, "yes\n");
+		}
+	elsif ($rv == 3) {
+		# Send an SFTP comment
+		if ($idx < @$sftp) {
+			syswrite($fh, $sftp->[$idx++]."\n");
+			}
+		else {
+			syswrite($fh, "quit\n");
+			}
 		}
 	elsif ($rv < 0) {
 		last;
