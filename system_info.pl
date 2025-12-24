@@ -617,7 +617,7 @@ if (!$data->{'nosysinfo'} && $info->{'progs'} && &can_view_sysinfo()) {
 		    'table' => \@table });
 	}
 
-# Virtualmin licence
+# Virtualmin license
 my %vserial;
 if (&read_env_file($virtualmin_license_file, \%vserial) &&
     $vserial{'SerialNumber'} ne 'GPL' &&
@@ -675,7 +675,7 @@ if (&read_env_file($virtualmin_license_file, \%vserial) &&
 		    'open' => $open,
 		    'table' => \@table });
 
-	# Re-check licence link
+	# Re-check license link
 	push(@rv, { 'type' => 'link',
 		    'priority' => 20,
 		    'desc' => $text{'right_vlcheck'},
