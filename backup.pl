@@ -246,7 +246,7 @@ if ($sched->{'email'} && $has_mailboxes &&
 	$output_header = "";
 	# Nice format $dest for email
 	$dest = &nice_backup_url($strfdests[0]);
-	if ($ok && !@$errdoms) {
+	if ($ok && !@$errdoms && $size) {
 		if (@perrs) {
 			# Worked, but purging failed
 			$output_header .= &text('backup_donepurge',
@@ -260,7 +260,7 @@ if ($sched->{'email'} && $has_mailboxes &&
 			$subject = &text('backup_donesubject', $host, $dest);
 			}
 		}
-	elsif ($ok && @$errdoms) {
+	elsif ($ok && @$errdoms && $size) {
 		# Worked for some domains but not all
 		$output_header .= &text('backup_partial',
 					&nice_size($size))." ";

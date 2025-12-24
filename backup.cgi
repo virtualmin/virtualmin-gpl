@@ -346,7 +346,7 @@ else {
 				  !$in{'sign'}, $sched->{'desc'}, undef);
 		}
 	&run_post_actions();
-	if (!$ok) {
+	if (!$ok || !$size) {
 		print "<p>",$text{'backup_failed'},"<p>\n";
 		}
 	else {
