@@ -3332,7 +3332,7 @@ print &ui_table_row(&hlink($text{'tmpl_dmarcextra'},
 			   "template_dns_dmarcextra"),
 	&ui_textbox("dns_dmarcextra", $tmpl->{'dns_dmarcextra'}, 40));
 
-if (!$config{'provision_dns'}) {
+if (!&is_dns_remote()) {
 	print &ui_table_hr();
 
 	# Extra named.conf directives
@@ -3526,7 +3526,7 @@ if (defined($in{'dns_slaves_def'}) ||
 		}
 	}
 
-if (!$config{'provision_dns'}) {
+if (!&is_dns_remote()) {
 	# Save named.conf
 	$tmpl->{'namedconf'} = &parse_none_def("namedconf");
 	if ($in{'namedconf_mode'} == 2) {
