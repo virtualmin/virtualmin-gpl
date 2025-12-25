@@ -602,19 +602,20 @@ foreach my $desturl (@$desturls) {
 		# Try listing the destination with sftp
 		my $err;
 		my $out;
+		my $r = ($user ? $user.'@' : '').$server;
 		if ($dirfmt) {
 			# Directory should already exist
 			if ($mkdir) {
 				my $mkdirerr;
-				&sftp_commands($user.'@'.$server, $pass, $port, ["mkdir $path"], \$mkdirerr);
+				&sftp_commands($r, $pass, $port, ["mkdir $path"], \$mkdirerr);
 				}
-			$out = &sftp_commands($user.'@'.$server, $pass, $port, ["ls $path"], \$err);
+			$out = &sftp_commands($r, $pass, $port, ["ls $path"], \$err);
 			}
 		else {
 			# Parent should exist
 			my $ppath = $path;
 			$ppath =~ s/\/[^\/]+$//;
-			$out = &sftp_commands($user.'@'.$server, $pass, $port, ["ls $path"], \$err);
+			$out = &sftp_commands($r, $pass, $port, ["ls $path"], \$err);
 			}
 		if ($err || $out =~ /not\s+found/) {
 			&$second_print(&text('backup_esftpdir', &html_escape($err || $out)));
@@ -3870,17 +3871,18 @@ if ($mode == 1) {
 		return $err if ($err);
 		}
 	}
-elsif ($mode == 2) {
-	# Download from SSH server
+elsif ($mode == 2 || $mode == 13) {
+	# Download from SSH or SFTP server
 	local $qserver = &check_ip6address($server) ? "[$server]" : $server;
+	my $cfunc = $mode == 2 ? \&scp_copy : \&sftp_download;
 	if ($infoonly) {
 		# First try file with .info or .dom extension
-		&scp_copy(($user ? "$user\@" : "")."$qserver:$path".$sfx,
+		&$cfunc(($user ? "$user\@" : "")."$qserver:$path".$sfx,
 			  $temp, $pass, \$err, $port, $asuser);
 		if ($err) {
 			# Fall back to .info or .dom files in directory
 			&make_dir($temp, 0700);
-			&scp_copy(($user ? "$user\@" : "").
+			&$cfunc(($user ? "$user\@" : "").
 				  $qserver.":".$path."/*".$sfx,
 				  $temp, $pass, \$err, $port, $asuser);
 			$err = undef;
@@ -3898,7 +3900,7 @@ elsif ($mode == 2) {
 			push(@wantdoms, "virtualmin") if (@$vbs);
 			local $domfiles = @wantdoms > 1 ?
 				"{".join(",", @wantdoms)."}" : $wantdoms[0];
-			&scp_copy(($user ? "$user\@" : "").
+			&$cfunc(($user ? "$user\@" : "").
 				  "$qserver:$path/$domfiles.*",
 				  $temp, $pass, \$err, $port, $asuser);
 			$gotfiles = 1 if (!$err);
@@ -3909,7 +3911,7 @@ elsif ($mode == 2) {
 			# Download the whole file or directory
 			&unlink_file($temp);	# Must remove so that recursive
 						# scp doesn't copy into it
-			&scp_copy(($user ? "$user\@" : "")."$qserver:$path",
+			&$cfunc(($user ? "$user\@" : "")."$qserver:$path",
 				  $temp, $pass, \$err, $port, $asuser);
 			}
 		}

@@ -7233,6 +7233,20 @@ my ($file, $dest, $pass, $err, $port, $asuser) = @_;
 my ($desthost, $destfile) = split(/:/, $dest);
 my $out = &sftp_commands($desthost, $pass, $port,
 			 [ "put $file $destfile" ], $err, $asuser);
+$$err = $out if ($out =~ /No\s+such\s+file\s+or\s+directory/i);
+return $out;
+}
+
+# sftp_download(source, file, password, &error, port, [as-user])
+# Downloads a file with the sftp command from a remote destination
+sub sftp_download
+{
+my ($src, $file, $pass, $err, $port, $asuser) = @_;
+my ($srchost, $srcfile) = split(/:/, $src);
+my $out = &sftp_commands($srchost, $pass, $port,
+			 [ "get -r $srcfile $file" ], $err, $asuser);
+$$err = $out if ($out =~ /No\s+such\s+file\s+or\s+directory/i);
+return $out;
 }
 
 # run_ssh_command(command, pass, &error, [as-user], [&sftp-commands])
