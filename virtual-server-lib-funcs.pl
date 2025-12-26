@@ -20483,6 +20483,7 @@ $reallocate = 0 if (!@vdoms);
 my @feats = grep { $config{$_} || $_ eq 'virtualmin' }
 	          @backup_features;
 push(@feats, &list_backup_plugins());
+@feats = &prune_all_features_for_backup(@feats);
 my $homefmt;
 if ($replication) {
 	my %remotes = map { $_, 1 } &list_remote_domain_features($d);
