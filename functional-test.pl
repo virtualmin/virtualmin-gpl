@@ -3936,6 +3936,9 @@ $ssh_backup_prefix = "ssh://$test_target_domain_user:smeg\@localhost".
 		     $remote_backup_dir;
 $ftp_backup_prefix = "ftp://$test_target_domain_user:smeg\@localhost".
 		     $remote_backup_dir;
+$sftp_backup_prefix = "sftp://$test_target_domain_user:smeg\@localhost".
+		      $remote_backup_dir;
+
 $remotebackup_tests = [
 	# Create a domain for the backup target
 	{ 'command' => 'create-domain.pl',
@@ -3992,6 +3995,35 @@ $remotebackup_tests = [
 	  'args' => [ [ 'domain', $test_subdomain ],
 		      [ 'all-features' ],
 		      [ 'source', "$ssh_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Delete the backups file
+	{ 'command' => "rm -rf /home/$test_target_domain_user/$test_domain.tar.gz" },
+
+	# Backup via SFTP
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$sftp_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$sftp_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Restore via SFTP
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$sftp_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Restore sub-domain via SFTP
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', "$sftp_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
 
 	# Delete the backups file
@@ -4078,6 +4110,26 @@ $remotebackup_tests = [
 	  'args' => [ [ 'all-domains' ],
 		      [ 'all-features' ],
 		      [ 'source', "$ssh_backup_prefix/backups" ] ],
+	},
+
+	# Delete the backups dir
+	{ 'command' => "rm -rf /home/$test_target_domain_user/backups" },
+
+	# Backup via SFTP one-by-one
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'onebyone' ],
+		      [ 'newformat' ],
+		      [ 'dest', "$sftp_backup_prefix/backups" ] ],
+	},
+
+	# Restore via SFTP, all domains
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', "$sftp_backup_prefix/backups" ] ],
 	},
 
 	# Cleanup the target domain
