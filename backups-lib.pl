@@ -605,17 +605,15 @@ foreach my $desturl (@$desturls) {
 		my $r = ($user ? $user.'@' : '').$server;
 		if ($dirfmt) {
 			# Directory should already exist
-			if ($mkdir) {
-				my $mkdirerr;
-				&sftp_commands($r, $pass, $port, ["mkdir $path"], \$mkdirerr);
-				}
+			my $mkdirerr;
+			&sftp_commands($r, $pass, $port, ["mkdir $path"], \$mkdirerr);
 			$out = &sftp_commands($r, $pass, $port, ["ls $path"], \$err);
 			}
 		else {
 			# Parent should exist
 			my $ppath = $path;
 			$ppath =~ s/\/[^\/]+$//;
-			$out = &sftp_commands($r, $pass, $port, ["ls $path"], \$err);
+			$out = &sftp_commands($r, $pass, $port, ["ls $ppath"], \$err);
 			}
 		if ($err || $out =~ /not\s+found/) {
 			&$second_print(&text('backup_esftpdir', &html_escape($err || $out)));
