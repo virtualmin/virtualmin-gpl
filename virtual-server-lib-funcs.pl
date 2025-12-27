@@ -701,6 +701,11 @@ if (-r $script_warnings_file) {
 	&write_file($script_warnings_file, \%warnsent);
 	}
 
+# Delete any systemd limits
+if (defined(&delete_domain_systemd_limits)) {
+	&delete_domain_systemd_limits($d);
+	}
+
 # Delete script install logs
 &unlink_file("$script_log_directory/$id");
 
@@ -15839,6 +15844,13 @@ for(my $i=0; $i<@doms; $i++) {
 		}
 	}
 &$second_print($text{'setup_done'});
+
+# Update domain owner limits
+if (defined &rename_domain_systemd_limits) {
+	if (!$oldd{'parent'}) {
+		&rename_domain_systemd_limits($d, \%oldd);
+		}
+	}
 
 # Fix backup schedule and key owners
 if (!$oldd{'parent'}) {

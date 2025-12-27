@@ -1,27 +1,37 @@
 <header>Resource Limits</header>
 
-This page allows you to define limits on CPU and memory use that apply
-to this virtual server and all sub-servers. Limits apply to both PHP
-scripts, and commands run via an SSH login. They can be used to prevent
-any one domain owner from overloading the system with a fork bomb or
-commands that use an excessive amount of RAM. <p>
+This page lets you control how much CPU, memory, and disk I/O a virtual server
+owner can use. Limits apply to the Unix user that owns this virtual server and
+all sub-servers, so they affect SSH logins, cron jobs, scripts, and most
+server-side processes that run as that user. Virtualmin provides two types of
+limits: user-based limits that use systemd user slices (cgroups v2) to cap total
+usage across all processes, and process-based limits that use
+<tt>limits.conf</tt> to restrict each individual process.<p></p>
 
-The available limit types are :<br>
-<dl>
-<dt><b>Maximum number of processes</b>
-<dd>Attempting to launch more processes running as the server's Unix user
-    than the limit set here will fail. This applies to concurrent PHP scripts
-    too.<p>
+The available user-based limit types are:
+<ul>
+<li><tt>CPUQuota</tt> and <tt>CPUWeight</tt> to cap CPU use and/or set CPU
+priority compared to other users.</li>
+<li><tt>MemoryMax</tt> to set a hard memory ceiling for all processes combined,
+and <tt>MemoryHigh</tt> to start throttling memory use before the hard
+limit.</li>
+<li><tt>MemorySwapMax</tt> to limit how much swap (disk-backed memory) the
+user’s processes can use.</li>
+<li><tt>TasksMax</tt> to cap the total number of processes and threads.</li>
+<li><tt>IOReadBandwidthMax</tt> / <tt>IOWriteBandwidthMax</tt> to cap disk
+bandwidth, and <tt>IOReadIOPSMax</tt> / <tt>IOWriteIOPSMax</tt> to cap I/O
+operations per second. These limits apply per block device.</li>
+<li><tt>IOWeight</tt> to set disk I/O priority compared to other users.</li>
+</ul>
 
-<dt><b>Maximum size per process</b>
-<dd>Any single process that tries to allocate more memory that this limit will
-    be terminated. However, the sum total of all processes owned by the server
-    can still exceed the limit.<p>
-
-<dt><b>Maximum CPU time per process</b>
-<dd>Any process whose time spent actually using the CPU (not waiting for IO
-    or sleeping) exceeds this limit will be killed.<p>
-</dl>
+The available process-based limit types are:
+<ul>
+<li>Maximum number of processes: prevents starting more processes than allowed
+for the user.</li>
+<li>Maximum size per process: kills any single process that exceeds the limit,
+but does not cap total memory across all processes.</li>
+<li>Maximum CPU time per process: kills any process whose CPU time exceeds the
+limit.</li>
+</ul>
 
 <footer>
-
