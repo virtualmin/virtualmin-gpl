@@ -2271,14 +2271,6 @@ check_ehomeformat=Das Format des Home-Verzeichnisses $1 enthält weder den Benut
 check_ehomestyle=Der Stil des Home-Verzeichnisses ist auf "Nur Basisverzeichnis" gesetzt, was mit Virtualmin unbrauchbar ist. Dies kann auf der <a href='$2'>Benutzer- und Gruppen-Modul-Konfigurations</a>-Seite korrigiert werden
 check_jailkitok=Chroot-Jails sind verfügbar
 check_jailkiterr=Chroot-Jails sind nicht verfügbar: $1
-check_eyumrepofile=Die Virtualmin-Repository-Konfigurationsdatei $1 existiert nicht!
-check_yumrepook=Das Virtualmin-Repository ist korrekt konfiguriert
-check_yumrepowrong=Die Virtualmin-Repository-Konfigurationsdatei $1 enthält die falsche Seriennummer des Lizenzschlüssels!
-check_yumrepomissing=Die Virtualmin-Repository-Konfigurationsdatei $1 verweist nicht auf software.virtualmin.com!
-check_eaptrepofile=Die APT-Repository-Konfigurationsdatei $1 existiert nicht!
-check_aptrepook=Das Virtualmin-APT-Repository ist korrekt konfiguriert
-check_aptrepowrong=Die APT-Repository-Konfigurationsdatei $1 enthält die falsche Seriennummer des Lizenzschlüssels!
-check_aptrepomissing=Die Virtualmin-APT-Repository-Konfigurationsdatei $1 verweist nicht auf software.virtualmin.com!
 check_repoeoutdate=Die Virtualmin-Repositories, die aktuell auf Ihrem System konfiguriert sind, sind veraltet. Bitte sehen Sie sich <a target="_blank" href='$1'>dieses Tutorial</a> zum Upgrade Ihrer Repositories an
 
 checkmap_enone=Keine Kartenquellen wurden in der <a href='$1'>Postfix-Konfiguration</a> gefunden
@@ -6157,7 +6149,6 @@ upgrade_to_pro=Upgrade auf Virtualmin Pro ..
 upgrade_update_pkgs=Aktualisiere verfügbare Pakete ..
 upgrade_yumclear=Bereinige Repository-Caches ..
 upgrade_etypematch=Ein Upgrade ist nicht möglich, da der Installations-Typ von Virtualmin <tt>$1</tt> ist, aber der von Webmin <tt>$2</tt> ist
-upgrade_addrepo=Füge Virtualmin Pro-Repository hinzu ..
 
 maillog_title=E-Mail-Protokoll durchsuchen
 maillog_desc=Mit diesem Formular können Sie die E-Mail-Protokolle nach Nachrichten durchsuchen, die bestimmten Bedingungen entsprechen, um herauszufinden, was mit ihnen passiert ist. Alle Felder sind optional und werden übersprungen, wenn sie leer gelassen werden.

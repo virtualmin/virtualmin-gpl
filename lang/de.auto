@@ -23,10 +23,22 @@ check_ednsipnonev6=Es wurde keine lokale IPv6-Adresse gefunden und auf der Seite
 check_dnsok3cloud=DNS-Domains werden von einem Cloud-Anbieter gehostet
 check_dnsok3webmin=BIND-DNS-Domains werden auf einem entfernten Webmin-System gehostet
 check_sysinfo=Systeminformationen werden aktualisiert ..
+check_erepofile=Die Virtualmin-Repository-Konfigurationsdatei $1 existiert nicht
+check_repo_stable=stabil
+check_repo_prerelease=Vorabversion
+check_repo_unstable=instabil
+check_repook=Das Virtualmin $1 $2 Repository ist korrekt konfiguriert
+check_repowrong=Die Virtualmin $2 $3 Repository-Konfigurationsdatei $1 enthält inkonsistente Lizenzdetails
+check_repomissing=Die Virtualmin $3 $4 Repository-Konfigurationsdatei $1 verweist auf keine bekannten Virtualmin-Repositories; verwenden Sie den Virtualmin CLI-Befehl $2, um Ihre Repositories neu zu konfigurieren
+check_repoupdatelink=Gehen Sie zur <a href='$1'>Virtualmin License Manager</a> Seite, um das Problem zu beheben
 
 backup_mode0a=Ablage unter <tt>~/$1/</tt>
+backup_mode13=SFTP-Server
+backup_sftpserver=SFTP-Server
 backup_niceftpt=FTP-Server
 backup_nicescpt=SSH-Server
+backup_nicesftpt=SFTP-Server
+backup_nicesftp=$1 auf dem SFTP-Server $2
 backup_nicewebmint=Webmin-Server
 backup_nicefilet=Lokale Datei
 backup_nices3at=S3
@@ -38,6 +50,9 @@ backup_niceazt=Azure Blob Storage
 backup_sign=Auch verschlüsselte Backups signieren?
 
 backup_eplugin_domain=Sie dürfen diese Domäne nicht sichern
+backup_upload13=Archiv wird auf den SFTP-Server $1 hochgeladen ..
+
+backup_esftpdir=Verbindung zum SFTP-Server fehlgeschlagen : $1
 
 restore_onlyfeats=Nur ausgewählte Funktionen wiederherstellen?
 
@@ -68,6 +83,20 @@ tmpl_mysql_mkdb=Erstellen Sie eine initiale Datenbank?
 tmpl_mail_mta_sts=MTA-STS für neue Domänen aktivieren?
 tmpl_php_fpmtype=Standardmäßiger PHP-FPM-Prozessmanagermodus
 
+databases_login_pma_link=Verwaltung in phpMyAdmin
+databases_login_pma_eweb=phpMyAdmin kann nicht verwendet werden, da die Domain keine Website oder kein Home-Verzeichnis besitzt
+databases_login_pma_enopma=phpMyAdmin ist weder auf diesem noch auf dem übergeordneten virtuellen Server installiert
+databases_login_pma_einfo=Die Installationsdetails von phpMyAdmin fehlen oder sind ungültig
+databases_login_pma_eurl=Die phpMyAdmin-URL fehlt
+databases_login_pma_badurl=Die phpMyAdmin-URL ist ungültig
+databases_login_pma_euser=Der MySQL-Benutzername fehlt für diesen virtuellen Server
+databases_login_pma_epass=Für diesen virtuellen Server fehlt das MySQL-Passwort
+databases_login_pma_baddb=Der Datenbankname ist ungültig : $1
+databases_login_pma_ecredwrite=Fehler beim Erstellen der temporären phpMyAdmin-Anmeldeinformationsdatei
+databases_login_pma_ephpwrite=Fehler beim Erstellen des temporären phpMyAdmin-Anmeldehelfers
+databases_login_pma_ehome=Das Home-Verzeichnis für diesen virtuellen Server fehlt oder ist ungültig
+databases_login_pma_emkdirhome=Das private Verzeichnis $1 konnte nicht erstellt werden
+
 newip_return=IP-Adresse ändern
 
 resel_defdnsip6=Externe IPv6-Adresse für namensbasierte Server
@@ -75,10 +104,16 @@ resel_edefdnsip6=Fehlende oder ungültige externe IPv6-Adresse
 
 licence_manager_hostid=Host-ID
 licence_manager_hostid_desc=Diese eindeutige Serverkennung basiert auf der Hardware und dem Betriebssystem Ihres Systems. Sie bindet Ihre Virtualmin Pro-Lizenz an diesen Rechner und kann daher nicht auf mehreren Servern verwendet werden. Bei größeren Änderungen an der Hardware oder dem Betriebssystem kann es bis zu 48 Stunden dauern, bis der Lizenzserver die Änderung erkennt und Ihre Lizenz erneut validiert.
+licence_manager_reposissue=Synchronisierung der Lizenzkonfiguration
+licence_manager_reposissue_desc=Die Virtualmin-Repository-Konfiguration auf diesem System stimmt nicht mit dem aktuell aktiven Lizenztyp überein. Überprüfen Sie anhand der Angaben auf Ihrer <a href='$1' target=_blank>Virtualmin Mein Konto</a>-Seite, ob Ihre Lizenzinformationen korrekt sind. Klicken Sie anschließend auf die Schaltfläche „<strong>Lizenzkonfiguration synchronisieren</strong>“, um die Repository-Einstellungen an Ihren Lizenztyp anzupassen.
+
 licence_gpl_repos_warning=GPL-Lizenz erkannt. Bitte aktualisieren Sie zuerst auf Virtualmin Pro.
-licence_updating_repo_stable=Konfiguration der stabilen Virtualmin-Repositories ..
-licence_updating_repo_prerelease=Konfiguration der Virtualmin-Vorabversions-Repositories ..
-licence_updating_repo_unstable=Konfiguration instabiler Virtualmin-Repositories ..
+licence_updating_repo_stable_gpl=Konfiguration der stabilen Virtualmin GPL-Repositories ..
+licence_updating_repo_stable_pro=Konfiguration der stabilen Virtualmin Pro-Repositories ..
+licence_updating_repo_prerelease_gpl=Konfiguration der Virtualmin GPL-Vorabversions-Repositories ..
+licence_updating_repo_prerelease_pro=Konfigurieren der Virtualmin Pro-Vorabversions-Repositories ..
+licence_updating_repo_unstable_gpl=Konfiguration der instabilen Virtualmin GPL-Repositories ..
+licence_updating_repo_unstable_pro=Konfiguration instabiler Virtualmin Pro-Repositories ..
 
 scripts_cats_longdesc=Kategorien und Beschreibung
 scripts_softwaremodperlreq=Das erforderliche Perl-Paket $1 wird installiert ..
@@ -162,6 +197,76 @@ mail_mta_sts_err=.. fehlgeschlagen : $1
 mail_mta_sts_cert=Ja (aber Hostname des SSL-Zertifikats fehlt)
 mail_mta_epostfix=Der Postfix-Mailserver ist nicht für die Annahme von SSL-Verbindungen konfiguriert
 mail_mta_eself=Das Postfix-SSL-Zertifikat ist selbstsigniert und wird von anderen Mailservern nicht akzeptiert
+
+res_tab_user=Benutzerbeschränkungen
+res_tab_proc=Prozessgrenzen
+res_user_header=Benutzerbeschränkungen
+res_proc_header=Prozessgrenzen
+res_user_desc=Diese Beschränkungen gelten für den Unix-Benutzer, dem dieser virtuelle Server und alle Subserver gehören. Sie verwenden systemd-Benutzer-Slices und begrenzen so die Gesamtnutzung aller Prozesse dieses Benutzers, einschließlich SSH-Logins und Skripte.
+res_proc_desc=Diese Grenzwerte sind prozessspezifische Grenzwerte, die in <tt>limits.conf</tt> gespeichert sind. Sie begrenzen nicht die Gesamtnutzung über alle Prozesse hinweg, können aber dennoch auf Systemen hilfreich sein, auf denen keine Benutzergrenzwerte verfügbar sind.
+res_user_elinux=Benutzerlimits werden nur auf Linux-Systemen unterstützt
+res_user_esystemd=Benutzerbeschränkungen erfordern <em>systemd</em> (<tt>systemctl</tt> wurde nicht gefunden)
+res_user_enorun=Benutzerbeschränkungen erfordern, dass <em>systemd</em> ausgeführt wird
+res_user_enouid=Die UID des Besitzers dieses virtuellen Servers konnte nicht gefunden werden
+res_user_enounix=Dieser virtuelle Server hat keinen Unix-Benutzer
+res_user_err=Benutzerlimits konnten nicht gespeichert werden
+res_user_set=Satz
+res_user_cpuq=CPU-Kontingent
+res_user_cpuw=CPU-Gewicht
+res_user_memmax=Speicher max
+res_user_memhigh=Speicher hoch
+res_user_memswap=Tauschen Sie maximal
+res_user_tasks=Aufgaben max
+res_user_iodev=E/A-Gerät
+res_user_iodev_def=Gerät verwendet
+res_user_iodev_set=Verwenden Sie dieses Gerät
+res_user_iodev_none=Kein Gerät erkannt
+res_user_iowt=I/O-Gewicht
+res_user_ior=E/A-Lesebandbreite
+res_user_iow=E/A-Schreibbandbreite
+res_user_ioriops=E/A-Lese-IOPS
+res_user_iowiops=E/A-Schreib-IOPS
+res_user_esetprop=Fehler beim Festlegen der Eigenschaft mit dem Befehl $1 : $2 
+res_user_ecpuq=Fehlendes oder ungültiges CPU-Kontingent
+res_user_ecpuq2=Das CPU-Kontingent muss größer als 0 sein
+res_user_ecpuw=Fehlendes oder ungültiges CPU-Gewicht
+res_user_ecpuw2=Das CPU-Gewicht muss zwischen 1 und 10000 liegen
+res_user_ememmax=Fehlender oder ungültiger Speicher (maximal)
+res_user_ememmax2=Der maximale Speicherwert muss größer als 0 sein
+res_user_ememhigh=Fehlender oder ungültiger Speicher (hoch)
+res_user_ememhigh2=Der Wert für „Speicher hoch“ muss größer als 0 sein
+res_user_ememhigh3=Der Speicherwert „Höhe“ muss kleiner oder gleich dem Speicherwert „Maximal“ sein
+res_user_ememswap=Fehlender oder ungültiger Swap-Maximalwert
+res_user_ememswap2=Der maximale Swap-Wert muss 0 oder höher sein
+res_user_etasks=Maximale Anzahl fehlender oder ungültiger Aufgaben
+res_user_etasks2=Die maximale Anzahl an Aufgaben muss mindestens 2 betragen
+res_user_eiodev=Fehlendes oder ungültiges E/A-Gerät
+res_user_eiodev2=Das Gerät $1 existiert auf diesem System nicht
+res_user_eiowt=Fehlendes oder ungültiges E/A-Gewicht
+res_user_eiowt2=Das I/O-Gewicht muss zwischen 1 und 10000 liegen
+res_user_eior=Fehlende oder ungültige E/A-Lesebandbreite
+res_user_eior2=Die E/A-Lesebandbreite muss größer als 0 sein
+res_user_eiow=Fehlende oder ungültige E/A-Schreibbandbreite
+res_user_eiow2=Die E/A-Schreibbandbreite muss größer als 0 sein
+res_user_eioriops=Fehlende oder ungültige E/A-Lese-IOPS
+res_user_eioriops2=Die Anzahl der gelesenen E/A-IOPS muss größer als 0 sein
+res_user_eiowiops=Fehlende oder ungültige E/A-Schreib-IOPS
+res_user_eiowiops2=Die Anzahl der Schreib-IOPS (I/O-IOPS) muss größer als 0 sein
+res_persec=pro Sekunde
+res_iops=IOPS
+res_stats_title=Aktuelle Nutzung
+res_stats_inactive=Für diesen Benutzer wurde kein aktiver Benutzerbereich gefunden.
+res_stats_unlimited=unbegrenzt
+res_stats_cg=Cgroup-Pfad
+res_stats_cpu_used=CPU-Auslastung
+res_stats_cpu_throt=CPU-Drosselung
+res_stats_mem=Speichernutzung
+res_stats_memhigh=Speicher hoch
+res_stats_swap=Tauschnutzung
+res_stats_tasks=Aufgaben
+res_stats_iowt=I/O-Gewicht
+res_stats_io=E/A-Details
+res_stats_show=Details anzeigen
 
 cron_cron_complex=Zur Cron-Zeit
 cron_save=Zeitplan anwenden

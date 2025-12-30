@@ -2210,14 +2210,6 @@ check_ehomeformat=Format katalogu domowego $1 nie zawiera nazwy użytkownika ani
 check_ehomestyle=Styl katalogu domowego jest ustawiony na "Tylko katalog bazowy", co jest nieużyteczne w Virtualmin. Można to poprawić na stronie <a href='$2'>konfiguracji modułu Użytkownicy i Grupy</a>.
 check_jailkitok=Chroot więzienia są dostępne.
 check_jailkiterr=Chroot więzienia są niedostępne: $1.
-check_eyumrepofile=Plik konfiguracyjny repozytorium Virtualmin $1 nie istnieje!
-check_yumrepook=Repozytorium Virtualmin jest poprawnie skonfigurowane.
-check_yumrepowrong=Plik konfiguracyjny repozytorium Virtualmin $1 zawiera nieprawidłowy numer seryjny klucza licencyjnego!
-check_yumrepomissing=Plik konfiguracyjny repozytorium Virtualmin $1 nie odnosi się do software.virtualmin.com!
-check_eaptrepofile=Plik konfiguracyjny repozytorium APT $1 nie istnieje!
-check_aptrepook=Repozytorium Virtualmin APT jest poprawnie skonfigurowane.
-check_aptrepowrong=Plik konfiguracyjny repozytorium APT Virtualmin $1 zawiera nieprawidłowy numer seryjny klucza licencyjnego!
-check_aptrepomissing=Plik konfiguracyjny repozytorium APT Virtualmin $1 nie odnosi się do software.virtualmin.com!
 check_repoeoutdate=Skonfigurowane obecnie w systemie repozytoria Virtualmin są nieaktualne. Sprawdź <a target="_blank" href='$1'>ten poradnik</a>, aby uzyskać więcej informacji.
 
 checkmap_enone=Nie znaleziono źródeł map w <a href='$1'>konfiguracji Postfix</a>

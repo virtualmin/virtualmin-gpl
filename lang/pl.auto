@@ -89,6 +89,14 @@ check_dnsok3webmin=Domeny DNS BIND będą hostowane w zdalnym systemie Webmin
 check_iface4=Adresy IPv4 nie są dostępne w tym systemie
 check_postfixok2=Serwer pocztowy Postfix jest zainstalowany i skonfigurowany jako host przekaźnikowy
 check_sysinfo=Aktualizowanie informacji o systemie ..
+check_erepofile=Plik konfiguracyjny repozytorium Virtualmin $1 nie istnieje
+check_repo_stable=stabilny
+check_repo_prerelease=przedpremiera
+check_repo_unstable=nietrwały
+check_repook=Repozytorium Virtualmin $1 $2 jest poprawnie skonfigurowane
+check_repowrong=Plik konfiguracyjny repozytorium Virtualmin $2 $3 $1 zawiera niespójne szczegóły licencji
+check_repomissing=Plik konfiguracyjny repozytorium Virtualmin $3 $4 $1 nie odwołuje się do żadnych znanych repozytoriów Virtualmin. Użyj polecenia wiersza poleceń Virtualmin $2, aby zmienić konfigurację repozytoriów
+check_repoupdatelink=przejdź na stronę <a href='$1'>Menedżera licencji Virtualmin</a>, aby to naprawić
 
 log_copycert_bind=Skopiowano certyfikat SSL do BIND
 log_create_acme=Dodano dostawcę SSL dla $1
@@ -98,9 +106,13 @@ log_update_acme=Zaktualizowano dostawcę SSL dla $1
 backup_headerfeatures2=Ustawienia globalne
 backup_compression4=<tt>zstd</tt>
 backup_mode0a=Plik pod <tt>~/$1/</tt>
+backup_mode13=Serwer SFTP
 backup_mode44=Pobierz w przeglądarce
+backup_sftpserver=Serwer SFTP
 backup_niceftpt=Serwer FTP
 backup_nicescpt=Serwer SSH
+backup_nicesftpt=Serwer SFTP
+backup_nicesftp=$1 na serwerze SFTP $2
 backup_nicewebmint=Serwer Webmin
 backup_nicefilet=Plik lokalny
 backup_nices3at=S3
@@ -112,9 +124,11 @@ backup_niceazt=Magazyn obiektów blob platformy Azure
 backup_sign=Czy podpisać również zaszyfrowaną kopię zapasową?
 
 backup_eplugin_domain=Nie masz uprawnień do tworzenia kopii zapasowej tej domeny
+backup_upload13=Przesyłanie archiwum na serwer SFTP $1 ..
 backup_finalstatusok=$1 serwerów wirtualnych zostało pomyślnie utworzonych kopii zapasowych
 
 backup_mysqlinfo=Kopiowanie danych użytkownika MySQL ..
+backup_esftpdir=Nie udało się połączyć z serwerem SFTP : $1
 
 restore_onlyfeats=Przywrócić tylko wybrane funkcje?
 
@@ -179,6 +193,20 @@ tmpl_content_web_html_esave=Nie udało się zapisać domyślnego pliku strony HT
 tmpl_content_web_html_eempty=Domyślna zawartość strony HTML witryny jest pusta
 tmpl_php_fpmtype=Domyślny tryb menedżera procesów PHP-FPM
 
+databases_login_pma_link=Zarządzaj w phpMyAdmin
+databases_login_pma_eweb=Nie można użyć phpMyAdmin, ponieważ domena nie ma witryny ani katalogu domowego
+databases_login_pma_enopma=phpMyAdmin nie jest zainstalowany na tym ani na nadrzędnym serwerze wirtualnym
+databases_login_pma_einfo=Brakuje szczegółów instalacji phpMyAdmin lub są one nieprawidłowe
+databases_login_pma_eurl=Brak adresu URL phpMyAdmin
+databases_login_pma_badurl=Adres URL phpMyAdmin jest nieprawidłowy
+databases_login_pma_euser=Brak nazwy użytkownika MySQL dla tego serwera wirtualnego
+databases_login_pma_epass=Brak hasła MySQL dla tego serwera wirtualnego
+databases_login_pma_baddb=Nazwa bazy danych jest nieprawidłowa : $1
+databases_login_pma_ecredwrite=Nie udało się utworzyć tymczasowego pliku poświadczeń phpMyAdmin
+databases_login_pma_ephpwrite=Nie udało się utworzyć tymczasowego pomocnika logowania phpMyAdmin
+databases_login_pma_ehome=Brak katalogu domowego tego serwera wirtualnego lub jest on nieprawidłowy
+databases_login_pma_emkdirhome=Nie udało się utworzyć prywatnego katalogu $1
+
 newip_return=zmień adres IP
 
 resel_defdnsip6=Zewnętrzny adres IPv6 dla serwerów opartych na nazwach
@@ -236,11 +264,13 @@ licence_manager_recom3=Odnów subskrypcję $1 w okresie karencji, aby nadal korz
 licence_manager_bind=Dni pozostałe w okresie karencji
 licence_manager_change=Zmień licencję
 licence_manager_setup=Skonfiguruj licencję
+licence_manager_reposissue=Synchronizuj konfigurację licencji
+licence_manager_reposissue_desc=Konfiguracja repozytorium Virtualmin w tym systemie nie jest zgodna z typem aktualnie aktywnej licencji. Sprawdź, czy informacje o licencji są poprawne, zgodnie z informacjami wyświetlanymi na stronie <a href='$1' target=_blank>Moje konto Virtualmin</a>, a następnie kliknij przycisk „<strong>Synchronizuj konfigurację licencji</strong>” poniżej, aby zaktualizować ustawienia repozytorium i dopasować je do typu licencji.
+
 licence_manager_deregister=Wyrejestruj licencję
 licence_manager_subscription=Zarządzaj subskrypcją
 licence_manager_support=Skontaktuj się z pomocą techniczną
 licence_manager_support_link=Okres karencji dobiegł końca. Jeśli masz pewność, że licencja jest używana wyłącznie na tym serwerze, ale serwer licencji po ponownym sprawdzeniu nadal wyświetla ją jako aktywną na wielu serwerach, skontaktuj się z <a href='$1' target=_blank>pomocą techniczną Virtualmin</a>, aby uzyskać szybszą pomoc, lub poczekaj 48 godzin, aż zostanie ona automatycznie odblokowana
-
 licence_gpl_repos_warning=Wykryto licencję GPL. Najpierw zaktualizuj do Virtualmin Pro.
 licence_validating=Sprawdzanie poprawności nowego klucza licencyjnego $1 ..
 licence_evalidating=.. licencji nie można zweryfikować
@@ -248,9 +278,12 @@ licence_ecanvalidating=.. licencja jest nieważna
 licence_valid_unlim=.. ważne dla nieograniczonej liczby domen do $1
 licence_valid=.. ważne dla domen $1 do $2
 licence_updating_repo=Aktualizowanie repozytorium Virtualmin ..
-licence_updating_repo_stable=Konfigurowanie stabilnych repozytoriów Virtualmin ..
-licence_updating_repo_prerelease=Konfigurowanie repozytoriów przedpremierowych Virtualmin ..
-licence_updating_repo_unstable=Konfigurowanie niestabilnych repozytoriów Virtualmin ..
+licence_updating_repo_stable_gpl=Konfigurowanie stabilnych repozytoriów Virtualmin GPL ..
+licence_updating_repo_stable_pro=Konfigurowanie stabilnych repozytoriów Virtualmin Pro ..
+licence_updating_repo_prerelease_gpl=Konfigurowanie repozytoriów Virtualmin GPL w wersji przedpremierowej ..
+licence_updating_repo_prerelease_pro=Konfigurowanie repozytoriów przedpremierowych Virtualmin Pro ..
+licence_updating_repo_unstable_gpl=Konfigurowanie niestabilnych repozytoriów Virtualmin GPL ..
+licence_updating_repo_unstable_pro=Konfigurowanie niestabilnych repozytoriów Virtualmin Pro ..
 licence_no_lines=.. nie znaleziono wierszy dla $1!
 licence_updfile=Aktualizowanie licencji Virtualmin ..
 licence_expired=Licencja wygasła
@@ -401,8 +434,6 @@ newdynip_external6=Adres IPv6 widoczny zewnętrznie
 newdynip_eext6=Nie udało się ustalić widocznego zewnętrznie adresu IPv6
 newdynip_eexternal2=W trybie Webmin należy wprowadzić nazwę hosta lub nazwę hosta:port serwera Webmin
 
-upgrade_addrepo=Dodawanie repozytorium Virtualmin Pro ..
-
 maillog_cls=Werdykt
 maillog_cspam=Spam
 maillog_cvirus=Wirus
@@ -429,6 +460,75 @@ nf_date=(zainstalowano $1)
 
 res_emem3=Maksymalny rozmiar na limit procesu musi być ustawiony na co najmniej 200 M
 res_wmem=Minimalny zalecany rozmiar to 200 M
+res_tab_user=Limity użytkownika
+res_tab_proc=Ograniczenia procesu
+res_user_header=Limity użytkownika
+res_proc_header=Ograniczenia procesu
+res_user_desc=Te limity dotyczą użytkownika Unix, który jest właścicielem tego serwera wirtualnego i wszystkich podserwerów. Wykorzystują one segmenty użytkownika <em>systemd</em>, więc ograniczają całkowite wykorzystanie zasobów przez wszystkie procesy danego użytkownika, w tym logowania SSH i skrypty.
+res_proc_desc=Limity te są limitami dla poszczególnych procesów, zapisanymi w <tt>limits.conf</tt>. Nie ograniczają one całkowitego wykorzystania zasobów przez wszystkie procesy, ale mogą być pomocne w systemach, w których limity użytkowników nie są dostępne.
+res_user_elinux=Limity użytkowników są obsługiwane tylko w systemach Linux
+res_user_esystemd=Limity użytkownika wymagają <em>systemd</em> (nie znaleziono <tt>systemctl</tt>)
+res_user_enorun=Limity użytkownika wymagają uruchomienia <em>systemd</em>
+res_user_enouid=Nie można znaleźć identyfikatora UID właściciela tego serwera wirtualnego
+res_user_enounix=Ten serwer wirtualny nie ma użytkownika Unix
+res_user_err=Nie udało się zapisać limitów użytkownika
+res_user_set=Ustawić
+res_user_cpuq=Limit procesora
+res_user_cpuw=Waga procesora
+res_user_memmax=Maksymalna pamięć
+res_user_memhigh=Pamięć jest wysoka
+res_user_memswap=Maksymalna wymiana
+res_user_tasks=Maksymalna liczba zadań
+res_user_iodev=Urządzenie wejścia/wyjścia
+res_user_iodev_def=Użyj wykrytego urządzenia
+res_user_iodev_set=Użyj tego urządzenia
+res_user_iodev_none=Nie wykryto urządzenia
+res_user_iowt=Waga wejścia/wyjścia
+res_user_ior=Przepustowość odczytu wejścia/wyjścia
+res_user_iow=Przepustowość zapisu wejścia/wyjścia
+res_user_ioriops=Odczyt I/O IOPS
+res_user_iowiops=IOPS zapisu wejścia/wyjścia
+res_user_esetprop=Nie udało się ustawić właściwości za pomocą polecenia $1 : $2 
+res_user_ecpuq=Brak lub nieprawidłowy limit procesora
+res_user_ecpuq2=Limit procesora musi być większy niż 0
+res_user_ecpuw=Brakująca lub nieprawidłowa waga procesora
+res_user_ecpuw2=Waga procesora musi mieścić się w przedziale od 1 do 10000
+res_user_ememmax=Brak lub nieprawidłowa maksymalna ilość pamięci
+res_user_ememmax2=Maksymalna ilość pamięci musi być większa niż 0
+res_user_ememhigh=Brak lub nieprawidłowa pamięć
+res_user_ememhigh2=Pamięć musi być większa niż 0
+res_user_ememhigh3=Pamięć maksymalna musi być mniejsza lub równa maksymalnej pamięci
+res_user_ememswap=Brak lub nieprawidłowy maksymalny swap
+res_user_ememswap2=Maksymalna kwota wymiany musi wynosić 0 lub więcej
+res_user_etasks=Brakujące lub nieprawidłowe zadania maks
+res_user_etasks2=Maksymalna liczba zadań musi wynosić 2 lub więcej
+res_user_eiodev=Brakujące lub nieprawidłowe urządzenie wejścia/wyjścia
+res_user_eiodev2=Urządzenie $1 nie istnieje w tym systemie
+res_user_eiowt=Brakująca lub nieprawidłowa waga wejścia/wyjścia
+res_user_eiowt2=Waga wejścia/wyjścia musi mieścić się w przedziale od 1 do 10000
+res_user_eior=Brak lub nieprawidłowa przepustowość odczytu wejścia/wyjścia
+res_user_eior2=Przepustowość odczytu wejścia/wyjścia musi być większa niż 0
+res_user_eiow=Brak lub nieprawidłowa przepustowość zapisu wejścia/wyjścia
+res_user_eiow2=Przepustowość zapisu wejścia/wyjścia musi być większa niż 0
+res_user_eioriops=Brak lub nieprawidłowy odczyt I/O na sekundę
+res_user_eioriops2=Odczyt I/O IOPS musi być większy niż 0
+res_user_eiowiops=Brak lub nieprawidłowy odczyt IOPS dla zapisu I/O
+res_user_eiowiops2=Prędkość zapisu I/O musi być większa niż 0
+res_persec=na sekundę
+res_iops=IOPS
+res_stats_title=Aktualne wykorzystanie
+res_stats_inactive=Nie znaleziono aktywnego fragmentu użytkownika dla tego użytkownika.
+res_stats_unlimited=nieograniczony
+res_stats_cg=Ścieżka Cgroup
+res_stats_cpu_used=Użyty procesor
+res_stats_cpu_throt=Ograniczanie procesora
+res_stats_mem=Wykorzystanie pamięci
+res_stats_memhigh=Pamięć jest wysoka
+res_stats_swap=Wykorzystanie swapu
+res_stats_tasks=Zadania
+res_stats_iowt=Waga wejścia/wyjścia
+res_stats_io=Szczegóły wejścia/wyjścia
+res_stats_show=Pokaż szczegóły
 
 cron_cron_complex=W czasie cron
 cron_save=Zastosuj harmonogram
