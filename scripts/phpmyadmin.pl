@@ -168,8 +168,9 @@ else {
 	if (!$in->{'db_def'} && !$in->{'db'}) {
 		return "No MySQL database to manage selected";
 		}
-	return { 'db' => $in->{'db_def'} ? undef
-				       : join(" ", split(/\0/, $in->{'db'})),
+	return { 'db' => $in->{'db_def'}
+				? undef
+				: join(" ", split(/\0/, $in->{'db'})),
 		 'dir' => $dir,
 		 'path' => $in->{'dir_def'} ? "/" : "/$in->{'dir'}",
 		 'emptypass' => $in->{'emptypass'},
