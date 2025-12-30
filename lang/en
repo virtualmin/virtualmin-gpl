@@ -4184,6 +4184,20 @@ database_encoding=Encoding for new database
 database_opts=Additional options for $1
 database_edbdef=You are not allowed to delete the default database for a domain
 
+databases_login_pma_link=Manage in phpMyAdmin
+databases_login_pma_eweb=phpMyAdmin cannot be used because the domain does not have a website or home directory
+databases_login_pma_enopma=phpMyAdmin is not installed for this or its parent virtual server
+databases_login_pma_einfo=phpMyAdmin installation details are missing or invalid
+databases_login_pma_eurl=phpMyAdmin URL is missing
+databases_login_pma_badurl=phpMyAdmin URL is invalid
+databases_login_pma_euser=MySQL username is missing for this virtual server
+databases_login_pma_epass=MySQL password is missing for this virtual server
+databases_login_pma_baddb=Database name is invalid : $1
+databases_login_pma_ecredwrite=Failed to create phpMyAdmin temporary credential file
+databases_login_pma_ephpwrite=Failed to create phpMyAdmin temporary login helper
+databases_login_pma_ehome=Home directory for this virtual server is missing or invalid
+databases_login_pma_emkdirhome=Failed to create private directory $1
+
 newips_title=Change IP Addresses
 newips_ecannot=You are not allowed to change IP addresses
 newips_desc=This page allows you to change the IP address of all non-dedicated IP virtual servers that are using a specified address. This should be done if you have just updated the primary IP address on the system.

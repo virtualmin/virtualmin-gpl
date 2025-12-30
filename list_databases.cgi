@@ -59,10 +59,14 @@ if (!$d->{'parent'}) {
 		}
 	}
 
+# Remember where databases are hosted
+my $on_remote = 0;
+
 # Show message about DB host
 if ($d->{'mysql'} && &master_admin()) {
 	my $myhost = &get_database_host_mysql($d);
 	if ($myhost && $myhost ne 'localhost') {
+		$on_remote = 1;
 		print &ui_alert_box(&text('databases_hosted',
 				  "<tt>$myhost</tt>"), 'info', undef, undef, ' ');
 		}
@@ -100,6 +104,21 @@ if ($dleft != 0) {
 		     $text{'databases_add'}]);
 	}
 
+# Can we use phpMyAdmin login?
+my @phpmyadmin;
+my $can_scripts = !$on_remote && &domain_has_website($d) && $d->{'dir'};
+if ($can_scripts) {
+	@phpmyadmin = grep { $_->{'name'} eq 'phpmyadmin' }
+		&list_domain_scripts($d);
+	# Perhaps parent domain has phpMyAdmin available?
+	if ($d->{'parent'} && !@phpmyadmin) {
+		my $pd = &get_domain($d->{'parent'});
+		@phpmyadmin = grep { $_->{'name'} eq 'phpmyadmin' }
+			&list_domain_scripts($pd);
+		}
+	}
+$can_scripts = $can_scripts && @phpmyadmin;
+
 # Build and show DB list
 print &ui_tabs_start_tab("databasemode", "list") if (@tabs > 1);
 print "$text{'databases_desc1'}<p>\n";
@@ -108,6 +127,13 @@ foreach $db (sort { $a->{'name'} cmp $b->{'name'} } @dbs) {
 	if ($db->{'link'}) {
 		$action = "<a href='$db->{'link'}'>".
 			  "$text{'databases_man'}</a>";
+		# Can we also show a link to phpMyAdmin login?
+		if ($can_scripts && $db->{'type'} eq 'mysql') {
+			$action .= 
+				"<a href='login_phpmyadmin.cgi?dom=$d->{'id'}".
+				"&dbname=".$db->{'name'}."' target='_blank'>".
+				"$text{'databases_login_pma_link'}</a>";
+			}
 		}
 	local $dis = $db->{'name'} eq $d->{'db'} && !&can_edit_database_name();
 	push(@table, [
