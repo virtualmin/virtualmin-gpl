@@ -1,22 +1,16 @@
 <header>Edit Databases</header>
 
-This page lists all databases that are currently owned by the virtual server,
-and allows the creation of addition databases up to any limit in force for
-the user logged into Virtualmin. You can also delete one more databases
-by selecting them from the list and hitting the <b>Delete Selected</b>
-button. <p>
+This page lists all databases owned by the virtual server and lets you create
+new ones up to the limit for the logged-in user. You can also delete one or more
+databases. <p>
 
-To view the actual tables and data in a database, click the <b>Manage</b>
-link next to the database name in the table. To see the size of the database,
-click on its name. <p>
+To view a database's tables and data, click the "Manage" button. If phpMyAdmin
+is installed for this virtual server, you will also see a "Manage in phpMyAdmin"
+button. If phpMyAdmin is installed on a sub-server, the sub-server's phpMyAdmin
+install is used instead of the parent's. <p>
 
-When using Virtualmin Pro, two additional forms are shown below the database
-list to change the login and password for the MySQL and PostgreSQL users
-used by this virtual server. This can be useful if you want the database
-login to be different from the primary administration login, perhaps for
-security purposes. These should be changed with care, as any PHP scripts
-(such as those from webapp installers) that have the username or password
-in their configuration files will not be updated. <p>
+To see additional details about a database, including its size and number of
+tables, click its name.  <p>
 
 <footer>
 
