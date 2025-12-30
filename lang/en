@@ -4518,6 +4518,7 @@ scripts_nonew=No web apps are available for this virtual server.
 scripts_nomatch=No web apps matched your search.
 scripts_iheader=Web app install options
 scripts_iname=Web app to install
+scripts_iname2=Web app name
 scripts_ipartial=Partial installation error
 scripts_idstatus=Installation status
 scripts_ideleted=Directory has been manually deleted

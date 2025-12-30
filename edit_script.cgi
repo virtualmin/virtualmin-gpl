@@ -66,14 +66,14 @@ if (!$have_kit) {
 	$content .= &ui_table_start($text{'scripts_uheader'}, undef, 2);
 	
 	# Show script description
+	$content .= &ui_table_row($text{'scripts_iname2'}, $script->{'desc'});
+	$content .= &ui_table_row($text{'scripts_iversion2'},
+		$script->{'vdesc'}->{$sinfo->{'version'}} || $sinfo->{'version'});
 	$content .= &ui_table_row($text{'scripts_iinstver'},
 		"$script->{'release'}&nbsp;".
 			&ui_help("$text{'scripts_iinstdate'}: ".
 				&filetimestamp_to_date($script->{'filename'})))
 					if ($script->{'release'});
-	$content .= &ui_table_row($text{'scripts_iname'}, $script->{'desc'});
-	$content .= &ui_table_row($text{'scripts_iversion2'},
-		$script->{'vdesc'}->{$sinfo->{'version'}} || $sinfo->{'version'});
 	
 	# Show original website
 	if ($script->{'site'}) {
