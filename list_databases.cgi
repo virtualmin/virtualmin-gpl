@@ -114,7 +114,10 @@ foreach $db (sort { $a->{'name'} cmp $b->{'name'} } @dbs) {
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $db->{'type'}.'_'.$db->{'name'},
 		  'disabled' => $dis },
-		"<a href='edit_database.cgi?dom=$in{'dom'}&name=$db->{'name'}&type=$db->{'type'}'>$db->{'name'}</a>",
+		"<a href='edit_database.cgi?dom=$in{'dom'}".
+			 "&name=$db->{'name'}&type=$db->{'type'}'>".
+			 "$db->{'name'}".
+		"</a>",
 		$db->{'desc'},
 		$action
 		]);
