@@ -110,11 +110,18 @@ my $can_scripts = !$on_remote && &domain_has_website($d) && $d->{'dir'};
 if ($can_scripts) {
 	@phpmyadmin = grep { $_->{'name'} eq 'phpmyadmin' }
 		&list_domain_scripts($d);
+
 	# Perhaps parent domain has phpMyAdmin available?
 	if ($d->{'parent'} && !@phpmyadmin) {
 		my $pd = &get_domain($d->{'parent'});
 		@phpmyadmin = grep { $_->{'name'} eq 'phpmyadmin' }
 			&list_domain_scripts($pd);
+		}
+
+	# Perhaps global is available?
+	if (!@phpmyadmin) {
+		my @all_glob = &list_all_global_def_scripts_cached();
+		@phpmyadmin = grep { $_->{'name'} eq 'phpmyadmin' } @all_glob;
 		}
 	}
 $can_scripts = $can_scripts && @phpmyadmin;

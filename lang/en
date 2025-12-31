@@ -4761,6 +4761,7 @@ scripts_kit_estype=No script of type '$1' has been installed yet on this virtual
 scripts_kit_estype_multi=Multiple instances of type '$1' are available at the following paths:
 scripts_kit_estype_multi2=Use the auxiliary '--app-path' parameter to specify the exact instance to use
 scripts_kit_estype_path=The script of type '$1' at path '$2' does not exist
+script_phpmyadmin_def=Use as system default phpMyAdmin
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Dismiss

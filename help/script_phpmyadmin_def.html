@@ -1,0 +1,27 @@
+<header>Use as system default phpMyAdmin</header>
+
+When enabled, this phpMyAdmin install is set as the system-wide default. A
+"Manage in phpMyAdmin" button will then be shown on the "Edit Databases" page
+for domains that do not have their own phpMyAdmin install.<p>
+
+Which phpMyAdmin is used depends on what is installed:
+<ul>
+<li>If the sub-server has its own phpMyAdmin install, that install is used</li>
+<li>Otherwise, if the top-level virtual server has phpMyAdmin installed, that
+install is used for both the top-level server and any sub-servers that do not
+have their own</li>
+<li>Otherwise, this system default phpMyAdmin install will be used</li>
+</ul><p>
+
+This can be useful when you want one shared phpMyAdmin instance (for example,
+under a dedicated hostname like <tt>pma.example.tld</tt>) while still allowing
+per-virtual server installs when needed. <p>
+        
+Beware, only use a shared "system default" phpMyAdmin under a dedicated hostname
+if you fully trust the virtual server that hosts it. When other virtual servers
+do not have their own phpMyAdmin installed, they will use this default instance,
+which can mean their MySQL login details are passed to it for sign-in. If the
+hosting virtual server is compromised, misconfigured, or controlled by someone
+you do not fully trust, those credentials could be exposed.</p>
+
+<footer>

@@ -16,10 +16,20 @@ my $d = &get_domain($in{'dom'});
 
 # Find phpMyAdmin installation details for this domain or its subdomains
 my @phpmyadmin = grep { $_->{'name'} eq 'phpmyadmin' } &list_domain_scripts($d);
+
+# Perhaps a subdomain has it installed?
 if (!@phpmyadmin && $d->{'parent'}) {
 	$d = &get_domain($d->{'parent'});
 	@phpmyadmin = grep { $_->{'name'} eq 'phpmyadmin' }
 		&list_domain_scripts($d);
+	}
+
+# Perhaps global is available?
+my $src_dom = $d;
+if (!@phpmyadmin) {
+	my @all_glob = &list_all_global_def_scripts_cached();
+	@phpmyadmin = grep { $_->{'name'} eq 'phpmyadmin' } @all_glob;
+	$src_dom = &get_domain($phpmyadmin[0]->{'dom_id'}) if (@phpmyadmin);
 	}
 @phpmyadmin || &error($text{'databases_login_pma_enopma'});
 @phpmyadmin = sort { ($b->{'time'} || 0) <=> ($a->{'time'} || 0) } @phpmyadmin;
@@ -47,7 +57,7 @@ if ($dbname) {
 	}
 
 # Private directory under the domain home
-my $home = $d->{'home'} || &error($text{'databases_login_pma_ehome'});
+my $home = $src_dom->{'home'} || &error($text{'databases_login_pma_ehome'});
 $home =~ /^\// || &error($text{'databases_login_pma_ehome'});
 
 my $privdir = "$home/.pma-login";
@@ -64,7 +74,7 @@ $credfile =~ s/([^:])\/\//$1\//g;
 
 # Create the private directory as the domain user so PHP can traverse it
 if (!-d $privdir) {
-	&make_dir_as_domain_user($d, $privdir, 0700) ||
+	&make_dir_as_domain_user($src_dom, $privdir, 0700) ||
 		&error(&text('databases_login_pma_emkdirhome', $privdir));
 	}
 
@@ -73,7 +83,7 @@ my $u64 = &encode_base64($dbuser); $u64 =~ s/\s+//g;
 my $p64 = &encode_base64($dbpass); $p64 =~ s/\s+//g;
 
 # Write the credential file as the domain user so PHP can read it
-eval { &write_as_domain_user($d, sub {
+eval { &write_as_domain_user($src_dom, sub {
 		&write_file_contents($credfile, join("\n",
 			"u64=$u64",
 			"p64=$p64",
@@ -308,7 +318,7 @@ $php =~ s/__PMAURL__/$php_sq->($pma_url)/ge;
 $php =~ s/__CREDFILE__/$php_sq->($credfile)/ge;
 
 # Write helper inside the phpMyAdmin directory as the domain user
-eval { &write_as_domain_user($d, sub {
+eval { &write_as_domain_user($src_dom, sub {
 		&write_file_contents($php_fullpath, $php);
 		chmod(0600, $php_fullpath); }) };
 if ($@) {

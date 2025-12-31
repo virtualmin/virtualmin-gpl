@@ -97,6 +97,14 @@ if (!$have_kit) {
 		$content .= &ui_table_row($text{'scripts_iurl'}, $slink);
 		}
 	$content .= &ui_table_row($text{'scripts_itime'}, &make_date($sinfo->{'time'}));
+
+	# If enabled as global default, say that
+	if ($sinfo->{'opts'}{'global_def'}) {
+		$content .= &ui_table_row(
+			&hlink($text{"script_".$sinfo->{'name'}."_def"}, 
+			       "script_".$sinfo->{'name'}."_def"),
+			$text{'yes'});
+		}
 	
 	# Show directory
 	if ($opts->{'dir'}) {

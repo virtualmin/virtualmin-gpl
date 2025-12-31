@@ -17432,6 +17432,9 @@ if ($itype =~ /^(rpm|deb)$/ &&
 		}
 	}
 
+# Invalidate global scripts default cache
+&invalidate_global_def_scripts_cache();
+
 # All looks OK .. save the config
 $config{'last_check'} = time()+1;
 $config{'disable'} =~ s/user/unix/g;	# changed since last release

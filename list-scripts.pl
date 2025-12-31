@@ -102,6 +102,7 @@ foreach my $d (@doms) {
 				print "    URL: $sinfo->{'url'}\n";
 				}
 			print "    State: ",$sinfo->{'partial'} || "OK","\n";
+			print "    System default: Yes\n" if ($opts->{'global_def'});
 			if ($opts->{'dir'}) {
 				print "    Directory: $opts->{'dir'}\n";
 				}

@@ -3859,5 +3859,104 @@ return (undef, $err3) unless ($ok);
 return (1, undef);
 }
 
+# global_def_cache_file()
+# Returns the filename used to cache global default scripts
+sub global_def_cache_file
+{
+return "$module_var_directory/global-default-scripts.cache";
+}
+
+# load_global_def_scripts_cache()
+# Returns an array ref from cache, or undef if missing/bad
+sub load_global_def_scripts_cache
+{
+my $file = &global_def_cache_file();
+return undef if (!$file || !-r $file);
+
+my $str = &read_file_contents($file);
+return undef if (!defined($str) || $str !~ /\S/);
+
+my $rv;
+eval { $rv = &unserialise_variable($str); };
+return undef if ($@);
+
+return (ref($rv) eq 'ARRAY') ? $rv : undef;
+}
+
+# save_global_def_scripts_cache(&data)
+# Writes array ref to cache. Returns 1 on success, 0 on failure.
+sub save_global_def_scripts_cache
+{
+my ($data) = @_;
+return 0 if (ref($data) ne 'ARRAY');
+return 0 if (!-d $module_var_directory);
+
+my $file = &global_def_cache_file();
+return 0 if (!$file);
+
+my $str = &serialise_variable($data);
+&lock_file($file);
+&write_file_contents($file, $str);
+&unlock_file($file);
+return 1;
+}
+
+# invalidate_global_def_scripts_cache()
+# Deletes the global default scripts cache file. Returns 1 if deleted, 0
+# otherwise.
+sub invalidate_global_def_scripts_cache
+{
+my $file = &global_def_cache_file();
+return 0 if (!$file);
+return &unlink_file($file) ? 1 : 0;
+}
+
+# list_all_global_def_scripts_cached()
+# Always returns cached data if present. If cache is missing, rebuilds it.
+sub list_all_global_def_scripts_cached
+{
+my $cached = &load_global_def_scripts_cache();
+return @$cached if ($cached);
+
+my @rv;
+
+return @rv if (!$script_log_directory || !-d $script_log_directory);
+opendir(my $DIR, $script_log_directory) || return @rv;
+while (defined(my $domid = readdir($DIR))) {
+	next if ($domid eq '.' || $domid eq '..');
+	next if ($domid !~ /^\d+\z/);
+
+	my $ddir = "$script_log_directory/$domid";
+	next if (!-d $ddir);
+
+	opendir(my $DDIR, $ddir) || next;
+	while (defined(my $f = readdir($DDIR))) {
+		next if ($f !~ /^(\S+)\.script$/);
+		my $sid = $1;
+
+		my %info;
+		eval { &read_file("$ddir/$f", \%info); };
+		next if ($@);
+
+		foreach my $k (keys %info) {
+			if ($k =~ /^opts_(.*)$/) {
+				$info{'opts'}->{$1} = $info{$k};
+				delete($info{$k});
+				}
+			}
+		next if (!defined($info{'opts'}->{'global_def'}) ||
+			 $info{'opts'}->{'global_def'} eq '' ||
+			 $info{'opts'}->{'global_def'} eq '0');
+		$info{'dom_id'} = $domid;
+		$info{'id'} = $sid;
+		push(@rv, \%info);
+		}
+	closedir($DDIR);
+	}
+closedir($DIR);
+&save_global_def_scripts_cache(\@rv);
+return @rv;
+}
+
 1;
 

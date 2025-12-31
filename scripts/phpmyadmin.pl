@@ -109,20 +109,129 @@ local $rv;
 local $hdir = &public_html_dir($d, 1);
 if ($upgrade) {
 	# Options are fixed when upgrading
-	$rv .= &ui_table_row("Allow logins with empty passwords",
-		     $upgrade->{'opts'}->{'emptypass'} ? $text{'yes'} : $text{'no'});
-	if ($d->{'mysql'}) {
-		$rv .= &ui_table_row("Automatically login to phpMyAdmin",
-			$upgrade->{'opts'}->{'auto'} ? $text{'yes'} : $text{'no'});
+	if ($upgrade->{'opts'}->{'global_def'}) {
+		$rv .= &ui_table_row(
+			&hlink($text{'script_phpmyadmin_def'},
+			       "script_phpmyadmin_def"),
+			$text{'yes'});
 		}
-	local @dbnames = split(/\s+/, $upgrade->{'opts'}->{'db'});
-	$rv .= &ui_table_row("Databases to manage",
-		join(" ", @dbnames) || "<i>All databases</i>");
+	else {
+		$rv .= &ui_table_row("Allow logins with empty passwords",
+			$upgrade->{'opts'}->{'emptypass'}
+				? $text{'yes'}
+				: $text{'no'});
+		if ($d->{'mysql'}) {
+			$rv .= &ui_table_row("Automatically login to phpMyAdmin",
+				$upgrade->{'opts'}->{'auto'}
+					? $text{'yes'}
+					: $text{'no'});
+			}
+		local @dbnames = split(/\s+/, $upgrade->{'opts'}->{'db'});
+		$rv .= &ui_table_row("Databases to manage",
+			join(" ", @dbnames) || "<i>All databases</i>");
+		}
 	local $dir = $upgrade->{'opts'}->{'dir'};
 	$dir =~ s/^$d->{'home'}\///;
 	$rv .= &ui_table_row("Install directory", $dir);
 	}
 else {
+	# If installing as master admin as a question to make global default
+	if (&master_admin()) {
+		my $js = <<'EOF';
+		<script>
+		(function () {
+			function byName(n) {
+				return document.querySelectorAll('input[name="'+n+'"]');
+			}
+		
+			function checkedVal(n) {
+				var els = byName(n);
+				for (var i = 0; i < els.length; i++) {
+					if (els[i].checked) return els[i].value;
+				}
+				return null;
+			}
+		
+			function setRadio(n, v) {
+				var els = byName(n);
+				for (var i = 0; i < els.length; i++) {
+					if (els[i].value == v) {
+						els[i].checked = true;
+						return;
+					}
+				}
+			}
+		
+			function rowForName(n) {
+				var el = document.querySelector('input[name="'+n+'"], select[name="'+n+'"]');
+				if (!el) return null;
+				while (el && el.tagName !== 'TR') el = el.parentNode;
+				return el;
+			}
+		
+			function setRowHidden(row, hide) {
+				if (!row) return;
+				row.style.display = hide ? 'none' : '';
+			}
+		
+			function setSelectDisabled(n, dis) {
+				var sel = document.querySelector('select[name="'+n+'"]');
+				if (sel) sel.disabled = !!dis;
+			}
+		
+			function applyGlobal() {
+				var g = checkedVal('global_def') === '1';
+		
+				var r1 = rowForName('emptypass');
+				var r2 = rowForName('auto');
+				var r3 = rowForName('db_def');
+		
+				if (g) {
+					/* Reset hidden options to safe defaults */
+					setRadio('emptypass', '0');
+					setRadio('auto', '0');
+					setRadio('db_def', '1');
+					setSelectDisabled('db', true);
+		
+					setRowHidden(r1, true);
+					setRowHidden(r2, true);
+					setRowHidden(r3, true);
+				}
+				else {
+					setRowHidden(r1, false);
+					setRowHidden(r2, false);
+					setRowHidden(r3, false);
+		
+					/* Re-apply current db_def state to enable/disable the db select */
+					setSelectDisabled('db', checkedVal('db_def') !== '0');
+				}
+			}
+		
+			/* React to global default toggle */
+			var g = byName('global_def');
+			for (var i = 0; i < g.length; i++) {
+				g[i].addEventListener('change', applyGlobal);
+			}
+		
+			/* React to db_def changes when not global */
+			var d = byName('db_def');
+			for (var j = 0; j < d.length; j++) {
+				d[j].addEventListener('change', function () {
+					if (checkedVal('global_def') === '1') return;
+					setSelectDisabled('db', checkedVal('db_def') !== '0');
+				});
+			}
+		
+			/* Initial state */
+			applyGlobal();
+		})();
+		</script>
+EOF
+		$rv .= &ui_table_row(
+			&hlink($text{'script_phpmyadmin_def'},
+			       "script_phpmyadmin_def"),
+			&ui_yesno_radio("global_def", 0).$js);
+		}
 	# Show editable install options
 	$rv .= &ui_table_row("Allow logins with empty passwords",
 		&ui_radio("emptypass", 0, [ [ 1, "Yes" ],
@@ -173,6 +282,11 @@ else {
 				: join(" ", split(/\0/, $in->{'db'})),
 		 'dir' => $dir,
 		 'path' => $in->{'dir_def'} ? "/" : "/$in->{'dir'}",
+		 'global_def' => &master_admin()
+		 	? $in->{'global_def'}
+				? 1 
+				: 0 
+			: 0,
 		 'emptypass' => $in->{'emptypass'},
 		 'auto' => $in->{'auto'},
 		 'all_langs' => $in->{'all_langs'} };
@@ -187,6 +301,18 @@ local ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 if (-r "$opts->{'dir'}/config.inc.php") {
 	return "phpMyAdmin appears to be already installed in the selected directory";
+	}
+# If already global check and show error if it is
+if ($opts->{'global_def'} && defined &list_all_global_def_scripts_cached) {
+	# Invalidate global scripts default cache
+	&invalidate_global_def_scripts_cache();
+	# Check if another global default exists
+	my @all_glob_cache = &list_all_global_def_scripts_cached();
+	@all_glob_cache = grep { $_->{'name'} eq 'phpmyadmin' } @all_glob_cache;
+	return @all_glob_cache
+		? "phpMyAdmin is already installed as a global default in domain ".
+			&get_domain($all_glob_cache[0]->{'dom_id'})->{'dom'}
+		: undef;
 	}
 return undef;
 }
@@ -244,6 +370,11 @@ if ($d->{'mysql'}) {
 if ($upgrade && $ver >= 4) {
 	&unlink_file_as_domain_user($d, "$opts->{'dir'}/main.php");
 	&unlink_file_as_domain_user($d, "$opts->{'dir'}/libraries/header_http.inc.php");
+	}
+
+# Invalidate global scripts default cache
+if ($opts->{'global_def'} && defined &invalidate_global_def_scripts_cache) {
+	&invalidate_global_def_scripts_cache();
 	}
 
 # Extract tar file to temp dir and copy to target
@@ -348,6 +479,11 @@ foreach $l (@$lref) {
 &unlink_file_as_domain_user($d, "$opts->{'dir'}/setup");
 &unlink_file_as_domain_user($d, "$opts->{'dir'}/scripts/setup.php");
 
+# Invalidate global scripts default cache
+if ($opts->{'global_def'} && defined &invalidate_global_def_scripts_cache) {
+	&invalidate_global_def_scripts_cache();
+	}
+
 # Return a URL for the user
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
@@ -360,6 +496,11 @@ return (1, "phpMyAdmin installation complete. It can be accessed at <a target=_b
 sub script_phpmyadmin_uninstall
 {
 local ($d, $version, $opts) = @_;
+
+# Invalidate global scripts default cache
+if ($opts->{'global_def'} && defined &invalidate_global_def_scripts_cache) {
+	&invalidate_global_def_scripts_cache();
+	}
 
 # Remove the contents of the target directory
 local $derr = &delete_script_install_directory($d, $opts);
