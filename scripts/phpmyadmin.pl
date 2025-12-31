@@ -136,7 +136,7 @@ if ($upgrade) {
 	}
 else {
 	# If installing as master admin as a question to make global default
-	if (&master_admin()) {
+	if (&master_admin() && defined &list_all_global_def_scripts_cached) {
 		my $js = <<'EOF';
 		<script>
 		(function () {
