@@ -4,10 +4,12 @@ This page lists all databases owned by the virtual server and lets you create
 new ones up to the limit for the logged-in user. You can also delete one or more
 databases. <p>
 
-To view a database's tables and data, click the "Manage" button. If phpMyAdmin
-is installed for this virtual server, you will also see a "Manage in phpMyAdmin"
-button. If phpMyAdmin is installed on a sub-server, the sub-server's phpMyAdmin
-install is used instead of the parent's. <p>
+To view a database's tables and data, click "Manage" button. If phpMyAdmin is
+installed for this virtual server, you will also see a "Manage in phpMyAdmin"
+button. If the virtual server is a sub-server and it has its own phpMyAdmin
+install, that one is used instead of the parent's. If there is no per-server
+install, but a system default phpMyAdmin has been set, that shared instance will
+be used. <p>
 
 To see additional details about a database, including its size and number of
 tables, click its name.  <p>
