@@ -99,9 +99,11 @@ $dsel = &ui_radio("all", int($sched->{'all'}),
 		  [ 0, $text{'backup_sel'}, $dis2 ],
 		  [ 2, $text{'backup_exc'}, $dis2 ] ])."<br>\n".
 	&servers_input("doms", \@bak, \@doms, $sched->{'all'} == 1, 1);
-$dsel .= "<br>".&ui_checkbox(
-	"parent", 1, &hlink($text{'backup_parent'}, 'backup_parent'),
-	$sched->{'parent'});
+if (!$d) {
+	$dsel .= "<br>".&ui_checkbox(
+		"parent", 1, &hlink($text{'backup_parent'}, 'backup_parent'),
+		$sched->{'parent'});
+	}
 print &ui_table_row(&hlink($text{'backup_doms'}, "backup_doms"),
 		    $dsel);
 
