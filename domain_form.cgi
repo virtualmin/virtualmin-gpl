@@ -149,7 +149,7 @@ if (!$parentuser) {
 
 	# SSH public key for Unix user
 	print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkey"),
-		&ui_radio("sshkey_mode", 0,
+		&ui_radio("sshkey_mode", $config{'gen_ssh_key'} // 0,
 			  [ [ 0, $text{'form_sshkey0'} ],
 			    [ 1, $text{'form_sshkey1'} ],
 			    [ 2, $text{'form_sshkey2'} ] ])."<br>\n".

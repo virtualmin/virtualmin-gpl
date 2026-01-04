@@ -90,6 +90,7 @@ dependent_mail=Send email from domain's IP by default?,1,1-Yes,0-No
 force_email=Contact email address is mandatory?,1,1-Yes,0-No
 contact_email=Default email address for new domains?,3,Domain owner's mailbox
 allow_numbers=Allow user and group names starting with numbers?,1,1-Yes,0-No
+gen_ssh_key=Default SSH key mode,1,1-Generate new key,0-No default key
 
 line2.1=SSL settings,11
 openssl_cnf=Location of OpenSSL configuration file,3,Work out automatically
