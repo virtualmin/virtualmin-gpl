@@ -1887,9 +1887,9 @@ foreach my $desturl (@$desturls) {
 			local $tstart = time();
 			eval {
 				local $main::error_must_die = 1;
-				&remote_finished();
-				&remote_foreign_require($w, "webmin");
 				foreach my $df (@destfiles) {
+					&remote_finished();
+					&remote_foreign_require($w, "webmin");
 					&remote_write($w, "$dest/$df","$path/$df");
 					}
 				};
@@ -1897,6 +1897,11 @@ foreach my $desturl (@$desturls) {
 			$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
 
 			# Upload each domain's .info and .dom files
+			eval {
+				local $main::error_must_die = 1;
+				&remote_finished();
+				&remote_foreign_require($w, "webmin");
+				};
 			foreach my $df (@destfiles) {
 				local $d = $destfiles_map{$df};
 				local $n = $d eq "virtualmin" ? "virtualmin"
@@ -5131,6 +5136,36 @@ elsif ($mode == 2) {
 		}
 	return "ssh://".$in{$name."_suser"}.":".$pass."\@".
 	       $in{$name."_sserver"}.":".$in{$name."_spath"};
+	}
+elsif ($mode == 13) {
+	# SFTP server
+	local ($server, $port);
+	if ($in{$name."_sfserver"} =~ /^\[([^\]]+)\](:(\d+))?$/) {
+		($server, $port) = ($1, $3);
+		}
+	elsif ($in{$name."_sfserver"} =~ /^([A-Za-z0-9\.\-\_]+)(:(\d+))?$/) {
+		($server, $port) = ($1, $3);
+		}
+	else {
+		&error($text{'backup_eserver2'});
+		}
+	&to_ipaddress($server) ||
+	    defined(&to_ip6address) && &to_ip6address($server) ||
+		&error($text{'backup_eserver2a'});
+	$port =~ /^\d*$/ || &error($text{'backup_eport'});
+	$in{$name."_sfpath"} =~ /\S/ || &error($text{'backup_epath'});
+	$in{$name."_sfuser"} =~ /^[^:\/ ]*$/ || &error($text{'backup_euser2'});
+	if ($in{$name."_sfpath"} ne "/") {
+		# Strip trailing /
+		$in{$name."_sfpath"} =~ s/\/+$//;
+		}
+	my $pass = $in{$name."_sfpass"};
+	if ($pass eq "") {
+		$pass = $in{$name."_sftpkey"};
+		$pass =~ s/\//\|/g;
+		}
+	return "sftp://".$in{$name."_sfuser"}.":".$pass."\@".
+	       $in{$name."_sfserver"}.":".$in{$name."_sfpath"};
 	}
 elsif ($mode == 3) {
 	# Amazon S3 service
