@@ -244,8 +244,12 @@ if ($config{'ftp'} || &foreign_installed("proftpd")) {
 		if ($virt) {
 			my $cfile = &proftpd::find_directive(
 					"TLSRSACertificateFile", $vconf);
+			$cfile ||= &proftpd::find_directive(
+					"TLSECCertificateFile", $vconf);
 			my $kfile = &proftpd::find_directive(
 					"TLSRSACertificateKeyFile", $vconf);
+			$kfile ||= &proftpd::find_directive(
+					"TLSECCertificateKeyFile", $vconf);
 			my $cafile = &proftpd::find_directive(
 					"TLSCACertificateFile", $vconf);
 			if ($cfile) {
@@ -265,8 +269,12 @@ if ($config{'ftp'} || &foreign_installed("proftpd")) {
 	# Check ProFTPd global certificate
 	my $cfile = &proftpd::find_directive(
 			"TLSRSACertificateFile", $conf);
+	$cfile ||= &proftpd::find_directive(
+			"TLSECCertificateFile", $conf);
 	my $kfile = &proftpd::find_directive(
 			"TLSRSACertificateKeyFile", $conf);
+	$kfile ||= &proftpd::find_directive(
+			"TLSECCertificateKeyFile", $conf);
 	my $cafile = &proftpd::find_directive(
 			"TLSCACertificateFile", $conf);
 	if ($cfile) {
@@ -679,7 +687,9 @@ my ($d) = @_;
 &proftpd::lock_proftpd_files();
 my $conf = &proftpd::get_config();
 my $cfile = &proftpd::find_directive("TLSRSACertificateFile", $conf);
+$cfile ||= &proftpd::find_directive("TLSECCertificateFile", $conf);
 my $kfile = &proftpd::find_directive("TLSRSACertificateKeyFile", $conf);
+$kfile ||= &proftpd::find_directive("TLSECCertificateKeyFile", $conf);
 my $cafile = &proftpd::find_directive("TLSCACertificateFile", $conf);
 my $cdir = $proftpd::config{'proftpd_conf'};
 $cdir =~ s/\/[^\/]+$//;
@@ -722,8 +732,26 @@ if ($cadata) {
 	}
 
 # Update config with correct files
-&proftpd::save_directive("TLSRSACertificateFile", [ $cfile ], $conf, $conf);
-&proftpd::save_directive("TLSRSACertificateKeyFile", [ $kfile ], $conf, $conf);
+if (&get_ssl_key_type($kfile) eq 'ec') {
+	&proftpd::save_directive(
+		"TLSECCertificateFile", [ $cfile ], $conf, $conf);
+	&proftpd::save_directive(
+		"TLSECCertificateKeyFile", [ $kfile ], $conf, $conf);
+	&proftpd::save_directive(
+		"TLSRSACertificateFile", [ ], $conf, $conf);
+	&proftpd::save_directive(
+		"TLSRSACertificateKeyFile", [ ], $conf, $conf);
+	}
+else {
+	&proftpd::save_directive(
+		"TLSRSACertificateFile", [ $cfile ], $conf, $conf);
+	&proftpd::save_directive(
+		"TLSRSACertificateKeyFile", [ $kfile ], $conf, $conf);
+	&proftpd::save_directive(
+		"TLSECCertificateFile", [ ], $conf, $conf);
+	&proftpd::save_directive(
+		"TLSECCertificateKeyFile", [ ], $conf, $conf);
+	}
 &proftpd::save_directive("TLSCACertificateFile", $cadata ? [ $cafile ] : [ ],
 			 $conf, $conf);
 &$second_print(&text('copycert_dsaved', "<tt>$cfile</tt>", "<tt>$kfile</tt>"));
