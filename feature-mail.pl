@@ -5740,6 +5740,7 @@ my $now = time();
 my @tm = localtime($now);
 my $lasttime = $logins{'lasttime'};
 my $finaltime = $lasttime;
+my %exists;
 while(<MAILLOG>) {
 	s/\r|\n//g;
 
@@ -5755,11 +5756,11 @@ while(<MAILLOG>) {
 
 	if (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+dovecot\S*:\s+(pop3|imap)-login:\s+Login:\s+user=<([^>]+)>/) {
 		# POP3 or IMAP login with dovecot
-		&add_last_login_time(\%logins, $ltime, $7, $8);
+		&add_last_login_time(\%logins, $ltime, $7, $8, \%exists);
 		}
 	elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+.*sasl_username=([^ ,]+)/) {
 		# Postfix SMTP
-		&add_last_login_time(\%logins, $ltime, 'smtp', $7);
+		&add_last_login_time(\%logins, $ltime, 'smtp', $7, \%exists);
 		}
 	}
 close(MAILLOG);
@@ -5776,7 +5777,7 @@ foreach my $k (keys %acl::sessiondb) {
 	my ($user, $ltime, $lip) = split(/\s+/, $acl::sessiondb{$k});
 	if ($ltime > $wsyslogins{$user} || !$wsyslogins{$user}) {
 		$wsyslogins{$user} = $ltime;
-		&add_last_login_time(\%logins, $ltime, 'webmin', $user);
+		&add_last_login_time(\%logins, $ltime, 'webmin', $user, \%exists);
 		}
 	}
 
@@ -5792,7 +5793,7 @@ foreach my $k (keys %acl::sessiondb) {
 	my ($user, $ltime, $lip) = split(/\s+/, $acl::sessiondb{$k});
 	if ($ltime > $usyslogins{$user} || !$usyslogins{$user}) {
 		$usyslogins{$user} = $ltime;
-		&add_last_login_time(\%logins, $ltime, 'usermin', $user);
+		&add_last_login_time(\%logins, $ltime, 'usermin', $user, \%exists);
 		}
 	}
 
@@ -5814,7 +5815,7 @@ foreach my $entry (&useradmin::list_last_logins(undef, $uaconfig_last_count)) {
 		my ($service) = $entry->[1] =~ /^(tty|pts|ftp)/;
 		next if (!$service);
 		$syslogins{$user} = $ts;
-		&add_last_login_time(\%logins, $ts, $service, $user);
+		&add_last_login_time(\%logins, $ts, $service, $user, \%exists);
 		}
 	}
 
@@ -5843,14 +5844,21 @@ if (!$ltime || $ltime > $now+(24*60*60)) {
 return $ltime;
 }
 
-# add_last_login_time(&logins, time, type, username)
+# add_last_login_time(&logins, time, type, username, &usercache)
 # Add to the hash of login types for some user
 sub add_last_login_time
 {
-my ($logins, $ltime, $ltype, $user) = @_;
-my %curr = map { split(/=/, $_) } split(/\s+/, $logins->{$user});
-$curr{$ltype} = $ltime;
-$logins->{$user} = join(" ", map { $_."=".$curr{$_} } keys %curr);
+my ($logins, $ltime, $ltype, $user, $cache) = @_;
+my $exists = $cache->{$user};
+if (!defined($exists)) {
+	my $d = &get_user_domain($user);
+	$exists = $cache->{$user} = $d ? $d->{'id'} : 0;
+	}
+if ($exists) {
+	my %curr = map { split(/=/, $_) } split(/\s+/, $logins->{$user});
+	$curr{$ltype} = $ltime;
+	$logins->{$user} = join(" ", map { $_."=".$curr{$_} } keys %curr);
+	}
 }
 
 # get_last_login_time(username)
