@@ -10,14 +10,14 @@
 # License and version
 SERIAL=GPL
 KEY=GPL
-VER=8.0.0
+VER=8.0.4
 vm_version=8
 
 # Server
 download_virtualmin_host="${download_virtualmin_host:-download.virtualmin.com}"
 download_virtualmin_host_lib="$download_virtualmin_host"
-download_virtualmin_host_dev="${download_virtualmin_host_dev:-software.virtualmin.dev}"
-download_virtualmin_host_rc="${download_virtualmin_host_rc:-rc.software.virtualmin.dev}"
+download_virtualmin_host_dev="${download_virtualmin_host_dev:-download.virtualmin.dev}"
+download_virtualmin_host_rc="${download_virtualmin_host_rc:-rc.download.virtualmin.dev}"
 download_webmin_host="${download_webmin_host:-download.webmin.com}"
 download_webmin_host_dev="${download_webmin_host_dev:-download.webmin.dev}"
 download_webmin_host_rc="${download_webmin_host_rc:-rc.download.webmin.dev}"
@@ -43,6 +43,8 @@ branch='stable'
 bundle='LAMP'        # Other option is LEMP
 mode="${mode:-full}" # Other option is mini
 skipyesno=0
+config_excludes="${config_excludes:-}"
+extra_packages="${extra_packages:-}"
 
 usage() {
   # shellcheck disable=SC2046
@@ -56,12 +58,15 @@ usage() {
   echo
   printf "  --branch|-B <stable|prerelease|unstable>\\n"
   printf "                                   install branch (default: stable)\\n"
-  printf "  --os-grade|-g <A|B>              operating system support grade (default: A)\\n"
+  printf "  --os-grade|-g <A|B>              operating system support grade (default: A)\\n\\n"
+  printf "  --extra|-E <name[,name..]>       install extra packages before stack install\\n"
+  printf "  --exclude|-e <name[,name..]>     exclude plugin from configuration phase\\n"
   echo
   printf "  --module|-o                      load custom module in post-install phase\\n"
   echo
   printf "  --hostname|-n                    force hostname during install\\n"
   printf "  --no-package-updates|-x          skip package updates during install\\n"
+  printf "  --no-hostname-ssl|-nhs           skip SSL certificate request for hostname\\n"
   echo
   printf "  --setup|-s                       reconfigure repos without installing\\n"
   printf "  --connect|-C <ipv4|ipv6>         test connectivity without installing\\n"
@@ -173,6 +178,58 @@ test_connection() {
   fi
 }
 
+# Function to add extra packages to install before stack install
+add_extra_packages() {
+  old_ifs=$IFS
+  IFS=,
+  set -f
+  for raw in $1; do
+    p=$(printf '%s' "$raw" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+    [ -n "$p" ] || continue
+
+    # Don't allow leading dash or whitespace
+    case "$p" in
+      \*|-*|*[[:space:]]*|*\'*)
+        printf "Invalid extra package name: %s\n" "$p" >&2
+        bind_hook "usage"
+        exit 1
+        ;;
+    esac
+
+    # Store as a shell-quoted token so globbing won't expand later
+    extra_packages="${extra_packages}${extra_packages:+ }'$p'"
+  done
+  set +f
+  IFS=$old_ifs
+}
+
+# Function to add config excludes
+add_config_excludes() {
+  old_ifs=$IFS
+  IFS=,
+  set -f
+  for raw in $1; do
+    # Trim leading/trailing whitespace
+    x=$(printf '%s' "$raw" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+    [ -n "$x" ] || continue
+    case "$x" in
+      -*|*[!A-Za-z0-9]*)
+        printf "Invalid exclude name: %s\n" "$x" >&2
+        exit 1
+        ;;
+    esac
+    # Converts for some formatted names
+    case "$x" in
+      MariaDB)
+        x="MySQL"
+        ;;
+    esac
+    config_excludes="${config_excludes} --exclude $x"
+  done
+  set +f
+  IFS=$old_ifs
+}
+
 # Default function to parse arguments
 parse_args() {
   while [ "$1" != "" ]; do
@@ -252,6 +309,10 @@ parse_args() {
       shift
       noupdates=1
       ;;
+    --no-hostname-ssl | -nhs)
+      shift
+      add_config_excludes "SSL"
+      ;;
     --setup | -s)
       shift
       setup_only=1
@@ -282,7 +343,6 @@ parse_args() {
       B|b)
         shift
         unstable='unstable'
-        virtualmin_config_system_excludes=""
         virtualmin_stack_custom_packages=""
         ;;
       *)
@@ -292,11 +352,30 @@ parse_args() {
         ;;
       esac
       ;;
-    --unstable | -e)
+    --unstable | -U)
       shift
       unstable='unstable'
-      virtualmin_config_system_excludes=""
       virtualmin_stack_custom_packages=""
+      ;;
+    --extra | -E)
+      shift
+      if [ -z "$1" ] || [ "${1#-}" != "$1" ]; then
+        printf "Missing value for extra flag\n"
+        bind_hook "usage"
+        exit 1
+      fi
+      add_extra_packages "$1"
+      shift
+      ;;
+    --exclude | -e)
+      shift
+      if [ -z "$1" ] || [ "${1#-}" != "$1" ]; then
+        printf "Missing value for exclude flag\\n"
+        bind_hook "usage"
+        exit 1
+      fi
+      add_config_excludes "$1"
+      shift
       ;;
     --module | -o)
       shift
@@ -403,17 +482,14 @@ if [ -e "$log" ]; then
   done
 fi
 
-# If Pro user downloads GPL version of `install.sh` script
-# to fix repos check if there is an active license exists
-if [ -n "$setup_only" ]; then
-  if [ "$SERIAL" = "GPL" ] && [ "$KEY" = "GPL" ] && [ -f "$virtualmin_license_file" ]; then
-    virtualmin_license_existing_serial="$(grep 'SerialNumber=' "$virtualmin_license_file" | sed 's/SerialNumber=//')"
-    virtualmin_license_existing_key="$(grep 'LicenseKey=' "$virtualmin_license_file" | sed 's/LicenseKey=//')"
-    if [ -n "$virtualmin_license_existing_serial" ] && [ -n "$virtualmin_license_existing_key" ]; then
-      SERIAL="$virtualmin_license_existing_serial"
-      KEY="$virtualmin_license_existing_key"
-    fi    
-  fi
+# If license file exists and both serial and key are set use them
+if [ "$SERIAL" = "GPL" ] && [ "$KEY" = "GPL" ] && [ -f "$virtualmin_license_file" ]; then
+  virtualmin_license_existing_serial="$(grep 'SerialNumber=' "$virtualmin_license_file" | sed 's/SerialNumber=//')"
+  virtualmin_license_existing_key="$(grep 'LicenseKey=' "$virtualmin_license_file" | sed 's/LicenseKey=//')"
+  if [ -n "$virtualmin_license_existing_serial" ] && [ -n "$virtualmin_license_existing_key" ]; then
+    SERIAL="$virtualmin_license_existing_serial"
+    KEY="$virtualmin_license_existing_key"
+  fi    
 fi
 
 arch="$(uname -m)"
@@ -765,6 +841,9 @@ grade_b_system() {
         *\.10|*[13579].04) # non-LTS versions are unstable
           return 0
           ;;
+        26.04)             # 26.04 is in testing so far
+          return 0
+          ;;
         *)
           return 1
           ;;
@@ -777,9 +856,9 @@ grade_b_system() {
 }
 
 if grade_b_system && [ "$unstable" != 'unstable' ]; then
-  log_error "Unsupported operating system detected. You may be able to install with"
-  log_error "${BOLD}--unstable${NORMAL} flag, but this is not recommended. Consult the installation"
-  log_error "documentation."
+  log_error "Unsupported OS detected. For production, use a ${CYAN}${BOLD}Grade A${NORMAL} supported"
+  log_error "OS. If you want to proceed anyway, use ${YELLOW}${BOLD}--os-grade B${NORMAL} flag, but it"
+  log_error "is not recommended for production use."
   exit 1
 fi
 
@@ -981,6 +1060,18 @@ uninstall() {
   manage_virtualmin_branch_repos
 }
 
+# Disable CD-ROM repos on Debian-based systems
+pre_check_disable_cdrom_repos() {
+  [ -x /usr/bin/apt-get ] || return 0
+  [ -f /etc/apt/sources.list ] || return 0
+
+  grep -Eq '^[[:space:]]*deb(-src)?[[:space:]]+cdrom:' /etc/apt/sources.list || return 0
+
+  # Comment out active CD-ROM repos
+  sed -i '/^[[:space:]]*#/! s/^[[:space:]]*\(deb\(-src\)\?[[:space:]]\+cdrom:\)/#\1/' \
+    /etc/apt/sources.list
+}
+
 # Phase control
 phase() {
     phases_total="${phases_total:-4}"
@@ -1057,7 +1148,8 @@ EOF
      - CloudLinux 8 and 9 on x86_64\\n \
      - openEuler 24.03 and above on x86_64 and aarch64\\n \
           ${NORMAL}"
-    unstable_deb="${YELLOW}- Kali Linux Rolling 2025 and above on amd64 and arm64\\n \
+    unstable_deb="${YELLOW}- Ubuntu 26.04 developer preview on i386, amd64 and arm64\\n \
+     - Kali Linux Rolling 2025 and above on amd64 and arm64\\n \
      - Ubuntu interim (non-LTS) on i386, amd64 and arm64\\n \
           ${NORMAL}"
     supported_all=$(echo "$supported_all" | sed "s/UNSTABLERHEL/$unstable_rhel/")
@@ -1106,12 +1198,11 @@ os_unstable_pre_check() {
   ${YELLOWBG}${BLACK}${BOLD} INSTALLATION WARNING ${NORMAL}
 
   You are about to install Virtualmin $PRODUCT on a ${BOLD}Grade B${NORMAL} operating
-  system. Be advised that this OS version is not recommended for servers,
-  and may have bugs that could affect the performance and stability of
-  the system.
+  system. This OS version is not recommended for production use,
+  and could affect the performance and stability of the system.
 
-  Certain features may not work as intended or might be unavailable on
-  this OS.
+  Certain features may not work as intended or might be
+  unavailable on this OS.
 
 EOF
     if [ "$skipyesno" -ne 1 ]; then
@@ -1149,7 +1240,7 @@ EOF
 EOF
     fi
     
-    if [ "$skipyesno" -ne 1 ]; then
+    if [ "$skipyesno" -ne 1 ] && [ "$branch" != "stable" ]; then
       printf " Continue with $branch branch? (y/n) "
       if ! yesno; then
         exit
@@ -1217,6 +1308,54 @@ EOF
   fi
 }
 
+# Read the post-install messages file from the config system, print it, and then
+# delete it
+virtualmin_config_postinstall_messages() {
+  logpath="${LOG_PATH:-$log}"
+  msgdir=${logpath%/*}
+  [ "$msgdir" = "$logpath" ] && msgdir="."
+  msgfile="$msgdir/virtualmin-config-postinstall-messages.log"
+
+  [ -f "$msgfile" ] || return 0
+  echo
+  while IFS= read -r line || [ -n "$line" ]; do
+    line=$(printf '%s' "$line" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+    [ -n "$line" ] || continue
+    case "$line" in \#*) continue ;; esac
+
+    msg="$line"
+    logger="log_warning"
+
+    case "$line" in
+      *\|*)
+        logger="${line##*|}"
+        msg="${line%|*}"
+        logger=$(printf '%s' "$logger" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+        msg=$(printf '%s' "$msg" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+        # Validate logger name and existence
+        case "$logger" in
+          ""|*[!A-Za-z0-9_]*)
+            logger="log_warning"
+            ;;
+          *)
+            command -v "$logger" >/dev/null 2>&1 || logger="log_warning"
+            ;;
+        esac
+        ;;
+    esac
+
+    [ -n "$msg" ] || continue
+
+    # Wrap long lines to fit terminal width
+    printf '%s\n' "$msg" | fold -s -w 64 | while IFS= read -r ln; do
+      [ -n "$ln" ] || continue
+      "$logger" "$ln"
+    done
+  done < "$msgfile"
+
+  rm -f "$msgfile" 2>/dev/null || :
+}
+
 post_install_message() {
   # Login at message
   login_at1="https://${hostname}:10000."
@@ -1241,8 +1380,9 @@ post_install_message() {
     log_success "$login_at2"
   fi
   if [ -z "$ssl_host_success" ]; then
-    log_success "You will see a security warning in the browser on your first visit."
+    log_warning "You will see a security warning in the browser on your first visit."
   fi
+  bind_hook "virtualmin_config_postinstall_messages"
 }
 
 if [ -z "$setup_only" ] && [ -z "$skipbanner" ]; then
@@ -1381,6 +1521,9 @@ pre_check_gpg() {
 }
 
 pre_check_all() {
+
+  # Disable CD-ROM repos if any
+  pre_check_disable_cdrom_repos
   
   if [ -z "$setup_only" ]; then
     # Check system time
@@ -1430,6 +1573,7 @@ fi
 bind_hook "phases_all_pre"
 
 if [ -n "$setup_only" ]; then
+  pre_check_disable_cdrom_repos
   pre_check_perl
   pre_check_http_client
   pre_check_gpg
@@ -1451,8 +1595,9 @@ log_debug "Install mode: $mode"
 log_debug "Product: Virtualmin $PRODUCT"
 log_debug "virtualmin-install.sh version: $VER"
 
-# Check for a fully qualified hostname
-if [ -z "$setup_only" ]; then
+# Check for a fully qualified hostname unless setting up repos or doing a
+# minimal install
+if [ -z "$setup_only" ] && [ "$mode" != "mini" ]; then
   log_debug "Checking for fully qualified hostname .."
   name="$(hostname -f)"
   if [ $? -ne 0 ]; then
@@ -1594,7 +1739,7 @@ preconfigure_virtualmin_release() {
     case "$os_type" in
     ubuntu)
       case "$os_version:$unstable" in
-        18.04:*|20.04:*|22.04:*|24.04:*|*\.10:unstable|*[13579].04:unstable)
+        18.04:*|20.04:*|22.04:*|24.04:*|26.04:*|*\.10:unstable|*[13579].04:unstable)
           : ;; # Do nothing for supported or allowed unstable versions
         *)
           printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
@@ -1623,22 +1768,7 @@ preconfigure_virtualmin_release() {
       deps="$debdeps"
       repos="virtualmin"
     fi
-    
-    # Make sure universe repos are available
-    if [ "$os_type" = "ubuntu" ]; then
-      if [ -x "/bin/add-apt-repository" ] || [ -x "/usr/bin/add-apt-repository" ]; then
-        run_ok "add-apt-repository -y universe" \
-          "Enabling universe repositories, if not already available"
-      elif [ -f /etc/apt/sources.list ]; then
-        run_ok "sed -ie '/backports/b; s/#*[ ]*deb \\(.*\\) universe$/deb \\1 universe/' /etc/apt/sources.list" \
-          "Enabling universe repositories, if not already available"
-      fi
-    fi
 
-    # Is this still enabled by default on Debian/Ubuntu systems?
-    if [ -f /etc/apt/sources.list ]; then
-      run_ok "sed -ie 's/^deb cdrom:/#deb cdrom:/' /etc/apt/sources.list" "Disabling cdrom: repositories"
-    fi
     install="DEBIAN_FRONTEND='noninteractive' /usr/bin/apt-get --quiet --assume-yes --install-recommends -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' -o Dpkg::Pre-Install-Pkgs::='/usr/sbin/dpkg-preconfigure --apt' install"
     upgrade="DEBIAN_FRONTEND='noninteractive' /usr/bin/apt-get --quiet --assume-yes --install-recommends -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' -o Dpkg::Pre-Install-Pkgs::='/usr/sbin/dpkg-preconfigure --apt' upgrade"
     update="/usr/bin/apt-get clean ; /usr/bin/apt-get update"
@@ -1683,6 +1813,11 @@ install_with_apt() {
   # Silently purge packages that may cause issues upon installation
   /usr/bin/apt-get --quiet --assume-yes purge ufw >> "$RUN_LOG" 2>&1
 
+  # Install extra packages if any
+  if [ -n "$extra_packages" ]; then
+    run_ok "$install $extra_packages" "Installing selected extra packages"
+  fi
+
   # Install Webmin/Usermin first, because it needs to be already done
   # for the deps. Then install Virtualmin Core and then Stack packages
   # Do it all in one go for the nicer UI
@@ -1726,31 +1861,31 @@ install_with_yum() {
   elif [ "$os_type" = "amzn" ]; then
     # Set for installation packages whichever available on Amazon Linux as they
     # go with different name, e.g. mariadb105-server instead of mariadb-server
-    virtualmin_stack_custom_packages="mariadb*-server"
+    add_extra_packages "mariadb*-server"
     # Exclude from config what's not available on Amazon Linux
-    virtualmin_config_system_excludes=" --exclude AWStats --exclude Etckeeper --exclude Fail2banFirewalld --exclude ProFTPd"
+    add_config_excludes "AWStats,Etckeeper,Fail2banFirewalld,ProFTPd"
   fi
 
   # Important Perl packages are now hidden in PowerTools repo
   if [ "$os_major_version" -ge 8 ] && [ "$os_type" = "centos" ] || [ "$os_type" = "centos_stream" ] || [ "$os_type" = "rocky" ] || [ "$os_type" = "almalinux" ] || [ "$os_type" = "cloudlinux" ]; then
     # Detect CRB/PowerTools repo name
     if [ "$os_major_version" -ge 9 ]; then
-      extra_packages=$(dnf repolist all | grep "^crb")
-      if [ -n "$extra_packages" ]; then
-        extra_packages="crb"
-        extra_packages_name="CRB"
+      crb_repo=$(dnf repolist all | grep "^crb")
+      if [ -n "$crb_repo" ]; then
+        crb_repo="crb"
+        crb_repo_name="CRB"
       fi
     else
-      extra_packages=$(dnf repolist all | grep "^powertools")
-      extra_packages_name="PowerTools"
-      if [ -n "$extra_packages" ]; then
-        extra_packages="powertools"
+      crb_repo=$(dnf repolist all | grep "^powertools")
+      crb_repo_name="PowerTools"
+      if [ -n "$crb_repo" ]; then
+        crb_repo="powertools"
       else
-        extra_packages="PowerTools"
+        crb_repo="PowerTools"
       fi
     fi
 
-    run_ok "$install_config_manager --set-enabled $extra_packages" "Enabling $extra_packages_name package repository"
+    run_ok "$install_config_manager --set-enabled $crb_repo" "Enabling $crb_repo_name package repository"
   fi
 
 
@@ -1773,9 +1908,9 @@ install_with_yum() {
     run_ok "$upgrade" "Checking and installing system package updates"
   fi
 
-  # Install custom stack packages
-  if [ -n "$virtualmin_stack_custom_packages" ]; then
-    run_ok "$install $virtualmin_stack_custom_packages" "Installing missing stack packages"
+  # Install extra packages if any
+  if [ -n "$extra_packages" ]; then
+    run_ok "$install $extra_packages" "Installing selected extra packages"
   fi
 
   # Install core and stack
@@ -1886,7 +2021,7 @@ if [ "$mode" = "mini" ]; then
   bundle="Mini${bundle}"
 fi
 # shellcheck disable=SC2086
-virtualmin-config-system --bundle "$bundle" $virtualmin_config_system_excludes --log "$log"
+virtualmin-config-system --bundle "$bundle" $config_excludes --log "$log"
 if [ "$?" != "0" ]; then
   errorlist="${errorlist}  ${YELLOW}◉${NORMAL} Postinstall configuration returned an error.\\n"
   errors=$((errors + 1))
@@ -1894,12 +2029,6 @@ fi
 sleep 1
 # Do we still need to kill stuck spinners?
 kill $! 1>/dev/null 2>&1
-
-# Log SSL request status, if available
-if [ -f "$VIRTUALMIN_INSTALL_TEMPDIR/virtualmin_ssl_host_status" ]; then
-  virtualmin_ssl_host_status=$(cat "$VIRTUALMIN_INSTALL_TEMPDIR/virtualmin_ssl_host_status")
-  log_debug "$virtualmin_ssl_host_status"
-fi
 
 # Functions that are used in the OS specific modifications section
 disable_selinux() {
