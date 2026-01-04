@@ -592,6 +592,10 @@ if (!&supports_ip6()) {
 	# Not supported
 	print &ui_table_row($text{'edit_ip6'}, $text{'edit_noip6support'});
 	}
+elsif (!$config{'ip6enabled'}) {
+	# Not enabled
+	print &ui_table_row($text{'edit_ip6'}, $text{'edit_noip6enabled'});
+	}
 elsif ($aliasdom) {
 	# From alias domain
 	print &ui_table_row($text{'edit_ip6'}, $aliasdom->{'ip6'} ||
@@ -601,8 +605,7 @@ elsif (!&can_select_ip6()) {
 	# User isn't allowed to select v6 address
 	print &ui_table_row($text{'edit_ip6'},
 		$access{'ipfollow'} && $parentdom ? $parentdom->{'ip6'} :
-		$config{'ip6enabled'} && $defip6 ? $defip6 :
-			$text{'edit_virt6off'});
+		$defip6 ? $defip6 : $text{'edit_virt6off'});
 	}
 else {
 	# Can select addres or allocate one
@@ -633,7 +636,7 @@ if (&can_dnsip()) {
 	}
 
 # Show DNS IPv6 address field
-if (&can_dnsip() && &supports_ip6()) {
+if (&can_dnsip() && &supports_ip6() && $config{'ip6enabled'}) {
 	my $def_dns_ip6 = &get_external_ip_address(undef, 6) ||
 			  &get_dns_ip($resel, 6);
 	my $dns_ip6 = $parentdom ? $parentdom->{'dns_ip6'} : undef;

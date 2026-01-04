@@ -1273,6 +1273,7 @@ edit_ip=IP address
 edit_ip6=IPv6 address
 edit_ips=IP addresses
 edit_noip6support=Not supported on this system
+edit_noip6enabled=Not enabled on this system
 edit_private=(Dedicated to this server)
 edit_shared=(Shared by all servers)
 edit_shared2=(Non-default shared address)

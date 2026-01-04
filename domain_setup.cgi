@@ -355,7 +355,7 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 		   $in{'dns_ip_def'} == 2 && &can_dnsip() ? undef :
 		   $alias ? $alias->{'dns_ip'} :
 		   $virt ? undef : &get_dns_ip($resel, 4),
-	 'dns_ip6', !&supports_ip6() ? undef :
+	 'dns_ip6', !&supports_ip6() || !$config{'ip6enabled'} ? undef :
 		    $in{'dns_ip6_def'} == 0 && &can_dnsip() ? $in{'dns_ip6'} :
 		    $in{'dns_ip6_def'} == 2 && &can_dnsip() ? undef :
 		    $alias ? $alias->{'dns_ip6'} :
