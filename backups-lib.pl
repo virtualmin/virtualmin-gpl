@@ -1887,9 +1887,9 @@ foreach my $desturl (@$desturls) {
 			local $tstart = time();
 			eval {
 				local $main::error_must_die = 1;
+				&remote_finished();
+				&remote_foreign_require($w, "webmin");
 				foreach my $df (@destfiles) {
-					&remote_finished();
-					&remote_foreign_require($w, "webmin");
 					&remote_write($w, "$dest/$df","$path/$df");
 					}
 				};
@@ -1897,11 +1897,6 @@ foreach my $desturl (@$desturls) {
 			$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
 
 			# Upload each domain's .info and .dom files
-			eval {
-				local $main::error_must_die = 1;
-				&remote_finished();
-				&remote_foreign_require($w, "webmin");
-				};
 			foreach my $df (@destfiles) {
 				local $d = $destfiles_map{$df};
 				local $n = $d eq "virtualmin" ? "virtualmin"
