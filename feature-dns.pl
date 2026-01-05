@@ -3873,7 +3873,7 @@ if ($d->{'dns_cloud'}) {
 		     'id' => $d->{'dns_cloud_id'},
 		     'location' => $d->{'dns_cloud_location'} };
 	my $cloud = &get_domain_dns_cloud($d);
-	$cloud || "Cloud provider $ctype does not exist!";
+	$cloud || return ("Cloud provider $ctype does not exist!");
 	my ($ok, $recs) = &$gfunc($d, $info);
 	return (&text('save_ereaddnscloud', $cloud->{'desc'}, $recs)) if (!$ok);
 	local $lnum = 0;
@@ -4324,14 +4324,16 @@ if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
 	foreach my $ad (@aliases) {
 		&obtain_lock_dns($ad);
 		&pre_records_change($d);
-		local ($recs, $file) = &get_domain_dns_records_and_file($ad);
-		&sync_alias_records($recs, $file, $ad,
-				    $ad->{'dns_ip'} || $ad->{'ip'},
-				    $ad->{'dns_ip6'} || $ad->{'ip6'},
-				    1);
-		&post_records_change($ad, $recs, $file);
-		&reload_bind_records($ad);
-		&release_lock_dns($ad);
+		my ($recs, $file) = &get_domain_dns_records_and_file($ad);
+		if ($file) {
+			&sync_alias_records($recs, $file, $ad,
+					    $ad->{'dns_ip'} || $ad->{'ip'},
+					    $ad->{'dns_ip6'} || $ad->{'ip6'},
+					    1);
+			&post_records_change($ad, $recs, $file);
+			&reload_bind_records($ad);
+			&release_lock_dns($ad);
+			}
 		}
 	}
 
