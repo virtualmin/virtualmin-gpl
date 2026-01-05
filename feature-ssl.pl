@@ -2975,11 +2975,19 @@ return 0 if (!$virt);
 if ($enable) {
 	# Make proftpd virtualhost use domain's SSL cert files
 	my $cfile = &get_website_ssl_file($d, "cert");
-	&proftpd::save_directive(
-		"TLSRSACertificateFile", [ $cfile ], $vconf, $conf);
 	my $kfile = &get_website_ssl_file($d, "key");
-	&proftpd::save_directive(
-		"TLSRSACertificateKeyFile", [ $kfile ], $vconf, $conf);
+	if (&get_ssl_key_type($kfile) eq 'ec') {
+		&proftpd::save_directive(
+			"TLSECCertificateFile", [ $cfile ], $vconf, $conf);
+		&proftpd::save_directive(
+			"TLSECCertificateKeyFile", [ $kfile ], $vconf, $conf);
+		}
+	else {
+		&proftpd::save_directive(
+			"TLSRSACertificateFile", [ $cfile ], $vconf, $conf);
+		&proftpd::save_directive(
+			"TLSRSACertificateKeyFile", [ $kfile ], $vconf, $conf);
+		}
 	my $cafile = &get_website_ssl_file($d, "ca");
 	&proftpd::save_directive(
 		"TLSCACertificateFile", $cafile ? [ $cafile ] : [ ], $vconf, $conf);
@@ -2992,6 +3000,10 @@ else {
 		"TLSRSACertificateFile", [ ], $vconf, $conf);
 	&proftpd::save_directive(
 		"TLSRSACertificateKeyFile", [ ], $vconf, $conf);
+	&proftpd::save_directive(
+		"TLSECCertificateFile", [ ], $vconf, $conf);
+	&proftpd::save_directive(
+		"TLSECCertificateKeyFile", [ ], $vconf, $conf);
 	&proftpd::save_directive(
 		"TLSCACertificateFile", [ ], $vconf, $conf);
 	&proftpd::save_directive("TLSEngine", [ ], $vconf, $conf);
