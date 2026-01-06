@@ -87,7 +87,7 @@ if (!$in{'readonly'}) {
 		}
 
 	$dmarc = &get_domain_dmarc($d);
-	$err = undef;
+	my $err;
 	if ($in{'denabled'}) {
 		# Turn on and update DMARC record
 		$dmarc ||= &default_domain_dmarc($d);
@@ -108,7 +108,7 @@ if (!$in{'readonly'}) {
 			}
 		$err = &save_domain_dmarc($d, $dmarc);
 		}
-	else {
+	elsif ($dmarc && !$in{'denabled'}) {
 		# Just turn off DMARC record
 		$err = &save_domain_dmarc($d, undef);
 		}
