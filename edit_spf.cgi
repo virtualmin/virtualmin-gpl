@@ -35,7 +35,7 @@ if (defined(&list_remote_dns)) {
 		}
 	}
 else {
-	$canlocal = 1;
+	$canlocal = &has_dns_local();
 	}
 if ($canlocal) {
 	splice(@opts, 0, 0, [ 'local', $text{'dns_cloud_local'} ]);

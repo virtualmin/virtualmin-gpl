@@ -6014,6 +6014,7 @@ spf_eclouddns=.. failed : $1
 spf_ecloudexists=Selected DNS cloud does not exist
 spf_ecloudcannot=Selected DNS cloud cannot be used
 spf_eremoteexists=Selected remote DNS server does not exist
+spf_ehaslocal=No local DNS server installed
 spf_ecloud=Failed to update DNS host : $1
 spf_epostchange=Failed to save DNS records : $1
 spf_enableds=Adding DS records to parent domain ..

@@ -181,6 +181,7 @@ elsif ($in{'cloud'} ne 'local' && $in{'cloud'} ne 'services') {
 	}
 else {
 	# On local or Cloudmin services
+	&has_dns_local() || &error($text{'spf_ehaslocal'});
 	$cloud = $in{'cloud'};
 	}
 $err = &modify_dns_cloud($d, $cloud, $rserver);

@@ -316,6 +316,7 @@ while(@ARGV > 0) {
 		$remotedns = shift(@ARGV);
 		}
 	elsif ($a eq "--local-dns") {
+		&has_dns_local() || &usage("No local DNS server installed");
 		$remotedns = "";
 		}
 	elsif ($a eq "--add-parent-ds") {

@@ -5335,6 +5335,13 @@ else {
 	}
 }
 
+# has_dns_local()
+# Return 1 if this system can host DNS on this Virtualmin box
+sub has_dns_local
+{
+return &foreign_installed("bind8");
+}
+
 # filter_domain_dns_records(&domain, &recs)
 # Given a domain and a list of DNS records, return only those records that are
 # in the domain and not any sub-domains
