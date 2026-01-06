@@ -5749,14 +5749,14 @@ sub extract_purge_path
 {
 local ($dest) = @_;
 local ($mode, undef, undef, $host, $path) = &parse_backup_url($dest);
-if (($mode == 0 || $mode == 1 || $mode == 2 || $mode == 9) &&
+if (($mode == 0 || $mode == 1 || $mode == 2 || $mode == 9 || $mode == 13) &&
     $path =~ /^(\S+)\/([^%]*%.*)$/) {
 	# Local, FTP, SSH or Webmin file like /backup/%d-%m-%Y
 	local ($base, $date) = ($1, $2);
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
 	}
-elsif (($mode == 1 || $mode == 2 || $mode == 9) &&
+elsif (($mode == 1 || $mode == 2 || $mode == 9 || $mode == 13) &&
        $path =~ /^([^%\/]+%.*)$/) {
 	# FTP, SSH or Webmin file like backup-%d-%m-%Y
 	local ($base, $date) = ("", $1);
@@ -5949,8 +5949,8 @@ elsif ($mode == 2) {
 		next if (!scalar(@st));
 		next if ($st[13] eq "." || $st[13] eq "..");
 		if ($detail) {
-			&$first_print(&text('backup_purgeposs', $f->[13],
-					    &make_date($f->[9])));
+			&$first_print(&text('backup_purgeposs', $st[13],
+					    &make_date($st[9])));
 			}
 		if ($st[13] =~ /^$re$/ && $st[13] !~ /\.(dom|info)$/) {
 			$mcount++;
@@ -6767,6 +6767,61 @@ elsif ($mode == 12 && $host =~ /\%/) {
 			&$second_print(&text('backup_purgepat', $re));
 			}
 		}
+	}
+
+elsif ($mode == 13) {
+	# Use SFTP ls -l command to list the directory
+	my $err;
+	my $lsout = &sftp_commands(($user ? $user."\@" : "").$host, $pass, $port,
+				   [ "ls -l ".quotemeta($base) ], \$err);
+	if ($err) {
+		&$second_print(&text('backup_purgeesftpls', $err));
+		return 0;
+		}
+	foreach my $l (split(/\r?\n/, $lsout)) {
+		my @st = &parse_lsl_line($l);
+		next if (!scalar(@st));
+		next if ($st[13] eq "." || $st[13] eq "..");
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $st[13],
+					    &make_date($st[9])));
+			}
+		if ($st[13] =~ /^$re$/ && $st[13] !~ /\.(dom|info)$/) {
+			$mcount++;
+			if (!$st[9] || $st[9] >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
+			local $old = int((time() - $st[9]) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
+			&$first_print(&text('backup_deletingssh',
+					    "<tt>$base/$st[13]</tt>", $old));
+			my $rmerr;
+			&sftp_commands(($user ? $user."\@" : "").$host, $pass, $port,
+				       [ "rm ".quotemeta("$base/$st[13]"),
+					 "rm ".quotemeta("$base/$st[13].info"),
+				 	 "rm ".quotemeta("$base/$st[13].dom") ], \$rmerr);
+			if ($rmerr) {
+				&$second_print(&text('backup_edelsftp', $rmerr));
+				$ok = 0;
+				}
+			else {
+				&$second_print(&text('backup_deleted',
+						     &nice_size($st[7])));
+				$pcount++;
+				}
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
+			}
+		}
+
 	}
 
 &$outdent_print();
