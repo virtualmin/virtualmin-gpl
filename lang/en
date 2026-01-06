@@ -7547,6 +7547,7 @@ provision_ednscheck=Services error checking DNS zone : $1
 provision_edns=DNS zone $1 already exists on the services host
 
 records_title=DNS Records
+records_err=Failed to list DNS records
 records_provmsg=$1, hosted on Cloudmin Services
 records_cloudmsg=$1, hosted on $2
 records_aliasof=DNS records cannot be edited here, as this server is an alias of <tt>$1</tt> and uses the same records.
