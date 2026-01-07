@@ -3252,6 +3252,7 @@ foreach my $d (&list_domains()) {
 	my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
 	my ($subject, $body);
 	&lock_domain($d);
+	$d = &get_domain($d->{'id'}, undef, 1);
 	if (!$ok) {
 		# Failed! Tell the user
 		$subject = $text{'letsencrypt_sfaileda'};
