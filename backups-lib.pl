@@ -1938,15 +1938,9 @@ foreach my $desturl (@$desturls) {
 				    &serialise_variable(\%donedoms));
 			eval {
 				local $main::error_must_die = 1;
-				# Open a session for the tarball upload
 				&remote_finished();
 				&remote_foreign_require($w, "webmin");
-				# Big upload can take a long time
 				&remote_write($w, $dest, $path);
-				# Session may be dead now, drop and reopen again
-				&remote_finished();
-				&remote_foreign_require($w, "webmin");
-				# Upload small info and dom files
 				&remote_write($w, $infotemp, $path.".info");
 				&remote_write($w, $domtemp, $path.".dom");
 				};
