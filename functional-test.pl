@@ -7942,6 +7942,7 @@ $wildcard_tests = [
 
 	# Test SSL cert
 	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'O=Test SSL shared domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -7968,6 +7969,7 @@ $wildcard_tests = [
 
 	# Test sub-domain SSL cert
 	{ 'command' => 'openssl s_client -host '.'sslsub.'.$test_domain.
+		       ' -servername sslsub.'.$test_domain.
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'O=Test SSL shared domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
