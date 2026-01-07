@@ -44,7 +44,6 @@ index_enet=Váš operačný systém nepodporuje modul konfigurácie siete. Virtu
 index_edefip=Virtualminu sa nepodarilo zistiť predvolenú adresu IPv4 pre virtuálne servery vo vašom systéme. Na stránke <a href='$1'>konfigurácie modulu</a> budete musieť aktualizovať buď pole <b>Sieťové rozhranie pre virtuálne adresy</b> alebo <b>Predvolená adresa IP virtuálneho servera</b>.
 index_eapache=Zdá sa, že webový server Apache nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>Webový server Apache</a> Webmin. Ak váš systém nepoužíva Apache, mal by byť vypnutý na stránke <a href='$2'>konfigurácie modulu</a> Virtualminu.
 index_eproftpd=Zdá sa, že server ProFTPD nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>ProFTPD Server</a> Webmin. Ak váš systém nepoužíva ProFTPD, mal by byť vypnutý na stránke <a href='$2'>modulu</a> Virtualmin.
-index_ebind=Server DNS BIND verzie 8 alebo 9 zrejme nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>BIND DNS Server</a> Webmin. Ak váš systém nepoužíva BIND, mal by byť vypnutý na stránke <a href='$2'>modulu</a> Virtualmin.
 index_ebinderrs=V konfigurácii BIND vášho systému sa našli chyby : $1
 index_ebindmod=Modul Webmin servera BIND DNS nie je nainštalovaný vo vašom systéme.
 index_email=Vo vašom systéme nebol zistený žiadny z podporovaných poštových serverov (Sendmail, Postfix a Qmail). Možno nie sú nainštalované alebo ich moduly Webmin neboli správne nastavené.
@@ -1273,6 +1272,7 @@ edit_ip=IP adresa
 edit_ip6=IPv6 adresu
 edit_ips=IP adresy
 edit_noip6support=<i>V tomto systéme nie je podporované</i>
+edit_noip6enabled=Nie je v tomto systéme povolené
 edit_private=(Vyhradené pre tento server)
 edit_shared=(Zdieľané všetkými servermi)
 edit_shared2=(Nepredvolená zdieľaná adresa)
@@ -2931,8 +2931,10 @@ backup_purgeelisttimes=.. Výpis servera FTP $1 nezahŕňa časy súborov
 backup_deletingftp=Odstraňuje sa súbor FTP $1, ktorý je $2 dní starý ..
 backup_edelftp=.. Odstránenie FTP zlyhalo : $1
 backup_purgeesshls=.. nepodarilo sa vypísať adresár cez SSH : $1
+backup_purgeesftpls=.. nepodarilo sa zobraziť zoznam adresárov cez SFTP : $1
 backup_deletingssh=Odstraňuje sa súbor $1 cez SSH, ktorý je $2 dni starý ..
 backup_edelssh=.. Odstránenie SSH zlyhalo : $1
+backup_edelsftp=.. Odstránenie SFTP zlyhalo : $1
 backup_purgeersh=.. nepodarilo sa pripojiť k Rackspace : $1
 backup_purgeecontainers=.. nepodarilo sa vypísať kontajnery : $1
 backup_deletingcontainer=Odstraňuje sa kontajner Rackspace $1, ktorý je $2 dní starý ..
@@ -3869,7 +3871,6 @@ tmpl_dns_slaves_sel=Vybrané nižšie ..
 tmpl_dns_eslaves=Nie sú vybraté žiadne podriadené servery DNS!
 dns_cloud_def=&lt;Vybrať automaticky&gt;
 dns_cloud_services=Služby Cloudmin
-dns_cloud_local=Lokálne súbory
 tmpl_clone=Klonovacia šablóna
 tmpl_mailgroup=Sekundárna skupina pre používateľov pošty
 tmpl_ftpgroup=Sekundárna skupina pre používateľov FTP
@@ -4518,6 +4519,7 @@ scripts_nonew=Pre tento virtuálny server nie sú dostupné žiadne webové apli
 scripts_nomatch=Vášmu vyhľadávaniu nezodpovedajú žiadne webové aplikácie.
 scripts_iheader=Možnosti inštalácie webovej aplikácie
 scripts_iname=Webapp na inštaláciu
+scripts_iname2=Názov webovej aplikácie
 scripts_ipartial=Čiastočná chyba inštalácie
 scripts_idstatus=Stav inštalácie
 scripts_ideleted=Adresár bol ručne odstránený
@@ -4760,6 +4762,7 @@ scripts_kit_estype=Na tomto virtuálnom serveri ešte nebol nainštalovaný žia
 scripts_kit_estype_multi=Viaceré inštancie typu '$1' sú k dispozícii na nasledujúcich cestách:
 scripts_kit_estype_multi2=Na určenie presnej inštancie, ktorá sa má použiť, použite pomocný parameter „--app-path“
 scripts_kit_estype_path=Skript typu '$1' na ceste '$2' neexistuje
+script_phpmyadmin_def=Použiť ako predvolený systémový phpMyAdmin
 
 scripts_gpl_pro_tip=Profesionálna funkcia
 scripts_gpl_pro_tip_hide=Ďakujem za upozornenie
@@ -6009,6 +6012,7 @@ spf_eclouddns=.. zlyhalo : $1
 spf_ecloudexists=Vybraný cloud DNS neexistuje
 spf_ecloudcannot=Vybraný cloud DNS nemožno použiť
 spf_eremoteexists=Vybraný vzdialený server DNS neexistuje
+spf_ehaslocal=Nie je nainštalovaný žiadny lokálny DNS server
 spf_ecloud=Aktualizácia hostiteľa DNS zlyhala : $1
 spf_epostchange=Nepodarilo sa uložiť záznamy DNS : $1
 spf_enableds=Pridávanie záznamov DS do nadradenej domény ..
@@ -7544,6 +7548,7 @@ provision_ednscheck=Zóna DNS pri kontrole chýb služieb : $1
 provision_edns=Zóna DNS $1 už na hostiteľovi služieb existuje
 
 records_title=DNS záznamy
+records_err=Nepodarilo sa zobraziť zoznam DNS záznamov
 records_provmsg=$1, hosťované na Cloudmin Services
 records_cloudmsg=$1, hosťované na $2
 records_aliasof=DNS záznamy tu nie je možné upravovať, pretože tento server je alias <tt>$1</tt> a používa rovnaké záznamy.

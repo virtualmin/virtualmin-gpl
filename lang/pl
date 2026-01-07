@@ -44,7 +44,6 @@ index_enet=Moduł Konfiguracji Sieci nie jest obsługiwany w twoim systemie oper
 index_edefip=Virtualmin nie mógł ustalić domyślnego adresu IPv4 dla wirtualnych serwerów na twoim systemie. Będziesz musiał zaktualizować pola <b>Interfejs sieciowy dla adresów wirtualnych</b> lub <b>Domyślny adres IP wirtualnego serwera</b> na stronie <a href='$1'>konfiguracji modułu</a>
 index_eapache=Serwer web Apache nie wydaje się być zainstalowany na twoim systemie lub nie został jeszcze poprawnie skonfigurowany w module Webmina <a href='$1'>Serwer WWW Apache</a>. Jeśli twój system nie korzysta z Apache, należy go wyłączyć na stronie <a href='$2'>konfiguracji modułu</a> Virtualmina
 index_eproftpd=Serwer ProFTPD nie wydaje się być zainstalowany na twoim systemie lub nie został jeszcze poprawnie skonfigurowany w module Webmina <a href='$1'>Serwer FTP ProFTPD</a>. Jeśli twój system nie korzysta z ProFTPD, należy go wyłączyć na stronie <a href='$2'>konfiguracji modułu</a> Virtualmina
-index_ebind=Serwer DNS BIND w wersji 8 lub 9 nie wydaje się być zainstalowany na twoim systemie lub nie został jeszcze poprawnie skonfigurowany w module Webmina <a href='$1'>Serwer DNS BIND</a>. Jeśli twój system nie korzysta z BIND, należy go wyłączyć na stronie <a href='$2'>konfiguracji modułu</a> Virtualmina
 index_ebinderrs=Znaleziono błędy w konfiguracji BIND na twoim systemie : $1
 index_ebindmod=Moduł serwera DNS BIND Webmina nie jest zainstalowany na twoim systemie
 index_email=Żaden z obsługiwanych serwerów poczty (Sendmail, Postfix i Qmail) nie został wykryty na twoim systemie. Być może nie są one zainstalowane lub moduły Webmina nie zostały poprawnie skonfigurowane
@@ -3703,7 +3702,6 @@ tmpl_dns_slaves_sel=Wybrane poniżej ..
 tmpl_dns_eslaves=Brak wybranych serwerów DNS zapasowych!
 dns_cloud_def=&lt;Wybierz automatycznie&gt;
 dns_cloud_services=Usługi Cloudmin
-dns_cloud_local=Pliki lokalne
 tmpl_clone=Klonuj szablon
 tmpl_mailgroup=Grupa pomocnicza dla użytkowników poczty
 tmpl_ftpgroup=Grupa pomocnicza dla użytkowników FTP

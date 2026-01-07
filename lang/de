@@ -44,7 +44,6 @@ index_enet=Das Netzwerkmodul wird von Ihrem Betriebssystem nicht unterstützt. V
 index_edefip=Virtualmin konnte die Standard-IPv4-Adresse für virtuelle Server auf Ihrem System nicht ermitteln. Sie müssen entweder die <b>Netzwerkschnittstelle für virtuelle Adressen</b> oder die <b>Standard-IPv4-Adresse für virtuelle Server</b> im <a href='$1'>Modul-Konfigurations</a>-Seite aktualisieren
 index_eapache=Der Apache-Webserver scheint auf Ihrem System nicht installiert zu sein oder wurde noch nicht korrekt im Webmin <a href='$1'>Apache Webserver</a>-Modul konfiguriert. Falls Ihr System keinen Apache verwendet, sollte er im Virtualmin <a href='$2'>Modul-Konfigurations</a>-Bereich deaktiviert werden
 index_eproftpd=Der ProFTPD-Server scheint auf Ihrem System nicht installiert zu sein oder wurde noch nicht korrekt im Webmin <a href='$1'>ProFTPD-Server</a>-Modul konfiguriert. Falls Ihr System keinen ProFTPD verwendet, sollte er im Virtualmin <a href='$2'>Modul-Konfigurations</a>-Bereich deaktiviert werden
-index_ebind=Der BIND DNS-Server Version 8 oder 9 scheint auf Ihrem System nicht installiert zu sein oder wurde noch nicht korrekt im Webmin <a href='$1'>BIND DNS Server</a>-Modul konfiguriert. Falls Ihr System keinen BIND verwendet, sollte er im Virtualmin <a href='$2'>Modul-Konfigurations</a>-Bereich deaktiviert werden
 index_ebinderrs=Fehler wurden in der BIND-Konfiguration Ihres Systems gefunden: $1
 index_ebindmod=Das BIND DNS-Server-Modul ist auf Ihrem System nicht installiert
 index_email=Keiner der unterstützten Mail-Server (Sendmail, Postfix und Qmail) wurde auf Ihrem System erkannt. Möglicherweise sind sie nicht installiert oder ihre Webmin-Module wurden noch nicht richtig konfiguriert
@@ -3799,7 +3798,6 @@ tmpl_dns_slaves_sel=Ausgewählte unten ..
 tmpl_dns_eslaves=Keine DNS-Slave-Server ausgewählt!
 dns_cloud_def=<Wird automatisch gewählt>
 dns_cloud_services=Cloudmin-Dienste
-dns_cloud_local=Lokale Dateien
 tmpl_clone=Template klonen
 tmpl_mailgroup=Sekundäre Gruppe für Mail-Benutzer
 tmpl_ftpgroup=Sekundäre Gruppe für FTP-Benutzer

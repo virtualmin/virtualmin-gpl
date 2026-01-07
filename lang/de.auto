@@ -3,6 +3,7 @@ index_warn_bindconf=Die BIND DNS-Serverkonfiguration auf Ihrem System weist Fehl
 
 user_remailbut3=Erstellungs-E-Mail erneut senden für :
 
+edit_noip6enabled=Auf diesem System nicht aktiviert
 edit_dnsip6=Externe IPv6-Adresse
 edit_nodnsip6=IPv6 nicht aktiviert
 
@@ -53,6 +54,8 @@ backup_eplugin_domain=Sie dürfen diese Domäne nicht sichern
 backup_upload13=Archiv wird auf den SFTP-Server $1 hochgeladen ..
 
 backup_esftpdir=Verbindung zum SFTP-Server fehlgeschlagen : $1
+backup_purgeesftpls=… konnte das Verzeichnis per SFTP nicht auflisten : $1
+backup_edelsftp=SFTP-Löschung fehlgeschlagen : $1
 
 restore_onlyfeats=Nur ausgewählte Funktionen wiederherstellen?
 
@@ -115,6 +118,7 @@ licence_updating_repo_prerelease_pro=Konfigurieren der Virtualmin Pro-Vorabversi
 licence_updating_repo_unstable_gpl=Konfiguration der instabilen Virtualmin GPL-Repositories ..
 licence_updating_repo_unstable_pro=Konfiguration instabiler Virtualmin Pro-Repositories ..
 
+scripts_iname2=Name der Web-App
 scripts_cats_longdesc=Kategorien und Beschreibung
 scripts_softwaremodperlreq=Das erforderliche Perl-Paket $1 wird installiert ..
 scripts_softwaremodperlrec=Empfohlenes Perl-Paket $1 wird installiert ..
@@ -122,6 +126,7 @@ scripts_discontinued_desc=Diese Web-App kann nicht mehr installiert werden. Sie 
 
 scripts_kit_estype_multi=Mehrere Instanzen des Typs „$1“ sind unter den folgenden Pfaden verfügbar:
 scripts_kit_estype_multi2=Verwenden Sie den Hilfsparameter „--app-path“, um die genaue zu verwendende Instanz anzugeben
+script_phpmyadmin_def=Als Systemstandard phpMyAdmin verwenden
 
 summary_ago_year=%vor 1 Jahr
 summary_ago_years=$1 vor Jahren
@@ -166,6 +171,7 @@ phpmode_skip=Vorlagenkonfiguration beibehalten
 spf_nodelrecs=.. keine passenden Datensätze gefunden!
 spf_eaddrecsdom=.. Datensatz $1 ist nicht in dieser Domäne
 spf_cloudns=NS-Einträge des Cloud-Anbieters
+spf_ehaslocal=Kein lokaler DNS-Server installiert
 
 s3_need_cli2=Der zum Erstellen von S3-Backups erforderliche AWS CLI-Befehl wurde auf Ihrem System nicht gefunden.
 s3_need_cli3=<a href='$1'>Klicken Sie hier</a>, um es automatisch installieren zu lassen, oder laden Sie es von <a href='https://aws.amazon.com/cli/' target=_blank>https://aws.amazon.com/cli/</a> herunter.
@@ -295,6 +301,8 @@ viewbackup_quick_restore=Schnelle Wiederherstellung dieser Sicherung
 viewbackup_sign=Signiertes Backup?
 
 dbackup_delnow=Backup jetzt löschen
+
+records_err=DNS-Einträge konnten nicht aufgelistet werden
 
 letsencrypt_emtasts=SSL-Zertifikatsanforderung für $1 fehlgeschlagen : $2
 letsencrypt_emtasts2=Die Antwort des SSL-Zertifikats enthielt nicht $1

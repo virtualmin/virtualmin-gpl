@@ -40,6 +40,7 @@ user_remailbut2=Wyślij ponownie e-mail dotyczący utworzenia domeny
 user_remailbut3=Wyślij ponownie wiadomość e-mail z informacją o utworzeniu :
 
 edit_ewebappcannot=Nie masz uprawnień do zarządzania aplikacjami internetowymi
+edit_noip6enabled=Nie włączono w tym systemie
 edit_dnsip6=Zewnętrzny adres IPv6
 edit_nodnsip6=IPv6 nie jest włączony
 
@@ -129,6 +130,8 @@ backup_finalstatusok=$1 serwerów wirtualnych zostało pomyślnie utworzonych ko
 
 backup_mysqlinfo=Kopiowanie danych użytkownika MySQL ..
 backup_esftpdir=Nie udało się połączyć z serwerem SFTP : $1
+backup_purgeesftpls=.. nie udało się wyświetlić katalogu przez SFTP : $1
+backup_edelsftp=.. Nie udało się usunąć SFTP : $1
 
 restore_onlyfeats=Przywrócić tylko wybrane funkcje?
 
@@ -289,6 +292,7 @@ licence_updfile=Aktualizowanie licencji Virtualmin ..
 licence_expired=Licencja wygasła
 licence_expired_desc=Możliwość wprowadzania zmian jest obecnie wyłączona dla Twojego systemu. Ten tryb włącza się po okresie karencji, jeśli Twoja licencja wygasła lub jest używana na więcej niż jednym serwerze. Odwiedź stronę <a href='$1'>Virtualmin License Manager</a>, aby uzyskać więcej szczegółów.
 
+scripts_iname2=Nazwa aplikacji internetowej
 scripts_enophpbestver=Nie można znaleźć pełnej wersji PHP dla $1
 scripts_cats_longdesc=Kategorie i opis
 scripts_softwaremodperlreq=Instalowanie wymaganego pakietu Perl $1 ..
@@ -336,6 +340,7 @@ scripts_kit_estype=Na tym serwerze wirtualnym nie zainstalowano jeszcze żadnego
 scripts_kit_estype_multi=Wiele wystąpień typu „$1” jest dostępnych w następujących ścieżkach:
 scripts_kit_estype_multi2=Użyj pomocniczego parametru „--app-path”, aby określić dokładną instancję, która ma zostać użyta
 scripts_kit_estype_path=Skrypt typu „$1” na ścieżce „$2” nie istnieje
+script_phpmyadmin_def=Użyj jako domyślnego phpMyAdmin w systemie
 
 scripts_gpl_pro_tip_enroll_single=Prosimy o rozważenie zakupu licencji <a target=_blank href='$1'>Virtualmin Pro</a>, aby wesprzeć rozwój i odblokować tę oraz wiele innych fajnych funkcji
 scripts_gpl_pro_tip_workbench_pro_only=Funkcja $1 Workbench nie jest dostępna w wersji GPL.
@@ -417,6 +422,7 @@ spf_dmarcrua=Raportowanie URI dla raportów zbiorczych
 spf_nodelrecs=.. nie znaleziono pasujących rekordów!
 spf_eaddrecsdom=.. rekord $1 nie znajduje się w tej domenie
 spf_cloudns=Rekordy NS dostawcy chmury
+spf_ehaslocal=Brak zainstalowanego lokalnego serwera DNS
 spf_aliasdns=Zmiana aliasu domeny na własne rekordy DNS ..
 spf_noaliasdns=Zmiana aliasu domeny w celu skopiowania rekordów DNS z domeny docelowej ..
 spf_ecloudprov=Dostawca usługi Cloud DNS o identyfikatorze <tt>$1</tt> nie jest obsługiwany w ramach licencji Virtualmin GPL
@@ -589,6 +595,7 @@ provision_emysql=Logowanie MySQL $1 już istnieje na hoście usług
 provision_ednscheck=Błąd usług podczas sprawdzania strefy DNS : $1
 provision_edns=Strefa DNS $1 już istnieje na hoście usług
 
+records_err=Nie udało się wyświetlić rekordów DNS
 records_aliasof=Tutaj nie można edytować rekordów DNS, ponieważ ten serwer jest aliasem <tt>$1</tt> i używa tych samych rekordów.
 records_ecannot2=Rekordów DNS domeny aliasowej nie można edytować
 records_typecaa=Urząd certyfikacji

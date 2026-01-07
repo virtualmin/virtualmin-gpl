@@ -30,7 +30,6 @@ index_enet=Modul Konfigurace sítě není ve vašem operačním systému podporo
 index_edefip=Virtualmin nemohl zjistit výchozí adresu IPv4 pro virtuální servery ve vašem systému. Bude třeba aktualizovat pole <b>Síťové rozhraní pro virtuální adresy</b> nebo <b>Výchozí IP adresa virtuálního serveru</b> na stránce <a href='$1'>konfigurace modulu</a>.
 index_eapache=Zdá se, že webový server Apache není nainstalován ve vašem systému, nebo ještě nebyl správně nastaven v modulu <a href='$1'>Apache Webserver</a> správce webu. Pokud váš systém Apache nepoužívá, měl by být deaktivován na stránce <a href='$2'>konfigurace modulu</a> společnosti Virtualmin.
 index_eproftpd=Zdá se, že server ProFTPD není nainstalován ve vašem systému, nebo dosud nebyl správně nastaven v modulu <a href='$1'>ProFTPD Server</a> správce webu. Pokud váš systém nepoužívá ProFTPD, měl by být deaktivován na stránce <a href='$2'>konfigurace modulu</a> společnosti Virtualmin.
-index_ebind=Zdá se, že server BIND DNS verze 8 nebo 9 není nainstalován ve vašem systému, nebo ještě nebyl správně nastaven v modulu <a href='$1'>BIND DNS Server</a> správce webu. Pokud váš systém nepoužívá BIND, měl by být deaktivován na stránce <a href='$2'>konfigurace modulu</a> společnosti Virtualmin.
 index_ebinderrs=V konfiguraci BIND vašeho systému byly nalezeny chyby : $1 
 index_ebindmod=Ve vašem systému není nainstalován modul Webmin BIND DNS serveru.
 index_email=Ve vašem systému nebyl detekován žádný z podporovaných poštovních serverů (Sendmail, Postfix a Qmail). Možná nejsou nainstalovány nebo jejich moduly Webmin nebyly správně nastaveny.
@@ -990,6 +989,7 @@ edit_disabled=Funkce virtuálního serveru, jako je web a doména DNS, nelze př
 edit_ip6=IPv6 adresa
 edit_ips=IP adresy
 edit_noip6support=<i>V tomto systému není podporováno</i>
+edit_noip6enabled=Není v tomto systému povoleno
 edit_private=(Určeno pro tento server)
 edit_shared2=(Předvolená sdílená adresa)
 edit_rshared=(Sdíleno zákazníky prodejce $1)
@@ -2261,6 +2261,8 @@ backup_purgeefiles3=.. se nepodařilo uvést soubory úložiště Google Cloud S
 backup_purgeefiles4=.. se nepodařilo vypsat soubory Dropbox : $1 
 backup_purgeefiles5=.. se nepodařilo vypsat soubory Backblaze : $1 
 backup_purgeefiles6=.. se nepodařilo vypsat soubory na Disku Google : $1
+backup_purgeesftpls=.. se nepodařilo zobrazit seznam adresářů přes SFTP : $1
+backup_edelsftp=.. Smazání SFTP se nezdařilo : $1
 backup_purgeersh=.. se nepodařilo připojit k prostoru Rackspace : $1 
 backup_purgeecontainers=.. nepodařilo se vypsat seznam kontejnerů : $1 
 backup_deletingcontainer=Mazání kontejneru Rackspace $1, který je $2 dní starý.
@@ -3124,7 +3126,6 @@ tmpl_dns_slaves_sel=Vybráno níže ..
 tmpl_dns_eslaves=Nejsou vybrány žádné podřízené servery DNS!
 dns_cloud_def=&lt; Vybrat automaticky &gt;
 dns_cloud_services=Cloudové služby
-dns_cloud_local=Místní soubory
 tmpl_clone=Klonovat šablonu
 tmpl_mailgroup=Sekundární skupina pro uživatele pošty
 tmpl_ftpgroup=Sekundární skupina pro uživatele FTP
@@ -3683,6 +3684,7 @@ scripts_nonew=Pro tento virtuální server nejsou k dispozici žádné webové a
 scripts_nomatch=Vašemu vyhledávání neodpovídají žádné webové aplikace.
 scripts_iheader=Možnosti instalace webové aplikace
 scripts_iname=Webapp k instalaci
+scripts_iname2=Název webové aplikace
 scripts_ipartial=Částečná chyba instalace
 scripts_idstatus=Stav instalace
 scripts_ideleted=Adresář byl ručně odstraněn
@@ -3925,6 +3927,7 @@ scripts_kit_estype=Na tento virtuální server zatím nebyl nainstalován žádn
 scripts_kit_estype_multi=Více instancí typu '$1' je k dispozici na následujících cestách:
 scripts_kit_estype_multi2=Pro určení přesné instance, která se má použít, použijte pomocný parametr '--app-path'
 scripts_kit_estype_path=Skript typu '$1' na cestě '$2' neexistuje
+script_phpmyadmin_def=Použít jako výchozí systémový phpMyAdmin
 
 scripts_gpl_pro_tip=Pro funkce
 scripts_gpl_pro_tip_hide=Díky za upozornění
@@ -4963,6 +4966,7 @@ spf_eclouddns=.. nezdařilo se : $1
 spf_ecloudexists=Vybraný cloud DNS neexistuje
 spf_ecloudcannot=Vybraný cloud DNS nelze použít
 spf_eremoteexists=Vybraný vzdálený server DNS neexistuje
+spf_ehaslocal=Není nainstalován žádný lokální DNS server
 spf_ecloud=Aktualizace hostitele DNS se nezdařila : $1
 spf_epostchange=Nepodařilo se uložit záznamy DNS : $1
 spf_enableds=Přidávání záznamů DS do nadřazené domény ..
@@ -6345,6 +6349,7 @@ provision_ednscheck=Chyba služeb při kontrole zóny DNS : $1
 provision_edns=Zóna DNS $1 již na hostiteli služeb existuje
 
 records_title=Záznamy DNS
+records_err=Nepodařilo se vypsat záznamy DNS
 records_provmsg=$1, hostované na Cloudmin Services
 records_cloudmsg=$1, hostováno na $2
 records_aliasof=DNS záznamy zde nelze upravovat, protože tento server je alias <tt>$1</tt> a používá stejné záznamy.

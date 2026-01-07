@@ -43,7 +43,6 @@ index_enet=O módulo de configuração de rede não é suportado no seu sistema 
 index_edefip=O Virtualmin não conseguiu determinar o endereço IPv4 padrão para servidores virtuais no seu sistema. Você precisará atualizar os campos <b>Interface de rede para endereços virtuais</b> ou <b>Endereço IP padrão do servidor virtual</b> na página <a href='$1'>configuração do módulo</a>.
 index_eapache=O servidor da web Apache não parece estar instalado no seu sistema ou ainda não foi configurado corretamente no módulo Apache Webserver <a href='$1'>Apmin Webserver</a> da Webmin. Se o seu sistema não usa o Apache, ele deve ser desativado na página de configuração do módulo <a href='$2'>do Virtualmin</a>.
 index_eproftpd=O servidor ProFTPD não parece estar instalado no seu sistema ou ainda não foi configurado corretamente no módulo <a href='$1'>ProFTPD Server</a> do Webmin. Se o seu sistema não usa o ProFTPD, ele deve ser desativado na página de configuração do módulo <a href='$2'>do Virtualmin</a>.
-index_ebind=O servidor BIND DNS versão 8 ou 9 não parece estar instalado no seu sistema ou ainda não foi configurado corretamente no módulo <a href='$1'>BIND DNS Server</a> do Webmin. Se o seu sistema não usa BIND, ele deve ser desativado na página de configuração do módulo <a href='$2'>do Virtualmin</a>.
 index_ebinderrs=Foram encontrados erros na configuração do BIND do seu sistema : $1 
 index_ebindmod=O módulo Webmin do servidor DNS BIND não está instalado no seu sistema.
 index_email=Nenhum dos servidores de email suportados (Sendmail, Postfix e Qmail) foi detectado no seu sistema. Talvez eles não estejam instalados ou seus módulos Webmin não tenham sido configurados corretamente.
@@ -1152,6 +1151,7 @@ edit_ip=endereço de IP
 edit_ip6=Endereço IPv6
 edit_ips=Endereços IP
 edit_noip6support=<i>Não suportado neste sistema</i>
+edit_noip6enabled=Não está habilitado neste sistema
 edit_private=(Dedicado a este servidor)
 edit_shared=(Compartilhado por todos os servidores)
 edit_shared2=(Endereço compartilhado não padrão)
@@ -2771,8 +2771,10 @@ backup_purgeelisttimes=.. A listagem do servidor FTP de $1 não inclui o tempo d
 backup_deletingftp=Excluindo o arquivo FTP $1, com $2 dias de idade.
 backup_edelftp=.. Falha na exclusão do FTP : $1 
 backup_purgeesshls=.. falha ao listar o diretório via SSH : $1 
+backup_purgeesftpls=... falha ao listar o diretório via SFTP : $1
 backup_deletingssh=Excluindo o arquivo $1 via SSH, com 2% de dias.
 backup_edelssh=.. Falha na exclusão do SSH : $1 
+backup_edelsftp=... Falha na exclusão via SFTP : $1
 backup_purgeersh=.. falha ao conectar-se ao Rackspace : $1 
 backup_purgeecontainers=.. falha ao listar contêineres : $1 
 backup_deletingcontainer=Excluindo o contêiner Rackspace $1, com $2 dias de idade.
@@ -3706,7 +3708,6 @@ tmpl_dns_slaves_sel=Selecionado abaixo ..
 tmpl_dns_eslaves=Nenhum servidor escravo DNS selecionado!
 dns_cloud_def=&lt; Escolha automaticamente &gt;
 dns_cloud_services=Serviços Cloudmin
-dns_cloud_local=Ficheiros locais
 tmpl_clone=Modelo de clone
 tmpl_mailgroup=Grupo secundário para usuários de email
 tmpl_ftpgroup=Grupo secundário para usuários de FTP
@@ -4314,6 +4315,7 @@ scripts_nonew=Nenhum webapps está disponível para este servidor virtual.
 scripts_nomatch=Nenhum webapp corresponde à sua pesquisa.
 scripts_iheader=Opções de instalação de aplicativos da Web
 scripts_iname=Webapp para instalar
+scripts_iname2=Nome do aplicativo web
 scripts_ipartial=Erro de instalação parcial
 scripts_idstatus=Status da instalação
 scripts_ideleted=O diretório foi excluído manualmente
@@ -4555,6 +4557,7 @@ scripts_kit_estype=Nenhum script do tipo '$1' foi instalado ainda neste servidor
 scripts_kit_estype_multi=Várias instâncias do tipo '$1' estão disponíveis nos seguintes caminhos:
 scripts_kit_estype_multi2=Use o parâmetro auxiliar '--app-path' para especificar a instância exata a ser usada
 scripts_kit_estype_path=O script do tipo '$1' no caminho '$2' não existe
+script_phpmyadmin_def=Usar phpMyAdmin como padrão do sistema
 
 scripts_gpl_pro_tip=Recurso Pro
 scripts_gpl_pro_tip_hide=Obrigado pelo aviso
@@ -5769,6 +5772,7 @@ spf_eclouddns=.. falhou : $1
 spf_ecloudexists=A nuvem DNS selecionada não existe
 spf_ecloudcannot=A nuvem DNS selecionada não pode ser usada
 spf_eremoteexists=O servidor DNS remoto selecionado não existe
+spf_ehaslocal=Nenhum servidor DNS local instalado
 spf_ecloud=Falha ao atualizar host DNS : $1 
 spf_epostchange=Falha ao salvar registros DNS : $1
 spf_enableds=Adicionando registros DS ao domínio pai ..
@@ -7280,6 +7284,7 @@ provision_ednscheck=Erro de serviços na verificação da zona DNS : $1
 provision_edns=A zona DNS $1 já existe no host de serviços
 
 records_title=Registros DNS
+records_err=Falha ao listar os registros DNS
 records_provmsg=$1, hospedado nos Serviços Cloudmin
 records_cloudmsg=$1, hospedado em $2
 records_aliasof=Os registros DNS não podem ser editados aqui, pois este servidor é um alias de <tt>$1</tt> e usa os mesmos registros.

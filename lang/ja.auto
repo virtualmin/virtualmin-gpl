@@ -44,7 +44,6 @@ index_enet=ネットワーク構成モジュールは、ご使用のオペレー
 index_edefip=Virtualminは、システム上の仮想サーバーのデフォルトIPv4アドレスを計算できませんでした。 <a href='$1'>モジュール構成</a>ページの[<b>仮想アドレスのネットワークインターフェース</b>]または[<b>デフォルトの仮想サーバーのIPアドレス</b>]フィールドを更新する必要があります。
 index_eapache=Apache Webサーバーがシステムにインストールされていないか、Webminの<a href='$1'>Apache Webサーバー</a>モジュールでまだ正しく設定されていません。システムでApacheを使用していない場合は、Virtualminの<a href='$2'>モジュール構成</a>ページで無効にする必要があります。
 index_eproftpd=ProFTPDサーバーがシステムにインストールされていないか、Webminの<a href='$1'>ProFTPDサーバー</a>モジュールでまだ正しく設定されていません。システムでProFTPDを使用していない場合は、Virtualminの<a href='$2'>モジュール構成</a>ページで無効にする必要があります。
-index_ebind=BIND DNSサーバーバージョン8または9がシステムにインストールされていないか、Webminの<a href='$1'>BIND DNSサーバー</a>モジュールでまだ正しく設定されていません。システムがBINDを使用していない場合は、Virtualminの<a href='$2'>モジュール構成</a>ページで無効にする必要があります。
 index_ebinderrs=システムのBIND構成でエラーが見つかりました： $1
 index_ebindmod=BIND DNSサーバーのWebminモジュールがシステムにインストールされていません。
 index_email=システムでサポートされているメールサーバー（Sendmail、Postfix、Qmail）が検出されませんでした。インストールされていないか、Webminモジュールが正しくセットアップされていない可能性があります。
@@ -1273,6 +1272,7 @@ edit_ip=IPアドレス
 edit_ip6=IPv6アドレス
 edit_ips=IPアドレス
 edit_noip6support=<i>このシステムではサポートされていません</i>
+edit_noip6enabled=このシステムでは有効になっていません
 edit_private=（このサーバー専用）
 edit_shared=（すべてのサーバーで共有）
 edit_shared2=（デフォルト以外の共有アドレス）
@@ -2931,8 +2931,10 @@ backup_purgeelisttimes=.. $1のFTPサーバーリストにファイル時間は�
 backup_deletingftp=$2日経過したFTPファイル $1を削除しています. ..
 backup_edelftp=.. FTPの削除に失敗しました： $1
 backup_purgeesshls=.. SSH経由のディレクトリのリストに失敗しました： $1
+backup_purgeesftpls=.. SFTP 経由でディレクトリの一覧を取得できませんでした : $1
 backup_deletingssh=SSH経由でファイル $1を削除しています。これは $2日前のものです。
 backup_edelssh=.. SSHの削除に失敗しました： $1
+backup_edelsftp=.. SFTP の削除に失敗しました : $1
 backup_purgeersh=.. Rackspaceへの接続に失敗しました： $1
 backup_purgeecontainers=..コンテナのリストに失敗しました： $1
 backup_deletingcontainer=$2日経過したRackspaceコンテナ $1を削除しています. ..
@@ -3869,7 +3871,6 @@ tmpl_dns_slaves_sel=以下で選択 ..
 tmpl_dns_eslaves=DNS スレーブ サーバーが選択されていません!
 dns_cloud_def=&lt;自動的に選択&gt;
 dns_cloud_services=Cloudminサービス
-dns_cloud_local=ローカルファイル
 tmpl_clone=クローンテンプレート
 tmpl_mailgroup=メールユーザーのセカンダリグループ
 tmpl_ftpgroup=FTPユーザーの2次グループ
@@ -4518,6 +4519,7 @@ scripts_nonew=この仮想サーバーでは使用できる Web アプリケー�
 scripts_nomatch=検索に一致するウェブアプリはありませんでした。
 scripts_iheader=Webアプリケーションのインストールオプション
 scripts_iname=インストールするWebアプリ
+scripts_iname2=ウェブアプリ名
 scripts_ipartial=部分的なインストールエラー
 scripts_idstatus=インストール状況
 scripts_ideleted=ディレクトリは手動で削除されました
@@ -4760,6 +4762,7 @@ scripts_kit_estype=この仮想サーバーにはまだ「$1」タイプのス�
 scripts_kit_estype_multi=タイプ '$1' の複数のインスタンスが次のパスで利用可能です:
 scripts_kit_estype_multi2=使用するインスタンスを正確に指定するには、補助パラメータ「--app-path」を使用します。
 scripts_kit_estype_path=パス '$2' にタイプ '$1' のスクリプトが存在しません
+script_phpmyadmin_def=システムのデフォルトのphpMyAdminとして使用する
 
 scripts_gpl_pro_tip=プロ機能
 scripts_gpl_pro_tip_hide=ヘッドアップをありがとう
@@ -6009,6 +6012,7 @@ spf_eclouddns=..失敗しました： $1
 spf_ecloudexists=選択した DNS クラウドは存在しません
 spf_ecloudcannot=選択した DNS クラウドは使用できません
 spf_eremoteexists=選択したリモート DNS サーバーが存在しません
+spf_ehaslocal=ローカルDNSサーバーがインストールされていません
 spf_ecloud=DNSホストの更新に失敗しました： $1
 spf_epostchange=DNSレコードの保存に失敗しました： $1
 spf_enableds=DS レコードを親ドメインに追加しています ..
@@ -7544,6 +7548,7 @@ provision_ednscheck=DNSゾーンをチェックするサービスエラー： $1
 provision_edns=DNSゾーン $1はサービスホストに既に存在します
 
 records_title=DNSレコード
+records_err=DNSレコードの一覧表示に失敗しました
 records_provmsg=$1、Cloudmin サービスでホスト
 records_cloudmsg=$1、$2 でホスト
 records_aliasof=このサーバーは <tt>$1</tt> のエイリアスであり、同じレコードを使用しているため、ここでは DNS レコードを編集できません。

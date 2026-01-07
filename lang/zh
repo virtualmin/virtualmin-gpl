@@ -30,7 +30,6 @@ index_edefip=Virtualmin无法计算出你系统上虚拟服务器的缺省IP地�
 
 index_eapache=你的系统没有安装Apache web服务器，或者没有在Webmin的<a href='$1'>Apache Web服务器</a>模块中正确配置。如果你的系统不使用Apache，你必须在Virtualmin的<a href='$2'>模块配置</a>页面中禁用它。
 index_eproftpd=你的系统没有安装ProFTPd服务器，或者没有在Webmin的<a href='$1'>ProFTPd 服务器</a>模块中正确配置。如果你的系统不使用ProFTPd，你必须在Virtualmin的<a href='$2'>模块配置</a>页面中禁用它。
-index_ebind=你的系统没有安装BIND DNS服务器第8版或第9版，或者没有在Webmin的<a href='$1'>BIND DNS服务器</a>模块中正确配置。如果你的系统不使用BIND，你必须在Virtualmin的<a href='$2'>模块配置</a>页面中禁用它。
 index_email=没有在你的系统上检测到任何被支持的邮件服务器（Sendmail，Postfix和Qmail）。可能这些服务器没有安装，或者它们的Webmin模块没有正确配置。
 index_emysql=你的系统没有安装并运行MySQL，或者没有在Webmin的<a href='$1'>MySQL数据库</a>模块中正确配置。如果你的系统不使用MySQL，你必须在Virtualmin的<a href='$2'>模块配置</a>页面中禁用它。
 index_epostgres=你的系统没有安装并运行PostgreSQL，或者没有在Webmin的<a href='$1'>PostgreSQL数据库</a>模块中正确配置。如果你的系统不使用PostgreSQL，你必须在Virtualmin的<a href='$2'>模块配置</a>页面中禁用它。
