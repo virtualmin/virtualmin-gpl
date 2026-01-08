@@ -3983,6 +3983,14 @@ $remotebackup_tests = [
 		      [ 'dest', "$ssh_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
 
+	# Make sure all files were transferred
+	{ 'command' => 'ls '.$remote_backup_dir.'/'.$test_domain.'.tar.gz' },
+	{ 'command' => 'ls '.$remote_backup_dir.'/'.$test_domain.'.tar.gz.info' },
+	{ 'command' => 'ls '.$remote_backup_dir.'/'.$test_domain.'.tar.gz.dom' },
+	{ 'command' => 'ls '.$remote_backup_dir.'/'.$test_subdomain.'.tar.gz' },
+	{ 'command' => 'ls '.$remote_backup_dir.'/'.$test_subdomain.'.tar.gz.info' },
+	{ 'command' => 'ls '.$remote_backup_dir.'/'.$test_subdomain.'.tar.gz.dom' },
+
 	# Restore via SSH
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -3998,7 +4006,7 @@ $remotebackup_tests = [
 	},
 
 	# Delete the backups file
-	{ 'command' => "rm -rf /home/$test_target_domain_user/$test_domain.tar.gz" },
+	{ 'command' => "rm -rf $remote_backup_dir/$test_domain.tar.gz" },
 
 	# Backup via SFTP
 	{ 'command' => 'backup-domain.pl',
@@ -4011,6 +4019,14 @@ $remotebackup_tests = [
 		      [ 'all-features' ],
 		      [ 'dest', "$sftp_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
+
+	# Make sure all files were transferred
+	{ 'command' => 'ls '.$remote_backup_dir.'/'.$test_domain.'.tar.gz' },
+	{ 'command' => 'ls '.$remote_backup_dir.'/'.$test_domain.'.tar.gz.info' },
+	{ 'command' => 'ls '.$remote_backup_dir.'/'.$test_domain.'.tar.gz.dom' },
+	{ 'command' => 'ls '.$remote_backup_dir.'/'.$test_subdomain.'.tar.gz' },
+	{ 'command' => 'ls '.$remote_backup_dir.'/'.$test_subdomain.'.tar.gz.info' },
+	{ 'command' => 'ls '.$remote_backup_dir.'/'.$test_subdomain.'.tar.gz.dom' },
 
 	# Restore via SFTP
 	{ 'command' => 'restore-domain.pl',
@@ -4027,7 +4043,7 @@ $remotebackup_tests = [
 	},
 
 	# Delete the backups file
-	{ 'command' => "rm -rf /home/$test_target_domain_user/$test_domain.tar.gz" },
+	{ 'command' => "rm -rf $remote_backup_dir/$test_domain.tar.gz" },
 
 	# Backup via FTP
 	{ 'command' => 'backup-domain.pl',
@@ -4187,6 +4203,14 @@ $webminbackup_tests = [
 		      [ 'all-features' ],
 		      [ 'dest', "$webmin_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
+
+	# Make sure all files were transferred
+	{ 'command' => 'ls '.$webmin_backup_dir.'/'.$test_domain.'.tar.gz' },
+	{ 'command' => 'ls '.$webmin_backup_dir.'/'.$test_domain.'.tar.gz.info' },
+	{ 'command' => 'ls '.$webmin_backup_dir.'/'.$test_domain.'.tar.gz.dom' },
+	{ 'command' => 'ls '.$webmin_backup_dir.'/'.$test_subdomain.'.tar.gz' },
+	{ 'command' => 'ls '.$webmin_backup_dir.'/'.$test_subdomain.'.tar.gz.info' },
+	{ 'command' => 'ls '.$webmin_backup_dir.'/'.$test_subdomain.'.tar.gz.dom' },
 
 	# Restore via Webmin
 	{ 'command' => 'restore-domain.pl',
