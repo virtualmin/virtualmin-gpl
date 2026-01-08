@@ -4833,6 +4833,7 @@ summary_title=Virtual Server Summary
 summary_title2=Virtual Sub-Server Summary
 summary_title3=Alias Server Summary
 summary_title4=Virtual Sub-Domain Summary
+summary_disabled=Disabled on
 summary_phpvermode=$1 ($2 mode)
 summary_ago_year=$1 year ago
 summary_ago_years=$1 years ago
