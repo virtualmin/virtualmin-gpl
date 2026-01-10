@@ -21144,15 +21144,16 @@ if ($mver =~ /\A(\d+)\.(\d+)(?:\.(\d+))?/) {
 	}
 }
 
-# set_provision_features(&domain)
+# set_provision_features(&domain, [&only-features])
 # Set the provision_* and cloud_* fields in a domain based on what
 # provisioning features are currently configured globally and in the template,
 # to indicate that they should be created remotely.
 sub set_provision_features
 {
-my ($d) = @_;
+my ($d, $only) = @_;
 my $tmpl = &get_template($d->{'template'});
 foreach my $f (&list_provision_features()) {
+	next if ($only && &indexof($f, @$only) < 0);
 	if ($f eq "dns") {
 		# Template has an option to control where DNS is hosted
 		my $alias = $d->{'alias'} ? &get_domain($d->{'alias'}) : undef;
@@ -21191,13 +21192,15 @@ foreach my $f (&list_provision_features()) {
 		$d->{'provision_'.$f} = 1;
 		}
 	}
-# Check if template has an option to control cloud SMTP provider
-my $cloud = $d->{'smtp_cloud'} || $tmpl->{'mail_cloud'};
-if ($cloud eq 'local') {
-	delete($d->{'smtp_cloud'});
-	}
-else {
-	$d->{'smtp_cloud'} = $cloud;
+if (!$only || &indexof("mail", @$only) >= 0) {
+	# Check if template has an option to control cloud SMTP provider
+	my $cloud = $d->{'smtp_cloud'} || $tmpl->{'mail_cloud'};
+	if ($cloud eq 'local') {
+		delete($d->{'smtp_cloud'});
+		}
+	else {
+		$d->{'smtp_cloud'} = $cloud;
+		}
 	}
 }
 # update_edit_limits(&dom, limit-name, limit-value)

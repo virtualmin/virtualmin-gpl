@@ -99,6 +99,9 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	$info->{'recs'} = $recs;
 	}
 
+# Select where DNS will be hosted based on the template
+&set_provision_features($d, ["dns"]);
+
 if ($d->{'provision_dns'}) {
 	# Create on provisioning server
 	$d->{'dns_submode'} = 0;	# Adding to existing domain not
