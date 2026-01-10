@@ -36,11 +36,21 @@ else {
 		"<tt>".&show_domain_name($d->{'dom'})."</tt>");
 	}
 
-# Creator
+# Created on
 print &ui_table_row($text{'edit_created'},
 	$d->{'creator'} ? &text('edit_createdby', &make_date($d->{'created'},1),
 						  $d->{'creator'})
 			: &make_date($d->{'created'}));
+
+# Disabled on
+if ($d->{'disabled_time'}) {
+	my $details = &make_date($d->{'disabled_time'});
+	if ($d->{'disabled_why'}) {
+		$details .= " ".&ui_help($text{'disable_why'} . " : "
+			.&html_escape($d->{'disabled_why'}));
+		}
+	print &ui_table_row($text{'summary_disabled'}, $details);
+	}
 
 # Last login
 if ($config{'show_domains_lastlogin'}) {
