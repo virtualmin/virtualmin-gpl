@@ -2563,7 +2563,6 @@ backup_reseller=Limit to servers owned by reseller
 backup_anyreseller=Any reseller
 backup_selreseller=Selected resellers ..
 backup_parent=Include sub-servers of those selected?
-backup_parent2=Include sub-servers in backup?
 backup_features=Features to backup
 backup_all=All virtual servers
 backup_sel=Only selected ..

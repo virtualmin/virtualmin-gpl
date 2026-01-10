@@ -99,11 +99,9 @@ $dsel = &ui_radio("all", int($sched->{'all'}),
 		  [ 0, $text{'backup_sel'}, $dis2 ],
 		  [ 2, $text{'backup_exc'}, $dis2 ] ])."<br>\n".
 	&servers_input("doms", \@bak, \@doms, $sched->{'all'} == 1, 1);
-if (!$d) {
-	$dsel .= "<br>".&ui_checkbox(
-		"parent", 1, &hlink($text{'backup_parent'}, 'backup_parent'),
-		$sched->{'parent'});
-	}
+$dsel .= "<br>".&ui_checkbox(
+	"parent", 1, &hlink($text{'backup_parent'}, 'backup_parent'),
+	$sched->{'parent'});
 print &ui_table_row(&hlink($text{'backup_doms'}, "backup_doms"),
 		    $dsel);
 
@@ -327,12 +325,6 @@ print &ui_table_row(&hlink($text{'backup_errors'}, "backup_errors"),
 			      [ [ 0, $text{'backup_errors0'} ],
 				[ 1, $text{'backup_errors1'} ],
 				[ 2, $text{'backup_errors2'} ] ]));
-
-# For a single domain, show option to add sub-servers
-if ($d) {
-	print &ui_table_row(&hlink($text{'backup_parent2'}, "backup_parent2"),
-		    &ui_yesno_radio("parent", $sched->{'parent'} ? 1 : 0));
-	}
 
 # Show compression format
 print &ui_table_row(
