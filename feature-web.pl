@@ -4266,9 +4266,22 @@ if ($p ne 'web') {
 &require_apache();
 foreach my $port ($d->{'web_port'},
 		  $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( )) {
+	# Get the current and default virtual hosts
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	$virt || return "No Apache virtualhost found for $d->{'dom'}:$port";
 	my ($oldvirt, $oldd) = &get_default_apache_website($d, $port);
+
+	# Get the files they are in
+	$virt->{'file'} =~ /^(.*)\/([^\/]+)$/;
+	my ($dir, $file) = ($1, $2);
+	my ($olddir, $oldfile);
+	if ($oldvirt) {
+		$oldvirt->{'file'} =~ /^(.*)\/([^\/]+)$/;
+		($olddir, $oldfile) = ($1, $2);
+		}
+	my $adddir = $apache::config{'virt_file'} ?
+		&apache::server_root($apache::config{'virt_file'}) : undef;
+
 	if ($virt && $oldvirt && $virt ne $oldvirt) {
 		if ($virt->{'file'} eq $oldvirt->{'file'}) {
 			# Swap virtualhosts in the file
@@ -4289,13 +4302,6 @@ foreach my $port ($d->{'web_port'},
 			}
 		else {
 			# Swap file order
-			$virt->{'file'} =~ /^(.*)\/([^\/]+)$/;
-			my ($dir, $file) = ($1, $2);
-			$oldvirt->{'file'} =~ /^(.*)\/([^\/]+)$/;
-			my ($olddir, $oldfile) = ($1, $2);
-			my $adddir = $apache::config{'virt_file'} ?
-			  &apache::server_root($apache::config{'virt_file'}) :
-			  undef;
 			if ($dir eq $olddir && $dir eq $adddir) {
 				# Rename the domain's file from xyz.com to
 				# 0-xyz.com to put it first
@@ -4323,6 +4329,18 @@ foreach my $port ($d->{'web_port'},
 			}
 		&register_post_action(\&restart_apache);
 		}
+	elsif ($virt && $oldvirt && $virt eq $oldvirt &&
+	       $dir eq $olddir && $dir eq $adddir) {
+		# Domain is the default, but only because it's file is
+		# alphabetically first. So rename it to 0-xyz.com to make it
+		# definitively first.
+		&apache::delete_webfile_link("$dir/$file");
+		&rename_logged("$dir/$file", "$dir/0-$file");
+		&apache::create_webfile_link("$dir/0-$file");
+		&recursive_set_apache_filename($conf,
+			"$dir/$file", "$dir/0-$file");
+		&register_post_action(\&restart_apache);
+		}
 	}
 return undef;
 }
@@ -4343,7 +4361,8 @@ foreach my $dir (@$conf) {
 }
 
 # is_default_website(&domain)
-# Returns 1 if some domain is the default website for it's IP, 0 otherwise
+# Returns 1 if some domain is the default website for it's IP, 2 if it's the
+# default but only due to file ordering, 0 otherwise
 sub is_default_website
 {
 local ($d) = @_;

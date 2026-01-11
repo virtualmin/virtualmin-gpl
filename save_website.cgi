@@ -149,7 +149,8 @@ if (defined($in{'ssi'}) && ($in{'ssi'} != $oldssi ||
 	}
 
 # Change default website
-if (&can_default_website($d) && $in{'defweb'}) {
+$defweb = &is_default_website($d);
+if (&can_default_website($d) && $in{'defweb'} && $in{'defweb'} != $defweb) {
 	&$first_print($text{'phpmode_defwebon'});
 	$err = &set_default_website($d);
 	if ($err) {

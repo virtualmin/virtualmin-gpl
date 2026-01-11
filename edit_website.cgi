@@ -72,10 +72,20 @@ if (!$d->{'alias'} || $d->{'alias_mode'} != 1 &&
 	$defweb = &is_default_website($d);
 	$defd = &find_default_website($d);
 	$defno = $defd ? &text('phpmode_defno', $defd->{'dom'}) : $text{'no'};
-	if (&can_default_website($d) && !$defweb) {
+	if (&can_default_website($d) && $defweb != 1) {
+		my @opts;
+		if ($defweb == 0) {
+			# Not the default
+			push(@opts, [ 1, $text{'yes'} ]);
+			}
+		elsif ($defweb == 2) {
+			# Is the default, but only by ordering
+			push(@opts, [ 1, $text{'yes'} ],
+				    [ 2, $text{'phpmode_defwebsort'} ]);
+			}
+		push(@opts, [ 0, $defno ]);
 		print &ui_table_row(&hlink($text{'phpmode_defweb'}, "defweb"),
-			&ui_radio("defweb", $defweb,
-				  [ [ 1, $text{'yes'} ], [ 0, $defno ] ]));
+			&ui_radio("defweb", $defweb, \@opts));
 		}
 	else {
 		print &ui_table_row(&hlink($text{'phpmode_defweb'}, "defweb"),
