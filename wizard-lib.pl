@@ -300,7 +300,10 @@ else {
 					$text{'wizard_mysql_pass0'}));
 		}
 	else {
-		if (defined(&mysql::mysql_login_type) &&
+		# Do we have socket authentication plugin?
+		my $plugins = &mysql::list_authentication_plugins();
+		my $has_unix_socket = grep { $_ eq 'unix_socket' } @$plugins;
+		if ($has_unix_socket && defined(&mysql::mysql_login_type) &&
 		    &mysql::mysql_login_type($mysql::mysql_login || 'root')) {
 			# Using socket authentication
 			my $text_mysql_def = $text{'wizard_mysql_pass2'} .
@@ -340,12 +343,18 @@ sub wizard_parse_mysql
 {
 local ($in) = @_;
 &require_mysql();
+local $user = $mysql::mysql_login || 'root';
 if ($in->{'socket'} && !$in->{'mypass'}) {
-	# No password needed
+	# Socket auth with no password. Check if we actually have socket plugin,
+	# and not just empty password
+	my $mode = &mysql::mysql_login_type($user);
+	if ($mode ne 'socket') {
+		&mysql::change_user_password('', $user, 'localhost',
+					     'unix_socket');
+		}
 	return undef;
 	}
 local $pass = $in->{'mypass_def'} ? $mysql::mysql_pass : $in->{'mypass'};
-local $user = $mysql::mysql_login || 'root';
 if ($in->{'needchange'}) {
 	# Change the password used by subsequent code to validate that it works
 	$mysql::mysql_pass = $pass;
