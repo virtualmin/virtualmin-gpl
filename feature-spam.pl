@@ -156,7 +156,9 @@ local ($recipe2, $recipe3);
 local $varon = { 'name' => 'SPAMMODE', 'value' => 1 };
 if ($config{'spam_level'}) {
 	# Recipe to delete high-score spam
-	local $stars = join("", map { "\\*" } (1..$config{'spam_level'}));
+	my $level = $config{'spam_level'};
+	$level = 50 if ($level > 50);
+	local $stars = join("", map { "\\*" } (1..$level));
 	$recipe3 = { 'flags' => [ ],
 		     'conds' => [ [ '', '^X-Spam-Level: '.$stars ] ],
 		     'action' => '/dev/null' };
@@ -830,8 +832,10 @@ if ($spamrec[2]) {
 	# Add deletion recipe info
 	foreach my $c (@{$spamrec[2]->{'conds'}}) {
 		if ($c->[1] =~ /X-Spam-Level:\s+((\\\*)+)/i) {
+			my $lvl = length($1) / 2;
+			$lvl = 50 if ($lvl > 50);
 			# Found it
-			push(@rv, length($1)/2, $r->{'action'});
+			push(@rv, $lvl, $spamrec[2]->{'action'});
 			}
 		}
 	}
@@ -872,6 +876,9 @@ local @todel = sort { $b->{'line'} <=> $a->{'line'} }
 foreach my $r (@todel) {
 	&procmail::delete_recipe($r);
 	}
+
+# Cap level at 50 stars, as it cannot be more than that
+$level = 50 if (defined($level) && $level > 50);
 
 # Make those we now want
 local @want;
