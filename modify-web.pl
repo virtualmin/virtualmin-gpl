@@ -50,6 +50,10 @@ The C<--proxy> parameter can be used to have the website proxy all requests
 to another URL, which must follow C<--proxy>. To disable this, the
 C<--no-proxy> parameter must be given.
 
+Related to this, the flag C<--proxy-host> will cause the original HTTP host
+header to be forwarded to proxy destination. This includes any additional
+per-directory proxies. To turn this off, use the C<--no-proxy-host> flag.
+
 The C<--framefwd> parameter similarly can be used to forward requests to the
 virtual server to another URL, using a hidden frame rather than proxying. To
 turn it off, using the C<--no-framefwd> option. To specify a title for the
@@ -205,6 +209,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--no-proxy") {
 		$proxy = "";
+		}
+	elsif ($a eq "--proxy-host") {
+		$proxyhost = 1;
+		}
+	elsif ($a eq "--no-proxy-host") {
+		$proxyhost = 0;
 		}
 	elsif ($a eq "--framefwd") {
 		$framefwd = shift(@ARGV);
@@ -420,6 +430,7 @@ $mode || defined($proxy) || defined($framefwd) || $tlsa || $rubymode ||
   $fpmsock || $fpmtype || $defmode || defined($cgimode) || $subprefix ||
   @add_dirs || @remove_dirs || $protocols || $fix_mod_php ||
   $ssl_cert || $ssl_key || $ssl_ca || defined($phpmail) || defined($wwwredir) ||
+  defined($proxyhost) ||
 	&usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
@@ -1151,11 +1162,24 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Update proxy host mode
+	if (defined($proxyhost)) {
+		if ($proxyhost) {
+			&$first_print("Enabling HTTP host header proxying ..");
+			}
+		else {
+			&$first_print("Disabling HTTP host header proxying ..");
+			}
+		my $err = &save_domain_proxy_host($d, $proxyhost);
+		&$second_print($err ? ".. failed : $err" : ".. done");
+		}
+
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($children_no_check) || defined($renew) || $breakcert ||
 	    $linkcert || $fixhtmldir || defined($fcgiwrap) ||
-	    defined($phplog) || defined($fcgiwrap) || $ssl_changed) {
+	    defined($phplog) || defined($fcgiwrap) || $ssl_changed ||
+	    defined($proxyhost)) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
@@ -1193,6 +1217,7 @@ print "                     [--php-log filename | --no-php-log | --default-php-l
 print "                     [--php-mail | --no-php-mail]\n";
 print "                     [--cleanup-mod-php]\n";
 print "                     [--proxy http://... | --no-proxy]\n";
+print "                     [--proxy-host | --no-proxy-host]\n";
 print "                     [--framefwd http://... | --no-framefwd]\n";
 print "                     [--frametitle \"title\" ]\n";
 if ($supports_ruby) {

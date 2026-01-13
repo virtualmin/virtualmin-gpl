@@ -3813,6 +3813,61 @@ if ($any) {
 	}
 }
 
+# has_proxy_host([&domain])
+# Returns 1 if this system supports passing the original host header on
+# to backend proxies
+sub has_proxy_host
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+return $p eq 'web' ? 1 : 0;
+}
+
+# get_domain_proxy_host(&domain)
+# Returns 1 if the original host header is passed on to proxies, 0 if not, or -1
+# if not supported.
+sub get_domain_proxy_host
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+return -1 if ($p ne 'web');
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+return -1 if (!$virt);
+my $pph = &apache::find_directive("ProxyPreserveHost", $vconf);
+return $pph && lc($pph) eq 'on' ? 1 : 0;
+}
+
+# save_domain_proxy_host(&domain, preserve?)
+# Enables or disables passing the host header on to proxies. Returns undef on
+# success or an error message on failure.
+sub save_domain_proxy_host
+{
+my ($d, $pres) = @_;
+my $p = &domain_has_website($d);            
+$p eq 'web' || return "Only supported under Apache";
+my $found = 0;
+foreach my $port ($d->{'web_port'},
+		  $d->{'ssl'} ? ($d->{'web_sslport'}) : ( )) {
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+	next if (!$virt);
+	$found++;
+	my $pph = &apache::find_directive("ProxyPreserveHost", $vconf);
+	if ($pres) {
+		&apache::save_directive("ProxyPreserveHost", ["On"], $vconf, $conf);
+		}
+	elsif ($pph) {
+		&apache::save_directive("ProxyPreserveHost", ["Off"], $vconf, $conf);
+		}
+	else {
+		next;
+		}
+	&flush_file_lines($pvirt->{'file'});
+	&register_post_action(\&restart_apache);
+	}
+$found || return "No virtual host found!";
+return undef;
+}
+
 # get_domain_supported_http_protocols(&domain)
 # Returns an array ref of possible protocols for a domain's webserver, using the
 # Apache names, or an error message. An empty array ref indicates no support
