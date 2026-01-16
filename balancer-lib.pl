@@ -440,6 +440,9 @@ if ($has == 2) {
 	}
 $balancer->{'urls'} = [ map { "$proto://127.0.0.1:$_$ppath" } @ports ];
 &create_proxy_balancer($d, $balancer);
+if (&has_proxy_host($d) && $path eq '/') {
+	&save_domain_proxy_host($d, 1);
+	}
 }
 
 # delete_proxy(&domain, path)
