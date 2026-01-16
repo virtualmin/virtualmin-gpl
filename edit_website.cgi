@@ -159,6 +159,14 @@ if (!$d->{'alias'}) {
 		}
 	}
 
+# Pass hostname to proxies?
+if (&has_proxy_host($d) && &list_proxy_balancers($d) &&
+    ($proxyhost = &get_domain_proxy_host($d)) >= 0) {
+	print &ui_table_row(
+		&hlink($text{'phpmode_proxyhost'}, "proxyhost"),
+		&ui_yesno_radio("proxyhost", $proxyhost));
+	}
+
 print &ui_table_end();
 
 print &ui_form_end([ [ "save", $text{'save'} ] ]);

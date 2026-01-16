@@ -113,6 +113,20 @@ if (defined($in{'http2'})) {
 		}
 	}
 
+# Save forwarding of host to proxy
+if (defined($in{'proxyhost'}) && &get_domain_proxy_host($d) != $in{'proxyhost'}) {
+	&$first_print($in{'proxyhost'} ? $text{'phpmode_proxyhoston'}
+                                       : $text{'phpmode_proxyhostoff'});
+	$err = &save_domain_proxy_host($d, $in{'proxyhost'});
+	if ($err) {
+		&$second_print(&text('phpmode_ssierr', $err));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	$anything++;
+	}
+
 # Save match-all mode
 $oldmatchall = &get_domain_web_star($d);
 if (defined($in{'matchall'}) && $in{'matchall'} != $oldmatchall) {
