@@ -639,6 +639,18 @@ foreach $d (@doms) {
 			if ($type eq "TXT") {
 				$values = [ join(" ", @$values) ];
 				}
+			# Validate A record
+			if ($type eq "A") {
+				&check_ipaddress("@$values") ||
+					&usage("Invalid IPv4 address ".$v.
+					       " in --add-record");
+				}
+			# Validate AAAA record
+			elsif ($type eq "AAAA") {
+				&check_ip6address("@$values") ||
+					&usage("Invalid IPv6 address ".$v.
+					       " in --add-record");
+				}
 			if ($name !~ /\.$/ && $name ne "\@") {
 				$name .= ".".$d->{'dom'}.".";
 				}
