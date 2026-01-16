@@ -1925,4 +1925,3 @@ foreach my $d (grep { $_->{'spam'} } &list_domains()) {
 $done_feature_script{'spam'} = 1;
 
 1;
-
