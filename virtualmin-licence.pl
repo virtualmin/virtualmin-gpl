@@ -24,16 +24,11 @@ if (!$serial || !$key) {
 	$key = $serial{'LicenseKey'};
 	}
 # New API call using POST
-my $post_details = {
-	'domain' => $virtualmin_host_domain,
-	'dom' => $virtualmin_host_domain,
-	'ip' => $virtualmin_host_domain,
-	'web_sslport' => $virtualmin_licence_port,
-	'web_port' => $virtualmin_licence_port,
-	'ssl' => $virtualmin_licence_ssl };
 my $params = 'id='.&urlize($hostid).'&serial='.&urlize($key);
 &post_http_connection($post_details, $virtualmin_licence_page, $params,
 		      \$out, \$error, undef, undef, undef, undef, 10);
+&http_post($virtualmin_host_domain, $virtualmin_licence_port, $virtualmin_licence_page,
+	   $params, \$out, \$error, undef, $virtualmin_licence_ssl, undef, undef, 10);
 if ($error) {
 	# Try the old API if the new fails (why would it?)
 	$error = undef;
