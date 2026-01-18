@@ -3848,7 +3848,7 @@ $p eq 'web' || return "Only supported under Apache";
 my $found = 0;
 foreach my $port ($d->{'web_port'},
 		  $d->{'ssl'} ? ($d->{'web_sslport'}) : ( )) {
-	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
 	$found++;
 	my $pph = &apache::find_directive("ProxyPreserveHost", $vconf);
@@ -3861,7 +3861,7 @@ foreach my $port ($d->{'web_port'},
 	else {
 		next;
 		}
-	&flush_file_lines($pvirt->{'file'});
+	&flush_file_lines($virt->{'file'});
 	&register_post_action(\&restart_apache);
 	}
 $found || return "No virtual host found!";
