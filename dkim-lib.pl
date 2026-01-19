@@ -396,7 +396,7 @@ my ($dkim, $newkey, $size) = @_;
 
 # Find domains that we can enable DKIM for (those with mail and DNS)
 &$first_print($text{'dkim_domains'});
-my @alldoms = &list_visible_domains();
+my @alldoms = &list_domains();
 my @doms = grep { &has_dkim_domain($_, $dkim) } @alldoms;
 if (@doms && @{$dkim->{'extra'}}) {
 	&$second_print(&text('dkim_founddomains3', scalar(@doms),
@@ -654,7 +654,7 @@ my @dnsdoms = grep { &has_dkim_domain($_, $dkim) &&
 # Remove from domains that didn't get the DNS records added
 my %dnsdoms = map { $_->{'id'}, $_ } @dnsdoms;
 my @exdoms = grep { !$dnsdoms{$_->{'id'}} && $_->{'dns'} &&
-		    !&copy_alias_records($_) } &list_visible_domains();
+		    !&copy_alias_records($_) } &list_domains();
 if (@exdoms) {
 	&remove_dkim_dns_records(\@exdoms, $dkim);
 	}
@@ -958,7 +958,7 @@ if (!$dom_controlled && !$dom_deleting) {
 	}
 
 # Enable DKIM for all domains
-my @doms = grep { &has_dkim_domain($_, $dkim) } &list_visible_domains();
+my @doms = grep { &has_dkim_domain($_, $dkim) } &list_domains();
 if (($action eq 'setup' || $action eq 'modify')) {
 	push(@doms, $d);
 	}
