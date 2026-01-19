@@ -397,6 +397,10 @@ else {
 	&add_parent_dnssec_ds_records($d);
 	&$second_print($text{'setup_done'});
 	}
+
+# Add DKIM domains
+&update_dkim_domains($d, 'setup');
+
 &register_post_action(\&restart_bind, $d);
 return 1;
 }
@@ -546,6 +550,13 @@ else {
 	delete($d->{'dns_submode'});
 	delete($d->{'dns_subof'});
 	}
+
+# Remove domain from DKIM list
+if ($d) {
+	local $d->{'dns'} = 0;
+	&update_dkim_domains($d, 'delete');
+	}
+
 &register_post_action(\&restart_bind, $d);
 return 1;
 }
@@ -1112,6 +1123,14 @@ elsif (!$d->{'mail'} && $oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 		&$second_print($text{'setup_done'});
 		$rv++;
 		}
+	}
+
+# Update domain in DKIM list, if DNS was enabled or disabled
+if ($d->{'dns'} && !$oldd->{'dns'}) {
+	&update_dkim_domains($d, 'setup');
+	}
+elsif (!$d->{'dns'} && $oldd->{'dns'}) {
+	&update_dkim_domains($d, 'delete');
 	}
 
 if ($d->{'mx_servers'} ne $oldd->{'mx_servers'} && $d->{'mail'} &&

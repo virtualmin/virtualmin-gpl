@@ -10,6 +10,7 @@ $d = &get_domain($in{'dom'});
 &can_edit_dns($d) || &error($text{'spf_ecannot'});
 &set_all_null_print();
 $oldd = { %$d };
+my $needs_refresh = 0;
 
 &obtain_lock_dns($d);
 
@@ -130,9 +131,11 @@ if (!$in{'readonly'}) {
 		my $newdkim = &has_dkim_domain($d, $dkim);
 		if (!$olddkim && $newdkim) {
 			&update_dkim_domains($d, 'setup');
+			$needs_refresh++;
 			}
 		elsif ($olddkim && !$newdkim) {
 			&update_dkim_domains($d, 'delete');
+			$needs_refresh++;
 			}
 		}
 	}
@@ -191,5 +194,5 @@ $err && &error(&text('spf_ecloud', $err));
 
 # All done
 &webmin_log("spf", "domain", $d->{'dom'});
-&domain_redirect($d);
+&domain_redirect($d, $needs_refresh);
 

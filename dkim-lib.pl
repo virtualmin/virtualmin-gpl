@@ -396,7 +396,7 @@ my ($dkim, $newkey, $size) = @_;
 
 # Find domains that we can enable DKIM for (those with mail and DNS)
 &$first_print($text{'dkim_domains'});
-my @alldoms = &list_domains();
+my @alldoms = &list_visible_domains();
 my @doms = grep { &has_dkim_domain($_, $dkim) } @alldoms;
 if (@doms && @{$dkim->{'extra'}}) {
 	&$second_print(&text('dkim_founddomains3', scalar(@doms),
@@ -411,7 +411,6 @@ elsif (@{$dkim->{'extra'}}) {
 	}
 else {
 	&$second_print($text{'dkim_nodomains'});
-	return 0;
 	}
 
 # Generate private key
@@ -655,7 +654,7 @@ my @dnsdoms = grep { &has_dkim_domain($_, $dkim) &&
 # Remove from domains that didn't get the DNS records added
 my %dnsdoms = map { $_->{'id'}, $_ } @dnsdoms;
 my @exdoms = grep { !$dnsdoms{$_->{'id'}} && $_->{'dns'} &&
-		    !&copy_alias_records($_) } &list_domains();
+		    !&copy_alias_records($_) } &list_visible_domains();
 if (@exdoms) {
 	&remove_dkim_dns_records(\@exdoms, $dkim);
 	}
@@ -936,8 +935,30 @@ return if (&check_dkim());
 my $dkim = &get_dkim_config();
 return if (!$dkim || !$dkim->{'enabled'});
 
-# Enable DKIM for all domains with mail
-my @doms = grep { &has_dkim_domain($_, $dkim) } &list_domains();
+# Options
+my $opt_dns_and_mail = $dkim->{'alldns'} == 0;
+my $opt_dns = $dkim->{'alldns'} == 1;
+my $opt_dom_chooses = $dkim->{'alldns'} == 2;
+my $opt_always = $dkim->{'alldns'} == 3;
+
+# Skip if domain is being created and domain has to choose
+my $dom_creating = $d->{'creating'};
+return if ($dom_creating && $opt_dom_chooses);
+
+# If not controlled by domain, skip based on global options
+my $dom_controlled = defined($d->{'dkim_enabled'});
+my $dom_deleting = $d->{'deleting'};
+my $nosetup = $nodns || $dom_deleting;
+if (!$dom_controlled && !$dom_deleting) {
+	return if ($action eq 'setup' && $opt_dns_and_mail &&
+		   (!$d->{'dns'} || !$d->{'mail'}));
+	return if ($action eq 'delete' && $opt_dns && $d->{'dns'});
+	return if ($action eq 'setup'  && $opt_dns && !$d->{'dns'});
+	return if ($action eq 'delete' && $opt_always && !$d->{'dns'});
+	}
+
+# Enable DKIM for all domains
+my @doms = grep { &has_dkim_domain($_, $dkim) } &list_visible_domains();
 if (($action eq 'setup' || $action eq 'modify')) {
 	push(@doms, $d);
 	}
@@ -950,8 +971,8 @@ my %done;
 &unlock_file(&get_dkim_config_file());
 
 # Add or remove DNS records
-if ($d->{'dns'} && !&copy_alias_records($d) && !$nodns) {
-	if ($action eq 'setup' || $action eq 'modify') {
+if (!&copy_alias_records($d)) {
+	if (!$nosetup && ($action eq 'setup' || $action eq 'modify')) {
 		&add_dkim_dns_records([ $d ], $dkim);
 		}
 	elsif ($action eq 'delete') {
@@ -1495,6 +1516,21 @@ if ($dkim && $dkim->{'enabled'} && &has_dkim_domain($d, $dkim) &&
 	&remove_dkim_dns_records([ $d ], $dkim, 1);
 	&add_dkim_dns_records([ $d ], $dkim);
 	}
+}
+
+# dkim_domains_file_has_domain(&domain)
+# Returns 1 if the domain appears in the OpenDKIM domains file, 0 if not
+sub dkim_domains_file_has_domain
+{
+my ($d) = @_;
+return 0 if !$d->{'dom'};
+my $dkim_config = &get_dkim_config_file();
+my $conf = $dkim_config ? &get_open_dkim_config($dkim_config) : undef;
+my $file = $conf && $conf->{'Domain'} ? $conf->{'Domain'} : undef;
+return 0 if (!$file || $file !~ /^\// || !-r $file);
+my $contents = &read_file_contents($file);
+my $dom = $d->{'dom'};
+return $contents =~ /^(?!\s*#)\s*\Q$dom\E\.?\s*$/im ? 1 : 0;
 }
 
 1;
