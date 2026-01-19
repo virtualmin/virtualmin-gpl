@@ -10,6 +10,7 @@
 * Add improvements to handling of remote/cloud DNS hosting
 * Fix validation of A and AAAA DNS records when using `modify-dns` CLI
 * Fix reliability of remote backups during long-running tasks using Webmin RPC
+* Fix several DKIM-related issues
 * Fix handling of EC SSL certificates
 * Update the repo setup script and workflow to match the newer packaging/CI layout
 
