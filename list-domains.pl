@@ -698,6 +698,14 @@ if ($multiline) {
 				}
 			}
 
+		# Show proxy hostname setting
+		if (&has_proxy_host($d)) {
+			my $ph = &get_domain_proxy_host($d);
+			print "    Proxy hostname: ",
+				($ph == 0 ? "No" :
+				 $ph == 1 ? "Yes" : "Unsupported"),"\n";
+			}
+
 		# Show SSL cert
 		if ($d->{'ssl_key'}) {
 			print "    SSL key file: $d->{'ssl_key'}\n";
