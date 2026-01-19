@@ -2406,6 +2406,32 @@ $proxy_tests = [
 	  'antigrep' => '/google/',
 	},
 
+	# Enable forwarding of proxy hostname
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'proxy-host' ] ],
+	},
+
+	# Make sure it was enabled
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'Proxy hostname: Yes',
+	},
+
+	# Disable forwarding of proxy hostname
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'no-proxy-host' ] ],
+	},
+
+	# Make sure it was disabled
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'Proxy hostname: No',
+	},
+
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
