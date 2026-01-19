@@ -15,6 +15,10 @@ By default the user's inbox is listed, however you can select any folder
 owned by the user with the C<--folder> flag followed by either a path or
 a unique folder ID.
 
+By default all messages in the folder will be listed, but you can limit
+output to the oldest N messages with the flag C<--first N>. Or the most
+recent N messages with C<--last N>.
+
 =cut
 
 package virtual_server;
@@ -50,11 +54,22 @@ while(@ARGV > 0) {
 	elsif ($a eq "--folder") {
 		$folderid = shift(@ARGV);
 		}
+	elsif ($a eq "--first") {
+		$first = shift(@ARGV);
+		$first =~ /^[1-9][0-9]*$/ || &usage("--first must be followed by a number ".
+						    "greater than zero");
+		}
+	elsif ($a eq "--last") {
+		$last = shift(@ARGV);
+		$last =~ /^[1-9][0-9]*$/ || &usage("--last must be followed by a number ".
+						   "greater than zero");
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
 	}
 $convert_format && &usage("XML or JSON conversion is not supported");
+$first && $last && &usage("Only one of --first and --last can be given");
 
 # Parse args and get domain
 $dname || &usage("No domain specified");
@@ -81,15 +96,23 @@ else {
 if ($filesonly) {
 	# Just filenames
 	@mails = &mailboxes::mailbox_list_mails(undef, undef, $folder, 1);
-	foreach $f (&unique(map { $_->{'file'} || $folder->{'file'} } @mails)) {
-		print $f,"\n";
+	%done = ( );
+	for(my $i=0; $i<@mails; $i++) {
+                my $m = $mails[$i];
+                next if ($first && $i > $first);
+                next if ($last && $i < @mails - $last);
+		my $f = $m->{'file'} || $folder->{'file'};
+		print $f,"\n" if (!$done{$f}++);
 		}
 	}
 else {
 	# Whole contents
 	@mails = &mailboxes::mailbox_list_mails(undef, undef, $folder);
 	$temp = &transname();
-	foreach $m (@mails) {
+	for(my $i=0; $i<@mails; $i++) {
+		my $m = $mails[$i];
+		next if ($first && $i > $first);
+		next if ($last && $i < @mails - $last);
 		&mailboxes::send_mail($m, $temp);
 		print &read_file_contents($temp);
 		unlink($temp);
@@ -105,6 +128,7 @@ print "virtualmin list-mailbox --domain domain.name\n";
 print "                        --user name\n";
 print "                       [--folder name|path]\n";
 print "                       [--filesonly]\n";
+print "                       [--first N | --last N]\n";
 exit(1);
 }
 
