@@ -1951,12 +1951,11 @@ else {
 
 # post_http_connection(&domain, page, &cgi-params, &out, &err,
 #		       &moreheaders, &returnheaders, &returnheaders-array,
-#		       form-data-mode, [timeout])
 # Makes an HTTP post to some URL, sending the given CGI parameters as data.
 sub post_http_connection
 {
 local ($d, $page, $params, $out, $err, $headers,
-       $returnheaders, $returnheaders_array, $formdata, $timeout) = @_;
+       $returnheaders, $returnheaders_array) = @_;
 local $ip = $d->{'ip'};
 local $host = &get_domain_http_hostname($d);
 my $usessl = &domain_has_ssl($d);
@@ -1966,7 +1965,7 @@ local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
 $gconfig{'http_proxy'} = '';			# to the IP explicitly
 $main::download_timed_out = undef;
 local $SIG{ALRM} = \&download_timeout;
-alarm($timeout || 300);
+alarm(300);
 local $h = &make_http_connection($ip, $port, $usessl, "POST", $page,
 			 undef, undef, { 'host' => $host, 'nocheckhost' => 1 });
 $gconfig{'http_proxy'} = $oldproxy;
@@ -1988,31 +1987,10 @@ if (!$gotcookie) {
 		&write_http_connection($h, "$hd->[0]: $hd->[1]\r\n");
 		}
 	}
-if ($formdata) {
-	# Use multipart format, suiteable for file uploads
-	my $bound = time().$$;
-	&write_http_connection($h, "Content-type: multipart/form-data; boundary=----${bound}\r\n");
-	&write_http_connection($h, "\r\n");
-	foreach my $i (split(/\&/, $params)) {
-		my ($k, $v) = split(/=/, $i, 2);
-		$k =~ tr/\+/ /;
-		$v =~ tr/\+/ /;
-		$k =~ s/%(..)/pack("c",hex($1))/ge;
-		$v =~ s/%(..)/pack("c",hex($1))/ge;
-		&write_http_connection($h, "------${bound}\r\n");
-		&write_http_connection($h, "Content-Disposition: form-data; name=\"$k\"\r\n");
-		&write_http_connection($h, "\r\n");
-		&write_http_connection($h, "$v\r\n");
-		}
-	&write_http_connection($h, "------${bound}--\r\n");
-	}
-else {
-	# Use regular POST format
-	&write_http_connection($h, "Content-type: application/x-www-form-urlencoded\r\n");
-	&write_http_connection($h, "Content-length: ".length($params)."\r\n");
-	&write_http_connection($h, "\r\n");
-	&write_http_connection($h, "$params\r\n");
-	}
+&write_http_connection($h, "Content-type: application/x-www-form-urlencoded\r\n");
+&write_http_connection($h, "Content-length: ".length($params)."\r\n");
+&write_http_connection($h, "\r\n");
+&write_http_connection($h, "$params\r\n");
 
 alarm(0);
 $h = $main::download_timed_out if ($main::download_timed_out);
