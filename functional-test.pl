@@ -70,6 +70,7 @@ $test_email_dir = "/usr/local/webadmin/virtualmin/testmail";
 $spam_email_file = "$test_email_dir/spam.txt";
 $virus_email_file = "$test_email_dir/virus.txt";
 $ok_email_file = "$test_email_dir/ok.txt";
+$dkim_email_file = "$test_email_dir/dkim.txt";
 $supports_fcgid = &indexof("fcgid", &supported_php_modes()) >= 0;
 $supports_fpm = &indexof("fpm", &supported_php_modes()) >= 0;
 $supports_cgi = &indexof("cgi", &supported_php_modes()) >= 0;
@@ -5878,6 +5879,89 @@ $mail_tests = [
 		{ 'command' => 'dig TXT default._domainkey.'.$test_domain.' ; dig SPF default._domainkey.'.$test_domain,
 		  'grep' => 'v=DKIM1',
 		},
+
+		# Add empty lines to procmail.log, to prevent later false matches
+		{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
+		},
+
+		# Send an email we can test the DKIM signature on
+		{ 'command' => 'test-smtp.pl',
+		  'args' => [ [ 'from', $test_user.'@'.$test_domain ],
+			      [ 'to', $test_user.'@'.$test_domain ],
+			      [ 'data', $dkim_email_file ] ],
+		},
+
+		# Check procmail log for delivery, for at most 60 seconds
+		{ 'command' => 'while [ "`tail -5 /var/log/procmail.log | grep '.
+			       'To:'.$test_user.'@'.$test_domain.'`" = "" ]; do '.
+			       'sleep 5; done',
+		  'timeout' => 60,
+		},
+
+		# Check the resulting email for a DKIM signature
+		{ 'command' => 'list-mailbox.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'user', $test_user ],
+			      [ 'folder', 0 ],
+			      [ 'last', 1 ] ],
+		  'grep' => 'DKIM-Signature:.*d='.$test_domain,
+		},
+	
+		# Turn off DKIM, which should remove the record
+		{ 'command' => 'modify-dns.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'disable-dkim' ] ],
+		},
+
+		# Check for the DKIM DNS record no longer being there
+		{ 'command' => 'get-dns.pl',
+		  'args' => [ [ 'multiline' ],
+			      [ 'domain', $test_domain ],
+			      [ 'regexp' => '_domainkey' ] ],
+		  'antigrep' => [ 'v=DKIM1' ],
+		},
+
+		# Add empty lines to procmail.log, to prevent later false matches
+		{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
+		},
+
+		# Send an email we can test the lack of DKIM signature on
+		{ 'command' => 'test-smtp.pl',
+		  'args' => [ [ 'from', $test_user.'@'.$test_domain ],
+			      [ 'to', $test_user.'@'.$test_domain ],
+			      [ 'data', $dkim_email_file ] ],
+		},
+
+		# Check procmail log for delivery, for at most 60 seconds
+		{ 'command' => 'while [ "`tail -5 /var/log/procmail.log | grep '.
+			       'To:'.$test_user.'@'.$test_domain.'`" = "" ]; do '.
+			       'sleep 5; done',
+		  'timeout' => 60,
+		},
+
+		# Check the resulting email for a lack of DKIM signature
+		{ 'command' => 'list-mailbox.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'user', $test_user ],
+			      [ 'folder', 0 ],
+			      [ 'last', 1 ] ],
+		  'antigrep' => 'DKIM-Signature:',
+		},
+	
+		# Turn on DKIM, which should add the record
+		{ 'command' => 'modify-dns.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'enable-dkim' ] ],
+		},
+	
+		# Check for the DKIM DNS record back again
+		{ 'command' => 'get-dns.pl',
+		  'args' => [ [ 'multiline' ],
+			      [ 'domain', $test_domain ],
+			      [ 'regexp' => '_domainkey' ] ],
+		  'grep' => [ 'v=DKIM1' ],
+		},
+
 		) : ( ),
 
 	# Enable webmail DNS record and redirect
