@@ -1,7 +1,5 @@
 # Functions for setting up DKIM signing
 
-use feature 'state';
-
 $debian_dkim_config = "/etc/dkim-filter.conf";
 $debian_dkim_default = "/etc/default/dkim-filter";
 
@@ -932,21 +930,6 @@ return $can;
 sub update_dkim_domains
 {
 my ($d, $action, $nodns) = @_;
-
-# De-dupe repeated DKIM updates which can be triggered by different features
-# enabled or disabled at the same (e.g. DNS+Mail) time within the same run
-state (%dkim_enabled, %dkim_disabled);
-my $dom = $d->{'dom'};
-if ($action eq 'delete') {
-	return if ($dkim_disabled{$dom});
-	$dkim_disabled{$dom} = 1;
-	delete($dkim_enabled{$dom});
-	}
-else {	# setup / modify
-	return if ($dkim_enabled{$dom});
-	$dkim_enabled{$dom} = 1;
-	delete($dkim_disabled{$dom});
-	}
 
 # DKIM support not enabled
 return if (&check_dkim());
