@@ -1,6 +1,7 @@
 #### Version 8.0.0
 * Add support for systemd resource limits for Virtualmin Pro users
 * Add support for SFTP backups and restores, including the ability to purge SFTP backups
+* Add support for paginated display of large user lists
 * Add backup signing improvements, including the ability to skip signing when necessary
 * Add option to forward the original HTTP hostname when proxying requests
 * Add phpMyAdmin integration (if installed) when editing databases for virtual servers
