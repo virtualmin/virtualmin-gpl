@@ -130,11 +130,11 @@ if (!$in{'readonly'}) {
 			}
 		my $newdkim = &has_dkim_domain($d, $dkim);
 		if (!$olddkim && $newdkim) {
-			&update_dkim_domains($d, 'setup');
+			&update_dkim_domain($d, 'setup');
 			$needs_refresh++;
 			}
 		elsif ($olddkim && !$newdkim) {
-			&update_dkim_domains($d, 'delete');
+			&update_dkim_domain($d, 'delete');
 			$needs_refresh++;
 			}
 		}

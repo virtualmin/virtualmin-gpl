@@ -399,7 +399,7 @@ else {
 	}
 
 # Add DKIM domains
-&update_dkim_domains($d, 'setup');
+&update_dkim_domain($d, 'setup');
 
 &register_post_action(\&restart_bind, $d);
 return 1;
@@ -554,7 +554,7 @@ else {
 # Remove domain from DKIM list
 if ($d) {
 	local $d->{'dns'} = 0;
-	&update_dkim_domains($d, 'delete');
+	&update_dkim_domain($d, 'delete');
 	}
 
 &register_post_action(\&restart_bind, $d);
@@ -1127,10 +1127,10 @@ elsif (!$d->{'mail'} && $oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 
 # Update domain in DKIM list, if DNS was enabled or disabled
 if ($d->{'dns'} && !$oldd->{'dns'}) {
-	&update_dkim_domains($d, 'setup');
+	&update_dkim_domain($d, 'setup');
 	}
 elsif (!$d->{'dns'} && $oldd->{'dns'}) {
-	&update_dkim_domains($d, 'delete');
+	&update_dkim_domain($d, 'delete');
 	}
 
 if ($d->{'mx_servers'} ne $oldd->{'mx_servers'} && $d->{'mail'} &&

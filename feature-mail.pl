@@ -286,7 +286,7 @@ if (!$d->{'alias'} && !$d->{'aliasmail'}) {
 	}
 
 # Add domain to DKIM list
-&update_dkim_domains($d, 'setup', $leave_dns);
+&update_dkim_domain($d, 'setup', $leave_dns);
 
 # Setup sender-dependent outgoing IP
 if ($supports_dependent && $d->{'virt'} && $config{'dependent_mail'}) {
@@ -484,7 +484,7 @@ if ($supports_dependent) {
 # Remove domain from DKIM list
 if ($d) {
 	local $d->{'mail'} = 0;
-	&update_dkim_domains($d, 'delete', $leave_dns);
+	&update_dkim_domain($d, 'delete', $leave_dns);
 	}
 
 # Remove secondary virtusers from slaves
@@ -956,10 +956,10 @@ if (!$d->{'alias'} && $config{'dkim_enabled'} &&
 
 # Update domain in DKIM list, if DNS was enabled or disabled
 if ($d->{'dns'} && !$oldd->{'dns'}) {
-	&update_dkim_domains($d, 'setup');
+	&update_dkim_domain($d, 'setup');
 	}
 elsif (!$d->{'dns'} && $oldd->{'dns'}) {
-	&update_dkim_domains($d, 'delete');
+	&update_dkim_domain($d, 'delete');
 	}
 
 # Add autoconfig DNS entry if re-enabling DNS

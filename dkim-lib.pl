@@ -886,7 +886,8 @@ return 1;
 }
 
 # can_dkim_domain(&domain, &dkim)
-# Returns 1 if a domain should have DKIM enabled by default
+# Returns 1 if a domain should have DKIM enabled by default, 0 if it should
+# not be, or 2 if it is enabled for all domains
 sub can_dkim_domain
 {
 my ($d, $dkim) = @_;
@@ -912,12 +913,14 @@ else {
 }
 
 # has_dkim_domain(&domain, &dkim)
-# Returns 1 if a domain must have DKIM enabled
+# Returns 1 if a domain should have DKIM enabled, based on current features
+# and any domain-level override.
 sub has_dkim_domain
 {
 my ($d, $dkim) = @_;
 my $can = &can_dkim_domain($d, $dkim);
 if ($can != 2) {
+	# DKIM is not enabled for all domains, so it depends on DNS
 	return 0 if (!$d->{'dns'});
 	}
 return 0 if (defined($d->{'dkim_enabled'}) && $d->{'dkim_enabled'} eq '0');
@@ -925,9 +928,10 @@ return 1 if (defined($d->{'dkim_enabled'}) && $d->{'dkim_enabled'} eq '1');
 return $can;
 }
 
-# update_dkim_domains(&domain, action, [no-dns])
-# Updates the list of domains to sign mail for, if needed
-sub update_dkim_domains
+# update_dkim_domain(&domain, action, [no-dns])
+# Updates the list of domains to sign mail for and add or remove DNS records,
+# based on a change being made to one domain
+sub update_dkim_domain
 {
 my ($d, $action, $nodns) = @_;
 
@@ -961,7 +965,8 @@ if (!$dom_controlled && !$dom_deleting) {
 	return if ($action eq 'delete' && $opt_always && !$d->{'dns'});
 	}
 
-# Enable DKIM for all domains
+# Update the list of domains that DKIM is enabled for, based on those
+# that are currently active and any change for this one domain
 my @doms = grep { &has_dkim_domain($_, $dkim) } &list_domains();
 if (($action eq 'setup' || $action eq 'modify')) {
 	push(@doms, $d);
@@ -974,7 +979,7 @@ my %done;
 &set_dkim_domains(\@doms, $dkim);
 &unlock_file(&get_dkim_config_file());
 
-# Add or remove DNS records
+# Add or remove DNS records for the one domain being changed
 if (!&copy_alias_records($d)) {
 	if (!$nosetup && ($action eq 'setup' || $action eq 'modify')) {
 		&add_dkim_dns_records([ $d ], $dkim);
