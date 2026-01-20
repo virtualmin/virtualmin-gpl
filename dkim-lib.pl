@@ -980,12 +980,15 @@ my %done;
 &unlock_file(&get_dkim_config_file());
 
 # Add or remove DNS records for the one domain being changed
-if (!&copy_alias_records($d)) {
-	if (!$nosetup && ($action eq 'setup' || $action eq 'modify')) {
-		&add_dkim_dns_records([ $d ], $dkim);
-		}
-	elsif ($action eq 'delete') {
-		&remove_dkim_dns_records([ $d ], $dkim);
+if (!&copy_alias_records($d) && $d->{'dns'}) {
+	my ($err, $file) = &get_domain_dns_records_and_file($d);
+	if ($file) {
+		if (!$nosetup && ($action eq 'setup' || $action eq 'modify')) {
+			&add_dkim_dns_records([ $d ], $dkim);
+			}
+		elsif ($action eq 'delete') {
+			&remove_dkim_dns_records([ $d ], $dkim);
+			}
 		}
 	}
 }
@@ -1104,14 +1107,22 @@ sub add_dkim_dns_records
 my ($doms, $dkim) = @_;
 my $anychanged = 0;
 foreach my $d (@$doms) {
+	# First check if records are already OK
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	next if (!$file);	# Should never happen
+	my ($dkrec, $selrecs) = &has_domain_dkim_record($d, $dkim, $recs);
+	if (@$selrecs) {
+		my $v = join("", @{$selrecs->[0]->{'values'}});
+		my $pubkey = &get_dkim_dns_pubkey($dkim, $d);
+		if ($v =~ /p=\Q$pubkey\E/) {
+			# Record already exists, and looks OK. So we don't need
+			# to update or add records for ths domain
+			next;
+			}
+		}
+
 	&$first_print(&text('dkim_dns', "<tt>$d->{'dom'}</tt>"));
 	&pre_records_change($d);
-	my ($recs, $file) = &get_domain_dns_records_and_file($d);
-	if (!$file) {
-		&after_records_change($d);
-		&$second_print($text{'dkim_ednszone'});
-		next;
-		}
 	&obtain_lock_dns($d);
 	my $changed = &add_domain_dkim_record($d, $dkim, $recs, $file);
 	if ($changed) {
@@ -1138,23 +1149,22 @@ foreach my $d (@$doms) {
 sub add_domain_dkim_record
 {
 my ($d, $dkim, $recs, $file) = @_;
+my ($dkrec, $selrecs) = &has_domain_dkim_record($d, $dkim, $recs);
+my $selrec = @$seclrecs ? $selrecs->[0] : undef;
 my $withdot = $d->{'dom'}.'.';
-my $dkname = '_domainkey.'.$withdot;
-my $changed = 0;
-my $selname = $dkim->{'selector'}.'.'.$dkname;
-my ($selrec) = grep { $_->{'name'} eq $selname && 
-		      $_->{'type'} eq 'TXT' } @$recs;
 my $pubkey = &get_dkim_dns_pubkey($dkim, $d);
+
+my $changed = 0;
 if (!$selrec) {
 	# Add new record
-	my $selrec = { 'name' => $selname,
+	my $selrec = { 'name' => $dkim->{'selector'}.'.'.'_domainkey.'.$withdot,
 		       'type' => 'TXT',
 		       'values' => [ 'v=DKIM1; k=rsa; t=s; p='.
 				     $pubkey ] };
 	&create_dns_record($recs, $file, $selrec);
 	$changed++;
 	}
-elsif ($selrec && join("", @{$selrec->{'values'}}) !~ /p=\Q$pubkey\E/) {
+elsif (join("", @{$selrec->{'values'}}) !~ /p=\Q$pubkey\E/) {
 	# Fix existing record
 	my $val = join("", @{$selrec->{'values'}});
 	if ($val !~ s/p=([^;]+)/p=$pubkey/) {
@@ -1203,22 +1213,9 @@ foreach my $d (@$doms) {
 sub remove_domain_dkim_record
 {
 my ($d, $dkim, $recs, $file, $all) = @_;
-my $withdot = $d->{'dom'}.'.';
-my $dkname = '_domainkey.'.$withdot;
-my ($dkrec) = grep { $_->{'name'} eq $dkname &&
-		     $_->{'type'} eq 'TXT' } @$recs;
-my @selrecs;
-if ($all) {
-	@selrecs = grep { $_->{'name'} =~ /^([^\.]+)\.\Q$dkname\E$/ &&
-			  $_->{'type'} eq 'TXT' } @$recs;
-	}
-else {
-	my $selname = $dkim->{'selector'}.'.'.$dkname;
-	@selrecs = grep { $_->{'name'} eq $selname &&
-			  $_->{'type'} eq 'TXT' } @$recs;
-	}
+my ($dkrec, $selrecs) = &has_domain_dkim_record($d, $dkim, $recs, $all);
 my $changed = 0;
-foreach my $selrec (@selrecs) {
+foreach my $selrec (@$selrecs) {
 	&delete_dns_record($recs, $selrec->{'file'}, $selrec);
 	$changed++;
 	}
@@ -1227,6 +1224,28 @@ if ($dkrec) {
 	$changed++;
 	}
 return $changed;
+}
+
+# has_domain_dkim_record(&domain, &dkim, &recs, [all-selectors])
+# Returns the DKIM primary record and selector records, where they exist
+sub has_domain_dkim_record
+{
+my ($d, $dkim, $recs, $all) = @_;
+my $withdot = $d->{'dom'}.'.';
+my $dkname = '_domainkey.'.$withdot;
+my ($dkrec) = grep { $_->{'name'} eq $dkname &&
+                     $_->{'type'} eq 'TXT' } @$recs;
+my @selrecs;
+if ($all) {
+        @selrecs = grep { $_->{'name'} =~ /^([^\.]+)\.\Q$dkname\E$/ &&
+                          $_->{'type'} eq 'TXT' } @$recs;
+        }
+else {
+        my $selname = $dkim->{'selector'}.'.'.$dkname;
+        @selrecs = grep { $_->{'name'} eq $selname &&
+                          $_->{'type'} eq 'TXT' } @$recs;
+        }
+return ($dkrec, \@selrecs);
 }
 
 # rebuild_sendmail_cf()

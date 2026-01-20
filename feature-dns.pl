@@ -552,10 +552,10 @@ else {
 	}
 
 # Remove domain from DKIM list
-if ($d) {
-	local $d->{'dns'} = 0;
+eval {
+	local $d->{'dns'} = 1;
 	&update_dkim_domain($d, 'delete');
-	}
+	};
 
 &register_post_action(\&restart_bind, $d);
 return 1;
