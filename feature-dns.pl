@@ -553,7 +553,7 @@ else {
 
 # Remove domain from DKIM list
 eval {
-	local $d->{'dns'} = 1;
+	local $d->{'dns'} = 0;
 	&update_dkim_domain($d, 'delete');
 	};
 
