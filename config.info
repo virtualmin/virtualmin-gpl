@@ -25,6 +25,7 @@ dns_resolver=Detect system external IP address using DNS,3,No,50
 
 line1.4=User interface settings,11
 display_max=Maximum number of domains to display,3,Unlimited
+udisplay_max=Maximum number of users to display,10,-Unlimited,auto-Paginate automatically,Paginate with fixed page size
 name_max=Maximum domain name length to display,0,5
 name_mode=Shorten long domain names at,1,1-End,0-Middle
 index_cols=Columns to show,2,dom-Domain name,type-Domain type,user-Username,owner-Description,emailto-Email address<br>,reseller-Reseller,admins-Extra admins,users-User count,aliases-Alias count<br>,quota-Disk quota,uquota-Quota used,created-Creation date,plan-Account plan,phpv-PHP version,ip-IP address,ssl_expiry-SSL cert expiry,lastlogin-Last login time

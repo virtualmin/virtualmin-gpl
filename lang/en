@@ -786,6 +786,7 @@ users_add_db=Add database user.
 users_add_web=Add webserver user.
 users_addweb=Add a website FTP access user.
 users_none=No users have been created in this domain yet.
+users_none_search=No users match the search criteria, <a href='javascript:history.back()'>click here</a> to go back and try again.
 users_return=users list
 users_size=Mail size
 users_ll=Last login

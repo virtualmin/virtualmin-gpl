@@ -5699,14 +5699,37 @@ if ($config{'show_plugins'}) {
 		}
 	}
 
+# Sort before pagination
+@$users = sort {
+	$b->{'domainowner'} <=> $a->{'domainowner'} ||
+	$a->{'user'} cmp $b->{'user'}
+    } @$users;
+
+# Pagination setup
+my $upagination;
+my $need_paginations = $config{'udisplay_max'};
+if ($need_paginations) {
+	my $upopts = \%in;
+	$upopts->{'paginations'}->{'form'} = {
+		'colspan' => scalar(@headers),
+		'dom'     => $d->{'id'} };
+	if ($need_paginations !~ /^auto$/i) {
+		$need_paginations = 25
+			if ($need_paginations !~ /^\d+$/ ||
+			    $need_paginations < 1);
+		$upopts->{'paginations'}->{'form'}->{'paginate'} =
+			$need_paginations;
+		}
+	$upagination = &ui_paginations($users, $upopts);
+	}
+
 # Build table contents
 local $u;
 local $did = $d ? $d->{'id'} : 0;
 local @table;
 local $userdesc;
 my @domsdbs = &domain_databases($d);
-foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
-		   $a->{'user'} cmp $b->{'user'} } @$users) {
+foreach $u (@$users) {
 	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
 	local $pop3_dis =
 		&ui_text_color($pop3.&vui_inline_label('users_disabled_label', undef, 'disabled'), 'danger');
@@ -5861,6 +5884,44 @@ if ($cgi) {
 else {
 	print &ui_columns_table(\@headers, 100, \@table, undef, 0, undef,
 				$empty);
+	}
+
+# Paginator and its search
+if ($upagination) {
+	my $pagination_margin_top = $tconfig{'framed'} ? -23 : -25;
+	my $pagination_margin_bottom = 0;
+	$pagination_margin_top = 6 if (!$cgi);
+	$pagination_margin_bottom = 6 if (!$cgi && $tconfig{'framed'});
+	print <<"ENDCSS";
+<style>
+	.ui_form_elements_wrapper_paginator {
+		margin-top: ${pagination_margin_top}px;
+		margin-bottom: ${pagination_margin_bottom}px;
+		margin-left: 12px;
+	}
+	.ui_form_elements_wrapper_search { 
+		position: relative;
+		margin-left: 3px;
+		margin-right: 3px;
+		margin-top: ${pagination_margin_top}px;
+	}
+	.ui_form_elements_wrapper_search .ui_textbox {
+		text-align: left;
+		border-style: solid;
+		border-color: inherit;
+		padding-right: 12px;
+	}
+	.ui_form_elements_wrapper_search .ui_reset {
+		margin-top: -1px;
+		right: 2px !important;
+	} 
+</style>
+ENDCSS
+	print $upagination->{'search'}->{'form-data'};
+	print $upagination->{'paginator'}->{'form-data'};
+	print $upagination->{'paginator'}->{'form-scripts'};
+	print $upagination->{'paginator'}->{'form'};
+	print $upagination->{'search'}->{'form'};
 	}
 }
 

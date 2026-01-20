@@ -71,10 +71,13 @@ elsif ($mleft == 0) {
 	}
 
 # Generate the table
+my $no_users = $text{'users_none'};
+$no_users = &ui_alert_box($text{'users_none_search'}, 'warn', undef, undef, "")
+	if ($in{'search0'} && $in{'paginate0'});
 &users_table(\@users, $d, "change_users.cgi", 
 	     [ [ "delete", $text{'users_delete'} ],
 	       $virtualmin_pro ? ( [ "mass", $text{'users_mass'} ] ) : ( ) ],
-	     \@links, $text{'users_none'});
+	     \@links, $no_users);
 
 print &ui_hr();
 print &ui_buttons_start();
