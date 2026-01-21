@@ -833,13 +833,7 @@ foreach $d (@doms) {
 		else {
 			delete($d->{'dkim_enabled'});
 			}
-		my $newdkim = &has_dkim_domain($d, $dkim);
-		if (!$olddkim && $newdkim) {
-			&update_dkim_domain($d, 'setup');
-			}
-		elsif ($olddkim && !$newdkim) {
-			&update_dkim_domain($d, 'delete');
-			}
+		&sync_dkim_domain($d);
 		}
 
 	# Move into a DNS sub-domain

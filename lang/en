@@ -7409,7 +7409,6 @@ dkim_enewkey=.. private key failed : $1
 dkim_pubkey=Extracting public key from private key in $1 ..
 dkim_epubkey=.. public key failed!
 dkim_dns=Adding DKIM records to DNS domain $1 ..
-dkim_ednszone=.. domain not found!
 dkim_ednsexclude=.. domain has been excluded from DKIM
 dkim_dnsadded=.. added successfully
 dkim_ednsadded=.. DNS update failed : $1

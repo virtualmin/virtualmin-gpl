@@ -128,15 +128,9 @@ if (!$in{'readonly'}) {
 		else {
 			delete($d->{'dkim_enabled'});
 			}
+		&sync_dkim_domain($d);
 		my $newdkim = &has_dkim_domain($d, $dkim);
-		if (!$olddkim && $newdkim) {
-			&update_dkim_domain($d, 'setup');
-			$needs_refresh++;
-			}
-		elsif ($olddkim && !$newdkim) {
-			&update_dkim_domain($d, 'delete');
-			$needs_refresh++;
-			}
+		$needs_refresh++ if ($olddkim != $newdkim);
 		}
 	}
 

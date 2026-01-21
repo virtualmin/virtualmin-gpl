@@ -398,8 +398,9 @@ else {
 	&$second_print($text{'setup_done'});
 	}
 
-# Add DKIM domains
-&update_dkim_domain($d, 'setup');
+# Request a call to setup DKIM after domain creation is complete,
+# once all features (like DNS) have been enabled
+&register_post_action(\&sync_dkim_domain, $d);
 
 &register_post_action(\&restart_bind, $d);
 return 1;
@@ -551,11 +552,9 @@ else {
 	delete($d->{'dns_subof'});
 	}
 
-# Remove domain from DKIM list
-eval {
-	local $d->{'dns'} = 0;
-	&update_dkim_domain($d, 'delete');
-	};
+# Request a call to disable DKIM if necessary, once all features
+# have been removed
+&register_post_action(\&sync_dkim_domain, $d);
 
 &register_post_action(\&restart_bind, $d);
 return 1;

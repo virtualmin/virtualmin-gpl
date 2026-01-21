@@ -285,8 +285,9 @@ if (!$d->{'alias'} && !$d->{'aliasmail'}) {
 	&create_everyone_file($d);
 	}
 
-# Add domain to DKIM list
-&update_dkim_domain($d, 'setup', $leave_dns);
+# Request a call to setup DKIM after domain creation is complete,
+# once all features (like DNS) have been enabled
+&register_post_action(\&sync_dkim_domain, $d);
 
 # Setup sender-dependent outgoing IP
 if ($supports_dependent && $d->{'virt'} && $config{'dependent_mail'}) {
@@ -481,11 +482,9 @@ if ($supports_dependent) {
 # Delete file containing all users' aliases
 &delete_everyone_file($d);
 
-# Remove domain from DKIM list
-eval {
-	local $d->{'mail'} = 0;
-	&update_dkim_domain($d, 'delete', $leave_dns);
-	};
+# Request a call to disable DKIM if necessary, once all features
+# have been removed
+&register_post_action(\&sync_dkim_domain, $d);
 
 # Remove secondary virtusers from slaves
 &sync_secondary_virtusers($d);
@@ -952,14 +951,6 @@ if (!$d->{'alias'} && $config{'dkim_enabled'} &&
 			&save_domain_dkim_key($d, $key);
 			}
 		}
-	}
-
-# Update domain in DKIM list, if DNS was enabled or disabled
-if ($d->{'dns'} && !$oldd->{'dns'}) {
-	&update_dkim_domain($d, 'setup');
-	}
-elsif (!$d->{'dns'} && $oldd->{'dns'}) {
-	&update_dkim_domain($d, 'delete');
 	}
 
 # Add autoconfig DNS entry if re-enabling DNS

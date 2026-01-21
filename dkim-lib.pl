@@ -928,69 +928,38 @@ return 1 if (defined($d->{'dkim_enabled'}) && $d->{'dkim_enabled'} eq '1');
 return $can;
 }
 
-# update_dkim_domain(&domain, action, [no-dns])
-# Updates the list of domains to sign mail for and add or remove DNS records,
-# based on a change being made to one domain
-sub update_dkim_domain
+# sync_dkim_domain(&domain)
+# Enable or disable DKIM for a domain based on it's current enabled features
+# and the global DKIM setting
+sub sync_dkim_domain
 {
-my ($d, $action, $nodns) = @_;
-
-# DKIM support not enabled
-return if (&check_dkim());
+my ($d) = @_;
 
 # Get global DKIM config
-&lock_file(&get_dkim_config_file());
+return if (&check_dkim());
+my $cfile = &get_dkim_config_file();
+&lock_file($cfile);
 my $dkim = &get_dkim_config();
-return if (!$dkim || !$dkim->{'enabled'});
-
-# Options
-my $opt_dns_and_mail = $dkim->{'alldns'} == 0;
-my $opt_dns = $dkim->{'alldns'} == 1;
-my $opt_dom_chooses = $dkim->{'alldns'} == 2;
-my $opt_always = $dkim->{'alldns'} == 3;
-
-# Skip if domain is being created and domain has to choose
-my $dom_creating = $d->{'creating'};
-return if ($dom_creating && $opt_dom_chooses);
-
-# If not controlled by domain, skip based on global options
-my $dom_controlled = defined($d->{'dkim_enabled'});
-my $dom_deleting = $d->{'deleting'};
-my $nosetup = $nodns || $dom_deleting;
-
-# Do not proceed if domain does not control and option is to let domain choose
-return if (!$dom_controlled && $opt_dom_chooses);
-	
-if (!$dom_controlled && !$dom_deleting) {
-	return if ($action eq 'setup' && $opt_dns_and_mail &&
-		   (!$d->{'dns'} || !$d->{'mail'}));
-	return if ($action eq 'delete' && $opt_dns && $d->{'dns'});
-	return if ($action eq 'setup'  && $opt_dns && !$d->{'dns'});
-	return if ($action eq 'delete' && $opt_always && !$d->{'dns'});
+if (!$dkim || !$dkim->{'enabled'}) {
+	&unlock_file($cfile);
+	return;
 	}
 
-# Update the list of domains that DKIM is enabled for, based on those
-# that are currently active and any change for this one domain
+# First update the complete list of domains to enable DKIM for, in the
+# OpenDKIM config file
 my @doms = grep { &has_dkim_domain($_, $dkim) } &list_domains();
-if (($action eq 'setup' || $action eq 'modify')) {
-	push(@doms, $d);
-	}
-elsif ($action eq 'delete') {
-	@doms = grep { $_->{'id'} ne $d->{'id'} } @doms;
-	}
-my %done;
-@doms = grep { !$done{$_->{'id'}}++ } @doms;
 &set_dkim_domains(\@doms, $dkim);
-&unlock_file(&get_dkim_config_file());
+&unlock_file($cfile);
 
-# Add or remove DNS records for the one domain being changed
 if (!&copy_alias_records($d) && $d->{'dns'}) {
 	my ($err, $file) = &get_domain_dns_records_and_file($d);
 	if ($file) {
-		if (!$nosetup && ($action eq 'setup' || $action eq 'modify')) {
+		if (&has_dkim_domain($d, $dkim)) {
+			# Make sure DNS records exist
 			&add_dkim_dns_records([ $d ], $dkim);
 			}
-		elsif ($action eq 'delete') {
+		else {
+			# Remove any DNS records
 			&remove_dkim_dns_records([ $d ], $dkim);
 			}
 		}
@@ -1188,14 +1157,12 @@ sub remove_dkim_dns_records
 my ($doms, $dkim, $all) = @_;
 my $anychanged = 0;
 foreach my $d (@$doms) {
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	next if (!$file);       # Should never happen
+        my ($dkrec, $selrecs) = &has_domain_dkim_record($d, $dkim, $recs);
+	next if (!$dkrec && !@$selrecs);
 	&$first_print(&text('dkim_undns', "<tt>$d->{'dom'}</tt>"));
 	&pre_records_change($d);
-	my ($recs, $file) = &get_domain_dns_records_and_file($d);
-	if (!$file) {
-		&after_records_change($d);
-		&$second_print($text{'dkim_ednszone'});
-		next;
-		}
 	&obtain_lock_dns($d);
 	my $changed = &remove_domain_dkim_record($d, $dkim, $recs, $file, $all);
 	if ($changed) {

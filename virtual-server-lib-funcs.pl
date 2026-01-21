@@ -9510,6 +9510,10 @@ foreach my $a (@main::post_actions) {
 		# Restarts in the same domain are considered equal
 		$key = $a->[0].($a->[1] ? ",".$a->[1]->{'dom'} : "");
 		}
+	elsif ($a->[0] eq \&sync_dkim_domain) {
+		# DKIM updates in the same domain are considered equal
+		$key = $a->[0].($a->[1] ? ",".$a->[1]->{'id'} : "");
+		}
 	elsif ($a->[0] eq \&restart_php_fpm_server) {
 		# Restarts of the same FPM version are equal
 		$key = $a->[0].($a->[1] ? ",".$a->[1]->{'init'} : "");
