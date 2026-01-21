@@ -912,12 +912,13 @@ else {
 	}
 }
 
-# has_dkim_domain(&domain, &dkim)
+# has_dkim_domain(&domain, [&dkim])
 # Returns 1 if a domain should have DKIM enabled, based on current features
 # and any domain-level override.
 sub has_dkim_domain
 {
 my ($d, $dkim) = @_;
+$dkim = &get_dkim_config() if (!$dkim);
 my $can = &can_dkim_domain($d, $dkim);
 if ($can != 2) {
 	# DKIM is not enabled for all domains, so it depends on DNS
