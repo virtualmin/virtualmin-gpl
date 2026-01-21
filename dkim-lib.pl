@@ -957,6 +957,10 @@ return if ($dom_creating && $opt_dom_chooses);
 my $dom_controlled = defined($d->{'dkim_enabled'});
 my $dom_deleting = $d->{'deleting'};
 my $nosetup = $nodns || $dom_deleting;
+
+# Do not proceed if domain does not control and option is to let domain choose
+return if (!$dom_controlled && $opt_dom_chooses);
+	
 if (!$dom_controlled && !$dom_deleting) {
 	return if ($action eq 'setup' && $opt_dns_and_mail &&
 		   (!$d->{'dns'} || !$d->{'mail'}));
