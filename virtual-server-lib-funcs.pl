@@ -14099,8 +14099,7 @@ if ($d->{'mail'} && $config{'mail'} && &can_edit_mail()) {
 		    'cat' => 'mail',
 		  });
 	}
-my $has_dkim_enabled = &dkim_domains_file_has_domain($d);
-if ($has_dkim_enabled && !$d->{'alias'} && $config{'dkim_enabled'}) {
+if (!$d->{'alias'} && $config{'dkim_enabled'}) {
 	# Per-domain DKIM page
 	push(@rv, { 'page' => 'edit_domdkim.cgi',
 		    'title' => $text{'edit_domdkim'},
