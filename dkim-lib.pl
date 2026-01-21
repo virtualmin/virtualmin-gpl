@@ -397,7 +397,7 @@ my ($dkim, $newkey, $size) = @_;
 # Find domains that we can enable DKIM for (those with mail and DNS)
 &$first_print($text{'dkim_domains'});
 my @alldoms = &list_domains();
-my @doms = grep { &has_dkim_domain($_, $dkim) } @alldoms;
+my @doms = grep { &has_dkim_domain($_) } @alldoms;
 if (@doms && @{$dkim->{'extra'}}) {
 	&$second_print(&text('dkim_founddomains3', scalar(@doms),
 			     scalar(@{$dkim->{'extra'}})));
@@ -647,7 +647,7 @@ elsif (&get_dkim_type() eq 'redhat') {
 &$second_print($text{'setup_done'});
 
 # Add public key to DNS zones for all domains that have DNS enabled,
-my @dnsdoms = grep { &has_dkim_domain($_, $dkim) &&
+my @dnsdoms = grep { &has_dkim_domain($_) &&
 		     $_->{'dns'} && !&copy_alias_records($_) } @alldoms;
 &add_dkim_dns_records(\@dnsdoms, $dkim);
 
@@ -885,24 +885,25 @@ my $init = &get_dkim_init_name();
 return 1;
 }
 
-# can_dkim_domain(&domain, &dkim)
+# can_dkim_domain(&domain)
 # Returns 1 if a domain should have DKIM enabled by default, 0 if it should
 # not be, or 2 if it is enabled for all domains
 sub can_dkim_domain
 {
-my ($d, $dkim) = @_;
-if ($dkim->{'alldns'} == 3) {
+my ($d) = @_;
+my $alldns = $config{'dkim_alldns'} || 0;
+if ($alldns == 3) {
 	# Can be enabled even without DNS
 	return 2;
 	}
 elsif (!$d->{'dns'}) {
 	return 0;
 	}
-elsif ($dkim->{'alldns'} == 1) {
+elsif ($alldns == 1) {
 	# Can be enabled even without email
 	return 1;
 	}
-elsif ($dkim->{'alldns'} == 2) {
+elsif ($alldns == 2) {
 	# Cannot be enabled even with email
 	return 0;
 	}
@@ -912,13 +913,13 @@ else {
 	}
 }
 
-# has_dkim_domain(&domain, &dkim)
+# has_dkim_domain(&domain)
 # Returns 1 if a domain should have DKIM enabled, based on current features
 # and any domain-level override.
 sub has_dkim_domain
 {
-my ($d, $dkim) = @_;
-my $can = &can_dkim_domain($d, $dkim);
+my ($d) = @_;
+my $can = &can_dkim_domain($d);
 if ($can != 2) {
 	# DKIM is not enabled for all domains, so it depends on DNS
 	return 0 if (!$d->{'dns'});
@@ -947,14 +948,14 @@ if (!$dkim || !$dkim->{'enabled'}) {
 
 # First update the complete list of domains to enable DKIM for, in the
 # OpenDKIM config file
-my @doms = grep { &has_dkim_domain($_, $dkim) } &list_domains();
+my @doms = grep { &has_dkim_domain($_) } &list_domains();
 &set_dkim_domains(\@doms, $dkim);
 &unlock_file($cfile);
 
 if (!&copy_alias_records($d) && $d->{'dns'}) {
 	my ($err, $file) = &get_domain_dns_records_and_file($d);
 	if ($file) {
-		if (&has_dkim_domain($d, $dkim)) {
+		if (&has_dkim_domain($d)) {
 			# Make sure DNS records exist
 			&add_dkim_dns_records([ $d ], $dkim);
 			}
@@ -1510,7 +1511,7 @@ sub refresh_dkim_dns
 {
 my ($d) = @_;
 my $dkim = &get_dkim_config();
-if ($dkim && $dkim->{'enabled'} && &has_dkim_domain($d, $dkim) &&
+if ($dkim && $dkim->{'enabled'} && &has_dkim_domain($d) &&
     $d->{'dns'} && !&copy_alias_records($d)) {
 	&remove_dkim_dns_records([ $d ], $dkim, 1);
 	&add_dkim_dns_records([ $d ], $dkim);
