@@ -823,7 +823,7 @@ foreach $d (@doms) {
 
 	# Update DKIM records
 	if (defined($dkim_enabled)) {
-		my $olddkim = &has_dkim_domain($d);
+		my $olddkim = &has_dkim_domain($d, $dkim);
 		if ($dkim_enabled == 1) {
 			$d->{'dkim_enabled'} = 1;
 			}
