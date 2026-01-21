@@ -1125,14 +1125,6 @@ elsif (!$d->{'mail'} && $oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 		}
 	}
 
-# Update domain in DKIM list, if DNS was enabled or disabled
-if ($d->{'dns'} && !$oldd->{'dns'}) {
-	&update_dkim_domain($d, 'setup');
-	}
-elsif (!$d->{'dns'} && $oldd->{'dns'}) {
-	&update_dkim_domain($d, 'delete');
-	}
-
 if ($d->{'mx_servers'} ne $oldd->{'mx_servers'} && $d->{'mail'} &&
     !$config{'secmx_nodns'}) {
 	# Secondary MX servers have been changed - add or remove MX records
