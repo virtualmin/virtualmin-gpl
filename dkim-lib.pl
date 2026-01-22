@@ -1518,20 +1518,5 @@ if ($dkim && $dkim->{'enabled'} && &has_dkim_domain($d, $dkim) &&
 	}
 }
 
-# dkim_domains_file_has_domain(&domain)
-# Returns 1 if the domain appears in the OpenDKIM domains file, 0 if not
-sub dkim_domains_file_has_domain
-{
-my ($d) = @_;
-return 0 if !$d->{'dom'};
-my $dkim_config = &get_dkim_config_file();
-my $conf = $dkim_config ? &get_open_dkim_config($dkim_config) : undef;
-my $file = $conf && $conf->{'Domain'} ? $conf->{'Domain'} : undef;
-return 0 if (!$file || $file !~ /^\// || !-r $file);
-my $contents = &read_file_contents($file);
-my $dom = $d->{'dom'};
-return $contents =~ /^(?!\s*#)\s*\Q$dom\E\.?\s*$/im ? 1 : 0;
-}
-
 1;
 
