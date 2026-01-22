@@ -918,7 +918,7 @@ else {
 sub has_dkim_domain
 {
 my ($d, $dkim) = @_;
-$dkim = &get_dkim_config() if (!$dkim);
+$dkim ||= { 'alldns' => $config{'dkim_alldns'} || 0 };
 my $can = &can_dkim_domain($d, $dkim);
 if ($can != 2) {
 	# DKIM is not enabled for all domains, so it depends on DNS
