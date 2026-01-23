@@ -1007,6 +1007,11 @@ if ($d->{'dom'} ne $oldd->{'dom'} && !&check_ratelimit()) {
 	&unlock_file(&get_ratelimit_config_file());
 	}
 
+# If domain name changed, a DKIM update may be needed
+if ($d->{'dom'} ne $oldd->{'dom'}) {
+	&register_post_action(\&sync_dkim_domain, $d);
+	}
+
 # Unlock mail and unix DBs the same number of times we locked them
 while($our_mail_locks--) {
 	&release_lock_mail($d);

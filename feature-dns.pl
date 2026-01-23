@@ -1241,6 +1241,11 @@ else {
 # Release locks
 &release_lock_dns($lockon, $lockconf);
 
+# If domain name changed, a DKIM update may be needed
+if ($d->{'dom'} ne $oldd->{'dom'}) {
+	&register_post_action(\&sync_dkim_domain, $d);
+	}
+
 &register_post_action(\&restart_bind, $d) if ($rv);
 return $rv;
 }
