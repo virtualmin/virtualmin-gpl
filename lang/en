@@ -7434,6 +7434,8 @@ dkim_records=DKIM DNS records for domains
 dkim_pubkeypem=DKIM public key in PEM format
 dkim_privkeypem=DKIM private key in PEM format
 dkim_esize=DKIM key size must be a number of at least 512 bits
+dkim_adding=Enabling DKIM signing for $1 ..
+dkim_removing=Disabling DKIM signing for $1 ..
 
 newautoconfig_title=Mail Client Configuration
 autoconfig_ecannot=You are not allowed to edit mail client configuration

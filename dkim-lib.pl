@@ -948,8 +948,20 @@ if (!$dkim || !$dkim->{'enabled'}) {
 
 # First update the complete list of domains to enable DKIM for, in the
 # OpenDKIM config file
+my @olddoms = &get_dkim_domains($dkim);
 my @doms = grep { &has_dkim_domain($_, $dkim) } &list_domains();
+my ($olddom) = grep { $_ eq $d->{'dom'} } @olddoms;
+my ($newdom) = grep { $_->{'id'} eq $d->{'id'} } @doms;
+my $msg;
+if ($newdom && !$olddom) {
+	$msg = &text('dkim_adding', &show_domain_name($d));
+	}
+elsif (!$newdom && $olddom) {
+	$msg = &text('dkim_removing', &show_domain_name($d));
+	}
+&$first_print($msg) if ($msg);
 &set_dkim_domains(\@doms, $dkim);
+&$second_print($text{'setup_done'}) if ($msg);
 &unlock_file($cfile);
 
 if (!&copy_alias_records($d) && $d->{'dns'}) {
