@@ -2983,6 +2983,65 @@ closedir(*DIR);
 return;
 }
 
+# php_fpm_profile(option)
+# Returns the value for a PHP-FPM tuning option based on the selected workload
+# profile, unless an explicit override exists in %config (advanced/manual use).
+# If the profile is unset or unknown, Balanced is used. Returns undef if the
+# option name is unknown.
+sub php_fpm_profile
+{
+my ($opt) = @_;
+return undef if !defined($opt) || $opt eq '';
+
+# Explicit per-option override wins
+return $config{$opt} if (defined($config{$opt}));
+
+# Profile selector
+my $p = lc($config{'php_fpm_profile'} || 'balanced');
+
+my %profile = (
+	lean => {
+		php_fpm_per_child_mb   => 80,
+		php_fpm_ram_frac       => 0.15,
+		php_fpm_hard_cap       => 12,
+		php_fpm_spare_cap      => 12,
+		php_fpm_max_cap_frac   => 0.25,
+		php_fpm_min_spare_frac => 0.33,
+		php_fpm_start_pos      => 0.33,
+	},
+	balanced => {
+		php_fpm_per_child_mb   => 64,
+		php_fpm_ram_frac       => 0.20,
+		php_fpm_hard_cap       => 24,
+		php_fpm_spare_cap      => 24,
+		php_fpm_max_cap_frac   => 0.33,
+		php_fpm_min_spare_frac => 0.50,
+		php_fpm_start_pos      => 0.50,
+	},
+	responsive => {
+		php_fpm_per_child_mb   => 64,
+		php_fpm_ram_frac       => 0.25,
+		php_fpm_hard_cap       => 48,
+		php_fpm_spare_cap      => 48,
+		php_fpm_max_cap_frac   => 0.40,
+		php_fpm_min_spare_frac => 0.66,
+		php_fpm_start_pos      => 0.66,
+	},
+	performance => {
+		php_fpm_per_child_mb   => 48,
+		php_fpm_ram_frac       => 0.35,
+		php_fpm_hard_cap       => 0,    # 0 => unlimited
+		php_fpm_spare_cap      => 0,
+		php_fpm_max_cap_frac   => 0.60,
+		php_fpm_min_spare_frac => 0.75,
+		php_fpm_start_pos      => 0.75,
+	},
+);
+
+my $r = $profile{$p} || $profile{'balanced'};
+return exists($r->{$opt}) ? $r->{$opt} : undef;
+}
+
 # get_php_max_children_allowed() Get PHP-FPM recommended allowed number for
 # sub-processes, which is calculated as a fraction of total system RAM divided
 # by estimated per-process memory usage. By default we assume each PHP-FPM
@@ -2998,14 +3057,10 @@ return $main::get_real_memory_size_cache
 
 my $mem = &get_real_memory_size();
 
-# Tunables config overrides and safe defaults
-my $per_child_mb = $config{'php_fpm_per_child_mb'} || 64;
-my $php_ram_frac = defined($config{'php_fpm_ram_frac'})
-	? $config{'php_fpm_ram_frac'}
-	: 0.20;
-my $hard_cap = defined($config{'php_fpm_hard_cap'})
-	? $config{'php_fpm_hard_cap'}
-	: 24;
+# Tunables via php_fpm_profile (explicit config overrides still win there)
+my $per_child_mb = &php_fpm_profile('php_fpm_per_child_mb');
+my $php_ram_frac = &php_fpm_profile('php_fpm_ram_frac');
+my $hard_cap     = &php_fpm_profile('php_fpm_hard_cap');
 
 # Hard safety minimums
 $per_child_mb = 0 + $per_child_mb;
@@ -3021,7 +3076,7 @@ my $max;
 if ($mem) {
 	my $sysram_mb = $mem / 1024 / 1024;
 	$max = int(($sysram_mb * $php_ram_frac) / $per_child_mb);
-	# Hard cap of zero meams unlimited
+	# Hard cap of zero means unlimited
 	$max = $hard_cap if $hard_cap && $max > $hard_cap;
 	}
 else {
@@ -3041,12 +3096,15 @@ sub get_php_max_spare_servers
 my ($defchildren) = @_;
 $defchildren = int($defchildren || 0);
 $defchildren = 1 if $defchildren < 1;
-my $spare_cap = defined($config{'php_fpm_spare_cap'})
-    ? $config{'php_fpm_spare_cap'}
-    : 24;
+
+my $spare_cap = &php_fpm_profile('php_fpm_spare_cap');
 $spare_cap = 0 + $spare_cap;
 $spare_cap = int($spare_cap);
 $spare_cap = 0 if $spare_cap < 0;
+
+my $max_cap_frac = &php_fpm_profile('php_fpm_max_cap_frac');
+$max_cap_frac = 0 + $max_cap_frac;
+$max_cap_frac = 0.33 if $max_cap_frac <= 0 || $max_cap_frac > 1;
 
 my $max;
 if ($defchildren <= 2) {
@@ -3056,8 +3114,8 @@ elsif ($defchildren <= 6) {
 	$max = 3;                        # small pools keep a few spares
 	}
 else {
-	$max = int($defchildren * 0.4);  # ~40% of max_children
-	$max = 4  if $max < 4;           # don't be too "cold"
+	$max = int($defchildren * $max_cap_frac);   # fraction of max_children
+	$max = 4  if $max < 4;                      # don't be too "cold"
 	}
 
 # Apply spare cap for all cases (zero means unlimited)
@@ -3069,18 +3127,23 @@ return $max;
 }
 
 # get_php_min_spare_servers(defchildren)
-# Targets half of max spare for responsiveness
+# Targets a fraction of max spare for responsiveness (default 0.50)
 sub get_php_min_spare_servers
 {
 my ($defchildren) = @_;
 my $max_spare = &get_php_max_spare_servers($defchildren);
+
+my $min_spare_frac = &php_fpm_profile('php_fpm_min_spare_frac');
+$min_spare_frac = 0 + $min_spare_frac;
+$min_spare_frac = 0.50 if $min_spare_frac <= 0 || $min_spare_frac > 1;
 
 my $min;
 if ($max_spare <= 3) {
 	$min = 1;                            # memory-friendly for small pools
 	}
 else {
-	$min = int(($max_spare + 1) / 2);    # ~50% of max_spare, rounded
+	# Round to nearest, then keep sensible floor
+	$min = int(($max_spare * $min_spare_frac) + 0.5);
 	$min = 2 if $min < 2;
 	}
 
@@ -3090,14 +3153,18 @@ return $min;
 }
 
 # get_php_start_servers(defchildren)
-# Start between min and max (midpoint) so restarts are warmer but not wasteful
+# Start position between min and max (default 0.50 => midpoint)
 sub get_php_start_servers
 {
 my ($defchildren) = @_;
 my $max_spare = &get_php_max_spare_servers($defchildren);
 my $min_spare = &get_php_min_spare_servers($defchildren);
 
-my $start = int(($min_spare + $max_spare) / 2);
+my $start_pos = &php_fpm_profile('php_fpm_start_pos');
+$start_pos = 0 + $start_pos;
+$start_pos = 0.50 if $start_pos < 0 || $start_pos > 1;
+
+my $start = int($min_spare + (($max_spare - $min_spare) * $start_pos));
 $start = $min_spare if $start < $min_spare;
 $start = $max_spare if $start > $max_spare;
 $start = 1 if $start < 1;

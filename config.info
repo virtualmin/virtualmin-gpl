@@ -183,6 +183,7 @@ php_fpm_cmd=Additional PHP FPM server,3,None installed
 php_fpm_pool=Additional PHP FPM pool directory,3,None installed
 php_fpm_init=Additional PHP FPM bootup action,3,None installed
 php_session_age=Cleanup PHP session files after,3,Never cleanup,6,,days
+php_fpm_profile=PHP-FPM workload profile,1,lean-Lean,balanced-Balanced,responsive-Responsive,performance-Performance
 
 line6=Advanced options,11
 iface_base=Base number for virtual interfaces,3,Automatic

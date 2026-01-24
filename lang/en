@@ -2156,6 +2156,7 @@ check_webphpversd=Updating domain <tt>$1</tt> ..
 check_webphpfpm=PHP-FPM version $1 support is available
 check_webphpnofpm=PHP-FPM support was not detected : $1
 check_webphpfpm2=The following PHP-FPM versions are available : $1
+check_webphpfpm_profile=The following PHP-FPM workload profile is selected: <tt>$1</tt>
 check_ewebphpfpm2=The following PHP-FPM versions cannot be used : $1
 check_webphpnofpm2=No PHP-FPM packages were found
 check_webphpfpmport=Fixing port $2 clash for PHP-FPM version $1

@@ -1,0 +1,27 @@
+<header>PHP-FPM workload profile</header>
+
+This option selects a set of tuned defaults for PHP-FPM process management.
+It affects how many PHP-FPM worker processes are started, how many are kept
+idle, and how much memory PHP-FPM is allowed to use. <p>
+
+<b>Lean</b><br>
+Uses the least memory. Keeps a smaller idle pool and uses a more conservative
+memory budget. Best for small systems, low-traffic sites, and servers where
+RAM is tight. <p>
+
+<b>Balanced</b><br>
+General-purpose defaults for most servers. Provides a reasonable idle pool and
+a moderate memory budget. Recommended if you are not sure which profile to use.
+This is the default profile. <p>
+
+<b>Responsive</b><br>
+Favors lower latency during bursts. Keeps more idle workers ready and starts
+the pool warmer after restarts, reducing the chance of slow first requests.
+Uses more memory than previous profiles. <p>
+
+<b>Performance</b><br>
+Favors throughput under sustained load. Allows more workers and keeps a larger
+pool ready, which can increase concurrency and request capacity. This profile
+can use significantly more RAM and is best for servers with ample memory. <p>
+
+<footer>
