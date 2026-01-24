@@ -3143,7 +3143,7 @@ print &ui_table_row(
     &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'}, 5,
 	int($tmpl->{'web_php_suexec'}) == 2 ? 
 	$text{'tmpl_phpchildrenauto'} :
-	&text('tmpl_phpchildrennone', &get_php_max_childred_allowed())));
+	&text('tmpl_phpchildrennone', &get_php_max_children_allowed())));
 
 # Allow editing of PHP configs
 print &ui_table_row(

@@ -996,17 +996,31 @@ if ($res->{'procs'}) {
 		$res->{'procs'} > $max_php_fcgid_children ? 
 			$max_php_fcgid_children : $res->{'procs'};
 	&save_php_fpm_config_value($d, "pm.max_children", $php_max_children);
-	&save_php_fpm_config_value($d, "pm.start_servers", &get_php_start_servers($php_max_children));
-	&save_php_fpm_config_value($d, "pm.max_spare_servers", &get_php_max_spare_servers($php_max_children));
+
+	&save_php_fpm_config_value($d, "pm.start_servers",
+		&get_php_start_servers($php_max_children));
+
+	&save_php_fpm_config_value($d, "pm.min_spare_servers",
+		&get_php_min_spare_servers($php_max_children));
+
+	&save_php_fpm_config_value($d, "pm.max_spare_servers",
+		&get_php_max_spare_servers($php_max_children));
 	}
 else {
 	my $tmpl = &get_template($d->{'template'});
 	my $php_max_children = $tmpl->{'web_phpchildren'};
-	$php_max_children = get_php_max_childred_allowed()
+	$php_max_children = get_php_max_children_allowed()
 		if ($php_max_children eq "none" || !$php_max_children);
 	&save_php_fpm_config_value($d, "pm.max_children", $php_max_children);
-	&save_php_fpm_config_value($d, "pm.start_servers", &get_php_start_servers($php_max_children));
-	&save_php_fpm_config_value($d, "pm.max_spare_servers", &get_php_max_spare_servers($php_max_children));
+
+	&save_php_fpm_config_value($d, "pm.start_servers",
+		&get_php_start_servers($php_max_children));
+
+	&save_php_fpm_config_value($d, "pm.min_spare_servers",
+		&get_php_min_spare_servers($php_max_children));
+
+	&save_php_fpm_config_value($d, "pm.max_spare_servers",
+		&get_php_max_spare_servers($php_max_children));
 	}
 &register_post_action(\&restart_php_fpm_server, $conf, $d->{'id'});
 }
@@ -1723,7 +1737,7 @@ elsif ($mode eq "fpm") {
 			}
 		}
 	&unflush_file_lines($file);
-	return $childs == get_php_max_childred_allowed() ? 0 : $childs;
+	return $childs == get_php_max_children_allowed() ? 0 : $childs;
 	}
 else {
 	return -2;
@@ -1809,19 +1823,25 @@ elsif ($mode eq "fpm") {
 	return 0 if (!-r $file);
 	&lock_file($file);
 	my $lref = &read_file_lines($file);
-	$children = get_php_max_childred_allowed() if ($children == 0);	# Recommended default
+	$children = get_php_max_children_allowed()
+		if ($children == 0);	# Use recommended default
 	foreach my $l (@$lref) {
 		if ($l =~ /pm\.max_children\s*=\s*(\d+)/) {
 			$l = "pm.max_children = $children";
 			}
-		if ($l =~ /pm\.start_servers\s*=\s*(\d+)/) {
-			$l = "pm.start_servers = " .
-				&get_php_start_servers($children) . "";
-			}
-		if ($children != $children_curr &&
-		    $l =~ /pm\.max_spare_servers\s*=\s*(\d+)/) {
-			$l = "pm.max_spare_servers = " .
-				&get_php_max_spare_servers($children) . "";
+		if ($children != $children_curr) {
+			if ($l =~ /pm\.start_servers\s*=\s*(\d+)/) {
+				$l = "pm.start_servers = " .
+				    &get_php_start_servers($children) . "";
+				}
+			if ($l =~ /pm\.min_spare_servers\s*=\s*(\d+)/) {
+				$l = "pm.min_spare_servers = " .
+				    &get_php_min_spare_servers($children) . "";
+				}
+			if ($l =~ /pm\.max_spare_servers\s*=\s*(\d+)/) {
+				$l = "pm.max_spare_servers = " .
+				    &get_php_max_spare_servers($children) . "";
+				}
 			}
 		}
 	&flush_file_lines($file);
@@ -2602,10 +2622,11 @@ else {
 	my $tmpl = &get_template($d->{'template'});
 	my $defchildren = $tmpl->{'web_phpchildren'};
 	if ($defchildren eq "none" || !$defchildren) {
-		$defchildren = get_php_max_childred_allowed();
+		$defchildren = &get_php_max_children_allowed();
 		}
-	my $defmaxspare = get_php_max_spare_servers($defchildren);
-	my $defstartservers = get_php_start_servers($defchildren);
+	my $defmaxspare = &get_php_max_spare_servers($defchildren);
+	my $defminspare = &get_php_min_spare_servers($defchildren);
+	my $defstartservers = &get_php_start_servers($defchildren);
 	local $tmp = &create_server_tmp($d);
 	my $lref = &read_file_lines($file);
 	@$lref = ( "[$d->{'id'}]",
@@ -2618,7 +2639,7 @@ else {
 		   "pm = ".($tmpl->{'php_fpmtype'} || "dynamic"),
 		   "pm.max_children = $defchildren",
 		   "pm.start_servers = $defstartservers",
-		   "pm.min_spare_servers = 1",
+		   "pm.min_spare_servers = $defminspare",
 		   "pm.max_spare_servers = $defmaxspare",
 	   	   "php_value[upload_tmp_dir] = $tmp",
 		   "php_value[session.save_path] = $tmp" );
@@ -2962,55 +2983,126 @@ closedir(*DIR);
 return;
 }
 
-# get_php_max_childred_allowed()
-# Get PHP-FPM recommended allowed number for sub-processes,
-# which is calculated as total available RAM devided by
-# 64 MiB (aprox. cunsumed by each PHP-FPM process) and 
-# devided by 4 (as we assume that a maximum recommended 
-# default which PHP can use is 20% of all available RAM
-# on the system). However, manually it will be possible
-# to rase the number to use all available RAM as defined
-# using `$max_php_fcgid_children` variable. Also on systems
-# with a lot of RAM limit maximum recommended to sensible 16.
-sub get_php_max_childred_allowed
+# get_php_max_children_allowed() Get PHP-FPM recommended allowed number for
+# sub-processes, which is calculated as a fraction of total system RAM divided
+# by estimated per-process memory usage. By default we assume each PHP-FPM
+# process consumes approximately 64 MiB and PHP-FPM should use at default 20% of
+# total system RAM. The calculated value can be capped to a sensible maximum
+# (default 24) and all of these defaults can be overridden via config options.
+# If RAM size cannot be detected, fall back to the $max_php_fcgid_children
+# variable (or 1).
+sub get_php_max_children_allowed
 {
 return $main::get_real_memory_size_cache
-	if (defined($main::get_real_memory_size_cache));
-my $max;
+	if defined($main::get_real_memory_size_cache);
+
 my $mem = &get_real_memory_size();
+
+# Tunables config overrides and safe defaults
+my $per_child_mb = $config{'php_fpm_per_child_mb'} || 64;
+my $php_ram_frac = defined($config{'php_fpm_ram_frac'})
+	? $config{'php_fpm_ram_frac'}
+	: 0.20;
+my $hard_cap = defined($config{'php_fpm_hard_cap'})
+	? $config{'php_fpm_hard_cap'}
+	: 24;
+
+# Hard safety minimums
+$per_child_mb = 0 + $per_child_mb;
+$per_child_mb = int($per_child_mb);
+$per_child_mb = 1 if $per_child_mb < 1;
+$php_ram_frac = 0 + $php_ram_frac;
+$php_ram_frac = 0.20 if $php_ram_frac <= 0 || $php_ram_frac > 1;
+$hard_cap = 0 + $hard_cap;
+$hard_cap = int($hard_cap);
+$hard_cap = 0 if $hard_cap < 0;
+
+my $max;
 if ($mem) {
 	my $sysram_mb = $mem / 1024 / 1024;
-	$max = int(($sysram_mb / 64) / 5);
-	if ($max > 16) {
-		$max = 16;
-		}
+	$max = int(($sysram_mb * $php_ram_frac) / $per_child_mb);
+	# Hard cap of zero meams unlimited
+	$max = $hard_cap if $hard_cap && $max > $hard_cap;
 	}
 else {
- 	$max = $max_php_fcgid_children;
+	$max = 0 + ($max_php_fcgid_children || 1);
+	$max = int($max);
 	}
 
-# Low memory systems should not
-# return values lower than 1
-$max ||= 1;
+$max = 1 if $max < 1;
 $main::get_real_memory_size_cache = $max;
-return int($max);
+return $max;
 }
 
+# get_php_max_spare_servers(defchildren)
+# Targets a small number of spare servers for responsiveness
 sub get_php_max_spare_servers
 {
 my ($defchildren) = @_;
-my $defmaxspare = $defchildren <= 1 ? $defchildren :
-        $defchildren >= 4 ? int($defchildren / 2) : 2;
-return int($defmaxspare);
+$defchildren = int($defchildren || 0);
+$defchildren = 1 if $defchildren < 1;
+my $spare_cap = defined($config{'php_fpm_spare_cap'})
+    ? $config{'php_fpm_spare_cap'}
+    : 24;
+$spare_cap = 0 + $spare_cap;
+$spare_cap = int($spare_cap);
+$spare_cap = 0 if $spare_cap < 0;
+
+my $max;
+if ($defchildren <= 2) {
+	$max = $defchildren;             # 1 or 2
+	}
+elsif ($defchildren <= 6) {
+	$max = 3;                        # small pools keep a few spares
+	}
+else {
+	$max = int($defchildren * 0.4);  # ~40% of max_children
+	$max = 4  if $max < 4;           # don't be too "cold"
+	}
+
+# Apply spare cap for all cases (zero means unlimited)
+$max = $spare_cap if ($spare_cap && $max > $spare_cap);
+
+$max = $defchildren if $max > $defchildren;
+$max = 1 if $max < 1;
+return $max;
 }
 
+# get_php_min_spare_servers(defchildren)
+# Targets half of max spare for responsiveness
+sub get_php_min_spare_servers
+{
+my ($defchildren) = @_;
+my $max_spare = &get_php_max_spare_servers($defchildren);
+
+my $min;
+if ($max_spare <= 3) {
+	$min = 1;                            # memory-friendly for small pools
+	}
+else {
+	$min = int(($max_spare + 1) / 2);    # ~50% of max_spare, rounded
+	$min = 2 if $min < 2;
+	}
+
+$min = $max_spare if $min > $max_spare;
+$min = 1 if $min < 1;
+return $min;
+}
+
+# get_php_start_servers(defchildren)
+# Start between min and max (midpoint) so restarts are warmer but not wasteful
 sub get_php_start_servers
 {
 my ($defchildren) = @_;
-my $min_spare_servers = 1;
-my $max_spare_servers = get_php_max_spare_servers($defchildren);
-my $start_servers = $min_spare_servers + ($max_spare_servers - $min_spare_servers) / 4;
-return int($start_servers) || 1;
+my $max_spare = &get_php_max_spare_servers($defchildren);
+my $min_spare = &get_php_min_spare_servers($defchildren);
+
+my $start = int(($min_spare + $max_spare) / 2);
+$start = $min_spare if $start < $min_spare;
+$start = $max_spare if $start > $max_spare;
+$start = 1 if $start < 1;
+
+return $start;
 }
 
 # get_domain_php_error_log(&domain)

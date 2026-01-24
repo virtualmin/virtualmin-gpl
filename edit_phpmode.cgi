@@ -88,7 +88,7 @@ if ($can) {
 					    &ui_opt_textbox("children", $children > 0 ? $children : '', 5,
 					        $mode eq 'fcgid' ?
 					        $text{'tmpl_phpchildrenauto'} : 
-					        &text('tmpl_phpchildrennone', &get_php_max_childred_allowed())).
+					        &text('tmpl_phpchildrennone', &get_php_max_children_allowed())).
 						" &nbsp; ".&ui_checkbox("nophpsanity_check", 1, $text{'phpmode_sanitycheck'},
 					                $d->{'phpnosanity_check'}));
 				}
