@@ -3483,6 +3483,7 @@ foreach my $r ('webmail', 'admin') {
 		$r = { 'path' => '/',
 		       'dest' => $url,
 		       'host' => $rhost,
+		       'code' => 301,
 		       'http' => 1,
 		       'https' => 1,
 		       'alias' => 0 };
