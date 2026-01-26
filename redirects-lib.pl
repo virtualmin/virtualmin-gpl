@@ -443,7 +443,7 @@ sub add_wellknown_redirect
 my ($redir) = @_;
 if ($redir->{'path'} eq '/' && !$redir->{'alias'} &&
     !$redir->{'regexp'} && !$redir->{'exact'}) {
-	$redir->{'path'} = '^/(?!.well-known)';
+	$redir->{'path'} = '^/(?!\.well-known)';
 	$redir->{'regexp'} = 1;
 	}
 return $redir;
@@ -455,7 +455,8 @@ sub remove_wellknown_redirect
 {
 my ($redir) = @_;
 if (($redir->{'path'} eq '^/(?!.well-known)' ||
-     $redir->{'path'} eq '^(?!/.well-known)') &&
+     $redir->{'path'} eq '^(?!/.well-known)' ||
+     $redir->{'path'} eq '^/(?!\.well-known)') &&
     !$redir->{'alias'} && $redir->{'regexp'}) {
 	$redir->{'path'} = '/';
 	$redir->{'regexp'} = 0;
