@@ -1,14 +1,20 @@
 <header>PHP service maximum sub-processes</header>
 
-This option sets the limit on the number of simultaneous requests that will be served,
-when PHP scripts for this domain setup to run via FPM, the number of child processes
-will be created when <tt>pm</tt> option is set to <tt>static</tt> and the maximum number of
-child processes could potentially be created when <tt>pm</tt> option is set to <tt>dynamic.</tt>
-<p>
+This option sets the limit on the number of simultaneous requests that will be
+served. When PHP scripts for this domain are set up to run via FPM, this
+controls the maximum number of child processes. When the <tt>pm</tt> option is
+set to <tt>static</tt>, this is the number of child processes that will be
+created. When the <tt>pm</tt> option is set to
+<tt>dynamic</tt>, this is the maximum number of child processes that could
+potentially be created. <p>
 
-When PHP scripts for this domain setup to run via FCGI, PHP child process management
-should always be disabled, which will only route one request at a time to application processes
-it has spawned. By default, and with the environment variable setting <tt>PHP_FCGI_CHILDREN=0</tt>,
-PHP child process management is disabled.<p>
+Based on the PHP-FPM workload profile selected in Virtualmin Configuration, a
+recommended value is calculated using available system memory. <p>
+
+When PHP scripts for this domain are set up to run via FCGI, PHP child process
+management should always be disabled, which will only route one request at a
+time to application processes it has spawned. By default, and with the
+environment variable setting
+<tt>PHP_FCGI_CHILDREN=0</tt>, PHP child process management is disabled. <p>
+
 <footer>
-

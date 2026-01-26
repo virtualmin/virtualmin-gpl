@@ -16423,6 +16423,8 @@ if (&domain_has_website()) {
 			&$second_print(&text('check_webphpfpm2',
 			  join(" ", map { $_->{'version'}.
 				  " (".($_->{'package'} || $_->{'cmd'}).")" } @okfpms)));
+			&$second_print(&text('check_webphpfpm_profile',
+				$config{'php_fpm_profile'}));
 			}
 		if (@errfpms) {
 			&$second_print(&text('check_ewebphpfpm2',

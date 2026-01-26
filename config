@@ -239,6 +239,7 @@ show_mailuser=1
 php_fpm_port=8000
 dnssec_alg=RSASHA256
 php_session_age=7
+php_fpm_profile=balanced
 always_ssl=0
 phpchildren=
 combined_cert=0
