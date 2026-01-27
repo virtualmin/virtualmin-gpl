@@ -125,7 +125,7 @@ foreach my $p (@ports) {
 			next if ($i > 0 &&
 				 $rws[$i-1]->{'name'} eq 'RewriteCond');
 			my $rwr = $rws[$i];
-			next if ($rwr->{'words'}->[2] !~ /^\[R(=\d+)?\]$/);
+			next if ($rwr->{'words'}->[2] !~ /^\[.*R(=\d+)?.*\]$/);
 			my @dirs = ( $rwr );
 			my $rd = { 'alias' => 0, 'dirs' => \@dirs };
 			$rd->{$proto} = 1;
@@ -140,9 +140,7 @@ foreach my $p (@ports) {
 			       $rd->{'path'} = $1;
 				$rd->{'exact'} = 1;
 				}
-			if ($rwr->{'words'}->[2] =~ /^\[R=(\d+)\]$/) {
-				$rd->{'code'} = $1;
-				}
+			&parse_rewritecond_flags($rwr->{'words'}->[2], $rd);
 			$rd->{'id'} = $rwr->{'name'}.'_'.$rd->{'path'};
 			my ($already) = 
 				grep { $_->{'path'} eq $rd->{'path'} &&
@@ -178,7 +176,7 @@ foreach my $p (@ports) {
 			$j++;
 			}
 		next if (!$rwr || !$rwc && !$rwh);
-		next if ($rwr->{'words'}->[2] !~ /^\[R(=\d+)?\]$/);
+		next if ($rwr->{'words'}->[2] !~ /^\[.*R(=\d+)?.*\]$/);
 		my @dirs = ( $rwr );
 		push(@dirs, $rwc) if ($rwc);
 		push(@dirs, $rwh) if ($rwh);
@@ -226,9 +224,7 @@ foreach my $p (@ports) {
 			$rd->{'path'} = $1;
 			$rd->{'exact'} = 1;
 			}
-		if ($rwr->{'words'}->[2] =~ /^\[R=(\d+)\]$/) {
-			$rd->{'code'} = $1;
-			}
+		&parse_rewritecond_flags($rwr->{'words'}->[2], $rd);
 		$rd->{'id'} = $rwc->{'name'}.'_'.$rd->{'path'};
 		$rd->{'id'} .= '_'.$rd->{'host'} if ($rd->{'host'});
 		my ($already) = grep { $_->{'path'} eq $rd->{'path'} &&
@@ -243,6 +239,24 @@ foreach my $p (@ports) {
 		}
 	}
 return @rv;
+}
+
+# parse_rewritecond_flags(flags, &redirect)
+# Turn a flag string like [R=302,L] into settings in a redirect
+sub parse_rewritecond_flags
+{
+my ($flags, $rd) = @_;
+if ($flags =~ /^\[(.*)\]$/) {
+	my @flags = split(/,/, $1);
+	foreach my $f (@flags) {
+		if ($f =~ /^R=(\d+)$/) {
+			$rd->{'code'} = $1;
+			}
+		elsif ($f eq "L") {
+			$rd->{'last'} = 1;
+			}
+		}
+	}
 }
 
 # create_redirect(&domain, &redirect)
@@ -278,8 +292,10 @@ foreach my $p (@ports) {
 		my @rwes = &apache::find_directive("RewriteEngine", $vconf);
 		my @rwcs = &apache::find_directive("RewriteCond", $vconf);
 		my @rwrs = &apache::find_directive("RewriteRule", $vconf);
-		my $flag = $redirect->{'code'} ? "[R=".$redirect->{'code'}."]"
-					       : "[R]";
+		my @flags;
+		push(@flags, $redirect->{'code'} ? "R=".$redirect->{'code'}
+						 : "R");
+		push(@flags, "L") if ($redirect->{'last'});
 		if ($redirect->{'host'}) {
 			push(@rwcs, "%{HTTP_HOST} ".
 			     ($redirect->{'hostregexp'} ? "" : "=").
@@ -288,7 +304,7 @@ foreach my $p (@ports) {
 		my $path = $redirect->{'path'};
 		$path .= "(\.\*)\$" if ($redirect->{'regexp'});
 		$path = "^".$path."\$" if ($redirect->{'exact'});
-		push(@rwrs, $path." ".$redirect->{'dest'}." ".$flag);
+		push(@rwrs, $path." ".$redirect->{'dest'}." [".join(",", @flags)."]");
 		if (!@rwes) {
 			&apache::save_directive(
 				"RewriteEngine", ["on"], $vconf, $conf);

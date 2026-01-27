@@ -3484,6 +3484,7 @@ foreach my $r ('webmail', 'admin') {
 		       'dest' => $url,
 		       'host' => $rhost,
 		       'code' => 301,
+		       'last' => 1,
 		       'http' => 1,
 		       'https' => 1,
 		       'alias' => 0 };
