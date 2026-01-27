@@ -91,6 +91,9 @@ if ($multiline) {
 		if ($r->{'code'}) {
 			print "    Code: ",$r->{'code'},"\n";
 			}
+		if ($r->{'last'}) {
+			print "    Last rule: Yes\n";
+			}
 		print "    Protocols: ",join(" ", grep { $r->{$_} } ("http", "https")),"\n";
 		if ($r->{'host'}) {
 			print "    Limit to hostname: $r->{'host'}\n";
