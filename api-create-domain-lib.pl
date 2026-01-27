@@ -372,11 +372,6 @@ if ($opts->{'proxy'}) {
 	$proxy_pass      = $opts->{'proxy'};
 	}
 
-if ($opts->{'framefwd'}) {
-	$proxy_pass_mode = 2;
-	$proxy_pass      = $opts->{'framefwd'};
-	}
-
 my $default_cert_owner;
 $default_cert_owner = 1 if $opts->{'default-cert-owner'};
 

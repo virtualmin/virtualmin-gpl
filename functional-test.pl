@@ -8638,28 +8638,6 @@ $web_tests = [
 	  'antigrep' => 'Google',
 	},
 
-	# Enable frame forwarding
-	{ 'command' => 'modify-web.pl',
-	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'framefwd', 'http://www.google.com/' ] ],
-	},
-
-	# Test wget for frame
-	{ 'command' => $wget_command.'http://'.$test_domain,
-	  'grep' => [ 'http://www.google.com/', 'frame' ],
-	},
-
-	# Disable frame forwarding
-	{ 'command' => 'modify-web.pl',
-	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'no-framefwd' ] ],
-	},
-
-	# Test wget to make sure frame is gone
-	{ 'command' => $wget_command.'http://'.$test_domain,
-	  'grep' => 'Test web page',
-	},
-
 	# Make this the default website
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain' => $test_domain ],

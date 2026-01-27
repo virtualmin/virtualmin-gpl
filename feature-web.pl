@@ -233,7 +233,6 @@ else {
 	&link_apache_logs($d, $log, $elog);
 	$d->{'alias_mode'} = 0;
 	}
-&create_framefwd_file($d);
 &$second_print($text{'setup_done'});
 
 if (!$d->{'alias'} && !$d->{'notmplcgimode'}) {
@@ -836,7 +835,6 @@ else {
 		&fix_php_ini_files($d, \@fixes);
 		}
 	&release_lock_web($d);
-	&create_framefwd_file($d);
 	if ($need_restart && $rv) {
 		# Need a full restart
 		&register_post_action(\&restart_apache, 1);
@@ -1964,34 +1962,6 @@ closedir(DIR);
 return sort { $mtime{$a} cmp $mtime{$b} } @rv;
 }
 
-# create_framefwd_file(&domain)
-# Create a framefwd.html file for a server, if needed
-sub create_framefwd_file
-{
-my ($d) = @_;
-if ($d->{'proxy_pass_mode'} == 2) {
-	my $template = &get_template($d->{'template'});
-	my $ff = &framefwd_file($d);
-	&unlink_file($ff);
-	my $text = $template->{'frame'};
-	$text =~ s/\t/\n/g;
-	&open_tempfile_as_domain_user($d, FRAME, ">$ff");
-	my %subs = %{$d};
-	$subs{'proxy_title'} ||= $tmpl{'owner'};
-	$subs{'proxy_meta'} ||= "";
-	$subs{'proxy_meta'} = join("\n", split(/\t/, $subs{'proxy_meta'}));
-	&print_tempfile(FRAME, &substitute_domain_template($text, \%subs));
-	&close_tempfile_as_domain_user($d, FRAME);
-
-	# Create a blank HTML page too, used in the frameset
-	my $bl = &frameblank_file($d);
-	&unlink_file($bl);
-	&open_tempfile_as_domain_user($d, BLANK, ">$bl");
-	&print_tempfile(BLANK, "<body bgcolor=#ffffff></body>\n");
-	&close_tempfile_as_domain_user($d, BLANK);
-	}
-}
-
 # public_html_dir(&domain, [relative], [no-subdomain])
 # Returns the HTML documents directory for a virtual server
 sub public_html_dir
@@ -2106,22 +2076,6 @@ else {
 	}
 }
 
-# framefwd_file(&domain)
-sub framefwd_file
-{
-my ($d) = @_;
-my $hdir = &public_html_dir($d);
-return "$hdir/framefwd.html";
-}
-
-# frameblank_file(&domain)
-sub frameblank_file
-{
-my ($d) = @_;
-my $hdir = &public_html_dir($d);
-return "$hdir/frameblank.html";
-}
-
 # check_depends_web(&dom)
 # Ensure that a website has a home directory, if not proxying
 sub check_depends_web
@@ -2135,10 +2089,6 @@ if ($d->{'alias'}) {
 	# If this is an alias domain, then no home is needed
 	return undef;
 	}
-elsif ($d->{'proxy_pass_mode'} == 2) {
-	# If proxying using frame forwarding, a home is needed
-	return $d->{'dir'} ? undef : $text{'setup_edepframe'};
-	}
 elsif ($d->{'proxy_pass_mode'} == 1) {
 	# If proxying using ProxyPass, no home is needed
 	return undef;
@@ -2147,22 +2097,6 @@ else {
 	# For a normal website, we need a home
 	return $d->{'dir'} ? undef : $text{'setup_edepweb'};
 	}
-}
-
-# frame_fwd_input(forwardto)
-sub frame_fwd_input
-{
-my ($fwdto) = @_;
-my $label;
-if ($config{'proxy_pass'} == 1) {
-	$label = &hlink($text{'form_proxy'}, "proxypass");
-	}
-else {
-	$label = &hlink($text{'form_framefwd'}, "framefwd");
-	}
-return &ui_table_row($label,
-	&ui_opt_textbox("proxy", $fwdto, 40,
-			$text{'form_plocal'}, $text{'form_purl'}), 3);
 }
 
 # disable_writelogs(&domain)
@@ -2834,19 +2768,6 @@ print &ui_table_row(&hlink($text{'tmpl_disabled_url'},
 		&ui_textbox("disabled_url", $url, 30)), 0, 0,
 	  $text{'tmpl_disabled_urlnone'}, [ "disabled_url" ]));
 
-if ($config{'proxy_pass'} == 2) {
-	# Frame-forwarding HTML (if enabled)
-	print &ui_table_hr();
-
-	print &ui_table_row(&hlink($text{'tmpl_frame'}, "template_frame"),
-		&none_def_input("frame", $tmpl->{'frame'},
-				$text{'tmpl_framebelow'}, 1, 0, undef,
-				[ "frame" ])."<br>".
-		&ui_textarea("frame", $tmpl->{'frame'} eq "none" ? undef :
-				join("\n", split(/\t/, $tmpl->{'frame'})),
-				10, 60));
-	}
-
 # Enable HTTP2 for new websites
 my @opts = ( [ 0, $text{'newweb_http2_def'} ],
 	     [ 1, $text{'yes'} ],
@@ -3051,11 +2972,6 @@ if ($in{'disabled_url_mode'} == 2) {
 		&error($text{'tmpl_edisabled_url'});
 	}
 $tmpl->{'disabled_url'} = &parse_none_def("disabled_url");
-
-if ($config{'proxy_pass'} == 2) {
-	# Save frame-forwarding settings
-	$tmpl->{'frame'} = &parse_none_def("frame");
-	}
 
 # Save HTTP2 option
 $tmpl->{'web_http2'} = $in{'web_http2'};
@@ -5687,57 +5603,26 @@ my ($d, $oldd) = @_;
 my @balancers = &list_proxy_balancers($d);
 my @redirects = &list_redirects($d);
 if ($d->{'proxy_pass_mode'} && (!$oldd || !$oldd->{'proxy_pass_mode'})) {
-	# Proxying enabled
-	if ($d->{'proxy_pass_mode'} == 1) {
-		# Need to add proxy directives
-		my $b = { 'path' => '/',
-			  'websockets' => 1,
-			  'urls' => [ $d->{'proxy_pass'} ] };
-		return &create_proxy_balancer($d, $b);
-		}
-	else {
-		# Setup frame forwarding
-		&create_framefwd_file($d);
-		my $ff = &framefwd_file($d);
-		my $r = { 'path' => '/',
-			  'regexp' => 1,
-			  'alias' => 1,
-			  'dest' => $ff,
-			  'http' => 1,
-			  'https' => 1 };
-		return &create_redirect($d, $r);
-		}
+	# Need to add proxy directives
+	my $b = { 'path' => '/',
+		  'websockets' => 1,
+		  'urls' => [ $d->{'proxy_pass'} ] };
+	return &create_proxy_balancer($d, $b);
 	}
 elsif (!$d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'}) {
-	# Proxying disabled
-	if ($oldd->{'proxy_pass_mode'} == 1) {
-		# Need to remove proxy directives
-		my ($b) = grep { $_->{'path'} eq '/' } @balancers;
-		return "Missing proxy for /" if (!$b);
-		return &delete_proxy_balancer($d, $b);
-		}
-	else {
-		# Turn off frame forwarding
-		my ($r) = grep { $_->{'path'} eq '/' } @redirects;
-		return "Missing redirect for /" if (!$r);
-		return &delete_redirect($d, $r);
-		}
+	# Need to remove proxy directives
+	my ($b) = grep { $_->{'path'} eq '/' } @balancers;
+	return "Missing proxy for /" if (!$b);
+	return &delete_proxy_balancer($d, $b);
 	}
 elsif ($d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'} &&
        $d->{'proxy_pass'} ne $oldd->{'proxy_pass'}) {
 	# URL has changed
-	if ($d->{'proxy_pass_mode'} == 1) {
-		my ($b) = grep { $_->{'path'} eq '/' } @balancers;
-                return "Missing proxy for /" if (!$b);
-		my $oldb = { %$b };
-		$b->{'urls'} = [ $d->{'proxy_pass'} ];
-		return &modify_proxy_balancer($d, $b, $oldb);
-		}
-	else {
-		# Update frame forwarding, which is all in the HTML
-		&create_framefwd_file($d);
-		return undef;
-		}
+	my ($b) = grep { $_->{'path'} eq '/' } @balancers;
+	return "Missing proxy for /" if (!$b);
+	my $oldb = { %$b };
+	$b->{'urls'} = [ $d->{'proxy_pass'} ];
+	return &modify_proxy_balancer($d, $b, $oldb);
 	}
 return undef;
 }

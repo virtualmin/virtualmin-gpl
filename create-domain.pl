@@ -90,9 +90,7 @@ Encrypt. To do the same but skip connectivity checks, use
 C<--acme-always> flag instead.
 
 The C<--proxy> parameter can be used to have the website proxy all requests
-to another URL, which must follow C<--proxy>. Alternately, the C<--framefwd>
-parameter similarly can be used to forward requests to the virtual server to
-another URL, using a hidden frame rather than proxying.
+to another URL, which must follow C<--proxy>.
 
 =cut
 
@@ -464,10 +462,6 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--proxy") {
 		$proxy_pass_mode = 1;
-		$proxy_pass = shift(@ARGV);
-		}
-	elsif ($a eq "--framefwd") {
-		$proxy_pass_mode = 2;
 		$proxy_pass = shift(@ARGV);
 		}
 	elsif ($a eq "--default-cert-owner") {
@@ -1197,7 +1191,7 @@ print "                        [--generate-ssh-key | --use-ssh-key file|data]\n"
 print "                        [--append-style format]\n";
 print "                        [--shell command]\n";
 print "                        [--subprefix directory]\n";
-print "                        [--proxy url | --framefwd url]\n";
+print "                        [--proxy url]\n";
 exit(1);
 }
 

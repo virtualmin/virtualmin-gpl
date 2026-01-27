@@ -202,11 +202,6 @@ if (!$parentuser) {
 	}
 if (!$aliasdom) {
 	# Validate non-alias domain inputs
-	if ($config{'proxy_pass'} && !$in{'proxy_def'} &&
-	    defined($in{'proxy'})) {
-		($proxy = $in{'proxy'}) =~ /^(http|https):\/\/\S+$/ ||
-			&error($text{'setup_eproxy'});
-		}
 	if (!$in{'prefix_def'}) {
 		$in{'prefix'} =~ /^[a-z0-9\.\-]+$/i ||
 			&error($text{'setup_eprefix'});
@@ -366,8 +361,6 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'virtalready', $virtalready,
 	 'virt6already', $virt6already,
 	 'source', 'domain_setup.cgi',
-	 'proxy_pass', $proxy,
-	 'proxy_pass_mode', $proxy ? $config{'proxy_pass'} : 0,
 	 'parent', $parentdom ? $parentdom->{'id'} : "",
 	 'template', $in{'template'},
 	 'plan', $plan->{'id'},

@@ -54,11 +54,6 @@ Related to this, the flag C<--proxy-host> will cause the original HTTP host
 header to be forwarded to proxy destination. This includes any additional
 per-directory proxies. To turn this off, use the C<--no-proxy-host> flag.
 
-The C<--framefwd> parameter similarly can be used to forward requests to the
-virtual server to another URL, using a hidden frame rather than proxying. To
-turn it off, using the C<--no-framefwd> option. To specify a title for the
-forwarding frame page, use C<--frametitle>.
-
 If Ruby is installed, the execution mode for scripts in that language can be
 set with the C<--ruby-mode> flag, followed by either C<--mod_ruby>, C<--cgi> or
 C<--fcgid>. This has no effect on scripts using the Rails framework though,
@@ -215,17 +210,6 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--no-proxy-host") {
 		$proxyhost = 0;
-		}
-	elsif ($a eq "--framefwd") {
-		$framefwd = shift(@ARGV);
-		$framefwd =~ /^(http|https):\/\/\S+$/ ||
-			&usage($text{'frame_eurl'});
-		}
-	elsif ($a eq "--frametitle") {
-		$frametitle = shift(@ARGV);
-		}
-	elsif ($a eq "--no-framefwd") {
-		$framefwd = "";
 		}
 	elsif ($a eq "--ruby-mode" && $supports_ruby) {
 		$rubymode = shift(@ARGV);
@@ -421,7 +405,7 @@ while(@ARGV > 0) {
 		}
 	}
 @dnames || $all_doms || usage("No domains to modify specified");
-$mode || defined($proxy) || defined($framefwd) || $tlsa || $rubymode ||
+$mode || defined($proxy) || $tlsa || $rubymode ||
   defined($content) || defined($children) || defined($phplog) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
@@ -432,7 +416,6 @@ $mode || defined($proxy) || defined($framefwd) || $tlsa || $rubymode ||
   $ssl_cert || $ssl_key || $ssl_ca || defined($phpmail) || defined($wwwredir) ||
   defined($proxyhost) ||
 	&usage("Nothing to do");
-$proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate FastCGI options
 @modes = &supported_php_modes();
@@ -470,16 +453,6 @@ else {
 foreach $d (@doms) {
 	if (defined($webmail) && !&has_webmail_rewrite($d)) {
 		&usage("The domain $d->{'dom'} does not support URL rewriting, needed for webmail redirects");
-		}
-	}
-
-# Make sure proxy and frame settings don't clash
-foreach $d (@doms) {
-	if ($framefwd && $d->{'proxy_pass_mode'} == 1) {
-		&usage("Frame forwarding cannot be enabled for $d->{'dom'}, as it is currently using proxying");
-		}
-	if ($proxy && $d->{'proxy_pass_mode'} == 2) {
-		&usage("Proxying cannot be enabled for $d->{'dom'}, as it is currently using frame forwarding");
 		}
 	}
 
@@ -657,26 +630,6 @@ foreach $d (@doms) {
 			}
 		}
 
-	if (defined($framefwd)) {
-		# Update frame forwarding mode
-		if ($framefwd) {
-			$d->{'proxy_pass'} = $framefwd;
-			$d->{'proxy_pass_mode'} = 2;
-			}
-		else {
-			$d->{'proxy_pass'} = undef;
-			$d->{'proxy_pass_mode'} = 0;
-			}
-		}
-	if (defined($frametitle)) {
-		$d->{'proxy_title'} = $frametitle;
-		}
-	if (defined($frametitle) || $framefwd) {
-		&$first_print($text{'frame_gen'});
-		&create_framefwd_file($d);
-		&$second_print($text{'setup_done'});
-		}
-
 	if (!$d->{'alias'} && defined($content)) {
 		# Just create index.html page with content
 		&$first_print($text{'setup_contenting'});
@@ -834,7 +787,7 @@ foreach $d (@doms) {
 			}
 		}
 
-	if (defined($proxy) || defined($framefwd) || $port || $sslport) {
+	if (defined($proxy) || $port || $sslport) {
 		# Update website feature
 		$p = &domain_has_website($d);
 		if ($p eq 'web') {
@@ -1174,7 +1127,7 @@ foreach $d (@doms) {
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
-	if (defined($proxy) || defined($framefwd) || $htmldir ||
+	if (defined($proxy) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($children_no_check) || defined($renew) || $breakcert ||
 	    $linkcert || $fixhtmldir || defined($fcgiwrap) ||
@@ -1218,8 +1171,6 @@ print "                     [--php-mail | --no-php-mail]\n";
 print "                     [--cleanup-mod-php]\n";
 print "                     [--proxy http://... | --no-proxy]\n";
 print "                     [--proxy-host | --no-proxy-host]\n";
-print "                     [--framefwd http://... | --no-framefwd]\n";
-print "                     [--frametitle \"title\" ]\n";
 if ($supports_ruby) {
 	print "                     [--ruby-mode none|mod_ruby|cgi|fcgid]\n";
 	}

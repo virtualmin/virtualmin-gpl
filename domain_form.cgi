@@ -551,11 +551,6 @@ if (@input_plugins) {
 print &ui_hidden_table_start($text{'form_proxysect'}, "width=100%", 2,
 			     "proxy", 0, [ "width=30%" ]);
 
-# Show inputs for setting up a proxy-only virtual server
-if ($can_website && $config{'proxy_pass'} && !$aliasdom) {
-	print &frame_fwd_input();
-	}
-
 # Show field for mail forwarding
 if ($can_feature{'mail'} && !$aliasdom && !$subdom && &can_edit_catchall()) {
 	print &ui_table_row(&hlink($text{'form_fwdto'}, "fwdto"),

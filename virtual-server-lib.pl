@@ -169,8 +169,7 @@ $reseller_group_name = "resellers";
 
 @all_template_files = ( "domain-template", "subdomain-template",
 			"user-template", "local-template", "bw-template",
-			"warnbw-template", "framefwd-template",
-			"update-template",
+			"warnbw-template", "update-template",
 			$virtualmin_pro ? ( "reseller-template" ) : ( ) );
 
 $initial_users_dir = "$module_config_directory/initial";

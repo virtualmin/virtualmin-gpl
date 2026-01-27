@@ -3661,10 +3661,8 @@ foreach my $d (&sort_indent_domains($doms)) {
 							  : "view_domain.cgi";
 			my $dn = &shorten_domain_name($d);
 			$dn = $d->{'disabled'} ? &ui_text_color("<i>$dn</i>", 'danger') : $dn;
-			my $proxy = $d->{'proxy_pass_mode'} == 2 ?
-			 " <a href='frame_form.cgi?dom=$d->{'id'}'>(F)</a>" :
-				    $d->{'proxy_pass_mode'} == 1 ?
-			 " <a href='proxy_form.cgi?dom=$d->{'id'}'>(P)</a>" :"";
+			my $proxy = $d->{'proxy_pass_mode'} ?
+				" <a href='proxy_form.cgi?dom=$d->{'id'}'>(P)</a>" : "";
 			push(@cols, "$pfx<a href='$prog?".
 				    "dom=$d->{'id'}'>$dn</a>$proxy");
 			}
@@ -9871,7 +9869,6 @@ if (scalar(@list_templates_cache)) {
 local @rv;
 &ensure_template("domain-template");
 &ensure_template("subdomain-template");
-&ensure_template("framefwd-template");
 &ensure_template("user-template");
 push(@rv, { 'id' => 0,
 	    'name' => $text{'newtmpl_name0'},
@@ -10049,7 +10046,6 @@ push(@rv, { 'id' => 0,
 	    'skel_subs' => int($config{'virtual_skel_subs'}),
 	    'skel_nosubs' => $config{'virtual_skel_nosubs'},
 	    'exclude' => $config{'default_exclude'} || "none",
-	    'frame' => &cat_file("framefwd-template", 1),
 	    'gacl' => 1,
 	    'gacl_umode' => $config{'gacl_umode'},
 	    'gacl_uusers' => $config{'gacl_uusers'},
@@ -10507,7 +10503,6 @@ if ($tmpl->{'id'} == 0) {
 	$config{'defsafeunder'} = $tmpl->{'safeunder'};
 	$config{'defipfollow'} = $tmpl->{'ipfollow'};
 	$config{'defresources'} = $tmpl->{'resources'};
-	&uncat_file("framefwd-template", $tmpl->{'frame'}, 1);
 	$config{'ip_ranges'} = $tmpl->{'ranges'} eq 'none' ? undef :
 			       $tmpl->{'ranges'};
 	$config{'ip_ranges6'} = $tmpl->{'ranges6'} eq 'none' ? undef :
@@ -10625,7 +10620,7 @@ if (!$tmpl->{'default'}) {
 		    "dns_cloud", "dns_slaves", "dns_prins", "dns_alias",
 		    "web_acme", "web_webmail", "web_admin", "web_http2",
 		    "web_redirects", "web_sslredirect", "web_php",
-		    "web", "dns", "ftp", "mail", "frame", "user_aliases",
+		    "web", "dns", "ftp", "mail", "user_aliases",
 		    "ugroup", "sgroup", "quota", "uquota", "ushell", "ujail",
 		    "mailboxlimit", "domslimit",
 		    "dbslimit", "aliaslimit", "bwlimit", "mongrelslimit","skel",
@@ -14009,12 +14004,10 @@ if (!$d->{'parent'} && $d->{'webmin'} && &can_switch_user($d)) {
 	}
 
 if (&domain_has_website($d) && !$d->{'alias'} && &can_edit_forward()) {
-	# Proxying / frame forward configuration button
-	local $mode = $d->{'proxy_pass_mode'} || $config{'proxy_pass'};
-	local $psuffix = $mode == 2 ? "frame" : "proxy";
-	push(@rv, { 'page' => $psuffix.'_form.cgi',
-		    'title' => $text{'edit_'.$psuffix},
-		    'desc' => $text{'edit_'.$psuffix.'desc'},
+	# Proxying configuration button
+	push(@rv, { 'page' => 'proxy_form.cgi',
+		    'title' => $text{'edit_proxy'},
+		    'desc' => $text{'edit_proxydesc'},
 		    'cat' => 'web',
 		  });
 	}
