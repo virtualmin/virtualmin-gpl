@@ -8616,28 +8616,6 @@ $web_tests = [
 		},
 	) : ( ),
 
-	# Enable proxying
-	{ 'command' => 'modify-web.pl',
-	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'proxy', 'http://www.google.com/' ] ],
-	},
-
-	# Test wget for proxy
-	{ 'command' => $wget_command.'http://'.$test_domain,
-	  'grep' => 'Google',
-	},
-
-	# Disable proxying
-	{ 'command' => 'modify-web.pl',
-	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'no-proxy' ] ],
-	},
-
-	# Test wget to make sure proxy is gone
-	{ 'command' => $wget_command.'http://'.$test_domain,
-	  'antigrep' => 'Google',
-	},
-
 	# Make this the default website
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain' => $test_domain ],

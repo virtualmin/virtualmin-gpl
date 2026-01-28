@@ -322,7 +322,6 @@ foreach my $pro_demo_feature
 	  'skip' => !(&domain_has_website($d) &&
 	              $d->{'dir'} &&
 	              !$d->{'alias'} &&
-	              !$d->{'proxy_pass_mode'} &&
 	              &can_edit_html()),
 	},
 )

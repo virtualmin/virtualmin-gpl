@@ -125,12 +125,6 @@ if (&master_admin()) {
 			    "<tt>$d->{'id'}</tt>");
 	}
 
-# Show forwarding / proxy destination
-if ($d->{'proxy_pass_mode'} && $d->{'proxy_pass'} && &domain_has_website($d)) {
-	print &ui_table_row($text{'edit_proxy'.$d->{'proxy_pass_mode'}},
-		$d->{'proxy_pass'}, 3, \@tds);
-	}
-
 if ($aliasdom) {
 	# Alias destination
 	print &ui_table_row($text{'edit_aliasto'},

@@ -53,7 +53,6 @@ disable=unix,mail,web,dns,mysql,postgres,ftp
 webmin_theme=*
 leave_acl=0
 hard_quotas=1
-proxy_pass=0
 show_features=0
 webmin=1
 ssl=1

@@ -184,7 +184,7 @@ if ((!$aliasdom && $d->{'dir'}) ||
     ($aliasdom && -d $d->{'home'})) {
 	my $domhome = "<tt>$d->{'home'}</tt>";
 	if (&domain_has_website($d) && $d->{'dir'} &&
-          !$d->{'proxy_pass_mode'} && &foreign_available("filemin")) {
+          & &foreign_available("filemin")) {
 		my $ophd;
 		my $phd = $ophd = &public_html_dir($d);
 		my $hd = $d->{'home'};

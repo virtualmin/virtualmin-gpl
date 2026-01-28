@@ -110,12 +110,6 @@ if (&can_change_ip($d) && &can_edit_domain($d)) {
 	}
 print &ui_table_row($text{'edit_ips'}, $ip);
 
-if ($d->{'proxy_pass_mode'} && $d->{'proxy_pass'} && &domain_has_website($d)) {
-	# Show forwarding / proxy destination
-	print &ui_table_row($text{'edit_proxy'.$d->{'proxy_pass_mode'}},
-			    "<tt>$d->{'proxy_pass'}</tt>");
-	}
-
 if ($aliasdom) {
 	# Show link to aliased domain
 	print &ui_table_row($text{'edit_aliasto'},

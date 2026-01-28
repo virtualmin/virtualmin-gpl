@@ -46,13 +46,10 @@ the C<--cleanup-mod-php> flag can be used to remove them from a virtual server.
 This is primarily useful if the Apache module has been disabled, but not all
 directives have been cleaned up.
 
-The C<--proxy> parameter can be used to have the website proxy all requests
-to another URL, which must follow C<--proxy>. To disable this, the
-C<--no-proxy> parameter must be given.
-
-Related to this, the flag C<--proxy-host> will cause the original HTTP host
-header to be forwarded to proxy destination. This includes any additional
-per-directory proxies. To turn this off, use the C<--no-proxy-host> flag.
+When proxies paths have been created, the flag C<--proxy-host> will cause the
+original HTTP host header to be forwarded to proxy destination. This includes
+any additional per-directory proxies. To turn this off, use the
+C<--no-proxy-host> flag.
 
 If Ruby is installed, the execution mode for scripts in that language can be
 set with the C<--ruby-mode> flag, followed by either C<--mod_ruby>, C<--cgi> or
@@ -196,14 +193,6 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--php-version") {
 		$version = shift(@ARGV);
-		}
-	elsif ($a eq "--proxy") {
-		$proxy = shift(@ARGV);
-		$proxy =~ /^(http|https):\/\/\S+$/ ||
-			&usage($text{'frame_eurl'});
-		}
-	elsif ($a eq "--no-proxy") {
-		$proxy = "";
 		}
 	elsif ($a eq "--proxy-host") {
 		$proxyhost = 1;
@@ -405,7 +394,7 @@ while(@ARGV > 0) {
 		}
 	}
 @dnames || $all_doms || usage("No domains to modify specified");
-$mode || defined($proxy) || $tlsa || $rubymode ||
+$mode || $tlsa || $rubymode ||
   defined($content) || defined($children) || defined($phplog) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
@@ -618,18 +607,6 @@ foreach $d (@doms) {
 		}
 
 	local $oldd = { %$d };
-	if (defined($proxy)) {
-		# Update proxy mode
-		if ($proxy) {
-			$d->{'proxy_pass'} = $proxy;
-			$d->{'proxy_pass_mode'} = 1;
-			}
-		else {
-			$d->{'proxy_pass'} = undef;
-			$d->{'proxy_pass_mode'} = 0;
-			}
-		}
-
 	if (!$d->{'alias'} && defined($content)) {
 		# Just create index.html page with content
 		&$first_print($text{'setup_contenting'});
@@ -787,7 +764,7 @@ foreach $d (@doms) {
 			}
 		}
 
-	if (defined($proxy) || $port || $sslport) {
+	if ($port || $sslport) {
 		# Update website feature
 		$p = &domain_has_website($d);
 		if ($p eq 'web') {
@@ -1115,7 +1092,7 @@ foreach $d (@doms) {
 			}
 		}
 
-	# Update proxy host mode
+	# Update proxy host header mode
 	if (defined($proxyhost)) {
 		if ($proxyhost) {
 			&$first_print("Enabling HTTP host header proxying ..");
@@ -1127,8 +1104,7 @@ foreach $d (@doms) {
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
-	if (defined($proxy) || $htmldir ||
-	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
+	if ($htmldir || $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($children_no_check) || defined($renew) || $breakcert ||
 	    $linkcert || $fixhtmldir || defined($fcgiwrap) ||
 	    defined($phplog) || defined($fcgiwrap) || $ssl_changed ||
@@ -1169,7 +1145,6 @@ print "                     [--php-fpm-mode dynamic|static|ondemand]\n";
 print "                     [--php-log filename | --no-php-log | --default-php-log]\n";
 print "                     [--php-mail | --no-php-mail]\n";
 print "                     [--cleanup-mod-php]\n";
-print "                     [--proxy http://... | --no-proxy]\n";
 print "                     [--proxy-host | --no-proxy-host]\n";
 if ($supports_ruby) {
 	print "                     [--ruby-mode none|mod_ruby|cgi|fcgid]\n";

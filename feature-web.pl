@@ -270,9 +270,12 @@ if ($config{'mail_autoconfig'} && $d->{'mail'} &&
 	&enable_email_autoconfig($d);
 	}
 
-# Add any proxypass directives
+# Add default proxy path
 if (!$d->{'alias'} && $d->{'proxy_pass'}) {
-	&update_apache_proxy_pass($d, undef);
+	my $b = { 'path' => '/',
+                  'websockets' => 1,
+                  'urls' => [ $d->{'proxy_pass'} ] };
+        &create_proxy_balancer($d, $b);
 	}
 
 &$first_print($text{'setup_webpost'});
@@ -723,35 +726,6 @@ else {
 		&flush_file_lines($virt->{'file'});
 		$rv++;
 		&$second_print($text{'setup_done'});
-		}
-	if ($d->{'proxy_pass_mode'} == 1 &&
-	    $oldd->{'proxy_pass_mode'} == 1 &&
-	    $d->{'proxy_pass'} ne $oldd->{'proxy_pass'}) {
-		# This is a proxying forwarding website and the URL has changed
-		&$first_print($text{'save_apache6'});
-		my $err = &update_apache_proxy_pass($d, $oldd);
-		if ($err) {
-			&$second_print(&text('save_eapache6', $err));
-			}
-		else {
-			$rv++;
-			&$second_print($text{'setup_done'});
-			}
-		}
-	if ($d->{'proxy_pass_mode'} != $oldd->{'proxy_pass_mode'}) {
-		# Proxy mode has been enabled or disabled
-		my $mode = $d->{'proxy_pass_mode'} ||
-			      $oldd->{'proxy_pass_mode'};
-		&$first_print($mode == 2 ? $text{'save_apache8'}
-					 : $text{'save_apache9'});
-		my $err = &update_apache_proxy_pass($d, $oldd);
-		if ($err) {
-			&$second_print(&text('save_eapache8', $err));
-			}
-		else {
-			$rv++;
-			&$second_print($text{'setup_done'});
-			}
 		}
 	if ($d->{'user'} ne $oldd->{'user'}) {
 		# Username has changed .. update SuexecUserGroup
@@ -2087,10 +2061,6 @@ if (!$d->{'parent'} && !$d->{'unix'}) {
 	}
 if ($d->{'alias'}) {
 	# If this is an alias domain, then no home is needed
-	return undef;
-	}
-elsif ($d->{'proxy_pass_mode'} == 1) {
-	# If proxying using ProxyPass, no home is needed
 	return undef;
 	}
 else {
@@ -5592,39 +5562,6 @@ my ($user, $d) = @_;
 &revoke_webserver_user_access($user, $d);
 # Delete user from domain config
 &delete_extra_user($d, $user);
-}
-
-# update_apache_proxy_pass(&domain, &old-domain)
-# Enable or disable Apache proxying of the whole site. Returns undef on success
-# or an error message on failure.
-sub update_apache_proxy_pass
-{
-my ($d, $oldd) = @_;
-my @balancers = &list_proxy_balancers($d);
-my @redirects = &list_redirects($d);
-if ($d->{'proxy_pass_mode'} && (!$oldd || !$oldd->{'proxy_pass_mode'})) {
-	# Need to add proxy directives
-	my $b = { 'path' => '/',
-		  'websockets' => 1,
-		  'urls' => [ $d->{'proxy_pass'} ] };
-	return &create_proxy_balancer($d, $b);
-	}
-elsif (!$d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'}) {
-	# Need to remove proxy directives
-	my ($b) = grep { $_->{'path'} eq '/' } @balancers;
-	return "Missing proxy for /" if (!$b);
-	return &delete_proxy_balancer($d, $b);
-	}
-elsif ($d->{'proxy_pass_mode'} && $oldd && $oldd->{'proxy_pass_mode'} &&
-       $d->{'proxy_pass'} ne $oldd->{'proxy_pass'}) {
-	# URL has changed
-	my ($b) = grep { $_->{'path'} eq '/' } @balancers;
-	return "Missing proxy for /" if (!$b);
-	my $oldb = { %$b };
-	$b->{'urls'} = [ $d->{'proxy_pass'} ];
-	return &modify_proxy_balancer($d, $b, $oldb);
-	}
-return undef;
 }
 
 # recursive_fix_apache_config(&parent, &config, old-regexp, new-value,

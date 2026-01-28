@@ -316,10 +316,6 @@ if (!defined($dom->{'home'})) {
 		$dom->{'home'} = $u[7];
 		}
 	}
-if (!defined($dom->{'proxy_pass_mode'}) && $dom->{'proxy_pass'}) {
-	# assume that proxy pass mode is proxy-based if not set
-	$dom->{'proxy_pass_mode'} = 1;
-	}
 if (!defined($dom->{'plan'}) && !$main::no_auto_plan) {
 	# assume first plan
 	local @plans = sort { $a->{'id'} <=> $b->{'id'} } &list_plans();
@@ -3661,10 +3657,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 							  : "view_domain.cgi";
 			my $dn = &shorten_domain_name($d);
 			$dn = $d->{'disabled'} ? &ui_text_color("<i>$dn</i>", 'danger') : $dn;
-			my $proxy = $d->{'proxy_pass_mode'} ?
-				" <a href='proxy_form.cgi?dom=$d->{'id'}'>(P)</a>" : "";
-			push(@cols, "$pfx<a href='$prog?".
-				    "dom=$d->{'id'}'>$dn</a>$proxy");
+			push(@cols, "$pfx<a href='$prog?dom=$d->{'id'}'>$dn</a>");
 			}
 		elsif ($c eq "type") {
 			my $dtype = $d->{'alias'} ? "$pfx$text{'form_generic_aliasshort'}" :
@@ -7130,8 +7123,6 @@ if (!$allopts->{'fix'}) {
 		$d->{'limit_'.$f} = $oldd{'limit_'.$f};
 		}
 	$d->{'owner'} = $oldd{'owner'};
-	$d->{'proxy_pass_mode'} = $oldd{'proxy_pass_mode'};
-	$d->{'proxy_pass'} = $oldd{'proxy_pass'};
 	foreach my $f (&list_custom_fields()) {
 		$d->{$f->{'name'}} = $oldd{$f->{'name'}};
 		}
@@ -11912,7 +11903,7 @@ return &can_edit_templates() || $access{'createresellers'};
 sub has_proxy_balancer
 {
 local ($d) = @_;
-if ($config{'web'} && !$d->{'alias'} && !$d->{'proxy_pass_mode'}) {
+if ($config{'web'} && !$d->{'alias'}) {
 	# From Apache
 	&require_apache();
 	if ($apache::httpd_modules{'mod_proxy'} &&
@@ -14003,15 +13994,6 @@ if (!$d->{'parent'} && $d->{'webmin'} && &can_switch_user($d)) {
 		  });
 	}
 
-if (&domain_has_website($d) && !$d->{'alias'} && &can_edit_forward()) {
-	# Proxying configuration button
-	push(@rv, { 'page' => 'proxy_form.cgi',
-		    'title' => $text{'edit_proxy'},
-		    'desc' => $text{'edit_proxydesc'},
-		    'cat' => 'web',
-		  });
-	}
-
 if (&has_proxy_balancer($d) && &can_edit_forward()) {
 	# Proxy balance editor
 	push(@rv, { 'page' => 'list_balancers.cgi',
@@ -14206,7 +14188,6 @@ if (&can_user_2fa()) {
 	}
 
 if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
-    !$d->{'proxy_pass_mode'} &&
     $virtualmin_pro && &can_edit_html()) {
 	# Edit web pages button
 	push(@rv, { 'page' => 'pro/edit_html.cgi',

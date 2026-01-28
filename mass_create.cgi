@@ -337,7 +337,6 @@ foreach $line (@lines) {
 		 'virt6', $virt6,
 		 'virtalready', $virtalready,
 		 'source', 'mass_create.cgi',
-		 'proxy_pass_mode', 0,
 		 'parent', $parentdom ? $parentdom->{'id'} : "",
 		 'alias', $aliasdom ? $aliasdom->{'id'} : "",
 		 'template', $tmpl->{'id'},
