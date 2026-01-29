@@ -7126,7 +7126,7 @@ wizard_db_postgres=Run PostgreSQL database server?
 wizard_emysqlinst=MySQL cannot be enabled, as it is not installed on your system
 wizard_emysqlconf=MySQL has been enabled, but cannot be used by Virtualmin. Use the <a href='$1'>MySQL Database</a> module to fix the problem.
 wizard_emysqlstart=An error occurred starting MySQL : $1
-wizard_epostgresinst=PostgreSQL cannot be enabled, as it is not installed on your system
+wizard_epostgresinst=PostgreSQL and the Webmin PostgreSQL module are no longer installed by default; for details, see the PostgreSQL <a href='$1' target=_blank>special instructions</a> for installing and configuring it
 wizard_epostgresconf=PostgreSQL has been enabled, but cannot be used by Virtualmin. Use the <a href='$1'>PostgreSQL Database</a> module to fix the problem.
 wizard_epostgresstart=An error occurred starting PostgreSQL : $1
 wizard_title_mysql=MySQL password

@@ -244,6 +244,7 @@ $denied_ssh_group = "deniedssh";
 
 $virtualmin_host_domain = "www.virtualmin.com";
 $virtualmin_link = "https://$virtualmin_host_domain";
+$virtualmin_docs_link = "$virtualmin_link/docs/";
 $virtualmin_account_link = "$virtualmin_link/account/";
 $virtualmin_account_subscriptions = "$virtualmin_link/account/subscriptions/";
 $virtualmin_shop_link = "$virtualmin_link/shop/";
