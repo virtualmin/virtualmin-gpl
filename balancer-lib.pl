@@ -153,6 +153,11 @@ foreach my $port (@ports) {
 		}
 	if ($balancer->{'websockets'} && !$balancer->{'none'}) {
 		# Add RewriteCond and RewriteRule for the path
+		my @rwes = &apache::find_directive("RewriteEngine", $vconf);
+		if (!@rwes) {
+			&apache::save_directive(
+				"RewriteEngine", ["on"], $vconf, $conf);
+			}
 		my $wsurl = $balancer->{'urls'}->[0];
 		my $wsprot = $wsurl =~ /^https:/i ? "wss" : "ws";
 		$wsurl =~ s/^(http|https):\/\///;
