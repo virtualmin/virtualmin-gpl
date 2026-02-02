@@ -17333,7 +17333,7 @@ if ($itype =~ /^(rpm|deb)$/ &&
 	my $vcmd = &get_api_helper_command() || "virtualmin";
 	my $outdated_message = '';
 	my $outdated_warning_icon = '';
-	my $date_trigger_warning = 1775001599;        # March 31, 2026
+	my $date_trigger_warning = 1790726400;        # September 30, 2026
 	if (time() > $date_trigger_warning) {         # cool-off period for devs
 		my ($prod_major) = &get_module_version();
 		$prod_major = 8 if ($prod_major < 8); # for new installer only
