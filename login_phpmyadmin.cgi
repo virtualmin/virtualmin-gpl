@@ -133,6 +133,23 @@ function pma_index_url(): string
 	return rtrim(PMAURL, '/').'/index.php';
 }
 
+/* Pass through browser auth for setups protected by Basic Auth */
+function incoming_auth_header(): string
+{
+	if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+		return trim((string)$_SERVER['HTTP_AUTHORIZATION']);
+	}
+	if (!empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+		return trim((string)$_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
+	}
+	if (!empty($_SERVER['PHP_AUTH_USER'])) {
+		$user = (string)$_SERVER['PHP_AUTH_USER'];
+		$pass = (string)($_SERVER['PHP_AUTH_PW'] ?? '');
+		return 'Basic '.base64_encode($user.':'.$pass);
+	}
+	return '';
+}
+
 /* Read key/value credentials from the credential file */
 function read_creds(): array
 {
@@ -234,6 +251,11 @@ if (!function_exists('curl_init')) {
 }
 
 $cookiejar = cookiejar_path();
+$auth = incoming_auth_header();
+$curl_headers = [];
+if ($auth !== '') {
+	$curl_headers[] = 'Authorization: '.$auth;
+}
 
 /* Remove the cookie jar on exit */
 register_shutdown_function(static function () use ($cookiejar): void {
@@ -253,10 +275,16 @@ curl_setopt_array($ch, [
 
 curl_setopt($ch, CURLOPT_URL, $login_idx);
 curl_setopt($ch, CURLOPT_HTTPGET, true);
+if ($curl_headers) {
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $curl_headers);
+}
 
 $res = curl_exec($ch);
 if ($res === false) {
 	fail(502, 'GET failed: '.curl_error($ch));
+}
+if ((int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE) >= 400) {
+	fail(502, 'GET blocked before phpMyAdmin login page (auth/proxy?)');
 }
 
 $hsz  = (int)curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -279,12 +307,18 @@ curl_setopt_array($ch, [
 	CURLOPT_URL => $login_idx,
 	CURLOPT_POST => true,
 	CURLOPT_POSTFIELDS => $post,
-	CURLOPT_HTTPHEADER => [ 'Content-Type: application/x-www-form-urlencoded' ],
+	CURLOPT_HTTPHEADER => array_merge(
+		$curl_headers,
+		[ 'Content-Type: application/x-www-form-urlencoded' ]
+	),
 ]);
 
 $res2 = curl_exec($ch);
 if ($res2 === false) {
 	fail(502, 'POST failed: '.curl_error($ch));
+}
+if ((int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE) >= 400) {
+	fail(502, 'POST rejected by upstream auth/proxy');
 }
 
 /* Forward session cookies to the browser so it is actually logged in */

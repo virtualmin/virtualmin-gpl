@@ -244,10 +244,11 @@ else {
 
 if ($in->{'postgres'}) {
 	# Enable and start PostgreSQL
-	&require_postgres();
 	if (!&foreign_installed("postgresql", 0)) {
-		return $text{'wizard_epostgresinst'};
+		return &text('wizard_epostgresinst', $virtualmin_docs_link.
+			"installation/automated/#postgresql");
 		}
+	&require_postgres();
 	$config{'postgres'} ||= 1;
 	if (&postgresql::is_postgresql_running() == 0) {
 		local $err = &postgresql::start_postgresql();

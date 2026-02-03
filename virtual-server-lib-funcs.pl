@@ -17333,7 +17333,7 @@ if ($itype =~ /^(rpm|deb)$/ &&
 	my $vcmd = &get_api_helper_command() || "virtualmin";
 	my $outdated_message = '';
 	my $outdated_warning_icon = '';
-	my $date_trigger_warning = 1775001599;        # March 31, 2026
+	my $date_trigger_warning = 1790726400;        # September 30, 2026
 	if (time() > $date_trigger_warning) {         # cool-off period for devs
 		my ($prod_major) = &get_module_version();
 		$prod_major = 8 if ($prod_major < 8); # for new installer only
@@ -21170,17 +21170,20 @@ return (( defined $_[0]
 			: 'GPL');
 }
 
+# get_module_version([no-edition])
+# Returns the module version, optionally without the edition suffix
 sub get_module_version
 {
+my ($no_edition) = @_;
 my $mver = $module_info{'version'};
-my $edit = &get_module_edition();
+my $edit = $no_edition ? '' : &get_module_edition();
 return wantarray ? (0, 0, 0, $edit) : "0.0.0 $edit" if (!$mver);
 if ($mver =~ /\A(\d+)\.(\d+)(?:\.(\d+))?/) {
 	my ($maj, $min, $bug) = ($1, $2, $3);
 	return wantarray
 		? ($maj, $min, $bug, $edit)
-		: ($maj . '.' . $min . (defined $bug ? ".$bug" : '') . " ".
-		   $edit);
+		: ($maj . '.' . $min . (defined $bug ? ".$bug" : '') .
+		   ($edit ? (" ". $edit) : ''));
 	}
 }
 
