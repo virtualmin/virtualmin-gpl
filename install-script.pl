@@ -400,7 +400,7 @@ else {
 	}
 
 # Install needed PHP and Perl modules
-&setup_script_requirements($d, $script, $ver, $phpver, $opts) || exit(1);
+&setup_script_requirements($d, $script, $ver, $phpver, $opts, $sinfo) || exit(1);
 
 # Disable PHP timeouts
 if (&indexof("php", @{$script->{'uses'}}) >= 0) {

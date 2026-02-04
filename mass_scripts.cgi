@@ -105,7 +105,7 @@ if ($in{'confirm'}) {
 
 		# Install needed PHP/perl/ruby modules
 		&setup_script_requirements($d, $script, $ver, $phpver,
-					   $opts) || next;
+					   $opts, $sinfo) || next;
 
 		# Work out login and password
 		$domuser = $sinfo->{'user'} || $d->{'user'};

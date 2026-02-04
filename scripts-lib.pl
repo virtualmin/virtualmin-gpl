@@ -2880,12 +2880,12 @@ foreach my $p (@proxies) {
 return 0;
 }
 
-# setup_script_requirements(&domain, &script, ver, &phpver, &opts)
+# setup_script_requirements(&domain, &script, ver, &phpver, &opts, [&upgrade])
 # Install any needed PHP modules or other dependencies for some script.
 # Returns 1 on success, 0 on failure. May print stuff.
 sub setup_script_requirements
 {
-local ($d, $script, $ver, $phpver, $opts) = @_;
+local ($d, $script, $ver, $phpver, $opts, $upgrade) = @_;
 
 # Install modules needed for various scripting languages
 &setup_php_modules($d, $script, $ver, $phpver, $opts) || return 0;
@@ -2893,7 +2893,9 @@ local ($d, $script, $ver, $phpver, $opts) = @_;
 &setup_perl_modules($d, $script, $ver, $opts) || return 0;
 &setup_ruby_modules($d, $script, $ver, $opts) || return 0;
 &setup_python_modules($d, $script, $ver, $opts) || return 0;
-&setup_noproxy_path($d, $script, $ver, $opts) || return 0;
+if (!$upgrade) {
+	&setup_noproxy_path($d, $script, $ver, $opts) || return 0;
+	}
 
 # Setup PHP variables, if the script has any
 if (&indexof("php", @{$script->{'uses'}}) >= 0 &&
