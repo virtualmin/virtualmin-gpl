@@ -84,6 +84,7 @@ foreach my $p (@ports) {
 			# or   AliasMatch /foo(.*)$ /home/smeg/public_html/bar
 			$rd->{'path'} = $1;
 			$rd->{'regexp'} = 1;
+			$rd->{'dest'} =~ s/\$1$//;
 			}
 		elsif (($al->{'name'} eq 'AliasMatch' ||
 			$al->{'name'} eq 'RedirectMatch') &&
@@ -319,17 +320,21 @@ foreach my $p (@ports) {
 				    $redirect->{'exact'});
 		my @aliases = &apache::find_directive($dir, $vconf);
 		my $path;
+		my $dest = $redirect->{'dest'};
 		if ($redirect->{'exact'}) {
 			$path = "^".$redirect->{'path'}."\$";
 			}
+		elsif ($redirect->{'regexp'}) {
+			$path = $redirect->{'path'}."(\.\*)\$";
+			$dest .= "\$1";
+			}
 		else {
-			$path = $redirect->{'path'}.
-				($redirect->{'regexp'} ? "(\.\*)\$" : "");
+			$path = $redirect->{'path'};
 			}
 		push(@aliases,
 			($redirect->{'code'} && !$redirect->{'alias'} ?
 				$redirect->{'code'}." " : "").
-			$path." ".$redirect->{'dest'});
+			$path." ".$dest);
 		&apache::save_directive($dir, \@aliases, $vconf, $conf);
 		}
 	&flush_file_lines($virt->{'file'});
