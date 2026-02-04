@@ -77,7 +77,6 @@ append=Include domain name in mailbox usernames?,1,1-Always,0-Only to avoid a cl
 longname=Domain name style in usernames,10,1-Full domain name,0-Username or first part of domain,2-First part of domain,Regular expression custom pattern
 appendadmin=Include domain name in extra admin usernames,1,1-Yes,0-No
 groupsame=Force group name to be always same as username?,1,1-Yes,0-No
-localgroup=Primary group for local users,3,Don't display local users
 mail_skel=Initial files directory for mail users,3,None
 homes_dir=Subdirectory for mailbox user home directories,0,20
 passwd_mode=Password field type,1,1-Randomly generated password,0-Enter password once,2-Enter password twice

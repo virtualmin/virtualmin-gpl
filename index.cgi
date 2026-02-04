@@ -63,16 +63,6 @@ $lerr = &warning_messages();
 print $lerr;
 $formno++ if ($lerr =~ /<\s*form/i);
 
-# Display local users
-if ($config{'localgroup'} && &can_edit_local()) {
-	print &ui_subheading($text{'index_header1'});
-	@lusers = &list_domain_users(undef, 0, 1);
-	&users_table(\@lusers, undef, undef, undef,
-		     [ [ 'edit_user.cgi?new=1&dom=0', $text{'index_uadd'} ] ],
-		     $text{'index_nousers'});
-	print &ui_hr();
-	}
-
 # Display domains
 if (!$main::basic_virtualmin_menu) {
 	print &ui_subheading($text{'index_header2'});

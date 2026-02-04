@@ -6,13 +6,9 @@ require './virtual-server-lib.pl';
 &ReadParse();
 &licence_status();
 &error_setup($text{'user_err'});
-if ($in{'dom'}) {
-	$d = &get_domain($in{'dom'});
-	&can_edit_domain($d) || &error($text{'users_ecannot'});
-	}
-else {
-	&can_edit_local() || &error($text{'users_ecannot2'});
-	}
+$d = &get_domain($in{'dom'});
+$d || &error($text{'edit_egone'});
+&can_edit_domain($d) || &error($text{'users_ecannot'});
 &can_edit_users() || &error($text{'users_ecannot'});
 
 if ($in{'recoverybut'}) {
@@ -163,19 +159,14 @@ elsif ($in{'delete'}) {
 		print &ui_form_end([ [ "confirm", $text{'user_deleteok'} ] ]);
 		print "</center>\n";
 
-		if ($d) {
-			&ui_print_footer("list_users.cgi?dom=$in{'dom'}",
-				$text{'users_return'});
-			}
-		else {
-			&ui_print_footer("", $text{'index_return'});
-			}
+		&ui_print_footer("list_users.cgi?dom=$in{'dom'}",
+			$text{'users_return'});
 		exit;
 		}
 	}
 else {
 	# Saving or creating, so verify inputs
-	if ($in{'new'} && $d) {
+	if ($in{'new'}) {
 		($mleft, $mreason, $mmax) = &count_feature("mailboxes");
 		$mleft == 0 && &error($text{'user_emailboxlimit'});
 		}
@@ -271,16 +262,14 @@ else {
 				}
 			}
 
-		if ($d) {
-			# Save list of allowed databases
-			local ($db, @dbs);
-			foreach $db (split(/\r?\n/, $in{'dbs'})) {
-				local ($type, $name) = split(/_/, $db, 2);
-				push(@dbs, { 'type' => $type,
-					     'name' => $name });
-				}
-			$user->{'dbs'} = \@dbs;
+		# Save list of allowed databases
+		local ($db, @dbs);
+		foreach $db (split(/\r?\n/, $in{'dbs'})) {
+			local ($type, $name) = split(/_/, $db, 2);
+			push(@dbs, { 'type' => $type,
+				     'name' => $name });
 			}
+		$user->{'dbs'} = \@dbs;
 		}
 	else {
 		# For a domain owner, the password is never changed here
@@ -297,7 +286,7 @@ else {
 	%donextra = ( );
 	foreach $e (@extra) {
 		$e = lc($e);
-		if ($d && $e =~ /^([^\@ \t]+$)$/) {
+		if ($e =~ /^([^\@ \t]+$)$/) {
 			$e = "$e\@$d->{'dom'}";
 			}
 		if ($e !~ /^(\S*)\@(\S+)$/) {
@@ -327,7 +316,7 @@ else {
 		}
 
 	# Save primary email address
-	if ($d && !$user->{'noprimary'}) {
+	if (!$user->{'noprimary'}) {
 		$user->{'email'} = $in{'mailbox'} ? $eu."\@".$d->{'dom'}
 						  : undef;
 		}
@@ -356,7 +345,7 @@ else {
 	if (!$mailbox && !$user->{'fixedhome'} && !$user->{'brokenhome'}) {
 		# Find home
 		if (&can_mailbox_home($user) &&
-		    $d && $d->{'home'} && !$in{'home_def'}) {
+		    $d->{'home'} && !$in{'home_def'}) {
 			$in{'home'} =~ /\.\.\// && &error($text{'user_ehome'});
 			$in{'home'} =~ /^\// && &error($text{'user_ehome2'});
 			if ($user->{'webowner'}) {
@@ -377,7 +366,7 @@ else {
 				}
 			$user->{'maybecreatehome'} = 1;
 			}
-		elsif ($d) {
+		else {
 			if ($user->{'webowner'}) {
 				# Auto home directory for web FTP user
 				$home = &public_html_dir($d);
@@ -387,12 +376,6 @@ else {
 				$home = "$d->{'home'}/$config{'homes_dir'}/".
 					$in{'mailuser'};
 				}
-			}
-		else {
-			# Auto home directory for local user
-			$home = &useradmin::auto_home_dir(
-				$home_base, $in{'mailuser'},
-				$config{'localgroup'});
 			}
 
 		# Make sure home exists, for web owner user
@@ -436,8 +419,7 @@ else {
 			# UID is same as domain for Qmail users and web owners
 			$user->{'uid'} = $d->{'uid'};
 			}
-		$user->{'gid'} = $d ? $d->{'gid'} :
-				      getgrnam($config{'localgroup'});
+		$user->{'gid'} = $d->{'gid'};
 
 		# Check for clash within this domain
 		($clash) = grep { $_->{'user'} eq $in{'mailuser'} } @users;
@@ -459,32 +441,23 @@ else {
 			$user->{'home'} = $home;
 			}
 
-		if (($utaken{$in{'mailuser'}} || ($d && $config{'append'})) &&
+		if (($utaken{$in{'mailuser'}} || $config{'append'}) &&
 		    !$user->{'noappend'}) {
 			# Need to append domain name
-			if ($d) {
-				# Add group name
-				$user->{'user'} = &userdom_name(
-					$in{'mailuser'},$d);
-				}
-			else {
-				# No domain to add, so give up!
-				&error($text{'user_eclash2'});
-				}
+			$user->{'user'} = &userdom_name(
+				$in{'mailuser'},$d);
 			}
 		else {
 			# Username is as entered
 			$user->{'user'} = $in{'mailuser'};
 			}
 
-		if ($d) {
-			# Check for a Unix clash
-			$mclash = &check_clash($in{'mailuser'}, $d->{'dom'});
-			if ($utaken{$user->{'user'}} ||
-			    $user->{'email'} && $mclash ||
-			    !$user->{'email'} && $mclash == 2) {
-				&error($text{'user_eclash'});
-				}
+		# Check for a Unix clash
+		$mclash = &check_clash($in{'mailuser'}, $d->{'dom'});
+		if ($utaken{$user->{'user'}} ||
+		    $user->{'email'} && $mclash ||
+		    !$user->{'email'} && $mclash == 2) {
+			&error($text{'user_eclash'});
 			}
 
 		# Check if any extras clash
@@ -656,8 +629,7 @@ else {
 				$clash && &error($text{'user_eclash2'});
 
 				# Has been renamed .. check for a username clash
-				if ($d && ($utaken{$in{'mailuser'}} ||
-					   $config{'append'}) &&
+				if (($utaken{$in{'mailuser'}} || $config{'append'}) &&
 				    !$user->{'noappend'}) {
 					# New name has to include group
 					$style = &guess_append_style(
@@ -676,8 +648,7 @@ else {
 					}
 
 				# Check for a virtuser clash too
-				if ($d && &check_clash($in{'mailuser'},
-						       $d->{'dom'})) {
+				if (&check_clash($in{'mailuser'}, $d->{'dom'})) {
 					&error($text{'user_eclash'});
 					}
 				}

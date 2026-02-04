@@ -761,7 +761,7 @@ if ($usermodule eq "ldap-useradmin") {
 return 0;
 }
 
-# list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs],
+# list_domain_users(&domain, [skipunix], [no-virts], [no-quotas], [no-dbs],
 # 		    [include-extra])
 # List all Unix users who are in the domain's primary group.
 # If domain is omitted, returns local users.
@@ -800,153 +800,146 @@ if (&has_quota_commands() && $config{'quota_get_user_command'} && $d) {
 	$ind_quota = 1;
 	}
 
+# Limit to domain users.
 local @users = &list_all_users_quotas($noquotas || $ind_quota);
-if ($d) {
-	# Limit to domain users.
-	@users = grep { $d->{'gid'} ne '' &&
-			$_->{'gid'} == $d->{'gid'} ||
-			$_->{'user'} eq $d->{'user'} } @users;
+@users = grep { $d->{'gid'} ne '' &&
+		$_->{'gid'} == $d->{'gid'} ||
+		$_->{'user'} eq $d->{'user'} } @users;
+foreach my $u (@users) {
+	if ($u->{'user'} eq $d->{'user'}) {
+		# Virtual server owner
+		$u->{'domainowner'} = 1;
+		if ($d->{'hashpass'}) {
+			$u->{'pass_crypt'} = $d->{'crypt_enc_pass'};
+			$u->{'pass_md5'} = $d->{'md5_enc_pass'};
+			$u->{'pass_mysql'} = $d->{'mysql_enc_pass'};
+			$u->{'pass_digest'} = $d->{'digest_enc_pass'};
+			}
+		}
+	elsif ($u->{'uid'} == $d->{'uid'}) {
+		# Web management user
+		$u->{'webowner'} = 1;
+		$u->{'noquota'} = 1;
+		$u->{'noprimary'} = 1;
+		$u->{'noextra'} = 1;
+		$u->{'noalias'} = 1;
+		$u->{'nocreatehome'} = 1;
+		$u->{'nomailfile'} = 1;
+		delete($u->{'email'});
+		}
+	if ($ind_quota && !$noquotas) {
+		# Call quota getting command for each user
+		local $out = &run_quota_command(
+				"get_user", $u->{'user'});
+		local ($used, $soft, $hard) = split(/\s+/, $out);
+		$u->{'softquota'} = $soft;
+		$u->{'hardquota'} = $hard;
+		$u->{'uquota'} = $used;
+		}
+	}
+local @subdoms;
+if ($d->{'parent'}) {
+	# This is a subdomain - exclude parent domain users, including
+	# jailed users
+	@users = grep { $_->{'home'} =~ 
+	    /(^|\/.*?\/\d{10,}\/\.)$d->{'home'}(\/|$)/ } @users;
+	}
+elsif (@subdoms = &get_domain_by("parent", $d->{'id'})) {
+	# This domain has subdomains - exclude their users, including
+	# jailed users
+	@users = grep { $_->{'home'} !~
+	    /(^|\/.*?\/\d{10,}\/\.)$d->{'home'}\/domains(\/|$)/ } @users;
+	}
+@users = grep { !$_->{'domainowner'} } @users
+	if ($skipunix || $d->{'parent'});
+
+# Remove users with @ in their names for whom a user with the @ replace
+# already exists (for Postfix)
+if ($mail_system == 0) {
+	local %umap = map { &replace_atsign($_->{'user'}), $_ }
+			grep { $_->{'user'} =~ /\@/ } @users;
+	@users = grep { !$umap{$_->{'user'}} } @users;
+	}
+
+# Find users with broken home dir (not under homes, or
+# domain's home, or public_html (for web ftp users))
+local $phd = &public_html_dir($d);
+foreach my $u (@users) {
+	if (!$u->{'webowner'} && $u->{'home'} &&
+	    $u->{'home'} !~ /^$d->{'home'}\/$config{'homes_dir'}\// &&
+	    !&is_under_directory($d->{'home'}, $u->{'home'})) {
+		# Home dir is outside domain's home base somehow
+		$u->{'brokenhome'} = 1;
+		}
+	elsif ($u->{'webowner'} && $u->{'home'} &&
+	       !&is_under_directory($phd, $u->{'home'}) &&
+	       $u->{'home'} ne $d->{'home'}) {
+		# Website FTP user's home dir must be under public_html
+		# or domain's home
+		$u->{'brokenhome'} = 1;
+		}
+	elsif (!$u->{'webowner'} && $u->{'home'} eq $d->{'home'}) {
+		# Home dir is equal to domain's dir, which is invalid,
+		# unless it is the web owner user (FTP user)
+		$u->{'brokenhome'} = 1;
+		}
+	}
+
+if ($d->{'hashpass'}) {
+	# Merge in encrypted passwords
+	&read_file_cached("$hashpass_dir/$d->{'id'}", \%hash);
 	foreach my $u (@users) {
-		if ($u->{'user'} eq $d->{'user'}) {
-			# Virtual server owner
-			$u->{'domainowner'} = 1;
-			if ($d->{'hashpass'}) {
-				$u->{'pass_crypt'} = $d->{'crypt_enc_pass'};
-				$u->{'pass_md5'} = $d->{'md5_enc_pass'};
-				$u->{'pass_mysql'} = $d->{'mysql_enc_pass'};
-				$u->{'pass_digest'} = $d->{'digest_enc_pass'};
-				}
-			}
-		elsif ($u->{'uid'} == $d->{'uid'}) {
-			# Web management user
-			$u->{'webowner'} = 1;
-			$u->{'noquota'} = 1;
-			$u->{'noprimary'} = 1;
-			$u->{'noextra'} = 1;
-			$u->{'noalias'} = 1;
-			$u->{'nocreatehome'} = 1;
-			$u->{'nomailfile'} = 1;
-			delete($u->{'email'});
-			}
-		if ($ind_quota && !$noquotas) {
-			# Call quota getting command for each user
-			local $out = &run_quota_command(
-					"get_user", $u->{'user'});
-			local ($used, $soft, $hard) = split(/\s+/, $out);
-			$u->{'softquota'} = $soft;
-			$u->{'hardquota'} = $hard;
-			$u->{'uquota'} = $used;
-			}
-		}
-	local @subdoms;
-	if ($d->{'parent'}) {
-		# This is a subdomain - exclude parent domain users, including
-		# jailed users
-		@users = grep { $_->{'home'} =~ 
-		    /(^|\/.*?\/\d{10,}\/\.)$d->{'home'}(\/|$)/ } @users;
-		}
-	elsif (@subdoms = &get_domain_by("parent", $d->{'id'})) {
-		# This domain has subdomains - exclude their users, including
-		# jailed users
-		@users = grep { $_->{'home'} !~
-		    /(^|\/.*?\/\d{10,}\/\.)$d->{'home'}\/domains(\/|$)/ } @users;
-		}
-	@users = grep { !$_->{'domainowner'} } @users
-		if ($skipunix || $d->{'parent'});
-
-	# Remove users with @ in their names for whom a user with the @ replace
-	# already exists (for Postfix)
-	if ($mail_system == 0) {
-		local %umap = map { &replace_atsign($_->{'user'}), $_ }
-				grep { $_->{'user'} =~ /\@/ } @users;
-		@users = grep { !$umap{$_->{'user'}} } @users;
-		}
-
-	# Find users with broken home dir (not under homes, or
-	# domain's home, or public_html (for web ftp users))
-	local $phd = &public_html_dir($d);
-	foreach my $u (@users) {
-		if (!$u->{'webowner'} && $u->{'home'} &&
-		    $u->{'home'} !~ /^$d->{'home'}\/$config{'homes_dir'}\// &&
-		    !&is_under_directory($d->{'home'}, $u->{'home'})) {
-			# Home dir is outside domain's home base somehow
-			$u->{'brokenhome'} = 1;
-			}
-		elsif ($u->{'webowner'} && $u->{'home'} &&
-		       !&is_under_directory($phd, $u->{'home'}) &&
-		       $u->{'home'} ne $d->{'home'}) {
-			# Website FTP user's home dir must be under public_html
-			# or domain's home
-			$u->{'brokenhome'} = 1;
-                        }
-		elsif (!$u->{'webowner'} && $u->{'home'} eq $d->{'home'}) {
-			# Home dir is equal to domain's dir, which is invalid,
-			# unless it is the web owner user (FTP user)
-			$u->{'brokenhome'} = 1;
-			}
-		}
-
-	if ($d->{'hashpass'}) {
-		# Merge in encrypted passwords
-		&read_file_cached("$hashpass_dir/$d->{'id'}", \%hash);
-		foreach my $u (@users) {
-			foreach my $s (@hashpass_types) {
-				$u->{'pass_'.$s} = $hash{$u->{'user'}.' '.$s};
-				}
-			}
-		}
-	else {
-		# Merge in plain text passwords
-		local (%plain, $need_plainpass_save);
-		&read_file_cached("$plainpass_dir/$d->{'id'}", \%plain);
-		foreach my $u (@users) {
-			if ($u->{'domainowner'}) {
-				# The domain owner's password is always known
-				$u->{'plainpass'} = $d->{'pass'};
-				}
-			elsif (!defined($u->{'plainpass'}) &&
-			       defined($plain{$u->{'user'}})) {
-				# Check if the plain password is valid, in case
-				# the crypted password was changed behind
-				# our back
-				if ($plain{$u->{'user'}." encrypted"} eq
-				     $u->{'pass'} ||
-				    &encrypt_user_password(
-				      $u, $plain{$u->{'user'}}) eq
-				      $u->{'pass'} ||
-				    &safe_unix_crypt($plain{$u->{'user'}},
-						     $u->{'pass'})
-				      eq $u->{'pass'}) {
-					# Valid - we can use it
-					$u->{'plainpass'} =$plain{$u->{'user'}};
-					if (!defined($plain{$u->{'user'}.
-						            " encrypted"})) {
-						# Save the correct crypted
-						# version now
-						$plain{$u->{'user'}.
-						       " encrypted"} =
-							$u->{'pass'};
-						$need_plainpass_save = 1;
-						}
-					}
-				else {
-					# We know it is wrong, so remove from
-					# the plain password cache file
-					delete($plain{$u->{'user'}});
-					delete($plain{$u->{'user'}." encrypted"});
-					$need_plainpass_save = 1;
-					}
-				}
-			}
-		if ($need_plainpass_save) {
-			&write_file("$plainpass_dir/$d->{'id'}", \%plain);
+		foreach my $s (@hashpass_types) {
+			$u->{'pass_'.$s} = $hash{$u->{'user'}.' '.$s};
 			}
 		}
 	}
 else {
-	# Limit to local users
-	local @lg = getgrnam($config{'localgroup'});
-	@users = grep { $_->{'gid'} == $lg[2] } @users;
+	# Merge in plain text passwords
+	local (%plain, $need_plainpass_save);
+	&read_file_cached("$plainpass_dir/$d->{'id'}", \%plain);
+	foreach my $u (@users) {
+		if ($u->{'domainowner'}) {
+			# The domain owner's password is always known
+			$u->{'plainpass'} = $d->{'pass'};
+			}
+		elsif (!defined($u->{'plainpass'}) &&
+		       defined($plain{$u->{'user'}})) {
+			# Check if the plain password is valid, in case
+			# the crypted password was changed behind
+			# our back
+			if ($plain{$u->{'user'}." encrypted"} eq
+			     $u->{'pass'} ||
+			    &encrypt_user_password(
+			      $u, $plain{$u->{'user'}}) eq
+			      $u->{'pass'} ||
+			    &safe_unix_crypt($plain{$u->{'user'}},
+					     $u->{'pass'})
+			      eq $u->{'pass'}) {
+				# Valid - we can use it
+				$u->{'plainpass'} =$plain{$u->{'user'}};
+				if (!defined($plain{$u->{'user'}.
+						    " encrypted"})) {
+					# Save the correct crypted
+					# version now
+					$plain{$u->{'user'}.
+					       " encrypted"} =
+						$u->{'pass'};
+					$need_plainpass_save = 1;
+					}
+				}
+			else {
+				# We know it is wrong, so remove from
+				# the plain password cache file
+				delete($plain{$u->{'user'}});
+				delete($plain{$u->{'user'}." encrypted"});
+				$need_plainpass_save = 1;
+				}
+			}
+		}
+	if ($need_plainpass_save) {
+		&write_file("$plainpass_dir/$d->{'id'}", \%plain);
+		}
 	}
 
 # Set appropriate quota field
@@ -3089,12 +3082,6 @@ sub can_recheck_licence
 {
 return 0 if (!$virtualmin_pro);
 return &master_admin();
-}
-
-# Returns 1 if the user can edit local users
-sub can_edit_local
-{
-return $access{'local'};
 }
 
 # Returns 1 if the user can create new top-level servers or child servers
@@ -8544,7 +8531,7 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			}
 
 		# Install needed PHP modules
-		if (!&setup_script_requirements($d, $script, $ver, $phpver, $opts)) {
+		if (!&setup_script_requirements($d, $script, $ver, $phpver, $opts, undef)) {
 			&$second_print($text{'setup_scriptreqs'});
 			next;
 			}
@@ -13293,7 +13280,7 @@ foreach my $f (@features) {
 	}
 foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "ldap_base", "ldap_login", "ldap_pass", "ldap_port", "ldap",
-	       "clamscan_cmd", "iface", "netmask6", "localgroup", "home_quotas",
+	       "clamscan_cmd", "iface", "netmask6", "home_quotas",
 	       "mail_quotas", "group_quotas", "quotas", "shell", "ftp_shell",
 	       "dns_ip", "default_procmail", "defaultdomain_name",
 	       "compression", "pbzip2", "domains_group",
@@ -17017,12 +17004,6 @@ else {
 		&$second_print(&ui_text_color("⚠ ".$text{'check_ednsip3v6'},
 					      'warn'));
 		}
-	}
-
-# Make sure local group exists
-if ($config{'localgroup'} && !defined(getgrnam($config{'localgroup'}))) {
-	return &text('index_elocal', "<tt>$config{'localgroup'}</tt>",
-			   "../config.cgi?$module_name");
 	}
 
 # Validate home directory format

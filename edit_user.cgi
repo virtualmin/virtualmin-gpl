@@ -7,13 +7,9 @@ require './virtual-server-lib.pl';
 &ReadParse();
 
 # Check access
-if ($in{'dom'}) {
-	$d = &get_domain($in{'dom'});
-	&can_edit_domain($d) || &error($text{'users_ecannot'});
-	}
-else {
-	&can_edit_local() || &error($text{'users_ecannot2'});
-	}
+$d = &get_domain($in{'dom'});
+$d || &error($text{'edit_egone'});
+&can_edit_domain($d) || &error($text{'users_ecannot'});
 &can_edit_users() || &error($text{'users_ecannot'});
 
 # Get domain and templates details
@@ -510,7 +506,7 @@ elsif ($user_type eq 'db') {
 					2, &procell(undef, @tds) || \@tds);
 
 	# Show allowed databases
-	my @dbs = grep { $_->{'users'} } &domain_databases($d) if ($d);
+	my @dbs = grep { $_->{'users'} } &domain_databases($d);
 	if (@dbs) {
 		my $user;
 		$user = &create_initial_user($d) if ($in{'new'});
@@ -634,7 +630,7 @@ else {
 	@sgroups = &allowed_secondary_groups($d);
 
 	# Work out if the other permissions section has anything to display
-	if ($d && !$mailbox) {
+	if (!$mailbox) {
 		@dbs = grep { $_->{'users'} } &domain_databases($d);
 		}
 
@@ -1231,21 +1227,16 @@ if ($form_end) {
 	}
 
 # Link back to user list and/or main menu
-if ($d) {
-	if ($single_domain_mode) {
-		&ui_print_footer(
-			"list_users.cgi?dom=$in{'dom'}", $text{'users_return'},
-			"", $text{'index_return2'});
-		}
-	else {
-		&ui_print_footer(
-			"list_users.cgi?dom=$in{'dom'}", $text{'users_return'},
-			&domain_footer_link($d),
-			"", $text{'index_return'});
-		}
+if ($single_domain_mode) {
+	&ui_print_footer(
+		"list_users.cgi?dom=$in{'dom'}", $text{'users_return'},
+		"", $text{'index_return2'});
 	}
 else {
-	&ui_print_footer("", $text{'index_return'});
+	&ui_print_footer(
+		"list_users.cgi?dom=$in{'dom'}", $text{'users_return'},
+		&domain_footer_link($d),
+		"", $text{'index_return'});
 	}
 
 sub show_real_name_fields
