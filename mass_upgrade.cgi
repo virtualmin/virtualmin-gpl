@@ -78,7 +78,7 @@ if ($in{'confirm'}) {
 
 		# Install needed PHP modules
 		&setup_script_requirements($d, $script, $ver, $phpver,
-					   $opts) || next;
+					   $opts, $sinfo) || next;
 
 		# Fetch needed files
 		$ferr = &fetch_script_files($script, $sinfo->{'dom'}, $ver,
