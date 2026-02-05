@@ -1,3 +1,6 @@
+#### Version 8.0.1
+* Add ability to migrate Webmin monolithic to modular while keeping enabled modules for the new repository
+
 #### Version 8.0.0
 * Add support for systemd resource limits for Virtualmin Pro users
 * Add support for SFTP backups and restores, including the ability to purge SFTP backups
