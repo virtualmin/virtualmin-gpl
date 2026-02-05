@@ -1,7 +1,11 @@
-#### Version 8.0.1
+
+#### Version 8.1.0
 * Add support for PHP-FPM workload profiles
 * Fix PHP-FPM not restarting when certain custom config options are used in the template
 * Fix the missing message when DKIM is enabled or disabled
+
+#### Version 8.0.1
+* Add ability to migrate Webmin monolithic to modular while keeping enabled modules for the new repository
 
 #### Version 8.0.0
 * Add support for systemd resource limits for Virtualmin Pro users
