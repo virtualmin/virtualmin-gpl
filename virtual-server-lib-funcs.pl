@@ -7923,23 +7923,25 @@ return $user;
 sub unixuser_name
 {
 my ($dname) = @_;
-my ($dname_, $config_longname, $try1, $user) = ($dname, $config{'longname'});
+my $orig_dname = $dname;
+my ($try1, $user);
 
-if ($config_longname && $config_longname !~ /^[0-9]$/) {
-	# Extract random username based on the user pattern
-	$user = &generate_random_available_user($config_longname);
+if ($config{'longname'} && $config{'longname'} !~ /^[0-9]$/) {
+	# Create random username based on the user pattern
+	$user = &generate_random_available_user($config{'longname'});
 	}
-elsif ($config_longname == 2) {
+elsif ($config{'longname'} == 2) {
+	# First part of domain name
 	$user = &compute_prefix($dname, undef, undef, 1);
 	}
 else {
-	# Use one based on actual domain name
+	# Full domain name
 	$dname =~ s/^xn(-+)//;
 	$dname = &remove_numeric_prefix($dname);
 	$dname =~ /^([^\.]+)/;
 	($try1, $user) = ($1, $1);
-	if (defined(getpwnam($try1)) || $config_longname) {
-		$user = &remove_numeric_prefix($dname_);
+	if (defined(getpwnam($try1)) || $config{'longname'}) {
+		$user = &remove_numeric_prefix($orig_dname);
 		$try2 = $user;
 		if (defined(getpwnam($try2))) {
 			return (undef, $try1, $try2);
@@ -7961,7 +7963,8 @@ return ($user);
 sub unixgroup_name
 {
 my ($dname, $user) = @_;
-my ($dname_, $config_longname, $try1, $group) = ($dname, $config{'longname'});
+my $orig_dname = $dname;
+my ($try1, $group);
 
 if ($user && $config{'groupsame'}) {
 	# Same as username where possible
@@ -7971,10 +7974,10 @@ if ($user && $config{'groupsame'}) {
 	return (undef, $user, $user);
 	}
 # Extract random group based on the user pattern
-if ($config_longname && $config_longname !~ /^[0-9]$/) {
-	$group = &generate_random_available_user($config_longname);
+if ($config{'longname'} && $config{'longname'} !~ /^[0-9]$/) {
+	$group = &generate_random_available_user($config{'longname'});
 	}
-elsif ($config_longname == 2) {
+elsif ($config{'longname'} == 2) {
 	$group = &compute_prefix($dname, undef, undef, 1);
 	}
 # Use one based on actual domain name
@@ -7984,7 +7987,7 @@ else {
 	$dname =~ /^([^\.]+)/;
 	($try1, $group) = ($1, $1);
 	if (defined(getgrnam($try1)) || $config{'longname'}) {
-		$group = &remove_numeric_prefix($dname_);
+		$group = &remove_numeric_prefix($orig_dname);
 		$try2 = $group;
 		if (defined(getpwnam($try))) {
 			return (undef, $try1, $try2);
