@@ -7931,16 +7931,19 @@ if ($config{'longname'} && $config{'longname'} !~ /^[0-9]$/) {
 	$user = &generate_random_available_user($config{'longname'});
 	}
 elsif ($config{'longname'} == 2) {
-	# First part of domain name
+	# Username is same as the prefix
 	$user = &compute_prefix($dname, undef, undef, 1);
 	}
 else {
-	# Full domain name
+	# Username is the first part of the domain name if possible,
+	# otherwise fall back to the full domain name
 	$dname =~ s/^xn(-+)//;
 	$dname = &remove_numeric_prefix($dname);
 	$dname =~ /^([^\.]+)/;
 	($try1, $user) = ($1, $1);
 	if (defined(getpwnam($try1)) || $config{'longname'}) {
+		# Short username is in use or the admin asked for a
+		# full domain name
 		$user = &remove_numeric_prefix($orig_dname);
 		$try2 = $user;
 		if (defined(getpwnam($try2))) {
@@ -7949,7 +7952,7 @@ else {
 		}
 	}
 if ($config{'username_length'} && length($user) > $config{'username_length'}) {
-	# Admin asked for a short username
+	# Admin asked for a short username, so truncate it
 	my $short = substr($user, 0, $config{'username_length'});
 	if (!defined(getpwnam($short))) {
 		$user = $short;
@@ -7973,15 +7976,17 @@ if ($user && $config{'groupsame'}) {
 		}
 	return (undef, $user, $user);
 	}
-# Extract random group based on the user pattern
 if ($config{'longname'} && $config{'longname'} !~ /^[0-9]$/) {
+	# Create random group based on the user pattern
 	$group = &generate_random_available_user($config{'longname'});
 	}
 elsif ($config{'longname'} == 2) {
+	# Group name is same as the prefix
 	$group = &compute_prefix($dname, undef, undef, 1);
 	}
-# Use one based on actual domain name
 else {
+	# Group name is the first part of the domain name if possible,
+	# otherwise fall back to the full domain name
 	$dname =~ s/^xn(-+)//;
 	$dname = &remove_numeric_prefix($dname);
 	$dname =~ /^([^\.]+)/;
