@@ -102,7 +102,8 @@ if ($shell eq 'none' || !$shell) {
 	   'plainpass', $d->{'pass'},
 	   'domainowner', 1,
 	   'unix', 1,
-	   'email', $d->{'user'}.'\@'.$d->{'dom'},
+	   'email', $d->{'user'} =~ /\@/ ? $d->{'user'} :
+			$d->{'user'}.'\@'.$d->{'dom'},
 	 );
 &set_pass_change(\%uinfo);
 eval {
@@ -1350,11 +1351,12 @@ sub create_email_for_unix
 {
 my ($d) = @_;
 my @virts = &list_virtusers();
-my $email = $d->{'user'}."\@".$d->{'dom'};
+my $email = $d->{'user'} =~ /\@/ ? $d->{'user'}
+				 : $d->{'user'}."\@".$d->{'dom'};
 my ($virt) = grep { $_->{'from'} eq $email } @virts;
 if (!$virt) {
 	$virt = { 'from' => $email,
-		  'to' => [ $d->{'user'} ] };
+		  'to' => [ &escape_user($d->{'user'}) ] };
 	&create_virtuser($virt);
 	&sync_alias_virtuals($d);
 	}
