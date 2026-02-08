@@ -395,6 +395,7 @@ if (!$parentuser) {
 	}
 $dom{'emailto'} = $parentdom ? $parentdom->{'emailto'} :
 		  $dom{'email'} ? $dom{'email'} :
+		  $dom{'user'} =~ /\@/ ? $dom{'user'} :
 		  $dom{'mail'} ? $dom{'user'}.'@'.$dom{'dom'} :
 		  		 $dom{'user'}.'@'.&get_system_hostname();
 

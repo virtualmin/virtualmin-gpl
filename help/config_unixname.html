@@ -1,0 +1,26 @@
+<header>Format for admin username</header>
+
+This option determines how the default administrator's username for new servers
+is created from the domain name. The options are :
+
+<dl>
+<dt><b>Full domain name</b>
+<dd>The username is always the same as the full domain name, like
+    <tt>example.com</tt>.
+
+<dt><b>First part of domain</b>
+<dd>The username is the first part of the domain name like <tt>example</tt>
+    if available, otherwise the full domain name like <tt>example.com</tt>.
+
+<dt><b>Same as prefix</b>
+<dd>The username follows the same rule as the <b>Domain name style in
+    usernames</b> config option above this one.
+
+<dt><b>First part @ domain</b>
+<dd>The username is always a full email address, like <tt>example@example.com</tt>
+
+<dt><b>Regular expression custom pattern</b>
+<dd>The prefix will be automatically generated based on custom regular expression pattern, like <tt>u-[0-9]{4}</tt> or <tt>[a-z]-[0-9]{2}</tt> or <tt>user-[0-9]{2}-${year}-${month}-${day}</tt> which will produce <tt>u-1234</tt> or <tt>x-89</tt> or <tt>user-99-2021-12-25</tt> accordingly. <p>
+</dl>
+
+<footer>

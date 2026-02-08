@@ -381,6 +381,9 @@ if ($dom->{'parent'} && ($parent = &get_domain($dom->{'parent'}))) {
 elsif ($dom->{'email'}) {
 	$dom->{'emailto'} = $dom->{'email'};
 	}
+elsif ($dom->{'user'} =~ /\@/) {
+	return $dom->{'user'};
+	}
 elsif ($dom->{'mail'}) {
 	$dom->{'emailto'} = $dom->{'user'}.'@'.$dom->{'dom'};
 	}
@@ -7926,13 +7929,20 @@ my ($dname) = @_;
 my $orig_dname = $dname;
 my ($try1, $user);
 
-if ($config{'longname'} && $config{'longname'} !~ /^[0-9]$/) {
+if ($config{'unixname'} && $config{'unixname'} !~ /^[0-9]$/) {
 	# Create random username based on the user pattern
-	$user = &generate_random_available_user($config{'longname'});
+	$user = &generate_random_available_user($config{'unixname'});
 	}
-elsif ($config{'longname'} == 2) {
+elsif ($config{'unixname'} == 2) {
 	# Username is same as the prefix
 	$user = &compute_prefix($dname, undef, undef, 1);
+	}
+elsif ($config{'unixname'} == 3) {
+	# Username is the admin's email address, like example@example.com
+	$dname =~ s/^xn(-+)//;
+        $dname = &remove_numeric_prefix($dname);
+        $dname =~ /^([^\.]+)/;
+	$user = $1.'@'.$orig_dname;
 	}
 else {
 	# Username is the first part of the domain name if possible,
@@ -7941,7 +7951,7 @@ else {
 	$dname = &remove_numeric_prefix($dname);
 	$dname =~ /^([^\.]+)/;
 	($try1, $user) = ($1, $1);
-	if (defined(getpwnam($try1)) || $config{'longname'}) {
+	if (defined(getpwnam($try1)) || $config{'unixname'}) {
 		# Short username is in use or the admin asked for a
 		# full domain name
 		$user = &remove_numeric_prefix($orig_dname);
@@ -7976,11 +7986,11 @@ if ($user && $config{'groupsame'}) {
 		}
 	return (undef, $user, $user);
 	}
-if ($config{'longname'} && $config{'longname'} !~ /^[0-9]$/) {
+if ($config{'unixname'} && $config{'unixname'} !~ /^[0-9]$/) {
 	# Create random group based on the user pattern
-	$group = &generate_random_available_user($config{'longname'});
+	$group = &generate_random_available_user($config{'unixname'});
 	}
-elsif ($config{'longname'} == 2) {
+elsif ($config{'unixname'} == 2) {
 	# Group name is same as the prefix
 	$group = &compute_prefix($dname, undef, undef, 1);
 	}
@@ -7991,7 +8001,7 @@ else {
 	$dname = &remove_numeric_prefix($dname);
 	$dname =~ /^([^\.]+)/;
 	($try1, $group) = ($1, $1);
-	if (defined(getgrnam($try1)) || $config{'longname'}) {
+	if (defined(getgrnam($try1)) || $config{'unixname'}) {
 		$group = &remove_numeric_prefix($orig_dname);
 		$try2 = $group;
 		if (defined(getpwnam($try))) {
@@ -12922,15 +12932,14 @@ return undef;
 sub compute_prefix
 {
 local ($name, $group, $parent, $creating) = @_;
-my $config_longname = $config{'longname'};
-if ($config_longname != 1) {
+if ($config{'longname'} != 1) {
 	$name =~ s/^xn(-+)//;	# Strip IDN part
 	}
-if ($config_longname == 1) {
+if ($config{'longname'} == 1 || $config{'longname'} == 3) {
 	# Prefix is same as domain name
 	return $name;
 	}
-elsif ($group && !$parent && !$config_longname) {
+elsif ($group && !$parent && !$config{'longname'}) {
 	# For top-level domains, prefix is same as group name (but append a
 	# number if there's a clash)
 	my $rv = $group;
@@ -12950,8 +12959,8 @@ else {
 	local $prefix;
 	if ($creating) {
 		# Extract prefix based on the user pattern
-		if ($config_longname && $config_longname !~ /^[0-9]$/) {
-			$prefix = &generate_random_available_user($config_longname);
+		if ($config{'longname'} && $config{'longname'} !~ /^[0-9]$/) {
+			$prefix = &generate_random_available_user($config{'longname'});
 			}
 		else {
 			# First try foo, then foo.com, then foo.com.au
@@ -21367,7 +21376,12 @@ $dom{'auto_letsencrypt'} = 2;
 # Fill in other default fields
 &set_limits_from_plan(\%dom, $plan);
 &set_capabilities_from_plan(\%dom, $plan);
-$dom{'emailto'} = $dom{'user'}.'@'.$system_host_name;
+if ($dom{'user'} =~ /\@/) {
+	$dom{'emailto'} = $dom{'user'};
+	}
+else {
+	$dom{'emailto'} = $dom{'user'}.'@'.$system_host_name;
+	}
 $dom{'db'} = &database_name(\%dom);
 &set_featurelimits_from_plan(\%dom, $plan);
 &set_chained_features(\%dom, undef);

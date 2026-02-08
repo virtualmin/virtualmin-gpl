@@ -11,6 +11,9 @@ local $need_restart;
 
 # Update last post-install time
 $config{'lastpost'} = time();
+if ($config{'unixname'} eq '') {
+	$config{'unixname'} = $config{'longname'};
+	}
 &save_module_config();
 
 # Convert all existing cron jobs to WebminCron, except existing backups
