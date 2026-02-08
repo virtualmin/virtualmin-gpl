@@ -187,10 +187,11 @@ if ($tmplname) {
 	}
 
 ($test_domain_user) = &unixuser_name($test_domain);
+($test_domain_group) = &unixgroup_name($test_domain);
 ($test_rename_domain_user) = &unixuser_name($test_rename_domain);
 ($test_clone_domain_user) = &unixuser_name($test_clone_domain);
 ($test_ssl_subdomain_user) = &unixuser_name($test_ssl_subdomain);
-$prefix = &compute_prefix($test_domain, $test_domain_user, undef, 1);
+$prefix = &compute_prefix($test_domain, $test_domain_group, undef, 1);
 $rename_prefix = &compute_prefix($test_rename_domain, $test_rename_domain_user,
 				 undef, 1);
 $clone_prefix = &compute_prefix($test_clone_domain, $test_clone_domain_user,
