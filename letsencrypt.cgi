@@ -104,7 +104,8 @@ else {
 	if ($in{'connectivity'} >= 1) {
 		&$first_print(&text('letsencrypt_validcheck',
 			join(" ", map { &show_domain_name($_) } @cdoms)));
-		my $vcheck = $in{'dwild'} ? ['dns'] : ['web'];
+		my @wilds = grep { /^\*\./ } @dnames;
+		my $vcheck = @wilds ? ['dns'] : undef;
 		my @errs = map { &validate_letsencrypt_config($_, $vcheck) } @cdoms;
 		if (@errs) {
 			&$second_print($text{'letsencrypt_connerrs'});

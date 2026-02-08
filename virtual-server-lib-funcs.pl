@@ -8855,10 +8855,8 @@ else {
 push(@dnames, "*.".$d->{'dom'}) if ($d->{'letsencrypt_dwild'});
 &$first_print($text{'letsencrypt_doing3'});
 if ($valid) {
-	my $vcheck = ['web'];
-	foreach my $dn (@dnames) {
-		$vcheck = ['dns'] if ($dn =~ /\*/);
-		}
+	my @wilds = grep { /^\*\./ } @dnames;
+	my $vcheck = @wilds ? ['dns'] : undef;
 	my @errs = &validate_letsencrypt_config($d, $vcheck);
 	if (@errs) {
 		# Always store last Certbot error

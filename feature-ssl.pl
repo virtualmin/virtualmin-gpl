@@ -3718,6 +3718,10 @@ foreach my $f (@$feats) {
 			push(@rv, { 'desc' => $text{'feature_'.$f},
 				    'error' => $err });
 			}
+		else {
+			# A valid method exists
+			return ();
+			}
 		}
 	}
 return @rv;
