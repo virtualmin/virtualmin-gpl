@@ -131,14 +131,27 @@ foreach my $p (@ports) {
 			$rd->{$proto} = 1;
 			$rd->{'path'} = $rwr->{'words'}->[0];
 			$rd->{'dest'} = $rwr->{'words'}->[1];
-			if ($rd->{'path'} =~ /^(.*)\.\*\$$/ ||
-			    $rd->{'path'} =~ /^(.*)\(\.\*\)\$$/) {
+			if ($rd->{'dest'} !~ /\$1$/ &&
+			    ($rd->{'path'} =~ /^(.*)\.\*\$$/ ||
+			     $rd->{'path'} =~ /^(.*)\(\.\*\)\$$/)) {
+				# Path is like /something(.*) but the destination
+				# does not include $1, meaning that sub-paths are
+				# matched but are not used
 				$rd->{'path'} = $1;
 				$rd->{'regexp'} = 1;
 				}
 			elsif ($rd->{'path'} =~ /^\^(.*)\$$/) {
-			       $rd->{'path'} = $1;
+				# Path is like ^/something$, meaning that sub-paths
+				# are not matched
+				$rd->{'path'} = $1;
 				$rd->{'exact'} = 1;
+				}
+			elsif ($rd->{'path'} =~ /^(.*)\(\.\*\)\$$/) {
+				# Path is like /something(.*) and the destination
+				# includes $1, meaning that sub-paths are matched
+				# and included in the redirect
+                                $rd->{'path'} = $1;
+				$rd->{'dest'} =~ s/\$1$//;
 				}
 			&parse_rewritecond_flags($rwr->{'words'}->[2], $rd);
 			$rd->{'id'} = $rwr->{'name'}.'_'.$rd->{'path'};
@@ -215,14 +228,27 @@ foreach my $p (@ports) {
 			}
 		$rd->{'path'} = $rwr->{'words'}->[0];
 		$rd->{'dest'} = $rwr->{'words'}->[1];
-		if ($rd->{'path'} =~ /^(.*)\.\*\$$/ ||
-		    $rd->{'path'} =~ /^(.*)\(\.\*\)\$$/) {
+		if ($rd->{'dest'} !~ /\$1$/ &&
+		    ($rd->{'path'} =~ /^(.*)\.\*\$$/ ||
+		     $rd->{'path'} =~ /^(.*)\(\.\*\)\$$/)) {
+			# Path is like /something(.*) but the destination
+			# does not include $1, meaning that sub-paths are
+			# matched but are not used
 			$rd->{'path'} = $1;
 			$rd->{'regexp'} = 1;
 			}
 		elsif ($rd->{'path'} =~ /^\^(.*)\$$/) {
+			# Path is like ^/something$, meaning that sub-paths
+			# are not matched
 			$rd->{'path'} = $1;
 			$rd->{'exact'} = 1;
+			}
+		elsif ($rd->{'path'} =~ /^(.*)\(\.\*\)\$$/) {
+			# Path is like /something(.*) and the destination
+			# includes $1, meaning that sub-paths are matched
+			# and included in the redirect
+			$rd->{'path'} = $1;
+			$rd->{'dest'} =~ s/\$1$//;
 			}
 		&parse_rewritecond_flags($rwr->{'words'}->[2], $rd);
 		$rd->{'id'} = $rwc->{'name'}.'_'.$rd->{'path'};
@@ -301,10 +327,24 @@ foreach my $p (@ports) {
 			     ($redirect->{'hostregexp'} ? "" : "=").
 			     $redirect->{'host'});
 			}
-		my $path = $redirect->{'path'};
-		$path .= "(\.\*)\$" if ($redirect->{'regexp'});
-		$path = "^".$path."\$" if ($redirect->{'exact'});
-		push(@rwrs, $path." ".$redirect->{'dest'}." [".join(",", @flags)."]");
+		my $path;
+		my $dest = $redirect->{'dest'};
+		if ($redirect->{'exact'}) {
+			# Only match the exact path, not any sub-paths
+			$path = "^".$redirect->{'path'}."\$";
+			}
+		elsif ($redirect->{'regexp'}) {
+			# Match all sub-paths, but do not include them
+			# in the redirect
+			$path = $redirect->{'path'}."(\.\*)\$";
+			}
+		else {
+			# Match all sub-paths, and include them in the
+			# redirect
+			$path = $redirect->{'path'}."(\.\*)\$";
+			$dest .= "\$1";
+			}
+		push(@rwrs, $path." ".$dest." [".join(",", @flags)."]");
 		if (!@rwes) {
 			&apache::save_directive(
 				"RewriteEngine", ["on"], $vconf, $conf);
@@ -315,17 +355,24 @@ foreach my $p (@ports) {
 	else {
 		# Can just use Alias or Redirect
 		my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
-		$dir .= "Match" if ($redirect->{'regexp'} ||
-				    $redirect->{'exact'});
-		my @aliases = &apache::find_directive($dir, $vconf);
 		my $path;
 		if ($redirect->{'exact'}) {
+			# Only match the exact path, not any sub-paths
 			$path = "^".$redirect->{'path'}."\$";
+			$dir .= "Match";
+			}
+		elsif ($redirect->{'regexp'}) {
+			# Match all sub-paths, but do not include them
+			# in the redirect
+			$path = $redirect->{'path'}."(\.\*)\$";
+			$dir .= "Match";
 			}
 		else {
-			$path = $redirect->{'path'}.
-				($redirect->{'regexp'} ? "(\.\*)\$" : "");
+			# Just use a bare redirect which automatically matches
+			# sub-paths and includes them in the redirect
+			$path = $redirect->{'path'};
 			}
+		my @aliases = &apache::find_directive($dir, $vconf);
 		push(@aliases,
 			($redirect->{'code'} && !$redirect->{'alias'} ?
 				$redirect->{'code'}." " : "").
