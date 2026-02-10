@@ -24,8 +24,14 @@ if (!-r $domains && $dom && -d "$backup/$dom") {
 
 if (!$dom) {
 	# Try to work out the default domain
-	local @domdirs = grep { !/^default$/ && -r "$backup/$_/domain.conf" }
-			      split(/\r?\n/, &backquote_command("ls -t $domains"));
+	local @domdirs;
+	if (opendir(DOMDIRS, $domains)) {
+		@domdirs = grep { !/^default$/ && -r "$backup/$_/domain.conf" }
+			   readdir(DOMDIRS);
+		closedir(DOMDIRS);
+		@domdirs = sort { (stat("$domains/$b"))[9] <=>
+				  (stat("$domains/$a"))[9] } @domdirs;
+		}
 	@domdirs || return ("No domains found in backup");
 	$dom = $domdirs[0];
 	}

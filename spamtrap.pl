@@ -184,7 +184,8 @@ foreach $d (&list_domains()) {
 			&mailboxes::send_mail($lm, $temp);
 			&set_ownership_permissions(
 				$user->{'uid'}, $user->{'gid'}, 0700, $temp);
-			$out = &backquote_command("$cmd <$temp 2>&1");
+			$out = &backquote_command("$cmd <".
+				quotemeta($temp)." 2>&1");
 			$ex = $?;
 			&unlink_file($temp);
 			if ($debug) {

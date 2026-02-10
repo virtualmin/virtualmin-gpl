@@ -13123,7 +13123,8 @@ sub get_python_version
 my ($python_pathpath) = @_;
 $python_pathpath ||= get_python_path();
 my $python_version;
-my $out = &backquote_command("$python_pathpath --version 2>&1", 1);
+my $out = &backquote_command(quotemeta($python_pathpath).
+			     " --version 2>&1", 1);
 $python_version = $1 if ($out =~ /Python\s+(.*)/i);
 return $python_version;
 }
@@ -20401,9 +20402,11 @@ my $port;
 if ($host =~ s/:(\d+)$//) {
 	$port = $1;
 	}
+my $qhost = &check_ip6address($host) ? "[$host]" : $host;
 my $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 	     $config{'ssh_args'}." ".
-	     ($user ? $user."\@" : "").$host." ".
+	     ($user ? quotemeta($user)."\@" : "").
+	     quotemeta($qhost)." ".
 	     $cmd;
 my $err;
 my $out = &run_ssh_command($sshcmd, $pass, \$err);
@@ -20632,7 +20635,8 @@ my @lsfiles;
 if ($proto eq "ssh") {
 	# Run the SSH command
 	my ($lsok, $lsout) = &execute_command_via_ssh(
-		$desthost, $destuser, $destpass, "ls ".$remotetemp);
+		$desthost, $destuser, $destpass,
+		"ls ".quotemeta($remotetemp));
 	if (!$lsok) {
 		&$second_print(&text('transfer_eremotetemp',
 				     $remotetemp, $desthost));
@@ -21525,9 +21529,11 @@ return $err ? 0 : 1;
 sub check_external_dns
 {
 my ($host, $wantrec) = @_;
+my $dns4 = quotemeta($config{'dns_default_ip4'} || "");
+my $dns6 = quotemeta($config{'dns_default_ip6'} || "");
 if (&has_command("dig")) {
 	my $out = &backquote_command(
-		"dig ".quotemeta($host)." \@$config{'dns_default_ip4'} 2>/dev/null");
+		"dig ".quotemeta($host)." \@$dns4 2>/dev/null");
 	return -1 if ($?);
 	return 0 if ($out !~ /ANSWER\s+SECTION/i);
 	# IPv4 and CNAME
@@ -21538,7 +21544,7 @@ if (&has_command("dig")) {
 		}
 	# IPv6 only
 	$out = &backquote_command(
-		"dig -6 AAAA ".quotemeta($host)." \@$config{'dns_default_ip6'} 2>/dev/null");
+		"dig -6 AAAA ".quotemeta($host)." \@$dns6 2>/dev/null");
 	if ($out =~ /\Q$host\E\.?.*\s+AAAA\s+(\S+)/) {
 		# Found an IP
 		return !$wantrec || $wantrec eq $1;
@@ -21548,7 +21554,7 @@ if (&has_command("dig")) {
 elsif (&has_command("host")) {
 	&clean_environment();
 	my $out = &backquote_command(
-		"host ".quotemeta($host)." $config{'dns_default_ip4'} 2>/dev/null");
+		"host ".quotemeta($host)." $dns4 2>/dev/null");
 	&reset_environment();
 	return 0 if ($out =~ /Host\s+\S+\s+not\s+found/i);
 	return -1 if ($?);

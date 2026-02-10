@@ -61,7 +61,7 @@ if ($src =~ /=head1\s+(.*)\n\n(.*)\n/) {
 # Run with --help to get command line flags
 &clean_environment();
 $ENV{'WEBMIN_CONFIG'} = $config_directory;
-$out = &backquote_command("$cmdpath --help 2>&1 </dev/null");
+$out = &backquote_command(quotemeta($cmdpath)." --help 2>&1 </dev/null");
 &reset_environment();
 @helpargs = ( );
 foreach my $l (split(/\r?\n/, $out)) {

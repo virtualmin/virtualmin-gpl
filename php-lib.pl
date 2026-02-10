@@ -1106,7 +1106,8 @@ foreach my $v (@all_possible_php_versions) {
 foreach my $path (split(/\t+/, $config{'php_paths'})) {
 	next if (!-x $path);
 	&clean_environment();
-	local $out = &backquote_command("$path -v 2>&1 </dev/null");
+	local $out = &backquote_command(quotemeta($path).
+		" -v 2>&1 </dev/null");
 	&reset_environment();
 	if ($out =~ /PHP\s+(\d+.\d+)/ && !$vercmds{$1}) {
 		$vercmds{$1} = $path;
@@ -1119,7 +1120,8 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	# a command for yet, use it.
 	if (!$php_command_version_cache) {
 		&clean_environment();
-		local $out = &backquote_command("$php -v 2>&1 </dev/null");
+		local $out = &backquote_command(quotemeta($php).
+			" -v 2>&1 </dev/null");
 		&reset_environment();
 		if ($out =~ /PHP\s+(\d+\.\d+)/) {
 			my $v = $1;
@@ -1258,7 +1260,7 @@ if ($cmd !~ /^\//) {
 	$cmd = $phpn->[1] || &has_command("php$cmd") || &has_command("php");
 	}
 &clean_environment();
-local $out = &backquote_command("$cmd -v 2>&1 </dev/null");
+local $out = &backquote_command(quotemeta($cmd)." -v 2>&1 </dev/null");
 &reset_environment();
 if ($out =~ /PHP\s+([0-9\.]+)/) {
 	$get_php_version_cache{$cmd} = $1;
@@ -1872,7 +1874,7 @@ else {
 	$ENV{'PHPRC'} = &get_domain_php_ini($d, $ver, 1);
 	}
 &clean_environment();
-local $out = &backquote_command("$cmd -d error_log= -m 2>&1");
+local $out = &backquote_command(quotemeta($cmd)." -d error_log= -m 2>&1");
 local @errs;
 foreach my $l (split(/\r?\n/, $out)) {
 	$l = &html_tags_to_text($l);
@@ -2923,7 +2925,8 @@ return undef if (!$major);
 foreach my $php ("php$major", "php") {
 	next if (!&has_command($php));
 	&clean_environment();
-	my $out = &backquote_command("$php -v 2>&1 </dev/null");
+	my $out = &backquote_command(quotemeta($php).
+				     " -v 2>&1 </dev/null");
 	&reset_environment();
 	if ($out =~ /PHP\s+(\d+\.\d+)/) {
 		$major = $1;

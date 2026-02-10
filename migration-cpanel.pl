@@ -1154,7 +1154,7 @@ sub extract_cpanel_file
 return undef if (!-r $_[0]);
 local $temp = &transname();
 local $qf = quotemeta($_[0]);
-local $out = `gunzip -c $qf >$temp`;
+local $out = &backquote_command("gunzip -c $qf >".quotemeta($temp));
 return $? ? undef : $temp;
 }
 
@@ -1568,7 +1568,10 @@ while(<PASSWD>) {
 		&make_dir($temp, 0755);
 		my $err;
 		&execute_command("chown -R ".quotemeta($uinfo->{'user'}).": ".quotemeta($mdtemp)." ".quotemeta($temp), undef, \$err, \$err);
-		local $out = &backquote_command("dsync -u ".quotemeta($uinfo->{'user'})." -o \"mail_location=mdbox:$mdtemp\" backup mbox:".quotemeta($temp)." 2>&1");
+		local $out = &backquote_command("dsync -u ".
+			quotemeta($uinfo->{'user'})." -o ".
+			quotemeta("mail_location=mdbox:$mdtemp").
+			" backup mbox:".quotemeta($temp)." 2>&1");
 		&unlink_file($mdtemp);
 		opendir(DIR, $temp);
 		while(my $mf = readdir(DIR)) {

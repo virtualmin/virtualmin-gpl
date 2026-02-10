@@ -27,7 +27,7 @@ open(CONF, ">", $cfile);
 print CONF "TCPSocket $port\n";
 print CONF "TCPAddr $host\n";
 close(CONF);
-my $rv = system("clamdscan -c $cfile --fdpass --stream $file");
+my $rv = system("clamdscan", "-c", $cfile, "--fdpass", "--stream", $file);
 unlink($cfile);
 exit($rv);
 

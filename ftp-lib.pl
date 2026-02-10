@@ -306,15 +306,18 @@ if ($user) {
 if (!ref($dest)) {
 	$cmd .= " -o ".quotemeta($dest);
 	}
-$cmd .= " ftp://".$host.($port ? ":".$port : "").$file;
+my $url = "ftp://".$host.($port ? ":".$port : "").$file;
+$cmd .= " ".quotemeta($url);
 my $errtemp = &transname();
 if (ref($dest)) {
 	# Save to scalar reference
-	$$dest = &backquote_command("$cmd 2>$errtemp </dev/null");
+	$$dest = &backquote_command("$cmd 2>".quotemeta($errtemp).
+		" </dev/null");
 	}
 else {
 	# Save to a file
-	&system_logged("$cmd >".quotemeta($dest)." 2>$errtemp </dev/null");
+	&system_logged("$cmd >".quotemeta($dest)." 2>".
+		quotemeta($errtemp)." </dev/null");
 	}
 # Handle any error
 if ($? || (!ref($dest) && !-s $dest)) {

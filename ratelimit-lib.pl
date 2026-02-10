@@ -233,7 +233,7 @@ sub get_milter_greylist_version
 {
 my $path = &get_milter_greylist_path();
 return undef if (!$path || !-x $path);
-my $out = &backquote_command("$path -r 2>&1 </dev/null");
+my $out = &backquote_command(quotemeta($path)." -r 2>&1 </dev/null");
 return $out =~ /milter-greylist-([0-9\.]+)/ ? $1 : undef;
 }
 

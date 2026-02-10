@@ -2168,7 +2168,8 @@ if (defined(&list_available_php_versions)) {
 	local @vers;
 	foreach my $a (grep { $_->[1] } @avail) {
 		&clean_environment();
-		local $out = &backquote_command("$a->[1] -v 2>&1 </dev/null");
+		local $out = &backquote_command(quotemeta($a->[1]).
+						" -v 2>&1 </dev/null");
 		&reset_environment();
 		if ($out =~ /PHP\s+([0-9\.]+)/) {
 			push(@vers, $1);
@@ -3882,7 +3883,7 @@ sub get_suexec_document_root
 {
 local $suexec = &get_suexec_path();
 return ( ) if (!$suexec);
-local $out = &backquote_command("$suexec -V 2>&1 </dev/null");
+local $out = &backquote_command(quotemeta($suexec)." -V 2>&1 </dev/null");
 if ($out =~ /AP_DOC_ROOT="([^"]+)"/ ||
     $out =~ /AP_DOC_ROOT=(\S+)/) {
 	return split(/:/, $1);
@@ -4393,7 +4394,7 @@ sub list_apache_directives
 &require_apache();
 local $httpd = &apache::find_httpd();
 local @rv;
-open(DIRS, "$httpd -L 2>/dev/null </dev/null |");
+open(DIRS, quotemeta($httpd)." -L 2>/dev/null </dev/null |");
 while(<DIRS>) {
 	if (/^(\S+)\s+\((\S+)\.c\)/) {
 		push(@rv, [ $1, $2 ]);

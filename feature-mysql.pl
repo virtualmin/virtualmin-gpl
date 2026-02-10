@@ -3122,7 +3122,8 @@ if ($direct) {
 	my $sql;
 	($sql) = &$gsql('localhost');
 	my $cmd = $mysql::config{'mysql'} || 'mysql';
-	my $out = &backquote_command("$cmd -D $mysql::master_db -e ".
+	my $out = &backquote_command(quotemeta($cmd)." -D ".
+			quotemeta($mysql::master_db)." -e ".
 			quotemeta("flush privileges; $sql")." 2>&1 </dev/null");
 	if ($?) {
 		$out =~ s/\n/ /gm;
