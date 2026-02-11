@@ -12643,9 +12643,9 @@ foreach my $d (&list_domains()) {
 	}
 
 # Check for impending domain registrar expiry
-my (@expired, @nearly);
+my (@whois_expired, @whois_nearly);
 foreach my $d (&list_domains()) {
-	next if (!$d->{'whois_expiry'} || !$d->{'dns'});
+	next if (!$d->{'whois_expiry'});
 	next if ($d->{'disabled'});
 	next if ($d->{'whois_ignore'});
 
@@ -12658,45 +12658,45 @@ foreach my $d (&list_domains()) {
 	if ($d->{'whois_next'}) {
 		if ($nocoll && $now > $d->{'whois_next'} ||
 		    $nocoll && $config{'last_check'} > $d->{'whois_next'} ||
-		    $config{'whois_expiry'} < $now &&
-		      $now > $d->{'whois_next'} + 1800) {
+		    $d->{'whois_expiry'} < $now &&
+		    $now > $d->{'whois_next'} + 1800) {
 			next;
 			}
 		}
 
 	# Tell if domain is already expired
 	if ($d->{'whois_expiry'} < $now) {
-		push(@expired, $d);
+		push(@whois_expired, $d);
 		}
 	# Warn 7 days before domain expiry
 	elsif ($d->{'whois_expiry'} < $now + 7*24*60*60) {
-		push(@nearly, $d);
+		push(@whois_nearly, $d);
 		}
 	}
-if (@expired || @nearly) {
+if (@whois_expired || @whois_nearly) {
 	my $exp;
-	if (@expired) {
+	if (@whois_expired) {
 		my $gluechar = ", ";
-		if (scalar(@expired) == 1) {
+		if (scalar(@whois_expired) == 1) {
 			$gluechar = "";
 			}
 		$expiry_text .= &text('index_expiryexpired',
-			join($gluechar, map { "<a href=\"$wp/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @expired));
+			join($gluechar, map { "<a href=\"$wp/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @whois_expired));
 		$exp++;
 		}
-	if (@nearly) {
+	if (@whois_nearly) {
 		my $gluechar = ", ";
-		if (scalar(@nearly) == 1) {
+		if (scalar(@whois_nearly) == 1) {
 			$gluechar = "";
 			}
 		my $nl = $exp ? "<br>" : "";
 		$expiry_text .= $nl . &text('index_expirynearly',
-			join($gluechar, map { "<a href=\"$wp/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @nearly));
+			join($gluechar, map { "<a href=\"$wp/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @whois_nearly));
 		}
-	if (@expired || @nearly) {
+	if (@whois_expired || @whois_nearly) {
 		my @edoms;
-		push(@edoms, map { $_->{'dom'} } @expired) if (@expired);
-		push(@edoms, map { $_->{'dom'} } @nearly) if (@nearly);
+		push(@edoms, map { $_->{'dom'} } @whois_expired) if (@whois_expired);
+		push(@edoms, map { $_->{'dom'} } @whois_nearly) if (@whois_nearly);
 		@edoms = &unique(@edoms);
 		my $expiry_form .= &ui_form_start(
 			"$wp/$module_name/recollect_whois.cgi");
