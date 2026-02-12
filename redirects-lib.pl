@@ -251,7 +251,7 @@ foreach my $p (@ports) {
 			$rd->{'dest'} =~ s/\$1$//;
 			}
 		&parse_rewritecond_flags($rwr->{'words'}->[2], $rd);
-		$rd->{'id'} = $rwc->{'name'}.'_'.$rd->{'path'};
+		$rd->{'id'} = $rwr->{'name'}.'_'.$rd->{'path'};
 		$rd->{'id'} .= '_'.$rd->{'host'} if ($rd->{'host'});
 		my ($already) = grep { $_->{'path'} eq $rd->{'path'} &&
 				       $_->{'host'} eq $rd->{'host'} } @rv;
