@@ -4724,6 +4724,7 @@ scripts_kit_estype_multi=Multiple instances of type '$1' are available at the fo
 scripts_kit_estype_multi2=Use the auxiliary '--app-path' parameter to specify the exact instance to use
 scripts_kit_estype_path=The script of type '$1' at path '$2' does not exist
 script_phpmyadmin_def=Use as system default phpMyAdmin
+script_phpmyadmin_httpdauth=Protect phpMyAdmin with login and password
 
 scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Dismiss
