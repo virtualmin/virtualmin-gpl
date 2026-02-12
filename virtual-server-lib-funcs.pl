@@ -15947,7 +15947,7 @@ if ($lastconfig) {
 		if (&indexof($f, @plugins) < 0) {
 			my @lost = grep { $_->{$f} } @doms;
 			return &text('check_lostplugin',
-				&plugin_call($f, "feature_name"),
+				&feature_name($f),
 				join(", ", map { &show_domain_name($_) } @lost))
 				if (@lost);
 			}
