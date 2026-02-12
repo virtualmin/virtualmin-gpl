@@ -558,6 +558,7 @@ sub is_webmail_redirect
 {
 my ($d, $r) = @_;
 return 0 if (!$r->{'host'});
+return 0 if ($r->{'path'} ne '/');
 my ($dhost, $dport) = lc($r->{'dest'} || '') =~
 	m/^https?:\/\/([^:\/\s]+):(\d+)(?:\/|$)/i;
 return 0 if (!$dhost || !$dport);
