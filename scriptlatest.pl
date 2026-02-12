@@ -22,8 +22,10 @@ if (!$gpgbad) {
 	($key) = grep { $_->{'email'}->[0] eq $script_latest_key } @keys;
 	if (!$key) {
 		&webmin::list_keys();
-		$out = &backquote_command("$webmin::gpgpath --import ".
-			"$module_root_directory/latest-scripts-key.asc 2>&1");
+		$out = &backquote_command(
+			quotemeta($webmin::gpgpath)." --import ".
+			quotemeta("$module_root_directory/latest-scripts-key.asc").
+			" 2>&1");
 		if ($?) {
 			if ($debug) {
 				print STDERR "GPG key import failed : $out\n";
@@ -190,7 +192,8 @@ foreach $down (@download) {
 	&print_tempfile(SCRIPT, $sdata);
 	&close_tempfile(SCRIPT);
 	$perl = &get_perl_path();
-	$out = &backquote_command("$perl -c $temp 2>&1");
+	$out = &backquote_command(quotemeta($perl)." -c ".
+				  quotemeta($temp)." 2>&1");
 	if ($?) {
 		if ($debug) {
 			print STDERR "Perl verification of $down failed : $out\n";

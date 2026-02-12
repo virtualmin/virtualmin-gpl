@@ -12643,9 +12643,9 @@ foreach my $d (&list_domains()) {
 	}
 
 # Check for impending domain registrar expiry
-my (@expired, @nearly);
+my (@whois_expired, @whois_nearly);
 foreach my $d (&list_domains()) {
-	next if (!$d->{'whois_expiry'} || !$d->{'dns'});
+	next if (!$d->{'whois_expiry'});
 	next if ($d->{'disabled'});
 	next if ($d->{'whois_ignore'});
 
@@ -12658,45 +12658,45 @@ foreach my $d (&list_domains()) {
 	if ($d->{'whois_next'}) {
 		if ($nocoll && $now > $d->{'whois_next'} ||
 		    $nocoll && $config{'last_check'} > $d->{'whois_next'} ||
-		    $config{'whois_expiry'} < $now &&
-		      $now > $d->{'whois_next'} + 1800) {
+		    $d->{'whois_expiry'} < $now &&
+		    $now > $d->{'whois_next'} + 1800) {
 			next;
 			}
 		}
 
 	# Tell if domain is already expired
 	if ($d->{'whois_expiry'} < $now) {
-		push(@expired, $d);
+		push(@whois_expired, $d);
 		}
 	# Warn 7 days before domain expiry
 	elsif ($d->{'whois_expiry'} < $now + 7*24*60*60) {
-		push(@nearly, $d);
+		push(@whois_nearly, $d);
 		}
 	}
-if (@expired || @nearly) {
+if (@whois_expired || @whois_nearly) {
 	my $exp;
-	if (@expired) {
+	if (@whois_expired) {
 		my $gluechar = ", ";
-		if (scalar(@expired) == 1) {
+		if (scalar(@whois_expired) == 1) {
 			$gluechar = "";
 			}
 		$expiry_text .= &text('index_expiryexpired',
-			join($gluechar, map { "<a href=\"$wp/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @expired));
+			join($gluechar, map { "<a href=\"$wp/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @whois_expired));
 		$exp++;
 		}
-	if (@nearly) {
+	if (@whois_nearly) {
 		my $gluechar = ", ";
-		if (scalar(@nearly) == 1) {
+		if (scalar(@whois_nearly) == 1) {
 			$gluechar = "";
 			}
 		my $nl = $exp ? "<br>" : "";
 		$expiry_text .= $nl . &text('index_expirynearly',
-			join($gluechar, map { "<a href=\"$wp/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @nearly));
+			join($gluechar, map { "<a href=\"$wp/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @whois_nearly));
 		}
-	if (@expired || @nearly) {
+	if (@whois_expired || @whois_nearly) {
 		my @edoms;
-		push(@edoms, map { $_->{'dom'} } @expired) if (@expired);
-		push(@edoms, map { $_->{'dom'} } @nearly) if (@nearly);
+		push(@edoms, map { $_->{'dom'} } @whois_expired) if (@whois_expired);
+		push(@edoms, map { $_->{'dom'} } @whois_nearly) if (@whois_nearly);
 		@edoms = &unique(@edoms);
 		my $expiry_form .= &ui_form_start(
 			"$wp/$module_name/recollect_whois.cgi");
@@ -13123,7 +13123,8 @@ sub get_python_version
 my ($python_pathpath) = @_;
 $python_pathpath ||= get_python_path();
 my $python_version;
-my $out = &backquote_command("$python_pathpath --version 2>&1", 1);
+my $out = &backquote_command(quotemeta($python_pathpath).
+			     " --version 2>&1", 1);
 $python_version = $1 if ($out =~ /Python\s+(.*)/i);
 return $python_version;
 }
@@ -20401,9 +20402,11 @@ my $port;
 if ($host =~ s/:(\d+)$//) {
 	$port = $1;
 	}
+my $qhost = &check_ip6address($host) ? "[$host]" : $host;
 my $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 	     $config{'ssh_args'}." ".
-	     ($user ? $user."\@" : "").$host." ".
+	     ($user ? quotemeta($user)."\@" : "").
+	     quotemeta($qhost)." ".
 	     $cmd;
 my $err;
 my $out = &run_ssh_command($sshcmd, $pass, \$err);
@@ -20632,7 +20635,8 @@ my @lsfiles;
 if ($proto eq "ssh") {
 	# Run the SSH command
 	my ($lsok, $lsout) = &execute_command_via_ssh(
-		$desthost, $destuser, $destpass, "ls ".$remotetemp);
+		$desthost, $destuser, $destpass,
+		"ls ".quotemeta($remotetemp));
 	if (!$lsok) {
 		&$second_print(&text('transfer_eremotetemp',
 				     $remotetemp, $desthost));
@@ -21525,9 +21529,11 @@ return $err ? 0 : 1;
 sub check_external_dns
 {
 my ($host, $wantrec) = @_;
+my $dns4 = quotemeta($config{'dns_default_ip4'} || "");
+my $dns6 = quotemeta($config{'dns_default_ip6'} || "");
 if (&has_command("dig")) {
 	my $out = &backquote_command(
-		"dig ".quotemeta($host)." \@$config{'dns_default_ip4'} 2>/dev/null");
+		"dig ".quotemeta($host)." \@$dns4 2>/dev/null");
 	return -1 if ($?);
 	return 0 if ($out !~ /ANSWER\s+SECTION/i);
 	# IPv4 and CNAME
@@ -21538,7 +21544,7 @@ if (&has_command("dig")) {
 		}
 	# IPv6 only
 	$out = &backquote_command(
-		"dig -6 AAAA ".quotemeta($host)." \@$config{'dns_default_ip6'} 2>/dev/null");
+		"dig -6 AAAA ".quotemeta($host)." \@$dns6 2>/dev/null");
 	if ($out =~ /\Q$host\E\.?.*\s+AAAA\s+(\S+)/) {
 		# Found an IP
 		return !$wantrec || $wantrec eq $1;
@@ -21548,7 +21554,7 @@ if (&has_command("dig")) {
 elsif (&has_command("host")) {
 	&clean_environment();
 	my $out = &backquote_command(
-		"host ".quotemeta($host)." $config{'dns_default_ip4'} 2>/dev/null");
+		"host ".quotemeta($host)." $dns4 2>/dev/null");
 	&reset_environment();
 	return 0 if ($out =~ /Host\s+\S+\s+not\s+found/i);
 	return -1 if ($?);

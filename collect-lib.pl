@@ -215,7 +215,6 @@ foreach my $d (@doms_all) {
 # Domain registration expiries
 my $now = time();
 foreach my $d (@doms_all) {
-	next if (!$d->{'dns'});
 	next if ($d->{'whois_next'} && $now < $d->{'whois_next'});
 
 	# If update called manually from the dashboard using refresh

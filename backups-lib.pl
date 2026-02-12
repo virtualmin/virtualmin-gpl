@@ -418,7 +418,8 @@ foreach my $desturl (@$desturls) {
 		# Clean up dummy file if possible
 		local $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 				$config{'ssh_args'}." ".
-				($user ? "$user\@" : "").$server;
+				($user ? quotemeta($user)."\@" : "").
+				quotemeta($qserver || $server);
 		local $rmcmd = $sshcmd." rm -f ".quotemeta($testfile);
 		local $rmerr;
 		&run_ssh_command($rmcmd, $pass, \$rmerr);
@@ -428,7 +429,8 @@ foreach my $desturl (@$desturls) {
 			# mkdir via ssh or scping an empty dir
 
 			# ssh mkdir first
-			local $mkcmd = $sshcmd." 'mkdir -p $path'";
+			local $mkcmd = $sshcmd." mkdir -p ".
+				       quotemeta($path);
 			local $err;
 			local $lsout = &run_ssh_command($mkcmd, $pass, \$err,
 							$asuser);
@@ -5928,9 +5930,11 @@ elsif ($mode == 1) {
 
 elsif ($mode == 2) {
 	# Use ls -l via SSH to list the directory
+	local $qhost = &check_ip6address($host) ? "[$host]" : $host;
 	local $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 			$config{'ssh_args'}." ".
-			($user ? $user."\@" : "").$host;
+			($user ? quotemeta($user)."\@" : "").
+			quotemeta($qhost);
 	local $err;
 	local $lscmd = $sshcmd." LANG=C ls -l ".quotemeta($base);
 	local $lsout = &run_ssh_command($lscmd, $pass, \$err, $asuser);
@@ -7256,9 +7260,11 @@ foreach my $sfx ("", ".info", ".dom") {
 		}
 	elsif ($proto == 2) {
 		# SSH server
+		my $qhost = &check_ip6address($host) ? "[$host]" : $host;
 		my $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 			     $config{'ssh_args'}." ".
-			     ($user ? $user."\@" : "").$host;
+			     ($user ? quotemeta($user)."\@" : "").
+			     quotemeta($qhost);
 		my $rmcmd = $sshcmd." rm -rf ".quotemeta($spath);
 		&run_ssh_command($rmcmd, $pass, \$err);
 		}

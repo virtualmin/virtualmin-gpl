@@ -681,7 +681,8 @@ sub get_aws_cmd_version
 {
 my $cmd = &has_aws_cmd();
 return undef if (!$cmd);
-my $out = &backquote_command("$cmd --version 2>/dev/null </dev/null");
+my $out = &backquote_command(quotemeta($cmd).
+			     " --version 2>/dev/null </dev/null");
 return $out =~ /aws-cli\/([0-9\.]+)/ ? $1 : undef;
 }
 

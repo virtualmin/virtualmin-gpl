@@ -1000,8 +1000,10 @@ return &indexof($mod, @mods) >= 0 ? 1 : 0;
 sub check_perl_module
 {
 local ($mod, $d) = @_;
+return 0 if ($mod !~ /^[A-Za-z_][A-Za-z0-9_:]*$/);
 local $perl = &get_perl_path();
-local $out = &backquote_command("$perl -e 'use $mod' 2>&1");
+local $out = &backquote_command(quotemeta($perl)." -e ".
+				quotemeta("use $mod")." 2>&1");
 return $? ? 0 : 1;
 }
 

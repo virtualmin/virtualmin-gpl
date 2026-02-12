@@ -8,9 +8,10 @@ my $domsstr = $in{'doms'};
 if ($domsstr) {
 	my @doms = split(" ", $domsstr);
 	foreach my $dom (@doms) {
-		$d = &get_domain_by('dom', $dom);
+		my $d = &get_domain_by('dom', $dom);
 		next if (!$d);
 		next if (!&can_edit_domain($d));
+		&lock_domain($d);
 		if ($in{'ignore'}) {
 			# Ignore expiry forever
 			$d->{'whois_ignore'} = 1;
@@ -26,6 +27,7 @@ if ($domsstr) {
 			delete($d->{'whois_ignore'});
 			}
 		&save_domain($d);
+		&unlock_domain($d);
 		}
 	}
 &redirect(&get_referer_relative());
