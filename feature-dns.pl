@@ -5172,6 +5172,7 @@ if (&dns_records_to_text(@oldrecs) ne &dns_records_to_text(@need)) {
 
 	&post_records_change($d, $recs, $file);
 	&release_lock_dns($d);
+	&register_post_action(\&restart_bind, $d);
 	}
 else {
 	&after_records_change($d);
