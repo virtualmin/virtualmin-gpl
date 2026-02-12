@@ -477,8 +477,18 @@ return "No matching Alias or Redirect found";
 sub modify_redirect
 {
 my ($d, $redirect, $oldredirect) = @_;
-&delete_redirect($d, $oldredirect);
-return &create_redirect($d, $redirect);
+# Replace in a safe order, so if creating the new redirect fails, restore old
+# one so edits are non-destructive
+my $err = &delete_redirect($d, $oldredirect);
+return $err if ($err);
+$err = &create_redirect($d, $redirect);
+if ($err) {
+	my $rerr = &create_redirect($d, $oldredirect);
+	if ($rerr) {
+		$err .= " (failed to restore previous redirect: $rerr)";
+		}
+	}
+return $err;
 }
 
 # get_redirect_root(&domain)
