@@ -6267,6 +6267,18 @@ $config{'last_check'} = $oldconfig{'last_check'};
 # Remove plugins that aren't on the new system
 &generate_plugins_list($config{'plugins'});
 $config{'plugins'} = join(' ', @plugins);
+
+# Disable restored core features whose dependencies are unavailable
+# on this system, to avoid post-restore failures
+foreach my $f (@features) {
+	next if (!$config{$f});
+	my $err = &check_feature_depends($f);
+	if (defined($err)) {
+		$config{$f} = 0;
+		}
+	}
+@config_features = grep { $config{$_} } @features;
+
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
