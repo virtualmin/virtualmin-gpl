@@ -41,7 +41,6 @@ else {
 		}
 	elsif ($in{'dest'} =~ /^(http|https):\/\/\S+$/) {
 		$in{'mode'} = 0;
-		$in{'url'} = $in{'dest'};
 		}
 	elsif ($in{'dest'} =~ /^\/\S*$/) {
 		my $rroot = &get_redirect_root($d);
@@ -119,9 +118,16 @@ else {
 		}
 	if ($in{'mode'} == 0) {
 		# Redirect to a URL on another host
-		$in{'url'} =~ /^(http|https):\/\/\S+$/ ||
+		$in{'dest'} =~ /^(http|https):\/\/\S+$/ ||
 			&error($text{'redirect_eurl'});
-		$r->{'dest'} = $in{'url'};
+		# Normalize IDN hostname to ASCII/punycode if needed
+		my ($phost) = &parse_http_url($in{'dest'});
+		$phost || &error($text{'redirect_eurl'});
+		my $ahost = &parse_domain_name($phost);
+		if ($ahost && $ahost ne $phost) {
+			$in{'dest'} =~ s/\Q$phost\E/$ahost/;
+			}
+		$r->{'dest'} = $in{'dest'};
 		$r->{'alias'} = 0;
 		}
 	elsif ($in{'mode'} == 3) {
@@ -210,6 +216,12 @@ else {
 			$host =~ /\S/ || &error($text{'redirect_ehost'});
 			$host =~ s/^\s+//;
 			$host =~ s/\s+$//;
+			if ($host !~ /[\*\?\[\]\(\)\{\}\+\^\$\|\\]/) {
+				# Normalize unicode hostnames to ASCII/punycode.
+				$host = &parse_domain_name($host);
+				$host =~ /^[a-z0-9\.\_\-]+$/i ||
+					&error($text{'redirect_ehost'});
+				}
 			if ($host =~ /^[a-z0-9\.\_\-]+$/i) {
 				# Plain hostname with exact host match
 				$r->{'host'} = $host;

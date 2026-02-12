@@ -26,10 +26,23 @@ foreach $r (@redirects) {
 	    $dest =~ /^(http|https):\/\/%\{HTTP_HOST\}(\/.*)$/) {
 		$dest = &text('redirects_with', "$2", uc($1));
 		}
+	elsif (!$r->{'alias'} && $dest =~ /^https?:\/\//) {
+		my ($phost) = &parse_http_url($dest);
+		if ($phost) {
+			my $dhost = &show_domain_name($phost, 2);
+			$dest =~ s/\Q$phost\E/$dhost/ if ($dhost ne $phost);
+			}
+		}
 	my $iswebmail = &is_webmail_redirect($d, $r);
 	my $iswww = &is_www_redirect($d, $r);
 	my $canedit = !$iswebmail && !$iswww;
 	my $code = $r->{'alias'} ? "&nbsp;&nbsp;-" : ($r->{'code'} || 302);
+	my $host = $r->{'host'};
+	my $host_disp = $host || $text{'redirects_any'};
+	if ($host && !$r->{'hostregexp'} &&
+	    $host !~ /[%\$\{\}\[\]\(\)\^\*\?\+\|\\]/) {
+		$host_disp = &show_domain_name($host, 2);
+		}
 	my $subpath = $r->{'exact'} ? $text{'redirects_subpath_exact'} :
 		      $r->{'regexp'} ? $text{'redirects_subpath_ignore'} :
 		                       $text{'redirects_subpath_keep'};
@@ -48,7 +61,7 @@ foreach $r (@redirects) {
 		$code,
 		$subpath,
 		join(", ", @protos),
-		$canhost ? ( $r->{'host'} || $text{'redirects_any'} ) : ( ),
+		$canhost ? ( $host_disp ) : ( ),
 		$dest,
 		]);
 	}

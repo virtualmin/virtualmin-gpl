@@ -44,6 +44,14 @@ elsif ($r->{'dest'} &&
 else {
 	$dest = $r->{'dest'};
 	}
+# Convert punycode hostname to unicode for display
+if ($dest && $dest =~ /^https?:\/\// && !$r->{'alias'}) {
+	my ($phost) = &parse_http_url($dest);
+	if ($phost) {
+		my $dhost = &show_domain_name($phost, 2);
+		$dest =~ s/\Q$phost\E/$dhost/ if ($dhost ne $phost);
+		}
+	}
 print &ui_table_row(&hlink($text{'redirect_to'}, 'redirect_dest'),
 	&ui_textbox("dest", $dest, 65, undef, undef,
 		"placeholder=\"$text{'index_global_eg'} ".
@@ -98,7 +106,7 @@ if (&has_web_host_redirects($d)) {
 	my @hmode_opts = ( [ 0, $text{'redirect_host_def'} ] );
 	if (@hosts) {
 		my @hopts = ( [ undef, $text{'redirect_host_pick'} ],
-			      map { [ $_, $_ ] } @hosts );
+			      map { [ $_, &show_domain_name($_) ] } @hosts );
 		my $hsel = &ui_select("host_pick",
 			$hmode == 1 ? $r->{'host'} : undef,
 			\@hopts, undef, undef, undef, undef,
