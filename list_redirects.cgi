@@ -11,6 +11,11 @@ $d = &get_domain($in{'dom'});
 
 # Build table data
 @redirects = map { &remove_wellknown_redirect($_) } &list_redirects($d);
+@redirects = sort {
+	lc($a->{'path'} || '') cmp lc($b->{'path'} || '') ||
+	lc($a->{'host'} || '') cmp lc($b->{'host'} || '') ||
+	($a->{'alias'} <=> $b->{'alias'})
+} @redirects;
 $canhost = &has_web_host_redirects($d);
 foreach $r (@redirects) {
 	my @protos;
