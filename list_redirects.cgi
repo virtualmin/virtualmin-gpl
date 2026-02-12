@@ -35,7 +35,7 @@ foreach $r (@redirects) {
 		  'value' => $r->{'id'}, 'disabled' => !$canedit },
 		$canedit ? 
 			&ui_link("edit_redirect.cgi?dom=$in{'dom'}&".
-				 "id=$r->{'id'}", $r->{'path'}) :
+				 "id=".&urlize($r->{'id'}), $r->{'path'}) :
 			$r->{'path'},
 		$iswebmail == 2 ? $text{'redirects_usermin'} :
 		$iswebmail == 1 ? $text{'redirects_webmin'} :
