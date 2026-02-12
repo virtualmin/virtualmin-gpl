@@ -1,19 +1,19 @@
-<header>Destination</header>
+<header>Redirect to</header>
 
-This field determines where the <b>URL path</b> above will be redirected to.
-You have two different choices :
-<dl>
-<dt><b>URL at other website</b>
-<dd>When this option is selected, any browser accessing the URL path will be
-    redirected to this new URL. If a sub-directory of the path is accessed,
-    the redirect will also include that same path. <p>
-
-<dt><b>Directory on this system</b>
-<dd>When this option is chosen, any browser accessing the URL path will be
-    served content from the specified directory. This should be in the domain's
-    home directory, and preferably under <tt>public_html</tt> or else PHP
-    scripts are unlikely to work. <p>
-</dl>
+This field determines where requests will be sent. Virtualmin detects the
+destination type automatically:
+<ul>
+<li><b>Full URL</b> (for example <tt>https://other.example/path</tt>)<br>
+    Redirect to another website.
+<li><b>URL path</b> (for example <tt>/new-path</tt>)<br>
+    Redirect to another path on this website.
+<li><b>Directory path</b> (for example
+    <tt>/home/user/public_html/files/</tt>)<br>
+    If this is an existing directory under the website root, it is used as an
+    alias target.
+<li><b>Host-preserving URL</b> (for example
+    <tt>http://%{HTTP_HOST}/path</tt>)<br>
+    Keep the requested hostname while changing protocol and/or path.
+</ul>
 
 <footer>
-

@@ -22,6 +22,86 @@ if ($in{'delete'}) {
 	&error($err) if ($err);
 	}
 else {
+	# Parse destination input into one of the existing redirect modes
+	$in{'dest'} =~ s/^\s+//; $in{'dest'} =~ s/\s+$//;
+	$in{'dest'} =~ /\S/ || &error($text{'redirect_edest'});
+
+	# Be tolerant of existing redirects set without a leading / (like pma/
+	# instead of /pma/)
+	if ($in{'dest'} =~ /^\S+$/ &&
+		$in{'dest'} !~ /^\// &&
+		$in{'dest'} !~ /^(http|https):\/\//) {
+		$in{'dest'} = "/".$in{'dest'};
+		}
+
+	if ($in{'dest'} =~ /^(http|https):\/\/%\{HTTP_HOST\}(\/\S*)?$/) {
+		$in{'mode'} = 2;
+		$in{'dproto'} = $1;
+		$in{'dpath'} = $2 || "/";
+		}
+	elsif ($in{'dest'} =~ /^(http|https):\/\/\S+$/) {
+		$in{'mode'} = 0;
+		$in{'url'} = $in{'dest'};
+		}
+	elsif ($in{'dest'} =~ /^\/\S*$/) {
+		my $rroot = &get_redirect_root($d);
+		my $actualdir = $in{'dest'};
+		if ($actualdir =~ s/\$.*$//) {
+			# If path contains $1, reduce to parent dir
+			$actualdir =~ s/\/[^\/]*$//;
+			}
+		my $looks_dir = 0;
+		# Treat paths under domain home/redirect root as filesystem
+		# alias intent
+		if ($d->{'home'} &&
+			($in{'dest'} eq $d->{'home'} ||
+			$in{'dest'} =~ /^\Q$d->{'home'}\E\//)) {
+			$looks_dir = 1;
+			}
+		elsif ($rroot && $rroot ne "/" &&
+			($in{'dest'} eq $rroot ||
+			$in{'dest'} =~ /^\Q$rroot\E\//)) {
+			$looks_dir = 1;
+			}
+		# Treat as directory alias only if it really exists on disk
+		if ($actualdir && -d $actualdir &&
+			(!$rroot || &is_under_directory($rroot, $in{'dest'}))) {
+			$in{'mode'} = 1;
+			$in{'dir'} = $in{'dest'};
+			}
+		elsif ($looks_dir) {
+			# Looks like a filesystem alias path, so fail fast
+			# if the destination directory is invalid/missing
+			!$actualdir || -d $actualdir ||
+				&error(&text('redirect_edir3', $actualdir));
+			!$rroot || &is_under_directory($rroot, $in{'dest'}) ||
+				&error(&text('redirect_edir2', $rroot));
+			}
+		else {
+			$in{'mode'} = 3;
+			$in{'urlpath'} = $in{'dest'};
+			}
+		}
+
+	# Parse protocols selector
+	if (defined($in{'proto_mode'})) {
+		if ($in{'proto_mode'} eq 'both') {
+			$in{'http'} = 1;
+			$in{'https'} = 1;
+			}
+		elsif ($in{'proto_mode'} eq 'http') {
+			$in{'http'} = 1;
+			$in{'https'} = 0;
+			}
+		elsif ($in{'proto_mode'} eq 'https') {
+			$in{'http'} = 0;
+			$in{'https'} = 1;
+			}
+		else {
+			&error($text{'redirect_eproto'});
+			}
+		}
+
 	# Validate inputs
 	if ($in{'path'} =~ /^(http|https):\/\/([^\/]+)(\/\S*)$/) {
 		# URL, check the domain and save the path
@@ -72,40 +152,89 @@ else {
 			}
 		!$actualdir || -d $actualdir ||
 			&error(&text('redirect_edir3', $actualdir));
-		if ($in{'new'} || $r->{'dest'} ne $in{'dir'}) {
+
+		# For directory aliases, mirror source path slash style, i.e.
+		# when source ends with /, destination should also end with /
+		# to avoid path-join issues in Alias mappings.
+		my $normdir = $in{'dir'};
+		if ($normdir !~ /\/$/ && $normdir !~ /\$/ &&
+		    $actualdir && -d $actualdir && $r->{'path'} =~ /\/$/) {
+			$normdir .= "/";
+			}
+
+		if ($in{'new'} || $r->{'dest'} ne $normdir) {
 			$rroot = &get_redirect_root($d);
-			&is_under_directory($rroot, $in{'dir'}) ||
+			&is_under_directory($rroot, $normdir) ||
 				&error(&text('redirect_edir2', $rroot));
 			}
-		$r->{'dest'} = $in{'dir'};
+		$r->{'dest'} = $normdir;
 		$r->{'alias'} = 1;
 		}
-	if ($in{'mode'} == 0 || $in{'mode'} == 2) {
-		# Save redirect code
+	if ($in{'mode'} == 0 || $in{'mode'} == 2 || $in{'mode'} == 3) {
+		# Save redirect code for URL redirects
+		$in{'code'} ||= 302;
 		$r->{'code'} = $in{'code'};
-		$in{'code'} eq '' || $in{'code'} =~ /^\d{3}$/ &&
+		$in{'code'} =~ /^\d{3}$/ &&
 		    $in{'code'} >= 300 && $in{'code'} < 400 ||
 			&error($text{'redirect_ecode'});
+		}
+	else {
+		# Aliases do not use HTTP redirect status codes
+		delete($r->{'code'});
 		}
 	$r->{'regexp'} = $in{'regexp'} == 1 ? 1 : 0;
 	$r->{'exact'} = $in{'regexp'} == 2 ? 1 : 0;
 	$r->{'http'} = $in{'http'};
 	$r->{'https'} = $in{'https'};
+
+	# Hostname filter mode
+	# 0 = any hostname, 1 = selected hostname, 2 = manually specified
 	if (&has_web_host_redirects($d)) {
-		if ($in{'host_def'}) {
+		my $hmode = int($in{'host_mode'});
+
+		if ($hmode == 0) {
 			delete($r->{'host'});
+			delete($r->{'hostregexp'});
 			}
-		else {
-			if ($in{'hostregexp'}) {
-				$in{'host'} =~ /^\S+$/ ||
-					&error($text{'redirect_ehost2'});
+		elsif ($hmode == 1) {
+			my $host = $in{'host_pick'};
+			$host =~ s/^\s+// if (defined($host));
+			$host =~ s/\s+$// if (defined($host));
+			$host =~ /^\S+$/ || &error($text{'redirect_ehost'});
+			# Selected hostnames are always exact matches
+			$r->{'host'} = $host;
+			$r->{'hostregexp'} = 0;
+			}
+		elsif ($hmode == 2) {
+			my $host = $in{'host'};
+			$host =~ /\S/ || &error($text{'redirect_ehost'});
+			$host =~ s/^\s+//;
+			$host =~ s/\s+$//;
+			if ($host =~ /^[a-z0-9\.\_\-]+$/i) {
+				# Plain hostname with exact host match
+				$r->{'host'} = $host;
+				$r->{'hostregexp'} = 0;
+				}
+			elsif ($host =~ /^[a-z0-9\.\_\-\*\?]+$/i) {
+				# Shell-like wildcard hostname from ServerAlias
+				# is converted to a safe anchored regex
+				my $re = quotemeta($host);
+				$re =~ s/\\\*/.*/g;
+				$re =~ s/\\\?/./g;
+				$r->{'host'} = "^".$re."\$";
+				$r->{'hostregexp'} = 1;
 				}
 			else {
-				$in{'host'} =~ /^[a-z0-9\.\_\-]+$/i ||
+				# Non-plain, no whitespace so treat as regex
+				# pattern
+				$host =~ /^\S+$/ ||
 					&error($text{'redirect_ehost'});
+				$r->{'host'} = $host;
+				$r->{'hostregexp'} = 1;
 				}
-			$r->{'host'} = $in{'host'};
-			$r->{'hostregexp'} = $in{'hostregexp'};
+			}
+		else {
+			&error($text{'redirect_ehost'});
 			}
 		}
 	$r = &add_wellknown_redirect($r);
@@ -128,4 +257,3 @@ else {
 	    "redirect", $r->{'path'}, { 'dom' => $d->{'dom'} });
 
 &redirect("list_redirects.cgi?dom=$in{'dom'}");
-
