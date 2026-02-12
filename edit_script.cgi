@@ -106,6 +106,19 @@ if (!$have_kit) {
 			$text{'yes'});
 		}
 	
+	# If httpdauth option is available, show if enabled 
+	local $httpdauth_ifunc =
+		"script_".$sinfo->{'name'}."_httpdauth_is_enabled";
+	if (defined($opts->{'httpdauth'}) || defined(&$httpdauth_ifunc)) {
+		local $httpdauth_enabled = $opts->{'httpdauth'} ? 1 : 0;
+		$httpdauth_enabled = &$httpdauth_ifunc($d, $opts) ? 1 : 0
+			if (defined(&$httpdauth_ifunc));
+		$content .= &ui_table_row(
+			&hlink($text{"script_".$sinfo->{'name'}."_httpdauth"},
+			       "script_".$sinfo->{'name'}."_httpdauth"),
+			$httpdauth_enabled ? $text{'yes'} : $text{'no'});
+		}
+	
 	# Show directory
 	if ($opts->{'dir'}) {
 		$content .= &ui_table_row($text{'scripts_idir'},
