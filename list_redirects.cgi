@@ -29,6 +29,7 @@ foreach $r (@redirects) {
 	my $iswebmail = &is_webmail_redirect($d, $r);
 	my $iswww = &is_www_redirect($d, $r);
 	my $canedit = !$iswebmail && !$iswww;
+	my $code = $r->{'alias'} ? "&nbsp;&nbsp;-" : ($r->{'code'} || 302);
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $r->{'id'}, 'disabled' => !$canedit },
@@ -41,6 +42,7 @@ foreach $r (@redirects) {
 		$iswww ? $text{'redirects_canon'} :
 		$r->{'alias'} ? $text{'redirects_alias'}
 			      : $text{'redirects_redirect'},
+		$code,
 		join(", ", @protos),
 		$canhost ? ( $r->{'host'} || $text{'redirects_any'} ) : ( ),
 		$dest,
@@ -57,6 +59,7 @@ print &ui_form_columns_table(
 	[ [ "dom", $in{'dom'} ] ],
 	[ "", $text{'redirects_path'},
           $text{'redirects_type'},
+	  $text{'redirects_code'},
           $text{'redirects_protos'},
 	  $canhost ? ( $text{'redirects_host'} ) : ( ),
           $text{'redirects_dest'},
