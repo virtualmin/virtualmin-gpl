@@ -6243,8 +6243,10 @@ local ($file, $vbs) = @_;
 &$first_print($text{'restore_vconfig_doing'});
 local %oldconfig = %config;
 local @tmpls = &list_templates();
+&lock_file($module_config_file);
 &copy_source_dest($file, $module_config_file);
 &read_file($module_config_file, \%config);
+&unlock_file($module_config_file);
 foreach my $t (@tmpls) {
 	if ($t->{'standard'}) {
 		&save_template($t);
@@ -6253,6 +6255,7 @@ foreach my $t (@tmpls) {
 
 # Put back site-specific settings, as those in the backup are unlikely to
 # be correct.
+&lock_file($module_config_file);
 $config{'iface'} = $oldconfig{'iface'};
 $config{'defip'} = $oldconfig{'defip'};
 $config{'sharedips'} = $oldconfig{'sharedips'};
@@ -6279,7 +6282,6 @@ foreach my $f (@features) {
 	}
 @config_features = grep { $config{$_} } @features;
 
-&lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
 &$second_print($text{'setup_done'});
