@@ -6267,9 +6267,12 @@ $config{'old_defip'} = $oldconfig{'old_defip'};
 $config{'old_defip6'} = $oldconfig{'old_defip6'};
 $config{'last_check'} = $oldconfig{'last_check'};
 
-# Remove plugins that aren't on the new system
-&generate_plugins_list($config{'plugins'});
-$config{'plugins'} = join(' ', @plugins);
+# Remove plugins that aren't on the new system, but keep the current ones that
+# are enabled
+my $plugins = $config{'plugins'};
+$plugins .= " " . $oldconfig{'plugins'} if ($oldconfig{'plugins'});
+&generate_plugins_list($plugins);
+$config{'plugins'} = join(' ', &unique(@plugins));
 
 # Disable restored core features whose dependencies are unavailable
 # on this system, to avoid post-restore failures
