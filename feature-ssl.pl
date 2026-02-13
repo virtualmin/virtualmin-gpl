@@ -6,6 +6,16 @@ $feature_depends{'ssl'} = [ 'web', 'dir' ];
 $default_web_sslport = $config{'web_sslport'} || 443;
 }
 
+# feature_depends_ssl()
+# Return undef if SSL feature prerequisites are met
+sub feature_depends_ssl
+{
+my $werr = &feature_depends_web();
+return $werr if ($werr);
+$config{'web'} || return &text('check_edepssl', "edit_newfeatures.cgi");
+return undef;
+}
+
 # check_warnings_ssl(&dom, &old-domain)
 # An SSL website should have either a private IP, or private port, UNLESS
 # the clashing domain's cert can be used for this domain.
