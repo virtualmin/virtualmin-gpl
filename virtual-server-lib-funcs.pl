@@ -6269,8 +6269,8 @@ $config{'last_check'} = $oldconfig{'last_check'};
 
 # Remove plugins that aren't on the new system, but keep the current ones that
 # are enabled
-my $plugins = $config{'plugins'};
-$plugins .= " " . $oldconfig{'plugins'} if ($oldconfig{'plugins'});
+my $plugins = join(" ", &unique(split(/\s+/, $config{'plugins'} || ''),
+				split(/\s+/, $oldconfig{'plugins'} || '')));
 &generate_plugins_list($plugins);
 $config{'plugins'} = join(' ', &unique(@plugins));
 
