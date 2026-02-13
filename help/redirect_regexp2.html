@@ -1,21 +1,15 @@
-<header>Redirect sub-directories to</header>
+<header>Sub-path handling</header>
 
-This option controls how paths under the source URL path are redirected. For
-example, if the source path is <tt>/foo</tt> and the destination is
-<tt>http://foo.com</tt> the meanings of the options are :<p>
-
+This option controls requests under the source path:
 <ul>
-<li><b>Same sub-directory under destination URL</b><br>
-    A request to <tt>/foo/bar</tt> will be redirected to
-    <tt>http://foo.com/bar</tt><p>
-
-<li><b>Just destination URL</b><br>
-    A request to <tt>/foo/bar</tt> will just be redirected to
-    <tt>http://foo.com</tt><p>
-
-<li><b>Ignore sub-directories</b><br>
-    A request to <tt>/foo/bar</tt> will not be redirected at all, only a
-    request to <tt>/foo</tt> will be.
+<li><b>Keep sub-paths</b><br>
+    Requests under the source path keep the same trailing path under the
+    destination.
+<li><b>Ignore sub-paths</b><br>
+    Requests under the source path are redirected to the destination itself,
+    without appending the trailing path.
+<li><b>Only redirect exact source path</b><br>
+    Only the exact source path is redirected.
 </ul>
 
 <footer>
