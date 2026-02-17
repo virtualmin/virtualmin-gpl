@@ -217,12 +217,15 @@ else {
 			$host =~ s/^\s+//;
 			$host =~ s/\s+$//;
 			if ($host !~ /[\*\?\[\]\(\)\{\}\+\^\$\|\\]/) {
-				# Normalize unicode hostnames to ASCII/punycode.
+				# Normalize unicode hostnames to ASCII/punycode
 				$host = &parse_domain_name($host);
-				$host =~ /^[a-z0-9\.\_\-]+$/i ||
-					&error($text{'redirect_ehost'});
 				}
-			if ($host =~ /^[a-z0-9\.\_\-]+$/i) {
+			my $is_plain_host = $host =~ /^[a-z0-9\.\_\-]+$/i;
+			if ($host !~ /[\*\?\[\]\(\)\{\}\+\^\$\|\\]/ &&
+			    !$is_plain_host) {
+				&error($text{'redirect_ehost'});
+				}
+			if ($is_plain_host) {
 				# Plain hostname with exact host match
 				$r->{'host'} = $host;
 				$r->{'hostregexp'} = 0;
