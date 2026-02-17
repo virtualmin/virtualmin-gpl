@@ -46,7 +46,7 @@ else {
 		my $rroot = &get_redirect_root($d);
 		my $actualdir = $in{'dest'};
 		if ($actualdir =~ s/\$.*$//) {
-			# If path contains $1, reduce to parent dir
+			# If path contains a $ variable, reduce to parent dir
 			$actualdir =~ s/\/[^\/]*$//;
 			}
 		my $looks_dir = 0;
@@ -153,7 +153,7 @@ else {
 			&error($text{'redirect_edir'});
 		$actualdir = $in{'dir'};
 		if ($actualdir =~ s/\$.*$//) {
-			# If path contains $1, reduce to parent dir
+			# If path contains a $ variable, reduce to parent dir
 			$actualdir =~ s/\/[^\/]*$//;
 			}
 		!$actualdir || -d $actualdir ||
