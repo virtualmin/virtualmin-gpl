@@ -23,7 +23,8 @@ if ($in{'delete'}) {
 	}
 else {
 	# Parse destination input into one of the existing redirect modes
-	$in{'dest'} =~ s/^\s+//; $in{'dest'} =~ s/\s+$//;
+	$in{'dest'} =~ s/^\s+//;
+	$in{'dest'} =~ s/\s+$//;
 	$in{'dest'} =~ /\S/ || &error($text{'redirect_edest'});
 
 	# Be tolerant of existing redirects set without a leading / (like pma/
