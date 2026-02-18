@@ -3694,7 +3694,31 @@ if (&init::action_status($action_name)) {
 sub detect_installed_scripts
 {
 my ($d, $dir) = @_;
-$dir ||= &public_html_dir($d);
+my $phd = &public_html_dir($d);
+$dir ||= $phd;
+
+# Keep an absolute path under public_html unchanged.
+# Only remap when "/" is given, the path is relative, or the path is outside
+# public_html.
+if ($dir eq "/" || $dir !~ /^\// || !&is_under_directory($phd, $dir)) {
+	if ($dir eq "/") {
+		$dir = $phd;
+		}
+	elsif ($dir !~ /^\//) {
+		$dir = "$phd/$dir";
+		}
+	else {
+		(my $reldir = $dir) =~ s/^\/+//;
+		$dir = $reldir ? "$phd/$reldir" : $phd;
+		}
+	$dir =~ s/\/+/\//g;
+	$dir =~ s/\/$// if ($dir ne "/");
+	if ($dir ne $phd && !&is_under_directory($phd, $dir)) {
+		$dir = $phd;
+		}
+	}
+$dir =~ s/\/+/\//g;
+
 my @rv;
 my %already = map { $_->{'opts'}->{'dir'}, $_ } &list_domain_scripts($d);
 foreach my $sname (&list_scripts()) {
