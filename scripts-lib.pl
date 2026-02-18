@@ -669,15 +669,32 @@ eval {
 	if ($dbtype eq "mysql") {
 		# Delete from MySQL
 		&require_mysql();
+		my @todrop;
 		foreach my $t (&list_dom_mysql_tables($d, $dbname)) {
 			if (ref($tables) && &indexoflc($t, @$tables) >= 0 ||
 			    !ref($tables) && $t =~ /^$tables/i) {
-				eval {
-					&execute_dom_sql($d, $dbname,
+				push(@todrop, $t);
+				}
+			}
+		if (@todrop) {
+			# Run all statements in one session, so
+			# foreign_key_checks applies to the DROP TABLE commands
+			my $temp = &transname();
+			if (!&open_tempfile(DROPSQL, ">$temp")) {
+				$droperr ||= "Failed to write SQL to $temp : $!";
+				}
+			else {
+				&print_tempfile(DROPSQL,
+					"set foreign_key_checks = 0;\n");
+				foreach my $t (@todrop) {
+					&print_tempfile(DROPSQL,
 						"drop table ".
-						&mysql::quotestr($t));
-					};
-				$droperr ||= $@;
+						&mysql::quotestr($t).";\n");
+					}
+				&close_tempfile(DROPSQL);
+				my ($ex, $out) =
+				    &execute_dom_sql_file($d, $dbname, $temp);
+				$droperr ||= $out if ($ex);
 				}
 			}
 		}
@@ -691,7 +708,8 @@ eval {
 					&execute_dom_psql(
 						$d, $dbname,
 						"drop table ".
-						&postgresql::quote_table($t));
+						&postgresql::quote_table($t).
+						" cascade");
 					};
 				$droperr ||= $@;
 				}
