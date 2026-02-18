@@ -3733,7 +3733,8 @@ foreach my $sname (&list_scripts()) {
 	my @sinfos = &$dfunc($d, \@dfiles);
 	foreach my $sinfo (@sinfos) {
 		$sinfo->{'name'} = $sname;
-		$sinfo->{'desc'} ||= "Detected under $sinfo->{'path'}";
+		my $path = $sinfo->{'path'} || $sinfo->{'opts'}->{'path'} || '/';
+		$sinfo->{'desc'} ||= "Detected under ".$path;
 
 		# Populate the PHP version field
 		if (&indexof('php', @{$script->{'uses'}}) >= 0) {
