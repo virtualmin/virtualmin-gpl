@@ -994,6 +994,21 @@ local ($got) = grep { $_->{'name'} eq $mod &&
 return $got ? 1 : 0;
 }
 
+# normalize_php_module_name(module-name)
+# Normalizes PHP extension names from package/script naming to php -m style.
+sub normalize_php_module_name
+{
+local ($mod) = @_;
+$mod = "" if (!defined($mod));
+$mod = lc($mod);
+$mod =~ s/^pecl-//;
+$mod =~ s/[^a-z0-9]+/_/g;
+$mod =~ s/_+/_/g;
+$mod =~ s/^_+//;
+$mod =~ s/_+$//;
+return $mod;
+}
+
 # check_php_module(mod, [version], [&domain])
 # Returns 1 if some PHP module is installed, 0 if not, or -1 if the php command
 # is missing
@@ -1009,8 +1024,12 @@ $verinfo ||= $vers[0];
 return -1 if (!$verinfo);
 local $cmd = $verinfo->[1];
 &has_command($cmd) || return -1;
-local @mods = &list_php_modules($d, $verinfo->[0], $verinfo->[1]);
-return &indexof($mod, @mods) >= 0 ? 1 : 0;
+local $want = &normalize_php_module_name($mod);
+local @mods = map { &normalize_php_module_name($_) }
+	&list_php_modules($d, $verinfo->[0], $verinfo->[1]);
+local %mods = map { $_, 1 } @mods;
+return 1 if ($mods{$want});
+return 0;
 }
 
 # check_perl_module(mod, &domain)

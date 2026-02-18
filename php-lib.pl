@@ -1916,7 +1916,7 @@ if (!defined($main::php_modules{$ver,$d->{'id'}})) {
 	&open_execute_command(PHP, "$cmd -m", 1);
 	while(<PHP>) {
 		s/\r|\n//g;
-		if (/^\S+$/ && !/\[/) {
+		if (/^\S+(?: \S+)?$/ && !/\[/) {
 			push(@{$main::php_modules{$ver,$d->{'id'}}}, $_);
 			}
 		}
