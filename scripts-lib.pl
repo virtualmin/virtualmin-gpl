@@ -3743,10 +3743,11 @@ foreach my $sname (&list_scripts()) {
 					$d, $sinfo->{'opts'}->{'dir'});
 			}
 
-		# Populate the URL field based on the path
+		# Populate and normalize URL based on the path
 		if ($sinfo->{'opts'}->{'path'}) {
-			$sinfo->{'url'} = 'http://'.$d->{'dom'}.
-					  $sinfo->{'opts'}->{'path'};
+			$sinfo->{'url'} = &script_path_url(
+				$d, $sinfo->{'opts'});
+			$sinfo->{'url'} =~ s/\/+$/\//g;
 			}
 
 		# Fetch real version from the script-specific function
