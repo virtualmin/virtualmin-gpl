@@ -1924,7 +1924,9 @@ if (!defined($main::php_modules{$ver,$d->{'id'}})) {
 	&reset_environment();
 	delete($ENV{'PHPRC'});
 	}
-return @{$main::php_modules{$ver,$d->{'id'}}};
+return () if (!defined($main::php_modules{$ver,$d->{'id'}}));
+my @rv = &unique(@{$main::php_modules{$ver,$d->{'id'}}});
+return @rv;
 }
 
 # fix_php_ini_files(&domain, &fixes)
