@@ -3712,7 +3712,7 @@ if ($dir eq "/" || $dir !~ /^\// || !&is_under_directory($phd, $dir)) {
 		$dir = $reldir ? "$phd/$reldir" : $phd;
 		}
 	$dir =~ s/\/+/\//g;
-	$dir =~ s/\/$// if ($dir ne "/");
+	$dir =~ s/\/+$// if ($dir ne "/");
 	if ($dir ne $phd && !&is_under_directory($phd, $dir)) {
 		$dir = $phd;
 		}
@@ -3721,6 +3721,14 @@ $dir =~ s/\/+/\//g;
 
 my @rv;
 my %already = map { $_->{'opts'}->{'dir'}, $_ } &list_domain_scripts($d);
+# Normalize paths and dir by removing duplicate slashes and trailing slashes to
+# avoid detection issue by duplicating already existing script
+foreach my $s (values %already) {
+	$s->{'opts'}->{'dir'} =~ s/\/+/\//g;
+	$s->{'opts'}->{'dir'} =~ s/\/+$//;
+	$s->{'opts'}->{'path'} =~ s/\/+/\//g;
+	$s->{'opts'}->{'path'} =~ s/\/+$// if ($s->{'opts'}->{'path'} ne "/");
+	}
 foreach my $sname (&list_scripts()) {
 	my $script = &get_script($sname);
 	next if (!$script);
@@ -3733,6 +3741,14 @@ foreach my $sname (&list_scripts()) {
 	my @sinfos = &$dfunc($d, \@dfiles);
 	foreach my $sinfo (@sinfos) {
 		$sinfo->{'name'} = $sname;
+		# Normalize paths and dir
+		$sinfo->{'opts'}->{'dir'} =~ s/\/+/\//g;
+		$sinfo->{'opts'}->{'dir'} =~ s/\/+$//;
+		$sinfo->{'path'} =~ s/\/+/\//g;
+		$sinfo->{'path'} =~ s/\/+$// if ($sinfo->{'path'} ne "/");
+		$sinfo->{'opts'}->{'path'} =~ s/\/+/\//g;
+		$sinfo->{'opts'}->{'path'} =~ s/\/+$//
+			if ($sinfo->{'opts'}->{'path'} ne "/");
 		my $path = $sinfo->{'path'} || $sinfo->{'opts'}->{'path'} || '/';
 		$sinfo->{'desc'} ||= "Detected under ".$path;
 
@@ -3747,7 +3763,7 @@ foreach my $sname (&list_scripts()) {
 		if ($sinfo->{'opts'}->{'path'}) {
 			$sinfo->{'url'} = &script_path_url(
 				$d, $sinfo->{'opts'});
-			$sinfo->{'url'} =~ s/\/+$/\//g;
+			$sinfo->{'url'} =~ s/(?<!:)\/+/\//g;
 			}
 
 		# Fetch real version from the script-specific function
