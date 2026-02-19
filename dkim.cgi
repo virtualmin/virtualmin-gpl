@@ -32,7 +32,8 @@ print &ui_table_row($text{'dkim_enabled'},
 if ($dkim && $dkim->{'enabled'}) {
 	# Selector is fixed
 	print &ui_table_row($text{'dkim_selector'},
-		"<tt>$dkim->{'selector'}</tt>");
+		&ui_textbox(undef, $dkim->{'selector'}, undef, 1, undef,
+		"title='$text{'dkim_selector_desc'}'", 'field-sizing-content'));
 	print &ui_hidden("selector", $dkim->{'selector'});
 	}
 else {

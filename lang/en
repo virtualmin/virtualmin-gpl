@@ -7340,6 +7340,7 @@ dkim_header2=Keys and records for offsite hosting
 dkim_header3=Domains currently signed for
 dkim_enabled=Signing of outgoing mail enabled?
 dkim_selector=Selector for DKIM record name
+dkim_selector_desc=To change the DKIM selector, you must first disable outgoing mail signing using the radio button above
 dkim_verify=Reject incoming email with invalid DKIM signature?
 dkim_size=Size of new DKIM key
 dkim_bits=bits
