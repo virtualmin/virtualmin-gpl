@@ -40,7 +40,7 @@ foreach $r (@redirects) {
 	my $host = $r->{'host'};
 	my $host_disp = $host || $text{'redirects_any'};
 	if ($host && !$r->{'hostregexp'} &&
-	    $host !~ /[%\$\{\}\[\]\(\)\^\*\?\+\|\\]/) {
+	    $host =~ /^[a-z0-9._-]+$/i) {
 		$host_disp = &show_domain_name($host, 2);
 		}
 	my $subpath = $r->{'exact'} ? $text{'redirects_subpath_exact'} :
