@@ -8378,6 +8378,15 @@ deftmplt_tmpltpagefooteraboutcont=Contact
 2fa_err=Failed to save two-factor authentication
 2fa_enrolling=Enrolling for two-factor authentication with $1 ..
 2fa_ecannot=You are not allowed to manage two-factor authentication
+2fa_testdesc=Before logging out, you can test your new two-factor authentication setup here by entering a token. If for some reason it doesn't work, turn off two-factor authentication and try setting it up again.
+2fa_testfield=Two-factor token
+2fa_test=Validate Token
+2fa_terr=Failed to test two-factor setup
+2fa_etestuser=Login does not have two-factor enabled!
+2fa_testing=Testing two-factor validation with $1 ..
+2fa_testfailed=.. test failed! Maybe the wrong token was entered, or your authentication app has not been configured correctly?
+2fa_testok=.. test passed! You can now safely login using two-factor authentication.
+2fa_testdis=Disable Two-Factor Now
 
 rcert_err=Failed to delete certificate
 rcert_ecert=Virtual server has no certificate to remove
