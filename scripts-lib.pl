@@ -300,7 +300,7 @@ sub add_domain_script
 {
 local ($d, $name, $version, $opts, $desc, $url, $user, $pass, $partial) = @_;
 $main::add_domain_script_count++;
-$partial =~ s/\n/ /g if ($partial);
+$partial =~ s/[\r\n]+/ /mg if ($partial);
 local %info = ( 'id' => time().$$.$main::add_domain_script_count,
 		'name' => $name,
 		'version' => $version,
@@ -669,15 +669,32 @@ eval {
 	if ($dbtype eq "mysql") {
 		# Delete from MySQL
 		&require_mysql();
+		my @todrop;
 		foreach my $t (&list_dom_mysql_tables($d, $dbname)) {
 			if (ref($tables) && &indexoflc($t, @$tables) >= 0 ||
 			    !ref($tables) && $t =~ /^$tables/i) {
-				eval {
-					&execute_dom_sql($d, $dbname,
+				push(@todrop, $t);
+				}
+			}
+		if (@todrop) {
+			# Run all statements in one session, so
+			# foreign_key_checks applies to the DROP TABLE commands
+			my $temp = &transname();
+			if (!&open_tempfile(DROPSQL, ">$temp")) {
+				$droperr ||= "Failed to write SQL to $temp : $!";
+				}
+			else {
+				&print_tempfile(DROPSQL,
+					"set foreign_key_checks = 0;\n");
+				foreach my $t (@todrop) {
+					&print_tempfile(DROPSQL,
 						"drop table ".
-						&mysql::quotestr($t));
-					};
-				$droperr ||= $@;
+						&mysql::quotestr($t).";\n");
+					}
+				&close_tempfile(DROPSQL);
+				my ($ex, $out) =
+				    &execute_dom_sql_file($d, $dbname, $temp);
+				$droperr ||= $out if ($ex);
 				}
 			}
 		}
@@ -691,7 +708,8 @@ eval {
 					&execute_dom_psql(
 						$d, $dbname,
 						"drop table ".
-						&postgresql::quote_table($t));
+						&postgresql::quote_table($t).
+						" cascade");
 					};
 				$droperr ||= $@;
 				}
@@ -976,6 +994,21 @@ local ($got) = grep { $_->{'name'} eq $mod &&
 return $got ? 1 : 0;
 }
 
+# normalize_php_module_name(module-name)
+# Normalizes PHP extension names from package/script naming to php -m style.
+sub normalize_php_module_name
+{
+local ($mod) = @_;
+$mod = "" if (!defined($mod));
+$mod = lc($mod);
+$mod =~ s/^pecl-//;
+$mod =~ s/[^a-z0-9]+/_/g;
+$mod =~ s/_+/_/g;
+$mod =~ s/^_+//;
+$mod =~ s/_+$//;
+return $mod;
+}
+
 # check_php_module(mod, [version], [&domain])
 # Returns 1 if some PHP module is installed, 0 if not, or -1 if the php command
 # is missing
@@ -991,8 +1024,12 @@ $verinfo ||= $vers[0];
 return -1 if (!$verinfo);
 local $cmd = $verinfo->[1];
 &has_command($cmd) || return -1;
-local @mods = &list_php_modules($d, $verinfo->[0], $verinfo->[1]);
-return &indexof($mod, @mods) >= 0 ? 1 : 0;
+local $want = &normalize_php_module_name($mod);
+local @mods = map { &normalize_php_module_name($_) }
+	&list_php_modules($d, $verinfo->[0], $verinfo->[1]);
+local %mods = map { $_, 1 } @mods;
+return 1 if ($mods{$want});
+return 0;
 }
 
 # check_perl_module(mod, &domain)
@@ -3694,9 +3731,41 @@ if (&init::action_status($action_name)) {
 sub detect_installed_scripts
 {
 my ($d, $dir) = @_;
-$dir ||= &public_html_dir($d);
+my $phd = &public_html_dir($d);
+$dir ||= $phd;
+
+# Keep an absolute path under public_html unchanged.
+# Only remap when "/" is given, the path is relative, or the path is outside
+# public_html.
+if ($dir eq "/" || $dir !~ /^\// || !&is_under_directory($phd, $dir)) {
+	if ($dir eq "/") {
+		$dir = $phd;
+		}
+	elsif ($dir !~ /^\//) {
+		$dir = "$phd/$dir";
+		}
+	else {
+		(my $reldir = $dir) =~ s/^\/+//;
+		$dir = $reldir ? "$phd/$reldir" : $phd;
+		}
+	$dir =~ s/\/+/\//g;
+	$dir =~ s/\/+$// if ($dir ne "/");
+	if ($dir ne $phd && !&is_under_directory($phd, $dir)) {
+		$dir = $phd;
+		}
+	}
+$dir =~ s/\/+/\//g;
+
 my @rv;
 my %already = map { $_->{'opts'}->{'dir'}, $_ } &list_domain_scripts($d);
+# Normalize paths and dir by removing duplicate slashes and trailing slashes to
+# avoid detection issue by duplicating already existing script
+foreach my $s (values %already) {
+	$s->{'opts'}->{'dir'} =~ s/\/+/\//g;
+	$s->{'opts'}->{'dir'} =~ s/\/+$//;
+	$s->{'opts'}->{'path'} =~ s/\/+/\//g;
+	$s->{'opts'}->{'path'} =~ s/\/+$// if ($s->{'opts'}->{'path'} ne "/");
+	}
 foreach my $sname (&list_scripts()) {
 	my $script = &get_script($sname);
 	next if (!$script);
@@ -3709,7 +3778,16 @@ foreach my $sname (&list_scripts()) {
 	my @sinfos = &$dfunc($d, \@dfiles);
 	foreach my $sinfo (@sinfos) {
 		$sinfo->{'name'} = $sname;
-		$sinfo->{'desc'} ||= "Detected under $sinfo->{'path'}";
+		# Normalize paths and dir
+		$sinfo->{'opts'}->{'dir'} =~ s/\/+/\//g;
+		$sinfo->{'opts'}->{'dir'} =~ s/\/+$//;
+		$sinfo->{'path'} =~ s/\/+/\//g;
+		$sinfo->{'path'} =~ s/\/+$// if ($sinfo->{'path'} ne "/");
+		$sinfo->{'opts'}->{'path'} =~ s/\/+/\//g;
+		$sinfo->{'opts'}->{'path'} =~ s/\/+$//
+			if ($sinfo->{'opts'}->{'path'} ne "/");
+		my $path = $sinfo->{'path'} || $sinfo->{'opts'}->{'path'} || '/';
+		$sinfo->{'desc'} ||= "Detected under ".$path;
 
 		# Populate the PHP version field
 		if (&indexof('php', @{$script->{'uses'}}) >= 0) {
@@ -3718,10 +3796,11 @@ foreach my $sname (&list_scripts()) {
 					$d, $sinfo->{'opts'}->{'dir'});
 			}
 
-		# Populate the URL field based on the path
+		# Populate and normalize URL based on the path
 		if ($sinfo->{'opts'}->{'path'}) {
-			$sinfo->{'url'} = 'http://'.$d->{'dom'}.
-					  $sinfo->{'opts'}->{'path'};
+			$sinfo->{'url'} = &script_path_url(
+				$d, $sinfo->{'opts'});
+			$sinfo->{'url'} =~ s/(?<!:)\/+/\//g;
 			}
 
 		# Fetch real version from the script-specific function

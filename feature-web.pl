@@ -11,6 +11,15 @@ return if ($require_apache++);
 &foreign_require("apache");
 }
 
+# feature_depends_web()
+# Return undef if Apache web feature prerequisites are met
+sub feature_depends_web
+{
+&foreign_installed("apache", 1) == 2 ||
+	return &text('index_eapache', "../apache/", "edit_newfeatures.cgi");
+return undef;
+}
+
 # setup_web(&domain)
 # Setup a virtual website for some domain
 sub setup_web

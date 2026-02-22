@@ -7251,6 +7251,8 @@ foreach my $sfx ("", ".info", ".dom") {
 	if ($proto == 0) {
 		# File on this system (but skip if missing)
 		if (-e $spath) {
+			# Avoid loading backup files into memory (can be huge)
+			local $no_log_file_changes = 1;
 			$err = &unlink_logged($spath) ? undef : $!;
 			}
 		}

@@ -1916,7 +1916,7 @@ if (!defined($main::php_modules{$ver,$d->{'id'}})) {
 	&open_execute_command(PHP, "$cmd -m", 1);
 	while(<PHP>) {
 		s/\r|\n//g;
-		if (/^\S+$/ && !/\[/) {
+		if (/^\S+(?: \S+)?$/ && !/\[/) {
 			push(@{$main::php_modules{$ver,$d->{'id'}}}, $_);
 			}
 		}
@@ -1924,7 +1924,9 @@ if (!defined($main::php_modules{$ver,$d->{'id'}})) {
 	&reset_environment();
 	delete($ENV{'PHPRC'});
 	}
-return @{$main::php_modules{$ver,$d->{'id'}}};
+return () if (!defined($main::php_modules{$ver,$d->{'id'}}));
+my @rv = &unique(@{$main::php_modules{$ver,$d->{'id'}}});
+return @rv;
 }
 
 # fix_php_ini_files(&domain, &fixes)

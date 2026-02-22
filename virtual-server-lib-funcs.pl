@@ -6243,8 +6243,10 @@ local ($file, $vbs) = @_;
 &$first_print($text{'restore_vconfig_doing'});
 local %oldconfig = %config;
 local @tmpls = &list_templates();
+&lock_file($module_config_file);
 &copy_source_dest($file, $module_config_file);
 &read_file($module_config_file, \%config);
+&unlock_file($module_config_file);
 foreach my $t (@tmpls) {
 	if ($t->{'standard'}) {
 		&save_template($t);
@@ -6253,6 +6255,7 @@ foreach my $t (@tmpls) {
 
 # Put back site-specific settings, as those in the backup are unlikely to
 # be correct.
+&lock_file($module_config_file);
 $config{'iface'} = $oldconfig{'iface'};
 $config{'defip'} = $oldconfig{'defip'};
 $config{'sharedips'} = $oldconfig{'sharedips'};
@@ -6264,10 +6267,24 @@ $config{'old_defip'} = $oldconfig{'old_defip'};
 $config{'old_defip6'} = $oldconfig{'old_defip6'};
 $config{'last_check'} = $oldconfig{'last_check'};
 
-# Remove plugins that aren't on the new system
-&generate_plugins_list($config{'plugins'});
-$config{'plugins'} = join(' ', @plugins);
-&lock_file($module_config_file);
+# Remove plugins that aren't on the new system, but keep the current ones that
+# are enabled
+my $plugins = join(" ", &unique(split(/\s+/, $config{'plugins'} || ''),
+				split(/\s+/, $oldconfig{'plugins'} || '')));
+&generate_plugins_list($plugins);
+$config{'plugins'} = join(' ', &unique(@plugins));
+
+# Disable restored core features whose dependencies are unavailable
+# on this system, to avoid post-restore failures
+foreach my $f (@features) {
+	next if (!$config{$f});
+	my $err = &check_feature_depends($f);
+	if (defined($err)) {
+		$config{$f} = 0;
+		}
+	}
+@config_features = grep { $config{$_} } @features;
+
 &save_module_config();
 &unlock_file($module_config_file);
 &$second_print($text{'setup_done'});
@@ -15947,7 +15964,7 @@ if ($lastconfig) {
 		if (&indexof($f, @plugins) < 0) {
 			my @lost = grep { $_->{$f} } @doms;
 			return &text('check_lostplugin',
-				&plugin_call($f, "feature_name"),
+				&feature_name($f),
 				join(", ", map { &show_domain_name($_) } @lost))
 				if (@lost);
 			}

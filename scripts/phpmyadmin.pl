@@ -100,6 +100,15 @@ my $wantver = &compare_versions($ver, "5.0") > 0 ? 7.1 : 5.6;
 return $wantver;
 }
 
+# script_phpmyadmin_httpdauth_text()
+# Returns help text for the HTTP Basic auth option
+sub script_phpmyadmin_httpdauth_text
+{
+my $txt = $text{'script_phpmyadmin_httpdauth'} ||
+	  'Protect phpMyAdmin with login and password';
+return $txt;
+}
+
 # script_phpmyadmin_params(&domain, version, &upgrade-info)
 # Returns HTML for table rows for options for installing PHP-NUKE
 sub script_phpmyadmin_params
@@ -109,13 +118,23 @@ local $rv;
 local $hdir = &public_html_dir($d, 1);
 if ($upgrade) {
 	# Options are fixed when upgrading
+	my $httpdauth_enabled =
+		&script_phpmyadmin_httpdauth_is_enabled($d, $upgrade->{'opts'});
+	my $httpdauth_row = &ui_table_row(
+		&hlink(&script_phpmyadmin_httpdauth_text(),
+		       "script_phpmyadmin_httpdauth"),
+		$httpdauth_enabled
+			? $text{'yes'}
+			: $text{'no'});
 	if ($upgrade->{'opts'}->{'global_def'}) {
 		$rv .= &ui_table_row(
 			&hlink($text{'script_phpmyadmin_def'},
 			       "script_phpmyadmin_def"),
 			$text{'yes'});
+		$rv .= $httpdauth_row;
 		}
 	else {
+		$rv .= $httpdauth_row;
 		$rv .= &ui_table_row("Allow logins with empty passwords",
 			$upgrade->{'opts'}->{'emptypass'}
 				? $text{'yes'}
@@ -233,6 +252,10 @@ EOF
 			&ui_yesno_radio("global_def", 0).$js);
 		}
 	# Show editable install options
+	$rv .= &ui_table_row(
+		&hlink(&script_phpmyadmin_httpdauth_text(),
+		       "script_phpmyadmin_httpdauth"),
+		&ui_yesno_radio("httpdauth", 0));
 	$rv .= &ui_table_row("Allow logins with empty passwords",
 		&ui_radio("emptypass", 0, [ [ 1, "Yes" ],
 				       [ 0, "No" ] ]));
@@ -289,7 +312,80 @@ else {
 			: 0,
 		 'emptypass' => $in->{'emptypass'},
 		 'auto' => $in->{'auto'},
+		 'httpdauth' => $in->{'httpdauth'} ? 1 : 0,
 		 'all_langs' => $in->{'all_langs'} };
+	}
+}
+
+# script_phpmyadmin_httpdauth_paths(&domain, &opts)
+# Returns .htaccess and .htpasswd paths for phpMyAdmin auth
+sub script_phpmyadmin_httpdauth_paths
+{
+local ($d, $opts) = @_;
+local $htaccess = ".htaccess";
+local $htpasswd = ".htpasswd";
+if (&foreign_check("htaccess-htpasswd")) {
+	&foreign_require("htaccess-htpasswd");
+	$htaccess = $htaccess_htpasswd::config{'htaccess'} || $htaccess;
+	$htpasswd = $htaccess_htpasswd::config{'htpasswd'} || $htpasswd;
+	}
+return ("$opts->{'dir'}/$htaccess", "$opts->{'dir'}/$htpasswd", $htpasswd);
+}
+
+# script_phpmyadmin_httpdauth_is_enabled(&domain, &opts)
+# Returns 1 if HTTP Basic auth files currently exist for this install
+sub script_phpmyadmin_httpdauth_is_enabled
+{
+local ($d, $opts) = @_;
+local ($htaccess_path, $htpasswd_path) =
+	&script_phpmyadmin_httpdauth_paths($d, $opts);
+return (-r $htaccess_path && -r $htpasswd_path) ? 1 : 0;
+}
+
+# script_phpmyadmin_httpdauth_user_pass(&domain)
+# Returns username and encrypted password for basic auth
+sub script_phpmyadmin_httpdauth_user_pass
+{
+local ($d) = @_;
+local $huser = $d->{'user'};
+local $hpass = $d->{'enc_pass'} || $d->{'md5_enc_pass'} ||
+	       $d->{'crypt_enc_pass'};
+if ((!$huser || !$hpass) && $d->{'parent'}) {
+	local $pd = &get_domain($d->{'parent'});
+	$huser ||= $pd->{'user'};
+	$hpass ||= $pd->{'enc_pass'} || $pd->{'md5_enc_pass'} ||
+		   $pd->{'crypt_enc_pass'};
+	}
+return ($huser, $hpass);
+}
+
+# script_phpmyadmin_httpdauth_cleanup(&domain, &opts)
+# Removes protected-dir metadata for phpMyAdmin basic auth
+sub script_phpmyadmin_httpdauth_cleanup
+{
+local ($d, $opts) = @_;
+local ($htaccess_path, $htpasswd_path) =
+	&script_phpmyadmin_httpdauth_paths($d, $opts);
+
+# Remove protected directory in webserver plugins
+foreach my $p (&list_feature_plugins()) {
+	if (&plugin_defined($p, "feature_delete_protected_dir")) {
+		&plugin_call($p, "feature_delete_protected_dir",
+			     $d,
+			     { 'protected_dir' => $opts->{'dir'},
+			       'protected_user_file_path' => $htpasswd_path });
+		}
+	}
+
+# Remove from list of protected directories
+if (&foreign_check("htaccess-htpasswd")) {
+	&foreign_require("htaccess-htpasswd");
+	&lock_file($htaccess_htpasswd::directories_file);
+	local @pdirs = &htaccess_htpasswd::list_directories();
+	@pdirs = grep { ref($_) ? $_->[0] ne $opts->{'dir'}
+				: $_ ne $opts->{'dir'} } @pdirs;
+	&htaccess_htpasswd::save_directories(\@pdirs);
+	&unlock_file($htaccess_htpasswd::directories_file);
 	}
 }
 
@@ -313,6 +409,13 @@ if ($opts->{'global_def'} && defined &list_all_global_def_scripts_cached) {
 		? "phpMyAdmin is already installed as a global default in domain ".
 			&get_domain($all_glob_cache[0]->{'dom_id'})->{'dom'}
 		: undef;
+	}
+if ($opts->{'httpdauth'}) {
+	local ($huser, $hpass) = &script_phpmyadmin_httpdauth_user_pass($d);
+	$huser || return "Cannot enable HTTP Basic authentication because ".
+			 "this domain has no owner username";
+	$hpass || return "Cannot enable HTTP Basic authentication because ".
+			 "this domain has no encrypted password";
 	}
 return undef;
 }
@@ -479,6 +582,53 @@ foreach $l (@$lref) {
 &unlink_file_as_domain_user($d, "$opts->{'dir'}/setup");
 &unlink_file_as_domain_user($d, "$opts->{'dir'}/scripts/setup.php");
 
+# Enable optional HTTP basic auth for the install directory
+if ($opts->{'httpdauth'} && !$upgrade) {
+	my ($huser, $hpass) = &script_phpmyadmin_httpdauth_user_pass($d);
+	my ($htaccess_path, $htpasswd_path, $htpasswd_file) =
+		&script_phpmyadmin_httpdauth_paths($d, $opts);
+	my $authname = "phpMyAdmin";
+	my $htaccess_content =
+		"AuthType Basic\n".
+		"AuthName \"$authname\"\n".
+		"AuthUserFile \"$htpasswd_path\"\n".
+		"Require valid-user\n".
+		"<Files \"$htpasswd_file\">\n".
+		"    Require all denied\n".
+		"</Files>\n";
+	&lock_file($htaccess_path);
+	&write_as_domain_user($d,
+		sub { &write_file_contents($htaccess_path, $htaccess_content); });
+	&unlock_file($htaccess_path);
+	&lock_file($htpasswd_path);
+	&write_as_domain_user($d,
+		sub { &write_file_contents($htpasswd_path,
+					   "$huser:$hpass\n"); });
+	&unlock_file($htpasswd_path);
+	foreach my $p (&list_feature_plugins()) {
+		if (&plugin_defined($p, "feature_add_protected_dir")) {
+			&plugin_call($p, "feature_add_protected_dir",
+				     $d,
+				     { 'protected_dir' => $opts->{'dir'},
+				       'protected_user_file_path' =>
+					$htpasswd_path,
+				       'protected_user_file' => $htpasswd_file,
+				       'protected_name' => $authname });
+			}
+		}
+	if (&foreign_check("htaccess-htpasswd")) {
+		&foreign_require("htaccess-htpasswd");
+		&lock_file($htaccess_htpasswd::directories_file);
+		local @pdirs = &htaccess_htpasswd::list_directories();
+		if (!grep { $_->[0] eq $opts->{'dir'} &&
+			    $_->[1] eq $htpasswd_path } @pdirs) {
+			push(@pdirs, [ $opts->{'dir'}, $htpasswd_path ]);
+			&htaccess_htpasswd::save_directories(\@pdirs);
+			}
+		&unlock_file($htaccess_htpasswd::directories_file);
+		}
+	}
+
 # Invalidate global scripts default cache
 if ($opts->{'global_def'} && defined &invalidate_global_def_scripts_cache) {
 	&invalidate_global_def_scripts_cache();
@@ -505,6 +655,11 @@ if ($opts->{'global_def'} && defined &invalidate_global_def_scripts_cache) {
 # Remove the contents of the target directory
 local $derr = &delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
+
+# Cleanup basic auth metadata
+if ($opts->{'httpdauth'}) {
+	&script_phpmyadmin_httpdauth_cleanup($d, $opts);
+	}
 
 return (1, "phpMyAdmin directory deleted.");
 }

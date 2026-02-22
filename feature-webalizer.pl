@@ -597,6 +597,7 @@ else {
 # Returns the Webalizer
 sub sysinfo_webalizer
 {
+return ( ) if (!&foreign_check("webalizer"));
 &require_webalizer();
 my $vers = &webalizer::get_webalizer_version();
 return ( [ $text{'sysinfo_webalizer'}, $vers ] );
@@ -605,6 +606,7 @@ return ( [ $text{'sysinfo_webalizer'}, $vers ] );
 sub links_webalizer
 {
 my ($d) = @_;
+return ( ) if (!&foreign_check("webalizer"));
 &require_webalizer();
 my $log = &get_website_log($d);
 my $cfg = &webalizer::config_file_name($log);
