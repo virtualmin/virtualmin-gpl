@@ -219,6 +219,10 @@ foreach my $ver (@vers) {
 			# Fix up session save path, extension_dir and
 			# gc_probability / gc_divisor
 			&foreign_require("phpini");
+			my $pd = $d->{'parent'} ? &get_domain($d->{'parent'}) :
+						  $d;
+			my $du = &has_domain_user($pd) ? $pd->{'user'} : undef;
+			local $phpini::access{'user'} = $du if ($du);
 			my $pconf = &phpini::get_config("$inidir/php.ini");
 			my $tmp = &create_server_tmp($d);
 			&phpini::save_directive($pconf, "session.save_path",
@@ -3399,6 +3403,9 @@ if ($phpini && -r $phpini && &foreign_check("phpini")) {
 	# Add the variables to the domain's php.ini file. Start by finding
 	# the variables already set, including those that are commented out.
 	&foreign_require("phpini");
+	my $pd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+	my $du = &has_domain_user($pd) ? $pd->{'user'} : undef;
+	local $phpini::access{'user'} = $du if ($du);
 	my $conf = &phpini::get_config($phpini);
 	my $anyini;
 
