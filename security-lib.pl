@@ -10,10 +10,10 @@ use IO::Handle;
 sub has_domain_user
 {
 my ($d) = @_;
-if ($d->{'parent'}) {
+if ($d && $d->{'parent'}) {
         $d = &get_domain($d->{'parent'});
         }
-return 0 if (!$d->{'unix'});
+return 0 if (!$d || !$d->{'unix'});
 my @uinfo = getpwnam($d->{'user'});
 return scalar(@uinfo) ? 1 : 0;
 }
