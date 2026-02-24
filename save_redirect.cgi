@@ -232,8 +232,8 @@ else {
 				$r->{'hostregexp'} = 0;
 				}
 			elsif ($host =~ /^[a-z0-9\.\_\-\*\?]+$/i) {
-				# Shell-like wildcard hostname from ServerAlias
-				# is converted to a safe anchored regex
+				# Convert wildcard hostname (e.g. *.example.com)
+				# to a safe anchored regex
 				my $re = quotemeta($host);
 				$re =~ s/\\\*/.*/g;
 				$re =~ s/\\\?/./g;
