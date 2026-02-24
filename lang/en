@@ -8175,8 +8175,10 @@ right_dom=Your server name
 right_subs=Sub-servers
 right_aliases=Alias servers
 right_fdoms=Virtual servers
-right_fweb=Virtual websites
-right_fssl=SSL websites
+right_fweb=Websites
+right_fssl=Websites SSL
+right_fwebaliases=Website aliases
+
 right_fdns=DNS domains
 right_fmail=Mail domains
 right_fdbs=Databases

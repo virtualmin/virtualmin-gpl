@@ -26,9 +26,12 @@ local @doms = &list_visible_domains();
 local @doms_all = &list_domains();
 local %fcount = map { $_, 0 } @features;
 $fcount{'doms'} = 0;
+$fcount{'webaliases'} = 0;
 foreach my $d (@doms) {
 	$fcount{'doms'}++;
+	$fcount{'webaliases'}++ if ($d->{'alias'});
 	foreach my $f (@features) {
+		next if ($d->{'alias'} && ($f eq "web" || $f eq "ssl"));
 		$fcount{$f}++ if ($d->{$f});
 		}
 	my @dbs = &domain_databases($d);
@@ -37,7 +40,7 @@ foreach my $d (@doms) {
 	$fcount{'aliases'} += $daliases->{$d->{'id'}};
 	}
 $info->{'fcount'} = \%fcount;
-$info->{'ftypes'} = [ "doms", "dns", "web", "ssl", "mail", "dbs",
+$info->{'ftypes'} = [ "doms", "dns", "web", "ssl", "webaliases", "mail", "dbs",
 		      "users", "aliases" ];
 local (%fmax, %fextra, %fhide);
 foreach my $f (@{$info->{'ftypes'}}) {
