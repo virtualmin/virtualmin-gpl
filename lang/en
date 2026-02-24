@@ -8187,7 +8187,7 @@ right_fusers2=FTP users
 right_fmailboxes=Mail/FTP users
 right_faliases=Mail aliases
 right_quota=Disk usage and quota
-right_bw=Bandwith usage and limit
+right_bw=Bandwidth usage and limit
 right_of=$1 out of $2
 right_sysinfo=system information
 
