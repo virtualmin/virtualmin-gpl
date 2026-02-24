@@ -1127,6 +1127,16 @@ if ($includeextra && &domain_has_website($d) &&
 	push(@users, &list_extra_web_users($d));
 	}
 
+# Include users from feature plugins that define list_plugin_users
+if ($includeextra) {
+	foreach my $f (&list_feature_plugins()) {
+		if ($d->{$f} && &plugin_defined($f, "list_plugin_users")) {
+			my @pu = &plugin_call($f, "list_plugin_users", $d);
+			push(@users, @pu) if @pu;
+			}
+		}
+	}
+
 # Add any secondary groups in the template
 local @sgroups = &allowed_secondary_groups($d);
 if (@sgroups) {
@@ -5723,10 +5733,17 @@ foreach $u (@$users) {
 	    $u->{'webowner'} && $u->{'pass'} =~ /^(\!|\*)/ ? $pop3_dis :
 	    $u->{'webowner'} ? $pop3 :
 	    $u->{'pass'} =~ /^(\!|\*)/ ? $pop3_dis : $pop3);
-	my $col_val = "<a href='edit_user.cgi?dom=$did$filetype&amp;".
-		      "user=".&urlize($u->{'user'})."'>$col_text</a>";
-	if (!$virtualmin_pro && $u->{'extra'}) {
+	my $col_val;
+	if ($u->{'edit_url'}) {
+		$col_val = "<a href='".&html_escape($u->{'edit_url'}).
+			   "'>$col_text</a>";
+		}
+	elsif (!$virtualmin_pro && $u->{'extra'}) {
 		$col_val = $col_text;
+		}
+	else {
+		$col_val = "<a href='edit_user.cgi?dom=$did$filetype&amp;".
+			      "user=".&urlize($u->{'user'})."'>$col_text</a>";
 		}
 	push(@cols, "$col_val\n");
 	push(@cols, &html_escape($u->{'user'}));
