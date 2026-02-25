@@ -569,9 +569,11 @@ sub is_webmail_redirect
 my ($d, $r) = @_;
 return 0 if (!$r->{'host'});
 return 0 if ($r->{'path'} ne '/');
-my ($dhost, $dport) = lc($r->{'dest'} || '') =~
-	m/^https?:\/\/([^:\/\s]+):(\d+)(?:\/|$)/i;
+my ($dhost, $dport) =
+	&parse_http_url($r->{'dest'} || '', undef, undef, undef, undef, undef,
+			undef, 1);
 return 0 if (!$dhost || !$dport);
+$dhost = lc($dhost);
 my $basedom = lc($d->{'dom'});
 return 0 if ($dhost ne $basedom && $dhost !~ /\.\Q$basedom\E$/);
 my $rhost = lc($r->{'host'});
