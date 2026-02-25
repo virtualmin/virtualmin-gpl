@@ -102,7 +102,7 @@ if (&has_web_host_redirects($d)) {
 			"this.form.host_mode.length > $htexti) { ".
 			"this.form.host_mode[$htexti].checked = true; }\" ".
 		"placeholder=\"$text{'index_global_eg'} ".
-		"www.$d->{'dom'}\"");
+		"dom.tld or ^regex\$\"");
 	my @hmode_opts = ( [ 0, $text{'redirect_host_def'} ] );
 	if (@hosts) {
 		my @hopts = ( [ undef, $text{'redirect_host_pick'} ],

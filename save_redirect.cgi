@@ -231,15 +231,6 @@ else {
 				$r->{'host'} = $host;
 				$r->{'hostregexp'} = 0;
 				}
-			elsif ($host =~ /^[a-z0-9\.\_\-\*\?]+$/i) {
-				# Convert wildcard hostname (e.g. *.example.com)
-				# to a safe anchored regex
-				my $re = quotemeta($host);
-				$re =~ s/\\\*/.*/g;
-				$re =~ s/\\\?/./g;
-				$r->{'host'} = "^".$re."\$";
-				$r->{'hostregexp'} = 1;
-				}
 			else {
 				# Non-plain, no whitespace so treat as regex
 				# pattern

@@ -10,15 +10,8 @@ Available options are:
 When using custom input:
 <ul>
 <li>Plain hostnames (like <tt>www.example.com</tt>) are matched exactly.</li>
-<li>Simple wildcard patterns using <tt>*</tt> and <tt>?</tt> (like
-<tt>*.example.com</tt> or <tt>mail?.example.com</tt>) are automatically
-converted to a regular expression.</li>
-<li>Other non-space patterns are treated as regular expressions.</li>
+<li>Custom patterns must be regular expressions (for example
+<tt>^mail[0-9]+\.example\.com$</tt>).</li>
 </ul>
-<p>
-Because wildcard patterns are stored internally as regular expressions, re-opening
-the redirect may show the equivalent regular expression instead of the original
-wildcard text.
-</p>
 
 <footer>
