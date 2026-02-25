@@ -1,9 +1,17 @@
-<header>Limit redirect to hostname</header>
+<header>Hostname filter</header>
 
-By default, redirectds will apply regardless of the URL hostname used to
-access the website. However, this field can be used instead to limit the
-redirect to a specific host. This can be useful for redirecting www.domain.com
-to domain.com for example, or changing the redirect for a specific alias domain.
-<p>
+By default, redirects apply to any hostname used to access the website.
+Available options are:
+<ul>
+<li><tt>Any hostname</tt> to match all hostnames.</li>
+<li><tt>Selected hostname</tt> to choose one detected website hostname.</li>
+<li><tt>Specify hostname or pattern</tt> to type a custom value.</li>
+</ul>
+When using custom input:
+<ul>
+<li>Plain hostnames (like <tt>www.example.com</tt>) are matched exactly.</li>
+<li>Custom patterns must be regular expressions (for example
+<tt>^mail[0-9]+\.example\.com$</tt>).</li>
+</ul>
 
 <footer>

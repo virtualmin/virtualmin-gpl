@@ -251,7 +251,7 @@ foreach my $p (@ports) {
 			$rd->{'dest'} =~ s/\$1$//;
 			}
 		&parse_rewritecond_flags($rwr->{'words'}->[2], $rd);
-		$rd->{'id'} = $rwc->{'name'}.'_'.$rd->{'path'};
+		$rd->{'id'} = $rwr->{'name'}.'_'.$rd->{'path'};
 		$rd->{'id'} .= '_'.$rd->{'host'} if ($rd->{'host'});
 		my ($already) = grep { $_->{'path'} eq $rd->{'path'} &&
 				       $_->{'host'} eq $rd->{'host'} } @rv;
@@ -477,8 +477,18 @@ return "No matching Alias or Redirect found";
 sub modify_redirect
 {
 my ($d, $redirect, $oldredirect) = @_;
-&delete_redirect($d, $oldredirect);
-return &create_redirect($d, $redirect);
+# Replace in a safe order, so if creating the new redirect fails, restore old
+# one so edits are non-destructive
+my $err = &delete_redirect($d, $oldredirect);
+return $err if ($err);
+$err = &create_redirect($d, $redirect);
+if ($err) {
+	my $rerr = &create_redirect($d, $oldredirect);
+	if ($rerr) {
+		$err .= " (failed to restore previous redirect: $rerr)";
+		}
+	}
+return $err;
 }
 
 # get_redirect_root(&domain)
@@ -558,8 +568,17 @@ sub is_webmail_redirect
 {
 my ($d, $r) = @_;
 return 0 if (!$r->{'host'});
-return 1 if ($r->{'host'} =~ /^admin\.\Q$d->{'dom'}\E$/);
-return 2 if ($r->{'host'} =~ /^webmail\.\Q$d->{'dom'}\E$/);
+return 0 if ($r->{'path'} ne '/');
+my ($dhost, $dport) =
+	&parse_http_url($r->{'dest'} || '', undef, undef, undef, undef, undef,
+			undef, 1);
+return 0 if (!$dhost || !$dport);
+$dhost = lc($dhost);
+my $basedom = lc($d->{'dom'});
+return 0 if ($dhost ne $basedom && $dhost !~ /\.\Q$basedom\E$/);
+my $rhost = lc($r->{'host'});
+return 1 if ($rhost eq "admin.".$basedom);
+return 2 if ($rhost eq "webmail.".$basedom);
 return 0;
 }
 
