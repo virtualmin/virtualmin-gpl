@@ -31,8 +31,10 @@ if (!$module_name) {
 
 my $gpl_repos_warning = "GPL version is already installed!";
 my $gpl_downgrading_package = "Downgrading packages ..";
-my $gpl_downgrading_all_done = "Your system has been successfully downgraded to Virtualmin GPL!";
-my $gpl_downgrading_some_failed = "Downgrading to Virtualmin GPL finished with errors!";
+my $gpl_downgrading_all_done = "Your system has been successfully downgraded ".
+			       "to Virtualmin GPL!";
+my $gpl_downgrading_some_failed = "Downgrading to Virtualmin GPL finished ".
+			       "with errors!";
 my $gpl_downgrading_done = ".. done";
 my $gpl_downgrading_failed = ".. failed";
 my $gpl_downgrading_failed_status;
@@ -47,7 +49,8 @@ if ($vserial{'SerialNumber'} eq 'GPL' ||
 
 # Ask for confirmation and explain what's going to happen
 my @lines = (
-  "This program downgrades a Virtualmin Pro system to GPL. It also removes Pro-only",
+  "This program downgrades a Virtualmin Pro system to GPL. It also removes ".
+  "Pro-only",
   "plugins like Virtualmin Support and Virtualmin WP Workbench, locks reseller",
   "accounts, switches repositories, and reverts the license to GPL."
 );
@@ -92,10 +95,15 @@ if (&has_command("apt-get")) {
 	eval { &lock_all_resellers; };
 	&$first_print($gpl_downgrading_package);
 	&execute_command("apt-get clean && apt-get update");
-	my $rv = &execute_command("apt-get -y install --allow-downgrades --reinstall webmin-virtual-server");
-	&$second_print(!$rv ? $gpl_downgrading_done : "$gpl_downgrading_failed : $rv");
+	my $rv = &execute_command("apt-get -y install --allow-downgrades ".
+				  "--reinstall webmin-virtual-server");
+	&execute_command("rm -rf $pwd/pro/") if (!$rv && -d "$pwd/pro");
+	&$second_print(!$rv
+		? $gpl_downgrading_done
+		: "$gpl_downgrading_failed : $rv");
 	$gpl_downgrading_failed_status++ if ($rv);
-	&execute_command("apt-get -y purge webmin-virtualmin-support webmin-virtualmin-wp-workbench");
+	&execute_command("apt-get -y purge webmin-virtualmin-support ".
+			 "webmin-virtualmin-wp-workbench");
 	}
 
 # Downgrade RHEL repo and the package
@@ -103,10 +111,20 @@ elsif (&has_command("rpm")) {
 	eval { &lock_all_resellers; };
 	&$first_print($gpl_downgrading_package);
 	&execute_command("yum clean all");
-	my $rv = &execute_command("yum -y downgrade webmin-virtual-server wbm-virtual-server");
-	&$second_print(!$rv ? $gpl_downgrading_done : "$gpl_downgrading_failed : $rv");
+	my $rv = &execute_command("yum -y swap wbm-virtual-server ".
+				  "webmin-virtual-server");
+	if ($rv) {
+		$rv = &execute_command("yum -y downgrade webmin-virtual-server");
+		}
+	&execute_command("rm -rf $pwd/pro/") if (!$rv && -d "$pwd/pro");
+	&$second_print(!$rv
+		? $gpl_downgrading_done
+		: "$gpl_downgrading_failed : $rv");
 	$gpl_downgrading_failed_status++ if ($rv);
-	&execute_command("yum -y remove wbm-virtualmin-support wbm-virtualmin-wp-workbench webmin-virtualmin-support webmin-virtualmin-wp-workbench");
+	&execute_command("yum -y remove wbm-virtualmin-support ".
+			 "wbm-virtualmin-wp-workbench ".
+			 "webmin-virtualmin-support ".
+			 "webmin-virtualmin-wp-workbench");
 	}
 
 unlink($licence_status);
