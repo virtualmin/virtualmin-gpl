@@ -7050,6 +7050,15 @@ $bms =~ s/\n//g;
 &obtain_lock_mail();
 if ($bms eq $mail_system) {
 	if ($mail_system == 0) {
+		# Save directives from Postfix that are specific to this system
+		my @local_dirs = ( "sender_dependent_default_transport_maps", "smtp_tls_security_level",
+				   "smtp_dns_support_level", "smtp_host_lookup", "alias_maps", "alias_database",
+				   "virtual_alias_maps", "sender_bcc_maps", "tls_server_sni_maps" );
+		my %old_map;
+		foreach my $dir (@local_dirs) {
+			$old_map{$dir} = &postfix::get_current_value($dir);
+			}
+
 		# Restore main.cf and master.cf
 		&lock_file($postfix::config{'postfix_config_file'});
 		&lock_file($postfix::config{'postfix_master'});
@@ -7057,6 +7066,8 @@ if ($bms eq $mail_system) {
 				  $postfix::config{'postfix_config_file'});
 		&copy_source_dest($file."_mastercf",
 				  $postfix::config{'postfix_master'});
+		&unflush_file_lines($postfix::config{'postfix_config_file'});
+		&unflush_file_lines($postfix::config{'postfix_master'});
 		&unlock_file($postfix::config{'postfix_master'});
 		&unlock_file($postfix::config{'postfix_config_file'});
 		undef(@postfix::master_config_cache);
@@ -7067,6 +7078,12 @@ if ($bms eq $mail_system) {
 				&copy_source_dest($file."_".$o, $v);
 				}
 			}
+
+		# Put back local directives, if set
+		foreach my $dir (@local_dirs) {
+			&postfix::set_current_value($dir, $old_map{$dir});
+			}
+
 		&$second_print($text{'setup_done'});
 		}
 	elsif ($mail_system == 1) {
