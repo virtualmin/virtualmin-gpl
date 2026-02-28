@@ -6,6 +6,7 @@
 * Add the ability to test two-factor authentication after enrollment
 * Fix PHP-FPM not restarting when certain custom configuration options are used in a template  
 * Fix domain expiry notifications occasionally getting stuck  
+* Fix to keep local-specific directives when restoring the Postfix configuration
 * Fix the missing message when DKIM is enabled or disabled  
 * Fix an issue reading PHP configuration files created by a reseller  
 * Update support for Moodle 5.1 and later versions
