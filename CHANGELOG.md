@@ -1,10 +1,14 @@
 
 #### Version 8.1.0
-* Add support for PHP-FPM workload profiles
-* Add Kanboard and Blesta web app installer for Virtualmin Pro users
-* Fix PHP-FPM not restarting when certain custom config options are used in the template
-* Fix domain expiry notification being stuck in certain cases
-* Fix the missing message when DKIM is enabled or disabled
+* Add a simplified UI for managing website redirects  
+* Add support for PHP-FPM workload profiles  
+* Add Kanboard and Blesta web app installers for Virtualmin Pro users  
+* Add the ability to test two-factor authentication after enrollment
+* Fix PHP-FPM not restarting when certain custom configuration options are used in a template  
+* Fix domain expiry notifications occasionally getting stuck  
+* Fix the missing message when DKIM is enabled or disabled  
+* Fix an issue reading PHP configuration files created by a reseller  
+* Update support for Moodle 5.1 and later versions
 
 #### Version 8.0.1
 * Add ability to migrate Webmin monolithic to modular while keeping enabled modules for the new repository
