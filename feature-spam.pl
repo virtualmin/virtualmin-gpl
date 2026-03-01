@@ -505,7 +505,7 @@ if ($config{'logrotate'} && &foreign_installed("logrotate")) {
 				 'name' => [ $procmail_log_file ] };
 		$lconf->{'members'} = [
 				{ 'name' => 'rotate',
-				  'value' => $config{'logrotate_num'} || 5 },
+				  'value' => $config{'logrotate_num'} || 30 },
 				{ 'name' => 'daily' },
 				{ 'name' => 'compress' },
 				];
