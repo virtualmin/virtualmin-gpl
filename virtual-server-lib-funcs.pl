@@ -7081,7 +7081,7 @@ if ($bms eq $mail_system) {
 
 		# Put back local directives, if set
 		foreach my $dir (@local_dirs) {
-			&postfix::set_current_value($dir, $old_map{$dir});
+			&postfix::set_current_value($dir, $old_map{$dir}) if ($old_map{$dir});
 			}
 
 		&$second_print($text{'setup_done'});
