@@ -887,7 +887,8 @@ else {
 	# If using php via CGI or fcgi, check for wrappers
 	my $need_suexec = 0;
 	my $mode = &get_domain_php_mode($d);
-	if ($mode eq "cgi" || $mode eq "fcgid") {
+	my $has_fcgiwrap = &get_domain_cgi_mode($d) eq 'fcgiwrap';
+	if (!$has_fcgiwrap && ($mode eq "cgi" || $mode eq "fcgid")) {
 		my $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin"
 					       : &cgi_bin_dir($_[0]);
 		my $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
@@ -946,7 +947,7 @@ else {
 		}
 
 	# If using fcgiwrap, make sure the server is running
-	if (&get_domain_cgi_mode($d) eq 'fcgiwrap') {
+	if ($has_fcgiwrap) {
 		my $st = &get_fcgiwrap_status($d);
 		if ($st == 0) {
 			return $text{'validate_efcgiwrapinit'};
