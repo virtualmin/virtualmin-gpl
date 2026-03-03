@@ -19,6 +19,7 @@ $IMAP_PORT = '';	# 143
 $POP3_PORT = '';	# 110
 $IMAP_TYPE = '';	# plain or SSL
 $IMAP_SSL = '';		# yes or no
+$IMAP_SSL2 = '';	# on or off
 $IMAP_ENC = '';		# password-cleartext or password-encrypted
 $PREFIX = '';		# bob
 $STYLE = '';		# 1
