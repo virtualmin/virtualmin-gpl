@@ -9918,7 +9918,6 @@ push(@rv, { 'id' => 0,
 	    'web_urlport' => $config{'web_urlport'},
 	    'web_urlsslport' => $config{'web_urlsslport'},
 	    'web_sslprotos' => $config{'web_sslprotos'},
-	    'web_alias' => $config{'alias_mode'},
 	    'web_acme' => $config{'web_acme'},
 	    'web_webmin_ssl' => $config{'webmin_ssl'},
 	    'web_usermin_ssl' => $config{'usermin_ssl'},
@@ -10346,7 +10345,6 @@ if ($tmpl->{'id'} == 0) {
 					$tmpl->{'disabled_web'};
 	$config{'disabled_url'} = $tmpl->{'disabled_url'} eq "none" ? "" :
 					$tmpl->{'disabled_url'};
-	$config{'alias_mode'} = $tmpl->{'web_alias'};
 	$config{'bind_config'} = $tmpl->{'dns'} eq "none" ? ""
 							  : $tmpl->{'dns'};
 	$config{'bind_replace'} = $tmpl->{'dns_replace'};

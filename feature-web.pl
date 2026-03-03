@@ -28,7 +28,7 @@ my ($d) = @_;
 my $tmpl = &get_template($d->{'template'});
 my $web_port = $d->{'web_port'} || $tmpl->{'web_port'} || 80;
 my ($alias, $lockdom);
-if ($d->{'alias'} && $tmpl->{'web_alias'} == 1) {
+if ($d->{'alias'}) {
 	&$first_print($text{'setup_webalias'});
 	$lockdom = $alias = &get_domain($d->{'alias'});
 	}
@@ -67,7 +67,7 @@ my @dirs = &apache_template($tmpl->{'web'}, $d);
 if ($apache::httpd_modules{'mod_proxy'}) {
 	push(@dirs, "ProxyPass /.well-known !");
 	}
-if ($d->{'alias'} && $tmpl->{'web_alias'} == 1) {
+if ($d->{'alias'}) {
 	# Update the parent virtual host (and the SSL virtual host, if any)
 	my @ports = ( $alias->{'web_port'} );
 	push(@ports, $alias->{'web_sslport'}) if ($alias->{'ssl'});
@@ -111,34 +111,7 @@ else {
 	# Add the actual <VirtualHost>
 
 	# First build up the directives in the <VirtualHost>
-	my $proxying;
-	if ($d->{'alias'}) {
-		# Because this is just an alias to an existing virtual server,
-		# create a ProxyPass or Redirect
-		@dirs = grep { /^\s*Server(Name|Alias)\s/i } @dirs;
-		my $aliasdom = &get_domain($d->{'alias'});
-		my $port = $aliasdom->{'web_port'} == 80 ? "" :
-				":$aliasdom->{'web_port'}";
-		my $urlhost = "www.".$aliasdom->{'dom'};
-		if (!&to_ipaddress($urlhost)) {
-			$urlhost = $aliasdom->{'dom'};
-			}
-		my $url = "http://$urlhost$port/";
-		if ($apache::httpd_modules{'mod_proxy'} &&
-		    $tmpl->{'web_alias'} == 2) {
-			push(@dirs, "ProxyPass /.well-known !",
-				    "ProxyPass / $url",
-				    "ProxyPassReverse / $url");
-			$proxying = 1;
-			}
-		elsif ($tmpl->{'web_alias'} == 0) {
-			push(@dirs, "Redirect / $url");
-			}
-		elsif ($tmpl->{'web_alias'} == 4) {
-			push(@dirs, "RedirectPermanent / $url");
-			}
-		}
-	elsif ($d->{'subdom'}) {
+	if ($d->{'subdom'}) {
 		# Because this is a sub-domain, force the document directory
 		# to be under the super-domain's public_html. Also, the logs
 		# must be the same as the parent domain's logs.
@@ -2590,14 +2563,6 @@ print &ui_table_row(&hlink($text{'newweb_htmlperms'}, "template_html_perms"),
 	&ui_textbox("html_perms", $tmpl->{'web_html_perms'}, 4));
 
 if ($config{'web'}) {
-	# Alias mode
-	print &ui_table_row(&hlink($text{'tmpl_alias'}, "template_alias_mode"),
-		&ui_radio("alias_mode", int($tmpl->{'web_alias'}),
-			  [ [ 0, $text{'tmpl_alias0'}."<br>" ],
-			    [ 4, $text{'tmpl_alias4'}."<br>" ],
-			    [ 2, $text{'tmpl_alias2'}."<br>" ],
-			    [ 1, $text{'tmpl_alias1'} ] ]));
-
 	# Default SSI setting
 	print &ui_table_row(
 	    &hlink($text{'tmpl_webssi'}, "template_webssi"),
@@ -2825,7 +2790,6 @@ if ($config{'web'}) {
 			defined(getpwnam($in{'user'})) || &error($text{'newweb_euser'});
 			$tmpl->{'web_user'} = $in{'user'};
 			}
-		$tmpl->{'web_alias'} = $in{'alias_mode'};
 		if (defined($in{'cgimode'})) {
 			$tmpl->{'web_cgimode'} = $in{'cgimode'};
 			}
