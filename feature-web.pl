@@ -2499,7 +2499,7 @@ if ($config{'web'}) {
 	# Work out fields to disable when Apache is in default mode
 	local @webfields = ( "web", "web_ssl", "user_def",
 			     "html_dir", "html_dir_def", "html_perms",
-			     "alias_mode", "web_port", "web_sslport",
+			     "web_port", "web_sslport",
 			     "web_ssi", "web_ssi_suffix");
 	if ($config{'webalizer'}) {
 		push(@webfields, "stats_mode", "stats_dir", "stats_hdir",
