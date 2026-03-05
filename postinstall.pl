@@ -14,6 +14,10 @@ $config{'lastpost'} = time();
 if ($config{'unixname'} eq '') {
 	$config{'unixname'} = $config{'longname'};
 	}
+if ($config{'web_aliasredir'} eq '') {
+	$config{'web_aliasredir'} = $config{'alias_mode'} == 0 ||
+				    $config{'alias_mode'} == 4 ? 1 : 0;
+	}
 &save_module_config();
 
 # Convert all existing cron jobs to WebminCron, except existing backups

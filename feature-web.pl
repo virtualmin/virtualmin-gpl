@@ -2500,7 +2500,8 @@ if ($config{'web'}) {
 	local @webfields = ( "web", "web_ssl", "user_def",
 			     "html_dir", "html_dir_def", "html_perms",
 			     "web_port", "web_sslport",
-			     "web_ssi", "web_ssi_suffix");
+			     "web_ssi", "web_ssi_suffix",
+			     "web_aliasredir" );
 	if ($config{'webalizer'}) {
 		push(@webfields, "stats_mode", "stats_dir", "stats_hdir",
 				 "statspass", "statsnoedit");
@@ -2563,6 +2564,12 @@ print &ui_table_row(&hlink($text{'newweb_htmlperms'}, "template_html_perms"),
 	&ui_textbox("html_perms", $tmpl->{'web_html_perms'}, 4));
 
 if ($config{'web'}) {
+	# Redirect alias domains?
+	print &ui_table_row(
+		&hlink($text{'tmpl_webaliasredir'}, "template_webaliasredir"),
+		&ui_radio("web_aliasredir", $tmpl->{'web_aliasredir'},
+			  [ [ 1, $text{'yes'} ], [ 1, $text{'no'} ] ]));
+
 	# Default SSI setting
 	print &ui_table_row(
 	    &hlink($text{'tmpl_webssi'}, "template_webssi"),
@@ -2822,6 +2829,9 @@ if ($config{'web'}) {
 				}
 			$tmpl->{'web_sslprotos'} = $in{'web_sslprotos'};
 			}
+
+		# Save alias redirect setting
+		$tmpl->{'web_aliasredir'} = $in{'web_aliasredir'};
 
 		# Parse SSI setting
 		$tmpl->{'web_ssi'} = $in{'web_ssi'};
