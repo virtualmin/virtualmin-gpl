@@ -464,6 +464,12 @@ while(@ARGV > 0) {
 		$proxy_pass_mode = 1;
 		$proxy_pass = shift(@ARGV);
 		}
+	elsif ($a eq "--alias-redirect") {
+		$aliasredir = 1;
+		}
+	elsif ($a eq "--no-alias-redirect") {
+		$aliasredir = 0;
+		}
 	elsif ($a eq "--default-cert-owner") {
 		$default_cert_owner = 1;
 		}
@@ -928,6 +934,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'dns_remote', $remotedns,
 	 'proxy_pass_mode', $proxy_pass_mode,
 	 'proxy_pass', $proxy_pass,
+	 'aliasredir', $aliasredir,
         );
 $dom{'dns_submode'} = $dns_submode if (defined($dns_submode));
 $dom{'dns_subany'} = $dns_subany if (defined($dns_subany));
@@ -1193,6 +1200,7 @@ print "                        [--append-style format]\n";
 print "                        [--shell command]\n";
 print "                        [--subprefix directory]\n";
 print "                        [--proxy url]\n";
+print "                        [--alias-redirect | --no-alias-redirect]\n";
 exit(1);
 }
 

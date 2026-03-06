@@ -106,6 +106,22 @@ if ($d->{'alias'}) {
 			&create_redirect($alias, $r);
 			}
 		}
+
+	# If redirecting to the target domain is enabled, set it up
+	$d->{'aliasredir'} = $tmpl->{'web_aliasredir'}
+		if ($d->{'aliasredir'} eq '');
+	if ($d->{'aliasredir'}) {
+		my @protos = ( 'http', $alias->{'ssl'} ? ( 'https' ) : ( ) );
+		foreach my $p (@protos) {
+			my $r = { 'path' => '/',
+				  'dest' => $p.'://'.$alias->{'dom'}.'/',
+				  'alias' => 0,
+				  'host' => '(www\.)?'.quotemeta($d->{'dom'}),
+				  'hostregexp' => 1,
+				  $p => 1 };
+			&create_redirect($alias, $r);
+			}
+		}
 	}
 else {
 	# Add the actual <VirtualHost>

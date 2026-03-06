@@ -32,6 +32,7 @@ return &plugin_defined($p, "feature_supports_web_host_redirects") &&
 #   dest - Either a URL or a directory
 #   alias - Set to 1 for an alias, 0 for a redirect
 #   regexp - If set to 1, any sub-path is redirected to the same destination
+#   host - Only match requests to this hostname
 #   http - Set in the non-SSL virtual host
 #   https - Set in the SSL virtual host
 sub list_redirects
