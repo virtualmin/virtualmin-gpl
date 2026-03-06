@@ -5487,22 +5487,23 @@ return $gid;
 # Returns the home directory for a new virtual server user
 sub server_home_directory
 {
+my ($d, $parent) = @_;
 &require_useradmin();
-if ($_[0]->{'parent'}) {
+if ($d->{'parent'}) {
 	# Owned by some existing user, so under his home
-	local $dname = $_[0]->{'dom'};
+	local $dname = $d->{'dom'};
 	$dname =~ s/^xn(-+)//;
-	return "$_[1]->{'home'}/domains/$dname";
+	return "$parent->{'home'}/domains/$dname";
 	}
 elsif ($config{'home_format'}) {
 	# Use the template from the module config
 	local $home = "$home_base/$config{'home_format'}";
-	return &substitute_domain_template($home, $_[0]);
+	return &substitute_domain_template($home, $d);
 	}
 else {
 	# Just use the Users and Groups module settings
-	return &useradmin::auto_home_dir($home_base, $_[0]->{'user'},
-						     $_[0]->{'ugroup'});
+	return &useradmin::auto_home_dir($home_base, $d->{'user'},
+						     $d->{'ugroup'});
 	}
 }
 
