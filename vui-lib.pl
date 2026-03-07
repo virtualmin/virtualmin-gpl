@@ -377,4 +377,25 @@ return &ui_brh() if (defined(&ui_brh));
 return "<br data-x-br>";
 }
 
+=head2 vui_findable_hidden_style()
+
+Returns CSS for visually-hidden but Ctrl+F-findable text
+
+=cut
+sub vui_findable_hidden_style
+{
+return <<'EOF';
+<style>
+  .findable-hidden {
+    position: absolute;
+    overflow: hidden;
+    margin-top: -20px;
+    margin-left: 6px;
+    pointer-events: none;
+    color: transparent;
+  }
+</style>
+EOF
+}
+
 1;

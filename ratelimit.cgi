@@ -49,17 +49,22 @@ print &ui_table_row($text{'ratelimit_max'},
               $_->{'values'}->[0] =~ /^"domain_(\d+)"/ } @$conf;
 $dtable = &ui_columns_start([ $text{'ratelimit_dom'},
 			      $text{'ratelimit_dmax'} ]);
+my $finable_style = &vui_findable_hidden_style();
 $i = 0;
 foreach $rl (@rls, {}, {}) {
 	my $did = $rl->{'values'}->[0] =~ /"domain_(\d+)"/ ? $1 : undef;
+	my $dom_find = $did ? &get_domain($did)->{'dom'} : '';
+	$dom_find = &ui_tag('div', $dom_find, { class => "findable-hidden" })
+		if ($dom_find);
 	$dtable .= &ui_columns_row([
+		($i == 0 ? $finable_style : '') .
 		&ui_select("dom_$i", $did, 
 			[ [ "", "&nbsp;" ],
 			  map { [ $_->{'id'}, &show_domain_name($_) ] }
 			      grep { $_->{'mail'} }
 				   sort { $a->{'dom'} cmp $b->{'dom'} }
 					&list_domains() ]).
-		"&nbsp;",
+		"$dom_find&nbsp;",
 		&ratelimit_field("max_$i", $rl),
 		]);
 	$i++;
