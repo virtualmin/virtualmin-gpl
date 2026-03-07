@@ -5502,7 +5502,20 @@ elsif ($config{'home_format'}) {
 	}
 else {
 	# Just use the Users and Groups module settings
-	return &useradmin::auto_home_dir($home_base, $d->{'user'},
+	my $home_user = $d->{'user'};
+	my $longname = $config{'longname'} // '';
+	my $unixname = $config{'unixname'} // '';
+	my $split_name_modes = $longname ne '' &&
+			       $unixname ne '' &&
+			       $longname ne $unixname;
+	if ($split_name_modes) {
+		# If owner username format differs from longname format, keep
+		# auto home directory naming based on longname
+		local $config{'unixname'} = $longname;
+		my ($longname_user) = &unixuser_name($d->{'dom'});
+		$home_user = $longname_user if (defined($longname_user));
+		}
+	return &useradmin::auto_home_dir($home_base, $home_user,
 						     $d->{'ugroup'});
 	}
 }
@@ -7963,16 +7976,17 @@ sub unixuser_name
 my ($dname) = @_;
 my $orig_dname = $dname;
 my ($try1, $user);
+my $unixname = $config{'unixname'};
 
-if ($config{'unixname'} && $config{'unixname'} !~ /^[0-9]$/) {
+if ($unixname && $unixname !~ /^[0-9]$/) {
 	# Create random username based on the user pattern
-	$user = &generate_random_available_user($config{'unixname'});
+	$user = &generate_random_available_user($unixname);
 	}
-elsif ($config{'unixname'} == 2) {
+elsif ($unixname == 2) {
 	# Username is same as the prefix
 	$user = &compute_prefix($dname, undef, undef, 1);
 	}
-elsif ($config{'unixname'} == 3) {
+elsif ($unixname == 3) {
 	# Username is the admin's email address, like example@example.com
 	$dname =~ s/^xn(-+)//;
         $dname = &remove_numeric_prefix($dname);
@@ -7986,7 +8000,7 @@ else {
 	$dname = &remove_numeric_prefix($dname);
 	$dname =~ /^([^\.]+)/;
 	($try1, $user) = ($1, $1);
-	if (defined(getpwnam($try1)) || $config{'unixname'}) {
+	if (defined(getpwnam($try1)) || $unixname) {
 		# Short username is in use or the admin asked for a
 		# full domain name
 		$user = &remove_numeric_prefix($orig_dname);
@@ -8013,6 +8027,7 @@ sub unixgroup_name
 my ($dname, $user) = @_;
 my $orig_dname = $dname;
 my ($try1, $group);
+my $unixname = $config{'unixname'};
 
 if ($user && $config{'groupsame'}) {
 	# Same as username where possible
@@ -8021,11 +8036,11 @@ if ($user && $config{'groupsame'}) {
 		}
 	return (undef, $user, $user);
 	}
-if ($config{'unixname'} && $config{'unixname'} !~ /^[0-9]$/) {
+if ($unixname && $unixname !~ /^[0-9]$/) {
 	# Create random group based on the user pattern
-	$group = &generate_random_available_user($config{'unixname'});
+	$group = &generate_random_available_user($unixname);
 	}
-elsif ($config{'unixname'} == 2) {
+elsif ($unixname == 2) {
 	# Group name is same as the prefix
 	$group = &compute_prefix($dname, undef, undef, 1);
 	}
@@ -8036,7 +8051,7 @@ else {
 	$dname = &remove_numeric_prefix($dname);
 	$dname =~ /^([^\.]+)/;
 	($try1, $group) = ($1, $1);
-	if (defined(getgrnam($try1)) || $config{'unixname'}) {
+	if (defined(getgrnam($try1)) || $unixname) {
 		$group = &remove_numeric_prefix($orig_dname);
 		$try2 = $group;
 		if (defined(getpwnam($try))) {
