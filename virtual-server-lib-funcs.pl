@@ -5502,20 +5502,7 @@ elsif ($config{'home_format'}) {
 	}
 else {
 	# Just use the Users and Groups module settings
-	my $home_user = $d->{'user'};
-	my $longname = $config{'longname'} // '';
-	my $unixname = $config{'unixname'} // '';
-	my $split_name_modes = $longname ne '' &&
-			       $unixname ne '' &&
-			       $longname ne $unixname;
-	if ($split_name_modes) {
-		# If owner username format differs from longname format, keep
-		# auto home directory naming based on longname
-		local $config{'unixname'} = $longname;
-		my ($longname_user) = &unixuser_name($d->{'dom'});
-		$home_user = $longname_user if (defined($longname_user));
-		}
-	return &useradmin::auto_home_dir($home_base, $home_user,
+	return &useradmin::auto_home_dir($home_base, $d->{'user'},
 						     $d->{'ugroup'});
 	}
 }
