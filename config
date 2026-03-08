@@ -12,6 +12,7 @@ unix_shell=/bin/bash /bin/sh
 append=1
 append_style=0
 longname=0
+unixname=0
 virtual_skel=/etc/skel
 quotas=1
 defquota=2097152
