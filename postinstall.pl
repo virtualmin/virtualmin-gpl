@@ -103,7 +103,7 @@ foreach my $tf (@all_template_files) {
 # Perform a module config check, to ensure that quota and interface settings
 # are correct.
 &set_all_null_print();
-$cerr = &html_tags_to_text(&check_virtual_server_config());
+$cerr = &html_tags_to_text(&check_virtual_server_config(undef, 1));
 #if ($cerr) {
 #	print STDERR "Warning: Module Configuration problem detected: $cerr\n";
 #	}
