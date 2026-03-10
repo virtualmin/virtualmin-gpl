@@ -60,16 +60,16 @@ else {
         my $err = &{\&{$efunc}}($details, $user);
         if ($err) {
                 # Failed!
-                print &text('twofactor_failed', $err),"<p>\n";
+                print &text('2fa_failed', $err),"<p>\n";
                 }
         else {
-                print &text('twofactor_done', $user->{'twofactor_id'}),"<p>\n";
+                print &text('2fa_done', $user->{'twofactor_id'}),"<p>\n";
 
                 # Print provider-specific message
                 my $mfunc = "webmin::message_twofactor_".
                             $miniserv{'twofactor_provider'};
                 if (defined(&{\&{$mfunc}})) {
-                        print &{\&{$mfunc}}($user);
+                        print "<p></p>".&{\&{$mfunc}}($user);
                         }
 
                 # Save user
