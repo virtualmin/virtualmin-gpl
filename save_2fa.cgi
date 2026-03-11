@@ -97,9 +97,11 @@ else {
 
 		# Show a test form, so the user can validate
 		print &ui_form_start("test_2fa.cgi");
-		print $text{'2fa_testdesc'},"<p>\n";
-		print $text{'2fa_testfield'}."&nbsp;\n",
-		      &ui_textbox("test", undef, 12),"<p>\n";
+		print &ui_tag('p', $text{'2fa_testdesc'});
+		print &ui_tag('p', "$text{'2fa_testfield'}".
+				   "&nbsp;&nbsp;".
+				   &ui_textbox("test", undef, 12));
+		print &ui_tag('p');
 		print &ui_form_end([ [ undef, $text{'2fa_test'} ] ]);
                 }
 
