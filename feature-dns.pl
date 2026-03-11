@@ -4852,6 +4852,8 @@ if ($parent) {
 	&pre_records_change($parent);
 	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
 	if (!$pfile) {
+		&after_records_change($parent);
+		&release_lock_dns($parent);
 		return "Failed to read parent DNS domain : $precs";
 		}
 	my $deleted = 0;
@@ -4933,7 +4935,12 @@ if ($parent && !$d->{'dns_submode'}) {
 			$changed++;
 			}
 		}
-	&post_records_change($parent, $precs, $pfile) if ($changed);
+	if ($changed) {
+		&post_records_change($parent, $precs, $pfile);
+		}
+	else {
+		&after_records_change($parent);
+		}
 	&release_lock_dns($parent);
 	}
 }
@@ -4950,6 +4957,11 @@ if ($parent && !$d->{'dns_submode'}) {
 	&obtain_lock_dns($parent);
         &pre_records_change($parent);
         my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
+	if (!$pfile) {
+		&after_records_change($parent);
+		&release_lock_dns($parent);
+		return "Failed to read parent DNS domain : $precs";
+		}
 	foreach my $r (@$precs) {
 		if ($r->{'type'} eq 'NS' && $r->{'name'} eq $d->{'dom'}.'.') {
 			push(@oldns, $r);
@@ -4960,7 +4972,12 @@ if ($parent && !$d->{'dns_submode'}) {
 		&delete_dns_record($precs, $pfile, $o);
 		$changed++;
 		}
-	&post_records_change($parent, $precs, $pfile) if ($changed);
+	if ($changed) {
+		&post_records_change($parent, $precs, $pfile);
+		}
+	else {
+		&after_records_change($parent);
+		}
         &release_lock_dns($parent);
 	}
 }
