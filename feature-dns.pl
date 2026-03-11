@@ -341,6 +341,7 @@ elsif (!$dnsparent) {
 	&post_records_change($d, $recs, $recstemp);
 	&remote_foreign_call($r, "bind8", "set_ownership", $rootfile);
 	&$second_print($text{'setup_done'});
+	&clear_domain_dns_records_and_file($d);	# Ensure fresh zone read below
 
 	# Add NS records to parent zone
 	&add_parent_ns_records($d);
@@ -379,7 +380,12 @@ else {
 	&pre_records_change($dnsparent);
 	my ($recs, $file) = &get_domain_dns_records_and_file($dnsparent);
 	if (!$file) {
-		&error(&text('setup_ednssub', $dnsparent->{'dom'}));
+		my $err = ref($recs) ? &text('setup_ednssub', $dnsparent->{'dom'})
+				     : $recs;
+		&after_records_change($dnsparent);
+		&release_lock_dns($dnsparent);
+		&$second_print($err);
+		return 0;
 		}
 	$d->{'dns_submode'} = 1;	# So we know how this was done
 	$d->{'dns_subof'} = $dnsparent->{'id'};
@@ -4809,6 +4815,11 @@ if ($parent) {
 	&obtain_lock_dns($parent);
 	&pre_records_change($parent);
 	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
+	if (!$pfile) {
+		&after_records_change($parent);
+		&release_lock_dns($parent);
+		return "Failed to read parent DNS domain : $precs";
+		}
 	my %already;
 	foreach my $rec (@$precs) {
 		$already{$rec->{'name'},$rec->{'type'}}++;
@@ -4816,7 +4827,7 @@ if ($parent) {
 	foreach my $ds (@$dsrecs) {
 		if (!$already{$ds->{'name'},$ds->{'type'}}) {
 			my $dsr = { %$ds };
-			&create_dns_record($prec, $pfile, $dsr);
+			&create_dns_record($precs, $pfile, $dsr);
 			}
 		}
 	&post_records_change($parent, $precs, $pfile);
@@ -4878,6 +4889,11 @@ if ($parent && !$d->{'dns_submode'}) {
 	&obtain_lock_dns($parent);
 	&pre_records_change($parent);
 	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
+	if (!$pfile) {
+		&after_records_change($parent);
+		&release_lock_dns($parent);
+		return "Failed to read parent DNS domain : $precs";
+		}
 	my @ns;
 	if ($d->{'dns_cloud'}) {
 		# Nameservers come from cloud provider
@@ -4888,6 +4904,11 @@ if ($parent && !$d->{'dns_submode'}) {
 	else {
 		# Nameservers are in this zone
 		my ($recs, $file) = &get_domain_dns_records_and_file($d);
+		if (!$file) {
+			&after_records_change($parent);
+			&release_lock_dns($parent);
+			return "Failed to read DNS domain $d->{'dom'} : $recs";
+			}
 		foreach my $r (@$recs) {
 			if ($r->{'name'} eq $d->{'dom'}."." &&
 			    $r->{'type'} eq 'NS') {
