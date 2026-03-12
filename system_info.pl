@@ -118,7 +118,7 @@ if (&should_show_pro_tip('wp_workbench_ad', 1)) {
 		      'alert_body2' => " ",
 		      'target_link' => $target_link,
 		      'button_text2' => $text{"${pref}learn_more"},
-		      'button_icon2' => 'fa fa-fw fa-question-circle',
+		      'button_icon2' => 'fa2 fa2-workbench fa-xs fa-fw',
 		      'button_text3' => $text{"${pref}remind"},
 		      'button_icon3' => 'fa fa-fw fa-clock',
 		      'button_text' => $text{"${pref}hide"},

@@ -5483,6 +5483,22 @@ while($_[0]->{$gid}) {
 return $gid;
 }
 
+# server_home_user(&domain)
+# Returns username to use for auto-generated home path naming
+sub server_home_user
+{
+my ($d) = @_;
+my $home_user = $d->{'user'};
+if (($config{'longname'} // '') ne '' &&
+    ($config{'unixname'} // '') ne '' &&
+    $config{'longname'} ne $config{'unixname'}) {
+	local $config{'unixname'} = $config{'longname'};
+	my ($longname_user) = &unixuser_name($d->{'dom'});
+	$home_user = $longname_user if (defined($longname_user));
+	}
+return $home_user;
+}
+
 # server_home_directory(&domain, [&parentdomain])
 # Returns the home directory for a new virtual server user
 sub server_home_directory
@@ -5502,7 +5518,7 @@ elsif ($config{'home_format'}) {
 	}
 else {
 	# Just use the Users and Groups module settings
-	return &useradmin::auto_home_dir($home_base, $d->{'user'},
+	return &useradmin::auto_home_dir($home_base, &server_home_user($d),
 						     $d->{'ugroup'});
 	}
 }
@@ -15959,12 +15975,12 @@ my $merr = &made_changes();
 return undef;
 }
 
-# check_virtual_server_config([&lastconfig])
+# check_virtual_server_config([&lastconfig], [skip_dns_network])
 # Validates the Virtualmin configuration, printing out messages as it goes.
 # Returns undef on success, or an error message on failure.
 sub check_virtual_server_config
 {
-local ($lastconfig) = @_;
+local ($lastconfig, $skip_dns_network) = @_;
 local $clink = "edit_newfeatures.cgi";
 local $mclink = "../config.cgi?$module_name";
 
@@ -16043,7 +16059,7 @@ if (&foreign_check("proc")) {
 		}
 	}
 
-if ($config{'dns'}) {
+if ($config{'dns'} && !$skip_dns_network) {
 	# Make sure BIND is installed
 	my $dnsremote;
 	if ($dnsremote = &is_dns_remote()) {
@@ -16993,71 +17009,88 @@ if ($defip || $defip6) {
 $config{'old_defip'} ||= $defip;
 $config{'old_defip6'} ||= $defip6;
 
-# Make sure the external IPv4 is set if needed
-my $ext_ip = &get_external_ip_address(1, 4);
-if ($config{'dns_ip'} ne '*') {
-	my $dns_ip = $config{'dns_ip'} || $defip;
-	if ($ext_ip && $ext_ip eq $dns_ip) {
-		# Looks OK
-		&$second_print(&text($config{'dns_ip'} ? 'check_dnsip1' :
-				'check_dnsip2', $dns_ip));
-		}
-	elsif ($ext_ip && $ext_ip ne $dns_ip) {
-		# Mis-match .. warn user
-		&$second_print(&ui_text_color(
-			&text($config{'dns_ip'} ? 'check_ednsip1' :
-			'check_ednsip2', $dns_ip, $ext_ip,
-			"../config.cgi?module=$module_name&section=line1.3"),
-			'warn'));
-		}
-	}
-else {
-	if ($ext_ip) {
-		&$second_print(&text('check_dnsip3', $ext_ip));
-		}
-	else {
-		&$second_print(&ui_text_color("⚠ ".$text{'check_ednsip3'},
-					      'warn'));
-		}
-	}
+if (!$skip_dns_network) {
+		# Make sure the external IPv4 is set if needed
+		my $ext_ip = &get_external_ip_address(1, 4);
+		if ($config{'dns_ip'} ne '*') {
+			my $dns_ip = $config{'dns_ip'} || $defip;
+			if ($ext_ip && $ext_ip eq $dns_ip) {
+				# Looks OK
+				&$second_print(&text($config{'dns_ip'}
+					? 'check_dnsip1'
+					: 'check_dnsip2', $dns_ip));
+				}
+			elsif ($ext_ip && $ext_ip ne $dns_ip) {
+				# Mis-match .. warn user
+				&$second_print(&ui_text_color(
+					&text($config{'dns_ip'}
+						? 'check_ednsip1'
+						: 'check_ednsip2',
+							$dns_ip, $ext_ip,
+							"../config.cgi?module=".
+							"$module_name&".
+							"section=line1.3"),
+					'warn'));
+				}
+			}
+		else {
+			if ($ext_ip) {
+				&$second_print(&text('check_dnsip3', $ext_ip));
+				}
+			else {
+				&$second_print(&ui_text_color("⚠ ".$text{'check_ednsip3'},
+							      'warn'));
+				}
+			}
 
-# Make sure the external IPv6 is set if needed
-my $ext_ip6 = &get_external_ip_address(1, 6);
-if ($config{'dns_ip6'} ne '*') {
-	my $dns_ip6 = $config{'dns_ip6'} || $defip6;
-	if (!$dns_ip6) {
-		# No IPv6 address configured or detected locally
-		&$second_print(&ui_text_color(
-			&text('check_ednsipnonev6',
-			"../config.cgi?$module_name"), 'warn'));
+		# Make sure the external IPv6 is set if needed
+		my $ext_ip6 = &get_external_ip_address(1, 6);
+		if ($config{'dns_ip6'} ne '*') {
+			my $dns_ip6 = $config{'dns_ip6'} || $defip6;
+			if (!$dns_ip6) {
+				# No IPv6 address configured or detected locally
+				&$second_print(&ui_text_color(
+					&text('check_ednsipnonev6',
+					"../config.cgi?$module_name"), 'warn'));
+				}
+			elsif ($ext_ip6 && $ext_ip6 eq $dns_ip6) {
+				# Looks OK
+				&$second_print(&text($config{'dns_ip6'}
+					? 'check_dnsip1v6'
+					: 'check_dnsip2v6', $dns_ip6));
+				}
+			elsif ($ext_ip6 && $ext_ip6 ne $dns_ip6) {
+				# Mis-match .. warn user
+				&$second_print(&ui_text_color(
+					&text($config{'dns_ip6'}
+						? 'check_ednsip1v6'
+						: 'check_ednsip2v6', $dns_ip6,
+							$ext_ip6,
+							"../config.cgi?module=".
+							"$module_name&".
+							"section=line1.3"),
+					'warn'));
+				}
+			elsif ($config{'ip6enabled'} && &supports_ip6()) {
+				&$second_print(
+					&ui_text_color(
+						"⚠ ".$text{'check_ednsip3v6'},
+							      'warn'));
+				}
+			}
+		else {
+			if ($ext_ip6) {
+				&$second_print(&text('check_dnsip3v6',
+					$ext_ip6));
+				}
+			elsif ($config{'ip6enabled'} && &supports_ip6()) {
+				&$second_print(
+					&ui_text_color(
+						"⚠ ".$text{'check_ednsip3v6'},
+							      'warn'));
+				}
+			}
 		}
-	elsif ($ext_ip6 && $ext_ip6 eq $dns_ip6) {
-		# Looks OK
-		&$second_print(&text($config{'dns_ip6'} ? 'check_dnsip1v6' :
-				'check_dnsip2v6', $dns_ip6));
-		}
-	elsif ($ext_ip6 && $ext_ip6 ne $dns_ip6) {
-		# Mis-match .. warn user
-		&$second_print(&ui_text_color(
-			&text($config{'dns_ip6'} ? 'check_ednsip1v6' :
-			'check_ednsip2v6', $dns_ip6, $ext_ip6,
-			"../config.cgi?module=$module_name&section=line1.3"),
-			'warn'));
-		}
-	elsif ($config{'ip6enabled'} && &supports_ip6()) {
-		&$second_print(&ui_text_color("⚠ ".$text{'check_ednsip3v6'},
-					      'warn'));
-		}
-	}
-else {
-	if ($ext_ip6) {
-		&$second_print(&text('check_dnsip3v6', $ext_ip6));
-		}
-	elsif ($config{'ip6enabled'} && &supports_ip6()) {
-		&$second_print(&ui_text_color("⚠ ".$text{'check_ednsip3v6'},
-					      'warn'));
-		}
-	}
 
 # Validate home directory format
 if ($config{'home_base'} && $config{'home_base'} !~ /^\/\S+/) {
