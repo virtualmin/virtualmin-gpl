@@ -5483,22 +5483,6 @@ while($_[0]->{$gid}) {
 return $gid;
 }
 
-# server_home_user(&domain)
-# Returns username to use for auto-generated home path naming
-sub server_home_user
-{
-my ($d) = @_;
-my $home_user = $d->{'user'};
-if (($config{'longname'} // '') ne '' &&
-    ($config{'unixname'} // '') ne '' &&
-    $config{'longname'} ne $config{'unixname'}) {
-	local $config{'unixname'} = $config{'longname'};
-	my ($longname_user) = &unixuser_name($d->{'dom'});
-	$home_user = $longname_user if (defined($longname_user));
-	}
-return $home_user;
-}
-
 # server_home_directory(&domain, [&parentdomain])
 # Returns the home directory for a new virtual server user
 sub server_home_directory
@@ -5518,7 +5502,7 @@ elsif ($config{'home_format'}) {
 	}
 else {
 	# Just use the Users and Groups module settings
-	return &useradmin::auto_home_dir($home_base, &server_home_user($d),
+	return &useradmin::auto_home_dir($home_base, $d->{'user'},
 						     $d->{'ugroup'});
 	}
 }
