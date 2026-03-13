@@ -2254,10 +2254,6 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 	else {
 		&set_certificate_permissions($d, $d->{'ssl_cert'});
 		&set_certificate_permissions($d, $d->{'ssl_key'});
-		if (&has_command("chcon")) {
-			&execute_command("chcon -R -t httpd_config_t ".quotemeta($d->{'ssl_cert'}).">/dev/null 2>&1");
-			&execute_command("chcon -R -t httpd_config_t ".quotemeta($d->{'ssl_key'}).">/dev/null 2>&1");
-			}
 		&$second_print($text{'setup_done'});
 		}
 	&unlock_file($d->{'ssl_cert'});
