@@ -4,12 +4,14 @@ This option controls requests under the source path:
 <ul>
 <li><b>Keep sub-paths</b><br>
     Requests under the source path keep the same trailing path under the
-    destination.
+    destination,<br>e.g.: <tt>/old/path</tt> &rarr; <tt>/new/path</tt>
 <li><b>Ignore sub-paths</b><br>
     Requests under the source path are redirected to the destination itself,
-    without appending the trailing path.
+    without appending the trailing path,<br>e.g.: <tt>/old/path</tt> &rarr;
+    <tt>/new</tt>
 <li><b>Only redirect exact source path</b><br>
-    Only the exact source path is redirected.
+    Only the exact source path is redirected,<br>e.g.: <tt>/old</tt> &rarr;
+    <tt>/new</tt><br>
 </ul>
 
 <footer>
