@@ -64,7 +64,7 @@ characters in the backup destination, you can use the C<--strftime> flag.
 When this is enabled, the C<--purge> flag can also be given, followed by a 
 number of days. The command will then delete backups in the same desination
 directory older than the specified number of days. To see more detail about
-which files were consisered for purging, add the C<--purge-debug> flag.
+which files were considered for purging, add the C<--purge-debug> flag.
 
 On a Virtualmin Pro system, you can use the C<--key> flag followed by
 a backup key ID or description to select the key to encrypt this backup with.
