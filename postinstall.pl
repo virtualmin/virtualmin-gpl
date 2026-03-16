@@ -12,8 +12,9 @@ local $need_restart;
 # Update last post-install time
 $config{'lastpost'} = time();
 if ($config{'unixname'} eq '') {
-	$config{'unixname'} = $config{'longname'} eq '1' ? 1 : 0;
+	$config{'unixname'} = $config{'longname'};
 	}
+$config{'unixname'} = 0 if ($config{'unixname'} == 2);
 if ($config{'web_aliasredir'} eq '') {
 	$config{'web_aliasredir'} = $config{'alias_mode'} == 0 ||
 				    $config{'alias_mode'} == 4 ? 1 : 0;

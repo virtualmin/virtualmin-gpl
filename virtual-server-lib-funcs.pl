@@ -7964,14 +7964,11 @@ my ($dname) = @_;
 my $orig_dname = $dname;
 my ($try1, $user);
 my $unixname = $config{'unixname'};
+$unixname = 0 if ($unixname == 2);
 
 if ($unixname && $unixname !~ /^[0-9]$/) {
 	# Create random username based on the user pattern
 	$user = &generate_random_available_user($unixname);
-	}
-elsif ($unixname == 2) {
-	# Username is same as the prefix
-	$user = &compute_prefix($dname, undef, undef, 1);
 	}
 elsif ($unixname == 3) {
 	# Username is the admin's email address, like example@example.com
