@@ -35,13 +35,48 @@ print "Time:$now From:$from To:$to User:$ENV{'LOGNAME'} Size:$size Dest:$dest Mo
 # Returns the email addresses in a string
 sub address_parts
 {
-local @rv;
-local $rest = $_[0];
-while($rest =~ /([^<>\s,'"\@]+\@[A-z0-9\-\.\!]+)(.*)/) {
-	push(@rv, $1);
-	$rest = $2;
-	}
+my @rv = map { $_->[0] } &split_addresses($_[0]);
 return wantarray ? @rv : $rv[0];
+}
+
+# split_addresses(string)
+# Splits a comma-separated list of addresses into [ email, real-name, original ]
+# triplets
+sub split_addresses
+{
+my ($str) = @_;
+my @rv;
+while(1) {
+	$str =~ s/\\"/\0/g;
+	if ($str =~ /^[\s,;]*(([^<>\(\)\s"]+)\s+\(([^\(\)]+)\))(.*)$/) {
+		# An address like  foo@bar.com (Fooey Bar)
+		push(@rv, [ $2, $3, $1 ]);
+		$str = $4;
+		}
+	elsif ($str =~ /^[\s,;]*("([^"]*)"\s*<([^\s<>,]+)>)(.*)$/ ||
+	       $str =~ /^[\s,;]*(([^<>\@]+)\s+<([^\s<>,]+)>)(.*)$/ ||
+	       $str =~ /^[\s,;]*(([^<>\@]+)<([^\s<>,]+)>)(.*)$/ ||
+	       $str =~ /^[\s,;]*(([^<>\[\]]+)\s+\[mailto:([^\s\[\]]+)\])(.*)$/||
+	       $str =~ /^[\s,;]*(()<([^<>,]+)>)(.*)/ ||
+	       $str =~ /^[\s,;]*(()([^\s<>,;]+))(.*)/) {
+		# Addresses like  "Fooey Bar" <foo@bar.com>
+		#                 Fooey Bar <foo@bar.com>
+		#                 Fooey Bar<foo@bar.com>
+		#		  Fooey Bar [mailto:foo@bar.com]
+		#		  <foo@bar.com>
+		#		  <group name>
+		#		  foo@bar.com or foo
+		my ($all, $name, $email, $rest) = ($1, $2, $3, $4);
+		$all =~ s/\0/\\"/g;
+		$name =~ s/\0/"/g;
+		push(@rv, [ $email, $name eq "," ? "" : $name, $all ]);
+		$str = $rest;
+		}
+	else {
+		last;
+		}
+	}
+return @rv;
 }
 
 
