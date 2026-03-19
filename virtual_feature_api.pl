@@ -31,6 +31,13 @@ sub feature_hlink
 {
 }
 
+# feature_config_link()
+# Returns a link for editing this feature's module configuration on the
+# plugins page
+sub feature_config_link
+{
+}
+
 # feature_check([&new-plugins-list])
 # Returns undef if all the needed programs for this feature are installed,
 # or an error message if not
