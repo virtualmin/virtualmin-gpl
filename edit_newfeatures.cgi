@@ -78,9 +78,12 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 	if (-r "$mdir/virtual_feature.pl") {
 		&foreign_require($m->{'dir'}, "virtual_feature.pl");
 		local @acts;
-		if (-r "$mdir/config.info") {
-			push(@acts, ui_link("edit_plugconfig.cgi?mod=$m->{'dir'}",
-                                $text{'newplugin_conf'}));
+		local $config_link = &plugin_call($m->{'dir'},
+						  "feature_config_link");
+		if ($config_link || -r "$mdir/config.info") {
+			push(@acts, ui_link($config_link ||
+				"edit_plugconfig.cgi?mod=$m->{'dir'}",
+				$text{'newplugin_conf'}));
 			}
 		if (!$m->{'hidden'}) {
 			push(@acts, ui_link("../$m->{'dir'}/",
