@@ -44,6 +44,11 @@ server that can still have mailboxes and email aliases. Or you can use
 C<--alias-with-dns> to create an alias that has it's own independently editable
 DNS records.
 
+By default, alias domains serve the same content as their target domain,
+but under a different URL. You can instead have the alias redirect clients
+to the target URL with the C<--alias-redirect> flag. Or turn this off if
+it's enabled by default in the template with C<--no-alias-redirect>.
+
 To create a sub-domain, use the C<--subdom> flag followed by the parent
 domain, which the domain being created must be under. The optional
 C<--subprefix> flag can be used to set the directory under public_html
@@ -439,6 +444,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--ssl-redirect") {
 		$auto_redirect = 1;
+		}
+	elsif ($a eq "--no-ssl-redirect") {
+		$auto_redirect = 0;
 		}
 	elsif ($a eq "--append-style") {
 		$append_style = shift(@ARGV);
@@ -1201,6 +1209,7 @@ print "                        [--shell command]\n";
 print "                        [--subprefix directory]\n";
 print "                        [--proxy url]\n";
 print "                        [--alias-redirect | --no-alias-redirect]\n";
+print "                        [--ssl-redirect | --no-ssl-redirect]\n";
 exit(1);
 }
 

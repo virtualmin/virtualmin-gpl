@@ -6948,6 +6948,7 @@ $ssl_tests = [
 		      [ 'logrotate' ],
 		      [ 'allocate-ip' ],
 		      [ 'content' => 'Test SSL home page' ],
+		      [ 'no-ssl-redirect' ],
 		      @create_args, ],
         },
 
@@ -6997,9 +6998,10 @@ $ssl_tests = [
 	  'antigrep' => &get_default_ip(),
 	},
 
-	# Test HTTP get
+	# Test HTTP get (which should not redirect)
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test SSL home page',
+	  'antigrep' => 'https://'.$test_domain,
 	},
 
 	# Test HTTPS get
