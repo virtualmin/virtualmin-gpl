@@ -119,6 +119,7 @@ if ($d->{'alias'}) {
 				  'host' => '(www\.)?'.quotemeta($d->{'dom'}),
 				  'hostregexp' => 1,
 				  $p => 1 };
+			&add_wellknown_redirect($r);
 			&create_redirect($alias, $r);
 			}
 		}
@@ -346,6 +347,7 @@ else {
 	}
 
 # If any alias domains with web already exist, re-set them up
+# XXX what is this for??
 my @adoms = &get_domain_by("alias", $d->{'id'},
 			      "web", 1,
 			      "alias_mode", 1);
