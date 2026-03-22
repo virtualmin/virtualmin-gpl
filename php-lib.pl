@@ -427,7 +427,12 @@ foreach my $p (@ports) {
 		# For fcgid mode, the directory needs to have Options ExecCGI
 		my ($opts) = &apache::find_directive("Options", $phpconf);
 		if ($opts && $mode eq "fcgid" && $opts !~ /ExecCGI/) {
-			$opts .= " +ExecCGI";
+			if ($opts =~ /(\+|\-)/) {
+				$opts .= " +ExecCGI";
+				}
+			else {
+				$opts .= " ExecCGI";
+				}
 			&apache::save_directive("Options", [ $opts ],
 						$phpconf, $conf);
 			}
