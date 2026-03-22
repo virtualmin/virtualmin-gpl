@@ -2827,6 +2827,7 @@ $aliasdom_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'alias', $test_target_domain ],
 		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'no-alias-redirect' ],
 		      @create_args, ],
 	},
 
@@ -2841,9 +2842,10 @@ $aliasdom_tests = [
 	  'grep' => &get_default_ip(),
 	},
 
-	# Test HTTP get
+	# Test HTTP get, which should not redirect
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test alias target page',
+	  'antigrep' => 'http://'.$test_target_domain,
 	},
 
 	# Test HTTP get to webmail alias
@@ -2988,13 +2990,20 @@ $aliasdom_tests = [
 	  'args' => [ [ 'domain', $test_domain ] ],
 	},
 
-	# Re-create the alias domain
+	# Re-create the alias domain, this time in redirect mode
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'desc', 'Test domain' ],
 		      [ 'alias', $test_target_domain ],
 		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'alias-redirect' ],
 		      @create_args, ],
+	},
+
+	# Validate that redirect works via HTTP
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => ['Test alias target page',
+		     'http://'.$test_target_domain],
 	},
 
 	# Cleanup the target domain
