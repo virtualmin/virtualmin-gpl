@@ -554,10 +554,10 @@ return $r->{'dest'} eq $exp->{'dest'} ? 1 : 0;
 sub get_redirect_to_ssl
 {
 my ($d) = @_;
-return { 'path' => '^/(?!.well-known)(.*)$',
+return { 'path' => '^/(?!.well-known)',
 	 'dest' => 'https://%{HTTP_HOST}/$1',
 	 'alias' => 0,
-	 'regexp' => 0,
+	 'regexp' => 1,
 	 'http' => 1,
 	 'https' => 0 };
 }
