@@ -600,13 +600,14 @@ my $mode = &get_domain_php_mode($oldd);
 if ($d->{'alias'} && $d->{'alias_mode'}) {
 	# Possibly just updating parent virtual server
 	if ($d->{'dom'} ne $oldd->{'dom'}) {
+		# Alias domain name has changed, so update ServerAlias line
 		&$first_print($text{'save_apache5'});
 		my $alias = &get_domain($d->{'alias'});
 		&obtain_lock_web($alias);
 		my @ports = ( $alias->{'web_port'} );
 		push(@ports, $alias->{'web_sslport'}) if ($alias->{'ssl'});
 		foreach my $p (@ports) {
-			my ($pvirt, $pconf) = &get_apache_virtual(
+			my ($pvirt, $pconf, $conf) = &get_apache_virtual(
 							$alias->{'dom'}, $p);
 			if (!$pvirt) {
 				&$second_print($text{'setup_ewebalias'});
@@ -619,6 +620,7 @@ if ($d->{'alias'} && $d->{'alias_mode'}) {
 				}
 			&apache::save_directive("ServerAlias", \@sa, $pconf,
 						$conf);
+			&modify_web_redirects($d, $oldd, $pvirt, $pconf, $conf, 1);
 			&flush_file_lines($pvirt->{'file'});
 			$rv++;
 			}
@@ -809,14 +811,15 @@ else {
 		&fix_php_ini_files($d, \@fixes);
 		}
 	&release_lock_web($d);
-	if ($need_restart && $rv) {
-		# Need a full restart
-		&register_post_action(\&restart_apache, 1);
-		}
-	elsif (!$need_restart && $rv) {
-		# Just do a soft config apply
-		&register_post_action(\&restart_apache, 0);
-		}
+	}
+
+if ($need_restart && $rv) {
+	# Need a full restart
+	&register_post_action(\&restart_apache, 1);
+	}
+elsif (!$need_restart && $rv) {
+	# Just do a soft config apply
+	&register_post_action(\&restart_apache, 0);
 	}
 return $rv;
 }
@@ -4586,8 +4589,10 @@ foreach my $file (split(/\r?\n/, $out)) {
 sub modify_web_domain
 {
 my ($d, $oldd, $virt, $vconf, $conf, $rlogs) = @_;
-&apache::save_directive("ServerName", [ $d->{'dom'} ],
-			$vconf, $conf);
+if (&apache::find_directive("ServerName", $vconf)) {
+	&apache::save_directive("ServerName", [ $d->{'dom'} ],
+				$vconf, $conf);
+	}
 my @sa;
 my @others = map { $_->{'dom'} } &get_domain_by("alias", $d->{'id'});
 foreach my $sa (&apache::find_directive("ServerAlias", $vconf)) {
@@ -4620,18 +4625,27 @@ foreach my $ld ("ErrorLog", "TransferLog", "CustomLog") {
 	&apache::save_directive($ld, \@ldv, $vconf, $conf);
 	}
 
+&modify_web_redirects($d, $oldd, $virt, $vconf, $conf);
+&flush_file_lines();
+}
+
 # Update RewriteCond / RewriteRule / Redirect* directives for
 # webmail and awstats redirects
+sub modify_web_redirects
+{
+my ($d, $oldd, $virt, $vconf, $conf) = @_;
 foreach my $ld ("RewriteCond", "RewriteRule",
 		"Redirect", "RedirectMatch") {
 	local @ldv = &apache::find_directive($ld, $vconf);
 	next if (!@ldv);
+	my $oqm = quotemeta($oldd->{'dom'});
+	my $qm = quotemeta($d->{'dom'});
 	foreach my $l (@ldv) {
 		$l =~ s/\Q$oldd->{'dom'}\E/$d->{'dom'}/g;
+		$l =~ s/\Q$oqm\E/$qm/g;
 		}
 	&apache::save_directive($ld, \@ldv, $vconf, $conf);
 	}
-&flush_file_lines();
 }
 
 # modify_web_user_group(&domain, &old-domain, &virt, &vconf, &apache-config)
