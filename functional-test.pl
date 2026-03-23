@@ -3006,6 +3006,18 @@ $aliasdom_tests = [
 		     'http://'.$test_target_domain],
 	},
 
+	# Rename the alias domain
+	{ 'command' => 'rename-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'new-domain', $test_rename_domain ] ],
+	},
+
+	# Make sure that a redirect to the target still works
+	{ 'command' => $wget_command.'http://'.$test_rename_domain,
+	  'grep' => ['Test alias target page',
+		     'http://'.$test_target_domain],
+	},
+
 	# Cleanup the target domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_target_domain ] ],
