@@ -8504,6 +8504,9 @@ reset_iwarning=.. ignoring warning : $1
 reset_swarning=.. skipping warning : $1
 reset_dataloss=.. resetting would cause data loss : $1
 reset_override=Proceed With Reset Anyway
+reset_dns=Deleting and re-creating standard DNS records ..
+reset_ednsfetch=.. failed to fetch DNS records!
+reset_ednssave=.. failed to update DNS records : $1
 
 remotedns_title=Remote DNS Servers
 remotedns_host=Hostname
