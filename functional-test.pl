@@ -5599,6 +5599,35 @@ $purge_tests = [
 	  'grep' => 'Deleting file',
 	},
 
+	# Backup via SFTP to a date-based directory that is a lie
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', "$sftp_backup_prefix/1973-12-12" ] ],
+	},
+
+	# Fake the time on that directory
+	{ 'command' => "perl -e 'utime(124531200, 124531200,
+		       \"$remote_backup_dir/1973-12-12\")'"
+	},
+
+	# Do another SFTP strftime-format backup with purging
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'strftime' ],
+		      [ 'purge', 30 ],
+		      [ 'dest', $sftp_backup_prefix.'/%Y-%m-%d' ] ],
+	  'grep' => 'Deleting file',
+	},
+
+	# Make sure the right dir got deleted
+	{ 'command' => 'ls -ld '.$remote_backup_dir.'/1973-12-12',
+	  'fail' => 1 },
+	{ 'command' => 'ls -ld '.$remote_backup_dir.'/'.$nowdate },
+
 	# Backup via FTP to a date-based directory that is a lie, but only
 	# one day ago to exercise the different date format
 	{ 'command' => 'backup-domain.pl',
