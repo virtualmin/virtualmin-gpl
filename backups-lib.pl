@@ -5792,6 +5792,47 @@ elsif ($mode == 8) {
 return ( );
 }
 
+# purge_sftp_backup(path, mode, host, pass, port, [as-user])
+# Recursively deletes a backup file or directory over SFTP.
+sub purge_sftp_backup
+{
+my ($path, $mode, $host, $pass, $port, $asuser) = @_;
+my $err;
+if ($mode & 040000) {
+	my $lsout = &sftp_commands($host, $pass, $port,
+				   [ "ls -l ".quotemeta($path) ], \$err,
+				   $asuser);
+	if (!$err) {
+		foreach my $l (split(/\r?\n/, $lsout)) {
+			my @st = &parse_lsl_line($l);
+			next if (!scalar(@st));
+			next if ($st[13] eq "." || $st[13] eq "..");
+			$err = &purge_sftp_backup("$path/$st[13]", $st[2],
+						  $host, $pass, $port,
+						  $asuser);
+			last if ($err);
+			}
+		}
+	if (!$err) {
+		my $out = &sftp_commands($host, $pass, $port,
+					 [ "rmdir ".quotemeta($path) ], \$err,
+					 $asuser);
+		if (!$err &&
+		    $out =~ /(Couldn't|Failure|No such file or directory)/i) {
+			$err = $out
+			}
+		}
+	}
+else {
+	my $out = &sftp_commands($host, $pass, $port,
+				 [ "rm ".quotemeta($path) ], \$err, $asuser);
+	$err = $out
+		if (!$err &&
+		    $out =~ /(Couldn't|Failure|No such file or directory)/i);
+	}
+return $err;
+}
+
 # purge_domain_backups(dest, days, [time-now], [&as-domain], [detailed-output])
 # Searches a backup destination for backup files or directories older than
 # same number of days, and deletes them. May print stuff using first_print.
@@ -6777,7 +6818,8 @@ elsif ($mode == 13) {
 	# Use SFTP ls -l command to list the directory
 	my $err;
 	my $lsout = &sftp_commands(($user ? $user."\@" : "").$host, $pass, $port,
-				   [ "ls -l ".quotemeta($base) ], \$err);
+				   [ "ls -l ".quotemeta($base) ], \$err,
+				   $asuser); # run as local user for SSH keys
 	if ($err) {
 		&$second_print(&text('backup_purgeesftpls', $err));
 		return 0;
@@ -6806,11 +6848,20 @@ elsif ($mode == 13) {
 				}
 			&$first_print(&text('backup_deletingssh',
 					    "<tt>$base/$st[13]</tt>", $old));
-			my $rmerr;
-			&sftp_commands(($user ? $user."\@" : "").$host, $pass, $port,
-				       [ "rm ".quotemeta("$base/$st[13]"),
-					 "rm ".quotemeta("$base/$st[13].info"),
-				 	 "rm ".quotemeta("$base/$st[13].dom") ], \$rmerr);
+			# Recursively delete backup file or directory over SFTP
+			my $rmerr = &purge_sftp_backup(
+				"$base/$st[13]", $st[2],
+				($user ? $user."\@" : "").$host,
+				$pass, $port, $asuser);
+			# Clean up sibling .info and .dom files for single-file
+			# backups
+			if (!$rmerr && !($st[2] & 040000)) {
+				&sftp_commands(($user ? $user."\@" : "").$host,
+					$pass, $port,
+					[ "rm ".quotemeta("$base/$st[13].info"),
+					  "rm ".quotemeta("$base/$st[13].dom") ],
+					\$rmerr, $asuser);
+				}
 			if ($rmerr) {
 				&$second_print(&text('backup_edelsftp', $rmerr));
 				$ok = 0;
