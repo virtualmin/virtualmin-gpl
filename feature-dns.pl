@@ -595,7 +595,10 @@ if (!$recs) {
 	return 0;
 	}
 foreach my $r (@$recs) {
-	&delete_dns_record($recs, $file, $r);
+	if ($r->{'name'} eq $d->{'dom'} ||
+	    $r->{'name'}  =~ /\.\Q$d->{'dom'}\E\.$/) {
+		&delete_dns_record($recs, $file, $r);
+		}
 	}
 my $ip = $d->{'dns_ip'} || $d->{'ip'};
 &create_standard_records($recs, $file, $d, $ip);
