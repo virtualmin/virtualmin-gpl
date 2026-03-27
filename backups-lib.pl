@@ -5792,6 +5792,15 @@ elsif ($mode == 8) {
 return ( );
 }
 
+# sftp_lsl_name(name)
+# Normalize sftp ls -l output that includes the full path
+sub sftp_lsl_name
+{
+my ($name) = @_;
+$name =~ s/^.*\///;
+return $name;
+}
+
 # purge_sftp_backup(path, mode, host, pass, port, [as-user])
 # Recursively deletes a backup file or directory over SFTP.
 sub purge_sftp_backup
@@ -5806,8 +5815,9 @@ if ($mode & 040000) {
 		foreach my $l (split(/\r?\n/, $lsout)) {
 			my @st = &parse_lsl_line($l);
 			next if (!scalar(@st));
-			next if ($st[13] eq "." || $st[13] eq "..");
-			$err = &purge_sftp_backup("$path/$st[13]", $st[2],
+			my $name = &sftp_lsl_name($st[13]);
+			next if ($name eq "." || $name eq "..");
+			$err = &purge_sftp_backup("$path/$name", $st[2],
 						  $host, $pass, $port,
 						  $asuser);
 			last if ($err);
@@ -6827,12 +6837,13 @@ elsif ($mode == 13) {
 	foreach my $l (split(/\r?\n/, $lsout)) {
 		my @st = &parse_lsl_line($l);
 		next if (!scalar(@st));
-		next if ($st[13] eq "." || $st[13] eq "..");
+		my $name = &sftp_lsl_name($st[13]);
+		next if ($name eq "." || $name eq "..");
 		if ($detail) {
-			&$first_print(&text('backup_purgeposs', $st[13],
+			&$first_print(&text('backup_purgeposs', $name,
 					    &make_date($st[9])));
 			}
-		if ($st[13] =~ /^$re$/ && $st[13] !~ /\.(dom|info)$/) {
+		if ($name =~ /^$re$/ && $name !~ /\.(dom|info)$/) {
 			$mcount++;
 			if (!$st[9] || $st[9] >= $cutoff) {
 				if ($detail) {
@@ -6847,10 +6858,10 @@ elsif ($mode == 13) {
 						     $re, $old));
 				}
 			&$first_print(&text('backup_deletingssh',
-					    "<tt>$base/$st[13]</tt>", $old));
+					    "<tt>$base/$name</tt>", $old));
 			# Recursively delete backup file or directory over SFTP
 			my $rmerr = &purge_sftp_backup(
-				"$base/$st[13]", $st[2],
+				"$base/$name", $st[2],
 				($user ? $user."\@" : "").$host,
 				$pass, $port, $asuser);
 			# Clean up sibling .info and .dom files for single-file
@@ -6858,8 +6869,8 @@ elsif ($mode == 13) {
 			if (!$rmerr && !($st[2] & 040000)) {
 				&sftp_commands(($user ? $user."\@" : "").$host,
 					$pass, $port,
-					[ "rm ".quotemeta("$base/$st[13].info"),
-					  "rm ".quotemeta("$base/$st[13].dom") ],
+					[ "rm ".quotemeta("$base/$name.info"),
+					  "rm ".quotemeta("$base/$name.dom") ],
 					\$rmerr, $asuser);
 				}
 			if ($rmerr) {
