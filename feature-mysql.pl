@@ -3012,9 +3012,38 @@ if (!$encpass && $plainpass) {
 	}
 if (&mysql_supports_grants($d, $ver, $variant)) {
 	# Need to use new 'create user' command
-	return ("create user '$user'\@'$host' identified $plugin by ".
-		($plainpass ? "'".&mysql_escape($plainpass)."'"
-			    : "password $encpass"));
+	if ($plainpass) {
+		# Plaintext password available - use BY 'plaintext' syntax
+		# (works for both MySQL 8+ and MariaDB 10.4+)
+		return ("create user '$user'\@'$host' identified $plugin by '".
+			&mysql_escape($plainpass)."'");
+		}
+	elsif ($variant eq "mysql") {
+		# MySQL 8+ with pre-hashed password: use AS keyword
+		# MySQL 8 removed 'IDENTIFIED BY PASSWORD' syntax entirely
+		my $auth_plugin = $plugin;
+		if (!$auth_plugin) {
+			# Fallback if default_authentication_plugin var
+			# was not found (renamed in 8.0.27+)
+			$auth_plugin = " with caching_sha2_password ";
+			}
+		return ("create user '$user'\@'$host' identified".
+			"${auth_plugin}as $encpass");
+		}
+	else {
+		# MariaDB 10.4+ with pre-hashed password
+		if ($plugin) {
+			# Has plugin - use USING keyword for hashed
+			return ("create user '$user'\@'$host' identified".
+				"${plugin}using $encpass");
+			}
+		else {
+			# No plugin specified - use BY PASSWORD syntax
+			# (still supported in MariaDB)
+			return ("create user '$user'\@'$host' identified".
+				" by password $encpass");
+			}
+		}
 	}
 elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
 	my $changepasssql;
