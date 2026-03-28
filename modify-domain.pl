@@ -9,7 +9,8 @@ server from the command line. The only mandatory parameter is C<--domain>, which
 must be followed by the domain name of the server to update. The actual
 changes to make are specified by the other optional parameters, such as
 C<--pass> to set a new password, C<--desc> to change the server description,
-and C<--quota> and C<--uquota> to change the disk quota.
+and C<--quota> and C<--uquota> to change the disk quota. If the domain's Webmin
+user has two-factor enabled, use the C<--disable-2fa> flag to turn it off.
 
 To make domain protected from deletion and disabling, the C<--protected> flag
 can be used. To remove the protection, use C<--unprotected> flag.
@@ -304,6 +305,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--apply-all-quotas") {
 		$applyquotas = 2;
 		}
+	elsif ($a eq "--disable-2fa") {
+		$no2fa = 1;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -467,6 +471,11 @@ if ($linkdname) {
 	$linkd || &usage("Link domain $linkdname does not exist");
 	$linkd->{'alias'} eq $dom->{'id'} || 
 	    &usage("Link domain $linkdname is not an alias of this domain");
+	}
+
+if ($no2fa) {
+	$dom->{'webmin'} || &usage("Two-factor cannot be disabled for domains without ".
+				   "a Webmin login");
 	}
 
 # Find all other domains to be changed
@@ -925,6 +934,27 @@ if (&has_home_quotas() && $applyquotas == 2) {
 # Update the Webmin user for this domain, or the parent
 &refresh_webmin_user($dom, $old);
 
+# If disabling 2fa, update the Webmin user
+if ($no2fa) {
+	&$first_print("Disabling two-factor for $dom->{'user'} ..");
+	&foreign_require("acl");
+	my @users = &acl::list_users();
+	my ($user) = grep { $_->{'name'} eq $dom->{'user'} } @users;
+	if (!$user) {
+		&$second_print(".. Webmin user does not exist!");
+		}
+	elsif (!$user->{'twofactor_provider'}) {
+		&$second_print(".. two-factor is not currently enabled");
+		}
+	else {
+		$user->{'twofactor_provider'} = undef;
+		$user->{'twofactor_id'} = undef;
+		$user->{'twofactor_apikey'} = undef;
+		&acl::modify_user($user->{'name'}, $user);
+		&register_post_action(\&restart_webmin);
+		}
+	}
+
 # If the template has changed, update secondary groups
 if ($dom->{'template'} ne $old->{'template'}) {
 	&update_domain_owners_group(undef, $oldd);
@@ -983,6 +1013,7 @@ print "                        [--dns-ip address | --no-dns-ip]\n";
 print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
 print "                        [--link-domain domain | --no-link-domain]\n";
+print "                        [--disable-2fa]\n";
 print "                        [--skip-warnings]\n";
 exit(1);
 }
