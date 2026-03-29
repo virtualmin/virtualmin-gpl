@@ -5705,14 +5705,16 @@ if ($redir && !@dels) {
 			  'hostregexp' => 1,
 			  $p => 1 };
 		&add_wellknown_redirect($r);
-		&create_redirect($alias, $r);
+		my $err = &create_redirect($alias, $r);
+		return $err if ($err);
 		}
 	$d->{'aliasredir'} = 1;
 	}
 elsif (!$redir && @dels) {
 	# Need to remove
 	foreach my $r (@dels) {
-		&delete_redirect($alias, $r);
+		my $err = &delete_redirect($alias, $r);
+		return $err if ($err);
 		}
 	$d->{'aliasredir'} = 0;
 	}

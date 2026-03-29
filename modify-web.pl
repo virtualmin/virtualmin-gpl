@@ -137,6 +137,11 @@ C<--domain-to-www>. Or to redirect all sub-domains to domain.com you can use
 C<--subdomain-to-domain>. Finally to turn off canonical domain redirects,
 use C<--no-redirect>.
 
+Similarly, for alias domains you can configure a redirect to the target
+domain with the C<--alias-redirect> flag. Or to return to the regular
+alias behavior where the target's content is served by the alias domain,
+use C<--no-alias-redirect>.
+
 =cut
 
 package virtual_server;
@@ -386,6 +391,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--subdomain-to-domain") {
 		$wwwredir = 3;
 		}
+	elsif ($a eq "--alias-redirect") {
+		$aliasredir = 1;
+		}
+	elsif ($a eq "--no-alias-redirect") {
+		$aliasredir = 0;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -403,7 +414,7 @@ $mode || $tlsa || $rubymode ||
   $fpmsock || $fpmtype || $defmode || defined($cgimode) || $subprefix ||
   @add_dirs || @remove_dirs || $protocols || $fix_mod_php ||
   $ssl_cert || $ssl_key || $ssl_ca || defined($phpmail) || defined($wwwredir) ||
-  defined($proxyhost) ||
+  defined($proxyhost) || defined($aliasredir) ||
 	&usage("Nothing to do");
 
 # Validate FastCGI options
@@ -1092,6 +1103,14 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Update alias redirect
+	if (defined($aliasredir)) {
+		&$first_print($aliasredir ? "Enabling redirect to target domain .."
+					  : "Disabling redirect to target domain ..");
+		my $err = &save_alias_redirect($d, $aliasredir);
+		&$second_print($err ? ".. failed : $err" : ".. done");
+		}
+
 	# Update proxy host header mode
 	if (defined($proxyhost)) {
 		if ($proxyhost) {
@@ -1182,6 +1201,7 @@ print "                     [--ssl-ca file | --default-ssl-ca]\n";
 print "                     [--default-ssl-paths]\n";
 print "                     [--www-to-domain | --domain-to-www |\n";
 print "                      --subdomain-to-domain | --no-redirect]\n";
+print "                     [--alias-redirect | --no-alias-redirect]\n";
 exit(1);
 }
 
