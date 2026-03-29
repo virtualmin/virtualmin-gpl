@@ -3006,6 +3006,30 @@ $aliasdom_tests = [
 		     'http://'.$test_target_domain],
 	},
 
+	# Turn off alias redirect
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'no-alias-redirect' ] ],
+	},
+
+	# Validate that redirect no longer happens
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test alias target page',
+	  'antigrep' => 'http://'.$test_target_domain,
+	},
+
+	# Turn on alias redirect again
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'alias-redirect' ] ],
+	},
+
+	# Validate that redirect works via HTTP, again
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => ['Test alias target page',
+		     'http://'.$test_target_domain],
+	},
+
 	# Rename the alias domain
 	{ 'command' => 'rename-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
