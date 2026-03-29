@@ -566,50 +566,44 @@ else {
 return 1;
 }
 
-# can_reset_dns(&domain)
-# Determines how DNS reset behaves, depending on whether it is hosted locally
-# or on a Cloud provider
-sub can_reset_dns
-{
-my ($d) = @_;
-if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
-	# Reset is possible via a reset function
-	return 1;
-	}
-# Feature has to be turned on and off
-return 2;
-}
-
 # reset_dns(&domain)
 # Re-create DNS records from the template
 sub reset_dns
 {
 my ($d) = @_;
-&$first_print($text{'reset_dns'});
-&obtain_lock_dns($d);
-&pre_records_change($d);
-my ($recs, $file) = &get_domain_dns_records_and_file($d);
-if (!$recs) {
-	&$second_print($text{'reset_ednsfetch'});
+if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
+	# Reset by re-creating records
+	&$first_print($text{'reset_dns'});
+	&obtain_lock_dns($d);
+	&pre_records_change($d);
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	if (!$recs) {
+		&$second_print($text{'reset_ednsfetch'});
+		&release_lock_dns($d);
+		return 0;
+		}
+	foreach my $r (@$recs) {
+		if ($r->{'name'} eq $d->{'dom'} ||
+		    $r->{'name'}  =~ /\.\Q$d->{'dom'}\E\.$/) {
+			&delete_dns_record($recs, $file, $r);
+			}
+		}
+	my $ip = $d->{'dns_ip'} || $d->{'ip'};
+	&create_standard_records($recs, $file, $d, $ip);
+	&sync_domain_tlsa_records($d);
+	my $err = &post_records_change($d, $recs, $file);
 	&release_lock_dns($d);
-	return 0;
-	}
-foreach my $r (@$recs) {
-	if ($r->{'name'} eq $d->{'dom'} ||
-	    $r->{'name'}  =~ /\.\Q$d->{'dom'}\E\.$/) {
-		&delete_dns_record($recs, $file, $r);
+	if ($err) {
+		&$second_print(&text('reset_ednssave', $err));
+		}
+	else {
+		&$second_print($text{'setup_done'});
 		}
 	}
-my $ip = $d->{'dns_ip'} || $d->{'ip'};
-&create_standard_records($recs, $file, $d, $ip);
-&sync_domain_tlsa_records($d);
-my $err = &post_records_change($d, $recs, $file);
-&release_lock_dns($d);
-if ($err) {
-	&$second_print(&text('reset_ednssave', $err));
-	}
 else {
-	&$second_print($text{'setup_done'});
+	# Reset by turning DNS off and on
+	&delete_dns($d);
+	&setup_dns($d);
 	}
 return 1;
 }
