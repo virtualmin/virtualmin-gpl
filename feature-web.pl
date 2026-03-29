@@ -111,17 +111,7 @@ if ($d->{'alias'}) {
 	$d->{'aliasredir'} = $tmpl->{'web_aliasredir'}
 		if ($d->{'aliasredir'} eq '');
 	if ($d->{'aliasredir'}) {
-		my @protos = ( 'http', $alias->{'ssl'} ? ( 'https' ) : ( ) );
-		foreach my $p (@protos) {
-			my $r = { 'path' => '/',
-				  'dest' => $p.'://'.$alias->{'dom'}.'/',
-				  'alias' => 0,
-				  'host' => '(www\.)?'.quotemeta($d->{'dom'}),
-				  'hostregexp' => 1,
-				  $p => 1 };
-			&add_wellknown_redirect($r);
-			&create_redirect($alias, $r);
-			}
+		&save_alias_redirect($d, 1);
 		}
 	}
 else {
@@ -388,13 +378,7 @@ if ($d->{'alias_mode'}) {
 		}
 
 	# Also remove any host-based redirects for the alias
-	foreach my $r (reverse(&list_redirects($alias))) {
-		if ($r->{'host'} &&
-		    ($r->{'host'} eq $d->{'dom'} ||
-		     $r->{'host'} =~ /^[^\.]+\.\Q$d->{'dom'}\E$/)) {
-			&delete_redirect($alias, $r);
-			}
-		}
+	&save_alias_redirect($d, 0);
 
 	&release_lock_web($alias);
 	&register_post_action(\&restart_apache);
@@ -5664,6 +5648,76 @@ foreach my $d (@$dirs) {
 	push(@rv, $c);
 	}
 return @rv;
+}
+
+# get_alias_redirect(&domain)
+# Returns 1 if an alias domain redirects all HTTP requests to the target
+sub get_alias_redirect
+{
+my ($d) = @_;
+$d->{'alias'} || return -1;
+my $alias = &get_domain($d->{'alias'});
+$alias || return -1;
+my @redirs = &list_redirects($alias);
+foreach my $r (@redirs) {
+	my $rc = { %$r };
+	&remove_wellknown_redirect($rc);
+	if ($rc->{'path'} eq '/' &&
+	    $rc->{'dest'} eq 'http://'.$alias->{'dom'}.'/' &&
+	    $rc->{'host'} eq '(www\.)?'.quotemeta($d->{'dom'})) {
+		return 1;
+		}
+	}
+return 0;
+}
+
+# save_alias_redirect(&domain, redirect-enabled?)
+# Turns redirects from an alias domain to the target on or off
+sub save_alias_redirect
+{
+my ($d, $redir) = @_;
+$d->{'alias'} || return "Not an alias domain";
+my $alias = &get_domain($d->{'alias'});
+$alias || return "Alias target does not exist!";
+
+# Get existing redirects
+my @redirs = &list_redirects($alias);
+my @dels;
+foreach my $r (@redirs) {
+	my $rc = { %$r };
+	&remove_wellknown_redirect($rc);
+	if ($rc->{'path'} eq '/' &&
+	    ($rc->{'dest'} eq 'http://'.$alias->{'dom'}.'/' ||
+	     $rc->{'dest'} eq 'https://'.$alias->{'dom'}.'/') &&
+	    $rc->{'host'} eq '(www\.)?'.quotemeta($d->{'dom'})) {
+		push(@dels, $r);
+		}
+	}
+
+if ($redir && !@dels) {
+	# Need to add
+	my @protos = ( 'http', $alias->{'ssl'} ? ( 'https' ) : ( ) );
+	foreach my $p (@protos) {
+		my $r = { 'path' => '/',
+			  'dest' => $p.'://'.$alias->{'dom'}.'/',
+			  'alias' => 0,
+			  'host' => '(www\.)?'.quotemeta($d->{'dom'}),
+			  'hostregexp' => 1,
+			  $p => 1 };
+		&add_wellknown_redirect($r);
+		&create_redirect($alias, $r);
+		}
+	$d->{'aliasredir'} = 1;
+	}
+elsif (!$redir && @dels) {
+	# Need to remove
+	foreach my $r (@dels) {
+		&delete_redirect($alias, $r);
+		}
+	$d->{'aliasredir'} = 0;
+	}
+
+return undef;
 }
 
 $done_feature_script{'web'} = 1;

@@ -706,6 +706,14 @@ if ($multiline) {
 				 $ph == 1 ? "Yes" : "Unsupported"),"\n";
 			}
 
+		# Show alias redirect mode
+		if ($d->{'alias'} && $multiline == 1) {
+			my $r = &get_alias_redirect($d);
+			print "    Redirect alias domain: ",
+			      ($r == 0 ? "No" :
+			       $r == 1 ? "Yes" : "Unknown")."\n";
+			}
+
 		# Show SSL cert
 		if ($d->{'ssl_key'}) {
 			print "    SSL key file: $d->{'ssl_key'}\n";
