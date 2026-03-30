@@ -41,6 +41,11 @@ while(@ARGV > 0) {
 
 # Find the command
 $cmd || &usage("Missing --command parameter");
+$cmd =~ s/\.pl$//;
+if (my $msg = &api_command_unavailable_message($cmd)) {
+	print "$msg\n";
+	exit(1);
+	}
 $cmd .= ".pl" if ($cmd !~ /\.pl$/);
 foreach $dir ($module_root_directory,
 	      map { &module_root_directory($_) } @plugins) {

@@ -3,6 +3,49 @@
 our ($convert_multiline, $convert_idonly, $convert_nameonly, $convert_emailonly,
      $convert_format);
 
+# list_pro_only_api_commands()
+# Returns API commands that exist only in Virtualmin Pro and should produce
+# a clear edition-specific message when invoked on GPL systems.
+sub list_pro_only_api_commands
+{
+return (
+	"check-connectivity.pl",
+	"create-reseller.pl",
+	"delete-reseller.pl",
+	"list-acme-providers.pl",
+	"list-backup-keys.pl",
+	"list-resellers.pl",
+	"modify-reseller.pl",
+	"modify-resources.pl",
+	"search-maillogs.pl",
+	);
+}
+
+# normalize_api_command_name(command)
+# Returns a command name with a .pl suffix, for matching against known API
+# script names.
+sub normalize_api_command_name
+{
+my ($cmd) = @_;
+$cmd =~ s/^.*\///;
+$cmd .= ".pl" if ($cmd !~ /\.pl$/);
+return $cmd;
+}
+
+# api_command_unavailable_message(command)
+# Returns a user-facing message if some API command is unavailable in this
+# edition, or undef if it should be runnable.
+sub api_command_unavailable_message
+{
+my ($cmd) = @_;
+return undef if ($virtualmin_pro);
+$cmd = &normalize_api_command_name($cmd);
+my %pro_only = map { $_, 1 } &list_pro_only_api_commands();
+return undef if (!$pro_only{$cmd});
+(my $display = $cmd) =~ s/\.pl$//;
+return "Command $display is only available in Virtualmin Pro";
+}
+
 sub list_api_categories
 {
 return ([ "Backup and restore", "backup-domain.pl", "*-scheduled-backup*.pl",
@@ -211,6 +254,7 @@ local ($extradirs) = @_;
 local @dirs = ( $module_root_directory );
 push(@dirs, @$extradirs) if ($extradirs);
 local $dirstr = join(" ", @dirs);
+local $proonly = join(" ", &list_pro_only_api_commands());
 local $api_helper_command = &get_api_helper_command();
 if (!$api_helper_command) {
 	return (0, "No writable path configured or auto-detected");
@@ -257,6 +301,16 @@ echo \$COMMAND | grep '\\.pl' > /dev/null
 if [ "\$?" != "0" ]; then
 	COMMAND="\$COMMAND.pl"
 fi
+DISPLAYCOMMAND="\$COMMAND"
+DISPLAYCOMMAND=\${DISPLAYCOMMAND%.pl}
+case " $proonly " in
+	*" \$COMMAND "*)
+		if [ ! -d "$module_root_directory/pro" ]; then
+			echo "Command \$DISPLAYCOMMAND is only available in Virtualmin Pro"
+			exit 1
+		fi
+	;;
+esac
 for dir in $dirstr; do
 	if [ -x "\$dir/\$COMMAND" ]; then
 		if [ "\$help" = "1" ]; then
