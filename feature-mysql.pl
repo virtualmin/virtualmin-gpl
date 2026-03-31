@@ -1267,7 +1267,7 @@ if ($allopts->{'repl'} && $mymod->{'config'}->{'host'} && $info{'remote'} &&
 	}
 
 # For DBs that exist already, save their user lists for later restore
-local (%userdbs, %userpasses);
+local (%userdbs, %userpasses, %userplugins);
 foreach my $db (&domain_databases($d, [ 'mysql' ])) {
 	foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
 		if ($u->[0] ne $d->{'user'} &&
@@ -1275,6 +1275,8 @@ foreach my $db (&domain_databases($d, [ 'mysql' ])) {
 		    $u->[0] ne $mymod->{'config'}->{'login'}) {
 			push(@{$userdbs{$u->[0]}}, $db->{'name'});
 			$userpasses{$u->[0]} = $u->[1];
+			$userplugins{$u->[0]} ||= &get_mysql_user_plugin(
+				$d, $u->[0]);
 			}
 		}
 	}
@@ -1385,7 +1387,8 @@ foreach my $uname (keys %userdbs) {
 	my @grant = grep { $created{$_} } @{$userdbs{$uname}};
 	if (@grant) {
 		&create_mysql_database_user($d, \@grant, $uname, undef,
-					    $userpasses{$uname});
+					    $userpasses{$uname},
+					    $userplugins{$uname});
 		}
 	}
 
@@ -1953,11 +1956,12 @@ else {
 	}
 }
 
-# create_mysql_database_user(&domain, &dbs, username, plain-pass, [enc-pass])
+# create_mysql_database_user(&domain, &dbs, username, plain-pass, [enc-pass],
+#			     [auth-plugin])
 # Adds one mysql user, who can access multiple databases
 sub create_mysql_database_user
 {
-local ($d, $dbs, $user, $pass, $encpass) = @_;
+local ($d, $dbs, $user, $pass, $encpass, $auth_plugin) = @_;
 &require_mysql();
 &obtain_lock_mysql($d);
 if ($d->{'provision_mysql'}) {
@@ -1988,7 +1992,7 @@ else {
 		&execute_user_deletion_sql($d, $h, $user);
 		&execute_user_creation_sql($d, $h, $myuser, 
 		      $encpass ? "'".&mysql_escape($encpass)."'" :undef,
-		      $pass);
+		      $pass, $auth_plugin);
 		local $db;
 		foreach $db (@$dbs) {
 			&create_mysql_db_grant($d, $h, $db, $myuser);
@@ -2538,11 +2542,12 @@ else {
 			}
 		my $plainpass = $u->[0] eq &mysql_user($d) ?
 					&mysql_pass($d) : undef;
+		my $auth_plugin = &get_mysql_user_plugin($d, $u->[0]);
 		foreach my $h (@$hosts) {
 			next if (&indexof($h, @$gothosts) >= 0);
 			&execute_user_creation_sql($d, $h, $u->[0],
 				"'".&mysql_escape($u->[1])."'",
-				$plainpass);
+				$plainpass, $auth_plugin);
 			}
 		}
 
