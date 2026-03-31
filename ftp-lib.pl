@@ -13,6 +13,19 @@ for(my $i=0; $i<$tries; $i++) {
 return 0;
 }
 
+# ftp_encrypted_tryload(host, file, srcfile, [&error], [&callback], [user, pass],
+# 	                [port], [attempts])
+# Upload data from a local file to an FTP-over-TLS site
+sub ftp_encrypted_tryload
+{
+local $tries = $_[8] || 1;
+for(my $i=0; $i<$tries; $i++) {
+	&ftp_encrypted_upload(@_);
+	return 1 if (!${$_[3]});
+	}
+return 0;
+}
+
 # ftp_onecommand(host, command, [&error], [user, pass], [port])
 # Executes one command on an FTP server, after logging in, and returns its
 # exit status.
@@ -288,25 +301,183 @@ else {
 return $sz;
 }
 
+# ftp_encrypted_url(host, file, [port])
+# Builds an FTP URL for curl.
+sub ftp_encrypted_url
+{
+my ($host, $file, $port) = @_;
+my $url = "ftp://";
+$url .= &check_ip6address($host) ? "[".$host."]" : $host;
+$url .= ":".$port if ($port);
+if (!defined($file) || $file eq "" || $file eq "/") {
+	$url .= "/";
+	}
+elsif ($file =~ /^\//) {
+	$url .= $file;
+	}
+else {
+	$url .= "/".$file;
+	}
+return $url;
+}
+
+# ftp_encrypted_upload(..)
+# Takes the same parameters as ftp_upload, but requires FTP over TLS.
+sub ftp_encrypted_upload
+{
+my ($host, $file, $srcfile, $error, $cbfunc, $user, $pass, $port) = @_;
+if (!&has_command("curl")) {
+	my $msg = "The curl command is needed for encrypted FTP uploads";
+	if ($error) { $$error = $msg; return 0; }
+	else { &error($msg); }
+	}
+my $cmd = "curl --ssl-reqd -k -sS";
+if ($user) {
+	$cmd .= " -u ".quotemeta($user).":".quotemeta($pass);
+	}
+$cmd .= " -T ".quotemeta($srcfile);
+$cmd .= " ".quotemeta(&ftp_encrypted_url($host, $file, $port));
+my $errtemp = &transname();
+&system_logged("$cmd >/dev/null 2>".quotemeta($errtemp)." </dev/null");
+if ($? || !-r $srcfile) {
+	$$error = &html_escape(&read_file_contents($errtemp)) ||
+		  "Unknown curl error with $cmd" if ($error);
+	&unlink_file($errtemp);
+	return 0;
+	}
+&unlink_file($errtemp);
+return 1;
+}
+
+# ftp_encrypted_onecommand(host, command, [&error], [user, pass], [port])
+# Executes one command on an FTP-over-TLS server using curl.
+sub ftp_encrypted_onecommand
+{
+my ($host, $command, $error, $user, $pass, $port) = @_;
+if (!&has_command("curl")) {
+	my $msg = "The curl command is needed for encrypted FTP commands";
+	if ($error) { $$error = $msg; return 0; }
+	else { &error($msg); }
+	}
+my $cmd = "curl --ssl-reqd -k -sS";
+if ($user) {
+	$cmd .= " -u ".quotemeta($user).":".quotemeta($pass);
+	}
+$cmd .= " -Q ".quotemeta($command);
+$cmd .= " ".quotemeta(&ftp_encrypted_url($host, "/", $port));
+my $errtemp = &transname();
+&system_logged("$cmd >/dev/null 2>".quotemeta($errtemp)." </dev/null");
+if ($?) {
+	$$error = &html_escape(&read_file_contents($errtemp)) ||
+		  "Unknown curl error with $cmd" if ($error);
+	&unlink_file($errtemp);
+	return 0;
+	}
+&unlink_file($errtemp);
+return 200;
+}
+
+# ftp_encrypted_listdir(host, dir, [&error], [user, pass], [port], [longmode])
+# Returns a reference to a list of filenames in a directory on an FTP-over-TLS
+# server, or full file details in stat format when longmode is set.
+sub ftp_encrypted_listdir
+{
+my ($host, $dir, $error, $user, $pass, $port, $longmode) = @_;
+if (!&has_command("curl")) {
+	my $msg = "The curl command is needed for encrypted FTP directory listings";
+	if ($error) { $$error = $msg; return 0; }
+	else { &error($msg); }
+	}
+my $cmd = "curl --ssl-reqd -k -sS";
+if ($user) {
+	$cmd .= " -u ".quotemeta($user).":".quotemeta($pass);
+	}
+$cmd .= " --list-only" if (!$longmode);
+my $listdir = $dir eq "/" ? "/" : $dir."/";
+$cmd .= " ".quotemeta(&ftp_encrypted_url($host, $listdir, $port));
+my $errtemp = &transname();
+my $out = &backquote_command("$cmd 2>".quotemeta($errtemp)." </dev/null");
+if ($?) {
+	$$error = &html_escape(&read_file_contents($errtemp)) ||
+		  "Unknown curl error with $cmd" if ($error);
+	&unlink_file($errtemp);
+	return 0;
+	}
+&unlink_file($errtemp);
+my @list;
+foreach my $l (split(/\r?\n/, $out)) {
+	$l =~ s/\r|\n//g;
+	next if ($l eq "");
+	if ($longmode) {
+		my @st = &parse_lsl_line($l);
+		if (scalar(@st)) {
+			$st[13] =~ s/^.*\///;
+			push(@list, \@st);
+			}
+		}
+	else {
+		$l =~ s/^.*\///;
+		push(@list, $l);
+		}
+	}
+return \@list;
+}
+
+# ftp_encrypted_deletefile(host, file, &error, [user, pass], [port])
+# Delete some file or directory from an FTP-over-TLS server. This is done
+# recursively if needed.
+sub ftp_encrypted_deletefile
+{
+my ($host, $file, $err, $user, $pass, $port) = @_;
+my $sz = 0;
+my $cwderr;
+my $isdir = &ftp_encrypted_onecommand($host, "CWD $file", \$cwderr,
+				      $user, $pass, $port);
+if ($isdir) {
+	# Yes .. so delete recursively first
+	my $files = &ftp_encrypted_listdir($host, $file, $err, $user, $pass,
+					   $port, 1);
+	$files = [ grep { $_->[13] ne "." && $_->[13] ne ".." } @$files ]
+		if ($files);
+	if (!$err || !$$err) {
+		foreach my $f (@$files) {
+			$sz += $f->[7];
+			$sz += &ftp_encrypted_deletefile(
+				$host, "$file/$f->[13]", $err,
+				$user, $pass, $port);
+			last if ($err && $$err);
+			}
+		&ftp_encrypted_onecommand($host, "RMD $file", $err,
+					  $user, $pass, $port);
+		}
+	}
+else {
+	# Just delete the file
+	&ftp_encrypted_onecommand($host, "DELE $file", $err,
+				  $user, $pass, $port);
+	}
+return $sz;
+}
+
 # ftp_encrypted_download(..)
-# Takes the same parameters as ftp_download, but uses an encrypted control 
-# connection
+# Takes the same parameters as ftp_download, but requires an encrypted
+# connection.
 sub ftp_encrypted_download
 {
 my ($host, $file, $dest, $error, $cbfunc, $user, $pass, $port, $nocache) = @_;
 if (!&has_command("curl")) {
 	my $msg = "The curl command is needed for encrypted FTP downloads";
 	if ($error) { $$error = $msg; return }
-	else { &error($error); }
+	else { &error($msg); }
 	}
-my $cmd = "curl --ftp-ssl-control -k";
+my $cmd = "curl --ssl-reqd -k -sS";
 if ($user) {
 	$cmd .= " -u ".quotemeta($user).":".quotemeta($pass);
 	}
 if (!ref($dest)) {
 	$cmd .= " -o ".quotemeta($dest);
 	}
-my $url = "ftp://".$host.($port ? ":".$port : "").$file;
+my $url = &ftp_encrypted_url($host, $file, $port);
 $cmd .= " ".quotemeta($url);
 my $errtemp = &transname();
 if (ref($dest)) {
@@ -332,4 +503,3 @@ return 1;
 }
 
 1;
-

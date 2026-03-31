@@ -345,10 +345,13 @@ foreach my $desturl (@$desturls) {
 		}
 
 	&$first_print(&text('backup_desttest', &nice_backup_url($desturl)));
-	if ($mode == 1) {
+	if ($mode == 1 || $mode == 14) {
 		# Try FTP login
+		my $ftpfunc = $mode == 14
+			? \&ftp_encrypted_onecommand
+			: \&ftp_onecommand;
 		local $ftperr;
-		&ftp_onecommand($server, "PWD", \$ftperr, $user, $pass, $port);
+		&$ftpfunc($server, "PWD", \$ftperr, $user, $pass, $port);
 		if ($ftperr) {
 			$ftperr =~ s/\Q$pass\E/$starpass/g;
 			&$second_print(&text('backup_eftptest', $ftperr));
@@ -368,8 +371,8 @@ foreach my $desturl (@$desturls) {
 				local $makepath = $prefix.
 						  join("/", @makepath[0..$i]);
 				local $mkdirerr;
-				&ftp_onecommand($server, "MKD $makepath",
-					\$mkdirerr, $user, $pass, $port);
+				&$ftpfunc($server, "MKD $makepath",
+					  \$mkdirerr, $user, $pass, $port);
 				$mkdirerr =~ s/\Q$pass\E/$starpass/g;
 				}
 			}
@@ -1100,20 +1103,23 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 						if (!$err);
 					}
 				}
-			elsif ($mode == 1) {
+			elsif ($mode == 1 || $mode == 14) {
 				# Via FTP
+				my $upfunc = $mode == 14
+					? \&ftp_encrypted_tryload
+					: \&ftp_tryload;
 				&$first_print(&text('backup_upload',
 						    "<tt>$server</tt>"));
-				&ftp_tryload($server, "$path/$df", "$dest/$df",
-					    \$err, undef, $user, $pass, $port,
-					    $ftp_upload_tries);
-				&ftp_tryload($server, "$path/$df.info",
-					    $infotemp, \$err, undef, $user,
-					    $pass, $port, $ftp_upload_tries)
+				&$upfunc($server, "$path/$df", "$dest/$df",
+					 \$err, undef, $user, $pass, $port,
+					 $ftp_upload_tries);
+				&$upfunc($server, "$path/$df.info",
+					 $infotemp, \$err, undef, $user,
+					 $pass, $port, $ftp_upload_tries)
 						if (!$err);
-				&ftp_tryload($server, "$path/$df.dom",
-					    $domtemp, \$err, undef, $user,
-					    $pass, $port, $ftp_upload_tries)
+				&$upfunc($server, "$path/$df.dom",
+					 $domtemp, \$err, undef, $user,
+					 $pass, $port, $ftp_upload_tries)
 						if (!$err);
 				$err =~ s/\Q$pass\E/$starpass/g;
 				}
@@ -1517,8 +1523,11 @@ $sz += $transferred_sz;
 foreach my $desturl (@$desturls) {
 	local ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
-	if ($ok && $mode == 1 && (@destfiles || !$dirfmt)) {
+	if ($ok && ($mode == 1 || $mode == 14) && (@destfiles || !$dirfmt)) {
 		# Upload file(s) to FTP server
+		my $upfunc = $mode == 14
+			? \&ftp_encrypted_tryload
+			: \&ftp_tryload;
 		&$first_print(&text('backup_upload', "<tt>$server</tt>"));
 		local $err;
 		local $infotemp = &transname();
@@ -1538,17 +1547,17 @@ foreach my $desturl (@$desturls) {
 					    &serialise_variable($binfo));
 				&uncat_file($domtemp,
 					    &serialise_variable($bdom));
-				&ftp_tryload($server, "$path/$df", "$dest/$df",
-					    \$err, undef, $user, $pass, $port,
-					    $ftp_upload_tries);
-				&ftp_tryload($server, "$path/$df.info",
-					    $infotemp, \$err,
-					    undef, $user, $pass, $port,
-					    $ftp_upload_tries) if (!$err);
-				&ftp_tryload($server, "$path/$df.dom",
-					    $domtemp, \$err,
-					    undef, $user, $pass, $port,
-					    $ftp_upload_tries) if (!$err);
+				&$upfunc($server, "$path/$df", "$dest/$df",
+					 \$err, undef, $user, $pass, $port,
+					 $ftp_upload_tries);
+				&$upfunc($server, "$path/$df.info",
+					 $infotemp, \$err,
+					 undef, $user, $pass, $port,
+					 $ftp_upload_tries) if (!$err);
+				&$upfunc($server, "$path/$df.dom",
+					 $domtemp, \$err,
+					 undef, $user, $pass, $port,
+					 $ftp_upload_tries) if (!$err);
 				if ($err) {
 					$err =~ s/\Q$pass\E/$starpass/g;
 					&$second_print(
@@ -1571,14 +1580,14 @@ foreach my $desturl (@$desturls) {
 				    &serialise_variable(\%donefeatures));
 			&uncat_file($domtemp,
 				    &serialise_variable(\%donedoms));
-			&ftp_tryload($server, $path, $dest, \$err, undef, $user,
-				    $pass, $port, $ftp_upload_tries);
-			&ftp_tryload($server, $path.".info", $infotemp, \$err,
-				    undef, $user, $pass, $port,
-				    $ftp_upload_tries) if (!$err);
-			&ftp_tryload($server, $path.".dom", $domtemp, \$err,
-				    undef, $user, $pass, $port,
-				    $ftp_upload_tries) if (!$err);
+			&$upfunc($server, $path, $dest, \$err, undef, $user,
+				 $pass, $port, $ftp_upload_tries);
+			&$upfunc($server, $path.".info", $infotemp, \$err,
+				 undef, $user, $pass, $port,
+				 $ftp_upload_tries) if (!$err);
+			&$upfunc($server, $path.".dom", $domtemp, \$err,
+				 undef, $user, $pass, $port,
+				 $ftp_upload_tries) if (!$err);
 			if ($err) {
 				$err =~ s/\Q$pass\E/$starpass/g;
 				&$second_print(&text('backup_uploadfailed',
@@ -2153,7 +2162,7 @@ if ($mode == 0) {
 local $starpass = "*" x length($pass);
 if ($mode > 0) {
 	# Need to download to temp file/directory first
-	&$first_print($mode == 1 ? $text{'restore_download'} :
+	&$first_print($mode == 1 || $mode == 14 ? $text{'restore_download'} :
 		      $mode == 3 ? $text{'restore_downloads3'} :
 		      $mode == 6 ? $text{'restore_downloadrs'} :
 		      $mode == 7 ? $text{'restore_downloadgc'} :
@@ -3836,18 +3845,27 @@ if ($cache && -r $cache && !$infoonly) {
 	}
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($url);
 local $sfx = $infoonly == 1 ? ".info" : $infoonly == 2 ? ".dom" : "";
-if ($mode == 1) {
+if ($mode == 1 || $mode == 14) {
 	# Download from FTP server
+	my $cmdfunc = $mode == 14
+		? \&ftp_encrypted_onecommand
+		: \&ftp_onecommand;
+	my $listfunc = $mode == 14
+		? \&ftp_encrypted_listdir
+		: \&ftp_listdir;
+	my $downfunc = $mode == 14
+		? \&ftp_encrypted_download
+		: \&ftp_download;
 	local $cwderr;
-	local $isdir = &ftp_onecommand($server, "CWD $path", \$cwderr,
-				       $user, $pass, $port);
+	local $isdir = &$cmdfunc($server, "CWD $path", \$cwderr,
+				 $user, $pass, $port);
 	local $err;
 	if ($isdir) {
 		# Need to download entire directory.
 		# In info-only mode, skip files that don't end with .info / .dom
 		&make_dir($temp, 0711);
-		local $list = &ftp_listdir($server, $path, \$err, $user, $pass,
-					   $port);
+		local $list = &$listfunc($server, $path, \$err, $user, $pass,
+					 $port);
 		return $err if (!$list);
 		foreach $f (@$list) {
 			$f =~ s/^$path[\\\/]//;
@@ -3858,16 +3876,16 @@ if ($mode == 1) {
 				# Make sure file is for a domain we want
 				next if (&indexof($1, @$domnames) < 0);
 				}
-			&ftp_download($server, "$path/$f", "$temp/$f", \$err,
-				      undef, $user, $pass, $port, 1);
+			&$downfunc($server, "$path/$f", "$temp/$f", \$err,
+				   undef, $user, $pass, $port, 1);
 			return $err if ($err);
 			}
 		}
 	else {
 		# Can just download a single file.
 		# In info-only mode, just get the .info and .dom files.
-		&ftp_download($server, $path.$sfx,
-			      $temp, \$err, undef, $user, $pass, $port, 1);
+		&$downfunc($server, $path.$sfx,
+			   $temp, \$err, undef, $user, $pass, $port, 1);
 		return $err if ($err);
 		}
 	}
@@ -4252,17 +4270,24 @@ return $rv;
 # Converts a URL like ftp:// or a filename into its components. These will be
 # protocol (1 for FTP, 2 for SSH, 0 for local, 3 for S3, 4 for download,
 # 5 for upload, 6 for rackspace, 7 for GCS, 8 for Dropbox, 9 for Webmin,
-# 10 for Backblaze, 11 for Azure, 12 for Drive, 13 for SFTP), login, password,
-# host, path and port
+# 10 for Backblaze, 11 for Azure, 12 for Drive, 13 for SFTP, 14 for FTPS),
+# login, password, host, path and port
 sub parse_backup_url
 {
 my ($url) = @_;
 my @rv;
 my $defs3 = &get_default_s3_account();
-if ($url =~ /^ftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
-    $url =~ /^ftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
-    $url =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
-    $url =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
+if ($url =~ /^ftps:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
+    $url =~ /^ftps:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
+    $url =~ /^ftps:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
+    $url =~ /^ftps:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
+	# FTP over TLS URL
+	@rv = (14, $1, $2, $3, $5, $4 ? substr($4, 1) : 21);
+	}
+elsif ($url =~ /^ftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
+       $url =~ /^ftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
+       $url =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
+       $url =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
 	# FTP URL
 	@rv = (1, $1, $2, $3, $5, $4 ? substr($4, 1) : 21);
 	}
@@ -4436,6 +4461,20 @@ elsif ($mode == 1) {
 		}
 	$rv .= $path;
 	}
+elsif ($mode == 14) {
+	# FTP server over TLS
+	$rv .= "ftps://".$user.":".$pass."\@";
+	if (&check_ip6address($host)) {
+		$rv .= "[".$host."]";
+		}
+	else {
+		$rv .= $host;
+		}
+	if ($port != 21) {
+		$rv .= ":".$port;
+		}
+	$rv .= $path;
+	}
 elsif ($mode == 2) {
 	# SSH server
 	$rv .= "ssh://".$user.":".$pass."\@";
@@ -4560,6 +4599,15 @@ if ($proto == 1) {
 		}
 	else {
 		$rv = &text('backup_niceftp', "<tt>$path</tt>", "<tt>$host</tt>");
+		}
+	}
+elsif ($proto == 14) {
+	# FTP server over TLS
+	if ($name_only) {
+		$rv = $text{'backup_niceftpst'};
+		}
+	else {
+		$rv = &text('backup_niceftps', "<tt>$path</tt>", "<tt>$host</tt>");
 		}
 	}
 elsif ($proto == 2) {
@@ -4780,6 +4828,8 @@ sub show_backup_destination
 local ($name, $value, $nolocal, $d, $nodownload, $noupload, $remove,
        $sched) = @_;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($value);
+local $ftptls = $mode == 14;
+$mode = 1 if ($ftptls);
 $mode = 1 if (!$value && $nolocal);	# Default to FTP
 local $defport = $mode == 1 ? 21 :
 		 $mode == 2 ? 22 :
@@ -4848,6 +4898,9 @@ $ft .= "<tr> <td>$text{'backup_login'}</td> <td>".
 $ft .= "<tr> <td>$text{'backup_pass'}</td> <td>".
        &ui_password($name."_pass", $mode == 1 ? $pass : undef, 15,
 		   0, undef, $noac).
+       "</td> </tr>\n";
+$ft .= "<tr> <td></td> <td>".
+       &ui_checkbox($name."_tls", 1, $text{'backup_ftptls'}, $ftptls).
        "</td> </tr>\n";
 $ft .= "</table>\n";
 push(@opts, [ 1, $text{'backup_mode1'}, $ft ]);
@@ -5101,8 +5154,9 @@ elsif ($mode == 1) {
 		$in{$name."_path"} =~ s/\/+$//;
 		}
 	local $sep = $in{$name."_path"} =~ /^\// ? "" : ":";
-	return "ftp://".$in{$name."_user"}.":".$in{$name."_pass"}."\@".
-	       $in{$name."_server"}.$sep.$in{$name."_path"};
+	local $proto = $in{$name."_tls"} ? "ftps" : "ftp";
+	return $proto."://".$in{$name."_user"}.":".$in{$name."_pass"}.
+	       "\@".$in{$name."_server"}.$sep.$in{$name."_path"};
 	}
 elsif ($mode == 2) {
 	# SSH server
@@ -5751,14 +5805,16 @@ sub extract_purge_path
 {
 local ($dest) = @_;
 local ($mode, undef, undef, $host, $path) = &parse_backup_url($dest);
-if (($mode == 0 || $mode == 1 || $mode == 2 || $mode == 9 || $mode == 13) &&
+if (($mode == 0 || $mode == 1 || $mode == 2 || $mode == 9 ||
+     $mode == 13 || $mode == 14) &&
     $path =~ /^(\S+)\/([^%]*%.*)$/) {
 	# Local, FTP, SSH or Webmin file like /backup/%d-%m-%Y
 	local ($base, $date) = ($1, $2);
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
 	}
-elsif (($mode == 1 || $mode == 2 || $mode == 9 || $mode == 13) &&
+elsif (($mode == 1 || $mode == 2 || $mode == 9 ||
+	$mode == 13 || $mode == 14) &&
        $path =~ /^([^%\/]+%.*)$/) {
 	# FTP, SSH or Webmin file like backup-%d-%m-%Y
 	local ($base, $date) = ("", $1);
@@ -5918,10 +5974,16 @@ if ($mode == 0) {
 	closedir(PURGEDIR);
 	}
 
-elsif ($mode == 1) {
+elsif ($mode == 1 || $mode == 14) {
 	# List parent directory via FTP
+	my $listfunc = $mode == 14
+		? \&ftp_encrypted_listdir
+		: \&ftp_listdir;
+	my $delfunc = $mode == 14
+		? \&ftp_encrypted_deletefile
+		: \&ftp_deletefile;
 	local $err;
-	local $dir = &ftp_listdir($host, $base, \$err, $user, $pass, $port, 1);
+	local $dir = &$listfunc($host, $base, \$err, $user, $pass, $port, 1);
 	if ($err) {
 		&$second_print(&text('backup_purgeelistdir', $err));
 		return 0;
@@ -5955,14 +6017,14 @@ elsif ($mode == 1) {
 					    "<tt>$base/$f->[13]</tt>", $old));
 			local $err;
 			local $sz = $f->[7];
-			$sz += &ftp_deletefile($host, "$base/$f->[13]",
-					       \$err, $user, $pass, $port);
+			$sz += &$delfunc($host, "$base/$f->[13]",
+					 \$err, $user, $pass, $port);
 			local $infoerr;
-			&ftp_deletefile($host, "$base/$f->[13].info",
-					\$infoerr, $user, $pass, $port);
+			&$delfunc($host, "$base/$f->[13].info",
+				  \$infoerr, $user, $pass, $port);
 			local $domerr;
-			&ftp_deletefile($host, "$base/$f->[13].dom",
-					\$domerr, $user, $pass, $port);
+			&$delfunc($host, "$base/$f->[13].dom",
+				  \$domerr, $user, $pass, $port);
 			if ($err) {
 				&$second_print(&text('backup_edelftp', $err));
 				$ok = 0;
@@ -7318,9 +7380,12 @@ foreach my $sfx ("", ".info", ".dom") {
 			$err = &unlink_logged($spath) ? undef : $!;
 			}
 		}
-	elsif ($proto == 1) {
+	elsif ($proto == 1 || $proto == 14) {
 		# FTP server
-		&ftp_deletefile($host, $path, \$err, $user, $pass, $port);
+		my $delfunc = $proto == 14
+			? \&ftp_encrypted_deletefile
+			: \&ftp_deletefile;
+		&$delfunc($host, $spath, \$err, $user, $pass, $port);
 		}
 	elsif ($proto == 2) {
 		# SSH server
@@ -7654,4 +7719,3 @@ return grep { !$rm{$_} } @features;
 }
 
 1;
-
