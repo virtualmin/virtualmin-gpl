@@ -3023,8 +3023,12 @@ if (!$encpass && $plainpass) {
 if (&mysql_supports_grants($d, $ver, $variant)) {
 	# Need to use new 'create user' command
 	if ($plainpass) {
-		# Plaintext password available - use BY 'plaintext' syntax
-		# (works for both MySQL 8+ and MariaDB 10.4+)
+		# MariaDB requires using WITH an explicit plugin, while MySQL
+		# accepts IDENTIFIED WITH ... BY 'plaintext'.
+		if ($variant eq "mariadb" && $plugin) {
+			return ("create user '$user'\@'$host' identified".
+				"${plugin} using $encpass");
+			}
 		return ("create user '$user'\@'$host' identified".
 			($plugin || "")." by '".
 			&mysql_escape($plainpass)."'");
@@ -3144,10 +3148,16 @@ my $gsql = sub {
 	my $plugin = &format_mysql_plugin_clause($variant, $auth_plugin);
 	if ($mysql_mariadb_with_auth_string) {
 		if ($plainpass) {
-			$sql = "alter user '$user'\@'$host' identified".
-			       ($plugin || "")." by '".
-			       &mysql_escape($plainpass)."'";
-			} 
+			if ($variant eq "mariadb" && $plugin) {
+				$sql = "alter user '$user'\@'$host' identified".
+				       "${plugin} using $encpass";
+				}
+			else {
+				$sql = "alter user '$user'\@'$host' identified".
+				       ($plugin || "")." by '".
+				       &mysql_escape($plainpass)."'";
+				}
+			}
 		else {
 			$sql = "update user set authentication_string = $encpass where user = '$user' and host = '$host'";
 			$flush++;
