@@ -4009,6 +4009,8 @@ $ssh_backup_prefix = "ssh://$test_target_domain_user:smeg\@localhost".
 		     $remote_backup_dir;
 $ftp_backup_prefix = "ftp://$test_target_domain_user:smeg\@localhost".
 		     $remote_backup_dir;
+$ftps_backup_prefix = "ftps://$test_target_domain_user:smeg\@localhost".
+		      $remote_backup_dir;
 $sftp_backup_prefix = "sftp://$test_target_domain_user:smeg\@localhost".
 		      $remote_backup_dir;
 
@@ -5675,6 +5677,34 @@ $purge_tests = [
 		      [ 'dest', $ftp_backup_prefix.'/%Y-%m-%d' ] ],
 	  'grep' => 'Deleting FTP file',
 	},
+
+	# Backup via FTPS to a date-based directory that is a lie
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', "$ftps_backup_prefix/ftps/1973-12-12" ] ],
+	},
+
+	# Fake the time on that directory
+	{ 'command' => "perl -e 'utime(124531200, 124531200,
+		       \"$remote_backup_dir/ftps/1973-12-12\")'"
+	},
+
+	# Do another FTPS strftime-format backup with purging
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'strftime' ],
+		      [ 'purge', 30 ],
+		      [ 'dest', $ftps_backup_prefix.'/ftps/%Y-%m-%d' ] ],
+	  'grep' => 'Deleting FTP file',
+	},
+
+	# Make sure the right dir got deleted
+	{ 'command' => 'ls -ld '.$remote_backup_dir.'/ftps/1973-12-12',
+	  'fail' => 1 },
 
 	# Finally delete to clean up
 	{ 'command' => 'delete-domain.pl',

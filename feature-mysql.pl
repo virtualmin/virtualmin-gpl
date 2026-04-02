@@ -1267,7 +1267,7 @@ if ($allopts->{'repl'} && $mymod->{'config'}->{'host'} && $info{'remote'} &&
 	}
 
 # For DBs that exist already, save their user lists for later restore
-local (%userdbs, %userpasses);
+local (%userdbs, %userpasses, %userplugins);
 foreach my $db (&domain_databases($d, [ 'mysql' ])) {
 	foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
 		if ($u->[0] ne $d->{'user'} &&
@@ -1275,6 +1275,8 @@ foreach my $db (&domain_databases($d, [ 'mysql' ])) {
 		    $u->[0] ne $mymod->{'config'}->{'login'}) {
 			push(@{$userdbs{$u->[0]}}, $db->{'name'});
 			$userpasses{$u->[0]} = $u->[1];
+			$userplugins{$u->[0]} ||= &get_mysql_user_plugin(
+				$d, $u->[0]);
 			}
 		}
 	}
@@ -1385,7 +1387,8 @@ foreach my $uname (keys %userdbs) {
 	my @grant = grep { $created{$_} } @{$userdbs{$uname}};
 	if (@grant) {
 		&create_mysql_database_user($d, \@grant, $uname, undef,
-					    $userpasses{$uname});
+					    $userpasses{$uname},
+					    $userplugins{$uname});
 		}
 	}
 
@@ -1953,11 +1956,12 @@ else {
 	}
 }
 
-# create_mysql_database_user(&domain, &dbs, username, plain-pass, [enc-pass])
+# create_mysql_database_user(&domain, &dbs, username, plain-pass, [enc-pass],
+#			     [auth-plugin])
 # Adds one mysql user, who can access multiple databases
 sub create_mysql_database_user
 {
-local ($d, $dbs, $user, $pass, $encpass) = @_;
+local ($d, $dbs, $user, $pass, $encpass, $auth_plugin) = @_;
 &require_mysql();
 &obtain_lock_mysql($d);
 if ($d->{'provision_mysql'}) {
@@ -1988,7 +1992,7 @@ else {
 		&execute_user_deletion_sql($d, $h, $user);
 		&execute_user_creation_sql($d, $h, $myuser, 
 		      $encpass ? "'".&mysql_escape($encpass)."'" :undef,
-		      $pass);
+		      $pass, $auth_plugin);
 		local $db;
 		foreach $db (@$dbs) {
 			&create_mysql_db_grant($d, $h, $db, $myuser);
@@ -2538,11 +2542,12 @@ else {
 			}
 		my $plainpass = $u->[0] eq &mysql_user($d) ?
 					&mysql_pass($d) : undef;
+		my $auth_plugin = &get_mysql_user_plugin($d, $u->[0]);
 		foreach my $h (@$hosts) {
 			next if (&indexof($h, @$gothosts) >= 0);
 			&execute_user_creation_sql($d, $h, $u->[0],
 				"'".&mysql_escape($u->[1])."'",
-				$plainpass);
+				$plainpass, $auth_plugin);
 			}
 		}
 
@@ -2888,12 +2893,14 @@ elsif ($size eq "huge") {
 return ( );
 }
 
-# execute_user_creation_sql(&domain, host, user, password-sql, plain-pass)
+# execute_user_creation_sql(&domain, host, user, password-sql, plain-pass,
+#			    [auth-plugin])
 # Create a MySQL user and set his password
 sub execute_user_creation_sql
 {
-my ($d, $host, $user, $encpass, $plainpass) = @_;
-foreach my $sql (&get_user_creation_sql($d, $host, $user, $encpass, $plainpass)) {
+my ($d, $host, $user, $encpass, $plainpass, $auth_plugin) = @_;
+foreach my $sql (&get_user_creation_sql($d, $host, $user, $encpass,
+					$plainpass, $auth_plugin)) {
 	if ($sql =~ /^set\s+password/) {
 		&execute_set_password_sql($d, $sql, $host);
 		}
@@ -2998,13 +3005,16 @@ else {
 	}
 }
 
-# get_user_creation_sql(&domain, host, user, password-sql, plain-pass)
+# get_user_creation_sql(&domain, host, user, password-sql, plain-pass,
+#		       [auth-plugin])
 # Returns SQL to add a user, with SSL fields if needed
 sub get_user_creation_sql
 {
-my ($d, $host, $user, $encpass, $plainpass) = @_;
+my ($d, $host, $user, $encpass, $plainpass, $auth_plugin) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-my $plugin = &get_mysql_plugin($d);
+my $plugin = defined($auth_plugin)
+	? &format_mysql_plugin_clause($variant, $auth_plugin)
+	: &get_mysql_plugin($d);
 
 # Hash password for setting
 if (!$encpass && $plainpass) {
@@ -3013,9 +3023,14 @@ if (!$encpass && $plainpass) {
 if (&mysql_supports_grants($d, $ver, $variant)) {
 	# Need to use new 'create user' command
 	if ($plainpass) {
-		# Plaintext password available - use BY 'plaintext' syntax
-		# (works for both MySQL 8+ and MariaDB 10.4+)
-		return ("create user '$user'\@'$host' identified $plugin by '".
+		# MariaDB requires using WITH an explicit plugin, while MySQL
+		# accepts IDENTIFIED WITH ... BY 'plaintext'.
+		if ($variant eq "mariadb" && $plugin) {
+			return ("create user '$user'\@'$host' identified".
+				"${plugin} using $encpass");
+			}
+		return ("create user '$user'\@'$host' identified".
+			($plugin || "")." by '".
 			&mysql_escape($plainpass)."'");
 		}
 	elsif ($variant eq "mysql") {
@@ -3023,19 +3038,20 @@ if (&mysql_supports_grants($d, $ver, $variant)) {
 		# MySQL 8 removed 'IDENTIFIED BY PASSWORD' syntax entirely
 		my $auth_plugin = $plugin;
 		if (!$auth_plugin) {
-			# Fallback if default_authentication_plugin var
-			# was not found (renamed in 8.0.27+)
-			$auth_plugin = " with caching_sha2_password ";
+			# Last-resort fallback when the server default cannot be
+			# determined.
+			$auth_plugin = &format_mysql_plugin_clause(
+				$variant, "caching_sha2_password");
 			}
 		return ("create user '$user'\@'$host' identified".
-			"${auth_plugin}as $encpass");
+			"${auth_plugin} as $encpass");
 		}
 	else {
 		# MariaDB 10.4+ with pre-hashed password
 		if ($plugin) {
 			# Has plugin - use USING keyword for hashed
 			return ("create user '$user'\@'$host' identified".
-				"${plugin}using $encpass");
+				"${plugin} using $encpass");
 			}
 		else {
 			# No plugin specified - use BY PASSWORD syntax
@@ -3121,19 +3137,27 @@ if (!$encpass && $plainpass) {
 	}
 my $error;
 my $flush;
-my $plugin;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my $mysql_mariadb_with_auth_string = 
    $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0 ||
    $variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0;
 my $gsql = sub {
-	my ($host, $plugin) = @_;
+	my ($host, $auth_plugin) = @_;
 	my $sql;
 	my $flush;
+	my $plugin = &format_mysql_plugin_clause($variant, $auth_plugin);
 	if ($mysql_mariadb_with_auth_string) {
 		if ($plainpass) {
-			$sql = "alter user '$user'\@'$host' identified $plugin by '".&mysql_escape($plainpass)."'";
-			} 
+			if ($variant eq "mariadb" && $plugin) {
+				$sql = "alter user '$user'\@'$host' identified".
+				       "${plugin} using $encpass";
+				}
+			else {
+				$sql = "alter user '$user'\@'$host' identified".
+				       ($plugin || "")." by '".
+				       &mysql_escape($plainpass)."'";
+				}
+			}
 		else {
 			$sql = "update user set authentication_string = $encpass where user = '$user' and host = '$host'";
 			$flush++;
@@ -3149,7 +3173,9 @@ if ($direct) {
 	# Run the SQL directly using the "mysql" command rather than via any
 	# DBI connection
 	my $sql;
-	($sql) = &$gsql('localhost');
+	($sql) = &$gsql('localhost',
+			&get_mysql_user_plugin($d, $user, 'localhost') ||
+			&get_mysql_default_plugin_name($d));
 	my $cmd = $mysql::config{'mysql'} || 'mysql';
 	my $out = &backquote_command(quotemeta($cmd)." -D ".
 			quotemeta($mysql::master_db)." -e ".
@@ -3164,9 +3190,6 @@ else {
 	my $rv = &execute_dom_sql($d, $mysql::master_db,
 			"select host from user where user = ?", $user);
 
-	# Get authentication plugin
-	$plugin = &get_mysql_plugin($d);
-
 	# It is needed to run flush privileges to avoid
 	# an error as in virtualmin/virtualmin-gpl#213
 	&execute_dom_sql($d, $mysql::master_db, "flush privileges");
@@ -3175,7 +3198,10 @@ else {
 	foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 		# Get the right SQL query first
 		my $sql;
-		($sql, $flush) = &$gsql($host, $plugin);
+		($sql, $flush) = &$gsql(
+			$host,
+			&get_mysql_user_plugin($d, $user, $host) ||
+			&get_mysql_default_plugin_name($d));
 
 		# Execute SQL finally
 		if ($sql =~ /^set\s+password/) {
@@ -3663,21 +3689,89 @@ my ($def) = grep { $_->{'config'}->{'virtualmin_default'} }
 return $def ? $def->{'minfo'}->{'dir'} : 'mysql';
 }
 
-# get_mysql_plugin(&domain)
-# Returns the name of the default plugin used by MySQL
-sub get_mysql_plugin
+# get_mysql_default_plugin_name(&domain)
+# Returns the default authentication plugin used for new MySQL accounts, if
+# it can be determined from the server.
+sub get_mysql_default_plugin_name
 {
 my ($d) = @_;
 &require_mysql();
-my $rv = &execute_dom_sql($d, $mysql::master_db,
-        "show variables LIKE '%default_authentication_plugin%'");
-my $plugin = $rv->{'data'}->[0]->[1];
-if ($plugin) {
-	my (undef, $variant) = &get_dom_remote_mysql_version($d);
-	my $keyword = $variant eq "mariadb" ? 'via' : 'with';
-	$plugin = " $keyword $plugin ";
+my (undef, $variant) = &get_dom_remote_mysql_version($d);
+
+my $plugin;
+foreach my $sql ("show variables like 'default_authentication_plugin'",
+		 $variant eq "mysql"
+		  ? "show variables like 'authentication_policy'" : ()) {
+	my $rv;
+	eval {
+		local $main::error_must_die = 1;
+		$rv = &execute_dom_sql($d, $mysql::master_db, $sql);
+		};
+	next if ($@ || !$rv || !@{$rv->{'data'}});
+	my $value = $rv->{'data'}->[0]->[1];
+	next if (!defined($value) || $value eq '');
+	if ($sql =~ /authentication_policy/) {
+		my ($factor1) = split(/\s*,\s*/, $value);
+		next if (!defined($factor1) || $factor1 eq '');
+		$plugin = $factor1 eq '*' ? 'caching_sha2_password' : $factor1;
+		}
+	else {
+		$plugin = $value;
+		}
+	last if ($plugin);
 	}
 return $plugin;
+}
+
+# format_mysql_plugin_clause(mysql-variant, plugin-name)
+# Returns the IDENTIFIED clause fragment for some authentication plugin.
+sub format_mysql_plugin_clause
+{
+my ($variant, $plugin) = @_;
+return undef if (!defined($plugin) || $plugin eq '');
+my $keyword = $variant eq "mariadb" ? 'via' : 'with';
+return " $keyword $plugin";
+}
+
+# get_mysql_plugin(&domain)
+# Returns the IDENTIFIED clause fragment for the default plugin used by MySQL.
+sub get_mysql_plugin
+{
+my ($d) = @_;
+my (undef, $variant) = &get_dom_remote_mysql_version($d);
+return &format_mysql_plugin_clause($variant,
+				   &get_mysql_default_plugin_name($d));
+}
+
+# get_mysql_user_plugin(&domain, user, [host])
+# Returns the plugin for an existing MySQL user. Without a host, a plugin is
+# only returned if it is the same for all of the user's host entries.
+sub get_mysql_user_plugin
+{
+my ($d, $user, $host) = @_;
+&require_mysql();
+my $rv;
+eval {
+	local $main::error_must_die = 1;
+	if (defined($host)) {
+		$rv = &execute_dom_sql($d, $mysql::master_db,
+			"select plugin from user where user = ? and host = ?",
+			$user, $host);
+		}
+	else {
+		$rv = &execute_dom_sql($d, $mysql::master_db,
+			"select distinct plugin from user where user = ?",
+			$user);
+		}
+	};
+return undef if ($@ || !$rv || !@{$rv->{'data'}});
+if (defined($host)) {
+	return $rv->{'data'}->[0]->[0];
+	}
+my @plugins = grep { defined($_) && $_ ne '' }
+		   map { $_->[0] } @{$rv->{'data'}};
+@plugins = &unique(@plugins);
+return @plugins == 1 ? $plugins[0] : undef;
 }
 
 # move_mysql_server(&domain, new-mysql-module)
@@ -3835,4 +3929,3 @@ return $variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 $done_feature_script{'mysql'} = 1;
 
 1;
-
