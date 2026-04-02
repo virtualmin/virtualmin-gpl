@@ -25,8 +25,6 @@ if (!$serial || !$key) {
 	}
 # New API call using POST
 my $params = 'id='.&urlize($hostid).'&serial='.&urlize($key);
-&post_http_connection($post_details, $virtualmin_licence_page, $params,
-		      \$out, \$error, undef, undef, undef, undef, 10);
 &http_post($virtualmin_host_domain, $virtualmin_licence_port, $virtualmin_licence_page,
 	   $params, \$out, \$error, undef, $virtualmin_licence_ssl, undef, undef, 10);
 if ($error) {
