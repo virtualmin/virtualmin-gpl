@@ -1312,6 +1312,7 @@ edit_subdom=Create Sub-Domain
 edit_subdomdesc=Add a virtual server that is a sub-domain of $1, and uses a sub-directory of this server's web directory for its website.
 edit_aliasto=Alias of server
 edit_aliasmail=With own email
+edit_aliasredir=Redirect alias domain to target?
 edit_aliasdoms=Aliases for this server
 edit_subdoms=Sub-servers owned by this server
 edit_bw=Bandwidth limit
@@ -1630,6 +1631,8 @@ save_installed_scripts_err_file_write=.. failed : could not write <tt>$1</tt> fi
 save_installed_scripts_done=.. done for <tt>$1</tt> file
 save_protected0=Disabling safeguard protection ..
 save_protected1=Enabling safeguard protection ..
+save_aliasredir0=Disabling redirect to target domain ..
+save_aliasredir1=Enabling redirect to target domain ..
 
 luser_err=Failed to save local user
 luser_etaken=A user with the same name already exists

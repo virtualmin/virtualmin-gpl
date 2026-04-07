@@ -63,6 +63,11 @@ To specify an alias server that will be used for any links inside Virtualmin
 to this server, use the C<--link-domain> flag followed by a domain name. To
 revert to the normal behavior, use C<--no-link-domain>.
 
+Similarly, for alias domains you can configure a redirect to the target
+domain with the C<--alias-redirect> flag. Or to return to the regular
+alias behavior where the target's content is served by the alias domain,
+use C<--no-alias-redirect>.
+
 By default, virtual server plan changes that modify features will be blocked
 if any warnings are detected, such as an existing database or SSL certificate
 conflict. These can be overridden with the C<--skip-warnings> flag.
@@ -299,6 +304,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-link-domain") {
 		$linkdname = "";
 		}
+	elsif ($a eq "--alias-redirect") {
+		$aliasredir = 1;
+		}
+	elsif ($a eq "--no-alias-redirect") {
+		$aliasredir = 0;
+		}
 	elsif ($a eq "--apply-quotas") {
 		$applyquotas = 1;
 		}
@@ -471,6 +482,11 @@ if ($linkdname) {
 	$linkd || &usage("Link domain $linkdname does not exist");
 	$linkd->{'alias'} eq $dom->{'id'} || 
 	    &usage("Link domain $linkdname is not an alias of this domain");
+	}
+if (defined($aliasredir)) {
+	$dom->{'alias'} || &usage("Alias redirect mode can only be changed for alias domains");
+	&domain_has_website($dom) && &has_web_redirects($dom) ||
+		&usage("Website redirects are not supported for this alias domain");
 	}
 
 if ($no2fa) {
@@ -857,6 +873,26 @@ for(my $i=0; $i<@doms; $i++) {
 	&$second_print($text{'setup_done'});
 	}
 
+# Update alias redirect mode
+if (defined($aliasredir)) {
+	my $oldaliasredir = &get_alias_redirect($dom);
+	$oldaliasredir = $dom->{'aliasredir'} if ($oldaliasredir < 0);
+	if ($oldaliasredir != $aliasredir) {
+		my $aliasdom = &get_domain($dom->{'alias'});
+		&lock_domain($dom);
+		&obtain_lock_web($aliasdom) if ($aliasdom);
+		&$first_print($aliasredir ? "Enabling redirect to target domain .."
+					  : "Disabling redirect to target domain ..");
+		my $err = &save_alias_redirect($dom, $aliasredir);
+		if (!$err) {
+			&save_domain($dom);
+			}
+		&release_lock_web($aliasdom) if ($aliasdom);
+		&unlock_domain($dom);
+		&$second_print($err ? ".. failed : $err" : $text{'setup_done'});
+		}
+	}
+
 # Apply exclude changes
 if (@add_excludes || @remove_excludes) {
 	&$first_print("Updating excluded directories ..");
@@ -1013,6 +1049,7 @@ print "                        [--dns-ip address | --no-dns-ip]\n";
 print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
 print "                        [--link-domain domain | --no-link-domain]\n";
+print "                        [--alias-redirect | --no-alias-redirect]\n";
 print "                        [--disable-2fa]\n";
 print "                        [--skip-warnings]\n";
 exit(1);
