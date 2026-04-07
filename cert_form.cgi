@@ -71,6 +71,15 @@ if (&domain_has_ssl_cert($d)) {
 
 	print &ui_table_start($text{'cert_header2'}, undef, 4);
 
+	# Pre-fetch cert data before File Manager module integration
+	# changes the effective UID as a side effect
+	$type = &get_ssl_key_type($d->{'ssl_key'}, $d->{'ssl_pass'});
+	$info = &cert_info($d);
+	$chain = &get_website_ssl_file($d, 'ca');
+	$chaininfo = $chain ? &cert_file_info($chain, $d) : undef;
+	@others = grep { &domain_has_ssl_cert($_) }
+		       &get_domain_by("ssl_same", $d->{'id'});
+
 	# Cert files
 	my @cert_files;
 	my $filemin_prefix;
@@ -139,16 +148,12 @@ if (&domain_has_ssl_cert($d)) {
 		}
 
 	# Cert hash type
-	$type = &get_ssl_key_type($d->{'ssl_key'}, $d->{'ssl_pass'});
 	if ($type) {
 		print &ui_table_row($text{'cert_hash'},
 			$text{'cert_type_'.$type} || uc($type));
 		}
 
 
-
-	$info = &cert_info($d);
-	$chain = &get_website_ssl_file($d, 'ca');
 	
 	foreach $i (@cert_attributes) {
 		next if ($i eq 'modulus' || $i eq 'exponent');
@@ -172,7 +177,7 @@ if (&domain_has_ssl_cert($d)) {
 
 		# Warn if the CA is wrong
 		if ($i eq 'type' && $chain) {
-			my $cainfo = &cert_file_info($chain);
+			my $cainfo = $chaininfo;
 			if ($cainfo &&
 			    ($cainfo->{'o'} ne $info->{'issuer_o'} ||
 			     $cainfo->{'cn'} ne $info->{'issuer_cn'})) {
@@ -187,8 +192,6 @@ if (&domain_has_ssl_cert($d)) {
 		}
 
 	# Other domains using same cert, such as via wildcards or UCC
-	@others = grep { &domain_has_ssl_cert($_) }
-		       &get_domain_by("ssl_same", $d->{'id'});
 	if (@others) {
 		my @links;
 		foreach my $d (@others) {
@@ -317,7 +320,7 @@ if (&domain_has_ssl_cert($d)) {
 	# CA cert details
 	if ($chain) {
 		my $ui_table_hr;
-		my $info = &cert_file_info($chain);
+		my $info = $chaininfo;
 		my @ca_cert_attributes = ('cn', 'notafter',
 		      grep { $_ ne 'cn' && $_ ne 'notafter' } @cert_attributes);
 		foreach $i (@ca_cert_attributes) {
