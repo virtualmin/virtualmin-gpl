@@ -55,7 +55,8 @@ if (!$gpgbad) {
 	$script_latest_sig = $script_latest_file."-sig.asc";
 	&http_download($script_latest_host, $script_latest_port,
 		       $script_latest_dir.$script_latest_sig,
-		       \$lsigstr, \$err, undef, 0, $user, $pass, 30, 0, 1);
+		       \$lsigstr, \$err, undef, $script_latest_ssl,
+		       $user, $pass, 30, 0, 1);
 	if ($err) {
 		if ($debug) {
 			print STDERR "Failed to fetch http://$script_latest_host$script_latest_dir$script_latest_sig : $err\n";
