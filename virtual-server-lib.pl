@@ -259,7 +259,8 @@ $osdn_website_host = "sourceforge.net";
 $osdn_website_port = 80;
 
 $script_latest_host = "latest-scripts.virtualmin.com";
-$script_latest_port = 80;
+$script_latest_port = 443;
+$script_latest_ssl = 1;
 if ($virtualmin_pro) {
 	$script_latest_dir = "/";
 	}

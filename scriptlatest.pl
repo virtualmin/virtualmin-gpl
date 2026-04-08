@@ -41,7 +41,8 @@ elsif ($debug) {
 # Try to fetch the scripts index
 &http_download($script_latest_host, $script_latest_port,
 	       $script_latest_dir.$script_latest_file,
-	       \$lstr, \$err, undef, 0, $user, $pass, 30, 0, 1);
+	       \$lstr, \$err, undef, $script_latest_ssl,
+	       $user, $pass, 30, 0, 1);
 if ($err) {
 	if ($debug) {
 		print STDERR "Failed to fetch http://$script_latest_host$script_latest_dir$script_latest_file : $err\n";
