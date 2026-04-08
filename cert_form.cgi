@@ -83,15 +83,22 @@ if (&domain_has_ssl_cert($d)) {
 	# Cert files
 	my @cert_files;
 	my $filemin_prefix;
+	my $filemin_get_allowed;
 	my @filemin_allowed;
 	my %filemin_acls;
 	if (&foreign_available("filemin")) {
 		$filemin_prefix = &get_webprefix_safe().
 			"/filemin/index.cgi?path=";
 		&foreign_require("filemin");
-		&filemin::get_paths();
-		@filemin_allowed = @filemin::allowed_paths;
-		%filemin_acls = %filemin::access;
+		$filemin_get_allowed = defined(&filemin::get_allowed_paths);
+		if ($filemin_get_allowed) {
+			%filemin_acls = &get_module_acl(undef, 'filemin');
+			}
+		else {
+			&filemin::get_paths();
+			@filemin_allowed = @filemin::allowed_paths;
+			%filemin_acls = %filemin::access;
+			}
 		}
 
 	my @certs = ( ['cert_incert', 'ssl_cert', 'cert'],
@@ -103,11 +110,15 @@ if (&domain_has_ssl_cert($d)) {
 		my $file = &ui_tag('tt', $val);
 		
 		# File name for file manager if available
-		if ($filemin_prefix && @filemin_allowed) {
+		if ($filemin_prefix &&
+		    ($filemin_get_allowed || @filemin_allowed)) {
 			my $dir = $val;
 			$dir =~ s{/[^/]*$}{};
+			my @cert_allowed = $filemin_get_allowed
+				? &filemin::get_allowed_paths($dir)
+				: @filemin_allowed;
 			my $rel;
-			for my $root (@filemin_allowed) {
+			for my $root (@cert_allowed) {
 				if (&is_under_directory($root, $dir)) {
 					$rel = $dir;
 					if ($filemin_acls{'work_as_user'} eq
