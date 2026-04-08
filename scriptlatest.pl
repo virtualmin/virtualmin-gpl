@@ -45,7 +45,9 @@ elsif ($debug) {
 	       $user, $pass, 30, 0, 1);
 if ($err) {
 	if ($debug) {
-		print STDERR "Failed to fetch http://$script_latest_host$script_latest_dir$script_latest_file : $err\n";
+		print STDERR "Failed to fetch ",
+			     ($script_latest_ssl ? "https" : "http"),
+			     "://$script_latest_host$script_latest_dir$script_latest_file : $err\n";
 		}
 	exit(0);
 	}
@@ -59,7 +61,9 @@ if (!$gpgbad) {
 		       $user, $pass, 30, 0, 1);
 	if ($err) {
 		if ($debug) {
-			print STDERR "Failed to fetch http://$script_latest_host$script_latest_dir$script_latest_sig : $err\n";
+			print STDERR "Failed to fetch ",
+				     ($script_latest_ssl ? "https" : "http"),
+				     "://$script_latest_host$script_latest_dir$script_latest_sig : $err\n";
 			}
 		exit(0);
 		}
@@ -156,7 +160,8 @@ foreach $down (@download) {
 	$err = undef;
 	&http_download($script_latest_host, $script_latest_port,
 		       $script_latest_dir.$down.".pl", \$sdata, \$err,
-		       undef, 0, $user, $pass, 30, 0, 1);
+		       undef, $script_latest_ssl,
+		       $user, $pass, 30, 0, 1);
 	if ($err) {
 		if ($debug) {
 			print STDERR "Failed to download $down : $err\n";
@@ -170,7 +175,8 @@ foreach $down (@download) {
 		&http_download($script_latest_host, $script_latest_port,
 			       $script_latest_dir.$down.".pl-sig.asc",
 			       \$sigdata, \$err,
-			       undef, 0, $user, $pass, 30, 0, 1);
+			       undef, $script_latest_ssl,
+			       $user, $pass, 30, 0, 1);
 		if ($err) {
 			if ($debug) {
 				print STDERR "Failed to download ${down}-sig.asc  : $err\n";
