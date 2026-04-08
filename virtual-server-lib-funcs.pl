@@ -9938,7 +9938,10 @@ push(@rv, { 'id' => 0,
 	    'web_php_noedit' => int($config{'php_noedit'}),
 	    'web_phpchildren' => $config{'phpchildren'},
 	    'web_ssi' => $config{'web_ssi'} eq '' ? 2 : $config{'web_ssi'},
-	    'web_aliasredir' => $config{'web_aliasredir'},
+	    'web_aliasredir' => !defined($config{'web_aliasredir'}) ||
+				$config{'web_aliasredir'} eq ''
+					? 0
+					: $config{'web_aliasredir'},
 	    'web_ssi_suffix' => $config{'web_ssi_suffix'},
 	    'web_dovecot_ssl' => $config{'dovecot_ssl'},
 	    'web_postfix_ssl' => $config{'postfix_ssl'},

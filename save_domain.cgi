@@ -372,6 +372,21 @@ else {
 # Update alias domain mail-related flag
 $d->{'aliasmail'} = $d->{'mail'} if ($d->{'alias'});
 
+# Update alias redirect mode
+if ($d->{'alias'} && defined($in{'aliasredir'}) &&
+    &can_edit_redirect() && &has_web_redirects($d)) {
+	my $oldaliasredir = &get_alias_redirect($d);
+	$oldaliasredir = $d->{'aliasredir'} if ($oldaliasredir < 0);
+	if ($oldaliasredir != $in{'aliasredir'}) {
+		my $aliasdom = &get_domain($d->{'alias'});
+		&obtain_lock_web($aliasdom) if ($aliasdom);
+		&$first_print($text{'save_aliasredir'.$in{'aliasredir'}});
+		my $err = &save_alias_redirect($d, $in{'aliasredir'});
+		&release_lock_web($aliasdom) if ($aliasdom);
+		&$second_print($err ? ".. failed : $err" : $text{'setup_done'});
+		}
+	}
+
 # Update the parent user
 &refresh_webmin_user($d);
 

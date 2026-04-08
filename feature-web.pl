@@ -2572,8 +2572,8 @@ if ($config{'web'}) {
 	# Redirect alias domains?
 	print &ui_table_row(
 		&hlink($text{'tmpl_webaliasredir'}, "template_webaliasredir"),
-		&ui_radio("web_aliasredir", $tmpl->{'web_aliasredir'},
-			  [ [ 1, $text{'yes'} ], [ 1, $text{'no'} ] ]));
+		&ui_radio("web_aliasredir", $tmpl->{'web_aliasredir'} || 0,
+			  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 	# Default SSI setting
 	print &ui_table_row(
@@ -5725,4 +5725,3 @@ return undef;
 $done_feature_script{'web'} = 1;
 
 1;
-

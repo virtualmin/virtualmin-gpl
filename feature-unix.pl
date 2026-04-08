@@ -159,11 +159,41 @@ else {
 	}
 
 # Setup resource limits from template
-if (defined(&supports_resource_limits) && $tmpl->{'resources'} ne 'none' &&
-    &supports_resource_limits()) {
-	my $rv = { map { split(/=/, $_) }
-		split(/\s+/, $tmpl->{'resources'}) };
-	&save_domain_resource_limits($d, $rv, 1);
+if ($tmpl->{'resources'} ne 'none') {
+	my (%rv, %sv);
+	if (defined(&split_template_resource_limits)) {
+		my ($rvref, $svref) =
+			&split_template_resource_limits($tmpl->{'resources'});
+		%rv = %$rvref;
+		%sv = %$svref;
+		}
+	else {
+		foreach my $pair (split(/\s+/, $tmpl->{'resources'})) {
+			next if ($pair !~ /^([^=]+)=(.*)$/);
+			my ($key, $val) = ($1, $2);
+			if ($key =~ /^sys_(.+)$/) {
+				$sv{$1} = $val;
+				}
+			else {
+				$rv{$key} = $val;
+				}
+			}
+		}
+	if (%rv && defined(&supports_resource_limits) &&
+	    &supports_resource_limits()) {
+		&$first_print($text{'setup_proclimits'});
+		&save_domain_resource_limits($d, \%rv, 1);
+		&$second_print($text{'setup_done'});
+		}
+	if (%sv && defined(&supports_systemd_user_slice_limits) &&
+	    defined(&save_domain_systemd_limits)) {
+		my ($ok) = &supports_systemd_user_slice_limits($d);
+		if ($ok) {
+			&$first_print($text{'setup_userlimits'});
+			&save_domain_systemd_limits($d, \%sv);
+			&$second_print($text{'setup_done'});
+			}
+		}
 	}
 
 &release_lock_unix($d);
