@@ -13269,14 +13269,11 @@ return $config{'quota_commands'} ? 1 : 0;
 # Returns 1 if the home or mail filesystems support quota checking
 sub has_quotacheck
 {
-&foreign_require("mount");
-my @mounted = &mount::list_mounted();
-my ($hm) = grep { $_->[0] eq $config{'home_quotas'} } @mounted;
-return 1 if ($hm && $hm->[2] ne 'xfs');
-if ($config{'mail_quotas'}) {
-	my ($mm) = grep { $_->[0] eq $config{'mail_quotas'} } @mounted;
-	return 1 if ($mm && $mm->[2] ne 'xfs');
-	}
+return 0 if (&has_quota_commands());
+&require_useradmin();
+return 1 if (&quota::can_quotacheck($config{'home_quotas'}));
+return 1 if ($config{'mail_quotas'} &&
+	     &quota::can_quotacheck($config{'mail_quotas'}));
 return 0;
 }
 
