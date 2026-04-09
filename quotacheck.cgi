@@ -19,14 +19,14 @@ foreach $fs (@quotafs) {
 		# Check users
 		&$first_print(&text('newquotacheck_udoing', "<tt>$dir</tt>"));
 		$out = &quota::quotacheck($dir, 1);
-		print "<pre>$out</pre>";
+		print "<pre>$out</pre>" if ($out);
 		&$second_print($text{'setup_done'});
 		}
 	if ($in{'who'} == 1 || $in{'who'} == 2) {
 		# Check groups
 		&$first_print(&text('newquotacheck_gdoing', "<tt>$dir</tt>"));
 		$out = &quota::quotacheck($dir, 2);
-		print "<pre>$out</pre>";
+		print "<pre>$out</pre>" if ($out);
 		&$second_print($text{'setup_done'});
 		}
 	}
