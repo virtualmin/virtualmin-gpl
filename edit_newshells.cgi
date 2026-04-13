@@ -5,7 +5,13 @@ require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newshells_ecannot'});
 &ui_print_header(undef, $text{'newshells_title'}, "", "newshells");
 
-print $text{'newshells_descr'},"<p>\n";
+print $text{'newshells_descr'}." ".
+      &ui_details({
+	'title' => '',
+	'content' => $text{'newshells_note'},
+	'class' => 'inline inlined',
+	'html' => 1,
+      })."<p>\n";
 
 # Find available shells
 @shells = &list_available_shells();
@@ -19,7 +25,6 @@ foreach $s (@shells) {
 print &ui_form_start("save_newshells.cgi", "post");
 
 # Use defaults?
-print "<b>$text{'newshells_defs'}</b>\n";
 $defs = -r $custom_shells_file ? 0 : 1;
 $js1 = &js_disable_inputs(\@fields, [ ], "onClick");
 $js0 = &js_disable_inputs([ ], \@fields, "onClick");
@@ -65,4 +70,3 @@ print &ui_columns_table(
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
 &ui_print_footer("", $text{'index_return'});
-
