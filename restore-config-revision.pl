@@ -1,8 +1,8 @@
 #!/usr/local/bin/perl
 
-=head1 restore-config-backups.pl
+=head1 restore-config-revision.pl
 
-Restores configuration file backups from Git
+Restores configuration files from Git revisions
 
 By default, this program operates on the entire F</etc/> directory. However,
 you can limit which files it handles by specifying a single Webmin module with
@@ -12,39 +12,39 @@ C<--file> flag, which must be relative to the module directory or F</etc/>.
 =head2 Restoring files
 
 To restore files to your filesystem, use the C<--target> flag. This retrieves
-all matching files from the most recent backups, as controlled by the C<--depth>
+all matching files from the most recent revisions, as controlled by the C<--depth>
 flag, and writes them into date-stamped directories. This allows you to browse
 or compare multiple saved versions simultaneously, without overwriting your
 current system configuration.
 
-For example, to restore all module configuration files from the latest backup
-to the F</root/backups> directory, run:
+For example, to restore all module configuration files from the latest revision
+to the F</root/config-revisions> directory, run:
 
-  virtualmin restore-config-backups --module virtual-server --target /root/backups
+  virtualmin restore-config-revision --module virtual-server --target /root/config-revisions
 
 You can also restore files directly to the F</etc/> directory, overwriting the
 live system configuration if needed, which can be helpful for quickly reverting
 to a previous state of a module or a single configuration file.
 
-For example, to restore both the main module config file and all domain config 
-files from the latest backup directly to the live system, run:
+For example, to restore both the main module config file and all domain config
+files from the latest revision directly to the live system, run:
 
-  virtualmin restore-config-backups --module virtual-server --file config \
-                                    --file domains --target /etc/
+  virtualmin restore-config-revision --module virtual-server --file config \
+                                     --file domains --target /etc/
 
-To simulate (dry run) restoring the last five versions of the main module config
-file into a target directory, add the C<--dry-run> flag:
+To simulate (dry run) restoring the last five revisions of the main module
+config file into a target directory, add the C<--dry-run> flag:
 
-  virtualmin restore-config-backups --depth 5 --module virtual-server \
-                                    --file config --target /root/backups --dry-run
+  virtualmin restore-config-revision --depth 5 --module virtual-server \
+                                     --file config --target /root/config-revisions --dry-run
 
 When the target directory is set to F</etc/> and C<--depth> is used, only the
-files from the oldest (deepest) record will be restored. For example, to restore
-the main module config file from ten backups ago directly to the live system,
-run:
+files from the oldest (deepest) revision will be restored. For example, to
+restore the main module config file from ten revisions ago directly to the live
+system, run:
 
-  virtualmin restore-config-backups --depth 10 --module virtual-server \
-                                    --file config --target /etc/
+  virtualmin restore-config-revision --depth 10 --module virtual-server \
+                                     --file config --target /etc/
 
 =head2 Restricting by module or specific files
 
@@ -68,8 +68,8 @@ Simulate the restore without actually writing files. Useful for testing.
 
 =item B<--depth <n>>
 
-Number of recent backups to restore. By default, 1 (the latest commit). Setting
-this higher, like 5, includes older backups.
+Number of recent revisions to restore. By default, 1 (the latest commit).
+Setting this higher, like 5, includes older revisions.
 
 =item B<--file <path>>
 
@@ -101,9 +101,9 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/restore-config-backups.pl";
+	$0 = "$pwd/restore-config-revision.pl";
 	require './virtual-server-lib.pl';
-	$< == 0 || die "restore-config-backups.pl must be run as root";
+	$< == 0 || die "restore-config-revision.pl must be run as root";
 	}
 
 # Get /etc from environment
@@ -203,13 +203,13 @@ sub usage
 my ($msg) = @_;
 print "$msg\n\n" if ($msg);
 print <<"EOF";
-Restores configuration file backups from a Git repository in $etcdir/ directory.
+Restores configuration files from Git revisions in $etcdir/ directory.
 
-virtualmin restore-config-backups --target <dir> [--dry-run]
-                                  [--depth <n>]
-                                  [--file file]*
-                                  [--module module]
-                                  [--git-repo </path/to/.git>]
+virtualmin restore-config-revision --target <dir> [--dry-run]
+                                   [--depth <n>]
+                                   [--file file]*
+                                   [--module module]
+                                   [--git-repo </path/to/.git>]
 EOF
 exit(1);
 }
@@ -273,28 +273,28 @@ foreach my $relp (@rel_paths) {
 	my $out;
 	my $rs = &execute_command($log_cmd, undef, \$out);
 	if ($rs != 0 || !$out) {
-		&$first_print("No backups found for \"$display_path_last\" $type!");
+		&$first_print("No revisions found for \"$display_path_last\" $type!");
 		next;
 		}
 
 	my @commits = split(/\n/, $out);
 	if (!@commits) {
-		&$first_print("No backups found for \"$display_path_last\" $type!");
+		&$first_print("No revisions found for \"$display_path_last\" $type!");
 		next;
 		}
 
-	# If --target is /etc, restore only the oldest commit
+	# If --target is /etc, restore only the oldest revision
 	my @use_commits = @commits;
 	my $latest_commit = "";
 	if ($target_dir eq $etcdir && @commits > 1) {
 		# The commits array is newest first. The oldest is at the end.
 		@use_commits = ( $commits[-1] );
-		$latest_commit = ", yet only the oldest one at depth $depth is used";
+		$latest_commit = ", yet only the oldest revision at depth $depth is used";
 		}
 	
 	# Print an overview (like do_list)
-	my $backups_text = scalar(@commits) == 1 ? "backup" : "backups";
-	&$first_print("Found ".scalar(@commits)." $backups_text$latest_commit ..");
+	my $revisions_text = scalar(@commits) == 1 ? "revision" : "revisions";
+	&$first_print("Found ".scalar(@commits)." $revisions_text$latest_commit ..");
 
 	&$indent_print();
 
@@ -342,7 +342,7 @@ foreach my $relp (@rel_paths) {
 
 		my $file_text = scalar(@files) == 1 ? "file" : "files";
 		&$first_print("Found ".scalar(@files)." $file_text to restore ".
-			"from backup \@$commit_short dated $date_out to ..");
+			"from revision \@$commit_short dated $date_out to ..");
 		&$indent_print();
 
 		# Extract or imitate each file

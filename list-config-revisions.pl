@@ -1,8 +1,8 @@
 #!/usr/local/bin/perl
 
-=head1 list-config-backups.pl
+=head1 list-config-revisions.pl
 
-Lists configuration file backups from Git
+Lists configuration file revisions from Git
 
 By default, this program operates on the entire F</etc/> directory. However,
 you can limit which files it handles by specifying a single Webmin module with
@@ -12,30 +12,30 @@ with the C<--file> flag, which must be relative to the module directory or F</et
 =head2 Listing and viewing files
 
 If you do not provide any additional options, the script defaults to showing
-backups under the Virtualmin C<virtual-server> module configuration directory.
+revisions under the Virtualmin C<virtual-server> module configuration directory.
 
-For example, to view all configuration files from the latest backup for the
+For example, to view all configuration files from the latest revision for the
 Virtualmin C<virtual-server> module, run:
 
-  virtualmin list-config-backups
+  virtualmin list-config-revisions
 
-To view the content of the last backup of the main configuration file for the
+To view the content of the latest revision of the main configuration file for the
 Virtualmin C<virtual-server> module, run:
 
-  virtualmin list-config-backups --module virtual-server --file config
+  virtualmin list-config-revisions --module virtual-server --file config
 
-To see the last backup of all domain configuration files for the Virtualmin 
+To see the latest revision of all domain configuration files for the Virtualmin
 C<virtual-server> module, run:
 
-  virtualmin list-config-backups --module virtual-server --file "domains/*"
+  virtualmin list-config-revisions --module virtual-server --file "domains/*"
 
-By default, only the most recent backup is shown, but you can use the C<--depth>
-flag to view more historic versions.
+By default, only the most recent revision is shown, but you can use the
+C<--depth> flag to view more historic revisions.
 
-For example, to view the backups of the F</etc/hosts> and F</etc/fstab> files
-from the last two backups, run:
+For example, to view the revisions of the F</etc/hosts> and F</etc/fstab>
+files from the last two revisions, run:
 
-  virtualmin list-config-backups --file hosts --file fstab --depth 2
+  virtualmin list-config-revisions --file hosts --file fstab --depth 2
 
 =head2 Restricting by module or specific files
 
@@ -49,8 +49,8 @@ under that module directory.
 
 =item B<--depth <n>>
 
-Number of recent backups to list. By default, 1 (the latest commit). Setting
-this higher (like 5) includes older backups.
+Number of recent revisions to list. By default, 1 (the latest commit). Setting
+this higher (like 5) includes older revisions.
 
 =item B<--file <path>>
 
@@ -82,9 +82,9 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/list-config-backups.pl";
+	$0 = "$pwd/list-config-revisions.pl";
 	require './virtual-server-lib.pl';
-	$< == 0 || die "list-config-backups.pl must be run as root";
+	$< == 0 || die "list-config-revisions.pl must be run as root";
 	}
 
 # Get /etc from environment
@@ -169,12 +169,12 @@ sub usage
 my ($msg) = @_;
 print "$msg\n\n" if ($msg);
 print <<"EOF";
-Lists configuration file backups from a Git repository in $etcdir/ directory.
+Lists configuration file revisions from a Git repository in $etcdir/ directory.
 
-virtualmin list-config-backups [--depth <n>]
-                               [--file file]*
-                               [--module module]
-                               [--git-repo </path/to/.git>]
+virtualmin list-config-revisions [--depth <n>]
+                                 [--file file]*
+                                 [--module module]
+                                 [--git-repo </path/to/.git>]
 EOF
 exit(1);
 }
@@ -199,13 +199,13 @@ return @outpaths;
 }
 
 # do_list(\@paths, depth, git_repo)
-# Shows file contents from Git for the given paths, for one or more backups.
+# Shows file contents from Git for the given paths, for one or more revisions.
 sub do_list
 {
 my ($paths, $depth, $git_repo) = @_;
 
 my @paths = &normalize_paths(@$paths);
-my $depth_str = $depth > 1 ? "last $depth backups" : "latest backup";
+my $depth_str = $depth > 1 ? "last $depth revisions" : "latest revision";
 &$first_print("Listing the following paths in the $depth_str:");
 &$indent_print();
 foreach my $pp (@$paths) {
@@ -234,23 +234,23 @@ foreach my $path (@paths) {
 	my $out;
 	my $rs = &execute_command($log_cmd, undef, \$out);
 	if ($rs != 0 || !$out) {
-		&$first_print("No backups found for \"$original_path\" $type!");
+		&$first_print("No revisions found for \"$original_path\" $type!");
 		next;
 		}
 
 	my @commits = split(/\n/, $out);
 	if (!@commits) {
-		&$first_print("No backups found for \"$original_path\" $type!");
+		&$first_print("No revisions found for \"$original_path\" $type!");
 		next;
 		}
 
 	# Print an overview
-	my $backups_text = scalar(@commits) == 1 ? "backup" : "backups";
+	my $revisions_text = scalar(@commits) == 1 ? "revision" : "revisions";
 	my $original_path_last = $original_path;
 	$original_path_last =~ s/(.*)\///;
 	my $original_path_dir = $1;
 	&$first_print("Found ".scalar(@commits).
-		" $backups_text in \"$original_path_dir\" directory ..");
+		" $revisions_text in \"$original_path_dir\" directory ..");
 
 	# Increase indentation for commits
 	&$indent_print();

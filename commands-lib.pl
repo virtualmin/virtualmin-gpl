@@ -97,8 +97,8 @@ return ([ "Backup and restore", "backup-domain.pl", "*-scheduled-backup*.pl",
 	$virtualmin_pro ? [ "Google Cloud Storage", "*-gcs-*.pl" ] : (),
 	[ "License", "*license*" ],
 	[ "Repository", "*setup-repos*" ],
-	[ "Configuration backups", "list-config-backups.pl",
-				   "restore-config-backups.pl" ],
+	[ "Configuration history", "list-config-revisions.pl",
+				   "restore-config-revision.pl" ],
 	[ "Other scripts", "*.pl" ],
 	);
 }
@@ -439,4 +439,3 @@ return 0;
 }
 
 1;
-

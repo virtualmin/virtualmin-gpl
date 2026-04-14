@@ -1,3 +1,5 @@
+#### Version 8.2.0
+* Rename the Git-based config history CLI commands to `list-config-revisions` and `restore-config-revision`
 
 #### Version 8.1.0
 * Add a simplified UI for managing website redirects  
