@@ -12,25 +12,28 @@ C<--file> flag, which must be relative to the module directory or F</etc/>.
 =head2 Restoring files
 
 To restore files to your filesystem, use the C<--target> flag. This retrieves
-all matching files from the most recent revisions, as controlled by the C<--depth>
-flag, and writes them into date-stamped directories. This allows you to browse
-or compare multiple saved versions simultaneously, without overwriting your
-current system configuration.
-
-For example, to restore all module configuration files from the latest revision
-to the F</root/config-revisions> directory, run:
-
-  virtualmin restore-config-revision --module virtual-server --target /root/config-revisions
-
-You can also restore files directly to the F</etc/> directory, overwriting the
-live system configuration if needed, which can be helpful for quickly reverting
-to a previous state of a module or a single configuration file.
+all matching files from the most recent revisions, as controlled by the
+C<--depth> flag. If the target is F</etc/>, files are restored directly into
+the live working tree. This is often the most useful mode when F</etc/> is
+clean and committed, because you can move to an older revision, inspect or test
+it, and then restore the newer revision again while keeping the benefits of
+revision control.
 
 For example, to restore both the main module config file and all domain config
 files from the latest revision directly to the live system, run:
 
   virtualmin restore-config-revision --module virtual-server --file config \
                                      --file domains --target /etc/
+
+If the target is any other directory, files are written into date-stamped
+subdirectories instead. This is mainly useful when you want exported copies
+outside the live tree, or when you need to inspect revisions on a system where
+F</etc/> is not clean.
+
+For example, to restore all module configuration files from the latest revision
+to the F</root/config-revisions> directory, run:
+
+  virtualmin restore-config-revision --module virtual-server --target /root/config-revisions
 
 To simulate (dry run) restoring the last five revisions of the main module
 config file into a target directory, add the C<--dry-run> flag:
@@ -60,7 +63,7 @@ under that module directory.
 
 Required flag. Directory where restored files should be written. Created if it
 does not exist. If set to F</etc/>, files will be restored directly into the
-live system without being placed in a date-stamped subdirectory.
+live working tree without being placed in a date-stamped subdirectory.
 
 =item B<--dry-run>
 
