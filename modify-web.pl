@@ -1155,7 +1155,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Changes web server settings for one or more domains.\n";
 print "\n";
 print "virtualmin modify-web --domain name | --all-domains\n";
-print "                     [--mode mod_php|cgi|fcgid|fpm | --default-mode]\n";
+print "                     [--mode none|mod_php|cgi|fcgid|fpm | --default-mode]\n";
 print "                     [--php-children|--php-children-no-check number | --no-php-children]\n";
 print "                     [--php-version num]\n";
 print "                     [--php-timeout seconds | --no-php-timeout]\n";
