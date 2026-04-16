@@ -44,6 +44,16 @@ $pma_url =~ /^https?:\/\/.+/ || &error($text{'databases_login_pma_badurl'});
 $pma_url =~ s/\s+//g;
 $pma_url =~ s/\/+$/\//;
 
+# Require HTTPS by upgrading if possible, otherwise refuse to send credentials
+if ($pma_url =~ /^http:\/\//) {
+	if (&domain_has_ssl($src_dom)) {
+		$pma_url =~ s/^http:/https:/;
+		}
+	else {
+		&error($text{'databases_login_pma_enossl'});
+		}
+	}
+
 # Domain MySQL credentials always come from the parent domain unless already
 $d = &get_domain($d->{'parent'}) if ($d->{'parent'});
 my $dbuser = $d->{'mysql_user'} || &error($text{'databases_login_pma_euser'});
@@ -124,7 +134,13 @@ function cleanup(): void
 {
 	@unlink(CREDFILE);
 	@rmdir(dirname(CREDFILE));
-	@unlink(__FILE__);
+
+	/* Remove this file and any stale pma-login-*.php helpers left behind
+	   by previous runs (e.g. browser closed before cleanup could fire) */
+	$dir = dirname(__FILE__);
+	foreach (glob($dir.'/pma-login-*.php') ?: [] as $f) {
+		@unlink($f);
+	}
 }
 
 /* Build the phpMyAdmin index URL */
@@ -271,6 +287,10 @@ curl_setopt_array($ch, [
 	CURLOPT_COOKIEJAR => $cookiejar,
 	CURLOPT_COOKIEFILE => $cookiejar,
 	CURLOPT_TIMEOUT => 10,
+	/* Loopback request to the same server — skip SSL peer verification
+	   to handle self-signed certs or missing CA bundles in PHP */
+	CURLOPT_SSL_VERIFYPEER => false,
+	CURLOPT_SSL_VERIFYHOST => 0,
 ]);
 
 curl_setopt($ch, CURLOPT_URL, $login_idx);
@@ -283,7 +303,59 @@ $res = curl_exec($ch);
 if ($res === false) {
 	fail(502, 'GET failed: '.curl_error($ch));
 }
-if ((int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE) >= 400) {
+$get_code = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+if ($get_code === 401) {
+	/* Basic Auth is blocking the server-side cURL request.  Fall back to a
+	   browser-side login: the browser already holds cached Basic Auth
+	   credentials (it needed them to reach this helper file). */
+	curl_close($ch);
+	log_msg('GET returned 401; falling back to browser-side login');
+	header('Content-Type: text/html; charset=UTF-8');
+	header('Cache-Control: no-store, no-cache, must-revalidate');
+	$j_login = json_encode($login_idx, JSON_HEX_TAG | JSON_HEX_AMP);
+	$j_dest  = json_encode($dest, JSON_HEX_TAG | JSON_HEX_AMP);
+	$j_user  = json_encode($user, JSON_HEX_TAG | JSON_HEX_AMP);
+	$j_pass  = json_encode($pass, JSON_HEX_TAG | JSON_HEX_AMP);
+	echo <<<LOGINHTML
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>phpMyAdmin</title></head><body>
+<script>
+(async function() {
+	try {
+		const loginUrl = {$j_login},
+		      dest     = {$j_dest};
+		const resp = await fetch(loginUrl, {credentials: 'same-origin'});
+		if (!resp.ok) throw new Error('HTTP ' + resp.status);
+		const html = await resp.text(),
+		      m = html.match(/name="token"\\s+value="([^"]+)"/);
+		if (!m) throw new Error('token not found');
+		const ta = document.createElement('textarea');
+		ta.innerHTML = m[1];
+		const token = ta.value,
+		      form = document.createElement('form');
+		form.method = 'POST';
+		form.action = dest;
+		form.style.display = 'none';
+		const flds = {pma_username: {$j_user}, pma_password: {$j_pass},
+		            server: '1', token: token};
+		for (const k in flds) {
+			const inp = document.createElement('input');
+			inp.type = 'hidden'; inp.name = k; inp.value = flds[k];
+			form.appendChild(inp);
+		}
+		document.body.appendChild(form);
+		form.submit();
+	} catch (e) {
+		document.body.textContent = 'Auto-login failed: ' + e.message;
+	}
+})();
+</script>
+<noscript><p>JavaScript is required for phpMyAdmin auto-login.</p></noscript>
+</body></html>
+LOGINHTML;
+	exit;
+}
+if ($get_code >= 400) {
 	fail(502, 'GET blocked before phpMyAdmin login page (auth/proxy?)');
 }
 

@@ -4163,6 +4163,7 @@ databases_login_pma_ecredwrite=Failed to create phpMyAdmin temporary credential 
 databases_login_pma_ephpwrite=Failed to create phpMyAdmin temporary login helper
 databases_login_pma_ehome=Home directory for this virtual server is missing or invalid
 databases_login_pma_emkdirhome=Failed to create private directory $1
+databases_login_pma_enossl=Failed to auto-login to phpMyAdmin : HTTPS is required but SSL is not enabled for this virtual server
 
 newips_title=Change IP Addresses
 newips_ecannot=You are not allowed to change IP addresses
