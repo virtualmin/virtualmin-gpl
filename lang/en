@@ -4468,6 +4468,14 @@ licence_updfile=Updating Virtualmin license ..
 licence_expired=License Expired
 licence_expired_desc=The ability to make changes is temporarily disabled for your system. This mode kicks in after the grace period, if your license has expired or is being used on more than one server. Visit the <a href='$1'>Virtualmin License Manager</a> page for more details.
 
+downgrade_gpl_package=Downgrading packages ..
+downgrade_gpl_already=Virtualmin GPL is already installed!
+downgrade_gpl_all_done=Your system has been successfully downgraded to Virtualmin GPL!
+downgrade_gpl_some_failed=Downgrading to Virtualmin GPL finished with errors!
+downgrade_gpl_license=Downgrading Virtualmin license to GPL ..
+downgrade_gpl_restore_license=Restoring previous Virtualmin license ..
+downgrade_gpl_restore_repos=Restoring previous Virtualmin repositories ..
+
 config_deftheme=Global Webmin default
 config_oldtheme=Old Webmin theme
 
