@@ -118,7 +118,7 @@ if (&can_php_error_log($mode)) {
 		    $plog eq $defplog ? 2 : 0;
 	if (&can_log_paths()) {
 		# Can set to any path
-		print &ui_table_row(&hlink($text{'phpmode_plog'}, 'phplog'),
+		print &ui_table_row($text{'phpmode_plog'},
 			&ui_radio_table("plog_def", $lmode,
 			[ [ 1, $text{'phpmode_noplog'} ],
 			  [ 2, $text{'phpmode_defplog'},
@@ -129,7 +129,7 @@ if (&can_php_error_log($mode)) {
 		}
 	else {
 		# Can just turn on or off
-		print &ui_table_row(&hlink($text{'phpmode_plog'}, 'phplog'),
+		print &ui_table_row($text{'phpmode_plog'},
 			&ui_radio("plog_def", $lmode == 1 ? 1 : 0,
 				  [ [ 1, $text{'phpmode_noplog'} ],
 				    [ 0, $lmode != 0 ? $text{'phpmode_defplog'}
