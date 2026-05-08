@@ -6646,6 +6646,10 @@ sub virtualmin_backup_chroot
 {
 local ($file, $vbs) = @_;
 &$first_print($text{'backup_vchroot_doing'});
+if (!&has_ftp_chroot()) {
+	&$second_print($text{'backup_vchroot_none'});
+	return 0;
+	}
 local @chroots = &list_ftp_chroots();
 &open_tempfile(CHROOT, ">$file");
 foreach my $c (@chroots) {
@@ -6664,6 +6668,10 @@ sub virtualmin_restore_chroot
 {
 local ($file, $vbs) = @_;
 &$first_print($text{'restore_vchroot_doing'});
+if (!&has_ftp_chroot()) {
+	&$second_print($text{'restore_vchroot_none'});
+	return 1;
+	}
 &obtain_lock_ftp();
 local @chroots;
 open(CHROOT, "<".$file);

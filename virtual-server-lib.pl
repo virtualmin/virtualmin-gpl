@@ -190,8 +190,7 @@ if (!$virtualmin_pro) {
 @virtualmin_backups = ( 'config', 'templates',
 			$virtualmin_pro ? ( 'resellers' ) : ( ),
 			'email', 'custom', 'scripts', 'scheds',
-			&has_ftp_chroot() ? ( 'chroot' ) : ( ),
-			'mailserver' );
+			'chroot', 'mailserver' );
 
 @limit_types = ("mailboxlimit", "aliaslimit", "dbslimit", "domslimit",
             	"aliasdomslimit", "realdomslimit");
