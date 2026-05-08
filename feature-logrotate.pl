@@ -494,7 +494,7 @@ print &ui_table_row(
 print &ui_table_row(
 	&hlink($text{'tmpl_logrotate'}, "template_logrotate"),
 	&none_def_input("logrotate", $tmpl->{'logrotate'},
-			$text{'tmpl_ftpbelow'}, 0, 0,
+			$text{'tmpl_logrotatebelow'}, 0, 0,
 			$text{'tmpl_logrotatenone'},
 			[ "logrotate" ])."<br>\n".
 	&ui_textarea("logrotate",
@@ -504,10 +504,10 @@ print &ui_table_row(
 
 # Additional files to rotate
 print &ui_table_row(
-        &hlink($text{'tmpl_logrotate_files'}, "template_logrotatefiles"),
+	&hlink($text{'tmpl_logrotate_files'}, "template_logrotatefiles"),
 	&none_def_input("logrotate_files", $tmpl->{'logrotate_files'},
-			$text{'tmpl_ftpbelow2'}, 0, 0,
-                        $text{'tmpl_logrotatenone2'},
+			$text{'tmpl_logrotatebelow2'}, 0, 0,
+			$text{'tmpl_logrotatenone2'},
 			[ "logrotate_files" ])."<br>\n".
 	&ui_textarea("logrotate_files",
 		     $tmpl->{'logrotate_files'} eq 'none' ? '' :
@@ -663,9 +663,6 @@ my ($d, $tmpl) = @_;
 my $alog = &get_website_log($d, 0);
 my $elog = &get_website_log($d, 1);
 my @logs = ( $alog, $elog );
-if ($d->{'ftp'}) {
-	push(@logs, &get_proftpd_log($d));
-	}
 push(@logs, $d->{'php_error_log'} || &get_domain_php_error_log($d));
 if ($tmpl) {
 	push(@logs, &get_domain_template_logs($d));
@@ -694,4 +691,3 @@ return @tmpllogs;
 $done_feature_script{'logrotate'} = 1;
 
 1;
-

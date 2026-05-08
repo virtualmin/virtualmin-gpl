@@ -3738,6 +3738,7 @@ if ($doms) {
 local @rv;
 foreach my $f (@allfeatures) {
 	next if ($f eq 'virtualmin');
+	next if (&indexof($f, @retired_features) >= 0);
 	if (&indexof($f, @features) >= 0) {
 		if (!$config{$f}) {
 			# Missing feature

@@ -132,6 +132,10 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--feature") {
 		local $f = shift(@ARGV);
+		if (&indexof($f, @retired_features) >= 0) {
+			push(@rfeats, $f);
+			next;
+			}
 		$f eq "virtualmin" || $config{$f} ||
 		   &indexof($f, &list_backup_plugins()) >= 0 ||
 			&usage("Feature $f is not enabled");
@@ -526,4 +530,3 @@ print " - A Google Cloud Storage bucket, like gcs://bucket\n";
 print " - A Dropbox folder, like dropbox://folder\n";
 exit(1);
 }
-

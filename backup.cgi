@@ -123,6 +123,7 @@ else {
 	@do_features = split(/\0/, $in{'feature'});
 	}
 @do_features || &error($text{'backup_efeatures'});
+@do_features = grep { &indexof($_, @retired_features) < 0 } @do_features;
 
 # Parse destinations
 for($i=0; defined($in{"dest".$i."_mode"}); $i++) {

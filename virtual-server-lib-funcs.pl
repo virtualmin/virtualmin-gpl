@@ -22,7 +22,7 @@ foreach my $lib ("scripts", "resellers", "admins", "users", "simple", "s3",
 		 "balancer", "newfeatures", "resources", "backups",
 		 "domainname", "commands", "connectivity", "plans",
 		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
-		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
+		 "proftpd", "dkim", "provision", "stats", "bkeys", "rs", "cron",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
 		 "jailkit", "ports", "bb", "dnscloud", "dnscloudpro",
 		 "smtpcloud", "pro-tip", "azure", "remotedns", "drive",
@@ -9878,7 +9878,6 @@ push(@rv, { 'id' => 0,
 	    'web_dovecot_ssl' => $config{'dovecot_ssl'},
 	    'web_postfix_ssl' => $config{'postfix_ssl'},
 	    'web_mysql_ssl' => $config{'mysql_ssl'},
-	    'web_proftpd_ssl' => $config{'proftpd_ssl'},
 	    'web_http2' => $config{'web_http2'},
 	    'web_redirects' => $config{'web_redirects'},
 	    'web_sslredirect' => $config{'auto_redirect'},
@@ -9934,8 +9933,6 @@ push(@rv, { 'id' => 0,
 		$config{'namedconf_no_allow_transfer'},
 	    'namedconf_no_also_notify' =>
 		$config{'namedconf_no_also_notify'},
-	    'ftp' => $config{'proftpd_config'},
-	    'ftp_dir' => $config{'ftp_dir'},
 	    'logrotate' => $config{'logrotate_config'} || "none",
 	    'logrotate_files' => $config{'logrotate_files'} || "none",
 	    'logrotate_shared' => $config{'logrotate_shared'} || "no",
@@ -10266,7 +10263,6 @@ if ($tmpl->{'id'} == 0) {
 	$config{'dovecot_ssl'} = $tmpl->{'web_dovecot_ssl'};
 	$config{'postfix_ssl'} = $tmpl->{'web_postfix_ssl'};
 	$config{'mysql_ssl'} = $tmpl->{'web_mysql_ssl'};
-	$config{'proftpd_ssl'} = $tmpl->{'web_proftpd_ssl'};
 	foreach my $phpver (@all_possible_php_versions) {
 		$config{'php_ini_'.$phpver} = $tmpl->{'web_php_ini_'.$phpver};
 		}
@@ -10327,8 +10323,6 @@ if ($tmpl->{'id'} == 0) {
 	$config{'dnssec_alg'} = $tmpl->{'dnssec_alg'};
 	$config{'dnssec_single'} = $tmpl->{'dnssec_single'};
 	delete($config{'mx_server'});
-	$config{'proftpd_config'} = $tmpl->{'ftp'};
-	$config{'ftp_dir'} = $tmpl->{'ftp_dir'};
 	$config{'logrotate_config'} = $tmpl->{'logrotate'} eq "none" ?
 					"" : $tmpl->{'logrotate'};
 	$config{'logrotate_files'} = $tmpl->{'logrotate_files'} eq "none" ?
@@ -13052,7 +13046,9 @@ sub get_disable_features
 {
 local ($d) = @_;
 local @disable;
-@disable = grep { $d->{$_} && $config{$_} } split(/,/, $config{'disable'});
+my %retired = map { $_, 1 } @retired_features;
+@disable = grep { !$retired{$_} && $d->{$_} && $config{$_} }
+	   split(/,/, $config{'disable'});
 push(@disable, "ssl") if (&indexof("web", @disable) >= 0 && $d->{'ssl'});
 push(@disable, "status") if (&indexof("web", @disable) >= 0 && $d->{'status'});
 @disable = grep { $_ ne "unix" } @disable if ($d->{'parent'});
@@ -13068,6 +13064,8 @@ sub get_enable_features
 local ($d) = @_;
 local @enable;
 local @disabled = split(/,/, $d->{'disabled'});
+my %retired = map { $_, 1 } @retired_features;
+@disabled = grep { !$retired{$_} } @disabled;
 local %disabled = map { $_, 1 } @disabled;
 @enable = grep { $d->{$_} && ($config{$_} || $_ eq 'unix') } @disabled;
 push(@enable, "ssl") if (&indexof("web", @enable) >= 0 && $d->{'ssl'});
@@ -16664,13 +16662,6 @@ if ($config{'postgres'}) {
 		}
 	}
 
-if ($config{'ftp'}) {
-	# Make sure ProFTPd is installed, and that the ftp user exists
-	my $err = &feature_depends_ftp();
-	return $err if ($err);
-	&$second_print($text{'check_ftpok'});
-	}
-
 if ($config{'logrotate'}) {
 	# Make sure logrotate is installed
 	&foreign_installed("logrotate", 1) == 2 ||
@@ -17408,6 +17399,19 @@ if ($itype =~ /^(rpm|deb)$/ &&
 # All looks OK .. save the config
 $config{'last_check'} = time()+1;
 $config{'disable'} =~ s/user/unix/g;	# changed since last release
+if (@retired_features) {
+	my %retired = map { $_, 1 } @retired_features;
+	$config{'disable'} = join(",", grep { !$retired{$_} }
+				   split(/,/, $config{'disable'}));
+	foreach my $k (@retired_features,
+		       'proftpd_config', 'proftpd_ssl', 'ftp_dir') {
+		delete($config{$k});
+		}
+	foreach my $f (@retired_features) {
+		delete($config{'backup_feature_'.$f});
+		delete($config{'backup_opts_'.$f});
+		}
+	}
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
@@ -18670,7 +18674,9 @@ sub get_available_backup_features
 {
 local ($safe) = @_;
 local @rv;
+my %retired = map { $_, 1 } @retired_features;
 foreach my $f ($safe ? @safe_backup_features : @backup_features) {
+	next if ($retired{$f});
 	local $bfunc = "backup_$f";
 	if (defined(&$bfunc) &&
 	    ($config{$f} ||
@@ -19340,6 +19346,7 @@ return $days ? $days." days, ".$hours.":".$mins.":".$secs :
 sub show_check_migration_features
 {
 local @got = @_;
+@got = grep { &indexof($_, @retired_features) < 0 } @got;
 local %pconfig = map { $_, 1 } &list_feature_plugins();
 local @notgot = grep { !$config{$_} && !$pconfig{$_} } @got;
 @got = grep { $config{$_} || $pconfig{$_} } @got;

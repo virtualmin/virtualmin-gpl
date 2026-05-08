@@ -275,18 +275,6 @@ if ($config{'allow_subdoms'} eq '') {
 # Remove old cron job for killing orphan php*-cgi processes
 &delete_cron_script($fcgiclear_cron_cmd);
 
-# Add ftp user to the groups for all domains that have FTP enabled
-&obtain_lock_unix();
-foreach my $d (&list_domains()) {
-	if ($d->{'ftp'}) {
-		local $ftp_user = &get_proftpd_user($d);
-		if ($ftp_user) {
-			&add_user_to_domain_group($d, $ftp_user, undef);
-			}
-		}
-	}
-&release_lock_unix();
-
 # If the default template uses a PHP or CGI mode that isn't supported, change it
 my $mmap = &php_mode_numbers_map();
 my @supp = &supported_php_modes();
@@ -695,4 +683,3 @@ if (!$itimes{$basever}) {
 
 &webmin_log("postinstall");
 }
-

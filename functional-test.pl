@@ -12907,78 +12907,6 @@ if (!$webmin_pass) {
 	$transfer_tests = [ { 'command' => 'echo Missing user or password ; false' } ];
 	}
 
-$ftp_tests = [
-	# Create a domain with SSL, FTP and a private IP
-	{ 'command' => 'create-domain.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'desc', 'Test FTP domain' ],
-		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ $ssl ],
-		      [ 'logrotate' ], [ 'ftp' ],
-		      [ 'allocate-ip' ],
-		      [ 'content' => 'Test FTP home page' ],
-		      @create_args, ],
-        },
-
-	# Copy the domain's SSL cert to proftpd
-	{ 'command' => 'install-service-cert.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'add-domain' ],
-		      [ 'service', 'proftpd' ] ],
-	},
-
-	# Check that anonymous FTP to it works
-	{ 'command' => $wget_command.' --inet4 '.
-		       'ftp://'.$test_domain.'/',
-	  'antigrep' => 'Login incorrect',
-	},
-
-	# Put a file in the anonymous FTP directory
-	{ 'command' => 'echo "bar" >~'.
-		       $test_domain_user.'/ftp/foo.txt',
-	},
-
-	# Try to fetch it
-	{ 'command' => $wget_command.' --inet4 '.
-		       'ftp://'.$test_domain.'/foo.txt',
-	  'grep' => 'bar',
-	},
-
-	# Test that encrypted FTP works and serves the right cert
-	{ 'command' => $curl_command.' --ftp-ssl --insecure -v --ipv4 '.
-		       'ftp://'.$test_domain.'/foo.txt',
-	  'grep' => [ 'bar', 'O=Test FTP domain', 'CN=(\\*\\.)?'.$test_domain ],
-	},
-
-	# Disable the domain
-	{ 'command' => 'disable-domain.pl',
-	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'feature' => 'ftp' ] ],
-	},
-
-	# FTP should fail now
-	{ 'command' => $wget_command.' --inet4 '.
-		       'ftp://'.$test_domain.'/',
-	  'grep' => 'Login incorrect',
-	  'fail' => 1,
-	},
-
-	# Re-enable the domain
-	{ 'command' => 'enable-domain.pl',
-	  'args' => [ [ 'domain' => $test_domain ] ],
-	},
-
-	# FTP should work again
-	{ 'command' => $wget_command.' --inet4 '.
-		       'ftp://'.$test_domain.'/',
-	  'antigrep' => 'Login incorrect',
-	},
-
-	# Cleanup the domain
-	{ 'command' => 'delete-domain.pl',
-	  'args' => [ [ 'domain', $test_domain ] ],
-	  'cleanup' => 1 },
-	];
 
 $xml_tests = [
 	# Create a domain to run API commands on
@@ -13262,7 +13190,6 @@ $alltests = { '_config' => $_config_tests,
 	      'allscript' => $allscript_tests,
 	      'parallel_backup' => $parallel_backup_tests,
 	      'transfer' => $transfer_tests,
-	      'ftp' => $ftp_tests,
 	      'scheduled' => $scheduled_tests,
 	      'xml' => $xml_tests,
 	      'assoc' => $assoc_tests,

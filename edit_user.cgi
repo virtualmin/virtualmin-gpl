@@ -157,7 +157,7 @@ elsif ($user_type eq 'ftp') {
 	$user = &create_initial_user($d, undef, 1);
 
 	# FTP user in a sub-server .. check if FTP restrictions are active
-	if ($user->{'webowner'} && $d->{'parent'} && $config{'ftp'}) {
+	if ($user->{'webowner'} && $d->{'parent'} && &has_ftp_chroot()) {
 		my @chroots = &list_ftp_chroots();
 		my ($home) = grep { $_->{'dir'} eq '~' } @chroots;
 		if (!$home) {
@@ -617,7 +617,7 @@ else {
 		}
 
 	# FTP user in a sub-server .. check if FTP restrictions are active
-	if ($user->{'webowner'} && $d->{'parent'} && $config{'ftp'}) {
+	if ($user->{'webowner'} && $d->{'parent'} && &has_ftp_chroot()) {
 		my @chroots = &list_ftp_chroots();
 		my ($home) = grep { $_->{'dir'} eq '~' } @chroots;
 		if (!$home) {
