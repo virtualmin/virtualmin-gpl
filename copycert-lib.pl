@@ -258,10 +258,7 @@ my $proftpd_conf;
 if (&has_proftpd_support()) {
 	# Check ProFTPd global certificate
 	&foreign_require("proftpd");
-	$proftpd_conf = eval { &proftpd::get_config() };
-	if ($@ || !ref($proftpd_conf)) {
-		$proftpd_conf = undef;
-		}
+	$proftpd_conf = &proftpd::get_config();
 	}
 if ($proftpd_conf) {
 	my $cfile = &proftpd::find_directive(
@@ -683,11 +680,7 @@ my ($d) = @_;
 &has_proftpd_support() || &error($text{'copycert_eproftpd'});
 &foreign_require("proftpd");
 &proftpd::lock_proftpd_files();
-my $conf = eval { &proftpd::get_config() };
-if ($@ || !ref($conf)) {
-	&proftpd::unlock_proftpd_files();
-	&error($text{'copycert_eproftpd'});
-	}
+my $conf = &proftpd::get_config();
 my $cfile = &proftpd::find_directive("TLSRSACertificateFile", $conf);
 $cfile ||= &proftpd::find_directive("TLSECCertificateFile", $conf);
 my $kfile = &proftpd::find_directive("TLSRSACertificateKeyFile", $conf);
