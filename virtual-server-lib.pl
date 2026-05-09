@@ -76,7 +76,6 @@ $config{'virt'} = 1;
 $config{'virt6'} = 1;
 
 &generate_plugins_list($no_virtualmin_plugins ? '' : $config{'plugins'});
-@retired_features = ( 'ftp' );
 @opt_features = ( 'unix', 'dir', 'dns', 'mail', 'web', 'webalizer', 'ssl',
 		  'logrotate', 'mysql', 'postgres', 'spam', 'virus',
 		  $virtualmin_pro ? ( 'status' ) : ( ),

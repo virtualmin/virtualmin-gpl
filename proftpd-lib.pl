@@ -220,23 +220,4 @@ $main::got_lock_ftp-- if ($main::got_lock_ftp);
 &release_lock_anything();
 }
 
-# backup_ftp(&domain, file)
-# Compatibility shim for backups or schedules that still request the retired
-# ProFTPd virtual FTP feature.
-sub backup_ftp
-{
-&$first_print($text{'backup_ftp_retired'});
-&$second_print($text{'setup_done'});
-return undef;
-}
-
-# restore_ftp(&domain, file)
-# Compatibility shim for backups that contain retired virtual FTP data.
-sub restore_ftp
-{
-&$first_print($text{'restore_ftp_retired'});
-&$second_print($text{'setup_done'});
-return undef;
-}
-
 1;

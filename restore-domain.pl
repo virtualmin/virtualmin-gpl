@@ -132,11 +132,8 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--feature") {
 		local $f = shift(@ARGV);
-		if (&indexof($f, @retired_features) >= 0) {
-			push(@rfeats, $f);
-			next;
-			}
-		$f eq "virtualmin" || $config{$f} ||
+		$f eq "virtualmin" ||
+		   (&indexof($f, @features) >= 0 && $config{$f}) ||
 		   &indexof($f, &list_backup_plugins()) >= 0 ||
 			&usage("Feature $f is not enabled");
 		push(@rfeats, $f);

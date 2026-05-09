@@ -124,7 +124,6 @@ if ($sched->{'feature_all'}) {
 else {
 	@do_features = split(/\s+/, $sched->{'features'});
 	}
-@do_features = grep { &indexof($_, @retired_features) < 0 } @do_features;
 foreach $f (@do_features) {
 	$options{$f} = { map { split(/=/, $_) }
 			  split(/,/, $sched->{'backup_opts_'.$f}) };

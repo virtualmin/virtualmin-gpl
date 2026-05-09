@@ -616,6 +616,7 @@ $d->{'lastsave_user'} = $remote_user;
 $d->{'lastsave_type'} = $main::webmin_script_type;
 $d->{'lastsave_webmincron'} = $main::webmin_script_webmincron;
 $d->{'lastsave_pid'} = $main::initial_process_id;
+delete($d->{'ftp'});		# Removed ProFTPd virtual FTP feature
 delete($d->{'lastread_time'});
 &write_file($file, $d);
 &unlock_file($file);
@@ -13054,8 +13055,8 @@ sub get_disable_features
 {
 local ($d) = @_;
 local @disable;
-my %retired = map { $_, 1 } @retired_features;
-@disable = grep { !$retired{$_} && $d->{$_} && $config{$_} }
+my %core = map { $_, 1 } @features;
+@disable = grep { $core{$_} && $d->{$_} && $config{$_} }
 	   split(/,/, $config{'disable'});
 push(@disable, "ssl") if (&indexof("web", @disable) >= 0 && $d->{'ssl'});
 push(@disable, "status") if (&indexof("web", @disable) >= 0 && $d->{'status'});
@@ -13072,10 +13073,9 @@ sub get_enable_features
 local ($d) = @_;
 local @enable;
 local @disabled = split(/,/, $d->{'disabled'});
-my %retired = map { $_, 1 } @retired_features;
-@disabled = grep { !$retired{$_} } @disabled;
 local %disabled = map { $_, 1 } @disabled;
-@enable = grep { $d->{$_} && ($config{$_} || $_ eq 'unix') } @disabled;
+my %core = map { $_, 1 } @features;
+@enable = grep { $core{$_} && $d->{$_} && ($config{$_} || $_ eq 'unix') } @disabled;
 push(@enable, "ssl") if (&indexof("web", @enable) >= 0 && $d->{'ssl'});
 @enable = grep { $_ ne "unix" } @enable if ($d->{'parent'});
 push(@enable, grep { $d->{$_} && $disabled{$_} &&
@@ -17407,18 +17407,12 @@ if ($itype =~ /^(rpm|deb)$/ &&
 # All looks OK .. save the config
 $config{'last_check'} = time()+1;
 $config{'disable'} =~ s/user/unix/g;	# changed since last release
-if (@retired_features) {
-	my %retired = map { $_, 1 } @retired_features;
-	$config{'disable'} = join(",", grep { !$retired{$_} }
-				   split(/,/, $config{'disable'}));
-	foreach my $k (@retired_features,
-		       'proftpd_config', 'proftpd_ssl', 'ftp_dir') {
-		delete($config{$k});
-		}
-	foreach my $f (@retired_features) {
-		delete($config{'backup_feature_'.$f});
-		delete($config{'backup_opts_'.$f});
-		}
+# Clean settings left behind by the removed ProFTPd virtual FTP feature.
+$config{'disable'} = join(",", grep { $_ ne 'ftp' }
+			   split(/,/, $config{'disable'}));
+foreach my $k ('ftp', 'proftpd_config', 'proftpd_ssl', 'ftp_dir',
+	       'backup_feature_ftp', 'backup_opts_ftp') {
+	delete($config{$k});
 	}
 &lock_file($module_config_file);
 &save_module_config();
@@ -18682,9 +18676,7 @@ sub get_available_backup_features
 {
 local ($safe) = @_;
 local @rv;
-my %retired = map { $_, 1 } @retired_features;
 foreach my $f ($safe ? @safe_backup_features : @backup_features) {
-	next if ($retired{$f});
 	local $bfunc = "backup_$f";
 	if (defined(&$bfunc) &&
 	    ($config{$f} ||
@@ -19354,7 +19346,6 @@ return $days ? $days." days, ".$hours.":".$mins.":".$secs :
 sub show_check_migration_features
 {
 local @got = @_;
-@got = grep { &indexof($_, @retired_features) < 0 } @got;
 local %pconfig = map { $_, 1 } &list_feature_plugins();
 local @notgot = grep { !$config{$_} && !$pconfig{$_} } @got;
 @got = grep { $config{$_} || $pconfig{$_} } @got;

@@ -94,8 +94,6 @@ else {
 	# Selected features
 	@do_features = split(/\0/, $in{'feature'});
 	@do_features || &error($text{'restore_efeatures'});
-	@do_features = grep { &indexof($_, @retired_features) < 0 }
-		       @do_features;
 	if (!$safe_backup) {
 		# Make sure they are all safe
 		foreach my $f (@do_features) {
