@@ -93,6 +93,13 @@ Specifies which Git repository to use. Defaults to F</etc/.git/>.
 
 package virtual_server;
 
+# File-scope lexicals shared between the main body and the subs below.
+# Kept outside the `unless (caller)` guard so subs see them when the
+# script is `require`d for testing without the main body running.
+my ($etcdir, $target_dir, $dry_run, $depth, $git_repo);
+
+unless (caller) {
+
 # If not loaded by Webmin, do standard Virtualmin environment prep
 if (!$module_name) {
 	$main::no_acl_check++;
@@ -110,7 +117,7 @@ if (!$module_name) {
 	}
 
 # Get /etc from environment
-my $etcdir = $ENV{'WEBMIN_CONFIG'};
+$etcdir = $ENV{'WEBMIN_CONFIG'};
 $etcdir =~ s/\/[^\/]+$//;
 
 # Disable HTML output
@@ -119,12 +126,10 @@ $etcdir =~ s/\/[^\/]+$//;
 # Parse command-line args
 &parse_common_cli_flags(\@ARGV);
 
-my $target_dir;
-my $dry_run;
-my $depth = 1;
+$depth = 1;
 my @module_files;
 my $module;
-my $git_repo = "$etcdir/.git";
+$git_repo = "$etcdir/.git";
 
 while(@ARGV > 0) {
 	my $a = shift(@ARGV);
@@ -198,6 +203,8 @@ else {
 # Main logic
 &do_restore(\@source_paths, $depth, $git_repo, $target_dir, $dry_run);
 exit(0);
+
+} # end of unless (caller)
 
 # usage(msg)
 # Print usage message and exit

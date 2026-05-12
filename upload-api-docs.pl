@@ -4,6 +4,8 @@
 
 use Pod::Simple::HTML;
 
+unless (caller) {
+
 $wiki_pages_host = "virtualmin.com";
 $wiki_pages_user = "virtualmin";
 $wiki_pages_dir = "/home/virtualmin/virtualmin-api";
@@ -191,6 +193,8 @@ if (!$noupload) {
 	print "Uploading to Wiki server $wiki_pages_host ..\n";
 	system("su $wiki_pages_su -c 'scp $tempdir/* $wiki_pages_user\@$wiki_pages_host:$wiki_pages_dir/'");
 	}
+
+} # end of unless (caller)
 
 # convert_to_html(pod-text)
 # Converts a POD-format text into HTML format, and returns that and

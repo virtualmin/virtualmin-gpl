@@ -3,6 +3,9 @@
 # the admin for those that are over.
 
 package virtual_server;
+
+unless (caller) {
+
 $main::no_acl_check++;
 $no_virtualmin_plugins = 1;
 require './virtual-server-lib.pl';
@@ -110,6 +113,8 @@ if ($config{'quota_email'}) {
 		&send_user_quota_email(\@umsgs, $config{'quota_email'});
 		}
 	}
+
+} # end of unless (caller)
 
 # send_domain_quota_email(&message, address)
 # Converts a list of domain over-quota notifications into a message, and send it

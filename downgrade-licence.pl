@@ -11,6 +11,9 @@ accounts, switches repositories, and reverts the license to GPL.
 =cut
 
 package virtual_server;
+
+unless (caller) {
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
@@ -166,6 +169,8 @@ if ($gpl_downgrading_failed_status) {
 else {
 	&$first_print($text{'downgrade_gpl_all_done'});
 	}
+
+} # end of unless (caller)
 
 # lock_all_resellers()
 # Lock all reseller accounts

@@ -11,6 +11,9 @@ be called.
 =cut
 
 package virtual_server;
+
+unless (caller) {
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
@@ -245,6 +248,8 @@ if (@errs) {
 					   $body);
 		}
 	}
+
+} # end of unless (caller)
 
 sub patch_file
 {
