@@ -4,7 +4,7 @@
 
 package virtual_server;
 
-unless (caller) {
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {
 
 $main::no_acl_check++;
 $no_virtualmin_plugins = 1;
@@ -114,7 +114,7 @@ if ($config{'quota_email'}) {
 		}
 	}
 
-} # end of unless (caller)
+} # end of unless ($ENV{VIRTUALMIN_NO_MAIN})
 
 # send_domain_quota_email(&message, address)
 # Converts a list of domain over-quota notifications into a message, and send it

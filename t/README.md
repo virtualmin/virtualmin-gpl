@@ -31,27 +31,67 @@ or runs CLI work. To test individual subs in isolation we `require` the
 script as a library without running the main body.
 
 Virtualmin's idiom — script body runs at file scope, helper subs are
-defined alongside or below — calls for the **block-wrap** form:
+defined alongside or below — calls for the **block-wrap** form. The
+guard differs between CLI `.pl` scripts and `.cgi` files:
 
 ```perl
 #!/usr/local/bin/perl
 package virtual_server;
-require './virtual-server-lib.pl';   # use lines and requires stay outside
 
-unless (caller) {
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {   # CLI .pl files
 
 # main body: arg parsing, the actual work
+require './virtual-server-lib.pl';
 while(@ARGV > 0) { ... }
 ...
 
-} # end of unless (caller)
+} # end of guard
 
 sub helper { ... }
 ```
 
+```perl
+#!/usr/local/bin/perl
+# A .cgi file
+unless (caller) {                      # .cgi files only
+
+require './virtual-server-lib.pl';
+&ReadParse();
+...
+
+} # end of guard
+
+sub helper { ... }
+```
+
+**Why two guards.** Virtualmin's `execute_webmin_script` (in
+`json-lib.pl`) runs CLI scripts as `do $cmd` inside an `eval "..."`
+block in a forked child — this is the path Webmin Cron uses to run
+scheduled jobs like `backup.pl`. Under that path, `caller` is defined
+(the eval frame), so `unless (caller)` would wrongly skip the main body
+and the cron job would silently no-op. `$ENV{VIRTUALMIN_NO_MAIN}` is
+unaffected by `do` and is explicitly cleared by
+`execute_webmin_script`'s `clean_environment()` call, so production
+always runs the main body and only tests skip it.
+
+`.cgi` files are never loaded via `do`/`require` in production —
+miniserv fork+execs them — so `unless (caller)` is sufficient there and
+keeps the test mechanism identical to Webmin's.
+
 The `!caller(0)` one-liner form used by Webmin's `bin/` tools (`exit
-main(\@ARGV) if !caller(0);`) doesn't fit here — Virtualmin scripts
-don't have a `sub main` convention.
+main(\@ARGV) if !caller(0);`) doesn't fit either kind of file here —
+Virtualmin scripts don't have a `sub main` convention.
+
+**In tests**: set the env var (for CLI `.pl`) before `require`:
+
+```perl
+BEGIN { $ENV{VIRTUALMIN_NO_MAIN} = 1; }
+require './backup.pl';
+# now backup.pl's subs are defined; its main body did not run
+```
+
+For `.cgi` files, the bare `require` is enough — `caller` is defined
+inside a `.t` file and the guard skips the body.
 
 **Which scripts are wrapped.** The vast majority of `.pl` and `.cgi`
 files have no helper subs beyond `sub usage`, so wrapping them buys

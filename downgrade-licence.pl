@@ -12,7 +12,7 @@ accounts, switches repositories, and reverts the license to GPL.
 
 package virtual_server;
 
-unless (caller) {
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {
 
 if (!$module_name) {
 	$main::no_acl_check++;
@@ -170,7 +170,7 @@ else {
 	&$first_print($text{'downgrade_gpl_all_done'});
 	}
 
-} # end of unless (caller)
+} # end of unless ($ENV{VIRTUALMIN_NO_MAIN})
 
 # lock_all_resellers()
 # Lock all reseller accounts

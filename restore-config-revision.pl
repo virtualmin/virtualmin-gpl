@@ -94,11 +94,11 @@ Specifies which Git repository to use. Defaults to F</etc/.git/>.
 package virtual_server;
 
 # File-scope lexicals shared between the main body and the subs below.
-# Kept outside the `unless (caller)` guard so subs see them when the
+# Kept outside the VIRTUALMIN_NO_MAIN guard so subs see them when the
 # script is `require`d for testing without the main body running.
 my ($etcdir, $target_dir, $dry_run, $depth, $git_repo);
 
-unless (caller) {
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {
 
 # If not loaded by Webmin, do standard Virtualmin environment prep
 if (!$module_name) {
@@ -204,7 +204,7 @@ else {
 &do_restore(\@source_paths, $depth, $git_repo, $target_dir, $dry_run);
 exit(0);
 
-} # end of unless (caller)
+} # end of unless ($ENV{VIRTUALMIN_NO_MAIN})
 
 # usage(msg)
 # Print usage message and exit

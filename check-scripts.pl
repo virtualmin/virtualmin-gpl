@@ -12,7 +12,7 @@ be called.
 
 package virtual_server;
 
-unless (caller) {
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {
 
 if (!$module_name) {
 	$main::no_acl_check++;
@@ -249,7 +249,7 @@ if (@errs) {
 		}
 	}
 
-} # end of unless (caller)
+} # end of unless ($ENV{VIRTUALMIN_NO_MAIN})
 
 sub patch_file
 {

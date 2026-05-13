@@ -23,7 +23,7 @@ package virtual_server;
 use POSIX;
 use Socket;
 
-unless (caller) {
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {
 
 $main::no_acl_check++;
 $ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
@@ -139,7 +139,7 @@ while(1) {
 		}
 	}
 
-} # end of unless (caller)
+} # end of unless ($ENV{VIRTUALMIN_NO_MAIN})
 
 sub handle_one_request
 {

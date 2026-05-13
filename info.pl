@@ -26,7 +26,7 @@ to sections of the full output, for example:
 
 package virtual_server;
 
-unless (caller) {
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {
 
 if (!$module_name) {
 	$main::no_acl_check++;
@@ -93,7 +93,7 @@ foreach my $k (keys %$info) {
 	}
 &recursive_info_dump($info, "");
 
-} # end of unless (caller)
+} # end of unless ($ENV{VIRTUALMIN_NO_MAIN})
 
 sub recursive_info_dump
 {

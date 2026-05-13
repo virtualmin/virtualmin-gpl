@@ -3,7 +3,7 @@
 
 package virtual_server;
 
-unless (caller) {
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {
 
 $main::no_acl_check++;
 require './virtual-server-lib.pl';
@@ -341,7 +341,7 @@ if ($sched->{'email_doms'} && $has_mailboxes &&
 	      'failed' => !$ok,
 	      'sched' => $id, });
 
-} # end of unless (caller)
+} # end of unless ($ENV{VIRTUALMIN_NO_MAIN})
 
 # Override print functions to capture output
 sub first_save_print
