@@ -128,7 +128,7 @@ remains inside the guard, so tests can mock the values themselves.
 ## Sub-stubbing in tests
 
 The canonical example lives in the Webmin repo:
-`webmin/t/miniserv-http_error.t`. The pattern:
+`webmin/t/miniserv.t`. The pattern:
 
 1. `require` the script. The `unless (caller)` guard skips its main body.
 2. Replace side-effecting subs (disk I/O, `backquote_command`, network,
