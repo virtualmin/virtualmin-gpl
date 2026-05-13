@@ -93,10 +93,10 @@ Specifies which Git repository to use. Defaults to F</etc/.git/>.
 
 package virtual_server;
 
-# File-scope lexicals shared between the main body and the subs below.
-# Kept outside the VIRTUALMIN_NO_MAIN guard so subs see them when the
+# File-scope lexical shared between the main body and the subs below.
+# Kept outside the VIRTUALMIN_NO_MAIN guard so subs see it when the
 # script is `require`d for testing without the main body running.
-my ($etcdir, $target_dir, $dry_run, $depth, $git_repo);
+my ($etcdir);
 
 unless ($ENV{VIRTUALMIN_NO_MAIN}) {
 
