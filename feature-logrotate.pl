@@ -37,10 +37,21 @@ if (@logs) {
 	$logdir =~ s/\/[^\/]+$//;
 	my $already;
 	if ($tmpl->{'logrotate_shared'} eq 'yes') {
+		# First look for any block in a virtualmin.conf file
+		foreach my $c (@{$parent->{'members'}}) {
+			if ($c->{'file'} =~ /\/virtualmin.conf$/) {
+				$already = $c;
+				last;
+				}
+			}
+		}
+	if ($tmpl->{'logrotate_shared'} eq 'yes' && !$already) {
+		# Fall back to looking for any block that rotates Virtualmin logs
 		LOGROTATE: foreach my $c (@{$parent->{'members'}}) {
 			foreach my $n (@{$c->{'name'}}) {
-				if ($n =~ /^\Q$logdir\E\/[^\/]+$/ ||
-				    $n =~ /^\Q$home_base\E\//) {
+				if (($n =~ /^\Q$logdir\E\/[^\/]+$/ ||
+				     $n =~ /^\Q$home_base\E\//) &&
+				    !&logrotate::find_value("su", $c->{'members'})) {
 					$already = $c;
 					last LOGROTATE;
 					}
