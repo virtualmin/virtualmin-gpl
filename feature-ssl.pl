@@ -2422,10 +2422,7 @@ my $aw = $a =~ s/^\*\.// ? 1 : 0;
 my $bw = $b =~ s/^\*\.// ? 1 : 0;
 my $rv = $aw && !$bw && $b =~ /^[^\.]+\.\Q$a\E$/ ? -1 :
 	 $bw && !$aw && $a =~ /^[^\.]+\.\Q$b\E$/ ? 1 : 0;
-if (&compare_versions($ver, "2.3") < 0) {
-	$rv = -$rv;
-	}
-return $rv;
+return &compare_versions($ver, "2.4") < 0 ? -$rv : $rv;
 }
 
 # sync_dovecot_ssl_cert(&domain, [enable-or-disable])
