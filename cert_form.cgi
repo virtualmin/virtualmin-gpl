@@ -73,8 +73,6 @@ if (&domain_has_ssl_cert($d)) {
 
 	# Create links to Filemin if installed
 	my $filemin_prefix;
-	my $filemin_get_allowed;
-	my @filemin_allowed;
 	my %filemin_acls;
 	if (&foreign_available("filemin")) {
 		&foreign_require("filemin");
@@ -148,6 +146,8 @@ if (&domain_has_ssl_cert($d)) {
 	
 	# Other cert attributes
 	$info = &cert_info($d);
+	$chain = &get_website_ssl_file($d, 'ca');
+	$chaininfo = $chain ? &cert_file_info($chain, $d) : undef;
 	foreach $i (@cert_attributes) {
 		next if ($i eq 'modulus' || $i eq 'exponent');
 		$v = $info->{$i};
@@ -169,9 +169,8 @@ if (&domain_has_ssl_cert($d)) {
 			}
 
 		# Warn if the CA is wrong
-		$chain = &get_website_ssl_file($d, 'ca');
 		if ($i eq 'type' && $chain) {
-			my $cainfo = &cert_file_info($chain, $d);
+			my $cainfo = $chaininfo;
 			if ($cainfo &&
 			    ($cainfo->{'o'} ne $info->{'issuer_o'} ||
 			     $cainfo->{'cn'} ne $info->{'issuer_cn'})) {
