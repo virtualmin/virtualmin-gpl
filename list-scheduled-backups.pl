@@ -8,7 +8,8 @@ By default, this program displays a table of all scheduled backups on
 the system. You can limit it to those owned by some virtual server with
 the C<--domain> or C<--user> flag, or to a reseller with the C<--reseller>
 flag. These must be followed by a domain name, administration username
-or reseller login respectively.
+or reseller login respectively. Or to select just a single scheduled backup
+by ID, use the C<--id> flag followed by it's unique ID number.
 
 To switch to a more detailed and parseable output format, add the 
 C<--multiline> flag to the command line. To show only scheduled backup IDs,
@@ -45,6 +46,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--user") {
 		$user = shift(@ARGV);
 		}
+	elsif ($a eq "--id") {
+		$backupid = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -68,6 +72,10 @@ elsif ($user) {
 elsif ($reseller) {
 	# By reseller owner
 	@scheds = grep { $_->{'owner'} eq $reseller } @scheds;
+	}
+elsif ($backupid) {
+	# By scheduled backup ID
+	@scheds = grep { $_->{'id'} eq $backupid } @scheds;
 	}
 
 if ($multiline) {
@@ -108,7 +116,14 @@ if ($multiline) {
 			($s->{'fmt'} == 0 ? "Single archive file" :
 			 $s->{'fmt'} == 1 ? "One file per server (old format)" :
 					    "One file per server"),"\n";
-		print "    Differential: ",$s->{'increment'} ? "Yes" : "No","\n";
+		print "    Differential: ",($s->{'increment'} == 1 ||
+					    $s->{'increment'} >= 3 ? "Yes" : "No"),"\n";
+		if ($s->{'increment'} >= 3) {
+			print "    Differential from: ",$s->{'increment'},"\n";
+			}
+		elsif ($s->{'increment'} == 1) {
+			print "    Differential from: Last full backup\n";
+			}
 		print "    Enabled: ",$s->{'enabled'} ? "Yes" : "No","\n";
 		if ($s->{'special'}) {
 			print "    Cron schedule: $s->{'special'}\n";
@@ -167,7 +182,8 @@ print "Lists some or all scheduled Virtualmin backups.\n";
 print "\n";
 print "virtualmin list-scheduled-backups [--domain domain.name |\n";
 print "                                   --user name |\n";
-print "                                   --reseller name]\n";
+print "                                   --reseller name |]\n";
+print "                                   --id backup-id]\n";
 print "                                  [--multiline | --json | --xml | --id-only]\n";
 exit(1);
 }
