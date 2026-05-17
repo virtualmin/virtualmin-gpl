@@ -24,9 +24,15 @@ print &ui_hidden("index", $in{'index'});
 print &ui_table_start($text{'editgrey_header'.$in{'type'}}, undef, 2);
 
 # Value field
+my $show_re = &get_postgrey_type() ne 'milter' ||
+	      $in{'type'} eq 'recipients' ||
+	      $in{'new'} ||
+	      !$d->{'clause'} ||
+	      $d->{'clause'} ne 'addr';
 print &ui_table_row($text{'editgrey_value'.$in{'type'}},
 	&ui_textbox("value", $d->{'value'}, 60)."<br>\n".
-	&ui_checkbox("re", 1, $text{'editgrey_re'}, $d->{'re'}));
+	($show_re ? &ui_checkbox("re", 1, $text{'editgrey_re'}, $d->{'re'})
+		  : &ui_hidden("re", 0)));
 
 # Comment lines
 print &ui_table_row($text{'editgrey_cmts'},

@@ -22,22 +22,42 @@ if ($err) {
 # Show button to enable / disable
 print $text{'postgrey_desc'},"<p>\n";
 $ok = &is_postgrey_enabled();
-print &ui_buttons_start();
-if ($ok) {
-	print &ui_buttons_row("disable_postgrey.cgi",
-			      $text{'postgrey_disable'},
-			      $text{'postgrey_disabledesc'});
+$failed = !$ok && &is_postgrey_service_expected() && !&is_postgrey_running();
+if ($failed) {
+	my $init = &get_postgrey_init();
+	print &ui_alert_box(&text('postgrey_notrun',
+				  "<tt>".&html_escape($init)."</tt>"),
+			    'danger');
+	my $status = &get_postgrey_service_status();
+	if ($status) {
+		$status =~ s/^\s*\r?\n//g;
+		print &ui_details({
+			'title' => $text{'postgrey_statusdesc'},
+			'content' => &ui_tag('tt', &html_escape($status), {
+				style => 'white-space : break-spaces;' }),
+			'class' => 'error',
+			'html' => 1}, 1);
+		}
 	}
 else {
-	print &ui_buttons_row("enable_postgrey.cgi",
-			      $text{'postgrey_enable'},
-			      $text{'postgrey_enabledesc'});
+	print &ui_buttons_start();
+	if ($ok) {
+		print &ui_buttons_row("disable_postgrey.cgi",
+				      $text{'postgrey_disable'},
+				      $text{'postgrey_disabledesc'});
+		}
+	else {
+		print &ui_buttons_row("enable_postgrey.cgi",
+				      $text{'postgrey_enable'},
+				      $text{'postgrey_enabledesc'});
+		}
+	print &ui_buttons_end();
 	}
-print &ui_buttons_end();
 
 if ($ok) {
 	# Show whitelists of emails and clients
 	$formno = 1;
+	my $milter = &get_postgrey_type() eq 'milter';
 	print &ui_hr();
 	@tabs = map { [ $_, $text{'postgrey_tab'.$_},
 			'postgrey.cgi?type='.&urlize($_) ] }
@@ -48,19 +68,27 @@ if ($ok) {
 		print &ui_tabs_start_tab('type', $t);
 		$data = &list_postgrey_data($t);
 		if ($data) {
+			my $show_re = !$milter ||
+				$t eq 'recipients' ||
+				grep { !$_->{'clause'} ||
+				       $_->{'clause'} ne 'addr' } @$data;
 			# Show in editable table
 			@table = ( );
 			foreach $d (@$data) {
-				push(@table, [
+				my @row = (
 				    { 'type' => 'checkbox', 'name' => 'd',
 				      'value' => $d->{'index'} },
 				    "<a href='edit_postgrey.cgi?type=$t&".
 				    "index=$d->{'index'}'>".
-				    &html_escape($d->{'value'})."</a>",
-				    $d->{'re'} ? $text{'yes'} : $text{'no'},
-				    &html_escape(join(" ", @{$d->{'cmts'}})),
-				    ]);
+				    &html_escape($d->{'value'})."</a>" );
+				push(@row, $d->{'re'} ? $text{'yes'} : $text{'no'})
+					if ($show_re);
+				push(@row, &html_escape(join(" ", @{$d->{'cmts'}})));
+				push(@table, \@row);
 				}
+			my @heads = ( '', $text{'postgrey_head'.$t} );
+			push(@heads, $text{'postgrey_re'}) if ($show_re);
+			push(@heads, $text{'postgrey_cmts'});
 			print &ui_form_columns_table(
 				"delete_postgrey.cgi",
 				[ [ undef, $text{'postgrey_delete'} ] ],
@@ -68,9 +96,7 @@ if ($ok) {
 				[ [ "edit_postgrey.cgi?type=$t&new=1",
 				    $text{'postgrey_add'.$t} ] ],
 				[ [ 'type', $t ] ],
-				[ '', $text{'postgrey_head'.$t},
-				  $text{'postgrey_re'}, 
-				  $text{'postgrey_cmts'} ],
+				\@heads,
 				100,
 				\@table,
 				undef,

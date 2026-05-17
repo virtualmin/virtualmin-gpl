@@ -445,11 +445,14 @@ if ($mail_log_file && $config{'mail'}) {
 			$recvcount++;
 			$bouncecount++;
 			}
-		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+(NOQUEUE):\s+(\S+):.*from=(\S+)\s+to=(\S+)/) {
-			# Postfix bounce message
+		elsif (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+(\S+):\s+NOQUEUE:\s+\S+:.*from=\S+\s+to=\S+/) {
+			# Postfix pre-queue rejection
 			$recvcount++;
-			if (/Greylisted/) {
+			if (/greylist/i) {
 				$greycount++;
+				}
+			elsif (/message quota exceeded|ratelimit/i) {
+				# Counted separately from the milter-greylist log
 				}
 			else {
 				$bouncecount++;
