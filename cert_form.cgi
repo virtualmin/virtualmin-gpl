@@ -71,52 +71,33 @@ if (&domain_has_ssl_cert($d)) {
 
 	print &ui_table_start($text{'cert_header2'}, undef, 4);
 
-	# Pre-fetch cert data before File Manager module integration
-	# changes the effective UID as a side effect
-	$type = &get_ssl_key_type($d->{'ssl_key'}, $d->{'ssl_pass'});
-	$info = &cert_info($d);
-	$chain = &get_website_ssl_file($d, 'ca');
-	$chaininfo = $chain ? &cert_file_info($chain, $d) : undef;
-	@others = grep { &domain_has_ssl_cert($_) }
-		       &get_domain_by("ssl_same", $d->{'id'});
-
-	# Cert files
-	my @cert_files;
+	# Create links to Filemin if installed
 	my $filemin_prefix;
 	my $filemin_get_allowed;
 	my @filemin_allowed;
 	my %filemin_acls;
 	if (&foreign_available("filemin")) {
+		&foreign_require("filemin");
 		$filemin_prefix = &get_webprefix_safe().
 			"/filemin/index.cgi?path=";
-		&foreign_require("filemin");
-		$filemin_get_allowed = defined(&filemin::get_allowed_paths);
-		if ($filemin_get_allowed) {
-			%filemin_acls = &get_module_acl(undef, 'filemin');
-			}
-		else {
-			&filemin::get_paths();
-			@filemin_allowed = @filemin::allowed_paths;
-			%filemin_acls = %filemin::access;
-			}
+		%filemin_acls = &get_module_acl(undef, 'filemin');
 		}
 
+	# Cert files
 	my @certs = ( ['cert_incert', 'ssl_cert', 'cert'],
 		      ['cert_inkey', 'ssl_key', 'key'],
 		      ['cert_inca', 'ssl_chain', undef] );
+	my @cert_files;
 	foreach (@certs) {
 		my ($label_key, $field, $dtype) = @$_;
 		my $val = $d->{$field} or next;		
 		my $file = &ui_tag('tt', $val);
 		
 		# File name for file manager if available
-		if ($filemin_prefix &&
-		    ($filemin_get_allowed || @filemin_allowed)) {
+		if ($filemin_prefix) {
 			my $dir = $val;
 			$dir =~ s{/[^/]*$}{};
-			my @cert_allowed = $filemin_get_allowed
-				? &filemin::get_allowed_paths($dir)
-				: @filemin_allowed;
+			my @cert_allowed = &filemin::get_allowed_paths($dir);
 			my $rel;
 			for my $root (@cert_allowed) {
 				if (&is_under_directory($root, $dir)) {
@@ -159,13 +140,14 @@ if (&domain_has_ssl_cert($d)) {
 		}
 
 	# Cert hash type
+	$type = &get_ssl_key_type($d->{'ssl_key'}, $d->{'ssl_pass'});
 	if ($type) {
 		print &ui_table_row($text{'cert_hash'},
 			$text{'cert_type_'.$type} || uc($type));
 		}
-
-
 	
+	# Other cert attributes
+	$info = &cert_info($d);
 	foreach $i (@cert_attributes) {
 		next if ($i eq 'modulus' || $i eq 'exponent');
 		$v = $info->{$i};
@@ -187,8 +169,9 @@ if (&domain_has_ssl_cert($d)) {
 			}
 
 		# Warn if the CA is wrong
+		$chain = &get_website_ssl_file($d, 'ca');
 		if ($i eq 'type' && $chain) {
-			my $cainfo = $chaininfo;
+			my $cainfo = &cert_file_info($chain, $d);
 			if ($cainfo &&
 			    ($cainfo->{'o'} ne $info->{'issuer_o'} ||
 			     $cainfo->{'cn'} ne $info->{'issuer_cn'})) {
@@ -203,6 +186,8 @@ if (&domain_has_ssl_cert($d)) {
 		}
 
 	# Other domains using same cert, such as via wildcards or UCC
+	@others = grep { &domain_has_ssl_cert($_) }
+		       &get_domain_by("ssl_same", $d->{'id'});
 	if (@others) {
 		my @links;
 		foreach my $d (@others) {
