@@ -1,71 +1,73 @@
+use strict;
+use warnings;
+no warnings 'redefine';
+no warnings 'uninitialized';
 
-require 'virtual-server-lib.pl';
+require 'virtual-server-lib.pl'; ## no critic
+our (%in, %text, @opt_features);
 
 # acl_security_form(&options)
 # Output HTML for editing security options for the virtual server module
 sub acl_security_form
 {
-print "<tr> <td colspan=4>$text{'acl_warn'}</td> </tr>\n";
+my ($o) = @_;
 
-print "<tr> <td valign=top rowspan=4><b>$text{'acl_domains'}</b></td>\n";
-printf "<td rowspan=4><input type=radio name=domains_def value=1 %s> %s\n",
-	$_[0]->{'domains'} eq '*' ? "checked" : "", $text{'acl_all'};
-printf "<input type=radio name=domains_def value=0 %s> %s<br>\n",
-	$_[0]->{'domains'} eq '*' ? "" : "checked", $text{'acl_sel'};
-local %doms = map { $_, 1 } split(/\s+/, $_[0]->{'domains'});
-print "<select name=domains multiple size=5>\n";
-local $d;
-foreach $d (&list_domains()) {
-	printf "<option value=%s %s>%s\n",
-		$d->{'id'}, $doms{$d->{'id'}} ? "selected" : "", $d->{'dom'};
-	}
-print "</select></td> </tr>\n";
+print &ui_table_span($text{'acl_warn'});
 
-foreach $q ('create', 'import', 'migrate', 'edit', 'local', 'stop') {
-	print "<tr> <td><b>",$text{'acl_'.$q},"</b></td> <td>\n";
-	printf "<input type=radio name=%s value=1 %s> %s\n",
-		$q, $_[0]->{$q} == 1 ? "checked" : "", $text{'yes'};
+my @selected_domains = split(/\s+/, $o->{'domains'} || '');
+my @domain_opts = map { [ $_->{'id'}, $_->{'dom'} ] } &list_domains();
+print &ui_table_row(
+	$text{'acl_domains'},
+	&ui_radio("domains_def", $o->{'domains'} eq '*' ? 1 : 0,
+		  [ [ 1, $text{'acl_all'} ],
+		    [ 0, $text{'acl_sel'} ] ])."<br>\n".
+	&ui_select("domains", \@selected_domains, \@domain_opts, 5, 1),
+	3
+);
+
+foreach my $q ('create', 'import', 'migrate', 'edit', 'local', 'stop') {
+	my $enabled = defined($o->{$q}) ? $o->{$q} : 0;
+	my $input;
 	if ($q eq "create") {
-		printf "<input type=radio name=%s value=2 %s> %s\n",
-			$q, $_[0]->{$q} == 2 ? "checked" : "",
-			$text{'acl_only'};
+		$input = &ui_radio($q, $enabled,
+			[ [ 1, $text{'yes'} ],
+			  [ 2, $text{'acl_only'} ],
+			  [ 0, $text{'no'} ] ]);
 		}
 	elsif ($q eq "edit") {
-		printf "<input type=radio name=%s value=2 %s> %s\n",
-			$q, $_[0]->{$q} == 2 ? "checked" : "",
-			$text{'acl_lim'};
+		$input = &ui_radio($q, $enabled,
+			[ [ 1, $text{'yes'} ],
+			  [ 2, $text{'acl_lim'} ],
+			  [ 0, $text{'no'} ] ]);
 		}
-	printf "<input type=radio name=%s value=0 %s> %s\n",
-		$q, $_[0]->{$q} == 0 ? "checked" : "", $text{'no'};
-	print "</td> </tr>\n";
+	else {
+		$input = &ui_yesno_radio($q, $enabled);
+		}
+	print &ui_table_row($text{'acl_'.$q}, $input);
 	}
 
-print "<tr> <td valign=top><b>$text{'limits_features'}</b></td>\n";
-print "<td colspan=3><table>\n";
-foreach $f (@opt_features) {
-	print "<tr>\n" if ($i%2 == 0);
-        printf "<td><input type=checkbox name=features value=%s %s> %s</td>\n",
-                $f, $_[0]->{"feature_$f"} ? "checked" : "",
-                $text{'feature_'.$f};
-        print "</tr>\n" if ($i++%2 == 1);
+my @feature_grid;
+foreach my $f (@opt_features) {
+	push(@feature_grid, &ui_checkbox("features", $f, $text{'feature_'.$f},
+					 $o->{"feature_$f"}));
 	}
-print "</table></td> </tr>\n";
+print &ui_table_row($text{'limits_features'},
+		    &ui_grid_table(\@feature_grid, 2), 3);
 }
 
 # acl_security_save(&options)
-# Parse the form for security options for the useradmin module
+# Parse the form for security options for the virtual server module
 sub acl_security_save
 {
-$_[0]->{'domains'} = $in{'domains_def'} ? "*" :
-			join(" ", split(/\0/, $in{'domains'}));
-$_[0]->{'create'} = $in{'create'};
-$_[0]->{'import'} = $in{'import'};
-$_[0]->{'edit'} = $in{'edit'};
-$_[0]->{'local'} = $in{'local'};
-$_[0]->{'stop'} = $in{'stop'};
-%sel_features = map { $_, 1 } split(/\0/, $in{'features'});
-foreach $f (@opt_features) {
-        $_[0]->{"feature_".$f} = $sel_features{$f};
-        }
-}
+my ($o) = @_;
 
+$o->{'domains'} = $in{'domains_def'} ? "*" :
+			join(" ", split(/\0/, $in{'domains'}));
+foreach my $q ('create', 'import', 'edit', 'local', 'stop') {
+	$o->{$q} = $in{$q};
+	}
+my %sel_features = map { $_, 1 } split(/\0/, $in{'features'});
+foreach my $f (@opt_features) {
+	$o->{"feature_".$f} = $sel_features{$f};
+	}
+}
