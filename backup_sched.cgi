@@ -175,7 +175,16 @@ else {
 	$sched->{'email_err'} = $in{'email_err'};
 	$sched->{'email_doms'} = $in{'email_doms'};
 	$sched->{'errors'} = $in{'errors'};
-	$sched->{'increment'} = $in{'increment'} == 3 ? $in{'incrementof'} : $in{'increment'};
+	if ($in{'increment'} == 3) {
+		my @fullscheds = grep { !$_->{'increment'} } @scheds;
+		my ($isched) = grep { $_->{'id'} eq $in{'incrementof'} } @fullscheds;
+		$isched || &error($text{'backup_eincrement'});
+		$sched->{'increment'} = $in{'incrementof'};
+		}
+	else {
+		$in{'increment'} =~ /^\d+$/ || &error($text{'backup_eincrement'});
+		$sched->{'increment'} = $in{'increment'};
+		}
 	$sched->{'compression'} = $in{'compression'};
 	$sched->{'strftime'} = $in{'strftime'};
 	$sched->{'onebyone'} = $in{'onebyone'};

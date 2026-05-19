@@ -2580,6 +2580,7 @@ backup_increment0=Full - all files
 backup_increment1=Differential - changes since full backup
 backup_increment2=Neither - all files, and don't update the state
 backup_increment3=Differential - changes since backup $1
+backup_eincrement=Invalid full backup for incremental
 backup_compression=Backup compression format
 backup_compression0=<tt>tar+gzip</tt>
 backup_compression1=<tt>tar+bzip2</tt>
