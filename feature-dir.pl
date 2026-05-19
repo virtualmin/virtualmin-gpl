@@ -466,15 +466,15 @@ return 0;
 }
 
 # backup_dir(&domain, file, &options, home-format, differential, [&as-domain],
-# 	     &all-options, &key)
+# 	     &all-options, &key, [skip-signing], [backup-id])
 # Backs up the server's home directory in tar format to the given file
 sub backup_dir
 {
-local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
+local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key, undef, $id) = @_;
 local $compression = $opts->{'compression'};
 &$first_print($compression == 3 ? $text{'backup_dirzip'} :
-	      $increment == 1 ? $text{'backup_dirtarinc'}
-			      : $text{'backup_dirtar'});
+	      $increment == 1 || $increment >= 3 ? $text{'backup_dirtarinc'}
+					         : $text{'backup_dirtar'});
 local $out;
 local $cmd;
 local $destfile = $file;
@@ -577,11 +577,10 @@ foreach my $x (@xlist) {
 # Work out differential flags
 local ($iargs, $iflag, $ifile, $ifilecopy);
 if (&has_incremental_tar() && $increment != 2) {
-	if (!-d $incremental_backups_dir) {
-		&make_dir($incremental_backups_dir, 0700);
-		}
-	$ifile = "$incremental_backups_dir/$d->{'id'}";
-	if (!$_[4]) {
+	$ifile = &get_incremental_file($d, $increment, $id);
+	my $idir = $ifile =~ /^(.*)\/[^\/]+$/ ? $1 : undef;
+	&make_dir($idir, 0711, 1);
+	if (!$increment) {
 		# Force full backup
 		&unlink_file($ifile);
 		}
@@ -870,8 +869,7 @@ else {
 		}
 	
 	# differential file is no longer valid, so clear it
-	local $ifile = "$incremental_backups_dir/$d->{'id'}";
-	&unlink_file($ifile);
+	&clear_incremental_files($d);
 
 	# Check if logs are links now .. if not, we need to move the files
 	local $new_aloglink = readlink($alog);

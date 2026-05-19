@@ -20,5 +20,10 @@ The <b>Neither</b> option also performs a full backup, but does not change
 the backup state. This can be useful when performing an ad-hoc
 backup of domains that also have full and differential backups scheduled. <p>
 
+Finally, the <tt>Differential - changes since backup</tt> option allows you
+to create an incremental backup against a specific scheduled full backup,
+rather that whatever the last complete backup was. This allows creation of
+independent full and incremental chains for different destinations. <p>
+
 <footer>
 

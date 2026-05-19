@@ -175,7 +175,7 @@ else {
 	$sched->{'email_err'} = $in{'email_err'};
 	$sched->{'email_doms'} = $in{'email_doms'};
 	$sched->{'errors'} = $in{'errors'};
-	$sched->{'increment'} = $in{'increment'};
+	$sched->{'increment'} = $in{'increment'} == 3 ? $in{'incrementof'} : $in{'increment'};
 	$sched->{'compression'} = $in{'compression'};
 	$sched->{'strftime'} = $in{'strftime'};
 	$sched->{'onebyone'} = $in{'onebyone'};

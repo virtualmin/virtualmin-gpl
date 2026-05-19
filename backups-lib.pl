@@ -261,7 +261,7 @@ return $asd;
 # backup_domains(file, &domains, &features, dir-format, skip-errors, &options,
 #		 home-format, &virtualmin-backups, mkdir, onebyone, as-owner,
 #		 &callback-func, differential, on-schedule, &key, kill-running,
-#		 compression-format, skip-signing)
+#		 compression-format, skip-signing, backup-id)
 # Perform a backup of one or more domains into a single tar.gz file. Returns
 # an OK flag, the size of the backup file, and a list of domains for which
 # something went wrong.
@@ -269,8 +269,9 @@ sub backup_domains
 {
 local ($desturls, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
        $mkdir, $onebyone, $asowner, $cbfunc, $increment, $onsched, $key,
-       $kill, $compression, $nosign) = @_;
+       $kill, $compression, $nosign, $id) = @_;
 $opts->{'skip'} = $skip;
+$opts->{'id'} = $id;
 $desturls = [ $desturls ] if (!ref($desturls));
 local $backupdir;
 local $transferred_sz;
@@ -940,7 +941,7 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 				local $main::error_must_die = 1;
 				$fok = &$bfunc(
 					$d, $ffile, $opts->{$f}, $homefmt,
-					$increment, $asd, $opts, $key, $nosign);
+					$increment, $asd, $opts, $key, $nosign, $id);
 				};
 			if ($@) {
 				my $err = $@;
@@ -2090,12 +2091,44 @@ foreach my $lockfile (@lockfiles) {
 if ($increment == 0 && &has_incremental_tar()) {
 	foreach my $d (@errdoms) {
 		if ($d->{'id'}) {
-			&unlink_file("$incremental_backups_dir/$d->{'id'}");
+			# XXX
+			&unlink_file(&get_incremental_file($d, $backup));
 			}
 		}
 	}
 
 return ($ok, $sz, \@errdoms);
+}
+
+# get_incremental_file(&domain, increment-mode, backup-id)
+# Returns the path to the incremental file for a backup
+sub get_incremental_file
+{
+my ($d, $mode, $id) = @_;
+return if (!$d || !$d->{'id'});
+if ($mode >= 3) {
+	# Incremental against a specific backup
+	return "$incremental_backups_dir/$mode/$d->{'id'}";
+	}
+elsif ($mode == 0) {
+	# This is a full backup, but are there other incrementals referencing it?
+	my @incrs = grep { $_->{'increment'} == $id } &list_scheduled_backups();
+	# XXX what is our ID?
+	if (@incrs) {
+		return "$incremental_backups_dir/$id/$d->{'id'}";
+		}
+	}
+return "$incremental_backups_dir/$d->{'id'}";
+}
+
+# clear_incremental_files(&domain)
+# Delete all incremental backup files for a domain
+sub clear_incremental_files
+{
+my ($d) = @_;
+return if (!$d || !$d->{'id'});
+&unlink_file("$incremental_backups_dir/$d->{'id'}");
+&unlink_file(glob("$incremental_backups_dir/*/$d->{'id'}"));
 }
 
 # make_backup_dir(dir, perms, recursive, &as-domain)

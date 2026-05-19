@@ -340,12 +340,25 @@ print &ui_table_row(
 
 # Show differential option
 if (&has_incremental_tar()) {
+	my @iopts = ( [ 0, $text{'backup_increment0'}."<br>" ],
+		      [ 1, $text{'backup_increment1'}."<br>" ],
+		      [ 2, $text{'backup_increment2'}."<br>" ] );
+	my @fullscheds = grep { !$_->{'increment'} } @scheds;
+	if (($in{'sched'} || $in{'new'}) && @fullscheds) {
+		# May be incremental of a specific full backup
+		my @sopts;
+		foreach my $s (@fullscheds) {
+			my @dests = &get_scheduled_backup_dests($s);
+			push(@sopts, [ $s->{'id'}, &nice_backup_url($dests[0], 1, 0) ]);
+			}
+		push(@iopts, [ 3, &text('backup_increment3',
+				&ui_select("incrementof", $sched->{'increment'}, \@sopts)) ]);
+		}
+	my $imode = int($sched->{'increment'});
+	$imode = 3 if ($imode >= 3);
 	print &ui_table_row(
 		&hlink($text{'backup_increment'}, "backup_increment"),
-		&ui_radio("increment", int($sched->{'increment'}),
-			      [ [ 0, $text{'backup_increment0'}."<br>" ],
-				[ 1, $text{'backup_increment1'}."<br>" ],
-				[ 2, $text{'backup_increment2'} ] ]));
+		&ui_radio("increment", $imode, \@iopts), 3);
 	}
 
 # Before and after commands (fixed)

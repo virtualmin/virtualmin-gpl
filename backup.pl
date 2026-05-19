@@ -183,7 +183,9 @@ eval {
 					1,
 					$key,
 					$sched->{'kill'},
-					$sched->{'compression'});
+					$sched->{'compression'},
+					0,
+					$sched->{'id'});
 	};
 if ($@) {
 	# Perl error during backup!

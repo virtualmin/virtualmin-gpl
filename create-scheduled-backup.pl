@@ -64,6 +64,11 @@ from clearing the list of files that were included in the last full backup.
 This is used if you have a scheduled differential backup setup, and don't want
 to change its behavior by doing an ad-hoc full backup.
 
+Finally, you can use C<--differential-of> followed by the ID of another
+scheduled non-differential backup. This will create a incremental backup that
+contains only files modified since that specific full backup. This can be used
+to create multiple independent chains of backups to different destinations.
+
 To exclude some files from each virtual server's home directory from the
 backup, use the C<--exclude> flag followed by a relative filename, like
 I<public_html/stats> or I<.bashrc>. Alternately, you can limit the backup to
@@ -214,6 +219,14 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--no-incremental" || $a eq "--no-differential") {
 		$increment = 2;
+		}
+	elsif ($a eq "--incremental-of" || $a eq "--differential-of") {
+		&has_incremental_tar() || &usage("The tar command on this system does not support differential backups");
+		$increment = shift(@ARGV);
+		($isched) = grep { $_->{'id'} eq $increment } &list_scheduled_backups();
+		$isched || &usage("No scheduled backup with ID $increment exists");
+		$isched->{'increment'} == 0 ||
+			&usage("Scheduled backup with ID $increment is not a full backup");
 		}
 	elsif ($a eq "--purge") {
 		$purge = shift(@ARGV);
@@ -402,7 +415,8 @@ print "                         [--newformat]\n";
 print "                         [--onebyone]\n";
 print "                         [--strftime] [--purge days]\n";
 if (&has_incremental_tar()) {
-	print "                         [--differential] | [--no-differential]\n";
+	print "                         [--differential | --no-differential |\n";
+	print "                          --differential-of backup-id]\n";
 	}
 print "                         [--all-virtualmin] | [--virtualmin config] |\n";
 print "                                              [--except-virtualmin config]\n";

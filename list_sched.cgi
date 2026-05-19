@@ -45,6 +45,7 @@ foreach $s (@scheds) {
 		# Differential level
 		push(@row, $s->{'increment'} == 1 ? $text{'sched_inc'} :
 			   $s->{'increment'} == 2 ? $text{'sched_inc2'} :
+			   $s->{'increment'} >= 3 ? $text{'sched_inc3'} :
 					            $text{'sched_full'});
 		}
 	# Creator of the backup

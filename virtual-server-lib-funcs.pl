@@ -709,7 +709,7 @@ if (defined(&delete_domain_systemd_limits)) {
 &unlink_file("$script_log_directory/$id");
 
 # Delete differential backup file
-&unlink_file("$incremental_backups_dir/$id");
+&clear_incremental_files($d);
 
 # Delete cached links for the domain
 &clear_links_cache($d);
