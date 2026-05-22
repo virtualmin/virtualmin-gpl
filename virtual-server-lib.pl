@@ -105,7 +105,7 @@ foreach my $fname (@features, "virt", "virt6") {
 	&$ifunc() if (defined(&$ifunc));
 	}
 @migration_types = ( "cpanel", "plesk", "directadmin" );
-@startstop_features = ("web", "dns", "mail", "unix", "virus", "spam",
+@startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus", "spam",
 		       "mysql", "postgres");
 @startstop_always_features = ("fpm");
 @bandwidth_features = ( @features, "backup", "restore" );
