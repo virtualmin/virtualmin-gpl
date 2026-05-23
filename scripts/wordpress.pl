@@ -26,7 +26,7 @@ return "A semantic personal publishing platform with a focus on aesthetics, web 
 # script_wordpress_versions()
 sub script_wordpress_versions
 {
-return ( "6.9.4", "5.9.9", "4.9.25", "3.9.40" );
+return ( "7.0", "5.9.9", "4.9.25", "3.9.40" );
 }
 
 sub script_wordpress_category
@@ -59,7 +59,7 @@ return ( "curl", "ssh2", "pecl-ssh2", "date",
 
 sub script_wordpress_php_vars
 {
-return ([ 'memory_limit', '256M', '+' ],
+return ([ 'memory_limit', '512M', '+' ],
         [ 'max_execution_time', 60, '+' ],
         [ 'file_uploads', 'On' ],
         [ 'upload_max_filesize', '10M', '+' ],
@@ -220,7 +220,8 @@ my $homebin = "$d->{'home'}/bin";
 my $wpcli = "$homebin/wp";
 my $wpcli_old = "$opts->{'dir'}/wp-cli.phar";
 &unlink_file_as_domain_user($d, $wpcli_old) if (-f $wpcli_old);
-my $wp = "cd $opts->{'dir'} && $dom_php_bin $wpcli --path=\"$opts->{'dir'}\"";
+my $ini = &get_domain_php_ini($d, $opts->{'phpver'}, 1);
+my $wp = "cd $opts->{'dir'} && PHPRC=$ini $dom_php_bin $wpcli --path=\"$opts->{'dir'}\"";
 
 # Copy WP-CLI
 &make_dir_as_domain_user($d, $opts->{'dir'}, 0755) if (!-d $opts->{'dir'});
