@@ -81,7 +81,9 @@ if (!$d->{'parent'}) {
 	}
 
 # Show user and group quotas
-if (&has_home_quotas() && !$parentdom) {
+my $show_home_quota = &has_home_quotas() && !$parentdom;
+my $show_home_quota_usage = $show_home_quota && $d->{'unix'};
+if ($show_home_quota) {
 	my $uq = $d->{'quota'} ? &quota_show($d->{'quota'}, "home")
 			  : $text{'form_unlimit'};
 	if (&can_config_domain($d)) {
@@ -204,6 +206,9 @@ if ((!$aliasdom && $d->{'dir'}) ||
 				".cgi?path=$dompath\">$domhome</a>";
 		}
 	print &ui_table_row($text{'edit_home'}, $domhome, 3);
+	}
+if ($show_home_quota_usage) {
+	&show_domain_quota_usage($d, 1, "usage.cgi?dom=$d->{'id'}");
 	}
 
 # Description

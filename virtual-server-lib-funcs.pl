@@ -18379,11 +18379,11 @@ my ($d, $newhash, $deleted) = @_;
 delete @{$d}{@$deleted} if @$deleted;
 }
 
-# show_domain_quota_usage(&domain)
+# show_domain_quota_usage(&domain, [compact], [usage-url])
 # Prints ui_table fields for quota usage in a domain
 sub show_domain_quota_usage
 {
-my ($d) = @_;
+my ($d, $compact, $usageurl) = @_;
 my ($tcount, $total) = (0, 0);
 
 # Get usage for mail users and DBs in the domain
@@ -18410,18 +18410,23 @@ if ($d->{'uquota'} && $duser->{'uquota'} > $d->{'uquota'}) {
 	$umsg = "<font color=#ff0000><b>$umsg</b></font>";
 	}
 my $mmsg = &nice_size(($homequota+$subhomequota)*$bsize);
-print &ui_table_row($text{'edit_allquotah'},
-		    &text('edit_quotaby', $tmsg, $umsg, $mmsg), 3);
+print &ui_table_row($compact ? $text{'summary_allquotah'}
+			     : $text{'edit_allquotah'},
+		    $compact ? ($usageurl ? &ui_link($usageurl."&mode=homes", $tmsg)
+					  : $tmsg)
+			     : &text('edit_quotaby', $tmsg, $umsg, $mmsg),
+		    3);
 $tcount++;
 $total += $totalhomequota*$bsize;
 
 # Show DB usage
 if ($dbquota+$subdbquota) {
+	my $dbmsg = &nice_size($dbquota+$subdbquota);
 	print &ui_table_row($text{'edit_dbquota'},
-	    &text('edit_quotabysubs',
-		&nice_size($dbquota+$subdbquota),
-		&nice_size($dbquota),
-		&nice_size($subdbquota)), 3);
+	    $compact ? ($usageurl ? &ui_link($usageurl."&mode=dbs", $dbmsg)
+				  : $dbmsg)
+		     : &text('edit_quotabysubs', $dbmsg, &nice_size($dbquota),
+			     &nice_size($subdbquota)), 3);
 	$tcount++;
 	$total += $dbquota + $subdbquota;
 	}
