@@ -4242,22 +4242,25 @@ foreach my $port ($d->{'web_port'},
 			# Swap file order
 			if ($dir eq $olddir && $dir eq $adddir) {
 				# Rename the domain's file from xyz.com to
-				# 0-xyz.com to put it first
-				&apache::delete_webfile_link("$dir/$file");
-				&rename_logged("$dir/$file", "$dir/0-$file");
-				&apache::create_webfile_link("$dir/0-$file");
-				&recursive_set_apache_filename($conf,
-					"$dir/$file", "$dir/0-$file");
-				if ($oldfile =~ /^0-(.*)$/) {
-					# Rename any previous 0-xyz.com file
-					# to just xyz.com
-					&apache::delete_webfile_link(
-							"$dir/$oldfile");
-					&rename_logged("$dir/$oldfile",
-						       "$dir/$1");
-					&apache::create_webfile_link("$dir/$1");
+				# 0-xyz.com to put it first (unless somehow it is already
+				# first)
+				if ($file !~ /^0-/) {
+					&apache::delete_webfile_link("$dir/$file");
+					&rename_logged("$dir/$file", "$dir/0-$file");
+					&apache::create_webfile_link("$dir/0-$file");
 					&recursive_set_apache_filename($conf,
-						"$dir/$oldfile", "$dir/$1");
+						"$dir/$file", "$dir/0-$file");
+					if ($oldfile =~ /^0-(.*)$/) {
+						# Rename any previous 0-xyz.com file
+						# to just xyz.com
+						&apache::delete_webfile_link(
+								"$dir/$oldfile");
+						&rename_logged("$dir/$oldfile",
+							       "$dir/$1");
+						&apache::create_webfile_link("$dir/$1");
+						&recursive_set_apache_filename($conf,
+							"$dir/$oldfile", "$dir/$1");
+						}
 					}
 				}
 			else {
