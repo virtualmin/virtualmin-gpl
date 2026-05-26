@@ -218,6 +218,34 @@ $name =~ s/^['"]|['"]$//g;
 return $name eq 'virtualmin_limit' || $name =~ /^domain_\d+$/;
 }
 
+# is_ratelimit_acl_directive(&directive)
+# Returns 1 for milter-greylist ACL directives
+sub is_ratelimit_acl_directive
+{
+my ($c) = @_;
+return $c->{'name'} eq 'racl' || $c->{'name'} eq 'acl';
+}
+
+# is_virtualmin_ratelimit_acl(&directive)
+# Returns 1 for blacklist ACLs that apply a Virtualmin rate-limit class
+sub is_virtualmin_ratelimit_acl
+{
+my ($c) = @_;
+return &is_ratelimit_acl_directive($c) &&
+       $c->{'values'}->[0] eq 'blacklist' &&
+       $c->{'values'}->[3] eq 'ratelimit' &&
+       &is_virtualmin_ratelimit_name($c->{'values'}->[4]);
+}
+
+# virtualmin_ratelimit_acl_from(&directive)
+# Returns the from regexp matched by a Virtualmin rate-limit ACL
+sub virtualmin_ratelimit_acl_from
+{
+my ($c) = @_;
+return undef if (!&is_virtualmin_ratelimit_acl($c));
+return $c->{'values'}->[1] eq 'from' ? $c->{'values'}->[2] : undef;
+}
+
 # normalize_ratelimit_config([&config])
 # Ensures milter-greylist does not bypass Virtualmin rate limits
 sub normalize_ratelimit_config
@@ -248,35 +276,30 @@ foreach my $name (@controls) {
 # otherwise milter-greylist accepts the message before checking quotas.
 my %rate_froms;
 foreach my $c (@$conf) {
-	if (($c->{'name'} eq 'racl' || $c->{'name'} eq 'acl') &&
-	    $c->{'values'}->[0] eq 'blacklist' &&
-	    $c->{'values'}->[1] eq 'from' &&
-	    $c->{'values'}->[3] eq 'ratelimit' &&
-	    &is_virtualmin_ratelimit_name($c->{'values'}->[4])) {
-		$rate_froms{$c->{'values'}->[2]} = 1;
+	my $from = &virtualmin_ratelimit_acl_from($c);
+	if (defined($from)) {
+		$rate_froms{$from} = 1;
 		}
 	}
-my @rate = grep {
-	$_->{'name'} eq 'ratelimit' ?
-		&is_virtualmin_ratelimit_name($_->{'values'}->[0]) :
-	($_->{'name'} eq 'racl' || $_->{'name'} eq 'acl') &&
-		(
-		$_->{'values'}->[0] eq 'blacklist' &&
-		$_->{'values'}->[3] eq 'ratelimit' &&
-		&is_virtualmin_ratelimit_name($_->{'values'}->[4]) ||
-		$_->{'values'}->[0] eq 'whitelist' &&
-		$_->{'values'}->[1] eq 'from' &&
-		$rate_froms{$_->{'values'}->[2]}
-		);
-	} @$conf;
+my @rate;
 my $before;
 foreach my $c (@$conf) {
-	next if ($c->{'name'} ne 'racl' && $c->{'name'} ne 'acl');
-	next if ($c->{'values'}->[0] ne 'whitelist');
-	next if ($c->{'values'}->[1] eq 'from' &&
-		 $rate_froms{$c->{'values'}->[2]});
-	$before = $c;
-	last;
+	if ($c->{'name'} eq 'ratelimit' &&
+	    &is_virtualmin_ratelimit_name($c->{'values'}->[0])) {
+		push(@rate, $c);
+		next;
+		}
+	next if (!&is_ratelimit_acl_directive($c));
+	if (&is_virtualmin_ratelimit_acl($c) ||
+	    ($c->{'values'}->[0] eq 'whitelist' &&
+	     $c->{'values'}->[1] eq 'from' &&
+	     $rate_froms{$c->{'values'}->[2]})) {
+		push(@rate, $c);
+		next;
+		}
+	if (!$before && $c->{'values'}->[0] eq 'whitelist') {
+		$before = $c;
+		}
 	}
 if ($before && grep { $_->{'line'} > $before->{'line'} } @rate) {
 	my @newrate = map {
