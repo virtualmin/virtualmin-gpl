@@ -393,6 +393,8 @@ return 1;
 sub enable_ratelimit
 {
 # Build stop and start commands (needed when installed from source)
+my $cfile = &get_ratelimit_config_file();
+&lock_file($cfile);
 my $conf = &get_ratelimit_config();
 my ($pidfile) = grep { $_->{'name'} eq 'pidfile' } @$conf;
 if (!$pidfile) {
@@ -403,11 +405,12 @@ if (!$pidfile) {
 	&flush_file_lines($pidfile->{'file'});
 	}
 if (&normalize_ratelimit_config($conf)) {
-	&flush_file_lines(&get_ratelimit_config_file());
+	&flush_file_lines($cfile);
 	}
+&unlock_file($cfile);
 my $stopcmd = "kill `cat $pidfile->{'value'}` && sleep 5";
 my $startcmd = &has_command("milter-greylist").
-	       " -f ".&get_ratelimit_config_file();
+	       " -f ".$cfile;
 
 # Enable at boot
 &foreign_require("init");
@@ -434,8 +437,11 @@ if (&get_ratelimit_type() eq 'debian' && -r $dfile) {
 # Pick a socket file under the mail server's chroot
 &$first_print($text{'ratelimit_socket'});
 my $chroot = &get_mailserver_chroot();
+&lock_file($cfile);
+$conf = &get_ratelimit_config();
 my ($oldsocket) = grep { $_->{'name'} eq 'socket' } @$conf;
 if (!$oldsocket) {
+	&unlock_file($cfile);
 	&$second_print($text{'ratelimit_esocket'});
 	return 0;
 	}
@@ -490,6 +496,7 @@ if ($socket && $socket->{'values'}->[1] ne '666') {
 	&save_ratelimit_directive($conf, $socket, $socket);
 	&flush_file_lines($socket->{'file'});
 	}
+&unlock_file($cfile);
 
 &$second_print($text{'setup_done'});
 
