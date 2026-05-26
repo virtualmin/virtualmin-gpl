@@ -208,6 +208,94 @@ if ($rlines) {
 	}
 }
 
+# is_virtualmin_ratelimit_name(name)
+# Returns 1 for rate-limit classes managed by Virtualmin
+sub is_virtualmin_ratelimit_name
+{
+my ($name) = @_;
+return 0 if (!defined($name));
+$name =~ s/^['"]|['"]$//g;
+return $name eq 'virtualmin_limit' || $name =~ /^domain_\d+$/;
+}
+
+# normalize_ratelimit_config([&config])
+# Ensures milter-greylist does not bypass Virtualmin rate limits
+sub normalize_ratelimit_config
+{
+my ($conf) = @_;
+$conf ||= &get_ratelimit_config();
+my $changed = 0;
+
+# milter-greylist otherwise bypasses authenticated users and SPF-valid senders
+# before the rate-limit ACLs have a chance to run.
+my @controls = ( 'noauth', 'nospf' );
+my %has_control = map { $_->{'name'}, 1 }
+		  grep { $_->{'name'} eq 'noauth' ||
+			 $_->{'name'} eq 'nospf' } @$conf;
+my ($control_before) = grep { $_->{'name'} eq 'ratelimit' ||
+			      $_->{'name'} eq 'racl' ||
+			      $_->{'name'} eq 'acl' } @$conf;
+foreach my $name (@controls) {
+	if (!$has_control{$name}) {
+		my $new = { 'name' => $name, 'values' => [] };
+		&save_ratelimit_directive($conf, undef, $new,
+					  $control_before);
+		$changed++;
+		}
+	}
+
+# Keep rate-limit ACLs before ordinary whitelists such as "my network",
+# otherwise milter-greylist accepts the message before checking quotas.
+my %rate_froms;
+foreach my $c (@$conf) {
+	if (($c->{'name'} eq 'racl' || $c->{'name'} eq 'acl') &&
+	    $c->{'values'}->[0] eq 'blacklist' &&
+	    $c->{'values'}->[1] eq 'from' &&
+	    $c->{'values'}->[3] eq 'ratelimit' &&
+	    &is_virtualmin_ratelimit_name($c->{'values'}->[4])) {
+		$rate_froms{$c->{'values'}->[2]} = 1;
+		}
+	}
+my @rate = grep {
+	$_->{'name'} eq 'ratelimit' ?
+		&is_virtualmin_ratelimit_name($_->{'values'}->[0]) :
+	($_->{'name'} eq 'racl' || $_->{'name'} eq 'acl') &&
+		(
+		$_->{'values'}->[0] eq 'blacklist' &&
+		$_->{'values'}->[3] eq 'ratelimit' &&
+		&is_virtualmin_ratelimit_name($_->{'values'}->[4]) ||
+		$_->{'values'}->[0] eq 'whitelist' &&
+		$_->{'values'}->[1] eq 'from' &&
+		$rate_froms{$_->{'values'}->[2]}
+		);
+	} @$conf;
+my $before;
+foreach my $c (@$conf) {
+	next if ($c->{'name'} ne 'racl' && $c->{'name'} ne 'acl');
+	next if ($c->{'values'}->[0] ne 'whitelist');
+	next if ($c->{'values'}->[1] eq 'from' &&
+		 $rate_froms{$c->{'values'}->[2]});
+	$before = $c;
+	last;
+	}
+if ($before && grep { $_->{'line'} > $before->{'line'} } @rate) {
+	my @newrate = map {
+		my $new = { 'name' => $_->{'name'},
+			    'values' => [ @{$_->{'values'}} ] };
+		$new->{'members'} = [ @{$_->{'members'}} ] if ($_->{'members'});
+		$new;
+		} @rate;
+	foreach my $c (reverse @rate) {
+		&save_ratelimit_directive($conf, $c, undef);
+		}
+	foreach my $c (@newrate) {
+		&save_ratelimit_directive($conf, undef, $c, $before);
+		}
+	$changed++;
+	}
+return $changed;
+}
+
 # make_ratelimit_lines(&directive)
 # Returns an array of lines for some directive
 sub make_ratelimit_lines
@@ -242,10 +330,11 @@ return $out =~ /milter-greylist-([0-9\.]+)/ ? $1 : undef;
 # milter-greylist socket file must be relative to this.
 sub get_mailserver_chroot
 {
+&require_mail() if (!defined($mail_system));
 if ($mail_system == 0) {
 	&foreign_require("postfix");
 	my $postfix_conf = &postfix::get_master_config();
-	my ($postsmtpchroot) = grep { $_->{'name'} = 'smtp' && $_->{'chroot'} eq 'y' } @{$postfix_conf};		
+	my ($postsmtpchroot) = grep { $_->{'name'} eq 'smtp' && $_->{'chroot'} eq 'y' } @{$postfix_conf};
 	if ($postsmtpchroot) {
 		return "/var/spool/postfix";
 		}
@@ -312,6 +401,9 @@ if (!$pidfile) {
 		     'values' => [ '"/var/run/milter-greylist.pid"' ] };
 	&save_ratelimit_directive($conf, undef, $pidfile);
 	&flush_file_lines($pidfile->{'file'});
+	}
+if (&normalize_ratelimit_config($conf)) {
+	&flush_file_lines(&get_ratelimit_config_file());
 	}
 my $stopcmd = "kill `cat $pidfile->{'value'}` && sleep 5";
 my $startcmd = &has_command("milter-greylist").

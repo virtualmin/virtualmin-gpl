@@ -491,15 +491,34 @@ if ($warn) {
 	print STDERR &get_virtualmin_url()," to fix them.\n";
 	}
 
-# Fix rate limiting noauth setting
-if (!&check_ratelimit() && &is_ratelimit_enabled()) {
+# Fix rate limiting milter-greylist settings
+if (!&check_ratelimit()) {
 	my $conf = &get_ratelimit_config();
-	($noauth) = grep { $_->{'name'} eq 'noauth' } @$conf;
-	if (!$noauth) {
-		&save_ratelimit_directive($conf, undef,
-			{ 'name' => 'noauth',
-			  'values' => [] });
-		&flush_file_lines(&get_ratelimit_config_file());
+	my $has_limits;
+	foreach my $c (@$conf) {
+		if ($c->{'name'} eq 'ratelimit' &&
+		    &is_virtualmin_ratelimit_name($c->{'values'}->[0])) {
+			$has_limits = 1;
+			last;
+			}
+		for(my $i=0; $i<@{$c->{'values'}}-1; $i++) {
+			# ACLs can reference Virtualmin rate-limit classes even
+			# if the class line is missing or has been moved by hand.
+			if ($c->{'values'}->[$i] eq 'ratelimit' &&
+			    &is_virtualmin_ratelimit_name($c->{'values'}->[$i+1])) {
+				$has_limits = 1;
+				last;
+				}
+			}
+		last if ($has_limits);
+		}
+	if ($has_limits) {
+		&lock_file(&get_ratelimit_config_file());
+		$conf = &get_ratelimit_config();
+		if (&normalize_ratelimit_config($conf)) {
+			&flush_file_lines(&get_ratelimit_config_file());
+			}
+		&unlock_file(&get_ratelimit_config_file());
 		}
 	}
 

@@ -6944,6 +6944,8 @@ if (&check_ratelimit() eq '') {
 			my ($socket) = grep { $_->{'name'} eq 'socket' }
 					    @$conf;
 			&save_ratelimit_directive($conf, $socket, $oldsocket);
+			&normalize_ratelimit_config($conf);
+			&flush_file_lines(&get_ratelimit_config_file());
 			&$outdent_print();
                         &$second_print($text{'setup_done'});
 			}

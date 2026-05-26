@@ -78,6 +78,7 @@ foreach my $rwhite (@rwhites) {
 		}
 	}
 
+&normalize_ratelimit_config($conf);
 &flush_file_lines();
 &unlock_file(&get_ratelimit_config_file());
 &webmin_log($action, "ratelimit");
