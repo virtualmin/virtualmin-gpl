@@ -30,18 +30,7 @@ if (!$before && $ok) {
 			&save_ratelimit_directive($conf, $c, undef);
 			}
 		}
-	($nospf) = grep { $_->{'name'} eq 'nospf' } @$conf;
-	if (!$nospf) {
-		&save_ratelimit_directive($conf, undef,
-			{ 'name' => 'nospf',
-			  'values' => [] });
-		}
-	($noauth) = grep { $_->{'name'} eq 'noauth' } @$conf;
-	if (!$noauth) {
-		&save_ratelimit_directive($conf, undef,
-			{ 'name' => 'noauth',
-			  'values' => [] });
-		}
+	&normalize_ratelimit_config($conf);
 	&flush_file_lines();
 	&unlock_file(&get_ratelimit_config_file());
 	&$second_print($text{'setup_done'});
