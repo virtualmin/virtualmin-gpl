@@ -119,10 +119,24 @@ print &ui_table_row($text{'viewbackup_time'},
 
 if (!$backup_plugin{noincrement}) {
 	# Differential?
-	print &ui_table_row($text{'viewbackup_inc'},
-		$log->{'increment'} == 1 ? $text{'viewbackup_inc1'} :
-		$log->{'increment'} == 2 ? $text{'viewbackup_inc2'} :
-					   $text{'viewbackup_inc0'});
+	my $imsg;
+	if ($log->{'increment'} >= 3) {
+		my ($isched) = grep { $_->{'id'} eq $log->{'increment'} }
+				    &list_scheduled_backups();
+		if ($isched) {
+			my @dests = &get_scheduled_backup_dests($isched);
+			$imsg = &text('viewbackup_inc3', &nice_backup_url($dests[0], 1, 0));
+			}
+		else {
+			$imsg = &text('viewbackup_inc3m', $log->{'increment'});
+			}
+		}
+	else {
+		$imsg = $log->{'increment'} == 1 ? $text{'viewbackup_inc1'} :
+			$log->{'increment'} == 2 ? $text{'viewbackup_inc2'} :
+						   $text{'viewbackup_inc0'};
+		}
+	print &ui_table_row($text{'viewbackup_inc'}, $imsg);
 	}
 if (!$backup_plugin{noownrestore}) {
 	# Can be restored by owners?

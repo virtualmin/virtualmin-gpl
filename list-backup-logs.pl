@@ -127,9 +127,15 @@ if ($multiline) {
 			print "    Failed domains: $l->{'errdoms'}\n";
 			}
 		print "    Destination: $l->{'dest'}\n";
-		print "    Differential: ",
-		      ($l->{'increment'} == 1 ? "Yes" :
-		       $l->{'increment'} == 2 ? "Disabled" : "No"),"\n";
+		if ($l->{'increment'} >= 3) {
+			print "    Differential: ",
+			      "Yes, from backup $l->{'increment'}\n";
+			}
+		else {
+			print "    Differential: ",
+			      ($l->{'increment'} == 1 ? "Yes" :
+			       $l->{'increment'} == 2 ? "Disabled" : "No"),"\n";
+			}
 		if (defined($l->{'compression'})) {
 			print "    Compression: ",
 			    &compression_to_suffix($l->{'compression'}),"\n";
