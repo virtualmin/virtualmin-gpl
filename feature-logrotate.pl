@@ -419,33 +419,34 @@ else {
 #		    &olddomain)
 sub restore_logrotate
 {
+my ($d, $file, $opts, $allopts, $homefmt, $oldd) = @_;
 &$first_print($text{'restore_logrotatecp'});
-my $tmpl = &get_template($_[0]->{'template'});
+my $tmpl = &get_template($d->{'template'});
 if ($d->{'logrotate_shared'}) {
 	&$second_print($text{'restore_logrotatecpshared'});
 	return 1;
 	}
-&obtain_lock_logrotate($_[0]);
-my $lconf = &get_logrotate_section($_[0]);
+&obtain_lock_logrotate($d);
+my $lconf = &get_logrotate_section($d);
 my $rv;
 if ($lconf) {
-	my $srclref = &read_file_lines($_[1]);
+	my $srclref = &read_file_lines($file);
 	my $dstlref = &read_file_lines($lconf->{'file'});
 	splice(@$dstlref, $lconf->{'line'}+1,
 	       $lconf->{'eline'}-$lconf->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
 	my @range = ($lconf->{'line'} .. $lconf->{'line'}+scalar(@$srclref)-1);
-	if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
+	if ($oldd->{'home'} && $oldd->{'home'} ne $d->{'home'}) {
 		# Fix up any references to old home dir
 		foreach my $i (@range) {
-			$dstlref->[$i] =~ s/(^|\s)$_[5]->{'home'}/$1$_[0]->{'home'}/g;
+			$dstlref->[$i] =~ s/(^|\s)$oldd->{'home'}/$1$d->{'home'}/g;
 			}
 		}
 
 	# Replace the old postrotate block with the config from this system
 	foreach my $i (@range) {
 		if ($dstlref->[$i] =~ /^\s*postrotate/) {
-			$dstlref->[$i+1] = "\t".&get_postrotate_script($_[0]);
+			$dstlref->[$i+1] = "\t".&get_postrotate_script($d);
 			last;
 			}
 		}
@@ -459,7 +460,7 @@ else {
 	&$second_print($text{'setup_nologrotate2'});
 	$rv = 0;
 	}
-&release_lock_logrotate($_[0]);
+&release_lock_logrotate($d);
 return $rv;
 }
 
