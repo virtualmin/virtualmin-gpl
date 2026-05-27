@@ -603,9 +603,7 @@ foreach $d (@doms) {
 		local @alld;
 		foreach my $rn (@delrecs) {
 			my ($name, $type, @values) = @$rn;
-			if ($name !~ /\.$/) {
-				$name .= ".".$d->{'dom'}.".";
-				}
+			$name = &expand_dns_record($name, $d);
 			local @d = grep { $_->{'name'} eq $name &&
 					 lc($_->{'type'}) eq lc($type) } @$recs;
 			if (@values) {
@@ -651,9 +649,7 @@ foreach $d (@doms) {
 					&usage("Invalid IPv6 address ".$v.
 					       " in --add-record");
 				}
-			if ($name !~ /\.$/ && $name ne "\@") {
-				$name .= ".".$d->{'dom'}.".";
-				}
+			$name = &expand_dns_record($name, $d);
 			my $r = { 'name' => $name,
 				  'type' => $type,
 				  'ttl' => $ttl,
@@ -688,12 +684,8 @@ foreach $d (@doms) {
 			}
 		foreach my $rn (@uprecs) {
 			my ($oldname, $oldtype, $name, $type, $ttl, $values, $proxied) = @$rn;
-			if ($oldname !~ /\.$/ && $oldname ne "\@") {
-				$oldname .= ".".$d->{'dom'}.".";
-				}
-			if ($name !~ /\.$/ && $name ne "\@") {
-				$name .= ".".$d->{'dom'}.".";
-				}
+			$oldname = &expand_dns_record($oldname, $d);
+			$name = &expand_dns_record($name, $d);
 			my ($r) = grep { $_->{'name'} eq $oldname &&
 					 $_->{'type'} eq $oldtype } @$recs;
 			if (!$r) {
