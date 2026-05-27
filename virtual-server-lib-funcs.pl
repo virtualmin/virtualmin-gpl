@@ -6935,15 +6935,21 @@ if (&check_ratelimit() eq '') {
 			# Enable on this system, and copy config file
 			&$indent_print();
 			&enable_ratelimit();
+			my $cfile = &get_ratelimit_config_file();
+			&lock_file($cfile);
 			my $conf = &get_ratelimit_config();
 			my ($oldsocket) = grep { $_->{'name'} eq 'socket' }
 					       @$conf;
 			&copy_source_dest($file."_ratelimitconfig",
-					  &get_ratelimit_config_file());
-			my $conf = &get_ratelimit_config();
+					  $cfile);
+			&unflush_file_lines($cfile);
+			$conf = &get_ratelimit_config();
 			my ($socket) = grep { $_->{'name'} eq 'socket' }
 					    @$conf;
 			&save_ratelimit_directive($conf, $socket, $oldsocket);
+			&normalize_ratelimit_config($conf);
+			&flush_file_lines($cfile);
+			&unlock_file($cfile);
 			&$outdent_print();
                         &$second_print($text{'setup_done'});
 			}
