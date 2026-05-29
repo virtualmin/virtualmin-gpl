@@ -4554,7 +4554,7 @@ return ( { 'type' => 'A',
 	   'domain' => 1,
 	   'create' => 1,
 	   'values' => [ { 'desc' => $text{'records_valuea'},
-			   'size' => 20,
+			   'size' => 15,
 			   'func' => sub { &check_ipaddress($_[0]) ? undef :
 						$text{'records_evaluea'} }
 			 },
@@ -4565,7 +4565,7 @@ return ( { 'type' => 'A',
 	   'domain' => 1,
 	   'create' => 1,
 	   'values' => [ { 'desc' => $text{'records_valueaaaa'},
-			   'size' => 20,
+			   'size' => 39,
 			   'func' => sub { &check_ip6address($_[0]) ? undef :
 						$text{'records_evalueaaaa'} }
 			 },
