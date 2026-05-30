@@ -416,19 +416,14 @@ $opts{'repl'} = $replication;
 # Make sure the backup is restorable
 &$first_print("Checking for errors in backup ..");
 @errs = &check_restore_errors($cont, $contdoms, $opts);
-if ($skipwarnings) {
-	@criticalerrs = grep { $_->{'critical'} } @errs;
-	}
-else {
-	foreach my $d (@$contdoms) {
-		foreach my $w (&virtual_server_warnings($d, undef, $opts->{'repl'})) {
-			push(@errs, { 'critial' => 0,
-				      'dom' => $d,
-				      'desc' => $w });
-			}
+foreach my $d (grep { $_->{'missing'} } @$contdoms) {
+	foreach my $w (&virtual_server_warnings($d, undef, $opts->{'repl'})) {
+		push(@errs, { 'critical' => 0,
+			      'dom' => $d,
+			      'desc' => $w });
 		}
-	@criticalerrs = @errs;
 	}
+@criticalerrs = $skipwarnings ? (grep { $_->{'critical'} } @errs) : @errs;
 if (@criticalerrs) {
 	&$second_print(".. this backup cannot be restored : ".
 	       join(", ", &unique(map { $_->{'desc'} } @criticalerrs)));
