@@ -20599,6 +20599,31 @@ if (@missing) {
 	}
 &$second_print($text{'transfer_validated'});
 
+# If the source is going to be deleted, first make sure the destination
+# restore will pass target-side checks like database and user clashes.
+if ($deletemode == 2) {
+	&$first_print($text{'transfer_prechecking'});
+	my ($pok, $perr, $pout) = &execute_virtualmin_api_command(
+		$desthost, $destuser, $destpass, $proto,
+		"restore-domain --source $remotetemp --all-domains ".
+		"--all-features --skip-warnings --continue-on-error ".
+		"--precheck ".
+		($deletemissing ? "--option dir delete 1 " : "").
+		($replication ? "--replication --no-reuid " : "").
+		($reallocate ? "--allocate-ip " : "")
+		);
+	if ($showoutput) {
+		&$first_print("<pre>".$pout."</pre>");
+		}
+	if ($pok != 0) {
+		&$cleanup_remotetemp();
+		&$second_print(&text('transfer_eprecheck',
+				     "<pre>".$perr."</pre>"));
+		return 0;
+		}
+	&$second_print($text{'transfer_precheckdone'});
+	}
+
 # Delete or disable locally, if requested
 if ($deletemode == 2) {
 	# Delete from this system

@@ -2175,6 +2175,9 @@ sub restore_domains
 {
 local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo, $asowner,
        $skipwarnings, $key, $continue, $delete_existing) = @_;
+local $precheck = $opts->{'precheck'};
+my @precheck_template_cache;
+@precheck_template_cache = @list_templates_cache if ($precheck);
 
 # Find owning domain
 local $asd = $asowner ? &get_backup_as_domain($doms) : undef;
@@ -2455,13 +2458,13 @@ if ($opts->{'reuid'}) {
 	}
 
 # Clear left-frame links cache, as the restore may change them
-&clear_links_cache();
+&clear_links_cache() if (!$precheck);
 
 local $vcount = 0;
 local %restoreok;	# Which domain IDs were restored OK?
 if ($ok) {
 	# Restore any Virtualmin settings
-	if (@$vbs) {
+	if (@$vbs && !$precheck) {
 		&$first_print($text{'restore_global2'});
 		&$indent_print();
 		foreach my $v (@$vbs) {
@@ -2482,7 +2485,7 @@ if ($ok) {
 	foreach $d (grep { $_->{'missing'} } @$doms) {
 		$d = &get_domain(undef,
 			"$restoredir/$d->{'dom'}_virtualmin");
-		if ($opts->{'fix'}) {
+		if ($opts->{'fix'} && !$precheck) {
 			# We can just use the domains file from the
 			# backup and import it
 			&save_domain($d, 1);
@@ -2501,10 +2504,22 @@ if ($ok) {
 
 	# Now restore each of the domain/feature files
 	local $d;
+	my $lookup_restore_domain = sub {
+		my ($id, $dom) = @_;
+		my $rv = $id ? &get_domain($id) : undef;
+		$rv ||= $dom ? &get_domain_by("dom", $dom) : undef;
+		if (!$rv && $precheck) {
+			($rv) = grep {
+				($id && $_->{'id'} eq $id) ||
+				($dom && $_->{'dom'} eq $dom)
+				} @$doms;
+			}
+		return $rv;
+		};
 	DOMAIN: foreach $d (sort { $a->{'parent'} <=> $b->{'parent'} ||
 				   $a->{'alias'} <=> $b->{'alias'} } @$doms) {
 
-		if ($delete_existing && !$d->{'missing'}) {
+		if ($delete_existing && !$d->{'missing'} && !$precheck) {
 			# Delete the domain first in preparation for re-create.
 			&$first_print(&text('restore_deletefirst',
 					    &show_domain_name($d)));
@@ -2596,12 +2611,12 @@ if ($ok) {
 			local ($parentdom, $parentuser);
 			if ($d->{'parent'}) {
 				# Does the parent exist?
-				$parentdom = &get_domain($d->{'parent'});
+				$parentdom = &$lookup_restore_domain($d->{'parent'});
 				if (!$parentdom && $d->{'backup_parent_dom'}) {
 					# Domain with same name exists, but ID
 					# has changed.
-					$parentdom = &get_domain_by(
-					    "dom", $d->{'backup_parent_dom'});
+					$parentdom = &$lookup_restore_domain(
+					    undef, $d->{'backup_parent_dom'});
 					if ($parentdom) {
 						$d->{'parent'} = $parentdom->{'id'};
 						}
@@ -2627,12 +2642,25 @@ if ($ok) {
 				  "$restoredir/$d->{'dom'}_virtualmin_template";
 				if (-r $tmplfile) {
 					# Yes - create on this system and use
-					&make_dir($templates_dir, 0700);
-					&copy_source_dest(
-					    $tmplfile,
-					    "$templates_dir/$d->{'template'}");
-					undef(@list_templates_cache);
-					$tmpl = &get_template($d->{'template'});
+					if ($precheck) {
+						my %btmpl;
+						&read_file($tmplfile, \%btmpl);
+						if (%btmpl) {
+							&list_templates();
+							push(@list_templates_cache,
+							     \%btmpl);
+							$tmpl = &get_template(
+								$d->{'template'});
+							}
+						}
+					else {
+						&make_dir($templates_dir, 0700);
+						&copy_source_dest(
+						    $tmplfile,
+						    "$templates_dir/$d->{'template'}");
+						undef(@list_templates_cache);
+						$tmpl = &get_template($d->{'template'});
+						}
 					}
 				}
 			if (!$tmpl) {
@@ -2648,7 +2676,7 @@ if ($ok) {
 			if (!$plan) {
 				local $planfile =
 				  "$restoredir/$d->{'dom'}_virtualmin_plan";
-				if (-r $planfile) {
+				if (-r $planfile && !$precheck) {
 					&make_dir($plans_dir, 0700);
 					&copy_source_dest(
 					  $planfile, "$plans_dir/$d->{'plan'}");
@@ -2750,7 +2778,8 @@ if ($ok) {
 			# If this was a DNS sub-domain and the parent no longer
 			# exists, use a separate zone file
 			if ($d->{'dns_subof'}) {
-				my $dnsparent = &get_domain($d->{'dns_subof'});
+				my $dnsparent = &$lookup_restore_domain(
+					$d->{'dns_subof'});
 				if (!$dnsparent) {
 					delete($d->{'dns_subof'});
 					delete($d->{'dns_submode'});
@@ -2779,7 +2808,7 @@ if ($ok) {
 			# If the domain was syncing the SSL cert with another
 			# domain, make sure it exists
 			if ($d->{'ssl_same'} &&
-			    !&get_domain($d->{'ssl_same'})) {
+			    !&$lookup_restore_domain($d->{'ssl_same'})) {
 				if ($skipwarnings) {
 					&$second_print(
 						$text{'restore_esslsame2'});
@@ -2898,7 +2927,7 @@ if ($ok) {
 			local $defip = &get_default_ip($d->{'reseller'});
 			if ($d->{'alias'}) {
 				# Alias domains always have same IP as parent
-				local $alias = &get_domain($d->{'alias'});
+				local $alias = &$lookup_restore_domain($d->{'alias'});
 				$d->{'ip'} = $alias->{'ip'};
 				}
 			elsif ($ipinfo && $ipinfo->{'mode'} == 5) {
@@ -2987,7 +3016,7 @@ if ($ok) {
 			local $defip6 = &get_default_ip6($d->{'reseller'});
 			if ($d->{'alias'}) {
 				# Alias domains always have same IP as parent
-				local $alias = &get_domain($d->{'alias'});
+				local $alias = &$lookup_restore_domain($d->{'alias'});
 				$d->{'ip6'} = $alias->{'ip6'};
 				}
 			elsif ($ipinfo && $ipinfo->{'mode6'} == -2) {
@@ -3103,8 +3132,18 @@ if ($ok) {
 
 			# Check for clashes
 			$d->{'wasmissing'} = 1;
+			my $check = undef;
+			if ($precheck && $d->{'dns'} &&
+			    ($d->{'provision_dns'} || $d->{'dns_cloud'} ||
+			     $d->{'dns_remote'})) {
+				# Avoid probing non-local DNS backends during
+				# a non-mutating precheck.
+				$check = { map { $_, 1 }
+					   (@features, &list_feature_plugins()) };
+				delete($check->{'dns'});
+				}
 			local $cerr = &virtual_server_clashes(
-					$d, undef, undef, $opts->{'repl'});
+					$d, $check, undef, $opts->{'repl'});
 			if ($cerr) {
 				&$second_print(&text('restore_eclash', $cerr));
 				$ok = 0;
@@ -3128,6 +3167,11 @@ if ($ok) {
 					if ($continue) { next DOMAIN; }
 					else { last DOMAIN; }
 					}
+				}
+
+			if ($precheck) {
+				$restoreok{$d->{'id'}} = 1;
+				next DOMAIN;
 				}
 
 			# Finally, create it
@@ -3165,8 +3209,15 @@ if ($ok) {
 		else {
 			# Make sure there are no databases that don't really
 			# exist, to avoid failures on restore.
-			my @alldbs = &all_databases($d);
-			&resync_all_databases($d, \@alldbs);
+			if (!$precheck) {
+				my @alldbs = &all_databases($d);
+				&resync_all_databases($d, \@alldbs);
+				}
+			}
+
+		if ($precheck) {
+			$restoreok{$d->{'id'}} = 1;
+			next DOMAIN;
 			}
 
 		# Users need to be restored last
@@ -3308,7 +3359,10 @@ if ($ok) {
 	}
 
 # Find domains that were restored OK
-if ($continue) {
+if ($precheck) {
+	$doms = [ ];
+	}
+elsif ($continue) {
 	$doms = [ grep { $restoreok{$_->{'id'}} } @$doms ];
 	}
 elsif (!$ok) {
@@ -3449,6 +3503,7 @@ if ($mode > 0) {
 	# Clean up downloaded file
 	&execute_command("rm -rf ".quotemeta($backup));
 	}
+@list_templates_cache = @precheck_template_cache if ($precheck);
 return $ok;
 }
 

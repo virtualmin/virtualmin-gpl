@@ -36,6 +36,9 @@ program, as it will not prompt for confirmation before restoring, which will
 over-write the contents of restored directories, databases and configuration
 files.
 
+Use C<--precheck> to run the restore validation and re-creation checks without
+making changes.
+
 You can limit the restore to only domains that do not yet exist yet with
 the C<--only-missing> flag. Conversely, you can specify only domains that
 already exist with the C<--only-existing> flag, to prevent any new virtual
@@ -157,6 +160,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--test") {
 		$test = 1;
+		}
+	elsif ($a eq "--precheck") {
+		$precheck = 1;
 		}
 	elsif ($a eq "--reuid") {
 		$reuid = 1;
@@ -467,18 +473,30 @@ $opts{'reuid'} = $reuid;
 $opts{'mail'}->{'reuser'} = $reuser;
 $opts{'fix'} = $fix;
 $opts{'repl'} = $replication;
-&$first_print("Starting restore..");
+$opts{'precheck'} = $precheck;
+&$first_print($precheck ? "Starting restore pre-check.." : "Starting restore..");
 $ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs, $onlyfeats,
 		       $ipinfo, $asowner, $skipwarnings, $key, $continue,
 		       $delete_existing);
-&run_post_actions();
-&virtualmin_api_log(\@OLDARGV, $doms[0]);
-if ($ok) {
-	&$second_print("Restore completed successfully.");
+if ($precheck) {
+	if ($ok) {
+		&$second_print("Restore pre-check completed successfully.");
+		}
+	else {
+		&$second_print("Restore pre-check failed!");
+		exit(1);
+		}
 	}
 else {
-	&$second_print("Restore failed!");
-	exit(1);
+	&run_post_actions();
+	&virtualmin_api_log(\@OLDARGV, $doms[0]);
+	if ($ok) {
+		&$second_print("Restore completed successfully.");
+		}
+	else {
+		&$second_print("Restore failed!");
+		exit(1);
+		}
 	}
 
 sub usage
@@ -489,6 +507,7 @@ print "on the command line.\n";
 print "\n";
 print "virtualmin restore-domain --source file\n";
 print "                         [--test]\n";
+print "                         [--precheck]\n";
 print "                         [--domain name] | [--all-domains]\n";
 print "                         [--feature name] | [--all-features]\n";
 print "                         [--except-feature name]\n";
@@ -526,4 +545,3 @@ print " - A Google Cloud Storage bucket, like gcs://bucket\n";
 print " - A Dropbox folder, like dropbox://folder\n";
 exit(1);
 }
-
