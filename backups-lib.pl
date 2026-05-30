@@ -3811,12 +3811,12 @@ if ($doms && !&supports_ip6()) {
 return @rv;
 }
 
-# check_restore_errors(&contents, [&domains])
+# check_restore_errors(&contents, [&domains], [&all-opts])
 # Returns a list of errors that would prevent this backup from being restored.
 # Each if a hash ref with 'critical' and 'desc' fields.
 sub check_restore_errors
 {
-my ($conts, $doms) = @_;
+my ($conts, $doms, $opts) = @_;
 my @rv;
 if ($doms) {
 	foreach my $d (@$doms) {
@@ -3839,7 +3839,7 @@ if ($doms) {
 				}
 			}
 
-		# If some is a sub-server, make sure parent exists (or is in
+		# If domain is a sub-server, make sure parent exists (or is in
 		# this backup)
 		if ($d->{'missing'} && $d->{'parent'}) {
 			my $parent = &get_domain($d->{'parent'}) ||
@@ -3854,6 +3854,17 @@ if ($doms) {
 				push(@rv, { 'critical' => 1,
 					    'desc' => &text('restore_eparent',
 						$d->{'backup_parent_dom'}),
+					    'dom' => $d });
+				}
+			}
+
+		# Check for clashes with existing DBs
+		if ($d->{'missing'}) {
+			my $cerr = &virtual_server_clashes(
+					$d, undef, undef, $opts->{'repl'});
+			if ($cerr) {
+				push(@rv, { 'critical' => 1,
+					    'desc' => $cerr,
 					    'dom' => $d });
 				}
 			}

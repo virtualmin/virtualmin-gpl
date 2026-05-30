@@ -408,11 +408,27 @@ else {
 	&$second_print(".. all features in backup are supported");
 	}
 
+$opts{'reuid'} = $reuid;
+$opts{'mail'}->{'reuser'} = $reuser;
+$opts{'fix'} = $fix;
+$opts{'repl'} = $replication;
+
 # Make sure the backup is restorable
 &$first_print("Checking for errors in backup ..");
-@errs = &check_restore_errors($cont, $contdoms);
-@criticalerrs = $skipwarnings ? (grep { $_->{'critical'} } @errs)
-			      : @errs;
+@errs = &check_restore_errors($cont, $contdoms, $opts);
+if ($skipwarnings) {
+	@criticalerrs = grep { $_->{'critical'} } @errs;
+	}
+else {
+	foreach my $d (@$contdoms) {
+		foreach my $w (&virtual_server_warnings($d, undef, $opts->{'repl'})) {
+			push(@errs, { 'critial' => 0,
+				      'dom' => $d,
+				      'desc' => $w });
+			}
+		}
+	@criticalerrs = @errs;
+	}
 if (@criticalerrs) {
 	&$second_print(".. this backup cannot be restored : ".
 	       join(", ", &unique(map { $_->{'desc'} } @criticalerrs)));
@@ -463,10 +479,6 @@ if ($test) {
 	}
 
 # Do it!
-$opts{'reuid'} = $reuid;
-$opts{'mail'}->{'reuser'} = $reuser;
-$opts{'fix'} = $fix;
-$opts{'repl'} = $replication;
 &$first_print("Starting restore..");
 $ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs, $onlyfeats,
 		       $ipinfo, $asowner, $skipwarnings, $key, $continue,
