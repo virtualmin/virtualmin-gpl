@@ -20350,15 +20350,16 @@ else {
 }
 
 # execute_virtualmin_api_command(host, user, pass, proto, command)
-# Runs a Virtualmin API command on some system via SSH. Returns
+# Runs a Virtualmin API command on some system via SSH or Webmin. Returns
 # 0 and the output structure on success, 1 and an error message
-# on remote API failure, or 2 and an error message on SSH failure.
+# on remote API failure, or 2 and an error message on transport failure.
 sub execute_virtualmin_api_command
 {
 my ($host, $user, $pass, $proto, $cmd) = @_;
 $proto ||= "ssh";
 $user ||= "root";
 my $out;
+my $ex = 0;
 if ($proto eq "ssh") {
 	# Run the virtualmin command via SSH
 	my $sshok;
@@ -20374,9 +20375,13 @@ elsif ($proto eq "webmin") {
 	eval {
 		local $main::error_must_die = 1;
 		&remote_foreign_require($webmin, "webmin");
-		my @out = &remote_foreign_call($webmin, "webmin",
-			"backquote_command", "virtualmin ".$cmd);
-		$out = join("", @out);
+		my $qcmd = "virtualmin ".$cmd;
+		$qcmd =~ s/\\/\\\\/g;
+		$qcmd =~ s/'/\\'/g;
+		my $rv = &remote_eval($webmin, "webmin",
+			"my \$out = &backquote_command('$qcmd'); ".
+			"my \$ex = \$?; [ \$out, \$ex ]");
+		($out, $ex) = @$rv;
 		};
 	if ($@) {
 		return (2, "Webmin failed : $@");
@@ -20386,9 +20391,10 @@ my $args = { };
 if ($cmd =~ /--(multiline|name-only|id-only)/) {
 	$args->{$1} = '';
 	}
-my $data = &convert_remote_format($out, 0, $cmd, $args, undef);
-if ($data->{'error'}) {
-	return (1, $data->{'error'});
+my $data = &convert_remote_format($out, $ex, $cmd, $args, undef);
+if ($data->{'error'} || $data->{'status'} eq 'failure') {
+	return (1, $data->{'error'} || $data->{'full_error'} ||
+		   "Command failed");
 	}
 else {
 	return (0, $data->{'data'}, $out);
