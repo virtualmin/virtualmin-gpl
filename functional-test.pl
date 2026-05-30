@@ -818,6 +818,10 @@ $domains_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'add-record-with-ttl', 'ttltest A 3600 5.6.7.8' ] ],
 	},
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-record', '@ TXT apex test record' ] ],
+	},
 
 	# Verify that it worked
 	{ 'command' => 'host -t A testing.'.$test_domain,
@@ -825,6 +829,9 @@ $domains_tests = [
 	},
 	{ 'command' => 'host -t A ttltest.'.$test_domain,
 	  'grep' => '5.6.7.8',
+	},
+	{ 'command' => 'dig TXT '.$test_domain,
+	  'grep' => 'apex test record',
 	},
 
 	# Modify one of the records
@@ -849,6 +856,11 @@ $domains_tests = [
 		      [ 'remove-record', 'ttltest A 5.6.7.8' ] ],
 	  'sleep' => 1,
 	},
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-record', '@ TXT apex test record' ] ],
+	  'sleep' => 1,
+	},
 
 	# Make sure they are gone
 	{ 'command' => 'host -t A testing.'.$test_domain,
@@ -856,6 +868,9 @@ $domains_tests = [
 	},
 	{ 'command' => 'host -t A ttltest.'.$test_domain,
 	  'fail' => 1,
+	},
+	{ 'command' => 'dig TXT '.$test_domain,
+	  'antigrep' => 'apex test record',
 	},
 
 	# Disable SPF, then re-enable
