@@ -20599,6 +20599,25 @@ if (@missing) {
 	}
 &$second_print($text{'transfer_validated'});
 
+# Perform a restore with the test flag to check for serious errors
+my $rcmd = "restore-domain --source $remotetemp --all-domains --all-features ".
+	   "--skip-warnings --continue-on-error ".
+	   ($deletemissing ? "--option dir delete 1 " : "").
+	   ($replication ? "--replication --no-reuid " : "").
+	   ($reallocate ? "--allocate-ip " : "");
+&$first_print($text{'transfer_testing'});
+my ($rok, $rerr, $rout) = &execute_virtualmin_api_command(
+	$desthost, $destuser, $destpass, $proto, $rcmd." --test");
+if ($showoutput) {
+	&$first_print("<pre>".$rout."</pre>");
+	}
+if ($rok != 0) {
+	&$second_print(&text('transfer_etesting', $rerr));
+	&$cleanup_remotetemp();
+	return 0;
+	}
+&$second_print($text{'transfer_tested'});
+
 # Delete or disable locally, if requested
 if ($deletemode == 2) {
 	# Delete from this system
@@ -20639,13 +20658,7 @@ elsif ($deletemode == 1) {
 # Restore via an API call to the remote system
 &$first_print($text{'transfer_restoring'});
 my ($rok, $rerr, $rout) = &execute_virtualmin_api_command(
-	$desthost, $destuser, $destpass, $proto,
-	"restore-domain --source $remotetemp --all-domains --all-features ".
-	"--skip-warnings --continue-on-error ".
-	($deletemissing ? "--option dir delete 1 " : "").
-	($replication ? "--replication --no-reuid " : "").
-	($reallocate ? "--allocate-ip " : "")
-	);
+	$desthost, $destuser, $destpass, $proto, $rcmd);
 if ($showoutput) {
 	&$first_print("<pre>".$rout."</pre>");
 	}
