@@ -122,9 +122,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--feature") {
 		local $f = shift(@ARGV);
-		$f eq "virtualmin" ||
-		   (&indexof($f, @features) >= 0 && $config{$f}) ||
-		   &indexof($f, &list_backup_plugins()) >= 0 ||
+		&is_enabled_feature($f, &list_backup_plugins()) ||
 			&usage("Feature $f is not enabled on this system");
 		push(@bfeats, $f);
 		}

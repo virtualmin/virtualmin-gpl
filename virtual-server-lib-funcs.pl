@@ -18687,6 +18687,17 @@ foreach my $f ($safe ? @safe_backup_features : @backup_features) {
 return @rv;
 }
 
+# is_enabled_feature(feature, [plugins...])
+# Returns 1 if a core Virtualmin feature is enabled, or the name is in the
+# optional plugin list.
+sub is_enabled_feature
+{
+my ($f, @plugins) = @_;
+return 1 if ($f eq "virtualmin");
+return 1 if (&indexof($f, @features) >= 0 && $config{$f});
+return @plugins && &indexof($f, @plugins) >= 0;
+}
+
 # html_extract_head_body(html)
 # Given some HTML, extracts the header, body and stuff after the body
 sub html_extract_head_body
