@@ -7982,15 +7982,14 @@ return ($group);
 # Returns a clash error message if any were found for some new domain
 sub virtual_server_clashes
 {
-local ($dom, $check, $field, $repl) = @_;
-my $f;
-foreach $f (@features) {
+my ($dom, $check, $field, $repl) = @_;
+foreach my $f (@features) {
 	next if ($dom->{'parent'} && $f eq "webmin");
 	next if ($dom->{'parent'} && $f eq "unix");
 	if ($dom->{$f} && (!$check || $check->{$f})) {
-		local $cfunc = "check_${f}_clash";
-		local $err = defined(&$cfunc) ? &$cfunc($dom, $field, $repl)
-					      : undef;
+		my $cfunc = "check_${f}_clash";
+		my $err = defined(&$cfunc) ? &$cfunc($dom, $field, $repl)
+					   : undef;
 		if ($err) {
 			if ($err eq '1') {
 				# Use a built-in error
@@ -8002,9 +8001,9 @@ foreach $f (@features) {
 			}
 		}
 	}
-foreach $f (&list_feature_plugins()) {
+foreach my $f (&list_feature_plugins()) {
 	if ($dom->{$f} && (!$check || $check->{$f})) {
-		local $cerr = &plugin_call($f, "feature_clash", $dom, $field);
+		my $cerr = &plugin_call($f, "feature_clash", $dom, $field);
 		return $cerr if ($cerr);
 		}
 	}
