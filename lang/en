@@ -2731,6 +2731,8 @@ backup_edownloadfile4=Backup file to download is owned by a different user
 
 backup_err=Backup failed
 backup_err2=Failed to save scheduled backup
+backup_err3=Failed to delete scheduled backup
+backup_eiuser=Full backup is being used by one or more incremental backups
 backup_ecannot=You are not allowed to perform backups
 backup_ecannot2=You are not allowed to schedule backups
 backup_edoms=No domains selected to backup

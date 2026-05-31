@@ -9,7 +9,8 @@ $cbmode = &can_backup_domain();
 # Get the current backup object
 &obtain_lock_cron();
 &lock_file($module_config_file);
-@scheds = grep { &can_backup_sched($_) } &list_scheduled_backups();
+@allscheds = &list_scheduled_backups();
+@scheds = grep { &can_backup_sched($_) } @allscheds;
 if (!$in{'new'}) {
 	($sched) = grep { $_->{'id'} == $in{'sched'} } @scheds;
         $sched || &error($text{'backup_egone'});
@@ -49,7 +50,11 @@ elsif ($cbmode == 3 && $in{'dest_mode'} == 0 && !$in{'new'}) {
 	}
 
 if ($in{'delete'}) {
-	# Just delete this schedule
+	# Just delete this schedule, unless another incremental is
+	# using it
+	&error_setup($text{'backup_err3'});
+	my @iusers = grep { $_->{'increment'} == $sched->{'id'} } @scheds;
+	@iusers && &error($text{'backup_eiuser'});
 	&delete_scheduled_backup($sched);
 	}
 else {

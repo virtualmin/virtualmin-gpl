@@ -38,6 +38,8 @@ elsif ($in{'enable'}) {
 elsif ($in{'delete'}) {
 	# Do the deletion
 	foreach $sched (@scheds) {
+		my @iusers = grep { $_->{'increment'} == $sched->{'id'} } @allscheds;
+		@iusers && &error($text{'backup_eiuser'});
 		&delete_scheduled_backup($sched);
 		}
 	&run_post_actions_silently();
