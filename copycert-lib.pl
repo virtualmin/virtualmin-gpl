@@ -370,7 +370,9 @@ my $tmpl = &get_template($d->{'template'});
 &push_all_print();
 &set_all_null_print();
 foreach my $svc (@$before) {
-	if ($tmpl->{'web_'.$svc->{'id'}.'_ssl'}) {
+	# Global service certs were explicitly copied, so keep them current.
+	my $enabled = $svc->{'d'} ? $tmpl->{'web_'.$svc->{'id'}.'_ssl'} : 1;
+	if ($enabled) {
 		if ($svc->{'d'}) {
 			my $func = "sync_".$svc->{'id'}."_ssl_cert";
 			&$func($d, 1) if (defined(&$func));
