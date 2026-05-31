@@ -3449,6 +3449,26 @@ $backup_tests = [
 		       ' -c "touch ~/public_html/kill.txt"',
 	},
 
+	# Test that restore will work
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'domain', $test_parallel_domain1 ],
+		      [ 'domain', $test_parallel_domain2 ],
+		      [ 'all-features' ],
+		      [ 'option', 'dir delete 1' ],
+		      [ 'source', $test_backup_file ],
+		      [ 'test' ] ],
+	  'grep' => [ 'The following servers will be restored',
+		      '^ +'.$test_domain.'$',
+		      '^ +'.$test_subdomain.'$',
+		      '^ +'.$test_parallel_domain1.'$',
+		      '^ +'.$test_parallel_domain2.'$',
+		      'The following features will be restored',
+		      '(dir)', '(unix)', '(dns)', '('.$web.')', '(mail)',
+		      '(mysql)', '(webmin)' ],
+	},
+
 	# Restore with the domain still in place
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -3471,6 +3491,26 @@ $backup_tests = [
 	# Delete the domain, in preparation for re-creation
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Intentionally create a conflicting DB
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' -e "create database '.$test_domain_db.'"',
+	},
+
+	# Test re-createfrom backup, which should fail fast
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'domain', $test_parallel_domain1 ],
+		      [ 'domain', $test_parallel_domain2 ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ],
+		      [ 'test' ] ],
+	  'fail' => 1,
+	},
+
+	# Drop the conflict DB
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' -e "drop database '.$test_domain_db.'"'
 	},
 
 	# Re-create from backup
@@ -3522,7 +3562,14 @@ $backup_tests = [
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
-	  'cleanup' => 1 },
+	  'cleanup' => 1,
+	},
+
+	# Cleanup the conflict DB
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' -e "drop database '.$test_domain_db.'"',
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
+	},
 	];
 
 $enc_backup_tests = &convert_to_encrypted($backup_tests);
