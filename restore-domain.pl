@@ -442,7 +442,7 @@ if ($test) {
 	if (@doms) {
 		print "The following servers will be restored :\n";
 		foreach $d (@doms) {
-			print "\t$d->{'dom'}\n";
+			print "        ",$d->{'dom'},"\n";
 			}
 		print "\n";
 		print "The following features will be restored :\n";
@@ -461,7 +461,7 @@ if ($test) {
 			else {
 				$fn = $text{"backup_feature_".$f} || $text{"feature_".$f};
 				}
-			print "\t",($fn ? $fn." ($f)" : $f),"\n";
+			print "        ",($fn ? $fn." ($f)" : $f),"\n";
 			}
 		}
 	if (@vbs) {
