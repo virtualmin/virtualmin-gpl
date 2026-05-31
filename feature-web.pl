@@ -4242,25 +4242,23 @@ foreach my $port ($d->{'web_port'},
 			# Swap file order
 			if ($dir eq $olddir && $dir eq $adddir) {
 				# Rename the domain's file from xyz.com to
-				# 0-xyz.com to put it first (unless somehow it is already
-				# first)
+				# 0-xyz.com to put it first (unless it already
+				# has the prefix)
 				if ($file !~ /^0-/) {
 					&apache::delete_webfile_link("$dir/$file");
 					&rename_logged("$dir/$file", "$dir/0-$file");
 					&apache::create_webfile_link("$dir/0-$file");
 					&recursive_set_apache_filename($conf,
 						"$dir/$file", "$dir/0-$file");
-					if ($oldfile =~ /^0-(.*)$/) {
-						# Rename any previous 0-xyz.com file
-						# to just xyz.com
-						&apache::delete_webfile_link(
-								"$dir/$oldfile");
-						&rename_logged("$dir/$oldfile",
-							       "$dir/$1");
-						&apache::create_webfile_link("$dir/$1");
-						&recursive_set_apache_filename($conf,
-							"$dir/$oldfile", "$dir/$1");
-						}
+					}
+				if ($oldfile =~ /^0-(.*)$/) {
+					# Rename any previous 0-xyz.com file
+					# to just xyz.com
+					&apache::delete_webfile_link("$dir/$oldfile");
+					&rename_logged("$dir/$oldfile", "$dir/$1");
+					&apache::create_webfile_link("$dir/$1");
+					&recursive_set_apache_filename($conf,
+						"$dir/$oldfile", "$dir/$1");
 					}
 				}
 			else {
@@ -4271,7 +4269,7 @@ foreach my $port ($d->{'web_port'},
 		&register_post_action(\&restart_apache);
 		}
 	elsif ($virt && $oldvirt && $virt eq $oldvirt &&
-	       $dir eq $olddir && $dir eq $adddir) {
+	       $dir eq $olddir && $dir eq $adddir && $file !~ /^0-/) {
 		# Domain is the default, but only because it's file is
 		# alphabetically first. So rename it to 0-xyz.com to make it
 		# definitively first.
