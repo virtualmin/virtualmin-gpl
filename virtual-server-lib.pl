@@ -105,9 +105,9 @@ foreach my $fname (@features, "virt", "virt6") {
 	&$ifunc() if (defined(&$ifunc));
 	}
 @migration_types = ( "cpanel", "plesk", "directadmin" );
-@startstop_features = ("web", "dns", "mail", "ftp", "unix", "virus", "spam",
+@startstop_features = ("web", "dns", "mail", "unix", "virus", "spam",
 		       "mysql", "postgres");
-@startstop_always_features = ("fpm");
+@startstop_always_features = ("ftp", "fpm");
 @bandwidth_features = ( @features, "backup", "restore" );
 @config_features = grep { $config{$_} } @features;
 @banned_usernames = ( 'root', 'resellers' );

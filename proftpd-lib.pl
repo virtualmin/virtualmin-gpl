@@ -73,6 +73,7 @@ return ( [ $text{'sysinfo_proftpd'}, $proftpd::site{'version'} ] );
 sub startstop_ftp
 {
 my ($typestatus) = @_;
+$typestatus ||= { };
 return () if (!&has_proftpd_support());
 &require_proftpd();
 my $conf = &proftpd::get_config();
