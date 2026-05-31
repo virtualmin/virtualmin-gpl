@@ -8692,6 +8692,8 @@ if (!&domain_has_ssl($dom) && $always_ssl && !$dom->{'alias'}) {
 # Attempt to request a let's encrypt cert. This has to be done after the
 # initial setup and when Apache has been restarted, so that it can serve the
 # new website.
+my $acme_never = defined($dom->{'auto_letsencrypt'}) &&
+		 !$dom->{'auto_letsencrypt'};
 if (!defined($dom->{'auto_letsencrypt'})) {
 	$dom->{'auto_letsencrypt'} = $tmpl->{'ssl_auto_letsencrypt'};
 	if ($dom->{'dns'}) {
@@ -8728,11 +8730,12 @@ if ($generated == 2) {
 
 # For a new alias domain, if the target has a Let's Encrypt cert for all
 # possible hostnames, re-request it to include the alias
-if ($dom->{'alias'} && &domain_has_website($dom)) {
+if ($dom->{'alias'} && &domain_has_website($dom) && !$acme_never) {
 	local $target = &get_domain($dom->{'alias'});
 	local $tinfo;
 	if ($target &&
 	    &domain_has_website($target) &&
+	    $target->{'letsencrypt_renew'} &&
 	    &domain_has_ssl_cert($target) &&
 	    ($tinfo = &cert_info($target)) &&
 	    &is_acme_cert($tinfo) &&
