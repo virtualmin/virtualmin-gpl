@@ -53,7 +53,7 @@ if ($in{'delete'}) {
 	# Just delete this schedule, unless another incremental is
 	# using it
 	&error_setup($text{'backup_err3'});
-	my @iusers = grep { $_->{'increment'} == $sched->{'id'} } @scheds;
+	my @iusers = grep { $_->{'increment'} == $sched->{'id'} } @allscheds;
 	@iusers && &error($text{'backup_eiuser'});
 	&delete_scheduled_backup($sched);
 	}
