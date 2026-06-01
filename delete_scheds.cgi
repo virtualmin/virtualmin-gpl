@@ -36,12 +36,19 @@ elsif ($in{'enable'}) {
 		}
 	}
 elsif ($in{'delete'}) {
+	# Check dependencies before deleting anything
+	my %deleting = map { $_->{'id'}, 1 } @scheds;
+	foreach $sched (@scheds) {
+		my @iusers = grep {
+			$_->{'increment'} == $sched->{'id'} &&
+			!$deleting{$_->{'id'}}
+			} @allscheds;
+		@iusers && &error($text{'backup_eiuser'});
+		}
+
 	# Do the deletion
 	foreach $sched (sort { $b->{'increment'} <=> $a->{'increment'} } @scheds) {
-		my @iusers = grep { $_->{'increment'} == $sched->{'id'} } @allscheds;
-		@iusers && &error($text{'backup_eiuser'});
 		&delete_scheduled_backup($sched);
-		@allscheds = grep { $_->{'id'} ne $sched->{'id'} } @allscheds;
 		}
 	&run_post_actions_silently();
 	&webmin_log("delete", "scheds", scalar(@d));
