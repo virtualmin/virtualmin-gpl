@@ -37,10 +37,11 @@ elsif ($in{'enable'}) {
 	}
 elsif ($in{'delete'}) {
 	# Do the deletion
-	foreach $sched (@scheds) {
+	foreach $sched (sort { $b->{'increment'} <=> $a->{'increment'} } @scheds) {
 		my @iusers = grep { $_->{'increment'} == $sched->{'id'} } @allscheds;
 		@iusers && &error($text{'backup_eiuser'});
 		&delete_scheduled_backup($sched);
+		@allscheds = grep { $_->{'id'} ne $sched->{'id'} } @allscheds;
 		}
 	&run_post_actions_silently();
 	&webmin_log("delete", "scheds", scalar(@d));
