@@ -147,7 +147,7 @@ else {
 	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 	}
 if ($in{'newca_mode'} == 2) {
-	$d->{'ssl_chain'} = $in{'cafile'};
+	$d->{'ssl_chain'} = $in{'newcafile'};
 	}
 elsif ($in{'newca_mode'} == 4) {
 	$d->{'ssl_chain'} = undef;
