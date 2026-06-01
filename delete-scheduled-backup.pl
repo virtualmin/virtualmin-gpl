@@ -52,17 +52,20 @@ while(@ARGV > 0) {
 	}
 
 # Get the backup to remove
+@allscheds = &list_scheduled_backups();
 if ($id) {
-	($sched) = grep { $_->{'id'} eq $id } &list_scheduled_backups();
+	($sched) = grep { $_->{'id'} eq $id } @allscheds;
 	$sched || &usage("No backup with ID $id exists");
 	}
 elsif ($dest) {
-	($sched) = grep { &indexof($dest, &get_scheduled_backup_dests($_)) >= 0 } &list_scheduled_backups();
+	($sched) = grep { &indexof($dest, &get_scheduled_backup_dests($_)) >= 0 } @allscheds;
 	$sched || &usage("No backup with destination $dest exists");
 	}
 else {
 	&usage("Missing --id or --dest parameters");
 	}
+my @iusers = grep { $_->{'increment'} == $sched->{'id'} } @allscheds;
+@iusers && &usage("This schededuled full backup is being used by other differential backups");
 &delete_scheduled_backup($sched);
 print "Scheduled backup deleted with ID $sched->{'id'}\n";
 
