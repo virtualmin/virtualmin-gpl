@@ -65,7 +65,7 @@ else {
 	&usage("Missing --id or --dest parameters");
 	}
 my @iusers = grep { $_->{'increment'} == $sched->{'id'} } @allscheds;
-@iusers && &usage("This schededuled full backup is being used by other differential backups");
+@iusers && &usage("This scheduled full backup is being used by other differential backups");
 &delete_scheduled_backup($sched);
 print "Scheduled backup deleted with ID $sched->{'id'}\n";
 
