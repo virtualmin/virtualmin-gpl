@@ -1738,12 +1738,16 @@ local %miniserv;
 &$getfunc(\%miniserv);
 local @ipkeys = &webmin::get_ipkeys(\%miniserv);
 local @ips;
-if ($d->{'virt'}) {
-	push(@ips, $d->{'ip'});
-	}
-if ($d->{'virt6'}) {
-	push(@ips, $d->{'ip6'});
-	}
+# Skip adding IPs to the ipkey entry - use domain names only for SNI.
+# Including IPs causes miniserv to create per-IP SSL contexts that
+# bypass the SNI callback, serving the wrong cert on shared IPs.
+# Ref: https://github.com/virtualmin/virtualmin-gpl/issues/1134
+#if ($d->{'virt'}) {
+#	push(@ips, $d->{'ip'});
+#	}
+#if ($d->{'virt6'}) {
+#	push(@ips, $d->{'ip6'});
+#	}
 push(@ips, @dnames);
 my $chain = &get_website_ssl_file($d, 'ca');
 push(@ipkeys, { 'ips' => \@ips,
@@ -2464,11 +2468,17 @@ my $chain = &get_website_ssl_file($d, "ca");
 my $nochange = 0;
 
 my @ips;
-if ($d->{'virt'}) {
-	# Domain has it's own IPv4, and maybe v6
-	push(@ips, $d->{'ip'});
-	push(@ips, "[".$d->{'ip6'}."]") if ($d->{'virt6'} && $d->{'ip6'});
-	}
+# Skip local IP block creation - always use local_name (SNI) instead.
+# local IP blocks conflict with local_name entries and Dovecot cannot
+# resolve both for the same connection. Since Dovecot 2+ supports SNI,
+# local_name is the correct mechanism for all domains regardless of
+# whether they have a dedicated IP.
+# Ref: https://github.com/virtualmin/virtualmin-gpl/issues/1134
+#if ($d->{'virt'}) {
+#	# Domain has it's own IPv4, and maybe v6
+#	push(@ips, $d->{'ip'});
+#	push(@ips, "[".$d->{'ip6'}."]") if ($d->{'virt6'} && $d->{'ip6'});
+#	}
 my ($cname, $cvalue) = &get_dovecot_ssl_dir("cert", $d->{'ssl_combined'});
 my ($kname, $kvalue) = &get_dovecot_ssl_dir("key", $d->{'ssl_key'});
 foreach my $ip (@ips) {
@@ -2567,8 +2577,8 @@ foreach my $ip (@ips) {
 		}
 	}
 
-if (!$d->{'virt'}) {
-	# Domain has no IP, but Dovecot supports SNI in version 2
+if (1) {
+	# Use local_name (SNI) for all domains, including those with dedicated IPs
 	my @loc = grep { $_->{'name'} eq 'local_name' &&
 			 $_->{'section'} } @$conf;
 	my @sslnames = &get_hostnames_from_cert($d);
