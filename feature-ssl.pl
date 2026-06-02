@@ -2464,11 +2464,18 @@ my $chain = &get_website_ssl_file($d, "ca");
 my $nochange = 0;
 
 my @ips;
-if ($d->{'virt'}) {
-	# Domain has it's own IPv4, and maybe v6
-	push(@ips, $d->{'ip'});
-	push(@ips, "[".$d->{'ip6'}."]") if ($d->{'virt6'} && $d->{'ip6'});
-	}
+# Skipping local IP block creation - always use local_name (SNI) instead.
+# local IP blocks conflict with local_name entries and Dovecot cannot
+# resolve both for the same connection (config error: "Conflict in
+# setting ssl_cert"). Since Dovecot 2+ supports SNI via local_name,
+# that is the correct mechanism for all domains regardless of whether
+# they have a dedicated IP.
+# Ref: https://github.com/virtualmin/virtualmin-gpl/issues/1134
+#if ($d->{'virt'}) {
+#	# Domain has it's own IPv4, and maybe v6
+#	push(@ips, $d->{'ip'});
+#	push(@ips, "[".$d->{'ip6'}."]") if ($d->{'virt6'} && $d->{'ip6'});
+#	}
 my ($cname, $cvalue) = &get_dovecot_ssl_dir("cert", $d->{'ssl_combined'});
 my ($kname, $kvalue) = &get_dovecot_ssl_dir("key", $d->{'ssl_key'});
 foreach my $ip (@ips) {
@@ -2567,7 +2574,8 @@ foreach my $ip (@ips) {
 		}
 	}
 
-if (!$d->{'virt'}) {
+if (1) {
+	# Always use local_name (SNI) for all domains, including those with dedicated IPs
 	# Domain has no IP, but Dovecot supports SNI in version 2
 	my @loc = grep { $_->{'name'} eq 'local_name' &&
 			 $_->{'section'} } @$conf;
