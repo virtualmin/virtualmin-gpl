@@ -1738,12 +1738,17 @@ local %miniserv;
 &$getfunc(\%miniserv);
 local @ipkeys = &webmin::get_ipkeys(\%miniserv);
 local @ips;
-if ($d->{'virt'}) {
-	push(@ips, $d->{'ip'});
-	}
-if ($d->{'virt6'}) {
-	push(@ips, $d->{'ip6'});
-	}
+# Skip adding IPs to the ipkey entry - use domain names only for SNI.
+# Including IPs causes miniserv to create per-IP SSL contexts that
+# bypass the SNI callback, serving the wrong cert on shared IPs.
+# Domain names alone are sufficient for SNI matching.
+# Ref: https://github.com/virtualmin/virtualmin-gpl/issues/1134
+#if ($d->{'virt'}) {
+#	push(@ips, $d->{'ip'});
+#	}
+#if ($d->{'virt6'}) {
+#	push(@ips, $d->{'ip6'});
+#	}
 push(@ips, @dnames);
 my $chain = &get_website_ssl_file($d, 'ca');
 push(@ipkeys, { 'ips' => \@ips,
