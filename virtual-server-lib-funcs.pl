@@ -18698,6 +18698,14 @@ return 1 if (&indexof($f, @features) >= 0 && $config{$f});
 return @plugins && &indexof($f, @plugins) >= 0;
 }
 
+# is_enabled_backup_feature(feature)
+# Returns 1 if a feature is enabled for backups, including backup plugins.
+sub is_enabled_backup_feature
+{
+my ($f) = @_;
+return &is_enabled_feature($f, &list_backup_plugins());
+}
+
 # html_extract_head_body(html)
 # Given some HTML, extracts the header, body and stuff after the body
 sub html_extract_head_body

@@ -132,7 +132,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--feature") {
 		local $f = shift(@ARGV);
-		&is_enabled_feature($f, &list_backup_plugins()) ||
+		&is_enabled_backup_feature($f) ||
 			&usage("Feature $f is not enabled");
 		push(@rfeats, $f);
 		}
