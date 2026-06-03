@@ -33,7 +33,6 @@ index_none2=Non hai accesso ad alcuni server virtuali.
 index_return=lista server virtuali
 index_return2=indice modulo
 index_list=Lista..
-index_eproftpd=ll server ProFTPd non sembra essere installato sul vostro sistema, o non è ancora stato configurato correttamente in Webmin tramite il <a href='$1'>modulo ProFTPd Server </a>. Se il sistema non utilizza ProFTPd, dovrebbe essere disabilitato nella pagina di <a href='$2'>configurazione del modulo</a>.
 
 index_astart=Avvia Apache
 index_astartdesc=Il webserver Apache è attualmente spento, quindi tutte le pagine web dei server virtuali sono inaccessibili. Clicca questo bottone per avviarlo.
@@ -589,8 +588,6 @@ delete_home=Cancellazione directory home ..
 delete_ehome=.. comando rm fallito: $1
 delete_emaking=Comando fallito prima della cancellazione: $1
 delete_ecannot=Non hai i permessi per cancellare questo server virtuale
-delete_proftpd=Cancellazione server FTP virtuali ..
-delete_noproftpd=.. nessun server virtuale di ProFTPd trovato!
 delete_aliasdoms=I seguenti alias server verrà eliminato definitivamente: $1
 delete_logrotate=Disabilitazione rotazione file di log ..
 delete_failure=.. $1 fallito! :$2
@@ -629,7 +626,6 @@ disable_title=Disabilita server
 disable_ok=Si, disabilitalo
 disable_unix=Bloccaggio amministrazione password utenti ..
 disable_apache=Sostituzione sito web con pagina di errore ..
-disable_proftpd=Disabilita accesso al server virtuale FTP ..
 disable_mysqluser=Bloccaggio password dell'utente MySQL
 disable_bind=Rinomina zona DNS per disabilitarle ..
 disable_bindnosub=.. impossibile per i sub-domini
@@ -683,10 +679,6 @@ newweb_webmin=Configurare Webmin per usare un certificato SSL per l'IP?
 newweb_usermin=Configurare Usermin per usare un certificato SSL per l'IP?
 newweb_webmailsame=Usa nome dominio
 
-newftp_title=ProFTPd Server Template
-newftp_undo=Annulla
-newftp_err=Salvataggio template per ProFTPd fallito
-newftp_dir0=Directory sotto home
 
 newdns_ecannot=Non hai il permesso per modificare il template DNS
 newdns_replace1=Usa solo i record nei nuovi domini
@@ -712,7 +704,6 @@ feature_mail=Mail per dominio
 feature_unix=Utente amministrazione
 feature_dir=Home directory
 feature_webmin=Webmin login
-feature_ftp=ProFTPd FTP virtuale
 feature_logrotate=Rotazione file log
 feature_virt=Indirizzo IP virtuale
 feature_virt6=Indirizzo IPv6
@@ -776,7 +767,6 @@ backup_partial=Il salvataggio è parzialmente completo. Il file avrà dimensione
 backup_partial2=Server virtuali che hanno fallito:
 backup_partialsubject=Salvataggio di Virtualmin su $1 parzialmente completo
 
-backup_proftpdcp=Copia la configurazione del server virtuali di ProFTPd
 backup_mysqldump=Dumpind database MySQL S1 ..
 backup_mysqldumpfailed=.. dump fallito! $1
 backup_mysqlgzipfailed=.. gzip fallito! $1

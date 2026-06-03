@@ -126,7 +126,7 @@ print &ui_table_row(&hlink($text{'newbw_servers'}, "bandwidth_serversmode"),
 				   [ &list_visible_domains() ]));
 
 # Log files for FTP and mail
-$defftplog = $config{'ftp'} ? &get_proftpd_log() : undef;
+$defftplog = &get_proftpd_log();
 print &ui_table_row(&hlink($text{'newbw_ftplog'}, "bandwidth_ftplog_def"),
 	&ui_opt_textbox("ftplog", $config{'bw_ftplog'}, 40,
 	  $defftplog ? &text('newbw_ftplogdef', "<tt>$defftplog</tt>")."<br>"
@@ -175,4 +175,3 @@ if ($config{'bw_active'} && $virtualmin_pro) {
 print &ui_buttons_end();
 
 &ui_print_footer("", $text{'index_return'});
-

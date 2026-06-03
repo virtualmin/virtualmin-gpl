@@ -7,7 +7,7 @@ Turns on or off some Virtualmin feature or plugin globally.
 This command is the equivalent of the Features and Plugins page in the
 Virtualmin UI, as it can be used to enable or disable features and plugins
 globally. To activate a feature, use the C<--enable-feature> flag followed
-by a code like C<web> or C<ftp>, as shown by the C<list-features> API command.
+by a code like C<web> or C<dns>, as shown by the C<list-features> API command.
 To turn off a feature, use the C<--disable-feature> flag. In both cases,
 dependencies will be checked before a change is made, to prevent enabling
 of features that have missing pre-requisites, or disabling of features that
@@ -206,4 +206,3 @@ print "                              --default-on name\n";
 print "                              --default-off name\n";
 exit(1);
 }
-

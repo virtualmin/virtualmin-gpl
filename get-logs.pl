@@ -6,8 +6,8 @@ Output webserver logs for a domain.
 
 Given a domain name with the C<--domain> flag, this command outputs some or
 all of it's Apache access or error log. The log file to display can be
-selected with the C<--access-log>, C<--error-log> or C<--ftp-log> flag,
-and the number of lines to output can be limited with the C<--tail> flag
+selected with the C<--access-log> or C<--error-log> flag, and the number
+of lines to output can be limited with the C<--tail> flag
 followed by a line count.
 
 =cut
@@ -45,7 +45,7 @@ while(@ARGV > 0) {
 		$logtype = "elog";
 		}
 	elsif ($a eq "--ftp-log") {
-		$logtype = "flog";
+		&usage("Per-domain FTP logs are no longer supported");
 		}
 	elsif ($a eq "--tail") {
 		$lines = int(shift(@ARGV));
@@ -69,10 +69,6 @@ if ($logtype eq "alog" || $logtype eq "elog") {
 		&usage("Virtual server does not have a website");
 	$logfile = &get_website_log($d, $logtype eq "elog" ? 1 : 0);
 	}
-elsif ($logtype eq "flog") {
-	$d->{'ftp'} || &usage("Virtual server does not have FTP enabled");
-	$logfile = &get_proftpd_log($d);
-	}
 $logfile || &usage("Log file not found!");
 
 # Print it out
@@ -94,8 +90,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Output webserver logs for a domain.\n";
 print "\n";
 print "virtualmin get-logs --domain name\n";
-print "                    --access-log | --error-log | --ftp-log\n";
+print "                    --access-log | --error-log\n";
 print "                   [--tail lines]\n";
 exit(1);
 }
-

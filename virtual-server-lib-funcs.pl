@@ -22,7 +22,7 @@ foreach my $lib ("scripts", "resellers", "admins", "users", "simple", "s3",
 		 "balancer", "newfeatures", "resources", "backups",
 		 "domainname", "commands", "connectivity", "plans",
 		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
-		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
+		 "proftpd", "dkim", "provision", "stats", "bkeys", "rs", "cron",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
 		 "jailkit", "ports", "bb", "dnscloud", "dnscloudpro",
 		 "smtpcloud", "pro-tip", "azure", "remotedns", "drive",
@@ -616,6 +616,7 @@ $d->{'lastsave_user'} = $remote_user;
 $d->{'lastsave_type'} = $main::webmin_script_type;
 $d->{'lastsave_webmincron'} = $main::webmin_script_webmincron;
 $d->{'lastsave_pid'} = $main::initial_process_id;
+delete($d->{'ftp'});		# Removed ProFTPd virtual FTP feature
 delete($d->{'lastread_time'});
 &write_file($file, $d);
 &unlock_file($file);
@@ -6645,6 +6646,10 @@ sub virtualmin_backup_chroot
 {
 local ($file, $vbs) = @_;
 &$first_print($text{'backup_vchroot_doing'});
+if (!&has_ftp_chroot()) {
+	&$second_print($text{'backup_vchroot_none'});
+	return 0;
+	}
 local @chroots = &list_ftp_chroots();
 &open_tempfile(CHROOT, ">$file");
 foreach my $c (@chroots) {
@@ -6663,6 +6668,10 @@ sub virtualmin_restore_chroot
 {
 local ($file, $vbs) = @_;
 &$first_print($text{'restore_vchroot_doing'});
+if (!&has_ftp_chroot()) {
+	&$second_print($text{'restore_vchroot_none'});
+	return 1;
+	}
 &obtain_lock_ftp();
 local @chroots;
 open(CHROOT, "<".$file);
@@ -9885,7 +9894,6 @@ push(@rv, { 'id' => 0,
 	    'web_dovecot_ssl' => $config{'dovecot_ssl'},
 	    'web_postfix_ssl' => $config{'postfix_ssl'},
 	    'web_mysql_ssl' => $config{'mysql_ssl'},
-	    'web_proftpd_ssl' => $config{'proftpd_ssl'},
 	    'web_http2' => $config{'web_http2'},
 	    'web_redirects' => $config{'web_redirects'},
 	    'web_sslredirect' => $config{'auto_redirect'},
@@ -9941,8 +9949,6 @@ push(@rv, { 'id' => 0,
 		$config{'namedconf_no_allow_transfer'},
 	    'namedconf_no_also_notify' =>
 		$config{'namedconf_no_also_notify'},
-	    'ftp' => $config{'proftpd_config'},
-	    'ftp_dir' => $config{'ftp_dir'},
 	    'logrotate' => $config{'logrotate_config'} || "none",
 	    'logrotate_files' => $config{'logrotate_files'} || "none",
 	    'logrotate_shared' => $config{'logrotate_shared'} || "no",
@@ -10273,7 +10279,6 @@ if ($tmpl->{'id'} == 0) {
 	$config{'dovecot_ssl'} = $tmpl->{'web_dovecot_ssl'};
 	$config{'postfix_ssl'} = $tmpl->{'web_postfix_ssl'};
 	$config{'mysql_ssl'} = $tmpl->{'web_mysql_ssl'};
-	$config{'proftpd_ssl'} = $tmpl->{'web_proftpd_ssl'};
 	foreach my $phpver (@all_possible_php_versions) {
 		$config{'php_ini_'.$phpver} = $tmpl->{'web_php_ini_'.$phpver};
 		}
@@ -10334,8 +10339,6 @@ if ($tmpl->{'id'} == 0) {
 	$config{'dnssec_alg'} = $tmpl->{'dnssec_alg'};
 	$config{'dnssec_single'} = $tmpl->{'dnssec_single'};
 	delete($config{'mx_server'});
-	$config{'proftpd_config'} = $tmpl->{'ftp'};
-	$config{'ftp_dir'} = $tmpl->{'ftp_dir'};
 	$config{'logrotate_config'} = $tmpl->{'logrotate'} eq "none" ?
 					"" : $tmpl->{'logrotate'};
 	$config{'logrotate_files'} = $tmpl->{'logrotate_files'} eq "none" ?
@@ -13059,7 +13062,9 @@ sub get_disable_features
 {
 local ($d) = @_;
 local @disable;
-@disable = grep { $d->{$_} && $config{$_} } split(/,/, $config{'disable'});
+my %core = map { $_, 1 } @features;
+@disable = grep { $core{$_} && $d->{$_} && $config{$_} }
+	   split(/,/, $config{'disable'});
 push(@disable, "ssl") if (&indexof("web", @disable) >= 0 && $d->{'ssl'});
 push(@disable, "status") if (&indexof("web", @disable) >= 0 && $d->{'status'});
 @disable = grep { $_ ne "unix" } @disable if ($d->{'parent'});
@@ -13076,7 +13081,8 @@ local ($d) = @_;
 local @enable;
 local @disabled = split(/,/, $d->{'disabled'});
 local %disabled = map { $_, 1 } @disabled;
-@enable = grep { $d->{$_} && ($config{$_} || $_ eq 'unix') } @disabled;
+my %core = map { $_, 1 } @features;
+@enable = grep { $core{$_} && $d->{$_} && ($config{$_} || $_ eq 'unix') } @disabled;
 push(@enable, "ssl") if (&indexof("web", @enable) >= 0 && $d->{'ssl'});
 @enable = grep { $_ ne "unix" } @enable if ($d->{'parent'});
 push(@enable, grep { $d->{$_} && $disabled{$_} &&
@@ -16671,13 +16677,6 @@ if ($config{'postgres'}) {
 		}
 	}
 
-if ($config{'ftp'}) {
-	# Make sure ProFTPd is installed, and that the ftp user exists
-	my $err = &feature_depends_ftp();
-	return $err if ($err);
-	&$second_print($text{'check_ftpok'});
-	}
-
 if ($config{'logrotate'}) {
 	# Make sure logrotate is installed
 	&foreign_installed("logrotate", 1) == 2 ||
@@ -17415,6 +17414,13 @@ if ($itype =~ /^(rpm|deb)$/ &&
 # All looks OK .. save the config
 $config{'last_check'} = time()+1;
 $config{'disable'} =~ s/user/unix/g;	# changed since last release
+# Clean settings left behind by the removed ProFTPd virtual FTP feature.
+$config{'disable'} = join(",", grep { $_ ne 'ftp' }
+			   split(/,/, $config{'disable'}));
+foreach my $k ('ftp', 'proftpd_config', 'proftpd_ssl', 'ftp_dir',
+	       'backup_feature_ftp', 'backup_opts_ftp') {
+	delete($config{$k});
+	}
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
@@ -18691,6 +18697,25 @@ foreach my $f ($safe ? @safe_backup_features : @backup_features) {
 		}
 	}
 return @rv;
+}
+
+# is_enabled_feature(feature, [plugins...])
+# Returns 1 if a core Virtualmin feature is enabled, or the name is in the
+# optional plugin list.
+sub is_enabled_feature
+{
+my ($f, @plugins) = @_;
+return 1 if ($f eq "virtualmin");
+return 1 if (&indexof($f, @features) >= 0 && $config{$f});
+return @plugins && &indexof($f, @plugins) >= 0;
+}
+
+# is_enabled_backup_feature(feature)
+# Returns 1 if a feature is enabled for backups, including backup plugins.
+sub is_enabled_backup_feature
+{
+my ($f) = @_;
+return &is_enabled_feature($f, &list_backup_plugins());
 }
 
 # html_extract_head_body(html)

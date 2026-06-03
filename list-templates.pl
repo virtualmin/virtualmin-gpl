@@ -63,7 +63,7 @@ elsif ($multiline) {
 	foreach $tmpl (@tmpls) {
 		print $tmpl->{'id'},"\n";
 		print "    Name: ",$tmpl->{'name'},"\n";
-		foreach $w ('web', 'dns', 'ftp', 'logrotate', 'mail_on') {
+		foreach $w ('web', 'dns', 'logrotate', 'mail_on') {
 			($sw = $w) =~ s/_on$//;
 			print "    Custom ${sw}: ",
 			      ($tmpl->{$w} eq "none" ? "None" :
@@ -90,4 +90,3 @@ print "virtualmin list-templates [--multiline | --json | --xml]\n";
 print "                          [--deleted]\n";
 exit(1);
 }
-

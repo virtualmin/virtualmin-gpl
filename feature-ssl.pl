@@ -2994,58 +2994,6 @@ foreach my $f (@$flags) {
 	}
 }
 
-# sync_proftpd_ssl_cert(&domain, enable)
-# Configure ProFTPd to use a domain's SSL cert for connections on its IP
-sub sync_proftpd_ssl_cert
-{
-my ($d, $enable) = @_;
-&foreign_require("proftpd");
-&proftpd::lock_proftpd_files();
-my ($virt, $vconf, $conf) = &get_proftpd_virtual($d);
-return 0 if (!$virt);
-if ($enable) {
-	# Make proftpd virtualhost use domain's SSL cert files
-	my $cfile = &get_website_ssl_file($d, "cert");
-	my $kfile = &get_website_ssl_file($d, "key");
-	if (&get_ssl_key_type($kfile) eq 'ec') {
-		&proftpd::save_directive(
-			"TLSECCertificateFile", [ $cfile ], $vconf, $conf);
-		&proftpd::save_directive(
-			"TLSECCertificateKeyFile", [ $kfile ], $vconf, $conf);
-		}
-	else {
-		&proftpd::save_directive(
-			"TLSRSACertificateFile", [ $cfile ], $vconf, $conf);
-		&proftpd::save_directive(
-			"TLSRSACertificateKeyFile", [ $kfile ], $vconf, $conf);
-		}
-	my $cafile = &get_website_ssl_file($d, "ca");
-	&proftpd::save_directive(
-		"TLSCACertificateFile", $cafile ? [ $cafile ] : [ ], $vconf, $conf);
-	&proftpd::save_directive("TLSEngine", [ "on" ], $vconf, $conf);
-	&proftpd::save_directive("TLSOptions", [ "NoSessionReuseRequired" ], $vconf, $conf);
-	}
-else {
-	# Remove SSL cert for domain
-	&proftpd::save_directive(
-		"TLSRSACertificateFile", [ ], $vconf, $conf);
-	&proftpd::save_directive(
-		"TLSRSACertificateKeyFile", [ ], $vconf, $conf);
-	&proftpd::save_directive(
-		"TLSECCertificateFile", [ ], $vconf, $conf);
-	&proftpd::save_directive(
-		"TLSECCertificateKeyFile", [ ], $vconf, $conf);
-	&proftpd::save_directive(
-		"TLSCACertificateFile", [ ], $vconf, $conf);
-	&proftpd::save_directive("TLSEngine", [ ], $vconf, $conf);
-	&proftpd::save_directive("TLSOptions", [ ], $vconf, $conf);
-	}
-&flush_file_lines($virt->{'file'}, undef, 1);
-&proftpd::unlock_proftpd_files();
-&register_post_action(\&restart_proftpd);
-return 1;
-}
-
 # get_postfix_ssl_cert(&domain)
 # Returns the path to the cert, key and CA cert in the Postfix config for
 # a domain, if any
@@ -4045,7 +3993,7 @@ print &ui_table_row(&hlink($text{'newweb_usermin'},
 			   "template_web_usermin_ssl"),
 	&ui_yesno_radio("web_usermin_ssl", $tmpl->{'web_usermin_ssl'}));
 
-# Setup Dovecot, Postfix, MySQL and ProFTPd SSL certs
+# Setup Dovecot, Postfix and MySQL SSL certs
 print &ui_table_row(&hlink($text{'newweb_dovecot'},
 			   "template_web_dovecot_ssl"),
 	&ui_yesno_radio("web_dovecot_ssl", $tmpl->{'web_dovecot_ssl'}));
@@ -4058,9 +4006,6 @@ print &ui_table_row(&hlink($text{'newweb_mysql'},
 			   "template_web_mysql_ssl"),
 	&ui_yesno_radio("web_mysql_ssl", $tmpl->{'web_mysql_ssl'}));
 
-print &ui_table_row(&hlink($text{'newweb_proftpd'},
-			   "template_web_proftpd_ssl"),
-	&ui_yesno_radio("web_proftpd_ssl", $tmpl->{'web_proftpd_ssl'}));
 }
 
 # parse_template_ssl(&tmpl)
@@ -4131,7 +4076,6 @@ $tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
 $tmpl->{'web_postfix_ssl'} = $in{'web_postfix_ssl'};
 $tmpl->{'web_dovecot_ssl'} = $in{'web_dovecot_ssl'};
 $tmpl->{'web_mysql_ssl'} = $in{'web_mysql_ssl'};
-$tmpl->{'web_proftpd_ssl'} = $in{'web_proftpd_ssl'};
 }
 
 # chained_ssl(&domain, [&old-domain])
@@ -4231,4 +4175,3 @@ else {
 $done_feature_script{'ssl'} = 1;
 
 1;
-

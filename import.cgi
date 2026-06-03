@@ -156,7 +156,6 @@ if ($in{'confirm'}) {
 		 'web_port', $found{'web'} ? $default_web_port : undef,
 		 'ssl', int($found{'ssl'}),
 		 'web_sslport', $found{'ssl'} ? $default_web_sslport : undef,
-		 'ftp', int($found{'ftp'}),
 		 'webalizer', int($found{'webalizer'}),
 		 'mysql', int($found{'mysql'}),
 		 'postgres', int($found{'postgres'}),
@@ -578,28 +577,6 @@ else {
 			}
 		}
 
-	# Check for a ProFTPd virtualhost
-	if ($config{'ftp'} && $in{'virt'}) {
-		&require_proftpd();
-		my ($virt, $vconf, $conf, $anon, $aconf) =
-			&get_proftpd_virtual($in{'ip'});
-		if ($virt && $anon) {
-			$found{'ftp'}++;
-			print "<li>".&text('import_ftp',
-				"<tt>$in{'ip'}</tt>",
-				"<tt>$anon->{'value'}</tt>"),"</li>\n";
-			}
-		elsif ($virt) {
-			$found{'ftp'}++;
-			print "<li>".&text('import_ftpnoanon',
-				"<tt>$in{'ip'}</tt>"),"</li>\n";
-			}
-		else {
-			print "<li>".&text('import_noftp',
-				"<tt>$in{'ip'}</tt>"),"</li>\n";
-			}
-		}
-
 	# Check for an existing logrotate configuration
 	if ($config{'logrotate'}) {
 		$log = &get_apache_log($in{'dom'});
@@ -687,4 +664,3 @@ else {
 	}
 
 &ui_print_footer("", $text{'index_return'});
-

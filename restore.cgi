@@ -385,4 +385,3 @@ if (defined($in{'onedom'})) {
 else {
 	&ui_print_footer($in{'return'} || "", $text{'index_return'});
 	}
-

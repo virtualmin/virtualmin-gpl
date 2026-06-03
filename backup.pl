@@ -389,5 +389,3 @@ print "                 [--purge-debug]\n";
 print "                 [--force-email]\n";
 exit(1);
 }
-
-

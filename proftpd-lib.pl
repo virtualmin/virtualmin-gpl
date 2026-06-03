@@ -26,8 +26,7 @@ sub restart_proftpd
 {
 return 1 if (!&has_proftpd_support());
 &require_proftpd();
-my $conf = eval { &proftpd::get_config() };
-return 0 if ($@ || !ref($conf));
+my $conf = &proftpd::get_config();
 my $st = &proftpd::find_directive("ServerType", $conf);
 if (lc($st) ne "inetd") {
 	&$first_print($text{'setup_proftpdpid'});
@@ -51,8 +50,7 @@ my ($d) = @_;
 return undef if ($d);
 return undef if (!&has_proftpd_support());
 &require_proftpd();
-my $conf = eval { &proftpd::get_config() };
-return undef if ($@ || !ref($conf));
+my $conf = &proftpd::get_config();
 my $global = &proftpd::find_directive_struct("Global", $conf);
 my $gconf = $global ? $global->{'members'} : undef;
 return ($gconf ? &proftpd::find_directive("TransferLog", $gconf) : undef) ||
@@ -75,10 +73,10 @@ return ( [ $text{'sysinfo_proftpd'}, $proftpd::site{'version'} ] );
 sub startstop_ftp
 {
 my ($typestatus) = @_;
+$typestatus ||= { };
 return () if (!&has_proftpd_support());
 &require_proftpd();
-my $conf = eval { &proftpd::get_config() };
-return () if ($@ || !ref($conf));
+my $conf = &proftpd::get_config();
 my $st = &proftpd::find_directive("ServerType", $conf);
 if ($st eq 'inetd') {
 	return ( );
@@ -128,10 +126,7 @@ return &proftpd::start_proftpd();
 # Returns 1 if we can configure ProFTPd chroot directories.
 sub has_ftp_chroot
 {
-return 0 if (!&has_proftpd_support());
-&require_proftpd();
-my $conf = eval { &proftpd::get_config() };
-return !$@ && ref($conf) ? 1 : 0;
+return &has_proftpd_support();
 }
 
 # list_ftp_chroots()
@@ -144,8 +139,7 @@ sub list_ftp_chroots
 my @rv;
 return @rv if (!&has_ftp_chroot());
 &require_proftpd();
-my $conf = eval { &proftpd::get_config() };
-return @rv if ($@ || !ref($conf));
+my $conf = &proftpd::get_config();
 $proftpd::conf = $conf;		# get_or_create is broken in Webmin 1.410
 my $gconf = &proftpd::get_or_create_global($conf);
 foreach my $dr (&proftpd::find_directive_struct("DefaultRoot", $gconf)) {
@@ -174,8 +168,7 @@ sub save_ftp_chroots
 my ($chroots) = @_;
 return 0 if (!&has_ftp_chroot());
 &require_proftpd();
-my $conf = eval { &proftpd::get_config() };
-return 0 if ($@ || !ref($conf));
+my $conf = &proftpd::get_config();
 $proftpd::conf = $conf;
 my $gconf = &proftpd::get_or_create_global($conf);
 
@@ -226,25 +219,6 @@ if ($main::got_lock_ftp == 1) {
 	}
 $main::got_lock_ftp-- if ($main::got_lock_ftp);
 &release_lock_anything();
-}
-
-# backup_ftp(&domain, file)
-# Compatibility shim for backups or schedules that still request the retired
-# ProFTPd virtual FTP feature.
-sub backup_ftp
-{
-&$first_print($text{'backup_ftp_retired'});
-&$second_print($text{'setup_done'});
-return undef;
-}
-
-# restore_ftp(&domain, file)
-# Compatibility shim for backups that contain retired virtual FTP data.
-sub restore_ftp
-{
-&$first_print($text{'restore_ftp_retired'});
-&$second_print($text{'setup_done'});
-return undef;
 }
 
 1;

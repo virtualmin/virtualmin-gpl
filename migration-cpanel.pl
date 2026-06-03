@@ -265,12 +265,8 @@ if (-s "$userdir/mysql.sql" && !$waschild) {
 	closedir(MYDIR);
 	push(@got, "mysql") if ($mycount);
 	}
-if ($ipinfo->{'virt'}) {
-	# Enable ProFTPd, if we have a private IP
-	push(@got, "ftp");
-	}
 if ($ipinfo->{'virt'} && -s "$userdir/sslcerts/www.$dom.crt" &&
-		         -s "$userdir/sslkeys/www.$dom.key") {
+			         -s "$userdir/sslkeys/www.$dom.key") {
 	# Enable SSL, if we have a private IP and if the key was found
 	push(@got, &domain_has_ssl());
 	}
@@ -902,24 +898,6 @@ if ($got{'mysql'}) {
 			$myucount++;
 			}
 		&$second_print(".. done (created $myucount MySQL users)");
-		}
-	}
-
-# Fix up FTP configuration
-if ($got{'ftp'}) {
-	&$first_print("Modifying FTP server configuration ..");
-	&require_proftpd();
-	local ($fvirt, $fconf, $conf, $anon, $aconf) =
-		&get_proftpd_virtual($ipinfo->{'ip'});
-	if ($anon) {
-		local $lref = &read_file_lines($anon->{'file'});
-		$lref->[$anon->{'line'}] = "<Anonymous $dom{'home'}/public_ftp>";
-		&flush_file_lines($anon->{'file'});
-		&$second_print(".. done");
-		&register_post_action(\&restart_proftpd);
-		}
-	else {
-		&$second_print(".. could not find FTP server configuration");
 		}
 	}
 
@@ -1771,4 +1749,3 @@ return @rv;
 }
 
 1;
-
