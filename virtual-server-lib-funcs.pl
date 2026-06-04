@@ -20377,15 +20377,16 @@ else {
 }
 
 # execute_virtualmin_api_command(host, user, pass, proto, command)
-# Runs a Virtualmin API command on some system via SSH. Returns
+# Runs a Virtualmin API command on some system via SSH or Webmin. Returns
 # 0 and the output structure on success, 1 and an error message
-# on remote API failure, or 2 and an error message on SSH failure.
+# on remote API failure, or 2 and an error message on transport failure.
 sub execute_virtualmin_api_command
 {
 my ($host, $user, $pass, $proto, $cmd) = @_;
 $proto ||= "ssh";
 $user ||= "root";
 my $out;
+my $ex = 0;
 if ($proto eq "ssh") {
 	# Run the virtualmin command via SSH
 	my $sshok;
@@ -20400,10 +20401,10 @@ elsif ($proto eq "webmin") {
 	my $webmin = &dest_to_webmin("webmin://$user:$pass\@$host:/tmp");
 	eval {
 		local $main::error_must_die = 1;
-		&remote_foreign_require($webmin, "webmin");
-		my @out = &remote_foreign_call($webmin, "webmin",
-			"backquote_command", "virtualmin ".$cmd);
-		$out = join("", @out);
+		&remote_foreign_require($webmin, "virtual-server",
+					"virtual-server-lib.pl");
+		($out, $ex) = &remote_foreign_call($webmin,
+			"virtual-server", "run_virtualmin_api_command", $cmd);
 		};
 	if ($@) {
 		return (2, "Webmin failed : $@");
@@ -20413,13 +20414,24 @@ my $args = { };
 if ($cmd =~ /--(multiline|name-only|id-only)/) {
 	$args->{$1} = '';
 	}
-my $data = &convert_remote_format($out, 0, $cmd, $args, undef);
-if ($data->{'error'}) {
-	return (1, $data->{'error'});
+my $data = &convert_remote_format($out, $ex, $cmd, $args, undef);
+if ($data->{'error'} || $data->{'status'} eq 'failure') {
+	return (1, $data->{'error'} || $data->{'full_error'} ||
+		   "Command failed");
 	}
 else {
 	return (0, $data->{'data'}, $out);
 	}
+}
+
+# run_virtualmin_api_command(command)
+# Runs a Virtualmin API command, returning its output and exit status
+sub run_virtualmin_api_command
+{
+my ($cmd) = @_;
+my $api = &get_api_helper_command() || "virtualmin";
+my $out = &backquote_command(quotemeta($api)." ".$cmd);
+return ($out, $?);
 }
 
 # validate_transfer_host(&domain, destuser, desthost, destpass, proto,
