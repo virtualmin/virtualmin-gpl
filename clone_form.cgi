@@ -4,6 +4,8 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
+$d || &error($text{'edit_egone'});
+&can_edit_domain($d) || &error($text{'edit_ecannot'});
 
 # Check limits
 if ($d->{'parent'} && !&can_create_sub_servers() ||
