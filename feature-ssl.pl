@@ -2583,6 +2583,7 @@ if (!$d->{'virt'}) {
 		@delloc = @myloc;
 		}
 	else {
+		my $addfile = &dovecot::get_add_config_file();
 		# May need to add or update
 		foreach my $n (@dnames) {
 			my ($l) = grep { $_->{'value'} eq $n } @loc;
@@ -2604,8 +2605,9 @@ if (!$d->{'virt'}) {
 						{ 'name' => $kname,
 						  'value' => $kvalue, },
 						],
-					  'file' => $cfile };
+					  'file' => $addfile };
 				my ($plocal) = grep {
+					$_->{'file'} eq $addfile &&
 					&dovecot_local_name_cmp(
 						$n, $_->{'value'}, $ver) < 0
 					} @loc;
