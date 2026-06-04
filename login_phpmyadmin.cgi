@@ -10,6 +10,7 @@ require './virtual-server-lib.pl';
 
 # Get domain and check permissions
 my $d = &get_domain($in{'dom'});
+&can_edit_domain($d) || &error($text{'edit_ecannot'});
 &domain_has_website($d) && $d->{'dir'} ||
 	&error($text{'databases_login_pma_eweb'});
 &can_edit_databases($d) || &error($text{'databases_ecannot'});
