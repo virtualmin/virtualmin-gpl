@@ -712,126 +712,6 @@ return { 'dirnohomes' => !$in{'dir_homes'},
 	 'delete' => $in{'dir_delete'} };
 }
 
-# check_restore_dir_zip(&domain, zip-file)
-# Returns an error message if an untrusted ZIP directory restore contains
-# entries that should not be extracted as a domain owner.
-sub check_restore_dir_zip
-{
-local ($d, $srcfile) = @_;
-local $zipinfo = &has_command("zipinfo");
-local $unzip = &has_command("unzip") || "unzip";
-local $cmd = $zipinfo ? quotemeta($zipinfo)." -l ".quotemeta($srcfile) :
-		 quotemeta($unzip)." -Z -l ".quotemeta($srcfile);
-$cmd = &command_as_user($d->{'user'}, 0, $cmd);
-local $out;
-local $ex = &execute_command($cmd, undef, \$out, \$out);
-if ($ex) {
-	return &text('restore_dirziplistfailed',
-		     "<pre>".&html_escape($out)."</pre>");
-	}
-foreach my $l (split(/\r?\n/, $out)) {
-	next if ($l =~ /^\s*$/ ||
-		 $l =~ /^Archive:\s/ ||
-		 $l =~ /^Zip file size:\s/ ||
-		 $l =~ /^\d+\s+files?,\s/);
-	if ($l !~ /^(\S+)\s+\S+\s+\S+\s+\d+\s+\S+\s+\d+\s+\S+\s+\S+\s+\S+\s+(.*)$/) {
-		return &text('restore_dirzipunsafe',
-			     "<tt>".&html_escape($l)."</tt>",
-			     "cannot parse ZIP entry metadata");
-		}
-	my ($mode, $name) = ($1, $2);
-	if ($mode !~ /^[-d]/) {
-		return &text('restore_dirzipunsafe',
-			     "<tt>".&html_escape($name)."</tt>",
-			     "special files are not allowed");
-		}
-	if ($mode =~ /[sStT]/) {
-		return &text('restore_dirzipunsafe',
-			     "<tt>".&html_escape($name)."</tt>",
-			     "special permission bits are not allowed");
-		}
-	if ($name eq "" || $name eq "." ||
-	    $name =~ /^\// || $name =~ /^\\/ ||
-	    $name =~ /^[A-Za-z]:[\/\\]/ ||
-	    $name =~ /\\/) {
-		return &text('restore_dirzipunsafe',
-			     "<tt>".&html_escape($name)."</tt>",
-			     "unsafe path");
-		}
-	my $path = $name;
-	$path =~ s/\/+$//;
-	foreach my $part (split(/\//, $path)) {
-		if ($part eq "" || $part eq "..") {
-			return &text('restore_dirzipunsafe',
-				     "<tt>".&html_escape($name)."</tt>",
-				     "unsafe path");
-			}
-		}
-	}
-return undef;
-}
-
-# prepare_restore_dir_zip(&domain, zip-file)
-# Returns a ZIP file path readable by the domain owner, a temporary path to
-# cleanup, and an error message if the copy failed.
-sub prepare_restore_dir_zip
-{
-local ($d, $srcfile) = @_;
-my @uinfo = getpwnam($d->{'user'});
-if (!@uinfo) {
-	return (undef, undef,
-		&text('restore_dirzipcopyfailed',
-		      "<tt>".&html_escape($srcfile)."</tt>",
-		      &text('user_edoesntexist',
-			    "<tt>".&html_escape($d->{'user'})."</tt>")));
-	}
-my $zipdir;
-&seed_random();
-for(my $i=0; $i<10; $i++) {
-	$zipdir = &tempname_dir_sys()."/virtualmin-restore-zip-".
-		  $$."-".int(rand(1000000));
-	last if (mkdir($zipdir, 0750));
-	$zipdir = undef;
-	}
-if (!$zipdir) {
-	return (undef, undef,
-		&text('restore_dirzipcopyfailed',
-		      "<tt>".&html_escape($srcfile)."</tt>",
-		      "<pre>".&html_escape($!)."</pre>"));
-	}
-push(@main::temporary_files, $zipdir);
-if (!&set_ownership_permissions(0, $uinfo[3], 0750, $zipdir)) {
-	my $err = $!;
-	&unlink_file($zipdir);
-	return (undef, undef,
-		&text('restore_dirzipcopyfailed',
-		      "<tt>".&html_escape($srcfile)."</tt>",
-		      "<pre>".&html_escape($err)."</pre>"));
-	}
-local $ziptemp = $zipdir."/restore.zip";
-local $old_umask = umask(077);
-local $out;
-my $ex = &execute_command("cp ".quotemeta($srcfile)." ".
-			  quotemeta($ziptemp), undef, \$out, \$out);
-umask($old_umask);
-if ($ex) {
-	&unlink_file($zipdir);
-	return (undef, undef,
-		&text('restore_dirzipcopyfailed',
-		      "<tt>".&html_escape($srcfile)."</tt>",
-		      "<pre>".&html_escape($out)."</pre>"));
-	}
-if (!&set_ownership_permissions(0, $uinfo[3], 0640, $ziptemp)) {
-	my $err = $!;
-	&unlink_file($zipdir);
-	return (undef, undef,
-		&text('restore_dirzipcopyfailed',
-		      "<tt>".&html_escape($srcfile)."</tt>",
-		      "<pre>".&html_escape($err)."</pre>"));
-	}
-return ($ziptemp, $zipdir, undef);
-}
-
 # restore_dir(&domain, file, &options, &all-options, homeformat?, &oldd,
 # 	      asowner, &key)
 # Extracts the given tar file into server's home directory
@@ -869,22 +749,6 @@ if ($osize && $config{'home_quotas'}) {
 		# Won't fit!
 		&$first_print(&text('restore_edirspace', &nice_size($osize),
 				    &nice_size($space[1]*1024)));
-		}
-	}
-
-local $zipsrc = $srcfile;
-local $zipcleanup;
-if ($cf == 4 && $asd) {
-	# Check untrusted ZIPs before changing restore-side state.
-	my $zerr;
-	($zipsrc, $zipcleanup, $zerr) = &prepare_restore_dir_zip($d, $srcfile);
-	if (!$zerr) {
-		$zerr = &check_restore_dir_zip($d, $zipsrc);
-		}
-	if ($zerr) {
-		&unlink_file($zipcleanup) if ($zipcleanup);
-		&$second_print($zerr);
-		return 0;
 		}
 	}
 
@@ -933,7 +797,7 @@ if (!-e $d->{'home'}) {
 
 local $outfile = &transname();
 local $errfile = &transname();
-local $q = quotemeta($zipsrc);
+local $q = quotemeta($srcfile);
 local $qh = quotemeta($d->{'home'});
 local $catter;
 if ($key && $homefmt) {
@@ -971,7 +835,6 @@ else {
 	&execute_command("cd $qh && $reader | $tarcmd", undef, $outfile,$errfile);
 	}
 local $ex = $?;
-&unlink_file($zipcleanup) if ($zipcleanup);
 local $out = &read_file_contents($outfile);
 $out =~ s/\\([0-7]+)/chr(oct($1))/ge;
 local $err = &read_file_contents($errfile);
