@@ -2,6 +2,9 @@
 # Runs all Virtualmin tests
 
 package virtual_server;
+
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
@@ -13364,6 +13367,8 @@ if ($total_failed) {
 	print "!!!!!!!!!!!!! FAILURES : ",join(" ", @failed_tests,),"\n";
 	}
 exit($total_failed);
+
+} # end of unless ($ENV{VIRTUALMIN_NO_MAIN})
 
 sub run_test
 {

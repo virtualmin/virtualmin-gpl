@@ -20,6 +20,11 @@ typically started by C</etc/init.d/lookup-domain>.
 =cut
 
 package virtual_server;
+use POSIX;
+use Socket;
+
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {
+
 $main::no_acl_check++;
 $ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
 $ENV{'WEBMIN_VAR'} ||= "/var/webmin";
@@ -33,8 +38,6 @@ $0 = "$pwd/lookup-domain-daemon.pl";
 $no_virtualmin_plugins = 1;
 require './virtual-server-lib.pl';
 $< == 0 || die "lookup-domain-daemon.pl must be run as root";
-use POSIX;
-use Socket;
 
 # Parse command line
 $port = $config{'lookup_domain_port'} || $lookup_domain_port;
@@ -135,6 +138,8 @@ while(1) {
 		@childpids = grep { kill(0, $_) } @childpids;
 		}
 	}
+
+} # end of unless ($ENV{VIRTUALMIN_NO_MAIN})
 
 sub handle_one_request
 {

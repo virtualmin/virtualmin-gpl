@@ -2,6 +2,9 @@
 # Do a scheduled virtual server backup
 
 package virtual_server;
+
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {
+
 $main::no_acl_check++;
 require './virtual-server-lib.pl';
 $host = &get_system_hostname();
@@ -339,6 +342,8 @@ if ($sched->{'email_doms'} && $has_mailboxes &&
 	    { 'doms' => [ map { $_->{'dom'} } @doms ],
 	      'failed' => !$ok,
 	      'sched' => $id, });
+
+} # end of unless ($ENV{VIRTUALMIN_NO_MAIN})
 
 # Override print functions to capture output
 sub first_save_print
