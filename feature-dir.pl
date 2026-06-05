@@ -828,10 +828,14 @@ else {
 		}
 	&execute_command("cd $qh && $reader | $tarcmd", undef, $outfile,$errfile);
 	}
+local $ex = $?;
+if ($cf != 4 && !$asd) {
+	&execute_command("find $qh -xdev -type f \\( -perm -4000 -o -perm -2000 \\) ".
+			 "-exec chmod ug-s '{}' \\;", undef, undef, undef);
+	}
 local $out = &read_file_contents($outfile);
 $out =~ s/\\([0-7]+)/chr(oct($1))/ge;
 local $err = &read_file_contents($errfile);
-local $ex = $?;
 &enable_quotas($d);
 if ($ex) {
 	# Errors about utime in the tar extract are ignored when running
