@@ -7708,7 +7708,8 @@ $sslserv_tests = [
 	},
 
 	# Check that cert is in the Dovecot config for the IP
-	{ 'command' => 'cat '.&dovecot::get_config_file(),
+	{ 'command' => 'cat '.&dovecot::get_config_file().' '.
+			      &dovecot::get_add_config_file(),
 	  'grep' => [ 'local $PRIVATE_IP', ],
 	},
 
@@ -7805,7 +7806,8 @@ $sslserv_tests = [
 	},
 
 	# Check that cert is in the Dovecot config, but by hostname
-	{ 'command' => 'cat '.&dovecot::get_config_file(),
+	{ 'command' => 'cat '.&dovecot::get_config_file().' '.
+			      &dovecot::get_add_config_file(),
 	  'grep' => [ 'local_name '.$test_domain,
 		      'local_name \\*\\.'.$test_domain,
 		      'local_name '.$test_subdomain,
@@ -7814,7 +7816,8 @@ $sslserv_tests = [
 	},
 
 	# Check that cert is not in the Dovecot config for the IP anymore
-	{ 'command' => 'cat '.&dovecot::get_config_file(),
+	{ 'command' => 'cat '.&dovecot::get_config_file().' '.
+			      &dovecot::get_add_config_file(),
 	  'antigrep' => [ 'local $PRIVATE_IP', ],
 	},
 
@@ -7958,7 +7961,8 @@ $sslserv_tests = [
 	},
 
 	# Check that cert is no longer in the Dovecot config
-	{ 'command' => 'cat '.&dovecot::get_config_file(),
+	{ 'command' => 'cat '.&dovecot::get_config_file().' '.
+			      &dovecot::get_add_config_file(),
 	  'antigrep' => [ 'local_name '.$test_domain,
 		          'local_name \\*\\.'.$test_domain,
 		          'local_name '.$test_subdomain,
