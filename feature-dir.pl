@@ -795,9 +795,6 @@ if (!-e $d->{'home'}) {
 	&create_domain_home_directory($d, $uinfo);
 	}
 
-# Turn off quotas for the domain, to prevent the import failing
-&disable_quotas($d);
-
 local $outfile = &transname();
 local $errfile = &transname();
 local $q = quotemeta($srcfile);
@@ -809,10 +806,19 @@ if ($key && $homefmt) {
 else {
 	$catter = "cat $q";
 	}
+
+# Turn off quotas for the domain, to prevent the import failing
+&disable_quotas($d);
+
 if ($cf == 4) {
 	# Unzip command does un-compression and un-archiving
 	# XXX ZIP doesn't support excludes of paths :-(
-	&execute_command("cd $qh && unzip -o $q", undef, $outfile, $outfile);
+	local $unzip = &has_command("unzip") || "unzip";
+	local $unzipcmd = quotemeta($unzip)." -o $q";
+	if ($asd) {
+		$unzipcmd = &command_as_user($d->{'user'}, 0, $unzipcmd);
+		}
+	&execute_command("cd $qh && $unzipcmd", undef, $outfile, $outfile);
 	}
 else {
 	local $comp = $cf == 1 ? &get_gunzip_command()." -c" :
@@ -822,22 +828,23 @@ else {
 	local $tarcmd = &make_tar_command("xvfX", "-", $xtemp);
 	local $reader = $catter." | ".$comp;
 	if ($asd) {
-		# Run as domain owner - disabled, as this prevents some files
-		# from being written to by tar
+		# Run extraction as the domain owner for untrusted/as-owner
+		# restores, matching the ZIP restore privilege boundary.
 		$tarcmd = &command_as_user($d->{'user'}, 0, $tarcmd);
 		}
 	&execute_command("cd $qh && $reader | $tarcmd", undef, $outfile,$errfile);
 	}
+local $ex = $?;
 local $out = &read_file_contents($outfile);
 $out =~ s/\\([0-7]+)/chr(oct($1))/ge;
 local $err = &read_file_contents($errfile);
-local $ex = $?;
 &enable_quotas($d);
 if ($ex) {
 	# Errors about utime in the tar extract are ignored when running
 	# as the domain owner
+	local $failout = $cf == 4 ? $out : $err;
 	&$second_print(&text('backup_dirtarfailed',
-			     "<pre>".&html_escape($err)."</pre>"));
+			     "<pre>".&html_escape($failout)."</pre>"));
 	return 0;
 	}
 else {
