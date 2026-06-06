@@ -619,6 +619,7 @@ my @rv;
 foreach my $ad ($d, &get_domain_by("alias", $d->{'id'})) {
 	push(@rv, { 'path' => '/',
 		    'host' => $d->{'dom'},
+		    'code' => 301,
 		    'http' => 1,
 		    'https' => 1,
 		    'regexp' => 1,
@@ -639,6 +640,7 @@ my @rv;
 foreach my $ad ($d, &get_domain_by("alias", $d->{'id'})) {
 	push(@rv, { 'path' => '/',
 		    'host' => 'www.'.$ad->{'dom'},
+		    'code' => 301,
 		    'http' => 1,
 		    'https' => 1,
 		    'regexp' => 1,
@@ -659,6 +661,7 @@ my @rv;
 foreach my $ad ($d, &get_domain_by("alias", $d->{'id'})) {
 	push(@rv, { 'path' => '/',
 		    'host' => '[a-z0-9_\-]+.'.$ad->{'dom'},
+		    'code' => 301,
 		    'hostregexp' => 1,
 		    'http' => 1,
 		    'https' => 1,
