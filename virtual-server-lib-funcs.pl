@@ -20399,8 +20399,10 @@ if ($proto eq "ssh") {
 elsif ($proto eq "webmin") {
 	# Run via a Webmin API call
 	my $wpass = defined($pass) ? $pass : "";
-	my $webmin = &dest_to_webmin("webmin://".&urlize($user).":".
-				     &urlize($wpass)."\@$host:/tmp");
+	my $webmin = &dest_to_webmin("webmin://".
+				     &escape_webmin_url_credential($user).":".
+				     &escape_webmin_url_credential($wpass).
+				     "\@$host:/tmp");
 	eval {
 		local $main::error_must_die = 1;
 		&remote_foreign_require($webmin, "virtual-server",
@@ -20536,8 +20538,9 @@ if ($proto eq "ssh") {
 elsif ($proto eq "webmin") {
 	# Get the temp dir via Webmin call
 	my $wdestpass = defined($destpass) ? $destpass : "";
-	$desturl = "webmin://".&urlize($destuser).":".
-		   &urlize($wdestpass)."\@$desthost";
+	$desturl = "webmin://".
+		   &escape_webmin_url_credential($destuser).":".
+		   &escape_webmin_url_credential($wdestpass)."\@$desthost";
 	$webmin = &dest_to_webmin($desturl.':/tmp');
 	eval {
 		local $main::error_must_die = 1;

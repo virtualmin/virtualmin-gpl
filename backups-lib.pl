@@ -4310,6 +4310,29 @@ else {
 return $rv;
 }
 
+# escape_webmin_url_credential(string)
+# Escapes only Webmin URL credential separators, plus % for round-tripping
+sub escape_webmin_url_credential
+{
+my ($rv) = @_;
+$rv = "" if (!defined($rv));
+$rv =~ s/%/%25/g;
+$rv =~ s/\@/%40/g;
+$rv =~ s/:/%3A/g;
+return $rv;
+}
+
+# unescape_webmin_url_credential(string)
+# Decodes only the sequences emitted by escape_webmin_url_credential
+sub unescape_webmin_url_credential
+{
+my ($rv) = @_;
+$rv =~ s/%40/\@/g;
+$rv =~ s/%3A/:/g;
+$rv =~ s/%25/%/g;
+return $rv;
+}
+
 # parse_backup_url(string)
 # Converts a URL like ftp:// or a filename into its components. These will be
 # protocol (1 for FTP, 2 for SSH, 0 for local, 3 for S3, 4 for download,
@@ -4362,7 +4385,8 @@ elsif ($url =~ /^webmin:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
        $url =~ /^webmin:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
        $url =~ /^webmin:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
 	# Webmin URL with username and password
-	@rv = (9, &un_urlize($1, 1), &un_urlize($2, 1), $3, $5,
+	@rv = (9, &unescape_webmin_url_credential($1),
+	       &unescape_webmin_url_credential($2), $3, $5,
 	       $4 ? substr($4, 1) : 10000);
 	}
 elsif ($url =~ /^webmin:\/\/([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
@@ -4552,8 +4576,8 @@ elsif ($mode == 9) {
 	# Webmin URL
 	$rv .= "webmin://";
 	if ($user) {
-		$rv .= &urlize($user).":".
-		       &urlize(defined($pass) ? $pass : "")."\@";
+		$rv .= &escape_webmin_url_credential($user).":".
+		       &escape_webmin_url_credential($pass)."\@";
 		}
 	$rv .= $host.":".$port.$path;
 	}
@@ -5356,9 +5380,9 @@ elsif ($mode == 9) {
 		# Strip trailing /
 		$in{$name."_spath"} =~ s/\/+$//;
 		}
-	return "webmin://".&urlize($in{$name."_wuser"}).":".
-	       &urlize(defined($in{$name."_wpass"}) ?
-		       $in{$name."_wpass"} : "")."\@".
+	return "webmin://".
+	       &escape_webmin_url_credential($in{$name."_wuser"}).":".
+	       &escape_webmin_url_credential($in{$name."_wpass"})."\@".
 	       $in{$name."_wserver"}.":".$in{$name."_wpath"};
 	}
 else {
