@@ -39,7 +39,10 @@ return "Wiki";
 sub script_tikiwiki_php_vers
 {
 local ($d, $ver) = @_;
-return ( 5 );
+if (&compare_versions($ver, "27") >= 0) {
+	return 8.1;
+	}
+return 7.4;
 }
 
 sub script_tikiwiki_php_modules
