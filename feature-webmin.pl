@@ -670,6 +670,15 @@ if ($mods{'cron'} && !$noextra && $d->{'unix'} && !$chroot) {
 	push(@mods, "cron");
 	}
 
+if ($mods{'systemd'} && !$noextra && &foreign_check("systemd")) {
+	# Can manage supported systemd user units owned by the domain owner
+	&foreign_require("systemd");
+	my %acl = &systemd::systemd_user_unit_acl($d->{'user'});
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "systemd")
+		if (!$hasmods{'systemd'});
+	push(@mods, "systemd");
+	}
+
 if ($mods{'at'} && !$noextra && $d->{'unix'} && !$chroot) {
 	# Can only manage his at jobs
 	my %acl = ( 'noconfig' => 1,
