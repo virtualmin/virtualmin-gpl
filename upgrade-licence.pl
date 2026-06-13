@@ -57,7 +57,7 @@ my $itype;
 chop($itype = &read_file_contents("$module_root_directory/install-type"));
 
 # Update GPL-side packages before switching repositories
-&$first_print("Updating Webmin and Virtualmin packages ..");
+&$first_print("Updating Virtualmin GPL package from current repository ..");
 my $pkgerr = &upgrade_pro_upgrade_packages($itype);
 if ($pkgerr) {
 	&$second_print("..error : $pkgerr");
