@@ -21882,6 +21882,119 @@ return @pairs ? $file . ( ($file =~ /\?/) ? '&' : '?' ) . join('&', @pairs)
 	      : $file;
 }
 
+# upgrade_pro_upgrade_packages(install-type)
+# Updates Webmin and Virtualmin from the current GPL repo before repo switching
+sub upgrade_pro_upgrade_packages
+{
+local ($itype) = @_;
+if ($itype eq "deb") {
+	return &upgrade_deb_pro_upgrade_packages();
+	}
+elsif ($itype eq "rpm") {
+	return &upgrade_rpm_pro_upgrade_packages();
+	}
+return undef;
+}
+
+sub upgrade_deb_pro_upgrade_packages
+{
+my ($out, $err);
+&execute_command("apt-get update", undef, \$out, \$err);
+return "Could not refresh package metadata: ".($err || $out) if ($?);
+
+my $cmd = "DEBIAN_FRONTEND=noninteractive apt-get -y ".
+	  "--allow-change-held-packages --allow-downgrades ".
+	  "-o Dpkg::Options::='--force-confdef' ".
+	  "-o Dpkg::Options::='--force-confold' ".
+	  "install webmin webmin-virtual-server";
+&execute_command($cmd, undef, \$out, \$err);
+return "Could not update Webmin and Virtualmin packages: ".($err || $out)
+	if ($?);
+
+my @updates;
+foreach my $pkg ("webmin", "webmin-virtual-server") {
+	my $installed = &deb_installed_package_version($pkg);
+	next if (!$installed);
+	my $candidate = &deb_candidate_package_version($pkg);
+	if ($candidate && &compare_versions($candidate, $installed) > 0) {
+		push(@updates, "$pkg $installed -> $candidate");
+		}
+	}
+return @updates ? &pro_upgrade_updates_error(@updates) : undef;
+}
+
+sub upgrade_rpm_pro_upgrade_packages
+{
+my $pm = &has_command("dnf") ? "dnf" :
+	 &has_command("yum") ? "yum" : undef;
+return "Could not find yum or dnf to check package updates" if (!$pm);
+
+my ($out, $err);
+&execute_command("$pm -y clean all", undef, \$out, \$err);
+&execute_command("$pm -y makecache", undef, \$out, \$err);
+return "Could not refresh package metadata: ".($err || $out) if ($?);
+
+my @pkgs = ("webmin", "wbm-virtual-server", "webmin-virtual-server");
+
+foreach my $pkg (@pkgs) {
+	&execute_command("$pm -y upgrade ".quotemeta($pkg),
+			 undef, \$out, \$err);
+	if ($? && $pkg ne "webmin") {
+		&execute_command("$pm -y install ".quotemeta($pkg),
+				 undef, \$out, \$err);
+		}
+	}
+
+my $cmd = "$pm -q check-update";
+my $updates = `$cmd 2>&1`;
+my $status = $? >> 8;
+return "Could not check package updates: $updates"
+	if ($status && $status != 100);
+
+my @updates;
+foreach my $line (split(/\r?\n/, $updates)) {
+	foreach my $pkg (@pkgs) {
+		if ($line =~ /^\Q$pkg\E(?:\.\S+)?\s+(\S+)/) {
+			push(@updates, "$pkg -> $1");
+			}
+		}
+	}
+return @updates ? &pro_upgrade_updates_error(@updates) : undef;
+}
+
+sub deb_installed_package_version
+{
+local ($name) = @_;
+my $qname = quotemeta($name);
+my $version = `dpkg-query -W -f='\${Version}\\n' $qname 2>/dev/null`;
+chomp($version);
+return $version;
+}
+
+sub deb_candidate_package_version
+{
+local ($name) = @_;
+my $qname = quotemeta($name);
+open(POLICY, "apt-cache policy $qname 2>/dev/null |");
+my $candidate;
+while(<POLICY>) {
+	if (/^\s*Candidate:\s+(\S+)/) {
+		$candidate = $1;
+		last;
+		}
+	}
+close(POLICY);
+return !$candidate || $candidate eq "(none)" ? undef : $candidate;
+}
+
+sub pro_upgrade_updates_error
+{
+my (@updates) = @_;
+return "Could not update all Webmin and Virtualmin GPL packages before ".
+       "upgrading to Pro. Pending package update(s): ".join(", ", @updates).
+       ". Please resolve the package update issue and try the Pro upgrade again.";
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;
