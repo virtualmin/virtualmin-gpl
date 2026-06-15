@@ -673,7 +673,7 @@ if ($mods{'cron'} && !$noextra && $d->{'unix'} && !$chroot) {
 if ($mods{'systemd'} && !$noextra && &foreign_check("systemd")) {
 	# Can manage supported systemd user units owned by the domain owner
 	&foreign_require("systemd");
-	my %acl = &systemd::systemd_user_unit_acl($d->{'user'});
+	my %acl = &systemd::systemd_safe_user_unit_acl($d->{'user'});
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "systemd")
 		if (!$hasmods{'systemd'});
 	push(@mods, "systemd");
