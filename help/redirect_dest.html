@@ -16,4 +16,13 @@ destination type automatically:
     Keep the requested hostname while changing protocol and/or path.
 </ul>
 
+This field is not a regular expression replacement field. Enter the final
+destination URL, URL path, or directory; use the sub-path, filename, and query
+string options to control which parts of the original request are kept. <p>
+
+When sub-paths are kept, Virtualmin normalizes the destination's trailing slash
+to match <b>Redirect from</b>. For example, a source ending in <tt>/</tt> will
+use a destination ending in <tt>/</tt>, so appended sub-paths are joined
+correctly. <p>
+
 <footer>

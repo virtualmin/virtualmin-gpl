@@ -522,12 +522,20 @@ sub feature_supports_web_redirects
 {
 }
 
+# feature_supports_web_redirect_part_options(&domain)
+# Returns 1 if filename and query string redirect options are supported
+sub feature_supports_web_redirect_part_options
+{
+}
+
 # feature_list_web_redirects(&domain)
 # If defined, must return a list of redirect hash refs with keys :
 #   path - A URL path like /foo
 #   dest - Either a URL or a directory
 #   alias - Set to 1 for an alias, 0 for a redirect
 #   regexp - If set to 1, any sub-path is redirected to the same destination
+#   stripfile - If set to 1, remove the last file-like part of kept sub-paths
+#   stripquery - If set to 1, remove the original query string
 sub feature_list_web_redirects
 {
 }

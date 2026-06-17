@@ -9984,31 +9984,36 @@ $redirect_tests = [
 		      @create_args, ],
 	},
 
+	# Create deterministic local content for redirect target tests
+	{ 'command' => 'echo Redirect sub-path target > '.
+		       $test_domain_html.'/imghp' },
+
 	# Create a redirect for /google
 	{ 'command' => 'create-redirect.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'path', '/google' ],
-		      [ 'redirect', 'http://www.google.com' ] ],
+		      [ 'redirect', 'http://'.$test_domain ] ],
 	},
 
 	# Make sure the redirect appears
 	{ 'command' => 'list-redirects.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ '^/google', 'Destination: http://www.google.com',
-		      'Type: Redirect', 'Match sub-paths: No' ],
+	  'grep' => [ '^/google', 'Destination: http://'.$test_domain,
+		      'Type: Redirect',
+		      'Sub-path handling: Keep sub-paths' ],
 	},
 
-	# Test wget to redirect to google
+	# Test wget to redirect to the local root page
 	{ 'command' => $wget_command.'http://'.$test_domain.'/google/',
-	  'grep' => 'Feeling Lucky',
+	  'grep' => 'Non-redirected web page',
 	},
 
 	# Test wget to a sub-url, which should also work as Redirect includes
 	# sub-paths automatically
 	{ 'command' => $wget_command.'http://'.$test_domain.
 		       '/google/imghp',
-	  'grep' => 'Google Images',
+	  'grep' => 'Redirect sub-path target',
 	},
 
 	# Delete the redirect
@@ -10033,7 +10038,7 @@ $redirect_tests = [
 	{ 'command' => 'create-redirect.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'path', '/google' ],
-		      [ 'redirect', 'http://www.google.com' ],
+		      [ 'redirect', 'http://'.$test_domain ],
 		      [ 'regexp' ] ],
 	},
 
@@ -10041,25 +10046,124 @@ $redirect_tests = [
 	{ 'command' => 'list-redirects.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ '^/google', 'Destination: http://www.google.com',
-		      'Type: Redirect', 'Match sub-paths: Yes' ],
+	  'grep' => [ '^/google', 'Destination: http://'.$test_domain,
+		      'Type: Redirect',
+		      'Sub-path handling: Ignore sub-paths' ],
 	},
 
-	# Test wget to redirect to google
+	# Test wget to redirect to the local root page
 	{ 'command' => $wget_command.'http://'.$test_domain.'/google/',
-	  'grep' => 'Feeling Lucky',
+	  'grep' => 'Non-redirected web page',
 	},
 
 	# Test wget to a sub-url, should go to the same place
 	{ 'command' => $wget_command.'http://'.$test_domain.
 		       '/google/imghp',
-	  'antigrep' => 'Google Images',
+	  'antigrep' => 'Redirect sub-path target',
 	},
 
 	# Delete the redirect
 	{ 'command' => 'delete-redirect.pl',
           'args' => [ [ 'domain', $test_domain ],
                       [ 'path', '/google' ] ],
+	},
+
+	# Create a redirect whose destination should gain a trailing slash
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/slash/' ],
+		      [ 'redirect', 'http://www.google.com' ] ],
+	},
+
+	# Make sure the trailing slash was normalized
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/slash/' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/slash/',
+		      'Destination: http://www.google.com/' ],
+	},
+
+	# Delete the redirect
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/slash/' ] ],
+	},
+
+	# Create a redirect whose destination should lose a trailing slash
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/noslash' ],
+		      [ 'redirect', 'http://www.google.com/maps/' ] ],
+	},
+
+	# Make sure the trailing slash was normalized
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/noslash' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/noslash',
+		      'Destination: http://www.google.com/maps$' ],
+	},
+
+	# Delete the redirect
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/noslash' ] ],
+	},
+
+	# Create a redirect that strips filename and query string
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/strip' ],
+		      [ 'redirect', 'http://www.google.com' ],
+		      [ 'strip-file' ],
+		      [ 'strip-query' ] ],
+	},
+
+	# Make sure the redirect appears correctly
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/strip' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/strip', 'Destination: http://www.google.com',
+		      'Type: Redirect',
+		      'Sub-path handling: Keep sub-paths',
+		      'Strip filename: Yes',
+		      'Strip query string: Yes',
+		      'Directives: RewriteRule' ],
+	},
+
+	# Delete the redirect
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/strip' ] ],
+	},
+
+	# Create a redirect with its own destination query string
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/stripq' ],
+		      [ 'redirect', 'http://www.google.com/search?q=1' ],
+		      [ 'strip-file' ],
+		      [ 'strip-query' ] ],
+	},
+
+	# Make sure the destination query string round-trips correctly
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/stripq' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/stripq',
+		      'Destination: http://www[.]google[.]com/search[?]q=1',
+		      'Strip filename: Yes',
+		      'Strip query string: Yes' ],
+	},
+
+	# Delete the redirect
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/stripq' ] ],
 	},
 
 	# Create the directory and a file in it
@@ -10079,7 +10183,8 @@ $redirect_tests = [
 		      [ 'multiline' ] ],
 	  'grep' => [ '^/somedir',
 		      'Destination: '.$test_domain_home.'/public_html/blah',
-		      'Type: Alias', 'Match sub-paths: No' ],
+		      'Type: Alias',
+		      'Sub-path handling: Keep sub-paths' ],
 	},
 
 	# Validate that the file can be fetched
@@ -10115,7 +10220,8 @@ $redirect_tests = [
 		      'Limit to hostname: www.'.$test_domain,
 		      'Regexp hostname: No',
 		      'Code: 301',
-		      'Type: Redirect', 'Match sub-paths: No' ],
+		      'Type: Redirect',
+		      'Sub-path handling: Keep sub-paths' ],
 	},
 
 	# Check that it works
@@ -10160,7 +10266,8 @@ $redirect_tests = [
 	  'grep' => [ '^/$', 'Destination: http://'.$test_domain,
 		      'Limit to hostname: \(ftp\|www\).'.$test_domain,
 		      'Regexp hostname: Yes',
-		      'Type: Redirect', 'Match sub-paths: No' ],
+		      'Type: Redirect',
+		      'Sub-path handling: Keep sub-paths' ],
 	},
 
 	# Check that it works
@@ -10250,14 +10357,17 @@ $redirect_tests = [
 		      [ 'fix-wellknown' ] ],
 	},
 
-	# Test wget to redirect to google
-	{ 'command' => $wget_command.'http://'.$test_domain.'/',
-	  'grep' => 'Feeling Lucky',
+	# Test wget to detect the redirect without relying on Google's content
+	{ 'command' => $wget_command.'--max-redirect=0 -S http://'.
+		       $test_domain.'/',
+	  'grep' => 'Location: http://www.google.com',
+	  'fail' => 1,
 	},
 
 	# Test wget doesn't redirect .well-known
-	{ 'command' => $wget_command.'http://'.$test_domain.'/.well-known/',
-	  'antigrep' => 'Feeling Lucky',
+	{ 'command' => $wget_command.'--max-redirect=0 -S http://'.
+		       $test_domain.'/.well-known/',
+	  'antigrep' => 'Location: http://www.google.com',
 	  'fail' => 1,
 	},
 
@@ -12420,7 +12530,7 @@ $reset_tests = [
 	  'grep' => [ '^/google',
 		      'Destination: http://www.google.com',
 		      'Type: Redirect',
-		      'Match sub-paths: No',
+		      'Sub-path handling: Keep sub-paths',
 		      'Protocols: http https$', ],
 	},
 
@@ -12432,7 +12542,7 @@ $reset_tests = [
 	  'grep' => [ '^/ssl',
 		      'Destination: http://www.example.com',
 		      'Type: Redirect',
-		      'Match sub-paths: No',
+		      'Sub-path handling: Keep sub-paths',
 		      'Protocols: https$', ],
 	},
 

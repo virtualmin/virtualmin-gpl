@@ -23,6 +23,10 @@ the same sub-path in the destination directory or path. However, you can
 use the C<--exact> flag to only match the given path, or the C<--regexp> flag
 to ignore sub-paths when redirecting.
 
+When sub-paths are kept, the C<--strip-file> flag removes a file-like final
+path segment such as C<index.html> from the appended path. The C<--strip-query>
+flag removes the original request query string from the redirected URL.
+
 If the path to redirect is C</>, this can break requests by Let's Encrypt
 needed when issuing new SSL certificates. To prevent this, add the
 C<--fix-wellknown> flag which excludes the C<.well-known> path, which is
@@ -84,6 +88,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--exact") {
 		$exact = 1;
 		}
+	elsif ($a eq "--strip-file") {
+		$stripfile = 1;
+		}
+	elsif ($a eq "--strip-query") {
+		$stripquery = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -127,10 +137,14 @@ if ($url) {
 elsif ($dir) {
 	$dir =~ /^\/\S+$/ && -d $dir ||
 		&usage("The --alias flag must be followed by a directory");
+	!$stripfile && !$stripquery ||
+		&usage("--strip-file and --strip-query cannot be used with --alias");
 	}
 else {
 	&usage("One of --redirect or --alias must be given");
 	}
+$stripfile && ($regexp || $exact) &&
+	&usage("--strip-file can only be used when sub-paths are kept");
 if (!$http && !$https) {
 	# If no protocol was given, assume both for backwards compatability
 	$http = $https = 1;
@@ -142,6 +156,9 @@ $d || usage("Virtual server $domain does not exist");
 	&usage("Virtual server $domain does not support redirects");
 !$host || &has_web_host_redirects($d) ||
     &usage("Virtual server $domain does not support hostname-based redirects");
+!($stripfile || $stripquery) || &has_web_redirect_part_options($d) ||
+	&usage("Virtual server $domain does not support filename or query ".
+	       "string redirect options");
 
 # Check for clash
 &obtain_lock_web($d);
@@ -160,6 +177,8 @@ $r = { 'path' => $path,
        'http' => $http,
        'https' => $https,
        'code' => $code,
+       'stripfile' => $stripfile,
+       'stripquery' => $stripquery,
        'host' => $host,
        'hostregexp' => $hostregexp,
      };
@@ -188,6 +207,8 @@ print "virtualmin create-redirect --domain domain.name\n";
 print "                           --path url-path\n";
 print "                           --alias directory | --redirect url\n";
 print "                          [--regexp | --exact]\n";
+print "                          [--strip-file]\n";
+print "                          [--strip-query]\n";
 print "                          [--code number]\n";
 print "                          [--host hostname | --host-regexp hostname]\n";
 print "                          [--http | --https]\n";

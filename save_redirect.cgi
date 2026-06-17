@@ -8,6 +8,7 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_redirect() ||
 	&error($text{'redirects_ecannot'});
 &has_web_redirects($d) || &error($text{'redirects_eweb'});
+$canparts = &has_web_redirect_part_options($d);
 &error_setup($text{'redirect_err'});
 &obtain_lock_web($d);
 if (!$in{'new'}) {
@@ -193,6 +194,15 @@ else {
 	$r->{'exact'} = $in{'regexp'} == 2 ? 1 : 0;
 	$r->{'http'} = $in{'http'};
 	$r->{'https'} = $in{'https'};
+	if (!$r->{'alias'} && $canparts) {
+		$r->{'stripfile'} =
+			$in{'stripfile'} && !$r->{'regexp'} && !$r->{'exact'} ? 1 : 0;
+		$r->{'stripquery'} = $in{'stripquery'} ? 1 : 0;
+		}
+	else {
+		delete($r->{'stripfile'});
+		delete($r->{'stripquery'});
+		}
 
 	# Hostname filter mode
 	# 0 = any hostname, 1 = selected hostname, 2 = manually specified
