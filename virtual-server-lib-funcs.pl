@@ -17886,6 +17886,9 @@ local @rv = (
 	    [ 0, 'No' ] ] ],
         [ 'cron', 'Scheduled Cron Jobs (user\'s Cron jobs)' ],
         [ 'at', 'Scheduled Commands (user\'s commands)' ],
+        &foreign_check("systemd") ?
+		( [ 'systemd', 'Systemd User Units (domain owner\'s units)' ] ) :
+		( ),
         [ 'telnet', 'SSH Login' ],
         [ 'xterm', 'Terminal' ],
         [ 'updown', 'Upload and Download (as user)',
