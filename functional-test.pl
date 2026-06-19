@@ -9984,36 +9984,35 @@ $redirect_tests = [
 		      @create_args, ],
 	},
 
-	# Create deterministic local content for redirect target tests
-	{ 'command' => 'echo Redirect sub-path target > '.
-		       $test_domain_html.'/imghp' },
-
 	# Create a redirect for /google
 	{ 'command' => 'create-redirect.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'path', '/google' ],
-		      [ 'redirect', 'http://www.'.$test_domain ] ],
+		      [ 'redirect', 'http://www.google.com' ] ],
 	},
 
 	# Make sure the redirect appears
 	{ 'command' => 'list-redirects.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ '^/google', 'Destination: http://www.'.$test_domain,
+	  'grep' => [ '^/google', 'Destination: http://www.google.com',
 		      'Type: Redirect',
 		      'Sub-path handling: Keep sub-paths' ],
 	},
 
-	# Test wget to redirect to the local root page
-	{ 'command' => $wget_command.'http://'.$test_domain.'/google/',
-	  'grep' => 'Non-redirected web page',
+	# Test wget gets the external redirect without following it
+	{ 'command' => $wget_command.'--max-redirect=0 -S http://'.
+		       $test_domain.'/google/',
+	  'grep' => 'Location: http://www.google.com/',
+	  'fail' => 1,
 	},
 
-	# Test wget to a sub-url, which should also work as Redirect includes
-	# sub-paths automatically
-	{ 'command' => $wget_command.'http://'.$test_domain.
+	# Test wget to a sub-url, which should be kept in the Location
+	{ 'command' => $wget_command.'--max-redirect=0 -S http://'.
+		       $test_domain.
 		       '/google/imghp',
-	  'grep' => 'Redirect sub-path target',
+	  'grep' => 'Location: http://www.google.com/imghp',
+	  'fail' => 1,
 	},
 
 	# Delete the redirect
@@ -10038,7 +10037,7 @@ $redirect_tests = [
 	{ 'command' => 'create-redirect.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'path', '/google' ],
-		      [ 'redirect', 'http://www.'.$test_domain ],
+		      [ 'redirect', 'http://www.google.com' ],
 		      [ 'regexp' ] ],
 	},
 
@@ -10046,20 +10045,25 @@ $redirect_tests = [
 	{ 'command' => 'list-redirects.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ '^/google', 'Destination: http://www.'.$test_domain,
+	  'grep' => [ '^/google', 'Destination: http://www.google.com',
 		      'Type: Redirect',
 		      'Sub-path handling: Ignore sub-paths' ],
 	},
 
-	# Test wget to redirect to the local root page
-	{ 'command' => $wget_command.'http://'.$test_domain.'/google/',
-	  'grep' => 'Non-redirected web page',
+	# Test wget gets the external redirect without following it
+	{ 'command' => $wget_command.'--max-redirect=0 -S http://'.
+		       $test_domain.'/google/',
+	  'grep' => 'Location: http://www.google.com',
+	  'fail' => 1,
 	},
 
 	# Test wget to a sub-url, should go to the same place
-	{ 'command' => $wget_command.'http://'.$test_domain.
+	{ 'command' => $wget_command.'--max-redirect=0 -S http://'.
+		       $test_domain.
 		       '/google/imghp',
-	  'antigrep' => 'Redirect sub-path target',
+	  'grep' => 'Location: http://www.google.com',
+	  'antigrep' => 'Location: http://www.google.com/imghp',
+	  'fail' => 1,
 	},
 
 	# Delete the redirect
