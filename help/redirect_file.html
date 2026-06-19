@@ -1,0 +1,18 @@
+<header>Filename handling</header>
+
+This option applies to URL redirects when <b>Sub-path handling</b> is set to
+<b>Keep sub-paths</b>.
+
+<ul>
+<li><b>Keep filename</b><br>
+    A request for <tt>/old/dir/index.html</tt> is redirected with
+    <tt>/dir/index.html</tt> appended to the destination.
+<li><b>Remove filename</b><br>
+    A request for <tt>/old/dir/index.html</tt> is redirected with
+    <tt>/dir/</tt> appended to the destination.
+</ul>
+
+Only a file-like final segment containing a dot, such as <tt>index.html</tt>,
+is removed. Directory-style or extensionless paths are kept as entered. <p>
+
+<footer>

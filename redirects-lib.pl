@@ -25,6 +25,18 @@ return &plugin_defined($p, "feature_supports_web_host_redirects") &&
 	&plugin_call($p, "feature_supports_web_host_redirects", $d);
 }
 
+# has_web_redirect_part_options(&domain)
+# Returns 1 if redirect editing can remove filenames or query strings
+sub has_web_redirect_part_options
+{
+my ($d) = @_;
+return 1 if ($d->{'web'});
+my $p = &domain_has_website($d);
+return 0 if (!$p);
+return &plugin_defined($p, "feature_supports_web_redirect_part_options") &&
+	&plugin_call($p, "feature_supports_web_redirect_part_options", $d);
+}
+
 # list_redirects(&domain)
 # Returns a list of URL paths and destinations for redirects and aliases. Each
 # is a hash ref with keys :
@@ -32,6 +44,8 @@ return &plugin_defined($p, "feature_supports_web_host_redirects") &&
 #   dest - Either a URL or a directory
 #   alias - Set to 1 for an alias, 0 for a redirect
 #   regexp - If set to 1, any sub-path is redirected to the same destination
+#   stripfile - If set to 1, remove the last file-like part of kept sub-paths
+#   stripquery - If set to 1, remove the original query string
 #   host - Only match requests to this hostname
 #   http - Set in the non-SSL virtual host
 #   https - Set in the SSL virtual host
@@ -132,29 +146,8 @@ foreach my $p (@ports) {
 			$rd->{$proto} = 1;
 			$rd->{'path'} = $rwr->{'words'}->[0];
 			$rd->{'dest'} = $rwr->{'words'}->[1];
-			if ($rd->{'dest'} !~ /\$1$/ &&
-			    ($rd->{'path'} =~ /^(.*)\.\*\$$/ ||
-			     $rd->{'path'} =~ /^(.*)\(\.\*\)\$$/)) {
-				# Path is like /something(.*) but the destination
-				# does not include $1, meaning that sub-paths are
-				# matched but are not used
-				$rd->{'path'} = $1;
-				$rd->{'regexp'} = 1;
-				}
-			elsif ($rd->{'path'} =~ /^\^(.*)\$$/) {
-				# Path is like ^/something$, meaning that sub-paths
-				# are not matched
-				$rd->{'path'} = $1;
-				$rd->{'exact'} = 1;
-				}
-			elsif ($rd->{'path'} =~ /^(.*)\(\.\*\)\$$/) {
-				# Path is like /something(.*) and the destination
-				# includes $1, meaning that sub-paths are matched
-				# and included in the redirect
-                                $rd->{'path'} = $1;
-				$rd->{'dest'} =~ s/\$1$//;
-				}
 			&parse_rewritecond_flags($rwr->{'words'}->[2], $rd);
+			&parse_rewriterule_redirect($rd);
 			$rd->{'id'} = $rwr->{'name'}.'_'.$rd->{'path'};
 			my ($already) = 
 				grep { $_->{'path'} eq $rd->{'path'} &&
@@ -226,32 +219,11 @@ foreach my $p (@ports) {
 			else {
 				next;
 				}
-			}
+		}
 		$rd->{'path'} = $rwr->{'words'}->[0];
 		$rd->{'dest'} = $rwr->{'words'}->[1];
-		if ($rd->{'dest'} !~ /\$1$/ &&
-		    ($rd->{'path'} =~ /^(.*)\.\*\$$/ ||
-		     $rd->{'path'} =~ /^(.*)\(\.\*\)\$$/)) {
-			# Path is like /something(.*) but the destination
-			# does not include $1, meaning that sub-paths are
-			# matched but are not used
-			$rd->{'path'} = $1;
-			$rd->{'regexp'} = 1;
-			}
-		elsif ($rd->{'path'} =~ /^\^(.*)\$$/) {
-			# Path is like ^/something$, meaning that sub-paths
-			# are not matched
-			$rd->{'path'} = $1;
-			$rd->{'exact'} = 1;
-			}
-		elsif ($rd->{'path'} =~ /^(.*)\(\.\*\)\$$/) {
-			# Path is like /something(.*) and the destination
-			# includes $1, meaning that sub-paths are matched
-			# and included in the redirect
-			$rd->{'path'} = $1;
-			$rd->{'dest'} =~ s/\$1$//;
-			}
 		&parse_rewritecond_flags($rwr->{'words'}->[2], $rd);
+		&parse_rewriterule_redirect($rd);
 		$rd->{'id'} = $rwr->{'name'}.'_'.$rd->{'path'};
 		$rd->{'id'} .= '_'.$rd->{'host'} if ($rd->{'host'});
 		my ($already) = grep { $_->{'path'} eq $rd->{'path'} &&
@@ -282,8 +254,92 @@ if ($flags =~ /^\[(.*)\]$/) {
 		elsif ($f eq "L") {
 			$rd->{'last'} = 1;
 			}
+		elsif ($f eq "QSD") {
+			$rd->{'stripquery'} = 1;
+			}
 		}
 	}
+}
+
+# parse_rewriterule_redirect(&redirect)
+# Parses a RewriteRule path and destination into redirect path-handling flags
+sub parse_rewriterule_redirect
+{
+my ($rd) = @_;
+my $uses_subpath = $rd->{'dest'} =~ /\$1(?:[?#].*)?$/;
+if ($uses_subpath &&
+    $rd->{'path'} =~ /^(.*)\(\.\*\?\)\(\?:\[\^\/\]\*\\\.\[\^\/\]\*\)\?\$$/) {
+	# Path strips a trailing file-like segment from the kept sub-path
+	$rd->{'path'} = $1;
+	$rd->{'dest'} = &remove_redirect_destination_path($rd->{'dest'});
+	$rd->{'stripfile'} = 1;
+	}
+elsif (!$uses_subpath &&
+       ($rd->{'path'} =~ /^(.*)\.\*\$$/ ||
+	$rd->{'path'} =~ /^(.*)\(\.\*\)\$$/)) {
+	# Path is like /something(.*) but the destination does not
+	# include $1, meaning that sub-paths are matched but are not used
+	$rd->{'path'} = $1;
+	$rd->{'regexp'} = 1;
+	}
+elsif ($rd->{'path'} =~ /^\^(.*)\$$/) {
+	# Path is like ^/something$, meaning that sub-paths are not matched
+	$rd->{'path'} = $1;
+	$rd->{'exact'} = 1;
+	}
+elsif ($rd->{'path'} =~ /^(.*)\(\.\*\)\$$/) {
+	# Path is like /something(.*) and the destination includes $1,
+	# meaning that sub-paths are matched and included in the redirect
+	$rd->{'path'} = $1;
+	$rd->{'dest'} = &remove_redirect_destination_path($rd->{'dest'});
+	}
+}
+
+# normalize_redirect_destination_slash(&redirect)
+# For redirects that keep sub-paths, mirror the source path trailing slash on
+# the destination so Apache does not join with a missing or duplicate slash.
+sub normalize_redirect_destination_slash
+{
+my ($redirect) = @_;
+return if ($redirect->{'alias'} || $redirect->{'regexp'} ||
+	   $redirect->{'exact'});
+return if (!defined($redirect->{'path'}) || !defined($redirect->{'dest'}));
+return if ($redirect->{'dest'} !~ /^(https?:\/\/|\/)/);
+
+my $dest = $redirect->{'dest'};
+my $suffix = "";
+if ($dest =~ s/([?#].*)$//) {
+	$suffix = $1;
+	}
+
+if ($redirect->{'path'} =~ /\/$/) {
+	$dest .= "/" if ($dest !~ /\/$/);
+	}
+else {
+	$dest =~ s/\/$// if ($dest =~ /^(https?:\/\/.+\/|\/.+\/)$/);
+	}
+$redirect->{'dest'} = $dest.$suffix;
+}
+
+# append_redirect_destination_path(destination, path-part)
+# Inserts a generated sub-path before any destination query string or fragment
+sub append_redirect_destination_path
+{
+my ($dest, $part) = @_;
+my $suffix = "";
+if ($dest =~ s/([?#].*)$//) {
+	$suffix = $1;
+	}
+return $dest.$part.$suffix;
+}
+
+# remove_redirect_destination_path(destination)
+# Removes a generated sub-path before any destination query string or fragment
+sub remove_redirect_destination_path
+{
+my ($dest) = @_;
+$dest =~ s/\$1([?#].*)?$/$1 || ""/e;
+return $dest;
 }
 
 # create_redirect(&domain, &redirect)
@@ -291,6 +347,17 @@ if ($flags =~ /^\[(.*)\]$/) {
 sub create_redirect
 {
 my ($d, $redirect) = @_;
+if ($redirect->{'alias'} &&
+    ($redirect->{'stripfile'} || $redirect->{'stripquery'})) {
+	return "Filename and query string options cannot be used with ".
+	       "directory aliases";
+	}
+if (($redirect->{'stripfile'} || $redirect->{'stripquery'}) &&
+    !&has_web_redirect_part_options($d)) {
+	return "Filename and query string redirect options are not supported ".
+	       "for this website type";
+	}
+&normalize_redirect_destination_slash($redirect);
 local $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_create_web_redirect", $d, $redirect);
@@ -313,9 +380,9 @@ foreach my $p (@ports) {
 	my $proto = $p == $d->{'web_port'} ? 'http' : 'https';
 	next if (!$redirect->{$proto});
 	next if (!$virt);
-	if ($redirect->{'dest'} =~ /%\{HTTP_/ || $redirect->{'host'}) {
-		# Destination uses variables or matches on a hostname,
-		# so RewriteRule is needed
+	if ($redirect->{'dest'} =~ /%\{HTTP_/ || $redirect->{'host'} ||
+	    $redirect->{'stripfile'} || $redirect->{'stripquery'}) {
+		# Advanced matching needs RewriteRule instead of Redirect
 		my @rwes = &apache::find_directive("RewriteEngine", $vconf);
 		my @rwcs = &apache::find_directive("RewriteCond", $vconf);
 		my @rwrs = &apache::find_directive("RewriteRule", $vconf);
@@ -323,6 +390,7 @@ foreach my $p (@ports) {
 		push(@flags, $redirect->{'code'} ? "R=".$redirect->{'code'}
 						 : "R");
 		push(@flags, "L") if ($redirect->{'last'});
+		push(@flags, "QSD") if ($redirect->{'stripquery'});
 		if ($redirect->{'host'}) {
 			push(@rwcs, "%{HTTP_HOST} ".
 			     ($redirect->{'hostregexp'} ? "" : "=").
@@ -334,6 +402,13 @@ foreach my $p (@ports) {
 			# Only match the exact path, not any sub-paths
 			$path = "^".$redirect->{'path'}."\$";
 			}
+		elsif ($redirect->{'stripfile'}) {
+			# Match all sub-paths, strip a trailing file-like
+			# component, and include the rest in the redirect
+			$path = $redirect->{'path'}.
+				"(.*?)(?:[^/]*\\.[^/]*)?\$";
+			$dest = &append_redirect_destination_path($dest, "\$1");
+			}
 		elsif ($redirect->{'regexp'}) {
 			# Match all sub-paths, but do not include them
 			# in the redirect
@@ -343,7 +418,7 @@ foreach my $p (@ports) {
 			# Match all sub-paths, and include them in the
 			# redirect
 			$path = $redirect->{'path'}."(\.\*)\$";
-			$dest .= "\$1";
+			$dest = &append_redirect_destination_path($dest, "\$1");
 			}
 		push(@rwrs, $path." ".$dest." [".join(",", @flags)."]");
 		if (!@rwes) {
