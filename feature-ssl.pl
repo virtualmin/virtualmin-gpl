@@ -2491,6 +2491,26 @@ foreach my $ip (@ips) {
 		}
 
 	if ($enable) {
+		# Remove any conflicting local_name blocks for this
+		# domain before creating the local IP block. Dedicated-IP
+		# domains should use local {} not local_name {}.
+		# Ref: https://github.com/virtualmin/virtualmin-gpl/issues/1134
+		my @lnloc = grep { $_->{'name'} eq 'local_name' &&
+				   $_->{'section'} } @$conf;
+		my @doms = ( $d, &get_domain_by("alias", $d->{'id'}) );
+		my @conflicting = grep {
+			&hostname_under_domain(\@doms, $_->{'value'})
+			} @lnloc;
+		foreach my $cl (@conflicting) {
+			&dovecot::delete_section($conf, $cl);
+			@$conf = grep { $_ ne $cl } @$conf;
+			@$conf = grep {
+				$_->{'sectionname'} ne $cl->{'name'} ||
+				$_->{'sectionvalue'} ne $cl->{'value'}
+				} @$conf;
+			&flush_file_lines($cl->{'file'});
+			}
+
 		# Needs a cert for the IP
 		if (!$l) {
 			$l = { 'name' => 'local',
