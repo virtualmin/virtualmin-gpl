@@ -8821,6 +8821,7 @@ sub create_initial_letsencrypt_cert
 {
 local ($d, $valid, $showerrors) = @_;
 &foreign_require("webmin");
+my $tmpl = &get_template($d->{'template'});
 my @dnames;
 if ($d->{'letsencrypt_dname'}) {
 	@dnames = split(/\s+/, $d->{'letsencrypt_dname'});
@@ -8854,8 +8855,33 @@ if ($valid) {
 		return 0;
 		}
 	if (defined(&check_domain_connectivity)) {
-		@errs = &check_domain_connectivity(
-			$d, { 'mail' => 1, 'ssl' => 1 });
+		my $skip = { 'mail' => 1, 'ssl' => 1 };
+		my $proxied = $d->{'dns_cloud'} && $tmpl->{'dns_cloud_proxy'};
+		if (!$proxied && $d->{'dns_cloud'}) {
+			# Imported cloud DNS records can already be proxied even
+			# when the template proxy default is off, so check the
+			# actual records for the requested certificate names.
+			my %dnames;
+			foreach my $dname (@dnames) {
+				$dname = lc($dname);
+				$dname =~ s/\.$//;
+				$dnames{$dname} = 1;
+				}
+			foreach my $r (&get_domain_dns_records($d)) {
+				next if (!$r->{'proxied'} ||
+					 $r->{'type'} !~ /^(A|AAAA|CNAME)$/);
+				my $name = lc(&expand_dns_record($r->{'name'}, $d));
+				$name =~ s/\.$//;
+				if ($dnames{$name}) {
+					$proxied = 1;
+					last;
+					}
+				}
+			}
+		if ($proxied) {
+			$skip->{'web'} = 1;
+			}
+		@errs = &check_domain_connectivity($d, $skip);
 		if (@errs) {
 			# Always store last Certbot error
 			my $e = &html_escape(join(", ",
