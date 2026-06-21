@@ -46,6 +46,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--user") {
 		$user = shift(@ARGV);
 		}
+	elsif ($a eq "--dest") {
+		$dest = shift(@ARGV);
+		}
 	elsif ($a eq "--id") {
 		$backupid = shift(@ARGV);
 		}
@@ -72,6 +75,10 @@ elsif ($user) {
 elsif ($reseller) {
 	# By reseller owner
 	@scheds = grep { $_->{'owner'} eq $reseller } @scheds;
+	}
+elsif ($dest) {
+	# By destination
+	@scheds = grep { &indexof($dest, &get_scheduled_backup_dests($_)) >= 0 } @scheds;
 	}
 elsif ($backupid) {
 	# By scheduled backup ID
