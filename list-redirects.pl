@@ -84,15 +84,21 @@ if ($multiline) {
 		print "$r->{'path'}\n";
 		print "    Destination: $r->{'dest'}\n";
 		print "    Type: ",$r->{'alias'} ? "Alias" : "Redirect","\n";
-		print "    Match sub-paths: ",
-			$r->{'regexp'} ? "Yes" : "No","\n";
-		print "    Match exact path: ",
-			$r->{'exact'} ? "Yes" : "No","\n";
+		my $subpath = $r->{'exact'} ? "Exact path only" :
+			      $r->{'regexp'} ? "Ignore sub-paths" :
+					       "Keep sub-paths";
+		print "    Sub-path handling: $subpath\n";
 		if ($r->{'code'}) {
 			print "    Code: ",$r->{'code'},"\n";
 			}
 		if ($r->{'last'}) {
 			print "    Last rule: Yes\n";
+			}
+		if ($r->{'stripfile'}) {
+			print "    Strip filename: Yes\n";
+			}
+		if ($r->{'stripquery'}) {
+			print "    Strip query string: Yes\n";
 			}
 		print "    Protocols: ",join(" ", grep { $r->{$_} } ("http", "https")),"\n";
 		if ($r->{'host'}) {
@@ -135,4 +141,3 @@ print "                         [--host hostname]\n";
 print "                         [--fix-wellknown]\n";
 exit(1);
 }
-

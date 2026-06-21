@@ -253,13 +253,14 @@ local ($e, $users, $aliasdoms) = @_;
 $e = lc($e);
 foreach my $u (@$users) {
 	foreach my $ee ($u->{'email'}, @{$u->{'extraemail'}}) {
+		$ee = lc($ee);
 		if ($ee eq $e) {
 			return $u;
 			}
 		# Check for same email address in alias domain
 		local ($mb, $dname) = split(/\@/, $ee);
 		foreach my $ad (@aliasdoms) {
-			if ($e eq $mb."\@".$ad->{'dom'}) {
+			if ($e eq $mb."\@".lc($ad->{'dom'})) {
 				return $u;
 				}
 			}

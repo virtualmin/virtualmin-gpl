@@ -7,6 +7,7 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_redirect() ||
 	&error($text{'redirects_ecannot'});
 &has_web_redirects($d) || &error($text{'redirects_eweb'});
+$canparts = &has_web_redirect_part_options($d);
 if (!$in{'new'}) {
 	($r) = grep { $_->{'id'} eq $in{'id'} } &list_redirects($d);
 	$r || &error($text{'redirect_egone'});
@@ -72,7 +73,23 @@ print &ui_table_row(&hlink($text{'redirect_regexp2'}, 'redirect_regexp2'),
 	&ui_select("regexp", $r->{'regexp'} ? 1 : $r->{'exact'} ? 2 : 0,
 		   [ [ 0, $text{'redirect_regexp2no'} ],
 		     [ 1, $text{'redirect_regexp2yes'} ],
-		     [ 2, $text{'redirect_regexp2exact'} ] ]));
+		     [ 2, $text{'redirect_regexp2exact'} ] ],
+		   undef, undef, undef, undef,
+		   $canparts ? "onchange=\"syncRedirectFilenameHandling()\""
+			     : undef));
+
+if ($canparts) {
+	# Filename and query handling
+	print &ui_table_row(&hlink($text{'redirect_file'}, 'redirect_file'),
+		&ui_select("stripfile", $r->{'stripfile'} ? 1 : 0,
+			   [ [ 0, $text{'redirect_file_keep'} ],
+			     [ 1, $text{'redirect_file_strip'} ] ]),
+		undef, undef, [ 'id="redirect_file_row"' ]);
+	print &ui_table_row(&hlink($text{'redirect_query'}, 'redirect_query'),
+		&ui_select("stripquery", $r->{'stripquery'} ? 1 : 0,
+			   [ [ 0, $text{'redirect_query_keep'} ],
+			     [ 1, $text{'redirect_query_strip'} ] ]));
+	}
 
 # Protocols to include
 if (&domain_has_ssl($d)) {
@@ -128,6 +145,29 @@ print &ui_table_end();
 print &ui_form_end(
     $in{'new'} ? [ [ undef, $text{'create'} ] ]
     	       : [ [ undef, $text{'save'} ], [ "delete", $text{'delete'} ] ]);
+
+if ($canparts) {
+	print <<'EOF';
+<script>
+function syncRedirectFilenameHandling() {
+	var mode = document.querySelector('[name="regexp"]'),
+	    row = document.getElementById('redirect_file_row'),
+	    file = document.querySelector('[name="stripfile"]'),
+	    keep = mode && mode.value === '0';
+	if (row) {
+		row.style.display = keep ? '' : 'none';
+	}
+	if (file) {
+		file.disabled = !keep;
+		if (!keep) {
+			file.value = '0';
+		}
+	}
+}
+syncRedirectFilenameHandling();
+</script>
+EOF
+	}
 
 &ui_print_footer("list_redirects.cgi?dom=$in{'dom'}", $text{'redirects_return'},
 		 &domain_footer_link($d), "", $text{'index_return'});

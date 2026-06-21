@@ -45,6 +45,19 @@ elsif ($itype eq "deb") {
 
 $SIG{'TERM'} = 'IGNORE';	# Stop process from being killed on upgrade
 
+# Update GPL-side packages before switching repositories
+&$first_print($text{'upgrade_gpl_pkgs'});
+my $pkgerr = &upgrade_pro_upgrade_packages($itype);
+if ($pkgerr) {
+	$errors++;
+	&$second_print($text{'setup_failed'});
+	print &ui_alert_box($pkgerr, 'danger');
+	goto PAGEEND;
+	}
+else {
+	&$second_print($text{'setup_done'});
+	}
+
 # Write out the licence file
 &$first_print($text{'upgrade_file'});
 &lock_file($virtualmin_license_file);

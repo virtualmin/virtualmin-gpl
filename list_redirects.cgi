@@ -17,6 +17,7 @@ $d = &get_domain($in{'dom'});
 	($a->{'alias'} <=> $b->{'alias'})
 } @redirects;
 $canhost = &has_web_host_redirects($d);
+$canparts = &has_web_redirect_part_options($d);
 foreach $r (@redirects) {
 	my @protos;
 	push(@protos, "HTTP") if ($r->{'http'});
@@ -46,7 +47,13 @@ foreach $r (@redirects) {
 	my $subpath = $r->{'exact'} ? $text{'redirects_subpath_exact'} :
 		      $r->{'regexp'} ? $text{'redirects_subpath_ignore'} :
 		                       $text{'redirects_subpath_keep'};
-	push(@table, [
+	my $filepart = $r->{'alias'} ? "&nbsp;&nbsp;-" :
+		       $r->{'stripfile'} ? $text{'redirects_file_strip'} :
+					   $text{'redirects_file_keep'};
+	my $querypart = $r->{'alias'} ? "&nbsp;&nbsp;-" :
+			$r->{'stripquery'} ? $text{'redirects_query_strip'} :
+					     $text{'redirects_query_keep'};
+	my @row = (
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $r->{'id'}, 'disabled' => !$canedit },
 		$canedit ? 
@@ -60,13 +67,26 @@ foreach $r (@redirects) {
 			      : $text{'redirects_redirect'},
 		$code,
 		$subpath,
+		);
+	push(@row, $filepart, $querypart) if ($canparts);
+	push(@row,
 		join(", ", @protos),
 		$canhost ? ( $host_disp ) : ( ),
 		$dest,
-		]);
+		);
+	push(@table, \@row);
 	}
 
 # Generate the table
+@heads = ( "", $text{'redirects_path'},
+	   $text{'redirects_type'},
+	   $text{'redirects_code'},
+	   $text{'redirects_subpath'} );
+push(@heads, $text{'redirects_file'}, $text{'redirects_query'})
+	if ($canparts);
+push(@heads, $text{'redirects_protos'},
+     $canhost ? ( $text{'redirects_host'} ) : ( ),
+     $text{'redirects_dest'});
 print &ui_form_columns_table(
 	"delete_redirects.cgi",
 	[ [ undef, $text{'redirects_delete'} ] ],
@@ -74,14 +94,7 @@ print &ui_form_columns_table(
 	[ [ "edit_redirect.cgi?new=1&dom=$in{'dom'}",
 	    $text{'redirects_add'} ] ],
 	[ [ "dom", $in{'dom'} ] ],
-	[ "", $text{'redirects_path'},
-          $text{'redirects_type'},
-	  $text{'redirects_code'},
-	  $text{'redirects_subpath'},
-          $text{'redirects_protos'},
-	  $canhost ? ( $text{'redirects_host'} ) : ( ),
-          $text{'redirects_dest'},
-	],
+	\@heads,
 	100,
 	\@table,
 	undef,

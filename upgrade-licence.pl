@@ -53,6 +53,19 @@ $key || &usage("No licence key specified");
 $key =~ /^(AMAZON|DEMO|GPL)$/ && &usage("This license key cannot be used for upgrades");
 
 my ($out, $err);
+my $itype;
+chop($itype = &read_file_contents("$module_root_directory/install-type"));
+
+# Update GPL-side packages before switching repositories
+&$first_print("Updating Virtualmin GPL package from current repository ..");
+my $pkgerr = &upgrade_pro_upgrade_packages($itype);
+if ($pkgerr) {
+	&$second_print("..error : $pkgerr");
+	exit(2);
+	}
+else {
+	&$second_print("..done");
+	}
 
 # Setup Virtualmin license and repositories
 &$first_print("Upgrading Virtualmin license and repositories ..");
@@ -71,8 +84,6 @@ else {
 
 # Update Virtualmin package to Pro
 &$first_print("Upgrading Virtualmin package ..");
-my $itype;
-chop($itype = &read_file_contents("$module_root_directory/install-type"));
 
 # Update metadata and install latest ca-certificates package
 if ($itype eq "rpm") {

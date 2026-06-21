@@ -8821,6 +8821,7 @@ sub create_initial_letsencrypt_cert
 {
 local ($d, $valid, $showerrors) = @_;
 &foreign_require("webmin");
+my $tmpl = &get_template($d->{'template'});
 my @dnames;
 if ($d->{'letsencrypt_dname'}) {
 	@dnames = split(/\s+/, $d->{'letsencrypt_dname'});
@@ -8854,8 +8855,33 @@ if ($valid) {
 		return 0;
 		}
 	if (defined(&check_domain_connectivity)) {
-		@errs = &check_domain_connectivity(
-			$d, { 'mail' => 1, 'ssl' => 1 });
+		my $skip = { 'mail' => 1, 'ssl' => 1 };
+		my $proxied = $d->{'dns_cloud'} && $tmpl->{'dns_cloud_proxy'};
+		if (!$proxied && $d->{'dns_cloud'}) {
+			# Imported cloud DNS records can already be proxied even
+			# when the template proxy default is off, so check the
+			# actual records for the requested certificate names.
+			my %dnames;
+			foreach my $dname (@dnames) {
+				$dname = lc($dname);
+				$dname =~ s/\.$//;
+				$dnames{$dname} = 1;
+				}
+			foreach my $r (&get_domain_dns_records($d)) {
+				next if (!$r->{'proxied'} ||
+					 $r->{'type'} !~ /^(A|AAAA|CNAME)$/);
+				my $name = lc(&expand_dns_record($r->{'name'}, $d));
+				$name =~ s/\.$//;
+				if ($dnames{$name}) {
+					$proxied = 1;
+					last;
+					}
+				}
+			}
+		if ($proxied) {
+			$skip->{'web'} = 1;
+			}
+		@errs = &check_domain_connectivity($d, $skip);
 		if (@errs) {
 			# Always store last Certbot error
 			my $e = &html_escape(join(", ",
@@ -17886,6 +17912,9 @@ local @rv = (
 	    [ 0, 'No' ] ] ],
         [ 'cron', 'Scheduled Cron Jobs (user\'s Cron jobs)' ],
         [ 'at', 'Scheduled Commands (user\'s commands)' ],
+        &foreign_check("systemd") ?
+		( [ 'systemd', 'Systemd User Units (domain owner\'s units)' ] ) :
+		( ),
         [ 'telnet', 'SSH Login' ],
         [ 'xterm', 'Terminal' ],
         [ 'updown', 'Upload and Download (as user)',
@@ -21880,6 +21909,142 @@ foreach my $p (@params) {
 return @pairs ? '?'.join('&', @pairs) : '' if $file eq '';
 return @pairs ? $file . ( ($file =~ /\?/) ? '&' : '?' ) . join('&', @pairs)
 	      : $file;
+}
+
+# upgrade_pro_upgrade_packages(install-type)
+# Updates Virtualmin from the current GPL repo before repo switching
+sub upgrade_pro_upgrade_packages
+{
+local ($itype) = @_;
+if ($itype eq "deb") {
+	return &upgrade_deb_pro_upgrade_packages();
+	}
+elsif ($itype eq "rpm") {
+	return &upgrade_rpm_pro_upgrade_packages();
+	}
+return undef;
+}
+
+sub upgrade_deb_pro_upgrade_packages
+{
+my ($out, $err);
+&execute_command("apt-get update", undef, \$out, \$err);
+return "Could not refresh package metadata: ".($err || $out) if ($?);
+
+my $cmd = "DEBIAN_FRONTEND=noninteractive apt-get -y ".
+	  "--allow-change-held-packages --allow-downgrades ".
+	  "-o Dpkg::Options::='--force-confdef' ".
+	  "-o Dpkg::Options::='--force-confold' ".
+	  "install webmin-virtual-server";
+&execute_command($cmd, undef, \$out, \$err);
+return "Could not update Virtualmin GPL package from current repository: ".
+       ($err || $out)
+	if ($?);
+
+my $installed = &deb_installed_package_version("webmin-virtual-server");
+my $candidate = $installed ?
+	&deb_candidate_package_version("webmin-virtual-server") : undef;
+if ($candidate && &compare_versions($candidate, $installed) > 0) {
+	return &pro_upgrade_update_error(
+		"webmin-virtual-server $installed -> $candidate");
+	}
+return undef;
+}
+
+sub upgrade_rpm_pro_upgrade_packages
+{
+my $pm = &has_command("dnf") ? "dnf" :
+	 &has_command("yum") ? "yum" : undef;
+return "Could not find yum or dnf to check package updates" if (!$pm);
+
+my ($out, $err);
+&execute_command("$pm -y clean all", undef, \$out, \$err);
+&execute_command("$pm -y makecache", undef, \$out, \$err);
+return "Could not refresh package metadata: ".($err || $out) if ($?);
+
+my @pkgs = ("wbm-virtual-server", "webmin-virtual-server");
+my @required;
+foreach my $pkg (@pkgs) {
+	push(@required, $pkg) if (&rpm_package_installed($pkg));
+	}
+
+foreach my $pkg (@required) {
+	&execute_command("$pm -y upgrade ".quotemeta($pkg),
+			 undef, \$out, \$err);
+	if ($? && $pkg eq "wbm-virtual-server") {
+		&execute_command("$pm -y install webmin-virtual-server",
+				 undef, \$out, \$err);
+		}
+	return "Could not update Virtualmin GPL package $pkg from current ".
+	       "repository: ".($err || $out)
+		if ($?);
+	}
+
+foreach my $pkg ("wbm-virtual-server", "webmin-virtual-server") {
+	if (&indexof($pkg, @required) < 0) {
+		&execute_command("$pm -y install ".quotemeta($pkg),
+				 undef, \$out, \$err);
+		}
+	}
+
+my $cmd = "$pm -q check-update";
+my $updates = `$cmd 2>&1`;
+my $status = $? >> 8;
+return "Could not check package updates: $updates"
+	if ($status && $status != 100);
+
+my $update;
+foreach my $line (split(/\r?\n/, $updates)) {
+	foreach my $pkg (@pkgs) {
+		if ($line =~ /^\Q$pkg\E(?:\.\S+)?\s+(\S+)/) {
+			$update = "$pkg -> $1";
+			last;
+			}
+		}
+	last if ($update);
+	}
+return $update ? &pro_upgrade_update_error($update) : undef;
+}
+
+sub deb_installed_package_version
+{
+local ($name) = @_;
+my $qname = quotemeta($name);
+my $version = `dpkg-query -W -f='\${Version}\\n' $qname 2>/dev/null`;
+chomp($version);
+return $version;
+}
+
+sub deb_candidate_package_version
+{
+local ($name) = @_;
+my $qname = quotemeta($name);
+open(POLICY, "apt-cache policy $qname 2>/dev/null |");
+my $candidate;
+while(<POLICY>) {
+	if (/^\s*Candidate:\s+(\S+)/) {
+		$candidate = $1;
+		last;
+		}
+	}
+close(POLICY);
+return !$candidate || $candidate eq "(none)" ? undef : $candidate;
+}
+
+sub rpm_package_installed
+{
+local ($name) = @_;
+system("rpm -q ".quotemeta($name)." >/dev/null 2>&1");
+return $? ? 0 : 1;
+}
+
+sub pro_upgrade_update_error
+{
+my ($update) = @_;
+return "Could not update the Virtualmin GPL package from current repository before ".
+       "upgrading to Pro. Current repository still has a newer version: ".
+       $update.
+       ". Please resolve the package update issue and try the Pro upgrade again.";
 }
 
 $done_virtual_server_lib_funcs = 1;

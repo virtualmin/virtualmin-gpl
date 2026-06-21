@@ -22,6 +22,7 @@ avail_passwd=1
 avail_proc=2
 avail_cron=1
 avail_at=1
+avail_systemd=0
 avail_telnet=0
 avail_custom=0
 avail_updown=0
