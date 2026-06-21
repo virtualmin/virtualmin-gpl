@@ -2091,8 +2091,7 @@ foreach my $lockfile (@lockfiles) {
 if ($increment == 0 && &has_incremental_tar()) {
 	foreach my $d (@errdoms) {
 		if ($d->{'id'}) {
-			# XXX
-			&unlink_file(&get_incremental_file($d, $backup));
+			&unlink_file(&get_incremental_file($d, $increment, $id));
 			}
 		}
 	}
