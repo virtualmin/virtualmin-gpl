@@ -3213,6 +3213,11 @@ $scheduled_tests = [
 		      [ 'schedule', '* * * * *' ] ],
 	},
 
+	# Get the ID of the scheduled backup
+	{ 'command' => 'list-scheduled-backups.pl --id-only --dest '.$test_backup_file,
+	  'save' => 'BACKUP_ID',
+	},
+
 	# Wait a minute for it to run
 	{ 'command' => 'sleep 90'
 	},
@@ -3232,6 +3237,44 @@ $scheduled_tests = [
 		      'Destination: '.$test_backup_file,
 		      'Run from: sched',
 		      'Differential: No' ],
+	},
+
+	# Create another scheduled backup, this time incremental based on the
+	# specific full backup
+	{ 'command' => 'create-scheduled-backup.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'differential-of', '$BACKUP_ID' ],
+		      [ 'dest', $test_differential_backup_file ],
+		      [ 'schedule', '* * * * *' ] ],
+	},
+
+	# Wait a minute for it to run
+	{ 'command' => 'sleep 90'
+	},
+
+	# Make sure the file and meta-files exist
+	{ 'command' => 'ls -l '.$test_differential_backup_file },
+	{ 'command' => 'ls -l '.$test_differential_backup_file.'.info' },
+	{ 'command' => 'ls -l '.$test_differential_backup_file.'.dom' },
+
+	# Make sure the differential is smaller than the full
+	{ 'command' =>
+		"full=`du -k $test_backup_file | cut -f 1` ; ".
+		"incr=`du -k $test_differential_backup_file | cut -f 1` ; ".
+		"test \$incr -lt \$full"
+	},
+
+	# Make sure it was logged
+	{ 'command' => 'list-backup-logs.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'start', -1 ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Domains: '.$test_domain,
+		      'Final status: OK',
+		      'Destination: '.$test_differential_backup_file,
+		      'Run from: sched',
+		      'Differential: Yes, from backup $BACKUP_ID' ],
 	},
 
 	# Delete the domain, in preparation for re-creation
@@ -3315,6 +3358,13 @@ $scheduled_tests = [
 	# Delete the scheduled backup
 	{ 'command' => 'delete-scheduled-backup.pl',
 	  'args' => [ [ 'dest', $test_backup_file ] ],
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
+	},
+
+	# Delete the scheduled incremental backup
+	{ 'command' => 'delete-scheduled-backup.pl',
+	  'args' => [ [ 'dest', $test_differential_backup_file ] ],
 	  'cleanup' => 1,
 	  'ignorefail' => 1,
 	},
