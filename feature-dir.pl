@@ -575,9 +575,10 @@ foreach my $x (@xlist) {
 &close_tempfile(XTEMP);
 
 # Work out differential flags
-local ($iargs, $iflag, $ifile, $ifilecopy);
+my ($iargs, $iflag, $ifile, $ifilecopy, $ifiledef);
 if (&has_incremental_tar() && $increment != 2) {
 	$ifile = &get_incremental_file($d, $increment, $id);
+	$ifiledef = &get_incremental_file($d);
 	my $idir = $ifile =~ /^(.*)\/[^\/]+$/ ? $1 : undef;
 	&make_dir($idir, 0711, 1);
 	if (!$increment) {
@@ -657,6 +658,12 @@ if (-r $ifile) {
 	# Make owned by domain owner, so tar can read in future
 	&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
 				   0700, $ifile);
+	}
+if ($ifile && $increment == 0 && $ifile ne $ifiledef) {
+	# This was a full backup but was using a per-backup incremental file.
+	# Copy that over the default incremental file so that other future
+	# non-chained incremental backups are relative to this latest backup.
+	&copy_source_dest($ifile, $ifiledef);
 	}
 if ($ex || !-s $destfile) {
 	&unlink_file($destfile);

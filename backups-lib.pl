@@ -2109,11 +2109,11 @@ if ($mode >= 3) {
 	# Incremental against a specific backup
 	return "$incremental_backups_dir/$mode/$d->{'id'}";
 	}
-elsif ($mode == 0) {
+elsif ($mode == 0 && $id) {
 	# This is a full backup, but are there other incrementals referencing it?
 	my @incrs = grep { $_->{'increment'} == $id } &list_scheduled_backups();
-	# XXX what is our ID?
 	if (@incrs) {
+		# Yes, so it gets its own incremental file
 		return "$incremental_backups_dir/$id/$d->{'id'}";
 		}
 	}

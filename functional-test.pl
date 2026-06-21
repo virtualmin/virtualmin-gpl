@@ -3230,6 +3230,7 @@ $scheduled_tests = [
 	# Make sure it was logged
 	{ 'command' => 'list-backup-logs.pl',
 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'dest', $test_backup_file ],
 		      [ 'start', -1 ],
 		      [ 'multiline' ] ],
 	  'grep' => [ 'Domains: '.$test_domain,
@@ -3268,6 +3269,7 @@ $scheduled_tests = [
 	# Make sure it was logged
 	{ 'command' => 'list-backup-logs.pl',
 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'dest', $test_differential_backup_file ],
 		      [ 'start', -1 ],
 		      [ 'multiline' ] ],
 	  'grep' => [ 'Domains: '.$test_domain,
