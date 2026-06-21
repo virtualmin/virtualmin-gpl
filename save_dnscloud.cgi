@@ -13,6 +13,8 @@ $cloud || &error($text{'dnscloud_egone'});
 
 if ($in{'clear'}) {
 	# Clear all cloud settings for this provider, to force re-enrollment
+	@users = grep { &dns_uses_cloud($_, $cloud) } &list_domains();
+	@users && &error(&text('dnscloud_einuse', scalar(@users)));
 	$cfunc = "dnscloud_".$cloud->{'name'}."_clear";
 	&$cfunc();
 	&webmin_log("clear", "dnscloud", $in{'name'});
