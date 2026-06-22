@@ -659,12 +659,6 @@ if (-r $ifile) {
 	&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
 				   0700, $ifile);
 	}
-if ($ifile && $increment == 0 && $ifile ne $ifiledef) {
-	# This was a full backup but was using a per-backup incremental file.
-	# Copy that over the default incremental file so that other future
-	# non-chained incremental backups are relative to this latest backup.
-	&copy_source_dest($ifile, $ifiledef);
-	}
 if ($ex || !-s $destfile) {
 	&unlink_file($destfile);
 	&$second_print(&text($cmd =~ /^\S*zip/ ? 'backup_dirzipfailed'
@@ -673,6 +667,13 @@ if ($ex || !-s $destfile) {
 	return 0;
 	}
 else {
+	if ($ifile && $increment == 0 && $ifile ne $ifiledef) {
+		# This was a full backup but was using a per-backup incremental
+		# file. Copy that over the default incremental file so that
+		# other future non-chained incremental backups are relative to
+		# this latest backup.
+		&copy_source_dest($ifile, $ifiledef);
+		}
 	&$second_print($text{'setup_done'});
 	return 1;
 	}
