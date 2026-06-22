@@ -181,7 +181,8 @@ else {
 	$sched->{'email_doms'} = $in{'email_doms'};
 	$sched->{'errors'} = $in{'errors'};
 	if ($in{'increment'} == 3) {
-		my @fullscheds = grep { !$_->{'increment'} } @scheds;
+		$in{'incrementof'} eq '1' && &error($text{'backup_eincrement1'});
+		my @fullscheds = grep { !$_->{'increment'} && $_->{'id'} ne '1' } @scheds;
 		my ($isched) = grep { $_->{'id'} eq $in{'incrementof'} } @fullscheds;
 		$isched || &error($text{'backup_eincrement'});
 		$sched->{'increment'} = $in{'incrementof'};

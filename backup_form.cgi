@@ -343,7 +343,7 @@ if (&has_incremental_tar()) {
 	my @iopts = ( [ 0, $text{'backup_increment0'}."<br>" ],
 		      [ 1, $text{'backup_increment1'}."<br>" ],
 		      [ 2, $text{'backup_increment2'}."<br>" ] );
-	my @fullscheds = grep { !$_->{'increment'} } @scheds;
+	my @fullscheds = grep { !$_->{'increment'} && $_->{'id'} ne '1' } @scheds;
 	if (($in{'sched'} || $in{'new'}) && @fullscheds) {
 		# May be incremental of a specific full backup
 		my @sopts;
