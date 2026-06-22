@@ -2788,6 +2788,7 @@ backup_eownrestore=Only signed backups can be restored by virtual server owners
 backup_dirtar=Creating TAR file of home directory ..
 backup_dirtarinc=Creating differential TAR file of home directory ..
 backup_dirtarfailed=.. TAR failed : $1
+backup_dirtarnobase=.. differential backup failed : no full backup state found for backup ID $1
 backup_dirzipfailed=.. ZIP failed : $1
 backup_dirzip=Creating ZIP file of home directory ..
 backup_virtualmincp=Copying virtual server configuration ..

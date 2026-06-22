@@ -588,7 +588,11 @@ if (&has_incremental_tar() && $increment != 2) {
 		# Add a flag file indicating that this was an differential,
 		# and take a copy of the file so we can put it back as before
 		# the backup (as tar modifies it)
-		if (-r $ifile) {
+		if ($increment >= 3 && !-s $ifile) {
+			&$second_print(&text('backup_dirtarnobase', $increment));
+			return 0;
+			}
+		elsif (-r $ifile) {
 			$iflag = "$d->{'home'}/.incremental";
 			&open_tempfile_as_domain_user(
 				$d, IFLAG, ">$iflag", 0, 1);

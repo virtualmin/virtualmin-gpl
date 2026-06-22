@@ -2125,13 +2125,10 @@ if ($mode >= 3) {
 	# Incremental against a specific backup
 	return "$incremental_backups_dir/$mode/$d->{'id'}";
 	}
-elsif ($mode == 0 && $id) {
-	# This is a full backup, but are there other incrementals referencing it?
-	my @incrs = grep { $_->{'increment'} == $id } &list_scheduled_backups();
-	if (@incrs) {
-		# Yes, so it gets its own incremental file
-		return "$incremental_backups_dir/$id/$d->{'id'}";
-		}
+elsif ($mode == 0 && $id =~ /^\d+$/ && $id >= 3) {
+	# This is a scheduled full backup. Keep its own snapshot even before
+	# any differential schedule references it, so future chains can use it.
+	return "$incremental_backups_dir/$id/$d->{'id'}";
 	}
 return "$incremental_backups_dir/$d->{'id'}";
 }
