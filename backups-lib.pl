@@ -2081,19 +2081,35 @@ if ($ok) {
 		}
 	}
 
-# Release lock on dest file
-foreach my $lockfile (@lockfiles) {
-	&unlock_file($lockfile);
-	}
-
-# For any domains that failed and were full backups, clear the differential
-# file so that future differential backups aren't diffs against it
+# Update full-backup differential state only after the complete backup result
+# is known. A failed upload can happen after tar has already advanced the
+# snapshot files, so failed full backups must not become a future baseline.
 if ($increment == 0 && &has_incremental_tar()) {
-	foreach my $d (@errdoms) {
+	my %errids = map { $_->{'id'} ? ($_->{'id'}, 1) : () } @errdoms;
+	if ($ok) {
+		foreach my $d (@$doms) {
+			next if (!$d->{'id'} || $errids{$d->{'id'}});
+			my $ifile = &get_incremental_file($d, $increment, $id);
+			my $ifiledef = &get_incremental_file($d);
+			if ($ifile && $ifiledef && $ifile ne $ifiledef &&
+			    -r $ifile) {
+				&copy_source_dest($ifile, $ifiledef);
+				}
+			}
+		}
+	my @cleardoms = $ok ? @errdoms : @$doms;
+	my %donecleardom;
+	foreach my $d (@cleardoms) {
 		if ($d->{'id'}) {
+			next if ($donecleardom{$d->{'id'}}++);
 			&unlink_file(&get_incremental_file($d, $increment, $id));
 			}
 		}
+	}
+
+# Release lock on dest file
+foreach my $lockfile (@lockfiles) {
+	&unlock_file($lockfile);
 	}
 
 return ($ok, $sz, \@errdoms);
