@@ -1647,6 +1647,7 @@ $h || return "Unknown SSL file type $type";
 local @lines = grep { /\S/ } split(/\r?\n/, $data);
 local $begin = quotemeta("-----BEGIN ").$h.quotemeta("-----");
 local $end = quotemeta("-----END ").$h.quotemeta("-----");
+@lines || return "Data is <em>empty</em>, but expected -----BEGIN $h-----";
 $lines[0] =~ /^$begin$/ ||
 	return "Data starts with $lines[0] , but expected -----BEGIN $h-----";
 $lines[$#lines] =~ /^$end$/ ||
