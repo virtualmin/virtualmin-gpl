@@ -292,15 +292,10 @@ if (!$pid) {
 			exit(2);
 			}
 		}
-	# Add flush and sync before closing
-	unless (IO::Handle::flush(*FILE)) {
-		print $readin "Flush of $realfile failed : $!\n";
-		exit(4);
-		}
-	unless (IO::Handle::sync(*FILE)) {
-		print $readin "Sync of $realfile failed : $!\n";
-		exit(5);
-		}
+	# Flush and sync before closing. sync may not be implemented on all
+	# platforms, so close is the authoritative failure check.
+	IO::Handle::flush(*FILE);
+	IO::Handle::sync(*FILE);
 	# Close the file
 	my $ex = close(FILE);
 	if ($ex) {
@@ -341,6 +336,7 @@ my $pid = $main::open_tempfile_as_domain_user_pid{$fh};
 my $readout = $main::open_tempfile_readout{$fh};
 my $realfile = $main::open_temphandles{$fh};
 my $tempfile = $main::open_tempfiles{$realfile};
+my $noerror = $main::open_tempfile_noerror{$fh};
 my ($rv, $err);
 if ($pid) {
 	# Writing was done in a sub-process .. wait for it to exit
@@ -353,22 +349,33 @@ if ($pid) {
 	# Rename over temp file if needed
 	if ($tempfile && !$ex) {
 		my @st = stat($realfile);
-		&rename_as_domain_user($d, $tempfile, $realfile);
-		if (@st) {
+		my ($renamed, $rerr) =
+			&rename_as_domain_user($d, $tempfile, $realfile);
+		if ($renamed && @st) {
 			&set_permissions_as_domain_user($d, $st[2], $realfile);
 			}
+		if (!$renamed) {
+			$err = "Failed to replace $realfile with $tempfile".
+			       ($rerr ? " : $rerr" : "");
+			}
 		}
-	$rv = !$ex;
+	$rv = !$ex && !$err;
 	}
 else {
 	# Just close the file, but flush and sync first
 	$fh->flush();
 	$fh->sync();
 	$rv = close($fh);
+	$err = "Failed to close $realfile : $!" if (!$rv);
 	}
 delete($main::open_tempfile_as_domain_user_pid{$fh});
 delete($main::open_tempfile_readout{$fh});
 delete($main::open_temphandles{$fh});
+delete($main::open_tempfile_noerror{$fh});
+if (!$rv && !$noerror) {
+	chomp($err) if (defined($err));
+	&error($err || "Failed to write $realfile");
+	}
 return $rv;
 }
 
@@ -501,10 +508,11 @@ delete($main::file_cache_noflush{$file});
 sub rename_as_domain_user
 {
 my ($d, $oldfile, $newfile) = @_;
-return 1 if (&is_readonly_mode());
+return wantarray ? (1, undef) : 1 if (&is_readonly_mode());
 my $cmd = "mv -f ".quotemeta($oldfile)." ".quotemeta($newfile)." 2>&1";
 my ($out, $ex) = &run_as_domain_user($d, $cmd);
-return $ex ? 0 : 1;
+chomp($out);
+return wantarray ? (!$ex, $out) : ($ex ? 0 : 1);
 }
 
 # set_permissions_as_domain_user(&domain, perms, file, ...)
@@ -754,4 +762,3 @@ return $rv;
 }
 
 1;
-

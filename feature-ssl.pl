@@ -2090,15 +2090,33 @@ else {
 		" -subj ".quotemeta($subject)." $addtextsup -utf8 2>&1");
 	}
 my $rv = $?;
-if (!-r $certtemp || !-r $keytemp || $rv) {
+if (!-s $certtemp || !-s $keytemp || $rv) {
 	# Failed .. return error
 	return &text('csr_ekey', "<pre>$out</pre>");
 	}
+my $certdata = &read_file_contents($certtemp);
+my $keydata = &read_file_contents($keytemp);
+my $err = &validate_cert_format($certdata, 'cert');
+return &text('csr_ekey', "<pre>$err</pre>") if ($err);
+$err = &validate_cert_format($keydata, 'key');
+return &text('csr_ekey', "<pre>$err</pre>") if ($err);
+$err = &check_cert_key_match($certdata, $keydata);
+return &text('csr_ekey', "<pre>$err</pre>") if ($err);
 
 # Save as domain owner
 &create_ssl_certificate_directories($d);
-&write_ssl_file_contents($d, $certfile, &read_file_contents($certtemp));
-&write_ssl_file_contents($d, $keyfile, &read_file_contents($keytemp));
+my $werr = &write_ssl_file_contents($d, $certfile, $certdata, 1);
+return $werr if ($werr);
+$werr = &write_ssl_file_contents($d, $keyfile, $keydata, 1);
+return $werr if ($werr);
+my $fcertdata = &read_file_contents($certfile);
+my $fkeydata = &read_file_contents($keyfile);
+$err = &validate_cert_format($fcertdata, 'cert');
+return &text('csr_ekey', "<pre>$err</pre>") if ($err);
+$err = &validate_cert_format($fkeydata, 'key');
+return &text('csr_ekey', "<pre>$err</pre>") if ($err);
+$err = &check_cert_key_match($fcertdata, $fkeydata);
+return &text('csr_ekey', "<pre>$err</pre>") if ($err);
 &sync_combined_ssl_cert($d);
 
 return undef;
@@ -2146,8 +2164,12 @@ if (!$ok) {
 
 # Copy into place
 &create_ssl_certificate_directories($d);
-&write_ssl_file_contents($d, $keyfile, &read_file_contents($keytemp));
-&write_ssl_file_contents($d, $csrfile, &read_file_contents($csrtemp));
+my $werr = &write_ssl_file_contents($d, $keyfile,
+				    &read_file_contents($keytemp), 1);
+return $werr if ($werr);
+$werr = &write_ssl_file_contents($d, $csrfile,
+				 &read_file_contents($csrtemp), 1);
+return $werr if ($werr);
 return undef;
 }
 
@@ -2267,7 +2289,7 @@ sub generate_default_certificate
 my ($d) = @_;
 $d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
 $d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
-if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
+if (!-s $d->{'ssl_cert'} && !-s $d->{'ssl_key'}) {
 	# Need to do it
 	my $temp = &transname();
 	&$first_print($text{'setup_openssl'});
@@ -2287,6 +2309,8 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 		\@alts, $d);
 	if ($err) {
 		&$second_print(&text('setup_eopenssl', $err));
+		&unlock_file($d->{'ssl_cert'});
+		&unlock_file($d->{'ssl_key'});
 		return 0;
 		}
 	else {
@@ -4190,32 +4214,56 @@ sub can_chained_ssl
 return ('web');
 }
 
-# write_ssl_file_contents(&domain, file, contents|srcfile)
-# Write out an SSL key or cert file with the correct permissions
+# write_ssl_file_contents(&domain, file, contents|srcfile, [no-error])
+# Write out an SSL key or cert file with the correct permissions.
+# Returns undef on success, or an error message on failure if no-error is set.
 sub write_ssl_file_contents
 {
-my ($d, $file, $contents) = @_;
-if ($contents =~ /^\// && -r $contents) {
+my ($d, $file, $contents, $noerror) = @_;
+if (defined($contents) && $contents =~ /^\// && -r $contents) {
 	# Actually copy from a file
-	$contents = &read_file_contents($contents);
+	my $srcfile = $contents;
+	$contents = &read_file_contents($srcfile);
+	if (!defined($contents)) {
+		return "Failed to read $srcfile" if ($noerror);
+		&error("Failed to read $srcfile");
+		}
 	}
 my $newfile = !-r $file;
 if (&is_under_directory($d->{'home'}, $file)) {
 	# Assume write can be done as the domain owner
 	&disable_quotas($d);
-	&open_tempfile_as_domain_user($d, KEY, ">$file");
+	my $ok = &open_tempfile_as_domain_user($d, KEY, ">$file", $noerror);
+	if (!$ok) {
+		&enable_quotas($d);
+		return "Failed to open $file for writing" if ($noerror);
+		&error("Failed to open $file for writing");
+		}
 	&print_tempfile(KEY, $contents);
-	&close_tempfile_as_domain_user($d, KEY);
-	&set_certificate_permissions($d, $file) if ($newfile);
+	$ok = &close_tempfile_as_domain_user($d, KEY);
 	&enable_quotas($d);
+	if (!$ok) {
+		return "Failed to write $file" if ($noerror);
+		&error("Failed to write $file");
+		}
+	&set_certificate_permissions($d, $file) if ($newfile);
 	}
 else {
 	# If SSL cert is elsewhere (like /etc/ssl), write as root
-	&open_tempfile(KEY, ">$file");
+	my $ok = &open_tempfile(KEY, ">$file", $noerror);
+	if (!$ok) {
+		return "Failed to open $file for writing : $!" if ($noerror);
+		&error("Failed to open $file for writing : $!");
+		}
 	&print_tempfile(KEY, $contents);
-	&close_tempfile(KEY);
+	$ok = &close_tempfile(KEY);
+	if (!$ok) {
+		return "Failed to write $file : $!" if ($noerror);
+		&error("Failed to write $file : $!");
+		}
 	&set_ownership_permissions(undef, undef, 0600, $file);
 	}
+return undef;
 }
 
 # get_dovecot_ssl_dir(cert|key, file)
