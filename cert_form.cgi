@@ -146,8 +146,7 @@ if (&domain_has_ssl_cert($d)) {
 	
 	# Other cert attributes
 	$info = &cert_info($d);
-	$chain = &get_website_ssl_file($d, 'ca');
-	$chaininfo = $chain ? &cert_file_info($chain, $d) : undef;
+	$chaininfo = &get_domain_ca_cert_info($d);
 	foreach $i (@cert_attributes) {
 		next if ($i eq 'modulus' || $i eq 'exponent');
 		$v = $info->{$i};
@@ -169,7 +168,7 @@ if (&domain_has_ssl_cert($d)) {
 			}
 
 		# Warn if the CA is wrong
-		if ($i eq 'type' && $chain) {
+		if ($i eq 'type' && $chaininfo) {
 			my $cainfo = $chaininfo;
 			if ($cainfo &&
 			    ($cainfo->{'o'} ne $info->{'issuer_o'} ||
@@ -177,8 +176,10 @@ if (&domain_has_ssl_cert($d)) {
 				print &ui_table_row('',
 				    &ui_text_color(
 				      "&nbsp;* ".&text('validate_esslcamatch',
-					    $cainfo->{'o'}, $cainfo->{'cn'},
-					    $info->{'issuer_o'}, $info->{'issuer_cn'}),
+					&cert_principal_name(
+					    $cainfo->{'o'}, $cainfo->{'cn'}),
+					&cert_principal_name(
+					    $info->{'issuer_o'}, $info->{'issuer_cn'})),
 				      "danger"), 3);
 				}
 			}
@@ -313,7 +314,7 @@ if (&domain_has_ssl_cert($d)) {
 		(@gmissing && &can_webmin_cert()) ? $text{'no'} : $text{'yes'}, 3);
 
 	# CA cert details
-	if ($chain) {
+	if ($chaininfo) {
 		my $ui_table_hr;
 		my $info = $chaininfo;
 		my @ca_cert_attributes = ('cn', 'notafter',

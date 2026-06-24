@@ -673,18 +673,21 @@ if ($info && $info->{'notafter'} && !$d->{'disabled'}) {
 		}
 	}
 
-# Make sure the CA matches the cert
-my $cafile = &get_website_ssl_file($d, "ca");
-if ($cafile && !&self_signed_cert($d)) {
-	my $cainfo = &cert_file_info($cafile);
-	if (!$cainfo || !$cainfo->{'cn'}) {
-		return &text('validate_esslcainfo', "<tt>$cafile</tt>");
+# Make sure the CA matches the cert. Use the domain's CA cert whether it is
+# in a separate chain file or bundled into the combined cert, so that combined
+# certs are validated too and a chain-less cert is not mistaken for its own CA
+my $cainfo = &get_domain_ca_cert_info($d);
+if ($cainfo && !&self_signed_cert($d)) {
+	if (!$cainfo->{'cn'}) {
+		return &text('validate_esslcainfo',
+		    "<tt>".($d->{'ssl_chain'} || $d->{'ssl_combined'})."</tt>");
 		}
 	if ($cainfo->{'o'} ne $info->{'issuer_o'} ||
 	    $cainfo->{'cn'} ne $info->{'issuer_cn'}) {
 		return &text('validate_esslcamatch',
-			     $cainfo->{'o'}, $cainfo->{'cn'},
-			     $info->{'issuer_o'}, $info->{'issuer_cn'});
+		    &cert_principal_name($cainfo->{'o'}, $cainfo->{'cn'}),
+		    &cert_principal_name($info->{'issuer_o'},
+					 $info->{'issuer_cn'}));
 		}
 	}
 	
@@ -1022,6 +1025,26 @@ local $info = &cert_file_info($temp);
 return $info;
 }
 
+# get_domain_ca_cert_info(&domain)
+# Returns a cert_file_info hash for the CA (chain) cert used by a domain,
+# whether it is stored in a separate CA file or bundled into the combined
+# cert file after the leaf. Returns undef if the domain has no CA cert.
+sub get_domain_ca_cert_info
+{
+my ($d) = @_;
+# Use the separate CA / chain file if the domain has one
+if ($d->{'ssl_chain'} && -r $d->{'ssl_chain'}) {
+	return &cert_file_info($d->{'ssl_chain'});
+	}
+# Otherwise the CA cert may be bundled into the combined cert file, as the
+# cert following the leaf
+if ($d->{'ssl_combined'} && -r $d->{'ssl_combined'}) {
+	my @certs = &cert_file_split($d->{'ssl_combined'});
+	return &cert_data_info($certs[1]) if (@certs > 1);
+	}
+return undef;
+}
+
 
 # cert_file_info_perl(file)
 # Returns a hash ref with info about the cert in file, or undef on error using
@@ -1343,6 +1366,15 @@ my $info = &cert_file_info_perl($file);
 # Type string
 $info->{type} = $info->{self} ? $text{cert_typeself} : $text{cert_typereal};
 return $info;
+}
+
+# cert_principal_name(organization, common-name)
+# Formats a cert's organization and common name as "O/CN", or just "CN" when
+# there is no organization (as on Let's Encrypt leaf certs)
+sub cert_principal_name
+{
+my ($o, $cn) = @_;
+return $o ? "$o/$cn" : $cn;
 }
 
 # convert_ssl_key_format(&domain, file, "pkcs1"|"pkcs8", [outfile])
@@ -2310,10 +2342,15 @@ sub break_ssl_linkage
 local ($d, $samed) = @_;
 my @beforecerts = &get_all_domain_service_ssl_certs($d);
 
-# Copy the cert and key to the new owning domain's directory
+# Copy the cert and key to the new owning domain's directory. The guard
+# checks the source domain's files, because the linked domain's own fields
+# may be empty even when the owner has the file - in particular ssl_chain is
+# never set on the linked domain when the owner uses a combined cert. Without
+# copying it the rebuilt combined cert would be missing the CA chain, which
+# triggers a bogus "CA cert does not match the issuer" validation error.
 &create_ssl_certificate_directories($d);
 foreach my $k (&list_ssl_file_types()) {
-	if ($d->{'ssl_'.$k}) {
+	if ($samed->{'ssl_'.$k}) {
 		$d->{'ssl_'.$k} = &default_certificate_file($d, $k);
 		&write_ssl_file_contents(
 			$d, $d->{'ssl_'.$k}, $samed->{'ssl_'.$k});
