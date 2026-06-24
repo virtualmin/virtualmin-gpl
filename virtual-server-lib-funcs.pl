@@ -9184,6 +9184,15 @@ foreach my $dd (@alldoms) {
 	# failures are ignored!
 	my $f;
 	local $p = &domain_has_website($dd);
+
+	# Always try to delete plugin-managed features before core features are
+	# torn down, so plugins can still access the domain home, web config and
+	# databases.
+	foreach my $plugin (@plugins) {
+		next unless &plugin_defined($plugin, 'features_always_delete');
+		&plugin_call($plugin, 'features_always_delete', $dd, $only);
+		}
+
 	local @of;
 	if ($only) {
 		@of = ( "webmin" );
@@ -9206,12 +9215,6 @@ foreach my $dd (@alldoms) {
 		if (&indexof($f, @plugins) >= 0) {
 			&plugin_call($f, "feature_always_delete", $dd);
 			}
-		}
-
-	# Always try to delete features even if not enabled
-	foreach my $p (@plugins) {
-		next unless &plugin_defined($p, 'features_always_delete');
-		&plugin_call($p, 'features_always_delete', $dd, $only);
 		}
 
 	# Delete any FPM or FCGIwrap servers, just in case they
