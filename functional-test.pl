@@ -3713,7 +3713,7 @@ $mysqlbackup_tests = [
 		      [ 'all-features' ],
 		      [ 'source', $test_backup_file ] ],
 	  'ignorefail' => 1,
-	  'grep' => 'Restore failed',
+	  'grep' => 'Restore failed|this backup cannot be restored',
 	},
 
 	# Try the restore again with warnings disabled
@@ -3903,7 +3903,7 @@ $postgresbackup_tests = [
 		      [ 'all-features' ],
 		      [ 'source', $test_backup_file ] ],
 	  'fail' => 1,
-	  'grep' => 'Restore failed',
+	  'grep' => 'Restore failed|this backup cannot be restored',
 	},
 
 	# Try the restore again with warnings disabled, which should
