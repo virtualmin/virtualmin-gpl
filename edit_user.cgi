@@ -1147,8 +1147,7 @@ else {
 		local %uminiserv;
 		&usermin::get_usermin_miniserv_config(\%uminiserv);
 		if (&check_pid_file($uminiserv{'pidfile'}) &&
-		    defined(&usermin::switch_to_usermin_user) &&
-		    $uminiserv{'session'}) {
+		    &can_create_usermin_login_url(\%uminiserv)) {
 			$usermin = 1;
 			}
 		}

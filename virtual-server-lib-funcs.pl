@@ -3473,6 +3473,91 @@ return &can_edit_domain($d) &&
        &master_admin() || $config{'usermin_switch'};
 }
 
+# can_create_usermin_login_url(&miniserv)
+# Returns 1 if Usermin can accept a one-time login URL
+sub can_create_usermin_login_url
+{
+local ($miniserv) = @_;
+&foreign_require("acl");
+return $miniserv->{'session'} &&
+       defined(&acl::open_session_db) &&
+       defined(&acl::generate_random_session_id) &&
+       defined(&usermin::reload_usermin_miniserv);
+}
+
+# create_usermin_login_url(&domain, username, [lifetime])
+# Creates a one-time URL that logs into Usermin as some user
+sub create_usermin_login_url
+{
+local ($d, $user, $lifetime) = @_;
+&foreign_require("usermin");
+local %miniserv;
+&usermin::get_usermin_miniserv_config(\%miniserv);
+&can_create_usermin_login_url(\%miniserv) ||
+	&error($text{'user_eswitch'});
+&check_pid_file($miniserv{'pidfile'}) ||
+	&error($text{'user_eswitch'});
+$lifetime ||= 5*60;
+local $sid = &create_usermin_login_session(\%miniserv, "-".$user,
+					   $lifetime);
+$sid || &error($text{'user_eswitch'});
+
+# Make sure the running Usermin process re-opens the session DBM, without
+# stopping the service or racing its PID file re-creation.
+&usermin::reload_usermin_miniserv();
+
+local $url = &get_usermin_login_base_url(\%miniserv);
+$url =~ s/\/+$//;
+return $url."/session_login.cgi?session=".&urlize($sid);
+}
+
+# create_usermin_login_session(&miniserv, username, lifetime)
+# Creates a one-time Usermin session token for the current browser
+sub create_usermin_login_session
+{
+local ($miniserv, $user, $lifetime) = @_;
+return if (&is_readonly_mode());
+local $sid = &acl::generate_random_session_id();
+return if (!$sid);
+local $ip = $ENV{'REMOTE_ADDR'} || "127.0.0.1";
+local $now = time();
+&acl::open_session_db($miniserv);
+$acl::sessiondb{$sid} = "$user $now $ip".($lifetime ? " ".$lifetime : "");
+dbmclose(%acl::sessiondb);
+return $sid;
+}
+
+# get_usermin_login_base_url(&miniserv)
+# Returns the base URL to use for browser handoff to Usermin
+sub get_usermin_login_base_url
+{
+local ($miniserv) = @_;
+return $miniserv->{'redirect_url'} if ($miniserv->{'redirect_url'});
+
+local %uconfig;
+&usermin::get_usermin_config(\%uconfig);
+local $ssl = $miniserv->{'ssl'} || $miniserv->{'inetd_ssl'};
+eval "use Net::SSLeay";
+$ssl = 0 if ($@);
+local ($host, $port);
+if ($uconfig{'host'}) {
+	$host = $uconfig{'host'};
+	}
+else {
+	local @sockets = &webmin::get_miniserv_sockets($miniserv);
+	if (@sockets && $sockets[0]->[0] ne "*") {
+		$host = $sockets[0]->[0];
+		$port = $sockets[0]->[1] if ($sockets[0]->[1] ne '*');
+		}
+	else {
+		$host = $ENV{'HTTP_HOST'} || &get_system_hostname();
+		$host =~ s/:.*//;
+		}
+	}
+$port ||= $uconfig{'port'} || $miniserv->{'port'};
+return ($ssl ? "https://" : "http://").$host.":".$port;
+}
+
 # Returns 1 if the user can view mail logs for some domain (or all domains if
 # none was given). Also returns 0 if mail logs are not enabled.
 sub can_view_maillog
