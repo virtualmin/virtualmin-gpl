@@ -151,9 +151,10 @@ if (&domain_has_ssl_cert($d)) {
 		next if ($i eq 'modulus' || $i eq 'exponent');
 		$v = $info->{$i};
 		if (ref($v)) {
-			my @opart = splice(@$v, 0, 5);
+			my @vlist = @$v;
+			my @opart = splice(@vlist, 0, 5);
 			my $ofirst = join(', ', @opart);
-			my $orest  = join(', <br>', @$v);
+			my $orest  = join(', <br>', @vlist);
 			$others = $orest
 				? &ui_details({
 					html => 1,
@@ -170,9 +171,7 @@ if (&domain_has_ssl_cert($d)) {
 		# Warn if the CA is wrong
 		if ($i eq 'type' && $chaininfo) {
 			my $cainfo = $chaininfo;
-			if ($cainfo &&
-			    ($cainfo->{'o'} ne $info->{'issuer_o'} ||
-			     $cainfo->{'cn'} ne $info->{'issuer_cn'})) {
+			if (&cert_issuer_ca_mismatch($info, $cainfo)) {
 				print &ui_table_row('',
 				    &ui_text_color(
 				      "&nbsp;* ".&text('validate_esslcamatch',
@@ -295,14 +294,21 @@ if (&domain_has_ssl_cert($d)) {
 	my $expiry = &parse_notafter_date($info->{'notafter'});
 	if ($expiry) {
 		$now = time();
-		$future = int(($expiry - $now) / (24*60*60));
-		if ($future <= 0) {
+		my $remaining = $expiry - $now;
+		$future = int($remaining / (24*60*60));
+		my $ipcert = grep {
+			&check_ipaddress($_) || &check_ip6address($_)
+			} grep { $_ } ($info->{'cn'}, @{$info->{'alt'} || []});
+		# IP certificates are short-lived, so warn only on the last day.
+		my $warn_days = $ipcert ? 2 : 7;
+		if ($remaining <= 0) {
 			$emsg = "<font color=red>".
-				&text('cert_expired', -$future)."</font>";
+				&text('cert_expired', int(-$remaining/(24*60*60))).
+				"</font>";
 			}
-		elsif ($future < 7) {
+		elsif ($future < $warn_days) {
 			$emsg = "<font color=orange>".
-				&text('cert_expiring', $future)."</font>";
+				&text('cert_expiring', $future || 1)."</font>";
 			}
 		else {
 			$emsg = &text('cert_future', $future);

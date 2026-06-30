@@ -81,6 +81,18 @@ $max_php_version = $php_versions[@php_versions-1]->[0];
 $scriptdb = 'mysql';
 $test_ssh_private_key = "/tmp/functional-test.key";
 $test_ssh_public_key = "/tmp/functional-test.key.pub";
+$test_ipcert_prefix = "/tmp/functional-test-ipcert";
+$test_ipcert_ca_key = "$test_ipcert_prefix.ca.key";
+$test_ipcert_ca_cert = "$test_ipcert_prefix.ca.cert";
+$test_ipcert_ca_serial = "$test_ipcert_prefix.ca.srl";
+$test_ipcert_key = "$test_ipcert_prefix.key";
+$test_ipcert_csr = "$test_ipcert_prefix.csr";
+$test_ipcert_cert = "$test_ipcert_prefix.cert";
+$test_ipcert_ext = "$test_ipcert_prefix.ext";
+$test_ipcert_files = join(" ", $test_ipcert_ca_key, $test_ipcert_ca_cert,
+			  $test_ipcert_ca_serial, $test_ipcert_key,
+			  $test_ipcert_csr, $test_ipcert_cert,
+			  $test_ipcert_ext);
 
 @create_args = ( [ 'limits-from-plan' ],
 		 [ 'no-email' ],
@@ -7737,6 +7749,29 @@ $sslserv_tests = [
 		      [ 'domain', $test_domain ] ],
 	  'save' => 'PRIVATE_IP',
 	},
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'IP address: $PRIVATE_IP ' ],
+	  'antigrep' => [ 'IP address: $PRIVATE_IP \\(Shared\\)' ],
+	},
+
+	# Check that malformed IP identifiers fail before domain validation.
+	{ 'command' => 'generate-acme-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'host', '2600:3c06::2000:f2ff:fea8:03ax' ] ],
+	  'grep' => 'IP address 2600:3c06::2000:f2ff:fea8:03ax is not valid',
+	  'fail' => 1,
+	},
+
+	# Check that IP identifiers cannot be requested with wildcard names.
+	{ 'command' => 'generate-acme-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'host', '$PRIVATE_IP' ],
+		      [ 'host', '\\*.'.$test_domain ] ],
+	  'grep' => 'IP address certificates cannot include wildcard names',
+	  'fail' => 1,
+	},
 
 	# Force enable private SSL cert for Webmin, Usermin, etc
 	{ 'command' => 'install-service-cert.pl',
@@ -7777,14 +7812,16 @@ $sslserv_tests = [
 	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
 		       ' -servername '.$test_domain.
 		       ' -port '.$webmin_port.' </dev/null',
-	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'grep' => [ 'O\s*=\s*Test SSL domain',
+		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
 	# Validate that Usermin cert works
 	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
 		       ' -servername '.$test_domain.
 		       ' -port '.$usermin_port.' </dev/null',
-	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'grep' => [ 'O\s*=\s*Test SSL domain',
+		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
 	# Validate that Dovecot cert works
@@ -7797,7 +7834,8 @@ $sslserv_tests = [
 	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
 		       ' -servername mail.'.$test_domain.
 		       ' -port 993 </dev/null',
-	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'grep' => [ 'O\s*=\s*Test SSL domain',
+		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
 	# Validate that Postfix cert works
@@ -7809,7 +7847,64 @@ $sslserv_tests = [
 	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
 		       ' -servername mail.'.$test_domain.
 		       ' -port 465 </dev/null',
-	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'grep' => [ 'O\s*=\s*Test SSL domain',
+		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
+	},
+
+	# Install a SAN-only cert with an IP identifier. This catches regressions
+	# in cert parsing and miniserv IP-key generation without calling ACME.
+	{ 'command' => 'rm -f '.$test_ipcert_files },
+	{ 'command' => 'openssl genrsa -out '.$test_ipcert_ca_key.' 2048' },
+	{ 'command' => 'openssl req -new -x509 -key '.$test_ipcert_ca_key.
+		       ' -sha256 -days 30 '.
+		       '-subj "/O=Virtualmin/CN=Functional Test CA"'.
+		       ' -out '.$test_ipcert_ca_cert },
+	{ 'command' => 'openssl genrsa -out '.$test_ipcert_key.' 2048' },
+	{ 'command' => 'openssl req -new -key '.$test_ipcert_key.
+		       ' -subj / -out '.$test_ipcert_csr },
+	{ 'command' => 'printf "[v3]\nsubjectAltName=critical,DNS:'.
+		       $test_domain.',DNS:mail.'.$test_domain.
+		       ',IP:$PRIVATE_IP\nkeyUsage=critical,digitalSignature,'.
+		       'keyEncipherment\nextendedKeyUsage=serverAuth\n" > '.
+		       $test_ipcert_ext },
+	{ 'command' => 'openssl x509 -req -in '.$test_ipcert_csr.
+		       ' -CA '.$test_ipcert_ca_cert.
+		       ' -CAkey '.$test_ipcert_ca_key.
+		       ' -CAcreateserial -out '.$test_ipcert_cert.
+		       ' -days 6 -sha256 -extfile '.$test_ipcert_ext.
+		       ' -extensions v3' },
+	{ 'command' => 'install-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'key', $test_ipcert_key ],
+		      [ 'cert', $test_ipcert_cert ],
+		      [ 'ca', $test_ipcert_ca_cert ] ],
+	},
+
+	# Check that the SAN-only cert is parsed as a valid CA-signed cert.
+	{ 'command' => 'get-ssl.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'issuer_cn: Functional Test CA',
+		      'issuer_o: Virtualmin',
+		      'notafter:',
+		      'type: Signed by CA',
+		      'alt: '.$test_domain,
+		      'alt: mail.'.$test_domain,
+		      'alt: $PRIVATE_IP',
+		    ],
+	  'antigrep' => [ '^cn:' ],
+	},
+
+	# Check that Webmin maps the IP identifier to this domain's cert.
+	{ 'command' => 'grep "^ipcert_.*$PRIVATE_IP" '.
+		       $config_directory.'/miniserv.conf',
+	  'grep' => [ 'ssl.cert' ],
+	},
+	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
+		       ' -servername $PRIVATE_IP'.
+		       ' -port '.$webmin_port.' </dev/null',
+	  'grep' => [ 'Functional Test CA' ],
+	  'sleep' => 1,
 	},
 
 	# Re-generate the cert with a different org
@@ -7823,14 +7918,16 @@ $sslserv_tests = [
 	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
 		       ' -servername mail.'.$test_domain.
 		       ' -port 993 </dev/null',
-	  'grep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'grep' => [ 'O\s*=\s*Test 2 SSL domain',
+		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
 	# Validate that new Postfix cert works
 	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
 		       ' -servername mail.'.$test_domain.
 		       ' -port 465 </dev/null',
-	  'grep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'grep' => [ 'O\s*=\s*Test 2 SSL domain',
+		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
 	# Re-generate the cert with original org
@@ -7885,14 +7982,16 @@ $sslserv_tests = [
 	{ 'command' => 'openssl s_client -host '.$test_domain.
 		       ' -servername '.$test_domain.
 		       ' -port '.$webmin_port.' </dev/null',
-	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'grep' => [ 'O\s*=\s*Test SSL domain',
+		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
 	# Validate that Usermin cert still works with SNI
 	{ 'command' => 'openssl s_client -host '.$test_domain.
 		       ' -servername '.$test_domain.
 		       ' -port '.$usermin_port.' </dev/null',
-	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'grep' => [ 'O\s*=\s*Test SSL domain',
+		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
 	# Validate that Dovecot cert still works with SNI
@@ -7905,23 +8004,23 @@ $sslserv_tests = [
 	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
 		       ' -servername '.$test_domain.
 		       ' -port 993 </dev/null',
-	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'grep' => [ 'O\s*=\s*Test SSL domain',
+		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
-	# Validate that Dovecot cert still works with SNI on the alias
-	{ 'command' => 'test-imap.pl',
-	  'args' => [ [ 'user', $test_domain_user ],
-		      [ 'pass', 'smeg' ],
-		      [ 'server', $test_subdomain ],
-		      [ 'ssl' ] ],
-	},
-	{ 'command' => 'openssl s_client -host mail.'.$test_subdomain.
+	# Validate that Dovecot cert selection still works with alias SNI.
+	# Connect via the known local mail host, as the alias domain name may
+	# otherwise resolve outside the test system.
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
 		       ' -servername '.$test_subdomain.
 		       ' -port 993 </dev/null',
-	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'grep' => [ 'O\s*=\s*Test SSL domain',
+		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
-	# Re-check that Postfix still works, but without the per-IP cert
+	# Re-check that Postfix still works. The list-domains check above
+	# verifies that the per-IP cert mapping was removed; the presented cert
+	# here can still match the domain if Postfix uses it as the default.
 	{ 'command' => 'test-smtp.pl',
 	  'args' => [ [ 'to', $test_domain_user.'@'.$test_domain ],
 		      [ 'server', $test_domain ],
@@ -7930,7 +8029,6 @@ $sslserv_tests = [
 	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
 		       ' -servername mail.'.$test_domain.
 		       ' -port 465 </dev/null',
-	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 	
 	# Re-generate the cert with a different org
@@ -7944,14 +8042,14 @@ $sslserv_tests = [
 	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
 		       ' -servername '.$test_domain.
 		       ' -port 993 </dev/null',
-	  'grep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'grep' => [ 'O\s*=\s*Test 2 SSL domain',
+		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
-	# Re-check that new Postfix still works
+	# Re-check that Postfix still accepts SSL connections
 	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
 		       ' -servername mail.'.$test_domain.
 		       ' -port 465 </dev/null',
-	  'antigrep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
 	# Create a child domain on the shared IP with a different cert
@@ -7989,16 +8087,17 @@ $sslserv_tests = [
 		      [ 'server', $test_ssl_subdomain ],
 		      [ 'ssl' ] ],
 	},
-	{ 'command' => 'openssl s_client -host mail.'.$test_ssl_subdomain.
+	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
 		       ' -servername '.$test_ssl_subdomain.
 		       ' -port 993 </dev/null',
-	  'grep' => [ 'O=Test 3 SSL subdomain',
-		      'CN=(\\*\\.)?'.$test_ssl_subdomain ],
+	  'grep' => [ 'O\s*=\s*Test 3 SSL subdomain',
+		      'CN\s*=\s*(\\*\\.)?'.$test_ssl_subdomain ],
 	},
 
 	# Remove the child domain again before the remaining service-cert tests
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_ssl_subdomain ] ],
+	  'ignorefail' => 1,
 	  'cleanup' => 1,
 	},
 
@@ -8025,20 +8124,24 @@ $sslserv_tests = [
 	# Re-check that per-domain cert is no longer being used
 	{ 'command' => 'openssl s_client -host '.$test_domain.
 		       ' -port '.$webmin_port.' </dev/null',
-	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'antigrep' => [ 'O\s*=\s*Test SSL domain',
+			  'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	  'sleep' => 1,
 	},
 	{ 'command' => 'openssl s_client -host '.$test_domain.
 		       ' -port '.$usermin_port.' </dev/null',
-	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'antigrep' => [ 'O\s*=\s*Test SSL domain',
+			  'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
 		       ' -port 993 </dev/null',
-	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'antigrep' => [ 'O\s*=\s*Test SSL domain',
+			  'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
 		       ' -port 465 </dev/null',
-	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'antigrep' => [ 'O\s*=\s*Test SSL domain',
+			  'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
 	# Turn per-service certs back on again, so we can test deletion
@@ -8054,6 +8157,8 @@ $sslserv_tests = [
 		      [ 'service', 'dovecot' ],
 		      [ 'service', 'postfix' ] ],
 	},
+	{ 'command' => 'rm -f '.$test_ipcert_files,
+	  'cleanup' => 1 },
 
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',

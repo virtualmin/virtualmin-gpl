@@ -631,7 +631,7 @@ if ($key) {
 
 # Make sure the cert is readable
 local $info = &cert_info($d);
-if (!$info || !$info->{'cn'}) {
+if (!$info || (!$info->{'cn'} && !@{$info->{'alt'} || []})) {
 	return &text('validate_esslcertinfo', "<tt>$cert</tt>");
 	}
 local $err = &validate_cert_format($cert, 'cert');
@@ -682,8 +682,7 @@ if ($cainfo && !&self_signed_cert($d)) {
 		return &text('validate_esslcainfo',
 		    "<tt>".($d->{'ssl_chain'} || $d->{'ssl_combined'})."</tt>");
 		}
-	if ($cainfo->{'o'} ne $info->{'issuer_o'} ||
-	    $cainfo->{'cn'} ne $info->{'issuer_cn'}) {
+	if (&cert_issuer_ca_mismatch($info, $cainfo)) {
 		return &text('validate_esslcamatch',
 		    &cert_principal_name($cainfo->{'o'}, $cainfo->{'cn'}),
 		    &cert_principal_name($info->{'issuer_o'},
@@ -1009,6 +1008,58 @@ foreach my $l (@lines) {
 		}
 	}
 return @rv;
+}
+
+# cert_file_info_openssl(file)
+# Returns certificate fields parsed with openssl.
+sub cert_file_info_openssl
+{
+my ($file) = @_;
+return undef if (!$file || !-r $file);
+my $out = &backquote_command("openssl x509 -noout -nameopt RFC2253 ".
+	"-issuer -subject -startdate -enddate -ext subjectAltName ".
+	"-in ".quotemeta($file)." 2>/dev/null");
+return undef if ($?);
+my %rv;
+my $parse_name = sub {
+	my ($name, $prefix) = @_;
+	foreach my $part (split(/(?<!\\),/, $name)) {
+		my ($k, $v) = split(/=/, $part, 2);
+		next if (!defined($k) || !defined($v));
+		$v =~ s/\\([,=+<>#;\\" ])/$1/g;
+		my $kp = $prefix ? $prefix."_" : "";
+		$rv{$kp."c"} = $v if ($k eq "C");
+		$rv{$kp."o"} = $v if ($k eq "O");
+		$rv{$kp."cn"} = $v if ($k eq "CN");
+		}
+	};
+my @alts;
+foreach my $l (split(/\r?\n/, $out)) {
+	if ($l =~ /^issuer=(.*)$/) {
+		$parse_name->($1, "issuer");
+		}
+	elsif ($l =~ /^subject=(.*)$/) {
+		$parse_name->($1, "");
+		}
+	elsif ($l =~ /^notBefore=(.*)$/) {
+		$rv{'notbefore'} = $1;
+		}
+	elsif ($l =~ /^notAfter=(.*)$/) {
+		$rv{'notafter'} = $1;
+		}
+	while ($l =~ /\bDNS:([^,\s]+)/g) {
+		push(@alts, $1);
+		}
+	while ($l =~ /\bIP Address:([^,\s]+)/g) {
+		push(@alts, &normalize_ssl_cert_identifier($1));
+		}
+	}
+$rv{'alt'} = [ &unique(@alts) ] if (@alts);
+$rv{'self'} = $rv{'cn'} && $rv{'issuer_cn'} &&
+	      $rv{'cn'} eq $rv{'issuer_cn'} &&
+	      (!$rv{'o'} || !$rv{'issuer_o'} || $rv{'o'} eq $rv{'issuer_o'})
+	      ? 1 : 0;
+return \%rv;
 }
 
 # cert_data_info(data)
@@ -1339,6 +1390,8 @@ if (@alts) {
 	my @dns;
 	while (my ($type, $val) = splice(@alts, 0, 2)) {
 		push @dns, $val if $type == 2;	# dNSName
+		push @dns, &ssl_cert_packed_ip_address($val)
+			if $type == 7;		# iPAddress
 		}
 	$rv{alt} = \@dns if @dns;
 	}
@@ -1360,8 +1413,35 @@ sub cert_file_info
 {
 my $file = shift;
 
-# Read cert info using Perl modules
+# Read cert info using Perl modules, and fall back to openssl for fields that
+# older Net::SSLeay versions may leave blank on SAN-only certificates.
 my $info = &cert_file_info_perl($file);
+if (!$info || !$info->{'issuer_cn'} || !$info->{'notafter'} ||
+    (!$info->{'cn'} && !@{$info->{'alt'} || []})) {
+	my $oinfo = &cert_file_info_openssl($file);
+	if (!$info) {
+		$info = $oinfo;
+		}
+	elsif ($oinfo) {
+		foreach my $k (qw(c o issuer_c issuer_o issuer_cn notbefore
+				  notafter self)) {
+			$info->{$k} = $oinfo->{$k}
+				if ((!defined($info->{$k}) || $info->{$k} eq "") &&
+				    defined($oinfo->{$k}));
+			}
+		if (@{$oinfo->{'alt'} || []}) {
+			my %seen;
+			$info->{'alt'} = [
+				grep {
+					my $k = &normalize_ssl_cert_identifier($_);
+					!$seen{$k}++;
+					} (@{$info->{'alt'} || []},
+					   @{$oinfo->{'alt'}})
+				];
+			}
+		}
+	}
+return undef if (!$info);
 
 # Type string
 $info->{type} = $info->{self} ? $text{cert_typeself} : $text{cert_typereal};
@@ -1375,6 +1455,20 @@ sub cert_principal_name
 {
 my ($o, $cn) = @_;
 return $o ? "$o/$cn" : $cn;
+}
+
+# cert_issuer_ca_mismatch(&cert-info, &ca-info)
+# Returns 1 only when the certificate issuer and CA subject are known to differ.
+sub cert_issuer_ca_mismatch
+{
+my ($info, $cainfo) = @_;
+return 0 if (!$info || !$cainfo || !$info->{'issuer_cn'} || !$cainfo->{'cn'});
+return 1 if ($info->{'issuer_cn'} ne $cainfo->{'cn'});
+# Some SAN-only certificates can omit issuer fields from the parsed data.
+# Treat organization as a mismatch only when both sides provide it.
+return 1 if ($info->{'issuer_o'} && $cainfo->{'o'} &&
+	     $info->{'issuer_o'} ne $cainfo->{'o'});
+return 0;
 }
 
 # convert_ssl_key_format(&domain, file, "pkcs1"|"pkcs8", [outfile])
@@ -1759,6 +1853,87 @@ close(OUT);
 return $data;
 }
 
+# domain_miniserv_ssl_ips(&domain)
+# Returns IPs that should map to this domain's cert in miniserv.
+sub domain_miniserv_ssl_ips
+{
+my ($d) = @_;
+my @ips;
+if ($d->{'virt'}) {
+	push(@ips, &normalize_ssl_cert_identifier($d->{'ip'}));
+	}
+if ($d->{'virt6'}) {
+	push(@ips, &normalize_ssl_cert_identifier($d->{'ip6'}));
+	}
+
+my @names = @{$d->{'_service_ssl_dnames'} || []};
+my $info = &cert_info($d);
+if ($info) {
+	push(@names, $info->{'cn'}, @{$info->{'alt'} || []});
+	}
+foreach my $ip (grep { &ssl_cert_identifier_is_ip($_) } @names) {
+	# For shared-IP domains, only the default website can own the IP
+	# certificate. Include both the public DNS IP and the local vhost IP,
+	# plus IPv4-mapped form because miniserv may receive that as SNI.
+	my $v6 = &check_ip6address($ip);
+	my $certip = $v6 ? ($d->{'dns_ip6'} || $d->{'ip6'})
+			 : ($d->{'dns_ip'} || $d->{'ip'});
+	my $localip = $v6 ? $d->{'ip6'} : $d->{'ip'};
+	next if (!$certip);
+	next if (&normalize_ssl_cert_identifier($ip) ne
+		 &normalize_ssl_cert_identifier($certip));
+	my $virt = $v6 ? $d->{'virt6'} : $d->{'virt'};
+	if (!$virt) {
+		# Never let an arbitrary shared-IP certificate installation
+		# take over miniserv's IP mapping. The ACME request path checks
+		# this too, but the miniserv write path must enforce ownership.
+		next if (!&domain_has_website($d) || !&is_default_website($d));
+		}
+	push(@ips, map { &normalize_ssl_cert_identifier($_) }
+		   grep { $_ } ($localip, $certip));
+	if (!$v6) {
+		foreach my $mapip (&unique(grep { $_ } ($localip, $certip))) {
+			push(@ips, &normalize_ssl_cert_identifier(
+					"::ffff:$mapip"));
+			}
+		}
+	}
+return &unique(grep { $_ } @ips);
+}
+
+# miniserv_ipkey_has_any(&ipkey, &values)
+# Returns 1 if a miniserv ipkey has any of some values.
+sub miniserv_ipkey_has_any
+{
+my ($ipkey, $values) = @_;
+foreach my $v (@$values) {
+	foreach my $k (@{$ipkey->{'ips'}}) {
+		if (&ssl_cert_identifier_is_ip($v) ||
+		    &ssl_cert_identifier_is_ip($k)) {
+			return 1 if (&normalize_ssl_cert_identifier($v) eq
+				     &normalize_ssl_cert_identifier($k));
+			}
+		else {
+			return 1 if (lc($v) eq lc($k));
+			}
+		}
+	}
+return 0;
+}
+
+# miniserv_ipkey_matches_domain(&domain, &ipkey)
+# Returns 1 if a miniserv ipkey belongs to some domain.
+sub miniserv_ipkey_matches_domain
+{
+my ($d, $ipkey) = @_;
+my @doms = ( $d, &get_domain_by("alias", $d->{'id'}) );
+my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) } @doms;
+return 1 if (&miniserv_ipkey_has_any($ipkey, \@dnames));
+return 1 if (&miniserv_ipkey_has_any($ipkey,
+				     [ &domain_miniserv_ssl_ips($d) ]));
+return 0;
+}
+
 # setup_ipkeys(&domain, &miniserv-getter, &miniserv-saver, &post-action)
 # Add the per-IP/domain SSL key for some domain
 sub setup_ipkeys
@@ -1769,14 +1944,9 @@ my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) } @doms;
 &foreign_require("webmin");
 local %miniserv;
 &$getfunc(\%miniserv);
-local @ipkeys = &webmin::get_ipkeys(\%miniserv);
-local @ips;
-if ($d->{'virt'}) {
-	push(@ips, $d->{'ip'});
-	}
-if ($d->{'virt6'}) {
-	push(@ips, $d->{'ip6'});
-	}
+local @ipkeys = grep { !&miniserv_ipkey_matches_domain($d, $_) }
+		     &webmin::get_ipkeys(\%miniserv);
+local @ips = &domain_miniserv_ssl_ips($d);
 push(@ips, @dnames);
 my $chain = &get_website_ssl_file($d, 'ca');
 push(@ipkeys, { 'ips' => \@ips,
@@ -1800,13 +1970,7 @@ local %miniserv;
 local @ipkeys = &webmin::get_ipkeys(\%miniserv);
 local @newipkeys;
 foreach my $ipk (@ipkeys) {
-	my $del = &indexof($d->{'dom'}, @{$ipk->{'ips'}}) >= 0;
-	if ($d->{'virt'} && !$del) {
-		$del = &indexof($d->{'ip'}, @{$ipk->{'ips'}}) >= 0;
-		}
-	if ($d->{'virt6'} && !$del) {
-		$del = &indexof($d->{'ip6'}, @{$ipk->{'ips'}}) >= 0;
-		}
+	my $del = &miniserv_ipkey_matches_domain($d, $ipk);
 	if (!$del) {
 		push(@newipkeys, $ipk);
 		}
@@ -1975,12 +2139,14 @@ sub check_domain_certificate
 {
 local ($dname, $d_or_info) = @_;
 local $info = $d_or_info->{'dom'} ? &cert_info($d_or_info) : $d_or_info;
-foreach my $check ($dname, "www.".$dname) {
-	if (lc($info->{'cn'}) eq lc($check)) {
+my $is_ip = &ssl_cert_identifier_is_ip($dname);
+foreach my $check ($is_ip ? ($dname) : ($dname, "www.".$dname)) {
+	my $ncheck = &normalize_ssl_cert_identifier($check);
+	if (&normalize_ssl_cert_identifier($info->{'cn'}) eq $ncheck) {
 		# Exact match
 		return 1;
 		}
-	elsif ($info->{'cn'} =~ /^\*\.(\S+)$/ &&
+	elsif (!$is_ip && $info->{'cn'} =~ /^\*\.(\S+)$/ &&
 	       (lc($check) eq lc($1) || $check =~ /^([^\.]+)\.\Q$1\E$/i)) {
 		# Matches wildcard
 		return 1;
@@ -1991,9 +2157,9 @@ foreach my $check ($dname, "www.".$dname) {
 		}
 	else {
 		# Check for subjectAltNames match (as seen in UCC certs)
-		foreach my $a (@{$info->{'alt'}}) {
-			if (lc($a) eq $check ||
-			    $a =~ /^\*\.(\S+)$/ &&
+		foreach my $a (@{$info->{'alt'} || []}) {
+			if (&normalize_ssl_cert_identifier($a) eq $ncheck ||
+			    !$is_ip && $a =~ /^\*\.(\S+)$/ &&
 			    (lc($check) eq lc($1) ||
 			     $check =~ /([^\.]+)\.\Q$1\E$/i)) {
 				return 1;
@@ -3371,6 +3537,11 @@ else {
 push(@dnames, "*.".$d->{'dom'}) if ($d->{'letsencrypt_dwild'});
 my $fdnames = &filter_ssl_wildcards(\@dnames);
 @dnames = @$fdnames;
+my $has_ips = &letsencrypt_dnames_have_ips(\@dnames);
+my $nerr = &validate_letsencrypt_ip_cert_names(\@dnames);
+return (0, $nerr, \@dnames) if ($nerr);
+my $rerr = &validate_letsencrypt_ip_cert_renewal($d, \@dnames, 1);
+return (0, $rerr, \@dnames) if ($rerr);
 if (defined($d->{'letsencrypt_nodnscheck'}) &&
     !$d->{'letsencrypt_nodnscheck'}) {
 	my @badnames;
@@ -3429,7 +3600,8 @@ delete($d->{'letsencrypt_last_err'});
 &sync_domain_tlsa_records($d);
 
 # Update services that were using the old cert, both globally and per-domain
-&update_all_domain_service_ssl_certs($d, \@beforecerts);
+&update_all_domain_service_ssl_certs($d, \@beforecerts,
+				     $has_ips ? \@dnames : undef);
 
 # Call the post command
 &set_domain_envs($d, "SSL_DOMAIN");
@@ -3675,6 +3847,130 @@ foreach my $h (@$dnames) {
 return \@rv;
 }
 
+# letsencrypt_is_ip_cert_identifier(identifier)
+# Returns 1 if some Let's Encrypt certificate identifier is an IP address.
+sub letsencrypt_is_ip_cert_identifier
+{
+my ($id) = @_;
+return 0 if (!$id);
+&foreign_require("webmin");
+if (defined(&webmin::letsencrypt_is_ip_cert_identifier)) {
+	return &webmin::letsencrypt_is_ip_cert_identifier($id);
+	}
+return &ssl_cert_identifier_is_ip($id);
+}
+
+# letsencrypt_invalid_ip_identifier_error(identifier)
+# Returns an error if an identifier looks like an IP address but is invalid.
+sub letsencrypt_invalid_ip_identifier_error
+{
+my ($id) = @_;
+return undef if (!$id || &letsencrypt_is_ip_cert_identifier($id));
+return &text('letsencrypt_eipbad', $id)
+	if ($id =~ /:/ || $id =~ /^[0-9]+(?:\.[0-9]+){3}$/);
+return undef;
+}
+
+# letsencrypt_dnames_have_ips(&dnames)
+# Returns 1 if any Let's Encrypt certificate identifier is an IP address.
+sub letsencrypt_dnames_have_ips
+{
+my ($dnames) = @_;
+foreach my $dname (@$dnames) {
+	return 1 if (&letsencrypt_is_ip_cert_identifier($dname));
+	}
+return 0;
+}
+
+# validate_letsencrypt_ip_cert_names(&dnames)
+# Returns an error if IP identifiers are combined with incompatible names.
+sub validate_letsencrypt_ip_cert_names
+{
+my ($dnames) = @_;
+return undef if (!&letsencrypt_dnames_have_ips($dnames));
+# IP identifiers require web validation, while wildcards require DNS validation.
+# Virtualmin does not mix those validation modes in one certificate request.
+my @wilds = grep { /^\*\./ } @$dnames;
+return @wilds ? $text{'letsencrypt_eipwild'} : undef;
+}
+
+# letsencrypt_ip_cert_renewal_max_days()
+# Returns the maximum renewal threshold for short-lived IP certificates.
+sub letsencrypt_ip_cert_renewal_max_days
+{
+return 5;
+}
+
+# letsencrypt_renewal_before_days(&domain)
+# Returns the template renewal threshold in days before expiry.
+sub letsencrypt_renewal_before_days
+{
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+return $tmpl->{'ssl_renew_letsencrypt'} || 21;
+}
+
+# validate_letsencrypt_ip_cert_renewal(&domain, &dnames, renew)
+# Returns an error if automatic renewal is unsafe for IP certificates.
+sub validate_letsencrypt_ip_cert_renewal
+{
+my ($d, $dnames, $renew) = @_;
+return undef if (!$renew || !&letsencrypt_dnames_have_ips($dnames));
+my $days = &letsencrypt_renewal_before_days($d);
+my $max = &letsencrypt_ip_cert_renewal_max_days();
+return &text('letsencrypt_eiprenew', $days, $max) if ($days > $max);
+return undef;
+}
+
+# validate_letsencrypt_ip_cert_support()
+# Returns an error if Certbot cannot request IP identifier certificates
+# in Virtualmin's webroot validation mode.
+sub validate_letsencrypt_ip_cert_support
+{
+&foreign_require("webmin");
+return $text{'letsencrypt_eipnowebmin'}
+	if (!defined(&webmin::letsencrypt_is_ip_cert_identifier) ||
+	    !defined(&webmin::get_certbot_major_version));
+return $text{'letsencrypt_eipnocertbot'}
+	if (!$webmin::letsencrypt_cmd);
+my $cmd_ver = &webmin::get_certbot_major_version($webmin::letsencrypt_cmd);
+my $min_ver = "5.4";
+return &text('letsencrypt_eipcertbotver', $min_ver)
+	if (!$cmd_ver || &compare_version_numbers($cmd_ver, $min_ver) < 0);
+return undef;
+}
+
+# validate_letsencrypt_ip_website(&domain, &dnames)
+# Returns an error if IP identifiers cannot validate against this website.
+sub validate_letsencrypt_ip_website
+{
+my ($d, $dnames) = @_;
+my @ips = grep { &letsencrypt_is_ip_cert_identifier($_) } @$dnames;
+return undef if (!@ips);
+my $err = &validate_letsencrypt_ip_cert_support();
+return $err if ($err);
+return $text{'letsencrypt_eipnoweb'} if (!&domain_has_website($d));
+foreach my $ip (@ips) {
+	my $v6 = &check_ip6address($ip);
+	my $certip = $v6 ? ($d->{'dns_ip6'} || $d->{'ip6'})
+			 : ($d->{'dns_ip'} || $d->{'ip'});
+	my $virt = $v6 ? $d->{'virt6'} : $d->{'virt'};
+	if (!$certip ||
+	    &normalize_ssl_cert_identifier($ip) ne
+	    &normalize_ssl_cert_identifier($certip)) {
+		return &text('letsencrypt_eipnotdom', $ip);
+		}
+	next if ($virt);
+	# On a shared IP, ACME webroot validation for the IP lands on the
+	# default website, so only that virtual server can safely request it.
+	next if (&is_default_website($d));
+	my $defd = &find_default_website($d);
+	return &text('letsencrypt_eipnotdefault', $ip,
+		     $defd ? $defd->{'dom'} : $text{'no'});
+	}
+return undef;
+}
+
 # request_domain_letsencrypt_cert(&domain, &dnames, [staging], [size], [mode],
 # 				  [key-type], [&acme], [allow-subset])
 # Attempts to request a Let's Encrypt cert for a domain, trying both web and
@@ -3714,6 +4010,11 @@ my $actype_reuse = $actype eq $dctype &&
 		   $size == $dcinfo->{'size'} ? 1 : 0;
 $actype_reuse = -1 if (!$dcalgo || !$dclets);
 my @wilds = grep { /^\*\./ } @$dnames;
+my $has_ips = &letsencrypt_dnames_have_ips($dnames);
+my $nerr = &validate_letsencrypt_ip_cert_names($dnames);
+return (0, $nerr) if ($nerr);
+my $iperr = &validate_letsencrypt_ip_website($d, $dnames);
+return (0, $iperr) if ($iperr);
 &lock_file($ssl_letsencrypt_lock);
 &disable_quotas($d);
 my $acme_email = $acme ? $acme->{'email'} : undef;
@@ -3728,7 +4029,9 @@ foreach my $try (0, 1) {
 			$server, $keytype, $hmac, $subset);
 		push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
 		}
-	if (!$ok && $d->{'dns'} && (!$mode || $mode eq "dns")) {
+	# DNS validation cannot prove control of IP identifiers, so never fall
+	# back to it once the request contains any IP address.
+	if (!$ok && !$has_ips && $d->{'dns'} && (!$mode || $mode eq "dns")) {
 		# Fall back to DNS
 		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 			$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
@@ -3739,7 +4042,8 @@ foreach my $try (0, 1) {
 		}
 	elsif (!$ok) {
 		if (!$cert) {
-			$cert = "Domain has no website, ".
+			$cert = $has_ips ? $text{'letsencrypt_eipnoweb'} :
+				"Domain has no website, ".
 				"and DNS-based validation is not possible";
 			push(@errs, $cert);
 			}
@@ -3799,6 +4103,53 @@ return 0 if (&webmin::check_letsencrypt());	# Not installed
 return 0 if (!$webmin::letsencrypt_cmd);	# Missing native client
 my $ver = &webmin::get_certbot_major_version($webmin::letsencrypt_cmd);
 return &compare_versions($ver, 2.0) >= 0;
+}
+
+# ssl_cert_identifier_is_ip(identifier)
+# Returns 1 if a certificate identifier is an IPv4 or IPv6 address.
+sub ssl_cert_identifier_is_ip
+{
+my ($id) = @_;
+return 1 if (&check_ipaddress($id));
+return $id !~ /\// && $id =~ /:/ && &check_ip6address($id);
+}
+
+# ssl_cert_packed_ip_address(packed-ip)
+# Converts a subjectAltName iPAddress value to text.
+sub ssl_cert_packed_ip_address
+{
+my ($val) = @_;
+return join(".", unpack("C4", $val)) if (length($val) == 4);
+if (length($val) == 16) {
+	eval "use Socket ();";
+	my $ip = !$@ ? eval { Socket::inet_ntop(Socket::AF_INET6(), $val) }
+		     : undef;
+	return $ip if ($ip);
+	return join(":", map { sprintf("%x", $_) } unpack("n8", $val));
+	}
+return $val;
+}
+
+# normalize_ssl_cert_identifier(identifier)
+# Normalizes hostnames and IP addresses for certificate name comparison.
+sub normalize_ssl_cert_identifier
+{
+my ($id) = @_;
+return "" if (!defined($id));
+if (&check_ipaddress($id)) {
+	return join(".", map { int($_) } split(/\./, $id));
+	}
+if (&check_ip6address($id)) {
+	eval "use Socket ();";
+	if (!$@) {
+		my $packed = eval { Socket::inet_pton(Socket::AF_INET6(), $id) };
+		my $ip = $packed ?
+			eval { Socket::inet_ntop(Socket::AF_INET6(), $packed) }
+			: undef;
+		return lc($ip) if ($ip);
+		}
+	}
+return lc($id);
 }
 
 # sync_webmin_ssl_cert(&domain, [enable-or-disable])

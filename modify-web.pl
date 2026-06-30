@@ -504,6 +504,21 @@ if (defined($includes) && !&supports_ssi()) {
 	&usage("Server-side includes are not supported on this system");
 	}
 
+# Validate Let's Encrypt renewal for short-lived IP address certificates
+if (defined($renew) && $renew) {
+	foreach $d (@doms) {
+		my @rdnames = $d->{'letsencrypt_dname'} ?
+			split(/\s+/, $d->{'letsencrypt_dname'}) :
+			&get_hostnames_for_ssl($d);
+		push(@rdnames, "*.".$d->{'dom'})
+			if ($d->{'letsencrypt_dwild'});
+		my $fdnames = &filter_ssl_wildcards(\@rdnames);
+		my $err = &validate_letsencrypt_ip_cert_renewal(
+			$d, $fdnames, 1);
+		&usage($err) if ($err);
+		}
+	}
+
 # Lock them all
 foreach $d (@doms) {
 	&lock_domain($d);
@@ -1204,4 +1219,3 @@ print "                      --subdomain-to-domain | --no-redirect]\n";
 print "                     [--alias-redirect | --no-alias-redirect]\n";
 exit(1);
 }
-
