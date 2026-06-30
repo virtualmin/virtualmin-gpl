@@ -1188,13 +1188,14 @@ foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
 		if (&indexof($dt, &list_database_plugins()) < 0) {
 			# Create in core database
 			my $crfunc = "create_${dt}_database_user";
-			&$crfunc($d, \@dbs, $user->{'user'}, $user->{'pass'});
+			&$crfunc($d, \@dbs, $user->{'user'}, $user->{'pass'},
+				 $user->{'mysql_pass'});
 			}
 		elsif (&indexof($dt, &list_database_plugins()) >= 0) {
 			# Create in plugin database
 			&plugin_call($dt, "database_create_user",
 				     $d, \@dbs, $user->{'user'},
-				     $user->{'pass'});
+				     $user->{'pass'}, $user->{'mysql_pass'});
 			}
 		};
 	# Show error
