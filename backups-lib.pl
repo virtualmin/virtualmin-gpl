@@ -2085,7 +2085,8 @@ if ($ok) {
 # is known. A failed upload can happen after tar has already advanced the
 # snapshot files, so failed full backups must not become a future baseline.
 if ($increment == 0 && &has_incremental_tar()) {
-	my %errids = map { $_->{'id'} ? ($_->{'id'}, 1) : () } @errdoms;
+	my %errids = map { $_->{'id'}, 1 }
+		     grep { $_->{'id'} } @errdoms;
 	if ($ok) {
 		foreach my $d (@$doms) {
 			next if (!$d->{'id'} || $errids{$d->{'id'}});
