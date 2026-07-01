@@ -358,7 +358,7 @@ if (($redirect->{'stripfile'} || $redirect->{'stripquery'}) &&
 	       "for this website type";
 	}
 &normalize_redirect_destination_slash($redirect);
-local $p = &domain_has_website($d);
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_create_web_redirect", $d, $redirect);
         }
@@ -470,7 +470,7 @@ return "No Apache virtualhost found";
 sub delete_redirect
 {
 my ($d, $redirect) = @_;
-local $p = &domain_has_website($d);
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
         return &plugin_call($p, "feature_delete_web_redirect", $d, $redirect);
         }

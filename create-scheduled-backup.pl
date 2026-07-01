@@ -121,12 +121,12 @@ $enabled = 1;
 @allplans = &list_plans();
 @OLDARGV = @ARGV;
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--dest") {
 		push(@dests, shift(@ARGV));
 		}
 	elsif ($a eq "--feature") {
-		local $f = shift(@ARGV);
+		my $f = shift(@ARGV);
 		&is_enabled_backup_feature($f) ||
 			&usage("Feature $f is not enabled on this system");
 		push(@bfeats, $f);

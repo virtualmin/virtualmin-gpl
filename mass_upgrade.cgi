@@ -69,7 +69,7 @@ if ($in{'confirm'}) {
 			$opts->{'phpver'} = $phpver;
 			}
 
-		local $phpver = $opts->{'phpver'};
+		my $phpver = $opts->{'phpver'};
 		if ($derr = &check_script_depends($script, $d, $ver, $sinfo, $phpver)) {
 			# Failed depends
 			&$second_print(&text('massscript_edep', $derr));

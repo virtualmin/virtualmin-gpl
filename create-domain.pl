@@ -135,7 +135,7 @@ $virt = 0;
 $anylimits = 0;
 $email = $config{'contact_email'};
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		$domain = shift(@ARGV);
 		}
@@ -769,7 +769,7 @@ if (!$alias) {
 			$clash || &usage(&text('setup_evirtclash2'));
 			if ($virtalready == 1) {
 				# Don't allow clash with another domain
-				local $already = &get_domain_by("ip", $ip);
+				my $already = &get_domain_by("ip", $ip);
 				$already && &usage(&text('setup_evirtclash4',
 						 $already->{'dom'}));
 				}

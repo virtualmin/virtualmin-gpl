@@ -7,7 +7,7 @@ do 'virtual-server-lib.pl';
 # Converts logged information from this module into human-readable form
 sub parse_webmin_log
 {
-local ($user, $script, $action, $type, $object, $p, $long) = @_;
+my ($user, $script, $action, $type, $object, $p, $long) = @_;
 if ($type eq "user") {
 	return &text('log_'.$action.'_user', "<tt>$object</tt>",
 					     "<tt>$p->{'dom'}</tt>");
@@ -58,7 +58,7 @@ elsif ($type eq "record" && $p->{'defttl'}) {
 	return &text('log_'.$action.'_defttl', "<tt>$object</tt>");
 	}
 elsif ($type eq "record") {
-	local $n = $p->{'name'};
+	my $n = $p->{'name'};
 	$n =~ s/\.$//;
 	$n =~ s/\.\Q$object\E$//;
 	return &text('log_'.$action.'_record', "<tt>$object</tt>",
@@ -100,7 +100,7 @@ elsif ($type eq "scripts" && ($action eq "upgrade" || $action eq "uninstall" ||
 	return &text('log_'.$action.'_scripts', $object);
 	}
 elsif ($type eq "scripts") {
-	local @scripts = map { /^(.*)\.pl$/ ? "<tt>$1</tt>" : "<tt>$_</tt>" }
+	my @scripts = map { /^(.*)\.pl$/ ? "<tt>$1</tt>" : "<tt>$_</tt>" }
 			     split(/\0/, $p->{'scripts'});
 	return &text('log_'.$action.'_scripts', join(" ", @scripts));
 	}
@@ -119,7 +119,7 @@ elsif ($action eq "start" || $action eq "stop" || $action eq "restart") {
 	return $text{'log_'.$action.'_'.$type};
 	}
 elsif ($action eq "backup" || $action eq "restore") {
-	local @doms = split(/\0/, $p->{'doms'});
+	my @doms = split(/\0/, $p->{'doms'});
 	$action .= '_failed' if ($p->{'failed'});
 	if ($long) {
 		return &text('log_'.$action.'_l', join(" ", map { "<tt>$_</tt>" } @doms));
@@ -129,7 +129,7 @@ elsif ($action eq "backup" || $action eq "restore") {
 		}
 	}
 elsif ($type eq "sched") {
-	local $msg = $object eq 'all' ? $text{'log_sched_all'} :
+	my $msg = $object eq 'all' ? $text{'log_sched_all'} :
 		     $object eq 'none' ? $text{'log_sched_none'} :
 		     $object eq 'virtualmin' ? $text{'log_sched_virtualmin'} :
 					       &text('log_sched_doms', $object);

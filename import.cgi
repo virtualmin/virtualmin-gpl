@@ -562,7 +562,7 @@ else {
 	@alldbs = &all_databases();
 	foreach $t ('mysql', 'postgres') {
 		foreach $db (split(/\s+/, $in{'db_'.$t})) {
-			local ($got) = grep { $_->{'type'} eq $t &&
+			my ($got) = grep { $_->{'type'} eq $t &&
 					      $_->{'name'} eq $db } @alldbs;
 			if ($got) {
 				$found{$t}++;

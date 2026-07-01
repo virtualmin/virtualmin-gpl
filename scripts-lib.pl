@@ -299,10 +299,10 @@ return @rv;
 # Records the installation of a script for a domains
 sub add_domain_script
 {
-local ($d, $name, $version, $opts, $desc, $url, $user, $pass, $partial) = @_;
+my ($d, $name, $version, $opts, $desc, $url, $user, $pass, $partial) = @_;
 $main::add_domain_script_count++;
 $partial =~ s/[\r\n]+/ /mg if ($partial);
-local %info = ( 'id' => time().$$.$main::add_domain_script_count,
+my %info = ( 'id' => time().$$.$main::add_domain_script_count,
 		'name' => $name,
 		'version' => $version,
 		'desc' => $desc,
@@ -310,7 +310,7 @@ local %info = ( 'id' => time().$$.$main::add_domain_script_count,
 		'user' => $user,
 		'pass' => $pass,
 		'partial' => $partial );
-local $o;
+my $o;
 foreach $o (keys %$opts) {
 	$info{'opts_'.$o} = $opts->{$o};
 	}
@@ -329,14 +329,14 @@ return \%info;
 # Updates a script object for a domain on disk
 sub save_domain_script
 {
-local ($d, $sinfo) = @_;
-local %info;
+my ($d, $sinfo) = @_;
+my %info;
 foreach my $k (keys %$sinfo) {
 	if ($k eq 'id' || $k eq 'file') {
 		next;	# No need to save
 		}
 	elsif ($k eq 'opts') {
-		local $opts = $sinfo->{'opts'};
+		my $opts = $sinfo->{'opts'};
 		foreach my $o (keys %$opts) {
 			$info{'opts_'.$o} = $opts->{$o};
 			}
@@ -358,7 +358,7 @@ foreach my $f (@fs) {
 # Records the un-install of a script for a domain
 sub remove_domain_script
 {
-local ($d, $info) = @_;
+my ($d, $info) = @_;
 &unlink_file($info->{'file'});
 &load_plugin_libraries();
 my @fs = grep { &plugin_defined($_, "feature_remove_domain_script") } @plugins;
@@ -376,10 +376,10 @@ sub find_database_table
 {
 my $myd = ref($_[0]) ? shift(@_) : $d;
 my ($dbtype, $dbname, $table) = @_;
-local $cfunc = "check_".$dbtype."_database_clash";
+my $cfunc = "check_".$dbtype."_database_clash";
 if (&$cfunc(undef, $dbname)) {
-	local $lfunc = "list_".$dbtype."_tables";
-	local @tables = &$lfunc($myd, $dbname);
+	my $lfunc = "list_".$dbtype."_tables";
+	my @tables = &$lfunc($myd, $dbname);
 	foreach my $t (@tables) {
 		if ($t =~ /^$table$/i) {
 			return $t;
@@ -394,11 +394,11 @@ return undef;
 # available file.
 sub save_scripts_available
 {
-local ($scripts) = @_;
+my ($scripts) = @_;
 &lock_file($scripts_unavail_file);
 &read_file_cached($scripts_unavail_file, \%unavail);
 foreach my $script (@$scripts) {
-	local $n = $script->{'name'};
+	my $n = $script->{'name'};
 	delete($unavail{$n."_minversion"});
 	if (!$script->{'avail_only'}) {
 		$unavail{$n} = 1;
@@ -420,12 +420,12 @@ foreach my $script (@$scripts) {
 # on success, or an error message on failure. Also prints out download progress.
 sub fetch_script_files
 {
-local ($script, $d, $ver, $opts, $sinfo, $gotfiles, $nocallback) = @_;
-local %serial;
+my ($script, $d, $ver, $opts, $sinfo, $gotfiles, $nocallback) = @_;
+my %serial;
 &read_env_file($virtualmin_license_file, \%serial);
 
-local $cb = $nocallback ? undef : \&progress_callback;
-local @files = &{$script->{'files_func'}}($d, $ver, $opts, $sinfo);
+my $cb = $nocallback ? undef : \&progress_callback;
+my @files = &{$script->{'files_func'}}($d, $ver, $opts, $sinfo);
 foreach my $f (@files) {
 	next if ($f->{'nodownload'});
 	if (-r "$script->{'dir'}/$f->{'file'}") {
@@ -439,12 +439,12 @@ foreach my $f (@files) {
 	else {
 		# Need to fetch it .. build list of possible URLs, from script
 		# and from Virtualmin
-		local @urls;
+		my @urls;
 		my $temp = &transname($f->{'file'});
-		local $newurl = &convert_osdn_url($f->{'url'});
+		my $newurl = &convert_osdn_url($f->{'url'});
 		push(@urls, [ $newurl || $f->{'url'}, $f->{'nocache'},
 			      $f->{'user'}, $f->{'pass'} ]);
-		local $vurl = "http://$script_download_host:$script_download_port$script_download_dir$f->{'file'}";
+		my $vurl = "http://$script_download_host:$script_download_port$script_download_dir$f->{'file'}";
 		if ($f->{'virtualmin'}) {
 			# Use Virtualmin site first, for scripts that don't
 			# have a version-specific name
@@ -474,12 +474,12 @@ foreach my $f (@files) {
 			}
 
 		# Try each URL
-		local $firsterror;
+		my $firsterror;
 		foreach my $urlcache (@urls) {
 			my ($url, $nocache, $user, $pass) = @$urlcache;
-			local $error;
+			my $error;
 			$progress_callback_url = $url;
-			local %headers;
+			my %headers;
 			if ($f->{'referer'}) {
 				$headers{'Referer'} = $f->{'referer'};
 				}
@@ -512,8 +512,8 @@ foreach my $f (@files) {
 
 			# Make sure the downloaded file is in some archive
 			# format, or is Perl or PHP.
-			local $fmt = &compression_format($temp);
-			local $cont;
+			my $fmt = &compression_format($temp);
+			my $cont;
 			if (!$fmt && $temp =~ /\.(pl|php|phar)$/i) {
 				$cont = &read_file_contents($temp);
 				}
@@ -528,7 +528,7 @@ foreach my $f (@files) {
 
 			# Check that it is a valid compressed file
 			if ($fmt) {
-				local $e = &extract_compressed_file($temp);
+				my $e = &extract_compressed_file($temp);
 				if ($e) {
 					$firsterror ||=
 					  &text('scripts_edownload3', $url, $e);
@@ -561,12 +561,12 @@ return undef;
 # domain. Can also include an option for a new database
 sub ui_database_select
 {
-local ($name, $value, $dbs, $d, $newsuffix) = @_;
-local ($newdbname, $newdbtype);
+my ($name, $value, $dbs, $d, $newsuffix) = @_;
+my ($newdbname, $newdbtype);
 if ($newsuffix) {
 	# Work out a name for the new DB (if one is allowed)
-	local $tmpl = &get_template($d->{'template'});
-	local ($dleft, $dreason, $dmax) = &count_feature("dbs");
+	my $tmpl = &get_template($d->{'template'});
+	my ($dleft, $dreason, $dmax) = &count_feature("dbs");
 	if ($dleft != 0 && &can_edit_databases()) {
 		# Choose a name ether based on the allowed prefix, or the
 		# default DB name
@@ -577,7 +577,7 @@ if ($newsuffix) {
 				&vui_edit_link_icon("edit_domain.cgi?dom=$d->{'id'}"));
 			}
 		if ($tmpl->{'mysql_suffix'} ne "none") {
-			local $prefix = &substitute_domain_template(
+			my $prefix = &substitute_domain_template(
 						$tmpl->{'mysql_suffix'}, $d);
 			$prefix =~ s/-/_/g;
 			$prefix =~ s/\./_/g;
@@ -595,7 +595,7 @@ if ($newsuffix) {
 
 		# Check if an existing DB with the same name already exists,
 		# and if so add a suffix for the new DB
-		local $count = 1;
+		my $count = 1;
 		while(1) {
 			my ($already) = grep { $_->{'type'} eq $newdbtype &&
 				       $_->{'name'} eq $newdbname } @$dbs;
@@ -621,10 +621,10 @@ return &ui_select($name, $value,
 sub create_script_database
 {
 my ($d, $dbspec, $opts) = @_;
-local ($dbtype, $dbname) = split(/_/, $dbspec, 2);
+my ($dbtype, $dbname) = split(/_/, $dbspec, 2);
 
 # Check limits (again)
-local ($dleft, $dreason, $dmax) = &count_feature("dbs");
+my ($dleft, $dreason, $dmax) = &count_feature("dbs");
 if ($dleft == 0) {
 	return "You are not allowed to create any more databases";
 	}
@@ -662,9 +662,9 @@ return undef;
 # on failure, or undef on success.
 sub cleanup_script_database
 {
-local ($d, $dbspec, $tables) = @_;
-local ($dbtype, $dbname) = split(/_/, $dbspec, 2);
-local $droperr;
+my ($d, $dbspec, $tables) = @_;
+my ($dbtype, $dbname) = split(/_/, $dbspec, 2);
+my $droperr;
 eval {
 	local $main::error_must_die = 1;
 	if ($dbtype eq "mysql") {
@@ -724,19 +724,19 @@ return $@ || $droperr;
 # Deletes the database that was created for some script, if it is empty
 sub delete_script_database
 {
-local ($d, $dbspec) = @_;
-local ($dbtype, $dbname) = split(/_/, $dbspec, 2);
+my ($d, $dbspec) = @_;
+my ($dbtype, $dbname) = split(/_/, $dbspec, 2);
 
-local $cfunc = "check_".$dbtype."_database_clash";
+my $cfunc = "check_".$dbtype."_database_clash";
 if (!&$cfunc($d, $dbname)) {
 	return "Database $dbname does not exist";
 	}
 
-local $lfunc = "list_".$dbtype."_tables";
-local @tables = &$lfunc($d, $dbname);
+my $lfunc = "list_".$dbtype."_tables";
+my @tables = &$lfunc($d, $dbname);
 if (!@tables) {
 	&push_all_print();
-	local $dfunc = "delete_".$dbtype."_database";
+	my $dfunc = "delete_".$dbtype."_database";
 	&$dfunc($d, $dbname);
 	&save_domain($d);
 	&refresh_webmin_user($d);
@@ -987,21 +987,21 @@ foreach my $script (@domain_scripts) {
 # missing.
 sub check_pear_module
 {
-local ($mod, $ver, $d) = @_;
-local ($mod, $modver) = split(/\-/, $mod);
+my ($mod, $ver, $d) = @_;
+my ($mod, $modver) = split(/\-/, $mod);
 return -1 if (!&foreign_check("php-pear"));
 &foreign_require("php-pear");
-local @cmds = &php_pear::get_pear_commands();
+my @cmds = &php_pear::get_pear_commands();
 return -1 if (!@cmds);
 if ($ver) {
 	# Check if we have Pear for this PHP version
-	local ($vercmd) = grep { $_->[1] == $ver } @cmds;
+	my ($vercmd) = grep { $_->[1] == $ver } @cmds;
 	return -1 if (!$vercmd);
 	}
 if (!scalar(@php_pear_modules)) {
 	@php_pear_modules = &php_pear::list_installed_pear_modules();
 	}
-local ($got) = grep { $_->{'name'} eq $mod &&
+my ($got) = grep { $_->{'name'} eq $mod &&
 		      (!$ver || $_->{'pear'} == $ver) } @php_pear_modules;
 return $got ? 1 : 0;
 }
@@ -1010,7 +1010,7 @@ return $got ? 1 : 0;
 # Normalizes PHP extension names from package/script naming to php -m style.
 sub normalize_php_module_name
 {
-local ($mod) = @_;
+my ($mod) = @_;
 $mod = "" if (!defined($mod));
 $mod = lc($mod);
 $mod =~ s/^pecl-//;
@@ -1026,20 +1026,20 @@ return $mod;
 # is missing
 sub check_php_module
 {
-local ($mod, $ver, $d) = @_;
-local @vers = &list_available_php_versions($d);
-local $verinfo;
+my ($mod, $ver, $d) = @_;
+my @vers = &list_available_php_versions($d);
+my $verinfo;
 if ($ver) {
 	($verinfo) = grep { $_->[0] == $ver } @vers;
 	}
 $verinfo ||= $vers[0];
 return -1 if (!$verinfo);
-local $cmd = $verinfo->[1];
+my $cmd = $verinfo->[1];
 &has_command($cmd) || return -1;
-local $want = &normalize_php_module_name($mod);
-local @mods = map { &normalize_php_module_name($_) }
+my $want = &normalize_php_module_name($mod);
+my @mods = map { &normalize_php_module_name($_) }
 	&list_php_modules($d, $verinfo->[0], $verinfo->[1]);
-local %mods = map { $_, 1 } @mods;
+my %mods = map { $_, 1 } @mods;
 return 1 if ($mods{$want});
 return 0;
 }
@@ -1048,10 +1048,10 @@ return 0;
 # Checks if some Perl module exists
 sub check_perl_module
 {
-local ($mod, $d) = @_;
+my ($mod, $d) = @_;
 return 0 if ($mod !~ /^[A-Za-z_][A-Za-z0-9_:]*$/);
-local $perl = &get_perl_path();
-local $out = &backquote_command(quotemeta($perl)." -e ".
+my $perl = &get_perl_path();
+my $out = &backquote_command(quotemeta($perl)." -e ".
 				quotemeta("use $mod")." 2>&1");
 return $? ? 0 : 1;
 }
@@ -1060,9 +1060,9 @@ return $? ? 0 : 1;
 # Checks if some Python module exists
 sub check_python_module
 {
-local ($mod, $d, $pyver) = @_;
+my ($mod, $d, $pyver) = @_;
 my $python = &get_python_path($pyver);
-local $out = &backquote_command("echo import ".quotemeta($mod).
+my $out = &backquote_command("echo import ".quotemeta($mod).
 				" | $python 2>&1");
 return $? ? 0 : 1;
 }
@@ -1072,7 +1072,7 @@ return $? ? 0 : 1;
 # Otherwise returns undef and an error message.
 sub setup_python_version
 {
-local ($d, $script, $scriptver, $path) = @_;
+my ($d, $script, $scriptver, $path) = @_;
 my $minfunc = $script->{'python_fullver_func'};
 my $maxfunc = $script->{'python_maxver_func'};
 return (undef, undef) if (!defined(&$minfunc));
@@ -1100,8 +1100,8 @@ return ($gotver, undef);
 # is given, any is allowed.
 sub check_php_version
 {
-local ($d, $ver) = @_;
-local @avail = map { $_->[0] } &list_available_php_versions($d);
+my ($d, $ver) = @_;
+my @avail = map { $_->[0] } &list_available_php_versions($d);
 return $ver ? &indexof($ver, @avail) >= 0
 	    : scalar(@avail);
 }
@@ -1111,12 +1111,12 @@ return $ver ? &indexof($ver, @avail) >= 0
 # if available
 sub expand_php_versions
 {
-local ($d, $vers) = @_;
-local @rv = @$vers;
+my ($d, $vers) = @_;
+my @rv = @$vers;
 if (&indexof(5, @rv) >= 0) {
 	# If the script indicates that it supports PHP 5 but we have separate
 	# 5.3+ versions detected, allow them too
-	local @fiveplus = grep { $_ > 5 } map { $_->[0] }
+	my @fiveplus = grep { $_ > 5 } map { $_->[0] }
 			       &list_available_php_versions($d);
 	push(@rv, @fiveplus);
 	}
@@ -1129,7 +1129,7 @@ return sort { $b <=> $a } &unique(@rv);
 # version, or undef and an error message.
 sub setup_php_version
 {
-local ($d, $script, $scriptver, $path) = @_;
+my ($d, $script, $scriptver, $path) = @_;
 
 # Figure out which PHP versions the script supports
 my @vers;
@@ -1165,13 +1165,13 @@ if (!@vers) {
 	}
 
 # Find the best matching directory with a PHP version set
-local $dirpath = &public_html_dir($d);
+my $dirpath = &public_html_dir($d);
 my $candirs = &can_domain_php_directories($d);
 if ($candirs && $path ne '/') {
 	$dirpath .= $path;
 	}
-local @dirs = &list_domain_php_directories($d);
-local $bestdir;
+my @dirs = &list_domain_php_directories($d);
+my $bestdir;
 foreach my $dir (sort { length($a->{'dir'}) cmp length($b->{'dir'}) } @dirs) {
 	if (&is_under_directory($dir->{'dir'}, $dirpath) ||
 	    $dir->{'dir'} eq $dirpath) {
@@ -1201,7 +1201,7 @@ if (!$candirs) {
 my ($setver) = sort { &compare_versions($a, $b) } @vers;
 $setver = $vmap{$setver} || $setver;
 $setver || return (undef, "No versions found!");
-local $err = &save_domain_php_directory($d, $dirpath, $setver);
+my $err = &save_domain_php_directory($d, $dirpath, $setver);
 if ($err) {
 	return (undef, &text('scripts_ephpverchange', $dirpath, $vers[0]));
 	}
@@ -1214,7 +1214,7 @@ else {
 # Removes the custom PHP version setting for some script
 sub clear_php_version
 {
-local ($d, $sinfo) = @_;
+my ($d, $sinfo) = @_;
 if ($sinfo->{'opts'}->{'dir'} &&
     $sinfo->{'opts'}->{'dir'} ne &public_html_dir($d)) {
 	&delete_domain_php_directory($d, $sinfo->{'opts'}->{'dir'});
@@ -1226,11 +1226,11 @@ if ($sinfo->{'opts'}->{'dir'} &&
 # of the install is written to STDOUT. Returns 1 if successful, 0 if not.
 sub setup_php_modules
 {
-local ($d, $script, $ver, $phpver, $opts, $installed) = @_;
-local $modfunc = $script->{'php_mods_func'};
-local $optmodfunc = $script->{'php_opt_mods_func'};
+my ($d, $script, $ver, $phpver, $opts, $installed) = @_;
+my $modfunc = $script->{'php_mods_func'};
+my $optmodfunc = $script->{'php_opt_mods_func'};
 return 1 if (!defined(&$modfunc) && !defined(&$optmodfunc));
-local (@mods, @optmods);
+my (@mods, @optmods);
 if (defined(&$modfunc)) {
 	push(@mods, &$modfunc($d, $ver, $phpver, $opts));
 	}
@@ -1241,7 +1241,7 @@ if (defined(&$optmodfunc)) {
 
 my $installing;
 foreach my $m (@mods) {
-	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
+	my $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	if ($phpver >= 7 && $m eq "mysql") {
 		# PHP actual package name is mysqlnd on all systems
 		$m = "mysqlnd";
@@ -1259,8 +1259,8 @@ foreach my $m (@mods) {
 
 	# Find the php.ini file
 	&foreign_require("phpini");
-	local $mode = &get_domain_php_mode($d);
-	local $inifile = $mode eq "mod_php" || $mode eq "fpm" ?
+	my $mode = &get_domain_php_mode($d);
+	my $inifile = $mode eq "mod_php" || $mode eq "fpm" ?
 			&get_global_php_ini($phpver, $mode) :
 			&get_domain_php_ini($d, $phpver);
 	if (!$inifile) {
@@ -1285,11 +1285,11 @@ foreach my $m (@mods) {
 		}
 
 	# Check if the package is already installed
-	local $iok = 0;
-	local @poss;
-	local @allphps = map{ $_->[0] } list_available_php_versions($d);
-	local $phpvercurr = $phpver;
-	local $nodotphpvercurr = $phpvercurr;
+	my $iok = 0;
+	my @poss;
+	my @allphps = map{ $_->[0] } list_available_php_versions($d);
+	my $phpvercurr = $phpver;
+	my $nodotphpvercurr = $phpvercurr;
 	$nodotphpvercurr =~ s/\.//;
 	foreach my $phpverall (@allphps) {
 		my $fullphpver = &get_php_version($phpverall, $d);
@@ -1356,12 +1356,12 @@ foreach my $m (@mods) {
 			my ($out, $rs) = &capture_function_output(
 				\&software::update_system_install, $pkg);
 			$iok = 1 if (scalar(@$rs));
-			local $newpkg = $pkg;
+			my $newpkg = $pkg;
 			if ($software::update_system eq "csw") {
 				# Real package name is different
 				$newpkg = "CSWphp".$phpver.$m;
 				}
-			local @pinfo2 = &software::package_info($newpkg);
+			my @pinfo2 = &software::package_info($newpkg);
 			if (@pinfo2 && $pinfo2[0] eq $newpkg) {
 				# Yep, it worked
 				$iok = 1;
@@ -1390,14 +1390,14 @@ foreach my $m (@mods) {
 	else {
 		# On success configure the domain's php.ini to load it,
 		# if needed
-		local $pconf = &phpini::get_config($inifile);
-		local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
-		local @exts = grep { $_->{'enabled'} } @allexts;
-		local ($got) = grep { $_->{'value'} eq "${mphp}.so" ||
+		my $pconf = &phpini::get_config($inifile);
+		my @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
+		my @exts = grep { $_->{'enabled'} } @allexts;
+		my ($got) = grep { $_->{'value'} eq "${mphp}.so" ||
 		                      $_->{'value'} eq $mphp } @exts;
 		if (!$got && &check_php_module($mphp, $phpver, $d) != 1) {
 			# Needs to be enabled
-			local $lref = &read_file_lines($inifile);
+			my $lref = &read_file_lines($inifile);
 			if (@exts) {
 				# After current extensions
 				splice(@$lref, $exts[$#exts]->{'line'}+1, 0,
@@ -1428,7 +1428,7 @@ foreach my $m (@mods) {
 
 	# If we are running via mod_php or fcgid, an Apache reload is needed
 	if ($mode eq "mod_php" || $mode eq "fcgid") {
-		local $p = &domain_has_website($d);
+		my $p = &domain_has_website($d);
 		if ($p eq "web") {
 			&register_post_action(\&restart_apache);
 			}
@@ -1454,10 +1454,10 @@ return 1;
 # of the install is written to STDOUT. Returns 1 if successful, 0 if not.
 sub setup_pear_modules
 {
-local ($d, $script, $ver, $phpver) = @_;
-local $modfunc = $script->{'pear_mods_func'};
+my ($d, $script, $ver, $phpver) = @_;
+my $modfunc = $script->{'pear_mods_func'};
 return 1 if (!defined(&$modfunc));
-local @mods = &$modfunc($d, $opts);
+my @mods = &$modfunc($d, $opts);
 return 1 if (!@mods);
 
 # Make sure we have the pear module
@@ -1470,8 +1470,8 @@ if (!&foreign_check("php-pear")) {
 
 # And that we have Pear for this PHP version
 &foreign_require("php-pear");
-local @cmds = &php_pear::get_pear_commands();
-local ($vercmd) = grep { $_->[1] == $phpver } @cmds;
+my @cmds = &php_pear::get_pear_commands();
+my ($vercmd) = grep { $_->[1] == $phpver } @cmds;
 if (!$vercmd) {
 	# No pear .. cannot do anything
 	&$first_print(&text('scripts_nopearcmd',
@@ -1481,12 +1481,12 @@ if (!$vercmd) {
 
 foreach my $m (@mods) {
 	next if (&check_pear_module($m, $phpver, $d) == 1);
-	local ($mname, $mver) = split(/\-/, $m);
+	my ($mname, $mver) = split(/\-/, $m);
 
 	# Install if needed
 	&$first_print(&text('scripts_needpear', "<tt>$mname</tt>"));
 	&foreign_require("php-pear");
-	local $err = &php_pear::install_pear_module($m, $phpver);
+	my $err = &php_pear::install_pear_module($m, $phpver);
 	if ($err) {
 		print $err;
 		&$second_print($text{'scripts_esoftwaremod'});
@@ -1512,9 +1512,9 @@ return 1;
 # At the moment, auto-install of modules is done only from APT or YUM.
 sub setup_perl_modules
 {
-local ($d, $script, $ver, $opts) = @_;
-local $modfunc = $script->{'perl_mods_func'};
-local $optmodfunc = $script->{'perl_opt_mods_func'};
+my ($d, $script, $ver, $opts) = @_;
+my $modfunc = $script->{'perl_mods_func'};
+my $optmodfunc = $script->{'perl_opt_mods_func'};
 return 1 if (!defined(&$modfunc) && !defined(&$optmodfunc));
 if (defined(&$modfunc)) {
 	push(@mods, &$modfunc($d, $ver, $opts));
@@ -1525,7 +1525,7 @@ if (defined(&$optmodfunc)) {
 	}
 
 # Check if the software module is installed and can do update
-local $canpkgs = 0;
+my $canpkgs = 0;
 if (&foreign_installed("software")) {
 	&foreign_require("software");
 	if (defined(&software::update_system_install)) {
@@ -1535,12 +1535,12 @@ if (&foreign_installed("software")) {
 
 foreach my $m (@mods) {
 	next if (&check_perl_module($m, $d) == 1);
-	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
-	local $pkg;
-	local $done = 0;
+	my $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
+	my $pkg;
+	my $done = 0;
 	if ($canpkgs) {
 		# Work out the package name
-		local $mp = $m;
+		my $mp = $m;
 		if ($software::config{'package_system'} eq 'rpm') {
 			# We can use RPM's tracking of perl dependencies
 			# to install the exact module.
@@ -1614,10 +1614,10 @@ return 1;
 # At the moment, auto-install of modules is done only from APT or YUM.
 sub setup_python_modules
 {
-local ($d, $script, $ver, $opts) = @_;
-local $modfunc = $script->{'python_mods_func'};
-local $optmodfunc = $script->{'python_opt_mods_func'};
-local (@mods, @optmods);
+my ($d, $script, $ver, $opts) = @_;
+my $modfunc = $script->{'python_mods_func'};
+my $optmodfunc = $script->{'python_opt_mods_func'};
+my (@mods, @optmods);
 if (defined(&$modfunc)) {
 	push(@mods, &$modfunc($d, $ver, $opts));
 	}
@@ -1628,7 +1628,7 @@ if (defined(&$optmodfunc)) {
 return 1 if (!@mods);
 
 # Check if the software module is installed and can do update
-local $canpkgs = 0;
+my $canpkgs = 0;
 if (&foreign_installed("software")) {
 	&foreign_require("software");
 	if (defined(&software::update_system_install)) {
@@ -1639,7 +1639,7 @@ my $python = &get_python_path($opts->{'pyver'});
 my $pyver = &get_python_version($python);
 foreach my $m (@mods) {
 	next if (&check_python_module($m, $d, $pyver) == 1);
-	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
+	my $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	&$first_print(&text($opt ? 'scripts_optpythonmod'
 				 : 'scripts_needpythonmod', "<tt>$m</tt>"));
 	if (!$canpkgs) {
@@ -1649,9 +1649,9 @@ foreach my $m (@mods) {
 		}
 
 	# Work out the package name
-	local @pkgs;
-	local $done = 0;
-	local $mp = $m;
+	my @pkgs;
+	my $done = 0;
+	my $mp = $m;
 	if ($software::config{'package_system'} eq 'debian') {
 		# For APT, the package name is python- followed
 		# by the lower-case module name, except for the svn module
@@ -1729,13 +1729,13 @@ foreach my $m (@mods) {
 		}
 
 	# Install the RPM, Debian or CSW package. If any work, then we are done
-	local $anyok;
+	my $anyok;
 	foreach my $pkg (@pkgs) {
 		&$first_print(&text('scripts_softwaremod', "<tt>$pkg</tt>"));
 		&$indent_print();
 		&software::update_system_install($pkg);
 		&$outdent_print();
-		local @pinfo = &software::package_info($pkg);
+		my @pinfo = &software::package_info($pkg);
 		if (@pinfo && $pinfo[0] eq $pkg) {
 			# Yep, it worked
 			&$second_print($text{'setup_done'});
@@ -1756,11 +1756,11 @@ return 1;
 # modifies 'path'. Returns an error message if the path is not valid
 sub validate_script_path
 {
-local ($opts, $script, $d) = @_;
+my ($opts, $script, $d) = @_;
 if (&indexof("horde", @{$script->{'uses'}}) >= 0) {
 	# Under Horde directory
-	local @scripts = &list_domain_scripts($d);
-	local ($horde) = grep { $_->{'name'} eq 'horde' } @scripts;
+	my @scripts = &list_domain_scripts($d);
+	my ($horde) = grep { $_->{'name'} eq 'horde' } @scripts;
 	$horde || return "Script uses Horde, but it is not installed";
 	$opts->{'path'} eq '/' && return "A path of / is not valid for Horde scripts";
 	$opts->{'db'} = $horde->{'opts'}->{'db'};
@@ -1769,13 +1769,13 @@ if (&indexof("horde", @{$script->{'uses'}}) >= 0) {
 	}
 elsif ($opts->{'path'} =~ /^\/cgi-bin/) {
 	# Under cgi directory
-	local $hdir = &cgi_bin_dir($d);
+	my $hdir = &cgi_bin_dir($d);
 	$opts->{'dir'} = $opts->{'path'} eq "/" ?
 				$hdir : $hdir.$opts->{'path'};
 	}
 else {
 	# Under HTML directory
-	local $hdir = &public_html_dir($d);
+	my $hdir = &public_html_dir($d);
 	$opts->{'dir'} = $opts->{'path'} eq "/" ?
 				$hdir : $hdir.$opts->{'path'};
 	}
@@ -1787,8 +1787,8 @@ return undef;
 # The path always ends with a /
 sub script_path_url
 {
-local ($d, $opts) = @_;
-local $pp = $opts->{'path'} eq '/' ? '' : $opts->{'path'};
+my ($d, $opts) = @_;
+my $pp = $opts->{'path'} eq '/' ? '' : $opts->{'path'};
 if ($pp !~ /\.(cgi|pl|php)$/i) {
 	$pp .= "/";
 	}
@@ -1799,21 +1799,21 @@ return &get_domain_url($d, 1).$pp;
 # Outputs HTML for editing script installer template options
 sub show_template_scripts
 {
-local ($tmpl) = @_;
-local $scripts = &list_template_scripts($tmpl);
-local $empty = { 'db' => '${DB}' };
-local @list = $scripts eq "none" ? ( $empty ) : ( @$scripts, $empty );
+my ($tmpl) = @_;
+my $scripts = &list_template_scripts($tmpl);
+my $empty = { 'db' => '${DB}' };
+my @list = $scripts eq "none" ? ( $empty ) : ( @$scripts, $empty );
 
 # Build field list and disablers
-local @sfields = map { ("name_".$_, "path_".$_,
+my @sfields = map { ("name_".$_, "path_".$_,
 			"version_".$_, "version_".$_."_def",
 			"db_def_".$_, "db_".$_, "dbtype_".$_) }
 		     (0..scalar(@list)-1);
-local $dis1 = &js_disable_inputs(\@sfields, [ ]);
-local $dis2 = &js_disable_inputs([ ], \@sfields);
+my $dis1 = &js_disable_inputs(\@sfields, [ ]);
+my $dis2 = &js_disable_inputs([ ], \@sfields);
 
 # None/default/listed selector
-local $stable = $text{'tscripts_what'}."\n";
+my $stable = $text{'tscripts_what'}."\n";
 $stable .= &ui_radio("def",
 	$scripts eq "none" ? 2 :
 	  @$scripts ? 0 :
@@ -1823,23 +1823,23 @@ $stable .= &ui_radio("def",
 	  [ 0, $text{'tscripts_below'}, "onClick='$dis2'" ] ]),"<p>\n";
 
 # Find scripts
-local @opts = ( );
+my @opts = ( );
 foreach $sname (&list_available_scripts()) {
 	$script = &get_script($sname);
 	push(@opts, [ $sname, $script->{'desc'} ]);
 	}
 @opts = sort { lc($a->[1]) cmp lc($b->[1]) } @opts;
-local @dbopts = ( );
+my @dbopts = ( );
 push(@dbopts, [ "mysql", $text{'databases_mysql'} ]) if ($config{'mysql'});
 push(@dbopts, [ "postgres", $text{'databases_postgres'} ]) if ($config{'postgres'});
 
 # Show table of scripts
-local $i = 0;
-local @table;
+my $i = 0;
+my @table;
 foreach $script (@list) {
 	$db_def = $script->{'db'} eq '${DB}' ? 1 :
                         $script->{'db'} ? 2 : 0;
-	local ($name, $ver) = split(/\s+/, $script->{'name'});
+	my ($name, $ver) = split(/\s+/, $script->{'name'});
 	push(@table, [
 		&ui_select("name_$i", $name,
 			   [ [ undef, "&nbsp;" ], @opts ]),
@@ -1881,9 +1881,9 @@ print &ui_table_row(undef, $stable, 2);
 # Updates script installer template options from %in
 sub parse_template_scripts
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
-local $scripts;
+my $scripts;
 if ($in{'def'} == 2) {
 	# None explicitly chosen
 	$scripts = "none";
@@ -1897,12 +1897,12 @@ else {
 	$scripts = [ ];
 	for($i=0; defined($name = $in{"name_$i"}); $i++) {
 		next if (!$name);
-		local $ver = $in{"version_${i}_def"} ? "latest"
+		my $ver = $in{"version_${i}_def"} ? "latest"
 						     : $in{"version_${i}"};
 		$ver =~ /^\S+$/ || &error(&text('tscripts_eversion', $i+1));
-		local $script = { 'id' => $i,
+		my $script = { 'id' => $i,
 			    	  'name' => $name." ".$ver };
-		local $path = $in{"path_$i"};
+		my $path = $in{"path_$i"};
 		$path =~ /^\/\S*$/ || &error(&text('tscripts_epath', $i+1));
 		$script->{'path'} = $path;
 		$script->{'dbtype'} = $in{"dbtype_$i"};
@@ -1929,28 +1929,28 @@ else {
 # (like cpg([0-9\.]+).zip), returns a list of version numbers found, newest 1st
 sub osdn_package_versions
 {
-local ($project, @res) = @_;
-local $subdir;
+my ($project, @res) = @_;
+my $subdir;
 if ($project =~ /^([^\/]+)(\/\S+)$/) {
 	$project = $1;
 	$subdir = $2;
 	}
-local ($alldata, $err);
+my ($alldata, $err);
 &http_download($osdn_website_host, $osdn_website_port,
 	       "/projects/$project/files".$subdir,
 	       \$alldata, \$err, undef, 0, undef, undef, undef, 0, 1);
 return ( ) if ($err);
 
 # Search for sub-directories
-local @data = ( $alldata );
-local $data = $alldata;
-local %donepath;
+my @data = ( $alldata );
+my $data = $alldata;
+my %donepath;
 while($data =~ /href="(\/projects\/$project\/files\Q$subdir\E\/[^: ]+)"(.*)/is) {
 	$data = $2;
-	local $spath = $1;
+	my $spath = $1;
 	next if ($donepath{$spath}++ || $spath =~ /\/stats\/timeline/ ||
 		 $spath =~ /\.\.$/ || $spath =~ /\/download$/);
-	local ($sdata, $err);
+	my ($sdata, $err);
 	&http_download($osdn_website_host, $osdn_website_port, $spath,
 		       \$sdata, \$err, undef, 0, undef, undef, undef, 0, 1);
 	push(@data, $sdata) if (!$err);
@@ -1958,10 +1958,10 @@ while($data =~ /href="(\/projects\/$project\/files\Q$subdir\E\/[^: ]+)"(.*)/is) 
 	}
 
 # Check them all for files
-local @vers;
+my @vers;
 foreach my $alldata (@data) {
 	foreach my $re (@res) {
-		local $data = $alldata;
+		my $data = $alldata;
 		while($data =~ /$re(.*)/is) {
 			push(@vers, $1);
 			$data = $2;
@@ -1976,8 +1976,8 @@ return @vers;
 # Returns 1 if the current user can install some version of a script
 sub can_script_version
 {
-local ($script, $ver) = @_;
-local ($allowmaster, $allowvers) = &get_script_master_permissions();
+my ($script, $ver) = @_;
+my ($allowmaster, $allowvers) = &get_script_master_permissions();
 if (&master_admin() && $allowvers) {
 	# No limits for master admin
 	return 1;
@@ -2012,7 +2012,7 @@ my $host = &get_domain_http_hostname($d);
 my $usessl = &domain_has_ssl($d);
 my $port = $usessl ? $d->{'web_sslport'} : $d->{'web_port'};
 
-local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
+my $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
 $gconfig{'http_proxy'} = '';			# to the IP explicitly
 $main::download_timed_out = undef;
 local $SIG{ALRM} = \&download_timeout;
@@ -2092,7 +2092,7 @@ my @headers;
 push(@headers, [ "Host", $host ]);
 push(@headers, [ "User-agent", "Webmin" ]);
 if ($user) {
-	local $auth = &encode_base64("$user:$pass");
+	my $auth = &encode_base64("$user:$pass");
 	$auth =~ tr/\r\n//d;
 	push(@headers, [ "Authorization", "Basic $auth" ]);
 	}
@@ -2109,7 +2109,7 @@ if (!$gotcookie) {
 $main::download_timed_out = undef;
 local $SIG{ALRM} = \&download_timeout;
 alarm($timeout || 60);
-local $h = &make_http_connection($ip, $port, $ssl, "GET", $page, \@headers,
+my $h = &make_http_connection($ip, $port, $ssl, "GET", $page, \@headers,
 			 undef, { 'host' => $host, 'nocheckhost' => 1 });
 alarm(0);
 $h = $main::download_timed_out if ($main::download_timed_out);
@@ -2592,11 +2592,11 @@ if ($callnow) {
 # Remove the cron job that runs some PHP command
 sub delete_script_php_cron
 {
-local ($d, $cmd) = @_;
+my ($d, $cmd) = @_;
 return 0 if (!&foreign_check("cron"));
 &foreign_require("cron");
-local @jobs = &cron::list_cron_jobs();
-local ($job) = grep { $_->{'user'} eq $d->{'user'} &&
+my @jobs = &cron::list_cron_jobs();
+my ($job) = grep { $_->{'user'} eq $d->{'user'} &&
 		      $_->{'command'} =~ /-f\s+\Q$cmd\E/ } @jobs;
 return 0 if (!$job);
 &cron::delete_cron_job($job);
@@ -3400,22 +3400,22 @@ return 0;
 # SymLinksifOwnerMatch
 sub fix_script_htaccess_files
 {
-local ($d, $dir, $findonly, $filename) = @_;
+my ($d, $dir, $findonly, $filename) = @_;
 $filename ||= ".htaccess";
-local $out = &run_as_domain_user($d, "find ".quotemeta($dir).
+my $out = &run_as_domain_user($d, "find ".quotemeta($dir).
 				     " -type f -name ".quotemeta($filename).
 				     " 2>/dev/null");
-local @fixed;
+my @fixed;
 foreach my $file (split(/\r?\n/, $out)) {
 	next if (!-r $file);
 	eval {
 		local $main::error_must_die = 1;
 		&lock_file($file) if (!$findonly);
-		local $lref = $findonly ?
+		my $lref = $findonly ?
 			&read_file_lines($file) :
 			&read_file_lines_as_domain_user($d, $file);
-		local $fixed = 0;
-		local $allowed = &get_allowed_options_list();
+		my $fixed = 0;
+		my $allowed = &get_allowed_options_list();
 		$allowed =~ s/^Options=//;
 		$allowed =~ s/,/ /g;
 		foreach my $l (@$lref) {

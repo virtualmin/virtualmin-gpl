@@ -87,7 +87,7 @@ if ($in{'confirm'}) {
 		&obtain_lock_cron($d);
 
 		# Check if we have PHP
-		local $phpver;
+		my $phpver;
 		if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 			($phpver, $phperr) = &setup_php_version(
 				$d, $script, $ver, $opts->{'path'});

@@ -148,10 +148,10 @@ foreach $f (&get_available_backup_features()) {
 		$text{'backup_feature_'.$f} || $text{'feature_'.$f},
 		&indexof($f, @schedfeats) >= 0,
 		"onClick='form.feature_all[1].checked = true'")."\n";
-	local $ofunc = "show_backup_$f";
-	local %opts = map { split(/=/, $_) }
+	my $ofunc = "show_backup_$f";
+	my %opts = map { split(/=/, $_) }
 			 split(/,/, $sched->{'backup_opts_'.$f});
-	local $ohtml;
+	my $ohtml;
 	if (defined(&$ofunc) && ($ohtml = &$ofunc(\%opts)) && $ohtml) {
 		$ftable .= "<table><tr><td>\n";
 		$ftable .= ("&nbsp;" x 5);
@@ -180,7 +180,7 @@ foreach my $f (&list_backup_plugins()) {
 		"onClick='form.feature_all[1].checked = true' ".
 		"data-feature-noall='$noall'", $dis)."\n";
 	if (&plugin_defined($f, "feature_backup_opts")) {
-		local %opts = map { split(/=/, $_) }
+		my %opts = map { split(/=/, $_) }
 				 split(/,/, $sched->{'backup_opts_'.$f});
 		$ftable .= &plugin_call($f, "feature_backup_opts",
 					\%opts, $dis);

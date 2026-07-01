@@ -84,7 +84,7 @@ while(1) {
 	($peerp, $peera) = unpack_sockaddr_in($acptaddr);
 
 	# Truncate the log if too big (10MB)
-	local @st = stat($daemon_logfile);
+	my @st = stat($daemon_logfile);
 	if ($st[7] > 10*1024*1024) {
 		close(STDERR);
 		open(STDERR, ">$daemon_logfile");
@@ -129,7 +129,7 @@ while(1) {
 		
 		# Maintain list of child processes
 		push(@childpids, $pid);
-		local $expid;
+		my $expid;
 		do {	$expid = waitpid(-1, WNOHANG);
 			} while($expid != 0 && $expid != -1);
 		@childpids = grep { kill(0, $_) } @childpids;
@@ -169,24 +169,24 @@ if (!$user) {
 # send_response(&domain, &user)
 sub send_response
 {
-local ($d, $user) = @_;
-local $now = localtime(time());
+my ($d, $user) = @_;
+my $now = localtime(time());
 if ($d && $user) {
 	# Get the user's quota
-	local $qmode = &has_home_quotas() ? "home" : undef;
-	local ($quota, $uquota);
+	my $qmode = &has_home_quotas() ? "home" : undef;
+	my ($quota, $uquota);
 	if ($qmode eq "home") {
 		($quota, $uquota) = ($user->{'quota'}, $user->{'uquota'});
 		}
-	local $quotadiff = $quota ? ($quota - $uquota) : undef;
+	my $quotadiff = $quota ? ($quota - $uquota) : undef;
 
 	# Get the domain's quota, in case it is less
-	local $qd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
-	local $dquota = $qd->{'quota'};
-	local $duquota;
+	my $qd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+	my $dquota = $qd->{'quota'};
+	my $duquota;
 	if ($dquota && &has_group_quotas()) {
 		($duquota) = &get_domain_quota($qd, 0);
-		local $dquotadiff = $dquota - $duquota;
+		my $dquotadiff = $dquota - $duquota;
 		if ($dquotadiff < $quotadiff) {
 			# Domain has less space free than user!
 			$quotadiff = $dquotadiff;
@@ -198,7 +198,7 @@ if ($d && $user) {
 		$quotadiff = undef;
 		}
 
-	local $client = &get_domain_spam_client($d);
+	my $client = &get_domain_spam_client($d);
 	print join("\t", $d->{'id'},
 			 $d->{'dom'},
 			 $d->{'spam'} && !$user->{'nospam'},

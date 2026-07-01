@@ -153,7 +153,7 @@ else {
 # Returns an error message if a required option is missing or invalid
 sub script_wordpress_check
 {
-local ($d, $ver, $opts, $upgrade) = @_;
+my ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 $opts->{'db'} || return "Missing database";
 if (-r "$opts->{'dir'}/wp-login.php") {
@@ -196,7 +196,7 @@ return ("unzip");
 # message, or 0 and an error
 sub script_wordpress_install
 {
-local ($d, $version, $opts, $files, $upgrade, $domuser, $dompass) = @_;
+my ($d, $version, $opts, $files, $upgrade, $domuser, $dompass) = @_;
 my ($out, $ex);
 if ($opts->{'newdb'} && !$upgrade) {
         my $err = create_script_database($d, $opts->{'db'});

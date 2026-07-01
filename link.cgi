@@ -87,9 +87,9 @@ close($fh);
 sub open_target_connection
 {
 my ($req, $method) = @_;
-local $oldproxy = $gconfig{'http_proxy'};
-local $con;
-local $httphost = $req->{'host'};
+my $oldproxy = $gconfig{'http_proxy'};
+my $con;
+my $httphost = $req->{'host'};
 $gconfig{'http_proxy'} = '';
 $con = &make_http_connection(
 	$req->{'ip'}, $req->{'port'}, $req->{'ssl'}, $method,

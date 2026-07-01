@@ -123,7 +123,7 @@ foreach my $u (@updates) {
 
 sub send_scriptwarn_email
 {
-local ($text, $emailto, $d) = @_;
+my ($text, $emailto, $d) = @_;
 if ($debug_mode) {
 	print STDERR "Sending to ",join(", ", @$emailto),"\n";
 	print STDERR "Sending from ",&get_global_from_address($d),"\n";

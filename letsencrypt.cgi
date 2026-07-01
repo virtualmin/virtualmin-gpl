@@ -260,7 +260,7 @@ else {
 
 		# Run the after command
 		&set_domain_envs($d, "SSL_DOMAIN");
-		local $merr = &made_changes();
+		my $merr = &made_changes();
 		&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
 			if (defined($merr));
 		&reset_domain_envs($d);

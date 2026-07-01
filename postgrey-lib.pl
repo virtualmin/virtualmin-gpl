@@ -100,8 +100,8 @@ return 0;
 sub install_postgrey_package
 {
 &foreign_require("software");
-local $pkg = &get_postgrey_package();
-local @inst = &software::update_system_install($pkg);
+my $pkg = &get_postgrey_package();
+my @inst = &software::update_system_install($pkg);
 return scalar(@inst) || !&check_postgrey();
 }
 
@@ -167,10 +167,10 @@ return undef;
 # Returns the port on which postgrey listens
 sub get_postgrey_port
 {
-local $args = &get_postgrey_args();
+my $args = &get_postgrey_args();
 if ($args =~ /--inet=(\S+)/) {
 	# TCP port
-	local $opts = $1;
+	my $opts = $1;
 	if ($opts =~ /^(\S+):(\d+)$/) {
 		return $2;
 		}
@@ -272,15 +272,15 @@ if (&get_postgrey_type() eq 'milter') {
 
 # Enable at boot
 &foreign_require("init");
-local $init = &get_postgrey_init();
-local $port = &get_postgrey_port();
+my $init = &get_postgrey_init();
+my $port = &get_postgrey_port();
 &$first_print($text{'postgrey_init'});
 if (&init::action_status($init) != 2) {
 	if (!$port) {
 		# Pick a random port now
 		$port = &allocate_random_port(60000);
 		}
-	local $postgrey = &has_command("postgrey");
+	my $postgrey = &has_command("postgrey");
 	&init::enable_at_boot(
 		$init,
 		'Start the Postgrey greylisting server',
@@ -296,7 +296,7 @@ else {
 # Start process
 &$first_print($text{'postgrey_proc'});
 if (!&find_byname("postgrey")) {
-	local ($ok, $out) = &init::start_action($init);
+	my ($ok, $out) = &init::start_action($init);
 	if (!$ok) {
 		&$second_print(&text('postgrey_procfailed',
 				     "<tt>".&html_escape($out)."</tt>"));
@@ -313,14 +313,14 @@ $port = &get_postgrey_port();	# In case we got it from the running
 # Configure Postfix and restart
 &$first_print($text{'postgrey_postfix'});
 &require_mail();
-local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
+my $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
 if ($rr =~ /check_policy_service\s+inet:\S+:\Q$port\E/ ||
     $rr =~ /check_policy_service\s+unix:\Q$port\E/) {
 	# Already OK
 	&$second_print($text{'postgrey_postfixalready'});
 	}
 else {
-	local $wantport = $port =~ /^\// ? "unix:$port"
+	my $wantport = $port =~ /^\// ? "unix:$port"
 					 : "inet:127.0.0.1:$port";
 	if ($rr =~ /(.*)check_policy_service\s+(inet|unix):[^, ]+(.*)/) {
 		# Wrong port?!
@@ -351,10 +351,10 @@ if (&get_postgrey_type() eq 'milter') {
 
 # Remove from Postfix configuration
 &$first_print($text{'postgrey_nopostfix'});
-local $port = &get_postgrey_port();
-local $init = &get_postgrey_init();
+my $port = &get_postgrey_port();
+my $init = &get_postgrey_init();
 &require_mail();
-local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
+my $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
 if ($rr =~ /^(.*)\s*check_policy_service\s+inet:\S+:\Q$port\E(.*)/ ||
     $rr =~ /^(.*)\s*check_policy_service\s+unix:\Q$port\E(.*)/) {
 	$rr = $1.$2;
@@ -368,10 +368,10 @@ else {
 
 # Kill the process
 &foreign_require("init");
-local $init = &get_postgrey_init();
+my $init = &get_postgrey_init();
 &$first_print($text{'postgrey_noproc'});
 if (&find_byname("postgrey")) {
-	local ($ok, $out) = &init::stop_action($init);
+	my ($ok, $out) = &init::stop_action($init);
 	if (!$ok) {
 		&$second_print(&text('postgrey_noprocfailed',
 				     "<tt>".&html_escape($out)."</tt>"));
@@ -399,8 +399,8 @@ else {
 # Find a socket that isn't currently in use
 sub allocate_random_port
 {
-local ($port) = @_;
-local $proto = getprotobyname('tcp');
+my ($port) = @_;
+my $proto = getprotobyname('tcp');
 if (!socket(RANDOMSOCK, PF_INET, SOCK_STREAM, $proto)) {
 	&error("socket failed : $!");
 	}
@@ -1286,12 +1286,12 @@ else {
 sub get_postgrey_data_file
 {
 return undef if (&get_postgrey_type() eq 'milter');
-local ($type) = @_;
-local $args = &get_postgrey_args();
+my ($type) = @_;
+my $args = &get_postgrey_args();
 if ($args =~ /--whitelist-\Q$type\E=(\S+)/) {
 	return $1;
 	}
-local $out = &backquote_command("postgrey -h 2>&1");
+my $out = &backquote_command("postgrey -h 2>&1");
 if ($out =~ /--whitelist-\Q$type\E=.*default:\s+(\S+)/) {
 	return $1;
 	}
@@ -1302,7 +1302,7 @@ return undef;
 # Returns a list of Postgrey configuration entries of some type, as an array ref
 sub list_postgrey_data
 {
-local ($type) = @_;
+my ($type) = @_;
 if (&get_postgrey_type() eq 'milter') {
 	if (!$postgrey_data_cache{$type}) {
 		$postgrey_data_cache{$type} =
@@ -1310,11 +1310,12 @@ if (&get_postgrey_type() eq 'milter') {
 		}
 	return $postgrey_data_cache{$type};
 	}
-local $file = &get_postgrey_data_file($type);
+my $file = &get_postgrey_data_file($type);
 return undef if (!$file);
 if (!$postgrey_data_cache{$type}) {
-	local ($_, @rv, @cmts);
-	local $lnum = 0;
+	local $_;
+	my (@rv, @cmts);
+	my $lnum = 0;
 	&open_readfile(POSTGREY, $file);
 	while(<POSTGREY>) {
 		s/\r|\n//g;
@@ -1378,15 +1379,15 @@ return undef;
 # Add an entry to a Postgrey whitelist file, and in-memory cache
 sub create_postgrey_data
 {
-local ($type, $data) = @_;
+my ($type, $data) = @_;
 if (&get_postgrey_type() eq 'milter') {
 	&create_postgrey_milter_data($type, $data);
 	return;
 	}
-local $file = &get_postgrey_data_file($type);
+my $file = &get_postgrey_data_file($type);
 $file || &error("Failed to find file for $type");
-local @newlines = &postgrey_data_lines($data);
-local $lref = &read_file_lines($file);
+my @newlines = &postgrey_data_lines($data);
+my $lref = &read_file_lines($file);
 if ($postgrey_data_cache{$type}) {
 	# Add to cache and set lines and index
 	$data->{'line'} = scalar(@$lref);
@@ -1403,17 +1404,17 @@ push(@$lref, @newlines);
 # Modify an entry in a Postgrey whitelist file
 sub modify_postgrey_data
 {
-local ($type, $data) = @_;
+my ($type, $data) = @_;
 if (&get_postgrey_type() eq 'milter') {
 	my $old = &list_postgrey_data($type)->[$data->{'index'}];
 	&modify_postgrey_milter_data($type, $old, $data);
 	return;
 	}
-local $file = &get_postgrey_data_file($type);
+my $file = &get_postgrey_data_file($type);
 $file || &error("Failed to find file for $type");
-local @newlines = &postgrey_data_lines($data);
-local $oldlines = $data->{'eline'} - $data->{'line'} + 1;
-local $lref = &read_file_lines($file);
+my @newlines = &postgrey_data_lines($data);
+my $oldlines = $data->{'eline'} - $data->{'line'} + 1;
+my $lref = &read_file_lines($file);
 splice(@$lref, $data->{'line'}, $oldlines, @newlines);
 $data->{'eline'} = $data->{'line'} + scalar(@newlines) - 1;
 if ($postgrey_data_cache{$type} && scalar(@newlines) != $oldlines) {
@@ -1432,15 +1433,15 @@ if ($postgrey_data_cache{$type} && scalar(@newlines) != $oldlines) {
 # Remove an entry from a Postgrey whitelist file, and in-memory cache
 sub delete_postgrey_data
 {
-local ($type, $data) = @_;
+my ($type, $data) = @_;
 if (&get_postgrey_type() eq 'milter') {
 	&delete_postgrey_milter_data($type, $data);
 	return;
 	}
-local $file = &get_postgrey_data_file($type);
+my $file = &get_postgrey_data_file($type);
 $file || &error("Failed to find file for $type");
-local $lref = &read_file_lines($file);
-local $oldlines = $data->{'eline'} - $data->{'line'} + 1;
+my $lref = &read_file_lines($file);
+my $oldlines = $data->{'eline'} - $data->{'line'} + 1;
 splice(@$lref, $data->{'line'}, $oldlines);
 if ($postgrey_data_cache{$type}) {
 	# Remove from cache and shift other lines and indexes down
@@ -1460,8 +1461,8 @@ if ($postgrey_data_cache{$type}) {
 
 sub postgrey_data_lines
 {
-local ($data) = @_;
-local @rv;
+my ($data) = @_;
+my @rv;
 push(@rv, map { "# $_" } @{$data->{'cmts'}});
 push(@rv, $data->{'re'} ? "/".$data->{'value'}."/" : $data->{'value'});
 return @rv;
@@ -1477,10 +1478,10 @@ if (&get_postgrey_type() eq 'milter') {
 	my ($ok, $out) = &init::restart_action(&get_postgrey_init());
 	return $ok ? 1 : 0;
 	}
-local $args = &get_postgrey_args();
-local $pid;
+my $args = &get_postgrey_args();
+my $pid;
 if ($args =~ /--pidfile=(\S+)/) {
-	local $pidfile = $1;
+	my $pidfile = $1;
 	$pid = &check_pid_file($pidfile);
 	}
 ($pid) = &find_byname("postgrey") if (!$pid);
@@ -1517,4 +1518,3 @@ $main::got_lock_postgrey-- if ($main::got_lock_postgrey);
 }
 
 1;
-

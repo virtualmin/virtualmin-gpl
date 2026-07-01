@@ -26,7 +26,7 @@ if (!$in{'readonly'}) {
 		$spf ||= &default_domain_spf($d);
 		$defspf = &default_domain_spf($d);
 		foreach $t ('a', 'mx', 'ip4', 'ip6', 'include') {
-			local @v = split(/\s+/, $in{'extra_'.$t});
+			my @v = split(/\s+/, $in{'extra_'.$t});
 			foreach my $v (@v) {
 				if ($a eq 'a' || $t eq 'mx' || $t eq 'include'){
 					# Must be a valid hostname

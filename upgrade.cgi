@@ -154,7 +154,7 @@ elsif ($itype eq "deb") {
 			# For the Virtualmin package, select pro
 			# version explicitly so that the GPL is
 			# replaced.
-			local ($ver) = grep { !/\.gpl/ }
+			my ($ver) = grep { !/\.gpl/ }
 				&apt_package_versions($p->{'name'});
                             push(@packages, $ver ? $p->{'name'}."=".$ver
 					     : $p->{'name'});
@@ -204,11 +204,11 @@ else {
 		&$first_print(&text('upgrade_mod', $mod, $ver));
 
 		# Check if we have a later version
-		local %minfo = &get_module_info($mod);
-		local %tinfo = &get_theme_info($mod);
-		local %info = %minfo ? %minfo : %tinfo;
-		local $current_ver = &round_hundred($info{'version'});
-		local $new_ver = &round_hundred($ver);
+		my %minfo = &get_module_info($mod);
+		my %tinfo = &get_theme_info($mod);
+		my %info = %minfo ? %minfo : %tinfo;
+		my $current_ver = &round_hundred($info{'version'});
+		my $new_ver = &round_hundred($ver);
 		if (%info) {
 			# Already installed .. but can we upgrade?
 			$can_upgrade = 0;
@@ -264,9 +264,9 @@ else {
 		&set_all_html_print();	# In case changed by postinstall
 		if (ref($irv)) {
 			# Worked!
-			local $dir = $irv->[1]->[0];
+			my $dir = $irv->[1]->[0];
 			$dir =~ s/^.*\///g;
-			local %tinfo = &get_theme_info($dir);
+			my %tinfo = &get_theme_info($dir);
 			&$second_print(&text(%tinfo ? 'upgrade_themeok' :
 						      'upgrade_modok', $irv->[0]->[0]));
 			}
@@ -332,8 +332,8 @@ else {
 
 sub apt_package_versions
 {
-local ($name) = @_;
-local @rv;
+my ($name) = @_;
+my @rv;
 open(OUT, "apt-cache show ".quotemeta($name)." |");
 while(<OUT>) {
 	if (/^Version:\s+(\S+)/) {
@@ -349,7 +349,7 @@ return sort { &compare_versions($b, $a) } @rv;
 # Also strips suffixes like .gpl.
 sub round_hundred
 {
-local ($v) = @_;
+my ($v) = @_;
 if ($v =~ /^(\d+)\.(\d\d)/) {
 	return "$1.$2";
 	}

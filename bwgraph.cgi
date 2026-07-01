@@ -235,7 +235,7 @@ if ($max) {
 		# Get bandwidth for relevant domains and sub-domains
 		foreach $d (@doms) {
 			foreach $dd ($d, &get_domain_by("parent", $d->{'id'})) {
-				local $bwinfo = &get_bandwidth($dd);
+				my $bwinfo = &get_bandwidth($dd);
 				push(@bands, $bwinfo);
 				}
 			}
@@ -258,9 +258,9 @@ if ($max) {
 			print "<tr>\n";
 			print "<td>",&make_date($i*24*60*60, 1),"</td>\n";
 			print "<td>";
-			local $usage = 0;
+			my $usage = 0;
 			foreach $f (@bandwidth_features) {
-				local $fusage = &usage_for_days($i, $i, $f,
+				my $fusage = &usage_for_days($i, $i, $f,
 								@bands);
 				$usage += $fusage;
 				if ($fusage) {
@@ -286,9 +286,9 @@ if ($max) {
 		$start_day = undef;
 		foreach $d (@doms) {
 			foreach $dd ($d, &get_domain_by("parent", $d->{'id'})) {
-				local $bwinfo = &get_bandwidth($dd);
+				my $bwinfo = &get_bandwidth($dd);
 				push(@bands, $bwinfo);
-				local $min = &minimum_day($bwinfo);
+				my $min = &minimum_day($bwinfo);
 				if ($min && (!defined($start_day) ||
 					     $min < $start_day)) {
 					$start_day = $min;
@@ -326,9 +326,9 @@ if ($max) {
 			print "<tr>\n";
 			print "<td>",strftime("%m/%Y", @tm),"</td>\n";
 			print "<td>";
-			local $usage = 0;
+			my $usage = 0;
 			foreach $f (@bandwidth_features) {
-				local $fusage = &usage_for_days(
+				my $fusage = &usage_for_days(
 					$istart[$i], $iend[$i], $f, @bands);
 				$usage += $fusage;
 				if ($fusage) {
@@ -351,7 +351,7 @@ if ($max) {
 		if ($donecolour{$f}) {
 			print "<img src=images/usage-$f.gif ",
 			      "width=10 height=10>\n";
-			local $label = $text{'bandwidth_'.$f} ||
+			my $label = $text{'bandwidth_'.$f} ||
 				       $text{'feature_'.$f};
 			print $label," (",
 			      &nice_size($donecolour{$f}),")\n";
@@ -368,8 +368,8 @@ if ($max) {
 		@mago = ( );
 		@tm = localtime(time());
 		for($i=0; $i<24; $i++) {
-			local $sday = &bandwidth_period_start($i);
-			local $eday = &bandwidth_period_end($i);
+			my $sday = &bandwidth_period_start($i);
+			my $eday = &bandwidth_period_end($i);
 			push(@mago, [ $i, &make_date($sday*24*60*60, 1)." - ".
 					  &make_date($eday*24*60*60, 1) ]);
 			}
@@ -407,10 +407,10 @@ push(@rets, "", $text{'index_return'});
 # usage_colours(&domain, &usage)
 sub usage_colours
 {
-local ($d, $usage) = @_;
-local ($f, $total);
+my ($d, $usage) = @_;
+my ($f, $total);
 foreach $f (@bandwidth_features) {
-	local $fusage = $usage->{$f}->{$d->{'id'}};
+	my $fusage = $usage->{$f}->{$d->{'id'}};
 	if ($fusage) {
 		printf "<img src=images/usage-$f.gif width=%s height=10>",
 			int($width*$fusage/$max)+($f eq "web" ? 1 : 0);
@@ -426,7 +426,7 @@ if (!$total) {
 # minimum_day(&bandwidth)
 sub minimum_day
 {
-local $min = undef;
+my $min = undef;
 foreach $k (keys %{$_[0]}) {
 	if ($k =~ /^(\S+)_(\d+)$/ && (!defined($min) || $2 < $min)) {
 		$min = $2;
@@ -438,9 +438,9 @@ return $min;
 # usage_for_days(start, end, feature, &bandwidth, ...)
 sub usage_for_days
 {
-local ($start, $end, $f, @bands) = @_;
-local $usage = 0;
-local ($i, $band);
+my ($start, $end, $f, @bands) = @_;
+my $usage = 0;
+my ($i, $band);
 for($i=int($start); $i<=int($end); $i++) {
 	foreach $band (@bands) {
 		$usage += $band->{$f.'_'.$i};

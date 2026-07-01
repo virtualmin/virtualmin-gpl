@@ -23,7 +23,7 @@ $in{'new1'} eq $in{'new2'} || error($text{'pass_enew2'});
 
 # Check password quality for virtual servers
 if ($d) {
-	local $fakeuser = { 'user' => $d->{'user'},
+	my $fakeuser = { 'user' => $d->{'user'},
 			    'plainpass' => $in{'new1'} };
 	$err = &check_password_restrictions($fakeuser, $d->{'webmin'});
 	&error($err) if ($err);
@@ -54,7 +54,7 @@ if ($d) {
 
 	# Call all save functions
 	foreach $f (@features) {
-		local $mfunc = "modify_$f";
+		my $mfunc = "modify_$f";
 		if ($config{$f} && $d->{$f}) {
 			&try_function($f, $mfunc, $d, $oldd);
 			}
@@ -73,7 +73,7 @@ if ($d) {
 	# Run the after command
 	&run_post_actions();
 	&set_domain_envs($d, "MODIFY_DOMAIN", undef, \%oldd);
-	local $merr = &made_changes();
+	my $merr = &made_changes();
 	&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
 		if (defined($merr));
 	&reset_domain_envs($d);

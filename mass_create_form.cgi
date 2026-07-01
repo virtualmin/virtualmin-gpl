@@ -91,7 +91,7 @@ foreach $f (@opt_features) {
 		next;
 		}
 
-	local $txt = $text{'form_'.$f};
+	my $txt = $text{'form_'.$f};
 	push(@grid_order, $f);
 	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1, undef,
 			  !$config{$f} && defined($config{$f}))." ".

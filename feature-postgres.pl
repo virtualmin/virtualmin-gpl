@@ -16,7 +16,7 @@ return &foreign_available("postgresql");
 sub check_depends_postgres
 {
 return undef if (!$_[0]->{'parent'});
-local $parent = &get_domain($_[0]->{'parent'});
+my $parent = &get_domain($_[0]->{'parent'});
 return $text{'setup_edeppostgres'} if (!$parent->{'postgres'});
 return undef;
 }
@@ -26,7 +26,7 @@ return undef;
 sub check_anti_depends_postgres
 {
 if (!$_[0]->{'postgres'}) {
-	local @subs = &get_domain_by("parent", $_[0]->{'id'});
+	my @subs = &get_domain_by("parent", $_[0]->{'id'});
 	foreach my $s (@subs) {
 		return $text{'setup_edeppostgressub'} if ($s->{'postgres'});
 		}
@@ -47,7 +47,7 @@ return if (!$config{'postgres'});
 # Un-lock the PostgreSQL config file for some domain
 sub release_lock_postgres
 {
-local ($d) = @_;
+my ($d) = @_;
 return if (!$config{'postgres'});
 &release_lock_anything($d);
 }
@@ -57,12 +57,12 @@ return if (!$config{'postgres'});
 # This can be overridden to allow a takeover of the DB.
 sub check_warnings_postgres
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 $d->{'postgres'} && (!$oldd || !$oldd->{'postgres'}) || return undef;
 if (!$d->{'provision_postgres'}) {
 	# DB clash
 	&require_postgres();
-	local @dblist = &list_dom_postgres_databases($d);
+	my @dblist = &list_dom_postgres_databases($d);
 	return &text('setup_epostgresdb', $d->{'db'})
 		if (&indexof($d->{'db'}, @dblist) >= 0);
 
@@ -91,8 +91,8 @@ return $s->{'data'}->[0] ? 1 : 0;
 # Returns 1 if some PostgreSQL user or database is used by another domain
 sub check_postgres_clash
 {
-local ($d, $field) = @_;
-local @doms = grep { $_->{'postgres'} && $_->{'id'} ne $d->{'id'} }
+my ($d, $field) = @_;
+my @doms = grep { $_->{'postgres'} && $_->{'id'} ne $d->{'id'} }
 		   &list_domains();
 
 # Check for DB clash
@@ -125,14 +125,14 @@ return undef;
 # Create a new PostgreSQL database and user
 sub setup_postgres
 {
-local ($d, $nodb) = @_;
-local $tmpl = &get_template($d->{'template'});
+my ($d, $nodb) = @_;
+my $tmpl = &get_template($d->{'template'});
 if (!$d->{'postgres_module'}) {
         # Use the default module for this system
         $d->{'postgres_module'} = &get_default_postgres_module();
 	}
 &require_postgres();
-local $user = $d->{'postgres_user'} = &postgres_user($d);
+my $user = $d->{'postgres_user'} = &postgres_user($d);
 
 if (!$d->{'parent'}) {
 	if ($d->{'postgres_module'} ne 'postgresql') {
@@ -142,14 +142,14 @@ if (!$d->{'parent'}) {
 	else {
 		&$first_print($text{'setup_postgresuser'});
 		}
-	local $pass = &postgres_pass($d);
+	my $pass = &postgres_pass($d);
 	if (&postgres_user_exists($d, $user)) {
 		&execute_dom_psql($d, undef,
 			"alter user ".&postgres_uquote($user).
 			" with password $pass");
 		}
 	else {
-		local $popts = &get_postgresql_user_flags();
+		my $popts = &get_postgresql_user_flags();
 		&execute_dom_psql($d, undef,
 			"create user ".&postgres_uquote($user).
 			" with password $pass $popts");
@@ -158,7 +158,7 @@ if (!$d->{'parent'}) {
 	}
 if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
 	# Create the initial DB
-	local $opts = &default_postgres_creation_opts($d);
+	my $opts = &default_postgres_creation_opts($d);
 	&create_postgres_database($d, $d->{'db'}, $opts);
 	}
 else {
@@ -178,7 +178,7 @@ return 1;
 # actually change the database - that must be done by modify_postgres.
 sub set_postgres_pass
 {
-local ($d, $pass) = @_;
+my ($d, $pass) = @_;
 if (defined($pass)) {
 	$d->{'postgres_pass'} = $pass;
 	}
@@ -197,7 +197,7 @@ if ($d->{'parent'}) {
 	return &postgres_pass($parent);
 	}
 &require_postgres();
-local $pass = defined($d->{'postgres_pass'}) ? $d->{'postgres_pass'}
+my $pass = defined($d->{'postgres_pass'}) ? $d->{'postgres_pass'}
 					     : $d->{'pass'};
 return !$noquote && &get_dom_remote_postgres_version($d) >= 7 ?
 	&postgres_quote($pass) : $pass;
@@ -207,7 +207,7 @@ return !$noquote && &get_dom_remote_postgres_version($d) >= 7 ?
 # Returns a string in '' quotes, with escaping if needed
 sub postgres_quote
 {
-local ($str) = @_;
+my ($str) = @_;
 $str =~ s/'/''/g;
 return "'$str'";
 }
@@ -216,7 +216,7 @@ return "'$str'";
 # Returns a string in "" quotes, with escaping if needed
 sub postgres_uquote
 {
-local ($str) = @_;
+my ($str) = @_;
 if ($str =~ /^[A-Za-z0-9\.\_\-]+$/) {
 	return "\"".$str."\"";
 	}
@@ -352,7 +352,7 @@ elsif ($user ne $olduser && $d->{'parent'}) {
 # Delete the PostgreSQL database and user
 sub delete_postgres
 {
-local ($d, $preserve) = @_;
+my ($d, $preserve) = @_;
 &require_postgres();
 my @dblist = &unique(split(/\s+/, $d->{'db_postgres'}));
 my $pghost = &get_database_host_postgres($d);
@@ -367,7 +367,7 @@ if ($preserve && &remote_postgres($d)) {
 
 # Delete all databases
 &delete_postgres_database($d, @dblist) if (@dblist);
-local $user = &postgres_user($d);
+my $user = &postgres_user($d);
 
 if (!$d->{'parent'}) {
 	# Delete the user
@@ -411,15 +411,15 @@ return 1;
 # Copy all databases and their contents to a new domain
 sub clone_postgres
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 &$first_print($text{'clone_postgres'});
 
 # Re-create each DB with a new name
-local %dbmap;
+my %dbmap;
 foreach my $db (&domain_databases($oldd, [ 'postgres' ])) {
-	local $newname = $db->{'name'};
-	local $newprefix = &fix_database_name($d->{'prefix'}, 'postgres');
-	local $oldprefix = &fix_database_name($oldd->{'prefix'}, 'postgres');
+	my $newname = $db->{'name'};
+	my $newprefix = &fix_database_name($d->{'prefix'}, 'postgres');
+	my $oldprefix = &fix_database_name($oldd->{'prefix'}, 'postgres');
 	if ($newname eq $oldd->{'db'}) {
 		$newname = $d->{'db'};
 		}
@@ -434,8 +434,8 @@ foreach my $db (&domain_databases($oldd, [ 'postgres' ])) {
 		}
 	&push_all_print();
 	&set_all_null_print();
-	local $opts = &get_postgres_creation_opts($oldd, $db->{'name'});
-	local $ok = &create_postgres_database($d, $newname, $opts);
+	my $opts = &get_postgres_creation_opts($oldd, $db->{'name'});
+	my $ok = &create_postgres_database($d, $newname, $opts);
 	&pop_all_print();
 	if (!$ok) {
 		&$second_print(&text('clone_postgrescreate', $newname));
@@ -452,9 +452,9 @@ if (%dbmap) {
 	&$first_print($text{'clone_postgrescopy'});
 	my $mod = &require_dom_postgres($d);
 	foreach my $db (&domain_databases($d, [ 'postgres' ])) {
-		local $oldname = $dbmap{$db->{'name'}};
-		local $temp = &transname();
-		local ($sameunix, $login) = &get_dom_postgres_creds($d);
+		my $oldname = $dbmap{$db->{'name'}};
+		my $temp = &transname();
+		my ($sameunix, $login) = &get_dom_postgres_creds($d);
 		if ($sameunix && (my @uinfo = getpwnam($login))) {
 			# Create empty file postgres user can write to
 			&open_tempfile(EMPTY, ">$temp", 0, 1);
@@ -462,7 +462,7 @@ if (%dbmap) {
 			&set_ownership_permissions($uinfo[2], $uinfo[3],
 						   undef, $temp);
 			}
-		local $err = &foreign_call($mod, "backup_database",
+		my $err = &foreign_call($mod, "backup_database",
 					   $oldname, $temp, 'c', undef);
 		if ($err) {
 			&$second_print(&text('clone_postgresbackup',
@@ -486,9 +486,9 @@ if (%dbmap) {
 # Make sure all PostgreSQL databases exist
 sub validate_postgres
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_postgres();
-local %got = map { $_, 1 } &list_dom_postgres_databases($d);
+my %got = map { $_, 1 } &list_dom_postgres_databases($d);
 foreach my $db (&domain_databases($d, [ "postgres" ])) {
 	$got{$db->{'name'}} || return &text('validate_epostgres',$db->{'name'});
 	}
@@ -654,7 +654,7 @@ if (!$d->{'wasmissing'}) {
 	}
 
 # Work out which databases are in backup
-local ($dbfile, @dbs);
+my ($dbfile, @dbs);
 foreach $dbfile (glob($file."_*")) {
 	if (-r $dbfile) {
 		$dbfile =~ /\Q$file\E_(.*)$/;
@@ -663,7 +663,7 @@ foreach $dbfile (glob($file."_*")) {
 	}
 
 # Finally, import the data
-local $db;
+my $db;
 foreach $db (@dbs) {
 	my $clash = &check_postgres_database_clash($d, $db->[0]);
 	if ($clash && $d->{'wasmissing'}) {
@@ -674,7 +674,7 @@ foreach $db (@dbs) {
 		my $ver = &get_dom_remote_postgres_version($d);
 		if (@tables && $ver >= 8.0) {
 			# But grant access to the DB to the domain owner
-			local $q = &postgres_uquote(&postgres_user($d));
+			my $q = &postgres_uquote(&postgres_user($d));
 			&execute_dom_psql(
 				$d, undef,
 				"alter database $db->[0] owner to $q");
@@ -703,7 +703,7 @@ foreach $db (@dbs) {
 		# file owned by him, and the parent directory world-accessible
 		&set_ownership_permissions($uinfo[2], $uinfo[3],
 					   undef, $db->[1]);
-		local $dir = $file;
+		my $dir = $file;
 		$dir =~ s/\/[^\/]+$//;
 		&set_ownership_permissions(undef, undef, 0711, $dir);
 		}
@@ -853,7 +853,7 @@ eval {
 		"revoke all on database ".&postgres_uquote($db).
 		" from public");
 	};
-local @dbs = split(/\s+/, $d->{'db_postgres'});
+my @dbs = split(/\s+/, $d->{'db_postgres'});
 push(@dbs, $db);
 $d->{'db_postgres'} = join(" ", @dbs);
 &release_lock_postgres($d);
@@ -930,7 +930,7 @@ else {
 # back to postgres
 sub revoke_postgres_database
 {
-local ($d, $dbname) = @_;
+my ($d, $dbname) = @_;
 &require_postgres();
 my $ver = &get_dom_remote_postgres_version($d);
 if ($ver && &postgres_user_exists($d, "postgres")) {
@@ -944,7 +944,7 @@ if ($ver && &postgres_user_exists($d, "postgres")) {
 # Returns a list of PostgreSQL users and passwords who can access some database
 sub list_all_postgres_users
 {
-local ($d, $db) = @_;
+my ($d, $db) = @_;
 return ( );	# XXX not possible
 }
 
@@ -952,7 +952,7 @@ return ( );	# XXX not possible
 # Returns a list of all PostgreSQL users
 sub list_postgres_database_users
 {
-local ($d, $db) = @_;
+my ($d, $db) = @_;
 return ( );	# XXX not possible
 }
 
@@ -995,11 +995,11 @@ return $pgconfig{'port'} || 5432;
 sub sysinfo_postgres
 {
 &require_postgres();
-local @rv;
+my @rv;
 eval {
 	# Protect against DBI errors
 	local $main::error_must_die = 1;
-	local $ver = &postgresql::get_postgresql_version();
+	my $ver = &postgresql::get_postgresql_version();
 	@rv = ( [ $text{'sysinfo_postgresql'}, $ver ] );
 	};
 return @rv;
@@ -1007,13 +1007,13 @@ return @rv;
 
 sub startstop_postgres
 {
-local ($typestatus) = @_;
+my ($typestatus) = @_;
 &require_postgres();
 return ( ) if (!&postgresql::is_postgresql_local());
-local $r = defined($typestatus->{'postgresql'}) ?
+my $r = defined($typestatus->{'postgresql'}) ?
                 $typestatus->{'postgresql'} == 1 :
 		&postgresql::is_postgresql_running();
-local @links = ( { 'link' => '/postgresql/',
+my @links = ( { 'link' => '/postgresql/',
 		   'desc' => $text{'index_pgmanage'},
 		   'manage' => 1 } );
 if ($r == 1) {
@@ -1039,7 +1039,7 @@ else {
 sub stop_service_postgres
 {
 &require_postgres();
-local $rv = &postgresql::stop_postgresql();
+my $rv = &postgresql::stop_postgresql();
 sleep(5);
 return $rv;
 }
@@ -1055,7 +1055,7 @@ return &postgresql::start_postgresql();
 # on failure
 sub check_postgres_login
 {
-local ($d, $dbname, $dbuser, $dbpass) = @_;
+my ($d, $dbname, $dbuser, $dbpass) = @_;
 &require_postgres();
 my $mod = &require_dom_postgres($d);
 my @defcreds = &get_dom_postgres_creds($d);
@@ -1064,7 +1064,7 @@ eval {
 	local $main::error_must_die = 1;
 	&execute_dom_psql($d, $dbname, "select version()");
 	};
-local $err = $@;
+my $err = $@;
 &foreign_call($mod, "set_login_pass", @defcreds);
 if ($err) {
 	$err =~ s/\s+at\s+.*\sline//g;
@@ -1096,8 +1096,8 @@ if ($ver >= 7.4) {
 # for passing to create_postgres_database
 sub creation_parse_postgres
 {
-local ($d, $in) = @_;
-local $opts = { 'encoding' => $in->{'postgres_encoding'} };
+my ($d, $in) = @_;
+my $opts = { 'encoding' => $in->{'postgres_encoding'} };
 return $opts;
 }
 
@@ -1111,7 +1111,7 @@ if (!scalar(@postgres_encodings_cache)) {
 	&open_readfile(ENCS, "$module_root_directory/postgres-encodings");
 	while(<ENCS>) {
 		s/\r|\n//g;
-		local @w = split(/\t/, $_);
+		my @w = split(/\t/, $_);
 		if ($w[2] !~ /\Q$w[0]\E/i) {
 			$w[2] .= " ($w[0])";
 			}
@@ -1128,7 +1128,7 @@ return @postgres_encodings_cache;
 # Outputs HTML for editing PostgreSQL related template options
 sub show_template_postgres
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 &require_postgres();
 
 # Default encoding
@@ -1145,7 +1145,7 @@ print &ui_table_row(&hlink($text{'tmpl_postgres_encoding'},
 # Updates PostgreSQL related template options from %in
 sub parse_template_postgres
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 &require_postgres();
 $tmpl->{'postgres_encoding'} = $in{'postgres_encoding'};
 }
@@ -1154,9 +1154,9 @@ $tmpl->{'postgres_encoding'} = $in{'postgres_encoding'};
 # Returns default options for a new PostgreSQL DB in some domain
 sub default_postgres_creation_opts
 {
-local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
-local %opts;
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my %opts;
 if ($tmpl->{'postgres_encoding'} &&
     $tmpl->{'postgres_encoding'} ne 'none') {
 	$opts{'encoding'} = $tmpl->{'postgres_encoding'};
@@ -1221,7 +1221,7 @@ return 1;
 # Returns true if the domain's PostgreSQL DB is on a remote system
 sub remote_postgres
 {
-local ($d) = @_;
+my ($d) = @_;
 my $host = &get_database_host_postgres($d);
 return $host eq "localhost" ? undef : $host;
 }

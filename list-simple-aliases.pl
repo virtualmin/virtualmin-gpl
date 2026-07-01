@@ -30,7 +30,7 @@ if (!$module_name) {
 # Parse command-line args
 &parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		push(@dnames, shift(@ARGV));
 		}
@@ -119,7 +119,7 @@ foreach $d (@doms) {
 
 sub nice_from
 {
-local $f = $_[0];
+my $f = $_[0];
 $f =~ s/\@$domain$//;
 return $f eq "%1" || !$f ? "*" : $f;
 }

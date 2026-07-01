@@ -18,7 +18,7 @@ else {
 		next if (!$in{"shell_$i"});
 		-r $in{"shell_$i"} || &error(&text('newshells_eshell', $i+1));
 		$in{"desc_$i"} =~ /\S/ || &error(&text('newshells_edesc',$i+1));
-		local %shell = ( 'shell' => $in{"shell_$i"},
+		my %shell = ( 'shell' => $in{"shell_$i"},
 				 'desc' => $in{"desc_$i"},
 				 'owner' => $in{"owner_$i"},
 				 'mailbox' => $in{"mailbox_$i"},

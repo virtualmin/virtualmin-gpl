@@ -117,10 +117,10 @@ foreach $f (&get_available_backup_features(!$safe_backup)) {
 		$text{'backup_feature_'.$f} || $text{'feature_'.$f},
 		$sched->{'feature_'.$f},
 		"onClick='form.feature_all[1].checked = true'");
-	local $ofunc = "show_restore_$f";
-	local %opts = map { split(/=/, $_) }
+	my $ofunc = "show_restore_$f";
+	my %opts = map { split(/=/, $_) }
 			split(/,/, $sched->{'opts_'.$f});
-	local $ohtml;
+	my $ohtml;
 	if (defined(&$ofunc) && ($ohtml = &$ofunc(\%opts)) && $ohtml) {
 		$ftable .= "<table><tr><td>\n";
 		$ftable .= ("&nbsp;" x 5);

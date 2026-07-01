@@ -34,7 +34,7 @@ if (!$module_name) {
 
 # Parse args
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--serial") {
 		$serial = shift(@ARGV);
 		}

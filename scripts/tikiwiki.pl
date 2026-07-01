@@ -38,7 +38,7 @@ return "Wiki";
 
 sub script_tikiwiki_php_vers
 {
-local ($d, $ver) = @_;
+my ($d, $ver) = @_;
 if (&compare_versions($ver, "27") >= 0) {
 	return 8.1;
 	}
@@ -59,7 +59,7 @@ return ("mysql");
 # Returns the PHP version to use for this script, or undef if it is not supported
 sub script_tikiwiki_php_fullver
 {
-local ($d, $ver, $sinfo) = @_;
+my ($d, $ver, $sinfo) = @_;
 return &compare_versions($ver, 17) <= 0 ? undef :
        &compare_versions($ver, 22) <= 0 ? "7.2" :
        &compare_versions($ver, 25) <= 0 ? "7.4" : "8.1";
@@ -79,20 +79,20 @@ return ( [ 'memory_limit', '128M', '+' ] );
 # Returns HTML for table rows for options for installing TikiWiki
 sub script_tikiwiki_params
 {
-local ($d, $ver, $upgrade) = @_;
-local $rv;
-local $hdir = &public_html_dir($d, 1);
+my ($d, $ver, $upgrade) = @_;
+my $rv;
+my $hdir = &public_html_dir($d, 1);
 if ($upgrade) {
 	# Options are fixed when upgrading
-	local ($dbtype, $dbname) = split(/_/, $upgrade->{'opts'}->{'db'}, 2);
+	my ($dbtype, $dbname) = split(/_/, $upgrade->{'opts'}->{'db'}, 2);
 	$rv .= &ui_table_row("Database for TikiWiki tables", $dbname);
-	local $dir = $upgrade->{'opts'}->{'dir'};
+	my $dir = $upgrade->{'opts'}->{'dir'};
 	$dir =~ s/^$d->{'home'}\///;
 	$rv .= &ui_table_row("Install directory", $dir);
 	}
 else {
 	# Show editable install options
-	local @dbs = &domain_databases($d, [ "mysql" ]);
+	my @dbs = &domain_databases($d, [ "mysql" ]);
 	$rv .= &ui_table_row("Database for TikiWiki tables",
 		     &ui_database_select("db", undef, \@dbs, $d, "tikiwiki"));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
@@ -107,17 +107,17 @@ return $rv;
 # Returns either a hash ref of parsed options, or an error string
 sub script_tikiwiki_parse
 {
-local ($d, $ver, $in, $upgrade) = @_;
+my ($d, $ver, $in, $upgrade) = @_;
 if ($upgrade) {
 	# Options are always the same
 	return $upgrade->{'opts'};
 	}
 else {
-	local $hdir = &public_html_dir($d, 0);
+	my $hdir = &public_html_dir($d, 0);
 	$in{'dir_def'} || $in{'dir'} =~ /\S/ && $in{'dir'} !~ /\.\./ ||
 		return "Missing or invalid installation directory";
-	local $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
-	local ($newdb) = ($in->{'db'} =~ s/^\*//);
+	my $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
+	my ($newdb) = ($in->{'db'} =~ s/^\*//);
 	my $password = &virtual_server::random_password(8);
 	return { 'db' => $in->{'db'},
 		 'newdb' => $newdb,
@@ -132,13 +132,13 @@ else {
 # Returns an error message if a required option is missing or invalid
 sub script_tikiwiki_check
 {
-local ($d, $ver, $opts, $upgrade) = @_;
+my ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 if (-r "$opts->{'dir'}/tiki-install.php") {
 	return "TikiWiki appears to be already installed in the selected directory";
 	}
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local $clash = &find_database_table($dbtype, $dbname, "tiki_.*");
+my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+my $clash = &find_database_table($dbtype, $dbname, "tiki_.*");
 $clash && return "TikiWiki appears to be already using the selected database (table $clash)";
 return undef;
 }
@@ -148,8 +148,8 @@ return undef;
 # containing a name, filename and URL
 sub script_tikiwiki_files
 {
-local ($d, $ver, $opts, $upgrade) = @_;
-local @files = ( { 'name' => "source",
+my ($d, $ver, $opts, $upgrade) = @_;
+my @files = ( { 'name' => "source",
 	   'file' => "tikiwiki-$ver.zip",
 	   'url' => "http://osdn.dl.sourceforge.net/sourceforge/tikiwiki/tiki-$ver.zip" } );
 return @files;
@@ -165,26 +165,26 @@ return ("unzip");
 # message, or 0 and an error
 sub script_tikiwiki_install
 {
-local ($d, $version, $opts, $files, $upgrade) = @_;
-local ($out, $ex);
+my ($d, $version, $opts, $files, $upgrade) = @_;
+my ($out, $ex);
 if ($opts->{'newdb'} && !$upgrade) {
-	local $dbopts = { 'charset' => 'utf8' };
-        local $err = &create_script_database($d, $opts->{'db'}, $dbopts);
+	my $dbopts = { 'charset' => 'utf8' };
+        my $err = &create_script_database($d, $opts->{'db'}, $dbopts);
         return (0, "Database creation failed : $err") if ($err);
         }
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local $dbuser = &mysql_user($d);
-local $dbpass = &mysql_pass($d);
-local $dbhost = &get_database_host($dbtype, $d);
-local $dberr = &check_script_db_connection($d, $dbtype, $dbname, $dbuser, $dbpass);
+my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+my $dbuser = &mysql_user($d);
+my $dbpass = &mysql_pass($d);
+my $dbhost = &get_database_host($dbtype, $d);
+my $dberr = &check_script_db_connection($d, $dbtype, $dbname, $dbuser, $dbpass);
 return (0, "Database connection failed : $dberr") if ($dberr);
 
 # Extract tar file to temp dir and copy to target
-local $temp = &transname();
-local $err = &extract_script_archive($files->{'source'}, $temp, $d,
+my $temp = &transname();
+my $err = &extract_script_archive($files->{'source'}, $temp, $d,
                                      $opts->{'dir'}, "tiki-$ver");
 $err && return (0, "Failed to extract source : $err");
-local $cfile = "$opts->{'dir'}/db/local.php";
+my $cfile = "$opts->{'dir'}/db/local.php";
 my $post_install  = $opts->{'install'} == 'y';
 if (!$upgrade) {
 	# Create the config file
@@ -220,9 +220,9 @@ if (! $post_install && !$upgrade) {
 	$password = "";
 }
 
-local $url = &script_path_url($d, $opts);
-local $adminurl = $url.($post_install ? "" : "tiki-install.php");
-local $rp = $opts->{'dir'};
+my $url = &script_path_url($d, $opts);
+my $adminurl = $url.($post_install ? "" : "tiki-install.php");
+my $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
 if ($upgrade) {
 	return (1, "Initial TikiWiki upgrade complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to complete the upgrade process.", "Under $rp using $dbtype database $dbname", $url, "admin", "$password");
@@ -237,14 +237,14 @@ else {
 # Returns 1 on success and a message, or 0 on failure and an error
 sub script_tikiwiki_uninstall
 {
-local ($d, $version, $opts) = @_;
+my ($d, $version, $opts) = @_;
 
 # Remove phpbb tables from the database
 &cleanup_script_database($d, $opts->{'db'},
 			 "(tiki_|galaxia_|messu_|sessions|users_|metrics_)");
 
 # Remove the contents of the target directory
-local $derr = &delete_script_install_directory($d, $opts);
+my $derr = &delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
 
 # Take out the DB
@@ -287,8 +287,8 @@ return $db_conn_desc;
 # a newer one. Otherwise returns undef.
 sub script_tikiwiki_check_latest
 {
-local ($ver) = @_;
-local @vers;
+my ($ver) = @_;
+my @vers;
 if ($ver >= 29) {
 	@vers = &osdn_package_versions("tikiwiki/Tiki_29.x_Bellatrix",
 				       "tiki-(29\.[0-9\\.]+)\\.zip");
@@ -334,7 +334,7 @@ return 'http://tiki.org/';
 # setup instance configuration after an fresh installation or an upgrade.
 sub tikiwiki_postinstallation
 {
-local ($d, $upgrade, $opts) = @_;
+my ($d, $upgrade, $opts) = @_;
 my $dom_php_bin = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
 $dom_php_bin || return (0, "Could not find PHP CLI command");
 my $cmd_prefix = "$dom_php_bin $opts->{'dir'}/console.php";

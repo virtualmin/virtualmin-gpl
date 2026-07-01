@@ -83,11 +83,11 @@ else {
 	@hclash = ( );
 	foreach $user (@dusers) {
 		if (!$user->{'nomailfile'} && !&mail_under_home()) {
-			local ($mailsz) = &mail_file_size($user);
+			my ($mailsz) = &mail_file_size($user);
 			$total += $mailsz;
 			}
 		if (!$user->{'nocreatehome'} && $user->{'home'}) {
-			local $homesz = &disk_usage_kb($user->{'home'});
+			my $homesz = &disk_usage_kb($user->{'home'});
 			$total += $homesz*1024;
 			}
 

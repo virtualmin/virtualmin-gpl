@@ -37,7 +37,7 @@ $owner = 1;
 $deleted = 0;
 &parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--deleted") {
 		$deleted = 1;
 		}

@@ -177,7 +177,7 @@ foreach $d (&list_domains()) {
 		foreach $lm (@learnm) {
 			print STDERR "$d->{'dom'}: $user->{'user'}: subject=",
 				   "$lm->{'header'}->{'subject'}\n" if ($debug);
-			local $cmd = $m->{'spamtrap'} ? "$salearn --spam"
+			my $cmd = $m->{'spamtrap'} ? "$salearn --spam"
 						      : "$salearn --ham";
 			$cmd = &command_as_user($user->{'user'}, 0, $cmd);
 			$temp = &transname();
@@ -249,7 +249,7 @@ foreach $d (&list_domains()) {
 # find_user_by_email(email, &users, &aliases)
 sub find_user_by_email
 {
-local ($e, $users, $aliasdoms) = @_;
+my ($e, $users, $aliasdoms) = @_;
 $e = lc($e);
 foreach my $u (@$users) {
 	foreach my $ee ($u->{'email'}, @{$u->{'extraemail'}}) {
@@ -258,7 +258,7 @@ foreach my $u (@$users) {
 			return $u;
 			}
 		# Check for same email address in alias domain
-		local ($mb, $dname) = split(/\@/, $ee);
+		my ($mb, $dname) = split(/\@/, $ee);
 		foreach my $ad (@aliasdoms) {
 			if ($e eq $mb."\@".lc($ad->{'dom'})) {
 				return $u;

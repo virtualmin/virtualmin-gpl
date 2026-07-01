@@ -15,7 +15,7 @@ $mode = 'sched';
 $id = 1;
 $backup_debug = 0;
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--id") {
 		$id = shift(@ARGV);
 		$id || &usage("Missing backup schedule ID");
@@ -60,7 +60,7 @@ elsif ($sched->{'all'} == 2) {
 else {
 	# Selected domains
 	foreach $d (split(/\s+/, $sched->{'doms'})) {
-		local $dinfo = &get_domain($d);
+		my $dinfo = &get_domain($d);
 		if ($dinfo) {
 			push(@doms, $dinfo);
 			if (!$dinfo->{'parent'} && $sched->{'parent'}) {
@@ -343,7 +343,7 @@ if ($sched->{'email_doms'} && $has_mailboxes &&
 # Override print functions to capture output
 sub first_save_print
 {
-local @msg = map { &html_tags_to_text(&entities_to_ascii($_)) } @_;
+my @msg = map { &html_tags_to_text(&entities_to_ascii($_)) } @_;
 $output .= $indent_text.join("", @msg)."\n";
 $domain_output{$current_id} .= $indent_text.join("", @msg)."\n"
 	if ($current_id);
@@ -351,7 +351,7 @@ print $indent_text.join("", @msg)."\n" if ($backup_debug);
 }
 sub second_save_print
 {
-local @msg = map { &html_tags_to_text(&entities_to_ascii($_)) } @_;
+my @msg = map { &html_tags_to_text(&entities_to_ascii($_)) } @_;
 $output .= $indent_text.join("", @msg)."\n\n";
 $domain_output{$current_id} .= $indent_text.join("", @msg)."\n\n"
 	if ($current_id);
@@ -369,7 +369,7 @@ $indent_text = substr($indent_text, 4);
 # Called during the backup process for each domain
 sub backup_cbfunc
 {
-local ($d, $step, $info) = @_;
+my ($d, $step, $info) = @_;
 if ($step == 0) {
 	$current_id = $d->{'id'};
 	}

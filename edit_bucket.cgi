@@ -171,9 +171,9 @@ else {
 # Returns HTML for selecting a day or date policy
 sub days_date_field
 {
-local ($name, $obj) = @_;
-local $mode = $obj->{'Days'} ? 1 : $obj->{'Date'} ? 2 : 0;
-local ($y, $m, $d) = $obj->{'Date'} =~ /^(\d+)\-(\d+)\-(\d+)/ ?
+my ($name, $obj) = @_;
+my $mode = $obj->{'Days'} ? 1 : $obj->{'Date'} ? 2 : 0;
+my ($y, $m, $d) = $obj->{'Date'} =~ /^(\d+)\-(\d+)\-(\d+)/ ?
 			($1, $2, $3) : ( );
 return &ui_radio($name, $mode,
 	[ [ 0, $text{'bucket_lnever'}."<br>" ],

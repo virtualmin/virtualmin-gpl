@@ -47,7 +47,7 @@ $server = "localhost";
 $from = "nobody\@virtualmin.com";
 $auth = "Plain";
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--server") {
 		$server = shift(@ARGV);
 		}
@@ -137,15 +137,15 @@ eval {
 						'user' => $user,
 						'pass' => $pass } );
 		&error("Failed to create Authen::SASL object") if (!$sasl);
-		local $conn = $sasl->client_new("smtp", &get_system_hostname());
-		local $arv = &mailboxes::smtp_command($h, "auth $auth\r\n", 1);
+		my $conn = $sasl->client_new("smtp", &get_system_hostname());
+		my $arv = &mailboxes::smtp_command($h, "auth $auth\r\n", 1);
 		if ($arv =~ /^(334)(\-\S+)?\s+(.*)/) {
 			# Server says to go ahead
 			$extra = $3;
-			local $initial = $conn->client_start();
-			local $auth_ok;
+			my $initial = $conn->client_start();
+			my $auth_ok;
 			if ($initial) {
-				local $enc = &encode_base64($initial);
+				my $enc = &encode_base64($initial);
 				$enc =~ s/\r|\n//g;
 				$arv = &mailboxes::smtp_command($h, "$enc\r\n", 1);
 				if ($arv =~ /^(\d+)(\-\S+)?\s+(.*)/) {
@@ -159,9 +159,9 @@ eval {
 				$extra = $3;
 				}
 			while(!$auth_ok) {
-				local $message = &decode_base64($extra);
-				local $return = $conn->client_step($message);
-				local $enc = &encode_base64($return);
+				my $message = &decode_base64($extra);
+				my $return = $conn->client_step($message);
+				my $enc = &encode_base64($return);
 				$enc =~ s/\r|\n//g;
 				$arv = &mailboxes::smtp_command($h, "$enc\r\n", 1);
 				if ($arv =~ /^(\d+)(\-\S+)?\s+(.*)/) {

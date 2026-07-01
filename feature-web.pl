@@ -495,7 +495,7 @@ if ($mode eq "fpm") {
 	}
 
 # Update session dir and upload path in php.ini files
-local @fixes = (
+my @fixes = (
 	[ "session.save_path", $oldd->{'home'}, $d->{'home'}, 1 ],
 	[ "upload_tmp_dir", $oldd->{'home'}, $d->{'home'}, 1 ],
 	);
@@ -1059,7 +1059,7 @@ if ($d->{'alias'} && $d->{'alias_mode'} == 1) {
 &require_apache();
 &obtain_lock_web($d);
 my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-local $ok;
+my $ok;
 if ($virt) {
 	&create_disable_directives($virt, $vconf, $d);
 	&$second_print($text{'setup_done'});
@@ -1306,7 +1306,7 @@ my ($dname, $port, $errorlog) = @_;
 &require_apache();
 my ($virt, $vconf) = &get_apache_virtual($dname, $port);
 if ($virt) {
-	local $log;
+	my $log;
 	if ($errorlog) {
 		# Looking for error log
 		$log = &apache::find_directive("ErrorLog", $vconf);
@@ -1412,7 +1412,7 @@ foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
 					        lc($sn) eq "www.$dname");
 	foreach my $n (&apache::find_directive_struct(
 			"ServerAlias", $v->{'members'})) {
-		local @lcw = map { lc($_) } @{$n->{'words'}};
+		my @lcw = map { lc($_) } @{$n->{'words'}};
 		return ($v, $v->{'members'}, $conf)
 			if (&indexof($dname, @lcw) >= 0 ||
 			    &indexof("www.$dname", @lcw) >= 0);
@@ -2153,15 +2153,15 @@ return undef;	# won't happen!
 sub sysinfo_web
 {
 &require_apache();
-local $ver = $apache::httpd_modules{'core'};
+my $ver = $apache::httpd_modules{'core'};
 $ver =~ s/^(\d+)\.(\d)(\d+)$/$1.$2.$3/;
-local @rv = ( [ $text{'sysinfo_apache'}, $ver ] );
+my @rv = ( [ $text{'sysinfo_apache'}, $ver ] );
 if (defined(&list_available_php_versions)) {
-	local @avail = &list_available_php_versions();
-	local @vers;
+	my @avail = &list_available_php_versions();
+	my @vers;
 	foreach my $a (grep { $_->[1] } @avail) {
 		&clean_environment();
-		local $out = &backquote_command(quotemeta($a->[1]).
+		my $out = &backquote_command(quotemeta($a->[1]).
 						" -v 2>&1 </dev/null");
 		&reset_environment();
 		if ($out =~ /PHP\s+([0-9\.]+)/) {
@@ -2186,15 +2186,15 @@ return @rv;
 # Returns 1 if there is a NameVirtualHost directive for *, 0 if not.
 sub add_name_virtual
 {
-local ($d, $conf, $web_port, $no_star_match, $ip) = @_;
+my ($d, $conf, $web_port, $no_star_match, $ip) = @_;
 &require_apache();
 if ($apache::httpd_modules{'core'} >= 2.4) {
 	# Apache 2.4 doesn't need NameVirtualHost any more.
 	# However, check if all existing <VirtualHost>s uses *, which means that
 	# subsequent ones should as well. Otherwise, they can just use IPs.
-	local @virt = &apache::find_directive_struct("VirtualHost", $conf);
-	local $starcount = 0;
-	local $ipcount = 0;
+	my @virt = &apache::find_directive_struct("VirtualHost", $conf);
+	my $starcount = 0;
+	my $ipcount = 0;
 	foreach my $v (@virt) {
 		foreach my $w (@{$v->{'words'}}) {
 			if ($w =~ /^(\*|_DEFAULT_)(:(\d+))?/i &&
@@ -2215,13 +2215,13 @@ if ($apache::httpd_modules{'core'} >= 2.4) {
 		}
 	return $ipcount ? 0 : 1;
 	}
-local $nvstar;
+my $nvstar;
 if ($d->{'name'}) {
-	local ($found, $found_no_port);
-	local $defport = &apache::find_directive("Port", $conf);
+	my ($found, $found_no_port);
+	my $defport = &apache::find_directive("Port", $conf);
 	$defport ||= 80;
-	local @nv = &apache::find_directive("NameVirtualHost", $conf);
-	local $canstar = $apache::httpd_modules{'core'} < 2.2;
+	my @nv = &apache::find_directive("NameVirtualHost", $conf);
+	my $canstar = $apache::httpd_modules{'core'} < 2.2;
 	foreach my $nv (@nv) {
 		$found++ if ($nv =~ /^([0-9\.]+):(\S+)/ &&   # Like x.x.x.x:80
 			      $1 eq $ip &&
@@ -2255,13 +2255,13 @@ return $nvstar;
 # Adds a Listen directive for some domain's port, if needed
 sub add_listen
 {
-local ($d, $conf, $web_port) = @_;
+my ($d, $conf, $web_port) = @_;
 &require_apache();
 foreach my $dip ($d->{'ip'} ? ( $d->{'ip'} ) : ( ),
 		 $d->{'ip6'} ? ( $d->{'ip6'} ) : ( )) {
-	local $defport = &apache::find_directive("Port", $conf) || 80;
-	local @listen = &apache::find_directive("Listen", $conf);
-	local $lfound;
+	my $defport = &apache::find_directive("Port", $conf) || 80;
+	my @listen = &apache::find_directive("Listen", $conf);
+	my $lfound;
 	foreach my $l (@listen) {
 		$l =~ s/\s\S+$//;	# Remove trailing port name
 		$lfound++ if (($l eq '*' && $web_port == $defport) ||
@@ -2281,7 +2281,7 @@ foreach my $dip ($d->{'ip'} ? ( $d->{'ip'} ) : ( ),
 		# the needed one. Add a listen for that IP specifically.
 		# Listening on * is no longer done, as it can cause conflicts
 		# with other servers on port 443 or 80 and other IPs.
-		local $ip = &check_ip6address($dip) ? "[$dip]" : $dip;
+		my $ip = &check_ip6address($dip) ? "[$dip]" : $dip;
 		&apache::save_directive("Listen", [ @listen, "$ip:$web_port" ],
 					$conf, $conf);
 		&flush_file_lines();
@@ -2294,10 +2294,10 @@ foreach my $dip ($d->{'ip'} ? ( $d->{'ip'} ) : ( ),
 # given port, if and only if the domain has a private IP address
 sub remove_listen
 {
-local ($d, $conf, $web_port) = @_;
+my ($d, $conf, $web_port) = @_;
 if ($d->{'virt'} && !$d->{'name'}) {
-	local @listen = &apache::find_directive("Listen", $conf);
-	local @newlisten = grep { $_ ne "$d->{'ip'}:$web_port" } @listen;
+	my @listen = &apache::find_directive("Listen", $conf);
+	my @newlisten = grep { $_ ne "$d->{'ip'}:$web_port" } @listen;
 	if ($d->{'ip6'}) {
 		@newlisten = grep { $_ ne "[$d->{'ip6'}]:$web_port" } @listen;
 		}
@@ -2311,9 +2311,9 @@ if ($d->{'virt'} && !$d->{'name'}) {
 
 sub links_web
 {
-local ($d) = @_;
+my ($d) = @_;
 return () if ($d->{'alias'});
-local @rv;
+my @rv;
 my $link = $d->{'dom'}.":".$d->{'web_port'};
 my $slink = $d->{'dom'}.":".$d->{'web_sslport'};
 
@@ -2335,10 +2335,10 @@ if ($d->{'ssl'}) {
 # Links to logs
 foreach my $log ([ 0, $text{'links_alog'} ],
 		 [ 1, $text{'links_elog'} ]) {
-	local $lf = &get_apache_log($d->{'dom'},
+	my $lf = &get_apache_log($d->{'dom'},
 				    $d->{'web_port'}, $log->[0]);
 	if ($lf) {
-		local $param = &master_admin() ? "file" : "extra";
+		my $param = &master_admin() ? "file" : "extra";
 		push(@rv, { 'mod' => 'logviewer',
 			    'desc' => $log->[1],
 			    'page' => "view_log.cgi?view=1&nonavlinks=1".
@@ -2404,13 +2404,13 @@ return @rv;
 # and long descriptions for the action to switch statuses
 sub startstop_web
 {
-local ($typestatus) = @_;
-local $apid = defined($typestatus->{'apache'}) ?
+my ($typestatus) = @_;
+my $apid = defined($typestatus->{'apache'}) ?
 		$typestatus->{'apache'} == 1 : &get_apache_pid();
-local @links = ( { 'link' => '/apache/',
+my @links = ( { 'link' => '/apache/',
 		   'desc' => $text{'index_amanage'},
 		   'manage' => 1 } );
-local @rv;
+my @rv;
 if ($apid) {
 	push(@rv, { 'status' => 1,
 		    'name' => $text{'index_aname'},
@@ -2444,7 +2444,7 @@ return &apache::start_apache();
 sub stop_service_web
 {
 &require_apache();
-local $err = &apache::stop_apache();
+my $err = &apache::stop_apache();
 sleep(1) if (!$err);
 return $err;
 }
@@ -2501,13 +2501,13 @@ return $ok ? undef : $err;
 # Outputs HTML for editing webserver related template options
 sub show_template_web
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 my $hr;
 my @cgimodes = &has_cgi_support();
 if ($config{'web'}) {
 	# Work out fields to disable when Apache is in default mode
-	local @webfields = ( "web", "web_ssl", "user_def",
+	my @webfields = ( "web", "web_ssl", "user_def",
 			     "html_dir", "html_dir_def", "html_perms",
 			     "web_port", "web_sslport",
 			     "web_ssi", "web_ssi_suffix",
@@ -2524,7 +2524,7 @@ if ($config{'web'}) {
 		}
 
 	# Apache directives
-	local $ndi = &none_def_input(
+	my $ndi = &none_def_input(
 		"web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
 		0, undef, \@webfields);
 	print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
@@ -2567,7 +2567,7 @@ print &ui_table_row(&hlink($text{'newweb_htmldir'}, "template_html_dir_def"),
 			"$text{'default'} (<tt>public_html</tt>)<br>",
 			$text{'newweb_htmldir0'})."<wbr>\n".
 			&vui_note($text{'newweb_htmldir0suf'}));
-local $hdir = $tmpl->{'web_html_dir'} || "public_html";
+my $hdir = $tmpl->{'web_html_dir'} || "public_html";
 
 # HTML directory permissions
 print &ui_table_row(&hlink($text{'newweb_htmlperms'}, "template_html_perms"),
@@ -2633,9 +2633,9 @@ if ($config{'web'} && $config{'webalizer'}) {
 	print &ui_table_hr();
 
 	# Webalizer stats sub-directory input
-	local $smode = $tmpl->{'web_stats_hdir'} ? 2 :
+	my $smode = $tmpl->{'web_stats_hdir'} ? 2 :
 		       $tmpl->{'web_stats_dir'} ? 1 : 0;
-	local ($hdir) = ($tmpl->{'web_html_dir'} || 'public_html');
+	my ($hdir) = ($tmpl->{'web_html_dir'} || 'public_html');
 	print &ui_table_row(&hlink($text{'newweb_statsdir'}, "template_stats_dir"),
 		&ui_radio("stats_mode", $smode,
 		  [ [ 0, "$text{'default'} (<tt>$hdir/stats</tt>)<br>" ],
@@ -2774,7 +2774,7 @@ print &ui_table_row(&hlink($text{'newweb_redirects'}, 'template_web_redirects'),
 # Updates webserver related template options from %in
 sub parse_template_web
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Save web-related settings
 $old_web_port = $web_port;
@@ -3074,14 +3074,14 @@ print &ui_table_row(
 print &ui_table_hr();
 
 # PHP variables for scripts
-local $i = 0;
-local @pv = $tmpl->{'php_vars'} eq "none" ? ( ) :
+my $i = 0;
+my @pv = $tmpl->{'php_vars'} eq "none" ? ( ) :
 	split(/\t+/, $tmpl->{'php_vars'});
-local @pfields;
-local @table;
+my @pfields;
+my @table;
 foreach $pv (@pv, "", "") {
-	local ($n, $v) = split(/=/, $pv, 2);
-	local $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
+	my ($n, $v) = split(/=/, $pv, 2);
+	my $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
 	push(@table, [ &ui_textbox("phpname_$i", $n, 25),
 		       &ui_select("phpdiff_$i", $diff,
 				  [ [ '', $text{'tmpl_phpexact'} ],
@@ -3091,7 +3091,7 @@ foreach $pv (@pv, "", "") {
 	push(@pfields, "phpname_$i", "phpdiff_$i", "phpval_$i");
 	$i++;
 	}
-local $ptable = &ui_columns_table(
+my $ptable = &ui_columns_table(
 	[ $text{'tmpl_phpname'}, $text{'tmpl_phpdiff'}, $text{'tmpl_phpval'} ],
 	undef,
 	\@table,
@@ -3109,7 +3109,7 @@ print &ui_table_row(
 # Updates PHP related template options from %in
 sub parse_template_php
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Save PHP settings
 &require_apache();
@@ -3210,13 +3210,13 @@ return @rv;
 # Outputs HTML for setting custom PHP wrapper scripts
 sub show_template_phpwrappers
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 foreach my $w (&unique(&list_php_wrapper_templates(1))) {
-	local $ndi = &none_def_input($w, $tmpl->{$w},
+	my $ndi = &none_def_input($w, $tmpl->{$w},
 				     $text{'tmpl_wrapperbelow'}, 0, 0,
 				     $text{'tmpl_wrappernone'}, [ $w ]);
 	$w =~ /^php([0-9\.]+)(cgi|fcgi)/ || next;
-	local ($v, $t) = ($1, $2);
+	my ($v, $t) = ($1, $2);
 	print &ui_table_row(&hlink(&text('tmpl_php'.$t, $v), "template_php".$t),
 			    $ndi."<br>".
 		&ui_textarea($w, $tmpl->{$w} eq "none" ? "" :
@@ -3229,10 +3229,10 @@ foreach my $w (&unique(&list_php_wrapper_templates(1))) {
 # Update the template with inputs from show_template_phpwrappers
 sub parse_template_phpwrappers
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 foreach my $w (&unique(&list_php_wrapper_templates(1))) {
 	$w =~ /^php([0-9\.]+)(cgi|fcgi)/ || next;
-	local ($v, $t) = ($1, $2);
+	my ($v, $t) = ($1, $2);
 	if ($in{$w."_mode"} == 0) {
 		$tmpl->{$w} = 'none';
 		}
@@ -3252,11 +3252,11 @@ foreach my $w (&unique(&list_php_wrapper_templates(1))) {
 # Returns 1 if some virtual host is setup to use suexec
 sub get_domain_suexec
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return 0 if (!$virt);
-local $su = &apache::find_directive("SuexecUserGroup", $vconf);
+my $su = &apache::find_directive("SuexecUserGroup", $vconf);
 return $su ? 1 : 0;
 }
 
@@ -3275,7 +3275,7 @@ return $mmap->{int($tmpl->{'web_php_suexec'})};
 # <virtualhost> for some new domain.
 sub add_script_language_directives
 {
-local ($d, $tmpl, $port) = @_;
+my ($d, $tmpl, $port) = @_;
 my $err;
 
 # Find a usable PHP mode
@@ -3476,21 +3476,21 @@ return @rv;
 # exists with a granted value for anything
 sub add_require_all_granted_directives
 {
-local ($d, $oneport) = @_;
-local @ports = $oneport ? ( $oneport ) :
+my ($d, $oneport) = @_;
+my @ports = $oneport ? ( $oneport ) :
 	       $d->{'ssl'} ? ( $d->{'web_port'}, $d->{'web_sslport'} ) :
 			     ( $d->{'web_port'} );
 foreach my $port (@ports) {
-	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	if ($virt && $apache::httpd_modules{'core'} >= 2.4) {
 		foreach my $pdir (&public_html_dir($d), &cgi_bin_dir($d)) {
-			local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
+			my ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
 					      $_->{'words'}->[0] eq $pdir."/" }
 			    &apache::find_directive_struct("Directory", $vconf);
 			if ($dir) {
-				local @req = &apache::find_directive("Require",
+				my @req = &apache::find_directive("Require",
 							$dir->{'members'});
-				local ($g) = grep { /granted|valid-user/i } @req;
+				my ($g) = grep { /granted|valid-user/i } @req;
 				if (!$g) {
 					push(@req, "all granted");
 					&apache::save_directive("Require",\@req,
@@ -3508,15 +3508,15 @@ foreach my $port (@ports) {
 # their paths from Apache.
 sub find_html_cgi_dirs
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p ne "web") {
 	return &plugin_call($p, "feature_find_web_html_cgi_dirs", $d);
 	}
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 if ($virt) {
 	# Set public_html directory from document root
-	local $str = &apache::find_directive_struct("DocumentRoot", $vconf);
+	my $str = &apache::find_directive_struct("DocumentRoot", $vconf);
 	if ($str && !$d->{'public_html_correct'}) {
 		$d->{'public_html_path'} = $str->{'words'}->[0];
 		if ($d->{'public_html_path'} =~ /^\Q$d->{'home'}\E\/(.*)$/) {
@@ -3532,7 +3532,7 @@ if ($virt) {
 		}
 
 	# Set CGI directory from ScriptAlias for /cgi-bin/
-	local @str = &apache::find_directive_struct("ScriptAlias", $vconf);
+	my @str = &apache::find_directive_struct("ScriptAlias", $vconf);
 	@str = grep { $_->{'words'}->[0] eq '/cgi-bin/' ||
 		      $_->{'words'}->[0] eq '/cgi-bin' } @str;
 	if (@str && !$d->{'cgi_bin_correct'}) {
@@ -3553,12 +3553,12 @@ if ($virt) {
 # indicating that it can read files that are group-readable only
 sub apache_in_domain_group
 {
-local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
-local $web_user = &get_apache_user($d);
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my $web_user = &get_apache_user($d);
 if ($tmpl->{'web_user'} ne 'none' && $web_user) {
 	# An Apache user is defined.. but is it a group member?
-	local @uinfo = getpwnam($web_user);
+	my @uinfo = getpwnam($web_user);
 	if ($uinfo[3] == $d->{'gid'} ||
             &indexof($d->{'group'}, &other_groups($web_user)) >= 0) {
 		return 1;
@@ -3571,13 +3571,13 @@ return 0;
 # Lock the Apache config file for some domain
 sub obtain_lock_web
 {
-local ($d) = @_;
+my ($d) = @_;
 return if (!$config{'web'});
 &obtain_lock_anything($d);
 
 # Where is the domain's .conf file? We have to guess, as actually checking could
 # mean reading the whole Apache config in twice.
-local $file = &get_website_file($d);
+my $file = &get_website_file($d);
 if ($main::got_lock_web_file{$file} == 0) {
 	&lock_file($file);
 	}
@@ -3586,7 +3586,7 @@ $main::got_lock_web_path{$d->{'id'}} = $file;
 
 # Always lock main config file too, as we may modify it with a Listen
 &require_apache();
-local ($conf) = &apache::find_httpd_conf();
+my ($conf) = &apache::find_httpd_conf();
 if ($conf) {
 	if ($main::got_lock_web_file{$conf} == 0) {
 		&lock_file($conf);
@@ -3600,16 +3600,16 @@ $main::got_lock_web_conf = $conf;
 # Un-lock the Apache config file for some domain
 sub release_lock_web
 {
-local ($d) = @_;
+my ($d) = @_;
 return if (!$config{'web'});
-local $file = $main::got_lock_web_path{$d->{'id'}};
+my $file = $main::got_lock_web_path{$d->{'id'}};
 if ($main::got_lock_web_file{$file} == 1) {
 	&unlock_file($file);
 	}
 $main::got_lock_web_file{$file}-- if ($main::got_lock_web_file{$file});
 
 # Unlock main config file too
-local $conf = $main::got_lock_web_conf;
+my $conf = $main::got_lock_web_conf;
 if ($conf) {
 	if ($main::got_lock_web_file{$conf} == 1) {
 		&unlock_file($conf);
@@ -3624,8 +3624,8 @@ if ($conf) {
 # sub-domain under the domain, with a *.domain.com serveralias
 sub get_domain_web_star
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_get_web_domain_star", $d);
 	}
@@ -3633,8 +3633,8 @@ elsif (!$p) {
 	return "Virtual server does not have a website";
 	}
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-local @sa = &apache::find_directive("ServerAlias", $vconf);
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my @sa = &apache::find_directive("ServerAlias", $vconf);
 my $withstar = "*.".$d->{'dom'};
 foreach my $sa (@sa) {
 	my @saw = split(/\s+/, $sa);
@@ -3647,8 +3647,8 @@ return 0;
 # Toggle accepting of *.domain.com requests on or off
 sub save_domain_web_star
 {
-local ($d, $star) = @_;
-local $p = &domain_has_website($d);
+my ($d, $star) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_save_web_domain_star", $d, $star);
 	}
@@ -3666,7 +3666,7 @@ foreach my $p (@ports) {
 	my @sa = &apache::find_directive("ServerAlias", $vconf);
 	my $found;
 	foreach my $sa (@sa) {
-		local @saw = split(/\s+/, $sa);
+		my @saw = split(/\s+/, $sa);
 		$found++ if (&indexoflc($withstar, @saw) >= 0);
 		}
 	my $done;
@@ -3678,7 +3678,7 @@ foreach my $p (@ports) {
 	elsif (!$star && $found) {
 		# Take away
 		foreach my $sa (@sa) {
-			local @saw = split(/\s+/, $sa);
+			my @saw = split(/\s+/, $sa);
 			@saw = grep { lc($_) ne $withstar } @saw;
 			$sa = join(" ", @saw);
 			}
@@ -3853,7 +3853,7 @@ else {
 sub get_suexec_path
 {
 &require_apache();
-local $httpd_dir = &apache::find_httpd();
+my $httpd_dir = &apache::find_httpd();
 $httpd_dir =~ s/\/[^\/]+$//;
 foreach my $p ("suexec",			# In path
 	       "/usr/lib/apache2/suexec",	# Debian
@@ -3864,7 +3864,7 @@ foreach my $p ("suexec",			# In path
 	       "/opt/csw/apache/sbin/suexec",
 	       "$httpd_dir/suexec",		# Same dir as httpd
 	      ) {
-	local $fp = &has_command($p) || &has_command($p."2");
+	my $fp = &has_command($p) || &has_command($p."2");
 	return $fp if ($fp);
 	}
 return undef;
@@ -3875,15 +3875,15 @@ return undef;
 # if unknown
 sub get_suexec_document_root
 {
-local $suexec = &get_suexec_path();
+my $suexec = &get_suexec_path();
 return ( ) if (!$suexec);
-local $out = &backquote_command(quotemeta($suexec)." -V 2>&1 </dev/null");
+my $out = &backquote_command(quotemeta($suexec)." -V 2>&1 </dev/null");
 if ($out =~ /AP_DOC_ROOT="([^"]+)"/ ||
     $out =~ /AP_DOC_ROOT=(\S+)/) {
 	return split(/:/, $1);
 	}
 # Try new Debian-style suexec config files
-local $user = &get_apache_user();
+my $user = &get_apache_user();
 if ($out =~ /SUEXEC_CONFIG_DIR="([^"]+)"/ ||
     $out =~ /SUEXEC_CONFIG_DIR=(\S+)/) {
 	foreach my $cf ("$1/$user", "$1/www-data") {
@@ -3905,19 +3905,19 @@ return ( );
 # Returns an error message if suexec does not appear to be installed properly.
 sub check_suexec_install
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 &require_useradmin();
 
 # Make sure suexec is actually installed
-local $suexec = &get_suexec_path();
-local @suhome = &get_suexec_document_root();
+my $suexec = &get_suexec_path();
+my @suhome = &get_suexec_document_root();
 if (!$suexec) {
 	return $text{'check_ewebsuexecbin'};
 	}
 
 # Work out CGI base directory
-local @dirs = split(/\t/, $tmpl->{'web'});
-local $cgibase;
+my @dirs = split(/\t/, $tmpl->{'web'});
+my $cgibase;
 foreach my $l (@dirs) {
 	if ($l =~ /^\s*ScriptAlias\s+\/cgi-bin\/?\s+(\/[^\$]*)/) {
 		$cgibase = $1;
@@ -3946,7 +3946,7 @@ return undef;
 # thus it can run CGI scripts. Otherwise return 0.
 sub supports_suexec
 {
-local ($d) = @_;
+my ($d) = @_;
 
 # Does Apache even support suexec?
 &require_apache();
@@ -3956,14 +3956,14 @@ if ($apache::httpd_modules{'core'} >= 2.0 &&
 	}
 
 # Make sure suexec is actually installed
-local $suexec = &get_suexec_path();
+my $suexec = &get_suexec_path();
 return 0 if (!$suexec);
 
 # Is the domain's CGI directory under one of the roots?
 &require_useradmin();
-local @suhome = &get_suexec_document_root();
-local $cgi = $d ? &cgi_bin_dir($d) : $home_base;
-local $under = 0;
+my @suhome = &get_suexec_document_root();
+my $cgi = $d ? &cgi_bin_dir($d) : $home_base;
+my $under = 0;
 foreach my $suhome (@suhome) {
 	if (&is_under_directory($suhome, $cgi)) {
 		$under = 1;
@@ -3974,10 +3974,10 @@ return 0 if (!$under);
 
 if ($d) {
 	# Is suEXEC enabled in the Apache config?
-	local ($virt, $vconf) = &get_apache_virtual(
+	my ($virt, $vconf) = &get_apache_virtual(
 					$d->{'dom'}, $d->{'web_port'});
 	return 1 if (!$virt);
-	local ($suexec) = &apache::find_directive_struct(
+	my ($suexec) = &apache::find_directive_struct(
 					"SuexecUserGroup", $vconf);
 	return 1 if (!$suexec);
 	return 2;
@@ -4034,14 +4034,14 @@ return wantarray ? @rv : $rv[0];
 # Create empty Apache log files for a domain, and set their ownership
 sub setup_apache_logs
 {
-local ($d, $log, $elog) = @_;
+my ($d, $log, $elog) = @_;
 $log ||= &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
 $elog ||= &get_apache_log($d->{'dom'}, $d->{'web_port'}, 1);
-local $auser = &get_apache_user($d);
-local $gid = $auser && $auser ne 'none' ? $auser : $d->{'gid'};
+my $auser = &get_apache_user($d);
+my $gid = $auser && $auser ne 'none' ? $auser : $d->{'gid'};
 foreach my $l ($log, $elog) {
 	if ($l && !-r $l) {
-		local $dir = $l;
+		my $dir = $l;
 		$dir =~ s/\/([^\/]+)$//;
 		if (&is_under_directory($d->{'home'}, $dir)) {
 			# If under home, create as the domain owner
@@ -4074,8 +4074,8 @@ foreach my $l ($log, $elog) {
 # Set correct ownership and permissions on an Apache log
 sub set_apache_log_permissions
 {
-local ($d, $l) = @_;
-local $auser = &get_apache_user($d);
+my ($d, $l) = @_;
+my $auser = &get_apache_user($d);
 if (&is_under_directory($d->{'home'}, $l)) {
 	&set_permissions_as_domain_user($d, 0660, $l);
 	}
@@ -4091,12 +4091,12 @@ else {
 # directory to the actual location.
 sub link_apache_logs
 {
-local ($d, $log, $elog) = @_;
+my ($d, $log, $elog) = @_;
 return if ($d->{'subdom'});	# Sub-domains have no separate logs
 $log ||= &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
 $elog ||= &get_apache_log($d->{'dom'}, $d->{'web_port'}, 1);
-local $loglink = "$d->{'home'}/logs/access_log";
-local $eloglink = "$d->{'home'}/logs/error_log";
+my $loglink = "$d->{'home'}/logs/access_log";
+my $eloglink = "$d->{'home'}/logs/error_log";
 if ($log && (!-e $loglink || -l $loglink) &&
     !&is_under_directory($d->{'home'}, $log)) {
 	&lock_file($loglink);
@@ -4118,8 +4118,8 @@ if ($elog && (!-e $eloglink || -l $eloglink) &&
 # Only true for the master admin, or if he owns all the sites on that IP.
 sub can_default_website
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p ne 'web') {
 	# Does this website type support it?
 	return 0 if (!&plugin_defined($p, "feature_supports_web_default") ||
@@ -4152,18 +4152,18 @@ return 1;
 # XXX will a request to some IP match both domains on that IP, and * ?
 sub list_apache_domains_on_ip
 {
-local ($d, $port) = @_;
+my ($d, $port) = @_;
 $port ||= $d->{'web_port'};
 &require_apache();
-local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 return ( ) if (!$virt);		# Cannot find our own site?
-local @rv;
+my @rv;
 foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
 	if (&indexof($virt->{'words'}->[0], @{$v->{'words'}}) >= 0) {
 		# Matches IP .. find the domain if we can
-		local $sn = &apache::find_directive("ServerName",
+		my $sn = &apache::find_directive("ServerName",
 						    $v->{'members'});
-		local $vd = &get_domain_by("dom", $sn);
+		my $vd = &get_domain_by("dom", $sn);
 		if (!$vd) {
 			# Search by ServerAlias
 			foreach my $sa (&apache::find_directive_struct(
@@ -4186,8 +4186,8 @@ return @rv;
 # default website on some domain's IP
 sub get_default_apache_website
 {
-local ($d, $port) = @_;
-local @onip = &list_apache_domains_on_ip($d, $port);
+my ($d, $port) = @_;
+my @onip = &list_apache_domains_on_ip($d, $port);
 return @onip ? @{$onip[0]} : ( );
 }
 
@@ -4304,13 +4304,13 @@ foreach my $dir (@$conf) {
 # default but only due to file ordering, 0 otherwise
 sub is_default_website
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p ne 'web') {
 	return &plugin_call($p, "feature_is_web_default", $d);
 	}
 else {
-	local ($defvirt, $defd) = &get_default_apache_website($d);
+	my ($defvirt, $defd) = &get_default_apache_website($d);
 	if (!$defd || $defd->{'id'} ne $d->{'id'}) {
 		# No default found, or not the default
 		return 0;
@@ -4333,10 +4333,10 @@ else {
 sub find_default_website
 {
 my ($d) = @_;
-local $p = &domain_has_website($d);
+my $p = &domain_has_website($d);
 if ($p eq 'web') {
 	# Can just use the default apache site function
-	local (undef, $defd) = &get_default_apache_website($d);
+	my (undef, $defd) = &get_default_apache_website($d);
 	return $defd;
 	}
 else {
@@ -4387,8 +4387,8 @@ return join(" ", @vips);
 sub list_apache_directives
 {
 &require_apache();
-local $httpd = &apache::find_httpd();
-local @rv;
+my $httpd = &apache::find_httpd();
+my @rv;
 open(DIRS, quotemeta($httpd)." -L 2>/dev/null </dev/null |");
 while(<DIRS>) {
 	if (/^(\S+)\s+\((\S+)\.c\)/) {
@@ -4404,15 +4404,15 @@ return @rv;
 # the new location, and update any links
 sub change_access_log
 {
-local ($d, $accesslog) = @_;
+my ($d, $accesslog) = @_;
 $accesslog =~ /^\/\S+$/ ||
 	return "Access log $accesslog must be an absolute path";
-local $p = &domain_has_website($d);
+my $p = &domain_has_website($d);
 if ($p ne "web") {
 	return &plugin_call($p, "feature_change_web_access_log",
 			    $d, $accesslog);
 	}
-local $err = &change_apache_log($d, $accesslog, "CustomLog");
+my $err = &change_apache_log($d, $accesslog, "CustomLog");
 if ($err) {
 	$err = &change_apache_log($d, $accesslog, "TransferLog");
 	}
@@ -4426,15 +4426,15 @@ return $err;
 # the new location, and update any links
 sub change_error_log
 {
-local ($d, $errorlog) = @_;
+my ($d, $errorlog) = @_;
 $errorlog =~ /^\/\S+$/ ||
 	return "Error log $errorlog must be an absolute path";
-local $p = &domain_has_website($d);
+my $p = &domain_has_website($d);
 if ($p ne "web") {
 	return &plugin_call($p, "feature_change_web_error_log",
 			    $d, $errorlog);
 	}
-local $err = &change_apache_log($d, $errorlog, "ErrorLog");
+my $err = &change_apache_log($d, $errorlog, "ErrorLog");
 &link_apache_logs($d);
 &register_post_action(\&restart_apache);
 return $err;
@@ -4445,22 +4445,22 @@ return $err;
 # the new location, and update any links
 sub change_apache_log
 {
-local ($d, $log, $dir) = @_;
+my ($d, $log, $dir) = @_;
 -d $log && return "Log file $log is a directory";
-local $logdir = $log;
+my $logdir = $log;
 $logdir =~ s/[^\/]+$//;
 -d $logdir || return "Log parent directory $logdir does not exist";
 
 # Update the Apache config
-local @ports = ( $d->{'web_port'},
+my @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-local $movelog;
+my $movelog;
 foreach my $p (@ports) {
-	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
 	next if (!$virt);
-	local $oldlog = &apache::find_directive($dir, $vconf);
+	my $oldlog = &apache::find_directive($dir, $vconf);
 	next if (!$oldlog);
-	local $oldlogfile = &extract_logfile_path($oldlog, $d->{'dom'});
+	my $oldlogfile = &extract_logfile_path($oldlog, $d->{'dom'});
 	$oldlog =~ s/\Q$oldlogfile\E/$log/;
 	$movelog ||= $oldlogfile;
 	&apache::save_directive($dir, [ $oldlog ], $vconf, $conf);
@@ -4480,9 +4480,9 @@ if (!&same_file($log, $movelog) || -l $log) {
 
 # Fix logrotate config
 if ($d->{'logrotate'}) {
-	local $lconf = &get_logrotate_section($movelog);
+	my $lconf = &get_logrotate_section($movelog);
 	if ($lconf) {
-		local $parent = &logrotate::get_config_parent();
+		my $parent = &logrotate::get_config_parent();
 		foreach my $n (@{$lconf->{'name'}}) {
 			if ($n eq $movelog) {
 				$n = $log;
@@ -4503,7 +4503,7 @@ return undef;
 # Invalidates the Apache config cache.
 sub modify_web_home_directory
 {
-local ($d, $oldd, $virt, $vconf, $conf, $mode) = @_;
+my ($d, $oldd, $virt, $vconf, $conf, $mode) = @_;
 &recursive_fix_apache_config(
 	$vconf, $conf, $oldd->{'home'}, $d->{'home'});
 &flush_file_lines($virt->{'file'}, undef, 1);
@@ -4547,7 +4547,7 @@ if ($mode eq "fpm") {
 
 # Fix paths in .htaccess files
 my $filename = ".htaccess";
-local $out = &run_as_domain_user($d, "find ".quotemeta($d->{'home'}).
+my $out = &run_as_domain_user($d, "find ".quotemeta($d->{'home'}).
 				     " -type f -name ".quotemeta($filename).
 				     " 2>/dev/null");
 foreach my $file (split(/\r?\n/, $out)) {
@@ -4555,7 +4555,7 @@ foreach my $file (split(/\r?\n/, $out)) {
 	eval {
 		local $main::error_must_die = 1;
 		&lock_file($file);
-		local $lref = &read_file_lines_as_domain_user($d, $file);
+		my $lref = &read_file_lines_as_domain_user($d, $file);
 		foreach my $l (@$lref) {
 			if ($l =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g) {
 				$fixed++;
@@ -4607,8 +4607,8 @@ foreach my $ld ("ErrorLog", "TransferLog", "CustomLog") {
 			}
 		if ($l ne $oldl && $rlogs) {
 			# Rename log file too
-			local $wl = &apache::wsplit($l);
-			local $woldl = &apache::wsplit($oldl);
+			my $wl = &apache::wsplit($l);
+			my $woldl = &apache::wsplit($oldl);
 			&rename_file($woldl->[0], $wl->[0]);
 			}
 		}
@@ -4626,7 +4626,7 @@ sub modify_web_redirects
 my ($d, $oldd, $virt, $vconf, $conf) = @_;
 foreach my $ld ("RewriteCond", "RewriteRule",
 		"Redirect", "RedirectMatch") {
-	local @ldv = &apache::find_directive($ld, $vconf);
+	my @ldv = &apache::find_directive($ld, $vconf);
 	next if (!@ldv);
 	my $oqm = quotemeta($oldd->{'dom'});
 	my $qm = quotemeta($d->{'dom'});
@@ -4642,8 +4642,8 @@ foreach my $ld ("RewriteCond", "RewriteRule",
 # Update the Apache config for a virtual host to fix the user and group names
 sub modify_web_user_group
 {
-local ($d, $oldd, $virt, $vconf, $conf) = @_;
-local $suexec = &apache::find_directive_struct("SuexecUserGroup", $vconf);
+my ($d, $oldd, $virt, $vconf, $conf) = @_;
+my $suexec = &apache::find_directive_struct("SuexecUserGroup", $vconf);
 if ($suexec && ($suexec->{'words'}->[0] eq $oldd->{'user'} ||
 		$suexec->{'words'}->[0] eq '#'.$oldd->{'uid'})){
 	&apache::save_directive("SuexecUserGroup",
@@ -4658,27 +4658,27 @@ if ($suexec && ($suexec->{'words'}->[0] eq $oldd->{'user'} ||
 # set change them to SymLinksifOwnerMatch
 sub fix_symlink_security
 {
-local ($doms, $findonly) = @_;
+my ($doms, $findonly) = @_;
 $doms ||= [ &list_domains() ];
-local @flush;
-local @fixdoms;
+my @flush;
+my @fixdoms;
 &require_apache();
-local @lockdoms;
+my @lockdoms;
 foreach my $d (@$doms) {
         next if (!$d->{'web'} || $d->{'alias'});
-	local @ports = ( $d->{'web_port'},
+	my @ports = ( $d->{'web_port'},
 			 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-	local $domfixed = 0;
+	my $domfixed = 0;
 	if (!$findonly) {
 		&obtain_lock_web($d);
 		&obtain_lock_ssl($d) if ($d->{'ssl'});
 		push(@lockdoms, $d);
 		}
 	foreach my $p (@ports) {
-		local ($virt, $vconf, $conf) = &get_apache_virtual(
+		my ($virt, $vconf, $conf) = &get_apache_virtual(
 						$d->{'dom'}, $p);
 		next if (!$virt);
-		local @dirs = &apache::find_directive_struct("Directory",
+		my @dirs = &apache::find_directive_struct("Directory",
 							     $vconf);
 		foreach my $dir (@dirs) {
 			# Fix Options line
@@ -4732,11 +4732,11 @@ foreach my $d (@$doms) {
 		}
 
 	# Replace awstats symlinks with copies
-	local $htmldir = &public_html_dir($d);
-	local @dirs = ( "icon", "awstats-icon", "awstatsicons" );
+	my $htmldir = &public_html_dir($d);
+	my @dirs = ( "icon", "awstats-icon", "awstatsicons" );
 	if ($domfixed && !$findonly && $d->{'virtualmin-awstats'} &&
 	    -l "$htmldir/$dirs[0]") {
-		local $dest = readlink("$htmldir/$dirs[0]");
+		my $dest = readlink("$htmldir/$dirs[0]");
 		&unlink_logged_as_domain_user($d, "$htmldir/$dirs[0]");
 		&copy_source_dest($dest, "$htmldir/$dirs[0]");
 		&system_logged("chown -R $d->{'uid'}:$d->{'gid'} ".
@@ -4834,8 +4834,8 @@ else {
 # in effect.
 sub get_domain_web_ssi
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_get_web_domain_ssi", $d);
 	}
@@ -4843,16 +4843,16 @@ elsif (!$p) {
 	return (0, "Virtual server does not have a website");
 	}
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return (0, "No Apache configuration found") if (!$virt);
 
 # Get options for public_html
-local @dirs = &apache::find_directive_struct("Directory", $vconf);
-local $phd = &public_html_dir($d);
-local ($dir) = grep { $_->{'words'}->[0] eq $phd } @dirs;
+my @dirs = &apache::find_directive_struct("Directory", $vconf);
+my $phd = &public_html_dir($d);
+my ($dir) = grep { $_->{'words'}->[0] eq $phd } @dirs;
 return (0, "No directory block for $phd found") if (!$dir);
-local @opts = &apache::find_directive("Options", $dir->{'members'});
-local $foundincludes;
+my @opts = &apache::find_directive("Options", $dir->{'members'});
+my $foundincludes;
 foreach my $o (@opts) {
 	if ($o =~ /(^|\s|\+)(Includes|IncludesNOEXEC)(\s|$)/) {
 		$foundincludes = 1;
@@ -4861,8 +4861,8 @@ foreach my $o (@opts) {
 return (0) if (!$foundincludes);
 
 # Look for AddOutputFilter INCLUDES suffix
-local @filters = &apache::find_directive("AddOutputFilter", $dir->{'members'});
-local $foundfilter;
+my @filters = &apache::find_directive("AddOutputFilter", $dir->{'members'});
+my $foundfilter;
 foreach my $f (@filters) {
 	if ($f =~ /^INCLUDES\s+(\S+)/) {
 		$foundfilter = $1;
@@ -4878,8 +4878,8 @@ return (1, $foundfilter);
 # on success or an error message on failure.
 sub save_domain_web_ssi
 {
-local ($d, $suffix) = @_;
-local $p = &domain_has_website($d);
+my ($d, $suffix) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_save_web_domain_ssi", $d, $suffix);
 	}
@@ -4889,22 +4889,22 @@ elsif (!$p) {
 &require_apache();
 
 &obtain_lock_web($d);
-local @ports = ( $d->{'web_port'} );
+my @ports = ( $d->{'web_port'} );
 push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
 
 foreach my $p (@ports) {
-	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
 	next if (!$virt);
 
 	# Fix options for public_html
-	local @dirs = &apache::find_directive_struct("Directory", $vconf);
-	local $phd = &public_html_dir($d);
-	local ($dir) = grep { $_->{'words'}->[0] eq $phd } @dirs;
+	my @dirs = &apache::find_directive_struct("Directory", $vconf);
+	my $phd = &public_html_dir($d);
+	my ($dir) = grep { $_->{'words'}->[0] eq $phd } @dirs;
 	next if (!$dir);
-	local @opts = &apache::find_directive("Options", $dir->{'members'});
+	my @opts = &apache::find_directive("Options", $dir->{'members'});
 	if ($suffix) {
 		# Adding to Options
-		local $foundincludes;
+		my $foundincludes;
 		foreach my $o (@opts) {
 			if ($o =~ /(^|\s|\+)(Includes|IncludesNOEXEC)(\s|$)/) {
 				$foundincludes = 1;
@@ -4923,10 +4923,10 @@ foreach my $p (@ports) {
 	&apache::save_directive("Options", \@opts, $dir->{'members'}, $conf);
 
 	# Add AddOutputFilter directive for the suffix
-	local @filters = &apache::find_directive("AddOutputFilter",
+	my @filters = &apache::find_directive("AddOutputFilter",
 						 $dir->{'members'});
-	local $idx;
-	local $oldsuffix;
+	my $idx;
+	my $oldsuffix;
 	for(my $i=0; $i<@filters; $i++) {
 		if ($filters[$i] =~ /^INCLUDES\s+(\S+)/) {
 			$idx = $i;
@@ -4949,8 +4949,8 @@ foreach my $p (@ports) {
 				$dir->{'members'}, $conf);
 
 	# Add AddType directive for the suffix, if not .html
-	local @types = &apache::find_directive("AddType", $dir->{'members'});
-	local $idx;
+	my @types = &apache::find_directive("AddType", $dir->{'members'});
+	my $idx;
 	if ($oldsuffix) {
 		for(my $i=0; $i<@types; $i++) {
 			if ($types[$i] =~ /^(\S+)\s+\Q$oldsuffix\E/) {

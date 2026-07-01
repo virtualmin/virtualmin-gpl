@@ -40,7 +40,7 @@ foreach $f (@database_features) {
 
 # Run the after command
 &set_domain_envs($d, "DBPASS_DOMAIN", undef, $oldd);
-local $merr = &made_changes();
+my $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($d);
 

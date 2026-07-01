@@ -126,12 +126,12 @@ $reuid = 1;
 $reuser = 0;
 $ipinfo = { };
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--source") {
 		$src = shift(@ARGV);
 		}
 	elsif ($a eq "--feature") {
-		local $f = shift(@ARGV);
+		my $f = shift(@ARGV);
 		&is_enabled_backup_feature($f) ||
 			&usage("Feature $f is not enabled");
 		push(@rfeats, $f);
@@ -146,7 +146,7 @@ while(@ARGV > 0) {
 		$all_features = 1;
 		}
 	elsif ($a eq "--except-feature") {
-		local $f = shift(@ARGV);
+		my $f = shift(@ARGV);
 		$all_features || &usage("--except-feature must come after ".
 				        "--all-features");
 		@rfeats = grep { $_ ne $f } @rfeats;
@@ -357,7 +357,7 @@ if ($all_doms) {
 	@rdoms = keys %$cont;
 	}
 foreach $dname (@rdoms) {
-	local $dinfo = &get_domain_by("dom", $dname);
+	my $dinfo = &get_domain_by("dom", $dname);
 	if ($dinfo && (!$dinfo->{'id'} || !$dinfo->{'dom'} || !$dinfo->{'user'})) {
 		# File is actually empty!
 		$dinfo = undef;

@@ -5,10 +5,10 @@
 # cron via a wrapper, run it within the same process
 sub run_cron_script
 {
-local ($script, $args) = @_;
-local @args = split(/\s+/, $args);
-local $fh = "CRONOUT";
-local $temp = &transname();
+my ($script, $args) = @_;
+my @args = split(/\s+/, $args);
+my $fh = "CRONOUT";
+my $temp = &transname();
 open($fh, ">$temp");
 my $pid = &execute_webmin_script("$module_root_directory/$script", $module_name,
 			         \@args, $fh);
@@ -29,10 +29,10 @@ my ($job, $mod) = @_;
 $mod ||= $module_name;
 &foreign_require("cron");
 &foreign_require("webmincron");
-local $cronjob = &find_module_cron_job($job->{'command'});
+my $cronjob = &find_module_cron_job($job->{'command'});
 if ($job->{'command'} =~ /(\Q$config_directory\E\/\E$mod\E\/([^ \|\&><;]+))/) {
 	# Run from this module
-	local ($wrapper, $script) = ($1, $2);
+	my ($wrapper, $script) = ($1, $2);
 	&cron::create_wrapper($wrapper, $mod, $script);
 
 	# Find existing classic cron job, and remove it
@@ -49,8 +49,8 @@ if ($job->{'command'} =~ /(\Q$config_directory\E\/\E$mod\E\/([^ \|\&><;]+))/) {
 		# Has command-line args 
 		$args = $1;
 		}
-	local @wcrons = &webmincron::list_webmin_crons();
-	local ($wjob) = grep { $_->{'module'} eq $mod &&
+	my @wcrons = &webmincron::list_webmin_crons();
+	my ($wjob) = grep { $_->{'module'} eq $mod &&
 			       $_->{'func'} eq "run_cron_script" &&
 			       $_->{'args'}->[0] eq $script &&
 			       $_->{'args'}->[1] eq $args } @wcrons;
@@ -78,7 +78,7 @@ else {
 	if (!$cronjob) {
 		if ($job->{'command'} =~
 		    /(\Q$config_directory\E\/([^\/]+)\/([^ \|\&><;]+))/) {
-			local ($wrapper, $m, $s) = ($1, $2, $3);
+			my ($wrapper, $m, $s) = ($1, $2, $3);
 			&cron::create_wrapper($wrapper, $m, $s);
 			}
 		&lock_file(&cron::cron_file($job));
@@ -96,7 +96,7 @@ my ($script_or_job, $mod) = @_;
 $mod ||= $module_name;
 if (ref($script_or_job)) {
 	# Delete a specific classic or webmincron job
-	local $job = $script_or_job;
+	my $job = $script_or_job;
 	if ($job->{'module'}) {
 		&foreign_require("webmincron");
 		&webmincron::delete_webmin_cron($job);
@@ -110,13 +110,13 @@ if (ref($script_or_job)) {
 	}
 else {
 	# Delete all matching the script
-	local $script = $script_or_job;
-	local $shortscript = $script;
+	my $script = $script_or_job;
+	my $shortscript = $script;
 	$shortscript =~ s/^.*\///;
 
 	# Classic cron
 	&foreign_require("cron");
-	local @jobs = &cron::list_cron_jobs();
+	my @jobs = &cron::list_cron_jobs();
 	foreach my $job (&find_module_cron_job($script, \@jobs)) {
 		&lock_file(&cron::cron_file($job));
 		&cron::delete_cron_job($job);
@@ -125,7 +125,7 @@ else {
 
 	# Webmin cron
 	&foreign_require("webmincron");
-	local @wcrons = &webmincron::list_webmin_crons();
+	my @wcrons = &webmincron::list_webmin_crons();
 	foreach my $wjob (grep { $_->{'module'} eq $mod &&
 				 $_->{'func'} eq "run_cron_script" &&
 				 $_->{'args'}->[0] eq $shortscript } @wcrons) {
@@ -140,7 +140,7 @@ sub convert_cron_script
 {
 my ($script, $mod) = @_;
 $mod ||= $module_name;
-local $shortscript = $script;
+my $shortscript = $script;
 $shortscript =~ s/^.*\///;
 
 &foreign_require("cron");
@@ -155,7 +155,7 @@ foreach my $job (&find_module_cron_job($script)) {
 		# Has command-line args 
 		$args = $1;
 		}
-	local ($wjob) = grep { $_->{'module'} eq $mod &&
+	my ($wjob) = grep { $_->{'module'} eq $mod &&
 			       $_->{'func'} eq "run_cron_script" &&
 			       $_->{'args'}->[0] eq $shortscript &&
 			       $_->{'args'}->[1] eq $args }
@@ -183,7 +183,7 @@ my $shortscript = $script;
 $shortscript =~ s/^.*\///;
 
 # Classic cron
-local @rv;
+my @rv;
 push(@rv, &find_module_cron_job($fullscript));
 
 # Webmin cron
@@ -193,7 +193,7 @@ foreach my $wjob (grep { $_->{'module'} eq $mod &&
 		         $_->{'args'}->[0] eq $shortscript }
 		       &webmincron::list_webmin_crons()) {
 	# Check rest of the args
-	local @a = @{$wjob->{'args'}};
+	my @a = @{$wjob->{'args'}};
 	shift(@a);
 	if (join(" ", @a) ne join(" ", @wantargs)) {
 		next;
@@ -214,7 +214,7 @@ return wantarray ? @rv : $rv[0];
 # Copy all time-related keys from one cron job to another
 sub copy_cron_sched_keys
 {
-local ($src, $dst) = @_;
+my ($src, $dst) = @_;
 foreach my $k ('mins', 'hours', 'days', 'months', 'weekdays',
 	       'special', 'interval') {
 	$dst->{$k} = $src->{$k};
@@ -225,14 +225,14 @@ foreach my $k ('mins', 'hours', 'days', 'months', 'weekdays',
 # Returns the cron job object that runs some command (perhaps with redirection)
 sub find_module_cron_job
 {
-local ($cmd, $jobs, $user) = @_;
+my ($cmd, $jobs, $user) = @_;
 return undef if (!$cmd);
 if (!$jobs) {
 	&foreign_require("cron");
 	$jobs = [ &cron::list_cron_jobs() ];
 	}
 $user ||= "root";
-local @rv = grep { $_->{'user'} eq $user &&
+my @rv = grep { $_->{'user'} eq $user &&
 	     $_->{'command'} =~ /(^|[ \|\&;\/])\Q$cmd\E($|[ \|\&><;])/ } @$jobs;
 return wantarray ? @rv : $rv[0];
 }

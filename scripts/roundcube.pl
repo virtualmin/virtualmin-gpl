@@ -22,7 +22,7 @@ return ( "1.7.1", "1.6.16" );
 
 sub script_roundcube_version_desc
 {
-local ($ver) = @_;
+my ($ver) = @_;
 return &compare_versions($ver, "1.6") >= 0 ? $ver : "$ver (LTS)";
 }
 
@@ -38,9 +38,9 @@ return 1;
 
 sub script_roundcube_php_modules
 {
-local ($d, $ver, $phpver, $opts) = @_;
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local @modules = ( "xml", "zip", "dom", "iconv", "mbstring", "intl" );
+my ($d, $ver, $phpver, $opts) = @_;
+my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+my @modules = ( "xml", "zip", "dom", "iconv", "mbstring", "intl" );
 push(@modules, $dbtype eq "mysql" ? "mysql" : "pgsql");
 return @modules;
 }
@@ -76,7 +76,7 @@ return 6;	# Fix root public_html alias
 
 sub script_roundcube_php_fullver
 {
-local ($d, $ver, $sinfo, $phpver) = @_;
+my ($d, $ver, $sinfo, $phpver) = @_;
 my $phpver = &compare_versions($ver, "1.7") >= 0 ? "8.1" :
 	     &compare_versions($ver, "1.6") >= 0 ? "7.3" : 5.6;
 return $phpver;
@@ -103,20 +103,20 @@ return $r->{'path'} eq $opts->{'path'} &&
 # Returns HTML for table rows for options for installing PHP-NUKE
 sub script_roundcube_params
 {
-local ($d, $ver, $upgrade) = @_;
-local $rv;
-local $hdir = &public_html_dir($d, 1);
+my ($d, $ver, $upgrade) = @_;
+my $rv;
+my $hdir = &public_html_dir($d, 1);
 if ($upgrade) {
 	# Options are fixed when upgrading
-	local ($dbtype, $dbname) = split(/_/, $upgrade->{'opts'}->{'db'}, 2);
+	my ($dbtype, $dbname) = split(/_/, $upgrade->{'opts'}->{'db'}, 2);
 	$rv .= &ui_table_row("Database for RoundCube preferences", $dbname);
-	local $dir = $upgrade->{'opts'}->{'dir'};
+	my $dir = $upgrade->{'opts'}->{'dir'};
 	$dir =~ s/^$d->{'home'}\///;
 	$rv .= &ui_table_row("Install directory", $dir);
 	}
 else {
 	# Show editable install options
-	local @dbs = &domain_databases($d, [ "mysql", "postgres" ]);
+	my @dbs = &domain_databases($d, [ "mysql", "postgres" ]);
 	$rv .= &ui_table_row("Database for RoundCube preferences",
 		     &ui_database_select("db", undef, \@dbs, $d, "roundcube"));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
@@ -129,17 +129,17 @@ return $rv;
 # Returns either a hash ref of parsed options, or an error string
 sub script_roundcube_parse
 {
-local ($d, $ver, $in, $upgrade) = @_;
+my ($d, $ver, $in, $upgrade) = @_;
 if ($upgrade) {
 	# Options are always the same
 	return $upgrade->{'opts'};
 	}
 else {
-	local $hdir = &public_html_dir($d, 0);
+	my $hdir = &public_html_dir($d, 0);
 	$in{'dir_def'} || $in{'dir'} =~ /\S/ && $in{'dir'} !~ /\.\./ ||
 		return "Missing or invalid installation directory";
-	local $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
-	local ($newdb) = ($in->{'db'} =~ s/^\*//);
+	my $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
+	my ($newdb) = ($in->{'db'} =~ s/^\*//);
 	return { 'db' => $in->{'db'},
 		 'newdb' => $newdb,
 		 'dir' => $dir,
@@ -151,14 +151,14 @@ else {
 # Returns an error message if a required option is missing or invalid
 sub script_roundcube_check
 {
-local ($d, $ver, $opts, $upgrade) = @_;
+my ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 $opts->{'db'} || return "Missing database";
 if (-r "$opts->{'dir'}/config/db.inc.php") {
 	return "RoundCube appears to be already installed in the selected directory";
 	}
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local $clash = &find_database_table($dbtype, $dbname, "system|filestore|contacts|users");
+my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+my $clash = &find_database_table($dbtype, $dbname, "system|filestore|contacts|users");
 $clash && return "RoundCube appears to be already using the selected database (table $clash)";
 return undef;
 }
@@ -168,8 +168,8 @@ return undef;
 # containing a name, filename and URL
 sub script_roundcube_files
 {
-local ($d, $ver, $opts, $upgrade) = @_;
-local @files = ( { 'name' => "source",
+my ($d, $ver, $opts, $upgrade) = @_;
+my @files = ( { 'name' => "source",
 	           'file' => "roundcube-$ver.tar.gz",
 	           'url' => $ver >= 1.1 ?
 			"https://github.com/roundcube/roundcubemail/releases/download/${ver}/roundcubemail-${ver}-complete.tar.gz" :
@@ -190,38 +190,38 @@ return ("tar", "gunzip");
 # message, or 0 and an error
 sub script_roundcube_install
 {
-local ($d, $version, $opts, $files, $upgrade) = @_;
-local ($out, $ex);
+my ($d, $version, $opts, $files, $upgrade) = @_;
+my ($out, $ex);
 
 # Create and get DB
 if ($opts->{'newdb'} && !$upgrade) {
-	local $err = &create_script_database($d, $opts->{'db'});
+	my $err = &create_script_database($d, $opts->{'db'});
 	return (0, "Database creation failed : $err") if ($err);
 	}
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
-local $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
-local $dbphptype = $dbtype eq "mysql" ? "mysql" : "psql";
-local $dbhost = &get_database_host($dbtype, $d);
-local $dberr = &check_script_db_connection(
+my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+my $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
+my $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
+my $dbphptype = $dbtype eq "mysql" ? "mysql" : "psql";
+my $dbhost = &get_database_host($dbtype, $d);
+my $dberr = &check_script_db_connection(
 	$d, $dbtype, $dbname, $dbuser, $dbpass);
 return (0, "Database connection failed : $dberr") if ($dberr);
 
 # Extract tar file to temp dir and copy to target
-local $temp = &transname();
-local $verdir = $ver;
+my $temp = &transname();
+my $verdir = $ver;
 $verdir =~ s/-complete$//;
-local $err = &extract_script_archive($files->{'source'}, $temp, $d,
+my $err = &extract_script_archive($files->{'source'}, $temp, $d,
                                      $opts->{'dir'}, "roundcubemail-$verdir");
 $err && return (0, "Failed to extract source : $err");
 
 if (!$upgrade) {
 	# Fix up the DB config file
-	local $dbcfileorig = "$opts->{'dir'}/config/db.inc.php.dist";
-	local $dbcfile = "$opts->{'dir'}/config/db.inc.php";
+	my $dbcfileorig = "$opts->{'dir'}/config/db.inc.php.dist";
+	my $dbcfile = "$opts->{'dir'}/config/db.inc.php";
 	if (-r $dbcfileorig) {
 		&copy_source_dest_as_domain_user($d, $dbcfileorig, $dbcfile);
-		local $lref = &read_file_lines_as_domain_user($d, $dbcfile);
+		my $lref = &read_file_lines_as_domain_user($d, $dbcfile);
 		foreach my $l (@$lref) {
 			if ($l =~ /^\$rcmail_config\['db_dsnw'\]\s+=/) {
 				$l = "\$rcmail_config['db_dsnw'] = 'mysql://$dbuser:".
@@ -236,11 +236,11 @@ if (!$upgrade) {
 		}
 
 	# Figure out folder names
-	local %fmap;
+	my %fmap;
 	$fmap{'drafts'} = $config{'drafts_folder'} || 'drafts';
 	$fmap{'sent'} = $config{'sent_folder'} || 'sent';
 	$fmap{'trash'} = $config{'trash_folder'} || 'sent';
-	local ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
+	my ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
 	if (($sdmode == 6 || $sdmode == 4) && $sdpath) {
 		$fmap{'junk'} = $sdpath;
 		}
@@ -249,14 +249,14 @@ if (!$upgrade) {
 		}
 
 	# Fix up the main config file
-	local $mcfileorig = "$opts->{'dir'}/config/main.inc.php.dist";
-	local $mcfile = "$opts->{'dir'}/config/main.inc.php";
+	my $mcfileorig = "$opts->{'dir'}/config/main.inc.php.dist";
+	my $mcfile = "$opts->{'dir'}/config/main.inc.php";
 	if (!-r $mcfileorig) {
 		$mcfileorig = "$opts->{'dir'}/config/config.inc.php.sample";
 		$mcfile = "$opts->{'dir'}/config/config.inc.php";
 		}
 	&copy_source_dest_as_domain_user($d, $mcfileorig, $mcfile);
-	local $lref = &read_file_lines_as_domain_user($d, $mcfile);
+	my $lref = &read_file_lines_as_domain_user($d, $mcfile);
 	foreach my $l (@$lref) {
 		if ($l =~ /^\$(rcmail_config|config)\['enable_caching'\]\s+=/) {
 			$l = "\$${1}['enable_caching'] = FALSE;";
@@ -295,14 +295,14 @@ if (!$upgrade) {
 
 	# Run SQL setup script
 	&require_mysql();
-	local $sqlfile;
+	my $sqlfile;
 	if ($dbtype eq "mysql") {
 		$sqlfile = "$opts->{'dir'}/SQL/mysql.initial.sql";
 		}
 	else {
 		$sqlfile = "$opts->{'dir'}/SQL/postgres.initial.sql";
 		}
-	local ($ex, $out) = &mysql::execute_sql_file($dbname, $sqlfile,
+	my ($ex, $out) = &mysql::execute_sql_file($dbname, $sqlfile,
 					       	     $dbuser, $dbpass);
 	$ex && return (-1, "Failed to run database setup script : ".
 			   "<tt>$out</tt>.");
@@ -335,8 +335,8 @@ if (&compare_versions($ver, "1.7") >= 0) {
 	}
 
 # Return a URL for the user
-local $url = &script_path_url($d, $opts);
-local $rp = $opts->{'dir'};
+my $url = &script_path_url($d, $opts);
+my $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
 my $installtype = $upgrade ? 'upgrade' : 'installation';
 return (1, "RoundCube $installtype complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $url);
@@ -372,7 +372,7 @@ return $db_conn_desc;
 # Returns 1 on success and a message, or 0 on failure and an error
 sub script_roundcube_uninstall
 {
-local ($d, $version, $opts) = @_;
+my ($d, $version, $opts) = @_;
 
 # Remove roundcube tables from the database
 &cleanup_script_database($d, $opts->{'db'}, "(.*)");
@@ -393,7 +393,7 @@ if (&compare_versions($version, "1.7") >= 0) {
 	}
 
 # Remove the contents of the target directory
-local $derr = &delete_script_install_directory($d, $opts);
+my $derr = &delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
 
 return (1, "RoundCube directory and tables deleted.");
@@ -403,7 +403,7 @@ return (1, "RoundCube directory and tables deleted.");
 # Returns a URL and regular expression or callback func to get the version
 sub script_roundcube_latest
 {
-local ($ver) = @_;
+my ($ver) = @_;
 return ( "http://roundcube.net/download/",
          $ver >= 1.7 ? "roundcubemail-([0-9\\.]+)-complete.tar.gz" :
          $ver >= 1.6 ? "roundcubemail-(1\\.6\\.[0-9\\.]+)-complete.tar.gz" :
