@@ -473,16 +473,11 @@ sub ipkeys_to_domain_cert
 my ($d, $ipkeys) = @_;
 foreach my $k (@$ipkeys) {
 	my @dnames = ($d->{'dom'}, "*.".$d->{'dom'});
-	my $md = defined(&miniserv_ipkey_has_any) ?
-		&miniserv_ipkey_has_any($k, \@dnames) :
-		&indexof($d->{'dom'}, @{$k->{'ips'}}) >= 0 ||
-		&indexof("*.".$d->{'dom'}, @{$k->{'ips'}}) >= 0;
-	my $m = $d->{'virt'} && (defined(&miniserv_ipkey_has_any) ?
-		&miniserv_ipkey_has_any($k, [ $d->{'ip'} ]) :
-		&indexof($d->{'ip'}, @{$k->{'ips'}}) >= 0);
-	my $m6 = $d->{'virt6'} && (defined(&miniserv_ipkey_has_any) ?
-		&miniserv_ipkey_has_any($k, [ $d->{'ip6'} ]) :
-		&indexof($d->{'ip6'}, @{$k->{'ips'}}) >= 0);
+	my $md = &miniserv_ipkey_has_any($k, \@dnames);
+	my $m = $d->{'virt'} &&
+		&miniserv_ipkey_has_any($k, [ $d->{'ip'} ]);
+	my $m6 = $d->{'virt6'} &&
+		&miniserv_ipkey_has_any($k, [ $d->{'ip6'} ]);
 	if ($md || $m || $m6) {
 		return ($k->{'cert'}, $k->{'extracas'},
 			$m ? $d->{'ip'} : undef,
