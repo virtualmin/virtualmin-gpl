@@ -804,6 +804,9 @@ local $ok = 1;
 local @donedoms;
 local ($okcount, $errcount) = (0, 0);
 local @errdoms;
+my %fullstateok;
+my $selected_full = $increment == 0 &&
+		    defined($id) && $id =~ /^\d+$/ && $id >= 3;
 local %donefeatures;				# Map from domain name->features
 local @cleanuphomes;				# Temporary homes
 local %donedoms;				# Map from domain name->hash
@@ -1029,6 +1032,8 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 	if ($onebyone && $homefmt && $dok && $anyremote) {
 		# Transfer this domain now
 		local $df = "$d->{'dom'}.$hfsuffix";
+		$fullstateok{$d->{'id'}} = 1
+			if ($selected_full && $anylocal && $d->{'id'});
 		&$cbfunc($d, 1, "$dest/$df") if ($cbfunc);
 		local $tstart = time();
 		local $binfo = { $d->{'dom'} =>
@@ -1207,6 +1212,8 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 				}
 			else {
 				&$second_print($text{'setup_done'});
+				$fullstateok{$d->{'id'}} = 1
+					if ($selected_full && $d->{'id'});
 				local @tst = stat("$dest/$df");
 				if ($mode != 0 && !$done_transferred_sz++) {
 					$transferred_sz += $tst[7];
@@ -1521,6 +1528,17 @@ else {
 	}
 $sz += $transferred_sz;
 
+my %archiveerrids = map { $_->{'id'}, 1 }
+		    grep { $_->{'id'} } @errdoms;
+my $mark_fullstate_ok = sub {
+	return if (!$selected_full);
+	foreach my $sd (@_) {
+		next if (!$sd || !$sd->{'id'} || $archiveerrids{$sd->{'id'}});
+		$fullstateok{$sd->{'id'}} = 1;
+		}
+	};
+&$mark_fullstate_ok(@donedoms) if ($ok && $anylocal);
+
 foreach my $desturl (@$desturls) {
 	local ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
@@ -1604,6 +1622,7 @@ foreach my $desturl (@$desturls) {
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
+		&$mark_fullstate_ok(@donedoms) if (!$err);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && ($mode == 2 || $mode == 13) && (@destfiles || !$dirfmt)) {
@@ -1688,6 +1707,7 @@ foreach my $desturl (@$desturls) {
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
+		&$mark_fullstate_ok(@donedoms) if (!$err);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && $mode == 3 && (@destfiles || !$dirfmt)) {
@@ -1742,6 +1762,7 @@ foreach my $desturl (@$desturls) {
 							 $tstart, time());
 				}
 			}
+		&$mark_fullstate_ok(@donedoms) if (!$err);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && $mode == 6 && (@destfiles || !$dirfmt)) {
@@ -1809,6 +1830,7 @@ foreach my $desturl (@$desturls) {
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
+		&$mark_fullstate_ok(@donedoms) if (!$err);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && ($mode == 7 || $mode == 8 || $mode == 10 ||
@@ -1886,6 +1908,7 @@ foreach my $desturl (@$desturls) {
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
+		&$mark_fullstate_ok(@donedoms) if (!$err);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && $mode == 9 && (@destfiles || !$dirfmt)) {
@@ -1971,6 +1994,7 @@ foreach my $desturl (@$desturls) {
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
+		&$mark_fullstate_ok(@donedoms) if (!$err);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && $mode == 0 && (@destfiles || !$dirfmt) &&
@@ -2081,29 +2105,31 @@ if ($ok) {
 		}
 	}
 
-# Update full-backup differential state only after the complete backup result
-# is known. A failed upload can happen after tar has already advanced the
-# snapshot files, so failed full backups must not become a future baseline.
+# Keep selected full-backup differential state only for domains whose full
+# backup reached at least one durable destination.
 if ($increment == 0 && &has_incremental_tar()) {
-	my %errids = map { $_->{'id'}, 1 }
-		     grep { $_->{'id'} } @errdoms;
-	if ($ok) {
+	if ($selected_full) {
+		my %donestate;
 		foreach my $d (@$doms) {
-			next if (!$d->{'id'} || $errids{$d->{'id'}});
+			next if (!$d->{'id'} || $donestate{$d->{'id'}}++);
 			my $ifile = &get_incremental_file($d, $increment, $id);
-			my $ifiledef = &get_incremental_file($d);
-			if ($ifile && $ifiledef && $ifile ne $ifiledef &&
-			    -r $ifile) {
-				&copy_source_dest($ifile, $ifiledef);
+			if ($fullstateok{$d->{'id'}}) {
+				my $ifiledef = &get_incremental_file($d);
+				if ($ifile && $ifiledef && $ifile ne $ifiledef &&
+				    -r $ifile) {
+					&copy_source_dest($ifile, $ifiledef);
+					}
+				}
+			else {
+				&unlink_file($ifile);
 				}
 			}
 		}
-	my @cleardoms = $ok ? @errdoms : @$doms;
-	my %donecleardom;
-	foreach my $d (@cleardoms) {
-		if ($d->{'id'}) {
-			next if ($donecleardom{$d->{'id'}}++);
-			&unlink_file(&get_incremental_file($d, $increment, $id));
+	else {
+		foreach my $d (@errdoms) {
+			if ($d->{'id'}) {
+				&unlink_file(&get_incremental_file($d, $increment, $id));
+				}
 			}
 		}
 	}
