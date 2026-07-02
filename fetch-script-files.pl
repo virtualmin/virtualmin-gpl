@@ -51,12 +51,12 @@ foreach $s (@scripts) {
 		foreach $f (grep { $_->{'url'} } @files) {
 			next if ($f->{'nofetch'});
 			next if ($f->{'virtualmin'});
-			local $url = &convert_osdn_url($f->{'url'}) ||
+			my $url = &convert_osdn_url($f->{'url'}) ||
 				     $f->{'url'};
-			local $destfile = "$dest/$f->{'file'}";
+			my $destfile = "$dest/$f->{'file'}";
 			next if (-r $destfile);		# Already gotten
-			local $temp = &transname($f->{'file'});
-			local $error;
+			my $temp = &transname($f->{'file'});
+			my $error;
 			print "script:$script->{'name'} version:$ver url:$url\n";
 			if ($url =~ /^http/) {
 				# Via HTTP

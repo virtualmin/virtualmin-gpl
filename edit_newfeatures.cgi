@@ -24,7 +24,7 @@ foreach $f (@features) {
 		next;
 		}
 
-	local @acts;
+	my @acts;
 	push(@acts, ui_link("search.cgi?field=$f&what=1",
 		                $text{'features_used'}));
 	my $vital = &indexof($f, @vital_features) >= 0;
@@ -77,8 +77,8 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 	$mdir = &module_root_directory($m->{'dir'});
 	if (-r "$mdir/virtual_feature.pl") {
 		&foreign_require($m->{'dir'}, "virtual_feature.pl");
-		local @acts;
-		local $config_link = &plugin_call($m->{'dir'},
+		my @acts;
+		my $config_link = &plugin_call($m->{'dir'},
 						  "feature_config_link");
 		if ($config_link || -r "$mdir/config.info") {
 			push(@acts, ui_link($config_link ||

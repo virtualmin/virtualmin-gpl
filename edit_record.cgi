@@ -190,8 +190,8 @@ else {
 # Returns a field for entering a TTL
 sub ttl_field
 {
-local ($name, $ttl) = @_;
-local $ttl_units;
+my ($name, $ttl) = @_;
+my $ttl_units;
 if ($ttl =~ /^(\d+)([a-z])$/i) {
 	$ttl = $1;
 	$ttl_units = lc($2);

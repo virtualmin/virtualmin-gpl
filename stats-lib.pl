@@ -4,7 +4,7 @@
 # Returns a hash ref with info about the units and class of some stat
 sub historic_stat_info
 {
-local ($name, $maxes) = @_;
+my ($name, $maxes) = @_;
 if ($name =~ /count$/) {
 	return { 'type' => 'email', 'units' => $text{'history_messages'} };
 	}

@@ -13,7 +13,7 @@ $utotal = scalar(@users);
 if (!$d->{'parent'}) {
 	# Sum up users from all sub-domains
 	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
-		local @susers = &list_domain_users($sd, 0, 1, 1, 1, 1);
+		my @susers = &list_domain_users($sd, 0, 1, 1, 1, 1);
 		$utotal += scalar(@susers);
 		}
 	}

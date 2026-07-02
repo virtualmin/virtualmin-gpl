@@ -965,7 +965,7 @@ foreach my $sched (&list_scheduled_backups()) {
 # access key, secret key and endpoint. Duplicate access keys are not repeated.
 sub list_all_s3_accounts
 {
-local @rv;
+my @rv;
 if (&can_cloud_providers()) {
 	foreach my $s3 (&list_s3_accounts()) {
 		push(@rv, [ $s3->{'access'}, $s3->{'secret'},
@@ -973,9 +973,9 @@ if (&can_cloud_providers()) {
 		}
 	}
 foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
-	local @dests = &get_scheduled_backup_dests($sched);
+	my @dests = &get_scheduled_backup_dests($sched);
 	foreach my $dest (@dests) {
-		local ($mode, $user, $pass, $server, $path, $port) =
+		my ($mode, $user, $pass, $server, $path, $port) =
 			&parse_backup_url($dest);
 		if ($mode == 3) {
 			my $s3 = &get_s3_account($user);
@@ -989,7 +989,7 @@ foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
 			}
 		}
 	}
-local %done;
+my %done;
 return grep { !$done{$_->[0]}++ } @rv;
 }
 

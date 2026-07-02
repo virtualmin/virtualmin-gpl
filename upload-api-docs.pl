@@ -197,10 +197,10 @@ if (!$noupload) {
 # the program summary line.
 sub convert_to_html
 {
-local ($data) = @_;
+my ($data) = @_;
 my $parser = Pod::Simple::HTML->new('dokuwiki');
-local $infile = "/tmp/pod2html.in";
-local $outfile = "/tmp/pod2html.out";
+my $infile = "/tmp/pod2html.in";
+my $outfile = "/tmp/pod2html.out";
 open(INFILE, ">$infile");
 print INFILE $data;
 close(INFILE);
@@ -210,13 +210,13 @@ $parser->output_fh(*OUTFILE);
 $parser->parse_file(*INFILE);
 close(INFILE);
 close(OUTFILE);
-local $html = `cat $outfile`;
+my $html = `cat $outfile`;
 return ($html, &extract_html_title($html));
 }
 
 sub extract_html_title
 {
-local ($html) = @_;
+my ($html) = @_;
 if ($html =~ /<p>([^<]+)<\/p>/i) {
 	return $1;
 	}
@@ -227,7 +227,7 @@ return undef;
 # Returns the unique elements of some array
 sub unique
 {
-local(%found, @rv, $e);
+my(%found, @rv, $e);
 foreach $e (@_) {
 	if (!$found{$e}++) { push(@rv, $e); }
 	}
@@ -237,7 +237,7 @@ return @rv;
 # indexof(string, array)
 # Returns the index of some value in an array, or -1
 sub indexof {
-  local($i);
+  my($i);
   for($i=1; $i <= $#_; $i++) {
     if ($_[$i] eq $_[0]) { return $i - 1; }
   }

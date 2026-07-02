@@ -96,7 +96,7 @@ if ($in{'refresh'}) {
 
 sub shorten_category
 {
-local ($desc, $max) = @_;
+my ($desc, $max) = @_;
 $max ||= 12;
 if (length($desc) > $max) {
 	return substr($desc, 0, $max-2)."...";

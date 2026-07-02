@@ -49,7 +49,7 @@ if (!$module_name) {
 
 # Parse command-line args
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		push(@domains, shift(@ARGV));
 		}
@@ -155,16 +155,16 @@ foreach my $d (@doms) {
 	$mod_php = 0;
 	if ($d->{'web'} && &get_apache_mod_php_version()) {
 		&obtain_lock_web($d);
-		local @ports;
+		my @ports;
 		push(@ports, $d->{'web_port'}) if ($d->{'web'});
 		push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
 		foreach my $port (@ports) {
-			local ($virt, $vconf, $conf) = &get_apache_virtual(
+			my ($virt, $vconf, $conf) = &get_apache_virtual(
 							$d->{'dom'}, $port);
 			next if (!$virt);
 
 			# Find currently set PHP variables
-			local @phpv = &apache::find_directive(
+			my @phpv = &apache::find_directive(
 					"php_value", $vconf);
 			for(my $i=0; $i<@ini_names; $i++) {
 				my $found = 0;

@@ -52,7 +52,7 @@ $config{'spam'} || &usage("Spam filtering is not enabled for Virtualmin");
 
 # Parse command-line args
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a =~ /^--use-(spamc|spamassassin)$/) {
 		$spam_client = $1;
 		}
@@ -146,8 +146,8 @@ $new_virus_host = defined($virus_host) ? $virus_host
 
 # Make sure the new virus scanner works
 if ($virus_scanner || $virus_host) {
-	local ($cmd, @args) = &split_quoted_string($new_virus_scanner);
-	local $shcmd = $cmd eq "clamdscan-remote" ? "clamdscan" : $cmd;
+	my ($cmd, @args) = &split_quoted_string($new_virus_scanner);
+	my $shcmd = $cmd eq "clamdscan-remote" ? "clamdscan" : $cmd;
 	&has_command($shcmd) ||
 		&usage("Virus scanning command $shcmd does not exist");
 	if (!$clamd || $new_virus_scanner ne "clamdscan") {

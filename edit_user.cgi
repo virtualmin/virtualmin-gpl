@@ -125,8 +125,8 @@ if ($user_type eq 'ssh') {
 
 	if ($showhome) {
 		# Show home directory editing field
-		local $reshome = &resolve_links($user->{'home'});
-		local $helppage = "userhome";
+		my $reshome = &resolve_links($user->{'home'});
+		my $helppage = "userhome";
 		if ($user->{'brokenhome'}) {
 			# Home directory is in odd location, and so cannot
 			# be edited
@@ -221,7 +221,7 @@ elsif ($user_type eq 'ftp') {
 			}
 		elsif ($user->{'webowner'}) {
 			# Home can be public_html or a sub-dir
-			local $phd = &public_html_dir($d);
+			my $phd = &public_html_dir($d);
 			$homefield = &ui_radio("home_def", 1 ? 1 : 0,
 					[ [ 1, $text{'user_home2'} ],
 					  [ 0, $text{'user_homeunder2'} ] ]).
@@ -325,7 +325,7 @@ elsif ($user_type eq 'mail') {
 		@extra = @{$user->{'extraemail'}};
 		foreach $e (@extra) {
 			if ($e =~ /^(\S*)\@(\S+)$/) {
-				local ($eu, $ed) = ($1, $2);
+				my ($eu, $ed) = ($1, $2);
 				$ed = &show_domain_name($ed);
 				$e = $eu."\@".$ed;
 				}
@@ -705,7 +705,7 @@ else {
 				         &ui_textbox("mailpass", undef, 20) ]);
 			$pwfield = &ui_radio("mailpass_def", $mode, \@opts);
 			if ($user->{'change'}) {
-				local $tm = timelocal(gmtime($user->{'change'} *
+				my $tm = timelocal(gmtime($user->{'change'} *
 							     60*60*24));
 				$pwfield .= "&nbsp;&nbsp;".
 				    &text('user_lastch', &make_date($tm, 1));
@@ -830,8 +830,8 @@ else {
 
 	if ($showhome) {
 		# Show home directory editing field
-		local $reshome = &resolve_links($user->{'home'});
-		local $helppage = "userhome";
+		my $reshome = &resolve_links($user->{'home'});
+		my $helppage = "userhome";
 		if ($user->{'brokenhome'}) {
 			# Home directory is in odd location, and so cannot
 			# be edited
@@ -840,8 +840,8 @@ else {
 			}
 		elsif ($user->{'webowner'}) {
 			# Home can be public_html or a sub-dir
-			local $phd = &public_html_dir($d);
-			local $auto = $in{'new'} ||
+			my $phd = &public_html_dir($d);
+			my $auto = $in{'new'} ||
 				      $reshome eq &resolve_links($phd);
 			$homefield = &ui_radio("home_def", $auto ? 1 : 0,
 					[ [ 1, $text{'user_home2'} ],
@@ -853,7 +853,7 @@ else {
 			}
 		else {
 			# Home is under server root, and so can be edited
-			local $auto = $in{'new'} ||
+			my $auto = $in{'new'} ||
 			$reshome eq
 			&resolve_links("$d->{'home'}/$config{'homes_dir'}/$pop3");
 			$homefield = &ui_radio("home_def", $auto ? 1 : 0,
@@ -900,8 +900,8 @@ else {
 
 		if ($hasmailfile && $config{'show_mailuser'}) {
 			# Show the user's mail file
-			local ($sz, $umf, $lastmod) = &mail_file_size($user);
-			local $link = &read_mail_link($user, $d);
+			my ($sz, $umf, $lastmod) = &mail_file_size($user);
+			my $link = &read_mail_link($user, $d);
 			if ($link) {
 				$mffield = "<a href='$link'><tt>$umf</tt></a>\n";
 				}
@@ -928,7 +928,7 @@ else {
 			@extra = @{$user->{'extraemail'}};
 			foreach $e (@extra) {
 				if ($e =~ /^(\S*)\@(\S+)$/) {
-					local ($eu, $ed) = ($1, $2);
+					my ($eu, $ed) = ($1, $2);
 					$ed = &show_domain_name($ed);
 					$e = $eu."\@".$ed;
 					}
@@ -1144,11 +1144,10 @@ else {
 	if (&can_switch_usermin($d, $user) &&
 	    &foreign_installed("usermin", 1)) {
 		&foreign_require("usermin");
-		local %uminiserv;
+		my %uminiserv;
 		&usermin::get_usermin_miniserv_config(\%uminiserv);
 		if (&check_pid_file($uminiserv{'pidfile'}) &&
-		    defined(&usermin::switch_to_usermin_user) &&
-		    $uminiserv{'session'}) {
+		    &can_create_usermin_login_url(\%uminiserv)) {
 			$usermin = 1;
 			}
 		}

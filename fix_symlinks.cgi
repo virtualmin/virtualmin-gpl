@@ -56,7 +56,7 @@ else {
 	@dfound = ( );
 	foreach my $d (&list_domains()) {
 		next if ($d->{'alias'} || !$d->{'dir'});
-		local @dhtaccess = &fix_script_htaccess_files(
+		my @dhtaccess = &fix_script_htaccess_files(
                                         $d, &public_html_dir($d), 1);
 		push(@htaccess, @dhtaccess);
 		push(@dfound, [ $d, \@dhtaccess ]) if (@dhtaccess);

@@ -91,7 +91,7 @@ else {
 # Print start of the alias form, either for simple or complex mode
 sub alias_form_start
 {
-local ($sfx) = @_;
+my ($sfx) = @_;
 my @tds = ( "width=30%" );
 print &ui_table_start($text{'alias_header'}, "width=100%", 2);
 

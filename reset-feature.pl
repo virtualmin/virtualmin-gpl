@@ -38,7 +38,7 @@ if (!$module_name) {
 
 # Parse command-line args
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		push(@dnames, shift(@ARGV));
 		}
@@ -206,7 +206,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 
 	# Run the after command
 	&set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
-	local $merr = &made_changes();
+	my $merr = &made_changes();
 	&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
 		if (defined($merr));
 	&reset_domain_envs($d);

@@ -219,8 +219,8 @@ return ( "upload-api-docs.pl",
 # Returns a list of directories to check for API scripts
 sub list_api_directories
 {
-local ($pwd) = @_;
-local $par = $pwd;
+my ($pwd) = @_;
+my $par = $pwd;
 $par =~ s/\/([^\/]+)$//;
 return ( $pwd, glob("$par/virtualmin-*") );
 }
@@ -250,16 +250,16 @@ else {
 # an error message.
 sub create_api_helper_command
 {
-local ($extradirs) = @_;
-local @dirs = ( $module_root_directory );
+my ($extradirs) = @_;
+my @dirs = ( $module_root_directory );
 push(@dirs, @$extradirs) if ($extradirs);
-local $dirstr = join(" ", @dirs);
-local $proonly = join(" ", &list_pro_only_api_commands());
-local $api_helper_command = &get_api_helper_command();
+my $dirstr = join(" ", @dirs);
+my $proonly = join(" ", &list_pro_only_api_commands());
+my $api_helper_command = &get_api_helper_command();
 if (!$api_helper_command) {
 	return (0, "No writable path configured or auto-detected");
 	}
-local $bash = &has_command("bash") || &has_command("sh");
+my $bash = &has_command("bash") || &has_command("sh");
 if ($bash) {
 	&open_tempfile(HELPER, ">$api_helper_command", 1, 0) ||
 		return (0, "Failed to write to $api_helper_command : $!");

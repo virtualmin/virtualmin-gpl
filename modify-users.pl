@@ -44,7 +44,7 @@ if (!$module_name) {
 # Parse command-line args
 my $argvs = "@ARGV";
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--all-domains") {
 		$all_doms = 1;
 		}

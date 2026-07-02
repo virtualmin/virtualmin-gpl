@@ -36,7 +36,7 @@ if (!$module_name) {
 $owner = 1;
 &parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--bucket") {
 		$bucket = shift(@ARGV);
 		}
@@ -70,7 +70,7 @@ if ($multiline) {
 		if ($f->{'Owner'}) {
 			print "    Owner: $f->{'Owner'}->{'DisplayName'}\n";
 			}
-		local $ctime = &s3_parse_date($f->{'LastModified'});
+		my $ctime = &s3_parse_date($f->{'LastModified'});
 		print "    Last modified: ",&make_date($ctime),"\n";
 		print "    Last modified time: ",$ctime,"\n";
 		print "    Storage class: $f->{'StorageClass'}\n";
@@ -89,7 +89,7 @@ else {
 	printf $fmt, "Filename", "Size", "Last modified";
 	printf $fmt, ("-" x 35), ("-" x 12), ("-" x 30);
 	foreach $f (@$files) {
-		local $ctime = &s3_parse_date($f->{'LastModified'});
+		my $ctime = &s3_parse_date($f->{'LastModified'});
 		printf $fmt, $f->{'Key'}, &nice_size($f->{'Size'}),
 			     &make_date($ctime);
 		}

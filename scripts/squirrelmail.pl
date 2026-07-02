@@ -28,7 +28,7 @@ return 2;	# Remove set_user_data
 
 sub script_squirrelmail_version_desc
 {
-local ($ver) = @_;
+my ($ver) = @_;
 return $ver < 1.5 ? "$ver (Stable)" : "$ver (Development)";
 }
 
@@ -59,7 +59,7 @@ return 1;
 
 sub script_squirrelmail_pear_modules
 {
-local ($d, $opts) = @_;
+my ($d, $opts) = @_;
 return $opts->{'db'} ? ( "DB" ) : ( );
 }
 
@@ -67,22 +67,22 @@ return $opts->{'db'} ? ( "DB" ) : ( );
 # Returns HTML for table rows for options for installing PHP-NUKE
 sub script_squirrelmail_params
 {
-local ($d, $ver, $upgrade) = @_;
-local $rv;
-local $hdir = &public_html_dir($d, 1);
+my ($d, $ver, $upgrade) = @_;
+my $rv;
+my $hdir = &public_html_dir($d, 1);
 if ($upgrade) {
 	# Options are fixed when upgrading
-	local ($dbtype, $dbname) = split(/_/, $upgrade->{'opts'}->{'db'}, 2);
+	my ($dbtype, $dbname) = split(/_/, $upgrade->{'opts'}->{'db'}, 2);
 	if ($dbtype) {
 		$rv .= &ui_table_row("Database for SquirrelMail preferences", $dbname);
 		}
-	local $dir = $upgrade->{'opts'}->{'dir'};
+	my $dir = $upgrade->{'opts'}->{'dir'};
 	$dir =~ s/^$d->{'home'}\///;
 	$rv .= &ui_table_row("Install directory", $dir);
 	}
 else {
 	# Show editable install options
-	local @dbs = &domain_databases($d, [ "mysql" ]);
+	my @dbs = &domain_databases($d, [ "mysql" ]);
 	if (@dbs) {
 		$rv .= &ui_table_row("Database for SquirrelMail preferences",
 		     &ui_radio("db_def", 1, [ [ 1, "None" ],
@@ -102,16 +102,16 @@ return $rv;
 # Returns either a hash ref of parsed options, or an error string
 sub script_squirrelmail_parse
 {
-local ($d, $ver, $in, $upgrade) = @_;
+my ($d, $ver, $in, $upgrade) = @_;
 if ($upgrade) {
 	# Options are always the same
 	return $upgrade->{'opts'};
 	}
 else {
-	local $hdir = &public_html_dir($d, 0);
+	my $hdir = &public_html_dir($d, 0);
 	$in{'dir_def'} || $in{'dir'} =~ /\S/ && $in{'dir'} !~ /\.\./ ||
 		return "Missing or invalid installation directory";
-	local $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
+	my $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
 	return { 'db' => $in{'db_def'} ? undef : $in->{'db'},
 		 'dir' => $dir,
 		 'path' => $in{'dir_def'} ? "/" : "/$in{'dir'}", };
@@ -122,14 +122,14 @@ else {
 # Returns an error message if a required option is missing or invalid
 sub script_squirrelmail_check
 {
-local ($d, $ver, $opts, $upgrade) = @_;
+my ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 if (-r "$opts->{'dir'}/config/config.php") {
 	return "SquirrelMail appears to be already installed in the selected directory";
 	}
 if ($opts->{'db'}) {
-	local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-	local $clash = &find_database_table($dbtype, $dbname, "userprefs|address|global_abook");
+	my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+	my $clash = &find_database_table($dbtype, $dbname, "userprefs|address|global_abook");
 	$clash && return "SquirrelMail appears to be already using the selected database (table $clash)";
 	}
 return undef;
@@ -140,8 +140,8 @@ return undef;
 # containing a name, filename and URL
 sub script_squirrelmail_files
 {
-local ($d, $ver, $opts, $upgrade) = @_;
-local @files = ( { 'name' => "source",
+my ($d, $ver, $opts, $upgrade) = @_;
+my @files = ( { 'name' => "source",
 	   'file' => "squirrelmail-$ver.tar.gz",
 	   'nocheck' => 1,
 	   'url' => "http://prdownloads.sourceforge.net/squirrelmail/squirrelmail-webmail-$ver.tar.gz" },
@@ -163,15 +163,15 @@ return ("tar", "gunzip");
 # message, or 0 and an error
 sub script_squirrelmail_install
 {
-local ($d, $version, $opts, $files, $upgrade) = @_;
-local ($out, $ex);
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
-local $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
-local $dbphptype = $dbtype eq "mysql" ? "mysql" : "psql";
-local $dbhost = &get_database_host($dbtype, $d);
+my ($d, $version, $opts, $files, $upgrade) = @_;
+my ($out, $ex);
+my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+my $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
+my $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
+my $dbphptype = $dbtype eq "mysql" ? "mysql" : "psql";
+my $dbhost = &get_database_host($dbtype, $d);
 if ($dbtype) {
-	local $dberr = &check_script_db_connection(
+	my $dberr = &check_script_db_connection(
 		$d, $dbtype, $dbname, $dbuser, $dbpass);
 	return (0, "Database connection failed : $dberr") if ($dberr);
 	}
@@ -182,25 +182,25 @@ if ($upgrade) {
 	}
 
 # Extract tar file to temp dir and copy to target
-local $temp = &transname();
-local $err = &extract_script_archive($files->{'source'}, $temp, $d,
+my $temp = &transname();
+my $err = &extract_script_archive($files->{'source'}, $temp, $d,
 			     $opts->{'dir'}, "squirrelmail-webmail-$ver");
 $err && return (0, "Failed to extract source : $err");
-local $cprog = "$opts->{'dir'}/config/conf.pl";
+my $cprog = "$opts->{'dir'}/config/conf.pl";
 
 # Extract locales
-local $temp2 = &transname();
-local $err2 = &extract_script_archive($files->{'locales'}, $temp2, $d,
+my $temp2 = &transname();
+my $err2 = &extract_script_archive($files->{'locales'}, $temp2, $d,
 			     $opts->{'dir'}."/locale", "locale");
 $err2 && return (0, "Failed to extract locales : $err2");
 
 if (!$upgrade) {
 	# Run the config program
 	&foreign_require("proc", "proc-lib.pl");
-	local $confcmd = &command_as_user($d->{'user'}, 0,
+	my $confcmd = &command_as_user($d->{'user'}, 0,
 					  "$opts->{'dir'}/config/conf.pl");
 	&clean_environment();
-	local ($fh, $fpid) = &proc::pty_process_exec($confcmd);
+	my ($fh, $fpid) = &proc::pty_process_exec($confcmd);
 	&reset_environment();
 	if (&wait_for($fh, "SquirrelMail", "different one") == 1) {
 		&sysprint($fh, "n\n");
@@ -208,7 +208,7 @@ if (!$upgrade) {
 	foreach my $cmd ([ ">>", "D" ], [ ">>", "courier" ],
 			 [ "any key|enter", "" ], [ ">>", "S" ],
 			 [ "enter", "" ], [ "Q", "Exiting" ]) {
-		local $rv = &wait_for($fh, $cmd->[0]);
+		my $rv = &wait_for($fh, $cmd->[0]);
 		return (0, "Configuration program failed : $wait_for_input")
 			if ($rv < 0);
 		&sysprint($fh, "$cmd->[1]\n");
@@ -219,7 +219,7 @@ if (!$upgrade) {
 	kill('KILL', $fpid);
 	if (&foreign_check("proc")) {
 		&foreign_require("proc", "proc-lib.pl");
-		local @cprocs = grep { $_->{'user'} eq $d->{'user'} &&
+		my @cprocs = grep { $_->{'user'} eq $d->{'user'} &&
 				       $_->{'args'} =~ /conf\.pl/ }
 				     &proc::list_processes();
 		foreach my $cproc (@cprocs) {
@@ -227,20 +227,20 @@ if (!$upgrade) {
 			}
 		}
 
-	local $cfile = "$opts->{'dir'}/config/config.php";
+	my $cfile = "$opts->{'dir'}/config/config.php";
 	-r $cfile || return (-1, "Failed to create config file");
 
 	# Create data directories
-	local $data_dir = "$opts->{'dir'}/data";
+	my $data_dir = "$opts->{'dir'}/data";
 	&make_dir_as_domain_user($d, $data_dir, 0700) if (!-d $data_dir);
 	&make_file_php_writable($d, $data_dir, 1, 1);
-	local $attachment_dir = "$opts->{'dir'}/attach";
+	my $attachment_dir = "$opts->{'dir'}/attach";
 	&make_dir_as_domain_user($d, $attachment_dir, 0700) if (!-d $attachment_dir);
 	&make_file_php_writable($d, $attachment_dir, 1, 1);
 
 	# Update the config file
-	local $lref = &read_file_lines_as_domain_user($d, $cfile);
-	local $dburl = "$dbphptype://$dbuser:".&php_quotemeta($dbpass, 1).
+	my $lref = &read_file_lines_as_domain_user($d, $cfile);
+	my $dburl = "$dbphptype://$dbuser:".&php_quotemeta($dbpass, 1).
 		       "\@$dbhost/$dbname";
 	foreach $l (@$lref) {
 		if ($l =~ /^\$domain\s*=\s*/) {
@@ -306,8 +306,8 @@ if (!$upgrade) {
 	}
 
 # Return a URL for the user
-local $url = &script_path_url($d, $opts);
-local $rp = $opts->{'dir'};
+my $url = &script_path_url($d, $opts);
+my $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
 return (1, "SquirrelMail installation complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", $dbname ? "Under $rp using $dbphptype database $dbname" : "Under $rp", $url);
 }
@@ -317,14 +317,14 @@ return (1, "SquirrelMail installation complete. It can be accessed at <a target=
 # Returns 1 on success and a message, or 0 on failure and an error
 sub script_squirrelmail_uninstall
 {
-local ($d, $version, $opts) = @_;
+my ($d, $version, $opts) = @_;
 
 # Remove squirrelmail tables from the database
 &cleanup_script_database($d, $opts->{'db'},
 			 [ "address", "global_abook", "userprefs" ]);
 
 # Remove the contents of the target directory
-local $derr = &delete_script_install_directory($d, $opts);
+my $derr = &delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
 
 return (1, $dbname ? "SquirrelMail directory and tables deleted."
@@ -336,8 +336,8 @@ return (1, $dbname ? "SquirrelMail directory and tables deleted."
 # a newer one. Otherwise returns undef.
 sub script_squirrelmail_check_latest
 {
-local ($ver) = @_;
-local @vers = &osdn_package_versions("squirrelmail", "squirrelmail-webmail-([a-z0-9\\.]+)\\.tar\\.gz");
+my ($ver) = @_;
+my @vers = &osdn_package_versions("squirrelmail", "squirrelmail-webmail-([a-z0-9\\.]+)\\.tar\\.gz");
 @vers = grep { !/RC/ } @vers;
 if (&compare_versions($ver, 1.5) > 0) {
 	@vers = grep { &compare_versions($_, 1.5) > 0 } @vers;

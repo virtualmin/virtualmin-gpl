@@ -38,7 +38,7 @@ $owner = 1;
 $ipv4 = 1;
 $ipv6 = 0;
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--ipv6") {
 		$ipv6 = 1;
 		}

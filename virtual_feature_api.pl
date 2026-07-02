@@ -865,13 +865,13 @@ sub database_users
 {
 }
 
-# database_create_user(&domain, &dbs, username, password)
+# database_create_user(&domain, &dbs, username, plain-password, [encrypted-password])
 # Creates a user with access to the specified databases
 sub database_create_user
 {
 }
 
-# database_modify_user(&domain, &olddbs, &dbs, oldusername, username, [pass])
+# database_modify_user(&domain, &olddbs, &dbs, oldusername, username, [plain-password], [encrypted-password])
 # Updates a user, changing his available databases, username and password
 sub database_modify_user
 {

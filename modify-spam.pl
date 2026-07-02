@@ -77,7 +77,7 @@ $config{'spam'} || &usage("Spam filtering is not enabled for Virtualmin");
 $spamlevel = undef;
 $auto = { };
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		push(@dnames, shift(@ARGV));
 		}

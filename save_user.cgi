@@ -45,9 +45,7 @@ if ($in{'switch'}) {
 	# Auto-login to Usermin
 	&can_switch_usermin($d, $user) ||
 		&error($text{'user_eswitch'});
-	&foreign_require("usermin");
-	($cookie, $url) = &usermin::switch_to_usermin_user($user->{'user'});
-	print "Set-Cookie: $cookie\n";
+	$url = &create_usermin_login_url($d, $user->{'user'});
 	&redirect($url);
 	return;
 	}
@@ -126,8 +124,8 @@ elsif ($in{'delete'}) {
 		print &ui_hidden("delete", 1);
 
 		# Count up home directory size
-		local ($mailsz) = &mail_file_size($user);
-		local ($msg, $homesz);
+		my ($mailsz) = &mail_file_size($user);
+		my ($msg, $homesz);
 		if ($user->{'nocreatehome'} || !$user->{'home'}) {
 			$msg = 'user_rusurew';
 			}
@@ -144,7 +142,7 @@ elsif ($in{'delete'}) {
 		# Check for home directory clash
 		if (!$user->{'nocreatehome'} && $user->{'home'} &&
 		    !$user->{'webowner'}) {
-			local @hclash = grep {
+			my @hclash = grep {
 				(&same_file($_->{'home'}, $user->{'home'}) ||
 				 &is_under_directory($user->{'home'},
 						     $_->{'home'})) &&
@@ -244,9 +242,9 @@ else {
 			}
 
 		# Save list of allowed databases
-		local ($db, @dbs);
+		my ($db, @dbs);
 		foreach $db (split(/\r?\n/, $in{'dbs'})) {
-			local ($type, $name) = split(/_/, $db, 2);
+			my ($type, $name) = split(/_/, $db, 2);
 			push(@dbs, { 'type' => $type,
 				     'name' => $name });
 			}
@@ -276,9 +274,9 @@ else {
 		if ($e eq $eu."\@".$d->{'dom'}) {
 			&error(&text('user_eextra5', $e));
 			}
-		local ($eu, $ed) = ($1, $2);
+		my ($eu, $ed) = ($1, $2);
 		$ed = &parse_domain_name($ed);
-		local $edom = &get_domain_by("dom", $ed);
+		my $edom = &get_domain_by("dom", $ed);
 		$edom && $edom->{'mail'} || &error(&text('user_eextra2', $ed));
 		&can_edit_domain($edom) || $oldextra{$e} ||
 			&error(&text('user_eextra3', $ed));
@@ -702,7 +700,7 @@ else {
 
 			# Set mail file location
 			if ($user->{'qmail'}) {
-				local $store = &substitute_virtualmin_template(
+				my $store = &substitute_virtualmin_template(
 					$config{'ldap_mailstore'}, $user);
 				$user->{'mailstore'} = $store;
 				}
@@ -820,4 +818,3 @@ foreach my $t (@{$user->{'to'}}) {
 		}
 	}
 }
-

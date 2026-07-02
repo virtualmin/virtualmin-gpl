@@ -130,7 +130,7 @@ $can_scripts = $can_scripts && @phpmyadmin;
 print &ui_tabs_start_tab("databasemode", "list") if (@tabs > 1);
 print "$text{'databases_desc1'}<p>\n";
 foreach $db (sort { $a->{'name'} cmp $b->{'name'} } @dbs) {
-	local $action;
+	my $action;
 	if ($db->{'link'}) {
 		$action = "<a href='$db->{'link'}'>".
 			  "$text{'databases_man'}</a>";
@@ -142,7 +142,7 @@ foreach $db (sort { $a->{'name'} cmp $b->{'name'} } @dbs) {
 				"$text{'databases_login_pma_link'}</a>";
 			}
 		}
-	local $dis = $db->{'name'} eq $d->{'db'} && !&can_edit_database_name();
+	my $dis = $db->{'name'} eq $d->{'db'} && !&can_edit_database_name();
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $db->{'type'}.'_'.$db->{'name'},

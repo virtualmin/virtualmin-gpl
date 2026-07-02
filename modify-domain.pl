@@ -102,7 +102,7 @@ if (!$module_name) {
 $name = 1;
 $virt = 0;
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		$domain = lc(shift(@ARGV));
 		}
@@ -854,7 +854,7 @@ for(my $i=0; $i<@doms; $i++) {
 	print "Updating virtual server $d->{'dom'} ..\n\n";
 	foreach $f (@features) {
 		if ($config{$f} && $d->{$f}) {
-			local $mfunc = "modify_$f";
+			my $mfunc = "modify_$f";
 			&try_function($f, $mfunc, $d, $od);
 			}
 		}
@@ -996,7 +996,7 @@ if ($dom->{'template'} ne $old->{'template'}) {
 # Run the after command
 &run_post_actions();
 &set_domain_envs($dom, "MODIFY_DOMAIN", undef, $old);
-local $merr = &made_changes();
+my $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($dom);
 &virtualmin_api_log(\@OLDARGV, $dom, $dom->{'hashpass'} ? [ "pass" ] : [ ]);

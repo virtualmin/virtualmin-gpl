@@ -220,7 +220,7 @@ if (&can_view_sysinfo()) {
 	print "<table width=100%>\n";
 	foreach my $f ("virtualmin", @features) {
 		if ($config{$f} || $f eq "virtualmin") {
-			local $ifunc = "sysinfo_$f";
+			my $ifunc = "sysinfo_$f";
 			push(@info, &$ifunc()) if (defined(&$ifunc));
 			}
 		}
@@ -273,9 +273,9 @@ PAGEEND:
 # create_links(num)
 sub create_links
 {
-local ($num) = @_;
-local ($dleft, $dreason, $dmax, $dhide) = &count_domains("realdoms");
-local ($cannot_add, $limit_reason);
+my ($num) = @_;
+my ($dleft, $dreason, $dmax, $dhide) = &count_domains("realdoms");
+my ($cannot_add, $limit_reason);
 if ($dleft == 0) {
 	# Need to show reason for hitting the limit
 	$cannot_add = &text('index_noadd'.$dreason, $dmax);

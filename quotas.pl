@@ -52,7 +52,7 @@ foreach $d (&list_domains()) {
 		}
 	foreach $u (@users) {
 		next if ($u->{'webowner'});
-		local $msg;
+		my $msg;
 
 		# Check if over home quota
 		if ($u->{'quota'}) {
@@ -113,19 +113,19 @@ if ($config{'quota_email'}) {
 # Converts a list of domain over-quota notifications into a message, and send it
 sub send_domain_quota_email
 {
-local ($msgs, $email) = @_;
+my ($msgs, $email) = @_;
 $email = $gconfig{'webmin_email_to'} if ($email eq '*');
 
-local $fmt = "%-20.20s %-15.15s %-15.15s %-20.20s\n";
-local $body = "$text{'quotawarn_body'}\n\n";
-local $body .= sprintf($fmt, $text{'quotawarn_server'},
+my $fmt = "%-20.20s %-15.15s %-15.15s %-20.20s\n";
+my $body = "$text{'quotawarn_body'}\n\n";
+my $body .= sprintf($fmt, $text{'quotawarn_server'},
 			     $text{'quotawarn_quota'},
 			     $text{'quotawarn_usage'},
 			     $text{'quotawarn_status'});
 $body .= sprintf($fmt, "-" x 20, "-" x 15, "-" x 15, "-" x 20);
-local $emaild = undef;
+my $emaild = undef;
 foreach my $m (@$msgs) {
-	local $msg = $m->[3] ? &text('quotawarn_reached', $m->[3])
+	my $msg = $m->[3] ? &text('quotawarn_reached', $m->[3])
 			     : $text{'quotawarn_over'};
 	$emaild ||= $m->[0];
 	$body .= sprintf($fmt, $m->[0]->{'dom'},
@@ -156,18 +156,18 @@ else {
 # Converts a list of user over-quota notifications into a message, and send it
 sub send_user_quota_email
 {
-local ($msgs, $email) = @_;
+my ($msgs, $email) = @_;
 
-local $fmt = "%-30.30s %-15.15s %-15.15s %-15.15s\n";
-local $body = "$text{'quotawarn_body2'}\n\n";
+my $fmt = "%-30.30s %-15.15s %-15.15s %-15.15s\n";
+my $body = "$text{'quotawarn_body2'}\n\n";
 $body .= sprintf($fmt, $text{'quotawarn_email'},
                        $text{'quotawarn_quota'},
                        $text{'quotawarn_usage'},
                        $text{'quotawarn_status'});
 $body .= sprintf($fmt, "-" x 35, "-" x 15, "-" x 15, "-" x 15);
-local $emaild = undef;
+my $emaild = undef;
 foreach my $m (@$msgs) {
-	local $msg = $m->[3] ? &text('quotawarn_reached', $m->[3])
+	my $msg = $m->[3] ? &text('quotawarn_reached', $m->[3])
                              : $text{'quotawarn_over'};
 	$emaild ||= $m->[0];
 	$body .= sprintf($fmt, $m->[5]->{'email'} ||
@@ -199,15 +199,15 @@ else {
 # Send email to one user who is close to or over quota
 sub send_single_user_quota_email
 {
-local ($msg) = @_;
+my ($msg) = @_;
 $email = $msg->[5]->{'email'} ||
 	  $msg->[5]->{'user'}.'@'.&get_system_hostname();
-local $tmpl = &get_quotas_message();
-local %hash = %{$msg->[5]};
+my $tmpl = &get_quotas_message();
+my %hash = %{$msg->[5]};
 $hash{'quota_limit'} = &nice_size($msg->[2]);
 $hash{'quota_used'} = &nice_size($msg->[1]);
 $hash{'quota_percent'} = $msg->[3] || '';
-local $body = &substitute_domain_template($tmpl, $msg->[0], \%hash);
+my $body = &substitute_domain_template($tmpl, $msg->[0], \%hash);
 
 # Send the email
 if ($debug_mode) {
@@ -230,14 +230,14 @@ else {
 # a message hash ref with the details.
 sub check_quota_threshold
 {
-local ($d, $usage, $limit, $user) = @_;
+my ($d, $usage, $limit, $user) = @_;
 if ($usage >= $limit) {
 	# Over!
 	return [ $d, $usage, $limit, undef, 100, $user ];
 	}
 elsif ($config{'quota_warn'}) {
 	# Check if passed some threshold
-	local @warn = sort { $b <=> $a } split(/\s+/, $config{'quota_warn'});
+	my @warn = sort { $b <=> $a } split(/\s+/, $config{'quota_warn'});
 	foreach my $w (@warn) {
 		if ($usage > $limit*$w/100) {
 			return [ $d, $usage, $limit,
@@ -252,7 +252,7 @@ return undef;
 # Returns 0 if the user or domain should not be notified, 1 if so
 sub check_quota_interval
 {
-local ($msg, $lastt, $lastw) = @_;
+my ($msg, $lastt, $lastw) = @_;
 if ($config{'quota_interval'}) {
 	# When as the last time we emailed at this level or
 	# higher?

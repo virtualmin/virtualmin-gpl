@@ -36,7 +36,7 @@ if (!$module_name) {
 
 # Parse command-line args
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		$domain = shift(@ARGV);
 		}

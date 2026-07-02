@@ -113,7 +113,7 @@ if (&can_backup_virtualmin()) {
 
 # Parse option inputs
 foreach $f (@do_features) {
-	local $ofunc = "parse_restore_$f";
+	my $ofunc = "parse_restore_$f";
 	if (defined(&$ofunc)) {
 		$options{$f} = &$ofunc(\%in);
 		}
@@ -178,7 +178,7 @@ if ($in{'confirm'}) {
 			$gotvbs = 1;
 			next;
 			}
-		local $dinfo = &get_domain_by("dom", $d);
+		my $dinfo = &get_domain_by("dom", $d);
 		if ($dinfo && (!$dinfo->{'id'} || !$dinfo->{'dom'})) {
 			# File is actually empty!
 			$dinfo = undef;
@@ -258,8 +258,8 @@ if (!$in{'confirm'}) {
 	$anymissing = 0;
 	foreach $d (sort { $a cmp $b } keys %$cont) {
 		next if ($d eq "virtualmin");
-		local $dinfo = &get_domain_by("dom", $d);
-		local $can = $crmode == 1 ||
+		my $dinfo = &get_domain_by("dom", $d);
+		my $can = $crmode == 1 ||
 			     $dinfo && &can_edit_domain($dinfo);
 		if ($in{'log'} && !$can) {
 			# When restoring from a logged backup, don't even show

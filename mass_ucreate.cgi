@@ -38,7 +38,7 @@ $source =~ s/\r//g;
 ($nologin_shell, $ftp_shell, $jailed_shell) = &get_common_available_shells();
 
 # Build taken lists
-local (%taken, %utaken);
+my (%taken, %utaken);
 &obtain_lock_unix();
 &obtain_lock_mail();
 &build_taken(\%taken, \%utaken);
@@ -58,7 +58,7 @@ $sep = "\t" if ($sep eq "tab");
 USER: foreach $line (@lines) {
 	$lnum++;
 	next if ($line !~ /\S/);
-	local ($username, $real, $pass, $ftp, $email, $quota, $extras, $forwards, $dbs) = split($sep, $line, -1);
+	my ($username, $real, $pass, $ftp, $email, $quota, $extras, $forwards, $dbs) = split($sep, $line, -1);
 	if (!$config{'allow_upper'}) {
 		$username = lc($username);
 		}
@@ -84,14 +84,14 @@ USER: foreach $line (@lines) {
 		}
 
 	# Check if this user has hit his mailbox limit
-	local ($mleft, $mreason, $mmax) = &count_feature("mailboxes");
+	my ($mleft, $mreason, $mmax) = &count_feature("mailboxes");
 	if ($mleft == 0) {
 		&line_error($text{'user_emailboxlimit'});
 		next USER;
 		}
 
 	# Validate extra addresses
-	local @extra = split(/,/, $extras);
+	my @extra = split(/,/, $extras);
 	foreach $e (@extra) {
 		if ($user->{'noextra'}) {
 			&line_error($text{'umass_eextra'});
@@ -105,8 +105,8 @@ USER: foreach $line (@lines) {
 			&line_error(&text('user_eextra1', $e));
 			next USER;
 			}
-		local ($eu, $ed) = ($1, $2);
-		local $edom = &get_domain_by("dom", $ed);
+		my ($eu, $ed) = ($1, $2);
+		my $edom = &get_domain_by("dom", $ed);
 		if (!$edom || !$edom->{'mail'}) {
 			&line_error(&text('user_eextra2', $ed));
 			next USER;
@@ -118,7 +118,7 @@ USER: foreach $line (@lines) {
 		}
 
 	# Validate forwarding addresses
-	local @forward = split(/,/, $forwards);
+	my @forward = split(/,/, $forwards);
 	foreach $f (@forward) {
 		if ($f !~ /\@/) {
 			$f .= "\@$d->{'dom'}";
@@ -130,7 +130,7 @@ USER: foreach $line (@lines) {
 		}
 
 	# Check if extras would exceed limit
-	local ($mleft, $mreason, $mmax) = &count_feature("aliases");
+	my ($mleft, $mreason, $mmax) = &count_feature("aliases");
 	if ($mleft >= 0 &&
 	    $mleft - @extra + (%old ? @{$old{'extraemail'}} : 0) < 0) {
 		&line_error($text{'alias_ealiaslimit'});
@@ -138,12 +138,12 @@ USER: foreach $line (@lines) {
 		}
 
 	# Validate databases
-	local @dbs;
+	my @dbs;
 	foreach my $dbi (split(/,/, $dbs)) {
-		local ($dbtype, $dbname) = split(/\s+/, $dbi);
+		my ($dbtype, $dbname) = split(/\s+/, $dbi);
 		push(@dbs, { 'type' => $dbtype, 'name' => $dbname });
 		}
-	local @alldbs = &domain_databases($d);
+	my @alldbs = &domain_databases($d);
 	foreach my $db (@dbs) {
 		($got) = grep { $_->{'type'} eq $db->{'type'} &&
 				$_->{'name'} eq $db->{'name'} } @alldbs;
@@ -154,7 +154,7 @@ USER: foreach $line (@lines) {
 		}
 
 	# Populate the user object
-	local $user = &create_initial_user($d, 0, $ftp == 3);
+	my $user = &create_initial_user($d, 0, $ftp == 3);
 	if (!$user->{'webowner'}) {
 		$user->{'uid'} = &allocate_uid(\%taken);
 		}
@@ -245,7 +245,7 @@ USER: foreach $line (@lines) {
 		}
 
 	# Check for clash within this domain
-	local ($clash) = grep { &remove_userdom($_->{'user'}, $d) eq
+	my ($clash) = grep { &remove_userdom($_->{'user'}, $d) eq
 				  &remove_userdom($username, $d)
 			      } @users;
 	if ($clash) {
@@ -304,7 +304,7 @@ print &text('umass_complete', $count, $ecount),"<br>\n";
 
 sub line_error
 {
-local ($msg) = @_;
+my ($msg) = @_;
 print "<font color=#ff0000>";
 if (!$username) {
 	print &text('cmass_eline', $lnum, $msg);

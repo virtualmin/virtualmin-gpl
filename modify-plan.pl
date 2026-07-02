@@ -35,7 +35,7 @@ if (!$module_name) {
 # Parse command-line args
 $newplan = { };
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--name") {
 		$planname = shift(@ARGV);
 		}
@@ -208,7 +208,7 @@ if ($applyplan) {
 	&set_all_null_print();
 	foreach my $d (&get_domain_by("plan", $plan->{'id'})) {
 		next if ($d->{'parent'});
-		local $oldd = { %$d };
+		my $oldd = { %$d };
 		&set_limits_from_plan($d, $plan);
 		&set_featurelimits_from_plan($d, $plan);
 		&set_capabilities_from_plan($d, $plan);

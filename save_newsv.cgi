@@ -59,7 +59,7 @@ if ($config{'spam'}) {
 	}
 if ($config{'virus'} && !$config{'provision_virus_host'}) {
 	if ($in{'scanner'} == 2) {
-		local ($cmd, @args) = &split_quoted_string($in{'scanprog'});
+		my ($cmd, @args) = &split_quoted_string($in{'scanprog'});
 		&has_command($cmd) || &error($text{'spam_escanner'});
 		$fullcmd = $in{'scanprog'};
 		}

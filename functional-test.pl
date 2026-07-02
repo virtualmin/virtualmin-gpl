@@ -113,7 +113,7 @@ $web = 'web';
 $ssl = 'ssl';
 &load_plugin_libraries();
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		$test_domain = shift(@ARGV);
 		}
@@ -3713,7 +3713,7 @@ $mysqlbackup_tests = [
 		      [ 'all-features' ],
 		      [ 'source', $test_backup_file ] ],
 	  'ignorefail' => 1,
-	  'grep' => 'Restore failed',
+	  'grep' => 'Restore failed|this backup cannot be restored',
 	},
 
 	# Try the restore again with warnings disabled
@@ -3903,7 +3903,7 @@ $postgresbackup_tests = [
 		      [ 'all-features' ],
 		      [ 'source', $test_backup_file ] ],
 	  'fail' => 1,
-	  'grep' => 'Restore failed',
+	  'grep' => 'Restore failed|this backup cannot be restored',
 	},
 
 	# Try the restore again with warnings disabled, which should
@@ -13469,7 +13469,7 @@ TESTS: foreach $tt (@tests) {
 	$count = 0;
 	$failed = 0;
 	$total = 0;
-	local $i = 0;
+	my $i = 0;
 	foreach $t (@tts) {
 		$t->{'index'} = $i++;
 		}
@@ -13533,14 +13533,14 @@ exit($total_failed);
 
 sub run_test
 {
-local ($t) = @_;
+my ($t) = @_;
 if ($t->{'wait'}) {
 	# Wait for a background process to exit
-	local @waits = ref($t->{'wait'}) ? @{$t->{'wait'}} : ( $t->{'wait'} );
-	local $ok = 1;
+	my @waits = ref($t->{'wait'}) ? @{$t->{'wait'}} : ( $t->{'wait'} );
+	my $ok = 1;
 	foreach my $w (@waits) {
 		print "    Waiting for background process $w ..\n";
-		local $pid = $backgrounds{$w};
+		my $pid = $backgrounds{$w};
 		if (!$pid) {
 			print "    .. already exited, or never started!\n";
 			$ok = 0;
@@ -13574,13 +13574,13 @@ if ($t->{'wait'}) {
 elsif ($t->{'background'}) {
 	# Run a test, but in the background
 	print "    Backgrounding test ..\n";
-	local $pid = fork();
+	my $pid = fork();
 	if ($pid < 0) {
 		print "    .. fork failed : $!\n";
 		return 0;
 		}
 	if (!$pid) {
-		local $rv = &run_test_command($t);
+		my $rv = &run_test_command($t);
 		exit($rv ? 0 : 1);
 		}
 	$backgrounds{$t->{'background'}} = $pid;
@@ -13595,7 +13595,7 @@ else {
 
 sub run_test_command
 {
-local $cmd = $t->{'command'};
+my $cmd = $t->{'command'};
 foreach my $a (@{$t->{'args'}}) {
 	my ($flag, @vals) = @$a;
 	$cmd .= " --".$flag;
@@ -13624,11 +13624,11 @@ if ($gconfig{'os_type'} !~ /-linux$/ && &has_command("bash")) {
 	# Force use of bash
 	$cmd = "bash -c ".quotemeta($cmd);
 	}
-local $to = $t->{'timeout'} || $timeout;
-local ($out, $timed_out) = &backquote_with_timeout(
+my $to = $t->{'timeout'} || $timeout;
+my ($out, $timed_out) = &backquote_with_timeout(
 				"($cmd) 2>&1 </dev/null", $to);
-local @lout = split(/\r?\n/, $out);
-local $shortout = $out;
+my @lout = split(/\r?\n/, $out);
+my $shortout = $out;
 if (length($shortout) > $max_output) {
 	$shortout = substr($shortout, 0, $max_output);
 	$shortout .= "\n" if ($shortout !~ /\n$/);
@@ -13651,10 +13651,10 @@ if (!$t->{'ignorefail'}) {
 	}
 if ($t->{'grep'}) {
 	# One line must match all regexps
-	local @greps = ref($t->{'grep'}) ? @{$t->{'grep'}} : ( $t->{'grep'} );
+	my @greps = ref($t->{'grep'}) ? @{$t->{'grep'}} : ( $t->{'grep'} );
 	foreach my $grep (@greps) {
 		$grep = &substitute_template($grep, \%saved_vars);
-		local $match = 0;
+		my $match = 0;
 		if ($t->{'grepall'}) {
 			$match = ($out =~ /$grep/);
 			}
@@ -13674,11 +13674,11 @@ if ($t->{'grep'}) {
 	}
 if ($t->{'antigrep'}) {
 	# No line must match all regexps
-	local @greps = ref($t->{'antigrep'}) ? @{$t->{'antigrep'}}
+	my @greps = ref($t->{'antigrep'}) ? @{$t->{'antigrep'}}
 					     : ( $t->{'antigrep'} );
 	foreach my $grep (@greps) {
 		$grep = &substitute_template($grep, \%saved_vars);
-		local $match = 0;
+		my $match = 0;
 		foreach my $l (split(/\r?\n/, $out)) {
 			if ($l =~ /$grep/) {
 				$match = 1;
@@ -13709,7 +13709,7 @@ return 1;
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
-local $mig = join("|", @migration_types);
+my $mig = join("|", @migration_types);
 print "Runs some or all Virtualmin functional tests.\n";
 print "\n";
 print "usage: functional-tests.pl [--domain test.domain]\n";
@@ -13755,12 +13755,12 @@ return (
 # a key
 sub convert_to_encrypted
 {
-local ($tests) = @_;
+my ($tests) = @_;
 if (!defined(&list_backup_keys)) {
 	return [ ];
 	}
-local ($key) = &list_backup_keys();
-local $rv = [ ];
+my ($key) = &list_backup_keys();
+my $rv = [ ];
 foreach my $t (@$tests) {
 	my $nt = { %$t };
 	if ($nt->{'command'} eq 'backup-domain.pl' ||
@@ -13776,8 +13776,8 @@ return $rv;
 # convert_to_dnscloud(&tests, cloud)
 sub convert_to_dnscloud
 {
-local ($tests, $cloud) = @_;
-local $rv = [ ];
+my ($tests, $cloud) = @_;
+my $rv = [ ];
 foreach my $t (@$tests) {
         my $nt = { %$t };
 	my @a;
@@ -13800,8 +13800,8 @@ return $rv;
 # EU S3 location
 sub convert_to_location
 {
-local ($tests, $location) = @_;
-local $rv = [ ];
+my ($tests, $location) = @_;
+my $rv = [ ];
 foreach my $t (@$tests) {
 	my $nt = { %$t };
 	my @na;

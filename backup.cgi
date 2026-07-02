@@ -65,7 +65,7 @@ elsif ($in{'all'} == 2) {
 else {
 	# Only selected
 	foreach $did (split(/\s+/, $in{'doms'})) {
-		local $dinfo = &get_domain($did);
+		my $dinfo = &get_domain($did);
 		if ($dinfo && &can_backup_domain($dinfo, $acluser)) {
 			push(@doms, $dinfo);
 			if (!$dinfo->{'parent'} && $in{'parent'}) {
@@ -157,7 +157,7 @@ if (defined(&get_backup_key) && $in{'key'}) {
 
 # Parse option inputs
 foreach $f (@do_features) {
-	local $ofunc = "parse_backup_$f";
+	my $ofunc = "parse_backup_$f";
 	if (&indexof($f, &list_backup_plugins()) < 0 &&
 	    defined(&$ofunc)) {
 		$options{$f} = &$ofunc(\%in);

@@ -31,7 +31,7 @@ if (!$module_name) {
 my $short = 1;
 &parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--short") {
 		$short = 1;
 		}

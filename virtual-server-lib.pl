@@ -101,14 +101,14 @@ foreach my $fname (@features, "virt", "virt6") {
 	if (!$done_feature_script{$fname} || $force_load_features) {
 		do "$module_root_directory/feature-$fname.pl";
 		}
-	local $ifunc = "init_$fname";
+	my $ifunc = "init_$fname";
 	&$ifunc() if (defined(&$ifunc));
 	}
 @migration_types = ( "cpanel", "plesk", "directadmin" );
 @startstop_features = ("web", "dns", "mail", "unix", "virus", "spam",
 		       "mysql", "postgres");
 @startstop_always_features = ("ftp", "fpm");
-@bandwidth_features = ( @features, "backup", "restore" );
+@bandwidth_features = ( @features, "ftp", "backup", "restore" );
 @config_features = grep { $config{$_} } @features;
 @banned_usernames = ( 'root', 'resellers' );
 
@@ -411,7 +411,7 @@ $mail_system = $config{'mail_system'};
 # or given space-separated string.
 sub generate_plugins_list
 {
-local $str = defined($_[0]) ? $_[0] : $config{'plugins'};
+my $str = defined($_[0]) ? $_[0] : $config{'plugins'};
 @confplugins = split(/\s+/, $str);
 @plugins = ( );
 foreach my $pname (@confplugins) {

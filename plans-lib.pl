@@ -4,17 +4,17 @@
 # Returns a list of all plans, each of which is a hash ref
 sub list_plans
 {
-local ($noconvert) = @_;
+my ($noconvert) = @_;
 if (!-d $plans_dir && !$noconvert) {
 	# Somehow hasn't been run yet
 	&convert_plans();
 	}
 if (!@list_plans_cache) {
-	local @rv;
+	my @rv;
 	opendir(DIR, $plans_dir);
 	foreach my $id (readdir(DIR)) {
 		if ($id ne "." && $id ne "..") {
-			local $plan = &get_plan($id);
+			my $plan = &get_plan($id);
 			push(@rv, $plan) if ($plan && !$plan->{'deleted'});
 			}
 		}
@@ -28,7 +28,7 @@ return @list_plans_cache;
 # Returns a list of plans the current user can edit
 sub list_editable_plans
 {
-local $canmode = &can_edit_plans();
+my $canmode = &can_edit_plans();
 if ($canmode == 0) {
 	return ( );
 	}
@@ -44,8 +44,8 @@ else {
 # Returns a list of plans the current user can use
 sub list_available_plans
 {
-local $canmode = &can_edit_plans();
-local @plans = &list_plans();
+my $canmode = &can_edit_plans();
+my @plans = &list_plans();
 if (&master_admin()) {
 	# Master admin can use all
 	return @plans;
@@ -68,7 +68,7 @@ else {
 # Returns 1 if the current user can use a plan
 sub can_use_plan
 {
-local ($plan) = @_;
+my ($plan) = @_;
 if (&master_admin()) {
 	# Masters can use all plans
 	return 1;
@@ -90,9 +90,9 @@ else {
 # Returns the default plan for the current user - may be undef if none is set
 sub get_default_plan
 {
-local ($allowundef) = @_;
-local @plans = sort { $a->{'id'} <=> $b->{'id'} } &list_available_plans();
-local $defplan;
+my ($allowundef) = @_;
+my @plans = sort { $a->{'id'} <=> $b->{'id'} } &list_available_plans();
+my $defplan;
 if (&reseller_admin()) {
 	($defplan) = grep { $_->{'id'} eq $access{'defplan'} } @plans;
 	}
@@ -110,7 +110,7 @@ return $defplan;
 # sets a reseller-level option .. otherwise, the global default iset
 sub set_default_plan
 {
-local ($plan) = @_;
+my ($plan) = @_;
 if (&reseller_admin()) {
 	$access{'defplan'} = $plan ? $plan->{'id'} : undef;
 	&save_module_acl(\%access);
@@ -125,9 +125,9 @@ else {
 # Returns the hash ref for the plan with some ID
 sub get_plan
 {
-local ($id) = @_;
+my ($id) = @_;
 return undef if ($id !~ /^\d+$/);
-local %plan;
+my %plan;
 &read_file_cached("$plans_dir/$id", \%plan) || return undef;
 $plan{'id'} = $id;
 $plan{'file'} = "$plans_dir/$id";
@@ -138,8 +138,8 @@ return \%plan;
 # Updates or creates a plan on disk
 sub save_plan
 {
-local ($plan) = @_;
-local $newplan;
+my ($plan) = @_;
+my $newplan;
 if ($plan->{'id'} eq '') {
 	$plan->{'id'} = &domain_id();
 	$newplan = 1;
@@ -160,9 +160,9 @@ if (@list_plans_cache && $newplan) {
 # Deletes an existing plan.
 sub delete_plan
 {
-local ($plan) = @_;
+my ($plan) = @_;
 &lock_file($plan->{'file'});
-local @users = &get_domain_by("plan", $plan->{'id'});
+my @users = &get_domain_by("plan", $plan->{'id'});
 if (@users) {
 	# Just flag as deleted
 	$plan->{'deleted'} = 1;
@@ -187,10 +187,10 @@ sub convert_plans
 local $main::no_auto_plan = 1;	# So plans don't get set by complete_domain
 
 # For each template, create a plan
-local %planmap;
+my %planmap;
 foreach my $ltmpl (&list_templates()) {
-	local $tmpl = &get_template($ltmpl->{'id'});
-	local $got = &get_plan($tmpl->{'id'});
+	my $tmpl = &get_template($ltmpl->{'id'});
+	my $got = &get_plan($tmpl->{'id'});
 	next if ($got);				# Already converted
 	next if ($tmpl->{'id'} eq '1');		# Sub-servers don't have plans!
 
@@ -219,7 +219,7 @@ foreach my $ltmpl (&list_templates()) {
 # For each top-level domain, map its template to the created plan
 foreach my $d (grep { !$_->{'parent'} } &list_domains()) {
 	if ($d->{'plan'} eq '' || !&get_plan($d->{'plan'})) {
-		local $plan = $planmap{$d->{'template'}};
+		my $plan = $planmap{$d->{'template'}};
 		$d->{'plan'} = $plan ? $plan->{'id'} : '0';
 		&save_domain($d);
 		}
@@ -260,7 +260,7 @@ else {
 # Set initial owner limits on a domain from the given plan
 sub set_limits_from_plan
 {
-local ($d, $plan) = @_;
+my ($d, $plan) = @_;
 $d->{'quota'} = $plan->{'quota'};
 $d->{'uquota'} = $plan->{'uquota'};
 $d->{'bw_limit'} = $plan->{'bwlimit'};
@@ -287,8 +287,8 @@ $d->{'migrate'} = $plan->{'migrate'};
 # Set initial limits for a reseller based on relevant ones from a plan
 sub set_reseller_limits_from_plan
 {
-local ($resel, $plan) = @_;
-local %lmap = ( 'domslimit' => 'max_doms',
+my ($resel, $plan) = @_;
+my %lmap = ( 'domslimit' => 'max_doms',
 		'aliasdomslimit' => 'max_aliasdoms',
 		'realdomslimit' => 'max_realdoms',
 		'quota' => 'max_quota',
@@ -312,10 +312,10 @@ foreach my $m (keys %lmap) {
 # features or limits defined in the plan.
 sub set_featurelimits_from_plan
 {
-local ($d, $plan) = @_;
+my ($d, $plan) = @_;
 if ($plan->{'featurelimits'}) {
 	# From template
-	local %flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
+	my %flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
 	foreach my $f (@features, 'virt', &list_feature_plugins()) {
 		$d->{'limit_'.$f} = int($flimits{$f});
 		}
@@ -332,8 +332,8 @@ else {
 # Set limits on allowed features for a reseller from a plan
 sub set_reseller_featurelimits_from_plan
 {
-local ($resel, $plan) = @_;
-local %flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
+my ($resel, $plan) = @_;
+my %flimits = map { $_, 1 } split(/\s+/, $plan->{'featurelimits'});
 foreach my $f (@features, &list_feature_plugins()) {
 	$resel->{'acl'}->{'feature_'.$f} = int($flimits{$f});
 	}
@@ -344,9 +344,9 @@ foreach my $f (@features, &list_feature_plugins()) {
 # the given plan
 sub set_capabilities_from_plan
 {
-local ($d, $plan) = @_;
+my ($d, $plan) = @_;
 if ($plan->{'capabilities'}) {
-	local %caps = map { $_, 1 } split(/\s+/, $plan->{'capabilities'});
+	my %caps = map { $_, 1 } split(/\s+/, $plan->{'capabilities'});
 	foreach my $ed (@edit_limits) {
 		$d->{'edit_'.$ed} = $caps{$ed} ? 1 : 0;
 		}

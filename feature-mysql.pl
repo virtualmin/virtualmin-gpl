@@ -82,7 +82,7 @@ return &foreign_available("mysql");
 sub check_depends_mysql
 {
 return undef if (!$_[0]->{'parent'});
-local $parent = &get_domain($_[0]->{'parent'});
+my $parent = &get_domain($_[0]->{'parent'});
 return $text{'setup_edepmysql'} if (!$parent->{'mysql'});
 return undef;
 }
@@ -92,7 +92,7 @@ return undef;
 sub check_anti_depends_mysql
 {
 if (!$_[0]->{'mysql'}) {
-	local @subs = &get_domain_by("parent", $_[0]->{'id'});
+	my @subs = &get_domain_by("parent", $_[0]->{'id'});
 	foreach my $s (@subs) {
 		return $text{'setup_edepmysqlsub'} if ($s->{'mysql'});
 		}
@@ -113,7 +113,7 @@ return if (!$config{'mysql'});
 # Un-lock the MySQL config file for some domain
 sub release_lock_mysql
 {
-local ($d) = @_;
+my ($d) = @_;
 return if (!$config{'mysql'});
 &release_lock_anything($d);
 }
@@ -122,8 +122,8 @@ return if (!$config{'mysql'});
 # Returns 1 if some MySQL user or database is used by another domain
 sub check_mysql_clash
 {
-local ($d, $field, $repl) = @_;
-local @doms = grep { $_->{'mysql'} && $_->{'id'} ne $d->{'id'} }
+my ($d, $field, $repl) = @_;
+my @doms = grep { $_->{'mysql'} && $_->{'id'} ne $d->{'id'} }
 		   &list_domains();
 
 # Check for DB clash
@@ -155,15 +155,15 @@ return undef;
 # Create a new MySQL database, user and permissions
 sub setup_mysql
 {
-local ($d, $nodb) = @_;
-local $tmpl = &get_template($d->{'template'});
+my ($d, $nodb) = @_;
+my $tmpl = &get_template($d->{'template'});
 if (!$d->{'mysql_module'}) {
 	# Use the default module for this system
 	$d->{'mysql_module'} = &get_default_mysql_module();
 	}
 &require_mysql();
 $d->{'mysql_user'} = &mysql_user($d);
-local $user = $d->{'mysql_user'};
+my $user = $d->{'mysql_user'};
 
 if (!$d->{'parent'}) {
 	if ($d->{'provision_mysql'}) {
@@ -178,7 +178,7 @@ if (!$d->{'parent'}) {
 		else {
 			$info->{'pass'} = &mysql_pass($d);
 			}
-		local @hosts = &unique(map { &to_ipaddress($_) }
+		my @hosts = &unique(map { &to_ipaddress($_) }
 				  	   &get_mysql_hosts($d, 2));
 		$info->{'remote'} = \@hosts;
 		my $conns = &get_mysql_user_connections($d, 0);
@@ -235,7 +235,7 @@ if (!$d->{'parent'}) {
 		else {
 			&$first_print($text{'setup_mysqluser'});
 			}
-		local $encpass = &encrypted_mysql_pass($d);
+		my $encpass = &encrypted_mysql_pass($d);
 		foreach my $h (@hosts) {
 			# Create the user with access from each of the hosts
 			# from the template
@@ -265,7 +265,7 @@ if (!$d->{'parent'}) {
 my $ok;
 if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
 	# Create the one initial DB
-	local $opts = &default_mysql_creation_opts($d);
+	my $opts = &default_mysql_creation_opts($d);
 	$ok = &create_mysql_database($d, $d->{'db'}, $opts);
 	if (!$ok) {
 		# Failed, but instread of marking this whole feature as failed,
@@ -298,10 +298,10 @@ return $ok;
 # Adds an entry to the db table, with all permission columns set to Y
 sub create_mysql_db_grant
 {
-local ($d, $host, $db, $user) = @_;
-local $mod = &require_dom_mysql($d);
-local @str = &foreign_call($mod, "table_structure", $mysql::master_db, 'db');
-local ($s, @fields, @yeses);
+my ($d, $host, $db, $user) = @_;
+my $mod = &require_dom_mysql($d);
+my @str = &foreign_call($mod, "table_structure", $mysql::master_db, 'db');
+my ($s, @fields, @yeses);
 foreach $s (@str) {
 	if ($s->{'field'} =~ /_priv$/i) {
 		push(@fields, $s->{'field'});
@@ -325,7 +325,7 @@ else {
 # Removes a grant to a specific MySQL DB for a user, for all hosts
 sub delete_mysql_db_grant
 {
-local ($d, $db, $user, $host) = @_;
+my ($d, $db, $user, $host) = @_;
 my $qdb = &quote_mysql_database($db);
 
 # Get all the hosts this user or DB has access from
@@ -406,7 +406,7 @@ return map { [ $_, $dbs{$_} ] } sort { $a cmp $b } keys %dbs;
 # Delete mysql databases, the domain's mysql user and all permissions for both
 sub delete_mysql
 {
-local ($d, $preserve) = @_;
+my ($d, $preserve) = @_;
 &require_mysql();
 my @dblist = &unique(split(/\s+/, $d->{'db_mysql'}));
 my $mymod = &get_domain_mysql_module($d);
@@ -421,7 +421,7 @@ if ($preserve && &remote_mysql($d)) {
 	}
 
 # Get the domain's users, so we can remove their MySQL logins
-local @users = &list_domain_users($d, 1, 1, 1, 0);
+my @users = &list_domain_users($d, 1, 1, 1, 0);
 
 # First remove the databases
 if (@dblist) {
@@ -490,9 +490,9 @@ if ($d->{'provision_mysql'}) {
 else {
 	# Remove the main user locally
 	&$first_print($text{'delete_mysqluser'}) if (!$d->{'parent'});
-	local $user = &mysql_user($d);
-	local $tmpl = &get_template($d->{'template'});
-	local $wild = &substitute_domain_template(
+	my $user = &mysql_user($d);
+	my $tmpl = &get_template($d->{'template'});
+	my $wild = &substitute_domain_template(
 			$tmpl->{'mysql_wild'}, $d);
 	if (!$d->{'parent'}) {
 		# Delete the user and any database permissions
@@ -509,7 +509,7 @@ else {
 	foreach my $u (@users) {
 		foreach my $udb (@{$u->{'dbs'}}) {
 			if ($udb->{'type'} eq 'mysql') {
-				local $myuser =
+				my $myuser =
 					&mysql_username($u->{'user'});
 				&execute_user_deletion_sql(
 					$d, undef, $myuser, 1);
@@ -526,18 +526,18 @@ return 1;
 # Changes the mysql user's password if needed
 sub modify_mysql
 {
-local ($d, $oldd) = @_;
-local $tmpl = &get_template($d->{'template'});
+my ($d, $oldd) = @_;
+my $tmpl = &get_template($d->{'template'});
 &require_mysql();
 my $mymod = &get_domain_mysql_module($d);
-local $rv = 0;
-local $changeduser = $d->{'user'} ne $oldd->{'user'} &&
+my $rv = 0;
+my $changeduser = $d->{'user'} ne $oldd->{'user'} &&
 		     !$tmpl->{'mysql_nouser'} ? 1 : 0;
-local $olduser = &mysql_user($oldd);
-local $user = &mysql_user($d, $changeduser);
-local $oldencpass = &encrypted_mysql_pass($oldd);
-local $encpass = &encrypted_mysql_pass($d);
-local @dbnames = map { $_->{'name'} } &domain_databases($d, [ "mysql" ]);
+my $olduser = &mysql_user($oldd);
+my $user = &mysql_user($d, $changeduser);
+my $oldencpass = &encrypted_mysql_pass($oldd);
+my $encpass = &encrypted_mysql_pass($d);
+my @dbnames = map { $_->{'name'} } &domain_databases($d, [ "mysql" ]);
 
 if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
     (!$tmpl->{'mysql_nopass'} || $d->{'mysql_pass'})) {
@@ -591,8 +591,8 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 	# Server has been converted to a parent .. need to create user, and
 	# change access to old DBs
 	$d->{'mysql_user'} = &mysql_user($d, 1);
-	local $user = $d->{'mysql_user'};
-	local @hosts = &get_mysql_hosts($d);
+	my $user = $d->{'mysql_user'};
+	my @hosts = &get_mysql_hosts($d);
 
 	# If hashed passwords are in use, generate a random MySQL password
 	# for the new MySQL user
@@ -612,7 +612,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 		else {
 			$info->{'pass'} = &mysql_pass($d);
 			}
-		local @hosts = map { &to_ipaddress($_) } @hosts;
+		my @hosts = map { &to_ipaddress($_) } @hosts;
 		$info->{'remote'} = \@hosts;
 		my $conns = &get_mysql_user_connections($d, 0);
 		$info->{'conns'} = $conns if ($conns);
@@ -656,9 +656,9 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 	else {
 		# Change locally
 		&$first_print($text{'setup_mysqluser'});
-		local $wild = &substitute_domain_template(
+		my $wild = &substitute_domain_template(
 				$tmpl->{'mysql_wild'}, $d);
-		local $encpass = &encrypted_mysql_pass($d);
+		my $encpass = &encrypted_mysql_pass($d);
 		foreach my $h (@hosts) {
 			&execute_user_creation_sql($d, $h, $user,
 					   $encpass, &mysql_pass($d));
@@ -825,7 +825,7 @@ if ($d->{'group'} ne $oldd->{'group'} && $tmpl->{'mysql_chgrp'}) {
 	# Unix group has changed - fix permissions on all DB files
 	&$first_print($text{'save_mysqlgroup'});
 	foreach my $db (&domain_databases($d, [ "mysql" ])) {
-		local $dd = &get_mysql_database_dir($db->{'name'});
+		my $dd = &get_mysql_database_dir($db->{'name'});
 		if ($dd) {
 			&system_logged("chgrp -R $d->{'group'} ".
 				       quotemeta($dd));
@@ -840,16 +840,16 @@ return $rv;
 # Copy all databases and their contents to a new domain
 sub clone_mysql
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 &$first_print($text{'clone_mysql'});
 
 # Re-create each DB with a new name
-local %dbmap;
+my %dbmap;
 my @dbs = &domain_databases($oldd, [ 'mysql' ]);
 foreach my $db (@dbs) {
-	local $newname = $db->{'name'};
-	local $newprefix = &fix_database_name($d->{'prefix'}, 'mysql');
-	local $oldprefix = &fix_database_name($oldd->{'prefix'}, 'mysql');
+	my $newname = $db->{'name'};
+	my $newprefix = &fix_database_name($d->{'prefix'}, 'mysql');
+	my $oldprefix = &fix_database_name($oldd->{'prefix'}, 'mysql');
 	if ($newname eq $oldd->{'db'} &&
 	    $oldd->{'db'} eq &database_name($oldd)) {
 		# If the DB name was the primary database for the old domain,
@@ -880,8 +880,8 @@ foreach my $db (@dbs) {
 		}
 	&push_all_print();
 	&set_all_null_print();
-	local $opts = &get_mysql_creation_opts($oldd, $db->{'name'});
-	local $ok = &create_mysql_database($d, $newname, $opts);
+	my $opts = &get_mysql_creation_opts($oldd, $db->{'name'});
+	my $ok = &create_mysql_database($d, $newname, $opts);
 	&pop_all_print();
 	if (!$ok) {
 		&$second_print(&text('clone_mysqlcreate', $newname));
@@ -936,7 +936,7 @@ if (!$d->{'parent'}) {
 # Make sure all MySQL databases exist, and that the admin user exists
 sub validate_mysql
 {
-local ($d) = @_;
+my ($d) = @_;
 my $mymod = &get_domain_mysql_module($d);
 &require_mysql();
 if ($d->{'provision_mysql'}) {
@@ -969,11 +969,11 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Check locally
-	local $mod = $d->{'mysql_module'} || 'mysql';
+	my $mod = $d->{'mysql_module'} || 'mysql';
 	if (!&foreign_check($mod)) {
 		return &text('validate_emysqlmod', $mod);
 		}
-	local %got = map { $_, 1 } &list_dom_mysql_databases($d);
+	my %got = map { $_, 1 } &list_dom_mysql_databases($d);
 	foreach my $db (&domain_databases($d, [ "mysql" ])) {
 		$got{$db->{'name'}} ||
 			return &text('validate_emysql', $db->{'name'});
@@ -989,7 +989,7 @@ return undef;
 # Modifies the mysql user for this domain so that he cannot login
 sub disable_mysql
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_mysql();
 if ($d->{'parent'}) {
 	&$second_print($text{'save_nomysqlpar'});
@@ -1015,7 +1015,7 @@ else {
 	# Lock locally by setting hashed password to an invalid string (or real
 	# password to a random string, only mysql 8)
 	&$first_print($text{'disable_mysqluser'});
-	local $user = &mysql_user($d);
+	my $user = &mysql_user($d);
 	if ($oldpass = &mysql_user_exists($d)) {
 		&execute_password_change_sql(
 			$d, $user, "'".("0" x 41)."'", &random_password(16));
@@ -1034,7 +1034,7 @@ else {
 # Puts back the original password for the mysql user so that he can login again
 sub enable_mysql
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_mysql();
 if ($d->{'parent'}) {
 	&$second_print($text{'save_nomysqlpar'});
@@ -1061,9 +1061,9 @@ elsif ($d->{'provision_mysql'}) {
 else {
 	# Un-lock locally
 	&$first_print($text{'enable_mysql'});
-	local $user = &mysql_user($d);
+	my $user = &mysql_user($d);
 	if (&mysql_user_exists($d)) {
-		local $pass = &mysql_pass($d);
+		my $pass = &mysql_pass($d);
 		if ($pass) {
 			# Need to re-set plaintext password
 			&execute_password_change_sql(
@@ -1071,7 +1071,7 @@ else {
 			}
 		else {
 			# Can put back old hashed password
-			local $qpass = &mysql_escape(
+			my $qpass = &mysql_escape(
 				$d->{'disabled_oldmysql'});
 			&execute_password_change_sql(
 				$d, $user, "'$qpass'");
@@ -1093,8 +1093,8 @@ sub mysql_user_exists
 {
 my ($d) = @_;
 &require_mysql();
-local $user = &mysql_user($d);
-local $u;
+my $user = &mysql_user($d);
+my $u;
 eval {
 	# Try old password column first
 	local $main::error_must_die = 1;
@@ -1121,7 +1121,7 @@ return undef;
 # This can be overridden to allow a takeover of the DB.
 sub check_warnings_mysql
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 $d->{'mysql'} && (!$oldd || !$oldd->{'mysql'}) || return undef;
 return undef if ($repl);	# Clashes are expected in MySQL is shared
 if ($d->{'provision_mysql'}) {
@@ -1146,7 +1146,7 @@ if ($d->{'provision_mysql'}) {
 else {
 	# DB clash on local
 	&require_mysql();
-	local @dblist = &list_dom_mysql_databases($d);
+	my @dblist = &list_dom_mysql_databases($d);
 	return &text('setup_emysqldb', $d->{'db'})
 		if (&indexof($d->{'db'}, @dblist) >= 0);
 
@@ -1164,15 +1164,15 @@ return undef;
 # Dumps this domain's mysql database to a backup file
 sub backup_mysql
 {
-local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
+my ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
 &require_mysql();
 my $compression = $allopts->{'dir'}->{'compression'};
 
 # Find all domain's databases
-local $tmpl = &get_template($d->{'template'});
-local $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $d);
-local @alldbs = &list_all_mysql_databases($d);
-local @dbs;
+my $tmpl = &get_template($d->{'template'});
+my $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $d);
+my @alldbs = &list_all_mysql_databases($d);
+my @dbs;
 if ($wild) {
 	$wild =~ s/\%/\.\*/g;
 	$wild =~ s/_/\./g;
@@ -1188,9 +1188,9 @@ my %exclude = map { $_, 1 } @exclude;
 
 # Create base backup file with meta-information
 &$first_print($text{'backup_mysqlinfo'});
-local @hosts = &get_mysql_allowed_hosts($d);
+my @hosts = &get_mysql_allowed_hosts($d);
 my $mymod = &get_domain_mysql_module($d);
-local %info = ( 'hosts' => join(' ', @hosts),
+my %info = ( 'hosts' => join(' ', @hosts),
 		'remote' => $mymod->{'config'}->{'host'} );
 foreach $db (@dbs) {
 	if (&foreign_defined($mymod, "get_character_set")) {
@@ -1206,11 +1206,11 @@ foreach $db (@dbs) {
 &$second_print($text{'setup_done'});
 
 # Back them all up
-local $db;
-local $ok = 1;
+my $db;
+my $ok = 1;
 foreach $db (@dbs) {
 	&$first_print(&text('backup_mysqldump', $db));
-	local $dbfile = $file."_".$db;
+	my $dbfile = $file."_".$db;
 
 	# Limit tables to those that aren't excluded
 	my %texclude = map { $_, 1 }
@@ -1263,8 +1263,8 @@ return $ok;
 # the mysql user.
 sub restore_mysql
 {
-local ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd) = @_;
-local %info;
+my ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd) = @_;
+my %info;
 &read_file($file, \%info);
 &require_mysql();
 
@@ -1276,7 +1276,7 @@ if (!&foreign_call($mymod, "is_mysql_running")) {
 	}
 
 # Re-grant allowed hosts from backup + local
-local @lhosts;
+my @lhosts;
 if (!$d->{'parent'} && $info{'hosts'}) {
 	&$first_print($text{'restore_mysqlgrant'});
 	@lhosts = &get_mysql_allowed_hosts($d);
@@ -1327,7 +1327,7 @@ if ($allopts->{'repl'} && $mymod->{'config'}->{'host'} && $info{'remote'} &&
 	}
 
 # For DBs that exist already, save their user lists for later restore
-local (%userdbs, %userpasses, %userplugins);
+my (%userdbs, %userpasses, %userplugins);
 foreach my $db (&domain_databases($d, [ 'mysql' ])) {
 	foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
 		if ($u->[0] ne $d->{'user'} &&
@@ -1409,7 +1409,7 @@ foreach my $db (@dbs) {
 			}
 		$db->[1] = $basefile;
 		}
-	local ($ex, $out);
+	my ($ex, $out);
 	if ($asd) {
 		# As the domain owner
 		($ex, $out) = &execute_dom_sql_file($d, $db->[0], $db->[1],
@@ -1490,9 +1490,9 @@ return $rv;
 # Returns an error message if a file doesn't look like a valid MySQL backup
 sub validate_mysql_backup
 {
-local ($dbfile) = @_;
+my ($dbfile) = @_;
 open(DBFILE, "<".$dbfile);
-local $first = <DBFILE>;
+my $first = <DBFILE>;
 close(DBFILE);
 if ($first =~ /^mysqldump:.*error/i) {
 	return $first;
@@ -1543,7 +1543,7 @@ return length($_[0]) > $mysql_user_size ?
 # actually change the database - that must be done by modify_mysql.
 sub set_mysql_pass
 {
-local ($d, $pass) = @_;
+my ($d, $pass) = @_;
 if (defined($pass)) {
 	$d->{'mysql_pass'} = $pass;
 	}
@@ -1561,7 +1561,7 @@ sub mysql_pass
 my ($d) = @_;
 if ($d->{'parent'}) {
 	# Password comes from parent domain
-	local $parent = &get_domain($d->{'parent'});
+	my $parent = &get_domain($d->{'parent'});
 	return &mysql_pass($parent);
 	}
 return $d->{'mysql_pass'} ne '' ? $d->{'mysql_pass'} : $d->{'pass'};
@@ -1590,12 +1590,12 @@ sub mysql_size
 {
 my ($d, $dbname, $sizeonly) = @_;
 &require_mysql();
-local ($size, $qsize, $count);
-local $dd = &get_mysql_database_dir($d, $dbname);
+my ($size, $qsize, $count);
+my $dd = &get_mysql_database_dir($d, $dbname);
 if ($dd) {
 	# Can check actual on-disk size
 	($size, undef, $count) = &recursive_disk_usage_mtime($dd);
-	local @dst = stat($dd);
+	my @dst = stat($dd);
 	if (&has_group_quotas() && &has_mysql_quotas() &&
             $dst[5] == $d->{'gid'}) {
 		$qsize = $size;
@@ -1617,7 +1617,7 @@ else {
 		$size = $count = undef;
 		}
 	}
-local @tables;
+my @tables;
 if (!$sizeonly) {
 	eval {
 		# Make sure DBI errors don't cause a total failure
@@ -1637,7 +1637,7 @@ return ($size, scalar(@tables), $qsize, $count);
 # Check if some MySQL database already exists
 sub check_mysql_database_clash
 {
-local ($d, $name) = @_;
+my ($d, $name) = @_;
 &require_mysql();
 if ($d->{'provision_mysql'}) {
 	# Check on provisioning server
@@ -1648,7 +1648,7 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Check locally
-	local @dblist = &list_dom_mysql_databases($d);
+	my @dblist = &list_dom_mysql_databases($d);
 	return &indexof($name, @dblist) >= 0 ? 1 : 0;
 	}
 }
@@ -1657,10 +1657,10 @@ else {
 # Add one database to this domain, and grants access to it to the user
 sub create_mysql_database
 {
-local ($d, $dbname, $opts) = @_;
+my ($d, $dbname, $opts) = @_;
 &require_mysql();
 &obtain_lock_mysql($d);
-local @dbs = split(/\s+/, $d->{'db_mysql'});
+my @dbs = split(/\s+/, $d->{'db_mysql'});
 
 if ($d->{'provision_mysql'}) {
 	# Create the database on the provisioning server
@@ -1716,7 +1716,7 @@ return 1;
 # and sets file ownership so that quotas work.
 sub grant_mysql_database
 {
-local ($d, $dbname) = @_;
+my ($d, $dbname) = @_;
 &require_mysql();
 &obtain_lock_mysql($d);
 
@@ -1731,15 +1731,15 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Add db entries for the user for each host
-	local @hosts = &get_mysql_hosts($d);
-	local $user = &mysql_user($d);
+	my @hosts = &get_mysql_hosts($d);
+	my $user = &mysql_user($d);
 	foreach my $h (@hosts) {
 		&create_mysql_db_grant($d, $h, $dbname, $user);
 		}
 
 	# Set group ownership of database directory, to enforce quotas
-	local $dd = &get_mysql_database_dir($d, $dbname);
-	local $tmpl = &get_template($d->{'template'});
+	my $dd = &get_mysql_database_dir($d, $dbname);
+	my $tmpl = &get_template($d->{'template'});
 	if ($tmpl->{'mysql_chgrp'} && $dd) {
 		&system_logged("chgrp -R $d->{'group'} ".quotemeta($dd));
 		&system_logged("chmod +s ".quotemeta($dd));
@@ -1752,12 +1752,12 @@ else {
 # Remove one or more MySQL database from this domain
 sub delete_mysql_database
 {
-local ($d, @dbnames) = @_;
+my ($d, @dbnames) = @_;
 &require_mysql();
 &obtain_lock_mysql($d);
-local @dbs = split(/\s+/, $d->{'db_mysql'});
-local @missing;
-local $failed = 0;
+my @dbs = split(/\s+/, $d->{'db_mysql'});
+my @missing;
+my $failed = 0;
 
 if ($d->{'provision_mysql'}) {
 	# Delete on provisioning server
@@ -1778,10 +1778,10 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Delete locally
-	local @dblist = &list_dom_mysql_databases($d);
+	my @dblist = &list_dom_mysql_databases($d);
 	&$first_print(&text('delete_mysqldb', join(", ", @dbnames)));
 	foreach my $db (@dbnames) {
-		local $qdb = &quote_mysql_database($db);
+		my $qdb = &quote_mysql_database($db);
 		if (&indexof($db, @dblist) >= 0) {
 			# Drop the DB
 			&execute_dom_sql($d, 
@@ -1817,12 +1817,12 @@ if (!$failed) {
 # Also resets group permissions.
 sub revoke_mysql_database
 {
-local ($d, $dbname) = @_;
+my ($d, $dbname) = @_;
 &require_mysql();
 &obtain_lock_mysql($d);
-local @oldusers = &list_mysql_database_users($d, $dbname);
-local @users = &list_domain_users($d, 1, 1, 1, 0);
-local @unames = ( &mysql_user($d),
+my @oldusers = &list_mysql_database_users($d, $dbname);
+my @users = &list_domain_users($d, 1, 1, 1, 0);
+my @unames = ( &mysql_user($d),
 		  map { &mysql_username($_->{'user'}) } @users );
 
 # Take away MySQL permissions for users in this domain
@@ -1831,10 +1831,10 @@ foreach my $uname (@unames) {
 	}
 
 # If any users had access to this DB only, remove them too
-local $duser = &mysql_user($d);
+my $duser = &mysql_user($d);
 foreach my $up (grep { $_->[0] ne $duser } @oldusers) {
 	# XXX why is this query needed when we already know the DB?
-	local $o = &execute_dom_sql($d, $mysql::master_db, "select db from db where user = '$up->[0]'");
+	my $o = &execute_dom_sql($d, $mysql::master_db, "select db from db where user = '$up->[0]'");
 	if (!@{$o->{'data'}}) {
 		&execute_user_deletion_sql($d, undef, $up->[0]);
 		}
@@ -1842,11 +1842,11 @@ foreach my $up (grep { $_->[0] ne $duser } @oldusers) {
 
 # Fix group owner, if the DB still exists, by setting to the owner of the
 # 'mysql' database
-local $tmpl = &get_template($d->{'template'});
-local $dd = &get_mysql_database_dir($d, $dbname);
+my $tmpl = &get_template($d->{'template'});
+my $dd = &get_mysql_database_dir($d, $dbname);
 if ($tmpl->{'mysql_chgrp'} && $dd && -d $dd) {
-	local @st = stat("$dd/../mysql");
-	local $group = scalar(@st) ? $st[5] : "mysql";
+	my @st = stat("$dd/../mysql");
+	my $group = scalar(@st) ? $st[5] : "mysql";
 	&system_logged("chgrp -R $group ".quotemeta($dd));
 	}
 &release_lock_mysql($d);
@@ -1857,12 +1857,12 @@ if ($tmpl->{'mysql_chgrp'} && $dd && -d $dd) {
 # If MySQL is running remotely, this will always return undef.
 sub get_mysql_database_dir
 {
-local ($d, $db) = @_;
+my ($d, $db) = @_;
 &require_mysql();
 return undef if ($d->{'provision_mysql'});
 return undef if (!$db);
-local $mymod = &require_dom_mysql($d);
-local %myconfig = &foreign_config($mymod);
+my $mymod = &require_dom_mysql($d);
+my %myconfig = &foreign_config($mymod);
 return undef if ($myconfig{'host'} &&
 		 $myconfig{'host'} ne 'localhost' &&
 		 &to_ipaddress($myconfig{'host'}) ne
@@ -1878,7 +1878,7 @@ if ($mysqld) {
 	}
 $dir ||= $myconfig{'mysql_data'};
 return undef if (!-d $dir);
-local $escdb = $db;
+my $escdb = $db;
 $escdb =~ s/-/\@002d/g;
 if (-d "$myconfig{'mysql_data'}/$escdb") {
 	return "$myconfig{'mysql_data'}/$escdb";
@@ -1900,29 +1900,29 @@ else {
 # If always-from-template == 3, then only existing hosts will be used
 sub get_mysql_hosts
 {
-local ($d, $always) = @_;
+my ($d, $always) = @_;
 &require_mysql();
-local @hosts;
+my @hosts;
 if (!$always) {
 	@hosts = &get_mysql_allowed_hosts($d);
 	}
 if (!@hosts) {
 	# Fall back to those from template
-	local $tmpl = &get_template($d->{'template'});
+	my $tmpl = &get_template($d->{'template'});
 	@hosts = $tmpl->{'mysql_hosts'} eq "none" ? ( ) :
 	    split(/\s+/, &substitute_domain_template(
 				$tmpl->{'mysql_hosts'}, $d));
 	@hosts = ( 'localhost', '127.0.0.1' ) if (!@hosts);
-	local $mymod = &require_dom_mysql($d);
-	local %myconfig = &foreign_config($mymod);
+	my $mymod = &require_dom_mysql($d);
+	my %myconfig = &foreign_config($mymod);
 	if ($always == 2 ||
 	    $myconfig{'host'} && $myconfig{'host'} ne 'localhost') {
 		# Remove localhost from hosts as we are creating on the remote
 		@hosts = grep { $_ ne 'localhost' && !/^127\./ } @hosts;
 
 		# Add this host too, as we are talking to a remote server
-		local $myhost = &get_system_hostname();
-		local $myip = &to_ipaddress($myhost);
+		my $myhost = &get_system_hostname();
+		my $myip = &to_ipaddress($myhost);
 		if ($myip =~ /^127\./) {
 			# Try again to get an actual IP address
 			($myip) = grep { &check_ipaddress($_) &&
@@ -1946,7 +1946,7 @@ return &unique(@hosts);
 # password, a list of allowed hosts
 sub list_mysql_database_users
 {
-local ($d, $db) = @_;
+my ($d, $db) = @_;
 &require_mysql();
 if ($d->{'provision_mysql'}) {
 	# Fetch from provisioning server
@@ -1964,8 +1964,8 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Query local MySQL server
-	local $qdb = &quote_mysql_database($db);
-	local $rv;
+	my $qdb = &quote_mysql_database($db);
+	my $rv;
 	eval {
 		# Try old password column first
 		local $main::error_must_die = 1;
@@ -1979,7 +1979,7 @@ else {
 			$rv = &execute_dom_sql($d, $mysql::master_db, "select user.user,user.authentication_string,db.host from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
 			};
 		}
-	local (@rv, %done);
+	my (@rv, %done);
 	foreach my $r (@{$rv->{'data'}}) {
 		my $u = $done{$r->[0]};
 		if (!$u) {
@@ -1999,7 +1999,7 @@ else {
 # Returns 1 if some user exists on the MySQL server
 sub check_mysql_user_clash
 {
-local ($d, $user) = @_;
+my ($d, $user) = @_;
 &require_mysql();
 return 1 if ($user eq 'root');	# Never available
 if ($d->{'provision_mysql'}) {
@@ -2011,7 +2011,7 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Check locally
-	local $rv = &execute_dom_sql($d, $mysql::master_db,
+	my $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select user from user where user = ?", $user);
 	return @{$rv->{'data'}} ? 1 : 0;
 	}
@@ -2022,7 +2022,7 @@ else {
 # Adds one mysql user, who can access multiple databases
 sub create_mysql_database_user
 {
-local ($d, $dbs, $user, $pass, $encpass, $auth_plugin) = @_;
+my ($d, $dbs, $user, $pass, $encpass, $auth_plugin) = @_;
 &require_mysql();
 &obtain_lock_mysql($d);
 if ($d->{'provision_mysql'}) {
@@ -2034,7 +2034,7 @@ if ($d->{'provision_mysql'}) {
 	else {
 		$info->{'pass'} = $pass;
 		}
-	local @hosts = map { &to_ipaddress($_) } &get_mysql_hosts($d, 2);
+	my @hosts = map { &to_ipaddress($_) } &get_mysql_hosts($d, 2);
 	$info->{'remote'} = \@hosts;
 	$info->{'database'} = $dbs;
 	my $conns = &get_mysql_user_connections($d, 1);
@@ -2047,14 +2047,14 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Create locally
-	local $myuser = &mysql_username($user);
-	local @hosts = &get_mysql_hosts($d, 1);
+	my $myuser = &mysql_username($user);
+	my @hosts = &get_mysql_hosts($d, 1);
 	foreach my $h (@hosts) {
 		&execute_user_deletion_sql($d, $h, $user);
 		&execute_user_creation_sql($d, $h, $myuser, 
 		      $encpass ? "'".&mysql_escape($encpass)."'" :undef,
 		      $pass, $auth_plugin);
-		local $db;
+		my $db;
 		foreach $db (@$dbs) {
 			&create_mysql_db_grant($d, $h, $db, $myuser);
 			}
@@ -2068,10 +2068,10 @@ else {
 # Removes one database user and his access to all databases
 sub delete_mysql_database_user
 {
-local ($d, $user) = @_;
+my ($d, $user) = @_;
 &require_mysql();
 &obtain_lock_mysql($d);
-local $myuser = &mysql_username($user);
+my $myuser = &mysql_username($user);
 if ($d->{'provision_mysql'}) {
 	# Delete on provisioning server
 	my $mymod = &get_domain_mysql_module($d);
@@ -2094,11 +2094,11 @@ else {
 # mysql databases
 sub modify_mysql_database_user
 {
-local ($d, $olddbs, $dbs, $olduser, $user, $pass, $encpass) = @_;
+my ($d, $olddbs, $dbs, $olduser, $user, $pass, $encpass) = @_;
 &require_mysql();
 &obtain_lock_mysql($d);
-local $myuser = &mysql_username($user);
-local $myolduser = &mysql_username($olduser);
+my $myuser = &mysql_username($user);
+my $myolduser = &mysql_username($olduser);
 if ($d->{'provision_mysql'}) {
 	# Update on provisioning server
 	my $mymod = &get_domain_mysql_module($d);
@@ -2141,11 +2141,11 @@ else {
 		}
 	if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
 		# Update accessible database list
-		local @hosts = &get_mysql_hosts($d);
+		my @hosts = &get_mysql_hosts($d);
 		&delete_mysql_db_grant($d, undef, $myuser);
-		local $h;
+		my $h;
 		foreach $h (@hosts) {
-			local $db;
+			my $db;
 			foreach $db (@$dbs) {
 				&create_mysql_db_grant($d, $h, $db, $myuser);
 				}
@@ -2206,14 +2206,14 @@ return ( [ $text{'sysinfo_mysql'}, $v ] );
 
 sub startstop_mysql
 {
-local ($typestatus) = @_;
+my ($typestatus) = @_;
 &require_mysql();
 return ( ) if ($config{'provision_mysql'} ||
 	       !&mysql::is_mysql_local());	# cannot stop/start remote
-local $r = defined($typestatus->{'mysql'}) ?
+my $r = defined($typestatus->{'mysql'}) ?
 		$typestatus->{'mysql'} == 1 :
 		&mysql::is_mysql_running();
-local @links = ( { 'link' => '/mysql/',
+my @links = ( { 'link' => '/mysql/',
 		   'desc' => $text{'index_mymanage'},
 		   'manage' => 1 } );
 if ($r == 1) {
@@ -2272,7 +2272,7 @@ else {
 # Returns a MySQL escaped database name like \% and \_ unescaped
 sub unquote_mysql_database
 {
-local ($db) = @_;
+my ($db) = @_;
 $db =~ s/\\_/_/g;
 $db =~ s/\\%/%/g;
 return $db;
@@ -2282,7 +2282,7 @@ return $db;
 # Returns a MySQL database name with % and _ characters escaped
 sub quote_mysql_database
 {
-local ($db) = @_;
+my ($db) = @_;
 $db =~ s/_/\\_/g;
 $db =~ s/%/\\%/g;
 return $db;
@@ -2292,7 +2292,7 @@ return $db;
 # Outputs HTML for editing MySQL related template options
 sub show_template_mysql
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 &require_mysql();
 
 # Default database name template
@@ -2412,7 +2412,7 @@ print &ui_table_row(&hlink($text{'tmpl_mysql_uconns'},
 # Updates MySQL related template options from %in
 sub parse_template_mysql
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 &require_mysql();
 
 # Save MySQL-related settings
@@ -2482,13 +2482,13 @@ sub creation_form_mysql
 {
 my ($d) = @_;
 &require_mysql();
-local $rv;
+my $rv;
 if (&get_dom_remote_mysql_version($d) >= 4.1) {
-	local $tmpl = &get_template($d->{'template'});
+	my $tmpl = &get_template($d->{'template'});
 
 	# Character set
-	local @charsets = &list_mysql_character_sets($d);
-	local $cs = $tmpl->{'mysql_charset'};
+	my @charsets = &list_mysql_character_sets($d);
+	my $cs = $tmpl->{'mysql_charset'};
 	$cs = "" if ($cs eq "none");
 	$rv .= &ui_table_row($text{'database_charset'},
 		     &ui_select("mysql_charset", $cs,
@@ -2497,11 +2497,11 @@ if (&get_dom_remote_mysql_version($d) >= 4.1) {
 				      @charsets ]));
 
 	# Collation order
-	local $cl = $tmpl->{'mysql_collate'};
+	my $cl = $tmpl->{'mysql_collate'};
 	$cl = "" if ($cs eq "none");
-	local @colls = &list_mysql_collation_orders($d);
+	my @colls = &list_mysql_collation_orders($d);
 	if (@colls) {
-		local %csmap = map { $_->[0], $_->[1] } @charsets;
+		my %csmap = map { $_->[0], $_->[1] } @charsets;
 		$rv .= &ui_table_row($text{'database_collate'},
 		     &ui_select("mysql_collate", $cl,
 			[ [ undef, "&lt;$text{'default'}&gt;" ],
@@ -2517,8 +2517,8 @@ return $rv;
 # for passing to create_mysql_database
 sub creation_parse_mysql
 {
-local ($d, $in) = @_;
-local $opts = { 'charset' => $in->{'mysql_charset'},
+my ($d, $in) = @_;
+my $opts = { 'charset' => $in->{'mysql_charset'},
 		'collate' => $in->{'mysql_collate'} };
 return $opts;
 }
@@ -2528,7 +2528,7 @@ return $opts;
 # allowed to connect to MySQL.
 sub get_mysql_allowed_hosts
 {
-local ($d) = @_;
+my ($d) = @_;
 return &get_mysql_user_allowed_hosts($d, &mysql_user($d));
 }
 
@@ -2551,7 +2551,7 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Get from local DB
-	local $data = &execute_dom_sql($d, $mysql::master_db,
+	my $data = &execute_dom_sql($d, $mysql::master_db,
 	    "select distinct host from user where user = ?", $user);
 	return map { $_->[0] } @{$data->{'data'}};
 	}
@@ -2562,10 +2562,10 @@ else {
 # Returns undef on success, or an error message on failure.
 sub save_mysql_allowed_hosts
 {
-local ($d, $hosts) = @_;
+my ($d, $hosts) = @_;
 &require_mysql();
 &obtain_lock_mysql($d);
-local $user = &mysql_user($d);
+my $user = &mysql_user($d);
 
 if ($d->{'provision_mysql'}) {
 	# Call the remote API
@@ -2580,7 +2580,7 @@ else {
 	# Update MySQL permissions locally
 
 	# First get all the DBs owned by this domain, and sub-domains
-	local @dbs = &domain_databases($d, [ 'mysql' ]);
+	my @dbs = &domain_databases($d, [ 'mysql' ]);
 	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
 		push(@dbs, &domain_databases($sd, [ 'mysql' ]));
 		}
@@ -2655,13 +2655,13 @@ return &has_home_quotas() &&
 # like password('smeg')
 sub encrypted_mysql_pass
 {
-local ($d) = @_;
+my ($d) = @_;
 if ($d->{'mysql_enc_pass'}) {
 	return "'".&mysql_escape($d->{'mysql_enc_pass'})."'";
 	}
 else {
-	local $qpass = &mysql_escape(&mysql_pass($d));
-	local $pf = &get_mysql_password_func($d);
+	my $qpass = &mysql_escape(&mysql_pass($d));
+	my $pf = &get_mysql_password_func($d);
 	return "$pf('$qpass')";
 	}
 }
@@ -2692,13 +2692,13 @@ return $rv;
 # Tries to login to MySQL with the given credentials, returning undef on failure
 sub check_mysql_login
 {
-local ($d, $dbname, $dbuser, $dbpass) = @_;
+my ($d, $dbname, $dbuser, $dbpass) = @_;
 &require_mysql();
 local $main::error_must_die = 1;
 local $mysql::mysql_login = $dbuser;
 local $mysql::mysql_pass = $dbpass;
 eval { &execute_dom_sql($d, $dbname, "show tables") };
-local $err = $@;
+my $err = $@;
 if ($err) {
 	$err =~ s/\s+at\s+.*\sline//g;
 	return $err;
@@ -2713,7 +2713,7 @@ sub list_mysql_collation_orders
 {
 my ($d) = @_;
 &require_mysql();
-local @rv;
+my @rv;
 if ($config{'provision_mysql'}) {
 	my $mymod = &get_domain_mysql_module($d);
 	if ($mymod->{'config'}->{'host'}) {
@@ -2767,10 +2767,10 @@ else {
 # Checks if a MySQL database name is valid
 sub validate_database_name_mysql
 {
-local ($d, $dbname) = @_;
+my ($d, $dbname) = @_;
 $dbname =~ /^[a-z0-9\_\-]+$/i ||
 	return $text{'database_ename'};
-local $maxlen;
+my $maxlen;
 if ($d->{'provision_mysql'}) {
 	# Just assume that the DB name max is 64 chars
 	$maxlen = 64;
@@ -2778,10 +2778,10 @@ if ($d->{'provision_mysql'}) {
 else {
 	# Get the DB name max from the mysql.db table
 	&require_mysql();
-	local $mod = &require_dom_mysql($d);
-	local @str = &foreign_call($mod, "table_structure",
+	my $mod = &require_dom_mysql($d);
+	my @str = &foreign_call($mod, "table_structure",
 				   $mysql::master_db, "db");
-	local ($dbcol) = grep { lc($_->{'field'}) eq 'db' } @str;
+	my ($dbcol) = grep { lc($_->{'field'}) eq 'db' } @str;
 	$maxlen = $dbcol && $dbcol->{'type'} =~ /\((\d+)\)/ ? $1 : 64;
 	}
 length($dbname) <= $maxlen ||
@@ -2793,9 +2793,9 @@ return undef;
 # Returns default options for a new MySQL DB in some domain
 sub default_mysql_creation_opts
 {
-local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
-local %opts;
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my %opts;
 if ($tmpl->{'mysql_charset'} && $tmpl->{'mysql_charset'} ne 'none') {
 	$opts{'charset'} = $tmpl->{'mysql_charset'};
 	}
@@ -2809,12 +2809,12 @@ return \%opts;
 # Returns a hash ref of database creation options for an existing DB
 sub get_mysql_creation_opts
 {
-local ($d, $dbname) = @_;
+my ($d, $dbname) = @_;
 &require_mysql();
-local $data = &execute_dom_sql($d, $dbname, "show create database ".
+my $data = &execute_dom_sql($d, $dbname, "show create database ".
 					    &mysql::quotestr($dbname));
-local $sql = $data->{'data'}->[0]->[1];
-local $opts = { };
+my $sql = $data->{'data'}->[0]->[1];
+my $opts = { };
 if ($sql =~ /CHARACTER\s+SET\s+(\S+)/i) {
 	$opts->{'charset'} = $1;
 	}
@@ -2828,12 +2828,12 @@ return $opts;
 # Returns the names of all known MySQL databases
 sub list_all_mysql_databases
 {
-local ($d) = @_;
-local $prov = $d ? $d->{'provision_mysql'} : $config{'provision_mysql'};
+my ($d) = @_;
+my $prov = $d ? $d->{'provision_mysql'} : $config{'provision_mysql'};
 &require_mysql();
 if ($prov) {
 	# From provisioning server
-	local $info = { 'feature' => 'mysqldb' };
+	my $info = { 'feature' => 'mysqldb' };
 	my ($ok, $msg) = &provision_api_call(
 		"list-provision-history", $info, 1);
 	if (!$ok) {
@@ -2851,8 +2851,8 @@ else {
 # Sets the max connections for a user if defined in the template
 sub set_mysql_user_connections
 {
-local ($d, $host, $user, $mailbox) = @_;
-local $conns = &get_mysql_user_connections($d, $mailbox);
+my ($d, $host, $user, $mailbox) = @_;
+my $conns = &get_mysql_user_connections($d, $mailbox);
 if ($conns) {
 	if (&mysql_supports_grants($d)) {
 		# Need to use the alter user command
@@ -2873,9 +2873,9 @@ if ($conns) {
 # Returns the max connections to MySQL from a template
 sub get_mysql_user_connections
 {
-local ($d, $mailbox) = @_;
-local $tmpl = &get_template($d->{'template'});
-local $conns = $tmpl->{$mailbox ? 'mysql_uconns' : 'mysql_conns'};
+my ($d, $mailbox) = @_;
+my $tmpl = &get_template($d->{'template'});
+my $conns = $tmpl->{$mailbox ? 'mysql_uconns' : 'mysql_conns'};
 $conns = undef if ($conns eq "none");
 return $conns;
 }
@@ -2890,7 +2890,7 @@ return ("default", "small", "medium", "large", "huge");
 # diff my-large.cnf my-huge.cnf  | grep ">" | grep -v "#" | grep = | perl -ne 'print "[ \"$1\", \"$2\" ],\n" if (/(\S+)\s*=\s*(\S+)/)'
 sub list_mysql_size_settings
 {
-local ($size, $myver, $variant) = @_;
+my ($size, $myver, $variant) = @_;
 &require_mysql();
 ($myver, $variant) = &get_dom_remote_mysql_version() if (!$myver && !$variant);
 my $cachedir = &compare_versions($myver, "5.1.3") > 0 ? "table_open_cache"
@@ -3015,7 +3015,7 @@ sub execute_user_rename_sql
 my ($d, $olduser, $user) = @_;
 if (&mysql_supports_grants($d)) {
 	# Need to alter user
-	local $rv = &execute_dom_sql($d, $mysql::master_db,
+	my $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $olduser);
 	foreach my $r (@{$rv->{'data'}}) {
 		&execute_dom_sql($d, $mysql::master_db,
@@ -3161,7 +3161,7 @@ if (&mysql_supports_grants($d)) {
 		}
 	else {
 		# Need to drop from all hosts explicitly
-		local $rv = &execute_dom_sql($d, $mysql::master_db,
+		my $rv = &execute_dom_sql($d, $mysql::master_db,
 			"select host from user where user = ?", $user);
 		foreach my $r (@{$rv->{'data'}}) {
 			push(@rv, "drop user if exists '$user'\@'$r->[0]'");
@@ -3310,7 +3310,7 @@ return 1;
 # Returns 1 if the domain's MySQL DB is on a remote system
 sub remote_mysql
 {
-local ($d) = @_;
+my ($d) = @_;
 my $mymod = &get_domain_mysql_module($d);
 return $mymod->{'config'}->{'host'};
 }

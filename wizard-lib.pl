@@ -35,7 +35,7 @@ sub wizard_show_memory
 {
 print &ui_table_row(undef, $text{'wizard_memory2'}. "<p></p>", 2);
 
-local $mem = &get_uname_arch() =~ /64/ ? "70M" : "35M";
+my $mem = &get_uname_arch() =~ /64/ ? "70M" : "35M";
 print &ui_table_row($text{'wizard_memory_lookup'},
 	&ui_radio("lookup", &check_lookup_domain_daemon(),
 		  [ [ 1, &text('wizard_memory_lookup1', $mem)."<br>" ],
@@ -45,11 +45,11 @@ print &ui_table_row($text{'wizard_memory_lookup'},
 # Enable or disable pre-loading and lookup-domain-daemon
 sub wizard_parse_memory
 {
-local ($in) = @_;
+my ($in) = @_;
 &push_all_print();
 &set_all_null_print();
 
-local $lud = &check_lookup_domain_daemon();
+my $lud = &check_lookup_domain_daemon();
 if ($in->{'lookup'} && !$lud) {
 	# Startup lookup daemon
 	&setup_lookup_domain_daemon();
@@ -69,7 +69,7 @@ return undef;
 sub wizard_show_virus
 {
 print &ui_table_row(undef, $text{'wizard_virusnew'} . "<p></p>", 2);
-local $cs = &check_clamd_status();
+my $cs = &check_clamd_status();
 if ($cs != -1) {
 	$cs = 2 if (!$cs && &get_global_virus_scanner() eq 'clamscan');
 	print &ui_table_row($text{'wizard_virusmsg'},
@@ -86,18 +86,18 @@ else {
 # Parse the clamd form, and enable or disable clamd
 sub wizard_parse_virus
 {
-local ($in) = @_;
+my ($in) = @_;
 if (defined($in->{'clamd'})) {
-	local $cs = &check_clamd_status();
+	my $cs = &check_clamd_status();
 	if ($in->{'clamd'} == 1 && !$cs) {
 		# Enable if needed
 		&push_all_print();
 		&set_all_null_print();
-		local $ok = &enable_clamd();
+		my $ok = &enable_clamd();
 		&pop_all_print();
 		if ($ok) {
 			# Switch to clamdscan, after testing
-			local $last_err;
+			my $last_err;
 			&foreign_require("init");
 			for(my $try=0; $try<20; $try++) {
 				$last_err = &test_virus_scanner("clamdscan");
@@ -155,7 +155,7 @@ return undef;
 sub wizard_show_spam
 {
 print &ui_table_row(undef, $text{'wizard_spam'} . "<p></p>", 2);
-local $cs = &check_spamd_status();
+my $cs = &check_spamd_status();
 if ($cs != -1) {
 	print &ui_table_row($text{'wizard_spamd'},
 		&ui_radio("spamd", $cs ? 1 : 0,
@@ -170,14 +170,14 @@ else {
 # Parse the spamd form, and enable or disable spamd
 sub wizard_parse_spam
 {
-local ($in) = @_;
+my ($in) = @_;
 if (defined($in->{'spamd'})) {
-	local $cs = &check_spamd_status();
+	my $cs = &check_spamd_status();
 	if ($in->{'spamd'} && !$cs) {
 		# Enable if needed
 		&push_all_print();
 		&set_all_null_print();
-		local $ok = &enable_spamd();
+		my $ok = &enable_spamd();
 		&pop_all_print();
 		if ($ok) {
 			# Switch to spamc
@@ -212,7 +212,7 @@ print &ui_table_row($text{'wizard_db_postgres'},
 # Enable or disable MySQL and PostgreSQL, depending on user's selections
 sub wizard_parse_db
 {
-local ($in) = @_;
+my ($in) = @_;
 &foreign_require("init");
 
 &require_mysql();
@@ -223,7 +223,7 @@ if ($in->{'mysql'}) {
 		}
 	$config{'mysql'} ||= 1;
 	if (&mysql::is_mysql_running() == 0) {
-		local $err = &mysql::start_mysql();
+		my $err = &mysql::start_mysql();
 		return &text('wizard_emysqlstart', $err) if ($err);
 		}
 	if (&init::action_status("mysql")) {
@@ -251,7 +251,7 @@ if ($in->{'postgres'}) {
 	&require_postgres();
 	$config{'postgres'} ||= 1;
 	if (&postgresql::is_postgresql_running() == 0) {
-		local $err = &postgresql::start_postgresql();
+		my $err = &postgresql::start_postgresql();
 		return &text('wizard_epostgresstart', $err) if ($err);
 		}
 	if (&init::action_status("postgresql")) {
@@ -342,9 +342,9 @@ else {
 # Set the MySQL password, if changed
 sub wizard_parse_mysql
 {
-local ($in) = @_;
+my ($in) = @_;
 &require_mysql();
-local $user = $mysql::mysql_login || 'root';
+my $user = $mysql::mysql_login || 'root';
 if ($in->{'socket'} && !$in->{'mypass'}) {
 	# Socket auth with no password. Check if we actually have socket plugin,
 	# and not just empty password
@@ -355,7 +355,7 @@ if ($in->{'socket'} && !$in->{'mypass'}) {
 		}
 	return undef;
 	}
-local $pass = $in->{'mypass_def'} ? $mysql::mysql_pass : $in->{'mypass'};
+my $pass = $in->{'mypass_def'} ? $mysql::mysql_pass : $in->{'mypass'};
 if ($in->{'needchange'}) {
 	# Change the password used by subsequent code to validate that it works
 	$mysql::mysql_pass = $pass;
@@ -411,10 +411,10 @@ sub wizard_show_dns
 print &ui_table_row(undef, $text{'wizard_dns'} . "<p></p>", 2);
 
 # Primary nameserver
-local $tmpl = &get_template(0);
-local $tmaster = $tmpl->{'dns_master'} eq 'none' ? undef
+my $tmpl = &get_template(0);
+my $tmaster = $tmpl->{'dns_master'} eq 'none' ? undef
 						 : $tmpl->{'dns_master'};
-local $master = $tmaster ||
+my $master = $tmaster ||
 		$bconfig{'default_prins'} ||
 		&get_system_hostname();
 print &ui_table_row($text{'wizard_dns_prins'},
@@ -423,7 +423,7 @@ print &ui_table_row($text{'wizard_dns_prins'},
 				 $config{'prins_skip'}));
 
 # Secondaries (optional)
-local @secns = split(/\s+/, $tmpl->{'dns_ns'});
+my @secns = split(/\s+/, $tmpl->{'dns_ns'});
 print &ui_table_row($text{'wizard_dns_secns'},
 		    &ui_textarea("secns", join("", map { "$_\n" } @secns),
 				 4, 40));
@@ -431,17 +431,17 @@ print &ui_table_row($text{'wizard_dns_secns'},
 
 sub wizard_parse_dns
 {
-local ($in) = @_;
+my ($in) = @_;
 &require_bind();
-local @tmpls = &list_templates();
-local ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
+my @tmpls = &list_templates();
+my ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
 $tmpl || return $text{'wizard_etmpl0'};
 
 # Validate primary NS
 $in->{'prins'} =~ /^[a-z0-9\.\_\-]+$/i || return $text{'wizard_dns_eprins'};
 if (!$in->{'prins_skip'}) {
 	&to_ipaddress($in->{'prins'}) || return $text{'wizard_dns_eprins2'};
-	local ($ok, $msg) = &check_resolvability($in->{'prins'});
+	my ($ok, $msg) = &check_resolvability($in->{'prins'});
 	if (!$ok) {
 		return &text('wizard_dns_eprins3', $msg);
 		}
@@ -450,12 +450,12 @@ $tmpl->{'dns_master'} = $in->{'prins'};
 &save_template($tmpl);
 
 # Validate any secondary NSs
-local @secns;
+my @secns;
 foreach my $ns (split(/\s+/, $in->{'secns'})) {
 	$ns =~ /^[a-z0-9\.\_\-]+$/i || return &text('wizard_dns_esecns', $ns);
 	if (!$in->{'prins_skip'}) {
 		&to_ipaddress($ns) || return &text('wizard_dns_esecns2', $ns);
-		local ($ok, $msg) = &check_resolvability($ns);
+		my ($ok, $msg) = &check_resolvability($ns);
 		if (!$ok) {
 			return &text('wizard_dns_esecns3', $ns, $msg);
 			}
@@ -491,7 +491,7 @@ print &ui_table_row($text{'wizard_to_addr'},
 
 sub wizard_parse_email
 {
-local ($in) = @_;
+my ($in) = @_;
 
 &lock_file($module_config_file);
 if ($in->{'from_addr_def'}) {
@@ -528,7 +528,7 @@ sub get_real_memory_size
 return undef if (!&foreign_check("proc"));
 &foreign_require("proc");
 return undef if (!defined(&proc::get_memory_info));
-local ($real) = &proc::get_memory_info();
+my ($real) = &proc::get_memory_info();
 return $real * 1024;
 }
 
@@ -536,7 +536,7 @@ return $real * 1024;
 # Returns the architecture, like x86_64 or i386
 sub get_uname_arch
 {
-local $out = &backquote_command("uname -m");
+my $out = &backquote_command("uname -m");
 $out =~ s/\s+//g;
 return $out;
 }

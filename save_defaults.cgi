@@ -43,7 +43,7 @@ else {
 
 # Save databases
 foreach $db (split(/\r?\n/, $in{'dbs'})) {
-	local ($type, $name) = split(/_/, $db, 2);
+	my ($type, $name) = split(/_/, $db, 2);
 	push(@dbs, { 'type' => $type, 'name' => $name });
 	}
 $user->{'dbs'} = \@dbs;

@@ -40,7 +40,7 @@ if (!$module_name) {
 $owner = 1;
 &parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		push(@domains, shift(@ARGV));
 		}
@@ -94,7 +94,7 @@ foreach my $d (@doms) {
 	foreach my $sd (@subdoms) {
 		$bwinfo = &get_bandwidth($sd);
 		foreach my $k (keys %$bwinfo) {
-			local ($f, $dt) = split(/_/, $k);
+			my ($f, $dt) = split(/_/, $k);
 			next if ($dt !~ /^\d+$/);
 			$daymap{$dt}->{$f} += $bwinfo->{$k};
 			$allfeatures{$f} = 1;
