@@ -7829,13 +7829,10 @@ $sslserv_tests = [
 	  'args' => [ [ 'user', $test_domain_user ],
 		      [ 'pass', 'smeg' ],
 		      [ 'server', 'mail.'.$test_domain ],
-		      [ 'ssl' ] ],
-	},
-	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
-		       ' -servername mail.'.$test_domain.
-		       ' -port 993 </dev/null',
-	  'grep' => [ 'O\s*=\s*Test SSL domain',
-		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
+		      [ 'ssl' ],
+		      [ 'sni', 'mail.'.$test_domain ],
+		      [ 'cert-host', 'mail.'.$test_domain ],
+		      [ 'cert-org', 'Test SSL domain' ] ],
 	},
 
 	# Validate that Postfix cert works
@@ -7915,11 +7912,14 @@ $sslserv_tests = [
 	},
 
 	# Validate that new Dovecot cert works
-	{ 'command' => 'openssl s_client -host $PRIVATE_IP'.
-		       ' -servername mail.'.$test_domain.
-		       ' -port 993 </dev/null',
-	  'grep' => [ 'O\s*=\s*Test 2 SSL domain',
-		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ],
+		      [ 'sni', 'mail.'.$test_domain ],
+		      [ 'cert-host', 'mail.'.$test_domain ],
+		      [ 'cert-org', 'Test 2 SSL domain' ] ],
 	},
 
 	# Validate that new Postfix cert works
@@ -7998,24 +7998,23 @@ $sslserv_tests = [
 	{ 'command' => 'test-imap.pl',
 	  'args' => [ [ 'user', $test_domain_user ],
 		      [ 'pass', 'smeg' ],
-		      [ 'server', $test_domain ],
-		      [ 'ssl' ] ],
-	},
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
-		       ' -servername '.$test_domain.
-		       ' -port 993 </dev/null',
-	  'grep' => [ 'O\s*=\s*Test SSL domain',
-		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ],
+		      [ 'sni', $test_domain ],
+		      [ 'cert-host', $test_domain ],
+		      [ 'cert-org', 'Test SSL domain' ] ],
 	},
 
 	# Validate that Dovecot cert selection still works with alias SNI.
 	# Connect via the known local mail host, as the alias domain name may
 	# otherwise resolve outside the test system.
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
-		       ' -servername '.$test_subdomain.
-		       ' -port 993 </dev/null',
-	  'grep' => [ 'O\s*=\s*Test SSL domain',
-		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ],
+		      [ 'sni', $test_subdomain ],
+		      [ 'cert-org', 'Test SSL domain' ] ],
 	},
 
 	# Re-check that Postfix still works. The list-domains check above
@@ -8039,11 +8038,14 @@ $sslserv_tests = [
 	},
 
 	# Validate that new Dovecot cert still works with SNI
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
-		       ' -servername '.$test_domain.
-		       ' -port 993 </dev/null',
-	  'grep' => [ 'O\s*=\s*Test 2 SSL domain',
-		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ],
+		      [ 'sni', $test_domain ],
+		      [ 'cert-host', $test_domain ],
+		      [ 'cert-org', 'Test 2 SSL domain' ] ],
 	},
 
 	# Re-check that Postfix still accepts SSL connections
@@ -8085,13 +8087,10 @@ $sslserv_tests = [
 	  'args' => [ [ 'user', $test_domain_user ],
 		      [ 'pass', 'smeg' ],
 		      [ 'server', $test_ssl_subdomain ],
-		      [ 'ssl' ] ],
-	},
-	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
-		       ' -servername '.$test_ssl_subdomain.
-		       ' -port 993 </dev/null',
-	  'grep' => [ 'O\s*=\s*Test 3 SSL subdomain',
-		      'CN\s*=\s*(\\*\\.)?'.$test_ssl_subdomain ],
+		      [ 'ssl' ],
+		      [ 'sni', $test_ssl_subdomain ],
+		      [ 'cert-host', $test_ssl_subdomain ],
+		      [ 'cert-org', 'Test 3 SSL subdomain' ] ],
 	},
 
 	# Remove the child domain again before the remaining service-cert tests
