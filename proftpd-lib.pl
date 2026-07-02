@@ -30,9 +30,9 @@ my $conf = &proftpd::get_config();
 my $st = &proftpd::find_directive("ServerType", $conf);
 if (lc($st) ne "inetd") {
 	&$first_print($text{'setup_proftpdpid'});
-	local $proftpdlock = "$module_config_directory/proftpd-restart";
+	my $proftpdlock = "$module_config_directory/proftpd-restart";
 	&lock_file($proftpdlock);
-	local $err = &proftpd::apply_configuration();
+	my $err = &proftpd::apply_configuration();
 	&unlock_file($proftpdlock);
 	&$second_print($err ? &text('setup_proftpdfailed', $err)
 			    : $text{'setup_done'});
@@ -143,7 +143,7 @@ my $conf = &proftpd::get_config();
 $proftpd::conf = $conf;		# get_or_create is broken in Webmin 1.410
 my $gconf = &proftpd::get_or_create_global($conf);
 foreach my $dr (&proftpd::find_directive_struct("DefaultRoot", $gconf)) {
-	local $chroot = { 'dr' => $dr,
+	my $chroot = { 'dr' => $dr,
 			  'dir' => $dr->{'words'}->[0] };
 	if ($dr->{'words'}->[1] eq '') {
 		# Applies to all groups

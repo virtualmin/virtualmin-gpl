@@ -19,10 +19,10 @@ sub useradmin_delete_user
 sub useradmin_modify_user
 {
 if ($_[0]->{'olduser'} && $_[0]->{'olduser'} ne $_[0]->{'user'}) {
-	local $d = &get_user_domain($_[0]->{'user'});
+	my $d = &get_user_domain($_[0]->{'user'});
 	if ($d) {
 		# User was renamed .. update mailbox plainpass
-		local %plain;
+		my %plain;
 		&read_file_cached("$plainpass_dir/$d->{'id'}", \%plain);
 		if ($plain{$_[0]->{'olduser'}}) {
 			$plain{$_[0]->{'user'}} = $plain{$_[0]->{'olduser'}};
@@ -31,7 +31,7 @@ if ($_[0]->{'olduser'} && $_[0]->{'olduser'} ne $_[0]->{'user'}) {
 			}
 
 		# And hashed passwords
-		local %hash;
+		my %hash;
 		&read_file_cached("$hashpass_dir/$d->{'id'}", \%hash);
 		if ($hash{$_[0]->{'olduser'}}) {
 			foreach my $s (@hashpass_types) {
@@ -64,7 +64,7 @@ if ($_[0]->{'passmode'} == 3) {
 		# updated by caller
 		foreach my $f (@features) {
 			if ($f ne "unix" && $config{$f} && $d->{$f}) {
-				local $mfunc = "modify_".$f;
+				my $mfunc = "modify_".$f;
 				&$mfunc($d, $oldd);
 				}
 			}
@@ -78,9 +78,9 @@ if ($_[0]->{'passmode'} == 3) {
 		}
 
 	# Update mailbox user passwords
-	local $d = &get_user_domain($_[0]->{'user'});
+	my $d = &get_user_domain($_[0]->{'user'});
 	if ($d && $d->{'user'} ne $_[0]->{'user'}) {
-		local ($user) = grep { $_->{'user'} eq $_[0]->{'user'} }
+		my ($user) = grep { $_->{'user'} eq $_[0]->{'user'} }
 				     &list_domain_users($d, 1, 0, 0, 0);
 		if ($user) {
 			$olduser = { %$user };

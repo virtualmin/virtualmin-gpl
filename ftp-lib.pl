@@ -5,7 +5,7 @@
 # Download data from a local file to an FTP site
 sub ftp_tryload
 {
-local $tries = $_[8] || 1;
+my $tries = $_[8] || 1;
 for(my $i=0; $i<$tries; $i++) {
 	&ftp_upload(@_);
 	return 1 if (!${$_[3]});
@@ -18,7 +18,7 @@ return 0;
 # Upload data from a local file to an FTP-over-TLS site
 sub ftp_encrypted_tryload
 {
-local $tries = $_[8] || 1;
+my $tries = $_[8] || 1;
 for(my $i=0; $i<$tries; $i++) {
 	&ftp_encrypted_upload(@_);
 	return 1 if (!${$_[3]});
@@ -31,7 +31,7 @@ return 0;
 # exit status.
 sub ftp_onecommand
 {
-local($buf, @n);
+my($buf, @n);
 
 $main::download_timed_out = undef;
 local $SIG{ALRM} = \&download_timeout;
@@ -47,7 +47,7 @@ if ($main::download_timed_out) {
 &ftp_command("", 2, $_[2]) || return 0;
 if ($_[3]) {
 	# Login as supplied user
-	local @urv = &ftp_command("USER $_[3]", [ 2, 3 ], $_[2]);
+	my @urv = &ftp_command("USER $_[3]", [ 2, 3 ], $_[2]);
 	@urv || return 0;
 	if (int($urv[1]/100) == 3) {
 		&ftp_command("PASS $_[4]", 2, $_[2]) || return 0;
@@ -55,7 +55,7 @@ if ($_[3]) {
 	}
 else {
 	# Login as anonymous
-	local @urv = &ftp_command("USER anonymous", [ 2, 3 ], $_[2]);
+	my @urv = &ftp_command("USER anonymous", [ 2, 3 ], $_[2]);
 	@urv || return 0;
 	if (int($urv[1]/100) == 3) {
 		&ftp_command("PASS root\@".&get_system_hostname(), 2,
@@ -64,7 +64,7 @@ else {
 	}
 
 # Run the command
-local @rv = &ftp_command($_[1], 2, $_[2]);
+my @rv = &ftp_command($_[1], 2, $_[2]);
 @rv || return 0;
 
 # finish off..
@@ -80,7 +80,7 @@ return $rv[1];
 # the filename)
 sub ftp_listdir
 {
-local($buf, @n);
+my($buf, @n);
 
 $main::download_timed_out = undef;
 local $SIG{ALRM} = \&download_timeout;
@@ -96,7 +96,7 @@ if ($main::download_timed_out) {
 &ftp_command("", 2, $_[2]) || return 0;
 if ($_[3]) {
 	# Login as supplied user
-	local @urv = &ftp_command("USER $_[3]", [ 2, 3 ], $_[2]);
+	my @urv = &ftp_command("USER $_[3]", [ 2, 3 ], $_[2]);
 	@urv || return 0;
 	if (int($urv[1]/100) == 3) {
 		&ftp_command("PASS $_[4]", 2, $_[2]) || return 0;
@@ -104,7 +104,7 @@ if ($_[3]) {
 	}
 else {
 	# Login as anonymous
-	local @urv = &ftp_command("USER anonymous", [ 2, 3 ], $_[2]);
+	my @urv = &ftp_command("USER anonymous", [ 2, 3 ], $_[2]);
 	@urv || return 0;
 	if (int($urv[1]/100) == 3) {
 		&ftp_command("PASS root\@".&get_system_hostname(), 2,
@@ -126,21 +126,21 @@ if ($v6) {
 	}
 else {
 	# request the listing over a PASV connection
-	local $pasv = &ftp_command("PASV", 2, $_[2]);
+	my $pasv = &ftp_command("PASV", 2, $_[2]);
 	defined($pasv) || return 0;
 	$pasv =~ /\(([0-9,]+)\)/ || return 0;
 	@n = split(/,/ , $1);
 	&open_socket("$n[0].$n[1].$n[2].$n[3]", $n[4]*256 + $n[5], "CON", $_[2]) || return 0;
 	}
 
-local @list;
+my @list;
 local $_;
 if ($_[6]) {
 	# Ask for full listing
 	&ftp_command("LIST $_[1]/", 1, $_[2]) || return 0;
 	while(<CON>) {
 		s/\r|\n//g;
-		local @st = &parse_lsl_line($_);
+		my @st = &parse_lsl_line($_);
 		push(@list, \@st) if (scalar(@st));
 		}
 	close(CON);
@@ -169,9 +169,9 @@ return \@list;
 # doesn't look like ls -l output.
 sub parse_lsl_line
 {
-local @w = split(/\s+/, $_[0]);
-local @now = localtime(time());
-local @st;
+my @w = split(/\s+/, $_[0]);
+my @now = localtime(time());
+my @st;
 return ( ) if ($w[0] !~ /^[rwxdlsSt\-]{10}(\+|@|\.)?$/);
 $st[3] = $w[1];			# Links
 $st[4] = $w[2];			# UID
@@ -179,9 +179,9 @@ $st[5] = $w[3];			# GID
 $st[7] = $w[4];			# Size
 if ($w[7] =~ /^(\d+):(\d+)$/) {
 	# Time is month day hour:minute
-	local @tm = ( 0, $2, $1, $w[6], &month_to_number($w[5]), $now[5] );
+	my @tm = ( 0, $2, $1, $w[6], &month_to_number($w[5]), $now[5] );
 	return ( ) if ($tm[4] eq '' || $tm[3] < 1 || $tm[3] > 31);
-	local $ut = timelocal(@tm);
+	my $ut = timelocal(@tm);
 	if ($ut > time()+(24*60*60)) {
 		# Must have been last year!
 		$tm[5]--;
@@ -192,7 +192,7 @@ if ($w[7] =~ /^(\d+):(\d+)$/) {
 	}
 elsif ($w[5] =~ /^(\d{4})\-(\d+)\-(\d+)$/) {
 	# Time is year-month-day hour:minute
-	local @tm = ( 0, 0, 0, $3, $2-1, $1 );
+	my @tm = ( 0, 0, 0, $3, $2-1, $1 );
 	if ($w[6] =~ /^(\d+):(\d+)$/) {
 		$tm[1] = $2;
 		$tm[2] = $1;
@@ -205,7 +205,7 @@ elsif ($w[5] =~ /^(\d{4})\-(\d+)\-(\d+)$/) {
 	}
 elsif ($w[7] =~ /^\d+$/ && $w[7] > 1000 && $w[7] < 10000) {
 	# Time is month day year
-	local @tm = ( 0, 0, 0, $w[6],
+	my @tm = ( 0, 0, 0, $w[6],
 		      &month_to_number($w[5]), $w[7] );
 	return ( ) if ($tm[4] eq '' || $tm[3] < 1 || $tm[3] > 31);
 	$st[8] = $st[9] = $st[10] = timelocal(@tm);
@@ -217,7 +217,7 @@ else {
 	}
 $st[2] = 0;			# Permissions
 $w[0] =~ s/(\+|@|\.)$//;	# Remove trailing + or @ or .
-local @p = reverse(split(//, $w[0]));
+my @p = reverse(split(//, $w[0]));
 for(my $i=0; $i<9; $i++) {
 	if ($p[$i] ne '-') {
 		$st[2] += (1<<$i);
@@ -273,16 +273,16 @@ return join('', $ftype, @permstrs);
 # if needed. Returns the size of any deleted sub-directories.
 sub ftp_deletefile
 {
-local ($host, $file, $err, $user, $pass, $port) = @_;
-local $sz = 0;
+my ($host, $file, $err, $user, $pass, $port) = @_;
+my $sz = 0;
 
 # Check if we can chdir to it
-local $cwderr;
-local $isdir = &ftp_onecommand($host, "CWD $file", \$cwderr,
+my $cwderr;
+my $isdir = &ftp_onecommand($host, "CWD $file", \$cwderr,
 			       $user, $pass, $port);
 if ($isdir) {
 	# Yes .. so delete recursively first
-	local $files = &ftp_listdir($host, $file, $err, $user, $pass, $port, 1);
+	my $files = &ftp_listdir($host, $file, $err, $user, $pass, $port, 1);
 	$files = [ grep { $_->[13] ne "." && $_->[13] ne ".." } @$files ];
 	if (!$err || !$$err) {
 		foreach my $f (@$files) {

@@ -19,11 +19,11 @@ sub setup_virus
 &obtain_lock_virus($_[0]);
 &require_spam();
 
-local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
+my $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
 
 # Find the clamscan recipe
-local @recipes = &procmail::parse_procmail_file($spamrc);
-local @clamrec = &find_clam_recipe(\@recipes);
+my @recipes = &procmail::parse_procmail_file($spamrc);
+my @clamrec = &find_clam_recipe(\@recipes);
 if (@clamrec) {
 	# Already there?
 	&$second_print($text{'setup_virusalready'});
@@ -34,14 +34,14 @@ else {
 	&create_clamdscan_remote_wrapper_cmd();
 
 	# Add the recipe
-	local $recipe0 = { 'flags' => [ 'c', 'w' ],
+	my $recipe0 = { 'flags' => [ 'c', 'w' ],
 			   'type' => '|',
 			   'action' => $clam_wrapper_cmd." ".
 				       &full_clamscan_path() };
-	local $varon = { 'name' => 'VIRUSMODE', 'value' => 1 };
-	local $recipe1 = { 'flags' => [ 'e' ],
+	my $varon = { 'name' => 'VIRUSMODE', 'value' => 1 };
+	my $recipe1 = { 'flags' => [ 'e' ],
 			   'action' => $config{'clam_delivery'} };
-	local $varoff = { 'name' => 'VIRUSMODE', 'value' => 0 };
+	my $varoff = { 'name' => 'VIRUSMODE', 'value' => 0 };
 	if (@recipes > 1) {
 		&procmail::create_recipe_before($recipe0, $recipes[1], $spamrc);
 		&procmail::create_recipe_before($varon, $recipes[1], $spamrc);
@@ -70,7 +70,7 @@ sub modify_virus
 # Just remove the procmail entry that calls clamscan
 sub delete_virus
 {
-local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
+my $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
 if (!-r $spamrc && !$_[0]->{'spam'}) {
 	# Spam already deleted, so the whole procmail file will have been
 	# already removed. So do nothing!
@@ -79,8 +79,8 @@ if (!-r $spamrc && !$_[0]->{'spam'}) {
 &$first_print($text{'delete_virus'});
 &obtain_lock_virus($_[0]);
 &require_spam();
-local @recipes = &procmail::parse_procmail_file($spamrc);
-local @clamrec = &find_clam_recipe(\@recipes);
+my @recipes = &procmail::parse_procmail_file($spamrc);
+my @clamrec = &find_clam_recipe(\@recipes);
 if (@clamrec) {
 	&procmail::delete_recipe($clamrec[1]);
 	&procmail::delete_recipe($clamrec[0]);
@@ -120,12 +120,12 @@ sub copy_clam_wrapper
 # Make sure the domain's procmail config file calls ClamAV
 sub validate_virus
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_spam();
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
 return &text('validate_espamprocmail', "<tt>$spamrc</tt>") if (!-r $spamrc);
-local @recipes = &procmail::parse_procmail_file($spamrc);
-local @clamrec = &find_clam_recipe(\@recipes);
+my @recipes = &procmail::parse_procmail_file($spamrc);
+my @clamrec = &find_clam_recipe(\@recipes);
 return &text('validate_evirus', "<tt>$spamrc</tt>") if (!@clamrec);
 return undef;
 }
@@ -141,7 +141,7 @@ return 0;
 # Returns the two recipes used for virus filtering
 sub find_clam_recipe
 {
-local $i;
+my $i;
 for($i=0; $i<@{$_[0]}; $i++) {
 	if ($_[0]->[$i]->{'action'} =~ /clam(d?)scan/ ||
 	    $_[0]->[$i]->{'action'} =~ /\Q$clam_wrapper_cmd\E/) {
@@ -161,8 +161,8 @@ return ( );
 # Returns the ClamAV version
 sub sysinfo_virus
 {
-local $out = &backquote_command("$config{'clamscan_cmd'} -V 2>/dev/null", 1);
-local $vers = $out =~ /ClamAV\s+([0-9\.]+)/i ? $1 : "Unknown";
+my $out = &backquote_command("$config{'clamscan_cmd'} -V 2>/dev/null", 1);
+my $vers = $out =~ /ClamAV\s+([0-9\.]+)/i ? $1 : "Unknown";
 return ( [ $text{'sysinfo_virus'}, $vers ] );
 }
 
@@ -172,9 +172,9 @@ sub fix_clam_wrapper
 {
 &require_spam();
 foreach my $d (grep { $_->{'virus'} } &list_domains()) {
-	local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-	local @recipes = &procmail::parse_procmail_file($spamrc);
-	local @clamrec = &find_clam_recipe(\@recipes);
+	my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+	my @recipes = &procmail::parse_procmail_file($spamrc);
+	my @clamrec = &find_clam_recipe(\@recipes);
 	if ($clamrec[0]->{'action'} !~ /\Q$clam_wrapper_cmd\E/ &&
 	    $clamrec[0]->{'action'} =~ /^(\S*clam(d?)scan)\s+\-$/) {
 		$clamrec[0]->{'action'} = "$clam_wrapper_cmd $1";
@@ -190,11 +190,11 @@ foreach my $d (grep { $_->{'virus'} } &list_domains()) {
 # -1 - Broken!
 sub get_domain_virus_delivery
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_spam();
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-local @recipes = &procmail::parse_procmail_file($spamrc);
-local @clamrec = &find_clam_recipe(\@recipes);
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my @recipes = &procmail::parse_procmail_file($spamrc);
+my @clamrec = &find_clam_recipe(\@recipes);
 if (!@clamrec) {
 	return (-1);
 	}
@@ -225,16 +225,16 @@ else {
 # Updates the delivery method for viruses for some domain
 sub save_domain_virus_delivery
 {
-local ($d, $mode, $dest) = @_;
+my ($d, $mode, $dest) = @_;
 &require_spam();
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-local @recipes = &procmail::parse_procmail_file($spamrc);
-local @clamrec = &find_clam_recipe(\@recipes);
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my @recipes = &procmail::parse_procmail_file($spamrc);
+my @clamrec = &find_clam_recipe(\@recipes);
 return 0 if (!@clamrec);
-local $r = $clamrec[1];
+my $r = $clamrec[1];
 
 # Preserve existing settings if not set
-local ($oldmode, $olddest) = &get_domain_virus_delivery($d);
+my ($oldmode, $olddest) = &get_domain_virus_delivery($d);
 if (!defined($mode)) {
 	($mode, $dest) = ($oldmode, $olddest);
 	}
@@ -243,7 +243,7 @@ elsif (!defined($dest)) {
 	}
 
 # Work out folder name, defaulting to upper case
-local $folder;
+my $folder;
 if ($mode == 4 || $mode == 6) {
 	if ($dest =~ /^[a-z0-9\.\_\-]+$/i) {
 		$folder = $dest;
@@ -266,7 +266,7 @@ return 1;
 # Returns the clamav scan command, using the full path plus any args
 sub full_clamscan_path
 {
-local $prog = $config{'clamscan_cmd'};
+my $prog = $config{'clamscan_cmd'};
 if ($prog eq "clamd-stream-client") {
 	$prog .= &make_stream_client_args($config{'clamscan_host'});
 	}
@@ -277,10 +277,10 @@ elsif ($prog eq "clamdscan-remote") {
 	$prog = $clamdscan_remote_wrapper_cmd.
 		&make_stream_client_args($config{'clamscan_host'});
 	}
-local ($cmd, @args) = &split_quoted_string($prog);
-local $fullcmd = &has_command($cmd);
+my ($cmd, @args) = &split_quoted_string($prog);
+my $fullcmd = &has_command($cmd);
 return undef if (!$fullcmd);
-local @rv = ( $fullcmd, @args );
+my @rv = ( $fullcmd, @args );
 return join(" ", map { /\s/ ? "\"$_\"" : $_ } @rv);
 }
 
@@ -304,7 +304,7 @@ return $rv;
 # Returns any extra args needed for clamdscan, like for the config file
 sub get_clamdscan_args
 {
-local $scanfile = "/etc/clamd.d/scan.conf";
+my $scanfile = "/etc/clamd.d/scan.conf";
 &foreign_require("init");
 if (-r $scanfile && (&init::action_status("clamd\@scan") ||
 		     &init::action_status("clamd.scan"))) {
@@ -318,15 +318,15 @@ return undef;
 # clamdscan or some other path.
 sub get_domain_virus_scanner
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_spam();
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-local @recipes = &procmail::parse_procmail_file($spamrc);
-local @clamrec = &find_clam_recipe(\@recipes);
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my @recipes = &procmail::parse_procmail_file($spamrc);
+my @clamrec = &find_clam_recipe(\@recipes);
 if (@clamrec) {
-	local $rv = $clamrec[0]->{'action'};
+	my $rv = $clamrec[0]->{'action'};
 	$rv =~ s/^\Q$clam_wrapper_cmd\E\s+//;
-	local @rvs = &split_quoted_string($rv);
+	my @rvs = &split_quoted_string($rv);
 	if ($rvs[0] eq &has_command("clamscan")) {
 		$rv = "clamscan";
 		}
@@ -350,11 +350,11 @@ else {
 # Updates the virus scanning program in the procmail config
 sub save_domain_virus_scanner
 {
-local ($d, $prog) = @_;
+my ($d, $prog) = @_;
 &require_spam();
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-local @recipes = &procmail::parse_procmail_file($spamrc);
-local @clamrec = &find_clam_recipe(\@recipes);
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my @recipes = &procmail::parse_procmail_file($spamrc);
+my @clamrec = &find_clam_recipe(\@recipes);
 if (@clamrec) {
 	if ($prog eq "clamscan") {
 		$prog = &has_command("clamscan");
@@ -416,7 +416,7 @@ else {
 # Update all domains to use a new scanning command
 sub save_global_virus_scanner
 {
-local ($cmd, $host) = @_;
+my ($cmd, $host) = @_;
 $config{'clamscan_cmd'} = $cmd;
 $config{'clamscan_cmd_global'} = 1;
 $config{'clamscan_host'} = $host;
@@ -433,8 +433,8 @@ foreach my $d (grep { $_->{'virus'} } &list_domains()) {
 # that it is working but slow.
 sub test_virus_scanner
 {
-local ($cmd, $host) = @_;
-local $fullcmd = $cmd;
+my ($cmd, $host) = @_;
+my $fullcmd = $cmd;
 if ($cmd eq "clamd-stream-client") {
 	# Set remote host
 	$fullcmd .= &make_stream_client_args($host);
@@ -451,7 +451,7 @@ else {
 		}
 	$fullcmd .= " -";
 	}
-local ($out, $timed_out) =
+my ($out, $timed_out) =
 	&backquote_with_timeout("$fullcmd </dev/null 2>&1", 10, 1);
 if ($timed_out) {
 	return undef;
@@ -472,14 +472,14 @@ else {
 # 1 if yes, or -1 if we can't tell (due to a non-supported OS).
 sub check_clamd_status
 {
-local %avahi_pids = map { $_, 1 }
+my %avahi_pids = map { $_, 1 }
 			grep { $_ != $$ } &find_byname("avahi-daemon");
-local @pids = grep { $_ != $$ && !$avahi_pids{$_} } &find_byname("clamd");
+my @pids = grep { $_ != $$ && !$avahi_pids{$_} } &find_byname("clamd");
 if (@pids) {
 	# Running already, so we assume everything is cool
 	return 1;
 	}
-local $clamd = &has_command("clamd") ||
+my $clamd = &has_command("clamd") ||
 	       &has_command("/opt/csw/sbin/clamd");
 if (!$clamd) {
 	# No installed
@@ -516,11 +516,11 @@ return -1;
 # standard functions.
 sub enable_clamd
 {
-local $st = &check_clamd_status();
+my $st = &check_clamd_status();
 return 1 if ($st == 1 || $st == -1);
 
 # Check for simple init scripts
-local $init;
+my $init;
 &foreign_require("init");
 foreach my $i ("clamav-daemon", "clamdscan-clamd", "clamav-clamd", "clamd", "clamd\@scan") {
 	if (&init::action_status($i)) {
@@ -533,10 +533,10 @@ foreach my $i ("clamav-daemon", "clamdscan-clamd", "clamav-clamd", "clamd", "cla
 foreach my $c ("/etc/clamd.conf", "/etc/clamd.d/scan.conf",
 	       "/etc/clamd.d/virtualmin.conf") {
 	next if (!-r $c);
-	local $lref = &read_file_lines($c);
-	local $sfile;
-	local $clamuser;
-	local $added_socketmode = 0;
+	my $lref = &read_file_lines($c);
+	my $sfile;
+	my $clamuser;
+	my $added_socketmode = 0;
 	foreach my $l (@$lref) {
 		if ($l =~ /^\s*LocalSocket\s+(\S+)/) {
 			$sfile = $1;
@@ -554,7 +554,7 @@ foreach my $c ("/etc/clamd.conf", "/etc/clamd.d/scan.conf",
 		}
 	&flush_file_lines($c);
 	if ($sfile =~ /^(\S+)\/([^\/]+)$/) {
-		local $sdir = $1;
+		my $sdir = $1;
 		if (!-d $sdir) {
 			if ($clamuser) {
 				&make_dir($sdir, 0755);
@@ -576,7 +576,7 @@ foreach my $c ("/etc/clamd.conf", "/etc/clamd.d/scan.conf",
 if (&init::action_status('clamav-freshclam')) {
 	&$first_print(&text('clamd_start_updater'));
 	&init::enable_at_boot('clamav-freshclam');
-	local ($ok, $out) = &init::restart_action('clamav-freshclam');
+	my ($ok, $out) = &init::restart_action('clamav-freshclam');
 	if (!$ok || $out =~ /failed|error/i) {
 		&$second_print(&text('clamd_estart',
 				"<tt>".&html_escape($out)."</tt>"));
@@ -592,7 +592,7 @@ if ($init) {
 	&$first_print(&text('clamd_start'));
 	if (&init::action_status($init)) {
 		&init::enable_at_boot($init);
-		local ($ok, $out) = &init::restart_action($init);
+		my ($ok, $out) = &init::restart_action($init);
 		if (!$ok || $out =~ /failed|error/i) {
 			&$second_print(&text('clamd_estart',
 					"<tt>".&html_escape($out)."</tt>"));
@@ -608,24 +608,24 @@ if ($init) {
 
 elsif (&init::action_status("clamd-wrapper")) {
         # Looks like a Redhat system .. start by creating the .conf file
-	local $service = "virtualmin";
-	local $cfile = "/etc/clamd.d/$service.conf";
-	local $srcpat = "/usr/share/doc/clamav-server-*/clamd.conf";
-	local ($srcfile) = glob($srcpat);
+	my $service = "virtualmin";
+	my $cfile = "/etc/clamd.d/$service.conf";
+	my $srcpat = "/usr/share/doc/clamav-server-*/clamd.conf";
+	my ($srcfile) = glob($srcpat);
 	&$first_print(&text('clamd_copyconf', "<tt>$cfile</tt>"));
 	if (!$srcfile && !-r $cfile) {
 		&$second_print(&text('clamd_esrcfile', "<tt>$srcpat</tt>"));
 		return 0;
 		}
-	local $user = "nobody";
-	local @uinfo = getgrnam($user);
-	local $group = getgrgid($uinfo[3]);
+	my $user = "nobody";
+	my @uinfo = getgrnam($user);
+	my $group = getgrgid($uinfo[3]);
 	&lock_file($cfile);
 	if (!-r $cfile) {
 		&copy_source_dest($srcfile, $cfile);
 		}
-	local $lref = &read_file_lines($cfile);
-	local ($logfile, $socketfile);
+	my $lref = &read_file_lines($cfile);
+	my ($logfile, $socketfile);
 	foreach my $l (@$lref) {
 		if ($l =~ /^\s*Example/) {
 			$l = "# Example";
@@ -646,7 +646,7 @@ elsif (&init::action_status("clamd-wrapper")) {
 		}
 	&flush_file_lines($cfile);
 	&unlock_file($cfile);
-	local $othercfile = "/etc/clamd.conf";
+	my $othercfile = "/etc/clamd.conf";
 	if (!-r $othercfile) {
 		&symlink_logged($cfile, $othercfile);
 		}
@@ -661,7 +661,7 @@ elsif (&init::action_status("clamd-wrapper")) {
 
 	# Create directory for socket file
 	if ($socketfile) {
-		local $socketdir = $socketfile;
+		my $socketdir = $socketfile;
 		$socketdir =~ s/\/[^\/]+$//;
 		if (!-d $socketdir) {
 			&make_dir($socketdir, 0755);
@@ -671,14 +671,14 @@ elsif (&init::action_status("clamd-wrapper")) {
 		}
 
 	# Copy and fix the init wrapper script
-	local $srcifile = &init::action_filename("clamd-wrapper");
-	local $ifile = &init::action_filename("clamd-virtualmin");
+	my $srcifile = &init::action_filename("clamd-wrapper");
+	my $ifile = &init::action_filename("clamd-virtualmin");
 	&$first_print(&text('clamd_initscript', "<tt>$ifile</tt>"));
 	if (-r $srcifile && !-r $ifile) {
 		&copy_source_dest($srcifile, $ifile);
 		}
-	local $lref = &read_file_lines($ifile);
-	local ($already) = grep { /^CLAMD_SERVICE=/ } @$lref;
+	my $lref = &read_file_lines($ifile);
+	my ($already) = grep { /^CLAMD_SERVICE=/ } @$lref;
 	if ($already) {
 		&$second_print($text{'clamd_initalready'});
 		}
@@ -706,8 +706,8 @@ elsif (&init::action_status("clamd-wrapper")) {
 		}
 
 	# Link the clamd program
-	local $clamd = &has_command("clamd");
-	local $clamdcopy = $clamd.".".$service;
+	my $clamd = &has_command("clamd");
+	my $clamdcopy = $clamd.".".$service;
 	&$first_print(&text('clamd_linkbin', "<tt>$clamdcopy</tt>"));
 	&unlink_file($clamdcopy);
 	&symlink_logged($clamd, $clamdcopy);
@@ -722,7 +722,7 @@ elsif (&init::action_status("clamd-wrapper")) {
 	&$first_print(&text('clamd_start'));
 	&init::enable_at_boot("clamd-virtualmin");
 	&init::disable_at_boot("clamd-wrapper");
-	local ($ok, $out);
+	my ($ok, $out);
 	if (defined(&init::start_action)) {
 		($ok, $out) = &init::start_action($init);
 		}
@@ -741,8 +741,8 @@ elsif (&init::action_status("clamd-wrapper")) {
 
 elsif (-r "/opt/csw/etc/clamd.conf.CSW") {
 	# Solaris CSW package .. copy config file
-	local $cfile = "/opt/csw/etc/clamd.conf";
-	local $srcfile = "/opt/csw/etc/clamd.conf.CSW";
+	my $cfile = "/opt/csw/etc/clamd.conf";
+	my $srcfile = "/opt/csw/etc/clamd.conf.CSW";
 	&$first_print(&text('clamd_copyconf', "<tt>$cfile</tt>"));
 	if (-r $cfile) {
 		&$second_print($text{'clamd_esrcalready'});
@@ -754,8 +754,8 @@ elsif (-r "/opt/csw/etc/clamd.conf.CSW") {
 
 	# Create the log directory
 	&$first_print($text{'clamd_logdir'});
-	local $lref = &read_file_lines($cfile);
-	local ($logfile, $user);
+	my $lref = &read_file_lines($cfile);
+	my ($logfile, $user);
 	foreach my $l (@$lref) {
 		if ($l =~ /^\s*LogFile\s+(\S+)/i) {
 			$logfile = $1;
@@ -768,7 +768,7 @@ elsif (-r "/opt/csw/etc/clamd.conf.CSW") {
 		&$second_print($text{'clamd_logalready'});
 		}
 	elsif ($logfile) {
-		local $logdir = $logfile;
+		my $logdir = $logfile;
 		$logdir =~ s/\/[^\/]+$//;
 		&make_dir($logdir, 0700);
 		if ($user) {
@@ -785,14 +785,14 @@ elsif (-r "/opt/csw/etc/clamd.conf.CSW") {
 
 	# Create or enable bootup action
 	&$first_print(&text('clamd_start'));
-	local $init = "clamd-csw";
-	local $clamd = &has_command("clamd") ||
+	my $init = "clamd-csw";
+	my $clamd = &has_command("clamd") ||
 		       &has_command("/opt/csw/sbin/clamd");
 	&init::enable_at_boot($init, "Start ClamAV server",
 			      $clamd,
 			      "ps -ef | grep clamd | grep -v grep | grep -v \$\$ | awk '{ print \$2 }' | xargs kill");
-	local $ifile = &init::action_filename($init);
-	local $out = &backquote_logged("$ifile start 2>&1");
+	my $ifile = &init::action_filename($init);
+	my $out = &backquote_logged("$ifile start 2>&1");
 	if ($? || $out =~ /failed|error/i) {
 		&$second_print(&text('clamd_estart',
 				"<tt>".&html_escape($out)."</tt>"));
@@ -816,7 +816,7 @@ foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-virtualmin",
 	if (&init::action_status($init)) {
 		&$first_print(&text('clamd_stop'));
 		&init::disable_at_boot($init);
-		local ($ok, $out) = &init::stop_action($init);
+		my ($ok, $out) = &init::stop_action($init);
 		if (!$ok || $out =~ /failed|error/i) {
 			&$second_print(&text('clamd_estop',
 					"<tt>".&html_escape($out)."</tt>"));
@@ -834,13 +834,13 @@ return 0;
 # and long descriptions for the action to switch statuses
 sub startstop_virus
 {
-local ($scanner, $host) = &get_global_virus_scanner();
+my ($scanner, $host) = &get_global_virus_scanner();
 if (!($scanner eq 'clamdscan' ||
       $scanner eq 'clamd-stream-client' && !$host)) {
 	# Clamd isn't being used
 	return ( );
 	}
-local @pids = grep { $_ != $$ } &find_byname("clamd");
+my @pids = grep { $_ != $$ } &find_byname("clamd");
 if (@pids) {
 	return ( { 'status' => 1,
 		   'name' => $text{'index_clamname'},
@@ -863,7 +863,7 @@ sub start_service_virus
 {
 &push_all_print();
 &set_all_null_print();
-local $rv = &enable_clamd();
+my $rv = &enable_clamd();
 &pop_all_print();
 return $rv ? undef : $text{'clamd_estartmsg'};
 }
@@ -878,11 +878,11 @@ foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-virtualmin",
 		  "clamd-wrapper", "clamd-csw", "clamav-clamd", "clamd",
 		  "clamd\@scan") {
 	if (&init::action_status($init)) {
-		local ($ok, $out) = &init::stop_action($init);
+		my ($ok, $out) = &init::stop_action($init);
 		return $ok ? undef : "<tt>".&html_escape($out)."</tt>";
 		}
 	}
-local @pids = grep { $_ != $$ } &find_byname("clamd");
+my @pids = grep { $_ != $$ } &find_byname("clamd");
 if (@pids) {
 	if (&kill_logged('TERM', @pids)) {
 		return undef;

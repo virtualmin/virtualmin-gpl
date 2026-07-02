@@ -36,7 +36,7 @@ if (!$module_name) {
 # Parse command-line args
 $owner = 1;
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--ip") {
 		$ip = shift(@ARGV);
 		}

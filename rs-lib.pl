@@ -250,7 +250,7 @@ sub rs_http_call
 {
 my ($url, $method, $headers, $dstfile, $srcfile, $offset, $length, $tries) = @_;
 $tries ||= $rs_upload_tries;
-local @rv;
+my @rv;
 
 for(my $i=0; $i<$tries; $i++) {
 	@rv = &rs_http_single_call($url, $method, $headers, $dstfile, $srcfile,

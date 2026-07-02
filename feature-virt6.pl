@@ -29,12 +29,12 @@ return $supports_ip6_cache;
 # Adds an IPv6 address to the system for a domain
 sub setup_virt6
 {
-local ($d) = @_;
+my ($d) = @_;
 &obtain_lock_virt($d);
 if (!$d->{'virt6already'}) {
 	# Save and bring up the IPv6 interface
 	&$first_print(&text('setup_virt6', $d->{'ip6'}));
-	local $virt = { 'name' => $config{'iface6'} || $config{'iface'},
+	my $virt = { 'name' => $config{'iface6'} || $config{'iface'},
 		        'netmask' => $d->{'netmask6'} ||
 				     $config{'netmask6'} || 64,
 			'address' => $d->{'ip6'} };
@@ -48,14 +48,14 @@ if (!$d->{'virt6already'}) {
 # Add IPv6 reverse entry, if possible
 if ($config{'dns'} && !$d->{'provision_dns'} && !$d->{'dns_cloud'}) {
 	&require_bind();
-	local $ip6 = $d->{'ip6'};
-	local ($revconf, $revfile, $revrec) = &bind8::find_reverse($ip6);
+	my $ip6 = $d->{'ip6'};
+	my ($revconf, $revfile, $revrec) = &bind8::find_reverse($ip6);
 	if ($revconf && $revfile && !$revrec) {
 		&lock_file(&bind8::make_chroot($revfile));
 		&bind8::create_record($revfile,
 			&bind8::net_to_ip6int($d->{'ip6'}),
 			undef, "IN", "PTR", $d->{'dom'}.".");
-		local @rrecs = &bind8::read_zone_file(
+		my @rrecs = &bind8::read_zone_file(
 			$revfile, $revconf->{'name'});
 		&bind8::bump_soa_record($revfile, \@rrecs);
 		&unlock_file(&bind8::make_chroot($revfile));
@@ -70,7 +70,7 @@ return 1;
 # Changes the IPv6 address for a domain, if needed
 sub modify_virt6
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 if ($d->{'ip6'} ne $oldd->{'ip6'} && !$d->{'virt6already'}) {
 	# Remove and re-add the IPv6 interface
 	&delete_virt6($oldd);
@@ -82,20 +82,20 @@ if ($d->{'ip6'} ne $oldd->{'ip6'} && !$d->{'virt6already'}) {
 # Removes the IPv6 interface for a domain
 sub delete_virt6
 {
-local ($d) = @_;
+my ($d) = @_;
 &obtain_lock_virt($d);
 if (!$d->{'virt6already'}) {
 	# Bring down and delete the IPv6 interface
 	&$first_print(&text('delete_virt6', $d->{'ip6'}));
-	local ($active) = grep { &canonicalize_ip6($_->{'address'}) eq
+	my ($active) = grep { &canonicalize_ip6($_->{'address'}) eq
 				 &canonicalize_ip6($d->{'ip6'}) }
 			       &active_ip6_interfaces();
-	local ($boot) = grep { &canonicalize_ip6($_->{'address'}) eq
+	my ($boot) = grep { &canonicalize_ip6($_->{'address'}) eq
 			       &canonicalize_ip6($d->{'ip6'}) }
 			     &boot_ip6_interfaces();
 	&delete_ip6_interface($boot) if ($boot);
 	&deactivate_ip6_interface($active) if ($active);
-	local $any = $active || $boot;
+	my $any = $active || $boot;
 	if ($any) {
 		&$second_print(&text('delete_virt6done', $any->{'name'}));
 		}
@@ -108,8 +108,8 @@ if (!$d->{'virt6already'}) {
 # Remove IPv6 reverse address, if defined
 if ($config{'dns'} && !$d->{'provision_dns'} && !$d->{'dns_cloud'}) {
 	&require_bind();
-	local $ip6 = $d->{'ip6'};
-	local ($revconf, $revfile, $revrec) = &bind8::find_reverse($ip6);
+	my $ip6 = $d->{'ip6'};
+	my ($revconf, $revfile, $revrec) = &bind8::find_reverse($ip6);
 	if ($revconf && $revfile && $revrec &&
 	    $revrec->{'values'}->[0] eq $d->{'dom'}.".") {
 		&lock_file(&bind8::make_chroot($revrec->{'file'}));
@@ -133,15 +133,15 @@ return 1;
 # Check for boot-time and active IP6 network interfaces
 sub validate_virt6
 {
-local ($d) = @_;
+my ($d) = @_;
 if (!$_[0]->{'virt6already'}) {
 	# Only check boot-time interface if added by Virtualmin
-	local @boots = map { &canonicalize_ip6($_) } &bootup_ip_addresses();
+	my @boots = map { &canonicalize_ip6($_) } &bootup_ip_addresses();
 	if (&indexoflc(&canonicalize_ip6($d->{'ip6'}), @boots) < 0) {
 		return &text('validate_evirt6b', $d->{'ip6'});
 		}
 	}
-local @acts = map { &canonicalize_ip6($_) } &active_ip_addresses();
+my @acts = map { &canonicalize_ip6($_) } &active_ip_addresses();
 if (&indexoflc(&canonicalize_ip6($d->{'ip6'}), @acts) < 0) {
 	return &text('validate_evirt6a', $d->{'ip6'});
 	}
@@ -152,7 +152,7 @@ return undef;
 # Returns 1 if some IPv6 is already in use, 0 if not
 sub check_virt6_clash
 {
-local ($ip6) = @_;
+my ($ip6) = @_;
 
 # Check interfaces
 foreach my $i (&active_ip6_interfaces(), &boot_ip6_interfaces()) {
@@ -162,8 +162,8 @@ foreach my $i (&active_ip6_interfaces(), &boot_ip6_interfaces()) {
 
 # Do a quick ping test
 if (&has_command("ping6")) {
-	local $pingcmd = "ping6 -c 1 -t 1";
-	local ($out, $timed_out) = &backquote_with_timeout(
+	my $pingcmd = "ping6 -c 1 -t 1";
+	my ($out, $timed_out) = &backquote_with_timeout(
 					$pingcmd." ".$ip6." 2>&1", 2, 1);
 	return 1 if (!$timed_out && !$?);
 	}
@@ -176,10 +176,10 @@ return 0;
 # Returns HTML for selecting a virtual IPv6 mode for a new server, or not
 sub virtual_ip6_input
 {
-local ($tmpls, $resel, $orig, $mode) = @_;
+my ($tmpls, $resel, $orig, $mode) = @_;
 $mode ||= 0;
-local $defip6 = &get_default_ip6($resel);
-local ($t, $anyalloc, $anychoose, $anyzone);
+my $defip6 = &get_default_ip6($resel);
+my ($t, $anyalloc, $anychoose, $anyzone);
 if (&running_in_zone() || &running_in_vserver()) {
 	# When running in a Solaris zone or VServer, you MUST select an
 	# existing active IP, as they are controlled from the host.
@@ -189,12 +189,12 @@ elsif (&can_use_feature("virt6")) {
 	# Check if private IPs are allocated or manual, if we are
 	# allowed to choose them.
 	foreach $t (@$tmpls) {
-		local $tmpl = &get_template($t->{'id'});
+		my $tmpl = &get_template($t->{'id'});
 		if ($tmpl->{'ranges6'} ne "none") { $anyalloc++; }
 		else { $anychoose++; }
 		}
 	}
-local @opts;
+my @opts;
 push(@opts, [ -2, $text{'edit_virt6off'} ]);
 if ($orig) {
 	# For restores - option to use original IP
@@ -203,7 +203,7 @@ if ($orig) {
 if ($defip6) {
 	push(@opts, [ 0, &text('form_shared', $defip6) ]);
 	}
-local @shared = sort { $a cmp $b } &list_shared_ip6s();
+my @shared = sort { $a cmp $b } &list_shared_ip6s();
 if (@shared && &can_edit_sharedips()) {
 	# Can select from extra shared list
 	push(@opts, [ 3, $text{'form_shared2'},
@@ -224,7 +224,7 @@ if ($anychoose) {
 if ($anyzone) {
 	# Can select an existing active IP, for inside a Solaris zone
 	&foreign_require("net");
-	local @act = grep { $_->{'virtual'} ne '' }
+	my @act = grep { $_->{'virtual'} ne '' }
 			  &net::active_interfaces();
 	if (@act) {
 		push(@opts, [ 4, $text{'form_activeip'},
@@ -253,7 +253,7 @@ return &ui_radio_table("virt6", $mode, \@opts, 1);
 # already flag and netmask. May call &error if the input is invalid.
 sub parse_virtual_ip6
 {
-local ($tmpl, $resel) = @_;
+my ($tmpl, $resel) = @_;
 if ($in{'virt6'} == -2) {
 	# Completely disabled
 	return ( );
@@ -264,16 +264,16 @@ elsif ($in{'virt6'} == 2) {
 	if ($resel) {
 		# Creating by or under a reseller .. use his range, if any
 		foreach my $r (split(/\s+/, $resel)) {
-			local %acl = &get_reseller_acl($r);
+			my %acl = &get_reseller_acl($r);
 			if ($acl{'ranges6'}) {
-				local ($ip,$netmask) = &free_ip6_address(\%acl);
+				my ($ip,$netmask) = &free_ip6_address(\%acl);
 				$ip || &error(&text('setup_evirtalloc'));
 				return ($ip, 1, 0, $netmask);
 				}
 			}
 		}
 	$tmpl->{'ranges6'} ne "none" || &error(&text('setup_evirttmpl'));
-	local ($ip, $netmask) = &free_ip6_address($tmpl);
+	my ($ip, $netmask) = &free_ip6_address($tmpl);
 	$ip || &error(&text('setup_evirtalloc'));
 	return ($ip, 1, 0, $netmask);
 	}
@@ -281,12 +281,12 @@ elsif ($in{'virt6'} == 1) {
 	# Manual IP allocation chosen
 	$tmpl->{'ranges6'} eq "none" || &error(&text('setup_evirttmpl2'));
 	&check_ip6address($in{'ip6'}) || &error($text{'setup_eip'});
-	local $clash = &check_virt6_clash($in{'ip6'});
+	my $clash = &check_virt6_clash($in{'ip6'});
 	if ($in{'virt6already'}) {
 		# Fail if the IP isn't yet active, or if claimed by another
 		# virtual server
 		$clash || &error(&text('setup_evirtclash2', $in{'ip6'}));
-		local $already = &get_domain_by("ip6", $in{'ip6'});
+		my $already = &get_domain_by("ip6", $in{'ip6'});
 		$already && &error(&text('setup_evirtclash4',
 					 $already->{'dom'}));
 		}
@@ -306,21 +306,21 @@ elsif ($in{'virt6'} == 4 && (&running_in_zone() || &running_in_vserver())) {
 	# On an active IP on a virtual machine that cannot bring up its
 	# own IP.
 	&check_ip6address($in{'zoneip6'}) || &error($text{'setup_eip'});
-	local $clash = &check_virt6_clash($in{'zoneip6'});
+	my $clash = &check_virt6_clash($in{'zoneip6'});
 	$clash || &error(&text('setup_evirtclash2', $in{'zoneip6'}));
-	local $already = &get_domain_by("ip6", $in{'ip6'});
+	my $already = &get_domain_by("ip6", $in{'ip6'});
 	$already && &error(&text('setup_evirtclash4',
 				 $already->{'dom'}));
 	return ($in{'zoneip6'}, 1, 1);
 	}
 elsif ($in{'virt6'} == 5) {
 	# Allocate if needed, shared otherwise
-	local ($ip, $netmask) = &free_ip6_address($tmpl);
+	my ($ip, $netmask) = &free_ip6_address($tmpl);
 	return ($ip, 1, 0, $netmask);
 	}
 else {
 	# Global shared IP
-	local $defip = &get_default_ip6($resel);
+	my $defip = &get_default_ip6($resel);
 	return ($defip, 0, 0);
 	}
 }
@@ -330,7 +330,7 @@ else {
 sub active_ip6_interfaces
 {
 &foreign_require("net");
-local @rv;
+my @rv;
 foreach my $i (&net::active_interfaces()) {
 	next if (!$i->{'address6'});
 	for(my $j=0; $j<@{$i->{'address6'}}; $j++) {
@@ -347,7 +347,7 @@ return @rv;
 sub boot_ip6_interfaces
 {
 &foreign_require("net");
-local @rv;
+my @rv;
 foreach my $i (&net::boot_interfaces()) {
 	next if (!$i->{'address6'});
 	for(my $j=0; $j<@{$i->{'address6'}}; $j++) {
@@ -363,7 +363,7 @@ return @rv;
 # Activate an IPv6 address right now. Calls error on failure.
 sub activate_ip6_interface
 {
-local ($iface) = @_;
+my ($iface) = @_;
 &foreign_require("net");
 if (&auto_apply_interface()) {
 	&net::apply_network();
@@ -382,7 +382,7 @@ else {
 # Record an IPv6 address for activation at boot time
 sub save_ip6_interface
 {
-local ($iface) = @_;
+my ($iface) = @_;
 &foreign_require("net");
 my @boot = &net::boot_interfaces();
 my ($boot) = grep { $_->{'fullname'} eq $iface->{'name'} } @boot;
@@ -396,7 +396,7 @@ push(@{$boot->{'netmask6'}}, $iface->{'netmask'});
 # Removes an IPv6 address that is currently active. Calls error on failure.
 sub deactivate_ip6_interface
 {
-local ($iface) = @_;
+my ($iface) = @_;
 if (&auto_apply_interface()) {
 	&net::apply_network();
 	}
@@ -423,7 +423,7 @@ else {
 # Removes an IPv6 address that is activated at boot time
 sub delete_ip6_interface
 {
-local ($iface) = @_;
+my ($iface) = @_;
 my @boot = &net::boot_interfaces();
 my ($boot) = grep { $_->{'fullname'} eq $iface->{'name'} } @boot;
 $boot || &error("No boot interface found for $iface->{'name'}");
@@ -448,8 +448,8 @@ sub ip6_interfaces_file
 {
 if ($gconfig{'os_type'} eq 'redhat-linux') {
 	# On redhat, this is typically the ifcfg-eth0 file
-	local $ifacename = $config{'iface6'} || $config{'iface'};
-	local ($boot) = grep { $_->{'fullname'} eq $ifacename }
+	my $ifacename = $config{'iface6'} || $config{'iface'};
+	my ($boot) = grep { $_->{'fullname'} eq $ifacename }
 			     &net::boot_interfaces();
 	return $boot->{'file'} if ($boot);
 	}

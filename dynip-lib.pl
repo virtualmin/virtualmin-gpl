@@ -21,11 +21,11 @@ return ( { 'name' => 'dyndns',
 # sent (if called in an array context)
 sub get_last_dynip_update
 {
-local ($service) = @_;
-local $file = "$module_config_directory/dynip.$service";
-local $ip = &read_file_contents($file);
+my ($service) = @_;
+my $file = "$module_config_directory/dynip.$service";
+my $ip = &read_file_contents($file);
 $ip =~ s/\r|\n//g;
-local @st = stat($file);
+my @st = stat($file);
 return wantarray ? ( $ip, $st[9] ) : $ip;
 }
 
@@ -33,8 +33,8 @@ return wantarray ? ( $ip, $st[9] ) : $ip;
 # Stores the IP that was successfully sent to the dynamic DNS service
 sub set_last_dynip_update
 {
-local ($service, $ip) = @_;
-local $file = "$module_config_directory/dynip.$service";
+my ($service, $ip) = @_;
+my $file = "$module_config_directory/dynip.$service";
 if ($ip) {
 	&open_tempfile(DYNIP, ">$file");
 	&print_tempfile(DYNIP, $ip,"\n");
@@ -277,7 +277,7 @@ foreach my $d (&list_domains()) {
 
 		# Update all features
 		foreach my $f (@features) {
-			local $mfunc = "modify_$f";
+			my $mfunc = "modify_$f";
 			if ($config{$f} && $d->{$f}) {
 				&try_function($f, $mfunc, $d, $oldd);
 				}
@@ -295,7 +295,7 @@ foreach my $d (&list_domains()) {
 
 		# Run the after command
 		&set_domain_envs($d, "MODIFY_DOMAIN", undef, \%oldd);
-		local $merr = &made_changes();
+		my $merr = &made_changes();
 		&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
 			if (defined($merr));
 		&reset_domain_envs($d);

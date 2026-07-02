@@ -53,41 +53,41 @@ else {
 # Runs some command as the owner of a virtual server, and returns the output
 sub run_as_domain_user
 {
-local ($d, $cmd, $bg, $nosu) = @_;
+my ($d, $cmd, $bg, $nosu) = @_;
 if ($d->{'parent'}) {
 	$d = &get_domain($d->{'parent'});
 	}
 
 # Set a reasonable environment for the command
-local %OLDENV = %ENV;
+my %OLDENV = %ENV;
 $ENV{'HOME'} = $uinfo[7];
 $ENV{'USER'} = $uinfo[0];
 $ENV{'LOGNAME'} = $uinfo[0];
 
 &foreign_require("proc");
-local @uinfo = getpwnam($d->{'user'});
-local @rv;
+my @uinfo = getpwnam($d->{'user'});
+my @rv;
 if (($uinfo[8] =~ /\/(sh|bash|tcsh|csh)$/ ||
      $gconfig{'os_type'} =~ /-linux$/) && !$nosu) {
 	# Usable shell .. use su
-	local $cmd = &command_as_user($d->{'user'}, 0, $cmd);
+	my $cmd = &command_as_user($d->{'user'}, 0, $cmd);
 	if ($bg) {
 		# No status available
 		&system_logged("$cmd &");
 		@rv = ( undef, 0 );
 		}
 	else {
-		local $out = &backquote_logged($cmd);
+		my $out = &backquote_logged($cmd);
 		@rv = ( $out, $? );
 		}
 	}
 else {
 	# Need to run ourselves
-	local $temp = &transname();
+	my $temp = &transname();
 	open(TEMP, ">$temp");
 	&proc::safe_process_exec_logged($cmd, $d->{'uid'}, $d->{'ugid'},\*TEMP);
-	local $ex = $?;
-	local $out;
+	my $ex = $?;
+	my $out;
 	close(TEMP);
 	local $_;
 	open(TEMP, "<".$temp);
@@ -113,12 +113,12 @@ sub make_dir_as_domain_user
 {
 my ($d, $dir, $perms, $recur) = @_;
 return 1 if (&is_readonly_mode());
-local $cmd = "mkdir ".($recur ? "-p " : "").quotemeta($dir)." 2>&1";;
+my $cmd = "mkdir ".($recur ? "-p " : "").quotemeta($dir)." 2>&1";;
 if ($perms) {
 	$cmd .= " && chmod ".sprintf("%o", $perms & 07777)." ".
 			     quotemeta($dir)." 2>&1";;
 	}
-local ($out, $ex) = &run_as_domain_user($d, $cmd);
+my ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
 }
 
@@ -138,8 +138,8 @@ while(@files) {
 		@del = @files;
 		@files = ( );
 		}
-	local $cmd = "rm -rf ".join(" ", map { quotemeta($_) } @del)." 2>&1";
-	local ($out, $ex) = &run_as_domain_user($d, $cmd);
+	my $cmd = "rm -rf ".join(" ", map { quotemeta($_) } @del)." 2>&1";
+	my ($out, $ex) = &run_as_domain_user($d, $cmd);
 	return wantarray ? ($ex ? 0 : 1, $out) : $ex ? 0 : 1;
 	}
 return wantarray ? (1) : 1;
@@ -172,8 +172,8 @@ sub symlink_file_as_domain_user
 {
 my ($d, $src, $dest) = @_;
 return 1 if (&is_readonly_mode());
-local $cmd = "ln -s ".quotemeta($src)." ".quotemeta($dest)." 2>&1";
-local ($out, $ex) = &run_as_domain_user($d, $cmd);
+my $cmd = "ln -s ".quotemeta($src)." ".quotemeta($dest)." 2>&1";
+my ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
 }
 
@@ -193,8 +193,8 @@ sub link_file_as_domain_user
 {
 my ($d, $src, $dest) = @_;
 return 1 if (&is_readonly_mode());
-local $cmd = "ln ".quotemeta($src)." ".quotemeta($dest)." 2>&1";
-local ($out, $ex) = &run_as_domain_user($d, $cmd);
+my $cmd = "ln ".quotemeta($src)." ".quotemeta($dest)." 2>&1";
+my ($out, $ex) = &run_as_domain_user($d, $cmd);
 return $ex ? 0 : 1;
 }
 

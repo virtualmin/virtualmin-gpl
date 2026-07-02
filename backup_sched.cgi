@@ -117,7 +117,7 @@ else {
 
 	# Parse option inputs
 	foreach $f (@do_features) {
-		local $ofunc = "parse_backup_$f";
+		my $ofunc = "parse_backup_$f";
 		if (&indexof($f, &list_backup_plugins()) < 0 &&
 		    defined(&$ofunc)) {
 			$options{$f} = &$ofunc(\%in);

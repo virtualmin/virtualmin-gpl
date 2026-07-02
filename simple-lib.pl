@@ -8,10 +8,10 @@ use Time::Local;
 # return undef.
 sub get_simple_alias
 {
-local ($d, $a, $allow_merge) = @_;
-local $simple;
+my ($d, $a, $allow_merge) = @_;
+my $simple;
 foreach my $v (@{$a->{'to'}}) {
-	local ($atype, $aval) = &alias_type($v, $a->{'user'} || $a->{'name'});
+	my ($atype, $aval) = &alias_type($v, $a->{'user'} || $a->{'name'});
 	if ($atype == 1) {
 		# Forward to an address
 		push(@{$simple->{'forward'}}, $aval);
@@ -43,9 +43,9 @@ foreach my $v (@{$a->{'to'}}) {
 		$simple->{'autoreply'} = $aval =~ /^\// ? $aval
 							: "$d->{'home'}/$aval";
 		$simple->{'auto'} = 1;
-		local $l = &read_autoreply(&command_as_user($d->{'user'}, 0,
+		my $l = &read_autoreply(&command_as_user($d->{'user'}, 0,
 		    "cat ".quotemeta($simple->{'autoreply'}))." |", $simple);
-		local @st = stat($simple->{'autoreply'});
+		my @st = stat($simple->{'autoreply'});
 		if ($st[7] && !$l) {
 			# Fall back to reading directly, if allowed
 			if ($st[4] == $d->{'uid'}) {
@@ -77,10 +77,10 @@ return $simple;
 # Updates a simple alias object with setting from an autoreply file
 sub read_autoreply
 {
-local ($file, $simple) = @_;
-local @lines;
+my ($file, $simple) = @_;
+my @lines;
 local $_;
-local $lines;
+my $lines;
 open(FILE, "<".$file);
 while(<FILE>) {
 	if (/^Reply-Tracking:\s*(.*)/) {
@@ -137,8 +137,8 @@ return $lines;
 # file needed
 sub save_simple_alias
 {
-local ($d, $alias, $simple) = @_;
-local @v;
+my ($d, $alias, $simple) = @_;
+my @v;
 push(@v, @{$simple->{'forward'}});
 if ($simple->{'bounce'}) {
 	push(@v, "BOUNCE");
@@ -146,7 +146,7 @@ if ($simple->{'bounce'}) {
 if ($simple->{'local'} &&
     (!$simple->{'local-all'} ||
      &indexof($simple->{'local'}, @{$simple->{'local-all'}}) == -1)) {
-	local $escuser = $simple->{'local'};
+	my $escuser = $simple->{'local'};
 	if ($mail_system == 0 && $escuser =~ /\@/) {
 		$escuser = &escape_replace_atsign_if_exists($escuser);
 		}
@@ -156,7 +156,7 @@ if ($simple->{'local'} &&
 	push(@v, "\\".$escuser);
 	}
 if ($simple->{'tome'}) {
-	local $escuser = $alias->{'user_extra'} || $alias->{'user'};
+	my $escuser = $alias->{'user_extra'} || $alias->{'user'};
 	if ($mail_system == 0 && $escuser =~ /\@/) {
 		$escuser = &escape_replace_atsign_if_exists($escuser);
 		}
@@ -165,12 +165,12 @@ if ($simple->{'tome'}) {
 		}
 	push(@v, "\\".($escuser || $alias->{'name'}));
 	}
-local $who = $alias->{'user'} || $alias->{'from'};
+my $who = $alias->{'user'} || $alias->{'from'};
 if ($simple->{'auto'} || $simple->{'autotext'}) {
 	$simple->{'autoreply'} ||= "$d->{'home'}/autoreply-$who.txt";
 	}
 if ($simple->{'auto'}) {
-	local $link = &convert_autoreply_file($d, $simple->{'autoreply'});
+	my $link = &convert_autoreply_file($d, $simple->{'autoreply'});
 	push(@v, "|$module_config_directory/autoreply.pl $simple->{'autoreply'} $who $link");
 	}
 if ($simple->{'everyone'}) {
@@ -185,7 +185,7 @@ $alias->{'cmt'} = $simple->{'cmt'};
 # Save the autoreply file for a simple alias defintion
 sub write_simple_autoreply
 {
-local ($d, $simple) = @_;
+my ($d, $simple) = @_;
 if ($simple->{'autotext'}) {
         # Save autoreply text
         &open_tempfile_as_domain_user($d, AUTO, ">$simple->{'autoreply'}");
@@ -229,7 +229,7 @@ if ($simple->{'autotext'}) {
 
 	# Hard link to the autoreply directory, which is readable by the mail
 	# server, unlike users' homes
-	local $link = &convert_autoreply_file($d, $simple->{'autoreply'});
+	my $link = &convert_autoreply_file($d, $simple->{'autoreply'});
 	if ($link) {
 		&unlink_file_as_domain_user($d, $link);
 		&link_file_as_domain_user($d, $simple->{'autoreply'}, $link) ||
@@ -240,7 +240,7 @@ if ($simple->{'autotext'}) {
 elsif ($simple->{'autoreply'}) {
 	# Clean up old autoreply file
 	&unlink_file_as_domain_user($d, $simple->{'autoreply'});
-	local $link = &convert_autoreply_file($d, $simple->{'autoreply'});
+	my $link = &convert_autoreply_file($d, $simple->{'autoreply'});
 	if ($link) {
 		&unlink_file_as_domain_user($d, $link);
 		}
@@ -252,13 +252,13 @@ elsif ($simple->{'autoreply'}) {
 # being re-saved)
 sub delete_simple_autoreply
 {
-local ($d, $simple) = @_;
+my ($d, $simple) = @_;
 if ($simple->{'auto'} &&
     $simple->{'autoreply'} &&
     $simple->{'autoreply'} =~ /\/autoreply-(\S+)\.txt$/) {
-	local @st = stat($simple->{'autoreply'});
+	my @st = stat($simple->{'autoreply'});
 	if ($st[4] == $d->{'uid'}) {
-		local $link = &convert_autoreply_file(
+		my $link = &convert_autoreply_file(
 			$d, $simple->{'autoreply'});
 		&unlink_file_as_domain_user($d, $simple->{'autoreply'});
 		&unlink_file_as_domain_user($d, $link) if ($link);
@@ -271,7 +271,7 @@ if ($simple->{'auto'} &&
 # Outputs ui_table_row entries for a simple mail forwarding form
 sub show_simple_form
 {
-local ($simple, $nofrom, $nolocal, $nobounce, $noeveryone, $tds, $sfx) = @_;
+my ($simple, $nofrom, $nolocal, $nobounce, $noeveryone, $tds, $sfx) = @_;
 $sfx ||= "alias";
 
 if ($nolocal) {
@@ -366,13 +366,13 @@ print &ui_table_row(&hlink($text{$sfx.'_period'}, $sfx."_period"),
 
 # Autoreply date range
 foreach my $p ('start', 'end') {
-	local @tm;
+	my @tm;
 	if ($simple->{'autoreply_'.$p}) {
 		@tm = localtime($simple->{'autoreply_'.$p});
 		$tm[4]++; $tm[5] += 1900;
 		}
-	local $dis1 = &js_disable_inputs([ 'd'.$p, 'm'.$p, 'y'.$p ], [ ]);
-	local $dis2 = &js_disable_inputs([ ], [ 'd'.$p, 'm'.$p, 'y'.$p ]);
+	my $dis1 = &js_disable_inputs([ 'd'.$p, 'm'.$p, 'y'.$p ], [ ]);
+	my $dis2 = &js_disable_inputs([ ], [ 'd'.$p, 'm'.$p, 'y'.$p ]);
 	print &ui_table_row(&hlink($text{'alias_'.$p}, 'alias_'.$p),
 		&ui_radio($p.'_def', $simple->{'autoreply_'.$p} ? 0 : 1,
 			  [ [ 1, $text{'alias_pdef'}, "onClick='$dis1'" ],
@@ -405,7 +405,7 @@ print &ui_hidden_table_row_end("aopts");
 # Updates a simple delivery object with settings from &in
 sub parse_simple_form
 {
-local ($simple, $in, $d, $nofrom, $nolocal, $nobounce, $name) = @_;
+my ($simple, $in, $d, $nofrom, $nolocal, $nobounce, $name) = @_;
 
 if ($nolocal) {
 	# Check to-me option
@@ -466,9 +466,9 @@ if ($in->{'autotext'}) {
 			}
 		else {
 			# Fix existing file
-			local $adir = &get_autoreply_file_dir();
+			my $adir = &get_autoreply_file_dir();
 			if (!&is_under_directory($adir, $simple->{'replies'})) {
-				local $c = &convert_autoreply_file(
+				my $c = &convert_autoreply_file(
 						$d, "replies-$name");
 				$simple->{'replies'} = $c if ($c);
 				}
@@ -494,9 +494,9 @@ if ($in->{'autotext'}) {
 	# Save autoreply start and end
 	foreach my $p ('start', 'end') {
 		if ($in{'d'.$p}) {
-			local ($s, $m, $h) = $p eq 'start' ? (0, 0, 0) :
+			my ($s, $m, $h) = $p eq 'start' ? (0, 0, 0) :
 						(59, 59, 23);
-			local $tm = timelocal($s, $m, $h, $in{'d'.$p},
+			my $tm = timelocal($s, $m, $h, $in{'d'.$p},
                                         $in{'m'.$p}-1, $in{'y'.$p}-1900);
 			$tm || &error($text{'alias_e'.$p});
 			$simple->{'autoreply_'.$p} = $tm;
@@ -534,10 +534,10 @@ $simple->{'auto'} = $in->{'auto'} && $mb_or_alias;
 # Returns the directory for autoreply file links
 sub get_autoreply_file_dir
 {
-local $autoreply_file_dir = "/var/virtualmin-autoreply";
+my $autoreply_file_dir = "/var/virtualmin-autoreply";
 &require_useradmin();
-local @hst = stat($home_base);
-local @vst = stat("/var");
+my @hst = stat($home_base);
+my @vst = stat("/var");
 if ($hst[0] != $vst[0]) {
 	# /var and /home are on different FS
 	$autoreply_file_dir = "$home_base/virtualmin-autoreply";
@@ -553,10 +553,10 @@ return $autoreply_file_dir;
 # Returns a file in the autoreply directory, for hard linking to
 sub convert_autoreply_file
 {
-local ($d, $file) = @_;
-local $dir = &get_autoreply_file_dir();
+my ($d, $file) = @_;
+my $dir = &get_autoreply_file_dir();
 return undef if (!$dir);
-local $origdir;
+my $origdir;
 if ($file =~ /\/(autoreply-([^\/]+)\.txt)$/) {
 	# Autoreply file in directory
 	$linkpath = "$dir/$d->{'id'}-$1";
@@ -575,8 +575,8 @@ else {
 	$file =~ s/\//_/g;
 	$linkpath = "$dir/$d->{'id'}-$file";
 	}
-local @fst = stat($origdir);
-local @lst = stat($dir);
+my @fst = stat($origdir);
+my @lst = stat($dir);
 if ($fst[0] == $lst[0]) {
 	return $linkpath;
 	}
@@ -592,20 +592,20 @@ else {
 # autoresponders, create hard links and update the aliases to use them.
 sub create_autoreply_alias_links
 {
-local ($d) = @_;
-local $adir = &get_autoreply_file_dir();
+my ($d) = @_;
+my $adir = &get_autoreply_file_dir();
 
 # Fix up aliases
 foreach my $virt (&list_domain_aliases($d)) {
-	local $simple = &get_simple_alias($d, $virt);
+	my $simple = &get_simple_alias($d, $virt);
 	if ($simple && $simple->{'auto'}) {
-		local $link = &convert_autoreply_file(
+		my $link = &convert_autoreply_file(
 			$d, $simple->{'autoreply'});
 		if ($link) {
-			local @st = stat($link);
+			my @st = stat($link);
 			if (!@st || $st[3] == 1) {
 				# Need to create the link, and re-write alias
-				local $oldvirt = { %$virt };
+				my $oldvirt = { %$virt };
 				unlink($link);
 				link($simple->{'autoreply'}, $link);
 				&save_simple_alias($d, $virt, $simple);
@@ -624,15 +624,15 @@ foreach my $virt (&list_domain_aliases($d)) {
 
 # Fix up users
 foreach my $user (&list_domain_users($d)) {
-	local $simple = &get_simple_alias($d, $user);
+	my $simple = &get_simple_alias($d, $user);
 	if ($simple && $simple->{'auto'}) {
-		local $link = &convert_autoreply_file(
+		my $link = &convert_autoreply_file(
 			$d, $simple->{'autoreply'});
 		if ($link) {
-			local @st = stat($link);
+			my @st = stat($link);
 			if (!@st || $st[3] == 1) {
 				# Need to create the link, and re-write alias
-				local $olduser = { %$user };
+				my $olduser = { %$user };
 				unlink($link);
 				link($simple->{'autoreply'}, $link);
 				&save_simple_alias($d, $user, $simple);
@@ -656,12 +656,12 @@ foreach my $user (&list_domain_users($d)) {
 # we want.
 sub break_autoreply_alias_links        
 {                               
-local ($d) = @_;                
-local $adir = &get_autoreply_file_dir();
+my ($d) = @_;
+my $adir = &get_autoreply_file_dir();
 foreach my $virt (&list_domain_aliases($d), &list_domain_users($d)) {
-	local $simple = &get_simple_alias($d, $virt);
+	my $simple = &get_simple_alias($d, $virt);
 	if ($simple && $simple->{'auto'}) {
-		local $link = &convert_autoreply_file(
+		my $link = &convert_autoreply_file(
 			$d, $simple->{'autoreply'});
 		if ($link && -r $link && $link ne $simple->{'autoreply'}) {
 			&unlink_file($link);
@@ -671,4 +671,3 @@ foreach my $virt (&list_domain_aliases($d), &list_domain_users($d)) {
 }
 
 1;
-

@@ -19,7 +19,7 @@ $user || &error("User does not exist!");
 if ($in{'confirm'}) {
 	# Generate a new password
 	if (!$user->{'plainpass'}) {
-		local $olduser = { %$user };
+		my $olduser = { %$user };
 		$user->{'passmode'} = 3;
 		$user->{'plainpass'} = &random_password();
 		$user->{'pass'} = &encrypt_user_password(

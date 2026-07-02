@@ -12,7 +12,7 @@ $bsize = &quota_bsize("home");
 @table = ( );
 $defplan = &get_default_plan(1);
 foreach $plan (@plans) {
-	local @cols;
+	my @cols;
 	push(@cols, { 'type' => 'checkbox', 'name' => 'd',
 		      'value' => $plan->{'id'} });
 	push(@cols, ui_link("edit_plan.cgi?id=$plan->{'id'}'",

@@ -8,7 +8,7 @@ return if ($require_status++);
 
 sub check_depends_status
 {
-local ($d) = @_;
+my ($d) = @_;
 if (!&domain_has_website($d)) {
 	return $text{'setup_edepstatus'};
 	}
@@ -30,17 +30,17 @@ my ($d) = @_;
 
 &$first_print($text{'setup_status'});
 &require_status();
-local $tmpl = &get_template($d->{'template'});
+my $tmpl = &get_template($d->{'template'});
 
 # Create website monitor
-local $serv = &make_monitor($d, 0);
+my $serv = &make_monitor($d, 0);
 &status::save_service($serv);
 &$second_print($text{'setup_done'});
 
 if (&domain_has_ssl($d)) {
 	# Add SSL website monitor too
 	&$first_print($text{'setup_statusssl'});
-	local $serv = &make_monitor($d, 1);
+	my $serv = &make_monitor($d, 1);
 	&status::save_service($serv);
 	&$second_print($text{'setup_done'});
 	}
@@ -48,7 +48,7 @@ if (&domain_has_ssl($d)) {
 if (&domain_has_ssl($d) && $tmpl->{'statussslcert'}) {
 	# Add SSL cert monitor
 	&$first_print($text{'setup_statussslcert'});
-	local $certserv = &make_sslcert_monitor($d);
+	my $certserv = &make_sslcert_monitor($d);
 	&status::save_service($certserv);
 	&$second_print($text{'setup_done'});
 	}
@@ -59,10 +59,10 @@ return 1;
 # Returns a hash ref for a status object for monitoring a webserver
 sub make_monitor
 {
-local ($d, $ssl) = @_;
-local $tmpl = &get_template($d->{'template'});
-local $host = &get_domain_http_hostname($d);
-local $serv = { 'id' => $d->{'id'}.($ssl ? "_ssl" : "_web"),
+my ($d, $ssl) = @_;
+my $tmpl = &get_template($d->{'template'});
+my $host = &get_domain_http_hostname($d);
+my $serv = { 'id' => $d->{'id'}.($ssl ? "_ssl" : "_web"),
 		'type' => 'http',
 		'desc' => $ssl ? "Website $host (SSL)" 
 			       : "Website $host",
@@ -84,10 +84,10 @@ return $serv;
 # Returns a hash ref for a status object for monitoring an SSL domain's cert
 sub make_sslcert_monitor
 {
-local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
-local $host = &get_domain_http_hostname($d);
-local $serv = { 'id' => $d->{'id'}."_sslcert",
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my $host = &get_domain_http_hostname($d);
+my $serv = { 'id' => $d->{'id'}."_sslcert",
 		'type' => 'sslcert',
 		'desc' => "SSL cert $host",
 		'fails' => 2,
@@ -107,9 +107,9 @@ return $serv;
 # Returns the addresses to send email to for a monitor
 sub monitor_email
 {
-local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
-local @rv;
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my @rv;
 if ($tmpl->{'status'} ne 'none') {
 	push(@rv, $tmpl->{'status'});
 	}
@@ -130,8 +130,8 @@ if ($d->{'dom'} ne $oldd->{'dom'} ||
     $d->{'emailto'} ne $oldd->{'emailto'}) {
 	# Update HTTP monitor
 	&$first_print($text{'save_status'});
-	local $serv = &status::get_service($d->{'id'}."_web");
-	local $host = &get_domain_http_hostname($d);
+	my $serv = &status::get_service($d->{'id'}."_web");
+	my $host = &get_domain_http_hostname($d);
 	if ($serv) {
 		$serv->{'host'} = $host;
 		$serv->{'desc'} = "Website $host";
@@ -145,7 +145,7 @@ if ($d->{'dom'} ne $oldd->{'dom'} ||
 
 	if (&domain_has_ssl_cert($d)) {
 		# Update cert monitor
-		local $certserv = &status::get_service($d->{'id'}."_sslcert");
+		my $certserv = &status::get_service($d->{'id'}."_sslcert");
 		if ($certserv) {
 			&$first_print($text{'save_statussslcert'});
 			$certserv->{'url'} =
@@ -160,7 +160,7 @@ if ($d->{'dom'} ne $oldd->{'dom'} ||
 	if (&domain_has_ssl($d)) {
 		# Update HTTPS monitor
 		&$first_print($text{'save_statusssl'});
-		local $serv = &status::get_service($d->{'id'}."_ssl");
+		my $serv = &status::get_service($d->{'id'}."_ssl");
 		if ($serv) {
 			$serv->{'host'} = $host;
 			$serv->{'desc'} = "Website $host (SSL)";
@@ -177,14 +177,14 @@ if ($d->{'dom'} ne $oldd->{'dom'} ||
 if (&domain_has_ssl($d) && !&domain_has_ssl($oldd)) {
 	# Turned on SSL .. add monitor
 	&$first_print($text{'setup_status'});
-	local $serv = &make_monitor($d, 1);
+	my $serv = &make_monitor($d, 1);
 	&status::save_service($serv);
 	&$second_print($text{'setup_done'});
 	}
 elsif (!&domain_has_ssl($d) && &domain_has_ssl($oldd)) {
 	# Turned off SSL .. remove monitor (but not the cert monitor)
 	&$first_print($text{'delete_statusssl'});
-	local $serv = &status::get_service($d->{'id'}."_ssl");
+	my $serv = &status::get_service($d->{'id'}."_ssl");
 	if ($serv) {
 		&status::delete_service($serv);
 		&$second_print($text{'setup_done'});
@@ -197,7 +197,7 @@ elsif (!&domain_has_ssl($d) && &domain_has_ssl($oldd)) {
 if (&domain_has_ssl_cert($d) && !&domain_has_ssl_cert($oldd)) {
 	# Added a cert ... add monitor
 	&$first_print($text{'setup_status'});
-	local $certserv = &make_sslcert_monitor($d);
+	my $certserv = &make_sslcert_monitor($d);
 	&status::save_service($certserv);
 	&$second_print($text{'setup_done'});
 	}
@@ -212,7 +212,7 @@ my ($d) = @_;
 # Remove HTTP status monitor
 &$first_print($text{'delete_status'});
 &require_status();
-local $serv = &status::get_service($d->{'id'}."_web");
+my $serv = &status::get_service($d->{'id'}."_web");
 if ($serv) {
 	&status::delete_service($serv);
 	&$second_print($text{'setup_done'});
@@ -224,7 +224,7 @@ else {
 if (&domain_has_ssl($d)) {
 	# Remove HTTPS status monitor
 	&$first_print($text{'delete_statusssl'});
-	local $serv = &status::get_service($d->{'id'}."_ssl");
+	my $serv = &status::get_service($d->{'id'}."_ssl");
 	if ($serv) {
 		&status::delete_service($serv);
 		&$second_print($text{'setup_done'});
@@ -237,7 +237,7 @@ if (&domain_has_ssl($d)) {
 if (&domain_has_ssl_cert($d)) {
 	# Remove SSL cert monitor
 	&$first_print($text{'delete_statussslcert'});
-	local $certserv = &status::get_service($d->{'id'}."_sslcert");
+	my $certserv = &status::get_service($d->{'id'}."_sslcert");
 	if ($certserv) {
 		&status::delete_service($certserv);
 		}
@@ -250,12 +250,12 @@ return 1;
 # Check for the required monitors
 sub validate_status
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_status();
-local $serv = &status::get_service($_[0]->{'id'}."_web");
+my $serv = &status::get_service($_[0]->{'id'}."_web");
 return &text('validate_estatusweb') if (!$serv);
 if (&domain_has_ssl($d)) {
-	local $serv = &status::get_service($_[0]->{'id'}."_ssl");
+	my $serv = &status::get_service($_[0]->{'id'}."_ssl");
 	return &text('validate_estatusssl') if (!$serv);
 	}
 return undef;
@@ -268,7 +268,7 @@ sub disable_status
 # Disable HTTP status monitor
 &$first_print($text{'disable_status'});
 &require_status();
-local $serv = &status::get_service($_[0]->{'id'}."_web");
+my $serv = &status::get_service($_[0]->{'id'}."_web");
 if ($serv) {
 	$serv->{'nosched'} = 1;
 	&status::save_service($serv);
@@ -281,12 +281,12 @@ else {
 # Disable HTTPS status monitor
 if (domain_has_ssl($_[0])) {
 	&$first_print($text{'disable_statusssl'});
-	local $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
+	my $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
 	if ($certserv) {
 		$certserv->{'nosched'} = 1;
 		&status::save_service($certserv);
 		}
-	local $serv = &status::get_service($_[0]->{'id'}."_ssl");
+	my $serv = &status::get_service($_[0]->{'id'}."_ssl");
 	if ($serv) {
 		$serv->{'nosched'} = 1;
 		&status::save_service($serv);
@@ -306,7 +306,7 @@ sub enable_status
 # Enable HTTP status monitor
 &$first_print($text{'enable_status'});
 &require_status();
-local $serv = &status::get_service($_[0]->{'id'}."_web");
+my $serv = &status::get_service($_[0]->{'id'}."_web");
 if ($serv) {
 	$serv->{'nosched'} = 0;
 	&status::save_service($serv);
@@ -319,12 +319,12 @@ else {
 # Disable HTTPS status monitor
 if (&domain_has_ssl($_[0])) {
 	&$first_print($text{'enable_statusssl'});
-	local $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
+	my $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
 	if ($certserv) {
 		$certserv->{'nosched'} = 0;
 		&status::save_service($certserv);
 		}
-	local $serv = &status::get_service($_[0]->{'id'}."_ssl");
+	my $serv = &status::get_service($_[0]->{'id'}."_ssl");
 	if ($serv) {
 		$serv->{'nosched'} = 0;
 		&status::save_service($serv);
@@ -341,10 +341,10 @@ return 1;
 # Outputs HTML for editing status monitoring related template options
 sub show_template_status
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 &require_status();
 
-local @status_fields = ( "status", "statusonly", "statustimeout",
+my @status_fields = ( "status", "statusonly", "statustimeout",
 			 "statustimeout_def", "statussslcert", "statustmpl" );
 print &ui_table_row(
 	&hlink($text{'tmpl_status'}, "template_status"),
@@ -375,7 +375,7 @@ print &ui_table_row(
 		    [ 2, $text{'tmpl_statussslcert2'} ] ]));
 
 # Default email template
-local @stmpls = &status::list_templates();
+my @stmpls = &status::list_templates();
 print &ui_table_row(
 	&hlink($text{'tmpl_statustmpl'}, "template_statustmpl"),
 	&ui_select("statustmpl", $tmpl->{'statustmpl'},
@@ -387,7 +387,7 @@ print &ui_table_row(
 # Updates status monitoring related template options from %in
 sub parse_template_status
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Save status monitoring settings
 $tmpl->{'status'} = &parse_none_def("status");

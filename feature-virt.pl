@@ -4,35 +4,35 @@
 # Bring up an interface for a domain, if the IP isn't already enabled
 sub setup_virt
 {
-local ($d) = @_;
+my ($d) = @_;
 &obtain_lock_virt($d);
 &foreign_require("net");
-local @active = &net::active_interfaces();
+my @active = &net::active_interfaces();
 if (!$d->{'virtalready'}) {
 	# Actually bring up
 	&$first_print(&text('setup_virt', $d->{'ip'}));
-	local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} } @active;
+	my ($iface) = grep { $_->{'fullname'} eq $config{'iface'} } @active;
 	if (!$iface) {
 		# Interface doesn't really exist!
 		&$second_print(&text('setup_virtmissing', $config{'iface'}));
 		return 0;
 		}
-	local $b;
-	local $vmin = $config{'iface_base'} || int($net::min_virtual_number);
-	local $vmax = -1;
+	my $b;
+	my $vmin = $config{'iface_base'} || int($net::min_virtual_number);
+	my $vmax = -1;
 	foreach $b (@active) {
 		$vmax = $b->{'virtual'}
 			if ($b->{'virtual'} ne '' &&
 			    $b->{'name'} eq $iface->{'name'} &&
 			    $b->{'virtual'} > $vmax);
 		}
-	local $vwant = $vmax + 1;
+	my $vwant = $vmax + 1;
 	if ($vwant < $vmin) {
 		$vwant = $vmin;
 		}
-	local $netmask = $d->{'netmask'} || $net::virtual_netmask ||
+	my $netmask = $d->{'netmask'} || $net::virtual_netmask ||
 			 $iface->{'netmask'};
-	local $virt = { 'address' => $d->{'ip'},
+	my $virt = { 'address' => $d->{'ip'},
 			'netmask' => $netmask,
 			'broadcast' => &net::compute_broadcast($d->{'ip'},
 							       $netmask),
@@ -55,7 +55,7 @@ if (!$d->{'virtalready'}) {
 else {
 	# Just guess the interface
 	&$first_print(&text('setup_virt2', $d->{'ip'}));
-	local ($virt) = grep { $_->{'address'} eq $d->{'ip'} } @active;
+	my ($virt) = grep { $_->{'address'} eq $d->{'ip'} } @active;
 	$d->{'iface'} = $virt ? $virt->{'fullname'} : undef;
 	if ($d->{'iface'}) {
 		&$second_print(&text('setup_virtdone2', $d->{'iface'}));
@@ -74,14 +74,14 @@ return 1;
 # Take down the network interface for a domain
 sub delete_virt
 {
-local ($d) = @_;
+my ($d) = @_;
 if (!$d->{'virtalready'}) {
 	&$first_print($text{'delete_virt'});
 	&obtain_lock_virt($d);
 	&foreign_require("net");
-	local ($biface) = grep { $_->{'address'} eq $d->{'ip'} }
+	my ($biface) = grep { $_->{'address'} eq $d->{'ip'} }
 			       &net::boot_interfaces();
-	local ($aiface) = grep { $_->{'address'} eq $d->{'ip'} }
+	my ($aiface) = grep { $_->{'address'} eq $d->{'ip'} }
 			       &net::active_interfaces();
 	if (!$biface) {
 		&$second_print(&text('delete_noiface', $d->{'iface'}));
@@ -110,16 +110,16 @@ return 1;
 # Change the virtual IP address for a domain
 sub modify_virt
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 if ($d->{'ip'} ne $oldd->{'ip'} && $d->{'virt'} &&
     !$d->{'virtalready'}) {
 	# Change IP on virtual interface
 	&$first_print($text{'save_virt'});
 	&obtain_lock_virt($d);
 	&foreign_require("net");
-	local ($biface) = grep { $_->{'address'} eq $oldd->{'ip'} }
+	my ($biface) = grep { $_->{'address'} eq $oldd->{'ip'} }
 			       &net::boot_interfaces();
-	local ($aiface) = grep { $_->{'address'} eq $oldd->{'ip'} }
+	my ($aiface) = grep { $_->{'address'} eq $oldd->{'ip'} }
 			       &net::active_interfaces();
 	if ($biface) {
 		if ($biface->{'virtual'} ne '') {
@@ -156,15 +156,15 @@ return 1;
 # Check for boot-time and active network interfaces
 sub validate_virt
 {
-local ($d) = @_;
+my ($d) = @_;
 if (!$_[0]->{'virtalready'}) {
 	# Only check boot-time interface if added by Virtualmin
-	local @boots = &bootup_ip_addresses();
+	my @boots = &bootup_ip_addresses();
 	if (&indexof($d->{'ip'}, @boots) < 0) {
 		return &text('validate_evirtb', $d->{'ip'});
 		}
 	}
-local @acts = &active_ip_addresses();
+my @acts = &active_ip_addresses();
 if (&indexof($d->{'ip'}, @acts) < 0) {
 	return &text('validate_evirta', $d->{'ip'});
 	}
@@ -176,13 +176,13 @@ return undef;
 sub check_virt_clash
 {
 # Check active and boot-time interfaces
-local %allips = &interface_ip_addresses();
+my %allips = &interface_ip_addresses();
 return 1 if ($allips{$_[0]});
 
 # Do a quick ping test
-local $pingcmd = $gconfig{'os_type'} =~ /-linux$/ ?
+my $pingcmd = $gconfig{'os_type'} =~ /-linux$/ ?
 			"ping -c 1 -t 1" : "ping";
-local ($out, $timed_out) = &backquote_with_timeout(
+my ($out, $timed_out) = &backquote_with_timeout(
 				$pingcmd." ".$_[0]." 2>&1", 2, 1);
 return 1 if (!$timed_out && !$?);
 
@@ -194,10 +194,10 @@ return 0;
 # Returns HTML for selecting a virtual IP mode for a new server, or not
 sub virtual_ip_input
 {
-local ($tmpls, $resel, $orig, $mode, $ip) = @_;
+my ($tmpls, $resel, $orig, $mode, $ip) = @_;
 $mode ||= 0;
-local $defip = &get_default_ip($resel);
-local ($t, $anyalloc, $anychoose, $anyzone);
+my $defip = &get_default_ip($resel);
+my ($t, $anyalloc, $anychoose, $anyzone);
 if (&running_in_zone() || &running_in_vserver()) {
 	# When running in a Solaris zone or VServer, you MUST select an
 	# existing active IP, as they are controlled from the host.
@@ -207,18 +207,18 @@ elsif (&can_use_feature("virt")) {
 	# Check if private IPs are allocated or manual, if we are
 	# allowed to choose them.
 	foreach $t (@$tmpls) {
-		local $tmpl = &get_template($t->{'id'});
+		my $tmpl = &get_template($t->{'id'});
 		if ($tmpl->{'ranges'} ne "none") { $anyalloc++; }
 		else { $anychoose++; }
 		}
 	}
-local @opts;
+my @opts;
 if ($orig) {
 	# For restores - option to use original IP
 	push(@opts, [ -1, $text{'form_origip'} ]);
 	}
 push(@opts, [ 0, &text('form_shared', $defip) ]);
-local @shared = sort { $a cmp $b } &list_shared_ips();
+my @shared = sort { $a cmp $b } &list_shared_ips();
 if (@shared && &can_edit_sharedips()) {
 	# Can select from extra shared list
 	push(@opts, [ 3, $text{'form_shared2'},
@@ -239,7 +239,7 @@ if ($anychoose) {
 if ($anyzone) {
 	# Can select an existing active IP
 	&foreign_require("net");
-	local @act = grep { $_->{'virtual'} ne '' }
+	my @act = grep { $_->{'virtual'} ne '' }
 			  &net::active_interfaces();
 	if (@act) {
 		push(@opts, [ 4, $text{'form_activeip'},
@@ -268,23 +268,23 @@ return &ui_radio_table("virt", $mode, \@opts, 1);
 # already flag and netmask. May call &error if the input is invalid.
 sub parse_virtual_ip
 {
-local ($tmpl, $resel) = @_;
+my ($tmpl, $resel) = @_;
 if ($in{'virt'} == 2) {
 	# Automatic IP allocation chosen .. select one from either the
 	# reseller's range, or the template
 	if ($resel) {
 		# Creating by or under a reseller .. use his range, if any
 		foreach my $r (split(/\s+/, $resel)) {
-			local %acl = &get_reseller_acl($r);
+			my %acl = &get_reseller_acl($r);
 			if ($acl{'ranges'}) {
-				local ($ip, $netmask) = &free_ip_address(\%acl);
+				my ($ip, $netmask) = &free_ip_address(\%acl);
 				$ip || &error(&text('setup_evirtalloc'));
 				return ($ip, 1, 0, $netmask);
 				}
 			}
 		}
 	$tmpl->{'ranges'} ne "none" || &error(&text('setup_evirttmpl'));
-	local ($ip, $netmask) = &free_ip_address($tmpl);
+	my ($ip, $netmask) = &free_ip_address($tmpl);
 	$ip || &error(&text('setup_evirtalloc'));
 	return ($ip, 1, 0, $netmask);
 	}
@@ -292,12 +292,12 @@ elsif ($in{'virt'} == 1) {
 	# Manual IP allocation chosen
 	$tmpl->{'ranges'} eq "none" || &error(&text('setup_evirttmpl2'));
 	&check_ipaddress($in{'ip'}) || &error($text{'setup_eip'});
-	local $clash = &check_virt_clash($in{'ip'});
+	my $clash = &check_virt_clash($in{'ip'});
 	if ($in{'virtalready'}) {
 		# Fail if the IP isn't yet active, or if claimed by another
 		# virtual server
 		$clash || &error(&text('setup_evirtclash2', $in{'ip'}));
-		local $already = &get_domain_by("ip", $in{'ip'});
+		my $already = &get_domain_by("ip", $in{'ip'});
 		$already && &error(&text('setup_evirtclash4',
 					 $already->{'dom'}));
 		}
@@ -317,21 +317,21 @@ elsif ($in{'virt'} == 4 && (&running_in_zone() || &running_in_vserver())) {
 	# On an active IP on a virtual machine that cannot bring up its
 	# own IP.
 	&check_ipaddress($in{'zoneip'}) || &error($text{'setup_eip'});
-	local $clash = &check_virt_clash($in{'zoneip'});
+	my $clash = &check_virt_clash($in{'zoneip'});
 	$clash || &error(&text('setup_evirtclash2', $in{'zoneip'}));
-	local $already = &get_domain_by("ip", $in{'ip'});
+	my $already = &get_domain_by("ip", $in{'ip'});
 	$already && &error(&text('setup_evirtclash4',
 				 $already->{'dom'}));
 	return ($in{'zoneip'}, 1, 1);
 	}
 elsif ($in{'virt'} == 5) {
 	# Allocate if needed, shared otherwise
-	local ($ip, $netmask) = &free_ip_address($tmpl);
+	my ($ip, $netmask) = &free_ip_address($tmpl);
 	return ($ip, 1, 0, $netmask);
 	}
 else {
 	# Global shared IP
-	local $defip = &get_default_ip($resel);
+	my $defip = &get_default_ip($resel);
 	return ($defip, 0, 0);
 	}
 }
@@ -340,20 +340,20 @@ else {
 # Outputs HTML for editing virtual IP related template options
 sub show_template_virt
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # IP allocation ranges (v4 and possibly v6)
 foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
-	local @ranges;
+	my @ranges;
 	@ranges = &parse_ip_ranges($tmpl->{$ranges})
 		if ($tmpl->{$ranges} ne "none");
-	local @rfields = map { ($ranges."_start_".$_, $ranges."_end_".$_) }
+	my @rfields = map { ($ranges."_start_".$_, $ranges."_end_".$_) }
 			     (0..scalar(@ranges)+1);
-	local $rtable = &none_def_input($ranges, $tmpl->{$ranges},
+	my $rtable = &none_def_input($ranges, $tmpl->{$ranges},
 			 $text{'tmpl_rangesbelow'}, 0, 0, undef, \@rfields);
-	local @table;
-	local $i = 0;
-	local $s = $ranges eq "ranges" ? 20 : 6;
+	my @table;
+	my $i = 0;
+	my $s = $ranges eq "ranges" ? 20 : 6;
 	foreach my $r (@ranges, [ ], [ ]) {
 		push(@table, [ &ui_textbox($ranges."_start_$i", $r->[0], 20),
 			       &ui_textbox($ranges."_end_$i", $r->[1], 20),
@@ -377,7 +377,7 @@ foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
 # Updates virtual IP related template options from %in
 sub parse_template_virt
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Save IPv4 and possibly v6 allocation ranges
 foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
@@ -388,7 +388,7 @@ foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
 		$tmpl->{$ranges} = undef;
 		}
 	else {
-		local (@ranges, $start, $end);
+		my (@ranges, $start, $end);
 		for(my $i=0; defined($start = $in{$ranges."_start_$i"}); $i++) {
 			next if (!$start);
 			$end = $in{$ranges."_end_$i"};
@@ -400,8 +400,8 @@ foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
 				    &error(&text('tmpl_eranges_start', $start));
 				&check_ipaddress($end) ||
 				    &error(&text('tmpl_eranges_end', $start));
-				local @start = split(/\./, $start);
-				local @end = split(/\./, $end);
+				my @start = split(/\./, $start);
+				my @end = split(/\./, $end);
 				$start[0] == $end[0] && $start[1] == $end[1] &&
 				    $start[2] == $end[2] ||
 					&error(&text('tmpl_eranges_net',

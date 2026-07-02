@@ -6,13 +6,13 @@ sub collect_system_info
 {
 my ($manual, $confchk) = @_;
 &foreign_require("system-status");
-local $info = &system_status::get_collected_info($manual);
+my $info = &system_status::get_collected_info($manual);
 
 # Memory may come from a custom command
 if ($config{'mem_cmd'}) {
 	# Get from custom command
-	local $out = &backquote_command($config{'mem_cmd'});
-	local @lines = split(/\r?\n/, $out);
+	my $out = &backquote_command($config{'mem_cmd'});
+	my @lines = split(/\r?\n/, $out);
 	$info->{'mem'} = [ map { $_/1024 } @lines ];
 	}
 
@@ -20,11 +20,11 @@ if ($config{'mem_cmd'}) {
 $info->{'startstop'} = [ &get_startstop_links() ];
 
 # Counts for domains
-local $dusers = &count_domain_users();
-local $daliases = &count_domain_aliases(1);
-local @doms = &list_visible_domains();
-local @doms_all = &list_domains();
-local %fcount = map { $_, 0 } @features;
+my $dusers = &count_domain_users();
+my $daliases = &count_domain_aliases(1);
+my @doms = &list_visible_domains();
+my @doms_all = &list_domains();
+my %fcount = map { $_, 0 } @features;
 $fcount{'doms'} = 0;
 $fcount{'webaliases'} = 0;
 foreach my $d (@doms) {
@@ -42,9 +42,9 @@ foreach my $d (@doms) {
 $info->{'fcount'} = \%fcount;
 $info->{'ftypes'} = [ "doms", "dns", "web", "ssl", "webaliases", "mail", "dbs",
 		      "users", "aliases" ];
-local (%fmax, %fextra, %fhide);
+my (%fmax, %fextra, %fhide);
 foreach my $f (@{$info->{'ftypes'}}) {
-	local ($extra, $reason, $max, $hide) =
+	my ($extra, $reason, $max, $hide) =
 		&count_feature($f);
 	$fmax{$f} = $max;
 	$fextra{$f} = $extra;
@@ -56,15 +56,15 @@ $info->{'fhide'} = \%fhide;
 
 # Quota use for domains
 if (&has_home_quotas()) {
-	local @quota;
-	local $homesize = &quota_bsize("home");
-	local $maxquota = 0;
+	my @quota;
+	my $homesize = &quota_bsize("home");
+	my $maxquota = 0;
 
 	# Work out quotas
 	foreach my $d (@doms) {
 		# If this is a parent domain, sum up quotas
 		if (!$d->{'parent'}) {
-			local ($home, $mail, $dbusage, $quota);
+			my ($home, $mail, $dbusage, $quota);
 			if ($config{'show_uquotas'} == 0) {
 				# Domain group quotas
 				($home, $dbusage) =
@@ -73,15 +73,15 @@ if (&has_home_quotas()) {
 				}
 			else {
 				# Just the domain owner
-				local $duser = &get_domain_owner($d, 1, 0, 1);
+				my $duser = &get_domain_owner($d, 1, 0, 1);
 				$home = $duser->{'uquota'};
 				$dbusage = 0;
 				$quota = $duser->{'quota'};
 				}
-			local $usage = $home*$homesize;
+			my $usage = $home*$homesize;
 			$maxquota = $usage+$dbusage
 				if ($usage+$dbusage > $maxquota);
-			local $limit = $quota * $homesize;
+			my $limit = $quota * $homesize;
 			$maxquota = $limit if ($limit > $maxquota);
 			push(@quota, [ $d, $usage, $limit, $dbusage ]);
 			}
@@ -91,7 +91,7 @@ if (&has_home_quotas()) {
 	}
 
 # IP addresses used
-local (%ipcount, %ipdom);
+my (%ipcount, %ipdom);
 foreach my $d (@doms) {
 	next if ($d->{'alias'});
 	$ipcount{$d->{'ip'}}++;
@@ -101,10 +101,10 @@ foreach my $d (@doms) {
 		$ipdom{$d->{'ip6'}} ||= $d;
 		}
 	}
-local %doneip;
+my %doneip;
 if (keys %ipdom > 1) {
-	local $defip = &get_default_ip();
-	local $defip6 = &get_default_ip6();
+	my $defip = &get_default_ip();
+	my $defip6 = &get_default_ip6();
 	if (defined(&list_resellers)) {
 		foreach my $r (&list_resellers()) {
 			if ($r->{'acl'}->{'defip'}) {
@@ -123,7 +123,7 @@ if (keys %ipdom > 1) {
 			$sharedip{$ip6}++;
 			}
 		}
-	local @ips;
+	my @ips;
 	foreach my $ip ($defip,
 		     (sort { $a cmp $b } keys %reselip),
 		     (sort { $a cmp $b } keys %ipcount)) {
@@ -141,16 +141,16 @@ if (keys %ipdom > 1) {
 	}
 
 # IP ranges available
-local $tmpl = &get_template(0);
-local @ranges = split(/\s+/, $tmpl->{'ranges'});
-local @ipranges;
-local %taken = &interface_ip_addresses();
+my $tmpl = &get_template(0);
+my @ranges = split(/\s+/, $tmpl->{'ranges'});
+my @ipranges;
+my %taken = &interface_ip_addresses();
 foreach my $r (@ranges) {
 	$r =~ /^(\d+\.\d+\.\d+)\.(\d+)\-(\d+)$/ || next;
-        local ($base, $s, $e) = ($1, $2, $3);
-	local ($ipcount, $usedcount) = (0, 0);
+        my ($base, $s, $e) = ($1, $2, $3);
+	my ($ipcount, $usedcount) = (0, 0);
 	for(my $j=$s; $j<=$e; $j++) {
-		local $try = "$base.$j";
+		my $try = "$base.$j";
 		if ($doneip{$try} || $taken{$try}) {
 			$usedcount++;
 			}
@@ -163,10 +163,10 @@ if (@ipranges) {
 	}
 
 # Program information
-local @progs;
+my @progs;
 foreach my $f ("virtualmin", @features) {
 	if ($config{$f} || $f eq "virtualmin") {
-		local $ifunc = "sysinfo_$f";
+		my $ifunc = "sysinfo_$f";
 		if (defined(&$ifunc)) {
 			push(@progs, &$ifunc());
 			}
@@ -241,10 +241,10 @@ return $info;
 sub get_collected_info
 {
 my ($no_cache) = @_;
-local $infostr = $config{'collect_interval'} eq 'none' ? undef :
+my $infostr = $config{'collect_interval'} eq 'none' ? undef :
 			&read_file_contents($collected_info_file);
 if ($infostr && $no_cache ne 'no-cache') {
-	local $info = &unserialise_variable($infostr);
+	my $info = &unserialise_variable($infostr);
 	if (ref($info) eq 'HASH' && keys(%$info) > 0) {
 		return $info;
 		}
@@ -256,7 +256,7 @@ return &collect_system_info();
 # Save information collected on schedule
 sub save_collected_info
 {
-local ($info) = @_;
+my ($info) = @_;
 &open_tempfile(INFO, ">$collected_info_file");
 &print_tempfile(INFO, &serialise_variable($info));
 &close_tempfile(INFO);
@@ -266,7 +266,7 @@ local ($info) = @_;
 # Refresh regularly collected info on status of services
 sub refresh_startstop_status
 {
-local $info = &get_collected_info();
+my $info = &get_collected_info();
 $info->{'startstop'} = [ &get_startstop_links() ];
 &save_collected_info($info);
 }
@@ -276,11 +276,11 @@ $info->{'startstop'} = [ &get_startstop_links() ];
 # system_status::refresh_possible_packages has already been called.
 sub refresh_possible_packages
 {
-local ($pkgs) = @_;
-local %pkgs = map { $_, 1 } @$pkgs;
-local $info = &get_collected_info();
+my ($pkgs) = @_;
+my %pkgs = map { $_, 1 } @$pkgs;
+my $info = &get_collected_info();
 &foreign_require("system-status");
-local $sinfo = &system_status::get_collected_info();
+my $sinfo = &system_status::get_collected_info();
 $info->{'poss'} = $sinfo->{'poss'};
 my @vposs = grep { &is_virtualmin_package($_) } @{$info->{'poss'}};
 $info->{'vposs'} = \@vposs;
@@ -292,11 +292,11 @@ $info->{'vposs'} = \@vposs;
 # use, disk use and other info we might want to graph
 sub add_historic_collected_info
 {
-local ($info, $time) = @_;
+my ($info, $time) = @_;
 if (!-d $historic_info_dir) {
 	&make_dir($historic_info_dir, 0700);
 	}
-local @stats;
+my @stats;
 push(@stats, [ "load", $info->{'load'}->[0] ]) if ($info->{'load'});
 push(@stats, [ "load5", $info->{'load'}->[1] ]) if ($info->{'load'});
 push(@stats, [ "load15", $info->{'load'}->[2] ]) if ($info->{'load'});
@@ -329,8 +329,8 @@ if ($info->{'disk_total'}) {
 push(@stats, [ "doms", $info->{'fcount'}->{'doms'} ]);
 push(@stats, [ "users", $info->{'fcount'}->{'users'} ]);
 push(@stats, [ "aliases", $info->{'fcount'}->{'aliases'} ]);
-local $qlimit = 0;
-local $qused = 0;
+my $qlimit = 0;
+my $qused = 0;
 foreach my $q (@{$info->{'quota'}}) {
 	$qlimit += $q->[2];
 	$qused += $q->[1]+$q->[3];
@@ -339,13 +339,13 @@ push(@stats, [ "quotalimit", $qlimit ]);
 push(@stats, [ "quotaused", $qused ]);
 
 # Get messages processed by procmail since the last collection time
-local $now = time();
+my $now = time();
 my $hasprocmail = &mail_system_has_procmail();
 if (-r $procmail_log_file && $hasprocmail) {
 	# Get last seek position
-	local $lastinfo = &read_file_contents("$historic_info_dir/procmailpos");
-	local @st = stat($procmail_log_file);
-	local ($lastpos, $lastinode, $lasttime);
+	my $lastinfo = &read_file_contents("$historic_info_dir/procmailpos");
+	my @st = stat($procmail_log_file);
+	my ($lastpos, $lastinode, $lasttime);
 	if (defined($lastinfo)) {
 		($lastpos, $lastinode, $lasttime) = split(/\s+/, $lastinfo);
 		}
@@ -363,11 +363,11 @@ if (-r $procmail_log_file && $hasprocmail) {
 	else {
 		$lastpos = 0;
 		}
-	local ($mailcount, $spamcount, $viruscount) = (0, 0, 0);
+	my ($mailcount, $spamcount, $viruscount) = (0, 0, 0);
 	while(<PROCMAILLOG>) {
 		$lastpos += length($_);
 		s/\r|\n//g;
-		local %log = map { split(/:/, $_, 2) } split(/\s+/, $_);
+		my %log = map { split(/:/, $_, 2) } split(/\s+/, $_);
 		if ($log{'User'}) {
 			$mailcount++;
 			if ($log{'Mode'} eq 'Spam') {
@@ -379,7 +379,7 @@ if (-r $procmail_log_file && $hasprocmail) {
 			}
 		}
 	close(PROCMAILLOG);
-	local $mins = ($now - $lasttime) / 60.0;
+	my $mins = ($now - $lasttime) / 60.0;
 	push(@stats, [ "mailcount", $mins ? $mailcount / $mins : 0 ]);
 	push(@stats, [ "spamcount", $mins ? $spamcount / $mins : 0 ]);
 	push(@stats, [ "viruscount", $mins ? $viruscount / $mins : 0 ]);
@@ -391,19 +391,19 @@ if (-r $procmail_log_file && $hasprocmail) {
 	}
 
 # Read mail server log to count messages since the last run
-local $lastinfo = &read_file_contents("$historic_info_dir/maillogpos");
-local ($lastpos, $lastinode, $lasttime);
+my $lastinfo = &read_file_contents("$historic_info_dir/maillogpos");
+my ($lastpos, $lastinode, $lasttime);
 if (defined($lastinfo)) {
 	($lastpos, $lastinode, $lasttime) = split(/\s+/, $lastinfo);
 	}
-local $mail_log_file = $config{'bw_maillog'};
+my $mail_log_file = $config{'bw_maillog'};
 $mail_log_file = &get_mail_log($lasttime)
 	if ($mail_log_file eq "auto");
 
 if ($mail_log_file && $config{'mail'}) {
 	# Get last seek position
-	local ($spamcount, $mailcount) = (0, 0);
-	local @st = stat($mail_log_file);
+	my ($spamcount, $mailcount) = (0, 0);
+	my @st = stat($mail_log_file);
 	if (!defined($lastinfo)) {
 		# For the first run, start at the end of the file
 		$lastpos = $st[7];
@@ -413,7 +413,7 @@ if ($mail_log_file && $config{'mail'}) {
 
 	# Read the log, finding number of messages recived, bounced and
 	# greylisted
-	local ($recvcount, $bouncecount, $greycount, $ratecount) = (0, 0, 0);
+	my ($recvcount, $bouncecount, $greycount, $ratecount) = (0, 0, 0);
 	open(MAILLOG, $mail_log_file);
 	if ($mail_log_file !~ /\|$/) {
 		# Seek forwards in the file, unless rotated
@@ -477,7 +477,7 @@ if ($mail_log_file && $config{'mail'}) {
 	if ($lastpos <= 0) {
 		$lastpos = $st[7];
 		}
-	local $mins = ($now - $lasttime) / 60.0;
+	my $mins = ($now - $lasttime) / 60.0;
 	push(@stats, [ "recvcount", $mins ? $recvcount / $mins : 0 ]);
 	push(@stats, [ "bouncecount", $mins ? $bouncecount / $mins : 0 ]);
 	if ($greycount || !&check_postgrey()) {
@@ -503,8 +503,8 @@ if ($mail_log_file && $config{'mail'}) {
 # Get network traffic counts since last run
 if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
 	# Get the current byte count
-	local $rxtotal = 0;
-	local $txtotal = 0;
+	my $rxtotal = 0;
+	my $txtotal = 0;
 	if ($config{'collect_ifaces'}) {
 		# From module config
 		@ifaces = split(/\s+/, $config{'collect_ifaces'});
@@ -526,22 +526,22 @@ if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
 			}
 		}
 	@ifaces = &unique(@ifaces);
-	local $ifaces = join(" ", @ifaces);
+	my $ifaces = join(" ", @ifaces);
 	if (&has_command("ifconfig")) {
 		# Get traffic from old ifconfig command
 		foreach my $iname (@ifaces) {
-			local $out = &backquote_command(
+			my $out = &backquote_command(
 				"LC_ALL='' LANG='' ifconfig ".
 				quotemeta($iname)." 2>/dev/null");
-			local $rx = $out =~ /RX\s+bytes:\s*(\d+)/i ? $1 : undef;
-			local $tx = $out =~ /TX\s+bytes:\s*(\d+)/i ? $1 : undef;
+			my $rx = $out =~ /RX\s+bytes:\s*(\d+)/i ? $1 : undef;
+			my $tx = $out =~ /TX\s+bytes:\s*(\d+)/i ? $1 : undef;
 			$rxtotal += $rx;
 			$txtotal += $tx;
 			}
 		}
 	else {
 		# Get traffic from /proc/net/dev
-		local $out = &read_file_contents("/proc/net/dev");
+		my $out = &read_file_contents("/proc/net/dev");
 		foreach my $l (split(/\r?\n/, $out)) {
 			$l =~ s/^\s+//;
 			my @w = split(/[ \t:]+/, $l);
@@ -553,14 +553,14 @@ if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
 		}
 
 	# Work out the diff since the last run, if we have it
-	local %netcounts;
+	my %netcounts;
 	if (&read_file("$historic_info_dir/netcounts", \%netcounts) &&
 	    $netcounts{'rx'} && $netcounts{'tx'} &&
 	    $netcounts{'ifaces'} eq $ifaces &&
 	    $rxtotal >= $netcounts{'rx'} && $txtotal >= $netcounts{'tx'}) {
-		local $secs = ($now - $netcounts{'now'}) * 1.0;
-		local $rxscaled = ($rxtotal - $netcounts{'rx'}) / $secs;
-		local $txscaled = ($txtotal - $netcounts{'tx'}) / $secs;
+		my $secs = ($now - $netcounts{'now'}) * 1.0;
+		my $rxscaled = ($rxtotal - $netcounts{'rx'}) / $secs;
+		my $txscaled = ($txtotal - $netcounts{'tx'}) / $secs;
 		if ($rxscaled >= $netcounts{'rx_max'}) {
 			$netcounts{'rx_max'} = $rxscaled;
 			}
@@ -580,7 +580,7 @@ if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
 	}
 
 # Get drive temperatures
-local ($temptotal, $tempcount);
+my ($temptotal, $tempcount);
 foreach my $t (@{$info->{'drivetemps'}}) {
 	$temptotal += $t->{'temp'};
 	$tempcount++;
@@ -590,7 +590,7 @@ if ($temptotal) {
 	}
 
 # Get CPU temperature
-local ($temptotal, $tempcount);
+my ($temptotal, $tempcount);
 foreach my $t (@{$info->{'cputemps'}}) {
 	$temptotal += $t->{'temp'};
 	$tempcount++;
@@ -621,7 +621,7 @@ foreach my $stat (@stats) {
 	}
 
 # Update the file storing the max possible value for each variable
-local %maxpossible;
+my %maxpossible;
 &read_file("$historic_info_dir/maxes", \%maxpossible);
 foreach my $stat (@stats) {
 	if ($stat->[2] && $stat->[2] > $maxpossible{$stat->[0]}) {
@@ -636,14 +636,14 @@ foreach my $stat (@stats) {
 # time period
 sub list_historic_collected_info
 {
-local ($stat, $start, $end) = @_;
-local @rv;
-local $last_time;
-local $now = time();
+my ($stat, $start, $end) = @_;
+my @rv;
+my $last_time;
+my $now = time();
 open(HISTORY, "<$historic_info_dir/$stat");
 while(<HISTORY>) {
 	chop;
-	local ($time, $value) = split(" ", $_);
+	my ($time, $value) = split(" ", $_);
 	next if ($time < $last_time ||	# No time travel or future data
 		 $time > $now);
 	if ((!defined($start) || $time >= $start) &&
@@ -663,9 +663,9 @@ return @rv;
 # Returns a hash mapping stats to data within some time period
 sub list_all_historic_collected_info
 {
-local ($start, $end) = @_;
+my ($start, $end) = @_;
 foreach my $f (&list_historic_stats()) {
-	local @rv = &list_historic_collected_info($f, $start, $end);
+	my @rv = &list_historic_collected_info($f, $start, $end);
 	$all{$f} = \@rv;
 	}
 closedir(HISTDIR);
@@ -676,7 +676,7 @@ return \%all;
 # Returns a hash reference from stats to the max possible values ever seen
 sub get_historic_maxes
 {
-local %maxpossible;
+my %maxpossible;
 &read_file("$historic_info_dir/maxes", \%maxpossible);
 return \%maxpossible;
 }
@@ -685,19 +685,19 @@ return \%maxpossible;
 # Returns the Unix time for the first and last stats recorded
 sub get_historic_first_last
 {
-local ($stat) = @_;
+my ($stat) = @_;
 open(HISTORY, "<$historic_info_dir/$stat") || return (undef, undef);
-local $first = <HISTORY>;
+my $first = <HISTORY>;
 $first || return (undef, undef);
 chop($first);
-local ($firsttime, $firstvalue) = split(" ", $first);
+my ($firsttime, $firstvalue) = split(" ", $first);
 seek(HISTORY, 2, -256) || seek(HISTORY, 0, 0);
 while(<HISTORY>) {
 	$last = $_;
 	}
 close(HISTORY);
 chop($last);
-local ($lasttime, $lastvalue) = split(" ", $last);
+my ($lasttime, $lastvalue) = split(" ", $last);
 return ($firsttime, $lasttime);
 }
 
@@ -705,7 +705,7 @@ return ($firsttime, $lasttime);
 # Returns a list of variables on which we have stats
 sub list_historic_stats
 {
-local @rv;
+my @rv;
 opendir(HISTDIR, $historic_info_dir);
 foreach my $f (readdir(HISTDIR)) {
 	if ($f =~ /^[a-z]+[0-9]*$/ && $f ne "maxes" && $f ne "procmailpos" &&
@@ -723,15 +723,15 @@ return @rv;
 sub setup_collectinfo_job
 {
 # Work out correct steps
-local $step = $config{'collect_interval'};
+my $step = $config{'collect_interval'};
 $step = 5 if (!$step || $step eq 'none');
 $step = 60 if ($step > 60);
-local $offset = int(rand()*$step);
-local @mins;
+my $offset = int(rand()*$step);
+my @mins;
 for(my $i=$offset; $i<60; $i+= $step) {
 	push(@mins, $i);
 	}
-local $job = &find_cron_script($collect_cron_cmd);
+my $job = &find_cron_script($collect_cron_cmd);
 if (!$job && $config{'collect_interval'} ne 'none') {
 	# Create, and run for the first time
 	$job = { 'mins' => join(',', @mins),
@@ -746,8 +746,8 @@ if (!$job && $config{'collect_interval'} ne 'none') {
 	}
 elsif ($job && $config{'collect_interval'} ne 'none') {
 	# Update existing job, if step has changed
-	local @oldmins = split(/,/, $job->{'mins'});
-	local $oldstep = $oldmins[0] eq '*' ? 1 :
+	my @oldmins = split(/,/, $job->{'mins'});
+	my $oldstep = $oldmins[0] eq '*' ? 1 :
 			 @oldmins == 1 ? 60 :
 			 $oldmins[1]-$oldmins[0];
 	if ($step != $oldstep) {
@@ -766,7 +766,7 @@ elsif ($job && $config{'collect_interval'} eq 'none') {
 # afterwards, and update the info hash.
 sub restart_collected_services
 {
-local ($info) = @_;
+my ($info) = @_;
 my $count = 0;
 foreach my $ss (@{$info->{'startstop'}}) {
 	if (!$ss->{'status'}) {

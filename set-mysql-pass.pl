@@ -33,7 +33,7 @@ if (!$module_name) {
 &require_mysql();
 $user = $mysql::config{'login'};
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--pass") {
 		$pass = shift(@ARGV);
 		}

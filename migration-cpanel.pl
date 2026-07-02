@@ -4,7 +4,7 @@
 # Make sure the given file is a cPanel backup, and contains the domain
 sub migration_cpanel_validate
 {
-local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
+my ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 
 # Password is needed for cPanel migrations
 if (!$parent && !$pass) {
@@ -12,26 +12,26 @@ if (!$parent && !$pass) {
 	}
 
 # Extract the backup and find paths inside it
-local ($ok, $root) = &extract_cpanel_dir($file);
+my ($ok, $root) = &extract_cpanel_dir($file);
 $ok || return ("Not a cPanel tar.gz file : $root");
-local $daily = glob("$root/backup*/cpbackup/daily");
-local ($homedir) = glob("$root/*/homedir");
+my $daily = glob("$root/backup*/cpbackup/daily");
+my ($homedir) = glob("$root/*/homedir");
 $homedir = "$root/homedir" if (!-d $homedir);
-local $datastore = "$root/.cpanel-datastore";
+my $datastore = "$root/.cpanel-datastore";
 $datastore = "$root/.cpanel/datastore" if (!-d $datastore);
 -d $daily || -d $homedir || -d $datastore ||
 	return ("Not a cPanel daily or home directory backup file");
 
 # Try to work out the domain
 if (!$dom) {
-	local @domfiles = glob("$root/*/vf/*");
+	my @domfiles = glob("$root/*/vf/*");
 	if (!@domfiles) {
 		@domfiles = glob("$root/vf/*");
 		}
-	local @doms = map { /\/vf\/([^\/]+)$/; $1 } @domfiles;
+	my @doms = map { /\/vf\/([^\/]+)$/; $1 } @domfiles;
 	if (@doms > 1) {
 		# Hack to work out primary domain
-		local $ds = "$homedir/.cpanel-datastore";
+		my $ds = "$homedir/.cpanel-datastore";
 		$ds = $datastore if (!-d $ds);
 		opendir(DATASTORE, $ds);
 		foreach my $gdi (readdir(DATASTORE)) {
@@ -46,9 +46,9 @@ if (!$dom) {
 			}
 		else {
 			# Look at the cp/username file
-			local ($cpfile) = glob("$root/*/cp/*");
+			my ($cpfile) = glob("$root/*/cp/*");
 			if ($cpfile && -r $cpfile) {
-				local %cp;
+				my %cp;
 				&read_env_file($cpfile, \%cp);
 				@doms = ( $cp{'DNS'} );
 				}
@@ -68,15 +68,15 @@ if (!$dom) {
 if (-d $daily) {
 	# Older style backup - check for user and Apache domain file
 	if (!$user) {
-		local ($tgz) = glob("$daily/*.tar.gz");
+		my ($tgz) = glob("$daily/*.tar.gz");
 		$tgz =~ /\/([^\/]+)\.tar\.gz$/ ||
 		    return ("Could not work out username from cPanel backup");
 		$user = $1;
 		}
 	-r "$daily/$user.tar.gz" ||
 		return ("Could not find directory for $user in backup");
-	local $httpd = &extract_cpanel_file("$daily/files/_etc_httpd_conf_httpd.conf.gz");
-	local ($vconf, $virt) = &get_apache_virtual($dom, undef, $httpd);
+	my $httpd = &extract_cpanel_file("$daily/files/_etc_httpd_conf_httpd.conf.gz");
+	my ($vconf, $virt) = &get_apache_virtual($dom, undef, $httpd);
 	$vconf ||
 	    return ("Could not find Apache virtual server $dom in backup");
 	}
@@ -93,7 +93,7 @@ elsif (-d $homedir) {
 		}
 	if (!$user) {
 		opendir(ROOT, $root);
-		local @rootfiles = grep { !/^\./ } readdir(ROOT);
+		my @rootfiles = grep { !/^\./ } readdir(ROOT);
 		closedir(ROOT);
 		$user = $rootfiles[0];
 		}
@@ -113,32 +113,32 @@ return (undef, $dom, $user, $pass);
 # created.
 sub migration_cpanel_migrate
 {
-local ($file, $dom, $user, $webmin, $template, $ipinfo, $pass, $parent,
+my ($file, $dom, $user, $webmin, $template, $ipinfo, $pass, $parent,
        $prefix, $email, $plan) = @_;
-local ($ok, $root) = &extract_cpanel_dir($file);
+my ($ok, $root) = &extract_cpanel_dir($file);
 $ok || &error("Failed to extract backup : $root");
-local $daily = glob("$root/backup*/cpbackup/daily");
-local $datastore = "$root/.cpanel-datastore";
+my $daily = glob("$root/backup*/cpbackup/daily");
+my $datastore = "$root/.cpanel-datastore";
 $datastore = "$root/.cpanel/datastore" if (!-d $datastore);
-local $tmpl = &get_template($template);
+my $tmpl = &get_template($template);
 
 # Check for prefix clash
 $prefix ||= &compute_prefix($dom, undef, $parent, 1);
-local $pclash = &get_domain_by("prefix", $prefix);
+my $pclash = &get_domain_by("prefix", $prefix);
 $pclash && &error("A virtual server using the prefix $prefix already exists");
 
 # Get shells for users
-local ($nologin_shell, $ftp_shell, undef, $def_shell) =
+my ($nologin_shell, $ftp_shell, undef, $def_shell) =
 	&get_common_available_shells();
 $nologin_shell ||= $def_shell;
 $ftp_shell ||= $def_shell;
 
 # Work out the username again if it wasn't supplied
-local $origuser;
-local ($homedir) = glob("$root/*/homedir");
+my $origuser;
+my ($homedir) = glob("$root/*/homedir");
 $homedir = "$root/homedir" if (!-d $homedir);
 if (-d $daily) {
-	local ($tgz) = glob("$daily/*.tar.gz");
+	my ($tgz) = glob("$daily/*.tar.gz");
 	$tgz =~ /\/([^\/]+)\.tar\.gz$/;
 	$origuser = $1;
 	}
@@ -148,26 +148,26 @@ elsif (-d $homedir) {
 	}
 $user ||= $origuser;
 $user || &error("Could not work out username automatically");
-local $group = $user;
-local $ugroup = $group;
+my $group = $user;
+my $ugroup = $group;
 
 # First work out what features we have ..
 &$first_print("Checking for cPanel features ..");
-local @got = ( "dir", $parent ? () : ("unix"), &domain_has_website(),
+my @got = ( "dir", $parent ? () : ("unix"), &domain_has_website(),
 	       "logrotate" );
 push(@got, "webmin") if ($webmin && !$parent);
-local $userdir;
-local $homesrc;
+my $userdir;
+my $homesrc;
 if (-d $daily) {
-	local $named = &extract_cpanel_file("$daily/files/_etc_named.conf.gz");
-	local $zone;
+	my $named = &extract_cpanel_file("$daily/files/_etc_named.conf.gz");
+	my $zone;
 	if ($named) {
 		push(@got, "dns");
 		}
-	local $localdomains = &extract_cpanel_file("$daily/files/_etc_localdomains.gz");
+	my $localdomains = &extract_cpanel_file("$daily/files/_etc_localdomains.gz");
 	if ($localdomains) {
 		# Check for mail domain
-		local $lref = &read_file_lines($localdomains);
+		my $lref = &read_file_lines($localdomains);
 		foreach my $l (@$lref) {
 			push(@got, "mail") if ($l eq $dom);
 			}
@@ -208,14 +208,14 @@ if (&indexof("mail", @got) >= 0 && -e "$homedir/.spamassassinenable") {
 	}
 
 # Work out if the original domain was a sub-server in cPanel
-local $waschild = 0;
-local $wasuser = $dom;
+my $waschild = 0;
+my $wasuser = $dom;
 $wasuser =~ s/\..*$//;
-local $aliasdom;
+my $aliasdom;
 if (-r "$datastore/apache_LISTMULTIPARKED_0") {
 	# Sub-servers are in this config file. We can also work out the original
 	# 'username' for the sub-directory.
-	local $subs = &read_file_contents(
+	my $subs = &read_file_contents(
 		"$datastore/apache_LISTMULTIPARKED_0");
 	if ($subs =~ /(\/[a-z0-9\.\-_\/]+)[^a-z0-9\.\-]+\Q$dom\E[^a-z0-9\.\-]+([a-z0-9\.\-]+)?/i) {
 		$waschild = 1;
@@ -237,7 +237,7 @@ else {
 	}
 
 # Check for Webalizer and AWstats
-local $webalizer = $waschild ? "$homesrc/tmp/webalizer/$dom"
+my $webalizer = $waschild ? "$homesrc/tmp/webalizer/$dom"
 			     : "$homesrc/tmp/webalizer";
 if (-d $webalizer) {
 	push(@got, "webalizer");
@@ -248,9 +248,9 @@ if (-r "$homesrc/tmp/awstats/awstats.$dom.conf") {
 
 if (-s "$userdir/mysql.sql" && !$waschild) {
 	# Check for mysql
-	local $mycount = 0;
-	local $mydir = "$userdir/mysql";
-	local %dblist = map { $_, 1 } &get_cpanel_db_list("$userdir/mysql.sql",
+	my $mycount = 0;
+	my $mydir = "$userdir/mysql";
+	my %dblist = map { $_, 1 } &get_cpanel_db_list("$userdir/mysql.sql",
 							  $user, $origuser);
 	opendir(MYDIR, $mydir);
 	while($myf = readdir(MYDIR)) {
@@ -272,7 +272,7 @@ if ($ipinfo->{'virt'} && -s "$userdir/sslcerts/www.$dom.crt" &&
 	}
 
 # Look for mailing lists
-local ($ml, @lists);
+my ($ml, @lists);
 opendir(MM, "$userdir/mm");
 foreach $ml (readdir(MM)) {
 	if ($ml =~ /^(\S+)_\Q$dom\E$/) {
@@ -286,10 +286,10 @@ if (@lists && &plugin_defined("virtualmin-mailman", "create_list")) {
 
 # Tell the user what we have got
 @got = &show_check_migration_features(@got);
-local %got = map { $_, 1 } @got;
+my %got = map { $_, 1 } @got;
 
 # Work out user and group IDs
-local ($gid, $ugid, $uid, $duser);
+my ($gid, $ugid, $uid, $duser);
 if ($parent) {
 	# UID and GID come from parent
 	$gid = $parent->{'gid'};
@@ -305,7 +305,7 @@ else {
 	$duser = $user;
 	}
 
-local $quota;
+my $quota;
 if (-r "$userdir/quota") {
 	# Get the quota (from home directory backup)
 	open(QUOTA, "<$userdir/quota");
@@ -326,7 +326,7 @@ elsif (-r "$datastore/quota_-v") {
 	}
 
 # Create the virtual server object
-local %dom;
+my %dom;
 $prefix ||= &compute_prefix($dom, $group, $parent, 1);
 $plan = $parent ? &get_plan($parent->{'plan'}) :
         $plan ? $plan : &get_default_plan();
@@ -386,11 +386,11 @@ if (open(MYSQL, "<$userdir/mysql.sql")) {
 	close(MYSQL);
 	}
 
-local $orighome;
+my $orighome;
 if (-d $daily) {
 	# Work out home directory (use cpanel home by default)
-	local $httpd = &extract_cpanel_file("$daily/files/_etc_httpd_conf_httpd.conf.gz");
-	local ($srcvconf, $srcvirt) = &get_apache_virtual($dom, undef, $httpd);
+	my $httpd = &extract_cpanel_file("$daily/files/_etc_httpd_conf_httpd.conf.gz");
+	my ($srcvconf, $srcvirt) = &get_apache_virtual($dom, undef, $httpd);
 	$orighome = &apache::find_directive("DocumentRoot", $srcvirt);
 	$orighome =~ s/\/public_html$//;
 	}
@@ -435,7 +435,7 @@ if ($cerr) {
 # Create the initial server
 &$first_print("Creating initial virtual server $dom ..");
 &$indent_print();
-local $err = &create_virtual_server(\%dom, $parent,
+my $err = &create_virtual_server(\%dom, $parent,
 				    $parent ? $parent->{'user'} : undef);
 &$outdent_print();
 if ($err) {
@@ -445,13 +445,13 @@ if ($err) {
 else {
 	&$second_print(".. done");
 	}
-local @rvdoms = ( \%dom );
+my @rvdoms = ( \%dom );
 
 # Extract homedir.tar if needed
-local $hometar = "$userdir/homedir.tar";
+my $hometar = "$userdir/homedir.tar";
 if (-r $hometar) {
 	&$first_print("Extracting home directory TAR file ..");
-	local $out;
+	my $out;
 	if (!-d $homesrc) {
 		&make_dir($homesrc, 0755);
 		}
@@ -472,9 +472,9 @@ if ($got{'web'} && -d $daily) {
 	&$first_print("Copying Apache directives ..");
 	if ($srcvconf) {
 		# Copy any directives not set by Virtualmin
-		local $conf = &apache::get_config();
-		local ($vconf, $virt) = &get_apache_virtual($dom, undef);
-		local %dirs;
+		my $conf = &apache::get_config();
+		my ($vconf, $virt) = &get_apache_virtual($dom, undef);
+		my %dirs;
 		foreach my $a (@$virt) {
 			next if ($a->{'type'});
 			$dirs{$a->{'name'}}++;
@@ -485,7 +485,7 @@ if ($got{'web'} && -d $daily) {
 		$dirs{'User'} = 1;		# Don't copy user-related
 		$dirs{'Group'} = 1;		# settings, as Virtualmin will
 		$dirs{'SuexecUserGroup'} = 1;	# have already set them
-		local %vals;
+		my %vals;
 		foreach my $a (@$srcvirt) {
 			next if ($a->{'type'} || $dirs{$a->{'name'}});
 			if ($dom{'home'} ne $orighome) {
@@ -505,8 +505,8 @@ if ($got{'web'} && -d $daily) {
 	}
 elsif ($got{'web'}) {
 	# Just adjust cgi-bin directory to match cPanel
-	local $conf = &apache::get_config();
-	local ($virt, $vconf) = &get_apache_virtual($dom, undef);
+	my $conf = &apache::get_config();
+	my ($virt, $vconf) = &get_apache_virtual($dom, undef);
 	if ($virt) {
 		&apache::save_directive("ScriptAlias",
 			[ "/cgi-bin $dom{'home'}/public_html/cgi-bin" ],
@@ -533,12 +533,12 @@ if ($got{&domain_has_ssl()}) {
 # Migrate DNS domain
 &cpanel_migrate_dns_zone(\%dom, $dom);
 
-local $out;
-local $ht = &public_html_dir(\%dom);
-local $qht = quotemeta($ht);
+my $out;
+my $ht = &public_html_dir(\%dom);
+my $qht = quotemeta($ht);
 if ($waschild) {
 	# Migrate web directory
-	local $qhtsrc = "$homesrc/public_html/$wasuser";
+	my $qhtsrc = "$homesrc/public_html/$wasuser";
 	&$first_print("Copying web pages to $ht ..");
 	&execute_command("cd $qhtsrc && ".
 			 "(".&make_tar_command("cf", "-", ".").
@@ -549,8 +549,8 @@ if ($waschild) {
 else {
 	# Migrate home directory contents (except logs and mail)
 	&$first_print("Copying home directory to $dom{'home'} ..");
-	local $qhome = quotemeta($dom{'home'});
-	local $xtemp = &transname();
+	my $qhome = quotemeta($dom{'home'});
+	my $xtemp = &transname();
 	&open_tempfile(XTEMP, ">$xtemp");
 	&print_tempfile(XTEMP, "./logs\n");
 	&print_tempfile(XTEMP, "./mail\n");
@@ -571,7 +571,7 @@ else {
 
 # If php.ini is migrated wrong, fix it
 if ($dom{'web'}) {
-	local $mode = &get_domain_php_mode(\%dom);
+	my $mode = &get_domain_php_mode(\%dom);
 	if ($mode eq "cgi" || $mode eq "fcgid") {
 		&fix_php_extension_dir(\%dom);
 		}
@@ -597,23 +597,23 @@ if (defined(&set_php_wrappers_writable)) {
 # Lock the user DB and build list of used IDs
 &obtain_lock_unix(\%dom);
 &obtain_lock_mail(\%dom);
-local (%taken, %utaken);
+my (%taken, %utaken);
 &build_taken(\%taken, \%utaken);
 
 &foreign_require("mailboxes");
 $mailboxes::no_permanent_index = 1;
-local %usermap;
+my %usermap;
 if ($got{'mail'}) {
 	# Migrate mail users
 	&cpanel_migrate_mailboxes($dom, \%dom, \%usermap);
 	}
 
 # Move server owner's inbox file
-local $owner = &get_domain_owner(\%dom);
+my $owner = &get_domain_owner(\%dom);
 if ($owner && !$parent) {
 	&$first_print("Moving server owner's mailbox ..");
-	local ($mfile, $mtype) = &user_mail_file($owner);
-	local $srcfolder;
+	my ($mfile, $mtype) = &user_mail_file($owner);
+	my $srcfolder;
 	if (-d "$homesrc/mail/cur" || -d "$homesrc/mail/new") {
 		# Maildir format
 		$srcfolder = { 'type' => 1, 'file' => "$homesrc/mail" };
@@ -624,7 +624,7 @@ if ($owner && !$parent) {
 			       'file' => "$homesrc/mail/inbox" };
 		}
 	if ($srcfolder) {
-		local $dstfolder = { 'type' => $mtype, 'file' => $mfile };
+		my $dstfolder = { 'type' => $mtype, 'file' => $mfile };
 		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
 		&set_mailfolder_owner($dstfolder, $owner);
 		&mailboxes::mailbox_uncompress_folder($dstfolder)
@@ -637,7 +637,7 @@ if ($owner && !$parent) {
 	}
 
 # Build map from email addresses to users
-local %useremail;
+my %useremail;
 foreach my $uinfo (&list_domain_users(\%dom)) {
 	if ($uinfo->{'email'}) {
 		$useremail{$uinfo->{'email'}} = $uinfo;
@@ -646,11 +646,11 @@ foreach my $uinfo (&list_domain_users(\%dom)) {
 
 if ($got{'mail'}) {
 	# Copy mail aliases
-	local $acount = 0;
-	local $domfwd;
+	my $acount = 0;
+	my $domfwd;
 	&$first_print("Copying email aliases ..");
 	&set_alias_programs();
-	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
+	my %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
 	local $_;
 	open(VAD, "<$userdir/vad/$dom");
 	while(<VAD>) {
@@ -658,9 +658,9 @@ if ($got{'mail'}) {
 		s/^\s*#.*$//;
 		if (/^(\S+):\s*(\S+)$/) {
 			# A domain forward exists ..
-			local $virt = { 'from' => "\@$dom",
+			my $virt = { 'from' => "\@$dom",
 					'to' => [ "%1\@$2" ] };
-			local $clash = $gotvirt{$virt->{'from'}};
+			my $clash = $gotvirt{$virt->{'from'}};
 			&delete_virtuser($clash) if ($clash);
 			&create_virtuser($virt);
 			$acount++;
@@ -673,9 +673,9 @@ if ($got{'mail'}) {
 		s/\r|\n//g;
 		s/^\s*#.*$//;
 		if (/^(\S+):\s*(.*)$/) {
-			local ($name, $v) = ($1, $2);
+			my ($name, $v) = ($1, $2);
 			next if (!$name);
-			local @values;
+			my @values;
 			if ($v !~ /,/ && $v !~ /"/) {
 				# A single destination, not quoted!
 				@values = ( $v );
@@ -690,13 +690,13 @@ if ($got{'mail'}) {
 					$v = $3;
 					}
 				}
-			local $mailman = 0;
+			my $mailman = 0;
 			foreach my $v (@values) {
 				if ($v =~ /:fail:\s+(.*)/) {
 					# Fix bounce alias
 					$v = "BOUNCE $1";
 					}
-				local ($atype, $aname) = &alias_type($v, $name);
+				my ($atype, $aname) = &alias_type($v, $name);
 				if ($atype == 4 && $aname =~ /autorespond\s+(\S+)\@(\S+)\s+(\S+)/) {
 					# Turn into Virtualmin auto-responder
 					$v = "| $module_config_directory/autoreply.pl $3/$name $1";
@@ -723,9 +723,9 @@ if ($got{'mail'}) {
 				# This is an alias from a user. Preserve
 				# delivery to his mailbox though, as this is
 				# what cPanel seems to do.
-				local $uinfo = $useremail{$name};
-				local $olduinfo = { %$uinfo };
-				local $touser = $uinfo->{'user'};
+				my $uinfo = $useremail{$name};
+				my $olduinfo = { %$uinfo };
+				my $touser = $uinfo->{'user'};
 				if ($mail_system == 0 && $escuser =~ /\@/) {
 					$touser = &escape_replace_atsign_if_exists($touser);
 					}
@@ -738,10 +738,10 @@ if ($got{'mail'}) {
 				if ($name !~ /\@/) {
 					$name .= "\@".$dom;
 					}
-				local $virt = { 'from' => $name =~ /^\*/ ?
+				my $virt = { 'from' => $name =~ /^\*/ ?
 						  "\@".$dom : $name,
 						'to' => \@values };
-				local $clash = $gotvirt{$virt->{'from'}};
+				my $clash = $gotvirt{$virt->{'from'}};
 				&delete_virtuser($clash) if ($clash);
 				&create_virtuser($virt);
 				$acount++;
@@ -763,10 +763,10 @@ if ($got{'spam'}) {
 
 # Create mailing lists
 if ($got{'virtualmin-mailman'}) {
-	local $lcount = 0;
+	my $lcount = 0;
 	&$first_print("Re-creating mailing lists ..");
 	foreach $ml (@lists) {
-		local $err = &plugin_call("virtualmin-mailman", "create_list",
+		my $err = &plugin_call("virtualmin-mailman", "create_list",
 			     $ml, $dom, "Migrated cPanel mailing list",
 			     undef, $dom{'emailto_addr'}, $dom{'pass'});
 		if ($err) {
@@ -811,11 +811,11 @@ if (-r "$userdir/cron/$user" && !$waschild) {
 
 if ($got{'mysql'}) {
 	# Re-create all MySQL databases
-	local $mycount = 0;
+	my $mycount = 0;
 	&$first_print("Re-creating and loading MySQL databases ..");
 	&disable_quotas(\%dom);
-	local $mydir = "$userdir/mysql";
-	local %dblist = map { $_, 1 } &get_cpanel_db_list("$userdir/mysql.sql",
+	my $mydir = "$userdir/mysql";
+	my %dblist = map { $_, 1 } &get_cpanel_db_list("$userdir/mysql.sql",
 							  $user, $origuser);
 	opendir(MYDIR, $mydir);
 	while($myf = readdir(MYDIR)) {
@@ -824,11 +824,11 @@ if ($got{'mysql'}) {
 		    $myf =~ /^(\Q$user\E).sql$/ ||
 		    $myf =~ /^(\Q$origuser\E).sql$/ ||
 		    $myf =~ /^(\S+).sql$/ && $dblist{$1}) {
-			local $db = $1;
+			my $db = $1;
 			&$indent_print();
 			&create_mysql_database(\%dom, $db);
 			&save_domain(\%dom, 1);
-			local ($ex, $out) = &execute_dom_sql_file(\%dom, $db, "$mydir/$myf");
+			my ($ex, $out) = &execute_dom_sql_file(\%dom, $db, "$mydir/$myf");
 			if ($ex) {
 				&$first_print("Error loading $db : $out");
 				}
@@ -842,20 +842,20 @@ if ($got{'mysql'}) {
 
 	# Re-create MySQL users
 	if ($got{'mysql'}) {
-		local $myucount = 0;
+		my $myucount = 0;
 		&$first_print("Re-creating MySQL users ..");
-		local %myusers;
+		my %myusers;
 		local $_;
-		local (%donemysqluser, %donemysqlpriv);
+		my (%donemysqluser, %donemysqlpriv);
 		open(MYSQL, "<$userdir/mysql.sql");
 		while(<MYSQL>) {
 			s/\r|\n//g;
 			if (/^GRANT USAGE ON \*\.\* TO '(\S+)'\@'(\S+)' IDENTIFIED BY PASSWORD '(\S+)';/) {
 				# Creating a MySQL user
-				local ($myuser, $mypass) = ($1, $3);
+				my ($myuser, $mypass) = ($1, $3);
 				next if ($myuser eq $user);	# domain owner
 				next if ($donemysqluser{$myuser}++);
-				local $myuinfo = &create_initial_user(\%dom);
+				my $myuinfo = &create_initial_user(\%dom);
 				$myuinfo->{'user'} = $myuser;
 				$myuinfo->{'pass'} = "x";	# not needed
 				$myuinfo->{'mysql_pass'} = $mypass;
@@ -868,7 +868,7 @@ if ($got{'mysql'}) {
 				}
 			elsif (/GRANT ALL PRIVILEGES ON `(\S+)`\.\* TO '(\S+)'\@'(\S+)';/ || /GRANT SELECT.*\sON `(\S+)`\.\* TO '(\S+)'\@'(\S+)';/) {
 				# Granting access to a MySQL database
-				local ($mydb, $myuser) = ($1, $2);
+				my ($mydb, $myuser) = ($1, $2);
 				next if ($myuser eq $user);	# domain owner
 				next if ($donemysqlpriv{$mydb,$myuser}++);
 				$mydb =~ s/\\(.)/$1/g;
@@ -880,10 +880,10 @@ if ($got{'mysql'}) {
 			}
 		close(MYSQL);
 		foreach my $myuinfo (values %myusers) {
-			local $already = $usermap{$myuinfo->{'user'}};
+			my $already = $usermap{$myuinfo->{'user'}};
 			if ($already) {
 				# User already exists, so just give him the dbs
-				local $olduinfo = { %$already };
+				my $olduinfo = { %$already };
 				$already->{'dbs'} = $myuinfo->{'dbs'};
 				&modify_user($already, $olduinfo, \%dom);
 				}
@@ -903,34 +903,34 @@ if ($got{'mysql'}) {
 
 # Migrate or update FTP users
 if (-r "$userdir/proftpdpasswd" && !$waschild) {
-	local $fcount = 0;
+	my $fcount = 0;
 	&$first_print("Re-creating FTP users ..");
 	local $_;
 	open(FTP, "<$userdir/proftpdpasswd");
 	while(<FTP>) {
 		s/\r|\n//g;
 		s/^\s*#.*$//;
-		local ($fuser, $fpass, $fuid, $fgid, $fdummy, $fhome, $fshell) = split(/:/, $_);
+		my ($fuser, $fpass, $fuid, $fgid, $fdummy, $fhome, $fshell) = split(/:/, $_);
 		next if (!$fuser);
 		$fuser = &remove_userdom($fuser, \%dom);
 		next if ($fuser eq "ftp" || $fuser eq $user ||
 			 $fuser eq $user."_logs");	# skip cpanel users
-		local $fullfuser = &userdom_name(lc($fuser), \%dom);
+		my $fullfuser = &userdom_name(lc($fuser), \%dom);
 		if ($fhome eq "/dev/null" ||
 		    !&is_under_directory($dom{'home'}, $fhome)) {
 			$fhome = "$dom{'home'}/$config{'homes_dir'}/$fuser";
 			}
-		local $already = $usermap{$fuser} ||
+		my $already = $usermap{$fuser} ||
 				 $usermap{$fullfuser};
 		if ($already) {
 			# Turn on FTP for existing user
-			local $olduinfo = { %$already };
+			my $olduinfo = { %$already };
 			$already->{'shell'} = $ftp_shell->{'shell'};
 			&modify_user($already, $olduinfo, \%dom);
 			}
 		else {
 			# Create new FTP-only user
-			local $fuinfo = &create_initial_user(\%dom, 0,
+			my $fuinfo = &create_initial_user(\%dom, 0,
 			     $fhome eq $ht || $fhome eq $dom{'home'});
 			$fuinfo->{'user'} = $fullfuser;
 			$fuinfo->{'pass'} = $fpass;
@@ -964,13 +964,13 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 &release_lock_mail(\%dom);
 
 # Migrate any parked domains as alias domains
-local @parked;
+my @parked;
 if (!$waschild) {
 	local $_;
 	open(PARKED, "<$userdir/pds");
 	while(<PARKED>) {
 		s/\r|\n//g;
-		local ($pdom) = split(/\s+/, $_);
+		my ($pdom) = split(/\s+/, $_);
 		push(@parked, $pdom) if ($pdom && $pdom !~ /^\*/);
 		}
 	close(PARKED);
@@ -994,7 +994,7 @@ foreach my $pdom (&unique(@parked)) {
 		next;
 		}
 	&$indent_print();
-	local %alias = ( 'id', &domain_id(),
+	my %alias = ( 'id', &domain_id(),
 			 'dom', $pdom,
 			 'user', $dom{'user'},
 			 'group', $dom{'group'},
@@ -1024,7 +1024,7 @@ foreach my $pdom (&unique(@parked)) {
 	foreach my $f (@alias_features) {
 		$alias{$f} = $dom{$f};
 		}
-	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+	my $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 					  : \%dom;
 	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
 	&generate_domain_password_hashes(\%alias, 1);
@@ -1046,8 +1046,8 @@ foreach my $pdom (&unique(@parked)) {
 	}
 
 # Read addons domain mapping file
-local %addons;
-local $lref = &read_file_lines("$userdir/addons");
+my %addons;
+my $lref = &read_file_lines("$userdir/addons");
 foreach my $l (@$lref) {
 	my ($a, $t) = split(/=/, $l);
 	if ($a && $t) {
@@ -1100,8 +1100,8 @@ return @rvdoms;
 # under which it was extracted, or an error message
 sub extract_cpanel_dir
 {
-local ($file) = @_;
-local $dir;
+my ($file) = @_;
+my $dir;
 if ($main::cpanel_dir_cache{$file} && -d $main::cpanel_dir_cache{$file}) {
 	# Use cached extract from this session
 	return (1, $main::cpanel_dir_cache{$file});
@@ -1116,7 +1116,7 @@ elsif (-d $file) {
 else {
 	$dir = &transname();
 	mkdir($dir, 0700);
-	local $err = &extract_compressed_file($file, $dir);
+	my $err = &extract_compressed_file($file, $dir);
 	if ($err) {
 		return (0, $err);
 		}
@@ -1130,9 +1130,9 @@ return (1, $dir);
 sub extract_cpanel_file
 {
 return undef if (!-r $_[0]);
-local $temp = &transname();
-local $qf = quotemeta($_[0]);
-local $out = &backquote_command("gunzip -c $qf >".quotemeta($temp));
+my $temp = &transname();
+my $qf = quotemeta($_[0]);
+my $out = &backquote_command("gunzip -c $qf >".quotemeta($temp));
 return $? ? undef : $temp;
 }
 
@@ -1140,17 +1140,17 @@ return $? ? undef : $temp;
 # Converts a userdata file into a perl hash ref
 sub read_cpanel_userdata_file
 {
-local ($file, $pos) = @_;
+my ($file, $pos) = @_;
 $pos ||= 0;
-local $lref = &read_file_lines($file, 1);
-local $startindent = 0;
+my $lref = &read_file_lines($file, 1);
+my $startindent = 0;
 if ($lref->[$pos] =~ /^(\s+)/) {
 	$startindent = length($1);
 	}
-local %rv;
-local $lastname;
+my %rv;
+my $lastname;
 while($pos < scalar(@$lref)) {
-	local $indent = 0;
+	my $indent = 0;
 	if ($lref->[$pos] =~ /^(\s+)/) {
 		$indent = length($1);
 		}
@@ -1163,14 +1163,14 @@ while($pos < scalar(@$lref)) {
 		if ($lref->[$pos] =~ /^\s*\-/) {
 			# Element in an array
 			$rv{$lastname} ||= [ ];
-			local ($subrv, $subpos) =
+			my ($subrv, $subpos) =
 				&read_cpanel_userdata_file($file, $pos+1);
 			push(@{$rv{$lastname}}, $subrv);
 			$pos = $subpos - 1;
 			}
 		else {
 			# Start of a section
-			local ($subrv, $subpos) =
+			my ($subrv, $subpos) =
 				&read_cpanel_userdata_file($file, $pos);
 			$rv{$lastname} = $subrv;
 			$pos = $subpos - 1;
@@ -1188,16 +1188,16 @@ return wantarray ? ( \%rv, $pos ) : \%rv;
 
 sub create_addon_domains
 {
-local ($skip_missing_target) = @_;
+my ($skip_missing_target) = @_;
 
 # Create addon domains as alias domains
 opendir(VF, "$userdir/vf");
 foreach my $vf (readdir(VF)) {
-	local ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
+	my ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
 	next if ($clash);
 	next if ($vf eq "." || $vf eq ".." || $clash);
 	next if (!$addons{$vf});
-	local $target = &get_domain_by("dom", $addons{$vf});
+	my $target = &get_domain_by("dom", $addons{$vf});
 	next if (!$target && $skip_missing_target);
 	&$first_print("Creating addon domain $vf ..");
 	if (!$target) {
@@ -1209,7 +1209,7 @@ foreach my $vf (readdir(VF)) {
 		next;
 		}
 	&$indent_print();
-	local %alias = ( 'id', &domain_id(),
+	my %alias = ( 'id', &domain_id(),
 			 'dom', $vf,
 			 'user', $dom{'user'},
 			 'group', $dom{'group'},
@@ -1237,7 +1237,7 @@ foreach my $vf (readdir(VF)) {
 	foreach my $f (@alias_features) {
 		$alias{$f} = $target->{$f};
 		}
-	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+	my $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 					  : \%dom;
 	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
 	&generate_domain_password_hashes(\%alias, 1);
@@ -1260,15 +1260,15 @@ foreach my $vf (readdir(VF)) {
 
 sub create_sub_domains
 {
-local ($skip_missing_target) = @_;
+my ($skip_missing_target) = @_;
 
 # Create sub-domains as virtualmin sub-domains, from vf directory
 opendir(VF, "$userdir/vf");
 foreach my $vf (readdir(VF)) {
-	local ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
+	my ($clash) = grep { $_->{'dom'} eq $vf } @rvdoms;
 	next if ($vf eq "." || $vf eq ".." || $clash);
 	next if ($addons{$vf});
-	local (%subof, $subprefix);
+	my (%subof, $subprefix);
 	foreach my $rv (grep { !$_->{'subdom'} } @rvdoms) {
 		if ($vf =~ /^(\S+)\.\Q$rv->{'dom'}\E$/) {
 			$subprefix = $1;
@@ -1295,7 +1295,7 @@ foreach my $vf (readdir(VF)) {
 		# of the main domain
 		&$first_print("Creating sub-server sub-domain $vf ..");
 		&$indent_print();
-		local %subs = ( 'id', &domain_id(),
+		my %subs = ( 'id', &domain_id(),
 				'dom', $vf,
 				'user', $dom{'user'},
 				'group', $dom{'group'},
@@ -1323,7 +1323,7 @@ foreach my $vf (readdir(VF)) {
 				$subs{$f} = $dom{$f};
 				}
 			}
-		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+		my $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 						  : \%dom;
 		$subs{'home'} = &server_home_directory(\%subs, $parentdom);
 		&generate_domain_password_hashes(\%subs, 1);
@@ -1332,11 +1332,11 @@ foreach my $vf (readdir(VF)) {
 				       $parentdom->{'user'});
 
 		# Copy files from parent
-		local $sdsrc = "$ht/$subprefix";
-		local $qsdsrc = quotemeta($sdsrc);
-		local $sddst = &public_html_dir(\%subs);
-		local $qsddst = quotemeta($sddst);
-		local $out;
+		my $sdsrc = "$ht/$subprefix";
+		my $qsdsrc = quotemeta($sdsrc);
+		my $sddst = &public_html_dir(\%subs);
+		my $qsddst = quotemeta($sddst);
+		my $out;
 		if (-d $sdsrc) {
 			&$first_print(
 				"Copying web pages from $sdsrc to $sddst ..");
@@ -1362,7 +1362,7 @@ foreach my $vf (readdir(VF)) {
 		# Sub-domain of a regular domain
 		&$first_print("Creating sub-domain $vf ..");
 		&$indent_print();
-		local %subd = ( 'id', &domain_id(),
+		my %subd = ( 'id', &domain_id(),
 				'dom', $vf,
 				'user', $dom{'user'},
 				'group', $dom{'group'},
@@ -1401,14 +1401,14 @@ foreach my $vf (readdir(VF)) {
 				$subd{$f} = $subof{$f};
 				}
 			}
-		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+		my $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 						  : \%dom;
 		$subd{'home'} = &server_home_directory(\%subd, $parentdom);
 		&generate_domain_password_hashes(\%subd, 1);
 		&complete_domain(\%subd);
 
 		# Extract correct sub-domain root dir
-		local $userdata = &read_cpanel_userdata_file(
+		my $userdata = &read_cpanel_userdata_file(
 					"$userdir/userdata/$vf");
 		if ($userdata->{'documentroot'} =~
 		    /^\/home\/([^\/]+)\/public_html\/(.*)/) {
@@ -1431,7 +1431,7 @@ foreach my $vf (readdir(VF)) {
 
 		# Cpanel sub-domains always seem to forward mail to the parent
 		if ($subd{'mail'}) {
-			local $virt = { 'from' => "\@$vf",
+			my $virt = { 'from' => "\@$vf",
 					'to' => [ "%1\@".$subof{'dom'} ] };
 			&create_virtuser($virt);
 			}
@@ -1448,25 +1448,25 @@ closedir(VF);
 # Re-create mailbox users from a cPanel backup
 sub cpanel_migrate_mailboxes
 {
-local ($dom, $d, $usermap) = @_;
+my ($dom, $d, $usermap) = @_;
 &foreign_require("mailboxes");
 &$first_print("Re-creating mail users for $dom ..");
-local $mcount = 0;
-local (%pass, %quota);
+my $mcount = 0;
+my (%pass, %quota);
 local $_;
 open(SHADOW, "<$homesrc/etc/$dom/shadow");
 while(<SHADOW>) {
 	s/\r|\n//g;
-	local ($suser, $spass) = split(/:/, $_);
+	my ($suser, $spass) = split(/:/, $_);
 	$pass{$suser} = $spass;
 	}
 close(SHADOW);
 local $_;
-local $bsize = &quota_bsize("home");
+my $bsize = &quota_bsize("home");
 open(QUOTA, "<$homesrc/etc/$dom/quota");
 while(<QUOTA>) {
 	s/\r|\n//g;
-	local ($quser, $qquota) = split(/:/, $_);
+	my ($quser, $qquota) = split(/:/, $_);
 	$quota{$quser} = $bsize ? int($qquota/$bsize) : 0;
 	}
 close(QUOTA);
@@ -1475,13 +1475,13 @@ open(PASSWD, "<$homesrc/etc/$dom/passwd");
 while(<PASSWD>) {
 	# Create the user
 	s/\r|\n//g;
-	local ($muser, $mdummy, $muid, $mgid, $mreal, $mdir, $mshell) =
+	my ($muser, $mdummy, $muid, $mgid, $mreal, $mdir, $mshell) =
 		split(/:/, $_);
 	next if (!$muser);
 	$muser = &remove_userdom($muser, $d);
 	next if ($muser =~ /_logs$/);		# Special logs user
 	next if ($muser eq $user && !$parent);	# Domain owner
-	local $uinfo = &create_initial_user($d);
+	my $uinfo = &create_initial_user($d);
 	$uinfo->{'user'} = &userdom_name(lc($muser), $d);
 	$uinfo->{'pass'} = $pass{$muser};
 	$uinfo->{'uid'} = &allocate_uid(\%taken);
@@ -1495,13 +1495,13 @@ while(<PASSWD>) {
 	&create_user_home($uinfo, $d, 1);
 	&create_user($uinfo, $d);
 	$taken{$uinfo->{'uid'}}++;
-	local ($crfile, $crtype) = &create_mail_file($uinfo, $d);
+	my ($crfile, $crtype) = &create_mail_file($uinfo, $d);
 
 	# Move his mail files
-	local $mailsrc = "$homesrc/mail/$dom/$muser";
-	local $sfdir = $mailboxes::config{'mail_usermin'};
-	local $sftype = $sfdir eq 'Maildir' ? 1 : 0;
-	local $sfpath = "$uinfo->{'home'}/$sfdir";
+	my $mailsrc = "$homesrc/mail/$dom/$muser";
+	my $sfdir = $mailboxes::config{'mail_usermin'};
+	my $sftype = $sfdir eq 'Maildir' ? 1 : 0;
+	my $sfpath = "$uinfo->{'home'}/$sfdir";
 	if (!-d $sfpath && !$sftype) {
 		# Create ~/mail if needed
 		&make_dir($sfpath, 0755);
@@ -1511,9 +1511,9 @@ while(<PASSWD>) {
 	if (-d "$mailsrc/cur" || -d "$mailsrc/new") {
 		# Mail directory is in Maildir format, and sub-folders
 		# are in Maildir++
-		local $srcfolder = { 'type' => 1,
+		my $srcfolder = { 'type' => 1,
 				     'file' => $mailsrc };
-		local $dstfolder = { 'file' => $crfile,
+		my $dstfolder = { 'file' => $crfile,
 				     'type' => $crtype };
 		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
 		&set_mailfolder_owner($dstfolder, $uinfo);
@@ -1523,11 +1523,11 @@ while(<PASSWD>) {
 		while(my $mf = readdir(DIR)) {
 			next if ($mf eq "." || $mf eq ".." ||
 				 $mf !~ /^\./);
-			local $srcfolder = { 'type' => 1,
+			my $srcfolder = { 'type' => 1,
 				'file' => "$mailsrc/$mf" };
 			# Remove . if destination is not Maildir++
 			$mf =~ s/^\.// if (!$sftype);
-			local $dstfolder = { 'type' => $sftype,
+			my $dstfolder = { 'type' => $sftype,
 					     'file' => "$sfpath/$mf" };
 			&mailboxes::mailbox_move_folder($srcfolder,
 							$dstfolder);
@@ -1539,13 +1539,13 @@ while(<PASSWD>) {
 		}
 	elsif (-d "$mailsrc/storage") {
 		# Mail directory is in mdbox format .. convert to mbox then move
-		local $mdtemp = &transname();
+		my $mdtemp = &transname();
 		&copy_source_dest($mailsrc, $mdtemp);
-		local $temp = &transname();
+		my $temp = &transname();
 		&make_dir($temp, 0755);
 		my $err;
 		&execute_command("chown -R ".quotemeta($uinfo->{'user'}).": ".quotemeta($mdtemp)." ".quotemeta($temp), undef, \$err, \$err);
-		local $out = &backquote_command("dsync -u ".
+		my $out = &backquote_command("dsync -u ".
 			quotemeta($uinfo->{'user'})." -o ".
 			quotemeta("mail_location=mdbox:$mdtemp").
 			" backup mbox:".quotemeta($temp)." 2>&1");
@@ -1553,9 +1553,9 @@ while(<PASSWD>) {
 		opendir(DIR, $temp);
 		while(my $mf = readdir(DIR)) {
 			next if ($mf =~ /^\./);
-			local $srcfolder = { 'type' => 0,
+			my $srcfolder = { 'type' => 0,
 					     'file' => "$temp/$mf" };
-			local $dstfolder;
+			my $dstfolder;
 			if ($mf eq "inbox") {
 				$dstfolder = { 'file' => $crfile,
 					       'type' => $crtype };
@@ -1580,9 +1580,9 @@ while(<PASSWD>) {
 		opendir(DIR, $mailsrc);
 		while(my $mf = readdir(DIR)) {
 			next if ($mf =~ /^\./);
-			local $srcfolder = { 'type' => 0,
+			my $srcfolder = { 'type' => 0,
 					     'file' => "$mailsrc/$mf" };
-			local $dstfolder;
+			my $dstfolder;
 			if ($mf eq "inbox") {
 				$dstfolder = { 'file' => $crfile,
 					       'type' => $crtype };
@@ -1613,17 +1613,17 @@ close(PASSWD);
 # cpanel_migrate_addon_aliases(domain)
 sub cpanel_migrate_addon_aliases
 {
-local ($vf) = @_;
-local $acount = 0;
-local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
+my ($vf) = @_;
+my $acount = 0;
+my %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
 open(VA, "<$userdir/va/$vf");
 while(<VA>) {
 	s/\r|\n//g;
 	s/^\s*#.*$//;
 	if (/^(\S+):\s*(.*)$/) {
-		local ($name, $v) = ($1, $2);
+		my ($name, $v) = ($1, $2);
 		next if (!$name);
-		local @values;
+		my @values;
 		if ($v !~ /,/ && $v !~ /"/) {
 			# A single destination, not quoted!
 			@values = ( $v );
@@ -1638,13 +1638,13 @@ while(<VA>) {
 				$v = $3;
 				}
 			}
-		local $mailman = 0;
+		my $mailman = 0;
 		foreach my $v (@values) {
 			if ($v =~ /:fail:\s+(.*)/) {
 				# Fix bounce alias
 				$v = "BOUNCE $1";
 				}
-			local ($atype, $aname) = &alias_type($v, $name);
+			my ($atype, $aname) = &alias_type($v, $name);
 			if ($atype == 4 && $aname =~ /autorespond\s+(\S+)\@(\S+)\s+(\S+)/) {
 				# Turn into Virtualmin auto-responder
 				$v = "| $module_config_directory/autoreply.pl $3/$name $1";
@@ -1666,10 +1666,10 @@ while(<VA>) {
 		if ($name !~ /\@/) {
 			$name .= "\@".$vf;
 			}
-		local $virt = { 'from' => $name =~ /^\*/ ? "\@".$vf
+		my $virt = { 'from' => $name =~ /^\*/ ? "\@".$vf
 							 : $name,
 				'to' => \@values };
-		local $clash = $gotvirt{$virt->{'from'}};
+		my $clash = $gotvirt{$virt->{'from'}};
 		&delete_virtuser($clash) if ($clash);
 		&create_virtuser($virt);
 		$acount++;
@@ -1713,7 +1713,7 @@ if ($zsrc) {
 		elsif ($r->{'name'} eq $dom."." &&
 		       $r->{'type'} eq 'NS') {
 			# Set NS record to this server
-			local $master = $bconfig{'default_prins'} ||
+			my $master = $bconfig{'default_prins'} ||
 					&get_system_hostname();
 			$master .= "." if ($master !~ /\.$/);
 			$r->{'values'} = [ $master ];

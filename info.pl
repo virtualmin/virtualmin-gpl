@@ -41,7 +41,7 @@ if (!$module_name) {
 	}
 
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--help") {
 		&usage();
 		}
@@ -92,7 +92,7 @@ foreach my $k (keys %$info) {
 
 sub recursive_info_dump
 {
-local ($info, $indent) = @_;
+my ($info, $indent) = @_;
 
 # Dump object, depending on type
 if (ref($info) eq "ARRAY") {
@@ -126,7 +126,7 @@ else {
 
 sub info_search_match
 {
-local ($i) = @_;
+my ($i) = @_;
 if (@searches && !ref($i)) {
 	foreach my $s (@searches) {
 		return 1 if ($i =~ /\Q$s\E/i);

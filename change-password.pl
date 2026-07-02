@@ -100,7 +100,7 @@ if ($user->{'domainowner'}) {
 		# Update all features
 		foreach my $f (@features) {
 			if ($config{$f} && $d->{$f}) {
-				local $mfunc = "modify_".$f;
+				my $mfunc = "modify_".$f;
 				&$mfunc($d, $oldd);
 				}
 			}

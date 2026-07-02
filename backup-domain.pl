@@ -115,12 +115,12 @@ $asowner = 0;
 @allplans = &list_plans();
 @OLDARGV = @ARGV;
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--dest") {
 		push(@dests, shift(@ARGV));
 		}
 	elsif ($a eq "--feature") {
-		local $f = shift(@ARGV);
+		my $f = shift(@ARGV);
 		&is_enabled_backup_feature($f) ||
 			&usage("Feature $f is not enabled on this system");
 		push(@bfeats, $f);
@@ -152,7 +152,7 @@ while(@ARGV > 0) {
 		push(@bfeats, &list_backup_plugins());
 		}
 	elsif ($a eq "--except-feature") {
-		local $f = shift(@ARGV);
+		my $f = shift(@ARGV);
 		@bfeats = grep { $_ ne $f } @bfeats;
 		}
 	elsif ($a eq "--all-domains") {

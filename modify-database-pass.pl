@@ -37,7 +37,7 @@ if (!$module_name) {
 
 # Parse command-line args
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		$dname = shift(@ARGV);
 		}
@@ -105,7 +105,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Changes the MySQL or PostgreSQL password for some domain.\n";
 print "\n";
-local $types = join("|", @database_features);
+my $types = join("|", @database_features);
 print "virtualmin modify-database-pass --domain name\n";
 print "                                --type $types\n";
 print "                                --pass new password\n";

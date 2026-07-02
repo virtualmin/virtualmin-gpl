@@ -41,7 +41,7 @@ if (!$module_name) {
 # Parse command-line args
 if (@ARGV > 0) {
 		while(@ARGV > 0) {
-		local $a = shift(@ARGV);
+		my $a = shift(@ARGV);
 		if ($a eq "--enable") {
 			$enabled = 1;
 			}

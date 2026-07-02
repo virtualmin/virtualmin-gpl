@@ -21,7 +21,7 @@ for($i=0; defined($in{"desc_$i"}); $i++) {
 
 sub desc_to_category_id
 {
-local ($desc) = @_;
+my ($desc) = @_;
 $desc =~ s/\s+/_/g;
 $desc = lc($desc);
 return $desc;

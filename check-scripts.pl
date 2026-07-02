@@ -152,7 +152,7 @@ foreach $s (@scripts) {
 				}
 
 			# Extract all the versions
-			local @vers;
+			my @vers;
 			if (ref($re)) {
 				# By callback func on data
 				@vers = &$re($data, $v);
@@ -265,10 +265,10 @@ else {
 
 sub ftp_size
 {
-local ($host, $file) = @_;
+my ($host, $file) = @_;
 
 # connect to host and login
-local $error;
+my $error;
 &open_socket($host, 21, "SOCK", \$error) || return 0;
 alarm(0);
 if ($download_timed_out) {
@@ -277,7 +277,7 @@ if ($download_timed_out) {
 &ftp_command("", 2, \$error) || return 0;
 
 # Login as anonymous
-local @urv = &ftp_command("USER anonymous", [ 2, 3 ], \$error);
+my @urv = &ftp_command("USER anonymous", [ 2, 3 ], \$error);
 @urv || return 0;
 if (int($urv[1]/100) == 3) {
 	&ftp_command("PASS root\@".&get_system_hostname(), 2,
@@ -286,7 +286,7 @@ if (int($urv[1]/100) == 3) {
 
 # get the file size and tell the callback
 &ftp_command("TYPE I", 2, \$error) || return 0;
-local $size = &ftp_command("SIZE $file", 2, \$error);
+my $size = &ftp_command("SIZE $file", 2, \$error);
 
 &ftp_command("QUIT", 2, \$error) || return 0;
 return $size;

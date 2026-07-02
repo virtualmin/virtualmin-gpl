@@ -21,7 +21,7 @@ $mdir = defined(&module_root_directory) ? &module_root_directory($m)
 if (-r "$mdir/config_info.pl") {
 	# Module has a custom config editor
 	&foreign_require($m, "config_info.pl");
-	local $fn = "${m}::config_form";
+	my $fn = "${m}::config_form";
 	if (defined(&$fn)) {
 		$func++;
 		&foreign_call($m, "config_form", \%pconfig);

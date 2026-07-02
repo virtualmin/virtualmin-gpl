@@ -115,7 +115,7 @@ if ($subdom) {
 	}
 else {
 	# Full domain name
-	local $force = $access{'forceunder'} && $parentdom ?
+	my $force = $access{'forceunder'} && $parentdom ?
 			".$parentdom->{'dom'}" :
 		       $access{'subdom'} ? ".$access{'subdom'}" : undef;
 	print &ui_table_row(&hlink($text{'form_domain'}, "domainname"),
@@ -174,7 +174,7 @@ $js .= "function select_template(num)\n";
 $js .= "{\n";
 $js .= "var domain_form_target = document.querySelectorAll('form[action*=\"domain_setup.cgi\"]');\n";
 foreach $t (@availtmpls) {
-	local $tmpl = &get_template($t->{'id'});
+	my $tmpl = &get_template($t->{'id'});
 	if (!$parentdom && &can_choose_ugroup()) {
 		# Set group for unix user
 		$js .= "if (num == $tmpl->{'id'}) {\n";
@@ -241,7 +241,7 @@ foreach $plan (@availplans) {
 
 	# Set features if configured
 	if ($config{'plan_auto'}) {
-		local @fl = $plan->{'featurelimits'} ?
+		my @fl = $plan->{'featurelimits'} ?
 				split(/\s+/, $plan->{'featurelimits'}) :
 				@def_features;
 		foreach $f (@dom_features, @fplugins) {
@@ -338,7 +338,7 @@ if (!$parentuser) {
 
 	if (&can_choose_ugroup()) {
 		# Group for Unix user
-		local $ug = $deftmpl->{'ugroup'};
+		my $ug = $deftmpl->{'ugroup'};
 		$ug = "" if ($ug eq "none");
 		print &ui_table_row(&hlink($text{'form_group'},"unixgroupname"),
 			&ui_opt_textbox("group", $ug, 15,
@@ -434,7 +434,7 @@ if (!$parentuser && !$config{'template_auto'}) {
 
 	# Show input for restriction of number of sub-domains this domain
 	# owner can create
-	local $dlm = $defplan->{'domslimit'} eq '' ? 2 :
+	my $dlm = $defplan->{'domslimit'} eq '' ? 2 :
 		     $defplan->{'domslimit'} eq '0' ? 1 : 2;
 	print &ui_table_row(&hlink($text{'form_domslimit'}, "domslimit"),
 		&ui_radio("domslimit_def", $dlm,

@@ -37,11 +37,11 @@ foreach $d (@bwdoms) {
 # For each feature that has a function for doing bandwidth for all domains
 # at once, call it
 foreach $f (@bandwidth_features) {
-	local $bwfunc = "bandwidth_all_$f";
+	my $bwfunc = "bandwidth_all_$f";
 	if (defined(&$bwfunc)) {
-		local %starts = map { $_, $bwinfomap{$_}->{"last_$f"} }
+		my %starts = map { $_, $bwinfomap{$_}->{"last_$f"} }
 				    (keys %bwinfomap);
-		local $newstarts = &$bwfunc(\@bwdoms, \%starts, \%bwinfomap);
+		my $newstarts = &$bwfunc(\@bwdoms, \%starts, \%bwinfomap);
 		foreach my $did (keys %$newstarts) {
 			$bwinfomap{$did}->{"last_$f"} = $newstarts->{$did};
 			}
@@ -55,7 +55,7 @@ foreach $d (@bwdoms) {
 	# Add bandwidth for all features
 	$bwinfo = $bwinfomap{$d->{'id'}};
 	foreach $f (@bandwidth_features) {
-		local $bwfunc = "bandwidth_$f";
+		my $bwfunc = "bandwidth_$f";
 		if (defined(&$bwfunc)) {
 			my $l = &$bwfunc($d, $bwinfo->{"last_$f"}, $bwinfo);
 			if ($l > $now + $oneday) {
@@ -110,8 +110,8 @@ foreach $d (@doms) {
 	%usage = ( );
 	foreach $dd (@alld) {
 		$bwinfo = &get_bandwidth($dd);
-		local $usage_only = 0;
-		local %usage_only = ( );
+		my $usage_only = 0;
+		my %usage_only = ( );
 		foreach $k (keys %$bwinfo) {
 			if ($k =~ /^(\S+)_(\d+)$/ && $2 >= $start_day) {
 				$usage += $bwinfo->{$k};
@@ -139,7 +139,7 @@ foreach $d (@doms) {
 	foreach $k (keys %usage) {
 		$d->{'bw_usage_'.$k} = $usage{$k};
 		}
-	local $from = &get_global_from_address($d);
+	my $from = &get_global_from_address($d);
 	if ($d->{'bw_limit'} && $usage > $d->{'bw_limit'}) {
 		# Over the limit! But check limit on how often to notify
 		$etime = $now - $d->{'bw_notify'} > $config{'bw_notify'}*60*60;
@@ -154,7 +154,7 @@ foreach $d (@doms) {
 				$tkeys{'bw_usage_'.$k} =
 					&nice_size($tkeys{'bw_usage_'}.$k);
 				}
-			local @addrs;
+			my @addrs;
 			push(@addrs, $d->{'email'} ||
 				   $d->{'user'}.'@'.&get_system_hostname() )
 				if ($config{'bw_owner'});
@@ -206,7 +206,7 @@ foreach $d (@doms) {
 					&nice_size($tkeys{'bw_usage_'.$k});
 				}
 			$tkeys{'bw_warn'} = $config{'bw_warn'};
-			local @addrs;
+			my @addrs;
 			push(@addrs, $d->{'email'} ||
 				   $d->{'user'}.'@'.&get_system_hostname() )
 				if ($config{'bw_owner'});
@@ -248,7 +248,7 @@ foreach $d (@doms) {
 			# Enable all disabled features
 			foreach my $f (@features) {
 				if ($dd->{$f} && $enable{$f}) {
-					local $efunc = "enable_$f";
+					my $efunc = "enable_$f";
 					&try_function($f, $efunc, $dd);
 					}
 				}
