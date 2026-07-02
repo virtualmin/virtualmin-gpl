@@ -321,6 +321,8 @@ if (!$$injected_ref) {
 return $chunk;
 }
 
+unless (caller) {
+
 &init_config();
 delete($ENV{'HTTP_REFERER'});
 $| = 1;
@@ -368,4 +370,6 @@ else {
 		}
 	}
 &close_http_connection($con);
+
+} # end of unless (caller)
 

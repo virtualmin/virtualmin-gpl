@@ -3,6 +3,9 @@
 # domains with spam emailed.
 
 package virtual_server;
+
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {
+
 $main::no_acl_check++;
 $no_virtualmin_plugins = 1;
 require './virtual-server-lib.pl';
@@ -245,6 +248,8 @@ foreach $d (&list_domains()) {
 	&clear_index_file($spamf->{'file'});
 	&clear_index_file($hamf->{'file'});
 	}
+
+} # end of unless ($ENV{VIRTUALMIN_NO_MAIN})
 
 # find_user_by_email(email, &users, &aliases)
 sub find_user_by_email

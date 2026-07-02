@@ -2,6 +2,8 @@
 # bwgraph.cgi
 # Show current bandwidth usage graphs
 
+unless (caller) {
+
 require './virtual-server-lib.pl';
 &ReadParse();
 
@@ -403,6 +405,8 @@ if (&can_edit_templates() && $in{'dom'}) {
 	}
 push(@rets, "", $text{'index_return'});
 &ui_print_footer(@rets);
+
+} # end of unless (caller)
 
 # usage_colours(&domain, &usage)
 sub usage_colours

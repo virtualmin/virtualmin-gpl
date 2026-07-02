@@ -25,6 +25,9 @@ to sections of the full output, for example:
 =cut
 
 package virtual_server;
+
+unless ($ENV{VIRTUALMIN_NO_MAIN}) {
+
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
@@ -89,6 +92,8 @@ foreach my $k (keys %$info) {
 	delete($info->{$k}) if (!&info_search_match($k));
 	}
 &recursive_info_dump($info, "");
+
+} # end of unless ($ENV{VIRTUALMIN_NO_MAIN})
 
 sub recursive_info_dump
 {
