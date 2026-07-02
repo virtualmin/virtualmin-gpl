@@ -575,9 +575,10 @@ foreach my $x (@xlist) {
 &close_tempfile(XTEMP);
 
 # Work out differential flags
-my ($iargs, $iflag, $ifile, $ifilecopy);
+my ($iargs, $iflag, $ifile, $ifilecopy, $ifiledef);
 if (&has_incremental_tar() && $increment != 2) {
 	$ifile = &get_incremental_file($d, $increment, $id);
+	$ifiledef = &get_incremental_file($d);
 	my $idir = $ifile =~ /^(.*)\/[^\/]+$/ ? $1 : undef;
 	&make_dir($idir, 0711, 1);
 	if (!$increment) {
@@ -670,6 +671,13 @@ if ($ex || !-s $destfile) {
 	return 0;
 	}
 else {
+	if ($ifile && $increment == 0 && $ifile ne $ifiledef) {
+		# This was a full backup but was using a per-backup incremental
+		# file. Copy that over the default incremental file so that
+		# other future non-chained incremental backups are relative to
+		# this latest backup.
+		&copy_source_dest($ifile, $ifiledef);
+		}
 	&$second_print($text{'setup_done'});
 	return 1;
 	}
