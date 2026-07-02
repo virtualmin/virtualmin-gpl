@@ -630,17 +630,17 @@ if ($key) {
 	}
 
 # Make sure the cert is readable
-local $info = &cert_info($d);
+my $info = &cert_info($d);
 if (!$info || (!$info->{'cn'} && !@{$info->{'alt'} || []})) {
 	return &text('validate_esslcertinfo', "<tt>$cert</tt>");
 	}
-local $err = &validate_cert_format($cert, 'cert');
+my $err = &validate_cert_format($cert, 'cert');
 if ($err) {
 	return $err;
 	}
 
 # Check the key type
-local $type = &get_ssl_key_type($key, $d->{'ssl_pass'});
+my $type = &get_ssl_key_type($key, $d->{'ssl_pass'});
 $type || return &text('validate_esslkeytype', "<tt>$key</tt>");
 
 # Make sure the cert and key match
@@ -1942,11 +1942,11 @@ my ($d, $getfunc, $putfunc, $postfunc) = @_;
 my @doms = ( $d, &get_domain_by("alias", $d->{'id'}) );
 my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) } @doms;
 &foreign_require("webmin");
-local %miniserv;
+my %miniserv;
 &$getfunc(\%miniserv);
-local @ipkeys = grep { !&miniserv_ipkey_matches_domain($d, $_) }
+my @ipkeys = grep { !&miniserv_ipkey_matches_domain($d, $_) }
 		     &webmin::get_ipkeys(\%miniserv);
-local @ips = &domain_miniserv_ssl_ips($d);
+my @ips = &domain_miniserv_ssl_ips($d);
 push(@ips, @dnames);
 my $chain = &get_website_ssl_file($d, 'ca');
 push(@ipkeys, { 'ips' => \@ips,
@@ -2137,8 +2137,8 @@ else {
 # domain, 0 if not. Based on the common names, including wildcards and UCC
 sub check_domain_certificate
 {
-local ($dname, $d_or_info) = @_;
-local $info = $d_or_info->{'dom'} ? &cert_info($d_or_info) : $d_or_info;
+my ($dname, $d_or_info) = @_;
+my $info = $d_or_info->{'dom'} ? &cert_info($d_or_info) : $d_or_info;
 my $is_ip = &ssl_cert_identifier_is_ip($dname);
 foreach my $check ($is_ip ? ($dname) : ($dname, "www.".$dname)) {
 	my $ncheck = &normalize_ssl_cert_identifier($check);
@@ -2174,9 +2174,9 @@ return 0;
 # Returns a list of DNS names and IP addresses that are in the cert
 sub list_domain_certificate
 {
-local ($d_or_info) = @_;
-local $info = $d_or_info->{'dom'} ? &cert_info($d_or_info) : $d_or_info;
-local @rv;
+my ($d_or_info) = @_;
+my $info = $d_or_info->{'dom'} ? &cert_info($d_or_info) : $d_or_info;
+my @rv;
 push(@rv, $info->{'cn'}) if ($info->{'cn'});
 push(@rv, @{$info->{'alt'}}) if ($info->{'alt'});
 return &unique(@rv);

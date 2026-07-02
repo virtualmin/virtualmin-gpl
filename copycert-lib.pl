@@ -360,6 +360,7 @@ foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 return @rv;
 }
 
+# update_all_domain_service_ssl_certs(&domain, &certs-before)
 # domain_cert_has_ip_identifiers(&domain)
 # Returns 1 if a domain's current certificate contains IP names.
 sub domain_cert_has_ip_identifiers
