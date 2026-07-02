@@ -228,6 +228,8 @@ while(@ARGV > 0) {
 	elsif ($a eq "--incremental-of" || $a eq "--differential-of") {
 		&has_incremental_tar() || &usage("The tar command on this system does not support differential backups");
 		$increment = shift(@ARGV);
+		$increment eq "1" &&
+			&usage("The legacy scheduled backup with ID 1 cannot be used as a selected full backup");
 		($isched) = grep { $_->{'id'} eq $increment } &list_scheduled_backups();
 		$isched || &usage("No scheduled backup with ID $increment exists");
 		$isched->{'increment'} == 0 ||
