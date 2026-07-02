@@ -575,10 +575,9 @@ foreach my $x (@xlist) {
 &close_tempfile(XTEMP);
 
 # Work out differential flags
-my ($iargs, $iflag, $ifile, $ifilecopy, $ifiledef);
+my ($iargs, $iflag, $ifile, $ifilecopy);
 if (&has_incremental_tar() && $increment != 2) {
 	$ifile = &get_incremental_file($d, $increment, $id);
-	$ifiledef = &get_incremental_file($d);
 	my $idir = $ifile =~ /^(.*)\/[^\/]+$/ ? $1 : undef;
 	&make_dir($idir, 0711, 1);
 	if (!$increment) {
@@ -589,7 +588,11 @@ if (&has_incremental_tar() && $increment != 2) {
 		# Add a flag file indicating that this was an differential,
 		# and take a copy of the file so we can put it back as before
 		# the backup (as tar modifies it)
-		if (-r $ifile) {
+		if ($increment >= 3 && !-s $ifile) {
+			&$second_print(&text('backup_dirtarnobase', $increment));
+			return 0;
+			}
+		elsif (-r $ifile) {
 			$iflag = "$d->{'home'}/.incremental";
 			&open_tempfile_as_domain_user(
 				$d, IFLAG, ">$iflag", 0, 1);
@@ -658,12 +661,6 @@ if (-r $ifile) {
 	# Make owned by domain owner, so tar can read in future
 	&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
 				   0700, $ifile);
-	}
-if ($ifile && $increment == 0 && $ifile ne $ifiledef) {
-	# This was a full backup but was using a per-backup incremental file.
-	# Copy that over the default incremental file so that other future
-	# non-chained incremental backups are relative to this latest backup.
-	&copy_source_dest($ifile, $ifiledef);
 	}
 if ($ex || !-s $destfile) {
 	&unlink_file($destfile);
