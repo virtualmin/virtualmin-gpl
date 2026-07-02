@@ -977,7 +977,6 @@ newtmpl_def=Misligholde
 newtmpl_edelete=Standardmaler kan ikke slettes
 newtmpl_setdef=Angi standard mal på toppnivå
 newtmpl_setdefsub=Angi standard underservermal
-newtmpl_name0=Standardinnstillinger
 newtmpl_name1=Innstillinger for sub-servere
 
 tmpl_exclude=Kataloger å ekskludere fra sikkerhetskopier
