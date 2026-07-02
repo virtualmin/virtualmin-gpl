@@ -253,7 +253,7 @@ else {
 		# Update other services using the cert
 		&$first_print($text{'cert_updatesvcs'});
 		&update_all_domain_service_ssl_certs($d, \@beforecerts,
-						     $has_ips ? \@dnames : undef);
+						     $has_ips ? 1 : undef);
 		&$second_print($text{'setup_done'});
 
 		# For domains that were using the SSL cert on this domain

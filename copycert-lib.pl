@@ -373,20 +373,13 @@ foreach my $n (grep { $_ } ($info->{'cn'}, @{$info->{'alt'} || []})) {
 return 0;
 }
 
-# update_all_domain_service_ssl_certs(&domain, &certs-before,
-# 				      [force-domain|&requested-names])
+# update_all_domain_service_ssl_certs(&domain, &certs-before, [force-sync])
 # Updates all services that were using this domain's SSL cert after it has
 # changed.
 sub update_all_domain_service_ssl_certs
 {
-my ($d, $before, $force_domain) = @_;
+my ($d, $before, $force_sync) = @_;
 my $tmpl = &get_template($d->{'template'});
-my $force_dnames = ref($force_domain) ? $force_domain : undef;
-# The requested identifiers are only needed while service SNI records are
-# rebuilt, so keep them out of the saved domain object. Using local also
-# restores the original value if a sync function dies mid-rebuild.
-local $d->{'_service_ssl_dnames'};
-$d->{'_service_ssl_dnames'} = $force_dnames if ($force_dnames);
 my %done;
 &push_all_print();
 &set_all_null_print();
@@ -410,7 +403,7 @@ foreach my $svc (@$before) {
 # IP identifiers may be new to this cert, so the matching per-domain service
 # records might not have existed in the "before" snapshot. Force enabled SNI
 # services, and always include Webmin/Usermin so miniserv can serve the IP cert.
-if ($force_domain || &domain_cert_has_ip_identifiers($d)) {
+if ($force_sync || &domain_cert_has_ip_identifiers($d)) {
 	foreach my $svc (&list_service_ssl_cert_types()) {
 		next if ($done{$svc->{'id'}});
 		next if (!$svc->{'dom'} && !$svc->{'virt'});

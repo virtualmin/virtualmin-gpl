@@ -9077,7 +9077,7 @@ else {
 
 	# Update other services using the cert
 	&update_all_domain_service_ssl_certs($d, \@beforecerts,
-					     $has_ips ? \@dnames : undef);
+					     $has_ips ? 1 : undef);
 
 	&break_invalid_ssl_linkages($d);
 	&sync_domain_tlsa_records($d);

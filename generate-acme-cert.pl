@@ -359,7 +359,7 @@ else {
 
 	# Update other services using the cert
 	&update_all_domain_service_ssl_certs($d, \@beforecerts,
-					     $has_ips ? \@dnames : undef);
+					     $has_ips ? 1 : undef);
 
 	# For domains that were using the SSL cert on this domain originally but
 	# can no longer due to the cert hostname changing, break the linkage

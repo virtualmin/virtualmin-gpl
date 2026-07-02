@@ -1866,7 +1866,7 @@ if ($d->{'virt6'}) {
 	push(@ips, &normalize_ssl_cert_identifier($d->{'ip6'}));
 	}
 
-my @names = @{$d->{'_service_ssl_dnames'} || []};
+my @names;
 my $info = &cert_info($d);
 if ($info) {
 	push(@names, $info->{'cn'}, @{$info->{'alt'} || []});
@@ -3601,7 +3601,7 @@ delete($d->{'letsencrypt_last_err'});
 
 # Update services that were using the old cert, both globally and per-domain
 &update_all_domain_service_ssl_certs($d, \@beforecerts,
-				     $has_ips ? \@dnames : undef);
+				     $has_ips ? 1 : undef);
 
 # Call the post command
 &set_domain_envs($d, "SSL_DOMAIN");
