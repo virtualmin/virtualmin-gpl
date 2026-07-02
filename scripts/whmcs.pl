@@ -55,7 +55,7 @@ return ( 5 );
 
 sub script_whmcs_php_fullver
 {
-local ($d, $ver, $sinfo) = @_;
+my ($d, $ver, $sinfo) = @_;
 return &compare_versions($ver, 8) >= 0 ? 7.2 : 5.6;
 }
 
@@ -79,14 +79,14 @@ return ("mysql");
 # Returns HTML for table rows for options for installing WHMCS
 sub script_whmcs_params
 {
-local ($d, $ver, $upgrade) = @_;
-local $rv;
-local $hdir = &public_html_dir($d, 1);
+my ($d, $ver, $upgrade) = @_;
+my $rv;
+my $hdir = &public_html_dir($d, 1);
 if ($upgrade) {
 	# Options are fixed when upgrading
-	local ($dbtype, $dbname) = split(/_/, $upgrade->{'opts'}->{'db'}, 2);
+	my ($dbtype, $dbname) = split(/_/, $upgrade->{'opts'}->{'db'}, 2);
 	$rv .= &ui_table_row("Database for WHMCS tables", $dbname);
-	local $dir = $upgrade->{'opts'}->{'dir'};
+	my $dir = $upgrade->{'opts'}->{'dir'};
 	$dir =~ s/^$d->{'home'}\///;
 	$rv .= &ui_table_row("Install directory", $dir);
 	$rv .= &ui_table_row("WHMCS licence key",
@@ -94,7 +94,7 @@ if ($upgrade) {
 	}
 else {
 	# Show editable install options
-	local @dbs = &domain_databases($d, [ "mysql", "postgres" ]);
+	my @dbs = &domain_databases($d, [ "mysql", "postgres" ]);
 	$rv .= &ui_table_row("Database for WHMCS tables",
 		     &ui_database_select("db", undef, \@dbs, $d, "whmcs"));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
@@ -111,17 +111,17 @@ return $rv;
 # Returns either a hash ref of parsed options, or an error string
 sub script_whmcs_parse
 {
-local ($d, $ver, $in, $upgrade) = @_;
+my ($d, $ver, $in, $upgrade) = @_;
 if ($upgrade) {
 	# Options are always the same
 	return $upgrade->{'opts'};
 	}
 else {
-	local $hdir = &public_html_dir($d, 0);
+	my $hdir = &public_html_dir($d, 0);
 	$in{'dir_def'} || $in{'dir'} =~ /\S/ && $in{'dir'} !~ /\.\./ ||
 		return "Missing or invalid installation directory";
-	local $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
-	local ($newdb) = ($in->{'db'} =~ s/^\*//);
+	my $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
+	my ($newdb) = ($in->{'db'} =~ s/^\*//);
 	$in{'licensekey'} =~ s/^\s*//;
 	$in{'licensekey'} =~ s/\s*$//;
 	$in{'licensekey'} =~ /^\S+$/ ||
@@ -139,15 +139,15 @@ else {
 # Returns an error message if a required option is missing or invalid
 sub script_whmcs_check
 {
-local ($d, $ver, $opts, $upgrade) = @_;
+my ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'licensekey'} || return "Missing licensekey option - licenses can be purchased at http://www.whmcs.com/members/aff.php?aff=4115";
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 $opts->{'db'} || return "Missing database";
 if (-r "$opts->{'dir'}/configuration.php") {
 	return "WHMCS appears to be already installed in the selected directory";
 	}
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local $clash = &find_database_table($dbtype, $dbname, "tbl");
+my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+my $clash = &find_database_table($dbtype, $dbname, "tbl");
 $clash && return "WHMCS appears to be already using the selected database (table $clash)";
 
 # Check for PHP mode
@@ -155,15 +155,15 @@ $clash && return "WHMCS appears to be already using the selected database (table
 	return "WHMCS cannot be installed when PHP is being run via mod_php";
 
 # Check if ioncube loader can be found
-local $io = &script_whmcs_get_ioncube_type();
+my $io = &script_whmcs_get_ioncube_type();
 $io || return "No ionCube loader for your operating system and CPU ".
 	      "architecture could be found";
 
 # Validate the licence
-local $params = "key=".&urlize($whmcs_api_key).
+my $params = "key=".&urlize($whmcs_api_key).
 	        "&licensekey=".&urlize($opts->{'licensekey'});
 
-local ($out, $err);
+my ($out, $err);
 &http_download($whmcs_api_host, $whmcs_api_port, $whmcs_api_prefix."?".$params,
 	       \$out, \$err, undef, $whmcs_api_ssl, undef, undef, undef, 0, 1);
 if ($err) {
@@ -196,14 +196,14 @@ return undef;
 # containing a name, filename and URL
 sub script_whmcs_files
 {
-local ($d, $ver, $opts, $upgrade) = @_;
-local $shortver = $ver;
+my ($d, $ver, $opts, $upgrade) = @_;
+my $shortver = $ver;
 $shortver =~ s/\.//g;
-local @files = ( {
+my @files = ( {
     'name' => "source",
     'file' => "whmcs_v${shortver}.zip",
     'url' => "https://scripts.virtualmin.com/whmcs_v${shortver}.zip" } );
-local $io = &script_whmcs_get_ioncube_type();
+my $io = &script_whmcs_get_ioncube_type();
 push(@files, {
     'name' => "ioncube",
     'file' => "ioncube_loaders.zip",
@@ -213,8 +213,8 @@ return @files;
 
 sub script_whmcs_get_ioncube_type
 {
-local $io;
-local $arch = &backquote_command("uname -m");
+my $io;
+my $arch = &backquote_command("uname -m");
 if ($gconfig{'os_type'} eq 'solaris' && $arch =~ /sparc/) {
 	$io = "sun_sparc";
 	}
@@ -259,66 +259,66 @@ return ("unzip");
 # message, or 0 and an error
 sub script_whmcs_install
 {
-local ($d, $version, $opts, $files, $upgrade, $domuser, $dompass) = @_;
+my ($d, $version, $opts, $files, $upgrade, $domuser, $dompass) = @_;
 
 # Get DB details
-local ($out, $ex);
+my ($out, $ex);
 if ($opts->{'newdb'} && !$upgrade) {
-	local $err = &create_script_database($d, $opts->{'db'});
+	my $err = &create_script_database($d, $opts->{'db'});
 	return (0, "Database creation failed : $err") if ($err);
 	}
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
-local $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
-local $dbphptype = $dbtype eq "mysql" ? "mysql" : "psql";
-local $dbhost = &get_database_host($dbtype, $d);
-local $dberr = &check_script_db_connection(
+my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+my $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
+my $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
+my $dbphptype = $dbtype eq "mysql" ? "mysql" : "psql";
+my $dbhost = &get_database_host($dbtype, $d);
+my $dberr = &check_script_db_connection(
 	$d, $dbtype, $dbname, $dbuser, $dbpass);
 return (0, "Database connection failed : $dberr") if ($dberr);
 
 # Extract ioncube loader
-local $iotemp = &transname();
-local $err = &extract_script_archive($files->{'ioncube'}, $iotemp, $d);
+my $iotemp = &transname();
+my $err = &extract_script_archive($files->{'ioncube'}, $iotemp, $d);
 $err && return (0, "Failed to extract ionCube files : $err");
-local $io = &script_whmcs_get_ioncube_type();
-local $phpver = &get_php_version($opts->{'phpver'});
+my $io = &script_whmcs_get_ioncube_type();
+my $phpver = &get_php_version($opts->{'phpver'});
 $phpver =~ s/^(\d+\.\d+)\..*$/$1/;
-local ($sofile) = glob("$iotemp/ioncube/ioncube_loader_*_$phpver.so");
+my ($sofile) = glob("$iotemp/ioncube/ioncube_loader_*_$phpver.so");
 $sofile ||
 	return (0, "No ionCube loader for PHP version $phpver found in file");
 
 # Extract tar file to temp dir and copy to target
-local $temp = &transname();
-local $cfile = "$opts->{'dir'}/configuration.php";
-local $cfilesrc = "$opts->{'dir'}/configuration.php.new";
-local $err = &extract_script_archive($files->{'source'}, $temp, $d,
+my $temp = &transname();
+my $cfile = "$opts->{'dir'}/configuration.php";
+my $cfilesrc = "$opts->{'dir'}/configuration.php.new";
+my $err = &extract_script_archive($files->{'source'}, $temp, $d,
 				     $opts->{'dir'}, "whmcs");
 $err && return (0, "Failed to extract source : $err");
 
 # Apply security patches, if needed
 foreach my $k (keys %$files) {
 	if ($k =~ /^patch/) {
-		local $ptemp = &transname();
-		local $err = &extract_script_archive($files->{$k}, $ptemp, $d,
+		my $ptemp = &transname();
+		my $err = &extract_script_archive($files->{$k}, $ptemp, $d,
 						     $opts->{'dir'});
 		$err && return (0, "Failed to extract patch source : $err");
 		}
 	}
 
 # Copy loader to ~/etc , adjust php.ini
-local $inifile = &get_domain_php_ini($d, $opts->{'phpver'});
+my $inifile = &get_domain_php_ini($d, $opts->{'phpver'});
 $inifile && -r $inifile || return (0, "PHP configuration file was not found!");
 $sofile =~ /\/([^\/]+)$/;
-local $sodest = "$d->{'home'}/etc/$1";
+my $sodest = "$d->{'home'}/etc/$1";
 &copy_source_dest_as_domain_user($d, $sofile, $sodest);
 &foreign_require("phpini", "phpini-lib.pl");
-local $conf = &phpini::get_config($inifile);
-local @allzends = grep { $_->{'name'} eq 'zend_extension' } @$conf;
-local @zends = grep { $_->{'enabled'} } @allzends;
-local ($got) = grep { $_->{'value'} eq $sodest } @zends;
+my $conf = &phpini::get_config($inifile);
+my @allzends = grep { $_->{'name'} eq 'zend_extension' } @$conf;
+my @zends = grep { $_->{'enabled'} } @allzends;
+my ($got) = grep { $_->{'value'} eq $sodest } @zends;
 if (!$got) {
 	# Needs to be enabled
-	local $lref = &read_file_lines($inifile);
+	my $lref = &read_file_lines($inifile);
 	if (@zends) {
 		# After current extensions
 		splice(@$lref, $zends[$#zends]->{'line'}+1, 0,
@@ -362,10 +362,10 @@ if (!-r $cfile) {
 	}
 
 # Run install script
-local $ipath = $opts->{'path'}."/install/install.php";
+my $ipath = $opts->{'path'}."/install/install.php";
 if (!$upgrade) {
 	# Fetch config check page
-	local ($out, $err);
+	my ($out, $err);
 	&get_http_connection($d, $ipath."?step=2", \$out, \$err);
 	if ($err) {
 		return (-1, "Failed to fetch system check page : $err");
@@ -375,7 +375,7 @@ if (!$upgrade) {
 		}
 
 	# Post to DB setup page
-	local @params = (
+	my @params = (
 		[ "licenseKey", $opts->{'licensekey'} ],
 		[ "databaseHost", $dbhost ],
 		[ "databasePort", 3306 ],
@@ -383,8 +383,8 @@ if (!$upgrade) {
 		[ "databasePassword", $dbpass ],
 		[ "databaseName", $dbname ],
 		);
-	local $params = join("&", map { $_->[0]."=".&urlize($_->[1]) } @params);
-	local ($out, $err);
+	my $params = join("&", map { $_->[0]."=".&urlize($_->[1]) } @params);
+	my ($out, $err);
 	&post_http_connection($d, $ipath."?step=4", $params, \$out, \$err);
 	if ($err) {
 		return (-1, "Database setup page failed : $err");
@@ -394,14 +394,14 @@ if (!$upgrade) {
 		}
 
 	# Post to user creation page
-	local $firstname = $d->{'owner'};
+	my $firstname = $d->{'owner'};
 	$firstname =~ s/\s.*$//;
 	$firstname =~ s/['"]//g;
 	$firstname ||= $d->{'dom'};
 	if (length($dompass) <= 5) {
 		$dompass .= "1!aA45";
 		}
-	local @params = (
+	my @params = (
 		[ "firstName", $firstname ],
 		[ "lastName", "Virtualmin" ],
 		[ "email", $d->{'emailto_addr'} ],
@@ -409,8 +409,8 @@ if (!$upgrade) {
 		[ "password", $dompass ],
 		[ "confirmPassword", $dompass ],
 		);
-	local $params = join("&", map { $_->[0]."=".&urlize($_->[1]) } @params);
-	local ($out, $err);
+	my $params = join("&", map { $_->[0]."=".&urlize($_->[1]) } @params);
+	my ($out, $err);
 	&post_http_connection($d, $ipath."?step=5", $params, \$out, \$err);
 	if ($err) {
 		return (-1, "Account creation page failed : $err");
@@ -421,7 +421,7 @@ if (!$upgrade) {
 	}
 else {
 	# Fetch config check page
-	local ($out, $err);
+	my ($out, $err);
 	&get_http_connection($d, $ipath."?step=2", \$out, \$err);
 	if ($err) {
 		return (-1, "Failed to fetch upgrade check page : $err");
@@ -431,11 +431,11 @@ else {
 		}
 
 	# Post to DB upgrade page
-	local @params = (
+	my @params = (
 		[ "confirmBackup", 1 ],
 		);
-	local $params = join("&", map { $_->[0]."=".&urlize($_->[1]) } @params);
-	local ($out, $err);
+	my $params = join("&", map { $_->[0]."=".&urlize($_->[1]) } @params);
+	my ($out, $err);
 	&post_http_connection($d, $ipath."?step=upgrade", $params, \$out, \$err);
 	if ($err) {
 		return (-1, "Database upgrade page failed : $err");
@@ -446,7 +446,7 @@ else {
 	}
 
 # Setup cron job
-local $url = &script_path_url($d, $opts);
+my $url = &script_path_url($d, $opts);
 if (!$upgrade) {
 	&create_script_wget_job($d, $url."admin/cron.php",
 			        '0', int(rand()*24), 1);
@@ -456,9 +456,9 @@ if (!$upgrade) {
 &unlink_file_as_domain_user($d, "$opts->{'dir'}/install");
 
 # Return a URL for the user
-local $rp = $opts->{'dir'};
+my $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-local $adminurl = $url."admin/";
+my $adminurl = $url."admin/";
 my $installtype = $upgrade ? 'upgrade' : 'installation';
 return (1, "WHMCS $installtype complete. It can be accessed at <a href=$url target=_blank>$url</a> and managed at <a href=$adminurl target=_blank>$adminurl</a>. For more information, see <a href=http://docs.whmcs.com/Installing_WHMCS target=_blank>http://docs.whmcs.com/Installing_WHMCS</a> and <a href=http://docs.whmcs.com/Virtualmin_Pro target=_blank>http://docs.whmcs.com/Virtualmin_Pro</a>.",
 	"Under $rp using $dbphptype database $dbname", $url,
@@ -470,7 +470,7 @@ return (1, "WHMCS $installtype complete. It can be accessed at <a href=$url targ
 # Returns 1 on success and a message, or 0 on failure and an error
 sub script_whmcs_uninstall
 {
-local ($d, $version, $opts) = @_;
+my ($d, $version, $opts) = @_;
 
 # Remove tbl* tables from the database
 &cleanup_script_database($d, $opts->{'db'}, "(tbl|mod_)");
@@ -479,7 +479,7 @@ local ($d, $version, $opts) = @_;
 &delete_script_wget_job($d, $sinfo->{'url'}."admin/cron.php");
 
 # Remove the contents of the target directory
-local $derr = &delete_script_install_directory($d, $opts);
+my $derr = &delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
 
 # Take out the DB
@@ -514,8 +514,8 @@ return $db_conn_desc;
 
 sub script_whmcs_latest
 {
-local ($ver) = @_;
-local $vwant = &compare_versions($ver, "9") >= 0 ? "9" :
+my ($ver) = @_;
+my $vwant = &compare_versions($ver, "9") >= 0 ? "9" :
 	       &compare_versions($ver, "8.13") >= 0 ? "8\\.13" : undef;
 if ($vwant) {
 	return ( "https://download.whmcs.com/assets/scripts/get-downloads.php",

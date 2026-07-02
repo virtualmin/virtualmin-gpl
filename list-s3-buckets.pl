@@ -36,7 +36,7 @@ if (!$module_name) {
 $owner = 1;
 &parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--access-key") {
 		$akey = shift(@ARGV);
 		}
@@ -68,7 +68,7 @@ if ($multiline) {
 	# Full details
 	foreach $f (@$files) {
 		print $f->{'Name'},"\n";
-		local $ctime = &s3_parse_date($f->{'CreationDate'});
+		my $ctime = &s3_parse_date($f->{'CreationDate'});
 		print "    Created: ",&make_date($ctime),"\n";
 		print "    Created time: ",$ctime,"\n";
 		$loc = &s3_get_bucket_location($akey, $skey, $f->{'Name'});
@@ -126,14 +126,14 @@ else {
 	printf $fmt, "Bucket name", "Created";
 	printf $fmt, ("-" x 45), ("-" x 30);
 	foreach $f (@$files) {
-		local $ctime = &s3_parse_date($f->{'CreationDate'});
+		my $ctime = &s3_parse_date($f->{'CreationDate'});
 		printf $fmt, $f->{'Name'}, &make_date($ctime);
 		}
 	}
 
 sub show_lifecycle_period
 {
-local ($obj, $txt) = @_;
+my ($obj, $txt) = @_;
 if ($obj && $obj->{'Date'}) {
 	print "    Lifecycle ${txt}: On date $obj->{'Date'}\n";
 	}

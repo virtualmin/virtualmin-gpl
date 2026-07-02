@@ -50,7 +50,7 @@ return ("pgsql");
 # Must have at least one existing DB
 sub script_phppgadmin_depends
 {
-local ($d, $ver) = @_;
+my ($d, $ver) = @_;
 &has_domain_databases($d, [ "postgres" ], 1) ||
 	return ("phpPgAdmin requires a PostgreSQL database");
 return ( );
@@ -65,19 +65,19 @@ return 7.2;
 # Returns HTML for table rows for options for installing PHP-NUKE
 sub script_phppgadmin_params
 {
-local ($d, $ver, $upgrade) = @_;
-local $rv;
-local $hdir = &public_html_dir($d, 1);
+my ($d, $ver, $upgrade) = @_;
+my $rv;
+my $hdir = &public_html_dir($d, 1);
 if ($upgrade) {
 	# Options are fixed when upgrading
 	$rv .= &ui_table_row("Default database", $upgrade->{'opts'}->{'db'});
-	local $dir = $upgrade->{'opts'}->{'dir'};
+	my $dir = $upgrade->{'opts'}->{'dir'};
 	$dir =~ s/^$d->{'home'}\///;
 	$rv .= &ui_table_row("Install directory", $dir);
 	}
 else {
 	# Show editable install options
-	local @dbs = &domain_databases($d, [ "postgres" ]);
+	my @dbs = &domain_databases($d, [ "postgres" ]);
 	$rv .= &ui_table_row("Default database to manage",
 		     &ui_select("db", undef,
 			[ [ "template1", "&lt;PostgreSQL default&gt;" ],
@@ -92,16 +92,16 @@ return $rv;
 # Returns either a hash ref of parsed options, or an error string
 sub script_phppgadmin_parse
 {
-local ($d, $ver, $in, $upgrade) = @_;
+my ($d, $ver, $in, $upgrade) = @_;
 if ($upgrade) {
 	# Options are always the same
 	return $upgrade->{'opts'};
 	}
 else {
-	local $hdir = &public_html_dir($d, 0);
+	my $hdir = &public_html_dir($d, 0);
 	$in{'dir_def'} || $in{'dir'} =~ /\S/ && $in{'dir'} !~ /\.\./ ||
 		return "Missing or invalid installation directory";
-	local $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
+	my $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
 	return { 'db' => $in{'db'},
 		 'dir' => $dir,
 		 'path' => $in{'dir_def'} ? "/" : "/$in{'dir'}", };
@@ -112,7 +112,7 @@ else {
 # Returns an error message if a required option is missing or invalid
 sub script_phppgadmin_check
 {
-local ($d, $ver, $opts, $upgrade) = @_;
+my ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 #$opts->{'db'} || return "Missing database";
 $opts->{'db'} ||= "template1";
@@ -127,10 +127,10 @@ return undef;
 # containing a name, filename and URL
 sub script_phppgadmin_files
 {
-local ($d, $ver, $opts, $upgrade) = @_;
-local $uver = $ver;
+my ($d, $ver, $opts, $upgrade) = @_;
+my $uver = $ver;
 $uver =~ s/\./-/g;
-local @files = ( { 'name' => "source",
+my @files = ( { 'name' => "source",
 	   'file' => "phpPgAdmin-$ver.tar.gz",
 	   'url' => "https://github.com/phppgadmin/phppgadmin/archive/REL_$uver.tar.gz" 
 	} );
@@ -147,28 +147,28 @@ return ("tar", "gunzip");
 # message, or 0 and an error
 sub script_phppgadmin_install
 {
-local ($d, $version, $opts, $files, $upgrade) = @_;
-local ($out, $ex);
-local @dbs = split(/\s+/, $opts->{'db'});
-local $dbuser = &postgres_user($d);
-local $dbpass = &postgres_pass($d, 1);
-local $dbhost = &get_database_host("postgres", $d);
+my ($d, $version, $opts, $files, $upgrade) = @_;
+my ($out, $ex);
+my @dbs = split(/\s+/, $opts->{'db'});
+my $dbuser = &postgres_user($d);
+my $dbpass = &postgres_pass($d, 1);
+my $dbhost = &get_database_host("postgres", $d);
 
 # Extract tar file to temp dir and copy to target
-local $temp = &transname();
-local $err = &extract_script_archive($files->{'source'}, $temp, $d,
+my $temp = &transname();
+my $err = &extract_script_archive($files->{'source'}, $temp, $d,
                                      $opts->{'dir'}, "phppgadmin-*");
 $err && return (0, "Failed to extract source : $err");
-local $cfileorig = "$opts->{'dir'}/conf/config.inc.php-dist";
-local $cfile = "$opts->{'dir'}/conf/config.inc.php";
+my $cfileorig = "$opts->{'dir'}/conf/config.inc.php-dist";
+my $cfile = "$opts->{'dir'}/conf/config.inc.php";
 
 # Copy and update the config file
 if (!-r $cfile) {
 	&run_as_domain_user($d, "cp ".quotemeta($cfileorig)." ".
 				      quotemeta($cfile));
 	}
-local $lref = &read_file_lines_as_domain_user($d, $cfile);
-local $l;
+my $lref = &read_file_lines_as_domain_user($d, $cfile);
+my $l;
 foreach $l (@$lref) {
 	if ($l =~ /^\s*\$conf\['servers'\]\[0\]\['defaultdb'\]/) {
 		$l = "\$conf['servers'][0]['defaultdb'] = '$opts->{'db'}';";
@@ -185,8 +185,8 @@ foreach $l (@$lref) {
 &flush_file_lines_as_domain_user($d, $cfile);
 
 # Return a URL for the user
-local $url = &script_path_url($d, $opts);
-local $rp = $opts->{'dir'};
+my $url = &script_path_url($d, $opts);
+my $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
 return (1, "phpPgAdmin installation complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp", $url, $dbuser, $dbpass);
 }
@@ -196,10 +196,10 @@ return (1, "phpPgAdmin installation complete. It can be accessed at <a target=_b
 # Returns 1 on success and a message, or 0 on failure and an error
 sub script_phppgadmin_uninstall
 {
-local ($d, $version, $opts) = @_;
+my ($d, $version, $opts) = @_;
 
 # Remove the contents of the target directory
-local $derr = &delete_script_install_directory($d, $opts);
+my $derr = &delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
 
 return (1, "phpPgAdmin directory deleted.");
@@ -209,7 +209,7 @@ return (1, "phpPgAdmin directory deleted.");
 # Returns a URL and regular expression or callback func to get the version
 sub script_phppgadmin_latest
 {
-local ($ver) = @_;
+my ($ver) = @_;
 return ( "https://github.com/phppgadmin/phppgadmin/tags",
 	 sub { my ($d, $v) = @_;
 	       $d =~ /REL_([0-9\.\-]+)/ || return ();

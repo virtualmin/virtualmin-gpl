@@ -6,7 +6,7 @@ do 'virtual-server-lib.pl';
 sub module_install
 {
 &foreign_require("cron");
-local $need_restart;
+my $need_restart;
 &lock_file($module_config_file);
 
 # Update last post-install time
@@ -30,7 +30,7 @@ foreach my $script (@all_cron_commands) {
 	}
 
 # Convert all templates to plans, if needed
-local @oldplans = &list_plans(1);
+my @oldplans = &list_plans(1);
 if (!@oldplans) {
 	&convert_plans();
 	}
@@ -87,9 +87,9 @@ if (!$config{'defaultdomain_name'}) {
 	}
 
 # Make sure the remote.cgi page is accessible in non-session mode
-local %miniserv;
+my %miniserv;
 &get_miniserv_config(\%miniserv);
-local @sa = split(/\s+/, $miniserv{'sessiononly'});
+my @sa = split(/\s+/, $miniserv{'sessiononly'});
 if (&indexof("/$module_name/remote.cgi", @sa) < 0) {
 	# Need to add
 	push(@sa, "/$module_name/remote.cgi");
@@ -163,7 +163,7 @@ elsif ($config{'preload_mode'} eq '') {
 $need_restart = 1 if ($config{'preload_mode'});		# To apply .pl changes
 
 # Restart Webmin if needed
-local %miniserv;
+my %miniserv;
 &get_miniserv_config(\%miniserv);
 if (&check_pid_file($miniserv{'pidfile'}) && $need_restart) {
 	&restart_miniserv();
@@ -210,7 +210,7 @@ if ($virtualmin_pro && !$config{'done_fix_autoreplies'}) {
 	}
 
 # If installing for the first time, enable backup of all features by default
-local @doms = &list_domains();
+my @doms = &list_domains();
 if (!@doms && !defined($config{'backup_feature_all'})) {
 	$config{'backup_feature_all'} = 1;
 	&save_module_config();
@@ -223,9 +223,9 @@ if (!@doms && !defined($config{'backup_feature_all'})) {
 if (&foreign_installed("sshd") && !$config{'nodeniedssh'}) {
 	# Add to SSHd config
 	&foreign_require("sshd");
-	local $conf = &sshd::get_sshd_config();
-	local @denyg = &sshd::find_value("DenyGroups", $conf);
-	local $commas = $sshd::version{'type'} eq 'ssh' &&
+	my $conf = &sshd::get_sshd_config();
+	my @denyg = &sshd::find_value("DenyGroups", $conf);
+	my $commas = $sshd::version{'type'} eq 'ssh' &&
 			$sshd::version{'number'} >= 3.2;
 	if ($commas) {
 		@denyg = split(/,/, $denyg[0]);
@@ -241,10 +241,10 @@ if (&foreign_installed("sshd") && !$config{'nodeniedssh'}) {
 	# Create the actual group, if missing
 	&require_useradmin();
 	&obtain_lock_unix();
-	local @allgroups = &list_all_groups();
-	local ($group) = grep { $_->{'group'} eq $denied_ssh_group } @allgroups;
+	my @allgroups = &list_all_groups();
+	my ($group) = grep { $_->{'group'} eq $denied_ssh_group } @allgroups;
 	if (!$group) {
-		local (%gtaken, %ggtaken);
+		my (%gtaken, %ggtaken);
 		&build_group_taken(\%gtaken, \%ggtaken, \@allgroups);
 		$group = { 'group' => $denied_ssh_group,
 			   'members' => '',
@@ -267,7 +267,7 @@ if (&foreign_installed("sshd") && !$config{'nodeniedssh'}) {
 
 # Decide if sub-domains should be allowed, by checking if any exist
 if ($config{'allow_subdoms'} eq '') {
-	local @subdoms = grep { $_->{'subdom'} } &list_domains();
+	my @subdoms = grep { $_->{'subdom'} } &list_domains();
 	$config{'allow_subdoms'} = @subdoms ? 1 : 0;
 	&save_module_config();
 	}
@@ -358,7 +358,7 @@ if (!$cerr) {
 
 # Make all domains' .acl files non-world-readable
 foreach my $d (grep { !$_->{'parent'} && $_->{'webmin'} } &list_domains()) {
-	local @aclfiles = glob("$config_directory/*/$d->{'user'}.acl");
+	my @aclfiles = glob("$config_directory/*/$d->{'user'}.acl");
 	foreach my $f (@aclfiles) {
 		&set_ownership_permissions(undef, undef, 0600, $f);
 		}
@@ -369,7 +369,7 @@ foreach my $d (grep { !$_->{'parent'} && $_->{'webmin'} } &list_domains()) {
 # /etc/webmin/*/config files
 foreach my $m ("mysql", "postgresql", "ldap-client", "ldap-server",
 	       "ldap-useradmin", $module_name) {
-	local $mdir = "$config_directory/$m";
+	my $mdir = "$config_directory/$m";
 	if (-d $mdir) {
 		&set_ownership_permissions(undef, undef, 0711,
 					   $mdir, "$mdir/config");
@@ -469,9 +469,9 @@ if (!@doms && $config{'allow_symlinks'} ne '1') {
 	}
 
 # Print warning if PHP or symlink settings have not been checked
-local $warn;
+my $warn;
 if ($config{'allow_symlinks'} eq '') {
-	local @fixdoms = &fix_symlink_security(undef, 1);
+	my @fixdoms = &fix_symlink_security(undef, 1);
 	$warn++ if (@fixdoms);
 	}
 if ($warn) {
@@ -692,9 +692,9 @@ if ($gconfig{'os_type'} eq 'redhat-linux' &&
 &run_post_actions_silently();
 
 # Record the install time for this version
-local %itimes;
+my %itimes;
 &read_file($install_times_file, \%itimes);
-local $basever = &get_base_module_version();
+my $basever = &get_base_module_version();
 if (!$itimes{$basever}) {
 	$itimes{$basever} = time();
 	&write_file($install_times_file, \%itimes);

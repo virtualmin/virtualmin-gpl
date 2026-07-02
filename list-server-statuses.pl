@@ -28,7 +28,7 @@ if (!$module_name) {
 
 &parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
-        local $a = shift(@ARGV);
+        my $a = shift(@ARGV);
 	&usage("Unknown parameter $a");
 	}
 

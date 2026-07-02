@@ -58,7 +58,7 @@ if (defined($in{'prefix'})) {
 
 # Check if the password was changed, and if so is it valid
 if (!$d->{'parent'} && !$in{'passwd_def'}) {
-	local $fakeuser = { 'user' => $d->{'user'},
+	my $fakeuser = { 'user' => $d->{'user'},
 			    'plainpass' => $in{'passwd'} };
 	$err = &check_password_restrictions($fakeuser, $d->{'webmin'});
 	&error($err) if ($err);
@@ -146,7 +146,7 @@ $newdom{'dir'} = $in{'mail'} ? 1 : 0 if ($d->{'alias'} && $config{'dir'} == 3);
 # he is sure
 if (!$in{'confirm'} && !$d->{'disabled'}) {
 	# Collect features and plugins being disabled
-	local (@alosing, @losing, @plosing);
+	my (@alosing, @losing, @plosing);
 	foreach $f (@dom_features) {
 		if ($config{$f} && $d->{$f} && !$newdom{$f}) {
 			push(@alosing, $f);
@@ -164,7 +164,7 @@ if (!$in{'confirm'} && !$d->{'disabled'}) {
 		}
 
 	# Check if any alias domains use a feature being disabled
-	local @ausers;
+	my @ausers;
 	foreach my $ad (&get_domain_by("alias", $d->{'id'})) {
 		foreach $f (@alosing) {
 			if ($ad->{$f}) {
@@ -419,7 +419,7 @@ if ($d->{'template'} ne $oldd->{'template'}) {
 # Run the after command
 &run_post_actions();
 &set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
-local $merr = &made_changes();
+my $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($d);
 &webmin_log("modify", "domain", $d->{'dom'}, $d);

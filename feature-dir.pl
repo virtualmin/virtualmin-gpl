@@ -5,7 +5,7 @@
 # own the files?
 sub check_depends_dir
 {
-local ($d) = @_;
+my ($d) = @_;
 if (!$d->{'parent'} && !$d->{'unix'}) {
 	return $text{'setup_edepunixdir'};
 	}
@@ -101,8 +101,8 @@ return 1;
 # Create the home directory for a server or sub-server
 sub create_domain_home_directory
 {
-local ($d, $uinfo) = @_;
-local $perms = oct($uconfig{'homedir_perms'});
+my ($d, $uinfo) = @_;
+my $perms = oct($uconfig{'homedir_perms'});
 if (&has_domain_user($d) && $d->{'parent'}) {
 	# Run as domain owner, as this is a sub-server
 	&make_dir_as_domain_user($d, $d->{'home'}, $perms, 1);
@@ -125,7 +125,7 @@ else {
 # Create and set permissions on standard directories
 sub create_standard_directories
 {
-local ($d) = @_;
+my ($d) = @_;
 foreach my $dir (&virtual_server_directories($d)) {
 	my $path = "$d->{'home'}/$dir->[0]";
 	&create_standard_directory_for_domain($d, $path, $dir->[1]);
@@ -163,15 +163,15 @@ else {
 # Rename home directory if needed
 sub modify_dir
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 
 # Special case .. converting alias to non-alias, so some directories need to
 # be created
 if ($oldd->{'alias'} && !$d->{'alias'}) {
 	&$first_print($text{'save_dirunalias'});
-	local $tmpl = &get_template($d->{'template'});
+	my $tmpl = &get_template($d->{'template'});
 	if ($tmpl->{'skel'} ne "none") {
-		local $uinfo = &get_domain_owner($d, 1);
+		my $uinfo = &get_domain_owner($d, 1);
 		&copy_skel_files(
 			&substitute_domain_template($tmpl->{'skel'}, $d),
 			$uinfo, $d->{'home'},
@@ -192,19 +192,19 @@ if ($d->{'home'} ne $oldd->{'home'}) {
 		if (defined(&set_php_wrappers_writable)) {
 			&set_php_wrappers_writable($d, 1);
 			}
-		local $wasjailed = 0;
+		my $wasjailed = 0;
 		if (!&check_jailkit_support() && !$oldd->{'parent'} &&
 		    &get_domain_jailkit($oldd)) {
 			# Turn off jail for the old home
 			&disable_domain_jailkit($oldd);
 			$wasjailed = 1;
 			}
-		local $cmd = $config{'move_command'} || "mv";
+		my $cmd = $config{'move_command'} || "mv";
 		$cmd .= " ".quotemeta($oldd->{'home'}).
 			" ".quotemeta($d->{'home'});
 		$cmd .= " 2>&1 </dev/null";
 		&set_domain_envs($oldd, "MODIFY_DOMAIN", $d);
-		local $out = &backquote_logged($cmd);
+		my $out = &backquote_logged($cmd);
 		&reset_domain_envs($oldd);
 		if ($?) {
 			&$second_print(&text('save_dirhomefailed',
@@ -234,14 +234,14 @@ if ($d->{'unix'} && !$oldd->{'unix'} ||
 	}
 if (!$d->{'subdom'} && $oldd->{'subdom'}) {
 	# No longer a sub-domain .. move the HTML dir
-	local $phsrc = &public_html_dir($oldd);
-	local $phdst = &public_html_dir($d);
+	my $phsrc = &public_html_dir($oldd);
+	my $phdst = &public_html_dir($d);
 	&copy_source_dest($phsrc, $phdst);
 	&unlink_file($phsrc);
 
 	# And the CGI directory
-	local $cgisrc = &cgi_bin_dir($oldd);
-	local $cgidst = &cgi_bin_dir($d);
+	my $cgisrc = &cgi_bin_dir($oldd);
+	my $cgidst = &cgi_bin_dir($d);
 	&copy_source_dest($cgisrc, $cgidst);
 	&unlink_file($cgisrc);
 	}
@@ -254,7 +254,7 @@ if (defined(&set_php_wrappers_writable)) {
 # Delete the home directory
 sub delete_dir
 {
-local ($d, $preserve) = @_;
+my ($d, $preserve) = @_;
 
 # Delete homedir
 &require_useradmin();
@@ -270,7 +270,7 @@ if (-d $d->{'home'} && &safe_delete_dir($d, $d->{'home'})) {
 	if (defined(&set_php_wrappers_writable)) {
 		&set_php_wrappers_writable($d, 1);
 		}
-	local $err = &backquote_logged("rm -rf ".quotemeta($d->{'home'}).
+	my $err = &backquote_logged("rm -rf ".quotemeta($d->{'home'}).
 				       " 2>&1");
 	if ($?) {
 		# Try again after running chattr
@@ -287,7 +287,7 @@ if (-d $d->{'home'} && &safe_delete_dir($d, $d->{'home'})) {
 		}
 	if ($err) {
 		# Ignore an error deleting a mount point
-		local @subs = &sub_mount_points($d->{'home'});
+		my @subs = &sub_mount_points($d->{'home'});
 		if (@subs) {
 			$err = undef;
 			}
@@ -306,14 +306,14 @@ return 1;
 # Copy home directory contents to a new cloned domain
 sub clone_dir
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 &$first_print($text{'clone_dir'});
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable($d, 1);
 	}
 
 # Exclude sub-server directories, logs, SSL certs and .zfs files
-local $xtemp = &transname();
+my $xtemp = &transname();
 &open_tempfile(XTEMP, ">$xtemp");
 &print_tempfile(XTEMP, "domains\n");
 &print_tempfile(XTEMP, "./domains\n");
@@ -361,7 +361,7 @@ if (!$d->{'parent'}) {
 if ($d->{'mail'}) {
 	&break_autoreply_alias_links($oldd);
 	}
-local $err = &backquote_logged(
+my $err = &backquote_logged(
 	       "cd ".quotemeta($oldd->{'home'})." && ".
 	       "tar cfX - ".quotemeta($xtemp)." . | ".
 	       "(cd ".quotemeta($d->{'home'})." && ".
@@ -392,23 +392,23 @@ else {
 # ownership
 sub validate_dir
 {
-local ($d) = @_;
+my ($d) = @_;
 
 # Make sure home dir exists and has the correct owner
 if (!-d $d->{'home'}) {
 	return &text('validate_edir', "<tt>$d->{'home'}</tt>");
 	}
-local @st = stat($d->{'home'});
-local $auser = &get_apache_user($d);
-local @ainfo = getpwnam($auser);
+my @st = stat($d->{'home'});
+my $auser = &get_apache_user($d);
+my @ainfo = getpwnam($auser);
 if ($d->{'uid'} && $st[4] != $d->{'uid'} && $st[4] != $ainfo[2]) {
-	local $owner = getpwuid($st[4]);
+	my $owner = getpwuid($st[4]);
 	return &text('validate_ediruser', "<tt>$d->{'home'}</tt>",
 		     $owner, $d->{'user'})
 	}
 if ($d->{'gid'} && $st[5] != $d->{'gid'} && $st[5] != $d->{'ugid'} &&
     $st[5] != $ainfo[3]) {
-	local $owner = getgrgid($st[5]);
+	my $owner = getgrgid($st[5]);
 	return &text('validate_edirgroup', "<tt>$d->{'home'}</tt>",
 		     $owner, $d->{'group'})
 	}
@@ -424,10 +424,10 @@ if (!$d->{'alias'}) {
 			return &text('validate_esubdir',
 				     "<tt>$sd->[0]</tt>")
 			}
-		local @st = stat("$d->{'home'}/$sd->[0]");
+		my @st = stat("$d->{'home'}/$sd->[0]");
 		if ($d->{'uid'} && $st[4] != $d->{'uid'} && $st[4] != $ainfo[2]) {
 			# UID is wrong
-			local $owner = getpwuid($st[4]);
+			my $owner = getpwuid($st[4]);
 			return &text('validate_esubdiruser',
 				     "<tt>$sd->[0]</tt>",
 				     $owner, $d->{'user'})
@@ -435,7 +435,7 @@ if (!$d->{'alias'}) {
 		if ($d->{'gid'} && $st[5] != $d->{'gid'} &&
 		    $st[5] != $d->{'ugid'} && $st[5] != $ainfo[3]) {
 			# GID is wrong
-			local $owner = getgrgid($st[5]);
+			my $owner = getgrgid($st[5]);
 			return &text('validate_esubdirgroup',
 				     "<tt>$sd->[0]</tt>",
 				     $owner, $d->{'group'})
@@ -470,14 +470,14 @@ return 0;
 # Backs up the server's home directory in tar format to the given file
 sub backup_dir
 {
-local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key, undef, $id) = @_;
-local $compression = $opts->{'compression'};
+my ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key, undef, $id) = @_;
+my $compression = $opts->{'compression'};
 &$first_print($compression == 3 ? $text{'backup_dirzip'} :
 	      $increment == 1 || $increment >= 3 ? $text{'backup_dirtarinc'}
 					         : $text{'backup_dirtar'});
-local $out;
-local $cmd;
-local $destfile = $file;
+my $out;
+my $cmd;
+my $destfile = $file;
 if (!$homefmt) {
 	$destfile .= ".".&compression_to_suffix_inner($compression);
 	}
@@ -510,9 +510,9 @@ if ($homefmt) {
 	}
 
 # Create exclude file
-local $xtemp = &transname();
-local @xlist;
-local @ilist;
+my $xtemp = &transname();
+my @xlist;
+my @ilist;
 if ($opts->{'include'}) {
 	# Include only specific files
 	@ilist = split(/\t+/, $opts->{'exclude'});
@@ -602,8 +602,8 @@ if (&has_incremental_tar() && $increment != 2) {
 	}
 
 # Create the dest file with strict permissions
-local $qf = quotemeta($destfile);
-local $toucher = "touch $qf && chmod 600 $qf";
+my $qf = quotemeta($destfile);
+my $toucher = "touch $qf && chmod 600 $qf";
 if ($asd && $homefmt) {
 	$toucher = &command_as_user($asd->{'user'}, 0, $toucher);
 	}
@@ -611,7 +611,7 @@ if ($asd && $homefmt) {
 
 # Create the writer command. This will be run as the domain owner if this
 # is the final step of the backup process, and if the owner is doing the backup.
-local $writer = "cat >$qf";
+my $writer = "cat >$qf";
 if ($asd && $homefmt) {
 	$writer = &command_as_user($asd->{'user'}, 0, $writer);
 	}
@@ -650,7 +650,7 @@ else {
 	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, @ilist);
 	}
 $cmd .= " | $writer";
-local $ex = &execute_command("cd ".quotemeta($d->{'home'})." && $cmd",
+my $ex = &execute_command("cd ".quotemeta($d->{'home'})." && $cmd",
 			     undef, \$out, \$out);
 &unlink_file($iflag) if ($iflag);
 &copy_source_dest($ifilecopy, $ifile) if ($ifilecopy);
@@ -682,7 +682,7 @@ else {
 # Returns HTML for the backup logs option
 sub show_backup_dir
 {
-local ($opts) = @_;
+my ($opts) = @_;
 return &ui_checkbox("dir_logs", 1, $text{'backup_dirlogs'},
 		    !$opts->{'dirnologs'})." ".
        &ui_checkbox("dir_homes", 1,
@@ -694,7 +694,7 @@ return &ui_checkbox("dir_logs", 1, $text{'backup_dirlogs'},
 # Parses the inputs for directory backup options
 sub parse_backup_dir
 {
-local %in = %{$_[0]};
+my %in = %{$_[0]};
 return { 'dirnologs' => $in{'dir_logs'} ? 0 : 1,
 	 'dirnohomes' => $in{'dir_homes'} ? 0 : 1 };
 }
@@ -703,7 +703,7 @@ return { 'dirnologs' => $in{'dir_logs'} ? 0 : 1,
 # Returns HTML for mail restore option inputs
 sub show_restore_dir
 {
-local ($opts) = @_;
+my ($opts) = @_;
 return &ui_checkbox("dir_homes", 1, $text{'restore_dirhomes'},
                     !$opts->{'dirnohomes'})."<br>\n".
        &ui_checkbox("dir_delete", 1, $text{'restore_dirdelete'},
@@ -714,7 +714,7 @@ return &ui_checkbox("dir_homes", 1, $text{'restore_dirhomes'},
 # Parses the inputs for mail backup options
 sub parse_restore_dir
 {
-local %in = %{$_[0]};
+my %in = %{$_[0]};
 return { 'dirnohomes' => !$in{'dir_homes'},
 	 'delete' => $in{'dir_delete'} };
 }
@@ -724,13 +724,13 @@ return { 'dirnohomes' => !$in{'dir_homes'},
 # Extracts the given tar file into server's home directory
 sub restore_dir
 {
-local ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd, $key) = @_;
-local $srcfile = $file;
+my ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd, $key) = @_;
+my $srcfile = $file;
 if (!-r $srcfile) {
 	($srcfile) = glob("$file.*");
 	}
 
-local $cf = &compression_format($srcfile, $key);
+my $cf = &compression_format($srcfile, $key);
 &$first_print($cf == 4 ? $text{'restore_dirzip'}
 	    	       : $text{'restore_dirtar'});
 
@@ -759,14 +759,14 @@ if ($osize && $config{'home_quotas'}) {
 		}
 	}
 
-local $iflag = "$d->{'home'}/.incremental";
+my $iflag = "$d->{'home'}/.incremental";
 &unlink_file($iflag);
 if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable($d, 1, 1);
 	}
 
 # Create exclude file, to skip local system-specific files
-local $xtemp = &transname();
+my $xtemp = &transname();
 &open_tempfile(XTEMP, ">$xtemp");
 my @exc = ( "cgi-bin/lang",	# Used by AWstats, and created locally .. so
 	    "cgi-bin/lib",	# no need to include in restore.
@@ -784,9 +784,9 @@ foreach my $e (@exc) {
 &close_tempfile(XTEMP);
 
 # Check if Apache logs were links before the restore
-local $alog = "$d->{'home'}/logs/access_log";
-local $elog = "$d->{'home'}/logs/error_log";
-local ($aloglink, $eloglink);
+my $alog = "$d->{'home'}/logs/access_log";
+my $elog = "$d->{'home'}/logs/error_log";
+my ($aloglink, $eloglink);
 if ($d->{'web'}) {
 	$aloglink = readlink($alog);
 	$eloglink = readlink($elog);
@@ -794,19 +794,19 @@ if ($d->{'web'}) {
 
 # If home dir is missing (perhaps due to deletion of /home), re-create it
 if (!-e $d->{'home'}) {
-	local $uinfo;
+	my $uinfo;
 	if ($d->{'unix'} || $d->{'parent'}) {
-		local @users = &list_all_users();
+		my @users = &list_all_users();
 		($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @users;
 		}
 	&create_domain_home_directory($d, $uinfo);
 	}
 
-local $outfile = &transname();
-local $errfile = &transname();
-local $q = quotemeta($srcfile);
-local $qh = quotemeta($d->{'home'});
-local $catter;
+my $outfile = &transname();
+my $errfile = &transname();
+my $q = quotemeta($srcfile);
+my $qh = quotemeta($d->{'home'});
+my $catter;
 if ($key && $homefmt) {
 	$catter = &backup_decryption_command($key)." ".$q;
 	}
@@ -820,20 +820,20 @@ else {
 if ($cf == 4) {
 	# Unzip command does un-compression and un-archiving
 	# XXX ZIP doesn't support excludes of paths :-(
-	local $unzip = &has_command("unzip") || "unzip";
-	local $unzipcmd = quotemeta($unzip)." -o $q";
+	my $unzip = &has_command("unzip") || "unzip";
+	my $unzipcmd = quotemeta($unzip)." -o $q";
 	if ($asd) {
 		$unzipcmd = &command_as_user($d->{'user'}, 0, $unzipcmd);
 		}
 	&execute_command("cd $qh && $unzipcmd", undef, $outfile, $outfile);
 	}
 else {
-	local $comp = $cf == 1 ? &get_gunzip_command()." -c" :
+	my $comp = $cf == 1 ? &get_gunzip_command()." -c" :
 		      $cf == 2 ? "uncompress -c" :
 		      $cf == 3 ? &get_bunzip2_command()." -c" :
 		      $cf == 6 ? &get_unzstd_command() : "cat";
-	local $tarcmd = &make_tar_command("xvfX", "-", $xtemp);
-	local $reader = $catter." | ".$comp;
+	my $tarcmd = &make_tar_command("xvfX", "-", $xtemp);
+	my $reader = $catter." | ".$comp;
 	if ($asd) {
 		# Run extraction as the domain owner for untrusted/as-owner
 		# restores, matching the ZIP restore privilege boundary.
@@ -841,15 +841,15 @@ else {
 		}
 	&execute_command("cd $qh && $reader | $tarcmd", undef, $outfile,$errfile);
 	}
-local $ex = $?;
-local $out = &read_file_contents($outfile);
+my $ex = $?;
+my $out = &read_file_contents($outfile);
 $out =~ s/\\([0-7]+)/chr(oct($1))/ge;
-local $err = &read_file_contents($errfile);
+my $err = &read_file_contents($errfile);
 &enable_quotas($d);
 if ($ex) {
 	# Errors about utime in the tar extract are ignored when running
 	# as the domain owner
-	local $failout = $cf == 4 ? $out : $err;
+	my $failout = $cf == 4 ? $out : $err;
 	&$second_print(&text('backup_dirtarfailed',
 			     "<pre>".&html_escape($failout)."</pre>"));
 	return 0;
@@ -886,11 +886,11 @@ else {
 	&clear_incremental_files($d);
 
 	# Check if logs are links now .. if not, we need to move the files
-	local $new_aloglink = readlink($alog);
-	local $new_eloglink = readlink($elog);
+	my $new_aloglink = readlink($alog);
+	my $new_eloglink = readlink($elog);
 	if ($d->{'web'} && !$d->{'subdom'} && !$d->{'alias'}) {
-		local $new_alog = &get_website_log($d, 0);
-		local $new_elog = &get_website_log($d, 1);
+		my $new_alog = &get_website_log($d, 0);
+		my $new_elog = &get_website_log($d, 1);
 		if ($aloglink && !$new_aloglink) {
 			&system_logged("mv ".quotemeta($alog)." ".
 					     quotemeta($new_alog));
@@ -969,12 +969,12 @@ else {
 # the homes directory which is used by mail users
 sub set_home_ownership
 {
-local ($d) = @_;
-local $hd = $config{'homes_dir'};
+my ($d) = @_;
+my $hd = $config{'homes_dir'};
 $hd =~ s/^\.\///;
-local @users = grep { $_->{'unix'} && !$_->{'webowner'} }
+my @users = grep { $_->{'unix'} && !$_->{'webowner'} }
 		    &list_domain_users($d, 1, 1, 1, 1);
-local $gid = $d->{'gid'} || $d->{'ugid'};
+my $gid = $d->{'gid'} || $d->{'ugid'};
 foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 	if (defined(&set_php_wrappers_writable)) {
 		&set_php_wrappers_writable($sd, 1);
@@ -1053,10 +1053,10 @@ return @changed_files;
 # Set the owners of all directories under ~/homes to their mailbox users
 sub set_mailbox_homes_ownership
 {
-local ($d) = @_;
-local $hd = $config{'homes_dir'};
+my ($d) = @_;
+my $hd = $config{'homes_dir'};
 $hd =~ s/^\.\///;
-local $homes = "$d->{'home'}/$hd";
+my $homes = "$d->{'home'}/$hd";
 foreach my $user (&list_domain_users($d, 1, 1, 1, 1)) {
 	if (&is_under_directory($homes, $user->{'home'}) &&
 	    !$user->{'webowner'} && $user->{'home'}) {
@@ -1095,9 +1095,9 @@ return @rv;
 # Creates the temporary files directory for a domain, and returns the path
 sub create_server_tmp
 {
-local ($d) = @_;
+my ($d) = @_;
 if ($d->{'dir'}) {
-	local $tmp = "$d->{'home'}/tmp";
+	my $tmp = "$d->{'home'}/tmp";
 	if (!-d $tmp) {
 		&make_dir_as_domain_user($d, $tmp, 0750, 1);
 		}
@@ -1113,7 +1113,7 @@ else {
 # Outputs HTML for editing directory-related template options
 sub show_template_dir
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # The skeleton files directory
 print &ui_table_row(&hlink($text{'tmpl_skel'}, "template_skel"),
@@ -1151,7 +1151,7 @@ print &ui_table_row(&hlink($text{'tmpl_exclude'}, "template_exclude"),
 # Updates directory-related template options from %in
 sub parse_template_dir
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Save skeleton directory
 $tmpl->{'skel'} = &parse_none_def("skel");
@@ -1178,11 +1178,11 @@ else {
 # Copy default content files to the domain's HTML directory
 sub create_index_content
 {
-local ($d, $content, $over) = @_;
+my ($d, $content, $over) = @_;
 
 # Remove any existing index.* files that might be used instead
-local $dest = &public_html_dir($d);
-local @indexes = grep { -f $_ } glob("$dest/index.*");
+my $dest = &public_html_dir($d);
+my @indexes = grep { -f $_ } glob("$dest/index.*");
 if ($over) {
 	if (@indexes) {
 		&unlink_file(@indexes);
@@ -1249,7 +1249,7 @@ while(@srcs) {
 # Returns 1 if the domain's home dir is on a remote server
 sub remote_dir
 {
-local ($d) = @_;
+my ($d) = @_;
 my ($home_mtab, $home_fstab) = &mount_point($d->{'home'});
 my $tab = $home_mtab || $home_fstab;
 return $tab && $tab->[1] =~ /^[a-z0-9\.\_\-]+:/i ? $tab->[1] : undef;

@@ -332,7 +332,7 @@ elsif ($d->{'virt6'} && $oldd->{'virt6'}) {
 
 # Update features and plugins
 foreach $f (@features) {
-	local $mfunc = "modify_$f";
+	my $mfunc = "modify_$f";
 	if ($config{$f} && $d->{$f}) {
 		&try_function($f, $mfunc, $d, $oldd);
 		}
@@ -378,7 +378,7 @@ foreach $sd (@doms) {
 		}
 
 	foreach $f (@features) {
-		local $mfunc = "modify_$f";
+		my $mfunc = "modify_$f";
 		if ($config{$f} && $sd->{$f}) {
 			&try_function($f, $mfunc, $sd, $oldsd);
 			}
@@ -402,7 +402,7 @@ foreach $sd (@doms) {
 # Run the after command
 &run_post_actions();
 &set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
-local $merr = &made_changes();
+my $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($d);
 &webmin_log("newip", "domain", $d->{'dom'}, $d);

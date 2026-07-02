@@ -33,7 +33,7 @@ if (!$module_name) {
 
 # Parse args
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--serial") {
 		$serial = shift(@ARGV);
 		}
@@ -115,7 +115,7 @@ elsif ($itype eq "deb") {
 			# For the Virtualmin package, select pro
 			# version explicitly so that the GPL is
 			# replaced.
-			local ($ver) = grep { !/\.gpl/ }
+			my ($ver) = grep { !/\.gpl/ }
 				&apt_package_versions($p->{'name'});
                             push(@packages, $ver ? $p->{'name'}."=".$ver
 					     : $p->{'name'});
@@ -147,8 +147,8 @@ else {
 
 sub apt_package_versions
 {
-local ($name) = @_;
-local @rv;
+my ($name) = @_;
+my @rv;
 open(OUT, "apt-cache show ".quotemeta($name)." |");
 while(<OUT>) {
 	if (/^Version:\s+(\S+)/) {

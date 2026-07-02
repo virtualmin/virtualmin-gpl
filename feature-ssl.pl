@@ -21,14 +21,14 @@ return undef;
 # the clashing domain's cert can be used for this domain.
 sub check_warnings_ssl
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 &require_apache();
-local $tmpl = &get_template($d->{'template'});
-local $defport = $tmpl->{'web_sslport'} || 443;
-local $port = $d->{'web_sslport'} || $defport;
+my $tmpl = &get_template($d->{'template'});
+my $defport = $tmpl->{'web_sslport'} || 443;
+my $port = $d->{'web_sslport'} || $defport;
 
 # Check if Apache supports SNI, which makes clashing certs not so bad
-local $sni = &has_sni_support($d);
+my $sni = &has_sni_support($d);
 
 if ($port != $defport) {
 	# Has a private port
@@ -42,13 +42,13 @@ elsif ($sni) {
 else {
 	# Neither .. but we can still do SSL, if there are no other domains
 	# with SSL on the same IPv4 address
-	local ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
+	my ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
 				   $_->{'ssl'} &&
 				   $_->{'id'} ne $d->{'id'}} &list_domains();
 	if (!$d->{'virt'} && $sslclash && (!$oldd || !$oldd->{'ssl'})) {
 		# Clash .. but is the cert OK?
 		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
-			local @certdoms = &list_domain_certificate($sslclash);
+			my @certdoms = &list_domain_certificate($sslclash);
 			return &text('setup_edepssl5', $d->{'ip'},
 				join(", ", map { "<tt>$_</tt>" } @certdoms),
 				$sslclash->{'dom'});
@@ -60,11 +60,11 @@ else {
 	# Check for <virtualhost> on the IP, if we are turning on SSL
 	if (!$oldd || !$oldd->{'ssl'}) {
 		&require_apache();
-		local $conf = &apache::get_config();
+		my $conf = &apache::get_config();
 		foreach my $v (&apache::find_directive_struct("VirtualHost",
 							      $conf)) {
 			foreach my $w (@{$v->{'words'}}) {
-				local ($vip, $vport) = split(/:/, $w);
+				my ($vip, $vport) = split(/:/, $w);
 				if ($vip eq $d->{'ip'} && $vport == $port) {
 					return &text('setup_edepssl4',
 						     $d->{'ip'}, $port);
@@ -74,14 +74,14 @@ else {
 		}
 
 	# Perform the same check on IPv6
-	local ($sslclash6) = grep { $_->{'ip6'} &&
+	my ($sslclash6) = grep { $_->{'ip6'} &&
 				    $_->{'ip6'} eq $d->{'ip6'} &&
 				    $_->{'ssl'} &&
 				    $_->{'id'} ne $d->{'id'}} &list_domains();
 	if (!$d->{'virt6'} && $sslclash6 && (!$oldd || !$oldd->{'ssl'})) {
 		# Clash .. but is the cert OK?
 		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
-			local @certdoms = &list_domain_certificate($sslclash);
+			my @certdoms = &list_domain_certificate($sslclash);
 			return &text('setup_edepssl5', $d->{'ip6'},
 				join(", ", map { "<tt>$_</tt>" } @certdoms),
 				$sslclash->{'dom'});
@@ -93,12 +93,12 @@ else {
 	# Check for <virtualhost> on the IPv6 address, if we are turning on SSL
 	if (!$oldd || !$oldd->{'ssl'}) {
 		&require_apache();
-		local $conf = &apache::get_config();
+		my $conf = &apache::get_config();
 		foreach my $v (&apache::find_directive_struct("VirtualHost",
 							      $conf)) {
 			foreach my $w (@{$v->{'words'}}) {
 				$w =~ /^\[([^\/]+)\]/ || next;
-				local $vip = $1;
+				my $vip = $1;
 				if ($vip eq $d->{'ip6'} && $vport == $port) {
 					return &text('setup_edepssl4',
 						     $d->{'ip6'}, $port);
@@ -115,12 +115,12 @@ else {
 # Creates a website with SSL enabled, and a private key and cert it to use.
 sub setup_ssl
 {
-local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
-local $web_sslport = $d->{'web_sslport'} || $tmpl->{'web_sslport'} || 443;
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my $web_sslport = $d->{'web_sslport'} || $tmpl->{'web_sslport'} || 443;
 &require_apache();
 &obtain_lock_web($d);
-local $conf = &apache::get_config();
+my $conf = &apache::get_config();
 $d->{'letsencrypt_renew'} = 1;		# Default let's encrypt renewal
 
 # Find out if this domain will share a cert with another
@@ -133,13 +133,13 @@ if (!$generated && !-r $d->{'ssl_cert'}) {
 	return 0;
 	}
 &refresh_ssl_cert_expiry($d);
-local $chained = $d->{'ssl_chain'};
+my $chained = $d->{'ssl_chain'};
 &sync_combined_ssl_cert($d);
 
 # Add NameVirtualHost if needed, and if there is more than one SSL site on
 # this IP address
-local $nvstar = &add_name_virtual($d, $conf, $web_sslport, 1, $d->{'ip'});
-local $nvstar6; 
+my $nvstar = &add_name_virtual($d, $conf, $web_sslport, 1, $d->{'ip'});
+my $nvstar6;
 if ($d->{'ip6'}) {                                
         $nvstar6 = &add_name_virtual($d, $conf, $web_sslport, 1, $d->{'ip6'});
         }       
@@ -162,34 +162,34 @@ if (!$virt) {
 	}
 
 # Double-check cert and key
-local $certdata = &read_file_contents($d->{'ssl_cert'});
-local $keydata = &read_file_contents($d->{'ssl_key'});
-local $err = &validate_cert_format($certdata, 'cert');
+my $certdata = &read_file_contents($d->{'ssl_cert'});
+my $keydata = &read_file_contents($d->{'ssl_key'});
+my $err = &validate_cert_format($certdata, 'cert');
 if ($err) {
 	&$second_print(&text('setup_esslcert', $err));
 	return 0;
 	}
-local $err = &validate_cert_format($keydata, 'key');
+my $err = &validate_cert_format($keydata, 'key');
 if ($err) {
 	&$second_print(&text('setup_esslkey', $err));
 	return 0;
 	}
 if ($d->{'ssl_chain'}) {
-	local $cadata = &read_file_contents($d->{'ssl_chain'});
-	local $err = &validate_cert_format($cadata, 'ca');
+	my $cadata = &read_file_contents($d->{'ssl_chain'});
+	my $err = &validate_cert_format($cadata, 'ca');
 	if ($err) {
 		&$second_print(&text('setup_esslca', $err));
 		return 0;
 		}
 	}
-local $err = &check_cert_key_match($certdata, $keydata);
+my $err = &check_cert_key_match($certdata, $keydata);
 if ($err) {
 	&$second_print(&text('setup_esslmatch', $err));
 	return 0;
 	}
 
 # Add the actual <VirtualHost>
-local $f = $virt->{'file'};
+my $f = $virt->{'file'};
 my @mems = &clone_apache_config($virt->{'members'});
 my @ssldirs = &apache_ssl_directives($d, $tmpl);
 push(@mems, &apache_lines_to_config(\@ssldirs));
@@ -260,17 +260,17 @@ my @certs = &get_all_domain_service_ssl_certs($aliasd);
 # modify_ssl(&domain, &olddomain)
 sub modify_ssl
 {
-local ($d, $oldd) = @_;
-local $rv = 0;
+my ($d, $oldd) = @_;
+my $rv = 0;
 &require_apache();
 &obtain_lock_web($d);
 
 # Get objects for SSL and non-SSL virtual hosts
-local ($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
+my ($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
                                                    $oldd->{'web_sslport'});
-local ($nonvirt, $nonvconf) = &get_apache_virtual($d->{'dom'},
+my ($nonvirt, $nonvconf) = &get_apache_virtual($d->{'dom'},
 						  $d->{'web_port'});
-local $tmpl = &get_template($d->{'template'});
+my $tmpl = &get_template($d->{'template'});
 
 if ($d->{'ip'} ne $oldd->{'ip'} ||
     $d->{'ip6'} ne $oldd->{'ip6'} ||
@@ -283,10 +283,10 @@ if ($d->{'ip'} ne $oldd->{'ip'} ||
 		&$second_print($text{'delete_noapache'});
 		goto VIRTFAILED;
 		}
-	local $nvstar = &add_name_virtual($d, $conf,
+	my $nvstar = &add_name_virtual($d, $conf,
 					  $d->{'web_sslport'}, 0,
 					  $d->{'ip'});
-	local $nvstar6;
+	my $nvstar6;
 	if ($d->{'ip6'}) {
 		$nvstar6 = &add_name_virtual(
 			$d, $conf, $d->{'web_sslport'}, 0,
@@ -323,7 +323,7 @@ if ($d->{'user'} ne $oldd->{'user'}) {
 		&$second_print($text{'delete_noapache'});
 		goto VIRTFAILED;
 		}
-	local @vals = &apache::find_directive("SuexecUserGroup", $nonvconf);
+	my @vals = &apache::find_directive("SuexecUserGroup", $nonvconf);
 	if (@vals) {
 		&apache::save_directive(
 			"SuexecUserGroup", \@vals, $vconf, $conf);
@@ -349,11 +349,11 @@ if ($d->{'dom'} ne $oldd->{'dom'}) {
 VIRTFAILED:
 if ($d->{'ip'} ne $oldd->{'ip'} && $oldd->{'ssl_same'}) {
 	# IP has changed - maybe clear ssl_same field
-	local ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
+	my ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
 				   $_->{'ssl'} &&
 				   $_->{'id'} ne $d->{'id'} &&
 				   !$_->{'ssl_same'} } &list_domains();
-	local $oldsslclash = &get_domain($oldd->{'ssl_same'});
+	my $oldsslclash = &get_domain($oldd->{'ssl_same'});
 	if ($sslclash && $oldd->{'ssl_same'} eq $sslclash->{'id'}) {
 		# No need to change
 		}
@@ -385,10 +385,10 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
     !&check_domain_certificate($d->{'dom'}, $d)) {
 	# Domain name has changed .. re-generate self-signed cert
 	&$first_print($text{'save_ssl11'});
-	local $info = &cert_info($d);
+	my $info = &cert_info($d);
 	&lock_file($d->{'ssl_cert'});
 	&lock_file($d->{'ssl_key'});
-	local @newalt = $info->{'alt'} ? @{$info->{'alt'}} : ( );
+	my @newalt = $info->{'alt'} ? @{$info->{'alt'}} : ( );
 	foreach my $a (@newalt) {
 		if ($a eq $oldd->{'dom'}) {
 			$a = $d->{'dom'};
@@ -397,9 +397,9 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
 			$a = $1.".".$d->{'dom'};
 			}
 		}
-	local $email = $info->{'emailAddress'};
+	my $email = $info->{'emailAddress'};
 	$email =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
-	local $err = &generate_self_signed_cert(
+	my $err = &generate_self_signed_cert(
 		$d->{'ssl_cert'}, $d->{'ssl_key'},
 		undef,
 		1825,
@@ -482,20 +482,20 @@ return $rv;
 # Deletes the SSL virtual server from the Apache config
 sub delete_ssl
 {
-local ($d) = @_;
+my ($d) = @_;
 
 &require_apache();
 &$first_print($text{'delete_ssl'});
 &obtain_lock_web($d);
-local $conf = &apache::get_config();
+my $conf = &apache::get_config();
 
 # Remove the custom Listen directive added for the domain, if any
 &remove_listen($d, $conf, $d->{'web_sslport'} || $default_web_sslport);
 
 # Remove the <virtualhost>
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 			    $d->{'web_sslport'} || $default_web_sslport);
-local $tmpl = &get_template($d->{'template'});
+my $tmpl = &get_template($d->{'template'});
 if ($virt) {
 	&delete_web_virtual_server($virt, $conf);
 	&$second_print($text{'setup_done'});
@@ -534,7 +534,7 @@ return 1;
 sub clone_ssl
 {
 my ($d, $oldd) = @_;
-local $tmpl = &get_template($d->{'template'});
+my $tmpl = &get_template($d->{'template'});
 &$first_print($text{'clone_ssl'});
 my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 						$d->{'web_sslport'});
@@ -555,7 +555,7 @@ if (!$virt) {
 # Is the linked SSL cert still valid for the new domain? If not, break the
 # linkage by copying over the cert.
 if ($d->{'ssl_same'} && !&check_domain_certificate($d->{'dom'}, $d)) {
-	local $oldsame = &get_domain($d->{'ssl_same'});
+	my $oldsame = &get_domain($d->{'ssl_same'});
 	&break_ssl_linkage($d, $oldsame);
 	}
 
@@ -581,25 +581,25 @@ return 1;
 # cert files are missing.
 sub validate_ssl
 {
-local ($d) = @_;
-local ($virt, $vconf, $conf) = &get_apache_virtual(
+my ($d) = @_;
+my ($virt, $vconf, $conf) = &get_apache_virtual(
 				$d->{'dom'}, $d->{'web_sslport'});
 return &text('validate_essl', "<tt>$d->{'dom'}</tt>") if (!$virt);
 
 # Check IP addresses
 if ($d->{'virt'}) {
-	local $ipp = $d->{'ip'}.":".$d->{'web_sslport'};
+	my $ipp = $d->{'ip'}.":".$d->{'web_sslport'};
 	&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
 		return &text('validate_ewebip', $ipp);
 	}
 if ($d->{'virt6'}) {
-	local $ipp = "[".$d->{'ip6'}."]:".$d->{'web_sslport'};
+	my $ipp = "[".$d->{'ip6'}."]:".$d->{'web_sslport'};
 	&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
 		return &text('validate_ewebip6', $ipp);
 	}
 
 # Make sure cert file exists
-local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
+my $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
 if (!$cert) {
 	return &text('validate_esslcert');
 	}
@@ -615,7 +615,7 @@ elsif (&is_under_directory($d->{'home'}, $cert) &&
 	}
 
 # Make sure key exists
-local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf, 1);
+my $key = &apache::find_directive("SSLCertificateKeyFile", $vconf, 1);
 if ($key) {
 	if (!-e $key) {
 		return &text('validate_esslkeyfile', "<tt>$key</tt>");
@@ -667,7 +667,7 @@ if (!$match) {
 
 # Make sure the cert isn't expired
 if ($info && $info->{'notafter'} && !$d->{'disabled'}) {
-	local $notafter = &parse_notafter_date($info->{'notafter'});
+	my $notafter = &parse_notafter_date($info->{'notafter'});
 	if ($notafter < time()) {
 		return &text('validate_esslexpired', &make_date($notafter));
 		}
@@ -722,17 +722,17 @@ return undef;
 # port 443 on the domain's IP is in use by Webmin or Usermin
 sub check_ssl_clash
 {
-local $tmpl = &get_template($_[0]->{'template'});
-local $web_sslport = $tmpl->{'web_sslport'} || 443;
+my $tmpl = &get_template($_[0]->{'template'});
+my $web_sslport = $tmpl->{'web_sslport'} || 443;
 if (!$_[1] || $_[1] eq 'dom') {
 	# Check for <virtualhost> clash by domain name
-	local ($cvirt, $cconf) = &get_apache_virtual($_[0]->{'dom'},
+	my ($cvirt, $cconf) = &get_apache_virtual($_[0]->{'dom'},
 						     $web_sslport);
 	return 1 if ($cvirt);
 	}
 if (!$_[1] || $_[1] eq 'ip') {
 	# Check for clash by IP and port with Webmin or Usermin
-	local $err = &check_webmin_port_clash($_[0], $web_sslport);
+	my $err = &check_webmin_port_clash($_[0], $web_sslport);
 	return $err if ($err);
 	}
 return 0;
@@ -773,7 +773,7 @@ sub disable_ssl
 {
 &$first_print($text{'disable_ssl'});
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
+my ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_sslport'});
 if ($virt) {
         &create_disable_directives($virt, $vconf, $_[0]);
@@ -792,7 +792,7 @@ sub enable_ssl
 {
 &$first_print($text{'enable_ssl'});
 &require_apache();
-local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
+my ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_sslport'});
 if ($virt) {
         &remove_disable_directives($virt, $vconf, $_[0]);
@@ -979,7 +979,7 @@ return $rv;
 # Returns a hash of details of a domain's cert
 sub cert_info
 {
-local ($d) = @_;
+my ($d) = @_;
 return &cert_file_info($d->{'ssl_cert'});
 }
 
@@ -1066,12 +1066,12 @@ return \%rv;
 # Returns details of a cert in PEM text format
 sub cert_data_info
 {
-local ($data) = @_;
-local $temp = &transname();
+my ($data) = @_;
+my $temp = &transname();
 &open_tempfile(TEMP, ">$temp", 0, 1);
 &print_tempfile(TEMP, $data);
 &close_tempfile(TEMP);
-local $info = &cert_file_info($temp);
+my $info = &cert_file_info($temp);
 &unlink_file($temp);
 return $info;
 }
@@ -1509,12 +1509,12 @@ return &mailboxes::parse_mail_date($str);
 # same file, or the same modulus and expiry date.
 sub same_cert_file
 {
-local ($file1, $file2) = @_;
+my ($file1, $file2) = @_;
 return 1 if (!$file1 && !$file2);
 return 0 if ($file1 && !$file2 || !$file1 && $file2);
 return 1 if (&same_file($file1, $file2));
-local $info1 = &cert_file_info($file1);
-local $info2 = &cert_file_info($file2);
+my $info1 = &cert_file_info($file1);
+my $info2 = &cert_file_info($file2);
 return 1 if (!$info1 && !$info2);
 return 0 if ($info1 && !$info2 || !$info1 && $info2);
 return $info1->{'modulus'} && $info2->{'modulus'} &&
@@ -1527,13 +1527,13 @@ return $info1->{'modulus'} && $info2->{'modulus'} &&
 # for any of the certs in file2.
 sub same_cert_file_any
 {
-local ($file1, $file2) = @_;
+my ($file1, $file2) = @_;
 return 1 if (!$file1 && !$file2);
 return 0 if ($file1 && !$file2 || !$file1 && $file2);
 return 1 if (&same_file($file1, $file2));
-local $info1 = &cert_file_info($file1);
+my $info1 = &cert_file_info($file1);
 foreach my $sp (&cert_file_split($file2)) {
-	local $info2 = &cert_data_info($sp);
+	my $info2 = &cert_data_info($sp);
 	return 1 if ($info1->{'modulus'} && $info2->{'modulus'} &&
 		     $info1->{'modulus'} eq $info2->{'modulus'} &&
 		     $info1->{'notafter'} eq $info2->{'notafter'});
@@ -1570,20 +1570,20 @@ return undef;
 # Returns 0 if a passphrase is needed by not given, 1 if not needed, 2 if OK
 sub check_passphrase
 {
-local ($newkey, $pass) = @_;
-local $temp = &transname();
+my ($newkey, $pass) = @_;
+my $temp = &transname();
 &open_tempfile(KEY, ">$temp", 0, 1);
 &set_ownership_permissions(undef, undef, 0700, $temp);
 &print_tempfile(KEY, $newkey);
 &close_tempfile(KEY);
 my $type = &get_ssl_key_type($temp, $pass);
-local $rv = &execute_command("openssl $type -in ".quotemeta($temp).
+my $rv = &execute_command("openssl $type -in ".quotemeta($temp).
 			     " -text -passin pass:NONE");
 if (!$rv) {
 	return 1;
 	}
 if ($pass) {
-	local $rv = &execute_command("openssl $type -in ".quotemeta($temp).
+	my $rv = &execute_command("openssl $type -in ".quotemeta($temp).
 				     " -text -passin pass:".quotemeta($pass));
 	if (!$rv) {
 		return 2;
@@ -1596,9 +1596,9 @@ return 0;
 # Given an SSL key file, returns the size in bits
 sub get_key_size
 {
-local ($file) = @_;
+my ($file) = @_;
 my $type = &get_ssl_key_type($file);
-local $out = &backquote_command(
+my $out = &backquote_command(
 	"openssl $type -in ".quotemeta($file)." -text 2>&1 </dev/null");
 if ($out =~ /Private-Key:\s+\((\d+)/i) {
 	return $1;
@@ -1611,20 +1611,20 @@ return undef;
 # Otherwise, remove the passphrase config.
 sub save_domain_passphrase
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p ne "web") {
 	return &plugin_call($p, "feature_save_web_passphrase", $d);
 	}
-local $pass_script = "$ssl_passphrase_dir/$d->{'id'}";
+my $pass_script = "$ssl_passphrase_dir/$d->{'id'}";
 &lock_file($pass_script);
-local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
                                                    $d->{'web_sslport'});
 return "SSL virtual host not found" if (!$vconf);
-local @pps = &apache::find_directive("SSLPassPhraseDialog", $conf);
-local @pps_str = &apache::find_directive_struct("SSLPassPhraseDialog", $conf);
+my @pps = &apache::find_directive("SSLPassPhraseDialog", $conf);
+my @pps_str = &apache::find_directive_struct("SSLPassPhraseDialog", $conf);
 &lock_file(@pps_str ? $pps_str[0]->{'file'} : $conf->[0]->{'file'});
-local ($pps) = grep { $_ eq "exec:$pass_script" } @pps;
+my ($pps) = grep { $_ eq "exec:$pass_script" } @pps;
 if ($d->{'ssl_pass'}) {
 	# Create script, add to Apache config
 	if (!-d $ssl_passphrase_dir) {
@@ -1726,21 +1726,21 @@ return $pub;
 # an error message if not. The type can be one of 'key', 'cert', 'ca' or 'csr'
 sub validate_cert_format
 {
-local ($data, $type) = @_;
+my ($data, $type) = @_;
 if ($data =~ /^\//) {
 	$data = &read_file_contents($data);
 	}
-local %headers = ( 'key' => '(RSA |EC )?PRIVATE KEY',
+my %headers = ( 'key' => '(RSA |EC )?PRIVATE KEY',
 		   'cert' => '(CERTIFICATE|PUBLIC KEY)',
 		   'ca' => '(CERTIFICATE|PUBLIC KEY)',
 		   'csr' => 'CERTIFICATE REQUEST',
 		   'newkey' => '(RSA |EC )?PRIVATE KEY' );
-local $h = $headers{$type};
+my $h = $headers{$type};
 $h || return "Unknown SSL file type $type";
 ($data) = &extract_cert_parameters($data);
-local @lines = grep { /\S/ } split(/\r?\n/, $data);
-local $begin = quotemeta("-----BEGIN ").$h.quotemeta("-----");
-local $end = quotemeta("-----END ").$h.quotemeta("-----");
+my @lines = grep { /\S/ } split(/\r?\n/, $data);
+my $begin = quotemeta("-----BEGIN ").$h.quotemeta("-----");
+my $end = quotemeta("-----END ").$h.quotemeta("-----");
 @lines || return "Data is <em>empty</em>, but expected -----BEGIN $h-----";
 $lines[0] =~ /^$begin$/ ||
 	return "Data starts with $lines[0] , but expected -----BEGIN $h-----";
@@ -1825,8 +1825,8 @@ return undef;
 # Returns a domain's cert in PKCS12 format
 sub cert_pkcs12_data
 {
-local ($d) = @_;
-local $cmd = "openssl pkcs12 -in ".quotemeta($d->{'ssl_cert'}).
+my ($d) = @_;
+my $cmd = "openssl pkcs12 -in ".quotemeta($d->{'ssl_cert'}).
              " -inkey ".quotemeta($_[0]->{'ssl_key'}).
 	     " -export -passout pass: -nokeys";
 open(OUT, &command_as_user($d->{'user'}, 0, $cmd)." |");
@@ -1841,8 +1841,8 @@ return $data;
 # Returns a domain's key in PKCS12 format
 sub key_pkcs12_data
 {
-local ($d) = @_;
-local $cmd = "openssl pkcs12 -in ".quotemeta($d->{'ssl_cert'}).
+my ($d) = @_;
+my $cmd = "openssl pkcs12 -in ".quotemeta($d->{'ssl_cert'}).
              " -inkey ".quotemeta($_[0]->{'ssl_key'}).
 	     " -export -passout pass: -nocerts";
 open(OUT, &command_as_user($d->{'user'}, 0, $cmd)." |");
@@ -1965,10 +1965,10 @@ sub delete_ipkeys
 {
 my ($d, $getfunc, $putfunc, $postfunc) = @_;
 &foreign_require("webmin");
-local %miniserv;
+my %miniserv;
 &$getfunc(\%miniserv);
-local @ipkeys = &webmin::get_ipkeys(\%miniserv);
-local @newipkeys;
+my @ipkeys = &webmin::get_ipkeys(\%miniserv);
+my @newipkeys;
 foreach my $ipk (@ipkeys) {
 	my $del = &miniserv_ipkey_matches_domain($d, $ipk);
 	if (!$del) {
@@ -2007,9 +2007,9 @@ else {
 # Returns extra Apache directives needed for SSL
 sub apache_ssl_directives
 {
-local ($d, $tmpl) = @_;
+my ($d, $tmpl) = @_;
 &require_apache();
-local @dirs;
+my @dirs;
 push(@dirs, "SSLEngine on");
 if (&apache_combined_cert($d)) {
 	push(@dirs, "SSLCertificateFile $d->{'ssl_combined'}");
@@ -2025,7 +2025,7 @@ if ($tmpl->{'web_sslprotos'}) {
 	push(@dirs, "SSLProtocol ".$tmpl->{'web_sslprotos'});
 	}
 else {
-	local @tls = ( "SSLv2", "SSLv3" );
+	my @tls = ( "SSLv2", "SSLv3" );
 	if ($apache::httpd_modules{'core'} >= 2.4) {
 		push(@tls, "TLSv1");
 		if (&compare_version_numbers(&get_openssl_version(), '>=', '1.0.0')) {
@@ -2035,7 +2035,7 @@ else {
 	push(@dirs, "SSLProtocol ".join(" ", "all", map { "-".$_ } @tls));
 	}
 if ($tmpl->{'web_ssl'} ne 'none') {
-	local $ssl_dirs = $tmpl->{'web_ssl'};
+	my $ssl_dirs = $tmpl->{'web_ssl'};
 	$ssl_dirs =~ s/\t/\n/g;
 	$ssl_dirs = &substitute_domain_template($ssl_dirs, $d);
 	push(@dirs, split(/\n/, $ssl_dirs));
@@ -2048,7 +2048,7 @@ return @dirs;
 # message if not
 sub check_certificate_data
 {
-local ($data) = @_;
+my ($data) = @_;
 my @lines = split(/\r?\n/, $data);
 my @certs;
 my $inside = 0;
@@ -2068,13 +2068,13 @@ foreach my $l (@lines) {
 	}
 $inside && return $text{'cert_einside'};
 @certs || return $text{'cert_ecerts'};
-local $temp = &transname();
+my $temp = &transname();
 foreach my $cdata (@certs) {
 	&open_tempfile(CERTDATA, ">$temp", 0, 1);
 	&print_tempfile(CERTDATA, $cdata);
 	&close_tempfile(CERTDATA);
-	local $out = &backquote_command("openssl x509 -in ".quotemeta($temp)." -issuer -subject -enddate 2>&1");
-	local $ex = $?;
+	my $out = &backquote_command("openssl x509 -in ".quotemeta($temp)." -issuer -subject -enddate 2>&1");
+	my $ex = $?;
 	&unlink_file($temp);
 	if ($ex) {
 		return "<tt>".&html_escape($out)."</tt>";
@@ -2123,7 +2123,7 @@ return $file."/ssl.".$mode;
 # Set permissions on a cert file so that Apache can read them.
 sub set_certificate_permissions
 {
-local ($d, $file) = @_;
+my ($d, $file) = @_;
 if (&is_under_directory($d->{'home'}, $file)) {
 	&set_permissions_as_domain_user($d, 0700, $file);
 	}
@@ -2343,12 +2343,12 @@ return undef;
 # Lock the Apache config file for some domain, and the Webmin config
 sub obtain_lock_ssl
 {
-local ($d) = @_;
+my ($d) = @_;
 return if (!$config{'ssl'});
 &obtain_lock_anything($d);
 &obtain_lock_web($d) if ($d->{'web'});
 if ($main::got_lock_ssl == 0) {
-	local @sfiles = ($ENV{'MINISERV_CONFIG'} ||
+	my @sfiles = ($ENV{'MINISERV_CONFIG'} ||
 		         "$config_directory/miniserv.conf",
 		        $config_directory =~ /^(.*)\/webmin$/ ?
 		         "$1/usermin/miniserv.conf" :
@@ -2369,7 +2369,7 @@ $main::got_lock_ssl++;
 # Un-lock the Apache config file for some domain, and the Webmin config
 sub release_lock_ssl
 {
-local ($d) = @_;
+my ($d) = @_;
 return if (!$config{'ssl'});
 &release_lock_web($d) if ($d->{'web'});
 if ($main::got_lock_ssl == 1) {
@@ -2386,12 +2386,12 @@ $main::got_lock_ssl-- if ($main::got_lock_ssl);
 # return it (or a list of matches)
 sub find_matching_certificate_domain
 {
-local ($d) = @_;
-local @sslclashes = grep { $_->{'ip'} eq $d->{'ip'} &&
+my ($d) = @_;
+my @sslclashes = grep { $_->{'ip'} eq $d->{'ip'} &&
 			   &domain_has_ssl($_) &&
 			   $_->{'id'} ne $d->{'id'} &&
 			   !$_->{'ssl_same'} } &list_domains();
-local @rv;
+my @rv;
 foreach my $sslclash (@sslclashes) {
 	if (&check_domain_certificate($d->{'dom'}, $sslclash)) {
 		push(@rv, $sslclash);
@@ -2530,7 +2530,7 @@ return 1;
 # domain and Apache config to match
 sub break_ssl_linkage
 {
-local ($d, $samed) = @_;
+my ($d, $samed) = @_;
 my @beforecerts = &get_all_domain_service_ssl_certs($d);
 
 # Copy the cert and key to the new owning domain's directory. The guard
@@ -2582,7 +2582,7 @@ $d->{'ssl_cert_expiry'} = $samed->{'ssl_cert_expiry'} if ($samed->{'ssl_cert_exp
 # names are no longer legit for the cert, break the link.
 sub break_invalid_ssl_linkages
 {
-local ($d, $newcert) = @_;
+my ($d, $newcert) = @_;
 foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	if (!&check_domain_certificate($od->{'dom'}, $newcert || $d)) {
 		&obtain_lock_ssl($d);
@@ -2598,7 +2598,7 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 # the assumption that a new cert type has been installed
 sub disable_letsencrypt_renewal
 {
-local ($d) = @_;
+my ($d) = @_;
 if ($d->{'letsencrypt_renew'} || $d->{'letsencrypt_last_id'}) {
 	delete($d->{'letsencrypt_renew'});
 	delete($d->{'letsencrypt_last_id'});
@@ -3786,15 +3786,15 @@ return 0;
 # path to ensure direct access
 sub before_letsencrypt_website
 {
-local ($d) = @_;
-local $rv = { };
+my ($d) = @_;
+my $rv = { };
 &push_all_print();
 &set_all_null_print();
 &setup_noproxy_path($d, { 'uses' => [ 'proxy' ] }, undef,
 		    { 'path' => '/.well-known' });
 if (&has_web_redirects($d)) {
 	# Remove redirects that may block let's encrypt
-	local @redirs;
+	my @redirs;
 	foreach my $r (&list_redirects($d)) {
 		if ($r->{'path'} eq '/' && $r->{'http'}) {
 			# Possible problem redirect
@@ -3815,7 +3815,7 @@ return $rv;
 # Undoes changes made by before_letsencrypt_website
 sub after_letsencrypt_website
 {
-local ($d, $before) = @_;
+my ($d, $before) = @_;
 &push_all_print();
 &set_all_null_print();
 if ($before->{'redirs'}) {
@@ -4288,7 +4288,7 @@ return 0;
 # Outputs HTML for editing SSL related template options
 sub show_template_ssl
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # SSL cert size
 print &ui_table_row(
@@ -4447,7 +4447,7 @@ print &ui_table_row(&hlink($text{'newweb_mysql'},
 # Updates SSL related template options from %in
 sub parse_template_ssl
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Save key size
 if ($in{'ssl_key_size_def'}) {
@@ -4518,7 +4518,7 @@ $tmpl->{'web_mysql_ssl'} = $in{'web_mysql_ssl'};
 # and if the website is just being turned on now.
 sub chained_ssl
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 if ($config{'ssl'} != 3) {
 	# Not in auto mode, so don't touch
 	return undef;

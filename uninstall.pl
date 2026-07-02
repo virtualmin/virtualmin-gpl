@@ -29,7 +29,7 @@ if ($init::init_mode eq 'systemd' && $gconfig{'os_type'} eq 'redhat-linux') {
 	}
 
 # Delete API helper
-local $api_helper_command = &get_api_helper_command();
+my $api_helper_command = &get_api_helper_command();
 if (-r $api_helper_command && !-d $api_helper_command) {
 	&unlink_file($api_helper_command);
 	}

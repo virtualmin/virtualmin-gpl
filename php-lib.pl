@@ -707,10 +707,10 @@ foreach my $ad (&get_domain_by("alias", $d->{'id'})) {
 # Set the IPCCommTimeout directive to follow the given PHP max execution time
 sub set_fcgid_max_execution_time
 {
-local ($d, $max, $mode, $port) = @_;
+my ($d, $max, $mode, $port) = @_;
 $mode ||= &get_domain_php_mode($d);
 return 0 if ($mode ne "fcgid");
-local $p = &domain_has_website($d);
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_set_fcgid_max_execution_time",
 			    $d, $max, $mode, $port);
@@ -718,20 +718,20 @@ if ($p && $p ne 'web') {
 elsif (!$p) {
 	return "Virtual server does not have a website";
 	}
-local @ports = ( $d->{'web_port'},
+my @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 @ports = ( $port ) if ($port);	# Overridden to just do SSL or non-SSL
-local $conf = &apache::get_config();
-local $pfound = 0;
-local $changed = 0;
+my $conf = &apache::get_config();
+my $pfound = 0;
+my $changed = 0;
 foreach my $p (@ports) {
-        local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
+        my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
         next if (!$vconf);
 	$pfound++;
-	local @newdir = &apache::find_directive("FcgidIOTimeout", $vconf);
-	local $dirname = @newdir ? "FcgidIOTimeout" : "IPCCommTimeout";
-	local $oldvalue = &apache::find_directive($dirname, $vconf);
-	local $want = $max ? $max + 1 : $max_php_fcgid_timeout;
+	my @newdir = &apache::find_directive("FcgidIOTimeout", $vconf);
+	my $dirname = @newdir ? "FcgidIOTimeout" : "IPCCommTimeout";
+	my $oldvalue = &apache::find_directive($dirname, $vconf);
+	my $want = $max ? $max + 1 : $max_php_fcgid_timeout;
 	if ($oldvalue ne $want) {
 		&apache::save_directive($dirname, [ $want ],
 					$vconf, $conf);
@@ -749,15 +749,15 @@ if ($changed) {
 # Returns the current max FCGId execution time, or undef for unlimited
 sub get_fcgid_max_execution_time
 {
-local $p = &domain_has_website($d);
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_get_fcgid_max_execution_time", $d);
 	}
 elsif (!$p) {
 	return "Virtual server does not have a website";
 	}
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-local $v = &apache::find_directive("IPCCommTimeout", $vconf);
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my $v = &apache::find_directive("IPCCommTimeout", $vconf);
 $v ||= &apache::find_directive("FcgidIOTimeout", $vconf);
 return $v == 9999 ? undef : $v ? $v-1 : 40;
 }
@@ -773,8 +773,8 @@ my @errs;
 foreach my $ini (&list_domain_php_inis($d)) {
 	eval {
 		local $main::error_must_die = 1;
-		local $f = $ini->[1];
-		local $conf = &phpini::get_config($f);
+		my $f = $ini->[1];
+		my $conf = &phpini::get_config($f);
 		&phpini::save_directive($conf, "max_execution_time", $max);
 		&flush_file_lines($f);
 		};
@@ -792,12 +792,12 @@ return @errs ? join(" ", @errs) : undef;
 # Returns the max execution time from a php.ini file
 sub get_php_max_execution_time
 {
-local ($d, $max) = @_;
+my ($d, $max) = @_;
 &foreign_require("phpini");
 foreach my $ini (&list_domain_php_inis($d)) {
-	local $f = $ini->[1];
-	local $conf = &phpini::get_config($f);
-	local $max = &phpini::find_value("max_execution_time", $conf);
+	my $f = $ini->[1];
+	my $conf = &phpini::get_config($f);
+	my $max = &phpini::find_value("max_execution_time", $conf);
 	return $max if ($max ne '');
 	}
 return undef;
@@ -807,7 +807,7 @@ return undef;
 # Returns 1 if this PHP mode needs CGI wrappers
 sub need_php_wrappers
 {
-local ($d, $mode) = @_;
+my ($d, $mode) = @_;
 $mode ||= &get_domain_php_mode($d);
 return $mode ne "mod_php" && $mode ne "fpm" && $mode ne "none";
 }
@@ -816,45 +816,45 @@ return $mode ne "mod_php" && $mode ne "fpm" && $mode ne "none";
 # Creates all phpN.cgi wrappers for some domain
 sub create_php_wrappers
 {
-local ($d, $mode) = @_;
+my ($d, $mode) = @_;
 $mode ||= &get_domain_php_mode($d);
-local $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin" : &cgi_bin_dir($_[0]);
-local $tmpl = &get_template($d->{'template'});
+my $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin" : &cgi_bin_dir($_[0]);
+my $tmpl = &get_template($d->{'template'});
 
 if (!-d $dest) {
 	# Need to create fcgi-bin
 	&make_dir_as_domain_user($d, $dest, 0755);
 	}
 
-local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
-local $dirvar = $mode eq "fcgid" ? "PWD" : "DOCUMENT_ROOT";
+my $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
+my $dirvar = $mode eq "fcgid" ? "PWD" : "DOCUMENT_ROOT";
 
 # Make wrappers mutable
 &set_php_wrappers_writable($d, 1);
 
 # For each version of PHP, create a wrapper
-local $pub = &public_html_dir($d);
-local $children = &get_domain_php_children($d);
+my $pub = &public_html_dir($d);
+my $children = &get_domain_php_children($d);
 foreach my $v (&list_available_php_versions($d, $mode)) {
 	next if (!$v->[1]);	# No executable available?!
 	&open_tempfile_as_domain_user($d, PHP, ">$dest/php$v->[0].$suffix");
-	local $t = "php".$v->[0].$suffix;
+	my $t = "php".$v->[0].$suffix;
 	if ($tmpl->{$t} && $tmpl->{$t} ne 'none') {
 		# Use custom script from template
-		local $s = &substitute_domain_template($tmpl->{$t}, $d);
+		my $s = &substitute_domain_template($tmpl->{$t}, $d);
 		$s =~ s/\t/\n/g;
 		$s .= "\n" if ($s !~ /\n$/);
 		&print_tempfile(PHP, $s);
 		}
 	else {
 		# Automatically generate
-		local $shell = -r "/bin/bash" ? "/bin/bash" : "/bin/sh";
-		local $common = "#!$shell\n".
+		my $shell = -r "/bin/bash" ? "/bin/bash" : "/bin/sh";
+		my $common = "#!$shell\n".
 				"PHPRC=\$$dirvar/../etc/php$v->[0]\n".
 				"export PHPRC\n".
 				"umask 022\n";
 		if ($mode eq "fcgid") {
-			local $defchildren = $tmpl->{'web_phpchildren'};
+			my $defchildren = $tmpl->{'web_phpchildren'};
 			$defchildren = undef if ($defchildren eq "none");
 			if ($defchildren) {
 				$common .= "PHP_FCGI_CHILDREN=$defchildren\n";
@@ -901,7 +901,7 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 
 # Re-apply resource limits
 if (defined(&supports_resource_limits) && &supports_resource_limits()) {
-	local $pd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+	my $pd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 	&set_php_wrapper_ulimits($d, &get_domain_resource_limits($pd));
 	}
 
@@ -913,7 +913,7 @@ if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 # If possible, make PHP wrapper scripts mutable or immutable
 sub set_php_wrappers_writable
 {
-local ($d, $writable, $subs) = @_;
+my ($d, $writable, $subs) = @_;
 if (&has_command("chattr")) {
 	foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 		foreach my $f (glob("$dir/php?.*cgi")) {
@@ -939,10 +939,10 @@ if (&has_command("chattr")) {
 # Add, update or remove ulimit lines to set RAM and process restrictions
 sub set_php_wrapper_ulimits
 {
-local ($d, $rv) = @_;
+my ($d, $rv) = @_;
 foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 	foreach my $f (glob("$dir/php?.*cgi")) {
-		local $lref = &read_file_lines_as_domain_user($d, $f);
+		my $lref = &read_file_lines_as_domain_user($d, $f);
 		foreach my $u ([ 'v', int($rv->{'mem'}/1024) ],
 			       [ 'u', $rv->{'procs'} ],
 			       [ 't', $rv->{'time'}*60 ]) {
@@ -954,7 +954,7 @@ foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 				}
 
 			# Find current line
-			local $lnum;
+			my $lnum;
 			for(my $i=0; $i<@$lref; $i++) {
 				if ($lref->[$i] =~ /^ulimit\s+\-(\S)\s+(\d+)/ &&
 				    $1 eq $u->[0]) {
@@ -977,7 +977,7 @@ foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 			}
 		# If using process limits, we can't exec PHP as there will
 		# be no chance for the limit to be applied :(
-		local $ll = scalar(@$lref) - 1;
+		my $ll = scalar(@$lref) - 1;
 		if ($lref->[$ll] =~ /php/) {
 			if ($rv->{'procs'} && $lref->[$ll] =~ /^exec\s+(.*)/) {
 				# Remove exec
@@ -1115,7 +1115,7 @@ foreach my $v (@all_possible_php_versions) {
 foreach my $path (split(/\t+/, $config{'php_paths'})) {
 	next if (!-x $path);
 	&clean_environment();
-	local $out = &backquote_command(quotemeta($path).
+	my $out = &backquote_command(quotemeta($path).
 		" -v 2>&1 </dev/null");
 	&reset_environment();
 	if ($out =~ /PHP\s+(\d+.\d+)/ && !$vercmds{$1}) {
@@ -1123,13 +1123,13 @@ foreach my $path (split(/\t+/, $config{'php_paths'})) {
 		}
 	}
 
-local $php = &has_command("php-cgi");
+my $php = &has_command("php-cgi");
 if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	# What version is the php command? If it is a version we don't have
 	# a command for yet, use it.
 	if (!$php_command_version_cache) {
 		&clean_environment();
-		local $out = &backquote_command(quotemeta($php).
+		my $out = &backquote_command(quotemeta($php).
 			" -v 2>&1 </dev/null");
 		&reset_environment();
 		if ($out =~ /PHP\s+(\d+\.\d+)/) {
@@ -1240,7 +1240,7 @@ return $php_command_for_version_cache{$v,$cgimode};
 # version number, like 5.2.7
 sub get_php_version
 {
-local ($cmd, $d) = @_;
+my ($cmd, $d) = @_;
 if (exists($get_php_version_cache{$cmd})) {
 	return $get_php_version_cache{$cmd};
 	}
@@ -1248,7 +1248,7 @@ if ($cmd !~ /^\//) {
 	# A number was given .. find the matching command
 	my $shortcmd = $cmd;
 	$shortcmd =~ s/^(\d+\.\d+)\..*/$1/;  # Reduce version to 5.x
-	local ($phpn) = grep { $_->[0] == $cmd ||
+	my ($phpn) = grep { $_->[0] == $cmd ||
 			       $_->[0] == $shortcmd }
 			     &list_available_php_versions($d);
 	if (!$phpn && $cmd =~ /^5\./) {
@@ -1269,7 +1269,7 @@ if ($cmd !~ /^\//) {
 	$cmd = $phpn->[1] || &has_command("php$cmd") || &has_command("php");
 	}
 &clean_environment();
-local $out = &backquote_command(quotemeta($cmd)." -v 2>&1 </dev/null");
+my $out = &backquote_command(quotemeta($cmd)." -v 2>&1 </dev/null");
 &reset_environment();
 if ($out =~ /PHP\s+([0-9\.]+)/) {
 	$get_php_version_cache{$cmd} = $1;
@@ -1284,7 +1284,7 @@ return undef;
 sub can_domain_php_directories
 {
 my ($d, $mode) = @_;
-local $p = &domain_has_website($d);
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web' &&
     &plugin_defined($p, "feature_can_domain_php_directories")) {
 	return &plugin_call($p, "feature_can_domain_php_directories",
@@ -1580,16 +1580,16 @@ return 0;
 # commands.
 sub list_domain_php_inis
 {
-local ($d, $mode) = @_;
-local @inis;
+my ($d, $mode) = @_;
+my @inis;
 foreach my $v (&list_available_php_versions($d, $mode)) {
-	local $ifile = "$d->{'home'}/etc/php$v->[0]/php.ini";
+	my $ifile = "$d->{'home'}/etc/php$v->[0]/php.ini";
 	if (-r $ifile) {
 		push(@inis, [ $v->[0], $ifile, $v->[1] ]);
 		}
 	}
 if (!@inis) {
-	local $ifile = "$d->{'home'}/etc/php.ini";
+	my $ifile = "$d->{'home'}/etc/php.ini";
 	if (-r $ifile) {
 		push(@inis, [ undef, $ifile, undef ]);
 		}
@@ -1602,8 +1602,8 @@ return @inis;
 # the home directory only
 sub find_domain_php_ini_files
 {
-local ($d) = @_;
-local @inis;
+my ($d) = @_;
+my @inis;
 foreach my $f (glob("$d->{'home'}/etc/php*/php.ini")) {
 	if ($f =~ /php([0-9\.]+)\/php.ini$/) {
 		push(@inis, [ $1, $f ]);
@@ -1616,9 +1616,9 @@ return @inis;
 # Returns the php.ini file path for this domain and a PHP version
 sub get_domain_php_ini
 {
-local ($d, $phpver, $dir) = @_;
-local @inis = &list_domain_php_inis($d);
-local ($ini) = grep { $_->[0] == $phpver } @inis;
+my ($d, $phpver, $dir) = @_;
+my @inis = &list_domain_php_inis($d);
+my ($ini) = grep { $_->[0] == $phpver } @inis;
 if (!$ini) {
 	($ini) = grep { !$_->[0]} @inis;
 	}
@@ -1639,10 +1639,10 @@ else {
 # Returns the full path to the global PHP config file
 sub get_global_php_ini
 {
-local ($ver, $mode) = @_;
-local $nodotv = $ver;
+my ($ver, $mode) = @_;
+my $nodotv = $ver;
 $nodotv =~ s/\.//g;
-local $shortv = $ver;
+my $shortv = $ver;
 $shortv =~ s/^(\d+\.\d+)\..*$/$1/g;
 foreach my $i ("/opt/rh/php$nodotv/root/etc/php.ini",
 	       "/opt/rh/php$nodotv/lib/php.ini",
@@ -1681,19 +1681,19 @@ return undef;
 # if not set.
 sub get_php_mysql_socket
 {
-local ($d) = @_;
+my ($d) = @_;
 return 'none' if (!&foreign_check("phpini"));
-local $mode = &get_domain_php_mode($d);
-local @vers = &list_available_php_versions($d, $mode);
+my $mode = &get_domain_php_mode($d);
+my @vers = &list_available_php_versions($d, $mode);
 return 'none' if (!@vers);
-local $tmpl = &get_template($d->{'template'});
-local $inifile = $tmpl->{'web_php_ini_'.$vers[0]->[0]};
+my $tmpl = &get_template($d->{'template'});
+my $inifile = $tmpl->{'web_php_ini_'.$vers[0]->[0]};
 if (!$inifile || $inifile eq "none" || !-r $inifile) {
 	$inifile = &get_global_php_ini($vers[0]->[0], $mode);
 	}
 &foreign_require("phpini");
-local $gconf = &phpini::get_config($inifile);
-local $sock = &phpini::find_value("mysql.default_socket", $gconf);
+my $gconf = &phpini::get_config($inifile);
+my $sock = &phpini::find_value("mysql.default_socket", $gconf);
 return $sock;
 }
 
@@ -1767,8 +1767,8 @@ my ($d, $modetype) = @_;
 # Update all of a domain's PHP wrapper scripts with the new number of children
 sub save_domain_php_children
 {
-local ($d, $children, $nowritable) = @_;
-local $p = &domain_has_website($d);
+my ($d, $children, $nowritable) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_save_web_php_children", $d,
 			    $children, $nowritable);
@@ -1779,15 +1779,15 @@ elsif (!$p) {
 my $mode = &get_domain_php_mode($d);
 if ($mode eq "fcgid") {
 	# Update in FCGI wrapper scripts
-	local $count = 0;
+	my $count = 0;
 	&set_php_wrappers_writable($d, 1) if (!$nowritable);
 	foreach my $ver (&list_available_php_versions($d, "fcgi")) {
-		local $wrapper = "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi";
+		my $wrapper = "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi";
 		next if (!-r $wrapper);
 
 		# Find the current line
-		local $lref = &read_file_lines_as_domain_user($d, $wrapper);
-		local $idx;
+		my $lref = &read_file_lines_as_domain_user($d, $wrapper);
+		my $idx;
 		for(my $i=0; $i<@$lref; $i++) {
 			if ($lref->[$i] =~ /PHP_FCGI_CHILDREN\s*=\s*\d+/) {
 				$idx = $i;
@@ -1803,7 +1803,7 @@ if ($mode eq "fcgid") {
 			}
 		elsif ($children && !defined($idx)) {
 			# Add before export line
-			local $found = 0;
+			my $found = 0;
 			for(my $e=0; $e<@$lref; $e++) {
 				if ($lref->[$e] =~ /^export\s+PHP_FCGI_CHILDREN/) {
 					splice(@$lref, $e, 0,
@@ -1869,11 +1869,11 @@ else {
 # Returns an error message if the domain's PHP config is invalid
 sub check_php_configuration
 {
-local ($d, $ver, $cmd) = @_;
+my ($d, $ver, $cmd) = @_;
 $cmd ||= &has_command("php".$ver) || &has_command("php");
-local $mode = &get_domain_php_mode($d);
+my $mode = &get_domain_php_mode($d);
 if ($mode eq "mod_php") {
-	local $gini = &get_global_php_ini($ver, $mode);
+	my $gini = &get_global_php_ini($ver, $mode);
 	if ($gini) {
 		$gini =~ s/\/php.ini$//;
 		$ENV{'PHPRC'} = $gini;
@@ -1883,8 +1883,8 @@ else {
 	$ENV{'PHPRC'} = &get_domain_php_ini($d, $ver, 1);
 	}
 &clean_environment();
-local $out = &backquote_command(quotemeta($cmd)." -d error_log= -m 2>&1");
-local @errs;
+my $out = &backquote_command(quotemeta($cmd)." -d error_log= -m 2>&1");
+my @errs;
 foreach my $l (split(/\r?\n/, $out)) {
 	$l = &html_tags_to_text($l);
 	if ($l =~ /(PHP\s+)?Fatal\s+error:\s*(.*)/) {
@@ -1902,15 +1902,15 @@ return join(", ", @errs);
 # Returns a list of PHP modules available for some domain. Uses caching.
 sub list_php_modules
 {
-local ($d, $ver, $cmd) = @_;
-local $mode = &get_domain_php_mode($d);
+my ($d, $ver, $cmd) = @_;
+my $mode = &get_domain_php_mode($d);
 if (!defined($main::php_modules{$ver,$d->{'id'}})) {
 	$cmd ||= &has_command("php".$ver) || &has_command("php");
 	$main::php_modules{$ver} = [ ];
 	if ($mode eq "mod_php" || $mode eq "fpm") {
 		# Use global PHP config, since with mod_php we can't do
 		# per-domain configurations
-		local $gini = &get_global_php_ini($ver, $mode);
+		my $gini = &get_global_php_ini($ver, $mode);
 		if ($gini) {
 			$gini =~ s/\/php.ini$//;
 			$ENV{'PHPRC'} = $gini;
@@ -1945,8 +1945,8 @@ return @rv;
 # number of changes made.
 sub fix_php_ini_files
 {
-local ($d, $fixes) = @_;
-local ($mode, $rv);
+my ($d, $fixes) = @_;
+my ($mode, $rv);
 if (defined(&get_domain_php_mode) &&
     ($mode = &get_domain_php_mode($d)) &&
     $mode ne "mod_php" &&
@@ -1957,10 +1957,10 @@ if (defined(&get_domain_php_mode) &&
 	foreach my $i (&list_domain_php_inis($d)) {
 		&unflush_file_lines($i->[1]);	# In case cached
 		undef($phpini::get_config_cache{$i->[1]});
-		local $pconf = &phpini::get_config($i->[1]);
+		my $pconf = &phpini::get_config($i->[1]);
 		foreach my $f (@$fixes) {
-			local $ov = &phpini::find_value($f->[0], $pconf);
-			local $nv = $ov;
+			my $ov = &phpini::find_value($f->[0], $pconf);
+			my $nv = $ov;
 			if (!defined($f->[1])) {
 				# Always change
 				$nv = $f->[2];
@@ -2043,12 +2043,12 @@ return $rv;
 # If the extension_dir in a domain's php.ini file is invalid, try to fix it
 sub fix_php_extension_dir
 {
-local ($d) = @_;
+my ($d) = @_;
 return if (!&foreign_check("phpini"));
 &foreign_require("phpini");
 foreach my $i (&list_domain_php_inis($d)) {
-	local $pconf = &phpini::get_config($i->[1]);
-	local $ed = &phpini::find_value("extension_dir", $pconf);
+	my $pconf = &phpini::get_config($i->[1]);
+	my $ed = &phpini::find_value("extension_dir", $pconf);
 	if ($ed && !-d $ed) {
 		# Doesn't exist .. maybe can fix
 		my $newed = $ed;
@@ -2071,12 +2071,12 @@ foreach my $i (&list_domain_php_inis($d)) {
 # Get the PHP version used by the domain by default (for public_html)
 sub get_domain_php_version
 {
-local ($d, $mode) = @_;
+my ($d, $mode) = @_;
 $mode ||= &get_domain_php_mode($d);
 if ($mode ne "mod_php") {
-	local @dirs = &list_domain_php_directories($d);
-	local $phd = &public_html_dir($d);
-        local ($hdir) = grep { $_->{'dir'} eq $phd } @dirs;
+	my @dirs = &list_domain_php_directories($d);
+	my $phd = &public_html_dir($d);
+        my ($hdir) = grep { $_->{'dir'} eq $phd } @dirs;
         $hdir ||= $dirs[0];
 	return $hdir ? $hdir->{'version'} : undef;
 	}
@@ -2113,10 +2113,10 @@ return $phpver;
 # public_html directory
 sub create_php_ini_link
 {
-local ($d, $mode) = @_;
-local $ver = &get_domain_php_version($d, $mode);
+my ($d, $mode) = @_;
+my $ver = &get_domain_php_version($d, $mode);
 if ($ver) {
-	local $etc = "$d->{'home'}/etc";
+	my $etc = "$d->{'home'}/etc";
 	&unlink_file_as_domain_user($d, "$etc/php.ini");
 	&symlink_file_as_domain_user($d, "php".$ver."/php.ini", "$etc/php.ini");
 	}
@@ -2425,7 +2425,7 @@ return $rv;
 sub get_domain_php_fpm_port
 {
 my ($d) = @_;
-local $p = &domain_has_website($d);
+my $p = &domain_has_website($d);
 if ($p ne 'web') {
 	if (!&plugin_defined($p, "feature_get_domain_php_fpm_port")) {
 		return (-1, "Not supported by plugin $p");
@@ -2640,7 +2640,7 @@ else {
 	my $defmaxspare = &get_php_max_spare_servers($defchildren);
 	my $defminspare = &get_php_min_spare_servers($defchildren);
 	my $defstartservers = &get_php_start_servers($defchildren);
-	local $tmp = &create_server_tmp($d);
+	my $tmp = &create_server_tmp($d);
 	my $lref = &read_file_lines($file);
 	@$lref = ( "[$d->{'id'}]",
 		   "user = ".$d->{'user'},

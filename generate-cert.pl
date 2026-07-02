@@ -72,7 +72,7 @@ if (!$module_name) {
 
 # Parse command-line args
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		$dname = shift(@ARGV);
 		}
@@ -124,7 +124,7 @@ my $merr = &making_changes();
 if ($self) {
 	# Break SSL linkages that no longer work with this cert
 	@beforecerts = &get_all_domain_service_ssl_certs($d);
-	local $newcert = { 'cn' => $subject{'cn'} || "*.$d->{'dom'}",
+	my $newcert = { 'cn' => $subject{'cn'} || "*.$d->{'dom'}",
 			   'alt' => \@alts };
 	&break_invalid_ssl_linkages($d, $newcert);
 

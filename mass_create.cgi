@@ -60,7 +60,7 @@ $sep = "\t" if ($sep eq "tab");
 foreach $line (@lines) {
 	$lnum++;
 	next if ($line !~ /\S/);
-	local ($dname, $owner, $pass, $user, $pname, $ip, $aname) = split($sep, $line, -1);
+	my ($dname, $owner, $pass, $user, $pname, $ip, $aname) = split($sep, $line, -1);
 	$dname = lc(&parse_domain_name($dname));
 	$user = lc($user);
 
@@ -85,7 +85,7 @@ foreach $line (@lines) {
 					$text{'setup_edomain4'});
 		next;
 		}
-	local $parentdom;
+	my $parentdom;
 	if ($pname) {
 		$parentdom = &get_domain_by("dom", $pname);
 		if (!$parentdom) {
@@ -100,7 +100,7 @@ foreach $line (@lines) {
 	elsif (!&can_create_master_servers()) {
 		&line_error($text{'cmass_emustparent'});
 		}
-	local $aliasdom;
+	my $aliasdom;
 	if ($aname) {
 		$aliasdom = &get_domain_by("dom", $aname);
 		if (!$aliasdom) {
@@ -113,16 +113,16 @@ foreach $line (@lines) {
 		}
 
 	# Get the reseller
-	local $resel = $parentdom ? $parentdom->{'reseller'} : $defresel;
+	my $resel = $parentdom ? $parentdom->{'reseller'} : $defresel;
 
 	# Get the template
-	local $tmpl = &get_template($parentdom ? $in{'stemplate'}
+	my $tmpl = &get_template($parentdom ? $in{'stemplate'}
 					       : $in{'ptemplate'});
 
 	# Validate IP address
-	local $defip = &get_default_ip($resel);
-	local $defip6 = &get_default_ip6($resel);
-	local ($virt, $virtalready, $ip6, $virt6, $allocated);
+	my $defip = &get_default_ip($resel);
+	my $defip6 = &get_default_ip6($resel);
+	my ($virt, $virtalready, $ip6, $virt6, $allocated);
 	if ($aliasdom) {
 		$ip = $aliasdom->{'ip'};
 		$ip6 = $aliasdom->{'ip6'};
@@ -218,7 +218,7 @@ foreach $line (@lines) {
 		}
 
 	# Work out username
-	local $group;
+	my $group;
 	if (!$parentdom) {
 		if (!$user) {
 			# Select a username
@@ -253,7 +253,7 @@ foreach $line (@lines) {
 			}
 
 		# Check username restrictions
-		local $uerr = &useradmin::check_username_restrictions($user);
+		my $uerr = &useradmin::check_username_restrictions($user);
 		if ($uerr) {
 			&line_error(&text('setup_eusername', $user, $uerr));
 			next;
@@ -261,7 +261,7 @@ foreach $line (@lines) {
 		}
 
 	# Check if domains limit has been exceeded
-	local ($dleft, $dreason, $dmax) =
+	my ($dleft, $dreason, $dmax) =
 		&count_domains($aliasdom ? "aliasdoms" :
 			       $parentdom ? "realdoms" : "topdoms");
 	if ($dleft == 0) {
@@ -271,15 +271,15 @@ foreach $line (@lines) {
 
 	# Make sure domain is under parent, if required
 	if ($parentdom) {
-		local $derr = &allowed_domain_name($parentdom, $dname);
+		my $derr = &allowed_domain_name($parentdom, $dname);
 		if ($derr) {
 			&line_error($derr);
 			next;
 			}
 		}
 
-	local (%gtaken, %ggtaken, %taken, %utaken);
-	local ($gid, $ugid, $uid);
+	my (%gtaken, %ggtaken, %taken, %utaken);
+	my ($gid, $ugid, $uid);
 	if ($parentdom) {
 		# User and group IDs come from parent
 		$gid = $parentdom->{'gid'};
@@ -293,7 +293,7 @@ foreach $line (@lines) {
 		$gid = $gid = $uid = undef;
 		$ugroup = $group;
 		}
-	local $prefix = &compute_prefix($dname, $group, $parentdom, 1);
+	my $prefix = &compute_prefix($dname, $group, $parentdom, 1);
 
 	# Work out the plan
 	if ($parentdom) {
@@ -308,7 +308,7 @@ foreach $line (@lines) {
 		}
 
 	# Build up domain object
-	local %dom;
+	my %dom;
 	%dom = ( 'id', &domain_id(),
 		 'dom', $dname,
 		 'user', $user,
@@ -372,19 +372,19 @@ foreach $line (@lines) {
 	&complete_domain(\%dom);
 
 	# Check for various clashes
-	local $derr = &virtual_server_depends(\%dom);
+	my $derr = &virtual_server_depends(\%dom);
 	if ($derr) {
 		&line_error($derr);
 		next;
 		}
-	local $cerr = &virtual_server_clashes(\%dom);
+	my $cerr = &virtual_server_clashes(\%dom);
 	if ($cerr) {
 		&line_error($cerr);
 		next;
 		}
 
 	# Check if this new domain would exceed any limits
-	local $lerr = &virtual_server_limits(\%dom);
+	my $lerr = &virtual_server_limits(\%dom);
 	if ($lerr) {
 		&line_error($lerr);
 		next;
@@ -407,7 +407,7 @@ foreach $line (@lines) {
 	else {
 		&set_all_null_print();
 		}
-	local $err = &create_virtual_server(\%dom, $parentdom,
+	my $err = &create_virtual_server(\%dom, $parentdom,
 			      $parentdom ? $parentdom->{'user'} : undef, 0, 1,
 			      $parentdom ? undef : $pass);
 
@@ -458,7 +458,7 @@ print &text('cmass_complete', $count, $ecount),"<br>\n";
 
 sub line_error
 {
-local ($msg) = @_;
+my ($msg) = @_;
 print "<font color=#ff0000>";
 if (!$dname) {
 	print &text('cmass_eline', $lnum, $msg);

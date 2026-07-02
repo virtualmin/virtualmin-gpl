@@ -32,7 +32,7 @@ if (!$module_name) {
 # Parse command-line args
 $delete = 0;
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--source") {
 		$src = shift(@ARGV);
 		}

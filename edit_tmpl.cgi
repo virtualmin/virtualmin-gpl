@@ -113,20 +113,20 @@ print "<script>",&virtualmin_ui_apply_radios(),"</script>\n";
 #		 &disable-fields, [no-disable-on-none])
 sub none_def_input
 {
-local ($name, $value, $final, $nonone, $nodef, $nonemsg, $dis, $nodisnone) = @_;
-local $rv;
-local $mode = $value eq "none" ? 0 :
+my ($name, $value, $final, $nonone, $nodef, $nonemsg, $dis, $nodisnone) = @_;
+my $rv;
+my $mode = $value eq "none" ? 0 :
 	      $value eq "" ? 1 : 2;
-local @opts;
+my @opts;
 push(@opts, 0) if (!$nonone);
 push(@opts, 1) if (!$tmpl->{'default'} && !$nodef);
 push(@opts, 2);
 if (@opts > 1) {
-	local $m;
-	local $dis1 = @$dis ? &js_disable_inputs($dis, [ ]) : undef;
-	local $dis2 = @$dis ? &js_disable_inputs([ ], $dis) : undef;
+	my $m;
+	my $dis1 = @$dis ? &js_disable_inputs($dis, [ ]) : undef;
+	my $dis2 = @$dis ? &js_disable_inputs([ ], $dis) : undef;
 	foreach $m (@opts) {
-		local $disn = $m == 2 ? $dis2 :
+		my $disn = $m == 2 ? $dis2 :
 			      $m == 0 && $nodisnone ? $dis2 :
 			      $m == 0 && !$nodisnone ? $dis1 :
 				        $dis1;

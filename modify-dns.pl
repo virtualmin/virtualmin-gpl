@@ -137,7 +137,7 @@ $config{'dns'} || &usage("The BIND DNS server is not enabled for Virtualmin");
 
 # Parse command-line args
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		push(@dnames, shift(@ARGV));
 		}
@@ -592,19 +592,19 @@ foreach $d (@doms) {
 		}
 
 	# Remove records from the domain
-	local ($recs, $file);
-	local $changed;
+	my ($recs, $file);
+	my $changed;
 	if (@delrecs && !&copy_alias_records($d)) {
 		&$first_print(&text('spf_delrecs', scalar(@delrecs)));
 		if (!$recs) {
 			&pre_records_change($d);
 			($recs, $file) = &get_domain_dns_records_and_file($d);
 			}
-		local @alld;
+		my @alld;
 		foreach my $rn (@delrecs) {
 			my ($name, $type, @values) = @$rn;
 			$name = &expand_dns_record($name, $d);
-			local @d = grep { $_->{'name'} eq $name &&
+			my @d = grep { $_->{'name'} eq $name &&
 					 lc($_->{'type'}) eq lc($type) } @$recs;
 			if (@values) {
 				# Also filter by values

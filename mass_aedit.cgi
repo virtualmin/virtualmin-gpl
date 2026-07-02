@@ -30,7 +30,7 @@ $count = $ecount = $mcount = $dcount = 0;
 USER: foreach $line (@lines) {
 	$lnum++;
 	next if ($line !~ /\S/);
-	local ($name, $desc, @dests) = split(/:/, $line, -1);
+	my ($name, $desc, @dests) = split(/:/, $line, -1);
 
 	# Make sure needed parameters are given
 	if ($name =~ /^\@\S*$/) {
@@ -182,7 +182,7 @@ print &text('aedit_complete', $count, $ecount, $mcount, $dcount),"<br>\n";
 
 sub line_error
 {
-local ($msg) = @_;
+my ($msg) = @_;
 print "<font color=#ff0000>";
 if (!$name) {
 	print &text('cmass_eline', $lnum, $msg);

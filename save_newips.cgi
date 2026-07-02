@@ -90,7 +90,7 @@ foreach $d (@doms) {
 	&error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
 	foreach $f (@features) {
-		local $mfunc = "modify_$f";
+		my $mfunc = "modify_$f";
 		if ($config{$f} && $d->{$f}) {
 			&try_function($f, $mfunc, $d, $oldd);
 			}
@@ -108,7 +108,7 @@ foreach $d (@doms) {
 
 	# Run the after command
 	&set_domain_envs($d, "MODIFY_DOMAIN", undef, \%oldd);
-	local $merr = &made_changes();
+	my $merr = &made_changes();
 	&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
 		if (defined($merr));
 	&reset_domain_envs($d);

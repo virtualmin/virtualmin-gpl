@@ -77,7 +77,7 @@ $owner = 1;
 @allplans = &list_plans();
 &parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--user-only") {
 		$useronly = 1;
 		}
@@ -302,8 +302,8 @@ if ($multiline) {
 		$recipient_bcc = &get_all_domains_recipient_bcc();
 		}
 	foreach $d (@doms) {
-		local @users = &list_domain_users($d, 0, 1, 0, 1);
-		local ($duser) = grep { $_->{'user'} eq $d->{'user'} } @users;
+		my @users = &list_domain_users($d, 0, 1, 0, 1);
+		my ($duser) = grep { $_->{'user'} eq $d->{'user'} } @users;
 		print "$d->{'dom'}\n";
 		print "    ID: $d->{'id'}\n";
 		print "    File: $d->{'file'}\n";
@@ -431,7 +431,7 @@ if ($multiline) {
 				print "    IP address: $d->{'ip'} (Private)\n";
 				}
 			else {
-				local $iface = &get_address_iface($d->{'ip'});
+				my $iface = &get_address_iface($d->{'ip'});
 				print "    IP address: $d->{'ip'} ",
 				      "(On $iface)\n";
 				}
@@ -444,7 +444,7 @@ if ($multiline) {
 				print "    IP address: $d->{'ip6'} (Private)\n";
 				}
 			else {
-				local $iface = &get_address_iface($d->{'ip6'});
+				my $iface = &get_address_iface($d->{'ip6'});
 				print "    IP address: $d->{'ip6'} ",
 				      "(On $iface)\n";
 				}

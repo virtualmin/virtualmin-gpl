@@ -5,7 +5,7 @@
 # Make sure the given file is a DirectAdmin backup, and contains the domain
 sub migration_directadmin_validate
 {
-local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
+my ($file, $dom, $user, $parent, $prefix, $pass) = @_;
 
 # Password is needed for DirectAdmin migrations
 if (!$parent && !$pass) {
@@ -13,10 +13,10 @@ if (!$parent && !$pass) {
 	}
 
 # Extract the backup and verify it
-local ($ok, $root) = &extract_directadmin_dir($file);
+my ($ok, $root) = &extract_directadmin_dir($file);
 $ok || return ("Not a DirectAdmin tar.gz file : $root");
-local $domains = "$root/domains";
-local $backup = "$root/backup";
+my $domains = "$root/domains";
+my $backup = "$root/backup";
 if (!-r $domains && $dom && -d "$backup/$dom") {
 	$domains = $backup;
 	}
@@ -24,7 +24,7 @@ if (!-r $domains && $dom && -d "$backup/$dom") {
 
 if (!$dom) {
 	# Try to work out the default domain
-	local @domdirs;
+	my @domdirs;
 	if (opendir(DOMDIRS, $domains)) {
 		@domdirs = grep { !/^default$/ && -r "$backup/$_/domain.conf" }
 			   readdir(DOMDIRS);
@@ -43,7 +43,7 @@ else {
 
 # If no username was given, use the default
 if (!$user) {
-	local %uinfo;
+	my %uinfo;
 	&read_env_file("$backup/user.conf", \%uinfo) ||
 		return ("$backup/user.conf not found!");
 	$user = $uinfo{'username'};
@@ -59,53 +59,53 @@ return (undef, $dom, $user, $pass);
 # created.
 sub migration_directadmin_migrate
 {
-local ($file, $dom, $user, $webmin, $template, $ipinfo, $pass, $parent,
+my ($file, $dom, $user, $webmin, $template, $ipinfo, $pass, $parent,
        $prefix, $email, $plan) = @_;
-local ($ok, $root) = &extract_directadmin_dir($file);
+my ($ok, $root) = &extract_directadmin_dir($file);
 $ok || return ("Not a DirectAdmin tar.gz file : $root");
-local $domains = "$root/domains";
-local $backup = "$root/backup";
-local $imap = "$root/imap";
+my $domains = "$root/domains";
+my $backup = "$root/backup";
+my $imap = "$root/imap";
 if (!-r $domains && $dom && -d "$backup/$dom") {
 	$domains = $backup;
 	}
 -d $domains && -d $backup || return ("Not a DirectAdmin backup file");
-local $tmpl = &get_template($template);
+my $tmpl = &get_template($template);
 
 # Check for prefix clash
 $prefix ||= &compute_prefix($dom, undef, $parent, 1);
-local $pclash = &get_domain_by("prefix", $prefix);
+my $pclash = &get_domain_by("prefix", $prefix);
 $pclash && &error("A virtual server using the prefix $prefix already exists");
 
 # Get shells for users
-local ($nologin_shell, $ftp_shell, undef, $def_shell) =
+my ($nologin_shell, $ftp_shell, undef, $def_shell) =
 	&get_common_available_shells();
 $nologin_shell ||= $def_shell;
 $ftp_shell ||= $def_shell;
 
 # Work out the username again if it wasn't supplied
-local %uinfo;
+my %uinfo;
 &read_env_file("$backup/user.conf", \%uinfo) ||
 	&error("$backup/user.conf not found!");
-local $origuser = $uinfo{'username'};
+my $origuser = $uinfo{'username'};
 $user ||= $origuser;
 $user || &error("Could not work out username automatically");
-local $group = $user;
-local $ugroup = $group;
-local %dinfo;
+my $group = $user;
+my $ugroup = $group;
+my %dinfo;
 &read_env_file("$backup/$dom/domain.conf", \%dinfo) ||
 	&error("$backup/$dom/domain.conf not found!");
 
 # First work out what features we have ..
 &$first_print("Checking for DirectAdmin features ..");
-local @got = &directadmin_domain_features($dom, $domains, $backup, $imap);
+my @got = &directadmin_domain_features($dom, $domains, $backup, $imap);
 
 # Tell the user what we have got
 @got = &show_check_migration_features(@got);
-local %got = map { $_, 1 } @got;
+my %got = map { $_, 1 } @got;
 
 # Work out user and group IDs
-local ($gid, $ugid, $uid, $duser);
+my ($gid, $ugid, $uid, $duser);
 if ($parent) {
 	# UID and GID come from parent
 	$gid = $parent->{'gid'};
@@ -122,8 +122,8 @@ else {
 	}
 
 # Work out quota
-local $quota;
-local $bsize = &quota_bsize("home");
+my $quota;
+my $bsize = &quota_bsize("home");
 $bsize ||= 1024;
 if ($uinfo{'quota'} && $uinfo{'quota'} ne 'unlimited') {
 	# Assume in MB
@@ -131,7 +131,7 @@ if ($uinfo{'quota'} && $uinfo{'quota'} ne 'unlimited') {
 	}
 
 # Create the virtual server object
-local %dom;
+my %dom;
 $prefix ||= &compute_prefix($dom, $group, $parent, 1);
 $plan = $parent ? &get_plan($parent->{'plan'}) :
 	$plan ? $plan : &get_default_plan();
@@ -210,7 +210,7 @@ if ($cerr) {
 # Create the initial server
 &$first_print("Creating initial virtual server $dom ..");
 &$indent_print();
-local $err = &create_virtual_server(\%dom, $parent,
+my $err = &create_virtual_server(\%dom, $parent,
 				    $parent ? $parent->{'user'} : undef);
 &$outdent_print();
 if ($err) {
@@ -220,7 +220,7 @@ if ($err) {
 else {
 	&$second_print(".. done");
 	}
-local @rvdoms = ( \%dom );
+my @rvdoms = ( \%dom );
 
 # Copy over public_html and private_html dirs
 &copy_directadmin_html_dir(\%dom, $domains);
@@ -246,15 +246,15 @@ local @rvdoms = ( \%dom );
 # Lock the user DB and build list of used IDs
 &obtain_lock_unix(\%dom);
 &obtain_lock_mail(\%dom);
-local (%taken, %utaken);
+my (%taken, %utaken);
 &build_taken(\%taken, \%utaken);
 
 &foreign_require("mailboxes");
 $mailboxes::no_permanent_index = 1;
-local %usermap;
+my %usermap;
 if ($got{'mail'}) {
 	# Migrate mail users
-	local $mcount = 0;
+	my $mcount = 0;
 	&$first_print("Re-creating mail users ..");
 	&foreign_require("mailboxes");
 	my $lref = &read_file_lines("$backup/$dom/email/quota", 1);
@@ -269,7 +269,7 @@ if ($got{'mail'}) {
 		my ($muser, $crypt) = split(/:/, $l);
 		next if (!$muser);
 		next if ($muser eq $user);	# Domain owner
-		local $uinfo = &create_initial_user(\%dom);
+		my $uinfo = &create_initial_user(\%dom);
 		$uinfo->{'user'} = &userdom_name(lc($muser), \%dom);
 		$uinfo->{'pass'} = $crypt;
 		$uinfo->{'uid'} = &allocate_uid(\%taken);
@@ -282,18 +282,18 @@ if ($got{'mail'}) {
 		&create_user_home($uinfo, \%dom, 1);
 		&create_user($uinfo, \%dom);
 		$taken{$uinfo->{'uid'}}++;
-		local ($crfile, $crtype) = &create_mail_file($uinfo, \%dom);
+		my ($crfile, $crtype) = &create_mail_file($uinfo, \%dom);
 
 		# Move his Maildir directory
 		# XXX sub-folders??
-		local $mailsrc = "$backup/$dom/email/data/imap/$muser/Maildir";
+		my $mailsrc = "$backup/$dom/email/data/imap/$muser/Maildir";
 		if (!-d $mailsrc) {
 			$mailsrc = "$imap/$dom/$muser/Maildir";
 			}
 		if (-d $mailsrc) {
-			local $srcfolder = { 'type' => 1,
+			my $srcfolder = { 'type' => 1,
 					     'file' => $mailsrc };
-			local $dstfolder = { 'file' => $crfile,
+			my $dstfolder = { 'file' => $crfile,
 					     'type' => $crtype };
 			&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
 			&set_mailfolder_owner($dstfolder, $uinfo);
@@ -308,14 +308,14 @@ if ($got{'mail'}) {
 &copy_directadmin_mail_aliases(\%dom, $backup);
 
 # Migrate FTP users
-local $fcount = 0;
+my $fcount = 0;
 &$first_print("Copying FTP users ..");
 my $lref = &read_file_lines("$backup/$dom/ftp.passwd");
 foreach my $l (@$lref) {
 	$l =~ /^([^@]+)@[^=]+=passwd=([^=]+)&path=([^=\&]+)/ || next;
 	my ($fuser, $crypt, $path) = ($1, $2, $3);
 	next if ($fuser eq $user);      # Domain owner
-	local $uinfo = &create_initial_user(\%dom, 0, 1);
+	my $uinfo = &create_initial_user(\%dom, 0, 1);
 	$uinfo->{'user'} = &userdom_name(lc($fuser), \%dom);
 	$uinfo->{'pass'} = $crypt;
 	$uinfo->{'uid'} = $dom{'uid'};
@@ -348,31 +348,31 @@ foreach my $l (@$lref) {
 
 if ($got{'mysql'}) {
 	# Re-create all MySQL databases
-	local $mycount = 0;
-	local $myucount = 0;
+	my $mycount = 0;
+	my $myucount = 0;
 	&$first_print("Re-creating and loading MySQL databases ..");
 	&disable_quotas(\%dom);
 	foreach my $myf (glob("$backup/*.sql")) {
 		if ($myf =~ /\/([^\/]+)\.sql$/) {
-			local $db = $1;
+			my $db = $1;
 			&$indent_print();
 			&create_mysql_database(\%dom, $db);
 			&save_domain(\%dom, 1);
-			local ($ex, $out) = &execute_dom_sql_file(\%dom, $db, $myf);
+			my ($ex, $out) = &execute_dom_sql_file(\%dom, $db, $myf);
 			if ($ex) {
 				&$first_print("Error loading $db : $out");
 				}
 			&$outdent_print();
 
 			# Create extra DB users
-			local %dbusers;
+			my %dbusers;
 			&read_env_file("$backup/$db.conf", \%dbusers);
 			foreach my $myuser (keys %dbusers) {
 				next if ($myuser eq $user);
 				next if ($dbusers{$myuser} !~ /passwd=([^&]+)/);
 				my $mypass = $1;
 				$mypass =~ s/^%2A/\*/;
-				local $myuinfo = &create_initial_user(\%dom);
+				my $myuinfo = &create_initial_user(\%dom);
 				$myuinfo->{'user'} = $myuser;
 				$myuinfo->{'pass'} = "x";	# not needed
 				$myuinfo->{'mysql_pass'} = $mypass;
@@ -383,7 +383,7 @@ if ($got{'mysql'}) {
 				$myuinfo->{'dbs'} = [ { 'type' => 'mysql',
 							'name' => $db } ];
 				delete($myuinfo->{'email'});
-				local $already = $usermap{$myuinfo->{'user'}};
+				my $already = $usermap{$myuinfo->{'user'}};
 				if ($already) {
 					# User already exists, so just give him
 					# access to the dbs
@@ -422,7 +422,7 @@ foreach my $adom (keys %aliaslist) {
 		next;
 		}
 	&$indent_print();
-	local %alias = ( 'id', &domain_id(),
+	my %alias = ( 'id', &domain_id(),
 			 'dom', $adom,
 			 'user', $dom{'user'},
 			 'group', $dom{'group'},
@@ -451,7 +451,7 @@ foreach my $adom (keys %aliaslist) {
 	foreach my $f (@alias_features) {
 		$alias{$f} = $dom{$f};
 		}
-	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+	my $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 					  : \%dom;
 	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
 	&generate_domain_password_hashes(\%alias, 1);
@@ -477,7 +477,7 @@ foreach my $sdom (@$sublist) {
 		next;
 		}
 	&$indent_print();
-	local %subd = ( 'id', &domain_id(),
+	my %subd = ( 'id', &domain_id(),
 			'dom', $sname,
 			'user', $dom{'user'},
 			'group', $dom{'group'},
@@ -507,7 +507,7 @@ foreach my $sdom (@$sublist) {
 	foreach my $f (@subdom_features) {
 		$subd{$f} = $dom{$f};
 		}
-	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+	my $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 					  : \%dom;
 	$subd{'home'} = &server_home_directory(\%subd, $parentdom);
 	&generate_domain_password_hashes(\%subd, 1);
@@ -535,7 +535,7 @@ if (!$dom{'parent'}) {
 			}
 		&$indent_print();
 
-		local %subd = ( 'id', &domain_id(),
+		my %subd = ( 'id', &domain_id(),
 				'dom', $dname,
 				'user', $dom{'user'},
 				'group', $dom{'group'},
@@ -567,7 +567,7 @@ if (!$dom{'parent'}) {
 			next if ($f eq "unix" || $f eq "webmin");
 			$subd{$f} = $got{$f} ? 1 : 0;
 			}
-		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+		my $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
 						  : \%dom;
 		$subd{'home'} = &server_home_directory(\%subd, $parentdom);
 		$subd{'cgi_bin_dir'} = "public_html/cgi-bin";
@@ -627,8 +627,8 @@ return @rvdoms;
 # under which it was extracted, or an error message
 sub extract_directadmin_dir
 {
-local ($file) = @_;
-local $dir;
+my ($file) = @_;
+my $dir;
 if ($main::directadmin_dir_cache{$file} && -d $main::directadmin_dir_cache{$file}) {
 	# Use cached extract from this session
 	return (1, $main::directadmin_dir_cache{$file});
@@ -643,7 +643,7 @@ elsif (-d $file) {
 else {
 	$dir = &transname();
 	mkdir($dir, 0700);
-	local $err = &extract_compressed_file($file, $dir);
+	my $err = &extract_compressed_file($file, $dir);
 	if ($err) {
 		return (0, $err);
 		}
@@ -778,7 +778,7 @@ if ($d->{'dns'} && -r $dnsfile && !$d->{'dns_submode'}) {
 		elsif ($r->{'name'} eq $d->{'dom'}."." &&
 		       $r->{'type'} eq 'NS') {
 			# Set NS record to this server
-			local $master = $bconfig{'default_prins'} ||
+			my $master = $bconfig{'default_prins'} ||
 					&get_system_hostname();
 			$master .= "." if ($master !~ /\.$/);
 			$r->{'values'} = [ $master ];
@@ -878,10 +878,10 @@ sub copy_directadmin_mail_aliases
 my ($d, $backup) = @_;
 my $afile = "$backup/$d->{'dom'}/email/aliases";
 if ($d->{'mail'} && -r $afile) {
-	local $acount = 0;
+	my $acount = 0;
 	&$first_print("Copying email aliases ..");
 	&set_alias_programs();
-	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
+	my %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
 	my $lref = &read_file_lines($afile, 1);
 	foreach my $l (@$lref) {
 		my ($name, $values) = split(/:/, $l, 2);
@@ -892,7 +892,7 @@ if ($d->{'mail'} && -r $afile) {
 				$v = "BOUNCE";
 				}
 			}
-		local $virt = { 'from' => $name =~ /^\*/ ?
+		my $virt = { 'from' => $name =~ /^\*/ ?
 				  "\@".$d->{'dom'} :
 				  $name."\@".$d->{'dom'},
 				'to' => \@values };
@@ -915,11 +915,11 @@ my %dinfo;
 my @got = ( "dir", $parent ? () : ("unix"),
 	    &domain_has_website(), "logrotate" );
 push(@got, "webmin") if ($webmin && !$parent);
-local @sqlfiles = glob("$backup/*.sql");
+my @sqlfiles = glob("$backup/*.sql");
 if (@sqlfiles) {
 	push(@got, "mysql");
 	}
-local $zonefile = "$backup/$dom/$dom.db";
+my $zonefile = "$backup/$dom/$dom.db";
 if (-r $zonefile) {
 	push(@got, "dns");
 	}

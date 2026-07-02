@@ -36,7 +36,7 @@ if (!$module_name) {
 # Parse command-line args
 &parse_common_cli_flags(\@ARGV);
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		$domain = shift(@ARGV);
 		}
@@ -197,8 +197,8 @@ exit(1);
 
 sub make_nice_dnames
 {
-local ($s) = @_;
-local @dnames = ( );
+my ($s) = @_;
+my @dnames = ( );
 foreach my $did (split(/\s+/, $s->{'doms'})) {
 	$d = &get_domain($did);
 	push(@dnames, $d->{'dom'}) if ($d);

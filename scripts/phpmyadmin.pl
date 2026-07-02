@@ -30,7 +30,7 @@ return $vers[0];
 
 sub script_phpmyadmin_version_desc
 {
-local ($ver) = @_;
+my ($ver) = @_;
 return &compare_versions($ver, "6") >= 0 ? "$ver (devel)" :
        &compare_versions($ver, "5") >= 0 ? "$ver" : "$ver (LTS)";
 }
@@ -42,7 +42,7 @@ return 13;		# compare_versions is not compare_version_numbers
 
 sub script_phpmyadmin_can_upgrade
 {
-local ($sinfo, $newver) = @_;
+my ($sinfo, $newver) = @_;
 if (&compare_versions($newver, 6) >= 0 &&
     &compare_versions($sinfo->{'version'}, 5) <= 0) {
 	# Cannot upgrade 5 -> 6 devel
@@ -113,9 +113,9 @@ return $txt;
 # Returns HTML for table rows for options for installing PHP-NUKE
 sub script_phpmyadmin_params
 {
-local ($d, $ver, $upgrade) = @_;
-local $rv;
-local $hdir = &public_html_dir($d, 1);
+my ($d, $ver, $upgrade) = @_;
+my $rv;
+my $hdir = &public_html_dir($d, 1);
 if ($upgrade) {
 	# Options are fixed when upgrading
 	my $httpdauth_enabled =
@@ -145,11 +145,11 @@ if ($upgrade) {
 					? $text{'yes'}
 					: $text{'no'});
 			}
-		local @dbnames = split(/\s+/, $upgrade->{'opts'}->{'db'});
+		my @dbnames = split(/\s+/, $upgrade->{'opts'}->{'db'});
 		$rv .= &ui_table_row("Databases to manage",
 			join(" ", @dbnames) || "<i>All databases</i>");
 		}
-	local $dir = $upgrade->{'opts'}->{'dir'};
+	my $dir = $upgrade->{'opts'}->{'dir'};
 	$dir =~ s/^$d->{'home'}\///;
 	$rv .= &ui_table_row("Install directory", $dir);
 	}
@@ -264,7 +264,7 @@ EOF
 			&ui_radio("auto", 0, [ [ 1, "Yes" ],
 					[ 0, "No" ] ]));
 		}
-	local @dbs = &domain_databases($d, [ "mysql" ]);
+	my @dbs = &domain_databases($d, [ "mysql" ]);
 	$rv .= &ui_table_row("Database to manage",
 		     &ui_radio("db_def", 1, [ [ 1, "All databases" ],
 					      [ 0, "Only selected .." ] ]).
@@ -287,16 +287,16 @@ return $rv;
 # Returns either a hash ref of parsed options, or an error string
 sub script_phpmyadmin_parse
 {
-local ($d, $ver, $in, $upgrade) = @_;
+my ($d, $ver, $in, $upgrade) = @_;
 if ($upgrade) {
 	# Options are always the same
 	return $upgrade->{'opts'};
 	}
 else {
-	local $hdir = &public_html_dir($d, 0);
+	my $hdir = &public_html_dir($d, 0);
 	$in->{'dir_def'} || $in->{'dir'} =~ /\S/ && $in->{'dir'} !~ /\.\./ ||
 		return "Missing or invalid installation directory";
-	local $dir = $in->{'dir_def'} ? $hdir : "$hdir/$in->{'dir'}";
+	my $dir = $in->{'dir_def'} ? $hdir : "$hdir/$in->{'dir'}";
 	if (!$in->{'db_def'} && !$in->{'db'}) {
 		return "No MySQL database to manage selected";
 		}
@@ -321,9 +321,9 @@ else {
 # Returns .htaccess and .htpasswd paths for phpMyAdmin auth
 sub script_phpmyadmin_httpdauth_paths
 {
-local ($d, $opts) = @_;
-local $htaccess = ".htaccess";
-local $htpasswd = ".htpasswd";
+my ($d, $opts) = @_;
+my $htaccess = ".htaccess";
+my $htpasswd = ".htpasswd";
 if (&foreign_check("htaccess-htpasswd")) {
 	&foreign_require("htaccess-htpasswd");
 	$htaccess = $htaccess_htpasswd::config{'htaccess'} || $htaccess;
@@ -336,8 +336,8 @@ return ("$opts->{'dir'}/$htaccess", "$opts->{'dir'}/$htpasswd", $htpasswd);
 # Returns 1 if HTTP Basic auth files currently exist for this install
 sub script_phpmyadmin_httpdauth_is_enabled
 {
-local ($d, $opts) = @_;
-local ($htaccess_path, $htpasswd_path) =
+my ($d, $opts) = @_;
+my ($htaccess_path, $htpasswd_path) =
 	&script_phpmyadmin_httpdauth_paths($d, $opts);
 return (-r $htaccess_path && -r $htpasswd_path) ? 1 : 0;
 }
@@ -346,12 +346,12 @@ return (-r $htaccess_path && -r $htpasswd_path) ? 1 : 0;
 # Returns username and encrypted password for basic auth
 sub script_phpmyadmin_httpdauth_user_pass
 {
-local ($d) = @_;
-local $huser = $d->{'user'};
-local $hpass = $d->{'enc_pass'} || $d->{'md5_enc_pass'} ||
+my ($d) = @_;
+my $huser = $d->{'user'};
+my $hpass = $d->{'enc_pass'} || $d->{'md5_enc_pass'} ||
 	       $d->{'crypt_enc_pass'};
 if ((!$huser || !$hpass) && $d->{'parent'}) {
-	local $pd = &get_domain($d->{'parent'});
+	my $pd = &get_domain($d->{'parent'});
 	$huser ||= $pd->{'user'};
 	$hpass ||= $pd->{'enc_pass'} || $pd->{'md5_enc_pass'} ||
 		   $pd->{'crypt_enc_pass'};
@@ -363,8 +363,8 @@ return ($huser, $hpass);
 # Removes protected-dir metadata for phpMyAdmin basic auth
 sub script_phpmyadmin_httpdauth_cleanup
 {
-local ($d, $opts) = @_;
-local ($htaccess_path, $htpasswd_path) =
+my ($d, $opts) = @_;
+my ($htaccess_path, $htpasswd_path) =
 	&script_phpmyadmin_httpdauth_paths($d, $opts);
 
 # Remove protected directory in webserver plugins
@@ -381,7 +381,7 @@ foreach my $p (&list_feature_plugins()) {
 if (&foreign_check("htaccess-htpasswd")) {
 	&foreign_require("htaccess-htpasswd");
 	&lock_file($htaccess_htpasswd::directories_file);
-	local @pdirs = &htaccess_htpasswd::list_directories();
+	my @pdirs = &htaccess_htpasswd::list_directories();
 	@pdirs = grep { ref($_) ? $_->[0] ne $opts->{'dir'}
 				: $_ ne $opts->{'dir'} } @pdirs;
 	&htaccess_htpasswd::save_directories(\@pdirs);
@@ -393,7 +393,7 @@ if (&foreign_check("htaccess-htpasswd")) {
 # Returns an error message if a required option is missing or invalid
 sub script_phpmyadmin_check
 {
-local ($d, $ver, $opts, $upgrade) = @_;
+my ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 if (-r "$opts->{'dir'}/config.inc.php") {
 	return "phpMyAdmin appears to be already installed in the selected directory";
@@ -411,7 +411,7 @@ if ($opts->{'global_def'} && defined &list_all_global_def_scripts_cached) {
 		: undef;
 	}
 if ($opts->{'httpdauth'}) {
-	local ($huser, $hpass) = &script_phpmyadmin_httpdauth_user_pass($d);
+	my ($huser, $hpass) = &script_phpmyadmin_httpdauth_user_pass($d);
 	$huser || return "Cannot enable HTTP Basic authentication because ".
 			 "this domain has no owner username";
 	$hpass || return "Cannot enable HTTP Basic authentication because ".
@@ -442,7 +442,7 @@ $url = "https://files.phpmyadmin.net/phpMyAdmin/$origver/phpMyAdmin-$ver.zip";
 if (&compare_versions($ver, 6) >= 0) {
 	$url = "https://files.phpmyadmin.net/snapshots/phpMyAdmin-$ver.zip";
 	}
-local @files = ( { 'name' => "source",
+my @files = ( { 'name' => "source",
 	   'file' => "phpMyAdmin-$ver.zip",
 	   'url' => $url } );
 return @files;
@@ -458,12 +458,12 @@ return ("unzip");
 # message, or 0 and an error
 sub script_phpmyadmin_install
 {
-local ($d, $ver, $opts, $files, $upgrade) = @_;
-local ($out, $ex);
-local @dbs = map { s/^mysql_//; $_ } split(/\s+/, $opts->{'db'});
-local $dbuser;
-local $dbpass;
-local $dbhost = 'localhost';
+my ($d, $ver, $opts, $files, $upgrade) = @_;
+my ($out, $ex);
+my @dbs = map { s/^mysql_//; $_ } split(/\s+/, $opts->{'db'});
+my $dbuser;
+my $dbpass;
+my $dbhost = 'localhost';
 if ($d->{'mysql'}) {
 	$dbuser = &mysql_user($d);
 	$dbpass = &mysql_pass($d);
@@ -481,13 +481,13 @@ if ($opts->{'global_def'} && defined &invalidate_global_def_scripts_cache) {
 	}
 
 # Extract tar file to temp dir and copy to target
-local $temp = &transname();
-local $err = &extract_script_archive($files->{'source'}, $temp, $d,
+my $temp = &transname();
+my $err = &extract_script_archive($files->{'source'}, $temp, $d,
                                      $opts->{'dir'}, "phpMyAdmin*");
 $err && return (0, "Failed to extract source : $err");
-local $cfile = "$opts->{'dir'}/config.inc.php";
+my $cfile = "$opts->{'dir'}/config.inc.php";
 if (!-r $cfile) {
-	local $cdef = "$opts->{'dir'}/config.default.php";
+	my $cdef = "$opts->{'dir'}/config.default.php";
 	$cdef = "$opts->{'dir'}/libraries/config.default.php" if (!-r $cdef);
 	$cdef = "$opts->{'dir'}/config.sample.inc.php" if (!-r $cdef);
 	&run_as_domain_user($d, "cp ".quotemeta($cdef)." ".quotemeta($cfile));
@@ -495,11 +495,11 @@ if (!-r $cfile) {
 -r $cfile || return (0, "Failed to copy config file");
 
 # Update the config file
-local $lref = &read_file_lines_as_domain_user($d, $cfile);
-local $l;
-local $url = &script_path_url($d, $opts);
-local $dbs = join(" ", @dbs);
-local $dbsarray = @dbs ? "Array(".join(", ", map { "'$_'" } @dbs).")" : "''";
+my $lref = &read_file_lines_as_domain_user($d, $cfile);
+my $l;
+my $url = &script_path_url($d, $opts);
+my $dbs = join(" ", @dbs);
+my $dbsarray = @dbs ? "Array(".join(", ", map { "'$_'" } @dbs).")" : "''";
 foreach $l (@$lref) {
 	# These are for phpMyAdmin 2.6+
 	if ($opts->{'emptypass'}) {
@@ -561,13 +561,13 @@ foreach $l (@$lref) {
 
 	# These are for version 2.7
 	if ($l =~ /^\$cfgServers\[\$i\]\['blowfish_secret'\]/) {
-		local $rand = &random_password(32);
+		my $rand = &random_password(32);
 		$l = "\$cfgServers[\$i]['blowfish_secret'] = '$rand';";
 		}
 
 	# These are for version 2.8.1
 	if ($l =~ /^\$cfg\['blowfish_secret'\]/) {
-		local $rand = &random_password(32);
+		my $rand = &random_password(32);
 		$l = "\$cfg['blowfish_secret'] = '$rand';";
 		}
 
@@ -619,7 +619,7 @@ if ($opts->{'httpdauth'} && !$upgrade) {
 	if (&foreign_check("htaccess-htpasswd")) {
 		&foreign_require("htaccess-htpasswd");
 		&lock_file($htaccess_htpasswd::directories_file);
-		local @pdirs = &htaccess_htpasswd::list_directories();
+		my @pdirs = &htaccess_htpasswd::list_directories();
 		if (!grep { $_->[0] eq $opts->{'dir'} &&
 			    $_->[1] eq $htpasswd_path } @pdirs) {
 			push(@pdirs, [ $opts->{'dir'}, $htpasswd_path ]);
@@ -635,7 +635,7 @@ if ($opts->{'global_def'} && defined &invalidate_global_def_scripts_cache) {
 	}
 
 # Return a URL for the user
-local $rp = $opts->{'dir'};
+my $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
 return (1, "phpMyAdmin installation complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp", $url, $dbuser, $dbpass);
 }
@@ -645,7 +645,7 @@ return (1, "phpMyAdmin installation complete. It can be accessed at <a target=_b
 # Returns 1 on success and a message, or 0 on failure and an error
 sub script_phpmyadmin_uninstall
 {
-local ($d, $version, $opts) = @_;
+my ($d, $version, $opts) = @_;
 
 # Invalidate global scripts default cache
 if ($opts->{'global_def'} && defined &invalidate_global_def_scripts_cache) {
@@ -653,7 +653,7 @@ if ($opts->{'global_def'} && defined &invalidate_global_def_scripts_cache) {
 	}
 
 # Remove the contents of the target directory
-local $derr = &delete_script_install_directory($d, $opts);
+my $derr = &delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
 
 # Cleanup basic auth metadata
@@ -668,7 +668,7 @@ return (1, "phpMyAdmin directory deleted.");
 # Returns a URL and regular expression or callback func to get the version
 sub script_phpmyadmin_latest
 {
-local ($ver) = @_;
+my ($ver) = @_;
 if (&compare_versions($ver, "6") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
 		 "phpMyAdmin-(6\\.[0-9\\.]+)\\+snapshot-all-languages\\.zip" );

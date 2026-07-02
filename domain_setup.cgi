@@ -153,7 +153,7 @@ if (!$parentuser) {
 	if (!$in{'group_def'} && &can_choose_ugroup()) {
 		$in{'group'} = lc($in{'group'});
 		$in{'group'} eq $group && &error(&text('setup_egroup3', $group));
-		local ($sg) = &get_domain_by("group", $in{'group'});
+		my ($sg) = &get_domain_by("group", $in{'group'});
 		$sg && &error(&text('setup_egroup4', $sg->{'dom'}));
 		}
 	$home_base || &error($text{'setup_ehomebase'});
@@ -195,7 +195,7 @@ if (!$parentuser) {
 
 	# Check password restrictions
 	if (defined($pass)) {
-		local $fakeuser = { 'user' => $user, 'plainpass' => $pass };
+		my $fakeuser = { 'user' => $user, 'plainpass' => $pass };
 		$err = &check_password_restrictions($fakeuser, $in{'webmin'});
 		&error(&text('setup_epassvalid', $err)) if ($err);
 		}
@@ -291,7 +291,7 @@ if (&can_dnsip()) {
 	}
 
 # Make sure domain is under parent, if required
-local $derr = &allowed_domain_name($parentdom, $dname);
+my $derr = &allowed_domain_name($parentdom, $dname);
 &error($derr) if ($derr);
 
 if ($parentuser) {

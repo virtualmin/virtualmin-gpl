@@ -712,7 +712,7 @@ if (defined(&theme_select_domain)) {
 # print_cert_fields(show-days)
 sub print_cert_fields
 {
-local ($showdays) = @_;
+my ($showdays) = @_;
 
 print &ui_table_row($webmin::text{'ssl_cn'},
 		    &ui_textbox("commonName", "www.$d->{'dom'}", 30));

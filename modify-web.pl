@@ -166,7 +166,7 @@ if (!$module_name) {
 # Parse command-line args
 $supports_ruby = defined(&supported_ruby_modes);
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		push(@dnames, shift(@ARGV));
 		}
@@ -632,7 +632,7 @@ foreach $d (@doms) {
 			$rubymode eq "none" ? undef : $rubymode);
 		}
 
-	local $oldd = { %$d };
+	my $oldd = { %$d };
 	if (!$d->{'alias'} && defined($content)) {
 		# Just create index.html page with content
 		&$first_print($text{'setup_contenting'});
@@ -643,7 +643,7 @@ foreach $d (@doms) {
 
 	if (defined($webmail) && &domain_has_website($d)) {
 		# Enable or disable webmail redirects
-		local @oldwm = &get_webmail_redirect_directives($d);
+		my @oldwm = &get_webmail_redirect_directives($d);
 		if ($webmail && !@oldwm) {
 			&$first_print("Adding webmail and admin redirects ..");
 			&add_webmail_redirect_directives($d, undef, 1);
@@ -665,7 +665,7 @@ foreach $d (@doms) {
 
 	if (defined($matchall) && &domain_has_website($d)) {
 		# Enable or disable *.domain.com serveralias
-		local $oldmatchall = &get_domain_web_star($d);
+		my $oldmatchall = &get_domain_web_star($d);
 		if ($matchall && !$oldmatchall) {
 			&$first_print(
 			    "Adding all sub-domains to Apache config ..");
@@ -688,7 +688,7 @@ foreach $d (@doms) {
 
 	if (defined($includes) && &domain_has_website($d)) {
 		# Enable or disable server-side includes
-		local ($ok, $oldincludes) = &get_domain_web_ssi($d);
+		my ($ok, $oldincludes) = &get_domain_web_ssi($d);
 		if ($includes && $includes ne $oldincludes) {
 			&$first_print("Enabling server-side includes ..");
 			$err = &save_domain_web_ssi($d, $includes);

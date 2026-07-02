@@ -45,7 +45,7 @@ if (!-d $spam_config_dir) {
 	&make_dir($spam_config_dir, 0755);
 	&set_ownership_permissions(undef, undef, 0755, $spam_config_dir);
 	}
-local $spamdir = "$spam_config_dir/$d->{'id'}";
+my $spamdir = "$spam_config_dir/$d->{'id'}";
 &make_dir($spamdir, 0750);
 &set_ownership_permissions($d->{'uid'}, $d->{'gid'}, 0750, $spamdir);
 
@@ -53,8 +53,8 @@ local $spamdir = "$spam_config_dir/$d->{'id'}";
 &obtain_lock_cron($d);
 
 # Add the procmail entry to get the VIRTUALMIN variable
-local @recipes = &procmail::get_procmailrc();
-local ($r, $gotvirt, $gotdef);
+my @recipes = &procmail::get_procmailrc();
+my ($r, $gotvirt, $gotdef);
 foreach $r (@recipes) {
 	if ($r->{'type'} eq '=' &&
 	    $r->{'action'} =~ /^VIRTUALMIN=/) {
@@ -66,12 +66,12 @@ foreach $r (@recipes) {
 	}
 if (!$gotvirt) {
 	# Need to add entries to lookup the domain, and run it's include file
-	local $var1 = { 'flags' => [ 'w', 'i' ],
+	my $var1 = { 'flags' => [ 'w', 'i' ],
 			'conds' => [ ],
 			'type' => '=',
 		        'action' => "VIRTUALMIN=|$domain_lookup_cmd \$LOGNAME" };
-	local $testcmd = &has_command("test") || "test";
-	local $var2 = { 'flags' => [ ],
+	my $testcmd = &has_command("test") || "test";
+	my $var2 = { 'flags' => [ ],
 			'conds' => [ [ "?", "$testcmd \"\$VIRTUALMIN\" != \"\"" ] ],
 			'block' => "INCLUDERC=$procmail_spam_dir/\$VIRTUALMIN",
 		      };
@@ -86,7 +86,7 @@ if (!$gotvirt) {
 	# Otherwise, add at the top
 	if (@recipes) {
 		# Has some recipes .. check if there is a TRAP
-		local ($trap, $aftertrap);
+		my ($trap, $aftertrap);
 		for(my $i=0; $i<@recipes; $i++) {
 			if ($recipes[$i]->{'name'} eq 'TRAP') {
 				$trap = $recipes[$i];
@@ -121,7 +121,7 @@ if (!$gotvirt) {
 # Create the lookup-domain.pl wrapper script, and hack it to turn off setuid
 &cron::create_wrapper($domain_lookup_cmd, $module_name,
 		      "lookup-domain.pl");
-local $lref = &read_file_lines($domain_lookup_cmd);
+my $lref = &read_file_lines($domain_lookup_cmd);
 splice(@$lref, 1, 0, "delete(\$ENV{'IFS'});",
 		     "delete(\$ENV{'CDPATH'});",
 		     "delete(\$ENV{'ENV'});",
@@ -132,18 +132,18 @@ splice(@$lref, 1, 0, "delete(\$ENV{'IFS'});",
 &flush_file_lines($domain_lookup_cmd);
 
 # Build spamassassin command to call
-local $cmd = &spamassassin_client_command($d);
+my $cmd = &spamassassin_client_command($d);
 
 # Create recipes to call spamassassin
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-local $recipe0 = { 'name' => 'DROPPRIVS',	# Run all commands as user
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my $recipe0 = { 'name' => 'DROPPRIVS',	# Run all commands as user
 		   'value' => 'yes' };
-local @conds;
+my @conds;
 if ($cmd =~ /spamassassin/ && $config{'spam_size'}) {
 	# Add condition for max message size
 	push(@conds, [ '<', $config{'spam_size'} ]);
 	}
-local $recipe1 = { 'flags' => [ 'f', 'w' ],	# Call spamassassin
+my $recipe1 = { 'flags' => [ 'f', 'w' ],	# Call spamassassin
 		   'conds' => \@conds,
 		   'type' => '|',
 		   'action' => $cmd,
@@ -152,13 +152,13 @@ if ($config{'spam_lock'}) {
 	# Add locking to prevent concurrent runs
 	$recipe1->{'lockfile'} = $spamassassin_lock_file;
 	}
-local ($recipe2, $recipe3);
-local $varon = { 'name' => 'SPAMMODE', 'value' => 1 };
+my ($recipe2, $recipe3);
+my $varon = { 'name' => 'SPAMMODE', 'value' => 1 };
 if ($config{'spam_level'}) {
 	# Recipe to delete high-score spam
 	my $level = $config{'spam_level'};
 	$level = 50 if ($level > 50);
-	local $stars = join("", map { "\\*" } (1..$level));
+	my $stars = join("", map { "\\*" } (1..$level));
 	$recipe3 = { 'flags' => [ ],
 		     'conds' => [ [ '', '^X-Spam-Level: '.$stars ] ],
 		     'action' => '/dev/null' };
@@ -169,7 +169,7 @@ if ($config{'spam_delivery'}) {
 		     'conds' => [ [ '', '^X-Spam-Status: Yes' ] ],
 		     'action' => $config{'spam_delivery'} };
 	}
-local $varoff = { 'name' => 'SPAMMODE', 'value' => 0 };
+my $varoff = { 'name' => 'SPAMMODE', 'value' => 0 };
 &procmail::create_recipe($recipe0, $spamrc);
 &procmail::create_recipe($recipe1, $spamrc);
 if ($recipe2 || $recipe3) {
@@ -234,7 +234,7 @@ my $spamid = $d->{'parent'} || $d->{'id'};
 $client ||= $config{'spam_client'};
 my $cmd = &has_command($client);
 if ($client eq 'spamc') {
-	local ($host, $port) = split(/:/, $config{'spam_host'});
+	my ($host, $port) = split(/:/, $config{'spam_host'});
 	if ($host) {
 		$cmd .= " -d $host";
 		if ($port) {
@@ -278,7 +278,7 @@ sub setup_default_delivery
 {
 &require_spam();
 &obtain_lock_spam();
-local @recipes = &procmail::get_procmailrc();
+my @recipes = &procmail::get_procmailrc();
 my ($gotdef, $gotorgmail, $gotdel, $gotdrop);
 foreach my $r (@recipes) {
 	if ($r->{'action'} eq '$DEFAULT' && !@{$r->{'conds'}}) {
@@ -310,8 +310,8 @@ foreach my $r (@recipes) {
 
 # The DEFAULT destination needs to be set to match the mail server, as procmail
 # will deliver to /var/mail/USER by default
-local ($dir, $style, $mailbox, $maildir) = &get_mail_style();
-local $maildef = $dir && $dir =~ /^(.*)\/$/ ? "$1/\$LOGNAME/" :
+my ($dir, $style, $mailbox, $maildir) = &get_mail_style();
+my $maildef = $dir && $dir =~ /^(.*)\/$/ ? "$1/\$LOGNAME/" :
 	         $dir ? "$dir/\$LOGNAME" :
 		 $maildir ? "\$HOME/$maildir/" :
 		 $mailbox ? "\$HOME/$mailbox" :
@@ -399,8 +399,8 @@ sub enable_procmail_logging
 {
 &require_spam();
 &obtain_lock_spam();
-local @recipes = &procmail::get_procmailrc();
-local ($gotlog, $gottrap);
+my @recipes = &procmail::get_procmailrc();
+my ($gotlog, $gottrap);
 foreach my $r (@recipes) {
 	if ($r->{'name'} eq 'LOGFILE') {
 		$gotlog = 1;
@@ -428,10 +428,10 @@ if (!$gottrap) {
 foreach my $d (&list_domains()) {
 	next if (!$d->{'spam'});
 	&obtain_lock_spam($d);
-	local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-	local @recipes = &procmail::parse_procmail_file($spamrc);
-	local ($spamrec, $spamrecafter, $gotspammode);
-	local $i = 0;
+	my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+	my @recipes = &procmail::parse_procmail_file($spamrc);
+	my ($spamrec, $spamrecafter, $gotspammode);
+	my $i = 0;
 	foreach my $r (@recipes) {
 		if ($r->{'name'} eq 'SPAMMODE') {
 			$gotspammode = 1;
@@ -445,8 +445,8 @@ foreach my $d (&list_domains()) {
 		$i++;
 		}
 	if ($spamrec && !$gotspammode) {
-		local $varon = { 'name' => 'SPAMMODE', 'value' => 1 };
-		local $varoff = { 'name' => 'SPAMMODE', 'value' => 0 };
+		my $varon = { 'name' => 'SPAMMODE', 'value' => 1 };
+		my $varoff = { 'name' => 'SPAMMODE', 'value' => 0 };
 		if ($spamrecafter) {
 			&procmail::create_recipe_before($varoff, $spamrecafter,
 							$spamrc);
@@ -459,9 +459,9 @@ foreach my $d (&list_domains()) {
 
 	# Do the same for viruses
 	if ($d->{'virus'}) {
-		local @recipes = &procmail::parse_procmail_file($spamrc);
-		local ($clamrec, $clamafter, $gotclammode);
-		local $i = 0;
+		my @recipes = &procmail::parse_procmail_file($spamrc);
+		my ($clamrec, $clamafter, $gotclammode);
+		my $i = 0;
 		foreach my $r (@recipes) {
 			if ($r->{'name'} eq 'VIRUSMODE') {
 				$gotclammode = 1;
@@ -474,8 +474,8 @@ foreach my $d (&list_domains()) {
 			$i++;
 			}
 		if ($clamrec && !$gotclammode) {
-			local $varon = { 'name' => 'VIRUSMODE', 'value' => 1 };
-			local $varoff = { 'name' => 'VIRUSMODE', 'value' => 0 };
+			my $varon = { 'name' => 'VIRUSMODE', 'value' => 1 };
+			my $varoff = { 'name' => 'VIRUSMODE', 'value' => 0 };
 			if ($clamrecafter) {
 				&procmail::create_recipe_before(
 					$varoff, $clamrecafter, $spamrc);
@@ -498,10 +498,10 @@ foreach my $d (&list_domains()) {
 if ($config{'logrotate'} && &foreign_installed("logrotate")) {
 	# Add logrotate section, if needed
 	&require_logrotate();
-	local $log = &get_logrotate_section($procmail_log_file);
+	my $log = &get_logrotate_section($procmail_log_file);
 	if (!$log) {
-		local $parent = &logrotate::get_config_parent();
-		local $lconf = { 'file' => &logrotate::get_add_file(),
+		my $parent = &logrotate::get_config_parent();
+		my $lconf = { 'file' => &logrotate::get_add_file(),
 				 'name' => [ $procmail_log_file ] };
 		$lconf->{'members'} = [
 				{ 'name' => 'rotate',
@@ -528,7 +528,7 @@ if ($config{'logrotate'} && &foreign_installed("logrotate")) {
 sub procmail_logging_enabled
 {
 &require_spam();
-local @recipes = &procmail::get_procmailrc();
+my @recipes = &procmail::get_procmailrc();
 foreach my $r (@recipes) {
 	if ($r->{'name'} eq 'LOGFILE') {
 		return 1;
@@ -553,9 +553,9 @@ my ($d) = @_;
 &$first_print($d->{'virus'} ? $text{'delete_spamvirus'}
 			    : $text{'delete_spam'});
 &obtain_lock_spam($d);
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
 &unlink_logged($spamrc);
-local $spamdir = "$spam_config_dir/$d->{'id'}";
+my $spamdir = "$spam_config_dir/$d->{'id'}";
 &system_logged("rm -rf ".quotemeta($spamdir));
 &clear_lookup_domain_cache($d);
 &save_domain_spam_autoclear($d, undef);
@@ -569,27 +569,27 @@ return 1;
 # correcting the domain ID
 sub clone_spam
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 &$first_print($text{'clone_spam'});
 &obtain_lock_spam($d);
-local $pm = "$procmail_spam_dir/$d->{'id'}";
-local $opm = "$procmail_spam_dir/$oldd->{'id'}";
+my $pm = "$procmail_spam_dir/$d->{'id'}";
+my $opm = "$procmail_spam_dir/$oldd->{'id'}";
 &copy_source_dest($opm, $pm);
-local $lref = &read_file_lines($pm);
+my $lref = &read_file_lines($pm);
 foreach my $l (@$lref) {
 	$l =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/;
 	}
 &flush_file_lines($pm);
-local $spamdir = "$spam_config_dir/$d->{'id'}";
-local $ospamdir = "$spam_config_dir/$oldd->{'id'}";
+my $spamdir = "$spam_config_dir/$d->{'id'}";
+my $ospamdir = "$spam_config_dir/$oldd->{'id'}";
 &system_logged("rm -rf ".quotemeta($spamdir)."/*");
 &system_logged("cd ".quotemeta($ospamdir)." && tar cf - . | ".
 	       "(cd $spamdir && tar xpf -)");
 
 # Fix email addresses in per-domain spamassassin config file
-local $spamfile = "$spamdir/virtualmin.cf";
+my $spamfile = "$spamdir/virtualmin.cf";
 &set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef, $spamfile);
-local $lref = &read_file_lines($spamfile);
+my $lref = &read_file_lines($spamfile);
 foreach my $l (@$lref) {
 	if ($l =~ /^whitelist_from\s+\Q$oldd->{'emailto_addr'}\E/) {
 		$l = "whitelist_from $d->{'emailto_addr'}";
@@ -622,21 +622,21 @@ return 0;
 # Also saves the auto-spam clearing settings.
 sub backup_spam
 {
-local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
-local $compression = $allopts->{'dir'}->{'compression'};
+my ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
+my $compression = $allopts->{'dir'}->{'compression'};
 &$first_print($text{'backup_spamcp'});
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-local $spamdir = "$spam_config_dir/$d->{'id'}";
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my $spamdir = "$spam_config_dir/$d->{'id'}";
 if (-r $spamrc) {
 	&copy_write_as_domain_user($d, $spamrc, $file);
-	local $temp = &transname();
+	my $temp = &transname();
 	&execute_command(&make_archive_command(
 		$compression, $spamdir, $temp, ".")." 2>&1");
 	&copy_write_as_domain_user($d, $temp, $file."_cf");
 	&unlink_file($temp);
 
 	# Save spam clearing
-	local $auto = &get_domain_spam_autoclear($_[0]);
+	my $auto = &get_domain_spam_autoclear($_[0]);
 	&write_as_domain_user($d,
 		sub { &write_file($file."_auto", $auto || { }) });
 	&$second_print($text{'setup_done'});
@@ -653,11 +653,11 @@ else {
 # Also restores auto-clearing setting, if in backup.
 sub restore_spam
 {
-local ($d, $file) = @_;
+my ($d, $file) = @_;
 &$first_print($text{'restore_spamcp'});
 &obtain_lock_spam($d);
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-local $spamdir = "$spam_config_dir/$d->{'id'}";
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my $spamdir = "$spam_config_dir/$d->{'id'}";
 &copy_source_dest($file, $spamrc);
 &execute_command(&make_unarchive_command($spamdir, $file."_cf")." 2>&1");
 
@@ -676,7 +676,7 @@ foreach my $l (@$lref) {
 if (-r $file."_auto") {
 	# Replace auto-clearing setting
 	&save_domain_spam_autoclear($d, undef);
-	local %auto;
+	my %auto;
 	&read_file($file."_auto", \%auto);
 	if (%auto) {
 		&save_domain_spam_autoclear($d, \%auto);
@@ -684,7 +684,7 @@ if (-r $file."_auto") {
 	}
 
 # If spamtrap aliases exist, make sure the files and cron job do
-local $st = &get_spamtrap_aliases($d);
+my $st = &get_spamtrap_aliases($d);
 if ($st > 0) {
 	&setup_spamtrap_directories($d);
 	&setup_spamtrap_cron();
@@ -702,11 +702,11 @@ return 1;
 # Adds or removes a lockfile to all domains' spamassassin calls
 sub save_global_spam_lockfile
 {
-local ($enabled) = @_;
+my ($enabled) = @_;
 foreach my $d (&get_domain_by("spam", 1)) {
-	local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-	local @recipes = &procmail::parse_procmail_file($spamrc);
-	local @spamrec = &find_spam_recipe(\@recipes);
+	my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+	my @recipes = &procmail::parse_procmail_file($spamrc);
+	my @spamrec = &find_spam_recipe(\@recipes);
 	if ($spamrec[0]) {
 		# Found it .. modify
 		if ($enabled) {
@@ -725,14 +725,14 @@ foreach my $d (&get_domain_by("spam", 1)) {
 sub sysinfo_spam
 {
 &require_spam();
-local $vers = &spam::get_spamassassin_version();
+my $vers = &spam::get_spamassassin_version();
 return ( [ $text{'sysinfo_spam'}, $vers ] );
 }
 
 sub links_spam
 {
-local ($d) = @_;
-local $client = &get_domain_spam_client($d);
+my ($d) = @_;
+my $client = &get_domain_spam_client($d);
 if ($client ne "spamc") {
 	return ( { 'mod' => 'spam',
 		   'desc' => $text{'links_spam'},
@@ -755,8 +755,8 @@ return ( );
 # 4 - Setting of SPAMMODE=0
 sub find_spam_recipe
 {
-local ($recs) = @_;
-local @rv;
+my ($recs) = @_;
+my @rv;
 for(my $i=0; $i<@$recs; $i++) {
 	if ($recs->[$i]->{'action'} =~ /(spamassassin|spamc)($|\s)/) {
 		# Found spamassassin
@@ -798,12 +798,12 @@ return @rv;
 # /dev/null)
 sub get_domain_spam_delivery
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_spam();
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-local @recipes = &procmail::parse_procmail_file($spamrc);
-local @spamrec = &find_spam_recipe(\@recipes);
-local @rv;
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my @recipes = &procmail::parse_procmail_file($spamrc);
+my @spamrec = &find_spam_recipe(\@recipes);
+my @rv;
 if (!@spamrec) {
 	@rv = (-1, undef);
 	}
@@ -846,15 +846,15 @@ return @rv;
 # Updates the delivery method for spam for some domain
 sub save_domain_spam_delivery
 {
-local ($d, $mode, $dest, $level, $ddest) = @_;
+my ($d, $mode, $dest, $level, $ddest) = @_;
 &require_spam();
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-local @recipes = &procmail::parse_procmail_file($spamrc);
-local @spamrec = &find_spam_recipe(\@recipes);
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my @recipes = &procmail::parse_procmail_file($spamrc);
+my @spamrec = &find_spam_recipe(\@recipes);
 return 0 if (!@spamrec);
 
 # Preserve existing settings if not set
-local ($oldmode, $olddest, $oldlevel, $oldddest) =
+my ($oldmode, $olddest, $oldlevel, $oldddest) =
 	&get_domain_spam_delivery($d);
 if (!defined($mode)) {
 	($mode, $dest) = ($oldmode, $olddest);
@@ -871,7 +871,7 @@ if (!defined($ddest)) {
 $ddest ||= "/dev/null";
 
 # Remove the existing recipes (except the spamassassin call)
-local @todel = sort { $b->{'line'} <=> $a->{'line'} }
+my @todel = sort { $b->{'line'} <=> $a->{'line'} }
 		    grep { $_ } @spamrec[1..$#spamrec];
 foreach my $r (@todel) {
 	&procmail::delete_recipe($r);
@@ -881,20 +881,20 @@ foreach my $r (@todel) {
 $level = 50 if (defined($level) && $level > 50);
 
 # Make those we now want
-local @want;
+my @want;
 if ($mode != 5 || $level) {
 	# Start of delivery section
 	push(@want, { 'name' => 'SPAMMODE', 'value' => 1 });
 	}
 if ($level) {
 	# High-level deletion
-	local $stars = join("", map { "\\*" } (1..$level));
+	my $stars = join("", map { "\\*" } (1..$level));
 	push(@want, { 'conds' => [ [ '', '^X-Spam-Level: '.$stars ] ],
 		      'action' => $ddest });
 	}
 if ($mode != 5) {
 	# Regular delivery
-	local $folder;
+	my $folder;
 	if ($mode == 4 || $mode == 6) {
 		if ($dest =~ /^[a-z0-9\.\_\-]+$/i) {
 			$folder = $dest;
@@ -903,12 +903,12 @@ if ($mode != 5) {
 			$folder = &default_spam_folder_suffix($d);
 			}
 		}
-	local $action = $mode == 0 ? "/dev/null" :
+	my $action = $mode == 0 ? "/dev/null" :
 			$mode == 4 ? "\$HOME/mail/$folder" :
 			$mode == 6 ? "\$HOME/Maildir/.$folder/" :
 			$mode == 1 ? "\$HOME/$dest" :
 				      $dest;
-	local $type = $mode == 2 ? "!" : "";
+	my $type = $mode == 2 ? "!" : "";
 	push(@want, { 'conds' => [ [ '', '^X-Spam-Status: Yes' ] ],
 		      'action' => $action,
 		      'type' => $type });
@@ -922,7 +922,7 @@ if ($mode != 5 || $level) {
 if (@want) {
 	@recipes = &procmail::parse_procmail_file($spamrc);
 	@spamrec = &find_spam_recipe(\@recipes);
-	local $idx = &indexof($spamrec[0], @recipes);
+	my $idx = &indexof($spamrec[0], @recipes);
 	if ($idx == $#recipes) {
 		# Add at end
 		foreach my $r (@want) {
@@ -959,10 +959,10 @@ return "Junk";
 # Returns the client program (spamassassin or spamc) used by some domain
 sub get_domain_spam_client
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_spam();
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-local @recipes = &procmail::parse_procmail_file($spamrc);
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my @recipes = &procmail::parse_procmail_file($spamrc);
 foreach my $r (@recipes) {
 	if ($r->{'action'} =~ /\/\S+\/(spamassassin|spamc)/) {
 		return $1;
@@ -975,14 +975,14 @@ return undef;	# Cannot happen!
 # Updates the procmail rule which calls spamassassin or spamc
 sub save_domain_spam_client
 {
-local ($d, $client) = @_;
+my ($d, $client) = @_;
 &require_spam();
-local $spamrc = "$procmail_spam_dir/$d->{'id'}";
-local @recipes = &procmail::parse_procmail_file($spamrc);
+my $spamrc = "$procmail_spam_dir/$d->{'id'}";
+my @recipes = &procmail::parse_procmail_file($spamrc);
 foreach my $r (@recipes) {
 	if ($r->{'action'} =~ /\/\S+\/(spamassassin|spamc)/) {
 		$r->{'action'} = &spamassassin_client_command($d, $client);
-		local ($c) = grep { $_->[0] eq '<' } @{$r->{'conds'}};
+		my ($c) = grep { $_->[0] eq '<' } @{$r->{'conds'}};
 		if ($c && !$config{'spam_size'}) {
 			# Remove size condition
 			@{$r->{'conds'}} = grep { $_ ne $c } @{$r->{'conds'}};
@@ -1005,16 +1005,16 @@ foreach my $r (@recipes) {
 # is spamc, also returns the spamd hostname and max message size
 sub get_global_spam_client
 {
-local ($client, $host, $size);
+my ($client, $host, $size);
 if ($config{'spam_client_global'}) {
 	# We know the global setting for sure
 	$client = $config{'spam_client'};
 	}
 else {
 	# Find the most used one for all domains
-	local (%cmdcount, $maxcmd);
+	my (%cmdcount, $maxcmd);
 	foreach my $d (grep { $_->{'spam'} } &list_domains()) {
-		local $cmd = &get_domain_spam_client($d);
+		my $cmd = &get_domain_spam_client($d);
 		if ($cmd) {
 			$cmdcount{$cmd}++;
 			if (!$maxcmd || $cmdcount{$cmd} > $cmdcount{$maxcmd}) {
@@ -1033,7 +1033,7 @@ return wantarray ? ( $client, $host, $size ) : $client;
 # Updates all domains with a new SpamAssassin client program
 sub save_global_spam_client
 {
-local ($client, $host, $size) = @_;
+my ($client, $host, $size) = @_;
 $config{'spam_client'} = $client;
 $config{'spam_client_global'} = 1;
 $config{'spam_host'} = $host;
@@ -1049,7 +1049,7 @@ foreach my $d (grep { $_->{'spam'} } &list_domains()) {
 sub get_global_quota_exitcode
 {
 &require_spam();
-local @recipes = &procmail::get_procmailrc();
+my @recipes = &procmail::get_procmailrc();
 foreach my $r (@recipes) {
 	if ($r->{'action'} =~ /\Q$domain_lookup_cmd\E.*\s+\-\-exitcode\s+(\d+)/) {
 		return $1;
@@ -1062,11 +1062,11 @@ return 73;
 # Updates the exit code from lookup-domain when a user is close to or over quota
 sub save_global_quota_exitcode
 {
-local ($code) = @_;
+my ($code) = @_;
 &require_spam();
 &lock_file($procmail::procmailrc);
-local @recipes = &procmail::get_procmailrc();
-local $changed = 0;
+my @recipes = &procmail::get_procmailrc();
+my $changed = 0;
 foreach my $r (@recipes) {
 	if ($r->{'action'} =~ /\Q$domain_lookup_cmd\E(.*?)\s+\$LOGNAME/) {
 		# Fix call to lookup-domain to return correct exit code
@@ -1127,13 +1127,13 @@ $config{'lookup_domain_port'} = $port;
 # configuration, and removes any whitelists that don't correspond to users.
 sub update_spam_whitelist
 {
-local ($d) = @_;
+my ($d) = @_;
 return if (!$d->{'spam'} || !$d->{'spam_white'});
 &require_spam();
-local $spamfile = "$spam_config_dir/$d->{'id'}/virtualmin.cf";
-local $conf = &spam::get_config($spamfile);
-local @whites = &spam::find_value("whitelist_from", $conf);
-local @oldwhites = @whites;
+my $spamfile = "$spam_config_dir/$d->{'id'}/virtualmin.cf";
+my $conf = &spam::get_config($spamfile);
+my @whites = &spam::find_value("whitelist_from", $conf);
+my @oldwhites = @whites;
 @whites = grep { !/\@$d->{'dom'}$/ } @whites;
 foreach my $user (&list_domain_users($d, 0, 1, 1, 1)) {
 	push(@whites, &remove_userdom($user->{'user'}, $d)."\@".$d->{'dom'});
@@ -1151,12 +1151,12 @@ if (join(" ", @whites) ne join(" ", @oldwhites)) {
 # Outputs HTML for editing spamassassin related template options
 sub show_template_spam
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Default spam clearing mode
-local ($cmode, $cnum) = split(/\s+/, $tmpl->{'spamclear'});
-local $cdays = $cmode eq 'days' ? $cnum : undef;
-local $csize = $cmode eq 'size' ? $cnum : undef;
+my ($cmode, $cnum) = split(/\s+/, $tmpl->{'spamclear'});
+my $cdays = $cmode eq 'days' ? $cnum : undef;
+my $csize = $cmode eq 'size' ? $cnum : undef;
 print &ui_table_row(&hlink($text{'tmpl_spamclear'}, 'template_spamclear'),
 	    &ui_radio("spamclear", $cmode,
 	        [ $tmpl->{'default'} ? ( )
@@ -1169,9 +1169,9 @@ print &ui_table_row(&hlink($text{'tmpl_spamclear'}, 'template_spamclear'),
 		]));
 
 # Default trash clearing mode
-local ($cmode, $cnum) = split(/\s+/, $tmpl->{'trashclear'});
-local $cdays = $cmode eq 'days' ? $cnum : undef;
-local $csize = $cmode eq 'size' ? $cnum : undef;
+my ($cmode, $cnum) = split(/\s+/, $tmpl->{'trashclear'});
+my $cdays = $cmode eq 'days' ? $cnum : undef;
+my $csize = $cmode eq 'size' ? $cnum : undef;
 print &ui_table_row(&hlink($text{'tmpl_trashclear'}, 'template_trashclear'),
 	    &ui_radio("trashclear", $cmode,
 	        [ $tmpl->{'default'} ? ( )
@@ -1196,7 +1196,7 @@ print &ui_table_row(&hlink($text{'tmpl_spamtrap'}, 'template_spamtrap'),
 # Updates spamassassin related template options from %in
 sub parse_template_spam
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Parse spam clearing option
 if ($in{'spamclear'} eq '') {
@@ -1244,11 +1244,11 @@ $tmpl->{'spamtrap'} = $in{'spamtrap'};
 # Removes entries from the lookup-domain cache for a user all users in a domain
 sub clear_lookup_domain_cache
 {
-local ($d, $user) = @_;
+my ($d, $user) = @_;
 
 # Open the cache DBM
-local $cachefile = "$ENV{'WEBMIN_VAR'}/lookup-domain-cache";
-local %cache;
+my $cachefile = "$ENV{'WEBMIN_VAR'}/lookup-domain-cache";
+my %cache;
 eval "use SDBM_File";
 dbmopen(%cache, $cachefile, 0700);
 eval "\$cache{'1111111111'} = 1";
@@ -1274,12 +1274,12 @@ else {
 # Returns an object containing spam clearing info for this domain, if defined
 sub get_domain_spam_autoclear
 {
-local ($d) = @_;
-local %spamclear;
+my ($d) = @_;
+my %spamclear;
 &read_file_cached($spamclear_file, \%spamclear);
-local $ds = $spamclear{$d->{'id'}};
+my $ds = $spamclear{$d->{'id'}};
 return undef if (!$ds);
-local %auto = map { split(/=/, $_, 2) } split(/\s+/, $ds);
+my %auto = map { split(/=/, $_, 2) } split(/\s+/, $ds);
 return \%auto;
 }
 
@@ -1288,10 +1288,10 @@ return \%auto;
 # cron job if needed
 sub save_domain_spam_autoclear
 {
-local ($d, $auto) = @_;
+my ($d, $auto) = @_;
 
 # Update config file
-local %spamclear;
+my %spamclear;
 &read_file_cached($spamclear_file, \%spamclear);
 if ($auto) {
 	$spamclear{$d->{'id'}} = join(" ", map { $_."=".$auto->{$_} }
@@ -1309,10 +1309,10 @@ else {
 # spam clearing is enabled for any domain
 sub setup_spamclear_cron_job
 {
-local $job = &find_cron_script($spamclear_cmd);
-local %spamclear;
+my $job = &find_cron_script($spamclear_cmd);
+my %spamclear;
 &read_file_cached($spamclear_file, \%spamclear);
-local $want = %spamclear || $config{'retention_policy'};
+my $want = %spamclear || $config{'retention_policy'};
 if ($job && !$want) {
 	# Disable job, as we don't need it
 	&delete_cron_script($job);
@@ -1336,8 +1336,8 @@ elsif (!$job && $want) {
 # spam directory.
 sub create_spam_config_links
 {
-local ($d) = @_;
-local $defdir;
+my ($d) = @_;
+my $defdir;
 &require_spam();
 if (-d $spam::config{'local_cf'}) {
 	$defdir = $spam::config{'local_cf'};
@@ -1345,14 +1345,14 @@ if (-d $spam::config{'local_cf'}) {
 elsif ($spam::config{'local_cf'} =~ /^(.*)\//) {
 	$defdir = $1;
 	}
-local $spamdir = "$spam_config_dir/$d->{'id'}";
+my $spamdir = "$spam_config_dir/$d->{'id'}";
 if ($defdir) {
 	# Remove any old links
 	opendir(DIR, $spamdir);
 	foreach my $f (readdir(DIR)) {
-		local $p = "$spamdir/$f";
+		my $p = "$spamdir/$f";
 		if ($f ne "." && $f ne "..") {
-			local $lnk = readlink($p);
+			my $lnk = readlink($p);
 			if ($lnk && !-e $lnk) {
 				unlink($p);
 				}
@@ -1376,7 +1376,7 @@ if ($defdir) {
 # files in /tmp
 sub setup_spam_config_job
 {
-local $job = &find_cron_script($spamconfig_cron_cmd);
+my $job = &find_cron_script($spamconfig_cron_cmd);
 if (!$job) {
 	# Create, and run for the first time
 	$job = { 'mins' => int(rand()*60),
@@ -1402,10 +1402,10 @@ foreach my $d (grep { $_->{'spam'} } &list_domains()) {
 sub setup_lookup_domain_daemon
 {
 &foreign_require("init");
-local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
-local $helper = &get_api_helper_command();
-local $killcmd = &has_command('kill');
-local $testcmd = &has_command('test');
+my $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
+my $helper = &get_api_helper_command();
+my $killcmd = &has_command('kill');
+my $testcmd = &has_command('test');
 if (!&init::action_status("lookup-domain")) {
 	# Need to create and start the action
 	&init::enable_at_boot(
@@ -1433,9 +1433,9 @@ sub delete_lookup_domain_daemon
 {
 &foreign_require("init");
 &init::disable_at_boot("lookup-domain");
-local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
+my $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
 &init::stop_action("lookup-domain");
-local $pid = &check_pid_file($pidfile);
+my $pid = &check_pid_file($pidfile);
 if ($pid) {
 	kill('TERM', $pid);
 	}
@@ -1453,7 +1453,7 @@ return &init::action_status("lookup-domain") == 2 ? 1 : 0;
 # Returns the full email address for the spam alias, like spamtrap@foo.com
 sub spam_alias_name
 {
-local ($d) = @_;
+my ($d) = @_;
 return 'spamtrap'.'@'.$d->{'dom'};
 }
 
@@ -1461,7 +1461,7 @@ return 'spamtrap'.'@'.$d->{'dom'};
 # Returns the full email address for the ham alias, like hamtrap@foo.com
 sub ham_alias_name
 {
-local ($d) = @_;
+my ($d) = @_;
 return 'hamtrap'.'@'.$d->{'dom'};
 }
 
@@ -1469,7 +1469,7 @@ return 'hamtrap'.'@'.$d->{'dom'};
 # Returns the file in which spam is stored for some domain
 sub spam_alias_file
 {
-local ($d) = @_;
+my ($d) = @_;
 return $spam_alias_dir."/".$d->{'id'};
 }
 
@@ -1477,7 +1477,7 @@ return $spam_alias_dir."/".$d->{'id'};
 # Returns the file in which ham is stored for some domain
 sub ham_alias_file
 {
-local ($d) = @_;
+my ($d) = @_;
 return $ham_alias_dir."/".$d->{'id'};
 }
 
@@ -1487,8 +1487,8 @@ return $ham_alias_dir."/".$d->{'id'};
 # ham aliases too.
 sub get_spamtrap_aliases
 {
-local ($d) = @_;
-local (%got, $clash);
+my ($d) = @_;
+my (%got, $clash);
 foreach my $a (&list_domain_aliases($d)) {
 	if ($a->{'from'} eq &spam_alias_name($d)) {
 		# Spam alias .. make sure it goes to the right file
@@ -1511,7 +1511,7 @@ foreach my $a (&list_domain_aliases($d)) {
 			}
 		}
 	}
-local $rv = $clash ? -1 : $got{'spam'} && $got{'ham'} ? 1 : 0;
+my $rv = $clash ? -1 : $got{'spam'} && $got{'ham'} ? 1 : 0;
 return wantarray ? ($rv, $got{'spam'}, $got{'ham'}) : $rv;
 }
 
@@ -1521,10 +1521,10 @@ return wantarray ? ($rv, $got{'spam'}, $got{'ham'}) : $rv;
 # on failure.
 sub setup_spamtrap_aliases
 {
-local ($d) = @_;
+my ($d) = @_;
 
 # Check for aliases already
-local ($ok, $spama, $hama) = &get_spamtrap_aliases($d);
+my ($ok, $spama, $hama) = &get_spamtrap_aliases($d);
 if ($ok == 1) {
 	return $text{'spamtrap_already'};
 	}
@@ -1538,8 +1538,8 @@ elsif ($ok < 0) {
 &setup_spamtrap_directories($d);
 
 # Create aliases
-local $spamfile = &spam_alias_file($d);
-local $hamfile = &ham_alias_file($d);
+my $spamfile = &spam_alias_file($d);
+my $hamfile = &ham_alias_file($d);
 $spama = { 'from' => &spam_alias_name($d), 'to' => [ $spamfile ] };
 $hama = { 'from' => &ham_alias_name($d), 'to' => [ $hamfile ] };
 &create_virtuser($spama);
@@ -1554,12 +1554,12 @@ return undef;
 # Create the spamtrap directories and mail files for a domain
 sub setup_spamtrap_directories
 {
-local ($d) = @_;
+my ($d) = @_;
 &make_dir($trap_base_dir, 0755) if (!-d $trap_base_dir);
 &make_dir($spam_alias_dir, 01777) if (!-d $spam_alias_dir);
 &make_dir($ham_alias_dir, 01777) if (!-d $ham_alias_dir);
-local $spamfile = &spam_alias_file($d);
-local $hamfile = &ham_alias_file($d);
+my $spamfile = &spam_alias_file($d);
+my $hamfile = &ham_alias_file($d);
 foreach my $f ($spamfile, $hamfile) {
 	if (!-r $f) {
 		&open_tempfile(SPAMFILE, ">$f", 0, 1);
@@ -1574,7 +1574,7 @@ foreach my $f ($spamfile, $hamfile) {
 sub setup_spamtrap_cron
 {
 &foreign_require("cron");
-local $job = &find_cron_script($spamtrap_cron_cmd);
+my $job = &find_cron_script($spamtrap_cron_cmd);
 if (!$job) {
 	$job = { 'user' => 'root',
 		 'command' => $spamtrap_cron_cmd,
@@ -1592,10 +1592,10 @@ if (!$job) {
 # Remove the spamtrap and hamtrap aliases for a domain, and any mail files
 sub delete_spamtrap_aliases
 {
-local ($d) = @_;
+my ($d) = @_;
 
 # Get the aliases, and remove them
-local ($ok, $spama, $hama) = &get_spamtrap_aliases($d);
+my ($ok, $spama, $hama) = &get_spamtrap_aliases($d);
 if ($ok == 1) {
 	&delete_virtuser($spama);
 	&delete_virtuser($hama);
@@ -1605,8 +1605,8 @@ else {
 	}
 
 # Delete the mail files
-local $spamfile = &spam_alias_file($d);
-local $hamfile = &ham_alias_file($d);
+my $spamfile = &spam_alias_file($d);
+my $hamfile = &ham_alias_file($d);
 &unlink_file($spamfile);
 &unlink_file($hamfile);
 
@@ -1618,12 +1618,12 @@ return undef;
 # 1 if yes, or -1 if we can't tell (due to a non-supported OS).
 sub check_spamd_status
 {
-local @pids = grep { $_ != $$ } &find_byname("spamd");
+my @pids = grep { $_ != $$ } &find_byname("spamd");
 if (@pids) {
 	# Running already, so we assume everything is cool
 	return 1;
 	}
-local $spamd = &has_command("spamd") ||
+my $spamd = &has_command("spamd") ||
 	       &has_command("/opt/csw/bin/spamd");
 if (!$spamd) {
 	# Not installed
@@ -1637,12 +1637,12 @@ return 0;	# Can be started
 # standard functions.
 sub enable_spamd
 {
-local $st = &check_spamd_status();
+my $st = &check_spamd_status();
 return 1 if ($st == 1 || $st == -1);
 
 # Find init script
 &foreign_require("init");
-local $init;
+my $init;
 foreach my $i ("spamassassin", "spamd", "sa-spamd") {
 	if (&init::action_status($i)) {
 		$init = $i;
@@ -1653,17 +1653,17 @@ $init ||= "virtualmin-spamassassin";	# Fall back to ours
 
 # Create or enable init script
 &$first_print(&text('spamd_boot'));
-local $spamd = &has_command("spamd") ||
+my $spamd = &has_command("spamd") ||
 	       &has_command("/opt/csw/bin/spamd");
 &init::enable_at_boot($init, "Start SpamAssassin filter server",
 	"spamd --pidfile=/var/run/spamd.pid -d",
 	"kill `cat /var/run/spamd.pid`");
 
 # Update OS-specific config files
-local $dfile = "/etc/default/spamassassin";
+my $dfile = "/etc/default/spamassassin";
 if (-r $dfile) {
 	# Init script won't start on Debian without this flag
-	local %defs;
+	my %defs;
 	&lock_file($dfile);
 	&read_env_file($dfile, \%defs);
 	if (!$defs{'ENABLED'} || !$defs{'CRON'}) {
@@ -1684,7 +1684,7 @@ if (&init::action_status("spamassassin-maintenance.timer")) {
 
 # Start now
 &$first_print($text{'spamd_start'});
-local ($ok, $out) = &init::start_action($init);
+my ($ok, $out) = &init::start_action($init);
 if ($ok) {
 	&$second_print($text{'setup_done'});
 	}
@@ -1701,13 +1701,13 @@ return 1;
 # Turn off spamd now and at boot time
 sub disable_spamd
 {
-local $st = &check_spamd_status();
+my $st = &check_spamd_status();
 return 1 if ($st == 0 || $st == -1);
 
 # Find init script
 &$first_print(&text('spamd_unboot'));
 &foreign_require("init");
-local $init;
+my $init;
 foreach my $i ("spamassassin", "spamd", "sa-spamd", "virtualmin-spamassassin") {
 	if (&init::action_status($i)) {
 		$init = $i;
@@ -1730,7 +1730,7 @@ if (&init::action_status("spamassassin-maintenance.timer")) {
 
 # Stop spamd process
 &$first_print($text{'spamd_stop'});
-local ($ok, $out) = &init::stop_action($init);
+my ($ok, $out) = &init::stop_action($init);
 if (!$ok) {
 	&kill_byname_logged('spamd', 'TERM');
 	}
@@ -1744,7 +1744,7 @@ return 1;
 # if quota if full.
 sub setup_quota_full_bounce
 {
-local @recipes = &procmail::get_procmailrc();
+my @recipes = &procmail::get_procmailrc();
 
 # Find existing VIRTUALMIN= and EXITCODE= recipes
 my ($virt, $exitcode, $virtafter);
@@ -1762,20 +1762,20 @@ foreach my $r (@recipes) {
 return 0 if (!$virt || $exitcode);
 
 # Create new recipe objects
-local $var1 = { 'name' => 'EXITCODE',
+my $var1 = { 'name' => 'EXITCODE',
 		'value' => '$?' };
-local $testcmd = &has_command("test") || "test";
-local $cmd;
+my $testcmd = &has_command("test") || "test";
+my $cmd;
 if ($gconfig{'os_type'} eq 'solaris') {
 	$cmd = "sh -c \"$testcmd '\$EXITCODE' = '73'\"";
 	}
 else {
 	$cmd = "$testcmd \"\$EXITCODE\" = \"73\"";
 	}
-local $var2 = { 'flags' => [ ],
+my $var2 = { 'flags' => [ ],
 		'conds' => [ [ "?", $cmd ] ],
 	        'action' => '/dev/null' };
-local $var3 = { 'name' => 'EXITCODE',
+my $var3 = { 'name' => 'EXITCODE',
                 'value' => '0' };
 
 # Add after the VIRTUALMIN= line
@@ -1789,12 +1789,12 @@ local $var3 = { 'name' => 'EXITCODE',
 # and long descriptions for the action to switch statuses
 sub startstop_spam
 {
-local ($scanner, $host) = &get_global_spam_client();
+my ($scanner, $host) = &get_global_spam_client();
 if ($scanner ne "spamc" || $host) {
 	# Spamd isn't being used
 	return ( );
 	}
-local @pids = grep { $_ != $$ } &find_byname("spamd");
+my @pids = grep { $_ != $$ } &find_byname("spamd");
 if (@pids) {
 	return ( { 'status' => 1,
 		   'name' => $text{'index_spamname'},
@@ -1817,7 +1817,7 @@ sub start_service_spam
 {
 &push_all_print();
 &set_all_null_print();
-local $rv = &enable_spamd();
+my $rv = &enable_spamd();
 &pop_all_print();
 return $rv ? undef : $text{'spamd_estartmsg'};
 }
@@ -1831,11 +1831,11 @@ sub stop_service_spam
 foreach my $init ("spamassassin", "spamd", "sa-spamd",
 	          "virtualmin-spamassassin") {
 	if (&init::action_status($init)) {
-		local ($ok, $out) = &init::stop_action($init);
+		my ($ok, $out) = &init::stop_action($init);
 		return $ok ? undef : "<tt>".&html_escape($out)."</tt>";
 		}
 	}
-local @pids = grep { $_ != $$ } &find_byname("spamd");
+my @pids = grep { $_ != $$ } &find_byname("spamd");
 if (@pids) {
 	if (&kill_logged('TERM', @pids)) {
 		return undef;
@@ -1851,7 +1851,7 @@ else {
 # Lock a domain's spamassassin config file and procmail file
 sub obtain_lock_spam
 {
-local ($d) = @_;
+my ($d) = @_;
 return if (!$config{'spam'});
 &obtain_lock_anything($d);
 
@@ -1879,7 +1879,7 @@ $main::get_lock_spam++;
 # Un-lock a domain's spamassassin config file and procmail file
 sub release_lock_spam
 {
-local ($d) = @_;
+my ($d) = @_;
 return if (!$config{'spam'});
 
 if ($d) {

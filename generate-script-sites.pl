@@ -43,7 +43,7 @@ foreach $s (@scripts) {
 		foreach $url (map { $_->{'url'} } @files) {
 			# Work out URLs
 			@urls = ( $url );
-			local $ourl = &convert_osdn_url($url);
+			my $ourl = &convert_osdn_url($url);
 			if ($ourl && $ourl ne $url) {
 				push(@orls, $ourl);
 				}

@@ -45,7 +45,7 @@ $ver =~ /^\S+$/ || &error($text{'scripts_eversion'});
 # Check that the domain has a PHP version
 $ok = 1;
 if (&indexof("php", @{$script->{'uses'}}) >= 0) {
-	@gotvers = grep { local $v = $_; local $_;
+	@gotvers = grep { my $v = $_; local $_;
 			  &check_php_version($d, $v) }
 			&expand_php_versions($d, [5]);
 	@gotvers = sort { &get_php_version($b, $d) <=>

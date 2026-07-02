@@ -81,11 +81,11 @@ foreach $d (&list_domains()) {
 		}
 
 	# Work out the spam, virus and trash folders for this domain
-	local $sfname = "spam";
-	local $vfname = "virus";
-	local $tfname = "trash";
-	local $fd = $mailboxes::config{'mail_usermin'};
-	local ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
+	my $sfname = "spam";
+	my $vfname = "virus";
+	my $tfname = "trash";
+	my $fd = $mailboxes::config{'mail_usermin'};
+	my ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
 	if ($sdmode == 1 && $sdpath =~ /^\Q$fd\E\/(.+)$/) {
 		$sfname = lc($1);
 		$sfname =~ s/^\.//;
@@ -94,7 +94,7 @@ foreach $d (&list_domains()) {
 	elsif ($sdmode == 4 || $sdmode == 6) {
 		$sfname = $sdpath;
 		}
-	local ($vdmode, $vdpath) = &get_domain_virus_delivery($d);
+	my ($vdmode, $vdpath) = &get_domain_virus_delivery($d);
 	if ($vdmode == 1 && $vdpath =~ /^\Q$fd\E\/(.+)$/) {
 		$vfname = lc($1);
 		$vfname =~ s/^\.//;
@@ -172,9 +172,9 @@ foreach $d (&list_domains()) {
 
 			# Verify the index on the folder
 			if ($folder->{'type'} == 0) {
-				local $ifile = &mailboxes::user_index_file(
+				my $ifile = &mailboxes::user_index_file(
 						$folder->{'file'});
-				local %index;
+				my %index;
 				eval {
 					&mailboxes::build_dbm_index(
 						$folder->{'file'}, \%index);
@@ -189,7 +189,7 @@ foreach $d (&list_domains()) {
 				}
 
 			# Work out the threshold
-			local ($days, $size);
+			my ($days, $size);
 			if ($fn eq $tfname) {
 				($days, $size) = ($auto->{'trashdays'},
 						  $auto->{'trashsize'});
@@ -263,7 +263,7 @@ foreach $d (&list_domains()) {
 # after being reduced.
 sub process_spam_mails
 {
-local ($mail, $days, $size, $folder, $needsize) = @_;
+my ($mail, $days, $size, $folder, $needsize) = @_;
 my @delmail;
 if ($days) {
 	# Find mail older than some number of days

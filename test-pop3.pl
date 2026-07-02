@@ -30,7 +30,7 @@ if (!$module_name) {
 $server = "localhost";
 $port = 110;
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--server") {
 		$server = shift(@ARGV);
 		}

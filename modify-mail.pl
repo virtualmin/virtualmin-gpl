@@ -94,7 +94,7 @@ $config{'mail'} || &usage("Email is not enabled for Virtualmin");
 
 # Parse command-line args
 while(@ARGV > 0) {
-	local $a = shift(@ARGV);
+	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
 		push(@dnames, shift(@ARGV));
 		}
@@ -315,7 +315,7 @@ foreach $d (@doms) {
 
 	# Enable or disable autoconfig
 	if (!$d->{'alias'} && &domain_has_website($d) && defined($autoconfig)) {
-		local $err;
+		my $err;
 		if ($autoconfig) {
 			&$first_print("Enabling mail client ".
 				      "auto-configuration for $d->{'dom'} ..");
@@ -337,8 +337,8 @@ foreach $d (@doms) {
 
 	# Enable or disable cloud mail filter
 	if (defined($cloud)) {
-		local $err;
-		local $oldprov = &get_domain_cloud_mail_provider($d);
+		my $err;
+		my $oldprov = &get_domain_cloud_mail_provider($d);
 		if ($prov) {
 			if (!$oldprov ||
 			    $prov->{'name'} ne $oldprov->{'name'} ||
