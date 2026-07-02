@@ -16,6 +16,14 @@ if ($in{'dname_def'}) {
 	}
 else {
 	foreach my $dname (split(/\s+/, $in{'dname'})) {
+		$dname =~ s/^\s+//;
+		$dname =~ s/\s+$//;
+		if (&letsencrypt_is_ip_cert_identifier($dname)) {
+			push(@dnames, lc($dname));
+			next;
+			}
+		my $iperr = &letsencrypt_invalid_ip_identifier_error($dname);
+		&error($iperr) if ($iperr);
 		$dname = lc(&parse_domain_name($dname));
 		my $checkname = $dname;
 		$checkname =~ s/^www\.//;
@@ -32,6 +40,16 @@ push(@dnames, "*.".$d->{'dom'}) if ($in{'dwild'});
 # Filter wildcard to prevent redundancy
 my $fdnames = &filter_ssl_wildcards(\@dnames);
 @dnames = @$fdnames;
+my $has_ips = &letsencrypt_dnames_have_ips(\@dnames);
+my $nerr = &validate_letsencrypt_ip_cert_names(\@dnames);
+&error($nerr) if ($nerr);
+
+if ($has_ips) {
+	my $err = &validate_letsencrypt_ip_website($d, \@dnames);
+	&error($err) if ($err);
+	}
+my $rerr = &validate_letsencrypt_ip_cert_renewal($d, \@dnames, $in{'renew'});
+&error($rerr) if ($rerr);
 
 # Work out filtering mode
 if ($in{'hostfilter'} == 0) {
@@ -105,7 +123,9 @@ else {
 		&$first_print(&text('letsencrypt_validcheck',
 			join(" ", map { &show_domain_name($_) } @cdoms)));
 		my @wilds = grep { /^\*\./ } @dnames;
-		my $vcheck = @wilds ? ['dns'] : undef;
+		my $vcheck = @wilds ? ['dns'] :
+			     &letsencrypt_dnames_have_ips(\@dnames) ? ['web'] :
+			     undef;
 		my @errs = map { &validate_letsencrypt_config($_, $vcheck) } @cdoms;
 		if (@errs) {
 			&$second_print($text{'letsencrypt_connerrs'});
@@ -173,6 +193,11 @@ else {
 	&foreign_require("webmin");
 	$phd = &public_html_dir($d);
 	$before = &before_letsencrypt_website($d);
+
+	# Figure out which services (webmin, postfix, etc)
+	# were using the old cert before the request changes anything.
+	@beforecerts = &get_all_domain_service_ssl_certs($d);
+
 	($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 					$d, \@dnames, 0, undef, undef,
 					$in{'ctype'}, $acme, $subset);
@@ -189,7 +214,8 @@ else {
 		}
 	else {
 		$info = &cert_file_info($cert);
-		@gotnames = &unique($info->{'cn'}, @{$info->{'alt'}});
+		@gotnames = &list_domain_certificate($info);
+		@gotnames = @dnames if (!@gotnames);
 		if (scalar(@gotnames) == scalar(@dnames)) {
 			&$second_print(&text('letsencrypt_done'));
 			}
@@ -197,10 +223,6 @@ else {
 			&$second_print(&text('letsencrypt_done2',
 				join(", ", map { "<tt>$_</tt>" } @gotnames)));
 			}
-
-		# Figure out which services (webmin, postfix, etc)
-		# were using the old cert
-		@beforecerts = &get_all_domain_service_ssl_certs($d);
 
 		# Worked .. copy to the domain
 		&obtain_lock_ssl($d);
@@ -230,7 +252,8 @@ else {
 
 		# Update other services using the cert
 		&$first_print($text{'cert_updatesvcs'});
-		&update_all_domain_service_ssl_certs($d, \@beforecerts);
+		&update_all_domain_service_ssl_certs($d, \@beforecerts,
+						     $has_ips ? 1 : undef);
 		&$second_print($text{'setup_done'});
 
 		# For domains that were using the SSL cert on this domain
@@ -274,4 +297,3 @@ else {
 		&domain_footer_link($d),
 			 "", $text{'index_return'});
 	}
-

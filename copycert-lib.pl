@@ -361,26 +361,59 @@ return @rv;
 }
 
 # update_all_domain_service_ssl_certs(&domain, &certs-before)
+# domain_cert_has_ip_identifiers(&domain)
+# Returns 1 if a domain's current certificate contains IP names.
+sub domain_cert_has_ip_identifiers
+{
+my ($d) = @_;
+my $info = &cert_info($d);
+return 0 if (!$info);
+foreach my $n (grep { $_ } ($info->{'cn'}, @{$info->{'alt'} || []})) {
+	return 1 if (&ssl_cert_identifier_is_ip($n));
+	}
+return 0;
+}
+
+# update_all_domain_service_ssl_certs(&domain, &certs-before, [force-sync])
 # Updates all services that were using this domain's SSL cert after it has
 # changed.
 sub update_all_domain_service_ssl_certs
 {
-my ($d, $before) = @_;
+my ($d, $before, $force_sync) = @_;
 my $tmpl = &get_template($d->{'template'});
+my %done;
 &push_all_print();
 &set_all_null_print();
 foreach my $svc (@$before) {
-	# Global service certs were explicitly copied, so keep them current.
+	# Preserve existing behavior: only refresh per-domain services whose
+	# template SSL option is still enabled.
 	my $enabled = $svc->{'d'} ? $tmpl->{'web_'.$svc->{'id'}.'_ssl'} : 1;
-	if ($enabled) {
-		if ($svc->{'d'}) {
-			my $func = "sync_".$svc->{'id'}."_ssl_cert";
-			&$func($d, 1) if (defined(&$func));
+	next if (!$enabled);
+	if ($svc->{'d'}) {
+		my $func = "sync_".$svc->{'id'}."_ssl_cert";
+		if (defined(&$func)) {
+			&$func($d, 1);
+			$done{$svc->{'id'}}++;
 			}
-		else {
-			my $func = "copy_".$svc->{'id'}."_ssl_service";
-			&$func($d) if (defined(&$func));
-			}
+		}
+	else {
+		my $func = "copy_".$svc->{'id'}."_ssl_service";
+		&$func($d) if (defined(&$func));
+		}
+	}
+# IP identifiers may be new to this cert, so the matching per-domain service
+# records might not have existed in the "before" snapshot. Force enabled SNI
+# services, and always include Webmin/Usermin so miniserv can serve the IP cert.
+if ($force_sync || &domain_cert_has_ip_identifiers($d)) {
+	foreach my $svc (&list_service_ssl_cert_types()) {
+		next if ($done{$svc->{'id'}});
+		next if (!$svc->{'dom'} && !$svc->{'virt'});
+		next if (!$svc->{'dom'} && !$d->{'virt'});
+		next if (!$tmpl->{'web_'.$svc->{'id'}.'_ssl'} &&
+			 $svc->{'id'} ne 'webmin' &&
+			 $svc->{'id'} ne 'usermin');
+		my $func = "sync_".$svc->{'id'}."_ssl_cert";
+		&$func($d, 1) if (defined(&$func));
 		}
 	}
 &pop_all_print();
@@ -433,9 +466,12 @@ sub ipkeys_to_domain_cert
 {
 my ($d, $ipkeys) = @_;
 foreach my $k (@$ipkeys) {
-	my $md = &indexof($d->{'dom'}, @{$k->{'ips'}}) >= 0;
-	my $m = $d->{'virt'} && &indexof($d->{'ip'}, @{$k->{'ips'}}) >= 0;
-	my $m6 = $d->{'virt6'} && &indexof($d->{'ip6'}, @{$k->{'ips'}}) >= 0;
+	my @dnames = ($d->{'dom'}, "*.".$d->{'dom'});
+	my $md = &miniserv_ipkey_has_any($k, \@dnames);
+	my $m = $d->{'virt'} &&
+		&miniserv_ipkey_has_any($k, [ $d->{'ip'} ]);
+	my $m6 = $d->{'virt6'} &&
+		&miniserv_ipkey_has_any($k, [ $d->{'ip6'} ]);
 	if ($md || $m || $m6) {
 		return ($k->{'cert'}, $k->{'extracas'},
 			$m ? $d->{'ip'} : undef,

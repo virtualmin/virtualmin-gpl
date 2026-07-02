@@ -5,9 +5,9 @@
 Requests and installs an SSL cert for a virtual server.
 
 The server must be specified with the C<--domain> flag, followed by a domain
-name. By default the certificate will be the for either previously used
-hostnames for a cert request, or the default SSL hostnames for the domain.
-However, you can specify an alternate list of hostnames with the C<--host>
+name. By default the certificate will be for either previously used identifiers
+for a cert request, or the default SSL hostnames for the domain. However, you
+can specify an alternate list of hostnames or IP addresses with the C<--host>
 flag, which can be given multiple times. Or you can force use of the default
 SSL hostname list with C<--default-hosts>.
 
@@ -36,14 +36,15 @@ is set. To prevent validation if it is enabled by default for the domain,
 use the C<--no-validate-first> flag.
 
 By default Virtualmin will attempt to perform an external DNS lookup of all
-domain names that the certificate is requested for, to make sure they can be
-resolved by the SSL provider. To disable this check, use the
+hostnames that the certificate is requested for, to make sure they can be
+resolved by the SSL provider. IP address identifiers are skipped by this
+lookup. To disable this check, use the
 C<--skip-dns-check> flag. Or to forcible enable it because it was disabled
 for the domain in the UI, use the C<--dns-check> flag.
 
 Alternately, you can use the C<--allow-subset> flag to have the SSL provider
-exclude any hostnames that cannot be resolved or validated from the certificate.
-Otherwise, failure of any hostname will block the entire request.
+exclude any identifiers that cannot be resolved or validated from the
+certificate. Otherwise, failure of any identifier will block the entire request.
 
 By default both web and DNS validation will be attempted by the SSL provider for
 domain ownership, but you can select just one with either the C<--web> or
@@ -181,14 +182,28 @@ if (!@dnames) {
 else {
 	# Hostnames given
 	foreach my $dname (@dnames) {
-                my $checkname = $dname;
-                $checkname =~ s/^www\.//;
-                $checkname =~ s/^\*\.//;
-                $err = &valid_domain_name($checkname);
-                &usage($err) if ($err);
+		next if (&letsencrypt_is_ip_cert_identifier($dname));
+		my $iperr = &letsencrypt_invalid_ip_identifier_error($dname);
+		&usage($iperr) if ($iperr);
+		my $checkname = $dname;
+		$checkname =~ s/^www\.//;
+		$checkname =~ s/^\*\.//;
+		$err = &valid_domain_name($checkname);
+		&usage($err) if ($err);
 		}
 	$custom_dname = join(" ", @dnames);
 	}
+my $has_ips = &letsencrypt_dnames_have_ips(\@dnames);
+my $nerr = &validate_letsencrypt_ip_cert_names(\@dnames);
+&usage($nerr) if ($nerr);
+if ($has_ips) {
+	$mode eq "dns" &&
+		&usage("DNS-based validation cannot be used for IP addresses");
+	my $err = &validate_letsencrypt_ip_website($d, \@dnames);
+	&usage($err) if ($err);
+	}
+my $rerr = &validate_letsencrypt_ip_cert_renewal($d, \@dnames, $renew);
+&usage($rerr) if ($rerr);
 if ($acmeid) {
 	defined(&list_acme_providers) ||
 		&usage("The --acme flag is only available in Virtualmin Pro");
@@ -238,6 +253,7 @@ if ($connectivity && defined(&check_domain_connectivity)) {
 if ($connectivity || $validation) {
 	my @wilds = grep { /^\*\./ } @dnames;
 	my $vcheck = @wilds ? ['dns'] :
+		     $has_ips ? ['web'] :
 		     $mode ? [$mode] : undef;
 	my @errs = map { &validate_letsencrypt_config(
 				$_, $vcheck) } @cdoms;
@@ -253,21 +269,21 @@ if ($connectivity || $validation) {
 # Filter hostnames down to those that can be resolved
 $nodnscheck = $d->{'letsencrypt_nodnscheck'} if (!defined($nodnscheck));
 if (!$nodnscheck) {
-	&$first_print("Checking hostnames for resolvability ..");
+	&$first_print("Checking certificate names for resolvability ..");
 	my @badnames;
 	my $fok = &filter_external_dns(\@dnames, \@badnames);
 	if ($fok < 0) {
 		&$second_print(".. check could not be performed!");
 		}
 	elsif ($fok) {
-		&$second_print(".. all hostnames can be resolved");
+		&$second_print(".. all certificate names are usable");
 		}
 	elsif (!@dnames) {
-		&$second_print(".. none of the hostnames could be resolved!");
+		&$second_print(".. none of the certificate names could be resolved!");
 		exit(1);
 		}
 	else {
-		&$second_print(".. some hostnames were removed : ".
+		&$second_print(".. some certificate names were removed : ".
 			join(', ', map { "<tt>$_</tt>" } @badnames));
 		}
 	}
@@ -306,9 +322,10 @@ if (!$ok) {
 	}
 else {
 	$info = &cert_file_info($cert);
-	@gotnames = &unique($info->{'cn'}, @{$info->{'alt'}});
+	@gotnames = &list_domain_certificate($info);
+	@gotnames = @dnames if (!@gotnames);
 	if (scalar(@gotnames) == scalar(@dnames)) {
-		&$second_print(".. done for all hostnames");
+		&$second_print(".. done for all certificate names");
 		}
 	else {
 		&$second_print(".. done for ".join(", ", @gotnames));
@@ -341,7 +358,8 @@ else {
 	&unlock_domain($d);
 
 	# Update other services using the cert
-	&update_all_domain_service_ssl_certs($d, \@beforecerts);
+	&update_all_domain_service_ssl_certs($d, \@beforecerts,
+					     $has_ips ? 1 : undef);
 
 	# For domains that were using the SSL cert on this domain originally but
 	# can no longer due to the cert hostname changing, break the linkage
@@ -384,7 +402,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Requests and installs an SSL cert for a virtual server.\n";
 print "\n";
 print "virtualmin generate-acme-cert --domain name\n";
-print "                             [--host hostname]*\n";
+print "                             [--host hostname-or-IP]*\n";
 print "                             [--default-hosts]\n";
 print "                             [--renew]\n";
 print "                             [--size bits]\n";
@@ -402,4 +420,3 @@ print "                             [--rsa | --ec]\n";
 print "                             [--acme id|provider]\n";
 exit(1);
 }
-

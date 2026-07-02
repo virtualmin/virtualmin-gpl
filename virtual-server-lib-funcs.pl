@@ -8916,10 +8916,45 @@ else {
 	@dnames = &get_hostnames_for_ssl($d);
 	}
 push(@dnames, "*.".$d->{'dom'}) if ($d->{'letsencrypt_dwild'});
+my $has_ips = &letsencrypt_dnames_have_ips(\@dnames);
 &$first_print($text{'letsencrypt_doing3'});
+my $iperr = &validate_letsencrypt_ip_cert_names(\@dnames) ||
+	    &validate_letsencrypt_ip_website($d, \@dnames);
+if ($iperr) {
+	$d->{'letsencrypt_last_failure'} = time();
+	$d->{'letsencrypt_last_err'} = $iperr;
+	$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
+	if ($showerrors) {
+		&$second_print(&text('letsencrypt_failed', $iperr));
+		}
+	else {
+		&$second_print($text{'letsencrypt_doing3failed'});
+		}
+	return 0;
+	}
+my $renew = !defined($d->{'letsencrypt_renew'}) ||
+	    $d->{'letsencrypt_renew'} eq '' ||
+	    $d->{'letsencrypt_renew'};
+my $rerr = &validate_letsencrypt_ip_cert_renewal($d, \@dnames, $renew);
+if ($rerr) {
+	# Initial IP certificates inherit automatic renewal from templates,
+	# so reject unsafe renew-before-expiry values before requesting one.
+	$d->{'letsencrypt_last_failure'} = time();
+	$d->{'letsencrypt_last_err'} = $rerr;
+	$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
+	if ($showerrors) {
+		&$second_print(&text('letsencrypt_failed', $rerr));
+		}
+	else {
+		&$second_print($text{'letsencrypt_doing3failed'});
+		}
+	return 0;
+	}
 if ($valid) {
 	my @wilds = grep { /^\*\./ } @dnames;
-	my $vcheck = @wilds ? ['dns'] : undef;
+	my $vcheck = @wilds ? ['dns'] :
+		     $has_ips ? ['web'] :
+		     undef;
 	my @errs = &validate_letsencrypt_config($d, $vcheck);
 	if (@errs) {
 		# Always store last Certbot error
@@ -9042,7 +9077,8 @@ else {
 	&unlock_domain($d);
 
 	# Update other services using the cert
-	&update_all_domain_service_ssl_certs($d, \@beforecerts);
+	&update_all_domain_service_ssl_certs($d, \@beforecerts,
+					     $has_ips ? 1 : undef);
 
 	&break_invalid_ssl_linkages($d);
 	&sync_domain_tlsa_records($d);
@@ -21680,10 +21716,12 @@ elsif (&has_command("host")) {
 return -1;
 }
 
-# filter_external_dns(&hostnames, &unresolvable)
-# Given a list of hostnames, removes those that can't be resolved and adds them
-# to the unresolvable list. Returns 1 if all are OK, 0 if any are not resolvable
-# and -1 if any lookups fail.
+# filter_external_dns(&identifiers, &unresolvable)
+# Given a list of certificate identifiers, removes hostnames that can't be
+# resolved and adds them to the unresolvable list. Wildcards and IP address
+# identifiers are kept because they are not resolved with normal DNS lookups.
+# Returns 1 if all are OK, 0 if any are not resolvable and -1 if any lookups
+# fail.
 sub filter_external_dns
 {
 my ($dnames, $badnames) = @_;
@@ -21692,6 +21730,10 @@ my @newdnames;
 foreach my $h (@$dnames) {
 	if ($h =~ /\*/) {
 		# Let's Encrypt wildcards are always OK
+		push(@newdnames, $h);
+		}
+	elsif (&letsencrypt_is_ip_cert_identifier($h)) {
+		# IP identifiers are validated by ACME as IPs, not DNS names
 		push(@newdnames, $h);
 		}
 	else {
