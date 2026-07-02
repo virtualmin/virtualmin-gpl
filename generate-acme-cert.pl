@@ -322,8 +322,7 @@ if (!$ok) {
 	}
 else {
 	$info = &cert_file_info($cert);
-	@gotnames = &unique(grep { $_ } ($info->{'cn'},
-					   @{$info->{'alt'} || []}));
+	@gotnames = &list_domain_certificate($info);
 	@gotnames = @dnames if (!@gotnames);
 	if (scalar(@gotnames) == scalar(@dnames)) {
 		&$second_print(".. done for all certificate names");

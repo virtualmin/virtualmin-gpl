@@ -2171,14 +2171,14 @@ return 0;
 }
 
 # list_domain_certificate(&domain|&cert-info)
-# Returns a list of domain names that are in the cert for a domain
+# Returns a list of DNS names and IP addresses that are in the cert
 sub list_domain_certificate
 {
 local ($d_or_info) = @_;
 local $info = $d_or_info->{'dom'} ? &cert_info($d_or_info) : $d_or_info;
 local @rv;
-push(@rv, $info->{'cn'});
-push(@rv, @{$info->{'alt'}});
+push(@rv, $info->{'cn'}) if ($info->{'cn'});
+push(@rv, @{$info->{'alt'}}) if ($info->{'alt'});
 return &unique(@rv);
 }
 
