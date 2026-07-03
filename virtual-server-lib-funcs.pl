@@ -8809,7 +8809,7 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
 			}
 		if (&create_initial_letsencrypt_cert(
 			$dom, $dom->{'auto_letsencrypt'} == 2 ? 0 : 1,
-			$config{'err_letsencrypt'})) {
+			$config{'err_letsencrypt'}, 1)) {
 			# Let's encrypt cert request worked
 			$generated = 2;
 			}
@@ -8900,12 +8900,13 @@ my $merr = &made_changes();
 return wantarray ? ($dom) : undef;
 }
 
-# create_initial_letsencrypt_cert(&domain, [validate-first], [show-errors])
+# create_initial_letsencrypt_cert(&domain, [validate-first], [show-errors],
+# 				  [new-domain])
 # Create the initial default let's encrypt cert for a domain which has just
 # had SSL enabled. May print stuff.
 sub create_initial_letsencrypt_cert
 {
-my ($d, $valid, $showerrors) = @_;
+my ($d, $valid, $showerrors, $newdom) = @_;
 &foreign_require("webmin");
 my $tmpl = &get_template($d->{'template'});
 my @dnames;
@@ -8995,7 +8996,7 @@ if ($tmpl->{'web_acme'} && defined(&list_acme_providers)) {
 	}
 $d->{'letsencrypt_id'} = $acme->{'id'} if ($acme);
 my @leargs = ($d, \@dnames, undef, undef, undef, undef, $acme,
-	      $d->{'letsencrypt_subset'});
+	      $d->{'letsencrypt_subset'}, $newdom);
 my ($ok, $cert, $key, $chain) =
 	&request_domain_letsencrypt_cert(@leargs);
 if ($ok) {
