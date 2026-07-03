@@ -2113,7 +2113,10 @@ elsif ($mode == 0 && $id && $id ne "1") {
 	# This full backup gets its own snapshot only if a differential
 	# schedule actually references it.
 	my @incrs = grep { $_->{'increment'} == $id } &list_scheduled_backups();
-	return "$incremental_backups_dir/$id/$d->{'id'}" if (@incrs);
+	if (@incrs) {
+		# Yes, so it gets its own incremental file
+		return "$incremental_backups_dir/$id/$d->{'id'}";
+		}
 	}
 return "$incremental_backups_dir/$d->{'id'}";
 }
