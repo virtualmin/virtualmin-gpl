@@ -60,6 +60,8 @@ $d || usage("Virtual server $domain does not exist");
 		 &remove_userdom($_->{'user'}, $d) eq $username } @users;
 $user || usage("No user named $username was found in the server $domain");
 $user->{'domainowner'} && usage("The user $username is the owner of server $domain, and so cannot be deleted");
+($user->{'feature_user'} || $user->{'noactions'}) &&
+	usage("The user $username is managed by a feature plugin, and so cannot be deleted by this command");
 
 if (!$user->{'nomailfile'}) {
 	# Remove mail file
@@ -110,4 +112,3 @@ print "virtualmin delete-user --domain domain.name\n";
 print "                       --user username\n";
 exit(1);
 }
-
