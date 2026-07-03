@@ -2637,6 +2637,7 @@ newtmpl_return=liste over maler
 newtmpl_delete=Slett valgte maler
 newtmpl_created=Opprettet
 newtmpl_init=Virtualmin installering
+newtmpl_name0=Standardinnstillinger
 
 tmpl_title1=Opprett tjener-mal
 tmpl_title2=Rediger tjener maler
