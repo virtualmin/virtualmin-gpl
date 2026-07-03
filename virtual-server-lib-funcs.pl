@@ -9030,7 +9030,7 @@ if ($tmpl->{'web_acme'} && defined(&list_acme_providers)) {
 	}
 $d->{'letsencrypt_id'} = $acme->{'id'} if ($acme);
 my @leargs = ($d, \@dnames, undef, undef, undef, undef, $acme,
-	      $d->{'letsencrypt_subset'});
+	      $d->{'letsencrypt_subset'}, $newdom);
 my ($ok, $cert, $key, $chain) =
 	&request_domain_letsencrypt_cert(@leargs);
 if ($ok) {

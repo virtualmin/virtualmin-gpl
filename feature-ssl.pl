@@ -3972,12 +3972,13 @@ return undef;
 }
 
 # request_domain_letsencrypt_cert(&domain, &dnames, [staging], [size], [mode],
-# 				  [key-type], [&acme], [allow-subset])
+# 				  [key-type], [&acme], [allow-subset],
+# 				  [new-domain])
 # Attempts to request a Let's Encrypt cert for a domain, trying both web and
 # DNS modes if possible. The key type must be one of 'rsa' or 'ecdsa'
 sub request_domain_letsencrypt_cert
 {
-my ($d, $dnames, $staging, $size, $mode, $ctype, $acme, $subset) = @_;
+my ($d, $dnames, $staging, $size, $mode, $ctype, $acme, $subset, $newdom) = @_;
 my $tmpl = &get_template($d->{'template'});
 my ($server, $keytype, $hmac);
 if ($acme) {
@@ -4019,43 +4020,38 @@ return (0, $iperr) if ($iperr);
 &disable_quotas($d);
 my $acme_email = $acme ? $acme->{'email'} : undef;
 $acme_email ||= &get_global_from_address();
-foreach my $try (0, 1) {
-	@errs = ();
-	if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
-		# Try using website first
-		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-			$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
-			$acme_email, $actype, $actype_reuse,
-			$server, $keytype, $hmac, $subset);
-		push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
-		}
-	# DNS validation cannot prove control of IP identifiers, so never fall
-	# back to it once the request contains any IP address.
-	if (!$ok && !$has_ips && $d->{'dns'} && (!$mode || $mode eq "dns")) {
-		# Fall back to DNS
-		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-			$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
-			$acme_email, $actype, $actype_reuse,
-			$server, $keytype, $hmac, $subset);
-		push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
-		&clear_domain_dns_records_and_file($d);
-		}
-	elsif (!$ok) {
-		if (!$cert) {
-			$cert = $has_ips ? $text{'letsencrypt_eipnoweb'} :
-				"Domain has no website, ".
-				"and DNS-based validation is not possible";
-			push(@errs, $cert);
-			}
-		}
-	if (!$ok && !$try) {
-		# Try again after a small delay, which works in 99% of
-		# cases, considering initial configuration was correct
+# Request now
+@errs = ();
+if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
+	# Wait for DNS propagation before initial web validation
+	if ($newdom) {
 		my %webmin_mod_config = &foreign_config("webmin");
-		sleep((int($webmin_mod_config{'letsencrypt_dns_wait'}) || 10) * 2);
+		sleep($webmin_mod_config{'letsencrypt_dns_wait'} // 10);
 		}
-	else {
-		last;
+	# Try using website first
+	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
+		$acme_email, $actype, $actype_reuse,
+		$server, $keytype, $hmac, $subset);
+	push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
+	}
+# DNS validation cannot prove control of IP identifiers, so never fall
+# back to it once the request contains any IP address.
+if (!$ok && !$has_ips && $d->{'dns'} && (!$mode || $mode eq "dns")) {
+	# Fall back to DNS
+	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
+		$acme_email, $actype, $actype_reuse,
+		$server, $keytype, $hmac, $subset);
+	push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
+	&clear_domain_dns_records_and_file($d);
+	}
+elsif (!$ok) {
+	if (!$cert) {
+		$cert = $has_ips ? $text{'letsencrypt_eipnoweb'} :
+			"Domain has no website, ".
+			"and DNS-based validation is not possible";
+		push(@errs, $cert);
 		}
 	}
 &enable_quotas($d);
