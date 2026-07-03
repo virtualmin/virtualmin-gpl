@@ -8809,7 +8809,7 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
 			}
 		if (&create_initial_letsencrypt_cert(
 			$dom, $dom->{'auto_letsencrypt'} == 2 ? 0 : 1,
-			$config{'err_letsencrypt'})) {
+			$config{'err_letsencrypt'}, 1)) {
 			# Let's encrypt cert request worked
 			$generated = 2;
 			}
@@ -8900,12 +8900,13 @@ my $merr = &made_changes();
 return wantarray ? ($dom) : undef;
 }
 
-# create_initial_letsencrypt_cert(&domain, [validate-first], [show-errors])
+# create_initial_letsencrypt_cert(&domain, [validate-first], [show-errors],
+# 				  [new-domain])
 # Create the initial default let's encrypt cert for a domain which has just
 # had SSL enabled. May print stuff.
 sub create_initial_letsencrypt_cert
 {
-my ($d, $valid, $showerrors) = @_;
+my ($d, $valid, $showerrors, $newdom) = @_;
 &foreign_require("webmin");
 my $tmpl = &get_template($d->{'template'});
 my @dnames;
@@ -8965,6 +8966,7 @@ if ($valid) {
 			}
 		my $err = &html_escape(join(", ", @estr));
 		$d->{'letsencrypt_last_failure'} = time();
+		$d->{'letsencrypt_first_failure'} ||= time();
 		$d->{'letsencrypt_last_err'} = $err;
 		$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 		if ($showerrors) {
@@ -9008,6 +9010,7 @@ if ($valid) {
 			my $e = &html_escape(join(", ",
 				map { $_->{'desc'} } @errs));
 			$d->{'letsencrypt_last_failure'} = time();
+			$d->{'letsencrypt_first_failure'} ||= time();
 			$d->{'letsencrypt_last_err'} = $e;
 			$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 			if ($showerrors) {
@@ -9050,6 +9053,7 @@ else {
 if (!$ok) {
 	# Always store last Certbot error
 	$d->{'letsencrypt_last_failure'} = time();
+	$d->{'letsencrypt_first_failure'} ||= time();
 	$d->{'letsencrypt_last_err'} = $cert;
 	$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 	if ($showerrors) {
@@ -9067,8 +9071,11 @@ else {
 	$d->{'letsencrypt_dname'} = '';
 	$d->{'letsencrypt_dwild'} = 0;
 	$d->{'letsencrypt_last'} = time();
+	$d->{'letsencrypt_last_success'} = time();
 	$d->{'letsencrypt_renew'} = 1 if ($d->{'letsencrypt_renew'} eq '');
 	$d->{'letsencrypt_last_id'} = $d->{'letsencrypt_id'};
+	delete($d->{'letsencrypt_last_err'});
+	delete($d->{'letsencrypt_first_failure'});
 
 	# Inject initial SSL expiry to avoid wrong "until expiry"
 	&refresh_ssl_cert_expiry($d);
