@@ -59,6 +59,13 @@ if ($mleft != 0) {
 			}
 		}
 	}
+# Include user creation links from feature plugins
+foreach my $f (&list_feature_plugins()) {
+	if ($d->{$f} && &plugin_defined($f, "users_create_links")) {
+		my @plinks = &plugin_call($f, "users_create_links", $d);
+		push(@links, @plinks) if @plinks;
+		}
+	}
 push(@links, [ "mass_ucreate_form.cgi?dom=$in{'dom'}",
 	       $text{'users_batch2'}, "right" ]);
 
