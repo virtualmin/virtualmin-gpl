@@ -2081,23 +2081,23 @@ if ($ok) {
 		}
 	}
 
-	# Release lock on dest file
-	foreach my $lockfile (@lockfiles) {
-		&unlock_file($lockfile);
-		}
+# Release lock on dest file
+foreach my $lockfile (@lockfiles) {
+	&unlock_file($lockfile);
+	}
 
-	# For any domains that failed and were full backups, clear the differential
-	# file so that future differential backups aren't diffs against it
-	if ($increment == 0 && &has_incremental_tar()) {
-		foreach my $d (@errdoms) {
-			if ($d->{'id'}) {
-				&unlink_file(&get_incremental_file($d, $increment, $id));
-				}
+# For any domains that failed and were full backups, clear the differential
+# file so that future differential backups aren't diffs against it
+if ($increment == 0 && &has_incremental_tar()) {
+	foreach my $d (@errdoms) {
+		if ($d->{'id'}) {
+			&unlink_file(&get_incremental_file($d, $increment, $id));
 			}
 		}
-
-	return ($ok, $sz, \@errdoms);
 	}
+
+return ($ok, $sz, \@errdoms);
+}
 
 # get_incremental_file(&domain, increment-mode, backup-id)
 # Returns the path to the incremental file for a backup
@@ -2109,10 +2109,11 @@ if ($mode >= 3) {
 	# Incremental against a specific backup
 	return "$incremental_backups_dir/$mode/$d->{'id'}";
 	}
-elsif ($mode == 0 && $id =~ /^\d+$/ && $id >= 3) {
-	# This is a scheduled full backup. Keep its own snapshot even before
-	# any differential schedule references it, so future chains can use it.
-	return "$incremental_backups_dir/$id/$d->{'id'}";
+elsif ($mode == 0 && $id && $id ne "1") {
+	# This full backup gets its own snapshot only if a differential
+	# schedule actually references it.
+	my @incrs = grep { $_->{'increment'} == $id } &list_scheduled_backups();
+	return "$incremental_backups_dir/$id/$d->{'id'}" if (@incrs);
 	}
 return "$incremental_backups_dir/$d->{'id'}";
 }
