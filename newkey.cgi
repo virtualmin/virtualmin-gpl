@@ -112,8 +112,7 @@ $certerr && &error(&text('newkey_ematch', $certerr));
 $newcertinfo = &cert_data_info($cert);
 if ($newca) {
 	$newcainfo = &cert_data_info($newca);
-	if ($newcainfo->{'o'} ne $newcertinfo->{'issuer_o'} ||
-	    $newcainfo->{'cn'} ne $newcertinfo->{'issuer_cn'}) {
+	if (&cert_issuer_ca_mismatch($newcertinfo, $newcainfo)) {
 		&error($text{'newkey_ecamatch'});
 		}
 	}
@@ -249,4 +248,3 @@ my $merr = &made_changes();
 &ui_print_footer("cert_form.cgi?dom=$in{'dom'}", $text{'cert_return'},
 	 	 &domain_footer_link($d),
 		 "", $text{'index_return'});
-
