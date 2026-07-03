@@ -20,6 +20,9 @@ $d = &get_domain($in{'dom'});
 foreach $mu (@mass) {
 	($user) = grep { $_->{'user'} eq $mu } @users;
 	if ($user) {
+		&error(&text('users_edplugin',
+			     &html_escape(&remove_userdom($user->{'user'}, $d))))
+			if ($user->{'feature_user'} || $user->{'noactions'});
 		push(@musers, $user);
 		}
 	}
@@ -157,4 +160,3 @@ foreach $user (@musers) {
 
 &ui_print_footer("list_users.cgi?dom=$in{'dom'}", $text{'users_return'},
 		 "", $text{'index_return2'});
-

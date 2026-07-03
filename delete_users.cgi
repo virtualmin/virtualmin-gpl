@@ -24,6 +24,9 @@ foreach $du (@del) {
 	if ($user) {
 		push(@dusers, $user);
 		&error($text{'users_edunix'}) if ($user->{'domainowner'});
+		&error(&text('users_edplugin',
+			     &html_escape(&remove_userdom($user->{'user'}, $d))))
+			if ($user->{'feature_user'} || $user->{'noactions'});
 		}
 	}
 
@@ -120,4 +123,3 @@ else {
 	&ui_print_footer("list_users.cgi?dom=$in{'dom'}",
 			 $text{'users_return'});
 	}
-

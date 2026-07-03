@@ -1126,12 +1126,29 @@ if ($includeextra && &domain_has_website($d) &&
 	push(@users, &list_extra_web_users($d));
 	}
 
-# Include users from feature plugins that define list_plugin_users
-if ($includeextra) {
+# Include users from feature plugins
+if ($includeextra && $d) {
 	foreach my $f (&list_feature_plugins()) {
-		if ($d->{$f} && &plugin_defined($f, "list_plugin_users")) {
-			my @pu = &plugin_call($f, "list_plugin_users", $d);
-			push(@users, @pu) if @pu;
+		next if (!$d->{$f});
+		next if (!&plugin_defined($f, "feature_list_users"));
+		foreach my $u (&plugin_call($f, "feature_list_users", $d)) {
+			next if (!$u || ref($u) ne "HASH" ||
+				 !defined($u->{'user'}) || $u->{'user'} eq "");
+			# Core can display feature users, but the plugin owns them.
+			$u->{'feature_user'} = $f;
+			$u->{'noactions'} = 1;
+			$u->{'nomailfile'} = 1 if (!defined($u->{'nomailfile'}));
+			$u->{'nocreatehome'} = 1 if (!defined($u->{'nocreatehome'}));
+			$u->{'noprimary'} = 1 if (!defined($u->{'noprimary'}));
+			$u->{'noextra'} = 1 if (!defined($u->{'noextra'}));
+			$u->{'noalias'} = 1 if (!defined($u->{'noalias'}));
+			$u->{'pass'} = "" if (!defined($u->{'pass'}));
+			$u->{'dbs'} = [ ] if (ref($u->{'dbs'}) ne "ARRAY");
+			$u->{'extraemail'} = [ ]
+				if (ref($u->{'extraemail'}) ne "ARRAY");
+			$u->{'extravirt'} = [ ]
+				if (ref($u->{'extravirt'}) ne "ARRAY");
+			push(@users, $u);
 			}
 		}
 	}
@@ -1667,6 +1684,9 @@ sub modify_user
 {
 my ($user, $olduser, $d, $noaliases) = @_;
 
+# Users owned by a feature plugin cannot be modified by core
+return if ($user->{'feature_user'} || $user->{'noactions'});
+
 # Rename any of his cron jobs
 &rename_unix_cron_jobs($user->{'user'}, $olduser->{'user'});
 
@@ -2075,6 +2095,9 @@ if ($d) {
 # Delete a mailbox user and all associated virtusers and aliases
 sub delete_user
 {
+# Users owned by a feature plugin cannot be deleted by core
+return undef if ($_[0]->{'feature_user'} || $_[0]->{'noactions'});
+
 # For extra specific user associated
 # with domain delete it and return
 if ($_[0]->{'extra'}) {
@@ -5738,9 +5761,9 @@ my $userdesc;
 my @domsdbs = &domain_databases($d);
 foreach $u (@$users) {
 	my $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
+	$pop3 = &html_escape($pop3);
 	my $pop3_dis =
 		&ui_text_color($pop3.&vui_inline_label('users_disabled_label', undef, 'disabled'), 'danger');
-	$pop3 = &html_escape($pop3);
 	my @cols;
 	my $filetype = $u->{'extra'} ? "&type=".&urlize($u->{'type'}) : "";
 	my $col_text =
@@ -5749,17 +5772,17 @@ foreach $u (@$users) {
 	    $u->{'webowner'} && $u->{'pass'} =~ /^(\!|\*)/ ? $pop3_dis :
 	    $u->{'webowner'} ? $pop3 :
 	    $u->{'pass'} =~ /^(\!|\*)/ ? $pop3_dis : $pop3);
-	my $col_val;
-	if ($u->{'edit_url'}) {
-		$col_val = "<a href='".&html_escape($u->{'edit_url'}).
-			   "'>$col_text</a>";
-		}
-	elsif (!$virtualmin_pro && $u->{'extra'}) {
+	my $col_val = "<a href='edit_user.cgi?dom=$did$filetype&amp;".
+		      "user=".&urlize($u->{'user'})."'>$col_text</a>";
+	if (!$virtualmin_pro && $u->{'extra'}) {
 		$col_val = $col_text;
 		}
-	else {
-		$col_val = "<a href='edit_user.cgi?dom=$did$filetype&amp;".
-			      "user=".&urlize($u->{'user'})."'>$col_text</a>";
+	if ($u->{'feature_user'} && !$u->{'edit_url'}) {
+		$col_val = $col_text;
+		}
+	if ($u->{'edit_url'}) {
+		$col_val = "<a href=\"".&html_escape($u->{'edit_url'}).
+			   "\">$col_text</a>";
 		}
 	push(@cols, "$col_val\n");
 	push(@cols, &html_escape($u->{'user'}));
@@ -5771,10 +5794,12 @@ foreach $u (@$users) {
 	$quota += $u->{'quota'} if (&has_home_quotas());
 	my $uquota;
 	$uquota += $u->{'uquota'} if (&has_home_quotas());
-	if (($u->{'webowner'} || $u->{'extra'}) && defined($quota)) {
-		# Website owners, virtual database and web users have no
-		# real quota
-		push(@cols, $u->{'type'} eq 'web' || $u->{'type'} eq 'db' ?
+	if (($u->{'webowner'} || $u->{'extra'} || $u->{'feature_user'}) &&
+	    defined($quota)) {
+		# Website owners, virtual database, web and feature users
+		# have no real quota
+		push(@cols, $u->{'feature_user'} ||
+			    $u->{'type'} eq 'web' || $u->{'type'} eq 'db' ?
 			$text{'users_na'} : $text{'users_same'}, "");
 		}
 	elsif (defined($quota)) {
@@ -5836,7 +5861,8 @@ foreach $u (@$users) {
 		}
 	my ($shell) = grep { $_->{'shell'} eq &get_user_shell($u) } @ashells;
 	my $udbs = scalar(@{$u->{'dbs'}}) || $u->{'domainowner'};
-	push(@cols, ($u->{'extra'} && $u->{'type'} eq 'db') ? &$login_access_label('db') :
+	push(@cols, $u->{'feature_user'} ? $text{'users_login_access_feature'} :
+		    ($u->{'extra'} && $u->{'type'} eq 'db') ? &$login_access_label('db') :
 		    ($u->{'extra'} && $u->{'type'} eq 'web') ? &$login_access_label('web') :
 		    !$u->{'shell'} ? &$login_access_label($udbs ? 'db' : undef, 'mail') :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
@@ -5865,7 +5891,8 @@ foreach $u (@$users) {
 	# Show columns from plugins
 	if ($users_cols{'show_plugins'}) {
 		foreach $f (grep { $plugcol{$_} } &list_mail_plugins()) {
-			push(@cols, &plugin_call($f, "mailbox_column", $u, $d));
+			push(@cols, $u->{'feature_user'} ? undef :
+				    &plugin_call($f, "mailbox_column", $u, $d));
 			}
 		}
 
@@ -5874,7 +5901,9 @@ foreach $u (@$users) {
 		unshift(@cols, { 'type' => 'checkbox',
 				 'name' => 'd',
 				 'value' => $u->{'user'},
-				 'disabled' => $u->{'domainowner'} });
+				 'disabled' => $u->{'domainowner'} ||
+					       $u->{'feature_user'} ||
+					       $u->{'noactions'} });
 		}
 	push(@table, \@cols);
 	}
@@ -9221,6 +9250,8 @@ foreach my $dd (@alldoms) {
 		my @users = $dd->{'alias'} && !$dd->{'aliasmail'} ||
 			       !$dd->{'group'} ? ( )
 					       : &list_domain_users($dd, 1, 0, 0, 0, 1);
+		@users = grep { !$_->{'feature_user'} && !$_->{'noactions'} }
+			 @users;
 		my @aliases = &list_domain_aliases($dd);
 
 		# Stop any processes belonging to installed scripts, such

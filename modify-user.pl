@@ -285,6 +285,8 @@ $d || &usage("Virtual server $domain does not exist");
 ($user) = grep { $_->{'user'} eq $username ||
 		 &remove_userdom($_->{'user'}, $d) eq $username } @users;
 $user || &usage("No user named $username was found in the server $domain");
+($user->{'feature_user'} || $user->{'noactions'}) &&
+	&usage("The user $username is managed by a feature plugin, and so cannot be modified by this command");
 $olduser = { %$user };
 $shortusername = &remove_userdom($user->{'user'}, $d);
 &build_taken(\%taken, \%utaken);
@@ -655,4 +657,3 @@ print "                      [--autoreply-end time | --no-autoreply-end]\n";
 print "                      [--autoreply-period secs | --no-autoreply-period]\n";
 exit(1);
 }
-

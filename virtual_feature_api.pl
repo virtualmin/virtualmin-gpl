@@ -230,6 +230,23 @@ sub feature_always_links
 {
 }
 
+# feature_list_users(&domain)
+# Returns a list of user hash references to show on the virtual server's
+# users page. Each user must have a 'user' key and may have an 'edit_url'
+# for the link target. These users are displayed by Virtualmin, but are owned
+# by the feature plugin and cannot be modified or deleted by core user actions.
+sub feature_list_users
+{
+}
+
+# feature_users_create_links(&domain)
+# Returns a list of link arrays to add to the virtual server's users page,
+# in the same format as ui_form_columns_table links:
+# [ url, label, optional-side ]
+sub feature_users_create_links
+{
+}
+
 # features_always_delete(&domain, only)
 # Called when a domain is being deleted, regardless of whether this feature
 # is enabled or not

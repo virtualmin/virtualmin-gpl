@@ -107,6 +107,32 @@ foreach $d (@doms) {
 			print "$u->{'user'}\n";
 			print "    User: " . &remove_userdom($u->{'user'}, $d),"\n";
 			print "    Domain: $d->{'dom'}\n";
+			if ($u->{'feature_user'}) {
+				print "    User type: Feature plugin user\n";
+				print "    Feature plugin: ",$u->{'feature_user'},"\n";
+				print "    Real name: ",$u->{'real'},"\n"
+					if ($u->{'real'});
+				if ($u->{'email'}) {
+					print "    Email address: ",
+					      $u->{'email'},"\n";
+					}
+				if (@{$u->{'extraemail'}}) {
+					print "    Extra addresses: ",
+					      join(" ", @{$u->{'extraemail'}}),"\n";
+					}
+				@dblist = ( );
+				foreach $db (@{$u->{'dbs'}}) {
+					push(@dblist, $db->{'name'}.
+					     " ($db->{'type'})");
+					}
+				if (@dblist) {
+					print "    Databases: ",
+					      join(", ", @dblist),"\n";
+					}
+				print "    Edit URL: ",$u->{'edit_url'},"\n"
+					if ($u->{'edit_url'});
+				next;
+				}
 			print "    Unix username: ",$u->{'user'},"\n" if (!$u->{'extra'});
 			print "    Real name: ",$u->{'real'},"\n";
 			if (defined($u->{'firstname'})) {
@@ -291,9 +317,11 @@ foreach $d (@doms) {
 			printf $fmt, &remove_userdom($u->{'user'}, $d),
 				    $u->{'real'},
 				    $u->{'email'} ? "Yes" : "No",
-				    $shell->{'id'} eq 'nologin' ? "No" : "Yes",
+				    $u->{'feature_user'} ? "No" :
+					$shell->{'id'} eq 'nologin' ? "No" : "Yes",
 				    scalar(@{$u->{'dbs'}}) || "No",
-				    &has_home_quotas() ? 
+				    $u->{'feature_user'} ? "NA" :
+				    &has_home_quotas() ?
 					    &quota_show($u->{'quota'}, "home") :
 					    "NA";
 			}
