@@ -8157,7 +8157,8 @@ $sslserv_tests = [
 		      [ 'service', 'postfix' ] ],
 	},
 	{ 'command' => 'rm -f '.$test_ipcert_files,
-	  'cleanup' => 1 },
+	  'cleanup' => 1,
+	},
 
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
@@ -13699,6 +13700,7 @@ else {
 
 sub run_test_command
 {
+my ($t) = @_;
 my $cmd = $t->{'command'};
 foreach my $a (@{$t->{'args'}}) {
 	my ($flag, @vals) = @$a;
