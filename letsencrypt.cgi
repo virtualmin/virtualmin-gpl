@@ -181,6 +181,7 @@ else {
 		# Always store last Certbot error
 		&lock_domain($d);
 		$d->{'letsencrypt_last_failure'} = time();
+		$d->{'letsencrypt_first_failure'} ||= time();
 		$d->{'letsencrypt_last_err'} = $cert;
 		$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 		&save_domain($d);
@@ -224,6 +225,7 @@ else {
 		$d->{'letsencrypt_id'} = $acme->{'id'} if ($acme);
 		$d->{'letsencrypt_last_id'} = $d->{'letsencrypt_id'};
 		delete($d->{'letsencrypt_last_err'});
+		delete($d->{'letsencrypt_first_failure'});
 		&refresh_ssl_cert_expiry($d);
 		&save_domain($d);
 		&$second_print($text{'setup_done'});

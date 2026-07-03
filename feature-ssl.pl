@@ -2406,7 +2406,9 @@ if ($p) {
 # If Let's Encrypt was in use before, copy across renewal fields
 $d->{'letsencrypt_renew'} = $samed->{'letsencrypt_renew'};
 $d->{'letsencrypt_last'} = $samed->{'letsencrypt_last'};
+$d->{'letsencrypt_last_success'} = $samed->{'letsencrypt_last_success'};
 $d->{'letsencrypt_last_failure'} = $samed->{'letsencrypt_last_failure'};
+$d->{'letsencrypt_first_failure'} = $samed->{'letsencrypt_first_failure'};
 $d->{'letsencrypt_last_err'} = $samed->{'letsencrypt_last_err'};
 $d->{'ssl_cert_expiry'} = $samed->{'ssl_cert_expiry'} if ($samed->{'ssl_cert_expiry'});
 }
@@ -3238,6 +3240,8 @@ sub apply_letsencrypt_cert_renewals
 {
 my $le_max_renewals = 300.0;
 my $le_max_time = 3*60*60;	# 3 hours
+my $le_fail_slowdown = 5*24*60*60;	# After failing for this long ..
+my $le_fail_interval = 24*60*60;	# .. retry only once a day
 my $last_renew_time = $config{'last_letsencrypt_mass_renewal'};
 my $now = time();
 
@@ -3267,8 +3271,19 @@ foreach my $d (&list_domains()) {
 		if ($d->{'letsencrypt_last'} > $ltime);
 
 	# If an attempt was made in the last hour, skip for now to prevent
-	# hammering the Let's Encrypt serivce
+	# hammering the Let's Encrypt service
 	next if (time() - $d->{'letsencrypt_last'} < 60*60);
+
+	# If renewals have been failing continuously for several days, slow
+	# down to one attempt per day, so that the ACME provider doesn't
+	# pause issuance for the domain due to too many failed requests
+	if ($d->{'letsencrypt_first_failure'} &&
+	    $d->{'letsencrypt_first_failure'} >
+	      ($d->{'letsencrypt_last_success'} || 0) &&
+	    time() - $d->{'letsencrypt_first_failure'} > $le_fail_slowdown) {
+		next if (time() - $d->{'letsencrypt_last_failure'} <
+			 $le_fail_interval);
+		}
 
 	# Is it time? Either the user-chosen number of months has passed, or
 	# the cert is within 21 days of expiry
@@ -3323,12 +3338,14 @@ foreach my $d (&list_domains()) {
 			      join(", ", @$dnames), $err, $pname);
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_failure'} = time();
+		$d->{'letsencrypt_first_failure'} ||= time();
 		$err =~ s/\r?\n/\t/g;
 		$d->{'letsencrypt_last_err'} = $err;
 		}
 	else {
 		# Tell the user it worked
 		delete($d->{'letsencrypt_last_err'});
+		delete($d->{'letsencrypt_first_failure'});
 		$subject = $text{'letsencrypt_sdonea'};
 		$body = &text('letsencrypt_bdonea',
 			      join(", ", @$dnames), $pname);
@@ -3421,6 +3438,7 @@ $d->{'letsencrypt_last'} = time();
 $d->{'letsencrypt_last_success'} = time();
 $d->{'letsencrypt_last_id'} = $d->{'letsencrypt_id'};
 delete($d->{'letsencrypt_last_err'});
+delete($d->{'letsencrypt_first_failure'});
 &save_domain($d);
 &unlock_domain($d);
 &release_lock_ssl($d);

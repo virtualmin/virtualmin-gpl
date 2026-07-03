@@ -8931,6 +8931,7 @@ if ($valid) {
 			}
 		my $err = &html_escape(join(", ", @estr));
 		$d->{'letsencrypt_last_failure'} = time();
+		$d->{'letsencrypt_first_failure'} ||= time();
 		$d->{'letsencrypt_last_err'} = $err;
 		$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 		if ($showerrors) {
@@ -8974,6 +8975,7 @@ if ($valid) {
 			my $e = &html_escape(join(", ",
 				map { $_->{'desc'} } @errs));
 			$d->{'letsencrypt_last_failure'} = time();
+			$d->{'letsencrypt_first_failure'} ||= time();
 			$d->{'letsencrypt_last_err'} = $e;
 			$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 			if ($showerrors) {
@@ -9016,6 +9018,7 @@ else {
 if (!$ok) {
 	# Always store last Certbot error
 	$d->{'letsencrypt_last_failure'} = time();
+	$d->{'letsencrypt_first_failure'} ||= time();
 	$d->{'letsencrypt_last_err'} = $cert;
 	$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 	if ($showerrors) {
@@ -9033,8 +9036,11 @@ else {
 	$d->{'letsencrypt_dname'} = '';
 	$d->{'letsencrypt_dwild'} = 0;
 	$d->{'letsencrypt_last'} = time();
+	$d->{'letsencrypt_last_success'} = time();
 	$d->{'letsencrypt_renew'} = 1 if ($d->{'letsencrypt_renew'} eq '');
 	$d->{'letsencrypt_last_id'} = $d->{'letsencrypt_id'};
+	delete($d->{'letsencrypt_last_err'});
+	delete($d->{'letsencrypt_first_failure'});
 
 	# Inject initial SSL expiry to avoid wrong "until expiry"
 	&refresh_ssl_cert_expiry($d);

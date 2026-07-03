@@ -297,6 +297,7 @@ if (!$ok) {
 	# Always store last Certbot error
 	&lock_domain($d);
 	$d->{'letsencrypt_last_failure'} = time();
+	$d->{'letsencrypt_first_failure'} ||= time();
 	$d->{'letsencrypt_last_err'} = $cert;
 	$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
 	&save_domain($d);
@@ -336,6 +337,7 @@ else {
 	$d->{'letsencrypt_connectivity'} = $connectivity ? 2 :
 					   $validation ? 1 : 0;
 	delete($d->{'letsencrypt_last_err'});
+	delete($d->{'letsencrypt_first_failure'});
 	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);
 	&unlock_domain($d);
