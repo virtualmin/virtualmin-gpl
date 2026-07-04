@@ -393,10 +393,19 @@ if (&domain_has_ssl_cert($d)) {
 			&ui_hidden("dom", $in{'dom'}));
 		}
 
-	# Show button to copy to the default location
-	if (!$d->{'ssl_same'} &&
-	    &get_website_ssl_file($d, "key") ne 
-	     &default_certificate_file($d, "key")) {
+	# Show button to copy to the default location. Only the certificate
+	# and key paths should expose this action; CA and generated combined
+	# files may be moved as helpers, but should not make it appear alone.
+	my $needs_default_path = 0;
+	foreach my $type ("key", "cert") {
+		my $oldfile = &get_website_ssl_file($d, $type);
+		my $deffile = &default_certificate_file($d, $type);
+		if ($oldfile && $oldfile ne $deffile) {
+			$needs_default_path = 1;
+			last;
+			}
+		}
+	if (!$d->{'ssl_same'} && $needs_default_path) {
 		my $defcert_dir = &default_certificate_file($d, "cert");
 		$defcert_dir =~ s|/[^/]+$||;
 		print &ui_hr() if (!$ui_hr++);
