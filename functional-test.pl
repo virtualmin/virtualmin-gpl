@@ -8000,8 +8000,8 @@ $sslserv_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'server', 'mail.'.$test_domain ],
 		      [ 'ssl' ],
-		      [ 'sni', $test_domain ],
-		      [ 'cert-host', $test_domain ],
+		      [ 'sni', 'mail.'.$test_domain ],
+		      [ 'cert-host', 'mail.'.$test_domain ],
 		      [ 'cert-org', 'Test SSL domain' ] ],
 	},
 
