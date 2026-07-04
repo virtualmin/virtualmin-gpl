@@ -1016,8 +1016,9 @@ sub cert_file_info_openssl
 {
 my ($file) = @_;
 return undef if (!$file || !-r $file);
+# Use -text instead of -ext subjectAltName for OpenSSL 1.0.x compatibility.
 my $out = &backquote_command("openssl x509 -noout -nameopt RFC2253 ".
-	"-issuer -subject -startdate -enddate -ext subjectAltName ".
+	"-issuer -subject -startdate -enddate -text ".
 	"-in ".quotemeta($file)." 2>/dev/null");
 return undef if ($?);
 my %rv;
@@ -1034,6 +1035,8 @@ my $parse_name = sub {
 		}
 	};
 my @alts;
+my $in_san = 0;
+my $san_indent = 0;
 foreach my $l (split(/\r?\n/, $out)) {
 	if ($l =~ /^issuer=(.*)$/) {
 		$parse_name->($1, "issuer");
@@ -1047,11 +1050,26 @@ foreach my $l (split(/\r?\n/, $out)) {
 	elsif ($l =~ /^notAfter=(.*)$/) {
 		$rv{'notafter'} = $1;
 		}
-	while ($l =~ /\bDNS:([^,\s]+)/g) {
-		push(@alts, $1);
+	if ($l =~ /^(\s*)X509v3 Subject Alternative Name:\s*(.*)$/) {
+		$in_san = 1;
+		$san_indent = length($1);
+		$l = $2;
 		}
-	while ($l =~ /\bIP Address:([^,\s]+)/g) {
-		push(@alts, &normalize_ssl_cert_identifier($1));
+	elsif ($in_san) {
+		# OpenSSL indents extension values deeper than extension
+		# headers, including private OID headers we do not know by name.
+		my $continuation_indent = $san_indent + 1;
+		if ($l !~ /^\s{$continuation_indent,}\S/) {
+			$in_san = 0;
+			}
+		}
+	if ($in_san) {
+		while ($l =~ /(?:^\s*|,\s*)DNS:([^,\s]+)/g) {
+			push(@alts, $1);
+			}
+		while ($l =~ /(?:^\s*|,\s*)IP Address:([^,\s]+)/g) {
+			push(@alts, &normalize_ssl_cert_identifier($1));
+			}
 		}
 	}
 $rv{'alt'} = [ &unique(@alts) ] if (@alts);
