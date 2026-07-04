@@ -7824,11 +7824,11 @@ $sslserv_tests = [
 		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
-	# Validate that Dovecot cert works
+	# Validate that Dovecot cert works on the private IP.
 	{ 'command' => 'test-imap.pl',
 	  'args' => [ [ 'user', $test_domain_user ],
 		      [ 'pass', 'smeg' ],
-		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'server', '$PRIVATE_IP' ],
 		      [ 'ssl' ],
 		      [ 'sni', 'mail.'.$test_domain ],
 		      [ 'cert-host', 'mail.'.$test_domain ],
@@ -7911,11 +7911,11 @@ $sslserv_tests = [
 		      [ 'o', 'Test 2 SSL domain' ] ],
 	},
 
-	# Validate that new Dovecot cert works
+	# Validate that new Dovecot cert works on the private IP.
 	{ 'command' => 'test-imap.pl',
 	  'args' => [ [ 'user', $test_domain_user ],
 		      [ 'pass', 'smeg' ],
-		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'server', '$PRIVATE_IP' ],
 		      [ 'ssl' ],
 		      [ 'sni', 'mail.'.$test_domain ],
 		      [ 'cert-host', 'mail.'.$test_domain ],
@@ -7994,7 +7994,8 @@ $sslserv_tests = [
 		      'CN\s*=\s*(\\*\\.)?'.$test_domain ],
 	},
 
-	# Validate that Dovecot cert still works with SNI
+	# Validate that Dovecot cert still works with SNI on a name
+	# covered by the generated wildcard certificate.
 	{ 'command' => 'test-imap.pl',
 	  'args' => [ [ 'user', $test_domain_user ],
 		      [ 'pass', 'smeg' ],
@@ -8037,14 +8038,15 @@ $sslserv_tests = [
 		      [ 'o', 'Test 2 SSL domain' ] ],
 	},
 
-	# Validate that new Dovecot cert still works with SNI
+	# Validate that new Dovecot cert still works with SNI on a name
+	# covered by the generated wildcard certificate.
 	{ 'command' => 'test-imap.pl',
 	  'args' => [ [ 'user', $test_domain_user ],
 		      [ 'pass', 'smeg' ],
 		      [ 'server', 'mail.'.$test_domain ],
 		      [ 'ssl' ],
-		      [ 'sni', $test_domain ],
-		      [ 'cert-host', $test_domain ],
+		      [ 'sni', 'mail.'.$test_domain ],
+		      [ 'cert-host', 'mail.'.$test_domain ],
 		      [ 'cert-org', 'Test 2 SSL domain' ] ],
 	},
 
@@ -8082,14 +8084,15 @@ $sslserv_tests = [
 		      [ 'service', 'dovecot' ] ],
 	},
 
-	# Validate that child Dovecot SNI prefers the specific host cert
+	# Validate that child Dovecot SNI prefers the specific host cert on
+	# a name covered by the generated wildcard certificate.
 	{ 'command' => 'test-imap.pl',
 	  'args' => [ [ 'user', $test_domain_user ],
 		      [ 'pass', 'smeg' ],
 		      [ 'server', $test_ssl_subdomain ],
 		      [ 'ssl' ],
-		      [ 'sni', $test_ssl_subdomain ],
-		      [ 'cert-host', $test_ssl_subdomain ],
+		      [ 'sni', 'mail.'.$test_ssl_subdomain ],
+		      [ 'cert-host', 'mail.'.$test_ssl_subdomain ],
 		      [ 'cert-org', 'Test 3 SSL subdomain' ] ],
 	},
 
@@ -8131,6 +8134,7 @@ $sslserv_tests = [
 		       ' -port '.$usermin_port.' </dev/null',
 	  'antigrep' => [ 'O\s*=\s*Test SSL domain',
 			  'CN\s*=\s*(\\*\\.)?'.$test_domain ],
+	  'sleep' => 5,
 	},
 	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
 		       ' -port 993 </dev/null',
