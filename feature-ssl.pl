@@ -1038,16 +1038,16 @@ my @alts;
 my $in_san = 0;
 my $san_indent = 0;
 foreach my $l (split(/\r?\n/, $out)) {
-	if ($l =~ /^issuer=(.*)$/) {
+	if ($l =~ /^issuer\s*=\s*(.*)$/) {
 		$parse_name->($1, "issuer");
 		}
-	elsif ($l =~ /^subject=(.*)$/) {
+	elsif ($l =~ /^subject\s*=\s*(.*)$/) {
 		$parse_name->($1, "");
 		}
-	elsif ($l =~ /^notBefore=(.*)$/) {
+	elsif ($l =~ /^notBefore\s*=\s*(.*)$/) {
 		$rv{'notbefore'} = $1;
 		}
-	elsif ($l =~ /^notAfter=(.*)$/) {
+	elsif ($l =~ /^notAfter\s*=\s*(.*)$/) {
 		$rv{'notafter'} = $1;
 		}
 	if ($l =~ /^(\s*)X509v3 Subject Alternative Name:\s*(.*)$/) {
