@@ -16,12 +16,9 @@ package virtual_server;
 $main::no_acl_check++;
 $ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
 $ENV{'WEBMIN_VAR'} ||= "/var/webmin";
-if ($0 =~ /^(.*)\/[^\/]+$/) {
-	chdir($pwd = $1);
-	}
-else {
-	chop($pwd = `pwd`);
-	}
+require FindBin;
+chdir($pwd = $FindBin::RealBin) ||
+	die "Failed to chdir to $FindBin::RealBin : $!";
 $0 = "$pwd/run-all-webalizer.pl";
 require './virtual-server-lib.pl';
 $< == 0 || die "run-all-webalizer.pl must be run as root";
