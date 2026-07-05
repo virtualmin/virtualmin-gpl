@@ -805,8 +805,11 @@ my @donedoms;
 my ($okcount, $errcount) = (0, 0);
 my @errdoms;
 my %fullstateok;
-my $selected_full = $increment == 0 &&
-		    defined($id) && $id =~ /^\d+$/ && $id >= 3;
+my $selected_full = 0;
+if ($increment == 0 && $id && $id ne "1") {
+	my @incrs = grep { $_->{'increment'} == $id } &list_scheduled_backups();
+	$selected_full = @incrs ? 1 : 0;
+	}
 my %donefeatures;				# Map from domain name->features
 my @cleanuphomes;				# Temporary homes
 my %donedoms;				# Map from domain name->hash

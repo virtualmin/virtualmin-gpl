@@ -670,13 +670,6 @@ if ($ex || !-s $destfile) {
 	return 0;
 	}
 else {
-	if ($ifile && $increment == 0 && $ifile ne $ifiledef) {
-		# This was a full backup but was using a per-backup incremental
-		# file. Copy that over the default incremental file so that
-		# other future non-chained incremental backups are relative to
-		# this latest backup.
-		&copy_source_dest($ifile, $ifiledef);
-		}
 	&$second_print($text{'setup_done'});
 	return 1;
 	}
