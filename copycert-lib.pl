@@ -1,5 +1,16 @@
 # Functions for copying SSL certs to other servers
 
+# postfix_config_command_available()
+# Returns 1 if the Postfix config command can be safely run
+sub postfix_config_command_available
+{
+return 0 if ($mail_system != 0);
+return 0 if (&foreign_installed("postfix", 1) != 2);
+my %pconfig = &foreign_config("postfix");
+return $pconfig{'postfix_config_command'} &&
+       &has_command($pconfig{'postfix_config_command'});
+}
+
 # list_service_ssl_cert_types()
 # Returns a list of services to which per-domain or per-IP certs can be copied
 sub list_service_ssl_cert_types
@@ -32,7 +43,7 @@ if (&foreign_installed("dovecot")) {
 			   'short' => 'd' });
 		}
 	}
-if ($config{'mail'} && $mail_system == 0) {
+if ($config{'mail'} && &postfix_config_command_available()) {
 	push(@rv, {'id' => 'postfix',
 		   'dom' => &postfix_supports_sni() ? 1 : 0,
 		   'virt' => 1,
@@ -217,7 +228,7 @@ if (&foreign_installed("dovecot")) {
 		}
 	}
 
-if ($mail_system == 0) {
+if (&postfix_config_command_available()) {
 	# Check Postfix certificate
 	if ($perip) {
 		# Try per-IP cert first
