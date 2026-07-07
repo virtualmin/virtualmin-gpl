@@ -33,6 +33,8 @@ if ($d->{'disabled'}) {
 		      &make_date($d->{'disabled_time'}))."<br>" : "").
 	      "</span>", 'warn', undef, undef, "");
 	}
+# Warn if the Unix owner was removed outside Virtualmin
+&show_missing_domain_owner_alert($d);
 
 @tds = ( "width=30%" );
 print &ui_form_start("save_domain.cgi", "post");

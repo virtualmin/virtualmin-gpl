@@ -21,6 +21,8 @@ $tmpl = &get_template($d->{'template'});
                                  $subdom ?    $text{'summary_title4'} :
                                  $parentdom ? $text{'summary_title2'} :
                                               $text{'summary_title'}, "");
+# Warn if the Unix owner was removed outside Virtualmin
+&show_missing_domain_owner_alert($d);
 
 print &ui_table_start($text{'edit_header'}, "width=100%", 4);
 

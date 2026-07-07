@@ -9,6 +9,9 @@ $d = &get_domain($in{'dom'});
 &can_rename_domains() || &error($text{'rename_ecannot'});
 &ui_print_header(&domain_in($d), $text{'rename_title'}, "", "rename");
 
+# Warn if the Unix owner was removed outside Virtualmin
+&show_missing_domain_owner_alert($d);
+
 print &ui_form_start("rename.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_table_start($text{'rename_header'}, "width=100%", 2);

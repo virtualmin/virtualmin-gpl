@@ -13188,6 +13188,32 @@ else {
 	}
 }
 
+# show_missing_domain_owner_alert(&domain)
+# Prints an alert if the Unix owner was removed outside Virtualmin.
+sub show_missing_domain_owner_alert
+{
+my ($d) = @_;
+return if ($d->{'parent'} || !$d->{'unix'} || !$d->{'user'});
+return if (&get_domain_owner($d, 1, 1, 1));
+
+my $umodule = $usermodule || "useradmin";
+my $ulabel = $umodule eq "ldap-useradmin" ?
+	$text{'edit_eusergone_ldapuseradmin'} :
+	$text{'edit_eusergone_useradmin'};
+my $msg;
+if (&foreign_available($umodule)) {
+	my $ulink = &ui_tag('a', $ulabel, {
+		href => &get_webprefix_safe()."/".$umodule."/",
+		});
+	chomp($ulink);
+	$msg = &text('edit_eusergone_admin', $d->{'user'}, $ulink);
+	}
+else {
+	$msg = &text('edit_eusergone', $d->{'user'});
+	}
+print &ui_alert_box($msg, 'danger', undef, undef, "");
+}
+
 # get_domain_shell(&domain, [&user])
 # Return the real shell for a domain's unix user
 sub get_domain_shell
