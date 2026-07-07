@@ -3632,12 +3632,15 @@ delete($d->{'letsencrypt_first_failure'});
 &unlock_domain($d);
 &release_lock_ssl($d);
 
-# Update DANE DNS records
-&sync_domain_tlsa_records($d);
-
 # Update services that were using the old cert, both globally and per-domain
 &update_all_domain_service_ssl_certs($d, \@beforecerts,
 				     $has_ips ? 1 : undef);
+
+# Update DANE DNS records now that all services point at the new cert
+&sync_domain_tlsa_records($d);
+foreach my $od (&get_domain_by("ssl_same", $d->{'id'})) {
+	&sync_domain_tlsa_records($od);
+	}
 
 # Call the post command
 &set_domain_envs($d, "SSL_DOMAIN");
