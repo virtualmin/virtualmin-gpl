@@ -14968,10 +14968,12 @@ else {
 }
 
 # call_feature_func(feature, &domain, &olddomain)
-# Calls the appropriate function to enable or disable a feature for a domain
+# Calls the appropriate function to enable, disable or modify a feature for a
+# domain. Returns 0 if a setup or delete transition failed and was rolled back.
 sub call_feature_func
 {
 my ($f, $d, $oldd) = @_;
+my $rv = 1;
 if (&indexof($f, @features) >= 0 && $config{$f}) {
 	# A core feature
 	my $sfunc = "setup_$f";
@@ -14982,6 +14984,7 @@ if (&indexof($f, @features) >= 0 && $config{$f}) {
 		my ($ok, $fok) = &try_function($f, $sfunc, $d);
 		if (!$ok || !$fok) {
 			$d->{$f} = 0;
+			$rv = 0;
 			}
 		}
 	elsif (!$d->{$f} && $oldd->{$f}) {
@@ -14989,6 +14992,7 @@ if (&indexof($f, @features) >= 0 && $config{$f}) {
 		my ($ok, $fok) = &try_function($f, $dfunc, $oldd);
 		if (!$ok || !$fok) {
 			$d->{$f} = 1;
+			$rv = 0;
 			}
 		$d->{'db_mysql'} = $oldd->{'db_mysql'};
 		$d->{'db_postgres'} = $oldd->{'db_postgres'};
@@ -15001,15 +15005,22 @@ if (&indexof($f, @features) >= 0 && $config{$f}) {
 elsif (&indexof($f, &list_feature_plugins()) >= 0) {
 	# A plugin feature
 	if ($d->{$f} && !$oldd->{$f}) {
-		&try_plugin_call($f, "feature_setup", $d);
+		if (!&try_plugin_call($f, "feature_setup", $d)) {
+			$d->{$f} = 0;
+			$rv = 0;
+			}
 		}
 	elsif (!$d->{$f} && $oldd->{$f}) {
-		&try_plugin_call($f, "feature_delete", $oldd);
+		if (!&try_plugin_call($f, "feature_delete", $oldd)) {
+			$d->{$f} = 1;
+			$rv = 0;
+			}
 		}
 	elsif ($d->{$f}) {
 		&try_plugin_call($f, "feature_modify", $d, $oldd);
 		}
 	}
+return $rv;
 }
 
 # feature_name(name, [&domain])

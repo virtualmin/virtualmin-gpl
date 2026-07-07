@@ -162,12 +162,15 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 			$d->{$f} = 0;
 			}
 		}
+	my $feature_failed = 0;
 	if (!$disassociate) {
 		# Only actually turn off feature if not just
 		# dis-associating
 		foreach $f (reverse(&list_ordered_features($oldd))) {
-			&call_feature_func($f, $d, $oldd);
+			$feature_failed = 1
+				if (!&call_feature_func($f, $d, $oldd));
 			}
+		$failed++ if ($feature_failed);
 		}
 
 	# Save new domain details
@@ -184,7 +187,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 		}
 
 	&$outdent_print();
-	&$second_print(".. done");
+	&$second_print($feature_failed ? $text{'setup_failed'} : ".. done");
 	}
 
 &run_post_actions();

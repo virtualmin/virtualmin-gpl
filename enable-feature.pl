@@ -185,10 +185,13 @@ foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 			$d->{$f} = 1;
 			}
 		}
+	my $feature_failed = 0;
 	if (!$associate) {
 		foreach $f (&list_ordered_features($d)) {
-			&call_feature_func($f, $d, $oldd);
+			$feature_failed = 1
+				if (!&call_feature_func($f, $d, $oldd));
 			}
+		$failed = 1 if ($feature_failed);
 		}
 	if ($associate && $validate) {
 		foreach $f (&list_ordered_features(\%newdom)) {
@@ -219,7 +222,7 @@ foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 		}
 
 	&$outdent_print();
-	&$second_print(".. done");
+	&$second_print($feature_failed ? $text{'setup_failed'} : ".. done");
 	}
 
 &run_post_actions();
