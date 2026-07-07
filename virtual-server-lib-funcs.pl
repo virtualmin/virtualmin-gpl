@@ -6333,6 +6333,12 @@ my $plugins = join(" ", &unique(split(/\s+/, $config{'plugins'} || ''),
 &generate_plugins_list($plugins);
 $config{'plugins'} = join(' ', &unique(@plugins));
 
+# Keep core features currently enabled on this system, as the restored config
+# may come from a different web/mail/DNS stack.
+foreach my $f (@features) {
+	$config{$f} ||= $oldconfig{$f} if ($oldconfig{$f});
+	}
+
 # Disable restored core features whose dependencies are unavailable
 # on this system, to avoid post-restore failures
 foreach my $f (@features) {
