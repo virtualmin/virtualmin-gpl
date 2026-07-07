@@ -6804,6 +6804,12 @@ if (!&has_ftp_chroot()) {
 	&$second_print($text{'restore_vchroot_none'});
 	return 1;
 	}
+&require_proftpd();
+if (!$proftpd::config{'proftpd_conf'} ||
+    !-r $proftpd::config{'proftpd_conf'}) {
+	&$second_print($text{'restore_vchroot_none'});
+	return 1;
+	}
 &obtain_lock_ftp();
 my @chroots;
 open(CHROOT, "<".$file);
@@ -6815,7 +6821,11 @@ while(<CHROOT>) {
 	push(@chroots, \%c);
 	}
 close(CHROOT);
-&save_ftp_chroots(\@chroots);
+if (!&save_ftp_chroots(\@chroots)) {
+	&release_lock_ftp();
+	&$second_print($text{'restore_vchroot_none'});
+	return 1;
+	}
 &release_lock_ftp();
 &$second_print($text{'setup_done'});
 return 1;

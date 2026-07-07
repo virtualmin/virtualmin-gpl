@@ -16,6 +16,10 @@ return 0 if (!&foreign_check("proftpd"));
 my $installed = eval { &foreign_installed("proftpd", 1) };
 return 0 if ($@ || $installed != 2);
 &require_proftpd();
+return 0 if (!$proftpd::config{'proftpd_path'} ||
+	     !-x $proftpd::config{'proftpd_path'} ||
+	     !$proftpd::config{'proftpd_conf'} ||
+	     !-r $proftpd::config{'proftpd_conf'});
 my $conf = eval { &proftpd::get_config() };
 return !$@ && ref($conf) ? 1 : 0;
 }
@@ -168,6 +172,8 @@ sub save_ftp_chroots
 my ($chroots) = @_;
 return 0 if (!&has_ftp_chroot());
 &require_proftpd();
+return 0 if (!$proftpd::config{'proftpd_conf'} ||
+	     !-r $proftpd::config{'proftpd_conf'});
 my $conf = &proftpd::get_config();
 $proftpd::conf = $conf;
 my $gconf = &proftpd::get_or_create_global($conf);
