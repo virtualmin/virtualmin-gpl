@@ -6325,6 +6325,11 @@ $config{'group_quotas'} = $oldconfig{'group_quotas'};
 $config{'old_defip'} = $oldconfig{'old_defip'};
 $config{'old_defip6'} = $oldconfig{'old_defip6'};
 $config{'last_check'} = $oldconfig{'last_check'};
+$config{'mail_system'} = $oldconfig{'mail_system'};
+$config{'mail'} = $oldconfig{'mail'};
+$config{'spam'} = $oldconfig{'spam'};
+$config{'virus'} = $oldconfig{'virus'};
+$config{'dns'} = $oldconfig{'dns'};
 
 # Remove plugins that aren't on the new system, but keep the current ones that
 # are enabled
