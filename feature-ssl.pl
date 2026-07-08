@@ -2994,7 +2994,7 @@ return @rv;
 # Returns 1 if the installed version of Postfix supports name-based SSL certs
 sub postfix_supports_sni
 {
-return 0 if (!&postfix_config_command_available());
+return 0 if ($mail_system != 0);
 &foreign_require("postfix");
 return &compare_versions($postfix::postfix_version, 3.4) >= 0;
 }
@@ -3007,7 +3007,7 @@ my ($d, $enable) = @_;
 my $tmpl = &get_template($d->{'template'});
 
 # Check if Postfix is in use
-return -1 if (!&postfix_config_command_available());
+return -1 if ($mail_system != 0);
 
 my $changed = 0;
 &foreign_require("postfix");
