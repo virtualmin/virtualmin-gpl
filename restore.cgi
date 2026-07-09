@@ -344,10 +344,14 @@ if (!$in{'confirm'}) {
 else {
 	# Actually execute the restore
 	if (@doms) {
-		print &text('restore_doing', scalar(@doms), $nice),"<p>\n";
+		print &ui_alert_box(
+			&text('restore_doing_ui', scalar(@doms), $nice),
+			'info', undef, undef, "");
 		}
 	else {
-		print &text('restore_doing2', scalar(@vbs), $nice),"<p>\n";
+		print &ui_alert_box(
+			&text('restore_doing2_ui', scalar(@vbs), $nice),
+			'info', undef, undef, "");
 		}
 	$ok = &restore_domains($src, \@doms, \@do_features, \%options, \@vbs,
 			       $in{'onlyfeats'}, $ipinfo, !$safe_backup,
@@ -355,10 +359,12 @@ else {
 			       $in{'delete_existing'});
 	&run_post_actions();
 	if ($ok) {
-		print &text('restore_done');
+		print &ui_alert_box($text{'restore_done_ui'}, 'success',
+				    undef, undef, "");
 		}
 	else {
-		print &text('restore_failed');
+		print &ui_alert_box($text{'restore_failed_ui'}, 'danger',
+				    undef, undef, "");
 		}
 	if ($origsrc eq "upload:") {
 		# Delete uploaded temp file

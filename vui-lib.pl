@@ -398,4 +398,23 @@ return <<'EOF';
 EOF
 }
 
+=head2 vui_failed_details(title, message, [html])
+
+Returns a compact inline failure summary with expandable details in HTML
+mode, or the full failure text in text modes. The optional html flag marks
+the detail content as already HTML.
+
+=cut
+sub vui_failed_details
+{
+my ($title, $msg, $html) = @_;
+return $title." : ".$msg if (!&text_html('setup_failed'));
+return &ui_details({
+	'title' => $title,
+	'content' => $msg,
+	'class' => 'inline inlined',
+	'html' => $html,
+	});
+}
+
 1;

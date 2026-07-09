@@ -21913,7 +21913,8 @@ my $remove_default_host_domain = sub {
 			    $system_host_name));
 	my ($ok, $rsmsg) = &delete_virtualmin_default_hostname_ssl();
 	if (!$ok) {
-		&$second_print(&text('check_apicmderr', $rsmsg));
+		&$second_print(&vui_failed_details(
+			$text{'setup_failed'}, $rsmsg, 1));
 		}
 	else {
 		&$second_print($text{'setup_done'});
@@ -21973,7 +21974,8 @@ elsif ($config{'default_domain_ssl'}) {
 			# default domain set to be visible
 			&$remove_default_host_domain(1)
 				if ($config{'default_domain_ssl'} != 2);
-			&$second_print(&text('check_apicmderr', $defdom_msg));
+			&$second_print(&vui_failed_details(
+				$text{'setup_failed'}, $defdom_msg, 1));
 			}
 		}
 	}
