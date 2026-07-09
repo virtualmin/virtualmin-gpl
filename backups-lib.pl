@@ -2593,6 +2593,18 @@ if ($ok) {
 				$d->{$newssl} = 1 if ($newssl);
 				}
 
+			# Do not let restored domain metadata enable features
+			# that are disabled globally on this system.
+			foreach my $f (@features) {
+				next if ($f eq 'dir' || $f eq 'unix');
+				$d->{$f} = 0 if ($d->{$f} && !$config{$f});
+				}
+			if (!&domain_has_website($d)) {
+				foreach my $f ('ssl', 'webalizer', 'logrotate') {
+					$d->{$f} = 0;
+					}
+				}
+
 			my ($parentdom, $parentuser);
 			if ($d->{'parent'}) {
 				# Does the parent exist?
