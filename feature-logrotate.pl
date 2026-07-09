@@ -15,14 +15,6 @@ if (!&domain_has_website($d)) {
 return undef;
 }
 
-# feature_depends_logrotate([&domain])
-# Returns undef if a website provider is available for log rotation
-sub feature_depends_logrotate
-{
-my ($d) = @_;
-return &domain_has_website($d) ? undef : $text{'setup_edeplogrotate'};
-}
-
 # setup_logrotate(&domain)
 # Create logrotate entries for the server's access and error logs
 sub setup_logrotate
