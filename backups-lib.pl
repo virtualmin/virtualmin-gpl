@@ -2594,7 +2594,7 @@ if ($ok) {
 				}
 
 			# Do not let restored domain metadata enable features
-			# that are disabled globally on this system.
+			# that are disabled globally on this system
 			foreach my $f (@features) {
 				next if ($f eq 'dir' || $f eq 'unix');
 				$d->{$f} = 0 if ($d->{$f} && !$config{$f});
