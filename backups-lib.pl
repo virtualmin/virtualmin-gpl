@@ -2577,6 +2577,12 @@ if ($ok) {
 				$d->{$oldweb} = 0;
 				my $newweb = &domain_has_website();
 				$d->{$newweb} = 1 if ($newweb);
+				if ($newweb && $d->{'php_mode'} &&
+				    &indexof($d->{'php_mode'},
+					     &supported_php_modes()) >= 0) {
+					$d->{'default_php_mode'} =
+						$d->{'php_mode'};
+					}
 				$changedweb = 1;
 				}
 			my $oldssl = $d->{'backup_ssl_type'};

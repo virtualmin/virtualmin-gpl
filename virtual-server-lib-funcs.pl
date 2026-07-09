@@ -6420,6 +6420,9 @@ sub virtualmin_restore_templates
 {
 my ($file, $vbs) = @_;
 &$first_print($text{'restore_vtemplates_doing'});
+my %oldtemplates = map { $_->{'id'}, $_ } grep { $_->{'standard'} }
+		       &list_templates();
+my $preserve_php = &restore_templates_preserve_php($file);
 
 # Extract backup file
 my $temp = &transname();
@@ -6444,6 +6447,11 @@ foreach my $t (readdir(DIR)) {
 		&read_file("$temp/$t", \%tmpl);
 		foreach my $k (keys %tmpl) {
 			$tmpl{$k} =~ s/\\n/\n/g;
+			}
+		if ($preserve_php && $tmpl{'standard'} &&
+		    $oldtemplates{$tmpl{'id'}}) {
+			&preserve_template_php(\%tmpl,
+						$oldtemplates{$tmpl{'id'}});
 			}
 		&save_template(\%tmpl);
 		}
@@ -6497,6 +6505,39 @@ if (-r $file."_acmes" && defined(&list_acme_providers)) {
 
 &$second_print($text{'setup_done'});
 return 1;
+}
+
+# restore_templates_preserve_php(file)
+# Returns 1 if restoring templates from a backup with a different web stack,
+# in which case target PHP defaults should be kept for standard templates.
+sub restore_templates_preserve_php
+{
+my ($file) = @_;
+my $cfile = $file;
+$cfile =~ s/_templates$/_config/;
+return 0 if (!-r $cfile);
+my %backupconfig;
+&read_file($cfile, \%backupconfig);
+return 0 if (!defined($backupconfig{'web'}));
+return ($backupconfig{'web'} || 0) != ($config{'web'} || 0);
+}
+
+# preserve_template_php(&template, &old-template)
+# Keep target PHP defaults when restoring stack-specific standard templates.
+sub preserve_template_php
+{
+my ($tmpl, $oldtmpl) = @_;
+my @phpfields = (
+	"web_cgimode", "php_vars", "php_fpm", "php_sock",
+	"php_fpmtype", "php_log", "php_log_path",
+	"web_php_suexec", "web_phpver", "web_php_noedit",
+	"web_phpchildren",
+	&list_php_wrapper_templates(),
+	map { "web_php_ini_".$_ } @all_possible_php_versions,
+);
+foreach my $f (@phpfields) {
+	$tmpl->{$f} = $oldtmpl->{$f} if (exists($oldtmpl->{$f}));
+	}
 }
 
 # virtualmin_backup_scheds(file, &vbs)
