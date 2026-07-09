@@ -22080,15 +22080,15 @@ foreach my $f (@sorted_plugins) {
 return @fopts;
 }
 
-# check_feature_depends(feature, [args])
+# check_feature_depends(feature)
 # If a feature's dependencies are available, return undef. Otherwise return
 # an error message
 sub check_feature_depends
 {
-my ($f, @args) = @_;
+my ($f) = @_;
 my $dfunc = "feature_depends_".$f;
 return undef if (!defined(&$dfunc));
-return &$dfunc(@args);
+return &$dfunc();
 }
 
 # split_path_file(path)

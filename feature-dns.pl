@@ -11,25 +11,6 @@ return $r if ($require_bind{$r->{'id'}}++);
 return $r;
 }
 
-# feature_depends_dns()
-# Returns undef if local or remote DNS hosting is available
-sub feature_depends_dns
-{
-my ($d) = @_;
-return undef if ($d ? &is_dns_remote($d) : &is_dns_remote());
-&foreign_installed("bind8", 1) == 2 ||
-	return &text('index_ebind', "../bind8/", "edit_newfeatures.cgi");
-&require_bind();
-my $named = &bind8::make_chroot($bind8::config{'named_conf'});
-return &text('index_ebind', "../bind8/", "edit_newfeatures.cgi")
-	if (!$named || !-r $named);
-if (&bind8::supports_check_conf()) {
-	my @errs = &bind8::check_bind_config();
-	return &text('index_ebinderrs', join(", ", @errs)) if (@errs);
-	}
-return undef;
-}
-
 # check_depends_dns(&domain)
 # For a sub-domain that is being added to a parent DNS domain, make sure the
 # parent zone actually exists

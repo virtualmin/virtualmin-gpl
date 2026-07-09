@@ -3100,11 +3100,6 @@ if ($ok) {
 			delete($d->{'dns_cloud'});
 			delete($d->{'dns_remote'});
 			&set_provision_features($d);
-			foreach my $f (@features) {
-				$d->{$f} = 0
-					if ($d->{$f} &&
-					    defined(&check_feature_depends($f, $d)));
-				}
 
 			# Check for clashes
 			$d->{'wasmissing'} = 1;
