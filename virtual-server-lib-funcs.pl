@@ -6325,12 +6325,7 @@ $config{'group_quotas'} = $oldconfig{'group_quotas'};
 $config{'old_defip'} = $oldconfig{'old_defip'};
 $config{'old_defip6'} = $oldconfig{'old_defip6'};
 $config{'last_check'} = $oldconfig{'last_check'};
-
 $config{'mail_system'} = $oldconfig{'mail_system'};
-$config{'mail'} = $oldconfig{'mail'};
-$config{'spam'} = $oldconfig{'spam'};
-$config{'virus'} = $oldconfig{'virus'};
-$config{'dns'} = $oldconfig{'dns'};
 
 # Remove plugins that aren't on the new system, but keep the current ones that
 # are enabled
@@ -6339,20 +6334,10 @@ my $plugins = join(" ", &unique(split(/\s+/, $config{'plugins'} || ''),
 &generate_plugins_list($plugins);
 $config{'plugins'} = join(' ', &unique(@plugins));
 
-# Keep core features currently enabled on this system, as the restored config
-# may come from a different web/mail/DNS stack.
+# Keep core feature enablement from this system, as the restored config may
+# come from a different web/mail/DNS stack.
 foreach my $f (@features) {
-	$config{$f} ||= $oldconfig{$f} if ($oldconfig{$f});
-	}
-
-# Disable restored core features whose dependencies are unavailable
-# on this system, to avoid post-restore failures
-foreach my $f (@features) {
-	next if (!$config{$f});
-	my $err = &check_feature_depends($f);
-	if (defined($err)) {
-		$config{$f} = 0;
-		}
+	$config{$f} = $oldconfig{$f};
 	}
 @config_features = grep { $config{$_} } @features;
 
