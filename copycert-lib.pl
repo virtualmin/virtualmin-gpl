@@ -219,6 +219,18 @@ if (&foreign_installed("dovecot")) {
 
 if ($mail_system == 0) {
 	# Check Postfix certificate
+	&foreign_require("postfix");
+	my @sslports = ( 25 );
+	my $master = &postfix::get_master_config();
+	my $smtps_name = qr/(?:smtps|submissions|465)/;
+	my ($smtps) = grep {
+		$_->{'enabled'} && $_->{'type'} eq 'inet' &&
+		($_->{'name'} =~ /^$smtps_name$/ ||
+		 $_->{'name'} =~ /^[0-9\.]+:$smtps_name$/ ||
+		 $_->{'name'} =~ /^\[[0-9a-fA-F:]+\]:$smtps_name$/)
+		} @$master;
+	push(@sslports, 465) if ($smtps);
+
 	if ($perip) {
 		# Try per-IP cert first
 		my ($cfile, $kfile, $cafile, $ip, $dom, $ip6) =
@@ -230,7 +242,7 @@ if ($mail_system == 0) {
 				      'ca' => $cafile,
 				      'prefix' => 'mail',
 				      'port' => 587,
-				      'sslports' => [ 25 ],
+				      'sslports' => [ @sslports ],
 				      'ip' => $ip,
 				      'ip6' => $ip6,
 				      'dom' => $dom,
@@ -238,7 +250,6 @@ if ($mail_system == 0) {
 			}
 		}
 	# Also add global Postfix cert
-	&foreign_require("postfix");
 	my $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
 	my $kfile = &postfix::get_real_value("smtpd_tls_key_file");
 	my $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
@@ -249,7 +260,7 @@ if ($mail_system == 0) {
 			      'ca' => $cafile,
 			      'prefix' => 'mail',
 			      'port' => 587,
-			      'sslports' => [ 25 ],
+			      'sslports' => [ @sslports ],
 			      'ip' => $ip, });
 		}
 	}
@@ -679,11 +690,21 @@ else {
 	&postfix::get_current_value("smtpd_tls_mandatory_protocols", "nodef") || "!SSLv2, !SSLv3, !TLSv1, !TLSv1.1");
 &lock_file($postfix::config{'postfix_master'});
 my $master = &postfix::get_master_config();
+my $smtps_name = qr/(?:smtps|submissions|465)/;
+my @smtps = grep {
+	$_->{'type'} eq 'inet' &&
+	($_->{'name'} =~ /^$smtps_name$/ ||
+	 $_->{'name'} =~ /^127\.0\.0\.1:$smtps_name$/ ||
+	 $_->{'name'} =~ /^\[::1\]:$smtps_name$/)
+	} @$master;
 my ($smtps_enabled_prior) = grep {
-	($_->{'name'} eq 'smtps' || $_->{'name'} eq '127.0.0.1:smtps') &&
-	$_->{'enabled'} } @$master;
-my ($smtps) = grep { $_->{'name'} eq 'smtps' ||
-		     $_->{'name'} eq '127.0.0.1:smtps' } @$master;
+	$_->{'enabled'} && $_->{'type'} eq 'inet' &&
+	($_->{'name'} =~ /^$smtps_name$/ ||
+	 $_->{'name'} =~ /^[0-9\.]+:$smtps_name$/ ||
+	 $_->{'name'} =~ /^\[[0-9a-fA-F:]+\]:$smtps_name$/)
+	} @$master;
+my ($smtps) = grep { $_->{'name'} =~ /^$smtps_name$/ } @smtps;
+$smtps ||= $smtps[0];
 my ($smtp) = grep { $_->{'name'} eq 'smtp' ||
 		    $_->{'name'} eq '127.0.0.1:smtp' } @$master;
 if (!$smtps_enabled_prior && $smtps && !$smtps->{'enabled'}) {

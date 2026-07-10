@@ -3039,7 +3039,7 @@ if ($d->{'virt'}) {
 	push(@flags, [ "smtpd_tls_security_level", "may" ]);
 	push(@flags, [ "myhostname", $d->{'dom'} ]);
 
-	foreach my $pfx ('smtp', 'submission', 'smtps') {
+	foreach my $pfx ('smtp', 'submission', 'smtps', 'submissions', '465') {
 		# Find the existing entry for the IP and for the default service
 		my $already;
 		my $already6;

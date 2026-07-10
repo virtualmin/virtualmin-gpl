@@ -5997,11 +5997,18 @@ if ($mail_system == 0) {
 	&foreign_require("postfix");
 	my $master = postfix::get_master_config();
 	my ($submission) = grep {
-		$_->{'name'} =~ /^(submission|[0-9\.]+:submission)$/ &&
-		$_->{'enabled'} } @$master;
+		$_->{'enabled'} && $_->{'type'} eq 'inet' &&
+		($_->{'name'} eq 'submission' ||
+		 $_->{'name'} =~ /^[0-9\.]+:submission$/ ||
+		 $_->{'name'} =~ /^\[[0-9a-fA-F:]+\]:submission$/)
+		} @$master;
+	my $smtps_name = qr/(?:smtps|submissions|465)/;
 	my ($smtps) = grep {
-		$_->{'name'} =~ /^(smtps|[0-9\.]+:smtps)$/ &&
-		$_->{'enabled'} } @$master;
+		$_->{'enabled'} && $_->{'type'} eq 'inet' &&
+		($_->{'name'} =~ /^$smtps_name$/ ||
+		 $_->{'name'} =~ /^[0-9\.]+:$smtps_name$/ ||
+		 $_->{'name'} =~ /^\[[0-9a-fA-F:]+\]:$smtps_name$/)
+		} @$master;
 	if ($submission) {
 		# Submission port, hopefully with TLS
 		$smtp_port = 587;
