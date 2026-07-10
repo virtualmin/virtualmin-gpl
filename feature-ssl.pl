@@ -3115,16 +3115,16 @@ if ($d->{'virt'}) {
 
 			# Apply the same fixes for IPv6
 			if (!$already6 && $d->{'virt6'}) {
-				$already = &create_ssl_postfix_service(
+				$already6 = &create_ssl_postfix_service(
 					$smtp, $d, $pfx, "[".$d->{'ip6'}."]",
 					\@flags);
-				&postfix::create_master($already);
+				&postfix::create_master($already6);
 				$changed = 1;
 				}
 			elsif ($already6 && $d->{'virt6'}) {
 				# Update cert file paths
-				&update_ssl_postfix_service($already, \@flags);
-				&postfix::modify_master($already);
+				&update_ssl_postfix_service($already6, \@flags);
+				&postfix::modify_master($already6);
 				$changed = 1;
 				}
 			elsif ($already6 && !$d->{'virt6'}) {
@@ -3258,8 +3258,8 @@ sub update_ssl_postfix_service
 {
 my ($svc, $flags) = @_;
 foreach my $f (@$flags) {
-	if ($already->{'command'} !~ s/-o\s+\Q$f->[0]\E=(\S+)/-o $f->[0]=$f->[1]/) {
-		$already->{'command'} .= " -o ".$f->[0]."=".$f->[1];
+	if ($svc->{'command'} !~ s/-o\s+\Q$f->[0]\E=(\S+)/-o $f->[0]=$f->[1]/) {
+		$svc->{'command'} .= " -o ".$f->[0]."=".$f->[1];
 		}
 	}
 }
