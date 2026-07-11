@@ -466,11 +466,13 @@ return 0;
 }
 
 # backup_dir(&domain, file, &options, home-format, differential, [&as-domain],
-# 	     &all-options, &key, [skip-signing], [backup-id])
+# 	     &all-options, &key, [skip-signing], [backup-id],
+# 	     [\%selected-full-state])
 # Backs up the server's home directory in tar format to the given file
 sub backup_dir
 {
-my ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key, undef, $id) = @_;
+my ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key, undef,
+    $id, $fullstatefiles) = @_;
 my $compression = $opts->{'compression'};
 &$first_print($compression == 3 ? $text{'backup_dirzip'} :
 	      $increment == 1 || $increment >= 3 ? $text{'backup_dirtarinc'}
@@ -574,15 +576,39 @@ foreach my $x (@xlist) {
 	}
 &close_tempfile(XTEMP);
 
-# Work out differential flags
+# Work out differential flags. The caller invalidates selected full snapshots
+# before any domain is archived. Tar writes the replacement to a staging file,
+# which the caller publishes or removes once destination results are known.
 my ($iargs, $iflag, $ifile, $ifilecopy);
 if (&has_incremental_tar() && $increment != 2) {
-	$ifile = &get_incremental_file($d, $increment, $id);
-	my $idir = $ifile =~ /^(.*)\/[^\/]+$/ ? $1 : undef;
+	my $ifilefinal = !$increment && $fullstatefiles
+		? &get_selected_incremental_file($d, $id)
+		: &get_incremental_file($d, $increment, $id);
+	my $idir = $ifilefinal =~ /^(.*)\/[^\/]+$/ ? $1 : undef;
 	&make_dir($idir, 0711, 1);
+	$ifile = $ifilefinal;
+	if (!$increment && $fullstatefiles) {
+		my $ifiledef = &get_incremental_file($d);
+		$ifile = $ifilefinal.".new.$$";
+		$fullstatefiles->{$d->{'id'}} = {
+			'file' => $ifilefinal,
+			'default' => $ifiledef,
+			'temp' => $ifile,
+			'uid' => $d->{'uid'},
+			'gid' => $d->{'gid'},
+			'dom' => $d->{'dom'},
+			'domain' => $d,
+			};
+		push(@main::temporary_files, $ifile);
+		}
 	if (!$increment) {
 		# Force full backup
 		&unlink_file($ifile);
+		if ($fullstatefiles && -e $ifile) {
+			&$second_print(&text('backup_dirstatefailed', $d->{'dom'},
+				"Failed to clear the staged snapshot"));
+			return 0;
+			}
 		}
 	else {
 		# Add a flag file indicating that this was an differential,
@@ -1279,4 +1305,3 @@ return $dir eq '/' ||
 $done_feature_script{'dir'} = 1;
 
 1;
-

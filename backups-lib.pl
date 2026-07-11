@@ -805,11 +805,83 @@ my @donedoms;
 my ($okcount, $errcount) = (0, 0);
 my @errdoms;
 my %fullstateok;
+my %fullstatefiles;
+my %dirdone;
 my $selected_full = 0;
 if ($increment == 0 && $id && $id ne "1") {
 	my @incrs = grep { $_->{'increment'} == $id } &list_scheduled_backups();
 	$selected_full = @incrs ? 1 : 0;
 	}
+
+# Serialize access to every snapshot this backup can read or replace. These
+# locks are acquired before domain locks and held until state is finalized, so
+# overlapping full and differential runs cannot publish, restore or remove each
+# other's snapshot generation.
+my @incremental_lockfiles;
+if (&has_incremental_tar() && $increment != 2) {
+	my %lockseen;
+	foreach my $ld (@$doms) {
+		next if (!$ld || !$ld->{'id'});
+		my @dfiles;
+		if (!$increment && $selected_full) {
+			push(@dfiles, &get_selected_incremental_file($ld, $id));
+			push(@dfiles, &get_incremental_file($ld));
+			}
+		else {
+			push(@dfiles, &get_incremental_file(
+				$ld, $increment, $id));
+			}
+		foreach my $lockfile (@dfiles) {
+			push(@incremental_lockfiles, $lockfile)
+				if ($lockfile && !$lockseen{$lockfile}++);
+			}
+		}
+	@incremental_lockfiles = sort @incremental_lockfiles;
+	foreach my $lockfile (@incremental_lockfiles) {
+		my $lockdir = $lockfile =~ /^(.*)\/[^\/]+$/ ? $1 : undef;
+		&make_dir($lockdir, 0711, 1) if ($lockdir && !-d $lockdir);
+		# Snapshot files can be large, and logging a diff would retain
+		# their contents for the full duration of packaging and remote
+		# uploads.
+		&lock_file($lockfile, undef, undef, 1);
+		}
+	}
+my $release_backup_file_locks = sub {
+	foreach my $lockfile (reverse(@incremental_lockfiles)) {
+		&unlock_file($lockfile);
+		}
+	foreach my $lockfile (@lockfiles) {
+		&unlock_file($lockfile);
+		}
+	};
+
+# Invalidate every selected snapshot before the first domain is archived. If
+# this process is terminated part-way through a multi-domain backup, no domain
+# that was not reached can retain state for an older full backup generation.
+if ($selected_full) {
+	my %invalidated;
+	foreach my $ld (@$doms) {
+		next if (!$ld || !$ld->{'id'} || $invalidated{$ld->{'id'}}++);
+		my $state = {
+			'file' => &get_selected_incremental_file($ld, $id),
+			'dom' => $ld->{'dom'},
+			'domain' => $ld,
+			};
+		my $stateerr = &invalidate_selected_full_backup_state($state);
+		if ($stateerr) {
+			&$first_print(&text('backup_dirstatefailed',
+				&show_domain_name($ld) || $ld->{'dom'},
+				&html_escape($stateerr)));
+			&$release_backup_file_locks();
+			return (0, 0, $doms);
+			}
+		}
+	}
+my $mark_fullstate_ok = sub {
+	return if (!$selected_full);
+	&record_full_backup_destination_success(
+		\%fullstateok, \%dirdone, @_);
+	};
 my %donefeatures;				# Map from domain name->features
 my @cleanuphomes;				# Temporary homes
 my %donedoms;				# Map from domain name->hash
@@ -947,7 +1019,8 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 				local $main::error_must_die = 1;
 				$fok = &$bfunc(
 					$d, $ffile, $opts->{$f}, $homefmt,
-					$increment, $asd, $opts, $key, $nosign, $id);
+					$increment, $asd, $opts, $key, $nosign, $id,
+					$selected_full ? \%fullstatefiles : undef);
 				};
 			if ($@) {
 				my $err = $@;
@@ -997,6 +1070,8 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 			}
 		if ($fok) {
 			push(@donefeatures, $f);
+			$dirdone{$d->{'id'}} = 1
+				if ($f eq "dir" && $d->{'id'});
 			}
 		}
 
@@ -1031,6 +1106,7 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 		$errcount++;
 		push(@errdoms, $d);
 		}
+	&$mark_fullstate_ok($d) if ($dok && $homefmt && $anylocal);
 
 	if ($onebyone && $homefmt && $dok && $anyremote) {
 		# Transfer this domain now
@@ -1213,8 +1289,7 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 				}
 			else {
 				&$second_print($text{'setup_done'});
-				$fullstateok{$d->{'id'}} = 1
-					if ($selected_full && $d->{'id'});
+				&$mark_fullstate_ok($d);
 				my @tst = stat("$dest/$df");
 				if ($mode != 0 && !$done_transferred_sz++) {
 					$transferred_sz += $tst[7];
@@ -1370,6 +1445,9 @@ if ($ok) {
 				$ok = 0;
 				last;
 				}
+			else {
+				&$mark_fullstate_ok($d) if ($anylocal);
+				}
 			}
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
@@ -1444,6 +1522,7 @@ if ($ok) {
 			}
 		else {
 			&$second_print($text{'setup_done'});
+			&$mark_fullstate_ok(@donedoms) if ($anylocal);
 			}
 		}
 	}
@@ -1529,20 +1608,10 @@ else {
 	}
 $sz += $transferred_sz;
 
-my %archiveerrids = map { $_->{'id'}, 1 }
-		    grep { $_->{'id'} } @errdoms;
-my $mark_fullstate_ok = sub {
-	return if (!$selected_full);
-	foreach my $sd (@_) {
-		next if (!$sd || !$sd->{'id'} || $archiveerrids{$sd->{'id'}});
-		$fullstateok{$sd->{'id'}} = 1;
-		}
-	};
-&$mark_fullstate_ok(@donedoms) if ($ok && $anylocal);
-
 foreach my $desturl (@$desturls) {
 	my ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
+	my $starpass = "*" x length($pass);
 	if ($ok && ($mode == 1 || $mode == 14) && (@destfiles || !$dirfmt)) {
 		# Upload file(s) to FTP server
 		my $upfunc = $mode == 14
@@ -1556,6 +1625,7 @@ foreach my $desturl (@$desturls) {
 			# Need to upload entire directory .. which has to be
 			# created first
 			foreach my $df (@destfiles) {
+				my $dferr;
 				my $tstart = time();
 				my $d = $destfiles_map{$df};
 				my $n = $d eq "virtualmin" ? "virtualmin"
@@ -1568,28 +1638,33 @@ foreach my $desturl (@$desturls) {
 				&uncat_file($domtemp,
 					    &serialise_variable($bdom));
 				&$upfunc($server, "$path/$df", "$dest/$df",
-					 \$err, undef, $user, $pass, $port,
+					 \$dferr, undef, $user, $pass, $port,
 					 $ftp_upload_tries);
 				&$upfunc($server, "$path/$df.info",
-					 $infotemp, \$err,
+					 $infotemp, \$dferr,
 					 undef, $user, $pass, $port,
-					 $ftp_upload_tries) if (!$err);
+					 $ftp_upload_tries) if (!$dferr);
 				&$upfunc($server, "$path/$df.dom",
-					 $domtemp, \$err,
+					 $domtemp, \$dferr,
 					 undef, $user, $pass, $port,
-					 $ftp_upload_tries) if (!$err);
-				if ($err) {
-					$err =~ s/\Q$pass\E/$starpass/g;
+					 $ftp_upload_tries) if (!$dferr);
+				if ($dferr) {
+					$dferr =~ s/\Q$pass\E/$starpass/g;
 					&$second_print(
-					    &text('backup_uploadfailed', $err));
+					    &text('backup_uploadfailed', $dferr));
+					$err ||= $dferr;
 					$ok = 0;
 					last;
 					}
-				elsif ($asd && $d) {
-					# Log bandwidth used by this domain
-					my @tst = stat("$dest/$df");
-					&record_backup_bandwidth(
-					    $d, 0, $tst[7], $tstart, time());
+				else {
+					&$mark_fullstate_ok($d);
+					if ($asd && ref($d)) {
+						# Log bandwidth used by this
+						# domain
+						my @tst = stat("$dest/$df");
+						&record_backup_bandwidth(
+						    $d, 0, $tst[7], $tstart, time());
+						}
 					}
 				}
 			}
@@ -1620,10 +1695,10 @@ foreach my $desturl (@$desturls) {
 				&record_backup_bandwidth($asd, 0, $tst[7], 
 							 $tstart, time());
 				}
+			&$mark_fullstate_ok(@donedoms) if (!$err);
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
-		&$mark_fullstate_ok(@donedoms) if (!$err);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && ($mode == 2 || $mode == 13) && (@destfiles || !$dirfmt)) {
@@ -1652,8 +1727,10 @@ foreach my $desturl (@$desturls) {
 				&$cfunc($dest, $r, $pass, \$err, $port,
 					  $asuser);
 				}
-			# Upload each domain's .info and .dom files
-			foreach my $df (@destfiles) {
+			# Upload each domain's .info and .dom files, and
+			# only then record success for that domain's state.
+			foreach my $df (!$err ? @destfiles : ( )) {
+				my $dferr;
 				my $d = $destfiles_map{$df};
 				my $n = $d eq "virtualmin" ? "virtualmin"
 							      : $d->{'dom'};
@@ -1664,23 +1741,25 @@ foreach my $desturl (@$desturls) {
 				&uncat_file($domtemp,
 					    &serialise_variable($bdom));
 				&$cfunc($infotemp, $r."/$df.info", $pass,
-					  \$err, $port, $asuser) if (!$err);
+					  \$dferr, $port, $asuser);
 				&$cfunc($domtemp, $r."/$df.dom", $pass,
-					  \$err, $port, $asuser) if (!$err);
-				}
-			$err =~ s/\Q$pass\E/$starpass/g;
-			if (!$err && $asd) {
-				# Log bandwidth used by domain
-				foreach my $df (@destfiles) {
-					my $d = $destfiles_map{$df};
-					if ($d) {
+					  \$dferr, $port, $asuser) if (!$dferr);
+				if ($dferr) {
+					$dferr =~ s/\Q$pass\E/$starpass/g;
+					$err ||= $dferr;
+					last;
+					}
+				else {
+					&$mark_fullstate_ok($d);
+					if ($asd && ref($d)) {
+						# Log bandwidth used by this domain
 						my @tst = stat("$dest/$df");
 						&record_backup_bandwidth(
 							$d, 0, $tst[7],
 							$tstart, time());
 						}
-					}
 				}
+			}
 			}
 		else {
 			# Just a single file
@@ -1708,7 +1787,7 @@ foreach my $desturl (@$desturls) {
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
-		&$mark_fullstate_ok(@donedoms) if (!$err);
+		&$mark_fullstate_ok(@donedoms) if (!$err && !$dirfmt);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && $mode == 3 && (@destfiles || !$dirfmt)) {
@@ -1718,6 +1797,7 @@ foreach my $desturl (@$desturls) {
 		if ($dirfmt) {
 			# Upload an entire directory of files
 			foreach my $df (@destfiles) {
+				my $dferr;
 				my $tstart = time();
 				my $d = $destfiles_map{$df};
 				my $n = $d eq "virtualmin" ? "virtualmin"
@@ -1725,22 +1805,26 @@ foreach my $desturl (@$desturls) {
 				my $binfo = { $n => $donefeatures{$n} };
 				my $bdom = $d eq "virtualmin" ? undef :
 					{ $n => &clean_domain_passwords($d) };
-				$err = &s3_upload($user, $pass, $server,
+				$dferr = &s3_upload($user, $pass, $server,
 						  "$dest/$df",
 						  $path ? $path."/".$df : $df,
 						  $binfo, $bdom,
 						  $s3_upload_tries, $port);
-				if ($err) {
+				if ($dferr) {
 					&$second_print(
-					    &text('backup_uploadfailed', $err));
+					    &text('backup_uploadfailed', $dferr));
+					$err ||= $dferr;
 					$ok = 0;
 					last;
 					}
-				elsif ($asd && $d) {
-					# Log bandwidth used by this domain
-					my @tst = stat("$dest/$df");
-					&record_backup_bandwidth(
-						$d, 0, $tst[7], $tstart,time());
+				else {
+					&$mark_fullstate_ok($d);
+					if ($asd && ref($d)) {
+						# Log bandwidth used by this domain
+						my @tst = stat("$dest/$df");
+						&record_backup_bandwidth(
+							$d, 0, $tst[7], $tstart,time());
+						}
 					}
 				}
 			}
@@ -1762,8 +1846,8 @@ foreach my $desturl (@$desturls) {
 				&record_backup_bandwidth($asd, 0, $tst[7], 
 							 $tstart, time());
 				}
+			&$mark_fullstate_ok(@donedoms) if (!$err);
 			}
-		&$mark_fullstate_ok(@donedoms) if (!$err);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && $mode == 6 && (@destfiles || !$dirfmt)) {
@@ -1776,6 +1860,7 @@ foreach my $desturl (@$desturls) {
 			# Upload an entire directory of files
 			my $tstart = time();
 			foreach my $df (@destfiles) {
+				my $dferr;
 				my $d = $destfiles_map{$df};
 				my $n = $d eq "virtualmin" ? "virtualmin"
 							      : $d->{'dom'};
@@ -1786,18 +1871,20 @@ foreach my $desturl (@$desturls) {
 				&uncat_file($domtemp,
 					    &serialise_variable($bdom));
 				my $dfpath = $path ? $path."/".$df : $df;
-				$err = &rs_upload_object($rsh, $server,
+				$dferr = &rs_upload_object($rsh, $server,
 					$dfpath, $dest."/".$df);
-				$err = &rs_upload_object($rsh, $server,
-					$dfpath.".info", $infotemp) if (!$err);
-				$err = &rs_upload_object($rsh, $server,
-					$dfpath.".dom", $domtemp) if (!$err);
-				}
-			if (!$err && $asd) {
-				# Log bandwidth used by domain
-				foreach my $df (@destfiles) {
-					my $d = $destfiles_map{$df};
-					if ($d) {
+				$dferr = &rs_upload_object($rsh, $server,
+					$dfpath.".info", $infotemp) if (!$dferr);
+				$dferr = &rs_upload_object($rsh, $server,
+					$dfpath.".dom", $domtemp) if (!$dferr);
+				if ($dferr) {
+					$err ||= $dferr;
+					last;
+					}
+				else {
+					&$mark_fullstate_ok($d);
+					if ($asd && ref($d)) {
+						# Log bandwidth used by this domain
 						my @tst = stat("$dest/$df");
 						&record_backup_bandwidth(
 							$d, 0, $tst[7],
@@ -1824,6 +1911,7 @@ foreach my $desturl (@$desturls) {
 				&record_backup_bandwidth($asd, 0, $tst[7], 
 							 $tstart, time());
 				}
+			&$mark_fullstate_ok(@donedoms) if (!$err);
 			}
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
@@ -1831,7 +1919,6 @@ foreach my $desturl (@$desturls) {
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
-		&$mark_fullstate_ok(@donedoms) if (!$err);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && ($mode == 7 || $mode == 8 || $mode == 10 ||
@@ -1854,6 +1941,7 @@ foreach my $desturl (@$desturls) {
 			# Upload an entire directory of files
 			my $tstart = time();
 			foreach my $df (@destfiles) {
+				my $dferr;
 				my $d = $destfiles_map{$df};
 				my $n = $d eq "virtualmin" ? "virtualmin"
 							      : $d->{'dom'};
@@ -1864,18 +1952,20 @@ foreach my $desturl (@$desturls) {
 				&uncat_file($domtemp,
 					    &serialise_variable($bdom));
 				my $dfpath = $path ? $path."/".$df : $df;
-				$err = &$func($server, $dfpath,
+				$dferr = &$func($server, $dfpath,
 					      $dest."/".$df, $tries);
-				$err = &$func($server, $dfpath.".info",
-					      $infotemp, $tries) if (!$err);
-				$err = &$func($server, $dfpath.".dom",
-					      $domtemp, $tries) if (!$err);
-				}
-			if (!$err && $asd) {
-				# Log bandwidth used by domain
-				foreach my $df (@destfiles) {
-					my $d = $destfiles_map{$df};
-					if ($d) {
+				$dferr = &$func($server, $dfpath.".info",
+					      $infotemp, $tries) if (!$dferr);
+				$dferr = &$func($server, $dfpath.".dom",
+					      $domtemp, $tries) if (!$dferr);
+				if ($dferr) {
+					$err ||= $dferr;
+					last;
+					}
+				else {
+					&$mark_fullstate_ok($d);
+					if ($asd && ref($d)) {
+						# Log bandwidth used by this domain
 						my @tst = stat("$dest/$df");
 						&record_backup_bandwidth(
 							$d, 0, $tst[7],
@@ -1902,6 +1992,7 @@ foreach my $desturl (@$desturls) {
 				&record_backup_bandwidth($asd, 0, $tst[7], 
 							 $tstart, time());
 				}
+			&$mark_fullstate_ok(@donedoms) if (!$err);
 			}
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
@@ -1909,12 +2000,12 @@ foreach my $desturl (@$desturls) {
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
-		&$mark_fullstate_ok(@donedoms) if (!$err);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && $mode == 9 && (@destfiles || !$dirfmt)) {
 		# Upload to Webmin server
 		&$first_print(&text('backup_upload9', "<tt>$server</tt>"));
+		my $err;
 		my $w = &dest_to_webmin($desturl);
 		my $infotemp = &transname();
 		my $domtemp = &transname();
@@ -1925,15 +2016,14 @@ foreach my $desturl (@$desturls) {
 				local $main::error_must_die = 1;
 				&remote_finished();
 				&remote_foreign_require($w, "webmin");
-				foreach my $df (@destfiles) {
-					&remote_write($w, "$dest/$df","$path/$df");
-					}
 				};
 			$err = $@;
 			$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
 
-			# Upload each domain's .info and .dom files
-			foreach my $df (@destfiles) {
+			# Upload each archive together with its metadata, so success can
+			# be recorded for the corresponding domain only.
+			foreach my $df (!$err ? @destfiles : ( )) {
+				my $dferr;
 				my $d = $destfiles_map{$df};
 				my $n = $d eq "virtualmin" ? "virtualmin"
 							      : $d->{'dom'};
@@ -1945,17 +2035,22 @@ foreach my $desturl (@$desturls) {
 					    &serialise_variable($bdom));
 				eval {
 					local $main::error_must_die = 1;
+					&remote_write($w, "$dest/$df", "$path/$df");
 					&remote_write($w, $infotemp,
 						      $path."/$df.info");
 					&remote_write($w, $domtemp,
 						      $path."/$df.dom");
 					};
-				}
-			if (!$err && $asd) {
-				# Log bandwidth used by domain
-				foreach my $df (@destfiles) {
-					my $d = $destfiles_map{$df};
-					if ($d) {
+				$dferr = $@;
+				$dferr =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
+				if ($dferr) {
+					$err ||= $dferr;
+					last;
+					}
+				else {
+					&$mark_fullstate_ok($d);
+					if ($asd && ref($d)) {
+						# Log bandwidth used by this domain
 						my @tst = stat("$dest/$df");
 						&record_backup_bandwidth(
 							$d, 0, $tst[7],
@@ -1963,7 +2058,6 @@ foreach my $desturl (@$desturls) {
 						}
 					}
 				}
-
 			}
 		else {
 			# Just a single file
@@ -1988,6 +2082,7 @@ foreach my $desturl (@$desturls) {
 				&record_backup_bandwidth($asd, 0, $tst[7], 
 							 $tstart, time());
 				}
+			&$mark_fullstate_ok(@donedoms) if (!$err);
 			}
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
@@ -1995,7 +2090,6 @@ foreach my $desturl (@$desturls) {
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
-		&$mark_fullstate_ok(@donedoms) if (!$err);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
 	elsif ($ok && $mode == 0 && (@destfiles || !$dirfmt) &&
@@ -2085,6 +2179,66 @@ if (!$anylocal) {
 	&execute_command("rm -rf ".quotemeta($dest));
 	}
 
+# Publish selected full-backup state only for domains whose home-directory
+# archive reached at least one durable destination. State produced by tar is
+# staged until this point, so a later packaging or upload failure cannot make
+# a differential depend on an unavailable full backup.
+if ($increment == 0) {
+	if ($selected_full) {
+		my %statedoms;
+		foreach my $sd (@$doms) {
+			next if (!$sd || !$sd->{'id'} || $statedoms{$sd->{'id'}});
+			$statedoms{$sd->{'id'}} = $sd;
+			}
+		foreach my $did (sort keys %statedoms) {
+			my $state = $fullstatefiles{$did} || {
+				'file' => &get_selected_incremental_file(
+					$statedoms{$did}, $id),
+				'dom' => $statedoms{$did}->{'dom'},
+				'domain' => $statedoms{$did},
+				};
+			my $sd = $state->{'domain'};
+			&obtain_lock_everything($sd);
+			&lock_domain($sd);
+			my $current = &get_domain($did, undef, 1);
+			my $stateerr;
+			if ($state->{'temp'} && $current && $fullstateok{$did}) {
+				$state->{'domain'} = $current;
+				$state->{'uid'} = $current->{'uid'};
+				$state->{'gid'} = $current->{'gid'};
+				$state->{'dom'} = $current->{'dom'};
+				$stateerr = &publish_selected_full_backup_state($state);
+				}
+			else {
+				$stateerr = &discard_selected_full_backup_state($state);
+				}
+			if ($stateerr) {
+				my $discarderr =
+					&discard_selected_full_backup_state($state);
+				$stateerr .= "; ".$discarderr if ($discarderr);
+				&$first_print(&text('backup_dirstatefailed',
+					&show_domain_name($state->{'domain'}) ||
+						$state->{'dom'},
+					&html_escape($stateerr)));
+				$ok = 0;
+				$errcount++;
+				push(@errdoms, $current || $sd);
+				}
+			&unlock_domain($sd);
+			&release_lock_everything($sd);
+			}
+		}
+	elsif (&has_incremental_tar()) {
+		# Preserve the existing behavior for ordinary full backups.
+		foreach my $d (@errdoms) {
+			if ($d->{'id'}) {
+				&unlink_file(
+					&get_incremental_file($d, $increment, $id));
+				}
+			}
+		}
+	}
+
 # Each domain can only fail once
 my %doneerrdom;
 @errdoms = grep { !$doneerrdom{$_->{'id'}}++ } @errdoms;
@@ -2105,42 +2259,129 @@ if ($ok) {
 			      join(" ", map { $_->{'dom'} } @errdoms)));
 		}
 	}
-
-# Keep selected full-backup differential state only for domains whose full
-# backup reached at least one durable destination.
-if ($increment == 0 && &has_incremental_tar()) {
-	if ($selected_full) {
-		my %donestate;
-		foreach my $d (@$doms) {
-			next if (!$d->{'id'} || $donestate{$d->{'id'}}++);
-			my $ifile = &get_incremental_file($d, $increment, $id);
-			if ($fullstateok{$d->{'id'}}) {
-				my $ifiledef = &get_incremental_file($d);
-				if ($ifile && $ifiledef && $ifile ne $ifiledef &&
-				    -r $ifile) {
-					&copy_source_dest($ifile, $ifiledef);
-					}
-				}
-			else {
-				&unlink_file($ifile);
-				}
-			}
-		}
-	else {
-		foreach my $d (@errdoms) {
-			if ($d->{'id'}) {
-				&unlink_file(&get_incremental_file($d, $increment, $id));
-				}
-			}
-		}
-	}
-
-# Release lock on dest file
-foreach my $lockfile (@lockfiles) {
-	&unlock_file($lockfile);
-	}
+# Release locks on snapshot and destination files
+&$release_backup_file_locks();
 
 return ($ok, $sz, \@errdoms);
+}
+
+# record_full_backup_destination_success(\%state, \%directory-done, domains...)
+# Records that a domain's home-directory archive reached one destination.
+sub record_full_backup_destination_success
+{
+my ($state, $dirdone, @doms) = @_;
+foreach my $d (@doms) {
+	next if (!ref($d) || !$d->{'id'} || !$dirdone->{$d->{'id'}});
+	$state->{$d->{'id'}} = 1;
+	}
+}
+
+# invalidate_selected_full_backup_state(&state)
+# Removes public state before a selected full backup begins, along with staged
+# files left behind if an earlier process was killed. Returns undef on success,
+# or an error message if any state file could not be removed.
+sub invalidate_selected_full_backup_state
+{
+my ($state) = @_;
+my $file = $state->{'file'};
+return "Final snapshot path is missing" if (!$file);
+my @files = ($file, glob($file.".new.*"));
+foreach my $statefile (@files) {
+	&unlink_file($statefile);
+	return "Failed to invalidate unusable snapshot $statefile"
+		if (-e $statefile || -l $statefile);
+	}
+return undef;
+}
+
+# publish_selected_full_backup_state(&state)
+# Atomically publishes a staged per-schedule snapshot and then the default
+# snapshot. Returns undef on success, or an error message on failure.
+sub publish_selected_full_backup_state
+{
+my ($state) = @_;
+my $temp = $state->{'temp'};
+my $file = $state->{'file'};
+my $default = $state->{'default'};
+return "Staged snapshot file is missing" if (!$temp || !-r $temp);
+return "Final snapshot path is missing" if (!$file);
+&set_ownership_permissions($state->{'uid'}, $state->{'gid'}, 0700, $temp);
+if (my $permerr = &verify_selected_full_backup_state($state, $temp)) {
+	return $permerr;
+	}
+
+my $newdefault;
+if ($default && $default ne $file) {
+	$newdefault = $default.".new.$$";
+	&unlink_file($newdefault);
+	push(@main::temporary_files, $newdefault);
+	my ($copyok, $copyerr) = &copy_source_dest($temp, $newdefault);
+	if (!$copyok) {
+		&unlink_file($newdefault);
+		return "Failed to stage default snapshot: $copyerr";
+		}
+	&set_ownership_permissions(
+		$state->{'uid'}, $state->{'gid'}, 0700, $newdefault);
+	if (my $permerr =
+	    &verify_selected_full_backup_state($state, $newdefault)) {
+		&unlink_file($newdefault);
+		return $permerr;
+		}
+	}
+
+if (!rename($temp, $file)) {
+	my $renameerr = $!;
+	&unlink_file($newdefault) if ($newdefault);
+	return "Failed to publish snapshot: $renameerr";
+	}
+if (my $permerr = &verify_selected_full_backup_state($state, $file)) {
+	&unlink_file($newdefault) if ($newdefault);
+	return $permerr;
+	}
+
+if ($newdefault) {
+	if (!rename($newdefault, $default)) {
+		my $renameerr = $!;
+		&unlink_file($newdefault);
+		return "Failed to publish default snapshot: $renameerr";
+		}
+	if (my $permerr = &verify_selected_full_backup_state($state, $default)) {
+		&unlink_file($default);
+		return $permerr;
+		}
+	}
+return undef;
+}
+
+# discard_selected_full_backup_state(&state)
+# Removes staged and public selected-full state after a failed backup. Returns
+# undef on success, or an error message if either file could not be removed.
+sub discard_selected_full_backup_state
+{
+my ($state) = @_;
+foreach my $file ($state->{'temp'}, $state->{'file'}) {
+	next if (!$file);
+	&unlink_file($file);
+	return "Failed to remove unusable snapshot $file"
+		if (-e $file || -l $file);
+	}
+return undef;
+}
+
+# verify_selected_full_backup_state(&state, file)
+# Returns undef if a published snapshot has the expected mode and ownership.
+sub verify_selected_full_backup_state
+{
+my ($state, $file) = @_;
+my @st = stat($file);
+return "Published snapshot is missing" if (!@st);
+return "Published snapshot has incorrect permissions"
+	if (($st[2] & 0777) != 0700);
+return "Published snapshot has incorrect owner"
+	if (defined($state->{'uid'}) && $st[4] != $state->{'uid'});
+return "Published snapshot has incorrect group"
+	if (defined($state->{'gid'}) && $st[5] != $state->{'gid'});
+return undef;
 }
 
 # get_incremental_file(&domain, increment-mode, backup-id)
@@ -2151,7 +2392,7 @@ my ($d, $mode, $id) = @_;
 return if (!$d || !$d->{'id'});
 if ($mode >= 3) {
 	# Incremental against a specific backup
-	return "$incremental_backups_dir/$mode/$d->{'id'}";
+	return &get_selected_incremental_file($d, $mode);
 	}
 elsif ($mode == 0 && $id && $id ne "1") {
 	# This full backup gets its own snapshot only if a differential
@@ -2159,10 +2400,19 @@ elsif ($mode == 0 && $id && $id ne "1") {
 	my @incrs = grep { $_->{'increment'} == $id } &list_scheduled_backups();
 	if (@incrs) {
 		# Yes, so it gets its own incremental file
-		return "$incremental_backups_dir/$id/$d->{'id'}";
+		return &get_selected_incremental_file($d, $id);
 		}
 	}
 return "$incremental_backups_dir/$d->{'id'}";
+}
+
+# get_selected_incremental_file(&domain, backup-id)
+# Returns the snapshot path for a selected full-backup chain.
+sub get_selected_incremental_file
+{
+my ($d, $id) = @_;
+return if (!$d || !$d->{'id'} || !$id);
+return "$incremental_backups_dir/$id/$d->{'id'}";
 }
 
 # clear_incremental_files(&domain)
