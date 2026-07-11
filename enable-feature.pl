@@ -29,9 +29,12 @@ if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
 	$ENV{'WEBMIN_VAR'} ||= "/var/webmin";
-	require FindBin;
-	chdir($pwd = $FindBin::RealBin) ||
-		die "Failed to chdir to $FindBin::RealBin : $!";
+	if ($0 =~ /^(.*)\/[^\/]+$/) {
+		chdir($pwd = $1);
+		}
+	else {
+		chop($pwd = `pwd`);
+		}
 	$0 = "$pwd/enable-feature.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "enable-feature.pl must be run as root";
