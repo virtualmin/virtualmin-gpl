@@ -818,6 +818,15 @@ if ($increment == 0 && $id && $id ne "1") {
 # overlapping full and differential runs cannot publish, restore or remove each
 # other's snapshot generation.
 my @incremental_lockfiles;
+my @incremental_lockhandles;
+my $release_backup_file_locks = sub {
+	foreach my $lockfh (reverse(@incremental_lockhandles)) {
+		close($lockfh);
+		}
+	foreach my $lockfile (@lockfiles) {
+		&unlock_file($lockfile);
+		}
+	};
 if (&has_incremental_tar() && $increment != 2) {
 	my %lockseen;
 	foreach my $ld (@$doms) {
@@ -840,20 +849,16 @@ if (&has_incremental_tar() && $increment != 2) {
 	foreach my $lockfile (@incremental_lockfiles) {
 		my $lockdir = $lockfile =~ /^(.*)\/[^\/]+$/ ? $1 : undef;
 		&make_dir($lockdir, 0711, 1) if ($lockdir && !-d $lockdir);
-		# Snapshot files can be large, and logging a diff would retain
-		# their contents for the full duration of packaging and remote
-		# uploads.
-		&lock_file($lockfile, undef, undef, 1);
+		my $lockfh;
+		open($lockfh, ">>", $lockfile.".lock") ||
+			&error(&text('backup_estatelock',
+				&html_escape($lockfile), $!));
+		flock($lockfh, 2) || &error(&text('backup_estatelock',
+			&html_escape($lockfile), $!));
+		chmod(0600, $lockfile.".lock");
+		push(@incremental_lockhandles, $lockfh);
 		}
 	}
-my $release_backup_file_locks = sub {
-	foreach my $lockfile (reverse(@incremental_lockfiles)) {
-		&unlock_file($lockfile);
-		}
-	foreach my $lockfile (@lockfiles) {
-		&unlock_file($lockfile);
-		}
-	};
 
 # Invalidate every selected snapshot before the first domain is archived. If
 # this process is terminated part-way through a multi-domain backup, no domain
