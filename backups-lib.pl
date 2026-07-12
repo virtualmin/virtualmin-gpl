@@ -2310,10 +2310,9 @@ my $file = $state->{'file'};
 my $default = $state->{'default'};
 return "Staged snapshot file is missing" if (!$temp || !-r $temp);
 return "Final snapshot path is missing" if (!$file);
-&set_ownership_permissions($state->{'uid'}, $state->{'gid'}, 0700, $temp);
-if (my $permerr = &verify_selected_full_backup_state($state, $temp)) {
-	return $permerr;
-	}
+return "Failed to set snapshot ownership and permissions"
+	if (!&set_ownership_permissions(
+		$state->{'uid'}, $state->{'gid'}, 0700, $temp));
 
 my $newdefault;
 if ($default && $default ne $file) {
@@ -2325,12 +2324,10 @@ if ($default && $default ne $file) {
 		&unlink_file($newdefault);
 		return "Failed to stage default snapshot: $copyerr";
 		}
-	&set_ownership_permissions(
-		$state->{'uid'}, $state->{'gid'}, 0700, $newdefault);
-	if (my $permerr =
-	    &verify_selected_full_backup_state($state, $newdefault)) {
+	if (!&set_ownership_permissions(
+	    $state->{'uid'}, $state->{'gid'}, 0700, $newdefault)) {
 		&unlink_file($newdefault);
-		return $permerr;
+		return "Failed to set default snapshot ownership and permissions";
 		}
 	}
 
@@ -2339,20 +2336,12 @@ if (!rename($temp, $file)) {
 	&unlink_file($newdefault) if ($newdefault);
 	return "Failed to publish snapshot: $renameerr";
 	}
-if (my $permerr = &verify_selected_full_backup_state($state, $file)) {
-	&unlink_file($newdefault) if ($newdefault);
-	return $permerr;
-	}
 
 if ($newdefault) {
 	if (!rename($newdefault, $default)) {
 		my $renameerr = $!;
 		&unlink_file($newdefault);
 		return "Failed to publish default snapshot: $renameerr";
-		}
-	if (my $permerr = &verify_selected_full_backup_state($state, $default)) {
-		&unlink_file($default);
-		return $permerr;
 		}
 	}
 return undef;
@@ -2370,22 +2359,6 @@ foreach my $file ($state->{'temp'}, $state->{'file'}) {
 	return "Failed to remove unusable snapshot $file"
 		if (-e $file || -l $file);
 	}
-return undef;
-}
-
-# verify_selected_full_backup_state(&state, file)
-# Returns undef if a published snapshot has the expected mode and ownership.
-sub verify_selected_full_backup_state
-{
-my ($state, $file) = @_;
-my @st = stat($file);
-return "Published snapshot is missing" if (!@st);
-return "Published snapshot has incorrect permissions"
-	if (($st[2] & 0777) != 0700);
-return "Published snapshot has incorrect owner"
-	if (defined($state->{'uid'}) && $st[4] != $state->{'uid'});
-return "Published snapshot has incorrect group"
-	if (defined($state->{'gid'}) && $st[5] != $state->{'gid'});
 return undef;
 }
 
