@@ -103,8 +103,7 @@ if ($in{'search'}) {
 
 	if ($search =~ /[a-z_]+\s*[:=]/i) {
 		# Support multi field terms search separated by commas
-		my @terms = grep length, map { s/^\s+|\s+$//gr }
-					 split /,/, $search;
+		my @terms = grep { $_ } split(/\s*,\s*/, $search);
 
 		# Build anded filters
 		my @filters;
