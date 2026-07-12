@@ -40,6 +40,7 @@ $test_parallel_domain2 = "example2.net";
 $test_cloud_domain = "webmincloudexample.com";
 $test_cloud_rename_domain = "webmincloudrename.com";
 $test_cloud_subdomain = "dns.webmincloudexample.com";
+$test_letsencrypt_domain = "letsencrypt.webmin.com";
 $test_ip_address = &get_default_ip();
 $test_user = "testy";
 $test_alias = "testing";
@@ -188,6 +189,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--timeout") {
 		$timeout = shift(@ARGV);
+		}
+	elsif ($a eq "--letsencrypt-domain") {
+		$test_letsencrypt_domain = shift(@ARGV);
+		}
+	elsif ($a eq "--letsencrypt-address") {
+		$test_letsencrypt_ip = shift(@ARGV);
 		}
 	else {
 		&usage("Unknown parameter $a");
@@ -7177,6 +7184,59 @@ $owner_tests = [
 	  'cleanup' => 1 },
 	];
 
+$letsencrypt_tests = [
+	# Create a domain with SSL enabled, on the external IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_letsencrypt_domain ],
+		      [ 'desc', 'Test SSL domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ $ssl ],
+		      [ 'logrotate' ],
+		      [ 'content' => 'Test SSL home page' ],
+		      [ 'shared-ip', $test_letsencrypt_ip ],
+		      [ 'acme-never' ],
+		      [ 'no-ssl-redirect' ],
+		      @create_args, ],
+        },
+
+	# Check external connectivity
+	{ 'command' => 'check-connectivity.pl',
+	  'args' => [ [ 'domain', $test_letsencrypt_domain ] ],
+	},
+	# XXX add a custom fail message
+
+	# Request a LE cert for it
+	{ 'command' => 'generate-acme-cert.pl',
+	  'args' => [ [ 'domain', $test_letsencrypt_domain ],
+		      [ 'acme', 'letsencrypt' ],
+		      [ 'allow-subset' ] ],
+	},
+
+	# Make sure it worked
+	{ 'command' => 'get-ssl.pl',
+	  'args' => [ [ 'domain', $test_letsencrypt_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'cn: '.$test_letsencrypt_domain,
+		      'issuer_o: Let\'s Encrypt' ],
+	},
+
+	# Test SSL connection
+	{ 'command' => 'openssl s_client -host '.$test_letsencrypt_domain.
+		       ' -servername '.$test_letsencrypt_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'issuer=/C=US/O=Let\'s Encrypt',
+		      'CN='.$test_letsencrypt_domain ],
+	},
+
+	# Delete the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_letsencrypt_domain ] ],
+	  'cleanup' => 1 },
+	];
+if (!$test_letsencrypt_ip) {
+	$letsencrypt_tests = [ { 'command' => 'echo Missing --letsencrypt-address flag ; false' } ];
+	}
+
 $ssl_tests = [
 	# Create a domain with SSL and a private IP
 	{ 'command' => 'create-domain.pl',
@@ -13486,6 +13546,7 @@ $alltests = { '_config' => $_config_tests,
 	      'remote' => $remote_tests,
 	      'ssl' => $ssl_tests,
 	      'nossl' => $nossl_tests,
+	      'letsencrypt' => $letsencrypt_tests,
 	      'sslserv' => $sslserv_tests,
 	      'shared' => $shared_tests,
 	      'wildcard' => $wildcard_tests,
@@ -13831,6 +13892,8 @@ print "                           [--max-output bytes]\n";
 print "                           [--timeout seconds]\n";
 print "                           [--migrate $mig]\n";
 print "                           [--user webmin-login --pass password]\n";
+print "                           [--letsencrypt-domain test.domain.com]\n";
+print "                           [--letsencrypt-address ip]\n";
 print "                           [--script name]*\n";
 exit(1);
 }
