@@ -431,9 +431,20 @@ return &master_admin() || &can_remote_as_user($program);
 sub can_remote_as_user
 {
 my ($program) = @_;
+$program =~ s/\.pl$//;
 if ($program eq "configure-script" ||
     $program eq "configure-all-scripts") {
 	return 1;
+	}
+# Let plugins declare their own command-line API scripts that are safe to run
+# over the remote API as a non-master (domain owner or reseller) user. Each such
+# script must enforce its own per-domain access checks.
+foreach my $p (@plugins) {
+	next if (!&plugin_defined($p, "feature_remote_cmds"));
+	foreach my $c (&plugin_call($p, "feature_remote_cmds")) {
+		(my $cn = $c) =~ s/\.pl$//;
+		return 1 if ($cn eq $program);
+		}
 	}
 return 0;
 }
