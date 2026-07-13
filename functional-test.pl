@@ -7202,8 +7202,10 @@ $letsencrypt_tests = [
 	# Check external connectivity
 	{ 'command' => 'check-connectivity.pl',
 	  'args' => [ [ 'domain', $test_letsencrypt_domain ] ],
+	  'failmsg' => 'Let\'s Encrypt tests cannot be run unless '.
+		       $test_letsencrypt_domain.' resolves to this domain, '.
+		       'or is changed with the --letsencrypt-domain flag.'
 	},
-	# XXX add a custom fail message
 
 	# Request a LE cert for it
 	{ 'command' => 'generate-acme-cert.pl',
@@ -13817,6 +13819,7 @@ if (!$t->{'ignorefail'}) {
 		else {
 			print "    .. failed : $?\n";
 			}
+		print "    .. $t->{'failmsg'}\n" if ($t->{'failmsg'});
 		return 0;
 		}
 	}
@@ -13839,6 +13842,7 @@ if ($t->{'grep'}) {
 		if (!$match) {
 			print $shortout if ($output || !$t->{'quiet'});
 			print "    .. no match on $grep\n";
+			print "    .. $t->{'failmsg'}\n" if ($t->{'failmsg'});
 			return 0;
 			}
 		}
@@ -13858,6 +13862,7 @@ if ($t->{'antigrep'}) {
 		if ($match) {
 			print $shortout if ($output || !$t->{'quiet'});
 			print "    .. unexpected match on $grep\n";
+			print "    .. $t->{'failmsg'}\n" if ($t->{'failmsg'});
 			return 0;
 			}
 		}
