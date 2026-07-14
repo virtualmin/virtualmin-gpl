@@ -5954,6 +5954,38 @@ $mail_tests = [
 	  'grep' => '[23] messages',
 	},
 
+	# Set the mailbox's quota low so that mail will be bounced by lookup-domain
+	{ 'command' => 'modify-user.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'quota' => 1 ] ],
+	},
+
+	# Add empty lines to procmail.log
+	{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
+	},
+
+	# Send email that should get rejected
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'from', 'nobody@webmin.com' ],
+		      [ 'to', $test_user.'@'.$test_domain ],
+		      [ 'data', $ok_email_file ] ],
+	},
+
+	# Check procmail log for quota rejection
+	{ 'command' => 'while [ "`tail -6 /var/log/procmail.log |grep '.
+		       '\'Disk quota for '.$test_full_user.' has been reached\'`" = "" ]; do '.
+		       'sleep 5; done',
+	  'timeout' => 60,
+	},
+
+	# Set quota back again
+	{ 'command' => 'modify-user.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'quota' => 100*1024 ] ],
+	},
+
 	-r $virus_email_file ? (
 		# Add empty lines to procmail.log
 		{ 'command' => '(echo ; echo ; echo ; echo ; echo) >>/var/log/procmail.log',
