@@ -137,7 +137,7 @@ if (defined($usercache{$username})) {
 # Lookup the user for real
 do './virtual-server-lib.pl';
 $d = &get_user_domain($username);
-if (!$d || !$d->{'spam'}) {
+if (!$d) {
 	$cachespam = $cachequota = $cacheuquota = 0;
 	$cachetime = $now;
 	&update_cache();
@@ -148,11 +148,11 @@ if (!$d || !$d->{'spam'}) {
 $qmode = &has_home_quotas() ? "home" : undef;
 if (!$qmode) {
 	# None .. so run spam checks
-	$cachespam = $d->{'id'};
+	$cachespam = $d->{'spam'} ? $d->{'id'} : 0;
 	$cachequota = $cacheuquota = 0;
 	$cachetime = $now;
 	&update_cache();
-	print "$d->{'id'}\n";
+	print "$d->{'id'}\n" if ($d->{'spam'});
 	exit(0);
 	}
 
@@ -165,25 +165,41 @@ $cacheclient = &get_domain_spam_client($d);
 		 &replace_atsign($_->{'user'}) eq $username } @users;
 if (!$user) {
 	# Couldn't find him?! So do the spam check
-	$cachespam = $d->{'id'};
+	$cachespam = $d->{'spam'} ? $d->{'id'} : 0;
 	$cachequota = $cacheuquota = 0;
 	$cachetime = $now;
 	&update_cache();
-	print "$d->{'id'}\n";
+	print "$d->{'id'}\n" if ($d->{'spam'});
 	exit(0);
 	}
 ($quota, $uquota) = ($user->{'quota'}, $user->{'uquota'});
+
+# Use the domain quota instead if it has less space remaining
+$qd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+$dquota = $qd->{'quota'};
+if ($dquota && &has_group_quotas()) {
+	($duquota) = &get_domain_quota($qd, 0);
+	if (!$quota || $dquota-$duquota < $quota-$uquota) {
+		($quota, $uquota) = ($dquota, $duquota);
+		}
+	}
+
+# If using only soft quotas, disable all quota checking
+if (!$config{'hard_quotas'}) {
+	$quota = $uquota = 0;
+	}
+
 $bsize = &quota_bsize($qmode);
 $quota *= $bsize;
 $uquota *= $bsize;
 if ($quota && $uquota+$size+$quota_margin >= $quota) {
 	# Over quota - intentionally fail
-	print STDERR "Disk quota for $user->{'user'} of $quota blocks has been reached.\n";
+	print STDERR "Disk quota for $user->{'user'} has been reached.\n";
 	print "$d->{'id'}\n";
 	exit($exitcode);
 	}
-elsif ($user->{'nospam'}) {
-	# Spam filtering disabled for this user
+elsif (!$d->{'spam'} || $user->{'nospam'}) {
+	# Spam filtering disabled for this domain or user
 	$cachespam = 0;
 	}
 elsif ($cacheclient eq "spamc") {
@@ -198,7 +214,7 @@ else {
 	# Under quota ... do the spam check
 	print "$d->{'id'}\n";
 	}
-$cachespam = $d->{'id'};
+$cachespam = $d->{'spam'} && !$user->{'nospam'} ? $d->{'id'} : 0;
 $cachequota = $quota;
 $cacheuquota = $uquota;
 $cachetime = $now;

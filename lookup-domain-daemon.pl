@@ -187,7 +187,7 @@ if ($d && $user) {
 	if ($dquota && &has_group_quotas()) {
 		($duquota) = &get_domain_quota($qd, 0);
 		my $dquotadiff = $dquota - $duquota;
-		if ($dquotadiff < $quotadiff) {
+		if (!defined($quotadiff) || $dquotadiff < $quotadiff) {
 			# Domain has less space free than user!
 			$quotadiff = $dquotadiff;
 			}
