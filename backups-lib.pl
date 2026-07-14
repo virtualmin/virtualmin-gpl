@@ -1521,6 +1521,7 @@ else {
 	}
 $sz += $transferred_sz;
 
+my $remotefailed = 0;
 foreach my $desturl (@$desturls) {
 	my ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
@@ -1564,6 +1565,7 @@ foreach my $desturl (@$desturls) {
 					&$second_print(
 					    &text('backup_uploadfailed', $err));
 					$ok = 0;
+					$remotefailed = 1;
 					last;
 					}
 				elsif ($asd && $d) {
@@ -1594,6 +1596,7 @@ foreach my $desturl (@$desturls) {
 				&$second_print(&text('backup_uploadfailed',
 						     $err));
 				$ok = 0;
+				$remotefailed = 1;
 				}
 			elsif ($asd) {
 				# Log bandwidth used by whole transfer
@@ -1685,6 +1688,7 @@ foreach my $desturl (@$desturls) {
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
 			$ok = 0;
+			$remotefailed = 1;
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
@@ -1713,6 +1717,7 @@ foreach my $desturl (@$desturls) {
 					&$second_print(
 					    &text('backup_uploadfailed', $err));
 					$ok = 0;
+					$remotefailed = 1;
 					last;
 					}
 				elsif ($asd && $d) {
@@ -1734,6 +1739,7 @@ foreach my $desturl (@$desturls) {
 				&$second_print(&text('backup_uploadfailed',
 						     $err));
 				$ok = 0;
+				$remotefailed = 1;
 				}
 			elsif ($asd) {
 				# Log bandwidth used by whole transfer
@@ -1806,6 +1812,7 @@ foreach my $desturl (@$desturls) {
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
 			$ok = 0;
+			$remotefailed = 1;
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
@@ -1883,6 +1890,7 @@ foreach my $desturl (@$desturls) {
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
 			$ok = 0;
+			$remotefailed = 1;
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
@@ -1968,6 +1976,7 @@ foreach my $desturl (@$desturls) {
 		if ($err) {
 			&$second_print(&text('backup_uploadfailed', $err));
 			$ok = 0;
+			$remotefailed = 1;
 			}
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
@@ -2006,6 +2015,7 @@ foreach my $desturl (@$desturls) {
 		if (!$lok) {
 			&$second_print(&text('backup_copyfailed', $err));
 			$ok = 0;
+			$remotefailed = 1;
 			}
 		else {
 			&$second_print($text{'setup_done'});
@@ -2087,9 +2097,14 @@ foreach my $lockfile (@lockfiles) {
 	}
 
 # For any domains that failed and were full backups, clear the differential
-# file so that future differential backups aren't diffs against it
+# file so that future differential backups aren't diffs against it. If uploads
+# to a backup destination failed, also clear the incremental file because we
+# can no longer trust that we have a full backup that future incrementals can
+# be taken against.
 if ($increment == 0 && &has_incremental_tar()) {
-	foreach my $d (@errdoms) {
+	my @incrfailed = @errdoms;
+	push(@incrfailed, @doms) if ($remotefailed);
+	foreach my $d (@incrfailed) {
 		if ($d->{'id'}) {
 			&unlink_file(&get_incremental_file($d, $increment, $id));
 			}
