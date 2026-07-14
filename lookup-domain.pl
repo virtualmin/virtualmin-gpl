@@ -30,7 +30,7 @@ while($got = read(STDIN, $buf, 32768)) {
 	$size += $got;
 	}
 $margin = $size*2+5*1024*1024;
-$quota_margin = 100*1024;    # Bounce if message would get this close to quota
+$quota_margin = 3*1024*1024; # Leave enough space for webmail and Dovecot
 
 # First, try connecting to the lookup-domain-daemon.pl process. Only wait for
 # 30 seconds, in case it has hung.
