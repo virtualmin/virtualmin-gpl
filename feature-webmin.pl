@@ -592,6 +592,7 @@ $acl{'gedit'} = &substitute_domain_template($tmpl->{'gacl_groups'}, $d);
 if (!$d->{'domslimit'}) {
 	$acl{'desc_'.$module_name} = $text{'index_title2'};
 	}
+$acl{'download_address_mode'} = 'public';
 &save_module_acl_logged(\%acl, $wuser->{'name'}, ".");
 
 if ($mods{'filemin'} && !$noextra && $d->{'unix'}) {
