@@ -1,4 +1,5 @@
 #### Version 8.2.0
+* Add ability for plugins to declare their own CLI API safe for users
 * Rename the Git-based config history CLI commands to `list-config-revisions` and `restore-config-revision`
 
 #### Version 8.1.0
