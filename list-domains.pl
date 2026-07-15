@@ -282,8 +282,8 @@ if ($php_mode) {
 
 # Limit by IP address
 if ($ip) {
-	@doms = grep { $_->{'ip'} eq $ip ||
-		       $_->{'ip6'} eq $ip } @doms;
+	@doms = grep { ($_->{'ip'} || "") eq $ip ||
+		       ($_->{'ip6'} || "") eq $ip } @doms;
 	}
 
 if ($multiline) {
@@ -436,7 +436,7 @@ if ($multiline) {
 				      "(On $iface)\n";
 				}
 			}
-		else {
+		elsif ($d->{'ip'}) {
 			print "    IP address: $d->{'ip'} (Shared)\n";
 			}
 		if ($d->{'virt6'}) {
