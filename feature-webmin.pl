@@ -314,6 +314,9 @@ else {
 
 # set_user_modules(&domain, &webminuser, [&acls-for-this-module], [no-features],
 #		   [no-extra], [is-extra-admin], [&only-domain-ids])
+# Update the Webmin modules granted to a domain owner or extra admin and the ACLs
+# for each module based on the domains they own and template settings. This is
+# used to grant access to the file manager, terminal and other core Webmin modules.
 sub set_user_modules
 {
 my ($d, $wuser, $acls, $nofeatures, $noextras, $isextra, $onlydoms) = @_;
