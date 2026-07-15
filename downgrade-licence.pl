@@ -148,6 +148,7 @@ elsif (&has_command("rpm")) {
 	$gpl_downgrading_failed_status++ if ($rv);
 	&execute_command("yum -y remove wbm-virtualmin-support ".
 			 "wbm-virtualmin-wp-workbench ".
+			 "wbm-virtualmin-podman ".
 			 "webmin-virtualmin-support ".
 			 "webmin-virtualmin-wp-workbench ".
 			 "webmin-virtualmin-podman");
