@@ -440,8 +440,8 @@ if ($program eq "configure-script" ||
 # over the remote API as a non-master (domain owner or reseller) user. Each such
 # script must enforce its own per-domain access checks.
 foreach my $p (@plugins) {
-	next if (!&plugin_defined($p, "feature_remote_cmds"));
-	foreach my $c (&plugin_call($p, "feature_remote_cmds")) {
+	next if (!&plugin_defined($p, "feature_remote_api_commands"));
+	foreach my $c (&plugin_call($p, "feature_remote_api_commands")) {
 		(my $cn = $c) =~ s/\.pl$//;
 		return 1 if ($cn eq $program);
 		}

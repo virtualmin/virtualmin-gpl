@@ -5,8 +5,8 @@
 Downgrade Virtualmin Pro system to GPL version
 
 This program downgrades a Virtualmin Pro system to GPL. It also removes Pro-only
-plugins like Virtualmin Support and Virtualmin WP Workbench, locks reseller
-accounts, switches repositories, and reverts the license to GPL.
+plugins like Virtualmin Support, Virtualmin WP Workbench, and Virtualmin Podman,
+locks reseller accounts, switches repositories, and reverts the license to GPL.
 
 =cut
 
@@ -47,8 +47,9 @@ if ($vserial{'SerialNumber'} eq 'GPL' ||
 my @lines = (
   "This program downgrades a Virtualmin Pro system to GPL. It also removes ".
   "Pro-only",
-  "plugins like Virtualmin Support and Virtualmin WP Workbench, locks reseller",
-  "accounts, switches repositories, and reverts the license to GPL."
+  "plugins like Virtualmin Support, Virtualmin WP Workbench, and Virtualmin",
+  "Podman, locks reseller accounts, switches repositories, and reverts the",
+  "license to GPL."
 );
 for my $line (@lines) {
 	printf "\e[1;30;41m%-80s\e[0m\n", $line;
@@ -116,7 +117,8 @@ if (&has_command("apt-get")) {
 		  &execute_command_error($out, $rv));
 	$gpl_downgrading_failed_status++ if ($rv);
 	&execute_command("apt-get -y purge webmin-virtualmin-support ".
-			 "webmin-virtualmin-wp-workbench");
+			 "webmin-virtualmin-wp-workbench ".
+			 "webmin-virtualmin-podman");
 	}
 
 # Downgrade RHEL repo and the package
@@ -146,8 +148,10 @@ elsif (&has_command("rpm")) {
 	$gpl_downgrading_failed_status++ if ($rv);
 	&execute_command("yum -y remove wbm-virtualmin-support ".
 			 "wbm-virtualmin-wp-workbench ".
+			 "wbm-virtualmin-podman ".
 			 "webmin-virtualmin-support ".
-			 "webmin-virtualmin-wp-workbench");
+			 "webmin-virtualmin-wp-workbench ".
+			 "webmin-virtualmin-podman");
 	}
 
 # Clear cached license state and run the usual post-actions so Virtualmin
