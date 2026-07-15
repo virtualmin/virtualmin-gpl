@@ -136,7 +136,7 @@ $ip = "default";	# Use default IP by default
 $name = 1;
 $virt = 0;
 if ($config{'ip6enabled'}) {
-	$ip6 = "default";	# Use default IPv6 by default
+	$ip6 = "auto";		# Use default IPv6 later, if configured
 	}
 else {
 	$ip6 = undef;		# No IPv6 address by default
@@ -599,6 +599,11 @@ if ($ip6 eq "allocate") {
 elsif ($virt6) {
 	# Make sure manual IPv6 specification is allowed
 	$tmpl->{'ranges6'} eq "none" || &usage("The --ip6 option cannot be used when automatic IPv6 address allocation is enabled - use --allocate-ip6 instead");
+	}
+elsif ($ip6 eq "auto") {
+	# Use default IPv6 only when one is configured
+	$ip6 = $defip6 || undef;
+	$name6 = $ip6 ? 1 : 0;
 	}
 elsif ($ip6 eq "default") {
 	# Use default IPv6, which may depend on reseller
