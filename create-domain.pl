@@ -23,7 +23,9 @@ option to specify it explicitly. If your Virtualmin is configured to
 automatically allocate IP addresses, use the --allocate-ip option instead, to
 have a free address chosen from the allocation ranges. If you want to
 use a virtual IP that is already active on the system, you must add the
---ip-already command-line option.
+--ip-already command-line option. Or to create a domain with no IPv4 address
+at all, use the C<--no-ip> flag - however, this only works if an IPv6 address
+is enabled instead.
 
 If your system supports IPv6, Virtualmin can also add a IPv6 address for a
 new virtual server with the C<--ip6> flag followed by an address in the correct
@@ -130,10 +132,17 @@ foreach $f (&list_feature_plugins()) {
 	}
 
 # Parse command-line args
-$ip = "";	# Use default IP by default
-$ip6 = undef;	# No IPv6 address by default
+$ip = "default";	# Use default IP by default
 $name = 1;
 $virt = 0;
+if ($config{'ip6enabled'}) {
+	$ip6 = "default";	# Use default IPv6 by default
+	}
+else {
+	$ip6 = undef;		# No IPv6 address by default
+	}
+$name6 = 1;
+$virt6 = 0;
 $anylimits = 0;
 $email = $config{'contact_email'};
 while(@ARGV > 0) {
@@ -203,7 +212,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--default-ip") {
 		# Use the global default IPv4 address
-		$ip = "";
+		$ip = "default";
 		$virt = 0;
 		$name = 1;
 		}
@@ -544,7 +553,7 @@ $clouddns && $remotedns &&
 	&usage("--cloud-dns and --remote-dns are mutually exclusive");
 
 if ($ip eq "allocate") {
-	# Allocate IP now
+	# Allocate IPv4 now
 	$virtalready && &usage("The --ip-already and --allocate-ip options are incompatible");
 	%racl = $resel ? &get_reseller_acl($resel) : ();
 	if ($racl{'ranges'}) {
@@ -560,8 +569,15 @@ if ($ip eq "allocate") {
 		}
 	}
 elsif ($virt) {
-	# Make sure manual IP specification is allowed
+	# Make sure manual IPv4 specification is allowed
 	$tmpl->{'ranges'} eq "none" || &usage("The --ip option cannot be used when automatic IP allocation is configured in templates - use --allocate-ip instead");
+	}
+elsif ($ip eq "default") {
+	# Use default IPv4, which may depend on reseller
+	$ip = $defip;
+	$ip || &usage("No default IP address found");
+	$virt = 0;
+	$name = 1;
 	}
 
 if ($ip6 eq "allocate") {
@@ -581,23 +597,20 @@ if ($ip6 eq "allocate") {
 		}
 	}
 elsif ($virt6) {
-	# Make sure manual IP specification is allowed
+	# Make sure manual IPv6 specification is allowed
 	$tmpl->{'ranges6'} eq "none" || &usage("The --ip6 option cannot be used when automatic IPv6 address allocation is enabled - use --allocate-ip6 instead");
 	}
 elsif ($ip6 eq "default") {
-	# Use default IP for reseller
+	# Use default IPv6, which may depend on reseller
 	$ip6 = $defip6;
 	$ip6 || &usage("No default IPv6 address found");
 	$virt6 = 0;
 	$name6 = 1;
 	}
-elsif (!defined($virt6) && $config{'ip6enabled'}) {
-	# No IPv6 selection made, use default
-	$ip6 = $defip6;
-	if ($ip6) {
-		$virt6 = 0;
-                $name6 = 1;
-		}
+
+if (!defined($ip) && !defined($ip6)) {
+	# Make sure we have some kind of address
+	&usage("--no-ip cannot be used if there is no IPv6 enabled");
 	}
 
 # If no limit-related flags are given, assume from plan
