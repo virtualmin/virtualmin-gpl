@@ -83,7 +83,7 @@ eval {
 		$recserr = &sync_alias_records($recs, $recstemp, $d, $ip, $ip6);
 		}
 	else {
-		$recserr = &create_standard_records($recs, $recstemp, $d, $ip);
+		$recserr = &create_standard_records($recs, $recstemp, $d);
 		}
 	};
 $recserr ||= $@;
@@ -396,7 +396,7 @@ else {
 		# don't want to delete this later
 		$d->{'dns_subalready'} = 1;
 		}
-	&create_standard_records($recs, $file, $d, $ip);
+	&create_standard_records($recs, $file, $d);
 	&post_records_change($dnsparent, $recs, $file);
 
 	&release_lock_dns($dnsparent);
@@ -588,8 +588,7 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 			&delete_dns_record($recs, $file, $r);
 			}
 		}
-	my $ip = $d->{'dns_ip'} || $d->{'ip'};
-	&create_standard_records($recs, $file, $d, $ip);
+	&create_standard_records($recs, $file, $d);
 	&sync_domain_tlsa_records($d);
 	my $err = &post_records_change($d, $recs, $file);
 	&release_lock_dns($d);
@@ -1412,11 +1411,13 @@ if (!$config{'secmx_nodns'}) {
 	}
 }
 
-# create_standard_records(&recs, file, &domain, ip)
+# create_standard_records(&recs, file, &domain)
 # Adds to a records file the needed records for some domain
 sub create_standard_records
 {
-my ($recs, $file, $d, $ip) = @_;
+my ($recs, $file, $d) = @_;
+my $ip = $d->{'dns_ip'} || $d->{'ip'};
+my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 my $tmpl = &get_template($d->{'template'});
 my $proxied = $tmpl->{'dns_cloud_proxy'};
 &require_bind();
@@ -5984,7 +5985,7 @@ my $temp = &transname();
 local $bind8::config{'auto_chroot'} = undef;
 local $bind8::config{'chroot'} = undef;
 my $defrecs = [ ];
-&create_standard_records($defrecs, $temp, $d, $d->{'dns_ip'} || $d->{'ip'});
+&create_standard_records($defrecs, $temp, $d);
 
 # Compare with the actual records
 my $recs = [ &get_domain_dns_records($d) ];

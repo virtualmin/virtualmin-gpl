@@ -16,7 +16,7 @@ local $bind8::config{'auto_chroot'} = undef;
 local $bind8::config{'chroot'} = undef;
 local $bind8::get_chroot_cache = "";
 $recs = [ ];
-&create_standard_records($recs, $temp, $d, $d->{'dns_ip'} || $d->{'ip'});
+&create_standard_records($recs, $temp, $d);
 if ($config{'mail_autoconfig'} && &domain_has_website($d)) {
 	# Add autoconfig records
 	foreach my $autoconfig (&get_autoconfig_hostname($d)) {
