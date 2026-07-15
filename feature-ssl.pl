@@ -2965,7 +2965,9 @@ return ( ) if (!$l && !$l6);
 return ( ) if (!$imap && !$imap6);
 
 # We have at least one IP
-my %mems = map { $_->{'name'}, $_->{'value'} } @{$imap->{'members'}};
+my $ione = $imap || $imap6;
+my %mems = map { $_->{'name'}, $_->{'value'} }
+	       @{$ione->{'members'}};
 my @rv = ( $mems{'ssl_cert'} || $mems{'ssl_server_cert_file'},
            $mems{'ssl_key'} || $mems{'ssl_server_key_file'},
            $mems{'ssl_ca'},

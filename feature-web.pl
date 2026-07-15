@@ -2302,7 +2302,7 @@ if ($d->{'virt'} && !$d->{'name'}) {
 		@newlisten = grep { $_ ne "$d->{'ip'}:$web_port" } @newlisten;
 		}
 	if ($d->{'ip6'}) {
-		@newlisten = grep { $_ ne "[$d->{'ip6'}]:$web_port" } @listen;
+		@newlisten = grep { $_ ne "[$d->{'ip6'}]:$web_port" } @newlisten;
 		}
 	if (scalar(@listen) != scalar(@newlisten)) {
 		&apache::save_directive("Listen", \@newlisten,
