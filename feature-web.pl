@@ -636,14 +636,14 @@ else {
 			&$second_print($text{'delete_noapache'});
 			goto VIRTFAILED;
 			}
-		my $nvstar = &add_name_virtual($d, $conf,
-						  $d->{'web_port'}, 0,
-						  $d->{'ip'});
-		my $nvstar6;
+		my ($nvstar, $nvstar6);
+		if ($d->{'ip'}) {
+			$nvstar = &add_name_virtual(
+				$d, $conf, $d->{'web_port'}, 0, $d->{'ip'});
+			}
 		if ($d->{'ip6'}) {
 			$nvstar6 = &add_name_virtual(
-				$d, $conf, $d->{'web_port'}, 0,
-				$d->{'ip6'});
+				$d, $conf, $d->{'web_port'}, 0, $d->{'ip6'});
 			}
 		&add_listen($d, $conf, $d->{'web_port'});
 
@@ -958,7 +958,7 @@ else {
 
 	# If the <virtualhost> address uses a *, make sure that no other
 	# virtualhost uses the domain's IP
-	if ($virt->{'words'}->[0] =~ /^\*/) {
+	if ($virt->{'words'}->[0] =~ /^\*/ && $d->{'ip'}) {
 		my ($ipclash, $ipclashv);
 		VHOST: foreach my $ovirt (&apache::find_directive_struct(
 					"VirtualHost", $conf)) {
@@ -2297,7 +2297,10 @@ sub remove_listen
 my ($d, $conf, $web_port) = @_;
 if ($d->{'virt'} && !$d->{'name'}) {
 	my @listen = &apache::find_directive("Listen", $conf);
-	my @newlisten = grep { $_ ne "$d->{'ip'}:$web_port" } @listen;
+	my @newlisten = @listen;
+	if ($d->{'ip'}) {
+		@newlisten = grep { $_ ne "$d->{'ip'}:$web_port" } @newlisten;
+		}
 	if ($d->{'ip6'}) {
 		@newlisten = grep { $_ ne "[$d->{'ip6'}]:$web_port" } @listen;
 		}
@@ -4135,7 +4138,7 @@ if ($p eq 'web') {
 			}
 		}
 	}
-else {
+elsif ($d->{'ip'}) {
 	# Just find all domains on the IP, and make sure the user can edit
 	# all of them
 	foreach my $o (&get_domain_by("ip", $d->{'ip'})) {
@@ -4339,13 +4342,14 @@ if ($p eq 'web') {
 	my (undef, $defd) = &get_default_apache_website($d);
 	return $defd;
 	}
-else {
-	# Iterate through domains
+elsif ($d->{'ip'}) {
+	# Iterate through domains on the same IP
 	foreach my $defd (&get_domain_by("ip", $d->{'ip'})) {
 		return $defd if (&is_default_website($defd));
 		}
 	return undef;
 	}
+return undef;
 }
 
 # get_apache_vhost_ips(&domain, star-namevirtualhost-ip4,

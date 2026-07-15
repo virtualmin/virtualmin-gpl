@@ -130,6 +130,8 @@ foreach $f (&list_feature_plugins()) {
 	}
 
 # Parse command-line args
+$ip = "";	# Use default IP by default
+$ip6 = undef;	# No IPv6 address by default
 $name = 1;
 $virt = 0;
 $anylimits = 0;
@@ -199,18 +201,33 @@ while(@ARGV > 0) {
 	       $a eq "--features-from-plan") {
 		$planfeatures = 1;
 		}
+	elsif ($a eq "--default-ip") {
+		# Use the global default IPv4 address
+		$ip = "";
+		$virt = 0;
+		$name = 1;
+		}
+	elsif ($a eq "--no-ip") {
+		# IPv4 explicitly turned off
+		$ip = undef;
+		$virt = 0;
+		$name = 0;
+		}
 	elsif ($a eq "--ip") {
+		# Specific virtual IPv4 requested
 		$ip = shift(@ARGV);
 		$feature{'virt'} = 1;	# for dependency checks
 		$virt = 1;
 		$name = 0;
 		}
 	elsif ($a eq "--allocate-ip") {
+		# Allocate a virtual IPv4
 		$ip = "allocate";	# will be done later
 		$virt = 1;
 		$name = 0;
 		}
 	elsif ($a eq "--ip-already") {
+		# Virtual IP is already active on the system
 		$virtalready = 1;
 		}
 	elsif ($a eq "--ip-primary") {
@@ -890,7 +907,8 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
          'ip', $virt ? $ip :
 	       $alias ? $ip :
 	       $parentip ? $parent->{'ip'} :
-	       $sharedip ? $sharedip : $defip,
+	       $sharedip ? $sharedip :
+	       !defined($ip) ? undef : $defip,
 	 'netmask', $netmask,
 	 'dns_ip', defined($dns_ip) ? $dns_ip :
 		   $alias ? $alias->{'dns_ip'} :
@@ -1137,11 +1155,15 @@ foreach $f (&list_feature_plugins()) {
 	print "                        [--$f]\n";
 	}
 print "                        [--default-features] | [--features-from-plan]\n";
-print "                        [--allocate-ip | --ip virtual.ip.address |\n";
-print "                         --shared-ip existing.ip.address]\n";
+print "                        [--default-ip |\n";
+print "                         --no-ip |\n";
+print "                         --shared-ip existing.ip.address |\n";
+print "                         --allocate-ip |\n";
+print "                         --ip virtual.ip.address]\n";
 print "                        [--ip-already]\n";
 if (&supports_ip6()) {
 	print "                        [--default-ip6 |\n";
+	print "                         --no-ip6 |\n";
 	print "                         --shared-ip6 existing.ip.address |\n";
 	print "                         --allocate-ip6 |\n";
 	print "                         --ip6 virtual.ip.address]\n";

@@ -42,23 +42,26 @@ elsif ($sni) {
 else {
 	# Neither .. but we can still do SSL, if there are no other domains
 	# with SSL on the same IPv4 address
-	my ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
-				   $_->{'ssl'} &&
-				   $_->{'id'} ne $d->{'id'}} &list_domains();
-	if (!$d->{'virt'} && $sslclash && (!$oldd || !$oldd->{'ssl'})) {
-		# Clash .. but is the cert OK?
-		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
-			my @certdoms = &list_domain_certificate($sslclash);
-			return &text('setup_edepssl5', $d->{'ip'},
-				join(", ", map { "<tt>$_</tt>" } @certdoms),
-				$sslclash->{'dom'});
-			}
-		else {
-			return undef;
+	if ($d->{'ip'}) {
+		my ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
+					$_->{'ssl'} &&
+					$_->{'id'} ne $d->{'id'}} &list_domains();
+		if (!$d->{'virt'} && $sslclash && (!$oldd || !$oldd->{'ssl'})) {
+			# Clash .. but is the cert OK?
+			if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
+				my @certdoms = &list_domain_certificate($sslclash);
+				return &text('setup_edepssl5', $d->{'ip'},
+					join(", ", map { "<tt>$_</tt>" } @certdoms),
+					$sslclash->{'dom'});
+				}
+			else {
+				return undef;
+				}
 			}
 		}
+
 	# Check for <virtualhost> on the IP, if we are turning on SSL
-	if (!$oldd || !$oldd->{'ssl'}) {
+	if ($d->{'ip'} && (!$oldd || !$oldd->{'ssl'})) {
 		&require_apache();
 		my $conf = &apache::get_config();
 		foreach my $v (&apache::find_directive_struct("VirtualHost",
@@ -74,24 +77,27 @@ else {
 		}
 
 	# Perform the same check on IPv6
-	my ($sslclash6) = grep { $_->{'ip6'} &&
-				    $_->{'ip6'} eq $d->{'ip6'} &&
-				    $_->{'ssl'} &&
-				    $_->{'id'} ne $d->{'id'}} &list_domains();
-	if (!$d->{'virt6'} && $sslclash6 && (!$oldd || !$oldd->{'ssl'})) {
-		# Clash .. but is the cert OK?
-		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
-			my @certdoms = &list_domain_certificate($sslclash);
-			return &text('setup_edepssl5', $d->{'ip6'},
-				join(", ", map { "<tt>$_</tt>" } @certdoms),
-				$sslclash->{'dom'});
-			}
-		else {
-			return undef;
+	if ($d->{'ip6'}) {
+		my ($sslclash6) = grep { $_->{'ip6'} &&
+					 $_->{'ip6'} eq $d->{'ip6'} &&
+					 $_->{'ssl'} &&
+					 $_->{'id'} ne $d->{'id'}} &list_domains();
+		if (!$d->{'virt6'} && $sslclash6 && (!$oldd || !$oldd->{'ssl'})) {
+			# Clash .. but is the cert OK?
+			if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
+				my @certdoms = &list_domain_certificate($sslclash);
+				return &text('setup_edepssl5', $d->{'ip6'},
+					join(", ", map { "<tt>$_</tt>" } @certdoms),
+					$sslclash->{'dom'});
+				}
+			else {
+				return undef;
+				}
 			}
 		}
+
 	# Check for <virtualhost> on the IPv6 address, if we are turning on SSL
-	if (!$oldd || !$oldd->{'ssl'}) {
+	if ($d->{'ip6'} && (!$oldd || !$oldd->{'ssl'})) {
 		&require_apache();
 		my $conf = &apache::get_config();
 		foreach my $v (&apache::find_directive_struct("VirtualHost",
@@ -138,8 +144,10 @@ my $chained = $d->{'ssl_chain'};
 
 # Add NameVirtualHost if needed, and if there is more than one SSL site on
 # this IP address
-my $nvstar = &add_name_virtual($d, $conf, $web_sslport, 1, $d->{'ip'});
-my $nvstar6;
+my ($nvstar, $nvstar6);
+if ($d->{'ip'}) {
+	$nvstar = &add_name_virtual($d, $conf, $web_sslport, 1, $d->{'ip'});
+	}
 if ($d->{'ip6'}) {                                
         $nvstar6 = &add_name_virtual($d, $conf, $web_sslport, 1, $d->{'ip6'});
         }       
@@ -283,14 +291,14 @@ if ($d->{'ip'} ne $oldd->{'ip'} ||
 		&$second_print($text{'delete_noapache'});
 		goto VIRTFAILED;
 		}
-	my $nvstar = &add_name_virtual($d, $conf,
-					  $d->{'web_sslport'}, 0,
-					  $d->{'ip'});
-	my $nvstar6;
+	my ($nvstar, $nvstar6);
+	if ($d->{'ip'}) {
+		$nvstar = &add_name_virtual($d, $conf,
+			$d->{'web_sslport'}, 0, $d->{'ip'});
+		}
 	if ($d->{'ip6'}) {
 		$nvstar6 = &add_name_virtual(
-			$d, $conf, $d->{'web_sslport'}, 0,
-			$d->{'ip6'});
+			$d, $conf, $d->{'web_sslport'}, 0, $d->{'ip6'});
 		}
 	&add_listen($d, $conf, $d->{'web_sslport'});
 
@@ -692,7 +700,7 @@ if ($cainfo && !&self_signed_cert($d)) {
 	
 # If the <virtualhost> address uses a *, make sure that no other
 # virtualhost uses the domain's IP
-if ($virt->{'words'}->[0] =~ /^\*/) {
+if ($virt->{'words'}->[0] =~ /^\*/ && $d->{'ip'}) {
 	my ($ipclash, $ipclashv);
 	VHOST: foreach my $ovirt (&apache::find_directive_struct(
 				"VirtualHost", $conf)) {
@@ -2714,7 +2722,7 @@ my $nochange = 0;
 my @ips;
 if ($d->{'virt'}) {
 	# Domain has it's own IPv4, and maybe v6
-	push(@ips, $d->{'ip'});
+	push(@ips, $d->{'ip'}) if ($d->{'ip'});
 	push(@ips, "[".$d->{'ip6'}."]") if ($d->{'virt6'} && $d->{'ip6'});
 	}
 my ($cname, $cvalue) = &get_dovecot_ssl_dir("cert", $d->{'ssl_combined'});
@@ -2934,36 +2942,39 @@ sub get_dovecot_ssl_cert_ip
 my ($d, $conf) = @_;
 my @loc = grep { $_->{'name'} eq 'local' &&
 		 $_->{'section'} } @$conf;
-my ($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;
-return ( ) if (!$l);
-my ($imap) = grep { $_->{'name'} eq 'protocol' &&
-		    $_->{'value'} eq 'imap' &&
-		    $_->{'enabled'} &&
-		    $_->{'sectionname'} eq 'local' &&
-		    $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
-return ( ) if (!$imap);
+my ($l, $l6, $imap, $imap6);
+if ($d->{'ip'}) {
+	# Check for an IPv4 specific block
+	($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;
+	($imap) = grep { $_->{'name'} eq 'protocol' &&
+			 $_->{'value'} eq 'imap' &&
+			 $_->{'enabled'} &&
+			 $_->{'sectionname'} eq 'local' &&
+			 $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
+	}
+if ($d->{'ip6'}) {
+	# Also check if there's an IPv6 specific block
+	($l6) = grep { $_->{'value'} eq "[".$d->{'ip6'}."]" } @loc;
+	($imap6) = grep { $_->{'name'} eq 'protocol' &&
+			  $_->{'value'} eq 'imap' &&
+			  $_->{'enabled'} &&
+			  $_->{'sectionname'} eq 'local' &&
+			  $_->{'sectionvalue'} eq "[".$d->{'ip6'}."]"} @$conf;
+	}
+return ( ) if (!$l && !$l6);
+return ( ) if (!$imap && !$imap6);
+
+# We have at least one IP
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$imap->{'members'}};
 my @rv = ( $mems{'ssl_cert'} || $mems{'ssl_server_cert_file'},
            $mems{'ssl_key'} || $mems{'ssl_server_key_file'},
            $mems{'ssl_ca'},
-           $d->{'ip'},
-	   undef );
+           $imap ? $d->{'ip'} : undef,
+           $imap6 ? $d->{'ip6'} : undef,
+	 );
 return () if (!$rv[0]);
 foreach my $r (@rv) {
 	$r =~ s/^<//;
-	}
-if ($d->{'ip6'}) {
-	# Also check if there's an IPv6 specific block
-	my ($l) = grep { $_->{'value'} eq "[".$d->{'ip6'}."]" } @loc;
-	my ($imap) = grep { $_->{'name'} eq 'protocol' &&
-			    $_->{'value'} eq 'imap' &&
-			    $_->{'enabled'} &&
-			    $_->{'sectionname'} eq 'local' &&
-			    $_->{'sectionvalue'} eq "[".$d->{'ip6'}."]"} @$conf;
-	if ($l && $imap) {
-		# Yes, so assume that it's for the same cert and key
-		push(@rv, $d->{'ip6'});
-		}
 	}
 return @rv;
 }
@@ -3047,13 +3058,14 @@ if ($d->{'virt'}) {
 		my @others;
 		my $lsmtp;
 		foreach my $m (@$master) {
-			if ($m->{'name'} eq $d->{'ip'}.':'.$pfx &&
+			if ($d->{'ip'} &&
+			    $m->{'name'} eq $d->{'ip'}.':'.$pfx &&
 			    $m->{'enabled'} &&
 			    $d->{'ip'} ne $defip) {
 				# Entry for service for the IP
 				$already = $m;
 				}
-			if ($d->{'virt6'} &&
+			if ($d->{'ip6'} && $d->{'virt6'} &&
 			    $m->{'name'} eq '['.$d->{'ip6'}.']:'.$pfx &&
 			    $m->{'enabled'}) {
 				# Entry for service for the IPv6
@@ -3066,7 +3078,7 @@ if ($d->{'virt'}) {
 				$smtp = $m;
 				}
 			if ($m->{'name'} =~ /^([0-9\.]+):\Q$pfx\E$/ &&
-			    $m->{'enabled'} && $1 ne $d->{'ip'} &&
+			    $m->{'enabled'} && (!$d->{'ip'} || $1 ne $d->{'ip'}) &&
 			    $1 ne $defip) {
 				# Entry for some other domain
 				if ($1 eq "127.0.0.1") {
@@ -3288,7 +3300,7 @@ if (&postfix::get_current_value("tls_server_sni_maps")) {
 my $master = &postfix::get_master_config();
 my @rv;
 foreach my $m (@$master) {
-	if ($m->{'name'} eq $d->{'ip'}.':smtp' && $m->{'enabled'} &&
+	if ($d->{'ip'} && $m->{'name'} eq $d->{'ip'}.':smtp' && $m->{'enabled'} &&
 	    $m->{'command'} =~ /smtpd_tls_cert_file=(\S+)/) {
 		@rv = ( $1 );
 		push(@rv, $m->{'command'} =~ /smtpd_tls_key_file=(\S+)/
@@ -3300,7 +3312,7 @@ foreach my $m (@$master) {
 		}
 	}
 foreach my $m (@$master) {
-	if ($m->{'name'} eq '['.$d->{'ip6'}.']:smtp' && $m->{'enabled'} &&
+	if ($d->{'ip6'} && $m->{'name'} eq '['.$d->{'ip6'}.']:smtp' && $m->{'enabled'} &&
 	    @rv && $m->{'command'} =~ /smtpd_tls_cert_file=(\S+)/ &&
 	    $1 eq $rv[0]) {
 		push(@rv, $d->{'ip6'});
