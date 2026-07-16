@@ -135,7 +135,7 @@ foreach $f (&list_feature_plugins()) {
 $ip = "default";	# Use default IP by default
 $name = 1;
 $virt = 0;
-if ($config{'ip6enabled'}) {
+if ($config{'ip6enabled'} && &supports_ip6()) {
 	$ip6 = "default";	# Use default IPv6 by default
 	}
 else {
