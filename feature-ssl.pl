@@ -2972,6 +2972,7 @@ my @rv = ( $mems{'ssl_cert'} || $mems{'ssl_server_cert_file'},
            $mems{'ssl_key'} || $mems{'ssl_server_key_file'},
            $mems{'ssl_ca'},
            $imap ? $d->{'ip'} : undef,
+           undef,	# No domain name for an IP-based certificate
            $imap6 ? $d->{'ip6'} : undef,
 	 );
 return () if (!$rv[0]);
