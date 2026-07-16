@@ -1997,8 +1997,8 @@ sub add_ip6_records
 {
 my ($d, $recs, $file) = @_;
 return &add_ip_any_records($d, $recs, $file, 'A', 'AAAA',
-	[ $d->{'ip'}, $d->{'dns_ip'} ],
-	[ $d->{'ip6'}, $d->{'dns_ip6'} ]);
+	$d->{'dns_ip'} || $d->{'ip'},
+	$d->{'dns_ip6'} || $d->{'ip6'});
 }
 
 # add_ip4_records(&domain, [&records, file])
@@ -2008,13 +2008,16 @@ sub add_ip4_records
 {
 my ($d, $recs, $file) = @_;
 return &add_ip_any_records($d, $recs, $file, 'AAAA', 'A',
-	[ $d->{'ip6'}, $d->{'dns_ip6'} ],
-	[ $d->{'ip'}, $d->{'dns_ip'} ]);
+	$d->{'dns_ip6'} || $d->{'ip6'},
+	$d->{'dns_ip'} || $d->{'ip'});
 }
 
+# add_ip_any_records(&domain, [&records, file], old-type, new-type,
+# 		     old-values, new-values)
+# Change records of one type to another, converting values as well
 sub add_ip_any_records
 {
-my ($d, $recs, $file, $oldrtype, $newrtype, $oldvals, $newvals) = @_;
+my ($d, $recs, $file, $oldrtype, $newrtype, $oldval, $newval) = @_;
 &require_bind();
 if (!$file) {
 	($recs, $file) = &get_domain_dns_records_and_file($d);
@@ -2047,7 +2050,7 @@ foreach my $r (@$recs) {
 	my $idx;
 	if ($r->{'type'} &&
 	    $r->{'type'} eq $oldrtype &&
-	    ($idx = &indexof($r->{'values'}->[0], @$oldvals)) >= 0 &&
+	    $r->{'values'}->[0] eq $oldval &&
 	    !$already{$r->{'name'}} &&
 	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
 		# Check if this record is in any sub-domain of this one
@@ -2063,7 +2066,7 @@ foreach my $r (@$recs) {
 		if (!$insub) {
 			my $nr = &clone_dns_record($r);
 			$nr->{'type'} = $newrtype;
-			$nr->{'values'} = [ $newvals->[$idx] ];
+			$nr->{'values'} = [ $newval ];
 			&create_dns_record($recs, $file, $nr);
 			$count++;
 			}
