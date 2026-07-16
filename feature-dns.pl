@@ -1111,9 +1111,7 @@ if ($d->{'mail'} && !$oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 		return 0;
 		}
 	&$first_print($text{'save_dns4'});
-	my $ip = $d->{'dns_ip'} || $d->{'ip'};
-	my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
-	&create_mail_records($recs, $file, $d, $ip, $ip6);
+	&create_mail_records($recs, $file, $d);
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
@@ -1347,22 +1345,26 @@ return @rv == 1 ? '"'.$rv[0].'"' :
 		     "( ".join("\n\t", map { '"'.$_.'"' } @rv)." )";
 }
 
-# create_mail_records(&records, file, &domain, ip, ip6)
+# create_mail_records(&records, file, &domain)
 # Adds MX and mail.domain records to a DNS domain
 sub create_mail_records
 {
-my ($recs, $file, $d, $ip, $ip6) = @_;
+my ($recs, $file, $d) = @_;
+my $ip = $d->{'dns_ip'} || $d->{'ip'};
+my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 my $tmpl = &get_template($d->{'template'});
 my $proxied = $tmpl->{'dns_cloud_proxy'};
 my $withdot = $d->{'dom'}.".";
-my $r = { 'name' => "mail.$withdot",
-	  'type' => "A",
-	  'proxied' => $proxied == 1 ? 1 : 0,
-	  'values' => [ $ip ] };
-my ($already) = grep { $_->{'name'} eq $r->{'name'} &&
-		       $_->{'type'} eq $r->{'type'} } @$recs;
-&create_dns_record($recs, $file, $r) if (!$already);
-if ($d->{'ip6'} && $ip6) {
+if ($ip) {
+	my $r = { 'name' => "mail.$withdot",
+		  'type' => "A",
+		  'proxied' => $proxied == 1 ? 1 : 0,
+		  'values' => [ $ip ] };
+	my ($already) = grep { $_->{'name'} eq $r->{'name'} &&
+			       $_->{'type'} eq $r->{'type'} } @$recs;
+	&create_dns_record($recs, $file, $r) if (!$already);
+	}
+if ($ip6) {
 	my $r = { 'name' => "mail.$withdot",
 		  'type' => "AAAA",
 		  'proxied' => $proxied == 1 ? 1 : 0,
@@ -1371,14 +1373,14 @@ if ($d->{'ip6'} && $ip6) {
 			       $_->{'type'} eq $r->{'type'} } @$recs;
 	&create_dns_record($recs, $file, $r) if (!$already);
 	}
-&create_mx_records($recs, $file, $d, $ip, $ip6);
+&create_mx_records($recs, $file, $d);
 }
 
-# create_mx_records(&records, file, &domain, ip, ip6)
+# create_mx_records(&records, file, &domain)
 # Adds MX records to a DNS domain
 sub create_mx_records
 {
-my ($recs, $file, $d, $ip, $ip6) = @_;
+my ($recs, $file, $d) = @_;
 my $withdot = $d->{'dom'}.".";
 
 # MX for this system
@@ -1579,7 +1581,12 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				{ 'name' => $n,
 				  'type' => 'A',
 				  'proxied' => $proxied ? 1 : 0,
-				  'values' => [ $ip ] });
+				  'values' => [ $ip ] }) if ($ip);
+			&create_dns_record($recs, $file,
+				{ 'name' => $n,
+				  'type' => 'AAAA',
+				  'proxied' => $proxied ? 1 : 0,
+				  'values' => [ $ip6 ] }) if ($ip6);
 			$already{$n}++;
 			}
 		}
@@ -1595,7 +1602,12 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				{ 'name' => $ns,
 				  'type' => 'A',
 				  'proxied' => $proxied == 1 ? 1 : 0,
-				  'values' => [ $ip ] });
+				  'values' => [ $ip ] }) if ($ip);
+			&create_dns_record($recs, $file,
+				{ 'name' => $ns,
+				  'type' => 'AAAA',
+				  'proxied' => $proxied == 1 ? 1 : 0,
+				  'values' => [ $ip6 ] }) if ($ip6);
 			$already{$ns}++;
 			}
 		}
@@ -1615,12 +1627,15 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	# for it
 	my $hn = &get_system_hostname().".";
 	if ($hn =~ /\.\Q$withdot\E$/ && !$already{$hn}) {
-		&create_dns_record($recs, $file,
-			{ 'name' => $hn,
-			  'type' => 'A',
-			  'proxied' => $proxied == 1 ? 1 : 0,
-			  'values' => [ &get_default_ip() ] });
-		$already{$hn}++;
+		my $defip = &get_default_ip();
+		if ($defip) {
+			&create_dns_record($recs, $file,
+				{ 'name' => $hn,
+				  'type' => 'A',
+				  'proxied' => $proxied == 1 ? 1 : 0,
+				  'values' => [ $defip ] });
+			$already{$hn}++;
+			}
 		}
 
 	# If enabled in the template, add webmail and admin records
@@ -1630,10 +1645,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 						 \%already);
 		}
 
-	# For mail domains, add MX to this server. Any IPv6 AAAA record is
-	# cloned later
+	# For mail domains, add MX to this server.
 	if ($d->{'mail'}) {
-		&create_mail_records($recs, $file, $d, $ip, undef);
+		&create_mail_records($recs, $file, $d);
 		}
 
 	# Add SPF record for domain, if defined and if it's not a sub-domain
@@ -1658,11 +1672,6 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			{ 'name' => "_dmarc.".$withdot, type => 'TXT',
 			  'values' => [ $str ] });
 		}
-	}
-
-if ($d->{'ip6'}) {
-	# Create IPv6 records for IPv4
-	&add_ip6_records($d, $recs, $file);
 	}
 
 if ($tmpl->{'dns_replace'} && !$d->{'dns_submode'}) {
@@ -1828,7 +1837,8 @@ RECORD: foreach my $r (@$aliasrecs) {
 			$v =~ s/\Q$oldip6\E$/$ip6/i;
 			}
 		}
-	next if ($nr->{'type'} eq 'AAAA' && !$ip6);	# Alias has no V6
+	next if ($nr->{'type'} eq 'A' && !$ip);		# Alias has no IPv4
+	next if ($nr->{'type'} eq 'AAAA' && !$ip6);	# Alias has no IPv6
 	$keep{&dns_record_key($nr, 1)} = 1;
 
 	# Create unless it already exists
@@ -1922,15 +1932,25 @@ sub add_webmail_dns_records_to_file
 my ($d, $tmpl, $file, $recs, $already, $force) = @_;
 my $count = 0;
 my $ip = $d->{'dns_ip'} || $d->{'ip'};
+my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 my $proxied = $tmpl->{'dns_cloud_proxy'};
 foreach my $r ('webmail', 'admin') {
 	my $n = "$r.$d->{'dom'}.";
 	if (($tmpl->{'web_'.$r} || $force) && (!$already || !$already->{$n})) {
-		my $r = { 'name' => $n,
-			  'type' => 'A',
-			  'proxied' => $proxied == 1 ? 1 : 0,
-			  'values' => [ $ip ] };
-		&create_dns_record($recs, $file, $r);
+		if ($ip) {
+			my $r = { 'name' => $n,
+				  'type' => 'A',
+				  'proxied' => $proxied == 1 ? 1 : 0,
+				  'values' => [ $ip ] };
+			&create_dns_record($recs, $file, $r);
+			}
+		if ($ip6) {
+			my $r = { 'name' => $n,
+				  'type' => 'AAAA',
+				  'proxied' => $proxied == 1 ? 1 : 0,
+				  'values' => [ $ip6 ] };
+			&create_dns_record($recs, $file, $r);
+			}
 		$already->{$n}++ if ($already);
 		$count++;
 		}
@@ -4160,10 +4180,10 @@ my $tmpl = &get_template($d->{'template'});
 my $defip = &get_default_ip();
 my $defip6 = &get_default_ip6();
 my $spf = { 'a' => 1, 'mx' => 1,
-	       'a:' => [ $d->{'dom'} ],
-	       'ip4:' => [ ],
-	       'ip6:' => [ ] };
-if ($defip ne "127.0.0.1" && !$tmpl->{'dns_spfonly'}) {
+	    'a:' => [ $d->{'dom'} ],
+	    'ip4:' => [ ],
+	    'ip6:' => [ ] };
+if ($defip && $defip ne "127.0.0.1" && !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip4:'}}, $defip);
 	}
 if ($defip6 && !$tmpl->{'dns_spfonly'}) {
