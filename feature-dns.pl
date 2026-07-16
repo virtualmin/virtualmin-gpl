@@ -2079,6 +2079,7 @@ my ($d, $file, $recs) = @_;
 sub remove_ip_any_records
 {
 my ($d, $file, $recs, $rtype, $vals) = @_;
+my @delrecs;
 &require_bind();
 my $withdot = $d->{'dom'}.".";
 foreach my $r (@$recs) {
