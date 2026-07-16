@@ -4143,11 +4143,18 @@ if ($p eq 'web') {
 			}
 		}
 	}
-elsif ($d->{'ip'}) {
+else {
 	# Just find all domains on the IP, and make sure the user can edit
 	# all of them
-	foreach my $o (&get_domain_by("ip", $d->{'ip'})) {
-		return 0 if (!&can_edit_domain($o));
+	if ($d->{'ip'}) {
+		foreach my $o (&get_domain_by("ip", $d->{'ip'})) {
+			return 0 if (!&can_edit_domain($o));
+			}
+		}
+	if ($d->{'ip6'}) {
+		foreach my $o (&get_domain_by("ip6", $d->{'ip6'})) {
+			return 0 if (!&can_edit_domain($o));
+			}
 		}
 	}
 return 1;
@@ -4167,7 +4174,11 @@ my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 return ( ) if (!$virt);		# Cannot find our own site?
 my @rv;
 foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
-	if (&indexof($virt->{'words'}->[0], @{$v->{'words'}}) >= 0) {
+	my $foundip = 0;
+	foreach my $ip (@{$virt->{'words'}}) {
+		$foundip++ if (&indexof($ip,  @{$v->{'words'}}) >= 0);
+		}
+	if ($foundip) {
 		# Matches IP .. find the domain if we can
 		my $sn = &apache::find_directive("ServerName",
 						    $v->{'members'});
@@ -4347,10 +4358,18 @@ if ($p eq 'web') {
 	my (undef, $defd) = &get_default_apache_website($d);
 	return $defd;
 	}
-elsif ($d->{'ip'}) {
-	# Iterate through domains on the same IP
-	foreach my $defd (&get_domain_by("ip", $d->{'ip'})) {
-		return $defd if (&is_default_website($defd));
+else {
+	if ($d->{'ip'}) {
+		# Iterate through domains on the same IPv4 address
+		foreach my $defd (&get_domain_by("ip", $d->{'ip'})) {
+			return $defd if (&is_default_website($defd));
+			}
+		}
+	if ($d->{'ip6'}) {
+		# Iterate through domains on the same IPv6 address
+		foreach my $defd (&get_domain_by("ip6", $d->{'ip6'})) {
+			return $defd if (&is_default_website($defd));
+			}
 		}
 	return undef;
 	}
