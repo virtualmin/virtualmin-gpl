@@ -1033,13 +1033,13 @@ elsif ($fileonly) {
 elsif ($iponly) {
 	# Just IP addresses
 	foreach $d (@doms) {
-		print ($d->{'ip'} || "none"),"\n";
+		print (($d->{'ip'} || "none")."\n");
 		}
 	}
 elsif ($ip6only) {
 	# Just IPv6 addresses
 	foreach $d (@doms) {
-		print ($d->{'ip6'} || "none"),"\n";
+		print (($d->{'ip6'} || "none")."\n");
 		}
 	}
 elsif ($expiryonly) {
