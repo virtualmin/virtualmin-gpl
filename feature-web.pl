@@ -2044,10 +2044,15 @@ else {
 }
 
 # check_depends_web(&dom)
-# Ensure that a website has a home directory, if not proxying
+# Ensure that a website has a home directory (if not proxying) and
+# an IP address
 sub check_depends_web
 {
 my ($d) = @_;
+if (!$d->{'ip'} && !$d->{'ip6'}) {
+	# Apache virtualhost needs either an IPv4 or v6 address
+	return $text{'setup_edepwebip'};
+	}
 if (!$d->{'parent'} && !$d->{'unix'}) {
 	# For a non-sub-server, we need a Unix user
 	return $text{'setup_edepunix2'};

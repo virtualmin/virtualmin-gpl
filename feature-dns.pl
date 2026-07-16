@@ -12,17 +12,22 @@ return $r;
 }
 
 # check_depends_dns(&domain)
-# For a sub-domain that is being added to a parent DNS domain, make sure the
-# parent zone actually exists
+# Check dependencies that must be met before enabling the DNS feature
 sub check_depends_dns
 {
 my ($d) = @_;
 if ($d->{'subdom'}) {
+	# For a sub-domain that is being added to a parent DNS domain, make
+	# sure the parent zone actually exists
 	my $tmpl = &get_template($d->{'template'});
 	my $parent = &get_domain($d->{'subdom'});
 	if ($tmpl->{'dns_sub'} && !$parent->{'dns'}) {
 		return $text{'setup_edepdnssub'};
 		}
+	}
+if (!$d->{'ip'} && !$d->{'ip6'}) {
+	# DNS records need either an IPv4 or v6 address
+	return $text{'setup_edepdnsip'};
 	}
 return undef;
 }
