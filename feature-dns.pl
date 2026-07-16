@@ -5526,7 +5526,9 @@ sub get_whois_expiry
 my ($d) = @_;
 my $whois = &has_command("whois");
 return (0, "Missing the <tt>whois</tt> command") if (!$whois);
-my $out = &backquote_command($whois." ".quotemeta($d->{'dom'})." 2>/dev/null");
+my ($out, $timed_out) = &backquote_with_timeout(
+	$whois." ".quotemeta($d->{'dom'})." 2>/dev/null", 15);
+return (0, "The <tt>whois</tt> command timed out") if ($timed_out);
 return (0, "No DNS registrar found for domain")
     if ($out =~ /No\s+whois\s+server\s+is\s+known/i);
 return (0, "The <tt>whois</tt> command did not report expiry date")
