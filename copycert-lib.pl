@@ -1090,7 +1090,9 @@ else {
 	if ($d->{'ssl_chain'} && !$ca) {
 		# No CA before, but there is one now!
 		$ca = $dir."/".$tlsname.".ca";
-		&bind8::save_directive($tls, "ca-file", [ $ca ]);
+		my $cadir = { 'name' => 'ca-file',
+			      'values' => [ $ca ] };
+		&bind8::save_directive($tls, "ca-file", [ $cadir ]);
 		}
 	elsif (!$d->{'ssl_chain'} && $ca) {
 		# CA exists in the BIND config, but no longer needed
