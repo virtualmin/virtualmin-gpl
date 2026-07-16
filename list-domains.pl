@@ -90,6 +90,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--ip-only") {
 		$iponly = 1;
 		}
+	elsif ($a eq "--ip6-only") {
+		$ip6only = 1;
+		}
 	elsif ($a eq "--ssl-expiry-only") {
 		$expiryonly = 1;
 		}
@@ -1030,7 +1033,13 @@ elsif ($fileonly) {
 elsif ($iponly) {
 	# Just IP addresses
 	foreach $d (@doms) {
-		print $d->{'ip'},"\n";
+		print ($d->{'ip'} || "none"),"\n";
+		}
+	}
+elsif ($ip6only) {
+	# Just IPv6 addresses
+	foreach $d (@doms) {
+		print ($d->{'ip6'} || "none"),"\n";
 		}
 	}
 elsif ($expiryonly) {
@@ -1057,7 +1066,8 @@ print "\n";
 print "virtualmin list-domains [--multiline | --simple-multiline |\n";
 print "                         --json | --xml]\n";
 print "                        [--name-only | --id-only | --user-only |\n";
-print "                         --home-only | --file-only | --ip-only]\n";
+print "                         --home-only | --file-only | --ip-only |\n";
+print "                         --ip6-only]\n";
 print "                        [--domain name]*\n";
 print "                        [--user name]*\n";
 print "                        [--mail-user name]*\n";
