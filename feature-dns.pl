@@ -1996,6 +1996,25 @@ return $count;
 sub add_ip6_records
 {
 my ($d, $recs, $file) = @_;
+return &add_ip_any_records($d, $recs, $file, 'A', 'AAAA',
+	[ $d->{'ip'}, $d->{'dns_ip'} ],
+	[ $d->{'ip6'}, $d->{'dns_ip6'} ]);
+}
+
+# add_ip4_records(&domain, [&records, file])
+# For each AAAA record for the domain whose value is it's IPv6 address, add an
+# A record with the v4 address.
+sub add_ip4_records
+{
+my ($d, $recs, $file) = @_;
+return &add_ip_any_records($d, $recs, $file, 'AAAA', 'A',
+	[ $d->{'ip6'}, $d->{'dns_ip6'} ],
+	[ $d->{'ip'}, $d->{'dns_ip'} ]);
+}
+
+sub add_ip_any_records
+{
+my ($d, $recs, $file, $oldrtype, $newrtype, $oldvals, $newvals) = @_;
 &require_bind();
 if (!$file) {
 	($recs, $file) = &get_domain_dns_records_and_file($d);
@@ -2005,9 +2024,8 @@ return 0 if (!$file);
 # Work out which AAAA records we already have
 my %already;
 foreach my $r (@$recs) {
-	if ($r->{'type'} eq 'AAAA' &&
-	    ($r->{'values'}->[0] eq $d->{'ip6'} ||
-	     $r->{'values'}->[0] eq $d->{'dns_ip6'})) {
+	if ($r->{'type'} eq $newrtype &&
+	    &indexof($r->{'values'}->[0], @$newvals) >= 0) {
 		$already{$r->{'name'}}++;
 		}
 	}
@@ -2025,12 +2043,11 @@ foreach my $od (&list_domains()) {
 # Clone A records with the correct IP
 my $count = 0;
 my $withdot = $d->{'dom'}.".";
-my $domip = $d->{'dns_ip'} || $d->{'ip'};
-my $domip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 foreach my $r (@$recs) {
+	my $idx;
 	if ($r->{'type'} &&
-	    $r->{'type'} eq 'A' &&
-	    $r->{'values'}->[0] eq $domip &&
+	    $r->{'type'} eq $oldrtype &&
+	    ($idx = &indexof($r->{'values'}->[0], @$oldvals)) >= 0 &&
 	    !$already{$r->{'name'}} &&
 	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
 		# Check if this record is in any sub-domain of this one
@@ -2045,8 +2062,8 @@ foreach my $r (@$recs) {
 			}
 		if (!$insub) {
 			my $nr = &clone_dns_record($r);
-			$nr->{'type'} = 'AAAA';
-			$nr->{'values'} = [ $domip6 ];
+			$nr->{'type'} = $newrtype;
+			$nr->{'values'} = [ $newvals->[$idx] ];
 			&create_dns_record($recs, $file, $nr);
 			$count++;
 			}
@@ -2061,7 +2078,7 @@ return $count;
 sub remove_ip6_records
 {
 my ($d, $file, $recs) = @_;
-&remove_ip_any_records($d, $file, $recs, 'AAAA',
+return &remove_ip_any_records($d, $file, $recs, 'AAAA',
 		       [ $d->{'ip6'}, $d->{'dns_ip6'} ]);
 }
 
@@ -2070,7 +2087,7 @@ my ($d, $file, $recs) = @_;
 sub remove_ip4_records
 {
 my ($d, $file, $recs) = @_;
-&remove_ip_any_records($d, $file, $recs, 'A',
+return &remove_ip_any_records($d, $file, $recs, 'A',
 		       [ $d->{'ip'}, $d->{'dns_ip'} ]);
 }
 
@@ -2092,6 +2109,7 @@ foreach my $r (@$recs) {
 foreach my $r (@delrecs) {
 	&delete_dns_record($recs, $file, $r);
 	}
+return scalar(@delrecs);
 }
 
 # save_domain_matchall_record(&domain, star)
