@@ -14044,6 +14044,7 @@ foreach my $t (@$tests) {
 	if ($nt->{'command'} eq 'create-domain.pl') {
 		push(@nargs, [ 'append-style' => 'username@domain' ]);
 		}
+	$nt->{'command'} =~ s/\Q$test_full_user\E/$test_full_atuser/g;
 	foreach my $a (@{$nt->{'args'}}) {
 		my $na = [ @$a ];
 		if ($na->[1] eq $test_full_user) {
