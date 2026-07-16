@@ -2057,16 +2057,33 @@ return $count;
 }
 
 # remove_ip6_records(&domain, file, &records)
-# Delete all AAAA records whose value is the domain's IP6 address
+# Delete all AAAA records whose value is the domain's IPv6 address
 sub remove_ip6_records
 {
 my ($d, $file, $recs) = @_;
+&remove_ip_any_records($d, $file, $recs, 'AAAA',
+		       [ $d->{'ip6'}, $d->{'dns_ip6'} ]);
+}
+
+# remove_ip4_records(&domain, file, &records)
+# Delete all A records whose value is the domain's IPv4 address
+sub remove_ip4_records
+{
+my ($d, $file, $recs) = @_;
+&remove_ip_any_records($d, $file, $recs, 'A',
+		       [ $d->{'ip'}, $d->{'dns_ip'} ]);
+}
+
+# remove_ip_any_records(&domain, file, &records, type, &values)
+# Remove some type of record with one of the given values
+sub remove_ip_any_records
+{
+my ($d, $file, $recs, $rtype, $vals) = @_;
 &require_bind();
 my $withdot = $d->{'dom'}.".";
 foreach my $r (@$recs) {
-	if ($r->{'type'} eq 'AAAA' &&
-	    ($r->{'values'}->[0] eq $d->{'ip6'} ||
-	     $r->{'values'}->[0] eq $d->{'dns_ip6'}) &&
+	if ($r->{'type'} eq $rtype &&
+	    &indexof($r->{'values'}->[0], @$vals) >= 0 &&
 	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
 		push(@delrecs, $r);
 		}
