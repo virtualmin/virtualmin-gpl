@@ -254,6 +254,7 @@ if (!$upgrade) {
 		if ($? && $dbhost eq "localhost") {
 			# Use a TCP connection instead of a socket file, which may
 			# be at the wrong location
+			$dbhost = "127.0.0.1";
 			$out = &run_as_domain_user($d,
 				"$wp config create".
 				" --dbname=".quotemeta($dbname).
@@ -261,7 +262,6 @@ if (!$upgrade) {
 				" --dbuser=".quotemeta($dbuser).
 				" --dbpass=".quotemeta($dbpass).
 				" --dbhost=".quotemeta($dbhost)." 2>&1");
-			$dbhost = "127.0.0.1";
 			}
 		if ($?) {
 			return (-1, "\`wp config create\` failed : $out");
