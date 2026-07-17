@@ -3,6 +3,7 @@
 * Add ability for plugins to declare their own CLI API safe for users
 * Fix to enforce mailbox and domain disk quota on mail delivery even when spam filtering is disabled, so full mailboxes no longer lock out webmail and IMAP access
 * Fix domain registration expiry checks taking too long when a WHOIS server does not respond
+* Fix installing PHP extensions for versioned PHP streams on RHEL 10 and derivatives
 * Rename the Git-based config history CLI commands to `list-config-revisions` and `restore-config-revision`
 
 #### Version 8.1.0

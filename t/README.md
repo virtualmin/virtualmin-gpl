@@ -24,6 +24,7 @@ VIRTUALMIN_COMPILE_T_FILTER='^\./backup' prove t/compile.t
 | File | What it checks |
 | --- | --- |
 | `compile.t` | Every discovered `.pl` and `.cgi` parses cleanly with `perl -c`. It catches syntax and compile-time module-loading breakage without running normal script bodies. |
+| `scripts-lib.t` | PHP extension package-name generation across supported package manager families. |
 
 ## Script Testing Guidance
 

@@ -1221,6 +1221,29 @@ if ($sinfo->{'opts'}->{'dir'} &&
 	}
 }
 
+# php_versioned_module_packages(module, php-version, update-system)
+# Returns possible versioned package names for a PHP module.
+sub php_versioned_module_packages
+{
+my ($mod, $phpver, $updatesystem) = @_;
+my $nodotphpver = $phpver;
+$nodotphpver =~ s/\.//g;
+
+if ($updatesystem eq "apt") {
+	# On Debian packages are named like php8.4-mysql
+	return ("php".$phpver."-".$mod);
+	}
+elsif ($updatesystem eq "yum" && $phpver =~ /\./) {
+	# RHEL 10+ parallel PHP streams are named like php8.4-mysqlnd,
+	# while older RPM repositories use names like php84-mysqlnd
+	return ("php".$phpver."-".$mod,
+		"php".$nodotphpver."-".$mod);
+	}
+else {
+	return ("php".$nodotphpver."-".$mod);
+	}
+}
+
 # setup_php_modules(&domain, &script, version, php-version, &opts, [&installed])
 # If possible, downloads PHP module packages need by the given script. Progress
 # of the install is written to STDOUT. Returns 1 if successful, 0 if not.
@@ -1304,12 +1327,8 @@ foreach my $m (@mods) {
 			push(@poss, "php".$nodotphpver."-".$m);
 			}
 		else {
-			if ($software::update_system eq "apt") {
-				push(@poss, "php".$phpverall."-".$m);
-				}
-			else {
-				push(@poss, "php".$nodotphpver."-".$m);
-				}
+			push(@poss, &php_versioned_module_packages(
+				$m, $phpverall, $software::update_system));
 			push(@poss, "php-".$m);
 			if ($software::update_system eq "apt" &&
 				$m eq "pdo_mysql") {
