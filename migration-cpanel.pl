@@ -156,8 +156,8 @@ my $ugroup = $group;
 my @got = ( "dir", $parent ? () : ("unix"), &domain_has_website(),
 	       "logrotate" );
 push(@got, "webmin") if ($webmin && !$parent);
-my $userdir;
-my $homesrc;
+local $userdir;
+local $homesrc;
 if (-d $daily) {
 	my $named = &extract_cpanel_file("$daily/files/_etc_named.conf.gz");
 	my $zone;
