@@ -156,8 +156,8 @@ my $ugroup = $group;
 my @got = ( "dir", $parent ? () : ("unix"), &domain_has_website(),
 	       "logrotate" );
 push(@got, "webmin") if ($webmin && !$parent);
-local $userdir;
-local $homesrc;
+my $userdir;
+my $homesrc;
 if (-d $daily) {
 	my $named = &extract_cpanel_file("$daily/files/_etc_named.conf.gz");
 	my $zone;
@@ -605,7 +605,7 @@ $mailboxes::no_permanent_index = 1;
 my %usermap;
 if ($got{'mail'}) {
 	# Migrate mail users
-	&cpanel_migrate_mailboxes($dom, \%dom, \%usermap);
+	&cpanel_migrate_mailboxes($dom, \%dom, \%usermap, $homesrc);
 	}
 
 # Move server owner's inbox file
@@ -1032,12 +1032,13 @@ foreach my $pdom (&unique(@parked)) {
 	&create_virtual_server(\%alias, $parentdom,
 			       $parentdom->{'user'});
 	if ($alias{'mail'}) {
-		&cpanel_migrate_mailboxes($alias{'dom'}, \%alias, undef);
+		&cpanel_migrate_mailboxes(
+			$alias{'dom'}, \%alias, undef, $homesrc);
 		}
 
 	# Create parked domain aliases
 	&$first_print("Copying email aliases for parked domain $pdom ..");
-	my $acount = &cpanel_migrate_addon_aliases($pdom);
+	my $acount = &cpanel_migrate_addon_aliases($pdom, $userdir);
 	&$second_print(".. done (migrated $acount aliases)");
 
 	&$outdent_print();
@@ -1057,13 +1058,13 @@ foreach my $l (@$lref) {
 	}
 
 # Create sub-domains, silently skipping those for which no parent exists yet
-&create_sub_domains(1);
+&create_sub_domains(1, $userdir);
 
 # Create addon domains
-&create_addon_domains();
+&create_addon_domains(0, $userdir, $homesrc);
 
 # Create sub-domains again, to catch those for which an addon target exists now
-&create_sub_domains(0);
+&create_sub_domains(0, $userdir);
 
 if ($got{'webalizer'}) {
 	# Copy existing Weblizer stats to ~/public_html/stats
@@ -1188,7 +1189,7 @@ return wantarray ? ( \%rv, $pos ) : \%rv;
 
 sub create_addon_domains
 {
-my ($skip_missing_target) = @_;
+my ($skip_missing_target, $userdir, $homesrc) = @_;
 
 # Create addon domains as alias domains
 opendir(VF, "$userdir/vf");
@@ -1245,7 +1246,8 @@ foreach my $vf (readdir(VF)) {
 	&create_virtual_server(\%alias, $parentdom,
 			       $parentdom->{'user'});
 	if ($alias{'mail'}) {
-		&cpanel_migrate_mailboxes($alias{'dom'}, \%alias, undef);
+		&cpanel_migrate_mailboxes(
+			$alias{'dom'}, \%alias, undef, $homesrc);
 		}
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
@@ -1253,14 +1255,14 @@ foreach my $vf (readdir(VF)) {
 
 	# Create parked domain aliases
 	&$first_print("Copying email aliases for addon domain $vf ..");
-	my $acount = &cpanel_migrate_addon_aliases($vf);
+	my $acount = &cpanel_migrate_addon_aliases($vf, $userdir);
 	&$second_print(".. done (migrated $acount aliases)");
 	}
 }
 
 sub create_sub_domains
 {
-my ($skip_missing_target) = @_;
+my ($skip_missing_target, $userdir) = @_;
 
 # Create sub-domains as virtualmin sub-domains, from vf directory
 opendir(VF, "$userdir/vf");
@@ -1444,11 +1446,11 @@ foreach my $vf (readdir(VF)) {
 closedir(VF);
 }
 
-# cpanel_migrate_mailboxes(domain-name, &domain, &user-map)
+# cpanel_migrate_mailboxes(domain-name, &domain, &user-map, homesrc)
 # Re-create mailbox users from a cPanel backup
 sub cpanel_migrate_mailboxes
 {
-my ($dom, $d, $usermap) = @_;
+my ($dom, $d, $usermap, $homesrc) = @_;
 &foreign_require("mailboxes");
 &$first_print("Re-creating mail users for $dom ..");
 my $mcount = 0;
@@ -1610,10 +1612,10 @@ close(PASSWD);
 &$second_print(".. done (migrated $mcount mail users)");
 }
 
-# cpanel_migrate_addon_aliases(domain)
+# cpanel_migrate_addon_aliases(domain, userdir)
 sub cpanel_migrate_addon_aliases
 {
-my ($vf) = @_;
+my ($vf, $userdir) = @_;
 my $acount = 0;
 my %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
 open(VA, "<$userdir/va/$vf");
