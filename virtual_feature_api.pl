@@ -962,7 +962,10 @@ sub feature_sysinfo
 # feature_global_links()
 # If defined, should return a list of additional links in the left-hand menu for
 # this plugin that are placed in the global section. Each element must be a hash
-# ref containing url, title, and optionally icon.
+# ref containing url, title, and optionally icon. A top-level link may set a
+# non-negative integer order, where lower values come first and omitted values
+# default to 1000. It may also set before to the URL of another top-level plugin
+# link that it should precede. Categorized links retain their normal ordering.
 sub feature_global_links
 {
 }

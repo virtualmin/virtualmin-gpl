@@ -14878,13 +14878,18 @@ if (&can_use_validation() && !&can_edit_templates()) {
 		    'title' => $text{'newvalidate_title'},
 		    'icon' => 'validate' });
 	}
+my @plugin_global_links;
 foreach my $f (@plugins) {
 	# Add global link from plugins
 	if (&plugin_defined($f, "feature_global_links")) {
 		my $global_links = &plugin_call($f, "feature_global_links");
-		push(@rv, $global_links) if ($global_links);
+		push(@plugin_global_links, $global_links) if ($global_links);
 		}
 	}
+
+# Order plugin links separately so core global links never move.
+&order_plugin_global_links(\@plugin_global_links);
+push(@rv, @plugin_global_links);
 
 # Set category names
 foreach my $l (@rv) {
@@ -14894,6 +14899,55 @@ foreach my $l (@rv) {
 	}
 
 return @rv;
+}
+
+# order_plugin_global_links(&links)
+# Applies stable numeric and relative ordering to top-level plugin global links.
+sub order_plugin_global_links
+{
+my ($links) = @_;
+my @indexes = grep { !($links->[$_]->{'cat'} || '') } 0 .. $#$links;
+return if (@indexes < 2);
+
+# Sort only top-level links and preserve categorized links in place.
+my @ordered = map {
+	my $link = $links->[$_];
+	{
+	'link' => $link,
+	'index' => $_,
+	'order' => defined($link->{'order'}) &&
+		$link->{'order'} =~ /^\d+$/ ? int($link->{'order'}) : 1000,
+	}
+	} @indexes;
+@ordered = sort {
+	$a->{'order'} <=> $b->{'order'} ||
+	$a->{'index'} <=> $b->{'index'}
+	} @ordered;
+my @top = map { $_->{'link'} } @ordered;
+
+# Apply exact relative hints after numeric ordering has settled.
+my @hinted = grep { $_->{'before'} } @top;
+
+# Process hints in their settled order so peers retain a stable position.
+foreach my $link (@hinted) {
+	my ($from) = grep { $top[$_] == $link } 0 .. $#top;
+	my ($before) = grep {
+		($top[$_]->{'url'} || '') eq $link->{'before'}
+		} 0 .. $#top;
+	next if (!defined($from) || !defined($before) || $from == $before);
+
+	# Remove the requested link before resolving the target's new index.
+	my ($move) = splice(@top, $from, 1);
+	($before) = grep {
+		($top[$_]->{'url'} || '') eq $link->{'before'}
+		} 0 .. $#top;
+	splice(@top, $before, 0, $move);
+	}
+
+# Write reordered top-level links back without touching categorized entries.
+for(my $i=0; $i<@indexes; $i++) {
+	$links->[$indexes[$i]] = $top[$i];
+	}
 }
 
 # get_links_cache(key, &cache-invalidator)
