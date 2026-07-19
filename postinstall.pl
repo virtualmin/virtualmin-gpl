@@ -103,9 +103,12 @@ foreach my $tf (@all_template_files) {
 	}
 
 # Perform a module config check, to ensure that quota and interface settings
-# are correct.
+# are correct. Defer PHP-FPM version repair until a normal config check, as
+# package installation may still be in progress at this point.
+my %skip = ( 'dns_network' => 1,
+	     'fpm_repair' => 1 );
 &set_all_null_print();
-$cerr = &html_tags_to_text(&check_virtual_server_config(undef, 1));
+$cerr = &html_tags_to_text(&check_virtual_server_config(undef, \%skip));
 #if ($cerr) {
 #	print STDERR "Warning: Module Configuration problem detected: $cerr\n";
 #	}
@@ -349,9 +352,10 @@ if ($config{'scriptlatest_enabled'} eq '') {
 	&setup_scriptlatest_job(1);
 	}
 
-# Prevent an un-needed module config check
+# Save any post-install changes, but leave the config check pending when
+# PHP-FPM version repair was skipped.
 if (!$cerr) {
-	$config{'last_check'} = time()+1;
+	$config{'last_check'} = time()+1 if (!$skip{'fpm_repair'});
 	&save_module_config();
 	&write_file("$module_config_directory/last-config", \%config);
 	}
