@@ -118,6 +118,19 @@ if (defined(&sync_parent_resellers)) {
 	&sync_parent_resellers();
 	}
 
+# Preserve the effective template-based Webmin module permissions of all
+# existing server owners as per-domain settings. This migration is idempotent
+# so an interrupted post-install can safely be run again.
+if (!$config{'migrated_domain_webmin_avail'}) {
+	foreach my $d (grep { !$_->{'parent'} } &list_domains()) {
+		if (&init_domain_webmin_avail($d)) {
+			&save_domain($d);
+			}
+		}
+	$config{'migrated_domain_webmin_avail'} = 1;
+	&save_module_config();
+	}
+
 # Force update of all Webmin users, to set new ACL options
 &modify_all_webmin();
 if ($virtualmin_pro) {

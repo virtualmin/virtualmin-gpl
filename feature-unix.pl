@@ -918,6 +918,27 @@ print &ui_table_row(&hlink($text{'tmpl_hashtypes'}, "template_hashtypes"),
 		[ 0, $text{'tmpl_hashtypes0'} ] ])."<br>\n".
     &ui_select("hashtypes", [ split(/\s+/, $tmpl->{'hashtypes'}) ],
 	       \@hashtypes, scalar(@hashtypes), 1));
+
+# Initial Webmin module access for the domain owner
+print &ui_table_hr();
+my $availmode = !$tmpl->{'default'} &&
+	(!defined($tmpl->{'avail'}) || $tmpl->{'avail'} eq '');
+my $availtable = &ui_table_start(
+	$text{'tmpl_webmin_avail'}." ".
+		&ui_help($text{'tmpl_webmin_avail_help'}),
+	"width=100%", 2, [ "width=30%" ]);
+if (!$tmpl->{'default'}) {
+	my @inames = map { "avail_".$_->[0] } &list_domain_owner_modules();
+	my $dis1 = &js_disable_inputs(\@inames, [ ], 'onClick');
+	my $dis2 = &js_disable_inputs([ ], \@inames, 'onClick');
+	$availtable .= &ui_table_row($text{'tmpl_webmin_avail_source'},
+		&ui_radio("avail_def", $availmode ? 1 : 0,
+		 [ [ 1, $text{'tmpl_webmin_avail_def'}, $dis1 ],
+		   [ 0, $text{'tmpl_webmin_avail_custom'}, $dis2 ] ]));
+	}
+$availtable .= &webmin_avail_rows(&get_template_webmin_avail($tmpl));
+$availtable .= &ui_table_end();
+print &ui_table_row(undef, $availtable, 2);
 }
 
 # parse_template_unix(&tmpl)
@@ -966,6 +987,10 @@ else {
 	$tmpl->{'hashtypes'} = join(" ", split(/\0/, $in{'hashtypes'}));
 	$tmpl->{'hashtypes'} || &error($text{'tmpl_ehashtypes'});
 	}
+
+# Save initial Webmin module access for newly-created domain owners only
+my $bad = &set_template_webmin_avail($tmpl, \%in);
+$bad && &error(&text('limits_ewebminavail', $bad));
 }
 
 # get_unix_shells()

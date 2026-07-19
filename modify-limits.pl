@@ -93,6 +93,118 @@ the C<--all-scripts> flag instead.
 To hide the Webmin tab in the UI from the domain owner, use the
 C<-no-cat-webmin> flag. Or to make it visible again, use C<--cat-webmin>.
 
+To set access to one of the restricted Webmin modules normally granted by
+Virtualmin, use C<--webmin-module> followed by a module code and access level,
+such as C<proc=2>. Use C<--no-webmin-module> followed by a module code to
+disable it. For most modules, level C<1> enables access and C<0> disables it.
+The modules with additional access levels are C<passwd> (C<1> allows changing
+the user password and C<2> also allows changing mailbox passwords), C<proc>
+(C<1> allows viewing all processes and C<2> restricts the user to their own
+processes), and C<updown> (C<1> allows uploads and downloads and C<2> allows
+uploads only). The standard module codes are:
+
+=over 4
+
+=item C<dns>
+
+BIND DNS Server
+
+=item C<mail>
+
+Virtual Email
+
+=item C<web>
+
+Apache Webserver
+
+=item C<webalizer>
+
+Webalizer Logfile Analysis
+
+=item C<mysql>
+
+MySQL or MariaDB Database Server
+
+=item C<postgres>
+
+PostgreSQL Database Server
+
+=item C<spam>
+
+SpamAssassin Mail Filter
+
+=item C<filemin>
+
+File Manager
+
+=item C<passwd>
+
+Change Password
+
+=item C<proc>
+
+Running Processes
+
+=item C<cron>
+
+Scheduled Cron Jobs
+
+=item C<at>
+
+Scheduled Commands
+
+=item C<systemd>
+
+Systemd User Units, when the Systemd module is installed
+
+=item C<telnet>
+
+SSH Login
+
+=item C<xterm>
+
+Terminal
+
+=item C<updown>
+
+Upload and Download
+
+=item C<change-user>
+
+Change Language and Theme
+
+=item C<htaccess-htpasswd>
+
+Protected Web Directories
+
+=item C<mailboxes>
+
+Read User Mail
+
+=item C<custom>
+
+Custom Commands
+
+=item C<shell>
+
+Command Shell
+
+=item C<webminlog>
+
+Webmin Actions Log
+
+=item C<logviewer>
+
+System Logs
+
+=item C<phpini>
+
+PHP Configuration
+
+=back
+
+Installed Virtualmin feature plugins may provide additional module codes.
+
 =cut
 
 package virtual_server;
@@ -115,6 +227,8 @@ if (!$module_name) {
 
 # Parse command-line args
 @all_allow = (@opt_features, "virt", &list_feature_plugins());
+@all_webmin_modules = &list_domain_owner_modules();
+%all_webmin_modules = map { $_->[0], $_ } @all_webmin_modules;
 while(@ARGV > 0) {
 	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -237,6 +351,24 @@ while(@ARGV > 0) {
 	elsif ($a eq "--cat-webmin") {
 		$nocatwebmin = 0;
 		}
+	elsif ($a eq "--webmin-module") {
+		$webmin_module = shift(@ARGV);
+		defined($webmin_module) && $webmin_module ne '' ||
+			&usage("Missing Webmin module code");
+		my ($mod, $value) = split(/=/, $webmin_module, 2);
+		$value = 1 if (!defined($value));
+		my $minfo = $all_webmin_modules{$mod};
+		$minfo || &usage("Webmin module $mod is not known. Valid modules are : ".join(" ", sort keys %all_webmin_modules));
+		&valid_webmin_avail_value($minfo, $value) ||
+			&usage("Access level $value is not valid for Webmin module $mod");
+		push(@webmin_module_changes, [ $mod, $value ]);
+		}
+	elsif ($a eq "--no-webmin-module") {
+		my $mod = shift(@ARGV);
+		my $minfo = $all_webmin_modules{$mod};
+		$minfo || &usage("Webmin module $mod is not known. Valid modules are : ".join(" ", sort keys %all_webmin_modules));
+		push(@webmin_module_changes, [ $mod, 0 ]);
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -319,6 +451,16 @@ if (defined($allowedscripts)) {
 if (defined($nocatwebmin)) {
 	$dom->{'webmin_nocat_modules'} = $nocatwebmin;
 	}
+if (@webmin_module_changes) {
+	my %avail = &webmin_avail_map(
+		&normalize_webmin_avail(&get_domain_webmin_avail($dom)));
+	foreach my $change (@webmin_module_changes) {
+		$avail{$change->[0]} = $change->[1];
+		}
+	my ($value, $bad) = &make_webmin_avail(\%avail);
+	$bad && &usage("Invalid access level for Webmin module $bad");
+	$dom->{'webmin_avail'} = $value;
+	}
 
 # Save domain object
 &set_all_null_print();
@@ -361,7 +503,7 @@ print "                        [--can-edit capability]*\n";
 print "                        [--cannot-edit capability]*\n";
 print "                        [--shell nologin|ftp|ssh]\n";
 print "                        [--no-cat-webmin | --cat-webmin]\n";
+print "                        [--webmin-module module[=level]]*\n";
+print "                        [--no-webmin-module module]*\n";
 exit(1);
 }
-
-

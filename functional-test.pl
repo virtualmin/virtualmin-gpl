@@ -7193,6 +7193,25 @@ $owner_tests = [
 		}
 		} @other_webmin_modules),
 
+	# Per-domain Webmin module access can be revoked and restored without
+	# changing the server template
+	{ 'command' => 'modify-limits.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'no-webmin-module', 'proc' ] ],
+	},
+	{ 'command' => $owner_webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}/proc/",
+	  'grep' => [ '>Failed to|is not allowed' ],
+	},
+	{ 'command' => 'modify-limits.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'webmin-module', 'proc=2' ] ],
+	},
+	{ 'command' => $owner_webmin_wget_command.
+		       "${webmin_proto}://localhost:${webmin_port}/proc/",
+	  'antigrep' => [ '>Failed to|is not allowed' ],
+	},
+
 	# Check a module that they should not have access to ever
 	{ 'command' => $owner_webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/acl/",

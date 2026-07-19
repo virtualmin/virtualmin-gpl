@@ -1,5 +1,6 @@
 #### Version 8.2.0
 * Add new [Virtualmin Podman](https://www.virtualmin.com/docs/plugins/podman/) plugin for Virtualmin Pro users, bringing per-domain container and pod management to both the UI and CLI
+* Make Webmin module access a per-domain setting under Server Owner Limits, initialized from the server template only when a virtual server is created
 * Add ability for plugins to declare their own CLI API safe for users
 * Fix to enforce mailbox and domain disk quota on mail delivery even when spam filtering is disabled, so full mailboxes no longer lock out webmail and IMAP access
 * Fix domain registration expiry checks taking too long when a WHOIS server does not respond

@@ -38,6 +38,11 @@ else {
 @editmodes = &list_template_editmodes($tmpl);
 $in{'editmode'} ||= 'basic';
 ($editmode) = grep { $_->[0] eq $in{'editmode'} } @editmodes;
+if (!$editmode) {
+	# An old bookmark may refer to a section that no longer exists.
+	($editmode) = grep { $_->[0] eq 'basic' } @editmodes;
+	$editmode ||= $editmodes[0];
+	}
 if (!$in{'new'}) {
 	# Work out template section to edit
 	$idx = &indexof($editmode, @editmodes);
@@ -142,4 +147,3 @@ else {
 	}
 return $rv;
 }
-
