@@ -50,7 +50,7 @@ foreach $f (@opt_features, "virt", &list_feature_plugins()) {
 $d->{'webmin_nocat_modules'} = $in{'nocatwebmin'};
 if (&can_webmin_modules()) {
 	my %avail = &webmin_avail_map(&get_domain_webmin_avail($d));
-	foreach my $m (&list_domain_owner_modules()) {
+	foreach my $m (&list_available_domain_owner_modules()) {
 		$avail{$m->[0]} = $in{'avail_'.$m->[0]};
 		}
 	my ($value, $bad) = &make_webmin_avail(\%avail);

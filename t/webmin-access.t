@@ -17,6 +17,8 @@ die $@ if ($@);
 die "Failed to load $lib: $!" if (!defined($loaded));
 
 my $list_domain_owner_modules = \&main::list_domain_owner_modules;
+my $list_available_domain_owner_modules =
+	\&main::list_available_domain_owner_modules;
 {
 no warnings 'redefine';
 local *main::require_mysql = sub { $mysql::mysql_version = 'MariaDB 10'; };
@@ -35,9 +37,8 @@ local *main::foreign_check = sub {
 	push(@foreign_install_checks, $_[0]);
 	return $_[0] ne 'custom' && $_[0] ne 'shell';
 	};
-local $main::no_acl_check = 0;
 local @main::plugins = ('sample-plugin');
-my @modules = &$list_domain_owner_modules();
+my @modules = &$list_available_domain_owner_modules();
 my ($plugin) = grep { $_->[0] eq 'plugin' } @modules;
 is($plugin->[4], 1,
 	'plugin-provided modules carry their legacy enabled default in the registry');
@@ -57,13 +58,49 @@ ok(scalar(grep { $_ eq 'filemin' } @foreign_checks),
 	'File Manager availability is checked against the filemin module');
 ok(!scalar(grep { $_ eq 'file-manager' } @foreign_checks),
 	'unused file-manager alias is never checked');
-$main::no_acl_check = 1;
 my @cli_modules = &$list_domain_owner_modules();
 ok(scalar(grep { $_->[0] eq 'proc' } @cli_modules) &&
    !scalar(grep { $_->[0] eq 'shell' } @cli_modules),
 	'CLI registry uses installed module checks without exposing absent modules');
 ok(scalar(grep { $_ eq 'proc' } @foreign_install_checks),
 	'CLI registry checks installed modules without Webmin user ACL state');
+@foreign_checks = ();
+@foreign_install_checks = ();
+my @policy_modules = &$list_domain_owner_modules();
+ok(!scalar(@foreign_checks) && scalar(@foreign_install_checks),
+	'policy construction never depends on the calling user Webmin ACL');
+is(scalar(@policy_modules), scalar(@cli_modules),
+	'policy registry matches the installed module registry');
+}
+
+# The one-shot migration must never alter valid enumerated access levels, and
+# must be stable when applied more than once. This is checked against the real
+# registry, as the synthetic registry used below cannot catch a regression in
+# the real module option lists.
+{
+no warnings 'redefine';
+local *main::require_mysql = sub { $mysql::mysql_version = 'MariaDB 10'; };
+local *main::load_plugin_libraries = sub { };
+local *main::plugin_defined = sub { return $_[1] eq 'feature_modules'; };
+local *main::plugin_call = sub {
+	return ([ 'plugin', 'Plugin (managed scope)' ]);
+	};
+local *main::foreign_check = sub { return 1; };
+local @main::plugins = ('sample-plugin');
+my $stored = 'passwd=2 proc=2 updown=2 plugin=0';
+my %normalized = &main::webmin_avail_map(
+	&main::normalize_webmin_avail($stored));
+is($normalized{'passwd'}.' '.$normalized{'proc'}.' '.$normalized{'updown'},
+	'2 2 2',
+	'enumerated access levels survive normalization with the real registry');
+my $migrated = &main::legacy_webmin_avail($stored);
+my %legacy = &main::webmin_avail_map($migrated);
+is($legacy{'passwd'}.' '.$legacy{'proc'}.' '.$legacy{'updown'}, '2 2 2',
+	'enumerated access levels survive migration with the real registry');
+is($legacy{'plugin'}, 1,
+	'plugin zeroes are reset to the legacy enabled access on migration');
+is(&main::legacy_webmin_avail($migrated), $migrated,
+	'migration is stable when applied to an already-migrated policy');
 }
 
 my %templates = (
@@ -80,13 +117,40 @@ no warnings 'redefine';
 *main::get_domain = sub { return $domains{$_[0]}; };
 *main::can_edit_limits = sub { return $can_edit_limits; };
 *main::error = sub { die $_[0]."\n"; };
-*main::list_domain_owner_modules = sub {
+my $test_modules = sub {
 	return (
 		[ 'dns', 'DNS' ],
 		[ 'proc', 'Processes', [ [ 2, 'Own' ], [ 1, 'All' ], [ 0, 'No' ] ] ],
 		[ 'plugin', 'Plugin (managed scope)', undef, undef, 1 ],
 		);
 	};
+*main::list_domain_owner_modules = $test_modules;
+*main::list_available_domain_owner_modules = $test_modules;
+*main::domain_owner_module_registry = sub {
+	my @modules = (&$test_modules(), [ 'shell', 'Command Shell' ]);
+	return (\@modules, { });
+	};
+}
+
+{
+local %main::config = (
+	'avail_dns' => 0,
+	'avail_proc' => 2,
+	'avail_plugin' => 0,
+	'avail_shell' => 1,
+	);
+is(&main::get_default_webmin_avail(),
+	'dns=0 proc=2 plugin=0 shell=1',
+	'legacy owner defaults include unavailable module settings');
+ok(&main::migrate_default_webmin_avail(),
+	'default owner policy is migrated to its separate config key');
+is($main::config{'default_webmin_avail'},
+	'dns=0 proc=2 plugin=1 shell=1',
+	'default owner policy preserves legacy effective plugin access');
+is($main::config{'avail_plugin'}, 0,
+	'migration does not widen the plugin access used by Pro resellers');
+ok(!&main::migrate_default_webmin_avail(),
+	'default owner policy migration is idempotent');
 }
 
 my $legacy = { 'id' => 100, 'template' => 10 };
@@ -155,6 +219,20 @@ is(&main::set_template_webmin_avail($custom_tmpl,
 	'explicit template module access is accepted');
 is($custom_tmpl->{'avail'}, 'dns=1 proc=2 plugin=0',
 	'explicit template module access is stored in stable order');
+{
+no warnings 'redefine';
+local *main::list_available_domain_owner_modules = sub {
+	return ([ 'dns', 'DNS' ]);
+	};
+my $restricted_tmpl = {
+	'id' => 22, 'avail' => 'dns=0 proc=2 plugin=0',
+	};
+is(&main::set_template_webmin_avail($restricted_tmpl,
+	{ 'avail_def' => 0, 'avail_dns' => 1 }), undef,
+	'caller-visible template settings can be saved');
+is($restricted_tmpl->{'avail'}, 'dns=1 proc=2 plugin=0',
+	'saving visible settings preserves modules hidden by the caller ACL');
+}
 is(&main::set_template_webmin_avail($custom_tmpl,
 	{ 'avail_def' => 1 }), undef,
 	'custom template can inherit default module access');
@@ -223,8 +301,8 @@ is(&main::normalize_webmin_avail(
 	'legacy values normalize safely and preserve truthy binary access');
 
 is(&main::normalize_webmin_avail(
-	'dns=1 proc=2 plugin=0 unavailable-z=1 unavailable-a=custom'),
-	'dns=1 proc=2 plugin=0 unavailable-a=custom unavailable-z=1',
+	'dns=1 proc=2 plugin=0 unavailable-z=1 unavailable-a=custom=value'),
+	'dns=1 proc=2 plugin=0 unavailable-a=custom=value unavailable-z=1',
 	'normalization preserves unavailable module settings in stable order');
 
 is(&main::normalize_webmin_avail('dns=1 proc=2'),

@@ -101,7 +101,8 @@ The modules with additional access levels are C<passwd> (C<1> allows changing
 the user password and C<2> also allows changing mailbox passwords), C<proc>
 (C<1> allows viewing all processes and C<2> restricts the user to their own
 processes), and C<updown> (C<1> allows uploads and downloads and C<2> allows
-uploads only). The standard module codes are:
+uploads only). A code is only accepted when the corresponding Webmin module
+is installed on the system. The standard module codes are:
 
 =over 4
 
@@ -357,6 +358,8 @@ while(@ARGV > 0) {
 			&usage("Missing Webmin module code");
 		my ($mod, $value) = split(/=/, $webmin_module, 2);
 		$value = 1 if (!defined($value));
+		$value eq '' &&
+			&usage("Missing access level for Webmin module $mod");
 		my $minfo = $all_webmin_modules{$mod};
 		$minfo || &usage("Webmin module $mod is not known. Valid modules are : ".join(" ", sort keys %all_webmin_modules));
 		&valid_webmin_avail_value($minfo, $value) ||

@@ -6348,6 +6348,12 @@ $config{'old_defip6'} = $oldconfig{'old_defip6'};
 $config{'last_check'} = $oldconfig{'last_check'};
 $config{'mail_system'} = $oldconfig{'mail_system'};
 
+# The one-shot migration of Webmin module access to per-domain settings must
+# not re-run just because an older config backup was restored, as it would
+# override module access choices made after the migration.
+$config{'migrated_domain_webmin_avail'} =
+	$oldconfig{'migrated_domain_webmin_avail'};
+
 # Remove plugins that aren't on the new system, but keep the current ones that
 # are enabled
 my $plugins = join(" ", &unique(split(/\s+/, $config{'plugins'} || ''),
@@ -10386,11 +10392,7 @@ if (!defined(getpwnam($rv[0]->{'web_user'})) &&
 	# Apache user is invalid, due to bad Virtualmin install script. Fix it
 	$rv[0]->{'web_user'} = &get_apache_user();
 	}
-my @avail;
-foreach my $m (&list_domain_owner_modules()) {
-	push(@avail, $m->[0]."=".$config{'avail_'.$m->[0]});
-	}
-$rv[0]->{'avail'} = join(' ', @avail);
+$rv[0]->{'avail'} = &get_default_webmin_avail();
 push(@rv, { 'id' => 1,
 	    'name' => $text{'newtmpl_name1'},
 	    'standard' => 1,
@@ -10786,10 +10788,7 @@ if ($tmpl->{'id'} == 0) {
 	foreach my $w (&list_php_wrapper_templates()) {
 		$config{$w} = $tmpl->{$w};
 		}
-	my %avail = map { split(/=/, $_) } split(/\s+/, $tmpl->{'avail'});
-	foreach my $m (&list_domain_owner_modules()) {
-		$config{'avail_'.$m->[0]} = $avail{$m->[0]} || 0;
-		}
+	$config{'default_webmin_avail'} = $tmpl->{'avail'};
 	$save_config = 1;
 	}
 elsif ($tmpl->{'id'} == 1) {
@@ -18184,11 +18183,9 @@ foreach my $f (@plugins) {
 	}
 }
 
-# list_domain_owner_modules()
-# Returns a list of modules that can be granted to domain owners, as array refs
-# with module name, description, optional list of options, optional help key and
-# optional default for a missing setting.
-sub list_domain_owner_modules
+# domain_owner_module_registry()
+# Returns all domain-owner module definitions and their backing Webmin modules.
+sub domain_owner_module_registry
 {
 &require_mysql();
 my $mytype = $mysql::mysql_version =~ /mariadb/i ? "MariaDB" : "MySQL";
@@ -18263,15 +18260,42 @@ foreach my $p (@plugins) {
 			}
 		}
 	}
+return (\@rv, \%foreign_modules);
+}
+
+# list_domain_owner_modules()
+# Returns installed modules that can be granted to domain owners. This stable
+# registry is used when building or storing access policies, so it must never
+# depend on the calling user's own Webmin ACL.
+sub list_domain_owner_modules
+{
+my ($modules, $foreign_modules) = &domain_owner_module_registry();
 my @available;
-foreach my $m (@rv) {
-	my $fmod = $foreign_modules{$m->[0]};
+foreach my $m (@$modules) {
+	my $fmod = $foreign_modules->{$m->[0]};
 	if (!$fmod) {
 		push(@available, $m);
 		next;
 		}
-	push(@available, $m) if ($main::no_acl_check ?
-		&foreign_check($fmod) : &foreign_available($fmod));
+	push(@available, $m) if (&foreign_check($fmod));
+	}
+return @available;
+}
+
+# list_available_domain_owner_modules()
+# Returns the installed domain-owner modules accessible to the calling Webmin
+# user. This caller-specific list is only for rendering and parsing UI fields.
+sub list_available_domain_owner_modules
+{
+my ($modules, $foreign_modules) = &domain_owner_module_registry();
+my @available;
+foreach my $m (@$modules) {
+	my $fmod = $foreign_modules->{$m->[0]};
+	if (!$fmod) {
+		push(@available, $m);
+		next;
+		}
+	push(@available, $m) if (&foreign_available($fmod));
 	}
 return @available;
 }
@@ -18330,6 +18354,33 @@ if (!$tmpl->{'default'} && (!defined($avail) || $avail eq '')) {
 	$avail = $deftmpl ? $deftmpl->{'avail'} : "";
 	}
 return &normalize_webmin_avail($avail);
+}
+
+# get_default_webmin_avail()
+# Returns the default template's domain-owner module policy. Before this policy
+# had its own config key, the values were shared with Pro reseller access.
+sub get_default_webmin_avail
+{
+return $config{'default_webmin_avail'}
+	if (defined($config{'default_webmin_avail'}));
+my @avail;
+my ($modules) = &domain_owner_module_registry();
+foreach my $m (@$modules) {
+	push(@avail, $m->[0].'='.$config{'avail_'.$m->[0]});
+	}
+return join(' ', @avail);
+}
+
+# migrate_default_webmin_avail()
+# Creates the separate default domain-owner policy while leaving the legacy
+# avail_* settings used by Pro resellers unchanged. Returns 1 if changed.
+sub migrate_default_webmin_avail
+{
+my $avail = &legacy_webmin_avail(&get_default_webmin_avail());
+return 0 if (defined($config{'default_webmin_avail'}) &&
+	     $config{'default_webmin_avail'} eq $avail);
+$config{'default_webmin_avail'} = $avail;
+return 1;
 }
 
 # webmin_avail_map(string)
@@ -18421,7 +18472,7 @@ if (!$tmpl->{'default'} && $values->{'avail_def'}) {
 	return undef;
 	}
 my %avail = &webmin_avail_map(&get_template_webmin_avail($tmpl));
-foreach my $m (&list_domain_owner_modules()) {
+foreach my $m (&list_available_domain_owner_modules()) {
 	$avail{$m->[0]} = $values->{'avail_'.$m->[0]};
 	}
 my ($value, $bad) = &make_webmin_avail(\%avail);
@@ -18457,7 +18508,7 @@ sub webmin_avail_rows
 my ($alist) = @_;
 my %avail = &webmin_avail_map($alist);
 my $rows;
-foreach my $m (&list_domain_owner_modules()) {
+foreach my $m (&list_available_domain_owner_modules()) {
 	my $desc = $m->[1];
 	my $minp;
 	if ($m->[2]) {

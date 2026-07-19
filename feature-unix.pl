@@ -928,7 +928,8 @@ my $availtable = &ui_table_start(
 		&ui_help($text{'tmpl_webmin_avail_help'}),
 	"width=100%", 2, [ "width=30%" ]);
 if (!$tmpl->{'default'}) {
-	my @inames = map { "avail_".$_->[0] } &list_domain_owner_modules();
+	my @inames = map { "avail_".$_->[0] }
+		&list_available_domain_owner_modules();
 	my $dis1 = &js_disable_inputs(\@inames, [ ], 'onClick');
 	my $dis2 = &js_disable_inputs([ ], \@inames, 'onClick');
 	$availtable .= &ui_table_row($text{'tmpl_webmin_avail_source'},
