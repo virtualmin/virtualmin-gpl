@@ -1,11 +1,11 @@
 #### Version 8.2.0
 * Add new [Virtualmin Podman](https://www.virtualmin.com/docs/plugins/podman/) plugin for Virtualmin Pro users, bringing per-domain container and pod management to both the UI and CLI
-* Make Webmin module access a per-domain setting under Server Owner Limits, initialized from the server template only when a virtual server is created
 * Add ability for plugins to declare their own CLI API safe for users
 * Fix to enforce mailbox and domain disk quota on mail delivery even when spam filtering is disabled, so full mailboxes no longer lock out webmail and IMAP access
 * Fix domain registration expiry checks taking too long when a WHOIS server does not respond
 * Fix installing PHP extensions for versioned PHP streams on RHEL 10 and derivatives
 * Rename the Git-based config history CLI commands to `list-config-revisions` and `restore-config-revision`
+* Change Webmin module access a per-domain setting on the "Manage Virtual Server ⇾ Edit Owner Limits" page, initialized from the server template only when a virtual server is created, while existing server owners keep their current effective access, Pro reseller module permissions remain unchanged, and later template changes no longer apply to existing servers
 
 #### Version 8.1.0
 * Add a simplified UI for managing website redirects  
