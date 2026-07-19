@@ -19,8 +19,12 @@ C<--ds-records> flag. Or you can choose to have DNSSEC records included in
 the output with C<--dnssec-records>.
 
 By default the command will list all records, but you can limit it to
-records with a specific name via the C<--name> flag. Similarly you can limit
+records with a specific name via the C<--name> flag, or select records
+whose name matches some pattern with C<--regexp>. Similarly you can limit
 by type (A, CNAME, MX, etc) with the C<--type> flag.
+
+To instead exclude only records with a given name or names, use the
+C<--skip-name> or C<--skip-regexp> flags.
 
 =cut
 
@@ -50,8 +54,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--name") {
 		$rname = shift(@ARGV);
 		}
+	elsif ($a eq "--skip-name") {
+		$skiprname = shift(@ARGV);
+		}
 	elsif ($a eq "--regexp") {
 		$regexp = shift(@ARGV);
+		}
+	elsif ($a eq "--skip-regexp") {
+		$skipregexp = shift(@ARGV);
 		}
 	elsif ($a eq "--type") {
 		$rtype = shift(@ARGV);
@@ -107,8 +117,16 @@ if ($rname) {
 	$rname .= "." if ($rname !~ /\.$/);
 	@recs = grep { lc($_->{'name'}) eq lc($rname) } @recs;
 	}
+if ($skiprname) {
+	$skiprname .= ".".$d->{'dom'} if ($skiprname !~ /\Q$d->{'dom'}\E$/i);
+	$skiprname .= "." if ($skiprname !~ /\.$/);
+	@recs = grep { lc($_->{'name'}) ne lc($skiprname) } @recs;
+	}
 if ($regexp) {
 	@recs = grep { $_->{'name'} =~ /$regexp/i } @recs;
+	}
+if ($skipregexp) {
+	@recs = grep { $_->{'name'} !~ /$skipregexp/i } @recs;
 	}
 if ($rtype) {
 	@recs = grep { lc($_->{'type'}) eq lc($rtype) } @recs;
@@ -164,7 +182,8 @@ print "virtualmin get-dns --domain name\n";
 print "                  [--ds-records]\n";
 print "                  [--dnssec-records]\n";
 print "                  [--multiline | --name-only]\n";
-print "                  [--name record-name | --regexp name-pattern]\n";
+print "                  [--name record-name | --regexp pattern]\n";
+print "                  [--skip-name record-name | --skip-regexp pattern]\n";
 print "                  [--type A|AAAA|CNAME|MX|NS|TXT]\n";
 exit(1);
 }
