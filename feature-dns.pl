@@ -1075,7 +1075,34 @@ if ($check_submode) {
 	}
 
 # Update IPv4 or IPv6 address, if changed
-if ($oldip ne $newip || $oldip6 ne $newip6) {
+if ($d->{'ip'} && !$oldd->{'ip'}) {
+	# IPv4 enabled
+	&$first_print($text{'save_dnsip4on'});
+	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
+	if (!$file) {
+		&$second_print(&text('save_nobind2', $recs));
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
+	&add_ip4_records($d, $recs, $file);
+	&$second_print($text{'setup_done'});
+	$rv++;
+	}
+elsif (!$d->{'ip'} && $oldd->{'ip'}) {
+	# IPv4 disabled
+	&$first_print($text{'save_dnsip4off'});
+	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
+	if (!$file) {
+		&$second_print(&text('save_nobind2', $recs));
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
+	&remove_ip4_records($oldd, $file, $recs);
+	&$second_print($text{'setup_done'});
+	$rv++;
+	}
+elsif ($oldip && $newip && $oldip ne $newip ||
+       $oldip6 && $newip6 && $oldip6 ne $newip6) {
 	# IP address has changed .. need to update any records that use
 	# the old IP
 	&$first_print($text{'save_dns'});
@@ -1092,7 +1119,7 @@ if ($oldip ne $newip || $oldip6 ne $newip6) {
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
-elsif ($oldd->{'ip'} ne $d->{'ip'}) {
+elsif ($oldd->{'ip'} && $d->{'ip'} && $oldd->{'ip'} ne $d->{'ip'}) {
 	# Internal IP address changed, but external IP didn't
 	&$first_print($text{'save_dnsinternal'});
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
@@ -1266,7 +1293,7 @@ elsif (!$d->{'ip6'} && $oldd->{'ip6'}) {
 	}
 elsif ($d->{'ip6'} && $oldd->{'ip6'} &&
        $d->{'ip6'} ne $oldd->{'ip6'}) {
-	# IPv6 address changed
+	# IPv6 internal address changed
 	&$first_print($text{'save_dnsip6'});
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
 	if (!$file) {
