@@ -444,11 +444,11 @@ if ($multiline) {
 			}
 		if ($d->{'virt6'}) {
 			if ($multiline == 2) {
-				print "    IP address: $d->{'ip6'} (Private)\n";
+				print "    IPv6 address: $d->{'ip6'} (Private)\n";
 				}
 			else {
 				my $iface = &get_address_iface($d->{'ip6'});
-				print "    IP address: $d->{'ip6'} ",
+				print "    IPv6 address: $d->{'ip6'} ",
 				      "(On $iface)\n";
 				}
 			}
