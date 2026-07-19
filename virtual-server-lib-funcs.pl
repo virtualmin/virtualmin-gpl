@@ -18186,7 +18186,8 @@ foreach my $f (@plugins) {
 
 # list_domain_owner_modules()
 # Returns a list of modules that can be granted to domain owners, as array refs
-# with module name, description, optional list of options and optional help key.
+# with module name, description, optional list of options, optional help key and
+# optional default for a missing setting.
 sub list_domain_owner_modules
 {
 &require_mysql();
@@ -18231,7 +18232,11 @@ my @rv = (
 &load_plugin_libraries();
 foreach my $p (@plugins) {
 	if (&plugin_defined($p, "feature_modules")) {
-		push(@rv, &plugin_call($p, "feature_modules"));
+		foreach my $m (&plugin_call($p, "feature_modules")) {
+			my @m = @$m;
+			$m[4] = 1;	# Plugin modules were historically enabled by default
+			push(@rv, \@m);
+			}
 		}
 	}
 return @rv;
@@ -18247,24 +18252,35 @@ my ($d) = @_;
 if ($d->{'parent'}) {
 	my $parent = &get_domain($d->{'parent'});
 	return $parent ? &get_domain_webmin_avail($parent) :
-		       &normalize_webmin_avail("");
+		       &normalize_webmin_avail("", 1);
 	}
 return &normalize_webmin_avail($d->{'webmin_avail'})
 	if (defined($d->{'webmin_avail'}));
 my $tmpl = &get_template($d->{'template'});
 return $tmpl ? &get_template_webmin_avail($tmpl) :
-	       &normalize_webmin_avail("");
+	       &normalize_webmin_avail("", 1);
 }
 
-# init_domain_webmin_avail(&domain)
+# init_domain_webmin_avail(&domain, [preserve-legacy-plugin-access])
 # Copies the template's initial Webmin module access settings into a new or
-# migrated top-level domain. Returns 1 if the domain object was changed.
+# migrated top-level domain. In migration mode, plugin modules are enabled to
+# preserve their effective access before per-domain settings existed. Returns
+# 1 if the domain object was changed.
 sub init_domain_webmin_avail
 {
-my ($d) = @_;
-return 0 if ($d->{'parent'} || defined($d->{'webmin_avail'}));
-my $tmpl = &get_template($d->{'template'});
-$d->{'webmin_avail'} = $tmpl ? &get_template_webmin_avail($tmpl) : "";
+my ($d, $legacy) = @_;
+return 0 if ($d->{'parent'});
+return 0 if (defined($d->{'webmin_avail'}) && !$legacy);
+my $avail = $d->{'webmin_avail'};
+if (!defined($avail)) {
+	my $tmpl = &get_template($d->{'template'});
+	$avail = $tmpl ? &get_template_webmin_avail($tmpl) :
+			   &normalize_webmin_avail("", 1);
+	}
+$avail = &legacy_webmin_avail($avail) if ($legacy);
+return 0 if (defined($d->{'webmin_avail'}) &&
+	     $d->{'webmin_avail'} eq $avail);
+$d->{'webmin_avail'} = $avail;
 return 1;
 }
 
@@ -18345,6 +18361,21 @@ foreach my $mod (sort grep { !$known{$_} } keys %$values) {
 return (join(' ', @avail), undef);
 }
 
+# legacy_webmin_avail(string)
+# Returns the module policy that matches the effective pre-migration behavior.
+# Plugin module zeroes were not enforced before per-domain policies existed,
+# including zeroes written automatically while saving the default template.
+sub legacy_webmin_avail
+{
+my ($str) = @_;
+my %avail = &webmin_avail_map(&normalize_webmin_avail($str));
+foreach my $m (&list_domain_owner_modules()) {
+	$avail{$m->[0]} = $m->[4] if (defined($m->[4]));
+	}
+my ($value, $bad) = &make_webmin_avail(\%avail);
+return $bad ? &normalize_webmin_avail("", 1) : $value;
+}
+
 # set_template_webmin_avail(&template, &values)
 # Updates a template's initial Webmin module access from form values. Returns
 # undef on success, or the code of a module with an invalid access level.
@@ -18365,18 +18396,20 @@ $tmpl->{'avail'} = $value;
 return undef;
 }
 
-# normalize_webmin_avail(string)
+# normalize_webmin_avail(string, [ignore-module-defaults])
 # Converts legacy or incomplete settings into valid values. Historically,
 # plugin availability could be stored as an arbitrary truthy string; for a
 # yes/no module that is equivalent to enabled and is normalized to 1. Invalid
-# enumerated values fail closed to 0.
+# enumerated values fail closed to 0. Module defaults apply only to missing or
+# empty settings, and can be suppressed when no owner policy can be resolved.
 sub normalize_webmin_avail
 {
-my ($str) = @_;
+my ($str, $nodefaults) = @_;
 my %avail = &webmin_avail_map($str);
 foreach my $m (&list_domain_owner_modules()) {
 	if (!&valid_webmin_avail_value($m, $avail{$m->[0]})) {
-		$avail{$m->[0]} = $m->[2] ? 0 : $avail{$m->[0]} ? 1 : 0;
+		$avail{$m->[0]} = !$nodefaults && defined($m->[4]) ? $m->[4] :
+				    !$m->[2] && $avail{$m->[0]} ? 1 : 0;
 		}
 	}
 my ($value, $bad) = &make_webmin_avail(\%avail);
@@ -18571,8 +18604,7 @@ foreach my $t (@template_features) {
 	}
 if ($tmpl && ($tmpl->{'id'} == 1 || !$tmpl->{'for_parent'})) {
 	# For sub-servers only
-	@rv = grep { $_ ne 'resources' && $_ ne 'unix' && $_ ne 'webmin' &&
-		     $_ ne 'avail' } @rv;
+	@rv = grep { $_ ne 'resources' && $_ ne 'unix' && $_ ne 'webmin' } @rv;
 	}
 my @rvdesc = map { [ $_,
 		     $text{'tmpl_editmode_'.$_} || $text{'feature_'.$_},

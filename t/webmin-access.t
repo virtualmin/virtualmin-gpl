@@ -15,6 +15,23 @@ my $loaded = do $lib;
 die $@ if ($@);
 die "Failed to load $lib: $!" if (!defined($loaded));
 
+my $list_domain_owner_modules = \&main::list_domain_owner_modules;
+{
+no warnings 'redefine';
+local *main::require_mysql = sub { $mysql::mysql_version = 'MariaDB 10'; };
+local *main::foreign_check = sub { return 0; };
+local *main::load_plugin_libraries = sub { };
+local *main::plugin_defined = sub { return $_[1] eq 'feature_modules'; };
+local *main::plugin_call = sub {
+	return ([ 'plugin', 'Plugin (managed scope)' ]);
+	};
+local @main::plugins = ('sample-plugin');
+my @modules = &$list_domain_owner_modules();
+my ($plugin) = grep { $_->[0] eq 'plugin' } @modules;
+is($plugin->[4], 1,
+	'plugin-provided modules carry their legacy enabled default in the registry');
+}
+
 my %templates = (
 	0 => { 'id' => 0, 'default' => 1,
 	       'avail' => 'dns=0 proc=1 plugin=1' },
@@ -33,7 +50,7 @@ no warnings 'redefine';
 	return (
 		[ 'dns', 'DNS' ],
 		[ 'proc', 'Processes', [ [ 2, 'Own' ], [ 1, 'All' ], [ 0, 'No' ] ] ],
-		[ 'plugin', 'Plugin (managed scope)' ],
+		[ 'plugin', 'Plugin (managed scope)', undef, undef, 1 ],
 		);
 	};
 }
@@ -53,6 +70,17 @@ is(&main::get_domain_webmin_avail($legacy), 'dns=1 proc=2 plugin=1',
 	'later template changes do not alter domain access');
 ok(!&main::init_domain_webmin_avail($legacy),
 	'existing per-domain access is never overwritten');
+
+my $partly_migrated = {
+	'id' => 106, 'template' => 10,
+	'webmin_avail' => 'dns=1 proc=2 plugin=0',
+	};
+ok(&main::init_domain_webmin_avail($partly_migrated, 1),
+	'migration corrects a plugin zero left by an interrupted earlier run');
+is($partly_migrated->{'webmin_avail'}, 'dns=1 proc=2 plugin=1',
+	'migration preserves the plugin access that the old runtime granted');
+ok(!&main::init_domain_webmin_avail($partly_migrated, 1),
+	'legacy plugin access migration is idempotent');
 
 $domains{100} = $legacy;
 my $child = { 'id' => 101, 'parent' => 100, 'template' => 10 };
@@ -165,13 +193,23 @@ is(&main::normalize_webmin_avail(
 	'dns=1 proc=2 plugin=0 unavailable-a=custom unavailable-z=1',
 	'normalization preserves unavailable module settings in stable order');
 
+is(&main::normalize_webmin_avail('dns=1 proc=2'),
+	'dns=1 proc=2 plugin=1',
+	'a newly registered plugin module retains its legacy enabled default');
+is(&main::normalize_webmin_avail('', 1),
+	'dns=0 proc=0 plugin=0',
+	'module defaults can be suppressed when no owner policy can be resolved');
+is(&main::legacy_webmin_avail('dns=1 proc=2 plugin=0'),
+	'dns=1 proc=2 plugin=1',
+	'legacy migration ignores plugin zeroes that the old runtime never enforced');
+
 my $incomplete = {
 	'id' => 103, 'template' => 10,
 	'webmin_avail' => 'dns=1 proc=invalid',
 	};
 is(&main::get_domain_webmin_avail($incomplete),
-	'dns=1 proc=0 plugin=0',
-	'stored access fails closed for invalid and newly-added module entries');
+	'dns=1 proc=0 plugin=1',
+	'invalid core access fails closed while new plugins remain compatible');
 
 {
 no warnings 'redefine';

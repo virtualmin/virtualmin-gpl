@@ -452,8 +452,7 @@ if (defined($nocatwebmin)) {
 	$dom->{'webmin_nocat_modules'} = $nocatwebmin;
 	}
 if (@webmin_module_changes) {
-	my %avail = &webmin_avail_map(
-		&normalize_webmin_avail(&get_domain_webmin_avail($dom)));
+	my %avail = &webmin_avail_map(&get_domain_webmin_avail($dom));
 	foreach my $change (@webmin_module_changes) {
 		$avail{$change->[0]} = $change->[1];
 		}

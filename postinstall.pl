@@ -122,8 +122,27 @@ if (defined(&sync_parent_resellers)) {
 # existing server owners as per-domain settings. This migration is idempotent
 # so an interrupted post-install can safely be run again.
 if (!$config{'migrated_domain_webmin_avail'}) {
+	# A zero for a plugin module was historically ignored at runtime and was
+	# also written automatically when saving an unrelated default-template
+	# section. Preserve the old effective default before zero becomes
+	# enforceable.
+	my @owner_modules = &list_domain_owner_modules();
+	foreach my $m (grep { defined($_->[4]) } @owner_modules) {
+		$config{'avail_'.$m->[0]} = $m->[4];
+		}
+	undef(@list_templates_cache);
+	my @templates = &list_templates();
+	foreach my $tmpl (grep { !$_->{'default'} && $_->{'for_parent'} &&
+				   defined($_->{'avail'}) && $_->{'avail'} ne '' }
+			    @templates) {
+		my $avail = &legacy_webmin_avail($tmpl->{'avail'});
+		if ($avail ne $tmpl->{'avail'}) {
+			$tmpl->{'avail'} = $avail;
+			&save_template($tmpl);
+			}
+		}
 	foreach my $d (grep { !$_->{'parent'} } &list_domains()) {
-		if (&init_domain_webmin_avail($d)) {
+		if (&init_domain_webmin_avail($d, 1)) {
 			&save_domain($d);
 			}
 		}
