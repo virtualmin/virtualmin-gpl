@@ -10,6 +10,7 @@ use Cwd qw(abs_path);
 my $root = abs_path(File::Spec->catdir(dirname(__FILE__), '..'));
 no warnings 'once';
 $main::module_root_directory = $root;
+$main::module_name = 'virtual-server';
 my $lib = File::Spec->catfile($root, 'virtual-server-lib-funcs.pl');
 my $loaded = do $lib;
 die $@ if ($@);
@@ -19,17 +20,50 @@ my $list_domain_owner_modules = \&main::list_domain_owner_modules;
 {
 no warnings 'redefine';
 local *main::require_mysql = sub { $mysql::mysql_version = 'MariaDB 10'; };
-local *main::foreign_check = sub { return 0; };
 local *main::load_plugin_libraries = sub { };
 local *main::plugin_defined = sub { return $_[1] eq 'feature_modules'; };
 local *main::plugin_call = sub {
 	return ([ 'plugin', 'Plugin (managed scope)' ]);
 	};
+my @foreign_checks;
+local *main::foreign_available = sub {
+	push(@foreign_checks, $_[0]);
+	return $_[0] ne 'custom' && $_[0] ne 'shell' && $_[0] ne 'mail';
+	};
+my @foreign_install_checks;
+local *main::foreign_check = sub {
+	push(@foreign_install_checks, $_[0]);
+	return $_[0] ne 'custom' && $_[0] ne 'shell';
+	};
+local $main::no_acl_check = 0;
 local @main::plugins = ('sample-plugin');
 my @modules = &$list_domain_owner_modules();
 my ($plugin) = grep { $_->[0] eq 'plugin' } @modules;
 is($plugin->[4], 1,
 	'plugin-provided modules carry their legacy enabled default in the registry');
+ok(!scalar(grep { $_->[0] eq 'custom' || $_->[0] eq 'shell' } @modules),
+	'unavailable Webmin modules are omitted from the registry');
+ok(scalar(grep { $_->[0] eq 'mail' } @modules),
+	'internal capabilities are retained without a foreign module check');
+ok(!scalar(grep { $_ eq 'mail' } @foreign_checks),
+	'internal capabilities are not passed to foreign_available');
+my ($dns) = grep { $_->[0] eq 'dns' } @modules;
+ok($dns, 'feature aliases remain listed when their backing module is available');
+is(scalar(@$dns), 2,
+	'module aliases do not add implementation details to registry entries');
+ok(scalar(grep { $_ eq 'bind8' } @foreign_checks),
+	'DNS availability is checked against the actual BIND module');
+ok(scalar(grep { $_ eq 'filemin' } @foreign_checks),
+	'File Manager availability is checked against the filemin module');
+ok(!scalar(grep { $_ eq 'file-manager' } @foreign_checks),
+	'unused file-manager alias is never checked');
+$main::no_acl_check = 1;
+my @cli_modules = &$list_domain_owner_modules();
+ok(scalar(grep { $_->[0] eq 'proc' } @cli_modules) &&
+   !scalar(grep { $_->[0] eq 'shell' } @cli_modules),
+	'CLI registry uses installed module checks without exposing absent modules');
+ok(scalar(grep { $_ eq 'proc' } @foreign_install_checks),
+	'CLI registry checks installed modules without Webmin user ACL state');
 }
 
 my %templates = (

@@ -18192,6 +18192,31 @@ sub list_domain_owner_modules
 {
 &require_mysql();
 my $mytype = $mysql::mysql_version =~ /mariadb/i ? "MariaDB" : "MySQL";
+my %foreign_modules = (
+	'dns' => 'bind8',
+	'web' => 'apache',
+	'webalizer' => 'webalizer',
+	'mysql' => 'mysql',
+	'postgres' => 'postgresql',
+	'spam' => 'spam',
+	'filemin' => 'filemin',
+	'passwd' => 'passwd',
+	'proc' => 'proc',
+	'cron' => 'cron',
+	'at' => 'at',
+	'systemd' => 'systemd',
+	'telnet' => 'telnet',
+	'xterm' => 'xterm',
+	'updown' => 'updown',
+	'change-user' => 'change-user',
+	'htaccess-htpasswd' => 'htaccess-htpasswd',
+	'mailboxes' => 'mailboxes',
+	'custom' => 'custom',
+	'shell' => 'shell',
+	'webminlog' => 'webminlog',
+	'logviewer' => 'logviewer',
+	'phpini' => 'phpini',
+	);
 my @rv = (
         [ 'dns', 'BIND DNS Server' ],
         [ 'mail', 'Virtual Email' ],
@@ -18211,9 +18236,7 @@ my @rv = (
 	    [ 0, 'No' ] ] ],
         [ 'cron', 'Scheduled Cron Jobs' ],
         [ 'at', 'Scheduled Commands' ],
-        &foreign_check("systemd") ?
-		( [ 'systemd', 'Systemd User Units' ] ) :
-		( ),
+        [ 'systemd', 'Systemd User Units' ],
         [ 'telnet', 'SSH Login' ],
         [ 'xterm', 'Terminal' ],
         [ 'updown', 'Upload and Download',
@@ -18235,11 +18258,22 @@ foreach my $p (@plugins) {
 		foreach my $m (&plugin_call($p, "feature_modules")) {
 			my @m = @$m;
 			$m[4] = 1;	# Plugin modules were historically enabled by default
+			$foreign_modules{$m[0]} = $m[0];
 			push(@rv, \@m);
 			}
 		}
 	}
-return @rv;
+my @available;
+foreach my $m (@rv) {
+	my $fmod = $foreign_modules{$m->[0]};
+	if (!$fmod) {
+		push(@available, $m);
+		next;
+		}
+	push(@available, $m) if ($main::no_acl_check ?
+		&foreign_check($fmod) : &foreign_available($fmod));
+	}
+return @available;
 }
 
 # get_domain_webmin_avail(&domain)
