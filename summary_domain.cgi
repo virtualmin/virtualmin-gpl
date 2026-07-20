@@ -103,7 +103,7 @@ if ($show_home_quota) {
 
 
 # IP-related options
-if (!$aliasdom) {
+if (!$aliasdom && $d->{'ip'}) {
 	if (defined(&get_reseller)) {
 		foreach $r (split(/\s+/, $d->{'reseller'})) {
 			$resel = &get_reseller($r);
@@ -123,7 +123,7 @@ if (!$aliasdom) {
 						  "<tt>$resel->{'name'}</tt>") :
 					    $text{'edit_shared'}));
 	}
-if ($d->{'ip6'} && !$aliasdom) {
+if (!$aliasdom && $d->{'ip6'}) {
 	my $ipv6 = "<tt>$d->{'ip6'}</tt>";
 	if (&can_change_ip($d) && &can_edit_domain($d)) {
 		$ipv6 = "<a href='newip_form.cgi?dom=$d->{'id'}'>$ipv6</a>"
