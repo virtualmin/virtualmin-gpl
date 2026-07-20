@@ -405,6 +405,7 @@ form_limits=Quotas and limits
 form_proxysect=IP address and forwarding
 form_ipsect=IP address and interfaces
 form_inputssect=Additional feature options
+form_esomeip=Either an IPv4 or IPv6 address must be enabled
 
 setup_err=Failed to create virtual server
 setup_eplan=Selected plan does not exist or is not available

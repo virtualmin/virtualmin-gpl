@@ -280,6 +280,9 @@ if (&supports_ip6()) {
 		}
 	}
 
+# Domains need some kind of IP
+$ip || $ip6 || &error($text{'form_esomeip'});
+
 # Validate the DNS IP
 if (&can_dnsip()) {
 	if ($in{'dns_ip_def'} == 0) {
