@@ -9422,6 +9422,14 @@ $noip4_tests = [
 	  'antigrep' => '^\s+IP address:',
 	},
 
+	# Also check IPs on the alias domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_target_domain ] ],
+	  'grep' => '^\s+IPv6 address:',
+	  'antigrep' => '^\s+IP address:',
+	},
+
 	# Validate all features in v6-only mode
 	{ 'command' => 'validate-domains.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
@@ -9493,6 +9501,14 @@ $noip4_tests = [
 		      '^\s+IPv6 address:' ],
 	},
 
+	# Also check the alias domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_target_domain ] ],
+	  'grep' => [ '^\s+IP address:',
+		      '^\s+IPv6 address:' ],
+	},
+
 	# Test DNS lookup to the new IPv4 address
 	{ 'command' => 'host -t A '.$test_domain,
 	  'grep' => &get_default_ip(),
@@ -9536,6 +9552,22 @@ $noip4_tests = [
 	{ 'command' => 'modify-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'no-ip' ] ],
+	},
+
+	# Check again that there is an IPv6 address but not v4
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => '^\s+IPv6 address:',
+	  'antigrep' => '^\s+IP address:',
+	},
+
+	# Also check IPs on the alias domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_target_domain ] ],
+	  'grep' => '^\s+IPv6 address:',
+	  'antigrep' => '^\s+IP address:',
 	},
 
 	# Cleanup the domain
