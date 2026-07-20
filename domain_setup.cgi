@@ -287,9 +287,11 @@ $ip || $ip6 || &error($text{'form_esomeip'});
 if (&can_dnsip()) {
 	if ($in{'dns_ip_def'} == 0) {
 		&check_ipaddress($in{'dns_ip'}) || &error($text{'save_ednsip'});
+		$ip || &error($text{'save_ednsipnone'});
 		}
 	if (defined($in{'dns_ip6_def'}) && $in{'dns_ip6_def'} == 0) {
 		&check_ip6address($in{'dns_ip6'}) || &error($text{'save_ednsip6'});
+		$ip6 || &error($text{'save_ednsip6none'});
 		}
 	}
 
@@ -349,11 +351,13 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'netmask', $netmask,
 	 'ip6', $ip6,
 	 'netmask6', $netmask6,
-	 'dns_ip', $in{'dns_ip_def'} == 0 && &can_dnsip() ? $in{'dns_ip'} :
+	 'dns_ip', !$ip ? undef :
+		   $in{'dns_ip_def'} == 0 && &can_dnsip() ? $in{'dns_ip'} :
 		   $in{'dns_ip_def'} == 2 && &can_dnsip() ? undef :
 		   $alias ? $alias->{'dns_ip'} :
 		   $virt ? undef : &get_dns_ip($resel, 4),
-	 'dns_ip6', !&supports_ip6() || !$config{'ip6enabled'} ? undef :
+	 'dns_ip6', !$ip6 ? undef :
+		    !&supports_ip6() || !$config{'ip6enabled'} ? undef :
 		    $in{'dns_ip6_def'} == 0 && &can_dnsip() ? $in{'dns_ip6'} :
 		    $in{'dns_ip6_def'} == 2 && &can_dnsip() ? undef :
 		    $alias ? $alias->{'dns_ip6'} :
