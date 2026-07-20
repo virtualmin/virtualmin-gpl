@@ -58,6 +58,11 @@ if ($in{'convert'}) {
 if (!&can_use_feature("virt")) {
 	# Cannot change anything, so no validation needed
 	}
+elsif ($in{'mode'} == -1) {
+	# Turning off IPv4 address
+	$virt = 0;
+	$ip = undef;
+	}
 elsif ($in{'mode'} == 0) {
 	# Switching to shared address
 	$ip = $in{'ip'};
@@ -114,16 +119,20 @@ elsif ($in{'mode'} == 3) {
 if (&can_dnsip()) {
 	$in{'dns_ip_def'} || &check_ipaddress($in{'dns_ip'}) ||
 		&error($text{'save_ednsip'});
+	$in{'dns_ip_def'} || $ip ||
+		&error($text{'save_ednsipnone'});
 	}
 if (&can_dnsip() && defined($in{'dns_ip6_def'})) {
 	$in{'dns_ip6_def'} || &check_ip6address($in{'dns_ip6'}) ||
 		&error($text{'save_ednsip6'});
+	$in{'dns_ip6_def'} || $ip6 ||
+		&error($text{'save_ednsip6none'});
 	}
 
 if (!&supports_ip6() || !&can_use_feature("virt6")) {
 	# Cannot use or change IPv6, so no validation needed
 	}
-elsif ($in{'mode6'} == -2) {
+elsif ($in{'mode6'} == -1) {
 	# Turning off IPv6 address
 	$virt6 = 0;
 	$ip6 = undef;

@@ -20,8 +20,10 @@ print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_table_start($text{'newip_header'}, "width=100%", 2, [ "width=30%" ]);
 
 # Old IP
-print &ui_table_row($text{'newip_old'},
-		    "<tt>$d->{'ip'}</tt>");
+if ($d->{'ip'}) {
+	print &ui_table_row($text{'newip_old'},
+			    "<tt>$d->{'ip'}</tt>");
+	}
 
 # Virtual interface
 if ($d->{'virt'}) {
@@ -44,15 +46,18 @@ if (&can_use_feature("virt")) {
 		}
 	push(@canips, map { [ $_, $text{'newip_shared2'} ] }
 			  &list_shared_ips());
-	if (!$d->{'virt'}) {
+	if (!$d->{'virt'} && $d->{'ip'}) {
 		push(@canips, [ $d->{'ip'}, $text{'newip_current'} ]);
 		}
 	@canips = map { [ $_->[0], "$_->[0] ($_->[1])" ] }
 		      grep { !$done{$_->[0]}++ } @canips;
 
 	# Build options for new IP field
-	@opts = ( [ 0, $text{'newip_sharedaddr'},
-		    &ui_select("ip", $d->{'ip'}, \@canips) ] );
+	@opts = ( [ -1, $text{'edit_virt6off'} ] );
+	if (@canips) {
+		push(@opts, [ 0, $text{'newip_sharedaddr'},
+			      &ui_select("ip", $d->{'ip'}, \@canips) ]);
+		}
 	if ($d->{'virt'}) {
 		# Already got a private IP, show option to keep
 		push(@opts, [ 1, $text{'newip_virtaddr'} ] );
@@ -69,15 +74,18 @@ if (&can_use_feature("virt")) {
 				   $text{'form_virtalready'}) ]);
 
 	# Show new IP field
+	$mode = $d->{'virt'} ? 1 : $d->{'ip'} && @canips ? 0 : -1;
 	print &ui_table_row($text{'newips_new'},
-		&ui_radio_table("mode", $d->{'virt'} ? 1 : 0, \@opts, 1));
+		&ui_radio_table("mode", $mode, \@opts, 1));
 	}
 
 # Show the external IPv4 address
 if (&can_dnsip()) {
 	print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
 		&ui_opt_textbox("dns_ip", $d->{'dns_ip'}, 20,
-				&text('spf_default', $d->{'ip'})));
+				$d->{'ip'} ?
+					&text('spf_default', $d->{'ip'}) :
+					$text{'edit_nodnsip4'}));
 	}
 
 my $ipv6hr;

@@ -1290,6 +1290,7 @@ edit_virt6on=Add with address
 edit_virt6using=Using address
 edit_dnsip=External IPv4 address
 edit_dnsip6=External IPv6 address
+edit_nodnsip4=IPv4 not enabled
 edit_nodnsip6=IPv6 not enabled
 edit_dnsip2=$1 externally
 edit_return=virtual server details
