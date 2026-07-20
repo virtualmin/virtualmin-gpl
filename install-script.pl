@@ -329,6 +329,14 @@ if (!$sinfo && !$script->{'overlap'}) {
 		}
 	}
 
+# An active or plugin-owned proxy shadows a filesystem app at the same path.
+if (!$sinfo && &script_path_used_by_proxy($d, $opts->{'path'})) {
+	my $message = $opts->{'path'} eq '/'
+		? $text{'scripts_epluginclashroot'}
+		: &text('scripts_epluginclash', $opts->{'path'});
+	&usage($message);
+	}
+
 # Install needed packages
 &setup_script_packages($script, $d, $ver);
 

@@ -71,6 +71,20 @@ if (!$sinfo && !$script->{'overlap'}) {
 		}
 	}
 
+# An active or plugin-owned proxy shadows a filesystem app at the same path.
+if (!$sinfo && &script_path_used_by_proxy($d, $opts->{'path'})) {
+	my $message = $opts->{'path'} eq '/'
+		? $text{'scripts_epluginclashroot'}
+		: &text('scripts_epluginclash', "<tt>$opts->{'path'}</tt>");
+	if (&has_proxy_balancer($d) && &can_edit_forward()) {
+		my $proxy_label = $text{'cat_web'}.' ⇾ '.$text{'edit_balancer'};
+		my $proxy_link = &ui_link(
+			"list_balancers.cgi?dom=".&urlize($d->{'id'}), $proxy_label);
+		$message .= '; '.&text('scripts_epluginclashproxy', $proxy_link);
+		}
+	&error($message);
+	}
+
 # Check options, unless upgrading
 if (defined(&{$script->{'check_func'}}) && !$sinfo) {
 	$oerr = &{$script->{'check_func'}}($d, $ver, $opts, $sinfo);
