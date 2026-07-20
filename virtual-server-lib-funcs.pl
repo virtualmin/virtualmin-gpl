@@ -20279,7 +20279,8 @@ if ($d->{'virt'} && $ip) {
 	&$second_print($text{'setup_done'});
 	}
 elsif ($d->{'virt'}) {
-	# Allocating IP
+	# Allocating IP because the original
+	# domain had done
 	&$first_print($text{'clone_virt'});
 	if ($tmpl->{'ranges'} eq 'none') {
 		&$second_print($text{'clone_virtrange'});
@@ -20299,6 +20300,8 @@ elsif ($d->{'virt'}) {
 
 # Allocate a new IPv6 address if needed
 if ($d->{'virt6'}) {
+	# Allocating IPv6 because the original
+	# domain had done
 	&$first_print($text{'clone_virt6'});
 	if ($tmpl->{'ranges6'} eq 'none') {
 		&$second_print($text{'clone_virt6range'});
