@@ -115,20 +115,6 @@ elsif ($in{'mode'} == 3) {
 	$virt = 1;
 	}
 
-# Check external IP
-if (&can_dnsip()) {
-	$in{'dns_ip_def'} || &check_ipaddress($in{'dns_ip'}) ||
-		&error($text{'save_ednsip'});
-	$in{'dns_ip_def'} || $ip ||
-		&error($text{'save_ednsipnone'});
-	}
-if (&can_dnsip() && defined($in{'dns_ip6_def'})) {
-	$in{'dns_ip6_def'} || &check_ip6address($in{'dns_ip6'}) ||
-		&error($text{'save_ednsip6'});
-	$in{'dns_ip6_def'} || $ip6 ||
-		&error($text{'save_ednsip6none'});
-	}
-
 if (!&supports_ip6() || !&can_use_feature("virt6")) {
 	# Cannot use or change IPv6, so no validation needed
 	}
@@ -188,6 +174,23 @@ elsif ($in{'mode6'} == 3) {
 					 $already->{'dom'}));
 		}
 	$virt6 = 1;
+	}
+
+# Domains need some kind of IP
+$ip || $ip6 || &error($text{'form_esomeip'});
+
+# Check external IP
+if (&can_dnsip()) {
+	$in{'dns_ip_def'} || &check_ipaddress($in{'dns_ip'}) ||
+		&error($text{'save_ednsip'});
+	$in{'dns_ip_def'} || $ip ||
+		&error($text{'save_ednsipnone'});
+	}
+if (&can_dnsip() && defined($in{'dns_ip6_def'})) {
+	$in{'dns_ip6_def'} || &check_ip6address($in{'dns_ip6'}) ||
+		&error($text{'save_ednsip6'});
+	$in{'dns_ip6_def'} || $ip6 ||
+		&error($text{'save_ednsip6none'});
 	}
 
 if (&domain_has_website($d)) {
