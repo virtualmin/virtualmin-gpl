@@ -9570,9 +9570,39 @@ $noip4_tests = [
 	  'antigrep' => '^\s+IP address:',
 	},
 
-	# Cleanup the domain
+	# Clone the domain, which should also not get an IPv4 address
+	{ 'command' => 'clone-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'newdomain', $test_clone_domain ],
+		      [ 'newuser', $test_clone_domain_user ],
+		      [ 'newpass', 'foo' ] ],
+	},
+
+	# Check that the clone has an IPv6 address but not v4
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_clone_domain ] ],
+	  'grep' => '^\s+IPv6 address:',
+	  'antigrep' => '^\s+IP address:',
+	},
+
+	# Test DNS lookup for v6 entry of the clone
+	{ 'command' => 'host -t AAAA '.$test_clone_domain,
+	  'grep' => 'IPv6 address',
+	},
+
+	# Test DNS lookup for v4 entry of the clone, which should fail
+	{ 'command' => 'host -t A '.$test_clone_domain,
+	  'antigrep' => 'IP address',
+	},
+
+	# Cleanup the domains
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1
+        },
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ] ],
 	  'cleanup' => 1
         },
 	];
