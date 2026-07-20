@@ -2269,11 +2269,11 @@ if (&domain_has_website($d)) {
 		my @nips6 = map { $_->{'values'}->[0] }
 			       grep { $_->{'type'} eq 'AAAA' &&
 				      $_->{'name'} eq $n } @$recs;
-		if (@nips && &indexof($ip, @nips) < 0) {
+		if ($ip && @nips && &indexof($ip, @nips) < 0) {
 			push(@recerrs, &text('validate_ednsip', $n,
 			    join(' or ', @nips), $ip));
 			}
-		if ($d->{'virt6'} && @nips6 && &indexof($ip6, @nips6) < 0) {
+		if ($ip6 && @nips6 && &indexof($ip6, @nips6) < 0) {
 			push(@recerrs, &text('validate_ednsip6', $n,
 			  join(' or ', @nips6), $ip6));
 			}
