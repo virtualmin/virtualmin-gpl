@@ -2934,6 +2934,11 @@ if ($ok) {
 				my $alias = &get_domain($d->{'alias'});
 				$d->{'ip'} = $alias->{'ip'};
 				}
+			elsif ($ipinfo && $ipinfo->{'mode'} == -2) {
+				# User requested no IP address
+				$d->{'ip'} = undef;
+				$d->{'virt'} = 0;
+				}
 			elsif ($ipinfo && $ipinfo->{'mode'} == 5) {
 				# Allocate IP if the domain had one before,
 				# use shared IP otherwise
@@ -3004,6 +3009,10 @@ if ($ok) {
 					if ($continue) { next DOMAIN; }
 					else { last DOMAIN; }
 					}
+				}
+			elsif (!$d->{'ip'}) {
+				# Domain had no IP before, so don't request one now
+				$d->{'ip'} = undef;
 				}
 			elsif (!$d->{'virt'}) {
 				# Use this system's default IP
@@ -3102,7 +3111,11 @@ if ($ok) {
 					}
 				}
 			elsif (!$d->{'virt6'} && !$config{'ip6enabled'}) {
-				# IPv6 for new domains is disabled
+				# IPv6 for new domains is disabled on this system
+				$d->{'ip6'} = undef;
+				}
+			elsif (!$d->{'ip6'}) {
+				# Domain had no IPv6 before, so don't request one now
 				$d->{'ip6'} = undef;
 				}
 			elsif (!$d->{'virt6'}) {
