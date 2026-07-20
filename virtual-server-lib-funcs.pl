@@ -16801,15 +16801,6 @@ if (&domain_has_website()) {
 				"<tt>$config{'php_fpm_pool'}</tt>"));
 			}
 
-		# Do not repair PHP-FPM versions when the package system reports
-		# busy
-		if (!$skip->{'fpm_repair'} && &foreign_check("software")) {
-			&foreign_require("software");
-			$skip->{'fpm_repair'} = 1
-				if (defined(&software::package_system_busy) &&
-				    &software::package_system_busy());
-			}
-
 		if (!$skip->{'fpm_repair'}) {
 			# Check for invalid FPM versions, in case one has been
 			# upgraded to a new release
