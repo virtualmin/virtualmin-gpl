@@ -16246,14 +16246,12 @@ my $merr = &made_changes();
 return undef;
 }
 
-# check_virtual_server_config([&lastconfig], [&skip])
+# check_virtual_server_config([&lastconfig], [skip_dns_network])
 # Validates the Virtualmin configuration, printing out messages as it goes.
-# The skip hash can contain dns_network and fpm_repair flags.
 # Returns undef on success, or an error message on failure.
 sub check_virtual_server_config
 {
-my ($lastconfig, $skip) = @_;
-$skip ||= { };
+my ($lastconfig, $skip_dns_network) = @_;
 my $clink = "edit_newfeatures.cgi";
 my $mclink = "../config.cgi?$module_name";
 
@@ -16344,7 +16342,7 @@ if (&foreign_check("proc")) {
 		}
 	}
 
-if ($config{'dns'} && !$skip->{'dns_network'}) {
+if ($config{'dns'} && !$skip_dns_network) {
 	# Make sure BIND is installed
 	my $dnsremote;
 	if ($dnsremote = &is_dns_remote()) {
@@ -16801,46 +16799,35 @@ if (&domain_has_website()) {
 				"<tt>$config{'php_fpm_pool'}</tt>"));
 			}
 
-		# Do not repair PHP-FPM versions when the package system reports
-		# busy
-		if (!$skip->{'fpm_repair'} && &foreign_check("software")) {
-			&foreign_require("software");
-			$skip->{'fpm_repair'} = 1
-				if (defined(&software::package_system_busy) &&
-				    &software::package_system_busy());
+		# Check for invalid FPM versions, in case one has been
+		# upgraded to a new release
+		my @fpmfixed;
+		foreach my $d (grep { &domain_has_website($_) &&
+				      !$_->{'alias'} } &list_domains()) {
+			# Check if an FPM version is stored in domain config
+			my $dv = $d->{'php_fpm_version'};
+			my $mode = &get_domain_php_mode($d);
+			next if ($mode ne "fpm");
+			# Version set in domain config exists in the list of
+			# FPMs, so skip it, all good
+			my ($f) = grep { $_->{'shortversion'} eq $dv ||
+					 $_->{'version'} eq $dv } @fpms;
+			next if ($f);
+
+			# Try to detect actually configured version
+			$dv = &detect_php_fpm_version($d);
+			# If still none exists do nothing
+			next if (!$dv);
+			
+			&lock_domain($d);
+			$d->{'php_fpm_version'} = $dv;
+			&save_domain($d);
+			&unlock_domain($d);
+			push(@fpmfixed, $d);
 			}
-
-		if (!$skip->{'fpm_repair'}) {
-			# Check for invalid FPM versions, in case one has been
-			# upgraded to a new release
-			my @fpmfixed;
-			foreach my $d (grep { &domain_has_website($_) &&
-					      !$_->{'alias'} } &list_domains()) {
-				# Check if an FPM version is stored in domain config
-				my $dv = $d->{'php_fpm_version'};
-				my $mode = &get_domain_php_mode($d);
-				next if ($mode ne "fpm");
-				# Version set in domain config exists in the list of
-				# FPMs, so skip it, all good
-				my ($f) = grep { $_->{'shortversion'} eq $dv ||
-						 $_->{'version'} eq $dv } @fpms;
-				next if ($f);
-
-				# Try to detect actually configured version
-				$dv = &detect_php_fpm_version($d);
-				# If still none exists do nothing
-				next if (!$dv);
-
-				&lock_domain($d);
-				$d->{'php_fpm_version'} = $dv;
-				&save_domain($d);
-				&unlock_domain($d);
-				push(@fpmfixed, $d);
-				}
-			if (@fpmfixed) {
-				&$second_print(&text('check_webphpverfixed',
-						     scalar(@fpmfixed)));
-				}
+		if (@fpmfixed) {
+			&$second_print(&text('check_webphpverfixed',
+					     scalar(@fpmfixed)));
 			}
 
 		# Fix numeric ports for any Virtualmin domains
@@ -17298,7 +17285,7 @@ if ($defip || $defip6) {
 $config{'old_defip'} ||= $defip;
 $config{'old_defip6'} ||= $defip6;
 
-if (!$skip->{'dns_network'}) {
+if (!$skip_dns_network) {
 		# Make sure the external IPv4 is set if needed
 		my $ext_ip = &get_external_ip_address(1, 4);
 		if ($config{'dns_ip'} ne '*') {
@@ -17787,10 +17774,8 @@ if ($itype =~ /^(rpm|deb)$/ &&
 # Invalidate global scripts default cache
 &invalidate_global_def_scripts_cache();
 
-# All looks OK .. save the config. If an FPM version repair was skipped,
-# leave the check timestamp unchanged. A normal config check must be run
-# manually after package installation to perform the repair.
-$config{'last_check'} = time()+1 if (!$skip->{'fpm_repair'});
+# All looks OK .. save the config
+$config{'last_check'} = time()+1;
 $config{'disable'} =~ s/user/unix/g;	# changed since last release
 # Clean settings left behind by the removed ProFTPd virtual FTP feature.
 $config{'disable'} = join(",", grep { $_ ne 'ftp' }
