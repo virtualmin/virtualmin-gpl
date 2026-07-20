@@ -173,10 +173,22 @@ foreach $line (@lines) {
 			$virtalready = 0;
 			}
 		}
+	elsif ($ip eq "none") {
+		# No IP address requested
+		$virt = 0;
+		$virtalready = 0;
+		$ip = undef;
+		}
 	else {
+		# Use default IP address
 		$virt = 0;
 		$virtalready = 1;
 		$ip = $defip;
+		}
+
+	if (!$ip && !$ip6) {
+		&line_error($text{'cmass_esomeip'});
+		next;
 		}
 
 	# Pick an IPv6 address
@@ -214,6 +226,8 @@ foreach $line (@lines) {
 			}
 		else {
 			# No IPv6 at all
+			$ip6 = undef;
+			$virt6 = 0;
 			}
 		}
 

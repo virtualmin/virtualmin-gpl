@@ -5655,6 +5655,7 @@ cmass_eipresel=Failed to allocate IP address from reseller's ranges!
 cmass_eiptmpl=Automatic IP allocation cannot be used unless ranges are set up in the template
 cmass_eipalloc=Failed to allocate IP address from template's ranges!
 cmass_eipmust=Automatic IP allocation is mandatory for this template
+cmass_esomeip=Either an IPv4 or IPv6 address must be enabled
 cmass_emustparent=You are not allowed to create top-level virtual servers - a parent domain must be specified
 cmass_ecanparent=You are not allowed to manage the parent virtual server $1
 cmass_eparpar=The parent server $1 is not a top-level server
