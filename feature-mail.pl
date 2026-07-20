@@ -963,13 +963,16 @@ if ($config{'mail_autoconfig'} &&
 	}
 
 # Update any outgoing IP mapping
-if (($d->{'dom'} ne $oldd->{'dom'} ||
-     $d->{'ip'} ne $oldd->{'ip'} ||
-     $d->{'ip6'} ne $oldd->{'ip6'}) && $supports_dependent) {
-	my $old_dependent = &get_domain_dependent($oldd);
-	if ($old_dependent) {
-		&save_domain_dependent($oldd, 0);
-		&save_domain_dependent($d, 1);
+if ($supports_dependent) {
+	if ($d->{'dom'} ne $oldd->{'dom'} ||
+	    $d->{'ip'} && $oldd->{'ip'} && $d->{'ip'} ne $oldd->{'ip'} ||
+	    $d->{'ip6'} && $oldd->{'ip6'} && $d->{'ip6'} ne $oldd->{'ip6'}) {
+		# IP or domain name changed
+		my $old_dependent = &get_domain_dependent($oldd);
+		if ($old_dependent) {
+			&save_domain_dependent($oldd, 0);
+			&save_domain_dependent($d, 1);
+			}
 		}
 	}
 
@@ -5542,7 +5545,9 @@ elsif (!$m && $dependent) {
 	$m = { %$smtp };
 	delete($m->{'line'});
 	delete($m->{'uline'});
-	$m->{'command'} .= " -o smtp_bind_address=$d->{'ip'}";
+	if ($d->{'ip'}) {
+		$m->{'command'} .= " -o smtp_bind_address=$d->{'ip'}";
+		}
 	if ($d->{'ip6'}) {
 		$m->{'command'} .= " -o smtp_bind_address6=$d->{'ip6'}";
 		}

@@ -3842,8 +3842,24 @@ foreach my $d (&sort_indent_domains($doms)) {
 		elsif ($c eq "ip") {
 			# IP address
 			my $ip = $d->{'ip'};
-			$ip = "<i>$ip</i>" if ($d->{'virt'});
-			push(@cols, $ip);
+			if ($ip) {
+				$ip = "<i>$ip</i>" if ($d->{'virt'});
+				push(@cols, $ip);
+				}
+			else {
+				push(@cols, "");
+				}
+			}
+		elsif ($c eq "ip6") {
+			# IPv6 address
+			my $ip6 = $d->{'ip6'};
+			if ($ip6) {
+				$ip6 = "<i>$ip6</i>" if ($d->{'virt6'});
+				push(@cols, $ip6);
+				}
+			else {
+				push(@cols, "");
+				}
 			}
 		elsif ($c eq "ssl_expiry") {
 			# SSL cert expiry
@@ -8392,7 +8408,8 @@ if ($dom->{'parent'}) {
 	}
 
 # Work out if this server is being created on the primary default IP address
-if ($dom->{'ip'} eq &get_default_ip() &&
+if ($dom->{'ip'} &&
+    $dom->{'ip'} eq &get_default_ip() &&
     !$dom->{'virt'}) {
 	$dom->{'defip'} = 1;
 	}
@@ -14542,8 +14559,9 @@ my %catmap = map { $_->{'catname'}, $_->{'cat'} } @rv;
 # Add preview website link, proxied via Webmin
 if (&domain_has_website($d) && &can_use_preview()) {
 	my $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";
+	my $ip = $d->{'ip'} || $d->{'ip6'};
 	push(@rv, { 'url' => "/$module_name/".
-		    	     "link.cgi/$d->{'ip'}/http://www.$d->{'dom'}$pt/",
+		    	     "link.cgi/$ip/http://www.$d->{'dom'}$pt/",
 		    'title' => $text{'links_website'},
 		    'cat' => 'web',
 		    'catname' => $text{'cat_services'},
@@ -19918,16 +19936,18 @@ my ($d, $oldd) = @_;
 my @aliases = &get_domain_by("alias", $d->{'id'});
 return 0 if (!@aliases);
 foreach my $ad (@aliases) {
-	next if ($ad->{'ip'} ne $oldd->{'ip'} &&
-		 $ad->{'ip6'} ne $oldd->{'ip6'});
 	my $oldad = { %$ad };
-	if ($ad->{'ip'} eq $oldd->{'ip'}) {
+	my $changed = 0;
+	if (($ad->{'ip'} // "") eq ($oldd->{'ip'} // "")) {
 		$ad->{'ip'} = $d->{'ip'};
+		$changed++;
 		}
-	if ($oldd->{'ip6'} && $ad->{'ip6'} eq $oldd->{'ip6'}) {
+	if (($ad->{'ip6'} // "") eq ($oldd->{'ip6'} // "")) {
 		$ad->{'ip6'} = $d->{'ip6'};
+		$changed++;
 		}
-	&$first_print(&text('save_aliasip', $ad->{'dom'}, $d->{'ip'}));
+	next if (!$changed);
+	&$first_print(&text('save_aliasip', $ad->{'dom'}, $d->{'ip'} || $text{'save_aliasipnone'}));
 	&$indent_print();
 	foreach my $f (@features) {
 		my $mfunc = "modify_$f";
@@ -20087,13 +20107,13 @@ my $host = $d->{'dom'};
 foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
 	my $ip = &to_ipaddress($h);
 	my $ip6 = &to_ip6address($h);
-	# IPv4
-	if ($ip && $ip eq $d->{'ip'}) {
+	if ($ip && $d->{'ip'} && $ip eq $d->{'ip'}) {
+		# IPv4
 		$host = $h;
 		last;
 		}
-	# IPv6
-	elsif ($ip6 && $ip6 eq $d->{'ip6'}) {
+	elsif ($ip6 && $d->{'ip6'} && $ip6 eq $d->{'ip6'}) {
+		# IPv6
 		$host = $h;
 		last;
 		}
@@ -20251,7 +20271,7 @@ foreach my $k (keys %$d) {
 
 # Pick a new IPv4 address if needed
 if ($d->{'virt'} && $ip) {
-	# IP specific by caller
+	# IP specified by caller
 	&$first_print(&text('clone_virt2', $ip));
 	$d->{'ip'} = $ip;
 	$d->{'virtalready'} = $virtalready;

@@ -2968,7 +2968,8 @@ if ($ok) {
 							}
 						}
 					}
-				elsif (&indexof($d->{'ip'},
+				elsif ($d->{'ip'} &&
+				       &indexof($d->{'ip'},
 						&list_shared_ips()) >= 0) {
 					# IP is on shared list, so keep it
 					}
