@@ -96,7 +96,8 @@ if (!$aliasdom && $d->{'dir'}) {
 	}
 
 # Show IP addresses
-@ips = ( $d->{'ip'} );
+my @ips;
+push(@ips, $d->{'ip'}) if ($d->{'ip'});
 if ($d->{'dns_ip'}) {
 	push(@ips, &text('edit_dnsip2', $d->{'dns_ip'}));
 	}
