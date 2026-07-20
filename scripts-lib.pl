@@ -2053,7 +2053,7 @@ sub post_http_connection
 {
 my ($d, $page, $params, $out, $err, $headers,
     $returnheaders, $returnheaders_array) = @_;
-my $ip = $d->{'ip'};
+my $ip = $d->{'ip'} || $d->{'ip6'};
 my $host = &get_domain_http_hostname($d);
 my $usessl = &domain_has_ssl($d);
 my $port = $usessl ? $d->{'web_sslport'} : $d->{'web_port'};
