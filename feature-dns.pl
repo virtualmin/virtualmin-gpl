@@ -2295,6 +2295,9 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 			my $mxh = $mx->{'values'}->[1];
 			$mxh .= ".".$d->{'dom'} if ($mxh !~ /\.$/);
 			$mxh =~ s/\.$//;
+
+			# Check if the MX hostname resolves to
+			# an IPv4 address on this system
 			my $ip = &to_ipaddress($mxh);
 			if ($ip && ($ip eq $d->{'ip'} ||
 				    $ip eq $d->{'dns_ip'} ||
@@ -2303,6 +2306,9 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 				$found = $ip;
 				last;
 				}
+
+			# Check if the MX hostname resolves to
+			# an IPv6 address on this system
 			my $ip6 = &to_ip6address($mxh);
 			if ($ip6 && ($ip6 eq $d->{'ip6'} ||
 				     $ip6 eq $d->{'dns_ip6'} ||
@@ -2311,20 +2317,35 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 				$found = $ip6;
 				last;
 				}
+
+			# Check for an IPv4 DNS record that points to
+			# this system
 			my ($arec) = grep { $_->{'name'} eq $mxh."." &&
-					    ($_->{'type'} eq 'A' ||
-					     $_->{'type'} eq 'AAAA') } @$recs;
+					    $_->{'type'} eq 'A' } @$recs;
 			if ($arec) {
-				$ip = $arec->{'values'}->[0];
+				my $ip = $arec->{'values'}->[0];
 				if ($ip && ($ip eq $d->{'ip'} ||
 					    $ip eq $d->{'dns_ip'} ||
-					    $ip eq $d->{'ip6'} ||
-					    $ip eq $d->{'dns_ip6'} ||
 					    $ip eq $defip)) {
 					$found = $ip;
 					last;
 					}
 				}
+
+			# Check for an IPv6 DNS record that points to
+			# this system
+			my ($arec) = grep { $_->{'name'} eq $mxh."." &&
+					    $_->{'type'} eq 'AAAA' } @$recs;
+			if ($arec) {
+				my $ip6 = $arec->{'values'}->[0];
+				if ($ip6 && ($ip6 eq $d->{'ip6'} ||
+					     $ip6 eq $d->{'dns_ip6'} ||
+					     $ip6 eq $defip6)) {
+					$found = $ip6;
+					last;
+					}
+				}
+
 			push(@mxips, $mxh);
 			}
 		if (!$found) {
