@@ -3129,6 +3129,14 @@ if ($ok) {
 					}
 				}
 
+			# Make sure we have some kind of IP after all that
+			if (!$d->{'ip'} && !$d->{'ip6'}) {
+				&$second_print(&text('form_esomeip'));
+				$ok = 0;
+				if ($continue) { next DOMAIN; }
+				else { last DOMAIN; }
+				}
+
 			# DNS external IP is always reset to match this system,
 			# as the old setting is unlikely to be correct.
 			$d->{'old_dns_ip'} = $d->{'dns_ip'};
