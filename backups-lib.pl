@@ -2978,8 +2978,9 @@ if ($ok) {
 						&list_shared_ips()) >= 0) {
 					# IP is on shared list, so keep it
 					}
-				else {
-					# Use shared IP
+				elsif ($d->{'ip'}) {
+					# Use default IP for this system, if
+					# the domain had an IP before
 					$d->{'ip'} = $defip;
 					if (!$d->{'ip'}) {
 						&$second_print(
@@ -2988,6 +2989,10 @@ if ($ok) {
 						if ($continue) { next DOMAIN; }
 						else { last DOMAIN; }
 						}
+					}
+				else {
+					# Domain had no IP before
+					$d->{'ip'} = undef;
 					}
 				}
 			elsif ($ipinfo && $ipinfo->{'ip'}) {
