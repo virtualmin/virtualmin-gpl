@@ -9596,6 +9596,55 @@ $noip4_tests = [
 	  'antigrep' => 'IP address',
 	},
 
+	# Backup the domain with no IPv4 address
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Delete the domain in preparation for restore
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+        },
+
+	# Restore the domain, which should come back with no IPv4 address
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Check that the restored domain has no IPv4
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => '^\s+IPv6 address:',
+	  'antigrep' => '^\s+IP address:',
+	},
+
+	# Delete the domain in preparation for restore again
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+        },
+
+	# Restore the domain, which should come back with an IPv4 but not v6
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ],
+		      [ 'default-ip' ],
+		      [ 'no-ip6' ] ],
+	},
+
+	# Check that the restored domain has no IPv6
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => '^\s+IP address:',
+	  'antigrep' => '^\s+IPv6 address:',
+	},
+
 	# Cleanup the domains
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
