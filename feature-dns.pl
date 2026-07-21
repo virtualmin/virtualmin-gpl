@@ -2305,7 +2305,8 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 				last;
 				}
 			my ($arec) = grep { $_->{'name'} eq $mxh."." &&
-					       $_->{'type'} eq 'A' } @$recs;
+					    ($_->{'type'} eq 'A' ||
+					     $_->{'type'} eq 'AAAA') } @$recs;
 			if ($arec) {
 				$ip = $arec->{'values'}->[0];
 				if ($ip && ($ip eq $d->{'ip'} ||
