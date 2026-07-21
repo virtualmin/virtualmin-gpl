@@ -45,6 +45,7 @@ foreach $d (@doms) {
 	if ($in{'mode'} == 0) {
 		# Changing real IP address
 		if (!$in{'new_def'} &&
+		    $d->{'ip'} &&
 		    ($d->{'ip'} eq $in{'old'} ||
 		     $d->{'alias'} &&
 		     &get_domain($d->{'alias'})->{'ip'} eq $in{'old'})) {
@@ -53,6 +54,7 @@ foreach $d (@doms) {
 			}
 		if ($in{'old6'}) {
 			if (!$in{'new6_def'} &&
+			    $d->{'ip6'} &&
 			    ($d->{'ip6'} eq $in{'old6'} ||
 			     $d->{'alias'} &&
 			     &get_domain($d->{'alias'})->{'ip6'} eq
@@ -66,12 +68,12 @@ foreach $d (@doms) {
 		# Changing external IP address
 		my $dns_ip = $d->{'dns_ip'} || $d->{'ip'};
 		my $dns_ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
-		if (!$in{'new_def'} && $dns_ip eq $in{'old'}) {
+		if (!$in{'new_def'} && $dns_ip && $dns_ip eq $in{'old'}) {
 			$d->{'dns_ip'} = $in{'new'};
 			$changed++;
 			}
 		if ($in{'old6'}) {
-			if (!$in{'new6_def'} && $dns_ip6 eq $in{'old6'}) {
+			if (!$in{'new6_def'} && $dns_ip6 && $dns_ip6 eq $in{'old6'}) {
 				$d->{'dns_ip6'} = $in{'new6'};
 				$changed++;
 				}
