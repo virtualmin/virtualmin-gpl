@@ -244,8 +244,21 @@ if (!$in{'confirm'}) {
 		    "</b><p>\n";
 		}
 
+	# Are there any missing existing domains?
+	my $existing = 0;
+	foreach $d (sort { $a cmp $b } keys %$cont) {
+                next if ($d eq "virtualmin");
+                my $dinfo = &get_domain_by("dom", $d);
+		$existing++ if ($dinfo);
+		}
+
 	# Tell the user what will be done
-	print &ui_alert_box(&text('restore_from', $nice), 'warn');
+	if ($existing) {
+		print &ui_alert_box(&text('restore_from', $nice), 'warn');
+		}
+	else {
+		print &ui_alert_box(&text('restore_from2', $nice), 'info');
+		}
 
 	print &ui_form_start("restore.cgi", "form-data");
 	print &ui_hidden("origsrc", $origsrc);
