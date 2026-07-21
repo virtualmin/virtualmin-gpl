@@ -2286,6 +2286,7 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 	my @mxs = grep { $_->{'name'} eq $d->{'dom'}.'.' &&
 			    $_->{'type'} eq 'MX' } @$recs;
 	my $defip = &get_default_ip();
+	my $defip6 = &get_default_ip6();
 	my %inuse = &interface_ip_addresses();
 	if (@mxs) {
 		my $found;
@@ -2297,11 +2298,17 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 			my $ip = &to_ipaddress($mxh);
 			if ($ip && ($ip eq $d->{'ip'} ||
 				    $ip eq $d->{'dns_ip'} ||
-				    $ip eq $d->{'ip6'} ||
-				    $ip eq $d->{'dns_ip6'} ||
 				    $ip eq $defip ||
 				    $inuse{$ip})) {
 				$found = $ip;
+				last;
+				}
+			my $ip6 = &to_ip6address($mxh);
+			if ($ip6 && ($ip6 eq $d->{'ip6'} ||
+				     $ip6 eq $d->{'dns_ip6'} ||
+				     $ip6 eq $defip6 ||
+				     $inuse{$ip6})) {
+				$found = $ip6;
 				last;
 				}
 			my ($arec) = grep { $_->{'name'} eq $mxh."." &&
