@@ -138,10 +138,15 @@ if (!$config{'migrated_domain_webmin_avail'}) {
 			&save_template($tmpl);
 			}
 		}
-	foreach my $d (grep { !$_->{'parent'} } &list_domains()) {
-		if (&init_domain_webmin_avail($d, 1)) {
+	foreach my $listed (grep { !$_->{'parent'} } &list_domains()) {
+		my $id = $listed->{'id'};
+		&lock_domain($id);
+		my $d = &get_domain($id, undef, 1);
+		if ($d && !$d->{'parent'} &&
+		    &init_domain_webmin_avail($d, 1)) {
 			&save_domain($d);
 			}
+		&unlock_domain($id);
 		}
 	$config{'migrated_domain_webmin_avail'} = 1;
 	&save_module_config();
