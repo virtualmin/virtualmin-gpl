@@ -45,14 +45,18 @@ else {
 	if ($d->{'ip'}) {
 		my ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
 					$_->{'ssl'} &&
-					$_->{'id'} ne $d->{'id'}} &list_domains();
-		if (!$d->{'virt'} && $sslclash && (!$oldd || !$oldd->{'ssl'})) {
+					$_->{'id'} ne $d->{'id'} }
+				      &list_domains();
+		if (!$d->{'virt'} && $sslclash &&
+		    (!$oldd || !$oldd->{'ssl'})) {
 			# Clash .. but is the cert OK?
-			if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
-				my @certdoms = &list_domain_certificate($sslclash);
+			if (!&check_domain_certificate($d->{'dom'},
+						       $sslclash)) {
+				my @certdoms =
+					&list_domain_certificate($sslclash);
 				return &text('setup_edepssl5', $d->{'ip'},
-					join(", ", map { "<tt>$_</tt>" } @certdoms),
-					$sslclash->{'dom'});
+				    join(", ", map { "<tt>$_</tt>" } @certdoms),
+				    $sslclash->{'dom'});
 				}
 			else {
 				return undef;
@@ -81,14 +85,18 @@ else {
 		my ($sslclash6) = grep { $_->{'ip6'} &&
 					 $_->{'ip6'} eq $d->{'ip6'} &&
 					 $_->{'ssl'} &&
-					 $_->{'id'} ne $d->{'id'}} &list_domains();
-		if (!$d->{'virt6'} && $sslclash6 && (!$oldd || !$oldd->{'ssl'})) {
+					 $_->{'id'} ne $d->{'id'} }
+				       &list_domains();
+		if (!$d->{'virt6'} && $sslclash6 &&
+		    (!$oldd || !$oldd->{'ssl'})) {
 			# Clash .. but is the cert OK?
-			if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
-				my @certdoms = &list_domain_certificate($sslclash);
+			if (!&check_domain_certificate($d->{'dom'},
+						       $sslclash)) {
+				my @certdoms =
+					&list_domain_certificate($sslclash);
 				return &text('setup_edepssl5', $d->{'ip6'},
-					join(", ", map { "<tt>$_</tt>" } @certdoms),
-					$sslclash->{'dom'});
+				    join(", ", map { "<tt>$_</tt>" } @certdoms),
+				    $sslclash->{'dom'});
 				}
 			else {
 				return undef;
