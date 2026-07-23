@@ -352,23 +352,32 @@ unlike($feature_source,
 	qr/&hlink\(\$text\{'tmpl_webmin_avail'\}/,
 	'template module access heading is not clickable');
 
-my $saved_domain;
+my @saved_domains;
 {
 no warnings 'redefine';
 local *main::make_dir = sub { };
 local *main::lock_file = sub { };
 local *main::unlock_file = sub { };
 local *main::read_file = sub { return 0; };
-local *main::write_file = sub { $saved_domain = { %{$_[1]} }; };
+local *main::write_file = sub { push(@saved_domains, { %{$_[1]} }); };
 local *main::set_ownership_permissions = sub { };
 local *main::build_domain_maps = sub { };
-my $imported = {
-	'id' => 104, 'dom' => 'imported.example', 'template' => 10,
+my $raw = {
+	'id' => 107, 'dom' => 'raw.example', 'template' => 10,
 	};
+ok(&main::save_domain($raw, 1),
+	'low-level creation persistence accepts a domain');
+ok(!defined($saved_domains[-1]->{'webmin_avail'}),
+	'low-level persistence does not derive a Webmin module policy');
+my $imported = {
+	'id' => 108, 'dom' => 'imported.example', 'template' => 10,
+	};
+ok(&main::init_domain_webmin_avail($imported),
+	'direct import initializes its Webmin module policy explicitly');
 ok(&main::save_domain($imported, 1),
 	'directly imported domain can be persisted');
-is($saved_domain->{'webmin_avail'}, 'dns=0 proc=0 plugin=0',
-	'direct creation persistence snapshots the effective template policy');
+is($saved_domains[-1]->{'webmin_avail'}, 'dns=0 proc=0 plugin=0',
+	'explicit direct-import initialization snapshots the effective template policy');
 }
 
 done_testing();

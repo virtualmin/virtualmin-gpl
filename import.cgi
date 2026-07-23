@@ -338,6 +338,7 @@ if ($in{'confirm'}) {
 	&complete_domain(\%dom);
 	&find_html_cgi_dirs(\%dom);
 	print $text{'setup_save'},"<br>\n";
+	&init_domain_webmin_avail(\%dom);
 	&save_domain(\%dom, 1);
 	&$second_print($text{'setup_done'});
 

@@ -356,7 +356,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--add-webmin-module") {
 		$webmin_module = shift(@ARGV);
 		defined($webmin_module) && $webmin_module ne '' ||
-			&usage("Missing Webmin module code");
+			&usage("Missing Webmin module argument");
 		my ($mod, $value) = split(/=/, $webmin_module, 2);
 		$value = 1 if (!defined($value));
 		$value eq '' &&
@@ -369,6 +369,8 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--remove-webmin-module") {
 		my $mod = shift(@ARGV);
+		defined($mod) && $mod ne '' ||
+			&usage("Missing Webmin module argument");
 		my $minfo = $all_webmin_modules{$mod};
 		$minfo || &usage("Webmin module $mod is not known. Valid modules are : ".join(" ", sort keys %all_webmin_modules));
 		push(@webmin_module_changes, [ $mod, 0 ]);

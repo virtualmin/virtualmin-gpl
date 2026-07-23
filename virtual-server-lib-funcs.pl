@@ -583,13 +583,6 @@ sub save_domain
 {
 my ($d, $creating) = @_;
 
-# Every newly persisted top-level server must own a stable copy of its Webmin
-# module policy, including imports and legacy restore paths that bypass the
-# normal virtual-server creation workflow.
-&init_domain_webmin_avail($d)
-	if ($creating && !$d->{'parent'} &&
-	    !defined($d->{'webmin_avail'}));
-
 my $file = "$domains_dir/$d->{'id'}";
 if (!$creating && $d->{'id'} && !-r $file) {
 	# Deleted from under us! Don't save
