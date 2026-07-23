@@ -111,8 +111,8 @@ else {
 		foreach my $v (&apache::find_directive_struct("VirtualHost",
 							      $conf)) {
 			foreach my $w (@{$v->{'words'}}) {
-				$w =~ /^\[([^\/]+)\]/ || next;
-				my $vip = $1;
+				$w =~ /^\[([^\]]+)\]:(\d+)$/ || next;
+				my ($vip, $vport) = ($1, $2);
 				if ($vip eq $d->{'ip6'} && $vport == $port) {
 					return &text('setup_edepssl4',
 						     $d->{'ip6'}, $port);
@@ -667,13 +667,15 @@ if (&foreign_installed("usermin")) {
 	&usermin::get_usermin_miniserv_config(\%uminiserv);
 	push(@checks, [ \%uminiserv, "Usermin" ]);
 	}
+my @ips = grep { $_ } ($d->{'ip'}, $d->{'ip6'});
 foreach my $c (@checks) {
 	my @sockets = &webmin::get_miniserv_sockets($c->[0]);
 	foreach my $s (@sockets) {
-		if (($s->[0] eq '*' || $s->[0] eq $d->{'ip'}) &&
+		if (($s->[0] eq '*' || &indexof($s->[0], @ips) >= 0) &&
 		    $s->[1] == $port) {
 			return &text('setup_esslportclash',
-				     $d->{'ip'}, $port, $c->[1]);
+				     $d->{'ip'} || $d->{'ip6'},
+				     $port, $c->[1]);
 			}
 		}
 	}
@@ -2318,7 +2320,10 @@ $main::got_lock_ssl-- if ($main::got_lock_ssl);
 sub find_matching_certificate_domain
 {
 my ($d) = @_;
-my @sslclashes = grep { $_->{'ip'} eq $d->{'ip'} &&
+my $ipkey = $d->{'ip'} ? 'ip' : 'ip6';
+my $ip = $d->{$ipkey};
+return wantarray ? ( ) : undef if (!$ip);
+my @sslclashes = grep { $_->{$ipkey} && $_->{$ipkey} eq $ip &&
 			   &domain_has_ssl($_) &&
 			   $_->{'id'} ne $d->{'id'} &&
 			   !$_->{'ssl_same'} } &list_domains();
@@ -2869,16 +2874,18 @@ if ($d->{'ip6'}) {
 return ( ) if (!$l && !$l6);
 return ( ) if (!$imap && !$imap6);
 
-# We have at least one IP
-my $ione = $imap || $imap6;
+# Use the address for the protocol block whose certificate we read
+my ($imap_block, $cert_ip, $cert_ip6) = $imap ?
+	($imap, $d->{'ip'}, undef) :
+	($imap6, undef, $d->{'ip6'});
 my %mems = map { $_->{'name'}, $_->{'value'} }
-	       @{$ione->{'members'}};
+	       @{$imap_block->{'members'}};
 my @rv = ( $mems{'ssl_cert'} || $mems{'ssl_server_cert_file'},
            $mems{'ssl_key'} || $mems{'ssl_server_key_file'},
            $mems{'ssl_ca'},
-           $imap ? $d->{'ip'} : undef,
+           $cert_ip,
            undef,	# No domain name for an IP-based certificate
-           $imap6 ? $d->{'ip6'} : undef,
+           $cert_ip6,
 	 );
 return () if (!$rv[0]);
 foreach my $r (@rv) {
@@ -4666,20 +4673,24 @@ return $rv;
 
 # update_ssl_link_on_domain_change(&domain, &old-domain)
 # If a virtual server changed IP address, update SSL cert linkage
-# XXX what about IPv6 ?
 sub update_ssl_link_on_domain_change
 {
 my ($d, $oldd) = @_;
-if (!$d->{'ip'}) {
+my $ipkey = $d->{'ip'} ? 'ip' : 'ip6';
+my $oldipkey = $oldd->{'ip'} ? 'ip' : 'ip6';
+my $ip = $d->{$ipkey};
+my $oldip = $oldd->{$oldipkey};
+if (!$ip) {
 	# With no IP address, SSL cert linkage is not possible
 	if ($oldd->{'ssl_same'}) {
 		my $oldsslclash = &get_domain($oldd->{'ssl_same'});
 		&break_ssl_linkage($d, $oldsslclash);
 		}
 	}
-elsif ((!$oldd->{'ip'} || $d->{'ip'} ne $oldd->{'ip'}) && $oldd->{'ssl_same'}) {
+elsif (($ipkey ne $oldipkey || !$oldip || $ip ne $oldip) &&
+       $oldd->{'ssl_same'}) {
 	# IP has changed or been added - maybe clear ssl_same field
-	my ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
+	my ($sslclash) = grep { $_->{$ipkey} && $_->{$ipkey} eq $ip &&
 				&domain_has_ssl($_) &&
 				$_->{'id'} ne $d->{'id'} &&
 				!$_->{'ssl_same'} } &list_domains();

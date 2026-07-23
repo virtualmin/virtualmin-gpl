@@ -965,8 +965,8 @@ if ($config{'mail_autoconfig'} &&
 # Update any outgoing IP mapping
 if ($supports_dependent) {
 	if ($d->{'dom'} ne $oldd->{'dom'} ||
-	    $d->{'ip'} && $oldd->{'ip'} && $d->{'ip'} ne $oldd->{'ip'} ||
-	    $d->{'ip6'} && $oldd->{'ip6'} && $d->{'ip6'} ne $oldd->{'ip6'}) {
+	    ($d->{'ip'} || "") ne ($oldd->{'ip'} || "") ||
+	    ($d->{'ip6'} || "") ne ($oldd->{'ip6'} || "")) {
 		# IP or domain name changed
 		my $old_dependent = &get_domain_dependent($oldd);
 		if ($old_dependent) {
@@ -6346,10 +6346,10 @@ my $changed = 0;
 my ($cr) = grep { $_->{'name'} eq $autoconfig &&
 		  $_->{'type'} eq 'CNAME' } @$recs;
 if (!$cr) {
+	my $ip = $d->{'dns_ip'} || $d->{'ip'};
 	my ($r) = grep { $_->{'name'} eq $autoconfig &&
 			    $_->{'type'} eq 'A' } @$recs;
-	if (!$r) {
-		my $ip = $d->{'dns_ip'} || $d->{'ip'};
+	if (!$r && $ip) {
 		my $cr = { 'name' => $autoconfig,
 			   'type' => 'A',
 			   'proxied' => $proxied ? 1 : 0,
@@ -6359,14 +6359,14 @@ if (!$cr) {
 		}
 
 	# Add AAAA record for IPv6
+	my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 	my ($r) = grep { $_->{'name'} eq $autoconfig &&
 			    $_->{'type'} eq 'AAAA' } @$recs;
-	if (!$r && $d->{'ip6'}) {
-		my $ip = $d->{'dns_ip6'} || $d->{'ip6'};
+	if (!$r && $ip6) {
 		my $cr = { 'name' => $autoconfig,
 			   'type' => 'AAAA',
 			   'proxied' => $proxied ? 1 : 0,
-			   'values' => [ $ip ] };
+			   'values' => [ $ip6 ] };
 		&create_dns_record($recs, $file, $cr);
 		$changed++;
 		}
@@ -6718,7 +6718,7 @@ if ($d->{'dns'}) {
 		}
 	else {
 		# Add standard records
-		&create_mx_records($file, $d, $d->{'ip'}, $d->{'ip6'});
+		&create_mx_records($recs, $file, $d);
 		}
 	&post_records_change($d, $recs);
 	&register_post_action(\&restart_bind, $d);
@@ -6854,12 +6854,15 @@ if (!&copy_alias_records($d)) {
 	&pre_records_change($d);
 	my ($recs, $file) = &get_domain_dns_records_and_file($d);
 	$file || return $recs;
+	my $ip = $d->{'dns_ip'} || $d->{'ip'};
+	my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
+	my $rtype = $ip ? 'A' : 'AAAA';
 	my ($mtsa) = grep { $_->{'name'} eq 'mta-sts.'.$d->{'dom'}.'.' &&
-			    $_->{'type'} eq 'A' } @$recs;
+			    $_->{'type'} eq $rtype } @$recs;
 	if (!$mtsa) {
 		$mtsa = { 'name' => 'mta-sts.'.$d->{'dom'}.'.',
-			  'type' => 'A',
-			  'values' => [ $d->{'dns_ip'} || $d->{'ip'} ] };
+			  'type' => $rtype,
+			  'values' => [ $ip || $ip6 ] };
 		&create_dns_record($recs, $file, $mtsa);
 		}
 	my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'}.'.' &&
@@ -7161,4 +7164,3 @@ return $envfile || "";
 $done_feature_script{'mail'} = 1;
 
 1;
-

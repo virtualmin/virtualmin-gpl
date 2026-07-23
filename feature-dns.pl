@@ -1542,17 +1542,20 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			# Make sure we have some NS records
 			@created_ns = &unique(@created_ns);
 			if ($tmpl->{'dns_indom'}) {
-				@created_ns = grep { &to_ipaddress($_) } @created_ns;
+				@created_ns = grep { &to_ipaddress($_) ||
+						     &to_ip6address($_) }
+						   @created_ns;
 				}
 			if (!@created_ns && !$d->{'dns_cloud'}) {
 				return $text{'setup_ednsns'};
 				}
 
 			if ($tmpl->{'dns_indom'}) {
-				# Add A records pointing to the nameserver IPs
+				# Add address records for the nameserver IPs
 				my $i = 1;
 				foreach my $ns (@created_ns) {
 					my $a = &to_ipaddress($ns);
+					my $aaaa = &to_ip6address($ns);
 					my $r = "ns".$i.".".$d->{'dom'}.".";
 					&create_dns_record($recs, $file,
 						{ 'name' => '@',
@@ -1562,7 +1565,12 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 						{ 'name' => $r,
 						  'type' => 'A',
 						  'proxied' => $proxied == 1 ? 1 : 0,
-						  'values' => [ $a ] });
+						  'values' => [ $a ] }) if ($a);
+					&create_dns_record($recs, $file,
+						{ 'name' => $r,
+						  'type' => 'AAAA',
+						  'proxied' => $proxied == 1 ? 1 : 0,
+						  'values' => [ $aaaa ] }) if ($aaaa);
 					$i++;
 					}
 				}
@@ -2001,8 +2009,10 @@ return 0 if (!$file);
 my $count = 0;
 foreach my $r (reverse('webmail', 'admin')) {
 	my $n = "$r.$d->{'dom'}.";
-	my ($rec) = grep { $_->{'name'} eq $n } @$recs;
-	if ($rec) {
+	my @delrecs = grep { $_->{'name'} eq $n &&
+			     ($_->{'type'} eq 'A' ||
+			      $_->{'type'} eq 'AAAA') } @$recs;
+	foreach my $rec (reverse(@delrecs)) {
 		&delete_dns_record($recs, $rec->{'file'}, $rec);
 		$count++;
 		}
@@ -2040,7 +2050,7 @@ return &add_ip_any_records($d, $recs, $file, 'AAAA', 'A',
 }
 
 # add_ip_any_records(&domain, [&records, file], old-type, new-type,
-# 		     old-values, new-values)
+# 		     old-value, new-value)
 # Change records of one type to another, converting values as well
 sub add_ip_any_records
 {
@@ -2055,7 +2065,7 @@ return 0 if (!$file);
 my %already;
 foreach my $r (@$recs) {
 	if ($r->{'type'} eq $newrtype &&
-	    &indexof($r->{'values'}->[0], @$newvals) >= 0) {
+	    $r->{'values'}->[0] eq $newval) {
 		$already{$r->{'name'}}++;
 		}
 	}
@@ -2074,7 +2084,6 @@ foreach my $od (&list_domains()) {
 my $count = 0;
 my $withdot = $d->{'dom'}.".";
 foreach my $r (@$recs) {
-	my $idx;
 	if ($r->{'type'} &&
 	    $r->{'type'} eq $oldrtype &&
 	    $r->{'values'}->[0] eq $oldval &&
@@ -2153,15 +2162,17 @@ my $tmpl = &get_template($d->{'template'});
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 return 0 if (!$file);
 my $withstar = "*.".$d->{'dom'}.".";
-my ($r) = grep { $_->{'name'} eq $withstar } @$recs;
+my ($r) = grep { $_->{'name'} eq $withstar &&
+		  ($_->{'type'} eq 'A' || $_->{'type'} eq 'AAAA') } @$recs;
 my $any = 0;
 if ($star && !$r) {
 	# Need to add
 	my $ip = $d->{'dns_ip'} || $d->{'ip'};
+	my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 	$r = { 'name' => $withstar,
-	       'type' => 'A',
+	       'type' => $ip ? 'A' : 'AAAA',
 	       'proxied' => $tmpl->{'dns_cloud_proxy'} == 1 ? 1 : 0,
-	       'values' => [ $ip ] };
+	       'values' => [ $ip || $ip6 ] };
 	&create_dns_record($recs, $file, $r);
 	$any++;
 	}
@@ -2256,7 +2267,12 @@ foreach my $r (@$recs) {
 	}
 $d->{'dns_submode'} || $d->{'dns_cloud'} || $got{'SOA'} ||
 	return $text{'validate_ednssoa2'};
-$got{'A'} || return $text{'validate_ednsa2'};
+if ($ip) {
+	$got{'A'} || return $text{'validate_ednsa2'};
+	}
+else {
+	$got{'AAAA'} || return $text{'validate_ednsa6'};
+	}
 if ($d->{'virt6'}) {
 	$got{'AAAA'} || return $text{'validate_ednsa6'};
 	}
@@ -4310,7 +4326,8 @@ foreach my $i (split(/\s+/, $includes)) {
 if ($d->{'dns_ip'} && !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip4:'}}, $d->{'dns_ip'});
 	}
-if ($d->{'ip'} ne $defip && $d->{'ip'} !~ /^(10\.|192\.168\.)/ &&
+if ($d->{'ip'} && $d->{'ip'} ne $defip &&
+    $d->{'ip'} !~ /^(10\.|192\.168\.)/ &&
     !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip4:'}}, $d->{'ip'});
 	}
@@ -6156,4 +6173,3 @@ return { 'id' => 0,
 $done_feature_script{'dns'} = 1;
 
 1;
-
