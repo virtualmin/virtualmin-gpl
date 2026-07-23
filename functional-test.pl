@@ -9789,17 +9789,18 @@ $rename_tests = [
 		      @create_args, ],
 	},
 
-	# Install a dummy CA cert
-	{ 'command' => 'install-cert.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'ca', $module_root_directory.'/lets-encrypt-*.pem.txt' ] ],
-	},
-
 	# Get the IP address
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'ip-only' ],
 		      [ 'domain', $test_domain ] ],
 	  'save' => 'PRIVATE_IP',
+	},
+
+	# Check that the SSL cert is for the test hostname
+	{ 'command' => 'get-ssl.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'cn: \\*.'.$test_domain ],
 	},
 
 	# Force enable private SSL cert for Webmin, Usermin, etc
@@ -9904,6 +9905,13 @@ $rename_tests = [
 	{ 'command' => 'ls /var/log/virtualmin/'.$test_domain.'_error_log',
 	  'fail' => 1 },
 	) : ( ),
+
+	# Check that the SSL cert is for the new hostname
+	{ 'command' => 'get-ssl.pl',
+	  'args' => [ [ 'domain', $test_rename_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'cn: \\*.'.$test_rename_domain ],
+	},
 
 	# Check that service certs still show up
 	{ 'command' => 'list-domains.pl',
