@@ -4693,7 +4693,7 @@ elsif ((!$oldd->{'ip'} || $d->{'ip'} ne $oldd->{'ip'}) && $oldd->{'ssl_same'}) {
 		$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
 		$d->{'ssl_key'} = $sslclash->{'ssl_key'};
 		$d->{'ssl_same'} = $sslclash->{'id'};
-		$chained = &get_website_ssl_file($sslclash, 'ca');
+		my $chained = &get_website_ssl_file($sslclash, 'ca');
 		$d->{'ssl_chain'} = $chained;
 		$d->{'ssl_combined'} = $sslclash->{'ssl_combined'};
 		$d->{'ssl_everything'} = $sslclash->{'ssl_everything'};
