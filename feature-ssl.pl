@@ -399,72 +399,8 @@ if ($d->{'home'} ne $oldd->{'home'}) {
 		}
 	}
 
-if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
-    !&check_domain_certificate($d->{'dom'}, $d)) {
-	# Domain name has changed .. re-generate self-signed cert
-	&$first_print($text{'save_ssl11'});
-	my $info = &cert_info($d);
-	&lock_file($d->{'ssl_cert'});
-	&lock_file($d->{'ssl_key'});
-	my @newalt = $info->{'alt'} ? @{$info->{'alt'}} : ( );
-	foreach my $a (@newalt) {
-		if ($a eq $oldd->{'dom'}) {
-			$a = $d->{'dom'};
-			}
-		elsif ($a =~ /^([^\.]+)\.(\S+)$/ && $2 eq $oldd->{'dom'}) {
-			$a = $1.".".$d->{'dom'};
-			}
-		}
-	my $email = $info->{'emailAddress'};
-	$email =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
-	my $err = &generate_self_signed_cert(
-		$d->{'ssl_cert'}, $d->{'ssl_key'},
-		undef,
-		1825,
-		$info->{'c'},
-		$info->{'st'},
-		$info->{'l'},
-		$info->{'o'},
-		$info->{'ou'},
-		"*.$d->{'dom'}",
-		$email,
-		\@newalt,
-		$d,
-		);
-	&unlock_file($d->{'ssl_key'});
-	&unlock_file($d->{'ssl_cert'});
-	if ($err) {
-		&$second_print(&text('setup_eopenssl', $err));
-		}
-	else {
-		$rv++;
-		&$second_print($text{'setup_done'});
-		}
-	}
-
-if ($d->{'dom'} ne $oldd->{'dom'} &&
-    !$d->{'ssl_same'} &&
-    &is_acme_cert($d) &&
-    !&check_domain_certificate($d->{'dom'}, $d)) {
-	# Domain name has changed ... re-request let's encrypt cert
-	&$first_print($text{'save_ssl12'});
-	if ($d->{'letsencrypt_dname'}) {
-		# Update any explicitly chosen domain names
-		my @dnames = split(/\s+/, $d->{'letsencrypt_dname'});
-		foreach my $dn (@dnames) {
-			$dn = $d->{'dom'} if ($dn eq $oldd->{'dom'});
-			$dn =~ s/\.\Q$oldd->{'dom'}\E$/\.$d->{'dom'}/;
-			}
-		$d->{'letsencrypt_dname'} = join(" ", @dnames);
-		}
-	my ($ok, $err) = &renew_letsencrypt_cert($d);
-	if ($ok) {
-		&$second_print($text{'setup_done'});
-		}
-	else {
-		&$second_print(&text('save_essl12', $err));
-		}
-	}
+# Re-generate or request cert if required due to a domain name change
+$rv += &rerequest_cert_on_domain_change($d, $oldd);
 
 # If anything has changed that would impact the per-domain SSL cert for
 # another server like Postfix or Webmin, re-set it up as long as it is supported
@@ -4672,6 +4608,84 @@ if (&dovecot::version_atleast(2.4)) {
 else {
 	return ("ssl_".$type, "<".$file);
 	}
+}
+
+# rerequest_cert_on_domain_change(&domain, &old-domain)
+# If a virutal server's domain name changes, re-request or re-generate the SSL
+# cert if possible
+sub rerequest_cert_on_domain_change
+{
+my ($d, $oldd) = @_;
+my $rv = 0;
+
+if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
+    !&check_domain_certificate($d->{'dom'}, $d)) {
+	# Domain name has changed .. re-generate self-signed cert
+	&$first_print($text{'save_ssl11'});
+	my $info = &cert_info($d);
+	&lock_file($d->{'ssl_cert'});
+	&lock_file($d->{'ssl_key'});
+	my @newalt = $info->{'alt'} ? @{$info->{'alt'}} : ( );
+	foreach my $a (@newalt) {
+		if ($a eq $oldd->{'dom'}) {
+			$a = $d->{'dom'};
+			}
+		elsif ($a =~ /^([^\.]+)\.(\S+)$/ && $2 eq $oldd->{'dom'}) {
+			$a = $1.".".$d->{'dom'};
+			}
+		}
+	my $email = $info->{'emailAddress'};
+	$email =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
+	my $err = &generate_self_signed_cert(
+		$d->{'ssl_cert'}, $d->{'ssl_key'},
+		undef,
+		1825,
+		$info->{'c'},
+		$info->{'st'},
+		$info->{'l'},
+		$info->{'o'},
+		$info->{'ou'},
+		"*.$d->{'dom'}",
+		$email,
+		\@newalt,
+		$d,
+		);
+	&unlock_file($d->{'ssl_key'});
+	&unlock_file($d->{'ssl_cert'});
+	if ($err) {
+		&$second_print(&text('setup_eopenssl', $err));
+		}
+	else {
+		$rv++;
+		&$second_print($text{'setup_done'});
+		}
+	}
+
+if ($d->{'dom'} ne $oldd->{'dom'} &&
+    !$d->{'ssl_same'} &&
+    &is_acme_cert($d) &&
+    !&check_domain_certificate($d->{'dom'}, $d)) {
+	# Domain name has changed ... re-request let's encrypt cert
+	&$first_print($text{'save_ssl12'});
+	if ($d->{'letsencrypt_dname'}) {
+		# Update any explicitly chosen domain names
+		my @dnames = split(/\s+/, $d->{'letsencrypt_dname'});
+		foreach my $dn (@dnames) {
+			$dn = $d->{'dom'} if ($dn eq $oldd->{'dom'});
+			$dn =~ s/\.\Q$oldd->{'dom'}\E$/\.$d->{'dom'}/;
+			}
+		$d->{'letsencrypt_dname'} = join(" ", @dnames);
+		}
+	my ($ok, $err) = &renew_letsencrypt_cert($d);
+	if ($ok) {
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print(&text('save_essl12', $err));
+		}
+	}
+
+return $rv;
 }
 
 $done_feature_script{'ssl'} = 1;
