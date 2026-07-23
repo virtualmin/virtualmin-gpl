@@ -91,12 +91,12 @@ else {
 		    (!$oldd || !$oldd->{'ssl'})) {
 			# Clash .. but is the cert OK?
 			if (!&check_domain_certificate($d->{'dom'},
-						       $sslclash)) {
+						       $sslclash6)) {
 				my @certdoms =
-					&list_domain_certificate($sslclash);
+					&list_domain_certificate($sslclash6);
 				return &text('setup_edepssl5', $d->{'ip6'},
 				    join(", ", map { "<tt>$_</tt>" } @certdoms),
-				    $sslclash->{'dom'});
+				    $sslclash6->{'dom'});
 				}
 			else {
 				return undef;
