@@ -115,6 +115,39 @@ if (defined(&sync_parent_resellers)) {
 	&sync_parent_resellers();
 	}
 
+# Preserve the effective template-based Webmin module permissions of all
+# existing server owners as per-domain settings. This migration is idempotent
+# so an interrupted post-install can safely be run again.
+if (!$config{'migrated_domain_webmin_avail'}) {
+	# A zero for a plugin module was historically ignored at runtime and was
+	# also written automatically when saving an unrelated default-template
+	# section. Preserve the old effective default in the new owner-policy key,
+	# without changing the legacy avail_* keys still used by Pro resellers.
+	&migrate_default_webmin_avail();
+	my @templates = &list_templates();
+	foreach my $tmpl (grep { !$_->{'default'} && $_->{'for_parent'} &&
+				   defined($_->{'avail'}) && $_->{'avail'} ne '' }
+			    @templates) {
+		my $avail = &legacy_webmin_avail($tmpl->{'avail'});
+		if ($avail ne $tmpl->{'avail'}) {
+			$tmpl->{'avail'} = $avail;
+			&save_template($tmpl);
+			}
+		}
+	foreach my $listed (grep { !$_->{'parent'} } &list_domains()) {
+		my $id = $listed->{'id'};
+		&lock_domain($id);
+		my $d = &get_domain($id, undef, 1);
+		if ($d && !$d->{'parent'} &&
+		    &init_domain_webmin_avail($d, 1)) {
+			&save_domain($d);
+			}
+		&unlock_domain($id);
+		}
+	$config{'migrated_domain_webmin_avail'} = 1;
+	&save_module_config();
+	}
+
 # Force update of all Webmin users, to set new ACL options
 &modify_all_webmin();
 if ($virtualmin_pro) {
