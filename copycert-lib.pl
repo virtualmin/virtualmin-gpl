@@ -1166,4 +1166,30 @@ DIRNAME: foreach my $dirname ("listen-on", "listen-on-v6") {
 &unlock_file(&bind8::make_chroot($bind8::config{'named_conf'}));
 }
 
+# update_ssl_certs_on_change(&domain, &old-domain)
+# If some field of a domain has changed that may need service certs to be
+# re-synced, call all relevant sync functions
+sub update_ssl_certs_on_change
+{
+my ($d, $oldd) = @_;
+if (($d->{'ip'} || "") ne ($oldd->{'ip'} || "") ||
+    $d->{'virt'} != $oldd->{'virt'} ||
+    ($d->{'ip6'} || "") ne ($oldd->{'ip6'} || "") ||
+    $d->{'virt6'} ne $oldd->{'virt6'} ||
+    $d->{'dom'} ne $oldd->{'dom'} ||
+    $d->{'home'} ne $oldd->{'home'}) {
+	my %types = map { $_->{'id'}, $_ } &list_service_ssl_cert_types();
+	foreach my $svc (&get_all_domain_service_ssl_certs($oldd)) {
+		next if (!$svc->{'d'});
+		my $t = $types{$svc->{'id'}};
+		my $func = "sync_".$svc->{'id'}."_ssl_cert";
+		next if (!defined(&$func));
+		&$func($oldd, 0);
+		if ($t->{'dom'} || $d->{'virt'}) {
+			&$func($d, 1);
+			}
+		}
+	}
+}
+
 1;
