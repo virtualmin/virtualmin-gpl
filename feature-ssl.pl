@@ -363,33 +363,9 @@ if ($d->{'dom'} ne $oldd->{'dom'}) {
 
 # Code after here still works even if SSL virtualhost is missing
 VIRTFAILED:
-if ($d->{'ip'} ne $oldd->{'ip'} && $oldd->{'ssl_same'}) {
-	# IP has changed - maybe clear ssl_same field
-	my ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
-				   $_->{'ssl'} &&
-				   $_->{'id'} ne $d->{'id'} &&
-				   !$_->{'ssl_same'} } &list_domains();
-	my $oldsslclash = &get_domain($oldd->{'ssl_same'});
-	if ($sslclash && $oldd->{'ssl_same'} eq $sslclash->{'id'}) {
-		# No need to change
-		}
-	elsif ($sslclash &&
-	       &check_domain_certificate($d->{'dom'}, $sslclash)) {
-		# New domain with same cert
-		$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
-		$d->{'ssl_key'} = $sslclash->{'ssl_key'};
-		$d->{'ssl_same'} = $sslclash->{'id'};
-		$chained = &get_website_ssl_file($sslclash, 'ca');
-		$d->{'ssl_chain'} = $chained;
-		$d->{'ssl_combined'} = $sslclash->{'ssl_combined'};
-		$d->{'ssl_everything'} = $sslclash->{'ssl_everything'};
-		}
-	else {
-		# No domain has the same cert anymore - copy the one from the
-		# old sslclash domain
-		&break_ssl_linkage($d, $oldsslclash);
-		}
-	}
+
+# Update SSL cert linkage
+&update_ssl_link_on_domain_change($d, $oldd);
 
 if ($d->{'home'} ne $oldd->{'home'}) {
 	# Fix SSL cert file locations
@@ -4686,6 +4662,48 @@ if ($d->{'dom'} ne $oldd->{'dom'} &&
 	}
 
 return $rv;
+}
+
+# update_ssl_link_on_domain_change(&domain, &old-domain)
+# If a virtual server changed IP address, update SSL cert linkage
+# XXX what about IPv6 ?
+sub update_ssl_link_on_domain_change
+{
+my ($d, $oldd) = @_;
+if (!$d->{'ip'}) {
+	# With no IP address, SSL cert linkage is not possible
+	if ($oldd->{'ssl_same'}) {
+		my $oldsslclash = &get_domain($oldd->{'ssl_same'});
+		&break_ssl_linkage($d, $oldsslclash);
+		}
+	}
+elsif ((!$oldd->{'ip'} || $d->{'ip'} ne $oldd->{'ip'}) && $oldd->{'ssl_same'}) {
+	# IP has changed or been added - maybe clear ssl_same field
+	my ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
+				&domain_has_ssl($_) &&
+				$_->{'id'} ne $d->{'id'} &&
+				!$_->{'ssl_same'} } &list_domains();
+	my $oldsslclash = &get_domain($oldd->{'ssl_same'});
+	if ($sslclash && $oldd->{'ssl_same'} eq $sslclash->{'id'}) {
+		# No need to change
+		}
+	elsif ($sslclash &&
+	       &check_domain_certificate($d->{'dom'}, $sslclash)) {
+		# New domain with same cert
+		$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
+		$d->{'ssl_key'} = $sslclash->{'ssl_key'};
+		$d->{'ssl_same'} = $sslclash->{'id'};
+		$chained = &get_website_ssl_file($sslclash, 'ca');
+		$d->{'ssl_chain'} = $chained;
+		$d->{'ssl_combined'} = $sslclash->{'ssl_combined'};
+		$d->{'ssl_everything'} = $sslclash->{'ssl_everything'};
+		}
+	else {
+		# No domain has the same cert anymore - copy the one from the
+		# old sslclash domain
+		&break_ssl_linkage($d, $oldsslclash);
+		}
+	}
 }
 
 $done_feature_script{'ssl'} = 1;
