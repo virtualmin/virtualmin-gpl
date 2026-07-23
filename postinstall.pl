@@ -127,7 +127,6 @@ if (!$config{'migrated_domain_webmin_avail'}) {
 	# section. Preserve the old effective default in the new owner-policy key,
 	# without changing the legacy avail_* keys still used by Pro resellers.
 	&migrate_default_webmin_avail();
-	undef(@list_templates_cache);
 	my @templates = &list_templates();
 	foreach my $tmpl (grep { !$_->{'default'} && $_->{'for_parent'} &&
 				   defined($_->{'avail'}) && $_->{'avail'} ne '' }

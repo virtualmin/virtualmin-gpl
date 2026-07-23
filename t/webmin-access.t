@@ -139,11 +139,24 @@ local %main::config = (
 	'avail_plugin' => 0,
 	'avail_shell' => 1,
 	);
+my $default_template_saves = 0;
+no warnings 'redefine';
+local *main::get_template = sub {
+	return { 'id' => 0,
+		 'avail' => &main::get_default_webmin_avail() };
+	};
+local *main::save_template = sub {
+	my ($tmpl) = @_;
+	$main::config{'default_webmin_avail'} = $tmpl->{'avail'};
+	$default_template_saves++;
+	};
 is(&main::get_default_webmin_avail(),
 	'dns=0 proc=2 plugin=0 shell=1',
 	'legacy owner defaults include unavailable module settings');
 ok(&main::migrate_default_webmin_avail(),
 	'default owner policy is migrated to its separate config key');
+is($default_template_saves, 1,
+	'default owner policy is saved through the template API');
 is($main::config{'default_webmin_avail'},
 	'dns=0 proc=2 plugin=1 shell=1',
 	'default owner policy preserves legacy effective plugin access');
@@ -151,6 +164,8 @@ is($main::config{'avail_plugin'}, 0,
 	'migration does not widen the plugin access used by Pro resellers');
 ok(!&main::migrate_default_webmin_avail(),
 	'default owner policy migration is idempotent');
+is($default_template_saves, 1,
+	'idempotent migration does not save the default template again');
 }
 
 my $legacy = { 'id' => 100, 'template' => 10 };

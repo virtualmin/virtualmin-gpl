@@ -18372,7 +18372,9 @@ sub migrate_default_webmin_avail
 my $avail = &legacy_webmin_avail(&get_default_webmin_avail());
 return 0 if (defined($config{'default_webmin_avail'}) &&
 	     $config{'default_webmin_avail'} eq $avail);
-$config{'default_webmin_avail'} = $avail;
+my $tmpl = &get_template(0);
+$tmpl->{'avail'} = $avail;
+&save_template($tmpl);
 return 1;
 }
 
