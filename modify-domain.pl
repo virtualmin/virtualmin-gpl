@@ -601,6 +601,8 @@ elsif ($noip) {
 	$dom->{'virt'} = 0;
 	$dom->{'name'} = 0;
 	$dom->{'ip'} = undef;
+	delete($dom->{'dns_ip'});
+	delete($dom->{'defip'});
 	}
 
 # Apply new IPv6 address
@@ -628,11 +630,12 @@ elsif ($noip6) {
 	$dom->{'virt6'} = 0;
 	$dom->{'name6'} = 0;
 	$dom->{'ip6'} = undef;
+	delete($dom->{'dns_ip6'});
 	}
 
 # Make sure there is some kind of IP
 $dom->{'ip'} || $dom->{'ip6'} ||
-	&usage("Either an IPv4 or IPv5 address must be enabled");
+	&usage("Either an IPv4 or IPv6 address must be enabled");
 
 # Apply reseller change
 if ($resel eq "NONE") {
@@ -672,6 +675,8 @@ elsif (defined($resel) || @add_resel || @del_resel) {
 if (defined($dns_ip)) {
 	if ($dns_ip) {
 		# Changing IP address for DNS
+		$dom->{'ip'} ||
+			&usage("--dns-ip cannot be used without an IP address");
 		$dom->{'dns_ip'} = $dns_ip;
 		}
 	else {
@@ -1064,5 +1069,4 @@ print "                        [--disable-2fa]\n";
 print "                        [--skip-warnings]\n";
 exit(1);
 }
-
 

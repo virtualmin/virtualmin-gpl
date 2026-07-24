@@ -127,6 +127,12 @@ foreach $line (@lines) {
 		$ip = $aliasdom->{'ip'};
 		$ip6 = $aliasdom->{'ip6'};
 		}
+	elsif ($ip eq "none") {
+		# No IPv4 address requested
+		$virt = 0;
+		$virtalready = 0;
+		$ip = undef;
+		}
 	elsif ($ip) {
 		if (!&check_ipaddress($ip) && $ip ne 'allocate') {
 			&line_error($text{'cmass_eip'});
@@ -173,12 +179,6 @@ foreach $line (@lines) {
 			$virtalready = 0;
 			}
 		}
-	elsif ($ip eq "none") {
-		# No IP address requested
-		$virt = 0;
-		$virtalready = 0;
-		$ip = undef;
-		}
 	else {
 		# Use default IP address
 		$virt = 0;
@@ -186,13 +186,8 @@ foreach $line (@lines) {
 		$ip = $defip;
 		}
 
-	if (!$ip && !$ip6) {
-		&line_error($text{'cmass_esomeip'});
-		next;
-		}
-
 	# Pick an IPv6 address
-	if (&supports_ipv6()) {
+	if (&supports_ipv6() && !$aliasdom) {
 		if ($allocated) {
 			# IPv4 allocation was requested, assume the same for V6
 			%racl = $resel ? &get_reseller_acl($resel) : ();
@@ -229,6 +224,11 @@ foreach $line (@lines) {
 			$ip6 = undef;
 			$virt6 = 0;
 			}
+		}
+
+	if (!$ip && !$ip6) {
+		&line_error($text{'cmass_esomeip'});
+		next;
 		}
 
 	# Work out username
@@ -343,9 +343,11 @@ foreach $line (@lines) {
 		 'ip6', $ip6,
 		 'netmask', $netmask,
 		 'netmask6', $netmask6,
-		 'dns_ip', $alias ? $alias->{'dns_ip'} :
+		 'dns_ip', !$ip ? undef :
+			   $aliasdom ? $aliasdom->{'dns_ip'} :
 			   $virt ? undef : &get_dns_ip($resel, 4),
-		 'dns_ip6', $alias ? $alias->{'dns_ip6'} :
+		 'dns_ip6', !$ip6 ? undef :
+			    $aliasdom ? $aliasdom->{'dns_ip6'} :
 			    $virt6 ? undef : &get_dns_ip($resel, 6),
 		 'virt', $virt,
 		 'virt6', $virt6,
@@ -483,4 +485,3 @@ else {
 print "</font><br>\n";
 $ecount++;
 }
-

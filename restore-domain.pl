@@ -265,8 +265,8 @@ while(@ARGV > 0) {
 	# Alternate IPv6 options
 	elsif ($a eq "--default-ip6") {
 		$ipinfo = { %$ipinfo,
-			    'virt' => 0, 'ip6' => &get_default_ip6(),
-			    'virtalready' => 0, 'mode6' => 0 };
+			    'virt6' => 0, 'ip6' => &get_default_ip6(),
+			    'virt6already' => 0, 'mode6' => 0 };
 		}
 	elsif ($a eq "--shared-ip6") {
 		$sharedip6 = shift(@ARGV);
@@ -279,7 +279,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--ip6") {
 		$ip6 = shift(@ARGV);
 		&check_ip6address($ip6) || &usage("Invalid IPv6 address");
-		&check_virt6_clash($ip) &&
+		&check_virt6_clash($ip6) &&
 			&usage("IPv6 address is already in use");
 		$ipinfo = { %$ipinfo,
 			    'virt6' => 1, 'ip6' => $ip6,
