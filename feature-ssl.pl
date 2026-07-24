@@ -2875,18 +2875,16 @@ if ($d->{'ip6'}) {
 return ( ) if (!$l && !$l6);
 return ( ) if (!$imap && !$imap6);
 
-# Use the address for the protocol block whose certificate we read
-my ($imap_block, $cert_ip, $cert_ip6) = $imap ?
-	($imap, $d->{'ip'}, undef) :
-	($imap6, undef, $d->{'ip6'});
+# Use whichever IP block exists
+my $imap_block = $imap || $imap6;
 my %mems = map { $_->{'name'}, $_->{'value'} }
 	       @{$imap_block->{'members'}};
 my @rv = ( $mems{'ssl_cert'} || $mems{'ssl_server_cert_file'},
            $mems{'ssl_key'} || $mems{'ssl_server_key_file'},
            $mems{'ssl_ca'},
-           $cert_ip,
+           $imap ? $d->{'ip'} : undef,
            undef,	# No domain name for an IP-based certificate
-           $cert_ip6,
+           $imap6 ? $d->{'ip6'} : undef,
 	 );
 return () if (!$rv[0]);
 foreach my $r (@rv) {
