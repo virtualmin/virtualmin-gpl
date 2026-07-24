@@ -971,7 +971,7 @@ if ($supports_dependent) {
 		my $old_dependent = &get_domain_dependent($oldd);
 		if ($old_dependent) {
 			&save_domain_dependent($oldd, 0);
-			&save_domain_dependent($d, 1);
+			&save_domain_dependent($d, 1) if ($d->{'ip'});
 			}
 		}
 	}
