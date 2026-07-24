@@ -603,9 +603,6 @@ elsif ($virt6) {
 elsif ($ip6 eq "default") {
 	# Use default IPv6, which may depend on reseller
 	$ip6 = $defip6;
-	if (!$ip6 && &indexof("--default-ip6", @OLDARGV) >= 0) {
-		&usage("No default IPv6 address found");
-		}
 	$virt6 = 0;
 	$name6 = $ip6 ? 1 : 0;
 	}
