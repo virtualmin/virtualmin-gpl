@@ -2300,13 +2300,14 @@ foreach my $dip ($d->{'ip'} ? ( $d->{'ip'} ) : ( ),
 sub remove_listen
 {
 my ($d, $conf, $web_port) = @_;
-if ($d->{'virt'} && !$d->{'name'}) {
+if ($d->{'virt'} && !$d->{'name'} ||
+    $d->{'virt6'} && !$d->{'name6'}) {
 	my @listen = &apache::find_directive("Listen", $conf);
 	my @newlisten = @listen;
-	if ($d->{'ip'}) {
+	if ($d->{'ip'} && $d->{'virt'} && !$d->{'name'}) {
 		@newlisten = grep { $_ ne "$d->{'ip'}:$web_port" } @newlisten;
 		}
-	if ($d->{'ip6'}) {
+	if ($d->{'ip6'} && $d->{'virt6'} && !$d->{'name6'}) {
 		@newlisten = grep { $_ ne "[$d->{'ip6'}]:$web_port" } @newlisten;
 		}
 	if (scalar(@listen) != scalar(@newlisten)) {

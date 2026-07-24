@@ -3100,8 +3100,8 @@ if ($ok) {
 				$d->{'ip6'} = $ipinfo->{'ip6'};
 				$d->{'virt6'} = $ipinfo->{'virt6'};
 				$d->{'virt6already'} = $ipinfo->{'virt6already'};
-				$d->{'netmask6'} = $netmaskinfo->{'netmask6'};
-				if ($ipinfo->{'mode'} == 2) {
+				$d->{'netmask6'} = $ipinfo->{'netmask6'};
+				if ($ipinfo->{'mode6'} == 2) {
 					# Re-allocate an IP, as we might be
 					# doing several domains
 					($d->{'ip6'}, $d->{'netmask6'}) =
@@ -3145,12 +3145,13 @@ if ($ok) {
 			# DNS external IP is always reset to match this system,
 			# as the old setting is unlikely to be correct.
 			$d->{'old_dns_ip'} = $d->{'dns_ip'};
-			$d->{'dns_ip'} = $d->{'virt'} ? undef
+			$d->{'dns_ip'} = !$d->{'ip'} || $d->{'virt'} ? undef
 					       : &get_dns_ip($d->{'reseller'});
 			if (&supports_ip6()) {
 				$d->{'old_dns_ip6'} = $d->{'dns_ip6'};
-				$d->{'dns_ip6'} = $d->{'virt6'} ? undef :
-					&get_dns_ip($d->{'reseller'}, 6);
+				$d->{'dns_ip6'} =
+					!$d->{'ip6'} || $d->{'virt6'} ? undef :
+						&get_dns_ip($d->{'reseller'}, 6);
 				}
 
 			# Change provisioning settings to match this system
