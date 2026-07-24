@@ -2979,7 +2979,7 @@ $aliasdom_tests = [
 	# Try disabling a feature in the main domain used by the alias
 	{ 'command' => 'disable-feature.pl',
 	  'args' => [ [ 'domain', $test_target_domain ],
-		      [ 'web' ], [ 'logrotate' ] ],
+		      [ $web ], [ 'logrotate' ] ],
 	  'fail' => 1,
 	},
 
@@ -6049,7 +6049,7 @@ $mail_tests = [
         # Enable a website
 	{ 'command' => 'enable-feature.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'web' ] ],
+		      [ $web ] ],
 	},
 
 	# Enable mail autoconfig URL
@@ -7290,7 +7290,7 @@ $ssl_tests = [
           'args' => [ [ 'domain', $test_ssl_subdomain ],
 		      [ 'desc', 'Test SSL subdomain' ],
 		      [ 'parent', $test_domain ],
-		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ $ssl ],
 		      [ 'parent-ip' ],
 		      [ 'content' => 'Test SSL subdomain home page' ],
 		      @create_args, ],
@@ -7302,7 +7302,7 @@ $ssl_tests = [
           'args' => [ [ 'domain', $test_ssl2_subdomain ],
 		      [ 'desc', 'Test SSL 2 subdomain' ],
 		      [ 'parent', $test_domain ],
-		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ $ssl ],
 		      [ 'parent-ip' ],
 		      [ 'break-ssl-cert' ],
 		      [ 'ssl-redirect' ],
@@ -7315,7 +7315,7 @@ $ssl_tests = [
           'args' => [ [ 'domain', $test_target_domain ],
 		      [ 'alias', $test_ssl2_subdomain ],
 		      [ 'desc', 'Test SSL 2 alias' ],
-		      [ 'dir' ], [ 'web' ], [ 'dns' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ],
 		      [ 'parent-ip' ],
 		      @create_args, ],
 	},
@@ -7623,7 +7623,7 @@ $ssl_tests = [
           'args' => [ [ 'domain', $test_ssl_subdomain ],
 		      [ 'desc', 'Test SSL subdomain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ $ssl ],
 		      [ 'shared-ip', '$SHARED_IP' ],
 		      [ 'content' => 'Test SSL subdomain home page' ],
 		      @create_args, ],
@@ -7658,7 +7658,7 @@ $ssl_tests = [
           'args' => [ [ 'domain', $test_ssl_subdomain ],
 		      [ 'desc', 'Test SSL subdomain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ $ssl ],
 		      [ 'shared-ip', '$SHARED_IP' ],
 		      [ 'always-link-ssl-cert' ],
 		      [ 'content' => 'Test SSL subdomain home page' ],
@@ -8709,7 +8709,7 @@ $wildcard_tests = [
 	  'cleanup' => 1,
 	},
 	];
-if (&domain_has_website() ne 'web') {
+if ($web ne 'web') {
 	# Assume only Apache supports
 	$wildcard_tests = [
 		{ 'command' => 'echo Skipping SSL wildcard tests for non-Apache webserver' },
@@ -12657,7 +12657,7 @@ $googledns_tests = [
 	  'args' => [ [ 'domain', $test_cloud_domain ],
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
 		      [ 'cloud-dns' => 'google' ],
 		      [ 'content' => 'Test home page' ],
 		      [ 'user' => $test_domain_user ],
@@ -12695,7 +12695,7 @@ $googledns_tests = [
 	  'args' => [ [ 'domain', $test_cloud_subdomain ],
 		      [ 'parent', $test_cloud_domain ],
 		      [ 'desc', 'Test subdomain' ],
-		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
 		      @create_args, ],
         },
 
@@ -13049,14 +13049,14 @@ $reset_tests = [
 	# Reset the website feature
 	{ 'command' => 'reset-feature.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'web' ] ],
+		      [ $web ] ],
 	},
 
 	# Validate to ensure that the config is now OK
 	{ 'command' => 'validate-domains.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'feature', 'web' ],
-		      [ 'feature', 'ssl' ], ],
+		      [ 'feature', $web ],
+		      [ 'feature', $ssl ], ],
 	},
 
 	# Check that the first redirect still exists
@@ -13221,14 +13221,14 @@ $reset_tests = [
 	# Reset the website feature again
 	{ 'command' => 'reset-feature.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'web' ] ],
+		      [ $web ] ],
 	},
 
 	# Validate to ensure that the config is now OK
 	{ 'command' => 'validate-domains.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'feature', 'web' ],
-		      [ 'feature', 'ssl' ], ],
+		      [ 'feature', $web ],
+		      [ 'feature', $ssl ], ],
 	},
 
 	# Check that the PHP mode is correct
