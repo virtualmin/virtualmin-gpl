@@ -1,10 +1,40 @@
 #### Version 8.2.0
 * Add new [Virtualmin Podman](https://www.virtualmin.com/docs/plugins/podman/) plugin for Virtualmin Pro users, bringing per-domain container and pod management to both the UI and CLI
-* Add ability for plugins to declare their own CLI API safe for users
+* Add support for Ubuntu 26.04
+* Add full lifecycle support for IPv6-only virtual servers, including creation, modification, cloning, backup, restore, DNS, web, mail and SSL handling
+* Add ability to add or remove an IPv4 address from an existing virtual server
+* Add support for requesting ACME SSL certificates containing IP address identifiers
+* Add support for FTPS backup destinations
+* Add support for chaining differential backups to a selected full backup, with safer state tracking, log filtering and deletion checks
+* Add alias domain redirect configuration and improve website redirects for sub-paths, filenames and query strings
+* Add resource limits configuration to virtual server templates
+* Add support for domain owners to manage their own systemd user units
+* Add milter-greylist support for greylisting on RHEL 10 and derivatives
+* Add TLSA records for Postfix SMTPS services
+* Add support for primary DNS zones and CLI flags to exclude named DNS records
+* Add ability to show disk usage on the virtual server summary page
+* Fix cross-stack restores to preserve target system features, disable unavailable domain features and handle PHP modes correctly
+* Fix to restore preflight checks and error reporting to catch clashes earlier and show SSL failures
 * Fix to enforce mailbox and domain disk quota on mail delivery even when spam filtering is disabled, so full mailboxes no longer lock out webmail and IMAP access
 * Fix domain registration expiry checks taking too long when a WHOIS server does not respond
-* Fix installing PHP extensions for versioned PHP streams on RHEL 10 and derivatives
+* Fix PHP-FPM version repair running during package updates
+* Fix ZIP restores to validate untrusted archives and extract them as the virtual server owner
+* Fix chroot jail cleanup to safely unmount nested bind mounts before removing files
+* Fix to prevent virtual server owners from downloading files from non-public URLs
+* Fix SSL certificate parsing, CA chain handling, service syncing and repeated ACME request retries
+* Fix several Dovecot SNI and per-IP certificate issues, including nested and alias domains
+* Fix Postfix per-IP certificate updates and TLSA refresh after ACME renewal
+* Fix several DNS record and zone issues, including apex shorthand, parent record locking, DS handling, sub-server zones and proxied cloud DNS checks
+* Fix to prevent deleting credentials used by an active cloud DNS provider
+* Fix MariaDB/MySQL user recreation to preserve authentication plugins and restore extra database users correctly
+* Fix several website SSL, alias and HTTPS proxy redirect regressions
+* Fix SFTP purging of backups stored in date-based directories
+* Fix phpMyAdmin and Usermin automatic login issues
+* Fix web app installers to avoid URL paths owned by plugins
+* Fix Webmin API credential handling and hide passwords from FTP command errors
+* Drop the obsolete per-domain ProFTPD virtual FTP feature while preserving service controls and backup compatibility
 * Rename the Git-based config history CLI commands to `list-config-revisions` and `restore-config-revision`
+* Replace the legacy website preview flow with sandboxed proxying
 
 #### Version 8.1.0
 * Add a simplified UI for managing website redirects  
