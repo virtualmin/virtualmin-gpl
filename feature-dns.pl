@@ -2162,24 +2162,40 @@ my $tmpl = &get_template($d->{'template'});
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 return 0 if (!$file);
 my $withstar = "*.".$d->{'dom'}.".";
-my ($r) = grep { $_->{'name'} eq $withstar &&
-		  ($_->{'type'} eq 'A' || $_->{'type'} eq 'AAAA') } @$recs;
+my ($r4) = grep { $_->{'name'} eq $withstar &&
+		   $_->{'type'} eq 'A' } @$recs;
+my ($r6) = grep { $_->{'name'} eq $withstar &&
+		   $_->{'type'} eq 'AAAA' } @$recs;
 my $any = 0;
-if ($star && !$r) {
-	# Need to add
+if ($star) {
+	# Add a wildcard record for each available address
 	my $ip = $d->{'dns_ip'} || $d->{'ip'};
 	my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
-	$r = { 'name' => $withstar,
-	       'type' => $ip ? 'A' : 'AAAA',
-	       'proxied' => $tmpl->{'dns_cloud_proxy'} == 1 ? 1 : 0,
-	       'values' => [ $ip || $ip6 ] };
-	&create_dns_record($recs, $file, $r);
-	$any++;
+	if ($ip && !$r4) {
+		$r4 = { 'name' => $withstar,
+			'type' => 'A',
+			'proxied' =>
+				$tmpl->{'dns_cloud_proxy'} == 1 ? 1 : 0,
+			'values' => [ $ip ] };
+		&create_dns_record($recs, $file, $r4);
+		$any++;
+		}
+	if ($ip6 && !$r6) {
+		$r6 = { 'name' => $withstar,
+			'type' => 'AAAA',
+			'proxied' =>
+				$tmpl->{'dns_cloud_proxy'} == 1 ? 1 : 0,
+			'values' => [ $ip6 ] };
+		&create_dns_record($recs, $file, $r6);
+		$any++;
+		}
 	}
-elsif (!$star && $r) {
-	# Need to remove
-	&delete_dns_record($recs, $file, $r);
-	$any++;
+else {
+	# Remove both wildcard address records
+	foreach my $r (grep { $_ } ($r4, $r6)) {
+		&delete_dns_record($recs, $file, $r);
+		$any++;
+		}
 	}
 if ($any) {
 	my $err = &post_records_change($d, $recs, $file);
