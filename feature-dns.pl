@@ -1542,9 +1542,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			# Make sure we have some NS records
 			@created_ns = &unique(@created_ns);
 			if ($tmpl->{'dns_indom'}) {
-				@created_ns = grep { &to_ipaddress($_) ||
-						     &to_ip6address($_) }
-						   @created_ns;
+				@created_ns =
+					grep { &to_ipaddress($_) ||
+					       &to_ip6address($_) } @created_ns;
 				}
 			if (!@created_ns && !$d->{'dns_cloud'}) {
 				return $text{'setup_ednsns'};
