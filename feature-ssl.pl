@@ -667,11 +667,12 @@ if (&foreign_installed("usermin")) {
 	&usermin::get_usermin_miniserv_config(\%uminiserv);
 	push(@checks, [ \%uminiserv, "Usermin" ]);
 	}
-my @ips = grep { $_ } ($d->{'ip'}, $d->{'ip6'});
 foreach my $c (@checks) {
 	my @sockets = &webmin::get_miniserv_sockets($c->[0]);
 	foreach my $s (@sockets) {
-		if (($s->[0] eq '*' || &indexof($s->[0], @ips) >= 0) &&
+		if (($s->[0] eq '*' ||
+		     ($d->{'ip'} && $s->[0] eq $d->{'ip'}) ||
+		     ($d->{'ip6'} && $s->[0] eq $d->{'ip6'})) &&
 		    $s->[1] == $port) {
 			return &text('setup_esslportclash',
 				     $d->{'ip'} || $d->{'ip6'},
