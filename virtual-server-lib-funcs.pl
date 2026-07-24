@@ -9720,12 +9720,16 @@ my @only = @_;
 my %only = map { $_, 1 } @only;
 my $a;
 
-# Check if we are restarting Apache or Webmin, and if so don't reload it
-my ($apache, $webmin);
+# Check if we are restarting Apache, Webmin or Nginx, and if so don't reload it
+my ($apache, $nginx, $webmin);
 foreach $a (@main::post_actions) {
 	if ($a->[0] eq \&restart_apache) {
 		$a->[1] ||= 0;
 		$apache = 1 if ($a->[1] == 1);
+		}
+	if ($a->[0] eq \&virtualmin_nginx::print_apply_nginx) {
+		$a->[1] ||= 0;
+		$nginx = 1 if ($a->[1] == 1);
 		}
 	if ($a->[0] eq \&restart_webmin_fully) {
 		$webmin = 1;
@@ -9733,6 +9737,10 @@ foreach $a (@main::post_actions) {
 	}
 if ($apache) {
 	@main::post_actions = grep { $_->[0] ne \&restart_apache ||
+				     $_->[1] != 0 } @main::post_actions;
+	}
+if ($nginx) {
+	@main::post_actions = grep { $_->[0] ne \&virtualmin_nginx::print_apply_nginx ||
 				     $_->[1] != 0 } @main::post_actions;
 	}
 if ($webmin) {
