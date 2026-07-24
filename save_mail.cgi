@@ -77,7 +77,7 @@ if (defined($in{'aliascopy'}) && $d->{'mail'}) {
 	}
 
 # Update outgoing IP mode
-if (defined($in{'dependent'}) && $supports_dependent) {
+if (defined($in{'dependent'}) && $supports_dependent && $d->{'ip'}) {
 	$old_dependent = &get_domain_dependent($d) ? 1 : 0;
 	if ($old_dependent != $in{'dependent'}) {
 		&$first_print($in{'dependent'} ?

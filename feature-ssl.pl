@@ -45,14 +45,18 @@ else {
 	if ($d->{'ip'}) {
 		my ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
 					$_->{'ssl'} &&
-					$_->{'id'} ne $d->{'id'}} &list_domains();
-		if (!$d->{'virt'} && $sslclash && (!$oldd || !$oldd->{'ssl'})) {
+					$_->{'id'} ne $d->{'id'} }
+				      &list_domains();
+		if (!$d->{'virt'} && $sslclash &&
+		    (!$oldd || !$oldd->{'ssl'})) {
 			# Clash .. but is the cert OK?
-			if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
-				my @certdoms = &list_domain_certificate($sslclash);
+			if (!&check_domain_certificate($d->{'dom'},
+						       $sslclash)) {
+				my @certdoms =
+					&list_domain_certificate($sslclash);
 				return &text('setup_edepssl5', $d->{'ip'},
-					join(", ", map { "<tt>$_</tt>" } @certdoms),
-					$sslclash->{'dom'});
+				    join(", ", map { "<tt>$_</tt>" } @certdoms),
+				    $sslclash->{'dom'});
 				}
 			else {
 				return undef;
@@ -81,14 +85,18 @@ else {
 		my ($sslclash6) = grep { $_->{'ip6'} &&
 					 $_->{'ip6'} eq $d->{'ip6'} &&
 					 $_->{'ssl'} &&
-					 $_->{'id'} ne $d->{'id'}} &list_domains();
-		if (!$d->{'virt6'} && $sslclash6 && (!$oldd || !$oldd->{'ssl'})) {
+					 $_->{'id'} ne $d->{'id'} }
+				       &list_domains();
+		if (!$d->{'virt6'} && $sslclash6 &&
+		    (!$oldd || !$oldd->{'ssl'})) {
 			# Clash .. but is the cert OK?
-			if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
-				my @certdoms = &list_domain_certificate($sslclash);
+			if (!&check_domain_certificate($d->{'dom'},
+						       $sslclash6)) {
+				my @certdoms =
+					&list_domain_certificate($sslclash6);
 				return &text('setup_edepssl5', $d->{'ip6'},
-					join(", ", map { "<tt>$_</tt>" } @certdoms),
-					$sslclash->{'dom'});
+				    join(", ", map { "<tt>$_</tt>" } @certdoms),
+				    $sslclash6->{'dom'});
 				}
 			else {
 				return undef;
@@ -103,8 +111,8 @@ else {
 		foreach my $v (&apache::find_directive_struct("VirtualHost",
 							      $conf)) {
 			foreach my $w (@{$v->{'words'}}) {
-				$w =~ /^\[([^\/]+)\]/ || next;
-				my $vip = $1;
+				$w =~ /^\[([^\]]+)\]:(\d+)$/ || next;
+				my ($vip, $vport) = ($1, $2);
 				if ($vip eq $d->{'ip6'} && $vport == $port) {
 					return &text('setup_edepssl4',
 						     $d->{'ip6'}, $port);
@@ -355,33 +363,10 @@ if ($d->{'dom'} ne $oldd->{'dom'}) {
 
 # Code after here still works even if SSL virtualhost is missing
 VIRTFAILED:
-if ($d->{'ip'} ne $oldd->{'ip'} && $oldd->{'ssl_same'}) {
-	# IP has changed - maybe clear ssl_same field
-	my ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
-				   $_->{'ssl'} &&
-				   $_->{'id'} ne $d->{'id'} &&
-				   !$_->{'ssl_same'} } &list_domains();
-	my $oldsslclash = &get_domain($oldd->{'ssl_same'});
-	if ($sslclash && $oldd->{'ssl_same'} eq $sslclash->{'id'}) {
-		# No need to change
-		}
-	elsif ($sslclash &&
-	       &check_domain_certificate($d->{'dom'}, $sslclash)) {
-		# New domain with same cert
-		$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
-		$d->{'ssl_key'} = $sslclash->{'ssl_key'};
-		$d->{'ssl_same'} = $sslclash->{'id'};
-		$chained = &get_website_ssl_file($sslclash, 'ca');
-		$d->{'ssl_chain'} = $chained;
-		$d->{'ssl_combined'} = $sslclash->{'ssl_combined'};
-		$d->{'ssl_everything'} = $sslclash->{'ssl_everything'};
-		}
-	else {
-		# No domain has the same cert anymore - copy the one from the
-		# old sslclash domain
-		&break_ssl_linkage($d, $oldsslclash);
-		}
-	}
+
+# Update SSL cert linkage
+&update_ssl_link_on_domain_change($d, $oldd);
+
 if ($d->{'home'} ne $oldd->{'home'}) {
 	# Fix SSL cert file locations
 	foreach my $k ('ssl_cert', 'ssl_key', 'ssl_chain', 'ssl_combined',
@@ -389,94 +374,14 @@ if ($d->{'home'} ne $oldd->{'home'}) {
 		$d->{$k} =~ s/\Q$oldd->{'home'}\E\//$d->{'home'}\//;
 		}
 	}
-if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
-    !&check_domain_certificate($d->{'dom'}, $d)) {
-	# Domain name has changed .. re-generate self-signed cert
-	&$first_print($text{'save_ssl11'});
-	my $info = &cert_info($d);
-	&lock_file($d->{'ssl_cert'});
-	&lock_file($d->{'ssl_key'});
-	my @newalt = $info->{'alt'} ? @{$info->{'alt'}} : ( );
-	foreach my $a (@newalt) {
-		if ($a eq $oldd->{'dom'}) {
-			$a = $d->{'dom'};
-			}
-		elsif ($a =~ /^([^\.]+)\.(\S+)$/ && $2 eq $oldd->{'dom'}) {
-			$a = $1.".".$d->{'dom'};
-			}
-		}
-	my $email = $info->{'emailAddress'};
-	$email =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
-	my $err = &generate_self_signed_cert(
-		$d->{'ssl_cert'}, $d->{'ssl_key'},
-		undef,
-		1825,
-		$info->{'c'},
-		$info->{'st'},
-		$info->{'l'},
-		$info->{'o'},
-		$info->{'ou'},
-		"*.$d->{'dom'}",
-		$email,
-		\@newalt,
-		$d,
-		);
-	&unlock_file($d->{'ssl_key'});
-	&unlock_file($d->{'ssl_cert'});
-	if ($err) {
-		&$second_print(&text('setup_eopenssl', $err));
-		}
-	else {
-		$rv++;
-		&$second_print($text{'setup_done'});
-		}
-	}
 
-if ($d->{'dom'} ne $oldd->{'dom'} &&
-    !$d->{'ssl_same'} &&
-    &is_acme_cert($d) &&
-    !&check_domain_certificate($d->{'dom'}, $d)) {
-	# Domain name has changed ... re-request let's encrypt cert
-	&$first_print($text{'save_ssl12'});
-	if ($d->{'letsencrypt_dname'}) {
-		# Update any explicitly chosen domain names
-		my @dnames = split(/\s+/, $d->{'letsencrypt_dname'});
-		foreach my $dn (@dnames) {
-			$dn = $d->{'dom'} if ($dn eq $oldd->{'dom'});
-			$dn =~ s/\.\Q$oldd->{'dom'}\E$/\.$d->{'dom'}/;
-			}
-		$d->{'letsencrypt_dname'} = join(" ", @dnames);
-		}
-	my ($ok, $err) = &renew_letsencrypt_cert($d);
-	if ($ok) {
-		&$second_print($text{'setup_done'});
-		}
-	else {
-		&$second_print(&text('save_essl12', $err));
-		}
-	}
+# Re-generate or request cert if required due to a domain name change
+$rv += &rerequest_cert_on_domain_change($d, $oldd);
 
 # If anything has changed that would impact the per-domain SSL cert for
 # another server like Postfix or Webmin, re-set it up as long as it is supported
 # with the new settings
-if ($d->{'ip'} ne $oldd->{'ip'} ||
-    $d->{'virt'} != $oldd->{'virt'} ||
-    $d->{'ip6'} ne $oldd->{'ip6'} ||
-    $d->{'virt6'} ne $oldd->{'virt6'} ||
-    $d->{'dom'} ne $oldd->{'dom'} ||
-    $d->{'home'} ne $oldd->{'home'}) {
-	my %types = map { $_->{'id'}, $_ } &list_service_ssl_cert_types();
-	foreach my $svc (&get_all_domain_service_ssl_certs($oldd)) {
-		next if (!$svc->{'d'});
-		my $t = $types{$svc->{'id'}};
-		my $func = "sync_".$svc->{'id'}."_ssl_cert";
-		next if (!defined(&$func));
-		&$func($oldd, 0);
-		if ($t->{'dom'} || $d->{'virt'}) {
-			&$func($d, 1);
-			}
-		}
-	}
+&update_ssl_certs_on_change($d, $oldd);
 
 # Update DANE DNS records
 &sync_domain_tlsa_records($d);
@@ -765,10 +670,13 @@ if (&foreign_installed("usermin")) {
 foreach my $c (@checks) {
 	my @sockets = &webmin::get_miniserv_sockets($c->[0]);
 	foreach my $s (@sockets) {
-		if (($s->[0] eq '*' || $s->[0] eq $d->{'ip'}) &&
+		if (($s->[0] eq '*' ||
+		     ($d->{'ip'} && $s->[0] eq $d->{'ip'}) ||
+		     ($d->{'ip6'} && $s->[0] eq $d->{'ip6'})) &&
 		    $s->[1] == $port) {
 			return &text('setup_esslportclash',
-				     $d->{'ip'}, $port, $c->[1]);
+				     $d->{'ip'} || $d->{'ip6'},
+				     $port, $c->[1]);
 			}
 		}
 	}
@@ -2413,7 +2321,10 @@ $main::got_lock_ssl-- if ($main::got_lock_ssl);
 sub find_matching_certificate_domain
 {
 my ($d) = @_;
-my @sslclashes = grep { $_->{'ip'} eq $d->{'ip'} &&
+my $ipkey = $d->{'ip'} ? 'ip' : 'ip6';
+my $ip = $d->{$ipkey};
+return wantarray ? ( ) : undef if (!$ip);
+my @sslclashes = grep { $_->{$ipkey} && $_->{$ipkey} eq $ip &&
 			   &domain_has_ssl($_) &&
 			   $_->{'id'} ne $d->{'id'} &&
 			   !$_->{'ssl_same'} } &list_domains();
@@ -2964,10 +2875,10 @@ if ($d->{'ip6'}) {
 return ( ) if (!$l && !$l6);
 return ( ) if (!$imap && !$imap6);
 
-# We have at least one IP
-my $ione = $imap || $imap6;
+# Use whichever IP block exists
+my $imap_block = $imap || $imap6;
 my %mems = map { $_->{'name'}, $_->{'value'} }
-	       @{$ione->{'members'}};
+	       @{$imap_block->{'members'}};
 my @rv = ( $mems{'ssl_cert'} || $mems{'ssl_server_cert_file'},
            $mems{'ssl_key'} || $mems{'ssl_server_key_file'},
            $mems{'ssl_ca'},
@@ -4678,6 +4589,130 @@ if (&dovecot::version_atleast(2.4)) {
 	}
 else {
 	return ("ssl_".$type, "<".$file);
+	}
+}
+
+# rerequest_cert_on_domain_change(&domain, &old-domain)
+# If a virutal server's domain name changes, re-request or re-generate the SSL
+# cert if possible
+sub rerequest_cert_on_domain_change
+{
+my ($d, $oldd) = @_;
+my $rv = 0;
+
+if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
+    !&check_domain_certificate($d->{'dom'}, $d)) {
+	# Domain name has changed .. re-generate self-signed cert
+	&$first_print($text{'save_ssl11'});
+	my $info = &cert_info($d);
+	&lock_file($d->{'ssl_cert'});
+	&lock_file($d->{'ssl_key'});
+	my @newalt = $info->{'alt'} ? @{$info->{'alt'}} : ( );
+	foreach my $a (@newalt) {
+		if ($a eq $oldd->{'dom'}) {
+			$a = $d->{'dom'};
+			}
+		elsif ($a =~ /^([^\.]+)\.(\S+)$/ && $2 eq $oldd->{'dom'}) {
+			$a = $1.".".$d->{'dom'};
+			}
+		}
+	my $email = $info->{'emailAddress'};
+	$email =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
+	my $err = &generate_self_signed_cert(
+		$d->{'ssl_cert'}, $d->{'ssl_key'},
+		undef,
+		1825,
+		$info->{'c'},
+		$info->{'st'},
+		$info->{'l'},
+		$info->{'o'},
+		$info->{'ou'},
+		"*.$d->{'dom'}",
+		$email,
+		\@newalt,
+		$d,
+		);
+	&unlock_file($d->{'ssl_key'});
+	&unlock_file($d->{'ssl_cert'});
+	if ($err) {
+		&$second_print(&text('setup_eopenssl', $err));
+		}
+	else {
+		$rv++;
+		&$second_print($text{'setup_done'});
+		}
+	}
+
+if ($d->{'dom'} ne $oldd->{'dom'} &&
+    !$d->{'ssl_same'} &&
+    &is_acme_cert($d) &&
+    !&check_domain_certificate($d->{'dom'}, $d)) {
+	# Domain name has changed ... re-request let's encrypt cert
+	&$first_print($text{'save_ssl12'});
+	if ($d->{'letsencrypt_dname'}) {
+		# Update any explicitly chosen domain names
+		my @dnames = split(/\s+/, $d->{'letsencrypt_dname'});
+		foreach my $dn (@dnames) {
+			$dn = $d->{'dom'} if ($dn eq $oldd->{'dom'});
+			$dn =~ s/\.\Q$oldd->{'dom'}\E$/\.$d->{'dom'}/;
+			}
+		$d->{'letsencrypt_dname'} = join(" ", @dnames);
+		}
+	my ($ok, $err) = &renew_letsencrypt_cert($d);
+	if ($ok) {
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print(&text('save_essl12', $err));
+		}
+	}
+
+return $rv;
+}
+
+# update_ssl_link_on_domain_change(&domain, &old-domain)
+# If a virtual server changed IP address, update SSL cert linkage
+sub update_ssl_link_on_domain_change
+{
+my ($d, $oldd) = @_;
+my $ipkey = $d->{'ip'} ? 'ip' : 'ip6';
+my $oldipkey = $oldd->{'ip'} ? 'ip' : 'ip6';
+my $ip = $d->{$ipkey};
+my $oldip = $oldd->{$oldipkey};
+if (!$ip) {
+	# With no IP address, SSL cert linkage is not possible
+	if ($oldd->{'ssl_same'}) {
+		my $oldsslclash = &get_domain($oldd->{'ssl_same'});
+		&break_ssl_linkage($d, $oldsslclash);
+		}
+	}
+elsif (($ipkey ne $oldipkey || !$oldip || $ip ne $oldip) &&
+       $oldd->{'ssl_same'}) {
+	# IP has changed or been added - maybe clear ssl_same field
+	my ($sslclash) = grep { $_->{$ipkey} && $_->{$ipkey} eq $ip &&
+				&domain_has_ssl($_) &&
+				$_->{'id'} ne $d->{'id'} &&
+				!$_->{'ssl_same'} } &list_domains();
+	my $oldsslclash = &get_domain($oldd->{'ssl_same'});
+	if ($sslclash && $oldd->{'ssl_same'} eq $sslclash->{'id'}) {
+		# No need to change
+		}
+	elsif ($sslclash &&
+	       &check_domain_certificate($d->{'dom'}, $sslclash)) {
+		# New domain with same cert
+		$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
+		$d->{'ssl_key'} = $sslclash->{'ssl_key'};
+		$d->{'ssl_same'} = $sslclash->{'id'};
+		my $chained = &get_website_ssl_file($sslclash, 'ca');
+		$d->{'ssl_chain'} = $chained;
+		$d->{'ssl_combined'} = $sslclash->{'ssl_combined'};
+		$d->{'ssl_everything'} = $sslclash->{'ssl_everything'};
+		}
+	else {
+		# No domain has the same cert anymore - copy the one from the
+		# old sslclash domain
+		&break_ssl_linkage($d, $oldsslclash);
+		}
 	}
 }
 

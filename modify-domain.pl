@@ -170,6 +170,10 @@ while(@ARGV > 0) {
 		# Set over-bw limit disable to no
 		$bw_no_disable = 1;
 		}
+	elsif ($a eq "--no-ip") {
+		# Turning off IP address
+		$noip = 1;
+		}
 	elsif ($a eq "--ip") {
 		# Changing or adding a virtual IP
 		$ip = shift(@ARGV);
@@ -389,7 +393,7 @@ elsif (!$dom->{'virt'} && $ip eq "allocate") {
 if ($dom->{'virt'} && defined($sharedip)) {
 	&usage("The shared IP address cannot be changed for a virtual server with a private IP");
 	}
-if (!$dom->{'virt'} && $defaultip) {
+if (!$dom->{'virt'} && $dom->{'ip'} && $defaultip) {
 	&usage("The --default-ip flag can only be used when the virtual server has a private address");
 	}
 if (($defaultip || $sharedip) && $ip) {
@@ -591,6 +595,15 @@ elsif (defined($sharedip)) {
 	# Just change the shared IP address
 	$dom->{'ip'} = $sharedip;
 	}
+elsif ($noip) {
+	# Remove the IP address entirely
+	$dom->{'netmask'} = undef;
+	$dom->{'virt'} = 0;
+	$dom->{'name'} = 0;
+	$dom->{'ip'} = undef;
+	delete($dom->{'dns_ip'});
+	delete($dom->{'defip'});
+	}
 
 # Apply new IPv6 address
 if ($ip6) {
@@ -617,7 +630,12 @@ elsif ($noip6) {
 	$dom->{'virt6'} = 0;
 	$dom->{'name6'} = 0;
 	$dom->{'ip6'} = undef;
+	delete($dom->{'dns_ip6'});
 	}
+
+# Make sure there is some kind of IP
+$dom->{'ip'} || $dom->{'ip6'} ||
+	&usage("Either an IPv4 or IPv6 address must be enabled");
 
 # Apply reseller change
 if ($resel eq "NONE") {
@@ -657,6 +675,8 @@ elsif (defined($resel) || @add_resel || @del_resel) {
 if (defined($dns_ip)) {
 	if ($dns_ip) {
 		# Changing IP address for DNS
+		$dom->{'ip'} ||
+			&usage("--dns-ip cannot be used without an IP address");
 		$dom->{'dns_ip'} = $dns_ip;
 		}
 	else {
@@ -1049,5 +1069,4 @@ print "                        [--disable-2fa]\n";
 print "                        [--skip-warnings]\n";
 exit(1);
 }
-
 

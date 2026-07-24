@@ -26,6 +26,22 @@ for(my $i=0; $i<$tries; $i++) {
 return 0;
 }
 
+# ftp_password_command(password, [&error])
+# Sends an FTP password without exposing it in an error message.
+sub ftp_password_command
+{
+my ($pass, $err) = @_;
+my $cmd = "PASS $pass";
+my $passerr;
+my $rv = &ftp_command($cmd, 2, \$passerr);
+if (!defined($rv)) {
+	$passerr =~ s/\Q$cmd\E/PASS *****/g;
+	if ($err) { $$err = $passerr; return undef; }
+	else { &error($passerr); }
+	}
+return $rv;
+}
+
 # ftp_onecommand(host, command, [&error], [user, pass], [port])
 # Executes one command on an FTP server, after logging in, and returns its
 # exit status.
@@ -50,7 +66,7 @@ if ($_[3]) {
 	my @urv = &ftp_command("USER $_[3]", [ 2, 3 ], $_[2]);
 	@urv || return 0;
 	if (int($urv[1]/100) == 3) {
-		&ftp_command("PASS $_[4]", 2, $_[2]) || return 0;
+		&ftp_password_command($_[4], $_[2]) || return 0;
 		}
 	}
 else {
@@ -58,8 +74,8 @@ else {
 	my @urv = &ftp_command("USER anonymous", [ 2, 3 ], $_[2]);
 	@urv || return 0;
 	if (int($urv[1]/100) == 3) {
-		&ftp_command("PASS root\@".&get_system_hostname(), 2,
-			     $_[2]) || return 0;
+		&ftp_password_command("root\@".&get_system_hostname(),
+				      $_[2]) || return 0;
 		}
 	}
 
@@ -99,7 +115,7 @@ if ($_[3]) {
 	my @urv = &ftp_command("USER $_[3]", [ 2, 3 ], $_[2]);
 	@urv || return 0;
 	if (int($urv[1]/100) == 3) {
-		&ftp_command("PASS $_[4]", 2, $_[2]) || return 0;
+		&ftp_password_command($_[4], $_[2]) || return 0;
 		}
 	}
 else {
@@ -107,8 +123,8 @@ else {
 	my @urv = &ftp_command("USER anonymous", [ 2, 3 ], $_[2]);
 	@urv || return 0;
 	if (int($urv[1]/100) == 3) {
-		&ftp_command("PASS root\@".&get_system_hostname(), 2,
-			     $_[2]) || return 0;
+		&ftp_password_command("root\@".&get_system_hostname(),
+				      $_[2]) || return 0;
 		}
 	}
 

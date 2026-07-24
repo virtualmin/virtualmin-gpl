@@ -213,6 +213,7 @@ elsif (&can_use_feature("virt")) {
 		}
 	}
 my @opts;
+push(@opts, [ -2, $text{'edit_virt6off'} ]);
 if ($orig) {
 	# For restores - option to use original IP
 	push(@opts, [ -1, $text{'form_origip'} ]);
@@ -269,7 +270,11 @@ return &ui_radio_table("virt", $mode, \@opts, 1);
 sub parse_virtual_ip
 {
 my ($tmpl, $resel) = @_;
-if ($in{'virt'} == 2) {
+if ($in{'virt'} == -2) {
+	# Completely disabled
+	return ( );
+	}
+elsif ($in{'virt'} == 2) {
 	# Automatic IP allocation chosen .. select one from either the
 	# reseller's range, or the template
 	if ($resel) {

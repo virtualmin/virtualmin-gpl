@@ -46,7 +46,7 @@ if ($d->{'alias'} && $supports_aliascopy) {
 	}
 
 # Outgoing IP binding
-if ($supports_dependent) {
+if ($supports_dependent && $d->{'ip'}) {
 	$dependent = &get_domain_dependent($d);
 	print &ui_table_row($text{'mail_dependent'},
                     &ui_radio("dependent", $dependent ? 1 : 0,

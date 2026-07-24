@@ -6151,7 +6151,7 @@ $mail_tests = [
 		{ 'command' => 'get-dns.pl',
 		  'args' => [ [ 'multiline' ],
 			      [ 'domain', $test_domain ],
-			      [ 'regexp' => '_domainkey' ] ],
+			      [ 'regexp', '_domainkey' ] ],
 		  'grep' => [ 'v=DKIM1' ],
 		},
 
@@ -9406,7 +9406,276 @@ $ip6_tests = [
         },
 	];
 if (!&supports_ip6()) {
-	$ip6_tests = [ { 'command' => 'echo IPv6 is not supported' } ];
+	$ip6_tests = [ { 'command' => 'echo IPv6 is not supported ; false' } ];
+	}
+
+# Test for domain with IPv6 but not IPv4
+$noip4_tests = [
+	# Create a domain with an IPv6 address only
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test IPv6 domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
+		      [ $ssl ], [ 'logrotate' ],
+		      [ 'allocate-ip6' ],
+		      [ 'no-ip' ],
+		      [ 'content' => 'Test IPv6 home page' ],
+		      @create_args, ],
+	},
+
+	# Create an alias for it
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'desc', 'Test alias domain' ],
+		      [ 'alias', $test_domain ],
+		      [ 'dir' ], [ $web ], [ 'dns' ],
+		      @create_args, ],
+	},
+
+	# Check that there is an IPv6 address but not v4
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => '^\s+IPv6 address:',
+	  'antigrep' => '^\s+IP address:',
+	},
+
+	# Also check IPs on the alias domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_target_domain ] ],
+	  'grep' => '^\s+IPv6 address:',
+	  'antigrep' => '^\s+IP address:',
+	},
+
+	# Validate all features in v6-only mode
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Delay needed for v6 address to become routable
+	{ 'command' => 'sleep 10' },
+
+	# Test DNS lookup for v6 entry
+	{ 'command' => 'host -t AAAA '.$test_domain,
+	  'grep' => 'IPv6 address',
+	},
+	{ 'command' => 'host -t AAAA '.$test_target_domain,
+	  'grep' => 'IPv6 address',
+	},
+
+	# Test DNS lookup for v4 entry, which should fail
+	{ 'command' => 'host -t A '.$test_domain,
+	  'antigrep' => 'IP address',
+	},
+	{ 'command' => 'host -t A '.$test_target_domain,
+	  'antigrep' => 'IP address',
+	},
+
+	# Test HTTP get to v6 address
+	{ 'command' => $wget_command.' --inet6 http://'.$test_domain,
+	  'grep' => 'Test IPv6 home page',
+	},
+	{ 'command' => $wget_command.' --inet6 http://'.$test_target_domain,
+	  'grep' => 'Test IPv6 home page',
+	},
+
+	# Make sure there are no v4 DNS addresses
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ], 
+		      [ 'skip-name', 'localhost' ],
+		      [ 'type', 'A' ] ],
+	  'antigrep' => 'Type: A',
+	},
+
+	# Also check the alias domain
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_target_domain ], 
+		      [ 'skip-name', 'localhost' ],
+		      [ 'type', 'A' ] ],
+	  'antigrep' => 'Type: A',
+	},
+
+	# Test adding an IPv4 address
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'default-ip' ] ],
+	},
+
+	# Validate all features with the v4 address back
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Check that there is now an IPv4 and IPv6 address
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ '^\s+IP address:',
+		      '^\s+IPv6 address:' ],
+	},
+
+	# Also check the alias domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_target_domain ] ],
+	  'grep' => [ '^\s+IP address:',
+		      '^\s+IPv6 address:' ],
+	},
+
+	# Test DNS lookup to the new IPv4 address
+	{ 'command' => 'host -t A '.$test_domain,
+	  'grep' => &get_default_ip(),
+	},
+
+	# V4 address should work now
+	{ 'command' => $wget_command.' --inet4 http://'.$test_domain,
+	  'grep' => 'Test IPv6 home page',
+	},
+
+	# V6 address should still work
+	{ 'command' => $wget_command.' --inet6 http://'.$test_domain,
+	  'grep' => 'Test IPv6 home page',
+	},
+
+	# Validate all features in v6-only mode again
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Make sure there are v4 DNS addresses now
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ], 
+		      [ 'skip-name', 'localhost' ],
+		      [ 'type', 'A' ] ],
+	  'grep' => 'Type: A',
+	},
+
+	# Also check the alias domain
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_target_domain ], 
+		      [ 'skip-name', 'localhost' ],
+		      [ 'type', 'A' ] ],
+	  'grep' => 'Type: A',
+	},
+
+	# Turn off the IPv4 address again
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'no-ip' ] ],
+	},
+
+	# Check again that there is an IPv6 address but not v4
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => '^\s+IPv6 address:',
+	  'antigrep' => '^\s+IP address:',
+	},
+
+	# Also check IPs on the alias domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_target_domain ] ],
+	  'grep' => '^\s+IPv6 address:',
+	  'antigrep' => '^\s+IP address:',
+	},
+
+	# Clone the domain, which should also not get an IPv4 address
+	{ 'command' => 'clone-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'newdomain', $test_clone_domain ],
+		      [ 'newuser', $test_clone_domain_user ],
+		      [ 'newpass', 'foo' ] ],
+	},
+
+	# Check that the clone has an IPv6 address but not v4
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_clone_domain ] ],
+	  'grep' => '^\s+IPv6 address:',
+	  'antigrep' => '^\s+IP address:',
+	},
+
+	# Test DNS lookup for v6 entry of the clone
+	{ 'command' => 'host -t AAAA '.$test_clone_domain,
+	  'grep' => 'IPv6 address',
+	},
+
+	# Test DNS lookup for v4 entry of the clone, which should fail
+	{ 'command' => 'host -t A '.$test_clone_domain,
+	  'antigrep' => 'IP address',
+	},
+
+	# Backup the domain with no IPv4 address
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Delete the domain in preparation for restore
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+        },
+
+	# Restore the domain, which should come back with no IPv4 address
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Check that the restored domain has no IPv4
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => '^\s+IPv6 address:',
+	  'antigrep' => '^\s+IP address:',
+	},
+
+	# Delete the domain in preparation for restore again
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+        },
+
+	# Restore the domain, which should come back with an IPv4 but not v6
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ],
+		      [ 'default-ip' ],
+		      [ 'no-ip6' ] ],
+	},
+
+	# Check that the restored domain has no IPv6
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => '^\s+IP address:',
+	  'antigrep' => '^\s+IPv6 address:',
+	},
+
+	# Cleanup the domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1
+        },
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_clone_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+if (!&supports_ip6()) {
+	$noip4_tests = [ { 'command' => 'echo IPv6 is not supported ; false' } ];
 	}
 
 # Tests for renaming a virtual server via the web UI
@@ -9539,17 +9808,18 @@ $rename_tests = [
 		      @create_args, ],
 	},
 
-	# Install a dummy CA cert
-	{ 'command' => 'install-cert.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'ca', $module_root_directory.'/lets-encrypt-*.pem.txt' ] ],
-	},
-
 	# Get the IP address
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'ip-only' ],
 		      [ 'domain', $test_domain ] ],
 	  'save' => 'PRIVATE_IP',
+	},
+
+	# Check that the SSL cert is for the test hostname
+	{ 'command' => 'get-ssl.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'cn: \\*.'.$test_domain ],
 	},
 
 	# Force enable private SSL cert for Webmin, Usermin, etc
@@ -9654,6 +9924,13 @@ $rename_tests = [
 	{ 'command' => 'ls /var/log/virtualmin/'.$test_domain.'_error_log',
 	  'fail' => 1 },
 	) : ( ),
+
+	# Check that the SSL cert is for the new hostname
+	{ 'command' => 'get-ssl.pl',
+	  'args' => [ [ 'domain', $test_rename_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'cn: \\*.'.$test_rename_domain ],
+	},
 
 	# Check that service certs still show up
 	{ 'command' => 'list-domains.pl',
@@ -13607,6 +13884,7 @@ $alltests = { '_config' => $_config_tests,
 	      'plans' => $plans_tests,
 	      'plugin' => $plugin_tests,
 	      'ip6' => $ip6_tests,
+	      'noip4' => $noip4_tests,
 	      'webrename' => $webrename_tests,
 	      'rename' => $rename_tests,
 	      'bw' => $bw_tests,

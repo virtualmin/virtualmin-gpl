@@ -71,11 +71,13 @@ given the system's default shared IP. However, if you have defined additional
 shared addresses, a different one can be selected with the C<--shared-ip>
 flag followed by an address.
 
+For IPv6-only systems, you can also use C<--no-ip> to turn off IPv4 for the
+domain entirely, even if it was enabled when the backup was taken. However,
+this onlt works if the domain has an IPv6 address.
+
 Flags similar to all those above also exist for IPv6, if your system supports
 it. The equivalent flags are named C<--default-ip6>, C<--ip6>, C<--allocate-ip6>,
-C<--original-ip6> and C<--shared-ip6> respectively. You can also use C<--no-ip6>
-to turn off IPv6 for the domain entirely, even if it was enabled when the
-backup was taken.
+C<--original-ip6>, C<--shared-ip6> and C<--no-ip6> respectively.
 
 By default, if any non-fatal warnings encountered during the restore process
 will cause the restore to fail. However, you can force it to continue with the
@@ -255,12 +257,16 @@ while(@ARGV > 0) {
 			    'virtalready' => 0, 'netmask' => $netmask,
 			    'mode' => 5 };
 		}
+	elsif ($a eq "--no-ip") {
+		$ipinfo = { %$ipinfo,
+			    'mode' => -2 };
+		}
 
 	# Alternate IPv6 options
 	elsif ($a eq "--default-ip6") {
 		$ipinfo = { %$ipinfo,
-			    'virt' => 0, 'ip6' => &get_default_ip6(),
-			    'virtalready' => 0, 'mode6' => 0 };
+			    'virt6' => 0, 'ip6' => &get_default_ip6(),
+			    'virt6already' => 0, 'mode6' => 0 };
 		}
 	elsif ($a eq "--shared-ip6") {
 		$sharedip6 = shift(@ARGV);
@@ -273,7 +279,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--ip6") {
 		$ip6 = shift(@ARGV);
 		&check_ip6address($ip6) || &usage("Invalid IPv6 address");
-		&check_virt6_clash($ip) &&
+		&check_virt6_clash($ip6) &&
 			&usage("IPv6 address is already in use");
 		$ipinfo = { %$ipinfo,
 			    'virt6' => 1, 'ip6' => $ip6,
@@ -506,7 +512,7 @@ print "                         [--all-virtualmin] | [--virtualmin config]\n";
 print "                         [--only-features]\n";
 print "                         [--default-ip |\n";
 print "                          --shared-ip address | --ip address |\n";
-print "                          --allocate-ip | --original-ip]\n";
+print "                          --allocate-ip | --original-ip | --no-ip]\n";
 print "                         [--default-ip6 |\n";
 print "                          --shared-ip6 address | --ip6 address |\n";
 print "                          --allocate-ip6 | --original-ip6 | --no-ip6]\n";

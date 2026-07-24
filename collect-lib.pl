@@ -94,8 +94,10 @@ if (&has_home_quotas()) {
 my (%ipcount, %ipdom);
 foreach my $d (@doms) {
 	next if ($d->{'alias'});
-	$ipcount{$d->{'ip'}}++;
-	$ipdom{$d->{'ip'}} ||= $d;
+	if ($d->{'ip'}) {
+		$ipcount{$d->{'ip'}}++;
+		$ipdom{$d->{'ip'}} ||= $d;
+		}
 	if ($d->{'ip6'}) {
 		$ipcount{$d->{'ip6'}}++;
 		$ipdom{$d->{'ip6'}} ||= $d;

@@ -1075,7 +1075,34 @@ if ($check_submode) {
 	}
 
 # Update IPv4 or IPv6 address, if changed
-if ($oldip ne $newip || $oldip6 ne $newip6) {
+if ($d->{'ip'} && !$oldd->{'ip'}) {
+	# IPv4 enabled
+	&$first_print($text{'save_dnsip4on'});
+	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
+	if (!$file) {
+		&$second_print(&text('save_nobind2', $recs));
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
+	&add_ip4_records($d, $recs, $file);
+	&$second_print($text{'setup_done'});
+	$rv++;
+	}
+elsif (!$d->{'ip'} && $oldd->{'ip'}) {
+	# IPv4 disabled
+	&$first_print($text{'save_dnsip4off'});
+	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
+	if (!$file) {
+		&$second_print(&text('save_nobind2', $recs));
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
+	&remove_ip4_records($oldd, $file, $recs);
+	&$second_print($text{'setup_done'});
+	$rv++;
+	}
+elsif ($oldip && $newip && $oldip ne $newip ||
+       $oldip6 && $newip6 && $oldip6 ne $newip6) {
 	# IP address has changed .. need to update any records that use
 	# the old IP
 	&$first_print($text{'save_dns'});
@@ -1092,7 +1119,7 @@ if ($oldip ne $newip || $oldip6 ne $newip6) {
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
-elsif ($oldd->{'ip'} ne $d->{'ip'}) {
+elsif ($oldd->{'ip'} && $d->{'ip'} && $oldd->{'ip'} ne $d->{'ip'}) {
 	# Internal IP address changed, but external IP didn't
 	&$first_print($text{'save_dnsinternal'});
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
@@ -1266,7 +1293,7 @@ elsif (!$d->{'ip6'} && $oldd->{'ip6'}) {
 	}
 elsif ($d->{'ip6'} && $oldd->{'ip6'} &&
        $d->{'ip6'} ne $oldd->{'ip6'}) {
-	# IPv6 address changed
+	# IPv6 internal address changed
 	&$first_print($text{'save_dnsip6'});
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
 	if (!$file) {
@@ -1515,17 +1542,20 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			# Make sure we have some NS records
 			@created_ns = &unique(@created_ns);
 			if ($tmpl->{'dns_indom'}) {
-				@created_ns = grep { &to_ipaddress($_) } @created_ns;
+				@created_ns =
+					grep { &to_ipaddress($_) ||
+					       &to_ip6address($_) } @created_ns;
 				}
 			if (!@created_ns && !$d->{'dns_cloud'}) {
 				return $text{'setup_ednsns'};
 				}
 
 			if ($tmpl->{'dns_indom'}) {
-				# Add A records pointing to the nameserver IPs
+				# Add address records for the nameserver IPs
 				my $i = 1;
 				foreach my $ns (@created_ns) {
 					my $a = &to_ipaddress($ns);
+					my $aaaa = &to_ip6address($ns);
 					my $r = "ns".$i.".".$d->{'dom'}.".";
 					&create_dns_record($recs, $file,
 						{ 'name' => '@',
@@ -1535,7 +1565,12 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 						{ 'name' => $r,
 						  'type' => 'A',
 						  'proxied' => $proxied == 1 ? 1 : 0,
-						  'values' => [ $a ] });
+						  'values' => [ $a ] }) if ($a);
+					&create_dns_record($recs, $file,
+						{ 'name' => $r,
+						  'type' => 'AAAA',
+						  'proxied' => $proxied == 1 ? 1 : 0,
+						  'values' => [ $aaaa ] }) if ($aaaa);
 					$i++;
 					}
 				}
@@ -1974,8 +2009,10 @@ return 0 if (!$file);
 my $count = 0;
 foreach my $r (reverse('webmail', 'admin')) {
 	my $n = "$r.$d->{'dom'}.";
-	my ($rec) = grep { $_->{'name'} eq $n } @$recs;
-	if ($rec) {
+	my @delrecs = grep { $_->{'name'} eq $n &&
+			     ($_->{'type'} eq 'A' ||
+			      $_->{'type'} eq 'AAAA') } @$recs;
+	foreach my $rec (reverse(@delrecs)) {
 		&delete_dns_record($recs, $rec->{'file'}, $rec);
 		$count++;
 		}
@@ -2013,7 +2050,7 @@ return &add_ip_any_records($d, $recs, $file, 'AAAA', 'A',
 }
 
 # add_ip_any_records(&domain, [&records, file], old-type, new-type,
-# 		     old-values, new-values)
+# 		     old-value, new-value)
 # Change records of one type to another, converting values as well
 sub add_ip_any_records
 {
@@ -2028,7 +2065,7 @@ return 0 if (!$file);
 my %already;
 foreach my $r (@$recs) {
 	if ($r->{'type'} eq $newrtype &&
-	    &indexof($r->{'values'}->[0], @$newvals) >= 0) {
+	    $r->{'values'}->[0] eq $newval) {
 		$already{$r->{'name'}}++;
 		}
 	}
@@ -2047,7 +2084,6 @@ foreach my $od (&list_domains()) {
 my $count = 0;
 my $withdot = $d->{'dom'}.".";
 foreach my $r (@$recs) {
-	my $idx;
 	if ($r->{'type'} &&
 	    $r->{'type'} eq $oldrtype &&
 	    $r->{'values'}->[0] eq $oldval &&
@@ -2126,22 +2162,40 @@ my $tmpl = &get_template($d->{'template'});
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 return 0 if (!$file);
 my $withstar = "*.".$d->{'dom'}.".";
-my ($r) = grep { $_->{'name'} eq $withstar } @$recs;
+my ($r4) = grep { $_->{'name'} eq $withstar &&
+		   $_->{'type'} eq 'A' } @$recs;
+my ($r6) = grep { $_->{'name'} eq $withstar &&
+		   $_->{'type'} eq 'AAAA' } @$recs;
 my $any = 0;
-if ($star && !$r) {
-	# Need to add
+if ($star) {
+	# Add a wildcard record for each available address
 	my $ip = $d->{'dns_ip'} || $d->{'ip'};
-	$r = { 'name' => $withstar,
-	       'type' => 'A',
-	       'proxied' => $tmpl->{'dns_cloud_proxy'} == 1 ? 1 : 0,
-	       'values' => [ $ip ] };
-	&create_dns_record($recs, $file, $r);
-	$any++;
+	my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
+	if ($ip && !$r4) {
+		$r4 = { 'name' => $withstar,
+			'type' => 'A',
+			'proxied' =>
+				$tmpl->{'dns_cloud_proxy'} == 1 ? 1 : 0,
+			'values' => [ $ip ] };
+		&create_dns_record($recs, $file, $r4);
+		$any++;
+		}
+	if ($ip6 && !$r6) {
+		$r6 = { 'name' => $withstar,
+			'type' => 'AAAA',
+			'proxied' =>
+				$tmpl->{'dns_cloud_proxy'} == 1 ? 1 : 0,
+			'values' => [ $ip6 ] };
+		&create_dns_record($recs, $file, $r6);
+		$any++;
+		}
 	}
-elsif (!$star && $r) {
-	# Need to remove
-	&delete_dns_record($recs, $file, $r);
-	$any++;
+else {
+	# Remove both wildcard address records
+	foreach my $r (grep { $_ } ($r4, $r6)) {
+		&delete_dns_record($recs, $file, $r);
+		$any++;
+		}
 	}
 if ($any) {
 	my $err = &post_records_change($d, $recs, $file);
@@ -2229,7 +2283,12 @@ foreach my $r (@$recs) {
 	}
 $d->{'dns_submode'} || $d->{'dns_cloud'} || $got{'SOA'} ||
 	return $text{'validate_ednssoa2'};
-$got{'A'} || return $text{'validate_ednsa2'};
+if ($ip) {
+	$got{'A'} || return $text{'validate_ednsa2'};
+	}
+else {
+	$got{'AAAA'} || return $text{'validate_ednsa6'};
+	}
 if ($d->{'virt6'}) {
 	$got{'AAAA'} || return $text{'validate_ednsa6'};
 	}
@@ -2242,11 +2301,11 @@ if (&domain_has_website($d)) {
 		my @nips6 = map { $_->{'values'}->[0] }
 			       grep { $_->{'type'} eq 'AAAA' &&
 				      $_->{'name'} eq $n } @$recs;
-		if (@nips && &indexof($ip, @nips) < 0) {
+		if ($ip && @nips && &indexof($ip, @nips) < 0) {
 			push(@recerrs, &text('validate_ednsip', $n,
 			    join(' or ', @nips), $ip));
 			}
-		if ($d->{'virt6'} && @nips6 && &indexof($ip6, @nips6) < 0) {
+		if ($ip6 && @nips6 && &indexof($ip6, @nips6) < 0) {
 			push(@recerrs, &text('validate_ednsip6', $n,
 			  join(' or ', @nips6), $ip6));
 			}
@@ -2259,6 +2318,7 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 	my @mxs = grep { $_->{'name'} eq $d->{'dom'}.'.' &&
 			    $_->{'type'} eq 'MX' } @$recs;
 	my $defip = &get_default_ip();
+	my $defip6 = &get_default_ip6();
 	my %inuse = &interface_ip_addresses();
 	if (@mxs) {
 		my $found;
@@ -2267,29 +2327,57 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 			my $mxh = $mx->{'values'}->[1];
 			$mxh .= ".".$d->{'dom'} if ($mxh !~ /\.$/);
 			$mxh =~ s/\.$//;
+
+			# Check if the MX hostname resolves to
+			# an IPv4 address on this system
 			my $ip = &to_ipaddress($mxh);
 			if ($ip && ($ip eq $d->{'ip'} ||
 				    $ip eq $d->{'dns_ip'} ||
-				    $ip eq $d->{'ip6'} ||
-				    $ip eq $d->{'dns_ip6'} ||
 				    $ip eq $defip ||
 				    $inuse{$ip})) {
 				$found = $ip;
 				last;
 				}
+
+			# Check if the MX hostname resolves to
+			# an IPv6 address on this system
+			my $ip6 = &to_ip6address($mxh);
+			if ($ip6 && ($ip6 eq $d->{'ip6'} ||
+				     $ip6 eq $d->{'dns_ip6'} ||
+				     $ip6 eq $defip6 ||
+				     $inuse{$ip6})) {
+				$found = $ip6;
+				last;
+				}
+
+			# Check for an IPv4 DNS record that points to
+			# this system
 			my ($arec) = grep { $_->{'name'} eq $mxh."." &&
-					       $_->{'type'} eq 'A' } @$recs;
+					    $_->{'type'} eq 'A' } @$recs;
 			if ($arec) {
-				$ip = $arec->{'values'}->[0];
+				my $ip = $arec->{'values'}->[0];
 				if ($ip && ($ip eq $d->{'ip'} ||
 					    $ip eq $d->{'dns_ip'} ||
-					    $ip eq $d->{'ip6'} ||
-					    $ip eq $d->{'dns_ip6'} ||
 					    $ip eq $defip)) {
 					$found = $ip;
 					last;
 					}
 				}
+
+			# Check for an IPv6 DNS record that points to
+			# this system
+			my ($arec) = grep { $_->{'name'} eq $mxh."." &&
+					    $_->{'type'} eq 'AAAA' } @$recs;
+			if ($arec) {
+				my $ip6 = $arec->{'values'}->[0];
+				if ($ip6 && ($ip6 eq $d->{'ip6'} ||
+					     $ip6 eq $d->{'dns_ip6'} ||
+					     $ip6 eq $defip6)) {
+					$found = $ip6;
+					last;
+					}
+				}
+
 			push(@mxips, $mxh);
 			}
 		if (!$found) {
@@ -4254,7 +4342,8 @@ foreach my $i (split(/\s+/, $includes)) {
 if ($d->{'dns_ip'} && !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip4:'}}, $d->{'dns_ip'});
 	}
-if ($d->{'ip'} ne $defip && $d->{'ip'} !~ /^(10\.|192\.168\.)/ &&
+if ($d->{'ip'} && $d->{'ip'} ne $defip &&
+    $d->{'ip'} !~ /^(10\.|192\.168\.)/ &&
     !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip4:'}}, $d->{'ip'});
 	}
@@ -6100,4 +6189,3 @@ return { 'id' => 0,
 $done_feature_script{'dns'} = 1;
 
 1;
-

@@ -3856,8 +3856,24 @@ foreach my $d (&sort_indent_domains($doms)) {
 		elsif ($c eq "ip") {
 			# IP address
 			my $ip = $d->{'ip'};
-			$ip = "<i>$ip</i>" if ($d->{'virt'});
-			push(@cols, $ip);
+			if ($ip) {
+				$ip = "<i>$ip</i>" if ($d->{'virt'});
+				push(@cols, $ip);
+				}
+			else {
+				push(@cols, "");
+				}
+			}
+		elsif ($c eq "ip6") {
+			# IPv6 address
+			my $ip6 = $d->{'ip6'};
+			if ($ip6) {
+				$ip6 = "<i>$ip6</i>" if ($d->{'virt6'});
+				push(@cols, $ip6);
+				}
+			else {
+				push(@cols, "");
+				}
 			}
 		elsif ($c eq "ssl_expiry") {
 			# SSL cert expiry
@@ -8412,7 +8428,8 @@ if ($dom->{'parent'}) {
 	}
 
 # Work out if this server is being created on the primary default IP address
-if ($dom->{'ip'} eq &get_default_ip() &&
+if ($dom->{'ip'} &&
+    $dom->{'ip'} eq &get_default_ip() &&
     !$dom->{'virt'}) {
 	$dom->{'defip'} = 1;
 	}
@@ -14560,8 +14577,9 @@ my %catmap = map { $_->{'catname'}, $_->{'cat'} } @rv;
 # Add preview website link, proxied via Webmin
 if (&domain_has_website($d) && &can_use_preview()) {
 	my $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";
+	my $ip = $d->{'ip'} || $d->{'ip6'};
 	push(@rv, { 'url' => "/$module_name/".
-		    	     "link.cgi/$d->{'ip'}/http://www.$d->{'dom'}$pt/",
+		    	     "link.cgi/$ip/http://www.$d->{'dom'}$pt/",
 		    'title' => $text{'links_website'},
 		    'cat' => 'web',
 		    'catname' => $text{'cat_services'},
@@ -14896,13 +14914,18 @@ if (&can_use_validation() && !&can_edit_templates()) {
 		    'title' => $text{'newvalidate_title'},
 		    'icon' => 'validate' });
 	}
+my @plugin_global_links;
 foreach my $f (@plugins) {
 	# Add global link from plugins
 	if (&plugin_defined($f, "feature_global_links")) {
 		my $global_links = &plugin_call($f, "feature_global_links");
-		push(@rv, $global_links) if ($global_links);
+		push(@plugin_global_links, $global_links) if ($global_links);
 		}
 	}
+
+# Order plugin links separately so core global links never move.
+&order_plugin_global_links(\@plugin_global_links);
+push(@rv, @plugin_global_links);
 
 # Set category names
 foreach my $l (@rv) {
@@ -14912,6 +14935,55 @@ foreach my $l (@rv) {
 	}
 
 return @rv;
+}
+
+# order_plugin_global_links(&links)
+# Applies stable numeric and relative ordering to top-level plugin global links.
+sub order_plugin_global_links
+{
+my ($links) = @_;
+my @indexes = grep { !($links->[$_]->{'cat'} || '') } 0 .. $#$links;
+return if (@indexes < 2);
+
+# Sort only top-level links and preserve categorized links in place.
+my @ordered = map {
+	my $link = $links->[$_];
+	{
+	'link' => $link,
+	'index' => $_,
+	'order' => defined($link->{'order'}) &&
+		$link->{'order'} =~ /^\d+$/ ? int($link->{'order'}) : 1000,
+	}
+	} @indexes;
+@ordered = sort {
+	$a->{'order'} <=> $b->{'order'} ||
+	$a->{'index'} <=> $b->{'index'}
+	} @ordered;
+my @top = map { $_->{'link'} } @ordered;
+
+# Apply exact relative hints after numeric ordering has settled.
+my @hinted = grep { $_->{'before'} } @top;
+
+# Process hints in their settled order so peers retain a stable position.
+foreach my $link (@hinted) {
+	my ($from) = grep { $top[$_] == $link } 0 .. $#top;
+	my ($before) = grep {
+		($top[$_]->{'url'} || '') eq $link->{'before'}
+		} 0 .. $#top;
+	next if (!defined($from) || !defined($before) || $from == $before);
+
+	# Remove the requested link before resolving the target's new index.
+	my ($move) = splice(@top, $from, 1);
+	($before) = grep {
+		($top[$_]->{'url'} || '') eq $link->{'before'}
+		} 0 .. $#top;
+	splice(@top, $before, 0, $move);
+	}
+
+# Write reordered top-level links back without touching categorized entries.
+for(my $i=0; $i<@indexes; $i++) {
+	$links->[$indexes[$i]] = $top[$i];
+	}
 }
 
 # get_links_cache(key, &cache-invalidator)
@@ -16193,14 +16265,12 @@ my $merr = &made_changes();
 return undef;
 }
 
-# check_virtual_server_config([&lastconfig], [&skip])
+# check_virtual_server_config([&lastconfig], [skip_dns_network])
 # Validates the Virtualmin configuration, printing out messages as it goes.
-# The skip hash can contain dns_network and fpm_repair flags.
 # Returns undef on success, or an error message on failure.
 sub check_virtual_server_config
 {
-my ($lastconfig, $skip) = @_;
-$skip ||= { };
+my ($lastconfig, $skip_dns_network) = @_;
 my $clink = "edit_newfeatures.cgi";
 my $mclink = "../config.cgi?$module_name";
 
@@ -16291,7 +16361,7 @@ if (&foreign_check("proc")) {
 		}
 	}
 
-if ($config{'dns'} && !$skip->{'dns_network'}) {
+if ($config{'dns'} && !$skip_dns_network) {
 	# Make sure BIND is installed
 	my $dnsremote;
 	if ($dnsremote = &is_dns_remote()) {
@@ -16748,37 +16818,35 @@ if (&domain_has_website()) {
 				"<tt>$config{'php_fpm_pool'}</tt>"));
 			}
 
-		if (!$skip->{'fpm_repair'}) {
-			# Check for invalid FPM versions, in case one has been
-			# upgraded to a new release
-			my @fpmfixed;
-			foreach my $d (grep { &domain_has_website($_) &&
-					      !$_->{'alias'} } &list_domains()) {
-				# Check if an FPM version is stored in domain config
-				my $dv = $d->{'php_fpm_version'};
-				my $mode = &get_domain_php_mode($d);
-				next if ($mode ne "fpm");
-				# Version set in domain config exists in the list of
-				# FPMs, so skip it, all good
-				my ($f) = grep { $_->{'shortversion'} eq $dv ||
-						 $_->{'version'} eq $dv } @fpms;
-				next if ($f);
+		# Check for invalid FPM versions, in case one has been
+		# upgraded to a new release
+		my @fpmfixed;
+		foreach my $d (grep { &domain_has_website($_) &&
+				      !$_->{'alias'} } &list_domains()) {
+			# Check if an FPM version is stored in domain config
+			my $dv = $d->{'php_fpm_version'};
+			my $mode = &get_domain_php_mode($d);
+			next if ($mode ne "fpm");
+			# Version set in domain config exists in the list of
+			# FPMs, so skip it, all good
+			my ($f) = grep { $_->{'shortversion'} eq $dv ||
+					 $_->{'version'} eq $dv } @fpms;
+			next if ($f);
 
-				# Try to detect actually configured version
-				$dv = &detect_php_fpm_version($d);
-				# If still none exists do nothing
-				next if (!$dv);
-
-				&lock_domain($d);
-				$d->{'php_fpm_version'} = $dv;
-				&save_domain($d);
-				&unlock_domain($d);
-				push(@fpmfixed, $d);
-				}
-			if (@fpmfixed) {
-				&$second_print(&text('check_webphpverfixed',
-						     scalar(@fpmfixed)));
-				}
+			# Try to detect actually configured version
+			$dv = &detect_php_fpm_version($d);
+			# If still none exists do nothing
+			next if (!$dv);
+			
+			&lock_domain($d);
+			$d->{'php_fpm_version'} = $dv;
+			&save_domain($d);
+			&unlock_domain($d);
+			push(@fpmfixed, $d);
+			}
+		if (@fpmfixed) {
+			&$second_print(&text('check_webphpverfixed',
+					     scalar(@fpmfixed)));
 			}
 
 		# Fix numeric ports for any Virtualmin domains
@@ -17236,7 +17304,7 @@ if ($defip || $defip6) {
 $config{'old_defip'} ||= $defip;
 $config{'old_defip6'} ||= $defip6;
 
-if (!$skip->{'dns_network'}) {
+if (!$skip_dns_network) {
 		# Make sure the external IPv4 is set if needed
 		my $ext_ip = &get_external_ip_address(1, 4);
 		if ($config{'dns_ip'} ne '*') {
@@ -17725,10 +17793,8 @@ if ($itype =~ /^(rpm|deb)$/ &&
 # Invalidate global scripts default cache
 &invalidate_global_def_scripts_cache();
 
-# All looks OK .. save the config. If an FPM version repair was skipped,
-# leave the check timestamp unchanged. A normal config check must be run
-# manually after package installation to perform the repair.
-$config{'last_check'} = time()+1 if (!$skip->{'fpm_repair'});
+# All looks OK .. save the config
+$config{'last_check'} = time()+1;
 $config{'disable'} =~ s/user/unix/g;	# changed since last release
 # Clean settings left behind by the removed ProFTPd virtual FTP feature.
 $config{'disable'} = join(",", grep { $_ ne 'ftp' }
@@ -20100,16 +20166,18 @@ my ($d, $oldd) = @_;
 my @aliases = &get_domain_by("alias", $d->{'id'});
 return 0 if (!@aliases);
 foreach my $ad (@aliases) {
-	next if ($ad->{'ip'} ne $oldd->{'ip'} &&
-		 $ad->{'ip6'} ne $oldd->{'ip6'});
 	my $oldad = { %$ad };
-	if ($ad->{'ip'} eq $oldd->{'ip'}) {
+	my $changed = 0;
+	if (($ad->{'ip'} // "") eq ($oldd->{'ip'} // "")) {
 		$ad->{'ip'} = $d->{'ip'};
+		$changed++;
 		}
-	if ($oldd->{'ip6'} && $ad->{'ip6'} eq $oldd->{'ip6'}) {
+	if (($ad->{'ip6'} // "") eq ($oldd->{'ip6'} // "")) {
 		$ad->{'ip6'} = $d->{'ip6'};
+		$changed++;
 		}
-	&$first_print(&text('save_aliasip', $ad->{'dom'}, $d->{'ip'}));
+	next if (!$changed);
+	&$first_print(&text('save_aliasip', $ad->{'dom'}, $d->{'ip'} || $text{'save_aliasipnone'}));
 	&$indent_print();
 	foreach my $f (@features) {
 		my $mfunc = "modify_$f";
@@ -20269,13 +20337,13 @@ my $host = $d->{'dom'};
 foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
 	my $ip = &to_ipaddress($h);
 	my $ip6 = &to_ip6address($h);
-	# IPv4
-	if ($ip && $ip eq $d->{'ip'}) {
+	if ($ip && $d->{'ip'} && $ip eq $d->{'ip'}) {
+		# IPv4
 		$host = $h;
 		last;
 		}
-	# IPv6
-	elsif ($ip6 && $ip6 eq $d->{'ip6'}) {
+	elsif ($ip6 && $d->{'ip6'} && $ip6 eq $d->{'ip6'}) {
+		# IPv6
 		$host = $h;
 		last;
 		}
@@ -20433,7 +20501,7 @@ foreach my $k (keys %$d) {
 
 # Pick a new IPv4 address if needed
 if ($d->{'virt'} && $ip) {
-	# IP specific by caller
+	# IP specified by caller
 	&$first_print(&text('clone_virt2', $ip));
 	$d->{'ip'} = $ip;
 	$d->{'virtalready'} = $virtalready;
@@ -20441,7 +20509,8 @@ if ($d->{'virt'} && $ip) {
 	&$second_print($text{'setup_done'});
 	}
 elsif ($d->{'virt'}) {
-	# Allocating IP
+	# Allocating IP because the original
+	# domain had done
 	&$first_print($text{'clone_virt'});
 	if ($tmpl->{'ranges'} eq 'none') {
 		&$second_print($text{'clone_virtrange'});
@@ -20461,6 +20530,8 @@ elsif ($d->{'virt'}) {
 
 # Allocate a new IPv6 address if needed
 if ($d->{'virt6'}) {
+	# Allocating IPv6 because the original
+	# domain had done
 	&$first_print($text{'clone_virt6'});
 	if ($tmpl->{'ranges6'} eq 'none') {
 		&$second_print($text{'clone_virt6range'});

@@ -2935,6 +2935,11 @@ if ($ok) {
 				my $alias = &get_domain($d->{'alias'});
 				$d->{'ip'} = $alias->{'ip'};
 				}
+			elsif ($ipinfo && $ipinfo->{'mode'} == -2) {
+				# User requested no IP address
+				$d->{'ip'} = undef;
+				$d->{'virt'} = 0;
+				}
 			elsif ($ipinfo && $ipinfo->{'mode'} == 5) {
 				# Allocate IP if the domain had one before,
 				# use shared IP otherwise
@@ -2969,12 +2974,14 @@ if ($ok) {
 							}
 						}
 					}
-				elsif (&indexof($d->{'ip'},
+				elsif ($d->{'ip'} &&
+				       &indexof($d->{'ip'},
 						&list_shared_ips()) >= 0) {
 					# IP is on shared list, so keep it
 					}
-				else {
-					# Use shared IP
+				elsif ($d->{'ip'}) {
+					# Use default IP for this system, if
+					# the domain had an IP before
 					$d->{'ip'} = $defip;
 					if (!$d->{'ip'}) {
 						&$second_print(
@@ -2983,6 +2990,10 @@ if ($ok) {
 						if ($continue) { next DOMAIN; }
 						else { last DOMAIN; }
 						}
+					}
+				else {
+					# Domain had no IP before
+					$d->{'ip'} = undef;
 					}
 				}
 			elsif ($ipinfo && $ipinfo->{'ip'}) {
@@ -3004,6 +3015,10 @@ if ($ok) {
 					if ($continue) { next DOMAIN; }
 					else { last DOMAIN; }
 					}
+				}
+			elsif (!$d->{'ip'}) {
+				# Domain had no IP before, so don't request one now
+				$d->{'ip'} = undef;
 				}
 			elsif (!$d->{'virt'}) {
 				# Use this system's default IP
@@ -3086,8 +3101,8 @@ if ($ok) {
 				$d->{'ip6'} = $ipinfo->{'ip6'};
 				$d->{'virt6'} = $ipinfo->{'virt6'};
 				$d->{'virt6already'} = $ipinfo->{'virt6already'};
-				$d->{'netmask6'} = $netmaskinfo->{'netmask6'};
-				if ($ipinfo->{'mode'} == 2) {
+				$d->{'netmask6'} = $ipinfo->{'netmask6'};
+				if ($ipinfo->{'mode6'} == 2) {
 					# Re-allocate an IP, as we might be
 					# doing several domains
 					($d->{'ip6'}, $d->{'netmask6'}) =
@@ -3102,7 +3117,11 @@ if ($ok) {
 					}
 				}
 			elsif (!$d->{'virt6'} && !$config{'ip6enabled'}) {
-				# IPv6 for new domains is disabled
+				# IPv6 for new domains is disabled on this system
+				$d->{'ip6'} = undef;
+				}
+			elsif (!$d->{'ip6'}) {
+				# Domain had no IPv6 before, so don't request one now
 				$d->{'ip6'} = undef;
 				}
 			elsif (!$d->{'virt6'}) {
@@ -3116,15 +3135,24 @@ if ($ok) {
 					}
 				}
 
+			# Make sure we have some kind of IP after all that
+			if (!$d->{'ip'} && !$d->{'ip6'}) {
+				&$second_print(&text('form_esomeip'));
+				$ok = 0;
+				if ($continue) { next DOMAIN; }
+				else { last DOMAIN; }
+				}
+
 			# DNS external IP is always reset to match this system,
 			# as the old setting is unlikely to be correct.
 			$d->{'old_dns_ip'} = $d->{'dns_ip'};
-			$d->{'dns_ip'} = $d->{'virt'} ? undef
+			$d->{'dns_ip'} = !$d->{'ip'} || $d->{'virt'} ? undef
 					       : &get_dns_ip($d->{'reseller'});
 			if (&supports_ip6()) {
 				$d->{'old_dns_ip6'} = $d->{'dns_ip6'};
-				$d->{'dns_ip6'} = $d->{'virt6'} ? undef :
-					&get_dns_ip($d->{'reseller'}, 6);
+				$d->{'dns_ip6'} =
+					!$d->{'ip6'} || $d->{'virt6'} ? undef :
+						&get_dns_ip($d->{'reseller'}, 6);
 				}
 
 			# Change provisioning settings to match this system

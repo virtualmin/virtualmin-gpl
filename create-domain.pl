@@ -572,8 +572,8 @@ elsif ($virt) {
 	# Make sure manual IPv4 specification is allowed
 	$tmpl->{'ranges'} eq "none" || &usage("The --ip option cannot be used when automatic IP allocation is configured in templates - use --allocate-ip instead");
 	}
-elsif ($ip eq "default") {
-	# Use default IPv4, which may depend on reseller
+elsif ($ip eq "default" && !$aliasdomain && !$parentip) {
+	# Alias and parent IPv4 addresses are resolved below
 	$ip = $defip;
 	$ip || &usage("No default IP address found");
 	$virt = 0;
@@ -603,15 +603,16 @@ elsif ($virt6) {
 elsif ($ip6 eq "default") {
 	# Use default IPv6, which may depend on reseller
 	$ip6 = $defip6;
-	$ip6 || &usage("No default IPv6 address found");
 	$virt6 = 0;
-	$name6 = 1;
+	$name6 = $ip6 ? 1 : 0;
 	}
 
 if (!defined($ip) && !defined($ip6)) {
 	# Make sure we have some kind of address
 	&usage("--no-ip cannot be used if there is no IPv6 enabled");
 	}
+$dns_ip && !$ip && &usage("--dns-ip cannot be used without an IP address");
+$dns_ip6 && !$ip6 && &usage("--dns-ip6 cannot be used without an IPv6 address");
 
 # If no limit-related flags are given, assume from plan
 if (!$tlimit && !$anylimits) {
@@ -818,6 +819,8 @@ if (!$alias) {
 		# IP comes from parent domain
 		$parent || &usage("The --parent-ip flag cannot be used for ".
 				  "top-level servers");
+		$ip = $parent->{'ip'};
+		$ip6 = $parent->{'ip6'} if (!$virt6);
 		}
 
 	if ($virt6) {
@@ -923,12 +926,14 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	       $sharedip ? $sharedip :
 	       !defined($ip) ? undef : $defip,
 	 'netmask', $netmask,
-	 'dns_ip', defined($dns_ip) ? $dns_ip :
+	 'dns_ip', !$ip ? undef :
+		   defined($dns_ip) ? $dns_ip :
 		   $alias ? $alias->{'dns_ip'} :
 		   $virt ? undef : &get_dns_ip($resel, 4),
-	 'dns_ip6', defined($dns_ip6) ? $dns_ip6 :
+	 'dns_ip6', !$ip6 ? undef :
+		    defined($dns_ip6) ? $dns_ip6 :
 		    $alias ? $alias->{'dns_ip6'} :
-		    $virt ? undef : &get_dns_ip($resel, 6),
+		    $virt6 ? undef : &get_dns_ip($resel, 6),
          'virt', $virt,
          'virtalready', $virtalready,
 	 'ip6', $parentip ? $parent->{'ip6'} : $ip6,
@@ -1247,5 +1252,3 @@ print "                        [--alias-redirect | --no-alias-redirect]\n";
 print "                        [--ssl-redirect | --no-ssl-redirect]\n";
 exit(1);
 }
-
-

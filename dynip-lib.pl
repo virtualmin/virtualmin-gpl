@@ -252,14 +252,16 @@ my $dc = 0;
 foreach my $d (&list_domains()) {
 	my $oldd = { %$d };
 	my $changed;
-	if (($d->{'ip'} eq $oldip || $d->{'dns_ip'} eq $oldip) &&
+	if ($d->{'ip'} &&
+	    ($d->{'ip'} eq $oldip || $d->{'dns_ip'} eq $oldip) &&
 	    !$d->{'virt'}) {
 		# Need to fix this server's IPv4 address
 		$d->{'ip'} = $ip if ($d->{'ip'} eq $oldip);
 		$d->{'dns_ip'} = $ip if ($d->{'dns_ip'} eq $oldip);
 		$changed++;
 		}
-	if (($d->{'ip6'} eq $oldip || $d->{'dns_ip6'} eq $oldip) &&
+	if ($d->{'ip6'} &&
+	    ($d->{'ip6'} eq $oldip || $d->{'dns_ip6'} eq $oldip) &&
 	    !$d->{'virt6'}) {
 		# Need to fix this server's IPv6 address
 		$d->{'ip6'} = $ip if ($d->{'ip6'} eq $oldip);

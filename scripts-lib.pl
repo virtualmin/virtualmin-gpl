@@ -294,6 +294,33 @@ closedir(DIR);
 return @rv;
 }
 
+# script_path_used_by_proxy(&domain, path)
+# Returns active or plugin-declared proxy details for the exact URL path.
+sub script_path_used_by_proxy
+{
+my ($d, $path) = @_;
+my (%script_usage, %plugin_usage);
+&get_balancer_usage($d, \%script_usage, \%plugin_usage);
+
+# Compare paths without insignificant trailing slashes.
+my $wanted = $path;
+$wanted =~ s/\/+\z// if ($wanted ne '/');
+foreach my $proxy (&list_proxy_balancers($d)) {
+	next if ($proxy->{'none'});
+	my $candidate = $proxy->{'path'};
+	$candidate =~ s/\/+\z// if ($candidate ne '/');
+	return $proxy if ($candidate eq $wanted);
+	}
+
+# Plugin metadata also covers proxies managed outside the standard path list.
+foreach my $plugin_path (keys %plugin_usage) {
+	my $candidate = $plugin_path;
+	$candidate =~ s/\/+\z// if ($candidate ne '/');
+	return $plugin_usage{$plugin_path} if ($candidate eq $wanted);
+	}
+return undef;
+}
+
 # add_domain_script(&domain, name, version, &opts, desc, url,
 #		    [login, password], [partial-failure])
 # Records the installation of a script for a domains
@@ -2026,7 +2053,7 @@ sub post_http_connection
 {
 my ($d, $page, $params, $out, $err, $headers,
     $returnheaders, $returnheaders_array) = @_;
-my $ip = $d->{'ip'};
+my $ip = $d->{'ip'} || $d->{'ip6'};
 my $host = &get_domain_http_hostname($d);
 my $usessl = &domain_has_ssl($d);
 my $port = $usessl ? $d->{'web_sslport'} : $d->{'web_port'};

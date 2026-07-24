@@ -77,7 +77,7 @@ if ($virtualmin_pro) {
 	}
 
 # IP-related options
-if (!$aliasdom) {
+if (!$aliasdom && $d->{'ip'}) {
 	foreach $r (split(/\s+/, $d->{'reseller'})) {
 		$resel = &get_reseller($r);
 		if ($resel && $resel->{'acl'}->{'defip'}) {
@@ -92,7 +92,7 @@ if (!$aliasdom) {
 						  "<tt>$resel->{'name'}</tt>") :
 					    $text{'edit_shared'}), 3, \@tds);
 	}
-if ($d->{'ip6'}) {
+if (!$aliasdom && $d->{'ip6'}) {
 	print &ui_table_row($text{'edit_ip6'},
 		"<tt>$d->{'ip6'}</tt> ".
 		($d->{'virt6'} ? $text{'edit_private'} :
