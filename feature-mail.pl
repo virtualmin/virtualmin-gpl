@@ -6856,13 +6856,13 @@ if (!&copy_alias_records($d)) {
 	$file || return $recs;
 	my $ip = $d->{'dns_ip'} || $d->{'ip'};
 	my $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
-	my $rtype = $ip ? 'A' : 'AAAA';
+	my ($rtype, $rvalue) = $ip ? ('A', $ip) : ('AAAA', $ip6);
 	my ($mtsa) = grep { $_->{'name'} eq 'mta-sts.'.$d->{'dom'}.'.' &&
 			    $_->{'type'} eq $rtype } @$recs;
 	if (!$mtsa) {
 		$mtsa = { 'name' => 'mta-sts.'.$d->{'dom'}.'.',
 			  'type' => $rtype,
-			  'values' => [ $ip || $ip6 ] };
+			  'values' => [ $rvalue ] };
 		&create_dns_record($recs, $file, $mtsa);
 		}
 	my ($mtsr) = grep { $_->{'name'} eq '_mta-sts.'.$d->{'dom'}.'.' &&
