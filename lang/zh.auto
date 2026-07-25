@@ -2233,25 +2233,12 @@ resel_ebwunlimit=无法将虚拟服务器 $1分配给该代理商，因为它具
 resel_ebefore=修改命令失败之前： $1
 
 licence_err=检测到您的 Virtualmin 许可证存在问题：
-licence_soon=您的 Virtualmin 许可证将在 $1 天后到期。
-licence_soon2=您的 Virtualmin 许可证将在 $1 小时后过期。
-licence_renew=可以在<a target=_blank href='$1'>$2</a>购买续订。
-licence_renew2=您可以在<a target=_blank href='$1'>$2</a>购买额外的许可证。
-licence_renew3=还剩下 $1 天的宽限期来管理许可证到新服务器的迁移。
-licence_renew3m=还剩下 $1 天的宽限期来管理许可证到新服务器的迁移。
-licence_renew3e=许可证续订宽限期还剩 $1 天。
-licence_renew3em=许可证续订宽限期还剩 $1 天。
-licence_renew4=转移许可证的宽限期已过，更改系统的功能将不可用。
-licence_renew4e=您的许可证续订宽限期已过期，在许可证续订之前，更改系统的功能将不可用。
 license_shop_name=虚拟商店
 licence_ok2=.. 许可证有效，适用于 $1 Virtualmin 域，并可在 $2 系统上使用
 licence_ok3=.. 许可证有效，适用于 $1 Virtualmin 域，并可在 $2 系统上使用，直至 $3
 licence_warn=$2 许可证检查期间出现临时问题：$1
 licence_unlimited=无限
 licence_goterr2=..无效的到期日期： $1
-licence_maxdoms=您的系统仅适用于 $1 服务器，但目前正在 $2 上使用。
-licence_maxservers2=您的序列号 $3 仅授权用于 $1 服务器，但当前正在 $2 服务器上使用。
-licence_maxwarn=除非临时使用此许可证来迁移到新服务器，否则您必须购买单独的许可证才能在此服务器上使用。
 licence_ipchanged=系统的主IP地址似乎已从 $1更改为 $2。使用旧地址的虚拟服务器可能无法访问或提供了错误的Web内容。
 licence_changeip=更新不正确的IP地址
 licence_smallcert=您的系统使用的SSL证书长度仅为 $1位，小于建议的2048位。此证书由 $4颁发给 $3的域 $2。

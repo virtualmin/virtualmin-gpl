@@ -3063,12 +3063,38 @@ resel_clone=Kloon Reseller
 resel_domsopts=Domeinen zonder eigenaar
 resel_domssel=In bezit van deze reseller
 
+licence_soon=Uw Virtualmin-licentie verloopt over $1 dag.
+licence_soonm=Uw Virtualmin-licentie verloopt over $1 dagen.
+licence_soon2=Uw Virtualmin-licentie verloopt over $1 uur.
+licence_soon2m=Uw Virtualmin-licentie verloopt over $1 uur.
+licence_renew=Verleng uw licentie via <a target=_blank href='$1'>$2</a>.
+licence_renew2=Bekijk uw licentieopties via <a target=_blank href='$1'>$2</a>.
+licence_renew2s=Als u alle servers wilt blijven gebruiken, koopt u de benodigde extra licenties via <a target=_blank href='$1'>$2</a>.
+licence_renew2d=Upgrade uw licentie via <a target=_blank href='$1'>$2</a>.
+licence_renew3=Er resteert $1 dag van de respijtperiode voor de migratie.
+licence_renew3m=Er resteren $1 dagen van de respijtperiode voor de migratie.
+licence_renew3e=Er resteert $1 dag van de respijtperiode voor verlenging.
+licence_renew3em=Er resteren $1 dagen van de respijtperiode voor verlenging.
+licence_renew3d=Verminder het aantal virtuele servers of upgrade de licentie binnen $1 dag.
+licence_renew3dm=Verminder het aantal virtuele servers of upgrade de licentie binnen $1 dagen.
+licence_renew3i=Er resteert $1 dag om dit licentieprobleem op te lossen.
+licence_renew3im=Er resteren $1 dagen om dit licentieprobleem op te lossen.
+licence_renew4=De respijtperiode voor de migratie is verstreken. Functies die het systeem wijzigen zijn uitgeschakeld totdat de serverlimiet is opgelost.
+licence_renew4e=De respijtperiode voor verlenging is verstreken. Functies die het systeem wijzigen zijn uitgeschakeld totdat de licentie is verlengd.
+licence_renew4d=De respijtperiode is verstreken. Functies die het systeem wijzigen zijn uitgeschakeld totdat de limiet voor virtuele servers is opgelost.
+licence_renew4i=De respijtperiode is verstreken. Functies die het systeem wijzigen zijn uitgeschakeld totdat het licentieprobleem is opgelost.
 licence_recheck=Her-controleer Licentie Status
 licence_title=Her-Controleer Licentie
 licence_doing=Nu uw Virtualmin licentie opnieuw controleren ..
 licence_unlimited=Ongelimiteerd
 licence_goterr=.. er is een probleem ontdekt : $1
 licence_ecannot=U bent niet bevoegd om de Virtualmin licentie te controleren
+licence_maxdoms=Dit systeem heeft slechts een licentie voor $1 virtuele server, maar host er momenteel $2.
+licence_maxdomsm=Dit systeem heeft slechts een licentie voor $1 virtuele servers, maar host er momenteel $2.
+licence_maxservers2=Serienummer $3 heeft slechts een licentie voor $1 server, maar is momenteel actief op $2 servers.
+licence_maxservers2m=Serienummer $3 heeft slechts een licentie voor $1 servers, maar is momenteel actief op $2 servers.
+licence_maxwarn=Als deze licentie tijdelijk voor een servermigratie wordt gebruikt, schakelt u de oude server uit en wacht u maximaal 48 uur totdat deze waarschuwing verdwijnt.
+licence_maxdomswarn=Verminder het aantal virtuele servers tot de licentielimiet.
 
 config_deftheme=Globale Webmin standaard
 config_oldtheme=Oude Webmin thema

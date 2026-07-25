@@ -12594,14 +12594,20 @@ if (defined($status) && $status == 0 && $doms) {
 			     !$_->{'defaultdomain'} } &list_domains();
 	if (@doms > $doms) {
 		$status = 1;
-		$err = &text('licence_maxdoms', $doms, scalar(@doms));
+		my $used = scalar(@doms);
+		my $msg = $doms == 1 ? 'licence_maxdoms' :
+				       'licence_maxdomsm';
+		$err = &text($msg, $doms,
+			"<span data-maxdoms='$used'>$used</span>");
 		}
 	}
 if (defined($status) && $status == 0 && $max_servers && !$err) {
 	# A servers limit exists .. check if we have exceeded it
 	if ($servers > $max_servers) {
 		$status = 1;
-		$err = &text('licence_maxservers2', $max_servers,
+		my $msg = $max_servers == 1 ? 'licence_maxservers2' :
+					     'licence_maxservers2m';
+		$err = &text($msg, $max_servers,
 			"<span data-maxservers='$servers'>$servers</span>",
 			"<tt>$serial{'SerialNumber'}</tt>");
 		}
@@ -12673,8 +12679,18 @@ if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
 		$expirytime = timelocal(59, 59, 23, $3, $2-1, $1);
 		};
 	}
-if ($status != 0 && !$state) {
-	my $license_expired = $status == 3 ? 'e' : undef;
+# Work out which kind of license problem was reported
+my $server_limit =
+	$status == 1 && $err && $err =~ /\bdata-maxservers=/;
+my $domain_limit =
+	$status == 1 && $err && $err =~ /\bdata-maxdoms=/;
+my $license_unreachable = $status == 2;
+
+# Give normal server migrations time to clear from the license server
+my $delay_server_warning = $server_limit && $bind &&
+	time() - $bind < 60*60*60;
+if ($status != 0 && !$state && !$delay_server_warning) {
+	my $license_expired = $status == 3;
 	my $scale = 1;
 	$scale = 3 if ($license_expired);
 	my $alert_text;
@@ -12687,24 +12703,49 @@ if ($status != 0 && !$state) {
 	$alert_text .= "<b>".$text{'licence_err'}."</b><br>\n";
 	$alert_text .= $err;
 	$alert_text = "$alert_text. " if ($err && $err !~ /\.$/);
-	my $renew_label = "licence_renew4$license_expired";
 	if ($bind) {
 		my $multi = $bind > 1 ? 'm' : '';
 		if ($license_expired) {
 			$alert_text .= " ".
-			    &text("licence_renew3$license_expired$multi", $bind); 
+			    &text("licence_renew3e$multi", $bind);
+			}
+		elsif ($server_limit) {
+			$alert_text .= " $text{'licence_maxwarn'}";
+			$alert_text .= " ".&text("licence_renew3$multi", $bind);
+			}
+		elsif ($domain_limit) {
+			$alert_text .= " ".
+				&text("licence_renew3d$multi", $bind);
 			}
 		else {
-			$alert_text .= " $text{'licence_maxwarn'}";
-			$alert_text .= " ".&text("licence_renew3$multi", $bind); 
+			$alert_text .= " ".
+				&text("licence_renew3i$multi", $bind);
 			}
 		}
 	else {
-		$alert_text .= " ".$text{$renew_label} if (defined($bind));
-		$alert_text .= " $text{'licence_maxwarn'}" if (!defined($bind));
+		if (defined($bind)) {
+			my $renew_label = $license_expired ? 'licence_renew4e' :
+					  $server_limit ? 'licence_renew4' :
+					  $domain_limit ? 'licence_renew4d' :
+							  'licence_renew4i';
+			$alert_text .= " ".$text{$renew_label};
+			$alert_text .= " $text{'licence_maxwarn'}"
+				if ($server_limit);
+			}
+		elsif ($server_limit) {
+			$alert_text .= " $text{'licence_maxwarn'}";
+			}
+		elsif ($domain_limit) {
+			$alert_text .= " $text{'licence_maxdomswarn'}";
+			}
 		}
-	if ($alert_text !~ /$virtualmin_renewal_url/) {
-		$alert_text .= " ".&text('licence_renew2', 
+	if (!$license_unreachable &&
+	    $alert_text !~ /\Q$virtualmin_renewal_url\E/) {
+		my $shop_label = $license_expired ? 'licence_renew' :
+				 $server_limit ? 'licence_renew2s' :
+				 $domain_limit ? 'licence_renew2d' :
+						 'licence_renew2';
+		$alert_text .= " ".&text($shop_label,
 			$virtualmin_renewal_url, $text{'license_shop_name'});
 		}
 	if (&can_recheck_licence()) {
@@ -12720,10 +12761,14 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 	my $days = int(($expirytime - time()) / (24*60*60));
 	my $hours = int(($expirytime - time()) / (60*60));
 	if ($days) {
-		$alert_text .= "<b>".&text('licence_soon', $days)."</b><br>\n";
+		my $multi = $days > 1 ? 'm' : '';
+		$alert_text .= "<b>".
+			&text("licence_soon$multi", $days)."</b><br>\n";
 		}
 	else {
-		$alert_text .= "<b>".&text('licence_soon2', $hours)."</b><br>\n";
+		my $multi = $hours == 1 ? '' : 'm';
+		$alert_text .= "<b>".
+			&text("licence_soon2$multi", $hours)."</b><br>\n";
 		}
 	$alert_text .= " ".&text('licence_renew', $virtualmin_renewal_url,
 			     $text{'license_shop_name'});

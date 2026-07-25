@@ -4359,16 +4359,26 @@ resel_ebwunlimit=The virtual server $1 cannot be assigned to this reseller, as i
 resel_ebefore=Before modification command failed : $1
 
 licence_err=A problem was detected with your Virtualmin license:
-licence_soon=Your Virtualmin license will expire in $1 days.
-licence_soon2=Your Virtualmin license will expire in $1 hours.
-licence_renew=A renewal can be purchased at <a target=_blank href='$1'>$2</a>.
-licence_renew2=An additional license can be purchased at <a target=_blank href='$1'>$2</a>.
-licence_renew3=A grace period of $1 day is left for managing the migration of the license to a new server.
-licence_renew3m=A grace period of $1 days is left for managing the migration of the license to a new server.
-licence_renew3e=A grace period of $1 day is left for renewing the license.
-licence_renew3em=A grace period of $1 days is left for renewing the license.
-licence_renew4=The grace period for moving your license has ended, so features that let you make changes to the system are now disabled.
-licence_renew4e=The grace period for renewing your license has ended, so you will not be able to make changes to the system until it is renewed.
+licence_soon=Your Virtualmin license will expire in $1 day.
+licence_soonm=Your Virtualmin license will expire in $1 days.
+licence_soon2=Your Virtualmin license will expire in $1 hour.
+licence_soon2m=Your Virtualmin license will expire in $1 hours.
+licence_renew=Renew your license at <a target=_blank href='$1'>$2</a>.
+licence_renew2=Review your license options at <a target=_blank href='$1'>$2</a>.
+licence_renew2s=To continue using all servers, purchase the additional licenses required at <a target=_blank href='$1'>$2</a>.
+licence_renew2d=Upgrade your license at <a target=_blank href='$1'>$2</a>.
+licence_renew3=There is $1 day left in the migration grace period.
+licence_renew3m=There are $1 days left in the migration grace period.
+licence_renew3e=There is $1 day left in the renewal grace period.
+licence_renew3em=There are $1 days left in the renewal grace period.
+licence_renew3d=Reduce the number of virtual servers or upgrade the license within $1 day.
+licence_renew3dm=Reduce the number of virtual servers or upgrade the license within $1 days.
+licence_renew3i=There is $1 day left to resolve this license problem.
+licence_renew3im=There are $1 days left to resolve this license problem.
+licence_renew4=The migration grace period has ended, so features that make changes to the system are disabled until the server limit is resolved.
+licence_renew4e=The renewal grace period has ended, so features that make changes to the system are disabled until the license is renewed.
+licence_renew4d=The grace period has ended, so features that make changes to the system are disabled until the virtual server limit is resolved.
+licence_renew4i=The grace period has ended, so features that make changes to the system are disabled until the license problem is resolved.
 license_shop_name=Virtualmin Shop
 licence_recheck=Re-check License Status
 licence_title=Re-Check License
@@ -4380,9 +4390,12 @@ licence_unlimited=unlimited
 licence_goterr=.. a problem was detected : $1
 licence_goterr2=.. invalid expiry date : $1
 licence_ecannot=You are not allowed to re-check the Virtualmin license
-licence_maxdoms=Your system is licensed for only $1 virtual servers, but it is currently being used on $2
-licence_maxservers2=Your serial number $3 is licensed for only $1 server, but it is currently being used on $2 servers.
-licence_maxwarn=Unless this license is being used temporarily for migration to a new server, you must purchase a separate license for use on this server.
+licence_maxdoms=This system is licensed for only $1 virtual server, but currently hosts $2.
+licence_maxdomsm=This system is licensed for only $1 virtual servers, but currently hosts $2.
+licence_maxservers2=Serial number $3 is licensed for only $1 server, but is currently active on $2 servers.
+licence_maxservers2m=Serial number $3 is licensed for only $1 servers, but is currently active on $2 servers.
+licence_maxwarn=If this license is being used temporarily for a server migration, shut down the old server and allow up to 48 hours for this warning to clear.
+licence_maxdomswarn=Reduce the number of virtual servers to the licensed limit.
 licence_ipchanged=Your system's primary IP address appears to have changed from $1 to $2. Virtual servers using the old address may be unreachable or serve the wrong web content.
 licence_changeip=Update Incorrect IP Addresses
 licence_smallcert=Your system is using an SSL certificate that is only $1 bits long, which is smaller than the recommended size of 2048 bits. This certificate was issued by $4 to $3 for the domain $2.

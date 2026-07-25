@@ -1,0 +1,26 @@
+licence_soon=Virtualmin ライセンスは $1 日後に期限切れになります。
+licence_soonm=Virtualmin ライセンスは $1 日後に期限切れになります。
+licence_soon2=Virtualmin ライセンスは $1 時間後に期限切れになります。
+licence_soon2m=Virtualmin ライセンスは $1 時間後に期限切れになります。
+licence_renew=<a target=_blank href='$1'>$2</a> でライセンスを更新してください。
+licence_renew2=<a target=_blank href='$1'>$2</a> でライセンスのオプションを確認してください。
+licence_renew2s=すべてのサーバーを引き続き使用するには、<a target=_blank href='$1'>$2</a> で必要な追加ライセンスを購入してください。
+licence_renew2d=<a target=_blank href='$1'>$2</a> でライセンスをアップグレードしてください。
+licence_renew3=移行の猶予期間は残り $1 日です。
+licence_renew3m=移行の猶予期間は残り $1 日です。
+licence_renew3e=更新の猶予期間は残り $1 日です。
+licence_renew3em=更新の猶予期間は残り $1 日です。
+licence_renew3d=$1 日以内に仮想サーバーの数を減らすか、ライセンスをアップグレードしてください。
+licence_renew3dm=$1 日以内に仮想サーバーの数を減らすか、ライセンスをアップグレードしてください。
+licence_renew3i=このライセンスの問題を解決するまで残り $1 日です。
+licence_renew3im=このライセンスの問題を解決するまで残り $1 日です。
+licence_renew4=移行の猶予期間が終了したため、サーバー数の制限が解決されるまでシステムを変更する機能は無効になります。
+licence_renew4e=更新の猶予期間が終了したため、ライセンスが更新されるまでシステムを変更する機能は無効になります。
+licence_renew4d=猶予期間が終了したため、仮想サーバー数の制限が解決されるまでシステムを変更する機能は無効になります。
+licence_renew4i=猶予期間が終了したため、ライセンスの問題が解決されるまでシステムを変更する機能は無効になります。
+licence_maxdoms=このシステムは $1 台の仮想サーバー用にのみライセンスされていますが、現在 $2 台をホストしています。
+licence_maxdomsm=このシステムは $1 台の仮想サーバー用にのみライセンスされていますが、現在 $2 台をホストしています。
+licence_maxservers2=シリアル番号 $3 は $1 台のサーバー用にのみライセンスされていますが、現在 $2 台のサーバーで有効です。
+licence_maxservers2m=シリアル番号 $3 は $1 台のサーバー用にのみライセンスされていますが、現在 $2 台のサーバーで有効です。
+licence_maxwarn=このライセンスをサーバー移行のために一時的に使用している場合は、古いサーバーを停止し、この警告が消えるまで最大 48 時間お待ちください。
+licence_maxdomswarn=仮想サーバーの数をライセンスの上限まで減らしてください。

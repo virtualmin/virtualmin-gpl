@@ -2018,11 +2018,37 @@ resel_defip=Ýsim-tabanlý sunucular için IP adresi
 resel_edefip=Hatalý ya da geçersiz IP address'i
 resel_edefip2=Bu sistemde ,IP adressi henüz aktif olmamýþtýr
 
+licence_soon=Virtualmin lisansınızın süresi $1 gün içinde dolacak.
+licence_soonm=Virtualmin lisansınızın süresi $1 gün içinde dolacak.
+licence_soon2=Virtualmin lisansınızın süresi $1 saat içinde dolacak.
+licence_soon2m=Virtualmin lisansınızın süresi $1 saat içinde dolacak.
+licence_renew=Lisansınızı <a target=_blank href='$1'>$2</a> üzerinden yenileyin.
+licence_renew2=Lisans seçeneklerinizi <a target=_blank href='$1'>$2</a> üzerinden inceleyin.
+licence_renew2s=Tüm sunucuları kullanmaya devam etmek için gereken ek lisansları <a target=_blank href='$1'>$2</a> üzerinden satın alın.
+licence_renew2d=Lisansınızı <a target=_blank href='$1'>$2</a> üzerinden yükseltin.
+licence_renew3=Geçiş ek süresinin dolmasına $1 gün kaldı.
+licence_renew3m=Geçiş ek süresinin dolmasına $1 gün kaldı.
+licence_renew3e=Yenileme ek süresinin dolmasına $1 gün kaldı.
+licence_renew3em=Yenileme ek süresinin dolmasına $1 gün kaldı.
+licence_renew3d=$1 gün içinde sanal sunucu sayısını azaltın veya lisansı yükseltin.
+licence_renew3dm=$1 gün içinde sanal sunucu sayısını azaltın veya lisansı yükseltin.
+licence_renew3i=Bu lisans sorununu çözmek için $1 gün kaldı.
+licence_renew3im=Bu lisans sorununu çözmek için $1 gün kaldı.
+licence_renew4=Geçiş ek süresi sona erdiğinden, sunucu sınırı çözülene kadar sistemde değişiklik yapan özellikler devre dışıdır.
+licence_renew4e=Yenileme ek süresi sona erdiğinden, lisans yenilenene kadar sistemde değişiklik yapan özellikler devre dışıdır.
+licence_renew4d=Ek süre sona erdiğinden, sanal sunucu sınırı çözülene kadar sistemde değişiklik yapan özellikler devre dışıdır.
+licence_renew4i=Ek süre sona erdiğinden, lisans sorunu çözülene kadar sistemde değişiklik yapan özellikler devre dışıdır.
 licence_recheck=Lisans Durumunu Yeniden Kontrol Et
 licence_title=Lisansý Yeniden Kontrol Et
 licence_doing=Virtualmin lisansýnýz yeniden kontrol ediliyor ..
 licence_goterr=.. bir problem tespit edildi : $1
 licence_ecannot=Virtualmin lisansýnýz yeniden kontrol etmeye izniniz yok
+licence_maxdoms=Bu sistem yalnızca $1 sanal sunucu için lisanslıdır, ancak şu anda $2 sunucu barındırmaktadır.
+licence_maxdomsm=Bu sistem yalnızca $1 sanal sunucu için lisanslıdır, ancak şu anda $2 sunucu barındırmaktadır.
+licence_maxservers2=$3 seri numarası yalnızca $1 sunucu için lisanslıdır, ancak şu anda $2 sunucuda aktiftir.
+licence_maxservers2m=$3 seri numarası yalnızca $1 sunucu için lisanslıdır, ancak şu anda $2 sunucuda aktiftir.
+licence_maxwarn=Bu lisans bir sunucu geçişi için geçici olarak kullanılıyorsa eski sunucuyu kapatın ve bu uyarının kaybolması için 48 saate kadar bekleyin.
+licence_maxdomswarn=Sanal sunucu sayısını lisans sınırına düşürün.
 
 config_deftheme=Genel Webmin varsayýlaný
 config_oldtheme=Eski Webmin temasý

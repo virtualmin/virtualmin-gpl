@@ -2397,25 +2397,12 @@ resel_ebwunlimit=$1 sanal sunucusu, sınırsız bant genişliği kotasına sahip
 resel_ebefore=Değiştirme komutu başarısız olmadan önce : $1 
 
 licence_err=Virtualmin lisansınızda bir sorun tespit edildi:
-licence_soon=Virtualmin lisansınız $1 gün içinde sona erecek.
-licence_soon2=Virtualmin lisansınız $1 saat içinde sona erecek.
-licence_renew=Yenileme <a target=_blank href='$1'>$2</a> adresinden satın alınabilir.
-licence_renew2=Ek bir lisans <a target=_blank href='$1'>$2</a> adresinden satın alınabilir.
-licence_renew3=Lisansın yeni sunucuya taşınmasının yönetilmesi için $1 günlük bir süre kaldı.
-licence_renew3m=Lisansın yeni sunucuya taşınmasının yönetilmesi için $1 günlük bir süre kaldı.
-licence_renew3e=Lisansın yenilenmesi için $1 günlük bir ek süre kaldı.
-licence_renew3em=Lisansın yenilenmesi için $1 günlük bir ek süre kaldı.
-licence_renew4=Lisansınızı transfer edebilmeniz için tanınan süre dolmuş olup, sistemde değişiklik yapma özellikleri kullanılamayacaktır.
-licence_renew4e=Lisansınızı yenilemeniz için tanınan süre doldu ve lisansınız yenilenene kadar sistemde değişiklik yapma özellikleri kullanılamayacak.
 license_shop_name=Sanal Mağaza
 licence_ok2=.. lisansı, $1 Virtualmin etki alanları ve $2 sisteminde kullanım için geçerlidir
 licence_ok3=.. lisansı, $1 Virtualmin etki alanları için ve $3'e kadar $2 sisteminde kullanım için geçerlidir
 licence_warn=$2 lisans kontrolü sırasında geçici bir sorun oluştu : $1
 licence_unlimited=sınırsız
 licence_goterr2=.. geçersiz son kullanma tarihi : $1 
-licence_maxdoms=Sisteminiz sadece $1 sunucusu için lisanslı, ancak şu anda $2 üzerinde kullanılıyor.
-licence_maxservers2=Seri numaranız $3 sadece $1 sunucusu için lisanslı, ancak şu anda $2 sunucusunda kullanılıyor.
-licence_maxwarn=Bu lisans yeni bir sunucuya geçiş için geçici olarak kullanılmıyorsa, bu sunucuda kullanım için ayrı bir lisans satın almanız gerekir.
 licence_ipchanged=Sisteminizin birincil IP adresinin $1 'den $2 'ye değiştiği görülüyor. Eski adresi kullanan sanal sunuculara ulaşılamayabilir veya yanlış web içeriği sunabilir.
 licence_changeip=Hatalı IP Adreslerini Güncelleyin
 licence_smallcert=Sisteminiz, yalnızca $1 bit uzunluğunda ve önerilen 2048 bit boyutundan daha küçük bir SSL sertifikası kullanıyor. Bu sertifika, $2 alan adı için $4 ile $3 arasında verildi.

@@ -986,12 +986,38 @@ dresels_err2=Blocco resellers fallito
 dresels_err3=Sblocco resellers fallito
 dresels_enone=Nessuno selezionato
 
+licence_soon=La tua licenza Virtualmin scadrà tra $1 giorno.
+licence_soonm=La tua licenza Virtualmin scadrà tra $1 giorni.
+licence_soon2=La tua licenza Virtualmin scadrà tra $1 ora.
+licence_soon2m=La tua licenza Virtualmin scadrà tra $1 ore.
+licence_renew=Rinnova la licenza su <a target=_blank href='$1'>$2</a>.
+licence_renew2=Consulta le opzioni della licenza su <a target=_blank href='$1'>$2</a>.
+licence_renew2s=Per continuare a utilizzare tutti i server, acquista le licenze aggiuntive necessarie su <a target=_blank href='$1'>$2</a>.
+licence_renew2d=Aggiorna la licenza su <a target=_blank href='$1'>$2</a>.
+licence_renew3=Rimane $1 giorno del periodo di tolleranza per la migrazione.
+licence_renew3m=Rimangono $1 giorni del periodo di tolleranza per la migrazione.
+licence_renew3e=Rimane $1 giorno del periodo di tolleranza per il rinnovo.
+licence_renew3em=Rimangono $1 giorni del periodo di tolleranza per il rinnovo.
+licence_renew3d=Riduci il numero di server virtuali o aggiorna la licenza entro $1 giorno.
+licence_renew3dm=Riduci il numero di server virtuali o aggiorna la licenza entro $1 giorni.
+licence_renew3i=Rimane $1 giorno per risolvere questo problema di licenza.
+licence_renew3im=Rimangono $1 giorni per risolvere questo problema di licenza.
+licence_renew4=Il periodo di tolleranza per la migrazione è terminato, quindi le funzioni che modificano il sistema sono disabilitate finché non viene risolto il limite dei server.
+licence_renew4e=Il periodo di tolleranza per il rinnovo è terminato, quindi le funzioni che modificano il sistema sono disabilitate finché la licenza non viene rinnovata.
+licence_renew4d=Il periodo di tolleranza è terminato, quindi le funzioni che modificano il sistema sono disabilitate finché non viene risolto il limite dei server virtuali.
+licence_renew4i=Il periodo di tolleranza è terminato, quindi le funzioni che modificano il sistema sono disabilitate finché non viene risolto il problema di licenza.
 licence_recheck=Ricontrolla stato licenza
 licence_title=Ricontrolla licenza
 licence_doing=Ricontrollo della tua licenza di Virtualmin ..
 licence_unlimited=illimitata
 licence_goterr=.. un problema trovato: $1
 licence_ecannot=Non hai i permessi per ricontrollare la licenza di Virtualmin
+licence_maxdoms=Questo sistema è concesso in licenza per solo $1 server virtuale, ma attualmente ne ospita $2.
+licence_maxdomsm=Questo sistema è concesso in licenza per soli $1 server virtuali, ma attualmente ne ospita $2.
+licence_maxservers2=Il numero di serie $3 è concesso in licenza per solo $1 server, ma attualmente è attivo su $2 server.
+licence_maxservers2m=Il numero di serie $3 è concesso in licenza per soli $1 server, ma attualmente è attivo su $2 server.
+licence_maxwarn=Se questa licenza viene utilizzata temporaneamente per la migrazione di un server, arresta il vecchio server e attendi fino a 48 ore affinché questo avviso scompaia.
+licence_maxdomswarn=Riduci il numero di server virtuali al limite previsto dalla licenza.
 
 addscripts_elocal=Il file locale non esiste
 addscripts_eupload=Nessun file da caricare selezionato
