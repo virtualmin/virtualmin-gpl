@@ -15,9 +15,11 @@ $d = &get_domain($in{'dom'});
 %smap = map { $_->{'name'}, $_ } @allscripts;
 
 # Start tabs for listing and installing
-@tabs = ( [ "existing", $text{'scripts_tabexisting'},
+@tabs = ( [ "existing", $text{'scripts_tabexisting'}."&nbsp;".
+			     &ui_tag("sup", scalar(@got)),
 	    "list_scripts.cgi?dom=$in{'dom'}&scriptsmode=existing" ],
-	  [ "new", $text{'scripts_tabnew'},
+	  [ "new", $text{'scripts_tabnew'}."&nbsp;".
+		 &ui_tag("sup", scalar(@scripts)),
 	    "list_scripts.cgi?dom=$in{'dom'}&scriptsmode=new" ] );
 if (&can_unsupported_scripts()) {
 	push(@tabs, [ "unsup", $text{'scripts_tabunsup'},
