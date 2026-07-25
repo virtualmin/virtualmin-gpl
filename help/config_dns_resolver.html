@@ -1,14 +1,16 @@
-<header>Detect system external IP address using DNS</header>
+<header>External IP DNS query and server</header>
 
-This option uses the <tt>dig</tt> command to query a DNS server and detect the
-system's external IP address. For instance, you can set this field to
-<tt>myip.opendns.com resolver1.opendns.com</tt> (a space-separated query name
-and nameserver). This avoids relying on HTTP-based method and retrieves the IP
-address directly from the DNS server.<p>
+Enter two space-separated values: the DNS query name followed by the
+nameserver. For example:
+<tt>myip.opendns.com resolver1.opendns.com</tt>.<p>
 
-However, DNS method should be used with care if the system is behind a NAT,
-proxy, or VPN, as the detected IP may not reflect the actual public IP of the
-machine. It may instead show the external IP of the NAT gateway, proxy, or VPN
-endpoint.<p>
+Virtualmin uses <tt>dig</tt> to request an A record for IPv4 or an AAAA record
+for IPv6 from the specified nameserver. If this field is set to <b>No</b>,
+<tt>dig</tt> is unavailable, or the query fails, Virtualmin uses the configured
+HTTP detection service instead.<p>
+
+When the system is behind NAT, a proxy, or a VPN, the result is the public
+address of that gateway or endpoint rather than an address assigned directly
+to the system.<p>
 
 <footer>

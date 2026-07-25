@@ -21,7 +21,7 @@ dns_default_ip4=Resolver for IPv4 queries,0,12
 dns_default_ip6=Resolver for IPv6 queries,0,30
 ip6enabled=Use default IPv6 address for new virtual servers?,1,1-Yes,0-No
 ip_lookup_url=HTTP service URL for system external IP detection,3,Default (<tt>software.virtualmin.com</tt>),40
-dns_resolver=Detect system external IP address using DNS,3,No,50
+dns_resolver=External IP DNS query and server,3,No,50
 
 line1.4=User interface settings,11
 display_max=Maximum number of domains to display,3,Unlimited
