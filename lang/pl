@@ -4168,9 +4168,26 @@ resel_ebwunlimit=wirtualny serwer $1 nie może zostać przypisany do tego sprzed
 resel_ebefore=Polecenie przed modyfikacją zakończyło się niepowodzeniem : $1
 
 licence_err=Wykryto problem z twoją licencją Virtualmina :
-licence_soon=Nota : Twoja licencja Virtualmin wygaśnie za $1 dni.
-licence_soon2=Nota : Twoja licencja Virtualmin wygaśnia za $1 godzin.
-licence_renew=Odnowienie może zostać kupione na <a target=_blank href='$1'>$1</a>
+licence_soon=Twoja licencja Virtualmin wygaśnie za $1 dzień.
+licence_soonm=Twoja licencja Virtualmin wygaśnie za $1 dni.
+licence_soon2=Twoja licencja Virtualmin wygaśnie za $1 godzinę.
+licence_soon2m=Twoja licencja Virtualmin wygaśnie za $1 godzin.
+licence_renew=Odnów licencję w <a target=_blank href='$1'>$2</a>.
+licence_renew2=Sprawdź dostępne opcje licencji w <a target=_blank href='$1'>$2</a>.
+licence_renew2s=Aby nadal korzystać ze wszystkich serwerów, kup wymagane dodatkowe licencje w <a target=_blank href='$1'>$2</a>.
+licence_renew2d=Uaktualnij licencję w <a target=_blank href='$1'>$2</a>.
+licence_renew3=Pozostał $1 dzień okresu karencji na migrację.
+licence_renew3m=Do końca okresu karencji na migrację pozostało $1 dni.
+licence_renew3e=Pozostał $1 dzień okresu karencji na odnowienie.
+licence_renew3em=Do końca okresu karencji na odnowienie pozostało $1 dni.
+licence_renew3d=Zmniejsz liczbę serwerów wirtualnych lub uaktualnij licencję w ciągu $1 dnia.
+licence_renew3dm=Zmniejsz liczbę serwerów wirtualnych lub uaktualnij licencję w ciągu $1 dni.
+licence_renew3i=Pozostał $1 dzień na rozwiązanie tego problemu z licencją.
+licence_renew3im=Pozostało $1 dni na rozwiązanie tego problemu z licencją.
+licence_renew4=Okres karencji na migrację dobiegł końca, dlatego funkcje zmieniające system są wyłączone do czasu rozwiązania problemu z limitem serwerów.
+licence_renew4e=Okres karencji na odnowienie dobiegł końca, dlatego funkcje zmieniające system są wyłączone do czasu odnowienia licencji.
+licence_renew4d=Okres karencji dobiegł końca, dlatego funkcje zmieniające system są wyłączone do czasu rozwiązania problemu z limitem serwerów wirtualnych.
+licence_renew4i=Okres karencji dobiegł końca, dlatego funkcje zmieniające system są wyłączone do czasu rozwiązania problemu z licencją.
 license_shop_name=Virtualmin Sklep
 licence_recheck=Ponownie sprawdź stan licencji
 licence_title=Ponownie sprawdź licencję
@@ -4182,9 +4199,12 @@ licence_unlimited=nie limitowana
 licence_goterr=..wykryto problem : $1
 licence_goterr2=.. nieprawidłowa data wygaśnięcia : $1
 licence_ecannot=Nie masz pozwolenia do ponownego sprawdzenia licencji Virtualmina
-licence_maxdoms=Twój system jest licencjonowany tylko dla $1 serwerów, ale masz $2.
-licence_maxservers2=Twój numer seryjny $3 jest licencjonowany tylko dla $1 serwerów, ale jest w użytku na $2.
-licence_maxwarn=Jeśli ten numer seryjny jest używany tymczasowo do migracji na nowy serwer, zakup dodatkową licencję na stronie <a target=_blank href='$1'>$2</a>.
+licence_maxdoms=Ten system ma licencję tylko na $1 serwer wirtualny, ale obecnie obsługuje ich $2.
+licence_maxdomsm=Ten system ma licencję tylko na $1 serwerów wirtualnych, ale obecnie obsługuje ich $2.
+licence_maxservers2=Numer seryjny $3 ma licencję tylko na $1 serwer, ale jest obecnie aktywny na $2 serwerach.
+licence_maxservers2m=Numer seryjny $3 ma licencję tylko na $1 serwerów, ale jest obecnie aktywny na $2 serwerach.
+licence_maxwarn=Jeśli ta licencja jest tymczasowo używana do migracji serwera, wyłącz stary serwer i poczekaj do 48 godzin na zniknięcie tego ostrzeżenia.
+licence_maxdomswarn=Zmniejsz liczbę serwerów wirtualnych do limitu licencji.
 licence_ipchanged=Główny adres IP systemu zmienił się z $1 na $2. Wirtualne serwery używające starego adresu mogą być niedostępne lub wyświetlać niewłaściwą zawartość.
 licence_changeip=Aktualizuj niepoprawne adresy IP
 licence_smallcert=Twój system używa certyfikatu SSL o długości $1 bitów, co jest mniejsze niż zalecana długość 2048 bitów. Ten certyfikat został wystawiony przez $4 dla $3 na domenę $2.

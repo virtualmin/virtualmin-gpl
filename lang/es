@@ -2713,12 +2713,38 @@ resel_linkurl=A URL
 resel_elogo=La URL del logo es inexistente o inválida
 resel_elink=La URL del enlace del logo es inexistente o inválida
 
+licence_soon=Su licencia de Virtualmin caducará en $1 día.
+licence_soonm=Su licencia de Virtualmin caducará en $1 días.
+licence_soon2=Su licencia de Virtualmin caducará en $1 hora.
+licence_soon2m=Su licencia de Virtualmin caducará en $1 horas.
+licence_renew=Renueve su licencia en <a target=_blank href='$1'>$2</a>.
+licence_renew2=Consulte sus opciones de licencia en <a target=_blank href='$1'>$2</a>.
+licence_renew2s=Para seguir utilizando todos los servidores, compre las licencias adicionales necesarias en <a target=_blank href='$1'>$2</a>.
+licence_renew2d=Actualice su licencia en <a target=_blank href='$1'>$2</a>.
+licence_renew3=Queda $1 día del período de gracia para la migración.
+licence_renew3m=Quedan $1 días del período de gracia para la migración.
+licence_renew3e=Queda $1 día del período de gracia para la renovación.
+licence_renew3em=Quedan $1 días del período de gracia para la renovación.
+licence_renew3d=Reduzca el número de servidores virtuales o actualice la licencia en un plazo de $1 día.
+licence_renew3dm=Reduzca el número de servidores virtuales o actualice la licencia en un plazo de $1 días.
+licence_renew3i=Queda $1 día para resolver este problema de licencia.
+licence_renew3im=Quedan $1 días para resolver este problema de licencia.
+licence_renew4=El período de gracia para la migración ha terminado, por lo que las funciones que modifican el sistema están desactivadas hasta que se resuelva el límite de servidores.
+licence_renew4e=El período de gracia para la renovación ha terminado, por lo que las funciones que modifican el sistema están desactivadas hasta que se renueve la licencia.
+licence_renew4d=El período de gracia ha terminado, por lo que las funciones que modifican el sistema están desactivadas hasta que se resuelva el límite de servidores virtuales.
+licence_renew4i=El período de gracia ha terminado, por lo que las funciones que modifican el sistema están desactivadas hasta que se resuelva el problema de licencia.
 licence_recheck=Re-chequear el estado de licencia
 licence_title=Re-chequear licencia
 licence_doing=Ahora re-chequeando su licencia de Virtualmin ..
 licence_unlimited=ilimitado
 licence_goterr=.. se ha detectado un problema : $1
 licence_ecannot=No está autorizado a re-chequear la licencia de Virtualmin
+licence_maxdoms=Este sistema tiene licencia para solo $1 servidor virtual, pero actualmente aloja $2.
+licence_maxdomsm=Este sistema tiene licencia para solo $1 servidores virtuales, pero actualmente aloja $2.
+licence_maxservers2=El número de serie $3 tiene licencia para solo $1 servidor, pero actualmente está activo en $2 servidores.
+licence_maxservers2m=El número de serie $3 tiene licencia para solo $1 servidores, pero actualmente está activo en $2 servidores.
+licence_maxwarn=Si esta licencia se utiliza temporalmente para una migración de servidor, apague el servidor antiguo y espere hasta 48 horas para que desaparezca esta advertencia.
+licence_maxdomswarn=Reduzca el número de servidores virtuales al límite de la licencia.
 
 config_deftheme=Webmin global por defecto
 config_oldtheme=Viejo tema del Webmin

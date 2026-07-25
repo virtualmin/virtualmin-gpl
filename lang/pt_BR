@@ -218,6 +218,33 @@ databases_ahosts=Hosts permitido para $1
 database_size=Espaço ocupado
 database_tables=Número de tabelas
 
+licence_soon=Sua licença Virtualmin expirará em $1 dia.
+licence_soonm=Sua licença Virtualmin expirará em $1 dias.
+licence_soon2=Sua licença Virtualmin expirará em $1 hora.
+licence_soon2m=Sua licença Virtualmin expirará em $1 horas.
+licence_renew=Renove sua licença na <a target=_blank href='$1'>$2</a>.
+licence_renew2=Consulte suas opções de licença na <a target=_blank href='$1'>$2</a>.
+licence_renew2s=Para continuar usando todos os servidores, adquira as licenças adicionais necessárias na <a target=_blank href='$1'>$2</a>.
+licence_renew2d=Atualize sua licença na <a target=_blank href='$1'>$2</a>.
+licence_renew3=Resta $1 dia no período de carência da migração.
+licence_renew3m=Restam $1 dias no período de carência da migração.
+licence_renew3e=Resta $1 dia no período de carência da renovação.
+licence_renew3em=Restam $1 dias no período de carência da renovação.
+licence_renew3d=Reduza o número de servidores virtuais ou atualize a licença em até $1 dia.
+licence_renew3dm=Reduza o número de servidores virtuais ou atualize a licença em até $1 dias.
+licence_renew3i=Resta $1 dia para resolver este problema de licença.
+licence_renew3im=Restam $1 dias para resolver este problema de licença.
+licence_renew4=O período de carência da migração terminou, portanto os recursos que alteram o sistema estão desativados até que o limite de servidores seja resolvido.
+licence_renew4e=O período de carência da renovação terminou, portanto os recursos que alteram o sistema estão desativados até que a licença seja renovada.
+licence_renew4d=O período de carência terminou, portanto os recursos que alteram o sistema estão desativados até que o limite de servidores virtuais seja resolvido.
+licence_renew4i=O período de carência terminou, portanto os recursos que alteram o sistema estão desativados até que o problema de licença seja resolvido.
+licence_maxdoms=Este sistema está licenciado para apenas $1 servidor virtual, mas atualmente hospeda $2.
+licence_maxdomsm=Este sistema está licenciado para apenas $1 servidores virtuais, mas atualmente hospeda $2.
+licence_maxservers2=O número de série $3 está licenciado para apenas $1 servidor, mas atualmente está ativo em $2 servidores.
+licence_maxservers2m=O número de série $3 está licenciado para apenas $1 servidores, mas atualmente está ativo em $2 servidores.
+licence_maxwarn=Se esta licença estiver sendo usada temporariamente para uma migração de servidor, desligue o servidor antigo e aguarde até 48 horas para que este aviso desapareça.
+licence_maxdomswarn=Reduza o número de servidores virtuais ao limite da licença.
+
 scripts_unsupver=Versão
 
 addscripts_elocal=Arquivo local não existe

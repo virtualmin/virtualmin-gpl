@@ -1,0 +1,26 @@
+licence_soon=Platnosť vašej licencie Virtualmin vyprší o $1 deň.
+licence_soonm=Platnosť vašej licencie Virtualmin vyprší o $1 dní.
+licence_soon2=Platnosť vašej licencie Virtualmin vyprší o $1 hodinu.
+licence_soon2m=Platnosť vašej licencie Virtualmin vyprší o $1 hodín.
+licence_renew=Obnovte si licenciu v obchode <a target=_blank href='$1'>$2</a>.
+licence_renew2=Pozrite si možnosti licencie v obchode <a target=_blank href='$1'>$2</a>.
+licence_renew2s=Ak chcete naďalej používať všetky servery, zakúpte si potrebné dodatočné licencie v obchode <a target=_blank href='$1'>$2</a>.
+licence_renew2d=Inovujte si licenciu v obchode <a target=_blank href='$1'>$2</a>.
+licence_renew3=Do konca tolerančnej lehoty na migráciu zostáva $1 deň.
+licence_renew3m=Do konca tolerančnej lehoty na migráciu zostáva $1 dní.
+licence_renew3e=Do konca tolerančnej lehoty na obnovenie zostáva $1 deň.
+licence_renew3em=Do konca tolerančnej lehoty na obnovenie zostáva $1 dní.
+licence_renew3d=Znížte počet virtuálnych serverov alebo inovujte licenciu do $1 dňa.
+licence_renew3dm=Znížte počet virtuálnych serverov alebo inovujte licenciu do $1 dní.
+licence_renew3i=Na vyriešenie tohto problému s licenciou zostáva $1 deň.
+licence_renew3im=Na vyriešenie tohto problému s licenciou zostáva $1 dní.
+licence_renew4=Tolerančná lehota na migráciu uplynula, preto sú funkcie meniace systém vypnuté, kým sa nevyrieši limit serverov.
+licence_renew4e=Tolerančná lehota na obnovenie uplynula, preto sú funkcie meniace systém vypnuté, kým sa licencia neobnoví.
+licence_renew4d=Tolerančná lehota uplynula, preto sú funkcie meniace systém vypnuté, kým sa nevyrieši limit virtuálnych serverov.
+licence_renew4i=Tolerančná lehota uplynula, preto sú funkcie meniace systém vypnuté, kým sa nevyrieši problém s licenciou.
+licence_maxdoms=Tento systém má licenciu iba pre $1 virtuálny server, ale momentálne ich hostí $2.
+licence_maxdomsm=Tento systém má licenciu iba pre $1 virtuálnych serverov, ale momentálne ich hostí $2.
+licence_maxservers2=Sériové číslo $3 má licenciu iba pre $1 server, ale momentálne je aktívne na $2 serveroch.
+licence_maxservers2m=Sériové číslo $3 má licenciu iba pre $1 serverov, ale momentálne je aktívne na $2 serveroch.
+licence_maxwarn=Ak sa táto licencia dočasne používa na migráciu servera, vypnite starý server a počkajte až 48 hodín, kým toto upozornenie zmizne.
+licence_maxdomswarn=Znížte počet virtuálnych serverov na licencovaný limit.

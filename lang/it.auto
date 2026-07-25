@@ -3418,24 +3418,11 @@ resel_ebwunlimit=Il server virtuale $1 non può essere assegnato a questo rivend
 resel_ebefore=Prima del comando di modifica non riuscito : $1 
 
 licence_err=È stato rilevato un problema con la tua licenza Virtualmin:
-licence_soon=La tua licenza Virtualmin scadrà tra $1 giorni.
-licence_soon2=La tua licenza Virtualmin scadrà tra $1 ore.
-licence_renew=Il rinnovo può essere acquistato al prezzo di <a target=_blank href='$1'>$2</a>.
-licence_renew2=È possibile acquistare una licenza aggiuntiva su <a target=_blank href='$1'>$2</a>.
-licence_renew3=È rimasto un periodo di tolleranza di $1 giorno per gestire la migrazione della licenza su un nuovo server.
-licence_renew3m=È rimasto un periodo di tolleranza di $1 giorni per gestire la migrazione della licenza su un nuovo server.
-licence_renew3e=È rimasto un periodo di tolleranza di $1 giorno per rinnovare la licenza.
-licence_renew3em=È rimasto un periodo di tolleranza di $1 giorni per il rinnovo della licenza.
-licence_renew4=Il periodo di grazia per il trasferimento della licenza è scaduto e le funzionalità per apportare modifiche al sistema non saranno disponibili.
-licence_renew4e=Il periodo di grazia per il rinnovo della licenza è scaduto e le funzionalità per apportare modifiche al sistema non saranno disponibili finché la licenza non verrà rinnovata.
 license_shop_name=Negozio Virtualmin
 licence_ok2=.. la licenza è valida per $1 domini Virtualmin e per l'uso sul sistema $2
 licence_ok3=.. la licenza è valida per $1 domini Virtualmin e per l'uso sul sistema $2 fino a $3
 licence_warn=Si è verificato un problema temporaneo durante il controllo della licenza $2 : $1 
 licence_goterr2=.. data di scadenza non valida : $1 
-licence_maxdoms=Il sistema è concesso in licenza solo per il server $1, ma al momento è utilizzato su $2.
-licence_maxservers2=Il numero di serie $3 è concesso in licenza solo per il server $1, ma al momento è utilizzato sui server $2.
-licence_maxwarn=A meno che questa licenza non venga utilizzata temporaneamente per la migrazione a un nuovo server, è necessario acquistare una licenza separata per l'utilizzo su questo server.
 licence_ipchanged=L'indirizzo IP primario del sistema sembra essere cambiato da $1 a $2. I server virtuali che utilizzano il vecchio indirizzo potrebbero essere irraggiungibili o servire il contenuto Web errato.
 licence_changeip=Aggiorna indirizzi IP errati
 licence_smallcert=Il sistema utilizza un certificato SSL che è lungo solo $1 bit, che è inferiore alla dimensione consigliata di 2048 bit. Questo certificato è stato rilasciato da $4 a $3 per il dominio $2.

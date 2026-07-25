@@ -3264,12 +3264,38 @@ resel_domssel=Eid av denne forhandleren
 resel_equnlimit=Den virtuelle tjeneren $1 jkan ikke tilordnes denne forhandleren, siden den har ubegrenset dik-kvote, men forhandleren har en grense,
 resel_ebwunlimit=Den virtuelle tjeneren $1 jkan ikke tilordnes denne forhandleren, siden den har ubegrenset båndbredde, men forhandleren har en grense,
 
+licence_soon=Virtualmin-lisensen din utløper om $1 dag.
+licence_soonm=Virtualmin-lisensen din utløper om $1 dager.
+licence_soon2=Virtualmin-lisensen din utløper om $1 time.
+licence_soon2m=Virtualmin-lisensen din utløper om $1 timer.
+licence_renew=Forny lisensen din på <a target=_blank href='$1'>$2</a>.
+licence_renew2=Se lisensalternativene dine på <a target=_blank href='$1'>$2</a>.
+licence_renew2s=For å fortsette å bruke alle serverne må du kjøpe de nødvendige tilleggslisensene på <a target=_blank href='$1'>$2</a>.
+licence_renew2d=Oppgrader lisensen din på <a target=_blank href='$1'>$2</a>.
+licence_renew3=Det er $1 dag igjen av utsettelsesperioden for migrering.
+licence_renew3m=Det er $1 dager igjen av utsettelsesperioden for migrering.
+licence_renew3e=Det er $1 dag igjen av utsettelsesperioden for fornyelse.
+licence_renew3em=Det er $1 dager igjen av utsettelsesperioden for fornyelse.
+licence_renew3d=Reduser antallet virtuelle servere eller oppgrader lisensen innen $1 dag.
+licence_renew3dm=Reduser antallet virtuelle servere eller oppgrader lisensen innen $1 dager.
+licence_renew3i=Det er $1 dag igjen til å løse dette lisensproblemet.
+licence_renew3im=Det er $1 dager igjen til å løse dette lisensproblemet.
+licence_renew4=Utsettelsesperioden for migrering er utløpt, så funksjoner som endrer systemet er deaktivert til servergrensen er løst.
+licence_renew4e=Utsettelsesperioden for fornyelse er utløpt, så funksjoner som endrer systemet er deaktivert til lisensen er fornyet.
+licence_renew4d=Utsettelsesperioden er utløpt, så funksjoner som endrer systemet er deaktivert til grensen for virtuelle servere er løst.
+licence_renew4i=Utsettelsesperioden er utløpt, så funksjoner som endrer systemet er deaktivert til lisensproblemet er løst.
 licence_recheck=Sjekk lisensstatus på nytt
 licence_title=Sjekk lisens på nytt
 licence_doing=Sjekker nå Virtualmin lisensen din på nytt ..
 licence_unlimited=ubegrenset
 licence_goterr=.. oppdaget et problem : $1
 licence_ecannot=Du har ikke lov til å sjekke Virtualmin lisensen på nytt
+licence_maxdoms=Dette systemet er bare lisensiert for $1 virtuell server, men er nå vert for $2.
+licence_maxdomsm=Dette systemet er bare lisensiert for $1 virtuelle servere, men er nå vert for $2.
+licence_maxservers2=Serienummer $3 er bare lisensiert for $1 server, men er nå aktivt på $2 servere.
+licence_maxservers2m=Serienummer $3 er bare lisensiert for $1 servere, men er nå aktivt på $2 servere.
+licence_maxwarn=Hvis denne lisensen brukes midlertidig til en servermigrering, slår du av den gamle serveren og venter i opptil 48 timer på at denne advarselen skal forsvinne.
+licence_maxdomswarn=Reduser antallet virtuelle servere til lisensgrensen.
 licence_ipchanged=Det ser ut til systemets primære IP adresse er endret fra $1 til $2. Virtuelle tjenere som bruker den gamle adressen kan være utilgjengelige, eller de kan vise feil innhold.
 licence_changeip=Oppdater ugyldige IP adresser
 licence_smallcert=Systemet ditt bruker et SSL sertifikat som er bare $1 bits langt. Dette er mindre enn den anbefalte størrelsesn på 2048 bits. Dette sertifikatet ble utstedt av $4 til $3 for domenet $2.

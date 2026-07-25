@@ -215,13 +215,6 @@ newip_return=zmień adres IP
 resel_defdnsip6=Zewnętrzny adres IPv6 dla serwerów opartych na nazwach
 resel_edefdnsip6=Brakujący lub nieprawidłowy zewnętrzny adres IPv6
 
-licence_renew2=Dodatkową licencję można zakupić za <a target=_blank href='$1'>$2</a>.
-licence_renew3=Pozostał okres karencji wynoszący $1 dnia na zarządzanie migracją licencji na nowy serwer.
-licence_renew3m=Pozostał okres karencji wynoszący $1 dni na zarządzanie migracją licencji na nowy serwer.
-licence_renew3e=Pozostał $1 dzień okresu karencji na odnowienie licencji.
-licence_renew3em=Pozostał okres karencji $1 dni na odnowienie licencji.
-licence_renew4=Okres karencji na przeniesienie licencji wygasł, a funkcje umożliwiające wprowadzanie zmian w systemie będą niedostępne.
-licence_renew4e=Okres karencji na odnowienie licencji wygasł, a funkcje umożliwiające wprowadzanie zmian w systemie nie będą dostępne do czasu odnowienia licencji.
 licence_efailed=Nie udało się nawiązać połączenia z serwerem licencji
 licence_eexp=Licencja dla tego serwera wygasła $1
 licence_echk=Wystąpił błąd podczas sprawdzania licencji

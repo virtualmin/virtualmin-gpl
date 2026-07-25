@@ -873,7 +873,33 @@ resel_eemail=Neplatná kontaktní emailová adresa
 resel_edefip=Neplatná nebo chybějící IP adresa
 resel_edefip2=IP adresa není na tomto systému zatím aktivní
 
+licence_soon=Platnost vaší licence Virtualmin vyprší za $1 den.
+licence_soonm=Platnost vaší licence Virtualmin vyprší za $1 dní.
+licence_soon2=Platnost vaší licence Virtualmin vyprší za $1 hodinu.
+licence_soon2m=Platnost vaší licence Virtualmin vyprší za $1 hodin.
+licence_renew=Obnovte licenci v obchodě <a target=_blank href='$1'>$2</a>.
+licence_renew2=Prohlédněte si možnosti licence v obchodě <a target=_blank href='$1'>$2</a>.
+licence_renew2s=Chcete-li nadále používat všechny servery, zakupte potřebné dodatečné licence v obchodě <a target=_blank href='$1'>$2</a>.
+licence_renew2d=Upgradujte licenci v obchodě <a target=_blank href='$1'>$2</a>.
+licence_renew3=Do konce lhůty pro migraci zbývá $1 den.
+licence_renew3m=Do konce lhůty pro migraci zbývá $1 dní.
+licence_renew3e=Do konce lhůty pro obnovení zbývá $1 den.
+licence_renew3em=Do konce lhůty pro obnovení zbývá $1 dní.
+licence_renew3d=Snižte počet virtuálních serverů nebo upgradujte licenci do $1 dne.
+licence_renew3dm=Snižte počet virtuálních serverů nebo upgradujte licenci do $1 dní.
+licence_renew3i=Na vyřešení tohoto problému s licencí zbývá $1 den.
+licence_renew3im=Na vyřešení tohoto problému s licencí zbývá $1 dní.
+licence_renew4=Lhůta pro migraci skončila, proto jsou funkce měnící systém zakázány, dokud nebude vyřešen limit serverů.
+licence_renew4e=Lhůta pro obnovení skončila, proto jsou funkce měnící systém zakázány, dokud nebude licence obnovena.
+licence_renew4d=Lhůta skončila, proto jsou funkce měnící systém zakázány, dokud nebude vyřešen limit virtuálních serverů.
+licence_renew4i=Lhůta skončila, proto jsou funkce měnící systém zakázány, dokud nebude problém s licencí vyřešen.
 licence_unlimited=neomezená
+licence_maxdoms=Tento systém má licenci pouze pro $1 virtuální server, ale aktuálně jich hostuje $2.
+licence_maxdomsm=Tento systém má licenci pouze pro $1 virtuálních serverů, ale aktuálně jich hostuje $2.
+licence_maxservers2=Sériové číslo $3 má licenci pouze pro $1 server, ale aktuálně je aktivní na $2 serverech.
+licence_maxservers2m=Sériové číslo $3 má licenci pouze pro $1 serverů, ale aktuálně je aktivní na $2 serverech.
+licence_maxwarn=Pokud se tato licence dočasně používá k migraci serveru, vypněte starý server a počkejte až 48 hodin, než toto upozornění zmizí.
+licence_maxdomswarn=Snižte počet virtuálních serverů na licencovaný limit.
 
 mailusers_title=Poslat Vsem
 mailusers_all=Vse

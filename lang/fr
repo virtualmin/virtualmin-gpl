@@ -2002,6 +2002,33 @@ resel_none=Aucun
 resel_logonone=Aucun
 resel_linknone=Aucun
 
+licence_soon=Votre licence Virtualmin expirera dans $1 jour.
+licence_soonm=Votre licence Virtualmin expirera dans $1 jours.
+licence_soon2=Votre licence Virtualmin expirera dans $1 heure.
+licence_soon2m=Votre licence Virtualmin expirera dans $1 heures.
+licence_renew=Renouvelez votre licence sur <a target=_blank href='$1'>$2</a>.
+licence_renew2=Consultez vos options de licence sur <a target=_blank href='$1'>$2</a>.
+licence_renew2s=Pour continuer à utiliser tous les serveurs, achetez les licences supplémentaires requises sur <a target=_blank href='$1'>$2</a>.
+licence_renew2d=Mettez à niveau votre licence sur <a target=_blank href='$1'>$2</a>.
+licence_renew3=Il reste $1 jour dans le délai de grâce de migration.
+licence_renew3m=Il reste $1 jours dans le délai de grâce de migration.
+licence_renew3e=Il reste $1 jour dans le délai de grâce de renouvellement.
+licence_renew3em=Il reste $1 jours dans le délai de grâce de renouvellement.
+licence_renew3d=Réduisez le nombre de serveurs virtuels ou mettez la licence à niveau sous $1 jour.
+licence_renew3dm=Réduisez le nombre de serveurs virtuels ou mettez la licence à niveau sous $1 jours.
+licence_renew3i=Il reste $1 jour pour résoudre ce problème de licence.
+licence_renew3im=Il reste $1 jours pour résoudre ce problème de licence.
+licence_renew4=Le délai de grâce de migration a expiré. Les fonctions qui modifient le système sont désactivées jusqu'à la résolution de la limite de serveurs.
+licence_renew4e=Le délai de grâce de renouvellement a expiré. Les fonctions qui modifient le système sont désactivées jusqu'au renouvellement de la licence.
+licence_renew4d=Le délai de grâce a expiré. Les fonctions qui modifient le système sont désactivées jusqu'à la résolution de la limite de serveurs virtuels.
+licence_renew4i=Le délai de grâce a expiré. Les fonctions qui modifient le système sont désactivées jusqu'à la résolution du problème de licence.
+licence_maxdoms=Ce système est autorisé pour seulement $1 serveur virtuel, mais en héberge actuellement $2.
+licence_maxdomsm=Ce système est autorisé pour seulement $1 serveurs virtuels, mais en héberge actuellement $2.
+licence_maxservers2=Le numéro de série $3 est autorisé pour seulement $1 serveur, mais il est actuellement actif sur $2 serveurs.
+licence_maxservers2m=Le numéro de série $3 est autorisé pour seulement $1 serveurs, mais il est actuellement actif sur $2 serveurs.
+licence_maxwarn=Si cette licence est utilisée temporairement pour une migration de serveur, arrêtez l'ancien serveur et attendez jusqu'à 48 heures que cet avertissement disparaisse.
+licence_maxdomswarn=Réduisez le nombre de serveurs virtuels à la limite autorisée.
+
 scripts_overall=Classement
 scripts_ok=Voir les options d'installation
 scripts_un=Afficher les options

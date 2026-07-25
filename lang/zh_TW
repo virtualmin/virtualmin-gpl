@@ -2178,11 +2178,37 @@ resel_defip=基于名字的服務器的IP地址
 resel_edefip=缺少或無效的IP地址
 resel_edefip2=IP地址在該系統上還不可用
 
+licence_soon=您的 Virtualmin 許可證將在 $1 天後到期。
+licence_soonm=您的 Virtualmin 許可證將在 $1 天後到期。
+licence_soon2=您的 Virtualmin 許可證將在 $1 小時後到期。
+licence_soon2m=您的 Virtualmin 許可證將在 $1 小時後到期。
+licence_renew=請前往 <a target=_blank href='$1'>$2</a> 續訂許可證。
+licence_renew2=請前往 <a target=_blank href='$1'>$2</a> 查看許可證選項。
+licence_renew2s=若要繼續使用所有伺服器，請前往 <a target=_blank href='$1'>$2</a> 購買所需的額外許可證。
+licence_renew2d=請前往 <a target=_blank href='$1'>$2</a> 升級許可證。
+licence_renew3=遷移寬限期還剩 $1 天。
+licence_renew3m=遷移寬限期還剩 $1 天。
+licence_renew3e=續訂寬限期還剩 $1 天。
+licence_renew3em=續訂寬限期還剩 $1 天。
+licence_renew3d=請在 $1 天內減少虛擬伺服器數量或升級許可證。
+licence_renew3dm=請在 $1 天內減少虛擬伺服器數量或升級許可證。
+licence_renew3i=還剩 $1 天來解決此許可證問題。
+licence_renew3im=還剩 $1 天來解決此許可證問題。
+licence_renew4=遷移寬限期已結束，因此在伺服器數量限制問題解決之前，修改系統的功能將被停用。
+licence_renew4e=續訂寬限期已結束，因此在許可證續訂之前，修改系統的功能將被停用。
+licence_renew4d=寬限期已結束，因此在虛擬伺服器數量限制問題解決之前，修改系統的功能將被停用。
+licence_renew4i=寬限期已結束，因此在許可證問題解決之前，修改系統的功能將被停用。
 licence_recheck=重新檢查許可証狀態
 licence_title=重新檢查許可証
 licence_doing=現在正在重新檢查你的Virtualmin許可証 ..
 licence_goterr=.. 發現問題：$1
 licence_ecannot=你不運行重新檢查Virtualmin許可証
+licence_maxdoms=此系統僅獲許可執行 $1 個虛擬伺服器，但目前託管了 $2 個。
+licence_maxdomsm=此系統僅獲許可執行 $1 個虛擬伺服器，但目前託管了 $2 個。
+licence_maxservers2=序號 $3 僅獲許可用於 $1 台伺服器，但目前在 $2 台伺服器上處於啟用狀態。
+licence_maxservers2m=序號 $3 僅獲許可用於 $1 台伺服器，但目前在 $2 台伺服器上處於啟用狀態。
+licence_maxwarn=如果此許可證暫時用於伺服器遷移，請關閉舊伺服器，並等待最多 48 小時讓此警告消失。
+licence_maxdomswarn=請將虛擬伺服器數量減少到許可證允許的上限。
 
 config_deftheme=全局Webmin缺省主題
 config_oldtheme=以前的Webmin主題

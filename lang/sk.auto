@@ -4360,16 +4360,6 @@ resel_ebwunlimit=Virtuálny server $1 nemožno priradiť tomuto predajcovi, pret
 resel_ebefore=Pred zlyhaním príkazu úpravy : $1
 
 licence_err=Bol zistený problém s vašou licenciou Virtualmin:
-licence_soon=Vaša licencia Virtualmin vyprší o $1 dní.
-licence_soon2=Vaša licencia Virtualmin vyprší o $1 hodín.
-licence_renew=Obnovenie je možné zakúpiť za <a target=_blank href='$1'>$2</a>.
-licence_renew2=Dodatočnú licenciu je možné zakúpiť na <a target=_blank href='$1'>$2</a>.
-licence_renew3=Na spravovanie migrácie licencie na nový server zostáva obdobie odkladu $1 dňa.
-licence_renew3m=Na spravovanie migrácie licencie na nový server zostáva doba odkladu $1 dní.
-licence_renew3e=Na obnovenie licencie zostáva doba odkladu $1 dňa.
-licence_renew3em=Na obnovenie licencie zostáva doba odkladu $1 dní.
-licence_renew4=Tolerančná lehota na prevod licencie uplynula a funkcie na vykonávanie zmien v systéme nebudú k dispozícii.
-licence_renew4e=Tolerančná lehota na obnovenie licencie uplynula a funkcie na vykonávanie zmien v systéme nebudú k dispozícii, kým sa licencia neobnoví.
 license_shop_name=Obchod Virtualmin
 licence_recheck=Znova skontrolujte stav licencie
 licence_title=Znova skontrolujte licenciu
@@ -4381,9 +4371,6 @@ licence_unlimited=neobmedzené
 licence_goterr=.. bol zistený problém : $1
 licence_goterr2=.. neplatný dátum vypršania platnosti : $1
 licence_ecannot=Nie je dovolené znova skontrolovať licenciu Virtualmin
-licence_maxdoms=Váš systém je licencovaný iba pre server $1, ale momentálne sa používa na $2.
-licence_maxservers2=Vaše sériové číslo $3 je licencované iba pre server $1, ale momentálne sa používa na serveroch $2.
-licence_maxwarn=Pokiaľ sa táto licencia dočasne nepoužíva na migráciu na nový server, musíte si zakúpiť samostatnú licenciu na používanie na tomto serveri.
 licence_ipchanged=Zdá sa, že primárna IP adresa vášho systému sa zmenila z $1 na $2. Virtuálne servery používajúce starú adresu môžu byť nedostupné alebo môžu poskytovať nesprávny webový obsah.
 licence_changeip=Aktualizujte nesprávne IP adresy
 licence_smallcert=Váš systém používa certifikát SSL, ktorý je dlhý iba $1 bitov, čo je menej ako odporúčaná veľkosť 2048 bitov. Tento certifikát bol vydaný $4 až $3 pre doménu $2.

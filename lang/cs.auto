@@ -3533,16 +3533,6 @@ resel_ebwunlimit=Virtuální server $1 nelze tomuto distributorovi přiřadit, p
 resel_ebefore=Před selháním příkazu k úpravě : $1 
 
 licence_err=Byl zjištěn problém s vaší licencí Virtualmin:
-licence_soon=Vaše licence Virtualmin vyprší za $1 dní.
-licence_soon2=Vaše licence Virtualmin vyprší za $1 hodin.
-licence_renew=Obnovení lze zakoupit za <a target=_blank href='$1'>$2</a>.
-licence_renew2=Další licenci lze zakoupit za <a target=_blank href='$1'>$2</a>.
-licence_renew3=Pro správu migrace licence na nový server zbývá doba odkladu $1 dne.
-licence_renew3m=Pro správu migrace licence na nový server zbývá doba odkladu $1 dní.
-licence_renew3e=Pro obnovení licence zbývá doba odkladu $1 dne.
-licence_renew3em=Pro obnovení licence zbývá doba odkladu $1 dní.
-licence_renew4=Lhůta pro převod vaší licence vypršela a funkce pro provádění změn v systému nebudou k dispozici.
-licence_renew4e=Lhůta pro obnovení licence vypršela a funkce pro provádění změn v systému nebudou k dispozici, dokud nebude licence obnovena.
 license_shop_name=Obchod Virtualmin
 licence_recheck=Znovu zkontrolujte stav licence
 licence_title=Znovu zkontrolujte licenci
@@ -3553,9 +3543,6 @@ licence_warn=Během kontroly licence $2 došlo k dočasnému problému : $1
 licence_goterr=.. byl zjištěn problém : $1 
 licence_goterr2=.. neplatné datum vypršení platnosti : $1 
 licence_ecannot=Není dovoleno znovu zkontrolovat licenci Virtualmin
-licence_maxdoms=Váš systém je licencován pouze pro server $1, ale aktuálně je používán na $2.
-licence_maxservers2=Vaše sériové číslo $3 je licencováno pouze pro server $1, ale aktuálně se používá na serverech $2.
-licence_maxwarn=Pokud není tato licence dočasně používána pro migraci na nový server, musíte si pro použití na tomto serveru zakoupit samostatnou licenci.
 licence_ipchanged=Zdá se, že primární IP adresa vašeho systému se změnila z $1 na $2. Virtuální servery používající starou adresu mohou být nedostupné nebo zobrazovat nesprávný webový obsah.
 licence_changeip=Aktualizujte nesprávné adresy IP
 licence_smallcert=Váš systém používá certifikát SSL, který je dlouhý pouze $1 bitů, což je menší než doporučená velikost 2048 bitů. Tento certifikát byl vydán doménou $4 až $3 pro doménu $2.

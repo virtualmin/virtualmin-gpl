@@ -1138,24 +1138,11 @@ resel_edefdnsip6=Manglende eller ugyldig ekstern IPv6-adresse
 resel_ebefore=Før modifikasjonskommandoen mislyktes : $1 
 
 licence_err=Det ble oppdaget et problem med Virtualmin-lisensen din:
-licence_soon=Virtualmin-lisensen din utløper om $1 dager.
-licence_soon2=Virtualmin-lisensen din utløper om $1 timer.
-licence_renew=En fornyelse kan kjøpes på <a target=_blank href='$1'>$2</a>.
-licence_renew2=En ekstra lisens kan kjøpes på <a target=_blank href='$1'>$2</a>.
-licence_renew3=En utsettelsesperiode på $1 dag er igjen for å administrere migreringen av lisensen til en ny server.
-licence_renew3m=Det gjenstår en utsettelsesperiode på $1 dager for å administrere migreringen av lisensen til en ny server.
-licence_renew3e=En utsettelsesperiode på $1 dag er igjen for fornyelse av lisensen.
-licence_renew3em=En utsettelsesperiode på $1 dager er igjen for å fornye lisensen.
-licence_renew4=Fristen for å overføre lisensen din er utløpt, og funksjoner for å gjøre endringer i systemet vil ikke være tilgjengelige.
-licence_renew4e=Fristen for å fornye lisensen din er utløpt, og funksjoner for å gjøre endringer i systemet vil ikke være tilgjengelige før lisensen er fornyet.
 license_shop_name=Virtualmin butikk
 licence_ok2=.. lisensen er gyldig for $1 Virtualmin-domener og for bruk på $2-systemet
 licence_ok3=.. lisensen er gyldig, for $1 Virtualmin-domener, og for bruk på $2-systemet frem til $3
 licence_warn=Det oppsto et midlertidig problem under lisenskontrollen $2 : $1 
 licence_goterr2=.. ugyldig utløpsdato : $1 
-licence_maxdoms=Systemet ditt er lisensiert for bare $1 server, men det brukes for øyeblikket på $2.
-licence_maxservers2=Serienummeret ditt $3 er lisensiert for bare $1 server, men det brukes for øyeblikket på $2 servere.
-licence_maxwarn=Med mindre denne lisensen brukes midlertidig for migrering til en ny server, må du kjøpe en separat lisens for bruk på denne serveren.
 licence_xfsreboot=Systemet ditt må startes på nytt for å aktivere XFS-kvoter i rotfilsystemet. Inntil dette er gjort, vil Virtualmin ikke oppdage kvoter som aktive, og det vil være umulig å anvende grenser for diskbruk på virtuelle servere eller brukere.
 licence_xfsrebootok=Starte på nytt nå
 licence_efailed=Kunne ikke kontakte lisensserveren

@@ -4269,16 +4269,26 @@ resel_ebwunlimit=Der virtuelle Server $1 kann diesem Reseller nicht zugewiesen w
 resel_ebefore=Vor dem Änderungsbefehl fehlgeschlagen: $1
 
 licence_err=Ein Problem wurde mit Ihrer Virtualmin-Lizenz festgestellt:
-licence_soon=Deine Virtualmin-Lizenz läuft in $1 Tagen ab.
-licence_soon2=Deine Virtualmin-Lizenz läuft in $1 Stunden ab.
-licence_renew=Eine Verlängerung kann unter <a target=_blank href='$1'>$2</a> gekauft werden.
-licence_renew2=Eine zusätzliche Lizenz kann unter <a target=_blank href='$1'>$2</a> gekauft werden.
-licence_renew3=Ein Nachfrist von $1 Tag bleibt für die Migration der Lizenz auf einen neuen Server.
-licence_renew3m=Ein Nachfrist von $1 Tagen bleibt für die Migration der Lizenz auf einen neuen Server.
-licence_renew3e=Ein Nachfrist von $1 Tag bleibt für die Verlängerung der Lizenz.
-licence_renew3em=Ein Nachfrist von $1 Tagen bleibt für die Verlängerung der Lizenz.
-licence_renew4=Die Kulanzfrist für die Übertragung Ihrer Lizenz ist abgelaufen, daher sind Funktionen zur Änderung des Systems nun deaktiviert.
-licence_renew4e=Die Kulanzfrist für die Verlängerung Ihrer Lizenz ist abgelaufen. Änderungen am System sind erst nach einer Verlängerung wieder möglich.
+licence_soon=Ihre Virtualmin-Lizenz läuft in $1 Tag ab.
+licence_soonm=Ihre Virtualmin-Lizenz läuft in $1 Tagen ab.
+licence_soon2=Ihre Virtualmin-Lizenz läuft in $1 Stunde ab.
+licence_soon2m=Ihre Virtualmin-Lizenz läuft in $1 Stunden ab.
+licence_renew=Verlängern Sie Ihre Lizenz im <a target=_blank href='$1'>$2</a>.
+licence_renew2=Prüfen Sie Ihre Lizenzoptionen im <a target=_blank href='$1'>$2</a>.
+licence_renew2s=Um alle Server weiterhin zu verwenden, erwerben Sie die erforderlichen zusätzlichen Lizenzen im <a target=_blank href='$1'>$2</a>.
+licence_renew2d=Aktualisieren Sie Ihre Lizenz im <a target=_blank href='$1'>$2</a>.
+licence_renew3=Die Kulanzfrist für die Migration endet in $1 Tag.
+licence_renew3m=Die Kulanzfrist für die Migration endet in $1 Tagen.
+licence_renew3e=Die Kulanzfrist für die Verlängerung endet in $1 Tag.
+licence_renew3em=Die Kulanzfrist für die Verlängerung endet in $1 Tagen.
+licence_renew3d=Reduzieren Sie die Anzahl virtueller Server oder aktualisieren Sie die Lizenz innerhalb von $1 Tag.
+licence_renew3dm=Reduzieren Sie die Anzahl virtueller Server oder aktualisieren Sie die Lizenz innerhalb von $1 Tagen.
+licence_renew3i=Es bleibt $1 Tag, um dieses Lizenzproblem zu beheben.
+licence_renew3im=Es bleiben $1 Tage, um dieses Lizenzproblem zu beheben.
+licence_renew4=Die Kulanzfrist für die Migration ist abgelaufen. Funktionen, die Änderungen am System vornehmen, sind deaktiviert, bis das Serverlimit eingehalten wird.
+licence_renew4e=Die Kulanzfrist für die Verlängerung ist abgelaufen. Funktionen, die Änderungen am System vornehmen, sind deaktiviert, bis die Lizenz verlängert wird.
+licence_renew4d=Die Kulanzfrist ist abgelaufen. Funktionen, die Änderungen am System vornehmen, sind deaktiviert, bis das Limit für virtuelle Server eingehalten wird.
+licence_renew4i=Die Kulanzfrist ist abgelaufen. Funktionen, die Änderungen am System vornehmen, sind deaktiviert, bis das Lizenzproblem behoben wird.
 license_shop_name=Virtualmin-Shop
 licence_recheck=Lizenzstatus erneut prüfen
 licence_title=Lizenz erneut prüfen
@@ -4290,9 +4300,12 @@ licence_unlimited=unbegrenzt
 licence_goterr=.. ein Problem wurde festgestellt: $1
 licence_goterr2=.. ungültiges Ablaufdatum: $1
 licence_ecannot=Du darfst die Virtualmin-Lizenz nicht erneut prüfen
-licence_maxdoms=Dein System ist nur für $1 virtuelle Server lizenziert, wird jedoch aktuell auf $2 verwendet
-licence_maxservers2=Deine Seriennummer $3 ist nur für $1 Server lizenziert, wird jedoch aktuell auf $2 Server verwendet.
-licence_maxwarn=Es sei denn, diese Lizenz wird vorübergehend für die Migration auf einen neuen Server verwendet, dann müssen Sie eine separate Lizenz für die Nutzung auf diesem Server erwerben.
+licence_maxdoms=Dieses System ist nur für $1 virtuellen Server lizenziert, hostet derzeit jedoch $2.
+licence_maxdomsm=Dieses System ist nur für $1 virtuelle Server lizenziert, hostet derzeit jedoch $2.
+licence_maxservers2=Die Seriennummer $3 ist nur für $1 Server lizenziert, derzeit aber auf $2 Servern aktiv.
+licence_maxservers2m=Die Seriennummer $3 ist nur für $1 Server lizenziert, derzeit aber auf $2 Servern aktiv.
+licence_maxwarn=Wenn diese Lizenz vorübergehend für eine Servermigration verwendet wird, fahren Sie den alten Server herunter und warten Sie bis zu 48 Stunden, bis diese Warnung verschwindet.
+licence_maxdomswarn=Reduzieren Sie die Anzahl virtueller Server auf das lizenzierte Limit.
 licence_ipchanged=Die primäre IP-Adresse Ihres Systems scheint sich von $1 auf $2 geändert zu haben. Virtuelle Server, die die alte Adresse verwenden, sind möglicherweise nicht erreichbar oder liefern falsche Webinhalte.
 licence_changeip=Fehlerhafte IP-Adressen aktualisieren
 licence_smallcert=Ihr System verwendet ein SSL-Zertifikat, das nur $1 Bit lang ist, was kleiner ist als die empfohlene Größe von 2048 Bit. Dieses Zertifikat wurde von $4 für $3 für die Domain $2 ausgestellt.
