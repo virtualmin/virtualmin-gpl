@@ -319,6 +319,7 @@ $webmin_user_theme ||= $current_theme;
 $config{'auto_redirect'} && die "auto_redirect must be set to 0";
 $config{'spam_client'} eq 'spamassassin' ||
 	die "Spam client must be spamassassin";
+$config{'ip6enabled'} || die "ip6enabled must be set to 1";
 
 # Work out which DNS server is being used
 if ($tmplname) {
