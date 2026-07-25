@@ -1,5 +1,7 @@
 #### Version 8.2.0
 * Add new [Virtualmin Podman](https://www.virtualmin.com/docs/plugins/podman/) plugin for Virtualmin Pro users, bringing per-domain container and pod management to both the UI and CLI
+* Add Auktiva, Fish Auctions and Pixelfed web app installers for Virtualmin Pro users
+* Add Django web app installer with isolated Python environments, Gunicorn services managed by systemd, production-safe settings and automatic database driver setup
 * Add support for Ubuntu 26.04
 * Add full lifecycle support for IPv6-only virtual servers, including creation, modification, cloning, backup, restore, DNS, web, mail and SSL handling
 * Add ability to add or remove an IPv4 address from an existing virtual server
