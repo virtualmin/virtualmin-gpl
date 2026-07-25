@@ -3679,15 +3679,10 @@ if ($in{"dns_mode"} != 1) {
 	}
 
 # Save NS hostname
-if ($in{'dns_master_mode'} == 2) {
-	# Master NS hostname must contain valid characters and be resolvale, unless
-	# it's a template
-	$in{'dns_master'} =~ /^[a-z0-9\.\-\_\$\{\}]+$/i ||
-		&error($text{'tmpl_ednsmaster'});
-	$in{'dns_master'} =~ /\{|\$/ || &check_ipaddress($in{'dns_master'}) ||
-		$tmpl->{'dns_master_skip'} ||
-		&error($text{'tmpl_ednsmaster2'});
-	}
+$in{'dns_master_mode'} != 2 ||
+   ($in{'dns_master'} =~ /^[a-z0-9\.\-\_\$\{\}]+$/i &&
+    $in{'dns_master'} =~ /\.|\{|\$/ && !&check_ipaddress($in{'dns_master'})) ||
+	&error($text{'tmpl_ednsmaster'});
 $tmpl->{'dns_master'} = $in{'dns_master_mode'} == 0 ? "none" :
 		        $in{'dns_master_mode'} == 1 ? undef : $in{'dns_master'};
 if (defined($in{'dns_indom'})) {

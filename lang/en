@@ -3786,7 +3786,6 @@ tmpl_owners_none=No owners
 tmpl_owners_sel=Selected below ..
 tmpl_dnsmaster=Primary DNS server hostname
 tmpl_ednsmaster=Missing or invalid primary DNS server hostname
-tmpl_ednsmaster2=Primary DNS server hostname cannot be resolved
 tmpl_dnsindom=Create A records for NS entries in server's domain?
 tmpl_ednsmx=Invalid mail server hostname for MX record
 tmpl_dnsmnames=Hostname
