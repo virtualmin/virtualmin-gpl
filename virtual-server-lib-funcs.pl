@@ -14116,6 +14116,7 @@ if (&can_domain_have_users($d) && &can_edit_users()) {
 		    'desc' => $text{'edit_usersdesc'},
 		    'cat' => 'objects',
 		    'icon' => 'group',
+		    'order' => 200,
 		    });
 	}
 
@@ -14136,6 +14137,7 @@ if (&database_feature($d) && &can_edit_databases()) {
 		    'desc' => $text{'edit_databasesdesc'},
 		    'cat' => 'objects',
 		    'icon' => 'database',
+		    'order' => 300,
 		  });
 	}
 
@@ -14146,6 +14148,7 @@ if (&can_domain_have_scripts($d) && &can_edit_scripts()) {
 		    'desc' => $text{'edit_scriptsdesc'},
 		    'cat' => 'objects',
 		    'icon' => 'page_code',
+		    'order' => 500,
 		  });
 	}
 
@@ -14529,6 +14532,7 @@ if ($d->{'dir'} && !$d->{'alias'} && &foreign_available("filemin")) {
 		    'desc' => $text{'edit_filemindesc'},
 		    'cat' => 'objects',
 		    'icon' => 'page_edit',
+		    'order' => 600,
 		  });
 	}
 
@@ -14543,6 +14547,7 @@ if (&foreign_available("xterm") &&
 		    'desc' => $text{'edit_terminaldesc'},
 		    'cat' => 'objects',
 		    'icon' => 'page_edit',
+		    'order' => 700,
 		  });
 	}
 &menu_link_pro_tips(\@rv, $d) if (!$virtualmin_pro);
@@ -14560,6 +14565,7 @@ return @rv;
 #  catname - Category human-readable name
 #  target - Frame to open in (right or _new), defaults to right
 #  icon - Unique code for this link
+#  order - Numeric priority for top-level objects links (optional)
 sub get_all_domain_links
 {
 my ($d) = @_;
@@ -14582,7 +14588,8 @@ push(@rv, { 'url' => $canconfig ? "$vm/edit_domain.cgi?dom=$d->{'id'}"
 				: "$vm/view_domain.cgi?dom=$d->{'id'}",
 	    'title' => $canconfig ? $edit_title : $view_title,
 	    'cat' => 'objects',
-	    'icon' => $canconfig ? 'edit' : 'view' });
+	    'icon' => $canconfig ? 'edit' : 'view',
+	    'order' => 100 });
 
 # Add link to list sub-servers
 if (!$d->{'parent'}) {
@@ -14650,7 +14657,38 @@ if (defined(&list_visible_custom_links)) {
 		}
 	}
 
+&order_domain_object_links(\@rv);
 return @rv;
+}
+
+# order_domain_object_links(&links)
+# Applies stable numeric ordering only to top-level virtual server shortcuts.
+sub order_domain_object_links
+{
+my ($links) = @_;
+my @indexes = grep { ($links->[$_]->{'cat'} || '') eq 'objects' }
+	0 .. $#$links;
+return if (@indexes < 2);
+
+# Sort object links by explicit priority while retaining stable default order.
+my @ordered = map {
+	my $link = $links->[$_];
+	{
+	'link' => $link,
+	'index' => $_,
+	'order' => defined($link->{'order'}) &&
+		$link->{'order'} =~ /^\d+$/ ? int($link->{'order'}) : 1000,
+	}
+	} @indexes;
+@ordered = sort {
+	$a->{'order'} <=> $b->{'order'} ||
+	$a->{'index'} <=> $b->{'index'}
+	} @ordered;
+
+# Reuse only object-category slots so all categorized links stay in place.
+for(my $i=0; $i<@indexes; $i++) {
+	$links->[$indexes[$i]] = $ordered[$i]->{'link'};
+	}
 }
 
 # domain_footer_link(&domain)

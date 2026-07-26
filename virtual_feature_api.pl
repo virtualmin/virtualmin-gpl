@@ -218,14 +218,20 @@ sub feature_limits_parse
 }
 
 # feature_links(&domain)
-# Returns an array of link objects for webmin modules for this feature
+# Returns an array of link objects for Webmin modules for this feature. A link
+# in the objects category may set a non-negative integer order, where lower
+# values come first and omitted values default to 1000. Other categories retain
+# their normal ordering. Core shortcuts use 100 for Edit Virtual Server, 200
+# for users, 300 for databases, 500 for web apps, 600 for File Manager and 700
+# for Terminal, leaving gaps for plugin links.
 sub feature_links
 {
 }
 
 # feature_always_links(&domain)
 # Returns an array of link objects for webmin modules, regardless of whether
-# this feature is enabled or not
+# this feature is enabled or not. Links use the same format and ordering rules
+# as feature_links.
 sub feature_always_links
 {
 }
