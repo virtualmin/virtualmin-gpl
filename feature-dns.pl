@@ -3672,6 +3672,7 @@ if ($in{"dns_mode"} != 1) {
 	foreach my $n (@ns) {
 		&check_ipaddress($n) && &error(&text('newdns_ensip', $n));
 		$n =~ /\$/ || &to_ipaddress($n) || &to_ip6address($n) ||
+		    $tmpl->{'dns_master_skip'} ||
 			&error(&text('newdns_enshost', $n));
 		}
 	$tmpl->{'dns_ns'} = join(" ", @ns);

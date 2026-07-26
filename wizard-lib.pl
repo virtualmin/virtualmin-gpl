@@ -447,6 +447,7 @@ if (!$in->{'prins_skip'}) {
 		}
 	}
 $tmpl->{'dns_master'} = $in->{'prins'};
+$tmpl->{'dns_master_skip'} = $in->{'prins_skip'};
 &save_template($tmpl);
 
 # Validate any secondary NSs
