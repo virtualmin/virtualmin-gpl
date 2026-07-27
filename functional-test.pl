@@ -2157,8 +2157,16 @@ foreach my $sname (&list_scripts(1)) {
 	my $tipfunc = $script->{'testinstallpath_func'};
 	my $tafunc = $script->{'testargs_func'};
 
-	foreach my $ver (@{$script->{'install_versions'}}) {
-		next if (@testversions && &indexof($ver, @testversions) < 0);
+	# Work out which versions to install
+	my @ivers;
+	if (!@testversions) {
+		@ivers = @{$script->{'install_versions'}};
+		}
+	else {
+		@ivers = @testversions;
+		}
+
+	foreach my $ver (@ivers) {
 		my $testable = &$tfunc($ver);
 		next if (!$testable);
 
@@ -2182,6 +2190,9 @@ foreach my $sname (&list_scripts(1)) {
 		my $path = defined(&$tpfunc) ? &$tpfunc($ver) :
 			   $ipath ? $ipath : "/";
 		my @args = defined(&$tafunc) ? &$tafunc($ver) : ();
+		if (&indexof($ver, @{$script->{'install_versions'}}) < 0) {
+			push(@args, [ 'unsupported' ]);
+			}
 		push(@$allscript_tests,
 			# Install it
 			{ 'command' => 'install-script.pl',
