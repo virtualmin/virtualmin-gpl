@@ -2177,7 +2177,7 @@ foreach my $sname (&list_scripts(1)) {
 			if (&indexof("mysql", @dbs) < 0 &&
 			    &indexof("postgres", @dbs) >= 0 &&
 			    !$done_postgres++) {
-				push($allscript_tests,
+				push(@$allscript_tests,
 				     { 'command' => 'enable-feature.pl',
 				       'args' => [ [ 'domain', $test_domain ],
 						   [ 'postgres' ],
