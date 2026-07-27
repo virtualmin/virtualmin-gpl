@@ -2150,7 +2150,8 @@ sub generate_self_signed_cert
 {
 my ($certfile, $keyfile, $size, $days, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames, $d, $ctype) = @_;
-$ctype ||= $config{'default_ctype'};
+my $tmpl = &get_template($d->{'template'});
+$ctype ||= $tmpl->{'ssl_cert_type'};
 &foreign_require("webmin");
 $size ||= $webmin::default_key_size;
 $days ||= 1825;

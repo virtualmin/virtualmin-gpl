@@ -9143,7 +9143,10 @@ if ($tmpl->{'web_acme'} && defined(&list_acme_providers)) {
 		       &list_acme_providers();
 	}
 $d->{'letsencrypt_id'} = $acme->{'id'} if ($acme);
-my @leargs = ($d, \@dnames, undef, undef, undef, undef, $acme,
+my $ctype = $tmpl->{'ssl_cert_type'} =~ /^ec/ &&
+	    &letsencrypt_supports_ec() ? "ecdsa" : "rsa";
+$d->{'letsencrypt_ctype'} = $ctype;
+my @leargs = ($d, \@dnames, undef, undef, undef, $ctype, $acme,
 	      $d->{'letsencrypt_subset'}, $newdom);
 my ($ok, $cert, $key, $chain) =
 	&request_domain_letsencrypt_cert(@leargs);
