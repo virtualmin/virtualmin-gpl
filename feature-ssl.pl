@@ -1,5 +1,4 @@
 
-
 sub init_ssl
 {
 $feature_depends{'ssl'} = [ 'web', 'dir' ];
@@ -4298,9 +4297,9 @@ if (defined(&list_acme_providers)) {
 	print &ui_table_row(
 		&hlink($text{'newweb_acme'}, "template_web_acme"),
 		&ui_select("web_acme", $tmpl->{'web_acme'},
-			   [ [ "", $text{'default'} ],
-			     map { [ $_->{'id'}, $_->{'desc'} ] }
-				 &list_acme_providers() ]));
+		   [ [ "", $text{'default'} ],
+		     map { [ $_->{'id'}, $_->{'desc'} || $_->{'issuer'} ] }
+			 &list_acme_providers() ]));
 	}
 
 # Request cert from provider at domain creation time?

@@ -616,9 +616,10 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 		# SSL certificate provider
 		if (defined(&list_acme_providers)) {
 			print &ui_table_row($text{'cert_acmes'},
-				&ui_select("acme", $d->{'letsencrypt_id'},
-					[ map { [ $_->{'id'}, $_->{'desc'} ] }
-					      @provs ]));
+			&ui_select("acme", $d->{'letsencrypt_id'},
+				[ map { [ $_->{'id'},
+					  $_->{'desc'} || $_->{'issuer'} ] }
+				      @provs ]));
 			}
 		else {
 			print &ui_table_row($text{'cert_acmes'},
