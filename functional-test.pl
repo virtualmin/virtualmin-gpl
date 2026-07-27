@@ -2134,7 +2134,6 @@ $allscript_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'mysql' ], [ 'dns' ],
-		      [ 'postgres' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -2147,6 +2146,7 @@ $allscript_tests = [
 	];
 
 # Test each script that we can
+my $done_postgres = 0;
 foreach my $sname (&list_scripts(1)) {
 	next if (@testscripts && &indexof($sname, @testscripts) < 0);
 	my $script = &get_script($sname);
@@ -2161,6 +2161,23 @@ foreach my $sname (&list_scripts(1)) {
 		next if (@testversions && &indexof($ver, @testversions) < 0);
 		my $testable = &$tfunc($ver);
 		next if (!$testable);
+
+		# Enable postgres if the script needs it
+		my $dbfunc = $script->{'dbs_func'};
+		if (defined(&$dbfunc)) {
+			my @dbs = &$dbfunc(\%test_domain, $ver);
+			if (&indexof("mysql", @dbs) < 0 &&
+			    &indexof("postgres", @dbs) >= 0 &&
+			    !$done_postgres++) {
+				push($allscript_tests,
+				     { 'command' => 'enable-feature.pl',
+				       'args' => [ [ 'domain', $test_domain ],
+						   [ 'postgres' ],
+						 ],
+				     });
+				}
+			}
+
 		my $ipath = defined(&$tipfunc) ? &$tipfunc($ver) : "/";
 		my $path = defined(&$tpfunc) ? &$tpfunc($ver) :
 			   $ipath ? $ipath : "/";
