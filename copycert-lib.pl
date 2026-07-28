@@ -609,6 +609,8 @@ my ($d) = @_;
 
 # Get the Postfix config and cert files
 &foreign_require("postfix");
+my $tlslevel = ($config{'postfix_tls_level'} || "may") eq "encrypt" ?
+			"encrypt" : "may";
 my $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
 my $kfile = &postfix::get_real_value("smtpd_tls_key_file");
 my $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
@@ -666,7 +668,7 @@ if ($cadata) {
 &postfix::set_current_value("smtpd_tls_key_file", $kfile);
 &postfix::set_current_value("smtpd_tls_CAfile", $cadata ? $cafile : undef);
 if (&compare_version_numbers($postfix::postfix_version, "2.3") >= 0) {
-	&postfix::set_current_value("smtpd_tls_security_level", "may");
+	&postfix::set_current_value("smtpd_tls_security_level", $tlslevel);
 	if (&compare_version_numbers($postfix::postfix_version, "2.11") >= 0) {
 		&postfix::set_current_value("smtp_tls_security_level", "dane");
 		&postfix::set_current_value("smtp_dns_support_level", "dnssec", 1);
@@ -681,7 +683,7 @@ if (&compare_version_numbers($postfix::postfix_version, "2.3") >= 0) {
 # Make sure SSL is enabled
 &$first_print($text{'copycert_penabling'});
 if (&compare_version_numbers($postfix::postfix_version, "2.3") >= 0) {
-	&postfix::set_current_value("smtpd_tls_security_level", "may");
+	&postfix::set_current_value("smtpd_tls_security_level", $tlslevel);
 	}
 else {
 	&postfix::set_current_value("smtpd_use_tls", "yes");

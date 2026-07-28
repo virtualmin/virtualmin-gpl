@@ -2935,6 +2935,8 @@ my $tmpl = &get_template($d->{'template'});
 return -1 if ($mail_system != 0);
 
 my $changed = 0;
+my $tlslevel = ($config{'postfix_tls_level'} || "may") eq "encrypt" ?
+			"encrypt" : "may";
 &foreign_require("postfix");
 if ($d->{'virt'}) {
 	# Setup per-IP cert in master.cf
@@ -2961,7 +2963,7 @@ if ($d->{'virt'}) {
 			   &domain_has_ssl_cert($d) ?
 				$d->{'ssl_key'} : $kfile ] );
 	push(@flags, [ "smtpd_tls_CAfile", $chain ]) if ($chain);
-	push(@flags, [ "smtpd_tls_security_level", "may" ]);
+	push(@flags, [ "smtpd_tls_security_level", $tlslevel ]);
 	push(@flags, [ "myhostname", $d->{'dom'} ]);
 
 	foreach my $pfx ('smtp', 'submission', 'smtps', 'submissions', '465') {

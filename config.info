@@ -120,6 +120,9 @@ trash_folder=Trash folder name for new mailboxes,10,*-Don't create any,trash-tra
 drafts_folder=Drafts folder name for new mailboxes,10,*-Don't create any,drafts-drafts,Drafts-Drafts,Other name
 sent_folder=Sent mail folder name for new mailboxes,10,*-Don't create any,sent-sent,Sent-Sent,Other name
 
+line4.6=Mail server options,11
+postfix_tls_level=TLS security level for Postfix services,1,may-Opportunistic TLS,encrypt-Mandatory TLS
+
 line4.7=Spam filtering options,11
 spam_delivery=Default delivery for spam,10,-Deliver normally,/dev/null-Delete,$HOME/mail/Junk-Junk mbox folder,$HOME/Maildir/.Junk/-Junk Maildir folder,Other file or email address
 clam_delivery=Default delivery for viruses,10,/dev/null-Delete,$HOME/mail/Virus-Virus mbox folder,$HOME/Maildir/.Virus/-Virus Maildir folder,Other file or email address
