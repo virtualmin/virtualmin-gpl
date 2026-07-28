@@ -349,7 +349,8 @@ if (&has_incremental_tar()) {
 		my @sopts;
 		foreach my $s (@fullscheds) {
 			my @dests = &get_scheduled_backup_dests($s);
-			push(@sopts, [ $s->{'id'}, &nice_backup_url($dests[0], 1, 0) ]);
+			my $nice = &nice_backup_url($dests[0], 1, 0);
+			push(@sopts, [ $s->{'id'}, &html_tags_to_text($nice) ]);
 			}
 		push(@iopts, [ 3, &text('backup_increment3',
 				&ui_select("incrementof", $sched->{'increment'}, \@sopts)) ]);
