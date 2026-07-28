@@ -18361,8 +18361,7 @@ return @available;
 
 # get_domain_webmin_avail(&domain)
 # Returns the Webmin module access settings for a top-level domain owner.
-# Older domains fall back to the template value until postinstall has copied
-# that value into the domain object.
+# A missing policy fails closed until postinstall initializes it.
 sub get_domain_webmin_avail
 {
 my ($d) = @_;
@@ -18373,9 +18372,7 @@ if ($d->{'parent'}) {
 	}
 return &normalize_webmin_avail($d->{'webmin_avail'})
 	if (defined($d->{'webmin_avail'}));
-my $tmpl = &get_template($d->{'template'});
-return $tmpl ? &get_template_webmin_avail($tmpl) :
-	       &normalize_webmin_avail("", 1);
+return &normalize_webmin_avail("", 1);
 }
 
 # init_domain_webmin_avail(&domain, [preserve-legacy-plugin-access])

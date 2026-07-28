@@ -170,8 +170,8 @@ is($default_template_saves, 1,
 
 my $legacy = { 'id' => 100, 'template' => 10 };
 is(&main::get_domain_webmin_avail($legacy),
-	'dns=1 proc=2 plugin=1',
-	'legacy domain falls back to its normalized effective template value');
+	'dns=0 proc=0 plugin=0',
+	'a domain without a migrated policy fails closed');
 
 ok(&main::init_domain_webmin_avail($legacy),
 	'initialization snapshots the template value');
