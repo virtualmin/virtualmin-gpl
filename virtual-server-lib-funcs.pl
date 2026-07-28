@@ -18260,30 +18260,13 @@ sub domain_owner_module_registry
 {
 &require_mysql();
 my $mytype = $mysql::mysql_version =~ /mariadb/i ? "MariaDB" : "MySQL";
-my %foreign_modules = (
+# Maps module codes from @rv to a different Webmin module name. Unlisted codes
+# use their own name, while undef means no installation check is needed.
+my %foreign_module_for = (
 	'dns' => 'bind8',
+	'mail' => undef,
 	'web' => 'apache',
-	'webalizer' => 'webalizer',
-	'mysql' => 'mysql',
 	'postgres' => 'postgresql',
-	'spam' => 'spam',
-	'filemin' => 'filemin',
-	'passwd' => 'passwd',
-	'proc' => 'proc',
-	'cron' => 'cron',
-	'at' => 'at',
-	'systemd' => 'systemd',
-	'telnet' => 'telnet',
-	'xterm' => 'xterm',
-	'updown' => 'updown',
-	'change-user' => 'change-user',
-	'htaccess-htpasswd' => 'htaccess-htpasswd',
-	'mailboxes' => 'mailboxes',
-	'custom' => 'custom',
-	'shell' => 'shell',
-	'webminlog' => 'webminlog',
-	'logviewer' => 'logviewer',
-	'phpini' => 'phpini',
 	);
 my @rv = (
         [ 'dns', 'BIND DNS Server' ],
@@ -18326,12 +18309,11 @@ foreach my $p (@plugins) {
 		foreach my $m (&plugin_call($p, "feature_modules")) {
 			my @m = @$m;
 			$m[4] = 1;	# Plugin modules were historically enabled by default
-			$foreign_modules{$m[0]} = $m[0];
 			push(@rv, \@m);
 			}
 		}
 	}
-return (\@rv, \%foreign_modules);
+return (\@rv, \%foreign_module_for);
 }
 
 # list_domain_owner_modules()
@@ -18340,11 +18322,12 @@ return (\@rv, \%foreign_modules);
 # depend on the calling user's own Webmin ACL.
 sub list_domain_owner_modules
 {
-my ($modules, $foreign_modules) = &domain_owner_module_registry();
+my ($modules, $foreign_module_for) = &domain_owner_module_registry();
 my @available;
 foreach my $m (@$modules) {
-	my $fmod = $foreign_modules->{$m->[0]};
-	if (!$fmod) {
+	my $fmod = exists($foreign_module_for->{$m->[0]}) ?
+		$foreign_module_for->{$m->[0]} : $m->[0];
+	if (!defined($fmod)) {
 		push(@available, $m);
 		next;
 		}
@@ -18358,11 +18341,12 @@ return @available;
 # user. This caller-specific list is only for rendering and parsing UI fields.
 sub list_available_domain_owner_modules
 {
-my ($modules, $foreign_modules) = &domain_owner_module_registry();
+my ($modules, $foreign_module_for) = &domain_owner_module_registry();
 my @available;
 foreach my $m (@$modules) {
-	my $fmod = $foreign_modules->{$m->[0]};
-	if (!$fmod) {
+	my $fmod = exists($foreign_module_for->{$m->[0]}) ?
+		$foreign_module_for->{$m->[0]} : $m->[0];
+	if (!defined($fmod)) {
 		push(@available, $m);
 		next;
 		}

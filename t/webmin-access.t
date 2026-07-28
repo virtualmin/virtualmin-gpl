@@ -58,6 +58,8 @@ ok(scalar(grep { $_ eq 'filemin' } @foreign_checks),
 	'File Manager availability is checked against the filemin module');
 ok(!scalar(grep { $_ eq 'file-manager' } @foreign_checks),
 	'unused file-manager alias is never checked');
+ok(scalar(grep { $_ eq 'plugin' } @foreign_checks),
+	'plugin modules default to an installation check using their own code');
 my @cli_modules = &$list_domain_owner_modules();
 ok(scalar(grep { $_->[0] eq 'proc' } @cli_modules) &&
    !scalar(grep { $_->[0] eq 'shell' } @cli_modules),
