@@ -3186,7 +3186,7 @@ sub update_ssl_postfix_service
 {
 my ($svc, $flags) = @_;
 foreach my $f (@$flags) {
-	if ($svc->{'command'} !~ s/-o\s+\Q$f->[0]\E=(\S+)/-o $f->[0]=$f->[1]/) {
+	if ($svc->{'command'} !~ s/-o\s+\Q$f->[0]\E=(\S+)/-o $f->[0]=$f->[1]/g) {
 		$svc->{'command'} .= " -o ".$f->[0]."=".$f->[1];
 		}
 	}
