@@ -13,6 +13,7 @@
 * Add support for domain owners to manage their own systemd user units
 * Add milter-greylist support for greylisting on RHEL 10 and derivatives
 * Add ability to configure the TLS security level for Postfix services managed by Virtualmin
+* Add a dedicated mail options section for related module configuration settings
 * Add TLSA records for Postfix SMTPS services
 * Add support for primary DNS zones and CLI flags to exclude named DNS records
 * Add ability to show disk usage on the virtual server summary page

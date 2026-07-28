@@ -481,7 +481,7 @@ else {
 
 # Postfix-specific options
 if ($mail_system != 0) {
-	push(@forbidden_keys, 'line4.6', 'postfix_tls_level');
+	push(@forbidden_keys, 'postfix_tls_level');
 	}
 
 # Remove forbidden from display
