@@ -10402,7 +10402,19 @@ if (!defined(getpwnam($rv[0]->{'web_user'})) &&
 	# Apache user is invalid, due to bad Virtualmin install script. Fix it
 	$rv[0]->{'web_user'} = &get_apache_user();
 	}
-$rv[0]->{'avail'} = &get_default_webmin_avail();
+if (defined($config{'default_webmin_avail'})) {
+	$rv[0]->{'avail'} = $config{'default_webmin_avail'};
+	}
+else {
+	# Before the owner policy had its own setting, these values were shared
+	# with the Pro reseller module settings.
+	my @avail;
+	my ($modules) = &domain_owner_module_registry();
+	foreach my $m (@$modules) {
+		push(@avail, $m->[0].'='.$config{'avail_'.$m->[0]});
+		}
+	$rv[0]->{'avail'} = join(' ', @avail);
+	}
 push(@rv, { 'id' => 1,
 	    'name' => $text{'newtmpl_name1'},
 	    'standard' => 1,
@@ -18412,30 +18424,15 @@ if (!$tmpl->{'default'} && (!defined($avail) || $avail eq '')) {
 return &normalize_webmin_avail($avail);
 }
 
-# get_default_webmin_avail()
-# Returns the default template's domain-owner module policy. Before this policy
-# had its own config key, the values were shared with Pro reseller access.
-sub get_default_webmin_avail
-{
-return $config{'default_webmin_avail'}
-	if (defined($config{'default_webmin_avail'}));
-my @avail;
-my ($modules) = &domain_owner_module_registry();
-foreach my $m (@$modules) {
-	push(@avail, $m->[0].'='.$config{'avail_'.$m->[0]});
-	}
-return join(' ', @avail);
-}
-
 # migrate_default_webmin_avail()
 # Creates the separate default domain-owner policy while leaving the legacy
 # avail_* settings used by Pro resellers unchanged. Returns 1 if changed.
 sub migrate_default_webmin_avail
 {
-my $avail = &legacy_webmin_avail(&get_default_webmin_avail());
+my $tmpl = &get_template(0);
+my $avail = &legacy_webmin_avail($tmpl->{'avail'});
 return 0 if (defined($config{'default_webmin_avail'}) &&
 	     $config{'default_webmin_avail'} eq $avail);
-my $tmpl = &get_template(0);
 $tmpl->{'avail'} = $avail;
 &save_template($tmpl);
 return 1;
