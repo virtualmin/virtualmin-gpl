@@ -833,7 +833,7 @@ if (!$alias) {
 			}
 		else {
 			# Make sure the IP isn't assigned yet
-			$clash && &usage(&text('setup_evirt6clash'));
+			$clash && &usage(&text('setup_evirt6clash', $ip6));
 			}
 		}
 	}

@@ -719,7 +719,7 @@ if (!$alias) {
 			}
 		else {
 			# Make sure the IP isn't assigned yet
-			$clash && return $text{'setup_evirt6clash'};
+			$clash && return &text('setup_evirt6clash', $ip6);
 			}
 		}
 	}

@@ -163,7 +163,7 @@ elsif ($in{'mode6'} == 3) {
 	$clash = &check_virt6_clash($ip6);
 	if (!$virt6already) {
 		# Make sure the IPv6 address isn't assigned yet
-		$clash && &error(&text('setup_evirt6clash'));
+		$clash && &error(&text('setup_evirt6clash', $ip6));
 		}
 	elsif ($virt6already) {
 		# Make sure the IP is assigned already, but
