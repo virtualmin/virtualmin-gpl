@@ -697,10 +697,12 @@ if ($plan) {
 	}
 
 # Update the IP in alias domains too
-if ($dom->{'ip'} ne $old->{'ip'}) {
+if ($dom->{'ip'} ne $old->{'ip'} ||
+    $dom->{'ip6'} ne $old->{'ip6'}) {
 	@aliases = grep { $_->{'alias'} eq $dom->{'id'} } @doms;
 	foreach my $adom (@aliases) {
 		$adom->{'ip'} = $dom->{'ip'};
+		$adom->{'ip6'} = $dom->{'ip6'};
 		}
 	}
 

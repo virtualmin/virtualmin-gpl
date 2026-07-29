@@ -371,9 +371,7 @@ foreach $sd (@doms) {
 	# Alias domain IP follows target
 	$sd->{'ip'} = $d->{'ip'};
 	$sd->{'defip'} = $sd->{'ip'} eq &get_default_ip();
-	if ($d->{'virt6'} && &supports_ip6()) {
-		$sd->{'ip6'} = $d->{'ip6'};
-		}
+	$sd->{'ip6'} = $d->{'ip6'};
 	if (&domain_has_website($sd)) {
 		$sd->{'web_port'} = $in{'port'};
 		$sd->{'web_sslport'} = $in{'sslport'};
