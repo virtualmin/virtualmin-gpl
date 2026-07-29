@@ -479,6 +479,11 @@ else {
 	    );
 	}
 
+# Postfix-specific options
+if ($mail_system != 0) {
+	push(@forbidden_keys, 'postfix_tls_level');
+	}
+
 # Remove forbidden from display
 foreach my $fkey (@forbidden_keys) {
 	delete($modconf_info->{$fkey});

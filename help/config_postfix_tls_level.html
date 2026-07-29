@@ -1,0 +1,12 @@
+<header>TLS security level for Postfix services</header>
+
+<p>
+Controls TLS requirements for incoming connections to Postfix services managed
+by Virtualmin. <strong>Opportunistic TLS</strong> sets
+<tt>smtpd_tls_security_level</tt> to <tt>may</tt>, offering encryption when
+supported while allowing unencrypted connections. <strong>Mandatory TLS</strong>
+sets the same option to <tt>encrypt</tt> and rejects connections that cannot use
+TLS, which may prevent delivery from mail servers without TLS support.
+</p>
+
+<footer>
