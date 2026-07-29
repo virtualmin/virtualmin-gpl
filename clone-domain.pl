@@ -136,15 +136,16 @@ $ok = &clone_virtual_server($d, $newdomain, $newuser, $newpass,
 # Refresh Webmin user to apply any new permisisons, such as DB ownership
 &refresh_webmin_user($d);
 
-&run_post_actions_silently();
 if ($ok) {
 	&$second_print($text{'setup_done'});
-	&virtualmin_api_log(\@OLDARGV, $d);
 	}
 else {
 	&$second_print($text{'clone_failed'});
 	exit(1);
 	}
+
+&run_post_actions();
+&virtualmin_api_log(\@OLDARGV, $d);
 
 sub usage
 {
