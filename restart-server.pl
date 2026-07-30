@@ -10,7 +10,8 @@ C<--server> flag, followed by a feature name like C<web> or C<dns>.
 
 For server types that have multiple versions such as FPM, you can select
 the version to restart with the C<--version> flag. Or use C<--domain> to find
-automatically select the correct version for the given domain.
+automatically select the correct version for the given domain. If no version
+is specified, all installed FPM servers will be restarted.
 
 By default the server will be completely stopped and re-started, but for some
 server types you can request a configuration reload instead with the 
@@ -102,8 +103,7 @@ foreach my $f (&list_startstop_plugins()) {
 $found || &usage("Server $sname does not exist. Valid servers are : ".join(" ", @slist));
 
 # Get the FPM version from the domain
-if ($sname eq "fpm" && !$ver) {
-	$dname || &usage("When restarting the FPM server, either the --version or --domain flag must be given");
+if ($sname eq "fpm" && $dname) {
 	$d = &get_domain($dname) || &get_domain_by("dom", $dname);
 	$d || &usage("Virtual server $dname does not exist");
 	my $conf = &get_php_fpm_config($d);

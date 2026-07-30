@@ -2472,11 +2472,24 @@ return &apache::restart_apache();
 sub start_service_fpm
 {
 my ($ver) = @_;
-my ($fpm) = grep { $_->{'version'} eq $ver } &list_php_fpm_configs();
-return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
-&foreign_require("init");
-my ($ok, $err) = &init::start_action($fpm->{'init'});
-return $ok ? undef : $err;
+my @confs = &list_php_fpm_configs();
+if ($ver) {
+	# Start specific version
+	my ($fpm) = grep { $_->{'version'} eq $ver } @confs;
+	return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
+	&foreign_require("init");
+	my ($ok, $err) = &init::start_action($fpm->{'init'});
+	return $ok ? undef : $err;
+	}
+else {
+	# Start all the versions
+	my @errs;
+	foreach my $c (grep { !$_->{'err'} } @confs) {
+		my $err = &start_service_fpm($c->{'version'});
+		push(@errs, $err) if ($err);
+		}
+	return @errs ? join(" ", @errs) : undef;
+	}
 }
 
 # stops_service_fpm(version)
@@ -2484,26 +2497,52 @@ return $ok ? undef : $err;
 sub stop_service_fpm
 {
 my ($ver) = @_;
-my ($fpm) = grep { $_->{'version'} eq $ver } &list_php_fpm_configs();
-return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
-&foreign_require("init");
-my ($ok, $err) = &init::stop_action($fpm->{'init'});
-return $ok ? undef : $err;
+my @confs = &list_php_fpm_configs();
+if ($ver) {
+	# Stop specific version
+	my ($fpm) = grep { $_->{'version'} eq $ver } @confs;
+	return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
+	&foreign_require("init");
+	my ($ok, $err) = &init::stop_action($fpm->{'init'});
+	return $ok ? undef : $err;
+	}
+else {
+	# Stop all the versions
+	my @errs;
+	foreach my $c (grep { !$_->{'err'} } @confs) {
+		my $err = &stop_service_fpm($c->{'version'});
+		push(@errs, $err) if ($err);
+		}
+	return @errs ? join(" ", @errs) : undef;
+	}
 }
 
-# reload_service_fpm(version)
+# reload_service_fpm([version])
 # Attempts to reload the FPM server for some version
 sub reload_service_fpm
 {
 my ($ver) = @_;
-my ($fpm) = grep { $_->{'version'} eq $ver } &list_php_fpm_configs();
-return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
-&foreign_require("init");
-my ($ok, $err) = &init::reload_action($fpm->{'init'});
-if (!$ok && $err =~ /Not\s+implemented/i) {
-	($ok, $err) = &init::restart_action($fpm->{'init'});
+my @confs = &list_php_fpm_configs();
+if ($ver) {
+	# Restart one specific version
+	my ($fpm) = grep { $_->{'version'} eq $ver } @confs;
+	return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
+	&foreign_require("init");
+	my ($ok, $err) = &init::reload_action($fpm->{'init'});
+	if (!$ok && $err =~ /Not\s+implemented/i) {
+		($ok, $err) = &init::restart_action($fpm->{'init'});
+		}
+	return $ok ? undef : $err;
 	}
-return $ok ? undef : $err;
+else {
+	# Restart all the versions
+	my @errs;
+	foreach my $c (grep { !$_->{'err'} } @confs) {
+		my $err = &reload_service_fpm($c->{'version'});
+		push(@errs, $err) if ($err);
+		}
+	return @errs ? join(" ", @errs) : undef;
+	}
 }
 
 # show_template_web(&tmpl)
