@@ -417,6 +417,68 @@ END {
 return 1;
 }
 
+# Core command-line API scripts audited for non-master remote use, and the
+# capability required for each one.
+my %user_remote_api_commands = (
+	"list-databases" => "can_edit_databases",
+	"list-proxies" => "can_edit_forward",
+	"list-redirects" => "can_edit_redirect",
+	"modify-user" => "can_edit_users",
+	);
+
+# get_user_remote_api_command(program-name)
+# Returns the capability function for an API command allowed for non-master users,
+# or undef if the command has not been allowed.
+sub get_user_remote_api_command
+{
+my ($program) = @_;
+$program = &normalize_api_command_name($program);
+$program =~ s/\.pl$//;
+return $user_remote_api_commands{$program};
+}
+
+# remote_api_can_domain(&domain, program-name)
+# Returns 1 if the current user can run an allowed API command for a domain.
+sub remote_api_can_domain
+{
+my ($d, $program) = @_;
+return 1 if (&master_admin());
+my $capfunc = &get_user_remote_api_command($program);
+return 0 if (!$capfunc || !$d || !&can_edit_domain($d));
+return &$capfunc($d);
+}
+
+# require_remote_api_domain(&domain, requested-domain, [program-name])
+# Exits with a non-leaking error if the current user cannot run the calling
+# API command for the requested domain.
+sub require_remote_api_domain
+{
+my ($d, $requested, $program) = @_;
+# Default to the API script that called this function
+if (!$program) {
+	(undef, $program) = caller;
+	}
+return if (&remote_api_can_domain($d, $program));
+# Only distinguish capability failures for domains the caller can see
+my $msg = $d && &can_edit_domain($d) ?
+	&text('remote_ecannotcap', $requested) :
+	&text('remote_ecannotdom', $requested);
+print $msg,"\n";
+exit(1);
+}
+
+# get_remote_api_domain(field, value, [requested-domain])
+# Looks up a domain and enforces remote API access for the calling command.
+sub get_remote_api_domain
+{
+my ($field, $value, $requested) = @_;
+my (undef, $program) = caller;
+my $d = &get_domain_by($field, $value);
+&require_remote_api_domain(
+	$d, defined($requested) ? $requested : $value, $program);
+return $d;
+}
+
 # can_remote(program-name)
 # Returns 1 if the current user can execute remote commands
 sub can_remote
@@ -436,6 +498,8 @@ if ($program eq "configure-script" ||
     $program eq "configure-all-scripts") {
 	return 1;
 	}
+# Allow audited core commands
+return 1 if (&get_user_remote_api_command($program));
 # Let plugins declare their own command-line API scripts that are safe to run
 # over the remote API as a non-master (domain owner or reseller) user. Each such
 # script must enforce its own per-domain access checks.
