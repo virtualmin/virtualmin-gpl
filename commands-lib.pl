@@ -454,10 +454,8 @@ return &$capfunc($d);
 sub require_remote_api_domain
 {
 my ($d, $requested, $program) = @_;
-# Default to the API script that called this function
-if (!$program) {
-	(undef, $program) = caller;
-	}
+# Default to the API script set by the dispatcher or standalone command
+$program ||= $0;
 return if (&remote_api_can_domain($d, $program));
 # Only distinguish capability failures for domains the caller can see
 my $msg = $d && &can_edit_domain($d) ?
@@ -472,10 +470,9 @@ exit(1);
 sub get_remote_api_domain
 {
 my ($field, $value, $requested) = @_;
-my (undef, $program) = caller;
 my $d = &get_domain_by($field, $value);
 &require_remote_api_domain(
-	$d, defined($requested) ? $requested : $value, $program);
+	$d, defined($requested) ? $requested : $value);
 return $d;
 }
 

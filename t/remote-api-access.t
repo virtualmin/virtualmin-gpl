@@ -73,12 +73,13 @@ die "Failed to load $lib: $!" if (!defined($loaded));
 		{ 'allowed' => 1 }, 'modify-user.pl'),
 		'owned domain is denied without user management capability');
 
+	local $0 = File::Spec->catfile($root, 'list-databases.pl');
 	my ($status, $out) = &run_domain_guard(
-		{ 'allowed' => 1 }, 'example.test', 'list-databases.pl');
+		{ 'allowed' => 1 }, 'example.test', undef);
 	ok($status, 'missing capability exits with a failure');
 	is($out,
 		"You are not allowed to run this command for virtual server example.test\n",
-		'missing capability returns a clear permission error');
+		'current API program is taken from $0');
 
 	($status, $out) = &run_domain_guard(
 		{ 'allowed' => 0 }, 'foreign.test', 'list-databases.pl');
@@ -108,8 +109,8 @@ die "Failed to load $lib: $!" if (!defined($loaded));
 		'remote domain helper returns the resolved domain');
 	is($guard[0], $domain, 'resolved domain is authorized');
 	is($guard[1], 'example.test', 'requested domain is preserved');
-	like($guard[2], qr/remote-api-access\.t$/,
-		'calling command is passed to the authorization guard');
+	is(scalar(@guard), 2,
+		'remote domain helper leaves program detection to the guard');
 	}
 
 foreach my $command (
