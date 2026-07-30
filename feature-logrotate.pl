@@ -36,7 +36,8 @@ if (@logs) {
 	my $logdir = $logs[0];
 	$logdir =~ s/\/[^\/]+$//;
 	my $already;
-	if ($tmpl->{'logrotate_shared'} eq 'yes') {
+	my $shared = $tmpl->{'logrotate_shared'} eq 'yes' ? 1 : 0;
+	if ($shared) {
 		# First look for any block in a virtualmin.conf file
 		foreach my $c (@{$parent->{'members'}}) {
 			if ($c->{'file'} =~ /\/virtualmin.conf$/) {
@@ -45,7 +46,7 @@ if (@logs) {
 				}
 			}
 		}
-	if ($tmpl->{'logrotate_shared'} eq 'yes' && !$already) {
+	if ($shared && !$already) {
 		# Fall back to looking for any block that rotates Virtualmin logs
 		LOGROTATE: foreach my $c (@{$parent->{'members'}}) {
 			foreach my $n (@{$c->{'name'}}) {
@@ -70,7 +71,8 @@ if (@logs) {
 					@addlogs = grep { $_ ne $n } @addlogs;
 					}
 				else {
-					# A block for just this domain exists!
+					# A block for just this domain
+					# already exists!
 					&error(&text('setup_clashlogrotate',
 						     "<tt>$n</tt>"));
 					}
@@ -81,14 +83,14 @@ if (@logs) {
 	if (!$already) {
 		# Add the new section
 		my $file = &logrotate::get_add_file(
-			$tmpl->{'logrotate_shared'} eq 'yes' ?
-			    'virtualmin' : $d->{'dom'});
+			$shared ? 'virtualmin' : $d->{'dom'});
 		my $lconf = { 'file' => $file,
 			      'name' => \@logs };
 		my $newfile = !-r $lconf->{'file'};
 		if ($tmpl->{'logrotate'} eq 'none') {
 			# Use automatic configuration
-			my $script = &get_postrotate_script($d);
+			my $script = &get_postrotate_script(
+					$shared ? undef : $d);
 			$lconf->{'members'} = [
 				{ 'name' => 'rotate',
 				  'value' => $config{'logrotate_num'} || 5 },
@@ -627,7 +629,7 @@ $main::got_lock_logrotate-- if ($main::got_lock_logrotate);
 &release_lock_anything();
 }
 
-# get_postrotate_script(&domain)
+# get_postrotate_script([&domain])
 # Returns the script (as a string) for running after rotation
 sub get_postrotate_script
 {
@@ -635,13 +637,25 @@ my ($d) = @_;
 my $p = &domain_has_website($d);
 return undef if (!$p);
 my $script;
-my $mode = &get_domain_php_mode($d);
-my $fpmcmd = undef;
-if ($mode eq "fpm" && $d->{'php_error_log'}) {
-	# Also needs to restart the FPM server
-	my $conf = &get_php_fpm_config($d);
-	if ($conf && $conf->{'init'}) {
-		$fpmcmd = "virtualmin restart-server --server fpm --domain $d->{'id'} ".
+my $fpmcmd;
+if ($d) {
+	# Command is for just this domain, so check if it
+	# specifically is using FPM
+	my $mode = &get_domain_php_mode($d);
+	if ($mode eq "fpm" && $d->{'php_error_log'}) {
+		# Also needs to restart the FPM server
+		my $conf = &get_php_fpm_config($d);
+		if ($conf && $conf->{'init'}) {
+			$fpmcmd = "virtualmin restart-server --server fpm --domain $d->{'id'} ".
+				  "--quiet --reload";
+			}
+		}
+	}
+else {
+	# Command is for all domains, so check if FPM is
+	# a supported PHP mode
+	if (&indexof("fpm", &supported_php_modes()) >= 0) {
+		$fpmcmd = "virtualmin restart-server --server fpm ".
 			  "--quiet --reload";
 		}
 	}
