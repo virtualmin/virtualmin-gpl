@@ -9688,6 +9688,86 @@ if (!&supports_ip6()) {
 	$noip4_tests = [ { 'command' => 'echo IPv6 is not supported ; false' } ];
 	}
 
+# Tests for Nginx wildcard listen directives
+if ($web eq 'virtualmin-nginx' &&
+    $ssl eq 'virtualmin-nginx-ssl' &&
+    &supports_ip6()) {
+	my $nginx_config =
+		($ENV{'WEBMIN_CONFIG'} || "/etc/webmin").
+		"/virtualmin-nginx/config";
+	my $nginx_config_backup =
+		"/tmp/functional-test-virtualmin-nginx-config";
+	$nginxlisten_tests = [
+		# Use wildcard listeners for this test
+		{ 'command' => 'cp -p '.$nginx_config.' '.
+			       $nginx_config_backup,
+		},
+		{ 'command' => "perl -pi -e ".
+			       "'s/^listen_mode=.*/listen_mode=0/' ".
+			       $nginx_config,
+		},
+		{ 'command' => 'grep "^listen_mode=0$" '.$nginx_config,
+		},
+
+		# Create an IPv6-only domain with HTTP and HTTPS listeners
+		{ 'command' => 'create-domain.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'desc', 'Test Nginx wildcard listeners' ],
+			      [ 'pass', 'smeg' ],
+			      [ 'dir' ], [ 'unix' ], [ $web ], [ $ssl ],
+			      [ 'default-ip6' ], [ 'no-ip' ],
+			      [ 'content' => 'Test Nginx wildcard page' ],
+			      @create_args, ],
+		},
+
+		# A port-only listener must remain a valid port-only listener
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'port', 8888 ] ],
+		},
+
+		# Adding IPv4 in wildcard mode must not add an IP-specific listener
+		{ 'command' => 'modify-domain.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'default-ip' ] ],
+		},
+
+		# Check the generated listeners
+		{ 'command' => 'nginx -T',
+		  'grep' => [ 'listen\s+8888;',
+			      'listen\s+\[::\]:8888;' ],
+		  'antigrep' => [
+			'listen\s+80:8888;',
+			'listen\s+'.quotemeta($test_ip_address).':8888;',
+			],
+		},
+
+		# Check that the website is actually reachable
+		{ 'command' => $wget_command.
+			       '--header="Host: '.$test_domain.'" '.
+			       'http://127.0.0.1:8888',
+		  'grep' => 'Test Nginx wildcard page',
+		},
+
+		# Cleanup the domain and restore the original module config
+		{ 'command' => 'delete-domain.pl',
+		  'args' => [ [ 'domain', $test_domain ] ],
+		  'cleanup' => 1,
+		  'ignorefail' => 1,
+		},
+		{ 'command' => 'cp -p '.$nginx_config_backup.' '.
+			       $nginx_config.' && rm -f '.
+			       $nginx_config_backup,
+		  'cleanup' => 1,
+		},
+		];
+	}
+else {
+	$nginxlisten_tests = [
+		{ 'command' => 'echo Nginx wildcard listener tests skipped' },
+		];
+	}
+
 # Tests for renaming a virtual server via the web UI
 $webrename_tests = [
 	# Create a domain that will get renamed
@@ -13895,6 +13975,7 @@ $alltests = { '_config' => $_config_tests,
 	      'plugin' => $plugin_tests,
 	      'ip6' => $ip6_tests,
 	      'noip4' => $noip4_tests,
+	      'nginxlisten' => $nginxlisten_tests,
 	      'webrename' => $webrename_tests,
 	      'rename' => $rename_tests,
 	      'bw' => $bw_tests,
