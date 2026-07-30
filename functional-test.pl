@@ -7197,7 +7197,7 @@ $owner_tests = [
 	# changing the server template
 	{ 'command' => 'modify-limits.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'no-webmin-module', 'proc' ] ],
+		      [ 'remove-webmin-module', 'proc' ] ],
 	},
 	{ 'command' => $owner_webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/proc/",
@@ -7205,7 +7205,7 @@ $owner_tests = [
 	},
 	{ 'command' => 'modify-limits.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'webmin-module', 'proc=2' ] ],
+		      [ 'add-webmin-module', 'proc=2' ] ],
 	},
 	{ 'command' => $owner_webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/proc/",

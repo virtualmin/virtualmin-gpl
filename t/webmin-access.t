@@ -40,8 +40,7 @@ local *main::foreign_check = sub {
 local @main::plugins = ('sample-plugin');
 my @modules = &$list_available_domain_owner_modules();
 my ($plugin) = grep { $_->[0] eq 'plugin' } @modules;
-is($plugin->[4], 1,
-	'plugin-provided modules carry their legacy enabled default in the registry');
+ok($plugin, 'plugin-provided modules are included in the registry');
 ok(!scalar(grep { $_->[0] eq 'custom' || $_->[0] eq 'shell' } @modules),
 	'unavailable Webmin modules are omitted from the registry');
 ok(scalar(grep { $_->[0] eq 'mail' } @modules),
@@ -75,10 +74,9 @@ is(scalar(@policy_modules), scalar(@cli_modules),
 	'policy registry matches the installed module registry');
 }
 
-# The one-shot migration must never alter valid enumerated access levels, and
-# must be stable when applied more than once. This is checked against the real
-# registry, as the synthetic registry used below cannot catch a regression in
-# the real module option lists.
+# Normalization must not alter valid enumerated access levels. This is checked
+# against the real registry, as the synthetic registry used below cannot catch
+# a regression in the real module option lists.
 {
 no warnings 'redefine';
 local *main::require_mysql = sub { $mysql::mysql_version = 'MariaDB 10'; };
@@ -95,14 +93,8 @@ my %normalized = &main::webmin_avail_map(
 is($normalized{'passwd'}.' '.$normalized{'proc'}.' '.$normalized{'updown'},
 	'2 2 2',
 	'enumerated access levels survive normalization with the real registry');
-my $migrated = &main::legacy_webmin_avail($stored);
-my %legacy = &main::webmin_avail_map($migrated);
-is($legacy{'passwd'}.' '.$legacy{'proc'}.' '.$legacy{'updown'}, '2 2 2',
-	'enumerated access levels survive migration with the real registry');
-is($legacy{'plugin'}, 1,
-	'plugin zeroes are reset to the legacy enabled access on migration');
-is(&main::legacy_webmin_avail($migrated), $migrated,
-	'migration is stable when applied to an already-migrated policy');
+is($normalized{'plugin'}, 0,
+	'disabled plugin access remains disabled during normalization');
 }
 
 my %templates = (
@@ -123,7 +115,7 @@ my $test_modules = sub {
 	return (
 		[ 'dns', 'DNS' ],
 		[ 'proc', 'Processes', [ [ 2, 'Own' ], [ 1, 'All' ], [ 0, 'No' ] ] ],
-		[ 'plugin', 'Plugin (managed scope)', undef, undef, 1 ],
+		[ 'plugin', 'Plugin (managed scope)' ],
 		);
 	};
 *main::list_domain_owner_modules = $test_modules;
@@ -134,42 +126,6 @@ my $test_modules = sub {
 	};
 }
 
-{
-local %main::config = (
-	'avail_dns' => 0,
-	'avail_proc' => 2,
-	'avail_plugin' => 0,
-	'avail_shell' => 1,
-	);
-my $default_template = {
-	'id' => 0,
-	'avail' => 'dns=0 proc=2 plugin=0 shell=1',
-	};
-my $default_template_saves = 0;
-no warnings 'redefine';
-local *main::get_template = sub {
-	return $default_template;
-	};
-local *main::save_template = sub {
-	my ($tmpl) = @_;
-	$main::config{'default_webmin_avail'} = $tmpl->{'avail'};
-	$default_template_saves++;
-	};
-ok(&main::migrate_default_webmin_avail(),
-	'default owner policy is migrated to its separate config key');
-is($default_template_saves, 1,
-	'default owner policy is saved through the template API');
-is($main::config{'default_webmin_avail'},
-	'dns=0 proc=2 plugin=1 shell=1',
-	'default owner policy preserves legacy effective plugin access');
-is($main::config{'avail_plugin'}, 0,
-	'migration does not widen the plugin access used by Pro resellers');
-ok(!&main::migrate_default_webmin_avail(),
-	'default owner policy migration is idempotent');
-is($default_template_saves, 1,
-	'idempotent migration does not save the default template again');
-}
-
 my $legacy = { 'id' => 100, 'template' => 10 };
 is(&main::get_domain_webmin_avail($legacy),
 	'dns=0 proc=0 plugin=0',
@@ -177,29 +133,32 @@ is(&main::get_domain_webmin_avail($legacy),
 
 ok(&main::init_domain_webmin_avail($legacy),
 	'initialization snapshots the template value');
-is($legacy->{'webmin_avail'}, 'dns=1 proc=2 plugin=1',
-	'legacy truthy plugin value is normalized without changing access');
+is($legacy->{'webmin_avail'}, 'dns=1 proc=2 plugin=0',
+	'invalid plugin access fails closed during initialization');
 
 $templates{10}->{'avail'} = 'dns=0 proc=0 plugin=0';
-is(&main::get_domain_webmin_avail($legacy), 'dns=1 proc=2 plugin=1',
+is(&main::get_domain_webmin_avail($legacy), 'dns=1 proc=2 plugin=0',
 	'later template changes do not alter domain access');
 ok(!&main::init_domain_webmin_avail($legacy),
 	'existing per-domain access is never overwritten');
+my $migrated_disabled = { 'id' => 109, 'template' => 10 };
+ok(&main::init_domain_webmin_avail($migrated_disabled),
+	'existing domain initialization copies disabled plugin access');
+is($migrated_disabled->{'webmin_avail'}, 'dns=0 proc=0 plugin=0',
+	'plugin access disabled in the template remains disabled');
 
-my $partly_migrated = {
+my $existing_policy = {
 	'id' => 106, 'template' => 10,
 	'webmin_avail' => 'dns=1 proc=2 plugin=0',
 	};
-ok(&main::init_domain_webmin_avail($partly_migrated, 1),
-	'migration corrects a plugin zero left by an interrupted earlier run');
-is($partly_migrated->{'webmin_avail'}, 'dns=1 proc=2 plugin=1',
-	'migration preserves the plugin access that the old runtime granted');
-ok(!&main::init_domain_webmin_avail($partly_migrated, 1),
-	'legacy plugin access migration is idempotent');
+ok(!&main::init_domain_webmin_avail($existing_policy),
+	'initialization does not overwrite an existing per-domain policy');
+is($existing_policy->{'webmin_avail'}, 'dns=1 proc=2 plugin=0',
+	'existing disabled plugin access remains unchanged');
 
 $domains{100} = $legacy;
 my $child = { 'id' => 101, 'parent' => 100, 'template' => 10 };
-is(&main::get_domain_webmin_avail($child), 'dns=1 proc=2 plugin=1',
+is(&main::get_domain_webmin_avail($child), 'dns=1 proc=2 plugin=0',
 	'sub-server uses its top-level owner policy');
 ok(!&main::init_domain_webmin_avail($child),
 	'sub-servers do not receive an independent owner policy');
@@ -297,10 +256,6 @@ is($serialized, 'dns=0 proc=1 plugin=1', 'module settings serialize stably');
 my %mapped = &main::webmin_avail_map($serialized);
 ok(exists($mapped{'dns'}) && $mapped{'dns'} eq '0',
 	'disabled module entries remain explicit for ACL enforcement');
-ok(!&main::webmin_avail_enabled(\%mapped, 'dns', 1),
-	'explicitly disabled plugin module access overrides the legacy default');
-ok(&main::webmin_avail_enabled(\%mapped, 'unregistered-plugin', 1),
-	'unregistered plugin modules retain the legacy allow-by-default behavior');
 
 ($serialized, $bad) = &main::make_webmin_avail(
 	{ 'dns' => 2, 'proc' => 1, 'plugin' => 1 });
@@ -314,8 +269,8 @@ is($bad, 'proc', 'invalid enumerated module is identified');
 
 is(&main::normalize_webmin_avail(
 	'dns=1 proc=invalid plugin=virtualmin-nginx'),
-	'dns=1 proc=0 plugin=1',
-	'legacy values normalize safely and preserve truthy binary access');
+	'dns=1 proc=0 plugin=0',
+	'invalid module access values fail closed');
 
 is(&main::normalize_webmin_avail(
 	'dns=1 proc=2 plugin=0 unavailable-z=1 unavailable-a=custom=value'),
@@ -323,22 +278,19 @@ is(&main::normalize_webmin_avail(
 	'normalization preserves unavailable module settings in stable order');
 
 is(&main::normalize_webmin_avail('dns=1 proc=2'),
-	'dns=1 proc=2 plugin=1',
-	'a newly registered plugin module retains its legacy enabled default');
-is(&main::normalize_webmin_avail('', 1),
+	'dns=1 proc=2 plugin=0',
+	'a newly registered plugin module is disabled until explicitly granted');
+is(&main::normalize_webmin_avail(''),
 	'dns=0 proc=0 plugin=0',
-	'module defaults can be suppressed when no owner policy can be resolved');
-is(&main::legacy_webmin_avail('dns=1 proc=2 plugin=0'),
-	'dns=1 proc=2 plugin=1',
-	'legacy migration ignores plugin zeroes that the old runtime never enforced');
+	'missing module settings fail closed');
 
 my $incomplete = {
 	'id' => 103, 'template' => 10,
 	'webmin_avail' => 'dns=1 proc=invalid',
 	};
 is(&main::get_domain_webmin_avail($incomplete),
-	'dns=1 proc=0 plugin=1',
-	'invalid core access fails closed while new plugins remain compatible');
+	'dns=1 proc=0 plugin=0',
+	'invalid and missing access settings fail closed');
 
 {
 no warnings 'redefine';

@@ -345,9 +345,7 @@ if ($onlydoms) {
 	@doms = grep { $onlydoms{$_->{'id'}} } @doms;
 	}
 
-# Module access levels for this user. Keep explicit zero values so plugin
-# modules can distinguish revoked access from modules they do not expose as a
-# configurable choice.
+# Module access levels for this user
 my %mods = &webmin_avail_map(&get_domain_webmin_avail($d));
 
 # Grant access to BIND module if needed
@@ -908,7 +906,7 @@ if (!$nofeatures) {
 					    \@doms);
 		my $pm;
 		foreach $pm (@pmods) {
-			next if (!&webmin_avail_enabled(\%mods, $pm->[0], 1));
+			next if (!$mods{$pm->[0]});
 			push(@mods, $pm->[0]);
 			if ($pm->[1]) {
 				&save_module_acl_logged(
