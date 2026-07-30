@@ -913,8 +913,7 @@ if (!$nofeatures) {
 					    \@doms);
 		my $pm;
 		foreach $pm (@pmods) {
-			next if ($mods{$pm->[0]} ne '' &&
-				 !$mods{$pm->[0]});
+			next if (!$mods{$pm->[0]});
 			push(@mods, $pm->[0]);
 			if ($pm->[1]) {
 				&save_module_acl_logged(
