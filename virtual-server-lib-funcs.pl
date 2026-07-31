@@ -15269,7 +15269,7 @@ return $rv;
 sub call_modify_feature_funcs
 {
 my ($d, $oldd) = @_;
-foreach my $f (@features, 'virt', 'virt6') {
+foreach my $f (@features) {
 	my $mfunc = "modify_$f";
 	if (defined(&$mfunc) && $config{$f} && $d->{$f}) {
 		&try_function($f, $mfunc, $d, $oldd);
