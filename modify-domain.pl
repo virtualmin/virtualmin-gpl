@@ -874,17 +874,7 @@ for(my $i=0; $i<@doms; $i++) {
 	my $od = $olddoms[$i];
 	&$indent_print();
 	print "Updating virtual server $d->{'dom'} ..\n\n";
-	foreach $f (@features) {
-		if ($config{$f} && $d->{$f}) {
-			my $mfunc = "modify_$f";
-			&try_function($f, $mfunc, $d, $od);
-			}
-		}
-	foreach $f (&list_feature_plugins()) {
-		if ($d->{$f}) {
-			&plugin_call($f, "feature_modify", $d, $od);
-			}
-		}
+	&call_modify_feature_funcs($d, $od);
 
 	# Save new domain details
 	&$first_print($text{'save_domain'});

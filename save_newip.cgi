@@ -343,17 +343,7 @@ elsif ($d->{'virt6'} && $oldd->{'virt6'}) {
 	}
 
 # Update features and plugins
-foreach $f (@features) {
-	my $mfunc = "modify_$f";
-	if ($config{$f} && $d->{$f}) {
-		&try_function($f, $mfunc, $d, $oldd);
-		}
-	}
-foreach $f (&list_feature_plugins()) {
-	if ($d->{$f}) {
-		&try_plugin_call($f, "feature_modify", $d, $oldd);
-		}
-	}
+&call_modify_feature_funcs($d, $oldd);
 
 # Save new domain details
 print $text{'save_domain'},"<br>\n";
@@ -387,20 +377,8 @@ foreach $sd (@doms) {
 			}
 		}
 
-	foreach $f (@features) {
-		my $mfunc = "modify_$f";
-		if ($config{$f} && $sd->{$f}) {
-			&try_function($f, $mfunc, $sd, $oldsd);
-			}
-		}
-	foreach $f (&list_feature_plugins()) {
-		if ($sd->{$f}) {
-			&try_plugin_call($f, "feature_modify", $sd, $oldsd);
-			}
-		}
-	if ($sd->{'virt6'} && &supports_ip6()) {
-		&try_function("virt6", "modify_virt6", $sd, $oldsd);
-		}
+	# Update all features that might depend on the new IP
+	&call_modify_feature_funcs($sd, $oldsd);
 
 	# Save new domain details
 	print $text{'save_domain'},"<br>\n";
