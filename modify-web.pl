@@ -534,6 +534,7 @@ foreach $d (@doms) {
 	&$first_print("Updating server $d->{'dom'} ..");
 	&$indent_print();
 	$tmpl = &get_template($d->{'template'});
+	my $oldd = { %$d };
 
 	# Use the default mode for this domain
 	if ($defmode) {
@@ -632,7 +633,6 @@ foreach $d (@doms) {
 			$rubymode eq "none" ? undef : $rubymode);
 		}
 
-	my $oldd = { %$d };
 	if (!$d->{'alias'} && defined($content)) {
 		# Just create index.html page with content
 		&$first_print($text{'setup_contenting'});
@@ -787,22 +787,6 @@ foreach $d (@doms) {
 			}
 		if ($pd->{'alias'}) {
 			&save_domain($pd);
-			}
-		}
-
-	if ($port || $sslport) {
-		# Update website feature
-		$p = &domain_has_website($d);
-		if ($p eq 'web') {
-			# Core website feature
-			&modify_web($d, $oldd);
-			if ($d->{'ssl'}) {
-				&modify_ssl($d, $oldd);
-				}
-			}
-		else {
-			# Via plugin call
-			&plugin_call($p, "feature_modify", $d, $oldd);
 			}
 		}
 
@@ -1137,6 +1121,9 @@ foreach $d (@doms) {
 		my $err = &save_domain_proxy_host($d, $proxyhost);
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
+
+	# Call all modify_ functions
+	&call_modify_feature_funcs($d, $oldd);
 
 	if ($htmldir || $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($children_no_check) || defined($renew) || $breakcert ||

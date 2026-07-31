@@ -116,7 +116,6 @@ if (@logs) {
 			my $tconf = &logrotate::get_config($temp);
 			$lconf->{'members'} = $tconf->[0]->{'members'};
 			unlink($temp);
-			$d->{'logrotate_shared'} = 1;
 			}
 		&logrotate::save_directive($parent, undef, $lconf);
 		&flush_file_lines($lconf->{'file'});
@@ -131,6 +130,7 @@ if (@logs) {
 		&logrotate::save_directive($parent, $already, $already);
 		&flush_file_lines($already->{'file'});
 		}
+	$d->{'logrotate_shared'} = $shared;
 
 	# Make sure extra log files actually exist
 	foreach my $lt (@tmpllogs) {
@@ -175,6 +175,7 @@ my @logmap = ( [ $alog, $oldalog ],
 # Stop here if nothing to do
 return if (!@logmap &&
 	   $d->{'user'} eq $oldd->{'user'} &&
+	   $d->{'php_mode'} eq $oldd->{'php_mode'} &&
 	   $d->{'group'} eq $oldd->{'group'});
 &require_logrotate();
 &obtain_lock_logrotate($d);
@@ -249,6 +250,19 @@ if ($d->{'user'} ne $oldd->{'user'} ||
 	else {
 		&$second_print($text{'setup_nologrotate2'});
 		}
+	}
+
+# May need to update post-rotation script for FPM mode
+if ($d->{'php_mode'} ne $oldd->{'php_mode'} &&
+    &is_logrotate_shared($d) == 0) {
+	&$first_print($text{'save_logrotatephp'});
+	my $lconf = &get_logrotate_section($alog);
+	my $script = &get_postrotate_script($d);
+	&logrotate::save_directive($lconf, "postrotate", 
+		{ 'name' => 'postrotate',
+		  'script' => $script });
+	&flush_file_lines($lconf->{'file'});
+	&$second_print($text{'setup_done'});
 	}
 
 &release_lock_logrotate($d);
@@ -386,6 +400,21 @@ foreach $c (@$conf) {
 return undef;
 }
 
+# is_logrotate_shared(&domain)
+# Returns 1 if the logrotate config block for a domain contains multiple
+# domain's log files
+sub is_logrotate_shared
+{
+my ($d) = @_;
+my $sect = &get_logrotate_section($d);
+return -1 if (!$sect);
+my %dlogs = map { $_, 1 } &get_all_domain_logs($d, 1);
+foreach my $f (@{$sect->{'name'}}) {
+	return 1 if (!$dlogs{$f} && !&is_under_directory($d->{'home'}, $f));
+	}
+return 0;
+}
+
 # check_logrotate_clash()
 # No need to check for clashes ..
 sub check_logrotate_clash
@@ -448,7 +477,8 @@ if ($lconf) {
 	# Replace the old postrotate block with the config from this system
 	foreach my $i (@range) {
 		if ($dstlref->[$i] =~ /^\s*postrotate/) {
-			$dstlref->[$i+1] = "\t".&get_postrotate_script($d);
+			$dstlref->[$i+1] = "\t".&get_postrotate_script(
+				$d->{'logrotate_shared'} ? undef : $d);
 			last;
 			}
 		}

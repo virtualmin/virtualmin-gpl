@@ -1601,6 +1601,7 @@ save_webalizerlog=Updating log file path in Webalizer configuration ..
 save_logrotate=Updating log file path in Logrotate configuration ..
 save_logrotatehome=Updating home directory in Logrotate configuration ..
 save_logrotateuser=Updating user and group in Logrotate configuration ..
+save_logrotatephp=Updating post-rotation script in Logrotate configuration ..
 save_nologrotatecreate=.. not needed
 save_virt=Changing virtual interface address ..
 save_fixcustomlog=Enabling logging via program ..
