@@ -18449,8 +18449,8 @@ return undef;
 }
 
 # normalize_webmin_avail(string)
-# Converts incomplete settings into valid values. Invalid or missing values
-# fail closed to 0.
+# Adds disabled entries for modules installed after the policy was saved.
+# Invalid stored values also fail closed to 0.
 sub normalize_webmin_avail
 {
 my ($str) = @_;
