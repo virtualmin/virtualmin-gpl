@@ -15263,6 +15263,26 @@ elsif (&indexof($f, &list_feature_plugins()) >= 0) {
 return $rv;
 }
 
+# call_modify_feature_funcs(&domain, &old-domain)
+# Calls the modify_ function as appropriate for all features and plugins
+# for a domain. May print stuff.
+sub call_modify_feature_funcs
+{
+my ($d, $oldd) = @_;
+foreach my $f (@features, 'virt', 'virt6') {
+	my $mfunc = "modify_$f";
+	if (defined(&$mfunc) && $config{$f} && $d->{$f}) {
+		&try_function($f, $mfunc, $d, $oldd);
+		}
+	}
+foreach my $f (&list_feature_plugins()) {
+	if ($d->{$f}) {
+		&try_plugin_call($f, "feature_modify", $d, $oldd);
+		}
+	}
+return undef;
+}
+
 # feature_name(name, [&domain])
 # Returns a human-readable short feature name, even if it's a plugin
 sub feature_name
