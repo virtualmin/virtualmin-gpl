@@ -274,8 +274,8 @@ is(&main::normalize_webmin_avail(
 
 is(&main::normalize_webmin_avail(
 	'dns=1 proc=2 plugin=0 unavailable-z=1 unavailable-a=custom=value'),
-	'dns=1 proc=2 plugin=0 unavailable-a=custom=value unavailable-z=1',
-	'normalization preserves unavailable module settings in stable order');
+	'dns=1 proc=2 plugin=0',
+	'unavailable module settings are removed');
 
 is(&main::normalize_webmin_avail('dns=1 proc=2'),
 	'dns=1 proc=2 plugin=0',

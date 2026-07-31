@@ -18419,23 +18419,11 @@ sub make_webmin_avail
 {
 my ($values) = @_;
 my @avail;
-my %known;
 foreach my $m (&list_domain_owner_modules()) {
-	$known{$m->[0]} = 1;
 	my $value = $values->{$m->[0]};
 	return (undef, $m->[0])
 		if (!&valid_webmin_avail_value($m, $value));
 	push(@avail, $m->[0].'='.$value);
-	}
-
-# Retain syntactically valid settings for plugins or conditional modules that
-# are temporarily unavailable. If they return, they become known above and
-# are validated against the registry before they can grant access.
-foreach my $mod (sort grep { !$known{$_} } keys %$values) {
-	my $value = $values->{$mod};
-	next if ($mod !~ /^[A-Za-z0-9_.-]+$/ ||
-		 !defined($value) || $value !~ /^\S+$/);
-	push(@avail, $mod.'='.$value);
 	}
 return (join(' ', @avail), undef);
 }
