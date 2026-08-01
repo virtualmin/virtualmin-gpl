@@ -260,7 +260,8 @@ if ($d->{'php_mode'} ne $oldd->{'php_mode'} &&
 	my $script = &get_postrotate_script($d);
 	&logrotate::save_directive($lconf, "postrotate", 
 		{ 'name' => 'postrotate',
-		  'script' => $script });
+		  'script' => $script },
+		"\t");
 	&flush_file_lines($lconf->{'file'});
 	&$second_print($text{'setup_done'});
 	}
