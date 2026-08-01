@@ -462,6 +462,7 @@ if ($d->{'logrotate_shared'}) {
 my $lconf = &get_logrotate_section($d);
 my $rv;
 if ($lconf) {
+	# Copy across the entire logrotate config from the backup
 	my $srclref = &read_file_lines($file);
 	my $dstlref = &read_file_lines($lconf->{'file'});
 	splice(@$dstlref, $lconf->{'line'}+1,
@@ -474,18 +475,20 @@ if ($lconf) {
 			$dstlref->[$i] =~ s/(^|\s)$oldd->{'home'}/$1$d->{'home'}/g;
 			}
 		}
-
-	# Replace the old postrotate block with the config from this system
-	foreach my $i (@range) {
-		if ($dstlref->[$i] =~ /^\s*postrotate/) {
-			$dstlref->[$i+1] = "\t".&get_postrotate_script(
-				$d->{'logrotate_shared'} ? undef : $d);
-			last;
-			}
-		}
-
 	&flush_file_lines($lconf->{'file'});
 	&clear_logrotate_caches();
+
+	# Re-write the postrotate config to match this system
+	$lconf = &get_logrotate_section($d);
+	if ($lconf) {
+		my $script = &get_postrotate_script($d);
+		&logrotate::save_directive($lconf, "postrotate", 
+			{ 'name' => 'postrotate',
+			  'script' => $script },
+			"\t");
+		&flush_file_lines($lconf->{'file'});
+		}
+
 	&$second_print($text{'setup_done'});
 	$rv = 1;
 	}
