@@ -89,8 +89,7 @@ local *main::foreign_check = sub { return 1; };
 local @main::plugins = ('sample-plugin');
 my $stored = 'passwd=2 proc=2 updown=2 plugin=0';
 my %stored = &main::webmin_avail_map($stored);
-my ($serialized, $bad) = &main::make_webmin_avail(\%stored);
-is($bad, undef, 'valid real-registry values can be serialized');
+my $serialized = &main::make_webmin_avail(\%stored);
 my %serialized = &main::webmin_avail_map($serialized);
 is($serialized{'passwd'}.' '.$serialized{'proc'}.' '.$serialized{'updown'},
 	'2 2 2',
@@ -102,7 +101,7 @@ is($serialized{'plugin'}, 0,
 my %templates = (
 	0 => { 'id' => 0, 'default' => 1,
 	       'avail' => 'dns=0 proc=1 plugin=1' },
-	10 => { 'avail' => 'dns=1 proc=2 plugin=1' },
+	10 => { 'avail' => 'dns=1 proc=2 plugin=1 unavailable=1' },
 );
 my %domains;
 my $can_edit_limits = 1;
@@ -135,7 +134,7 @@ is(&main::get_domain_webmin_avail($legacy), '',
 ok(&main::init_domain_webmin_avail($legacy),
 	'initialization snapshots the template value');
 is($legacy->{'webmin_avail'}, 'dns=1 proc=2 plugin=1',
-	'initialization copies the template value');
+	'initialization copies only installed modules from the template');
 
 $templates{10}->{'avail'} = 'dns=0 proc=0 plugin=0';
 is(&main::get_domain_webmin_avail($legacy), 'dns=1 proc=2 plugin=1',
@@ -250,23 +249,24 @@ like($@, qr/Cannot edit server/,
 	'owner limits reject a domain without edit permission');
 $can_edit_limits = 1;
 
-my ($serialized, $bad) = &main::make_webmin_avail(
+my $serialized = &main::make_webmin_avail(
 	{ 'dns' => 0, 'proc' => 1, 'plugin' => 1 });
-is($bad, undef, 'valid module access levels are accepted');
 is($serialized, 'dns=0 proc=1 plugin=1', 'module settings serialize stably');
 my %mapped = &main::webmin_avail_map($serialized);
 ok(exists($mapped{'dns'}) && $mapped{'dns'} eq '0',
 	'disabled module entries remain explicit for ACL enforcement');
 
-($serialized, $bad) = &main::make_webmin_avail(
-	{ 'dns' => 2, 'proc' => 1, 'plugin' => 1 });
-is($serialized, undef, 'invalid binary access level is rejected');
-is($bad, 'dns', 'invalid module is identified');
-
-($serialized, $bad) = &main::make_webmin_avail(
-	{ 'dns' => 1, 'proc' => 3, 'plugin' => 1 });
-is($serialized, undef, 'invalid enumerated access level is rejected');
-is($bad, 'proc', 'invalid enumerated module is identified');
+is(&main::make_webmin_avail(
+	{ 'dns' => 1, 'proc' => 2, 'plugin' => '' }),
+	'dns=1 proc=2 plugin=0',
+	'missing or empty installed modules are stored as disabled');
+my @modules = &main::list_domain_owner_modules();
+my ($dns_info) = grep { $_->[0] eq 'dns' } @modules;
+my ($proc_info) = grep { $_->[0] eq 'proc' } @modules;
+ok(!&main::valid_webmin_avail_value($dns_info, 2),
+	'invalid binary access level is rejected');
+ok(!&main::valid_webmin_avail_value($proc_info, 3),
+	'invalid enumerated access level is rejected');
 
 {
 no warnings 'redefine';

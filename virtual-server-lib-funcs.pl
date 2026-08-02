@@ -18365,7 +18365,8 @@ my ($d) = @_;
 return 0 if ($d->{'parent'});
 return 0 if (defined($d->{'webmin_avail'}));
 my $tmpl = &get_template($d->{'template'});
-$d->{'webmin_avail'} = &get_template_webmin_avail($tmpl);
+my %avail = &webmin_avail_map(&get_template_webmin_avail($tmpl));
+$d->{'webmin_avail'} = &make_webmin_avail(\%avail);
 return 1;
 }
 
@@ -18409,20 +18410,19 @@ return $value eq '0' || $value eq '1';
 }
 
 # make_webmin_avail(&values)
-# Serializes a hash of module access levels in a stable order. Returns the
-# serialized value and undef on success, or undef and the bad module code.
+# Serializes installed module access levels in a stable order. Missing values
+# are stored as disabled.
 sub make_webmin_avail
 {
 my ($values) = @_;
 my @avail;
 foreach my $m (&list_domain_owner_modules()) {
-	my $value = defined($values->{$m->[0]}) ?
+	my $value = defined($values->{$m->[0]}) &&
+		$values->{$m->[0]} ne '' ?
 		$values->{$m->[0]} : 0;
-	return (undef, $m->[0])
-		if (!&valid_webmin_avail_value($m, $value));
 	push(@avail, $m->[0].'='.$value);
 	}
-return (join(' ', @avail), undef);
+return join(' ', @avail);
 }
 
 # set_template_webmin_avail(&template, &values)
@@ -18437,11 +18437,11 @@ if (!$tmpl->{'default'} && $values->{'avail_def'}) {
 	}
 my %avail = &webmin_avail_map(&get_template_webmin_avail($tmpl));
 foreach my $m (&list_available_domain_owner_modules()) {
-	$avail{$m->[0]} = $values->{'avail_'.$m->[0]};
+	my $value = $values->{'avail_'.$m->[0]};
+	return $m->[0] if (!&valid_webmin_avail_value($m, $value));
+	$avail{$m->[0]} = $value;
 	}
-my ($value, $bad) = &make_webmin_avail(\%avail);
-return $bad if ($bad);
-$tmpl->{'avail'} = $value;
+$tmpl->{'avail'} = &make_webmin_avail(\%avail);
 return undef;
 }
 

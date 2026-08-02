@@ -51,11 +51,12 @@ $d->{'webmin_nocat_modules'} = $in{'nocatwebmin'};
 if (&can_webmin_modules()) {
 	my %avail = &webmin_avail_map(&get_domain_webmin_avail($d));
 	foreach my $m (&list_available_domain_owner_modules()) {
-		$avail{$m->[0]} = $in{'avail_'.$m->[0]};
+		my $value = $in{'avail_'.$m->[0]};
+		&valid_webmin_avail_value($m, $value) ||
+			&error(&text('limits_ewebminavail', $m->[0]));
+		$avail{$m->[0]} = $value;
 		}
-	my ($value, $bad) = &make_webmin_avail(\%avail);
-	$bad && &error(&text('limits_ewebminavail', $bad));
-	$d->{'webmin_avail'} = $value;
+	$d->{'webmin_avail'} = &make_webmin_avail(\%avail);
 	$d->{'webmin_modules'} = $in{'modules'};
 	}
 

@@ -462,9 +462,7 @@ if (@webmin_module_changes) {
 	foreach my $change (@webmin_module_changes) {
 		$avail{$change->[0]} = $change->[1];
 		}
-	my ($value, $bad) = &make_webmin_avail(\%avail);
-	$bad && &usage("Invalid access level for Webmin module $bad");
-	$dom->{'webmin_avail'} = $value;
+	$dom->{'webmin_avail'} = &make_webmin_avail(\%avail);
 	}
 
 # Save domain object
