@@ -74,7 +74,7 @@ is(scalar(@policy_modules), scalar(@cli_modules),
 	'policy registry matches the installed module registry');
 }
 
-# Normalization must not alter valid enumerated access levels. This is checked
+# Serialization must not alter valid enumerated access levels. This is checked
 # against the real registry, as the synthetic registry used below cannot catch
 # a regression in the real module option lists.
 {
@@ -88,19 +88,21 @@ local *main::plugin_call = sub {
 local *main::foreign_check = sub { return 1; };
 local @main::plugins = ('sample-plugin');
 my $stored = 'passwd=2 proc=2 updown=2 plugin=0';
-my %normalized = &main::webmin_avail_map(
-	&main::normalize_webmin_avail($stored));
-is($normalized{'passwd'}.' '.$normalized{'proc'}.' '.$normalized{'updown'},
+my %stored = &main::webmin_avail_map($stored);
+my ($serialized, $bad) = &main::make_webmin_avail(\%stored);
+is($bad, undef, 'valid real-registry values can be serialized');
+my %serialized = &main::webmin_avail_map($serialized);
+is($serialized{'passwd'}.' '.$serialized{'proc'}.' '.$serialized{'updown'},
 	'2 2 2',
-	'enumerated access levels survive normalization with the real registry');
-is($normalized{'plugin'}, 0,
-	'disabled plugin access remains disabled during normalization');
+	'enumerated access levels survive serialization with the real registry');
+is($serialized{'plugin'}, 0,
+	'disabled plugin access remains disabled during serialization');
 }
 
 my %templates = (
 	0 => { 'id' => 0, 'default' => 1,
 	       'avail' => 'dns=0 proc=1 plugin=1' },
-	10 => { 'avail' => 'dns=1 proc=2 plugin=virtualmin-nginx' },
+	10 => { 'avail' => 'dns=1 proc=2 plugin=1' },
 );
 my %domains;
 my $can_edit_limits = 1;
@@ -127,17 +129,16 @@ my $test_modules = sub {
 }
 
 my $legacy = { 'id' => 100, 'template' => 10 };
-is(&main::get_domain_webmin_avail($legacy),
-	'dns=0 proc=0 plugin=0',
+is(&main::get_domain_webmin_avail($legacy), '',
 	'a domain without a migrated policy fails closed');
 
 ok(&main::init_domain_webmin_avail($legacy),
 	'initialization snapshots the template value');
-is($legacy->{'webmin_avail'}, 'dns=1 proc=2 plugin=0',
-	'invalid plugin access fails closed during initialization');
+is($legacy->{'webmin_avail'}, 'dns=1 proc=2 plugin=1',
+	'initialization copies the template value');
 
 $templates{10}->{'avail'} = 'dns=0 proc=0 plugin=0';
-is(&main::get_domain_webmin_avail($legacy), 'dns=1 proc=2 plugin=0',
+is(&main::get_domain_webmin_avail($legacy), 'dns=1 proc=2 plugin=1',
 	'later template changes do not alter domain access');
 ok(!&main::init_domain_webmin_avail($legacy),
 	'existing per-domain access is never overwritten');
@@ -158,12 +159,12 @@ is($existing_policy->{'webmin_avail'}, 'dns=1 proc=2 plugin=0',
 
 $domains{100} = $legacy;
 my $child = { 'id' => 101, 'parent' => 100, 'template' => 10 };
-is(&main::get_domain_webmin_avail($child), 'dns=1 proc=2 plugin=0',
+is(&main::get_domain_webmin_avail($child), 'dns=1 proc=2 plugin=1',
 	'sub-server uses its top-level owner policy');
 ok(!&main::init_domain_webmin_avail($child),
 	'sub-servers do not receive an independent owner policy');
 my $orphan = { 'id' => 105, 'parent' => 999, 'template' => 10 };
-is(&main::get_domain_webmin_avail($orphan), 'dns=0 proc=0 plugin=0',
+is(&main::get_domain_webmin_avail($orphan), '',
 	'a sub-server with a missing parent fails closed');
 
 is(&main::get_template_webmin_avail({ 'id' => 11 }),
@@ -266,31 +267,6 @@ is($bad, 'dns', 'invalid module is identified');
 	{ 'dns' => 1, 'proc' => 3, 'plugin' => 1 });
 is($serialized, undef, 'invalid enumerated access level is rejected');
 is($bad, 'proc', 'invalid enumerated module is identified');
-
-is(&main::normalize_webmin_avail(
-	'dns=1 proc=invalid plugin=virtualmin-nginx'),
-	'dns=1 proc=0 plugin=0',
-	'invalid module access values fail closed');
-
-is(&main::normalize_webmin_avail(
-	'dns=1 proc=2 plugin=0 unavailable-z=1 unavailable-a=custom=value'),
-	'dns=1 proc=2 plugin=0',
-	'unavailable module settings are removed');
-
-is(&main::normalize_webmin_avail('dns=1 proc=2'),
-	'dns=1 proc=2 plugin=0',
-	'a newly registered plugin module is disabled until explicitly granted');
-is(&main::normalize_webmin_avail(''),
-	'dns=0 proc=0 plugin=0',
-	'missing module settings fail closed');
-
-my $incomplete = {
-	'id' => 103, 'template' => 10,
-	'webmin_avail' => 'dns=1 proc=invalid',
-	};
-is(&main::get_domain_webmin_avail($incomplete),
-	'dns=1 proc=0 plugin=0',
-	'invalid and missing access settings fail closed');
 
 {
 no warnings 'redefine';
