@@ -18365,7 +18365,7 @@ my ($d) = @_;
 return 0 if ($d->{'parent'});
 return 0 if (defined($d->{'webmin_avail'}));
 my $tmpl = &get_template($d->{'template'});
-$d->{'webmin_avail'} = $tmpl ? &get_template_webmin_avail($tmpl) : "";
+$d->{'webmin_avail'} = &get_template_webmin_avail($tmpl);
 return 1;
 }
 
