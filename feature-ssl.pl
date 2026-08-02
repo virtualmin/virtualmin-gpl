@@ -290,7 +290,6 @@ my $tmpl = &get_template($d->{'template'});
 if ($d->{'ip'} ne $oldd->{'ip'} ||
     $d->{'ip6'} ne $oldd->{'ip6'} ||
     $d->{'virt6'} != $oldd->{'virt6'} ||
-    $d->{'name6'} != $oldd->{'name6'} ||
     $d->{'web_sslport'} != $oldd->{'web_sslport'}) {
 	# IP address or port has changed .. update VirtualHost
 	&$first_print($text{'save_ssl'});

@@ -26,7 +26,6 @@ foreach my $f (&list_feature_plugins()) {
 	}
 
 # Initialize variables
-my $name = 1;
 my $virt = 0;
 my $anylimits = 0;
 my $email = $config{'contact_email'};
@@ -99,13 +98,11 @@ if ($opts->{'ip'}) {
 	$ip = $opts->{'ip'};
 	$feature{'virt'} = 1;    # for dependency checks
 	$virt = 1;
-	$name = 0;
 	}
 
 if ($opts->{'allocate-ip'}) {
 	$ip = "allocate";    # will be done later
 	$virt = 1;
-	$name = 0;
 	}
 
 my $virtalready;
@@ -115,18 +112,16 @@ my $sharedip;
 if ($opts->{'shared-ip'}) {
 	$sharedip = $opts->{'shared-ip'};
 	$virt = 0;
-	$name = 1;
 	}
 
 my $parentip;
 $parentip = 1 if ($opts->{'parent-ip'});
 
-my ($ip6, $virt6, $name6);
+my ($ip6, $virt6);
 if ($opts->{'no-ip6'}) {
 	# IPv6 explicitly turned off
 	$ip6 = undef;
 	$virt6 = 0;
-	$name6 = 0;
 	}
 
 if ($opts->{'default-ip6'} && &supports_ip6()) {
@@ -134,14 +129,12 @@ if ($opts->{'default-ip6'} && &supports_ip6()) {
 	$ip6 = "default";
 	$ip6 || return $text{'api_ndom_no_default_ipv6'};
 	$virt6 = 0;
-	$name6 = 1;
 	}
 
 if ($opts->{'ip6'} && &supports_ip6()) {
 	# IPv6 on specific address
 	$ip6 = $opts->{'ip6'};
 	$virt6 = 1;
-	$name6 = 0;
 	}
 
 my $virt6already;
@@ -151,14 +144,12 @@ if ($opts->{'allocate-ip6'} && &supports_ip6()) {
 	# IPv6 on allocated address
 	$ip6 = "allocate";
 	$virt6 = 1;
-	$name6 = 0;
 	}
 
 if (defined($opts->{'shared-ip6'})) {
 	# IPv6 on shared address
 	$ip6 = $opts->{'shared-ip6'};
 	$virt6 = 0;
-	$name6 = 1;
 	&indexof($ip6, &list_shared_ip6s()) >= 0 ||
 		return &text('api_ndom_ip6_not_in_shared_list', $ip6);
 	}
@@ -478,14 +469,12 @@ elsif ($ip6 eq "default") {
 	$ip6 = $defip6;
 	$ip6 || return $text{'api_ndom_no_default_ipv6_address_found'};
 	$virt6 = 0;
-	$name6 = 1;
 	}
 elsif (!defined($virt6) && $config{'ip6enabled'}) {
 	# No IPv6 selection made, use default
 	$ip6 = $defip6;
 	if ($ip6) {
 		$virt6 = 0;
-		$name6 = 1;
 		}
 	}
 
@@ -812,8 +801,6 @@ my %dom =
 	 'ugid', $gid,
 	 'owner', $owner,
 	 'email', $parent ? $parent->{'email'} : $email,
-	 'name', $name,
-	 'name6', $name6,
 	 'ip', $virt ? $ip :
 	       $alias ? $ip :
 	       $parentip ? $parent->{'ip'} :

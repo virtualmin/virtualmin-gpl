@@ -578,7 +578,6 @@ if (defined($ip)) {
 	$dom->{'netmask'} = $netmask;
 	delete($dom->{'dns_ip'});
 	$dom->{'virt'} = 1;
-	$dom->{'name'} = 0;
 	$dom->{'virtalready'} = 0;
 	}
 elsif ($defaultip) {
@@ -588,7 +587,6 @@ elsif ($defaultip) {
 	$dom->{'defip'} = $dom->{'ip'} eq &get_default_ip();
 	$dom->{'virt'} = 0;
 	$dom->{'virtalready'} = 0;
-	$dom->{'name'} = 1;
 	delete($dom->{'dns_ip'});
 	}
 elsif (defined($sharedip)) {
@@ -599,7 +597,6 @@ elsif ($noip) {
 	# Remove the IP address entirely
 	$dom->{'netmask'} = undef;
 	$dom->{'virt'} = 0;
-	$dom->{'name'} = 0;
 	$dom->{'ip'} = undef;
 	delete($dom->{'dns_ip'});
 	delete($dom->{'defip'});
@@ -611,14 +608,12 @@ if ($ip6) {
 	$dom->{'ip6'} = $ip6;
 	$dom->{'netmask6'} = $netmask6;
 	$dom->{'virt6'} = 1;
-	$dom->{'name6'} = 0;
 	}
 elsif ($defaultip6) {
 	# Using the default IPv6 address
 	$dom->{'ip6'} = &get_default_ip6($dom->{'reseller'});
 	$dom->{'netmask6'} = undef;
 	$dom->{'virt6'} = 0;
-	$dom->{'name6'} = 1;
 	}
 elsif (defined($sharedip6)) {
 	# Just change the shared IP address
@@ -628,7 +623,6 @@ elsif ($noip6) {
 	# Removing the IPv6 address
 	$dom->{'netmask6'} = undef;
 	$dom->{'virt6'} = 0;
-	$dom->{'name6'} = 0;
 	$dom->{'ip6'} = undef;
 	delete($dom->{'dns_ip6'});
 	}

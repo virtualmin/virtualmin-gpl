@@ -133,7 +133,6 @@ foreach $f (&list_feature_plugins()) {
 
 # Parse command-line args
 $ip = "default";	# Use default IP by default
-$name = 1;
 $virt = 0;
 if ($config{'ip6enabled'} && &supports_ip6()) {
 	$ip6 = "default";	# Use default IPv6 by default
@@ -141,7 +140,6 @@ if ($config{'ip6enabled'} && &supports_ip6()) {
 else {
 	$ip6 = undef;		# No IPv6 address by default
 	}
-$name6 = 1;
 $virt6 = 0;
 $anylimits = 0;
 $email = $config{'contact_email'};
@@ -214,26 +212,22 @@ while(@ARGV > 0) {
 		# Use the global default IPv4 address
 		$ip = "default";
 		$virt = 0;
-		$name = 1;
 		}
 	elsif ($a eq "--no-ip") {
 		# IPv4 explicitly turned off
 		$ip = undef;
 		$virt = 0;
-		$name = 0;
 		}
 	elsif ($a eq "--ip") {
 		# Specific virtual IPv4 requested
 		$ip = shift(@ARGV);
 		$feature{'virt'} = 1;	# for dependency checks
 		$virt = 1;
-		$name = 0;
 		}
 	elsif ($a eq "--allocate-ip") {
 		# Allocate a virtual IPv4
 		$ip = "allocate";	# will be done later
 		$virt = 1;
-		$name = 0;
 		}
 	elsif ($a eq "--ip-already") {
 		# Virtual IP is already active on the system
@@ -245,7 +239,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--shared-ip") {
 		$sharedip = shift(@ARGV);
 		$virt = 0;
-		$name = 1;
 		}
 	elsif ($a eq "--parent-ip") {
 		$parentip = 1;
@@ -254,20 +247,17 @@ while(@ARGV > 0) {
 		# IPv6 explicitly turned off
 		$ip6 = undef;
 		$virt6 = 0;
-		$name6 = 0;
 		}
 	elsif ($a eq "--default-ip6" && &supports_ip6()) {
 		# IPv6 on default shared address
 		$ip6 = "default";
 		$ip6 || &usage("System does not have a default IPv6 address");
 		$virt6 = 0;
-		$name6 = 1;
 		}
 	elsif ($a eq "--ip6" && &supports_ip6()) {
 		# IPv6 on specific address
 		$ip6 = shift(@ARGV);
 		$virt6 = 1;
-		$name6 = 0;
 		}
 	elsif ($a eq "--ip6-already" && &supports_ip6()) {
 		# Specific IPv6 address is already active
@@ -277,13 +267,11 @@ while(@ARGV > 0) {
 		# IPv6 on allocated address
 		$ip6 = "allocate";
 		$virt6 = 1;
-		$name6 = 0;
 		}
 	elsif ($a eq "--shared-ip6") {
 		# IPv6 on shared address
 		$ip6 = shift(@ARGV);
 		$virt6 = 0;
-		$name6 = 1;
 		&indexof($ip6, &list_shared_ip6s()) >= 0 ||
 		    &usage("$ip6 is not in the shared IP addresses list");
 		}
@@ -577,7 +565,6 @@ elsif ($ip eq "default" && !$aliasdomain && !$parentip) {
 	$ip = $defip;
 	$ip || &usage("No default IP address found");
 	$virt = 0;
-	$name = 1;
 	}
 
 if ($ip6 eq "allocate") {
@@ -604,7 +591,6 @@ elsif ($ip6 eq "default") {
 	# Use default IPv6, which may depend on reseller
 	$ip6 = $defip6;
 	$virt6 = 0;
-	$name6 = $ip6 ? 1 : 0;
 	}
 
 if (!defined($ip) && !defined($ip6)) {
@@ -918,8 +904,6 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
          'ugid', $gid,
          'owner', $owner,
          'email', $parent ? $parent->{'email'} : $email,
-         'name', $name,
-         'name6', $name6,
          'ip', $virt ? $ip :
 	       $alias ? $ip :
 	       $parentip ? $parent->{'ip'} :

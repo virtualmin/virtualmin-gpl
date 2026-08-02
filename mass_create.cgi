@@ -337,8 +337,6 @@ foreach $line (@lines) {
 		 'ugid', $ugid,
 		 'owner', $owner,
 		 'email', $parentdom ? $parentdom->{'email'} : undef,
-		 'name', !$virt,
-		 'name6', !$virt6,
 		 'ip', $ip,
 		 'ip6', $ip6,
 		 'netmask', $netmask,

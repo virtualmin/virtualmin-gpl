@@ -622,11 +622,10 @@ else {
 	&obtain_lock_web($d);
 	my ($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
 						    $oldd->{'web_port'});
-	if ($d->{'name'} != $oldd->{'name'} ||
-	    $d->{'ip'} ne $oldd->{'ip'} ||
+	if ($d->{'ip'} ne $oldd->{'ip'} ||
 	    $d->{'ip6'} ne $oldd->{'ip6'} ||
+	    $d->{'virt'} != $oldd->{'virt'} ||
 	    $d->{'virt6'} != $oldd->{'virt6'} ||
-	    $d->{'name6'} != $oldd->{'name6'} ||
 	    $d->{'ssl'} != $oldd->{'ssl'} ||
 	    $d->{'web_port'} != $oldd->{'web_port'}) {
 		# Name-based hosting mode or IP has changed .. update the
@@ -2221,7 +2220,8 @@ if ($apache::httpd_modules{'core'} >= 2.4) {
 	return $ipcount ? 0 : 1;
 	}
 my $nvstar;
-if ($d->{'name'}) {
+if (!$d->{'virt'}) {
+	# Add a NameVirtualHost line
 	my ($found, $found_no_port);
 	my $defport = &apache::find_directive("Port", $conf);
 	$defport ||= 80;
@@ -2300,14 +2300,13 @@ foreach my $dip ($d->{'ip'} ? ( $d->{'ip'} ) : ( ),
 sub remove_listen
 {
 my ($d, $conf, $web_port) = @_;
-if ($d->{'virt'} && !$d->{'name'} ||
-    $d->{'virt6'} && !$d->{'name6'}) {
+if ($d->{'virt'} || $d->{'virt6'}) {
 	my @listen = &apache::find_directive("Listen", $conf);
 	my @newlisten = @listen;
-	if ($d->{'ip'} && $d->{'virt'} && !$d->{'name'}) {
+	if ($d->{'ip'} && $d->{'virt'}) {
 		@newlisten = grep { $_ ne "$d->{'ip'}:$web_port" } @newlisten;
 		}
-	if ($d->{'ip6'} && $d->{'virt6'} && !$d->{'name6'}) {
+	if ($d->{'ip6'} && $d->{'virt6'}) {
 		@newlisten = grep { $_ ne "[$d->{'ip6'}]:$web_port" } @newlisten;
 		}
 	if (scalar(@listen) != scalar(@newlisten)) {
@@ -4434,12 +4433,12 @@ $port ||= $d->{'web_port'};
 &require_apache();
 my @vips;
 if ($d->{'ip'}) {
-	my $vip = $d->{'name'} && &is_shared_ip($d->{'ip'}) && $nvstar ?
+	my $vip = !$d->{'virt'} && &is_shared_ip($d->{'ip'}) && $nvstar ?
 			"*" : $d->{'ip'};
 	push(@vips, "$vip:$port");
 	}
 if ($d->{'ip6'}) {
-	my $vip6 = $d->{'name'} && &is_shared_ip($d->{'ip6'}) && $nvstar6 ?
+	my $vip6 = !$d->{'virt6'} && &is_shared_ip($d->{'ip6'}) && $nvstar6 ?
 			"*" : $d->{'ip6'};
 	if ($vip6 ne "*") {
 		# If already matching *:port for the IPv4 part, no need to

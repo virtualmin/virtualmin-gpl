@@ -17,11 +17,9 @@ if ($in{'convert'}) {
 	# Turn off virt mode for the domain
 	if ($d->{'virt'}) {
 		$d->{'virt'} = 0;
-		$d->{'name'} = 1;
 		}
 	if ($d->{'virt6'}) {
 		$d->{'virt6'} = 0;
-		$d->{'name6'} = 1;
 		}
 	&set_domain_envs($d, "MODIFY_DOMAIN", $d);
 	$merr = &making_changes();
@@ -215,7 +213,6 @@ elsif ($virt && !$d->{'virt'}) {
 	$d->{'ip'} = $ip;
 	$d->{'netmask'} = $netmask;
 	$d->{'virt'} = 1;
-	$d->{'name'} = 0;
 	$d->{'virtalready'} = $virtalready;
 	delete($d->{'dns_ip'});
 	delete($d->{'defip'});
@@ -227,7 +224,6 @@ elsif (!$virt && $d->{'virt'}) {
 	$d->{'defip'} = $ip eq &get_default_ip();
 	$d->{'virt'} = 0;
 	$d->{'virtalready'} = 0;
-	$d->{'name'} = 1;
 	delete($d->{'dns_ip'});
 	}
 elsif (!$virt && !$d->{'virt'} && $d->{'ip'} ne $ip) {
@@ -260,7 +256,6 @@ elsif ($virt6 && !$d->{'virt6'}) {
 	$d->{'ip6'} = $ip6;
 	$d->{'netmask6'} = $netmask6;
 	$d->{'virt6'} = 1;
-	$d->{'name6'} = 0;
 	$d->{'virt6already'} = $virt6already;
 	delete($d->{'dns_ip6'});
 	}
@@ -269,7 +264,6 @@ elsif (!$virt6 && $d->{'virt6'}) {
 	$d->{'ip6'} = $ip6;
 	$d->{'netmask6'} = undef;
 	$d->{'virt6'} = 0;
-	$d->{'name6'} = 1;
 	$d->{'virt6already'} = 0;
 	delete($d->{'dns_ip6'});
 	}

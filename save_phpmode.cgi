@@ -6,6 +6,7 @@ require './virtual-server-lib.pl';
 &licence_status();
 &error_setup($text{'phpmode_err2'});
 $d = &get_domain($in{'dom'});
+$oldd = { %$d };
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 $can = &can_edit_phpmode($d);
 $canv = &can_edit_phpver($d);
@@ -247,6 +248,9 @@ if (!$anything) {
 	&$first_print($text{'phpmode_nothing'});
 	&$second_print($text{'phpmode_nothing_skip'});
 	}
+
+# Call all modify_ functions
+&call_modify_feature_funcs($d, $oldd);
 
 &save_domain($d);
 &refresh_webmin_user($d);

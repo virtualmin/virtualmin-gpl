@@ -346,7 +346,6 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'owner', $in{'owner'},
 	 'email', $parentdom ? $parentdom->{'email'} :
 		  !$in{'email_def'} ? $in{'email'} : undef,
-	 'name', !$virt,
 	 'ip', $ip,
 	 'netmask', $netmask,
 	 'ip6', $ip6,
@@ -364,7 +363,6 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 		    $virt6 ? undef : &get_dns_ip($resel, 6),
 	 'virt', $virt,
 	 'virt6', $virt6,
-	 'name6', !$virt6,
 	 'virtalready', $virtalready,
 	 'virt6already', $virt6already,
 	 'source', 'domain_setup.cgi',

@@ -7385,13 +7385,11 @@ $d->{'virt'} = $ipinfo->{'virt'};
 $d->{'ip'} = $ipinfo->{'ip'};
 $d->{'virtalready'} = $ipinfo->{'virtalready'};
 $d->{'netmask'} = $ipinfo->{'netmask'};
-$d->{'name'} = !$ipinfo->{'virt'};
 if ($ipinfo->{'ip6'}) {
 	$d->{'virt6'} = $ipinfo->{'virt6'};
 	$d->{'ip6'} = $ipinfo->{'ip6'};
 	$d->{'virt6already'} = $ipinfo->{'virt6already'};
 	$d->{'netmask6'} = $ipinfo->{'netmask6'};
-	$d->{'name6'} = !$ipinfo->{'virt6'};
 	}
 }
 

@@ -21803,8 +21803,6 @@ my %dom;
 	'group', $group,
 	'ugroup', $group,
 	'owner', $text{'check_defhost_desc'},
-	'name', 1,
-	'name6', 1,
 	'ip', $defip,
 	'dns_ip', &get_dns_ip(undef, 4),
 	'dns_ip6', &get_dns_ip(undef, 6),
