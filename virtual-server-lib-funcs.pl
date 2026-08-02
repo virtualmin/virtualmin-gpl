@@ -18351,12 +18351,9 @@ sub get_domain_webmin_avail
 my ($d) = @_;
 if ($d->{'parent'}) {
 	my $parent = &get_domain($d->{'parent'});
-	return $parent ? &get_domain_webmin_avail($parent) :
-		       &normalize_webmin_avail("");
+	return $parent ? &get_domain_webmin_avail($parent) : "";
 	}
-return &normalize_webmin_avail($d->{'webmin_avail'})
-	if (defined($d->{'webmin_avail'}));
-return &normalize_webmin_avail("");
+return defined($d->{'webmin_avail'}) ? $d->{'webmin_avail'} : "";
 }
 
 # init_domain_webmin_avail(&domain)
@@ -18368,8 +18365,7 @@ my ($d) = @_;
 return 0 if ($d->{'parent'});
 return 0 if (defined($d->{'webmin_avail'}));
 my $tmpl = &get_template($d->{'template'});
-$d->{'webmin_avail'} = $tmpl ? &get_template_webmin_avail($tmpl) :
-			       &normalize_webmin_avail("");
+$d->{'webmin_avail'} = $tmpl ? &get_template_webmin_avail($tmpl) : "";
 return 1;
 }
 
@@ -18384,7 +18380,7 @@ if (!$tmpl->{'default'} && (!defined($avail) || $avail eq '')) {
 	my $deftmpl = &get_template(0);
 	$avail = $deftmpl ? $deftmpl->{'avail'} : "";
 	}
-return &normalize_webmin_avail($avail);
+return $avail;
 }
 
 # webmin_avail_map(string)
@@ -18420,7 +18416,8 @@ sub make_webmin_avail
 my ($values) = @_;
 my @avail;
 foreach my $m (&list_domain_owner_modules()) {
-	my $value = $values->{$m->[0]};
+	my $value = defined($values->{$m->[0]}) ?
+		$values->{$m->[0]} : 0;
 	return (undef, $m->[0])
 		if (!&valid_webmin_avail_value($m, $value));
 	push(@avail, $m->[0].'='.$value);
@@ -18446,22 +18443,6 @@ my ($value, $bad) = &make_webmin_avail(\%avail);
 return $bad if ($bad);
 $tmpl->{'avail'} = $value;
 return undef;
-}
-
-# normalize_webmin_avail(string)
-# Adds disabled entries for modules installed after the policy was saved.
-# Invalid stored values also fail closed to 0.
-sub normalize_webmin_avail
-{
-my ($str) = @_;
-my %avail = &webmin_avail_map($str);
-foreach my $m (&list_domain_owner_modules()) {
-	if (!&valid_webmin_avail_value($m, $avail{$m->[0]})) {
-		$avail{$m->[0]} = 0;
-		}
-	}
-my ($value, $bad) = &make_webmin_avail(\%avail);
-return $bad ? "" : $value;
 }
 
 # webmin_avail_rows(string)
