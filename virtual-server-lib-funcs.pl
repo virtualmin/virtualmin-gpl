@@ -582,6 +582,7 @@ $id = $id->{'id'} if (ref($id));
 sub save_domain
 {
 my ($d, $creating) = @_;
+
 my $file = "$domains_dir/$d->{'id'}";
 if (!$creating && $d->{'id'} && !-r $file) {
 	# Deleted from under us! Don't save
@@ -3170,6 +3171,19 @@ sub can_select_ip6
 my @shared = &list_shared_ip6s();
 return &can_use_feature("virt6") ||
        @shared && &can_edit_sharedips();
+}
+
+# get_editable_limits_domain(id)
+# Returns a top-level domain if it exists and the current user can edit its
+# owner limits.
+sub get_editable_limits_domain
+{
+my ($id) = @_;
+my $d = &get_domain($id);
+$d || &error($text{'edit_egone'});
+$d->{'parent'} && &error($text{'limits_etoplevel'});
+&can_edit_limits($d) || &error($text{'edit_ecannot'});
+return $d;
 }
 
 # can_edit_limits(&domain)
@@ -8416,6 +8430,11 @@ if ($dom->{'ip'} &&
 
 # Work out the auto-alias domain name
 my $tmpl = &get_template($dom->{'template'});
+
+# Webmin module access is a per-owner policy. The template supplies only the
+# initial value for a newly-created top-level virtual server.
+&init_domain_webmin_avail($dom) if (!$dom->{'parent'});
+
 my $aliasname;
 if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
 	my $aliasprefix = $dom->{'dom'};
@@ -10389,8 +10408,9 @@ if (!defined(getpwnam($rv[0]->{'web_user'})) &&
 	$rv[0]->{'web_user'} = &get_apache_user();
 	}
 my @avail;
-foreach my $m (&list_domain_owner_modules()) {
-	push(@avail, $m->[0]."=".$config{'avail_'.$m->[0]});
+my ($modules) = &domain_owner_module_registry();
+foreach my $m (@$modules) {
+	push(@avail, $m->[0].'='.$config{'avail_'.$m->[0]});
 	}
 $rv[0]->{'avail'} = join(' ', @avail);
 push(@rv, { 'id' => 1,
@@ -10788,9 +10808,11 @@ if ($tmpl->{'id'} == 0) {
 	foreach my $w (&list_php_wrapper_templates()) {
 		$config{$w} = $tmpl->{$w};
 		}
-	my %avail = map { split(/=/, $_) } split(/\s+/, $tmpl->{'avail'});
-	foreach my $m (&list_domain_owner_modules()) {
-		$config{'avail_'.$m->[0]} = $avail{$m->[0]} || 0;
+	my %avail = &webmin_avail_map($tmpl->{'avail'});
+	my ($modules) = &domain_owner_module_registry();
+	foreach my $m (@$modules) {
+		$config{'avail_'.$m->[0]} = defined($avail{$m->[0]}) ?
+					   $avail{$m->[0]} : 0;
 		}
 	$save_config = 1;
 	}
@@ -15665,6 +15687,7 @@ foreach my $f (@opt_features, "virt", &list_feature_plugins()) {
 	}
 $d->{'demo'} = $oldparent->{'demo'};
 $d->{'webmin_modules'} = $oldparent->{'webmin_modules'};
+$d->{'webmin_avail'} = &get_domain_webmin_avail($oldparent);
 $d->{'plan'} = $oldparent->{'plan'};
 
 # Find any alias domains that also need to be re-parented. Also find
@@ -18337,49 +18360,54 @@ foreach my $f (@plugins) {
 	}
 }
 
-# list_domain_owner_modules()
-# Returns a list of modules that can be granted to domain owners, as array refs
-# with module name, description and list of options (optional) entries.
-sub list_domain_owner_modules
+# domain_owner_module_registry()
+# Returns all domain-owner module definitions and their backing Webmin modules.
+sub domain_owner_module_registry
 {
 &require_mysql();
 my $mytype = $mysql::mysql_version =~ /mariadb/i ? "MariaDB" : "MySQL";
+# Maps module codes from @rv to a different Webmin module name. Unlisted codes
+# use their own name, while undef means no installation check is needed.
+my %foreign_module_for = (
+	'dns' => 'bind8',
+	'mail' => undef,
+	'web' => 'apache',
+	'postgres' => 'postgresql',
+	);
 my @rv = (
-        [ 'dns', 'BIND DNS Server (for DNS domain)' ],
-        [ 'mail', 'Virtual Email (for mailboxes and aliases)' ],
-        [ 'web', 'Apache Webserver (for virtual host)' ],
-        [ 'webalizer', 'Webalizer Logfile Analysis (for website\'s logs)' ],
-        [ 'mysql', $mytype.' Database Server (for database)' ],
-        [ 'postgres', 'PostgreSQL Database Server (for database)' ],
-        [ 'spam', 'SpamAssassin Mail Filter (for domain\'s config file)' ],
-        [ 'filemin', 'File Manager (home directory only)' ],
+        [ 'dns', 'BIND DNS Server' ],
+        [ 'mail', 'Virtual Email' ],
+        [ 'web', 'Apache Webserver' ],
+        [ 'webalizer', 'Webalizer Logfile Analysis' ],
+        [ 'mysql', $mytype.' Database Server' ],
+        [ 'postgres', 'PostgreSQL Database Server' ],
+        [ 'spam', 'SpamAssassin Mail Filter' ],
+        [ 'filemin', 'File Manager', undef, 'config_avail_file' ],
         [ 'passwd', 'Change Password',
 	  [ [ 2, 'User and mailbox passwords' ],
 	    [ 1, 'User password' ],
 	    [ 0, 'No' ] ] ],
-        [ 'proc', 'Running Processes (user\'s processes only)',
+        [ 'proc', 'Running Processes',
 	  [ [ 2, 'See own processes' ],
 	    [ 1, 'See all processes' ],
 	    [ 0, 'No' ] ] ],
-        [ 'cron', 'Scheduled Cron Jobs (user\'s Cron jobs)' ],
-        [ 'at', 'Scheduled Commands (user\'s commands)' ],
-        &foreign_check("systemd") ?
-		( [ 'systemd', 'Systemd User Units (domain owner\'s units)' ] ) :
-		( ),
+        [ 'cron', 'Scheduled Cron Jobs' ],
+        [ 'at', 'Scheduled Commands' ],
+        [ 'systemd', 'Systemd User Units' ],
         [ 'telnet', 'SSH Login' ],
         [ 'xterm', 'Terminal' ],
-        [ 'updown', 'Upload and Download (as user)',
+        [ 'updown', 'Upload and Download',
 	  [ [ 1, 'Yes' ],
 	    [ 0, 'No' ],
 	    [ 2, 'Upload only' ] ] ],
         [ 'change-user', 'Change Language and Theme' ],
-        [ 'htaccess-htpasswd', 'Protected Web Directories (under home directory)' ],
-        [ 'mailboxes', 'Read User Mail (users\' mailboxes)' ],
+        [ 'htaccess-htpasswd', 'Protected Web Directories' ],
+        [ 'mailboxes', 'Read User Mail' ],
         [ 'custom', 'Custom Commands' ],
-        [ 'shell', 'Command Shell (run commands as admin)' ],
-        [ 'webminlog', 'Webmin Actions Log (view own actions)' ],
-        [ 'logviewer', 'System Logs (view Apache and FTP logs)' ],
-        [ 'phpini', 'PHP Configuration (for domain\'s php.ini files)' ],
+        [ 'shell', 'Command Shell' ],
+        [ 'webminlog', 'Webmin Actions Log' ],
+        [ 'logviewer', 'System Logs' ],
+        [ 'phpini', 'PHP Configuration' ],
 	);
 &load_plugin_libraries();
 foreach my $p (@plugins) {
@@ -18387,73 +18415,174 @@ foreach my $p (@plugins) {
 		push(@rv, &plugin_call($p, "feature_modules"));
 		}
 	}
-return @rv;
+return (\@rv, \%foreign_module_for);
 }
 
-# show_template_avail(&tmpl)
-# Output HTML for selecting modules available to domain owners
-sub show_template_avail
+# list_domain_owner_modules()
+# Returns installed modules that can be granted to domain owners. This stable
+# registry is used when building or storing access policies, so it must never
+# depend on the calling user's own Webmin ACL.
+sub list_domain_owner_modules
+{
+my ($modules, $foreign_module_for) = &domain_owner_module_registry();
+my @available;
+foreach my $m (@$modules) {
+	my $fmod = exists($foreign_module_for->{$m->[0]}) ?
+		$foreign_module_for->{$m->[0]} : $m->[0];
+	if (!defined($fmod)) {
+		push(@available, $m);
+		next;
+		}
+	push(@available, $m) if (&foreign_check($fmod));
+	}
+return @available;
+}
+
+# list_available_domain_owner_modules()
+# Returns the installed domain-owner modules accessible to the calling Webmin
+# user. This caller-specific list is only for rendering and parsing UI fields.
+sub list_available_domain_owner_modules
+{
+my ($modules, $foreign_module_for) = &domain_owner_module_registry();
+my @available;
+foreach my $m (@$modules) {
+	my $fmod = exists($foreign_module_for->{$m->[0]}) ?
+		$foreign_module_for->{$m->[0]} : $m->[0];
+	if (!defined($fmod)) {
+		push(@available, $m);
+		next;
+		}
+	push(@available, $m) if (&foreign_available($fmod));
+	}
+return @available;
+}
+
+# get_domain_webmin_avail(&domain)
+# Returns the Webmin module access settings for a top-level domain owner.
+# A missing policy fails closed until postinstall initializes it.
+sub get_domain_webmin_avail
+{
+my ($d) = @_;
+if ($d->{'parent'}) {
+	my $parent = &get_domain($d->{'parent'});
+	return $parent ? &get_domain_webmin_avail($parent) : "";
+	}
+return defined($d->{'webmin_avail'}) ? $d->{'webmin_avail'} : "";
+}
+
+# init_domain_webmin_avail(&domain)
+# Copies the template's initial Webmin module access settings into a new or
+# migrated top-level domain. Returns 1 if the domain object was changed.
+sub init_domain_webmin_avail
+{
+my ($d) = @_;
+return 0 if ($d->{'parent'});
+return 0 if (defined($d->{'webmin_avail'}));
+my $tmpl = &get_template($d->{'template'});
+my %avail = &webmin_avail_map(&get_template_webmin_avail($tmpl));
+$d->{'webmin_avail'} = &make_webmin_avail(\%avail);
+return 1;
+}
+
+# get_template_webmin_avail(&template)
+# Returns the effective initial Webmin module access for a template. Custom
+# templates with no setting inherit the current default template value.
+sub get_template_webmin_avail
 {
 my ($tmpl) = @_;
-my $field;
-if (!$tmpl->{'default'}) {
-	my @inames = map { "avail_".$_->[0] } &list_domain_owner_modules();
-	my $dis1 = &js_disable_inputs(\@inames, [ ], 'onClick');
-	my $dis2 = &js_disable_inputs([ ], \@inames, 'onClick');
-	$field .= &ui_radio("avail_def", $tmpl->{'avail'} ? 0 : 1,
-			    [ [ 1, $text{'tmpl_avail1'}, $dis1 ],
-			      [ 0, $text{'tmpl_avail0'}, $dis2 ] ])."<br>\n";
-	}
-$field .= &ui_columns_start(
-	[ $text{'tmpl_availmod'}, $text{'tmpl_availyes'} ]);
-my $alist;
-if ($tmpl->{'default'} || $tmpl->{'avail'}) {
-	$alist = $tmpl->{'avail'};
-	}
-else {
-	# Initial selection comes from default template
+my $avail = $tmpl->{'avail'};
+if (!$tmpl->{'default'} && (!defined($avail) || $avail eq '')) {
 	my $deftmpl = &get_template(0);
-	$alist = $deftmpl->{'avail'};
+	$avail = $deftmpl ? $deftmpl->{'avail'} : "";
 	}
-my %avail = map { split(/=/, $_, 2) } split(/\s+/, $alist);
-# If not set yet, assumed enabled for plugins
-foreach my $p (@plugins) {
-	if ($avail{$p} eq '') {
-		$avail{$p} = 1;
-		}
+return $avail;
+}
+
+# webmin_avail_map(string)
+# Converts serialized Webmin module access settings into a hash.
+sub webmin_avail_map
+{
+my ($str) = @_;
+my %rv;
+foreach my $a (split(/\s+/, $str)) {
+	my ($mod, $value) = split(/=/, $a, 2);
+	$rv{$mod} = $value if ($mod ne '' && defined($value));
 	}
+return %rv;
+}
+
+# valid_webmin_avail_value(&module-info, value)
+# Returns 1 if a module access level is one of the values offered by the UI.
+sub valid_webmin_avail_value
+{
+my ($m, $value) = @_;
+return 0 if (!defined($value));
+if ($m->[2]) {
+	return scalar(grep { "$_->[0]" eq "$value" } @{$m->[2]});
+	}
+return $value eq '0' || $value eq '1';
+}
+
+# make_webmin_avail(&values)
+# Serializes installed module access levels in a stable order. Missing values
+# are stored as disabled.
+sub make_webmin_avail
+{
+my ($values) = @_;
+my @avail;
 foreach my $m (&list_domain_owner_modules()) {
+	my $value = defined($values->{$m->[0]}) &&
+		$values->{$m->[0]} ne '' ?
+		$values->{$m->[0]} : 0;
+	push(@avail, $m->[0].'='.$value);
+	}
+return join(' ', @avail);
+}
+
+# set_template_webmin_avail(&template, &values)
+# Updates a template's initial Webmin module access from form values. Returns
+# undef on success, or the code of a module with an invalid access level.
+sub set_template_webmin_avail
+{
+my ($tmpl, $values) = @_;
+if (!$tmpl->{'default'} && $values->{'avail_def'}) {
+	$tmpl->{'avail'} = undef;
+	return undef;
+	}
+my %avail = &webmin_avail_map(&get_template_webmin_avail($tmpl));
+foreach my $m (&list_available_domain_owner_modules()) {
+	my $value = $values->{'avail_'.$m->[0]};
+	return $m->[0] if (!&valid_webmin_avail_value($m, $value));
+	$avail{$m->[0]} = $value;
+	}
+$tmpl->{'avail'} = &make_webmin_avail(\%avail);
+return undef;
+}
+
+# webmin_avail_rows(string)
+# Returns standard table rows for selecting a server owner's Webmin modules.
+sub webmin_avail_rows
+{
+my ($alist) = @_;
+my %avail = &webmin_avail_map($alist);
+my $rows;
+foreach my $m (&list_available_domain_owner_modules()) {
+	my $desc = $m->[1];
 	my $minp;
 	if ($m->[2]) {
 		$minp = &ui_radio("avail_".$m->[0], int($avail{$m->[0]}),
 				  $m->[2]);
 		}
 	else {
-		$minp = &ui_yesno_radio("avail_".$m->[0], int($avail{$m->[0]}));
+		$minp = &ui_yesno_radio("avail_".$m->[0],
+					 int($avail{$m->[0]}));
 		}
-	my @h = ( $m->[1], "config_avail_".$m->[0] );
-	$field .= &ui_columns_row([
-		-r &help_file($module_name, $h[1]) ? &hlink(@h) : $m->[1], $minp ]);
+	my @h = ( $desc, $m->[3] || "config_avail_".$m->[0] );
+	my $label = -r &help_file($module_name, $h[1]) ?
+		&hlink(@h) : $desc;
+	$rows .= &ui_table_row($label, $minp);
 	}
-$field .= &ui_columns_end();
-print &ui_table_row(undef, $field, 2);
-}
-
-# parse_template_avail(&tmpl)
-# Update the list of modules available to domain owners
-sub parse_template_avail
-{
-my ($tmpl) = @_;
-if ($in{'avail_def'}) {
-	$tmpl->{'avail'} = undef;
-	}
-else {
-	my @avail;
-	foreach my $m (&list_domain_owner_modules()) {
-		push(@avail, $m->[0].'='.$in{'avail_'.$m->[0]});
-		}
-	$tmpl->{'avail'} = join(' ', @avail);
-	}
+return $rows;
 }
 
 # show_template_virtualmin(&tmpl)
@@ -18618,8 +18747,7 @@ foreach my $t (@template_features) {
 	}
 if ($tmpl && ($tmpl->{'id'} == 1 || !$tmpl->{'for_parent'})) {
 	# For sub-servers only
-	@rv = grep { $_ ne 'resources' && $_ ne 'unix' && $_ ne 'webmin' &&
-		     $_ ne 'avail' } @rv;
+	@rv = grep { $_ ne 'resources' && $_ ne 'unix' && $_ ne 'webmin' } @rv;
 	}
 my @rvdesc = map { [ $_,
 		     $text{'tmpl_editmode_'.$_} || $text{'feature_'.$_},

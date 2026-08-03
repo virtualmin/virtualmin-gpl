@@ -39,6 +39,7 @@
 * Drop the obsolete per-domain ProFTPD virtual FTP feature while preserving service controls and backup compatibility
 * Rename the Git-based config history CLI commands to `list-config-revisions` and `restore-config-revision`
 * Replace the legacy website preview flow with sandboxed proxying
+* Change Webmin module access to a per-domain setting on the "Manage Virtual Server ⇾ Edit Owner Limits" page, copy current template settings to existing servers, apply later template changes only to new servers, and correctly enforce disabled plugin modules
 
 #### Version 8.1.0
 * Add a simplified UI for managing website redirects  

@@ -67,6 +67,7 @@ elsif ($in{'clone'}) {
 # Get the editing mode in use
 @editmodes = &list_template_editmodes($tmpl);
 ($editmode) = grep { $_->[0] eq $in{'editmode'} } @editmodes;
+$editmode || &error($text{'tmpl_eeditmode'});
 
 # Validate and store all inputs
 $oldname = $tmpl->{'name'};
@@ -147,5 +148,4 @@ else {
 	return $in{$_[0]};
 	}
 }
-
 

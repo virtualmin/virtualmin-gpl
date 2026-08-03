@@ -92,9 +92,9 @@ $config{'virt6'} = 1;
 @subdom_features = ( @opt_subdom_features );
 @database_features = ( 'mysql', 'postgres' );
 @template_features = ( 'basic', 'resources', @features, 'virt', 'virtualmin',
-		       'plugins', 'scripts', 'autoconfig', 'php', 'avail',
+		       'plugins', 'scripts', 'autoconfig', 'php',
 		       'newuser', 'updateuser', );
-@template_features_effecting_webmin = ( 'web', 'webmin', 'avail' );
+@template_features_effecting_webmin = ( 'web', 'webmin' );
 @can_always_features = ( 'dir', 'unix', 'logrotate' );
 @validate_features = ( @features, "virt", "virt6" );
 foreach my $fname (@features, "virt", "virt6") {

@@ -4,8 +4,7 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 &licence_status();
-$d = &get_domain($in{'dom'});
-&can_edit_limits($d) || &error($text{'edit_ecannot'});
+my $d = &get_editable_limits_domain($in{'dom'});
 
 # Validate and store inputs
 &error_setup($text{'limits_err'});
@@ -50,6 +49,14 @@ foreach $f (@opt_features, "virt", &list_feature_plugins()) {
 	}
 $d->{'webmin_nocat_modules'} = $in{'nocatwebmin'};
 if (&can_webmin_modules()) {
+	my %avail = &webmin_avail_map(&get_domain_webmin_avail($d));
+	foreach my $m (&list_available_domain_owner_modules()) {
+		my $value = $in{'avail_'.$m->[0]};
+		&valid_webmin_avail_value($m, $value) ||
+			&error(&text('limits_ewebminavail', $m->[0]));
+		$avail{$m->[0]} = $value;
+		}
+	$d->{'webmin_avail'} = &make_webmin_avail(\%avail);
 	$d->{'webmin_modules'} = $in{'modules'};
 	}
 
@@ -171,5 +178,3 @@ if (!&check_jailkit_support()) {
 &webmin_log("limits", "domain", $d->{'dom'}, $d);
 
 &domain_redirect($d);
-
-
