@@ -2500,6 +2500,7 @@ if ($ok) {
 		if ($opts->{'fix'}) {
 			# We can just use the domains file from the
 			# backup and import it
+			&init_domain_webmin_avail($d);
 			&save_domain($d, 1);
 			}
 		else {

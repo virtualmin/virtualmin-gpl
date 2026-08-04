@@ -345,15 +345,8 @@ if ($onlydoms) {
 	@doms = grep { $onlydoms{$_->{'id'}} } @doms;
 	}
 
-# Modules that this user should be granted access to, and exist
-# on this system
-my %mods;
-foreach my $avail (split(/\s+/, $tmpl->{'avail'})) {
-	my ($m, $a) = split(/=/, $avail, 2);
-	if ($a) {
-		$mods{$m} = $a;
-		}
-	}
+# Module access levels for this user
+my %mods = &webmin_avail_map(&get_domain_webmin_avail($d));
 
 # Grant access to BIND module if needed
 if ($features{'dns'} && $mods{'dns'} && !$d->{'provision_dns'} &&

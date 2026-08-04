@@ -115,6 +115,23 @@ if (defined(&sync_parent_resellers)) {
 	&sync_parent_resellers();
 	}
 
+# Copy the current template settings to existing top-level servers so later
+# template changes no longer affect their owners. Servers already copied are
+# skipped if postinstall is resumed.
+if (!$config{'migrated_domain_webmin_avail'}) {
+	foreach my $listed (grep { !$_->{'parent'} } &list_domains()) {
+		my $id = $listed->{'id'};
+		&lock_domain($id);
+		my $d = &get_domain($id, undef, 1);
+		if ($d && !$d->{'parent'} && &init_domain_webmin_avail($d)) {
+			&save_domain($d);
+			}
+		&unlock_domain($id);
+		}
+	$config{'migrated_domain_webmin_avail'} = 1;
+	&save_module_config();
+	}
+
 # Force update of all Webmin users, to set new ACL options
 &modify_all_webmin();
 if ($virtualmin_pro) {
