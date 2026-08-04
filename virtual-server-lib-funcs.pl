@@ -2598,14 +2598,14 @@ my ($username, $quota, $d) = @_;
 my $tmpl = &get_template($d ? $d->{'template'} : 0);
 if (&has_quota_commands()) {
 	# Call the external quota program
-	&run_quota_command("set_user", $user,
+	&run_quota_command("set_user", $username,
 	    $tmpl->{'quotatype'} eq 'hard' ? ( int($quota), int($quota) )
 					   : ( int($quota), 0 ));
 	}
 else {
 	# Call through to quotas module
 	if (&has_home_quotas()) {
-		&set_quota($user, $config{'home_quotas'}, $quota,
+		&set_quota($username, $config{'home_quotas'}, $quota,
 			   $tmpl->{'quotatype'} eq 'hard');
 		}
 	}
