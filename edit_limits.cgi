@@ -4,13 +4,12 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
-$d = &get_domain($in{'dom'});
-&can_edit_limits($d) || &error($text{'edit_ecannot'});
+my $d = &get_editable_limits_domain($in{'dom'});
 
 &ui_print_header(&domain_in($d), $text{'limits_title'}, "", "limits");
 
 print &ui_form_start("save_limits.cgi", "post");
-print &ui_hidden("dom", $in{'dom'}),"\n";
+print &ui_hidden("dom", $d->{'id'}),"\n";
 print &ui_hidden_table_start($text{'limits_header'}, "width=100%", 2,
 			     "limits", 1, [ "width=30%" ]);
 
@@ -169,6 +168,30 @@ if (defined(&list_scripts)) {
 
 print &ui_hidden_table_end("limits");
 
+# Webmin module access section
+print &ui_hidden_table_start($text{'limits_header5'}, "width=100%", 2,
+				     "wmods", 0, [ "width=30%" ]);
+
+if (&can_webmin_modules()) {
+	# Core and feature-related Webmin modules with restricted ACLs
+	print &webmin_avail_rows(&get_domain_webmin_avail($d));
+
+	# Extra Webmin modules
+	print &ui_table_hr();
+	print &ui_table_row(
+		&hlink($text{'limits_modules'}, "limits_modules"),
+		&ui_textbox("modules", $d->{'webmin_modules'}, 30)."\n".
+		&modules_chooser_button("modules", 1));
+	}
+
+# Hide Webmin Modules category for domain owners
+print &ui_table_row(&hlink($text{'limits_nocatwebmin'},
+			   "limits_nocatwebmin"),
+	&ui_radio("nocatwebmin", $d->{'webmin_nocat_modules'} ? 1 : 0,
+	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
+print &ui_hidden_table_end("wmods");
+
 # Jailkit section
 if (!&check_jailkit_support()) {
 	print &ui_hidden_table_start($text{'limits_header4'}, "width=100%", 2,
@@ -203,18 +226,6 @@ print &ui_table_row(&hlink($text{'limits_demo'}, "limits_demo"),
 	&ui_radio("demo", $d->{'demo'} ? 1 : 0,
 	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
-# Hide Webmin Modules category for domain owners
-print &ui_table_row(&hlink($text{'limits_nocatwebmin'}, "limits_nocatwebmin"),
-	&ui_radio("nocatwebmin", $d->{'webmin_nocat_modules'} ? 1 : 0,
-	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
-
-if (&can_webmin_modules()) {
-	# Extra Webmin modules
-	print &ui_table_row(&hlink($text{'limits_modules'}, "limits_modules"),
-		&ui_textbox("modules", $d->{'webmin_modules'}, 30)."\n".
-		&modules_chooser_button("modules", 1));
-	}
-
 if (&can_edit_shell() && $d->{'unix'}) {
 	# Login shell, which determines FTP/SSH access
 	my $shell = &get_domain_shell($d);
@@ -227,4 +238,3 @@ print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});
-

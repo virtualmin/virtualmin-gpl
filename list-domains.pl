@@ -938,6 +938,8 @@ if ($multiline) {
 					       @edit_limits),"\n";
 			print "    Allowed scripts: ",
 				($d->{'allowedscripts'} || "All"),"\n";
+			print "    Webmin module access: ",
+				&get_domain_webmin_avail($d),"\n";
 
 			$shellcmd = &get_domain_shell($d);
 			($shell) = grep { $_->{'shell'} eq $shellcmd }
@@ -1089,5 +1091,4 @@ if ($virtualmin_pro) {
 	}
 exit(1);
 }
-
 
