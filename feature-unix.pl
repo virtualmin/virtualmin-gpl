@@ -369,7 +369,7 @@ if (!$d->{'parent'}) {
 
 	# Zero his quotas
 	if ($uinfo) {
-		&set_user_quotas($uinfo->{'user'}, 0, 0, $d);
+		&set_user_quotas($uinfo->{'user'}, 0, $d);
 		}
 
 	# Delete his cron jobs
