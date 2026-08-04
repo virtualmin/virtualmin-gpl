@@ -116,16 +116,6 @@ $path =~ s/\\([0-7]{3})/chr(oct($1))/eg;
 return $path;
 }
 
-# path_is_under_btrfs_mount(mount, path)
-# Returns 1 when path is the mount point itself or one of its descendants.
-sub path_is_under_btrfs_mount
-{
-my ($mount, $path) = @_;
-return 1 if ($mount eq "/");
-$mount =~ s/\/*$/\//;
-return $path eq substr($mount, 0, -1) || index($path, $mount) == 0;
-}
-
 # parse_btrfs_mountinfo(text, path)
 # Returns the deepest Btrfs mount point containing path and its filesystem root.
 sub parse_btrfs_mountinfo
@@ -142,7 +132,7 @@ foreach my $line (split(/\r?\n/, $text)) {
 	next if (@left < 5);
 	my $root = &decode_btrfs_mount_path($left[3]);
 	my $mount = &decode_btrfs_mount_path($left[4]);
-	next if (!&path_is_under_btrfs_mount($mount, $path));
+	next if (!&is_under_directory($mount, $path));
 	# Prefer the deepest match when nested Btrfs subvolumes are mounted.
 	if (!defined($best_mount) || length($mount) > length($best_mount)) {
 		$best_mount = $mount;
@@ -691,7 +681,7 @@ foreach my $u (@$users) {
 	# Limit fallback commands to homes governed by this quota backend. System
 	# accounts elsewhere cannot have a relevant Btrfs home qgroup.
 	if (!$q && $u->{'home'} && -e $u->{'home'} &&
-	    &path_is_under_btrfs_mount($quota_root, $u->{'home'})) {
+	    &is_under_directory($quota_root, $u->{'home'})) {
 		$q = &get_btrfs_qgroup_by_path(
 			$u->{'home'}, 0, undef);
 		}

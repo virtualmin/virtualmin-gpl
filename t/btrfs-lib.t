@@ -14,6 +14,17 @@ my $loaded = do $lib;
 die $@ if ($@);
 die "Failed to load $lib: $!" if (!defined($loaded));
 
+# The production library gets this helper from Webmin's standard library.
+{
+	no warnings qw(redefine once);
+	*main::is_under_directory = sub {
+		my ($dir, $file) = @_;
+		return 1 if ($dir eq "/" || $dir eq $file);
+		$dir =~ s/\/*$/\//;
+		return index($file, $dir) == 0;
+		};
+}
+
 # Load the real English messages so unit tests also catch missing language keys.
 my $lang = File::Spec->catfile($root, 'lang', 'en');
 open(my $langfh, '<', $lang) or die "Failed to read $lang: $!";
