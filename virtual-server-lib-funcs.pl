@@ -1548,7 +1548,7 @@ if ($config{'generics'} && $firstemail) {
 
 if (!$_[0]->{'noquota'}) {
 	# Set his initial quotas
-	&set_user_quotas($_[0]->{'user'}, $_[0]->{'quota'}, undef, $_[1]);
+	&set_user_quotas($_[0]->{'user'}, $_[0]->{'quota'}, $_[1]);
 	&update_user_quota_cache($_[1], $_[0], 0);
 	}
 
@@ -1914,7 +1914,7 @@ NOALIASES:
 if ($d && $user->{'user'} ne $d->{'user'} &&
     !$user->{'noquota'} &&
     $user->{'quota'} != $olduser->{'quota'}) {
-	&set_user_quotas($user->{'user'}, $user->{'quota'}, undef, $d);
+	&set_user_quotas($user->{'user'}, $user->{'quota'}, $d);
 	if ($user->{'user'} ne $olduser->{'user'}) {
 		&update_user_quota_cache($olduser, $user, 1);
 		}
@@ -2119,7 +2119,7 @@ if ($_[0]->{'extra'}) {
 
 # Zero out his quotas
 if (!$_[0]->{'noquota'}) {
-	&set_user_quotas($_[0]->{'user'}, 0, 0, $_[1]);
+	&set_user_quotas($_[0]->{'user'}, 0, $_[1]);
 	&update_user_quota_cache($_[1], $_[0], 1);
 	}
 
@@ -2589,21 +2589,22 @@ if ($d && $user->{'home'} &&
 return undef;
 }
 
-# set_user_quotas(username, home-quota, mail-quota, [&domain])
+# set_user_quotas(username, home-quota, [&domain])
 # Sets the quotas for a mailbox user
 sub set_user_quotas
 {
-my $tmpl = &get_template($_[3] ? $_[3]->{'template'} : 0);
+my ($username, $quota, $d) = @_;
+my $tmpl = &get_template($d ? $d->{'template'} : 0);
 if (&has_quota_commands()) {
 	# Call the external quota program
-	&run_quota_command("set_user", $_[0],
-	    $tmpl->{'quotatype'} eq 'hard' ? ( int($_[1]), int($_[1]) )
-					   : ( int($_[1]), 0 ));
+	&run_quota_command("set_user", $user,
+	    $tmpl->{'quotatype'} eq 'hard' ? ( int($quota), int($quota) )
+					   : ( int($quota), 0 ));
 	}
 else {
 	# Call through to quotas module
 	if (&has_home_quotas()) {
-		&set_quota($_[0], $config{'home_quotas'}, $_[1],
+		&set_quota($user, $config{'home_quotas'}, $quota,
 			   $tmpl->{'quotatype'} eq 'hard');
 		}
 	}
@@ -5650,7 +5651,7 @@ elsif ($d->{'unix'} && $d->{'quota'}) {
 		@disable_quotas_users = &list_domain_users($d, 1, 1, 0, 1);
 		foreach my $u (@disable_quotas_users) {
 			next if ($u->{'noquota'});
-			&set_user_quotas($u->{'user'}, 0, 0, $d);
+			&set_user_quotas($u->{'user'}, 0, $d);
 			}
 		}
 	}
@@ -5671,7 +5672,7 @@ elsif ($d->{'unix'} && $d->{'quota'}) {
 	if (@disable_quotas_users) {
 		foreach my $u (@disable_quotas_users) {
 			next if ($u->{'noquota'});
-			&set_user_quotas($u->{'user'}, $u->{'quota'}, undef, $d);
+			&set_user_quotas($u->{'user'}, $u->{'quota'}, $d);
 			}
 		@disable_quotas_users = ( );
 		}
