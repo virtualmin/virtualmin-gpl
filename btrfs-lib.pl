@@ -60,7 +60,8 @@ foreach my $f (qw(is_btrfs_fs btrfs_quota_status list_btrfs_qgroups
 		  btrfs_subvolume_id set_btrfs_qgroup_limit
 		  create_btrfs_qgroup delete_btrfs_qgroup
 		  assign_btrfs_qgroup unassign_btrfs_qgroup
-		  rescan_btrfs_quotas run_btrfs_command)) {
+		  rescan_btrfs_quotas run_btrfs_command btrfs_mountinfo
+		  btrfs_qgroup_absolute_path)) {
 	return &text('btrfs_eapi', $f)
 		if (!defined(&{"quota::$f"}));
 	}
@@ -107,76 +108,6 @@ return 0 if (!$bytes);
 return int((int($bytes) + 1023) / 1024);
 }
 
-# decode_btrfs_mount_path(path)
-# Decode the octal escapes used by /proc/self/mountinfo.
-sub decode_btrfs_mount_path
-{
-my ($path) = @_;
-$path =~ s/\\([0-7]{3})/chr(oct($1))/eg;
-return $path;
-}
-
-# parse_btrfs_mountinfo(text, path)
-# Returns the deepest Btrfs mount point containing path and its filesystem root.
-sub parse_btrfs_mountinfo
-{
-my ($text, $path) = @_;
-my ($best_mount, $best_root);
-# Parse only Btrfs mountinfo records that can contain the requested path.
-foreach my $line (split(/\r?\n/, $text)) {
-	my ($left, $right) = split(/\s+-\s+/, $line, 2);
-	next if (!defined($right));
-	my @right = split(/\s+/, $right);
-	next if ($right[0] ne 'btrfs');
-	my @left = split(/\s+/, $left);
-	next if (@left < 5);
-	my $root = &decode_btrfs_mount_path($left[3]);
-	my $mount = &decode_btrfs_mount_path($left[4]);
-	next if (!&is_under_directory($mount, $path));
-	# Prefer the deepest match when nested Btrfs subvolumes are mounted.
-	if (!defined($best_mount) || length($mount) > length($best_mount)) {
-		$best_mount = $mount;
-		$best_root = $root;
-		}
-	}
-return defined($best_mount) ? ($best_mount, $best_root) : ( );
-}
-
-# btrfs_mountinfo(path)
-# Reads Linux mountinfo and returns the visible mount point and filesystem root.
-sub btrfs_mountinfo
-{
-my ($path) = @_;
-open(my $fh, "<", "/proc/self/mountinfo") || return ( );
-local $/ = undef;
-my $text = <$fh>;
-close($fh);
-return &parse_btrfs_mountinfo($text, $path);
-}
-
-# btrfs_qgroup_absolute_path(mount, fs-root, qgroup-path)
-# Convert the path reported by `btrfs qgroup show` to a visible absolute path.
-sub btrfs_qgroup_absolute_path
-{
-my ($mount, $root, $path) = @_;
-return undef if (!defined($path) || $path eq '' || $path =~ /^</);
-$root ||= "/";
-$root =~ s/^\/+//;
-$root =~ s/\/+\z//;
-$path =~ s/^\/+//;
-# Strip the mounted subvolume root from the filesystem-relative qgroup path.
-if ($root ne '') {
-	return undef if ($path ne $root && index($path, "$root/") != 0);
-	$path = substr($path, length($root));
-	$path =~ s/^\/+//;
-	}
-$mount =~ s/\/+\z// if ($mount ne "/");
-my $absolute = $path eq '' ? ($mount || "/") :
-		       ($mount eq "/" ? "/$path" : "$mount/$path");
-$absolute =~ s{//+}{/}g;
-return $absolute;
-}
-
 # clear_btrfs_quota_cache()
 # Invalidates all indexes after a qgroup or subvolume mutation.
 sub clear_btrfs_quota_cache
@@ -207,11 +138,11 @@ my $qgroups = &quota::list_btrfs_qgroups($fs, $sync, $errref);
 return undef if (!$qgroups);
 my %byid = map { $_->{'id'}, $_ } @$qgroups;
 my %bypath;
-my ($mount, $root) = &btrfs_mountinfo($fs);
+my ($mount, $root) = &quota::btrfs_mountinfo($fs);
 # Build absolute-path indexes only when the visible Btrfs mount can be resolved.
 if (defined($mount)) {
 	foreach my $q (@$qgroups) {
-		my $path = &btrfs_qgroup_absolute_path(
+		my $path = &quota::btrfs_qgroup_absolute_path(
 			$mount, $root, $q->{'path'});
 		# Special or out-of-mount qgroup paths intentionally remain ID-only.
 		if (defined($path)) {

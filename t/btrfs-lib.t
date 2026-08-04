@@ -130,22 +130,35 @@ ok(!defined(&btrfs_quota_blocks_to_bytes(0)),
 	unlike($err, qr/<a\b/, 'UI error omits an inaccessible configuration link');
 }
 
-my $mountinfo = <<'EOF';
-24 1 0:20 / / rw,relatime - ext4 /dev/root rw
-31 24 0:42 /@home /home rw,relatime - btrfs /dev/vdb rw,compress=zstd
-32 31 0:42 /@home/example/homes/bob /srv/bob rw,relatime - btrfs /dev/vdb rw,compress=zstd
-EOF
-my ($mount, $fsroot) = &parse_btrfs_mountinfo(
-	$mountinfo, '/home/example/homes/alice');
-is($mount, '/home', 'containing Btrfs mount is selected');
-is($fsroot, '/@home', 'mounted Btrfs filesystem root is returned');
-is(&btrfs_qgroup_absolute_path(
-	$mount, $fsroot, '@home/example/homes/alice'),
-	'/home/example/homes/alice',
-	'qgroup path is translated through a mounted subvolume root');
-ok(!defined(&btrfs_qgroup_absolute_path(
-	$mount, $fsroot, '@var/lib/mysql')),
-	'qgroups outside the mounted filesystem root are ignored');
+# Virtualmin should use Webmin's mount mapping when indexing qgroups by path.
+{
+	no warnings qw(redefine once);
+	local %main::config = ( 'home_quotas' => '/home' );
+	local $main::home_base = '/home';
+	local $main::btrfs_qgroups_cache;
+	local $main::btrfs_qgroups_by_id_cache;
+	local $main::btrfs_qgroups_by_path_cache;
+	local *main::btrfs_quota_api_error = sub { return undef; };
+	local *quota::list_btrfs_qgroups = sub {
+		return [ { 'id' => '0/256', 'path' => '@home/example' } ];
+		};
+	my (@mount_args, @path_args);
+	local *quota::btrfs_mountinfo = sub {
+		@mount_args = @_;
+		return ('/home', '/@home');
+		};
+	local *quota::btrfs_qgroup_absolute_path = sub {
+		@path_args = @_;
+		return '/home/example';
+		};
+	my $qgroups = &list_btrfs_qgroups(0, undef);
+	is_deeply(\@mount_args, [ '/home' ],
+		'quota module resolves the Btrfs mount layout');
+	is_deeply(\@path_args, [ '/home', '/@home', '@home/example' ],
+		'quota module converts the filesystem-relative qgroup path');
+	is($main::btrfs_qgroups_by_path_cache->{'/home/example'}, $qgroups->[0],
+		'resolved qgroup path is indexed for Virtualmin');
+}
 
 my $object = { };
 &apply_btrfs_quota($object, {
