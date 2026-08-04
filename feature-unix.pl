@@ -315,8 +315,17 @@ if (!$d->{'parent'}) {
 		if ($d->{'quota'} != $oldd->{'quota'} ||
 		    $d->{'uquota'} != $oldd->{'uquota'}) {
 			&$first_print($text{'save_quota'});
-			&set_server_quotas($d);
-			&$second_print($text{'setup_done'});
+			# A quota backend failure must not abort unrelated domain edits.
+			# Catch it here so the UI reports the operation, not the feature.
+			my $quota_err;
+			{
+			local $main::error_must_die = 1;
+			eval { &set_server_quotas($d); };
+			$quota_err = $@;
+			}
+			$quota_err =~ s/\s+$// if ($quota_err);
+			&$second_print($quota_err ? ".. failed : $quota_err" :
+						     $text{'setup_done'});
 			}
 		}
 

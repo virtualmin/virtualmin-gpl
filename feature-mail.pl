@@ -594,6 +594,12 @@ foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
 		}
 	$newu->{'to'} = \@to;
 
+	# Domain cloning copies mailbox contents before recreating the Unix user.
+	# Convert that populated directory into a subvolume before quotas are set.
+	my $convert_err =
+		&convert_btrfs_restored_user_home($newu, $d);
+	&error($convert_err) if ($convert_err);
+
 	# Fix home directory permissions
 	if (-d $newu->{'home'} && &is_under_directory($hb, $newu->{'home'})) {
 		&execute_command("chown -R $newu->{'uid'}:$newu->{'gid'} ".
@@ -3127,6 +3133,13 @@ while(<UFILE>) {
 		#		delete($uinfo->{$dt."_pass"});
 		#		}
 		#	}
+
+		# Home data is extracted before mailbox accounts are restored. On
+		# Btrfs, explicitly convert that restored directory into the mailbox
+		# subvolume before quota setup runs as part of user creation.
+		my $btrfs_restore_err =
+			&convert_btrfs_restored_user_home($uinfo, $d);
+		&error($btrfs_restore_err) if ($btrfs_restore_err);
 
 		# Create the user, which will also add any configured DB account
 		&create_user($uinfo, $d);
