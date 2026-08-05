@@ -2134,7 +2134,7 @@ if ($_[0]->{'extra'}) {
 
 # Zero out his quotas
 if (!$_[0]->{'noquota'}) {
-	&set_user_quotas($_[0]->{'user'}, 0, 0, $_[1], 1);
+	&set_user_quotas($_[0]->{'user'}, 0, $_[1], 1);
 	&update_user_quota_cache($_[1], $_[0], 1);
 	}
 
@@ -2604,27 +2604,28 @@ if ($d && $user->{'home'} &&
 return undef;
 }
 
-# set_user_quotas(username, home-quota, mail-quota, [&domain], [deleting])
+# set_user_quotas(username, home-quota, [&domain], [deleting])
 # Sets the quotas for a mailbox user
 sub set_user_quotas
 {
-my $tmpl = &get_template($_[3] ? $_[3]->{'template'} : 0);
+my ($username, $quota, $d, $deleting) = @_;
+my $tmpl = &get_template($d ? $d->{'template'} : 0);
 # Route Btrfs homes through subvolume limits rather than POSIX UID quotas.
 if (&has_btrfs_quotas()) {
 	my $err = &set_btrfs_user_quota(
-		$_[0], $_[1], $_[3], $_[4]);
+		$username, $quota, $d, $deleting);
 	&error($err) if ($err);
 	}
 elsif (&has_quota_commands()) {
 	# Call the external quota program
-	&run_quota_command("set_user", $user,
+	&run_quota_command("set_user", $username,
 	    $tmpl->{'quotatype'} eq 'hard' ? ( int($quota), int($quota) )
 					   : ( int($quota), 0 ));
 	}
 else {
 	# Call through to quotas module
 	if (&has_home_quotas()) {
-		&set_quota($user, $config{'home_quotas'}, $quota,
+		&set_quota($username, $config{'home_quotas'}, $quota,
 			   $tmpl->{'quotatype'} eq 'hard');
 		}
 	}
