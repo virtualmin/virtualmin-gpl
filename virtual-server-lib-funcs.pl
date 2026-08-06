@@ -17621,55 +17621,45 @@ elsif ($config{'quotas'}) {
 			# Btrfs quotas are subvolume qgroups, not POSIX UID/GID
 			# quotas, so the traditional quota_can/quota_now APIs do
 			# not apply.
-			if (!defined(&quota::btrfs_quota_status) ||
-			    !defined(&quota::list_btrfs_qgroups)) {
-				$qerr = $text{'index_ebtrfsapi'};
+			my $status = &quota::btrfs_quota_status($home_base);
+			if (!$status) {
+				$qerr = &text('index_ebtrfserror',
+					$text{'index_ebtrfsunknown'});
+				}
+			elsif ($status->{'error'}) {
+				$qerr = &text('index_ebtrfserror',
+					&html_escape($status->{'error'}));
+				}
+			elsif (!$status->{'enabled'}) {
+				$qerr = &text('index_equota3',
+				    "<tt>$home_mtab->[0]</tt>",
+				    "<tt>$home_base</tt>");
+				}
+			elsif (($status->{'mode'} || '') eq 'squota') {
+				# Simple quotas cannot aggregate domain and mailbox
+				# subvolumes into Virtualmin's parent qgroups.
+				$qerr = $text{'index_ebtrfssquota'};
 				}
 			else {
-				my $status = &quota::btrfs_quota_status($home_base);
-				if (!$status) {
+				# Temporarily select this backend so its layout scan uses
+				# the visible home path. This supports bind and subvolume
+				# mounts.
+				$config{'home_quotas'} = $home_base;
+				$config{'btrfs_quotas'} = 1;
+				my $layout_err;
+				my @invalid = &list_invalid_btrfs_homes(\$layout_err);
+				if ($layout_err) {
+					$config{'home_quotas'} = '';
+					$config{'btrfs_quotas'} = '';
 					$qerr = &text('index_ebtrfserror',
-						$text{'index_ebtrfsunknown'});
-					}
-				elsif ($status->{'error'}) {
-					$qerr = &text('index_ebtrfserror',
-						&html_escape($status->{'error'}));
-					}
-				elsif (!$status->{'enabled'}) {
-					$qerr = &text('index_equota3',
-					    "<tt>$home_mtab->[0]</tt>",
-					    "<tt>$home_base</tt>");
-					}
-				elsif (($status->{'mode'} || '') eq 'squota') {
-					# Simple quotas cannot aggregate domain and mailbox
-					# subvolumes into Virtualmin's parent qgroups.
-					$qerr = $text{'index_ebtrfssquota'};
+						&html_escape($layout_err));
 					}
 				else {
-					# Temporarily select this backend so its
-					# layout scan uses the visible home path.
-					# This supports bind and subvolume mounts.
-					$config{'home_quotas'} = $home_base;
-					$config{'btrfs_quotas'} = 1;
-					my $layout_err;
-					my @invalid =
-						&list_invalid_btrfs_homes(
-							\$layout_err);
-					if ($layout_err) {
-						$config{'home_quotas'} = '';
-						$config{'btrfs_quotas'} = '';
-						$qerr = &text('index_ebtrfserror',
-							&html_escape($layout_err));
-						}
-					else {
-						$config{'group_quotas'} = 1;
-						$btrfs_quota_mode =
-							$status->{'mode'} || 'qgroup';
-						$btrfs_quota_warning = 1
-							if ($status->{'inconsistent'});
-						$btrfs_invalid_homes =
-							scalar(@invalid);
-						}
+					$config{'group_quotas'} = 1;
+					$btrfs_quota_mode = $status->{'mode'} || 'qgroup';
+					$btrfs_quota_warning = 1
+						if ($status->{'inconsistent'});
+					$btrfs_invalid_homes = scalar(@invalid);
 					}
 				}
 			}

@@ -50,24 +50,6 @@ while(my $current = shift(@pending)) {
 return @rv;
 }
 
-# btrfs_quota_api_error()
-# Returns an error if the required Webmin quota APIs are unavailable.
-sub btrfs_quota_api_error
-{
-&require_useradmin();
-# Check the entire API surface up front so lifecycle operations fail clearly.
-foreach my $f (qw(is_btrfs_fs btrfs_quota_status list_btrfs_qgroups
-		  btrfs_subvolume_id set_btrfs_qgroup_limit
-		  create_btrfs_qgroup delete_btrfs_qgroup
-		  assign_btrfs_qgroup unassign_btrfs_qgroup
-		  rescan_btrfs_quotas run_btrfs_command btrfs_mountinfo
-		  btrfs_qgroup_absolute_path)) {
-	return &text('btrfs_eapi', $f)
-		if (!defined(&{"quota::$f"}));
-	}
-return undef;
-}
-
 # btrfs_quota_parent_id(&domain, [&error])
 # Returns the collision-free level-1 qgroup used to aggregate a top-level
 # domain. Btrfs qgroup object IDs are only 48 bits wide, so Virtualmin's longer
@@ -122,12 +104,7 @@ undef($main::btrfs_qgroups_by_path_cache);
 sub list_btrfs_qgroups
 {
 my ($sync, $errref) = @_;
-my $apierr = &btrfs_quota_api_error();
-# Report missing Webmin support before consulting potentially stale state.
-if ($apierr) {
-	$$errref = $apierr if ($errref);
-	return undef;
-	}
+&require_useradmin();
 # Reuse a request-local snapshot unless the caller explicitly requests a sync.
 if (!$sync && $main::btrfs_qgroups_cache) {
 	$$errref = undef if ($errref);
@@ -267,8 +244,7 @@ return undef;
 sub ensure_btrfs_subvolume
 {
 my ($path, $d) = @_;
-my $apierr = &btrfs_quota_api_error();
-return wantarray ? ($apierr, 0) : $apierr if ($apierr);
+&require_useradmin();
 return wantarray ? ($text{'btrfs_ehomepath'}, 0) :
 		   $text{'btrfs_ehomepath'}
 	if (!defined($path) || $path !~ /^\// || $path =~ /[\r\n\0]/);
@@ -362,8 +338,7 @@ sub convert_btrfs_restored_user_home
 my ($user, $d) = @_;
 return undef if (!&has_btrfs_quotas() || !$d || !$user->{'home'} ||
 		 $user->{'nocreatehome'} || $user->{'webowner'});
-my $apierr = &btrfs_quota_api_error();
-return $apierr if ($apierr);
+&require_useradmin();
 $d = &btrfs_quota_domain($d);
 return $text{'btrfs_enotopdomain'} if (!$d);
 my $path = $user->{'home'};
@@ -505,8 +480,7 @@ sub set_btrfs_home_quota
 {
 my ($home, $blocks, $d, $deleting) = @_;
 return undef if (!$home || !-e $home);  # Creation applies it after mkdir.
-my $apierr = &btrfs_quota_api_error();
-return $apierr if ($apierr);
+&require_useradmin();
 # Resolve sub-server users to the top-level domain that owns their aggregate.
 if ($d) {
 	$d = &btrfs_quota_domain($d);
@@ -704,8 +678,6 @@ return undef if ($user->{'home'} eq $d->{'home'});
 return undef if (!defined(&quota::btrfs_subvolume_id));
 my $id = &quota::btrfs_subvolume_id($user->{'home'}, undef);
 return undef if (!defined($id));
-my $apierr = &btrfs_quota_api_error();
-return $apierr if ($apierr);
 my $fs = $config{'home_quotas'} || $user->{'home'};
 my $status = &quota::btrfs_quota_status($fs);
 return &text('btrfs_equotastatus', &btrfs_format_path($fs)) if (!$status);
@@ -734,8 +706,7 @@ sub delete_btrfs_domain_home
 {
 my ($d) = @_;
 return undef if ($d->{'parent'} || $d->{'alias'});
-my $apierr = &btrfs_quota_api_error();
-return $apierr if ($apierr);
+&require_useradmin();
 my $id = &quota::btrfs_subvolume_id($d->{'home'}, undef);
 return undef if (!defined($id));
 my $parent = "1/$id";

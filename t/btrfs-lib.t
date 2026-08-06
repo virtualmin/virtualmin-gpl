@@ -14,9 +14,10 @@ my $loaded = do $lib;
 die $@ if ($@);
 die "Failed to load $lib: $!" if (!defined($loaded));
 
-# The production library gets this helper from Webmin's standard library.
+# The production library gets these helpers from Virtualmin and Webmin.
 {
 	no warnings qw(redefine once);
+	*main::require_useradmin = sub { };
 	*main::is_under_directory = sub {
 		my ($dir, $file) = @_;
 		return 1 if ($dir eq "/" || $dir eq $file);
@@ -70,7 +71,6 @@ ok(!defined(&btrfs_quota_blocks_to_bytes(0)),
 		'home_quotas' => '/quota-test',
 		);
 	local $main::home_base = '/quota-test';
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *quota::btrfs_quota_status = sub {
 		return { 'enabled' => 1, 'mode' => 'squota', 'inconsistent' => 1 };
 		};
@@ -138,7 +138,6 @@ ok(!defined(&btrfs_quota_blocks_to_bytes(0)),
 	local $main::btrfs_qgroups_cache;
 	local $main::btrfs_qgroups_by_id_cache;
 	local $main::btrfs_qgroups_by_path_cache;
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *quota::list_btrfs_qgroups = sub {
 		return [ { 'id' => '0/256', 'path' => '@home/example' } ];
 		};
@@ -182,7 +181,6 @@ my @command;
 		'home_quotas' => $tmp,
 		);
 	local $main::home_base = $tmp;
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *main::ensure_btrfs_parent_qgroup = sub {
 		return undef;
 		};
@@ -255,7 +253,6 @@ is_deeply(\@command,
 		'home_quotas' => $tmp,
 		);
 	local $main::home_base = $tmp;
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *main::ensure_btrfs_parent_qgroup = sub {
 		return undef;
 		};
@@ -304,7 +301,6 @@ is_deeply(\@command,
 		'home_quotas' => $tmp,
 		);
 	local $main::home_base = $tmp;
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *main::ensure_btrfs_parent_qgroup = sub {
 		return undef;
 		};
@@ -344,7 +340,6 @@ is_deeply(\@command,
 		'home_quotas' => $tmp,
 		);
 	local $main::home_base = $tmp;
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *quota::btrfs_subvolume_id = sub { return 256; };
 	local *main::list_btrfs_qgroups = sub {
 		$main::btrfs_qgroups_by_id_cache = {
@@ -380,7 +375,6 @@ close($fh);
 		'home_quotas' => $tmp,
 		);
 	local $main::home_base = $tmp;
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *main::ensure_btrfs_parent_qgroup = sub {
 		return undef;
 		};
@@ -433,7 +427,6 @@ ok(-f "$legacy/file", 'legacy home contents are preserved');
 	my $domain = { 'id' => 1700000000457, 'home' => $restore_root };
 	my $user = { 'home' => $restore_home };
 	my $is_subvolume = 0;
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *main::btrfs_quota_domain = sub { return $domain; };
 	local *quota::btrfs_subvolume_id = sub {
 		return $is_subvolume ? 457 : undef;
@@ -489,7 +482,6 @@ ok(-f "$legacy/file", 'legacy home contents are preserved');
 	close($fh);
 	my $domain = { 'id' => 1700000000458, 'home' => $restore_root };
 	my $user = { 'home' => $restore_home };
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *main::btrfs_quota_domain = sub { return $domain; };
 	local *quota::btrfs_subvolume_id = sub { return undef; };
 	local *main::ensure_btrfs_user_home = sub {
@@ -519,7 +511,6 @@ ok(-f "$legacy/file", 'legacy home contents are preserved');
 	my $domain = { 'id' => 1700000000459, 'home' => $restore_root };
 	my $user = { 'home' => $restore_home };
 	my $is_subvolume = 0;
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *main::btrfs_quota_domain = sub { return $domain; };
 	local *quota::btrfs_subvolume_id = sub {
 		return $is_subvolume ? 459 : undef;
@@ -637,7 +628,6 @@ ok(-f "$legacy/file", 'legacy home contents are preserved');
 	my $home = "$tmp/pre-passwd-mailbox";
 	mkdir($home) or die "mkdir($home): $!";
 	my @calls;
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *main::btrfs_quota_domain = sub { return $_[0]; };
 	local *main::ensure_btrfs_subvolume = sub {
 		push(@calls, [ 'ensure', @_ ]);
@@ -694,7 +684,6 @@ is_deeply(\@calls, [
 	my $home = "$tmp/ordinary-mailbox-to-delete";
 	mkdir($home) or die "mkdir($home): $!";
 	my $domain = { 'home' => "$tmp/domain" };
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *main::btrfs_quota_domain = sub { return $_[0]; };
 	local *quota::btrfs_subvolume_id = sub { return undef; };
 	my $prepared = 0;
@@ -739,7 +728,6 @@ is_deeply(\@calls, [
 		);
 	local $main::home_base = $tmp;
 	local *main::require_useradmin = sub { };
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *quota::btrfs_subvolume_id = sub { return 300; };
 	local *quota::btrfs_quota_status = sub {
 		return { 'enabled' => 1, 'inconsistent' => 0 };
@@ -780,28 +768,6 @@ is_deeply(\@calls, [
 		{ 'home' => $domainhome });
 	is($err, undef,
 		'external quota backends skip unavailable Btrfs mailbox cleanup');
-}
-# Fresh quota and restore processes must load and validate the Webmin API
-# before calling any Btrfs function directly.
-{
-	no warnings qw(redefine once);
-	local %main::config = ( 'btrfs_quotas' => 1 );
-	my $home = "$tmp/api-guard-mailbox";
-	mkdir($home) or die "mkdir($home): $!";
-	my $domain = { 'home' => $domainhome };
-	local *main::btrfs_quota_api_error = sub {
-		return 'Btrfs quota API unavailable';
-		};
-	local *quota::btrfs_subvolume_id = sub {
-		die 'Btrfs API called before validation';
-		};
-	is(&set_btrfs_home_quota($home, 1024, $domain),
-		'Btrfs quota API unavailable',
-		'quota changes validate the Btrfs API before using it');
-	is(&convert_btrfs_restored_user_home(
-		{ 'home' => $home }, $domain),
-		'Btrfs quota API unavailable',
-		'restores validate the Btrfs API before using it');
 }
 # Subvolume teardown must clean stale qgroups left by older kernels.
 {
@@ -862,7 +828,6 @@ is_deeply(\@calls, [
 		'home_quotas' => $tmp,
 		);
 	local $main::home_base = $tmp;
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *quota::btrfs_subvolume_id = sub { return 256; };
 	local *quota::btrfs_quota_status = sub {
 		return { 'enabled' => 1, 'inconsistent' => 0 };
@@ -891,7 +856,6 @@ is_deeply(\@calls, [
 		'home_quotas' => $tmp,
 		);
 	local $main::home_base = $tmp;
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *quota::btrfs_subvolume_id = sub { return 256; };
 	local *quota::btrfs_quota_status = sub {
 		return { 'enabled' => 1, 'inconsistent' => 0 };
@@ -920,7 +884,6 @@ is_deeply(\@calls, [
 		'btrfs_quotas' => 0,
 		);
 	local $main::home_base = $tmp;
-	local *main::btrfs_quota_api_error = sub { return undef; };
 	local *quota::btrfs_subvolume_id = sub { return 256; };
 	local *quota::btrfs_quota_status = sub {
 		return { 'enabled' => 0 };
