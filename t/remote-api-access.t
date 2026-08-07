@@ -16,7 +16,21 @@ die "Failed to load $lib: $!" if (!defined($loaded));
 {
 	no warnings qw(once redefine);
 	local @main::plugins = ();
+	local %main::access = ();
+	my $reseller = 0;
 	local *main::master_admin = sub { 0 };
+	local *main::reseller_admin = sub { $reseller };
+	ok(!&can_use_remote_api(),
+		'remote API access is denied by default');
+	ok(!&can_remote_as_user('list-databases'),
+		'allowed commands remain denied without API permission');
+	ok(!&can_remote_as_user('configure-script'),
+		'existing user API commands also require permission');
+	$main::access{'edit_remote_api'} = 1;
+	ok(&can_use_remote_api(),
+		'domain owner can use the remote API when granted permission');
+	ok(&can_remote_as_user('configure-script'),
+		'existing user API commands remain available when permitted');
 	ok(&can_remote_as_user('list-databases'),
 		'database listing is allowed for non-master API users');
 	ok(&can_remote_as_user('list-proxies.pl'),
@@ -27,6 +41,10 @@ die "Failed to load $lib: $!" if (!defined($loaded));
 		'user modification is allowed for non-master API users');
 	ok(!&can_remote_as_user('list-users'),
 		'unaudited core commands remain denied');
+	delete($main::access{'edit_remote_api'});
+	$reseller = 1;
+	ok(&can_use_remote_api(),
+		'reseller remote API behavior remains unchanged');
 	is(&get_user_remote_api_command('list-databases'),
 		'can_edit_databases', 'database capability is registered');
 	is(&get_user_remote_api_command('list-proxies'),
@@ -39,7 +57,9 @@ die "Failed to load $lib: $!" if (!defined($loaded));
 
 {
 	no warnings qw(once redefine);
+	local %main::access = ( 'edit_remote_api' => 1 );
 	local *main::master_admin = sub { 0 };
+	local *main::reseller_admin = sub { 0 };
 	local *main::can_edit_domain = sub { $_[0]->{'allowed'} };
 	local *main::can_edit_databases = sub { 1 };
 	local *main::can_edit_users = sub { 1 };

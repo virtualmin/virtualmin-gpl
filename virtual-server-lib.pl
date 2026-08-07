@@ -181,7 +181,7 @@ $saved_aliases_dir = &cache_file_path("saved-aliases");
 		'spam', 'phpver', 'phpmode',
 		'mail', 'backup', 'sched', 'restore', 'sharedips', 'catchall',
 		'html', 'allowedhosts', 'passwd', 'spf', 'records',
-		'disable', 'delete');
+		'disable', 'delete', 'remote_api');
 if (!$virtualmin_pro) {
 	@edit_limits = grep { $_ ne 'html' } @edit_limits;
 	}

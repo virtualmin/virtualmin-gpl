@@ -426,6 +426,13 @@ my %user_remote_api_commands = (
 	"modify-user" => "can_edit_users",
 	);
 
+# can_use_remote_api()
+# Returns 1 if the current user has permission to call the remote API.
+sub can_use_remote_api
+{
+return &master_admin() || &reseller_admin() || $access{'edit_remote_api'};
+}
+
 # get_user_remote_api_command(program-name)
 # Returns the capability function for an API command allowed for non-master users,
 # or undef if the command has not been allowed.
@@ -443,6 +450,7 @@ sub remote_api_can_domain
 {
 my ($d, $program) = @_;
 return 1 if (&master_admin());
+return 0 if (!&can_use_remote_api());
 my $capfunc = &get_user_remote_api_command($program);
 return 0 if (!$capfunc || !$d || !&can_edit_domain($d));
 return &$capfunc($d);
@@ -490,6 +498,7 @@ return &master_admin() || &can_remote_as_user($program);
 sub can_remote_as_user
 {
 my ($program) = @_;
+return 0 if (!&can_use_remote_api());
 $program =~ s/\.pl$//;
 if ($program eq "configure-script" ||
     $program eq "configure-all-scripts") {
