@@ -9696,17 +9696,19 @@ if ($web eq 'virtualmin-nginx' &&
 		($ENV{'WEBMIN_CONFIG'} || "/etc/webmin").
 		"/virtualmin-nginx/config";
 	my $nginx_config_backup =
-		"/tmp/functional-test-virtualmin-nginx-config";
+		&transname("functional-test-virtualmin-nginx-config");
+	my $q_nginx_config = &quote_path($nginx_config);
+	my $q_nginx_config_backup = &quote_path($nginx_config_backup);
 	$nginxlisten_tests = [
 		# Use wildcard listeners for this test
-		{ 'command' => 'cp -p '.$nginx_config.' '.
-			       $nginx_config_backup,
+		{ 'command' => 'cp -p '.$q_nginx_config.' '.
+			       $q_nginx_config_backup,
 		},
 		{ 'command' => "perl -pi -e ".
 			       "'s/^listen_mode=.*/listen_mode=0/' ".
-			       $nginx_config,
+			       $q_nginx_config,
 		},
-		{ 'command' => 'grep "^listen_mode=0$" '.$nginx_config,
+		{ 'command' => 'grep "^listen_mode=0$" '.$q_nginx_config,
 		},
 
 		# Create an IPv6-only domain with HTTP and HTTPS listeners
@@ -9732,20 +9734,21 @@ if ($web eq 'virtualmin-nginx' &&
 			      [ 'default-ip' ] ],
 		},
 
-		# Check the generated listeners
-		{ 'command' => 'nginx -T',
-		  'grep' => [ 'listen\s+8888;',
-			      'listen\s+\[::\]:8888;' ],
-		  'antigrep' => [
-			'listen\s+80:8888;',
-			'listen\s+'.quotemeta($test_ip_address).':8888;',
-			],
+		# Validate the domain after changing its listeners
+		{ 'command' => 'validate-domains.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'all-features' ] ],
 		},
 
 		# Check that the website is actually reachable
 		{ 'command' => $wget_command.
 			       '--header="Host: '.$test_domain.'" '.
 			       'http://127.0.0.1:8888',
+		  'grep' => 'Test Nginx wildcard page',
+		},
+		{ 'command' => $wget_command.
+			       '--inet6 --header="Host: '.$test_domain.'" '.
+			       '"http://[::1]:8888"',
 		  'grep' => 'Test Nginx wildcard page',
 		},
 
@@ -9755,9 +9758,9 @@ if ($web eq 'virtualmin-nginx' &&
 		  'cleanup' => 1,
 		  'ignorefail' => 1,
 		},
-		{ 'command' => 'cp -p '.$nginx_config_backup.' '.
-			       $nginx_config.' && rm -f '.
-			       $nginx_config_backup,
+		{ 'command' => 'cp -p '.$q_nginx_config_backup.' '.
+			       $q_nginx_config.' && rm -f '.
+			       $q_nginx_config_backup,
 		  'cleanup' => 1,
 		},
 		];
