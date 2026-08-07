@@ -6043,7 +6043,13 @@ my $asuser = $asd ? $asd->{'user'} : undef;
 my ($mode, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
 my ($base, $re) = &extract_purge_path($dest);
 my $nicebase = $base;
-if ($dest =~ /^(([a-z0-9]+):\/\/[^\/]*\@[^\/]*)/) {
+if (($mode == 1 || $mode == 2 || $mode == 9 || $mode == 13 ||
+     $mode == 14) && $base && $path && $dest =~ /\Q$path\E$/) {
+	# Replace the date-based path while preserving the URL separator
+	$nicebase = $dest;
+	$nicebase =~ s/\Q$path\E$/$base/;
+	}
+elsif ($dest =~ /^(([a-z0-9]+):\/\/[^\/]*\@[^\/]*)/) {
 	# Add protocol prefix back, if formatted like ftp://user:pass@host/dir
 	$nicebase = $1.$nicebase;
 	}
