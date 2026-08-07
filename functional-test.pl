@@ -10613,6 +10613,9 @@ $btrfsquota_tests = [
 	  'grep' => 'Inconsistent:\s+no',
 	},
 	];
+# Skip on systems not using Btrfs quotas
+$btrfsquota_tests = [ { 'command' => 'true' } ]
+	if (!&has_btrfs_quotas());
 
 # Test deletion of domains when entries in virtual file overlap
 $overlap_tests = [
@@ -14122,6 +14125,7 @@ $alltests = { '_config' => $_config_tests,
 	      'bw' => $bw_tests,
 	      'lastlogin' => $lastlogin_tests,
 	      'quota' => $quota_tests,
+	      'btrfsquota' => $btrfsquota_tests,
 	      'overlap' => $overlap_tests,
 	      'redirect' => $redirect_tests,
 	      'admin' => $admin_tests,
@@ -14157,9 +14161,6 @@ if (!$virtualmin_pro) {
 	delete($alltests->{'proxy'});
 	delete($alltests->{'script'});
 	}
-# Btrfs tests require the qgroup backend selected by the configuration check.
-$alltests->{'btrfsquota'} = $btrfsquota_tests if (&has_btrfs_quotas());
-
 # Find tests to run
 if (!@tests) {
 	@tests = sort { $a cmp $b }
