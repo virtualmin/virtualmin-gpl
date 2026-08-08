@@ -420,11 +420,145 @@ return 1;
 # Core command-line API scripts audited for non-master remote use, and the
 # capability required for each one.
 my %user_remote_api_commands = (
+	"create-admin" => "can_edit_admins",
+	"create-alias" => "can_edit_aliases",
+	"create-database" => "can_edit_databases",
+	"create-domain" => "can_create_sub_servers",
+	"create-proxy" => "can_edit_forward",
+	"create-redirect" => "can_edit_redirect",
+	"create-simple-alias" => "can_edit_aliases",
+	"backup-domain" => "can_backup_domain",
+	"check-connectivity" => "can_edit_domain",
+	"clone-domain" => "can_create_sub_servers",
+	"create-scheduled-backup" => "can_backup_domain",
+	"create-user" => "can_edit_users",
+	"delete-admin" => "can_edit_admins",
+	"delete-alias" => "can_edit_aliases",
+	"delete-backup" => "can_backup_log",
+	"delete-database" => "can_edit_databases",
+	"delete-domain" => "can_delete_domain",
+	"delete-php-directory" => "can_edit_phpver",
+	"delete-scheduled-backup" => "can_backup_sched",
+	"delete-proxy" => "can_edit_forward",
+	"delete-redirect" => "can_edit_redirect",
+	"delete-script" => "can_edit_scripts",
+	"delete-user" => "can_edit_users",
+	"detect-scripts" => "can_edit_scripts",
+	"disable-domain" => "can_disable_domain",
+	"disable-feature" => "can_config_domain",
+	"enable-feature" => "can_config_domain",
+	"reset-feature" => "can_config_domain",
+	"restore-domain" => "can_restore_domain",
+	"disconnect-database" => "can_remote_import_databases",
+	"enable-domain" => "can_disable_domain",
+	"fix-domain-permissions" => "can_config_domain",
+	"fix-domain-quota" => "can_edit_quotas",
+	"generate-cert" => "can_edit_ssl",
+	"generate-acme-cert" => "can_remote_edit_acme",
+	"generate-letsencrypt-cert" => "can_remote_edit_acme",
+	"get-dns" => "can_edit_records",
+	"get-command" => "can_use_remote_api",
+	"get-logs" => "can_edit_domain",
+	"get-ssl" => "can_edit_ssl",
+	"import-database" => "can_remote_import_databases",
+	"install-cert" => "can_edit_ssl",
+	"install-script" => "can_edit_scripts",
+	"list-admins" => "can_edit_admins",
+	"list-aliases" => "can_edit_aliases",
+	"list-available-scripts" => "can_edit_scripts",
+	"list-available-shells" => "can_edit_users",
+	"list-backup-keys" => "can_backup_keys",
+	"list-bandwidth" => "can_edit_domain",
+	"list-certs" => "can_edit_ssl",
+	"list-certs-expiry" => "can_edit_ssl",
+	"list-commands" => "can_use_remote_api",
+	"list-custom" => "can_edit_domain",
 	"list-databases" => "can_edit_databases",
+	"list-domains" => "can_edit_domain",
+	"list-features" => "can_edit_domain",
+	"list-backup-logs" => "can_backup_log",
+	"list-mailbox" => "can_remote_read_mailbox",
+	"list-php-directories" => "can_edit_phpver",
+	"list-php-ini" => "can_edit_phpmode",
+	"list-php-versions" => "can_edit_phpver",
+	"list-ports" => "can_edit_domain",
 	"list-proxies" => "can_edit_forward",
 	"list-redirects" => "can_edit_redirect",
+	"list-scheduled-backups" => "can_backup_sched",
+	"list-scripts" => "can_edit_scripts",
+	"list-service-certs" => "can_edit_ssl",
+	"list-simple-aliases" => "can_edit_aliases",
+	"list-users" => "can_edit_users",
+	"modify-admin" => "can_edit_admins",
+	"modify-custom" => "can_config_domain",
+	"modify-domain" => "can_config_domain",
+	"modify-database-hosts" => "can_remote_edit_database_hosts",
+	"modify-database-pass" => "can_edit_databases",
+	"modify-database-user" => "can_edit_databases",
+	"modify-dns" => "can_remote_edit_dns",
+	"modify-mail" => "can_edit_mail",
+	"modify-php-ini" => "can_edit_phpmode",
+	"modify-proxy" => "can_edit_forward",
+	"modify-scheduled-backup" => "can_backup_sched",
+	"modify-spam" => "can_edit_spam",
 	"modify-user" => "can_edit_users",
+	"modify-web" => "can_remote_edit_web",
+	"resend-email" => "can_edit_users",
+	"rename-domain" => "can_rename_domains",
+	"reset-pass" => "can_edit_users",
+	"search-maillogs" => "can_view_maillog",
+	"set-php-directory" => "can_edit_phpver",
+	"start-stop-script" => "can_edit_scripts",
+	"syncmx-domain" => "can_edit_mail",
+	"unalias-domain" => "can_config_domain",
+	"unsub-domain" => "can_config_domain",
+	"validate-domains" => "can_use_validation",
 	);
+
+# can_remote_edit_database_hosts(&domain)
+# Returns 1 if the current user can edit databases and their allowed hosts.
+sub can_remote_edit_database_hosts
+{
+return &can_edit_databases($_[0]) && &can_allowed_db_hosts();
+}
+
+# can_remote_read_mailbox(&domain)
+# Returns 1 if the current user can manage users and read their mail, which in
+# the user interface additionally requires access to the mailboxes module.
+sub can_remote_read_mailbox
+{
+return &can_edit_users($_[0]) && &foreign_available("mailboxes");
+}
+
+# can_remote_import_databases(&domain)
+# Returns 1 if the current user can import and disconnect databases.
+sub can_remote_import_databases
+{
+return &can_edit_databases($_[0]) && &can_import_servers();
+}
+
+# can_remote_edit_acme(&domain)
+# Returns 1 if the current user can manage SSL and request ACME certificates.
+sub can_remote_edit_acme
+{
+return &can_edit_ssl($_[0]) && &can_edit_letsencrypt($_[0]);
+}
+
+# can_remote_edit_dns(&domain)
+# Returns 1 if the current user can change any DNS setting for a domain.
+sub can_remote_edit_dns
+{
+return &can_edit_dns($_[0]) || &can_edit_records($_[0]) || &can_dnsip();
+}
+
+# can_remote_edit_web(&domain)
+# Returns 1 if the current user can change any website setting for a domain.
+sub can_remote_edit_web
+{
+return &can_edit_phpmode($_[0]) || &can_edit_phpver($_[0]) ||
+	&can_edit_html($_[0]) || &can_edit_redirect($_[0]) ||
+	&can_edit_ssl($_[0]) || &can_default_website($_[0]);
+}
 
 # can_use_remote_api()
 # Returns 1 if the current user has permission to call the remote API.
@@ -456,6 +590,19 @@ return 0 if (!$capfunc || !$d || !&can_edit_domain($d));
 return &$capfunc($d);
 }
 
+# require_remote_api_command([program-name])
+# Exits if the current user cannot run a registered command without a domain.
+sub require_remote_api_command
+{
+my ($program) = @_;
+$program ||= $0;
+return if (&master_admin());
+my $capfunc = &get_user_remote_api_command($program);
+return if (&can_use_remote_api() && $capfunc && &$capfunc());
+print $text{'remote_ecannotcmd'},"\n";
+exit(1);
+}
+
 # require_remote_api_domain(&domain, requested-domain, [program-name])
 # Exits with a non-leaking error if the current user cannot run the calling
 # API command for the requested domain.
@@ -482,6 +629,45 @@ my $d = &get_domain_by($field, $value);
 &require_remote_api_domain(
 	$d, defined($requested) ? $requested : $value);
 return $d;
+}
+
+# get_remote_api_owned_domain(field, value, [requested-domain])
+# Looks up an ancillary domain without applying the calling command's feature
+# capability, while still preventing access outside the current user's ACL.
+sub get_remote_api_owned_domain
+{
+my ($field, $value, $requested) = @_;
+my $d = &get_domain_by($field, $value);
+return $d if (&master_admin() || $d && &can_edit_domain($d));
+print &text('remote_ecannotdom',
+	defined($requested) ? $requested : $value),"\n";
+exit(1);
+}
+
+# require_remote_api_capability(&domain, allowed, [requested-domain])
+# Exits if the current user lacks a command-specific capability for a domain.
+sub require_remote_api_capability
+{
+my ($d, $allowed, $requested) = @_;
+return if (&master_admin() || $allowed);
+print &text('remote_ecannotcap',
+	defined($requested) ? $requested : $d->{'dom'}),"\n";
+exit(1);
+}
+
+# get_remote_api_domains(&domains, [owned-only], [program-name])
+# Enforces remote API access for an existing list of target domains. When
+# owned-only is set, domains outside the current user's scope are filtered out.
+sub get_remote_api_domains
+{
+my ($doms, $owned_only, $program) = @_;
+$program ||= $0;
+my @rv = $owned_only && !&master_admin() ?
+	grep { &can_edit_domain($_) } @$doms : @$doms;
+foreach my $d (@rv) {
+	&require_remote_api_domain($d, $d->{'dom'}, $program);
+	}
+return @rv;
 }
 
 # can_remote(program-name)

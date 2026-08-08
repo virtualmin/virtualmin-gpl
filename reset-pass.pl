@@ -42,6 +42,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "reset-pass.pl must be run as root";
 	}
+my $is_master = &master_admin();
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -77,12 +78,18 @@ if ($all) {
 else {
 	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
 	}
+@doms = &get_remote_api_domains(\@doms, $all);
+# Domain owner passwords are managed as part of the virtual server
+$exclude_owner = 1 if (!$is_master);
 
 # Change the password
 foreach my $d (@doms) {
 	my @users = &list_domain_users($d, 0, 0, 0, 0);
     my @users_users = grep { !$_->{'domainowner'} } @users;
     my @users_owners = grep { $_->{'domainowner'} } @users;
+	# Feature-managed users must be changed by their owning plugin
+	@users_users = grep { !$_->{'feature_user'} && !$_->{'noactions'} }
+		@users_users if (!$is_master);
 	if (%usernames) {
 		@users_users = grep { $usernames{$_->{'user'}} ||
 				$usernames{&remove_userdom($_->{'user'}, $d)} }
@@ -133,6 +140,11 @@ foreach my $d (@doms) {
         my ($u) = grep { $_->{'user'} eq $user } @users;
         my $oldu = $u;
         my $passwd = $pass || &random_password();
+		if (!$is_master) {
+			my $checku = { %$u, 'plainpass' => $passwd };
+			my $err = &check_password_restrictions($checku, 0, $d);
+			&usage($err) if ($err);
+			}
         #
         &push_all_print();
         &set_all_null_print();

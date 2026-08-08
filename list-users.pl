@@ -91,6 +91,7 @@ if ($all) {
 else {
 	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
 	}
+@doms = &get_remote_api_domains(\@doms, $all || @users);
 @ashells = grep { $_->{'mailbox'} } &list_available_shells();
 
 foreach $d (@doms) {
@@ -141,15 +142,17 @@ foreach $d (@doms) {
 			if (defined($u->{'surname'})) {
 				print "    Surname: ",$u->{'surname'},"\n";
 				}
-			if (defined($u->{'plainpass'})) {
-				print "    Password: ",$u->{'plainpass'},"\n";
-				}
 			$pass = $u->{'pass'};
 			$disable = ($pass =~ s/^\!// ? 1 : 0);
-			print "    Encrypted password: ",$pass,"\n";
-			my $existing_key = &get_domain_user_ssh_pubkey($d, $u);
-			if ($existing_key) {
-				print "    SSH public key: $existing_key\n";
+			if (&master_admin()) {
+				if (defined($u->{'plainpass'})) {
+					print "    Password: ",$u->{'plainpass'},"\n";
+					}
+				print "    Encrypted password: ",$pass,"\n";
+				my $existing_key = &get_domain_user_ssh_pubkey($d, $u);
+				if ($existing_key) {
+					print "    SSH public key: $existing_key\n";
+					}
 				}
 			print "    Disabled: ",($disable ? "Yes" : "No"),"\n";
 			print "    No password accepted: ",

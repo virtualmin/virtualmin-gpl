@@ -57,6 +57,12 @@ $schedid || &usage("Missing backup ID flag");
 @scheds = &list_scheduled_backups();
 ($sched) = grep { $_->{'id'} eq $schedid } @scheds;
 $sched || &usage("No scheduled backup with ID $schedid found");
+if (!&master_admin()) {
+	# Only schedules owned by this user can be changed, and schedule 1
+	# also holds the global backup settings
+	&can_backup_sched($sched) && $sched->{'id'} ne '1' ||
+		&usage("No scheduled backup with ID $schedid found");
+	}
 
 # Make any changes
 if (defined($enabled)) {

@@ -41,12 +41,21 @@ while(@ARGV > 0) {
 		$domain = shift(@ARGV);
 		}
 	elsif ($a eq "--reseller") {
+		&master_admin() ||
+			&usage("--reseller is only available to the master ".
+			       "administrator");
 		$reseller = shift(@ARGV);
 		}
 	elsif ($a eq "--user") {
+		&master_admin() ||
+			&usage("--user is only available to the master ".
+			       "administrator");
 		$user = shift(@ARGV);
 		}
 	elsif ($a eq "--dest") {
+		&master_admin() ||
+			&usage("--dest is only available to the master ".
+			       "administrator");
 		$dest = shift(@ARGV);
 		}
 	elsif ($a eq "--id") {
@@ -59,9 +68,11 @@ while(@ARGV > 0) {
 
 # Get them all, then limit by domain
 @scheds = &list_scheduled_backups();
+# Only show schedules the caller is allowed to see
+@scheds = grep { &can_backup_sched($_) } @scheds;
 if ($domain) {
 	# By top-level domain
-	$d = &get_domain_by("dom", $domain);
+	$d = &get_remote_api_owned_domain("dom", $domain);
 	$d || &usage("No domain named $domain exists");
 	$d->{'parent'} && &usage("--domain must be followed by a top-level domain name");
 	@scheds = grep { $_->{'owner'} eq $d->{'id'} } @scheds;
@@ -99,7 +110,9 @@ if ($multiline) {
 		@dests = get_scheduled_backup_dests($s);
 		@purges = &get_scheduled_backup_purges($s);
 		for(my $i=0; $i<@dests; $i++) {
-			print "    Destination: $dests[$i]\n";
+			print "    Destination: ",
+			      (&master_admin() ? $dests[$i]
+					       : &nice_backup_url($dests[$i], 1)),"\n";
 			print "    Delete old backups after: ",
 			    ($purges[$i] ? "$purges[$i] days" : "Never"),"\n";
 			}

@@ -66,6 +66,8 @@ else {
 	# By domain or user
 	@doms = &get_domains_by_names_users(\@domains, \@users, \&usage);
 	}
+@doms = &get_remote_api_domains(\@doms, $all_doms || @users);
+@doms || &usage("No virtual servers selected");
 
 # Make sure MXs exist
 @servers = &list_mx_servers();

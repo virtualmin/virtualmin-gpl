@@ -191,6 +191,8 @@ while(@ARGV > 0) {
 defined($mode{'spam'}) || defined($mode{'virus'}) || $spam_client ||
     $virus_scanner || defined($auto) || defined($spamlevel) ||
     defined($spamtrap) || &usage("Nothing to do");
+!&master_admin() && ($spam_client || $virus_scanner) &&
+	&usage("Spam and virus scanning clients can only be changed by the master administrator");
 
 # Get domains to update
 if ($all_doms) {
@@ -198,12 +200,13 @@ if ($all_doms) {
 	}
 else {
 	foreach $n (@dnames) {
-		$d = &get_domain_by("dom", $n);
+		$d = &get_remote_api_domain("dom", $n);
 		$d || &usage("Domain $n does not exist");
 		$d->{'spam'} || &usage("Virtual server $n does not have spam filtering enabled");
 		push(@doms, $d);
 		}
 	}
+@doms = &get_remote_api_domains(\@doms, $all_doms);
 
 # Do it for all domains
 foreach $d (@doms) {

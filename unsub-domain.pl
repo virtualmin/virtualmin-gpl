@@ -53,9 +53,11 @@ while(@ARGV > 0) {
 
 # Find the domain
 $domain || usage("No domain specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 $d->{'subdom'} || &usage("Only sub-domains can be converted to sub-servers");
+$d->{'parent'} || &master_admin() ||
+	&usage("Only a sub-server sub-domain can be converted");
 
 # Call the move function
 &$first_print(&text('unsub_doing', "<tt>$d->{'dom'}</tt>"));

@@ -5011,6 +5011,7 @@ sysinfo_pythonpath=Path to Python
 remote_ecannot=You are not allowed to run remote commands
 remote_ecannotcap=You are not allowed to run this command for virtual server $1
 remote_ecannotdom=Virtual server $1 does not exist
+remote_ecannotcmd=You are not allowed to run this command
 remote_eprogram=Invalid remote program name
 remote_eprogram2=Remote program $1 does not exist
 

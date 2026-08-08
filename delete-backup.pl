@@ -36,6 +36,11 @@ while(@ARGV > 0) {
 		$id = shift(@ARGV);
 		}
 	elsif ($a eq "--dest") {
+		# Deleting by destination has no user interface equivalent, and
+		# would remove files outside any virtual server
+		&master_admin() ||
+			&usage("--dest is only available to the master ".
+			       "administrator");
 		$dest = shift(@ARGV);
 		}
 	elsif ($a eq "--multiline") {
@@ -54,6 +59,17 @@ $id || $dest || &usage("One of the --id or --dest flags must be given");
 if ($id) {
 	$log = &get_backup_log($id);
 	$log || &usage("No logged backup with ID $id was found");
+	if (!&master_admin()) {
+		# Only backups made by this user, covering only his own
+		# domains, can be deleted
+		&can_backup_log($log) == 1 ||
+			&usage("No logged backup with ID $id was found");
+		my @alldnames = split(/\s+/, $log->{'doms'});
+		my @owndnames = &backup_log_own_domains($log);
+		scalar(@alldnames) == scalar(@owndnames) ||
+			&usage("This backup covers virtual servers that you ".
+			       "do not own");
+		}
 	$dest = $log->{'dest'};
 	}
 

@@ -87,6 +87,7 @@ if (!$module_name) {
 # Get shells
 ($nologin_shell, $ftp_shell, $jailed_shell, $shell) =
 	&get_common_available_shells();
+my $is_master = &master_admin();
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -104,6 +105,8 @@ while(@ARGV > 0) {
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
+		$is_master ||
+			&usage("--passfile is only available to the master administrator");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
@@ -111,12 +114,16 @@ while(@ARGV > 0) {
 		$pass = &random_password();
 		}
 	elsif ($a eq "--encpass") {
+		$is_master ||
+			&usage("--encpass is only available to the master administrator");
 		$encpass = shift(@ARGV);
 		}
 	elsif ($a eq "--ssh-pubkey") {
 		$sshpubkey = shift(@ARGV);
 		}
 	elsif ($a eq "--ssh-pubkey-id") {
+		$is_master ||
+			&usage("--ssh-pubkey-id is only available to the master administrator");
 		$sshpubkeyid = shift(@ARGV);
 		}
 	elsif ($a eq "--real" || $a eq "--desc") {
@@ -132,12 +139,15 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--ftp") {
 		$shell = $ftp_shell;
+		$custom_shell = 1;
 		}
 	elsif ($a eq "--jailed-ftp") {
 		$shell = $jailed_shell;
+		$custom_shell = 1;
 		}
 	elsif ($a eq "--shell") {
 		$shell = { 'shell' => shift(@ARGV) };
+		$custom_shell = 1;
 		}
 	elsif ($a eq "--noemail") {
 		$noemail++;
@@ -189,6 +199,8 @@ while(@ARGV > 0) {
 		    &usage("--recovery must be followed by an email address");
 		}
 	elsif ($a eq "--noappend") {
+		$is_master ||
+			&usage("--noappend is only available to the master administrator");
 		$noappend = 1;
 		}
 	elsif ($a eq "--multiline") {
@@ -206,12 +218,36 @@ $username || &usage("No username specified");
 $pass || $encpass || &usage("No password specified");
 
 # Get the initial user
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 &obtain_lock_unix($d);
 &obtain_lock_mail($d);
 $user = &create_initial_user($d, 0, $web);
 $username = &remove_userdom($username, $d);
+
+# Enforce the same owner limits as the user interface
+if (!$is_master) {
+	($mleft) = &count_feature("mailboxes");
+	$mleft == 0 && &usage($text{'user_emailboxlimit'});
+	if ($custom_shell && (!&can_mailbox_ftp() ||
+	    !&check_available_shell($shell->{'shell'}, 'mailbox'))) {
+		&usage($text{'user_eshell'});
+		}
+	defined($quota) && !&can_mailbox_quota() &&
+		&usage("You are not allowed to set mailbox quotas");
+	if (defined($home)) {
+		&can_mailbox_home($user) ||
+			&usage("You are not allowed to set mailbox home directories");
+		$home =~ /\.\.\// && &usage($text{'user_ehome'});
+		$home =~ /^\// && &usage($text{'user_ehome2'});
+		}
+	foreach my $webdir (@webdirs) {
+		$webdir = &public_html_dir($d)."/".$webdir
+			if ($webdir !~ /^\//);
+		&is_under_directory(&public_html_dir($d), $webdir) ||
+			&usage("Webserver user directories must be under the website root");
+		}
+	}
 
 # Make sure all needed args are set
 if (!$user->{'noquota'}) {
@@ -221,7 +257,15 @@ if (!$user->{'noquota'}) {
 	}
 $err = &valid_mailbox_name($username);
 &usage($err) if ($err);
-$real =~ /^[^:]*$/ || usage($text{'user_ereal'});
+($is_master ? $real =~ /^[^:]*$/ : $real =~ /^[^:\r\n]*$/) ||
+	usage($text{'user_ereal'});
+if (!$is_master) {
+	defined($firstname) && $firstname !~ /^[^:\r\n]*$/ &&
+		&usage($text{'user_efirstname'});
+	defined($surname) && $surname !~ /^[^:\r\n]*$/ &&
+		&usage($text{'user_esurname'});
+	}
+%donextra = ( );
 foreach $e (@extra) {
 	$user->{'noextra'} && &usage("This user cannot have extra email addresses");
 	$e = lc($e);
@@ -231,11 +275,18 @@ foreach $e (@extra) {
 	if ($e !~ /^(\S+)\@(\S+)$/) {
 		usage(&text('user_eextra1', $e));
 		}
-	my ($eu, $ed) = ($1, $2);
-	my $edom = &get_domain_by("dom", $ed);
+	my ($eu, $ed) = ($1, $is_master ? $2 : &parse_domain_name($2));
+	my $edom = $is_master ? &get_domain_by("dom", $ed) :
+		&get_remote_api_owned_domain("dom", $ed);
 	$edom && $edom->{'mail'} || usage(&text('user_eextra2', $ed));
 	!$edom->{'alias'} || !$edom->{'aliascopy'} ||
 		&usage(&text('user_eextra7', $ed));
+	if (!$is_master) {
+		$e = "$eu\@$ed";
+		$e eq "$username\@$d->{'dom'}" &&
+			&usage(&text('user_eextra5', $e));
+		$donextra{lc($e)}++ && &usage(&text('user_eextra6', $e));
+		}
 	}
 
 @alldbs = &domain_databases($d);
@@ -298,7 +349,7 @@ else {
 # SSH public key
 my $pubkey;
 if ($sshpubkey) {
-	my $sshpubkeyfile = -r $sshpubkey ? $sshpubkey : undef;
+	my $sshpubkeyfile = $is_master && -r $sshpubkey ? $sshpubkey : undef;
 	if ($sshpubkeyfile) {
 		$pubkey = &get_ssh_pubkey_from_file($sshpubkeyfile, $sshpubkeyid);
 		}
@@ -331,6 +382,10 @@ if (!$user->{'noprimary'}) {
 	}
 if (defined($recovery)) {
 	$user->{'recovery'} = $recovery;
+	}
+if (!$is_master && $pass) {
+	$err = &check_password_restrictions($user, 0, $d);
+	&usage($err) if ($err);
 	}
 if (!$user->{'noquota'}) {
 	# Set quotas, if not using the defaults
@@ -366,6 +421,12 @@ if (!$user->{'noextra'}) {
 			usage(&text('user_eextra4', $e));
 			}
 		}
+	}
+
+if (!$is_master) {
+	($mleft) = &count_feature("aliases");
+	$mleft >= 0 && $mleft - @extra < 0 &&
+		&usage($text{'alias_ealiaslimit'});
 	}
 
 # Check if the name is too long

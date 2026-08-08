@@ -51,15 +51,30 @@ while(@ARGV > 0) {
 		push(@users, shift(@ARGV));
 		}
 	elsif ($a eq "--only") {
+		# Leaves the underlying objects on the system, which has no
+		# equivalent in the user interface
+		&master_admin() ||
+			&usage("--only is only available to the master ".
+			       "administrator");
 		$only = 1;
 		}
 	elsif ($a eq "--preserve-remote") {
+		&master_admin() || &can_import_servers() ||
+			&usage("--preserve-remote is only available to the ".
+			       "master administrator");
 		$preserve = 1;
 		}
 	elsif ($a eq "--pre-command") {
+		# Commands are run as root, so only the master can set them
+		&master_admin() ||
+			&usage("--pre-command is only available to the ".
+			       "master administrator");
 		$precommand = shift(@ARGV);
 		}
 	elsif ($a eq "--post-command") {
+		&master_admin() ||
+			&usage("--post-command is only available to the ".
+			       "master administrator");
 		$postcommand = shift(@ARGV);
 		}
 	elsif ($a eq "--multiline") {
@@ -81,6 +96,7 @@ foreach $d (@doms) {
 	}
 @doms = grep { !$_->{'parent'} || !$idmap{$_->{'parent'}} } @doms;
 @doms = sort { $b->{'dns_subof'} <=> $a->{'dns_subof'} } @doms;
+@doms = &get_remote_api_domains(\@doms);
 
 # Kill them
 $config{'pre_command'} = $precommand if ($precommand);

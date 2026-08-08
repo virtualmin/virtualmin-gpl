@@ -154,27 +154,48 @@ while(@ARGV > 0) {
 		@rfeats = grep { $_ ne $f } @rfeats;
 		}
 	elsif ($a eq "--all-domains") {
+		&master_admin() ||
+			&usage("--all-domains is only available to the master ".
+			       "administrator");
 		$all_doms = 1;
 		}
 	elsif ($a eq "--test") {
 		$test = 1;
 		}
 	elsif ($a eq "--reuid") {
+		&master_admin() ||
+			&usage("--reuid is only available to the master ".
+			       "administrator");
 		$reuid = 1;
 		}
 	elsif ($a eq "--no-reuid") {
+		&master_admin() ||
+			&usage("--no-reuid is only available to the master ".
+			       "administrator");
 		$reuid = 0;
 		}
 	elsif ($a eq "--reuser") {
+		&master_admin() ||
+			&usage("--reuser is only available to the master ".
+			       "administrator");
 		$reuser = 1;
 		}
 	elsif ($a eq "--no-reuser") {
+		&master_admin() ||
+			&usage("--no-reuser is only available to the master ".
+			       "administrator");
 		$reuser = 0;
 		}
 	elsif ($a eq "--fix") {
+		&master_admin() ||
+			&usage("--fix is only available to the master ".
+			       "administrator");
 		$fix = 1;
 		}
 	elsif ($a eq "--option") {
+		&master_admin() ||
+			&usage("--option is only available to the master ".
+			       "administrator");
 		$optf = shift(@ARGV);
 		if ($optf =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
 			$optf = $1;
@@ -197,34 +218,58 @@ while(@ARGV > 0) {
 		$asowner = 1;
 		}
 	elsif ($a eq "--virtualmin") {
+		&master_admin() ||
+			&usage("--virtualmin is only available to the master ".
+			       "administrator");
 		$v = shift(@ARGV);
 		&indexof($v, @virtualmin_backups) >= 0 ||
 			&usage("Unknown --virtualmin option $v. Available options are : ".join(" ", @virtualmin_backups));
 		push(@vbs, $v);
 		}
 	elsif ($a eq "--all-virtualmin") {
+		&master_admin() ||
+			&usage("--all-virtualmin is only available to the master ".
+			       "administrator");
 		@vbs = @virtualmin_backups;
 		}
 	elsif ($a eq "--only-features") {
+		&master_admin() ||
+			&usage("--only-features is only available to the master ".
+			       "administrator");
 		$onlyfeats = 1;
 		}
 	elsif ($a eq "--only-missing") {
+		&master_admin() ||
+			&usage("--only-missing is only available to the master ".
+			       "administrator");
 		$onlymissing = 1;
 		}
 	elsif ($a eq "--only-existing") {
+		&master_admin() ||
+			&usage("--only-existing is only available to the master ".
+			       "administrator");
 		$onlyexisting = 1;
 		}
 	elsif ($a eq "--delete-existing") {
+		&master_admin() ||
+			&usage("--delete-existing is only available to the master ".
+			       "administrator");
 		$delete_existing = 1;
 		}
 
 	# Alternate IPv4 options
 	elsif ($a eq "--default-ip") {
+		&master_admin() ||
+			&usage("--default-ip is only available to the master ".
+			       "administrator");
 		$ipinfo = { %$ipinfo,
 			    'virt' => 0, 'ip' => &get_default_ip(),
 			    'virtalready' => 0, 'mode' => 0 };
 		}
 	elsif ($a eq "--shared-ip") {
+		&master_admin() ||
+			&usage("--shared-ip is only available to the master ".
+			       "administrator");
 		$sharedip = shift(@ARGV);
 		&indexof($sharedip, &list_shared_ips()) >= 0 ||
 		    &usage("$sharedip is not in the shared IP addresses list");
@@ -233,6 +278,9 @@ while(@ARGV > 0) {
 			    'virtalready' => 0, 'mode' => 3 };
 		}
 	elsif ($a eq "--ip") {
+		&master_admin() ||
+			&usage("--ip is only available to the master ".
+			       "administrator");
 		$ip = shift(@ARGV);
 		&check_ipaddress($ip) || &usage("Invalid IP address");
 		&check_virt_clash($ip) &&
@@ -242,6 +290,9 @@ while(@ARGV > 0) {
 			    'virtalready' => 0, 'mode' => 1 };
 		}
 	elsif ($a eq "--allocate-ip") {
+		&master_admin() ||
+			&usage("--allocate-ip is only available to the master ".
+			       "administrator");
 		$tmpl = &get_template(0);
 		($ip, $netmask) = &free_ip_address($tmpl);
 		$ipinfo = { %$ipinfo,
@@ -250,6 +301,9 @@ while(@ARGV > 0) {
 			    'mode' => 2 };
 		}
 	elsif ($a eq "--original-ip") {
+		&master_admin() ||
+			&usage("--original-ip is only available to the master ".
+			       "administrator");
 		$tmpl = &get_template(0);
 		($ip, $netmask) = &free_ip_address($tmpl);
 		$ipinfo = { %$ipinfo,
@@ -258,17 +312,26 @@ while(@ARGV > 0) {
 			    'mode' => 5 };
 		}
 	elsif ($a eq "--no-ip") {
+		&master_admin() ||
+			&usage("--no-ip is only available to the master ".
+			       "administrator");
 		$ipinfo = { %$ipinfo,
 			    'mode' => -2 };
 		}
 
 	# Alternate IPv6 options
 	elsif ($a eq "--default-ip6") {
+		&master_admin() ||
+			&usage("--default-ip6 is only available to the master ".
+			       "administrator");
 		$ipinfo = { %$ipinfo,
 			    'virt6' => 0, 'ip6' => &get_default_ip6(),
 			    'virt6already' => 0, 'mode6' => 0 };
 		}
 	elsif ($a eq "--shared-ip6") {
+		&master_admin() ||
+			&usage("--shared-ip6 is only available to the master ".
+			       "administrator");
 		$sharedip6 = shift(@ARGV);
 		&indexof($sharedip6, &list_shared_ip6s()) >= 0 ||
 		  &usage("$sharedip is not in the shared IPv6 addresses list");
@@ -277,6 +340,9 @@ while(@ARGV > 0) {
 			    'virt6already' => 0, 'mode6' => 3 };
 		}
 	elsif ($a eq "--ip6") {
+		&master_admin() ||
+			&usage("--ip6 is only available to the master ".
+			       "administrator");
 		$ip6 = shift(@ARGV);
 		&check_ip6address($ip6) || &usage("Invalid IPv6 address");
 		&check_virt6_clash($ip6) &&
@@ -286,6 +352,9 @@ while(@ARGV > 0) {
 			    'virt6already' => 0, 'mode6' => 1 };
 		}
 	elsif ($a eq "--allocate-ip6") {
+		&master_admin() ||
+			&usage("--allocate-ip6 is only available to the master ".
+			       "administrator");
 		$tmpl = &get_template(0);
 		($ip6, $netmask6) = &free_ip6_address($tmpl);
 		$ipinfo = { %$ipinfo,
@@ -294,6 +363,9 @@ while(@ARGV > 0) {
 			    'mode6' => 2 };
 		}
 	elsif ($a eq "--original-ip6") {
+		&master_admin() ||
+			&usage("--original-ip6 is only available to the master ".
+			       "administrator");
 		$tmpl = &get_template(0);
 		($ip6, $netmask6) = &free_ip6_address($tmpl);
 		$ipinfo = { %$ipinfo,
@@ -302,20 +374,32 @@ while(@ARGV > 0) {
 			    'mode6' => 5 };
 		}
 	elsif ($a eq "--no-ip6") {
+		&master_admin() ||
+			&usage("--no-ip6 is only available to the master ".
+			       "administrator");
 		$ipinfo = { %$ipinfo,
 			    'mode6' => -2 };
 		}
 
 	elsif ($a eq "--skip-warnings") {
+		&master_admin() ||
+			&usage("--skip-warnings is only available to the master ".
+			       "administrator");
 		$skipwarnings = 1;
 		}
 	elsif ($a eq "--continue-on-error") {
+		&master_admin() ||
+			&usage("--continue-on-error is only available to the master ".
+			       "administrator");
 		$continue = 1;
 		}
 	elsif ($a eq "--key") {
 		$keyid = shift(@ARGV);
 		}
 	elsif ($a eq "--replication") {
+		&master_admin() ||
+			&usage("--replication is only available to the master ".
+			       "administrator");
 		$replication = 1;
 		}
 	elsif ($a eq "--multiline") {
@@ -330,6 +414,28 @@ while(@ARGV > 0) {
 	}
 $src || usage("Missing --source parameter");
 @rdoms || $all_doms || @vbs || usage("No domains to restore specified");
+
+# Work out what kind of restore the caller is allowed to do. Mode 1 is a full
+# restore, mode 2 is the limited restore offered to resellers and domain
+# owners, which can only touch data-only features of existing domains.
+my $crmode = &can_restore_domain();
+$crmode || &usage("You are not allowed to restore virtual servers");
+my $safe_backup = $crmode == 1 ? 1 : 0;
+if (!$safe_backup) {
+	# The source must be one of the caller's own backups
+	my $od = &get_domain_by_user($base_remote_user);
+	my ($newsrc, $serr) = &confine_backup_dest($src, $crmode, $od);
+	$serr && &usage($serr);
+	$src = $newsrc;
+	# Only features that cannot change a server's configuration may be
+	# restored, exactly as restore.cgi limits them
+	foreach my $f (@rfeats) {
+		&indexof($f, @safe_backup_features) >= 0 ||
+		  &plugin_call($f, "feature_backup_safe") ||
+			&usage("The $f feature cannot be restored by ".
+			       "anyone other than the master administrator");
+		}
+	}
 if (@rdoms || $all_doms) {
 	@rfeats || $fix || usage("No features to restore specified");
 	}
@@ -347,9 +453,12 @@ if ($keyid) {
 		  	$_->{'key'} eq $keyid ||
 		  	$_->{'desc'} eq $keyid } &list_backup_keys();
 	$key || &usage("No backup key with ID or description $keyid exists");
+	$safe_backup || !defined(&can_backup_key) || &can_backup_key($key) ||
+		&usage("No backup key with ID or description $keyid exists");
 	}
 
 # Find the owner of a domain
+$asowner = 1 if (!$safe_backup);
 if ($asowner && @rdoms) {
 	$asd = &get_domain_by("dom", $rdoms[0]);
 	}
@@ -369,14 +478,25 @@ foreach $dname (@rdoms) {
 		$dinfo = undef;
 		}
 	if ($dname eq "virtualmin") {
+		$safe_backup ||
+			&usage("Virtualmin configuration can only be ".
+			       "restored by the master administrator");
 		$got_vbs = 1;
 		}
 	elsif ($dinfo) {
 		# Domain exists on this system already
+		if (!$safe_backup) {
+			&can_edit_domain($dinfo) ||
+				&usage(&text('remote_ecannotdom', $dname));
+			}
 		push(@doms, $dinfo);
 		}
 	else {
 		# Doesn't exist, will need to be re-created
+		$safe_backup ||
+			&usage("Virtual server $dname does not exist, and ".
+			       "only the master administrator can re-create ".
+			       "servers from a backup");
 		push(@doms, { 'dom' => $dname,
 			      'missing' => 1 });
 		}

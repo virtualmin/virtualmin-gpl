@@ -36,13 +36,14 @@ while(@ARGV > 0) {
 	if ($a eq "--domain") {
 		# Add a domain to validate
 		$dname = shift(@ARGV);
-		$d = &get_domain_by("dom", $dname);
+		$d = &get_remote_api_domain("dom", $dname);
 		$d || &usage("Virtual server $dname does not exist");
 		push(@doms, $d);
 		}
 	elsif ($a eq "--all-domains") {
 		# Validating all domains
 		@doms = &list_domains();
+		$all_doms = 1;
 		}
 	elsif ($a eq "--feature") {
 		# Add a feature to validate
@@ -80,6 +81,8 @@ while(@ARGV > 0) {
 		&usage("Unknown parameter $a");
 		}
 	}
+
+@doms = &get_remote_api_domains(\@doms, $all_doms);
 
 # Validate args
 @doms || &usage("No virtual servers to validate specified");

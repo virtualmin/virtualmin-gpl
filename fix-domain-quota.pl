@@ -64,6 +64,7 @@ else {
 		push(@doms, $d);
 		}
 	}
+@doms = &get_remote_api_domains(\@doms, $all_doms);
 
 # Lock them all
 foreach $d (@doms) {

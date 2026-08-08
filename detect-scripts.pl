@@ -62,8 +62,13 @@ while(@ARGV > 0) {
 
 # Validate args
 $dname || &usage("No domain specified");
-$d = &get_domain_by("dom", $dname);
+$d = &get_remote_api_domain("dom", $dname);
 $d || &usage("Domain $dname does not exist!");
+if ($dir && !&master_admin()) {
+	$dir = &public_html_dir($d)."/".$dir if ($dir !~ /^\//);
+	&is_under_directory(&public_html_dir($d), $dir) ||
+		&usage("The search directory must be under the website root");
+	}
 
 # Search for scripts
 &$first_print("Searching for installed scripts".

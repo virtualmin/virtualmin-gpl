@@ -43,7 +43,7 @@ while(@ARGV > 0) {
 	}
 
 $domain || &usage("No domain specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 
 my @useports = &active_domain_server_ports($d);

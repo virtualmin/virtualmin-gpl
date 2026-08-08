@@ -56,12 +56,13 @@ while(@ARGV > 0) {
 	}
 
 # Get and filter scripts
+&require_remote_api_command();
 @types = &list_scripts($coreonly) if (!@types);
 @scripts = map { &get_script($_, $coreonly) } @types;
 if ($source) {
 	@scripts = grep { $_->{'source'} eq $source } @scripts;
 	}
-if ($availonly) {
+if ($availonly || !&master_admin()) {
 	@scripts = grep { $_->{'avail'} } @scripts;
 	}
 

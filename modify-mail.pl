@@ -93,6 +93,7 @@ $config{'mail'} || &usage("Email is not enabled for Virtualmin");
 &set_all_text_print();
 
 # Parse command-line args
+$is_master = &master_admin();
 while(@ARGV > 0) {
 	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -137,6 +138,7 @@ while(@ARGV > 0) {
 		$autoconfig = 0;
 		}
 	elsif ($a eq "--dkim-key") {
+		$is_master || &usage("The --dkim-key option is only available to the master administrator");
 		$keyfile = shift(@ARGV);
 		$key = &read_file_contents($keyfile);
 		$key || &usage("DKIM key file $keyfile does not exist");
@@ -185,6 +187,14 @@ while(@ARGV > 0) {
 defined($bcc) || defined($rbcc) || defined($aliascopy) || defined($dependent) ||
     defined($autoconfig) || defined($key) || defined($cloud) ||
     defined($cloudsmtp) || defined($mta_sts) || &usage("Nothing to do");
+if (!$is_master) {
+	defined($bcc) && $bcc ne "" && $bcc !~ /^\S+\@\S+$/ &&
+		&usage("The sender BCC must be an email address");
+	defined($rbcc) && $rbcc ne "" && $rbcc !~ /^\S+\@\S+$/ &&
+		&usage("The recipient BCC must be an email address");
+	defined($autoconfig) &&
+		&usage("Mail auto-configuration can only be changed by the master administrator");
+	}
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -194,8 +204,17 @@ else {
 	# Get domains by name and user
 	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
 	}
+@doms = &get_remote_api_domains(\@doms, $all_doms || @users);
 @doms = grep { $_->{'mail'} } @doms;
 @doms || &usage("None of the selected domains have email enabled");
+if (!$is_master) {
+	foreach my $d (@doms) {
+		defined($dependent) && !$d->{'ip'} &&
+			&usage("Outgoing IP addresses are not available for $d->{'dom'}");
+		defined($mta_sts) && !&can_mta_sts($d) &&
+			&usage("MTA-STS is not available for $d->{'dom'}");
+		}
+	}
 
 # Check supported features
 if (defined($bcc) && !$supports_bcc) {
@@ -209,14 +228,17 @@ if (defined($dependent) && !$supports_dependent) {
 	}
 
 # Check cloud mail filter
+my %cloud_provs;
 if ($cloud) {
-	@provs = &list_cloud_mail_providers();
-	($prov) = grep { $_->{'name'} eq $cloud } @provs;
-	$prov || &usage("Valid cloud mail filter providers are : ".
-			join(" ", map { $_->{'name'} } @provs));
-	if ($prov->{'id'} && !$cloudid) {
-		&usage("The cloud mail filter ".$cloud." requires a customer ".
-		       "ID to be set with the --cloud-mail-filter-id flag");
+	foreach my $d (@doms) {
+		my @provs = &list_cloud_mail_providers($d, $cloudid);
+		my ($prov) = grep { $_->{'name'} eq $cloud } @provs;
+		$prov || &usage("Cloud mail filter $cloud is not available for ".
+				$d->{'dom'});
+		$prov->{'id'} && !$cloudid &&
+			&usage("The cloud mail filter $cloud requires a customer ".
+			       "ID to be set with the --cloud-mail-filter-id flag");
+		$cloud_provs{$d->{'id'}} = $prov;
 		}
 	}
 
@@ -339,16 +361,11 @@ foreach $d (@doms) {
 	if (defined($cloud)) {
 		my $err;
 		my $oldprov = &get_domain_cloud_mail_provider($d);
+		my $prov = $cloud_provs{$d->{'id'}};
 		if ($prov) {
 			if (!$oldprov ||
 			    $prov->{'name'} ne $oldprov->{'name'} ||
 			    $cloudid ne $d->{'cloud_mail_id'}) {
-				# Re-fetch provider object for THIS domain, and
-				# apply it
-				my @provs = &list_cloud_mail_providers(
-						$d, $cloudid);
-				($prov) = grep { $_->{'name'} eq $cloud }
-					       @provs;
 				&$first_print("Configuring MX records for ".
 					      "filter $prov->{'name'} ..");
 				$err = &save_domain_cloud_mail_provider(

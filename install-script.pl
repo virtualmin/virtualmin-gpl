@@ -169,13 +169,29 @@ while(@ARGV > 0) {
 # Validate args
 $domain || &usage("No domain specified");
 $sname || &usage("No script name specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 @scripts = &list_domain_scripts($d);
 $script = &get_script($sname);
 $script || &usage("Script type $sname is not known");
 ($script->{'migrated'} && !$virtualmin_pro) &&
 	&usage("Script type $sname is not known");
+if (!&master_admin()) {
+	$script->{'avail'} && $script->{'enabled'} ||
+		&usage("Script type $sname is not available to this user");
+	$unsupported && !&can_unsupported_scripts() &&
+		&usage("Unsupported script versions cannot be installed");
+	$logonly &&
+		&usage("--log-only is only available to the master administrator");
+	if ($forcedir) {
+		&is_under_directory(&public_html_dir($d), $forcedir) ||
+			&usage("The forced install directory must be under the website root");
+		}
+	if ($opts->{'newdb'}) {
+		my ($dleft) = &count_feature("dbs");
+		$dleft == 0 && &usage($text{'database_emax'});
+		}
+	}
 @vers = defined($id) ? @{$script->{'versions'}}
 		     : @{$script->{'install_versions'}};
 $ver || &usage("Missing version number. Available versions are : ".
@@ -207,6 +223,8 @@ else {
 		      "Available versions are : ".
 		      join(" ", @{$script->{'versions'}}));
 	}
+!&master_admin() && !&can_script_version($script, $ver) &&
+	&usage("Version $ver is not available to this user");
 if (defined($id)) {
 	# Find script being upgraded
 	if ($id) {
@@ -242,6 +260,12 @@ if (defined($id)) {
 else {
 	$domuser ||= $d->{'user'};
 	$dompass = $dompass || $d->{'pass'} || &random_password(8);
+	}
+
+# Global defaults affect other virtual servers
+if (!&master_admin() && $opts->{'global_def'}) {
+	&usage("Global default scripts can only be installed by the ".
+	       "master administrator");
 	}
 
 # Check domain features
@@ -295,6 +319,11 @@ if ($opts->{'path'}) {
 		$perr = &validate_script_path($opts, $script, $d);
 		&usage($perr) if ($perr);
 		}
+	}
+# Keep domain-owner installs inside their website
+if (!&master_admin() && $opts->{'dir'} &&
+    !&is_under_directory(&public_html_dir($d), $opts->{'dir'})) {
+	&usage("The install directory must be under the website root");
 	}
 if ($opts->{'db'} && $sname !~ /^php\S+admin$/i) {
 	($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);

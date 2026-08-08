@@ -30,9 +30,9 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/modify-domain.pl";
+	$0 = "$pwd/rename-domain.pl";
 	require './virtual-server-lib.pl';
-	$< == 0 || die "modify-domain.pl must be run as root";
+	$< == 0 || die "rename-domain.pl must be run as root";
 	}
 @OLDARGV = @ARGV;
 &set_all_text_print();
@@ -47,15 +47,30 @@ while(@ARGV > 0) {
 		$newdomain = lc(shift(@ARGV));
 		}
 	elsif ($a eq "--new-user") {
+		# Selecting a Unix login is only offered to those who can
+		# rename and choose a username
+		&can_rename_domains() == 2 ||
+			&usage("--new-user is only available to the master ".
+			       "administrator");
 		$newuser = lc(shift(@ARGV));
 		}
 	elsif ($a eq "--auto-user") {
+		&can_rename_domains() == 2 ||
+			&usage("--auto-user is only available to the master ".
+			       "administrator");
 		$newuser = "auto";
 		}
 	elsif ($a eq "--new-home") {
+		# An arbitrary home directory can only be set by the master
+		&can_rehome_domains() == 2 ||
+			&usage("--new-home is only available to the master ".
+			       "administrator");
 		$newhome = lc(shift(@ARGV));
 		}
 	elsif ($a eq "--auto-home") {
+		&can_rehome_domains() ||
+			&usage("You are not allowed to change the home ".
+			       "directory");
 		$newhome = "auto";
 		}
 	elsif ($a eq "--new-prefix") {
@@ -74,7 +89,7 @@ while(@ARGV > 0) {
 
 # Find the domain and validate inputss
 $domain || usage("No domain specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 $newdomain || $newuser || $newhome || $newprefix ||
 	&usage("No changes specified");

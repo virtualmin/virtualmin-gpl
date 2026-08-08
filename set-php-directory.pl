@@ -60,7 +60,7 @@ while(@ARGV > 0) {
 $domain || &usage("No domain specified");
 $dir || &usage("No directory specified");
 $version || &usage("No PHP version specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 $mode = &get_domain_php_mode($d);
 $mode eq "mod_php" &&
@@ -76,6 +76,8 @@ if ($dir eq ".") {
 elsif ($dir !~ /^\//) {
 	$dir = &public_html_dir($d)."/".$dir;
 	}
+!&master_admin() && !&is_under_directory(&public_html_dir($d), $dir) &&
+	&usage("The PHP directory must be under the website root");
 
 # Make the change
 &obtain_lock_web($d);

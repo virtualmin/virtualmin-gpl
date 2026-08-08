@@ -55,7 +55,7 @@ while(@ARGV > 0) {
 $domain || &usage("No domain specified");
 $name || &usage("No database name specified");
 $type || &usage("No database type specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 @dbs = &domain_databases($d);
 
@@ -63,6 +63,10 @@ $d || usage("Virtual server $domain does not exist");
 ($db) = grep { $_->{'name'} eq $name &&
 	       $_->{'type'} eq $type } @dbs;
 $db || &usage("The specified database is not associated with this server");
+if (!&master_admin() && $name eq $d->{'db'} &&
+    !&can_edit_database_name()) {
+	&usage($text{'database_edbdef'});
+	}
 
 # Do it
 &set_all_null_print();

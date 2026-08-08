@@ -51,7 +51,7 @@ while(@ARGV > 0) {
 # Make sure all needed args are set
 $domain || &usage("No domain specified");
 $username || &usage("No username specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 &obtain_lock_mail($d);
 &obtain_lock_unix($d);

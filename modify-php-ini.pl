@@ -93,6 +93,20 @@ while(@ARGV > 0) {
 @ini_names || &usage("The --ini-name parameter must be given at least once");
 @ini_names == @ini_values ||
 	&usage("The number of names and values must be the same");
+!&master_admin() && $type &&
+	&usage("--fpm-admin-value is only available to the master administrator");
+if (!&master_admin()) {
+	foreach my $name (@ini_names) {
+		$name =~ /^[a-z0-9_\.\-]+$/i ||
+			&usage("Invalid PHP configuration setting $name");
+		}
+	foreach my $value (grep { defined($_) } @ini_values) {
+		$value !~ /[\r\n]/ ||
+			&usage("PHP configuration values cannot contain newlines");
+		}
+	# Never preserve or create an administrator-only FPM value
+	$type = 0;
+	}
 
 # Get the domains
 if (@domains || @users) {
@@ -101,6 +115,7 @@ if (@domains || @users) {
 else {
 	@doms = &list_domains();
 	}
+@doms = &get_remote_api_domains(\@doms, $all_doms || @users);
 
 # Do each domain
 foreach my $d (@doms) {

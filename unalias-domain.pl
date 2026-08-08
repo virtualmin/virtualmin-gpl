@@ -53,9 +53,18 @@ while(@ARGV > 0) {
 
 # Find the domain
 $domain || usage("No domain specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 $d->{'alias'} || &usage("The given virtual server is not an alias");
+$d->{'parent'} || &master_admin() ||
+	&usage("Only a sub-server alias can be converted");
+
+# An alias becomes a real sub-server, so it counts against that limit
+if (!&master_admin()) {
+	my ($dleft, $dreason, $dmax) = &count_domains("realdoms");
+	$dleft == 0 && &usage("You have reached the maximum of $dmax ".
+			      "virtual servers that can be created");
+	}
 
 # Call the move function
 &$first_print(&text('unalias_doing', "<tt>$d->{'dom'}</tt>"));

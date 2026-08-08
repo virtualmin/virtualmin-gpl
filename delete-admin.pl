@@ -50,7 +50,7 @@ while(@ARGV > 0) {
 
 $domain || &usage("No domain specified");
 $name || &usage("No username specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 
 # Find the admin, and delete him
