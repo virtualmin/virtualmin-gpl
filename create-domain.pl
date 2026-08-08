@@ -722,12 +722,7 @@ if (!$is_master) {
 	# Check any restriction on the names he can use
 	my $derr = &allowed_domain_name($parent, $domain);
 	&usage($derr) if ($derr);
-	# Only features the owner has been granted can be enabled
-	foreach my $f (keys %feature, keys %plugin) {
-		&can_use_feature($f) ||
-			&usage("You are not allowed to enable the $f feature");
-		}
-	# Selecting an IP address is only for those allowed to
+	# Only users allowed to select an address may request one
 	($virt || $sharedip) && !&can_select_ip() &&
 		&usage($text{'setup_eip'});
 	($virt6 || $sharedip6) && !&can_select_ip6() &&
@@ -798,6 +793,16 @@ elsif ($deffeatures || $planfeatures && !$tfl) {
 		}
 	}
 scalar(keys %feature) || &usage("No virtual server features enabled");
+
+# Only features the owner has been granted can be enabled. This runs after the
+# set is final, as it may be rebuilt above from a template or plan.
+if (!$is_master) {
+	foreach my $f (grep { $feature{$_} } keys %feature,
+		       grep { $plugin{$_} } keys %plugin) {
+		&can_use_feature($f) ||
+			&usage("You are not allowed to enable the $f feature");
+		}
+	}
 
 if (!$parent) {
 	# Make sure alias, database, etc limits are set properly
