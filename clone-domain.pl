@@ -61,7 +61,7 @@ while(@ARGV > 0) {
 		$newpass = shift(@ARGV);
 		}
 	elsif ($a eq "--ip") {
-		# Selecting an IP address is only for those allowed to
+		# Only users allowed to select an address may request one
 		&master_admin() || &can_select_ip() ||
 			&usage("You are not allowed to select an IP address");
 		$ip = shift(@ARGV);
@@ -86,6 +86,9 @@ while(@ARGV > 0) {
 # Find the domain
 $domain || usage("Missing --domain flag");
 $newdomain || usage("Missing --newdomain flag");
+$newdomain = lc(&parse_domain_name($newdomain));
+my $dnerr = &valid_domain_name($newdomain);
+&usage($dnerr) if ($dnerr);
 $d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 

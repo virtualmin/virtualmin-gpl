@@ -93,6 +93,12 @@ $d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 $newdomain || $newuser || $newhome || $newprefix ||
 	&usage("No changes specified");
+if ($newdomain) {
+	# Validate the new name, as the rename function does not
+	$newdomain = lc(&parse_domain_name($newdomain));
+	my $err = &valid_domain_name($newdomain);
+	&usage($err) if ($err);
+	}
 
 # Do the rename
 $err = &rename_virtual_server($d, $newdomain, $newuser, $newhome, $newprefix);
