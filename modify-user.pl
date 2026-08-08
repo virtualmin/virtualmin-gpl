@@ -100,6 +100,8 @@ if (!$module_name) {
 # Get shells
 @ashells = grep { $_->{'mailbox'} && $_->{'avail'} } &list_available_shells();
 ($nologin_shell, $ftp_shell, $jailed_shell) = &get_common_available_shells();
+# Cache the caller level used by the remote-safe option checks
+my $is_master = &master_admin();
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -114,6 +116,9 @@ while(@ARGV > 0) {
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
+		# Prevent non-master callers from reading server-side files
+		$is_master ||
+			&usage("--passfile is only available to the master administrator");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
@@ -277,7 +282,7 @@ while(@ARGV > 0) {
 
 # Make sure all needed args are set
 $domain && $username || &usage("No domain name or username specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || &usage("Virtual server $domain does not exist");
 &obtain_lock_mail($d);
 &obtain_lock_unix($d);
@@ -287,7 +292,44 @@ $d || &usage("Virtual server $domain does not exist");
 $user || &usage("No user named $username was found in the server $domain");
 ($user->{'feature_user'} || $user->{'noactions'}) &&
 	&usage("The user $username is managed by a feature plugin, and so cannot be modified by this command");
+
+# Enforce the same input and option restrictions as the user interface
+if (!$is_master && $shell &&
+    (!&can_mailbox_ftp() ||
+     !&check_available_shell($shell->{'shell'}, 'mailbox', $user->{'shell'}))) {
+	&usage($text{'user_eshell'});
+	}
+if (defined($quota) && !$is_master && !&can_mailbox_quota()) {
+	&usage("You are not allowed to change mailbox quotas");
+	}
+
+# Server-side SSH key selection is only safe for the master administrator
+if (defined($sshpubkeyid) && !$is_master) {
+	&usage("--ssh-pubkey-id is only available to the master administrator");
+	}
+if (!$is_master) {
+	if (defined($newusername)) {
+		$err = &valid_mailbox_name($newusername);
+		&usage($err) if ($err);
+		}
+	defined($real) && $real !~ /^[^:\r\n]*$/ &&
+		&usage($text{'user_ereal'});
+	defined($firstname) && $firstname !~ /^[^:\r\n]*$/ &&
+		&usage($text{'user_efirstname'});
+	defined($surname) && $surname !~ /^[^:\r\n]*$/ &&
+		&usage($text{'user_esurname'});
+	foreach my $forward (@addforward) {
+		$forward =~ /^([^\|\:\"\' \t\/\\\%]\S*)$/ ||
+			&usage(&text('alias_etype1', $forward));
+		&can_forward_alias($forward) ||
+			&usage(&text('alias_etype1f', $forward));
+		$forward eq $user->{'email'} &&
+			&usage($text{'user_eloop'});
+		}
+	}
 $olduser = { %$user };
+# Keep the original count because the user copy shares nested array references
+$oldextracount = scalar(@{$user->{'extraemail'}});
 $shortusername = &remove_userdom($user->{'user'}, $d);
 &build_taken(\%taken, \%utaken);
 %cangroups = map { $_, 1 } &allowed_secondary_groups($d);
@@ -297,14 +339,20 @@ foreach $g (@addgroups) {
 	}
 $disable && $enable && &usage("Only one of the --disable and --enable options can be used");
 
-# Limit what can be done to domain owners
+# Limit what can be done to domain owners, preserving existing master behavior
 if ($user->{'domainowner'}) {
-	$real &&
+	($is_master ? $real : defined($real)) &&
 	  &usage("The --real flag cannot be used when editing a domain owner");
+	!$is_master && (defined($firstname) || defined($surname)) &&
+	  &usage("First and last names cannot be changed when editing a domain owner");
 	defined($pass) &&
 	  &usage("The --pass and --passfile flags cannot be used when ".
 		 "editing a domain owner");
-	$quota &&
+	!$is_master && defined($sshpubkey) &&
+	  &usage("The SSH public key cannot be changed when editing a domain owner");
+	!$is_master && defined($recovery) &&
+	  &usage("The recovery address cannot be changed when editing a domain owner");
+	($is_master ? $quota : defined($quota)) &&
 	  &usage("Quotas cannot be changed when editing a domain owner");
 	(@adddbs || @deldbs) &&
 	  &usage("Databases cannot be changed when editing a domain owner");
@@ -312,6 +360,8 @@ if ($user->{'domainowner'}) {
 	  &usage("The username cannot be changed when editing a domain owner");
 	$shell &&
 	  &usage("The shell cannot be changed when editing a domain owner");
+	!$is_master && ($disable || $enable) &&
+	  &usage("The account status cannot be changed when editing a domain owner");
 	}
 
 # Make the changes to the user object
@@ -321,6 +371,11 @@ if (defined($pass)) {
 	$user->{'plainpass'} = $pass;
 	$user->{'pass'} = &encrypt_user_password($user, $pass);
 	&set_pass_change($user);
+	# Apply the user interface password policy to non-master callers
+	if (!$is_master) {
+		$err = &check_password_restrictions($user, 0, $d);
+		&usage($err) if ($err);
+		}
 	}
 if ($disable) {
 	&set_pass_disable($user, 1);
@@ -382,6 +437,17 @@ foreach $e (@addemails) {
 	if ($e !~ /^(\S*)\@(\S+)$/) {
 		&usage("Email address $e is not valid");
 		}
+	# Additional addresses must belong to an accessible mail domain
+	if (!$is_master) {
+		my ($eu, $ed) = ($1, &parse_domain_name($2));
+		my $edom = &get_remote_api_domain("dom", $ed);
+		$edom->{'mail'} || &usage(&text('user_eextra2', $ed));
+		!$edom->{'alias'} || !$edom->{'aliascopy'} ||
+			&usage(&text('user_eextra7', $ed));
+		$e = "$eu\@$ed";
+		&check_clash($eu, $ed) &&
+			&usage(&text('user_eextra4', $e));
+		}
 	($got) = grep { $_ eq $e } @{$user->{'extraemail'}};
 	$got && &usage("Email address $e is already associated with this user");
 	$user->{'email'} eq $e && &usage("Email address $e is already the user's primary address");
@@ -391,6 +457,14 @@ foreach $e (@delemails) {
 	($got) = grep { $_ eq $e } @{$user->{'extraemail'}};
 	$got || &usage("Email address $e does not belong to this user");
 	@{$user->{'extraemail'}} = grep { $_ ne $e } @{$user->{'extraemail'}};
+	}
+
+# Prevent non-master callers from exceeding their alias limit
+if (!$is_master) {
+	($mleft) = &count_feature("aliases");
+	$mleft >= 0 &&
+	  $mleft - @{$user->{'extraemail'}} + $oldextracount < 0 &&
+		&usage($text{'alias_ealiaslimit'});
 	}
 if (defined($recovery)) {
 	$user->{'recovery'} = $recovery;
@@ -549,12 +623,16 @@ else {
 	# Update SSH key if given
 	if ($sshpubkey) {
 		my $pubkey;
-		my $sshpubkeyfile = -r $sshpubkey ? $sshpubkey : undef;
+		# Only the master administrator can load a key from a server file
+		my $sshpubkeyfile =
+			$is_master && -r $sshpubkey ? $sshpubkey : undef;
 		if ($sshpubkeyfile) {
+			# Select the requested key from the server-side file
 			$pubkey = &get_ssh_pubkey_from_file(
 				$sshpubkeyfile, $sshpubkeyid);
 			}
 		else {
+			# Treat direct input as literal public key content
 			$pubkey = $sshpubkey;
 			}
 		my $pubkeyerr = &validate_ssh_pubkey($pubkey);

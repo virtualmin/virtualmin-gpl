@@ -3237,6 +3237,7 @@ limits_edit_ip=Can change IP address
 limits_edit_dnsip=Can change external IP address
 limits_edit_forward=Can edit forwarding and proxies
 limits_edit_redirect=Can edit website redirects
+limits_edit_remote_api=Can call remote API
 limits_edit_backup=Can make backups
 limits_edit_restore=Can restore backups
 limits_edit_sched=Can schedule backups
@@ -5008,6 +5009,8 @@ sysinfo_python=Python version
 sysinfo_pythonpath=Path to Python
 
 remote_ecannot=You are not allowed to run remote commands
+remote_ecannotcap=You are not allowed to run this command for virtual server $1
+remote_ecannotdom=Virtual server $1 does not exist
 remote_eprogram=Invalid remote program name
 remote_eprogram2=Remote program $1 does not exist
 

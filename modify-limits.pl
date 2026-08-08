@@ -83,6 +83,8 @@ C<disable> - Disable virtual servers
 
 C<delete> - Delete virtual servers
 
+C<remote_api> - Call the Virtualmin remote API
+
 Access to capabilities can also be taken away with the C<--cannot-edit> flag.
 
 To restrict the virtual server owner to only installing certain scripts 

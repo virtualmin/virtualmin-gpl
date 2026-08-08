@@ -398,7 +398,8 @@ sub list_automatic_capabilities
 {
 my ($cancreate) = @_;
 if ($cancreate) {
-	return @edit_limits;
+	# Remote API access must always be explicitly granted
+	return grep { $_ ne 'remote_api' } @edit_limits;
 	}
 else {
 	return ( 'users', 'aliases', 'html', 'passwd' );
