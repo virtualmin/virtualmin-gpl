@@ -103,6 +103,11 @@ sub create_domain_home_directory
 {
 my ($d, $uinfo) = @_;
 my $perms = oct($uconfig{'homedir_perms'});
+# Btrfs quota enforcement requires every top-level home to be a subvolume.
+if (&has_btrfs_quotas() && !$d->{'parent'} && !$d->{'alias'}) {
+	my ($err) = &ensure_btrfs_domain_home($d);
+	&error($err) if ($err);
+	}
 if (&has_domain_user($d) && $d->{'parent'}) {
 	# Run as domain owner, as this is a sub-server
 	&make_dir_as_domain_user($d, $d->{'home'}, $perms, 1);
@@ -270,20 +275,30 @@ if (-d $d->{'home'} && &safe_delete_dir($d, $d->{'home'})) {
 	if (defined(&set_php_wrappers_writable)) {
 		&set_php_wrappers_writable($d, 1);
 		}
-	my $err = &backquote_logged("rm -rf ".quotemeta($d->{'home'}).
-				       " 2>&1");
-	if ($?) {
+	my $err;
+	# Detect subvolumes independently of quota editing so they remain deletable.
+	my $btrfs_id = !$d->{'parent'} && !$d->{'alias'} &&
+		defined(&quota::btrfs_subvolume_id) ?
+		&quota::btrfs_subvolume_id($d->{'home'}, undef) : undef;
+	# Btrfs subvolume roots need their qgroup-aware deletion path.
+	if (defined($btrfs_id)) {
+		$err = &delete_btrfs_domain_home($d);
+		}
+	else {
+		# Ordinary home directories retain the established recursive cleanup.
+		$err = &backquote_logged("rm -rf ".quotemeta($d->{'home'}).
+					       " 2>&1");
+		$err = undef if (!$?);
+		}
+	if ($err) {
 		# Try again after running chattr
-		if (&has_command("chattr")) {
+		if (!defined($btrfs_id) && &has_command("chattr")) {
 			&system_logged("chattr -i -R ".
 				       quotemeta($d->{'home'}));
 			$err = &backquote_logged(
 				"rm -rf ".quotemeta($d->{'home'})." 2>&1");
 			$err = undef if (!$?);
 			}
-		}
-	else {
-		$err = undef;
 		}
 	if ($err) {
 		# Ignore an error deleting a mount point
@@ -1287,4 +1302,3 @@ return $dir eq '/' ||
 $done_feature_script{'dir'} = 1;
 
 1;
-

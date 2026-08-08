@@ -2642,7 +2642,9 @@ return undef;
 sub has_mysql_quotas
 {
 &require_mysql();
+# A shared MySQL data subvolume cannot enforce independent domain qgroups.
 return &has_home_quotas() &&
+       !&has_btrfs_quotas() &&
        $mysql::config{'mysql_data'} &&
        $config{'home_quotas'} &&
        &is_under_directory($config{'home_quotas'},

@@ -1,4 +1,5 @@
 #### Version 8.2.0
+* Add Btrfs subvolume and hierarchical qgroup quota support for virtual servers and mailbox users
 * Add new [Virtualmin Podman](https://www.virtualmin.com/docs/plugins/podman/) plugin for Virtualmin Pro users, bringing per-domain container and pod management to both the UI and CLI
 * Add Auktiva, Fish Auctions and Pixelfed web app installers for Virtualmin Pro users
 * Add Django web app installer with isolated Python environments, Gunicorn services managed by systemd, production-safe settings and automatic database driver setup

@@ -942,30 +942,43 @@ if ($mysql_module) {
 		}
 	}
 
-# Re-apply filesystem quotas
+# Re-apply filesystem quotas. This is best-effort because domain changes above
+# have already completed and must not be reported as failed retroactively.
+my $quota_apply_err;
 if (&has_home_quotas() && $applyquotas && $dom->{'unix'}) {
 	&$first_print("Re-applying virtual server quotas ..");
-	&set_server_quotas($dom);
-	&$second_print(".. done");
+	{
+	local $main::error_must_die = 1;
+	eval { &set_server_quotas($dom); };
+	$quota_apply_err = $@;
+	}
+	$quota_apply_err =~ s/\s+$// if ($quota_apply_err);
+	&$second_print($quota_apply_err ? ".. failed : $quota_apply_err" :
+					   ".. done");
 	}
 if (&has_home_quotas() && $applyquotas == 2) {
 	&$first_print("Re-applying mailbox user quotas ..");
-	my $fixed = 0;
-	foreach my $u (&list_domain_users($dom, 1, 0, 0, 0)) {
-		next if ($u->{'noquota'});
-		my $oldu = { %$u };
-		my $save = 0;
-		if (defined($u->{'quota_cache'}) &&
-		    $u->{'quota'} != $u->{'quota_cache'}) {
-			$u->{'quota'} = $u->{'quota_cache'};
-			$save = 1;
-			}
-		if ($save) {
-			&modify_user($u, $oldu, $dom);
-			$fixed++;
-			}
+	if ($quota_apply_err) {
+		&$second_print(".. skipped : virtual server quotas were not applied");
 		}
-	&$second_print(".. updated $fixed users");
+	else {
+		my $fixed = 0;
+		foreach my $u (&list_domain_users($dom, 1, 0, 0, 0)) {
+			next if ($u->{'noquota'});
+			my $oldu = { %$u };
+			my $save = 0;
+			if (defined($u->{'quota_cache'}) &&
+			    $u->{'quota'} != $u->{'quota_cache'}) {
+				$u->{'quota'} = $u->{'quota_cache'};
+				$save = 1;
+				}
+			if ($save) {
+				&modify_user($u, $oldu, $dom);
+				$fixed++;
+				}
+			}
+		&$second_print(".. updated $fixed users");
+		}
 	}
 
 # Update the Webmin user for this domain, or the parent
@@ -1055,4 +1068,3 @@ print "                        [--disable-2fa]\n";
 print "                        [--skip-warnings]\n";
 exit(1);
 }
-
