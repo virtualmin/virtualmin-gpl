@@ -65,7 +65,7 @@ $type || &usage("Missing --type parameter");
 	       join(" ", @database_features));
 defined($user) || &usage("Missing --user parameter");
 $dname || &usage("Missing --domain parameter");
-$d = &get_domain_by("dom", $dname);
+$d = &get_remote_api_domain("dom", $dname);
 $d || &usage("No domain named $dname exists");
 $d->{'parent'} && &usage("The database username can only be changed for a top ".
 			 "level virtual server");

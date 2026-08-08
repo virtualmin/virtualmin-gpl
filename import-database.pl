@@ -60,7 +60,7 @@ while(@ARGV > 0) {
 $domain || &usage("No domain specified");
 $name || &usage("No database name specified");
 $type || &usage("No database type specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 @dbs = &domain_databases($d);
 $d->{$type} || &usage("The specified database type is not enabled in this virtual server");
@@ -74,7 +74,11 @@ $db->{'special'} && &usage("The $type database named $name is special and cannot
 foreach $dd (&list_domains()) {
 	foreach $dddb (&domain_databases($dd)) {
 		if ($dddb->{'name'} eq $name && $dddb->{'type'} eq $type) {
-			&usage("The $type database named $name is already owned by virtual server $dd->{'dom'}");
+			my $owner = &master_admin() ?
+				"virtual server $dd->{'dom'}" :
+				"another virtual server";
+			&usage("The $type database named $name is already owned ".
+			       "by $owner");
 			}
 		}
 	}

@@ -71,7 +71,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--local") {
 		$local = shift(@ARGV);
-		defined(getpwnam($local)) ||
+		&master_admin() && !defined(getpwnam($local)) &&
 			&usage("Missing or invalid local user for --local");
 		}
 	elsif ($a eq "--everyone") {
@@ -107,12 +107,36 @@ while(@ARGV > 0) {
 	}
 $bounce || $local || @forward || $autotext || $everyone ||
 	&usage("No destination specified");
+$domain || &usage("No domain specified");
+$from || &usage("No from address specified");
 
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 $d->{'mail'} || usage("Virtual server $domain does not have email enabled");
 $from =~ /\@/ && &usage("No domain name is needed in the --from parameter");
 $d->{'aliascopy'} && &usage("Aliases cannot be edited in alias domains in copy mode");
+if (!&master_admin()) {
+	$err = &valid_alias_name($from);
+	$err && &usage("Invalid alias name : $err");
+	my ($aleft) = &count_feature("aliases");
+	$aleft == 0 && &usage($text{'alias_ealiaslimit'});
+	$from eq "*" && !&can_edit_catchall() &&
+		&usage("You are not allowed to create catchall aliases");
+	foreach my $to (@forward) {
+		$to =~ /^([^\|\:\"\' \t\/\\\%]\S*)$/ ||
+			&usage(&text('alias_etype1', $to));
+		&can_forward_alias($to) ||
+			&usage(&text('alias_etype1f', $to));
+		$to eq "$from\@$domain" && &usage($text{'alias_eloop'});
+		}
+	if ($local) {
+		my ($u) = grep { $_->{'user'} eq $local ||
+			&remove_userdom($_->{'user'}, $d) eq $local }
+			&list_domain_users($d, 0, 0, 0, 0);
+		$u || &usage("Local delivery user does not belong to this domain");
+		$local = $u->{'user'};
+		}
+	}
 
 # Check for clash
 &obtain_lock_mail($d);
@@ -120,6 +144,8 @@ $d->{'aliascopy'} && &usage("Aliases cannot be edited in alias domains in copy m
 $email = $from eq "*" ? "\@$domain" : "$from\@$domain";
 ($clash) = grep { $_->{'from'} eq $email } @aliases;
 $clash && &usage("An alias for the same email address already exists");
+!&master_admin() && &check_clash($from, $domain) &&
+	&usage($text{'alias_eclash'});
 
 # Create the simple object
 $simple = { };

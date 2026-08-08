@@ -366,13 +366,43 @@ elsif ($all_doms == 2) {
 	}
 else {
 	foreach $n (@dnames) {
-		$d = &get_domain_by("dom", $n);
+		$d = &get_remote_api_domain("dom", $n);
 		$d || &usage("Domain $n does not exist");
 		$d->{'dns'} || &usage("Virtual server $n does not have a DNS domain");
 		push(@doms, $d);
 		}
 	}
+@doms = &get_remote_api_domains(\@doms, $all_doms);
 @doms || &usage("No domains to update found!");
+
+# Enforce the capability for each kind of requested DNS change
+my $records_change = @addrecs || @delrecs || @uprecs || $ttl || $allttl ||
+	$bumpsoa;
+my $ip_change = defined($dns_ip) || defined($dns_ip6);
+my $master_change = @addslaves || @delslaves || $addallslaves ||
+	$syncallslaves || defined($submode);
+my $options_change = defined($spf) || %add || %rem ||
+	defined($spfall) || @addslaves || @delslaves || $addallslaves ||
+	$syncallslaves || defined($dmarc) || $dmarcp || defined($dmarcpct) ||
+	defined($dmarcrua) || defined($dmarcruf) || defined($dnssec) ||
+	defined($tlsa) || defined($submode) || $clouddns ||
+	defined($remotedns) || defined($parentds) || $clouddns_import ||
+	defined($dkim_enabled) || defined($aliasdns);
+foreach my $d (@doms) {
+	&require_remote_api_capability($d, &can_edit_records($d))
+		if ($records_change);
+	&require_remote_api_capability($d, &can_dnsip()) if ($ip_change);
+	&require_remote_api_capability($d, &can_edit_dns($d))
+		if ($options_change);
+	&require_remote_api_capability($d, 0) if ($master_change);
+	if (defined($parentds) && !&master_admin()) {
+		my $pname = $d->{'dom'};
+		$pname =~ s/^[^\.]+\.//;
+		my $parent = &get_domain_by("dom", $pname);
+		&require_remote_api_capability($d,
+			$parent && &can_edit_domain($parent));
+		}
+	}
 
 # Are all domains alias domains?
 @nonalias = grep { !&copy_alias_records($_) } @doms;
@@ -425,10 +455,14 @@ if ($clouddns) {
 			&usage("Cloudmin Services for DNS is not enabled");
 		}
 	elsif ($clouddns ne "local") {
-		my @cnames = map { $_->{'name'} } &list_dns_clouds();
+		my @clouds = &list_dns_clouds();
+		my @cnames = map { $_->{'name'} } @clouds;
 		&indexof($clouddns, @cnames) >= 0 ||
 			&usage("Valid cloud DNS providers are : ".
 			       join(" ", @cnames));
+		my ($cloud) = grep { $_->{'name'} eq $clouddns } @clouds;
+		&master_admin() || &can_dns_cloud($cloud) ||
+			&usage("You are not allowed to use DNS provider $clouddns");
 		}
 	}
 
@@ -614,6 +648,8 @@ foreach $d (@doms) {
 			push(@alld, @d);
 			}
 		foreach my $r (@alld) {
+			!&master_admin() && !&can_delete_record($r, $d) &&
+				&usage("This DNS record cannot be removed by a domain owner");
 			&delete_dns_record($recs, $file, $r);
 			$changed++;
 			}
@@ -655,6 +691,9 @@ foreach $d (@doms) {
 				  'ttl' => $ttl,
 				  'values' => $values,
 				  'proxied' => $proxied };
+			&validate_remote_api_dns_record($d, $r);
+			!&master_admin() && !&can_edit_record($r, $d) &&
+				&usage("This DNS record cannot be created by a domain owner");
 			my ($clash) = grep { $_->{'name'} eq $name &&
 					     &bind8::join_record_values($_) eq
 						&bind8::join_record_values($r) } @$recs;
@@ -684,6 +723,8 @@ foreach $d (@doms) {
 			}
 		foreach my $rn (@uprecs) {
 			my ($oldname, $oldtype, $name, $type, $ttl, $values, $proxied) = @$rn;
+			$values = [ join(" ", @$values) ]
+				if (!&master_admin() && uc($type) eq "TXT");
 			$oldname = &expand_dns_record($oldname, $d);
 			$name = &expand_dns_record($name, $d);
 			my ($r) = grep { $_->{'name'} eq $oldname &&
@@ -692,6 +733,14 @@ foreach $d (@doms) {
 				&$second_print(&text('spf_euprecs', $oldname));
 				}
 			else {
+				my $newr = { %$r, 'name' => $name,
+					     'type' => uc($type),
+					     'values' => $values };
+				&validate_remote_api_dns_record($d, $newr);
+				!&master_admin() &&
+				  (!&can_edit_record($r, $d) ||
+				   !&can_edit_record($newr, $d)) &&
+					&usage("This DNS record cannot be changed by a domain owner");
 				$r->{'name'} = $name;
 				$r->{'type'} = $type;
 				$r->{'ttl'} = $ttl if (defined($ttl));
@@ -961,6 +1010,37 @@ foreach $d (@doms) {
 
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV);
+
+# validate_remote_api_dns_record(&domain, &record)
+# Applies the DNS record restrictions used by the domain-owner interface.
+sub validate_remote_api_dns_record
+{
+my ($d, $r) = @_;
+return if (&master_admin());
+my ($type) = grep { $_->{'type'} eq uc($r->{'type'}) && $_->{'create'} }
+	&list_dns_record_types($d);
+$type || &usage("Invalid DNS record type $r->{'type'}");
+$r->{'name'} eq $d->{'dom'}."." ||
+	$r->{'name'} =~ /^(?:\*\.)?(?:[a-z0-9_-]+\.)*\Q$d->{'dom'}\E\.$/i ||
+	&usage("DNS record names must be within $d->{'dom'}");
+defined($r->{'ttl'}) && $r->{'ttl'} !~ /^\d+(s|m|h|d)?$/ &&
+	&usage("Invalid DNS record TTL $r->{'ttl'}");
+my @defs = @{$type->{'values'} || [ ]};
+@defs == @{$r->{'values'}} ||
+	&usage("Invalid number of values for DNS record type $r->{'type'}");
+for(my $i = 0; $i < @defs; $i++) {
+	my $value = $r->{'values'}->[$i];
+	my $opts = $defs[$i]->{'opts'};
+	!$opts || (grep { $_->[0] eq $value } @$opts) ||
+		&usage("Invalid value for DNS record type $r->{'type'}");
+	my $regexp = $defs[$i]->{'regexp'};
+	!$regexp || $value =~ /$regexp/ ||
+		&usage("Invalid value for DNS record type $r->{'type'}");
+	my $func = $defs[$i]->{'func'};
+	my $err = $func && &$func($value);
+	&usage($err) if ($err);
+	}
+}
 
 sub usage
 {

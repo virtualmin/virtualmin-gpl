@@ -46,6 +46,7 @@ if (!$module_name) {
 	}
 @OLDARGV = @ARGV;
 &set_all_text_print();
+my $is_master = &master_admin();
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -59,6 +60,8 @@ while(@ARGV > 0) {
 		$f = shift(@ARGV);
 		if ($f =~ /^\//) {
 			# In some file on the server
+			$is_master ||
+				&usage("Certificate files are only available to the master administrator");
 			$data = &read_file_contents($f);
 			$data || &usage("File $f does not exist");
 			push(@got, [ $g, $data ]);
@@ -90,7 +93,7 @@ while(@ARGV > 0) {
 		}
 	}
 $dname || &usage("Missing --domain parameter");
-$d = &get_domain_by("dom", $dname);
+$d = &get_remote_api_domain("dom", $dname);
 $d || &usage("No virtual server named $dname found");
 $d->{'ssl_same'} && &usage("This server shares it's SSL certificate ".
 			   "with another domain");

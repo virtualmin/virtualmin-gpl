@@ -80,7 +80,7 @@ while(@ARGV > 0) {
 
 # Find the domain
 $domain || usage("No domain specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || &usage("Virtual server $domain does not exist");
 $d->{'disabled'} && &usage("Virtual server $domain is already disabled");
 @doms = ( $d );
@@ -121,6 +121,7 @@ else {
 				}
 			}
 		}
+	@doms = &get_remote_api_domains(\@doms, 1);
 
 	foreach $d (@doms) {
 		print "Disabling virtual server $d->{'dom'} ..\n\n";

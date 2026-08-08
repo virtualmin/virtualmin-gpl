@@ -53,8 +53,10 @@ while(@ARGV > 0) {
 	}
 
 $dname && $forcemode && &usage("Only one of --domain or --mode can be set");
+!&master_admin() && !$dname &&
+	&usage("The --domain parameter is required for domain owners");
 if ($dname) {
-	$d = &get_domain_by("dom", $dname);
+	$d = &get_remote_api_domain("dom", $dname);
 	$d || &usage("Virtual server $dname does not exist");
 	}
 

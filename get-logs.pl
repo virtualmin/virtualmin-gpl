@@ -23,7 +23,7 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/get-ssl.pl";
+	$0 = "$pwd/get-logs.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "get-ssl.pl must be run as root";
 	}
@@ -60,7 +60,7 @@ while(@ARGV > 0) {
 
 # Validate inputs and get the domain
 $dname || &usage("Missing --domain parameter");
-$d = &get_domain_by("dom", $dname);
+$d = &get_remote_api_domain("dom", $dname);
 $d || &usage("Virtual server $dname does not exist");
 
 # Find the log file

@@ -4708,6 +4708,33 @@ elsif ($mode == 5) {
 return $rv;
 }
 
+# confine_backup_dest(dest, backup-mode, [&domain])
+# Given a destination for a backup, returns it restricted to what the current
+# user is allowed to write to, or an error message. Mirrors the limits that
+# parse_backup_destination applies in the user interface - domain owners can
+# only write under their own backup directory, and resellers cannot write to
+# any local file.
+sub confine_backup_dest
+{
+my ($dest, $mode, $d) = @_;
+return ($dest, undef) if ($mode == 1);
+my ($proto, undef, undef, undef, $path) = &parse_backup_url($dest);
+return ($dest, undef) if ($proto != 0);
+if ($mode == 3) {
+	# Resellers can only back up to a remote destination
+	return (undef, $text{'backup_emode'});
+	}
+$d || return (undef, $text{'backup_edest'});
+# Force the file to be under the domain's own backup directory
+my $file = $dest;
+$file =~ s/^\Q$d->{'home'}\E\/\Q$home_virtualmin_backup\E\/*//;
+$file =~ s/^\/+//;
+$file =~ s/\/+$//;
+$file =~ /^\S+$/ || return (undef, $text{'backup_edest2'});
+$file =~ /\.\./ && return (undef, $text{'backup_edest3'});
+return ("$d->{'home'}/$home_virtualmin_backup/$file", undef);
+}
+
 # nice_backup_url(string, [caps-first], [show-backup-path-opts])
 # Converts a backup URL to a nice human-readable format
 sub nice_backup_url

@@ -48,7 +48,7 @@ while(@ARGV > 0) {
 	}
 $domain || &usage("No domain specified");
 $path || &usage("No proxy path specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 &has_proxy_balancer($d) || &usage("Proxy balancers cannot be configured for this virtual server");
 

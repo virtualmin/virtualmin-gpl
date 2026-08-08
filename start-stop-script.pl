@@ -69,7 +69,7 @@ while(@ARGV > 0) {
 
 # Validate args
 $domain || &usage("No domain specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 $mode || &usage("Missing one of --start, --stop or --restart");
 
@@ -91,6 +91,12 @@ else {
 	@matches || &usage("No script install for $sname was found for this virtual server");
 	@matches == 1 || &usage("More than one script install for $sname was found for this virtual server. Use the --id option to specify the exact install, or --version to select a version");
 	$sinfo = $matches[0];
+	}
+
+# Global defaults affect other virtual servers
+if (!&master_admin() && $sinfo->{'opts'}->{'global_def'}) {
+	&usage("Global default scripts can only be managed by the ".
+	       "master administrator");
 	}
 
 # Do the action

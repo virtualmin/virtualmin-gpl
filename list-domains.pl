@@ -191,6 +191,7 @@ if (@ids) {
 	foreach $id (@ids) {
 		$d = &get_domain($id);
 		$d || &usage("No virtual server with ID $id exists");
+		&require_remote_api_domain($d, $id);
 		push(@doms, $d);
 		}
 	}
@@ -213,14 +214,17 @@ else {
 	# Showing all domains, with some limits
 	@doms = &list_domains();
 	}
+my $all_domains = !(@ids || @domains || @users || @plans || @mailusers);
+@doms = &get_remote_api_domains(\@doms,
+	$all_domains || @users || @plans || @mailusers);
 
 # Get alias/parent domains
 if ($aliasof) {
-	$aliasofdom = &get_domain_by("dom", $aliasof);
+	$aliasofdom = &get_remote_api_domain("dom", $aliasof);
 	$aliasofdom || &usage("No alias target named $aliasof found");
 	}
 if ($parentof) {
-	$parentofdom = &get_domain_by("dom", $parentof);
+	$parentofdom = &get_remote_api_domain("dom", $parentof);
 	$parentofdom || &usage("No parent named $parentof found");
 	}
 
@@ -361,11 +365,13 @@ if ($multiline) {
 		print "    Mailbox username prefix: $d->{'prefix'}\n";
 		print "    Password storage: ",
 		      ($d->{'hashpass'} ? "Hashed" : "Plain text"),"\n";
-		if ($d->{'pass'}) {
-			print "    Password: $d->{'pass'}\n";
-			}
-		elsif ($d->{'enc_pass'}) {
-			print "    Hashed password: $d->{'enc_pass'}\n";
+		if (&master_admin()) {
+			if ($d->{'pass'}) {
+				print "    Password: $d->{'pass'}\n";
+				}
+			elsif ($d->{'enc_pass'}) {
+				print "    Hashed password: $d->{'enc_pass'}\n";
+				}
 			}
 		foreach my $f (grep { $d->{$_} } @database_features) {
 			my $ufunc = "${f}_user";
@@ -374,7 +380,7 @@ if ($multiline) {
 				print "    Username for ${f}: $u\n";
 				}
 			my $pfunc = "${f}_pass";
-			if (defined(&$pfunc)) {
+			if (&master_admin() && defined(&$pfunc)) {
 				my $p = &$pfunc($d);
 				print "    Password for ${f}: $p\n";
 				}

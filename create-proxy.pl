@@ -78,9 +78,20 @@ $path || &usage("No proxy path specified");
 @urls || $none || &usage("At least one URL must be specified");
 $path =~ /^\/\S*$/ || &error("Path must be like / or /foo");
 
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 $has = &has_proxy_balancer($d);
+
+if (!&master_admin()) {
+	$balancer && $balancer !~ /^[a-z0-9_\-]+$/i &&
+		&usage("Invalid proxy balancer name");
+	foreach my $url (@urls) {
+		$url =~ /^(http|https):\/\/\S+$/ ||
+			&usage("Proxy URLs must start with http:// or https://");
+		}
+	$websockets && (@urls != 1 || $urls[0] !~ /^(http|https):\/\//) &&
+		&usage("WebSockets proxying requires one HTTP or HTTPS URL");
+	}
 
 $has || &usage("Proxies cannot be configured for this virtual server");
 $has == 2 || $none || @urls == 1 || &usage("Multiple URL proxy balancers cannot be configured for this virtual server");

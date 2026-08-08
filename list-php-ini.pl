@@ -72,6 +72,7 @@ if (@domains || @users) {
 else {
 	@doms = &list_domains();
 	}
+@doms = &get_remote_api_domains(\@doms, $all_doms || @users);
 
 # Get from domain
 foreach my $d (@doms) {

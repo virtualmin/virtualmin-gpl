@@ -98,6 +98,10 @@ if (!$module_name) {
 @OLDARGV = @ARGV;
 &set_all_text_print();
 
+# Remote API callers that are not the master admin can only change the
+# settings that the user interface offers them
+my $is_master = &master_admin();
+
 # Parse command-line args
 $name = 1;
 $virt = 0;
@@ -111,9 +115,14 @@ while(@ARGV > 0) {
 		$owner =~ /:/ && &usage($text{'setup_eowner'});
 		}
 	elsif ($a eq "--pass") {
+		$is_master || &can_passwd() ||
+			&usage("You are not allowed to change the password");
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
+		$is_master ||
+			&usage("--passfile is only available to the master ".
+			       "administrator");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
@@ -121,33 +130,51 @@ while(@ARGV > 0) {
 		$email = shift(@ARGV);
 		}
 	elsif ($a eq "--protected") {
+		$is_master ||
+			&usage("--protected is only available to the master ".
+			       "administrator");
 		$protected = 1;
 		}
 	elsif ($a eq "--unprotected") {
+		$is_master ||
+			&usage("--unprotected is only available to the master ".
+			       "administrator");
 		$protected = 0;
 		}
 	elsif ($a eq "--quota") {
+		$is_master || &can_edit_quotas() ||
+			&usage("You are not allowed to change quotas");
 		$quota = shift(@ARGV);
 		$quota = 0 if ($quota eq 'UNLIMITED');
 		$quota =~ /^\d+$/ || &usage("Quota must be a number of blocks");
 		}
 	elsif ($a eq "--uquota") {
+		$is_master || &can_edit_quotas() ||
+			&usage("You are not allowed to change quotas");
 		$uquota = shift(@ARGV);
 		$uquota = 0 if ($uquota eq 'UNLIMITED');
 		$uquota =~ /^\d+$/ || &usage("Quota must be a number of blocks");
 		}
 	elsif ($a eq "--user") {
+		$is_master ||
+			&usage("--user is only available to the master ".
+			       "administrator");
 		$user = shift(@ARGV);
 		$user =~ /^[^\t :]+$/ || &usage($text{'setup_euser2'});
 		defined(getpwnam($user)) &&
 			&usage("A user named $user already exists");
 		}
 	elsif ($a eq "--home") {
+		$is_master ||
+			&usage("--home is only available to the master ".
+			       "administrator");
 		$home = shift(@ARGV);
 		$home =~ /^\/\S+$/ || &usage("Home directory must be an absolute path");
 		-d $home && &usage("New home directory already exists");
 		}
 	elsif ($a eq "--newdomain") {
+		$is_master || &can_rename_domains() ||
+			&usage("You are not allowed to rename virtual servers");
 		$newdomain = shift(@ARGV);
 		$newdomain =~ /^[A-Za-z0-9\.\-]+$/ || &usage("Invalid new domain name");
 		$newdomain = lc($newdomain);
@@ -158,77 +185,114 @@ while(@ARGV > 0) {
 			}
 		}
 	elsif ($a eq "--bw") {
+		$is_master || &can_edit_bandwidth() ||
+			&usage("You are not allowed to change bandwidth limits");
 		# Setting or removing the bandwidth limit
 		$bw = shift(@ARGV);
 		$bw eq "NONE" || $bw =~ /^\d+$/ || &usage("Bandwidth limit must be a number of bytes, or NONE");
 		}
 	elsif ($a eq "--bw-disable") {
+		$is_master || &can_edit_bandwidth() ||
+			&usage("You are not allowed to change bandwidth limits");
 		# Set over-bw limit disable to yes
 		$bw_no_disable = 0;
 		}
 	elsif ($a eq "--bw-no-disable") {
+		$is_master || &can_edit_bandwidth() ||
+			&usage("You are not allowed to change bandwidth limits");
 		# Set over-bw limit disable to no
 		$bw_no_disable = 1;
 		}
 	elsif ($a eq "--no-ip") {
+		$is_master || &can_select_ip() ||
+			&usage($text{'setup_eip'});
 		# Turning off IP address
 		$noip = 1;
 		}
 	elsif ($a eq "--ip") {
+		$is_master || &can_select_ip() ||
+			&usage($text{'setup_eip'});
 		# Changing or adding a virtual IP
 		$ip = shift(@ARGV);
 		&check_ipaddress($ip) || &usage("Invalid IP address");
 		}
 	elsif ($a eq "--shared-ip") {
+		$is_master || &can_select_ip() ||
+			&usage($text{'setup_eip'});
 		# Changing the shared IP
 		$sharedip = shift(@ARGV);
 		&check_ipaddress($sharedip) ||
 			&usage("Invalid shared IP address");
 		}
 	elsif ($a eq "--allocate-ip") {
+		$is_master || &can_select_ip() ||
+			&usage($text{'setup_eip'});
 		# Allocating an IP
 		$ip = "allocate";
 		}
 	elsif ($a eq "--default-ip") {
+		$is_master || &can_select_ip() ||
+			&usage($text{'setup_eip'});
 		# Fall back to the default shared IP
 		$defaultip = 1;
 		}
 	elsif ($a eq "--ip6" && &supports_ip6()) {
+		$is_master || &can_select_ip6() ||
+			&usage($text{'setup_eip6'});
 		# Adding or changing an IPv6 address
 		$ip6 = shift(@ARGV);
 		&check_ip6address($ip6) || &usage("Invalid IPv6 address");
 		}
 	elsif ($a eq "--no-ip6" && &supports_ip6()) {
+		$is_master || &can_select_ip6() ||
+			&usage($text{'setup_eip6'});
 		# Removing an IPv6 address
 		$noip6 = 1;
 		}
 	elsif ($a eq "--allocate-ip6" && &supports_ip6()) {
+		$is_master || &can_select_ip6() ||
+			&usage($text{'setup_eip6'});
 		# Allocating an IPv6 address
 		$ip6 = "allocate";
 		}
 	elsif ($a eq "--default-ip6" && &supports_ip6()) {
+		$is_master || &can_select_ip6() ||
+			&usage($text{'setup_eip6'});
 		# IPv6 on default shared address
 		$defaultip6 = 1;
 		}
 	elsif ($a eq "--shared-ip6") {
+		$is_master || &can_select_ip6() ||
+			&usage($text{'setup_eip6'});
 		# Changing the shared IPv6 address
 		$sharedip6 = shift(@ARGV);
 		&check_ip6address($sharedip6) ||
 			&usage("Invalid shared IPv6 address");
 		}
 	elsif ($a eq "--reseller") {
+		$is_master ||
+			&usage("--reseller is only available to the master ".
+			       "administrator");
 		# Changing the reseller
 		$resel = shift(@ARGV);
 		}
 	elsif ($a eq "--add-reseller") {
+		$is_master ||
+			&usage("--add-reseller is only available to the master ".
+			       "administrator");
 		# Adding a reseller
 		push(@add_resel, shift(@ARGV));
 		}
 	elsif ($a eq "--delete-reseller") {
+		$is_master ||
+			&usage("--delete-reseller is only available to the master ".
+			       "administrator");
 		# Removing a reseller
 		push(@del_resel, shift(@ARGV));
 		}
 	elsif ($a eq "--prefix") {
+		$is_master || &can_rename_domains() ||
+			&usage("You are not allowed to rename virtual servers");
 		# Changing the prefix
 		$prefix = shift(@ARGV);
 		}
@@ -244,6 +308,9 @@ while(@ARGV > 0) {
 		$template eq "" && &usage("Unknown template name");
 		}
 	elsif ($a eq "--plan" || $a eq "--apply-plan") {
+		$is_master ||
+			&usage("--plan is only available to the master ".
+			       "administrator");
 		# Changing the plan
 		$planname = shift(@ARGV);
 		foreach $p (&list_plans()) {
@@ -256,6 +323,9 @@ while(@ARGV > 0) {
 		$planapply = 1 if ($a eq "--apply-plan");
 		}
 	elsif ($a eq "--plan-features") {
+		$is_master ||
+			&usage("--plan-features is only available to the master ".
+			       "administrator");
 		$planfeatures = 1;
 		}
 	elsif ($a eq "--add-exclude") {
@@ -271,17 +341,27 @@ while(@ARGV > 0) {
 		push(@remove_db_excludes, shift(@ARGV));
 		}
 	elsif ($a eq "--pre-command") {
+		$is_master ||
+			&usage("--pre-command is only available to the master ".
+			       "administrator");
 		$precommand = shift(@ARGV);
 		}
 	elsif ($a eq "--post-command") {
+		$is_master ||
+			&usage("--post-command is only available to the master ".
+			       "administrator");
 		$postcommand = shift(@ARGV);
 		}
 	elsif ($a eq "--dns-ip") {
+		$is_master || &can_dnsip() ||
+			&usage("You are not allowed to change the DNS IP address");
 		$dns_ip = shift(@ARGV);
 		&check_ipaddress($dns_ip) ||
 			&usage("--dns-ip must be followed by an IP address");
 		}
 	elsif ($a eq "--no-dns-ip") {
+		$is_master || &can_dnsip() ||
+			&usage("You are not allowed to change the DNS IP address");
 		$dns_ip = "";
 		}
 	elsif ($a eq "--skip-warnings") {
@@ -291,15 +371,27 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	elsif ($a eq "--enable-jail") {
+		$is_master ||
+			&usage("--enable-jail is only available to the master ".
+			       "administrator");
 		$jail = 1;
 		}
 	elsif ($a eq "--disable-jail") {
+		$is_master ||
+			&usage("--disable-jail is only available to the master ".
+			       "administrator");
 		$jail = 0;
 		}
 	elsif ($a eq "--copy-jail") {
+		$is_master ||
+			&usage("--copy-jail is only available to the master ".
+			       "administrator");
 		$copyjail = 1;
 		}
 	elsif ($a eq "--mysql-server") {
+		$is_master ||
+			&usage("--mysql-server is only available to the master ".
+			       "administrator");
 		$myserver = shift(@ARGV);
 		}
 	elsif ($a eq "--link-domain") {
@@ -309,18 +401,28 @@ while(@ARGV > 0) {
 		$linkdname = "";
 		}
 	elsif ($a eq "--alias-redirect") {
+		$is_master || &can_edit_redirect() ||
+			&usage("You are not allowed to change redirects");
 		$aliasredir = 1;
 		}
 	elsif ($a eq "--no-alias-redirect") {
+		$is_master || &can_edit_redirect() ||
+			&usage("You are not allowed to change redirects");
 		$aliasredir = 0;
 		}
 	elsif ($a eq "--apply-quotas") {
 		$applyquotas = 1;
 		}
 	elsif ($a eq "--apply-all-quotas") {
+		$is_master ||
+			&usage("--apply-all-quotas is only available to the master ".
+			       "administrator");
 		$applyquotas = 2;
 		}
 	elsif ($a eq "--disable-2fa") {
+		$is_master ||
+			&usage("--disable-2fa is only available to the master ".
+			       "administrator");
 		$no2fa = 1;
 		}
 	elsif ($a eq "--help") {
@@ -333,10 +435,28 @@ while(@ARGV > 0) {
 
 # Find the domain
 $domain || usage("No domain specified");
-$dom = &get_domain_by("dom", $domain);
+$dom = &get_remote_api_domain("dom", $domain);
 $dom || usage("Virtual server $domain does not exist.");
 $old = { %$dom };
 $tmpl = &get_template(defined($template) ? $template : $dom->{'template'});
+if (!$is_master && defined($pass)) {
+	my $fakeuser = { 'user' => $dom->{'user'}, 'plainpass' => $pass };
+	my $err = &check_password_restrictions($fakeuser, $dom->{'webmin'});
+	&usage($err) if ($err);
+	}
+if (!$is_master && defined($newdomain)) {
+	my $err = &valid_domain_name($newdomain);
+	&usage($err) if ($err);
+	my $parent = $dom->{'parent'} ? &get_domain($dom->{'parent'}) : undef;
+	$err = &allowed_domain_name($parent, $newdomain);
+	&usage($err) if ($err);
+	}
+if (!$is_master && defined($template)) {
+	# Only templates that are available to this user can be selected
+	&can_use_template($tmpl) &&
+	  (&reseller_admin() || $tmpl->{'for_users'}) ||
+		&usage($text{'setup_etmpl'});
+	}
 
 # Make sure options are valid for domain
 if ($dom->{'parent'}) {
@@ -482,7 +602,7 @@ if ($myserver) {
 
 # Validate link domain
 if ($linkdname) {
-	$linkd = &get_domain_by("dom", $linkdname);
+	$linkd = &get_remote_api_owned_domain("dom", $linkdname);
 	$linkd || &usage("Link domain $linkdname does not exist");
 	$linkd->{'alias'} eq $dom->{'id'} || 
 	    &usage("Link domain $linkdname is not an alias of this domain");
@@ -683,6 +803,12 @@ if (defined($dns_ip)) {
 		# Resetting DNS IP address to default
 		delete($dom->{'dns_ip'});
 		}
+	}
+
+# Apply the same plan and account limits as the domain settings page
+if (!$is_master) {
+	my $err = &virtual_server_limits($dom, $old);
+	&usage($err) if ($err);
 	}
 
 # Change the plan and limits, if given

@@ -74,7 +74,7 @@ $first && $last && &usage("Only one of --first and --last can be given");
 # Parse args and get domain
 $dname || &usage("No domain specified");
 $uname || &usage("No username specified");
-$d = &get_domain_by("dom", $dname);
+$d = &get_remote_api_domain("dom", $dname);
 $d || &usage("No domain name $dname found");
 @users = &list_domain_users($d, 0, 1, 1, 1);
 ($user) = grep { $_->{'user'} eq $uname ||

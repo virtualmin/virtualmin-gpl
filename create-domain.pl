@@ -145,6 +145,8 @@ $name6 = 1;
 $virt6 = 0;
 $anylimits = 0;
 $email = $config{'contact_email'};
+# Remote API callers that are not the master admin may only create sub-servers
+my $is_master = &master_admin();
 while(@ARGV > 0) {
 	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -172,6 +174,10 @@ while(@ARGV > 0) {
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
+		# Prevent non-master callers from reading server-side files
+		$is_master ||
+			&usage("--passfile is only available to the master ".
+			       "administrator");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
@@ -281,7 +287,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--shared-ip6") {
 		# IPv6 on shared address
-		$ip6 = shift(@ARGV);
+		$ip6 = $sharedip6 = shift(@ARGV);
 		$virt6 = 0;
 		$name6 = 1;
 		&indexof($ip6, &list_shared_ip6s()) >= 0 ||
@@ -401,9 +407,15 @@ while(@ARGV > 0) {
 		$nosecondaries = 1;
 		}
 	elsif ($a eq "--pre-command") {
+		$is_master ||
+			&usage("--pre-command is only available to the master ".
+			       "administrator");
 		$precommand = shift(@ARGV);
 		}
 	elsif ($a eq "--post-command") {
+		$is_master ||
+			&usage("--post-command is only available to the master ".
+			       "administrator");
 		$postcommand = shift(@ARGV);
 		}
 	elsif ($a eq "--skip-warnings") {
@@ -464,6 +476,11 @@ while(@ARGV > 0) {
 		$sshmode = 2;
 		$sshkey = shift(@ARGV);
 		if ($sshkey =~ /^\//) {
+			# Only the master administrator can load a key from a
+			# server-side file
+			$is_master ||
+				&usage("--use-ssh-key must be followed by key ".
+				       "data rather than a file");
 			$sshkey = &read_file_contents($sshkey);
 			}
 		$sshkey =~ /\S/ || &usage("--use-ssh-key must be followed by a key file or data");
@@ -523,6 +540,8 @@ while(@ARGV > 0) {
 		@fields = &list_custom_fields();
 		($f) = grep { $_->{'name'} eq $fn } @fields;
 		$f || &usage("Custom field $fn does not exist");
+		$is_master || $f->{'visible'} == 0 ||
+			&usage("Custom field $fn cannot be edited by domain owners");
 		$fields{'field_'.$fn} = $fv;
 		}
 	elsif ($a eq "--help") {
@@ -532,12 +551,22 @@ while(@ARGV > 0) {
 		&usage("Unknown parameter $a");
 		}
 	}
+# Non-master callers may only ever create a sub-server, so bail out early
+# before any settings that only apply to top-level servers are looked up
+if (!$is_master) {
+	$parentdomain || &usage("Only sub-servers can be created, so the ".
+				"--parent, --alias or --subdom flag must ".
+				"be given");
+	}
 if ($template eq "") {
 	$template = &get_init_template($parentdomain);
 	}
 $tmpl = &get_template($template);
+$is_master || &can_use_template($tmpl) || &usage($text{'setup_etmpl'});
 $plan = $planid ne '' ? &get_plan($planid) : &get_default_plan();
-$plan || &usage("Plan does not exist");
+# Sub-servers always inherit the plan from their parent, and domain owners
+# have no plans of their own to default to
+$plan || $parentdomain || &usage("Plan does not exist");
 $defip = &get_default_ip($resel);
 $defip6 = &get_default_ip6($resel);
 if ($sharedip) {
@@ -676,6 +705,33 @@ if ($parentdomain) {
 			&usage("Sub-domain $domain must be under the parent domain $subdomain");
 		$subprefix ||= $1;
 		}
+	}
+
+# Enforce the same restrictions as the user interface for non-master callers,
+# who may only ever create a sub-server under a domain that they own
+if (!$is_master) {
+	&can_create_sub_servers() ||
+		&usage("You are not allowed to create sub-servers");
+	&can_edit_domain($parent) ||
+		&usage(&text('remote_ecannotdom', $parentdomain));
+	# Check the sub-server limit that applies to this parent
+	my ($dleft, $dreason, $dmax) = &count_domains(
+		$aliasdomain ? "aliasdoms" : "realdoms");
+	$dleft == 0 && &usage("You have reached the maximum of $dmax ".
+			      "virtual servers that can be created");
+	# Check any restriction on the names he can use
+	my $derr = &allowed_domain_name($parent, $domain);
+	&usage($derr) if ($derr);
+	# Only features the owner has been granted can be enabled
+	foreach my $f (keys %feature, keys %plugin) {
+		&can_use_feature($f) ||
+			&usage("You are not allowed to enable the $f feature");
+		}
+	# Selecting an IP address is only for those allowed to
+	($virt || $sharedip) && !&can_select_ip() &&
+		&usage($text{'setup_eip'});
+	($virt6 || $sharedip6) && !&can_select_ip6() &&
+		&usage($text{'setup_eip6'});
 	}
 
 # Allow user and group names
@@ -878,10 +934,14 @@ if ($clouddns) {
 			&usage("Cloudmin Services for DNS is not enabled");
 		}
 	elsif ($clouddns ne "local") {
-		my @cnames = map { $_->{'name'} } &list_dns_clouds();
+		my @clouds = &list_dns_clouds();
+		my @cnames = map { $_->{'name'} } @clouds;
 		&indexof($clouddns, @cnames) >= 0 ||
 			&usage("Valid cloud DNS providers are : ".
 			       join(" ", @cnames));
+		my ($cloud) = grep { $_->{'name'} eq $clouddns } @clouds;
+		$is_master || &can_dns_cloud($cloud) ||
+			&usage("You are not allowed to use DNS provider $clouddns");
 		}
 	}
 

@@ -73,12 +73,17 @@ if ($all) {
 else {
 	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
 	}
+@doms = &get_remote_api_domains(\@doms, $all || @users);
 @doms || &usage("No virtual servers matching the domain names and usernames ".
 		"given were found");
 @doms = grep { &domain_has_ssl_cert($_) } @doms;
 @doms || &usage("None of the specified virtual servers have an SSL cert");
 if (!@types) {
 	@types = @alltypes;
+	}
+if (!&master_admin()) {
+	@types = grep { $_ ne 'key' && $_ ne 'newkey' } @types;
+	@types || &usage("Private keys cannot be retrieved by domain owners");
 	}
 
 # Output the certs

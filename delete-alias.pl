@@ -56,7 +56,7 @@ while(@ARGV > 0) {
 $domain || &usage("No domain specified");
 $from || &usage("No from address specified");
 
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 $d->{'aliascopy'} && &usage("Aliases cannot be edited in alias domains in copy mode");
 

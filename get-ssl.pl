@@ -50,7 +50,7 @@ while(@ARGV > 0) {
 
 # Validate inputs and get the domain
 $dname || &usage("Missing --domain parameter");
-$d = &get_domain_by("dom", $dname);
+$d = &get_remote_api_domain("dom", $dname);
 $d || &usage("Virtual server $dname does not exist");
 &domain_has_ssl_cert($d) ||
 	&usage("Virtual server $dname does not have an SSL cert");
