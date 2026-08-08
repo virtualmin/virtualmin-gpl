@@ -78,7 +78,13 @@ $supports_cgi = &indexof("cgi", &supported_php_modes()) >= 0;
 @php_versions = sort { &compare_versions($a->[0], $b->[0]) }
 		  grep { &indexof("fcgid", @{$_->[2]}) >= 0 }
 		     &list_available_php_versions();
-$max_php_version = $php_versions[@php_versions-1]->[0];
+# Fall back to any available version, as systems that only support FPM and
+# CGI have no PHP version on the fcgid list
+if (!@php_versions) {
+	@php_versions = sort { &compare_versions($a->[0], $b->[0]) }
+			     &list_available_php_versions();
+	}
+$max_php_version = @php_versions ? $php_versions[$#php_versions]->[0] : undef;
 $scriptdb = 'mysql';
 $test_ssh_private_key = "/tmp/functional-test.key";
 $test_ssh_public_key = "/tmp/functional-test.key.pub";
