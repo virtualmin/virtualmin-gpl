@@ -655,6 +655,19 @@ print &text('remote_ecannotcap',
 exit(1);
 }
 
+# require_remote_api_relative_path(path)
+# Exits if a non-master caller gives a path that escapes the domain's own
+# directory, such as an absolute path or one containing "..". Backup include
+# and exclude lists are relative to the domain home and run as root, so this
+# keeps a domain owner from reaching another server's or the system's files.
+sub require_remote_api_relative_path
+{
+my ($path) = @_;
+return if (&master_admin());
+$path !~ /^\// && $path !~ /(^|\/)\.\.(\/|$)/ ||
+	&usage("File paths must be under the virtual server's home directory");
+}
+
 # get_remote_api_domains(&domains, [owned-only], [program-name])
 # Enforces remote API access for an existing list of target domains. When
 # owned-only is set, domains outside the current user's scope are filtered out.

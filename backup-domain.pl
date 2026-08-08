@@ -207,6 +207,10 @@ while(@ARGV > 0) {
 			$optv = shift(@ARGV);
 			}
 		$optf && $optn && $optv || &usage("Invalid option specification");
+		# The dir feature's include/exclude values are paths run as root
+		&require_remote_api_relative_path($optv)
+			if ($optf eq "dir" &&
+			    ($optn eq "include" || $optn eq "exclude"));
 		$opts{$optf}->{$optn} = $optv;
 		}
 	elsif ($a eq "--mailfiles") {
@@ -281,10 +285,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--exclude") {
 		$exclude = shift(@ARGV);
+		&require_remote_api_relative_path($exclude);
 		push(@exclude, $exclude);
 		}
 	elsif ($a eq "--include") {
 		$include = shift(@ARGV);
+		&require_remote_api_relative_path($include);
 		push(@include, $include);
 		}
 	elsif ($a eq "--multiline") {
@@ -373,6 +379,9 @@ if ($keyid) {
 		  	$_->{'key'} eq $keyid ||
 		  	$_->{'desc'} eq $keyid } &list_backup_keys();
 	$key || &usage("No backup key with ID or description $keyid exists");
+	# A non-master may only use their own keys, as restore-domain enforces
+	!defined(&can_backup_key) || &master_admin() || &can_backup_key($key) ||
+		&usage("No backup key with ID or description $keyid exists");
 	}
 if ($onebyone && !$newformat) {
 	&usage("--onebyone option can only be used in conjunction ".
