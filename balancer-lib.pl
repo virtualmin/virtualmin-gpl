@@ -15,6 +15,60 @@ sub can_balancer_unix
 return &master_admin();
 }
 
+# proxy_url_in_use(&virtual-config, url)
+# Returns 1 if any ProxyPass directive still sends requests to some URL
+sub proxy_url_in_use
+{
+my ($vconf, $url) = @_;
+foreach my $pp (&apache::find_directive("ProxyPass", $vconf)) {
+	my (undef, $dest) = split(/\s+/, $pp);
+	return 1 if ($dest && $dest eq $url);
+	}
+return 0;
+}
+
+# update_proxy_forwarded_proto(&virtual-config, &config, url, enable)
+# Adds or removes frontend protocol headers for a proxy.
+sub update_proxy_forwarded_proto
+{
+my ($vconf, $conf, $url, $enable) = @_;
+return if (!$url || $url !~ /^(https?|balancer):\/\/[^\s>]+\z/i);
+my @proxies = &apache::find_directive_struct("Proxy", $vconf);
+my ($proxy) = grep { $_->{'value'} eq $url } @proxies;
+my @members = $proxy ? grep { ($_->{'name'} || '') ne 'dummy' }
+			    @{$proxy->{'members'}} : ( );
+my @managed = grep {
+	lc($_->{'name'} || '') eq 'requestheader' &&
+	$_->{'value'} =~ /^set\s+X-Forwarded-Proto\s+/i
+	} @members;
+my $add = $enable &&
+	&indexof('mod_headers', &apache::available_modules()) >= 0;
+return if ((!$proxy && !$add) || (!$add && !@managed));
+my @headers = $proxy ?
+	&apache::find_directive("RequestHeader", $proxy->{'members'}) : ( );
+@headers = grep { !/^set\s+X-Forwarded-Proto\s+/i } @headers;
+if ($add) {
+	push(@headers, 'set X-Forwarded-Proto "https" env=HTTPS',
+		       'set X-Forwarded-Proto "http" env=!HTTPS');
+	}
+if (!$proxy) {
+	my @mems = map { { 'name' => 'RequestHeader', 'value' => $_ } }
+			@headers;
+	$proxy = { 'name' => 'Proxy',
+		   'type' => 1,
+		   'value' => $url,
+		   'members' => \@mems };
+	&apache::save_directive_struct(undef, $proxy, $vconf, $conf);
+	}
+elsif (!$add && @managed == @members) {
+	&apache::save_directive_struct($proxy, undef, $vconf, $conf);
+	}
+else {
+	&apache::save_directive("RequestHeader", \@headers,
+				$proxy->{'members'}, $conf);
+	}
+}
+
 # list_proxy_balancers(&domain)
 # Returns a list of URL paths and backends for balancer blocks
 sub list_proxy_balancers
@@ -122,12 +176,9 @@ foreach my $port (@ports) {
 			push(@mems, { 'name' => 'SSLProxyCheckPeerExpire',
 				      'value' => 'off' });
 			}
-		if ($d->{'ssl'} && $port == $d->{'web_sslport'} &&
-		    &indexof('mod_headers', &apache::available_modules()) > 0) {
-			push(@mems, { 'name' =>  'RequestHeader',
-				      'value' => 'set X-Forwarded-Proto "https" env=HTTPS' });
-			}
 		&apache::save_directive_struct(undef, $pxy, $vconf, $conf);
+		&update_proxy_forwarded_proto($vconf, $conf,
+			"balancer://$balancer->{'balancer'}", 1);
 		foreach my $dir ("ProxyPass", "ProxyPassReverse") {
 			my @pp = &apache::find_directive($dir, $vconf);
 			push(@pp, "$balancer->{'path'} balancer://$balancer->{'balancer'}$slash");
@@ -144,6 +195,8 @@ foreach my $port (@ports) {
 			# no trailing /, add one
 			$url .= "/";
 			}
+		&update_proxy_forwarded_proto(
+			$vconf, $conf, $url, $url ne "!");
 		foreach my $dir ("ProxyPass", "ProxyPassReverse") {
 			my @pp = &apache::find_directive($dir, $vconf);
 			@pp = &sort_proxy_paths(@pp,
@@ -255,6 +308,12 @@ foreach my $port (@ports) {
 			$done++;
 			}
 		}
+	elsif (!$balancer->{'none'}) {
+		# Remove the direct proxy block if its URL is no longer used
+		my $url = $balancer->{'urls'}->[0];
+		&update_proxy_forwarded_proto($vconf, $conf, $url, 0)
+			if (!&proxy_url_in_use($vconf, $url));
+		}
 
 	# Remove any rewrite directives for websockets
 	my @rwc = &apache::find_directive("RewriteCond", $vconf);
@@ -334,8 +393,21 @@ foreach my $port (@ports) {
 		if ($proxy) {
 			&apache::save_directive("BalancerMember", $b->{'urls'},
 						$proxy->{'members'}, $conf);
+			&update_proxy_forwarded_proto($vconf, $conf,
+				"balancer://$bn", 1);
 			$done++;
 			}
+		}
+	else {
+		# Update protocol headers for a direct proxy
+		my $oldurl = $oldb->{'none'} ? undef : $oldb->{'urls'}->[0];
+		my $newurl = $b->{'none'} ? undef : $b->{'urls'}->[0];
+		if ($oldurl && (!$newurl || $oldurl ne $newurl)) {
+			&update_proxy_forwarded_proto($vconf, $conf, $oldurl, 0)
+				if (!&proxy_url_in_use($vconf, $oldurl));
+			}
+		&update_proxy_forwarded_proto(
+			$vconf, $conf, $newurl, 1) if ($newurl);
 		}
 
 	# Fix any RewriteRule for websockets
