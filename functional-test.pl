@@ -6991,6 +6991,326 @@ if (!$webmin_user || !$webmin_pass) {
 	$remote_tests = [ { 'command' => 'echo Missing user or password ; false' } ];
 	}
 
+$ownerremote_tests = [
+	# Create two test domains with different owners
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Remote API owner test' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'mail' ], [ 'mysql' ],
+		      [ 'webmin' ],
+		      @create_args, ],
+	},
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'desc', 'Remote API foreign domain test' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'mysql' ], [ 'webmin' ],
+		      @create_args, ],
+	},
+
+	# Remote API access is denied to the domain owner by default
+	{ 'command' => &owner_remote_api_command(
+		       "program=list-databases&domain=$test_domain"),
+	  'grep' => 'ERROR: You are not allowed to run remote commands',
+	  'ignorefail' => 1,
+	},
+
+	# Grant remote API access, but not the database capability yet
+	{ 'command' => 'modify-limits.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'can-edit', 'remote_api' ], ],
+	},
+
+	# Each API command still requires its matching owner capability
+	{ 'command' => &owner_remote_api_command(
+		       "program=list-databases&domain=$test_domain"),
+	  'grep' => 'You are not allowed to run this command for virtual server '.
+		    $test_domain,
+	  'ignorefail' => 1,
+	},
+
+	# Commands outside the audited registry remain unavailable
+	{ 'command' => &owner_remote_api_command(
+		       "program=modify-limits&domain=$test_domain&can-edit=dbs"),
+	  'grep' => 'ERROR: You are not allowed to run remote commands',
+	  'ignorefail' => 1,
+	},
+
+	# Grant the capabilities and limits needed by the remaining tests
+	{ 'command' => 'modify-limits.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'can-edit', 'dbs' ],
+		      [ 'can-edit', 'users' ],
+		      [ 'can-edit', 'delete' ],
+		      [ 'max-dbs', 'UNLIMITED' ],
+		      [ 'max-mailboxes', 'UNLIMITED' ],
+		      [ 'max-doms', 'UNLIMITED' ],
+		      [ 'max-realdoms', 'UNLIMITED' ], ],
+	},
+
+	# An all-domain listing only returns domains owned by the caller
+	{ 'command' => &owner_remote_api_command(
+		       "program=list-domains&name-only="),
+	  'grep' => '^'.quotemeta($test_domain).'$',
+	  'antigrep' => '^'.quotemeta($test_target_domain).'$',
+	  'ignorefail' => 1,
+	},
+
+	# Detailed domain output does not expose stored passwords
+	{ 'command' => &owner_remote_api_command(
+		       "program=list-domains&domain=$test_domain&multiline="),
+	  'grep' => [ '^'.quotemeta($test_domain).'$',
+		      '^    Username: '.quotemeta($test_domain_user).'$' ],
+	  'antigrep' => [ '^    Password:', '^    Hashed password:',
+			  '^    Password for ' ],
+	  'ignorefail' => 1,
+	},
+
+	# The domain owner can call an allowed API command for their own domain
+	{ 'command' => &owner_remote_api_command(
+		       "program=list-databases&domain=$test_domain"),
+	  'grep' => [ '^'.$test_domain_db.'\\s+mysql', 'Exit status: 0' ],
+	  'ignorefail' => 1,
+	},
+
+	# The same command cannot access another owner's domain
+	{ 'command' => &owner_remote_api_command(
+		       "program=list-databases&domain=$test_target_domain"),
+	  'grep' => 'Virtual server '.$test_target_domain.' does not exist',
+	  'ignorefail' => 1,
+	},
+
+	# Create, list and delete a database through the owner API
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-database&domain=$test_domain&".
+		       "name=${test_domain_db}_remote&type=mysql"),
+	  'grep' => 'Database '.$test_domain_db.'_remote created successfully',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=list-databases&domain=$test_domain&name-only="),
+	  'grep' => '^'.quotemeta($test_domain_db.'_remote').'$',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=delete-database&domain=$test_domain&".
+		       "name=${test_domain_db}_remote&type=mysql"),
+	  'grep' => 'Database '.$test_domain_db.'_remote deleted successfully',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=list-databases&domain=$test_domain&name-only="),
+	  'grep' => 'Exit status: 0',
+	  'antigrep' => '^'.quotemeta($test_domain_db.'_remote').'$',
+	  'ignorefail' => 1,
+	},
+
+	# Server-side password files remain restricted to the master administrator
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-user&domain=$test_domain&user=$test_user&".
+		       "passfile=/etc/shadow&real=Remote+API+User"),
+	  'grep' => '--passfile is only available to the master administrator',
+	  'ignorefail' => 1,
+	},
+
+	# Create and inspect a mailbox without exposing password or SSH key data
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-user&domain=$test_domain&user=$test_user&".
+		       "pass=smeg&real=Remote+API+User&no-creation-mail="),
+	  'grep' => 'created successfully',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=list-users&domain=$test_domain&user=$test_user&".
+		       "multiline="),
+	  'grep' => [ '^    User: '.quotemeta($test_user).'$',
+		      '^    Real name: Remote API User$', 'Exit status: 0' ],
+	  'antigrep' => [ '^    Password:', '^    Encrypted password:',
+			  '^    SSH public key:' ],
+	  'ignorefail' => 1,
+	},
+
+	# Modify the mailbox and verify the persisted result
+	{ 'command' => &owner_remote_api_command(
+		       "program=modify-user&domain=$test_domain&user=$test_user&".
+		       "real=Updated+Remote+API+User"),
+	  'grep' => 'updated successfully',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=list-users&domain=$test_domain&user=$test_user&".
+		       "multiline="),
+	  'grep' => '^    Real name: Updated Remote API User$',
+	  'ignorefail' => 1,
+	},
+
+	# Delete the mailbox and verify that it is no longer returned
+	{ 'command' => &owner_remote_api_command(
+		       "program=delete-user&domain=$test_domain&user=$test_user"),
+	  'grep' => 'deleted successfully',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=list-users&domain=$test_domain&user=$test_user&".
+		       "multiline="),
+	  'grep' => 'Exit status: 0',
+	  'antigrep' => '^    User: '.quotemeta($test_user).'$',
+	  'ignorefail' => 1,
+	},
+
+	# Domain owners cannot create top-level servers or use a foreign parent
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-domain&domain=api.$test_domain&dir="),
+	  'grep' => 'Only sub-servers can be created',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-domain&domain=api.$test_target_domain&".
+		       "parent=$test_target_domain&dir="),
+	  'grep' => 'Virtual server '.$test_target_domain.' does not exist',
+	  'ignorefail' => 1,
+	},
+
+	# Create and delete a permitted sub-server under the owned domain
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-domain&domain=api.$test_domain&".
+		       "parent=$test_domain&dir="),
+	  'grep' => [ 'All done!', 'Exit status: 0' ],
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=list-domains&domain=api.$test_domain&name-only="),
+	  'grep' => '^api.'.quotemeta($test_domain).'$',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=delete-domain&domain=api.$test_domain"),
+	  'grep' => [ 'Deleting virtual server api.'.quotemeta($test_domain),
+		      'Exit status: 0' ],
+	  'ignorefail' => 1,
+	  'cleanup' => 1,
+	},
+
+	# Commands that would run as root are never accepted from an owner
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-domain&domain=rce.$test_domain".
+		       "&parent=$test_domain&dir=&web=".
+		       "&pre-command=touch+/tmp/virtualmin-api-test"),
+	  'grep' => '--pre-command is only available to the master administrator',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=delete-domain&domain=$test_domain".
+		       "&post-command=touch+/tmp/virtualmin-api-test"),
+	  'grep' => '--post-command is only available to the master administrator',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => 'ls /tmp/virtualmin-api-test',
+	  'fail' => 1,
+	},
+
+	# Reading a server-side file through a certificate flag is blocked
+	{ 'command' => &owner_remote_api_command(
+		       "program=install-cert&domain=$test_domain".
+		       "&cert=/etc/shadow&key=/etc/shadow"),
+	  'grep' => 'only available to the master administrator',
+	  'antigrep' => '^root:',
+	  'ignorefail' => 1,
+	},
+
+	# Owners cannot raise their own quota or bandwidth limits
+	{ 'command' => &owner_remote_api_command(
+		       "program=modify-domain&domain=$test_domain&quota=99999999"),
+	  'grep' => 'not allowed to change quotas',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ], [ 'multiline' ] ],
+	  'antigrep' => '^    Server quota: 99999999',
+	},
+
+	# Grant the backup capabilities needed by the checks below, so that the
+	# limits being tested are the destination and feature ones
+	{ 'command' => 'modify-limits.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'can-edit', 'backup' ],
+		      [ 'can-edit', 'sched' ],
+		      [ 'can-edit', 'restore' ], ],
+	},
+
+	# Backups can only be written under the owner's own backup directory
+	{ 'command' => &owner_remote_api_command(
+		       "program=backup-domain&domain=$test_domain".
+		       "&dest=/etc/cron.d/virtualmin-api-test&all-features="),
+	  'antigrep' => 'completed',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => 'ls /etc/cron.d/virtualmin-api-test',
+	  'fail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=backup-domain&domain=$test_domain".
+		       "&dest=apitest.tar.gz&all-features="),
+	  'grep' => 'Exit status: 0',
+	  'ignorefail' => 1,
+	},
+
+	# Restores are limited to features that cannot change the server setup
+	{ 'command' => &owner_remote_api_command(
+		       "program=restore-domain&domain=$test_domain".
+		       "&source=apitest.tar.gz&feature=virtualmin"),
+	  'grep' => 'cannot be restored by anyone other than the master',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=restore-domain&domain=$test_domain".
+		       "&source=apitest.tar.gz&feature=dir"),
+	  'grep' => 'Exit status: 0',
+	  'ignorefail' => 1,
+	},
+
+	# Scheduled backups are recorded against their owner, so they never
+	# run with master privileges, and other schedules stay out of reach
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-scheduled-backup&domain=$test_domain".
+		       "&dest=apisched.tar.gz&all-features=&schedule=0+3+*+*+*"),
+	  'grep' => 'Exit status: 0',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => 'list-scheduled-backups.pl --multiline',
+	  'grep' => 'apisched.tar.gz',
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=modify-scheduled-backup&id=1&disable="),
+	  'grep' => 'No scheduled backup with ID',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=delete-backup&dest=/etc/passwd"),
+	  'grep' => '--dest is only available to the master administrator',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => 'ls /etc/passwd',
+	},
+	{ 'command' => 'delete-scheduled-backup.pl',
+	  'args' => [ [ 'dest', $test_domain_home.
+			        '/virtualmin-backup/apisched.tar.gz' ] ],
+	  'ignorefail' => 1,
+	  'cleanup' => 1,
+	},
+
+	# Cleanup both domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_target_domain ] ],
+	  'cleanup' => 1,
+	},
+	];
+
 $owner_tests = [
 	# Create a test domain
 	{ 'command' => 'create-domain.pl',
@@ -14030,6 +14350,7 @@ $alltests = { '_config' => $_config_tests,
 	      'xml' => $xml_tests,
 	      'assoc' => $assoc_tests,
 	      'owner' => $owner_tests,
+	      'ownerremote' => $ownerremote_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
@@ -14144,6 +14465,16 @@ if ($total_failed) {
 	print "!!!!!!!!!!!!! FAILURES : ",join(" ", @failed_tests,),"\n";
 	}
 exit($total_failed);
+
+# owner_remote_api_command(query-string)
+# Returns a bounded remote API request authenticated as the test domain owner.
+sub owner_remote_api_command
+{
+my ($query) = @_;
+return $owner_webmin_wget_command.'--tries=1 --timeout=30 '.
+	"'${webmin_proto}://localhost:${webmin_port}".
+	"/virtual-server/remote.cgi?$query'";
+}
 
 sub run_test
 {
