@@ -22,7 +22,7 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/list-features.pl";
+	$0 = "$pwd/list-commands.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "list-commands.pl must be run as root";
 	}

@@ -23,7 +23,7 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/list-databases.pl";
+	$0 = "$pwd/list-admins.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "list-admins.pl must be run as root";
 	}

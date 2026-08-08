@@ -26,7 +26,7 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/list-users.pl";
+	$0 = "$pwd/list-php-directories.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "list-php-directories.pl must be run as root";
 	}

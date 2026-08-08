@@ -96,6 +96,7 @@ if ($all_doms) {
 else {
 	foreach $n (@dnames) {
 		$d = &get_remote_api_domain("dom", $n);
+		$d || &usage("Virtual server $n does not exist");
 		$d->{$type} ||
 		  &usage("Virtual server $n does not have a $type database");
 		$d->{'parent'} &&

@@ -28,7 +28,7 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/delete-script.pl";
+	$0 = "$pwd/start-stop-script.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "start-stop-script.pl must be run as root";
 	}

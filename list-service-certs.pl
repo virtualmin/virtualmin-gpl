@@ -21,9 +21,9 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/list-certs.pl";
+	$0 = "$pwd/list-service-certs.pl";
 	require './virtual-server-lib.pl';
-	$< == 0 || die "list-certs.pl must be run as root";
+	$< == 0 || die "list-service-certs.pl must be run as root";
 	}
 
 # Parse command line to get domains

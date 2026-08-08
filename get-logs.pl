@@ -25,7 +25,7 @@ if (!$module_name) {
 		}
 	$0 = "$pwd/get-logs.pl";
 	require './virtual-server-lib.pl';
-	$< == 0 || die "get-ssl.pl must be run as root";
+	$< == 0 || die "get-logs.pl must be run as root";
 	}
 
 # Parse command line
