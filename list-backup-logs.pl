@@ -133,9 +133,15 @@ if ($multiline) {
 	%schedmap = map { $_->{'id'}, $_ } &list_scheduled_backups();
 	foreach my $l (@logs) {
 		print "$l->{'id'}\n";
-		print "    Domains: $l->{'doms'}\n";
+		print "    Domains: ",
+		      (&master_admin() ? $l->{'doms'}
+				       : join(" ", &backup_log_own_domains($l))),
+		      "\n";
 		if ($l->{'errdoms'}) {
-			print "    Failed domains: $l->{'errdoms'}\n";
+			print "    Failed domains: ",
+			      (&master_admin() ? $l->{'errdoms'}
+				: join(" ", &backup_log_own_domains($l, 1))),
+			      "\n";
 			}
 		print "    Destination: ",
 		      (&master_admin() ? $l->{'dest'}
