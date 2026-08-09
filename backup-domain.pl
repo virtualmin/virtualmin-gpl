@@ -379,8 +379,9 @@ if ($keyid) {
 		  	$_->{'key'} eq $keyid ||
 		  	$_->{'desc'} eq $keyid } &list_backup_keys();
 	$key || &usage("No backup key with ID or description $keyid exists");
-	# A non-master may only use their own keys, as restore-domain enforces
-	!defined(&can_backup_key) || &master_admin() || &can_backup_key($key) ||
+	# A non-master may use their own keys or keys shared for backups
+	!defined(&can_use_backup_key) || &master_admin() ||
+		&can_use_backup_key($key) ||
 		&usage("No backup key with ID or description $keyid exists");
 	}
 if ($onebyone && !$newformat) {

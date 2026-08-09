@@ -347,6 +347,9 @@ while(@ARGV > 0) {
 			}
 		}
 	elsif ($a eq "--plan") {
+		$is_master ||
+			&usage("--plan is only available to the master ".
+			       "administrator");
 		$planname = shift(@ARGV);
 		foreach $p (&list_plans()) {
 			if ($p->{'id'} eq $planname ||
@@ -392,6 +395,9 @@ while(@ARGV > 0) {
 		$subdomain = $parentdomain = lc(shift(@ARGV));
 		}
 	elsif ($a eq "--reseller") {
+		$is_master ||
+			&usage("--reseller is only available to the master ".
+			       "administrator");
 		$resel = shift(@ARGV);
 		}
 	elsif ($a eq "--content") {
@@ -551,6 +557,47 @@ while(@ARGV > 0) {
 		&usage("Unknown parameter $a");
 		}
 	}
+# Enforce option-specific permissions before looking up global configuration
+if (!$is_master) {
+	defined($jail) &&
+		&usage("--enable-jail and --disable-jail are only available to ".
+		       "the master administrator");
+	($myserver || $pgserver) &&
+		&usage("--mysql-server and --postgres-server are only available ".
+		       "to the master administrator");
+	($noslaves || $nosecondaries || defined($dns_submode) || $dns_subany) &&
+		&usage("DNS server placement options are only available to the ".
+		       "master administrator");
+	(defined($dns_ip) || defined($dns_ip6)) && !&can_dnsip() &&
+		&usage("You are not allowed to change the DNS IP address");
+	defined($db) && !&can_edit_databases() &&
+		&usage("You are not allowed to select the initial database name");
+	$fwdto && !&can_edit_catchall() &&
+		&usage("You are not allowed to configure catch-all forwarding");
+	defined($content) && !&can_edit_html() &&
+		&usage("You are not allowed to set website content");
+	($clouddns || $clouddns_import || defined($remotedns)) &&
+	  !&can_edit_dns() &&
+		&usage("You are not allowed to select the DNS server");
+	defined($letsencrypt) &&
+	  (!&can_edit_ssl() || !&can_edit_letsencrypt()) &&
+		&usage("You are not allowed to request an SSL certificate");
+	(defined($linkcert) || defined($always_ssl) || $default_cert_owner) &&
+	  !&can_edit_ssl() &&
+		&usage("You are not allowed to configure SSL certificates");
+	($sshmode || defined($append_style) || defined($defaultshell)) &&
+	  !&can_edit_users() &&
+		&usage("You are not allowed to configure domain users");
+	defined($phpmode) && !&can_edit_phpmode() &&
+		&usage("You are not allowed to select the PHP execution mode");
+	$proxy_pass_mode && !&can_edit_forward() &&
+		&usage("You are not allowed to configure proxying");
+	$proxy_pass_mode && $proxy_pass !~ /^(http|https):\/\/\S+$/ &&
+		&usage("Proxy URLs must start with http:// or https://");
+	(defined($auto_redirect) || defined($aliasredir)) &&
+	  !&can_edit_redirect() &&
+		&usage("You are not allowed to configure redirects");
+	}
 # Non-master callers may only ever create a sub-server, so bail out early
 # before any settings that only apply to top-level servers are looked up
 if (!$is_master) {
@@ -679,7 +726,7 @@ if ($subdomain) {
 
 # Validate args and work out defaults for those unset
 $domain = lc(&parse_domain_name($domain));
-if (!$skipwarnings) {
+if (!$skipwarnings || !$is_master) {
 	$err = &valid_domain_name($domain);
 	&usage($err) if ($err);
 	}
@@ -1113,9 +1160,14 @@ $cerr = &virtual_server_clashes(\%dom);
 &usage($cerr) if ($cerr);
 
 # Check if features are not forbidden
-if (!$skipwarnings) {
+if (!$skipwarnings || !$is_master) {
 	foreach my $ff (&forbidden_domain_features(\%dom, 1)) {
-		$dom{$ff} && &usage("The feature $ff is not allowed for virtual server matching the hostname unless the --skip-warnings flag is given.");
+		if ($dom{$ff}) {
+			my $msg = &text('setup_efeatforbidhostdef', $ff);
+			$msg .= " unless the --skip-warnings flag is given"
+				if ($is_master);
+			&usage($msg);
+			}
 		}
 	}
 

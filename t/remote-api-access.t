@@ -50,7 +50,7 @@ my %expected_commands = (
 	'generate-letsencrypt-cert' => 'can_remote_edit_acme',
 	'get-command' => 'can_use_remote_api',
 	'get-dns' => 'can_edit_records',
-	'get-logs' => 'can_edit_domain',
+	'get-logs' => 'can_remote_read_logs',
 	'get-ssl' => 'can_edit_ssl',
 	'import-database' => 'can_remote_import_databases',
 	'install-cert' => 'can_edit_ssl',
@@ -60,7 +60,7 @@ my %expected_commands = (
 	'list-available-scripts' => 'can_edit_scripts',
 	'list-available-shells' => 'can_edit_users',
 	'list-backup-keys' => 'can_backup_keys',
-	'list-bandwidth' => 'can_edit_domain',
+	'list-bandwidth' => 'can_remote_read_bandwidth',
 	'list-certs' => 'can_edit_ssl',
 	'list-certs-expiry' => 'can_edit_ssl',
 	'list-commands' => 'can_use_remote_api',
@@ -230,6 +230,39 @@ my %expected_commands = (
 {
 	no warnings qw(once redefine);
 	local %main::access = ( 'edit_remote_api' => 1 );
+	local %main::config = ( 'bw_active' => 0 );
+	my ($logs, $bandwidth) = (0, 0);
+	local *main::master_admin = sub { 0 };
+	local *main::reseller_admin = sub { 0 };
+	local *main::can_edit_domain = sub { 1 };
+	local *main::foreign_available = sub {
+		return $_[0] eq 'logviewer' && $logs;
+		};
+	local *main::can_monitor_bandwidth = sub { $bandwidth };
+	my $domain = { 'dom' => 'example.test' };
+	ok(!&remote_api_can_domain($domain, 'get-logs'),
+		'web logs require access to the log viewer module');
+	$logs = 1;
+	ok(&remote_api_can_domain($domain, 'get-logs'),
+		'web logs pass when the log viewer is available');
+	ok(!&remote_api_can_domain($domain, 'list-bandwidth'),
+		'bandwidth data is denied when monitoring is disabled');
+	$main::config{'bw_active'} = 1;
+	ok(!&remote_api_can_domain($domain, 'list-bandwidth'),
+		'bandwidth data is denied for an unmonitored domain');
+	$bandwidth = 1;
+	# Isolate the bw_active gate: monitoring available but accounting off
+	$main::config{'bw_active'} = 0;
+	ok(!&remote_api_can_domain($domain, 'list-bandwidth'),
+		'bandwidth data is denied when accounting is turned off');
+	$main::config{'bw_active'} = 1;
+	ok(&remote_api_can_domain($domain, 'list-bandwidth'),
+		'bandwidth data passes for a monitored domain');
+	}
+
+{
+	no warnings qw(once redefine);
+	local %main::access = ( 'edit_remote_api' => 1 );
 	local %main::text = (
 		'remote_ecannotcmd' => 'You are not allowed to run this command',
 		);
@@ -341,6 +374,10 @@ foreach my $command (sort keys %expected_commands) {
 			unlike($source, qr/`virtualmin\s+list-certs/,
 				"$command does not bypass ACLs through the root CLI");
 			}
+		elsif ($command eq 'list-backup-keys') {
+			like($source, qr/can_use_backup_key\s*\(/,
+				"$command includes keys shared for creating backups");
+			}
 		}
 	elsif ($object_commands{$command}) {
 		# Their capability takes an object, so they must not resolve a
@@ -377,6 +414,29 @@ foreach my $command (sort keys %expected_commands) {
 		like($source,
 			qr/elsif \(\$a eq "--post-command"\) \{\s*\$is_master \|\|/s,
 			"$command keeps post-creation commands master-only");
+		like($source,
+			qr/if \(!\$skipwarnings \|\| !\$is_master\) \{\s*\$err = &valid_domain_name/s,
+			"$command always validates owner-supplied domain names");
+		like($source,
+			qr/if \(!\$skipwarnings \|\| !\$is_master\) \{\s*foreach my \$ff \(&forbidden_domain_features/s,
+			"$command does not let owners skip forbidden features");
+		like($source, qr/defined\(\$jail\).*master administrator/s,
+			"$command keeps jail selection master-only");
+		like($source, qr/\(\$myserver \|\| \$pgserver\).*master administrator/s,
+			"$command keeps database server selection master-only");
+		like($source, qr/defined\(\$dns_ip\).*can_dnsip/s,
+			"$command requires DNS IP permission");
+		like($source, qr/\$fwdto.*can_edit_catchall/s,
+			"$command requires catch-all permission");
+		like($source, qr/defined\(\$content\).*can_edit_html/s,
+			"$command requires website content permission");
+		like($source, qr/\$proxy_pass_mode.*can_edit_forward/s,
+			"$command requires proxy permission");
+		like($source,
+			qr/\$proxy_pass !~ \/\^\(http\|https\).*Proxy URLs must start/s,
+			"$command validates owner-supplied proxy URLs");
+		like($source, qr/defined\(\$aliasredir\).*can_edit_redirect/s,
+			"$command requires redirect permission");
 		}
 	else {
 		like($source, qr/get_remote_api_domain(?:s)?\s*\(/,
@@ -386,6 +446,16 @@ foreach my $command (sort keys %expected_commands) {
 				"$command enforces the domain password policy");
 			like($source, qr/virtual_server_limits\s*\(/,
 				"$command enforces domain plan limits");
+			}
+		elsif ($command eq 'enable-feature') {
+			like($source,
+				qr/!\$skipwarnings \|\| !\$is_master.*\@forbidden_domain_features/s,
+				"$command does not let owners skip forbidden features");
+			}
+		elsif ($command eq 'backup-domain' ||
+		       $command eq 'create-scheduled-backup') {
+			like($source, qr/can_use_backup_key\s*\(/,
+				"$command permits keys shared for creating backups");
 			}
 		}
 	}

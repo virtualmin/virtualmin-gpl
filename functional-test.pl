@@ -7043,6 +7043,10 @@ $ownerremote_tests = [
 		      [ 'can-edit', 'dbs' ],
 		      [ 'can-edit', 'users' ],
 		      [ 'can-edit', 'delete' ],
+		      [ 'cannot-edit', 'forward' ],
+		      [ 'cannot-edit', 'html' ],
+		      [ 'cannot-edit', 'dnsip' ],
+		      [ 'cannot-edit', 'catchall' ],
 		      [ 'max-dbs', 'UNLIMITED' ],
 		      [ 'max-mailboxes', 'UNLIMITED' ],
 		      [ 'max-doms', 'UNLIMITED' ],
@@ -7169,6 +7173,53 @@ $ownerremote_tests = [
 		       "program=create-domain&domain=api.$test_target_domain&".
 		       "parent=$test_target_domain&dir="),
 	  'grep' => 'Virtual server '.$test_target_domain.' does not exist',
+	  'ignorefail' => 1,
+	},
+
+	# Warning overrides cannot bypass hard validation for domain owners
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-domain&domain=invalid..$test_domain&".
+		       "parent=$test_domain&dir=&skip-warnings="),
+	  'grep' => 'Domain names cannot contain consecutive dots',
+	  'ignorefail' => 1,
+	},
+
+	# Creation options retain the permissions and master-only boundaries
+	# enforced by their corresponding user interface settings
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-domain&domain=dbhost.$test_domain&".
+		       "parent=$test_domain&dir=&mysql-server=remote.test"),
+	  'grep' => '--mysql-server and --postgres-server are only available',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-domain&domain=jail.$test_domain&".
+		       "parent=$test_domain&dir=&disable-jail="),
+	  'grep' => '--enable-jail and --disable-jail are only available',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-domain&domain=proxy.$test_domain&".
+		       "parent=$test_domain&dir=&proxy=http%3A%2F%2F127.0.0.1"),
+	  'grep' => 'You are not allowed to configure proxying',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-domain&domain=content.$test_domain&".
+		       "parent=$test_domain&dir=&content=Owner+content"),
+	  'grep' => 'You are not allowed to set website content',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-domain&domain=dnsip.$test_domain&".
+		       "parent=$test_domain&dir=&dns-ip=192.0.2.10"),
+	  'grep' => 'You are not allowed to change the DNS IP address',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=create-domain&domain=forward.$test_domain&".
+		       "parent=$test_domain&dir=&fwdto=test%40example.test"),
+	  'grep' => 'You are not allowed to configure catch-all forwarding',
 	  'ignorefail' => 1,
 	},
 

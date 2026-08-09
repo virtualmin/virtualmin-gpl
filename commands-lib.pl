@@ -458,7 +458,7 @@ my %user_remote_api_commands = (
 	"generate-letsencrypt-cert" => "can_remote_edit_acme",
 	"get-dns" => "can_edit_records",
 	"get-command" => "can_use_remote_api",
-	"get-logs" => "can_edit_domain",
+	"get-logs" => "can_remote_read_logs",
 	"get-ssl" => "can_edit_ssl",
 	"import-database" => "can_remote_import_databases",
 	"install-cert" => "can_edit_ssl",
@@ -468,7 +468,7 @@ my %user_remote_api_commands = (
 	"list-available-scripts" => "can_edit_scripts",
 	"list-available-shells" => "can_edit_users",
 	"list-backup-keys" => "can_backup_keys",
-	"list-bandwidth" => "can_edit_domain",
+	"list-bandwidth" => "can_remote_read_bandwidth",
 	"list-certs" => "can_edit_ssl",
 	"list-certs-expiry" => "can_edit_ssl",
 	"list-commands" => "can_use_remote_api",
@@ -528,6 +528,21 @@ return &can_edit_databases($_[0]) && &can_allowed_db_hosts();
 sub can_remote_read_mailbox
 {
 return &can_edit_users($_[0]) && &foreign_available("mailboxes");
+}
+
+# can_remote_read_logs(&domain)
+# Returns 1 if the current user can access the domain's Webmin log viewer.
+sub can_remote_read_logs
+{
+return &can_edit_domain($_[0]) && &foreign_available("logviewer");
+}
+
+# can_remote_read_bandwidth(&domain)
+# Returns 1 if bandwidth monitoring is enabled for the domain.
+sub can_remote_read_bandwidth
+{
+return &can_edit_domain($_[0]) && $config{'bw_active'} &&
+	&can_monitor_bandwidth($_[0]);
 }
 
 # can_remote_import_databases(&domain)
