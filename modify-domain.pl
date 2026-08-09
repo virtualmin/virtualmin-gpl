@@ -457,6 +457,21 @@ if (!$is_master && defined($template)) {
 	  (&reseller_admin() || $tmpl->{'for_users'}) ||
 		&usage($text{'setup_etmpl'});
 	}
+if (!$is_master && (@add_excludes || @remove_excludes ||
+			    @add_db_excludes || @remove_db_excludes)) {
+	# Backup exclusions require the same permission and validation as the UI
+	&can_edit_exclude() ||
+		&usage("You are not allowed to edit backup exclusions");
+	foreach my $e (@add_excludes, @remove_excludes) {
+		$e =~ s/^\///;
+		$e !~ /^\// || &usage(&text('exclude_eabs', $e));
+		$e !~ /\.\./ || &usage(&text('exclude_edot', $e));
+		}
+	foreach my $e (@add_db_excludes, @remove_db_excludes) {
+		$e =~ /^[a-z0-9\.\_\-\*]+$/i ||
+			&usage(&text('exclude_edb', $e));
+		}
+	}
 
 # Make sure options are valid for domain
 if ($dom->{'parent'}) {

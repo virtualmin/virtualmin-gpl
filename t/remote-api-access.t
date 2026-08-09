@@ -446,6 +446,10 @@ foreach my $command (sort keys %expected_commands) {
 				"$command enforces the domain password policy");
 			like($source, qr/virtual_server_limits\s*\(/,
 				"$command enforces domain plan limits");
+			like($source, qr/can_edit_exclude\s*\(/,
+				"$command requires backup exclusion permission");
+			like($source, qr/\$e !~ \/\\\.\\\.\//,
+				"$command rejects parent paths in backup exclusions");
 			}
 		elsif ($command eq 'enable-feature') {
 			like($source,

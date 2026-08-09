@@ -7281,6 +7281,20 @@ $ownerremote_tests = [
 	  'antigrep' => '^    Server quota: 99999999',
 	},
 
+	# Grant access to general domain settings, but not backups yet
+	{ 'command' => 'modify-limits.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'can-edit', 'domain' ], ],
+	},
+
+	# Backup exclusions require the backup capability
+	{ 'command' => &owner_remote_api_command(
+		       "program=modify-domain&domain=$test_domain".
+		       "&add-exclude=logs"),
+	  'grep' => 'not allowed to edit backup exclusions',
+	  'ignorefail' => 1,
+	},
+
 	# Grant the backup capabilities needed by the checks below, so that the
 	# limits being tested are the destination and feature ones
 	{ 'command' => 'modify-limits.pl',
@@ -7288,6 +7302,26 @@ $ownerremote_tests = [
 		      [ 'can-edit', 'backup' ],
 		      [ 'can-edit', 'sched' ],
 		      [ 'can-edit', 'restore' ], ],
+	},
+
+	# Backup exclusions use the same validation as the owner UI
+	{ 'command' => &owner_remote_api_command(
+		       "program=modify-domain&domain=$test_domain".
+		       "&add-exclude=../etc"),
+	  'grep' => "Directory '../etc' cannot contain ..",
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=modify-domain&domain=$test_domain".
+		       "&add-exclude=logs"),
+	  'grep' => 'Exit status: 0',
+	  'ignorefail' => 1,
+	},
+	{ 'command' => &owner_remote_api_command(
+		       "program=modify-domain&domain=$test_domain".
+		       "&remove-exclude=logs"),
+	  'grep' => 'Exit status: 0',
+	  'ignorefail' => 1,
 	},
 
 	# Backups can only be written under the owner's own backup directory
