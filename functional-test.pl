@@ -2381,6 +2381,12 @@ $database_tests = [
 	];
 
 # Proxy tests
+$proxy_xfp_supported = 0;
+if ($web eq 'web' && $ssl eq 'ssl') {
+	&require_apache();
+	$proxy_xfp_supported =
+		&indexof('mod_headers', &apache::available_modules()) >= 0;
+	}
 $proxy_tests = [
 	# Create the domain for proxies
 	{ 'command' => 'create-domain.pl',
@@ -2388,6 +2394,8 @@ $proxy_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ],
+		      $proxy_xfp_supported ?
+			( [ $ssl ], [ 'no-ssl-redirect' ] ) : ( ),
 		      @create_args, ],
         },
 
@@ -2483,6 +2491,44 @@ $proxy_tests = [
 		      [ 'multiline' ] ],
 	  'grep' => 'Proxy hostname: Yes',
 	},
+
+	$proxy_xfp_supported ? (
+		# Create a CGI that reports the headers received by the backend
+		{ 'command' => '(echo "#!/bin/sh" ; '.
+			       'echo "echo Content-type: text/plain" ; '.
+			       'echo echo ; echo env) >~'.
+			       $test_domain_user.'/cgi-bin/proxy-xfp.cgi',
+		},
+		{ 'command' => 'chown '.$test_domain_user.': ~'.
+			       $test_domain_user.'/cgi-bin/proxy-xfp.cgi',
+		},
+		{ 'command' => 'chmod 755 ~'.$test_domain_user.
+			       '/cgi-bin/proxy-xfp.cgi',
+		},
+
+		# Proxy to the CGI over HTTP while preserving the original host
+		{ 'command' => 'create-proxy.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'path', '/proxy-xfp' ],
+			      [ 'url', 'http://127.0.0.1/cgi-bin/proxy-xfp.cgi' ] ],
+		},
+
+		# The backend must receive the original frontend protocol
+		{ 'command' => $wget_command.'http://'.$test_domain.
+			       '/proxy-xfp',
+		  'grep' => '^HTTP_X_FORWARDED_PROTO=http$',
+		},
+		{ 'command' => $wget_command.'https://'.$test_domain.
+			       '/proxy-xfp',
+		  'grep' => '^HTTP_X_FORWARDED_PROTO=https$',
+		},
+
+		# Remove the local proxy
+		{ 'command' => 'delete-proxy.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'path', '/proxy-xfp' ] ],
+		},
+	) : ( ),
 
 	# Disable forwarding of proxy hostname
 	{ 'command' => 'modify-web.pl',
