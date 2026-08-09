@@ -123,10 +123,10 @@ if (@domains) {
 		my $domain = $d->{'dom'};
 		my $cfile = $d->{'ssl_cert'};
 		if ($cfile && -r $cfile) {
-			my $expiration_date = &backquote_command(
-				"openssl x509 -enddate -noout -in ".quotemeta($cfile));
-			($expiration_date) = $expiration_date =~ /notAfter=(.*)\sGMT/;
+			my $info = &cert_file_info($cfile);
+			my $expiration_date = $info && $info->{'notafter'};
 			next if (!$expiration_date);
+			$expiration_date =~ s/\sGMT$//;
 			my $valid_until    = Time::Piece->strptime($expiration_date, $fpm_in);
 			my $valid_until_st = $valid_until->strftime("%s");
 			my $now_st         = $now->strftime("%s");
