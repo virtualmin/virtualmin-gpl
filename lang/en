@@ -5161,6 +5161,7 @@ massdomains_headerq=Quota and bandwidth changes
 massdomains_headerf=Enabled feature changes
 massdomains_headerl=Changes to owner limits
 massdomains_headerc=Changes to owner capabilities
+massdomains_headerw=Changes to Webmin module access
 massdomains_headero=Configuration changes
 massdomains_headerp=PHP option changes
 massdomains_feat=Feature '$1'
