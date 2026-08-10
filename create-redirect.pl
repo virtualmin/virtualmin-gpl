@@ -135,7 +135,9 @@ if ($url) {
 		       "a URL path");
 	}
 elsif ($dir) {
-	$dir =~ /^\/\S+$/ && -d $dir ||
+	$dir =~ /^\/\S+$/ ||
+		&usage("The --alias flag must be followed by a directory");
+	&master_admin() && !-d $dir &&
 		&usage("The --alias flag must be followed by a directory");
 	!$stripfile && !$stripquery ||
 		&usage("--strip-file and --strip-query cannot be used with --alias");
@@ -150,8 +152,21 @@ if (!$http && !$https) {
 	$http = $https = 1;
 	}
 
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
+if (!&master_admin()) {
+	$path =~ /^\/\S*$/ || $regexp && $path =~ /^\^\S*$/ ||
+		&usage("The redirect path must start with / or ^");
+	$host && $host !~ /^\S+$/ &&
+		&usage("The redirect host must not contain whitespace");
+	if ($dir) {
+		my $rroot = &get_redirect_root($d);
+		&is_under_directory($rroot, $dir) ||
+			&usage("Alias directories must be under $rroot");
+		-d $dir ||
+			&usage("The --alias flag must be followed by a directory");
+		}
+	}
 &has_web_redirects($d) ||
 	&usage("Virtual server $domain does not support redirects");
 !$host || &has_web_host_redirects($d) ||

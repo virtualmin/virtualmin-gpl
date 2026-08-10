@@ -52,6 +52,9 @@ while(@ARGV > 0) {
 		$domain = shift(@ARGV);
 		}
 	elsif ($a eq "--user") {
+		&master_admin() ||
+			&usage("--user is only available to the master ".
+			       "administrator");
 		$user = shift(@ARGV);
 		}
 	elsif ($a eq "--mode") {
@@ -79,8 +82,16 @@ while(@ARGV > 0) {
 $failed && $succeeded &&
 	&usage("The --failed and --succeeded flags are mutually exclusive");
 
+# Check that any requested domain can be seen by the caller
+if ($domain) {
+	my $d = &get_remote_api_owned_domain("dom", $domain);
+	$d || &usage("Virtual server $domain does not exist");
+	}
+
 # Get all the backup logs, then filter down
 @alllogs = &list_backup_logs($start);
+# Only show logs for backups the caller is allowed to see
+@alllogs = grep { &can_backup_log($_) } @alllogs;
 @logs = ( );
 foreach $l (@alllogs) {
 	if ($domain) {
@@ -122,11 +133,19 @@ if ($multiline) {
 	%schedmap = map { $_->{'id'}, $_ } &list_scheduled_backups();
 	foreach my $l (@logs) {
 		print "$l->{'id'}\n";
-		print "    Domains: $l->{'doms'}\n";
+		print "    Domains: ",
+		      (&master_admin() ? $l->{'doms'}
+				       : join(" ", &backup_log_own_domains($l))),
+		      "\n";
 		if ($l->{'errdoms'}) {
-			print "    Failed domains: $l->{'errdoms'}\n";
+			print "    Failed domains: ",
+			      (&master_admin() ? $l->{'errdoms'}
+				: join(" ", &backup_log_own_domains($l, 1))),
+			      "\n";
 			}
-		print "    Destination: $l->{'dest'}\n";
+		print "    Destination: ",
+		      (&master_admin() ? $l->{'dest'}
+				       : &nice_backup_url($l->{'dest'}, 1)),"\n";
 		if ($l->{'increment'} >= 3) {
 			print "    Differential: ",
 			      "Yes, from backup $l->{'increment'}\n";
@@ -166,7 +185,8 @@ if ($multiline) {
 				@dests = get_scheduled_backup_dests($sched);
 				for(my $i=0; $i<@dests; $i++) {
 					print "    Scheduled destination: ",
-					      "$dests[$i]\n";
+					      (&master_admin() ? $dests[$i]
+							 : &nice_backup_url($dests[$i], 1)),"\n";
 					}
 				}
 			else {

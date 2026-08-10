@@ -65,7 +65,7 @@ while(@ARGV > 0) {
 # Get the domains
 if (@domains) {
 	foreach $dname (@domains) {
-		$d = &get_domain_by("dom", $dname);
+		$d = &get_remote_api_domain("dom", $dname);
 		$d || &usage("Virtual server $dname does not exist");
 		push(@doms, $d);
 		}
@@ -78,6 +78,7 @@ if ($subs) {
 	@doms = grep { !$_->{'parent'} } @doms;
 	@doms || &usage("None of the selected virtual servers are top-level");
 	}
+@doms = &get_remote_api_domains(\@doms, $all_domains);
 
 # Show the bandwidth report for each
 foreach my $d (@doms) {
@@ -86,6 +87,7 @@ foreach my $d (@doms) {
 	# Get the relevant domains
 	@subdoms = $subs ? ( $d, &get_domain_by("parent", $d->{'id'}) )
 			 : ( $d );
+	@subdoms = &get_remote_api_domains(\@subdoms, 1);
 
 	# Build per-day maps
 	%daymap = ( );

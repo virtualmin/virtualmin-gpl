@@ -71,8 +71,10 @@ while(@ARGV > 0) {
 $domain && @set || &usage("No domain or fields to set specified");
 
 # Get the domain
-$dom = &get_domain_by("dom", $domain);
+$dom = &get_remote_api_domain("dom", $domain);
 $dom || usage("Virtual server $domain does not exist.");
+!&master_admin() && $allow_missing &&
+	&usage("--allow-missing is only available to the master administrator");
 $old = { %$dom };
 
 # Run the before script
@@ -88,6 +90,8 @@ foreach $f (@set) {
 			  $_->{'desc'} eq $f->[0] } @fields;
 	$field || $allow_missing ||
 		&usage("No custom field named $f->[0] exists");
+	!$field || &master_admin() || $field->{'visible'} == 0 ||
+		&usage("Custom field $f->[0] cannot be edited by domain owners");
 	$dom->{'field_'.($field->{'name'} || $f->[0])} = $f->[1];
 	}
 &save_domain($dom);

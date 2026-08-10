@@ -55,6 +55,7 @@ if (!$module_name) {
 	}
 &licence_status();
 @OLDARGV = @ARGV;
+my $is_master = &master_admin();
 
 # Parse command-line args
 $norename = 1;
@@ -79,6 +80,8 @@ while(@ARGV > 0) {
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
+		$is_master ||
+			&usage("--passfile is only available to the master administrator");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
@@ -121,11 +124,23 @@ while(@ARGV > 0) {
 	}
 
 $domain && $name || &usage("Missing domain name or login name");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 $d->{'parent'} && &usage("Virtual server $domain is not a parent server");
 $d->{'webmin'} || &usage("Virtual server $domain does not have a Webmin login enabled");
 @admins = &list_extra_admins($d);
+if (!$is_master) {
+	$email && $email !~ /^\S+\@\S+$/ &&
+		&usage("Invalid extra administrator email address");
+	$create && !$d->{'domslimit'} &&
+		&usage("This virtual server cannot create sub-servers");
+	!$norename && $d->{'norename'} &&
+		&usage("This virtual server cannot rename servers");
+	foreach my $edit (@edits) {
+		$d->{'edit_'.$edit} ||
+			&usage("Capability $edit is not available to this virtual server");
+		}
+	}
 
 # Check for a clash
 $name eq "webmin" && &usage("The login name webmin is reserved");
@@ -143,7 +158,7 @@ $clash && &usage("The Webmin username $name is already in use");
 # Validate allowed domains
 @allowed = ( );
 foreach $aname (@allowednames) {
-	$a = &get_domain_by("dom", $aname);
+	$a = &get_remote_api_owned_domain("dom", $aname);
 	$a || &usage("The allowed virtual server $aname does not exist");
 	$a->{'user'} eq $d->{'user'} ||
 		&usage("The allowed virtual server $a->{'dom'} is not owned ".

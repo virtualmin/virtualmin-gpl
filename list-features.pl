@@ -57,20 +57,22 @@ while(@ARGV > 0) {
 	}
 
 # Get the domain objects
+!&master_admin() && !$parentname && !$aliasname && !$subname &&
+	&usage("One of --parent, --subdom or --alias is required for domain owners");
 if ($parentname) {
-	$parentdom = &get_domain_by("dom", $parentname);
+	$parentdom = &get_remote_api_domain("dom", $parentname);
 	$parentdom ||
 	  &usage("Parent virtual server $parentname does not exist");
 	}
 if ($aliasname) {
-	$aliasdom = &get_domain_by("dom", $aliasname);
+	$aliasdom = &get_remote_api_domain("dom", $aliasname);
 	$aliasdom ||
 	  &usage("Alias target virtual server $aliasname does not exist");
 	$parentdom = $aliasdom->{'parent'} ? &get_domain($aliasdom->{'parent'})
 					   : $aliasdom;
 	}
 if ($subname) {
-	$subdom = &get_domain_by("dom", $subname);
+	$subdom = &get_remote_api_domain("dom", $subname);
 	$subdom ||
 	  &usage("Super-domain virtual server $subname does not exist");
 	$parentdom = $subdom->{'parent'} ? &get_domain($subdom->{'parent'})

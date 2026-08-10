@@ -42,6 +42,11 @@ while(@ARGV > 0) {
 # Find the command
 $cmd || &usage("Missing --command parameter");
 $cmd =~ s/\.pl$//;
+!&master_admin() && $cmd !~ /^[a-z0-9_\-]+$/i &&
+	&usage("API command $cmd was not found");
+&require_remote_api_command();
+!&master_admin() && !&can_remote_as_user($cmd) &&
+	&usage("API command $cmd was not found");
 if (my $msg = &api_command_unavailable_message($cmd)) {
 	print "$msg\n";
 	exit(1);

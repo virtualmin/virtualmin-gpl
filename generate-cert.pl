@@ -110,10 +110,23 @@ while(@ARGV > 0) {
 	}
 $dname || &usage("Missing --domain parameter");
 $self || $csr || &usage("One of the --self or --csr parameters must be given");
-$d = &get_domain_by("dom", $dname);
+$d = &get_remote_api_domain("dom", $dname);
 $d || &usage("No virtual server named $dname found");
 $d->{'ssl_same'} && &usage("This server shares it's SSL certificate ".
 			   "with another domain");
+if (!&master_admin()) {
+	defined($size) && $size !~ /^\d+$/ &&
+		&usage("Certificate key size must be a number");
+	defined($days) && $days !~ /^\d+$/ &&
+		&usage("Certificate validity must be a number of days");
+	defined($subject{'cn'}) &&
+	  $subject{'cn'} !~ /^[a-z0-9\.\-\*]+$/i &&
+		&usage("Invalid certificate common name");
+	foreach my $alt (@alts) {
+		$alt =~ /^(\*\.)?[a-z0-9\.\_\-]+$/i ||
+			&usage("Invalid certificate alternate name $alt");
+		}
+	}
 
 # Run the before command
 &set_domain_envs($d, "SSL_DOMAIN");

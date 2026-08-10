@@ -364,6 +364,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--php-log") {
 		$phplog = shift(@ARGV);
+		$custom_phplog = 1;
 		$phplog =~ /^\S+$/ || &usage("--php-log must be followed by ".
 					     "a filename");
 		}
@@ -441,12 +442,53 @@ if ($all_doms) {
 	}
 else {
 	foreach $n (@dnames) {
-		$d = &get_domain_by("dom", $n);
+		$d = &get_remote_api_domain("dom", $n);
 		$d || &usage("Domain $n does not exist");
 		&domain_has_website($d) ||
 		  &usage("Virtual server $n does not have a web site enabled");
 		push(@doms, $d);
 		}
+	}
+@doms = &get_remote_api_domains(\@doms, $all_doms);
+
+# Enforce the capability for each kind of requested website change
+my $phpmode_change = $mode || $rubymode || defined($children) ||
+	defined($phplog) || defined($webmail) || defined($matchall) ||
+	defined($timeout) || $htmldir || defined($includes) || $fixhtmldir ||
+	$fpmport || $fpmsock || $fpmtype || $defmode || defined($cgimode) ||
+	$subprefix || $protocols || $fix_mod_php || defined($phpmail) ||
+	defined($proxyhost) || $fixoptions;
+my $ssl_change = defined($renew) || $breakcert || $linkcert;
+my $master_change = $accesslog || $errorlog || $port || $sslport ||
+	$urlport || $sslurlport || @add_dirs || @remove_dirs || $ssl_cert ||
+	$ssl_key || $ssl_ca || $custom_phplog || $fixhtmldir || $fixoptions ||
+	$fix_mod_php;
+foreach my $d (@doms) {
+	&require_remote_api_capability($d, &can_edit_phpmode($d))
+		if ($phpmode_change);
+	&require_remote_api_capability($d, &can_edit_phpver($d)) if ($version);
+	&require_remote_api_capability($d, &can_edit_html($d))
+		if (defined($content));
+	&require_remote_api_capability($d, &can_edit_redirect($d))
+		if (defined($wwwredir) || defined($aliasredir));
+	&require_remote_api_capability($d, &can_edit_ssl($d))
+		if ($ssl_change);
+	&require_remote_api_capability($d, &can_edit_letsencrypt($d))
+		if (defined($renew));
+	&require_remote_api_capability($d,
+		&can_edit_ssl($d) && &can_edit_dns($d)) if ($tlsa);
+	&require_remote_api_capability($d, &can_default_website($d))
+		if ($defwebsite);
+	&require_remote_api_capability($d, 0) if ($master_change);
+	&require_remote_api_capability($d, 0) if ($children_no_check);
+	}
+if (!&master_admin() && $htmldir && $htmldir =~ /^domains(?:\/|$)/i) {
+	&usage("Document directory cannot be under the domains directory");
+	}
+if (!&master_admin() && $subprefix &&
+    ($subprefix !~ /^[a-z0-9\.\_\/-]+$/i ||
+     $subprefix =~ /^\// || $subprefix =~ /\/$/ || $subprefix =~ /\.\./)) {
+	&usage("Invalid sub-domain document directory");
 	}
 
 # Check if webmail is supported
@@ -482,7 +524,7 @@ foreach $d (@doms) {
 		&usage("The selected Ruby execution mode cannot be used with $d->{'dom'}");
 	}
 
-if ($defaultwebsite && @doms > 1) {
+if ($defwebsite && @doms > 1) {
 	&usage("The --default-website flag can only be applied to a single virtual server");
 	}
 

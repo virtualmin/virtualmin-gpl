@@ -74,6 +74,15 @@ while(@ARGV > 0) {
 # Get domains to update
 @dnames || @users || usage("No domains or users specified");
 @doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
+@doms = &get_remote_api_domains(\@doms);
+
+# Only features the caller has been granted can be reset
+if (!&master_admin()) {
+	foreach my $f (keys %feature, keys %plugin) {
+		&can_use_feature($f) ||
+			&usage("You are not allowed to reset the $f feature");
+		}
+	}
 
 # Do it for all domains, aliases first
 $failed = 0;

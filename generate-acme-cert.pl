@@ -155,10 +155,15 @@ while(@ARGV > 0) {
 
 # Validate inputs
 $dname || &usage("Missing --domain parameter");
-$d = &get_domain_by("dom", $dname);
+$d = &get_remote_api_domain("dom", $dname);
 $d || &usage("No virtual server named $dname found");
 $d->{'ssl_same'} && &usage("This server shares it's SSL certificate ".
 			   "with another domain");
+# Only the master administrator can enable notifications to the master
+if (!&master_admin() && defined($email_master)) {
+	&usage("Master administrator notifications can only be changed by ".
+	       "the master administrator");
+	}
 if ($ctype =~ /^ec/) {
 	&letsencrypt_supports_ec() ||
 		&usage("The ACME client on your system does ".
@@ -215,6 +220,8 @@ elsif (defined(&list_acme_providers)) {
 	($acme) = grep { $_->{'id'} eq $d->{'letsencrypt_id'} }
 		       &list_acme_providers();
 	}
+!&master_admin() && $acme && !&can_acme_provider($acme) &&
+	&usage("The selected ACME provider is not available to this user");
 
 # Build a list of the domains being validated
 my @cdoms = ( $d );

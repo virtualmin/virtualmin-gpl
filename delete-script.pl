@@ -74,7 +74,7 @@ while(@ARGV > 0) {
 
 # Validate args
 $domain || &usage("No domain specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 
 # Find the script
@@ -98,6 +98,11 @@ else {
 	}
 
 $script = &get_script($sinfo->{'name'});
+# Global defaults affect other virtual servers
+if (!&master_admin() && $sinfo->{'opts'}->{'global_def'}) {
+	&usage("Global default scripts can only be removed by the ".
+	       "master administrator");
+	}
 if ($dereg) {
 	# Just un-register it
 	&$first_print(&text('scripts_deregistering', $script->{'desc'},

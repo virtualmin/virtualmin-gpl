@@ -68,10 +68,16 @@ while(@ARGV > 0) {
 		}
 	}
 $domain && $path || &usage("No domain or URL path specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 &has_proxy_balancer($d) || &usage("Proxy balancers cannot be configured for this virtual server");
 !$newpath || $newpath =~ /^\/\S*$/ || &error("Path must be like / or /foo");
+if (!&master_admin()) {
+	foreach my $url (@urls) {
+		$url =~ /^(http|https):\/\/\S+$/ ||
+			&usage("Proxy URLs must start with http:// or https://");
+		}
+	}
 
 # Get the balancer
 &obtain_lock_web($d);
@@ -93,6 +99,12 @@ elsif (@urls) {
 	}
 if (defined($websockets)) {
 	$b->{'websockets'} = $websockets;
+	}
+if (!&master_admin() && $b->{'websockets'} &&
+    ($b->{'none'} || $b->{'balancer'} || !$b->{'urls'} ||
+     @{$b->{'urls'}} != 1 ||
+     $b->{'urls'}->[0] !~ /^(http|https):\/\//)) {
+	&usage("WebSockets proxying requires one HTTP or HTTPS URL");
 	}
 
 # Update it

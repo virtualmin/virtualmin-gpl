@@ -20103,12 +20103,15 @@ $flags{'argv'} = &urlize(join(" ", @qargv));
 # Log it
 my $script = $0;
 $script =~ s/^.*\///;
-local $remote_user = "root";
-local $WebminCore::remote_user = "root";
+my $api = $main::virtualmin_remote_api || $ENV{'VIRTUALMIN_REMOTE_API'};
+# Attribute a remote API call to the user who made it, not to root
+my $loguser = $api && !&master_admin() && $base_remote_user
+		? $base_remote_user : "root";
+local $remote_user = $loguser;
+local $WebminCore::remote_user = $loguser;
 my $rh = $ENV{'REMOTE_HOST'};
 local $ENV{'REMOTE_HOST'} = $rh || "127.0.0.1";
-&webmin_log($main::virtualmin_remote_api ||
-	    $ENV{'VIRTUALMIN_REMOTE_API'} ? "remote" : "cmd",
+&webmin_log($api ? "remote" : "cmd",
 	    $script, $d ? $d->{'dom'} : undef, \%flags);
 }
 

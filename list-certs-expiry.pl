@@ -31,9 +31,9 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/list-certs.pl";
+	$0 = "$pwd/list-certs-expiry.pl";
 	require './virtual-server-lib.pl';
-	$< == 0 || die "list-certs.pl must be run as root";
+	$< == 0 || die "list-certs-expiry.pl must be run as root";
 	}
 
 # Parse command-line args
@@ -57,10 +57,20 @@ while (@ARGV > 0) {
 		}
 	}
 
+# Check that the caller is allowed to see certificates at all. The
+# certificate list itself is gathered by list-certs, which applies the
+# caller's own access rights.
+&require_remote_api_command();
+
 # Sanity check
 ($domain || $all_doms) || &usage("Missing --domain flag");
 (!$sort || ($sort && ($sort eq 'name' || $sort eq 'expiry'))) || &usage("Incorrect --sort flag value");
 (!$sort_type || ($sort_type && ($sort_type eq 'asc' || $sort_type eq 'desc'))) || &usage("Incorrect --sort-order flag value");
+my $domain_re;
+if ($domain) {
+	eval { $domain_re = qr/$domain/ };
+	$@ && &usage("Invalid domain regular expression");
+	}
 
 # Check for dependencies
 &foreign_require("software");
@@ -74,6 +84,12 @@ foreach my $mod (keys %mods) {
 		$poss{ $mods{$mod}[0] } = $mod if ($software::update_system eq "apt");
 		$poss{ $mods{$mod}[1] } = $mod if ($software::update_system eq "yum");
 		}
+	}
+
+# Installing packages is a system-wide change, so never do it for an owner
+if (%poss && !&master_admin()) {
+	&usage("Required Perl modules are not installed: ".
+	       join(" ", sort values %poss));
 	}
 
 # Try installing missing dependencies
@@ -93,21 +109,24 @@ foreach my $pkg (keys %poss) {
 
 exit if ($error);
 
-# Get all domains known to Virtualmin
-my $out = `virtualmin list-certs --all-domains --cert`;
-my (@data) = $out =~ /(.*):\n.*\n.*File:\s+(.*?)\n/g;
+# Get only certificates belonging to domains visible to the caller
+my @domains = grep { &domain_has_ssl_cert($_) } &list_domains();
+@domains = &get_remote_api_domains(\@domains, 1);
+@domains = grep { $_->{'dom'} =~ $domain_re } @domains
+	if ($domain_re && !$all_doms);
 my %rows;
-if (@data) {
+if (@domains) {
 	my $fpm_in  = "%b  %d %H:%M:%S %Y";
 	my $fpm_out = "%b %d, %Y";
 	my $now     = Time::Piece->new();
-	my $i = 1;
-	foreach my $d (@data) {
-		if ($i % 2 == 1) {
-			my $domain          = $d;
-			my $cfile           = $data[$i];
-			my $expiration_date = `openssl x509 -enddate -noout -in "$cfile"`;
-			($expiration_date) = $expiration_date =~ /notAfter=(.*)\sGMT/;
+	foreach my $d (@domains) {
+		my $domain = $d->{'dom'};
+		my $cfile = $d->{'ssl_cert'};
+		if ($cfile && -r $cfile) {
+			my $info = &cert_file_info($cfile);
+			my $expiration_date = $info && $info->{'notafter'};
+			next if (!$expiration_date);
+			$expiration_date =~ s/\sGMT$//;
 			my $valid_until    = Time::Piece->strptime($expiration_date, $fpm_in);
 			my $valid_until_st = $valid_until->strftime("%s");
 			my $now_st         = $now->strftime("%s");
@@ -144,14 +163,13 @@ if (@data) {
 			$rows{($sort eq 'name' ? $domain : $valid_until_st)} = 
 				[$domain, $cfile, $valid_until->strftime($fpm_out), $diff, $status];
 			}
-		$i++;
 		}
 
 	# Sort results
 	my @rows = $sort_type eq 'desc' ? reverse sort keys %rows : sort keys %rows;
 	if ($multiline) {
 		foreach my $column (@rows) {
-			if ($all_doms || $rows{$column}[0] =~ /$domain/) {
+			if ($all_doms || $rows{$column}[0] =~ $domain_re) {
 				print "$rows{$column}[0]\n";
 				print "  Path to certificate file: $rows{$column}[1]\n";
 				print "  Valid until: $rows{$column}[2]\n";
@@ -164,7 +182,7 @@ if (@data) {
 		my $table   = Text::ASCIITable->new({ headingText => 'SSL CERTIFICATES EXPIRATION DATES' });
 		$table->setCols('DOMAIN NAME', 'PATH TO CERTIFICATE FILE', 'VALID UNTIL', 'EXPIRES IN', 'STATUS');
 		foreach my $column (@rows) {
-			if ($all_doms || $rows{$column}[0] =~ /$domain/) {
+			if ($all_doms || $rows{$column}[0] =~ $domain_re) {
 				$table->addRow($rows{$column}[0],
 					       $rows{$column}[1], 
 					       $rows{$column}[2],

@@ -21,9 +21,9 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/list-certs.pl";
+	$0 = "$pwd/list-service-certs.pl";
 	require './virtual-server-lib.pl';
-	$< == 0 || die "list-certs.pl must be run as root";
+	$< == 0 || die "list-service-certs.pl must be run as root";
 	}
 
 # Parse command line to get domains
@@ -40,7 +40,7 @@ while(@ARGV > 0) {
 
 # Validate inputs and get the domain
 $dname || &usage("Missing --domain parameter");
-$d = &get_domain_by("dom", $dname);
+$d = &get_remote_api_domain("dom", $dname);
 $d || &usage("Virtual server $dname does not exist");
 &domain_has_ssl_cert($d) ||
 	&usage("Virtual server $dname does not have an SSL cert");
@@ -53,7 +53,8 @@ if ($multiline) {
 		print "    Service type: ",
 		      ($svc->{'d'} ? "domain" : "global"),"\n";
 		print "    Cert file: ",$svc->{'cert'},"\n";
-		print "    Key file: ",$svc->{'key'},"\n" if ($svc->{'key'});
+		print "    Key file: ",$svc->{'key'},"\n"
+			if ($svc->{'key'} && &master_admin());
 		print "    CA file: ",$svc->{'ca'},"\n" if ($svc->{'ca'});
 		print "    IP address: ",$svc->{'ip'},"\n" if ($svc->{'ip'});
 		print "    IPv6 address: ",$svc->{'ip6'},"\n" if ($svc->{'ip6'});

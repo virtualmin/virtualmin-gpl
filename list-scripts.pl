@@ -65,6 +65,7 @@ if ($all) {
 else {
 	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
 	}
+@doms = &get_remote_api_domains(\@doms, $all || @users);
 @doms = grep { &can_domain_have_scripts($_) } @doms;
 @doms || &usage("None of the selected virtual servers can have scripts");
 
@@ -114,7 +115,8 @@ foreach my $d (@doms) {
 				}
 			if ($sinfo->{'user'}) {
 				print "    Initial login: $sinfo->{'user'}\n";
-				print "    Initial password: $sinfo->{'pass'}\n";
+				print "    Initial password: $sinfo->{'pass'}\n"
+					if (&master_admin());
 				}
 			if ($script->{'site'}) {
 				print "    Website: @{[&script_link($script->{'site'}, undef, 2)]}\n";

@@ -53,11 +53,13 @@ while(@ARGV > 0) {
 # Validate inputs
 $domain || &usage("No domain specified");
 $dir || &usage("No directory specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 if ($dir !~ /^\//) {
 	$dir = &public_html_dir($d)."/".$dir;
 	}
+!&master_admin() && !&is_under_directory(&public_html_dir($d), $dir) &&
+	&usage("The PHP directory must be under the website root");
 if ($dir eq &public_html_dir($d)) {
 	usage("The PHP version cannot be removed for public_html");
 	}

@@ -80,6 +80,14 @@ $type || &usage("Missing --type parameter");
 if (@sethosts) {
 	(@addhosts || @delhosts) && &usage("--set-host cannot be combined with --add-host and --remove-host");
 	}
+if (!&master_admin()) {
+	foreach my $h (@addhosts, @delhosts, @sethosts) {
+		$h =~ /^[a-z0-9\.\-\_\%\\:]+$/i ||
+		  $h =~ /^([0-9\.]+)\/([0-9\.]+)$/ &&
+		  &check_ipaddress($1) && &check_ipaddress($2) ||
+			&usage("Invalid remote database host $h");
+		}
+	}
 
 # Get domains to update
 if ($all_doms) {
@@ -87,8 +95,8 @@ if ($all_doms) {
 	}
 else {
 	foreach $n (@dnames) {
-		$d = &get_domain_by("dom", $n);
-		$d || &usage("Domain $n does not exist");
+		$d = &get_remote_api_domain("dom", $n);
+		$d || &usage("Virtual server $n does not exist");
 		$d->{$type} ||
 		  &usage("Virtual server $n does not have a $type database");
 		$d->{'parent'} &&
@@ -96,6 +104,7 @@ else {
 		push(@doms, $d);
 		}
 	}
+@doms = &get_remote_api_domains(\@doms, $all_doms);
 @doms || &usage("No domains to set remote $type hosts on specified");
 
 # Do all the domains

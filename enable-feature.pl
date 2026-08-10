@@ -92,6 +92,19 @@ else {
 	# Get domains by name and user
 	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
 	}
+@doms = &get_remote_api_domains(\@doms, $all_doms);
+
+# Only features the caller has been granted can be enabled, and connecting
+# existing objects to a domain is always a master-only operation
+my $is_master = &master_admin();
+if (!$is_master) {
+	$associate && &usage("The --associate flag is only available to the ".
+			     "master administrator");
+	foreach my $f (keys %feature, keys %plugin) {
+		&can_use_feature($f) ||
+			&usage("You are not allowed to enable the $f feature");
+		}
+	}
 
 # Do it for all domains, non-aliases first
 $failed = 0;
@@ -107,9 +120,12 @@ foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 	my $f;
 	foreach $f (&list_ordered_features(\%newdom)) {
 		if ($feature{$f} || $plugin{$f}) {
-			if (!$skipwarnings &&
+			if ((!$skipwarnings || !$is_master) &&
 			    grep {$_ eq $f} @forbidden_domain_features) {
-				&$second_print(".. the feature $f cannot be enabled for this type of virtual server unless the --skip-warnings flag is given");
+				my $msg = ".. the feature $f cannot be enabled for this type of virtual server";
+				$msg .= " unless the --skip-warnings flag is given"
+					if ($is_master);
+				&$second_print($msg);
 				$failed = 1;
 				next DOMAIN;
 				}

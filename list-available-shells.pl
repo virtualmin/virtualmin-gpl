@@ -55,7 +55,9 @@ while(@ARGV > 0) {
 	}
 
 # Get the shells
+&require_remote_api_command();
 @shells = &list_available_shells();
+@shells = grep { $_->{'avail'} } @shells if (!&master_admin());
 if ($type) {
 	@shells = grep { $_->{$type} } @shells;
 	}

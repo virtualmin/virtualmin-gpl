@@ -46,7 +46,7 @@ while(@ARGV > 0) {
 
 # Find the domain
 $domain || usage("No domain specified");
-$dom = &get_domain_by("dom", $domain);
+$dom = &get_remote_api_domain("dom", $domain);
 $dom || usage("Virtual server $domain does not exist");
 
 if (&will_send_domain_email($dom)) {

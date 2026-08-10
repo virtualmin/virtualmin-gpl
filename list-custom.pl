@@ -56,7 +56,7 @@ while(@ARGV > 0) {
 if (@domains) {
 	# Just showing listed domains
 	foreach $domain (@domains) {
-		$d = &get_domain_by("dom", $domain);
+		$d = &get_remote_api_domain("dom", $domain);
 		$d || &usage("Virtual server $domain does not exist");
 		push(@doms, $d);
 		}
@@ -64,11 +64,13 @@ if (@domains) {
 else {
 	# Showing all domains
 	@doms = &list_domains();
+	@doms = &get_remote_api_domains(\@doms, 1);
 	}
 @doms = sort { $a->{'user'} cmp $b->{'user'} ||
 	       $a->{'created'} <=> $b->{'created'} } @doms;
 
 @fields = &list_custom_fields();
+@fields = grep { $_->{'visible'} < 2 } @fields if (!&master_admin());
 if ($field) {
 	@fields = grep { $_->{'name'} eq $field } @fields;
 	}

@@ -138,11 +138,17 @@ while(@ARGV > 0) {
 		$includesubs = 1;
 		}
 	elsif ($a eq "--reseller") {
+		&master_admin() ||
+			&usage("--reseller is only available to the master ".
+			       "administrator");
 		defined(&list_resellers) ||
 			&usage("Your system does not support resellers");
 		push(@resellers, shift(@ARGV));
 		}
 	elsif ($a eq "--plan") {
+		&master_admin() ||
+			&usage("--plan is only available to the master ".
+			       "administrator");
 		$planname = shift(@ARGV);
 		($plan) = grep { lc($_->{'name'}) eq lc($planname) ||
 				 $_->{'id'} eq $planname } @allplans;
@@ -153,6 +159,9 @@ while(@ARGV > 0) {
 		$all_bfeats = 1;
 		}
 	elsif ($a eq "--all-domains") {
+		&master_admin() ||
+			&usage("--all-domains is only available to the master ".
+			       "administrator");
 		$all_doms = 1;
 		}
 	elsif ($a eq "--ignore-errors") {
@@ -162,6 +171,9 @@ while(@ARGV > 0) {
 		$separate = 1;
 		}
 	elsif ($a eq "--mkdir") {
+		&master_admin() ||
+			&usage("--mkdir is only available to the master ".
+			       "administrator");
 		$mkdir = 1;
 		}
 	elsif ($a eq "--onebyone") {
@@ -186,6 +198,10 @@ while(@ARGV > 0) {
 			$optv = shift(@ARGV);
 			}
 		$optf && $optn && $optv || &usage("Invalid option specification");
+		# The dir feature's include/exclude values are paths run as root
+		&require_remote_api_relative_path($optv)
+			if ($optf eq "dir" &&
+			    ($optn eq "include" || $optn eq "exclude"));
 		$opts{$optf}->{$optn} = $optv;
 		}
 	elsif ($a eq "--mailfiles") {
@@ -197,6 +213,9 @@ while(@ARGV > 0) {
 		$asowner = 1;
 		}
 	elsif ($a eq "--virtualmin") {
+		&master_admin() ||
+			&usage("--virtualmin is only available to the master ".
+			       "administrator");
 		$v = shift(@ARGV);
 		if (&indexof($v, @virtualmin_backups) < 0) {
 			print STDERR "Unknown --virtualmin option $v. Available options are : ".join(" ", @virtualmin_backups)."\n";
@@ -206,6 +225,9 @@ while(@ARGV > 0) {
 			}
 		}
 	elsif ($a eq "--all-virtualmin") {
+		&master_admin() ||
+			&usage("--all-virtualmin is only available to the master ".
+			       "administrator");
 		@vbs = @virtualmin_backups;
 		}
 	elsif ($a eq "--except-virtualmin") {
@@ -220,6 +242,9 @@ while(@ARGV > 0) {
 		$increment = 2;
 		}
 	elsif ($a eq "--incremental-of" || $a eq "--differential-of") {
+		&master_admin() ||
+			&usage("--differential-of is only available to the master ".
+			       "administrator");
 		&has_incremental_tar() || &usage("The tar command on this system does not support differential backups");
 		$increment = shift(@ARGV);
 		$increment eq "1" &&
@@ -230,6 +255,9 @@ while(@ARGV > 0) {
 			&usage("Scheduled backup with ID $increment is not a full backup");
 		}
 	elsif ($a eq "--purge") {
+		&master_admin() ||
+			&usage("--purge is only available to the master ".
+			       "administrator");
 		$purge = shift(@ARGV);
 		$purge =~ /^[0-9\.]+$/ || &usage("--purge must be followed by a number");
 		}
@@ -238,10 +266,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--exclude") {
 		$exclude = shift(@ARGV);
+		&require_remote_api_relative_path($exclude);
 		push(@exclude, $exclude);
 		}
 	elsif ($a eq "--include") {
 		$include = shift(@ARGV);
+		&require_remote_api_relative_path($include);
 		push(@include, $include);
 		}
 	elsif ($a eq "--multiline") {
@@ -295,6 +325,27 @@ foreach my $dname (@bdoms) {
 	$d || &usage("Virtual server $dname does not exist");
 	push(@doms, $d);
 	}
+@doms = &get_remote_api_domains(\@doms);
+
+# Record who owns this schedule, which controls the account it runs as, and
+# keep its destinations inside what that owner may write to
+my $cbmode = &can_backup_domain();
+$cbmode || &usage("You are not allowed to backup virtual servers");
+&can_backup_sched() ||
+	&usage("You are not allowed to create scheduled backups");
+my $schedowner;
+if ($cbmode != 1) {
+	my $od = &get_domain_by_user($base_remote_user);
+	$schedowner = &reseller_admin() ? $base_remote_user :
+		$od ? $od->{'id'} : undef;
+	$schedowner || &usage("You are not allowed to create scheduled backups");
+	foreach my $i (0 .. $#dests) {
+		my ($newdest, $err) = &confine_backup_dest(
+			$dests[$i], $cbmode, $od);
+		$err && &usage($err);
+		$dests[$i] = $newdest;
+		}
+	}
 foreach $dest (@dests) {
 	# Validate destination URL
 	($bmode, $derr, undef, $host, $path) = &parse_backup_url($dest);
@@ -329,6 +380,10 @@ if ($keyid) {
 		  	$_->{'key'} eq $keyid ||
 		  	$_->{'desc'} eq $keyid } &list_backup_keys();
 	$key || &usage("No backup key with ID or description $keyid exists");
+	# A non-master may use their own keys or keys shared for backups
+	!defined(&can_use_backup_key) || &master_admin() ||
+		&can_use_backup_key($key) ||
+		&usage("No backup key with ID or description $keyid exists");
 	}
 if ($onebyone && !$newformat) {
 	&usage("--onebyone option can only be used in conjunction ".
@@ -341,6 +396,7 @@ if ($increment) {
 # Create a backup schedule object
 my $sched = { };
 $sched->{'desc'} = $desc;
+$sched->{'owner'} = $schedowner if ($schedowner);
 for(my $i=0; $i<@dests; $i++) {
 	$sched->{'dest'.$i} = $dests[$i];
 	}

@@ -32,7 +32,7 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/list-proxies.pl";
+	$0 = "$pwd/list-redirects.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "list-redirects.pl must be run as root";
 	}

@@ -90,6 +90,17 @@ else {
 if ($dnssub) {
 	@doms = &expand_dns_subdomains(\@doms);
 	}
+@doms = &get_remote_api_domains(\@doms, $all_doms);
+
+# Disconnecting objects from a domain is always a master-only operation
+if (!&master_admin()) {
+	$disassociate && &usage("The --disassociate flag is only available ".
+				"to the master administrator");
+	foreach my $f (keys %feature, keys %plugin) {
+		&can_use_feature($f) ||
+			&usage("You are not allowed to disable the $f feature");
+		}
+	}
 
 # Do it for all domains, aliases first
 $failed = 0;

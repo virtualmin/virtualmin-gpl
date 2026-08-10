@@ -22,7 +22,7 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/list-features.pl";
+	$0 = "$pwd/list-commands.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "list-commands.pl must be run as root";
 	}
@@ -44,10 +44,13 @@ while(@ARGV > 0) {
 	}
 
 # Work out the max command length, for formatting
+&require_remote_api_command();
 my $maxlen = 0;
 foreach my $c (&list_api_categories()) {
 	my ($cname, @cglobs) = @$c;
 	foreach my $cmd (map { glob($_) } @cglobs) {
+		(my $remote_cmd = $cmd) =~ s/^.*\///;
+		next if (!&can_remote($remote_cmd));
 		my $scmd = $cmd;
 		$scmd =~ s/\.pl$// if ($short);
 		$maxlen = length($scmd) if (length($scmd) > $maxlen);
@@ -69,6 +72,8 @@ foreach my $c (&list_api_categories()) {
 	foreach my $cmd (@cmds) {
 		next if (-l $cmd);
 		next if (&indexof($cmd, @skips) >= 0);
+		(my $remote_cmd = $cmd) =~ s/^.*\///;
+		next if (!&can_remote($remote_cmd));
 		my $spellcmd = $cmd;
 		$spellcmd =~ s/licence/license/g;
 		next if ($done{$spellcmd}++);

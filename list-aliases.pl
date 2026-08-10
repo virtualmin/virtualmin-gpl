@@ -74,6 +74,7 @@ if ($all) {
 else {
 	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
 	}
+@doms = &get_remote_api_domains(\@doms, $all || @users);
 
 foreach $d (@doms) {
 	@aliases = &list_domain_aliases($d, !$plugins);

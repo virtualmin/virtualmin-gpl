@@ -440,7 +440,7 @@ foreach $e (@addemails) {
 	# Additional addresses must belong to an accessible mail domain
 	if (!$is_master) {
 		my ($eu, $ed) = ($1, &parse_domain_name($2));
-		my $edom = &get_remote_api_domain("dom", $ed);
+		my $edom = &get_remote_api_owned_domain("dom", $ed);
 		$edom->{'mail'} || &usage(&text('user_eextra2', $ed));
 		!$edom->{'alias'} || !$edom->{'aliascopy'} ||
 			&usage(&text('user_eextra7', $ed));

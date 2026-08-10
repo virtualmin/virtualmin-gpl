@@ -61,10 +61,15 @@ while(@ARGV > 0) {
 		$newpass = shift(@ARGV);
 		}
 	elsif ($a eq "--ip") {
+		# Only users allowed to select an address may request one
+		&master_admin() || &can_select_ip() ||
+			&usage("You are not allowed to select an IP address");
 		$ip = shift(@ARGV);
 		&check_ipaddress($ip) || &usage("Invalid IP address");
 		}
 	elsif ($a eq "--ip-already") {
+		&master_admin() || &can_select_ip() ||
+			&usage("You are not allowed to select an IP address");
 		$virtalready = 1;
 		}
 	elsif ($a eq "--multiline") {
@@ -81,8 +86,29 @@ while(@ARGV > 0) {
 # Find the domain
 $domain || usage("Missing --domain flag");
 $newdomain || usage("Missing --newdomain flag");
-$d = &get_domain_by("dom", $domain);
+$newdomain = lc(&parse_domain_name($newdomain));
+my $dnerr = &valid_domain_name($newdomain);
+&usage($dnerr) if ($dnerr);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
+
+# Cloning creates a new virtual server, so enforce the same restrictions as
+# the user interface for non-master callers
+if (!&master_admin()) {
+	($d->{'parent'} ? &can_create_sub_servers()
+			: &can_create_master_servers()) ||
+		&usage("You are not allowed to create virtual servers of ".
+		       "this type");
+	my ($dleft, $dreason, $dmax) = &count_domains(
+		$d->{'alias'} ? "aliasdoms" :
+		$d->{'parent'} ? "realdoms" : "topdoms");
+	$dleft == 0 && &usage("You have reached the maximum of $dmax ".
+			      "virtual servers that can be created");
+	# Check any restriction on the names he can use
+	my $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+	my $derr = &allowed_domain_name($parent, $newdomain);
+	&usage($derr) if ($derr);
+	}
 if (!$d->{'parent'}) {
 	if (!$newuser) {
 		($newuser, $try1, $try2) = &unixuser_name($newdomain);

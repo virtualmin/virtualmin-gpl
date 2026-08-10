@@ -58,6 +58,7 @@ if (!$module_name) {
 	}
 &licence_status();
 @OLDARGV = @ARGV;
+my $is_master = &master_admin();
 
 # Parse command-line args
 $append = $config{'appendadmin'};
@@ -76,6 +77,8 @@ while(@ARGV > 0) {
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
+		$is_master ||
+			&usage("--passfile is only available to the master administrator");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
@@ -146,8 +149,22 @@ while(@ARGV > 0) {
 	}
 
 $domain && $name || &usage("No domain or username specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
+if (!$is_master) {
+	defined($email) && $email ne "" && $email !~ /^\S+\@\S+$/ &&
+		&usage("Invalid extra administrator email address");
+	defined($newname) && $newname !~ /^[a-z0-9\_\.\-]+$/i &&
+		&usage("Invalid extra administrator name");
+	defined($create) && $create && !$d->{'domslimit'} &&
+		&usage("This virtual server cannot create sub-servers");
+	defined($norename) && !$norename && $d->{'norename'} &&
+		&usage("This virtual server cannot rename servers");
+	foreach my $edit (@canedits) {
+		$d->{'edit_'.$edit} ||
+			&usage("Capability $edit is not available to this virtual server");
+		}
+	}
 
 # Find the admin
 &obtain_lock_webmin();
@@ -210,7 +227,7 @@ if ($allowedall) {
 	@allowed = ( );
 	}
 foreach $aname (@allowednames) {
-	$a = &get_domain_by("dom", $aname);
+	$a = &get_remote_api_owned_domain("dom", $aname);
         $a || &usage("The allowed virtual server $aname does not exist");
 	$a->{'user'} eq $d->{'user'} ||
                 &usage("The allowed virtual server $a->{'dom'} is not owned ".
@@ -218,7 +235,7 @@ foreach $aname (@allowednames) {
 	push(@allowed, $a->{'id'});
 	}
 foreach $aname (@deniednames) {
-	$a = &get_domain_by("dom", $aname);
+	$a = &get_remote_api_owned_domain("dom", $aname);
         $a || &usage("The allowed virtual server $aname does not exist");
 	@allowed = grep { $_ ne $a->{'id'} } @allowed;
 	@allowed || &usage("You cannot remove all allowed virtual servers");

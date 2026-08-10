@@ -143,6 +143,8 @@ else {
 $virt6 = 0;
 $anylimits = 0;
 $email = $config{'contact_email'};
+# Remote API callers that are not the master admin may only create sub-servers
+my $is_master = &master_admin();
 while(@ARGV > 0) {
 	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -170,6 +172,10 @@ while(@ARGV > 0) {
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
+		# Prevent non-master callers from reading server-side files
+		$is_master ||
+			&usage("--passfile is only available to the master ".
+			       "administrator");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
@@ -270,7 +276,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--shared-ip6") {
 		# IPv6 on shared address
-		$ip6 = shift(@ARGV);
+		$ip6 = $sharedip6 = shift(@ARGV);
 		$virt6 = 0;
 		&indexof($ip6, &list_shared_ip6s()) >= 0 ||
 		    &usage("$ip6 is not in the shared IP addresses list");
@@ -329,6 +335,9 @@ while(@ARGV > 0) {
 			}
 		}
 	elsif ($a eq "--plan") {
+		$is_master ||
+			&usage("--plan is only available to the master ".
+			       "administrator");
 		$planname = shift(@ARGV);
 		foreach $p (&list_plans()) {
 			if ($p->{'id'} eq $planname ||
@@ -374,6 +383,9 @@ while(@ARGV > 0) {
 		$subdomain = $parentdomain = lc(shift(@ARGV));
 		}
 	elsif ($a eq "--reseller") {
+		$is_master ||
+			&usage("--reseller is only available to the master ".
+			       "administrator");
 		$resel = shift(@ARGV);
 		}
 	elsif ($a eq "--content") {
@@ -389,9 +401,15 @@ while(@ARGV > 0) {
 		$nosecondaries = 1;
 		}
 	elsif ($a eq "--pre-command") {
+		$is_master ||
+			&usage("--pre-command is only available to the master ".
+			       "administrator");
 		$precommand = shift(@ARGV);
 		}
 	elsif ($a eq "--post-command") {
+		$is_master ||
+			&usage("--post-command is only available to the master ".
+			       "administrator");
 		$postcommand = shift(@ARGV);
 		}
 	elsif ($a eq "--skip-warnings") {
@@ -452,6 +470,11 @@ while(@ARGV > 0) {
 		$sshmode = 2;
 		$sshkey = shift(@ARGV);
 		if ($sshkey =~ /^\//) {
+			# Only the master administrator can load a key from a
+			# server-side file
+			$is_master ||
+				&usage("--use-ssh-key must be followed by key ".
+				       "data rather than a file");
 			$sshkey = &read_file_contents($sshkey);
 			}
 		$sshkey =~ /\S/ || &usage("--use-ssh-key must be followed by a key file or data");
@@ -511,6 +534,8 @@ while(@ARGV > 0) {
 		@fields = &list_custom_fields();
 		($f) = grep { $_->{'name'} eq $fn } @fields;
 		$f || &usage("Custom field $fn does not exist");
+		$is_master || $f->{'visible'} == 0 ||
+			&usage("Custom field $fn cannot be edited by domain owners");
 		$fields{'field_'.$fn} = $fv;
 		}
 	elsif ($a eq "--help") {
@@ -520,12 +545,63 @@ while(@ARGV > 0) {
 		&usage("Unknown parameter $a");
 		}
 	}
+# Enforce option-specific permissions before looking up global configuration
+if (!$is_master) {
+	defined($jail) &&
+		&usage("--enable-jail and --disable-jail are only available to ".
+		       "the master administrator");
+	($myserver || $pgserver) &&
+		&usage("--mysql-server and --postgres-server are only available ".
+		       "to the master administrator");
+	($noslaves || $nosecondaries || defined($dns_submode) || $dns_subany) &&
+		&usage("DNS server placement options are only available to the ".
+		       "master administrator");
+	(defined($dns_ip) || defined($dns_ip6)) && !&can_dnsip() &&
+		&usage("You are not allowed to change the DNS IP address");
+	defined($db) && !&can_edit_databases() &&
+		&usage("You are not allowed to select the initial database name");
+	$fwdto && !&can_edit_catchall() &&
+		&usage("You are not allowed to configure catch-all forwarding");
+	defined($content) && !&can_edit_html() &&
+		&usage("You are not allowed to set website content");
+	($clouddns || $clouddns_import || defined($remotedns)) &&
+	  !&can_edit_dns() &&
+		&usage("You are not allowed to select the DNS server");
+	defined($letsencrypt) &&
+	  (!&can_edit_ssl() || !&can_edit_letsencrypt()) &&
+		&usage("You are not allowed to request an SSL certificate");
+	(defined($linkcert) || defined($always_ssl) || $default_cert_owner) &&
+	  !&can_edit_ssl() &&
+		&usage("You are not allowed to configure SSL certificates");
+	($sshmode || defined($append_style) || defined($defaultshell)) &&
+	  !&can_edit_users() &&
+		&usage("You are not allowed to configure domain users");
+	defined($phpmode) && !&can_edit_phpmode() &&
+		&usage("You are not allowed to select the PHP execution mode");
+	$proxy_pass_mode && !&can_edit_forward() &&
+		&usage("You are not allowed to configure proxying");
+	$proxy_pass_mode && $proxy_pass !~ /^(http|https):\/\/\S+$/ &&
+		&usage("Proxy URLs must start with http:// or https://");
+	(defined($auto_redirect) || defined($aliasredir)) &&
+	  !&can_edit_redirect() &&
+		&usage("You are not allowed to configure redirects");
+	}
+# Non-master callers may only ever create a sub-server, so bail out early
+# before any settings that only apply to top-level servers are looked up
+if (!$is_master) {
+	$parentdomain || &usage("Only sub-servers can be created, so the ".
+				"--parent, --alias or --subdom flag must ".
+				"be given");
+	}
 if ($template eq "") {
 	$template = &get_init_template($parentdomain);
 	}
 $tmpl = &get_template($template);
+$is_master || &can_use_template($tmpl) || &usage($text{'setup_etmpl'});
 $plan = $planid ne '' ? &get_plan($planid) : &get_default_plan();
-$plan || &usage("Plan does not exist");
+# Sub-servers always inherit the plan from their parent, and domain owners
+# have no plans of their own to default to
+$plan || $parentdomain || &usage("Plan does not exist");
 $defip = &get_default_ip($resel);
 $defip6 = &get_default_ip6($resel);
 if ($sharedip) {
@@ -636,7 +712,7 @@ if ($subdomain) {
 
 # Validate args and work out defaults for those unset
 $domain = lc(&parse_domain_name($domain));
-if (!$skipwarnings) {
+if (!$skipwarnings || !$is_master) {
 	$err = &valid_domain_name($domain);
 	&usage($err) if ($err);
 	}
@@ -662,6 +738,28 @@ if ($parentdomain) {
 			&usage("Sub-domain $domain must be under the parent domain $subdomain");
 		$subprefix ||= $1;
 		}
+	}
+
+# Enforce the same restrictions as the user interface for non-master callers,
+# who may only ever create a sub-server under a domain that they own
+if (!$is_master) {
+	&can_create_sub_servers() ||
+		&usage("You are not allowed to create sub-servers");
+	&can_edit_domain($parent) ||
+		&usage(&text('remote_ecannotdom', $parentdomain));
+	# Check the sub-server limit that applies to this parent
+	my ($dleft, $dreason, $dmax) = &count_domains(
+		$aliasdomain ? "aliasdoms" : "realdoms");
+	$dleft == 0 && &usage("You have reached the maximum of $dmax ".
+			      "virtual servers that can be created");
+	# Check any restriction on the names he can use
+	my $derr = &allowed_domain_name($parent, $domain);
+	&usage($derr) if ($derr);
+	# Only users allowed to select an address may request one
+	($virt || $sharedip) && !&can_select_ip() &&
+		&usage($text{'setup_eip'});
+	($virt6 || $sharedip6) && !&can_select_ip6() &&
+		&usage($text{'setup_eip6'});
 	}
 
 # Allow user and group names
@@ -728,6 +826,16 @@ elsif ($deffeatures || $planfeatures && !$tfl) {
 		}
 	}
 scalar(keys %feature) || &usage("No virtual server features enabled");
+
+# Only features the owner has been granted can be enabled. This runs after the
+# set is final, as it may be rebuilt above from a template or plan.
+if (!$is_master) {
+	foreach my $f (grep { $feature{$_} } keys %feature,
+		       grep { $plugin{$_} } keys %plugin) {
+		&can_use_feature($f) ||
+			&usage("You are not allowed to enable the $f feature");
+		}
+	}
 
 if (!$parent) {
 	# Make sure alias, database, etc limits are set properly
@@ -864,10 +972,14 @@ if ($clouddns) {
 			&usage("Cloudmin Services for DNS is not enabled");
 		}
 	elsif ($clouddns ne "local") {
-		my @cnames = map { $_->{'name'} } &list_dns_clouds();
+		my @clouds = &list_dns_clouds();
+		my @cnames = map { $_->{'name'} } @clouds;
 		&indexof($clouddns, @cnames) >= 0 ||
 			&usage("Valid cloud DNS providers are : ".
 			       join(" ", @cnames));
+		my ($cloud) = grep { $_->{'name'} eq $clouddns } @clouds;
+		$is_master || &can_dns_cloud($cloud) ||
+			&usage("You are not allowed to use DNS provider $clouddns");
 		}
 	}
 
@@ -1032,9 +1144,14 @@ $cerr = &virtual_server_clashes(\%dom);
 &usage($cerr) if ($cerr);
 
 # Check if features are not forbidden
-if (!$skipwarnings) {
+if (!$skipwarnings || !$is_master) {
 	foreach my $ff (&forbidden_domain_features(\%dom, 1)) {
-		$dom{$ff} && &usage("The feature $ff is not allowed for virtual server matching the hostname unless the --skip-warnings flag is given.");
+		if ($dom{$ff}) {
+			my $msg = &text('setup_efeatforbidhostdef', $ff);
+			$msg .= " unless the --skip-warnings flag is given"
+				if ($is_master);
+			&usage($msg);
+			}
 		}
 	}
 

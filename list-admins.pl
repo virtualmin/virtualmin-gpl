@@ -23,7 +23,7 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/list-databases.pl";
+	$0 = "$pwd/list-admins.pl";
 	require './virtual-server-lib.pl';
 	$< == 0 || die "list-admins.pl must be run as root";
 	}
@@ -41,7 +41,7 @@ while(@ARGV > 0) {
 	}
 
 $domain || &usage("No domain specified");
-$d = &get_domain_by("dom", $domain);
+$d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 @admins = &list_extra_admins($d);
 if ($multiline) {
@@ -53,7 +53,7 @@ if ($multiline) {
 			print "    Email: $admin->{'email'}\n";
 			}
 		print "    Base username: $admin->{'origname'}\n";
-		print "    Password: $admin->{'pass'}\n";
+		print "    Password: $admin->{'pass'}\n" if (&master_admin());
 		print "    Create servers: ",($admin->{'create'} ? "Yes" : "No"),"\n";
 		print "    Rename servers: ",($admin->{'norename'} ? "No" : "Yes"),"\n";
 		print "    Configure features: ",($admin->{'features'} ? "Yes" : "No"),"\n";

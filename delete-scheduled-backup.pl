@@ -58,11 +58,19 @@ if ($id) {
 	$sched || &usage("No backup with ID $id exists");
 	}
 elsif ($dest) {
+	# Matching by destination would reveal other users' schedules
+	&master_admin() ||
+		&usage("--dest is only available to the master administrator");
 	($sched) = grep { &indexof($dest, &get_scheduled_backup_dests($_)) >= 0 } @allscheds;
 	$sched || &usage("No backup with destination $dest exists");
 	}
 else {
 	&usage("Missing --id or --dest parameters");
+	}
+if (!&master_admin()) {
+	# Only schedules owned by this user can be removed
+	&can_backup_sched($sched) && $sched->{'id'} ne '1' ||
+		&usage("No scheduled backup with the given ID exists");
 	}
 my @iusers = grep { $_->{'increment'} == $sched->{'id'} } @allscheds;
 @iusers && &usage("This scheduled full backup is being used by other differential backups");
