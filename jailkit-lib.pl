@@ -71,12 +71,13 @@ foreach $f (&mount::files_to_lock()) {
 
 # Modify the domain user's home dir and shell
 &require_useradmin();
+my $jkshell = &has_command("jk_chrootsh") ||
+		      "/usr/sbin/jk_chrootsh";
 foreach my $uinfo (&list_all_domains_users($d, 0, 0, 1, 1, 0)) {
 	my $duser = $uinfo->{'user'};
 	my $olduinfo = { %$uinfo };
 	if ($uinfo->{'shell'} !~ /\/jk_chrootsh$/) {
-		$uinfo->{'shell'} = &has_command("jk_chrootsh") ||
-				    "/usr/sbin/jk_chrootsh";
+		$uinfo->{'shell'} = $jkshell;
 		}
 	$uinfo->{'home'} = $dir."/.".$uinfo->{'home'}
 		if ($uinfo->{'home'} !~ /^\Q$dir\E\/\./);
@@ -124,13 +125,13 @@ my $found = 0;
 foreach my $l (@$lref) {
 	my $ll = $l;
 	$ll =~ s/#.*$//;
-	$found++ if ($ll eq $uinfo->{'shell'});
+	$found++ if ($ll eq $jkshell);
 	}
 if ($found) {
 	&unflush_file_lines($sf);
 	}
 else {
-	push(@$lref, $uinfo->{'shell'});
+	push(@$lref, $jkshell);
 	&flush_file_lines($sf);
 	}
 
