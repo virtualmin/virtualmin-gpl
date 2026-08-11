@@ -41,7 +41,7 @@
 * Drop the obsolete per-domain ProFTPD virtual FTP feature while preserving service controls and backup compatibility
 * Rename the Git-based config history CLI commands to `list-config-revisions` and `restore-config-revision`
 * Replace the legacy website preview flow with sandboxed proxying
-* Change Webmin module access to a per-domain setting on the "Manage Virtual Server ⇾ Edit Owner Limits" page, copy current template settings to existing servers, apply later template changes only to new servers, and correctly enforce disabled plugin modules
+* Change to move domain-owner Webmin module access from "Server Templates" to "Manage Virtual Server ⇾ Edit Owner Limits", preserving existing access on upgrade and applying template defaults only to new servers; module access can also be updated for multiple servers from "List Virtual Servers" in Pro, or through `modify-limits` CLI in all editions [#1039](https://github.com/virtualmin/virtualmin-gpl/issues/1039#issuecomment-5253028294)
 
 #### Version 8.1.0
 * Add a simplified UI for managing website redirects  
