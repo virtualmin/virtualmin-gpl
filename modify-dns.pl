@@ -841,9 +841,16 @@ foreach $d (@doms) {
 			}
 		elsif ($tlsa == 0) {
 			&$first_print($text{'spf_disabletlsa'});
-			&sync_domain_tlsa_records($d, 2, $tlsa_sel);
-			&$second_print($text{'setup_done'});
-			$changed++;
+			my @recs = &get_domain_tlsa_records($d);
+			if (@recs) {
+				&sync_domain_tlsa_records($d, 2, $tlsa_sel);
+				&$second_print($text{'setup_done'});
+				$changed++;
+				}
+			else {
+				&$second_print($text{'spf_esynctlsa'});
+				&after_records_change($d);
+				}
 			}
 		elsif ($tlsa == 2) {
 			&$first_print($text{'spf_synctlsa'});
