@@ -939,6 +939,7 @@ foreach $d (@doms) {
 		my $err = &post_records_change($d, $recs, $file);
 		if ($err) {
 			&$second_print(&text('spf_epostchange', $err));
+			$failed = 1;
 			}
 		&reload_bind_records($d);
 		}
@@ -948,6 +949,7 @@ foreach $d (@doms) {
 		my $err = &post_records_change($target, $recs, $file);
 		if ($err) {
 			&$second_print(&text('spf_epostchange', $err));
+			$failed = 1;
 			}
 		&reload_bind_records($d);
 		}
