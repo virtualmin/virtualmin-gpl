@@ -17,6 +17,7 @@
 * Add a dedicated mail options section and group other related module configuration settings into appropriate sections
 * Add TLSA records for Postfix SMTPS services
 * Add support for primary DNS zones and CLI flags to exclude named DNS records
+* Add transactional Cloudflare DNS record updates using the batch API to prevent partial migrations [#1267](https://github.com/virtualmin/virtualmin-gpl/issues/1267)
 * Add ability to show disk usage on the virtual server summary page
 * Fix cross-stack restores to preserve target system features, disable unavailable domain features and handle PHP modes correctly
 * Fix to restore preflight checks and error reporting to catch clashes earlier and show SSL failures
