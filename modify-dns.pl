@@ -832,6 +832,7 @@ foreach $d (@doms) {
 			$err = &check_tlsa_support();
 			if ($err) {
 				&$second_print(&text('spf_etlsa', $err));
+				&after_records_change($d);
 				}
 			else {
 				&sync_domain_tlsa_records($d, 1, $tlsa_sel);
@@ -860,7 +861,8 @@ foreach $d (@doms) {
 				&$second_print($text{'setup_done'});
 				}
 			else {
-				&$first_print($text{'spf_esynctlsa'});
+				&$second_print($text{'spf_esynctlsa'});
+				&after_records_change($d);
 				}
 			}
 		if ($changed) {
@@ -984,6 +986,7 @@ foreach $d (@doms) {
 		&$outdent_print();
 		if ($err) {
 			&$second_print(&text('spf_eclouddns', $err));
+			$failed = 1;
 			}
 		else {
 			&$second_print($text{'setup_done'});
@@ -1017,6 +1020,7 @@ foreach $d (@doms) {
 
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV);
+exit($failed);
 
 # validate_remote_api_dns_record(&domain, &record)
 # Applies the DNS record restrictions used by the domain-owner interface.
