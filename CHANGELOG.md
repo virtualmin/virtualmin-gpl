@@ -1,5 +1,6 @@
 #### Version 8.2.0
 * Add new [Virtualmin Podman](https://www.virtualmin.com/docs/plugins/podman/) plugin for Virtualmin Pro users, bringing per-domain container and pod management to both the UI and CLI
+* Add ability for domain owners to use permitted Virtualmin remote API commands, with auditing and domain-scoped access checks
 * Add Auktiva, Fish Auctions and Pixelfed web app installers for Virtualmin Pro users
 * Add Django web app installer with isolated Python environments, Gunicorn services managed by systemd, production-safe settings and automatic database driver setup
 * Add support for Ubuntu 26.04
@@ -36,6 +37,7 @@
 * Fix phpMyAdmin and Usermin automatic login issues
 * Fix web app installers to avoid URL paths owned by plugins
 * Fix Webmin API credential handling and hide passwords from FTP command errors
+* Fix Apache proxy backends to receive the original HTTP or HTTPS scheme through X-Forwarded-Proto
 * Drop the obsolete per-domain ProFTPD virtual FTP feature while preserving service controls and backup compatibility
 * Rename the Git-based config history CLI commands to `list-config-revisions` and `restore-config-revision`
 * Replace the legacy website preview flow with sandboxed proxying
