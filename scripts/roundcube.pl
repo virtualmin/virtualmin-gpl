@@ -71,15 +71,15 @@ return ([ 'memory_limit', '64M', '+' ],
 
 sub script_roundcube_release
 {
-return 6;	# Fix root public_html alias
+return 7;	# Fix public_html alias creation
 }
 
 sub script_roundcube_php_fullver
 {
 my ($d, $ver, $sinfo, $phpver) = @_;
-my $phpver = &compare_versions($ver, "1.7") >= 0 ? "8.1" :
-	     &compare_versions($ver, "1.6") >= 0 ? "7.3" : 5.6;
-return $phpver;
+my $minphpver = &compare_versions($ver, "1.7") >= 0 ? "8.1" :
+		&compare_versions($ver, "1.6") >= 0 ? "7.3" : 5.6;
+return $minphpver;
 }
 
 sub script_roundcube_public_html_alias
@@ -93,10 +93,13 @@ return $dest;
 sub script_roundcube_has_public_html_alias
 {
 my ($r, $opts) = @_;
-return $r->{'path'} eq $opts->{'path'} &&
-       $r->{'alias'} &&
-       defined($r->{'dest'}) &&
-       $r->{'dest'} eq &script_roundcube_public_html_alias($opts);
+return 0 if (!defined($r->{'path'}) ||
+	     $r->{'path'} ne $opts->{'path'} ||
+	     !$r->{'alias'} ||
+	     !defined($r->{'dest'}));
+my $dest = $opts->{'dir'}.'/public_html';
+return $r->{'dest'} eq $dest ||
+       $r->{'dest'} eq $dest.'/';
 }
 
 # script_roundcube_params(&domain, version, &upgrade-info)
@@ -209,7 +212,7 @@ return (0, "Database connection failed : $dberr") if ($dberr);
 
 # Extract tar file to temp dir and copy to target
 my $temp = &transname();
-my $verdir = $ver;
+my $verdir = $version;
 $verdir =~ s/-complete$//;
 my $err = &extract_script_archive($files->{'source'}, $temp, $d,
                                      $opts->{'dir'}, "roundcubemail-$verdir");
@@ -315,13 +318,15 @@ else {
 	}
 
 # Add an alias to the public_html sub-dir for version 1.7.0+
-if (&compare_versions($ver, "1.7") >= 0) {
+if (&compare_versions($version, "1.7") >= 0) {
 	my @redirs = &list_redirects($d);
 	my $dest = &script_roundcube_public_html_alias($opts);
 	my ($r) = grep { &script_roundcube_has_public_html_alias($_, $opts) }
 		       @redirs;
 	if ($r && $r->{'dest'} ne $dest) {
-		&delete_redirect($d, $r);
+		my $rerr = &delete_redirect($d, $r);
+		return (-1, "RoundCube was installed, but the old public_html ".
+			    "alias could not be removed : $rerr") if ($rerr);
 		$r = undef;
 		}
 	if (!$r) {
@@ -330,7 +335,9 @@ if (&compare_versions($ver, "1.7") >= 0) {
 		       'dest' => $dest,
 		       'http' => 1,
 		       'https' => 1 };
-		&create_redirect($d, $r);
+		my $rerr = &create_redirect($d, $r);
+		return (-1, "RoundCube was installed, but its public_html ".
+			    "alias could not be created : $rerr") if ($rerr);
 		}
 	}
 
