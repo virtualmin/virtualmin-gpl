@@ -71,7 +71,7 @@ return ([ 'memory_limit', '64M', '+' ],
 
 sub script_roundcube_release
 {
-return 7;	# Fix public_html alias creation
+return 8;	# Fix Nginx alias trailing slash
 }
 
 sub script_roundcube_php_fullver
@@ -82,21 +82,46 @@ my $minphpver = &compare_versions($ver, "1.7") >= 0 ? "8.1" :
 return $minphpver;
 }
 
+sub script_roundcube_uses_nginx
+{
+my ($d) = @_;
+return &domain_has_website($d) eq 'virtualmin-nginx';
+}
+
+sub script_roundcube_public_html_alias_path
+{
+my ($d, $opts) = @_;
+my $path = $opts->{'path'};
+if (&script_roundcube_uses_nginx($d) && $path ne '/') {
+	$path =~ s{/+$}{};
+	$path .= '/';
+	}
+return $path;
+}
+
 sub script_roundcube_public_html_alias
 {
-my ($opts) = @_;
+my ($d, $opts) = @_;
 my $dest = $opts->{'dir'}.'/public_html';
-$dest .= "/" if ($opts->{'path'} eq "/");
+$dest .= '/' if ($opts->{'path'} eq '/' ||
+		 (&script_roundcube_uses_nginx($d) && $opts->{'path'} ne '/'));
 return $dest;
 }
 
 sub script_roundcube_has_public_html_alias
 {
-my ($r, $opts) = @_;
+my ($r, $d, $opts) = @_;
 return 0 if (!defined($r->{'path'}) ||
-	     $r->{'path'} ne $opts->{'path'} ||
 	     !$r->{'alias'} ||
 	     !defined($r->{'dest'}));
+my $path = $opts->{'path'};
+my $slashpath = $path;
+if (&script_roundcube_uses_nginx($d) && $slashpath ne '/') {
+	$path =~ s{/+$}{};
+	$slashpath = $path;
+	$slashpath .= '/';
+	}
+return 0 if ($r->{'path'} ne $path && $r->{'path'} ne $slashpath);
 my $dest = $opts->{'dir'}.'/public_html';
 return $r->{'dest'} eq $dest ||
        $r->{'dest'} eq $dest.'/';
@@ -320,17 +345,18 @@ else {
 # Add an alias to the public_html sub-dir for version 1.7.0+
 if (&compare_versions($version, "1.7") >= 0) {
 	my @redirs = &list_redirects($d);
-	my $dest = &script_roundcube_public_html_alias($opts);
-	my ($r) = grep { &script_roundcube_has_public_html_alias($_, $opts) }
+	my $path = &script_roundcube_public_html_alias_path($d, $opts);
+	my $dest = &script_roundcube_public_html_alias($d, $opts);
+	my ($r) = grep { &script_roundcube_has_public_html_alias($_, $d, $opts) }
 		       @redirs;
-	if ($r && $r->{'dest'} ne $dest) {
+	if ($r && ($r->{'path'} ne $path || $r->{'dest'} ne $dest)) {
 		my $rerr = &delete_redirect($d, $r);
 		return (-1, "RoundCube was installed, but the old public_html ".
 			    "alias could not be removed : $rerr") if ($rerr);
 		$r = undef;
 		}
 	if (!$r) {
-		$r = { 'path' => $opts->{'path'},
+		$r = { 'path' => $path,
 		       'alias' => 1,
 		       'dest' => $dest,
 		       'http' => 1,
@@ -392,7 +418,7 @@ if ($opts->{'newdb'}) {
 # Remove the alias needed for version 1.7.0+
 if (&compare_versions($version, "1.7") >= 0) {
 	my @redirs = &list_redirects($d);
-	my ($r) = grep { &script_roundcube_has_public_html_alias($_, $opts) }
+	my ($r) = grep { &script_roundcube_has_public_html_alias($_, $d, $opts) }
 		       @redirs;
 	if ($r) {
 		&delete_redirect($d, $r);
@@ -429,4 +455,3 @@ return 1;
 }
 
 1;
-
