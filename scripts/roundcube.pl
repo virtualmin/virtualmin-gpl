@@ -188,6 +188,29 @@ if (-r "$opts->{'dir'}/config/db.inc.php") {
 my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
 my $clash = &find_database_table($dbtype, $dbname, "system|filestore|contacts|users");
 $clash && return "RoundCube appears to be already using the selected database (table $clash)";
+if (!$upgrade && &script_roundcube_uses_nginx($d)) {
+	# On Nginx a top-level install adds a rewrite rule that captures
+	# requests to all paths, which breaks any RoundCube installs in
+	# sub-directories of the same domain
+	my @others = grep { $_->{'name'} eq 'roundcube' &&
+			    !$_->{'deleted'} &&
+			    $_->{'opts'}->{'dir'} ne $opts->{'dir'} }
+			  &list_domain_scripts($d);
+	if ($opts->{'path'} eq '/' &&
+	    &compare_versions($ver, "1.7") >= 0 && @others) {
+		return "RoundCube cannot be installed at the top level, as ".
+		       "its Nginx rewrite rule would break the existing ".
+		       "RoundCube install at $others[0]->{'opts'}->{'path'}";
+		}
+	my ($top) = grep { $_->{'opts'}->{'path'} eq '/' &&
+			   &compare_versions($_->{'version'}, "1.7") >= 0 }
+			@others;
+	if ($opts->{'path'} ne '/' && $top) {
+		return "RoundCube cannot be installed in a sub-directory, as ".
+		       "the Nginx rewrite rule for the existing top-level ".
+		       "RoundCube install would prevent it from working";
+		}
+	}
 return undef;
 }
 
