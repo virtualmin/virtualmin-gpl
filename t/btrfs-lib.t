@@ -406,6 +406,46 @@ close($fh);
 }
 ok(-f "$legacy/file", 'legacy home contents are preserved');
 
+# Domains created before Btrfs quotas keep working: their mailboxes stay
+# ordinary directories without limits instead of failing user creation.
+{
+	no warnings qw(redefine once);
+	local %main::config = ( 'btrfs_quotas' => 1, 'home_quotas' => $tmp );
+	my $legacy_domain_home = "$tmp/legacy-domain";
+	my $legacy_mailbox = "$legacy_domain_home/homes/mailbox";
+	mkdir($legacy_domain_home) or die "mkdir($legacy_domain_home): $!";
+	mkdir("$legacy_domain_home/homes") or
+		die "mkdir($legacy_domain_home/homes): $!";
+	my $domain = { 'id' => 1700000000460, 'home' => $legacy_domain_home };
+	my $user = { 'user' => 'mailbox', 'home' => $legacy_mailbox };
+	local *main::btrfs_quota_domain = sub { return $_[0]; };
+	local *quota::btrfs_subvolume_id = sub { return undef; };
+	my $prepared = 0;
+	local *main::ensure_btrfs_subvolume = sub {
+		$prepared++;
+		return ('must not be called', 0);
+		};
+	my $limited = 0;
+	local *main::set_btrfs_qgroup_limit = sub {
+		$limited++;
+		return undef;
+		};
+	my ($err, $created) = &ensure_btrfs_user_home($user, $domain);
+	is($err, undef, 'mailbox creation succeeds in a pre-quota domain');
+	ok(!$created, 'pre-quota domain mailbox stays an ordinary directory');
+	mkdir($legacy_mailbox) or die "mkdir($legacy_mailbox): $!";
+	is(&set_btrfs_home_quota($legacy_mailbox, 4096, $domain), undef,
+		'mailbox quota is skipped in a pre-quota domain');
+	open(my $mfh, '>', "$legacy_mailbox/mail") or die $!;
+	print {$mfh} "mail\n";
+	close($mfh);
+	is(&convert_btrfs_restored_user_home($user, $domain), undef,
+		'restore leaves pre-quota domain mailboxes unconverted');
+	ok(-f "$legacy_mailbox/mail", 'pre-quota mailbox data is untouched');
+	is($prepared, 0, 'pre-quota domain never attempts subvolume creation');
+	is($limited, 0, 'pre-quota domain never applies a qgroup limit');
+}
+
 # Full restores explicitly convert populated mailbox directories while keeping
 # normal creation's refusal above intact.
 {
@@ -429,6 +469,7 @@ ok(-f "$legacy/file", 'legacy home contents are preserved');
 	my $is_subvolume = 0;
 	local *main::btrfs_quota_domain = sub { return $domain; };
 	local *quota::btrfs_subvolume_id = sub {
+		return 456 if ($_[0] eq $restore_root);
 		return $is_subvolume ? 457 : undef;
 		};
 	local *main::ensure_btrfs_user_home = sub {
@@ -483,7 +524,9 @@ ok(-f "$legacy/file", 'legacy home contents are preserved');
 	my $domain = { 'id' => 1700000000458, 'home' => $restore_root };
 	my $user = { 'home' => $restore_home };
 	local *main::btrfs_quota_domain = sub { return $domain; };
-	local *quota::btrfs_subvolume_id = sub { return undef; };
+	local *quota::btrfs_subvolume_id = sub {
+		return $_[0] eq $restore_root ? 458 : undef;
+		};
 	local *main::ensure_btrfs_user_home = sub {
 		return ('simulated subvolume creation failure', 0);
 		};
@@ -513,6 +556,7 @@ ok(-f "$legacy/file", 'legacy home contents are preserved');
 	my $is_subvolume = 0;
 	local *main::btrfs_quota_domain = sub { return $domain; };
 	local *quota::btrfs_subvolume_id = sub {
+		return 458 if ($_[0] eq $restore_root);
 		return $is_subvolume ? 459 : undef;
 		};
 	local *main::ensure_btrfs_user_home = sub {
@@ -616,6 +660,33 @@ ok(-f "$legacy/file", 'legacy home contents are preserved');
 		[ $domainhome, undef, 1024 ],
 		[ $tmp, '1/256', 2048 ],
 		], 'cached mailbox, owner, and aggregate limits are restored');
+}
+
+# Backups and restores toggle server quotas, so a pre-quota domain home must
+# be skipped instead of failing those operations.
+{
+	no warnings qw(redefine once);
+	local %main::config = (
+		'btrfs_quotas' => 1,
+		'home_quotas' => $tmp,
+		);
+	my $legacy_domain_home = "$tmp/legacy-server-domain";
+	mkdir($legacy_domain_home) or die "mkdir($legacy_domain_home): $!";
+	local *quota::btrfs_subvolume_id = sub { return undef; };
+	my ($prepared, $limited) = (0, 0);
+	local *main::ensure_btrfs_domain_home = sub {
+		$prepared++;
+		return ('must not be called', 0);
+		};
+	local *main::set_btrfs_qgroup_limit = sub {
+		$limited++;
+		return undef;
+		};
+	my $err = &set_btrfs_server_quotas(
+		{ 'id' => 1700000000558, 'home' => $legacy_domain_home }, 0, 0);
+	is($err, undef, 'server quota toggling tolerates a pre-quota domain');
+	is($prepared, 0, 'pre-quota domain home is not converted by quota toggling');
+	is($limited, 0, 'pre-quota domain receives no qgroup limits');
 }
 
 # Mailbox creation applies its quota before the Unix passwd entry is present.

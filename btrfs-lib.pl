@@ -50,6 +50,19 @@ while(my $current = shift(@pending)) {
 return @rv;
 }
 
+# btrfs_legacy_domain_home(&top-domain)
+# Returns 1 when a top-level domain home exists as an ordinary directory. Such
+# domains predate Btrfs quotas and keep the pre-quota behavior for their
+# mailboxes until the home is migrated to a subvolume, because no aggregate
+# qgroup can exist without the domain subvolume ID.
+sub btrfs_legacy_domain_home
+{
+my ($d) = @_;
+return 0 if (!$d || !$d->{'home'} || !-d $d->{'home'});
+&require_useradmin();
+return defined(&quota::btrfs_subvolume_id($d->{'home'}, undef)) ? 0 : 1;
+}
+
 # btrfs_quota_parent_id(&domain, [&error])
 # Returns the collision-free level-1 qgroup used to aggregate a top-level
 # domain. Btrfs qgroup object IDs are only 48 bits wide, so Virtualmin's longer
@@ -327,6 +340,8 @@ $d = &btrfs_quota_domain($d);
 return wantarray ? ($text{'btrfs_enotopdomain'}, 0) :
 		   $text{'btrfs_enotopdomain'} if (!$d);
 return wantarray ? (undef, 0) : undef if ($user->{'home'} eq $d->{'home'});
+# Mailboxes of a pre-quota domain remain ordinary directories until migration.
+return wantarray ? (undef, 0) : undef if (&btrfs_legacy_domain_home($d));
 return &ensure_btrfs_subvolume($user->{'home'}, $d);
 }
 
@@ -343,6 +358,8 @@ $d = &btrfs_quota_domain($d);
 return $text{'btrfs_enotopdomain'} if (!$d);
 my $path = $user->{'home'};
 return undef if ($path eq $d->{'home'} || !-e $path);
+# A pre-quota domain has no aggregate qgroup to migrate mailboxes into.
+return undef if (&btrfs_legacy_domain_home($d));
 
 # Restore may migrate only a real mailbox directory below this domain home.
 # This prevents backup metadata from turning arbitrary legacy paths into
@@ -491,6 +508,8 @@ if ($d) {
 # deletable instead of entering the subvolume-creation path.
 my $id = &quota::btrfs_subvolume_id($home, undef);
 return undef if ($deleting && !defined($id));
+# Homes of a pre-quota domain cannot be limited until the domain is migrated.
+return undef if ($d && &btrfs_legacy_domain_home($d));
 # Mailbox homes must be subvolumes and members of the domain parent qgroup.
 if ($d && $home ne $d->{'home'}) {
 	my ($layout_err) = &ensure_btrfs_subvolume($home, $d);
@@ -517,6 +536,10 @@ return &set_btrfs_home_quota($pw[7], $blocks, $d, $deleting);
 sub set_btrfs_server_quotas
 {
 my ($d, $uquota, $quota) = @_;
+# Backups, restores and certificate renewals toggle server quotas, so a
+# pre-quota domain must stay unenforced rather than failing those operations.
+return undef if (!$d->{'parent'} && !$d->{'alias'} &&
+		 &btrfs_legacy_domain_home($d));
 my ($err) = &ensure_btrfs_domain_home($d);
 return $err if ($err);
 return undef if ($d->{'parent'} || $d->{'alias'});
