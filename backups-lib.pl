@@ -3719,7 +3719,7 @@ else {
 		$comp = $cf == 1 ? &get_gunzip_command()." -c" :
 			$cf == 2 ? "uncompress -c" :
 			$cf == 3 ? &get_bunzip2_command()." -c" :
-			$cf == 4 ? &get_unzstd_command() :
+			$cf == 6 ? &get_unzstd_command() :
 				   "cat";
 		my ($compcmd) = &split_quoted_string($comp);
 		if (!&has_command($compcmd)) {
