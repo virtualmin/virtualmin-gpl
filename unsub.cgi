@@ -11,7 +11,9 @@ if ($in{'confirm'}) {
 	&ui_print_unbuffered_header(&domain_in($d), $text{'unsub_title'}, "");
 
 	&$first_print(&text('unsub_doing', "<tt>$d->{'dom'}</tt>"));
+	&$indent_print();
 	$ok = &unsub_virtual_server($d);
+	&$outdent_print();
 	if ($ok) {
 		&$second_print($text{'setup_done'});
 		}

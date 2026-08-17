@@ -13,7 +13,9 @@ if ($in{'confirm'}) {
 	&ui_print_unbuffered_header(&domain_in($d), $text{'unalias_title'}, "");
 
 	&$first_print(&text('unalias_doing', "<tt>$d->{'dom'}</tt>"));
+	&$indent_print();
 	$ok = &unalias_virtual_server($d);
+	&$outdent_print();
 	if ($ok) {
 		&$second_print($text{'setup_done'});
 		}

@@ -1528,6 +1528,7 @@ save_nopostgresuser2=.. not supported by your version of PostgreSQL!
 save_dirchown=Setting ownership for home directory ..
 save_dirhome=Moving home directory ..
 save_dirhomefailed=.. move failed : $1
+save_dirunalias=Creating standard directories for website ..
 save_webmin=Updating Webmin user ..
 save_webminuser=Renaming Webmin user ..
 save_webminreal=Updating Webmin user's real name ..

@@ -31,8 +31,7 @@ if (!$module_name) {
 	}
 @OLDARGV = @ARGV;
 
-$first_print = \&first_text_print;
-$second_print = \&second_text_print;
+&set_all_text_print();
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -61,7 +60,9 @@ $d->{'parent'} || &master_admin() ||
 
 # Call the move function
 &$first_print(&text('unsub_doing', "<tt>$d->{'dom'}</tt>"));
+&$indent_print();
 $ok = &unsub_virtual_server($d);
+&$outdent_print();
 &run_post_actions_silently();
 if ($ok) {
 	&$second_print($text{'setup_done'});
