@@ -975,4 +975,209 @@ is_deeply(\@calls, [
 		'disabled qgroups do not leave a Btrfs subvolume behind');
 }
 
+# Migration must build the replacement beside the live directory, swap it in
+# with renames, keep ownership, and remove the original only afterwards.
+{
+	no warnings qw(redefine once);
+	local %main::config = ( 'btrfs_quotas' => 1, 'home_quotas' => $tmp );
+	local $main::home_base = $tmp;
+	my $home = "$tmp/migrate-domain";
+	mkdir($home) or die "mkdir($home): $!";
+	mkdir("$home/public_html") or die "mkdir($home/public_html): $!";
+	open(my $fh, '>', "$home/public_html/index.html") or die $!;
+	print {$fh} "site\n";
+	close($fh);
+	chmod(0750, $home);
+	my %subvolumes;
+	local *quota::btrfs_subvolume_id = sub {
+		return $subvolumes{$_[0]};
+		};
+	local *main::list_btrfs_qgroups = sub {
+		$main::btrfs_qgroups_by_path_cache = { };
+		$main::btrfs_qgroups_by_id_cache = { };
+		return [ ];
+		};
+	my @commands;
+	local *quota::run_btrfs_command = sub {
+		my ($logged, @args) = @_;
+		push(@commands, [ @args ]);
+		mkdir($args[2]) or die "mkdir($args[2]): $!";
+		$subvolumes{$args[2]} = 900 + scalar(@commands);
+		return ('', undef);
+		};
+	my ($copy_command, $copied_from, $copied_to);
+	local *main::system_logged = sub {
+		$copy_command = $_[0];
+		# Undo quotemeta on the two shell arguments after the -- marker
+		($copied_from, $copied_to) =
+			(split(/ -- /, $copy_command, 2))[1] =~ /^(\S+) (\S+)$/;
+		s/\\(.)/$1/g foreach ($copied_from, $copied_to);
+		$copied_from =~ s{/\.$}{};
+		$copied_to =~ s{/$}{};
+		mkdir("$copied_to/public_html") or die $!;
+		open(my $src, '<', "$copied_from/public_html/index.html")
+			or die $!;
+		open(my $dst, '>', "$copied_to/public_html/index.html")
+			or die $!;
+		print {$dst} <$src>;
+		close($src);
+		close($dst);
+		return 0;
+		};
+	my $removed;
+	local *main::unlink_file = sub {
+		$removed = $_[0];
+		unlink("$removed/public_html/index.html");
+		rmdir("$removed/public_html");
+		return (rmdir($removed), $!);
+		};
+	my $deleted = 0;
+	local *main::delete_btrfs_subvolume = sub { $deleted++; return undef; };
+	is(&migrate_btrfs_directory($home), undef,
+		'populated home is migrated into a subvolume');
+	like($copy_command, qr/\bcp -a --reflink=always --/,
+		'migration reflinks the original into the staging subvolume');
+	like($copied_to, qr/^\Q$home\E\.virtualmin-btrfs-migrate-/,
+		'staging subvolume is created beside the original');
+	ok(defined($subvolumes{$home}) || defined($subvolumes{$copied_to}),
+		'the swapped-in path is the newly created subvolume');
+	ok(-f "$home/public_html/index.html", 'migrated data is in place');
+	like($removed, qr/^\Q$home\E\.virtualmin-btrfs-old-/,
+		'the original directory is removed after the swap');
+	ok(!-e $removed, 'no original copy is left behind');
+	is((stat($home))[2] & 07777, 0750,
+		'migration preserves the original directory mode');
+	is($deleted, 0, 'successful migration deletes no subvolume');
+	# A second run finds a subvolume and does nothing.
+	$subvolumes{$home} = 901;
+	@commands = ( );
+	is(&migrate_btrfs_directory($home), undef,
+		'migrating an existing subvolume is a no-op');
+	is(scalar(@commands), 0, 'no subvolume is created for a subvolume home');
+}
+
+# A failed reflink copy must remove the staging subvolume and keep the
+# original untouched and in place.
+{
+	no warnings qw(redefine once);
+	local %main::config = ( 'btrfs_quotas' => 1, 'home_quotas' => $tmp );
+	my $home = "$tmp/migrate-failed-copy";
+	mkdir($home) or die "mkdir($home): $!";
+	open(my $fh, '>', "$home/data") or die $!;
+	print {$fh} "keep\n";
+	close($fh);
+	local *quota::btrfs_subvolume_id = sub {
+		return $_[0] =~ /virtualmin-btrfs-migrate/ ? 950 : undef;
+		};
+	local *main::list_btrfs_qgroups = sub {
+		$main::btrfs_qgroups_by_path_cache = { };
+		return [ ];
+		};
+	local *quota::run_btrfs_command = sub {
+		mkdir($_[3]) or die "mkdir($_[3]): $!";
+		return ('', undef);
+		};
+	local *main::system_logged = sub { return 1; };
+	my @deleted;
+	local *main::delete_btrfs_subvolume = sub {
+		push(@deleted, [ @_ ]);
+		return rmdir($_[0]) ? undef : "rmdir failed: $!";
+		};
+	my $err = &migrate_btrfs_directory($home);
+	like($err, qr/failed to copy/, 'a failed reflink copy is reported');
+	is(scalar(@deleted), 1, 'the staging subvolume is deleted after failure');
+	like($deleted[0]->[0], qr/virtualmin-btrfs-migrate/,
+		'only the staging subvolume is deleted');
+	is($deleted[0]->[1], 950, 'the staging qgroup is cleaned up too');
+	ok(-f "$home/data", 'the original directory is untouched');
+	my @leftovers = glob("$home.virtualmin-btrfs-*");
+	is(scalar(@leftovers), 0, 'failed migration leaves no staging paths');
+}
+
+# Nested subvolumes cannot be flattened by a copy and must be refused.
+{
+	no warnings qw(redefine once);
+	local %main::config = ( 'btrfs_quotas' => 1, 'home_quotas' => $tmp );
+	my $home = "$tmp/migrate-nested";
+	mkdir($home) or die "mkdir($home): $!";
+	local *quota::btrfs_subvolume_id = sub { return undef; };
+	local *main::list_btrfs_qgroups = sub {
+		$main::btrfs_qgroups_by_path_cache = {
+			"$home/homes/mailbox" => { 'id' => '0/300' },
+			};
+		return [ ];
+		};
+	my $created = 0;
+	local *quota::run_btrfs_command = sub { $created++; return ('', undef); };
+	like(&migrate_btrfs_directory($home), qr/nested subvolumes/,
+		'migration refuses a home that already contains subvolumes');
+	is($created, 0, 'no staging subvolume is created for a refused home');
+}
+
+# Domain migration converts the domain home first, then every mailbox home,
+# and finally rebuilds the qgroup hierarchy through the server quota path.
+{
+	no warnings qw(redefine once);
+	local %main::config = ( 'btrfs_quotas' => 1, 'home_quotas' => $tmp );
+	local $main::home_base = $tmp;
+	local *main::unique = sub {
+		my %seen;
+		return grep { !$seen{$_}++ } @_;
+		};
+	my $home = "$tmp/migrate-tree";
+	mkdir($home) or die "mkdir($home): $!";
+	mkdir("$home/homes") or die "mkdir($home/homes): $!";
+	mkdir("$home/homes/one") or die "mkdir($home/homes/one): $!";
+	mkdir("$home/homes/two") or die "mkdir($home/homes/two): $!";
+	my $domain = { 'id' => 1700000000600, 'home' => $home };
+	local *main::get_domain_by = sub { return ( ); };
+	local *main::list_domain_users = sub {
+		return (
+			{ 'user' => 'one', 'home' => "$home/homes/one" },
+			{ 'user' => 'two', 'home' => "$home/homes/two" },
+			{ 'user' => 'web', 'home' => "$home/public_html",
+			  'webowner' => 1 },
+			{ 'user' => 'ext', 'home' => "$tmp/elsewhere" },
+			);
+		};
+	local *main::list_btrfs_qgroups = sub {
+		$main::btrfs_qgroups_by_path_cache = { };
+		return [ ];
+		};
+	my @migrated;
+	local *main::migrate_btrfs_directory = sub {
+		push(@migrated, $_[0]);
+		return undef;
+		};
+	my $quotas_set = 0;
+	local *main::set_server_quotas = sub {
+		$quotas_set++;
+		is(scalar(@migrated), 3,
+			'quotas are rebuilt only after every home is converted');
+		};
+	my @progress;
+	is(&migrate_btrfs_domain_homes($domain, sub { push(@progress, [ @_ ]); }),
+		undef, 'domain tree migration succeeds');
+	is_deeply(\@migrated, [ $home, "$home/homes/one", "$home/homes/two" ],
+		'domain home is converted first, then mailbox homes only');
+	is($quotas_set, 1, 'server quotas are re-applied once');
+	is_deeply(\@progress, [
+		[ $home, 0 ], [ $home, 1 ],
+		[ "$home/homes/one", 0 ], [ "$home/homes/one", 1 ],
+		[ "$home/homes/two", 0 ], [ "$home/homes/two", 1 ],
+		], 'progress is reported before and after each conversion');
+	# A conversion failure stops before quotas are touched.
+	@migrated = ( );
+	$quotas_set = 0;
+	local *main::migrate_btrfs_directory = sub { return "disk full"; };
+	is(&migrate_btrfs_domain_homes($domain), "disk full",
+		'a failed conversion is reported');
+	is($quotas_set, 0, 'quotas are not rebuilt after a failed conversion');
+	# Homes outside the quota filesystem are refused up front.
+	like(&migrate_btrfs_domain_homes(
+		{ 'id' => 1700000000601, 'home' => "/srv/outside" }),
+		qr/outside the quota filesystem/,
+		'domains outside the quota filesystem are refused');
+}
+
 done_testing();

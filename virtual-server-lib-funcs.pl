@@ -4313,6 +4313,7 @@ if ($disallow_newlines) {
 	}
 $rv =~ s/<tt>|<\/tt>//g;
 $rv =~ s/<span.*?>|<\/span>//g;
+$rv =~ s/<font.*?>|<\/font>//g;
 $rv =~ s/<sup.*?(data-title|aria-label)="([^"]*)".*?<\/sup>//g;
 $rv =~ s/<sup.*?>|<\/sup>//g;
 $rv =~ s/<b>|<\/b>//g;
@@ -17716,6 +17717,9 @@ elsif ($config{'quotas'}) {
 			&$second_print(&ui_text_color(
 				&text('check_btrfs_layout', $btrfs_invalid_homes),
 				'warn'));
+			# Migration is disruptive, so it is only offered as a CLI command.
+			&$second_print(&ui_note(&text('check_btrfs_migrate',
+				"<tt>virtualmin fix-btrfs-homes --all-domains</tt>")));
 			}
 		}
 	else {

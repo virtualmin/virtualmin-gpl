@@ -771,6 +771,37 @@ if ($parent_qgroup) {
 return &delete_btrfs_subvolume($d->{'home'}, $id);
 }
 
+# list_btrfs_domain_homes(&top-domain)
+# Returns the domain home followed by every mailbox home in its tree that
+# Btrfs quotas expect to be a subvolume, whether or not it currently is one.
+sub list_btrfs_domain_homes
+{
+my ($d) = @_;
+return ( ) if (!$d || $d->{'parent'} || $d->{'alias'} || !$d->{'home'});
+my @homes = ( $d->{'home'} );
+# Scan the complete domain tree so deeply nested sub-server users are covered.
+foreach my $user_domain (&list_btrfs_domain_tree($d)) {
+	foreach my $u (&list_domain_users($user_domain, 1, 1, 1, 1)) {
+		next if (!$u->{'home'} || $u->{'nocreatehome'} ||
+			 $u->{'webowner'} || $u->{'home'} eq $d->{'home'});
+		push(@homes, $u->{'home'});
+		}
+	}
+return &unique(@homes);
+}
+
+# list_invalid_btrfs_domain_homes(&top-domain, [&error])
+# Returns existing homes of one domain tree that are not subvolumes yet.
+sub list_invalid_btrfs_domain_homes
+{
+my ($d, $errref) = @_;
+my $qgroups = &list_btrfs_qgroups(0, $errref);
+return ( ) if (!$qgroups);
+$$errref = undef if ($errref);
+return grep { -d $_ && !$main::btrfs_qgroups_by_path_cache->{$_} }
+	    &list_btrfs_domain_homes($d);
+}
+
 # list_invalid_btrfs_homes([&error])
 # Returns existing domain and mailbox homes that are not subvolumes.
 sub list_invalid_btrfs_homes
@@ -780,26 +811,133 @@ return ( ) if (!&has_btrfs_quotas());
 my $qgroups = &list_btrfs_qgroups(0, $errref);
 return ( ) if (!$qgroups);
 my @invalid;
-# Scan each complete domain tree so deeply nested sub-server users are covered.
 foreach my $d (grep { !$_->{'parent'} && !$_->{'alias'} } &list_domains()) {
-	if (-d $d->{'home'} &&
-	    !$main::btrfs_qgroups_by_path_cache->{$d->{'home'}}) {
-		push(@invalid, $d->{'home'});
-		}
-	foreach my $user_domain (&list_btrfs_domain_tree($d)) {
-		foreach my $u (&list_domain_users(
-				$user_domain, 1, 1, 1, 1)) {
-			next if (!$u->{'home'} || $u->{'nocreatehome'} ||
-				 $u->{'webowner'});
-			if (-d $u->{'home'} &&
-			    !$main::btrfs_qgroups_by_path_cache->{$u->{'home'}}) {
-				push(@invalid, $u->{'home'});
-				}
-			}
-		}
+	push(@invalid, &list_invalid_btrfs_domain_homes($d));
 	}
 $$errref = undef if ($errref);
 return &unique(@invalid);
+}
+
+# btrfs_unique_sibling(path, suffix)
+# Returns an unused sibling path used for staging next to a home directory.
+sub btrfs_unique_sibling
+{
+my ($path, $suffix) = @_;
+my $sibling = "$path.$suffix-$$";
+my $sequence = 0;
+while(-e $sibling) {
+	$sibling = "$path.$suffix-$$-".(++$sequence);
+	}
+return $sibling;
+}
+
+# migrate_btrfs_directory(path)
+# Converts an existing populated directory into a subvolume in place. The data
+# is reflinked into a staging subvolume first and then swapped in with two
+# renames, so the path is missing only for that instant rather than for the
+# whole copy. Returns undef on success or an error message.
+sub migrate_btrfs_directory
+{
+my ($path) = @_;
+&require_useradmin();
+return $text{'btrfs_ehomepath'}
+	if (!defined($path) || $path !~ /^\// || $path =~ /[\r\n\0]/);
+$path =~ s{/+\z}{};
+my $display_path = &btrfs_format_path($path);
+return &text('btrfs_emigratedir', $display_path) if (!-d $path || -l $path);
+# An existing subvolume needs no data migration.
+return undef if (defined(&quota::btrfs_subvolume_id($path, undef)));
+
+# Nested subvolumes would be flattened into ordinary directories by the copy
+# and their qgroups orphaned, so such layouts must be handled manually.
+my $err;
+my $qgroups = &list_btrfs_qgroups(0, \$err);
+return $err || $text{'btrfs_elistqgroups'} if (!$qgroups);
+foreach my $nested (keys %{$main::btrfs_qgroups_by_path_cache || { }}) {
+	return &text('btrfs_emigratenested', $display_path)
+		if (index($nested, "$path/") == 0);
+	}
+
+# Build the replacement beside the original so the original stays live.
+my @st = stat($path);
+my $staging = &btrfs_unique_sibling($path, "virtualmin-btrfs-migrate");
+my ($out, $cmderr) = &quota::run_btrfs_command(
+	1, "subvolume", "create", $staging);
+return $cmderr if ($cmderr);
+&clear_btrfs_quota_cache();
+my $staging_id = &quota::btrfs_subvolume_id($staging, undef);
+my $discard_staging = sub {
+	my ($message) = @_;
+	my $delete_err = &delete_btrfs_subvolume($staging, $staging_id);
+	return $delete_err ? &text('btrfs_erollback', $message, $delete_err)
+			   : $message;
+	};
+
+# A mandatory reflink keeps this instant and free of a second physical copy.
+my $copy_status = &system_logged("cp -a --reflink=always -- ".
+				 quotemeta($path."/.")." ".
+				 quotemeta($staging."/"));
+return &$discard_staging(&text('btrfs_ecopydir', $display_path))
+	if ($copy_status);
+# Carry the original root ownership and mode onto the new subvolume root.
+chown($st[4], $st[5], $staging);
+chmod($st[2] & 07777, $staging);
+
+# Swap the two with renames and keep the original until the swap succeeded.
+my $old = &btrfs_unique_sibling($path, "virtualmin-btrfs-old");
+rename($path, $old) ||
+	return &$discard_staging(&text('btrfs_eswapdir', $display_path, $!));
+if (!rename($staging, $path)) {
+	my $swap_err = &text('btrfs_eswapdir', $display_path, $!);
+	$swap_err = &text('btrfs_erestoreoriginal', $swap_err, $!)
+		if (!rename($old, $path));
+	return &$discard_staging($swap_err);
+	}
+&clear_btrfs_quota_cache();
+
+# The subvolume now serves the path, so the original copy can go.
+my ($removed, $remove_err) = &unlink_file($old);
+return &text('btrfs_eremovestage', &btrfs_format_path($old),
+	     $remove_err || $!) if (!$removed);
+return undef;
+}
+
+# migrate_btrfs_domain_homes(&top-domain, [&progress-callback])
+# Converts a pre-quota domain home and every mailbox home in its tree into
+# subvolumes, then rebuilds the qgroup hierarchy and limits. The callback is
+# called with (path, 0) before and (path, 1) after each successful conversion.
+# Returns undef or an error message.
+sub migrate_btrfs_domain_homes
+{
+my ($d, $progress) = @_;
+return $text{'btrfs_etopdomain'}
+	if (!$d || $d->{'parent'} || $d->{'alias'} || !$d->{'home'});
+return $text{'btrfs_equotasoff'} if (!&has_btrfs_quotas());
+my $fs = $config{'home_quotas'} || $home_base;
+# Only homes on the quota filesystem can join its qgroup hierarchy.
+return &text('btrfs_emigrateoutside', &btrfs_format_path($d->{'home'}),
+	     &btrfs_format_path($fs))
+	if (!&is_under_directory($fs, $d->{'home'}));
+my $err;
+my @homes = &list_invalid_btrfs_domain_homes($d, \$err);
+return $err if ($err);
+# The domain home goes first because mailbox parents need its subvolume ID.
+foreach my $home (@homes) {
+	next if ($home ne $d->{'home'} &&
+		 !&is_under_directory($d->{'home'}, $home));
+	&$progress($home, 0) if ($progress);
+	$err = &migrate_btrfs_directory($home);
+	return $err if ($err);
+	&$progress($home, 1) if ($progress);
+	}
+# Create the aggregate qgroup, attach every subvolume and re-apply limits.
+{
+local $main::error_must_die = 1;
+eval { &set_server_quotas($d); };
+$err = $@;
+}
+$err =~ s/\s+$// if ($err);
+return $err || undef;
 }
 
 1;
