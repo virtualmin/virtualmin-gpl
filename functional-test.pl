@@ -63,6 +63,7 @@ $test_backup_file = "/tmp/$test_domain.tar.gz";
 $test_zip_backup_file = "/tmp/$test_domain.zip";
 $test_tar_backup_file = "/tmp/$test_domain.tar";
 $test_bzip2_backup_file = "/tmp/$test_domain.tar.bz2";
+$test_zstd_backup_file = "/tmp/$test_domain.tar.zst";
 $test_differential_backup_file = "/tmp/$test_domain.differential.tar.gz";
 $test_differential_backup_file2 = "/tmp/$test_domain.differential2.tar.gz";
 $test_backup_dir = "/tmp/functional-test-backups";
@@ -13902,6 +13903,44 @@ $compression_tests = [
 	{ 'command' => 'file '.$test_bzip2_backup_file,
 	  'grep' => ['bzip2 compressed data'],
 	},
+
+	# Backup to a temp file in tar.zst format, if zstd is installed
+	&has_command("zstd") ? (
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_zstd_backup_file ],
+		      [ 'compression', 'zstd' ] ],
+	},
+
+	# Check that it's actually a tar.zst
+	{ 'command' => 'file '.$test_zstd_backup_file,
+	  'grep' => ['Zstandard compressed data'],
+	},
+
+	# Remove the .info and .dom files, so that the restore has to read the
+	# archive itself to find its contents
+	{ 'command' => 'rm -f '.$test_zstd_backup_file.'.info '.
+			      $test_zstd_backup_file.'.dom',
+	},
+
+	# Delete web page
+	{ 'command' => 'rm -f ~'.$test_domain_user.'/public_html/index.*',
+	},
+
+	# Restore from the tar.zst
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_zstd_backup_file ] ],
+	},
+
+	# Test HTTP get on restored file
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test home page',
+	  'quiet' => 1,
+	},
+	) : ( ),
 
 	# Backup to a ZIP file, but without specifying a compression format
 	{ 'command' => 'backup-domain.pl',
