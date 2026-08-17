@@ -16003,6 +16003,42 @@ foreach my $f (&list_feature_plugins(1)) {
 	eval { &plugin_call($f, "feature_always_modify", $d, $oldd) };
 	}
 
+# Notify all features and plugins in the original target domain that it has
+# lost this alias, so that things like AWStats symlinks and host aliases
+# created for the alias are removed
+my $aliasdom = &get_domain($oldd->{'alias'});
+if ($aliasdom) {
+	foreach my $f (@features) {
+		my $dafunc = "delete_alias_$f";
+		if ($aliasdom->{$f} && defined(&$dafunc)) {
+			&try_function($f, $dafunc, $aliasdom, $oldd);
+			}
+		}
+	foreach my $f (&list_feature_plugins()) {
+		if ($aliasdom->{$f} &&
+		    &plugin_defined($f, "feature_delete_alias")) {
+			local $main::error_must_die = 1;
+			eval { &plugin_call($f, "feature_delete_alias",
+					    $aliasdom, $oldd) };
+			if ($@) {
+				&$second_print(&text('delete_aliasfailure',
+					&plugin_call($f, "feature_name"), "$@"));
+				}
+			}
+		}
+	}
+
+# Enable any features chained to the website (like SSL and log rotation),
+# as an alias domain never had them but the new sub-server should, just as
+# if it had been created with a website from the start
+my $chained = { %$d };
+&set_chained_features($chained, undef);
+foreach my $f (&list_ordered_features($chained)) {
+	next if (!$chained->{$f} || $d->{$f});
+	$d->{$f} = 1;
+	&call_feature_func($f, $d, $oldd);	# Clears the flag on failure
+	}
+
 # Save the domain object
 &$first_print($text{'save_domain'});
 &lock_domain($d);
