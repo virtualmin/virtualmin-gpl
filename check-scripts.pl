@@ -41,6 +41,9 @@ while(@ARGV) {
 	elsif ($a eq "--help") {
 		&usage();
 		}
+	elsif ($a eq "--email") {
+		$emailto = shift(@ARGV);
+		}
 	elsif ($a !~ /^\-/) {
 		push(@scripts, $a);
 		}
@@ -237,12 +240,16 @@ if (@errs) {
 		print STDERR $body;
 		exit(1);
 		}
-	else {
+	elsif ($emailto) {
 		&mailboxes::send_text_mail(&get_global_from_address(),
-					   "jcameron\@webmin.com",
+					   $emailto,
 					   undef,
 					   "Virtualmin script errors",
 					   $body);
+		}
+	else {
+		print STDERR "Missing --debug or --email flags\n";
+		exit(1);
 		}
 	}
 
