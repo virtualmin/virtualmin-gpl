@@ -26,7 +26,7 @@ foreach my $lib ("scripts", "resellers", "admins", "users", "simple", "s3",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
 		 "jailkit", "ports", "bb", "dnscloud", "dnscloudpro",
 		 "smtpcloud", "pro-tip", "azure", "remotedns", "drive",
-		 "acme", "api-create-domain") {
+		 "acme", "api-create-domain", "btrfs") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
 		$libfile = "$virtual_server_root/$lib-lib.pl";
@@ -1309,6 +1309,7 @@ sub list_all_users_quotas
 # Get quotas for all users
 &require_useradmin($_[0]);
 my $hascmds = &has_quota_commands();
+my $hasbtrfs = &has_btrfs_quotas();
 if ($hascmds) {
 	# Get from user quota command
 	if (!%main::soft_home_quota && !$_[0]) {
@@ -1321,7 +1322,7 @@ if ($hascmds) {
 			}
 		}
 	}
-else {
+elsif (!$hasbtrfs) {
 	# Get from real quota system
 	if (!%main::soft_home_quota && &has_home_quotas() && !$_[0]) {
 		my $n = &quota::filesystem_users($config{'home_quotas'});
@@ -1340,11 +1341,16 @@ else {
 
 # Get user list and add in quota info
 my @users = &foreign_call($usermodule, "list_users");
+# Btrfs reports quota state by home subvolume instead of by Unix UID.
+if ($hasbtrfs && !$_[0]) {
+	my $err = &populate_btrfs_user_quotas(\@users);
+	&error($err) if ($err);
+	}
 my %uidmap;
 foreach my $u (@users) {
 	$u->{'module'} = $usermodule;
 	my $sameu = $uidmap{$u->{'uid'}};
-	if ($sameu && !$hascmds) {
+	if (!$hasbtrfs && $sameu && !$hascmds) {
 		# Quotas are set on a per-uid basis, so copy from previously
 		# seem user with same ID
 		$u->{'softquota'} = $sameu->{'softquota'};
@@ -1352,7 +1358,7 @@ foreach my $u (@users) {
 		$u->{'uquota'} = $sameu->{'uquota'};
 		$u->{'ufquota'} = $sameu->{'ufquota'};
 		}
-	else {
+	elsif (!$hasbtrfs) {
 		# Set quotas based on quota commands
 		my $altuser = $u->{'user'} =~ /\@/ ?
 				&replace_atsign($u->{'user'}) :
@@ -1378,6 +1384,7 @@ sub list_all_groups_quotas
 {
 # Get quotas for all groups
 &require_useradmin($_[0]);
+my $hasbtrfs = &has_btrfs_quotas();
 if (&has_quota_commands()) {
 	# Get from user quota command
 	if (!%main::gsoft_home_quota && !$_[0]) {
@@ -1390,7 +1397,7 @@ if (&has_quota_commands()) {
 			}
 		}
 	}
-else {
+elsif (!$hasbtrfs) {
 	# Get from real quota system
 	if (!%main::gsoft_home_quota && &has_home_quotas() && !$_[0]) {
 		my $n = &quota::filesystem_groups($config{'home_quotas'});
@@ -1409,13 +1416,20 @@ else {
 
 # Get group list and add in quota info
 my @groups = &foreign_call($usermodule, "list_groups");
+# Domain groups map to higher-level qgroups that aggregate their homes.
+if ($hasbtrfs && !$_[0]) {
+	my $err = &populate_btrfs_group_quotas(\@groups);
+	&error($err) if ($err);
+	}
 my $u;
 foreach $u (@groups) {
 	$u->{'module'} = $usermodule;
-	$u->{'softquota'} = $main::gsoft_home_quota{$u->{'group'}};
-	$u->{'hardquota'} = $main::ghard_home_quota{$u->{'group'}};
-	$u->{'uquota'} = $main::gused_home_quota{$u->{'group'}};
-	$u->{'ufquota'} = $main::gused_home_fquota{$u->{'group'}};
+	if (!$hasbtrfs) {
+		$u->{'softquota'} = $main::gsoft_home_quota{$u->{'group'}};
+		$u->{'hardquota'} = $main::ghard_home_quota{$u->{'group'}};
+		$u->{'uquota'} = $main::gused_home_quota{$u->{'group'}};
+		$u->{'ufquota'} = $main::gused_home_fquota{$u->{'group'}};
+		}
 	}
 return @groups;
 }
@@ -2121,7 +2135,7 @@ if ($_[0]->{'extra'}) {
 
 # Zero out his quotas
 if (!$_[0]->{'noquota'}) {
-	&set_user_quotas($_[0]->{'user'}, 0, $_[1]);
+	&set_user_quotas($_[0]->{'user'}, 0, $_[1], 1);
 	&update_user_quota_cache($_[1], $_[0], 1);
 	}
 
@@ -2591,13 +2605,19 @@ if ($d && $user->{'home'} &&
 return undef;
 }
 
-# set_user_quotas(username, home-quota, [&domain])
+# set_user_quotas(username, home-quota, [&domain], [deleting])
 # Sets the quotas for a mailbox user
 sub set_user_quotas
 {
-my ($username, $quota, $d) = @_;
+my ($username, $quota, $d, $deleting) = @_;
 my $tmpl = &get_template($d ? $d->{'template'} : 0);
-if (&has_quota_commands()) {
+# Route Btrfs homes through subvolume limits rather than POSIX UID quotas.
+if (&has_btrfs_quotas()) {
+	my $err = &set_btrfs_user_quota(
+		$username, $quota, $d, $deleting);
+	&error($err) if ($err);
+	}
+elsif (&has_quota_commands()) {
 	# Call the external quota program
 	&run_quota_command("set_user", $username,
 	    $tmpl->{'quotatype'} eq 'hard' ? ( int($quota), int($quota) )
@@ -2787,9 +2807,17 @@ my $home = $user->{'home'};
 if ($home) {
 	# Create his homedir
 	my @st = $d ? stat($d->{'home'}) : ( undef, undef, 0755 );
-	if (!-e $home || $always) {
+	my $btrfs_created = 0;
+	# Create mailbox subvolumes before ownership and skeleton initialization.
+	if (&has_btrfs_quotas() && $d) {
+		my ($err, $created) =
+			&ensure_btrfs_user_home($user, $d);
+		&error($err) if ($err);
+		$btrfs_created = $created;
+		}
+	if (!-e $home || $always || $btrfs_created) {
 		&lock_file($home);
-		&make_dir($home, $st[2] & 0777);
+		&make_dir($home, $st[2] & 0777) if (!-d $home);
 		&set_ownership_permissions($user->{'uid'}, $user->{'gid'},
 					   $st[2] & 0777, $home);
 		&system_logged("chown -R $user->{'uid'}:$user->{'gid'} ".
@@ -2804,6 +2832,15 @@ if ($home) {
 			&substitute_domain_template($config{'mail_skel'}, $d),
 			$user, $home);
 		};
+	# The earlier quota call is deferred when the home does not yet exist.
+	if (&has_btrfs_quotas() && $d && !$user->{'noquota'} &&
+	    !$user->{'nocreatehome'} && !$user->{'webowner'}) {
+		# Mailbox homes are created before their Unix passwd entries, so apply
+		# the limit directly to the prepared subvolume path.
+		my $err = &set_btrfs_home_quota(
+			$user->{'home'}, $user->{'quota'}, $d);
+		&error($err) if ($err);
+		}
 	}
 }
 
@@ -2815,7 +2852,14 @@ my ($user, $d) = @_;
 if (-d $user->{'home'} &&
     !&same_file($user->{'home'}, $d->{'home'}) &&
     &safe_delete_dir($d, $user->{'home'})) {
-	&system_logged("rm -rf ".quotemeta($user->{'home'}));
+	# Detach Btrfs qgroups before falling back to ordinary directory removal.
+	my $err = &delete_btrfs_user_home($user, $d);
+	if ($err) {
+		&error($err);
+		}
+	elsif (-d $user->{'home'}) {
+		&system_logged("rm -rf ".quotemeta($user->{'home'}));
+		}
 	}
 }
 
@@ -4270,6 +4314,7 @@ if ($disallow_newlines) {
 	}
 $rv =~ s/<tt>|<\/tt>//g;
 $rv =~ s/<span.*?>|<\/span>//g;
+$rv =~ s/<font.*?>|<\/font>//g;
 $rv =~ s/<sup.*?(data-title|aria-label)="([^"]*)".*?<\/sup>//g;
 $rv =~ s/<sup.*?>|<\/sup>//g;
 $rv =~ s/<b>|<\/b>//g;
@@ -5613,7 +5658,12 @@ my ($d, $uquota, $quota) = @_;
 $uquota = $d->{'uquota'} if (!defined($uquota));
 $quota = $d->{'quota'} if (!defined($quota));
 my $tmpl = &get_template($d->{'template'});
-if (&has_quota_commands()) {
+# Btrfs enforces owner and whole-server limits on separate qgroups.
+if (&has_btrfs_quotas()) {
+	my $err = &set_btrfs_server_quotas($d, $uquota, $quota);
+	&error($err) if ($err);
+	}
+elsif (&has_quota_commands()) {
 	# User and group quotas are set externally
 	&run_quota_command("set_user", $d->{'user'},
 		$tmpl->{'quotatype'} eq 'hard' ? ( int($uquota), int($uquota) )
@@ -6354,6 +6404,7 @@ $config{'sharedips'} = $oldconfig{'sharedips'};
 $config{'sharedip6s'} = $oldconfig{'sharedip6s'};
 $config{'home_quotas'} = $oldconfig{'home_quotas'};
 $config{'group_quotas'} = $oldconfig{'group_quotas'};
+$config{'btrfs_quotas'} = $oldconfig{'btrfs_quotas'};
 $config{'old_defip'} = $oldconfig{'old_defip'};
 $config{'old_defip6'} = $oldconfig{'old_defip6'};
 $config{'last_check'} = $oldconfig{'last_check'};
@@ -13580,6 +13631,8 @@ return $config{'quota_commands'} ? 1 : 0;
 sub has_quotacheck
 {
 return 0 if (&has_quota_commands());
+# Btrfs repairs qgroup accounting with quota rescans, not quotacheck.
+return 0 if (&has_btrfs_quotas());
 &require_useradmin();
 return 1 if (&quota::can_quotacheck($config{'home_quotas'}));
 return 0;
@@ -13639,7 +13692,7 @@ foreach my $f (@features) {
 foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "ldap_base", "ldap_login", "ldap_pass", "ldap_port", "ldap",
 	       "clamscan_cmd", "iface", "netmask6", "home_quotas",
-	       "group_quotas", "quotas", "shell", "ftp_shell",
+	       "group_quotas", "btrfs_quotas", "quotas", "shell", "ftp_shell",
 	       "dns_ip", "default_procmail", "defaultdomain_name",
 	       "compression", "pbzip2", "domains_group",
 	       "quota_commands", "home_base",
@@ -15385,6 +15438,9 @@ foreach my $k (keys %$d) {
 sub move_virtual_server
 {
 my ($d, $parent) = @_;
+# Moving a home across ownership trees requires atomically rebuilding its
+# subvolume and parent-qgroup hierarchy, which is not supported yet.
+&error($text{'move_ebtrfs'}) if (&has_btrfs_quotas());
 my $oldd = { %$d };
 my $oldparent;
 if ($d->{'parent'}) {
@@ -15628,6 +15684,9 @@ return 1;
 sub reparent_virtual_server
 {
 my ($d, $newuser, $newpass) = @_;
+# Promoting an ordinary sub-server directory would require an explicit
+# populated-home migration into a new top-level subvolume.
+&error($text{'move_ebtrfs'}) if (&has_btrfs_quotas());
 my $oldd = { %$d };
 my $oldparent = &get_domain($d->{'parent'});
 
@@ -17570,6 +17629,8 @@ elsif (!$config{'home_format'} && $uconfig{'home_style'} == 4) {
 
 $config{'home_quotas'} = '';
 $config{'group_quotas'} = '';
+$config{'btrfs_quotas'} = '';
+my ($btrfs_quota_mode, $btrfs_quota_warning, $btrfs_invalid_homes);
 if ($config{'quotas'} && $config{'quota_commands'}) {
 	# External commands are being used for quotas - make sure they exist!
 	foreach my $c ("set_user", "set_group", "list_users", "list_groups") {
@@ -17599,34 +17660,73 @@ elsif ($config{'quotas'}) {
 		if (!$home_mtab) {
 			$qerr = &text('index_ehomemtab', "<tt>$home_base</tt>");
 			}
+		elsif ($home_mtab->[2] eq 'btrfs') {
+			# Btrfs quotas are subvolume qgroups, not POSIX UID/GID
+			# quotas, so the traditional quota_can/quota_now APIs do
+			# not apply.
+			my $status = &quota::btrfs_quota_status($home_base);
+			if (!$status) {
+				$qerr = &text('index_ebtrfserror',
+					$text{'index_ebtrfsunknown'});
+				}
+			elsif ($status->{'error'}) {
+				$qerr = &text('index_ebtrfserror',
+					&html_escape($status->{'error'}));
+				}
+			elsif (!$status->{'enabled'}) {
+				$qerr = &text('index_equota3',
+				    "<tt>$home_mtab->[0]</tt>",
+				    "<tt>$home_base</tt>");
+				}
+			elsif (($status->{'mode'} || '') eq 'squota') {
+				# Simple quotas cannot aggregate domain and mailbox
+				# subvolumes into Virtualmin's parent qgroups.
+				$qerr = $text{'index_ebtrfssquota'};
+				}
+			else {
+				# Temporarily select this backend so its layout scan uses
+				# the visible home path. This supports bind and subvolume
+				# mounts.
+				$config{'home_quotas'} = $home_base;
+				$config{'btrfs_quotas'} = 1;
+				my $layout_err;
+				my @invalid = &list_invalid_btrfs_homes(\$layout_err);
+				if ($layout_err) {
+					$config{'home_quotas'} = '';
+					$config{'btrfs_quotas'} = '';
+					$qerr = &text('index_ebtrfserror',
+						&html_escape($layout_err));
+					}
+				else {
+					$config{'group_quotas'} = 1;
+					$btrfs_quota_mode = $status->{'mode'} || 'qgroup';
+					$btrfs_quota_warning = 1
+						if ($status->{'inconsistent'});
+					$btrfs_invalid_homes = scalar(@invalid);
+					}
+				}
+			}
 		else {
-			# Check if quotas are enabled for home filesystem
+			# Check if POSIX quotas are enabled for home filesystem
 			my $nohome;
-			$home_mtab->[4] = &quota::quota_can($home_mtab,
-						            $home_fstab);
-			$home_mtab->[4] &&= &quota::quota_now($home_mtab,
-                                                              $home_fstab);
+			$home_mtab->[4] = &quota::quota_can(
+				$home_mtab, $home_fstab);
+			$home_mtab->[4] &&= &quota::quota_now(
+				$home_mtab, $home_fstab);
 			if ($home_mtab->[4] != 3 && $home_mtab->[4] != 7) {
-				# User quotas are not active (we need 
-				# both user and group quotas being active)
+				# We need both user and group quotas.
 				$nohome++;
 				}
 			else {
-				# User quotas are active
-				if ($home_mtab->[4] >= 2) {
-					# Group quotas are active too
-					$config{'group_quotas'} = 1;
-					}
+				$config{'group_quotas'} = 1
+					if ($home_mtab->[4] >= 2);
 				}
-
 			if ($nohome) {
-				# Quotas are not enabled
 				$qerr = &text('index_equota3',
 				    "<tt>$home_mtab->[0]</tt>",
 				    "<tt>$home_base</tt>");
 				}
 			else {
-				# Quotas are enabled
 				$config{'home_quotas'} =
 					mount_point_bind($home_mtab->[0]);
 				}
@@ -17648,6 +17748,21 @@ elsif ($config{'quotas'}) {
 		}
 	elsif (!$config{'group_quotas'}) {
 		&$second_print($text{'check_nogroup'});
+		}
+	elsif ($config{'btrfs_quotas'}) {
+		&$second_print(&text('check_btrfs', $btrfs_quota_mode));
+		if ($btrfs_quota_warning) {
+			&$second_print(&ui_text_color(
+				$text{'check_btrfs_inconsistent'}, 'warn'));
+			}
+		if ($btrfs_invalid_homes) {
+			&$second_print(&ui_text_color(
+				&text('check_btrfs_layout', $btrfs_invalid_homes),
+				'warn'));
+			# Migration is disruptive, so it is only offered as a CLI command.
+			&$second_print(&ui_note(&text('check_btrfs_migrate',
+				"<tt>virtualmin fix-btrfs-homes --all-domains</tt>")));
+			}
 		}
 	else {
 		&$second_print($text{'check_group'});

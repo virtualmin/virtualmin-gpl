@@ -10953,6 +10953,291 @@ $quota_tests = [
         },
 	];
 
+# Btrfs quota tests
+$btrfs_quota_fs = $config{'home_quotas'} || $home_base;
+$btrfs_qgroup_command = 'btrfs qgroup show --sync --raw -repc '.
+			  $btrfs_quota_fs;
+$btrfsquota_tests = [
+	# Create a domain whose aggregate quota is lower than its owner quota.
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test Btrfs quota domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'quota', 12*$blocks_per_mb ],
+		      [ 'uquota', 32*$blocks_per_mb ],
+		      [ 'dir' ], [ 'unix' ], [ 'mail' ],
+		      (grep { $_->[0] ne 'limits-from-plan' } @create_args), ],
+	},
+
+	# The domain home must be a subvolume with a level-0 qgroup.
+	{ 'command' => 'btrfs subvolume show '.$test_domain_home,
+	  'grep' => 'Subvolume ID:',
+	},
+	{ 'command' => 'btrfs subvolume show '.$test_domain_home.
+		       q! | awk '/Subvolume ID:/ { print $3 }'!,
+	  'save' => 'BTRFS_DOMAIN_ID',
+	},
+
+	# Create a mailbox whose quota allows the aggregate-limit test write.
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test Btrfs quota user' ],
+		      [ 'quota', 12*$blocks_per_mb ] ],
+	},
+	{ 'command' => 'btrfs subvolume show '.$test_full_user_home,
+	  'grep' => 'Subvolume ID:',
+	},
+	{ 'command' => 'btrfs subvolume show '.$test_full_user_home.
+		       q! | awk '/Subvolume ID:/ { print $3 }'!,
+	  'save' => 'BTRFS_MAILBOX_ID',
+	},
+
+	# A write below the owner limit succeeds.
+	{ 'command' => &command_as_user($test_domain_user, 0,
+		"dd if=/dev/urandom of=$test_domain_home/btrfs-owner-test ".
+		"bs=1M count=5 conv=fsync"),
+	},
+
+	# A second write exceeds the shared domain limit and must fail even though
+	# the mailbox's individual limit is higher.
+	{ 'command' => &command_as_user($test_full_user, 0,
+		"dd if=/dev/urandom of=$test_full_user_home/btrfs-aggregate-test ".
+		"bs=1M count=10 conv=fsync"),
+	  'fail' => 1,
+	},
+	{ 'command' => 'rm -f '.$test_domain_home.'/btrfs-owner-test '.
+		       $test_full_user_home.'/btrfs-aggregate-test && '.
+		       'btrfs filesystem sync '.$btrfs_quota_fs,
+	},
+
+	# Raise the aggregate limit and lower only the mailbox limit.
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'quota', 64*$blocks_per_mb ],
+		      [ 'uquota', 32*$blocks_per_mb ] ],
+	},
+	{ 'command' => 'modify-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'quota', 5*$blocks_per_mb ] ],
+	},
+
+	# Verify the individual and aggregate limits and their relationship.
+	{ 'command' => $btrfs_qgroup_command.
+		       ' | grep -E "^0/$BTRFS_DOMAIN_ID[[:space:]]"',
+	  'grep' => '^0/$BTRFS_DOMAIN_ID\s+\d+\s+\d+\s+'.
+		    (32*1024*1024).'\s+none\s+1/$BTRFS_DOMAIN_ID',
+	},
+	{ 'command' => $btrfs_qgroup_command.
+		       ' | grep -E "^0/$BTRFS_MAILBOX_ID[[:space:]]"',
+	  'grep' => '^0/$BTRFS_MAILBOX_ID\s+\d+\s+\d+\s+'.
+		    (5*1024*1024).'\s+none\s+1/$BTRFS_DOMAIN_ID',
+	},
+	{ 'command' => $btrfs_qgroup_command.
+		       ' | grep -E "^1/$BTRFS_DOMAIN_ID[[:space:]]"',
+	  'grep' => '^1/$BTRFS_DOMAIN_ID\s+\d+\s+\d+\s+'.
+		    (64*1024*1024).'\s+none',
+	},
+
+	# The lower mailbox limit must now stop a larger write by that user.
+	{ 'command' => &command_as_user($test_full_user, 0,
+		"dd if=/dev/urandom of=$test_full_user_home/btrfs-user-test ".
+		"bs=1M count=10 conv=fsync"),
+	  'fail' => 1,
+	},
+	{ 'command' => 'rm -f '.$test_full_user_home.'/btrfs-user-test && '.
+		       'btrfs filesystem sync '.$btrfs_quota_fs,
+	},
+
+	# User deletion must remove both the subvolume and its qgroup.
+	{ 'command' => 'delete-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ] ],
+	},
+	{ 'command' => $btrfs_qgroup_command.
+		       ' | grep -E "^0/$BTRFS_MAILBOX_ID[[:space:]]"',
+	  'fail' => 1,
+	},
+
+	# Domain deletion must remove its level-0 and aggregate qgroups.
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+	{ 'command' => $btrfs_qgroup_command.
+		       ' | grep -E "^[01]/$BTRFS_DOMAIN_ID[[:space:]]"',
+	  'fail' => 1,
+	},
+	{ 'command' => 'btrfs quota status '.$btrfs_quota_fs,
+	  'grep' => 'Inconsistent:\s+no',
+	},
+	];
+# Skip on systems not using Btrfs quotas
+$btrfsquota_tests = [ { 'command' => 'true' } ]
+	if (!&has_btrfs_quotas());
+
+# Btrfs migration tests for homes created before quotas were enabled
+$btrfs_legacy_home = $test_domain_home.'.legacy';
+$btrfsmigrate_tests = [
+	# Create a domain and mailbox with limits, so their subvolumes exist.
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test Btrfs migration domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'quota', 64*$blocks_per_mb ],
+		      [ 'uquota', 32*$blocks_per_mb ],
+		      [ 'dir' ], [ 'unix' ], [ 'mail' ],
+		      (grep { $_->[0] ne 'limits-from-plan' } @create_args), ],
+	},
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test Btrfs migration user' ],
+		      [ 'quota', 5*$blocks_per_mb ] ],
+	},
+	{ 'command' => 'btrfs subvolume show '.$test_domain_home.
+		       q! | awk '/Subvolume ID:/ { print $3 }'!,
+	  'save' => 'BTRFS_OLD_DOMAIN_ID',
+	},
+	{ 'command' => 'btrfs subvolume show '.$test_full_user_home.
+		       q! | awk '/Subvolume ID:/ { print $3 }'!,
+	  'save' => 'BTRFS_OLD_MAILBOX_ID',
+	},
+	{ 'command' => &command_as_user($test_full_user, 0,
+		"echo migrated-mail > $test_full_user_home/marker"),
+	},
+
+	# Turn the domain into a pre-quota layout: plain directories with no
+	# subvolumes or qgroups, exactly as an upgraded installation would have.
+	{ 'command' => 'mv '.$test_domain_home.' '.$btrfs_legacy_home.' && '.
+		       'mkdir '.$test_domain_home.' && '.
+		       'cp -a --reflink=always '.$btrfs_legacy_home.'/. '.
+		       $test_domain_home.'/ && '.
+		       'chown --reference='.$btrfs_legacy_home.' '.
+		       $test_domain_home.' && '.
+		       'chmod --reference='.$btrfs_legacy_home.' '.
+		       $test_domain_home,
+	},
+	{ 'command' => 'btrfs qgroup remove 0/$BTRFS_OLD_MAILBOX_ID '.
+		       '1/$BTRFS_OLD_DOMAIN_ID '.$btrfs_quota_fs.' ; '.
+		       'btrfs qgroup remove 0/$BTRFS_OLD_DOMAIN_ID '.
+		       '1/$BTRFS_OLD_DOMAIN_ID '.$btrfs_quota_fs.' ; '.
+		       'btrfs subvolume delete '.$btrfs_legacy_home.'/homes/'.
+		       $test_user.' && '.
+		       'btrfs subvolume delete '.$btrfs_legacy_home.' && '.
+		       'btrfs qgroup destroy 1/$BTRFS_OLD_DOMAIN_ID '.
+		       $btrfs_quota_fs.' ; '.
+		       'btrfs qgroup destroy 0/$BTRFS_OLD_DOMAIN_ID '.
+		       $btrfs_quota_fs.' ; '.
+		       'btrfs qgroup destroy 0/$BTRFS_OLD_MAILBOX_ID '.
+		       $btrfs_quota_fs.' ; '.
+		       'btrfs quota rescan -w '.$btrfs_quota_fs,
+	},
+	{ 'command' => 'btrfs subvolume show '.$test_domain_home,
+	  'fail' => 1,
+	},
+
+	# The pre-quota layout must still allow ordinary operations.
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user_extra ],
+		      [ 'pass', 'smeg' ],
+		      [ 'quota', 5*$blocks_per_mb ] ],
+	},
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'quota', 96*$blocks_per_mb ] ],
+	},
+
+	# Test mode only reports the directories that need conversion.
+	{ 'command' => 'fix-btrfs-homes.pl',
+	  'args' => [ [ 'domain', $test_domain ], [ 'test' ] ],
+	  'grep' => 'has 3 home directories to convert',
+	},
+	{ 'command' => 'btrfs subvolume show '.$test_domain_home,
+	  'fail' => 1,
+	},
+
+	# Convert the domain, then verify subvolumes, data, and quotas.
+	{ 'command' => 'fix-btrfs-homes.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+	{ 'command' => 'btrfs subvolume show '.$test_domain_home.
+		       q! | awk '/Subvolume ID:/ { print $3 }'!,
+	  'save' => 'BTRFS_DOMAIN_ID',
+	},
+	{ 'command' => 'btrfs subvolume show '.$test_full_user_home.
+		       q! | awk '/Subvolume ID:/ { print $3 }'!,
+	  'save' => 'BTRFS_MAILBOX_ID',
+	},
+	{ 'command' => 'btrfs subvolume show '.$test_domain_home.'/homes/'.
+		       $test_user_extra,
+	  'grep' => 'Subvolume ID:',
+	},
+	{ 'command' => 'cat '.$test_full_user_home.'/marker',
+	  'grep' => 'migrated-mail',
+	},
+	{ 'command' => 'stat -c %U '.$test_full_user_home,
+	  'grep' => '^'.$test_full_user.'$',
+	},
+	{ 'command' => 'ls -d '.$test_domain_home.'.virtualmin-btrfs-*',
+	  'fail' => 1,
+	},
+	{ 'command' => $btrfs_qgroup_command.
+		       ' | grep -E "^0/$BTRFS_DOMAIN_ID[[:space:]]"',
+	  'grep' => '^0/$BTRFS_DOMAIN_ID\s+\d+\s+\d+\s+'.
+		    (32*1024*1024).'\s+none\s+1/$BTRFS_DOMAIN_ID',
+	},
+	{ 'command' => $btrfs_qgroup_command.
+		       ' | grep -E "^0/$BTRFS_MAILBOX_ID[[:space:]]"',
+	  'grep' => '^0/$BTRFS_MAILBOX_ID\s+\d+\s+\d+\s+'.
+		    (5*1024*1024).'\s+none\s+1/$BTRFS_DOMAIN_ID',
+	},
+	{ 'command' => $btrfs_qgroup_command.
+		       ' | grep -E "^1/$BTRFS_DOMAIN_ID[[:space:]]"',
+	  'grep' => '^1/$BTRFS_DOMAIN_ID\s+\d+\s+\d+\s+'.
+		    (96*1024*1024).'\s+none',
+	},
+
+	# Limits are enforced again after conversion.
+	{ 'command' => &command_as_user($test_full_user, 0,
+		"dd if=/dev/urandom of=$test_full_user_home/btrfs-migrate-test ".
+		"bs=1M count=10 conv=fsync"),
+	  'fail' => 1,
+	},
+	{ 'command' => 'rm -f '.$test_full_user_home.'/btrfs-migrate-test && '.
+		       'btrfs filesystem sync '.$btrfs_quota_fs,
+	},
+
+	# A second run finds nothing left to convert.
+	{ 'command' => 'fix-btrfs-homes.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'grep' => 'already uses Btrfs subvolumes',
+	},
+
+	# Cleanup leaves no qgroups behind.
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+	{ 'command' => 'rm -rf '.$btrfs_legacy_home,
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
+	},
+	{ 'command' => $btrfs_qgroup_command.
+		       ' | grep -E "^[01]/($BTRFS_DOMAIN_ID|$BTRFS_OLD_DOMAIN_ID)[[:space:]]"',
+	  'fail' => 1,
+	},
+	{ 'command' => 'btrfs quota status '.$btrfs_quota_fs,
+	  'grep' => 'Inconsistent:\s+no',
+	},
+	];
+$btrfsmigrate_tests = [ { 'command' => 'true' } ]
+	if (!&has_btrfs_quotas());
+
 # Test deletion of domains when entries in virtual file overlap
 $overlap_tests = [
 	# Create first domain
@@ -14955,6 +15240,8 @@ $alltests = { '_config' => $_config_tests,
 	      'bw' => $bw_tests,
 	      'lastlogin' => $lastlogin_tests,
 	      'quota' => $quota_tests,
+	      'btrfsquota' => $btrfsquota_tests,
+	      'btrfsmigrate' => $btrfsmigrate_tests,
 	      'overlap' => $overlap_tests,
 	      'redirect' => $redirect_tests,
 	      'admin' => $admin_tests,
@@ -14991,7 +15278,6 @@ if (!$virtualmin_pro) {
 	delete($alltests->{'proxy'});
 	delete($alltests->{'script'});
 	}
-
 # Find tests to run
 if (!@tests) {
 	@tests = sort { $a cmp $b }
