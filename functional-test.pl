@@ -11256,7 +11256,8 @@ $redirect_tests = [
 		      'Sub-path handling: Keep sub-paths',
 		      'Strip filename: Yes',
 		      'Strip query string: Yes',
-		      'Directives: RewriteRule' ],
+		      # Only Apache reports the generated directives
+		      $web eq 'web' ? ( 'Directives: RewriteRule' ) : ( ) ],
 	},
 
 	# Delete the redirect
@@ -11326,6 +11327,368 @@ $redirect_tests = [
 	# Validate that the file can no longer be fetched
 	{ 'command' => $wget_command.'http://'.$test_domain.'/somedir/bar.txt',
 	  'fail' => 1,
+	  'sleep' => 2,
+	},
+
+	# Create an application layout whose public files live in a public_html
+	# directory nested under the alias path, like Roundcube 1.7
+	{ 'command' => 'mkdir -p '.$test_domain_html.'/app/public_html/sub' },
+	{ 'command' => 'echo "Nested alias index" >'.
+		       $test_domain_html.'/app/public_html/index.html' },
+	{ 'command' => 'echo nested >'.
+		       $test_domain_html.'/app/public_html/sub/file.txt' },
+	{ 'command' => 'echo \'<?php echo "PATH_INFO=[".'.
+		       '(isset($_SERVER["PATH_INFO"]) ? '.
+		       '$_SERVER["PATH_INFO"] : "unset")."]";\' >'.
+		       $test_domain_html.'/app/public_html/pi.php' },
+
+	# Create a directory alias to the nested public_html directory
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/app' ],
+		      [ 'alias', $test_domain_html.'/app/public_html' ] ],
+	},
+
+	# Make sure the alias appears with its filesystem destination
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/app' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/app$',
+		      'Destination: '.$test_domain_html.'/app/public_html$',
+		      'Type: Alias',
+		      'Sub-path handling: Keep sub-paths' ],
+	},
+
+	# Validate that the alias directory index and sub-paths are served
+	{ 'command' => $wget_command.'http://'.$test_domain.'/app/',
+	  'grep' => 'Nested alias index',
+	  'sleep' => 2,
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/app/sub/file.txt',
+	  'grep' => '^nested$',
+	},
+
+	# Validate that PHP does not receive an empty PATH_INFO via the alias
+	$max_php_version ?
+		( { 'command' => $wget_command.'http://'.$test_domain.
+				 '/app/pi.php',
+		    'grep' => 'PATH_INFO=\[unset\]',
+		  } ) : ( ),
+
+	$web eq 'virtualmin-nginx' ? (
+		# Validate that the real path under the alias destination is
+		# not rewritten a second time
+		{ 'command' => $wget_command.'http://'.$test_domain.
+			       '/app/public_html/sub/file.txt',
+		  'grep' => '^nested$',
+		},
+
+		# Validate that alias directories outside the document root
+		# are rejected
+		{ 'command' => 'create-redirect.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'path', '/outside' ],
+			      [ 'alias', '/tmp' ] ],
+		  'fail' => 1,
+		},
+		) : ( ),
+
+	# Delete the alias
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/app' ] ],
+	},
+
+	# Make sure the alias is gone
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => [ '^/app$' ],
+	},
+
+	# Validate that the aliased sub-path can no longer be fetched
+	{ 'command' => $wget_command.'http://'.$test_domain.'/app/sub/file.txt',
+	  'fail' => 1,
+	  'sleep' => 2,
+	},
+
+	# Create a directory for a root alias
+	{ 'command' => 'mkdir -p '.$test_domain_html.'/pub/dir' },
+	{ 'command' => 'echo "Root alias index" >'.
+		       $test_domain_html.'/pub/index.html' },
+	{ 'command' => 'echo hello >'.$test_domain_html.'/pub/dir/hello.txt' },
+	{ 'command' => 'mkdir -p '.$test_domain_html.'/.well-known' },
+	{ 'command' => 'echo wellknown >'.
+		       $test_domain_html.'/.well-known/alias.txt' },
+
+	# Create a directory alias for the whole website
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/' ],
+		      [ 'alias', $test_domain_html.'/pub/' ] ],
+	},
+
+	# Make sure the root alias appears
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/$',
+		      'Destination: '.$test_domain_html.'/pub/$',
+		      'Type: Alias',
+		      'Sub-path handling: Keep sub-paths' ],
+	},
+
+	# Validate that the root alias serves the index and sub-paths
+	{ 'command' => $wget_command.'http://'.$test_domain.'/',
+	  'grep' => 'Root alias index',
+	  'sleep' => 2,
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/dir/hello.txt',
+	  'grep' => '^hello$',
+	},
+
+	$web eq 'virtualmin-nginx' ? (
+		# Validate that the alias destination itself is not rewritten
+		# again, and that .well-known is excluded from the alias
+		{ 'command' => $wget_command.'http://'.$test_domain.
+			       '/pub/dir/hello.txt',
+		  'grep' => '^hello$',
+		},
+		{ 'command' => $wget_command.'http://'.$test_domain.
+			       '/.well-known/alias.txt',
+		  'grep' => '^wellknown$',
+		},
+		) : ( ),
+
+	# Create a regular redirect while the root alias exists
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/google' ],
+		      [ 'redirect', 'http://www.google.com' ] ],
+	},
+
+	# Make sure both the redirect and the root alias appear
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/google$', '^/$' ],
+	},
+
+	# Validate that the redirect is still processed before the alias
+	{ 'command' => $wget_command.'--max-redirect=0 -S http://'.
+		       $test_domain.'/google/imghp',
+	  'grep' => 'Location: http://www.google.com/imghp',
+	  'fail' => 1,
+	  'sleep' => 2,
+	},
+
+	# Validate that the root alias still works alongside the redirect
+	{ 'command' => $wget_command.'http://'.$test_domain.'/dir/hello.txt',
+	  'grep' => '^hello$',
+	},
+
+	# Delete the redirect and the root alias
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/google' ] ],
+	},
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/' ] ],
+	},
+
+	# Make sure both are gone
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => [ '^/google$', '^/$' ],
+	},
+
+	# Validate that the original web page is served again
+	{ 'command' => $wget_command.'http://'.$test_domain.'/',
+	  'grep' => 'Non-redirected web page',
+	  'sleep' => 2,
+	},
+
+	# Create an alias that ignores sub-paths
+	{ 'command' => 'echo "Alias directory index" >'.
+		       $test_domain_html.'/blah/index.html' },
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/ignore' ],
+		      [ 'alias', $test_domain_html.'/blah' ],
+		      [ 'regexp' ] ],
+	},
+
+	# Make sure the alias appears correctly
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/ignore' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/ignore$',
+		      'Destination: '.$test_domain_html.'/blah$',
+		      'Type: Alias',
+		      'Sub-path handling: Ignore sub-paths' ],
+	},
+
+	$web eq 'virtualmin-nginx' ? (
+		# Validate that any sub-path goes to the alias directory
+		{ 'command' => $wget_command.'http://'.$test_domain.
+			       '/ignore/any/sub/path',
+		  'grep' => 'Alias directory index',
+		  'sleep' => 2,
+		},
+		) : ( ),
+
+	# Delete the alias
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/ignore' ] ],
+	},
+
+	# Create an alias that only matches the exact path
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/exactonly' ],
+		      [ 'alias', $test_domain_html.'/blah' ],
+		      [ 'exact' ] ],
+	},
+
+	# Make sure the alias appears correctly
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/exactonly' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/exactonly$',
+		      'Destination: '.$test_domain_html.'/blah$',
+		      'Type: Alias',
+		      'Sub-path handling: Exact path only' ],
+	},
+
+	$web eq 'virtualmin-nginx' ? (
+		# Validate that the exact path is served
+		{ 'command' => $wget_command.'http://'.$test_domain.
+			       '/exactonly',
+		  'grep' => 'Alias directory index',
+		  'sleep' => 2,
+		},
+		) : ( ),
+
+	# Validate that sub-paths are not aliased
+	{ 'command' => $wget_command.'http://'.$test_domain.'/exactonly/bar.txt',
+	  'fail' => 1,
+	  'sleep' => 2,
+	},
+
+	# Delete the alias
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/exactonly' ] ],
+	},
+
+	# Create an alias with a trailing slash in the path and destination
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/slashdir/' ],
+		      [ 'alias', $test_domain_html.'/blah/' ] ],
+	},
+
+	# Make sure the alias appears with its trailing slashes
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/slashdir/' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/slashdir/$',
+		      'Destination: '.$test_domain_html.'/blah/$',
+		      'Type: Alias',
+		      'Sub-path handling: Keep sub-paths' ],
+	},
+
+	# Validate that the file can be fetched via the alias
+	{ 'command' => $wget_command.'http://'.$test_domain.'/slashdir/bar.txt',
+	  'grep' => '^foo$',
+	  'sleep' => 2,
+	},
+
+	# Delete the alias
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/slashdir/' ] ],
+	},
+
+	# Create an HTTP-only alias
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/httponly' ],
+		      [ 'alias', $test_domain_html.'/blah' ],
+		      [ 'http' ] ],
+	},
+
+	# Make sure the alias appears with only the HTTP protocol
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/httponly' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/httponly$',
+		      'Type: Alias',
+		      'Protocols: http$' ],
+	},
+
+	# Validate that it works for HTTP but not HTTPS
+	{ 'command' => $wget_command.'http://'.$test_domain.'/httponly/bar.txt',
+	  'grep' => '^foo$',
+	  'sleep' => 2,
+	},
+	{ 'command' => $wget_command.'https://'.$test_domain.'/httponly/bar.txt',
+	  'fail' => 1,
+	},
+
+	# Delete the alias
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/httponly' ] ],
+	},
+
+	# Create an HTTPS-only alias
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/httpsonly' ],
+		      [ 'alias', $test_domain_html.'/blah' ],
+		      [ 'https' ] ],
+	},
+
+	# Make sure the alias appears with only the HTTPS protocol
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/httpsonly' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/httpsonly$',
+		      'Type: Alias',
+		      'Protocols: https$' ],
+	},
+
+	# Validate that it works for HTTPS but not HTTP
+	{ 'command' => $wget_command.'https://'.$test_domain.'/httpsonly/bar.txt',
+	  'grep' => '^foo$',
+	  'sleep' => 2,
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/httpsonly/bar.txt',
+	  'fail' => 1,
+	},
+
+	# Delete the alias
+	{ 'command' => 'delete-redirect.pl',
+          'args' => [ [ 'domain', $test_domain ],
+                      [ 'path', '/httpsonly' ] ],
+	},
+
+	# Make sure no aliases remain
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => [ 'Type: Alias' ],
 	},
 
 	# Create a redirect from www.domain to just the domain
@@ -11352,6 +11715,7 @@ $redirect_tests = [
 	# Check that it works
 	{ 'command' => $wget_command.'http://www.'.$test_domain,
 	  'grep' => 'http://'.$test_domain,
+	  'sleep' => 2,
 	},
 
 	# Check that it works for SSL
@@ -11374,6 +11738,7 @@ $redirect_tests = [
 	# Check that it no longer works
 	{ 'command' => $wget_command.'http://www.'.$test_domain,
 	  'antigrep' => 'http://'.$test_domain,
+	  'sleep' => 2,
 	},
 
 	# Create a redirect using a regexp
@@ -11398,6 +11763,7 @@ $redirect_tests = [
 	# Check that it works
 	{ 'command' => $wget_command.'http://www.'.$test_domain,
 	  'grep' => 'http://'.$test_domain,
+	  'sleep' => 2,
 	},
 
 	# Check that there is no redirect for another domain
@@ -11412,66 +11778,151 @@ $redirect_tests = [
 		      [ 'host', '"(ftp|www).'.$test_domain.'"' ] ],
 	},
 
-	# Create an HTTP-only redirect
+	# Nginx host-based redirects use return inside an if block on $host,
+	# which cannot also be limited by scheme, so scheme-limited host
+	# redirects are only tested on Apache
+	$web eq 'web' ? (
+		# Create an HTTP-only redirect
+		{ 'command' => 'create-redirect.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'path', '/' ],
+			      [ 'host', 'www.'.$test_domain ],
+			      [ 'http' ],
+			      [ 'redirect', 'http://'.$test_domain ] ],
+		},
+
+		# Check that it works
+		{ 'command' => $wget_command.'http://www.'.$test_domain,
+		  'grep' => 'http://'.$test_domain,
+		  'sleep' => 2,
+		},
+
+		# Check that it doesn't work for SSL
+		{ 'command' => $wget_command.'https://www.'.$test_domain,
+		  'antigrep' => 'http://'.$test_domain,
+		},
+
+		# Delete the redirect
+		{ 'command' => 'delete-redirect.pl',
+	          'args' => [ [ 'domain', $test_domain ],
+	                      [ 'path', '/' ],
+			      [ 'host', 'www.'.$test_domain ] ],
+		},
+
+		# Check that it no longer works
+		{ 'command' => $wget_command.'http://www.'.$test_domain,
+		  'antigrep' => 'http://'.$test_domain,
+		  'sleep' => 2,
+		},
+
+		# Create an HTTPS-only redirect
+		{ 'command' => 'create-redirect.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'path', '/' ],
+			      [ 'host', 'www.'.$test_domain ],
+			      [ 'https' ],
+			      [ 'redirect', 'http://'.$test_domain ] ],
+		},
+
+		# Check that it works
+		{ 'command' => $wget_command.'https://www.'.$test_domain,
+		  'grep' => 'http://'.$test_domain,
+		  'sleep' => 2,
+		},
+
+		# Check that it doesn't work for SSL
+		{ 'command' => $wget_command.'http://www.'.$test_domain,
+		  'antigrep' => 'http://'.$test_domain,
+		},
+
+		# Delete the redirect
+		{ 'command' => 'delete-redirect.pl',
+	          'args' => [ [ 'domain', $test_domain ],
+	                      [ 'path', '/' ],
+			      [ 'host', 'www.'.$test_domain ] ],
+		},
+
+		# Check that it no longer works
+		{ 'command' => $wget_command.'https://www.'.$test_domain,
+		  'antigrep' => 'http://'.$test_domain,
+		  'sleep' => 2,
+		},
+		) : ( ),
+
+	# Create an HTTP-only redirect for a path
 	{ 'command' => 'create-redirect.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'path', '/' ],
-		      [ 'host', 'www.'.$test_domain ],
+		      [ 'path', '/httponly' ],
 		      [ 'http' ],
-		      [ 'redirect', 'http://'.$test_domain ] ],
+		      [ 'redirect', 'http://www.google.com' ] ],
 	},
 
-	# Check that it works
-	{ 'command' => $wget_command.'http://www.'.$test_domain,
-	  'grep' => 'http://'.$test_domain,
+	# Make sure the redirect appears with only the HTTP protocol
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/httponly' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/httponly$',
+		      'Destination: http://www.google.com',
+		      'Type: Redirect',
+		      'Protocols: http$' ],
 	},
 
-	# Check that it doesn't work for SSL
-	{ 'command' => $wget_command.'https://www.'.$test_domain,
-	  'antigrep' => 'http://'.$test_domain,
+	# Check that it works for HTTP but not HTTPS
+	{ 'command' => $wget_command.'--max-redirect=0 -S http://'.
+		       $test_domain.'/httponly/',
+	  'grep' => 'Location: http://www.google.com',
+	  'fail' => 1,
+	  'sleep' => 2,
+	},
+	{ 'command' => $wget_command.'--max-redirect=0 -S https://'.
+		       $test_domain.'/httponly/',
+	  'antigrep' => 'Location: http://www.google.com',
+	  'fail' => 1,
 	},
 
 	# Delete the redirect
 	{ 'command' => 'delete-redirect.pl',
           'args' => [ [ 'domain', $test_domain ],
-                      [ 'path', '/' ],
-		      [ 'host', 'www.'.$test_domain ] ],
+                      [ 'path', '/httponly' ] ],
 	},
 
-	# Check that it no longer works
-	{ 'command' => $wget_command.'http://www.'.$test_domain,
-	  'antigrep' => 'http://'.$test_domain,
-	},
-
-	# Create an HTTPS-only redirect
+	# Create an HTTPS-only redirect for a path
 	{ 'command' => 'create-redirect.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'path', '/' ],
-		      [ 'host', 'www.'.$test_domain ],
+		      [ 'path', '/httpsonly' ],
 		      [ 'https' ],
-		      [ 'redirect', 'http://'.$test_domain ] ],
+		      [ 'redirect', 'http://www.google.com' ] ],
 	},
 
-	# Check that it works
-	{ 'command' => $wget_command.'https://www.'.$test_domain,
-	  'grep' => 'http://'.$test_domain,
+	# Make sure the redirect appears with only the HTTPS protocol
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/httpsonly' ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/httpsonly$',
+		      'Destination: http://www.google.com',
+		      'Type: Redirect',
+		      'Protocols: https$' ],
 	},
 
-	# Check that it doesn't work for SSL
-	{ 'command' => $wget_command.'http://www.'.$test_domain,
-	  'antigrep' => 'http://'.$test_domain,
+	# Check that it works for HTTPS but not HTTP
+	{ 'command' => $wget_command.'--max-redirect=0 -S https://'.
+		       $test_domain.'/httpsonly/',
+	  'grep' => 'Location: http://www.google.com',
+	  'fail' => 1,
+	  'sleep' => 2,
+	},
+	{ 'command' => $wget_command.'--max-redirect=0 -S http://'.
+		       $test_domain.'/httpsonly/',
+	  'antigrep' => 'Location: http://www.google.com',
+	  'fail' => 1,
 	},
 
 	# Delete the redirect
 	{ 'command' => 'delete-redirect.pl',
           'args' => [ [ 'domain', $test_domain ],
-                      [ 'path', '/' ],
-		      [ 'host', 'www.'.$test_domain ] ],
-	},
-
-	# Check that it no longer works
-	{ 'command' => $wget_command.'https://www.'.$test_domain,
-	  'antigrep' => 'http://'.$test_domain,
+                      [ 'path', '/httpsonly' ] ],
 	},
 
 	# Create a redirect that excludes well-known
@@ -11487,6 +11938,7 @@ $redirect_tests = [
 		       $test_domain.'/',
 	  'grep' => 'Location: http://www.google.com',
 	  'fail' => 1,
+	  'sleep' => 2,
 	},
 
 	# Test wget doesn't redirect .well-known
@@ -11517,27 +11969,31 @@ $redirect_tests = [
 		      [ 'webmail' ] ],
 	},
 
-	# Make sure they shows up
-	{ 'command' => 'list-redirects.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'host', 'webmail.'.$test_domain ],
-		      [ 'fix-wellknown' ],
-		      [ 'multiline' ] ],
-	  'grep' => [ '^/$',
-		      'Limit to hostname: webmail.'.$test_domain,
-		      'Last rule: Yes',
-		      'Destination: '.$usermin_proto.'://'.$test_domain.':'.$usermin_port ],
-	},
-	{ 'command' => 'list-redirects.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'host', 'admin.'.$test_domain ],
-		      [ 'fix-wellknown' ],
-		      [ 'multiline' ] ],
-	  'grep' => [ '^/$',
-		      'Limit to hostname: admin.'.$test_domain,
-		      'Last rule: Yes',
-		      'Destination: '.$webmin_proto.'://'.$test_domain.':'.$webmin_port ],
-	},
+	# Make sure they show up. Nginx keeps webmail and admin redirects in
+	# host-specific if blocks that are not listed as redirects, so this is
+	# only checked on Apache
+	$web eq 'web' ? (
+		{ 'command' => 'list-redirects.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'host', 'webmail.'.$test_domain ],
+			      [ 'fix-wellknown' ],
+			      [ 'multiline' ] ],
+		  'grep' => [ '^/$',
+			      'Limit to hostname: webmail.'.$test_domain,
+			      'Last rule: Yes',
+			      'Destination: '.$usermin_proto.'://'.$test_domain.':'.$usermin_port ],
+		},
+		{ 'command' => 'list-redirects.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'host', 'admin.'.$test_domain ],
+			      [ 'fix-wellknown' ],
+			      [ 'multiline' ] ],
+		  'grep' => [ '^/$',
+			      'Limit to hostname: admin.'.$test_domain,
+			      'Last rule: Yes',
+			      'Destination: '.$webmin_proto.'://'.$test_domain.':'.$webmin_port ],
+		},
+		) : ( ),
 
 	# Test HTTP and HTTPS get to webmail alias
 	{ 'command' => $wget_command.'http://webmail.'.$test_domain,
