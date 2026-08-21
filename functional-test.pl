@@ -14647,40 +14647,40 @@ $compression_tests = [
 
 	# Backup to a temp file in tar.zst format, if zstd is installed
 	&has_command("zstd") ? (
-	{ 'command' => 'backup-domain.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'all-features' ],
-		      [ 'dest', $test_zstd_backup_file ],
-		      [ 'compression', 'zstd' ] ],
-	},
+		{ 'command' => 'backup-domain.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'all-features' ],
+			      [ 'dest', $test_zstd_backup_file ],
+			      [ 'compression', 'zstd' ] ],
+		},
 
-	# Check that it's actually a tar.zst
-	{ 'command' => 'file '.$test_zstd_backup_file,
-	  'grep' => ['Zstandard compressed data'],
-	},
+		# Check that it's actually a tar.zst
+		{ 'command' => 'zstd -l '.$test_zstd_backup_file,
+		  'grep' => ['Frames'],
+		},
 
-	# Remove the .info and .dom files, so that the restore has to read the
-	# archive itself to find its contents
-	{ 'command' => 'rm -f '.$test_zstd_backup_file.'.info '.
-			      $test_zstd_backup_file.'.dom',
-	},
+		# Remove the .info and .dom files, so that the restore has to read the
+		# archive itself to find its contents
+		{ 'command' => 'rm -f '.$test_zstd_backup_file.'.info '.
+				      $test_zstd_backup_file.'.dom',
+		},
 
-	# Delete web page
-	{ 'command' => 'rm -f ~'.$test_domain_user.'/public_html/index.*',
-	},
+		# Delete web page
+		{ 'command' => 'rm -f ~'.$test_domain_user.'/public_html/index.*',
+		},
 
-	# Restore from the tar.zst
-	{ 'command' => 'restore-domain.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'all-features' ],
-		      [ 'source', $test_zstd_backup_file ] ],
-	},
+		# Restore from the tar.zst
+		{ 'command' => 'restore-domain.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'all-features' ],
+			      [ 'source', $test_zstd_backup_file ] ],
+		},
 
-	# Test HTTP get on restored file
-	{ 'command' => $wget_command.'http://'.$test_domain,
-	  'grep' => 'Test home page',
-	  'quiet' => 1,
-	},
+		# Test HTTP get on restored file
+		{ 'command' => $wget_command.'http://'.$test_domain,
+		  'grep' => 'Test home page',
+		  'quiet' => 1,
+		},
 	) : ( ),
 
 	# Backup to a ZIP file, but without specifying a compression format
