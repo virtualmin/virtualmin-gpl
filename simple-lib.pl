@@ -289,8 +289,9 @@ else {
 			    undef, $tds);
 	}
 
-if (!$nobounce) {
-	# Bounce back
+if (!$nobounce && ($can_alias_types{9} || $simple->{'bounce'})) {
+	# Bounce back, but only if the mail server supports it, or if it is
+	# already set on this alias so that it can still be turned off
 	print &ui_table_row(&hlink($text{$sfx.'_bounce'}, $sfx."_bounce"),
 			    &ui_checkbox("bounce", 1, $text{'alias_bounceyes'},
 					 $simple->{'bounce'}),
@@ -424,7 +425,9 @@ else {
 		delete($simple->{'local'});
 		}
 	}
-if (!$nobounce) {
+if (!$nobounce && ($can_alias_types{9} || $simple->{'bounce'})) {
+	# Only accept the bounce flag when the field was actually shown by
+	# &show_simple_form, which uses the same condition
 	$simple->{'bounce'} = $in->{'bounce'};
 	}
 my $mb_or_alias =
