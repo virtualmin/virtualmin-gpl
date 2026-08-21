@@ -572,16 +572,48 @@ foreach my $c ("/etc/clamd.conf", "/etc/clamd.d/scan.conf",
 	&set_ownership_permissions(undef, undef, 0666, $sfile);
 	}
 
+# Seed a newly installed ClamAV database before starting clamd. The EL 10
+# freshclam service performs its first update in the background, so starting
+# clamd immediately after the service creates a race that leaves clamd with no
+# supported database files.
+my @clamdbs = (glob("/var/lib/clamav/*.cvd"),
+	       glob("/var/lib/clamav/*.cld"));
+my $seeded_clamdb = 0;
+if (!@clamdbs) {
+	my $freshclam = &has_command("freshclam");
+	if ($freshclam) {
+		my $freshclam_running =
+			&init::action_status('clamav-freshclam') == 2;
+		&init::stop_action('clamav-freshclam') if ($freshclam_running);
+		&$first_print(&text('clamd_start_updater'));
+		my ($out, $timed_out) =
+			&backquote_with_timeout("$freshclam 2>&1", 300, 1);
+		my $status = $?;
+		@clamdbs = (glob("/var/lib/clamav/*.cvd"),
+			     glob("/var/lib/clamav/*.cld"));
+		if ($timed_out || $status || !@clamdbs) {
+			# Restore the updater daemon if it was stopped
+			&init::start_action('clamav-freshclam')
+				if ($freshclam_running);
+			&$second_print(&text('clamd_estart',
+				"<tt>".&html_escape($out)."</tt>"));
+			return 0;
+			}
+		$seeded_clamdb = 1;
+		&$second_print($text{'setup_done'});
+		}
+	}
 
 if (&init::action_status('clamav-freshclam')) {
-	&$first_print(&text('clamd_start_updater'));
+	&$first_print(&text('clamd_start_updater')) if (!$seeded_clamdb);
 	&init::enable_at_boot('clamav-freshclam');
 	my ($ok, $out) = &init::restart_action('clamav-freshclam');
 	if (!$ok || $out =~ /failed|error/i) {
+		&$first_print(&text('clamd_start_updater')) if ($seeded_clamdb);
 		&$second_print(&text('clamd_estart',
 				"<tt>".&html_escape($out)."</tt>"));
 		}
-	else {
+	elsif (!$seeded_clamdb) {
 		&$second_print($text{'setup_done'});
 		}
 	}
