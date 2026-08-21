@@ -72,6 +72,12 @@ USER: foreach $line (@lines) {
 	# Add destinations to the simple object
 	foreach $dest (@dests) {
 		if ($dest eq "bounce") {
+			if (!$can_alias_types{9}) {
+				# Not supported by this mail server
+				&line_error($text{'alias_etype'}." : ".
+					    $text{'alias_type9'});
+				next USER;
+				}
 			$simple->{'bounce'} = 1;
 			}
 		elsif ($dest =~ /^local\s+(\S+)$/) {

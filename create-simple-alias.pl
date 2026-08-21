@@ -19,7 +19,8 @@ To deliver directly to the inbox of some user (bypassing other forwarding),
 use the C<--local> parameter, followed by a full username like C<jamie.somedomain>.
 
 To bounce mail back to the sender, use the C<--bounce> flag. This is useful if you
-have a catchall address setup for the domain.
+have a catchall address setup for the domain. Note that this is not supported when
+Postfix is the mail server.
 
 To setup an autoresponder, use the C<--autoreply> parameter followed by the text of
 the automatic reply message. The from address for automatic replies can be set with
@@ -67,6 +68,8 @@ while(@ARGV > 0) {
 		push(@forward, $forward);
 		}
 	elsif ($a eq "--bounce") {
+		$can_alias_types{9} ||
+		  &usage("Your mail server does not support bouncing mail");
 		$bounce = 1;
 		}
 	elsif ($a eq "--local") {
