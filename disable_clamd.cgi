@@ -10,12 +10,15 @@ print $text{'sv_disabling'},"<br>\n";
 $ok = &disable_clamd();
 if ($ok) {
 	($scanner) = &get_global_virus_scanner();
-	if ($scanner eq "clamdscan") {
-		&$first_print("<b>".$text{'sv_warning'}."</b>");
-		}
 	&webmin_log("disable", "clamd");
 	}
 &$outdent_print();
+
+# Warn if the server scanner is still selected but clamd is now stopped
+if ($ok && $scanner eq "clamdscan") {
+	print &ui_tag('p').&ui_alert_box($text{'sv_warning'}, 'warn',
+					 undef, undef, '');
+	}
 
 &run_post_actions();
 &ui_print_footer("edit_newsv.cgi", $text{'sv_return'});

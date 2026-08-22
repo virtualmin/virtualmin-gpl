@@ -6627,7 +6627,7 @@ sv_return=spam and virus scanning
 sv_enabling=Configuring and enabling the ClamAV scanning server ..
 sv_enabledok=.. all done
 sv_notenabled=.. something went wrong!
-sv_warning=Warning! Virtualmin is configured to use the server scanner, but the ClamAV server process is no longer running
+sv_warning=Warning! Virtualmin is configured to use the server scanner, but the ClamAV server process is no longer running.
 sv_sdisable=Disable SpamAssassin Server
 sv_sdisabledesc=Click this button to shut down the SpamAssassin filter server. It will no longer be possible to use the <tt>spamc</tt> server scanner above.
 sv_senable=Enable SpamAssassin Server
@@ -6636,7 +6636,7 @@ sv_title4=Disable Spam Filtering Server
 sv_title5=Enable Spam Filtering Server
 sv_sdisabling=Disabling the SpamAssassin filtering server ..
 sv_senabling=Configuring and enabling the SpamAssassin filtering server ..
-sv_swarning=Warning! Virtualmin is configured to use the server filter, but the SpamAssassin server process is no longer running
+sv_swarning=Warning! Virtualmin is configured to use the server filter, but the SpamAssassin server process is no longer running.
 
 features_title=Features and Plugins
 newfeatures_title=Features and Plugins

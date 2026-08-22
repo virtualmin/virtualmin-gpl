@@ -10,12 +10,16 @@ print $text{'sv_sdisabling'},"<br>\n";
 $ok = &disable_spamd();
 if ($ok) {
 	($scanner) = &get_global_spam_client();
-	if ($scanner eq "spamc") {
-		&$first_print("<b>".$text{'sv_swarning'}."</b>");
-		}
 	&webmin_log("disable", "spamd");
 	}
 &$outdent_print();
+
+# Warn if the server filter is still selected but spamd is now stopped
+if ($ok && $scanner eq "spamc") {
+	print &ui_tag('p').&ui_alert_box($text{'sv_swarning'}, 'warn',
+					 undef, undef, '');
+	}
+
 &run_post_actions();
 
 &ui_print_footer("edit_newsv.cgi", $text{'sv_return'});
