@@ -575,32 +575,61 @@ foreach my $c ("/etc/clamd.conf", "/etc/clamd.d/scan.conf",
 # Seed a newly installed ClamAV database before starting clamd. The EL 10
 # freshclam service performs its first update in the background, so starting
 # clamd immediately after the service creates a race that leaves clamd with no
-# supported database files.
-my @clamdbs = (glob("/var/lib/clamav/*.cvd"),
-	       glob("/var/lib/clamav/*.cld"));
+# supported database files. Both main and daily (.cvd, .cld or a legacy .inc
+# directory) are required, as the Debian clamav-daemon unit refuses to start
+# without either of them.
+my $has_clamdbs = sub {
+	foreach my $db ("main", "daily") {
+		my @found = grep { -e "/var/lib/clamav/$db.$_" }
+				 ("cvd", "cld", "inc");
+		return 0 if (!@found);
+		}
+	return 1;
+	};
 my $seeded_clamdb = 0;
-if (!@clamdbs) {
+if (!$has_clamdbs->()) {
 	my $freshclam = &has_command("freshclam");
 	if ($freshclam) {
-		my $freshclam_running =
-			&init::action_status('clamav-freshclam') == 2;
-		&init::stop_action('clamav-freshclam') if ($freshclam_running);
 		&$first_print(&text('clamd_start_updater'));
+
+		# Stop a running updater daemon so the one-off run can take
+		# its lock
+		my $freshclam_running =
+			&init::status_action('clamav-freshclam') == 1;
+		if ($freshclam_running) {
+			my ($ok, $out) =
+				&init::stop_action('clamav-freshclam');
+			if (!$ok || $out =~ /failed|error/i) {
+				&$second_print(&text('clamd_estop',
+					"<tt>".&html_escape($out)."</tt>"));
+				return 0;
+				}
+			}
 		my ($out, $timed_out) =
 			&backquote_with_timeout("$freshclam 2>&1", 300, 1);
 		my $status = $?;
-		@clamdbs = (glob("/var/lib/clamav/*.cvd"),
-			     glob("/var/lib/clamav/*.cld"));
-		if ($timed_out || $status || !@clamdbs) {
+		if ($timed_out || $status || !$has_clamdbs->()) {
 			# Restore the updater daemon if it was stopped
-			&init::start_action('clamav-freshclam')
-				if ($freshclam_running);
+			if ($freshclam_running) {
+				my ($ok, $restart_out) =
+					&init::start_action('clamav-freshclam');
+				if (!$ok || $restart_out =~ /failed|error/i) {
+					$out .= "\n" if ($out);
+					$out .= &text('clamd_erestart_updater',
+						$restart_out);
+					}
+				}
 			&$second_print(&text('clamd_estart',
 				"<tt>".&html_escape($out)."</tt>"));
 			return 0;
 			}
 		$seeded_clamdb = 1;
 		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$first_print(&text('clamd_start_updater'));
+		&$second_print($text{'clamd_efreshclam'});
+		return 0;
 		}
 	}
 
@@ -941,4 +970,3 @@ sub release_lock_virus
 $done_feature_script{'virus'} = 1;
 
 1;
-
