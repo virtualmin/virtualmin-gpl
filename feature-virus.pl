@@ -586,6 +586,24 @@ my $has_clamdbs = sub {
 		}
 	return 1;
 	};
+# On a fresh EL install, RPM can create the database directory before the
+# clamupdate system account exists and leave it owned by root, which stops
+# freshclam from ever writing a database. Fix this regardless of whether any
+# databases were shipped by a package, as they are left owned by root too.
+my @clamupdate = getpwnam('clamupdate');
+my @dbdir = stat('/var/lib/clamav');
+if (@clamupdate && @dbdir &&
+    ($dbdir[4] != $clamupdate[2] || $dbdir[5] != $clamupdate[3])) {
+	&$first_print($text{'clamd_dbowner'});
+	if (!&set_ownership_permissions($clamupdate[2], $clamupdate[3], undef,
+					'/var/lib/clamav')) {
+		&$second_print(&text('clamd_edbowner',
+			"<tt>".&html_escape($!)."</tt>"));
+		return 0;
+		}
+	&$second_print($text{'setup_done'});
+	}
+
 my $seeded_clamdb = 0;
 if (!$has_clamdbs->()) {
 	my $freshclam = &has_command("freshclam");
