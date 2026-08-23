@@ -88,6 +88,14 @@ To override the default compression format set on the Virtualmin Configuration
 page, use the C<--compression> flag followed by one of C<gzip>, C<bzip2>, 
 C<tar> or C<zip>.
 
+By default, scheduled backups follow the Virtualmin Configuration setting for
+including MySQL binary log coordinates. Use
+C<--enable-mysql-binlog-coordinates> or
+C<--disable-mysql-binlog-coordinates> to override it for this schedule. When
+enabled, this adds C<--source-data=2> if the configured dump client supports
+it, or C<--master-data=2> otherwise, without making the replication statement
+executable when the dump is restored.
+
 Scheduled backups can have an optional description, which can be set with the
 C<--desc> flag.
 
@@ -207,6 +215,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mailfiles") {
 		# Convenience flag for --option mail mailfiles 1
 		# Deprecated, as this is on by default now
+		}
+	elsif ($a eq "--enable-mysql-binlog-coordinates") {
+		# Include binary log coordinates in this schedule
+		$opts{'mysql'}->{'source_data'} = 2;
+		}
+	elsif ($a eq "--disable-mysql-binlog-coordinates") {
+		# Omit binary log coordinates from this schedule
+		$opts{'mysql'}->{'source_data'} = 0;
 		}
 	elsif ($a eq "--as-owner") {
 		# Run as domain owner
@@ -478,6 +494,8 @@ if (&has_incremental_tar()) {
 print "                         [--all-virtualmin] | [--virtualmin config] |\n";
 print "                                              [--except-virtualmin config]\n";
 print "                         [--option \"feature name value\"]\n";
+print "                         [--enable-mysql-binlog-coordinates |\n";
+print "                          --disable-mysql-binlog-coordinates]\n";
 print "                         [--as-owner]\n";
 print "                         [--exclude file]*\n";
 print "                         [--include file]*\n";

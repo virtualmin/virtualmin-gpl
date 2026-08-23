@@ -1159,6 +1159,28 @@ else {
 return undef;
 }
 
+# get_mysql_backup_parameters(&options, [dump-command])
+# Returns the binary log coordinate option for Webmin's MySQL backup function.
+sub get_mysql_backup_parameters
+{
+my ($opts, $dumpcmd) = @_;
+
+# Use the backup setting when present, or the global default otherwise
+my $source_data = $opts && defined($opts->{'source_data'}) ?
+	$opts->{'source_data'} : $config{'mysql_source_data'} ? 2 : 0;
+return undef if ($source_data ne '2');
+
+# Use the option name supported by the local dump client, not the server version
+return "--master-data=2" if (!$dumpcmd);
+if (!defined($mysql_source_data_support_cache{$dumpcmd})) {
+	my $help = &backquote_command("$dumpcmd --help 2>&1 </dev/null");
+	$mysql_source_data_support_cache{$dumpcmd} =
+		$help =~ /^\s*--source-data(?:\[|=|\s|$)/m ? 1 : 0;
+	}
+return $mysql_source_data_support_cache{$dumpcmd} ?
+	"--source-data=2" : "--master-data=2";
+}
+
 # backup_mysql(&domain, file, &options, home-format, differential, [&as-domain],
 #              &all-options, &key)
 # Dumps this domain's mysql database to a backup file
@@ -1192,6 +1214,8 @@ my @hosts = &get_mysql_allowed_hosts($d);
 my $mymod = &get_domain_mysql_module($d);
 my %info = ( 'hosts' => join(' ', @hosts),
 		'remote' => $mymod->{'config'}->{'host'} );
+my $parameters = &get_mysql_backup_parameters(
+	$opts, $mymod->{'config'}->{'mysqldump'});
 foreach $db (@dbs) {
 	if (&foreign_defined($mymod, "get_character_set")) {
 		$info{'charset_'.$db} = &foreign_call(
@@ -1227,7 +1251,8 @@ foreach $db (@dbs) {
 	my $err = &foreign_call(
 		$mymod, "backup_database", $db, $dbfile, 0, 1, undef,
 		$cs, undef, $tables, $d->{'user'},
-		&mysql_single_transaction($d, $db), 0, $allopts->{'skip'});
+		&mysql_single_transaction($d, $db), 0, $allopts->{'skip'},
+		$parameters);
 	if (!$err) {
 		$err = &validate_mysql_backup($dbfile);
 		}
