@@ -159,6 +159,31 @@ if (!$d->{'alias'}) {
 		}
 	}
 
+# HTTP3 protocol support?
+if (!$d->{'alias'}) {
+	my $canprots = &get_domain_supported_http_protocols($d);
+	my $prots = &get_domain_http_protocols($d);
+	my $defprots = &get_default_http_protocols($d);
+	if (&indexof("h3", @$canprots) >= 0 && ref($prots)) {
+		if (@$defprots) {
+			$def = &indexof("h3", @$defprots) >= 0 ? $text{'yes'}
+						       : $text{'no'};
+			$inp = &ui_radio("http3",
+				@$prots == 0 ? 2 :
+				&indexof("h3", @$prots) >= 0 ? 1 : 0,
+				[ [ 2, $text{'newweb_http2_def'}." ($def)" ],
+				  [ 1, $text{'yes'} ],
+				  [ 0, $text{'no'} ] ]);
+			}
+		else {
+			$inp = &ui_yesno_radio(
+				"http3", &indexof("h3", @$prots) >= 0);
+			}
+		print &ui_table_row(
+			&hlink($text{'phpmode_http3'}, "http3"), $inp);
+		}
+	}
+
 # Pass hostname to proxies?
 if (&has_proxy_host($d) && &list_proxy_balancers($d) &&
     ($proxyhost = &get_domain_proxy_host($d)) >= 0) {
