@@ -199,7 +199,7 @@ elsif ($config{'dynip_service'} eq 'webmin') {
 	&http_download($whost, $wport,
 		       "/virtual-server/remote.cgi?program=modify-dns&".
 		       "domain=".&urlize($dom)."&".
-		       "update-record=".&urlize("$host A\n$host A $newip"),
+		       "update-record=".&urlize("$host A\n$host A $ip"),
 		       \$out, \$error, undef, 1,
 		       $config{'dynip_user'},
 		       $config{'dynip_pass'},
@@ -214,7 +214,7 @@ elsif ($config{'dynip_service'} eq 'webmin') {
 		return (undef, "Invalid hostname");
 		}
 	elsif ($out =~ /Exit\s+status:\s+0/i) {
-		return ($newip, undef);
+		return ($ip, undef);
 		}
 	else {
 		return (undef, $out);
