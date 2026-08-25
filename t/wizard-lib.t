@@ -236,4 +236,61 @@ subtest 'an unknown service state blocks setup and startup' => sub {
 		'PostgreSQL is not initialized or started');
 	};
 
+subtest 'spam filtering is asked before virus scanning' => sub {
+	local %main::config = ( 'spam' => 1, 'virus' => 1 );
+	local $main::mail_system = 0;
+	my @steps = &main::get_wizard_steps();
+	my %index = map { $steps[$_] => $_ } (0 .. $#steps);
+	ok(defined($index{'spam'}), 'spam step is included');
+	ok(defined($index{'virus'}), 'virus step is included');
+	ok($index{'spam'} < $index{'virus'},
+		'spam step is shown before the virus step');
+	};
+
+subtest 'virus scanning step requires spam filtering' => sub {
+	local %main::config = ( 'spam' => 0, 'virus' => 1 );
+	local $main::mail_system = 0;
+	my @steps = &main::get_wizard_steps();
+	is(scalar(grep { $_ eq 'virus' } @steps), 0,
+		'virus step is skipped without spam filtering');
+	};
+
+subtest 'wizard navigation follows configuration changes' => sub {
+	local %main::config = ( 'spam' => 1, 'virus' => 1 );
+	local $main::mail_system = 0;
+	my @old = &main::get_wizard_steps();
+	my $next = &main::get_wizard_next_step('spam', \@old);
+	is($old[$next], 'virus', 'next step follows the current one');
+	$main::config{'virus'} = 0;
+	my @new = &main::get_wizard_steps();
+	$next = &main::get_wizard_next_step('virus', \@old);
+	is($new[$next], 'db', 'removed step advances to the next surviving one');
+	is(&main::get_wizard_next_step('done', \@new), undef,
+		'wizard finishes after the last step');
+	};
+
+subtest 'enabling virus scanning preserves optional default state' => sub {
+	no warnings qw(redefine once);
+	local %main::config = ( 'spam' => 1, 'virus' => 2 );
+	local *main::check_clamd_status = sub { return 0; };
+	local *main::push_all_print = sub { };
+	local *main::set_all_null_print = sub { };
+	local *main::pop_all_print = sub { };
+	local *main::disable_clamd = sub { };
+	local *main::save_global_virus_scanner = sub { };
+	local *main::save_module_config = sub { };
+	my $result = &main::wizard_parse_virus({ 'clamd' => 2 });
+	is($result, undef, 'wizard step succeeds');
+	is($main::config{'virus'}, 2, 'enabled-but-not-default state is kept');
+	};
+
+subtest 'virus scanning cannot be enabled without spam filtering' => sub {
+	local %main::config = ( 'spam' => 0, 'virus' => 1 );
+	local %main::text = ( 'check_evirusspam' => 'evirusspam' );
+	my $result = &main::wizard_parse_virus({ 'clamd' => 1 });
+	is($result, 'evirusspam', 'enabling clamd is rejected');
+	$result = &main::wizard_parse_virus({ 'clamd' => 2 });
+	is($result, 'evirusspam', 'enabling clamscan is rejected');
+	};
+
 done_testing();

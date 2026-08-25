@@ -15,13 +15,41 @@ sub get_wizard_steps
 {
 return ( "intro",
 	 $config{'spam'} ? ( "memory" ) : ( ),
-	 $config{'virus'} ? ( "virus" ) : ( ),
 	 $config{'spam'} ? ( "spam" ) : ( ),
+	 # Virus scanning depends on spam filtering, which sets up the
+	 # procmail configuration used to run the scanner
+	 $config{'spam'} && $config{'virus'} ? ( "virus" ) : ( ),
 	 "db",
 	 $config{'mysql'} ? ( "mysql" ) : ( ),
 	 $config{'dns'} ? ( "dns" ) : ( ),
 	 $mail_system == 99 ? ( ) : "email",
 	 "done" );
+}
+
+# get_wizard_next_step(step, &old-steps)
+# Returns the index of the step to show after the given one in the re-computed
+# step list, or undef if the wizard is complete. Parsing a step can enable or
+# disable features, which changes the list of remaining steps.
+sub get_wizard_next_step
+{
+my ($current, $oldsteps) = @_;
+my @steps = &get_wizard_steps();
+my %index = map { $steps[$_] => $_ } (0 .. $#steps);
+if (defined($index{$current})) {
+	# Step is still in the flow, so move to the one following it
+	my $next = $index{$current} + 1;
+	return $next < scalar(@steps) ? $next : undef;
+	}
+# The step removed itself from the flow, so find the first of the steps
+# that followed it which still exists
+my $oldidx = 0;
+foreach my $i (0 .. $#$oldsteps) {
+	$oldidx = $i if ($oldsteps->[$i] eq $current);
+	}
+foreach my $s (@$oldsteps[$oldidx+1 .. $#$oldsteps]) {
+	return $index{$s} if (defined($index{$s}));
+	}
+return undef;
 }
 
 sub wizard_show_intro
@@ -88,6 +116,9 @@ sub wizard_parse_virus
 {
 my ($in) = @_;
 if (defined($in->{'clamd'})) {
+	# Virus scanning cannot be enabled without spam filtering
+	return $text{'check_evirusspam'}
+		if ($in->{'clamd'} != 0 && !$config{'spam'});
 	my $cs = &check_clamd_status();
 	if ($in->{'clamd'} == 1 && !$cs) {
 		# Enable if needed
@@ -119,7 +150,7 @@ if (defined($in->{'clamd'})) {
 		else {
 			return $text{'wizard_eclamdenable'};
 			}
-		$config{'virus'} = 1;
+		$config{'virus'} ||= 1;
 		&save_module_config();
 		}
 	elsif ($in->{'clamd'} == 0) {
@@ -144,7 +175,7 @@ if (defined($in->{'clamd'})) {
 		&disable_clamd();
 		&pop_all_print();
 		&save_global_virus_scanner("clamscan");
-		$config{'virus'} = 1;
+		$config{'virus'} ||= 1;
 		&save_module_config();
 		}
 	}

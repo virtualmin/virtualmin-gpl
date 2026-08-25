@@ -25,9 +25,11 @@ if ($in{'parse'} || $in{'mypass'}) {
 		&webmin_log("wizard", undef, $step);
 		}
 	if (!$err) {
-		# Worked, show next step, if there is one
-		if ($in{'step'}+1 < scalar(@wizard_steps)) {
-			&redirect("wizard.cgi?step=".($in{'step'}+1));
+		# Worked, show next step, if there is one. The step list is
+		# re-computed, as parsing may have changed the enabled features
+		my $next = &get_wizard_next_step($step, \@wizard_steps);
+		if (defined($next)) {
+			&redirect("wizard.cgi?step=".$next);
 			}
 		else {
 			$config{'wizard_run'} = 1;
