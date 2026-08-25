@@ -13,6 +13,33 @@ BEGIN {
 do "$FindBin::Bin/../wizard-lib.pl"
 	or die "Failed to load wizard-lib.pl: $@ $!";
 
+# Get the PostgreSQL default shown by the database wizard with detection calls
+# stubbed out
+sub get_postgres_wizard_default
+{
+my (%opts) = @_;
+my @calls;
+my $default;
+
+{
+	no warnings qw(redefine once);
+	local %main::config = ( 'postgres' => $opts{'feature'} || 0 );
+	local $postgresql::hba_conf_file = $opts{'hba_conf_file'};
+	local *main::foreign_installed = sub {
+		push(@calls, 'installed-'.$_[1]);
+		return $opts{'installed'};
+		};
+	local *main::require_postgres = sub { push(@calls, 'require'); };
+	local *postgresql::is_postgresql_running = sub {
+		push(@calls, 'running');
+		return $opts{'running'};
+		};
+	$default = &main::get_wizard_postgres_default();
+	}
+
+return ($default, \@calls);
+}
+
 # Run the database wizard parser with database and service calls stubbed out
 sub run_db_wizard
 {
@@ -78,6 +105,30 @@ $main::slept = 0;
 
 return ($result, \@postgres_calls);
 }
+
+subtest 'configured PostgreSQL is preselected without changing its feature' => sub {
+	my ($default, $calls) = get_postgres_wizard_default(
+		'installed' => 1,
+		'hba_conf_file' => '/etc/postgresql/17/main/pg_hba.conf',
+		);
+	is($default, 1, 'configured local cluster defaults to Yes');
+	is_deeply($calls, [ 'installed-0', 'require' ],
+		'stopped cluster is detected without a configured-state cache');
+
+	($default, $calls) = get_postgres_wizard_default(
+		'installed' => 1,
+		'running' => 1,
+		);
+	is($default, 1, 'reachable configured server defaults to Yes');
+	is_deeply($calls, [ 'installed-0', 'require', 'running' ],
+		'running server is detected directly');
+
+	($default, $calls) = get_postgres_wizard_default(
+		'installed' => 1,
+		'running' => 0,
+		);
+	is($default, 0, 'uninitialized installation still defaults to No');
+	};
 
 subtest 'an uninitialized local server is set up before it is started' => sub {
 	my ($result, $calls) = run_db_wizard(
@@ -269,28 +320,153 @@ subtest 'wizard navigation follows configuration changes' => sub {
 		'wizard finishes after the last step');
 	};
 
-subtest 'enabling virus scanning preserves optional default state' => sub {
+subtest 'scanner wizard choices only offer daemonized yes or disabled no' => sub {
 	no warnings qw(redefine once);
-	local %main::config = ( 'spam' => 1, 'virus' => 2 );
+	my %choices;
+	local %main::text;
+	local *main::ui_table_row = sub { return ''; };
+	local *main::ui_radio = sub {
+		$choices{$_[0]} = [ map { $_->[0] } @{$_[2]} ];
+		return '';
+		};
 	local *main::check_clamd_status = sub { return 0; };
-	local *main::push_all_print = sub { };
-	local *main::set_all_null_print = sub { };
-	local *main::pop_all_print = sub { };
-	local *main::disable_clamd = sub { };
-	local *main::save_global_virus_scanner = sub { };
+	local *main::check_spamd_status = sub { return 0; };
+	&main::wizard_show_spam();
+	&main::wizard_show_virus();
+	is_deeply($choices{'spamd'}, [ 1, 0 ],
+		'spam wizard has only daemonized and disabled choices');
+	is_deeply($choices{'clamd'}, [ 1, 0 ],
+		'virus wizard has only daemonized and disabled choices');
+	};
+
+subtest 'enabling virus scanning selects clamd and preserves feature state' => sub {
+	no warnings qw(redefine once);
+	my @scanners;
+	local %main::config = ( 'spam' => 1, 'virus' => 2 );
+	local *main::check_clamd_status = sub { return 1; };
+	local *main::save_global_virus_scanner = sub {
+		push(@scanners, $_[0]);
+		};
 	local *main::save_module_config = sub { };
-	my $result = &main::wizard_parse_virus({ 'clamd' => 2 });
+	my $result = &main::wizard_parse_virus({ 'clamd' => 1 });
 	is($result, undef, 'wizard step succeeds');
+	is_deeply(\@scanners, [ 'clamdscan' ],
+		'daemonized virus scanner is selected');
 	is($main::config{'virus'}, 2, 'enabled-but-not-default state is kept');
 	};
 
 subtest 'virus scanning cannot be enabled without spam filtering' => sub {
+	no warnings qw(redefine once);
 	local %main::config = ( 'spam' => 0, 'virus' => 1 );
 	local %main::text = ( 'check_evirusspam' => 'evirusspam' );
+	local *main::check_clamd_status = sub { return 1; };
 	my $result = &main::wizard_parse_virus({ 'clamd' => 1 });
 	is($result, 'evirusspam', 'enabling clamd is rejected');
-	$result = &main::wizard_parse_virus({ 'clamd' => 2 });
-	is($result, 'evirusspam', 'enabling clamscan is rejected');
+	};
+
+subtest 'disabling virus scanning disables clamd and the feature' => sub {
+	no warnings qw(redefine once);
+	my @calls;
+	local %main::config = ( 'spam' => 1, 'virus' => 1 );
+	local *main::check_clamd_status = sub { return 0; };
+	local *main::list_domains = sub { return (); };
+	local *main::push_all_print = sub { };
+	local *main::set_all_null_print = sub { };
+	local *main::pop_all_print = sub { };
+	local *main::disable_clamd = sub { push(@calls, 'disable-clamd'); };
+	local *main::save_global_virus_scanner = sub {
+		push(@calls, 'scanner-'.$_[0]);
+		};
+	local *main::save_module_config = sub { };
+	my $result = &main::wizard_parse_virus({ 'clamd' => 0 });
+	is($result, undef, 'wizard step succeeds');
+	is_deeply(\@calls, [ 'disable-clamd', 'scanner-clamscan' ],
+		'stopped clamd is disabled at boot and a dormant client is stored');
+	is($main::config{'virus'}, 0, 'virus feature is disabled');
+	};
+
+subtest 'enabling spam filtering selects spamd and preserves feature state' => sub {
+	no warnings qw(redefine once);
+	my @clients;
+	local %main::config = ( 'spam' => 2, 'virus' => 1 );
+	local *main::check_spamd_status = sub { return 1; };
+	local *main::save_global_spam_client = sub {
+		push(@clients, $_[0]);
+		};
+	local *main::save_module_config = sub { };
+	my $result = &main::wizard_parse_spam({ 'spamd' => 1 });
+	is($result, undef, 'wizard step succeeds');
+	is_deeply(\@clients, [ 'spamc' ],
+		'daemonized spam client is selected');
+	is($main::config{'spam'}, 2, 'enabled-but-not-default state is kept');
+	};
+
+subtest 'disabling spam filtering also disables dependent virus scanning' => sub {
+	no warnings qw(redefine once);
+	my @calls;
+	local %main::config = ( 'spam' => 1, 'virus' => 1 );
+	local $main::mail_system = 0;
+	my @old = &main::get_wizard_steps();
+	local *main::list_domains = sub { return (); };
+	local *main::check_spamd_status = sub { return 0; };
+	local *main::check_clamd_status = sub { return 0; };
+	local *main::push_all_print = sub { };
+	local *main::set_all_null_print = sub { };
+	local *main::pop_all_print = sub { };
+	local *main::disable_spamd = sub { push(@calls, 'disable-spamd'); };
+	local *main::disable_clamd = sub { push(@calls, 'disable-clamd'); };
+	local *main::delete_lookup_domain_daemon = sub {
+		push(@calls, 'stop-lookup');
+		};
+	local *main::save_global_spam_client = sub {
+		push(@calls, 'spam-'.$_[0]);
+		};
+	local *main::save_global_virus_scanner = sub {
+		push(@calls, 'virus-'.$_[0]);
+		};
+	local *main::save_module_config = sub { };
+	my $result = &main::wizard_parse_spam({ 'spamd' => 0 });
+	is($result, undef, 'wizard step succeeds');
+	is_deeply(\@calls,
+		[ 'disable-spamd', 'disable-clamd', 'stop-lookup',
+		  'spam-spamassassin', 'virus-clamscan' ],
+		'filtering daemons are disabled and dormant clients are stored');
+	is($main::config{'spam'}, 0, 'spam feature is disabled');
+	is($main::config{'virus'}, 0, 'dependent virus feature is disabled');
+	is($main::config{'no_lookup_domain_daemon'}, 1,
+		'lookup daemon is disabled with mail filtering');
+	my @new = &main::get_wizard_steps();
+	my $next = &main::get_wizard_next_step('spam', \@old);
+	is($new[$next], 'db',
+		'wizard skips the removed virus step after disabling spam');
+	};
+
+subtest 'domain use blocks disabling spam and virus scanning' => sub {
+	no warnings qw(redefine once);
+	my @calls;
+	local %main::config = ( 'spam' => 1, 'virus' => 1 );
+	local *main::check_spamd_status = sub { return 1; };
+	local *main::list_domains = sub {
+		return ({ 'spam' => 1 }, { 'virus' => 1 });
+		};
+	local *main::text = sub { return join(':', @_); };
+	local *main::push_all_print = sub { push(@calls, 'mutated'); };
+	my $result = &main::wizard_parse_spam({ 'spamd' => 0 });
+	is($result, 'wizard_espaminuse:2', 'domain-use error is returned');
+	is_deeply(\@calls, [], 'no services or configuration are changed');
+	};
+
+subtest 'provisioned scanners are not managed as local daemons' => sub {
+	local %main::config = (
+		'spam' => 1,
+		'virus' => 1,
+		'provision_spam_host' => 'spam.example.test',
+		'provision_virus_host' => 'virus.example.test',
+		);
+	local $main::mail_system = 0;
+	my @steps = &main::get_wizard_steps();
+	is(scalar(grep { $_ eq 'spam' || $_ eq 'virus' } @steps), 0,
+		'local daemon steps are skipped for provisioned services');
 	};
 
 done_testing();

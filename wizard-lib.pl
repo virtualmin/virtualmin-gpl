@@ -15,10 +15,13 @@ sub get_wizard_steps
 {
 return ( "intro",
 	 $config{'spam'} ? ( "memory" ) : ( ),
-	 $config{'spam'} ? ( "spam" ) : ( ),
+	 $config{'spam'} && !$config{'provision_spam_host'} ?
+		( "spam" ) : ( ),
 	 # Virus scanning depends on spam filtering, which sets up the
-	 # procmail configuration used to run the scanner
-	 $config{'spam'} && $config{'virus'} ? ( "virus" ) : ( ),
+	 # procmail configuration used to run the scanner. Provisioned
+	 # services are managed outside this local-daemon wizard.
+	 $config{'spam'} && $config{'virus'} &&
+		!$config{'provision_virus_host'} ? ( "virus" ) : ( ),
 	 "db",
 	 $config{'mysql'} ? ( "mysql" ) : ( ),
 	 $config{'dns'} ? ( "dns" ) : ( ),
@@ -99,15 +102,14 @@ sub wizard_show_virus
 print &ui_table_row(undef, $text{'wizard_virusnew'} . "<p></p>", 2);
 my $cs = &check_clamd_status();
 if ($cs != -1) {
-	$cs = 2 if (!$cs && &get_global_virus_scanner() eq 'clamscan');
 	print &ui_table_row($text{'wizard_virusmsg'},
-		&ui_radio("clamd", $cs,
+		&ui_radio("clamd", $cs ? 1 : 0,
 		  [ [ 1, $text{'wizard_virus1'}."<br>" ],
-		    $cs == 2 ? ( [ 2, $text{'wizard_virus2'}."<br>" ] ) : ( ),
 		    [ 0, $text{'wizard_virus0'} ] ]));
 	}
 else {
 	print &ui_table_row(undef, $text{'wizard_clamdnone'});
+	print &ui_hidden("clamd", 0);
 	}
 }
 
@@ -116,18 +118,19 @@ sub wizard_parse_virus
 {
 my ($in) = @_;
 if (defined($in->{'clamd'})) {
-	# Virus scanning cannot be enabled without spam filtering
-	return $text{'check_evirusspam'}
-		if ($in->{'clamd'} != 0 && !$config{'spam'});
 	my $cs = &check_clamd_status();
-	if ($in->{'clamd'} == 1 && !$cs) {
-		# Enable if needed
-		&push_all_print();
-		&set_all_null_print();
-		my $ok = &enable_clamd();
-		&pop_all_print();
-		if ($ok) {
-			# Switch to clamdscan, after testing
+	if ($in->{'clamd'}) {
+		# Virus scanning cannot be enabled without spam filtering or a
+		# manageable local clamd service
+		return $text{'check_evirusspam'} if (!$config{'spam'});
+		return $text{'wizard_eclamdenable'} if ($cs == -1);
+		if (!$cs) {
+			# Start and test clamd before selecting its client program
+			&push_all_print();
+			&set_all_null_print();
+			my $ok = &enable_clamd();
+			&pop_all_print();
+			return $text{'wizard_eclamdenable'} if (!$ok);
 			my $last_err;
 			&foreign_require("init");
 			for(my $try=0; $try<20; $try++) {
@@ -145,37 +148,26 @@ if (defined($in->{'clamd'})) {
 				}
 			return &text('wizard_eclamdtest', $last_err)
 				if ($last_err);
-			&save_global_virus_scanner("clamdscan");
 			}
-		else {
-			return $text{'wizard_eclamdenable'};
-			}
+		# Yes always means the daemonized scanner, even when clamd was
+		# already running before the wizard
+		&save_global_virus_scanner("clamdscan");
 		$config{'virus'} ||= 1;
 		&save_module_config();
 		}
-	elsif ($in->{'clamd'} == 0) {
+	else {
 		# Disable clamd and virus feature, unless some domains are
 		# using it
 		my @doms = grep { $_->{'virus'} } &list_domains();
 		if (@doms) {
 			return &text('wizard_eclaminuse', scalar(@doms));
-			}
+		}
 		&push_all_print();
 		&set_all_null_print();
-		&disable_clamd();
+		&disable_clamd() if ($cs >= 0);
 		&pop_all_print();
 		&save_global_virus_scanner("clamscan");
 		$config{'virus'} = 0;
-		&save_module_config();
-		}
-	elsif ($in->{'clamd'} == 2) {
-		# Must have been on clamscan mode, so leave it
-		&push_all_print();
-		&set_all_null_print();
-		&disable_clamd();
-		&pop_all_print();
-		&save_global_virus_scanner("clamscan");
-		$config{'virus'} ||= 1;
 		&save_module_config();
 		}
 	}
@@ -195,6 +187,7 @@ if ($cs != -1) {
 	}
 else {
 	print &ui_table_row($text{'wizard_spamdnone'});
+	print &ui_hidden("spamd", 0);
 	}
 }
 
@@ -204,30 +197,68 @@ sub wizard_parse_spam
 my ($in) = @_;
 if (defined($in->{'spamd'})) {
 	my $cs = &check_spamd_status();
-	if ($in->{'spamd'} && !$cs) {
-		# Enable if needed
-		&push_all_print();
-		&set_all_null_print();
-		my $ok = &enable_spamd();
-		&pop_all_print();
-		if ($ok) {
-			# Switch to spamc
-			&save_global_spam_client("spamc");
+	if ($in->{'spamd'}) {
+		# Yes always enables the feature with the daemonized client
+		return $text{'wizard_espamdenable'} if ($cs == -1);
+		if (!$cs) {
+			&push_all_print();
+			&set_all_null_print();
+			my $ok = &enable_spamd();
+			&pop_all_print();
+			return $text{'wizard_espamdenable'} if (!$ok);
 			}
-		else {
-			return $text{'wizard_espamdenable'};
-			}
+		&save_global_spam_client("spamc");
+		$config{'spam'} ||= 1;
+		&save_module_config();
 		}
-	elsif (!$in->{'spamd'} && $cs) {
-		# Disable if needed
+	else {
+		# Spam owns the mail-filtering chain used by virus scanning, so
+		# neither feature can be disabled while a domain uses either one
+		my @doms = grep { $_->{'spam'} || $_->{'virus'} } &list_domains();
+		if (@doms) {
+			return &text('wizard_espaminuse', scalar(@doms));
+			}
+		my $virus_enabled = $config{'virus'};
+
+		# Stop all daemons used only by the disabled filtering features
 		&push_all_print();
 		&set_all_null_print();
-		&disable_spamd();
+		&disable_spamd() if ($cs >= 0);
+		&disable_clamd()
+			if ($virus_enabled && !$config{'provision_virus_host'} &&
+			    &check_clamd_status() >= 0);
+		&delete_lookup_domain_daemon();
 		&pop_all_print();
-		&save_global_spam_client("spamassassin");
+
+		# Keep safe dormant clients so the features can be re-enabled and
+		# configured later without referring to stopped daemon services
+		$config{'spam'} = 0;
+		$config{'virus'} = 0;
+		$config{'no_lookup_domain_daemon'} = 1;
+		&save_global_spam_client("spamassassin")
+			if (!$config{'provision_spam_host'});
+		&save_global_virus_scanner("clamscan")
+			if ($virus_enabled && !$config{'provision_virus_host'});
+		&save_module_config();
 		}
 	}
 return undef;
+}
+
+# get_wizard_postgres_default()
+# Returns the PostgreSQL choice to show initially. Detect an existing usable
+# installation without changing the Virtualmin feature configuration.
+sub get_wizard_postgres_default
+{
+return 1 if ($config{'postgres'});
+return 0 if (!&foreign_installed("postgresql", 0));
+&require_postgres();
+
+# A discovered local cluster may be configured but currently stopped
+return 1 if ($postgresql::hba_conf_file);
+
+# A reachable server also covers configured remote PostgreSQL instances
+return &postgresql::is_postgresql_running() == 1 ? 1 : 0;
 }
 
 # Ask the user if he wants to run MySQL and/or PostgreSQL
@@ -237,7 +268,8 @@ print &ui_table_row(undef, $text{'wizard_db'}. "<p></p>", 2);
 print &ui_table_row($text{'wizard_db_mysql'},
                     &ui_yesno_radio("mysql", $config{'mysql'} ? 1 : 0));
 print &ui_table_row($text{'wizard_db_postgres'},
-                    &ui_yesno_radio("postgres", $config{'postgres'} ? 1 : 0));
+                    &ui_yesno_radio("postgres",
+				    &get_wizard_postgres_default()));
 }
 
 # Enable or disable MySQL and PostgreSQL, depending on user's selections
