@@ -26,6 +26,7 @@ VIRTUALMIN_COMPILE_T_FILTER='^\./backup' prove t/compile.t
 | `compile.t` | Every discovered `.pl` and `.cgi` parses cleanly with `perl -c`. It catches syntax and compile-time module-loading breakage without running normal script bodies. |
 | `btrfs-lib.t` | Btrfs qgroup unit conversion, mount-path mapping, hierarchy repair, and safe subvolume lifecycle behavior. |
 | `scripts-lib.t` | PHP extension package-name generation across supported package manager families. |
+| `wizard-lib.t` | Post-install database wizard handling for PostgreSQL initialization and startup. |
 
 ## Script Testing Guidance
 

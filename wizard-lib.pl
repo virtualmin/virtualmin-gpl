@@ -250,7 +250,31 @@ if ($in->{'postgres'}) {
 		}
 	&require_postgres();
 	$config{'postgres'} ||= 1;
-	if (&postgresql::is_postgresql_running() == 0) {
+	my $postgres_status = &postgresql::is_postgresql_running();
+	my $postgres_setup;
+	my $postgres_service_status;
+	if ($postgres_status == 0 && !$postgresql::hba_conf_file &&
+	    &postgresql::is_postgresql_local()) {
+		# Check the service when one is registered with Webmin
+		my $postgres_action = &init::action_status("postgresql");
+		$postgres_service_status = $postgres_action ?
+			&init::status_action("postgresql") : undef;
+		if (!$postgres_action || $postgres_service_status == 0) {
+			# Fall back to module setup when no service action exists
+			my $err = &postgresql::setup_postgresql();
+			return &text('wizard_epostgressetup', $err) if ($err);
+			$postgres_setup = 1;
+			$postgres_service_status = &init::status_action("postgresql")
+				if ($postgres_action);
+			}
+		elsif ($postgres_service_status != 1) {
+			# Don't initialize or start when service status is unknown
+			return &text('wizard_epostgresconf', '../postgresql/');
+			}
+		}
+	if ($postgres_status == 0 &&
+	    (!defined($postgres_service_status) ||
+	     $postgres_service_status != 1)) {
 		my $err = &postgresql::start_postgresql();
 		return &text('wizard_epostgresstart', $err) if ($err);
 		}
@@ -259,7 +283,9 @@ if ($in->{'postgres'}) {
 		}
 
 	# Make sure PostgreSQL can be used
-	if (&foreign_installed("postgresql", 1) != 2) {
+	# A newly initialized module still has its old state cached, and setup
+	# and startup errors for it have already been checked above
+	if (!$postgres_setup && &foreign_installed("postgresql", 1) != 2) {
 		return &text('wizard_epostgresconf', '../postgresql/');
 		}
 	}
