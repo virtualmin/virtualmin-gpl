@@ -22,6 +22,7 @@
 * Add ability to show disk usage on the virtual server summary page
 * Fix cross-stack restores to preserve target system features, disable unavailable domain features and handle PHP modes correctly
 * Fix to restore preflight checks and error reporting to catch clashes earlier and show SSL failures
+* Fix post-installation wizard setup for PostgreSQL, SpamAssassin and ClamAV
 * Fix to enforce mailbox and domain disk quota on mail delivery even when spam filtering is disabled, so full mailboxes no longer lock out webmail and IMAP access
 * Fix domain registration expiry checks taking too long when a WHOIS server does not respond
 * Fix PHP-FPM version repair running during package updates
