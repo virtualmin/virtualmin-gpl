@@ -277,6 +277,12 @@ if ($in->{'postgres'}) {
 	     $postgres_service_status != 1)) {
 		my $err = &postgresql::start_postgresql();
 		return &text('wizard_epostgresstart', $err) if ($err);
+		# The service command can return before the server is ready,
+		# so wait for it to start accepting connections
+		for (my $try = 0; $try < 5; $try++) {
+			last if (&postgresql::is_postgresql_running() != 0);
+			sleep(1);
+			}
 		}
 	if (&init::action_status("postgresql")) {
 		&init::enable_at_boot("postgresql");

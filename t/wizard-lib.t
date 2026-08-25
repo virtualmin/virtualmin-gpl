@@ -5,6 +5,11 @@ use warnings;
 use Test::More;
 use FindBin;
 
+# Count slept seconds instead of really sleeping in startup wait loops
+BEGIN {
+	*CORE::GLOBAL::sleep = sub { $main::slept += $_[0] };
+	}
+
 do "$FindBin::Bin/../wizard-lib.pl"
 	or die "Failed to load wizard-lib.pl: $@ $!";
 
@@ -15,6 +20,7 @@ my (%opts) = @_;
 my @postgres_calls;
 my $result;
 my $running = $opts{'running'};
+$main::slept = 0;
 
 {
 	no warnings qw(redefine once);
@@ -54,12 +60,15 @@ my $running = $opts{'running'};
 		};
 	local *postgresql::is_postgresql_running = sub {
 		push(@postgres_calls, 'running');
+		my $checks = grep { $_ eq 'running' } @postgres_calls;
+		$running = 1 if ($opts{'ready_after'} &&
+				 $checks >= $opts{'ready_after'});
 		return $running;
 		};
 	local *postgresql::start_postgresql = sub {
 		push(@postgres_calls, 'start');
 		return $opts{'start_error'} if ($opts{'start_error'});
-		$running = 1;
+		$running = 1 if (!$opts{'start_slow'});
 		return undef;
 		};
 	local *postgresql::stop_postgresql = sub { };
@@ -77,7 +86,8 @@ subtest 'an uninitialized local server is set up before it is started' => sub {
 		);
 	is($result, undef, 'wizard step succeeds');
 	is_deeply($calls,
-		[ 'running', 'service', 'setup', 'service', 'start' ],
+		[ 'running', 'service', 'setup', 'service', 'start',
+		  'running' ],
 		'stopped service is initialized before startup');
 	};
 
@@ -88,7 +98,7 @@ subtest 'an initialized server is only started' => sub {
 		'running' => 0,
 		);
 	is($result, undef, 'wizard step succeeds');
-	is_deeply($calls, [ 'running', 'start', 'configured' ],
+	is_deeply($calls, [ 'running', 'start', 'running', 'configured' ],
 		'existing PostgreSQL configuration is not initialized again');
 	};
 
@@ -98,7 +108,7 @@ subtest 'a remote server is never initialized locally' => sub {
 		'running' => 0,
 		);
 	is($result, undef, 'wizard step succeeds');
-	is_deeply($calls, [ 'running', 'start', 'configured' ],
+	is_deeply($calls, [ 'running', 'start', 'running', 'configured' ],
 		'remote PostgreSQL setup is skipped');
 	};
 
@@ -158,7 +168,8 @@ subtest 'new cluster validation ignores stale module configuration' => sub {
 		);
 	is($result, undef, 'wizard step succeeds');
 	is_deeply($calls,
-		[ 'running', 'service', 'setup', 'service', 'start' ],
+		[ 'running', 'service', 'setup', 'service', 'start',
+		  'running' ],
 		'stale module configuration is not used for a new cluster');
 	};
 
@@ -194,8 +205,23 @@ subtest 'a missing service action falls back to module setup' => sub {
 		'running' => 0,
 		);
 	is($result, undef, 'wizard step succeeds');
-	is_deeply($calls, [ 'running', 'setup', 'start' ],
+	is_deeply($calls, [ 'running', 'setup', 'start', 'running' ],
 		'module setup runs when no service action exists');
+	};
+
+subtest 'startup waits for the server to become reachable' => sub {
+	my ($result, $calls) = run_db_wizard(
+		'local' => 1,
+		'ready_after' => 4,
+		'running' => 0,
+		'start_slow' => 1,
+		);
+	is($result, undef, 'wizard step succeeds');
+	is_deeply($calls,
+		[ 'running', 'service', 'setup', 'service', 'start',
+		  'running', 'running', 'running' ],
+		'startup is polled until the server accepts connections');
+	is($main::slept, 2, 'wizard waits between connection checks');
 	};
 
 subtest 'an unknown service state blocks setup and startup' => sub {
