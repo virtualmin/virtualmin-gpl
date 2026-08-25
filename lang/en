@@ -2140,7 +2140,7 @@ check_dnsip2v6=Default IPv6 address is set to $1, which matches the detected ext
 check_dnsip3=Detected external IPv4 address is $1
 check_dnsip3v6=Detected external IPv6 address is $1
 check_ednsip3=Failed to work out externally visible IPv4 address
-check_ednsip3v6=Failed to work out externally visible IPv6 address
+check_ednsip3v6=Failed to work out externally visible IPv6 address, and the default IPv6 address should be disabled on the <a href='$1'>module configuration</a> page if the system has no public IPv6 address
 check_ednsip1=External IPv4 address for DNS records is set to $1, but the detected external address is actually $2. This may cause DNS records for Virtualmin domains to point to the wrong system
 check_ednsip2=Default IPv4 address is set to $1, but the detected external address is actually $2. This is typically the result of being behind a NAT firewall, and should be corrected on the <a href='$3'>module configuration</a> page
 check_ednsip1v6=External IPv6 address for DNS records is set to $1, but the detected external address is actually $2. This may cause DNS records for Virtualmin domains to point to the wrong system

@@ -17589,7 +17589,10 @@ if (!$skip_dns_network) {
 		elsif ($config{'ip6enabled'} && &supports_ip6()) {
 			&$second_print(
 				&ui_text_color(
-					"⚠ ".$text{'check_ednsip3v6'},
+					"⚠ ".&text('check_ednsip3v6',
+						"../config.cgi?module=".
+						"$module_name&".
+						"section=line1.3"),
 						      'warn'));
 			}
 		}
@@ -17601,7 +17604,10 @@ if (!$skip_dns_network) {
 		elsif ($config{'ip6enabled'} && &supports_ip6()) {
 			&$second_print(
 				&ui_text_color(
-					"⚠ ".$text{'check_ednsip3v6'},
+					"⚠ ".&text('check_ednsip3v6',
+						"../config.cgi?module=".
+						"$module_name&".
+						"section=line1.3"),
 						      'warn'));
 			}
 		}
