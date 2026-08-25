@@ -170,7 +170,7 @@ if ($config{'dynip_service'} eq 'dyndns') {
 		      "mx=NOCHG&".
 		      "backmx=NOCHG";
 	my ($out, $error);
-	&http_download($host, $port, $page, \$out, \$error, undef, 0,
+	&http_download($host, $port, $page, \$out, \$error, undef, 1,
 		       $config{'dynip_user'},
 		       $config{'dynip_pass'},
 		       10, 0, 1);
