@@ -68,6 +68,7 @@ if (!&master_admin()) {
 if (defined($enabled)) {
 	$sched->{'enabled'} = $enabled;
 	}
+
 # Save the new schedule
 &obtain_lock_cron();
 &save_scheduled_backup($sched);
@@ -84,3 +85,4 @@ print "virtualmin modify-scheduled-backup --id backup-id\n";
 print "                                  [--enable | --disable]\n";
 exit(1);
 }
+
