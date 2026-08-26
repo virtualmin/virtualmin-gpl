@@ -12,12 +12,6 @@ command.
 To stop a backup from running, you can use the C<--disable> flag. Or to
 re-enable a backup that's been turned off, use the C<--enable> flag.
 
-The C<--enable-mysql-binlog-coordinates> flag adds MySQL binary log coordinates
-to database dumps for point-in-time recovery. Use
-C<--disable-mysql-binlog-coordinates> to turn this off for this schedule, or
-C<--default-config-mysql-binlog-coordinates> to return to the default from the
-Virtualmin Configuration page.
-
 =cut
 
 package virtual_server;
@@ -50,15 +44,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--disable") {
 		$enabled = 0;
 		}
-	elsif ($a eq "--enable-mysql-binlog-coordinates") {
-		$mysql_source_data = 2;
-		}
-	elsif ($a eq "--disable-mysql-binlog-coordinates") {
-		$mysql_source_data = 0;
-		}
-	elsif ($a eq "--default-config-mysql-binlog-coordinates") {
-		$mysql_source_data = "default";
-		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -83,21 +68,6 @@ if (!&master_admin()) {
 if (defined($enabled)) {
 	$sched->{'enabled'} = $enabled;
 	}
-if (defined($mysql_source_data)) {
-	# Preserve other MySQL options when changing the coordinate setting
-	my %mysqlopts = map { split(/=/, $_, 2) }
-		grep { length($_) }
-		  split(/,/, $sched->{'backup_opts_mysql'} || '');
-	if ($mysql_source_data eq "default") {
-		delete($mysqlopts{'source_data'});
-		}
-	else {
-		$mysqlopts{'source_data'} = $mysql_source_data;
-		}
-	$sched->{'backup_opts_mysql'} = join(",",
-		map { $_."=".$mysqlopts{$_} } sort keys %mysqlopts);
-	}
-
 # Save the new schedule
 &obtain_lock_cron();
 &save_scheduled_backup($sched);
@@ -112,8 +82,5 @@ print "Change some attributes of a scheduled backup.\n";
 print "\n";
 print "virtualmin modify-scheduled-backup --id backup-id\n";
 print "                                  [--enable | --disable]\n";
-print "                                  [--enable-mysql-binlog-coordinates |\n";
-print "                                   --disable-mysql-binlog-coordinates |\n";
-print "                                   --default-config-mysql-binlog-coordinates]\n";
 exit(1);
 }

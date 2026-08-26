@@ -1159,16 +1159,31 @@ else {
 return undef;
 }
 
-# get_mysql_backup_parameters(&options, [dump-command])
-# Returns the binary log coordinate option for Webmin's MySQL backup function.
+# get_mysql_backup_parameters(&domain, [dump-command])
+# Returns the binary log coordinate option for Webmin's MySQL backup function,
+# if the database server has binary logging enabled.
 sub get_mysql_backup_parameters
 {
-my ($opts, $dumpcmd) = @_;
+my ($d, $dumpcmd) = @_;
 
-# Use the backup setting when present, or the global default otherwise
-my $source_data = $opts && defined($opts->{'source_data'}) ?
-	$opts->{'source_data'} : $config{'mysql_source_data'} ? 2 : 0;
-return undef if ($source_data ne '2');
+# Without a single-transaction dump the coordinates option would force
+# locking all tables, which is too invasive to enable automatically
+return undef if (!&mysql_single_transaction($d));
+
+# Coordinates only exist when the server has binary logging enabled,
+# checked once per MySQL module
+my $mod = &require_dom_mysql($d);
+if (!defined($mysql_binlog_enabled_cache{$mod})) {
+	my $rv = eval {
+		local $main::error_must_die = 1;
+		&execute_dom_sql($d, $mysql::master_db,
+			"show variables like 'log_bin'");
+		};
+	$mysql_binlog_enabled_cache{$mod} =
+		$rv && @{$rv->{'data'}} &&
+		uc($rv->{'data'}->[0]->[1]) eq 'ON' ? 1 : 0;
+	}
+return undef if (!$mysql_binlog_enabled_cache{$mod});
 
 # Use the option name supported by the local dump client, not the server version
 return "--master-data=2" if (!$dumpcmd);
@@ -1215,7 +1230,7 @@ my $mymod = &get_domain_mysql_module($d);
 my %info = ( 'hosts' => join(' ', @hosts),
 		'remote' => $mymod->{'config'}->{'host'} );
 my $parameters = &get_mysql_backup_parameters(
-	$opts, $mymod->{'config'}->{'mysqldump'});
+	$d, $mymod->{'config'}->{'mysqldump'});
 foreach $db (@dbs) {
 	if (&foreign_defined($mymod, "get_character_set")) {
 		$info{'charset_'.$db} = &foreign_call(

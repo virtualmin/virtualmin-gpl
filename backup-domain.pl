@@ -87,10 +87,6 @@ To override the default compression format set on the Virtualmin Configuration
 page, use the C<--compression> flag followed by one of C<gzip>, C<bzip2>, 
 C<tar>, C<zstd> or C<zip>.
 
-To override whether MySQL binary log coordinates are included in this backup,
-use C<--enable-mysql-binlog-coordinates> or C<--disable-mysql-binlog-coordinates>.
-If neither flag is given, the default from the Virtualmin Configuration page is used.
-
 =cut
 
 package virtual_server;
@@ -220,14 +216,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mailfiles") {
 		# Convenience flag for --option mail mailfiles 1
 		# Deprecated, as this is on by default now
-		}
-	elsif ($a eq "--enable-mysql-binlog-coordinates") {
-		# Include binary log coordinates in this backup
-		$opts{'mysql'}->{'source_data'} = 2;
-		}
-	elsif ($a eq "--disable-mysql-binlog-coordinates") {
-		# Omit binary log coordinates from this backup
-		$opts{'mysql'}->{'source_data'} = 0;
 		}
 	elsif ($a eq "--as-owner") {
 		# Run as domain owner
@@ -575,8 +563,6 @@ if (&has_incremental_tar()) {
 print "                         [--all-virtualmin] | [--virtualmin config] |\n";
 print "                                              [--except-virtualmin config]\n";
 print "                         [--option \"feature name value\"]\n";
-print "                         [--enable-mysql-binlog-coordinates |\n";
-print "                          --disable-mysql-binlog-coordinates]\n";
 print "                         [--as-owner]\n";
 print "                         [--exclude file]*\n";
 print "                         [--include file]*\n";

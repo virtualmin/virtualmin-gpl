@@ -245,7 +245,6 @@ allow_subset=0
 php_log=1
 dns_secany=0
 single_tx=1
-mysql_source_data=0
 err_letsencrypt=0
 bind_spf=yes
 bind_spfall=3
