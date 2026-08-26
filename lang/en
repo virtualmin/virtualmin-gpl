@@ -6260,8 +6260,10 @@ newdynip_eext=Failed to work out externally visible IPv4 address
 newdynip_eext6=Failed to work out externally visible IPv6 address
 newdynip_eexternal=In external script mode, the full path to a script to run must be entered
 newdynip_eexternal2=In Webmin mode, the hostname or hostname:port of a Webmin server must be entered
+newdynip_eserver=The DynDNS-compatible update server must be a hostname or hostname:port
+newdynip_return=dynamic IP update
 
-dynip_dyndns=DynDNS
+dynip_dyndns=DynDNS-compatible service ..
 dynip_webmin=Virtualmin system ..
 dynip_external=Run external script ..
 dynip_none=Don't update any service

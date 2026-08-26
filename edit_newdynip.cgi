@@ -15,14 +15,26 @@ print &ui_table_row($text{'newdynip_enabled'},
 	&ui_yesno_radio("enabled", $job ? 1 : 0));
 
 # Service to use
-print &ui_table_row($text{'newdynip_service'},
-	&ui_select("service", $config{'dynip_service'},
+$dynip_service = $config{'dynip_service'} || 'dyndns';
+$show_external = $dynip_service =~ /^(external|webmin)$/;
+$show_server = $dynip_service eq 'dyndns';
+$external_input = &ui_textbox("external", $config{'dynip_external'}, 30,
+			     !$show_external);
+$server_input = &ui_textbox("server",
+			   $config{'dynip_server'} || "members.dyndns.org",
+			   30, !$show_server);
+print &ui_table_row(&hlink($text{'newdynip_service'}, "newdynip_service"),
+	&ui_select("service", $dynip_service,
 		   [ map { [ $_->{'name'}, $_->{'desc'} ] }
 			 &list_dynip_services() ],
 		   1, 0, 0, 0,
-		   "onChange='form.external.disabled = (value != \"external\" && value != \"webmin\")'")." ".
-	&ui_textbox("external", $config{'dynip_external'}, 30,
-		    $config{'dynip_service'} !~ /^(external|webmin)$/));
+		   "onChange='sync_dynip_service_fields()'")." ".
+	"<span id='dynip_external_input'".
+		($show_external ? "" : " hidden style='display: none !important'").">".
+		$external_input."</span>".
+	"<span id='dynip_server_input'".
+		($show_server ? "" : " hidden style='display: none !important'").">".
+		$server_input."</span>");
 
 # Hostname to update
 print &ui_table_row($text{'newdynip_host'},
@@ -103,5 +115,42 @@ else {
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'newdynip_ok'} ] ]);
 
-&ui_print_footer("", $text{'index_return'});
+# Show only the input used by the selected dynamic DNS service
+print <<'EOF';
+<script type='text/javascript'>
+function sync_dynip_service_fields()
+{
+var service = document.querySelector('[name="service"]');
+var external = document.querySelector('[name="external"]');
+var server = document.querySelector('[name="server"]');
+var external_span = document.getElementById('dynip_external_input');
+var server_span = document.getElementById('dynip_server_input');
+if (!service) {
+	return;
+	}
+var show_external = service.value == 'external' || service.value == 'webmin';
+var show_server = service.value == 'dyndns';
 
+if (external) {
+	external.disabled = !show_external;
+	}
+if (external_span) {
+	external_span.hidden = !show_external;
+	external_span.style.setProperty('display', show_external ? '' : 'none',
+		show_external ? '' : 'important');
+	}
+if (server) {
+	server.disabled = !show_server;
+	}
+if (server_span) {
+	server_span.hidden = !show_server;
+	server_span.style.setProperty('display', show_server ? '' : 'none',
+		show_server ? '' : 'important');
+	}
+}
+sync_dynip_service_fields();
+window.addEventListener('pageshow', sync_dynip_service_fields);
+</script>
+EOF
+
+&ui_print_footer("", $text{'index_return'});

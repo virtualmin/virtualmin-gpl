@@ -25,7 +25,19 @@ elsif ($in{'service'} eq 'webmin') {
 	   $in{'external'} =~ /^(\S+):\d+$/ && &to_ipaddress($1) ||
 	     &error($text{'newdynip_eexternal2'});
 	}
-$config{'dynip_external'} = $in{'external'};
+elsif ($in{'service'} eq 'dyndns') {
+	# Update server is optional, and defaults to DynDNS itself
+	if ($in{'server'}) {
+		my ($server_host, $server_port) = $in{'server'} =~
+			/^([a-z0-9][a-z0-9\.\-_]*)(?::(\d+))?$/i;
+		$server_host && (!defined($server_port) ||
+			$server_port >= 1 && $server_port <= 65535) ||
+				&error($text{'newdynip_eserver'});
+		}
+	}
+$config{'dynip_external'} = $in{'external'}
+	if (defined($in{'external'}));
+$config{'dynip_server'} = $in{'server'} if (defined($in{'server'}));
 $config{'dynip_host'} = $in{'host'};
 $config{'dynip_auto'} = $in{'auto'};
 $config{'dynip_update'} = $in{'update'};
@@ -66,5 +78,6 @@ else {
 
 &run_post_actions();
 
-&ui_print_footer("", $text{'index_return'});
+&ui_print_footer("edit_newdynip.cgi", $text{'newdynip_return'},
+		 "", $text{'index_return'});
 
