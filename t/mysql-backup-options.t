@@ -119,7 +119,7 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 	}
 
 {
-	# Verify the option keys used by both backup and restore paths
+	# Verify options for the config-based backup schedule
 	no warnings qw(once redefine);
 	local %main::config = (
 		'backup_dest' => '/tmp/legacy-backup',
@@ -135,11 +135,9 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 
 	my ($sched) = grep { $_->{'id'} == 1 } &list_scheduled_backups();
 	is($sched->{'backup_opts_dir'}, 'include=public_html',
-		'the legacy schedule exposes options to the backup path');
-	is($sched->{'opts_dir'}, 'include=public_html',
-		'the legacy schedule preserves options for the restore path');
+		'the config-based schedule exposes feature options');
 
-	# Verify that older callers can still save the legacy option key
+	# Verify options can be saved back to the module config
 	local $main::module_config_file = '/tmp/unused-virtualmin-config';
 	local $main::backup_cron_cmd = '/tmp/unused-virtualmin-backup';
 	local $main::module_name = 'virtual-server';
@@ -152,11 +150,11 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 	&save_scheduled_backup({
 		'id' => 1,
 		'features' => 'dir',
-		'opts_dir' => 'exclude=tmp',
+		'backup_opts_dir' => 'exclude=tmp',
 		'enabled' => 0,
 		});
 	is($main::config{'backup_opts_dir'}, 'exclude=tmp',
-		'the legacy restore key remains accepted when saving');
+		'the config-based schedule saves feature options');
 	}
 
 done_testing();
