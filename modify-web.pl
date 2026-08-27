@@ -126,7 +126,7 @@ entirely (not recommended) with C<--disable-cgi>.
 
 If your webserver supports multiple HTTP protocols, you can use the 
 C<--protocols> flag to choose which are enabled for the website. This flag must
-be followed by some combination of C<http/1.1>, C<h2> and C<h2c>. To revert to
+be followed by some combination of C<http/1.1>, C<h2>, C<h2c> and C<h3>. To revert to
 the default protocols for your webserver, use the C<--default-protocols> flag.
 
 Although the C<create-redirect> API command can be used to create arbitrary

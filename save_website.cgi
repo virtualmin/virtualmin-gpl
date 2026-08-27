@@ -79,7 +79,7 @@ if (defined($in{'http2'})) {
 		my @h2 = grep { /^h2/ } @$canprots;
 		# Always remove http/1.1 before adding HTTP2,
 		# to have a correct directives order
-		$prots = grep { !/^http\/1\.1/ } @$prots;
+		$prots = [ grep { !/^http\/1\.1/ } @$prots ];
 		$prots = [ &unique(@$prots, @h2, 'http/1.1') ];
 		$changed = 1;
 		}
@@ -95,10 +95,54 @@ if (defined($in{'http2'})) {
 		$prots = [ grep { !/^h2/ } @$prots ];
 		$changed = 1;
 		}
-	elsif ($in{'http2'} == 0 && !$hashttp2) {
+	elsif ($in{'http2'} == 0 && !$hashttp2 && !@$prots) {
 		# Turn off, when set globally
 		&$first_print($text{'phpmode_http2off'});
 		$prots = [ grep { !/^h2/ } @$canprots ];
+		$changed = 1;
+		}
+	if ($changed) {
+		$err = &save_domain_http_protocols($d, $prots);
+		if ($err) {
+			&$second_print(&text('phpmode_ssierr', $err));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+		$anything++;
+		}
+	}
+
+# Save HTTP3 support
+if (defined($in{'http3'})) {
+	my $canprots = &get_domain_supported_http_protocols($d);
+	my $prots = &get_domain_http_protocols($d);
+	my ($hashttp3) = grep { /^h3/ } @$prots;
+	my $changed = 0;
+	if ($in{'http3'} == 1 && !$hashttp3) {
+		# Turn on
+		&$first_print($text{'phpmode_http3on'});
+		my @h3 = grep { /^h3/ } @$canprots;
+		$prots = [ grep { !/^http\/1\.1/ } @$prots ];
+		$prots = [ &unique(@$prots, @h3, 'http/1.1') ];
+		$changed = 1;
+		}
+	elsif ($in{'http3'} == 2 && @$prots) {
+		# Set to default protocols
+		&$first_print($text{'phpmode_http3def'});
+		$prots = [ ];
+		$changed = 1;
+		}
+	elsif ($in{'http3'} == 0 && $hashttp3) {
+		# Turn off when set in the domain
+		&$first_print($text{'phpmode_http3off'});
+		$prots = [ grep { !/^h3/ } @$prots ];
+		$changed = 1;
+		}
+	elsif ($in{'http3'} == 0 && !$hashttp3 && !@$prots) {
+		# Turn off when set globally
+		&$first_print($text{'phpmode_http3off'});
+		$prots = [ grep { !/^h3/ } @$canprots ];
 		$changed = 1;
 		}
 	if ($changed) {
