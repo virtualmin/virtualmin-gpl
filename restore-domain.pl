@@ -98,6 +98,20 @@ server or LDAP user database with the system the backup was take from, you
 can use the C<--replication> flag to tell Virtualmin that it is expected that
 the directories, databases or users may already exist.
 
+If the backup was taken with binary log coordinates included and the binary
+logs written since then still exist on the system, the C<--mysql-replay-binlogs>
+flag can be used to re-apply all changes made to the restored MySQL databases
+after the backup was taken, known as point-in-time recovery. To stop the replay
+at a specific time instead of the latest available transaction, add the
+C<--mysql-stop-time> flag followed by a date and time in the format
+C<YYYY-MM-DD HH:MM:SS>.
+
+Replay is only possible when the backup was taken from the same MySQL server
+being restored to, and requires row-based binary logging, which can be enabled
+on the Binary Logging page in Webmin's MySQL module. It also cannot be
+combined with the C<--as-owner> flag, as it needs an administrative MySQL
+login.
+
 =cut
 
 package virtual_server;
@@ -212,6 +226,30 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mailfiles") {
 		# Convenience flag for --option mail mailfiles 1
 		# Deprecated, as this is on by default now
+		}
+	elsif ($a eq "--mysql-replay-binlogs") {
+		# Re-apply binary log transactions after restoring databases
+		&master_admin() ||
+			&usage("--mysql-replay-binlogs is only available to ".
+			       "the master administrator");
+		$opts{'mysql'}->{'replay_binlogs'} = 1;
+		}
+	elsif ($a eq "--mysql-stop-time") {
+		# Stop the binary log replay at a specific time
+		&master_admin() ||
+			&usage("--mysql-stop-time is only available to ".
+			       "the master administrator");
+		my $stoptime = shift(@ARGV);
+		my ($year, $mon, $day, $hour, $min, $sec) = $stoptime =~
+			/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
+		my $valid = $year && eval {
+			timelocal($sec, $min, $hour, $day, $mon-1, $year);
+			1;
+			};
+		$valid ||
+			&usage("--mysql-stop-time must be followed by a time ".
+			       "in YYYY-MM-DD HH:MM:SS format");
+		$opts{'mysql'}->{'stop_time'} = $stoptime;
 		}
 	elsif ($a eq "--as-owner") {
 		# Run as domain owner
@@ -414,6 +452,9 @@ while(@ARGV > 0) {
 	}
 $src || usage("Missing --source parameter");
 @rdoms || $all_doms || @vbs || usage("No domains to restore specified");
+!$opts{'mysql'}->{'stop_time'} || $opts{'mysql'}->{'replay_binlogs'} ||
+	usage("--mysql-stop-time can only be used with ".
+	      "--mysql-replay-binlogs");
 
 # Work out what kind of restore the caller is allowed to do. Mode 1 is a full
 # restore, mode 2 is the limited restore offered to resellers and domain
@@ -628,6 +669,8 @@ print "                         [--reuid | --no-reuid]\n";
 print "                         [--reuser | --no-reuser]\n";
 print "                         [--fix]\n";
 print "                         [--option \"feature name value\"]\n";
+print "                         [--mysql-replay-binlogs]\n";
+print "                         [--mysql-stop-time \"YYYY-MM-DD HH:MM:SS\"]\n";
 print "                         [--all-virtualmin] | [--virtualmin config]\n";
 print "                         [--only-features]\n";
 print "                         [--default-ip |\n";
