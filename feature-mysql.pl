@@ -1159,6 +1159,253 @@ else {
 return undef;
 }
 
+# get_mysql_binlog_coords_flag(&domain, [dump-command])
+# Returns the binary log coordinate option for Webmin's MySQL backup function,
+# if the database server has binary logging enabled.
+sub get_mysql_binlog_coords_flag
+{
+my ($d, $dumpcmd) = @_;
+
+# Without a single-transaction dump the coordinates option would force
+# locking all tables, which is too invasive to enable automatically
+return undef if (!&mysql_single_transaction($d));
+
+# Coordinates only exist when the server has binary logging enabled,
+# checked once per MySQL module
+my $mod = &require_dom_mysql($d);
+if (!defined($mysql_binlog_enabled_cache{$mod})) {
+	my $rv = eval {
+		local $main::error_must_die = 1;
+		&execute_dom_sql($d, $mysql::master_db,
+			"show variables like 'log_bin'");
+		};
+	$mysql_binlog_enabled_cache{$mod} =
+		$rv && @{$rv->{'data'}} &&
+		uc($rv->{'data'}->[0]->[1]) eq 'ON' ? 1 : 0;
+	}
+return undef if (!$mysql_binlog_enabled_cache{$mod});
+
+# Use the option name supported by the local dump client, not the server version
+return "--master-data=2" if (!$dumpcmd);
+if (!defined($mysql_source_data_support_cache{$dumpcmd})) {
+	my $help = &backquote_command("$dumpcmd --help 2>&1 </dev/null");
+	$mysql_source_data_support_cache{$dumpcmd} =
+		$help =~ /^\s*--source-data(?:\[|=|\s|$)/m ? 1 : 0;
+	}
+return $mysql_source_data_support_cache{$dumpcmd} ?
+	"--source-data=2" : "--master-data=2";
+}
+
+# get_mysql_dump_coordinates(file)
+# Returns the binary log file and position recorded in a dump file, if any
+sub get_mysql_dump_coordinates
+{
+my ($file) = @_;
+my ($logfile, $logpos);
+my $lnum = 0;
+if ($file =~ /\.gz$/) {
+	# Read via gunzip for still-compressed dumps
+	open(DUMP, &get_gunzip_command()." -c ".quotemeta($file).
+		   " 2>/dev/null |") || return ( );
+	}
+else {
+	open(DUMP, "<".$file) || return ( );
+	}
+while(my $line = <DUMP>) {
+	# Coordinates always appear near the top of the dump
+	last if ($lnum++ > 100);
+	if ($line =~ /CHANGE\s+(?:MASTER\s+TO\s+MASTER_LOG_FILE|REPLICATION\s+SOURCE\s+TO\s+SOURCE_LOG_FILE)\s*=\s*'([^']+)'\s*,\s*(?:MASTER_LOG_POS|SOURCE_LOG_POS)\s*=\s*(\d+)/i) {
+		($logfile, $logpos) = ($1, $2);
+		last;
+		}
+	}
+close(DUMP);
+return $logfile ? ($logfile, $logpos) : ( );
+}
+
+# get_mysql_binlog_files(&domain, start-file, [stop-file])
+# Returns a list of full paths to the server's binary log files starting with
+# the given one, or an error message if they cannot be found
+sub get_mysql_binlog_files
+{
+my ($d, $startfile, $stopfile) = @_;
+my ($logs, $base);
+eval {
+	local $main::error_must_die = 1;
+	$logs = &execute_dom_sql($d, $mysql::master_db, "show binary logs");
+	$base = &execute_dom_sql($d, $mysql::master_db,
+		"show variables like 'log_bin_basename'");
+	};
+return (undef, $@) if ($@);
+my $basefile = @{$base->{'data'}} ? $base->{'data'}->[0]->[1] : undef;
+$basefile || return (undef, $text{'restore_mysqlreplaybase'});
+my $dir = $basefile;
+$dir =~ s/\/[^\/]+$//;
+
+# Take all logs from the one named in the dump onwards, up to the log
+# that was current when the replay boundary was captured
+my @files;
+my $found = 0;
+my $stopfound = !$stopfile;
+foreach my $l (@{$logs->{'data'}}) {
+	$found++ if ($l->[0] eq $startfile);
+	push(@files, $dir."/".$l->[0]) if ($found);
+	if ($found && $stopfile && $l->[0] eq $stopfile) {
+		$stopfound = 1;
+		last;
+		}
+	}
+$found || return (undef, &text('restore_mysqlreplaygone', $startfile));
+$stopfound || return (undef, &text('restore_mysqlreplaygone', $stopfile));
+return (\@files, undef);
+}
+
+# get_mysql_binlog_position(&domain)
+# Returns the binary log file and position currently being written
+sub get_mysql_binlog_position
+{
+my ($d) = @_;
+# The statement name varies between MySQL and MariaDB releases
+foreach my $sql ("show master status", "show binary log status",
+		 "show binlog status") {
+	my $rv = eval {
+		local $main::error_must_die = 1;
+		&execute_dom_sql($d, $mysql::master_db, $sql);
+		};
+	next if ($@ || !$rv);
+	return ( ) if (!@{$rv->{'data'}});
+	return ($rv->{'data'}->[0]->[0], $rv->{'data'}->[0]->[1]);
+	}
+return ( );
+}
+
+# get_mysql_server_identity(&domain)
+# Returns a hash of attributes identifying the domain's MySQL server and
+# its binary logging setup
+sub get_mysql_server_identity
+{
+my ($d) = @_;
+my %id;
+foreach my $v ('hostname', 'server_uuid', 'server_id', 'binlog_format') {
+	my $rv = eval {
+		local $main::error_must_die = 1;
+		&execute_dom_sql($d, $mysql::master_db,
+			"show variables like '".$v."'");
+		};
+	$id{$v} = !$@ && $rv && @{$rv->{'data'}} ?
+		$rv->{'data'}->[0]->[1] : undef;
+	}
+return %id;
+}
+
+# check_mysql_replay_safety(&domain, &info, [as-owner])
+# Checks if binary logs can be safely replayed for a restore from the backup
+# described by the info hash, returning an error message if not
+sub check_mysql_replay_safety
+{
+my ($d, $info, $asd) = @_;
+
+# Disabling binary logging for a session requires administrative database
+# privileges, which a domain owner's login deliberately does not have
+return $text{'restore_mysqlreplayowner'} if ($asd);
+
+# Binary log files can only be read on the local system, using the same
+# locality test as the Webmin module itself
+my $mod = &require_dom_mysql($d);
+if (!&foreign_call($mod, "is_mysql_local")) {
+	return $text{'restore_mysqlreplayremote'};
+	}
+
+# Replay restores require companion support in the Webmin database module,
+# otherwise the restore's own SQL would contaminate later retries
+if (!&foreign_defined($mod, "supports_disable_session_binlog") ||
+    !&foreign_call($mod, "supports_disable_session_binlog")) {
+	return $text{'restore_mysqlreplaymodule'};
+	}
+
+# The backup must have been taken from this same server, as binary log
+# file names alone are not unique across servers
+return $text{'restore_mysqlreplaynoid'}
+	if (!defined($info->{'binlog_hostname'}));
+my %id = &get_mysql_server_identity($d);
+foreach my $k ('hostname', 'server_uuid', 'server_id') {
+	my $want = $info->{'binlog_'.$k};
+	next if (!defined($want));
+	if (!defined($id{$k}) || $id{$k} ne $want) {
+		return &text('restore_mysqlreplayid',
+			     $k, $want, $id{$k} // "");
+		}
+	}
+
+# Only row-based logs can be safely filtered by database, both when the
+# backup was taken and since then
+my $wasfmt = uc($info->{'binlog_format'} // '');
+my $curfmt = uc($id{'binlog_format'} // '');
+if ($wasfmt ne 'ROW' || $curfmt ne 'ROW') {
+	return &text('restore_mysqlreplayformat', $wasfmt, $curfmt);
+	}
+return undef;
+}
+
+# replay_mysql_binlogs(&domain, db, log-file, log-pos, [stop-time],
+#		       [stop-file], [stop-pos])
+# Re-applies transactions for one database from the server's binary logs,
+# starting at the given coordinates and never past the given stop position.
+# Returns an error message on failure.
+sub replay_mysql_binlogs
+{
+my ($d, $db, $logfile, $logpos, $stoptime, $stopfile, $stoppos) = @_;
+my $mymod = &get_domain_mysql_module($d);
+
+# Binary log files can only be read on the local system, using the same
+# locality test as the Webmin module itself
+if (!&foreign_call(&require_dom_mysql($d), "is_mysql_local")) {
+	return $text{'restore_mysqlreplayremote'};
+	}
+
+# Find the binary log files to replay
+my ($files, $err) = &get_mysql_binlog_files($d, $logfile, $stopfile);
+return $err if (!$files);
+
+# Find the binlog client, preferring one alongside the dump command
+my $binlogcmd = $mymod->{'config'}->{'mysqldump'};
+$binlogcmd =~ s/mysqldump$/mysqlbinlog/ ||
+	$binlogcmd =~ s/mariadb-dump$/mariadb-binlog/ if ($binlogcmd);
+if (!$binlogcmd || !&has_command($binlogcmd)) {
+	$binlogcmd = &has_command("mysqlbinlog") ||
+		     &has_command("mariadb-binlog");
+	}
+$binlogcmd || return $text{'restore_mysqlreplaycmd'};
+
+# On MySQL with GTIDs enabled, transaction IDs must be stripped so that
+# replaying them on the same server is not silently skipped
+my $help = &backquote_command(
+	quotemeta($binlogcmd)." --help 2>&1 </dev/null");
+my $skipgtids = $help =~ /^\s*--skip-gtids/m ? " --skip-gtids" : "";
+
+# Decode the events for this database into a temporary file first, so
+# that a decoder failure cannot be mistaken for a successful replay
+my $temp = &transname();
+my $cmd = quotemeta($binlogcmd).$skipgtids.
+	  " --database=".quotemeta($db).
+	  " --start-position=".quotemeta($logpos).
+	  ($stoppos ? " --stop-position=".quotemeta($stoppos) : "").
+	  ($stoptime ? " --stop-datetime=".quotemeta($stoptime) : "").
+	  " ".join(" ", map { quotemeta($_) } @$files);
+my $out = &backquote_logged("$cmd 2>&1 >".quotemeta($temp));
+if ($?) {
+	unlink($temp);
+	return $out || "$binlogcmd failed";
+	}
+
+# Feed the decoded events back through the module so the restore's session
+# logging policy and normal authentication handling both apply
+my $mod = &require_dom_mysql($d);
+my ($ex, $sqlout) = &foreign_call($mod, "execute_sql_file", $db, $temp);
+unlink($temp);
+return $ex ? $sqlout : undef;
+}
+
 # backup_mysql(&domain, file, &options, home-format, differential, [&as-domain],
 #              &all-options, &key)
 # Dumps this domain's mysql database to a backup file
@@ -1190,16 +1437,29 @@ my %exclude = map { $_, 1 } @exclude;
 &$first_print($text{'backup_mysqlinfo'});
 my @hosts = &get_mysql_allowed_hosts($d);
 my $mymod = &get_domain_mysql_module($d);
+my $mod = &require_dom_mysql($d);
 my %info = ( 'hosts' => join(' ', @hosts),
 		'remote' => $mymod->{'config'}->{'host'} );
+my $parameters = &get_mysql_binlog_coords_flag(
+	$d, $mymod->{'config'}->{'mysqldump'});
 foreach $db (@dbs) {
-	if (&foreign_defined($mymod, "get_character_set")) {
+	if (&foreign_defined($mod, "get_character_set")) {
 		$info{'charset_'.$db} = &foreign_call(
-			$mymod, "get_character_set", $db);
+			$mod, "get_character_set", $db);
 		}
-	if (&foreign_defined($mymod, "get_collation_order")) {
+	if (&foreign_defined($mod, "get_collation_order")) {
 		$info{'collate_'.$db} = &foreign_call(
-			$mymod, "get_collation_order", $db);
+			$mod, "get_collation_order", $db);
+		}
+	}
+if ($parameters) {
+	# Record which server the binary log coordinates belong to and the
+	# log format, so that a restore can validate replay safety
+	my %id = &get_mysql_server_identity($d);
+	foreach my $k (keys %id) {
+		next if (!defined($id{$k}));
+		my $ik = $k =~ /^binlog_/ ? $k : 'binlog_'.$k;
+		$info{$ik} = $id{$k};
 		}
 	}
 &write_as_domain_user($d, sub { &write_file($file, \%info) });
@@ -1227,7 +1487,8 @@ foreach $db (@dbs) {
 	my $err = &foreign_call(
 		$mymod, "backup_database", $db, $dbfile, 0, 1, undef,
 		$cs, undef, $tables, $d->{'user'},
-		&mysql_single_transaction($d, $db), 0, $allopts->{'skip'});
+		&mysql_single_transaction($d, $db), 0, $allopts->{'skip'},
+		$parameters);
 	if (!$err) {
 		$err = &validate_mysql_backup($dbfile);
 		}
@@ -1269,14 +1530,75 @@ my %info;
 &require_mysql();
 
 # Fail fast if MySQL is down
-my $mymod = &require_dom_mysql($d);
-if (!&foreign_call($mymod, "is_mysql_running")) {
+my $mysqlmod = &require_dom_mysql($d);
+if (!&foreign_call($mysqlmod, "is_mysql_running")) {
 	&$first_print($text{'restore_mysqlerunning'});
 	return 0;
 	}
 
-# Re-grant allowed hosts from backup + local
+# Keep every SQL session used by a point-in-time restore out of the binary
+# log, so the restore itself cannot contaminate a later replay or retry
+my $mysqlpkg = $mysqlmod;
+$mysqlpkg =~ s/[^A-Za-z0-9]/_/g;
+local ${$mysqlpkg."::disable_session_binlog"} =
+	$opts->{'replay_binlogs'} ? 1 : 0;
+
+# Track allowed hosts for restoration after replay preflight succeeds
 my @lhosts;
+
+# Work out which databases are in backup
+my @dbs;
+foreach my $dbfile (glob($file."_*")) {
+	if (-r $dbfile) {
+		$dbfile =~ /\Q$file\E_(.*)\.gz$/ ||
+			$dbfile =~ /\Q$file\E_(.*)$/;
+		push(@dbs, [ $1, $dbfile ]);
+		}
+	}
+
+# When replaying binary logs, check that it is safe and possible for every
+# database in the backup, and capture the exact position to stop at, all
+# before any destructive changes so that a hopeless replay never leaves a
+# half-restored domain and the restore's own statements are never re-applied
+my ($replay_stopfile, $replay_stoppos, %replay_coords);
+if ($opts->{'replay_binlogs'}) {
+	&$first_print($text{'restore_mysqlreplaycheck'});
+	my $err = &check_mysql_replay_safety($d, \%info, $asd);
+	if (!$err) {
+		($replay_stopfile, $replay_stoppos) =
+			&get_mysql_binlog_position($d);
+		$err = $text{'restore_mysqlreplayoff'}
+			if (!$replay_stopfile);
+		}
+	if (!$err) {
+		# All dumps must have coordinates pointing to binary logs
+		# that still exist on the server
+		foreach my $db (@dbs) {
+			my ($logfile, $logpos) =
+				&get_mysql_dump_coordinates($db->[1]);
+			if (!$logfile) {
+				$err = &text('restore_mysqlreplaynone2',
+					     $db->[0]);
+				last;
+				}
+			my ($files, $ferr) = &get_mysql_binlog_files(
+				$d, $logfile, $replay_stopfile);
+			if (!$files) {
+				$err = $ferr;
+				last;
+				}
+			$replay_coords{$db->[0]} = [ $logfile, $logpos ];
+			}
+		}
+	if ($err) {
+		&$second_print(&text('restore_mysqlreplayerr', $err));
+		return 0;
+		}
+	&$second_print($text{'setup_done'});
+	}
+
+# Restore allowed hosts only after all replay checks have passed, so an
+# unsupported restore mode cannot change database grants before failing
 if (!$d->{'parent'} && $info{'hosts'}) {
 	&$first_print($text{'restore_mysqlgrant'});
 	@lhosts = &get_mysql_allowed_hosts($d);
@@ -1298,16 +1620,6 @@ if (!$d->{'parent'} && $info{'hosts'}) {
 		}
 	else {
 		&$second_print($text{'setup_done'});
-		}
-	}
-
-# Work out which databases are in backup
-my @dbs;
-foreach my $dbfile (glob($file."_*")) {
-	if (-r $dbfile) {
-		$dbfile =~ /\Q$file\E_(.*)\.gz$/ ||
-			$dbfile =~ /\Q$file\E_(.*)$/;
-		push(@dbs, [ $1, $dbfile ]);
 		}
 	}
 
@@ -1427,6 +1739,36 @@ foreach my $db (@dbs) {
 		}
 	else {
 		&$second_print($text{'setup_done'});
+		}
+
+	# Roll the database forward from the binary logs, if requested,
+	# using the coordinates validated before the restore began
+	if ($opts->{'replay_binlogs'}) {
+		&$first_print(&text('restore_mysqlreplay', $db->[0]));
+		my ($logfile, $logpos) =
+			@{$replay_coords{$db->[0]} || [ ]};
+		my $err;
+		if (!$logfile) {
+			# A requested replay must fail if the dump has no
+			# coordinates to start from
+			$err = $text{'restore_mysqlreplaynone'};
+			}
+		else {
+			$err = &replay_mysql_binlogs(
+				$d, $db->[0], $logfile, $logpos,
+				$opts->{'stop_time'},
+				$replay_stopfile, $replay_stoppos);
+			}
+		if ($err) {
+			&$second_print(&text('restore_mysqlreplayerr',
+					     "<pre>$err</pre>"));
+			$rv = 0;
+			last;
+			}
+		else {
+			&$second_print(&text('restore_mysqlreplaydone',
+					     $logfile, $logpos));
+			}
 		}
 	}
 

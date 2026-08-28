@@ -9,6 +9,8 @@
 * Add ability to add or remove an IPv4 address from an existing virtual server
 * Add support for requesting ACME SSL certificates containing IP address identifiers
 * Add support for FTPS backup destinations
+* Add automatic inclusion of MySQL/MariaDB binary log coordinates in database backups for point-in-time recovery when binary logging is enabled on the server
+* Add point-in-time recovery on restore, optionally replaying MySQL/MariaDB binary log transactions from the coordinates recorded in the backup up to a given time
 * Add support for chaining differential backups to a selected full backup, with safer state tracking, log filtering and deletion checks
 * Add alias domain redirect configuration and improve website redirects for sub-paths, filenames and query strings
 * Add resource limits configuration to virtual server templates
