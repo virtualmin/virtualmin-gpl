@@ -8,11 +8,11 @@ return ( { 'name' => 'dyndns',
 	   'desc' => $text{'dynip_dyndns'} },
 	 { 'name' => 'webmin',
 	   'desc' => $text{'dynip_webmin'} },
-	 { 'name' => 'none',
-	   'desc' => $text{'dynip_none'} },
 	 { 'name' => 'external',
 	   'desc' => $text{'dynip_external'},
 	   'external' => 1, },
+	 { 'name' => 'none',
+	   'desc' => $text{'dynip_none'} },
        );
 }
 
@@ -159,9 +159,10 @@ sub update_dynip_service
 {
 my ($ip, $oldip) = @_;
 if ($config{'dynip_service'} eq 'dyndns') {
-	# Update DynDNS
-	my $host = "members.dyndns.org";
-	my $port = 443;
+	# Update DynDNS or another service supporting the same protocol
+	my ($host, $port) = split(/:/, $config{'dynip_server'} ||
+				       "members.dyndns.org", 2);
+	$port = 443 if (!defined($port) || $port eq '');
 	my $page = "/nic/update?".
 		      "system=dyndns&".
 		      "hostname=".&urlize($config{'dynip_host'})."&".
@@ -170,7 +171,7 @@ if ($config{'dynip_service'} eq 'dyndns') {
 		      "mx=NOCHG&".
 		      "backmx=NOCHG";
 	my ($out, $error);
-	&http_download($host, $port, $page, \$out, \$error, undef, 0,
+	&http_download($host, $port, $page, \$out, \$error, undef, 1,
 		       $config{'dynip_user'},
 		       $config{'dynip_pass'},
 		       10, 0, 1);
@@ -180,8 +181,13 @@ if ($config{'dynip_service'} eq 'dyndns') {
 	elsif ($error) {
 		return (undef, $error);
 		}
-	elsif ($out =~ /^(good|nochg)\s+(\S+)/) {
-		return ($2, undef);
+	elsif ($out =~ /^badauth(?:\s|$)/) {
+		# Some compatible services report bad logins in the body
+		return (undef, "Invalid login or password");
+		}
+	elsif ($out =~ /^(?:good|nochg)(?:\s+(\S+))?(?:\s|\z)/) {
+		# Some compatible services don't echo back the IP
+		return ($1 || $ip, undef);
 		}
 	elsif ($out =~ /^nohost/) {
 		return (undef, "Invalid hostname");
@@ -199,7 +205,7 @@ elsif ($config{'dynip_service'} eq 'webmin') {
 	&http_download($whost, $wport,
 		       "/virtual-server/remote.cgi?program=modify-dns&".
 		       "domain=".&urlize($dom)."&".
-		       "update-record=".&urlize("$host A\n$host A $newip"),
+		       "update-record=".&urlize("$host A\n$host A $ip"),
 		       \$out, \$error, undef, 1,
 		       $config{'dynip_user'},
 		       $config{'dynip_pass'},
@@ -214,7 +220,7 @@ elsif ($config{'dynip_service'} eq 'webmin') {
 		return (undef, "Invalid hostname");
 		}
 	elsif ($out =~ /Exit\s+status:\s+0/i) {
-		return ($newip, undef);
+		return ($ip, undef);
 		}
 	else {
 		return (undef, $out);

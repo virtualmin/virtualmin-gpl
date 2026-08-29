@@ -84,8 +84,12 @@ and allows this one to continue. Or you can use the C<--wait-running> flag
 to delay the backup until the first one completes.
 
 To override the default compression format set on the Virtualmin Configuration
-page, use the C<--compression> flag followed by one of C<gzip>, C<bzip2>, 
+page, use the C<--compression> flag followed by one of C<gzip>, C<bzip2>,
 C<tar>, C<zstd> or C<zip>.
+
+When the MySQL server has binary logging enabled, database dumps automatically
+record the binary log coordinates at the time of the backup, which
+C<restore-domain> can later use for point-in-time recovery.
 
 =cut
 

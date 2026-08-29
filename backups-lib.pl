@@ -36,7 +36,7 @@ if ($config{'backup_dest'}) {
 	my @bf;
 	foreach $f (&get_available_backup_features(), &list_backup_plugins()) {
 		push(@bf, $f) if ($config{'backup_feature_'.$f});
-		$backup{'opts_'.$f} = $config{'backup_opts_'.$f};
+		$backup{'backup_opts_'.$f} = $config{'backup_opts_'.$f};
 		}
 	for(my $i=1; $config{'backup_dest'.$i}; $i++) {
 		$backup{'dest'.$i} = $config{'backup_dest'.$i};
@@ -138,7 +138,7 @@ if ($backup->{'id'} == 1) {
 	my @bf = split(/\s+/, $backup->{'features'});
 	foreach $f (&get_available_backup_features(), &list_backup_plugins()) {
 		$config{'backup_feature_'.$f} = &indexof($f, @bf) >= 0 ? 1 : 0;
-		$config{'backup_opts_'.$f} = $backup->{'opts_'.$f};
+		$config{'backup_opts_'.$f} = $backup->{'backup_opts_'.$f};
 		}
 	foreach my $k (keys %config) {
 		if ($k =~ /^backup_(dest|purge)\d+$/) {

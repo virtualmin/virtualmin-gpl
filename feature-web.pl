@@ -2788,6 +2788,9 @@ if (!$tmpl->{'default'}) {
 print &ui_table_row(&hlink($text{'newweb_http2'}, 'template_web_http2'),
     &ui_radio("web_http2", $tmpl->{'web_http2'}, \@opts));
 
+# Show webserver plugin protocol options alongside the built-in HTTP/2 option
+print &template_web_protocols_input($tmpl);
+
 # Default redirects
 print &ui_table_hr();
 my @redirs = map { [ split(/\s+/, $_, 4) ] }
@@ -2815,6 +2818,20 @@ $rtable .= &ui_checkbox("sslredirect", 1, $text{'newweb_sslredirect'},
 			$tmpl->{'web_sslredirect'});
 print &ui_table_row(&hlink($text{'newweb_redirects'}, 'template_web_redirects'),
 	$rtable);
+}
+
+# template_web_protocols_input(&template)
+# Returns protocol options supplied by third-party webserver plugins
+sub template_web_protocols_input
+{
+my ($tmpl) = @_;
+my $rv;
+foreach my $p (@plugins) {
+	if (&plugin_defined($p, "template_web_protocols_input")) {
+		$rv .= &plugin_call($p, "template_web_protocols_input", $tmpl);
+		}
+	}
+return $rv;
 }
 
 # parse_template_web(&tmpl)

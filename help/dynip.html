@@ -20,6 +20,14 @@ When a change is detected, all virtual servers with shared IP addresses
 using the old address will be updated to the new one. This change will be
 made in both the Apache configuration and DNS records. <p>
 
+The <tt>DynDNS-compatible service</tt> option works with DynDNS and any other
+provider that supports the same update protocol, such as No-IP or Dynu. The
+<b>DynDNS-compatible update server</b> field selects the provider's update
+server. It is shown next to the service selector, defaults to
+<tt>members.dyndns.org</tt>, and is always contacted via HTTPS. A port other
+than 443 can be selected using the
+<tt>hostname:port</tt> format. <p>
+
 If the <tt>External script</tt> service is selected, you must enter the full
 path to a script into the adjacent field that will be called when the system's
 IP address changes. The new IP and hostname will be passed to the script as

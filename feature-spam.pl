@@ -1702,7 +1702,7 @@ return 1;
 sub disable_spamd
 {
 my $st = &check_spamd_status();
-return 1 if ($st == 0 || $st == -1);
+return 1 if ($st == -1);
 
 # Find init script
 &$first_print(&text('spamd_unboot'));
@@ -1728,13 +1728,15 @@ if (&init::action_status("spamassassin-maintenance.timer")) {
 	}
 &$second_print($text{'setup_done'});
 
-# Stop spamd process
-&$first_print($text{'spamd_stop'});
-my ($ok, $out) = &init::stop_action($init);
-if (!$ok) {
-	&kill_byname_logged('spamd', 'TERM');
+# Stop the process too when it is currently running
+if ($st) {
+	&$first_print($text{'spamd_stop'});
+	my ($ok, $out) = &init::stop_action($init);
+	if (!$ok) {
+		&kill_byname_logged('spamd', 'TERM');
+		}
+	&$second_print($text{'setup_done'});
 	}
-&$second_print($text{'setup_done'});
 
 return 1;
 }

@@ -9,6 +9,8 @@
 * Add ability to add or remove an IPv4 address from an existing virtual server
 * Add support for requesting ACME SSL certificates containing IP address identifiers
 * Add support for FTPS backup destinations
+* Add automatic inclusion of MySQL/MariaDB binary log coordinates in database backups for point-in-time recovery when binary logging is enabled on the server
+* Add point-in-time recovery on restore, optionally replaying MySQL/MariaDB binary log transactions from the coordinates recorded in the backup up to a given time
 * Add support for chaining differential backups to a selected full backup, with safer state tracking, log filtering and deletion checks
 * Add alias domain redirect configuration and improve website redirects for sub-paths, filenames and query strings
 * Add resource limits configuration to virtual server templates
@@ -20,8 +22,10 @@
 * Add support for primary DNS zones and CLI flags to exclude named DNS records
 * Add transactional Cloudflare DNS record updates using the batch API to prevent partial migrations [#1267](https://github.com/virtualmin/virtualmin-gpl/issues/1267)
 * Add ability to show disk usage on the virtual server summary page
+* Add support for using any DynDNS-compatible dynamic DNS service, like No-IP or Dynu, by making the update server configurable
 * Fix cross-stack restores to preserve target system features, disable unavailable domain features and handle PHP modes correctly
 * Fix to restore preflight checks and error reporting to catch clashes earlier and show SSL failures
+* Fix post-installation wizard setup for PostgreSQL, SpamAssassin and ClamAV
 * Fix to enforce mailbox and domain disk quota on mail delivery even when spam filtering is disabled, so full mailboxes no longer lock out webmail and IMAP access
 * Fix domain registration expiry checks taking too long when a WHOIS server does not respond
 * Fix PHP-FPM version repair running during package updates
@@ -40,6 +44,8 @@
 * Fix web app installers to avoid URL paths owned by plugins
 * Fix Webmin API credential handling and hide passwords from FTP command errors
 * Fix Apache proxy backends to receive the original HTTP or HTTPS scheme through X-Forwarded-Proto
+* Fix config check to advise disabling the default IPv6 address when no externally visible IPv6 address can be detected
+* Fix dynamic IP updates to use SSL when connecting to DynDNS
 * Drop the obsolete per-domain ProFTPD virtual FTP feature while preserving service controls and backup compatibility
 * Rename the Git-based config history CLI commands to `list-config-revisions` and `restore-config-revision`
 * Replace the legacy website preview flow with sandboxed proxying

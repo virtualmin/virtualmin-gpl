@@ -119,7 +119,7 @@ foreach $f (&get_available_backup_features(!$safe_backup)) {
 		"onClick='form.feature_all[1].checked = true'");
 	my $ofunc = "show_restore_$f";
 	my %opts = map { split(/=/, $_) }
-			split(/,/, $sched->{'opts_'.$f});
+			split(/,/, $sched->{'backup_opts_'.$f});
 	my $ohtml;
 	if (defined(&$ofunc) && ($ohtml = &$ofunc(\%opts)) && $ohtml) {
 		$ftable .= "<table><tr><td>\n";

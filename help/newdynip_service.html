@@ -1,0 +1,29 @@
+<header>Dynamic DNS service</header>
+
+This field selects what Virtualmin contacts when it detects that the system's
+IP address has changed. <p>
+
+The available options are described below.<p>
+
+<dl>
+<dt>DynDNS-compatible service
+<dd>Updates a provider that implements the DynDNS update protocol. Enter the
+    provider's update server in the adjacent field as a hostname or
+    <tt>hostname:port</tt>. The default is <tt>members.dyndns.org</tt>, and
+    the connection always uses HTTPS. The login, password, and full hostname
+    fields are sent to the selected provider.
+<dt>Virtualmin system
+<dd>Asks another Virtualmin installation to update the hostname's DNS record.
+    Enter that system's hostname in the adjacent field, using the
+    <tt>hostname:port</tt> format if Webmin listens on a port other than the
+    default of 10000, along with login credentials that can modify the domain.
+<dt>Run external script
+<dd>Runs the absolute path entered in the adjacent field. Virtualmin passes
+    the new IP address, the configured hostname, and the previous IP address
+    to the script as command-line arguments.
+<dt>Don't update any service
+<dd>Skips notification of an external service. Dynamic address detection and
+    optional updates to local virtual servers can still remain enabled.
+</dl>
+
+<footer>
