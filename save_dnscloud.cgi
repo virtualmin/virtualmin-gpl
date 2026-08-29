@@ -26,6 +26,12 @@ else {
 	$config{'dnscloud_'.$in{'name'}.'_owner'} = $in{'useby_owner'};
 	$pfunc = "dnscloud_".$cloud->{'name'}."_parse_inputs";
 	$html = &$pfunc(\%in);
+
+	# Save access controls after the provider settings have been validated
+	&save_module_config_keys({
+		'dnscloud_'.$in{'name'}.'_reseller' => $in{'useby_reseller'},
+		'dnscloud_'.$in{'name'}.'_owner' => $in{'useby_owner'},
+		});
 	&webmin_log("save", "dnscloud", $in{'name'});
 
 	if ($html) {

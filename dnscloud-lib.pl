@@ -183,11 +183,11 @@ my ($ok, $err) = &can_use_aws_route53_cmd(
 $ok || &error(&text('dnscloud_eawscreds', $err));
 
 # Parse delegation set
-if ($in{'dset_def'}) {
+if ($in->{'dset_def'}) {
 	delete($config{'route53_dset'});
 	}
 else {
-	$in{'dset'} =~ /^\S+$/ || &error($text{'dnscloud_route53_edset'});
+	$in->{'dset'} =~ /^\S+$/ || &error($text{'dnscloud_route53_edset'});
 	my $rv = &call_route53_cmd(
 		$config{'route53_akey'},
 		[ 'list-reusable-delegation-sets' ],
@@ -195,11 +195,11 @@ else {
 	ref($rv) || &error(&text('dnscloud_eawsdset', $err));
 	my $found = 0;
 	foreach my $ds (@{$rv->{'DelegationSets'}}) {
-		$found++ if ($ds->{'Id'} eq $in{'dset'} ||
-			     $ds->{'Id'} eq "/delegationset/".$in{'dset'});
+		$found++ if ($ds->{'Id'} eq $in->{'dset'} ||
+			     $ds->{'Id'} eq "/delegationset/".$in->{'dset'});
 		}
-	$found || return &text('dnscloud_eawsdset2', $in{'dset'});
-	$config{'route53_dset'} = $in{'dset'};
+	$found || return &text('dnscloud_eawsdset2', $in->{'dset'});
+	$config{'route53_dset'} = $in->{'dset'};
 	}
 
 &save_module_config_diff(\%original_config);

@@ -211,10 +211,10 @@ else {
 	}
 
 # Parse endpoint
-$config{'rs_endpoint'} = $in{'rs_endpoint'};
+$config{'rs_endpoint'} = $in->{'rs_endpoint'};
 
 # Parse internal network flag
-$config{'rs_snet'} = $in{'rs_snet'};
+$config{'rs_snet'} = $in->{'rs_snet'};
 
 # Parse chunk size
 if ($in->{'rs_chunk_def'}) {
@@ -460,7 +460,7 @@ my ($in) = @_;
 my %original_config = %config;
 my $reauth = 0;
 
-if ($in{'dropbox_set_oauth'}) {
+if ($in->{'dropbox_set_oauth'}) {
 	# Special mode - saving the oauth token
 	$in->{'dropbox_oauth'} =~ /^\S+$/ ||
 		&error($text{'cloud_egoogle_oauth'});
@@ -490,7 +490,7 @@ if ($config{'dropbox_oauth'} && !$config{'dropbox_token'}) {
 
 &save_module_config_diff(\%original_config);
 
-if ($in{'dropbox_set_oauth'} || !$reauth) {
+if ($in->{'dropbox_set_oauth'} || !$reauth) {
 	# Nothing more to do - either the OAuth2 token was just set, or the
 	# settings were saved with no change
 	return undef;
@@ -550,21 +550,22 @@ return $rv;
 
 sub cloud_bb_parse_inputs
 {
+my ($in) = @_;
 my %original_config = %config;
-$in{'bb_keyid'} =~ /^[A-Za-z0-9\/]+$/ || &error($text{'cloud_bb_ekeyid'});
-$in{'bb_key'} =~ /^[A-Za-z0-9\/\+\-\_]+$/ || &error($text{'cloud_bb_ekey'});
+$in->{'bb_keyid'} =~ /^[A-Za-z0-9\/]+$/ || &error($text{'cloud_bb_ekeyid'});
+$in->{'bb_key'} =~ /^[A-Za-z0-9\/\+\-\_]+$/ || &error($text{'cloud_bb_ekey'});
 
 # If key changed, re-login using the b2 command
-if ($in{'bb_keyid'} ne $config{'bb_keyid'} ||
-    $in{'bb_key'} ne $config{'bb_key'}) {
+if ($in->{'bb_keyid'} ne $config{'bb_keyid'} ||
+    $in->{'bb_key'} ne $config{'bb_key'}) {
 	my ($out, $err) = &run_bb_command("authorize-account",
-					  [$in{'bb_keyid'}, $in{'bb_key'}]);
+					  [$in->{'bb_keyid'}, $in->{'bb_key'}]);
 	if ($err) {
 		&error(&text('cloud_bb_elogin',
 			     "<tt>".&html_escape($err)."</tt>"));
 		}
-	$config{'bb_keyid'} = $in{'bb_keyid'};
-	$config{'bb_key'} = $in{'bb_key'};
+	$config{'bb_keyid'} = $in->{'bb_keyid'};
+	$config{'bb_key'} = $in->{'bb_key'};
 	}
 &save_module_config_diff(\%original_config);
 
@@ -630,36 +631,37 @@ return $rv;
 
 sub cloud_azure_parse_inputs
 {
+my ($in) = @_;
 my %original_config = %config;
 # Save account and check that it's in use
-$in{'azure_account'} =~ /^\S+\@\S+$/ || &error($text{'cloud_eazure_eaccount'});
-$config{'azure_account'} = $in{'azure_account'};
+$in->{'azure_account'} =~ /^\S+\@\S+$/ || &error($text{'cloud_eazure_eaccount'});
+$config{'azure_account'} = $in->{'azure_account'};
 my $out = &call_az_cmd("account", ["list"]);
 ref($out) && @$out || &error($text{'cloud_eazure_eaccount3'});
-$out->[0]->{'user'}->{'name'} eq $in{'azure_account'} ||
+$out->[0]->{'user'}->{'name'} eq $in->{'azure_account'} ||
 	&error(&text('cloud_eazure_eaccount2', $out->[0]->{'user'}->{'name'}));
 
 # Fetch list of storage accounts
 my $stors = &call_az_cmd("storage", ["account", "list"]);
 ref($stors) || &error($stors);
 @$stors || &error($text{'cloud_eazure_estor'});
-if ($in{'azure_name_def'}) {
+if ($in->{'azure_name_def'}) {
 	$config{'azure_name'} = $stors->[0]->{'name'};
 	}
 else {
-	$in{'azure_name'} =~ /^[a-z0-9]+$/ ||
+	$in->{'azure_name'} =~ /^[a-z0-9]+$/ ||
 		&error($text{'cloud_eazure_ename'});
-	$config{'azure_name'} = $in{'azure_name'};
+	$config{'azure_name'} = $in->{'azure_name'};
 	}
-if ($in{'azure_id_def'}) {
+if ($in->{'azure_id_def'}) {
 	$stors->[0]->{'id'} =~ /^\/subscriptions\/([^\/]+)\// ||
 		&error($text{'cloud_eazure_eid2'});
 	$config{'azure_id'} = $1;
 	}
 else {
-	$in{'azure_id'} =~ /^[a-z0-9\-]+$/ ||
+	$in->{'azure_id'} =~ /^[a-z0-9\-]+$/ ||
 		&error($text{'cloud_eazure_eid'});
-	$config{'azure_id'} = $in{'azure_id'};
+	$config{'azure_id'} = $in->{'azure_id'};
 	}
 
 # Make sure the storage account entered works

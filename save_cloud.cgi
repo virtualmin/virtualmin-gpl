@@ -24,6 +24,12 @@ else {
 	$config{'cloud_'.$in{'name'}.'_owner'} = $in{'useby_owner'};
 	$pfunc = "cloud_".$prov->{'name'}."_parse_inputs";
 	$html = &$pfunc(\%in);
+
+	# Save access controls after the provider settings have been validated
+	&save_module_config_keys({
+		'cloud_'.$in{'name'}.'_reseller' => $in{'useby_reseller'},
+		'cloud_'.$in{'name'}.'_owner' => $in{'useby_owner'},
+		});
 	&webmin_log("save", "cloud", $in{'name'});
 
 	if ($html) {
