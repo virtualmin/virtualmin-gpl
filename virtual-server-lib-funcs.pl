@@ -18146,9 +18146,10 @@ foreach my $k ('ftp', 'proftpd_config', 'proftpd_ssl', 'ftp_dir',
 	       'backup_feature_ftp', 'backup_opts_ftp') {
 	delete($config{$k});
 	}
-my $latest_config = &save_module_config_diff(\%original_config);
-if ($latest_config) {
-	%config = %$latest_config;
+&save_module_config_diff(\%original_config);
+my %latest_config;
+if (&read_file($module_config_file, \%latest_config)) {
+	%config = %latest_config;
 	&write_file("$module_config_directory/last-config", \%config);
 	}
 
