@@ -471,7 +471,7 @@ if (&mysql::is_mysql_running() == -1) {
 		}
 	}
 else {
-	if (!$in{'mypass_def'}) {
+	if (!$in->{'mypass_def'}) {
 		# Change in DB
 		eval {
 			local $main::error_must_die = 1;
@@ -562,7 +562,8 @@ $tmpl->{'dns_ns'} = join(" ", @secns);
 &save_template($tmpl);
 
 # Save skip option
-&save_module_config_keys({ 'prins_skip' => $in{'prins_skip'} });
+&save_module_config_keys({ 'prins_skip' => $in->{'prins_skip'} });
+return;
 }
 
 sub wizard_show_email

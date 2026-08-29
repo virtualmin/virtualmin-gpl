@@ -13,7 +13,9 @@ BEGIN {
 do "$FindBin::Bin/../wizard-lib.pl"
 	or die "Failed to load wizard-lib.pl: $@ $!";
 
-# Apply the process-local part of save_module_config_keys in isolated tests
+# Apply the process-local part of save_module_config_keys in isolated tests.
+# Deliberately return a truthy value so wizard parsers must define their own
+# success return instead of leaking an implementation detail from a helper.
 sub mock_save_module_config_keys
 {
 my ($values, $deletes) = @_;
@@ -21,6 +23,7 @@ foreach my $key (keys %$values) {
 	$main::config{$key} = $values->{$key};
 	}
 delete @main::config{@$deletes} if ($deletes);
+return { %main::config };
 }
 
 # Get the PostgreSQL default shown by the database wizard with detection calls
@@ -477,6 +480,45 @@ subtest 'provisioned scanners are not managed as local daemons' => sub {
 	my @steps = &main::get_wizard_steps();
 	is(scalar(grep { $_ eq 'spam' || $_ eq 'virus' } @steps), 0,
 		'local daemon steps are skipped for provisioned services');
+	};
+
+subtest 'DNS wizard step succeeds and saves the skip option' => sub {
+	no warnings qw(redefine once);
+	local %main::config = ( );
+	local %main::in = ( );
+	my @saved_tmpls;
+	my $tmpl = { 'id' => 0 };
+	local *main::require_bind = sub { };
+	local *main::list_templates = sub { return ($tmpl); };
+	local *main::save_template = sub { push(@saved_tmpls, { %{$_[0]} }); };
+	local *main::save_module_config_keys = \&mock_save_module_config_keys;
+	local *main::text = sub { return join(':', @_); };
+	my $result = &main::wizard_parse_dns({
+		'prins' => 'ns1.example.test',
+		'prins_skip' => 1,
+		'secns' => '' });
+	is($result, undef,
+		'step returns no error, not the merged config from the save');
+	is($main::config{'prins_skip'}, 1, 'skip option is saved');
+	is($saved_tmpls[0]->{'dns_master'}, 'ns1.example.test',
+		'primary nameserver is saved to the default template');
+	is($saved_tmpls[1]->{'dns_ns'}, '', 'secondary nameservers are saved');
+	};
+
+subtest 'MySQL wizard parser uses its passed input hash' => sub {
+	no warnings qw(redefine once);
+	local %main::in = ( );
+	local $mysql::mysql_login = 'root';
+	local $mysql::mysql_pass = 'existing-password';
+	my $password_changes = 0;
+	local *main::require_mysql = sub { };
+	local *mysql::is_mysql_running = sub { return 1; };
+	local *main::execute_password_change_sql = sub { $password_changes++ };
+	local *main::update_webmin_mysql_pass = sub { };
+	my $result = &main::wizard_parse_mysql({ 'mypass_def' => 1 });
+	is($result, undef, 'wizard step succeeds');
+	is($password_changes, 0,
+		'existing password selection is read from the passed input');
 	};
 
 done_testing();
