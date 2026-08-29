@@ -571,7 +571,7 @@ $deletes ||= [ ];
 my $locked = &lock_file($module_config_file);
 if (!$locked) {
 	my $lock_owner = &test_lock($module_config_file);
-	return undef if (!$lock_owner || $lock_owner != $$);
+	return if (!$lock_owner || $lock_owner != $$);
 	}
 my %latest_config;
 my $read = &read_file($module_config_file, \%latest_config);
@@ -605,7 +605,7 @@ if ($read) {
 		delete($config{$key});
 		}
 	}
-return $read ? \%latest_config : undef;
+return;
 }
 
 # save_module_config_diff(&oldconfig)
@@ -625,7 +625,8 @@ foreach my $key (keys %config) {
 foreach my $key (keys %$oldconfig) {
 	push(@deletes, $key) if (!exists($config{$key}));
 	}
-return &save_module_config_keys(\%values, \@deletes);
+&save_module_config_keys(\%values, \@deletes);
+return;
 }
 
 # lock_domain(&domain|id)
