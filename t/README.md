@@ -26,6 +26,7 @@ VIRTUALMIN_COMPILE_T_FILTER='^\./backup' prove t/compile.t
 | `compile.t` | Every discovered `.pl` and `.cgi` parses cleanly with `perl -c`. It catches syntax and compile-time module-loading breakage without running normal script bodies. |
 | `btrfs-lib.t` | Btrfs qgroup unit conversion, mount-path mapping, hierarchy repair, and safe subvolume lifecycle behavior. |
 | `mysql-backup-options.t` | Automatic MySQL point-in-time recovery coordinates, including binary log detection, dump client compatibility, Webmin backup API propagation, and restore-time coordinate parsing and log selection. |
+| `module-config-write.t` | Locked module config updates preserve settings saved by concurrent processes. |
 | `scripts-lib.t` | PHP extension package-name generation across supported package manager families. |
 | `wizard-lib.t` | Post-install database wizard handling for PostgreSQL initialization and startup. |
 

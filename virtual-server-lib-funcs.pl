@@ -560,6 +560,74 @@ $main::domain_id_count++;
 return $rv;
 }
 
+# save_module_config_keys(&values, [&deletes])
+# Atomically update selected module config keys, preserving other changes
+sub save_module_config_keys
+{
+my ($values, $deletes) = @_;
+$values ||= { };
+$deletes ||= [ ];
+
+my $locked = &lock_file($module_config_file);
+if (!$locked) {
+	my $lock_owner = &test_lock($module_config_file);
+	return undef if (!$lock_owner || $lock_owner != $$);
+	}
+my %latest_config;
+my $read = &read_file($module_config_file, \%latest_config);
+if ($read) {
+	my $changed = 0;
+	foreach my $key (keys %$values) {
+		my $value = $values->{$key};
+		if (!exists($latest_config{$key}) ||
+		    defined($latest_config{$key}) != defined($value) ||
+		    (defined($value) && $latest_config{$key} ne $value)) {
+			$latest_config{$key} = $value;
+			$changed = 1;
+			}
+		}
+	foreach my $key (@$deletes) {
+		if (exists($latest_config{$key})) {
+			delete($latest_config{$key});
+			$changed = 1;
+			}
+		}
+	&save_module_config(\%latest_config) if ($changed);
+	}
+&unlock_file($module_config_file) if ($locked);
+
+# Keep the caller's process-local values consistent with its requested update
+if ($read) {
+	foreach my $key (keys %$values) {
+		$config{$key} = $values->{$key};
+		}
+	foreach my $key (@$deletes) {
+		delete($config{$key});
+		}
+	}
+return $read ? \%latest_config : undef;
+}
+
+# save_module_config_diff(&oldconfig)
+# Atomically save only keys changed in %config since the supplied snapshot
+sub save_module_config_diff
+{
+my ($oldconfig) = @_;
+my (%values, @deletes);
+foreach my $key (keys %config) {
+	my $value = $config{$key};
+	if (!exists($oldconfig->{$key}) ||
+	    defined($oldconfig->{$key}) != defined($value) ||
+	    (defined($value) && $oldconfig->{$key} ne $value)) {
+		$values{$key} = $value;
+		}
+	}
+foreach my $key (keys %$oldconfig) {
+	push(@deletes, $key) if (!exists($config{$key}));
+	}
+return &save_module_config_keys(\%values, \@deletes);
+}
+
 # lock_domain(&domain|id)
 # Lock the config file for some domain
 sub lock_domain
@@ -9587,11 +9655,8 @@ foreach my $dd (@alldoms) {
 
 # If deleted domain was default host name
 if ($d->{'dom'} eq $config{'defaultdomain_name'}) {
-	&lock_file($module_config_file);
-	delete($config{'defaultdomain_name'});
-	$config{'default_domain_ssl'} = 0;
-	&save_module_config();
-	&unlock_file($module_config_file);
+	&save_module_config_keys({ 'default_domain_ssl' => 0 },
+				 [ 'defaultdomain_name' ]);
 	}
 
 # Run the after deletion command
@@ -12940,10 +13005,7 @@ if ($config{'allow_symlinks'} eq '') {
 		}
 	else {
 		# All OK already, don't check again
-		$config{'allow_symlinks'} = 0;
-		&lock_file($module_config_file);
-		&save_module_config();
-		&unlock_file($module_config_file);
+		&save_module_config_keys({ 'allow_symlinks' => 0 });
 		}
 	}
 
@@ -16491,6 +16553,7 @@ return undef;
 sub check_virtual_server_config
 {
 my ($lastconfig, $skip_dns_network) = @_;
+my %original_config = %config;
 my $clink = "edit_newfeatures.cgi";
 my $mclink = "../config.cgi?$module_name";
 
@@ -16663,9 +16726,8 @@ if ($config{'mail'}) {
 			}
 		&$second_print(&text('check_detected', &mail_system_name()));
 		$mail_system = $config{'mail_system'};
-		&lock_file($module_config_file);
-		&save_module_config();
-		&unlock_file($module_config_file);
+		&save_module_config_keys(
+			{ 'mail_system' => $config{'mail_system'} });
 		}
 	my $expected_mailboxes;
 	if ($mail_system == 1) {
@@ -17474,9 +17536,7 @@ if (!$config{'iface'}) {
 			return &text('index_eiface',
 				     "../config.cgi?$module_name");
 			}
-		&lock_file($module_config_file);
-		&save_module_config();
-		&unlock_file($module_config_file);
+		&save_module_config_keys({ 'iface' => $config{'iface'} });
 		}
 	else {
 		# In a zone, it is worked out as needed, as it changes!
@@ -18085,10 +18145,11 @@ foreach my $k ('ftp', 'proftpd_config', 'proftpd_ssl', 'ftp_dir',
 	       'backup_feature_ftp', 'backup_opts_ftp') {
 	delete($config{$k});
 	}
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
-&write_file("$module_config_directory/last-config", \%config);
+my $latest_config = &save_module_config_diff(\%original_config);
+if ($latest_config) {
+	%config = %$latest_config;
+	&write_file("$module_config_directory/last-config", \%config);
+	}
 
 return undef;
 }
@@ -19322,10 +19383,7 @@ return split(/\s+/, $config{'sharedips'});
 # Updates the list of extra IP addresses that can be used by virtual servers
 sub save_shared_ips
 {
-&lock_file($module_config_file);
-$config{'sharedips'} = join(" ", @_);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ 'sharedips' => join(" ", @_) });
 }
 
 # list_shared_ip6s()
@@ -19339,10 +19397,7 @@ return split(/\s+/, $config{'sharedip6s'});
 # Updates the list of extra IPv6 addresses that can be used by virtual servers
 sub save_shared_ip6s
 {
-&lock_file($module_config_file);
-$config{'sharedip6s'} = join(" ", @_);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ 'sharedip6s' => join(" ", @_) });
 }
 
 # is_shared_ip(ip)
@@ -22189,16 +22244,14 @@ if ($config{'err_letsencrypt'}) {
 		$elelast = " :<br>$elelast";
 		}
 	}
-my $succ_msg = $succ ? 
+my $succ_msg = $succ ?
 	&text($succ == 2 ? 'check_defhost_sharedsucc'
 			 : 'check_defhost_succ', $system_host_name) :
 	&text('check_defhost_err', $system_host_name).$elelast;
-$config{'defaultdomain_name'} = $dom{'dom'};
-$config{'default_domain_ssl'} = 1
+my %config_updates = ( 'defaultdomain_name' => $dom{'dom'} );
+$config_updates{'default_domain_ssl'} = 1
 	if ($succ && !$config{'default_domain_ssl'});
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys(\%config_updates);
 
 # Set as default domain if create some time later
 if (&can_default_website(\%dom)) {
@@ -22244,10 +22297,7 @@ $err = &delete_virtual_server($d, 0, 0);
 &pop_all_print();
 &run_post_actions_silently();
 &unlock_domain_name($d->{'dom'});
-&lock_file($module_config_file);
-$config{'defaultdomain_name'} = undef;
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ 'defaultdomain_name' => undef });
 &clear_links_cache();
 return wantarray ? (0, $err) : 0 if ($err);
 return wantarray ? (1, undef) : 1;
@@ -22279,10 +22329,7 @@ foreach my $st (&list_service_ssl_cert_types()) {
 	$err = 1 if (!$ok);
 	}
 # Update config entry
-$config{'defaultdomain_name'} = $new_hostname;
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ 'defaultdomain_name' => $new_hostname });
 &run_post_actions_silently();
 &pop_all_print();
 &clear_links_cache() if ($config{'default_domain_ssl'} == 2);

@@ -417,11 +417,12 @@ else {
 sub save_global_virus_scanner
 {
 my ($cmd, $host) = @_;
-$config{'clamscan_cmd'} = $cmd;
-$config{'clamscan_cmd_global'} = 1;
-$config{'clamscan_host'} = $host;
-$config{'last_check'} = time()+1;
-&save_module_config();
+&save_module_config_keys({
+	'clamscan_cmd' => $cmd,
+	'clamscan_cmd_global' => 1,
+	'clamscan_host' => $host,
+	'last_check' => time()+1,
+	});
 foreach my $d (grep { $_->{'virus'} } &list_domains()) {
 	&save_domain_virus_scanner($d, $cmd);
 	}

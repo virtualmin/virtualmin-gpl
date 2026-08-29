@@ -119,9 +119,7 @@ else {
         }
 
 # Save config if changed
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ 'dkim_enabled' => $config{'dkim_enabled'} });
 &clear_links_cache();
 
 &run_post_actions();

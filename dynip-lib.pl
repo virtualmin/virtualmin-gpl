@@ -110,11 +110,8 @@ if ($error) {
 	return $ip->($config{$cache_optname});
 	}
 # Cache it for future calls
-&lock_file($module_config_file);
-$config{$cache_optname} = $out;
-$config{$cache_time_optname} = $now;
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ $cache_optname => $out,
+			   $cache_time_optname => $now });
 return $out;
 }
 

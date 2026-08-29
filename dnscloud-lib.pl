@@ -153,6 +153,7 @@ return $rv;
 sub dnscloud_route53_parse_inputs
 {
 my ($in) = @_;
+my %original_config = %config;
 
 # Parse default login
 if ($config{'route53_akey'} || !&can_use_aws_route53_creds()) {
@@ -201,9 +202,7 @@ else {
 	$config{'route53_dset'} = $in{'dset'};
 	}
 
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_diff(\%original_config);
 
 return undef;
 }
@@ -212,11 +211,7 @@ return undef;
 # Reset the S3 account to the default
 sub dnscloud_route53_clear
 {
-delete($config{'route53_akey'});
-delete($config{'route53_skey'});
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ }, [ 'route53_akey', 'route53_skey' ]);
 }
 
 # dnscloud_route53_create_domain(&domain, &info)

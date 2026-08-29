@@ -89,8 +89,8 @@ elsif (!$in->{'lookup'} && $lud) {
 	# Stop lookup daemon
 	&delete_lookup_domain_daemon();
 	}
-$config{'no_lookup_domain_daemon'} = !$in->{'lookup'};
-&save_module_config();
+&save_module_config_keys(
+	{ 'no_lookup_domain_daemon' => !$in->{'lookup'} });
 
 &pop_all_print();
 return undef;
@@ -152,8 +152,7 @@ if (defined($in->{'clamd'})) {
 		# Yes always means the daemonized scanner, even when clamd was
 		# already running before the wizard
 		&save_global_virus_scanner("clamdscan");
-		$config{'virus'} ||= 1;
-		&save_module_config();
+		&save_module_config_keys({ 'virus' => $config{'virus'} || 1 });
 		}
 	else {
 		# Disable clamd and virus feature, unless some domains are
@@ -167,8 +166,7 @@ if (defined($in->{'clamd'})) {
 		&disable_clamd() if ($cs >= 0);
 		&pop_all_print();
 		&save_global_virus_scanner("clamscan");
-		$config{'virus'} = 0;
-		&save_module_config();
+		&save_module_config_keys({ 'virus' => 0 });
 		}
 	}
 return undef;
@@ -208,8 +206,7 @@ if (defined($in->{'spamd'})) {
 			return $text{'wizard_espamdenable'} if (!$ok);
 			}
 		&save_global_spam_client("spamc");
-		$config{'spam'} ||= 1;
-		&save_module_config();
+		&save_module_config_keys({ 'spam' => $config{'spam'} || 1 });
 		}
 	else {
 		# Spam owns the mail-filtering chain used by virus scanning, so
@@ -232,14 +229,15 @@ if (defined($in->{'spamd'})) {
 
 		# Keep safe dormant clients so the features can be re-enabled and
 		# configured later without referring to stopped daemon services
-		$config{'spam'} = 0;
-		$config{'virus'} = 0;
-		$config{'no_lookup_domain_daemon'} = 1;
 		&save_global_spam_client("spamassassin")
 			if (!$config{'provision_spam_host'});
 		&save_global_virus_scanner("clamscan")
 			if ($virus_enabled && !$config{'provision_virus_host'});
-		&save_module_config();
+		&save_module_config_keys({
+			'spam' => 0,
+			'virus' => 0,
+			'no_lookup_domain_daemon' => 1,
+			});
 		}
 	}
 return undef;
@@ -365,7 +363,9 @@ elsif (&foreign_available("postgresql")) {
 	&postgresql::stop_postgresql();
 	&init::disable_at_boot("postgresql");
 	}
-&save_module_config();
+my %feature_config = map { $_ => $config{$_} }
+			 grep { exists($config{$_}) } qw(mysql postgres);
+&save_module_config_keys(\%feature_config);
 
 return undef;
 }
@@ -562,10 +562,7 @@ $tmpl->{'dns_ns'} = join(" ", @secns);
 &save_template($tmpl);
 
 # Save skip option
-$config{'prins_skip'} = $in{'prins_skip'};
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ 'prins_skip' => $in{'prins_skip'} });
 }
 
 sub wizard_show_email
@@ -589,16 +586,13 @@ sub wizard_parse_email
 {
 my ($in) = @_;
 
-&lock_file($module_config_file);
 if ($in->{'from_addr_def'}) {
-	delete($config{'from_addr'});
+	&save_module_config_keys({ }, [ 'from_addr' ]);
 	}
 else {
 	$in->{'from_addr'} =~ /\S+\@\S+/ || return $text{'wizard_efrom_addr'};
-	$config{'from_addr'} = $in->{'from_addr'};
+	&save_module_config_keys({ 'from_addr' => $in->{'from_addr'} });
 	}
-&save_module_config();
-&unlock_file($module_config_file);
 
 &lock_file("$config_directory/config");
 if ($in->{'to_addr_def'}) {

@@ -121,10 +121,7 @@ if ($oldip) {
 	&$second_print(".. updated $bc domains");
 
 	# Update the old default IP, which is used by a dashboard warning
-	$config{'old_defip'} = &get_default_ip();
-	&lock_file($module_config_file);
-	&save_module_config();
-	&unlock_file($module_config_file);
+	&save_module_config_keys({ 'old_defip' => &get_default_ip() });
 	}
 
 # Do the IPv6 change on all domains
@@ -146,10 +143,7 @@ if ($oldip6) {
 		}
 
 	# Update the old default IPv6, which is used by a dashboard warning
-	$config{'old_defip6'} = &get_default_ip6();
-	&lock_file($module_config_file);
-	&save_module_config();
-	&unlock_file($module_config_file);
+	&save_module_config_keys({ 'old_defip6' => &get_default_ip6() });
 	}
 
 &run_post_actions();

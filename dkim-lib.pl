@@ -558,10 +558,11 @@ if ($dkim_config) {
 	&unlock_file($dkim_config);
 
 	# Save list of extra domains
-	$config{'dkim_extra'} = join(" ", @{$dkim->{'extra'}});
-	$config{'dkim_exclude'} = join(" ", @{$dkim->{'exclude'}});
-	$config{'dkim_alldns'} = $dkim->{'alldns'};
-	&save_module_config();
+	&save_module_config_keys({
+		'dkim_extra' => join(" ", @{$dkim->{'extra'}}),
+		'dkim_exclude' => join(" ", @{$dkim->{'exclude'}}),
+		'dkim_alldns' => $dkim->{'alldns'},
+		});
 	}
 
 my $dkim_defaults = &get_dkim_defaults_file();

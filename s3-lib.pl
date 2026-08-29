@@ -807,14 +807,13 @@ sub save_s3_account
 {
 my ($account) = @_;
 if ($account->{'default'}) {
-	&lock_file($module_config_file);
-	$config{'s3_akey'} = $account->{'access'};
-	$config{'s3_skey'} = $account->{'secret'};
-	$config{'s3_endpoint'} = $account->{'endpoint'};
-	$config{'s3_location'} = $account->{'location'};
-	$config{'s3_desc'} = $account->{'desc'};
-	&unlock_file($module_config_file);
-	&save_module_config();
+	&save_module_config_keys({
+		's3_akey' => $account->{'access'},
+		's3_skey' => $account->{'secret'},
+		's3_endpoint' => $account->{'endpoint'},
+		's3_location' => $account->{'location'},
+		's3_desc' => $account->{'desc'},
+		});
 	}
 else {
 	$account->{'id'} ||= &domain_id();
@@ -835,13 +834,8 @@ my $akey = $account->{'access'};
 my $id = $account->{'id'};
 my $profile = $account->{'id'} <= 1 ? $account->{'access'} : $account->{'id'};
 if ($account->{'default'}) {
-	&lock_file($module_config_file);
-	delete($config{'s3_akey'});
-	delete($config{'s3_skey'});
-	delete($config{'s3_endpoint'});
-	delete($config{'s3_location'});
-	&unlock_file($module_config_file);
-	&save_module_config();
+	&save_module_config_keys({ }, [ qw(s3_akey s3_skey s3_endpoint
+		s3_location) ]);
 	}
 else {
 	$account->{'id'} || &error("Missing account ID!");

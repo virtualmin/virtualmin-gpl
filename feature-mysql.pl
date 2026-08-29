@@ -49,16 +49,7 @@ else {
 		}
 	}
 if ($known && $config{'mysql_user_size'} ne $size) {
-	# Merge the detected size into any config changes made during the probe
-	my $locked = &lock_file($module_config_file);
-	my %latest_config;
-	if (&read_file($module_config_file, \%latest_config) &&
-	    $latest_config{'mysql_user_size'} ne $size) {
-		$latest_config{'mysql_user_size'} = $size;
-		&save_module_config(\%latest_config);
-		}
-	&unlock_file($module_config_file) if ($locked);
-	$config{'mysql_user_size'} = $size;
+	&save_module_config_keys({ 'mysql_user_size' => $size });
 	}
 return $size || $config{'mysql_user_size'} || 32;
 }

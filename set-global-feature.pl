@@ -147,10 +147,26 @@ $config{'plugins_inactive'} = join(" ", @inactive);
 $oldplugins = $config{'plugins'};
 $config{'plugins'} = join(" ", @plugins);
 
+# Keep only settings this command intends to save after the configuration check
+%feature_config = ( );
+foreach $f ('plugins', 'plugins_inactive') {
+	$feature_config{$f} = $config{$f}
+		if ($config{$f} ne $lastconfig{$f});
+	}
+foreach $f (&unique(@enable, @disable, @defaulton, @defaultoff)) {
+	$feature_config{$f} = $config{$f} if (&indexof($f, @features) >= 0);
+	}
+
 # Validate new settings with a config check
 &set_all_null_print();
 $cerr = &check_virtual_server_config(\%lastconfig);
 &usage(&html_tags_to_text($cerr)) if ($cerr);
+
+# The check reloads the latest config, so restore this command's validated
+# changes locally until they are atomically saved below
+foreach $f (keys %feature_config) {
+	$config{$f} = $feature_config{$f};
+	}
 
 # Update the procmail setting for default delivery, turn on logging, and 
 # create cron job to link up files
@@ -174,12 +190,10 @@ if ($config{'virus'}) {
 &create_virtualmin_api_helper_command();
 
 # Save the config
-&lock_file($module_config_file);
 if ($config{'last_check'} < time()) {
-	$config{'last_check'} = time()+1;
+	$feature_config{'last_check'} = time()+1;
 	}
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys(\%feature_config);
 
 # Update the miniserv preload list, which includes plugins
 if ($oldplugins ne $config{'plugins'}) {

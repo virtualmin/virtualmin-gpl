@@ -3489,14 +3489,7 @@ foreach my $d (&list_domains()) {
 	}
 
 # Preserve configuration changes made while this collection was running
-&lock_file($module_config_file);
-my %latest_config;
-if (&read_file($module_config_file, \%latest_config)) {
-	$latest_config{'last_letsencrypt_mass_renewal'} = $now;
-	&save_module_config(\%latest_config);
-	}
-&unlock_file($module_config_file);
-$config{'last_letsencrypt_mass_renewal'} = $now;
+&save_module_config_keys({ 'last_letsencrypt_mass_renewal' => $now });
 }
 
 # renew_letsencrypt_cert(&domain)

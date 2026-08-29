@@ -13,6 +13,16 @@ BEGIN {
 do "$FindBin::Bin/../wizard-lib.pl"
 	or die "Failed to load wizard-lib.pl: $@ $!";
 
+# Apply the process-local part of save_module_config_keys in isolated tests
+sub mock_save_module_config_keys
+{
+my ($values, $deletes) = @_;
+foreach my $key (keys %$values) {
+	$main::config{$key} = $values->{$key};
+	}
+delete @main::config{@$deletes} if ($deletes);
+}
+
 # Get the PostgreSQL default shown by the database wizard with detection calls
 # stubbed out
 sub get_postgres_wizard_default
@@ -62,7 +72,7 @@ $main::slept = 0;
 		push(@postgres_calls, 'configured') if ($_[1]);
 		return $_[1] ? ($opts{'configured'} // 2) : 1;
 		};
-	local *main::save_module_config = sub { };
+	local *main::save_module_config_keys = \&mock_save_module_config_keys;
 	local *main::text = sub {
 		my ($key, @args) = @_;
 		return join(":", $key, @args);
@@ -347,7 +357,7 @@ subtest 'enabling virus scanning selects clamd and preserves feature state' => s
 	local *main::save_global_virus_scanner = sub {
 		push(@scanners, $_[0]);
 		};
-	local *main::save_module_config = sub { };
+	local *main::save_module_config_keys = \&mock_save_module_config_keys;
 	my $result = &main::wizard_parse_virus({ 'clamd' => 1 });
 	is($result, undef, 'wizard step succeeds');
 	is_deeply(\@scanners, [ 'clamdscan' ],
@@ -377,7 +387,7 @@ subtest 'disabling virus scanning disables clamd and the feature' => sub {
 	local *main::save_global_virus_scanner = sub {
 		push(@calls, 'scanner-'.$_[0]);
 		};
-	local *main::save_module_config = sub { };
+	local *main::save_module_config_keys = \&mock_save_module_config_keys;
 	my $result = &main::wizard_parse_virus({ 'clamd' => 0 });
 	is($result, undef, 'wizard step succeeds');
 	is_deeply(\@calls, [ 'disable-clamd', 'scanner-clamscan' ],
@@ -393,7 +403,7 @@ subtest 'enabling spam filtering selects spamd and preserves feature state' => s
 	local *main::save_global_spam_client = sub {
 		push(@clients, $_[0]);
 		};
-	local *main::save_module_config = sub { };
+	local *main::save_module_config_keys = \&mock_save_module_config_keys;
 	my $result = &main::wizard_parse_spam({ 'spamd' => 1 });
 	is($result, undef, 'wizard step succeeds');
 	is_deeply(\@clients, [ 'spamc' ],
@@ -424,7 +434,7 @@ subtest 'disabling spam filtering also disables dependent virus scanning' => sub
 	local *main::save_global_virus_scanner = sub {
 		push(@calls, 'virus-'.$_[0]);
 		};
-	local *main::save_module_config = sub { };
+	local *main::save_module_config_keys = \&mock_save_module_config_keys;
 	my $result = &main::wizard_parse_spam({ 'spamd' => 0 });
 	is($result, undef, 'wizard step succeeds');
 	is_deeply(\@calls,

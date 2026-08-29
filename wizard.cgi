@@ -7,8 +7,7 @@ require './virtual-server-lib.pl';
 
 if ($in{'cancel'}) {
 	# Give up on the whole wizard
-	$config{'wizard_run'} = 1;
-	&save_module_config();
+	&save_module_config_keys({ 'wizard_run' => 1 });
 	&redirect("");
 	return;
 	}
@@ -32,8 +31,7 @@ if ($in{'parse'} || $in{'mypass'}) {
 			&redirect("wizard.cgi?step=".$next);
 			}
 		else {
-			$config{'wizard_run'} = 1;
-			&save_module_config();
+			&save_module_config_keys({ 'wizard_run' => 1 });
 			&redirect("");
 			}
 		return;

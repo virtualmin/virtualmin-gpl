@@ -1034,11 +1034,12 @@ return wantarray ? ( $client, $host, $size ) : $client;
 sub save_global_spam_client
 {
 my ($client, $host, $size) = @_;
-$config{'spam_client'} = $client;
-$config{'spam_client_global'} = 1;
-$config{'spam_host'} = $host;
-$config{'spam_size'} = $size;
-&save_module_config();
+&save_module_config_keys({
+	'spam_client' => $client,
+	'spam_client_global' => 1,
+	'spam_host' => $host,
+	'spam_size' => $size,
+	});
 foreach my $d (grep { $_->{'spam'} } &list_domains()) {
 	&save_domain_spam_client($d, $client);
 	}
@@ -1114,10 +1115,7 @@ foreach my $r (@recipes) {
 &unlock_file($procmail::procmailrc);
 
 # Update the server
-&lock_file($module_config_file);
-$config{'lookup_domain_port'} = $port;
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ 'lookup_domain_port' => $port });
 &foreign_require("init");
 &init::restart_action("lookup-domain");
 }

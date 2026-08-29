@@ -131,6 +131,7 @@ return $rv;
 sub cloud_s3_parse_inputs
 {
 my ($in) = @_;
+my %original_config = %config;
 
 # Parse chunk size
 if ($in->{'s3_chunk_def'}) {
@@ -142,9 +143,7 @@ else {
 	$config{'s3_chunk'} = $in->{'s3_chunk'};
 	}
 
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_diff(\%original_config);
 
 return undef;
 }
@@ -197,6 +196,7 @@ return $rv;
 sub cloud_rs_parse_inputs
 {
 my ($in) = @_;
+my %original_config = %config;
 
 # Parse default login
 if ($in->{'rs_user_def'}) {
@@ -226,9 +226,7 @@ else {
 	$config{'rs_chunk'} = $in->{'rs_chunk'};
 	}
 
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_diff(\%original_config);
 
 return undef;
 }
@@ -237,11 +235,7 @@ return undef;
 # Reset the Rackspace account to the default
 sub cloud_rs_clear
 {
-delete($config{'rs_user'});
-delete($config{'rs_key'});
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ }, [ 'rs_user', 'rs_key' ]);
 }
 
 sub list_rackspace_endpoints
@@ -338,6 +332,7 @@ return $rv;
 sub cloud_google_parse_inputs
 {
 my ($in) = @_;
+my %original_config = %config;
 my $reauth = 0;
 my $authed = 0;
 
@@ -383,13 +378,11 @@ else {
 # Parse bucket location
 $config{'google_location'} = $in->{'google_location'};
 
-&lock_file($module_config_file);
 if (!$authed) {
 	$reauth++ if (!$config{'google_oauth'});
 	$config{'cloud_oauth_mode'} = $reauth ? 'google' : undef;
 	}
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_diff(\%original_config);
 
 if (!$reauth) {
 	# Nothing more to do - either the OAuth2 token was just set, or the
@@ -419,15 +412,8 @@ return $text{'cloud_descoauth'}."<p>\n".
 # Reset the GCS account to the default
 sub cloud_google_clear
 {
-delete($config{'google_account'});
-delete($config{'google_clientid'});
-delete($config{'google_secret'});
-delete($config{'google_oauth'});
-delete($config{'google_token'});
-delete($config{'google_rtoken'});
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ }, [ qw(google_account google_clientid
+	google_secret google_oauth google_token google_rtoken) ]);
 }
 
 ######## Functions for Dropbox ########
@@ -471,6 +457,7 @@ return $rv;
 sub cloud_dropbox_parse_inputs
 {
 my ($in) = @_;
+my %original_config = %config;
 my $reauth = 0;
 
 if ($in{'dropbox_set_oauth'}) {
@@ -501,9 +488,7 @@ if ($config{'dropbox_oauth'} && !$config{'dropbox_token'}) {
 	$config{'dropbox_expires'} = $expires;
 	}
 
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_diff(\%original_config);
 
 if ($in{'dropbox_set_oauth'} || !$reauth) {
 	# Nothing more to do - either the OAuth2 token was just set, or the
@@ -529,14 +514,8 @@ return $text{'cloud_descoauth_dropbox'}."<p>\n".
 # Reset the GCS account to the default
 sub cloud_dropbox_clear
 {
-delete($config{'dropbox_account'});
-delete($config{'dropbox_oauth'});
-delete($config{'dropbox_token'});
-delete($config{'dropbox_rtoken'});
-delete($config{'dropbox_expires'});
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ }, [ qw(dropbox_account dropbox_oauth
+	dropbox_token dropbox_rtoken dropbox_expires) ]);
 }
 
 ######## Functions for Backblaze ########
@@ -571,6 +550,7 @@ return $rv;
 
 sub cloud_bb_parse_inputs
 {
+my %original_config = %config;
 $in{'bb_keyid'} =~ /^[A-Za-z0-9\/]+$/ || &error($text{'cloud_bb_ekeyid'});
 $in{'bb_key'} =~ /^[A-Za-z0-9\/\+\-\_]+$/ || &error($text{'cloud_bb_ekey'});
 
@@ -586,9 +566,7 @@ if ($in{'bb_keyid'} ne $config{'bb_keyid'} ||
 	$config{'bb_keyid'} = $in{'bb_keyid'};
 	$config{'bb_key'} = $in{'bb_key'};
 	}
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_diff(\%original_config);
 
 return undef;
 }
@@ -597,13 +575,8 @@ return undef;
 # Reset the Backblaze account to the default
 sub cloud_bb_clear
 {
-delete($config{'bb_key'});
-delete($config{'bb_keyid'});
-delete($config{'cloud_bb_owner'});
-delete($config{'cloud_bb_reseller'});
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ }, [ qw(bb_key bb_keyid cloud_bb_owner
+	cloud_bb_reseller) ]);
 }
 
 ######## Functions for Backblaze ########
@@ -657,6 +630,7 @@ return $rv;
 
 sub cloud_azure_parse_inputs
 {
+my %original_config = %config;
 # Save account and check that it's in use
 $in{'azure_account'} =~ /^\S+\@\S+$/ || &error($text{'cloud_eazure_eaccount'});
 $config{'azure_account'} = $in{'azure_account'};
@@ -692,9 +666,7 @@ else {
 my $list = &call_az_cmd("storage", ["container", "list"]);
 ref($list) || &error(&text('cloud_eazure_elist', (split(/\r?\n/, $list))[0]));
 
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_diff(\%original_config);
 
 return undef;
 }
@@ -703,12 +675,7 @@ return undef;
 # Reset the Azure account to the default
 sub cloud_azure_clear
 {
-&lock_file($module_config_file);
-delete($config{'azure_account'});
-delete($config{'azure_name'});
-delete($config{'azure_id'});
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ }, [ qw(azure_account azure_name azure_id) ]);
 }
 
 ######## Functions for Google Drive ########
@@ -789,6 +756,7 @@ return $rv;
 sub cloud_drive_parse_inputs
 {
 my ($in) = @_;
+my %original_config = %config;
 my $reauth = 0;
 my $authed = 0;
 
@@ -831,13 +799,11 @@ else {
 	$config{'drive_project'} = $in->{'drive_project'};
 	}
 
-&lock_file($module_config_file);
 if (!$authed) {
 	$reauth++ if (!$config{'drive_oauth'});
 	$config{'cloud_oauth_mode'} = $reauth ? 'drive' : undef;
 	}
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_diff(\%original_config);
 
 if (!$reauth) {
 	# Nothing more to do - either the OAuth2 token was just set, or the
@@ -867,15 +833,8 @@ return $text{'cloud_descoauth'}."<p>\n".
 # Reset the GCS account to the default
 sub cloud_drive_clear
 {
-delete($config{'drive_account'});
-delete($config{'drive_clientid'});
-delete($config{'drive_secret'});
-delete($config{'drive_oauth'});
-delete($config{'drive_token'});
-delete($config{'drive_rtoken'});
-&lock_file($module_config_file);
-&save_module_config();
-&unlock_file($module_config_file);
+&save_module_config_keys({ }, [ qw(drive_account drive_clientid
+	drive_secret drive_oauth drive_token drive_rtoken) ]);
 }
 
 1;
