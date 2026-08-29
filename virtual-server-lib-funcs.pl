@@ -560,11 +560,13 @@ $main::domain_id_count++;
 return $rv;
 }
 
-# save_module_config_keys(&values, [&deletes])
-# Atomically update selected module config keys, preserving other changes
+# save_module_config_keys(&values, [&deletes], [sync-last-config])
+# Atomically update selected module config keys, preserving other changes.
+# When sync-last-config is set, apply the same validated changes to the config
+# check snapshot while the module config remains locked.
 sub save_module_config_keys
 {
-my ($values, $deletes) = @_;
+my ($values, $deletes, $sync_last_config) = @_;
 $values ||= { };
 $deletes ||= [ ];
 
@@ -593,6 +595,33 @@ if ($read) {
 			}
 		}
 	&save_module_config(\%latest_config) if ($changed);
+
+	# Keep the configuration-check snapshot aligned with settings that were
+	# validated before being saved separately by the caller
+	if ($sync_last_config) {
+		my %last_config;
+		my $last_config_file = "$module_config_directory/last-config";
+		if (&read_file($last_config_file, \%last_config)) {
+			my $last_changed = 0;
+			foreach my $key (keys %$values) {
+				my $value = $values->{$key};
+				if (!exists($last_config{$key}) ||
+				    defined($last_config{$key}) != defined($value) ||
+				    (defined($value) && $last_config{$key} ne $value)) {
+					$last_config{$key} = $value;
+					$last_changed = 1;
+					}
+				}
+			foreach my $key (@$deletes) {
+				if (exists($last_config{$key})) {
+					delete($last_config{$key});
+					$last_changed = 1;
+					}
+				}
+			&write_file($last_config_file, \%last_config)
+				if ($last_changed);
+			}
+		}
 	}
 &unlock_file($module_config_file) if ($locked);
 
@@ -18147,11 +18176,22 @@ foreach my $k ('ftp', 'proftpd_config', 'proftpd_ssl', 'ftp_dir',
 	delete($config{$k});
 	}
 &save_module_config_diff(\%original_config);
-my %latest_config;
-if (&read_file($module_config_file, \%latest_config)) {
-	%config = %latest_config;
-	&write_file("$module_config_directory/last-config", \%config);
+
+# Read the final config and update its check snapshot under the config lock
+my $locked = &lock_file($module_config_file);
+my $have_lock = $locked;
+if (!$have_lock) {
+	my $lock_owner = &test_lock($module_config_file);
+	$have_lock = $lock_owner && $lock_owner == $$;
 	}
+if ($have_lock) {
+	my %latest_config;
+	if (&read_file($module_config_file, \%latest_config)) {
+		%config = %latest_config;
+		&write_file("$module_config_directory/last-config", \%config);
+		}
+	}
+&unlock_file($module_config_file) if ($locked);
 
 return undef;
 }

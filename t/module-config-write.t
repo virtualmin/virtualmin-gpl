@@ -88,6 +88,54 @@ subtest 'unchanged update avoids an unnecessary write' => sub {
 	is($result, undef, 'unchanged keyed update has a void return value');
 	};
 
+subtest 'validated keys are merged into the config check snapshot' => sub {
+	no warnings qw(once redefine);
+	local %main::config = ( 'status' => 1 );
+	local $main::module_config_file = '/tmp/virtualmin-config-test';
+	local $main::module_config_directory = '/tmp';
+	my %disk = ( 'status' => 1, 'concurrent' => 'keep' );
+	my %last = ( 'status' => 1, 'unrelated' => 'keep' );
+	my @events;
+	local *main::lock_file = sub {
+		push(@events, "lock:$_[0]");
+		return 1;
+		};
+	local *main::read_file = sub {
+		my ($file, $values) = @_;
+		push(@events, "read:$file");
+		%$values = $file eq '/tmp/last-config' ? %last : %disk;
+		return 1;
+		};
+	local *main::save_module_config = sub {
+		push(@events, 'save:config');
+		%disk = %{$_[0]};
+		};
+	local *main::write_file = sub {
+		my ($file, $values) = @_;
+		push(@events, "save:$file");
+		%last = %$values;
+		};
+	local *main::unlock_file = sub {
+		push(@events, "unlock:$_[0]");
+		};
+
+	my $result = &main::save_module_config_keys(
+		{ 'status' => 2 }, undef, 1);
+	is_deeply(\%disk, { 'status' => 2, 'concurrent' => 'keep' },
+		'validated setting is merged into the latest module config');
+	is_deeply(\%last, { 'status' => 2, 'unrelated' => 'keep' },
+		'validated setting alone is merged into last-config');
+	is_deeply(\@events, [
+		'lock:/tmp/virtualmin-config-test',
+		'read:/tmp/virtualmin-config-test',
+		'save:config',
+		'read:/tmp/last-config',
+		'save:/tmp/last-config',
+		'unlock:/tmp/virtualmin-config-test',
+		], 'module config and snapshot are updated under one lock');
+	is($result, undef, 'snapshot-syncing update has a void return value');
+	};
+
 subtest 'snapshot update merges only changes made by a long process' => sub {
 	my $original = {
 		'wizard_run' => 0,

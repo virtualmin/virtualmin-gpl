@@ -189,11 +189,11 @@ if ($config{'virus'}) {
 # Re-generate helper script, for plugins
 &create_virtualmin_api_helper_command();
 
-# Save the config
+# Save the feature settings and keep the config-check snapshot in sync
 if ($config{'last_check'} < time()) {
 	$feature_config{'last_check'} = time()+1;
 	}
-&save_module_config_keys(\%feature_config);
+&save_module_config_keys(\%feature_config, undef, 1);
 
 # Update the miniserv preload list, which includes plugins
 if ($oldplugins ne $config{'plugins'}) {
