@@ -5,6 +5,7 @@
 * Add Auktiva, Fish Auctions and Pixelfed web app installers for Virtualmin Pro users
 * Add Django web app installer with isolated Python environments, Gunicorn services managed by systemd, production-safe settings and automatic database driver setup
 * Add support for Ubuntu 26.04
+* Add HTTP/3 support for Nginx websites, including per-domain and server-template controls on supported systems
 * Add full lifecycle support for IPv6-only virtual servers, including creation, modification, cloning, backup, restore, DNS, web, mail and SSL handling
 * Add ability to add or remove an IPv4 address from an existing virtual server
 * Add support for requesting ACME SSL certificates containing IP address identifiers
