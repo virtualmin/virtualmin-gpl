@@ -4646,10 +4646,14 @@ foreach my $file (split(/\r?\n/, $out)) {
 sub modify_web_domain
 {
 my ($d, $oldd, $virt, $vconf, $conf, $rlogs) = @_;
+
+# Fix domain name in ServerName directive
 if (&apache::find_directive("ServerName", $vconf)) {
 	&apache::save_directive("ServerName", [ $d->{'dom'} ],
 				$vconf, $conf);
 	}
+
+# Fix domain name in ServerAlias
 my @sa;
 my @others = map { $_->{'dom'} } &get_domain_by("alias", $d->{'id'});
 foreach my $sa (&apache::find_directive("ServerAlias", $vconf)) {
@@ -4662,7 +4666,7 @@ foreach my $sa (&apache::find_directive("ServerAlias", $vconf)) {
 	}
 &apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
 
-# Update log paths
+# Update log paths that contain domain name
 foreach my $ld ("ErrorLog", "TransferLog", "CustomLog") {
 	my @ldv = &apache::find_directive($ld, $vconf);
 	next if (!@ldv);

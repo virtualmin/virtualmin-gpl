@@ -470,6 +470,18 @@ if ($d->{'ssl_same'} && !&check_domain_certificate($d->{'dom'}, $d)) {
 	&break_ssl_linkage($d, $oldsame);
 	}
 
+# Have the SSL cert paths changed to a location outside the home dir, like
+# in /etc/ssl/virtualmin ? If so, copy the file over and re-save
+&create_ssl_certificate_directories($d);
+foreach my $t (&list_ssl_file_types()) {
+	my $op = $oldd->{'ssl_'.$t};
+	my $np = $d->{'ssl_'.$t};
+	if ($op && $np && !&is_under_directory($d->{'home'}, $np)) {
+		&write_ssl_file_contents($d, $np, $op);
+		&save_website_ssl_file($d, $t, $np);
+		}
+	}
+
 # If in FPM mode update the port as well
 my $mode = &get_domain_php_mode($oldd);
 if ($mode eq "fpm") {
