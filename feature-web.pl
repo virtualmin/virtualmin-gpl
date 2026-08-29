@@ -491,6 +491,7 @@ if (&need_php_wrappers($d, $mode)) {
 my $mode = &get_domain_php_mode($oldd);
 if ($mode eq "fpm") {
 	delete($d->{'php_fpm_port'});
+	&create_php_fpm_pool($d);
 	&save_domain_php_mode($d, $mode);
 	}
 
@@ -522,6 +523,11 @@ my $vconf = $virt->{'members'};
 
 # Fix home dir
 &modify_web_home_directory($d, $oldd, $virt, $vconf, $conf);
+
+# Fix generated handler paths that contain the domain ID
+&recursive_fix_apache_config(
+	$vconf, $conf, $oldd->{'id'}, $d->{'id'},
+	[ "SetHandler" ]);
 
 # Fix username in suexec, if needed
 if ($d->{'user'} ne $oldd->{'user'}) {

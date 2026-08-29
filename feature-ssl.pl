@@ -462,6 +462,7 @@ if (!$virt) {
 
 # Fix up all the Apache directives
 &clone_web_domain($oldd, $d, $ovirt, $virt, $conf);
+$vconf = $virt->{'members'};
 
 # Is the linked SSL cert still valid for the new domain? If not, break the
 # linkage by copying over the cert.
@@ -470,28 +471,45 @@ if ($d->{'ssl_same'} && !&check_domain_certificate($d->{'dom'}, $d)) {
 	&break_ssl_linkage($d, $oldsame);
 	}
 
-# Have the SSL cert paths changed to a location outside the home dir, like
-# in /etc/ssl/virtualmin ? If so, copy the file over and re-save
-&create_ssl_certificate_directories($d);
-foreach my $t (&list_ssl_file_types()) {
-	my $op = $oldd->{'ssl_'.$t};
-	my $np = $d->{'ssl_'.$t};
-	if ($op && $np && !&is_under_directory($d->{'home'}, $np)) {
-		&write_ssl_file_contents($d, $np, $op);
-		&save_website_ssl_file($d, $t, $np);
+# Copy changed external SSL files owned by this domain
+if (!$d->{'ssl_same'}) {
+	&create_ssl_certificate_directories($d);
+	foreach my $t (&list_ssl_file_types()) {
+		my $op = $oldd->{'ssl_'.$t};
+		my $np = $d->{'ssl_'.$t};
+		if ($op && $np && $op ne $np &&
+		    !&is_under_directory($d->{'home'}, $np)) {
+			&write_ssl_file_contents($d, $np, $op);
+			}
 		}
 	}
 
 # If in FPM mode update the port as well
 my $mode = &get_domain_php_mode($oldd);
 if ($mode eq "fpm") {
-	# Force port re-allocation
-	delete($d->{'php_fpm_port'});
+	&create_php_fpm_pool($d);
 	&save_domain_php_mode($d, $mode);
 	}
 
 # Re-generate combined cert file in case cert changed
 &sync_combined_ssl_cert($d);
+
+# Point Apache to the cloned or shared SSL files
+my $combined = &apache_combined_cert($d);
+my $cert = $combined ? $d->{'ssl_combined'} : $d->{'ssl_cert'};
+&apache::save_directive("SSLCertificateFile", [ $cert ], $vconf, $conf);
+&apache::save_directive("SSLCertificateKeyFile", [ $d->{'ssl_key'} ],
+				$vconf, $conf);
+my ($oldchain) = &apache::find_directive(
+	"SSLCertificateChainFile", $vconf);
+my $chainname = $oldchain ? "SSLCertificateChainFile" :
+				"SSLCACertificateFile";
+foreach my $name ("SSLCACertificateFile", "SSLCertificateChainFile") {
+	my $files = !$combined && $d->{'ssl_chain'} && $name eq $chainname ?
+			[ $d->{'ssl_chain'} ] : [ ];
+	&apache::save_directive($name, $files, $vconf, $conf);
+	}
+&flush_file_lines($virt->{'file'}, undef, 1);
 
 &release_lock_web($d);
 &$second_print($text{'setup_done'});
