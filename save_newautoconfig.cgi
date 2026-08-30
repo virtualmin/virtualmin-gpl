@@ -13,8 +13,15 @@ require './virtual-server-lib.pl';
 &ui_print_unbuffered_header(undef, $text{'newautoconfig_title'}, "");
 
 if (@doms) {
-	&$first_print(&text($in{'autoconfig'} ? 'autoconfig_enable'
-					      : 'autoconfig_disable', scalar(@doms)));
+	my $msgkey = 'autoconfig_disable';
+	if ($in{'autoconfig'}) {
+		# Report when CGI execution will be enabled as part of setup
+		my $enablecgi = grep { !&get_domain_cgi_mode($_) &&
+					 scalar(&has_cgi_support($_)) } @doms;
+		$msgkey = $enablecgi ? 'autoconfig_enablecgi'
+					: 'autoconfig_enable';
+		}
+	&$first_print(&text($msgkey, scalar(@doms)));
 	foreach $d (@doms) {
 		if ($in{'autoconfig'}) {
 			$err = &enable_email_autoconfig($d);
@@ -23,8 +30,10 @@ if (@doms) {
 			$err = &disable_email_autoconfig($d);
 			}
 		if ($err) {
-			&$second_print(&text('autoconfig_failed',
-					     &show_domain_name($d), $err));
+			&$second_print(&text('autoconfig_failed2', $err));
+			&run_post_actions();
+			&ui_print_footer("", $text{'index_return'});
+			return;
 			}
 		}
 	&$second_print($text{'setup_done'});

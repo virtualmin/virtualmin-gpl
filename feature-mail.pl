@@ -6190,13 +6190,25 @@ sub enable_email_autoconfig
 {
 my ($d) = @_;
 
+# Enable CGI execution for the autoconfiguration script if needed
+my $p = &domain_has_website($d);
+if ($p && !&get_domain_cgi_mode($d)) {
+	my @cgimodes = &has_cgi_support($d);
+	my ($cgimode) = grep { &indexof($_, @cgimodes) >= 0 }
+				('suexec', 'fcgiwrap');
+	return $text{'autoconfig_ecgi'} if (!$cgimode);
+
+	# Prefer suEXEC when available, with FCGIwrap as the fallback
+	my $err = &save_domain_cgi_mode($d, $cgimode);
+	return $err if ($err);
+	}
+
 # Create the CGI script
 my $err = &enable_cgi_autoconfig($d);
 return $err if ($err);
 
 # Add ServerAlias and redirect if missing
 my @autoconfig = &get_autoconfig_hostname($d);
-my $p = &domain_has_website($d);
 if ($p && $p ne "web") {
 	# Call plugin, like Nginx
 	my $err = &plugin_call($p, "feature_save_web_autoconfig", $d, 1);

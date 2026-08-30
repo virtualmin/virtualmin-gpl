@@ -7548,9 +7548,12 @@ autoconfig_desc=This page allows you to enable the automatic configuration URL $
 autoconfig_enabled=Enable mail client autoconfiguration?
 autoconfig_err=Failed to save mail client configuration
 autoconfig_edoms=No virtual servers with both email and a website enabled exist!
+autoconfig_ecgi=Mail client autoconfiguration cannot be enabled because no supported CGI script execution mode is available for this virtual server
 autoconfig_enable=Enabling mail client autoconfiguration for $1 virtual servers ..
+autoconfig_enablecgi=Enabling mail client autoconfiguration and required CGI modes for $1 virtual servers ..
 autoconfig_disable=Disabling mail client autoconfiguration for $1 virtual servers ..
 autoconfig_failed=Failed for $1 : $2
+autoconfig_failed2=.. failed : $1
 autoconfig_enabled_global=Saved mail autoconfiguration settings.
 
 newretention_title=Mailbox Cleanup
