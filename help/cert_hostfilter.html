@@ -1,0 +1,23 @@
+<header>Identifier verification</header>
+
+This setting controls which domain names and IP addresses are included when
+requesting a certificate from the ACME provider.
+
+<ul>
+<li><b>Request every identifier</b> submits all listed identifiers without a
+preliminary DNS lookup. The entire request fails if the provider cannot
+validate any one of them.</li>
+<li><b>Skip unresolvable hostnames</b> performs an external DNS lookup first and
+omits hostnames that do not resolve. IP addresses are not checked by this
+lookup. The entire request still fails if the provider cannot validate any
+remaining identifier.</li>
+<li><b>Use only validated identifiers</b> allows the provider to omit identifiers
+that it cannot resolve or validate and issue a certificate for the successful
+subset.</li>
+</ul><p>
+
+The last option may produce a certificate that does not cover every requested
+name or IP address. Correct the DNS or validation problem before relying on an
+omitted identifier.
+
+<footer>

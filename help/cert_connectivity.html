@@ -1,0 +1,21 @@
+<header>Check connectivity first?</header>
+
+This setting controls the checks Virtualmin performs before asking the ACME
+provider to issue a certificate. Preflight checks can detect configuration or
+connectivity problems before a certificate request is made.
+
+<ul>
+<li><b>Test connectivity</b> uses Virtualmin's external connectivity service to
+check that the domain can be reached, and also runs the domain validation
+checks described below.</li>
+<li><b>Validate domain</b> checks the local website and DNS configuration without
+running the external connectivity test.</li>
+<li><b>Skip tests</b> makes the certificate request without either Virtualmin
+preflight check.</li>
+</ul>><p>
+
+Skipping these tests does not bypass validation by the ACME provider. The
+separate <b>Identifier verification</b> setting also continues to control which
+names and IP addresses are included in the request.
+
+<footer>

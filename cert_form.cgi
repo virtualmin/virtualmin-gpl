@@ -634,15 +634,16 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 		# Renewal email option
 		my $mmsg = "";
 		if (&master_admin() && $gconfig{'webmin_email_to'}) {
-			$mmsg = "<br>".&ui_checkbox("email_master", 1,
+			$mmsg = "".&ui_checkbox("email_master", 1,
 					$text{'cert_letsemail_master'},
 					$d->{'letsencrypt_email_master'} //
 					  $tmpl->{'ssl_email_master'});
 			}
 		my  $email = $d->{'letsencrypt_email'} //
 			     $tmpl->{'ssl_email'} // 0;
-		print &ui_table_row($text{'cert_letsemail'},
-			&ui_radio("email", $email,
+		print &ui_table_row(
+			&hlink($text{'cert_letsemail'}, "cert_letsemail"),
+			&ui_select("email", $email,
 				  [ [ 0, $text{'yes'} ],
 				    [ 1, $text{'cert_letsemailerr'} ],
 				    [ 2, $text{'no'} ] ]).$mmsg);
@@ -651,8 +652,10 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 		if (defined(&check_domain_connectivity)) {
 			my $conn = $d->{'letsencrypt_connectivity'} //
 				   $tmpl->{'ssl_connectivity'} // 1;
-			print &ui_table_row($text{'cert_connectivity'},
-				&ui_radio("connectivity", $conn,
+			print &ui_table_row(
+				&hlink($text{'cert_connectivity'},
+				       "cert_connectivity"),
+				&ui_select("connectivity", $conn,
 				  [ [ 2, $text{'cert_connectivity2'} ],
 				    [ 1, $text{'cert_connectivity1'} ],
 				    [ 0, $text{'cert_connectivity0'} ] ]));
@@ -661,10 +664,11 @@ if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 		# Hostname filter mode
 		my $filter = $d->{'letsencrypt_subset'} ? 2 :
 			     !$d->{'letsencrypt_nodnscheck'} ? 1 : 0;
-		print &ui_table_row($text{'cert_hostfilter'},
-			&ui_radio("hostfilter", $filter,
-				  [ [ 0, $text{'cert_hostfilter0'}."<br>" ],
-				    [ 1, $text{'cert_hostfilter1'}."<br>" ],
+		print &ui_table_row(
+			&hlink($text{'cert_hostfilter'}, "cert_hostfilter"),
+			&ui_select("hostfilter", $filter,
+				  [ [ 0, $text{'cert_hostfilter0'} ],
+				    [ 1, $text{'cert_hostfilter1'} ],
 				    [ 2, $text{'cert_hostfilter2'} ] ]));
 
 		# Certificate type, if supported
