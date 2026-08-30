@@ -10608,15 +10608,21 @@ while(defined($f = readdir(DIR))) {
 			}
 		}
 	}
+my @cgimodes = &has_cgi_support();
 foreach my $tmpl (@rv) {
 	$tmpl->{'resellers'} = '*' if (!defined($tmpl->{'resellers'}));
 	$tmpl->{'owners'} = '*' if (!defined($tmpl->{'owners'}));
 	if (!defined($tmpl->{'web_cgimode'})) {
 		# Switch from the old CGI mode field to the new one
-		my @cgimodes = &has_cgi_support();
 		$tmpl->{'web_cgimode'} = $tmpl->{'web_fcgiwrap'} ? 'fcgiwrap' :
 					 @cgimodes ? $cgimodes[0] : 'none';
 		delete($tmpl->{'web_fcgiwrap'});
+		}
+	elsif ($tmpl->{'standard'} && @cgimodes &&
+	       $tmpl->{'web_cgimode'} ne 'none' &&
+	       &indexof($tmpl->{'web_cgimode'}, @cgimodes) < 0) {
+		# Replace a default from another web stack with a supported mode
+		$tmpl->{'web_cgimode'} = $cgimodes[0];
 		}
 	}
 closedir(DIR);
