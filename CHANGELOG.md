@@ -25,6 +25,8 @@
 * Add ability to show disk usage on the virtual server summary page
 * Add support for using any DynDNS-compatible dynamic DNS service, like No-IP or Dynu, by making the update server configurable
 * Fix cross-stack restores to preserve target system features, disable unavailable domain features and handle PHP modes correctly
+* Fix unsupported CGI modes in standard templates after cross-stack restores
+* Fix mail client autoconfiguration to enable a supported CGI mode when needed
 * Fix to restore preflight checks and error reporting to catch clashes earlier and show SSL failures
 * Fix post-installation wizard setup for PostgreSQL, SpamAssassin and ClamAV
 * Fix configuration write races in long-running operations that could cause recent Virtualmin settings to be lost
