@@ -7072,6 +7072,7 @@ $ownerremote_tests = [
 	# Grant remote API access, but not the database capability yet
 	{ 'command' => 'modify-limits.pl',
 	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'cannot-edit', 'dbs' ],
 		      [ 'can-edit', 'remote_api' ], ],
 	},
 
