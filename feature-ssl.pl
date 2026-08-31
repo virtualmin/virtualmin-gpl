@@ -1961,7 +1961,7 @@ elsif ($tmpl->{'ssl_combined_cert'} == 1) {
 	return 0;
 	}
 else {
-	return &compare_versions($apache::httpd_modules{'core'}, "2.4.6") >= 0;
+	return &compare_versions($apache::httpd_modules{'core'}, "2.4.8") >= 0;
 	}
 }
 
