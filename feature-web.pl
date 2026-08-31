@@ -166,7 +166,6 @@ else {
 		}
 
 	# Add to the file
-	&lock_file($f);
 	my @mems = &apache_lines_to_config(\@dirs);
 	my $newvirt = { 'name' => 'VirtualHost',
 			'value' => $vips,
@@ -217,7 +216,6 @@ else {
 					$conf, $conf);
 		&flush_file_lines();
 		}
-	&unlock_file($f);
 
 	# Create empty access and error log files, owned by the domain's user.
 	# Apache opens them as root, so it will be able to write.
@@ -3644,12 +3642,14 @@ sub obtain_lock_web
 my ($d) = @_;
 return if (!$config{'web'});
 &obtain_lock_anything($d);
+my $newlock;
 
 # Where is the domain's .conf file? We have to guess, as actually checking could
 # mean reading the whole Apache config in twice.
 my $file = &get_website_file($d);
 if ($main::got_lock_web_file{$file} == 0) {
 	&lock_file($file);
+	$newlock = 1;
 	}
 $main::got_lock_web_file{$file}++;
 $main::got_lock_web_path{$d->{'id'}} = $file;
@@ -3660,10 +3660,14 @@ my ($conf) = &apache::find_httpd_conf();
 if ($conf) {
 	if ($main::got_lock_web_file{$conf} == 0) {
 		&lock_file($conf);
+		$newlock = 1;
 		}
 	$main::got_lock_web_file{$conf}++;
 	}
 $main::got_lock_web_conf = $conf;
+
+# Discard config data that may have been read before waiting for either lock
+&apache::flush_config_cache() if ($newlock);
 }
 
 # release_lock_web(&domain)
