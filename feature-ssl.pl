@@ -2470,10 +2470,16 @@ sub move_website_ssl_file
 {
 my ($d, $type, $file) = @_;
 my $oldfile = &get_website_ssl_file($d, $type);
+if ($type eq 'ca' &&
+    $oldfile eq &get_website_ssl_file($d, 'cert')) {
+	# If we're moving the CA file but it is combined
+	# with the cert file, we cannot actually move it
+	$oldfile = undef;
+	}
 return 0 if (!$oldfile || $oldfile eq $file);
 &create_ssl_certificate_directories($d);
-&write_ssl_file_contents($d, $file, $oldfile);
 &lock_file($file);
+&write_ssl_file_contents($d, $file, $oldfile);
 &save_website_ssl_file($d, $type, $file);
 &unlock_file($file);
 foreach my $sd (&get_domain_by("ssl_same", $d->{'id'})) {
