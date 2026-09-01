@@ -95,8 +95,8 @@ if ((my $dig = &has_command("dig")) &&
 if ($error || !$out) {
 	$error = undef;
 	my $url = $config{'ip_lookup_url'} || 
-		"https://v4.software.virtualmin.com/cgi-bin/ip.cgi ".
-		"https://v6.software.virtualmin.com/cgi-bin/ip.cgi";
+		"https://v4.download.virtualmin.com/ ".
+		"https://v6.download.virtualmin.com/";
 	my ($url4, $url6) = split(/\s+/, $url, 2);
 	$url6 ||= $url4;
 	$url = $type == 4 ? $url4 : $url6;
