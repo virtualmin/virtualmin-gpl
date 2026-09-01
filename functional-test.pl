@@ -2558,7 +2558,8 @@ $proxy_tests = [
 		{ 'command' => 'create-proxy.pl',
 		  'args' => [ [ 'domain', $test_domain ],
 			      [ 'path', '/proxy-xfp' ],
-			      [ 'url', 'http://127.0.0.1/cgi-bin/proxy-xfp.cgi' ] ],
+			      [ 'url', 'http://'.$test_ip_address.
+				       '/cgi-bin/proxy-xfp.cgi' ] ],
 		},
 
 		# The backend must receive the original frontend protocol
