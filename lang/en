@@ -5726,7 +5726,7 @@ cmass_done=Created server $1
 cmass_uploaded=uploaded file
 cmass_texted=pasted text
 cmass_doing=Creating virtual servers from $1 ..
-cmass_complete=.. done ($1 created, $2 errors)
+cmass_complete=Batch creation complete: $1 created, $2 errors
 cmass_resel=Owned by reseller
 cmass_detail=Batch creation output
 cmass_detail0=Show summaries only
@@ -5743,7 +5743,7 @@ cmass_emustparent=You are not allowed to create top-level virtual servers - a pa
 cmass_ecanparent=You are not allowed to manage the parent virtual server $1
 cmass_eparpar=The parent server $1 is not a top-level server
 cmass_creating=Creating virtual server $1 ..
-cmass_failed=.. creation failed : $1
+cmass_failed=.. failed : $1
 
 umass_title=Batch Create Users
 umass_header=Create multiple mail and FTP users from batch file

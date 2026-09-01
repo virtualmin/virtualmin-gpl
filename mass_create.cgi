@@ -50,6 +50,7 @@ else {
 &ui_print_unbuffered_header(undef, $text{'cmass_title'}, "", "cmass");
 
 print &text('cmass_doing', $src),"<p>\n";
+&$indent_print();
 
 # Split into lines, and process each one
 @lines = split(/\n+/, $source);
@@ -63,6 +64,7 @@ foreach $line (@lines) {
 	my ($dname, $owner, $pass, $user, $pname, $ip, $aname) = split($sep, $line, -1);
 	$dname = lc(&parse_domain_name($dname));
 	$user = lc($user);
+	&$first_print(&text('cmass_creating', $dname)) if ($dname);
 
 	# Validate domain details
 	if (!$dname || !$owner) {
@@ -426,37 +428,20 @@ foreach $line (@lines) {
 		}
 
 	# Actually do it!
-	if ($in{'detail'}) {
-		&$first_print(&text('cmass_creating', $dom{'dom'}));
-		&$indent_print();
-		}
-	else {
-		&set_all_null_print();
-		}
+	&$indent_print();
 	my $err = &create_virtual_server(\%dom, $parentdom,
 			      $parentdom ? $parentdom->{'user'} : undef, 0, 1,
 			      $parentdom ? undef : $pass, $content);
 
 	# Show the results
-	if ($in{'detail'}) {
-		&$outdent_print();
-		if ($err) {
-			&$second_print(&text('cmass_failed', $err));
-			next;
-			}
-		else {
-			&$second_print($text{'setup_done'});
-			}
+	&$outdent_print();
+	if ($err) {
+		&$second_print(&text('cmass_failed', $err));
+		$ecount++;
+		next;
 		}
 	else {
-		if ($err) {
-			&line_error($err);
-			next;
-			}
-		else {
-			print "<font color=#00aa00>",
-			      &text('cmass_done', "<tt>$dname</tt>"),"</font><br>\n";
-			}
+		&$second_print($text{'setup_done'});
 		}
 	$count++ if (!$err);
 
@@ -469,15 +454,19 @@ foreach $line (@lines) {
 		push(@das, \%dom, 'create');
 		}
 	}
+&$outdent_print();
 
 # Run post-create commands
+print "<p>\n";
 &run_post_actions();
 if (defined(&theme_post_save_domains)) {
 	&theme_post_save_domains(@das);
 	}
 
 print "<p>\n";
-print &text('cmass_complete', $count, $ecount),"<br>\n";
+my $alert_type = !$ecount ? 'success' : $count ? 'warn' : 'danger';
+print &ui_alert_box(&text('cmass_complete', $count, $ecount), $alert_type,
+		    undef, undef, "");
 &webmin_log("create", "domains", $count);
 
 &ui_print_footer("", $text{'index_return'});
@@ -485,13 +474,7 @@ print &text('cmass_complete', $count, $ecount),"<br>\n";
 sub line_error
 {
 my ($msg) = @_;
-print "<font color=#ff0000>";
-if (!$dname) {
-	print &text('cmass_eline', $lnum, $msg);
-	}
-else {
-	print &text('cmass_eline2', $lnum, $msg, "<tt>$dname</tt>");
-	}
-print "</font><br>\n";
+&$second_print(&text('cmass_failed',
+			     &text('cmass_eline', $lnum, $msg)));
 $ecount++;
 }
