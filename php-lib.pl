@@ -412,7 +412,9 @@ foreach my $p (@ports) {
 		if ($mode eq "cgi") {
 			push(@types, "application/x-httpd-php$ver .php");
 			}
-		elsif ($mode eq "mod_php") {
+		# Keep a MIME type for MultiViews; execution is still selected by
+		# the mode-specific handler or wrapper configured above.
+		elsif ($mode eq "mod_php" || $mode eq "fcgid") {
 			push(@types, "application/x-httpd-php .php");
 			}
 		@types = &unique(@types);

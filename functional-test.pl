@@ -564,6 +564,11 @@ $domains_tests = [
 		       $test_domain_user.'/public_html/test.php',
 	},
 
+	# Enable content negotiation for extensionless PHP requests
+	{ 'command' => 'echo "Options +MultiViews" >~'.
+		       $test_domain_user.'/public_html/.htaccess',
+	},
+
 	# Create a test sub-directory
 	{ 'command' => 'su -s /bin/sh '.$test_domain_user.' -c "mkdir ~/public_html/foo"',
 	},
@@ -661,6 +666,12 @@ $domains_tests = [
 
 		# Check PHP running via fCGId
 		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+			      'cgi-fcgi' ],
+		},
+
+		# Check PHP running via fCGId through MultiViews
+		{ 'command' => $wget_command.'http://'.$test_domain.'/test',
 		  'grep' => [ 'uid=[0-9]+\\('.$test_domain_user.'\\)',
 			      'cgi-fcgi' ],
 		},
