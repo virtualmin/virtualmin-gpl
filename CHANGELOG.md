@@ -1,3 +1,6 @@
+#### Version 8.2.1
+Change default external IP lookup endpoints
+
 #### Version 8.2.0
 * Add new [Virtualmin Podman](https://www.virtualmin.com/docs/plugins/podman/) plugin for Virtualmin Pro users, bringing per-domain container and pod management to both the UI and CLI, along with a large catalog of easy-to-deploy application recipes
 * Add Btrfs subvolume and hierarchical qgroup quota support for virtual servers and mailbox users
