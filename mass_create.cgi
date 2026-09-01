@@ -119,6 +119,18 @@ foreach $line (@lines) {
 	my $tmpl = &get_template($parentdom ? $in{'stemplate'}
 					       : $in{'ptemplate'});
 
+	# Work out initial website content from the selected template
+	my $content;
+	my $content_web_tmpl = $tmpl->{'content_web'};
+	my $content_web_tmpl_html_file = $tmpl->{'content_web_html'};
+	if ($content_web_tmpl == 2) {
+		$content = "";
+		}
+	elsif (!$content_web_tmpl && $virtualmin_pro &&
+	       -r $content_web_tmpl_html_file) {
+		$content = &read_file_contents($content_web_tmpl_html_file);
+		}
+
 	# Validate IP address
 	my $defip = &get_default_ip($resel);
 	my $defip6 = &get_default_ip6($resel);
@@ -423,7 +435,7 @@ foreach $line (@lines) {
 		}
 	my $err = &create_virtual_server(\%dom, $parentdom,
 			      $parentdom ? $parentdom->{'user'} : undef, 0, 1,
-			      $parentdom ? undef : $pass);
+			      $parentdom ? undef : $pass, $content);
 
 	# Show the results
 	if ($in{'detail'}) {
