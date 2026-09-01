@@ -245,8 +245,6 @@ $test_domain_home = $test_domain{'home'} =
 $test_domain_html = $test_domain_home.'/public_html';
 $test_full_user_home = $test_domain_home.'/homes/'.$test_user;
 $test_domain_db = &database_name(\%test_domain);
-$test_domain_key = &default_certificate_file(\%test_domain, "key");
-$test_domain_cert = &default_certificate_file(\%test_domain, "cert");
 
 %test_rename_domain = ( 'dom' => $test_rename_domain,
 		        'prefix' => $rename_prefix,
@@ -271,8 +269,7 @@ $test_full_clone_user_mysql = &mysql_username($test_full_clone_user);
        		        'user' => $test_ssl_subdomain_user,
 		        'group' => $test_ssl_subdomain_user,
 		        'template' => &get_init_template() );
-$test_ssl_subdomain_home = $test_ssl_subdomain{'home'} =
-	&server_home_directory(\%test_ssl_subdomain);
+$test_ssl_subdomain{'home'} = &server_home_directory(\%test_ssl_subdomain);
 
 # Create various wget commands
 $webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$webmin_user --http-passwd=$webmin_pass --user-agent=Webmin ";
@@ -336,6 +333,56 @@ if ($tmplname) {
 else {
 	$tmpl = &get_template(0);
 	}
+
+# Work out the template-based certificate paths. Domain IDs are filled in
+# from list-domains after each server has been created.
+$test_domain_tmpl = $tmplname ? $tmpl :
+	&get_template(&get_init_template());
+%test_cert_domain = ( %test_domain,
+		      'template' => $test_domain_tmpl->{'id'},
+		      'id' => '${DOMAIN_ID}' );
+$test_domain_key = &default_certificate_file(\%test_cert_domain, "key");
+$test_domain_cert = &default_certificate_file(\%test_cert_domain, "cert");
+
+# Child servers use the explicitly selected template, or the configured
+# initial sub-server template when none was selected.
+$test_sub_tmpl = $tmplname ? $tmpl :
+	&get_template(&get_init_template(1));
+%test_ssl_child_domain = ( 'dom' => $test_ssl_subdomain,
+			   'prefix' => $prefix,
+			   'user' => $test_domain_user,
+			   'group' => $test_domain_user,
+			   'template' => $test_sub_tmpl->{'id'},
+			   'id' => '${SSL_SUBDOMAIN_ID}' );
+$test_ssl_child_domain{'home'} =
+	&server_home_directory(
+		{ %test_ssl_child_domain, 'parent' => 1 }, \%test_domain);
+$test_ssl_subdomain_key =
+	&default_certificate_file(\%test_ssl_child_domain, "key");
+$test_ssl_subdomain_cert =
+	&default_certificate_file(\%test_ssl_child_domain, "cert");
+
+# The second SSL server is also a child, but has its own runtime ID.
+%test_ssl2_child_domain = ( %test_ssl_child_domain,
+			    'dom' => $test_ssl2_subdomain,
+			    'id' => '${SSL2_SUBDOMAIN_ID}' );
+$test_ssl2_child_domain{'home'} =
+	&server_home_directory(
+		{ %test_ssl2_child_domain, 'parent' => 1 }, \%test_domain);
+$test_ssl2_subdomain_key =
+	&default_certificate_file(\%test_ssl2_child_domain, "key");
+$test_ssl2_subdomain_cert =
+	&default_certificate_file(\%test_ssl2_child_domain, "cert");
+
+# Later SSL tests re-create the first subdomain as an independent server.
+%test_ssl_independent_domain = ( %test_ssl_subdomain,
+				 'template' => $test_domain_tmpl->{'id'},
+				 'id' => '${SSL_SUBDOMAIN_ID}' );
+$test_ssl_independent_key =
+	&default_certificate_file(\%test_ssl_independent_domain, "key");
+$test_ssl_independent_cert =
+	&default_certificate_file(\%test_ssl_independent_domain, "cert");
+
 if ($tmpl->{'dns_cloud'} =~ /^remote_(\S+)$/) {
 	$dnsserver = $1;
 	}
@@ -7792,6 +7839,11 @@ $ssl_tests = [
 		      @create_args, ],
         },
 
+	# Save the ID used by template-based certificate paths
+	{ 'command' => 'list-domains.pl --id-only --domain '.$test_domain,
+	  'save' => 'DOMAIN_ID',
+	},
+
 	# Create a sub-domain with SSL on the same IP
 	{ 'command' => 'create-domain.pl',
           'args' => [ [ 'domain', $test_ssl_subdomain ],
@@ -7801,6 +7853,12 @@ $ssl_tests = [
 		      [ 'parent-ip' ],
 		      [ 'content' => 'Test SSL subdomain home page' ],
 		      @create_args, ],
+	},
+
+	# Save the child ID used by template-based certificate paths
+	{ 'command' => 'list-domains.pl --id-only --domain '.
+		       $test_ssl_subdomain,
+	  'save' => 'SSL_SUBDOMAIN_ID',
 	},
 
 	# Create a second sub-domain with SSL on the same IP, but with no
@@ -7815,6 +7873,12 @@ $ssl_tests = [
 		      [ 'ssl-redirect' ],
 		      [ 'content' => 'Test SSL subdomain home page' ],
 		      @create_args, ],
+	},
+
+	# Save the second child ID used by template-based certificate paths
+	{ 'command' => 'list-domains.pl --id-only --domain '.
+		       $test_ssl2_subdomain,
+	  'save' => 'SSL2_SUBDOMAIN_ID',
 	},
 
 	# Create an alias domain for the second sub-domain
@@ -7879,10 +7943,8 @@ $ssl_tests = [
 	  'args' => [ [ 'domain', $test_ssl_subdomain ],
 		      [ 'multiline' ] ],
 	  'grep' => [ 'SSL shared with: '.$test_domain ],
-	  'antigrep' => [ 'SSL key file: '.$test_domain_home.
-		          '/domains/'.$test_ssl_subdomain.'/',
-		          'SSL cert file: '.$test_domain_home.
-                          '/domains/'.$test_ssl_subdomain.'/' ],
+	  'antigrep' => [ 'SSL key file: '.$test_ssl_subdomain_key,
+		          'SSL cert file: '.$test_ssl_subdomain_cert ],
 	},
 
 	# Check for SSL expiry, and save it
@@ -7914,10 +7976,8 @@ $ssl_tests = [
 	  'args' => [ [ 'domain', $test_ssl2_subdomain ],
 		      [ 'multiline' ] ],
 	  'antigrep' => [ 'SSL shared with: '.$test_domain ],
-	  'grep' => [ 'SSL key file: '.$test_domain_home.
-		      '/domains/'.$test_ssl2_subdomain.'/',
-		      'SSL cert file: '.$test_domain_home.
-                      '/domains/'.$test_ssl2_subdomain.'/' ],
+	  'grep' => [ 'SSL key file: '.$test_ssl2_subdomain_key,
+		      'SSL cert file: '.$test_ssl2_subdomain_cert ],
 	},
 
 	# Check for TLSA records
@@ -7945,10 +8005,8 @@ $ssl_tests = [
 	  'args' => [ [ 'domain', $test_ssl2_subdomain ],
 		      [ 'multiline' ] ],
 	  'grep' => [ 'SSL shared with: '.$test_domain ],
-	  'antigrep' => [ 'SSL key file: '.$test_domain_home.
-		          '/domains/'.$test_ssl2_subdomain.'/',
-		          'SSL cert file: '.$test_domain_home.
-                          '/domains/'.$test_ssl2_subdomain.'/' ],
+	  'antigrep' => [ 'SSL key file: '.$test_ssl2_subdomain_key,
+		          'SSL cert file: '.$test_ssl2_subdomain_cert ],
 	},
 	
 	# Test HTTPS get to the second subdomain
@@ -7992,7 +8050,7 @@ $ssl_tests = [
 	{ 'command' => 'generate-cert.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
 		      [ 'self' ],
-		      [ 'size', 1024 ],
+		      [ 'size', 2048 ],
 		      [ 'days', 365 ],
 		      [ 'cn', $test_domain ],
 		      [ 'c', 'US' ],
@@ -8039,17 +8097,15 @@ $ssl_tests = [
 	  'args' => [ [ 'domain', $test_ssl_subdomain ],
 		      [ 'multiline' ] ],
 	  'antigrep' => 'SSL shared with:',
-	  'grep' => [ 'SSL key file: '.$test_domain_home.
-		      '/domains/'.$test_ssl_subdomain.'/',
-		      'SSL cert file: '.$test_domain_home.
-                      '/domains/'.$test_ssl_subdomain.'/' ],
+	  'grep' => [ 'SSL key file: '.$test_ssl_subdomain_key,
+		      'SSL cert file: '.$test_ssl_subdomain_cert ],
 	},
 
 	# Test generation of a CSR
 	{ 'command' => 'generate-cert.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
 		      [ 'csr' ],
-		      [ 'size', 1024 ],
+		      [ 'size', 2048 ],
 		      [ 'days', 365 ],
 		      [ 'cn', $test_domain ],
 		      [ 'c', 'US' ],
@@ -8125,6 +8181,11 @@ $ssl_tests = [
 		      @create_args, ],
         },
 
+	# Save the new ID used by template-based certificate paths
+	{ 'command' => 'list-domains.pl --id-only --domain '.$test_domain,
+	  'save' => 'DOMAIN_ID',
+	},
+
 	# Re-create the sub-domain with a different owner
 	{ 'command' => 'create-domain.pl',
           'args' => [ [ 'domain', $test_ssl_subdomain ],
@@ -8132,6 +8193,7 @@ $ssl_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ $ssl ],
 		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'break-ssl-cert' ],
 		      [ 'content' => 'Test SSL subdomain home page' ],
 		      @create_args, ],
 	},
@@ -8172,6 +8234,12 @@ $ssl_tests = [
 		      @create_args, ],
 	},
 
+	# Save the re-created server ID before checking its private paths
+	{ 'command' => 'list-domains.pl --id-only --domain '.
+		       $test_ssl_subdomain,
+	  'save' => 'SSL_SUBDOMAIN_ID',
+	},
+
 	# Check that there is an SSL linkage now
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'domain', $test_ssl_subdomain ],
@@ -8197,8 +8265,8 @@ $ssl_tests = [
 	  'args' => [ [ 'domain', $test_ssl_subdomain ],
 		      [ 'multiline' ] ],
 	  'antigrep' => 'SSL shared with: '.$test_domain,
-	  'grep' => [ 'SSL key file: '.$test_ssl_subdomain_home.'/',
-		      'SSL cert file: '.$test_ssl_subdomain_home.'/', ],
+	  'grep' => [ 'SSL key file: '.$test_ssl_independent_key,
+		      'SSL cert file: '.$test_ssl_independent_cert, ],
 	},
 
 	# Test SSL cert to subdomain with copied cert
@@ -8246,8 +8314,8 @@ $ssl_tests = [
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'antigrep' => [ 'SSL cert file: '.$test_domain_home.'/ssl.cert',
-		          'SSL key file: '.$test_domain_home.'/ssl.key' ],
+	  'grep' => [ 'SSL cert file: '.$test_domain_cert,
+		      'SSL key file: '.$test_domain_key ],
 	},
 
 	# Check for TLSA records again after all these changes
@@ -8785,6 +8853,11 @@ $nossl_tests = [
 		      @create_args, ],
         },
 
+	# Save the ID used by template-based certificate paths
+	{ 'command' => 'list-domains.pl --id-only --domain '.$test_domain,
+	  'save' => 'DOMAIN_ID',
+	},
+
 	# Get the IP address
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'ip-only' ],
@@ -8891,7 +8964,7 @@ $nossl_tests = [
 	{ 'command' => 'generate-cert.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
 		      [ 'self' ],
-		      [ 'size', 1024 ],
+		      [ 'size', 2048 ],
 		      [ 'days', 365 ],
 		      [ 'cn', $test_domain ],
 		      [ 'c', 'US' ],
@@ -8914,7 +8987,7 @@ $nossl_tests = [
 	{ 'command' => 'generate-cert.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
 		      [ 'csr' ],
-		      [ 'size', 1024 ],
+		      [ 'size', 2048 ],
 		      [ 'days', 365 ],
 		      [ 'cn', $test_domain ],
 		      [ 'c', 'US' ],
@@ -15104,7 +15177,7 @@ $assoc_tests = [
 	{ 'command' => 'generate-cert.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
 		      [ 'self' ],
-		      [ 'size', 1024 ],
+		      [ 'size', 2048 ],
 		      [ 'days', 365 ],
 		      [ 'cn', $test_domain ],
 		      [ 'c', 'US' ],

@@ -2522,8 +2522,19 @@ delete($d->{'ssl_same'});
 my $p = &domain_has_website($d);
 if ($p) {
 	if ($p eq 'web' && &apache_combined_cert($d)) {
+		# Keep the logical cert-only files in the domain record while
+		# configuring Apache to use the generated combined certificate.
+		my $cert = $d->{'ssl_cert'};
+		my $chain = $d->{'ssl_chain'};
 		&save_website_ssl_file($d, "cert", $d->{'ssl_combined'});
 		&save_website_ssl_file($d, "ca", undef);
+		$d->{'ssl_cert'} = $cert;
+		if ($chain) {
+			$d->{'ssl_chain'} = $chain;
+			}
+		else {
+			delete($d->{'ssl_chain'});
+			}
 		}
 	else {
 		&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
