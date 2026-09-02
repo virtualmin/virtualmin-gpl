@@ -64,7 +64,8 @@ foreach $line (@lines) {
 	my ($dname, $owner, $pass, $user, $pname, $ip, $aname) = split($sep, $line, -1);
 	$dname = lc(&parse_domain_name($dname));
 	$user = lc($user);
-	&$first_print(&text('cmass_creating', $dname)) if ($dname);
+	&$first_print($dname ? &text('cmass_creating', $dname) :
+			      &text('cmass_processing', $lnum));
 
 	# Validate domain details
 	if (!$dname || !$owner) {

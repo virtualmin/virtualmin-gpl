@@ -5743,6 +5743,7 @@ cmass_emustparent=You are not allowed to create top-level virtual servers - a pa
 cmass_ecanparent=You are not allowed to manage the parent virtual server $1
 cmass_eparpar=The parent server $1 is not a top-level server
 cmass_creating=Creating virtual server $1 ..
+cmass_processing=Processing batch line $1 ..
 cmass_failed=.. failed : $1
 
 umass_title=Batch Create Users
