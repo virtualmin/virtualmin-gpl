@@ -137,15 +137,21 @@ foreach $s (@scripts) {
 			print "Checking $script->{'name'} website for $v ..\n";
 			$data = $err = undef;
 			if ($opts->{'wget'}) {
+				# Download with wget
 				$data = &backquote_command("wget -O - -q ".quotemeta($url)." 2>/dev/null");
 				$err = "wget $url failed" if ($?);
 				}
 			else {
+				# Use Webmin's built-in download function
 				($host, $port, $page, $ssl) =
 					&parse_http_url($url);
+				my $rheaders;
 				&http_download($host, $port, $page, \$data,
 					       \$err, undef, $ssl, undef, undef,
-					        undef, 0, 1);
+					        undef, 0, 1, undef, \$rheaders);
+				if ($opts->{'header'} && !$err) {
+					$data = $rheaders->{$opts->{'header'}};
+					}
 				}
 			if ($err || !$data) {
 				push(@errs, [ $script, $v, $url,
