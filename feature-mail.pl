@@ -2467,7 +2467,7 @@ if (-d $umf) {
 else {
 	# Just the size of a single mail file
 	my @st = stat($umf);
-	return ( $st[12]*&quota_bsize("mail", 1) || $st[7], $umf, $st[9], 1 );
+	return ( $st[12]*&quota_bsize("home", 1) || $st[7], $umf, $st[9], 1 );
 	}
 }
 
@@ -2483,7 +2483,7 @@ my ($dir, $gid, $levels, $inodes, $exclude) = @_;
 $exclude = [ map { &translate_filename($_) } @$exclude ] if ($exclude);
 my $dir = &translate_filename($dir);
 return (0, undef, 0, 0) if $exclude && grep { index($dir, $_) == 0 } @$exclude;
-my $bs = &quota_bsize("mail", 1);
+my $bs = &quota_bsize("home", 1);
 $inodes ||= { };
 if (-l $dir) {
 	return (0, undef, 1, 0);
