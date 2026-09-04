@@ -5178,6 +5178,9 @@ return wantarray ? @rv : $rv[0];
 # Copy the wrapper scripts needed for autoresponders
 sub set_alias_programs
 {
+# No alias programs are needed when the mail feature is disabled
+return if (!$config{'mail'});
+
 &require_mail();
 
 # Copy autoresponder

@@ -9,7 +9,10 @@ if (!$mysql::config{'login'}) {
 	$mysql::authstr = &mysql::make_authstr();
 	}
 %mconfig = &foreign_config("mysql");
-$mysql_user_size = &get_mysql_user_size();
+$mysql_user_size = $config{'mysql_user_size'} || 32;
+
+# Only probe a server when the MySQL feature is enabled
+$mysql_user_size = &get_mysql_user_size() if ($config{'mysql'});
 }
 
 # get_mysql_user_size()
