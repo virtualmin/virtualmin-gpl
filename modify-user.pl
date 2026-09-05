@@ -529,18 +529,26 @@ if (defined($nospam)) {
 $user->{'secs'} = \@newsecs;
 
 if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
-	# Apply simple alias changes. If user has no forwarding set yet, assume
-	# delivery is local.
-	$simple = @{$user->{'to'}} ? &get_simple_alias($d, $user)
+	# Parse using the original username so local delivery survives a rename.
+	# If user has no forwarding set yet, assume delivery is local.
+	$simple = @{$user->{'to'}} ? &get_simple_alias($d, $olduser)
 				   : { 'tome' => 1 };
+
+	# Preserve all local forwards verbatim, rather than the single local
+	# destination retained by get_simple_alias.
+	delete($simple->{'local'});
+	push(@{$simple->{'forward'}},
+	     grep { &alias_type($_, $olduser->{'user'}) == 7 } @{$user->{'to'}});
 
 	# Update forwarding destinations
 	foreach $a (@addforward) {
 		push(@{$simple->{'forward'}}, $a);
 		}
 	foreach $a (@delforward) {
-		@{$simple->{'forward'}} = grep { $_ ne $a }
-					       @{$simple->{'forward'}};
+		# Also match local destinations stored with mail alias escaping
+		@{$simple->{'forward'}} = grep { $_ ne $a &&
+					       $_ ne "\\".&escape_user($a) }
+					      @{$simple->{'forward'}};
 		}
 	@{$simple->{'forward'}} = &unique(@{$simple->{'forward'}});
 

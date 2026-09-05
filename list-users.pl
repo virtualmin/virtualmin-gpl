@@ -257,8 +257,12 @@ foreach $d (@doms) {
 				   &get_simple_alias($d, $u) : { 'tome' => 1 };
 				print "    Deliver to user: ",
 				      ($simple->{'tome'} ? "Yes" : "No"),"\n";
-				foreach $f (@{$simple->{'forward'}}) {
-					print "    Forward: $f\n";
+				# Include every local forward, which simple aliases
+				# otherwise reduce to a single local destination
+				foreach $f (@{$u->{'to'}}) {
+					my ($type, $value) = &alias_type($f, $u->{'user'});
+					print "    Forward: ",&unescape_user($value),"\n"
+						if ($type == 1 || $type == 7);
 					}
 				if ($simple->{'auto'}) {
 					$msg = $simple->{'autotext'};
