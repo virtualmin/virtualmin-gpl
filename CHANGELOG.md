@@ -1,6 +1,11 @@
 #### Version 8.2.1
-Change default external IP lookup endpoints
 * Fix batch-created virtual servers not applying the template's initial website content
+* Fix batch virtual server creation progress and status reporting
+* Fix `modify-user` CLI command dropping all but one local mail forwarding destination on any update, and show local forwards in `list-users` output
+* Fix cPanel, DirectAdmin and Plesk migrations creating unsupported bounce aliases on Postfix, which accepted mail for such addresses and then bounced it [#380](https://github.com/virtualmin/virtualmin-gpl/issues/380)
+* Fix missing disk usage for mail files after the 8.2.0 update
+* Fix errors during package upgrades when the MySQL or mail features are disabled
+* Change default external IP lookup endpoints
 
 #### Version 8.2.0
 * Add new [Virtualmin Podman](https://www.virtualmin.com/docs/plugins/podman/) plugin for Virtualmin Pro users, bringing per-domain container and pod management to both the UI and CLI, along with a large catalog of easy-to-deploy application recipes
