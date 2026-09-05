@@ -692,9 +692,9 @@ if ($got{'mail'}) {
 				}
 			my $mailman = 0;
 			foreach my $v (@values) {
-				if ($v =~ /:fail:\s+(.*)/) {
+				if ($v =~ /^:fail:\s*(.*)$/) {
 					# Fix bounce alias
-					$v = "BOUNCE $1";
+					$v = "BOUNCE".($1 ne "" ? " $1" : "");
 					}
 				my ($atype, $aname) = &alias_type($v, $name);
 				if ($atype == 4 && $aname =~ /autorespond\s+(\S+)\@(\S+)\s+(\S+)/) {
@@ -714,10 +714,23 @@ if ($got{'mail'}) {
 			# Already done a domain forward
 			next if ($name =~ /^\*/ && $domfwd);
 
-			# No need for a catchall that bounces mail, as this
-			# will happen anyway
-			next if ($name =~ /^\*/ && @values == 1 &&
-				 $values[0] =~ /^BOUNCE/);
+			# Without bounce support, skip a catchall that only bounces,
+			# as unknown addresses are rejected anyway
+			if (!$can_alias_types{9} && $name =~ /^\*/ &&
+			    @values == 1 && $values[0] =~ /^BOUNCE(?:\s|$)/) {
+				my $clash = $gotvirt{'@'.$dom};
+				&delete_virtuser($clash) if ($clash);
+				next;
+				}
+			# A named bounce cannot be expressed, so skip it and let
+			# mail to it be rejected as unknown or reach a catchall
+			if (!$can_alias_types{9} &&
+			    grep { /^BOUNCE(?:\s|$)/ } @values) {
+				&$indent_print();
+				&$first_print("Skipping bounce alias $name in $dom, as your mail server does not support bouncing mail");
+				&$outdent_print();
+				next;
+				}
 
 			if ($useremail{$name}) {
 				# This is an alias from a user. Preserve
@@ -1642,9 +1655,9 @@ while(<VA>) {
 			}
 		my $mailman = 0;
 		foreach my $v (@values) {
-			if ($v =~ /:fail:\s+(.*)/) {
+			if ($v =~ /^:fail:\s*(.*)$/) {
 				# Fix bounce alias
-				$v = "BOUNCE $1";
+				$v = "BOUNCE".($1 ne "" ? " $1" : "");
 				}
 			my ($atype, $aname) = &alias_type($v, $name);
 			if ($atype == 4 && $aname =~ /autorespond\s+(\S+)\@(\S+)\s+(\S+)/) {
@@ -1663,6 +1676,16 @@ while(<VA>) {
 
 		# Already done a domain forward
 		next if ($name =~ /^\*/);
+
+		# A named bounce cannot be expressed, so skip it and let mail
+		# to it be rejected as unknown or reach a catchall
+		if (!$can_alias_types{9} &&
+		    grep { /^BOUNCE(?:\s|$)/ } @values) {
+			&$indent_print();
+			&$first_print("Skipping bounce alias $name in $vf, as your mail server does not support bouncing mail");
+			&$outdent_print();
+			next;
+			}
 
 		# Just create an alias
 		if ($name !~ /\@/) {

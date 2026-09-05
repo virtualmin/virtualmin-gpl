@@ -888,8 +888,8 @@ if ($d->{'mail'} && -r $afile) {
 		next if ($name eq $d->{'user'} && $values eq $d->{'user'});
 		my @values = split(/,/, $values);
 		foreach my $v (@values) {
-			if ($v eq ":fail:") {
-				$v = "BOUNCE";
+			if ($v =~ /^\s*:fail:\s*(.*)$/) {
+				$v = "BOUNCE".($1 ne "" ? " $1" : "");
 				}
 			}
 		my $virt = { 'from' => $name =~ /^\*/ ?
@@ -897,6 +897,21 @@ if ($d->{'mail'} && -r $afile) {
 				  $name."\@".$d->{'dom'},
 				'to' => \@values };
 		my $clash = $gotvirt{$virt->{'from'}};
+		if (!$can_alias_types{9} &&
+		    grep { /^BOUNCE(?:\s|$)/ } @values) {
+			# A catchall that only bounces is redundant, as unknown
+			# addresses are rejected anyway
+			if ($name eq "*" && @values == 1) {
+				&delete_virtuser($clash) if ($clash);
+				next;
+				}
+			# A named bounce cannot be expressed, so skip it and let
+			# mail to it be rejected as unknown or reach a catchall
+			&$indent_print();
+			&$first_print("Skipping bounce alias $virt->{'from'}, as your mail server does not support bouncing mail");
+			&$outdent_print();
+			next;
+			}
 		&delete_virtuser($clash) if ($clash);
 		&create_virtuser($virt);
 		$acount++;

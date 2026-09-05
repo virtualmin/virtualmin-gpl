@@ -624,8 +624,17 @@ if ($ca) {
 		}
 	my $virt = { 'from' => "\@$dom",
 			'to' => \@to };
-	&create_virtuser($virt);
-	$acount++;
+	if (!$can_alias_types{9} && $to[0] =~ /^BOUNCE(?:\s|$)/) {
+		# Unknown addresses already bounce without a catchall.
+		my ($clash) = grep { $_->{'from'} eq $virt->{'from'} }
+				  &list_virtusers();
+		&delete_virtuser($clash) if ($clash);
+		}
+	else {
+		# Preserve forwarding and supported bounce destinations.
+		&create_virtuser($virt);
+		$acount++;
+		}
 	}
 &$second_print(".. done (migrated $acount aliases)");
 
