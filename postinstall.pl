@@ -584,7 +584,7 @@ foreach (grep { $_->{'ssl_cert'} =~ /\/ssl\.combined$/ } &list_domains()) {
 	if ($d && $d->{'ssl_cert'} =~ /\/ssl\.combined$/ &&
 	    $d->{'ssl_cert'} eq $d->{'ssl_combined'}) {
 		my @certs = &unique(&cert_file_split($d->{'ssl_combined'}));
-		if (@certs && $certs[0] =~ /^-----BEGIN CERTIFICATE-----/) {
+		if (@certs && !&validate_cert_format($certs[0], 'cert')) {
 			# Recover the current leaf, as renewals may have left
 			# ssl.cert stale. Keep the files in the existing
 			# certificate directory.
@@ -596,7 +596,8 @@ foreach (grep { $_->{'ssl_cert'} =~ /\/ssl\.combined$/ } &list_domains()) {
 
 			# Restore the CA chain cleared by the old
 			# linkage-breaking code.
-			if (!$d->{'ssl_chain'} && @certs) {
+			if (!$d->{'ssl_chain'} && @certs &&
+			    !grep { &validate_cert_format($_, 'ca') } @certs) {
 				my $chain = &relative_certificate_file(
 					$d->{'ssl_combined'}, 'ca');
 				&lock_file($chain);
