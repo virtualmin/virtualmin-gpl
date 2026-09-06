@@ -211,6 +211,16 @@ if ($ok > 0 && !$sinfo) {
 	elsif ($spass) {
 		print &text('scripts_passonly', "<tt>$spass</tt>"),"<p>\n";
 		}
+
+	# Show code to embed in website pages, if the script provides it
+	my $efunc = $script->{'embed_code_func'};
+	if (defined(&$efunc)) {
+		my $ecode = &$efunc($d, $opts);
+		if ($ecode) {
+			print "$text{'scripts_embed'}:","<br>\n";
+			print "<pre>",&html_escape($ecode),"</pre><p>\n";
+			}
+		}
 	}
 if ($ok && $script->{'site'} && $ok >= 0) {
 	print &script_link($script->{'site'}, 'scripts_sitelink'),"<p>\n";

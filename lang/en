@@ -4630,6 +4630,7 @@ scripts_idbname2=<a href='$1'>$2 $3</a>
 scripts_idbtbpref=with table prefix
 scripts_iuser=Initial login
 scripts_ipass=$1 with password $2
+scripts_iembed=Tracking code to embed in website pages
 scripts_iphpver=PHP version
 scripts_uok=Un-Install Web App
 scripts_rdeps=Re-Install Dependencies
@@ -4710,6 +4711,7 @@ scripts_mmax=(At most $1)
 scripts_sitelink=More information on using this web app can be found at <a href='$1' target=_blank>$2</a>
 scripts_userpass=The initial administration login is $1 with the password $2
 scripts_useronly=The initial administration login is $1
+scripts_embed=To use this web app, the following tracking code must be embedded in the pages of your website
 scripts_passonly=The initial administration password is $1
 scripts_passmode=Initial login for web app
 scripts_passmode4=Initial password for web app

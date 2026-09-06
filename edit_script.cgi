@@ -167,7 +167,17 @@ if (!$have_kit) {
 			&text('scripts_ipass', "<tt>$sinfo->{'user'}</tt>",
 					       "<tt>$sinfo->{'pass'}</tt>"));
 		}
-	
+
+	# Show code to embed in website pages, if the script provides it
+	my $efunc = $script->{'embed_code_func'};
+	if (defined(&$efunc)) {
+		my $ecode = &$efunc($d, $opts, $sinfo);
+		if ($ecode) {
+			$content .= &ui_table_row($text{'scripts_iembed'},
+				"<pre>".&html_escape($ecode)."</pre>");
+			}
+		}
+
 	$sfunc = $script->{'status_server_func'};
 	# Show link to service
 	if (defined(&$sfunc)) {
