@@ -1,5 +1,6 @@
 #### Version 8.2.1
 * Add Matomo web analytics installer to Virtualmin GPL, including detection of existing installs and display of the tracking code to embed in website pages
+* Fix incorrect SSL certificate paths left by older releases when breaking certificate sharing, recovering the current certificate and any missing CA chain from the combined file
 * Fix batch-created virtual servers not applying the template's initial website content
 * Fix batch virtual server creation progress and status reporting
 * Fix `modify-user` CLI command dropping all but one local mail forwarding destination on any update, and show local forwards in `list-users` output
