@@ -575,6 +575,42 @@ if (!@doms && !$config{'logrotate_shared'}) {
 my $hfile = "$module_config_directory/transfer-hosts";
 &set_ownership_permissions(undef, undef, 0600, $hfile);
 
+# Repair cert paths saved by older releases when breaking SSL sharing. Finish
+# all repairs before syncing, as a shared domain can sync its owner.
+foreach (grep { $_->{'ssl_cert'} =~ /\/ssl\.combined$/ } &list_domains()) {
+	my $id = $_->{'id'};
+	&lock_domain($id);
+	my $d = &get_domain($id, undef, 1);
+	if ($d && $d->{'ssl_cert'} =~ /\/ssl\.combined$/ &&
+	    $d->{'ssl_cert'} eq $d->{'ssl_combined'}) {
+		my @certs = &unique(&cert_file_split($d->{'ssl_combined'}));
+		if (@certs && $certs[0] =~ /^-----BEGIN CERTIFICATE-----/) {
+			# Recover the current leaf, as renewals may have left
+			# ssl.cert stale. Keep the files in the existing
+			# certificate directory.
+			my $cert = &relative_certificate_file(
+				$d->{'ssl_combined'}, 'cert');
+			&lock_file($cert);
+			&write_ssl_file_contents($d, $cert, shift(@certs));
+			&unlock_file($cert);
+
+			# Restore the CA chain cleared by the old
+			# linkage-breaking code.
+			if (!$d->{'ssl_chain'} && @certs) {
+				my $chain = &relative_certificate_file(
+					$d->{'ssl_combined'}, 'ca');
+				&lock_file($chain);
+				&write_ssl_file_contents($d, $chain, join("", @certs));
+				&unlock_file($chain);
+				$d->{'ssl_chain'} = $chain;
+				}
+			$d->{'ssl_cert'} = $cert;
+			&save_domain($d);
+			}
+		}
+	&unlock_domain($id);
+	}
+
 # Create combined cert files for domains with SSL
 foreach my $d (&list_domains()) {
 	if (&domain_has_ssl_cert($d)) {
