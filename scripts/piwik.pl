@@ -42,14 +42,11 @@ sub script_piwik_php_vers
 return ( 5 );
 }
 
+# script_piwik_php_modules()
+# The PDO MySQL adapter is always selected by the installer, so it is required
 sub script_piwik_php_modules
 {
-return ( "curl", "gd", "xml", "mbstring" );
-}
-
-sub script_piwik_php_optional_modules
-{
-return ( "pdo", "pdo_mysql" );
+return ( "curl", "gd", "xml", "mbstring", "pdo", "pdo_mysql" );
 }
 
 sub script_piwik_dbs
