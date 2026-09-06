@@ -115,9 +115,9 @@ if ($upgrade) {
 	}
 else {
 	my $hdir = &public_html_dir($d, 0);
-	$in{'dir_def'} || $in{'dir'} =~ /\S/ && $in{'dir'} !~ /\.\./ ||
+	$in->{'dir_def'} || $in->{'dir'} =~ /\S/ && $in->{'dir'} !~ /\.\./ ||
 		return "Missing or invalid installation directory";
-	my $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
+	my $dir = $in->{'dir_def'} ? $hdir : "$hdir/$in->{'dir'}";
 	my ($newdb) = ($in->{'db'} =~ s/^\*//);
 	return { 'db' => $in->{'db'},
 		 'newdb' => $newdb,
