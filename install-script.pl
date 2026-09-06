@@ -502,6 +502,16 @@ if ($ok) {
 		elsif ($spass) {
 			print &text('scripts_passonly', $spass),"\n\n";
 			}
+
+		# Show code to embed in website pages, if the script provides it
+		my $efunc = $script->{'embed_code_func'};
+		if (defined(&$efunc)) {
+			my $ecode = &$efunc($d, $opts);
+			if ($ecode) {
+				print "$text{'scripts_embed'}:","\n";
+				print $ecode,"\n";
+				}
+			}
 		}
 
 	# Record script install in domain

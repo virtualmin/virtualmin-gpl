@@ -235,6 +235,7 @@ my $rv = { 'name' => $name,
 	   'kit_apply_func' => "script_${name}_kit_apply",
 	   'detect_func' => "script_${name}_detect",
 	   'detect_file_func' => "script_${name}_detect_file",
+	   'embed_code_func' => "script_${name}_embed_code",
 	 };
 if (defined(&$catfunc)) {
 	my @cats = &$catfunc();
