@@ -321,6 +321,21 @@ if (!$upgrade) {
 	($iout, $ierr) = (undef, undef);
 	&post_http_connection($d, $ipage, $params, \$iout, \$ierr, $cheaders);
 
+	# Trust both the plain and www hostnames, as Matomo only trusts the
+	# hostname used by the install wizard and warns when accessed by another
+	my $cfile = "$opts->{'dir'}/config/config.ini.php";
+	my $lref = &read_file_lines_as_domain_user($d, $cfile);
+	my %trusted = map { /^\s*trusted_hosts\[\]\s*=\s*"([^"]*)"/ ? ($1, 1) : () }
+			  @$lref;
+	my ($tidx) = grep { $lref->[$_] =~ /^\s*trusted_hosts\[\]/ } (0..$#$lref);
+	if (defined($tidx)) {
+		foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
+			next if ($trusted{$h});
+			splice(@$lref, $tidx+1, 0, "trusted_hosts[] = \"$h\"");
+			}
+		&flush_file_lines_as_domain_user($d, $cfile);
+		}
+
 	# Configure analytics module to use this Matomo URL
 	if ($opts->{'analytics'} && $d->{'virtualmin-google-analytics'}) {
 		&foreign_require("virtualmin-google-analytics",
