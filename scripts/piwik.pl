@@ -378,6 +378,11 @@ if (!$upgrade) {
 		$opts->{"token"} = $1;
 		}
 	}
+else {
+	# Refresh the saved tracking code, as it may change between versions
+	delete($opts->{'embed'});
+	&script_piwik_embed_code($d, $opts);
+	}
 
 # Tell the user about the new install
 my $rp = $opts->{'dir'};
@@ -421,19 +426,24 @@ return (1, "Deleted Matomo directory and tables.");
 sub script_piwik_embed_code
 {
 my ($d, $opts, $sinfo) = @_;
+
+# Use the code saved at install time, if any
+return &un_urlize($opts->{'embed'}) if ($opts->{'embed'});
+
 my $url = &script_path_url($d, $opts);
 # Older releases only ship the piwik.js and piwik.php tracker files
 my $tracker = -r "$opts->{'dir'}/matomo.js" ? "matomo" : "piwik";
 # The website created during installation always has ID 1
 my $siteid = 1;
 
-# Ask Matomo for the exact code it would show, using the API token created
-# at install time
+# Get the code from Matomo, and save it to avoid future API requests
 my $code = &piwik_api_embed_code($d, $opts, $siteid);
-return $code if ($code);
+if ($code) {
+	$opts->{'embed'} = &urlize($code);
+	return $code;
+	}
 
-# Fall back to the standard code, as for detected installs with no token
-# or when Matomo cannot be reached
+# Fall back to the standard code
 return <<EOF;
 <!-- Matomo -->
 <script>
