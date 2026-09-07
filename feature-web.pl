@@ -463,6 +463,7 @@ if ($d->{'alias_mode'}) {
 	&$second_print($text{'clone_webalias'});
 	return 1;
 	}
+&obtain_lock_web($d);
 my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 my ($ovirt, $ovconf) = &get_apache_virtual($oldd->{'dom'}, $oldd->{'web_port'});
 if (!$ovirt) {
@@ -473,7 +474,6 @@ if (!$virt) {
 	&$second_print($text{'clone_webnew'});
 	return 0;
 	}
-&obtain_lock_web($d);
 
 # Fix up all the Apache directives
 &clone_web_domain($oldd, $d, $ovirt, $virt, $conf);
@@ -1396,6 +1396,7 @@ return $log;
 sub get_apache_virtual
 {
 my ($dname, $sp, $file) = @_;
+&print_call_stack();
 &require_apache();
 my $conf;
 if ($file) {
@@ -5743,6 +5744,7 @@ my ($dirs) = @_;
 my @rv;
 foreach my $d (@$dirs) {
 	my $c = { %$d };
+	$c->{'words'} = [ @{$d->{'words'}} ];
 	delete($c->{'line'});
 	delete($c->{'eline'});
 	delete($c->{'file'});
