@@ -484,7 +484,7 @@ if (!$d->{'ssl_same'}) {
 		}
 	}
 
-# If in FPM mode update the port as well
+# Reapply FPM settings using the endpoint allocated by clone_web
 my $mode = &get_domain_php_mode($oldd);
 if ($mode eq "fpm") {
 	&create_php_fpm_pool($d);
