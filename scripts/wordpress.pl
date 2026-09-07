@@ -424,8 +424,11 @@ sub script_wordpress_latest
 {
 my ($ver) = @_;
 if (&compare_versions($ver, 6) >= 0) {
-	return ( "http://wordpress.org/download/",
-		 "Download\\s+WordPress\\s+([0-9\\.]+)" );
+	return ( "https://wordpress.org/latest.zip",
+		 "filename=wordpress-([0-9\\.]+).zip",
+		 undef,
+		 undef,
+		 { 'header' => 'content-disposition' } );
 	}
 return ( );
 }
