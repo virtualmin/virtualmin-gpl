@@ -1396,7 +1396,6 @@ return $log;
 sub get_apache_virtual
 {
 my ($dname, $sp, $file) = @_;
-&print_call_stack();
 &require_apache();
 my $conf;
 if ($file) {
