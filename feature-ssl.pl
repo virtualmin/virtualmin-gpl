@@ -447,15 +447,22 @@ sub clone_ssl
 my ($d, $oldd) = @_;
 my $tmpl = &get_template($d->{'template'});
 &$first_print($text{'clone_ssl'});
+
+# Lock before reading directives so nested SSL updates keep them valid
+&obtain_lock_web($d);
 my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 						$d->{'web_sslport'});
 my ($ovirt, $ovconf) = &get_apache_virtual($oldd->{'dom'},
 					   $oldd->{'web_sslport'});
 if (!$ovirt) {
+	# Release the lock when the source virtual host is missing
+	&release_lock_web($d);
 	&$second_print($text{'clone_webold'});
 	return 0;
 	}
 if (!$virt) {
+	# Release the lock when the destination virtual host is missing
+	&release_lock_web($d);
 	&$second_print($text{'clone_webnew'});
 	return 0;
 	}

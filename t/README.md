@@ -19,11 +19,18 @@ VIRTUALMIN_COMPILE_T_FILTER='^\./backup' prove t/compile.t
 `prove` and `Test::More` are core Perl modules. On RPM-based distros, install
 `perl-Test-Harness` if `prove` is not already available.
 
+On a disposable Virtualmin host, run `functional-test.pl --test apacheclone`
+using the script's full path for Apache cloning integration coverage. This group
+checks HTTP/HTTPS, PHP-FPM when available, missing-vhost lock cleanup, and SSL directive preservation when
+breaking a certificate link. It cleans up its test domains, needs no test-domain
+DNS records, and skips non-Apache website plugins.
+
 ## Current tests
 
 | File | What it checks |
 | --- | --- |
 | `compile.t` | Every discovered `.pl` and `.cgi` parses cleanly with `perl -c`. It catches syntax and compile-time module-loading breakage without running normal script bodies. |
+| `apache-clone-locks.t` | Apache cloning keeps parsed directives under a web lock, preserves them across nested SSL updates, and releases locks when either virtual host is missing. |
 | `btrfs-lib.t` | Btrfs qgroup unit conversion, mount-path mapping, hierarchy repair, and safe subvolume lifecycle behavior. |
 | `mysql-backup-options.t` | Automatic MySQL point-in-time recovery coordinates, including binary log detection, dump client compatibility, Webmin backup API propagation, and restore-time coordinate parsing and log selection. |
 | `module-config-write.t` | Locked module config updates preserve settings saved by concurrent processes. |
