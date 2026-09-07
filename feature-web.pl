@@ -463,14 +463,19 @@ if ($d->{'alias_mode'}) {
 	&$second_print($text{'clone_webalias'});
 	return 1;
 	}
+# Lock before reading directives because a new lock clears the Apache cache
 &obtain_lock_web($d);
 my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 my ($ovirt, $ovconf) = &get_apache_virtual($oldd->{'dom'}, $oldd->{'web_port'});
 if (!$ovirt) {
+	# Release the lock when the source virtual host is missing
+	&release_lock_web($d);
 	&$second_print($text{'clone_webold'});
 	return 0;
 	}
 if (!$virt) {
+	# Release the lock when the destination virtual host is missing
+	&release_lock_web($d);
 	&$second_print($text{'clone_webnew'});
 	return 0;
 	}
