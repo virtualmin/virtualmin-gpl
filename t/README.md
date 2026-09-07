@@ -21,9 +21,12 @@ VIRTUALMIN_COMPILE_T_FILTER='^\./backup' prove t/compile.t
 
 On a disposable Virtualmin host, run `functional-test.pl --test apacheclone`
 using the script's full path for Apache cloning integration coverage. This group
-checks HTTP/HTTPS, PHP-FPM when available, missing-vhost lock cleanup, and SSL directive preservation when
-breaking a certificate link. It cleans up its test domains, needs no test-domain
-DNS records, and skips non-Apache website plugins.
+uses CLI commands to create, clone and validate websites, including PHP-FPM
+configuration when available. HTTP/HTTPS requests check that the clone serves
+its copied page after the source is deleted. The group uses `.invalid` domain
+names with direct IP requests, cleans up both domains, and skips non-Apache
+website plugins. Internal lock cleanup and nested SSL cache behavior are covered
+by `apache-clone-locks.t`.
 
 ## Current tests
 
