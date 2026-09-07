@@ -478,8 +478,13 @@ if ($d->{'ssl_same'} && !&check_domain_certificate($d->{'dom'}, $d)) {
 	&break_ssl_linkage($d, $oldsame);
 	}
 
-# Copy changed external SSL files owned by this domain
-if (!$d->{'ssl_same'}) {
+# Preserve a CA-issued certificate obtained for the clone during creation
+my $info = !$d->{'ssl_same'} ? &cert_info($d) : undef;
+my $keepcert = $info && !$info->{'self'} &&
+	       &check_domain_certificate($d->{'dom'}, $info);
+
+# Copy changed external SSL files as a fallback
+if (!$d->{'ssl_same'} && !$keepcert) {
 	&create_ssl_certificate_directories($d);
 	foreach my $t (&list_ssl_file_types()) {
 		my $op = $oldd->{'ssl_'.$t};
