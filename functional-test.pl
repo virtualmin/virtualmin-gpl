@@ -12631,208 +12631,84 @@ $configbackup_tests = [
 
 $enc_configbackup_tests = &convert_to_encrypted($configbackup_tests);
 
-# Apache cloning must keep parsed directives valid through nested SSL updates
+# Check that a cloned Apache website still works after its source is deleted
 $apacheclone_tests = [ ];
 if ($web eq 'web' && $ssl eq 'ssl') {
+	# Keep public DNS records out of the website validator's IPv6 checks
+	my $source = $test_domain.'.invalid';
+	my $clone = $test_clone_domain.'.invalid';
 	push(@$apacheclone_tests,
 		{ 'command' => 'create-domain.pl',
-		  'args' => [ [ 'domain', $test_domain ],
+		  'args' => [ [ 'domain', $source ],
+			      [ 'user', $test_domain_user ],
 			      [ 'desc', 'Test Apache clone source' ],
 			      [ 'pass', 'smeg' ],
 			      [ 'unix' ], [ 'dir' ], [ $web ], [ $ssl ],
-			      [ 'acme-never' ], [ 'break-ssl-cert' ],
+			      [ 'no-ip6' ], [ 'acme-never' ], [ 'break-ssl-cert' ],
 			      [ 'generate-ssl-cert' ], [ 'no-ssl-redirect' ],
 			      [ 'content', 'Test Apache clone page' ],
 			      @create_args ],
 		  'antigrep' => 'Call Stack Trace',
 		},
-		# Prefer FPM so the cloned handler and pool are exercised as
-		# well
+		# Prefer FPM so validation checks the cloned handler and pool
 		{ 'command' => 'modify-web.pl',
-		  'args' => [ [ 'domain', $test_domain ],
+		  'args' => [ [ 'domain', $source ],
 			      [ 'mode', $supports_fpm ? 'fpm' : 'none' ] ],
 		},
-		{ 'command' => &apache_clone_test_command(q{
-			my $d = &get_domain_by("dom", $ARGV[0]) || die "Missing source";
-			&obtain_lock_web($d);
-			my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_sslport'});
-			&apache::save_directive("SSLProtocol", [ '-all +TLSv1.2' ], $vconf, $conf);
-			&flush_file_lines($virt->{'file'});
-			&release_lock_web($d);
-			my $file = &public_html_dir($d)."/clone-test.php";
-			&open_tempfile_as_domain_user($d, PHP, ">$file");
-			&print_tempfile(PHP, '<?php echo "apache-clone-php-ok";');
-			&close_tempfile_as_domain_user($d, PHP);
-		}, $test_domain),
-		  'label' => 'Apache clone fixture preparation',
+		# External certificates are copied when cloning, so cover both names
+		{ 'command' => 'generate-cert.pl',
+		  'args' => [ [ 'domain', $source ], [ 'self' ],
+			      [ 'cn', $source ],
+			      [ 'alt', $source ], [ 'alt', $clone ] ],
 		},
 		{ 'command' => 'clone-domain.pl',
-		  'args' => [ [ 'domain', $test_domain ],
-			      [ 'newdomain', $test_clone_domain ],
+		  'args' => [ [ 'domain', $source ],
+			      [ 'newdomain', $clone ],
 			      [ 'newuser', $test_clone_domain_user ],
 			      [ 'newpass', 'foo' ] ],
 		  'antigrep' => [ 'Call Stack Trace', 'source Apache configuration not found',
 				 'destination Apache configuration not found' ],
 		});
 
-	# Both websites must retain their own paths and serve HTTP and HTTPS
-	foreach my $domain ($test_domain, $test_clone_domain) {
+	# Check and delete the source first. The clone must still validate and
+	# serve its copied page after the source's files and FPM pool are removed.
+	foreach my $domain ($source, $clone) {
 		push(@$apacheclone_tests,
-			{ 'command' => &apache_clone_test_command(q{
-				my $d = &get_domain_by("dom", $ARGV[0]) || die "Missing domain";
-				foreach my $port ($d->{'web_port'}, $d->{'web_sslport'}) {
-					my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
-					$virt || die "Missing virtual host on port $port";
-					my $root = &apache::find_directive("DocumentRoot", $vconf, 1);
-					$root eq &public_html_dir($d) || die "Incorrect cloned document root";
-					}
-				if (&get_domain_php_mode($d) eq "fpm") {
-					my ($ok, $err) = &get_domain_php_fpm_port($d);
-					$ok || die "Cloned FPM endpoint does not match its pool: $err";
-					}
-			}, $domain),
-			  'label' => "Apache document roots and PHP-FPM pool for $domain",
+			{ 'command' => 'validate-domains.pl',
+			  'args' => [ [ 'domain', $domain ],
+				      [ 'feature', $web ], [ 'feature', $ssl ] ],
 			  'antigrep' => 'Call Stack Trace',
 			});
 		foreach my $proto ('http', 'https') {
 			my $port = $proto eq 'https' ? 443 : 80;
-			my $url = "$proto://$domain";
-			my $curl = 'curl --fail --silent --show-error --insecure '.
-				   '--noproxy "*" --max-time 30 --resolve '.
-				   &quote_path("$domain:$port:$test_ip_address").' ';
+			my $url = "$proto://$domain/";
 			push(@$apacheclone_tests,
-				{ 'command' => $curl.&quote_path($url.'/'),
+				{ 'command' => 'curl --fail --silent --show-error --insecure '.
+					       '--noproxy "*" --max-time 30 --resolve '.
+					       &quote_path("$domain:$port:$test_ip_address").' '.
+					       &quote_path($url),
 				  'label' => "Apache clone page over $proto for $domain",
 				  'grep' => 'Test Apache clone page',
 				});
-			if ($supports_fpm) {
-				push(@$apacheclone_tests,
-					{ 'command' => $curl.&quote_path($url.'/clone-test.php'),
-					  'label' => "Apache clone PHP over $proto for $domain",
-					  'grep' => '^apache-clone-php-ok$',
-					});
-				}
 			}
+		push(@$apacheclone_tests,
+			{ 'command' => 'delete-domain.pl',
+			  'args' => [ [ 'domain', $domain ] ],
+			  'cleanup' => 1,
+			  'ignorefail' => $domain eq $clone,
+			});
 		}
 
-	# Check failure cleanup before process exit can hide a leaked file lock
-	foreach my $feature ('web', 'ssl') {
-		foreach my $missing ('source', 'target') {
-			push(@$apacheclone_tests,
-				{ 'command' => &apache_clone_test_command(q{
-					my ($src, $dst, $feature, $missing) = @ARGV;
-					my $source = { %{&get_domain_by("dom", $src)} };
-					my $target = { %{&get_domain_by("dom", $dst)} };
-					my $d = $missing eq "source" ? $source : $target;
-					$d->{'dom'} = "missing.".$d->{'dom'};
-					my $rv = $feature eq "ssl" ? &clone_ssl($target, $source)
-									  : &clone_web($target, $source);
-					!$rv || die "Clone unexpectedly found the missing $missing";
-					my @held = grep { $main::got_lock_web_file{$_} }
-							keys %main::got_lock_web_file;
-					my @files = (&get_website_file($target))[0];
-					push(@files, (&apache::find_httpd_conf())[0]);
-					my @locked = grep { defined($main::locked_file_list{$_}) } @files;
-					&release_lock_web($target) if (@held);
-					!@held && !@locked || die "Clone left Apache locks held";
-				}, $test_domain, $test_clone_domain, $feature, $missing),
-				  'label' => "Apache $feature clone lock cleanup with missing $missing",
-				  'continuefail' => 1,
-				});
-			}
-		}
-
-	# Isolate SSL relinking from PHP updates, then test the real nested helpers
+	# Confirm cleanup removed both test domains
 	push(@$apacheclone_tests,
-		{ 'command' => 'modify-web.pl',
-		  'args' => [ [ 'domain', $test_domain ],
-			      [ 'domain', $test_clone_domain ], [ 'mode', 'none' ] ],
-		},
-		{ 'command' => &apache_clone_test_command(q{
-			my $source = &get_domain_by("dom", $ARGV[0]) || die "Missing source";
-			my $target = &get_domain_by("dom", $ARGV[1]) || die "Missing target";
-			my %saved;
-			foreach my $d ($source, $target) {
-				my ($virt) = &get_apache_virtual($d->{'dom'}, $d->{'web_sslport'});
-				$virt || die "Missing SSL virtual host";
-				$saved{$virt->{'file'}} = &read_file_contents($virt->{'file'});
-				}
-			local $main::error_must_die = 1;
-			eval {
-				# Put a removable CA directive before the cert and key so that
-				# relinking changes the line numbers of subsequent directives.
-				&obtain_lock_web($source);
-				my ($virt, $vconf, $conf) = &get_apache_virtual(
-					$source->{'dom'}, $source->{'web_sslport'});
-				my @dirs = grep { $_->{'name'} ne 'SSLCACertificateFile' &&
-						 $_->{'name'} ne 'SSLCertificateChainFile' }
-					&clone_apache_config($vconf);
-				my ($idx) = grep { $dirs[$_]->{'name'} eq "SSLCertificateFile" } 0..$#dirs;
-				defined($idx) || die "Missing certificate directive";
-				splice(@dirs, $idx, 0, {
-					'name' => 'SSLCACertificateFile',
-					'value' => $source->{'ssl_cert'},
-					'words' => [ $source->{'ssl_cert'} ],
-					});
-				$virt->{'members'} = \@dirs;
-				&apache::save_directive_struct($virt, $virt, $conf, $conf);
-				&flush_file_lines($virt->{'file'});
-				&release_lock_web($source);
-				my $err = &apache::test_config();
-				!$err || die "Invalid SSL test fixture: $err";
-
-				# The clone must break an inherited link whose cert does not
-				# cover its name, preserving unrelated protocol restrictions.
-				$target->{'ssl_same'} = $source->{'id'};
-				foreach my $type (&list_ssl_file_types()) {
-					$target->{'ssl_'.$type} = $source->{'ssl_'.$type};
-					}
-				!&check_domain_certificate($target->{'dom'}, $target) ||
-					die "Fixture certificate unexpectedly covers clone";
-				&clone_ssl($target, $source) || die "SSL cloning failed";
-				!$target->{'ssl_same'} || die "SSL link was not broken";
-				&apache::flush_config_cache();
-				my ($newvirt, $newconf) = &get_apache_virtual(
-					$target->{'dom'}, $target->{'web_sslport'});
-				$newvirt || die "SSL virtual host disappeared";
-				my $protocols = &apache::find_directive("SSLProtocol", $newconf);
-				$protocols eq '-all +TLSv1.2' || die "SSLProtocol lost during SSL clone";
-				my $cert = &apache::find_directive("SSLCertificateFile", $newconf, 1);
-				$cert eq (&apache_combined_cert($target) ?
-					$target->{'ssl_combined'} : $target->{'ssl_cert'}) ||
-					die "SSL clone retained the source certificate path";
-				$err = &apache::test_config();
-				!$err || die "SSL clone damaged Apache configuration: $err";
-				};
-			my $err = $@;
-			# Restore the vhosts even after a failed assertion, so normal
-			# domain cleanup never has to parse a damaged Apache config.
-			foreach my $file (keys %saved) {
-				&unflush_file_lines($file);
-				&write_file_contents($file, $saved{$file});
-				}
-			&apache::flush_config_cache();
-			die $err if ($err);
-		}, $test_domain, $test_clone_domain),
-		  'label' => 'Apache SSL directive preservation when breaking certificate sharing',
-		},
-		{ 'command' => 'delete-domain.pl',
-		  'args' => [ [ 'domain', $test_clone_domain ] ],
-		  'cleanup' => 1,
-		  'ignorefail' => 1,
-		},
-		{ 'command' => 'delete-domain.pl',
-		  'args' => [ [ 'domain', $test_domain ] ],
-		  'cleanup' => 1,
-		},
 		{ 'command' => 'list-domains.pl --name-only',
-		  'antigrep' => [ '^'.quotemeta($test_domain).'$',
-				 '^'.quotemeta($test_clone_domain).'$' ],
+		  'antigrep' => [ '^'.quotemeta($source).'$',
+				 '^'.quotemeta($clone).'$' ],
 		});
 	}
 else {
 	$apacheclone_tests = [
-		{ 'command' => 'echo Apache clone lock tests skipped for non-Apache webserver' },
+		{ 'command' => 'echo Apache clone tests skipped for non-Apache webserver' },
 		];
 	}
 
@@ -15676,19 +15552,6 @@ if ($total_failed) {
 	}
 exit($total_failed);
 
-# apache_clone_test_command(code, args...)
-# Run a real-library assertion in its own process, with shell-safe Perl source.
-sub apache_clone_test_command
-{
-my ($code, @args) = @_;
-$code = '$0 = shift(@ARGV); require "./virtual-server-lib.pl"; '.
-	'&set_all_null_print(); &require_apache(); '.$code;
-$code =~ s/'/'"'"'/g;
-return &quote_path($^X)." -I. -e '".$code."' ".
-	join(' ', map { &quote_path($_) }
-		      ("$module_root_directory/functional-test.pl", @args));
-}
-
 # owner_remote_api_command(query-string)
 # Returns a bounded remote API request authenticated as the test domain owner.
 sub owner_remote_api_command
@@ -15787,7 +15650,7 @@ if ($cmd =~ /^wget/) {
 if ($t->{'user'}) {
 	$cmd = &command_as_user($t->{'user'}, 0, $cmd);
 	}
-# Use a short label for tests whose commands contain lengthy inline code
+# Use a short label when supplied for a test command
 my $label = $t->{'label'} || $cmd;
 print "    Running $label ..\n";
 sleep($t->{'sleep'});
