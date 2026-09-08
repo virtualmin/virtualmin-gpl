@@ -20866,9 +20866,14 @@ if ($err) {
 &set_domain_envs($d, "CLONE_DOMAIN", undef, $oldd);
 my $merr = &making_changes();
 &reset_domain_envs($d);
-return &text('setup_emaking', "<tt>$merr</tt>") if (defined($merr));
+if (defined($merr)) {
+	&$second_print(&text('setup_emaking', "<tt>$merr</tt>"));
+	return 0;
+	}
+&lock_domain($d);
 
 # Copy across features, mail last so that user DB association works
+my $ok = 1;
 my @clonefeatures = @features;
 if (&indexof("mail", @clonefeatures) >= 0) {
 	@clonefeatures = ( ( grep { $_ ne "mail" } @clonefeatures ), "mail" );
@@ -20876,15 +20881,16 @@ if (&indexof("mail", @clonefeatures) >= 0) {
 foreach my $f (@clonefeatures) {
 	if ($d->{$f}) {
 		my $cfunc = "clone_".$f;
-		&try_function($f, $cfunc, $d, $oldd);
+		my $fok = &try_function($f, $cfunc, $d, $oldd);
+		$ok = 0 if (!$fok);
 		}
 	}
 foreach my $f (@plugins) {
 	if ($d->{$f}) {
-		&try_plugin_call($f, "feature_clone", $d, $oldd);
+		my $fok = &try_plugin_call($f, "feature_clone", $d, $oldd);
+		$ok = 0 if (!$fok);
 		}
 	}
-&lock_domain($d);
 &save_domain($d);
 &unlock_domain($d);
 
@@ -20914,7 +20920,7 @@ my $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($d);
 
-return 1;
+return $ok;
 }
 
 # record_old_uid(uid, [gid])
