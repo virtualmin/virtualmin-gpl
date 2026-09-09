@@ -12201,29 +12201,86 @@ else {
 	}
 }
 
-# servers_input(name, &ids, &domains, [disabled], [use-multi-select])
-# Returns HTML for a multi-server selection field
+# servers_input(name, &ids, &domains, [disabled], [use-multi-select], [&list-opts])
+# Returns HTML for a multi-server selection field. Multi-select uses the
+# dual-list widget unless list-opts selects the checkbox list.
+# Without use-multi-select it keeps the native select.
 sub servers_input
 {
-my ($name, $ids, $doms, $dis, $ms) = @_;
+my ($name, $ids, $doms, $dis, $ms, $listopts) = @_;
+my $list = $ms && ref($listopts) eq 'HASH';
 my $sz = scalar(@$doms) > 10 ? 10 : scalar(@$doms) < 5 ? 5 : scalar(@$doms);
 my $optdis = " style='font-style:italic; color:#a94442'".
 	     " title='$text{enable_tooltip}'";
-my $opts = [ map { [ $_->{'id'}, 
-		    ($_->{'parent'} ? "&nbsp;&nbsp;" : "").&show_domain_name($_),
-		     $_->{'disabled'} ? $optdis : undef ] }
-	     &sort_indent_domains($doms) ];
+
+# Keep foldable children beside an offered top-level parent in every sort mode.
+my @sorted = &sort_indent_domains($doms);
+my %parents;
+if ($list) {
+	%parents = map { $_->{'id'}, $_ } grep { !$_->{'parent'} } @sorted;
+	my %children;
+	foreach my $d (@sorted) {
+		push(@{$children{$d->{'parent'}}}, $d) if ($parents{$d->{'parent'}});
+		}
+	@sorted = map { ($_, @{$children{$_->{'id'}} || []}) }
+		grep { !$parents{$_->{'parent'}} } @sorted;
+	}
+
+# The checkbox list takes plain labels and separate hierarchy and status
+# fields; the older selects keep their HTML indentation and option styles.
+my @opts;
+my %names;
+foreach my $d (@sorted) {
+	my $label = &show_domain_name($d);
+	if ($list) {
+		# Decode IDN entities to the UTF-8 bytes used by widget labels.
+		$label = &html_unescape($label);
+		utf8::encode($label) if (utf8::is_utf8($label));
+		$names{$d->{'id'}} = $label;
+		my $parent = $parents{$d->{'parent'}};
+		my $pname = $parent ? $names{$parent->{'id'}} : undef;
+		my $suffix;
+		# Mute the shared domain suffix when it matches the parent.
+		if ($pname && $label =~ /^(.+)(\.\Q$pname\E)$/i) {
+			($label, $suffix) = ($1, $2);
+			}
+		push(@opts, { 'value' => $d->{'id'},
+			      'label' => $label,
+			      'suffix' => $suffix,
+			      'level' => $parent ? 1 : 0,
+			      'tag' => $d->{'disabled'} ?
+					$text{'servers_disabled'} : undef });
+		}
+	else {
+		push(@opts, [ $d->{'id'},
+			     ($d->{'parent'} ? "&nbsp;&nbsp;" : "").$label,
+			     $d->{'disabled'} ? $optdis : undef ]);
+		}
+	}
+
+# Resolve selected IDs even when they are absent from the offered domains.
 my $vals = [ ];
 foreach my $id (@$ids) {
 	my $d = &get_domain($id);
-	push(@$vals, [ $id, $d ? &show_domain_name($d) : $id,
+	my $label = $d ? &show_domain_name($d) : $id;
+	if ($list && $d) {
+		$label = &html_unescape($label);
+		utf8::encode($label) if (utf8::is_utf8($label));
+		}
+	push(@$vals, [ $id, $label,
 		       $d && $d->{'disabled'} ? $optdis : undef ]);
 	}
-if ($ms) {
-	return &ui_multi_select($name, $vals, $opts, $sz, 1, $dis);
+
+# Only callers supplying list options opt into the checkbox list.
+if ($list) {
+	return &ui_multi_select_list($name, $vals, \@opts,
+		{ %$listopts, 'disabled' => $dis });
+	}
+elsif ($ms) {
+	return &ui_multi_select($name, $vals, \@opts, $sz, 1, $dis);
 	}
 else {
-	return &ui_select($name, $vals, $opts, $sz, 1, 0, $dis);
+	return &ui_select($name, $vals, \@opts, $sz, 1, 0, $dis);
 	}
 }
 

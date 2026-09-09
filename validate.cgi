@@ -11,7 +11,7 @@ if ($in{'servers_def'}) {
 	@doms = &list_visible_domains();
 	}
 else {
-	foreach $id (split(/\0/, $in{'servers'})) {
+	foreach $id (split(/[\0\s]+/, $in{'servers'})) {
 		$d = &get_domain($id);
 		if ($d) {
 			&can_edit_domain($d) ||

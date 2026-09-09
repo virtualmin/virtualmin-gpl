@@ -43,10 +43,12 @@ if ($anyv6 && ($in{'old6'} || &get_default_ip6())) {
 # Virtual servers to update
 @doms = grep { !$_->{'virt'} && !$_->{'alias'} } &list_domains();
 print &ui_table_row(&hlink($text{'newips_servers'}, "newips_servers_def"),
-		    &ui_radio("servers_def", 1,
-			[ [ 1, $text{'newips_all'} ],
-			  [ 0, $text{'newips_sel'} ] ])."<br>\n".
-		    &servers_input("servers", [ ], \@doms));
+	&servers_input("servers", [ ], \@doms, 0, 1,
+		{ 'modes' => { 'name' => 'servers_def',
+			       'value' => 1,
+			       'options' => [ [ 1, $text{'newips_all'} ],
+					      [ 0, $text{'newips_sel'} ] ],
+			       'hide' => [ 1 ] } }));
 
 # Other global settings to update
 print &ui_table_row($text{'newips_also'},

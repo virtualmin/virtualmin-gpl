@@ -39,6 +39,8 @@ by `apache-clone-locks.t`.
 | `module-config-write.t` | Locked module config updates preserve settings saved by concurrent processes. |
 | `module-config-returns.t` | Config writer call sites treat the public keyed and diff helpers as void operations. |
 | `scripts-lib.t` | PHP extension package-name generation across supported package manager families. |
+| `servers-input.t` | Widget selection, grouped child folding, missing-parent visibility, IDN labels, optional list settings and administrator selection saving. |
+| `server-selection.t` | Server selection parsing across bulk actions and schedules, including exclusions, repeated fields and domain access checks. |
 | `wizard-lib.t` | Post-install database wizard handling for PostgreSQL initialization and startup. |
 
 ## Script Testing Guidance

@@ -12,7 +12,7 @@ if ($in{'servers_def'}) {
 	@doms = grep { $_->{'emailto'} } &list_domains();
 	}
 else {
-	@doms = map { &get_domain($_) } split(/\0/, $in{'servers'});
+	@doms = map { &get_domain($_) } split(/[\0\s]+/, $in{'servers'});
 	}
 @doms || &error($text{'newnotify_edoms'});
 $in{'subject'} =~ /\S/ || &error($text{'newnotify_esubject'});

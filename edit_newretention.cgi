@@ -22,12 +22,14 @@ print &ui_table_row($text{'retention_policy'},
 # Apply to domains
 @alldoms = &list_visible_domains();
 print &ui_table_row($text{'retention_doms'},
-	&ui_radio("mode", $config{'retention_mode'} || 0,
-		  [ [ 0, $text{'retention_domsall'}."<br>" ],
-		    [ 1, $text{'retention_domonly'}."<br>" ],
-		    [ 2, $text{'retention_domexcept'}."<br>" ] ]).
 	&servers_input("doms", [ split(/\s+/, $config{'retention_doms'}) ],
-		       \@alldoms));
+		\@alldoms, 0, 1,
+		{ 'modes' => { 'name' => 'mode',
+			       'value' => $config{'retention_mode'} || 0,
+			       'options' => [ [ 0, $text{'retention_domsall'} ],
+					      [ 1, $text{'retention_domonly'} ],
+					      [ 2, $text{'retention_domexcept'} ] ],
+			       'hide' => [ 0 ] } }));
 
 # Apply to folders
 print &ui_table_row($text{'retention_folders'},

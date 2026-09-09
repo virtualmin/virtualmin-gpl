@@ -23,11 +23,11 @@ if ($in{'serversmode'} == 0) {
 	}
 elsif ($in{'serversmode'} == 2) {
 	$config{'scriptwarn_servers'} =
-		"!".join(" ", split(/\0/, $in{'servers'}));
+		"!".join(" ", split(/[\0\s]+/, $in{'servers'}));
 	}
 else {
 	$config{'scriptwarn_servers'} =
-		join(" ", split(/\0/, $in{'servers'}));
+		join(" ", split(/[\0\s]+/, $in{'servers'}));
 	}
 $config{'scriptwarn_email'} = join(" ", @email);
 $config{'scriptwarn_notify'} = $in{'wnotify'};

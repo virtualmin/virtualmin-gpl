@@ -35,10 +35,12 @@ print &ui_table_row($text{'bwreset_features'},
 # Domains to reset
 @doms = &list_domains();
 print &ui_table_row($text{'bwreset_domains'},
-		    &ui_radio("domains_def", 1,
-			      [ [ 1, $text{'bwreset_domains1'} ],
-				[ 0, $text{'bwreset_domains0'} ] ])."<br>".
-		    &servers_input("domains", [ map { $_->{'id'} } @doms ], \@doms));
+	&servers_input("domains", [ map { $_->{'id'} } @doms ], \@doms, 0, 1,
+		{ 'modes' => { 'name' => 'domains_def',
+			       'value' => 1,
+			       'options' => [ [ 1, $text{'bwreset_domains1'} ],
+					      [ 0, $text{'bwreset_domains0'} ] ],
+			       'hide' => [ 1 ] } }));
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'bwreset_ok'} ] ]);

@@ -29,7 +29,7 @@ elsif ($in{'policy'} == 2) {
 	$config{'retention_size'} = $in{'size'}*$in{'size_units'};
 	}
 $config{'retention_mode'} = $in{'mode'};
-$config{'retention_doms'} = join(" ", split(/\0/, $in{'doms'}));
+$config{'retention_doms'} = join(" ", split(/[\0\s]+/, $in{'doms'}));
 $config{'retention_folders'} = $in{'folders'};
 &save_module_config();
 &unlock_file($module_config_file);

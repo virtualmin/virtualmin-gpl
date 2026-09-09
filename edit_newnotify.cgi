@@ -17,10 +17,12 @@ print &ui_table_start($text{'newnotify_header'}, undef, 2);
 # Servers to email
 @doms = grep { $_->{'emailto'} } &list_visible_domains();
 print &ui_table_row($text{'newnotify_servers'},
-		    &ui_radio("servers_def", 1,
-			[ [ 1, $text{'newips_all'} ],
-			  [ 0, $text{'newips_sel'} ] ])."<br>\n".
-		    &servers_input("servers", [ ], \@doms).
+	&servers_input("servers", [ ], \@doms, 0, 1,
+		{ 'modes' => { 'name' => 'servers_def',
+			       'value' => 1,
+			       'options' => [ [ 1, $text{'newips_all'} ],
+					      [ 0, $text{'newips_sel'} ] ],
+			       'hide' => [ 1 ] } }).
 		    "<br>".
 		    &ui_checkbox("admins", 1, $text{'newnotify_admins'}, 1).
 		    "<br>".

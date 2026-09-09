@@ -25,10 +25,12 @@ print &ui_table_start($text{'newvalidate_header'}, undef, 2);
 # Servers to check
 @doms = &list_visible_domains();
 print &ui_table_row($text{'newvalidate_servers'},
-		    &ui_radio("servers_def", 1,
-			[ [ 1, $text{'newips_all'} ],
-			  [ 0, $text{'newips_sel'} ] ])."<br>\n".
-		    &servers_input("servers", [ ], \@doms));
+	&servers_input("servers", [ ], \@doms, 0, 1,
+		{ 'id' => 'validate_servers', 'modes' => { 'name' => 'servers_def',
+			       'value' => 1,
+			       'options' => [ [ 1, $text{'newips_all'} ],
+					      [ 0, $text{'newips_sel'} ] ],
+			       'hide' => [ 1 ] } }));
 
 # Features to check
 my @fopts = &validation_select_features();
@@ -71,10 +73,12 @@ if (&can_use_validation() == 2) {
 	# Servers to check
 	@ids = split(/\s+/, $config{'validate_servers'});
 	print &ui_table_row($text{'newvalidate_servers'},
-			    &ui_radio("servers_def", @ids ? 0 : 1,
-				[ [ 1, $text{'newips_all'} ],
-				  [ 0, $text{'newips_sel'} ] ])."<br>\n".
-			    &servers_input("servers", \@ids, \@doms));
+		&servers_input("servers", \@ids, \@doms, 0, 1,
+			{ 'id' => 'scheduled_validate_servers', 'modes' => { 'name' => 'servers_def',
+				       'value' => @ids ? 0 : 1,
+				       'options' => [ [ 1, $text{'newips_all'} ],
+						      [ 0, $text{'newips_sel'} ] ],
+				       'hide' => [ 1 ] } }));
 
 	# Features to check
 	@fids = split(/\s+/, $config{'validate_features'});
@@ -98,11 +102,12 @@ if (&can_use_validation() == 2) {
 
 	# Servers to check
 	print &ui_table_row($text{'newvalidate_fixservers'},
-			    &ui_radio("servers_def", 1,
-				[ [ 1, $text{'newips_all'} ],
-				  [ 0, $text{'newips_sel'} ] ])."<br>\n".
-			    &servers_input("servers", [ ],
-				[ grep { !$_->{'parent'} } @doms ]));
+		&servers_input("servers", [ ], [ grep { !$_->{'parent'} } @doms ], 0, 1,
+			{ 'id' => 'fix_permissions_servers', 'modes' => { 'name' => 'servers_def',
+				       'value' => 1,
+				       'options' => [ [ 1, $text{'newips_all'} ],
+						      [ 0, $text{'newips_sel'} ] ],
+				       'hide' => [ 1 ] } }));
 
 	# Also check sub-servers?
 	print &ui_table_row($text{'newvalidate_subservers'},

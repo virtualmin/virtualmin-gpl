@@ -102,7 +102,8 @@ else {
 		}
 	else {
 		$in{'doms'} || &error($text{'admin_edoms'});
-		$admin->{'doms'} = join(" ", split(/\0/, $in{'doms'}));
+		# Store selected IDs on one line.
+		$admin->{'doms'} = join(" ", split(/[\0\s]+/, $in{'doms'}));
 		}
 
 	# Save or create the admin

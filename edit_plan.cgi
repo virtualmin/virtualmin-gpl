@@ -138,14 +138,6 @@ print &ui_table_row(&hlink($text{'tmpl_capabilities'},
 
 # Allowed scripts
 if (defined(&list_scripts)) {
-	@sfields = ( "scripts_opts", "scripts_vals",
-		     "scripts_add", "scripts_remove" );
-	$dis1 = &js_disable_inputs(\@sfields, [ ], "onClick");
-	$dis2 = &js_disable_inputs([ ], \@sfields, "onClick");
-	$stable = &ui_radio('scripts_def',
-			    $plan->{'scripts'} ? 0 : 1,
-			    [ [ 1, $text{'plan_scriptsall'}, $dis1 ],
-			      [ 0, $text{'tmpl_below'}, $dis2 ] ])."<br>\n";
 	@scripts = &list_scripts();
 	foreach $s (@scripts) {
 		$script = &get_script($s);
@@ -155,13 +147,22 @@ if (defined(&list_scripts)) {
 		}
 	@scripts = grep { $scriptname{$_} } @scripts;
 	@scripts = sort { lc($scriptname{$a}) cmp lc($scriptname{$b}) }@scripts;
-	$stable .= &ui_multi_select("scripts",
-		[ map { [ $_, $scriptname{$_} ] }
-		      $plan->{'scripts'} ? split(/\s+/, $plan->{'scripts'})
-					 : @scripts ],
-		[ map { [ $_, $scriptname{$_} ] } @scripts ],
-		10, 1, !$plan->{'scripts'},
-		$text{'plan_scriptsopts'}, $text{'plan_scriptssel'});
+	my $values = [ map { [ $_, $scriptname{$_} ] }
+		$plan->{'scripts'} ? split(/\s+/, $plan->{'scripts'}) : @scripts ];
+	my $options = [ map { [ $_, $scriptname{$_} ] } @scripts ];
+	# Let the picker hide its list when every script is allowed.
+	my $modes = { 'name' => 'scripts_def',
+		'value' => $plan->{'scripts'} ? 0 : 1,
+		'options' => [ [ 1, $text{'plan_scriptsall'} ],
+			       [ 0, $text{'plan_scriptsselected'} ] ],
+		'hide' => [ 1 ] };
+	$stable = &ui_multi_select_list("scripts", $values, $options,
+		{ 'modes' => @$options || @$values ? $modes : undef });
+	# Keep the permission mode editable even with no available scripts.
+	if (!@$options && !@$values) {
+		$stable = &ui_select($modes->{'name'}, $modes->{'value'},
+			$modes->{'options'})."<br>\n".$stable;
+		}
 	print &ui_table_row(&hlink($text{'plan_scripts'}, "plan_scripts"),
 			    $stable);
 	}

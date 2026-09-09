@@ -19,7 +19,7 @@ if ($in{'domains_def'}) {
 	@doms = &list_domains();
 	}
 else {
-	foreach $did (split(/\0/, $in{'domains'})) {
+	foreach $did (split(/[\0\s]+/, $in{'domains'})) {
 		$d = &get_domain($did);
 		push(@doms, $d) if ($d);
 		}

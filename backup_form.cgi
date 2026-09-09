@@ -91,17 +91,19 @@ if ($in{'new'} || $in{'sched'}) {
 # Fields to select domains
 @bak = split(/\s+/, $sched->{'doms'});
 @doms = grep { &can_backup_domain($_) } &list_visible_domains();
-@dlist = ( "doms_opts", "doms_vals", "doms_add", "doms_remove" );
-$dis1 = &js_disable_inputs(\@dlist, [ ], "onClick");
-$dis2 = &js_disable_inputs([ ], \@dlist, "onClick");
-$dsel = &ui_radio("all", int($sched->{'all'}),
-		[ [ 1, $text{'backup_all'}, $dis1 ],
-		  [ 0, $text{'backup_sel'}, $dis2 ],
-		  [ 2, $text{'backup_exc'}, $dis2 ] ])."<br>\n".
-	&servers_input("doms", \@bak, \@doms, $sched->{'all'} == 1, 1);
-$dsel .= "<br>".&ui_checkbox(
-	"parent", 1, &hlink($text{'backup_parent'}, 'backup_parent'),
-	$sched->{'parent'});
+# The list includes its mode select and the switch folding sub-servers.
+$dsel = &servers_input("doms", \@bak, \@doms, 0, 1,
+	{ 'modes' => { 'name' => 'all',
+		       'value' => int($sched->{'all'}),
+		       'options' => [ [ 1, $text{'backup_all'} ],
+				      [ 0, $text{'backup_sel'} ],
+				      [ 2, $text{'backup_exc'} ] ],
+		       'hide' => [ 1 ] },
+	  'children' => { 'name' => 'parent',
+			  'checked' => $sched->{'parent'},
+			  'label_html' => &hlink($text{'backup_parent'},
+						 'backup_parent'),
+			  'note' => 'backup_subs' } });
 print &ui_table_row(&hlink($text{'backup_doms'}, "backup_doms"),
 		    $dsel);
 

@@ -11,7 +11,7 @@ if ($in{'servers_def'}) {
 	@doms = grep { $_->{'dir'} } &list_domains();
 	}
 else {
-	foreach $id (split(/\0/, $in{'servers'})) {
+	foreach $id (split(/[\0\s]+/, $in{'servers'})) {
 		$d = &get_domain($id);
 		if ($d) {
 			push(@doms, $d);

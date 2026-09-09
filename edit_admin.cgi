@@ -124,10 +124,12 @@ print &ui_hidden_table_start($text{'admin_header3'}, "width=100%", 2, "dom", 0);
 @doms = &get_domain_by("user", $d->{'user'});
 @aids = split(/\s+/, $admin->{'doms'});
 print &ui_table_row(&hlink($text{'admin_doms'}, "admin_doms"),
-		    &ui_radio("doms_def", $admin->{'doms'} ? 0 : 1,
-			      [ [ 1, $text{'admin_doms1'} ],
-				[ 0, $text{'admin_doms0'} ] ])."<br>\n".
-		    &servers_input("doms", \@aids, \@doms));
+	&servers_input("doms", \@aids, \@doms, 0, 1,
+		{ 'modes' => { 'name' => 'doms_def',
+			       'value' => $admin->{'doms'} ? 0 : 1,
+			       'options' => [ [ 1, $text{'admin_doms1'} ],
+					      [ 0, $text{'admin_doms0'} ] ],
+			       'hide' => [ 1 ] } }));
 
 print &ui_hidden_table_end();
 if ($in{'new'}) {

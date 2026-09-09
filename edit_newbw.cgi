@@ -118,12 +118,13 @@ else {
 	@servers = split(/\s+/, $config{'bw_servers'});
 	}
 print &ui_table_row(&hlink($text{'newbw_servers'}, "bandwidth_serversmode"),
-		    &ui_radio("serversmode", $serversmode,
-			      [ [ 0, $text{'newbw_servers0'} ],
-			        [ 1, $text{'newbw_servers1'} ],
-			        [ 2, $text{'newbw_servers2'} ] ])."<br>\n".
-		    &servers_input("servers", \@servers,
-				   [ &list_visible_domains() ]));
+	&servers_input("servers", \@servers, [ &list_visible_domains() ], 0, 1,
+		{ 'modes' => { 'name' => 'serversmode',
+			       'value' => $serversmode,
+			       'options' => [ [ 0, $text{'newbw_servers0'} ],
+					      [ 1, $text{'newbw_servers1'} ],
+					      [ 2, $text{'newbw_servers2'} ] ],
+			       'hide' => [ 0 ] } }));
 
 # Log files for FTP and mail
 $defftplog = &get_proftpd_log();

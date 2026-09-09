@@ -28,7 +28,7 @@ if ($in{'servers_def'}) {
 	}
 else {
 	# Update selected virtual servers
-	%servers = map { $_, 1 } split(/\0/, $in{'servers'});
+	%servers = map { $_, 1 } split(/[\0\s]+/, $in{'servers'});
 	@doms = grep { $servers{$_->{'id'}} } &list_domains();
 	}
 if (!@doms) {

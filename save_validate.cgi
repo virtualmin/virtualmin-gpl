@@ -35,7 +35,7 @@ if ($in{'servers_def'}) {
 	}
 else {
 	$in{'servers'} || &error($text{'newvalidate_edoms'});
-	$config{'validate_servers'} = join(" ", split(/\0/, $in{'servers'}));
+	$config{'validate_servers'} = join(" ", split(/[\0\s]+/, $in{'servers'}));
 	}
 if ($in{'features_def'}) {
 	delete($config{'validate_features'});

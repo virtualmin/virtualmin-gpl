@@ -25,7 +25,7 @@ $in{'ftplog_def'} || -r $in{'ftplog'} ||
 $in{'maillog_def'} != 0 || -r $in{'maillog'} || $in{'maillog'} =~ /\|$/ ||
 	&error($text{'newbw_emaillog'});
 if ($in{'serversmode'}) {
-	@servers = split(/\0/, $in{'servers'});
+	@servers = split(/[\0\s]+/, $in{'servers'});
 	@servers || &error($text{'newbw_eservers'});
 	}
 

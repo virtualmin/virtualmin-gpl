@@ -12,7 +12,7 @@ if ($in{'servers_def'}) {
 	@doms = &list_domains();
 	}
 else {
-	foreach my $s (&unique(split(/\0/, $in{'servers'}))) {
+	foreach my $s (&unique(split(/[\0\s]+/, $in{'servers'}))) {
 		push(@doms, &get_domain($s));
 		}
 	@doms || &error($text{'massscript_enone'});

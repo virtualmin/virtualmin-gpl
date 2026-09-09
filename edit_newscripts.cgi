@@ -164,10 +164,12 @@ if (@opts) {
 	# Servers to upgrade
 	@doms = grep { !$_->{'disabled'} } &list_visible_domains();
 	print &ui_table_row($text{'newscripts_servers'},
-			    &ui_radio("servers_def", 1,
-				[ [ 1, $text{'newips_all'} ],
-				  [ 0, $text{'newips_sel'} ] ])."<br>\n".
-			    &servers_input("servers", [ ], \@doms));
+		&servers_input("servers", [ ], \@doms, 0, 1,
+			{ 'id' => 'upgrade_servers', 'modes' => { 'name' => 'servers_def',
+				       'value' => 1,
+				       'options' => [ [ 1, $text{'newips_all'} ],
+						      [ 0, $text{'newips_sel'} ] ],
+				       'hide' => [ 1 ] } }));
 
 	print &ui_table_row($text{'newscripts_fail'},
 			    &ui_yesno_radio("fail", 1));
@@ -207,12 +209,13 @@ else {
 	@servers = split(/\s+/, $config{'scriptwarn_servers'});
 	}
 print &ui_table_row($text{'newscripts_wservers'},
-		    &ui_radio("serversmode", $serversmode,
-			      [ [ 0, $text{'newbw_servers0'} ],
-			        [ 1, $text{'newbw_servers1'} ],
-			        [ 2, $text{'newbw_servers2'} ] ])."<br>\n".
-		    &servers_input("servers", \@servers,
-				   [ &list_visible_domains() ]));
+	&servers_input("servers", \@servers, [ &list_visible_domains() ], 0, 1,
+		{ 'id' => 'scriptwarn_servers', 'modes' => { 'name' => 'serversmode',
+			       'value' => $serversmode,
+			       'options' => [ [ 0, $text{'newbw_servers0'} ],
+					      [ 1, $text{'newbw_servers1'} ],
+					      [ 2, $text{'newbw_servers2'} ] ],
+			       'hide' => [ 0 ] } }));
 
 # Notification schedule
 $sched = $job ? &parse_cron_schedule($job)

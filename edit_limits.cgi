@@ -142,10 +142,6 @@ if (defined(&list_scripts)) {
 	# Allowed scripts
 	print &ui_table_hr();
 
-	$stable = &ui_radio('scripts_def',
-			    $d->{'allowedscripts'} ? 0 : 1,
-			    [ [ 1, $text{'plan_scriptsall'} ],
-			      [ 0, $text{'tmpl_below'} ] ])."<br>\n";
 	@scripts = &list_scripts();
 	foreach $s (@scripts) {
 		$script = &get_script($s);
@@ -155,13 +151,22 @@ if (defined(&list_scripts)) {
 		}
 	@scripts = grep { $scriptname{$_} } @scripts;
 	@scripts = sort { lc($scriptname{$a}) cmp lc($scriptname{$b}) }@scripts;
-	$stable .= &ui_multi_select("scripts",
-		[ map { [ $_, $scriptname{$_} ] }
-		      $d->{'allowedscripts'} ?
-				split(/\s+/, $d->{'allowedscripts'}) :
-				@scripts ],
-		[ map { [ $_, $scriptname{$_} ] } @scripts ],
-		10, 1, 0, $text{'plan_scriptsopts'}, $text{'plan_scriptssel'});
+	my $values = [ map { [ $_, $scriptname{$_} ] }
+		$d->{'allowedscripts'} ? split(/\s+/, $d->{'allowedscripts'}) : @scripts ];
+	my $options = [ map { [ $_, $scriptname{$_} ] } @scripts ];
+	# Match the plan picker, hiding the list when all apps are allowed.
+	my $modes = { 'name' => 'scripts_def',
+		'value' => $d->{'allowedscripts'} ? 0 : 1,
+		'options' => [ [ 1, $text{'plan_scriptsall'} ],
+			       [ 0, $text{'plan_scriptsselected'} ] ],
+		'hide' => [ 1 ] };
+	$stable = &ui_multi_select_list("scripts", $values, $options,
+		{ 'modes' => @$options || @$values ? $modes : undef });
+	# An empty list still allows changing the permission mode.
+	if (!@$options && !@$values) {
+		$stable = &ui_select($modes->{'name'}, $modes->{'value'},
+			$modes->{'options'})."<br>\n".$stable;
+		}
 	print &ui_table_row(&hlink($text{'plan_scripts'}, "limits_scripts"),
 			    $stable);
 	}
