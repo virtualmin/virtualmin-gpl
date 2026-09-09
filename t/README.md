@@ -35,6 +35,7 @@ by `apache-clone-locks.t`.
 | `compile.t` | Every discovered `.pl` and `.cgi` parses cleanly with `perl -c`. It catches syntax and compile-time module-loading breakage without running normal script bodies. |
 | `apache-clone-locks.t` | Apache cloning keeps parsed directives under a web lock, preserves them across nested SSL updates, and releases locks when either virtual host is missing. |
 | `btrfs-lib.t` | Btrfs qgroup unit conversion, mount-path mapping, hierarchy repair, and safe subvolume lifecycle behavior. |
+| `configure-swap.t` | Swap CLI arguments, administrator access, noninteractive execution, exit status and signal handling, and the shared downloader's address selection, cleanup and forced modes. |
 | `get-command.t` | Help parsing for plain, quoted and angle-bracketed values, required groups, alternatives and repetition. |
 | `mysql-backup-options.t` | Automatic MySQL point-in-time recovery coordinates, including binary log detection, dump client compatibility, Webmin backup API propagation, and restore-time coordinate parsing and log selection. |
 | `module-config-write.t` | Locked module config updates preserve settings saved by concurrent processes. |
