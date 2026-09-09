@@ -12598,27 +12598,77 @@ $branch = undef if ($branch !~ /^(stable|prerelease|unstable)$/);
 return wantarray ? ($branch, $major_version) : $branch;
 }
 
-# setup_virtualmin_repos([branch])
+# setup_virtualmin_repos([branch], [&downloaded])
 # Sets up the Virtualmin repositories for the given branch (stable,
-# prerelease, unstable)
+# prerelease, unstable). The optional callback runs when downloading completes.
 sub setup_virtualmin_repos
 {
-my $branch = shift;
+my ($branch, $downloaded) = @_;
 $branch = &detect_virtualmin_repo_branch() if (!$branch);
 $branch ||= 'stable';
 $branch = 'stable' if ($branch !~ /^(stable|prerelease|unstable)$/);
 my $shcmd = &has_command('sh');
 my ($out, $err);
+if ($downloaded) {
+	# Stream download progress for CLI callers; other callers retain captured output.
+	return (256, "Repositories cannot be configured in read-only mode", undef)
+		if (&is_readonly_mode());
+	return (256, "The sh command was not found", undef) if (!$shcmd);
+	local $ENV{'INTERACTIVE_MODE'} = 'off';
+	local $ENV{'PS1'} = '';
+	local $ENV{'log_dir_path'} = $module_var_directory;
+	local $ENV{'setup_log_file_name'} = 'configure-repos';
+	local $ENV{'VIRTUALMIN_SETUP_PROGRESS'} = 1;
+	my $pid = open(my $output, '-|');
+	return (256, "Failed to start repository setup: $!", undef)
+		if (!defined($pid));
+	if (!$pid) {
+		# Merge diagnostics into the same stream, and never consume
+		# caller input, including from an interactive terminal
+		open(STDERR, '>&STDOUT') || POSIX::_exit(1);
+		open(STDIN, '<', '/dev/null') || POSIX::_exit(1);
+		exec { $shcmd } $shcmd, "$module_root_directory/run-setup.sh",
+			'repos', '--setup', '--branch', $branch;
+		print STDERR "[ERROR] Failed to start repository setup: $!\n";
+		POSIX::_exit(1);
+		}
+	# Announce the end of the download, and keep installer errors apart
+	# from the rest of its output
+	my $done = 0;
+	while (1) {
+		$! = 0;
+		my $line = <$output>;
+		if (!defined($line)) {
+			next if ($!{EINTR});
+			$err = "Failed to read repository setup output: $!" if ($!);
+			last;
+			}
+		if (!$done && $line eq "[SETUP] Download complete\n") {
+			$done = 1;
+			&$downloaded();
+			}
+		elsif ($line =~ /^\[ERROR\]/) {
+			$err .= $line;
+			}
+		else {
+			$out .= $line;
+			}
+		}
+	close($output);
+	my $status = $?;
+	$status ||= 256 if ($err);
+	return ($status, $err, $out);
+	}
 &execute_command("INTERACTIVE_MODE=off ".
 		 "log_dir_path=$module_var_directory ".
-		 "setup_log_file_name=repos-setup ".
-		 "$shcmd $module_root_directory/setup-repos.sh ".
+		 "setup_log_file_name=configure-repos ".
+		 "$shcmd $module_root_directory/run-setup.sh repos ".
 		 "--setup --branch $branch", undef, \$out, \$err);
 return ($?, $err, $out);
 }
 
 # setup_repos_error(error)
-# Cleans up error messages from setup-repos.sh
+# Cleans up repository setup error messages
 sub setup_repos_error
 {
 my ($e) = @_;
@@ -18097,7 +18147,7 @@ if ($itype =~ /^(rpm|deb)$/ &&
 		    $prod_major != $branch_version) { # old major repo in use
 			$outdated_message =
 				&text("check_repoeoutdate",
-				      "<tt>$vcmd setup-repos</tt>");
+				      "<tt>$vcmd configure-repos</tt>");
 			$outdated_warning_icon = "⚠ ";
 			}
 		}
@@ -18150,7 +18200,7 @@ if ($itype =~ /^(rpm|deb)$/ &&
 			else {
 				&$second_print("⚠ ".&text('check_repomissing',
 					"<tt>$virtualmin_yum_repo</tt>",
-					"<tt>$vcmd setup-repos</tt>",
+					"<tt>$vcmd configure-repos</tt>",
 					$edition,
 					$text{'check_repo_'.$repo_branch}));
 				}
@@ -18220,7 +18270,7 @@ if ($itype =~ /^(rpm|deb)$/ &&
 			else {
 				&$second_print("⚠ ".&text('check_repomissing',
 					"<tt>$virtualmin_apt_repo</tt>",
-					"<tt>$vcmd setup-repos</tt>",
+					"<tt>$vcmd configure-repos</tt>",
 					$edition,
 					$text{'check_repo_'.$repo_branch}));
 				}
