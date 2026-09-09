@@ -92,15 +92,16 @@ while($args =~ /\S/) {
 		$repeat = $2;
 		$args = $3;
 		}
-	elsif ($args =~ /^\s*\<([^\>]+)\>(\*|\+|)(.*)$/) {
-		# One or more required args
+	elsif ($args =~ /^\s*\<((?:[^<>]|<[^<>]*>)+)\>(\*|\+|)(.*)$/) {
+		# One or more required args, which may hold <value> placeholders
 		$opt = 0;
 		$flags = $1;
 		$repeat = $2;
 		$args = $3;
 		}
-	elsif ($args =~ /^\s*(\-\-\S+\s+"[^"]+")(.*)$/) {
-		# One arg with quoted parameter
+	elsif ($args =~ /^\s*(\-\-\S+\s+"[^"]+")(.*)$/ ||
+	       $args =~ /^\s*(\-\-\S+\s+<(?!\s*--)[^<>]+>)(.*)$/) {
+		# One arg with a quoted or bracketed parameter, not a group
 		$opt = 0;
 		$flags = $1;
 		$repeat = "";
@@ -127,7 +128,8 @@ while($args =~ /\S/) {
 	# Split list of flags
 	while($flags =~ /\S/) {
 		$flags =~ s/^\s*\|\s*//;
-		if ($flags =~ /^\s*\-\-(\S+)\s+"([^"]+)"(.*)$/ ||
+		if ($flags =~ /^\s*\-\-(\S+)\s+<(?!\s*--)([^<>]+)>(.*)$/ ||
+		    $flags =~ /^\s*\-\-(\S+)\s+"([^"]+)"(.*)$/ ||
 		    $flags =~ /^\s*\-\-(\S+)\s+([^\[\<\-\s]\S+)(.*)$/) {
 			push(@rv, { 'name' => $1,
 				    'binary' => 0,
