@@ -18910,8 +18910,10 @@ foreach my $m (&list_available_domain_owner_modules()) {
 		$minp = &ui_yesno_radio("avail_".$m->[0],
 					 int($avail{$m->[0]}));
 		}
-	my @h = ( $desc, $m->[3] || "config_avail_".$m->[0] );
-	my $label = -r &help_file($module_name, $h[1]) ?
+	# Plugins can keep access help in their own module's help directory.
+	my @h = ( $desc, $m->[3] || "config_avail_".$m->[0],
+		  $m->[4] || $module_name );
+	my $label = -r &help_file($h[2], $h[1]) ?
 		&hlink(@h) : $desc;
 	$rows .= &ui_table_row($label, $minp);
 	}

@@ -193,7 +193,10 @@ sub feature_webmin
 
 # feature_modules()
 # Returns a list of the modules that domain owners with this feature may be
-# granted access to. Used in server templates.
+# granted access to. Used in server templates and server owner limits.
+# Each entry is [ module, description, &choices, help-page, help-module ].
+# The last three fields are optional. Choices default to Yes/No, the help page
+# to config_avail_<module>, and the help module to virtual-server.
 sub feature_modules
 {
 }
