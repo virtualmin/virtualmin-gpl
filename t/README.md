@@ -38,7 +38,9 @@ by `apache-clone-locks.t`.
 | `configure-commands.t` | Preferred command names, hidden repository alias, live download progress, argument forwarding, help and API access. |
 | `configure-swap.t` | Swap CLI arguments, administrator access, noninteractive execution, exit status and signal handling, and the shared downloader's address selection, cleanup and forced modes. |
 | `get-command.t` | Help parsing for plain, quoted and angle-bracketed values, required groups, alternatives and repetition. |
+| `mailserver-restore.t` | Mail settings restores preserve the destination's Postfix SASL configuration path, including custom paths and older backups without the setting. |
 | `mysql-backup-options.t` | Automatic MySQL point-in-time recovery coordinates, including binary log detection, dump client compatibility, Webmin backup API propagation, and restore-time coordinate parsing and log selection. |
+| `restore-preflight.t` | Restore preflight honors UID/GID reallocation and destination DNS settings while preserving database ownership, account-name, parent, and reseller checks. |
 | `module-config-write.t` | Locked module config updates preserve settings saved by concurrent processes. |
 | `module-config-returns.t` | Config writer call sites treat the public keyed and diff helpers as void operations. |
 | `scripts-lib.t` | PHP extension package-name generation across supported package manager families. |
