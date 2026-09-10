@@ -245,6 +245,40 @@ SH
 		}
 };
 
+subtest 'captured repository setup quotes installation paths' => sub {
+	my $dir = "$tmp/paths with spaces; literal \$name 'quote'";
+	mkdir($dir) or die $!;
+	symlink('/bin/sh', "$dir/test shell") or die $!;
+	write_file("$dir/run-setup.sh", <<'SH');
+printf '%s\n' "$log_dir_path" "$setup_log_file_name" "$INTERACTIVE_MODE" "$@"
+exit "$TEST_CAPTURE_STATUS"
+SH
+	write_file("$tmp/captured-driver.pl", <<'PERL');
+package virtual_server;
+$module_root_directory = $module_var_directory = shift(@ARGV);
+sub has_command { "$module_root_directory/test shell" }
+# Match Webmin's Unix path quoting and execute the resulting shell command.
+sub quote_path { quotemeta($_[0]) }
+sub execute_command {
+	my ($cmd, $stdin, $stdout, $stderr) = @_;
+	$$stdout = `$cmd 2>&1`;
+}
+do "$ENV{'TEST_MODULE'}/repo-runner.pl";
+die $@ if $@;
+my ($status, $err, $out) = setup_virtualmin_repos('prerelease');
+print $out;
+print $err if defined($err);
+exit($status >> 8);
+PERL
+	for my $status (0, 7) {
+		local $ENV{'TEST_CAPTURE_STATUS'} = $status;
+		my ($st, $out) = run_command(0, "$tmp/captured-driver.pl", $dir);
+		is($st, $status, 'captured setup preserves the exit status');
+		is($out, "$dir\nconfigure-repos\noff\nrepos\n--setup\n--branch\nprerelease\n",
+			'paths, environment and arguments reach the helper literally');
+		}
+};
+
 subtest 'command metadata can parse the advertised options' => sub {
 	for my $name (qw(configure-repos setup-repos configure-swap)) {
 		my ($help_st, $help) = run_command(0, "$tmp/$name.pl", '--help');

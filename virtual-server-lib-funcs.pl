@@ -12660,9 +12660,10 @@ if ($downloaded) {
 	return ($status, $err, $out);
 	}
 &execute_command("INTERACTIVE_MODE=off ".
-		 "log_dir_path=$module_var_directory ".
+		 "log_dir_path=".&quote_path($module_var_directory)." ".
 		 "setup_log_file_name=configure-repos ".
-		 "$shcmd $module_root_directory/run-setup.sh repos ".
+		 &quote_path($shcmd)." ".
+		 &quote_path("$module_root_directory/run-setup.sh")." repos ".
 		 "--setup --branch $branch", undef, \$out, \$err);
 return ($?, $err, $out);
 }
