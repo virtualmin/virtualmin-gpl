@@ -1,6 +1,8 @@
 #### Version 8.2.1
 * Add Matomo web analytics installer to Virtualmin GPL, including detection of existing installs and display of the tracking code to embed in website pages
 * Fix cloning Apache virtual servers overwriting newly issued SSL certificates with the source server's certificate [#1280](https://github.com/virtualmin/virtualmin-gpl/issues/1280)
+* Fix backup restores rejecting UID conflicts and existing cloud DNS zones before applying restore options and destination settings
+* Fix mail settings restores removing the local Postfix SASL configuration path and breaking SMTP authentication on Debian 13
 * Fix incorrect SSL certificate paths left by older releases when breaking certificate sharing, recovering the current certificate and any missing CA chain from the combined file
 * Fix batch-created virtual servers not applying the template's initial website content
 * Fix batch virtual server creation progress and status reporting
