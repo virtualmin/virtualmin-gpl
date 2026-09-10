@@ -69,6 +69,8 @@ while(@ARGV > 0) {
 
 # Change license if serial and key given
 if ($serial && $key) {
+	# Keep license and repository progress single-spaced.
+	local $second_print = $first_print;
 	my ($err, $msg) = &change_licence($serial, $key, $nocheck, 1, 1);
 	if ($err) {
 		# Validation may have already printed the error without returning a message.
