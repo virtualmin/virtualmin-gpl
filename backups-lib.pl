@@ -3875,10 +3875,12 @@ return @rv;
 
 # check_restore_errors(&contents, [&domains], [&all-opts])
 # Returns a list of errors that would prevent this backup from being restored.
-# Each if a hash ref with 'critical' and 'desc' fields.
+# Each is a hash ref with 'critical' and 'desc' fields. Creation checks use a
+# copy of the backup metadata, adjusted for the restore options and destination.
 sub check_restore_errors
 {
 my ($conts, $doms, $opts) = @_;
+$opts ||= { };
 my @rv;
 if ($doms) {
 	foreach my $d (@$doms) {
@@ -3920,10 +3922,42 @@ if ($doms) {
 				}
 			}
 
-		# Check for clashes with existing DBs
-		if ($d->{'missing'}) {
+		# Detect conflicts before a transfer can delete the source. Fix
+		# mode only imports domain metadata, without creating resources.
+		if ($d->{'missing'} && !$opts->{'fix'}) {
+			my $check = { %$d, 'wasmissing' => 1 };
+
+			# The old numeric IDs will be replaced during restore.
+			# Keep checking user and group names, which may still
+			# clash.
+			if ($opts->{'reuid'}) {
+				delete($check->{'uid'});
+				delete($check->{'gid'});
+				}
+
+			# Restore uses this system's DNS provider and zone
+			# takeover setting. A missing template or alias target
+			# is resolved later, so defer DNS validation until then.
+			if ($check->{'dns'}) {
+				if ($config{'dns'} &&
+				    &get_template($check->{'template'}) &&
+				    (!$check->{'alias'} ||
+				     &get_domain($check->{'alias'}))) {
+					$check->{'provision_dns'} = 0;
+					delete($check->{'dns_cloud'});
+					delete($check->{'dns_remote'});
+					&set_provision_features($check, [ 'dns' ]);
+					}
+				else {
+					$check->{'dns'} = 0;
+					}
+				}
+
+			# The complete check is repeated by restore_domains
+			# after preparing the domain, immediately before
+			# creating it.
 			my $cerr = &virtual_server_clashes(
-					$d, undef, undef, $opts->{'repl'});
+					$check, undef, undef, $opts->{'repl'});
 			if ($cerr) {
 				push(@rv, { 'critical' => 1,
 					    'desc' => $cerr,

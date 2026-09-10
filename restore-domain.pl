@@ -581,9 +581,9 @@ $opts{'repl'} = $replication;
 
 # Make sure the backup is restorable
 &$first_print("Checking for errors in backup ..");
-@errs = &check_restore_errors($cont, $contdoms, $opts);
+@errs = &check_restore_errors($cont, $contdoms, \%opts);
 foreach my $d (grep { $_->{'missing'} } @$contdoms) {
-	foreach my $w (&virtual_server_warnings($d, undef, $opts->{'repl'})) {
+	foreach my $w (&virtual_server_warnings($d, undef, $opts{'repl'})) {
 		push(@errs, { 'critical' => 0,
 			      'dom' => $d,
 			      'desc' => $w });
