@@ -24,6 +24,80 @@ my $conf = eval { &proftpd::get_config() };
 return !$@ && ref($conf) ? 1 : 0;
 }
 
+# setup_proftpd_logrotate()
+# Add uncovered SFTP and TLS logs to the existing system log rotation block.
+sub setup_proftpd_logrotate
+{
+return 0 if (!$config{'logrotate'} || !&has_proftpd_support());
+&require_logrotate();
+&obtain_lock_logrotate();
+
+# Re-read coverage under the lock, including rules added since an earlier read.
+&clear_logrotate_caches();
+my $parent = &logrotate::get_config_parent();
+my @blocks = grep { ref($_->{'name'}) eq 'ARRAY' }
+		 @{$parent->{'members'}};
+my @logs = ( '/var/log/proftpd/sftp.log', '/var/log/proftpd/tls.log' );
+
+# Match configured patterns even before the logs have been created.
+foreach my $block (@blocks) {
+	foreach my $pattern (@{$block->{'name'}}) {
+		@logs = grep { !&proftpd_log_matches($_, $pattern) } @logs;
+		}
+	}
+
+# Reuse the package's options and restart script. Only extend a block that
+# permits missing logs, since SFTP and TLS logs are created on first use.
+my ($block) = grep {
+	&indexof('/var/log/proftpd/proftpd.log', @{$_->{'name'}}) >= 0 &&
+	&logrotate::find('missingok', $_->{'members'}) &&
+	!&logrotate::find('nomissingok', $_->{'members'})
+	} @blocks;
+if (@logs && $block) {
+	# Add only filename lines so custom scripts and comments stay intact.
+	my $file = defined(&logrotate::ensure_writable_config_file) ?
+		&logrotate::ensure_writable_config_file($block->{'file'}) :
+		$block->{'file'};
+	my $lref = &read_file_lines($file);
+	splice(@$lref, $block->{'line'}, 0, @logs);
+	&flush_file_lines($file);
+	&clear_logrotate_caches();
+	}
+&release_lock_logrotate();
+return $block ? scalar(@logs) : 0;
+}
+
+# proftpd_log_matches(path, pattern)
+# Match a logrotate glob without requiring the log file to exist.
+sub proftpd_log_matches
+{
+my ($path, $pattern) = @_;
+my $re = '';
+while (length($pattern)) {
+	if ($pattern =~ s/^\\(.)//s) {
+		$re .= quotemeta($1);
+		}
+	elsif ($pattern =~ s/^\*//) {
+		$re .= '[^/]*';
+		}
+	elsif ($pattern =~ s/^\?//) {
+		$re .= '[^/]';
+		}
+	elsif ($pattern =~ s/^\[([!^]?\]?(?:\\.|\[:\w+:\]|[^\]\\])+)\]//) {
+		# Shell character classes use ! for negation; wildcards never
+		# cross directory boundaries, including negated classes.
+		my $class = $1;
+		$class =~ s/^[!^]/^/;
+		$re .= '(?!/)['.$class.']';
+		}
+	else {
+		$pattern =~ s/^(.)//s;
+		$re .= quotemeta($1);
+		}
+	}
+return eval { $path =~ /\A$re\z/ } ? 1 : 0;
+}
+
 # restart_proftpd()
 # Tell ProFTPd to re-read its config file. Does nothing if run from inetd.
 sub restart_proftpd

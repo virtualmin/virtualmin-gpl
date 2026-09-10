@@ -17498,6 +17498,9 @@ if ($config{'logrotate'}) {
 		return &text('index_elogrotatever', "/logrotate/",
 				   $clink, $ver, 3.6);
 
+	# Repair missing ProFTPd log rotation on existing installations too.
+	&setup_proftpd_logrotate();
+
 	# Make sure the current config is OK
 	my $out = &backquote_with_timeout(
 		"$logrotate::config{'logrotate'} -d -f ".
