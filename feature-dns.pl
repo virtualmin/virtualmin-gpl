@@ -47,11 +47,11 @@ if (!$d->{'dns'}) {
 return undef;
 }
 
-# setup_dns(&domain)
-# Set up a zone for a domain
+# setup_dns(&domain, [keep-provider])
+# Set up a zone for a domain, optionally keeping its selected DNS provider
 sub setup_dns
 {
-my ($d) = @_;
+my ($d, $keep_provider) = @_;
 &require_bind();
 my $tmpl = &get_template($d->{'template'});
 my $ip = $d->{'dns_ip'} || $d->{'ip'};
@@ -104,8 +104,8 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	$info->{'recs'} = $recs;
 	}
 
-# Select where DNS will be hosted based on the template
-&set_provision_features($d, ["dns"]);
+# Apply provider defaults only when no migration destination was selected
+&set_provision_features($d, ["dns"]) if (!$keep_provider);
 
 if ($d->{'provision_dns'}) {
 	# Create on provisioning server
@@ -5903,7 +5903,8 @@ elsif ($server) {
 	$d->{'dns_remote'} = $server->{'host'};
 	}
 $print_output = "";
-$ok = &setup_dns($d);
+# Keep the requested provider even if the template or alias target differs
+$ok = &setup_dns($d, 1);
 my $setup_err;
 if (!$ok) {
 	# Setup failed! Try to put everything back so we don't end up in a
@@ -5912,7 +5913,7 @@ if (!$ok) {
 	$d->{'dns_remote'} = $oldremote;
 	$d->{'provision_dns'} = $oldprov;
 	$setup_err = "Failed to setup new DNS zone : $print_output";
-	&setup_dns($d);
+	&setup_dns($d, 1);
 	}
 &save_domain($d);
 &pop_all_print();
