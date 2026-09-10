@@ -7358,7 +7358,8 @@ if ($bms eq $mail_system) {
 		# Save directives from Postfix that are specific to this system
 		my @local_dirs = ( "sender_dependent_default_transport_maps", "smtp_tls_security_level",
 				   "smtp_dns_support_level", "smtp_host_lookup", "alias_maps", "alias_database",
-				   "virtual_alias_maps", "sender_bcc_maps", "tls_server_sni_maps" );
+				   "virtual_alias_maps", "sender_bcc_maps", "tls_server_sni_maps",
+				   "cyrus_sasl_config_path" );
 		my %old_map;
 		foreach my $dir (@local_dirs) {
 			$old_map{$dir} = &postfix::get_current_value($dir);
