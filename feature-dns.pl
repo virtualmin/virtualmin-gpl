@@ -48,10 +48,13 @@ return undef;
 }
 
 # setup_dns(&domain)
-# Set up a zone for a domain
+# Set up a zone for a domain. The temporary dns_keep_provider field preserves
+# its selected DNS provider instead of applying template or alias defaults.
 sub setup_dns
 {
 my ($d) = @_;
+# Consume the override before setup helpers can save the domain
+my $keep_provider = delete($d->{'dns_keep_provider'});
 &require_bind();
 my $tmpl = &get_template($d->{'template'});
 my $ip = $d->{'dns_ip'} || $d->{'ip'};
@@ -104,8 +107,8 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	$info->{'recs'} = $recs;
 	}
 
-# Select where DNS will be hosted based on the template
-&set_provision_features($d, ["dns"]);
+# Apply provider defaults only when no migration destination was selected
+&set_provision_features($d, ["dns"]) if (!$keep_provider);
 
 if ($d->{'provision_dns'}) {
 	# Create on provisioning server
@@ -5903,6 +5906,8 @@ elsif ($server) {
 	$d->{'dns_remote'} = $server->{'host'};
 	}
 $print_output = "";
+# Keep the requested provider even if the template or alias target differs
+$d->{'dns_keep_provider'} = 1;
 $ok = &setup_dns($d);
 my $setup_err;
 if (!$ok) {
@@ -5912,6 +5917,7 @@ if (!$ok) {
 	$d->{'dns_remote'} = $oldremote;
 	$d->{'provision_dns'} = $oldprov;
 	$setup_err = "Failed to setup new DNS zone : $print_output";
+	$d->{'dns_keep_provider'} = 1;
 	&setup_dns($d);
 	}
 &save_domain($d);

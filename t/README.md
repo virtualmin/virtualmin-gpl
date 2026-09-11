@@ -28,11 +28,17 @@ names with direct IP requests, cleans up both domains, and skips non-Apache
 website plugins. Internal lock cleanup and nested SSL cache behavior are covered
 by `apache-clone-locks.t`.
 
+On a disposable Virtualmin Pro host, run
+`VIRTUALMIN_DNS_VM_TEST=1 prove -v t/dns-cloud-migration-vm.t` to test DNS
+migration with real BIND zones and a simulated cloud provider. It creates and
+removes a DNS-only `.invalid` domain and does not contact Cloudflare.
+
 ## Current tests
 
 | File | What it checks |
 | --- | --- |
 | `compile.t` | Every discovered `.pl` and `.cgi` parses cleanly with `perl -c`. It catches syntax and compile-time module-loading breakage without running normal script bodies. |
+| `dns-cloud-migration-vm.t` | Explicit DNS migration destinations override templates and alias targets, preserve records, and restore the original provider after a setup failure. Requires a disposable Virtualmin Pro host. |
 | `apache-clone-locks.t` | Apache cloning keeps parsed directives under a web lock, preserves them across nested SSL updates, and releases locks when either virtual host is missing. |
 | `btrfs-lib.t` | Btrfs qgroup unit conversion, mount-path mapping, hierarchy repair, and safe subvolume lifecycle behavior. |
 | `configure-commands.t` | Preferred command names, hidden repository alias, live download progress, argument forwarding, help and API access. |
