@@ -5,6 +5,7 @@ use warnings;
 no warnings qw(once redefine);
 use Test::More;
 use FindBin;
+use File::Temp qw(tempfile);
 use Storable qw(dclone);
 
 plan skip_all => 'Set VIRTUALMIN_DNS_VM_TEST=1 on a disposable Virtualmin Pro VM'
@@ -44,8 +45,17 @@ END {
 		run_cli('delete-domain', '--domain', $name);
 		}
 }
+# Generate the fixture password only on the VM, in a private temporary file.
+my ($passfh, $passfile) = tempfile('dns-migration-pass-XXXXXX',
+	DIR => '/tmp', UNLINK => 1);
+open(my $random, '<', '/dev/urandom') or die $!;
+my $bytes;
+read($random, $bytes, 32) == 32 or die 'Cannot generate fixture password';
+close($random);
+print $passfh unpack('H*', $bytes) or die $!;
+close($passfh) or die $!;
 my ($status, $output) = run_cli('create-domain', '--domain', $name,
-	'--pass', 'unused-dns-only-fixture', '--dns', '--cloud-dns', 'local',
+	'--passfile', $passfile, '--dns', '--cloud-dns', 'local',
 	'--skip-warnings');
 $created = !$status;
 BAIL_OUT("Cannot create DNS fixture: $output") if $status;
@@ -115,6 +125,7 @@ my ($cloud_records, $cloud_reads, $cloud_creates, $fail_create) = ([], 0, 0, 0);
 			is(virtual_server::modify_dns_cloud($d, 'cloudflare'), undef,
 				'moves fixture records to the simulated cloud');
 			is($d->{'dns_cloud'}, 'cloudflare', 'cloud provider selected');
+			ok(!exists($d->{'dns_keep_provider'}), 'switch flag is consumed during setup');
 			my $creates = $cloud_creates;
 			is(virtual_server::modify_dns_cloud($d, 'local'), undef,
 				'migration to local succeeds');
@@ -123,6 +134,7 @@ my ($cloud_records, $cloud_reads, $cloud_creates, $fail_create) = ([], 0, 0, 0);
 				'cloud provider and zone ID are cleared');
 			my $saved = $get_domain->($d->{'id'}, undef, 1);
 			ok(!$saved->{'dns_cloud'}, 'local provider is saved to disk');
+			ok(!exists($saved->{'dns_keep_provider'}), 'switch flag is not saved to disk');
 
 			$cloud_reads = 0;
 			my ($recs, $zone) = virtual_server::get_domain_dns_records_and_file($saved, 1);
@@ -144,6 +156,9 @@ my ($cloud_records, $cloud_reads, $cloud_creates, $fail_create) = ([], 0, 0, 0);
 	$err = virtual_server::modify_dns_cloud($d, 'cloudflare');
 	like($err, qr/Failed to setup new DNS zone/, 'reports destination setup failure');
 	ok(!$d->{'dns_cloud'}, 'rollback restores the original local provider');
+	ok(!exists($d->{'dns_keep_provider'}), 'rollback consumes the switch flag');
+	my $restored = $get_domain->($d->{'id'}, undef, 1);
+	ok(!exists($restored->{'dns_keep_provider'}), 'rollback does not save the switch flag');
 	my ($recs, $zone) = virtual_server::get_domain_dns_records_and_file($d, 1);
 	is_deeply(record_values($recs), $expected, 'rollback restores the original records');
 	virtual_server::save_domain($d);

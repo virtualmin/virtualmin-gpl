@@ -47,11 +47,14 @@ if (!$d->{'dns'}) {
 return undef;
 }
 
-# setup_dns(&domain, [keep-provider])
-# Set up a zone for a domain, optionally keeping its selected DNS provider
+# setup_dns(&domain)
+# Set up a zone for a domain. The temporary dns_keep_provider field preserves
+# its selected DNS provider instead of applying template or alias defaults.
 sub setup_dns
 {
-my ($d, $keep_provider) = @_;
+my ($d) = @_;
+# Consume the override before setup helpers can save the domain
+my $keep_provider = delete($d->{'dns_keep_provider'});
 &require_bind();
 my $tmpl = &get_template($d->{'template'});
 my $ip = $d->{'dns_ip'} || $d->{'ip'};
@@ -5904,7 +5907,8 @@ elsif ($server) {
 	}
 $print_output = "";
 # Keep the requested provider even if the template or alias target differs
-$ok = &setup_dns($d, 1);
+$d->{'dns_keep_provider'} = 1;
+$ok = &setup_dns($d);
 my $setup_err;
 if (!$ok) {
 	# Setup failed! Try to put everything back so we don't end up in a
@@ -5913,7 +5917,8 @@ if (!$ok) {
 	$d->{'dns_remote'} = $oldremote;
 	$d->{'provision_dns'} = $oldprov;
 	$setup_err = "Failed to setup new DNS zone : $print_output";
-	&setup_dns($d, 1);
+	$d->{'dns_keep_provider'} = 1;
+	&setup_dns($d);
 	}
 &save_domain($d);
 &pop_all_print();
