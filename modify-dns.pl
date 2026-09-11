@@ -99,6 +99,11 @@ with the C<--cloud-dns> flag followed by a provider name like C<cloudflare>
 or C<route53>. Alternately the domain can be moved back to local hosting
 with the flag C<--cloud-dns local>.
 
+Changing DNS hosting deletes the zone from the old provider and recreates
+its records at the destination. In particular, C<--cloud-dns local> deletes
+the existing cloud zone. Update the domain's nameservers at its registrar
+as needed when moving DNS hosting.
+
 Similarly, the C<--remote-dns> flag followed by a hostname can be used to move
 this domain to a remote Webmin DNS server, if one is configured. Or to move it
 back to local hosting, use the C<--local-dns> flag.

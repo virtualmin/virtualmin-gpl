@@ -2,7 +2,9 @@
 
 If you have other Cloud DNS providers configured, this option allows you to
 move the DNS hosting for this domain between them, or from local hosting to
-the cloud. Note that this may require updating this nameserver IP addresses
-with your DNS registrar after making the move. <p>
+the cloud. Moving DNS hosting deletes the zone from the old provider and
+recreates its records at the destination. Moving to local hosting therefore
+deletes the existing cloud zone. Update the domain's nameservers at its
+registrar as needed when moving DNS hosting. <p>
 
 <footer>
