@@ -644,6 +644,9 @@ if ($config{'rs_endpoint'} eq 'https://lon.auth.api.rackspacecloud.com/v1.0') {
 # Unlock config now we're done with it
 &unlock_file($module_config_file);
 
+# Repair ProFTPd log rotation on upgrades after releasing the config lock.
+&setup_proftpd_logrotate();
+
 if (!defined($gconfig{'forgot_pass'})) {
 	# Enable Webmin forgotten password recovery
 	&lock_file("$config_directory/config");

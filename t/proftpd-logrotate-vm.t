@@ -2,6 +2,7 @@ use strict;
 use warnings;
 no warnings qw(once redefine);
 use File::Temp qw(tempdir);
+use POSIX ();
 use Test::More;
 use FindBin;
 
@@ -50,6 +51,96 @@ $virtual_server::config{'logrotate'} = 1;
 
 my $debian = exists($original{'proftpd-core'});
 my $rule = $debian ? 'proftpd-core' : 'proftpd';
+
+# Run the actual postinstall section with real Webmin locks. Other upgrade
+# migrations are outside this test's scope.
+my $postinstall = read_text("$FindBin::Bin/../postinstall.pl");
+my ($hook_source) = $postinstall =~ /(# Unlock config now we're done with it\n.*?)\nif \(!defined\(\$gconfig\{'forgot_pass'\}\)\)/s;
+die 'Cannot locate postinstall repair section' unless $hook_source;
+my $hook = eval "package virtual_server; no strict 'vars'; sub { $hook_source }";
+die $@ unless $hook;
+reset_config();
+{
+    local $virtual_server::module_config_file = "$tmp/virtualmin-config";
+    write_text($virtual_server::module_config_file, "fixture=1\n");
+    my $repair = \&virtual_server::setup_proftpd_logrotate;
+    my @repairs;
+    local *virtual_server::setup_proftpd_logrotate = sub {
+        ok(!defined($main::locked_file_list{$virtual_server::module_config_file}),
+            'postinstall releases the module configuration lock before repair');
+        push(@repairs, $repair->());
+        return $repairs[-1];
+    };
+    for (1 .. 2) {
+        lock_file($virtual_server::module_config_file);
+        $hook->();
+        ok(!-e "$tmp/conf.d.lock" && !-e "$tmp/main.conf.lock" &&
+            !$main::got_lock_logrotate, 'postinstall repair releases its logrotate locks');
+    }
+    is_deeply(\@repairs, [$debian ? 2 : 0, 0], 'postinstall repairs once and is safe to repeat');
+    check_config('configuration repaired by postinstall remains valid');
+
+    # A competing process holds the logrotate lock, then needs the module
+    # configuration lock. Postinstall must release its lock before waiting.
+    reset_config();
+    pipe(my $ready, my $notify) or die $!;
+    lock_file($virtual_server::module_config_file);
+    my $child = fork();
+    die "fork: $!" unless defined($child);
+    if (!$child) {
+        close($ready);
+        # The child must not inherit ownership of its parent's locks.
+        %main::locked_file_list = ();
+        @main::temporary_files = ();
+        my $error;
+        {
+            local $SIG{'ALRM'} = sub { die "competing lock timeout\n" };
+            eval {
+                alarm(15);
+                lock_file("$tmp/conf.d", 0, 0, 1);
+                die 'Competing lock was not created' unless -e "$tmp/conf.d.lock";
+                syswrite($notify, "ready\n");
+                lock_file($virtual_server::module_config_file, 0, 0, 1);
+                unlock_file($virtual_server::module_config_file);
+                unlock_file("$tmp/conf.d");
+                alarm(0);
+            };
+            $error = $@;
+            alarm(0);
+        }
+        unlock_all_files();
+        print STDERR $error if $error;
+        close($notify);
+        POSIX::_exit($error ? 1 : 0);
+    }
+    close($notify);
+    my ($completed, $waited);
+    {
+        local $SIG{'ALRM'} = sub { die "postinstall lock timeout\n" };
+        eval {
+            alarm(20);
+            my $signal = <$ready>;
+            die 'Competing process did not acquire its lock' unless $signal && $signal eq "ready\n";
+            $hook->();
+            waitpid($child, 0);
+            $waited = 1;
+            $completed = $? == 0;
+            alarm(0);
+        };
+        alarm(0);
+        diag($@) if $@;
+    }
+    close($ready);
+    if (!$waited) {
+        kill('KILL', $child);
+        waitpid($child, 0);
+    }
+    ok($completed, 'postinstall and a competing configuration editor both finish without deadlock');
+    ok(!-e "$tmp/virtualmin-config.lock" && !-e "$tmp/conf.d.lock" &&
+        !-e "$tmp/main.conf.lock" && !$main::got_lock_logrotate,
+        'competing processes leave no configuration locks behind');
+}
+
 reset_config();
 my $before = read_text("$tmp/conf.d/$rule");
 my $count = virtual_server::setup_proftpd_logrotate();
