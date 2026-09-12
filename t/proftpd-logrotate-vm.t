@@ -223,6 +223,86 @@ if ($debian) {
     unlink("$tmp/conf.d/$rule") or die $!;
     is(virtual_server::setup_proftpd_logrotate(), 0, 'does not invent a rule when the package block is absent');
 }
+
+# Parse custom paths from an included ProFTPD file using the VM's real parser.
+# Keep the package rules present to catch accidental use of default paths.
+{
+    local $proftpd::config{'proftpd_conf'} = "$tmp/proftpd.conf";
+    my $system = "$tmp/system logs/daemon.log";
+    my $sftp = "$tmp/custom logs/ssh sessions.log";
+    my $tls = "$tmp/custom logs/encrypted.log";
+    mkdir("$tmp/system logs") or die $!;
+    mkdir("$tmp/custom logs") or die $!;
+    my $included = "<Global>\n TLSLog \"$tls\"\n</Global>\n".
+                   "<VirtualHost 127.0.0.1>\n SFTPLog \"$sftp\"\n TLSLog \"$tls\"\n</VirtualHost>\n";
+    my $policy = " {\n weekly\n rotate 2\n missingok\n notifempty\n create 640 root root\n sharedscripts\n".
+                 " postrotate\n echo rotated >> $tmp/custom-postrotate\n endscript\n}\n";
+    write_text("$tmp/proftpd.conf", "SystemLog \"$system\"\nInclude $tmp/proftpd-extra.conf\n");
+    write_text("$tmp/proftpd-extra.conf", $included);
+    reset_config();
+    write_text("$tmp/conf.d/custom", "\"$system\"$policy");
+    is(virtual_server::setup_proftpd_logrotate(), 2, 'reads unique custom SFTP and TLS paths from included virtual host and global sections');
+    my ($custom) = grep { ref($_->{'name'}) && grep { $_ eq $system } @{$_->{'name'}} } @{logrotate::get_config()};
+    is_deeply([sort @{$custom->{'name'}}], [sort($system, $sftp, $tls)], 'extends the configured SystemLog block with correctly quoted paths');
+    is(read_text("$tmp/conf.d/$rule"), $original{$rule}, 'custom paths leave the stock package rule untouched');
+    is(virtual_server::setup_proftpd_logrotate(), 0, 'custom paths with spaces are not added twice');
+    check_config('custom paths are accepted by native logrotate');
+
+    # Exercise the resulting filenames and preserved policy, including spaces.
+    write_text($_, "custom rotation test\n") foreach ($sftp, $tls);
+    my $out = `logrotate --force --state $tmp/custom-state $tmp/conf.d/custom 2>&1`;
+    is($? >> 8, 0, 'native logrotate rotates the configured custom paths') or diag($out);
+    foreach my $path ($sftp, $tls) {
+        is(read_text("$path.1"), "custom rotation test\n", 'custom log contents are preserved in the archive');
+        ok(-f $path && !-s $path, 'custom log is recreated');
+        is((stat($path))[2] & 07777, 0640, 'custom log keeps the rotation policy permissions');
+    }
+    is(read_text("$tmp/custom-postrotate"), "rotated\n", 'custom block runs its shared postrotate script once');
+
+    # Coverage and block selection must also work with configured wildcards.
+    reset_config();
+    write_text("$tmp/conf.d/custom", "\"$tmp/system logs/*.log\"$policy");
+    is(virtual_server::setup_proftpd_logrotate(), 2, 'finds the SystemLog rotation block through a wildcard');
+    check_config('custom SystemLog wildcard remains valid');
+    reset_config();
+    write_text("$tmp/conf.d/custom", "\"$system\"$policy\n\"$sftp\"$policy");
+    is(virtual_server::setup_proftpd_logrotate(), 1, 'skips a custom SFTP path covered by a separate exact rule');
+    check_config('custom exact coverage does not produce duplicate entries');
+    reset_config();
+    write_text("$tmp/conf.d/custom", "\"$system\"$policy\n\"$tmp/custom logs/*.log\"$policy");
+    is(virtual_server::setup_proftpd_logrotate(), 0, 'skips custom logs covered by a wildcard');
+    check_config('custom wildcard coverage remains valid');
+
+    # The installer's earlier parse must not hide freshly written directives.
+    reset_config();
+    write_text("$tmp/conf.d/custom", "\"$system\"$policy");
+    write_text("$tmp/proftpd-extra.conf", "TLSLog none\n");
+    @proftpd::get_config_cache = ();
+    proftpd::get_config();
+    write_text("$tmp/proftpd-extra.conf", $included);
+    is(virtual_server::setup_proftpd_logrotate(), 2, 'reloads ProFTPD configuration after the installer changes it');
+
+    # Disabled logging and special files do not become rotation targets.
+    reset_config();
+    write_text("$tmp/conf.d/custom", "\"$system\"$policy");
+    write_text("$tmp/proftpd-extra.conf", "TLSLog none\n<VirtualHost 127.0.0.1>\n SFTPLog none\n</VirtualHost>\n");
+    is(virtual_server::setup_proftpd_logrotate(), 0, 'disabled logging adds no default paths');
+    write_text("$tmp/proftpd-extra.conf", "TLSLog /dev/null\nSFTPLog relative.log\n");
+    is(virtual_server::setup_proftpd_logrotate(), 0, 'ignores device files and non-absolute paths');
+    write_text("$tmp/proftpd-extra.conf", "TLSLog \"$tmp/custom logs/*.log\"\n");
+    is(virtual_server::setup_proftpd_logrotate(), 0, 'does not turn a literal ProFTPD filename into a rotation wildcard');
+    write_text("$tmp/proftpd-extra.conf", '');
+    is(virtual_server::setup_proftpd_logrotate(), 0, 'absent log directives add nothing');
+    is(read_text("$tmp/conf.d/custom"), "\"$system\"$policy", 'ignored log settings leave the rotation rule unchanged');
+
+    # Do not guess a destination block when SystemLog is absent or unrotated.
+    write_text("$tmp/proftpd-extra.conf", $included);
+    reset_config();
+    is(virtual_server::setup_proftpd_logrotate(), 0, 'unrotated SystemLog does not cause unrelated package rules to change');
+    is(read_text("$tmp/conf.d/$rule"), $original{$rule}, 'stock rule remains unchanged when custom SystemLog has no rule');
+    write_text("$tmp/proftpd.conf", "Include $tmp/proftpd-extra.conf\n");
+    is(virtual_server::setup_proftpd_logrotate(), 0, 'missing SystemLog does not select an arbitrary rotation block');
+}
 done_testing();
 
 sub write_text {
