@@ -52,6 +52,14 @@ cloning with no databases, copied table data, and failure when one database name
 clashes. It requires `psql`, `runuser`, and `timeout`, and removes its four domains,
 Unix accounts, PostgreSQL roles, and databases afterward.
 
+On a disposable Virtualmin host with local MySQL or MariaDB, run
+`VIRTUALMIN_MYSQL_CLONE_VM_TEST=1 prove -v t/mysql-clone-vm.t` as root.
+Install the candidate code in the VM's Virtualmin module first. The test checks
+empty and populated clones, allowed hosts, a database name clash, an invalid view
+that prevents dumping, and a corrupted dump rejected by the real importer.
+It requires `timeout` and removes its six domains, Unix accounts, database users,
+and databases afterward.
+
 On a disposable Virtualmin Pro host, run
 `VIRTUALMIN_DNS_VM_TEST=1 prove -v t/dns-cloud-migration-vm.t` to test DNS
 migration with real BIND zones and a simulated cloud provider. It creates and
@@ -65,8 +73,9 @@ removes a DNS-only `.invalid` domain and does not contact Cloudflare.
 | `dns-cloud-migration-vm.t` | Explicit DNS migration destinations override templates and alias targets, preserve records, and restore the original provider after a setup failure. Requires a disposable Virtualmin Pro host. |
 | `apache-clone-locks.t` | Apache cloning keeps parsed directives under a web lock, preserves them across nested SSL updates, and releases locks when either virtual host is missing. |
 | `apache-clone-vm.t` | Real Apache directive preservation, missing-vhost lock cleanup, document roots, and PHP-FPM requests during cloning. Requires an explicit opt-in on a disposable Virtualmin Apache VM. |
-| `clone-domain-exit.t` | Returned feature and plugin failures reach the CLI exit status, including PostgreSQL empty, successful, and partially failed clones. Exceptions, legacy success returns, and clone cleanup retain their behavior. Runs with in-memory fixtures and no host changes. |
+| `clone-domain-exit.t` | Returned feature and plugin failures reach the CLI exit status, including empty, successful, and partially failed MySQL and PostgreSQL clones. Exceptions, legacy success returns, and clone cleanup retain their behavior. Runs with in-memory fixtures and no host changes. |
 | `postgres-clone-vm.t` | Real PostgreSQL cloning with no databases, copied table data, and a database name clash. Verifies exit status and fixture cleanup. Requires an explicit opt-in on a disposable Virtualmin PostgreSQL VM. |
+| `mysql-clone-vm.t` | Real MySQL/MariaDB cloning with no databases, copied table data, allowed hosts, and failures during naming, dumping and importing. Verifies exit status and fixture cleanup. Requires an explicit opt-in on a disposable Virtualmin MySQL/MariaDB VM. |
 | `btrfs-lib.t` | Btrfs qgroup unit conversion, mount-path mapping, hierarchy repair, and safe subvolume lifecycle behavior. |
 | `configure-commands.t` | Preferred command names, hidden repository alias, live download progress, argument forwarding, help and API access. |
 | `configure-swap.t` | Swap CLI arguments, administrator access, noninteractive execution, exit status and signal handling, and the shared downloader's address selection, cleanup and forced modes. |

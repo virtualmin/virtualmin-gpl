@@ -468,7 +468,7 @@ if (%dbmap) {
 			}
 		my $err = &foreign_call($mod, "backup_database",
 					   $oldname, $temp, 'c', undef);
-		if ($err) {
+		if (defined($err)) {
 			&$second_print(&text('clone_postgresbackup',
 					     $oldname, $err));
 			$ok = 0;
@@ -477,7 +477,7 @@ if (%dbmap) {
 		$err = &foreign_call($mod, "restore_database",
 				     $db->{'name'}, $temp, 0, 0);
 		&unlink_file($temp);
-		if ($err) {
+		if (defined($err)) {
 			&$second_print(&text('clone_postgresrestore',
 					     $db->{'name'}, $err));
 			$ok = 0;

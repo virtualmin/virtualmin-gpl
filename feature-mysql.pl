@@ -845,6 +845,7 @@ my ($d, $oldd) = @_;
 
 # Re-create each DB with a new name
 my %dbmap;
+my $ok = 1;
 my @dbs = &domain_databases($oldd, [ 'mysql' ]);
 foreach my $db (@dbs) {
 	my $newname = $db->{'name'};
@@ -876,15 +877,17 @@ foreach my $db (@dbs) {
 		}
 	if (&check_mysql_database_clash($d, $newname)) {
 		&$second_print(&text('clone_mysqlclash', $newname));
+		$ok = 0;
 		next;
 		}
 	&push_all_print();
 	&set_all_null_print();
 	my $opts = &get_mysql_creation_opts($oldd, $db->{'name'});
-	my $ok = &create_mysql_database($d, $newname, $opts);
+	my $created = &create_mysql_database($d, $newname, $opts);
 	&pop_all_print();
-	if (!$ok) {
+	if (!$created) {
 		&$second_print(&text('clone_mysqlcreate', $newname));
+		$ok = 0;
 		}
 	else {
 		$dbmap{$newname} = $db->{'name'};
@@ -908,9 +911,10 @@ if (%dbmap) {
 			$mymod, "backup_database", $oldname, $temp, 0, 1, undef,
 			$cs, undef, undef, undef,
 			&mysql_single_transaction($d, $db));
-		if ($err) {
+		if (defined($err)) {
 			&$second_print(&text('clone_mysqlbackup',
 					     $oldname, $err));
+			$ok = 0;
 			next;
 			}
 		my ($ex, $out) = &execute_dom_sql_file($d, $db->{'name'},
@@ -919,6 +923,7 @@ if (%dbmap) {
 		if ($ex) {
 			&$second_print(&text('clone_mysqlrestore',
 					     $db->{'name'}, $out));
+			$ok = 0;
 			next;
 			}
 		}
@@ -928,8 +933,15 @@ if (%dbmap) {
 if (!$d->{'parent'}) {
 	# Duplicate allowed hosts
 	my @allowed = &get_mysql_allowed_hosts($oldd);
-	&save_mysql_allowed_hosts($d, \@allowed);
+	my $err = &save_mysql_allowed_hosts($d, \@allowed);
+	if (defined($err)) {
+		&$second_print(&text('dbhosts_failed', $err));
+		$ok = 0;
+		}
 	}
+
+# No databases is a successful clone; retain any database or host-copy failure.
+return $ok;
 }
 
 # validate_mysql(&domain)
