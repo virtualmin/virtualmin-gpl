@@ -94,6 +94,7 @@ my $result;
 	local *main::find_html_cgi_dirs = sub { };
 	local *main::need_php_wrappers = sub { return 0; };
 	local *main::fix_php_ini_files = sub { };
+	local *main::cert_info = sub { return { 'self' => 1 }; };
 	local *main::create_ssl_certificate_directories = sub { };
 	local *main::list_ssl_file_types = sub { return (); };
 	local *main::sync_combined_ssl_cert = sub { };
