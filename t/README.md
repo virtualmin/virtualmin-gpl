@@ -36,13 +36,14 @@ VIRTUALMIN_APACHE_CLONE_VM_TEST=1 prove -v t/apache-clone-vm.t
 ```
 
 This tests the VM's installed Virtualmin module, so install the candidate code
-there first. It requires Apache, SSL, `curl`, and `timeout`. It creates two
+there first. It requires Apache, SSL, `curl`, and `timeout`. It creates three
 `.invalid` domains and Unix accounts, checks document roots, executes PHP over
 HTTP/HTTPS when PHP-FPM is available, and checks lock release with missing
 virtual hosts. It also forces certificate sharing to break and checks that
-`SSLProtocol` survives in the saved Apache file. PHP checks are explicitly
+`SSLProtocol` survives in the saved Apache file. A clone with a missing source
+SSL virtual host must exit with a failure status. PHP checks are explicitly
 skipped without FPM. Cleanup restores the SSL fixture's Apache files before
-deleting both domains. The test skips by default and on non-Linux systems.
+deleting all three domains. The test skips by default and on non-Linux systems.
 
 On a disposable Virtualmin Pro host, run
 `VIRTUALMIN_DNS_VM_TEST=1 prove -v t/dns-cloud-migration-vm.t` to test DNS
@@ -57,6 +58,7 @@ removes a DNS-only `.invalid` domain and does not contact Cloudflare.
 | `dns-cloud-migration-vm.t` | Explicit DNS migration destinations override templates and alias targets, preserve records, and restore the original provider after a setup failure. Requires a disposable Virtualmin Pro host. |
 | `apache-clone-locks.t` | Apache cloning keeps parsed directives under a web lock, preserves them across nested SSL updates, and releases locks when either virtual host is missing. |
 | `apache-clone-vm.t` | Real Apache directive preservation, missing-vhost lock cleanup, document roots, and PHP-FPM requests during cloning. Requires an explicit opt-in on a disposable Virtualmin Apache VM. |
+| `clone-domain-exit.t` | Returned feature and plugin failures reach the CLI exit status, while exceptions, legacy success returns, and clone cleanup retain their behavior. Runs with in-memory fixtures and no host changes. |
 | `btrfs-lib.t` | Btrfs qgroup unit conversion, mount-path mapping, hierarchy repair, and safe subvolume lifecycle behavior. |
 | `configure-commands.t` | Preferred command names, hidden repository alias, live download progress, argument forwarding, help and API access. |
 | `configure-swap.t` | Swap CLI arguments, administrator access, noninteractive execution, exit status and signal handling, and the shared downloader's address selection, cleanup and forced modes. |

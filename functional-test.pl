@@ -12666,8 +12666,7 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 			      [ 'newdomain', $clone ],
 			      [ 'newuser', $test_clone_domain_user ],
 			      [ 'newpass', 'foo' ] ],
-		  'antigrep' => [ 'Call Stack Trace', 'source Apache configuration not found',
-				 'destination Apache configuration not found' ],
+		  'antigrep' => 'Call Stack Trace',
 		});
 
 	# Check and delete the source first. The clone must still validate and

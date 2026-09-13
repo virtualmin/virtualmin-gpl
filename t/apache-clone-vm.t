@@ -47,10 +47,11 @@ close($random);
 print $passfh unpack('H*', $bytes) or die $!;
 close($passfh) or die $!;
 my $tag = sprintf('%x%04x', $$, int(rand(65536)));
-my @names = ("apache-clone-source-$tag.invalid", "apache-clone-target-$tag.invalid");
-my @users = ("acls$tag", "aclt$tag");
+my @names = ("apache-clone-source-$tag.invalid", "apache-clone-target-$tag.invalid",
+	"apache-clone-failed-$tag.invalid");
+my @users = ("acls$tag", "aclt$tag", "aclf$tag");
 my (%attempted, %saved);
-foreach my $i (0, 1) {
+foreach my $i (0 .. $#names) {
 	die "Fixture domain already exists: $names[$i]"
 		if virtual_server::get_domain_by('dom', $names[$i]);
 	die "Fixture account already exists: $users[$i]" if getpwnam($users[$i]);
@@ -121,6 +122,24 @@ $source = domain($names[0]);
 $target = domain($names[1]);
 subtest 'SSL directives survive breaking certificate sharing' => sub {
 	check_ssl_relink($source, $target);
+	};
+
+# A real CLI failure must survive the feature wrapper and reach exit status 1.
+# The source vhost is already backed up for restoration during cleanup.
+subtest 'CLI fails when the source SSL virtual host is missing' => sub {
+	virtual_server::obtain_lock_web($source);
+	my ($virt, $vconf, $conf) = ssl_vhost($source);
+	apache::save_directive_struct($virt, undef, $conf, $conf);
+	flush_file_lines($virt->{'file'});
+	virtual_server::release_lock_web($source);
+	my $error = apache::test_config();
+	die "Invalid missing-vhost fixture: $error" if $error;
+	$attempted{$names[2]} = 1;
+	my ($status, $output) = run_command($^X, "$module/clone-domain.pl",
+		'--domain', $names[0], '--newdomain', $names[2], '--newuser', $users[2]);
+	is($status, 1 << 8, 'clone-domain exits with status 1') or diag($output);
+	like($output, qr/source Apache configuration not found/,
+		'failure comes from the missing source SSL virtual host');
 	};
 }
 
@@ -243,13 +262,13 @@ my $output = backquote_command("$command </dev/null 2>&1");
 return ($?, $output);
 }
 
-# A feature can print a failure yet let the CLI exit successfully.
+# CLI exit status reports feature failures; also reject stray debug output.
 sub cli
 {
 my ($command, @args) = @_;
 my ($status, $output) = run_command($^X, "$module/$command.pl", @args);
 die "$command failed (status $status):\n$output" if $status ||
-	$output =~ /Call Stack Trace|(?:source|destination) Apache configuration not found/;
+	$output =~ /Call Stack Trace/;
 }
 
 # CLI subprocesses change domain records and Apache files behind our caches.
@@ -307,7 +326,7 @@ if (!$restored) {
 	diag($error, "Fixtures left for manual cleanup: @names");
 	return;
 	}
-foreach my $i (reverse(0, 1)) {
+foreach my $i (reverse(0 .. $#names)) {
 	my $name = $names[$i];
 	next unless $attempted{$name};
 	refresh_caches();

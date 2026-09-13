@@ -11283,18 +11283,29 @@ else {
 }
 
 # try_plugin_call(module, function, [arg, ...])
-# Like plugin_call, but catches and prints errors
+# Like plugin_call, but catches and prints exceptions. In list context returns
+# the exception status (1=no exception) and the plugin's scalar return value.
 sub try_plugin_call
 {
 my ($mod, $func, @args) = @_;
 local $main::error_must_die = 1;
-eval { &plugin_call($mod, $func, @args) };
+my $wantresult = wantarray;
+my $rv;
+eval {
+	# Preserve the existing calling context unless a result is requested
+	if ($wantresult) {
+		$rv = &plugin_call($mod, $func, @args);
+		}
+	else {
+		&plugin_call($mod, $func, @args);
+		}
+	};
 if ($@) {
 	my $fn = &plugin_call($mod, "feature_name");
 	&$second_print(&text('setup_failure', $fn, "$@"));
 	return 0;
 	}
-return 1;
+return wantarray ? ( 1, $rv ) : 1;
 }
 
 # plugin_defined(module, function)
@@ -12118,9 +12129,9 @@ return $rv;
 }
 
 # try_function(feature, function, arg, ...)
-# Executes some function, and if it fails prints an error message. In a scalar
-# context returns 0 if the function failed, 1 otherwise. In an array context,
-# returns this flag plus the function's actual return value.
+# Executes a function and prints any exception. In scalar context returns 0
+# if the function threw an exception, 1 otherwise. In list context returns
+# this flag plus the function's actual return value.
 sub try_function
 {
 my ($f, $func, @args) = @_;
@@ -20989,17 +21000,19 @@ my @clonefeatures = @features;
 if (&indexof("mail", @clonefeatures) >= 0) {
 	@clonefeatures = ( ( grep { $_ ne "mail" } @clonefeatures ), "mail" );
 	}
+# Clone handlers signal failure with 0. Legacy handlers may return undef or
+# an empty string on success, so only an explicit zero is a returned failure.
 foreach my $f (@clonefeatures) {
 	if ($d->{$f}) {
 		my $cfunc = "clone_".$f;
-		my $fok = &try_function($f, $cfunc, $d, $oldd);
-		$ok = 0 if (!$fok);
+		my ($fok, $rv) = &try_function($f, $cfunc, $d, $oldd);
+		$ok = 0 if (!$fok || defined($rv) && $rv eq '0');
 		}
 	}
 foreach my $f (@plugins) {
 	if ($d->{$f}) {
-		my $fok = &try_plugin_call($f, "feature_clone", $d, $oldd);
-		$ok = 0 if (!$fok);
+		my ($fok, $rv) = &try_plugin_call($f, "feature_clone", $d, $oldd);
+		$ok = 0 if (!$fok || defined($rv) && $rv eq '0');
 		}
 	}
 &save_domain($d);
