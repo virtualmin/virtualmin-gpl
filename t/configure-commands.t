@@ -64,7 +64,7 @@ sub set_all_text_print {
 			}
 		};
 }
-sub has_command { '/bin/sh' }
+sub has_command { $ENV{'TEST_SH_COMMAND'} || '/bin/sh' }
 sub is_readonly_mode { $ENV{'TEST_READONLY'} }
 sub trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s; }
 sub detect_virtualmin_repo_branch { 'stable' }
@@ -243,6 +243,15 @@ SH
 			ok(!-e "$tmp/repo-args", 'read-only mode never launches the helper') if ($failure eq 'TEST_READONLY');
 			}
 		}
+};
+
+subtest 'repository exec failure reaches the parent' => sub {
+	local $ENV{'TEST_REAL_REPO'} = 1;
+	local $ENV{'TEST_SH_COMMAND'} = "$tmp/missing-shell";
+	my ($st, $out) = run_command(0, "$tmp/configure-repos.pl");
+	is($st, 1, 'failed exec exits the child with an error');
+	like($out, qr/failed to start repository setup:/i, 'failed exec is reported');
+	unlike($out, qr/\.\. done|Configure repositories/, 'failed exec never starts configuration');
 };
 
 subtest 'captured repository setup quotes installation paths' => sub {

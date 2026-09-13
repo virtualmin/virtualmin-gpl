@@ -12626,12 +12626,12 @@ if ($downloaded) {
 	if (!$pid) {
 		# Merge diagnostics into the same stream, and never consume
 		# caller input, including from an interactive terminal
-		open(STDERR, '>&STDOUT') || POSIX::_exit(1);
-		open(STDIN, '<', '/dev/null') || POSIX::_exit(1);
+		open(STDERR, '>&STDOUT') || exit(1);
+		open(STDIN, '<', '/dev/null') || exit(1);
 		exec { $shcmd } $shcmd, "$module_root_directory/run-setup.sh",
 			'repos', '--setup', '--branch', $branch;
 		print STDERR "[ERROR] Failed to start repository setup: $!\n";
-		POSIX::_exit(1);
+		exit(1);
 		}
 	# Announce the end of the download, and keep installer errors apart
 	# from the rest of its output

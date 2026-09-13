@@ -26,7 +26,6 @@ For example, C<virtualmin configure-swap --size 2G> sets up 2 GiB of swap.
 =cut
 
 package virtual_server;
-use POSIX ();
 if (!$module_name) {
 	$< == 0 || die "configure-swap.pl must be run as root";
 	$main::no_acl_check++;
@@ -99,12 +98,12 @@ if (!defined($pid)) {
 	}
 if (!$pid) {
 	# Merge diagnostics into the same stream without invoking a shell command string.
-	open(STDERR, '>&STDOUT') || POSIX::_exit(1);
+	open(STDERR, '>&STDOUT') || exit(1);
 	# Never consume caller input, including from an interactive terminal.
-	open(STDIN, '<', '/dev/null') || POSIX::_exit(1);
+	open(STDIN, '<', '/dev/null') || exit(1);
 	exec { $shcmd } $shcmd, "$module_root_directory/run-setup.sh", @args;
 	print STDERR "[ERROR] Failed to start swap setup: $!\n";
-	POSIX::_exit(1);
+	exit(1);
 	}
 
 my $downloaded = 0;

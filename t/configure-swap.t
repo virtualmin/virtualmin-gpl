@@ -62,7 +62,7 @@ sub set_all_text_print {
 }
 sub master_admin { !$ENV{'TEST_DENY'} }
 sub is_readonly_mode { $ENV{'TEST_READONLY'} }
-sub has_command { '/bin/sh' }
+sub has_command { $ENV{'TEST_SH_COMMAND'} || '/bin/sh' }
 sub virtualmin_api_log {
 	open(my $fh, '>', "$ENV{'TEST_ROOT'}/audit") or die $!;
 	print $fh join("\n", @{$_[0]});
@@ -169,6 +169,10 @@ subtest 'host-wide changes require administrator access' => sub {
 };
 
 subtest 'CLI propagates failures and signals' => sub {
+	my ($exec_st, $exec_out) = run_cli({ TEST_SH_COMMAND => "$tmp/missing-shell" }, '');
+	is($exec_st, 1, 'failed exec exits the child with an error');
+	like($exec_out, qr/failed to start swap setup:/i, 'failed exec reaches the parent');
+	unlike($exec_out, qr/\.\. done/, 'failed exec never reports success');
 	my ($st) = run_cli({ TEST_STATUS => 7 }, '', '--yes');
 	is($st, 7, 'installer failure remains a failure');
 	($st) = run_cli({ TEST_SIGNAL => 1 }, '', '--yes');
