@@ -367,6 +367,8 @@ if ($max) {
 		print "<b>",$text{'bwgraph_mago_'.$config{'bw_past'}},"</b>\n";
 		@mago = ( );
 		@tm = localtime(time());
+		# Select option labels must not contain theme special markup
+		local $main::theme_prevent_make_date = 1;
 		for($i=0; $i<24; $i++) {
 			my $sday = &bandwidth_period_start($i);
 			my $eday = &bandwidth_period_end($i);
