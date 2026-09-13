@@ -53,6 +53,13 @@ temporary invalid vhost, and removes the domains and accounts afterward.
 Install the candidate code in the VM's Virtualmin module first; the test requires
 `curl` and `timeout`.
 
+To test Webmin preference cloning on a disposable Virtualmin VM, run
+`VIRTUALMIN_WEBMIN_CLONE_VM_TEST=1 prove -v t/webmin-clone-vm.t` as root.
+Install the candidate code in the VM's Virtualmin module first. It checks that
+clones inherit explicit and default language/theme preferences without changing
+the source user. It requires local Webmin users, Authentic Theme and `timeout`,
+and removes its three domains, Unix accounts and Webmin accounts afterward.
+
 On a disposable Virtualmin host with local PostgreSQL, run
 `VIRTUALMIN_POSTGRES_CLONE_VM_TEST=1 prove -v t/postgres-clone-vm.t` as root.
 Install the candidate code in the VM's Virtualmin module first. The test checks
@@ -84,6 +91,8 @@ removes a DNS-only `.invalid` domain and does not contact Cloudflare.
 | `post-actions.t` | Post-action status reporting, callback compatibility, filtering and deduplication, plus Apache backend errors and restart lock cleanup. Runs without host changes. |
 | `clone-post-actions-vm.t` | Clone exit status after hook, Apache configuration, reload command and post-action failures. Checks a successful HTTP clone and fixture cleanup on an explicitly opted-in disposable Apache VM. |
 | `clone-domain-exit.t` | Feature, plugin, post-action and after-clone command failures reach the CLI exit status. Covers empty, successful and partially failed database clones, legacy return values, and cleanup. Runs with in-memory fixtures and no host changes. |
+| `webmin-clone.t` | Webmin language and theme copying, source preservation, unrelated account settings, inherited defaults and missing users. Runs without host changes. |
+| `webmin-clone-vm.t` | Real CLI clones inherit Webmin preferences without overwriting the source user. Requires an explicit opt-in on a disposable Virtualmin VM. |
 | `postgres-clone-vm.t` | Real PostgreSQL cloning with no databases, copied table data, and a database name clash. Verifies exit status and fixture cleanup. Requires an explicit opt-in on a disposable Virtualmin PostgreSQL VM. |
 | `mysql-clone-vm.t` | Real MySQL/MariaDB cloning with no databases, copied table data, allowed hosts, and failures during naming, dumping and importing. Verifies exit status and fixture cleanup. Requires an explicit opt-in on a disposable Virtualmin MySQL/MariaDB VM. |
 | `btrfs-lib.t` | Btrfs qgroup unit conversion, mount-path mapping, hierarchy repair, and safe subvolume lifecycle behavior. |

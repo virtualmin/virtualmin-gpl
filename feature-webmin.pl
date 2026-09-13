@@ -188,11 +188,11 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 return 0;
 }
 
-# clone_webmin(&old-domain, &domain)
+# clone_webmin(&domain, &old-domain)
 # Copy Webmin user settings to the new domain
 sub clone_webmin
 {
-my ($oldd, $d) = @_;
+my ($d, $oldd) = @_;
 &obtain_lock_webmin($d);
 &require_acl();
 my ($olduser) = grep { $_->{'name'} eq $oldd->{'user'} } &acl::list_users();
