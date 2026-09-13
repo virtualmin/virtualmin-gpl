@@ -17796,8 +17796,9 @@ if (!$skip_dns_network) {
 			}
 		}
 
-	# Make sure the external IPv6 is set if needed
-	my $ext_ip6 = &get_external_ip_address(1, 6);
+	# Only probe external IPv6 when it is enabled and supported.
+	my $ext_ip6 = $config{'ip6enabled'} && &supports_ip6() ?
+		&get_external_ip_address(1, 6) : undef;
 	if ($config{'dns_ip6'} ne '*') {
 		my $dns_ip6 = $config{'dns_ip6'} || $defip6;
 		if (!$dns_ip6) {
