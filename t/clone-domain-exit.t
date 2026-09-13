@@ -54,6 +54,31 @@ foreach my $feature (qw(core plugin)) {
 		}
 	}
 
+# PostgreSQL may have no databases, or fail one database before copying another.
+foreach my $result (qw(no_db success prefix clash create backup restore
+		       mixed_create mixed_backup mixed_restore)) {
+	subtest "PostgreSQL clone with $result" => sub {
+		my ($status, $output) = run_cli('postgres', $result, '');
+		my $success = $result eq 'no_db' || $result eq 'success';
+		is($status, $success ? 0 : 1, 'CLI reports the database clone result');
+		my %errors = (prefix => qr/could not work out a new name/,
+			clash => qr/a database named target already exists/,
+			create => qr/creation of database target failed/,
+			backup => qr/Controlled backup failure/,
+			restore => qr/Controlled restore failure/);
+		(my $failure = $result) =~ s/^mixed_//;
+		like($output, $errors{$failure}, 'reports the expected database failure')
+			unless $success;
+		like($output, qr/created 0 databases/, 'empty database list is exercised')
+			if $result eq 'no_db';
+		like($output, qr/Restored target_extra/, 'copies the later database')
+			if $result =~ /^mixed_/;
+		like($output, qr/Restored target\n/, 'copies the primary database')
+			if $result eq 'success';
+		check_completion($output);
+		};
+	}
+
 # Only list callers request the plugin's return value. Existing scalar callers
 # still receive the exception status, including when a plugin returns zero.
 load_functions();
@@ -83,7 +108,8 @@ sub load_functions
 foreach my $spec (
 	[ 'virtual-server-lib-funcs.pl', qw(clone_virtual_server try_function try_plugin_call) ],
 	[ 'feature-web.pl', qw(clone_web obtain_lock_web release_lock_web) ],
-	[ 'feature-ssl.pl', 'clone_ssl' ]) {
+	[ 'feature-ssl.pl', 'clone_ssl' ],
+	[ 'feature-postgres.pl', 'clone_postgres' ]) {
 	my ($file, @names) = @$spec;
 	open(my $fh, '<', "$root/$file") or die "$file: $!";
 	my $source = do { local $/; <$fh> };
@@ -128,11 +154,12 @@ sub setup_fixture
 ($feature, $result, $missing, $tmp) = @_;
 $module_name = 'virtual-server';
 $script_log_directory = "$tmp/scripts";
-@features = ($feature =~ /^(web|ssl)$/ ? $feature : 'probe', 'after');
+@features = ($feature =~ /^(web|ssl|postgres)$/ ? $feature : 'probe', 'after');
 @plugins = ($feature eq 'plugin' ? ('fixture') : (), 'later');
 %config = (web => 1);
 $source = { id => 'source-id', dom => 'source.invalid', user => 'source',
 	home => "$tmp/source", template => 0, web_port => 80, web_sslport => 443,
+	db => 'source', prefix => 'source',
 	map { $_ => 1 } (@features, @plugins) };
 open(my $lang, '<', "$root/lang/en") or die $!;
 while (<$lang>) {
@@ -204,6 +231,41 @@ sub get_apache_virtual {
 }
 sub apache::find_httpd_conf { "$virtual_server::tmp/apache/httpd.conf" }
 sub apache::flush_config_cache { }
+
+# Keep PostgreSQL cloning real, replacing only database and file operations.
+sub domain_databases {
+	my ($d) = @_;
+	return @created_dbs if $d->{'dom'} eq 'target.invalid';
+	return () if $result eq 'no_db';
+	return ({ name => 'unmatched' }) if $result eq 'prefix';
+	return ({ name => 'source' },
+		$result =~ /^mixed_/ ? ({ name => 'source_extra' }) : ());
+}
+sub fix_database_name { $_[0] }
+sub check_postgres_database_clash { $result eq 'clash' }
+sub push_all_print { }
+sub set_all_null_print { }
+sub pop_all_print { }
+sub get_postgres_creation_opts { {} }
+sub create_postgres_database {
+	return 0 if $result =~ /^(mixed_)?create$/ && $_[1] eq 'target';
+	push(@created_dbs, { name => $_[1] });
+	return 1;
+}
+sub require_postgres { }
+sub require_dom_postgres { 'postgresql' }
+sub transname { "$tmp/unused-dump" }
+sub get_dom_postgres_creds { (0, '') }
+sub unlink_file { }
+sub foreign_call {
+	my ($mod, $func, $db) = @_;
+	return 'Controlled backup failure' if $func eq 'backup_database' &&
+		$result =~ /^(mixed_)?backup$/ && $db eq 'source';
+	return 'Controlled restore failure' if $func eq 'restore_database' &&
+		$result =~ /^(mixed_)?restore$/ && $db eq 'target';
+	print "Restored $db\n" if $func eq 'restore_database';
+	return undef;
+}
 
 # Probe return values independently of printing and other side effects.
 sub clone_probe { return $feature eq 'plugin' ? 1 : probe_result(); }

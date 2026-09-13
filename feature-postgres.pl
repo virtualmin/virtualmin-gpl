@@ -416,6 +416,7 @@ my ($d, $oldd) = @_;
 
 # Re-create each DB with a new name
 my %dbmap;
+my $ok = 1;
 foreach my $db (&domain_databases($oldd, [ 'postgres' ])) {
 	my $newname = $db->{'name'};
 	my $newprefix = &fix_database_name($d->{'prefix'}, 'postgres');
@@ -426,19 +427,22 @@ foreach my $db (&domain_databases($oldd, [ 'postgres' ])) {
 	elsif ($newname !~ s/\Q$oldprefix\E/$newprefix/) {
 		&$second_print(&text('clone_postgresprefix', $newname,
 				     $oldprefix, $newprefix));
+		$ok = 0;
 		next;
 		}
 	if (&check_postgres_database_clash($d, $newname)) {
 		&$second_print(&text('clone_postgresclash', $newname));
+		$ok = 0;
 		next;
 		}
 	&push_all_print();
 	&set_all_null_print();
 	my $opts = &get_postgres_creation_opts($oldd, $db->{'name'});
-	my $ok = &create_postgres_database($d, $newname, $opts);
+	my $created = &create_postgres_database($d, $newname, $opts);
 	&pop_all_print();
-	if (!$ok) {
+	if (!$created) {
 		&$second_print(&text('clone_postgrescreate', $newname));
+		$ok = 0;
 		}
 	else {
 		$dbmap{$newname} = $db->{'name'};
@@ -467,6 +471,7 @@ if (%dbmap) {
 		if ($err) {
 			&$second_print(&text('clone_postgresbackup',
 					     $oldname, $err));
+			$ok = 0;
 			next;
 			}
 		$err = &foreign_call($mod, "restore_database",
@@ -475,11 +480,15 @@ if (%dbmap) {
 		if ($err) {
 			&$second_print(&text('clone_postgresrestore',
 					     $db->{'name'}, $err));
+			$ok = 0;
 			next;
 			}
 		}
 	&$second_print($text{'setup_done'});
 	}
+
+# No databases is a successful clone; retain any earlier database failure.
+return $ok;
 }
 
 # validate_postgres(&domain)
