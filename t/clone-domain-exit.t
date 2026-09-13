@@ -89,6 +89,25 @@ foreach my $feature (qw(postgres mysql)) {
 		}
 }
 
+# Applying configuration and running the after-clone command affect CLI status.
+foreach my $result (qw(success no_actions zero exception count_zero
+		       hook_failure hook_empty combined_failure)) {
+	subtest "clone completion with $result" => sub {
+		my ($status, $output) = run_cli('post', $result, '');
+		my $success = $result =~ /^(success|no_actions|count_zero)$/;
+		is($status, $success ? 0 : 1, 'CLI reports completion failures');
+		like($output, qr/Clone saved\nDomain unlocked/, 'saves and unlocks the clone');
+		like($output, qr/After-clone command ran/, 'runs the after-clone command');
+		like($output, qr/After-clone command ran\n.*?Clone environment reset\n/s, 'resets the clone environment after the hook');
+		like($output, qr/Post actions ran/, 'runs later actions despite a failure')
+			unless $result eq 'no_actions';
+		like($output, qr/Controlled post-action exception/, 'prints the exception')
+			if $result eq 'exception';
+		like($output, qr/Post-creation command failed/, 'prints the hook failure')
+			if $result =~ /^hook_/ || $result eq 'combined_failure';
+		};
+	}
+
 # Only list callers request the plugin's return value. Existing scalar callers
 # still receive the exception status, including when a plugin returns zero.
 load_functions();
@@ -122,6 +141,8 @@ foreach my $spec (
 	[ 'feature-postgres.pl', 'clone_postgres' ],
 	[ 'feature-mysql.pl', 'clone_mysql' ]) {
 	my ($file, @names) = @$spec;
+	push(@names, qw(run_post_actions made_changes))
+		if $file eq 'virtual-server-lib-funcs.pl' && ($virtual_server::feature || '') eq 'post';
 	open(my $fh, '<', "$root/$file") or die "$file: $!";
 	my $source = do { local $/; <$fh> };
 	close($fh);
@@ -167,7 +188,7 @@ $module_name = 'virtual-server';
 $script_log_directory = "$tmp/scripts";
 @features = ($feature =~ /^(web|ssl|postgres|mysql)$/ ? $feature : 'probe', 'after');
 @plugins = ($feature eq 'plugin' ? ('fixture') : (), 'later');
-%config = (web => 1);
+%config = (web => 1, post_command => $feature eq 'post' ? 'fixture' : '');
 $source = { id => 'source-id', dom => 'source.invalid', user => 'source',
 	home => "$tmp/source", template => 0, web_port => 80, web_sslport => 443,
 	db => 'source', prefix => 'source',
@@ -207,7 +228,9 @@ sub virtual_server_depends { undef }
 sub virtual_server_clashes { undef }
 sub create_virtual_server { undef }
 sub set_domain_envs { }
-sub reset_domain_envs { }
+sub reset_domain_envs {
+	print "Clone environment reset\n" if $feature eq 'post';
+}
 sub making_changes { undef }
 sub made_changes { undef }
 sub lock_domain { }
@@ -298,8 +321,28 @@ sub foreign_call {
 }
 
 # Probe return values independently of printing and other side effects.
-sub clone_probe { return $feature eq 'plugin' ? 1 : probe_result(); }
-sub clone_after { print "Later core feature ran\n"; return 1; }
+sub clone_probe { return $feature =~ /^(plugin|post)$/ ? 1 : probe_result(); }
+sub clone_after {
+	print "Later core feature ran\n";
+	if ($feature eq 'post' && $result ne 'no_actions') {
+		@main::post_actions = ([ $result eq 'count_zero' ?
+			\&post_count : \&restart_apache ], [ \&post_later ]);
+		}
+	return 1;
+}
+sub restart_apache {
+	die "Controlled post-action exception\n" if $result eq 'exception';
+	return $result =~ /^(zero|combined_failure)$/ ? 0 : 1;
+}
+sub post_count { 0 }
+sub post_later { print "Post actions ran\n"; }
+sub clean_changes_environment { }
+sub reset_changes_environment { }
+sub backquote_logged {
+	print "After-clone command ran\n";
+	$? = $result =~ /^hook_/ || $result eq 'combined_failure' ? 256 : 0;
+	return $result eq 'hook_empty' ? '' : $? ? 'Controlled hook failure' : '';
+}
 sub plugin_call {
 	my ($plugin, $function) = @_;
 	return 'Fixture plugin' if $function eq 'feature_name';

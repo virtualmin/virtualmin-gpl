@@ -45,6 +45,14 @@ SSL virtual host must exit with a failure status. PHP checks are explicitly
 skipped without FPM. Cleanup restores the SSL fixture's Apache files before
 deleting all three domains. The test skips by default and on non-Linux systems.
 
+To test clone completion on a disposable Apache VM, run
+`VIRTUALMIN_CLONE_POST_VM_TEST=1 prove -v t/clone-post-actions-vm.t` as root.
+It checks after-clone commands, rejected Apache configuration, a failed reload
+command, and a post-action exception. It creates seven domains, restores the
+temporary invalid vhost, and removes the domains and accounts afterward.
+Install the candidate code in the VM's Virtualmin module first; the test requires
+`curl` and `timeout`.
+
 On a disposable Virtualmin host with local PostgreSQL, run
 `VIRTUALMIN_POSTGRES_CLONE_VM_TEST=1 prove -v t/postgres-clone-vm.t` as root.
 Install the candidate code in the VM's Virtualmin module first. The test checks
@@ -73,7 +81,9 @@ removes a DNS-only `.invalid` domain and does not contact Cloudflare.
 | `dns-cloud-migration-vm.t` | Explicit DNS migration destinations override templates and alias targets, preserve records, and restore the original provider after a setup failure. Requires a disposable Virtualmin Pro host. |
 | `apache-clone-locks.t` | Apache cloning keeps parsed directives under a web lock, preserves them across nested SSL updates, and releases locks when either virtual host is missing. |
 | `apache-clone-vm.t` | Real Apache directive preservation, missing-vhost lock cleanup, document roots, and PHP-FPM requests during cloning. Requires an explicit opt-in on a disposable Virtualmin Apache VM. |
-| `clone-domain-exit.t` | Returned feature and plugin failures reach the CLI exit status, including empty, successful, and partially failed MySQL and PostgreSQL clones. Exceptions, legacy success returns, and clone cleanup retain their behavior. Runs with in-memory fixtures and no host changes. |
+| `post-actions.t` | Post-action status reporting, callback compatibility, filtering and deduplication, plus Apache backend errors and restart lock cleanup. Runs without host changes. |
+| `clone-post-actions-vm.t` | Clone exit status after hook, Apache configuration, reload command and post-action failures. Checks a successful HTTP clone and fixture cleanup on an explicitly opted-in disposable Apache VM. |
+| `clone-domain-exit.t` | Feature, plugin, post-action and after-clone command failures reach the CLI exit status. Covers empty, successful and partially failed database clones, legacy return values, and cleanup. Runs with in-memory fixtures and no host changes. |
 | `postgres-clone-vm.t` | Real PostgreSQL cloning with no databases, copied table data, and a database name clash. Verifies exit status and fixture cleanup. Requires an explicit opt-in on a disposable Virtualmin PostgreSQL VM. |
 | `mysql-clone-vm.t` | Real MySQL/MariaDB cloning with no databases, copied table data, allowed hosts, and failures during naming, dumping and importing. Verifies exit status and fixture cleanup. Requires an explicit opt-in on a disposable Virtualmin MySQL/MariaDB VM. |
 | `btrfs-lib.t` | Btrfs qgroup unit conversion, mount-path mapping, hierarchy repair, and safe subvolume lifecycle behavior. |

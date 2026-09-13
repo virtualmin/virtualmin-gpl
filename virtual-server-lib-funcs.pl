@@ -9887,7 +9887,8 @@ push(@main::post_actions, [ @_ ]);
 }
 
 # run_post_actions([&only-action])
-# Run all registered post-modification actions
+# Run registered actions. Returns 0 on exceptions or failures from the boolean
+# service callbacks below, and 1 otherwise. Other callbacks retain their context.
 sub run_post_actions
 {
 my @only = @_;
@@ -9925,6 +9926,11 @@ if ($webmin) {
 # Run unique actions
 my %done;
 my @newpost;
+my $ok = 1;
+# These actions report failure with 0. Other callbacks can return counts or
+# nothing on success, so their return values cannot be treated as status flags.
+my %returns_status = map { $_, 1 } (\&restart_apache, \&restart_bind,
+	\&reload_bind_records, \&restart_php_fpm_server, \&restart_proftpd);
 foreach my $a (@main::post_actions) {
 	# Don't run multiple times
 	my $key;
@@ -9959,12 +9965,25 @@ foreach my $a (@main::post_actions) {
 
 	# Call the restart function
 	local $main::error_must_die = 1;
-	eval { &$afunc(@aargs) };
+	my $rv;
+	eval {
+		if ($returns_status{$afunc}) {
+			$rv = &$afunc(@aargs);
+			}
+		else {
+			&$afunc(@aargs);
+			}
+		};
 	if ($@) {
 		&$second_print(&text('setup_postfailure', "$@"));
+		$ok = 0;
+		}
+	elsif (defined($rv) && $rv eq '0') {
+		$ok = 0;
 		}
 	}
 @main::post_actions = @newpost;
+return $ok;
 }
 
 # run_post_actions_silently()
@@ -21037,11 +21056,15 @@ if (-d $scriptsrc) {
 	&$second_print($text{'setup_done'});
 	}
 
-&run_post_actions();
+# Applying the cloned configuration is part of the clone's result.
+$ok = 0 if (!&run_post_actions());
 
 &set_domain_envs($d, "CLONE_DOMAIN", undef, $oldd);
 my $merr = &made_changes();
-&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
+if (defined($merr)) {
+	&$second_print(&text('setup_emade', "<tt>$merr</tt>"));
+	$ok = 0;
+	}
 &reset_domain_envs($d);
 
 return $ok;

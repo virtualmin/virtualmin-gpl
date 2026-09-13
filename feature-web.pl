@@ -1284,24 +1284,38 @@ my $apachelock = "$module_config_directory/apache-restart";
 &lock_file($apachelock);
 my $pid = &get_apache_pid();
 if (!$pid || !kill(0, $pid)) {
+	&unlock_file($apachelock);
 	&$second_print($text{'setup_notrun'});
 	return 0;
 	}
-if ($restart) {
-	# Totally stop and start
-	&apache::stop_apache();
-	sleep(5);
-	my $try = 0;
-	while($try < 10 && &get_apache_pid()) {
-		$try++;		# Wait up till 10 seconds for final exit
+
+# Keep the backend result and release the restart lock even if it throws.
+my $err;
+eval {
+	if ($restart) {
+		# Only start again if stopping succeeded
+		$err = &apache::stop_apache();
+		if (!defined($err)) {
+			sleep(5);
+			my $try = 0;
+			while($try < 10 && &get_apache_pid()) {
+				$try++;
+				}
+			$err = &apache::start_apache();
+			}
 		}
-	&apache::start_apache();
-	}
-else {
-	# Just signal a re-load
-	&apache::restart_apache();
-	}
+	else {
+		# Just signal a re-load
+		$err = &apache::restart_apache();
+		}
+	};
+my $exception = $@;
 &unlock_file($apachelock);
+die $exception if ($exception);
+if (defined($err)) {
+	&$second_print(&text('setup_postfailure', $err));
+	return 0;
+	}
 &$second_print($text{'setup_done'});
 return 1;
 }
