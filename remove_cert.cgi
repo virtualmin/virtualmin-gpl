@@ -35,7 +35,7 @@ delete($d->{'ssl_pass'});
 foreach $f (&domain_features($d), &list_feature_plugins()) {
 	&call_feature_func($f, $d, $oldd);
 	}
-&save_domain($d);
+&save_domain_diff($d, $oldd);
 
 &set_domain_envs($d, "SSL_DOMAIN", undef);
 my $merr = &made_changes();
@@ -44,4 +44,3 @@ my $merr = &made_changes();
 
 &webmin_log("rcert", "domain", $d->{'dom'});
 &redirect("cert_form.cgi?dom=$d->{'id'}");
-

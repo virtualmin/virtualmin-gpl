@@ -274,9 +274,9 @@ foreach my $d (&list_domains()) {
 
 	if ($changed) {
 		# Run the before command
-		&set_domain_envs(\%oldd, "MODIFY_DOMAIN", $d);
+		&set_domain_envs($oldd, "MODIFY_DOMAIN", $d);
 		$merr = &making_changes();
-		&reset_domain_envs(\%oldd);
+		&reset_domain_envs($oldd);
 		&error(&text('save_emaking', "<tt>$merr</tt>"))
 			if (defined($merr));
 
@@ -295,11 +295,11 @@ foreach my $d (&list_domains()) {
 
 		# Save new domain details
 		&$first_print($text{'save_domain'});
-		&save_domain($d);
+		&save_domain_diff($d, $oldd);
 		&$second_print($text{'setup_done'});
 
 		# Run the after command
-		&set_domain_envs($d, "MODIFY_DOMAIN", undef, \%oldd);
+		&set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
 		my $merr = &made_changes();
 		&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
 			if (defined($merr));
@@ -346,4 +346,3 @@ return undef; # If format is unknown
 }
 
 1;
-

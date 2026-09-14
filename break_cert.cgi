@@ -10,8 +10,9 @@ $d->{'ssl_same'} || &error($text{'cert_esame'});
 # Break it
 $same = &get_domain($d->{'ssl_same'});
 $same || &error($text{'cert_esame'});
+$oldd = { %$d };
 &break_ssl_linkage($d, $same);
-&save_domain($d);
+&save_domain_diff($d, $oldd);
 &run_post_actions_silently();
 &webmin_log("breakcert", "domain", $d->{'dom'}, $d);
 

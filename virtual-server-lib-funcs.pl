@@ -676,6 +676,86 @@ $id = $id->{'id'} if (ref($id));
 &unlock_file("$domains_dir/$id");
 }
 
+# save_domain_keys(&domain, &values, [&deletes])
+# Atomically update selected domain config keys, preserving other changes
+# Returns no value. A deleted domain is left deleted.
+sub save_domain_keys
+{
+my ($d, $values, $deletes) = @_;
+$values ||= { };
+$deletes ||= [ ];
+
+my $file = "$domains_dir/$d->{'id'}";
+my $locked = &lock_file($file);
+if (!$locked) {
+	# A nested caller may already own the lock; any other failure stops the save
+	my $lock_owner = &test_lock($file);
+	return if (!$lock_owner || $lock_owner != $$);
+	}
+
+# Re-read without mutating the caller's domain object, which may contain other
+# changes that have not been saved yet
+my $latest;
+{
+	local $main::get_domain_cache{$d->{'id'}};
+	$latest = &get_domain($d->{'id'}, undef, 1);
+}
+if ($latest) {
+	# Merge only requested values and deletions into the current disk record
+	my $changed = 0;
+	foreach my $key (keys %$values) {
+		my $value = $values->{$key};
+		if (!exists($latest->{$key}) ||
+		    defined($latest->{$key}) != defined($value) ||
+		    (defined($value) && $latest->{$key} ne $value)) {
+			$latest->{$key} = $value;
+			$changed = 1;
+			}
+		}
+	foreach my $key (@$deletes) {
+		if (exists($latest->{$key})) {
+			delete($latest->{$key});
+			$changed = 1;
+			}
+		}
+	&save_domain($latest) if ($changed);
+	}
+&unlock_file($file) if ($locked);
+
+# Reflect only this helper's requested changes in the caller's domain
+if ($latest) {
+	foreach my $key (keys %$values) {
+		$d->{$key} = $values->{$key};
+		}
+	foreach my $key (@$deletes) {
+		delete($d->{$key});
+		}
+	}
+return;
+}
+
+# save_domain_diff(&domain, &original-domain)
+# Atomically save only domain keys changed since the supplied snapshot
+# Returns no value. The original snapshot must precede the caller's changes.
+sub save_domain_diff
+{
+my ($d, $original) = @_;
+my (%values, @deletes);
+foreach my $key (keys %$d) {
+	my $value = $d->{$key};
+	if (!exists($original->{$key}) ||
+	    defined($original->{$key}) != defined($value) ||
+	    (defined($value) && $original->{$key} ne $value)) {
+		$values{$key} = $value;
+		}
+	}
+foreach my $key (keys %$original) {
+	push(@deletes, $key) if (!exists($d->{$key}));
+	}
+&save_domain_keys($d, \%values, \@deletes);
+return;
+}
+
 # save_domain(&domain, [creating])
 # Write domain information to disk
 sub save_domain
@@ -695,7 +775,16 @@ if ($d->{'dom'} eq '') {
 	return 0;
 	}
 &make_dir($domains_dir, 0700);
-&lock_file($file);
+my $locked = &lock_file($file);
+if (!$locked) {
+	# Preserve a surrounding critical section when the caller already holds the lock
+	my $lock_owner = &test_lock($file);
+	if (!$lock_owner || $lock_owner != $$) {
+		print STDERR "Domain $file could not be locked for saving!\n";
+		&print_call_stack() if ($gconfig{'error_stack'});
+		return 0;
+		}
+	}
 my $oldd = { };
 if (&read_file($file, $oldd)) {
 	my @st = stat($file);
@@ -719,7 +808,7 @@ $d->{'lastsave_pid'} = $main::initial_process_id;
 delete($d->{'ftp'});		# Removed ProFTPd virtual FTP feature
 delete($d->{'lastread_time'});
 &write_file($file, $d);
-&unlock_file($file);
+&unlock_file($file) if ($locked);
 $d->{'lastread_time'} = time();
 $main::get_domain_cache{$d->{'id'}} = $d;
 if (scalar(@main::list_domains_cache)) {
@@ -9743,6 +9832,16 @@ my @disdoms = grep {
 	$_->{'disabled_auto'} <= time()         # if timestamp is in the past
 	} &list_domains();
 foreach my $d (@disdoms) {
+	# Recheck the schedule after locking, since another request may have changed it
+	my $id = $d->{'id'};
+	&lock_domain($id);
+	$d = &get_domain($id, undef, 1);
+	if (!$d || $d->{'protected'} || $d->{'disabled'} ||
+	    !&is_timestamp($d->{'disabled_auto'}) ||
+	    $d->{'disabled_auto'} > time()) {
+		&unlock_domain($id);
+		next;
+		}
 	&push_all_print();
 	&set_all_null_print();
 	eval {
@@ -9752,6 +9851,7 @@ foreach my $d (@disdoms) {
 			&text('disable_autodisabledone', $disabled_auto));
 		};
 	&pop_all_print();
+	&unlock_domain($id);
 	&error_stderr("Disabling domain on schedule failed : $@") if ($@);
 	}
 }
@@ -9762,6 +9862,7 @@ foreach my $d (@disdoms) {
 sub disable_virtual_server
 {
 my ($d, $reason, $why, $only) = @_;
+my %original_domain = %$d;
 
 # Work out what can be disabled
 my @disable = &get_disable_features($d);
@@ -9810,7 +9911,7 @@ foreach my $f (&list_feature_plugins()) {
 &$first_print($text{'save_domain'});
 &lock_domain($d);
 $d->{'disabled'} = join(",", @disabled);
-&save_domain($d);
+&save_domain_diff($d, \%original_domain);
 &unlock_domain($d);
 &$second_print($text{'setup_done'});
 
@@ -9830,6 +9931,7 @@ return undef;
 sub enable_virtual_server
 {
 my ($d) = @_;
+my %original_domain = %$d;
 
 # Work out what can be enabled
 my @enable = &get_enable_features($d);
@@ -9866,7 +9968,7 @@ foreach my $f (&list_feature_plugins()) {
 &$first_print($text{'save_domain'});
 &lock_domain($d);
 delete($d->{'disabled'});
-&save_domain($d);
+&save_domain_diff($d, \%original_domain);
 &unlock_domain($d);
 &$second_print($text{'setup_done'});
 
@@ -22790,10 +22892,7 @@ foreach my $d (&list_domains()) {
 	# Sort logins and get last login
 	@logins = sort { $b <=> $a } @logins;
 	# Save most recent timestamp
-	&lock_domain($d);
-	$d->{'last_login_timestamp'} = $logins[0];
-	&save_domain($d);
-	&unlock_domain($d);
+	&save_domain_keys($d, { 'last_login_timestamp' => $logins[0] });
 	}
 }
 

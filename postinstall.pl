@@ -330,7 +330,14 @@ foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 # Cache current PHP modes, versions and error log files
 foreach my $d (grep { &domain_has_website($_) && !$_->{'alias'} }
 		    &list_domains()) {
-	&lock_domain($d);
+	# Preserve edits made since the domain list was loaded
+	my $id = $d->{'id'};
+	&lock_domain($id);
+	$d = &get_domain($id, undef, 1);
+	if (!$d || !&domain_has_website($d) || $d->{'alias'}) {
+		&unlock_domain($id);
+		next;
+		}
 	if (!$d->{'php_mode'}) {
 		$d->{'php_mode'} = &get_domain_php_mode($d);
 		&save_domain($d);
@@ -347,16 +354,23 @@ foreach my $d (grep { &domain_has_website($_) && !$_->{'alias'} }
 			}
 		&save_domain($d);
 		}
-	&unlock_domain($d);
+	&unlock_domain($id);
 	}
 foreach my $d (grep { $_->{'alias'} } &list_domains()) {
-	&lock_domain($d);
+	# The alias may have been changed or deleted while earlier domains were updated
+	my $id = $d->{'id'};
+	&lock_domain($id);
+	$d = &get_domain($id, undef, 1);
+	if (!$d || !$d->{'alias'}) {
+		&unlock_domain($id);
+		next;
+		}
 	my $dd = &get_domain($d->{'alias'});
 	if ($dd && $dd->{'php_mode'}) {
 		$d->{'php_mode'} = $dd->{'php_mode'};
 		&save_domain($d);
 		}
-	&unlock_domain($d);
+	&unlock_domain($id);
 	}
 
 # Enable checking for latest scripts
@@ -537,10 +551,7 @@ if (!&check_dkim()) {
 		foreach my $e (@{$dkim->{'exclude'}}) {
 			my $d = &get_domain_by("dom", $e);
 			if ($d) {
-				&lock_domain($d);
-				$d->{'dkim_enabled'} = 0;
-				&save_domain($d);
-				&unlock_domain($d);
+				&save_domain_keys($d, { 'dkim_enabled' => 0 });
 				}
 			}
 		delete($config{'dkim_exclude'});
@@ -551,10 +562,7 @@ if (!&check_dkim()) {
 		foreach my $e (@{$dkim->{'extra'}}) {
 			my $d = &get_domain_by("dom", $e);
 			if ($d && $d->{'dns'}) {
-				&lock_domain($d);
-				$d->{'dkim_enabled'} = 1;
-				&save_domain($d);
-				&unlock_domain($d);
+				&save_domain_keys($d, { 'dkim_enabled' => 1 });
 				}
 			else {
 				push(@newextra, $e);

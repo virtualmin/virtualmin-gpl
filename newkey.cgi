@@ -6,6 +6,7 @@ require './virtual-server-lib.pl';
 &ReadParseMime();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
+%original_domain = %$d;
 &error_setup($text{'newkey_err'});
 
 $homed = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
@@ -158,7 +159,7 @@ else {
 &save_website_ssl_file($d, "key", $d->{'ssl_key'});
 &save_website_ssl_file($d, "ca", $d->{'ssl_chain'});
 &refresh_ssl_cert_expiry($d);
-&save_domain($d);
+&save_domain_diff($d, \%original_domain);
 &$second_print($text{'setup_done'});
 
 # If a passphrase is needed, add it to the top-level Apache config. This is
@@ -205,7 +206,7 @@ if ($d->{'ssl_newkey'}) {
 		&unlink_logged($d->{'ssl_newkey'});
 		delete($d->{'ssl_newkey'});
 		delete($d->{'ssl_csr'});
-		&save_domain($d);
+		&save_domain_keys($d, { }, [ 'ssl_newkey', 'ssl_csr' ]);
 		}
 	}
 &sync_combined_ssl_cert($d);
@@ -217,6 +218,7 @@ if ($d->{'ssl_newkey'}) {
 # Copy SSL directives to domains using same cert
 foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	next if (!&domain_has_ssl_cert($od));
+	my %original_od = %$od;
 	$od->{'ssl_cert'} = $d->{'ssl_cert'};
 	$od->{'ssl_key'} = $d->{'ssl_key'};
 	$od->{'ssl_chain'} = $d->{'ssl_chain'};
@@ -224,7 +226,7 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	$od->{'ssl_csr'} = $d->{'ssl_csr'};
 	$od->{'ssl_pass'} = $d->{'ssl_pass'};
 	&save_domain_passphrase($od);
-	&save_domain($od);
+	&save_domain_diff($od, \%original_od);
 	}
 
 # Update DANE DNS records
@@ -235,6 +237,9 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 
 # Turn off any let's encrypt renewal
 &disable_letsencrypt_renewal($d);
+
+# Save the passphrase and combined-file paths set after the first domain save
+&save_domain_diff($d, \%original_domain);
 
 # Run the after command
 &set_domain_envs($d, "SSL_DOMAIN", undef, $oldd);

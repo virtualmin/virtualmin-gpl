@@ -7,6 +7,7 @@ $d = &get_domain($in{'dom'});
 $d && &can_edit_domain($d) && &can_edit_ssl() ||
 	&error($text{'defaultcert_ecannot'});
 $d->{'ssl_same'} && &error($text{'defaultcert_esame'});
+$oldd = { %$d };
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'defaultcert_title'}, "");
 
@@ -32,7 +33,7 @@ foreach my $t ("key", "cert", "ca", "combined", "everything") {
 &$second_print($text{'setup_done'});
 
 &run_post_actions();
-&save_domain($d);
+&save_domain_diff($d, $oldd);
 
 &release_lock_web($d);
 &unlock_domain($d);
@@ -41,4 +42,3 @@ foreach my $t ("key", "cert", "ca", "combined", "everything") {
 &ui_print_footer("cert_form.cgi?dom=$d->{'id'}", $text{'cert_return'},
 		 &domain_footer_link($d),
 		 "", $text{'index_return'});
-

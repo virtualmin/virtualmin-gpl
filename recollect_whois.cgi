@@ -11,7 +11,14 @@ if ($domsstr) {
 		my $d = &get_domain_by('dom', $dom);
 		next if (!$d);
 		next if (!&can_edit_domain($d));
-		&lock_domain($d);
+		# Refresh both the record and access decision while holding the domain lock
+		my $id = $d->{'id'};
+		&lock_domain($id);
+		$d = &get_domain($id, undef, 1);
+		if (!$d || !&can_edit_domain($d)) {
+			&unlock_domain($id);
+			next;
+			}
 		if ($in{'ignore'}) {
 			# Ignore expiry forever
 			$d->{'whois_ignore'} = 1;
@@ -27,8 +34,7 @@ if ($domsstr) {
 			delete($d->{'whois_ignore'});
 			}
 		&save_domain($d);
-		&unlock_domain($d);
+		&unlock_domain($id);
 		}
 	}
 &redirect(&get_referer_relative());
-

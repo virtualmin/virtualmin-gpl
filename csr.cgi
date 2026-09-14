@@ -5,6 +5,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
+%original_domain = %$d;
 &foreign_require("webmin");
 
 # Validate inputs
@@ -73,7 +74,7 @@ if (!$in{'self'}) {
 	&$second_print($text{'setup_done'});
 
 	# Save the domain
-	&save_domain($d);
+	&save_domain_diff($d, \%original_domain);
 	
 	&set_domain_envs($d, "SSL_DOMAIN", undef);
 	my $merr = &made_changes();
@@ -144,10 +145,11 @@ else {
 	# copied though, as the cert file isn't changing
 	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 		next if (!&domain_has_ssl_cert($od));
+		my %original_od = %$od;
 		&obtain_lock_ssl($od);
 		$od->{'ssl_pass'} = undef;
 		&save_domain_passphrase($od);
-		&save_domain($od);
+		&save_domain_diff($od, \%original_od);
 		&release_lock_ssl($od);
 		}
 
@@ -160,7 +162,7 @@ else {
 	# Turn off any let's encrypt renewal
 	&disable_letsencrypt_renewal($d);
 
-	&save_domain($d);
+	&save_domain_diff($d, \%original_domain);
 	
 	&run_post_actions();
 

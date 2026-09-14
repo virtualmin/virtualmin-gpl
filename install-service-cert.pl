@@ -69,6 +69,7 @@ while(@ARGV > 0) {
 $dname || &usage("Missing --domain parameter");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
+$oldd = { %$d };
 &domain_has_ssl_cert($d) ||
 	&usage("Virtual server $dname does not have SSL enabled");
 @services || &usage("No services to copy the cert to specified");
@@ -122,7 +123,7 @@ foreach my $s (@services) {
 		}
 	}
 
-&save_domain($d);
+&save_domain_diff($d, $oldd);
 
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV, $d);
@@ -137,4 +138,3 @@ print "                                --add-global | --add-domain | --remove-do
 print "                               [--service type]+\n";
 exit(1);
 }
-

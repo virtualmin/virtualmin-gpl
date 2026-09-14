@@ -157,6 +157,7 @@ while(@ARGV > 0) {
 $dname || &usage("Missing --domain parameter");
 $d = &get_remote_api_domain("dom", $dname);
 $d || &usage("No virtual server named $dname found");
+%original_domain = %$d;
 $d->{'ssl_same'} && &usage("This server shares it's SSL certificate ".
 			   "with another domain");
 # Only the master administrator can enable notifications to the master
@@ -323,7 +324,7 @@ if (!$ok) {
 	$d->{'letsencrypt_first_failure'} ||= time();
 	$d->{'letsencrypt_last_err'} = $cert;
 	$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
-	&save_domain($d);
+	&save_domain_diff($d, \%original_domain);
 	&unlock_domain($d);
 	&$second_print(".. failed : $cert");
 	exit(1);
@@ -345,7 +346,6 @@ else {
 	&install_letsencrypt_cert($d, $cert, $key, $chain);
 
 	# Save renewal state
-	&lock_domain($d);
 	$d->{'letsencrypt_dname'} = $custom_dname;
 	$d->{'letsencrypt_last'} = time();
 	$d->{'letsencrypt_last_success'} = time();
@@ -363,8 +363,7 @@ else {
 	delete($d->{'letsencrypt_last_err'});
 	delete($d->{'letsencrypt_first_failure'});
 	&refresh_ssl_cert_expiry($d);
-	&save_domain($d);
-	&unlock_domain($d);
+	&save_domain_diff($d, \%original_domain);
 
 	# Update other services using the cert
 	&update_all_domain_service_ssl_certs($d, \@beforecerts,
@@ -377,13 +376,14 @@ else {
 	# Copy SSL directives to domains using same cert
 	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 		next if (!&domain_has_ssl_cert($od));
+		my %original_od = %$od;
 		$od->{'ssl_cert'} = $d->{'ssl_cert'};
 		$od->{'ssl_key'} = $d->{'ssl_key'};
 		$od->{'ssl_newkey'} = $d->{'ssl_newkey'};
 		$od->{'ssl_csr'} = $d->{'ssl_csr'};
 		$od->{'ssl_pass'} = $d->{'ssl_pass'};
 		&save_domain_passphrase($od);
-		&save_domain($od);
+		&save_domain_diff($od, \%original_od);
 		}
 
 	# Update DANE DNS records

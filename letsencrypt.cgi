@@ -9,6 +9,7 @@ $d = &get_domain($in{'dom'});
     (&domain_has_website($d) || $d->{'dns'}) ||
 	&error($text{'edit_ecannot'});
 $d->{'disabled'} && &error($text{'letsencrypt_eenabled'});
+%original_domain = %$d;
 
 if ($in{'dname_def'}) {
 	@dnames = &get_hostnames_for_ssl($d);
@@ -78,7 +79,7 @@ if ($in{'only'}) {
 		}
 	$d->{'letsencrypt_id'} = $in{'acme'} if (defined($in{'acme'}));
 	$d->{'letsencrypt_connectivity'} = $in{'connectivity'};
-	&save_domain($d);
+	&save_domain_diff($d, \%original_domain);
 	&redirect("cert_form.cgi?dom=$d->{'id'}");
 	}
 else {
@@ -209,7 +210,7 @@ else {
 		$d->{'letsencrypt_first_failure'} ||= time();
 		$d->{'letsencrypt_last_err'} = $cert;
 		$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
-		&save_domain($d);
+		&save_domain_diff($d, \%original_domain);
 		&unlock_domain($d);
 		&$second_print(&text('letsencrypt_failed', $cert));
 		}
@@ -249,7 +250,7 @@ else {
 		delete($d->{'letsencrypt_last_err'});
 		delete($d->{'letsencrypt_first_failure'});
 		&refresh_ssl_cert_expiry($d);
-		&save_domain($d);
+		&save_domain_diff($d, \%original_domain);
 		&$second_print($text{'setup_done'});
 
 		# Update other services using the cert
@@ -266,13 +267,14 @@ else {
 		# Copy SSL directives to domains using same cert
 		foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 			next if (!&domain_has_ssl_cert($od));
+			my %original_od = %$od;
 			$od->{'ssl_cert'} = $d->{'ssl_cert'};
 			$od->{'ssl_key'} = $d->{'ssl_key'};
 			$od->{'ssl_newkey'} = $d->{'ssl_newkey'};
 			$od->{'ssl_csr'} = $d->{'ssl_csr'};
 			$od->{'ssl_pass'} = $d->{'ssl_pass'};
 			&save_domain_passphrase($od);
-			&save_domain($od);
+			&save_domain_diff($od, \%original_od);
 			}
 
 		# Update DANE DNS records

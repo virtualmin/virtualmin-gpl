@@ -108,6 +108,7 @@ foreach my $d (@doms) {
         foreach my $user (@users_owners) {
             $dom_done++;
             my $passwd = $pass || &random_password();
+            my %original_domain = %$d;
             my $oldd = $d;
             if ($d->{'disabled'}) {
                 $d->{'disabled_mysqlpass'} = undef;
@@ -122,7 +123,7 @@ foreach my $d (@doms) {
                 &generate_domain_password_hashes($d, 0);
                 &modify_unix($d, $oldd) if ($d->{'unix'});
                 &modify_webmin($d, $oldd);
-                &save_domain($d);
+                &save_domain_diff($d, \%original_domain);
                 };
             &pop_all_print();
             if ($@) {

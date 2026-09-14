@@ -418,8 +418,9 @@ else {
 
 # If any other domains were using this one's SSL cert or key, break the linkage
 foreach my $od (&get_domain_by("ssl_same", $d->{'id'})) {
+	my %original_od = %$od;
 	&break_ssl_linkage($od, $d);
-	&save_domain($od);
+	&save_domain_diff($od, \%original_od);
 	}
 
 # Update DANE DNS records
@@ -2582,9 +2583,10 @@ sub break_invalid_ssl_linkages
 my ($d, $newcert) = @_;
 foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	if (!&check_domain_certificate($od->{'dom'}, $newcert || $d)) {
+		my %original_od = %$od;
 		&obtain_lock_ssl($d);
 		&break_ssl_linkage($od, $d);
-		&save_domain($od);
+		&save_domain_diff($od, \%original_od);
 		&release_lock_ssl($d);
 		}
 	}
@@ -2599,7 +2601,8 @@ my ($d) = @_;
 if ($d->{'letsencrypt_renew'} || $d->{'letsencrypt_last_id'}) {
 	delete($d->{'letsencrypt_renew'});
 	delete($d->{'letsencrypt_last_id'});
-	&save_domain($d);
+	&save_domain_keys($d, { },
+		[ 'letsencrypt_renew', 'letsencrypt_last_id' ]);
 	}
 }
 
@@ -3545,6 +3548,7 @@ foreach my $d (&list_domains()) {
 sub renew_letsencrypt_cert
 {
 my ($d) = @_;
+my %original_domain = %$d;
 
 # Work out the hostnames to request
 my @dnames;
@@ -3607,14 +3611,12 @@ my @beforecerts = &get_all_domain_service_ssl_certs($d);
 # Copy into place
 &obtain_lock_ssl($d);
 &install_letsencrypt_cert($d, $cert, $key, $chain);
-&lock_domain($d);
 $d->{'letsencrypt_last'} = time();
 $d->{'letsencrypt_last_success'} = time();
 $d->{'letsencrypt_last_id'} = $d->{'letsencrypt_id'};
 delete($d->{'letsencrypt_last_err'});
 delete($d->{'letsencrypt_first_failure'});
-&save_domain($d);
-&unlock_domain($d);
+&save_domain_diff($d, \%original_domain);
 &release_lock_ssl($d);
 
 # Update services that were using the old cert, both globally and per-domain

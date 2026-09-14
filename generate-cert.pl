@@ -112,6 +112,7 @@ $dname || &usage("Missing --domain parameter");
 $self || $csr || &usage("One of the --self or --csr parameters must be given");
 $d = &get_remote_api_domain("dom", $dname);
 $d || &usage("No virtual server named $dname found");
+$oldd = { %$d };
 $d->{'ssl_same'} && &usage("This server shares it's SSL certificate ".
 			   "with another domain");
 if (!&master_admin()) {
@@ -178,7 +179,7 @@ if ($self) {
 	&$first_print("Configuring server to use it ..");
 	$d->{'ssl_pass'} = undef;
 	&save_domain_passphrase($d);
-	&save_domain($d);
+	&save_domain_diff($d, $oldd);
 	&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
 	&save_website_ssl_file($d, "key", $d->{'ssl_key'});
 	&save_website_ssl_file($d, "ca", undef);
@@ -192,11 +193,12 @@ if ($self) {
 
 	# Remove SSL passphrase on other domains sharing the cert
 	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+		my %original_od = %$od;
 		&obtain_lock_ssl($od);
 		&lock_domain($od);
                 $od->{'ssl_pass'} = undef;
                 &save_domain_passphrase($od);
-                &save_domain($od);
+		&save_domain_diff($od, \%original_od);
 		&unlock_domain($od);
 		&release_lock_ssl($od);
                 }
@@ -250,7 +252,7 @@ else {
 	&$second_print(".. done");
 
 	# Save the domain
-	&save_domain($d);
+	&save_domain_diff($d, $oldd);
 	&unlock_domain($d);
 	&run_post_actions();
 	}
@@ -282,4 +284,3 @@ print "                        [--alt alternate-domain-name]*\n";
 print "                        [--sha2 | --sha1 | --ec]\n";
 exit(1);
 }
-

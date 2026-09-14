@@ -74,7 +74,7 @@ if ($_[0]->{'passmode'} == 3) {
 				&plugin_call($f, "feature_modify", $d, $oldd);
 				}
 			}
-		&save_domain($d);
+		&save_domain_diff($d, $oldd);
 		}
 
 	# Update mailbox user passwords

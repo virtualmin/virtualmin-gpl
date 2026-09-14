@@ -82,6 +82,14 @@ removes a DNS-only `.invalid` domain and does not contact Cloudflare.
 
 ## Current tests
 
+On a disposable Virtualmin VM, install the candidate code and run
+`VIRTUALMIN_DOMAIN_CONFIG_VM_TEST=1 prove -v t/domain-config-vm.t` as root.
+It creates a temporary `.invalid` domain and checks concurrent config writes,
+login collection across disable/enable operations, nested locks, scheduled
+disabling, owner limits, feature toggles, and certificate generation and installation.
+The test uses a private login-data fixture and does not contact an ACME service.
+It removes its domain and account afterward and requires `timeout`.
+
 | File | What it checks |
 | --- | --- |
 | `compile.t` | Every discovered `.pl` and `.cgi` parses cleanly with `perl -c`. It catches syntax and compile-time module-loading breakage without running normal script bodies. |
@@ -104,6 +112,8 @@ removes a DNS-only `.invalid` domain and does not contact Cloudflare.
 | `mysql-backup-options.t` | Automatic MySQL point-in-time recovery coordinates, including binary log detection, dump client compatibility, Webmin backup API propagation, and restore-time coordinate parsing and log selection. |
 | `restore-preflight.t` | Restore preflight honors UID/GID reallocation and destination DNS settings while preserving database ownership, account-name, parent, and reseller checks. |
 | `module-config-write.t` | Locked module config updates preserve settings saved by concurrent processes. |
+| `domain-config-write.t` | Domain key and diff updates, deleted records, lock ownership, login collection, IP-update snapshots, and final certificate metadata saves. |
+| `domain-config-vm.t` | Concurrent domain writes and real CLI operations on an explicitly opted-in disposable Virtualmin VM. |
 | `module-config-returns.t` | Config writer call sites treat the public keyed and diff helpers as void operations. |
 | `scripts-lib.t` | PHP extension package-name generation across supported package manager families. |
 | `servers-input.t` | Widget selection, grouped child folding, missing-parent visibility, IDN labels, optional list settings and administrator selection saving. |

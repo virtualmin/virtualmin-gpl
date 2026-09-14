@@ -1474,8 +1474,7 @@ $donefeatures{"virtualmin"} = $vbs;
 # Remove any temporary home dirs
 foreach my $d (@cleanuphomes) {
 	&unlink_file($d->{'home'});
-	$d->{'dir'} = 0;
-	&save_domain($d);	# In case it was saved during the backup
+	&save_domain_keys($d, { 'dir' => 0 });
 	}
 
 if (!$homefmt) {

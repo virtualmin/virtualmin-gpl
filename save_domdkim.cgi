@@ -7,6 +7,7 @@ require './virtual-server-lib.pl';
 &error_setup($text{'domdkim_err'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_mail() || &error($text{'edit_ecannot'});
+%oldd = %$d;
 
 # Validate inputs
 if ($in{'key_def'} == 0) {
@@ -29,7 +30,7 @@ else {
 
 # Update the key
 $err = &save_domain_dkim_key($d, $key);
-&save_domain($d);
+&save_domain_diff($d, \%oldd);
 &run_post_actions();
 
 # All done

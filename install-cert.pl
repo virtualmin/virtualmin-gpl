@@ -135,7 +135,7 @@ if ($remove) {
 	foreach $f (&domain_features($d), &list_feature_plugins()) {
 		&call_feature_func($f, $d, $oldd);
 		}
-	&save_domain($d);
+	&save_domain_diff($d, $oldd);
 	&$second_print(".. done");
 	}
 else {
@@ -221,7 +221,7 @@ else {
 	foreach $f (&domain_features($d), &list_feature_plugins()) {
 		&call_feature_func($f, $d, $oldd);
 		}
-	&save_domain($d);
+	&save_domain_diff($d, $oldd);
 
 	# Copy SSL directives to domains using same cert
 	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
@@ -270,4 +270,3 @@ print "                       [--pass key-password]\n";
 print "                       [--remove-cert]\n";
 exit(1);
 }
-

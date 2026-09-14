@@ -110,7 +110,7 @@ if ($user->{'domainowner'}) {
 				&plugin_call($f, "feature_modify", $d, $oldd);
 				}
 			}
-		&save_domain($d);
+		&save_domain_diff($d, $oldd);
 		}
 	&run_post_actions();
 	}

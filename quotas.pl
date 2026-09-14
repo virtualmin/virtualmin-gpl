@@ -40,7 +40,8 @@ foreach $d (&list_domains()) {
 		# Record that we have notified this domain
 		if ($msg) {
 			$d->{'quota_notify'} = $now." ".$msg->[4];
-			&save_domain($d);
+			&save_domain_keys($d,
+				{ 'quota_notify' => $d->{'quota_notify'} });
 			push(@msgs, $msg);
 			}
 		}

@@ -91,6 +91,7 @@ else {
 
 # Do it for all domains
 foreach $d (@doms) {
+	%oldd = %$d;
 	&$first_print("Updating server $d->{'dom'} ..");
 	&$indent_print();
 	@dom_features = $d->{'alias'} ? @alias_features :
@@ -118,7 +119,7 @@ foreach $d (@doms) {
 		}
 
 	# Save new domain details
-	&save_domain($d);
+	&save_domain_diff($d, \%oldd);
 
 	&refresh_webmin_user($d);
 

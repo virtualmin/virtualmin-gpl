@@ -22,9 +22,10 @@ my @lines = <$fh>;
 close($fh);
 for (my $i = 0; $i < @lines; $i++) {
 	my $line = $lines[$i];
-	if ($line =~ /\breturn\s+&?save_module_config_(?:keys|diff)/ ||
-	    $line =~ /=\s*&?save_module_config_(?:keys|diff)/ ||
-	    $line =~ /\b(?:if|unless|while)\s*\(\s*&?save_module_config_(?:keys|diff)/) {
+	my $writer = qr/save_(?:module_config|domain)_(?:keys|diff)/;
+	if ($line =~ /\breturn\s+&?$writer/ ||
+	    $line =~ /=\s*&?$writer/ ||
+	    $line =~ /\b(?:if|unless|while)\s*\(\s*&?$writer/) {
 		push(@flagged, $file =~ s/^\Q$root\E\///r.":".($i + 1));
 		}
 	}

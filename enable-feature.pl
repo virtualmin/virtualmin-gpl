@@ -227,7 +227,7 @@ foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 		}
 
 	# Save new domain details
-	&save_domain($d);
+	&save_domain_diff($d, $oldd);
 
 	# Run the after command
 	&set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
