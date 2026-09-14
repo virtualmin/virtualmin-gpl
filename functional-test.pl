@@ -4895,6 +4895,25 @@ $rsbackup_tests = [
 		      [ 'source', $rs_backup_prefix."/subdir" ] ],
 	},
 
+	# Backup to Rackspace subdirectory using a date-based filename
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'strftime' ],
+		      [ 'dest', $rs_backup_prefix."/subdir-%d-%M-%Y" ] ],
+	},
+
+	# Purge backups from Rackspace
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'dest', $rs_backup_prefix."/subdir-%d-%M-%Y" ],
+		      [ 'strftime' ],
+		      [ 'purge', '0.00001' ] ],
+	  'grep' => 'Deleting file',
+	  'sleep' => 5,
+	},
+
 	# Cleanup the backup domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
@@ -5536,6 +5555,25 @@ $bbbackup_tests = [
 		      [ 'domain', $test_subdomain ],
 		      [ 'all-features' ],
 		      [ 'source', $bb_backup_prefix."/subdir" ] ],
+	},
+
+	# Backup to Backblaze subdirectory using a date-based filename
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'strftime' ],
+		      [ 'dest', $bb_backup_prefix."/subdir-%d-%M-%Y" ] ],
+	},
+
+	# Purge backups from Backblaze
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'dest', $bb_backup_prefix."/subdir-%d-%M-%Y" ],
+		      [ 'strftime' ],
+		      [ 'purge', '0.00001' ] ],
+	  'grep' => 'Deleting directory',
+	  'sleep' => 5,
 	},
 
 	# Cleanup the backup domain
