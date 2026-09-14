@@ -5973,6 +5973,9 @@ foreach my $l (@$lref) {
 		push(@list_public_dns_suffixes_cache, $l);
 		}
 	}
+@list_public_dns_suffixes_cache =
+	sort { length($b) <=> length($a) }
+	     @list_public_dns_suffixes_cache;
 return @list_public_dns_suffixes_cache;
 }
 
@@ -5982,8 +5985,7 @@ return @list_public_dns_suffixes_cache;
 sub under_public_dns_suffix
 {
 my ($dname) = @_;
-foreach my $sfx (sort { length($b) <=> length($a) }
-		      &list_public_dns_suffixes()) {
+foreach my $sfx (&list_public_dns_suffixes()) {
 	if ($sfx =~ /^\*\.(\S+)$/) {
 		# Any sub-domain is a valid suffix
 		my $ssfx = $1;
