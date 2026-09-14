@@ -5948,13 +5948,16 @@ return $err if ($err);
 return $setup_err;
 }
 
-# list_public_dns_suffixes()
-# Returns a full list of known DNS public suffixes
+# list_public_dns_suffixes([icann-only])
+# Returns the known public suffix rules. If icann-only is set, rules from the
+# private section are excluded.
 sub list_public_dns_suffixes
 {
-if (@list_public_dns_suffixes_cache) {
+my ($icann_only) = @_;
+if ($list_public_dns_suffixes_loaded) {
 	# Already in RAM
-	return @list_public_dns_suffixes_cache;
+	return $icann_only ? @list_icann_dns_suffixes_cache
+			   : @list_public_dns_suffixes_cache;
 	}
 my @st = stat($public_dns_suffix_cache);
 if (!@st || time() - $st[9] > 7*24*60*60) {
@@ -5967,40 +5970,165 @@ if (!@st || time() - $st[9] > 7*24*60*60) {
 my $f = $public_dns_suffix_cache;
 $f = $public_dns_suffix_file if (!-r $f);
 my $lref = &read_file_lines($f, 1);
+my $private = 0;
 foreach my $l (@$lref) {
+	if ($l =~ /^\/\/\s*===BEGIN PRIVATE DOMAINS===/) {
+		$private = 1;
+		}
 	$l =~ s/\/\/.*$//;
 	if ($l =~ /\S/) {
 		push(@list_public_dns_suffixes_cache, $l);
+		push(@list_icann_dns_suffixes_cache, $l) if (!$private);
 		}
 	}
-@list_public_dns_suffixes_cache =
-	sort { length($b) <=> length($a) }
-	     @list_public_dns_suffixes_cache;
-return @list_public_dns_suffixes_cache;
+$list_public_dns_suffixes_loaded = 1;
+return $icann_only ? @list_icann_dns_suffixes_cache
+		   : @list_public_dns_suffixes_cache;
 }
 
-# under_public_dns_suffix(domain)
-# If a DNS domain is under a public suffix, return the prefix and suffix.
-# Otherwise, return undef.
-sub under_public_dns_suffix
+# decode_punycode_dns_label(label)
+# Decodes the Punycode payload of an xn-- DNS label. Returns undef for malformed
+# input.
+sub decode_punycode_dns_label
+{
+my ($input) = @_;
+my ($n, $pos, $bias) = (128, 0, 72);
+my @output;
+
+# Copy the basic code points before the last delimiter.
+if ($input =~ s/^(.*)-//) {
+	my $basic = $1;
+	return undef if ($basic =~ /[^\x00-\x7f]/);
+	@output = split(//, $basic);
+	}
+
+while (length($input)) {
+	my ($oldpos, $weight) = ($pos, 1);
+	for(my $k = 36; ; $k += 36) {
+		$input =~ s/^(.)// || return undef;
+		my $char = lc($1);
+		my $digit = $char ge 'a' && $char le 'z' ? ord($char)-ord('a') :
+			    $char ge '0' && $char le '9' ? ord($char)-ord('0')+26 :
+			    undef;
+		return undef if (!defined($digit));
+		$pos += $digit * $weight;
+		my $threshold = $k <= $bias ? 1 :
+				$k >= $bias + 26 ? 26 : $k - $bias;
+		last if ($digit < $threshold);
+		$weight *= 36 - $threshold;
+		}
+
+	# Adjust the decoding bias for the next non-ASCII code point.
+	my $delta = $pos - $oldpos;
+	$delta = $oldpos == 0 ? int($delta / 700) : int($delta / 2);
+	$delta += int($delta / (scalar(@output) + 1));
+	my $k = 0;
+	while ($delta > 455) {
+		$delta = int($delta / 35);
+		$k += 36;
+		}
+	$bias = $k + int(36 * $delta / ($delta + 38));
+
+	my $count = scalar(@output) + 1;
+	$n += int($pos / $count);
+	$pos %= $count;
+	return undef if ($n > 0x10ffff || $n >= 0xd800 && $n <= 0xdfff);
+	splice(@output, $pos, 0, chr($n));
+	$pos++;
+	}
+return join('', @output);
+}
+
+# public_dns_suffix_name(domain)
+# Normalizes a domain for suffix matching and decodes Punycode labels to UTF-8.
+sub public_dns_suffix_name
 {
 my ($dname) = @_;
-foreach my $sfx (&list_public_dns_suffixes()) {
-	if ($sfx =~ /^\*\.(\S+)$/) {
-		# Any sub-domain is a valid suffix
-		my $ssfx = $1;
-		if ($dname =~ /^(\S+)\.([^\.]+)\.\Q$ssfx\E$/) {
-			return ($1, $2.".".$sfx);
-			}
-		}
-	else {
-		# Regular suffix
-		if ($dname =~ /^(\S+)\.\Q$sfx\E$/) {
-			return ($1, $sfx);
-			}
+$dname = lc($dname);
+$dname =~ s/\.$//;
+utf8::encode($dname) if (utf8::is_utf8($dname));
+my @labels = split(/\./, $dname, -1);
+foreach my $label (@labels) {
+	if ($label =~ /^xn--(.+)$/) {
+		my $decoded = &decode_punycode_dns_label($1);
+		return undef if (!defined($decoded));
+		utf8::upgrade($decoded);
+		utf8::encode($decoded);
+		$label = $decoded;
 		}
 	}
-return ();
+return join('.', @labels);
+}
+
+# public_dns_suffix_rules(icann-only)
+# Builds and caches exact, wildcard and exception indexes for suffix matching.
+sub public_dns_suffix_rules
+{
+my ($icann_only) = @_;
+my $key = $icann_only ? 'icann' : 'all';
+return $public_dns_suffix_rules_cache{$key}
+	if ($public_dns_suffix_rules_cache{$key});
+my (%exact, %wildcard, %exception);
+foreach my $rule (&list_public_dns_suffixes($icann_only)) {
+	$rule = lc($rule);
+	if ($rule =~ /^!(.+)$/) {
+		$exception{$1} = 1;
+		}
+	elsif ($rule =~ /^\*\.(.+)$/) {
+		$wildcard{$1} = 1;
+		}
+	else {
+		$exact{$rule} = 1;
+		}
+	}
+return $public_dns_suffix_rules_cache{$key} = {
+	'exact' => \%exact,
+	'wildcard' => \%wildcard,
+	'exception' => \%exception,
+	};
+}
+
+# under_public_dns_suffix(domain, [icann-only])
+# Returns the prefix and matching public suffix, or an empty list if no rule
+# matches. If icann-only is set, private rules are ignored.
+sub under_public_dns_suffix
+{
+my ($dname, $icann_only) = @_;
+my $original = lc($dname);
+$original =~ s/\.$//;
+my @original_labels = split(/\./, $original, -1);
+my $match_name = &public_dns_suffix_name($original);
+return () if (!$match_name);
+my @labels = split(/\./, $match_name, -1);
+return () if (@labels < 2 || grep { !length($_) } @labels);
+my $rules = &public_dns_suffix_rules($icann_only);
+
+# Exception rules override exact and wildcard matches. Their left-most label
+# belongs to the registrable prefix rather than the public suffix.
+for(my $i = 0; $i < @labels-1; $i++) {
+	my $candidate = join('.', @labels[$i..$#labels]);
+	if ($rules->{'exception'}->{$candidate}) {
+		return (join('.', @original_labels[0..$i]),
+			join('.', @original_labels[$i+1..$#labels]));
+		}
+	}
+
+# Select the longest exact or wildcard rule.
+my $suffix_start;
+for(my $i = 0; $i < @labels; $i++) {
+	my $candidate = join('.', @labels[$i..$#labels]);
+	if ($i > 0 && $rules->{'wildcard'}->{$candidate}) {
+		$suffix_start = $i-1;
+		last;
+		}
+	if ($rules->{'exact'}->{$candidate}) {
+		$suffix_start = $i;
+		last;
+		}
+	}
+return () if (!defined($suffix_start) || !$suffix_start);
+return (join('.', @original_labels[0..$suffix_start-1]),
+	join('.', @original_labels[$suffix_start..$#labels]));
 }
 
 # lookup_dns_records(name, [type], [external])
