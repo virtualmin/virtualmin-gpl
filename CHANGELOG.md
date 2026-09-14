@@ -11,6 +11,7 @@
 * Fix cPanel, DirectAdmin and Plesk migrations creating unsupported bounce aliases on Postfix, which accepted mail for such addresses and then bounced it [#380](https://github.com/virtualmin/virtualmin-gpl/issues/380)
 * Fix missing disk usage for mail files after the 8.2.0 update
 * Fix errors during package upgrades when the MySQL or mail features are disabled
+* Fix Google Drive backup folder and file listings stopping after the first page of results, which could hide existing backups from restores and purging and create duplicate backup folders for Virtualmin Pro users
 * Change default external IP lookup endpoints
 
 #### Version 8.2.0
