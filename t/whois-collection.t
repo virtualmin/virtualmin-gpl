@@ -120,6 +120,13 @@ subtest 'Ineligible domain cache cleanup' => sub {
 		qw(whois_next whois_last whois_err whois_expiry)),
 		'old WHOIS fields are removed');
 	is($domain->{'keep'}, 1, 'unrelated domain data is preserved');
+
+	my $clean = { 'id' => 5, 'dom' => 'sub.example.com' };
+	($result, $events) = run_whois_refresh(
+		{ %$clean }, $clean, [ 'sub.example', 'com' ]);
+	ok(!$result, 'clean nested domain is not queried');
+	is_deeply($events, [ 'suffix' ],
+		'clean nested domain is skipped before locking');
 	};
 
 subtest 'Concurrent domain changes' => sub {

@@ -243,6 +243,10 @@ my $name = $listed->{'dom'};
 # be refreshed over the network.
 my ($prefix, $suffix) = &under_public_dns_suffix($name, 1);
 
+# A domain without its own WHOIS record needs no lookup or cleanup when no
+# cached WHOIS data exists. Return before locking or reading the file again.
+return 0 if ((!$suffix || $prefix =~ /\./) &&
+	     &domain_whois_state($listed) eq &domain_whois_state({}));
 &lock_domain($id);
 my $domain = &get_domain($id, undef, 1);
 if (!$domain) {
