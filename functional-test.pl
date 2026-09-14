@@ -5388,6 +5388,25 @@ $drivebackup_tests = [
 		      [ 'source', $drive_backup_prefix ] ],
 	},
 
+	# Backup to Google Drive subdirectory using a date-based filename
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'strftime' ],
+		      [ 'dest', $drive_backup_prefix."/subdir-%d-%M-%Y" ] ],
+	},
+
+	# Purge backups from Google Drive
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'dest', $drive_backup_prefix."/subdir-%d-%M-%Y" ],
+		      [ 'strftime' ],
+		      [ 'purge', '0.00001' ] ],
+	  'grep' => 'Deleting directory',
+	  'sleep' => 5,
+	},
+
 	# Cleanup the backup domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
