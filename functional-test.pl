@@ -4604,6 +4604,25 @@ $webminbackup_tests = [
 		      [ 'source', "$webmin_backup_prefix/backups" ] ],
 	},
 
+	# Backup to Webmin subdirectory using a date-based filename
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'strftime' ],
+		      [ 'dest', $webmin_backup_prefix."/subdir-%d-%M-%Y" ] ],
+	},
+
+	# Purge backups from Webmin
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'dest', $webmin_backup_prefix."/subdir-%d-%M-%Y" ],
+		      [ 'strftime' ],
+		      [ 'purge', '0.00001' ] ],
+	  'grep' => 'Deleting file',
+	  'sleep' => 5,
+	},
+
 	# Cleanup the backup domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
@@ -5029,6 +5048,25 @@ $gcsbackup_tests = [
 		      [ 'domain', $test_subdomain ],
 		      [ 'all-features' ],
 		      [ 'source', $gcs_backup_prefix."/subdir" ] ],
+	},
+
+	# Backup to GCS subdirectory using a date-based filename
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'strftime' ],
+		      [ 'dest', $gcs_backup_prefix."/subdir-%d-%M-%Y" ] ],
+	},
+
+	# Purge backups from GCS
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'dest', $gcs_backup_prefix."/subdir-%d-%M-%Y" ],
+		      [ 'strftime' ],
+		      [ 'purge', '0.00001' ] ],
+	  'grep' => 'Deleting file',
+	  'sleep' => 5,
 	},
 
 	# Cleanup the backup domain
