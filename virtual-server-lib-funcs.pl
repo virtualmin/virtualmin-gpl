@@ -6479,12 +6479,16 @@ else {
 # Record webserver type
 $d->{'backup_web_type'} = &domain_has_website($d);
 $d->{'backup_ssl_type'} = &domain_has_ssl($d);
-&lock_domain($d);
-&save_domain($d);
-&unlock_domain($d);
 
-# Save the domain's data file
-&copy_source_dest($d->{'file'}, $file);
+# Keep backup metadata and temporary home-directory flags in the archive
+# without overwriting live settings changed since this domain was read
+my %backupd = %$d;
+delete($backupd{'lastread_time'});
+# Restrict the destination before writing password and other private metadata
+&open_tempfile(BACKUPDOMAIN, ">$file");
+&close_tempfile(BACKUPDOMAIN);
+&set_ownership_permissions(undef, undef, 0600, $file);
+&write_file($file, \%backupd);
 
 if (-r "$initial_users_dir/$d->{'id'}") {
 	# Initial user settings

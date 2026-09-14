@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Test::More;
 use FindBin;
+use File::Temp qw(tempdir);
 
 {
 	no warnings 'once';
@@ -284,6 +285,61 @@ subtest 'certificate upload saves its final metadata' => sub {
 	ok($disk{'ssl_pass'} eq $main::d->{'ssl_pass'}, 'passphrase is persisted');
 	is($disk{'ssl_combined'}, '/fixture/combined', 'combined certificate path is persisted');
 	is($disk{'description'}, 'newer value', 'unrelated setting remains current');
+	};
+
+# Archiving an old snapshot must not write it back to the live domain.
+subtest 'backup metadata stays in the archive' => sub {
+	no warnings qw(once redefine);
+	my $tmp = tempdir(CLEANUP => 1);
+	my %domain = ( 'id' => '123', 'dom' => 'example.test',
+		'file' => "$tmp/live", 'dir' => 1, 'lastread_time' => 10,
+		'backup_encpass' => 'obsolete', 'backup_mail_folders' => 'obsolete',
+		'backup_web_default' => 1, 'template' => 0 );
+	my %disk = ( %domain, 'dir' => 0, 'disabled' => 1, 'owner' => 'newer' );
+	my %before = %disk;
+	my ($archive, $mode);
+	my $unlocks = 0;
+	local $main::first_print = sub { };
+	local $main::second_print = sub { };
+	local $main::initial_users_dir = "$tmp/missing";
+	local $main::extra_admins_dir = "$tmp/missing";
+	local $main::extra_users_dir = "$tmp/missing";
+	local $main::script_log_directory = "$tmp/missing";
+	local $main::saved_aliases_dir = "$tmp/missing";
+	local %main::config;
+	local *main::foreign_config = sub { return (); };
+	local *main::domain_has_website = sub { return ''; };
+	local *main::domain_has_ssl = sub { return ''; };
+	local *main::lock_domain = sub { return 0; };
+	local *main::unlock_domain = sub { $unlocks++; };
+	local *main::save_domain = sub {
+		%disk = %{$_[0]};
+		delete($disk{'lastread_time'});
+		};
+	local *main::open_tempfile = sub { };
+	local *main::close_tempfile = sub { };
+	local *main::set_ownership_permissions = sub { $mode = $_[2]; };
+	local *main::write_file = sub {
+		is($_[0], "$tmp/archive", 'snapshot is written to the archive path');
+		is($mode, 0600, 'archive is private before metadata is written');
+		$archive = { %{$_[1]} };
+		};
+	local *main::copy_source_dest = sub {
+		$archive = { %disk } if $_[0] eq $domain{'file'};
+		return 1;
+		};
+	local *main::list_templates = sub { return { 'id' => 0, 'standard' => 1 }; };
+	local *main::get_plan = sub { return undef; };
+	local *main::get_website_ssl_file = sub { return undef; };
+	ok(&main::backup_virtualmin(\%domain, "$tmp/archive"), 'metadata backup succeeds');
+	is_deeply(\%disk, \%before, 'newer live settings are untouched');
+	is($unlocks, 0, 'backup does not release a caller-owned domain lock');
+	is($archive->{'dir'}, 1, 'temporary home-directory flag is archived');
+	ok(!exists($archive->{'lastread_time'}), 'process-local read time is not archived');
+	is($domain{'lastread_time'}, 10, 'caller snapshot retains its read time');
+	foreach my $key (qw(backup_encpass backup_mail_folders backup_web_default)) {
+		ok(!exists($archive->{$key}), "archive removes obsolete $key");
+		}
 	};
 
 # Keep CGI tests bounded to the changed persistence code, without host setup.

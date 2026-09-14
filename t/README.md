@@ -87,6 +87,8 @@ On a disposable Virtualmin VM, install the candidate code and run
 It creates a temporary `.invalid` domain and checks concurrent config writes,
 login collection across disable/enable operations, nested locks, scheduled
 disabling, owner limits, feature toggles, and certificate generation and installation.
+It also checks that stale backups leave live settings untouched and restores both
+backup formats, including an alias whose backup needs a temporary home directory.
 The test uses a private login-data fixture and does not contact an ACME service.
 It removes its domain and account afterward and requires `timeout`.
 
@@ -112,7 +114,7 @@ It removes its domain and account afterward and requires `timeout`.
 | `mysql-backup-options.t` | Automatic MySQL point-in-time recovery coordinates, including binary log detection, dump client compatibility, Webmin backup API propagation, and restore-time coordinate parsing and log selection. |
 | `restore-preflight.t` | Restore preflight honors UID/GID reallocation and destination DNS settings while preserving database ownership, account-name, parent, and reseller checks. |
 | `module-config-write.t` | Locked module config updates preserve settings saved by concurrent processes. |
-| `domain-config-write.t` | Domain key and diff updates, deleted records, lock ownership, login collection, IP-update snapshots, and final certificate metadata saves. |
+| `domain-config-write.t` | Domain key and diff updates, deleted records, lock ownership, login collection, IP-update snapshots, final certificate metadata saves, and archive-only backup metadata. |
 | `domain-config-vm.t` | Concurrent domain writes and real CLI operations on an explicitly opted-in disposable Virtualmin VM. |
 | `module-config-returns.t` | Config writer call sites treat the public keyed and diff helpers as void operations. |
 | `scripts-lib.t` | PHP extension package-name generation across supported package manager families. |

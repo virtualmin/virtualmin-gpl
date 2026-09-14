@@ -30,6 +30,7 @@ die 'Install the candidate domain config helpers first'
 	unless defined(&virtual_server::save_domain_keys);
 die 'Requires timeout' unless has_command('timeout');
 local $main::error_must_die = 1;
+local $virtual_server::gconfig{'error_stack'} = 1;
 virtual_server::set_all_null_print();
 
 # Keep fixture credentials and login data on the VM, in a private directory.
@@ -100,7 +101,8 @@ is(test_lock("$virtual_server::domains_dir/$id"), $$, 'full save retains the cal
 virtual_server::unlock_domain($id);
 ok(!test_lock("$virtual_server::domains_dir/$id"), 'caller releases the domain lock');
 
-# Two independent processes update different keys through the real lock code.
+# Fork after releasing the fixture lock; Webmin's lock table is process-local.
+# Two independent processes then update different keys through the real lock code.
 my $child = fork();
 die "fork: $!" unless defined($child);
 if (!$child) {
@@ -140,6 +142,24 @@ foreach my $key (@disabled_keys) {
 	ok(defined($after->{$key}) && $after->{$key} eq $disabled->{$key},
 		"collector preserves $key");
 	}
+
+# A backup snapshot may predate both the CLI change and login collection.
+my $backup_file = "$tmp/stale-domain-backup";
+my %before_backup = %{disk()};
+ok(virtual_server::backup_virtualmin({ %$stale }, $backup_file),
+	'stale domain snapshot can be archived');
+my $after_backup = disk();
+ok(!grep({ !exists($after_backup->{$_}) ||
+	$after_backup->{$_} ne $before_backup{$_} } keys %before_backup),
+	'backup leaves every current live field unchanged');
+is(scalar(keys %$after_backup), scalar(keys %before_backup),
+	'backup does not add metadata to the live domain');
+my %archived;
+read_file($backup_file, \%archived) or die 'Cannot read archived snapshot';
+is($archived{'dir'}, $stale->{'dir'}, 'archive retains the snapshot home flag');
+ok(exists($archived{'backup_web_type'}), 'archive includes restore metadata');
+is((stat($backup_file))[2] & 0777, 0600, 'archived domain metadata is private');
+
 my $mtime = (stat("$virtual_server::domains_dir/$id"))[9];
 {
 	no warnings 'redefine';
@@ -208,12 +228,77 @@ is(disk()->{'owner'}, 'Newer owner description', 'CLI writers retain unrelated d
 cli('validate-domains', '--domain', $name, '--all-features');
 pass('fixture features validate after disable, enable, and certificate changes');
 
+# Exercise both archive layouts and the temporary home needed by aliases.
+backup_roundtrips();
+
 # A record deleted after reading must not be resurrected by a background writer.
 $stale = virtual_server::get_domain($id, undef, 1);
 cli('delete-domain', '--domain', $name);
 virtual_server::save_domain_keys($stale, { 'last_login_timestamp' => time() });
 ok(!-e "$virtual_server::domains_dir/$id", 'keyed update does not recreate a deleted domain');
 ok(!test_lock("$virtual_server::domains_dir/$id"), 'deleted-domain update releases its lock');
+}
+
+# Restore real files and settings, then cover an alias that has no home to archive.
+sub backup_roundtrips
+{
+my $d = domain();
+my $payload = "$d->{'home'}/domain-config-backup-fixture";
+foreach my $homeformat (0, 1) {
+	my $destination = "$tmp/backup-$homeformat";
+	my @format = $homeformat ? ('--newformat') : ();
+	$destination .= '.tar.gz' unless $homeformat;
+	mkdir($destination, 0700) or die $! if $homeformat;
+	write_file_contents($payload, "original backup payload\n");
+	cli('backup-domain', '--domain', $name, '--all-features',
+		'--dest', $destination, @format, '--compression', 'gzip');
+	my $archive = $homeformat ? "$destination/$name.tar.gz" : $destination;
+	ok(-s $archive, "backup format $homeformat produces an archive");
+	write_file_contents($payload, "changed after backup\n");
+	cli('restore-domain', '--domain', $name, '--all-features', '--source', $archive);
+	is(read_file_contents($payload), "original backup payload\n",
+		"backup format $homeformat restores home contents");
+	is(disk()->{'owner'}, 'Newer owner description',
+		"backup format $homeformat restores domain metadata");
+	cli('validate-domains', '--domain', $name, '--all-features');
+	pass("backup format $homeformat restores valid features");
+	}
+
+# Home-format backups must archive dir=1 while cleaning up the temporary home.
+my $alias_name = "alias-$name";
+cli('create-domain', '--domain', $alias_name, '--alias', $name,
+	'--dns', '--no-ip6', '--no-email', '--no-slaves', '--no-secondaries',
+	'--letsencrypt-never');
+my $alias = domain($alias_name)
+	or die 'Alias fixture was not created';
+ok(!$alias->{'dir'} && !-d $alias->{'home'}, 'alias starts without a home directory');
+my $destination = "$tmp/alias-backup";
+mkdir($destination, 0700) or die $!;
+cli('backup-domain', '--domain', $alias_name, '--all-features',
+	'--dest', $destination, '--newformat', '--compression', 'gzip');
+my $archive = "$destination/$alias_name.tar.gz";
+ok(-s $archive, 'alias backup produces a home-format archive');
+$alias = virtual_server::get_domain($alias->{'id'}, undef, 1);
+ok(!$alias->{'dir'} && !-d $alias->{'home'}, 'alias backup removes its temporary home');
+
+# An existing home is intentionally enabled and must survive backup cleanup.
+mkdir($alias->{'home'}, 0755) or die $!;
+set_ownership_permissions($alias->{'uid'}, $alias->{'gid'}, 0755, $alias->{'home'});
+my $existing_destination = "$tmp/alias-existing-home";
+mkdir($existing_destination, 0700) or die $!;
+cli('backup-domain', '--domain', $alias_name, '--all-features',
+	'--dest', $existing_destination, '--newformat', '--compression', 'gzip');
+$alias = virtual_server::get_domain($alias->{'id'}, undef, 1);
+ok($alias->{'dir'} && -d $alias->{'home'}, 'backup preserves and enables an existing home');
+cli('delete-domain', '--domain', $alias_name);
+cli('restore-domain', '--domain', $alias_name, '--all-features', '--source', $archive);
+$alias = domain($alias_name)
+	or die 'Alias fixture was not restored';
+is($alias->{'parent'}, $id, 'restored alias retains its parent');
+ok($alias->{'dir'} && -d $alias->{'home'}, 'restore uses the archived temporary home flag');
+cli('validate-domains', '--domain', $alias_name, '--all-features');
+pass('restored alias features validate');
+cli('delete-domain', '--domain', $alias_name);
 }
 
 # Bound child commands and keep all credentials out of arguments and diagnostics.
@@ -242,12 +327,14 @@ return \%d;
 
 sub domain
 {
+my ($lookup_name) = @_;
+$lookup_name ||= $name;
 virtual_server::flush_virtualmin_caches();
 foreach my $file (values %virtual_server::get_domain_by_maps) {
 	delete($main::read_file_cache{$file});
 	delete($main::read_file_missing{$file});
 	}
-return virtual_server::get_domain_by('dom', $name);
+return virtual_server::get_domain_by('dom', $lookup_name);
 }
 
 # Remove the domain and its service, Unix, and Webmin state even after failures.

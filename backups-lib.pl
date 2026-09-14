@@ -894,7 +894,7 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 		}
 	elsif ($homefmt && !$d->{'dir'} && -d $d->{'home'}) {
 		# Home directory actually exists, so enable it on the domain
-		$d->{'dir'} = 1;
+		&save_domain_keys($d, { 'dir' => 1 });
 		}
 
 	# Turn off quotas for the domain so that writes as the domain owner
