@@ -218,6 +218,10 @@ foreach my $d (@doms_all) {
 my $now = time();
 foreach my $d (@doms_all) {
 	next if ($d->{'whois_next'} && $now < $d->{'whois_next'});
+	my ($pfx, $sfx) = &under_public_dns_suffix($d->{'dom'});
+	next if (!$sfx);        # Not an internet domain
+	next if ($pfx =~ /\./); # Domains that are not directly under a public suffix
+				# cannot have whois expiry 
 
 	# If update called manually from the dashboard using refresh
 	# button return unless status collection is disabled, and if
