@@ -3347,11 +3347,12 @@ foreach my $full ("www.".$d->{'dom'},
 		}
 	next if ($found);
 
-	# Is there a DNS entry for this hostname?
+	# Avoid resolving hostnames already found in the domain's DNS records.
 	if ($d->{'dns'}) {
 		my ($r) = grep { $_->{'name'} eq $full."." } @recs;
 		if ($r) {
 			push(@rv, $full);
+			next;
 			}
 		}
 	if (&to_ipaddress($full)) {
