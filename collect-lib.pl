@@ -218,28 +218,100 @@ foreach my $d (@doms_all) {
 my $now = time();
 foreach my $d (@doms_all) {
 	next if ($d->{'whois_next'} && $now < $d->{'whois_next'});
-	my ($pfx, $sfx) = &under_public_dns_suffix($d->{'dom'});
-	next if (!$sfx);        # Not an internet domain
-	next if ($pfx =~ /\./); # Domains that are not directly under a public suffix
-				# cannot have whois expiry
 
 	# If update called manually from the dashboard using refresh
 	# button return unless status collection is disabled, and if
 	# disabled allow updating records on manual run to prevent
 	# leaving stale records
 	next if ($manual && $config{'collect_interval'} ne 'none');
-	&lock_domain($d);
-	$d = &get_domain($d->{'id'}, undef, 1);
-	my ($exp, $err) = &get_whois_expiry($d);
-	$d->{'whois_next'} = $now + 7*24*60*60 + int(rand(24*60*60));
-	$d->{'whois_last'} = $now;
-	$d->{'whois_err'} = $err;
-	$d->{'whois_expiry'} = $exp;
-	&save_domain($d);
-	&unlock_domain($d);
+	&collect_domain_whois($d, $now);
 	}
 
 return $info;
+}
+
+# collect_domain_whois(&domain, now)
+# Refreshes WHOIS data for a registrable domain without holding its lock during
+# the network lookup. Returns true if a lookup was attempted.
+sub collect_domain_whois
+{
+my ($listed, $now) = @_;
+my $id = $listed->{'id'};
+my $name = $listed->{'dom'};
+
+# Resolve the suffix before locking because an expired public suffix cache may
+# be refreshed over the network.
+my ($prefix, $suffix) = &under_public_dns_suffix($name, 1);
+
+# A domain without its own WHOIS record needs no lookup or cleanup when no
+# cached WHOIS data exists. Return before locking or reading the file again.
+return 0 if ((!$suffix || $prefix =~ /\./) &&
+	     &domain_whois_state($listed) eq &domain_whois_state({}));
+&lock_domain($id);
+my $domain = &get_domain($id, undef, 1);
+if (!$domain) {
+	&unlock_domain($id);
+	return 0;
+	}
+if ($domain->{'whois_next'} && $now < $domain->{'whois_next'}) {
+	&unlock_domain($id);
+	return 0;
+	}
+if ($domain->{'dom'} ne $name) {
+	$name = $domain->{'dom'};
+	($prefix, $suffix) = &under_public_dns_suffix($name, 1);
+	}
+
+# Only domains directly under an ICANN suffix have separate WHOIS records.
+# Remove cached WHOIS data from other domains.
+if (!$suffix || $prefix =~ /\./) {
+	my $changed = 0;
+	foreach my $key (qw(whois_next whois_last whois_err whois_expiry)) {
+		$changed++ if (exists($domain->{$key}));
+		delete($domain->{$key});
+		}
+	&save_domain($domain) if ($changed);
+	&unlock_domain($id);
+	return 0;
+	}
+
+# Save the WHOIS state before releasing the lock so a concurrent refresh is not
+# overwritten.
+my $old_state = &domain_whois_state($domain);
+&unlock_domain($id);
+
+my ($expiry, $error) = &get_whois_expiry($domain);
+
+# Lock and re-read the domain after the lookup. Save only if its name and WHOIS
+# data are unchanged.
+&lock_domain($id);
+my $current = &get_domain($id, undef, 1);
+if ($current && $current->{'dom'} eq $name) {
+	my $current_state = &domain_whois_state($current);
+	if ($current_state eq $old_state) {
+		$current->{'whois_next'} = $now + 7*24*60*60 +
+			int(rand(24*60*60));
+		$current->{'whois_last'} = $now;
+		$current->{'whois_err'} = $error;
+		$current->{'whois_expiry'} = $expiry;
+		&save_domain($current);
+		}
+	}
+&unlock_domain($id);
+return 1;
+}
+
+# domain_whois_state(&domain)
+# Returns a stable representation of the WHOIS fields for detecting concurrent
+# changes.
+sub domain_whois_state
+{
+my ($domain) = @_;
+return join("\0", map {
+	!exists($domain->{$_}) ? 'm' :
+	!defined($domain->{$_}) ? 'u' :
+	'v'.length($domain->{$_}).':'.$domain->{$_}
+	} qw(whois_next whois_last whois_err whois_expiry));
 }
 
 # get_collected_info()
