@@ -1,4 +1,5 @@
 #### Version 8.2.1
+* Fix a race that lets background collection and backups overwrite newer virtual server settings [#1277](https://github.com/virtualmin/virtualmin-gpl/issues/1277)
 * Add Matomo web analytics installer to Virtualmin GPL, including detection of existing installs and display of the tracking code to embed in website pages
 * Fix missing ProFTPD SFTP and TLS log rotation while preserving existing rotation rules
 * Fix cloning Apache virtual servers overwriting newly issued SSL certificates with the source server's certificate [#1280](https://github.com/virtualmin/virtualmin-gpl/issues/1280)

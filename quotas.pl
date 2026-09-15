@@ -17,63 +17,66 @@ $homesize = &quota_bsize("home");
 $now = time();
 &read_file($user_quota_warnings_file, \%userwarnings);
 foreach $d (&list_domains()) {
-	next if ($d->{'alias'});
-	next if ($d->{'disabled'});
+	&with_locked_domain($d, sub {
+		my ($d) = @_;
+		return if ($d->{'alias'});
+		return if ($d->{'disabled'});
 
-	if ($d->{'quota'} && !$d->{'parent'}) {
-		# Get usage for this server and all sub-servers
-		($homequota, $dbquota) = &get_domain_quota($d, 1);
-		$usage = $homequota*$homesize +
-			 $dbquota;
+		if ($d->{'quota'} && !$d->{'parent'}) {
+			# Get usage for this server and all sub-servers
+			($homequota, $dbquota) = &get_domain_quota($d, 1);
+			$usage = $homequota*$homesize +
+				 $dbquota;
 
-		# Compare to server's limit
-		$msg = &check_quota_threshold($d, $usage,
-					      $d->{'quota'}*$homesize);
+			# Compare to server's limit
+			$msg = &check_quota_threshold($d, $usage,
+						      $d->{'quota'}*$homesize);
 
-		# Don't send if we have already sent one for this limit within
-		# the configured minimum period
-		if ($msg && !&check_quota_interval($msg,
-				split(/\s+/, $d->{'quota_notify'}))) {
-			$msg = undef;
+			# Don't send if we have already sent one for this limit within
+			# the configured minimum period
+			if ($msg && !&check_quota_interval($msg,
+					split(/\s+/, $d->{'quota_notify'}))) {
+				$msg = undef;
+				}
+
+			# Record that we have notified this domain
+			if ($msg) {
+				$d->{'quota_notify'} = $now." ".$msg->[4];
+				&save_domain($d);
+				push(@msgs, $msg);
+				}
 			}
 
-		# Record that we have notified this domain
-		if ($msg) {
-			$d->{'quota_notify'} = $now." ".$msg->[4];
-			&save_domain($d);
-			push(@msgs, $msg);
+		# Check all users in the domain, if enabled
+		@users = ( );
+		if ($config{'quota_mailbox'}) {
+			@users = &list_domain_users($d, 1, 0, 0, 1);
 			}
-		}
-	
-	# Check all users in the domain, if enabled
-	@users = ( );
-	if ($config{'quota_mailbox'}) {
-		@users = &list_domain_users($d, 1, 0, 0, 1);
-		}
-	foreach $u (@users) {
-		next if ($u->{'webowner'});
-		my $msg;
+		foreach $u (@users) {
+			next if ($u->{'webowner'});
+			my $msg;
 
-		# Check if over home quota
-		if ($u->{'quota'}) {
-			$usage = $u->{'uquota'}*$homesize;
-			$msg = &check_quota_threshold(
-				$d, $usage, $u->{'quota'}*$homesize, $u);
-			}
+			# Check if over home quota
+			if ($u->{'quota'}) {
+				$usage = $u->{'uquota'}*$homesize;
+				$msg = &check_quota_threshold(
+					$d, $usage, $u->{'quota'}*$homesize, $u);
+				}
 
-		# Don't send if we have already sent one for this limit within
-		# the configured minimum period
-		if ($msg && !&check_quota_interval($msg,
-				split(/\s+/, $userwarnings{$u->{'user'}}))) {
-			$msg = undef;
-			}
+			# Don't send if we have already sent one for this limit within
+			# the configured minimum period
+			if ($msg && !&check_quota_interval($msg,
+					split(/\s+/, $userwarnings{$u->{'user'}}))) {
+				$msg = undef;
+				}
 
-		if ($msg) {
-			# Record that we have notified this user
-			$userwarnings{$u->{'user'}} = $now." ".$msg->[4];
-			push(@umsgs, $msg);
+			if ($msg) {
+				# Record that we have notified this user
+				$userwarnings{$u->{'user'}} = $now." ".$msg->[4];
+				push(@umsgs, $msg);
+				}
 			}
-		}
+	});
 	}
 &write_file($user_quota_warnings_file, \%userwarnings);
 
