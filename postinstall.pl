@@ -330,33 +330,39 @@ foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 # Cache current PHP modes, versions and error log files
 foreach my $d (grep { &domain_has_website($_) && !$_->{'alias'} }
 		    &list_domains()) {
-	&lock_domain($d);
-	if (!$d->{'php_mode'}) {
-		$d->{'php_mode'} = &get_domain_php_mode($d);
-		&save_domain($d);
-		}
-	if (!defined($d->{'php_error_log'})) {
-		$d->{'php_error_log'} = &get_domain_php_error_log($d) || "";
-		&save_domain($d);
-		}
-	if (!defined($d->{'php_version'}) &&
-	    ($d->{'php_mode'} eq 'cgi' || $d->{'php_mode'} eq 'fcgid')) {
-		my @dirs = &list_domain_php_directories($d);
-		if (@dirs) {
-			$d->{'php_version'} = $dirs[0]->{'version'};
+	# Preserve edits made since the domain list was loaded
+	&with_locked_domain($d, sub {
+		my ($d) = @_;
+		return if (!&domain_has_website($d) || $d->{'alias'});
+		if (!$d->{'php_mode'}) {
+			$d->{'php_mode'} = &get_domain_php_mode($d);
+			&save_domain($d);
 			}
-		&save_domain($d);
-		}
-	&unlock_domain($d);
+		if (!defined($d->{'php_error_log'})) {
+			$d->{'php_error_log'} = &get_domain_php_error_log($d) || "";
+			&save_domain($d);
+			}
+		if (!defined($d->{'php_version'}) &&
+		    ($d->{'php_mode'} eq 'cgi' || $d->{'php_mode'} eq 'fcgid')) {
+			my @dirs = &list_domain_php_directories($d);
+			if (@dirs) {
+				$d->{'php_version'} = $dirs[0]->{'version'};
+				}
+			&save_domain($d);
+			}
+		});
 	}
 foreach my $d (grep { $_->{'alias'} } &list_domains()) {
-	&lock_domain($d);
-	my $dd = &get_domain($d->{'alias'});
-	if ($dd && $dd->{'php_mode'}) {
-		$d->{'php_mode'} = $dd->{'php_mode'};
-		&save_domain($d);
-		}
-	&unlock_domain($d);
+	# Recheck the alias before copying its target's PHP mode
+	&with_locked_domain($d, sub {
+		my ($d) = @_;
+		return if (!$d->{'alias'});
+		my $dd = &get_domain($d->{'alias'});
+		if ($dd && $dd->{'php_mode'}) {
+			$d->{'php_mode'} = $dd->{'php_mode'};
+			&save_domain($d);
+			}
+		});
 	}
 
 # Enable checking for latest scripts
@@ -537,10 +543,11 @@ if (!&check_dkim()) {
 		foreach my $e (@{$dkim->{'exclude'}}) {
 			my $d = &get_domain_by("dom", $e);
 			if ($d) {
-				&lock_domain($d);
-				$d->{'dkim_enabled'} = 0;
-				&save_domain($d);
-				&unlock_domain($d);
+				&with_locked_domain($d, sub {
+					my ($d) = @_;
+					$d->{'dkim_enabled'} = 0;
+					&save_domain($d);
+					});
 				}
 			}
 		delete($config{'dkim_exclude'});
@@ -551,10 +558,12 @@ if (!&check_dkim()) {
 		foreach my $e (@{$dkim->{'extra'}}) {
 			my $d = &get_domain_by("dom", $e);
 			if ($d && $d->{'dns'}) {
-				&lock_domain($d);
-				$d->{'dkim_enabled'} = 1;
-				&save_domain($d);
-				&unlock_domain($d);
+				&with_locked_domain($d, sub {
+					my ($d) = @_;
+					return if (!$d->{'dns'});
+					$d->{'dkim_enabled'} = 1;
+					&save_domain($d);
+					});
 				}
 			else {
 				push(@newextra, $e);
