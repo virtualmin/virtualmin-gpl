@@ -12997,9 +12997,23 @@ $clone_tests = [
 	  'grep' => 'Test clone page',
 	},
 
-	# Test HTTP get of old page
+	# Test HTTP get to original domain
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test source page',
+	},
+
+	# Test new domain SSL cert
+	{ 'command' => 'openssl s_client -host '.$test_clone_domain.
+		       ' -servername '.$test_clone_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Clone of Test domain', 'CN=(\\*\\.)?'.$test_clone_domain ],
+	},
+
+	# Test old domain SSL cert
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
 	# Check FTP login
