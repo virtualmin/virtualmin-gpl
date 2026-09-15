@@ -7142,6 +7142,15 @@ if ($mail_system == 0) {
 			  $file."_maincf");
 	&copy_source_dest($postfix::config{'postfix_master'},
 			  $file."_mastercf");
+	# Save transport map sources as well as their main.cf references.
+	my $mapnum = 0;
+	foreach my $map (&postfix::get_maps_types_files(
+			 &postfix::get_real_value("transport_maps"))) {
+		next if (!&postfix::file_map_type($map->[0]));
+		my ($ok, $err) = &copy_source_dest(
+			$map->[1], $file."_transport_".$mapnum++, 1);
+		&error(&text('backup_transportcopy', $map->[1], $err)) if (!$ok);
+		}
 	foreach my $o ("smtpd_tls_cert_file", "smtpd_tls_key_file",
 		       "smtpd_tls_CAfile") {
 		my $v = &postfix::get_current_value($o);
@@ -7389,6 +7398,25 @@ if ($bms eq $mail_system) {
 		foreach my $dir (@local_dirs) {
 			&postfix::set_current_value($dir, $old_map{$dir}) if ($old_map{$dir});
 			}
+
+		# Older backups have no transport files. Restore only saved maps,
+		# and rebuild indexes from text rather than copying database files.
+		my ($mapnum, $restored_maps) = (0, 0);
+		foreach my $map (&postfix::get_maps_types_files(
+				 &postfix::get_real_value("transport_maps"))) {
+			next if (!&postfix::file_map_type($map->[0]));
+			my $saved = $file."_transport_".$mapnum++;
+			next if (!-f $saved);
+			my $mapdir = $map->[1];
+			$mapdir =~ s/[^\/]+$//;
+			&make_dir_recursive($mapdir, 0755);
+			my ($ok, $err) = &copy_source_dest($saved, $map->[1], 1);
+			&error(&text('restore_transportcopy', $map->[1], $err)) if (!$ok);
+			&unflush_file_lines($map->[1]);
+			$restored_maps++;
+			}
+		delete($postfix::maps_cache{'transport_maps'});
+		&postfix::regenerate_transport_table() if ($restored_maps);
 
 		&$second_print($text{'setup_done'});
 		}
