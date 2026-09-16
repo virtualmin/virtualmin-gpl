@@ -7548,6 +7548,7 @@ dkim_adding=Enabling DKIM signing for $1 ..
 dkim_removing=Disabling DKIM signing for $1 ..
 
 newautoconfig_title=Mail Client Configuration
+newautoconfig_return=mail client configuration
 autoconfig_ecannot=You are not allowed to edit mail client configuration
 autoconfig_header=Client autoconfiguration options
 autoconfig_desc=This page allows you to enable the automatic configuration URL $1 for all Virtual servers, which is used by mail clients like Thunderbird and Outlook. This lets users configure the IMAP and SMTP settings in their mail clients based on only an email address.

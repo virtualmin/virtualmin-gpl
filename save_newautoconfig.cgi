@@ -32,7 +32,9 @@ if (@doms) {
 		if ($err) {
 			&$second_print(&text('autoconfig_failed2', $err));
 			&run_post_actions();
-			&ui_print_footer("", $text{'index_return'});
+			&ui_print_footer("edit_newautoconfig.cgi",
+				$text{'newautoconfig_return'},
+				"", $text{'index_return'});
 			return;
 			}
 		}
@@ -50,4 +52,5 @@ $config{'mail_autoconfig'} = $in{'autoconfig'};
 &run_post_actions();
 &webmin_log("autoconfig", undef, undef, { 'enabled' => $in{'autoconfig'} });
 
-&ui_print_footer("", $text{'index_return'});
+&ui_print_footer("edit_newautoconfig.cgi", $text{'newautoconfig_return'},
+		 "", $text{'index_return'});
