@@ -6094,6 +6094,83 @@ $purge_tests = [
 	},
 	];
 
+# Tests for enabling mail autoconfiguration when CGI execution is disabled
+my %mailautoconfig_domain = %test_domain;
+$mailautoconfig_domain{$web} = 1;
+my @mailautoconfig_cgimodes = &has_cgi_support(\%mailautoconfig_domain);
+my ($mailautoconfig_cgimode) =
+	grep { &indexof($_, @mailautoconfig_cgimodes) >= 0 }
+		('suexec', 'fcgiwrap');
+if ($mailautoconfig_cgimode) {
+	my $passfile = &transname("mailautoconfig-password");
+	my $qpassfile = &quote_path($passfile);
+	# Show only the CGI mode to keep passwords out of failure output
+	my $cgimode_command = 'list-domains.pl --multiline --domain '.
+		&quote_path($test_domain).' | grep '.
+		&quote_path('CGI script execution mode:');
+	$mailautoconfig_tests = [
+		# Write a random test password to a private file
+		{ 'command' => 'umask 077; openssl rand -hex 32 > '.$qpassfile,
+		},
+		# Create a domain with mail and a website
+		{ 'command' => 'create-domain.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'desc', 'Test mail autoconfiguration' ],
+			      [ 'passfile', $passfile ],
+			      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+			      [ $web ], [ 'no-ip6' ], [ 'letsencrypt-never' ],
+			      @create_args, ],
+		},
+
+		# Turn off PHP and CGI execution before enabling autoconfiguration
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'mode', 'none' ] ],
+		},
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'disable-cgi' ] ],
+		},
+		{ 'command' => $cgimode_command,
+		  'grep' => 'CGI script execution mode: disabled',
+		},
+
+		# Enabling autoconfiguration must select a supported CGI mode
+		{ 'command' => 'modify-mail.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'autoconfig' ] ],
+		},
+		{ 'command' => $cgimode_command,
+		  'grep' => 'CGI script execution mode: '.
+			    $mailautoconfig_cgimode,
+		},
+
+		# Check that the autoconfiguration URL returns clientConfig XML
+		{ 'command' => $curl_command.'--location --resolve autoconfig.'.
+			       $test_domain.':80:'.$test_ip_address.' '.
+			       'http://autoconfig.'.
+			       $test_domain.'/mail/config-v1.1.xml?emailaddress='.
+			       'foo@'.$test_domain,
+		  'grep' => 'clientConfig',
+		  'sleep' => 5,
+		},
+
+		# Remove the test domain and password file
+		{ 'command' => 'delete-domain.pl',
+		  'args' => [ [ 'domain', $test_domain ] ],
+		  'cleanup' => 1,
+		},
+		{ 'command' => 'rm -f '.$qpassfile,
+		  'cleanup' => 1,
+		},
+		];
+	}
+else {
+	$mailautoconfig_tests = [
+		{ 'command' => 'echo Mail autoconfiguration test skipped: suEXEC and FCGIwrap are unavailable' },
+		];
+	}
+
 $mail_tests = [
 	# Create a domain to get spam
 	{ 'command' => 'create-domain.pl',
@@ -15492,6 +15569,7 @@ $alltests = { '_config' => $_config_tests,
 	      'purge' => $purge_tests,
 	      'differential' => $differential_tests,
 	      'enc_differential' => $enc_differential_tests,
+	      'mailautoconfig' => $mailautoconfig_tests,
               'mail' => $mail_tests,
               'atmail' => $atmail_tests,
               'aliasmail' => $aliasmail_tests,
