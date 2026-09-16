@@ -10019,7 +10019,7 @@ $web_tests = [
 	) : ( ),
 
 	# Test in suexec mode
-	&supports_fcgiwrap() ? (
+	&supports_suexec() ? (
 		{ 'command' => 'modify-web.pl',
 		  'args' => [ [ 'domain' => $test_domain ],
 			      [ 'enable-suexec' ] ],
