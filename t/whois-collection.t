@@ -94,7 +94,8 @@ subtest 'WHOIS lock scope' => sub {
 		{ %$domain }, $domain, [ 'example', 'com' ]);
 	ok($result, 'eligible domain is queried');
 	is_deeply($events,
-		[ qw(suffix lock read unlock whois lock read save unlock) ],
+		[ 'suffix', 'lock', 'read', 'unlock', 'whois', 'lock',
+		  'read', 'save', 'unlock' ],
 		'domain lock covers only reads and writes');
 	is($domain->{'whois_expiry'}, 123456, 'expiry result is saved');
 	is($domain->{'whois_last'}, 1000, 'lookup time is saved');
@@ -114,10 +115,10 @@ subtest 'Ineligible domain cache cleanup' => sub {
 	my ($result, $events) = run_whois_refresh(
 		{ %$domain }, $domain, [ 'sub.example', 'com' ]);
 	ok(!$result, 'nested domain is not queried');
-	is_deeply($events, [ qw(suffix lock read save unlock) ],
+	is_deeply($events, [ 'suffix', 'lock', 'read', 'save', 'unlock' ],
 		'stale cache is removed under a short lock');
 	ok(!grep({ exists($domain->{$_}) }
-		qw(whois_next whois_last whois_err whois_expiry)),
+		('whois_next', 'whois_last', 'whois_err', 'whois_expiry')),
 		'old WHOIS fields are removed');
 	is($domain->{'keep'}, 1, 'unrelated domain data is preserved');
 

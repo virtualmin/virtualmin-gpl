@@ -246,7 +246,9 @@ my ($prefix, $suffix) = &under_public_dns_suffix($name, 1);
 # A domain without its own WHOIS record needs no lookup or cleanup when no
 # cached WHOIS data exists. Return before locking or reading the file again.
 return 0 if ((!$suffix || $prefix =~ /\./) &&
-	     &domain_whois_state($listed) eq &domain_whois_state({}));
+	     !grep { exists($listed->{$_}) }
+		   ('whois_next', 'whois_last', 'whois_err',
+		    'whois_expiry'));
 &lock_domain($id);
 my $domain = &get_domain($id, undef, 1);
 if (!$domain) {
@@ -266,7 +268,8 @@ if ($domain->{'dom'} ne $name) {
 # Remove cached WHOIS data from other domains.
 if (!$suffix || $prefix =~ /\./) {
 	my $changed = 0;
-	foreach my $key (qw(whois_next whois_last whois_err whois_expiry)) {
+	foreach my $key ('whois_next', 'whois_last', 'whois_err',
+			'whois_expiry') {
 		$changed++ if (exists($domain->{$key}));
 		delete($domain->{$key});
 		}
@@ -275,43 +278,27 @@ if (!$suffix || $prefix =~ /\./) {
 	return 0;
 	}
 
-# Save the WHOIS state before releasing the lock so a concurrent refresh is not
-# overwritten.
-my $old_state = &domain_whois_state($domain);
+# Save the last lookup time so a concurrent refresh is not overwritten.
+my $old_whois_last = $domain->{'whois_last'} || 0;
 &unlock_domain($id);
 
 my ($expiry, $error) = &get_whois_expiry($domain);
 
-# Lock and re-read the domain after the lookup. Save only if its name and WHOIS
-# data are unchanged.
+# Lock and re-read the domain after the lookup. Save only if its name and last
+# lookup time are unchanged.
 &lock_domain($id);
 my $current = &get_domain($id, undef, 1);
-if ($current && $current->{'dom'} eq $name) {
-	my $current_state = &domain_whois_state($current);
-	if ($current_state eq $old_state) {
-		$current->{'whois_next'} = $now + 7*24*60*60 +
-			int(rand(24*60*60));
-		$current->{'whois_last'} = $now;
-		$current->{'whois_err'} = $error;
-		$current->{'whois_expiry'} = $expiry;
-		&save_domain($current);
-		}
+if ($current && $current->{'dom'} eq $name &&
+    ($current->{'whois_last'} || 0) == $old_whois_last) {
+	$current->{'whois_next'} = $now + 7*24*60*60 +
+		int(rand(24*60*60));
+	$current->{'whois_last'} = $now;
+	$current->{'whois_err'} = $error;
+	$current->{'whois_expiry'} = $expiry;
+	&save_domain($current);
 	}
 &unlock_domain($id);
 return 1;
-}
-
-# domain_whois_state(&domain)
-# Returns a stable representation of the WHOIS fields for detecting concurrent
-# changes.
-sub domain_whois_state
-{
-my ($domain) = @_;
-return join("\0", map {
-	!exists($domain->{$_}) ? 'm' :
-	!defined($domain->{$_}) ? 'u' :
-	'v'.length($domain->{$_}).':'.$domain->{$_}
-	} qw(whois_next whois_last whois_err whois_expiry));
 }
 
 # get_collected_info()
