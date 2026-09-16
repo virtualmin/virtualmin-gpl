@@ -10506,6 +10506,52 @@ else {
 		];
 	}
 
+# Tests for replacing unsupported CGI modes in standard templates
+my @template_cgimodes = &has_cgi_support();
+if (@template_cgimodes) {
+	my ($unsupported_cgimode) =
+		grep { &indexof($_, @template_cgimodes) < 0 }
+			('suexec', 'fcgiwrap');
+	$unsupported_cgimode ||= 'unsupported-functional-test-mode';
+	my $template_cgimode = $template_cgimodes[0];
+	my $config_backup = &transname("functional-test-virtualmin-config");
+	my $q_config = &quote_path($module_config_file);
+	my $q_config_backup = &quote_path($config_backup);
+	$cgitemplate_tests = [
+		# Preserve the module configuration before changing the default
+		{ 'command' => 'cp -p '.$q_config.' '.$q_config_backup,
+		},
+
+		# Store a CGI mode that the active web stack cannot use
+		{ 'command' => 'modify-template.pl',
+		  'args' => [ [ 'id', 0 ],
+			      [ 'setting', 'web_cgimode' ],
+			      [ 'value', $unsupported_cgimode ] ],
+		},
+		{ 'command' => 'grep "^cgimode='.
+			       $unsupported_cgimode.'$" '.$q_config,
+		},
+
+		# Reading the standard template must return the supported fallback
+		{ 'command' => 'get-template.pl',
+		  'args' => [ [ 'id', 0 ],
+			      [ 'setting', 'web_cgimode' ] ],
+		  'grep' => '^'.$template_cgimode.'$',
+		},
+
+		# Restore the original module configuration
+		{ 'command' => 'cp -p '.$q_config_backup.' '.$q_config.' && '.
+			       'rm -f '.$q_config_backup,
+		  'cleanup' => 1,
+		},
+		];
+	}
+else {
+	$cgitemplate_tests = [
+		{ 'command' => 'echo Standard template CGI test skipped' },
+		];
+	}
+
 # Tests for renaming a virtual server via the web UI
 $webrename_tests = [
 	# Create a domain that will get renamed
@@ -15588,6 +15634,7 @@ $alltests = { '_config' => $_config_tests,
 	      'ip6' => $ip6_tests,
 	      'noip4' => $noip4_tests,
 	      'nginxlisten' => $nginxlisten_tests,
+	      'cgitemplate' => $cgitemplate_tests,
 	      'webrename' => $webrename_tests,
 	      'rename' => $rename_tests,
 	      'bw' => $bw_tests,
