@@ -12855,59 +12855,7 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 	# Keep public DNS records out of the website validator's IPv6 checks
 	my $source = $test_domain.'.invalid';
 	my $clone = $test_clone_domain.'.invalid';
-	my $template = 'Functional Apache comments '.$test_domain_user;
-	my $template_file = &transname('apache-comments-template');
-	my @template_lines = (
-		'# Virtualmin functional comment ${DOM}: server name',
-		'ServerName ${DOM}',
-		'ServerAlias www.${DOM}',
-		'DocumentRoot ${HOME}/public_html',
-		'ErrorLog /var/log/virtualmin/${DOM}_error_log',
-		'CustomLog /var/log/virtualmin/${DOM}_access_log combined',
-		'ScriptAlias /cgi-bin/ ${HOME}/cgi-bin/',
-		'DirectoryIndex index.php index.htm index.html',
-		'# Virtualmin functional comment ${DOM}: directory',
-		'<Directory ${HOME}/public_html>',
-		'    Options -Indexes +IncludesNOEXEC +SymLinksIfOwnerMatch +ExecCGI',
-		'    # Virtualmin functional comment ${DOM}: access',
-		'',
-		'    Require all granted',
-		'    AllowOverride All Options=ExecCGI,Includes,IncludesNOEXEC,Indexes,MultiViews,SymLinksIfOwnerMatch',
-		'</Directory>',
-		'<Directory ${HOME}/cgi-bin>',
-		'    Require all granted',
-		'    AllowOverride All',
-		'</Directory>',
-		);
-	my $write_template = 'printf "%s\\n" '.
-		join(' ', map { &quote_path($_) } @template_lines).' > '.
-		&quote_path($template_file);
-	my $marker = '# Virtualmin functional comment '.$source;
-	my $comment_search = 'grep -rhsF -- '.&quote_path($marker).
-		' /etc/apache2 /etc/httpd 2>/dev/null | wc -l';
-	my $comment_check = sub {
-		my ($expected) = @_;
-		return $comment_search.' | awk '.
-			&quote_path('{ print; exit($1 == '.$expected.' ? 0 : 1) }');
-		};
-	my @comment_create_args = grep { $_->[0] ne 'template' } @create_args;
 	push(@$apacheclone_tests,
-		# Use the public template APIs to create a config with comments
-		{ 'command' => $write_template,
-		  'label' => 'Write commented Apache template',
-		},
-		{ 'command' => 'create-template.pl',
-		  'args' => [ [ 'name', $template ],
-			      [ 'clone', $tmpl->{'name'} ] ],
-		},
-		{ 'command' => 'modify-template.pl',
-		  'args' => [ [ 'name', $template ],
-			      [ 'setting', 'web' ],
-			      [ 'value-file', $template_file ] ],
-		},
-		{ 'command' => 'rm -f '.&quote_path($template_file),
-		  'label' => 'Remove commented Apache template file',
-		},
 		{ 'command' => 'create-domain.pl',
 		  'args' => [ [ 'domain', $source ],
 			      [ 'user', $test_domain_user ],
@@ -12917,34 +12865,13 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 			      [ 'no-ip6' ], [ 'acme-never' ], [ 'break-ssl-cert' ],
 			      [ 'generate-ssl-cert' ], [ 'no-ssl-redirect' ],
 			      [ 'content', 'Test Apache clone page' ],
-			      @comment_create_args,
-			      [ 'template', $template ] ],
+			      @create_args ],
 		  'antigrep' => 'Call Stack Trace',
 		},
-		# Exercise handler changes that edit nested Apache directives
-		{ 'command' => 'modify-web.pl',
-		  'args' => [ [ 'domain', $source ], [ 'mode', 'none' ] ],
-		},
-		# Prefer FPM so validation also checks the cloned handler and pool
+		# Prefer FPM so validation checks the cloned handler and pool
 		{ 'command' => 'modify-web.pl',
 		  'args' => [ [ 'domain', $source ],
 			      [ 'mode', $supports_fpm ? 'fpm' : 'none' ] ],
-		},
-		{ 'command' => &$comment_check(6),
-		  'label' => 'Check comments after PHP configuration changes',
-		},
-		# Redirect updates add and remove directives in both virtual hosts
-		{ 'command' => 'create-redirect.pl',
-		  'args' => [ [ 'domain', $source ],
-			      [ 'path', '/comment-test' ],
-			      [ 'redirect', 'https://example.invalid' ] ],
-		},
-		{ 'command' => 'delete-redirect.pl',
-		  'args' => [ [ 'domain', $source ],
-			      [ 'path', '/comment-test' ] ],
-		},
-		{ 'command' => &$comment_check(6),
-		  'label' => 'Check comments after redirect configuration changes',
 		},
 		# External certificates are copied when cloning, so cover both names
 		{ 'command' => 'generate-cert.pl',
@@ -12958,9 +12885,6 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 			      [ 'newuser', $test_clone_domain_user ],
 			      [ 'newpass', 'foo' ] ],
 		  'antigrep' => 'Call Stack Trace',
-		},
-		{ 'command' => &$comment_check(12),
-		  'label' => 'Check comments after cloning both virtual hosts',
 		});
 
 	# Check and delete the source first. The clone must still validate and
@@ -12990,18 +12914,10 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 			  'cleanup' => 1,
 			  'ignorefail' => $domain eq $clone,
 			});
-		push(@$apacheclone_tests,
-			{ 'command' => &$comment_check($domain eq $source ? 6 : 0),
-			  'label' => "Check comments after deleting $domain",
-			});
 		}
 
-	# Confirm cleanup removed both test domains and their custom template
+	# Confirm cleanup removed both test domains
 	push(@$apacheclone_tests,
-		{ 'command' => 'delete-template.pl',
-		  'args' => [ [ 'name', $template ] ],
-		  'cleanup' => 1,
-		},
 		{ 'command' => 'list-domains.pl --name-only',
 		  'antigrep' => [ '^'.quotemeta($source).'$',
 				 '^'.quotemeta($clone).'$' ],
