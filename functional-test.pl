@@ -12855,6 +12855,18 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 	# Keep public DNS records out of the website validator's IPv6 checks
 	my $source = $test_domain.'.invalid';
 	my $clone = $test_clone_domain.'.invalid';
+	my @comment_directives = (
+		[ '# Functional test server signature', 'ServerSignature Off' ],
+		[ '# Functional test file etag', 'FileETag None' ],
+		);
+	my (@comment_add_args, @comment_remove_args);
+	foreach my $directive (@comment_directives) {
+		push(@comment_add_args,
+			[ 'add-directive', $directive->[0] ],
+			[ 'add-directive', $directive->[1] ]);
+		push(@comment_remove_args,
+			[ 'remove-directive', $directive->[1] ]);
+		}
 	push(@$apacheclone_tests,
 		{ 'command' => 'create-domain.pl',
 		  'args' => [ [ 'domain', $source ],
@@ -12868,10 +12880,23 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 			      @create_args ],
 		  'antigrep' => 'Call Stack Trace',
 		},
-		# Prefer FPM so validation checks the cloned handler and pool
+		# Add comments through the public API to both HTTP and SSL hosts
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain', $source ], @comment_add_args ],
+		},
+		# Exercise handler changes that rewrite nested Apache directives
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain', $source ], [ 'mode', 'none' ] ],
+		},
+		# Prefer FPM so validation also checks the cloned handler and pool
 		{ 'command' => 'modify-web.pl',
 		  'args' => [ [ 'domain', $source ],
 			      [ 'mode', $supports_fpm ? 'fpm' : 'none' ] ],
+		},
+		{ 'command' => 'validate-domains.pl',
+		  'args' => [ [ 'domain', $source ],
+			      [ 'feature', $web ], [ 'feature', $ssl ] ],
+		  'antigrep' => 'Call Stack Trace',
 		},
 		# External certificates are copied when cloning, so cover both names
 		{ 'command' => 'generate-cert.pl',
@@ -12906,6 +12931,20 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 					       &quote_path($url),
 				  'label' => "Apache clone page over $proto for $domain",
 				  'grep' => 'Test Apache clone page',
+				});
+			}
+		if ($domain eq $clone) {
+			# Remove the custom directives before deleting the clone
+			push(@$apacheclone_tests,
+				{ 'command' => 'modify-web.pl',
+				  'args' => [ [ 'domain', $clone ],
+					      @comment_remove_args ],
+				},
+				{ 'command' => 'validate-domains.pl',
+				  'args' => [ [ 'domain', $clone ],
+					      [ 'feature', $web ],
+					      [ 'feature', $ssl ] ],
+				  'antigrep' => 'Call Stack Trace',
 				});
 			}
 		push(@$apacheclone_tests,
