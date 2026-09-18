@@ -894,6 +894,13 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 		}
 	elsif ($homefmt && !$d->{'dir'} && -d $d->{'home'}) {
 		# Home directory actually exists, so enable it on the domain
+		&with_locked_domain($d, sub {
+			my ($current) = @_;
+			return if ($current->{'home'} ne $d->{'home'} ||
+				! -d $current->{'home'});
+			$current->{'dir'} = 1;
+			&save_domain($current);
+			});
 		$d->{'dir'} = 1;
 		}
 
@@ -1473,9 +1480,14 @@ $donefeatures{"virtualmin"} = $vbs;
 
 # Remove any temporary home dirs
 foreach my $d (@cleanuphomes) {
-	&unlink_file($d->{'home'});
-	$d->{'dir'} = 0;
-	&save_domain($d);	# In case it was saved during the backup
+	# Keep the home if another request enabled it. The temporary dir flag
+	# is saved only in the archive, so the live record needs no update.
+	my $home = $d->{'home'};
+	&with_locked_domain($d, sub {
+		my ($current) = @_;
+		&unlink_file($home) if (!$current->{'dir'} &&
+			$current->{'home'} eq $home);
+		});
 	}
 
 if (!$homefmt) {
@@ -3220,7 +3232,7 @@ if ($ok) {
 				&$indent_print();
 				my $err = &disable_virtual_server($d,
 					$d->{'disabled_reason'},
-					$d->{'disabled_why'});
+					$d->{'disabled_why'}, undef, 1);
 				&$outdent_print();
 				}
 			}

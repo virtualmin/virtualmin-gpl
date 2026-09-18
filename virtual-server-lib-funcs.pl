@@ -673,7 +673,47 @@ sub unlock_domain
 {
 my ($id) = @_;
 $id = $id->{'id'} if (ref($id));
+return if ($domain_lock_scope{$id} && $domain_lock_scope{$id} == $$);
 &unlock_file("$domains_dir/$id");
+}
+
+# with_locked_domain(&domain|id, &callback)
+# Lock and reread one domain, then pass its current record to the callback.
+# Keep the lock through the callback. Release it on completion or failure only
+# if acquired here; leave any lock already held by the caller in place.
+# Return the callback's scalar result, or undef if the domain cannot be read.
+# The callback must save its changes. The supplied object is left untouched.
+# Do not start another update to the same domain inside the callback.
+sub with_locked_domain
+{
+my ($id, $code) = @_;
+$id = $id->{'id'} if (ref($id));
+# A second reread would discard changes pending in the outer update.
+&error("Domain $id is already being updated!") if ($domain_lock_scope{$id});
+my $file = "$domains_dir/$id";
+my $locked = &lock_file($file);
+if (!$locked && (&test_lock($file) || 0) != $$) {
+	&error("Domain $file could not be locked for updating!");
+	}
+
+my ($result, $err);
+{
+	# Feature helpers may unlock the same domain. Only this scope may release it.
+	local $domain_lock_scope{$id} = $$;
+	# Forced reads otherwise overwrite the caller's cached hash in place.
+	local $main::get_domain_cache{$id};
+	local $main::error_must_die = 1;
+	eval {
+		my $d = &get_domain($id, undef, 1);
+		$result = &$code($d) if ($d);
+		};
+	$err = $@;
+}
+# Clear the restored cache so the next lookup reads the saved record.
+delete($main::get_domain_cache{$id});
+&unlock_file($file) if ($locked);
+&error($err) if ($err);
+return $result;
 }
 
 # save_domain(&domain, [creating])
@@ -695,7 +735,16 @@ if ($d->{'dom'} eq '') {
 	return 0;
 	}
 &make_dir($domains_dir, 0700);
-&lock_file($file);
+my $locked = &lock_file($file);
+if (!$locked) {
+	# Continue only if this process already holds the lock
+	my $lock_owner = &test_lock($file);
+	if (!$lock_owner || $lock_owner != $$) {
+		print STDERR "Domain $file could not be locked for saving!\n";
+		&print_call_stack() if ($gconfig{'error_stack'});
+		return 0;
+		}
+	}
 my $oldd = { };
 if (&read_file($file, $oldd)) {
 	my @st = stat($file);
@@ -719,7 +768,7 @@ $d->{'lastsave_pid'} = $main::initial_process_id;
 delete($d->{'ftp'});		# Removed ProFTPd virtual FTP feature
 delete($d->{'lastread_time'});
 &write_file($file, $d);
-&unlock_file($file);
+&unlock_file($file) if ($locked);
 $d->{'lastread_time'} = time();
 $main::get_domain_cache{$d->{'id'}} = $d;
 if (scalar(@main::list_domains_cache)) {
@@ -6390,12 +6439,15 @@ else {
 # Record webserver type
 $d->{'backup_web_type'} = &domain_has_website($d);
 $d->{'backup_ssl_type'} = &domain_has_ssl($d);
-&lock_domain($d);
-&save_domain($d);
-&unlock_domain($d);
 
-# Save the domain's data file
-&copy_source_dest($d->{'file'}, $file);
+# Write the backup snapshot directly to the archive to preserve newer live settings
+my %backupd = %$d;
+delete($backupd{'lastread_time'});
+# Make the metadata file private before writing passwords and other settings
+&open_tempfile(BACKUPDOMAIN, ">$file");
+&close_tempfile(BACKUPDOMAIN);
+&set_ownership_permissions(undef, undef, 0600, $file);
+&write_file($file, \%backupd);
 
 if (-r "$initial_users_dir/$d->{'id'}") {
 	# Initial user settings
@@ -9747,37 +9799,59 @@ foreach my $d (@disdoms) {
 	&set_all_null_print();
 	eval {
 		local $main::error_must_die = 1;
-		my $disabled_auto = &make_date($d->{'disabled_auto'});
-		&disable_virtual_server($d, 'schedule',
-			&text('disable_autodisabledone', $disabled_auto));
+		&disable_virtual_server($d, 'schedule');
 		};
+	my $err = $@;
 	&pop_all_print();
-	&error_stderr("Disabling domain on schedule failed : $@") if ($@);
+	&error_stderr("Disabling domain on schedule failed : $err") if ($err);
 	}
 }
 
-# disable_virtual_server(&domain, [reason-code], [reason-why], [&only-features])
+# disable_virtual_server(&domain, [reason-code], [reason-why], [&only-features], [reapply])
 # Disables all features of one virtual server. Returns undef on success, or
-# an error message on failure.
+# an error message on failure. Set reapply when restoring a disabled domain
+# to disable its newly recreated services.
 sub disable_virtual_server
 {
-my ($d, $reason, $why, $only) = @_;
+my ($domain, $reason, $why, $only, $reapply) = @_;
+my ($d, $err, @disable);
+my $prepare = sub {
+	my ($current) = @_;
+	$d = { %$current };
+	# Skip domains that are already disabled or protected.
+	return undef if (!$reapply && $d->{'disabled'});
+	if (!$reapply && $d->{'protected'}) {
+		$err = "Virtual server $d->{'dom'} is protected and cannot be disabled";
+		return undef;
+		}
+	if ($reason eq 'schedule' && !$reapply) {
+		# Run only if the current schedule is still due.
+		return undef if (!&is_timestamp($d->{'disabled_auto'}) ||
+			$d->{'disabled_auto'} > time());
+		$why = &text('disable_autodisabledone', &make_date($d->{'disabled_auto'}));
+		}
 
-# Work out what can be disabled
-my @disable = &get_disable_features($d);
-if ($only) {
-	@disable = grep { &indexof($_, @$only) >= 0 } @disable;
-	@disable || return "None of the features to disable exist on this ".
-			   "virtual server";
-	}
+	# Work out what can be disabled
+	@disable = &get_disable_features($d);
+	if ($only) {
+		@disable = grep { &indexof($_, @$only) >= 0 } @disable;
+		if (!@disable) {
+			$err = "None of the features to disable exist on this virtual server";
+			return undef;
+			}
+		}
 
-# Disable it
-my %disable = map { $_, 1 } @disable;
-$d->{'disabled_reason'} = $reason;
-$d->{'disabled_why'} = $why;
-$d->{'disabled_time'} = time();
-delete($d->{'disabled_auto'});
+	# Disable it
+	$d->{'disabled_reason'} = $reason;
+	$d->{'disabled_why'} = $why;
+	$d->{'disabled_time'} = time();
+	delete($d->{'disabled_auto'});
 
+	return 1;
+	};
+
+# Read current settings for the before command; recheck them afterward.
+return $err if (!&with_locked_domain($domain, $prepare));
 # Run the before command
 &set_domain_envs($d, "DISABLE_DOMAIN");
 my $merr = &making_changes();
@@ -9785,38 +9859,48 @@ my $merr = &making_changes();
 return &text('disable_emaking', "<tt>".&html_escape($merr)."</tt>")
 	if (defined($merr));
 
-# Disable all configured features
-my @disabled;
-foreach my $f (@features) {
-	if ($d->{$f} && $disable{$f}) {
-		my $dfunc = "disable_$f";
-		my ($ok, $fok) = &try_function($f, $dfunc, $d);
-		if ($ok && $fok) {
+# Recheck after the before command, then keep the lock through service changes and saving.
+my $changed = &with_locked_domain($domain, sub {
+	return 0 if (!&$prepare(shift));
+	$main::get_domain_cache{$d->{'id'}} = $d;
+	my %disable = map { $_, 1 } @disable;
+	# Disable all configured features
+	my @disabled;
+	foreach my $f (@features) {
+		if ($d->{$f} && $disable{$f}) {
+			my $dfunc = "disable_$f";
+			my ($ok, $fok) = &try_function($f, $dfunc, $d);
+			if ($ok && $fok) {
+				push(@disabled, $f);
+				}
+			}
+		}
+	foreach my $f (&list_feature_plugins()) {
+		if ($d->{$f} && $disable{$f}) {
+			&plugin_call($f, "feature_disable", $d);
 			push(@disabled, $f);
 			}
 		}
-	}
-foreach my $f (&list_feature_plugins()) {
-	if ($d->{$f} && $disable{$f}) {
-		&plugin_call($f, "feature_disable", $d);
-		push(@disabled, $f);
-		}
-	}
 
-# Disable extra admins
-&update_extra_webmin($d, 1);
+	# Disable extra admins
+	&update_extra_webmin($d, 1);
 
-# Save new domain details
-&$first_print($text{'save_domain'});
-&lock_domain($d);
-$d->{'disabled'} = join(",", @disabled);
-&save_domain($d);
-&unlock_domain($d);
-&$second_print($text{'setup_done'});
+	# Save new domain details
+	&$first_print($text{'save_domain'});
+	$d->{'disabled'} = join(",", @disabled);
+	&save_domain($d);
+	&$second_print($text{'setup_done'});
+
+	return 1;
+	});
+return $err if (!$changed);
+%$domain = %$d;
+# Make cache lookups use the caller's updated object.
+$main::get_domain_cache{$domain->{'id'}} = $domain;
 
 # Run the after command
 &set_domain_envs($d, "DISABLE_DOMAIN");
-my $merr = &made_changes();
+$merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>"))
 	if (defined($merr));
 &reset_domain_envs($d);
@@ -9829,50 +9913,70 @@ return undef;
 # success, or an error message on failure.
 sub enable_virtual_server
 {
-my ($d) = @_;
+my ($domain) = @_;
+my ($d, $err, @enable);
+my $prepare = sub {
+	my ($current) = @_;
+	$d = { %$current };
+	# Another request may already have enabled this domain.
+	return undef if (!$d->{'disabled'});
 
-# Work out what can be enabled
-my @enable = &get_enable_features($d);
+	# Work out what can be enabled
+	@enable = &get_enable_features($d);
 
-# Go ahead and do it
-my %enable = map { $_, 1 } @enable;
-delete($d->{'disabled_reason'});
-delete($d->{'disabled_why'});
-delete($d->{'disabled_auto'});
+	# Go ahead and do it
+	delete($d->{'disabled_reason'});
+	delete($d->{'disabled_why'});
+	delete($d->{'disabled_auto'});
 
+	return 1;
+	};
+
+# Read current settings for the before command; recheck them afterward.
+return $err if (!&with_locked_domain($domain, $prepare));
 # Run the before command
 &set_domain_envs($d, "ENABLE_DOMAIN");
 my $merr = &making_changes();
 &reset_domain_envs($d);
 return &text('enable_emaking', "<tt>$merr</tt>") if (defined($merr));
 
-# Enable all disabled features
-foreach my $f (@features) {
-	if ($d->{$f} && $enable{$f}) {
-		my $efunc = "enable_$f";
-		&try_function($f, $efunc, $d);
+# Recheck after the before command, then keep the lock through service changes and saving.
+my $changed = &with_locked_domain($domain, sub {
+	return 0 if (!&$prepare(shift));
+	$main::get_domain_cache{$d->{'id'}} = $d;
+	my %enable = map { $_, 1 } @enable;
+	# Enable all disabled features
+	foreach my $f (@features) {
+		if ($d->{$f} && $enable{$f}) {
+			my $efunc = "enable_$f";
+			&try_function($f, $efunc, $d);
+			}
 		}
-	}
-foreach my $f (&list_feature_plugins()) {
-	if ($d->{$f} && $enable{$f}) {
-		&plugin_call($f, "feature_enable", $d);
+	foreach my $f (&list_feature_plugins()) {
+		if ($d->{$f} && $enable{$f}) {
+			&plugin_call($f, "feature_enable", $d);
+			}
 		}
-	}
 
-# Enable extra admins
-&update_extra_webmin($d, 0);
+	# Enable extra admins
+	&update_extra_webmin($d, 0);
 
-# Save new domain details
-&$first_print($text{'save_domain'});
-&lock_domain($d);
-delete($d->{'disabled'});
-&save_domain($d);
-&unlock_domain($d);
-&$second_print($text{'setup_done'});
+	# Save new domain details
+	&$first_print($text{'save_domain'});
+	delete($d->{'disabled'});
+	&save_domain($d);
+	&$second_print($text{'setup_done'});
+
+	return 1;
+	});
+return $err if (!$changed);
+%$domain = %$d;
+# Make cache lookups use the caller's updated object.
+$main::get_domain_cache{$domain->{'id'}} = $domain;
 
 # Run the after command
 &set_domain_envs($d, "ENABLE_DOMAIN");
-my $merr = &made_changes();
+$merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>".&html_escape($merr)."</tt>"))
 	if (defined($merr));
 &reset_domain_envs($d);
@@ -21732,12 +21836,20 @@ elsif ($deletemode == 1) {
 		&push_all_print();
 		&set_all_null_print();
 		}
+	my $err;
 	foreach my $dd (@doms) {
-		&disable_virtual_server($dd, 'transfer',
+		$err = &disable_virtual_server($dd, 'transfer',
 				'Transferred to '.$desthost);
+		last if ($err);
 		}
 	if (!$showoutput) {
 		&pop_all_print();
+		}
+	# Stop the transfer if disabling the source fails.
+	if ($err) {
+		&$second_print(&text('transfer_edisable', $err));
+		&$cleanup_remotetemp();
+		return 0;
 		}
 	&$second_print($text{'setup_done'});
 	}
@@ -22776,25 +22888,28 @@ return grep { &plugin_defined($_, "check_scripts_extension") } @plugins;
 sub update_domains_last_login_times
 {
 foreach my $d (&list_domains()) {
-	next if ($d->{'alias'});
-	next if ($d->{'no_last_login'});
-	my @logins;
-	# Get all users logins timestamps
-	foreach my $user (&list_domain_users($d, 0, 1, 1, 1)) {
-		my $ll = &get_last_login_time($user->{'user'});
-		foreach my $k (sort { $a cmp $b } keys %$ll) {
-			push(@logins, $ll->{$k});
+	&with_locked_domain($d, sub {
+		my ($d) = @_;
+		return if ($d->{'alias'});
+		return if ($d->{'no_last_login'});
+		my @logins;
+		# Get all users logins timestamps
+		foreach my $user (&list_domain_users($d, 0, 1, 1, 1)) {
+			my $ll = &get_last_login_time($user->{'user'});
+			foreach my $k (sort { $a cmp $b } keys %$ll) {
+				push(@logins, $ll->{$k});
+				}
 			}
-		}
-	next if (!@logins);
-	# Logins found
-	# Sort logins and get last login
-	@logins = sort { $b <=> $a } @logins;
-	# Save most recent timestamp
-	&lock_domain($d);
-	$d->{'last_login_timestamp'} = $logins[0];
-	&save_domain($d);
-	&unlock_domain($d);
+		return if (!@logins);
+		# Logins found
+		# Sort logins and get last login
+		@logins = sort { $b <=> $a } @logins;
+		# Save most recent timestamp
+		if ($logins[0] > ($d->{'last_login_timestamp'} || 0)) {
+			$d->{'last_login_timestamp'} = $logins[0];
+			&save_domain($d);
+			}
+		});
 	}
 }
 
