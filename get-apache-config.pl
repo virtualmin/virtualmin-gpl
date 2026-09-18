@@ -20,9 +20,9 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/get-ssl.pl";
+	$0 = "$pwd/get-apache-config.pl";
 	require './virtual-server-lib.pl';
-	$< == 0 || die "get-ssl.pl must be run as root";
+	$< == 0 || die "get-apache-config.pl must be run as root";
 	}
 
 # Parse command line
@@ -74,8 +74,8 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Output Apache virtualhost config for a domain.\n";
 print "\n";
-print "virtualmin get-ssl --domain name\n";
-print "                  [--ssl]\n";
+print "virtualmin get-apache-config --domain name\n";
+print "                            [--ssl]\n";
 exit(1);
 }
 
