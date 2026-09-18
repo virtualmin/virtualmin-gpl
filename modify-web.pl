@@ -1058,27 +1058,39 @@ foreach $d (@doms) {
 		&require_apache();
 		my @ports = ( $d->{'web_port'},
 			      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+		my $structured_adds = grep { @{$_->[2]} } @add_dirs;
 		foreach my $p (@ports) {
 			my ($virt, $vconf, $conf) =
 				&get_apache_virtual($d->{'dom'}, $p);
 			next if (!$virt);
-			foreach my $a (@add_dirs) {
-				my @old = &apache::find_directive(
-					$a->[0], $vconf);
-				push(@old, $a->[1]);
-				&apache::save_directive(
-					$a->[0], \@old, $vconf, $conf);
-				if (@{$a->[2]}) {
-					# Attach comments to the directive just added
-					my @dirs = &apache::find_directive_struct(
-						$a->[0], $vconf);
-					my $old = $dirs[$#dirs];
-					my $new = { %$old };
-					my $indent = " " x $old->{'indent'};
-					$new->{'comments'} =
-						[ map { $indent.$_ } @{$a->[2]} ];
+			# Structs use the same insertion point, so add in reverse
+			my @ordered_adds = $structured_adds ?
+				reverse(@add_dirs) : @add_dirs;
+			foreach my $a (@ordered_adds) {
+				if ($structured_adds) {
+					# Add a commented batch as structures in
+					# CLI order
+					my $indent = $vconf->[0]->{'indent'};
+					my $new = {
+						'name' => $a->[0],
+						'value' => $a->[1],
+						'type' => 0,
+						'indent' => $indent,
+						};
+					$new->{'comments'} = [ map {
+							(" " x $indent).$_
+							} @{$a->[2]} ] if (@{$a->[2]});
 					&apache::save_directive_struct(
-						$old, $new, $vconf, $conf);
+						undef, $new, $vconf, $conf);
+					}
+				else {
+					# Keep the existing path for plain
+					# directives
+					my @old = &apache::find_directive(
+						$a->[0], $vconf);
+					push(@old, $a->[1]);
+					&apache::save_directive(
+						$a->[0], \@old, $vconf, $conf);
 					}
 				}
 			foreach my $a (@remove_dirs) {
