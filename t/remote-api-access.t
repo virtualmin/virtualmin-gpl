@@ -125,6 +125,17 @@ my %expected_commands = (
 	$main::access{'edit_remote_api'} = 1;
 	ok(&can_use_remote_api(),
 		'domain owner can use the remote API when granted permission');
+	ok(!&can_remote('virtualmin-ai'),
+		'virtualmin-ai cannot be nested through the remote API');
+	ok(&can_remote('configure-ai'),
+		'domain owners can save their own AI settings through the remote API');
+	ok(&can_use_virtualmin_ai(),
+		'remote API permission also grants the AI planner');
+	{
+	local $main::virtualmin_pro = 1;
+	ok(!grep($_ eq 'configure-ai', &list_ai_api_commands()),
+		'the planner can never configure its own credentials');
+	}
 	ok(&can_remote_as_user('configure-script'),
 		'existing user API commands remain available when permitted');
 	foreach my $command (sort keys %expected_commands) {
@@ -200,6 +211,10 @@ my %expected_commands = (
 	local *main::master_admin = sub { 1 };
 	ok(&remote_api_can_domain(undef, 'not-allowed.pl'),
 		'master API and standalone root behavior remains unrestricted');
+	ok(!&can_remote('virtualmin-ai'),
+		'virtualmin-ai remains local-only for master administrators');
+	ok(&can_use_virtualmin_ai(),
+		'the master administrator may always use the AI planner');
 	}
 
 {

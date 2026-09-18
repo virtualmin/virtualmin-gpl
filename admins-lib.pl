@@ -42,6 +42,8 @@ sub delete_extra_admin
 {
 my ($admin, $d) = @_;
 unlink($admin->{'file'});
+# Remove any AI provider settings saved for this login
+&delete_ai_account($admin->{'name'});
 &push_all_print();
 &set_all_null_print();
 &refresh_webmin_user($d);
@@ -57,6 +59,8 @@ my ($admin, $old, $d) = @_;
 if ($old->{'name'} ne $admin->{'name'}) {
 	unlink($old->{'file'});
 	$admin->{'file'} = "$extra_admins_dir/$d->{'id'}/$admin->{'name'}.admin";
+	# Keep the provider settings with the renamed Webmin login
+	&rename_ai_account($old->{'name'}, $admin->{'name'});
 	}
 &write_file($admin->{'file'}, $admin);
 &push_all_print();

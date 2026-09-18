@@ -78,6 +78,9 @@ if (!$preserve || !&remote_webmin($d)) {
 	&acl::delete_user($d->{'user'});
 	&update_extra_webmin($d);
 
+	# Remove any AI provider settings saved for this login
+	&delete_ai_account($d->{'user'});
+
 	# Delete from any groups
 	foreach my $group (&acl::list_groups()) {
 		my $idx = &indexof($d->{'user'}, @{$group->{'members'}});
@@ -151,6 +154,7 @@ if (!$d->{'parent'}) {
 		$wuser->{'email'} = $d->{'emailto'};
 		$wuser->{'name'} = $d->{'user'};
 		&acl::modify_user($oldd->{'user'}, $wuser);
+		&rename_ai_account($oldd->{'user'}, $d->{'user'});
 
 		# Rename in groups too
 		foreach my $group (&acl::list_groups()) {
@@ -1068,6 +1072,7 @@ foreach my $u (&acl::list_users()) {
 			else {
 				# Who shouldn't exist!
 				&acl::delete_user($u->{'name'});
+				&delete_ai_account($u->{'name'});
 				}
 			}
 		}

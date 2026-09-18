@@ -26,7 +26,7 @@ foreach my $lib ("scripts", "resellers", "admins", "users", "simple", "s3",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
 		 "jailkit", "ports", "bb", "dnscloud", "dnscloudpro",
 		 "smtpcloud", "pro-tip", "azure", "remotedns", "drive",
-		 "acme", "api-create-domain", "btrfs") {
+		 "acme", "api-create-domain", "btrfs", "virtualmin-ai") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
 		$libfile = "$virtual_server_root/$lib-lib.pl";
@@ -6862,6 +6862,7 @@ mkdir($temp, 0700);
 		 &make_tar_command("xf", $file));
 foreach my $resel (&list_resellers()) {
 	&acl::delete_user($resel->{'name'});
+	&delete_ai_account($resel->{'name'});
 	&delete_reseller_unix_user($resel);
 	}
 my %miniserv;
@@ -18469,6 +18470,13 @@ if ($config{'api_helper'} ne $lastconfig{'api_helper'} ||
 	!&has_command(&get_api_helper_command())) {
 	&$first_print($text{'check_apicmd'});
 	my ($ok, $path) = &create_virtualmin_api_helper_command();
+	&$second_print(&text($ok ? 'check_apicmdok' : 'check_apicmderr',
+			     $path));
+	}
+my $ai_helper_command = &get_ai_helper_command();
+if ($ai_helper_command && !&has_command($ai_helper_command)) {
+	&$first_print($text{'check_aicmd'});
+	my ($ok, $path) = &create_virtualmin_ai_helper_command();
 	&$second_print(&text($ok ? 'check_apicmdok' : 'check_apicmderr',
 			     $path));
 	}

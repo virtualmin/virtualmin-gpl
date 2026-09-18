@@ -28,7 +28,11 @@ if ($init::init_mode eq 'systemd' && $gconfig{'os_type'} eq 'redhat-linux') {
 	&init::restart_systemd();
 	}
 
-# Delete API helper
+# Delete both command wrappers
+my $ai_helper_command = &get_ai_helper_command();
+if ($ai_helper_command && -r $ai_helper_command && !-d $ai_helper_command) {
+	&unlink_file($ai_helper_command);
+	}
 my $api_helper_command = &get_api_helper_command();
 if (-r $api_helper_command && !-d $api_helper_command) {
 	&unlink_file($api_helper_command);
@@ -48,4 +52,3 @@ if (-r $brand_file) {
 }
 
 1;
-

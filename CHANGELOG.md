@@ -1,4 +1,5 @@
 #### Version 8.2.1
+* Add `virtualmin-ai` to build and optionally run validated Virtualmin CLI plans from natural-language requests using OpenAI, Anthropic, Gemini, xAI, DeepSeek or a local OpenAI-compatible server. Add per-user provider settings and `remote-ai.cgi` for planning authenticated `remote.cgi` requests
 * Add Matomo web analytics installer to Virtualmin GPL, including detection of existing installs and display of the tracking code to embed in website pages
 * Fix missing ProFTPD SFTP and TLS log rotation while preserving existing rotation rules
 * Fix cloning Apache virtual servers overwriting newly issued SSL certificates with the source server's certificate [#1280](https://github.com/virtualmin/virtualmin-gpl/issues/1280)

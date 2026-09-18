@@ -186,8 +186,9 @@ if ($config{'virus'}) {
 	&create_clamdscan_remote_wrapper_cmd();
 	}
 
-# Re-generate helper script, for plugins
+# Regenerate both command wrappers after changing plugins
 &create_virtualmin_api_helper_command();
+&create_virtualmin_ai_helper_command();
 
 # Save the feature settings and keep the config-check snapshot in sync
 if ($config{'last_check'} < time()) {

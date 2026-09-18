@@ -32,6 +32,14 @@ $cmd .= ".pl" if ($cmd !~ /\.pl$/);
 return $cmd;
 }
 
+# is_ai_api_command(command)
+# Returns 1 for the local-only natural-language command.
+sub is_ai_api_command
+{
+my ($cmd) = @_;
+return &normalize_api_command_name($cmd) eq "virtualmin-ai.pl";
+}
+
 # api_command_unavailable_message(command)
 # Returns a user-facing message if some API command is unavailable in this
 # edition, or undef if it should be runnable.
@@ -213,6 +221,8 @@ return ( "upload-api-docs.pl",
 	 "check-scripts.pl",
 	 "fetch-script-files.pl",
 	 "postinstall.pl",
+	 # This has a dedicated wrapper and must never be exposed as an API.
+	 "virtualmin-ai.pl",
 	 # Keep the old command callable without listing or publishing it.
 	 "setup-repos.pl",
 	 );
@@ -246,6 +256,43 @@ else {
 		}
 	return undef;
 	}
+}
+
+# get_ai_helper_command()
+# Returns the path to the virtualmin-ai wrapper.
+sub get_ai_helper_command
+{
+my $api_helper_command = &get_api_helper_command();
+return undef if (!$api_helper_command);
+$api_helper_command =~ s/\/[^\/]+$/\/virtualmin-ai/;
+return $api_helper_command;
+}
+
+# create_virtualmin_ai_helper_command()
+# Creates the virtualmin-ai wrapper beside the regular API wrapper.
+sub create_virtualmin_ai_helper_command
+{
+my $api_helper_command = &get_api_helper_command();
+my $ai_helper_command = &get_ai_helper_command();
+return (0, "No API helper path is configured or available")
+	if (!$api_helper_command || !$ai_helper_command);
+return (0, "virtualmin and virtualmin-ai cannot use the same helper path")
+	if ($api_helper_command eq $ai_helper_command);
+my $bash = &has_command("bash") || &has_command("sh");
+return (0, "No shell was found for the virtualmin-ai wrapper") if (!$bash);
+my $quoted_api_helper = $api_helper_command;
+$quoted_api_helper =~ s/'/'"'"'/g;
+$quoted_api_helper = "'$quoted_api_helper'";
+
+&open_tempfile(AIHELPER, ">$ai_helper_command", 1, 0) ||
+	return (0, "Failed to write to $ai_helper_command : $!");
+&print_tempfile(AIHELPER, <<EOF);
+#!$bash
+exec $quoted_api_helper virtualmin-ai "\$@"
+EOF
+&close_tempfile(AIHELPER);
+&set_ownership_permissions(undef, undef, 0755, $ai_helper_command);
+return (1, $ai_helper_command);
 }
 
 # create_api_helper_command([&extra-dirs])
@@ -433,6 +480,7 @@ my %user_remote_api_commands = (
 	"backup-domain" => "can_backup_domain",
 	"check-connectivity" => "can_edit_domain",
 	"clone-domain" => "can_create_sub_servers",
+	"configure-ai" => "can_use_virtualmin_ai",
 	"create-scheduled-backup" => "can_backup_domain",
 	"create-user" => "can_edit_users",
 	"delete-admin" => "can_edit_admins",
@@ -517,6 +565,29 @@ my %user_remote_api_commands = (
 	"unsub-domain" => "can_config_domain",
 	"validate-domains" => "can_use_validation",
 	);
+
+# list_ai_api_commands()
+# Returns the commands that the natural-language planner may select. GPL
+# installations get the basic domain and user operations, while Pro gets the
+# larger set already audited for non-master remote API use.
+sub list_ai_api_commands
+{
+my @gpl = qw(create-domain create-user list-domains list-users);
+return @gpl if (!$virtualmin_pro);
+# Metadata commands do not perform requested work. The planner must also never
+# change its own provider settings.
+my %excluded = map { $_, 1 } qw(get-command list-commands configure-ai);
+return sort grep { !$excluded{$_} } keys %user_remote_api_commands;
+}
+
+# can_use_virtualmin_ai()
+# Returns 1 if the current user may use the AI planner and save provider
+# settings. Non-master users need remote API access because clients run their
+# plans through remote.cgi.
+sub can_use_virtualmin_ai
+{
+return &master_admin() || &can_use_remote_api() ? 1 : 0;
+}
 
 # can_remote_edit_database_hosts(&domain)
 # Returns 1 if the current user can edit databases and their allowed hosts.
@@ -706,6 +777,8 @@ return @rv;
 sub can_remote
 {
 my ($program) = @_;
+return 0 if (&is_ai_api_command($program));
+$program = &normalize_api_command_name($program);
 return &master_admin() || &can_remote_as_user($program);
 }
 

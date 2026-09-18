@@ -2289,6 +2289,7 @@ check_packageok=The selected package management and update systems are installed
 check_apicmd=Creating API helper command ..
 check_apicmdok=.. created <tt>$1</tt>
 check_apicmderr=.. failed : $1
+check_aicmd=Creating Virtualmin AI helper command ..
 check_bashphpprofile=Creating Bash startup profile for PHP alias ..
 check_hostdefaultdomain_enable=Setting up SSL certificate for the <tt>$1</tt> hostname ..
 check_hostdefaultdomain_disable=Disabling the serving of SSL certificate for the <tt>$1</tt> hostname ..

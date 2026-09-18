@@ -153,6 +153,8 @@ while(@ARGV > 0) {
 		}
 	}
 $apicmd || &usage("Missing command to run");
+&is_ai_api_command($apicmd) &&
+	&usage("virtualmin-ai cannot be run through run-api-command");
 
 if (@ids) {
 	# Get domains by IDs

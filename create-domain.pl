@@ -1256,8 +1256,9 @@ print "Adds a new Virtualmin virtual server, with the settings and features\n";
 print "specified on the command line.\n";
 print "\n";
 print "virtualmin create-domain --domain domain.name\n";
-print "                         --pass \"password-for-new-domain\" |\n";
-print "                         --passfile password-file\n";
+print "                        [--pass \"password-for-new-domain\" |\n";
+print "                         --passfile password-file]\n";
+print "                         (required only for a top-level server)\n";
 print "                        [--hashpass]\n";
 print "                        [--parent domain.name | --alias domain.name |\n";
 print "                         --alias-with-mail domain.name |\n";
@@ -1273,7 +1274,8 @@ foreach $f (@features) {
 foreach $f (&list_feature_plugins()) {
 	print "                        [--$f]\n";
 	}
-print "                        [--default-features] | [--features-from-plan]\n";
+print "                        --default-features | --features-from-plan |\n";
+print "                         one or more feature flags, such as --unix --dir --web\n";
 print "                        [--default-ip |\n";
 print "                         --no-ip |\n";
 print "                         --shared-ip existing.ip.address |\n";
@@ -1297,8 +1299,10 @@ print "                        [--max-mailboxes boxes]\n";
 print "                        [--max-dbs databases]\n";
 print "                        [--max-aliases aliases]\n";
 if (&has_home_quotas()) {
-	print "                        [--quota quota-for-domain|UNLIMITED]\n";
-	print "                        [--uquota quota-for-unix-user|UNLIMITED]\n";
+	print "                        [--quota quota-in-1kB-blocks|UNLIMITED\n";
+	print "                         --uquota quota-in-1kB-blocks|UNLIMITED |\n";
+	print "                         --limits-from-plan]\n";
+	print "                         (give both quotas; 1 MB = 1024 blocks)\n";
 	}
 if ($config{'bw_active'}) {
 	print "                        [--bandwidth bytes]\n";

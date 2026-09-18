@@ -86,13 +86,18 @@ if (!$config{'defaultdomain_name'}) {
 	&save_module_config();
 	}
 
-# Make sure the remote.cgi page is accessible in non-session mode
+# Let API clients authenticate to remote.cgi and remote-ai.cgi directly
+# instead of requiring a Webmin browser session
 my %miniserv;
 &get_miniserv_config(\%miniserv);
 my @sa = split(/\s+/, $miniserv{'sessiononly'});
-if (&indexof("/$module_name/remote.cgi", @sa) < 0) {
-	# Need to add
-	push(@sa, "/$module_name/remote.cgi");
+my $sa_changed = 0;
+foreach my $page ("/$module_name/remote.cgi", "/$module_name/remote-ai.cgi") {
+	next if (&indexof($page, @sa) >= 0);
+	push(@sa, $page);
+	$sa_changed = 1;
+	}
+if ($sa_changed) {
 	$miniserv{'sessiononly'} = join(" ", @sa);
 	&put_miniserv_config(\%miniserv);
 	}
@@ -463,8 +468,9 @@ foreach my $d (@doms) {
 		}
 	}
 
-# Create API helper script /usr/bin/virtualmin
+# Create the virtualmin and virtualmin-ai command wrappers
 &create_virtualmin_api_helper_command();
+&create_virtualmin_ai_helper_command();
 
 # If resource limits are supported, make sure the Apache user isn't limited
 if (defined(&supports_resource_limits) &&
