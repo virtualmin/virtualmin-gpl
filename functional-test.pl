@@ -12855,10 +12855,9 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 	# Keep public DNS records out of the website validator's IPv6 checks
 	my $source = $test_domain.'.invalid';
 	my $clone = $test_clone_domain.'.invalid';
-	my $comment_marker = '# Virtualmin functional comment '.$$;
 	my @comment_directives = (
-		[ $comment_marker.': server signature', 'ServerSignature Off' ],
-		[ $comment_marker.': file etag', 'FileETag None' ],
+		[ '# Functional test server signature', 'ServerSignature Off' ],
+		[ '# Functional test file etag', 'FileETag None' ],
 		);
 	my (@comment_add_args, @comment_remove_args);
 	foreach my $directive (@comment_directives) {
@@ -12868,13 +12867,6 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 		push(@comment_remove_args,
 			[ 'remove-directive', $directive->[1] ]);
 		}
-	my $comment_search = 'grep -rhsF -- '.&quote_path($comment_marker).
-		' /etc/apache2 /etc/httpd 2>/dev/null | wc -l';
-	my $comment_check = sub {
-		my ($expected) = @_;
-		return $comment_search.' | awk '.
-			&quote_path('{ print; exit($1 == '.$expected.' ? 0 : 1) }');
-		};
 	push(@$apacheclone_tests,
 		{ 'command' => 'create-domain.pl',
 		  'args' => [ [ 'domain', $source ],
@@ -12901,8 +12893,10 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 		  'args' => [ [ 'domain', $source ],
 			      [ 'mode', $supports_fpm ? 'fpm' : 'none' ] ],
 		},
-		{ 'command' => &$comment_check(4),
-		  'label' => 'Check comments after PHP configuration changes',
+		{ 'command' => 'validate-domains.pl',
+		  'args' => [ [ 'domain', $source ],
+			      [ 'feature', $web ], [ 'feature', $ssl ] ],
+		  'antigrep' => 'Call Stack Trace',
 		},
 		# External certificates are copied when cloning, so cover both names
 		{ 'command' => 'generate-cert.pl',
@@ -12916,9 +12910,6 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 			      [ 'newuser', $test_clone_domain_user ],
 			      [ 'newpass', 'foo' ] ],
 		  'antigrep' => 'Call Stack Trace',
-		},
-		{ 'command' => &$comment_check(8),
-		  'label' => 'Check comments after cloning both virtual hosts',
 		});
 
 	# Check and delete the source first. The clone must still validate and
@@ -12943,14 +12934,17 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 				});
 			}
 		if ($domain eq $clone) {
-			# Removing directives must also remove their attached comments
+			# Remove the custom directives before deleting the clone
 			push(@$apacheclone_tests,
 				{ 'command' => 'modify-web.pl',
 				  'args' => [ [ 'domain', $clone ],
 					      @comment_remove_args ],
 				},
-				{ 'command' => &$comment_check(0),
-				  'label' => 'Check comments after removing directives',
+				{ 'command' => 'validate-domains.pl',
+				  'args' => [ [ 'domain', $clone ],
+					      [ 'feature', $web ],
+					      [ 'feature', $ssl ] ],
+				  'antigrep' => 'Call Stack Trace',
 				});
 			}
 		push(@$apacheclone_tests,
@@ -12958,10 +12952,6 @@ if ($web eq 'web' && $ssl eq 'ssl') {
 			  'args' => [ [ 'domain', $domain ] ],
 			  'cleanup' => 1,
 			  'ignorefail' => $domain eq $clone,
-			});
-		push(@$apacheclone_tests,
-			{ 'command' => &$comment_check($domain eq $source ? 4 : 0),
-			  'label' => "Check comments after deleting $domain",
 			});
 		}
 
