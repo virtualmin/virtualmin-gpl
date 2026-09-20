@@ -10,6 +10,7 @@
 * Fix batch virtual server creation progress and status reporting
 * Fix `modify-user` CLI command dropping all but one local mail forwarding destination on any update, and show local forwards in `list-users` output
 * Fix cPanel, DirectAdmin and Plesk migrations creating unsupported bounce aliases on Postfix, which accepted mail for such addresses and then bounced it [#380](https://github.com/virtualmin/virtualmin-gpl/issues/380)
+* Fix DirectAdmin migrations creating duplicate Unix users when importing extra database users
 * Fix missing disk usage for mail files after the 8.2.0 update
 * Fix errors during package upgrades when the MySQL or mail features are disabled
 * Fix Google Drive backup folder and file listings stopping after the first page of results, which could hide existing backups from restores and purging and create duplicate backup folders for Virtualmin Pro users
