@@ -368,7 +368,9 @@ if ($got{'mysql'}) {
 			my %dbusers;
 			&read_env_file("$backup/$db.conf", \%dbusers);
 			foreach my $myuser (keys %dbusers) {
-				next if ($myuser eq $user);
+				# Skip the domain owner, who is either the
+				# DirectAdmin account or the parent's Unix user
+				next if ($myuser eq $user || $myuser eq $duser);
 				next if ($dbusers{$myuser} !~ /passwd=([^&]+)/);
 				my $mypass = $1;
 				$mypass =~ s/^%2A/\*/;
@@ -392,12 +394,23 @@ if ($got{'mysql'}) {
 					     @{$myuinfo->{'dbs'}});
 					&modify_user($already, $olduinfo, \%dom);
 					}
+				elsif ($utaken{$myuinfo->{'user'}}) {
+					# A Unix user with this name already
+					# exists outside this import, so don't
+					# create a duplicate passwd entry
+					&$first_print(&text('migrate_edbuser',
+						$myuinfo->{'user'}));
+					next;
+					}
 				else {
 					$myuinfo->{'uid'} =
 						&allocate_uid(\%taken);
 					&create_user_home($myuinfo, \%dom, 1);
 					&create_user($myuinfo, \%dom);
 					&create_mail_file($myuinfo, \%dom);
+					# Mark the UID as used so the next DB
+					# user doesn't get the same one
+					$taken{$myuinfo->{'uid'}}++;
 					$usermap{$myuinfo->{'user'}} = $myuinfo;
 					}
 				$myucount++;
