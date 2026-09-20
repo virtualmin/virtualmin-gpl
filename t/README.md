@@ -88,6 +88,7 @@ removes a DNS-only `.invalid` domain and does not contact Cloudflare.
 | `dns-cloud-migration-vm.t` | Explicit DNS migration destinations override templates and alias targets, preserve records, and restore the original provider after a setup failure. Requires a disposable Virtualmin Pro host. |
 | `apache-clone-locks.t` | Apache cloning keeps parsed directives under a web lock, preserves them across nested SSL updates, and releases locks when either virtual host is missing. |
 | `ssl-hostnames.t` | SSL hostname selection uses known DNS records without resolver lookups, preserves fallback for other names, and excludes unconditional redirects. Runs without networking. |
+| `whois-collection.t` | Tests exact, wildcard, exception, private and IDN suffix rules. Confirms that WHOIS requests run without domain locks and preserve concurrent changes. |
 | `apache-clone-vm.t` | Real Apache directive preservation, missing-vhost lock cleanup, document roots, and PHP-FPM requests during cloning. Requires an explicit opt-in on a disposable Virtualmin Apache VM. |
 | `post-actions.t` | Post-action status reporting, callback compatibility, filtering and deduplication, plus Apache backend errors and restart lock cleanup. Runs without host changes. |
 | `clone-post-actions-vm.t` | Clone exit status after hook, Apache configuration, reload command and post-action failures. Checks a successful HTTP clone and fixture cleanup on an explicitly opted-in disposable Apache VM. |
