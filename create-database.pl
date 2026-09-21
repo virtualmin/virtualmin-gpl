@@ -126,6 +126,8 @@ if (!%opts) {
 
 # Do it
 &set_all_null_print();
+&lock_domain($d);
+$d = &get_domain($d->{'id'}, undef, 1);
 if (&indexof($type, &list_database_plugins()) >= 0) {
 	$ok = &plugin_call($type, "database_create", $d, $name, \%opts);
 	}
@@ -135,6 +137,7 @@ else {
 	}
 &save_domain($d);
 &refresh_webmin_user($d);
+&unlock_domain($d);
 &run_post_actions();
 if ($ok) {
 	&virtualmin_api_log(\@OLDARGV, $d);
