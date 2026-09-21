@@ -504,6 +504,7 @@ if ($certificate) {
 &obtain_lock_mail(\%dom);
 my (%taken, %utaken);
 &build_taken(\%taken, \%utaken);
+my %usermap;
 
 # Re-create mail users and copy mail files
 &$first_print("Re-creating mail users ..");
@@ -587,6 +588,7 @@ foreach my $name (keys %$mailusers) {
 	&create_user($uinfo, \%dom);
 	$taken{$uinfo->{'uid'}}++;
 	my ($crfile, $crtype) = &create_mail_file($uinfo, \%dom);
+	$usermap{$uinfo->{'user'}} = $uinfo;
 
 	# Copy mail into user's inbox
 	my $cids = [ $mailuser->{'preferences'}->{'mailbox'}->{'content'}->{'cid'} ];
@@ -643,6 +645,7 @@ if ($got{'mysql'}) {
 	&require_mysql();
 	my $mcount = 0;
 	my $myucount = 0;
+	my %myuserdone;
 	&$first_print("Migrating MySQL databases ..");
 	&disable_quotas(\%dom);
 	foreach my $name (keys %$databases) {
@@ -683,14 +686,14 @@ if ($got{'mysql'}) {
 		   $dbusers->{'password'} ? { $dbusers->{'name'} => $dbusers } :
 					    $dbusers;
 		foreach my $mname (keys %$dbusers) {
-			next if ($mname eq $user);	# Domain owner
+			# Skip the original or shared parent domain owner
+			next if ($mname eq $user || $mname eq $duser);
 			my $myuinfo = &create_initial_user(\%dom);
 			$myuinfo->{'user'} = $mname;
 			$myuinfo->{'plainpass'} =
 				$dbusers->{$mname}->{'password'}->{'content'};
 			$myuinfo->{'pass'} = &encrypt_user_password($myuinfo,
 						$myuinfo->{'plainpass'});
-			$myuinfo->{'uid'} = &allocate_uid(\%taken);
 			$myuinfo->{'gid'} = $dom{'gid'};
 			$myuinfo->{'real'} = "MySQL user";
 			$myuinfo->{'home'} =
@@ -699,11 +702,39 @@ if ($got{'mysql'}) {
 			delete($myuinfo->{'email'});
 			$myuinfo->{'dbs'} = [ { 'type' => 'mysql',
 					        'name' => $name } ];
-			&create_user_home($myuinfo, \%dom, 1);
-			&create_user($myuinfo, \%dom);
-			&create_mail_file($myuinfo, \%dom);
-			$taken{$myuinfo->{'uid'}}++;
-			$myucount++;
+			my $already = $usermap{$myuinfo->{'user'}};
+			if ($already) {
+				# Add the database to a user created earlier in the
+				# import if it isn't already granted
+				my %hasdb = map {
+					$_->{'type'}."\0".$_->{'name'}, 1
+					} @{$already->{'dbs'}};
+				my @newdbs = grep {
+					!$hasdb{$_->{'type'}."\0".$_->{'name'}}++
+					} @{$myuinfo->{'dbs'}};
+				if (@newdbs) {
+					my $olduinfo = { %$already };
+					$already->{'dbs'} = [ @{$already->{'dbs'}},
+							       @newdbs ];
+					&modify_user($already, $olduinfo, \%dom);
+					}
+				}
+			elsif ($utaken{$myuinfo->{'user'}}) {
+				# Don't create a duplicate account for an existing
+				# Unix username
+				&$first_print(&text('migrate_edbuser',
+					$myuinfo->{'user'}));
+				next;
+				}
+			else {
+				$myuinfo->{'uid'} = &allocate_uid(\%taken);
+				&create_user_home($myuinfo, \%dom, 1);
+				&create_user($myuinfo, \%dom);
+				&create_mail_file($myuinfo, \%dom);
+				$taken{$myuinfo->{'uid'}}++;
+				$usermap{$myuinfo->{'user'}} = $myuinfo;
+				}
+			$myucount++ if (!$myuserdone{$mname}++);
 			}
 
 		&$outdent_print();
@@ -720,15 +751,14 @@ if ($got{'mysql'}) {
 		$dbusers = { $dbusers->{'name'} => $dbusers };
 		}
 	foreach my $mname (keys %$dbusers) {
-		my $dbuser = $dbusers->{$name};
-		next if ($mname eq $user);	# Domain owner
+		# Skip the original or shared parent domain owner
+		next if ($mname eq $user || $mname eq $duser);
 		my $myuinfo = &create_initial_user(\%dom);
 		$myuinfo->{'user'} = $mname;
 		$myuinfo->{'plainpass'} =
 			$dbusers->{$mname}->{'password'}->{'content'};
 		$myuinfo->{'pass'} = &encrypt_user_password($myuinfo,
 					$myuinfo->{'plainpass'});
-		$myuinfo->{'uid'} = &allocate_uid(\%taken);
 		$myuinfo->{'gid'} = $dom{'gid'};
 		$myuinfo->{'real'} = "MySQL user";
 		$myuinfo->{'home'} =
@@ -738,11 +768,38 @@ if ($got{'mysql'}) {
 		$myuinfo->{'dbs'} = [ map { { 'type' => 'mysql',
 					      'name' => $_ } }
 					  (keys %$databases) ];
-		&create_user_home($myuinfo, \%dom, 1);
-		&create_user($myuinfo, \%dom);
-		&create_mail_file($myuinfo, \%dom);
-		$taken{$myuinfo->{'uid'}}++;
-		$myucount++;
+		my $already = $usermap{$myuinfo->{'user'}};
+		if ($already) {
+			# Add any missing databases to a user created earlier
+			# in the import
+			my %hasdb = map { $_->{'type'}."\0".$_->{'name'}, 1 }
+					@{$already->{'dbs'}};
+			my @newdbs = grep {
+				!$hasdb{$_->{'type'}."\0".$_->{'name'}}++
+				} @{$myuinfo->{'dbs'}};
+			if (@newdbs) {
+				my $olduinfo = { %$already };
+				$already->{'dbs'} = [ @{$already->{'dbs'}},
+						       @newdbs ];
+				&modify_user($already, $olduinfo, \%dom);
+				}
+			}
+		elsif ($utaken{$myuinfo->{'user'}}) {
+			# Don't create a duplicate account for an existing
+			# Unix username
+			&$first_print(&text('migrate_edbuser',
+				$myuinfo->{'user'}));
+			next;
+			}
+		else {
+			$myuinfo->{'uid'} = &allocate_uid(\%taken);
+			&create_user_home($myuinfo, \%dom, 1);
+			&create_user($myuinfo, \%dom);
+			&create_mail_file($myuinfo, \%dom);
+			$taken{$myuinfo->{'uid'}}++;
+			$usermap{$myuinfo->{'user'}} = $myuinfo;
+			}
+		$myucount++ if (!$myuserdone{$mname}++);
 		}
 
 	&enable_quotas(\%dom);
