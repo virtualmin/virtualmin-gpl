@@ -2681,7 +2681,7 @@ if ($ssldis =~ /yes/i) {
 	}
 
 # Created combined file if needed
-if (!$d->{'ssl_combined'} && !-r $d->{'ssl_combined'}) {
+if (!$d->{'ssl_combined'} || !-r $d->{'ssl_combined'}) {
 	&sync_combined_ssl_cert($d);
 	}
 
