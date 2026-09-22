@@ -239,6 +239,18 @@ if ($id) {
 return \%dom;
 }
 
+# get_lock_domain(&domain)
+# Lock a domain and re-read it from disk if needed
+sub get_lock_domain
+{
+my ($d) = @_;
+my $rv = &lock_domain($d);
+if ($rv) {
+	$d = &get_domain($d->{'id'}, undef, 1);
+	}
+return $d;
+}
+
 # complete_domain(&domain)
 # Fills in any missing fields in a domain object
 sub complete_domain
@@ -659,12 +671,16 @@ return;
 }
 
 # lock_domain(&domain|id)
-# Lock the config file for some domain
+# Lock the config file for some domain. Returns 1 if a new lock was
+# taken, or 0 if we already had a lock.
 sub lock_domain
 {
 my ($id) = @_;
 $id = $id->{'id'} if (ref($id));
+my $f = "$domains_dir/$id";
+my $oldpid = &test_lock($f);
 &lock_file("$domains_dir/$id");
+return $oldpid && $oldpid == $$ ? 0 : 1;
 }
 
 # unlock_domain(&domain|id)
