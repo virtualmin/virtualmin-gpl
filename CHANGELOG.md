@@ -1,6 +1,8 @@
-#### Version 8.2.1
+#### Version 8.3.0
 * Add Matomo web analytics installer to Virtualmin GPL, including detection of existing installs and display of the tracking code to embed in website pages
 * Fix missing ProFTPD SFTP and TLS log rotation while preserving existing rotation rules
+* Fix rotated Apache and Nginx logs keeping the old domain name after a virtual server is renamed
+* Fix domain owners losing access to Nginx logs after reopening or rotation
 * Fix cloning Apache virtual servers overwriting newly issued SSL certificates with the source server's certificate [#1280](https://github.com/virtualmin/virtualmin-gpl/issues/1280)
 * Fix missing POP3 password authentication in mail client autoconfiguration
 * Fix backup restores rejecting UID conflicts and existing cloud DNS zones before applying restore options and destination settings
