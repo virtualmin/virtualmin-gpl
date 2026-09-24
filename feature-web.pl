@@ -4723,10 +4723,14 @@ foreach my $ld ("ErrorLog", "TransferLog", "CustomLog") {
 			$l =~ s/\Q$oldd->{'dom'}\E/$d->{'dom'}/g;
 			}
 		if ($l ne $oldl && $rlogs) {
-			# Rename log file too
+			# Rename the active log and rotated copies, keeping each suffix
 			my $wl = &apache::wsplit($l);
 			my $woldl = &apache::wsplit($oldl);
-			&rename_file($woldl->[0], $wl->[0]);
+			foreach my $log (&all_log_files($woldl->[0])) {
+				my $newlog = $log;
+				$newlog =~ s/^\Q$woldl->[0]\E/$wl->[0]/;
+				&rename_file($log, $newlog);
+				}
 			}
 		}
 	&apache::save_directive($ld, \@ldv, $vconf, $conf);

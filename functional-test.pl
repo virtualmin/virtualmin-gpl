@@ -10742,6 +10742,16 @@ $rename_tests = [
 		      [ 'all-features' ] ],
 	},
 
+	# Seed numbered and dated archives for the Apache log rename
+	$web eq 'web' && -d "/var/log/virtualmin" ? (map {
+		my $log = '/var/log/virtualmin/'.$test_domain.'_'.$_.'_log';
+		{ 'command' => 'echo rotated-log-test > '.&quote_path($log.'.1').
+				' && gzip -c '.&quote_path($log.'.1').
+				' > '.&quote_path($log.'.2.gz').
+				' && gzip -c '.&quote_path($log.'.1').
+				' > '.&quote_path($log.'-20260101.gz') },
+		} ('access', 'error')) : ( ),
+
 	# Rename the domain
 	{ 'command' => 'rename-domain.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
@@ -10798,6 +10808,18 @@ $rename_tests = [
 	{ 'command' => 'ls /var/log/virtualmin/'.$test_domain.'_error_log',
 	  'fail' => 1 },
 	) : ( ),
+
+	# Check archive contents and ensure the old names are gone
+	$web eq 'web' && -d "/var/log/virtualmin" ? (map {
+		my $oldlog = '/var/log/virtualmin/'.$test_domain.'_'.$_.'_log';
+		my $newlog = '/var/log/virtualmin/'.$test_rename_domain.'_'.$_.'_log';
+		map {
+			my $read = /\.gz$/ ? 'gzip -cd ' : 'cat ';
+			{ 'command' => 'test ! -e '.&quote_path($oldlog.$_).
+					' && '.$read.&quote_path($newlog.$_),
+			  'grep' => '^rotated-log-test$' },
+			} ('.1', '.2.gz', '-20260101.gz');
+		} ('access', 'error')) : ( ),
 
 	# Check that the SSL cert is for the new hostname
 	{ 'command' => 'get-ssl.pl',
