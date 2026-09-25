@@ -3,7 +3,7 @@
 # correct SMTP and IMAP server details.
 
 # For internal version checking
-$AUTOCONFIG_VERSION = 1.0;
+$AUTOCONFIG_VERSION = 1.1;
 
 # These variables get replaced when the script is copied
 $OWNER = '';		# Bob's website
@@ -17,6 +17,7 @@ $SMTP_ENC = '';		# password-cleartext
 $IMAP_HOST = '';	# mail.bob.com
 $IMAP_PORT = '';	# 143
 $POP3_PORT = '';	# 110
+$POP3_ENC = '';		# password-cleartext
 $IMAP_TYPE = '';	# plain or SSL
 $IMAP_SSL = '';		# yes or no
 $IMAP_SSL2 = '';	# on or off

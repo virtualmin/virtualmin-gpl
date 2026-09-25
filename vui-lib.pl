@@ -364,7 +364,10 @@ Returns a note as a small font size text
 sub vui_note
 {
 my ($text) = @_;
-return "<font style='font-size:92%;opacity:0.66;white-space:nowrap;'>&nbsp;&nbsp;ⓘ&nbsp;&nbsp;".
+return "<font style='font-size:92%;opacity:0.66;white-space:nowrap;'>".
+		"&nbsp;&nbsp;".
+		"&#9432;".
+		"&nbsp;&nbsp;".
 	"$text</font>";
 }
 

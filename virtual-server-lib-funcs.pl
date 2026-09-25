@@ -101,7 +101,7 @@ else {
 	$main::list_domains_cache_time = $st[9];
 	}
 foreach $d (@files) {
-	if ($d !~ /^\./ && $d !~ /\.(lock|bak|back|backup|rpmsave|sav|swp|~)$/i && $d !~ /\.webmintmp\.\d+/i) {
+	if ($d !~ /^\./ && $d !~ /\.(lock|bak|back|backup|rpmsave|sav|swp|webminorig|~)$/i && $d !~ /\.webmintmp\.\d+/i) {
 		push(@rv, &get_domain($d));
 		}
 	}
@@ -11232,6 +11232,7 @@ if (!$tmpl->{'default'}) {
 		    "dns_cloud", "dns_slaves", "dns_prins", "dns_alias",
 		    "web_acme", "web_webmail", "web_admin", "web_http2",
 		    "web_redirects", "web_sslredirect", "web_php",
+		    "web_html_perms",
 		    "web", "dns", "ftp", "mail", "user_aliases",
 		    "ugroup", "sgroup", "quota", "uquota", "ushell", "ujail",
 		    "mailboxlimit", "domslimit",

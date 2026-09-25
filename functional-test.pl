@@ -6094,6 +6094,83 @@ $purge_tests = [
 	},
 	];
 
+# Tests for enabling mail autoconfiguration when CGI execution is disabled
+my %mailautoconfig_domain = %test_domain;
+$mailautoconfig_domain{$web} = 1;
+my @mailautoconfig_cgimodes = &has_cgi_support(\%mailautoconfig_domain);
+my ($mailautoconfig_cgimode) =
+	grep { &indexof($_, @mailautoconfig_cgimodes) >= 0 }
+		('suexec', 'fcgiwrap');
+if ($mailautoconfig_cgimode) {
+	my $passfile = &transname("mailautoconfig-password");
+	my $qpassfile = &quote_path($passfile);
+	# Show only the CGI mode to keep passwords out of failure output
+	my $cgimode_command = 'list-domains.pl --multiline --domain '.
+		&quote_path($test_domain).' | grep '.
+		&quote_path('CGI script execution mode:');
+	$mailautoconfig_tests = [
+		# Write a random test password to a private file
+		{ 'command' => 'umask 077; openssl rand -hex 32 > '.$qpassfile,
+		},
+		# Create a domain with mail and a website
+		{ 'command' => 'create-domain.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'desc', 'Test mail autoconfiguration' ],
+			      [ 'passfile', $passfile ],
+			      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+			      [ $web ], [ 'no-ip6' ], [ 'letsencrypt-never' ],
+			      @create_args, ],
+		},
+
+		# Turn off PHP and CGI execution before enabling autoconfiguration
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'mode', 'none' ] ],
+		},
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'disable-cgi' ] ],
+		},
+		{ 'command' => $cgimode_command,
+		  'grep' => 'CGI script execution mode: disabled',
+		},
+
+		# Enabling autoconfiguration must select a supported CGI mode
+		{ 'command' => 'modify-mail.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'autoconfig' ] ],
+		},
+		{ 'command' => $cgimode_command,
+		  'grep' => 'CGI script execution mode: '.
+			    $mailautoconfig_cgimode,
+		},
+
+		# Check that the autoconfiguration URL returns clientConfig XML
+		{ 'command' => $curl_command.'--location --resolve autoconfig.'.
+			       $test_domain.':80:'.$test_ip_address.' '.
+			       'http://autoconfig.'.
+			       $test_domain.'/mail/config-v1.1.xml?emailaddress='.
+			       'foo@'.$test_domain,
+		  'grep' => 'clientConfig',
+		  'sleep' => 5,
+		},
+
+		# Remove the test domain and password file
+		{ 'command' => 'delete-domain.pl',
+		  'args' => [ [ 'domain', $test_domain ] ],
+		  'cleanup' => 1,
+		},
+		{ 'command' => 'rm -f '.$qpassfile,
+		  'cleanup' => 1,
+		},
+		];
+	}
+else {
+	$mailautoconfig_tests = [
+		{ 'command' => 'echo Mail autoconfiguration test skipped: suEXEC and FCGIwrap are unavailable' },
+		];
+	}
+
 $mail_tests = [
 	# Create a domain to get spam
 	{ 'command' => 'create-domain.pl',
@@ -9942,7 +10019,7 @@ $web_tests = [
 	) : ( ),
 
 	# Test in suexec mode
-	&supports_fcgiwrap() ? (
+	&supports_suexec() ? (
 		{ 'command' => 'modify-web.pl',
 		  'args' => [ [ 'domain' => $test_domain ],
 			      [ 'enable-suexec' ] ],
@@ -10426,6 +10503,52 @@ if ($web eq 'virtualmin-nginx' &&
 else {
 	$nginxlisten_tests = [
 		{ 'command' => 'echo Nginx wildcard listener tests skipped' },
+		];
+	}
+
+# Tests for replacing unsupported CGI modes in standard templates
+my @template_cgimodes = &has_cgi_support();
+if (@template_cgimodes) {
+	my ($unsupported_cgimode) =
+		grep { &indexof($_, @template_cgimodes) < 0 }
+			('suexec', 'fcgiwrap');
+	$unsupported_cgimode ||= 'unsupported-functional-test-mode';
+	my $template_cgimode = $template_cgimodes[0];
+	my $config_backup = &transname("functional-test-virtualmin-config");
+	my $q_config = &quote_path($module_config_file);
+	my $q_config_backup = &quote_path($config_backup);
+	$cgitemplate_tests = [
+		# Preserve the module configuration before changing the default
+		{ 'command' => 'cp -p '.$q_config.' '.$q_config_backup,
+		},
+
+		# Store a CGI mode that the active web stack cannot use
+		{ 'command' => 'modify-template.pl',
+		  'args' => [ [ 'id', 0 ],
+			      [ 'setting', 'web_cgimode' ],
+			      [ 'value', $unsupported_cgimode ] ],
+		},
+		{ 'command' => 'grep "^cgimode='.
+			       $unsupported_cgimode.'$" '.$q_config,
+		},
+
+		# Reading the standard template must return the supported fallback
+		{ 'command' => 'get-template.pl',
+		  'args' => [ [ 'id', 0 ],
+			      [ 'setting', 'web_cgimode' ] ],
+		  'grep' => '^'.$template_cgimode.'$',
+		},
+
+		# Restore the original module configuration
+		{ 'command' => 'cp -p '.$q_config_backup.' '.$q_config.' && '.
+			       'rm -f '.$q_config_backup,
+		  'cleanup' => 1,
+		},
+		];
+	}
+else {
+	$cgitemplate_tests = [
+		{ 'command' => 'echo Standard template CGI test skipped' },
 		];
 	}
 
@@ -12997,9 +13120,23 @@ $clone_tests = [
 	  'grep' => 'Test clone page',
 	},
 
-	# Test HTTP get of old page
+	# Test HTTP get to original domain
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test source page',
+	},
+
+	# Test new domain SSL cert
+	{ 'command' => 'openssl s_client -host '.$test_clone_domain.
+		       ' -servername '.$test_clone_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Clone of Test domain', 'CN=(\\*\\.)?'.$test_clone_domain ],
+	},
+
+	# Test old domain SSL cert
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
 	# Check FTP login
@@ -15478,6 +15615,7 @@ $alltests = { '_config' => $_config_tests,
 	      'purge' => $purge_tests,
 	      'differential' => $differential_tests,
 	      'enc_differential' => $enc_differential_tests,
+	      'mailautoconfig' => $mailautoconfig_tests,
               'mail' => $mail_tests,
               'atmail' => $atmail_tests,
               'aliasmail' => $aliasmail_tests,
@@ -15496,6 +15634,7 @@ $alltests = { '_config' => $_config_tests,
 	      'ip6' => $ip6_tests,
 	      'noip4' => $noip4_tests,
 	      'nginxlisten' => $nginxlisten_tests,
+	      'cgitemplate' => $cgitemplate_tests,
 	      'webrename' => $webrename_tests,
 	      'rename' => $rename_tests,
 	      'bw' => $bw_tests,

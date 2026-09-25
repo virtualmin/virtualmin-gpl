@@ -866,7 +866,8 @@ if ($got{'mysql'}) {
 			if (/^GRANT USAGE ON \*\.\* TO '(\S+)'\@'(\S+)' IDENTIFIED BY PASSWORD '(\S+)';/) {
 				# Creating a MySQL user
 				my ($myuser, $mypass) = ($1, $3);
-				next if ($myuser eq $user);	# domain owner
+				# Skip the original or shared parent domain owner
+				next if ($myuser eq $user || $myuser eq $duser);
 				next if ($donemysqluser{$myuser}++);
 				my $myuinfo = &create_initial_user(\%dom);
 				$myuinfo->{'user'} = $myuser;
@@ -882,7 +883,8 @@ if ($got{'mysql'}) {
 			elsif (/GRANT ALL PRIVILEGES ON `(\S+)`\.\* TO '(\S+)'\@'(\S+)';/ || /GRANT SELECT.*\sON `(\S+)`\.\* TO '(\S+)'\@'(\S+)';/) {
 				# Granting access to a MySQL database
 				my ($mydb, $myuser) = ($1, $2);
-				next if ($myuser eq $user);	# domain owner
+				# Skip the original or shared parent domain owner
+				next if ($myuser eq $user || $myuser eq $duser);
 				next if ($donemysqlpriv{$mydb,$myuser}++);
 				$mydb =~ s/\\(.)/$1/g;
 				if ($myusers{$myuser}) {
@@ -899,6 +901,13 @@ if ($got{'mysql'}) {
 				my $olduinfo = { %$already };
 				$already->{'dbs'} = $myuinfo->{'dbs'};
 				&modify_user($already, $olduinfo, \%dom);
+				}
+			elsif ($utaken{$myuinfo->{'user'}}) {
+				# Don't create a duplicate account for an existing
+				# Unix username
+				&$first_print(&text('migrate_edbuser',
+					$myuinfo->{'user'}));
+				next;
 				}
 			else {
 				$myuinfo->{'uid'} = &allocate_uid(\%taken);

@@ -70,6 +70,8 @@ if (!&master_admin() && $name eq $d->{'db'} &&
 
 # Do it
 &set_all_null_print();
+&lock_domain($d);
+$d = &get_domain($d->{'id'}, undef, 1);
 if (&indexof($type, &list_database_plugins()) >= 0) {
 	&plugin_call($type, "database_delete", $d, $name);
 	}
@@ -79,6 +81,7 @@ else {
 	}
 &save_domain($d);
 &refresh_webmin_user($d);
+&unlock_domain($d);
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV, $d);
 print "Database $name deleted successfully\n";

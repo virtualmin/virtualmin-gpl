@@ -4942,6 +4942,7 @@ migrate_edom=Missing or invalid domain name
 migrate_eclash=The specified domain is already hosted by Virtualmin
 migrate_euser=Missing or invalid username
 migrate_euserclash=The specified administration user already exists
+migrate_edbuser=Skipping database user $1, as a Unix user with that name already exists
 migrate_doing1=Starting migration of $1 from $2 ..
 migrate_ok=Successfully migrated $2 virtual server, <a href='$1'>click here</a> to manage it.
 migrate_failed=Failed to migrate any servers!
@@ -7548,6 +7549,7 @@ dkim_adding=Enabling DKIM signing for $1 ..
 dkim_removing=Disabling DKIM signing for $1 ..
 
 newautoconfig_title=Mail Client Configuration
+newautoconfig_return=mail client configuration
 autoconfig_ecannot=You are not allowed to edit mail client configuration
 autoconfig_header=Client autoconfiguration options
 autoconfig_desc=This page allows you to enable the automatic configuration URL $1 for all Virtual servers, which is used by mail clients like Thunderbird and Outlook. This lets users configure the IMAP and SMTP settings in their mail clients based on only an email address.

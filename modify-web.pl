@@ -120,6 +120,10 @@ as well.
 To force re-generated of TLSA DNS records after the SSL cert is manually
 modified, use the C<--sync-tlsa> flag.
 
+Apache directives can be added with the C<--add-directive> flag. To attach
+comments, pass each comment in its own C<--add-directive> argument immediately
+before the directive, with the leading C<#> included.
+
 You can select which mode is used for running CGI scripts with one of the
 flags C<--enable-fcgiwrap> or C<--enable-suexec>. Or you can turn off CGIs
 entirely (not recommended) with C<--disable-cgi>.
@@ -341,11 +345,23 @@ while(@ARGV > 0) {
 		$cgimode = '';
 		}
 	elsif ($a eq "--add-directive") {
-		my ($n, $v) = split(/\s+/, shift(@ARGV));
-		$n ne "" && $n ne "" ||
-			&usage("--add-directive must be followed by a ".
-			       "directive name and value");
-		push(@add_dirs, [ $n, $v ]);
+		my $spec = shift(@ARGV);
+		defined($spec) && $spec !~ /[\r\n]/ ||
+			&usage("--add-directive must be followed by a single ".
+			       "directive or comment line");
+		if ($spec =~ /^\s*(#.*)$/) {
+			# Comments belong to the next real directive
+			push(@add_dir_comments, $1);
+			}
+		else {
+			$spec =~ s/^\s+//;
+			my ($n, $v) = split(/\s+/, $spec, 2);
+			defined($n) && $n ne "" && defined($v) && $v ne "" ||
+				&usage("--add-directive must be followed by a ".
+				       "directive name and value");
+			push(@add_dirs, [ $n, $v, [ @add_dir_comments ] ]);
+			@add_dir_comments = ( );
+			}
 		}
 	elsif ($a eq "--remove-directive") {
 		my ($n, $v) = split(/\s+/, shift(@ARGV));
@@ -405,6 +421,8 @@ while(@ARGV > 0) {
 		&usage("Unknown parameter $a");
 		}
 	}
+@add_dir_comments &&
+	&usage("An --add-directive comment must be followed by a directive");
 @dnames || $all_doms || usage("No domains to modify specified");
 $mode || $tlsa || $rubymode ||
   defined($content) || defined($children) || defined($phplog) ||
@@ -1044,12 +1062,20 @@ foreach $d (@doms) {
 			my ($virt, $vconf, $conf) =
 				&get_apache_virtual($d->{'dom'}, $p);
 			next if (!$virt);
-			foreach my $a (@add_dirs) {
-				my @old = &apache::find_directive(
-					$a->[0], $vconf);
-				push(@old, $a->[1]);
-				&apache::save_directive(
-					$a->[0], \@old, $vconf, $conf);
+			# Structs use the same insertion point, so add in reverse
+			foreach my $a (reverse(@add_dirs)) {
+				my $indent = $vconf->[0]->{'indent'};
+				my $new = {
+					'name' => $a->[0],
+					'value' => $a->[1],
+					'type' => 0,
+					'indent' => $indent,
+					};
+				$new->{'comments'} = [ map {
+						(" " x $indent).$_
+						} @{$a->[2]} ] if (@{$a->[2]});
+				&apache::save_directive_struct(
+					undef, $new, $vconf, $conf);
 				}
 			foreach my $a (@remove_dirs) {
 				my @old;
@@ -1237,6 +1263,7 @@ print "                     [--enable-fcgiwrap | --enable-suexec |\n";
 print "                      --disable-cgi]\n";
 print "                     [--sync-tlsa]\n";
 print "                     [--add-directive \"name value\"]\n";
+print "                     [--add-directive \"# comment\"]\n";
 print "                     [--remove-directive \"name value\"]\n";
 print "                     [--protocols \"proto ..\" | --default-protocols]\n";
 print "                     [--ssl-cert file | --default-ssl-cert]\n";
