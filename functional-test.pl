@@ -10753,14 +10753,22 @@ $rename_tests = [
 	) : ( ),
 
 	# Seed numbered and dated archives for the Apache log rename
-	$web eq 'web' ? (map {
-		my $log = $rename_log_dir.'/'.$test_domain.'_'.$_.'_log';
-		{ 'command' => 'echo rotated-log-test > '.&quote_path($log.'.1').
-				' && gzip -c '.&quote_path($log.'.1').
-				' > '.&quote_path($log.'.2.gz').
-				' && gzip -c '.&quote_path($log.'.1').
-				' > '.&quote_path($log.'-20260101.gz') },
-		} ('access', 'error')) : ( ),
+	$web eq 'web' ? (
+	{ 'command' => 'echo rotated-log-test > '.
+			&quote_path($rename_log_dir.'/'.$test_domain.'_access_log.1').
+		      ' && gzip -c '.&quote_path($rename_log_dir.'/'.$test_domain.'_access_log.1').
+		      ' > '.&quote_path($rename_log_dir.'/'.$test_domain.'_access_log.2.gz').
+		      ' && gzip -c '.&quote_path($rename_log_dir.'/'.$test_domain.'_access_log.1').
+		      ' > '.&quote_path($rename_log_dir.'/'.$test_domain.'_access_log-20260101.gz'),
+	},
+	{ 'command' => 'echo rotated-log-test > '.
+			&quote_path($rename_log_dir.'/'.$test_domain.'_error_log.1').
+		      ' && gzip -c '.&quote_path($rename_log_dir.'/'.$test_domain.'_error_log.1').
+		      ' > '.&quote_path($rename_log_dir.'/'.$test_domain.'_error_log.2.gz').
+		      ' && gzip -c '.&quote_path($rename_log_dir.'/'.$test_domain.'_error_log.1').
+		      ' > '.&quote_path($rename_log_dir.'/'.$test_domain.'_error_log-20260101.gz'),
+	},
+	) : ( ),
 
 	# Rename the domain
 	{ 'command' => 'rename-domain.pl',
@@ -10820,16 +10828,32 @@ $rename_tests = [
 	) : ( ),
 
 	# Check archive contents and ensure the old names are gone
-	$web eq 'web' ? (map {
-		my $oldlog = $rename_log_dir.'/'.$test_domain.'_'.$_.'_log';
-		my $newlog = $rename_log_dir.'/'.$test_rename_domain.'_'.$_.'_log';
-		map {
-			my $read = /\.gz$/ ? 'gzip -cd ' : 'cat ';
-			{ 'command' => 'test ! -e '.&quote_path($oldlog.$_).
-					' && '.$read.&quote_path($newlog.$_),
-			  'grep' => '^rotated-log-test$' },
-			} ('.1', '.2.gz', '-20260101.gz');
-		} ('access', 'error')) : ( ),
+	$web eq 'web' ? (
+	{ 'command' => 'test ! -e '.&quote_path($rename_log_dir.'/'.$test_domain.'_access_log.1').
+		      ' && cat '.&quote_path($rename_log_dir.'/'.$test_rename_domain.'_access_log.1'),
+	  'grep' => '^rotated-log-test$',
+	},
+	{ 'command' => 'test ! -e '.&quote_path($rename_log_dir.'/'.$test_domain.'_access_log.2.gz').
+		      ' && gzip -cd '.&quote_path($rename_log_dir.'/'.$test_rename_domain.'_access_log.2.gz'),
+	  'grep' => '^rotated-log-test$',
+	},
+	{ 'command' => 'test ! -e '.&quote_path($rename_log_dir.'/'.$test_domain.'_access_log-20260101.gz').
+		      ' && gzip -cd '.&quote_path($rename_log_dir.'/'.$test_rename_domain.'_access_log-20260101.gz'),
+	  'grep' => '^rotated-log-test$',
+	},
+	{ 'command' => 'test ! -e '.&quote_path($rename_log_dir.'/'.$test_domain.'_error_log.1').
+		      ' && cat '.&quote_path($rename_log_dir.'/'.$test_rename_domain.'_error_log.1'),
+	  'grep' => '^rotated-log-test$',
+	},
+	{ 'command' => 'test ! -e '.&quote_path($rename_log_dir.'/'.$test_domain.'_error_log.2.gz').
+		      ' && gzip -cd '.&quote_path($rename_log_dir.'/'.$test_rename_domain.'_error_log.2.gz'),
+	  'grep' => '^rotated-log-test$',
+	},
+	{ 'command' => 'test ! -e '.&quote_path($rename_log_dir.'/'.$test_domain.'_error_log-20260101.gz').
+		      ' && gzip -cd '.&quote_path($rename_log_dir.'/'.$test_rename_domain.'_error_log-20260101.gz'),
+	  'grep' => '^rotated-log-test$',
+	},
+	) : ( ),
 
 	# Check that the SSL cert is for the new hostname
 	{ 'command' => 'get-ssl.pl',
