@@ -12,9 +12,15 @@ if ($domsstr) {
 		next if (!$d);
 		next if (!&can_edit_domain($d));
 		# Recheck access to the current record before updating WHOIS settings.
-		&with_locked_domain($d, sub {
-			my ($d) = @_;
-			return if (!&can_edit_domain($d));
+		my $locked;
+		$d = &get_lock_domain($d, \$locked);
+		if (!$d || !&can_edit_domain($d)) {
+			&unlock_domain($d) if ($locked);
+			next;
+			}
+		eval {
+			local $main::error_must_die = 1;
+			local $domain_lock_scope{$d->{'id'}} = $$;
 			if ($in{'ignore'}) {
 				# Ignore expiry forever
 				$d->{'whois_ignore'} = 1;
@@ -30,7 +36,11 @@ if ($domsstr) {
 				delete($d->{'whois_ignore'});
 				}
 			&save_domain($d);
-			});
+			};
+		my $err = $@;
+		&unlock_domain($d) if ($locked);
+		delete($main::get_domain_cache{$d->{'id'}}) if ($err);
+		&error($err) if ($err);
 		}
 	}
 &redirect(&get_referer_relative());

@@ -50,8 +50,12 @@ if ($in{'confirm'} || $in{'confirm_auto'}) {
 		}
 	elsif ($in{'confirm_auto'}) {
 		# Recheck permission and disabled status before changing the schedule.
-		&with_locked_domain($d, sub {
-			$d = shift;
+		my $locked;
+		$d = &get_lock_domain($d, \$locked);
+		&error($text{'edit_egone'}) if (!$d);
+		eval {
+			local $main::error_must_die = 1;
+			local $domain_lock_scope{$d->{'id'}} = $$;
 			&can_disable_domain($d) || &error($text{'edit_ecannot'});
 			$d->{'disabled'} && &error($text{'disable_ealready'});
 			# Update auto-disabled flag
@@ -89,7 +93,11 @@ if ($in{'confirm'} || $in{'confirm_auto'}) {
 			print $text{'save_domain'},"<br>\n";
 			&save_domain($d);
 			&$second_print($text{'setup_done'});
-		});
+			};
+		my $err = $@;
+		&unlock_domain($d) if ($locked);
+		delete($main::get_domain_cache{$d->{'id'}}) if ($err);
+		&error($err) if ($err);
 		# Add link to show domain schedule
 		@auto_disable_link =
 			( "disable_domain.cgi?dom=$d->{'id'}&mode=schedule",

@@ -182,8 +182,6 @@ foreach $d (@doms) {
 		    !$d->{'bw_no_disable'}) {
 			# Time to disable this domain and all sub-servers
 			&set_all_null_print();
-			# Save usage and notification times before disabling rereads the domain.
-			&save_domain($d);
 
 			foreach my $dd (@alld) {
 				&disable_virtual_server($dd, 'bw',

@@ -279,34 +279,61 @@ foreach my $domain (&list_domains()) {
 		};
 
 	# Read current settings for the before command, then recheck the IP afterward.
-	next if (!&with_locked_domain($domain, $prepare));
+	my $locked;
+	my $current = &get_lock_domain($domain, \$locked);
+	next if (!$current);
+	my $ready;
+	eval {
+		local $main::error_must_die = 1;
+		$ready = &$prepare($current);
+		};
+	my $failure = $@;
+	&unlock_domain($current) if ($locked);
+	&error($failure) if ($failure);
+	next if (!$ready);
 	&set_domain_envs($oldd, "MODIFY_DOMAIN", $d);
 	my $merr = &making_changes();
 	&reset_domain_envs($oldd);
 	&error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
-	my $changed = &with_locked_domain($domain, sub {
-		return 0 if (!&$prepare(shift));
-		$main::get_domain_cache{$d->{'id'}} = $d;
-		# Update all features
-		foreach my $f (@features) {
-			my $mfunc = "modify_$f";
-			if ($config{$f} && $d->{$f}) {
-				&try_function($f, $mfunc, $d, $oldd);
-				}
-			}
-		foreach my $f (&list_feature_plugins()) {
-			if ($d->{$f}) {
-				&plugin_call($f, "feature_modify", $d, $oldd);
-				}
-			}
+	$current = &get_lock_domain($domain, \$locked);
+	next if (!$current);
+	my $changed;
+	{
+		# Feature helpers must not release this update's domain lock.
+		local $domain_lock_scope{$domain->{'id'}} = $$;
+		local $main::get_domain_cache{$domain->{'id'}} = $current;
+		eval {
+			local $main::error_must_die = 1;
+			if (&$prepare($current)) {
+				$main::get_domain_cache{$d->{'id'}} = $d;
+				# Update all features
+				foreach my $f (@features) {
+					my $mfunc = "modify_$f";
+					if ($config{$f} && $d->{$f}) {
+						&try_function($f, $mfunc, $d, $oldd);
+						}
+					}
+				foreach my $f (&list_feature_plugins()) {
+					if ($d->{$f}) {
+						&plugin_call($f, "feature_modify", $d, $oldd);
+						}
+					}
 
-		# Save new domain details
-		&$first_print($text{'save_domain'});
-		&save_domain($d);
-		&$second_print($text{'setup_done'});
-
-		return 1;
-		});
+				# Save new domain details
+				&$first_print($text{'save_domain'});
+				&save_domain($d);
+				&$second_print($text{'setup_done'});
+				$changed = 1;
+				}
+			};
+		$failure = $@;
+	}
+	&unlock_domain($current) if ($locked);
+	if ($failure) {
+		# Discard a cached copy if a feature failed after changing it.
+		delete($main::get_domain_cache{$domain->{'id'}});
+		&error($failure);
+		}
 	next if (!$changed);
 	%$domain = %$d;
 	# Make cache lookups use the caller's updated object.

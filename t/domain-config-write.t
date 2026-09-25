@@ -68,76 +68,46 @@ local $main::outdent_print = sub { };
 $code->(\%stale, \%disk, \$held, \$writes, \$missing);
 }
 
-subtest 'operation locks survive nested helpers and failures' => sub {
-	fixture(sub {
-		my ($stale, $disk, $held) = @_;
-		my $rv = main::with_locked_domain($stale, sub {
-			my ($d) = @_;
-			is($d->{owner}, 'new', 'callback sees the current domain');
-			main::lock_domain($d);
-			main::unlock_domain($d);
-			ok($$held, 'nested feature unlock cannot release the operation lock');
-			eval { main::with_locked_domain($d, sub { fail('nested update ran'); }); };
-			like($@, qr/already being updated/, 'nested operation is rejected');
-			ok($$held, 'rejected nested operation retains outer lock');
-			return 42;
-			});
-		is($rv, 42, 'callback result is returned');
-		ok(!$$held, 'operation releases its lock');
-		eval { main::with_locked_domain($stale, sub { die "fixture failure\n"; }); };
-		like($@, qr/fixture failure/, 'failure is propagated');
-		ok(!$$held, 'failed operation releases its lock');
-		main::lock_domain($stale);
-		main::with_locked_domain($stale, sub { });
-		ok($$held, 'pre-existing caller lock is retained');
-		main::unlock_domain($stale);
-		});
-	};
-
-subtest 'private cache protects snapshots and pending changes' => sub {
+subtest 'get_lock_domain rereads only when acquiring a lock' => sub {
 	fixture(sub {
 		my ($stale, $disk, $held, $writes) = @_;
-		$stale->{owner} = 'unsaved caller change';
-		my %before = %$stale;
-		my $other_reference = $stale;
-		main::with_locked_domain($stale, sub {
-			my ($d) = @_;
-			is($d->{owner}, 'new', 'operation starts with the disk record');
-			is(refaddr(main::get_domain($d->{id})), refaddr($d),
-				'lookups inside the operation use its private record');
-			$d->{owner} = 'pending outer change';
-			eval { main::with_locked_domain($d, sub { fail('nested update ran'); }); };
-			like($@, qr/already being updated/, 'nested update is rejected');
-			is($d->{owner}, 'pending outer change', 'rejected update preserves pending values');
-			main::save_domain($d);
-			});
-		is_deeply($other_reference, \%before, 'all references to the caller snapshot are unchanged');
-		is(main::get_domain('123')->{owner}, 'pending outer change',
-			'next lookup sees the saved record instead of the restored stale cache');
-		is($$writes, 1, 'only the outer update is saved');
-
-		# An exception must not leave unsaved changes in the cache.
-		eval { main::with_locked_domain($stale, sub {
-			$_[0]->{owner} = 'abandoned change';
-			die "fixture failure\n";
-			}); };
-		like($@, qr/fixture failure/, 'callback failure is propagated');
-		is(main::get_domain('123')->{owner}, 'pending outer change',
-			'failed callback does not leave an unsaved value in the cache');
-		ok(!$$held, 'failed callback releases its lock');
+		my $locked;
+		my $d = main::get_lock_domain($stale, \$locked);
+		ok($locked, 'new lock is reported');
+		is($d->{owner}, 'new', 'caller receives the current record');
+		is(refaddr(main::get_domain($d->{id})), refaddr($d),
+			'cache lookups use the returned record');
+		$d->{owner} = 'pending edit';
+		my $nested;
+		my $same = main::get_lock_domain($d, \$nested);
+		ok(!$nested, 'nested call does not claim the caller lock');
+		is(refaddr($same), refaddr($d), 'nested call returns the active object');
+		is($same->{owner}, 'pending edit', 'nested call keeps unsaved edits');
+		main::save_domain($same);
+		ok($$held, 'save retains the caller lock');
+		main::unlock_domain($d) if $locked;
+		ok(!$$held, 'caller releases its lock');
+		is($disk->{owner}, 'pending edit', 'pending edit is saved');
+		$disk->{owner} = 'another process';
+		$d = main::get_lock_domain($d);
+		is($d->{owner}, 'another process', 'one-argument call rereads after reacquiring');
+		main::unlock_domain($d);
 		});
 	};
 
-subtest 'missing domains and failed locks prevent operations' => sub {
+subtest 'missing domains and failed locks prevent updates' => sub {
 	fixture(sub {
 		my ($stale, $disk, $held, $writes, $missing) = @_;
 		$$missing = 1;
-		main::with_locked_domain($stale, sub { fail('deleted domain callback ran'); });
-		ok(!$$held, 'deleted domain releases its lock');
+		my $locked;
+		is(main::get_lock_domain($stale, \$locked), undef,
+			'deleted domain is not returned');
+		ok(!$$held && !$locked, 'deleted domain releases its new lock');
+		ok(!exists($main::get_domain_cache{123}), 'deleted record is removed from cache');
 		no warnings 'redefine';
 		local *main::lock_file = sub { return 0; };
 		local *main::test_lock = sub { return $$ + 1; };
-		eval { main::with_locked_domain($stale, sub { fail('unlocked callback ran'); }); };
+		eval { main::get_lock_domain($stale); };
 		like($@, qr/could not be locked/, 'lock failure stops the operation');
 		is($$writes, 0, 'neither failure writes a domain');
 		local *main::test_lock = sub { return undef; };
@@ -145,10 +115,21 @@ subtest 'missing domains and failed locks prevent operations' => sub {
 		local $SIG{__WARN__} = sub { push(@warnings, @_); };
 		{
 			local $^W = 1;
-			eval { main::with_locked_domain($stale, sub { fail('unlocked callback ran'); }); };
+			eval { main::get_lock_domain($stale); };
 		}
 		like($@, qr/could not be locked/, 'missing lock owner is reported');
 		is_deeply(\@warnings, [], 'undefined lock owner does not cause a warning');
+		});
+	};
+
+subtest 'failed domain reads release new locks' => sub {
+	fixture(sub {
+		my ($stale, $disk, $held) = @_;
+		no warnings 'redefine';
+		local *main::read_file = sub { die "fixture read failure\n"; };
+		eval { main::get_lock_domain($stale); };
+		like($@, qr/fixture read failure/, 'read failure reaches the caller');
+		ok(!$$held, 'failed read releases its new lock');
 		});
 	};
 
@@ -349,6 +330,66 @@ for my $operation ('disable', 'enable', 'IP update') {
 				'later edits do not diverge between caller and cache');
 			});
 		};
+	}
+
+# Library operations must preserve a caller's pending edits and keep feature
+# unlocks from releasing the domain before the final save.
+for my $operation ('disable', 'enable', 'IP update') {
+	for my $outer (0, 1) {
+		for my $fail (0, 1) {
+			subtest "$operation lock cleanup: outer=$outer failure=$fail" => sub {
+				fixture(sub {
+					my ($stale, $disk, $held, $writes) = @_;
+					no warnings qw(once redefine);
+					$disk->{web} = 1;
+					$disk->{disabled} = 'web' if $operation eq 'enable';
+					my $d = $stale;
+					if ($outer) {
+						$d = main::get_lock_domain($d);
+						$d->{bw_usage} = 12345;
+						}
+					local *main::list_domains = sub { return $d; };
+					local *main::get_disable_features = sub { return ('web'); };
+					local *main::get_enable_features = sub { return ('web'); };
+					local *main::update_extra_webmin = sub { };
+					local *main::try_function = sub {
+						my $active = $_[2];
+						main::lock_domain($active);
+						main::unlock_domain($active);
+						ok($$held, 'feature unlock leaves the outer lock held');
+						$active->{feature_pending} = 1;
+						my $nested = main::get_lock_domain($active);
+						ok($nested->{feature_pending}, 'nested read preserves pending edits');
+						die "fixture feature failure\n" if $fail;
+						return (1, 1);
+						};
+					eval {
+						if ($operation eq 'disable') {
+							main::disable_virtual_server($d, 'bw');
+							}
+						elsif ($operation eq 'enable') {
+							main::enable_virtual_server($d);
+							}
+						else {
+							main::update_all_domain_ip_addresses('192.0.2.2', '192.0.2.1');
+							}
+						};
+					my $err = $@;
+					is(!!$$held, !!$outer, 'operation releases only its own lock');
+					is($$writes, $fail ? 0 : 1, 'failed feature changes are not saved');
+					if ($fail) {
+						like($err, qr/fixture feature failure/, 'failure reaches the caller');
+						ok(!exists($main::get_domain_cache{123}), 'failed working copy is not cached');
+						}
+					else {
+						is($err, '', 'operation succeeds');
+						is($disk->{bw_usage}, 12345, 'caller pending bandwidth survives') if $outer;
+						}
+					main::unlock_domain($d) if $outer;
+					});
+				};
+			}
+		}
 	}
 
 # Test transfer failures with simulated backups, services and transport.

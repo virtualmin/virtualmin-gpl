@@ -27,7 +27,7 @@ WebminCore->import();
 init_config();
 foreign_require('virtual-server');
 die 'Install the candidate domain locking helper first'
-	unless defined(&virtual_server::with_locked_domain);
+	unless defined(&virtual_server::get_lock_domain);
 die 'Requires timeout' unless has_command('timeout');
 local $main::error_must_die = 1;
 local $virtual_server::gconfig{'error_stack'} = 1;
@@ -280,13 +280,24 @@ sub update_fixture
 {
 my ($domain, $values, $deletes) = @_;
 my $domain_id = ref($domain) ? $domain->{'id'} : $domain;
+my $locked;
 local $main::get_domain_cache{$domain_id};
-virtual_server::with_locked_domain($domain, sub {
-	my ($d) = @_;
-	$d->{$_} = $values->{$_} for keys %$values;
-	delete($d->{$_}) for @{$deletes || []};
-	virtual_server::save_domain($d);
-	});
+# The fixture deliberately supplies snapshots, even when testing a caller lock.
+# Reread under that existing lock; otherwise get_lock_domain takes it first.
+my $d = (test_lock("$virtual_server::domains_dir/$domain_id") || 0) == $$ ?
+	virtual_server::get_domain($domain_id, undef, 1) :
+	virtual_server::get_lock_domain({ id => $domain_id }, \$locked);
+eval {
+	local $main::error_must_die = 1;
+	if ($d) {
+		$d->{$_} = $values->{$_} for keys %$values;
+		delete($d->{$_}) for @{$deletes || []};
+		virtual_server::save_domain($d);
+		}
+	};
+my $err = $@;
+virtual_server::unlock_domain($domain_id) if $locked;
+die $err if $err;
 if (ref($domain)) {
 	$domain->{$_} = $values->{$_} for keys %$values;
 	delete($domain->{$_}) for @{$deletes || []};

@@ -86,8 +86,12 @@ $d->{'disabled'} && &usage("Virtual server $domain is already disabled");
 @doms = ( $d );
 
 if ($scheduled) {
-	&with_locked_domain($d, sub {
-		$d = shift;
+	my $locked;
+	$d = &get_lock_domain($d, \$locked);
+	&usage("Virtual server $domain does not exist") if (!$d);
+	eval {
+		local $main::error_must_die = 1;
+		local $domain_lock_scope{$d->{'id'}} = $$;
 		$d->{'disabled'} && &usage("Virtual server $domain is already disabled");
 		if ($schedule eq "none") {
 			# Cancel scheduled disable
@@ -110,7 +114,11 @@ if ($scheduled) {
 		else {
 			&usage("Invalid schedule time $schedule");
 			}
-	});
+		};
+	my $err = $@;
+	&unlock_domain($d) if ($locked);
+	delete($main::get_domain_cache{$d->{'id'}}) if ($err);
+	&error($err) if ($err);
 	}
 else {
 	# If disabling sub-servers, find them too

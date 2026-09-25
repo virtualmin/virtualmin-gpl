@@ -82,10 +82,12 @@ removes a DNS-only `.invalid` domain and does not contact Cloudflare.
 
 ## Current tests
 
-`with_locked_domain` locks and rereads one domain without changing the caller's
-snapshot. The callback must save its changes. Calls to `lock_domain` and
-`unlock_domain` inside the callback keep the outer lock; another
-`with_locked_domain` call for the same domain is rejected to protect pending changes.
+`get_lock_domain` locks and rereads a domain before the caller changes it.
+If the caller already holds the lock, it returns the supplied record without
+rereading, preserving pending edits. Its optional second argument reports
+whether it acquired the lock. The caller must save changes and release its own
+lock on completion or failure. Feature updates keep nested helpers from releasing
+that lock early; `save_domain` also preserves caller-held locks.
 
 On a disposable Virtualmin VM, install the candidate code and run
 `VIRTUALMIN_DOMAIN_CONFIG_VM_TEST=1 prove -v t/domain-config-vm.t` as root.
@@ -123,7 +125,7 @@ without ACME requests. The test removes its domains and account afterward.
 | `mysql-backup-options.t` | Automatic MySQL point-in-time recovery coordinates, including binary log detection, dump client compatibility, Webmin backup API propagation, and restore-time coordinate parsing and log selection. |
 | `restore-preflight.t` | Restore preflight honors UID/GID reallocation and destination DNS settings while preserving database ownership, account-name, parent, and reseller checks. |
 | `module-config-write.t` | Locked module config updates preserve settings saved by concurrent processes. |
-| `domain-config-write.t` | Locked domain updates, cache isolation, stale IP and schedule decisions, deleted records, lock ownership, login and WHOIS collection, backup snapshots, and transfer failures. Uses local fixtures without service changes. |
+| `domain-config-write.t` | Locked domain updates, nested pending edits, stale IP and schedule decisions, deleted records, lock ownership, login and WHOIS collection, backup snapshots, and transfer failures. Uses local fixtures without service changes. |
 | `domain-config-vm.t` | Concurrent domain writes and real CLI operations. Requires an explicit opt-in on a disposable Virtualmin VM. |
 | `module-config-returns.t` | Config writer call sites treat the public keyed and diff helpers as void operations. |
 | `scripts-lib.t` | PHP extension package-name generation across supported package manager families. |

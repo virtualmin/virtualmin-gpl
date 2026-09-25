@@ -17,10 +17,15 @@ $homesize = &quota_bsize("home");
 $now = time();
 &read_file($user_quota_warnings_file, \%userwarnings);
 foreach $d (&list_domains()) {
-	&with_locked_domain($d, sub {
-		my ($d) = @_;
-		return if ($d->{'alias'});
-		return if ($d->{'disabled'});
+	my $locked;
+	$d = &get_lock_domain($d, \$locked);
+	if (!$d || $d->{'alias'} || $d->{'disabled'}) {
+		&unlock_domain($d) if ($locked);
+		next;
+		}
+	eval {
+		local $main::error_must_die = 1;
+		local $domain_lock_scope{$d->{'id'}} = $$;
 
 		if ($d->{'quota'} && !$d->{'parent'}) {
 			# Get usage for this server and all sub-servers
@@ -76,7 +81,11 @@ foreach $d (&list_domains()) {
 				push(@umsgs, $msg);
 				}
 			}
-	});
+		};
+	my $err = $@;
+	&unlock_domain($d) if ($locked);
+	delete($main::get_domain_cache{$d->{'id'}}) if ($err);
+	&error($err) if ($err);
 	}
 &write_file($user_quota_warnings_file, \%userwarnings);
 

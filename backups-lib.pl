@@ -894,13 +894,20 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 		}
 	elsif ($homefmt && !$d->{'dir'} && -d $d->{'home'}) {
 		# Home directory actually exists, so enable it on the domain
-		&with_locked_domain($d, sub {
-			my ($current) = @_;
-			return if ($current->{'home'} ne $d->{'home'} ||
-				! -d $current->{'home'});
-			$current->{'dir'} = 1;
-			&save_domain($current);
-			});
+		my $locked;
+		local $main::get_domain_cache{$d->{'id'}};
+		my $current = &get_lock_domain($d, \$locked);
+		eval {
+			local $main::error_must_die = 1;
+			if ($current && $current->{'home'} eq $d->{'home'} &&
+			    -d $current->{'home'}) {
+				$current->{'dir'} = 1;
+				&save_domain($current);
+				}
+			};
+		my $err = $@;
+		&unlock_domain($current) if ($locked);
+		&error($err) if ($err);
 		$d->{'dir'} = 1;
 		}
 
@@ -1483,11 +1490,17 @@ foreach my $d (@cleanuphomes) {
 	# Keep the home if another request enabled it. The temporary dir flag
 	# is saved only in the archive, so the live record needs no update.
 	my $home = $d->{'home'};
-	&with_locked_domain($d, sub {
-		my ($current) = @_;
-		&unlink_file($home) if (!$current->{'dir'} &&
+	my $locked;
+	local $main::get_domain_cache{$d->{'id'}};
+	my $current = &get_lock_domain($d, \$locked);
+	eval {
+		local $main::error_must_die = 1;
+		&unlink_file($home) if ($current && !$current->{'dir'} &&
 			$current->{'home'} eq $home);
-		});
+		};
+	my $err = $@;
+	&unlock_domain($current) if ($locked);
+	&error($err) if ($err);
 	}
 
 if (!$homefmt) {
