@@ -86,39 +86,33 @@ $d->{'disabled'} && &usage("Virtual server $domain is already disabled");
 @doms = ( $d );
 
 if ($scheduled) {
-	my $locked;
-	$d = &get_lock_domain($d, \$locked);
+	# Reread the domain under its lock, so the schedule change is applied
+	# to the current settings
+	$d = &get_lock_domain($d);
 	&usage("Virtual server $domain does not exist") if (!$d);
-	eval {
-		local $main::error_must_die = 1;
-		local $domain_lock_scope{$d->{'id'}} = $$;
-		$d->{'disabled'} && &usage("Virtual server $domain is already disabled");
-		if ($schedule eq "none") {
-			# Cancel scheduled disable
-			print "Turning off disable schedule for $d->{'dom'} ..\n";
-			delete($d->{'disabled_auto'});
-			&save_domain($d);
-			print ".. done\n";
-			}
-		elsif ($schedule =~ /^(\d+(?:\.\d+)?)$/) {
-			# Schedule can either be a timestamp or a number of days
-			$schedule = time() + int($schedule * 86400)
-				if ($schedule < 365*10);
-			$schedule > time() || &usage("Disable time must be in the future");
-			my $amsg = $d->{'disabled_auto'} ? "Updating" : "Setting";
-			print "$amsg the disable schedule for $d->{'dom'} to @{[&make_date($schedule)]} ..\n";
-			$d->{'disabled_auto'} = $schedule;
-			&save_domain($d);
-			print ".. done\n";
-			}
-		else {
-			&usage("Invalid schedule time $schedule");
-			}
-		};
-	my $err = $@;
-	&unlock_domain($d) if ($locked);
-	delete($main::get_domain_cache{$d->{'id'}}) if ($err);
-	&error($err) if ($err);
+	$d->{'disabled'} && &usage("Virtual server $domain is already disabled");
+	if ($schedule eq "none") {
+		# Cancel scheduled disable
+		print "Turning off disable schedule for $d->{'dom'} ..\n";
+		delete($d->{'disabled_auto'});
+		&save_domain($d);
+		print ".. done\n";
+		}
+	elsif ($schedule =~ /^(\d+(?:\.\d+)?)$/) {
+		# Schedule can either be a timestamp or a number of days
+		$schedule = time() + int($schedule * 86400)
+			if ($schedule < 365*10);
+		$schedule > time() || &usage("Disable time must be in the future");
+		my $amsg = $d->{'disabled_auto'} ? "Updating" : "Setting";
+		print "$amsg the disable schedule for $d->{'dom'} to @{[&make_date($schedule)]} ..\n";
+		$d->{'disabled_auto'} = $schedule;
+		&save_domain($d);
+		print ".. done\n";
+		}
+	else {
+		&usage("Invalid schedule time $schedule");
+		}
+	&unlock_domain($d);
 	}
 else {
 	# If disabling sub-servers, find them too
