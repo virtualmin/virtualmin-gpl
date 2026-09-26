@@ -49,43 +49,55 @@ if ($in{'confirm'} || $in{'confirm_auto'}) {
 				       $text{'disable_domain_return'} );
 		}
 	elsif ($in{'confirm_auto'}) {
-		# Update auto-disabled flag
-		&error_setup($text{'disable_edomain_sched2'});
-		my $auto_disable =
-			$in{'autodisable_def'} ? undef :
-				$in{'autodisable'} =~ /^(\d+)$/ ? $1 : undef;
-		if (defined($auto_disable)) {
-			my $ts = time();
-			$auto_disable = int($auto_disable);
-			$auto_disable || &error($text{'disable_save_eautodisable'});
-			if ($auto_disable > 365*10 &&
-			    $auto_disable < $ts) {
-				&error($text{'disable_save_eautodisable2'});
+		# Recheck permission and disabled status before changing the schedule.
+		my $locked;
+		$d = &get_lock_domain($d, \$locked);
+		&error($text{'edit_egone'}) if (!$d);
+		eval {
+			local $main::error_must_die = 1;
+			local $domain_lock_scope{$d->{'id'}} = $$;
+			&can_disable_domain($d) || &error($text{'edit_ecannot'});
+			$d->{'disabled'} && &error($text{'disable_ealready'});
+			# Update auto-disabled flag
+			&error_setup($text{'disable_edomain_sched2'});
+			my $auto_disable =
+				$in{'autodisable_def'} ? undef :
+					$in{'autodisable'} =~ /^(\d+)$/ ? $1 : undef;
+			if (defined($auto_disable)) {
+				my $ts = time();
+				$auto_disable = int($auto_disable);
+				$auto_disable || &error($text{'disable_save_eautodisable'});
+				if ($auto_disable > 365*10 &&
+				    $auto_disable < $ts) {
+					&error($text{'disable_save_eautodisable2'});
+					}
+				my $tlabel = !$d->{'disabled_auto'} ?
+					'disable_save_autodisable3' :
+					'disable_save_autodisable';
+				$d->{'disabled_auto'} =
+					$auto_disable >= $ts ? $auto_disable :
+					$ts + $auto_disable * 86400;
+				if ($auto_disable < $ts) {
+					&$first_print($text{$tlabel});
+					&$second_print($text{'setup_done'});
+					}
 				}
-			my $tlabel = !$d->{'disabled_auto'} ? 
-				'disable_save_autodisable3' :
-				'disable_save_autodisable'; 
-			$d->{'disabled_auto'} = 
-				$auto_disable >= $ts ? $auto_disable :
-				$ts + $auto_disable * 86400;
-			if ($auto_disable < $ts) {
-				&$first_print($text{$tlabel});
-				&$second_print($text{'setup_done'});
+			else {
+				$in{'autodisable'} && &error($text{'disable_save_eautodisable'});
+				if ($d->{'disabled_auto'}) {
+					&$first_print($text{'disable_save_autodisable2'});
+					delete($d->{'disabled_auto'});
+					&$second_print($text{'setup_done'});
+					}
 				}
-			}
-		else {
-			$in{'autodisable'} && &error($text{'disable_save_eautodisable'});
-			if ($d->{'disabled_auto'}) {
-				&$first_print($text{'disable_save_autodisable2'});
-				delete($d->{'disabled_auto'});
-				&$second_print($text{'setup_done'});
-				}
-			}
-		print $text{'save_domain'},"<br>\n";
-		&lock_domain($d);
-		&save_domain($d);
-		&unlock_domain($d);
-		&$second_print($text{'setup_done'});
+			print $text{'save_domain'},"<br>\n";
+			&save_domain($d);
+			&$second_print($text{'setup_done'});
+			};
+		my $err = $@;
+		&unlock_domain($d) if ($locked);
+		delete($main::get_domain_cache{$d->{'id'}}) if ($err);
+		&error($err) if ($err);
 		# Add link to show domain schedule
 		@auto_disable_link =
 			( "disable_domain.cgi?dom=$d->{'id'}&mode=schedule",

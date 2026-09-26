@@ -301,7 +301,7 @@ my @saved_domains;
 {
 no warnings 'redefine';
 local *main::make_dir = sub { };
-local *main::lock_file = sub { };
+local *main::lock_file = sub { return 1; };
 local *main::unlock_file = sub { };
 local *main::read_file = sub { return 0; };
 local *main::write_file = sub { push(@saved_domains, { %{$_[1]} }); };

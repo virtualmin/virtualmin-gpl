@@ -330,33 +330,59 @@ foreach my $tmpl (grep { $_->{'standard'} } &list_templates()) {
 # Cache current PHP modes, versions and error log files
 foreach my $d (grep { &domain_has_website($_) && !$_->{'alias'} }
 		    &list_domains()) {
-	&lock_domain($d);
-	if (!$d->{'php_mode'}) {
-		$d->{'php_mode'} = &get_domain_php_mode($d);
-		&save_domain($d);
+	# Preserve edits made since the domain list was loaded
+	my $locked;
+	$d = &get_lock_domain($d, \$locked);
+	if (!$d || !&domain_has_website($d) || $d->{'alias'}) {
+		&unlock_domain($d) if ($locked);
+		next;
 		}
-	if (!defined($d->{'php_error_log'})) {
-		$d->{'php_error_log'} = &get_domain_php_error_log($d) || "";
-		&save_domain($d);
-		}
-	if (!defined($d->{'php_version'}) &&
-	    ($d->{'php_mode'} eq 'cgi' || $d->{'php_mode'} eq 'fcgid')) {
-		my @dirs = &list_domain_php_directories($d);
-		if (@dirs) {
-			$d->{'php_version'} = $dirs[0]->{'version'};
+	eval {
+		local $main::error_must_die = 1;
+		local $domain_lock_scope{$d->{'id'}} = $$;
+		if (!$d->{'php_mode'}) {
+			$d->{'php_mode'} = &get_domain_php_mode($d);
+			&save_domain($d);
 			}
-		&save_domain($d);
-		}
-	&unlock_domain($d);
+		if (!defined($d->{'php_error_log'})) {
+			$d->{'php_error_log'} = &get_domain_php_error_log($d) || "";
+			&save_domain($d);
+			}
+		if (!defined($d->{'php_version'}) &&
+		    ($d->{'php_mode'} eq 'cgi' || $d->{'php_mode'} eq 'fcgid')) {
+			my @dirs = &list_domain_php_directories($d);
+			if (@dirs) {
+				$d->{'php_version'} = $dirs[0]->{'version'};
+				}
+			&save_domain($d);
+			}
+		};
+	my $err = $@;
+	&unlock_domain($d) if ($locked);
+	delete($main::get_domain_cache{$d->{'id'}}) if ($err);
+	&error($err) if ($err);
 	}
 foreach my $d (grep { $_->{'alias'} } &list_domains()) {
-	&lock_domain($d);
-	my $dd = &get_domain($d->{'alias'});
-	if ($dd && $dd->{'php_mode'}) {
-		$d->{'php_mode'} = $dd->{'php_mode'};
-		&save_domain($d);
+	# Recheck the alias before copying its target's PHP mode
+	my $locked;
+	$d = &get_lock_domain($d, \$locked);
+	if (!$d || !$d->{'alias'}) {
+		&unlock_domain($d) if ($locked);
+		next;
 		}
-	&unlock_domain($d);
+	eval {
+		local $main::error_must_die = 1;
+		local $domain_lock_scope{$d->{'id'}} = $$;
+		my $dd = &get_domain($d->{'alias'});
+		if ($dd && $dd->{'php_mode'}) {
+			$d->{'php_mode'} = $dd->{'php_mode'};
+			&save_domain($d);
+			}
+		};
+	my $err = $@;
+	&unlock_domain($d) if ($locked);
+	delete($main::get_domain_cache{$d->{'id'}}) if ($err);
+	&error($err) if ($err);
 	}
 
 # Enable checking for latest scripts
@@ -537,10 +563,22 @@ if (!&check_dkim()) {
 		foreach my $e (@{$dkim->{'exclude'}}) {
 			my $d = &get_domain_by("dom", $e);
 			if ($d) {
-				&lock_domain($d);
-				$d->{'dkim_enabled'} = 0;
-				&save_domain($d);
-				&unlock_domain($d);
+				my $locked;
+				$d = &get_lock_domain($d, \$locked);
+				if (!$d) {
+					&unlock_domain($d) if ($locked);
+					next;
+					}
+				eval {
+					local $main::error_must_die = 1;
+					local $domain_lock_scope{$d->{'id'}} = $$;
+					$d->{'dkim_enabled'} = 0;
+					&save_domain($d);
+					};
+				my $err = $@;
+				&unlock_domain($d) if ($locked);
+				delete($main::get_domain_cache{$d->{'id'}}) if ($err);
+				&error($err) if ($err);
 				}
 			}
 		delete($config{'dkim_exclude'});
@@ -551,10 +589,22 @@ if (!&check_dkim()) {
 		foreach my $e (@{$dkim->{'extra'}}) {
 			my $d = &get_domain_by("dom", $e);
 			if ($d && $d->{'dns'}) {
-				&lock_domain($d);
-				$d->{'dkim_enabled'} = 1;
-				&save_domain($d);
-				&unlock_domain($d);
+				my $locked;
+				$d = &get_lock_domain($d, \$locked);
+				if (!$d || !$d->{'dns'}) {
+					&unlock_domain($d) if ($locked);
+					next;
+					}
+				eval {
+					local $main::error_must_die = 1;
+					local $domain_lock_scope{$d->{'id'}} = $$;
+					$d->{'dkim_enabled'} = 1;
+					&save_domain($d);
+					};
+				my $err = $@;
+				&unlock_domain($d) if ($locked);
+				delete($main::get_domain_cache{$d->{'id'}}) if ($err);
+				&error($err) if ($err);
 				}
 			else {
 				push(@newextra, $e);

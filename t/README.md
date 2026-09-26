@@ -82,6 +82,27 @@ removes a DNS-only `.invalid` domain and does not contact Cloudflare.
 
 ## Current tests
 
+`get_lock_domain` locks and rereads a domain before the caller changes it.
+If the caller already holds the lock, it returns the supplied record without
+rereading, preserving pending edits. Its optional second argument reports
+whether it acquired the lock. The caller must save changes and release its own
+lock on completion or failure. Feature updates keep nested helpers from releasing
+that lock early; `save_domain` also preserves caller-held locks.
+
+On a disposable Virtualmin VM, install the candidate code and run
+`VIRTUALMIN_DOMAIN_CONFIG_VM_TEST=1 prove -v t/domain-config-vm.t` as root.
+The test requires `timeout`.
+
+It creates temporary `.invalid` domains and checks concurrent writes, IP updates,
+login collection across disable/enable operations, lock ownership, scheduled
+disabling, owner limits, feature toggles, and certificate generation and installation.
+It also verifies that archiving stale settings leaves the live record unchanged
+and tests both backup formats, including aliases that need a temporary home directory.
+
+The Nginx recreation test disables CGI and does not test FCGIwrap restoration.
+Login data stays in a private test file, and certificates are generated locally
+without ACME requests. The test removes its domains and account afterward.
+
 | File | What it checks |
 | --- | --- |
 | `compile.t` | Every discovered `.pl` and `.cgi` parses cleanly with `perl -c`. It catches syntax and compile-time module-loading breakage without running normal script bodies. |
@@ -105,6 +126,8 @@ removes a DNS-only `.invalid` domain and does not contact Cloudflare.
 | `mysql-backup-options.t` | Automatic MySQL point-in-time recovery coordinates, including binary log detection, dump client compatibility, Webmin backup API propagation, and restore-time coordinate parsing and log selection. |
 | `restore-preflight.t` | Restore preflight honors UID/GID reallocation and destination DNS settings while preserving database ownership, account-name, parent, and reseller checks. |
 | `module-config-write.t` | Locked module config updates preserve settings saved by concurrent processes. |
+| `domain-config-write.t` | Locked domain updates, nested pending edits, stale IP and schedule decisions, deleted records, lock ownership, login and WHOIS collection, backup snapshots, and transfer failures. Uses local fixtures without service changes. |
+| `domain-config-vm.t` | Concurrent domain writes and real CLI operations. Requires an explicit opt-in on a disposable Virtualmin VM. |
 | `module-config-returns.t` | Config writer call sites treat the public keyed and diff helpers as void operations. |
 | `scripts-lib.t` | PHP extension package-name generation across supported package manager families. |
 | `servers-input.t` | Widget selection, grouped child folding, missing-parent visibility, IDN labels, optional list settings and administrator selection saving. |
