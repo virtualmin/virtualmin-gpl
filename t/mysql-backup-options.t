@@ -21,6 +21,89 @@ die "Failed to load $backups: $!" if (!defined($loaded));
 my $dom = { 'id' => 1, 'dom' => 'example.com' };
 
 {
+	# Check charset selection, table filters and errors without a DB.
+	no warnings qw(once redefine);
+	my ($rows, $query_error, $support_error);
+	my $supports_mb4 = 1;
+	my @queries;
+	# execute_dom_sql(&domain, db, sql, [bind-values...])
+	# Records queries and returns fixture metadata or a controlled error.
+	local *main::execute_dom_sql = sub {
+		push(@queries, [ @_ ]);
+		if ($_[2] =~ /information_schema.COLUMNS/) {
+			# Simulate column metadata or a failure to read it.
+			die "$query_error\n" if ($query_error);
+			return { 'data' => $rows };
+			}
+		# Simulate charset support or a failure to query it.
+		die "$support_error\n" if ($support_error);
+		return { 'data' => $supports_mb4 ? [ [ 'utf8mb4' ] ] : [ ] };
+		};
+	# text(key, [values...])
+	# Returns untranslated error keys and parameters for assertions.
+	local *main::text = sub { return join(': ', @_); };
+	# Keep a single client charset unchanged, including legacy ones.
+	foreach my $cs (qw(ascii latin1 latin2 utf8 utf8mb3 utf8mb4 cp932 armscii8)) {
+		$rows = [ [ 't', $cs, 'varchar' ] ];
+		is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
+			[ $cs, undef ], "columns using only $cs keep that dump charset");
+		}
+	# Supported mixtures and charsets unusable by clients require Unicode.
+	foreach my $charsets ([qw(latin1 utf8mb4)], [qw(latin1 latin2 utf8mb3)],
+			      [qw(utf8 utf8mb3)], [qw(ucs2)], [qw(utf16 utf16le utf32)]) {
+		$rows = [ map { [ 't', $_, 'varchar' ] } @$charsets ];
+		is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
+			[ 'utf8mb4', undef ], "@{$charsets} use a Unicode client charset");
+		}
+	# JSON needs Unicode even when the server reports no column charset.
+	$rows = [ [ 't', undef, 'json' ], [ 't', 'latin1', 'varchar' ] ];
+	is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
+		[ 'utf8mb4', undef ], 'JSON requires Unicode even without charset metadata');
+	# Without text columns, use the supported Unicode charset.
+	$rows = [ [ 't', undef, 'int' ], [ 't', undef, 'blob' ] ];
+	is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
+		[ 'utf8mb4', undef ], 'numeric and binary columns need no native text charset');
+	$rows = [ ];
+	is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
+		[ 'utf8mb4', undef ], 'empty databases select utf8mb4');
+
+	# Reject legacy mixtures whose Unicode conversion loses bytes.
+	foreach my $charsets ([qw(cp932 utf8mb4)], [qw(armscii8 latin1)]) {
+		$rows = [ map { [ $_, $_, 'varchar' ] } @$charsets ];
+		my ($cs, $err) = &get_mysql_backup_charset($dom, 'appdb');
+		ok(!defined($cs) && $err, "@{$charsets} are rejected");
+		like($err, qr/\Q$charsets->[0]\E/, 'error identifies the affected charsets');
+		}
+	# Honor table exclusions and bind database names as SQL values.
+	$rows = [ [ 'keep', 'cp932', 'varchar' ], [ 'omit', 'utf8mb4', 'varchar' ] ];
+	@queries = ( );
+	is_deeply([ &get_mysql_backup_charset($dom, "a'b", [ 'keep' ]) ],
+		[ 'cp932', undef ], 'excluded tables do not affect charset selection');
+	is($queries[0]->[0], $dom, 'metadata query uses the source domain connection');
+	is($queries[0]->[3], "a'b", 'database name is passed as a SQL parameter');
+	unlike($queries[0]->[2], qr/a'b/, 'database name is not interpolated into SQL');
+	like($queries[0]->[2], qr/TABLE_TYPE <> 'VIEW'/, 'view columns do not affect dumped rows');
+	# An empty table list selects all tables in the existing dump API.
+	my ($cs, $err) = &get_mysql_backup_charset($dom, 'appdb', [ ]);
+	ok(!defined($cs) && $err, 'an empty table list means all tables, as in the dump API');
+
+	# Use utf8 when the server lacks utf8mb4 support.
+	$supports_mb4 = 0;
+	$rows = [ [ 't', 'latin1', 'varchar' ], [ 't', 'utf8', 'varchar' ] ];
+	is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
+		[ 'utf8', undef ], 'older servers use their supported Unicode charset');
+	# A query failure must return an error instead of selecting a charset.
+	$support_error = 'Cannot read supported charsets';
+	($cs, $err) = &get_mysql_backup_charset($dom, 'appdb');
+	ok(!defined($cs) && $err =~ /Cannot read supported charsets/,
+		'capability query errors prevent dumping');
+	$query_error = 'Cannot read column charsets';
+	($cs, $err) = &get_mysql_backup_charset($dom, 'appdb');
+	ok(!defined($cs) && $err =~ /Cannot read column charsets/,
+		'metadata query errors prevent dumping');
+	}
+
+{
 	no warnings qw(once redefine);
 	local %main::mysql_binlog_enabled_cache;
 	local %main::mysql_source_data_support_cache;
@@ -91,7 +174,14 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 			} };
 		};
 	local *main::require_dom_mysql = sub { return 'mysql'; };
+	my $column_rows = [ [ 'posts', 'utf8mb4', 'varchar' ] ];
+	# execute_dom_sql(&domain, db, sql, [bind-values...])
+	# Supplies column metadata while retaining the binary log fixture.
 	local *main::execute_dom_sql = sub {
+		# Return column charsets independently of DB defaults.
+		return { 'data' => $column_rows }
+			if ($_[2] =~ /information_schema.COLUMNS/);
+		# Keep binary log coordinates enabled for backup checks.
 		return { 'data' => [ [ 'log_bin', 'ON' ] ] };
 		};
 	local *main::backquote_command = sub {
@@ -109,14 +199,21 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 	local *main::validate_mysql_backup = sub { return undef; };
 	local *main::text = sub { return $_[0]; };
 	my @foreign_calls;
+	# foreign_call(module, function, [args...])
+	# Records calls and supplies database defaults for restore metadata.
 	local *main::foreign_call = sub {
 		push(@foreign_calls, [ @_ ]);
-		return 'utf8mb4' if ($_[1] eq 'get_character_set');
-		return 'utf8mb4_unicode_ci'
+		# The database default differs from the Unicode column charset.
+		return 'latin1' if ($_[1] eq 'get_character_set');
+		# Supply the collation matching the saved database charset.
+		return 'latin1_swedish_ci'
 			if ($_[1] eq 'get_collation_order');
+		# A successful dump returns no error.
 		return undef;
 		};
 
+	# Dump the Unicode columns in utf8mb4 while retaining the database's
+	# latin1 charset and collation in the metadata used for restore.
 	my $ok = &backup_mysql(
 		{ 'template' => 1, 'db_mysql' => 'appdb', 'user' => 'example' },
 		'/tmp/mysql-backup-options-test', { },
@@ -126,14 +223,28 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 				 @foreign_calls;
 	is($backup_call->[1], 'backup_database',
 		'Virtualmin calls the Webmin MySQL backup API');
+	is($backup_call->[7], 'utf8mb4',
+		'dump uses utf8mb4 despite a latin1 database default');
 	is($backup_call->[-1], '--source-data=2',
 		'coordinates parameter is passed through to Webmin automatically');
 	is_deeply([ map { $_->[0] } @defined_calls ], [ 'mysql', 'mysql' ],
 		'backup metadata capability checks use the module name');
-	is($written_info{'charset_appdb'}, 'utf8mb4',
+	is($written_info{'charset_appdb'}, 'latin1',
 		'database character set is recorded in backup metadata');
-	is($written_info{'collate_appdb'}, 'utf8mb4_unicode_ci',
+	is($written_info{'collate_appdb'}, 'latin1_swedish_ci',
 		'database collation is recorded in backup metadata');
+
+	# A rejected charset mixture must not invoke the dump program.
+	$column_rows = [ [ 'legacy', 'cp932', 'varchar' ],
+			 [ 'posts', 'utf8mb4', 'varchar' ] ];
+	@foreign_calls = ( );
+	$ok = &backup_mysql(
+		{ 'template' => 1, 'db_mysql' => 'appdb', 'user' => 'example' },
+		'/tmp/mysql-backup-options-test', { },
+		0, 0, undef, { 'dir' => { 'compression' => 0 }, 'skip' => 0 });
+	ok(!$ok, 'unsafe charset mixture fails the backup');
+	ok(!grep($_->[1] eq 'backup_database', @foreign_calls),
+		'unsafe charset mixture never reaches the dump API');
 	}
 
 {

@@ -2855,6 +2855,7 @@ backup_mysqlinfo=Copying MySQL user details ..
 backup_mysqldump=Dumping MySQL database $1 ..
 backup_mysqldumpfailed=.. dump failed : $1
 backup_mysqlgzipfailed=.. gzip failed : $1
+backup_mysqlcharset=Cannot safely dump mixed column charsets: $1. Use a backup method that preserves the original bytes.
 backup_fordomain=Creating backup for virtual server $1 ..
 backup_emptydomain=.. some domain details missing!
 backup_deleteddom=Virtual server $1 cannot be backed up as it has been deleted!

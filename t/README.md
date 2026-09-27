@@ -75,6 +75,14 @@ that prevents dumping, and a corrupted dump rejected by the real importer.
 It requires `timeout` and removes its six domains, Unix accounts, database users,
 and databases afterward.
 
+To test MySQL backup charset selection on a disposable VM, run
+`functional-test.pl --test mysqlcharset` as root, using the script's full path.
+Install the candidate module first. This group uses the backup, restore and clone
+commands and the MySQL client to compare stored bytes, table definitions and
+database defaults. It covers mixed Latin/Unicode columns, native legacy encodings,
+table exclusions and rejected charset mixtures. It removes both test domains,
+accounts, databases and temporary password and client configuration files afterward.
+
 On a disposable Virtualmin Pro host, run
 `VIRTUALMIN_DNS_VM_TEST=1 prove -v t/dns-cloud-migration-vm.t` to test DNS
 migration with real BIND zones and a simulated cloud provider. It creates and
