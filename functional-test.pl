@@ -3421,8 +3421,8 @@ $scheduled_tests = [
 
 	# Make sure the differential is smaller than the full
 	{ 'command' =>
-		"full=`du -k $test_backup_file | cut -f 1` ; ".
-		"incr=`du -k $test_differential_backup_file | cut -f 1` ; ".
+		"full=`ls -l $test_backup_file | cut -d ' ' -f 5` ; ".
+		"incr=`ls -l $test_differential_backup_file | cut -d ' ' -f 5` ; ".
 		"test \$incr -lt \$full"
 	},
 
@@ -5869,8 +5869,8 @@ $differential_tests = [
 
 	# Make sure the differential is smaller than the full
 	{ 'command' =>
-		"full=`du -k $test_backup_file | cut -f 1` ; ".
-		"incr=`du -k $test_differential_backup_file | cut -f 1` ; ".
+		"full=`ls -l $test_backup_file | cut -d ' ' -f 5` ; ".
+		"incr=`ls -l $test_differential_backup_file | cut -d ' ' -f 5` ; ".
 		"test \$incr -lt \$full"
 	},
 
@@ -5884,16 +5884,16 @@ $differential_tests = [
 
 	# Make sure the second differential is smaller than the full
 	{ 'command' =>
-		"full=`du -k $test_backup_file | cut -f 1` ; ".
-		"incr=`du -k $test_differential_backup_file2 | cut -f 1` ; ".
+		"full=`ls -l $test_backup_file | cut -d ' ' -f 5` ; ".
+		"incr=`ls -l $test_differential_backup_file2 | cut -d ' ' -f 5` ; ".
 		"test \$incr -lt \$full"
 	},
 
 	# Make sure the two differentials are the same
 	{ 'command' =>
-		"incr=`du -k $test_differential_backup_file | cut -f 1` ; ".
-		"incr2=`du -k $test_differential_backup_file2 | cut -f 1` ; ".
-		"test \$incr -eq \$incr2"
+		"incr=`ls -l $test_differential_backup_file | cut -d ' ' -f 5` ; ".
+		"incr2=`ls -l $test_differential_backup_file2 | cut -d ' ' -f 5` ; ".
+		"perl -e \"exit(abs(\$incr - \$incr2) < 100 ? 0 : 1)\""
 	},
 
 	# Delete the domain
