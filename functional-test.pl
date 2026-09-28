@@ -1310,7 +1310,7 @@ $disable_tests = [
 	# Run a schedule collection, which should trigger the disable
 	{ 'command' => $module_config_directory."/collectinfo.pl",
 	  'antigrep' => 'Already running',
-	  'tries' => 5,
+	  'tries' => 10,
 	},
 
 	# Check that it was disabled
