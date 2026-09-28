@@ -55,10 +55,11 @@ foreach my $feature (qw(core plugin)) {
 	}
 
 # Database cloning must preserve failures while allowing empty and renamed DBs.
+# Keep MySQL charset failures even when a later database copy succeeds.
 foreach my $feature (qw(postgres mysql)) {
 	foreach my $result (qw(no_db success prefix clash create backup restore empty_backup empty_restore
 			       mixed_create mixed_backup mixed_restore),
-			       $feature eq 'mysql' ? qw(hosts no_db_hosts) : ()) {
+			       $feature eq 'mysql' ? qw(hosts no_db_hosts charset mixed_charset) : ()) {
 		subtest "$feature clone with $result" => sub {
 			my ($status, $output) = run_cli($feature, $result, '');
 			my $success = $result eq 'no_db' || $result eq 'success' ||
@@ -68,6 +69,7 @@ foreach my $feature (qw(postgres mysql)) {
 				clash => qr/a database named target already exists/,
 				create => qr/creation of database target failed/,
 				backup => qr/Controlled backup failure/,
+				charset => qr/Controlled charset failure/,
 				restore => qr/Controlled restore failure/,
 				hosts => qr/Controlled allowed-hosts failure/,
 				no_db_hosts => qr/Controlled allowed-hosts failure/,
@@ -290,6 +292,18 @@ sub create_postgres_database { create_fixture_database(@_) }
 sub create_mysql_database { create_fixture_database(@_) }
 sub check_mysql_database_clash { $result eq 'clash' }
 sub get_mysql_creation_opts { {} }
+# get_mysql_backup_charset(&domain, db)
+# Checks the source arguments and simulates charset selection or failure.
+sub get_mysql_backup_charset {
+	# Catch accidental use of the clone domain or a database hash reference.
+	die 'Expected the source domain and database name'
+		unless $_[0]->{'dom'} eq 'source.invalid' && !ref($_[1]);
+	# Fail the first database so mixed cases can still copy the next.
+	return (undef, 'Controlled charset failure')
+		if $result =~ /^(mixed_)?charset$/ && $_[1] eq 'source';
+	# Other cases can proceed to the dump and restore steps.
+	return ('utf8mb4', undef);
+}
 sub require_mysql { }
 sub require_dom_mysql { 'mysql' }
 sub foreign_defined { 0 }

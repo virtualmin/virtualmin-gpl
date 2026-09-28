@@ -3986,6 +3986,202 @@ $mysqlbackup_tests = [
 
 $enc_mysqlbackup_tests = &convert_to_encrypted($mysqlbackup_tests);
 
+# Check that backup, restore and clone preserve text bytes and defaults.
+$mysqlcharset_tests = [ ];
+{
+use utf8;
+require Encode;
+# Use reserved domain names and keep test files outside the source home.
+my $source = $test_domain.'.invalid';
+my $clone = $test_clone_domain.'.invalid';
+my $dir = $test_backup_dir.'/charset';
+my $passfile = "$dir/pass";
+my $archive = "$dir/backup.tar.gz";
+my $db = $test_domain_db;
+my @users = ($test_domain_user, $test_clone_domain_user);
+my @dbs = ($db, $test_clone_domain_db);
+my @clients = map { "$dir/client$_.cnf" } (0, 1);
+
+# sql_command(target, sql)
+# Builds a MySQL command for the source (0) or clone (1), using a password file.
+my $sql_command = sub {
+	my ($target, $sql) = @_;
+	return 'mysql --defaults-extra-file='.&quote_path($clients[$target]).
+		' --batch --skip-column-names '.&quote_path($dbs[$target]).
+		' -e '.&quote_path($sql);
+	};
+push(@$mysqlcharset_tests,
+	# Refuse existing domains before any fixture can be created or removed.
+	{ 'command' => 'list-domains.pl --name-only',
+	  'antigrep' => [ '^'.quotemeta($source).'$', '^'.quotemeta($clone).'$' ],
+	},
+	# Keep generated fixture credentials in private files on the test host.
+	{ 'command' => 'umask 077; mkdir '.&quote_path($dir).
+		' && openssl rand -hex 24 > '.&quote_path($passfile),
+	  'label' => 'Create private MySQL charset fixture credentials',
+	},
+	# Create only the account, home and database needed for these tests.
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $source ], [ 'user', $users[0] ],
+		      [ 'db', $db ], [ 'passfile', $passfile ],
+		      [ 'unix' ], [ 'dir' ], [ 'mysql' ], [ 'no-ip6' ],
+		      @create_args ],
+	});
+foreach my $i (0, 1) {
+	# The clone inherits the source password; each client uses its own login.
+	my $options = "[client]\nuser=".&mysql_username($users[$i])."\n".
+		"host=".($mysql::config{'host'} || 'localhost')."\n".
+		"port=".($mysql::config{'port'} || 3306)."\npassword=";
+	push(@$mysqlcharset_tests,
+		{ 'command' => 'umask 077; { printf %s '.&quote_path($options).
+			'; cat '.&quote_path($passfile).'; } > '.&quote_path($clients[$i]),
+		  'label' => "Prepare MySQL charset fixture client $i",
+		});
+	}
+# Cover Unicode text, column overrides and UTF-8 bytes stored as latin1.
+# Test every latin1, latin2 and ASCII byte to catch conversion losses.
+my $unicode = 'Zażółć gęślą jaźń 😀 ГРУФФАЛО';
+my @mixed = (
+	[ 'unicode4', 'utf8mb4', undef, Encode::encode('UTF-8', $unicode) ],
+	[ 'unicode3', 'utf8', undef, Encode::encode('UTF-8', 'Zażółć ГРУФФАЛО') ],
+	[ 'polish', 'latin2', undef, Encode::encode('ISO-8859-2', 'Zażółć gęślą jaźń') ],
+	[ 'column_override', 'latin1', 'utf8mb4', Encode::encode('UTF-8', $unicode) ],
+	[ 'legacy_utf8', 'latin1', undef, Encode::encode('UTF-8', $unicode) ],
+	[ 'latin1_bytes', 'latin1', undef, pack('C*', 0..255) ],
+	[ 'latin2_bytes', 'latin2', undef, pack('C*', 0..255) ],
+	[ 'ascii_bytes', 'ascii', undef, pack('C*', 0..127) ],
+	[ 'unicode16', 'utf16', undef, Encode::encode('UTF-16BE', $unicode) ],
+	);
+foreach my $mode ('mixed', 'cp932', 'armscii8') {
+	# Unicode conversion merges some cp932 and armscii8 byte sequences.
+	# Native dumps must preserve both; the mixed case uses Unicode.
+	my @cases = $mode eq 'mixed' ? @mixed :
+		([ 'native', $mode, undef,
+		   pack('H*', $mode eq 'cp932' ? 'ED40FA5C5C27' : '29A429A4') ]);
+	# Reproduce the mismatch between database defaults and column charsets.
+	my $setup = "ALTER DATABASE `$db` CHARACTER SET latin1 COLLATE latin1_general_ci; ";
+	my $snapshot = 'SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME '.
+		'FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = DATABASE(); ';
+	my @expected;
+	foreach my $case (@cases) {
+		# Use explicit bytes to avoid conversion by the client.
+		# Compare bytes and table definitions after restore and clone.
+		my ($table, $charset, $column_charset, $bytes) = @$case;
+		my $effective = $column_charset || $charset;
+		my $column = $column_charset ? "CHARACTER SET $column_charset" : '';
+		my $hex = uc(unpack('H*', $bytes));
+		$setup .= "CREATE TABLE $table (id INT PRIMARY KEY, s VARCHAR(512) $column) ".
+			"CHARACTER SET $charset; INSERT INTO $table VALUES (1, _$effective 0x$hex); ";
+		$snapshot .= "SELECT '$table', HEX(s) FROM $table ORDER BY id; SHOW CREATE TABLE $table; ";
+		push(@expected, '^'.$table.'\s+'.$hex.'$');
+		}
+	# A view's charset must not influence the encoding of dumped table rows.
+	$setup .= 'CREATE VIEW charset_view AS SELECT CONVERT(s USING utf8mb4) AS s FROM native; '
+		if $mode ne 'mixed';
+	my $charset = $mode eq 'mixed' ? 'utf8mb4' : $mode;
+	push(@$mysqlcharset_tests,
+		# Check source bytes before using them as expected results.
+		{ 'command' => &$sql_command(0, $setup),
+		  'label' => "Create $mode charset fixtures",
+		},
+		{ 'command' => &$sql_command(0, $snapshot).' > '.&quote_path("$dir/before"),
+		  'label' => "Record $mode bytes, table definitions and database defaults",
+		},
+		{ 'command' => 'cat '.&quote_path("$dir/before"),
+		  'grep' => [ '^latin1\s+latin1_general_ci$', @expected ],
+		},
+		# Check the dump's connection charset inside the backup archive.
+		{ 'command' => 'backup-domain.pl',
+		  'args' => [ [ 'domain', $source ], [ 'feature', 'mysql' ],
+			      [ 'compression', 'gzip' ], [ 'dest', $archive ] ],
+		},
+		{ 'command' => 'tar -xzOf '.&quote_path($archive).' '.
+			&quote_path('./'.$source.'_mysql_'.$db),
+		  'label' => "Check $mode dump encoding",
+		  'grep' => 'SET NAMES '.$charset,
+		},
+		# Restore must recreate both the data and the original Latin-1 defaults.
+		{ 'command' => 'restore-domain.pl',
+		  'args' => [ [ 'domain', $source ], [ 'feature', 'mysql' ],
+			      [ 'source', $archive ] ],
+		},
+		{ 'command' => &$sql_command(0, $snapshot).' > '.&quote_path("$dir/after").
+			' && cmp '.&quote_path("$dir/before").' '.&quote_path("$dir/after"),
+		  'label' => "Verify $mode restore preserves bytes, definitions and defaults",
+		},
+		# Clones must retain source column charsets and DB defaults.
+		{ 'command' => 'clone-domain.pl',
+		  'args' => [ [ 'domain', $source ], [ 'newdomain', $clone ],
+			      [ 'newuser', $users[1] ] ],
+		},
+		{ 'command' => &$sql_command(1, $snapshot).' > '.&quote_path("$dir/after").
+			' && cmp '.&quote_path("$dir/before").' '.&quote_path("$dir/after"),
+		  'label' => "Verify $mode clone preserves bytes, definitions and defaults",
+		},
+		# Leave the destination name free for the next case.
+		{ 'command' => 'delete-domain.pl', 'args' => [ [ 'domain', $clone ] ] },
+		);
+	# Keep the final native table to test an unsupported mixture.
+	if ($mode ne 'armscii8') {
+		push(@$mysqlcharset_tests,
+			{ 'command' => &$sql_command(0,
+				($mode ne 'mixed' ? 'DROP VIEW charset_view; ' : '').
+				join(' ', map { 'DROP TABLE '.$_->[0].';' } @cases)),
+			  'label' => "Remove $mode fixture tables",
+			});
+		}
+	}
+push(@$mysqlcharset_tests,
+	# Unsupported mixtures must fail through the CLI before importing a clone.
+	{ 'command' => &$sql_command(0, 'CREATE TABLE incompatible (s VARCHAR(10)) CHARACTER SET utf8mb4'),
+	  'label' => 'Add an incompatible charset',
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $source ], [ 'feature', 'mysql' ],
+		      [ 'compression', 'gzip' ], [ 'dest', "$dir/rejected.tar.gz" ] ],
+	  'fail' => 1, 'grep' => 'Cannot safely dump mixed column charsets: armscii8, utf8mb4',
+	},
+	# A rejected clone must exit with an error and import no tables.
+	{ 'command' => 'clone-domain.pl',
+	  'args' => [ [ 'domain', $source ], [ 'newdomain', $clone ],
+		      [ 'newuser', $users[1] ] ],
+	  'fail' => 1, 'grep' => 'Cannot safely dump mixed column charsets: armscii8, utf8mb4',
+	},
+	{ 'command' => &$sql_command(1, 'SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()'),
+	  'label' => 'Verify the rejected clone imported no tables',
+	  'grep' => '^0$',
+	},
+	# Excluding the incompatible table must allow a native-charset backup.
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $source ], [ 'add-db-exclude', "$db.incompatible" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $source ], [ 'feature', 'mysql' ],
+		      [ 'compression', 'gzip' ], [ 'dest', $archive ] ],
+	},
+	# Check the table exclusion and the resulting dump charset.
+	{ 'command' => 'tar -xzOf '.&quote_path($archive).' '.&quote_path('./'.$source.'_mysql_'.$db),
+	  'label' => 'Verify the filtered dump uses armscii8 and omits the excluded table',
+	  'grep' => 'SET NAMES armscii8', 'antigrep' => 'CREATE TABLE `incompatible`',
+	},
+	# Under normal runner settings, cleanup also runs after a test failure.
+	# Either domain may be absent or only partly created at that point.
+	{ 'command' => 'delete-domain.pl', 'args' => [ [ 'domain', $clone ] ],
+	  'cleanup' => 1, 'ignorefail' => 1,
+	},
+	{ 'command' => 'delete-domain.pl', 'args' => [ [ 'domain', $source ] ],
+	  'cleanup' => 1, 'ignorefail' => 1,
+	},
+	# Verify domain removal even when deletion errors are ignored.
+	{ 'command' => 'list-domains.pl --name-only',
+	  'antigrep' => [ '^'.quotemeta($source).'$', '^'.quotemeta($clone).'$' ],
+	  'cleanup' => 1,
+	},
+	# Remove archives, SQL snapshots and private password and client files.
+	{ 'command' => 'rm -rf '.&quote_path($dir), 'cleanup' => 1 },
+	);
+}
+
 $postgresbackup_tests = [
 	# Make sure the PostgreSQL root login works
 	{ 'command' => 'psql -U '.$postgresql::postgres_login.
@@ -15640,6 +15836,7 @@ $alltests = { '_config' => $_config_tests,
 	      'backup' => $backup_tests,
 	      'enc_backup' => $enc_backup_tests,
 	      'mysqlbackup' => $mysqlbackup_tests,
+	      'mysqlcharset' => $mysqlcharset_tests,
 	      'enc_mysqlbackup' => $enc_mysqlbackup_tests,
 	      'postgresbackup' => $postgresbackup_tests,
 	      'enc_postgresbackup' => $enc_postgresbackup_tests,

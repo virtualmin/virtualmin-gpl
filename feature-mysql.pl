@@ -903,14 +903,15 @@ if (%dbmap) {
 		my $oldname = $dbmap{$db->{'name'}};
 		my $temp = &transname();
 		my $mymod = &require_dom_mysql($oldd);
-		my $cs;
-		if (&foreign_defined($mymod, "get_character_set")) {
-			$cs = &foreign_call($mymod, "get_character_set", $db);
+		# Select the dump charset from the source database's columns
+		my ($cs, $err) = &get_mysql_backup_charset($oldd, $oldname);
+		if (!defined($err)) {
+			# Dump only after charset selection succeeds
+			$err = &foreign_call(
+				$mymod, "backup_database", $oldname, $temp, 0, 1,
+				undef, $cs, undef, undef, undef,
+				&mysql_single_transaction($d, $db));
 			}
-		my $err = &foreign_call(
-			$mymod, "backup_database", $oldname, $temp, 0, 1, undef,
-			$cs, undef, undef, undef,
-			&mysql_single_transaction($d, $db));
 		if (defined($err)) {
 			&$second_print(&text('clone_mysqlbackup',
 					     $oldname, $err));
@@ -1418,6 +1419,61 @@ unlink($temp);
 return $ex ? $sqlout : undef;
 }
 
+# get_mysql_backup_charset(&domain, db, [&tables])
+# Selects a dump charset from the selected tables' text columns.
+# domain selects the MySQL connection; db is the database name.
+# An omitted or empty table list means all tables, as in backup_database.
+# Returns (charset, undef) on success or (undef, error) on failure.
+sub get_mysql_backup_charset
+{
+my ($d, $db, $tables) = @_;
+my $charset;
+# Return query and charset errors to the backup or clone caller.
+eval {
+	local $main::error_must_die = 1;
+	# Views have no rows to dump. The subquery limits both metadata lookups
+	# to this schema, avoiding a join that can scan tables in other schemas.
+	my $data = &execute_dom_sql($d, $db,
+		"select distinct TABLE_NAME, CHARACTER_SET_NAME, DATA_TYPE ".
+		"from information_schema.COLUMNS ".
+		"where TABLE_SCHEMA = ? and TABLE_NAME in ".
+		"(select TABLE_NAME from information_schema.TABLES ".
+		"where TABLE_SCHEMA = ? and TABLE_TYPE <> 'VIEW')", $db, $db);
+	# Collect text charsets only from tables included in the dump.
+	my %include = map { $_, 1 } @{$tables || [ ]};
+	my %charsets;
+	foreach my $row (@{$data->{'data'}}) {
+		# Ignore tables excluded by the caller.
+		next if ($tables && @$tables && !$include{$row->[0]});
+		# JSON needs utf8mb4 even when its column charset is NULL.
+		my $cs = $row->[2] eq 'json' ? 'utf8mb4' : $row->[1];
+		# Binary and non-text values need no text conversion.
+		$charsets{lc($cs)} = 1 if ($cs && $cs ne 'binary');
+		}
+	my @cs = sort(keys %charsets);
+	if (@cs == 1 && $cs[0] !~ /^(ucs2|utf16|utf16le|utf32)$/) {
+		# Avoid conversion when all text columns share a client charset
+		$charset = $cs[0];
+		}
+	else {
+		# Use Unicode for mixtures and charsets clients cannot use.
+		# It also works when there are no text columns.
+		# Combine only listed charsets; other mixtures may lose bytes.
+		my @unsafe = grep {
+			! /^(ascii|latin1|latin2|utf8|utf8mb3|utf8mb4|ucs2|utf16|utf16le|utf32)$/
+			} @cs;
+		die &text('backup_mysqlcharset', join(', ', @cs))."\n"
+			if (@unsafe);
+		# UCS-2, UTF-16 and UTF-32 cannot be client charsets.
+		# Prefer utf8mb4, with utf8 for servers that lack it.
+		my $supported = &execute_dom_sql(
+			$d, $db, "show character set like 'utf8mb4'");
+		$charset = @{$supported->{'data'}} ? 'utf8mb4' : 'utf8';
+		}
+	};
+return ($charset, $@ || undef);
+}
+
 # backup_mysql(&domain, file, &options, home-format, differential, [&as-domain],
 #              &all-options, &key)
 # Dumps this domain's mysql database to a backup file
@@ -1495,12 +1551,16 @@ foreach $db (@dbs) {
 		}
 
 	my $mymod = &require_dom_mysql($d);
-	my $cs = $info{'charset_'.$db};
-	my $err = &foreign_call(
-		$mymod, "backup_database", $db, $dbfile, 0, 1, undef,
-		$cs, undef, $tables, $d->{'user'},
-		&mysql_single_transaction($d, $db), 0, $allopts->{'skip'},
-		$parameters);
+	# Keep the dump charset separate from the saved database defaults
+	my ($cs, $err) = &get_mysql_backup_charset($d, $db, $tables);
+	if (!defined($err)) {
+		# Dump only after charset selection succeeds
+		$err = &foreign_call(
+			$mymod, "backup_database", $db, $dbfile, 0, 1, undef,
+			$cs, undef, $tables, $d->{'user'},
+			&mysql_single_transaction($d, $db), 0, $allopts->{'skip'},
+			$parameters);
+		}
 	if (!$err) {
 		$err = &validate_mysql_backup($dbfile);
 		}
@@ -1708,10 +1768,11 @@ foreach my $db (@dbs) {
 		}
 	&$indent_print();
 	if (!$clash) {
+		# Recreate the database with its saved charset and collation.
 		my $opts = { 'charset' => $info{'charset_'.$db->[0]},
 			     'collate' => $info{'collate_'.$db->[0]},
 			   };
-		&create_mysql_database($d, $db->[0], $info);
+		&create_mysql_database($d, $db->[0], $opts);
 		$created{$db->[0]} = 1;
 		}
 	&$outdent_print();
