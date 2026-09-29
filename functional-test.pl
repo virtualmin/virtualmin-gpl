@@ -4000,7 +4000,7 @@ my $archive = "$dir/backup.tar.gz";
 my $db = $test_domain_db;
 my @users = ($test_domain_user, $test_clone_domain_user);
 my @dbs = ($db, $test_clone_domain_db);
-my @clients = map { "$dir/client$_.cnf" } (0, 1);
+my @clients = ( "$dir/client0.cnf", "$dir/client1.cnf" );
 
 # sql_command(target, sql)
 # Builds a MySQL command for the source (0) or clone (1), using a password file.
