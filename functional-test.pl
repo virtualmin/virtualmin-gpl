@@ -16285,6 +16285,9 @@ if (!defined(&list_backup_keys)) {
 	return [ ];
 	}
 my ($key) = &list_backup_keys();
+if (!$key) {
+	return [ { 'command' => 'echo No backup encryption keys defined ; false ' } ];
+	}
 my $rv = [ ];
 foreach my $t (@$tests) {
 	my $nt = { %$t };
