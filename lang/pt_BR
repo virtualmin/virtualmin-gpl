@@ -114,8 +114,6 @@ edit_group=Grupo
 edit_prefix=Prefixo da conta de e-mail
 edit_suffix=Sufixo da caixa de email
 edit_plan=Plano
-edit_proxy1=Proxy do site para
-edit_proxy2=Frame-Encaminhamento site para
 edit_dbs=Banco de dados
 edit_lv=Deixar inalterada
 edit_set=Alterar para ..
@@ -134,7 +132,6 @@ edit_aliases=Editar apelidos de e-mail
 edit_qon=$1 de $2
 edit_qdbs=$1 no banco de dados
 edit_rename=Modificar nome do domínio
-edit_proxy=Editar Site Proxy
 edit_redirects=Redirecionamento de site
 edit_redirectsdesc=Edite redirecionamentos para caminhos de URL sob o site do servidor para outros domínios ou diretórios.
 edit_spamvirus=Entrega de Spam e Vírus
@@ -223,6 +220,7 @@ licence_soonm=Sua licença Virtualmin expirará em $1 dias.
 licence_soon2=Sua licença Virtualmin expirará em $1 hora.
 licence_soon2m=Sua licença Virtualmin expirará em $1 horas.
 licence_renew=Renove sua licença na <a target=_blank href='$1'>$2</a>.
+
 licence_renew2=Consulte suas opções de licença na <a target=_blank href='$1'>$2</a>.
 licence_renew2s=Para continuar usando todos os servidores, adquira as licenças adicionais necessárias na <a target=_blank href='$1'>$2</a>.
 licence_renew2d=Atualize sua licença na <a target=_blank href='$1'>$2</a>.

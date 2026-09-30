@@ -243,7 +243,6 @@ form_domslimit=Peut créer et éditer les sous-serveurs?
 form_unlimit=Illimité
 form_atmost=Au plus
 form_proxy=Proxier le site Web vers l'URL
-form_framefwd=Forwarder le site web via une frame vers l'URL
 form_plocal=Servir localement
 form_purl=URL Web
 form_iface=Interface réseau
@@ -282,7 +281,6 @@ setup_euquota=Quota utilisateur manquant ou invalide
 setup_eiface=L'interface réseau $1  sur laquelle les adresses virtuelles sont ajoutées n'existe pas sur votre système
 setup_eiface2=L'interface réseau $1 sur laquelle les adresse virtuelles sont ajoutées n'a pas d'adresse IP fixe (peut-être parce que DHCP est utilisé)
 setup_edepweb=Un site Web ne peut pas être activé sans qu'un répertoire utilisateur ne soit créé
-setup_edepframe=Un utilisateur Unix est nécessaire pour un site Web de redirection via une frame
 setup_edepmail=Le courriel du domaine ne peut pas être activé sans créer un utilisateur Unix
 setup_edepwebalizer=Webaliser ne peut pas être éctivé sans qu'un site Web ne soit configuré
 setup_edepssl=SSL ne peut pas être activé sans qu'un site Web ne soit configuré, et une adresse IP virtuelle allouée
@@ -296,7 +294,6 @@ setup_emailbox=Une adresse mél pour l'utilisteur Unix ne peut pas être créée
 setup_edomslimit=Nombre maximum de serveurs virtuels incorrect
 setup_mailbox=Ajout d'adresse mél pour l'utilisateur Unix en cours ..
 setup_eproxy=URL de proxy incorrect ou manquant
-setup_eproxyweb=Un proxy ou un URL de rediraction via une frame ne peut être saisi qu'à l'activation d'un site Web
 setup_emailboxlimit=Limite de boîtes mél incorrecte ou manquante
 setup_ebwlimit=Limite de bande passante incorrecte ou manquante
 setup_epass=Mot de passe de l'utilisateur Unix manquant
@@ -675,8 +672,6 @@ edit_home=Répertoire utilisateur
 edit_tmpl=Créé en utilisant un template
 edit_plan=Plan de compte
 edit_applyplan=Appliquez des limites de nouveau plan si changé
-edit_proxy1=Proxy site web vers
-edit_proxy2=Transférer le site Web via une frame vers
 edit_dbs=Bases de données
 edit_nodbs=Aucun créé
 edit_dbtypes=$1 MySQL, $2 PostgreSQL
@@ -772,12 +767,6 @@ edit_bwusage=Usage depuis $1
 edit_bwunknown=Inconnue
 edit_bwnotify=(Notification envoyée à $1)
 edit_bwdis=(Désactive si plus de limite)
-edit_frame=Éditer la frame de redirection
-edit_framedesc=Changer les paramètres utilisés pour générer la page HTML contenant la frame de redirection, comme par exemple l'URL cible et le titre.
-edit_proxy=Modifier Proxy site Web
-edit_proxydesc=Définir ou modifier l'URL que le site Web à laquelle ce serveur virtuel est transmis.
-edit_expframe=Éditer le HTML manuellement
-edit_expframedesc=Éditer manuellement la page HTML utilisée pour la redirection via une frame, plutôt que d'utiliser la page générée par Virtualmin.
 edit_balancer=Proxy chemins
 edit_balancerdesc=Gérer les chemins proxy d'URL sous le site Web de ce serveur à un ou plusieurs serveurs Web séparés, comme d'autres serveurs web ou des instances de Mongrel.
 edit_redirects=Les redirections de site Web
@@ -1082,7 +1071,6 @@ newweb_esslport=Numéro de Port pour les hôtes virtuels SSL manquant ou incorre
 newweb_esslport2=Le numéros de port pour les hôtes virtuels SSL ne peut pas être le même que celui des hôtes virtuels normaux
 newweb_euser=Utilisateur Apache manquant ou incorrect
 
-
 newdns_title=Template DNS Bind
 newdns_ecannot=Vous n'êtes pas autorisé à éditer le template DNS
 newdns_desc=Ce formulaire vous permet d'éditer le template des directives de BIND qui sera placé dans les domaines DNS créés par Virtualmin (quand il n'est pas en mode automatique). Les substitutions suivantes seront faites lorsque le domaine sera créé à partir du template :
@@ -1244,7 +1232,6 @@ backup_plan=Limiter aux serveurs sur plan
 backup_anyplan=Tous les plans
 backup_selplan=Plans sélectionnés ..
 backup_parent=Inclure les sous-serveurs de ceux choisis?
-backup_parent2=Inclure les sous-serveurs dans sauvegarde?
 backup_features=Fonctionnalités à sauvegarder
 backup_all=Tous les serveurs virtuels
 backup_sel=Seulement la sélection ..
@@ -1818,34 +1805,8 @@ newbw_graphbutton=Afficher le graphe d'utilisation
 newbw_graphdesc=Cliquez sur ce bouton pour afficher un graphe de l'usage de la bande passante et ses limites pour tous les serveurs virtuels
 newbw_ftplognone=Aucun
 
-newframe_title=HTML de redirection via une frame
-newframe_ecannot=Vous n'êtes pas autorisé à éditer le template HTML de redirection via une frame
-newframe_desc=Utiliser ce formulaire pour éditer le template de page HTML
-
-frame_title=Paramètres de la frame de forwarding
-frame_header=Paramètres de génération le HTML de forwarding via une frame
-frame_url=Forwarder via une frame vers l'URL
-frame_owner=Titre du frameset
-frame_meta=HTML supplémentaire pour la section &lt;head&gt;
-frame_ok=Sauvegarder et appliquer les changements
-frame_desc=Ce formulaire peut être utilisé pour le fichier de forwarding via une frame $1 pour ce serveur virtuel. Tous les changements manuels faits dans ce fichier seront écrasés.
-frame_err=La sSauvegarde des paramètres de la frame de forwarding a échoué
-frame_eurl=URL manquant ou invalide
-frame_gen=re-génération du HTML de forward via une frame en cours ..
-
-proxy_title=Paramètres de proxy Site
-proxy_enabled=Proxy activé?
-proxy_url=Proxy vers URL
-proxy_header=Paramètres de proxy pour d'autres sites
-proxy_desc=Ce formulaire peut être utilisé pour activer et configurer l'URL vers laquelle toutes les requêtes vers le site Web de ce serveur virtuel sont transmises.
-
-expframe_title=HTML de forwarding via une frame
-expframe_desc=Ce formulaire peut être utilisé pour mettre à jour manuellement le fichier de forwarding via une frame $1 de ce serveur virtuel.
-expframe_ewrite=L'écriture du fichier de forwarding via une frame $1, sous l'utilisateur $2, a échoué : $3
-
 newtmpl_title=Templates de serveur
 newtmpl_name=Template
-newtmpl_frame=Frame HTML?
 newtmpl_mail=Courriel?
 newtmpl_none=Aucun
 newtmpl_cust=Personnalisé
@@ -1861,8 +1822,6 @@ tmpl_skel=répertoire squelette pour les fichiers
 tmpl_skeldir=Répertoire
 tmpl_mail=Message mél à envoyer lors de la création du serveur
 tmpl_mailbelow=Message ci-dessous ..
-tmpl_frame=HTML pour les sites Web redirigés via des frames
-tmpl_framebelow=HTML ci-dessous ..
 tmpl_web=Directives et paramètres des nouveaux sites Web
 tmpl_webbelow=Directives Apache ci-dessous ..
 tmpl_dns=Enregistrements DNS BIND pour les nouveaux domaines
@@ -1871,9 +1830,6 @@ tmpl_dnsbelow=Enregistrements ci-dessous ..
 tmpl_replace=Mode d'enregistrement
 tmpl_replace0=Ajouter aux enregistrements générés automatiquement
 tmpl_replace1=N'utiliser que les enregistrements ci-dessus
-tmpl_alias=Créer des alias de sites Web par
-tmpl_alias1=Ajout de ServerAlias au parent
-tmpl_alias0=Création de Redirect vers hôte virtuel
 tmpl_err=Impossible de sauvegarder le template serveur
 tmpl_ename=Nom de template manquant
 tmpl_eskel=Répertoire squelette incorrect ou manquant
@@ -2007,6 +1963,7 @@ licence_soonm=Votre licence Virtualmin expirera dans $1 jours.
 licence_soon2=Votre licence Virtualmin expirera dans $1 heure.
 licence_soon2m=Votre licence Virtualmin expirera dans $1 heures.
 licence_renew=Renouvelez votre licence sur <a target=_blank href='$1'>$2</a>.
+
 licence_renew2=Consultez vos options de licence sur <a target=_blank href='$1'>$2</a>.
 licence_renew2s=Pour continuer à utiliser tous les serveurs, achetez les licences supplémentaires requises sur <a target=_blank href='$1'>$2</a>.
 licence_renew2d=Mettez à niveau votre licence sur <a target=_blank href='$1'>$2</a>.
