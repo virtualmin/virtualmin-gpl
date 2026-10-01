@@ -3,6 +3,7 @@ licence_soonm=Platnosť vašej licencie Virtualmin vyprší o $1 dní.
 licence_soon2=Platnosť vašej licencie Virtualmin vyprší o $1 hodinu.
 licence_soon2m=Platnosť vašej licencie Virtualmin vyprší o $1 hodín.
 licence_renew=Obnovte si licenciu v obchode <a target=_blank href='$1'>$2</a>.
+
 licence_renew2=Pozrite si možnosti licencie v obchode <a target=_blank href='$1'>$2</a>.
 licence_renew2s=Ak chcete naďalej používať všetky servery, zakúpte si potrebné dodatočné licencie v obchode <a target=_blank href='$1'>$2</a>.
 licence_renew2d=Inovujte si licenciu v obchode <a target=_blank href='$1'>$2</a>.

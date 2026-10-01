@@ -3991,9 +3991,8 @@ $mysqlcharset_tests = [ ];
 {
 use utf8;
 require Encode;
-# Use reserved domain names and keep test files outside the source home.
-my $source = $test_domain.'.invalid';
-my $clone = $test_clone_domain.'.invalid';
+my $source = $test_domain;
+my $clone = $test_clone_domain;
 my $dir = $test_backup_dir.'/charset';
 my $passfile = "$dir/pass";
 my $archive = "$dir/backup.tar.gz";

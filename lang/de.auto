@@ -1,13 +1,78 @@
+index_ebind=Der BIND-DNS-Server scheint auf Ihrem System nicht installiert oder im Webmin-Modul <a href='$1'>BIND-DNS-Server</a> noch nicht korrekt eingerichtet zu sein. Falls Ihr System BIND nicht verwendet, sollte es auf der Virtualmin-Seite <a href='$2'>Modulkonfiguration</a> deaktiviert werden
+index_ebtrfserror=Der Btrfs-Quota-Status konnte nicht gelesen werden: $1
+index_ebtrfsunknown=Unbekannter Btrfs-Quota-Status
+index_ebtrfssquota=Der einfache Btrfs-Quota-Modus ist aktiv; stellen Sie sicher, dass im Modul „Festplattenquoten“ die vollständige Quota-Gruppenabrechnung ausgewählt ist, und deaktivieren und aktivieren Sie dann die Btrfs-Quotas erneut, bevor Sie die Konfigurationsprüfung erneut ausführen
+btrfs_enoqgroup=Für das Subvolume $1 existiert keine Btrfs-Quotagruppe
+btrfs_edomainhome=Das Domain-Home ist kein Btrfs-Subvolume
+btrfs_eqgroupoutside=Die Quotengruppe $1 wird bereits außerhalb von $2 verwendet
+btrfs_ehomepath=Ungültiger Btrfs-Home-Pfad
+btrfs_etopdomain=Ungültige Virtualmin-Domäne der obersten Ebene
+btrfs_eexistinghome=Das bestehende Home $1 ist kein Btrfs-Subvolume
+btrfs_ereplaceempty=Das leere Verzeichnis $1 konnte nicht ersetzt werden: $2
+btrfs_enewhomeid=Die neue Btrfs-Home-Subvolume-ID konnte nicht gelesen werden
+btrfs_enotopdomain=Die Virtualmin-Domäne der obersten Ebene konnte nicht gefunden werden
+btrfs_erestorehome=Ungültig wiederhergestelltes Btrfs-Postfach $1
+btrfs_estagehome=Fehler beim Wiederherstellen des Postfachs $1:$2 
+btrfs_erollback=$1; Rollback fehlgeschlagen: $2
+btrfs_erestoreoriginal=$1; Wiederherstellung des ursprünglichen Verzeichnisses fehlgeschlagen: $2
+btrfs_enewmailhome=Das Mailbox-Home $1 wurde nicht als Btrfs-Subvolume erstellt
+btrfs_ecopyhome=Fehler beim Kopieren der wiederhergestellten Mailbox-Daten in das Btrfs-Subvolume $1
+btrfs_eremovestage=Das Entfernen des wiederhergestellten Mailbox-Staging-Verzeichnisses $1 ist fehlgeschlagen: $2
+btrfs_quotamodule=Modul für Festplattenkontingente
+btrfs_esquota=Domänenquoten können nicht angewendet werden, solange $1 den einfachen Btrfs-Quotenmodus verwendet. Stellen Sie sicher, dass in $2 die vollständige Qgroup-Abrechnung ausgewählt ist, deaktivieren und aktivieren Sie anschließend die Btrfs-Quoten erneut, führen Sie die Konfigurationsprüfung aus und versuchen Sie es erneut
+btrfs_equotastatus=Der Btrfs-Quota-Status für $1 konnte nicht gelesen werden
+btrfs_equotasdisabled=Quotas sind auf dem Btrfs-Dateisystem $1 nicht aktiviert
+btrfs_ehomesubvolume=Das Home-Verzeichnis $1 ist kein Btrfs-Subvolume
+btrfs_enouser=Es existiert kein Unix-Benutzer mit dem Namen $1
+btrfs_elistqgroups=Btrfs-Quotagruppen konnten nicht aufgelistet werden
+btrfs_edeletenested=Das Btrfs-Home-Verzeichnis $1 kann nicht gelöscht werden, solange verschachtelte Home-Subvolumes vorhanden sind
+btrfs_equotasoff=Btrfs-Quotas sind in der Virtualmin-Konfiguration nicht aktiviert
+btrfs_emigratedir=$1 kann nicht migriert werden, da es sich nicht um ein Verzeichnis handelt
+btrfs_emigratenested=$1 kann nicht migriert werden, da es verschachtelte Subvolumes enthält
+btrfs_emigrateoutside=$1 kann nicht migriert werden, da es sich außerhalb des Quota-Dateisystems $2 befindet
+btrfs_ecopydir=$1 konnte nicht in das neue Btrfs-Subvolume kopiert werden
+btrfs_eswapdir=Fehler beim Tausch von $1 mit dem neuen Btrfs-Subvolume: $2
+
 index_warn_apacheconf=Die Apache-Konfiguration auf Ihrem System weist Fehler auf! Dadurch wird verhindert, dass neue Domänen vollständig von Virtualmin hinzugefügt werden, bis die Fehler behoben sind.
 index_warn_bindconf=Die BIND DNS-Serverkonfiguration auf Ihrem System weist Fehler auf! Dadurch wird verhindert, dass neue Domänen vollständig von Virtualmin hinzugefügt werden, bis die Fehler behoben sind.
 
+form_esomeip=Entweder eine IPv4- oder eine IPv6-Adresse muss aktiviert sein
+
+setup_proclimits=Prozessgrenzen konfigurieren
+setup_userlimits=Benutzerlimits konfigurieren
+setup_edepwebip=Eine Website kann nur erstellt werden, wenn entweder eine IPv4- oder eine IPv6-Adresse aktiviert ist
+setup_edepdnsip=Eine DNS-Zone kann nur erstellt werden, wenn entweder eine IPv4- oder eine IPv6-Adresse aktiviert ist
+
+setup_webclash=… ein Apache Virtual Host für $1 auf Port $2 existiert bereits!
+
+users_none_search=Es wurden keine Benutzer gefunden, die den Suchkriterien entsprechen. <a href='javascript:history.back()'>Klicken Sie hier</a>, um zurückzukehren und es erneut zu versuchen.
+users_edplugin=Der Benutzer $1 wird von einem Feature-Plugin verwaltet und kann hier nicht geändert oder gelöscht werden
+users_login_access_feature=Feature-Plugin
+
 user_remailbut3=Erstellungs-E-Mail erneut senden für :
 
+edit_eusergone=Der Administratorbenutzer <tt>$1</tt> für diesen virtuellen Server existiert auf diesem System nicht. Viele Funktionen sind möglicherweise nicht verfügbar, bis dieses Unix-Konto manuell neu erstellt wurde. Wenden Sie sich an Ihren Serveradministrator.
+edit_eusergone_admin=Der Administratorbenutzer <tt>$1</tt> für diesen virtuellen Server existiert auf diesem System nicht. Viele Funktionen sind möglicherweise nicht verfügbar, bis dieses Unix-Konto manuell im Modul $2 neu erstellt wurde.
+edit_eusergone_ldapuseradmin=LDAP-Benutzer und -Gruppen
+edit_eusergone_useradmin=Benutzer und Gruppen
 edit_noip6enabled=Auf diesem System nicht aktiviert
 edit_dnsip6=Externe IPv6-Adresse
+edit_nodnsip4=IPv4 nicht aktiviert
 edit_nodnsip6=IPv6 nicht aktiviert
+edit_aliasredir=Alias-Domain auf Ziel umleiten?
+
+delete_ejail=Fehler beim Entfernen des Chroot-Jails : $1
 
 save_ednsip6=Fehlende oder ungültige externe IPv6-Adresse
+save_ednsipnone=Eine externe IPv4-Adresse kann nicht ohne eine interne IPv4-Adresse festgelegt werden
+save_ednsip6none=Eine externe IPv6-Adresse kann nicht ohne eine interne IPv6-Adresse festgelegt werden
+save_dirunalias=Erstellung von Standardverzeichnissen für die Website ..
+save_dnsip4on=Hinzufügen von IPv4-DNS-Einträgen ..
+save_dnsip4off=Entfernen von IPv4-DNS-Einträgen ..
+save_logrotatephp=Aktualisierung des Post-Rotation-Skripts in der Logrotate-Konfiguration ..
+save_aliasipnone=Nichts
+save_aliasredir0=Deaktivierung der Weiterleitung zur Zieldomäne ..
+save_aliasredir1=Weiterleitung zur Zieldomäne aktivieren ..
 
 enable_tooltip=Virtueller Server ist deaktiviert
 
@@ -21,8 +86,13 @@ check_ednsip3v6=Externe IPv6-Adresse konnte nicht erkannt werden
 check_ednsip1v6=Die externe IPv6-Adresse für DNS-Einträge ist auf $1 eingestellt, die erkannte externe Adresse ist jedoch tatsächlich $2. Dies kann dazu führen, dass DNS-Einträge für Virtualmin-Domänen auf das falsche System verweisen
 check_ednsip2v6=Die Standard-IPv6-Adresse ist auf $1 eingestellt, die erkannte externe Adresse ist jedoch tatsächlich $2. Dies ist typischerweise das Ergebnis einer NAT-Firewall und sollte auf der Seite <a href='$3'>Modulkonfiguration</a> korrigiert werden
 check_ednsipnonev6=Es wurde keine lokale IPv6-Adresse gefunden und auf der Seite <a href='$1'>Modulkonfiguration</a> ist keine festgelegt
+check_webphpfpm_profile=Das folgende PHP-FPM-Workload-Profil wurde ausgewählt: <tt>$1</tt>
 check_dnsok3cloud=DNS-Domains werden von einem Cloud-Anbieter gehostet
 check_dnsok3webmin=BIND-DNS-Domains werden auf einem entfernten Webmin-System gehostet
+check_btrfs=Btrfs-Subvolume-Quotas sind mit $1-Abrechnung aktiviert
+check_btrfs_inconsistent=Die Quotenverwaltung von Btrfs ist inkonsistent, daher werden Quotenlimits möglicherweise erst nach Abschluss eines Quoten-Rescans durchgesetzt
+check_btrfs_layout=$1 Die bestehenden Home-Verzeichnisse sind keine Btrfs-Subvolumes; ihre individuellen Quotenlimits können erst durchgesetzt werden, nachdem sie in Subvolumes migriert wurden
+check_btrfs_migrate=Führen Sie $1 aus, um die Daten zu konvertieren, idealerweise nach einer Datensicherung und während die betroffenen virtuellen Server im Leerlauf sind
 check_sysinfo=Systeminformationen werden aktualisiert ..
 check_erepofile=Die Virtualmin-Repository-Konfigurationsdatei $1 existiert nicht
 check_repo_stable=stabil
@@ -33,10 +103,18 @@ check_repowrong=Die Virtualmin $2 $3 Repository-Konfigurationsdatei $1 enthält 
 check_repomissing=Die Virtualmin $3 $4 Repository-Konfigurationsdatei $1 verweist auf keine bekannten Virtualmin-Repositories; verwenden Sie den Virtualmin CLI-Befehl $2, um Ihre Repositories neu zu konfigurieren
 check_repoupdatelink=Gehen Sie zur <a href='$1'>Virtualmin License Manager</a> Seite, um das Problem zu beheben
 
+backup_subs=+$1 Subserver
+servers_disabled=Deaktiviert
+backup_increment3=Differenziell – Änderungen seit der Sicherung $1
+backup_eincrement=Ungültige vollständige Sicherung für differentielle
+backup_eincrement1=Die ältere geplante Sicherung mit der ID 1 kann nicht als ausgewählte vollständige Sicherung verwendet werden
 backup_mode0a=Ablage unter <tt>~/$1/</tt>
 backup_mode13=SFTP-Server
 backup_sftpserver=SFTP-Server
+backup_ftptls=Ist TLS für die FTP-Verbindung erforderlich?
 backup_niceftpt=FTP-Server
+backup_niceftps=$1 auf FTP-Server $2 über TLS
+backup_niceftpst=FTP-Server über TLS
 backup_nicescpt=SSH-Server
 backup_nicesftpt=SFTP-Server
 backup_nicesftp=$1 auf dem SFTP-Server $2
@@ -50,14 +128,48 @@ backup_nicebbn=Backblaze B2
 backup_niceazt=Azure Blob Storage
 backup_sign=Auch verschlüsselte Backups signieren?
 
+backup_err3=Fehler beim Löschen der geplanten Sicherung
+backup_eiuser=Eine vollständige Datensicherung wird von einer oder mehreren differenziellen Datensicherungen verwendet
 backup_eplugin_domain=Sie dürfen diese Domäne nicht sichern
 backup_upload13=Archiv wird auf den SFTP-Server $1 hochgeladen ..
 
+backup_dirtarnobase=...Differenzielle Sicherung fehlgeschlagen: Kein vollständiger Sicherungsstatus für die Sicherungs-ID $1 gefunden
+backup_mysqlcharset=Gemischte Spaltenzeichensätze können nicht sicher gespeichert werden: $1. Verwenden Sie eine Sicherungsmethode, die die Originalbytes beibehält.
 backup_esftpdir=Verbindung zum SFTP-Server fehlgeschlagen : $1
 backup_purgeesftpls=… konnte das Verzeichnis per SFTP nicht auflisten : $1
 backup_edelsftp=SFTP-Löschung fehlgeschlagen : $1
+backup_vchroot_none=ProFTPd ist nicht installiert oder konfiguriert
 
 restore_onlyfeats=Nur ausgewählte Funktionen wiederherstellen?
+
+restore_from2=Möchten Sie die ausgewählten Domänen und Funktionen aus $1 wirklich wiederherstellen und neu erstellen?
+restore_doing_ui=Wiederherstellung von $1 Domänen aus $2 wird gestartet
+restore_doing2_ui=Wiederherstellung der Virtualmin-Einstellungen von $1 aus $2 wird gestartet
+restore_failed_ui=Die Wiederherstellung ist fehlgeschlagen. Einzelheiten finden Sie in der obigen Fortschrittsanzeige.
+restore_done_ui=Wiederherstellung vollständig
+
+restore_mysqlreplay=Wiedergabe der Binärlog-Transaktionen für die MySQL-Datenbank $1 ..
+restore_mysqlreplaycheck=Überprüfung, ob Transaktionen im Binärlog wiederholt werden können ..
+restore_mysqlreplaynone=Im Dump wurden keine Binärlog-Koordinaten gefunden, von denen aus man hätte abspielen können
+restore_mysqlreplaynone2=Im Backup-Dump für die Datenbank $1 wurden keine Binärlog-Koordinaten gefunden
+restore_mysqlreplaydone=…fertig, beginnend bei Log $1 Position $2
+restore_mysqlreplayerr=Wiedergabe fehlgeschlagen : $1
+restore_mysqlreplayremote=Binärprotokolle können nur auf einem lokalen MySQL-Server wiedergegeben werden
+restore_mysqlreplaynoid=Das Backup protokolliert nicht, zu welchem MySQL-Server die zugehörigen Binärlog-Koordinaten gehören
+restore_mysqlreplayid=Das Backup wurde von einem anderen MySQL-Server erstellt ($1 war vorher $2, ist jetzt aber $3)
+restore_mysqlreplayformat=Die Wiedergabe von Binärlogs erfordert zeilenbasierte Protokollierung. Das Format war jedoch zum Zeitpunkt der Sicherung $1 und ist jetzt $2. Es kann auf der Seite „Binärprotokollierung“ im MySQL-Modul von Webmin geändert werden
+restore_mysqlreplayoff=Die Binärprotokollierung ist auf dem Server nicht aktiv
+restore_mysqlreplaybase=Das Verzeichnis für die Binärlogdatei konnte vom Server nicht ermittelt werden
+restore_mysqlreplaygone=Die Binärlogdatei $1 existiert nicht mehr auf dem Server
+restore_mysqlreplaycmd=Der Befehl mysqlbinlog wurde auf diesem System nicht gefunden
+restore_mysqlreplaymodule=Das Webmin-MySQL-Modul unterstützt das sichere Deaktivieren der Binärprotokollierung für Wiederherstellungssitzungen nicht. Aktualisieren Sie Webmin, bevor Sie Binärprotokolle wiedergeben
+restore_mysqlreplayowner=Die Wiedergabe von Binärlogs kann nicht mit der Wiederherstellung als Domäneninhaber kombiniert werden, da die Deaktivierung der Binärprotokollierung für die Wiederherstellung einen administrativen MySQL-Login erfordert
+restore_vchroot_none=ProFTPd ist nicht installiert oder konfiguriert
+
+limits_header5=Zulässige Webmin-Module
+limits_ewebminavail=Ungültige Zugriffsebene für das Webmin-Modul $1 ausgewählt
+limits_etoplevel=Die Beschränkungen für Serverbesitzer können nur für virtuelle Server der obersten Ebene bearbeitet werden
+limits_edit_remote_api=Kann eine Remote-API aufrufen
 
 cert_files=Zertifikatspfade und Downloads
 cert_filescnt=$1 Dateien
@@ -81,10 +193,20 @@ cert_hostfilter2=Hostnamen ausschließen, die nicht vom Zertifikat validiert wer
 
 newbw_email_def=Webmin-Standard ($1)
 
+tmpl_logrotatebelow=Anweisungen siehe unten ..
+tmpl_logrotatebelow2=Protokolldateien unten
 tmpl_erealdomslimit=Fehlende oder ungültige Standardbegrenzung für die Anzahl der Nicht-Alias-Server
 tmpl_mysql_mkdb=Erstellen Sie eine initiale Datenbank?
 tmpl_mail_mta_sts=MTA-STS für neue Domänen aktivieren?
+dns_cloud_local=Lokales BIND DNS
+tmpl_webaliasredir=Alias-Domains auf Ursprungsdomain umleiten?
 tmpl_php_fpmtype=Standardmäßiger PHP-FPM-Prozessmanagermodus
+tmpl_eeditmode=Dieser Servervorlagenbereich ist nicht mehr verfügbar
+tmpl_webmin_avail=Webmin-Module sind standardmäßig zugelassen
+tmpl_webmin_avail_help=Diese Modulzugriffseinstellungen werden beim Erstellen eines neuen virtuellen Servers kopiert. Nach der Erstellung können sie für diesen Server auf der Seite „Bearbeitungsbeschränkungen für Besitzer virtueller Server verwalten“ verwaltet werden.
+tmpl_webmin_avail_source=Einstellungen
+tmpl_webmin_avail_def=Aus der Standardvorlage
+tmpl_webmin_avail_custom=Benutzerdefinierte Einstellungen
 
 databases_login_pma_link=Verwaltung in phpMyAdmin
 databases_login_pma_eweb=phpMyAdmin kann nicht verwendet werden, da die Domain keine Website oder kein Home-Verzeichnis besitzt
@@ -99,6 +221,7 @@ databases_login_pma_ecredwrite=Fehler beim Erstellen der temporären phpMyAdmin-
 databases_login_pma_ephpwrite=Fehler beim Erstellen des temporären phpMyAdmin-Anmeldehelfers
 databases_login_pma_ehome=Das Home-Verzeichnis für diesen virtuellen Server fehlt oder ist ungültig
 databases_login_pma_emkdirhome=Das private Verzeichnis $1 konnte nicht erstellt werden
+databases_login_pma_enossl=Automatische Anmeldung bei phpMyAdmin fehlgeschlagen: HTTPS ist erforderlich, aber SSL ist für diesen virtuellen Server nicht aktiviert
 
 newip_return=IP-Adresse ändern
 
@@ -118,16 +241,34 @@ licence_updating_repo_prerelease_pro=Konfigurieren der Virtualmin Pro-Vorabversi
 licence_updating_repo_unstable_gpl=Konfiguration der instabilen Virtualmin GPL-Repositories ..
 licence_updating_repo_unstable_pro=Konfiguration instabiler Virtualmin Pro-Repositories ..
 
+downgrade_gpl_package=Pakete herabstufen ..
+downgrade_gpl_already=Virtualmin GPL ist bereits installiert!
+downgrade_gpl_all_done=Ihr System wurde erfolgreich auf Virtualmin GPL herabgestuft!
+downgrade_gpl_some_failed=Das Downgrade auf Virtualmin GPL wurde mit Fehlern abgeschlossen!
+downgrade_gpl_license=Herabstufung der Virtualmin-Lizenz auf GPL ..
+downgrade_gpl_restore_license=Die vorherige Virtualmin-Lizenz wird wiederhergestellt…
+downgrade_gpl_restore_repos=Wiederherstellung vorheriger Virtualmin-Repositories ..
+
 scripts_iname2=Name der Web-App
+scripts_iembed=Tracking-Code zum Einbetten in Webseiten
 scripts_cats_longdesc=Kategorien und Beschreibung
 scripts_softwaremodperlreq=Das erforderliche Perl-Paket $1 wird installiert ..
 scripts_softwaremodperlrec=Empfohlenes Perl-Paket $1 wird installiert ..
+scripts_epluginclash=Der URL-Pfad $1 wird bereits von einer anderen Anwendung verwendet
+scripts_epluginclashroot=Das Stammverzeichnis dieser Website wird bereits von einer anderen Anwendung genutzt
+scripts_epluginclashproxy=Überprüfen oder entfernen Sie den Konfliktpfad unter $1.
+scripts_embed=Um diese Web-App zu nutzen, muss der folgende Tracking-Code in die Seiten Ihrer Website eingebettet werden
 scripts_discontinued_desc=Diese Web-App kann nicht mehr installiert werden. Sie wurde entweder eingestellt oder ist in der Virtualmin GPL-Version nicht verfügbar
 
 scripts_kit_estype_multi=Mehrere Instanzen des Typs „$1“ sind unter den folgenden Pfaden verfügbar:
 scripts_kit_estype_multi2=Verwenden Sie den Hilfsparameter „--app-path“, um die genaue zu verwendende Instanz anzugeben
 script_phpmyadmin_def=Als Systemstandard phpMyAdmin verwenden
+script_phpmyadmin_httpdauth=Schützen Sie phpMyAdmin mit Benutzername und Passwort
 
+scripts_gpl_pro_tip_podman_desc_dashboard=Podman ist ein neues Plugin für Virtualmin Pro, das für die Bereitstellung und Verwaltung von Containern pro virtuellem Server mit Ports, Proxy-Pfaden, Protokollen, Terminalzugriff und Laufzeitsteuerung entwickelt wurde.
+
+summary_allquotah=Verwendeter Speicherplatz auf der Home-Festplatte
+summary_disabled=Deaktiviert am
 summary_ago_year=%vor 1 Jahr
 summary_ago_years=$1 vor Jahren
 summary_ago_month=%vor 1 Monat
@@ -159,14 +300,36 @@ summary_in_secs=In $1 Sekunden
 summary_now=Soeben
 
 migrate_plesk=Plesk-Backup
+migrate_edbuser=Der Datenbankbenutzer $1 wird übersprungen, da bereits ein Unix-Benutzer mit diesem Namen existiert
+
+remote_ecannotcap=Sie dürfen diesen Befehl nicht für den virtuellen Server $1 ausführen
+remote_ecannotdom=Der virtuelle Server $1 existiert nicht
+remote_ecannotcmd=Sie sind nicht berechtigt, diesen Befehl auszuführen
+
+links_preview_basic=Website-Vorschau konnte nicht angezeigt werden: Die Vorschau ist für Websites, die durch HTTP-Basisauthentifizierung geschützt sind, nicht verfügbar
+links_preview_note=Der normale Betrieb der Website funktioniert im Vorschaumodus nicht wie erwartet
+
+massdomains_headerw=Änderungen am Webmin-Modulzugriff
 
 admin_origname=Basisbenutzername des Administrators
 admin_fullname=Vollständiger Benutzername
 admin_eclash2=Ein zusätzlicher Administrator mit demselben Namen ist bereits vorhanden
 
+move_ebtrfs=Virtuelle Server können nicht zwischen Eigentümerstrukturen verschoben werden, solange Btrfs-Subvolume-Quotas aktiviert sind
+
 validate_ednsc=Das Abrufen der Datensätze für $1 vom Cloud-DNS-Anbieter $2 ist fehlgeschlagen : $3
 
+cmass_esomeip=Entweder eine IPv4- oder eine IPv6-Adresse muss aktiviert sein
+cmass_processing=Verarbeitung der Chargenzeile $1 ..
+
 phpmode_skip=Vorlagenkonfiguration beibehalten
+phpmode_http3=HTTP3-Protokollunterstützung aktivieren?
+phpmode_http3on=HTTP3 wird aktiviert ..
+phpmode_http3off=HTTP3 wird deaktiviert ..
+phpmode_http3def=Es wird der standardmäßige HTTP3-Modus verwendet..
+phpmode_proxyhost=Den ursprünglichen HTTP-Hostnamen beim Proxying weiterleiten?
+phpmode_proxyhoston=Proxying des ursprünglichen Hostnamens aktivieren ..
+phpmode_proxyhostoff=Deaktivierung des Proxyings des ursprünglichen Hostnamens ..
 
 spf_nodelrecs=.. keine passenden Datensätze gefunden!
 spf_eaddrecsdom=.. Datensatz $1 ist nicht in dieser Domäne
@@ -184,11 +347,26 @@ sharedips_eboot6=Bootzeit oder aktive Konfiguration für IPv6-Adresse konnte nic
 newdynip_iface6=IPv6-Adresse der primären Schnittstelle
 newdynip_external6=Extern sichtbare IPv6-Adresse
 newdynip_eext6=Die extern sichtbare IPv6-Adresse konnte nicht ermittelt werden
+newdynip_eserver=Der DynDNS-kompatible Aktualisierungsserver muss ein Hostname oder ein Hostname:Port-Wert sein
+newdynip_return=Dynamische IP-Aktualisierung
 
+upgrade_gpl_pkgs=Aktualisiere das Virtualmin GPL-Paket aus dem aktuellen Repository ..
+
+maillog_greylist=Auf der Grauliste: $1
+maillog_ratelimit=Begrenzte Rate: $1
 maillog_cls=Urteil
 maillog_cspam=Spam
 maillog_cvirus=Virus
 maillog_cok=OK
+
+viewmaillog_fromheader=Aus der Kopfzeile
+
+clamd_erestart_updater=Neustart des ClamAV-Datenbank-Updaters fehlgeschlagen : $1
+clamd_efreshclam=Der Befehl „freshclam“ wurde nicht gefunden!
+clamd_dbowner=Behebung des Problems mit den Besitzrechten der ClamAV-Datenbank ..
+clamd_edbowner=.. fehlgeschlagen : $1
+
+newshells_note=Jede Zeile definiert eine Shell. Wählen Sie die Benutzerrollen aus, die diese Shell verwenden dürfen, und aktivieren Sie <tt>Default for checked roles</tt> wenn diese Shell beim Erstellen der Benutzer standardmäßig verwendet werden soll. In dieser Tabelle bezeichnet <tt>Mailbox user</tt> jeden Benutzer eines virtuellen Servers, der nicht der Inhaber der primären Domäne oder ein Reseller-Konto ist.
 
 mail_mta_edns=MTA-STS kann ohne eine DNS-Domäne nicht aktiviert werden
 mail_mta_eweb=MTA-STS kann ohne eine Website nicht aktiviert werden
@@ -274,8 +452,20 @@ res_stats_iowt=I/O-Gewicht
 res_stats_io=E/A-Details
 res_stats_show=Details anzeigen
 
+sched_inc3=Differential (ausgewählt)
+
 cron_cron_complex=Zur Cron-Zeit
 cron_save=Zeitplan anwenden
+
+plan_scriptsselected=Nur ausgewählt
+
+postgrey_notrun=Der Greylisting-Dienst $1 ist konfiguriert, aber nicht aktiv. Greylisting ist derzeit inaktiv. Überprüfen Sie den Dienststatus unten, beheben Sie etwaige Konfigurationsfehler und starten Sie Greylisting erneut.
+postgrey_statusdesc=Greylisting-Dienststatus
+
+editgrey_eduplicate=Für $1 existiert bereits ein Eintrag in der Whitelist
+editgrey_ercptmilter=Einträge in der Empfänger-Whitelist von Milter müssen vollständige E-Mail-Adressen sein. Um eine Domain abzugleichen, aktivieren Sie die Suche nach regulären Ausdrücken und geben Sie ein Empfängermuster wie z. B..*@example\.com ein
+
+copycert_eproftpd=Der ProFTPD-Server ist nicht installiert oder konfiguriert
 
 wizard_cancel=Überspringen
 wizard_intro=Dieser Assistent nach der Installation unterstützt Sie bei der Einrichtung von Virtualmin auf Ihrem System basierend auf Ihrem Anwendungsfall. Um fortzufahren, fahren Sie mit dem nächsten Schritt fort oder überspringen Sie den Vorgang, um die Standardeinstellungen zu verwenden.
@@ -286,7 +476,9 @@ wizard_title_virus=Virenscan
 wizard_virus0=Nein, E-Mails werden nicht gescannt
 wizard_spam=Wenn Ihr System Domänen hostet, die ein großes E-Mail-Volumen empfangen, wird der SpamAssassin-Server-Daemon <tt>spamd</tt> zum Filtern eingehender Nachrichten verwendet. Die Ausführung dieses Dienstes im Hintergrund verbraucht zwar zusätzlichen RAM, beschleunigt aber die E-Mail-Verarbeitung.
 wizard_spamd1=Ja, schnellere E-Mail-Verarbeitung mit mehr RAM-Nutzung und ohne Domäneneinstellungen
+wizard_espaminuse=Spam- und Virenprüfung können nicht deaktiviert werden, da eine oder beide Funktionen von $1 virtuellen Servern verwendet werden
 wizard_db=Virtualmin unterstützt MySQL und PostgreSQL, aber Sie benötigen fast nie beide. Beide Systeme verbrauchen auch im Leerlauf RAM. Für die meisten Websites reicht MySQL allein aus, da nur wenige Anwendungen PostgreSQL benötigen. Wenn das System nur für E-Mail oder DNS verwendet wird, benötigen Sie keines von beiden.
+wizard_epostgressetup=Beim Initialisieren von PostgreSQL ist ein Fehler aufgetreten : $1
 wizard_email_desc=E-Mail-Benachrichtigungen von diesem Virtualmin-System verwenden die hier angegebene Adresse. Wählen Sie am besten eine Adresse, die E-Mails an eine Person weiterleitet oder zustellt, damit Antworten auf Systemnachrichten gelesen werden.
 wizard_to_addr=E-Mail-Adresse des Empfängers
 wizard_to_addr_none=Keine Einstellung
@@ -297,16 +489,87 @@ backuplog_sched=Protokolle der geplanten Sicherung auf $1 werden angezeigt
 backuplog_scheddesc=Protokolle für geplante Sicherung „$1“ werden angezeigt
 
 viewbackup_mode_manual=Manuell im Hintergrund
+viewbackup_inc3=Vollständige Sicherung bis $1
+viewbackup_inc3m=Vollständige Sicherung mit der ID $1
 viewbackup_quick_restore=Schnelle Wiederherstellung dieser Sicherung
 viewbackup_sign=Signiertes Backup?
 
 dbackup_delnow=Backup jetzt löschen
 
+redirects_subpath=Teilpfad
+redirects_subpath_keep=Halten
+redirects_subpath_ignore=Ignorieren
+redirects_subpath_exact=Genau
+redirects_file=Dateiname
+redirects_file_keep=Halten
+redirects_file_strip=Entfernen
+redirects_query=Abfrage
+redirects_query_keep=Halten
+redirects_query_strip=Entfernen
+redirects_code=Code
+
+redirect_from=Weiterleitung von
+redirect_to=Weiterleitung zu
+redirect_file=Dateinamenverarbeitung
+redirect_file_keep=Dateinamen beibehalten
+redirect_file_strip=Dateinamen entfernen
+redirect_query=Verarbeitung von Abfragezeichenfolgen
+redirect_query_keep=Abfragezeichenfolge beibehalten
+redirect_query_strip=Abfragezeichenfolge entfernen
+redirect_proto_both=Sowohl HTTP als auch HTTPS
+redirect_proto_http=HTTP-only
+redirect_proto_https=Nur HTTPS
+redirect_host_pick=Website-Hostnamen auswählen
+redirect_host_pick_mode=Ausgewählter Hostname
+redirect_host_spec=Geben Sie einen Hostnamen oder ein Muster an
+redirect_eproto=Fehlende oder ungültige Auswahl des Umleitungsprotokolls
+redirect_edest=Fehlendes oder ungültiges Ziel
+
+dkim_selector_desc=Um den DKIM-Selektor zu ändern, müssen Sie zuerst die Signierung ausgehender E-Mails mithilfe des obigen Optionsfelds deaktivieren
+
+dkim_adding=DKIM-Signatur für $1 wird aktiviert ..
+dkim_removing=DKIM-Signatur für $1 wird deaktiviert ..
+
+newautoconfig_return=E-Mail-Client-Konfiguration
+autoconfig_ecgi=Die automatische Konfiguration des E-Mail-Clients kann nicht aktiviert werden, da für diesen virtuellen Server kein unterstützter CGI-Skriptausführungsmodus verfügbar ist
+autoconfig_enablecgi=Aktivierung der automatischen Konfiguration des E-Mail-Clients und der erforderlichen CGI-Modi für $1 virtuelle Server ..
+autoconfig_failed2=.. fehlgeschlagen : $1
+
 records_err=DNS-Einträge konnten nicht aufgelistet werden
 
+transfer_testing=Testen, ob eine Wiederherstellung auf dem Zielsystem möglich ist…
+transfer_etesting=Test fehlgeschlagen : $1
+transfer_tested=Test erfolgreich
+
+right_fwebaliases=Website-Aliase
+
+letsencrypt_eipnoweb=IP-Adresszertifikate erfordern eine webbasierte Validierung
+letsencrypt_eipnotdom=Die IP-Adresse $1 wird von diesem virtuellen Server nicht verwendet
+letsencrypt_eipnotdefault=Die IP-Adresse $1 kann nur dann angegeben werden, wenn dieser virtuelle Server eine private IP-Adresse besitzt oder die Standardwebsite für diese IP-Adresse ist. Die aktuelle Standardwebsite ist $2.
+letsencrypt_eiprenew=Die automatische Erneuerung von IP-Adresszertifikaten erfordert eine Erneuerung spätestens 2 % der Tage vor Ablauf, die Vorlage dieses virtuellen Servers ist jedoch auf 1 % der Tage eingestellt.
+letsencrypt_eipnowebmin=Diese Version von Webmin unterstützt keine IP-Adresszertifikate
+letsencrypt_eipnocertbot=Der Befehl certbot ist für IP-Adresszertifikate erforderlich
+letsencrypt_eipcertbotver=Für IP-Adresszertifikate wird Certbot Version $1 oder höher benötigt
+letsencrypt_eipwild=IP-Adresszertifikate dürfen keine Wildcard-Namen enthalten, da IP-Adressen eine webbasierte Validierung und Wildcard-Namen eine DNS-basierte Validierung erfordern
+letsencrypt_eipbad=Die IP-Adresse $1 ist ungültig
 letsencrypt_emtasts=SSL-Zertifikatsanforderung für $1 fehlgeschlagen : $2
 letsencrypt_emtasts2=Die Antwort des SSL-Zertifikats enthielt nicht $1
 
+jailkit_eumount2=Fehler beim Aushängen von $1 im Chroot-Jail : $2
+
+2fa_failed=... Einschreibung fehlgeschlagen : $1
+2fa_done=... abgeschlossen, mit der ID <tt>$1</tt>
+2fa_testdesc=Bevor Sie sich abmelden, können Sie Ihre neue Zwei-Faktor-Authentifizierung hier testen, indem Sie ein Token eingeben. Sollte dies aus irgendeinem Grund nicht funktionieren, deaktivieren Sie die Zwei-Faktor-Authentifizierung und versuchen Sie die Einrichtung erneut.
+2fa_testfield=Zwei-Faktor-Token
+2fa_test=Token validieren
+2fa_terr=Zwei-Faktor-Authentifizierung konnte nicht getestet werden
+2fa_etestuser=Die Anmeldung ist nicht mit Zwei-Faktor-Authentifizierung möglich!
+2fa_testing=Test der Zwei-Faktor-Validierung mit $1 ..
+2fa_testfailed=…Test fehlgeschlagen! Möglicherweise wurde das falsche Token eingegeben oder Ihre Authentifizierungs-App ist nicht korrekt konfiguriert?
+2fa_testok=… Test bestanden! Sie können sich jetzt sicher mit Zwei-Faktor-Authentifizierung anmelden.
+2fa_testdis=Zwei-Faktor-Authentifizierung jetzt deaktivieren
+
+dnscloud_einuse=Die Zugangsdaten des Cloud-DNS-Anbieters können nicht gelöscht werden, da sie von $1 Servern verwendet werden
 dnscloud_bunny_longdesc=Den Bunny-API-Schlüssel auf dieser Seite finden Sie auf der Seite mit den Kontoeinstellungen Ihrer <a href=https://dash.bunny.net/account/settings target=_blank>Bunny-Konsole</a>.
 
 dnscloud_btoken=API-Schlüssel $1 wird verwendet
@@ -314,6 +577,10 @@ dnscloud_bunny_apikey=Bunny DNS API-Schlüssel
 dnscloud_bunny_eapikey=Fehlender oder ungültig aussehender Bunny-API-Schlüssel
 dnscloud_bunny_ecreds=Der Bunny DNS API-Schlüssel ist falsch : $1
 bunny_edomainavail=Die DNS-Domäne wird bereits verwendet
+
+reset_dns=Löschen und Neuerstellen von Standard-DNS-Einträgen ..
+reset_ednsfetch=… konnte die DNS-Einträge nicht abrufen!
+reset_ednssave=… konnte DNS-Einträge nicht aktualisieren : $1
 
 acme_email=E-Mail für neues Provider-Konto
 acme_email_def=Virtualmin-Standard ($1)

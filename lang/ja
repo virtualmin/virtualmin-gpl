@@ -3,6 +3,7 @@ licence_soonm=Virtualmin ライセンスは $1 日後に期限切れになりま
 licence_soon2=Virtualmin ライセンスは $1 時間後に期限切れになります。
 licence_soon2m=Virtualmin ライセンスは $1 時間後に期限切れになります。
 licence_renew=<a target=_blank href='$1'>$2</a> でライセンスを更新してください。
+
 licence_renew2=<a target=_blank href='$1'>$2</a> でライセンスのオプションを確認してください。
 licence_renew2s=すべてのサーバーを引き続き使用するには、<a target=_blank href='$1'>$2</a> で必要な追加ライセンスを購入してください。
 licence_renew2d=<a target=_blank href='$1'>$2</a> でライセンスをアップグレードしてください。

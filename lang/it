@@ -33,7 +33,6 @@ index_none2=Non hai accesso ad alcuni server virtuali.
 index_return=lista server virtuali
 index_return2=indice modulo
 index_list=Lista..
-
 index_astart=Avvia Apache
 index_astartdesc=Il webserver Apache è attualmente spento, quindi tutte le pagine web dei server virtuali sono inaccessibili. Clicca questo bottone per avviarlo.
 index_astop=Ferma Apache
@@ -128,6 +127,7 @@ index_usermode=amministratore server
 index_resellermode=reseller
 index_mailmode=gestione mail
 index_epvirts=Nessun dominio virtuale è stato trovato nella configurazione di <a href='$1'>Postfix</a>. Forse non è stata definita una mappa virtuale dei domini.
+
 index_sheader=Stato configurazioni Virtualmin
 index_sfeatures=Configurazioni disponibili
 index_snfeatures=Parametri disabilitati
@@ -440,7 +440,6 @@ edit_home=Home directory
 edit_tmpl=Template configurazione server
 edit_plan=Piano account
 edit_applyplan=Applica limiti dal nuovo piano se modificati
-edit_proxy1=Proxy sito web a
 edit_dbs=Databases
 edit_nodbs=Nessuna creazione
 edit_dbtypes=$1 MySQL, $2 PostgreSQL
@@ -509,9 +508,6 @@ edit_bwpast_=$1 ogni $2 giorni
 edit_bwunknown=Sconosciuto
 edit_bwnotify=(Notifiche inviate a $1)
 edit_bwdis=(Disabilitato al superamento del limite)
-edit_frame=Modifica frame inoltro
-edit_proxy=Modifica proxy sito web
-edit_expframe=Modifica HTML manualmente
 edit_balancer=Percorsi proxy
 edit_redirects=Reindirizzamento sito web
 edit_weba=Rapporto Webalizer
@@ -679,7 +675,6 @@ newweb_webmin=Configurare Webmin per usare un certificato SSL per l'IP?
 newweb_usermin=Configurare Usermin per usare un certificato SSL per l'IP?
 newweb_webmailsame=Usa nome dominio
 
-
 newdns_ecannot=Non hai il permesso per modificare il template DNS
 newdns_replace1=Usa solo i record nei nuovi domini
 newdns_err=Salvataggio template DNS fallito
@@ -737,7 +732,6 @@ backup_headersched=Programma e rapporto
 backup_plan=Limite ai server sul piano
 backup_anyplan=Ogni piano
 backup_parent=Includere sub-server in questa selezione?
-backup_parent2=Includere sub-server nel salvataggio?
 backup_sel=Solo selezionati ..
 backup_mkdir=Creare directory destinazione?
 backup_increment=Livello salvataggio
@@ -868,11 +862,6 @@ newbw_servers0=Tutti i server
 newbw_servers2=Tutti tranne i server selezionati ..
 newbw_unknown=(Sconosciuto)
 
-frame_enabled=Abilitare il frame d'inoltro?
-frame_ok=Salva ed applica
-frame_err=Salvataggio parametri frame d'inoltro fallito
-frame_eurl=URL mancante o non valido
-
 tmpl_name=Nome template
 tmpl_dnsrecords=Record indirizzi per nuovi domini
 tmpl_dns_record_@=Nome dominio
@@ -991,6 +980,7 @@ licence_soonm=La tua licenza Virtualmin scadrà tra $1 giorni.
 licence_soon2=La tua licenza Virtualmin scadrà tra $1 ora.
 licence_soon2m=La tua licenza Virtualmin scadrà tra $1 ore.
 licence_renew=Rinnova la licenza su <a target=_blank href='$1'>$2</a>.
+
 licence_renew2=Consulta le opzioni della licenza su <a target=_blank href='$1'>$2</a>.
 licence_renew2s=Per continuare a utilizzare tutti i server, acquista le licenze aggiuntive necessarie su <a target=_blank href='$1'>$2</a>.
 licence_renew2d=Aggiorna la licenza su <a target=_blank href='$1'>$2</a>.

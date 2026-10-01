@@ -343,7 +343,6 @@ save_apache4=Probiha zmena aliasu v konfiguraci webove stranky ..
 save_apache5=Opravuji cilovou virtualni stranku ..
 save_apache6=Menim cil adresace proxy v konfiguraci webove stranky ..
 save_apache7=Probiha zmena uzivatelskeho jmena v konfiguraci webove stranky.
-save_apache8=Opravuji predavani ramcu ..
 save_apache9=Opravuji poskytovani proxy webovym strankam ..
 save_apache10=Opravuji domovsky adresar v konfiguraci PHP ..
 save_dns=Probiha zmena IP adesy v DNS zaznamu domeny ...
@@ -370,7 +369,6 @@ save_ssl=Probiha zmena IP adresy virtualni webove stranky SSL ..
 save_ssl2=Probiha zmena nazvu hostitele virtualni webove stranky SSL ..
 save_ssl3=Probiha zmena domovskeho adresare v konfiguraci webovych stranek ..
 save_ssl6=Probiha zmena adresace proxy v konfiguraci webovych stranek SSL ..
-save_ssl8=Opravuji predavani ramcu SSL ..
 save_ssl9=Opravuji poskytovani proxu webstrankam SSL ...
 save_webalizerhome=Aktualizuji domovský adresář v konfiguraci Webalizeru ..
 save_logrotate=Soubor k ukladani zaznamu v konfiguraci Logrotate ..
@@ -520,7 +518,6 @@ backup_headerdest=Cil a format cile
 backup_headersched=Plan a generovani zprav
 backup_doms=Ulozit tyto servery
 backup_parent=Zahrnout sub-servery vybranych serveru?
-backup_parent2=Zahrnout sub-servery behem zalohovani?
 backup_features=Doplnky k zalohovani
 backup_all=Vsechny virtualni servery
 backup_sel=Pouze vybrane ..
@@ -878,6 +875,7 @@ licence_soonm=Platnost vaší licence Virtualmin vyprší za $1 dní.
 licence_soon2=Platnost vaší licence Virtualmin vyprší za $1 hodinu.
 licence_soon2m=Platnost vaší licence Virtualmin vyprší za $1 hodin.
 licence_renew=Obnovte licenci v obchodě <a target=_blank href='$1'>$2</a>.
+
 licence_renew2=Prohlédněte si možnosti licence v obchodě <a target=_blank href='$1'>$2</a>.
 licence_renew2s=Chcete-li nadále používat všechny servery, zakupte potřebné dodatečné licence v obchodě <a target=_blank href='$1'>$2</a>.
 licence_renew2d=Upgradujte licenci v obchodě <a target=_blank href='$1'>$2</a>.
