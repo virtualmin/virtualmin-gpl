@@ -20,7 +20,7 @@ return "Matomo is an open source web analytics software. It gives interesting re
 # script_piwik_versions()
 sub script_piwik_versions
 {
-return ( "5.13.0" );
+return ( "5.14.0" );
 }
 
 sub script_piwik_can_upgrade
@@ -49,6 +49,16 @@ sub script_piwik_php_modules
 return ( "curl", "gd", "xml", "mbstring", "pdo", "pdo_mysql" );
 }
 
+sub script_piwik_depends
+{
+my ($d, $ver) = @_;
+my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+if (&compare_versions($ver, "5.6") < 0) {
+	return "Matomo requires MySQL 5.6 or later";
+	}
+return undef;
+}
+
 sub script_piwik_dbs
 {
 return ("mysql");
@@ -57,7 +67,7 @@ return ("mysql");
 sub script_piwik_php_fullver
 {
 my ($d, $ver, $sinfo) = @_;
-return "7.2.5";
+return "8.0";
 }
 
 # script_piwik_php_vars(&domain)
