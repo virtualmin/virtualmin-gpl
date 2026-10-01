@@ -1,3 +1,6 @@
+#### Version 8.3.1
+* Fix `list-users` CLI table output to mark truncated usernames with an ellipsis [#1301](https://github.com/virtualmin/virtualmin-gpl/issues/1301)
+
 #### Version 8.3.0
 * Add Matomo web analytics installer to Virtualmin GPL, including detection of existing installs and display of the tracking code to embed in website pages
 * Fix missing ProFTPD SFTP and TLS log rotation while preserving existing rotation rules

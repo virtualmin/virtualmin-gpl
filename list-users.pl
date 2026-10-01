@@ -11,11 +11,15 @@ C<--all-domains> to list users from all virtual servers on the system. Finally,
 users from domains owned by a particular user can be listed with the
 C<--domain-user> flag, which must be followed by an administrator's username.
 
-By default, it will output a
-reader-friendly table of users, but you can use the C<--multiline> option to show
-more detail in a format that is suitable for reading by other programs. To
-just show the usernames, use the C<--name-only> flag. Or to list all email
-addresses for all users, use the C<--email-only> flag.
+By default, this command displays a table with short usernames, without their
+domain prefix or suffix. Usernames longer than 20 characters are shortened with
+C<...>. Long real names may also be truncated. Use C<--multiline> to display
+full usernames and real names.
+
+For scripts, use C<--multiline>, C<--json> or C<--xml> instead of parsing the
+table. These formats provide untruncated user details. To list only full
+usernames, including any domain prefix or suffix, use C<--name-only>. To list
+email addresses, use C<--email-only>.
 
 When in multiline mode, any email forwarding destinations setup for the
 user will be listed in the internal mail server format. To get a more 
@@ -321,7 +325,11 @@ foreach $d (@doms) {
 		foreach $u (@users) {
 			($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
 					@ashells;
-			printf $fmt, &remove_userdom($u->{'user'}, $d),
+			# Mark usernames shortened to fit the fixed-width column
+			my $username = &remove_userdom($u->{'user'}, $d);
+			$username = substr($username, 0, 17)."..."
+				if (length($username) > 20);
+			printf $fmt, $username,
 				    $u->{'real'},
 				    $u->{'email'} ? "Yes" : "No",
 				    $u->{'feature_user'} ? "No" :
