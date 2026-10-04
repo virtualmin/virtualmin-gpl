@@ -5001,8 +5001,16 @@ elsif ($s->{'doms'}) {
 		my $d = &get_domain($did);
 		push(@dnames, &show_domain_name($d)) if ($d);
 		}
-	my $msg = @dnames > 4 ? join(", ", @dnames[0..3]).", ..."
-			      : join(", ", @dnames);
+	# Show up to two domains directly and collapse longer lists.
+	my $msg = join(", ", @dnames);
+	if (@dnames > 2) {
+		$msg = shift(@dnames)." ".&ui_details({
+			'html' => 1,
+			'class' => 'inline inlined',
+			'title' => &text('sched_moredoms', scalar(@dnames)),
+			'content' => join("<br>", @dnames),
+			});
+		}
 	return $s->{'all'} == 2 ? &text('sched_except', $msg) : $msg;
 	}
 elsif ($s->{'virtualmin'}) {

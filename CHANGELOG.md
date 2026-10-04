@@ -1,4 +1,5 @@
 #### Version 8.3.1
+* Fix long backup domain lists widening the page by making additional domains expandable [#1303](https://github.com/virtualmin/virtualmin-gpl/issues/1303)
 * Fix `list-users` CLI table output to mark truncated usernames with an ellipsis [#1301](https://github.com/virtualmin/virtualmin-gpl/issues/1301)
 * Fix external IPv6 detection falling back to IPv4 when a DNS search domain resolves the IPv6 lookup hostname [#1300](https://github.com/virtualmin/virtualmin-gpl/issues/1300)
 
