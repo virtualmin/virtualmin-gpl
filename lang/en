@@ -6940,6 +6940,7 @@ sched_ecannot=You are not allowed to manage scheduled backups
 sched_yes=Yes, $1
 sched_dest=Destination
 sched_doms=Backup contents
+sched_moredoms=and $1 domains
 sched_enabled=Backup enabled?
 sched_all=All virtual servers
 sched_allplan=On plan $1
