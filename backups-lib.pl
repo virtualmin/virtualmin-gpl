@@ -5877,6 +5877,16 @@ return &master_admin();
 sub can_backup_domain
 {
 my ($d, $acluser) = @_;
+
+# Keep an owned backup scoped when its Webmin login has been removed
+if ($acluser) {
+	my $od = &get_domain_by("user", $acluser, "parent", "");
+	if ($od && !$od->{'webmin'}) {
+		return 2 if (!$d);
+		return $d->{'id'} eq $od->{'id'} ||
+		       $d->{'parent'} && $d->{'parent'} eq $od->{'id'};
+		}
+	}
 $acluser ||= $base_remote_user;
 local $base_remote_user = $acluser;
 local %access = &get_module_acl($acluser);	# Use local for scoping
