@@ -1,5 +1,6 @@
 #### Version 8.3.1
 * Fix `list-users` CLI table output to mark truncated usernames with an ellipsis [#1301](https://github.com/virtualmin/virtualmin-gpl/issues/1301)
+* Fix external IPv6 detection falling back to IPv4 when a DNS search domain resolves the IPv6 lookup hostname [#1300](https://github.com/virtualmin/virtualmin-gpl/issues/1300)
 
 #### Version 8.3.0
 * Add Matomo web analytics installer to Virtualmin GPL, including detection of existing installs and display of the tracking code to embed in website pages

@@ -102,7 +102,7 @@ if ($error || !$out) {
 	$url = $type == 4 ? $url4 : $url6;
 	my ($host, $port, $page, $ssl) = &parse_http_url($url);
 	&http_download($host, $port, $page, \$out, \$error, undef, $ssl,
-		undef, undef, $timeout, 0, 1);
+		undef, undef, $timeout, 0, 1, undef, undef, $type);
 	$out = $ip->($out);
 	}
 if ($error) {
