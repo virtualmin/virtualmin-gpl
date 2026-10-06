@@ -7,6 +7,7 @@ use File::Basename qw(dirname);
 use File::Spec;
 use File::Temp qw(tempdir);
 use Cwd qw(abs_path);
+use version;
 
 my $root = abs_path(File::Spec->catdir(dirname(__FILE__), '..'));
 my $feature = File::Spec->catfile($root, 'feature-mysql.pl');
@@ -19,6 +20,13 @@ die $@ if ($@);
 die "Failed to load $backups: $!" if (!defined($loaded));
 
 my $dom = { 'id' => 1, 'dom' => 'example.com' };
+
+# compare_versions(version, other-version)
+# Compare fixture versions without loading the Webmin runtime.
+sub compare_versions
+{
+return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
+}
 
 {
 	# Check charset selection, table filters and errors without a DB.
@@ -107,10 +115,17 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 	no warnings qw(once redefine);
 	local %main::mysql_binlog_enabled_cache;
 	local %main::mysql_source_data_support_cache;
+	local %main::mysql_binary_log_status_support_cache;
 	local %main::config = ( 'single_tx' => 1 );
 	my $binlog = 'ON';
 	my $binlog_calls = 0;
 	my $help_calls = 0;
+	my ($server_version, $variant, $version_error) = ('8.4.0', 'mysql');
+	# get_dom_remote_mysql_version(&domain)
+	# Supply the connected server's version independently of the client.
+	local *main::get_dom_remote_mysql_version = sub {
+		return ($server_version, $variant, $version_error);
+		};
 	local *main::require_dom_mysql = sub { return 'mysql'; };
 	local *main::execute_dom_sql = sub {
 		$binlog_calls++;
@@ -118,14 +133,31 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 		};
 	local *main::backquote_command = sub {
 		$help_calls++;
-		return $_[0] =~ /^mysql-new / ?
-			"  --source-data[=#]  Write source coordinates\n" :
-			"  --master-data[=#]  Write source coordinates\n";
+		# Real banner formats distinguish the distribution and tool versions.
+		return "mysqldump  Ver 8.4.0 for Linux on aarch64\n".
+			"  --source-data[=#]  Write source coordinates\n"
+			if ($_[0] =~ /^mysql-new /);
+		return "mysqldump  Ver 10.13 Distrib 5.7.44, for Linux\n".
+			"  --master-data[=#]  Write source coordinates\n"
+			if ($_[0] =~ /^mysql-old /);
+		return "mysqldump  Ver 10.17 Distrib 10.3.39-MariaDB, for Linux\n".
+			"  --master-data[=#]  Write source coordinates\n"
+			if ($_[0] =~ /^mariadb-dump /);
+		# MySQL 8.0 and 8.1 advertise --source-data but use the old SQL.
+		return "mysqldump  Ver 10.13 Distrib $1, for Linux\n".
+			"  --source-data[=#]  Write source coordinates\n"
+			if ($_[0] =~ /^mysql-(8\.0\.36|8\.1\.0) /);
+		return "mysqldump  Ver $1 for Linux on aarch64\n".
+			"  --source-data[=#]  Write source coordinates\n"
+			if ($_[0] =~ /^mysql-(8\.2\.0|9\.0\.0) /);
+		# A wrapper may expose flags without identifying its client version.
+		return "  --source-data[=#]  Write source coordinates\n";
 		};
 
 	is(&get_mysql_binlog_coords_flag($dom, 'mysql-new'),
 		'--source-data=2',
 		'binlog enabled with a new dump client uses --source-data');
+	$server_version = '8.0.36';
 	is(&get_mysql_binlog_coords_flag($dom, 'mysql-old'),
 		'--master-data=2',
 		'an older dump client falls back to --master-data');
@@ -137,6 +169,37 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 		'a missing dump command safely falls back to --master-data');
 	is($binlog_calls, 1, 'binary log state is checked only once per module');
 	is($help_calls, 3, 'each configured dump command is checked only once');
+
+	# Reuse cached clients against MySQL 8.4, which rejects the old SQL.
+	$server_version = '8.4.0';
+	foreach my $client ('mariadb-dump', 'mysql-old', 'mysql-8.0.36',
+			   'mysql-8.1.0', 'unknown-client', undef) {
+		ok(!defined(&get_mysql_binlog_coords_flag($dom, $client)),
+			($client || 'missing client').
+			' omits incompatible coordinates on MySQL 8.4');
+		}
+	# The replacement SQL is supported starting with the MySQL 8.2 client.
+	foreach my $client ('mysql-8.2.0', 'mysql-new', 'mysql-9.0.0') {
+		is(&get_mysql_binlog_coords_flag($dom, $client),
+			'--source-data=2', "$client retains coordinates on MySQL 8.4");
+		}
+	# Do not cache a server-specific decision under the shared client path.
+	($server_version, $variant) = ('10.3.39', 'mariadb');
+	is(&get_mysql_binlog_coords_flag($dom, 'mariadb-dump'),
+		'--master-data=2', 'MariaDB server retains coordinates with its client');
+	($server_version, $variant) = ('8.3.0', 'mysql');
+	is(&get_mysql_binlog_coords_flag($dom, 'mariadb-dump'),
+		'--master-data=2', 'MySQL before 8.4 retains the legacy statement');
+	$server_version = '9.0.0';
+	ok(!defined(&get_mysql_binlog_coords_flag($dom, 'mariadb-dump')),
+		'later MySQL servers also omit incompatible coordinates');
+	# A failed server lookup must not use a fallback local client version.
+	($server_version, $variant, $version_error) =
+		('10.3.39', 'mariadb', 'Cannot read server version');
+	ok(!defined(&get_mysql_binlog_coords_flag($dom, 'mariadb-dump')),
+		'unknown server compatibility omits optional coordinates');
+	($server_version, $variant, $version_error) = ('8.4.0', 'mysql', undef);
+	is($help_calls, 8, 'client probes are reused across different servers');
 
 	%main::mysql_binlog_enabled_cache = ( );
 	$binlog = 'OFF';
@@ -154,6 +217,7 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 	no warnings qw(once redefine);
 	local %main::mysql_binlog_enabled_cache;
 	local %main::mysql_source_data_support_cache;
+	local %main::mysql_binary_log_status_support_cache;
 	local %main::config = (
 		'gzip_mysql' => 0,
 		'single_tx' => 1,
@@ -167,13 +231,15 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 	local *main::unique = sub { return @_; };
 	local *main::get_backup_db_excludes = sub { return ( ); };
 	local *main::get_mysql_allowed_hosts = sub { return ( ); };
+	my $dumpcmd = 'mysql-new';
 	local *main::get_domain_mysql_module = sub {
 		return { 'config' => {
 			'host' => 'localhost',
-			'mysqldump' => 'mysql-new',
+			'mysqldump' => $dumpcmd,
 			} };
 		};
 	local *main::require_dom_mysql = sub { return 'mysql'; };
+	local *main::get_dom_remote_mysql_version = sub { return ('8.4.0', 'mysql'); };
 	my $column_rows = [ [ 'posts', 'utf8mb4', 'varchar' ] ];
 	# execute_dom_sql(&domain, db, sql, [bind-values...])
 	# Supplies column metadata while retaining the binary log fixture.
@@ -185,7 +251,10 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 		return { 'data' => [ [ 'log_bin', 'ON' ] ] };
 		};
 	local *main::backquote_command = sub {
-		return "  --source-data[=#]  Write source coordinates\n";
+		# Exercise both clients against the same MySQL 8.4 server.
+		return $dumpcmd eq 'mysql-new' ?
+			"mysqldump  Ver 8.4.0 for Linux\n  --source-data[=#]\n" :
+			"mysqldump  Ver 10.17 Distrib 10.3.39-MariaDB\n  --master-data[=#]\n";
 		};
 	my @defined_calls;
 	local *main::foreign_defined = sub {
@@ -233,6 +302,21 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 		'database character set is recorded in backup metadata');
 	is($written_info{'collate_appdb'}, 'latin1_swedish_ci',
 		'database collation is recorded in backup metadata');
+
+	# An incompatible client still makes a normal single-transaction dump.
+	$dumpcmd = 'mariadb-dump';
+	@foreign_calls = ( );
+	$ok = &backup_mysql(
+		{ 'template' => 1, 'db_mysql' => 'appdb', 'user' => 'example' },
+		'/tmp/mysql-backup-options-test', { },
+		0, 0, undef, { 'dir' => { 'compression' => 0 }, 'skip' => 0 });
+	ok($ok, 'MariaDB client backup proceeds on MySQL 8.4');
+	($backup_call) = grep { $_->[1] eq 'backup_database' } @foreign_calls;
+	ok($backup_call && !defined($backup_call->[-1]),
+		'backup omits incompatible coordinate flags');
+	is($backup_call->[11], 1, 'backup preserves the single-transaction option');
+	ok(!grep(/^binlog_/, keys %written_info),
+		'backup records no replay identity when coordinates are omitted');
 
 	# A rejected charset mixture must not invoke the dump program.
 	$column_rows = [ [ 'legacy', 'cp932', 'varchar' ],
