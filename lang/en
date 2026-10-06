@@ -582,6 +582,9 @@ setup_etmpl=You are not allowed to use the selected template
 setup_efeatforbidhostdef=The feature $1 is not allowed for virtual server matching the hostname
 
 setup_title=Setting Up Virtual Server
+setup_title2=Setting Up Sub-Server
+setup_title3=Setting Up Alias Server
+setup_title4=Setting Up Virtual Sub-Domain
 setup_group=Creating administration group $1 ..
 setup_user=Creating administration user $1 ..
 setup_usermail2=Creating aliases for administration user ..
