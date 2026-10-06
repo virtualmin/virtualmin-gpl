@@ -53,8 +53,9 @@ return undef;
 sub setup_dns
 {
 my ($d) = @_;
-# Consume the override before setup helpers can save the domain
-my $keep_provider = delete($d->{'dns_keep_provider'});
+# Keep resolved creation choices and consume any migration override
+my $keep_provider = delete($d->{'dns_keep_provider'}) ||
+	($d->{'creating'} && defined($d->{'provision_dns'}));
 &require_bind();
 my $tmpl = &get_template($d->{'template'});
 my $ip = $d->{'dns_ip'} || $d->{'ip'};
@@ -107,7 +108,7 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	$info->{'recs'} = $recs;
 	}
 
-# Apply provider defaults only when no migration destination was selected
+# Apply defaults only when no provider selection needs to be preserved
 &set_provision_features($d, ["dns"]) if (!$keep_provider);
 
 if ($d->{'provision_dns'}) {
