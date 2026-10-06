@@ -6,10 +6,10 @@ Creates an extra administrator for a virtual server
 
 This command creates a new administrator associated with an existing
 virtual server.  You must supply the C<--domain> parameter to
-specify the server and C<--name> to set the admin login name. The C<--pass> and
-C<--desc> options should also be given, to specify the initial password and
-a description for the account respectively. To specify a contact email address
-for the admin, use the C<--email> flag followed by the address.
+specify the server and C<--name> to set the admin login name. A non-blank password
+must be supplied with C<--pass> or C<--passfile>. Use C<--desc> to set a description
+for the account. To specify a contact email address for the admin, use the
+C<--email> flag followed by the address.
 
 The C<--append> flag can be used to add the domain name, prefix or suffix
 to the final admin username. Similarly, C<--no-append> can be used to prevent
@@ -124,6 +124,8 @@ while(@ARGV > 0) {
 	}
 
 $domain && $name || &usage("Missing domain name or login name");
+# Require a password before creating an account through the CLI or remote API
+$pass =~ /\S/ || &usage("Missing password");
 $d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 $d->{'parent'} && &usage("Virtual server $domain is not a parent server");
@@ -198,7 +200,7 @@ print "Creates a new extra administrator associated with some virtual server.\n"
 print "\n";
 print "virtualmin create-admin --domain domain.name\n";
 print "                        --name login\n";
-print "                       [--pass password | --passfile password-file]\n";
+print "                        --pass password | --passfile password-file\n";
 print "                       [--desc description]\n";
 print "                       [--email user\@domain]\n";
 print "                       [--create] [--rename]\n";

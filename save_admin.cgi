@@ -71,7 +71,9 @@ else {
 		$clash && &error($text{'admin_eclash2'});
 		}
 	$admin->{'origname'} = $in{'name'};
-	if (!$in{'pass_def'}) {
+	if ($in{'new'} || !$in{'pass_def'}) {
+		# Require a password for new accounts and password changes
+		$in{'pass'} =~ /\S/ || &error($text{'setup_epass'});
 		$admin->{'pass'} = $in{'pass'};
 		}
 	$admin->{'desc'} = $in{'desc'};
