@@ -3616,8 +3616,10 @@ if (!$encpass && $plainpass) {
 my $error;
 my $flush;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+# MariaDB before 10.4 cannot use PASSWORD() in IDENTIFIED VIA clauses.
+# Use SET PASSWORD on those versions for both plaintext and stored hashes.
 my $mysql_mariadb_with_auth_string = 
-   $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0 ||
+   $variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
    $variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0;
 my $gsql = sub {
 	my ($host, $auth_plugin) = @_;
