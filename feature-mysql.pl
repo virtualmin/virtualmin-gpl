@@ -912,6 +912,10 @@ if (%dbmap) {
 				undef, $cs, undef, undef, undef,
 				&mysql_single_transaction($d, $db));
 			}
+		if (!defined($err) && $cs eq 'binary') {
+			# Keep schema literals in Unicode while restoring row bytes unchanged.
+			$err = &prepare_mysql_binary_dump($temp);
+			}
 		if (defined($err)) {
 			&$second_print(&text('clone_mysqlbackup',
 					     $oldname, $err));
@@ -1461,11 +1465,13 @@ eval {
 	# Collect text charsets only from tables included in the dump.
 	my %include = map { $_, 1 } @{$tables || [ ]};
 	my %charsets;
+	my $has_json;
 	foreach my $row (@{$data->{'data'}}) {
 		# Ignore tables excluded by the caller.
 		next if ($tables && @$tables && !$include{$row->[0]});
 		# JSON needs utf8mb4 even when its column charset is NULL.
 		my $cs = $row->[2] eq 'json' ? 'utf8mb4' : $row->[1];
+		$has_json ||= $row->[2] eq 'json';
 		# Binary and non-text values need no text conversion.
 		$charsets{lc($cs)} = 1 if ($cs && $cs ne 'binary');
 		}
@@ -1475,22 +1481,82 @@ eval {
 		$charset = $cs[0];
 		}
 	else {
-		# Use Unicode for mixtures and charsets clients cannot use.
-		# It also works when there are no text columns.
-		# Combine only listed charsets; other mixtures may lose bytes.
+		# Select a shared encoding for mixtures and non-client charsets.
+		# Unlisted charsets may lose bytes when converted to Unicode.
 		my @unsafe = grep {
 			! /^(ascii|latin1|latin2|utf8|utf8mb3|utf8mb4|ucs2|utf16|utf16le|utf32)$/
 			} @cs;
-		die &text('backup_mysqlcharset', join(', ', @cs))."\n"
-			if (@unsafe);
-		# UCS-2, UTF-16 and UTF-32 cannot be client charsets.
-		# Prefer utf8mb4, with utf8 for servers that lack it.
-		my $supported = &execute_dom_sql(
-			$d, $db, "show character set like 'utf8mb4'");
-		$charset = @{$supported->{'data'}} ? 'utf8mb4' : 'utf8';
+		if (@unsafe) {
+			# Preserve original bytes when Unicode conversion may lose data.
+			# Native MySQL JSON cannot be restored from binary string literals.
+			die &text('backup_mysqlcharset', join(', ', @cs))."\n"
+				if ($has_json);
+			$charset = 'binary';
+			}
+		else {
+			# UCS-2, UTF-16 and UTF-32 cannot be client charsets.
+			# Prefer utf8mb4, with utf8 for servers that lack it.
+			my $supported = &execute_dom_sql(
+				$d, $db, "show character set like 'utf8mb4'");
+			$charset = @{$supported->{'data'}} ? 'utf8mb4' : 'utf8';
+			}
 		}
 	};
 return ($charset, $@ || undef);
+}
+
+# prepare_mysql_binary_dump(file)
+# Fixes connection charsets around schema statements in an uncompressed binary
+# dump. Run as the file owner. Returns undef on success or an error on failure.
+sub prepare_mysql_binary_dump
+{
+my ($file) = @_;
+my $temp;
+my $ok = eval {
+	require File::Temp;
+	require File::Basename;
+	open(my $in, '<', $file) || die "Cannot read $file: $!\n";
+	my @st = stat($in);
+	my $out;
+	($out, $temp) = File::Temp::tempfile('mysql-charset-XXXXXX',
+		DIR => File::Basename::dirname($file));
+	my ($binary, $schema, $active);
+	# Stream the dump so large databases do not need to fit in memory.
+	while (my $line = <$in>) {
+		$binary++ if ($line =~ m{^/\*!\d+ SET NAMES binary \*/;\s*$});
+		print $out $line or die "Cannot write $temp: $!\n";
+		if ($line =~ m{^/\*!\d+ SET character_set_client\s*= (\w+) \*/\s*;\s*$}) {
+			# Dump clients change only the client charset for table definitions.
+			# The connection must also decode defaults and ENUM/SET literals.
+			die "Nested schema charset switch in $file\n" if ($active);
+			print $out "/*!40101 SET \@virtualmin_saved_collation = \@\@collation_connection */;\n",
+				"/*!40101 SET character_set_connection = $1 */;\n"
+				or die "Cannot write $temp: $!\n";
+			$active = 1;
+			$schema++;
+			}
+		elsif ($line =~ m{^(?:/\*!\d+ )?SET character_set_client\s*= \@saved_cs_client\s*(?:\*/\s*)?;\s*$} && $active) {
+			# Restore the binary connection before any row INSERT statements.
+			# MySQL 8 uses an unwrapped SET after placeholder view definitions.
+			print $out "/*!40101 SET collation_connection = \@virtualmin_saved_collation */;\n"
+				or die "Cannot write $temp: $!\n";
+			$active = 0;
+			}
+		}
+	die "Cannot read $file: $!\n" if (!eof($in));
+	close($in) || die "Cannot close $file: $!\n";
+	close($out) || die "Cannot close $temp: $!\n";
+	# Reject unfamiliar dump formats instead of risking schema corruption.
+	die "Missing or incomplete charset statements in $file\n"
+		if (!$binary || !$schema || $active);
+	chmod($st[2] & 0777, $temp) || die "Cannot set permissions on $temp: $!\n";
+	# Replace the original only after the complete adjusted dump is written.
+	rename($temp, $file) || die "Cannot replace $file: $!\n";
+	1;
+	};
+my $err = $@;
+unlink($temp) if (!$ok && defined($temp));
+return $ok ? undef : $err;
 }
 
 # backup_mysql(&domain, file, &options, home-format, differential, [&as-domain],
@@ -1579,6 +1645,12 @@ foreach $db (@dbs) {
 			$cs, undef, $tables, $d->{'user'},
 			&mysql_single_transaction($d, $db), 0, $allopts->{'skip'},
 			$parameters);
+		}
+	if (!defined($err) && $cs eq 'binary') {
+		# Adjust schema encoding with the same file access as the dump writer.
+		$err = &write_as_domain_user($d, sub {
+			return &prepare_mysql_binary_dump($dbfile);
+			});
 		}
 	if (!$err) {
 		$err = &validate_mysql_backup($dbfile);
