@@ -21,6 +21,45 @@ die "Failed to load $backups: $!" if (!defined($loaded));
 
 my $dom = { 'id' => 1, 'dom' => 'example.com' };
 
+{
+	# Binary row bytes and Unicode schema literals need separate connections.
+	my $dir = tempdir(CLEANUP => 1);
+	my $file = "$dir/binary.sql";
+	my $data = "INSERT INTO t VALUES ('".pack('C*', 0xC5, 0xEB)."');\n";
+	my $dump = "/*!40101 SET NAMES binary */;\n".
+		"/*!50503 SET character_set_client = utf8mb4 */;\n".
+		"/*!50001 CREATE VIEW v AS SELECT 1 AS g */;\n".
+		"SET character_set_client = \@saved_cs_client;\n".
+		"/*!40101 SET character_set_client = utf8mb4 */;\n".
+		"CREATE TABLE t (g VARCHAR(10) CHARACTER SET greek DEFAULT 'test');\n".
+		"/*!40101 SET character_set_client = \@saved_cs_client */;\n".$data;
+	open(my $fh, '>', $file) || die $!;
+	print $fh $dump;
+	close($fh);
+	chmod(0640, $file) || die $!;
+	is(&prepare_mysql_binary_dump($file), undef, 'binary dump schema is prepared');
+	open($fh, '<', $file) || die $!;
+	my $fixed = do { local $/; <$fh> };
+	close($fh);
+	like($fixed, qr/SET character_set_connection = utf8mb4.*CREATE TABLE/s,
+		'schema statements use the Unicode connection charset');
+	like($fixed, qr/SET collation_connection = \@virtualmin_saved_collation.*\Q$data\E/s,
+		'row bytes are unchanged and follow restoration of the binary connection');
+	is((stat($file))[2] & 0777, 0640, 'dump permissions are preserved');
+	is(scalar(() = $fixed =~ /SET collation_connection = \@virtualmin_saved_collation/g),
+		2, 'both the MySQL placeholder view and table restore the connection');
+	# An incomplete schema block must fail without replacing the original.
+	$dump =~ s{/\*!40101 SET character_set_client = \@saved_cs_client \*/;\n}{};
+	open($fh, '>', $file) || die $!;
+	print $fh $dump;
+	close($fh);
+	ok(&prepare_mysql_binary_dump($file), 'incomplete charset statements are rejected');
+	open($fh, '<', $file) || die $!;
+	my $unchanged = do { local $/; <$fh> };
+	close($fh);
+	is($unchanged, $dump, 'rejected dump remains unchanged');
+}
+
 # compare_versions(version, other-version)
 # Compare fixture versions without loading the Webmin runtime.
 sub compare_versions
@@ -51,7 +90,7 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 	# Returns untranslated error keys and parameters for assertions.
 	local *main::text = sub { return join(': ', @_); };
 	# Keep a single client charset unchanged, including legacy ones.
-	foreach my $cs (qw(ascii latin1 latin2 utf8 utf8mb3 utf8mb4 cp932 armscii8)) {
+	foreach my $cs (qw(ascii latin1 latin2 greek utf8 utf8mb3 utf8mb4 cp932 armscii8)) {
 		$rows = [ [ 't', $cs, 'varchar' ] ];
 		is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
 			[ $cs, undef ], "columns using only $cs keep that dump charset");
@@ -62,6 +101,15 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 		$rows = [ map { [ 't', $_, 'varchar' ] } @$charsets ];
 		is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
 			[ 'utf8mb4', undef ], "@{$charsets} use a Unicode client charset");
+		}
+	# Use a binary connection for mixtures that may lose bytes through Unicode.
+	foreach my $charsets ([qw(greek utf8 utf8mb4)], [qw(greek latin1)],
+			      [qw(greek utf16)], [qw(greek utf8mb3)],
+			      [qw(cp932 utf8mb4)], [qw(armscii8 latin1)],
+			      [qw(greek cp932 utf8mb4)], [qw(cp1251 utf8mb4)]) {
+		$rows = [ map { [ 't', $_, 'varchar' ] } @$charsets ];
+		is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
+			[ 'binary', undef ], "@{$charsets} preserve their original bytes");
 		}
 	# JSON needs Unicode even when the server reports no column charset.
 	$rows = [ [ 't', undef, 'json' ], [ 't', 'latin1', 'varchar' ] ];
@@ -75,12 +123,12 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 	is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
 		[ 'utf8mb4', undef ], 'empty databases select utf8mb4');
 
-	# Reject legacy mixtures whose Unicode conversion loses bytes.
-	foreach my $charsets ([qw(cp932 utf8mb4)], [qw(armscii8 latin1)]) {
-		$rows = [ map { [ $_, $_, 'varchar' ] } @$charsets ];
+	# Native JSON prevents the binary fallback for legacy charset mixtures.
+	foreach my $legacy (qw(greek cp932 armscii8)) {
+		$rows = [ [ 'legacy', $legacy, 'varchar' ], [ 'json', undef, 'json' ] ];
 		my ($cs, $err) = &get_mysql_backup_charset($dom, 'appdb');
-		ok(!defined($cs) && $err, "@{$charsets} are rejected");
-		like($err, qr/\Q$charsets->[0]\E/, 'error identifies the affected charsets');
+		ok(!defined($cs) && $err, "$legacy with native JSON is rejected");
+		like($err, qr/\Q$legacy\E/, 'error identifies the affected charsets');
 		}
 	# Honor table exclusions and bind database names as SQL values.
 	$rows = [ [ 'keep', 'cp932', 'varchar' ], [ 'omit', 'utf8mb4', 'varchar' ] ];
@@ -92,8 +140,12 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 	unlike($queries[0]->[2], qr/a'b/, 'database name is not interpolated into SQL');
 	like($queries[0]->[2], qr/TABLE_TYPE <> 'VIEW'/, 'view columns do not affect dumped rows');
 	# An empty table list selects all tables in the existing dump API.
-	my ($cs, $err) = &get_mysql_backup_charset($dom, 'appdb', [ ]);
-	ok(!defined($cs) && $err, 'an empty table list means all tables, as in the dump API');
+	is_deeply([ &get_mysql_backup_charset($dom, 'appdb', [ ]) ],
+		[ 'binary', undef ], 'an empty table list includes both charsets');
+	# Excluded JSON columns must not prevent a binary dump of remaining tables.
+	push(@$rows, [ 'json', undef, 'json' ]);
+	is_deeply([ &get_mysql_backup_charset($dom, 'appdb', [ 'keep', 'omit' ]) ],
+		[ 'binary', undef ], 'excluded JSON does not prevent binary fallback');
 
 	# Use utf8 when the server lacks utf8mb4 support.
 	$supports_mb4 = 0;
@@ -102,7 +154,7 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 		[ 'utf8', undef ], 'older servers use their supported Unicode charset');
 	# A query failure must return an error instead of selecting a charset.
 	$support_error = 'Cannot read supported charsets';
-	($cs, $err) = &get_mysql_backup_charset($dom, 'appdb');
+	my ($cs, $err) = &get_mysql_backup_charset($dom, 'appdb');
 	ok(!defined($cs) && $err =~ /Cannot read supported charsets/,
 		'capability query errors prevent dumping');
 	$query_error = 'Cannot read column charsets';
@@ -266,6 +318,8 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 	local *main::write_as_domain_user = sub { $_[1]->(); };
 	local *main::write_file = sub { %written_info = %{$_[1]}; };
 	local *main::validate_mysql_backup = sub { return undef; };
+	my ($prepared, $prepare_error) = (0, undef);
+	local *main::prepare_mysql_binary_dump = sub { $prepared++; return $prepare_error; };
 	local *main::text = sub { return $_[0]; };
 	my @foreign_calls;
 	# foreign_call(module, function, [args...])
@@ -318,9 +372,29 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 	ok(!grep(/^binlog_/, keys %written_info),
 		'backup records no replay identity when coordinates are omitted');
 
-	# A rejected charset mixture must not invoke the dump program.
+	# Mixed legacy columns must reach Webmin with the binary dump charset.
 	$column_rows = [ [ 'legacy', 'cp932', 'varchar' ],
 			 [ 'posts', 'utf8mb4', 'varchar' ] ];
+	@foreign_calls = ( );
+	$ok = &backup_mysql(
+		{ 'template' => 1, 'db_mysql' => 'appdb', 'user' => 'example' },
+		'/tmp/mysql-backup-options-test', { },
+		0, 0, undef, { 'dir' => { 'compression' => 0 }, 'skip' => 0 });
+	ok($ok, 'mixed legacy charsets can be backed up');
+	($backup_call) = grep { $_->[1] eq 'backup_database' } @foreign_calls;
+	is($backup_call->[7], 'binary', 'Webmin receives the binary dump charset');
+	is($prepared, 1, 'binary backup schema is prepared before validation');
+	# A failed rewrite must not produce a successful backup result.
+	$prepare_error = 'Cannot write adjusted dump';
+	$ok = &backup_mysql(
+		{ 'template' => 1, 'db_mysql' => 'appdb', 'user' => 'example' },
+		'/tmp/mysql-backup-options-test', { },
+		0, 0, undef, { 'dir' => { 'compression' => 0 }, 'skip' => 0 });
+	ok(!$ok, 'a schema rewrite failure fails the backup');
+	$prepare_error = undef;
+
+	# A rejected JSON mixture must not invoke the dump program.
+	push(@$column_rows, [ 'documents', undef, 'json' ]);
 	@foreign_calls = ( );
 	$ok = &backup_mysql(
 		{ 'template' => 1, 'db_mysql' => 'appdb', 'user' => 'example' },

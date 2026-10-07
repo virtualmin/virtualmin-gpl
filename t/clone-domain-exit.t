@@ -59,7 +59,7 @@ foreach my $feature (qw(core plugin)) {
 foreach my $feature (qw(postgres mysql)) {
 	foreach my $result (qw(no_db success prefix clash create backup restore empty_backup empty_restore
 			       mixed_create mixed_backup mixed_restore),
-			       $feature eq 'mysql' ? qw(hosts no_db_hosts charset mixed_charset) : ()) {
+			       $feature eq 'mysql' ? qw(hosts no_db_hosts charset mixed_charset prepare) : ()) {
 		subtest "$feature clone with $result" => sub {
 			my ($status, $output) = run_cli($feature, $result, '');
 			my $success = $result eq 'no_db' || $result eq 'success' ||
@@ -70,6 +70,7 @@ foreach my $feature (qw(postgres mysql)) {
 				create => qr/creation of database target failed/,
 				backup => qr/Controlled backup failure/,
 				charset => qr/Controlled charset failure/,
+				prepare => qr/Controlled schema rewrite failure/,
 				restore => qr/Controlled restore failure/,
 				hosts => qr/Controlled allowed-hosts failure/,
 				no_db_hosts => qr/Controlled allowed-hosts failure/,
@@ -301,9 +302,14 @@ sub get_mysql_backup_charset {
 	# Fail the first database so mixed cases can still copy the next.
 	return (undef, 'Controlled charset failure')
 		if $result =~ /^(mixed_)?charset$/ && $_[1] eq 'source';
+	# Exercise binary schema preparation separately from charset selection.
+	return ('binary', undef) if $result eq 'prepare';
 	# Other cases can proceed to the dump and restore steps.
 	return ('utf8mb4', undef);
 }
+# prepare_mysql_binary_dump(file)
+# Simulates a failed schema rewrite before the clone can import the dump.
+sub prepare_mysql_binary_dump { 'Controlled schema rewrite failure' }
 sub require_mysql { }
 sub require_dom_mysql { 'mysql' }
 sub foreign_defined { 0 }

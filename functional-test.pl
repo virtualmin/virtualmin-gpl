@@ -4051,14 +4051,23 @@ my @mixed = (
 	[ 'ascii_bytes', 'ascii', undef, pack('C*', 0..127) ],
 	[ 'unicode16', 'utf16', undef, Encode::encode('UTF-16BE', $unicode) ],
 	);
-foreach my $mode ('mixed', 'cp932', 'armscii8') {
+foreach my $mode ('mixed', 'legacy', 'cp932', 'armscii8') {
 	# Unicode conversion merges some cp932 and armscii8 byte sequences.
-	# Native dumps must preserve both; the mixed case uses Unicode.
-	my @cases = $mode eq 'mixed' ? @mixed :
+	# Test native dumps as well as shared encodings for mixed columns.
+	my $mixed = $mode eq 'mixed' || $mode eq 'legacy';
+	my @cases = $mixed ? @mixed :
 		([ 'native', $mode, undef,
 		   pack('H*', $mode eq 'cp932' ? 'ED40FA5C5C27' : '29A429A4') ]);
+	if ($mode eq 'legacy') {
+		# Cover unmapped bytes and distinct sequences that map to one character.
+		push(@cases,
+			[ 'greek_bytes', 'greek', undef, pack('C*', 0..255) ],
+			[ 'greek_column', 'latin1', 'greek', pack('C*', 0..255) ],
+			[ 'armenian_bytes', 'armscii8', undef, pack('C*', 0..255) ],
+			[ 'japanese_bytes', 'cp932', undef, pack('H*', 'ED40FA5C5C27') ]);
+		}
 	# Reproduce the mismatch between database defaults and column charsets.
-	my $setup = "ALTER DATABASE `$db` CHARACTER SET latin1 COLLATE latin1_general_ci; ";
+	my $setup = "SET NAMES utf8mb4; ALTER DATABASE `$db` CHARACTER SET latin1 COLLATE latin1_general_ci; ";
 	my $snapshot = 'SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME '.
 		'FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = DATABASE(); ';
 	my @expected;
@@ -4074,10 +4083,33 @@ foreach my $mode ('mixed', 'cp932', 'armscii8') {
 		$snapshot .= "SELECT '$table', HEX(s) FROM $table ORDER BY id; SHOW CREATE TABLE $table; ";
 		push(@expected, '^'.$table.'\s+'.$hex.'$');
 		}
+	if ($mode eq 'legacy') {
+		# Preserve Greek and Unicode bytes within the same table as well.
+		my $hex = uc(unpack('H*', Encode::encode('UTF-8', $unicode)));
+		$setup .= 'ALTER TABLE greek_bytes ADD u VARCHAR(512) CHARACTER SET utf8mb4; '.
+			"UPDATE greek_bytes SET u = _utf8mb4 0x$hex; ";
+		$snapshot .= "SELECT 'greek_unicode', HEX(u) FROM greek_bytes; ";
+		push(@expected, '^greek_unicode\s+'.$hex.'$');
+		# Schema literals must be decoded as Unicode even with binary row data.
+		# Insert another row after each restore to exercise restored defaults.
+		my $greek = Encode::encode('UTF-8', 'Ελληνικά');
+		my $default = Encode::encode('UTF-8', 'Zażółć ГРУФФАЛО');
+		$setup .= "ALTER TABLE greek_bytes ".
+			"ADD g VARCHAR(30) CHARACTER SET greek DEFAULT '$greek', ".
+			"ADD e ENUM('$greek') CHARACTER SET greek DEFAULT '$greek', ".
+			"ADD t SET('$greek') CHARACTER SET greek DEFAULT '$greek', ".
+			"ADD v VARCHAR(100) CHARACTER SET utf8mb4 DEFAULT '$default'; ";
+		$snapshot .= "INSERT INTO greek_bytes (id) VALUES (2); ".
+			"SELECT 'greek_defaults', id, HEX(g), HEX(e), HEX(t), HEX(v) FROM greek_bytes ORDER BY id; ".
+			"DELETE FROM greek_bytes WHERE id = 2; ";
+		push(@expected, map { '^greek_defaults\s+'.$_.'\s+'.
+			join('\s+', ('C5EBEBE7EDE9EADC') x 3, uc(unpack('H*', $default))).'$' } (1, 2));
+		}
 	# A view's charset must not influence the encoding of dumped table rows.
 	$setup .= 'CREATE VIEW charset_view AS SELECT CONVERT(s USING utf8mb4) AS s FROM native; '
-		if $mode ne 'mixed';
-	my $charset = $mode eq 'mixed' ? 'utf8mb4' : $mode;
+		if !$mixed;
+	my $charset = $mode eq 'legacy' ? 'binary' :
+		      $mode eq 'mixed' ? 'utf8mb4' : $mode;
 	push(@$mysqlcharset_tests,
 		# Check source bytes before using them as expected results.
 		{ 'command' => &$sql_command(0, $setup),
@@ -4120,39 +4152,43 @@ foreach my $mode ('mixed', 'cp932', 'armscii8') {
 		# Leave the destination name free for the next case.
 		{ 'command' => 'delete-domain.pl', 'args' => [ [ 'domain', $clone ] ] },
 		);
-	# Keep the final native table to test an unsupported mixture.
+	# Keep the final native table to test charset selection after exclusions.
 	if ($mode ne 'armscii8') {
 		push(@$mysqlcharset_tests,
 			{ 'command' => &$sql_command(0,
-				($mode ne 'mixed' ? 'DROP VIEW charset_view; ' : '').
+				(!$mixed ? 'DROP VIEW charset_view; ' : '').
 				join(' ', map { 'DROP TABLE '.$_->[0].';' } @cases)),
 			  'label' => "Remove $mode fixture tables",
 			});
 		}
 	}
 push(@$mysqlcharset_tests,
-	# Unsupported mixtures must fail through the CLI before importing a clone.
-	{ 'command' => &$sql_command(0, 'CREATE TABLE incompatible (s VARCHAR(10)) CHARACTER SET utf8mb4'),
-	  'label' => 'Add an incompatible charset',
+	# Adding Unicode to a legacy database must select a binary dump.
+	{ 'command' => &$sql_command(0,
+		'CREATE TABLE unicode_extra (s VARCHAR(10)) CHARACTER SET utf8mb4; '.
+		'INSERT INTO unicode_extra VALUES (_utf8mb4 0xCE95F09F9880)'),
+	  'label' => 'Add a Unicode table to the legacy database',
 	},
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $source ], [ 'feature', 'mysql' ],
-		      [ 'compression', 'gzip' ], [ 'dest', "$dir/rejected.tar.gz" ] ],
-	  'fail' => 1, 'grep' => 'Cannot safely dump mixed column charsets: armscii8, utf8mb4',
+		      [ 'compression', 'gzip' ], [ 'dest', $archive ] ],
 	},
-	# A rejected clone must exit with an error and import no tables.
+	{ 'command' => 'tar -xzOf '.&quote_path($archive).' '.&quote_path('./'.$source.'_mysql_'.$db),
+	  'label' => 'Verify the unfiltered dump uses binary',
+	  'grep' => 'SET NAMES binary',
+	},
+	# Both legacy and Unicode bytes must survive the clone.
 	{ 'command' => 'clone-domain.pl',
 	  'args' => [ [ 'domain', $source ], [ 'newdomain', $clone ],
 		      [ 'newuser', $users[1] ] ],
-	  'fail' => 1, 'grep' => 'Cannot safely dump mixed column charsets: armscii8, utf8mb4',
 	},
-	{ 'command' => &$sql_command(1, 'SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()'),
-	  'label' => 'Verify the rejected clone imported no tables',
-	  'grep' => '^0$',
+	{ 'command' => &$sql_command(1, 'SELECT HEX(s) FROM native; SELECT HEX(s) FROM unicode_extra'),
+	  'label' => 'Verify the clone preserves legacy and Unicode bytes',
+	  'grep' => [ '^29A429A4$', '^CE95F09F9880$' ],
 	},
-	# Excluding the incompatible table must allow a native-charset backup.
+	# Excluding the Unicode table must switch back to the native charset.
 	{ 'command' => 'modify-domain.pl',
-	  'args' => [ [ 'domain', $source ], [ 'add-db-exclude', "$db.incompatible" ] ],
+	  'args' => [ [ 'domain', $source ], [ 'add-db-exclude', "$db.unicode_extra" ] ],
 	},
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $source ], [ 'feature', 'mysql' ],
@@ -4161,7 +4197,7 @@ push(@$mysqlcharset_tests,
 	# Check the table exclusion and the resulting dump charset.
 	{ 'command' => 'tar -xzOf '.&quote_path($archive).' '.&quote_path('./'.$source.'_mysql_'.$db),
 	  'label' => 'Verify the filtered dump uses armscii8 and omits the excluded table',
-	  'grep' => 'SET NAMES armscii8', 'antigrep' => 'CREATE TABLE `incompatible`',
+	  'grep' => 'SET NAMES armscii8', 'antigrep' => 'CREATE TABLE `unicode_extra`',
 	},
 	# Under normal runner settings, cleanup also runs after a test failure.
 	# Either domain may be absent or only partly created at that point.
