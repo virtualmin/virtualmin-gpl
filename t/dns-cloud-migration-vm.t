@@ -86,6 +86,8 @@ my ($cloud_records, $cloud_reads, $cloud_creates, $fail_create) = ([], 0, 0, 0);
 	local *virtual_server::dnscloud_cloudflare_get_state = sub { return { 'ok' => 1 }; };
 	local *virtual_server::dnscloud_cloudflare_test = sub { return undef; };
 	local *virtual_server::dnscloud_cloudflare_valid_domain = sub { return undef; };
+	# find_zone(&info): Keep this suite on the new-zone migration path.
+	local *virtual_server::dnscloud_cloudflare_find_zone = sub { return (1, undef); };
 	local *virtual_server::dnscloud_cloudflare_create_domain = sub {
 		$cloud_creates++;
 		return (0, 'simulated create failure') if $fail_create;
