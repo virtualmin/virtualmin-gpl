@@ -777,6 +777,7 @@ setup_ednscloudexists=Selected DNS cloud provider does not exist!
 setup_ednscloudstate=DNS cloud provider $1 is not ready for use
 setup_ednscloudclash=Failed to check for clash on DNS cloud provider $1 : $2
 setup_dnscloudclash=DNS zone already exists on cloud provider $1
+setup_ednscloudmissing=Domain must already exist on DNS cloud provider $1
 setup_mail_smtpcloud=Configuring cloud mail delivery provider $1 ..
 setup_mail_nosmtpcloud=.. provider does not exist!
 setup_mail_esmtpcloud=.. failed : $1
