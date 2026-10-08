@@ -214,31 +214,59 @@ sub dnscloud_route53_clear
 &save_module_config_keys({ }, [ 'route53_akey', 'route53_skey' ]);
 }
 
+# dnscloud_route53_find_zone(&info)
+# Find the domain's zone in the configured Route 53 account. An optional id selects
+# among matching zones; without one, multiple matches are an error.
+# Returns (1, &zone) with id and location, (1, undef) if absent, or (0, error).
+sub dnscloud_route53_find_zone
+{
+my ($info) = @_;
+my $name = lc($info->{'domain'});
+$name =~ s/\.$//;
+return (0, "Missing Route 53 domain name") if (!$name);
+
+# The AWS CLI retrieves every page of hosted zones.
+my $rv = &call_route53_cmd(
+	$config{'route53_akey'}, [ 'list-hosted-zones' ], undef, 1);
+return (0, $rv) if (!ref($rv));
+return (0, "Invalid Route 53 hosted zone list response")
+	if (ref($rv->{'HostedZones'}) ne 'ARRAY');
+my @zones = grep { lc($_->{'Name'}) eq $name.'.' } @{$rv->{'HostedZones'}};
+
+# Do not choose arbitrarily when several hosted zones have the same name.
+my $id = $info->{'id'} || '';
+$id =~ s{^/hostedzone/}{};
+my ($zone) = grep { $id && ($_->{'Id'} eq $id ||
+				  $_->{'Id'} eq '/hostedzone/'.$id) } @zones;
+return (0, "Multiple Route 53 zones found for $name")
+	if (!$zone && @zones > 1);
+$zone ||= $zones[0];
+return (1, undef) if (!$zone);
+return (1, { 'id' => $zone->{'Id'},
+	     'location' => $info->{'location'} || $config{'route53_location'} });
+}
+
 # dnscloud_route53_create_domain(&domain, &info)
-# Create a new DNS zone with amazon's route53
+# Create a Route 53 zone, or keep an existing zone's records.
 sub dnscloud_route53_create_domain
 {
 my ($d, $info) = @_;
-my $ref = &generate_route53_ref();
 my $location = $info->{'location'} || $config{'route53_location'};
 
-# Does it already exist?
-my $rv = &call_route53_cmd(
-	$config{'route53_akey'},
-	[ 'list-hosted-zones' ], undef, 1);
-my $already;
-foreach my $z (@{$rv->{'HostedZones'}}) {
-	if ($z->{'Name'} eq $info->{'domain'}.".") {
-		$already = $z;
-		}
-	}
-if ($already) {
-	# Yes .. just take it over but leave the records
-	$info->{'id'} = $already->{'Id'};
-	$info->{'location'} = $location;
-	return (1, $already->{'Id'}, $location);
+# Use the saved ID during restore when several zones have the same name.
+$info->{'id'} ||= $d->{'dns_cloud_id'}
+	if ($d->{'dns_cloud'} eq 'route53' && $d->{'dom'} eq $info->{'domain'});
+my ($found, $zone) = &dnscloud_route53_find_zone($info);
+return (0, $zone) if (!$found);
+if ($zone) {
+	# Take over the existing zone without uploading default records.
+	$info->{'id'} = $zone->{'id'};
+	$info->{'location'} = $zone->{'location'};
+	return (1, $info->{'id'}, $info->{'location'});
 	}
 
+# Create a missing zone and populate its initial records.
+my $ref = &generate_route53_ref();
 my $dset = $d->{'dns_dset'} eq 'none' ? '' : $config{'route53_dset'};
 my $rv = &call_route53_cmd(
 	$config{'route53_akey'},

@@ -5890,20 +5890,23 @@ if ($newcloud !~ /^(local|services|remote_.*)$/) {
 		return $err if ($err);
 		}
 
-	# Look for an existing zone if the provider supports it.
-	# Providers without zone lookup use setup_dns below.
+	# Find an existing zone before removing the old records.
+	# Keep compatibility with older Pro modules that lack zone lookup.
 	my $ffunc = "dnscloud_".$cloud."_find_zone";
 	if (defined(&$ffunc)) {
 		my $info = { 'domain' => $d->{'dom'} };
 		my ($ok, $zone) = &$ffunc($info);
 		# Leave the old zone in place if lookup fails.
 		return $zone if (!$ok);
+		# Providers such as Namecheap cannot create a missing domain.
+		my ($c) = grep { $_->{'name'} eq $cloud } &list_dns_clouds();
+		return &text('setup_ednscloudmissing', $c->{'desc'})
+			if (!$zone && $c->{'import'});
 		if ($zone) {
 			# Use the caller's choice, or the current template setting.
 			# The domain's saved setting may be out of date.
 			my $tmpl = &get_template($d->{'template'});
 			$import = $tmpl->{'dns_cloud_import'} if (!defined($import));
-			my ($c) = grep { $_->{'name'} eq $cloud } &list_dns_clouds();
 			return &text('setup_dnscloudclash', $c->{'desc'}) if (!$import);
 
 			# Check the domain name and read the zone's records before

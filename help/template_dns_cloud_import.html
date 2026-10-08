@@ -4,13 +4,13 @@ When creating a domain with cloud DNS, this option controls what happens
 if the zone already exists at the provider. Choose <b>No</b> to refuse
 domain creation, or <b>Yes</b> to let Virtualmin manage the existing zone. <p>
 
-When moving DNS hosting to an existing Cloudflare zone, <b>No</b> refuses
-the move before either zone changes. <b>Yes</b> uses the existing Cloudflare
-records and keeps their proxy settings. Source records are not copied
-over them. <p>
+When moving DNS hosting to an existing cloud DNS zone, <b>No</b> refuses
+the move before either zone changes. <b>Yes</b> uses the existing records
+and keeps any provider-specific settings, such as proxy settings. Source
+records are not copied over them. <p>
 
-When moving DNS to a Cloudflare zone that does not exist, Virtualmin
-creates the zone and copies the source records, regardless of this
-setting. <p>
+When the destination zone does not exist, Virtualmin creates it and copies
+the source records, regardless of this setting. Providers such as Namecheap
+require the domain to exist already; otherwise, the move is refused. <p>
 
 <footer>

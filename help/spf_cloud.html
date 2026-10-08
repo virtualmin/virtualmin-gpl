@@ -6,9 +6,10 @@ the cloud. Moving DNS hosting deletes the zone from the old provider and
 normally copies its records to the destination. Moving to local hosting
 deletes the existing cloud zone. <p>
 
-If the destination zone already exists in Cloudflare, the template's
+If the destination zone already exists at the cloud provider, the template's
 <b>Take over existing DNS zones?</b> option controls the move. When enabled,
-Virtualmin manages the existing records and keeps their proxy settings.
+Virtualmin manages the existing records and keeps any provider-specific
+settings, such as proxy settings.
 Source records are not copied over them. When disabled, Virtualmin refuses
 the move before changing either zone. <p>
 
