@@ -989,7 +989,9 @@ foreach $d (@doms) {
 			&$first_print(&text('spf_dnscloud', $c->{'name'}));
 			}
 		&$indent_print();
-		my $err = &modify_dns_cloud($d, $clouddns);
+		# Let --cloud-dns-import override the template's takeover setting.
+		# Without that option, use the current template.
+		my $err = &modify_dns_cloud($d, $clouddns, undef, $clouddns_import);
 		&$outdent_print();
 		if ($err) {
 			&$second_print(&text('spf_eclouddns', $err));
