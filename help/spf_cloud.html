@@ -3,8 +3,16 @@
 If you have other Cloud DNS providers configured, this option allows you to
 move the DNS hosting for this domain between them, or from local hosting to
 the cloud. Moving DNS hosting deletes the zone from the old provider and
-recreates its records at the destination. Moving to local hosting therefore
-deletes the existing cloud zone. Update the domain's nameservers at its
-registrar as needed when moving DNS hosting. <p>
+normally copies its records to the destination. Moving to local hosting
+deletes the existing cloud zone. <p>
+
+If the destination zone already exists in Cloudflare, the template's
+<b>Take over existing DNS zones?</b> option controls the move. When enabled,
+Virtualmin manages the existing records and keeps their proxy settings.
+Source records are not copied over them. When disabled, Virtualmin refuses
+the move before changing either zone. <p>
+
+Update the domain's nameservers at its registrar as needed when moving DNS
+hosting. <p>
 
 <footer>

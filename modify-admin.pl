@@ -74,13 +74,17 @@ while(@ARGV > 0) {
 		$newname = shift(@ARGV);
 		}
 	elsif ($a eq "--pass") {
+		# An explicit password change must not clear the password
 		$pass = shift(@ARGV);
+		$pass =~ /\S/ || &usage("Missing password");
 		}
 	elsif ($a eq "--passfile") {
+		# Reject password files that are blank after removing line endings
 		$is_master ||
 			&usage("--passfile is only available to the master administrator");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
+		$pass =~ /\S/ || &usage("Missing password");
 		}
 	elsif ($a eq "--desc") {
 		$desc = shift(@ARGV);

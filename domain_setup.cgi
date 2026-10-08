@@ -473,8 +473,12 @@ foreach my $ff (&forbidden_domain_features(\%dom, 1)) {
 # Update custom fields
 &parse_custom_fields(\%dom, \%in);
 
+# Match the setup title to the server type selected in the creation form
 $main::force_bottom_scroll = 1;
-&ui_print_unbuffered_header(&domain_in(\%dom), $text{'setup_title'}, "");
+&ui_print_unbuffered_header(&domain_in(\%dom),
+	$aliasdom ? $text{'setup_title3'} :
+	$subdom ? $text{'setup_title4'} :
+	$parentdom ? $text{'setup_title2'} : $text{'setup_title'}, "");
 
 # Check for and show any warnings
 if (&show_virtual_server_warnings(\%dom, undef, \%in)) {

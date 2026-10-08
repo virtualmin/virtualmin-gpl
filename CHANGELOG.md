@@ -1,4 +1,7 @@
 #### Version 8.3.1
+* Fix backups failing on MySQL 8.4 and later with MariaDB or older MySQL dump clients by skipping incompatible binary log coordinate options
+* Fix database password changes failing on MariaDB 10.2 and 10.3
+* Fix extra administrator creation and password changes accepting blank passwords in the web UI, CLI and remote API [forum.virtualmin.com/t/138123](https://forum.virtualmin.com/t/prevent-creation-of-extra-admin-with-blank-password/138123)
 * Fix long backup domain lists widening the page by making additional domains expandable [#1303](https://github.com/virtualmin/virtualmin-gpl/issues/1303)
 * Fix `list-users` CLI table output to mark truncated usernames with an ellipsis [#1301](https://github.com/virtualmin/virtualmin-gpl/issues/1301)
 * Fix external IPv6 detection falling back to IPv4 when a DNS search domain resolves the IPv6 lookup hostname [#1300](https://github.com/virtualmin/virtualmin-gpl/issues/1300)

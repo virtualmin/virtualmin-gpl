@@ -1,8 +1,16 @@
-<header>Take over existing zone when creating?</header>
+<header>Take over existing DNS zones?</header>
 
-If a Cloud DNS provider is selected, this option determines what happens 
-if a new domain already exists at the provider. If <b>No</b> is selected,
-domain creation will fail. But if <b>Yes</b> is chosen, the existing domain
-will be used and managed by Virtualmin. <p>
+When creating a domain with cloud DNS, this option controls what happens
+if the zone already exists at the provider. Choose <b>No</b> to refuse
+domain creation, or <b>Yes</b> to let Virtualmin manage the existing zone. <p>
+
+When moving DNS hosting to an existing Cloudflare zone, <b>No</b> refuses
+the move before either zone changes. <b>Yes</b> uses the existing Cloudflare
+records and keeps their proxy settings. Source records are not copied
+over them. <p>
+
+When moving DNS to a Cloudflare zone that does not exist, Virtualmin
+creates the zone and copies the source records, regardless of this
+setting. <p>
 
 <footer>

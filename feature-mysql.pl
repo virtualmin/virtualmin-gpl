@@ -1174,7 +1174,7 @@ return undef;
 
 # get_mysql_binlog_coords_flag(&domain, [dump-command])
 # Returns the binary log coordinate option for Webmin's MySQL backup function,
-# if the database server has binary logging enabled.
+# if binary logging is enabled and the dump client supports the server.
 sub get_mysql_binlog_coords_flag
 {
 my ($d, $dumpcmd) = @_;
@@ -1198,13 +1198,32 @@ if (!defined($mysql_binlog_enabled_cache{$mod})) {
 	}
 return undef if (!$mysql_binlog_enabled_cache{$mod});
 
-# Use the option name supported by the local dump client, not the server version
-return "--master-data=2" if (!$dumpcmd);
+# MySQL 8.4 removed SHOW MASTER STATUS. Do not let optional coordinates
+# break a backup when the client still uses it or the server is unknown.
+my ($ver, $variant, $err) = &get_dom_remote_mysql_version($d);
+return undef if ($err || !$ver);
+my $needs_binary_status = $variant eq "mysql" &&
+	&compare_versions($ver, "8.4") >= 0;
+return $needs_binary_status ? undef : "--master-data=2" if (!$dumpcmd);
+
+# Cache capabilities per dump command, since remote servers can share a client.
 if (!defined($mysql_source_data_support_cache{$dumpcmd})) {
 	my $help = &backquote_command("$dumpcmd --help 2>&1 </dev/null");
 	$mysql_source_data_support_cache{$dumpcmd} =
 		$help =~ /^\s*--source-data(?:\[|=|\s|$)/m ? 1 : 0;
+	# MySQL 8.0 supports --source-data but still uses SHOW MASTER STATUS.
+	# MySQL clients gained the replacement statement in 8.2. Prefer
+	# Distrib over Ver, which is a separate tool version in older banners.
+	my ($dumpver) = $help =~ /\bDistrib\s+([0-9.]+)/i;
+	($dumpver) = $help =~ /\bVer\s+([0-9.]+)/i if (!$dumpver);
+	$mysql_binary_log_status_support_cache{$dumpcmd} =
+		$dumpver && $help !~ /mariadb/i &&
+		&compare_versions($dumpver, "8.2") >= 0 ? 1 : 0;
 	}
+return undef if ($needs_binary_status &&
+	!$mysql_binary_log_status_support_cache{$dumpcmd});
+
+# Select the spelling accepted by the compatible dump client.
 return $mysql_source_data_support_cache{$dumpcmd} ?
 	"--source-data=2" : "--master-data=2";
 }
@@ -3616,8 +3635,10 @@ if (!$encpass && $plainpass) {
 my $error;
 my $flush;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+# MariaDB before 10.4 cannot use PASSWORD() in IDENTIFIED VIA clauses.
+# Use SET PASSWORD on those versions for both plaintext and stored hashes.
 my $mysql_mariadb_with_auth_string = 
-   $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0 ||
+   $variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
    $variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0;
 my $gsql = sub {
 	my ($host, $auth_plugin) = @_;

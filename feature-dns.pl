@@ -53,8 +53,9 @@ return undef;
 sub setup_dns
 {
 my ($d) = @_;
-# Consume the override before setup helpers can save the domain
-my $keep_provider = delete($d->{'dns_keep_provider'});
+# Keep resolved creation choices and consume any migration override
+my $keep_provider = delete($d->{'dns_keep_provider'}) ||
+	($d->{'creating'} && defined($d->{'provision_dns'}));
 &require_bind();
 my $tmpl = &get_template($d->{'template'});
 my $ip = $d->{'dns_ip'} || $d->{'ip'};
@@ -107,7 +108,7 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	$info->{'recs'} = $recs;
 	}
 
-# Apply provider defaults only when no migration destination was selected
+# Apply defaults only when no provider selection needs to be preserved
 &set_provision_features($d, ["dns"]) if (!$keep_provider);
 
 if ($d->{'provision_dns'}) {
@@ -426,10 +427,13 @@ $slave_error = $_[0];
 }
 
 # delete_dns(&domain)
-# Delete a domain from the BIND config
+# Remove DNS hosting. Skip DKIM updates during takeover to preserve the
+# existing zone's records.
 sub delete_dns
 {
 my ($d) = @_;
+# Remove the flag now so later calls cannot save it with the domain.
+my $keep_dkim = delete($d->{'dns_keep_dkim'});
 &require_bind();
 if ($d->{'dns_cloud'} && !$d->{'dns_submode'}) {
 	# Delete from cloud DNS provider
@@ -566,9 +570,8 @@ else {
 	delete($d->{'dns_subof'});
 	}
 
-# Request a call to disable DKIM if necessary, once all features
-# have been removed
-&register_post_action(\&sync_dkim_domain, $d);
+# Run DKIM updates after feature changes finish, except during takeover.
+&register_post_action(\&sync_dkim_domain, $d) if (!$keep_dkim);
 
 &register_post_action(\&restart_bind, $d);
 return 1;
@@ -5853,12 +5856,18 @@ else {
 	}
 }
 
-# modify_dns_cloud(&domain, cloud-name|"local"|"services", &remote-server)
-# Update the cloud DNS provider or remote server for a domain, while preserving
-# the original records
+# modify_dns_cloud(&domain, cloud-name|"local"|"services", [&remote-server],
+#                  [import-existing])
+# Move DNS hosting. Copy the old zone's records unless taking over an existing
+# zone, in which case keep that zone's records.
+# For a remote DNS server, pass undef or "local" as cloud-name.
+# Set import-existing to 1 to allow takeover or 0 to refuse it. Leave it undef
+# to use the current template setting.
+# Takeover requires the provider to support zone lookup.
+# Returns undef on success, or an error message.
 sub modify_dns_cloud
 {
-my ($d, $cloud, $server) = @_;
+my ($d, $cloud, $server, $import) = @_;
 my $oldcloud = $d->{'dns_cloud'} ? $d->{'dns_cloud'} :
 	       $d->{'dns_remote'} ? "remote_".$d->{'dns_remote'} :
 	       $d->{'provision_dns'} ? 'services' : 'local';
@@ -5866,7 +5875,8 @@ my $newcloud = $server ? "remote_".$server->{'host'}
 		       : $cloud;
 return undef if ($oldcloud eq $newcloud);
 
-# Is the cloud provider working?
+# Check that the new cloud provider is ready before changing DNS.
+my $existing;
 if ($newcloud !~ /^(local|services|remote_.*)$/) {
 	my $cfunc = "dnscloud_".$cloud."_check";
 	my $err = &$cfunc();
@@ -5879,13 +5889,45 @@ if ($newcloud !~ /^(local|services|remote_.*)$/) {
 		my $err = &$tfunc();
 		return $err if ($err);
 		}
+
+	# Look for an existing zone if the provider supports it.
+	# Providers without zone lookup use setup_dns below.
+	my $ffunc = "dnscloud_".$cloud."_find_zone";
+	if (defined(&$ffunc)) {
+		my $info = { 'domain' => $d->{'dom'} };
+		my ($ok, $zone) = &$ffunc($info);
+		# Leave the old zone in place if lookup fails.
+		return $zone if (!$ok);
+		if ($zone) {
+			# Use the caller's choice, or the current template setting.
+			# The domain's saved setting may be out of date.
+			my $tmpl = &get_template($d->{'template'});
+			$import = $tmpl->{'dns_cloud_import'} if (!defined($import));
+			my ($c) = grep { $_->{'name'} eq $cloud } &list_dns_clouds();
+			return &text('setup_dnscloudclash', $c->{'desc'}) if (!$import);
+
+			# Check the domain name and read the zone's records before
+			# removing the old zone.
+			my $vfunc = "dnscloud_".$cloud."_valid_domain";
+			my $err = &$vfunc($d, $info);
+			return $err if ($err);
+			$info->{'id'} = $zone->{'id'};
+			$info->{'location'} = $zone->{'location'};
+			my $gfunc = "dnscloud_".$cloud."_get_records";
+			my ($ok, $recs) = &$gfunc($d, $info);
+			return $recs if (!$ok);
+			$existing = $info;
+			}
+		}
 	}
 
-# Get current records, then re-create the DNS config
+# Read the old records so we can copy them or restore them on failure.
 &push_all_print();
 &set_all_capture_print();
 $print_output = "";
 my @oldrecs = &get_domain_dns_records($d);
+# Prevent DKIM updates from changing the zone we are taking over.
+$d->{'dns_keep_dkim'} = 1 if ($existing);
 my $ok = &delete_dns($d);
 if (!$ok) {
 	return "Failed to remove existing DNS zone : $print_output";
@@ -5905,6 +5947,17 @@ elsif ($cloud && $cloud ne "local") {
 elsif ($server) {
 	$d->{'dns_remote'} = $server->{'host'};
 	}
+# Use the existing zone without creating or copying records.
+if ($existing) {
+	$d->{'dns_cloud_id'} = $existing->{'id'};
+	$d->{'dns_cloud_location'} = $existing->{'location'};
+	&clear_domain_dns_records_and_file($d);
+	&add_parent_ns_records($d);
+	&save_domain($d);
+	&pop_all_print();
+	return undef;
+	}
+
 $print_output = "";
 # Keep the requested provider even if the template or alias target differs
 $d->{'dns_keep_provider'} = 1;
