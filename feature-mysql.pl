@@ -1511,52 +1511,64 @@ return ($charset, $@ || undef);
 sub prepare_mysql_binary_dump
 {
 my ($file) = @_;
-my $temp;
-my $ok = eval {
-	require File::Temp;
-	require File::Basename;
-	open(my $in, '<', $file) || die "Cannot read $file: $!\n";
-	my @st = stat($in);
-	my $out;
-	($out, $temp) = File::Temp::tempfile('mysql-charset-XXXXXX',
-		DIR => File::Basename::dirname($file));
-	my ($binary, $schema, $active);
-	# Stream the dump so large databases do not need to fit in memory.
-	while (my $line = <$in>) {
-		$binary++ if ($line =~ m{^/\*!\d+ SET NAMES binary \*/;\s*$});
-		print $out $line or die "Cannot write $temp: $!\n";
-		if ($line =~ m{^/\*!\d+ SET character_set_client\s*= (\w+) \*/\s*;\s*$}) {
-			# Dump clients change only the client charset for table definitions.
-			# The connection must also decode defaults and ENUM/SET literals.
-			die "Nested schema charset switch in $file\n" if ($active);
-			print $out "/*!40101 SET \@virtualmin_saved_collation = \@\@collation_connection */;\n",
-				"/*!40101 SET character_set_connection = $1 */;\n"
-				or die "Cannot write $temp: $!\n";
-			$active = 1;
-			$schema++;
-			}
-		elsif ($line =~ m{^(?:/\*!\d+ )?SET character_set_client\s*= \@saved_cs_client\s*(?:\*/\s*)?;\s*$} && $active) {
-			# Restore the binary connection before any row INSERT statements.
-			# MySQL 8 uses an unwrapped SET after placeholder view definitions.
-			print $out "/*!40101 SET collation_connection = \@virtualmin_saved_collation */;\n"
-				or die "Cannot write $temp: $!\n";
-			$active = 0;
-			}
-		}
-	die "Cannot read $file: $!\n" if (!eof($in));
-	close($in) || die "Cannot close $file: $!\n";
-	close($out) || die "Cannot close $temp: $!\n";
-	# Reject unfamiliar dump formats instead of risking schema corruption.
-	die "Missing or incomplete charset statements in $file\n"
-		if (!$binary || !$schema || $active);
-	chmod($st[2] & 0777, $temp) || die "Cannot set permissions on $temp: $!\n";
-	# Replace the original only after the complete adjusted dump is written.
-	rename($temp, $file) || die "Cannot replace $file: $!\n";
-	1;
+local (*MYSQLDUMPIN, *MYSQLDUMPOUT);
+my ($in, $out) = (\*MYSQLDUMPIN, \*MYSQLDUMPOUT);
+&open_readfile($in, $file) || return "Cannot read $file: $!\n";
+
+# Keep Webmin's temporary file beside the dump for an atomic rename.
+# Write to that path directly so a failed open cannot truncate the source.
+my $temp = &open_tempfile($file);
+return "Cannot write $temp: File already exists\n" if (-e $temp || -l $temp);
+# close_tempfile looks up non-fatal error flags by paths without the > prefix.
+local $main::open_tempfiles_noerror{$temp} = 1;
+local $main::open_tempfiles_noerror{$file} = 1;
+my $oldmask = umask(077);
+my $opened = &open_tempfile($out, ">$temp", 1, 1);
+umask($oldmask);
+$opened || return "Cannot write $temp: $!\n";
+
+# discard(error) removes partial output before returning the original error.
+my $discard = sub {
+	my ($err) = @_;
+	close($in) if (defined(fileno($in)));
+	&close_tempfile($out) if (defined(fileno($out)));
+	&unlink_file($temp);
+	return $err;
 	};
-my $err = $@;
-unlink($temp) if (!$ok && defined($temp));
-return $ok ? undef : $err;
+my ($binary, $schema, $active);
+# Stream the dump so large databases do not need to fit in memory.
+while (my $line = <$in>) {
+	$binary++ if ($line =~ m{^/\*!\d+ SET NAMES binary \*/;\s*$});
+	print $out $line or return &$discard("Cannot write $temp: $!\n");
+	if ($line =~ m{^/\*!\d+ SET character_set_client\s*= (\w+) \*/\s*;\s*$}) {
+		# Dump clients change only the client charset for table definitions.
+		# The connection must also decode defaults and ENUM/SET literals.
+		return &$discard("Nested schema charset switch in $file\n") if ($active);
+		print $out "/*!40101 SET \@virtualmin_saved_collation = \@\@collation_connection */;\n",
+			"/*!40101 SET character_set_connection = $1 */;\n"
+			or return &$discard("Cannot write $temp: $!\n");
+		$active = 1;
+		$schema++;
+		}
+	elsif ($line =~ m{^(?:/\*!\d+ )?SET character_set_client\s*= \@saved_cs_client\s*(?:\*/\s*)?;\s*$} && $active) {
+		# Restore the binary connection before any row INSERT statements.
+		# MySQL 8 uses an unwrapped SET after placeholder view definitions.
+		print $out "/*!40101 SET collation_connection = \@virtualmin_saved_collation */;\n"
+			or return &$discard("Cannot write $temp: $!\n");
+		$active = 0;
+		}
+	}
+return &$discard("Cannot read $file: $!\n") if (!eof($in));
+close($in) || return &$discard("Cannot close $file: $!\n");
+# Check buffered writes before Webmin closes the temporary output.
+$out->flush() || return &$discard("Cannot write $temp: $!\n");
+&close_tempfile($out) || return &$discard("Cannot close $temp: $!\n");
+# Reject unfamiliar dump formats instead of risking schema corruption.
+return &$discard("Missing or incomplete charset statements in $file\n")
+	if (!$binary || !$schema || $active);
+# Let Webmin replace the validated dump and preserve its file metadata.
+&close_tempfile($file) || return &$discard("Cannot replace $file: $!\n");
+return undef;
 }
 
 # backup_mysql(&domain, file, &options, home-format, differential, [&as-domain],

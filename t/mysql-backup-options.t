@@ -6,6 +6,8 @@ use Test::More;
 use File::Basename qw(dirname);
 use File::Spec;
 use File::Temp qw(tempdir);
+use IO::Handle;
+use Errno qw(EACCES EIO);
 use Cwd qw(abs_path);
 use version;
 
@@ -23,8 +25,44 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 
 {
 	# Binary row bytes and Unicode schema literals need separate connections.
+	no warnings qw(once redefine);
 	my $dir = tempdir(CLEANUP => 1);
 	my $file = "$dir/binary.sql";
+	my $temp = "$file.webmintmp";
+	my ($open_error, $close_error, $replace_error, $temp_mode);
+	# open_readfile(handle, file) opens fixture input without Webmin startup.
+	local *main::open_readfile = sub { return open($_[0], '<', $_[1]); };
+	# open_tempfile([handle], file, [no-error], [no-tempfile])
+	# Supply a staging path or open it, with controllable open failures.
+	local *main::open_tempfile = sub {
+		return $temp if (@_ == 1);
+		my ($fh, $path) = @_;
+		$path =~ s/^>//;
+		if ($open_error) {
+			# Refuse writing without opening or truncating the original dump.
+			$! = EACCES;
+			return 0;
+			}
+		my $ok = open($fh, '>', $path);
+		$temp_mode = (stat($path))[2] & 0777 if ($ok);
+		return $ok;
+		};
+	# close_tempfile(handle|file) closes output or commits the validated dump.
+	local *main::close_tempfile = sub {
+		my ($target) = @_;
+		if (ref($target)) {
+			# Simulate a close failure after releasing the handle.
+			my $ok = close($target);
+			if ($close_error) { $! = EIO; return 0; }
+			return $ok;
+			}
+		# Simulate a failed commit that leaves the original untouched.
+		if ($replace_error) { $! = EACCES; return 0; }
+		my @st = stat($target);
+		rename($temp, $target) || return 0;
+		return chmod($st[2] & 0777, $target);
+		};
+	local *main::unlink_file = sub { return unlink($_[0]); };
 	my $data = "INSERT INTO t VALUES ('".pack('C*', 0xC5, 0xEB)."');\n";
 	my $dump = "/*!40101 SET NAMES binary */;\n".
 		"/*!50503 SET character_set_client = utf8mb4 */;\n".
@@ -46,8 +84,23 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 	like($fixed, qr/SET collation_connection = \@virtualmin_saved_collation.*\Q$data\E/s,
 		'row bytes are unchanged and follow restoration of the binary connection');
 	is((stat($file))[2] & 0777, 0640, 'dump permissions are preserved');
+	is($temp_mode, 0600, 'temporary output is private from creation');
+	ok(!-e $temp, 'successful rewrite leaves no temporary file');
 	is(scalar(() = $fixed =~ /SET collation_connection = \@virtualmin_saved_collation/g),
 		2, 'both the MySQL placeholder view and table restore the connection');
+	# API failures must return an error, clean up and preserve the source.
+	foreach my $failure (\$open_error, \$close_error, \$replace_error) {
+		open($fh, '>', $file) || die $!;
+		print $fh $dump;
+		close($fh);
+		$$failure = 1;
+		ok(&prepare_mysql_binary_dump($file), 'a file API failure is returned');
+		$$failure = 0;
+		open($fh, '<', $file) || die $!;
+		is(do { local $/; <$fh> }, $dump, 'API failure preserves the original dump');
+		close($fh);
+		ok(!-e $temp, 'API failure leaves no temporary output');
+		}
 	# An incomplete schema block must fail without replacing the original.
 	$dump =~ s{/\*!40101 SET character_set_client = \@saved_cs_client \*/;\n}{};
 	open($fh, '>', $file) || die $!;
@@ -58,6 +111,18 @@ my $dom = { 'id' => 1, 'dom' => 'example.com' };
 	my $unchanged = do { local $/; <$fh> };
 	close($fh);
 	is($unchanged, $dump, 'rejected dump remains unchanged');
+	ok(!-e $temp, 'rejected dump leaves no partial temporary file');
+	# Opening errors are returned, and a colliding file must stay untouched.
+	like(&prepare_mysql_binary_dump("$dir/missing.sql"), qr/^Cannot read /,
+		'a missing input returns an error');
+	open($fh, '>', $temp) || die $!;
+	print $fh 'existing file';
+	close($fh);
+	like(&prepare_mysql_binary_dump($file), qr/^Cannot write /,
+		'a temporary path collision returns an error');
+	open($fh, '<', $temp) || die $!;
+	is(do { local $/; <$fh> }, 'existing file', 'colliding file is preserved');
+	close($fh);
 }
 
 # compare_versions(version, other-version)
