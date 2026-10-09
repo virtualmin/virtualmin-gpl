@@ -2696,7 +2696,6 @@ backup_mysqlinfo=Copiando detalhes do usuário MySQL ..
 backup_mysqldump=Despejando banco de dados MySQL $1 ..
 backup_mysqldumpfailed=.. despejo falhou! $1 
 backup_mysqlgzipfailed=.. gzip falhou! $1 
-backup_mysqlcharset=Não é possível despejar com segurança conjuntos de caracteres de colunas mistas: $1. Use um método de backup que preserve os bytes originais.
 backup_fordomain=Criando backup para o servidor virtual $1 ..
 backup_emptydomain=.. faltam alguns detalhes do domínio!
 backup_deleteddom=Não é possível fazer backup do servidor virtual $1, pois ele foi excluído!

@@ -4121,15 +4121,17 @@ foreach my $mode ('mixed', 'legacy', 'cp932', 'armscii8') {
 		{ 'command' => 'cat '.&quote_path("$dir/before"),
 		  'grep' => [ '^latin1\s+latin1_general_ci$', @expected ],
 		},
-		# Check the dump's connection charset inside the backup archive.
+		# Inspect the SQL produced by the real backup command.
 		{ 'command' => 'backup-domain.pl',
 		  'args' => [ [ 'domain', $source ], [ 'feature', 'mysql' ],
 			      [ 'compression', 'gzip' ], [ 'dest', $archive ] ],
 		},
+		# Binary dumps leave the restore charset to the caller.
 		{ 'command' => 'tar -xzOf '.&quote_path($archive).' '.
 			&quote_path('./'.$source.'_mysql_'.$db),
 		  'label' => "Check $mode dump encoding",
-		  'grep' => 'SET NAMES '.$charset,
+		  'grep' => $charset eq 'binary' ? '0x[0-9A-F]+' : 'SET NAMES '.$charset,
+		  'antigrep' => $charset eq 'binary' ? 'SET NAMES binary' : undef,
 		},
 		# Restore must recreate both the data and the original Latin-1 defaults.
 		{ 'command' => 'restore-domain.pl',
@@ -4173,9 +4175,10 @@ push(@$mysqlcharset_tests,
 	  'args' => [ [ 'domain', $source ], [ 'feature', 'mysql' ],
 		      [ 'compression', 'gzip' ], [ 'dest', $archive ] ],
 	},
+	# Require hex values without SET NAMES binary.
 	{ 'command' => 'tar -xzOf '.&quote_path($archive).' '.&quote_path('./'.$source.'_mysql_'.$db),
-	  'label' => 'Verify the unfiltered dump uses binary',
-	  'grep' => 'SET NAMES binary',
+	  'label' => 'Verify the unfiltered dump uses hex values',
+	  'grep' => '0x29A429A4', 'antigrep' => 'SET NAMES binary',
 	},
 	# Both legacy and Unicode bytes must survive the clone.
 	{ 'command' => 'clone-domain.pl',

@@ -906,26 +906,29 @@ if (%dbmap) {
 		# Select the dump charset from the source database's columns
 		my ($cs, $err) = &get_mysql_backup_charset($oldd, $oldname);
 		if (!defined($err)) {
-			# Dump only after charset selection succeeds
+			# Use hex output to avoid losing text bytes.
+			my $parameters = $cs eq 'binary' ?
+				&get_mysql_binary_dump_options(
+					&get_domain_mysql_module($oldd)->{'config'}->{'mysqldump'}) : undef;
+			# Use the source domain's configured MySQL module.
 			$err = &foreign_call(
 				$mymod, "backup_database", $oldname, $temp, 0, 1,
 				undef, $cs, undef, undef, undef,
-				&mysql_single_transaction($d, $db));
-			}
-		if (!defined($err) && $cs eq 'binary') {
-			# Keep schema literals in Unicode while restoring row bytes unchanged.
-			$err = &prepare_mysql_binary_dump($temp);
+				&mysql_single_transaction($d, $db), 0, 0, $parameters);
 			}
 		if (defined($err)) {
+			# Record this failure and try the remaining databases.
 			&$second_print(&text('clone_mysqlbackup',
 					     $oldname, $err));
 			$ok = 0;
 			next;
 			}
-		my ($ex, $out) = &execute_dom_sql_file($d, $db->{'name'},
-							  $temp);
+		# Binary dumps need Unicode for table definitions and JSON.
+		my ($ex, $out) = &restore_mysql_dump($d, $db->{'name'},
+						   $temp, $cs);
 		&unlink_file($temp);
 		if ($ex) {
+			# Record the import failure and try the remaining DBs.
 			&$second_print(&text('clone_mysqlrestore',
 					     $db->{'name'}, $out));
 			$ok = 0;
@@ -1447,6 +1450,7 @@ return $ex ? $sqlout : undef;
 # domain selects the MySQL connection; db is the database name.
 # An omitted or empty table list means all tables, as in backup_database.
 # Returns (charset, undef) on success or (undef, error) on failure.
+# A binary result needs --hex-blob --skip-set-charset and a Unicode import.
 sub get_mysql_backup_charset
 {
 my ($d, $db, $tables) = @_;
@@ -1465,13 +1469,11 @@ eval {
 	# Collect text charsets only from tables included in the dump.
 	my %include = map { $_, 1 } @{$tables || [ ]};
 	my %charsets;
-	my $has_json;
 	foreach my $row (@{$data->{'data'}}) {
 		# Ignore tables excluded by the caller.
 		next if ($tables && @$tables && !$include{$row->[0]});
-		# JSON needs utf8mb4 even when its column charset is NULL.
+		# Native MySQL JSON uses utf8mb4 but reports no column charset.
 		my $cs = $row->[2] eq 'json' ? 'utf8mb4' : $row->[1];
-		$has_json ||= $row->[2] eq 'json';
 		# Binary and non-text values need no text conversion.
 		$charsets{lc($cs)} = 1 if ($cs && $cs ne 'binary');
 		}
@@ -1487,93 +1489,91 @@ eval {
 			! /^(ascii|latin1|latin2|utf8|utf8mb3|utf8mb4|ucs2|utf16|utf16le|utf32)$/
 			} @cs;
 		if (@unsafe) {
-			# Preserve original bytes when Unicode conversion may lose data.
-			# Native MySQL JSON cannot be restored from binary string literals.
-			die &text('backup_mysqlcharset', join(', ', @cs))."\n"
-				if ($has_json);
+			# Let the caller dump text as hex to preserve its bytes.
 			$charset = 'binary';
 			}
 		else {
 			# UCS-2, UTF-16 and UTF-32 cannot be client charsets.
 			# Prefer utf8mb4, with utf8 for servers that lack it.
-			my $supported = &execute_dom_sql(
-				$d, $db, "show character set like 'utf8mb4'");
-			$charset = @{$supported->{'data'}} ? 'utf8mb4' : 'utf8';
+			$charset = &get_mysql_unicode_charset($d, $db);
 			}
 		}
 	};
 return ($charset, $@ || undef);
 }
 
-# prepare_mysql_binary_dump(file)
-# Fixes connection charsets around schema statements in an uncompressed binary
-# dump. Run as the file owner. Returns undef on success or an error on failure.
-sub prepare_mysql_binary_dump
+# get_mysql_binary_dump_options(dump-command, [parameters])
+# Returns parameters for a binary dump, adding --hex-blob and
+# --skip-set-charset only when needed. Parameters default to an empty string.
+# Checks explicit flags in the configured dump command and extra parameters.
+sub get_mysql_binary_dump_options
 {
-my ($file) = @_;
-local (*MYSQLDUMPIN, *MYSQLDUMPOUT);
-my ($in, $out) = (\*MYSQLDUMPIN, \*MYSQLDUMPOUT);
-&open_readfile($in, $file) || return "Cannot read $file: $!\n";
-
-# Keep Webmin's temporary file beside the dump for an atomic rename.
-# Write to that path directly so a failed open cannot truncate the source.
-my $temp = &open_tempfile($file);
-return "Cannot write $temp: File already exists\n" if (-e $temp || -l $temp);
-# close_tempfile looks up non-fatal error flags by paths without the > prefix.
-local $main::open_tempfiles_noerror{$temp} = 1;
-local $main::open_tempfiles_noerror{$file} = 1;
-my $oldmask = umask(077);
-my $opened = &open_tempfile($out, ">$temp", 1, 1);
-umask($oldmask);
-$opened || return "Cannot write $temp: $!\n";
-
-# discard(error) removes partial output before returning the original error.
-my $discard = sub {
-	my ($err) = @_;
-	close($in) if (defined(fileno($in)));
-	&close_tempfile($out) if (defined(fileno($out)));
-	&unlink_file($temp);
-	return $err;
-	};
-my ($binary, $schema, $active);
-# Stream the dump so large databases do not need to fit in memory.
-while (my $line = <$in>) {
-	$binary++ if ($line =~ m{^/\*!\d+ SET NAMES binary \*/;\s*$});
-	print $out $line or return &$discard("Cannot write $temp: $!\n");
-	if ($line =~ m{^/\*!\d+ SET character_set_client\s*= (\w+) \*/\s*;\s*$}) {
-		# Dump clients change only the client charset for table definitions.
-		# The connection must also decode defaults and ENUM/SET literals.
-		return &$discard("Nested schema charset switch in $file\n") if ($active);
-		print $out "/*!40101 SET \@virtualmin_saved_collation = \@\@collation_connection */;\n",
-			"/*!40101 SET character_set_connection = $1 */;\n"
-			or return &$discard("Cannot write $temp: $!\n");
-		$active = 1;
-		$schema++;
+my ($dumpcmd, $parameters) = @_;
+my ($hex, $skip_charset);
+# Webmin appends parameters after the configured command; later flags win.
+foreach my $opt (&split_quoted_string(join(" ", $dumpcmd || "",
+					      $parameters || ""))) {
+	# MySQL accepts underscores in long option names as well as hyphens.
+	$opt =~ tr/_/-/;
+	if ($opt =~ /^--(?:(skip|disable|enable)-)?(hex-blob|set-charset)(?:=(.*))?$/) {
+		# Handle boolean values and inverted forms such as --skip-...=0.
+		my ($prefix, $name, $value) = ($1, $2, $3);
+		# Webmin leaves quotes around values after an equals sign.
+		$value =~ s/^(['"])(.*)\1$/$2/ if (defined($value));
+		my $enabled = !defined($value) || $value !~ /^(0|false|off)$/i;
+		# A false value on a skip or disable option enables the setting.
+		$enabled = !$enabled if (($prefix || '') =~ /^(skip|disable)$/);
+		$name eq 'hex-blob' ? ($hex = $enabled) :
+				  ($skip_charset = !$enabled);
 		}
-	elsif ($line =~ m{^(?:/\*!\d+ )?SET character_set_client\s*= \@saved_cs_client\s*(?:\*/\s*)?;\s*$} && $active) {
-		# Restore the binary connection before any row INSERT statements.
-		# MySQL 8 uses an unwrapped SET after placeholder view definitions.
-		print $out "/*!40101 SET collation_connection = \@virtualmin_saved_collation */;\n"
-			or return &$discard("Cannot write $temp: $!\n");
-		$active = 0;
+	elsif ($opt =~ /^--(no-set-names|compact|skip-opt)$/) {
+		# These aliases and option groups also omit charset statements.
+		$skip_charset = 1;
+		}
+	elsif ($opt =~ /^--(?:enable-)?opt$/) {
+		# The option group can re-enable charset statements.
+		$skip_charset = 0;
 		}
 	}
-return &$discard("Cannot read $file: $!\n") if (!eof($in));
-close($in) || return &$discard("Cannot close $file: $!\n");
-# Check buffered writes before Webmin closes the temporary output.
-$out->flush() || return &$discard("Cannot write $temp: $!\n");
-&close_tempfile($out) || return &$discard("Cannot close $temp: $!\n");
-# Reject unfamiliar dump formats instead of risking schema corruption.
-return &$discard("Missing or incomplete charset statements in $file\n")
-	if (!$binary || !$schema || $active);
-# Let Webmin replace the validated dump and preserve its file metadata.
-&close_tempfile($file) || return &$discard("Cannot replace $file: $!\n");
-return undef;
+# Keep other parameters and append only options not already in effect.
+return join(" ", $parameters ? ($parameters) : (),
+	$hex ? () : ('--hex-blob'),
+	$skip_charset ? () : ('--skip-set-charset'));
+}
+
+# get_mysql_unicode_charset(&domain, db)
+# Uses the domain's connection to db to check for utf8mb4 support.
+# Returns utf8mb4 if supported, otherwise utf8.
+sub get_mysql_unicode_charset
+{
+my ($d, $db) = @_;
+my $supported = &execute_dom_sql($d, $db, "show character set like 'utf8mb4'");
+return @{$supported->{'data'}} ? 'utf8mb4' : 'utf8';
+}
+
+# restore_mysql_dump(&domain, db, file, [dump-charset], [user], [password])
+# Imports a dump into db and returns (exit-status, output). Pass 'binary' only
+# for dumps made with --hex-blob --skip-set-charset; omit it for older backups.
+# Optional user and password select the database login for an owner restore.
+sub restore_mysql_dump
+{
+my ($d, $db, $file, $charset, @params) = @_;
+# Find the package holding this domain's MySQL client settings.
+my $mod = &require_dom_mysql($d);
+my $pkg = $mod;
+$pkg =~ s/[^A-Za-z0-9]/_/g;
+# Hex values preserve text bytes; table definitions and MySQL JSON need
+# Unicode. Limit the override to this import. Without the binary marker,
+# keep the module's configured charset and let the dump's SET NAMES apply.
+local ${$pkg."::sql_charset"} = ($charset || '') eq 'binary' ?
+	&get_mysql_unicode_charset($d, $db) : ${$pkg."::sql_charset"};
+return &execute_dom_sql_file($d, $db, $file, @params);
 }
 
 # backup_mysql(&domain, file, &options, home-format, differential, [&as-domain],
 #              &all-options, &key)
-# Dumps this domain's mysql database to a backup file
+# Writes per-database dumps beside file, which holds restore metadata.
+# Returns false if any dump, validation or compression fails.
 sub backup_mysql
 {
 my ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
@@ -1647,27 +1647,29 @@ foreach $db (@dbs) {
 				 &list_dom_mysql_tables($d, $db) ];
 		}
 
-	my $mymod = &require_dom_mysql($d);
 	# Keep the dump charset separate from the saved database defaults
 	my ($cs, $err) = &get_mysql_backup_charset($d, $db, $tables);
 	if (!defined($err)) {
-		# Dump only after charset selection succeeds
+		# Add native hex options only after charset selection succeeds.
+		my $dbparameters = $cs eq 'binary' ?
+			&get_mysql_binary_dump_options(
+				$mymod->{'config'}->{'mysqldump'},
+				$parameters) : $parameters;
+		# Keep table filters and binary log options in the dump.
 		$err = &foreign_call(
-			$mymod, "backup_database", $db, $dbfile, 0, 1, undef,
+			$mod, "backup_database", $db, $dbfile, 0, 1, undef,
 			$cs, undef, $tables, $d->{'user'},
 			&mysql_single_transaction($d, $db), 0, $allopts->{'skip'},
-			$parameters);
-		}
-	if (!defined($err) && $cs eq 'binary') {
-		# Adjust schema encoding with the same file access as the dump writer.
-		$err = &write_as_domain_user($d, sub {
-			return &prepare_mysql_binary_dump($dbfile);
-			});
+			$dbparameters);
+		# Mark binary dumps for Unicode import; keep DB defaults.
+		$info{'dump_charset_'.$db} = $cs if ($cs eq 'binary');
 		}
 	if (!$err) {
+		# Validate dumps before compression or success reporting.
 		$err = &validate_mysql_backup($dbfile);
 		}
 	if ($err) {
+		# Record the failed database in the overall backup result.
 		&$second_print(&text('backup_mysqldumpfailed',
 				     "<pre>$err</pre>"));
 		$ok = 0;
@@ -1691,12 +1693,14 @@ foreach $db (@dbs) {
 		&$second_print($text{'setup_done'});
 		}
 	}
+# Save the binary format markers collected while dumping each database.
+&write_as_domain_user($d, sub { &write_file($file, \%info) });
 return $ok;
 }
 
-# restore_mysql(&domain, file,  &opts, &allopts, homeformat, &oldd, asowner)
-# Restores this domain's mysql database from a backup file, and re-creates
-# the mysql user.
+# restore_mysql(&domain, file, &opts, &allopts, home-format,
+#               &old-domain, as-owner)
+# Restores the domain's database dumps and recreates its MySQL login.
 sub restore_mysql
 {
 my ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd) = @_;
@@ -1897,23 +1901,28 @@ foreach my $db (@dbs) {
 			}
 		$db->[1] = $basefile;
 		}
+	# The saved dump format selects the import charset for either login.
 	my ($ex, $out);
 	if ($asd) {
-		# As the domain owner
-		($ex, $out) = &execute_dom_sql_file($d, $db->[0], $db->[1],
+		# Supply the domain owner's database credentials.
+		($ex, $out) = &restore_mysql_dump($d, $db->[0], $db->[1],
+				$info{'dump_charset_'.$db->[0]},
 				&mysql_user($d), &mysql_pass($d, 1));
 		}
 	else {
-		# As master admin
-		($ex, $out) = &execute_dom_sql_file($d, $db->[0], $db->[1]);
+		# Use the MySQL module's configured administrator login.
+		($ex, $out) = &restore_mysql_dump($d, $db->[0], $db->[1],
+				$info{'dump_charset_'.$db->[0]});
 		}
 	if ($ex) {
+		# Stop before replaying binary logs if the SQL import failed.
 		&$second_print(&text('restore_mysqlloadfailed',
 				     "<pre>$out</pre>"));
 		$rv = 0;
 		last;
 		}
 	else {
+		# Report the completed import before any optional log replay.
 		&$second_print($text{'setup_done'});
 		}
 

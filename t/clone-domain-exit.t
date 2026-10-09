@@ -56,26 +56,28 @@ foreach my $feature (qw(core plugin)) {
 
 # Database cloning must preserve failures while allowing empty and renamed DBs.
 # Keep MySQL charset failures even when a later database copy succeeds.
+# Exercise binary dumps with native flags both absent and already configured.
 foreach my $feature (qw(postgres mysql)) {
 	foreach my $result (qw(no_db success prefix clash create backup restore empty_backup empty_restore
 			       mixed_create mixed_backup mixed_restore),
-			       $feature eq 'mysql' ? qw(hosts no_db_hosts charset mixed_charset prepare) : ()) {
+			       $feature eq 'mysql' ? qw(hosts no_db_hosts charset mixed_charset binary binary_config) : ()) {
 		subtest "$feature clone with $result" => sub {
+			# Check CLI status and database error handling.
 			my ($status, $output) = run_cli($feature, $result, '');
 			my $success = $result eq 'no_db' || $result eq 'success' ||
-				$feature eq 'mysql' && $result eq 'prefix';
+				$feature eq 'mysql' && $result =~ /^(prefix|binary|binary_config)$/;
 			is($status, $success ? 0 : 1, 'CLI reports the database clone result');
 			my %errors = (prefix => qr/could not work out a new name/,
 				clash => qr/a database named target already exists/,
 				create => qr/creation of database target failed/,
 				backup => qr/Controlled backup failure/,
 				charset => qr/Controlled charset failure/,
-				prepare => qr/Controlled schema rewrite failure/,
 				restore => qr/Controlled restore failure/,
 				hosts => qr/Controlled allowed-hosts failure/,
 				no_db_hosts => qr/Controlled allowed-hosts failure/,
 				empty_backup => qr/backup of source failed/,
 				empty_restore => qr/restore into target failed/);
+			# Check errors and continued copying after a failure.
 			(my $failure = $result) =~ s/^mixed_//;
 			like($output, $errors{$failure}, 'reports the expected database failure')
 				unless $success;
@@ -83,8 +85,9 @@ foreach my $feature (qw(postgres mysql)) {
 				if $result =~ /^no_db/;
 			like($output, qr/Restored target_extra/, 'copies the later database')
 				if $result =~ /^mixed_/;
+			# Check that successful copies finish domain setup.
 			like($output, qr/Restored target\n/, 'copies the primary database')
-				if $result eq 'success' || $feature eq 'mysql' && $result eq 'prefix';
+				if $result eq 'success' || $feature eq 'mysql' && $result =~ /^(prefix|binary|binary_config)$/;
 			like($output, qr/Allowed hosts processed/, 'also copies allowed hosts')
 				if $feature eq 'mysql';
 			check_completion($output);
@@ -134,7 +137,8 @@ foreach my $result (qw(zero exception success undef empty)) {
 	}
 done_testing();
 
-# Extract complete functions without loading Webmin or other module libraries.
+# load_functions()
+# Extracts complete functions without loading Webmin or other module libraries.
 sub load_functions
 {
 foreach my $spec (
@@ -142,7 +146,7 @@ foreach my $spec (
 	[ 'feature-web.pl', qw(clone_web obtain_lock_web release_lock_web) ],
 	[ 'feature-ssl.pl', 'clone_ssl' ],
 	[ 'feature-postgres.pl', 'clone_postgres' ],
-	[ 'feature-mysql.pl', 'clone_mysql' ]) {
+	[ 'feature-mysql.pl', qw(clone_mysql get_mysql_binary_dump_options restore_mysql_dump get_mysql_unicode_charset) ]) {
 	my ($file, @names) = @$spec;
 	push(@names, qw(run_post_actions made_changes))
 		if $file eq 'virtual-server-lib-funcs.pl' && ($virtual_server::feature || '') eq 'post';
@@ -302,14 +306,22 @@ sub get_mysql_backup_charset {
 	# Fail the first database so mixed cases can still copy the next.
 	return (undef, 'Controlled charset failure')
 		if $result =~ /^(mixed_)?charset$/ && $_[1] eq 'source';
-	# Exercise binary schema preparation separately from charset selection.
-	return ('binary', undef) if $result eq 'prepare';
+	# Exercise native options and Unicode import for legacy mixtures.
+	return ('binary', undef) if $result =~ /^binary/;
 	# Other cases can proceed to the dump and restore steps.
 	return ('utf8mb4', undef);
 }
-# prepare_mysql_binary_dump(file)
-# Simulates a failed schema rewrite before the clone can import the dump.
-sub prepare_mysql_binary_dump { 'Controlled schema rewrite failure' }
+# get_domain_mysql_module(&domain)
+# Checks the source domain and supplies its configured dump options.
+sub get_domain_mysql_module {
+	die 'Expected source connection' unless $_[0]->{'dom'} eq 'source.invalid';
+	return { config => { mysqldump => 'mysqldump'.
+		($result eq 'binary_config' ? ' --hex-blob --skip-set-charset' : '') } };
+}
+# split_quoted_string(command) splits the unquoted fixture commands into words.
+sub split_quoted_string { split(/\s+/, $_[0]) }
+# execute_dom_sql(&domain, db, sql) reports Unicode support on the clone server.
+sub execute_dom_sql { return { data => [ [ 'utf8mb4' ] ] }; }
 sub require_mysql { }
 sub require_dom_mysql { 'mysql' }
 sub foreign_defined { 0 }
@@ -319,7 +331,12 @@ sub save_mysql_allowed_hosts {
 	print "Allowed hosts processed\n";
 	return $result =~ /hosts$/ ? 'Controlled allowed-hosts failure' : undef;
 }
+# execute_dom_sql_file(&domain, db, file)
+# Checks the binary import charset and simulates the selected restore result.
 sub execute_dom_sql_file {
+	die 'Binary clone import must use Unicode'
+		if $result =~ /^binary/ && $mysql::sql_charset ne 'utf8mb4';
+	# Return the exit status and output expected from the SQL import API.
 	my $err = foreign_call('mysql', 'restore_database', $_[1]);
 	return defined($err) ? (1, $err) : (0, '');
 }
@@ -328,14 +345,24 @@ sub require_dom_postgres { 'postgresql' }
 sub transname { "$tmp/unused-dump" }
 sub get_dom_postgres_creds { (0, '') }
 sub unlink_file { }
+# foreign_call(module, function, db, [args...])
+# Checks native dump options and supplies the selected backup or restore result.
 sub foreign_call {
 	my ($mod, $func, $db) = @_;
+	if ($func eq 'backup_database' && $result =~ /^binary/) {
+		# Configured flags need no duplicate command parameters.
+		my $expected = $result eq 'binary_config' ? '' : '--hex-blob --skip-set-charset';
+		die 'Incorrect native clone options' unless $_[7] eq 'binary' && $_[14] eq $expected;
+		}
+	# Empty error strings still represent failures in the clone handlers.
 	return '' if $func eq 'backup_database' && $result eq 'empty_backup';
 	return '' if $func eq 'restore_database' && $result eq 'empty_restore';
+	# Fail the first database so the next database can still be copied.
 	return 'Controlled backup failure' if $func eq 'backup_database' &&
 		$result =~ /^(mixed_)?backup$/ && $db eq 'source';
 	return 'Controlled restore failure' if $func eq 'restore_database' &&
 		$result =~ /^(mixed_)?restore$/ && $db eq 'target';
+	# Successful imports leave a marker for the parent process to check.
 	print "Restored $db\n" if $func eq 'restore_database';
 	return undef;
 }
