@@ -36,7 +36,7 @@ sub script_tikiwiki_category
 return "Wiki";
 }
 
-sub script_tikiwiki_php_vers
+sub script_tikiwiki_php_fullvers
 {
 my ($d, $ver) = @_;
 if (&compare_versions($ver, "27") >= 0) {
