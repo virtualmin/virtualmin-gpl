@@ -37,11 +37,6 @@ sub script_squirrelmail_category
 return "Email";
 }
 
-sub script_squirrelmail_php_vers
-{
-return ( 5 );
-}
-
 sub script_squirrelmail_testable
 {
 return 1;

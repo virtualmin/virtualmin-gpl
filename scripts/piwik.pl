@@ -37,11 +37,6 @@ sub script_piwik_testable
 return 1;
 }
 
-sub script_piwik_php_vers
-{
-return ( 5 );
-}
-
 # script_piwik_php_modules()
 # The PDO MySQL adapter is always selected by the installer, so it is required
 sub script_piwik_php_modules

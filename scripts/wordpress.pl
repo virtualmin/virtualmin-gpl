@@ -34,11 +34,6 @@ sub script_wordpress_category
 return ("Blog", "CMS");
 }
 
-sub script_wordpress_php_vers
-{
-return ( 5 );
-}
-
 sub script_wordpress_testable
 {
 return 1;

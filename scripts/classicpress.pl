@@ -34,11 +34,6 @@ sub script_classicpress_category
 return ("Blog", "CMS");
 }
 
-sub script_classicpress_php_vers
-{
-return ( 5 );
-}
-
 sub script_classicpress_testable
 {
 return 1;

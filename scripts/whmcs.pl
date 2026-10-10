@@ -48,11 +48,6 @@ sub script_whmcs_category
 return "Commerce";
 }
 
-sub script_whmcs_php_vers
-{
-return ( 5 );
-}
-
 sub script_whmcs_php_fullver
 {
 my ($d, $ver, $sinfo) = @_;
