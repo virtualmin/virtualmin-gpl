@@ -661,6 +661,7 @@ if ($mods{'cron'} && !$noextra && $d->{'unix'} && !$chroot) {
 	my %acl = ( 'noconfig' => 1,
 		    'mode' => 1,
 		    'users' => $d->{'user'},
+		    'env' => 0,
 		    'allow' => 0 );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "cron")
 		if (!$hasmods{'cron'});
