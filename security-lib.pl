@@ -208,10 +208,7 @@ my ($d, $fh, $file, $noerror, $notemp, $safe) = @_;
 $fh = (caller(0))[0]."::".$fh;
 my $realfile = $file;
 $realfile =~ s/^[> ]*//;
-while(-l $realfile) {
-	# Open the link target instead
-	$realfile = &resolve_links($realfile);
-	}
+$realfile = &resolve_links($realfile);    # Open the link target instead
 if (-d $realfile) {
 	if ($noerror) { return 0; }
 	else { &error("Cannot write to directory $realfile"); }
