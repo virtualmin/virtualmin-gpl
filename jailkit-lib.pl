@@ -344,13 +344,6 @@ $user->{'home'} = $dir."/.".$user->{'home'}
 &foreign_call($usermodule, "making_changes");
 &foreign_call($usermodule, "modify_user", $olduser, $user);
 &foreign_call($usermodule, "made_changes");
-if (&need_extra_user($d)) {
-	# Additional Postfix user exists, so fix it's home too
-	my $extrauser = &replace_atsign($user);
-	if ($extrauser ne $user) {
-		&modify_jailkit_user($d, $extrauser);
-		}
-	}
 }
 
 # copy_jailkit_files(&domain, [dir])
