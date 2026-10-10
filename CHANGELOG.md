@@ -1,4 +1,5 @@
 #### Version 8.3.1
+* Fix backups and clones of databases with mixed legacy text encodings, including those with JSON columns [forum.virtualmin.com/t/138131](https://forum.virtualmin.com/t/db-backup-error/138131)
 * Fix backups failing on MySQL 8.4 and later with MariaDB or older MySQL dump clients by skipping incompatible binary log coordinate options
 * Fix database password changes failing on MariaDB 10.2 and 10.3
 * Fix extra administrator creation and password changes accepting blank passwords in the web UI, CLI and remote API [forum.virtualmin.com/t/138123](https://forum.virtualmin.com/t/prevent-creation-of-extra-admin-with-blank-password/138123)

@@ -6,6 +6,7 @@ use Test::More;
 use File::Basename qw(dirname);
 use File::Spec;
 use File::Temp qw(tempdir);
+use Text::ParseWords qw(shellwords);
 use Cwd qw(abs_path);
 use version;
 
@@ -20,6 +21,107 @@ die $@ if ($@);
 die "Failed to load $backups: $!" if (!defined($loaded));
 
 my $dom = { 'id' => 1, 'dom' => 'example.com' };
+
+# split_quoted_string(command)
+# Parses quoted test commands without loading Webmin.
+sub split_quoted_string { return shellwords($_[0]); }
+
+{
+	# Keep each required flag once and honor later overrides.
+	my $required = '--hex-blob --skip-set-charset';
+	is(&get_mysql_binary_dump_options('mysqldump'), $required,
+		'adds both required options when missing');
+	is(&get_mysql_binary_dump_options('mysqldump --hex-blob'),
+		'--skip-set-charset', 'does not duplicate --hex-blob');
+	is(&get_mysql_binary_dump_options('mysqldump --skip-set-charset'),
+		'--hex-blob', 'does not duplicate --skip-set-charset');
+	# Preserve existing flags and unrelated parameters.
+	is(&get_mysql_binary_dump_options('mysqldump '.$required), '',
+		'adds nothing when both options are configured');
+	is(&get_mysql_binary_dump_options('mysqldump', $required), $required,
+		'does not duplicate extra parameters');
+	is(&get_mysql_binary_dump_options('mysqldump --hex-blob', '--source-data=2'),
+		'--source-data=2 --skip-set-charset', 'preserves other extra parameters');
+	# Accept the client's alternate spellings and boolean option values.
+	is(&get_mysql_binary_dump_options('mysqldump --hex_blob=TRUE --set_charset=OFF'),
+		'', 'recognizes boolean values and underscore option names');
+	is(&get_mysql_binary_dump_options('mysqldump --hex-blob --no-set-names'),
+		'', 'recognizes --no-set-names as an alias');
+	# Re-enable required settings when a later option has disabled them.
+	foreach my $options ('--hex-blob=0 --set-charset',
+		'--hex-blob --skip-hex-blob --skip-set-charset --set-charset',
+		'--disable-hex-blob --skip-set-charset --opt',
+		'--hex-blob --skip-hex-blob=1 --skip-set-charset=0',
+		'--hex-blob=0 --skip-set-charset --enable-set-charset') {
+		is(&get_mysql_binary_dump_options('mysqldump '.$options), $required,
+			"corrects conflicting options: $options");
+		}
+	# Accept negated values and groups that supply the required flags.
+	is(&get_mysql_binary_dump_options('mysqldump --skip-hex-blob=0 --set-charset=0'),
+		'', 'recognizes false values on negated options');
+	is(&get_mysql_binary_dump_options('mysqldump --hex-blob --compact'),
+		'', 'compact output already omits charset statements');
+	# Check parameter order and quoting in the configured command.
+	is(&get_mysql_binary_dump_options('mysqldump --skip-set-charset', '--set-charset'),
+		'--set-charset '.$required, 'extra parameters take precedence over command options');
+	is(&get_mysql_binary_dump_options('"/opt/mysql tools/mysqldump" "--hex-blob"'),
+		'--skip-set-charset', 'recognizes quoted command options');
+}
+
+{
+	# Binary dumps need Unicode even with a legacy default charset.
+	no warnings qw(once redefine);
+	my $module = 'mysql';
+	my ($supports_mb4, $query_error) = (1, undef);
+	# require_dom_mysql([&domain])
+	# Selects the local or remote fixture module.
+	local *main::require_dom_mysql = sub { return $module; };
+	# execute_dom_sql(&domain, db, sql)
+	# Simulates Unicode support or a failed charset query.
+	local *main::execute_dom_sql = sub {
+		die "$query_error\n" if ($query_error);
+		return { 'data' => $supports_mb4 ? [ [ 'utf8mb4' ] ] : [] };
+		};
+	# Use legacy defaults to expose charset override errors.
+	local $mysql::sql_charset = 'greek';
+	local $mysql_remote::sql_charset = 'latin1';
+	my ($charset, @args);
+	# execute_dom_sql_file(&domain, db, file, [user], [password])
+	# Captures the import charset and credentials without running SQL.
+	local *main::execute_dom_sql_file = sub {
+		$charset = $module eq 'mysql' ? $mysql::sql_charset : $mysql_remote::sql_charset;
+		@args = @_;
+		return (0, 'Imported');
+		};
+	# Check Unicode selection and owner credential forwarding.
+	is_deeply([ &restore_mysql_dump($dom, 'db', 'dump.sql', 'binary', 'owner', 'fixture') ],
+		[ 0, 'Imported' ], 'returns the built-in SQL import result');
+	is($charset, 'utf8mb4', 'binary dump uses Unicode for schema and JSON');
+	is_deeply(\@args, [ $dom, 'db', 'dump.sql', 'owner', 'fixture' ],
+		'owner credentials reach the import API unchanged');
+	# Apply the override only to binary dumps and only during import.
+	is($mysql::sql_charset, 'greek', 'configured charset is restored after import');
+	foreach my $cs (undef, 'cp932', 'utf8mb4') {
+		&restore_mysql_dump($dom, 'db', 'dump.sql', $cs);
+		is($charset, 'greek', 'old and non-binary dumps retain existing import behavior');
+		}
+	# Use utf8 when the restore server does not support utf8mb4.
+	$supports_mb4 = 0;
+	&restore_mysql_dump($dom, 'db', 'dump.sql', 'binary');
+	is($charset, 'utf8', 'uses utf8 when utf8mb4 is unavailable');
+	# Remote modules keep their own settings after the Unicode import.
+	$module = 'mysql-remote';
+	$supports_mb4 = 1;
+	&restore_mysql_dump($dom, 'db', 'dump.sql', 'binary');
+	is($charset, 'utf8mb4', 'remote module imports also use Unicode');
+	is($mysql_remote::sql_charset, 'latin1', 'remote module charset is restored after import');
+	# A failed charset query must stop the dump from being imported.
+	$query_error = 'Cannot read supported charsets';
+	@args = ();
+	eval { &restore_mysql_dump($dom, 'db', 'dump.sql', 'binary'); };
+	like($@, qr/Cannot read supported charsets/, 'charset query failure stops the import');
+	is_deeply(\@args, [], 'no import is attempted after a charset query failure');
+}
 
 # compare_versions(version, other-version)
 # Compare fixture versions without loading the Webmin runtime.
@@ -51,7 +153,7 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 	# Returns untranslated error keys and parameters for assertions.
 	local *main::text = sub { return join(': ', @_); };
 	# Keep a single client charset unchanged, including legacy ones.
-	foreach my $cs (qw(ascii latin1 latin2 utf8 utf8mb3 utf8mb4 cp932 armscii8)) {
+	foreach my $cs (qw(ascii latin1 latin2 greek utf8 utf8mb3 utf8mb4 cp932 armscii8)) {
 		$rows = [ [ 't', $cs, 'varchar' ] ];
 		is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
 			[ $cs, undef ], "columns using only $cs keep that dump charset");
@@ -62,6 +164,15 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 		$rows = [ map { [ 't', $_, 'varchar' ] } @$charsets ];
 		is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
 			[ 'utf8mb4', undef ], "@{$charsets} use a Unicode client charset");
+		}
+	# Use a binary connection for mixtures that may lose bytes through Unicode.
+	foreach my $charsets ([qw(greek utf8 utf8mb4)], [qw(greek latin1)],
+			      [qw(greek utf16)], [qw(greek utf8mb3)],
+			      [qw(cp932 utf8mb4)], [qw(armscii8 latin1)],
+			      [qw(greek cp932 utf8mb4)], [qw(cp1251 utf8mb4)]) {
+		$rows = [ map { [ 't', $_, 'varchar' ] } @$charsets ];
+		is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
+			[ 'binary', undef ], "@{$charsets} preserve their original bytes");
 		}
 	# JSON needs Unicode even when the server reports no column charset.
 	$rows = [ [ 't', undef, 'json' ], [ 't', 'latin1', 'varchar' ] ];
@@ -75,12 +186,11 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 	is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
 		[ 'utf8mb4', undef ], 'empty databases select utf8mb4');
 
-	# Reject legacy mixtures whose Unicode conversion loses bytes.
-	foreach my $charsets ([qw(cp932 utf8mb4)], [qw(armscii8 latin1)]) {
-		$rows = [ map { [ $_, $_, 'varchar' ] } @$charsets ];
-		my ($cs, $err) = &get_mysql_backup_charset($dom, 'appdb');
-		ok(!defined($cs) && $err, "@{$charsets} are rejected");
-		like($err, qr/\Q$charsets->[0]\E/, 'error identifies the affected charsets');
+	# Legacy text mixed with native MySQL JSON selects the binary dump path.
+	foreach my $legacy (qw(greek cp932 armscii8)) {
+		$rows = [ [ 'legacy', $legacy, 'varchar' ], [ 'json', undef, 'json' ] ];
+		is_deeply([ &get_mysql_backup_charset($dom, 'appdb') ],
+			[ 'binary', undef ], "$legacy with native JSON selects binary");
 		}
 	# Honor table exclusions and bind database names as SQL values.
 	$rows = [ [ 'keep', 'cp932', 'varchar' ], [ 'omit', 'utf8mb4', 'varchar' ] ];
@@ -92,8 +202,12 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 	unlike($queries[0]->[2], qr/a'b/, 'database name is not interpolated into SQL');
 	like($queries[0]->[2], qr/TABLE_TYPE <> 'VIEW'/, 'view columns do not affect dumped rows');
 	# An empty table list selects all tables in the existing dump API.
-	my ($cs, $err) = &get_mysql_backup_charset($dom, 'appdb', [ ]);
-	ok(!defined($cs) && $err, 'an empty table list means all tables, as in the dump API');
+	is_deeply([ &get_mysql_backup_charset($dom, 'appdb', [ ]) ],
+		[ 'binary', undef ], 'an empty table list includes both charsets');
+	# Excluding JSON still leaves a legacy mixture needing binary output.
+	push(@$rows, [ 'json', undef, 'json' ]);
+	is_deeply([ &get_mysql_backup_charset($dom, 'appdb', [ 'keep', 'omit' ]) ],
+		[ 'binary', undef ], 'excluded JSON does not prevent binary fallback');
 
 	# Use utf8 when the server lacks utf8mb4 support.
 	$supports_mb4 = 0;
@@ -102,7 +216,7 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 		[ 'utf8', undef ], 'older servers use their supported Unicode charset');
 	# A query failure must return an error instead of selecting a charset.
 	$support_error = 'Cannot read supported charsets';
-	($cs, $err) = &get_mysql_backup_charset($dom, 'appdb');
+	my ($cs, $err) = &get_mysql_backup_charset($dom, 'appdb');
 	ok(!defined($cs) && $err =~ /Cannot read supported charsets/,
 		'capability query errors prevent dumping');
 	$query_error = 'Cannot read column charsets';
@@ -318,7 +432,7 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 	ok(!grep(/^binlog_/, keys %written_info),
 		'backup records no replay identity when coordinates are omitted');
 
-	# A rejected charset mixture must not invoke the dump program.
+	# Mixed legacy columns must reach Webmin with the binary dump charset.
 	$column_rows = [ [ 'legacy', 'cp932', 'varchar' ],
 			 [ 'posts', 'utf8mb4', 'varchar' ] ];
 	@foreign_calls = ( );
@@ -326,9 +440,44 @@ return version->parse('v'.$_[0]) <=> version->parse('v'.$_[1]);
 		{ 'template' => 1, 'db_mysql' => 'appdb', 'user' => 'example' },
 		'/tmp/mysql-backup-options-test', { },
 		0, 0, undef, { 'dir' => { 'compression' => 0 }, 'skip' => 0 });
-	ok(!$ok, 'unsafe charset mixture fails the backup');
-	ok(!grep($_->[1] eq 'backup_database', @foreign_calls),
-		'unsafe charset mixture never reaches the dump API');
+	ok($ok, 'mixed legacy charsets can be backed up');
+	($backup_call) = grep { $_->[1] eq 'backup_database' } @foreign_calls;
+	is($backup_call->[7], 'binary', 'Webmin receives the binary dump charset');
+	is($backup_call->[-1], '--hex-blob --skip-set-charset',
+		'binary backups use the native dump options');
+	# Keep the dump format separate from the database charset default.
+	is($written_info{'dump_charset_appdb'}, 'binary',
+		'backup metadata records the binary dump format');
+	is($written_info{'charset_appdb'}, 'latin1',
+		'database default charset is preserved');
+
+	# Allow native JSON and legacy text in the same backup.
+	push(@$column_rows, [ 'documents', undef, 'json' ]);
+	@foreign_calls = ( );
+	$ok = &backup_mysql(
+		{ 'template' => 1, 'db_mysql' => 'appdb', 'user' => 'example' },
+		'/tmp/mysql-backup-options-test', { },
+		0, 0, undef, { 'dir' => { 'compression' => 0 }, 'skip' => 0 });
+	ok($ok, 'native JSON and legacy text can be backed up together');
+	($backup_call) = grep { $_->[1] eq 'backup_database' } @foreign_calls;
+	is($backup_call->[7], 'binary', 'JSON mixture uses a binary dump connection');
+	is($backup_call->[-1], '--hex-blob --skip-set-charset',
+		'JSON mixture enables hex output and omits SET NAMES');
+
+	# Configured native options and binary log coordinates must coexist.
+	$dumpcmd = 'mysql-new --hex-blob --skip-set-charset';
+	$main::mysql_source_data_support_cache{$dumpcmd} = 1;
+	$main::mysql_binary_log_status_support_cache{$dumpcmd} = 1;
+	@foreign_calls = ( );
+	$ok = &backup_mysql(
+		{ 'template' => 1, 'db_mysql' => 'appdb', 'user' => 'example' },
+		'/tmp/mysql-backup-options-test', { },
+		0, 0, undef, { 'dir' => { 'compression' => 0 }, 'skip' => 0 });
+	ok($ok, 'binary backup succeeds with options already configured');
+	# Webmin only needs to append coordinates when both native flags exist.
+	($backup_call) = grep { $_->[1] eq 'backup_database' } @foreign_calls;
+	is($backup_call->[-1], '--source-data=2',
+		'only coordinates are appended when native options already exist');
 	}
 
 {

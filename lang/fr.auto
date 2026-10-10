@@ -1502,7 +1502,6 @@ backup_eownrestore=Seules les sauvegardes signées peuvent être restaurées par
 backup_dirtarinc=Création du fichier TAR différentiel du répertoire personnel ..
 backup_dirtarnobase=.. échec de la sauvegarde différentielle : aucun état de sauvegarde complet trouvé pour l'ID de sauvegarde $1
 backup_mysqlinfo=Copie des détails de l'utilisateur MySQL ..
-backup_mysqlcharset=Impossible de sauvegarder en toute sécurité des jeux de caractères de colonnes mixtes : $1. Utilisez une méthode de sauvegarde qui préserve les octets d'origine.
 backup_deleteddom=Le serveur virtuel $1 ne peut pas être sauvegardé car il a été supprimé!
 backup_ebackupdirlock=.. le répertoire de sauvegarde temporaire $1 est verrouillé par le processus $2 
 backup_efeatureeval=.. la sauvegarde de $1 a échoué : $2 

@@ -2251,7 +2251,6 @@ backup_dirtarnobase=.. rozdílová záloha selhala: pro ID zálohy $1 nebyl nale
 backup_dirzipfailed=.. ZIP selhal! $1 
 backup_apachecp2=Kopírování aliasu Apache ..
 backup_mysqlinfo=Kopírování podrobností uživatele MySQL ..
-backup_mysqlcharset=Nelze bezpečně vypsat smíšené znakové sady sloupců: $1. Použijte zálohovací metodu, která zachovává původní bajty.
 backup_emptydomain=.. některé podrobnosti o doméně chybí!
 backup_deleteddom=Virtuální server $1 nelze zálohovat, protože byl odstraněn!
 backup_donedomain=.. dokončeno v $1 

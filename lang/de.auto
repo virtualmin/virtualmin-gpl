@@ -134,7 +134,6 @@ backup_eplugin_domain=Sie dürfen diese Domäne nicht sichern
 backup_upload13=Archiv wird auf den SFTP-Server $1 hochgeladen ..
 
 backup_dirtarnobase=...Differenzielle Sicherung fehlgeschlagen: Kein vollständiger Sicherungsstatus für die Sicherungs-ID $1 gefunden
-backup_mysqlcharset=Gemischte Spaltenzeichensätze können nicht sicher gespeichert werden: $1. Verwenden Sie eine Sicherungsmethode, die die Originalbytes beibehält.
 backup_esftpdir=Verbindung zum SFTP-Server fehlgeschlagen : $1
 backup_purgeesftpls=… konnte das Verzeichnis per SFTP nicht auflisten : $1
 backup_edelsftp=SFTP-Löschung fehlgeschlagen : $1
