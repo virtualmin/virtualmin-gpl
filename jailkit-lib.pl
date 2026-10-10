@@ -324,7 +324,7 @@ foreach my $file ($dir."/etc/passwd", $dir."/etc/shadow") {
 	}
 }
 
-# modify_jailkit_user(&domain, username)
+# modify_jailkit_user(&domain, &user)
 # Update a real Unix user in a jailed domain to have the correct jailed
 # shell and home directory
 sub modify_jailkit_user
