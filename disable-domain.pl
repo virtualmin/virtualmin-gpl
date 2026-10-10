@@ -86,13 +86,16 @@ $d->{'disabled'} && &usage("Virtual server $domain is already disabled");
 @doms = ( $d );
 
 if ($scheduled) {
+	# Reread the domain under its lock, so the schedule change is applied
+	# to the current settings
+	$d = &get_lock_domain($d);
+	&usage("Virtual server $domain does not exist") if (!$d);
+	$d->{'disabled'} && &usage("Virtual server $domain is already disabled");
 	if ($schedule eq "none") {
 		# Cancel scheduled disable
 		print "Turning off disable schedule for $d->{'dom'} ..\n";
-		&lock_domain($d);
 		delete($d->{'disabled_auto'});
 		&save_domain($d);
-		&unlock_domain($d);
 		print ".. done\n";
 		}
 	elsif ($schedule =~ /^(\d+(?:\.\d+)?)$/) {
@@ -101,16 +104,15 @@ if ($scheduled) {
 			if ($schedule < 365*10);
 		$schedule > time() || &usage("Disable time must be in the future");
 		my $amsg = $d->{'disabled_auto'} ? "Updating" : "Setting";
-		print "$amsg up disable schedule for $d->{'dom'} to @{[&make_date($schedule)]} ..\n";
-		&lock_domain($d);
+		print "$amsg the disable schedule for $d->{'dom'} to @{[&make_date($schedule)]} ..\n";
 		$d->{'disabled_auto'} = $schedule;
 		&save_domain($d);
-		&unlock_domain($d);
 		print ".. done\n";
 		}
 	else {
 		&usage("Invalid schedule time $schedule");
 		}
+	&unlock_domain($d);
 	}
 else {
 	# If disabling sub-servers, find them too
