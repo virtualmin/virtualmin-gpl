@@ -1131,7 +1131,6 @@ backup_eownrestore=Solo los propietarios de servidores virtuales pueden restaura
 backup_dirtarinc=Creando un archivo TAR diferencial del directorio de inicio ..
 backup_dirtarnobase=... Falló la copia de seguridad diferencial: no se encontró un estado de copia de seguridad completo para la ID de copia de seguridad $1
 backup_mysqlinfo=Copiando detalles de usuario MySQL ..
-backup_mysqlcharset=No se pueden volcar de forma segura conjuntos de caracteres de columna mixtos: $1. Utilice un método de copia de seguridad que conserve los bytes originales.
 backup_ebackupdirlock=.. el directorio de respaldo temporal $1 está bloqueado por el proceso $2
 backup_efeatureeval=.. falló la copia de seguridad de $1 : $2 
 backup_dnsnozone2=.. archivo de zona no encontrado!

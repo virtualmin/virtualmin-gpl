@@ -2852,7 +2852,6 @@ backup_mysqlinfo=Kopírovanie údajov používateľa MySQL ..
 backup_mysqldump=Výpis databázy MySQL $1 ..
 backup_mysqldumpfailed=.. výpis zlyhal! $1
 backup_mysqlgzipfailed=.. gzip zlyhal! $1
-backup_mysqlcharset=Nie je možné bezpečne vypísať zmiešané znakové sady stĺpcov: $1. Použite metódu zálohovania, ktorá zachová pôvodné bajty.
 backup_fordomain=Vytvára sa záloha pre virtuálny server $1 ..
 backup_emptydomain=.. chýbajú niektoré detaily domény!
 backup_deleteddom=Virtuálny server $1 nie je možné zálohovať, pretože bol odstránený!

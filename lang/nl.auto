@@ -914,7 +914,6 @@ backup_eownrestore=Alleen ondertekende back-ups kunnen worden hersteld door eige
 backup_dirtarinc=Differentieel TAR-bestand van de thuismap maken ..
 backup_dirtarnobase=... differentiële back-up mislukt: geen volledige back-upstatus gevonden voor back-up-ID $1
 backup_mysqlinfo=MySQL-gebruikersgegevens kopiëren ..
-backup_mysqlcharset=Kan geen gemengde kolomtekensets veilig dumpen: $1. Gebruik een back-upmethode die de oorspronkelijke bytes behoudt.
 backup_emptydomain=.. sommige domeingegevens ontbreken!
 backup_deleteddom=Van virtuele server $1 kan geen back-up worden gemaakt omdat deze is verwijderd!
 backup_ebackupdirlock=.. tijdelijke back-up directory $1 is vergrendeld door proces $2

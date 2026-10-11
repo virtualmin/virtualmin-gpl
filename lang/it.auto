@@ -2116,7 +2116,6 @@ backup_apachecp=Copia della configurazione dell'host virtuale Apache.
 backup_apachecp2=Copia degli alias di Apache ..
 backup_apachelog=Copia dei file di registro di Apache.
 backup_mysqlinfo=Copia dei dettagli utente MySQL ..
-backup_mysqlcharset=Impossibile eseguire il dump in modo sicuro di colonne con set di caratteri misti: $1. Utilizzare un metodo di backup che preservi i byte originali.
 backup_fordomain=Creazione di backup per server virtuale $1 ..
 backup_emptydomain=.. mancano alcuni dettagli del dominio!
 backup_deleteddom=Impossibile eseguire il backup del server virtuale $1 poiché è stato eliminato!

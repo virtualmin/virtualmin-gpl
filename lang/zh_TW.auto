@@ -1436,7 +1436,6 @@ backup_dirzip=正在創建主目錄的ZIP文件 ..
 backup_apachecp2=複製Apache別名 ..
 backup_apachelog=複製Apache日誌文件 ..
 backup_mysqlinfo=複製 MySQL 使用者詳細資訊 ..
-backup_mysqlcharset=無法安全地轉儲混合列字元集：$1。請使用保留原始位元組的備份方法。
 backup_emptydomain=..一些域名詳細信息丟失！
 backup_deleteddom=虛擬服務器 $1已被刪除，因此無法備份！
 backup_donedomain=..已在 $1中完成

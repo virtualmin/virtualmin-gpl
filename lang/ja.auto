@@ -2852,7 +2852,6 @@ backup_mysqlinfo=MySQL ユーザーの詳細をコピーしています。
 backup_mysqldump=MySQLデータベース $1をダンプしています. ..
 backup_mysqldumpfailed=..ダンプに失敗しました！ $1
 backup_mysqlgzipfailed=.. gzipが失敗しました！ $1
-backup_mysqlcharset=混在する列の文字セットを安全にダンプすることはできません: $1。元のバイト列を保持するバックアップ方法を使用してください。
 backup_fordomain=仮想サーバー $1のバックアップを作成しています ..
 backup_emptydomain=..一部のドメイン詳細がありません！
 backup_deleteddom=仮想サーバー $1は削除されているため、バックアップできません！

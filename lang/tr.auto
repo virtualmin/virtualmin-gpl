@@ -1537,7 +1537,6 @@ backup_dirzip=Giriş dizininin ZIP dosyası oluşturuluyor ..
 backup_apachecp2=Apache takma adları kopyalanıyor ..
 backup_apachelog=Apache günlük dosyaları kopyalanıyor ..
 backup_mysqlinfo=MySQL kullanıcı detayları kopyalanıyor ..
-backup_mysqlcharset=Karışık sütun karakter kümeleri güvenli bir şekilde yedeklenemez: $1. Orijinal baytları koruyan bir yedekleme yöntemi kullanın.
 backup_emptydomain=.. bazı alan adı bilgileri eksik!
 backup_deleteddom=$1 sanal sunucusu silindiği için yedeklenemiyor!
 backup_donedomain=.. $1 içinde tamamlandı

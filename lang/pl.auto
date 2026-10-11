@@ -206,7 +206,6 @@ backup_finalstatusok=$1 serwerów wirtualnych zostało pomyślnie utworzonych ko
 
 backup_dirtarnobase=..nieudana kopia zapasowa różnicowa: nie znaleziono pełnego stanu kopii zapasowej dla identyfikatora kopii zapasowej $1
 backup_mysqlinfo=Kopiowanie danych użytkownika MySQL ..
-backup_mysqlcharset=Nie można bezpiecznie zrzucić zestawów znaków w kolumnach mieszanych: $1. Użyj metody tworzenia kopii zapasowej, która zachowuje oryginalne bajty.
 backup_esftpdir=Nie udało się połączyć z serwerem SFTP : $1
 backup_purgeesftpls=.. nie udało się wyświetlić katalogu przez SFTP : $1
 backup_edelsftp=.. Nie udało się usunąć SFTP : $1
