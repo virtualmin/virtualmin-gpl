@@ -344,7 +344,7 @@ $user->{'home'} = $dir."/.".$user->{'home'}
 &foreign_call($usermodule, "making_changes");
 &foreign_call($usermodule, "modify_user", $olduser, $user);
 &foreign_call($usermodule, "made_changes");
-if (&need_extra_user($d)) {
+if (&need_extra_user($user)) {
 	my $extrauser = { %$user };
 	$extrauser->{'user'} = &replace_atsign($extrauser->{'user'});
 	if ($extrauser->{'user'} ne $user->{'user'}) {
