@@ -3730,7 +3730,10 @@ return if (!$sid);
 my $ip = $ENV{'REMOTE_ADDR'} || "127.0.0.1";
 my $now = time();
 &acl::open_session_db($miniserv);
-$acl::sessiondb{$sid} = "$user $now $ip".($lifetime ? " ".$lifetime : "");
+# Miniserv now only accepts hashed keys
+my $skey = defined(&acl::load_session_hmac_key) ?
+		&acl::hash_session_id($sid) : $sid;
+$acl::sessiondb{$skey} = "$user $now $ip".($lifetime ? " ".$lifetime : "");
 dbmclose(%acl::sessiondb);
 return $sid;
 }
