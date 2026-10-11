@@ -36,15 +36,6 @@ sub script_tikiwiki_category
 return "Wiki";
 }
 
-sub script_tikiwiki_php_fullvers
-{
-my ($d, $ver) = @_;
-if (&compare_versions($ver, "27") >= 0) {
-	return 8.1;
-	}
-return 7.4;
-}
-
 sub script_tikiwiki_php_modules
 {
 return ("mysql", "xml", "intl", "zip", "gd", "mbstring");
