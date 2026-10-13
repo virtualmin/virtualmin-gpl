@@ -207,8 +207,6 @@ if ($has_ips) {
 	my $err = &validate_letsencrypt_ip_website($d, \@dnames);
 	&usage($err) if ($err);
 	}
-my $rerr = &validate_letsencrypt_ip_cert_renewal($d, \@dnames, $renew);
-&usage($rerr) if ($rerr);
 if ($acmeid) {
 	defined(&list_acme_providers) ||
 		&usage("The --acme flag is only available in Virtualmin Pro");

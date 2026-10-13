@@ -9237,24 +9237,6 @@ if ($iperr) {
 		}
 	return 0;
 	}
-my $renew = !defined($d->{'letsencrypt_renew'}) ||
-	    $d->{'letsencrypt_renew'} eq '' ||
-	    $d->{'letsencrypt_renew'};
-my $rerr = &validate_letsencrypt_ip_cert_renewal($d, \@dnames, $renew);
-if ($rerr) {
-	# Initial IP certificates inherit automatic renewal from templates,
-	# so reject unsafe renew-before-expiry values before requesting one.
-	$d->{'letsencrypt_last_failure'} = time();
-	$d->{'letsencrypt_last_err'} = $rerr;
-	$d->{'letsencrypt_last_err'} =~ s/\r?\n/\t/g;
-	if ($showerrors) {
-		&$second_print(&text('letsencrypt_failed', $rerr));
-		}
-	else {
-		&$second_print($text{'letsencrypt_doing3failed'});
-		}
-	return 0;
-	}
 if ($valid) {
 	my @wilds = grep { /^\*\./ } @dnames;
 	my $vcheck = @wilds ? ['dns'] :
@@ -10392,7 +10374,6 @@ push(@rv, { 'id' => 0,
 	    'ssl_cert_type' => $config{'cert_type'},
 	    'ssl_auto_letsencrypt' => $config{'auto_letsencrypt'},
 	    'ssl_letsencrypt_wild' => $config{'letsencrypt_wild'},
-	    'ssl_renew_letsencrypt' => $config{'renew_letsencrypt'},
 	    'ssl_always_ssl' => $config{'always_ssl'},
 	    'ssl_tlsa_records' => $config{'tlsa_records'},
 	    'ssl_combined_cert' => $config{'combined_cert'},
@@ -10751,7 +10732,6 @@ if ($tmpl->{'id'} == 0) {
 	$config{'cert_type'} = $tmpl->{'ssl_cert_type'};
 	$config{'auto_letsencrypt'} = $tmpl->{'ssl_auto_letsencrypt'};
 	$config{'letsencrypt_wild'} = $tmpl->{'ssl_letsencrypt_wild'};
-	$config{'renew_letsencrypt'}= $tmpl->{'ssl_renew_letsencrypt'};
 	$config{'always_ssl'} = $tmpl->{'ssl_always_ssl'};
 	$config{'tlsa_records'} = $tmpl->{'ssl_tlsa_records'};
 	$config{'combined_cert'} = $tmpl->{'ssl_combined_cert'};
@@ -11117,7 +11097,7 @@ if (!$tmpl->{'default'}) {
 		    "ssl_key_size", "ssl_cert_type", "ssl_auto_letsencrypt",
 		    "ssl_letsencrypt_wild", "ssl_always_ssl",
 		    "ssl_tlsa_records", "ssl_combined_cert",
-		    "ssl_renew_letsencrypt", "ssl_allow_subset",
+		    "ssl_allow_subset",
 		    "ssl_connectivity", "ssl_email",
 		    "aliascopy", "bccto", "resources", "dnssec", "avail",
 		    @plugins,

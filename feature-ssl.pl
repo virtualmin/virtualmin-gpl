@@ -3435,11 +3435,8 @@ foreach my $d (&list_domains()) {
 	# Is the current cert even from an SSL provider?
 	next if (!&is_acme_cert($info));
 
-	# Figure out when the cert was last renewed. This is the max of the
-	# date in the cert and the time recorded in Virtualmin
-	my $ltime = &parse_notafter_date($info->{'notbefore'});
-	$ltime = $d->{'letsencrypt_last'}
-		if ($d->{'letsencrypt_last'} > $ltime);
+	# Get the issue time so renewal can account for the certificate lifetime
+	my $issued = &parse_notafter_date($info->{'notbefore'});
 
 	# If an attempt was made in the last hour, skip for now to prevent
 	# hammering the Let's Encrypt service
@@ -3456,14 +3453,12 @@ foreach my $d (&list_domains()) {
 			 $le_fail_interval);
 		}
 
-	# Is it time? Either the user-chosen number of months has passed, or
-	# the cert is within 21 days of expiry
-	my $tmpl = &get_template($d->{'template'});
-	my $before = $tmpl->{'ssl_renew_letsencrypt'} || 21;
-	my $day = 24 * 60 * 60;
-	my $age = time() - $ltime;
+	# Set the renewal window from the global maximum and certificate lifetime
+	my $before = &letsencrypt_renewal_before_seconds($issued, $expiry);
+
+	# Add up to an hour of variation so domains do not renew together
 	my $rf = rand() * 3600;
-	my $renew = $expiry && $expiry - time() < $before * $day + $rf;
+	my $renew = $expiry && $expiry - time() < $before + $rf;
 	next if (!$renew);
 
 	# Don't even attempt now if the lock is being held
@@ -3560,8 +3555,6 @@ my $fdnames = &filter_ssl_wildcards(\@dnames);
 my $has_ips = &letsencrypt_dnames_have_ips(\@dnames);
 my $nerr = &validate_letsencrypt_ip_cert_names(\@dnames);
 return (0, $nerr, \@dnames) if ($nerr);
-my $rerr = &validate_letsencrypt_ip_cert_renewal($d, \@dnames, 1);
-return (0, $rerr, \@dnames) if ($rerr);
 if (defined($d->{'letsencrypt_nodnscheck'}) &&
     !$d->{'letsencrypt_nodnscheck'}) {
 	my @badnames;
@@ -3906,6 +3899,29 @@ foreach my $dname (@$dnames) {
 return 0;
 }
 
+# letsencrypt_renewal_before_seconds(issued, expiry)
+# Returns how many seconds before expiry renewal can start. The issue and expiry
+# times are Unix timestamps.
+sub letsencrypt_renewal_before_seconds
+{
+my ($issued, $expiry) = @_;
+
+# Read the hidden global maximum, or use the 21-day default.
+my $day = 24 * 60 * 60;
+my $days = $config{'acme_renewal_max_days'};
+$days = 21 if (!defined($days) || $days !~ /^\d+$/ || $days < 1);
+my $before = $days * $day;
+
+# Preserve that window if the certificate lifetime cannot be calculated.
+return $before if (!$issued || !$expiry || $expiry <= $issued);
+
+# Allow at most the final third of a standard certificate lifetime for renewal.
+# For lifetimes under ten days, allow at most the final half.
+my $lifetime = $expiry - $issued;
+my $max_before = $lifetime < 10 * $day ? $lifetime / 2 : $lifetime / 3;
+return $before < $max_before ? $before : $max_before;
+}
+
 # validate_letsencrypt_ip_cert_names(&dnames)
 # Returns an error if IP identifiers are combined with incompatible names.
 sub validate_letsencrypt_ip_cert_names
@@ -3916,34 +3932,6 @@ return undef if (!&letsencrypt_dnames_have_ips($dnames));
 # Virtualmin does not mix those validation modes in one certificate request.
 my @wilds = grep { /^\*\./ } @$dnames;
 return @wilds ? $text{'letsencrypt_eipwild'} : undef;
-}
-
-# letsencrypt_ip_cert_renewal_max_days()
-# Returns the maximum renewal threshold for short-lived IP certificates.
-sub letsencrypt_ip_cert_renewal_max_days
-{
-return 5;
-}
-
-# letsencrypt_renewal_before_days(&domain)
-# Returns the template renewal threshold in days before expiry.
-sub letsencrypt_renewal_before_days
-{
-my ($d) = @_;
-my $tmpl = &get_template($d->{'template'});
-return $tmpl->{'ssl_renew_letsencrypt'} || 21;
-}
-
-# validate_letsencrypt_ip_cert_renewal(&domain, &dnames, renew)
-# Returns an error if automatic renewal is unsafe for IP certificates.
-sub validate_letsencrypt_ip_cert_renewal
-{
-my ($d, $dnames, $renew) = @_;
-return undef if (!$renew || !&letsencrypt_dnames_have_ips($dnames));
-my $days = &letsencrypt_renewal_before_days($d);
-my $max = &letsencrypt_ip_cert_renewal_max_days();
-return &text('letsencrypt_eiprenew', $days, $max) if ($days > $max);
-return undef;
 }
 
 # validate_letsencrypt_ip_cert_support()
@@ -4379,14 +4367,6 @@ print &ui_table_row(
 	    [ 1, $text{'yes'} ],
 	    [ 0, $text{'no'} ] ]));
 
-# Days before expiry to auto-renew?
-print &ui_table_row(
-	&hlink($text{'newweb_renew_letsencrypt'}, "config_renew_letsencrypt"),
-	&ui_opt_textbox("ssl_renew_letsencrypt",
-		$tmpl->{'ssl_renew_letsencrypt'},
-		6, $tmpl->{'default'} ? $text{'newweb_renew_letsencrypt_def'}
-				      : $text{'tmpl_default'}));
-
 # Allow request for a subset of hostnames?
 print &ui_table_row(
 	&hlink($text{'newweb_allow_subset'}, "config_allow_subset"),
@@ -4507,14 +4487,6 @@ if (defined($in{'ssl_connectivity'})) {
 	}
 $tmpl->{'ssl_email'} = $in{'ssl_email'};
 $tmpl->{'ssl_email_master'} = $in{'ssl_email_master'};
-if ($in{'ssl_renew_letsencrypt_def'}) {
-	delete($tmpl->{'ssl_renew_letsencrypt'});
-	}
-else {
-	$in{'ssl_renew_letsencrypt'} =~ /^\d+$/ ||
-		&error($text{'newweb_erenew_letsencrypt'});
-	$tmpl->{'ssl_renew_letsencrypt'} = $in{'ssl_renew_letsencrypt'};
-	}
 $tmpl->{'ssl_always_ssl'} = $in{'ssl_always_ssl'};
 
 if ($in{'ssl_tlsa_records'}) {

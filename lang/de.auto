@@ -546,7 +546,6 @@ right_fwebaliases=Website-Aliase
 letsencrypt_eipnoweb=IP-Adresszertifikate erfordern eine webbasierte Validierung
 letsencrypt_eipnotdom=Die IP-Adresse $1 wird von diesem virtuellen Server nicht verwendet
 letsencrypt_eipnotdefault=Die IP-Adresse $1 kann nur dann angegeben werden, wenn dieser virtuelle Server eine private IP-Adresse besitzt oder die Standardwebsite für diese IP-Adresse ist. Die aktuelle Standardwebsite ist $2.
-letsencrypt_eiprenew=Die automatische Erneuerung von IP-Adresszertifikaten erfordert eine Erneuerung spätestens 2 % der Tage vor Ablauf, die Vorlage dieses virtuellen Servers ist jedoch auf 1 % der Tage eingestellt.
 letsencrypt_eipnowebmin=Diese Version von Webmin unterstützt keine IP-Adresszertifikate
 letsencrypt_eipnocertbot=Der Befehl certbot ist für IP-Adresszertifikate erforderlich
 letsencrypt_eipcertbotver=Für IP-Adresszertifikate wird Certbot Version $1 oder höher benötigt
