@@ -282,8 +282,9 @@ if (&need_php_wrappers($d, $mode)) {
 	&create_php_wrappers($d, $mode);
 	}
 
-# Setup PHP-FPM pool
-if ($mode eq "fpm" && $oldmode ne "fpm") {
+# Create the PHP-FPM pool when enabling FPM or if its config file is missing
+my $fpmfile = $mode eq "fpm" ? &get_php_fpm_config_file($d) : undef;
+if ($mode eq "fpm" && ($oldmode ne "fpm" || !-r $fpmfile)) {
 	&create_php_fpm_pool($d);
 	}
 elsif ($mode ne "fpm") {
