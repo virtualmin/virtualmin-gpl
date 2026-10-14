@@ -112,13 +112,18 @@ eval {
         $h->{'fh'} = $callpkg."::".$h->{'fh'};
 
 	&mailboxes::smtp_command($h);
-	&mailboxes::smtp_command($h, "helo ".&get_system_hostname()."\r\n");
+	# A login or STARTTLS needs the EHLO greeting
+	my $helocmd = ($user || $ssl ? "ehlo " : "helo ").
+		      &get_system_hostname()."\r\n";
+	&mailboxes::smtp_command($h, $helocmd);
 
 	if ($ssl == 2) {
 		# Switch to SSL with STARTTLS
 		my $rv = &mailboxes::smtp_command($h, "starttls\r\n", 1);
 		if ($rv =~ /^2\d+/) {
 			&switch_to_ssl($h);
+			# Greet again on the encrypted connection
+			&mailboxes::smtp_command($h, $helocmd);
 			}
 		else {
 			$ssl = 0;
