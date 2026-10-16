@@ -206,7 +206,7 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 		$temp = &transname().".".$sfx;
 		}
 	else {
-		my $host = &get_system_hostname(1);
+		my $host = &get_system_hostname();
 		my $time = strftime("%Y%m%d_%H%M", localtime);
 		my $numb = scalar @doms;
 		my $feat = @vbs ? '+settings' : '';
