@@ -18754,6 +18754,7 @@ my @rv = (
         [ 'webalizer', 'Webalizer Logfile Analysis' ],
         [ 'mysql', $mytype.' Database Server' ],
         [ 'postgres', 'PostgreSQL Database Server' ],
+        [ 'sqlite', 'SQLite Database Browser' ],
         [ 'spam', 'SpamAssassin Mail Filter' ],
         [ 'filemin', 'File Manager', undef, 'config_avail_file' ],
         [ 'passwd', 'Change Password',
@@ -18789,6 +18790,23 @@ foreach my $p (@plugins) {
 		}
 	}
 return (\@rv, \%foreign_module_for);
+}
+
+# domain_owner_sqlite_acl(&domain, is-extra-admin)
+# Returns a SQLite ACL limited to the domain owner's home directory. The owner
+# works as their matching Unix account; extra admins use that account by name.
+sub domain_owner_sqlite_acl
+{
+my ($d, $isextra) = @_;
+return (
+	'noconfig' => 1,
+	'paths' => '$HOME',
+	'write' => 1,
+	'create' => 1,
+	'sql' => 1,
+	'work_as_root' => 0,
+	'work_as_user' => $isextra ? $d->{'user'} : '',
+	);
 }
 
 # list_domain_owner_modules()

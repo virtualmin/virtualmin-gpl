@@ -76,6 +76,7 @@ avail_web=1
 avail_webalizer=0
 avail_mysql=1
 avail_postgres=1
+avail_sqlite=0
 avail_mail=1
 avail_phpini=1
 homes_dir=homes

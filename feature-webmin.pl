@@ -435,6 +435,14 @@ else {
 	@mods = grep { $_ ne "postgresql" } @mods;
 	}
 
+# Grant access to SQLite databases in the domain owner's home directory.
+if ($mods{'sqlite'} && !$noextra && $d->{'unix'}) {
+	push(@mods, "sqlite");
+	my %acl = &domain_owner_sqlite_acl($d, $isextra);
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "sqlite")
+		if (!$hasmods{'sqlite'});
+	}
+
 # Grant access to Apache module if needed
 if ($features{'web'} && $mods{'web'} && $d->{'edit_phpmode'}) {
 	# Allow user to manage just this website

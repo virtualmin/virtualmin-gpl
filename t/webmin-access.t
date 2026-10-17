@@ -51,6 +51,20 @@ my ($dns) = grep { $_->[0] eq 'dns' } @modules;
 ok($dns, 'feature aliases remain listed when their backing module is available');
 is(scalar(@$dns), 2,
 	'module aliases do not add implementation details to registry entries');
+my ($sqlite) = grep { $_->[0] eq 'sqlite' } @modules;
+ok($sqlite, 'SQLite is available to domain-owner access policies');
+is($sqlite->[1], 'SQLite Database Browser',
+	'SQLite uses its Webmin module description');
+my $sqlite_help = File::Spec->catfile($root, 'help',
+	'config_avail_sqlite.html');
+ok(-r $sqlite_help, 'SQLite domain-owner access has a help page');
+my $module_config = File::Spec->catfile($root, 'config');
+open(my $module_config_fh, '<', $module_config) ||
+	die "Failed to open $module_config: $!";
+my $module_config_source = do { local $/; <$module_config_fh> };
+close($module_config_fh);
+like($module_config_source, qr/^avail_sqlite=0$/m,
+	'SQLite has a disabled default and can appear in the owner menu');
 ok(scalar(grep { $_ eq 'bind8' } @foreign_checks),
 	'DNS availability is checked against the actual BIND module');
 ok(scalar(grep { $_ eq 'filemin' } @foreign_checks),
@@ -72,6 +86,25 @@ ok(!scalar(@foreign_checks) && scalar(@foreign_install_checks),
 	'policy construction never depends on the calling user Webmin ACL');
 is(scalar(@policy_modules), scalar(@cli_modules),
 	'policy registry matches the installed module registry');
+}
+
+# SQLite access is confined to the domain home and never runs as root. Extra
+# administrators use the domain owner's Unix account because they may lack one.
+{
+my $domain = { 'user' => 'example' };
+my %owner_acl = &main::domain_owner_sqlite_acl($domain, 0);
+is_deeply(\%owner_acl, {
+	'noconfig' => 1,
+	'paths' => '$HOME',
+	'write' => 1,
+	'create' => 1,
+	'sql' => 1,
+	'work_as_root' => 0,
+	'work_as_user' => '',
+	}, 'domain owner gets home-only SQLite access as the matching Unix user');
+my %extra_acl = &main::domain_owner_sqlite_acl($domain, 1);
+is($extra_acl{'work_as_user'}, 'example',
+	'extra administrator runs SQLite as the domain owner');
 }
 
 # Serialization must not alter valid enumerated access levels. This is checked
@@ -296,6 +329,14 @@ like($feature_source,
 unlike($feature_source,
 	qr/&hlink\(\$text\{'tmpl_webmin_avail'\}/,
 	'template module access heading is not clickable');
+my $feature_webmin = File::Spec->catfile($root, 'feature-webmin.pl');
+open(my $feature_webmin_fh, '<', $feature_webmin) ||
+	die "Failed to open $feature_webmin: $!";
+my $feature_webmin_source = do { local $/; <$feature_webmin_fh> };
+close($feature_webmin_fh);
+like($feature_webmin_source,
+	qr/if \(\$mods\{'sqlite'\}.*?push\(\@mods, "sqlite"\).*?&domain_owner_sqlite_acl\(\$d, \$isextra\)/s,
+	'SQLite access assigns the domain-owner ACL when granting the module');
 
 my @saved_domains;
 {
