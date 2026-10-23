@@ -4534,6 +4534,7 @@ licence_no_lines=.. no lines for $1 found!
 licence_updfile=Updating Virtualmin license ..
 licence_expired=License Expired
 licence_expired_desc=The ability to make changes is temporarily disabled for your system. This mode kicks in after the grace period, if your license has expired or is being used on more than one server. Visit the <a href='$1'>Virtualmin License Manager</a> page for more details.
+licence_offline_changed=This cloned server needs its own Virtualmin Pro license. Enter a separate Pro license, or downgrade manually to GPL. The source server’s license has not changed.
 
 downgrade_gpl_package=Downgrading packages ..
 downgrade_gpl_already=Virtualmin GPL is already installed!
