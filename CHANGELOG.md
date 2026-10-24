@@ -1,4 +1,6 @@
 #### Version 8.3.1
+* Add API accounts with command, virtual server, template and plan permissions so integrations do not need a master administrator login
+* Add root-only CLI commands to create, update, list and delete API accounts
 * Fix ACME certificates renewing too early by adapting the renewal window to their lifetime and using the hidden `acme_renewal_max_days` global maximum instead of per-template settings [forum.virtualmin.com/t/138152](https://forum.virtualmin.com/t/let-s-encrypt-to-cut-ssl-certificate-lifetimes-to-64-days-in-february-2027/138152)
 * Fix backups failing on MySQL 8.4 and later with MariaDB or older MySQL dump clients by skipping incompatible binary log coordinate options
 * Fix restored virtual servers missing their PHP-FPM pool configuration, which caused "No listen directive found in FPM config" warnings and HTTP 503 errors

@@ -1,0 +1,138 @@
+#!/usr/bin/perl
+# api-access-account.pl(mode, fixture-file)
+# Runs fixture operations using the driver's mode-0600 JSON file.
+# Requires a disposable VM with Webmin installed under /usr/share/webmin.
+# Modes: setup, catalog, make-alias, module-root, inspect, block-policy,
+# unblock-policy, and cleanup.
+
+use strict;
+use warnings;
+no warnings 'uninitialized';
+use JSON::PP;
+use lib '/usr/share/webmin';
+our (%access, $module_name, $module_config_directory, $module_root_directory);
+my ($mode, $file) = @ARGV;
+# Load only the VM-local fixture file supplied by the test driver.
+open(my $fh, '<', $file) or die "Cannot read fixture\n";
+my $fixture = decode_json(do { local $/; <$fh> });
+close($fh);
+# Initialize the installed guest instance; this helper must not run locally.
+$ENV{'WEBMIN_CONFIG'} = '/etc/webmin';
+$ENV{'WEBMIN_VAR'} = '/var/webmin';
+$main::no_acl_check = 1;
+$0 = '/usr/share/webmin/virtual-server/api-access-account.pl';
+chdir('/usr/share/webmin/virtual-server') or die $!;
+require './virtual-server-lib.pl';
+&require_acl();
+my $policy_file = "$module_config_directory/$fixture->{user}.acl";
+my $alias_file = "$fixture->{user}-acme-alias.pl";
+
+if ($mode eq 'setup') {
+	# Use a temporary Webmin master credential to exercise the real admin UI.
+	my $user = { name => $fixture->{admin},
+		pass => &acl::encrypt_password($fixture->{admin_password}, '$6$fixture$'),
+		modules => ['virtual-server'], nochange => 1 };
+	(grep { $_->{name} eq $user->{name} } &acl::list_users()) && die 'Name clash';
+	&acl::create_user($user);
+	&save_module_acl({ noconfig => 0, domains => '*' }, $user->{name}, 'virtual-server', 1);
+	&save_module_acl({ rpc => 0 }, $user->{name}, '', 1);
+	# Distinct plans let the driver test allowed and forbidden selections.
+	my $base = &get_default_plan();
+	for my $name ('allowed', 'forbidden') {
+		my $plan = { %$base, id => '', name => $fixture->{user}."-$name",
+			featurelimits => 'unix dir webmin web mysql', quota => 131072,
+			uquota => 65536, domslimit => 5, mailboxlimit => 3, dbslimit => 2 };
+		&save_plan($plan);
+		$fixture->{$name.'_plan'} = $plan->{id};
+		}
+	# Return generated plan IDs through the existing private fixture file.
+	open($fh, '>', $file) or die $!;
+	print $fh encode_json($fixture);
+	close($fh);
+	&reload_miniserv();
+	}
+elsif ($mode eq 'catalog') {
+	# Return the current grant keys to check a saved all-commands selection.
+	print encode_json([ map { $_->{'key'} } &list_api_access_commands() ]);
+	}
+elsif ($mode eq 'module-root') {
+	# Return the configured module path for direct CLI tests.
+	print "$module_root_directory\n";
+	}
+elsif ($mode eq 'make-alias') {
+	# Test packaged aliases with an exact copy, without changing installed names.
+	!-e $alias_file || die "Alias fixture already exists";
+	my $source = &read_file_contents('generate-acme-cert.pl');
+	$source || die "Missing alias source";
+	open(my $alias, '>', $alias_file) or die $!;
+	print $alias $source;
+	close($alias) or die $!;
+	chmod(0755, $alias_file) or die $!;
+	}
+elsif ($mode eq 'inspect') {
+	# Return only the fields asserted by the tests, never saved passwords.
+	# A directory at the ACL path represents the injected write failure.
+	my %a = -d $policy_file ? () : &get_module_acl($fixture->{user}, 'virtual-server');
+	my %g = &get_module_acl($fixture->{user}, '');
+	my $d = &get_domain_by('dom', $fixture->{domain});
+	my $outside = &get_domain_by('dom', $fixture->{outside});
+	my $clone = &get_domain_by('dom', $fixture->{clone});
+	my ($account) = grep { $_->{name} eq $fixture->{user} } &acl::list_users();
+	# Include saved ownership and limits for the driver's assertions.
+	print encode_json({ api_id => $a{api_id}, noconfig => $a{noconfig},
+		account_exists => $account ? 1 : 0,
+		description => $account ? $account->{real} : undef,
+		other_descriptions => scalar(grep {
+			$_->{name} ne $fixture->{user} && $_->{real} =~ /\S/
+			} &list_api_access_users()),
+		account_locked => $account && $account->{pass} eq '!' ? 1 : 0,
+		api_commands => $a{api_commands}, api_domains => $a{api_domains},
+		api_disabled => $a{api_disabled},
+		rpc => $g{rpc}, api_only => $g{api_only},
+		outside_id => $outside ? $outside->{id} : undef,
+		clone_owner => $clone ? $clone->{api_owner} : undef,
+		domain => $d ? { map { $_ => $d->{$_} }
+			qw(id dom user api_owner plan template quota uquota) } : undef,
+		unix_user => scalar(getpwnam($fixture->{user})) });
+	}
+elsif ($mode eq 'block-policy') {
+	# Force a real file-backed ACL write failure for this new fixture only.
+	my ($account) = grep { $_->{name} eq $fixture->{user} } &acl::list_users();
+	!$account && !-e $policy_file || die "Fixture already exists";
+	mkdir($policy_file) || die "Cannot block fixture policy: $!";
+	}
+elsif ($mode eq 'unblock-policy') {
+	# Remove the fault and any locked account left by the failed creation.
+	rmdir($policy_file) || die "Cannot unblock fixture policy: $!";
+	my ($account) = grep { $_->{name} eq $fixture->{user} } &acl::list_users();
+	# Creation may have failed before a login was saved.
+	&acl::delete_user($fixture->{user}) if ($account);
+	&reload_miniserv();
+	}
+elsif ($mode eq 'cleanup') {
+	# Remove only fixture accounts and plans. Domain deletion is done by the
+	# driver first through the normal administrator API.
+	unlink($alias_file) or die $! if (-e $alias_file);
+	# Remove the directory left by an interrupted write-failure test.
+	rmdir($policy_file) || die "Cannot remove fixture fault: $!" if (-d $policy_file);
+	my %names = map { $_->{name} => 1 } &acl::list_users();
+	for my $name ($fixture->{user}, $fixture->{admin}) {
+		# Setup may have failed before creating both accounts.
+		&acl::delete_user($name) if ($names{$name});
+		}
+	# Check plan names as well as IDs before removing fixture data.
+	for my $kind ('allowed', 'forbidden') {
+		my $p = &get_plan($fixture->{$kind.'_plan'});
+		&delete_plan($p) if ($p && $p->{name} eq $fixture->{user}."-$kind");
+		}
+	&reload_miniserv();
+	# Domain cleanup runs first; report anything left instead of hiding it.
+	my @left = grep { &get_domain_by('dom', $_) }
+		($fixture->{domain}, $fixture->{outside}, $fixture->{clone},
+		 $fixture->{user}.'-blocked.example.test');
+	die "Fixture domains remain: ".join(', ', @left)."\n" if (@left);
+	}
+else {
+	# Reject unknown operations instead of leaving ambiguous fixture state.
+	die "Unknown fixture operation\n";
+	}

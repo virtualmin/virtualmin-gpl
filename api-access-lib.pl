@@ -1,0 +1,547 @@
+# API accounts have Webmin credentials but no Unix account or master role.
+# Their module ACL stores permissions; a random ID links new domains to them.
+
+# is_api_access_user()
+# Returns true for a dedicated API account, including a disabled account.
+sub is_api_access_user
+{
+return $access{'api_id'} ne '';
+}
+
+# api_access_contains(list, value)
+# Checks value against a whitespace-separated string.
+# A * entry allows any nonempty value.
+sub api_access_contains
+{
+my ($list, $value) = @_;
+# Even '*' requires a resource ID.
+return 0 if (!defined($value) || $value eq '');
+return scalar(grep { $_ eq '*' || $_ eq $value } split(/\s+/, $list));
+}
+
+# list_api_access_commands()
+# Returns command hashrefs with provider keys, script paths, scope, and aliases.
+# Scoped commands enforce account permissions themselves. Other commands may
+# affect resources outside the account's domain list.
+sub list_api_access_commands
+{
+# Reuse the catalog only within this process. New requests rescan providers.
+return @api_access_commands if ($api_access_commands_loaded);
+# Scan providers in dispatcher order so later implementations take precedence.
+my %skip = map { $_ => 1 } &list_api_skip_scripts();
+my %commands;
+foreach my $provider ($module_name, "$module_name/pro", @plugins) {
+	# Missing Pro or plugin directories contribute no commands.
+	my $dir = &module_root_directory($provider);
+	opendir(my $dh, $dir) || next;
+	my @files = readdir($dh);
+	closedir($dh);
+	my %scoped;
+	if ($provider ne $module_name && $provider ne "$module_name/pro" &&
+	    &plugin_defined($provider, 'feature_remote_api_commands')) {
+		# Plugins list commands that check access without a master role.
+		%scoped = map { my $name = $_; $name =~ s/\.pl$//; ($name, 1) }
+			&plugin_call($provider, 'feature_remote_api_commands');
+		}
+	foreach my $file (sort @files) {
+		# Skip hidden scripts, helpers, and non-executable files.
+		next if ($file !~ /^([a-z0-9][a-z0-9-]*)\.pl$/ ||
+			 $skip{$file} || !-x "$dir/$file");
+		# Resolve aliases before assigning a command grant.
+		my $name = $1;
+		# Root-only account commands cannot be granted through the API UI.
+		next if (&is_api_account_command($name));
+		my $canonical = $name;
+		my %seen;
+		while (-l "$dir/$canonical.pl" && !$seen{$canonical}++) {
+			# Aliases in this directory share the target's grant.
+			# Old command names cannot bypass an exclusion.
+			my $target = readlink("$dir/$canonical.pl");
+			last if ($target !~ /^([a-z0-9][a-z0-9-]*)\.pl$/);
+			$canonical = $1;
+			}
+		# Read the whole opening POD paragraph, including wrapped sentences.
+		my $src = &read_file_contents("$dir/$file");
+		next if ($src !~ /^=head1([^\n]*)\n\s*\n(.+?)(?:\n[ \t]*\r?\n|\n=|\z)/ms);
+		my ($title, $desc) = ($1, $2);
+		$desc =~ s/\s+/ /g;
+		$desc =~ s/^ | $//g;
+		# Give command tooltips a final period when the source omits it.
+		$desc .= '.' if ($desc ne '' && $desc !~ /\.$/);
+		if ($title =~ /^\s+([a-z0-9][a-z0-9-]*)\.pl\s*$/) {
+			# Packages can replace symlinks with copies. Accept the documented
+			# target only when it is executable and has identical contents.
+			my $target = $1;
+			$canonical = $target if ($target ne $canonical &&
+				-x "$dir/$target.pl" &&
+				&read_file_contents("$dir/$target.pl") eq $src);
+			}
+		# Aliases must not expose a terminal-only command either.
+		next if (&is_api_account_command($canonical));
+		# Core uses the domain-owner command registry plus filtered listings
+		# and batch requests. Plugins declare their own scoped commands.
+		my $core = $provider eq $module_name ||
+			   $provider eq "$module_name/pro";
+		my $scoped = $core ?
+			(&get_user_remote_api_command($canonical) ||
+			 $canonical =~ /^(list-templates|list-plans|run-api-command)$/) :
+			$scoped{$canonical};
+		# Match remote.cgi's provider precedence, including Pro overrides.
+		$commands{$name} = { 'name' => $canonical, 'provider' => $provider,
+			'key' => "$provider:$canonical", 'path' => "$dir/$canonical.pl",
+			'desc' => $desc, 'scoped' => $scoped ? 1 : 0 };
+		}
+	}
+# Present aliases as one permission while retaining each accepted spelling.
+my %grants;
+foreach my $name (sort keys %commands) {
+	my $command = $commands{$name};
+	$grants{$command->{'key'}} ||= $command;
+	push(@{$grants{$command->{'key'}}->{'aliases'}}, $name);
+	}
+@api_access_commands = map { $grants{$_} } sort keys %grants;
+$api_access_commands_loaded = 1;
+return @api_access_commands;
+}
+
+# get_api_access_command(name)
+# Resolves a name or script path to its provider entry, or returns undef.
+sub get_api_access_command
+{
+my ($name) = @_;
+# Match the dispatcher's script spelling, including registered aliases.
+$name = &normalize_api_command_name($name);
+$name =~ s/\.pl$//;
+my ($command) = grep {
+	my $entry = $_;
+	grep { $_ eq $name } @{$entry->{'aliases'} || [ $entry->{'name'} ]}
+	} &list_api_access_commands();
+return $command;
+}
+
+# api_access_can_command(name)
+# Checks a command name or script path against the saved provider grants.
+# Unknown and newly installed commands are denied.
+sub api_access_can_command
+{
+my ($name) = @_;
+# An account must be active before any saved grant can authorize a command.
+return 0 if (!&is_api_access_user() || $access{'api_disabled'});
+# Reject terminal-only commands even if an old catalog or ACL contains one.
+return 0 if (&is_api_account_command($name));
+# The saved command selection authorizes both scoped and server-wide commands.
+# Grants must match the command's module.
+my $command = &get_api_access_command($name);
+return $command &&
+	&api_access_contains($access{'api_commands'}, $command->{'key'});
+}
+
+# api_access_can_domain(&domain)
+# Checks a domain hashref against the current API account's domain policy.
+# Callers must first establish that this is an API account.
+# Grants cover descendants; api_created also grants this account's creations.
+# This checks target access only; command grants are checked separately.
+sub api_access_can_domain
+{
+my ($d) = @_;
+# Missing targets and disabled accounts cannot satisfy a domain grant.
+return 0 if (!$d || $access{'api_disabled'});
+# A parent grant covers descendants; stop if stored ancestry contains a cycle.
+my %seen;
+while ($d && !$seen{$d->{'id'}}++) {
+	# An explicit grant or the all-domains setting authorizes this ancestor.
+	return 1 if (&api_access_contains($access{'api_domains'}, $d->{'id'}));
+	# The account ID prevents a reused username inheriting old creations.
+	return 1 if ($access{'api_created'} &&
+		    $d->{'api_owner'} eq $access{'api_id'});
+	$d = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+	}
+return 0;
+}
+
+# api_access_system_command()
+# True only while executing an explicitly granted server-wide command.
+# This is not a master login and must not be used to authorize scoped commands.
+sub api_access_system_command
+{
+return &is_api_access_user() && $api_access_command &&
+	!$api_access_command->{'scoped'} &&
+	&api_access_can_command($api_access_command->{'name'});
+}
+
+# api_access_request_args(&raw-parameters, [format])
+# Builds argv without letting a parameter value introduce additional options.
+# raw-parameters contains URL-encoded name=value pairs. format, if supplied,
+# names the output selector to omit; no selector is omitted by default.
+# Repeated values remain separate arguments. Invalid input raises an error.
+sub api_access_request_args
+{
+my ($raw, $format) = @_;
+my @args;
+my $programs = 0;
+foreach my $pair (@$raw) {
+	my ($name, $value) = split(/=/, $pair, 2);
+	# Decode names and values once, keeping each value in one argument.
+	foreach ($name, $value) {
+		# A parameter without '=' is a flag with an empty value.
+		$_ = '' if (!defined($_));
+		tr/+/ /;
+		s/%([a-f0-9]{2})/chr(hex($1))/egi;
+		}
+	if ($name eq 'program') {
+		# Count dispatch selectors separately from command options.
+		$programs++;
+		next;
+		}
+	# The dispatcher consumes this selector; it is not a command option.
+	next if (defined($format) && $name eq $format);
+	# Names become switches; allow lowercase letters, digits, and hyphens.
+	$name =~ /^[a-z][a-z0-9-]*$/ || die "Invalid API parameter name\n";
+	# Even optional-value parsers must not interpret values as switches.
+	$value !~ /\0/ && $value !~ /^--/ || die "Invalid API parameter value\n";
+	# Empty values are flags; other values remain one argument.
+	push(@args, "--$name");
+	push(@args, $value) if ($value ne '');
+	}
+# Reject missing or repeated selectors instead of choosing one implicitly.
+$programs == 1 || die "Supply exactly one program parameter\n";
+return @args;
+}
+
+# prepare_api_access_command(name, &args)
+# Checks a command name or path and its argv arrayref, returning its catalog
+# entry and setting the current command's permission context. Raises an error
+# on denial. Wrappers must call this before executing a nested command too.
+sub prepare_api_access_command
+{
+my ($name, $args) = @_;
+# Check the saved grant before recording any command as authorized.
+&api_access_can_command($name) || die "API command is not permitted\n";
+my $command = &get_api_access_command($name);
+if ($command->{'name'} =~ /^(create|modify)-domain$/) {
+	# Resource limits must come from an allowed plan, not caller overrides.
+	foreach my $arg (@$args) {
+		$arg !~ /^--(quota|uquota|bandwidth|mailboxlimit|dbslimit|domslimit|aliaslimit|aliasdomslimit|realdomslimit|max-mailboxes|max-dbs|max-doms|max-aliases|max-aliasdoms|max-realdoms)$/ ||
+			die "API accounts must use the limits from a plan\n";
+		}
+	}
+# Record the authorized command for checks inside its implementation.
+$api_access_command = $command;
+return $command;
+}
+
+# run_api_access_batch(&args)
+# Parses an argv arrayref and runs an allowed command for selected domains.
+# Repeated --domain options choose targets; omitting them selects all allowed
+# domains. --test checks permissions without executing. --command is required
+# and consumes the remaining arguments as options for the child command.
+# --help alone describes these options without running a command.
+# Forked children retain API permissions instead of starting the root CLI.
+# Lexical parser state prevents wrapper variables leaking into child scripts.
+sub run_api_access_batch
+{
+my ($argv) = @_;
+my @args = @$argv;
+my (@names, $name, $test);
+if (@args == 1 && $args[0] eq '--help') {
+	# get-command also uses this help to discover supported API parameters.
+	print "Executes another API command over multiple servers.\n\n";
+	print "virtualmin run-api-command [--domain name]* [--test]\n";
+	print "                           --command name\n\n";
+	print "Pass the command's options after --command name.\n";
+	return;
+	}
+# Wrapper options end at --command; all following arguments belong to the child.
+while (@args) {
+	my $arg = shift(@args);
+	if ($arg eq '--domain') {
+		# Repeated domain options select the batch targets.
+		push(@names, shift(@args));
+		}
+	elsif ($arg eq '--test') {
+		# Dry runs check grants and targets without running the child.
+		$test = 1;
+		}
+	elsif ($arg eq '--command') {
+		# Preserve the remaining arguments for the selected command.
+		$name = shift(@args);
+		last;
+		}
+	else {
+		# Reject wrapper flags not supported for API accounts.
+		die "Use --domain, --test and --command for API batch requests\n";
+		}
+	}
+# Reject a missing command before resolving targets and canonical aliases.
+$name && $name ne 'run-api-command' || die "Missing or recursive command\n";
+my @domains;
+if (@names) {
+	# Validate every target before doing any work.
+	foreach my $domain (@names) {
+		my $d = &get_domain_by('dom', $domain);
+		$d && &api_access_can_domain($d) || die "Domain is not permitted\n";
+		push(@domains, $d);
+		}
+	}
+else {
+	# An omitted domain list means all domains visible to this API account.
+	@domains = grep { &api_access_can_domain($_) } &list_domains();
+	}
+# Reauthorize the child and reject recursive aliases or system commands.
+my $command = &prepare_api_access_command($name, \@args);
+$name = $command->{'name'};
+$name ne 'run-api-command' || die "Recursive batch command is not permitted\n";
+$command->{'scoped'} || die "Batch commands must support domain access checks\n";
+foreach my $d (@domains) {
+	my @childargs = ('--domain', $d->{'dom'}, @args);
+	if ($test) {
+		# Report the validated target without starting a child process.
+		print "Would run $name for $d->{'dom'}\n";
+		next;
+		}
+	# Child execution preserves the ACL and the caller's identity.
+	pipe(my $read, my $write) || die "Cannot open command pipe: $!\n";
+	my $pid = &execute_webmin_script($command->{'path'},
+		$command->{'provider'}, \@childargs, $write);
+	# Forward output and stop the batch when a child fails.
+	print while (<$read>);
+	close($read);
+	waitpid($pid, 0);
+	die "Command failed for $d->{'dom'}\n" if ($?);
+	}
+}
+
+# api_access_module_acl(&policy)
+# Builds module ACL key/value pairs from a policy hashref without a master role.
+# Dispatch checks command grants; scoped commands apply their domain checks.
+sub api_access_module_acl
+{
+my ($policy) = @_;
+# Retain only recognized policy fields; never import a caller-supplied role.
+my %acl = map { $_ => $policy->{$_} }
+	qw(api_id api_commands api_domains api_templates api_plans api_created
+	   api_disabled api_template api_plan);
+# Enable capabilities that commands check after their saved grant is verified.
+$acl{'noconfig'} = 1;
+$acl{'domains'} = '';
+$acl{'create'} = 1;
+$acl{'edit'} = 1;
+$acl{'import'} = 1;
+$acl{'edit_remote_api'} = 1;
+# Command and domain grants control access to these editing capabilities.
+foreach my $edit (@edit_limits) {
+	$acl{"edit_$edit"} = 1;
+	}
+# Feature checks also consult the customer's plan when a target domain is set.
+foreach my $feature (@features, &list_feature_plugins()) {
+	$acl{"feature_$feature"} = 1;
+	}
+return %acl;
+}
+
+# list_api_access_users()
+# Returns Webmin user hashrefs with their API policy in a policy hashref.
+# Includes disabled accounts so administrators can enable or delete them.
+sub list_api_access_users
+{
+&require_acl();
+my @rv;
+# Module access and an API account ID distinguish these from ordinary users.
+foreach my $user (&acl::list_users()) {
+	next if (!grep { $_ eq $module_name } @{$user->{'modules'}});
+	my %acl = &get_module_acl($user->{'name'}, $module_name);
+	push(@rv, { %$user, 'policy' => \%acl }) if ($acl{'api_id'});
+	}
+return @rv;
+}
+
+# save_api_access_accounts(&params-or-builder)
+# Creates, updates or deletes API accounts and returns the affected usernames.
+# Accepts a form hashref or a no-argument callback returning one under the lock.
+# Raises an error on failure and always releases the account lock.
+sub save_api_access_accounts
+{
+my ($params) = @_;
+# Authorize both entry points before locking or changing Webmin accounts.
+&master_admin() || die $text{'apiaccess_ecannot'}."\n";
+defined(&webmin_user_api_only) || die $text{'apiaccess_ewebmin'}."\n";
+&require_acl();
+&obtain_lock_webmin();
+my @changed;
+# Turn Webmin write errors into exceptions so the lock is released on failure.
+local $main::error_must_die = 1;
+eval {
+	# The UI supplies form fields directly. The CLI callback reads the latest
+	# account settings under this lock, then applies its requested changes.
+	# Reading before the lock could overwrite an edit made while waiting.
+	my %in = %{ ref($params) eq 'CODE' ? &$params() : $params };
+	my (@delete_users, $user, $name, %policy, @catalog, %known, @chosen,
+	    %domains, $hash, %global, %acl);
+	@delete_users = ( );
+	if ($in{'bulk'}) {
+		# Validate the entire selection under the lock before deleting any account.
+		$in{'delete'} && !$in{'new'} || die($text{'apiaccess_egone'}."\n");
+		my @ids = &unique(split(/\0/, $in{'d'}));
+		@ids || die($text{'apiaccess_enone'}."\n");
+		my %by_id = map { $_->{'policy'}->{'api_id'} => $_ }
+			&list_api_access_users();
+		foreach my $id (@ids) {
+			# A missing ID may belong to a deleted or replaced login.
+			$by_id{$id} || die($text{'apiaccess_egone'}."\n");
+			push(@delete_users, $by_id{$id});
+			}
+		}
+	elsif (!$in{'new'}) {
+		# Recheck both the name and immutable ID under the account lock.
+		($user) = grep { $_->{'name'} eq $in{'old'} } &list_api_access_users();
+		$user && $in{'id'} eq $user->{'policy'}->{'api_id'} ||
+			die($text{'apiaccess_egone'}."\n");
+		$name = $user->{'name'};
+		# Delete a single account through the same path as a bulk deletion.
+		@delete_users = ($user) if ($in{'delete'});
+		}
+	else {
+		# Reject reserved names and existing Webmin or Unix accounts.
+		$name = $in{'name'};
+		$name =~ /^[a-z][a-z0-9_-]{0,63}$/ &&
+			$name !~ /^(root|admin|sysadm|webmin)$/ ||
+			die($text{'apiaccess_ename'}."\n");
+		(grep { $_->{'name'} eq $name } &acl::list_users()) &&
+			die($text{'apiaccess_eexists'}."\n");
+		defined(getpwnam($name)) && die($text{'apiaccess_eexists'}."\n");
+		}
+
+	if ($in{'delete'}) {
+		# Only existing accounts that passed the ID checks may be deleted.
+		$in{'new'} && die($text{'apiaccess_egone'}."\n");
+		# Deleting an account revokes access but keeps its virtual servers.
+		foreach my $selected (@delete_users) {
+			&acl::delete_user($selected->{'name'});
+			push(@changed, $selected->{'name'});
+			&webmin_log('delete', 'apiaccount', $selected->{'name'}, { });
+			}
+		}
+	else {
+		# Validate the complete policy before changing any account files.
+		%policy = ( 'api_id' => $user ? $user->{'policy'}->{'api_id'} :
+			&acl::generate_random_id(), 'api_disabled' => !$in{'enabled'} ? 1 : 0,
+			'api_created' => $in{'created'} ? 1 : 0 );
+		$policy{'api_id'} || die($text{'apiaccess_erandom'}."\n");
+		# Validate command keys before applying the selection mode.
+		@catalog = &list_api_access_commands();
+		%known = map { $_->{'key'} => $_ } @catalog;
+		@chosen = split(/\s+/, $in{'commands'});
+		foreach my $key (@chosen) {
+			$known{$key} || die($text{'apiaccess_ecommand'}."\n");
+			}
+		$in{'command_mode'} =~ /^(include|exclude|all)$/ ||
+			die($text{'apiaccess_ecommand'}."\n");
+		if ($in{'command_mode'} eq 'all') {
+			# Grant the current catalog explicitly, without allowing future commands.
+			@chosen = sort keys %known;
+			}
+		elsif ($in{'command_mode'} eq 'exclude') {
+			# Resolve exclusions now; future commands are never implicitly allowed.
+			my %excluded = map { $_ => 1 } @chosen;
+			@chosen = grep { !$excluded{$_} } sort keys %known;
+			}
+		$policy{'api_commands'} = join(' ', &unique(@chosen));
+		# All-domain access includes future domains; selected IDs must exist.
+		$in{'domain_mode'} =~ /^(all|selected)$/ || die($text{'apiaccess_escope'}."\n");
+		%domains = map { $_->{'id'} => 1 } &list_domains();
+		@chosen = split(/\s+/, $in{'domains'});
+		if ($in{'domain_mode'} eq 'selected') {
+			# Reject grants for removed or unknown domains.
+			(grep { !$domains{$_} } @chosen) && die($text{'apiaccess_escope'}."\n");
+			}
+		$policy{'api_domains'} = $in{'domain_mode'} eq 'all' ? '*' : join(' ', @chosen);
+		# Validate template and plan grants separately from their defaults.
+		foreach my $kind ('template', 'plan') {
+			my @items = $kind eq 'template' ?
+				grep { !$_->{'deleted'} } &list_templates() : &list_plans();
+			my %ids = map { $_->{'id'} => 1 } @items;
+			my @ids = split(/\s+/, $in{$kind.'s'});
+			$in{$kind.'_mode'} =~ /^(all|selected)$/ ||
+				die($text{'apiaccess_escope'}."\n");
+			if ($in{$kind.'_mode'} eq 'selected') {
+				# Reject missing or deleted templates and plans.
+				(grep { !$ids{$_} } @ids) && die($text{'apiaccess_escope'}."\n");
+				}
+			$policy{"api_${kind}s"} = $in{$kind.'_mode'} eq 'all' ? '*' : join(' ', @ids);
+			$policy{'api_'.$kind} = $in{$kind};
+			if ($in{$kind} ne '') {
+				# Defaults must be allowed; template ID 0 is valid.
+				$ids{$in{$kind}} && &api_access_contains(
+					$policy{"api_${kind}s"}, $in{$kind}) ||
+					die($text{'apiaccess_edefault'}."\n");
+				}
+			}
+		if (grep { $known{$_}->{'name'} eq 'create-domain' }
+		    split(/\s+/, $policy{'api_commands'})) {
+			# Creation needs defaults for requests that omit these options.
+			$policy{'api_template'} ne '' && $policy{'api_plan'} ne '' ||
+				die($text{'apiaccess_edefault'}."\n");
+			}
+		if ($in{'new'} || !$in{'password_def'}) {
+			# Require a valid password when creating or explicitly replacing it.
+			length($in{'password'}) >= 24 && $in{'password'} !~ /[\0\r\n]/ ||
+				die($text{'apiaccess_epassword'}."\n");
+			my $err = &acl::check_password_restrictions($name, $in{'password'});
+			# Apply Webmin's password rules as well as the API minimum.
+			die($err."\n") if ($err);
+			# Use SHA-512 password hashing even on installations using DES.
+			# Reject the result if crypt lacks SHA-512 support.
+			my $salt = &acl::generate_random_id();
+			$salt || die($text{'apiaccess_erandom'}."\n");
+			$hash = &acl::encrypt_password($in{'password'}, '$6$'.substr($salt, 0, 16).'$');
+			$hash =~ /^\$6\$/ || die($text{'apiaccess_ehash'}."\n");
+			}
+
+		if (!$user) {
+			# Keep a new login locked until both ACLs are saved.
+			# A failed write must not leave a usable, unrestricted account.
+			$user = { 'name' => $name, 'pass' => '!',
+				'modules' => [ $module_name ], 'nochange' => 1 };
+			&acl::create_user($user);
+			}
+		# Store endpoint and command restrictions before unlocking a new login.
+		%global = ( 'rpc' => 0, 'api_only' => 'virtual-server/remote.cgi',
+			'fileunix' => 'nobody' );
+		&save_module_acl(\%global, $name, '', 1);
+		%acl = &api_access_module_acl(\%policy);
+		&save_module_acl(\%acl, $name, $module_name, 1);
+		# Change the hash only for a new password; block other modules and
+		# self-service password changes.
+		$user->{'pass'} = $hash if (defined($hash));
+		$user->{'modules'} = [ $module_name ];
+		$user->{'nochange'} = 1;
+		if (exists($in{'desc'})) {
+			# Share Webmin's real-name field. Omitted input preserves it.
+			# Keep the value on one config line. An empty field clears it.
+			my $desc = $in{'desc'};
+			$desc =~ s/[\r\n\0]+/ /g;
+			$desc =~ s/^\s+|\s+$//g;
+			$user->{'real'} = length($desc) ? $desc : undef;
+			}
+		&acl::modify_user($name, $user);
+		push(@changed, $name);
+		# Revoke any sessions issued before a policy or password change.
+		my %miniserv;
+		&get_miniserv_config(\%miniserv);
+		&acl::delete_session_user(\%miniserv, $name) if ($miniserv{'session'});
+		# Log commands and account status without including the password.
+		&webmin_log($in{'new'} ? 'create' : 'modify', 'apiaccount', $name,
+			{ 'commands' => $policy{'api_commands'},
+			  'disabled' => $policy{'api_disabled'} });
+		}
+	};
+# Save the failure before cleanup, then report it after releasing the lock.
+my $err = $@;
+&release_lock_webmin();
+die $err if ($err);
+# Reload only after all requested changes have completed.
+&reload_miniserv();
+return @changed;
+}
+
+1;

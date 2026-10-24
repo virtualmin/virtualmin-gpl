@@ -1,0 +1,31 @@
+<header>API Access</header>
+
+<p>Use API accounts to let scripts, <tt>curl</tt> or other tools work with
+Virtualmin without sharing your administrator login. Each account has its own
+username and password. You control which commands it can run, which virtual
+servers it can manage, and which templates and plans it can use.</p>
+
+<p>API accounts have no Unix login and cannot open the Webmin interface or use
+its general RPC interface. Only the master administrator can manage them.</p>
+
+<p>For example, to allow only virtual server creation:</p>
+
+<ol>
+<li>Create an API account with a username and password.</li>
+<li>Under <b>Allowed commands</b>, check only <tt>create-domain</tt>.
+Leave the other settings at their defaults.</li>
+<li>Save the account. Use its username and password to call
+<tt>/virtual-server/remote.cgi</tt> over HTTPS.</li>
+</ol>
+
+<p>This account can create new virtual servers using the allowed
+templates and plans. It cannot run other API commands to list, change, suspend
+or delete servers.</p>
+
+<p>Root can also manage these accounts from the command line with
+<tt>create-api-account</tt>, <tt>modify-api-account</tt>,
+<tt>list-api-accounts</tt> and <tt>delete-api-account</tt>.
+Run <tt>virtualmin create-api-account --help</tt> for options.
+These commands cannot be called through the HTTP API.</p>
+
+<footer>

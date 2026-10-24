@@ -46,6 +46,8 @@ sub list_available_plans
 {
 my $canmode = &can_edit_plans();
 my @plans = &list_plans();
+# Dedicated accounts use their plan allowlist instead of reseller ownership.
+return grep { &can_use_plan($_) } @plans if ($access{'api_id'});
 if (&master_admin()) {
 	# Master admin can use all
 	return @plans;
@@ -69,6 +71,9 @@ else {
 sub can_use_plan
 {
 my ($plan) = @_;
+# Missing plans cannot satisfy an API grant, including an all-plans grant.
+return $plan && &api_access_contains($access{'api_plans'}, $plan->{'id'})
+	if ($access{'api_id'});
 if (&master_admin()) {
 	# Masters can use all plans
 	return 1;
@@ -87,12 +92,19 @@ else {
 }
 
 # get_default_plan([allow-undef])
-# Returns the default plan for the current user - may be undef if none is set
+# Returns the caller's default plan. By default, non-API callers fall back to
+# their first available plan; allow-undef disables that fallback. API accounts
+# return undef when their configured default is missing or not allowed.
 sub get_default_plan
 {
 my ($allowundef) = @_;
 my @plans = sort { $a->{'id'} <=> $b->{'id'} } &list_available_plans();
 my $defplan;
+if ($access{'api_id'}) {
+	# A missing or revoked default must not fall back to a different plan.
+	($defplan) = grep { $_->{'id'} eq $access{'api_plan'} } @plans;
+	return $defplan;
+	}
 if (&reseller_admin()) {
 	($defplan) = grep { $_->{'id'} eq $access{'defplan'} } @plans;
 	}

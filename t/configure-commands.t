@@ -44,6 +44,8 @@ $module_var_directory = "$ENV{'TEST_MODULE'}/logs";
 do "$ENV{'TEST_SOURCE'}/commands-lib.pl";
 die $@ if $@;
 sub master_admin { !$ENV{'TEST_NONMASTER'} }
+# is_api_access_user(): this fixture checks ordinary administrator commands.
+sub is_api_access_user { 0 }
 sub reseller_admin { 0 }
 sub indexof {
 	my ($item, @list) = @_;
