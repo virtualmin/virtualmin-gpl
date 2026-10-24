@@ -50,18 +50,29 @@ return $out =~ /^EXP\s+(?<exp>\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\d+)(?:\s+([\w]
 		    &text("licence_evalid", "<tt data-evalid>$serial</tt>"));
 }
 
-# Changes license with a new serial and key, and performs repo setup unless
-# disabled
+# change_licence(serial, key, [nocheck], [force-update], [no-repos], [offline])
+# Changes credentials and normally validates the license and sets up repositories.
+# Offline mode only replaces local credentials and invalidates cached status.
 sub change_licence
 {
-my ($serial, $key, $nocheck, $force_update, $no_repos) = @_;
-&require_licence($force_update);
+my ($serial, $key, $nocheck, $force_update, $no_repos, $offline) = @_;
+# Offline replacement shares local writes but skips loading and validation.
+if ($offline) {
+	return (1, 'Offline license credentials must contain only letters, numbers, underscores or hyphens')
+		if (!defined($serial) || !defined($key) ||
+		    $serial !~ /\A[A-Za-z0-9_-]+\z/ || $key !~ /\A[A-Za-z0-9_-]+\z/);
+	($nocheck, $force_update, $no_repos) = (1, 1, 1);
+	}
+else {
+	&require_licence($force_update);
+	}
 my ($status, $exp, $err, $doms, $server, $hostid);
+# Keep the previous serial to find other copies of it below
+my %vserial;
+&read_env_file($virtualmin_license_file, \%vserial);
 # Display a warning to GPL user trying to apply a license instead of
 # properly upgrading. Can be bypassed by using --force-update flag
 if (!$force_update) {
-	my %vserial;
-	&read_env_file($virtualmin_license_file, \%vserial);
 	if ($vserial{'SerialNumber'} eq 'GPL' ||
 	    $vserial{'LicenseKey'} eq 'GPL') {
 		return (1, $text{'licence_gpl_repos_warning'});
@@ -106,12 +117,12 @@ if (!$nocheck) {
 
 # Update Webmin updates file
 &foreign_require("webmin");
-if ($webmin::config{'upsource'} =~ /\Q$upgrade_virtualmin_host\E/) {
+if ($webmin::config{'upsource'} =~ /(?:$upgrade_virtualmin_host_all)(?=[:\/\s]|$)/) {
 	&$first_print("Updating Webmin module updates URL ..");
 	&lock_file($webmin::module_config_file);
 	@upsource = split(/\t/, $webmin::config{'upsource'});
 	foreach my $u (@upsource) {
-		if ($u =~ /^(http|https|ftp):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/) {
+		if ($u =~ /^(http|https|ftp):\/\/([^:]+):([^\@]+)\@((?:$upgrade_virtualmin_host_all)(?=[:\/\s]|$).*)$/) {
 			$u = $1."://".$serial.":".$key."\@".$4;
 			}
 		}
@@ -135,6 +146,19 @@ elsif (!$no_repos) {
 			       &setup_repos_error($err || $out)));
 		}
 	}
+# Systems upgraded through the web interface also keep the serial and key
+# as Webmin update credentials
+if ($vserial{'SerialNumber'} ne '' &&
+    $webmin::config{'upuser'} eq $vserial{'SerialNumber'}) {
+	&lock_file($webmin::module_config_file);
+	$webmin::config{'upuser'} = $serial;
+	$webmin::config{'uppass'} = $key;
+	&webmin::save_module_config();
+	&unlock_file($webmin::module_config_file);
+	}
+
+# Offline mode updates existing repository credentials without running setup.
+return &change_licence_offline($serial, $key) if ($offline);
 
 if (defined($status) && $status == 0) {
 	# Update the status file
@@ -152,5 +176,29 @@ if (defined($status) && $status == 0) {
 	}
 }
 
-1;
+# change_licence_offline(serial, key) finishes the offline change_licence path.
+# Update only the known Virtualmin repository files and discard cached status.
+sub change_licence_offline
+{
+my ($serial, $key) = @_;
+foreach my $file (grep { $_ && -f $_ }
+	($virtualmin_apt_auth_file, $virtualmin_yum_repo, $virtualmin_apt_repo)) {
+	&lock_file($file);
+	my $data = &read_file_contents($file);
+	die "Cannot read license repository configuration: $file\n" if (!defined($data));
+	my $old = $data;
+	# RPM and older APT entries carry credentials in their repository URL.
+	$data =~ s{((?:https?|ftp)://)[^\s/\@]+:[^\s/\@]+\@((?:$upgrade_virtualmin_host_all)(?=[:/\s]|$))}{$1$serial:$key\@$2}g;
+	# Current APT entries use the separate Virtualmin authentication file.
+	$data =~ s{(^[ \t]*machine\s+(?:https?://)?(?:$upgrade_virtualmin_host_all)(?:[/:]\S*)?\s+login\s+)\S+(\s+password\s+)\S+}{$1$serial$2$key}gm;
+	&write_file_contents($file, $data) if ($data ne $old);
+	&unlock_file($file);
+	}
+&lock_file($licence_status);
+&write_file($licence_status, { status => 1, last => 0,
+	err => $text{'licence_offline_changed'} });
+&unlock_file($licence_status);
+return (0, undef);
+}
 
+1;
