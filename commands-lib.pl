@@ -32,6 +32,25 @@ $cmd .= ".pl" if ($cmd !~ /\.pl$/);
 return $cmd;
 }
 
+# is_api_account_command(command)
+# Identifies root-only account commands by name or script path.
+sub is_api_account_command
+{
+my ($cmd) = @_;
+$cmd = &normalize_api_command_name($cmd);
+return $cmd =~ /^(?:(?:create|modify|delete)-api-account|list-api-accounts)\.pl$/;
+}
+
+# is_remote_api_request()
+# Recognizes HTTP requests and their children. The API environment marker
+# survives CGI environment cleanup when a request spawns another command.
+sub is_remote_api_request
+{
+return $main::virtualmin_remote_api || $ENV{'VIRTUALMIN_REMOTE_API'} ||
+	$ENV{'REQUEST_METHOD'} || $ENV{'GATEWAY_INTERFACE'} ||
+	$main::webmin_script_type eq 'web';
+}
+
 # api_command_unavailable_message(command)
 # Returns a user-facing message if some API command is unavailable in this
 # edition, or undef if it should be runnable.
@@ -602,20 +621,33 @@ return $user_remote_api_commands{$program};
 sub remote_api_can_domain
 {
 my ($d, $program) = @_;
+# Masters bypass delegation checks; other callers need remote API access.
 return 1 if (&master_admin());
 return 0 if (!&can_use_remote_api());
+# Check the API account's command permission before its domain access.
+return 0 if ($access{'api_id'} && !&api_access_can_command($program));
+# A saved grant still requires a registered capability and an accessible target.
 my $capfunc = &get_user_remote_api_command($program);
 return 0 if (!$capfunc || !$d || !&can_edit_domain($d));
 return &$capfunc($d);
 }
 
 # require_remote_api_command([program-name])
-# Exits if the current user cannot run a registered command without a domain.
+# Exits unless the caller may run program-name, which defaults to $0.
+# Dedicated accounts use their allowlist; owners use the capability registry.
 sub require_remote_api_command
 {
 my ($program) = @_;
 $program ||= $0;
 return if (&master_admin());
+if ($access{'api_id'}) {
+	# Check the command grant here; target resolution checks domain access.
+	return if (&api_access_can_command($program));
+	# Deny before the command can resolve or modify any target.
+	print $text{'remote_ecannotcmd'},"\n";
+	exit(1);
+	}
+# Ordinary owners need a capability that permits calling without a domain.
 my $capfunc = &get_user_remote_api_command($program);
 return if (&can_use_remote_api() && $capfunc && &$capfunc());
 print $text{'remote_ecannotcmd'},"\n";
@@ -623,14 +655,19 @@ exit(1);
 }
 
 # require_remote_api_domain(&domain, requested-domain, [program-name])
-# Exits with a non-leaking error if the current user cannot run the calling
-# API command for the requested domain.
+# Exits unless the caller may run the command for the domain hashref.
+# requested-domain labels errors; program-name defaults to $0. Errors do not
+# reveal whether an inaccessible domain exists.
 sub require_remote_api_domain
 {
 my ($d, $requested, $program) = @_;
 # Default to the API script set by the dispatcher or standalone command
 $program ||= $0;
-return if (&remote_api_can_domain($d, $program));
+if (&remote_api_can_domain($d, $program)) {
+	# Owner limits must be evaluated for the customer, not the API login.
+	$api_access_domain = $d if ($access{'api_id'});
+	return;
+	}
 # Only distinguish capability failures for domains the caller can see
 my $msg = $d && &can_edit_domain($d) ?
 	&text('remote_ecannotcap', $requested) :
@@ -703,19 +740,27 @@ return @rv;
 }
 
 # can_remote(program-name)
-# Returns 1 if the current user can execute remote commands
+# Checks whether the current user may run the named API command.
 sub can_remote
 {
 my ($program) = @_;
+# Terminal-only commands must never be offered to an HTTP caller.
+return 0 if (&is_api_account_command($program) &&
+	(&is_remote_api_request() || !&master_admin()));
+# API accounts use explicit grants instead of the legacy owner command list.
+return &api_access_can_command($program) if ($access{'api_id'});
 return &master_admin() || &can_remote_as_user($program);
 }
 
 # can_remote_as_user(program-name)
-# Returns 1 if given API supports remote commands
-# as the current user (not root)
+# Checks whether the caller may run program-name without a master role.
 sub can_remote_as_user
 {
 my ($program) = @_;
+# Account management cannot be delegated, even with a hand-edited grant.
+return 0 if (&is_api_account_command($program));
+# API accounts use explicit grants instead of the legacy owner command list.
+return &api_access_can_command($program) if ($access{'api_id'});
 return 0 if (!&can_use_remote_api());
 $program =~ s/\.pl$//;
 if ($program eq "configure-script" ||

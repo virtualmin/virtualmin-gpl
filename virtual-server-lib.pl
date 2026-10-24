@@ -11,6 +11,28 @@ if (&indexof($module_root_directory, @INC) < 0) {
 use Time::Local;
 %access = &get_module_acl();
 
+# Require the API entry point and account policy before loading module helpers.
+# Reject API accounts if Webmin lacks the endpoint restriction checks.
+if ($access{'api_id'} ||
+    $main::webmin_script_type eq 'web' && defined(&webmin_user_api_only) &&
+    &webmin_user_api_only() eq 'virtual-server/remote.cgi') {
+	if ($main::allow_api_only ne 'virtual-server/remote.cgi' ||
+	    !defined(&webmin_user_api_only) || !$access{'api_id'} ||
+	    $access{'api_disabled'}) {
+		# Deny wrong entry points, missing policy, or disabled accounts.
+		# A themed error can recursively load this partially initialized module.
+		if ($miniserv::doing_cgi_eval) {
+			# Set miniserv's status without rendering a theme.
+			$miniserv::ok_code = 403;
+			$miniserv::ok_message = 'Forbidden';
+			}
+		# Emit the CGI status header as well as the plain denial body.
+		print "Status: 403 Forbidden\r\nContent-type: text/plain\r\n\r\n";
+		print "This account is restricted to the Virtualmin API\n";
+		CORE::exit(1);
+		}
+	}
+
 # Use MariaDB in text strings if appropriate
 my $mysql_module_version = &read_file_contents(
 	"$config_directory/mysql/version"); 

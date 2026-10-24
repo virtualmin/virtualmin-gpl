@@ -3,11 +3,16 @@
 
 do 'virtual-server-lib.pl';
 
-# parse_webmin_log(user, script, action, type, object, &params)
-# Converts logged information from this module into human-readable form
+# parse_webmin_log(user, script, action, type, object, &params, [long])
+# Returns a readable action description from the log fields and parameter hash.
+# long selects expanded details where supported; it defaults to false.
 sub parse_webmin_log
 {
 my ($user, $script, $action, $type, $object, $p, $long) = @_;
+if ($type eq 'apiaccount') {
+	# API account actions identify a login rather than a customer domain.
+	return &text('log_'.$action.'_apiaccount', &html_escape($object));
+	}
 if ($type eq "user") {
 	return &text('log_'.$action.'_user', "<tt>$object</tt>",
 					     "<tt>$p->{'dom'}</tt>");

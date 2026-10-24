@@ -308,9 +308,10 @@ while(@ARGV > 0) {
 		$template eq "" && &usage("Unknown template name");
 		}
 	elsif ($a eq "--plan" || $a eq "--apply-plan") {
-		$is_master ||
-			&usage("--plan is only available to the master ".
-			       "administrator");
+		# Check the API account's selected plan after parsing options.
+		$is_master || &is_api_access_user() ||
+			&usage("--plan requires the master administrator ".
+			       "or a dedicated API account");
 		# Changing the plan
 		$planname = shift(@ARGV);
 		foreach $p (&list_plans()) {
@@ -323,9 +324,10 @@ while(@ARGV > 0) {
 		$planapply = 1 if ($a eq "--apply-plan");
 		}
 	elsif ($a eq "--plan-features") {
-		$is_master ||
-			&usage("--plan-features is only available to the master ".
-			       "administrator");
+		# API callers may request features from the permitted plan.
+		$is_master || &is_api_access_user() ||
+			&usage("--plan-features requires the master administrator ".
+			       "or a dedicated API account");
 		$planfeatures = 1;
 		}
 	elsif ($a eq "--add-exclude") {
@@ -452,9 +454,10 @@ if (!$is_master && defined($newdomain)) {
 	&usage($err) if ($err);
 	}
 if (!$is_master && defined($template)) {
-	# Only templates that are available to this user can be selected
+	# API accounts use their template allowlist; ordinary owners also need
+	# a template marked for users.
 	&can_use_template($tmpl) &&
-	  (&reseller_admin() || $tmpl->{'for_users'}) ||
+	  (&reseller_admin() || &is_api_access_user() || $tmpl->{'for_users'}) ||
 		&usage($text{'setup_etmpl'});
 	}
 if (!$is_master && (@add_excludes || @remove_excludes ||
@@ -583,6 +586,11 @@ if (defined($template)) {
 
 # Plans can only be used with top-level servers
 if ($plan) {
+	if (&is_api_access_user()) {
+		# Apply the new plan's limits instead of keeping old quotas.
+		&can_use_plan($plan) || &usage("The selected plan is not permitted");
+		$planapply = 1;
+		}
 	$dom->{'parent'} && &usage("--plan can only be used with top ".
 				 "level virtual servers");
 	}

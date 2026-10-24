@@ -1,0 +1,43 @@
+<header>Allowed commands</header>
+
+<p>Choose which commands this API account can run. The label beside each command
+names the module that provides it.</p>
+
+<ul>
+<li><b>Allow selected commands</b>: allow only the checked commands. An empty
+selection allows no commands.</li>
+<li><b>Allow all current commands except selected</b>: allow every listed
+command except the checked ones. An empty selection allows all listed
+commands.</li>
+<li><b>Allow all current commands</b>: allow every command in the current
+list.</li>
+</ul>
+
+<p>All three modes save the commands allowed when you click <b>Save</b>. Commands
+added later need permission before the account can use them. When you edit the
+account again, its allowed commands are checked under
+<b>Allow selected commands</b>.</p>
+
+<h4>Commands limited to allowed virtual servers</h4>
+
+<p>These commands check which virtual servers the account may manage. They also
+check template and plan permissions where needed. <tt>create-domain</tt>
+requires an allowed default template and plan.</p>
+
+<h4>Server-wide commands</h4>
+
+<p>These commands can affect the whole server or grant root access. Virtual
+server, template and plan restrictions do not limit them. Allow them only for
+integrations you trust with this access.</p>
+
+<p>The selection mode above applies to these commands too.
+<b>Allow all current commands</b> includes them.</p>
+
+<p>If a different module takes over a command, this account loses access to it.
+Review the replacement before allowing it again. Updates within the same module
+keep the existing permission.</p>
+
+<p>Some commands have more than one name. Allowing or blocking a command applies
+to all of its names. Each command still checks its own permissions.</p>
+
+<footer>
