@@ -1,16 +1,20 @@
 #!/usr/bin/perl
 # api-access-account.pl(mode, fixture-file)
 # Runs fixture operations using the driver's mode-0600 JSON file.
-# Requires a disposable VM with Webmin installed under /usr/share/webmin.
+# Requires a disposable VM. API_TEST_WEBMIN_ROOT overrides /usr/share/webmin.
 # Modes: setup, catalog, make-alias, module-root, inspect, block-policy,
-# unblock-policy, and cleanup.
+# unblock-policy, edition-info, seed-pro-grants, make-pro-alias,
+# theme-authentic, theme-gray, and cleanup.
 
 use strict;
 use warnings;
 no warnings 'uninitialized';
 use JSON::PP;
-use lib '/usr/share/webmin';
-our (%access, $module_name, $module_config_directory, $module_root_directory);
+our (%access, $module_name, $module_config_directory, $module_root_directory,
+     $virtualmin_pro);
+# Allow the installed Webmin path to vary between disposable test VMs.
+my $webmin_root = $ENV{'API_TEST_WEBMIN_ROOT'} || '/usr/share/webmin';
+unshift(@INC, $webmin_root);
 my ($mode, $file) = @ARGV;
 # Load only the VM-local fixture file supplied by the test driver.
 open(my $fh, '<', $file) or die "Cannot read fixture\n";
@@ -20,12 +24,13 @@ close($fh);
 $ENV{'WEBMIN_CONFIG'} = '/etc/webmin';
 $ENV{'WEBMIN_VAR'} = '/var/webmin';
 $main::no_acl_check = 1;
-$0 = '/usr/share/webmin/virtual-server/api-access-account.pl';
-chdir('/usr/share/webmin/virtual-server') or die $!;
+$0 = "$webmin_root/virtual-server/api-access-account.pl";
+chdir("$webmin_root/virtual-server") or die $!;
 require './virtual-server-lib.pl';
 &require_acl();
 my $policy_file = "$module_config_directory/$fixture->{user}.acl";
 my $alias_file = "$fixture->{user}-acme-alias.pl";
+my $pro_alias_file = "$fixture->{user}-create-alias.pl";
 
 if ($mode eq 'setup') {
 	# Use a temporary Webmin master credential to exercise the real admin UI.
@@ -58,6 +63,40 @@ elsif ($mode eq 'catalog') {
 elsif ($mode eq 'module-root') {
 	# Return the configured module path for direct CLI tests.
 	print "$module_root_directory\n";
+	}
+elsif ($mode eq 'edition-info') {
+	# Report metadata independently of the current user's saved grants.
+	print encode_json({ pro => $virtualmin_pro ? 1 : 0,
+		commands => [ &list_api_access_commands() ] });
+	}
+elsif ($mode eq 'seed-pro-grants') {
+	# Simulate a downgrade or hand-edited ACL on this fixture account only.
+	my %a = &get_module_acl($fixture->{user}, $module_name);
+	$a{'api_id'} || die "Missing fixture account";
+	my @pro = map { $_->{'key'} } grep { $_->{'pro'} }
+		&list_api_access_commands();
+	$a{'api_commands'} = join(' ', &unique(split(/\s+/, $a{'api_commands'}), @pro));
+	&save_module_acl(\%a, $fixture->{user}, $module_name, 1);
+	}
+elsif ($mode eq 'make-pro-alias') {
+	# A packaged copy must resolve to the same edition rule as create-domain.
+	!-e $pro_alias_file || die "Alias fixture already exists";
+	my $source = &read_file_contents('create-domain.pl');
+	$source || die "Missing alias source";
+	# Keep the POD title and contents intact for alias detection.
+	open(my $alias, '>', $pro_alias_file) or die $!;
+	print $alias $source;
+	close($alias) or die $!;
+	chmod(0755, $pro_alias_file) or die $!;
+	}
+elsif ($mode =~ /^theme-(authentic|gray)$/) {
+	# Change only the temporary administrator's theme, never the server default.
+	my $theme = "$1-theme";
+	-d "$webmin_root/$theme" || die "Missing test theme $theme";
+	my ($admin) = grep { $_->{name} eq $fixture->{admin} } &acl::list_users();
+	$admin || die "Missing fixture administrator";
+	$admin->{theme} = $theme;
+	&acl::modify_user($admin->{name}, $admin);
 	}
 elsif ($mode eq 'make-alias') {
 	# Test packaged aliases with an exact copy, without changing installed names.
@@ -110,11 +149,13 @@ elsif ($mode eq 'unblock-policy') {
 	&reload_miniserv();
 	}
 elsif ($mode eq 'cleanup') {
-	# Remove only fixture accounts and plans. Domain deletion is done by the
-	# driver first through the normal administrator API.
+	# The driver handles domain deletion through the administrator API.
+	# Remove test aliases only if their setup steps completed.
 	unlink($alias_file) or die $! if (-e $alias_file);
+	unlink($pro_alias_file) or die $! if (-e $pro_alias_file);
 	# Remove the directory left by an interrupted write-failure test.
 	rmdir($policy_file) || die "Cannot remove fixture fault: $!" if (-d $policy_file);
+	# Delete only fixture logins; leave other accounts unchanged.
 	my %names = map { $_->{name} => 1 } &acl::list_users();
 	for my $name ($fixture->{user}, $fixture->{admin}) {
 		# Setup may have failed before creating both accounts.

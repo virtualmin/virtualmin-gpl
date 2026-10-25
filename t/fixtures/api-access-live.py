@@ -3,8 +3,10 @@
 
 api-access-live.py(task-directory, [options...]): test the installed API.
 The directory must contain api-access-account.pl. With no options, run the full
-account and domain lifecycle. Credentials stay in the guest and are removed
-during cleanup. Never run this on the workstation.
+account and domain lifecycle on Pro. On GPL, this and the shortened account
+modes stop with status 2 after the form checks, because they grant provisioning
+commands; use --editions-only or --cli-only there. Credentials stay in the guest
+and are removed during cleanup. Never run this on the workstation.
 
 --help-only stops after checking the form and help pages.
 --commands-only stops after account creation and command selection checks.
@@ -12,6 +14,9 @@ during cleanup. Never run this on the workstation.
 stops before domain creation. Choose only one of these shortened modes.
 --cli-only tests root CLI account management and checks that HTTP calls are
 rejected.
+--editions-only checks command permissions, direct and batch requests, and plan
+changes on GPL or Pro. It also checks forms in both themes. On GPL, it adds saved
+Pro grants to simulate a downgrade without changing the VM's license.
 --write-failure adds a failed account creation check for file-backed Webmin users
 unless --help-only stops the run first.
 """
@@ -295,6 +300,172 @@ def account_cli(command, args=(), password=None):
     return result.returncode, redact(result.stdout + result.stderr)
 
 
+def check_editions():
+    """check_editions(): test the installed edition through UI forms, CLI and HTTP.
+
+    On GPL, add saved Pro grants to simulate a downgrade. Keep the VM's license
+    unchanged. The driver's finally block removes fixture accounts and domains.
+    """
+    # Use the catalog's edition flags as the expected set for all/exclude saves.
+    info = json.loads(helper_call('edition-info'))
+    pro = bool(info['pro'])
+    gated = ['create-domain', 'clone-domain', 'disable-domain', 'enable-domain']
+    basic = ['list-domains', 'list-commands', 'get-command', 'run-api-command', 'modify-domain']
+    available = {entry['key'] for entry in info['commands'] if pro or not entry['pro']}
+    # Both themes must show Pro badges and disable these commands only on GPL.
+    for theme in ('authentic', 'gray'):
+        helper_call('theme-' + theme)
+        status, page = request('api_access.cgi?new=1', admin=True)
+        fields = {field.get('value'): field for field in HelpPage(page).inputs
+                  if field.get('type') == 'checkbox'}
+        # Inspect rendered fields rather than inferring their state from labels.
+        for command in gated:
+            field = fields.get('virtual-server:' + command)
+            check(status == 200 and field is not None and
+                  ('disabled' in field) == (not pro),
+                  theme + ': command availability matches the edition: ' + command, page)
+        check('ui_badge' in page and '>Pro<' in page,
+              theme + ': selector shows Pro badges', page)
+    helper_call('theme-authentic')
+    # A narrow account starts with commands available in either edition.
+    page = save_policy(new=True, commands=basic)
+    state = json.loads(helper_call('inspect'))
+    check(state['account_exists'], 'create API account on this edition', page)
+    fixture['id'] = state['api_id']
+    # Validation errors must identify the failed operation without changing it.
+    page = save_policy(commands=basic, password='short')
+    check('Failed to save API account' in page and 'at least 24 characters' in page,
+          'save errors include the operation and validation message', page)
+    status, page = request('save_api_access.cgi', {'bulk': '1', 'delete': '1'},
+                           admin=True)
+    check('Failed to delete API accounts' in page and
+          json.loads(helper_call('inspect'))['account_exists'],
+          'empty bulk deletion reports its operation and preserves the account', page)
+    if not pro:
+        # Both public save entry points must reject explicit new Pro grants.
+        for command in gated:
+            page = save_policy(commands=basic + [command])
+            check('requires Virtualmin Pro' in page,
+                  'form rejects new GPL grant: ' + command, page)
+            # The terminal account editor must enforce the same grant rule.
+            status, out = account_cli('modify-api-account',
+                ['--name', fixture['user'], '--command', command])
+            check(status != 0 and 'requires Virtualmin Pro' in out,
+                  'CLI rejects new GPL grant: ' + command, out)
+    # All/exclude save only this edition's catalog, with no future Pro grants.
+    for mode in ('all', 'exclude'):
+        page = save_policy(commands=[], command_mode=mode)
+        stored = set(json.loads(helper_call('inspect'))['api_commands'].split())
+        check(stored == available, mode + ' saves this edition\'s available commands', page)
+    save_policy(commands=basic + gated if pro else basic)
+    # Inject inactive grants on GPL to exercise dispatch independently of saves.
+    helper_call('seed-pro-grants')
+    helper_call('make-pro-alias')
+    stored = json.loads(helper_call('inspect'))['api_commands']
+    for command in gated + [fixture['user'] + '-create-alias']:
+        out = api(command, [('help', '')])
+        check(('requires Virtualmin Pro' not in out and 'virtualmin ' in out)
+              if pro else ('requires Virtualmin Pro' in out),
+              'dispatch enforces edition for ' + command, out)
+    # Account metadata and counts show only commands usable in this edition.
+    out = api('list-commands', [('name-only', '')])
+    for command in gated:
+        check((command in out.splitlines()) == pro,
+              'list-commands reflects edition for ' + command, out)
+    # Command help and the account list must omit inactive grants too.
+    out = api('get-command', [('command', 'create-domain')])
+    check(('Exit status: 0' in out) == pro, 'get-command reflects edition', out)
+    status, page = request('api_access.cgi', admin=True)
+    expected = len(basic) + (len(gated) if pro else 0)
+    row = re.search(r'<tr\b[^>]*>(?:(?!</tr>).)*?' + fixture['user'] +
+                    r'.*?</tr>', page, re.S)
+    check(row and ('data-order=\"' + str(expected) + '\"' in row[0] or
+                   "data-order='" + str(expected) + "'" in row[0]),
+          'account list counts only usable grants', page)
+    # Post the rendered hidden field, including checked disabled entries.
+    # This tests HTML and form saves, without running browser JavaScript.
+    for theme in ('authentic', 'gray'):
+        helper_call('theme-' + theme)
+        status, page = request('api_access.cgi?user=' + fixture['user'], admin=True)
+        fields = HelpPage(page).inputs
+        hidden = [field for field in fields if field.get('name') == 'commands'
+                  and field.get('type') == 'hidden']
+        check(len(hidden) == 1 and 'disabled' not in hidden[0] and
+              set(hidden[0]['value'].split()) == set(stored.split()),
+              theme + ': one submitted field retains all stored grants', page)
+        # Changing only the description must preserve the submitted command set.
+        page = save_policy(commands=[], overrides={
+            'commands': hidden[0]['value'], 'desc': 'Edition fixture ' + theme})
+        state = json.loads(helper_call('inspect'))
+        check(state['description'] == 'Edition fixture ' + theme and
+              set(state['api_commands'].split()) == set(stored.split()),
+              theme + ': form save preserves inactive Pro grants', page)
+    # A partial CLI edit must also retain grants while disabling the account.
+    helper_call('theme-authentic')
+    status, out = account_cli('modify-api-account',
+        ['--name', fixture['user'], '--disable', '--desc', 'Updated edition fixture'])
+    state = json.loads(helper_call('inspect'))
+    check(status == 0 and state['api_disabled'] == '1' and
+          set(state['api_commands'].split()) == set(stored.split()),
+          'CLI can disable and edit description with inactive grants', out)
+    # Module initialization rejects disabled accounts before edition messages.
+    status, out = request('remote.cgi?program=create-domain')
+    check(status == 403 and 'restricted' in out.lower() and
+          'requires Virtualmin Pro' not in out,
+          'disabled account is denied before the edition check', out)
+    save_policy(commands=basic + gated)
+    # Pro uses the API credential to provision; GPL uses the unchanged master API.
+    out = api('create-domain', [('domain', fixture['domain']),
+              ('pass', fixture['domain_password']), ('unix', ''), ('dir', ''),
+              ('webmin', ''), ('plan', fixture['allowed_plan']), ('template', '0')],
+              admin=not pro)
+    check('Exit status: 0' in out, 'create fixture through ' +
+          ('Pro API account' if pro else 'ordinary GPL master API'), out)
+    domain_id = json.loads(helper_call('inspect'))['domain']['id']
+    save_policy(commands=basic + gated, domains=domain_id)
+    # These flags stay available on GPL, with allowed-plan validation intact.
+    for flags in ([('plan', fixture['allowed_plan'])],
+                  [('apply-plan', fixture['allowed_plan'])], [('plan-features', '')]):
+        out = api('modify-domain', [('domain', fixture['domain']), *flags])
+        check('Exit status: 0' in out, 'plan option remains available: ' + flags[0][0], out)
+    # Edition availability must not bypass the account's allowed-plan selection.
+    out = api('modify-domain', [('domain', fixture['domain']),
+              ('plan', fixture['forbidden_plan'])])
+    check('not permitted' in out, 'plan changes still enforce allowed plans', out)
+    # Test actual nested execution as well as dry-run authorization.
+    for dry_run in (True, False):
+        out = api('run-api-command', [('domain', fixture['domain']),
+                  *([('test', '')] if dry_run else []), ('command', 'disable-domain')])
+        check(('Exit status: 0' in out) if pro else ('requires Virtualmin Pro' in out),
+              'batch enforces edition' + (' in dry run' if dry_run else ''), out)
+    if pro:
+        # Restore the fixture before cloning it through the restricted credential.
+        out = api('enable-domain', [('domain', fixture['domain'])])
+        check('Exit status: 0' in out, 'Pro API account reactivates its server', out)
+        # Cloning must also work with an explicit Pro grant.
+        out = api('clone-domain', [('domain', fixture['domain']),
+                  ('newdomain', fixture['clone']), ('newpass', fixture['domain_password'])])
+        check('Exit status: 0' in out, 'Pro API account clones its server', out)
+    # Root's CLI help must stay reachable on either edition.
+    for command in gated:
+        status, out = account_cli(command, ['--help'])
+        check('requires Virtualmin Pro' not in out and 'virtualmin ' in out,
+              'root CLI help works for ' + command, out)
+    if not pro:
+        # Explicit broad modes replace retained Pro grants with the GPL catalog.
+        for mode in ('all', 'exclude'):
+            helper_call('seed-pro-grants')
+            page = save_policy(commands=[], command_mode=mode)
+            check(set(json.loads(helper_call('inspect'))['api_commands'].split()) == available,
+                  mode + ' replaces inactive grants with available GPL commands', page)
+        # Restore inactive grants to check that they cannot prevent deletion.
+        helper_call('seed-pro-grants')
+    # Removing the account must work whether its Pro grants are active or not.
+    status, out = account_cli('delete-api-account', ['--name', fixture['user']])
+    check(status == 0 and not json.loads(helper_call('inspect'))['account_exists'],
+          'delete account with retained grants', out)
+
+
 def check_account_cli(form):
     """check_account_cli(form): test account management and terminal-only access.
 
@@ -443,6 +614,11 @@ try:
     check(not re.search(r'''name=["']system["']''', page) and
           'api_access_system' not in page,
           'command permissions have no separate server-wide switch', page)
+    if '--editions-only' in sys.argv[2:]:
+        # This mode covers GPL and Pro without assuming provisioning is granted.
+        check_editions()
+        print('All API account edition checks passed.', flush=True)
+        sys.exit(0)
     if '--cli-only' in sys.argv[2:]:
         # CLI testing shares the same isolated accounts and cleanup as UI tests.
         check_account_cli(page)
@@ -452,6 +628,12 @@ try:
         # Stop before account creation; the finally block removes the admin fixture.
         print('All API Access help checks passed.', flush=True)
         sys.exit(0)
+    if not json.loads(helper_call('edition-info'))['pro']:
+        # The remaining checks grant provisioning commands, which GPL refuses by
+        # design before validating anything else on the form.
+        print('Remaining checks need Virtualmin Pro; use --editions-only or --cli-only on GPL.',
+              flush=True)
+        sys.exit(2)
     # Only run the Pro metadata case when that command is actually installed.
     pro_command = 'virtual-server/pro:check-connectivity' in html.unescape(page)
 

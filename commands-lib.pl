@@ -21,6 +21,32 @@ return (
 	);
 }
 
+# These operations need Pro only when delegated to a dedicated API account.
+# Ordinary administrator, reseller, owner and terminal access is unchanged.
+# Map canonical command names to language keys explaining the restriction.
+our %api_account_pro_features = (
+	'create-domain' => 'apiaccess_procreate',
+	'clone-domain' => 'apiaccess_proclone',
+	'disable-domain' => 'apiaccess_prodisable',
+	'enable-domain' => 'apiaccess_proenable',
+	);
+
+# api_account_pro_message(command)
+# Returns a Pro requirement message on GPL, or undef if no restriction applies.
+# Accepts a canonical command name or script path; callers must resolve aliases.
+# Checks only the edition; callers apply it only to API accounts.
+sub api_account_pro_message
+{
+my ($command) = @_;
+# Pro permits these operations when the account has the required grants.
+return undef if ($virtualmin_pro);
+# Match names and paths to the same rule, regardless of the .pl suffix.
+$command = &normalize_api_command_name($command);
+$command =~ s/\.pl$//;
+my $reason = $api_account_pro_features{$command};
+return $reason ? &text('apiaccess_epro', $text{$reason}) : undef;
+}
+
 # normalize_api_command_name(command)
 # Returns a command name with a .pl suffix, for matching against known API
 # script names.

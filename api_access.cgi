@@ -35,10 +35,11 @@ if (!$in{'new'} && !defined($in{'user'})) {
 	my $show_desc = grep { $_->{'real'} =~ /\S/ } @users;
 	foreach my $user (sort { $a->{'name'} cmp $b->{'name'} } @users) {
 		my $p = $user->{'policy'};
-		# Only show grants that still match an installed command and provider.
+		# Count grants whose provider and edition still allow the command.
 		my %grants = map { ($_, 1) } split(/\s+/, $p->{'api_commands'});
 		my @allowed = sort { $a->{'name'} cmp $b->{'name'} }
-			grep { $grants{$_->{'key'}} } @catalog;
+			grep { $grants{$_->{'key'}} &&
+				!&api_account_pro_message($_->{'name'}) } @catalog;
 		# Leave zero as plain text when no commands can be expanded.
 		my $commands = scalar(@allowed);
 		if (@allowed) {
@@ -133,9 +134,12 @@ foreach my $provider (&unique(map { $_->{'provider'} } @catalog)) {
 		($info{'shortdesc'} || $info{'desc'} || $mod).($pro ? ' Pro' : '');
 	}
 # Group commands by scope, with descriptions available as tooltips.
+# Keep Pro entries visible but disabled on GPL, with a badge explaining why.
 @command_options = map { {
 	'value' => $_->{'key'}, 'label' => $_->{'name'},
 	'tag' => $provider_labels{$_->{'provider'}},
+	'badges' => $_->{'pro'} ? [ [ 'Pro', 'warning' ] ] : [],
+	'disabled' => $_->{'pro'} && !$virtualmin_pro,
 	'attrs' => { 'title' => $_->{'desc'} },
 	'group' => { 'label' => $text{$_->{'scoped'} ? 'apiaccess_scoped' :
 		'apiaccess_system'}, 'state' => $_->{'scoped'} ? 'info' : 'warning',
@@ -145,6 +149,7 @@ foreach my $provider (&unique(map { $_->{'provider'} } @catalog)) {
 # Keep command permissions collapsible and open by default.
 print &ui_hidden_table_start($text{'apiaccess_permissions'}, 'width=100%', 2,
 	'permissions', 1);
+# The widget's hidden field preserves checked, disabled grants on form saves.
 print &ui_table_row(&hlink($text{'apiaccess_commands'}, 'api_access_commands'),
 	&ui_multi_select_list('commands', [ split(/\s+/, $p->{'api_commands'}) ],
 		\@command_options, { 'height' => '305px', 'search' => 1,
@@ -152,7 +157,8 @@ print &ui_table_row(&hlink($text{'apiaccess_commands'}, 'api_access_commands'),
 			'options' => [ [ 'include', $text{'apiaccess_include'} ],
 				[ 'exclude', $text{'apiaccess_exclude'} ],
 				[ 'all', $text{'apiaccess_allcommands'} ] ],
-			'hide' => [ 'all' ] } }),
+			'hide' => [ 'all' ] } }).
+	($virtualmin_pro ? '' : &ui_p($text{'apiaccess_pronote'})),
 	undef, undef, undef, 1);
 print &ui_hidden_table_end();
 # Resource restrictions have their own initially open section.

@@ -9,7 +9,7 @@ called through the HTTP API or delegated to an API account.
 
 Run C<virtualmin create-api-account --help> for supported options.
 
-For example, allow an integration to create virtual servers:
+On Virtualmin Pro, allow a billing script to create virtual servers:
 
   virtualmin create-api-account --name billing-api \
       --passfile /root/billing-api.pass --command create-domain
@@ -19,9 +19,13 @@ from a file, or C<--pass-stdin> to read it from standard input.
 
 New accounts use the API Access page defaults and have no command permissions.
 Use C<--command> to allow individual commands. C<--command-mode exclude> allows
-all current API commands except those named with C<--command>.
-C<--command-mode all> allows all current API commands. In every mode, commands
-added later still need permission.
+all API commands available in this edition except those named with C<--command>.
+C<--command-mode all> allows all API commands available in this edition.
+Commands added later or unlocked by an upgrade to Pro need explicit permission.
+
+C<create-domain>, C<clone-domain>, C<disable-domain> and C<enable-domain> require
+Pro when run by an API account. Plan changes with C<modify-domain> remain
+available on GPL. These restrictions do not change root's terminal access.
 
 =cut
 

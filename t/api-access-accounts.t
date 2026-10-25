@@ -7,7 +7,10 @@ use Test::More;
 use FindBin;
 use File::Temp qw(tempdir);
 our (%access, @api_access_commands, $api_access_commands_loaded,
-     $api_access_command, @edit_limits, @features, $module_name, @plugins);
+     $api_access_command, @edit_limits, @features, $module_name, @plugins,
+     $virtualmin_pro);
+# General policy tests use Pro; edition transitions have their own tests.
+$virtualmin_pro = 1;
 do "$FindBin::Bin/../commands-lib.pl" or die $@ || $!;
 do "$FindBin::Bin/../api-access-lib.pl" or die $@ || $!;
 

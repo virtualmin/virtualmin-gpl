@@ -18,6 +18,14 @@ $format = exists($in{'json'}) ? 'json' :
 # A master HTTP login cannot invoke terminal-only account management either.
 &is_api_account_command($in{'program'}) &&
 	&api_error($text{'remote_eclionly'});
+# Only dedicated API accounts need this edition check; other logins keep
+# their existing permissions. Report it before the general grant denial.
+if (&is_api_access_user()) {
+	# Resolve aliases before applying the command's edition restriction.
+	my $entry = &get_api_access_command($in{'program'});
+	my $err = $entry && &api_account_pro_message($entry->{'name'});
+	&api_error($err) if ($err);
+	}
 # Explain whether the request omitted a command or the caller cannot run it.
 &can_remote($in{'program'}) || &api_error($in{'program'} ?
 	&text('remote_ecannotprogram', $in{'program'}) :

@@ -21,6 +21,7 @@ return scalar(grep { $_ eq '*' || $_ eq $value } split(/\s+/, $list));
 
 # list_api_access_commands()
 # Returns command hashrefs with provider keys, script paths, scope, and aliases.
+# The pro flag marks commands that need Pro when run by a dedicated API account.
 # Scoped commands enforce account permissions themselves. Other commands may
 # affect resources outside the account's domain list.
 sub list_api_access_commands
@@ -87,9 +88,11 @@ foreach my $provider ($module_name, "$module_name/pro", @plugins) {
 			 $canonical =~ /^(list-templates|list-plans|run-api-command)$/) :
 			$scoped{$canonical};
 		# Match remote.cgi's provider precedence, including Pro overrides.
+		# All aliases share the canonical command's edition requirement.
 		$commands{$name} = { 'name' => $canonical, 'provider' => $provider,
 			'key' => "$provider:$canonical", 'path' => "$dir/$canonical.pl",
-			'desc' => $desc, 'scoped' => $scoped ? 1 : 0 };
+			'desc' => $desc, 'scoped' => $scoped ? 1 : 0,
+			'pro' => exists($api_account_pro_features{$canonical}) ? 1 : 0 };
 		}
 	}
 # Present aliases as one permission while retaining each accepted spelling.
@@ -120,7 +123,7 @@ return $command;
 }
 
 # api_access_can_command(name)
-# Checks a command name or script path against the saved provider grants.
+# Checks a command name or script path against saved grants and the edition.
 # Unknown and newly installed commands are denied.
 sub api_access_can_command
 {
@@ -129,10 +132,11 @@ my ($name) = @_;
 return 0 if (!&is_api_access_user() || $access{'api_disabled'});
 # Reject terminal-only commands even if an old catalog or ACL contains one.
 return 0 if (&is_api_account_command($name));
-# The saved command selection authorizes both scoped and server-wide commands.
-# Grants must match the command's module.
+# Both scoped and server-wide commands need a saved grant for this provider
+# and must be available in this edition.
 my $command = &get_api_access_command($name);
 return $command &&
+	!&api_account_pro_message($command->{'name'}) &&
 	&api_access_contains($access{'api_commands'}, $command->{'key'});
 }
 
@@ -215,9 +219,14 @@ return @args;
 sub prepare_api_access_command
 {
 my ($name, $args) = @_;
+# Resolve aliases before checking the edition, including nested batch calls.
+my $command = &get_api_access_command($name);
+if ($command && (my $err = &api_account_pro_message($command->{'name'}))) {
+	# Retained grants cannot authorize these operations after a downgrade.
+	die $err."\n";
+	}
 # Check the saved grant before recording any command as authorized.
 &api_access_can_command($name) || die "API command is not permitted\n";
-my $command = &get_api_access_command($name);
 if ($command->{'name'} =~ /^(create|modify)-domain$/) {
 	# Resource limits must come from an allowed plan, not caller overrides.
 	foreach my $arg (@$args) {
@@ -436,14 +445,27 @@ eval {
 			}
 		$in{'command_mode'} =~ /^(include|exclude|all)$/ ||
 			die($text{'apiaccess_ecommand'}."\n");
+		# Broad selection modes include only commands available in this edition.
+		my @available = grep {
+			!&api_account_pro_message($known{$_}->{'name'}) } sort keys %known;
 		if ($in{'command_mode'} eq 'all') {
-			# Grant the current catalog explicitly, without allowing future commands.
-			@chosen = sort keys %known;
+			# Store a fixed list; upgrading later does not expand this grant.
+			@chosen = @available;
 			}
 		elsif ($in{'command_mode'} eq 'exclude') {
 			# Resolve exclusions now; future commands are never implicitly allowed.
 			my %excluded = map { $_ => 1 } @chosen;
-			@chosen = grep { !$excluded{$_} } sort keys %known;
+			@chosen = grep { !$excluded{$_} } @available;
+			}
+		# Include mode may resubmit existing Pro grants on GPL.
+		# All/exclude replace them with this edition's commands.
+		my %previous = $user ? map { $_ => 1 }
+			split(/\s+/, $user->{'policy'}->{'api_commands'}) : ( );
+		foreach my $key (@chosen) {
+			# Only a newly added grant must pass the current edition check.
+			next if ($previous{$key});
+			my $err = &api_account_pro_message($known{$key}->{'name'});
+			die $err."\n" if ($err);
 			}
 		$policy{'api_commands'} = join(' ', &unique(@chosen));
 		# All-domain access includes future domains; selected IDs must exist.

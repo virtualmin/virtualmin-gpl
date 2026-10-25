@@ -25,6 +25,8 @@ sub master_admin { return $admin; }
 sub webmin_user_api_only { return ''; }
 # require_acl(): account operations are provided by the stubs below.
 sub require_acl { }
+# error_setup(message): omit the prefix; this fixture renders no UI.
+sub error_setup { }
 # error(message): stop the request before any later mutation.
 sub error { die "$_[0]\n"; }
 # obtain_lock_webmin(): track whether account operations run under the lock.
