@@ -312,7 +312,7 @@ def check_editions():
     gated = ['create-domain', 'clone-domain', 'disable-domain', 'enable-domain']
     basic = ['list-domains', 'list-commands', 'get-command', 'run-api-command', 'modify-domain']
     available = {entry['key'] for entry in info['commands'] if pro or not entry['pro']}
-    # Both themes must show Pro badges and disable these commands only on GPL.
+    # Both themes show Pro badges and disable these commands only on GPL.
     for theme in ('authentic', 'gray'):
         helper_call('theme-' + theme)
         status, page = request('api_access.cgi?new=1', admin=True)
@@ -324,8 +324,8 @@ def check_editions():
             check(status == 200 and field is not None and
                   ('disabled' in field) == (not pro),
                   theme + ': command availability matches the edition: ' + command, page)
-        check('ui_badge' in page and '>Pro<' in page,
-              theme + ': selector shows Pro badges', page)
+        check(('ui_badge' in page and '>Pro<' in page) == (not pro),
+              theme + ': Pro restriction badges appear only on GPL', page)
     helper_call('theme-authentic')
     # A narrow account starts with commands available in either edition.
     page = save_policy(new=True, commands=basic)
