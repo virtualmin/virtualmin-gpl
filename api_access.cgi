@@ -85,11 +85,7 @@ if (!$in{'new'}) {
 	}
 else {
 	# Use the server's creation defaults; commands still need explicit grants.
-	my $plan = &get_default_plan();
-	$p = { 'api_created' => 1, 'api_disabled' => 0,
-		'api_domains' => '*', 'api_templates' => '*', 'api_plans' => '*',
-		'api_template' => &get_init_template(0),
-		'api_plan' => $plan ? $plan->{'id'} : '' };
+	$p = &default_api_access_policy();
 	}
 
 # Carry the account ID so saving cannot overwrite a replacement login.
@@ -157,17 +153,16 @@ print &ui_table_row(&hlink($text{'apiaccess_commands'}, 'api_access_commands'),
 			'options' => [ [ 'include', $text{'apiaccess_include'} ],
 				[ 'exclude', $text{'apiaccess_exclude'} ],
 				[ 'all', $text{'apiaccess_allcommands'} ] ],
-			'hide' => [ 'all' ] } }).
-	($virtualmin_pro ? '' : &ui_p($text{'apiaccess_pronote'})),
+			'hide' => [ 'all' ] } }),
 	undef, undef, undef, 1);
 print &ui_hidden_table_end();
 # Resource restrictions have their own initially open section.
 print &ui_hidden_table_start($text{'apiaccess_resources'}, 'width=100%', 2,
 	'resources', 1);
 
-# Include child servers and optionally servers created by this account.
+# Offer existing servers and separate access to servers this account creates.
 @domain_options = map { [ $_->{'id'}, $_->{'dom'} ] }
-	sort { $a->{'dom'} cmp $b->{'dom'} } &list_domains();
+	sort { $a->{'dom'} cmp $b->{'dom'} } &list_api_access_resources('domain');
 %domain_modes = ( 'name' => 'domain_mode',
 	'value' => $p->{'api_domains'} eq '*' ? 'all' : 'selected',
 	'options' => [ [ 'selected', $text{'apiaccess_selected'} ],
@@ -189,8 +184,7 @@ print &ui_table_row(&hlink($text{'apiaccess_domains'}, 'api_access_scope'),
 
 # Template and plan selections allow use; editing them needs separate grants.
 foreach my $kind ('template', 'plan') {
-	my @items = $kind eq 'template' ?
-		grep { !$_->{'deleted'} } &list_templates() : &list_plans();
+	my @items = &list_api_access_resources($kind);
 	my @options = map { [ $_->{'id'}, $_->{'name'} ] } @items;
 	print &ui_table_row(&hlink($text{"apiaccess_${kind}s"}, "api_access_${kind}s"),
 		&ui_multi_select_list($kind.'s',

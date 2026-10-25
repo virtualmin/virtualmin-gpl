@@ -8902,7 +8902,6 @@ apiaccess_procreate=Creating virtual servers
 apiaccess_proclone=Cloning virtual servers
 apiaccess_prodisable=Suspending virtual servers
 apiaccess_proenable=Reactivating virtual servers
-apiaccess_pronote=Commands marked Pro require Virtualmin Pro for API accounts. Other commands, including those for plan changes, follow the account's permissions.
 apiaccess_escope=The virtual server, template or plan selection is invalid. Reload the account form.
 apiaccess_edefault=The default template and plan must be in the allowed selections. Both are required for create-domain.
 apiaccess_epassword=The API password must contain at least 24 characters and no line breaks or NUL characters.

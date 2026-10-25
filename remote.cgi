@@ -93,11 +93,10 @@ if ($access{'api_id'}) {
 else {
 	# Preserve newline-separated arguments for ordinary Webmin accounts.
 	foreach $iv (@in) {
+		# Use form decoding; API accounts use stricter parsing.
 		($i, $v) = split(/=/, $iv, 2);
-		$i =~ tr/\+/ /;
-		$v =~ tr/\+/ /;
-		$i =~ s/%(..)/pack("c",hex($1))/ge;
-		$v =~ s/%(..)/pack("c",hex($1))/ge;
+		$i = &un_urlize($i);
+		$v = &un_urlize($v);
 		next if ($i eq "program" || $i eq $format);
 		if ($v eq "") {
 			# Empty values represent flags without an argument.

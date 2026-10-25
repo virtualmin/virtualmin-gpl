@@ -7,6 +7,8 @@ use FindBin;
 our (%text, %access, $virtualmin_pro, %api_account_pro_features,
      @api_access_commands, $api_access_commands_loaded, $api_access_command,
      $module_name, $locked, %users, %policies, $writes);
+# Use the real permission and save helpers without initializing Webmin.
+do "$FindBin::Bin/../security-lib.pl" or die $@ || $!;
 do "$FindBin::Bin/../commands-lib.pl" or die $@ || $!;
 do "$FindBin::Bin/../api-access-lib.pl" or die $@ || $!;
 # Load only the CLI parameter builder, without its root guard or initialization.
@@ -72,6 +74,8 @@ sub get_default_plan { return { id => 1 }; }
 sub get_init_template { return 0; }
 # acl::list_users(): expose only the in-memory accounts created by this test.
 sub acl::list_users { return values %users; }
+# acl::get_user(name): resolve one account without reading Webmin's user store.
+sub acl::get_user { return $users{$_[0]}; }
 # acl::generate_random_id(): return a fixed fixture ID instead of using entropy.
 sub acl::generate_random_id { return 'fixture-identity'; }
 # acl::check_password_restrictions(name, password): accept fixture passwords.

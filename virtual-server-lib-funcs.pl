@@ -3103,31 +3103,29 @@ return @rv;
 }
 
 # can_edit_domain(&domain)
-# Returns 1 if the current user can edit some domain (ie. change users, aliases
-# databases, and so on)
+# Checks whether the current user can access the supplied domain hashref.
+# Individual editing capabilities are checked separately.
 sub can_edit_domain
 {
 # API visibility comes from saved domain grants and creation ownership.
 return &api_access_can_domain($_[0]) if ($access{'api_id'});
 if ($access{'reseller'}) {
-	# User is a reseller .. is this one of his domains?
+	# Resellers can access their customers and child servers.
 	if ($_[0]->{'parent'}) {
-		# Parent domain permissions apply
+		# A child server inherits its parent's reseller access.
 		return &can_edit_domain(&get_domain($_[0]->{'parent'}));
 		}
 	else {
-		return &indexof($base_remote_user,
-				split(/\s+/, $_[0]->{'reseller'})) >= 0;
+		# Reseller names are exact entries, with no wildcard expansion.
+		return &acl_list_contains($_[0]->{'reseller'}, $base_remote_user);
 		}
 	}
 else {
+	# Ordinary domain lists allow all only when * is the entire field.
 	return 1 if ($access{'domains'} eq "*");
+	# A selected-domain grant requires a domain ID.
 	return 0 if (!$_[0]->{'id'});
-	my $d;
-	foreach $d (split(/\s+/, $access{'domains'})) {
-		return 1 if ($d eq $_[0]->{'id'});
-		}
-	return 0;
+	return &acl_list_contains($access{'domains'}, $_[0]->{'id'});
 	}
 }
 
@@ -3296,46 +3294,29 @@ return $config{'show_ugroup'} && &master_admin();
 }
 
 # can_use_feature(feature)
-# Returns 1 if the current user can use some feature at domain creation time,
-# or enable or disable it for existing domains
+# Checks whether the caller may use the named feature when creating a server
+# or changing its features. API calls also check the current target's plan.
 sub can_use_feature
 {
 my ($f) = @_;
-if ($access{'api_id'}) {
-	# Check the target customer's plan limits. With no customer selected,
-	# create-domain applies the allowed plan's features separately.
-	if ($api_access_domain) {
-		# A child uses its parent's plan when enabling features.
-		my $d = $api_access_domain->{'parent'} ?
-			&get_domain($api_access_domain->{'parent'}) : $api_access_domain;
-		my $plan = &get_plan($d->{'plan'});
-		# Deny missing plans and features outside a nonempty allowlist.
-		return 0 if (!$plan);
-		return 0 if ($plan->{'featurelimits'} &&
-			!&api_access_contains($plan->{'featurelimits'}, $f));
-		}
-	# Passing the plan check still requires a forced or granted feature.
-	return $config{$f} == 3 || $access{"feature_".$f};
+if ($access{'api_id'} && $api_access_domain) {
+	# API callers must also satisfy the target customer's plan. A child uses
+	# its parent's plan; create-domain handles plans for new customers itself.
+	my $d = $api_access_domain->{'parent'} ?
+		&get_domain($api_access_domain->{'parent'}) : $api_access_domain;
+	my $plan = &get_plan($d->{'plan'});
+	# A missing plan cannot authorize any feature.
+	return 0 if (!$plan);
+	# A nonempty feature list also limits forced features for API accounts.
+	return 0 if ($plan->{'featurelimits'} &&
+		!&api_access_contains($plan->{'featurelimits'}, $f));
 	}
-if (&master_admin()) {
-	# Master admin can use anything
-	return 1;
-	}
-elsif (&reseller_admin()) {
-	# Resellers can use features they have been granted, or features
-	# that are forced on
-	return $config{$f} == 3 || $access{"feature_".$f};
-	}
-else {
-	# Domain owners can use granted features (but never change the Unix
-	# account, which will be always on)
-	if ($f eq 'unix') {
-		return 0;
-		}
-	else {
-		return $config{$f} == 3 || $access{"feature_".$f};
-		}
-	}
+# Master administrators can use any feature.
+return 1 if (&master_admin());
+# Domain owners cannot enable or disable the Unix account feature.
+return 0 if (!&reseller_admin() && !$access{'api_id'} && $f eq 'unix');
+# Other callers need a granted feature or one configured as always enabled.
+return $config{$f} == 3 || $access{"feature_".$f};
 }
 
 # Returns 1 if the current user is allowed to select a private or shared
@@ -3639,38 +3620,37 @@ return &master_admin() || $config{'edit_quota'};
 }
 
 # can_use_template(&template)
-# Returns 1 if some template can be used by the current user, or his reseller
+# Checks whether the current user may use the supplied template hashref.
 sub can_use_template
 {
 my ($tmpl) = @_;
-# API template selection is independent of owner and reseller defaults.
+# API accounts use their saved selections instead of owner and reseller lists.
 return $tmpl && &api_access_contains($access{'api_templates'}, $tmpl->{'id'})
 	if ($access{'api_id'});
 if (&master_admin()) {
-	# Root can use all templates
+	# Master administrators can use every template.
 	return 1;
 	}
 if ($tmpl->{'resellers'} ne '*') {
-	# Template has a reseller restriction, check it
-	my %resels = map { $_, 1 } split(/\s+/, $tmpl->{'resellers'});
+	# A reseller list containing only * allows every reseller.
 	if (&reseller_admin()) {
-		# Is current user in the reseller list?
-		return 0 if (!$resels{$base_remote_user});
+		# Resellers must appear under their own login name.
+		return 0 if (!&acl_list_contains($tmpl->{'resellers'}, $base_remote_user));
 		}
 	else {
-		# Is user's reseller in list?
+		# Domain owners must belong to one of the listed resellers.
 		my $dom = &get_domain_by("user", $base_remote_user,
 					    "parent", undef);
 		if (!($dom && $dom->{'reseller'} &&
-		      $resels{$dom->{'reseller'}})) {
+		      &acl_list_contains($tmpl->{'resellers'}, $dom->{'reseller'}))) {
+			# Deny missing domains and unlisted resellers.
 			return 0;
 			}
 		}
 	}
 if ($tmpl->{'owners'} ne '*' && !&reseller_admin()) {
-	# Template has owner restrictions, check them
-	my %owners = map { $_, 1 } split(/\s+/, $tmpl->{'owners'});
-	return 0 if (!$owners{$base_remote_user});
+	# Owner limits also apply, except for reseller logins.
+	return 0 if (!&acl_list_contains($tmpl->{'owners'}, $base_remote_user));
 	}
 return 1;
 }

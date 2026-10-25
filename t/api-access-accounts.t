@@ -11,6 +11,8 @@ our (%access, @api_access_commands, $api_access_commands_loaded,
      $virtualmin_pro);
 # General policy tests use Pro; edition transitions have their own tests.
 $virtualmin_pro = 1;
+# Load shared permission helpers without initializing Webmin.
+do "$FindBin::Bin/../security-lib.pl" or die $@ || $!;
 do "$FindBin::Bin/../commands-lib.pl" or die $@ || $!;
 do "$FindBin::Bin/../api-access-lib.pl" or die $@ || $!;
 

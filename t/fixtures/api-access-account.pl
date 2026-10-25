@@ -37,7 +37,7 @@ if ($mode eq 'setup') {
 	my $user = { name => $fixture->{admin},
 		pass => &acl::encrypt_password($fixture->{admin_password}, '$6$fixture$'),
 		modules => ['virtual-server'], nochange => 1 };
-	(grep { $_->{name} eq $user->{name} } &acl::list_users()) && die 'Name clash';
+	&acl::get_user($user->{name}) && die 'Name clash';
 	&acl::create_user($user);
 	&save_module_acl({ noconfig => 0, domains => '*' }, $user->{name}, 'virtual-server', 1);
 	&save_module_acl({ rpc => 0 }, $user->{name}, '', 1);
@@ -78,35 +78,29 @@ elsif ($mode eq 'seed-pro-grants') {
 	$a{'api_commands'} = join(' ', &unique(split(/\s+/, $a{'api_commands'}), @pro));
 	&save_module_acl(\%a, $fixture->{user}, $module_name, 1);
 	}
-elsif ($mode eq 'make-pro-alias') {
-	# A packaged copy must resolve to the same edition rule as create-domain.
-	!-e $pro_alias_file || die "Alias fixture already exists";
-	my $source = &read_file_contents('create-domain.pl');
+elsif ($mode eq 'make-pro-alias' || $mode eq 'make-alias') {
+	# Test copied aliases for commands with and without a Pro requirement.
+	my ($original, $target) = $mode eq 'make-pro-alias' ?
+		('create-domain.pl', $pro_alias_file) :
+		('generate-acme-cert.pl', $alias_file);
+	!-e $target || die "Alias fixture already exists";
+	my $source = &read_file_contents($original);
 	$source || die "Missing alias source";
-	# Keep the POD title and contents intact for alias detection.
-	open(my $alias, '>', $pro_alias_file) or die $!;
+	# Keep the POD title and contents so the copy shares the original
+	# command's grant.
+	open(my $alias, '>', $target) or die $!;
 	print $alias $source;
 	close($alias) or die $!;
-	chmod(0755, $pro_alias_file) or die $!;
+	chmod(0755, $target) or die $!;
 	}
 elsif ($mode =~ /^theme-(authentic|gray)$/) {
 	# Change only the temporary administrator's theme, never the server default.
 	my $theme = "$1-theme";
 	-d "$webmin_root/$theme" || die "Missing test theme $theme";
-	my ($admin) = grep { $_->{name} eq $fixture->{admin} } &acl::list_users();
+	my $admin = &acl::get_user($fixture->{admin});
 	$admin || die "Missing fixture administrator";
 	$admin->{theme} = $theme;
 	&acl::modify_user($admin->{name}, $admin);
-	}
-elsif ($mode eq 'make-alias') {
-	# Test packaged aliases with an exact copy, without changing installed names.
-	!-e $alias_file || die "Alias fixture already exists";
-	my $source = &read_file_contents('generate-acme-cert.pl');
-	$source || die "Missing alias source";
-	open(my $alias, '>', $alias_file) or die $!;
-	print $alias $source;
-	close($alias) or die $!;
-	chmod(0755, $alias_file) or die $!;
 	}
 elsif ($mode eq 'inspect') {
 	# Return only the fields asserted by the tests, never saved passwords.
@@ -116,7 +110,7 @@ elsif ($mode eq 'inspect') {
 	my $d = &get_domain_by('dom', $fixture->{domain});
 	my $outside = &get_domain_by('dom', $fixture->{outside});
 	my $clone = &get_domain_by('dom', $fixture->{clone});
-	my ($account) = grep { $_->{name} eq $fixture->{user} } &acl::list_users();
+	my $account = &acl::get_user($fixture->{user});
 	# Include saved ownership and limits for the driver's assertions.
 	print encode_json({ api_id => $a{api_id}, noconfig => $a{noconfig},
 		account_exists => $account ? 1 : 0,
@@ -136,14 +130,14 @@ elsif ($mode eq 'inspect') {
 	}
 elsif ($mode eq 'block-policy') {
 	# Force a real file-backed ACL write failure for this new fixture only.
-	my ($account) = grep { $_->{name} eq $fixture->{user} } &acl::list_users();
+	my $account = &acl::get_user($fixture->{user});
 	!$account && !-e $policy_file || die "Fixture already exists";
 	mkdir($policy_file) || die "Cannot block fixture policy: $!";
 	}
 elsif ($mode eq 'unblock-policy') {
 	# Remove the fault and any locked account left by the failed creation.
 	rmdir($policy_file) || die "Cannot unblock fixture policy: $!";
-	my ($account) = grep { $_->{name} eq $fixture->{user} } &acl::list_users();
+	my $account = &acl::get_user($fixture->{user});
 	# Creation may have failed before a login was saved.
 	&acl::delete_user($fixture->{user}) if ($account);
 	&reload_miniserv();

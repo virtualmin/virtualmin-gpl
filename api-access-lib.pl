@@ -9,14 +9,40 @@ return $access{'api_id'} ne '';
 }
 
 # api_access_contains(list, value)
-# Checks value against a whitespace-separated string.
-# A * entry allows any nonempty value.
+# Checks value against a whitespace-separated API permission list.
+# A * entry allows any nonempty value, even alongside explicit IDs.
 sub api_access_contains
 {
 my ($list, $value) = @_;
-# Even '*' requires a resource ID.
-return 0 if (!defined($value) || $value eq '');
-return scalar(grep { $_ eq '*' || $_ eq $value } split(/\s+/, $list));
+return &acl_list_contains($list, $value, 1);
+}
+
+# default_api_access_policy()
+# Returns a new policy hashref using the configured template and plan defaults.
+# UI and CLI accounts start with no command grants; saving assigns their ID.
+sub default_api_access_policy
+{
+my $plan = &get_default_plan();
+return { 'api_created' => 1, 'api_disabled' => 0,
+	 'api_domains' => '*', 'api_templates' => '*', 'api_plans' => '*',
+	 'api_template' => &get_init_template(0),
+	 'api_plan' => $plan ? $plan->{'id'} : '' };
+}
+
+# list_api_access_resources(kind)
+# Returns resource hashrefs for kind: domain, template or plan.
+# Uses the same choices for UI fields, CLI lookups and save validation.
+sub list_api_access_resources
+{
+my ($kind) = @_;
+# Domain grants may name any existing server, including child servers.
+return &list_domains() if ($kind eq 'domain');
+# Exclude deleted templates; list_templates() includes them.
+return grep { !$_->{'deleted'} } &list_templates() if ($kind eq 'template');
+# list_plans() already excludes deleted plans.
+return &list_plans() if ($kind eq 'plan');
+# Reject unsupported kinds instead of returning an empty list.
+die "Unknown API resource type: $kind\n";
 }
 
 # list_api_access_commands()
@@ -415,7 +441,7 @@ eval {
 		$name =~ /^[a-z][a-z0-9_-]{0,63}$/ &&
 			$name !~ /^(root|admin|sysadm|webmin)$/ ||
 			die($text{'apiaccess_ename'}."\n");
-		(grep { $_->{'name'} eq $name } &acl::list_users()) &&
+		&acl::get_user($name) &&
 			die($text{'apiaccess_eexists'}."\n");
 		defined(getpwnam($name)) && die($text{'apiaccess_eexists'}."\n");
 		}
@@ -470,7 +496,7 @@ eval {
 		$policy{'api_commands'} = join(' ', &unique(@chosen));
 		# All-domain access includes future domains; selected IDs must exist.
 		$in{'domain_mode'} =~ /^(all|selected)$/ || die($text{'apiaccess_escope'}."\n");
-		%domains = map { $_->{'id'} => 1 } &list_domains();
+		%domains = map { $_->{'id'} => 1 } &list_api_access_resources('domain');
 		@chosen = split(/\s+/, $in{'domains'});
 		if ($in{'domain_mode'} eq 'selected') {
 			# Reject grants for removed or unknown domains.
@@ -479,8 +505,7 @@ eval {
 		$policy{'api_domains'} = $in{'domain_mode'} eq 'all' ? '*' : join(' ', @chosen);
 		# Validate template and plan grants separately from their defaults.
 		foreach my $kind ('template', 'plan') {
-			my @items = $kind eq 'template' ?
-				grep { !$_->{'deleted'} } &list_templates() : &list_plans();
+			my @items = &list_api_access_resources($kind);
 			my %ids = map { $_->{'id'} => 1 } @items;
 			my @ids = split(/\s+/, $in{$kind.'s'});
 			$in{$kind.'_mode'} =~ /^(all|selected)$/ ||

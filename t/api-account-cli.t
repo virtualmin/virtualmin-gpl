@@ -7,6 +7,7 @@ use FindBin;
 our (%text, %access, $admin, $module_name, @api_access_commands,
      $api_access_commands_loaded, $virtualmin_remote_api, $webmin_script_type);
 # Load the real policy functions without starting Webmin or reading its config.
+do "$FindBin::Bin/../security-lib.pl" or die $@ || $!;
 do "$FindBin::Bin/../commands-lib.pl" or die $@ || $!;
 do "$FindBin::Bin/../api-access-lib.pl" or die $@ || $!;
 open(my $fh, '<', "$FindBin::Bin/../api-account-cli.pl") or die $!;
@@ -24,9 +25,10 @@ $admin = 1;
 sub master_admin { return $admin; }
 # list_domains(): supply a named domain and a stable ID.
 sub list_domains { return ({ id => '1', dom => 'customer.example' }); }
-# list_templates(): include the valid zero ID and a named custom template.
+# list_templates(): include zero, a custom template and a deleted entry.
 sub list_templates { return ({ id => '0', name => 'Default Settings' },
-    { id => '9', name => 'Custom template' }); }
+    { id => '9', name => 'Custom template' },
+    { id => '10', name => 'Deleted template', deleted => 1 }); }
 # list_plans(): duplicate names must be rejected instead of chosen arbitrarily.
 sub list_plans { return ({ id => '50', name => 'Default Plan' },
     { id => '60', name => 'Duplicate' }, { id => '61', name => 'Duplicate' }); }
@@ -82,6 +84,31 @@ is($params->{template}, '0', 'creation uses the configured template');
 is($params->{plan}, '50', 'creation uses the configured plan');
 is($params->{domain_mode}, 'all', 'creation matches the UI domain default');
 is($params->{password_def}, 0, 'new password is explicit');
+
+# New policies must use the configured defaults without sharing later edits.
+{
+    no warnings 'redefine';
+    # get_default_plan(): simulate a configured plan other than the usual one.
+    local *get_default_plan = sub { return { id => '60' }; };
+    # get_init_template(parent): simulate a custom top-level template.
+    local *get_init_template = sub { return '9'; };
+    # CLI creation must follow the same configured choices as the shared helper.
+    my $defaults = default_api_access_policy();
+    my $configured = api_account_cli_params('create', $create);
+    is($configured->{template}, '9', 'CLI follows the configured custom template');
+    is($configured->{plan}, '60', 'CLI follows the configured custom plan');
+    # Changing one policy must not grant commands to the next new account.
+    $defaults->{api_commands} = 'virtual-server:list-domains';
+    ok(!default_api_access_policy()->{api_commands}, 'each new account starts without command grants');
+    # get_default_plan(): simulate an installation without an available plan.
+    local *get_default_plan = sub { return undef; };
+    is(default_api_access_policy()->{api_plan}, '', 'missing default plan stays empty');
+}
+# The shared choices exclude deleted templates, and CLI lookup rejects them.
+is_deeply([map { $_->{id} } list_api_access_resources('template')], ['0', '9'],
+    'shared template catalog excludes deleted entries but keeps zero');
+eval { api_account_cli_params('create', { %$create, template => '10' }) };
+like($@, qr/Unknown or ambiguous template/, 'CLI cannot resolve a deleted template');
 
 # Editing one field preserves all permissions and the immutable identity.
 $params = api_account_cli_params('modify', parse_api_account_cli('modify',

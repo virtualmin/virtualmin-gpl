@@ -165,10 +165,7 @@ my ($user) = grep { $_->{'name'} eq $opts->{'name'} } &list_api_access_users();
 my $p;
 if ($action eq 'create') {
 	# Match the UI defaults, with no commands granted until explicitly selected.
-	my $plan = &get_default_plan();
-	$p = { api_domains => '*', api_templates => '*', api_plans => '*',
-		api_created => 1, api_template => &get_init_template(0),
-		api_plan => $plan ? $plan->{'id'} : '' };
+	$p = &default_api_access_policy();
 	}
 else {
 	# Modify and delete only API accounts, never ordinary Webmin users.
@@ -207,8 +204,7 @@ if (exists($opts->{'commands'}) || exists($opts->{'command_mode'})) {
 foreach my $kind ('domain', 'template', 'plan') {
 	my $field = $kind.'s';
 	my $mode = $kind.'_mode';
-	my @items = $kind eq 'domain' ? &list_domains() : $kind eq 'template' ?
-		grep { !$_->{'deleted'} } &list_templates() : &list_plans();
+	my @items = &list_api_access_resources($kind);
 	my $label = $kind eq 'domain' ? 'dom' : 'name';
 	$in{$mode} = $p->{'api_'.$field} eq '*' ? 'all' : 'selected';
 	$in{$field} = $p->{'api_'.$field} eq '*' ? '' : $p->{'api_'.$field};
