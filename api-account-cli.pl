@@ -162,7 +162,7 @@ return \%opts;
 sub api_account_cli_params
 {
 my ($action, $opts) = @_;
-my ($user) = grep { $_->{'name'} eq $opts->{'name'} } &list_api_access_users();
+my ($user) = &list_api_access_users($opts->{'name'});
 my $p;
 if ($action eq 'create') {
 	# Match the UI defaults, with no commands granted until explicitly selected.
@@ -247,10 +247,10 @@ return $found[0]->{'id'};
 sub list_api_accounts_cli
 {
 my ($opts) = @_;
-my @users = sort { $a->{'name'} cmp $b->{'name'} } &list_api_access_users();
+my @users = sort { $a->{'name'} cmp $b->{'name'} }
+	&list_api_access_users(exists($opts->{'name'}) ? ($opts->{'name'}) : ());
 if (exists($opts->{'name'})) {
 	# Report a missing account rather than returning an empty listing.
-	@users = grep { $_->{'name'} eq $opts->{'name'} } @users;
 	@users || die $text{'apiaccess_egone'}."\n";
 	}
 # Headings belong only to the default table, not script-friendly output.

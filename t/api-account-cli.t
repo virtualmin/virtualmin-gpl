@@ -44,8 +44,10 @@ my $account = { name => 'billing', real => 'Existing description', policy => {
     api_template => '0', api_plan => '50', api_created => 0, api_disabled => 0 } };
 {
     no warnings qw(redefine once);
-    # list_api_access_users(): return only this test's dedicated account.
-    *list_api_access_users = sub { return ($account); };
+    # list_api_access_users([name]): return the matching dedicated account.
+    *list_api_access_users = sub {
+        return !@_ || $_[0] eq $account->{name} ? ($account) : ();
+    };
 }
 # Use a fixed command catalog instead of scanning installed modules.
 @api_access_commands = map { { name => $_, key => "virtual-server:$_" } }

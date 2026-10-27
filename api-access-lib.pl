@@ -339,16 +339,17 @@ foreach my $feature (@features, &list_feature_plugins()) {
 return %acl;
 }
 
-# list_api_access_users()
+# list_api_access_users([name])
 # Returns Webmin user hashrefs with their API policy in a policy hashref.
 # Includes disabled accounts so administrators can enable or delete them.
+# When name is supplied, looks up only that login through Webmin.
 sub list_api_access_users
 {
 &require_acl();
 my @rv;
 # Module access and an API account ID distinguish these from ordinary users.
-foreach my $user (&acl::list_users()) {
-	next if (!grep { $_ eq $module_name } @{$user->{'modules'}});
+foreach my $user (@_ ? &acl::get_user($_[0]) : &acl::list_users()) {
+	next if (!$user || !grep { $_ eq $module_name } @{$user->{'modules'}});
 	my %acl = &get_module_acl($user->{'name'}, $module_name);
 	push(@rv, { %$user, 'policy' => \%acl }) if ($acl{'api_id'});
 	}
@@ -392,7 +393,7 @@ eval {
 		}
 	elsif (!$in{'new'}) {
 		# Recheck both the name and immutable ID under the account lock.
-		($user) = grep { $_->{'name'} eq $in{'old'} } &list_api_access_users();
+		($user) = &list_api_access_users($in{'old'});
 		$user && $in{'id'} eq $user->{'policy'}->{'api_id'} ||
 			die($text{'apiaccess_egone'}."\n");
 		$name = $user->{'name'};

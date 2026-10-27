@@ -10,7 +10,7 @@ print &ui_page_start();
 
 if (!$in{'new'}) {
 	# This page edits dedicated API accounts, not other Webmin users.
-	($user) = grep { $_->{'name'} eq $in{'user'} } &list_api_access_users();
+	($user) = &list_api_access_users($in{'user'});
 	$user || &error($text{'apiaccess_egone'});
 	$p = $user->{'policy'};
 	}

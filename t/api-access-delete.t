@@ -11,8 +11,10 @@ $INC{'./virtual-server-lib.pl'} = __FILE__;
 do "$FindBin::Bin/../api-access-lib.pl" or die $@ || $!;
 {
     no warnings qw(redefine once);
-    # list_api_access_users(): use in-memory accounts for the real save service.
-    *list_api_access_users = sub { return @accounts; };
+    # list_api_access_users([name]): filter the in-memory account fixtures.
+    *list_api_access_users = sub {
+        return grep { !@_ || $_->{name} eq $_[0] } @accounts;
+    };
 }
 %text = map { $_ => $_ } qw(apiaccess_ecannot apiaccess_epost
     apiaccess_egone apiaccess_enone);

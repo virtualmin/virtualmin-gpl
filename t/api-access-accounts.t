@@ -257,4 +257,51 @@ ok($override->{scoped}, 'plugin scope comes from its existing declaration');
 ok(!api_access_can_command('create-domain'), 'old provider grant cannot authorize an override');
 $access{api_commands} = $override->{key};
 ok(api_access_can_command('create-domain'), 'explicit grant authorizes the winning provider');
+
+# Named lookups must retain account filtering without loading unrelated ACLs.
+{
+	no warnings qw(redefine once);
+	local $module_name = 'virtual-server';
+	my @users = (
+		{ name => 'enabled', modules => [ $module_name ] },
+		{ name => 'disabled', modules => [ $module_name ] },
+		{ name => 'ordinary', modules => [ $module_name ] },
+		{ name => 'foreign', modules => [ 'other-module' ] });
+	my %policies = (
+		enabled => { api_id => 'first' },
+		disabled => { api_id => 'second', api_disabled => 1 },
+		foreign => { api_id => 'foreign' });
+	my (@reads, @lookups, $listed);
+	# require_acl(): the fixture supplies Webmin's account helpers below.
+	local *require_acl = sub { };
+	# acl::list_users(): record requests for the full account list.
+	local *acl::list_users = sub { $listed++; return @users; };
+	# acl::get_user(name): return the exact fixture login, if it exists.
+	local *acl::get_user = sub {
+		push(@lookups, $_[0]);
+		my ($user) = grep { $_->{name} eq $_[0] } @users;
+		return $user;
+	};
+	# get_module_acl(name, module): track which users' policies are read.
+	local *get_module_acl = sub {
+		push(@reads, $_[0]);
+		return %{$policies{$_[0]} || {}};
+	};
+	my @accounts = list_api_access_users();
+	is_deeply([map { $_->{name} } @accounts], ['enabled', 'disabled'],
+		'full listing includes only API accounts, including disabled ones');
+	@reads = ();
+	my ($found) = list_api_access_users('disabled');
+	is_deeply($found, $accounts[1], 'named lookup returns the same user and policy');
+	is_deeply(\@reads, ['disabled'], 'named lookup reads only the requested ACL');
+	is($listed, 1, 'named lookup does not request all Webmin users');
+	for my $name ('ordinary', 'foreign', 'missing', '') {
+		is_deeply([list_api_access_users($name)], [],
+			"named lookup excludes non-API or missing login '$name'");
+	}
+	is_deeply(\@lookups, ['disabled', 'ordinary', 'foreign', 'missing', ''],
+		'all named lookups use Webmin exact-name resolution');
+	is_deeply(\@reads, ['disabled', 'ordinary'],
+		'foreign and missing users never load a Virtualmin policy');
+}
 done_testing();
