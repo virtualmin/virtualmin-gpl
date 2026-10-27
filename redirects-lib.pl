@@ -633,6 +633,7 @@ return { 'path' => '^/(?!.well-known)',
 	 'dest' => 'https://%{HTTP_HOST}/$1',
 	 'alias' => 0,
 	 'regexp' => 1,
+	 'code' => 301,
 	 'http' => 1,
 	 'https' => 0 };
 }
