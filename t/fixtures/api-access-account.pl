@@ -141,9 +141,10 @@ elsif ($mode eq 'clear-policy') {
 	}
 elsif ($mode eq 'restore-policy') {
 	# Restore the policy saved before the missing-policy request.
-	open(my $saved, '<', $saved_policy) or die $!;
-	my $policy = decode_json(do { local $/; <$saved> });
-	close($saved);
+	local *SAVED;
+	&open_readfile(\*SAVED, $saved_policy) or die $!;
+	my $policy = decode_json(do { local $/; <SAVED> });
+	close(SAVED);
 	&save_module_acl($policy, $fixture->{user}, $module_name, 1);
 	unlink($saved_policy) or die $!;
 	}

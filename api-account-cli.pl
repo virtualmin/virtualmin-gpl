@@ -46,7 +46,8 @@ eval {
 		# Changes use the same validation and account lock as the UI.
 		if ($opts->{'passfile'} || $opts->{'pass_stdin'}) {
 			# Read the password before taking the account lock.
-			my $fh;
+			local *PASSFILE;
+			my $fh = \*PASSFILE;
 			if ($opts->{'pass_stdin'}) {
 				# Pipes support automation without putting passwords in argv.
 				$fh = \*STDIN;
@@ -54,7 +55,7 @@ eval {
 			else {
 				# Relative files are relative to the shell, not the module root.
 				my $file = File::Spec->rel2abs($opts->{'passfile'}, $api_account_cli_cwd);
-				open($fh, '<', $file) || die "Cannot read password file: $!\n";
+				&open_readfile($fh, $file) || die "Cannot read password file: $!\n";
 				}
 			local $/;
 			$opts->{'password'} = <$fh>;
