@@ -1,18 +1,9 @@
-<header>Manage servers this account creates</header>
+<header>Automatically include servers this account creates</header>
 
-<p>Let this account manage the virtual servers it creates, for example to suspend or delete them later.</p>
+<p>Allow this account to use its permitted commands on servers it creates and
+their child servers, without selecting them here.</p>
 
-<ul>
-<li><b>On:</b> The account can manage these servers and their child servers using its allowed commands.</li>
-<li><b>Off:</b> The account can manage only servers allowed by <b>Existing virtual servers</b>.</li>
-</ul>
-
-<p>If <b>Existing virtual servers</b> allows all servers, this switch makes no difference.</p>
-
-<p>This controls access after creation. The account still needs <tt>create-domain</tt> permission to create a server. Turning this off leaves existing servers in place.</p>
-
-<p>A replacement API account with the same username does not inherit this access.</p>
-
-<p>Server-wide commands are not limited by this setting.</p>
+<p>When off, the account can still create servers if permitted, but later access
+must be granted explicitly.</p>
 
 <footer>

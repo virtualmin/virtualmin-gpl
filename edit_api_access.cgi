@@ -105,12 +105,18 @@ $domain_input = @domain_options ?
 		{ 'modes' => \%domain_modes }) :
 	&ui_select('domain_mode', $domain_modes{'value'}, $domain_modes{'options'}).
 		&ui_hidden('domains', '');
+# Hide the extra grant in All mode without clearing its saved checkbox value.
+print &ui_tag('style',
+	'.api_access_domains:has(select[name="domain_mode"] option[value="all"]:checked) '.
+	'.api_access_created { display: none; }');
 print &ui_table_row(&hlink($text{'apiaccess_domains'}, 'api_access_scope'),
 	&ui_stack([ $domain_input,
 	&ui_toggle({ 'name' => 'created', 'value' => 1,
 		'label_html' => &hlink($text{'apiaccess_created'}, 'api_access_created'),
 		'checked' => $p->{'api_created'},
-		'state' => 'primary', 'outline' => 1 }) ]),
+		'state' => 'primary', 'outline' => 1,
+		'class' => 'api_access_created' }) ],
+		{ 'class' => 'api_access_domains' }),
 	undef, undef, undef, 1);
 
 # Template and plan selections allow use; editing them needs separate grants.
