@@ -60,6 +60,8 @@ sub get_miniserv_config { }
 sub list_feature_plugins { return (); }
 # unique([values...]): deduplicate grant keys while preserving selection order.
 sub unique { my %seen; return grep { !$seen{$_}++ } @_; }
+# trim(value): match Webmin's whitespace helper without loading its config.
+sub trim { my ($s) = @_; $s =~ s/^\s+//; $s =~ s/\s+$//; return $s; }
 # list_domains(): provide no targets, including for batch authorization checks.
 sub list_domains { return (); }
 # list_templates(): provide the template accepted by creation validation.
@@ -144,6 +146,60 @@ is(save_cli('modify', { name => $name, command_mode => 'exclude',
 unlike(grants($name), qr/create-domain|clone-domain|disable-domain|enable-domain|list-users/,
     'exclude does not grant Pro commands');
 my $gpl_grants = grants($name);
+
+# All resource kinds retain the same selection, default and error behavior.
+{
+    no warnings 'redefine';
+    # list_domains(): make one existing server available for scope validation.
+    local *list_domains = sub { return ({ id => '42', dom => 'selected.example' }); };
+    my $base = api_account_cli_params('modify', { name => $name });
+    for my $kind ('domain', 'template', 'plan') {
+        my $id = $kind eq 'domain' ? '42' : $kind eq 'template' ? '0' : '1';
+        for my $case (
+            ['all', 'missing', '*', 0],
+            ['selected', '', '', 0],
+            ['selected', "$id $id", "$id $id", 0],
+            ['selected', 'missing', undef, 1],
+            ['invalid', $id, undef, 1],
+            [undef, $id, undef, 1]) {
+            my ($mode, $selection, $expected, $denied) = @$case;
+            my %form = (%$base, $kind.'_mode' => $mode, $kind.'s' => $selection);
+            # Empty selections are valid when they have no creation default.
+            $form{$kind} = '' if ($kind ne 'domain' && $selection eq '');
+            my $before = $writes;
+            eval { save_api_access_accounts(\%form) };
+            if ($denied) {
+                # Invalid selections must fail before any account write.
+                is($@, $text{apiaccess_escope}."\n", "$kind selection keeps its error");
+                is($writes, $before, 'invalid selection changes no account data');
+            }
+            else {
+                # All and selected modes preserve their exact saved values.
+                is($@, '', "$kind selection is accepted");
+                is($policies{$name}{$module_name}{'api_'.$kind.'s'}, $expected,
+                    "$kind selection is saved unchanged");
+            }
+            ok(!$locked, 'resource validation releases the account lock');
+        }
+        if ($kind ne 'domain') {
+            # A creation default cannot refer to an excluded resource.
+            eval { save_api_access_accounts({ %$base, $kind.'_mode' => 'selected',
+                $kind.'s' => '', $kind => $id }) };
+            is($@, $text{apiaccess_edefault}."\n", "$kind default must remain allowed");
+        }
+    }
+    # Description normalization still clears blanks and keeps literal zero.
+    for my $case ([" \tBilling\r\n\0account\t ", 'Billing account'],
+                  [" \t\r\n ", undef], ['0', '0']) {
+        eval { save_api_access_accounts({ %$base, desc => $case->[0] }) };
+        is($@, '', 'description edit succeeds');
+        is($users{$name}{real}, $case->[1], 'description is normalized as before');
+    }
+    # Omitted descriptions survive later policy-only edits.
+    eval { save_api_access_accounts($base) };
+    is($@, '', 'restore the base policy for the edition checks');
+    is($users{$name}{real}, '0', 'omitting description preserves its value');
+}
 
 # Upgrading alone leaves the saved command list unchanged.
 $virtualmin_pro = 1;

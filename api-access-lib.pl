@@ -376,7 +376,7 @@ eval {
 	# Reading before the lock could overwrite an edit made while waiting.
 	my %in = %{ ref($params) eq 'CODE' ? &$params() : $params };
 	my (@delete_users, $user, $name, %policy, @catalog, %known, @chosen,
-	    %domains, $hash, %global, %acl);
+	    $hash, %global, %acl);
 	@delete_users = ( );
 	if ($in{'bulk'}) {
 		# Validate the entire selection under the lock before deleting any account.
@@ -459,27 +459,20 @@ eval {
 			die $err."\n" if ($err);
 			}
 		$policy{'api_commands'} = join(' ', &unique(@chosen));
-		# All-domain access includes future domains; selected IDs must exist.
-		$in{'domain_mode'} =~ /^(all|selected)$/ || die($text{'apiaccess_escope'}."\n");
-		%domains = map { $_->{'id'} => 1 } &list_api_access_resources('domain');
-		@chosen = split(/\s+/, $in{'domains'});
-		if ($in{'domain_mode'} eq 'selected') {
-			# Reject grants for removed or unknown domains.
-			(grep { !$domains{$_} } @chosen) && die($text{'apiaccess_escope'}."\n");
-			}
-		$policy{'api_domains'} = $in{'domain_mode'} eq 'all' ? '*' : join(' ', @chosen);
-		# Validate template and plan grants separately from their defaults.
-		foreach my $kind ('template', 'plan') {
+		# All includes future resources; selected IDs must still exist.
+		foreach my $kind ('domain', 'template', 'plan') {
+			$in{$kind.'_mode'} =~ /^(all|selected)$/ ||
+				die($text{'apiaccess_escope'}."\n");
 			my @items = &list_api_access_resources($kind);
 			my %ids = map { $_->{'id'} => 1 } @items;
 			my @ids = split(/\s+/, $in{$kind.'s'});
-			$in{$kind.'_mode'} =~ /^(all|selected)$/ ||
-				die($text{'apiaccess_escope'}."\n");
 			if ($in{$kind.'_mode'} eq 'selected') {
-				# Reject missing or deleted templates and plans.
+				# Reject missing or deleted resources.
 				(grep { !$ids{$_} } @ids) && die($text{'apiaccess_escope'}."\n");
 				}
 			$policy{"api_${kind}s"} = $in{$kind.'_mode'} eq 'all' ? '*' : join(' ', @ids);
+			# Only templates and plans have creation defaults to validate.
+			next if ($kind eq 'domain');
 			$policy{'api_'.$kind} = $in{$kind};
 			if ($in{$kind} ne '') {
 				# Defaults must be allowed; template ID 0 is valid.
@@ -532,7 +525,7 @@ eval {
 			# Keep the value on one config line. An empty field clears it.
 			my $desc = $in{'desc'};
 			$desc =~ s/[\r\n\0]+/ /g;
-			$desc =~ s/^\s+|\s+$//g;
+			$desc = &trim($desc);
 			$user->{'real'} = length($desc) ? $desc : undef;
 			}
 		&acl::modify_user($name, $user);
