@@ -18,7 +18,7 @@ if (!@users) {
 			$text{'apiaccess_add'}) });
 	print &ui_page_end();
 	&ui_print_footer('', $text{'index_return'});
-	exit;
+	return;
 	}
 # Show account status without exposing credentials or password hashes.
 print &ui_p($text{'apiaccess_intro'});
