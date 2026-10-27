@@ -315,7 +315,7 @@ def check_editions():
     # Both themes show Pro badges and disable these commands only on GPL.
     for theme in ('authentic', 'gray'):
         helper_call('theme-' + theme)
-        status, page = request('api_access.cgi?new=1', admin=True)
+        status, page = request('edit_api_access.cgi?new=1', admin=True)
         fields = {field.get('value'): field for field in HelpPage(page).inputs
                   if field.get('type') == 'checkbox'}
         # Inspect rendered fields rather than inferring their state from labels.
@@ -386,7 +386,7 @@ def check_editions():
     # This tests HTML and form saves, without running browser JavaScript.
     for theme in ('authentic', 'gray'):
         helper_call('theme-' + theme)
-        status, page = request('api_access.cgi?user=' + fixture['user'], admin=True)
+        status, page = request('edit_api_access.cgi?user=' + fixture['user'], admin=True)
         fields = HelpPage(page).inputs
         hidden = [field for field in fields if field.get('name') == 'commands'
                   and field.get('type') == 'hidden']
@@ -603,8 +603,13 @@ try:
         headers={'Cookie': 'testing=1'})
     with admin_opener.open(login, timeout=60) as response:
         response.read()
+    # The list links to the separate editor without rendering its form.
+    status, page = request('api_access.cgi', admin=True)
+    check(status == 200 and 'edit_api_access.cgi?new=1' in page and
+          'command_mode' not in page,
+          'account list links to creation without rendering the editor', page)
     # Check that creation exposes the expected command controls and help links.
-    status, page = request('api_access.cgi?new=1', admin=True)
+    status, page = request('edit_api_access.cgi?new=1', admin=True)
     check(status == 200 and 'save_api_access.cgi' in page and 'command_mode' in page,
           'master can render account creation form', page)
     check('virtual-server:create-domain' in html.unescape(page),
@@ -670,7 +675,7 @@ try:
 
     # Create through the real UI handler, then inspect the saved permissions.
     page = save_policy(new=True, commands=['list-shared-addresses'])
-    check('api_access.cgi?user=' + fixture['user'] in page,
+    check('edit_api_access.cgi?user=' + fixture['user'] in page,
           'admin UI creates dedicated API account', page)
     state = json.loads(helper_call('inspect'))
     fixture['id'] = state['api_id']
@@ -721,7 +726,7 @@ try:
     save_policy(commands=['list-shared-addresses'])
     check(json.loads(helper_call('inspect'))['description'] == description,
           'an omitted description preserves the saved value')
-    status, page = request('api_access.cgi?user=' + fixture['user'], admin=True)
+    status, page = request('edit_api_access.cgi?user=' + fixture['user'], admin=True)
     check(any(f.get('name') == 'desc' and f.get('value') == description
               for f in HelpPage(page).inputs), 'description appears in the edit form', page)
     page = save_policy(commands=['list-shared-addresses'], overrides={'desc': '   '})
@@ -733,7 +738,7 @@ try:
               'description column is hidden when all descriptions are blank', page)
 
     # The edit form must distinguish keeping a password from replacing it.
-    status, page = request('api_access.cgi?user=' + fixture['user'], admin=True)
+    status, page = request('edit_api_access.cgi?user=' + fixture['user'], admin=True)
     fields = HelpPage(page).inputs
     check(status == 200 and any(f.get('name') == 'password_def' and
           f.get('value') == '1' and 'checked' in f for f in fields),
@@ -746,7 +751,7 @@ try:
     # A password manager may fill the box while Leave unchanged is selected.
     page = save_policy(commands=['list-shared-addresses'], password='ignored-autofill',
                        overrides={'password_def': '1'})
-    check('api_access.cgi?user=' + fixture['user'] in page,
+    check('edit_api_access.cgi?user=' + fixture['user'] in page,
           'Leave unchanged ignores a filled password box', page)
     out = api('list-shared-addresses')
     check('Exit status: 0' in out, 'unchanged password still authenticates', out)
@@ -758,7 +763,7 @@ try:
     # A valid explicit replacement must revoke the old credential.
     fixture['replacement_password'] = secrets.token_urlsafe(32)
     page = save_policy(commands=['list-shared-addresses'], password=fixture['replacement_password'])
-    check('api_access.cgi?user=' + fixture['user'] in page,
+    check('edit_api_access.cgi?user=' + fixture['user'] in page,
           'Set to accepts a valid replacement password', page)
     status, out = request('remote.cgi?program=list-shared-addresses')
     check(status == 401, 'replaced password no longer authenticates', out)
@@ -788,7 +793,8 @@ try:
     # Broad command selection still cannot open the UI or generic RPC.
     out = api('list-shared-addresses')
     check('Exit status: 0' in out, 'all mode permits a server administration command', out)
-    for path in ('api_access.cgi', '../rpc.cgi'):
+    for path in ('api_access.cgi', 'edit_api_access.cgi?new=1',
+                 'edit_api_access.cgi?user=' + fixture['user'], '../rpc.cgi'):
         status, out = request(path)
         check(status == 403, 'all mode cannot access ' + path, out)
     # Keep the remaining tests on their original restricted command selection.
