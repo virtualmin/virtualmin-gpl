@@ -141,10 +141,16 @@ ok($acl{feature_unix}, 'API ACL enables the Unix feature');
 
 # Exercise the real catalog with command aliases, including an alias chain.
 my $catalog_dir = tempdir(CLEANUP => 1);
-# module_root_directory(module): map catalog reads into the temporary fixture.
-sub module_root_directory { return $_[0] =~ /\/pro$/ ? "$catalog_dir/pro" : $catalog_dir; }
-# plugin_defined(module, function): declare no external plugin API in this test.
-sub plugin_defined { return 0; }
+# module_root_directory(module): map each provider to its own fixture directory.
+sub module_root_directory {
+	return "$catalog_dir/pro" if ($_[0] =~ /\/pro$/);
+	return "$catalog_dir/plugin" if ($_[0] eq 'virtualmin-fixture');
+	return $catalog_dir;
+	}
+# plugin_defined(module, function): the fixture declares its domain commands.
+sub plugin_defined { return $_[0] eq 'virtualmin-fixture'; }
+# plugin_call(module, function): match the plugin's scoped-command hook.
+sub plugin_call { return ('create-domain.pl'); }
 # read_file_contents(path): return fixture contents without initializing Webmin.
 sub read_file_contents {
 	open(my $fh, '<', $_[0]) or die $!;
@@ -222,4 +228,33 @@ foreach my $case (@descriptions) {
 	is(get_api_access_command($name)->{desc}, $expected,
 		"$name description keeps only the complete opening paragraph");
 	}
+
+# Shared discovery keeps aliases available to both listing and grant callers.
+my @files = list_api_commands(['*create*.pl'], ['virtual-server']);
+is_deeply([ sort map { $_->{name} } @files ],
+	[ sort qw(copied-create create-api-account create-domain old-create older-create) ],
+	'shared catalog retains terminal commands and aliases for CLI callers');
+my ($wrapped) = grep { $_->{name} eq 'wrapped' } list_api_commands();
+like($wrapped->{desc}, qr/does not update\napplications/,
+	'shared descriptions preserve source lines for CLI summaries');
+
+# Both Pro and plugin overrides must keep the winning provider's grant key.
+foreach my $provider ('pro', 'plugin') {
+	mkdir("$catalog_dir/$provider") or die $!;
+	open(my $fh, '>', "$catalog_dir/$provider/create-domain.pl") or die $!;
+	print $fh "#!/usr/bin/perl\n\n=head1 create-domain.pl\n\n$provider command\n\n=cut\n";
+	close($fh);
+	chmod(0755, "$catalog_dir/$provider/create-domain.pl");
+	}
+$api_access_commands_loaded = 0;
+is(get_api_access_command('create-domain')->{key}, 'virtual-server/pro:create-domain',
+	'Pro overrides the core command');
+@plugins = ('virtualmin-fixture');
+$api_access_commands_loaded = 0;
+my $override = get_api_access_command('create-domain');
+is($override->{key}, 'virtualmin-fixture:create-domain', 'plugin overrides Pro');
+ok($override->{scoped}, 'plugin scope comes from its existing declaration');
+ok(!api_access_can_command('create-domain'), 'old provider grant cannot authorize an override');
+$access{api_commands} = $override->{key};
+ok(api_access_can_command('create-domain'), 'explicit grant authorizes the winning provider');
 done_testing();

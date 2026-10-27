@@ -54,72 +54,37 @@ sub list_api_access_commands
 {
 # Reuse the catalog only within this process. New requests rescan providers.
 return @api_access_commands if ($api_access_commands_loaded);
-# Scan providers in dispatcher order so later implementations take precedence.
-my %skip = map { $_ => 1 } &list_api_skip_scripts();
-my %commands;
-foreach my $provider ($module_name, "$module_name/pro", @plugins) {
-	# Missing Pro or plugin directories contribute no commands.
+# Use the shared command catalog in dispatcher order; later providers win.
+my (%commands, %plugin_scoped);
+foreach my $entry (&list_api_commands()) {
+	my ($name, $canonical, $provider) =
+		@$entry{ 'name', 'canonical', 'provider' };
+	# Only executable command names can be granted, never account-management CLI.
+	next if ($name !~ /^[a-z0-9][a-z0-9-]*$/ || !-x $entry->{'path'} ||
+		&is_api_account_command($name) || &is_api_account_command($canonical));
+	my $core = $provider eq $module_name || $provider eq "$module_name/pro";
+	if (!$core && !exists($plugin_scoped{$provider})) {
+		# Ask each plugin once which commands enforce domain permissions.
+		my @scoped = &plugin_defined($provider, 'feature_remote_api_commands') ?
+			&plugin_call($provider, 'feature_remote_api_commands') : ();
+		$plugin_scoped{$provider} = {
+			map { my $name = $_; $name =~ s/\.pl$//; ($name, 1) } @scoped };
+		}
+	# Core reuses the owner command registry, plus filtered listings and batches.
+	my $scoped = $core ? (&get_user_remote_api_command($canonical) ||
+		$canonical =~ /^(list-templates|list-plans|run-api-command)$/) :
+		$plugin_scoped{$provider}->{$canonical};
+	# Tooltips use the full opening paragraph and end with a period.
+	my $desc = $entry->{'desc'};
+	$desc =~ s/\s+/ /g;
+	$desc =~ s/^ | $//g;
+	$desc .= '.' if ($desc ne '' && $desc !~ /\.$/);
+	# Keep provider-bound grants and canonical execution paths for all aliases.
 	my $dir = &module_root_directory($provider);
-	opendir(my $dh, $dir) || next;
-	my @files = readdir($dh);
-	closedir($dh);
-	my %scoped;
-	if ($provider ne $module_name && $provider ne "$module_name/pro" &&
-	    &plugin_defined($provider, 'feature_remote_api_commands')) {
-		# Plugins list commands that check access without a master role.
-		%scoped = map { my $name = $_; $name =~ s/\.pl$//; ($name, 1) }
-			&plugin_call($provider, 'feature_remote_api_commands');
-		}
-	foreach my $file (sort @files) {
-		# Skip hidden scripts, helpers, and non-executable files.
-		next if ($file !~ /^([a-z0-9][a-z0-9-]*)\.pl$/ ||
-			 $skip{$file} || !-x "$dir/$file");
-		# Resolve aliases before assigning a command grant.
-		my $name = $1;
-		# Root-only account commands cannot be granted through the API UI.
-		next if (&is_api_account_command($name));
-		my $canonical = $name;
-		my %seen;
-		while (-l "$dir/$canonical.pl" && !$seen{$canonical}++) {
-			# Aliases in this directory share the target's grant.
-			# Old command names cannot bypass an exclusion.
-			my $target = readlink("$dir/$canonical.pl");
-			last if ($target !~ /^([a-z0-9][a-z0-9-]*)\.pl$/);
-			$canonical = $1;
-			}
-		# Read the whole opening POD paragraph, including wrapped sentences.
-		my $src = &read_file_contents("$dir/$file");
-		next if ($src !~ /^=head1([^\n]*)\n\s*\n(.+?)(?:\n[ \t]*\r?\n|\n=|\z)/ms);
-		my ($title, $desc) = ($1, $2);
-		$desc =~ s/\s+/ /g;
-		$desc =~ s/^ | $//g;
-		# Give command tooltips a final period when the source omits it.
-		$desc .= '.' if ($desc ne '' && $desc !~ /\.$/);
-		if ($title =~ /^\s+([a-z0-9][a-z0-9-]*)\.pl\s*$/) {
-			# Packages can replace symlinks with copies. Accept the documented
-			# target only when it is executable and has identical contents.
-			my $target = $1;
-			$canonical = $target if ($target ne $canonical &&
-				-x "$dir/$target.pl" &&
-				&read_file_contents("$dir/$target.pl") eq $src);
-			}
-		# Aliases must not expose a terminal-only command either.
-		next if (&is_api_account_command($canonical));
-		# Core uses the domain-owner command registry plus filtered listings
-		# and batch requests. Plugins declare their own scoped commands.
-		my $core = $provider eq $module_name ||
-			   $provider eq "$module_name/pro";
-		my $scoped = $core ?
-			(&get_user_remote_api_command($canonical) ||
-			 $canonical =~ /^(list-templates|list-plans|run-api-command)$/) :
-			$scoped{$canonical};
-		# Match remote.cgi's provider precedence, including Pro overrides.
-		# All aliases share the canonical command's edition requirement.
-		$commands{$name} = { 'name' => $canonical, 'provider' => $provider,
-			'key' => "$provider:$canonical", 'path' => "$dir/$canonical.pl",
-			'desc' => $desc, 'scoped' => $scoped ? 1 : 0,
-			'pro' => exists($api_account_pro_features{$canonical}) ? 1 : 0 };
-		}
+	$commands{$name} = { 'name' => $canonical, 'provider' => $provider,
+		'key' => "$provider:$canonical", 'path' => "$dir/$canonical.pl",
+		'desc' => $desc, 'scoped' => $scoped ? 1 : 0,
+		'pro' => exists($api_account_pro_features{$canonical}) ? 1 : 0 };
 	}
 # Present aliases as one permission while retaining each accepted spelling.
 my %grants;

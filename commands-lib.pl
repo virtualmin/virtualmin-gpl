@@ -263,6 +263,54 @@ return ( "upload-api-docs.pl",
 	 );
 }
 
+# list_api_commands([&patterns], [&providers])
+# Returns documented command files with names, providers, paths, descriptions
+# and canonical names for aliases. Defaults to *.pl in core, Pro and plugins.
+# Patterns and providers retain their order; callers apply access checks and
+# choose whether to show aliases. Descriptions retain their source line breaks.
+sub list_api_commands
+{
+my ($patterns, $providers) = @_;
+$patterns ||= [ '*.pl' ];
+$providers ||= [ $module_name, "$module_name/pro", @plugins ];
+my %skip = map { $_ => 1 } &list_api_skip_scripts();
+my @commands;
+foreach my $pattern (@$patterns) {
+	foreach my $provider (@$providers) {
+		# Missing providers contribute no matching files.
+		my $dir = &module_root_directory($provider);
+		foreach my $path (glob("$dir/$pattern")) {
+			my ($file) = $path =~ /([^\/]+)$/;
+			next if (!-f $path || $skip{$file});
+			# The opening POD paragraph identifies a documented command.
+			my $src = &read_file_contents($path);
+			next if ($src !~ /^=head1([^\n]*)\n\s*\n(.+?)(?:\n[ \t]*\r?\n|\n=|\z)/ms);
+			my ($title, $desc) = ($1, $2);
+			(my $name = $file) =~ s/\.pl$//;
+			my $canonical = $name;
+			my %seen;
+			while (-l "$dir/$canonical.pl" && !$seen{$canonical}++) {
+				# Local symlink aliases share the target's command grant.
+				my $target = readlink("$dir/$canonical.pl");
+				last if ($target !~ /^([a-z0-9][a-z0-9-]*)\.pl$/);
+				$canonical = $1;
+				}
+			if ($title =~ /^\s+([a-z0-9][a-z0-9-]*)\.pl\s*$/) {
+				# Packages may replace symlinks with copies. A POD title alone
+				# cannot give different code the target's command grant.
+				my $target = $1;
+				$canonical = $target if ($target ne $canonical &&
+					-x "$dir/$target.pl" &&
+					&read_file_contents("$dir/$target.pl") eq $src);
+				}
+			push(@commands, { 'name' => $name, 'canonical' => $canonical,
+				'provider' => $provider, 'path' => $path, 'desc' => $desc });
+			}
+		}
+	}
+return @commands;
+}
+
 # list_api_directories(pwd)
 # Returns a list of directories to check for API scripts
 sub list_api_directories
