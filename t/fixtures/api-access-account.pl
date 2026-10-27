@@ -4,7 +4,7 @@
 # Requires a disposable VM. API_TEST_WEBMIN_ROOT overrides /usr/share/webmin.
 # Modes: setup, catalog, make-alias, module-root, inspect, block-policy,
 # unblock-policy, edition-info, seed-pro-grants, make-pro-alias,
-# theme-authentic, theme-gray, and cleanup.
+# theme-authentic, theme-gray, clear-policy, restore-policy, and cleanup.
 
 use strict;
 use warnings;
@@ -29,6 +29,7 @@ chdir("$webmin_root/virtual-server") or die $!;
 require './virtual-server-lib.pl';
 &require_acl();
 my $policy_file = "$module_config_directory/$fixture->{user}.acl";
+my $saved_policy = "$file.policy";
 my $alias_file = "$fixture->{user}-acme-alias.pl";
 my $pro_alias_file = "$fixture->{user}-create-alias.pl";
 
@@ -128,6 +129,24 @@ elsif ($mode eq 'inspect') {
 			qw(id dom user api_owner plan template quota uquota) } : undef,
 		unix_user => scalar(getpwnam($fixture->{user})) });
 	}
+elsif ($mode eq 'clear-policy') {
+	# Remove only the fixture's module policy while retaining its login.
+	my %policy = &get_module_acl($fixture->{user}, $module_name);
+	$policy{'api_id'} && !-e $saved_policy || die "Cannot save fixture policy";
+	open(my $saved, '>', $saved_policy) or die $!;
+	chmod(0600, $saved_policy) or die $!;
+	print $saved encode_json(\%policy);
+	close($saved) or die $!;
+	&save_module_acl({}, $fixture->{user}, $module_name, 1);
+	}
+elsif ($mode eq 'restore-policy') {
+	# Restore the policy saved before the missing-policy request.
+	open(my $saved, '<', $saved_policy) or die $!;
+	my $policy = decode_json(do { local $/; <$saved> });
+	close($saved);
+	&save_module_acl($policy, $fixture->{user}, $module_name, 1);
+	unlink($saved_policy) or die $!;
+	}
 elsif ($mode eq 'block-policy') {
 	# Force a real file-backed ACL write failure for this new fixture only.
 	my $account = &acl::get_user($fixture->{user});
@@ -144,6 +163,7 @@ elsif ($mode eq 'unblock-policy') {
 	}
 elsif ($mode eq 'cleanup') {
 	# The driver handles domain deletion through the administrator API.
+	unlink($saved_policy) or die $! if (-e $saved_policy);
 	# Remove test aliases only if their setup steps completed.
 	unlink($alias_file) or die $! if (-e $alias_file);
 	unlink($pro_alias_file) or die $! if (-e $pro_alias_file);

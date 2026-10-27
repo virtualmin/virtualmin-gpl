@@ -408,9 +408,9 @@ def check_editions():
     check(status == 0 and state['api_disabled'] == '1' and
           set(state['api_commands'].split()) == set(stored.split()),
           'CLI can disable and edit description with inactive grants', out)
-    # Module initialization rejects disabled accounts before edition messages.
+    # Disabled accounts receive the normal API denial, not an edition message.
     status, out = request('remote.cgi?program=create-domain')
-    check(status == 403 and 'restricted' in out.lower() and
+    check(status == 200 and 'ERROR: You are not allowed to run' in out and
           'requires Virtualmin Pro' not in out,
           'disabled account is denied before the edition check', out)
     save_policy(commands=basic + gated)
@@ -548,7 +548,8 @@ def check_account_cli(form):
           and after['api_id'] == state['api_id'] and after['api_commands'] == state['api_commands'],
           'CLI edit changes only supplied settings', out)
     status, out = request('remote.cgi?program=list-domains')
-    check(status == 403, 'CLI disable immediately blocks API requests', out)
+    check(status == 200 and 'ERROR: You are not allowed to run' in out,
+          'CLI disable immediately blocks API requests', out)
     # Password files resolve relative to the invoking shell's working directory.
     fixture['replacement_password'] = secrets.token_urlsafe(32)
     password_file = task / 'cli-password.txt'
@@ -680,6 +681,21 @@ try:
     out = api('list-shared-addresses')
     check('Exit status: 0' in out,
           'new account runs a selected server-wide command without another flag', out)
+    # An API-only login must never fall back to an ordinary master role.
+    helper_call('clear-policy')
+    try:
+        status, out = request('remote.cgi?program=list-shared-addresses&json=1')
+        result = json.loads(out)
+        check(status == 200 and result.get('status') == 'error' and
+              'not allowed' in result.get('error', ''),
+              'missing Virtualmin policy is denied through the API', out)
+        out = api('list-shared-addresses', admin=True)
+        check('Exit status: 0' in out, 'ordinary master API still works', out)
+    finally:
+        # Restore only the fixture policy, even if a request fails.
+        helper_call('restore-policy')
+    out = api('list-shared-addresses')
+    check('Exit status: 0' in out, 'restored API policy works again', out)
     out = api('list-domains')
     check('ERROR:' in out, 'server-wide command selection does not allow other commands', out)
     # Rejected edits must leave the existing account's saved policy intact.
@@ -973,7 +989,8 @@ try:
     # Disable and password rotation must take effect on subsequent requests.
     page = save_policy(enabled=False)
     out = api('list-domains')
-    check('restricted' in out.lower(), 'disabled account rejects new API requests', out)
+    check('ERROR: You are not allowed to run' in out,
+          'disabled account rejects new API requests', out)
     new_password = secrets.token_urlsafe(32)
     page = save_policy(password=new_password)
     status, out = request('remote.cgi?program=list-domains')

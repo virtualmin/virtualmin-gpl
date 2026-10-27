@@ -21,8 +21,6 @@ do "$FindBin::Bin/../api-access-lib.pl" or die $@ || $!;
 sub ReadParse { }
 # master_admin(): return the current fixture's administrator status.
 sub master_admin { return $admin; }
-# webmin_user_api_only(): advertise the required endpoint restriction support.
-sub webmin_user_api_only { return ''; }
 # require_acl(): account operations are provided by the stubs below.
 sub require_acl { }
 # error_setup(message): omit the prefix; this fixture renders no UI.

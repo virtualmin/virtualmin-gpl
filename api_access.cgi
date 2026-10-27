@@ -1,13 +1,10 @@
 #!/usr/local/bin/perl
 # List dedicated API accounts and edit their command and resource policies.
 
-# Check the administrator role and required Webmin support before rendering.
+# Check the administrator role before rendering.
 require './virtual-server-lib.pl';
 &ReadParse();
 &master_admin() || &error($text{'apiaccess_ecannot'});
-defined(&webmin_user_api_only) && defined(&ui_multi_select_list) &&
-	defined(&ui_form_grouped_buttons) ||
-	&error($text{'apiaccess_ewebmin'});
 # Show overview help on the account list; forms have field-specific help.
 &ui_print_header(undef, $text{'apiaccess_title'}, '',
 	!$in{'new'} && !defined($in{'user'}) ? 'api_access' : undef);

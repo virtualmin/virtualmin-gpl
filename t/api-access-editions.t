@@ -44,8 +44,6 @@ sub text {
 }
 # master_admin(): deny the simulated master role while acting as an API account.
 sub master_admin { return !$access{api_id}; }
-# webmin_user_api_only(): advertise support for restricting an API endpoint.
-sub webmin_user_api_only { return ''; }
 # require_acl(): use the stubs below instead of Webmin's user module.
 sub require_acl { }
 # obtain_lock_webmin(): mark the simulated lock held for write assertions.

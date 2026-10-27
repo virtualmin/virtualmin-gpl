@@ -3,7 +3,7 @@
 # Dedicated API accounts also need a saved grant for the resolved provider.
 
 $main::allow_rpc_only = 1;
-# Opt in before module initialization checks the account's endpoint restriction.
+# Opt in before Webmin checks the account's endpoint restriction.
 $main::allow_api_only = 'virtual-server/remote.cgi';
 package virtual_server;
 use POSIX;
@@ -15,12 +15,16 @@ require './virtual-server-lib.pl';
 $format = exists($in{'json'}) ? 'json' :
           exists($in{'xml'}) ? 'xml' :
           exists($in{'perl'}) ? 'perl' : undef;
+# An API-only login without a Virtualmin policy cannot use ordinary role checks.
+if (&webmin_user_api_only() eq 'virtual-server/remote.cgi' &&
+    !&is_api_access_user()) {
+	&api_error($text{'remote_ecannot'});
+	}
 # A master HTTP login cannot invoke terminal-only account management either.
 &is_api_account_command($in{'program'}) &&
 	&api_error($text{'remote_eclionly'});
-# Only dedicated API accounts need this edition check; other logins keep
-# their existing permissions. Report it before the general grant denial.
-if (&is_api_access_user()) {
+# Explain edition limits for enabled API accounts before the grant denial.
+if (&is_api_access_user() && !$access{'api_disabled'}) {
 	# Resolve aliases before applying the command's edition restriction.
 	my $entry = &get_api_access_command($in{'program'});
 	my $err = $entry && &api_account_pro_message($entry->{'name'});

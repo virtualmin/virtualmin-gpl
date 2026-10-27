@@ -8889,7 +8889,6 @@ apiaccess_return=API accounts
 apiaccess_err=Failed to save API account
 apiaccess_derr=Failed to delete API accounts
 apiaccess_ecannot=Only the master administrator can manage API access.
-apiaccess_ewebmin=This Webmin version does not support API Access. Upgrade Webmin to continue.
 apiaccess_epost=API account changes require a POST request.
 apiaccess_egone=The API account no longer exists or has been replaced. Reload the account list.
 apiaccess_enone=Select at least one API account.

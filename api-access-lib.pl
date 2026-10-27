@@ -399,7 +399,6 @@ sub save_api_access_accounts
 my ($params) = @_;
 # Authorize both entry points before locking or changing Webmin accounts.
 &master_admin() || die $text{'apiaccess_ecannot'}."\n";
-defined(&webmin_user_api_only) || die $text{'apiaccess_ewebmin'}."\n";
 &require_acl();
 &obtain_lock_webmin();
 my @changed;
