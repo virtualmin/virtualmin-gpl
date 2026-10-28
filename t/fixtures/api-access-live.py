@@ -223,7 +223,7 @@ def check_help(page):
         '_commands': ('Allowed commands', 'All three modes save the commands allowed when you click Save'),
         '_scope': ('Existing virtual servers', 'including servers created later by other accounts'),
         '_created': ('Automatically include servers this account creates',
-                     'without selecting them here'),
+                     'marked Automatic'),
         '_templates': ('Allowed templates', 'including ones added later'),
         '_plans': ('Allowed plans', 'no combined resource limit'),
         '_defaulttemplate': ('Default template', 'requires a default template from Allowed templates'),
@@ -919,6 +919,24 @@ try:
     check('Exit status: 0' in out, 'clone explicitly granted existing customer', out)
     state = json.loads(helper_call('inspect'))
     check(state['clone_owner'] == fixture['id'], 'clone is owned by the API account that created it')
+    # Inspect the rendered choices with automatic access both on and off.
+    for created in ('1', '0'):
+        save_policy(domains=state['outside_id'], overrides={'created': created})
+        page = request('edit_api_access.cgi?user=' + fixture['user'], admin=True)[1]
+        fields = HelpPage(page).inputs
+        rows = {field['value']: field for field in fields
+                if field.get('name') == 'domains_display_item'}
+        # Only automatic checks follow the switch; manual grants stay editable.
+        owned = rows[state['domain']['id']]
+        check(('checked' in owned) == (created == '1') and
+              ('disabled' in owned) == (created == '1'),
+              'created=' + created + ': owned server follows the automatic switch')
+        check('checked' in rows[state['outside_id']] and
+              'disabled' not in rows[state['outside_id']],
+              'created=' + created + ': manual selection stays editable')
+        # The submitted hidden field must contain only the manual grant.
+        check(next(field['value'] for field in fields if field.get('name') == 'domains')
+              == state['outside_id'], 'submitted field contains only the manual selection')
     # Revoking the source grant must leave the API account's clone visible.
     save_policy()
     out = api('list-domains', [('name-only', '')])

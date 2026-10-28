@@ -91,24 +91,56 @@ print &ui_hidden_table_end();
 print &ui_hidden_table_start($text{'apiaccess_resources'}, 'width=100%', 2,
 	'resources', 1);
 
-# Offer existing servers and separate access to servers this account creates.
-@domain_options = map { [ $_->{'id'}, $_->{'dom'} ] }
-	sort { $a->{'dom'} cmp $b->{'dom'} } &list_api_access_resources('domain');
+# Load existing servers and their saved manual selections.
+@domains = sort { $a->{'dom'} cmp $b->{'dom'} }
+	&list_api_access_resources('domain');
+my %manual = map { $_ => 1 } split(/\s+/, $p->{'api_domains'});
+my %automatic;
+if ($p->{'api_id'}) {
+	# Use the access check to find this account's creations and descendants.
+	# Ignore manual grants and disabled settings when finding these servers.
+	local %access = ( %$p, 'api_domains' => '', 'api_created' => 1,
+		'api_disabled' => 0 );
+	%automatic = map { $_->{'id'} => 1 }
+		grep { &api_access_can_domain($_) } @domains;
+	}
+# Lock automatic selections while the switch is on; manual grants stay editable.
+# Mark eligible rows so the browser can update them when the switch changes.
+@domain_options = map { {
+	'value' => $_->{'id'}, 'label' => $_->{'dom'},
+	'disabled' => $p->{'api_created'} && $automatic{$_->{'id'}} &&
+		!$manual{$_->{'id'}},
+	'attrs' => { 'data-api-created' => $automatic{$_->{'id'}} ? 1 : 0 },
+	'badges' => $automatic{$_->{'id'}} ?
+		[ [ $text{'apiaccess_automatic'}, 'info',
+			{ 'class' => 'api_access_auto_badge', 'small' => 1,
+			  'title' => $text{'apiaccess_automaticdesc'} } ] ] : []
+	} } @domains;
+# Include automatic checks only while enabled; '*' belongs to the mode selector.
+my @domain_values = grep { $_ ne '*' } keys %manual;
+push(@domain_values, keys %automatic) if ($p->{'api_created'});
+# The displayed selection includes automatic grants; submit only manual ones.
+my $domain_field = %automatic ? 'domains_display' : 'domains';
 %domain_modes = ( 'name' => 'domain_mode',
 	'value' => $p->{'api_domains'} eq '*' ? 'all' : 'selected',
 	'options' => [ [ 'selected', $text{'apiaccess_selected'} ],
 		[ 'all', $text{'apiaccess_all'} ] ], 'hide' => [ 'all' ] );
 # All is a mode, not a selectable ID. Keep it editable on an empty server too.
 $domain_input = @domain_options ?
-	&ui_multi_select_list('domains', $p->{'api_domains'} eq '*' ? [] :
-		[ split(/\s+/, $p->{'api_domains'}) ], \@domain_options,
+	&ui_multi_select_list($domain_field, \@domain_values, \@domain_options,
 		{ 'modes' => \%domain_modes }) :
 	&ui_select('domain_mode', $domain_modes{'value'}, $domain_modes{'options'}).
 		&ui_hidden('domains', '');
-# Hide the extra grant in All mode without clearing its saved checkbox value.
+# With automatic rows, submit manual grants through a separate hidden field.
+$domain_input .= &ui_hidden('domains', join("\n", grep { $_ ne '*' } keys %manual))
+	if (%automatic);
+# Hide the switch in All mode without clearing it. Show the Automatic badge only
+# on locked rows, not on manual selections or while automatic access is off.
 print &ui_tag('style',
 	'.api_access_domains:has(select[name="domain_mode"] option[value="all"]:checked) '.
-	'.api_access_created { display: none; }');
+	'.api_access_created { display: none; } '.
+	'.api_access_domains .ui_multi_item:not(.ui_multi_disabled) '.
+	'.api_access_auto_badge { display: none; }');
 print &ui_table_row(&hlink($text{'apiaccess_domains'}, 'api_access_scope'),
 	&ui_stack([ $domain_input,
 	&ui_toggle({ 'name' => 'created', 'value' => 1,
@@ -143,5 +175,53 @@ print &ui_hidden_table_end();
 @delete_buttons = $in{'new'} ? ( ) : ( [ 'delete', $text{'delete'} ] );
 print &ui_form_grouped_buttons([ \@buttons, \@delete_buttons ]);
 print &ui_form_end();
+# Only accounts with automatic rows need this sync between displayed and saved
+# choices. The shared widget still handles selection, filtering and counts.
+if (%automatic) {
+print <<'EOF';
+<script>
+// Initialize the automatic-selection controls in this private scope.
+(function () {
+	const list = document.getElementById('ui_multi_domains_display');
+	const form = list.closest('form');
+	const created = form.elements.created;
+	const manual = form.elements.domains;
+	const rows = list.querySelectorAll('.ui_multi_item');
+	// sync(): update automatic checks without changing manual permissions.
+	function sync() {
+		const selected = [];
+		// For each row, keep manual choices and apply the switch.
+		rows.forEach(function (row) {
+			const input = row.querySelector('input[type="checkbox"]');
+			// Disabled checks are automatic; never copy them into manual grants.
+			const explicit = !input.disabled && input.checked;
+			input.disabled = created.checked && row.dataset.apiCreated === '1' && !explicit;
+			input.checked = input.disabled || explicit;
+			row.classList.toggle('ui_multi_disabled', input.disabled);
+			// Save only manual grants.
+			if (explicit) selected.push(input.value);
+		});
+		// Update the submitted grants and refresh the widget's display.
+		manual.value = selected.join('\n');
+		list.dispatchEvent(new Event('change', { bubbles: true }));
+	}
+	// For each event type, listen for widget actions and switch changes.
+	['click', 'change'].forEach(function (type) {
+		// Handle each event after the widget's bulk or Shift actions.
+		form.addEventListener(type, function (event) {
+			// Skip our own change event and unrelated fields.
+			if (event.target !== list && (list.contains(event.target) || event.target === created)) {
+				setTimeout(sync, 0);
+			}
+		});
+	});
+	// Sync before submission, even if a deferred update is pending.
+	form.addEventListener('submit', sync);
+	// Apply the saved switch state when the form first opens.
+	sync();
+}());
+</script>
+EOF
+}
 print &ui_page_end();
 &ui_print_footer('api_access.cgi', $text{'apiaccess_return'});
