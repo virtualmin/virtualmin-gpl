@@ -2240,6 +2240,27 @@ if ($apache::httpd_modules{'core'} >= 2.4) {
 				}
 			}
 		}
+	if (!$ipcount && $ip =~ /:/ && !$d->{'virt6'} &&
+	    &is_shared_ip($ip) && $d->{'ip'} &&
+	    ($d->{'virt'} || !&is_shared_ip($d->{'ip'}) ||
+	     !&add_name_virtual($d, $conf, $web_port, $no_star_match, $d->{'ip'}))) {
+		# An IPv6 wildcard would also expose this explicit IPv4 site on
+		# other IPv4 addresses. Keep existing wildcard sites reachable
+		# on IPv6 by adding the same explicit address to their group.
+		my @wild = grep { grep {
+			/^(\*|_default_|0\.0\.0\.0|\[::\])(?::(\d+|\*))?$/i &&
+			(!$2 || $2 eq '*' || $2 == $web_port) } @{$_->{'words'}} } @virt;
+		# Exact ports take priority over wildcard ports in Apache.
+		my @exact = grep { grep {
+			/^(\*|_default_|0\.0\.0\.0|\[::\]):$web_port$/i }
+			@{$_->{'words'}} } @wild;
+		foreach my $v (@exact ? @exact : @wild) {
+			$v->{'value'} = join(" ", @{$v->{'words'}}, "[$ip]:$web_port");
+			&apache::save_directive_struct($v, $v, $conf, $conf, 1);
+			&flush_file_lines($v->{'file'});
+			}
+		return 0;
+		}
 	return $ipcount ? 0 : 1;
 	}
 my $nvstar;
@@ -4472,8 +4493,8 @@ my ($d, $nvstar, $nvstar6, $port) = @_;
 my $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 $port ||= $d->{'web_port'};
 &require_apache();
-# Keep each address family in its existing matching group. An explicit IPv6
-# address must not move IPv4 out of a wildcard group, or vice versa.
+# Choose IPv4 independently so explicit IPv6 entries do not displace
+# existing IPv4 wildcard sites.
 my @vips;
 if ($d->{'ip'}) {
 	my $vip = !$d->{'virt'} && &is_shared_ip($d->{'ip'}) && $nvstar ?
@@ -4481,14 +4502,15 @@ if ($d->{'ip'}) {
 	push(@vips, "$vip:$port");
 	}
 if ($d->{'ip6'}) {
-	my $vip6 = !$d->{'virt6'} && &is_shared_ip($d->{'ip6'}) && $nvstar6 ?
+	my $vip6 = !$d->{'virt6'} && &is_shared_ip($d->{'ip6'}) && $nvstar6 &&
+			(!@vips || $vips[0] eq "*:$port") ?
 			"*" : $d->{'ip6'};
 	if ($vip6 ne "*") {
 		# Explicit IPv6 addresses need brackets to separate the port.
 		push(@vips, "[$vip6]:$port");
 		}
-	elsif (!@vips || $vips[0] ne "*:$port") {
-		# A wildcard covers both families, but IPv4 may be explicit or absent.
+	elsif (!@vips) {
+		# An IPv6-only shared site still needs its wildcard entry.
 		push(@vips, "*:$port");
 		}
 	}

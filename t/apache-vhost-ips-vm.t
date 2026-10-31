@@ -70,9 +70,17 @@ my ($status, $output) = run_command('openssl', 'req', '-x509', '-newkey',
 	'-keyout', $key, '-out', $cert);
 die "Cannot create fixture certificate: $output" if $status;
 
-# Cover different creation orders, both mixed layouts, and existing explicit groups.
+# Cover IPv4-only and dual-stack hosting, creation order, and existing groups.
+my $ipv4 = { ip => $ip };
 my $dual = { ip => $ip, ip6 => $ip6 };
 my @cases = (
+	[ 'shared IPv4-only hosts', [ $ipv4, $ipv4 ] ],
+	[ 'existing explicit IPv4-only hosts', [ $ipv4, $ipv4 ], [ $ip ] ],
+	[ 'IPv4-only hosts around a dedicated IPv4', [ $ipv4,
+		{ ip => $other, virt => 1 }, $ipv4 ],
+		undef, [ [ 1, $ip, 'site0' ] ] ],
+	[ 'IPv4-only then dual-stack', [ $ipv4, $dual ] ],
+	[ 'dual-stack then IPv4-only', [ $dual, $ipv4 ] ],
 	[ 'wildcard defaults', [ $dual, $dual ] ],
 	[ 'IPv6-only first', [ { ip6 => $ip6 }, $dual ] ],
 	[ 'reported non-shared IPv6 sequence', [
@@ -80,8 +88,12 @@ my @cases = (
 	[ 'later dedicated IPv6', [ $dual,
 		{ ip => $ip, ip6 => $other6, virt6 => 1 }, $dual ] ],
 	[ 'later dedicated IPv4', [ $dual,
-		{ ip => $other, ip6 => $ip6, virt => 1 }, $dual ] ],
-	[ 'existing explicit IPv4 with wildcard IPv6', [ $dual, $dual ], [ $ip, '*' ] ],
+		{ ip => $other, ip6 => $ip6, virt => 1 }, $dual ],
+		undef, [ [ 1, $ip, 'site0' ] ] ],
+	[ 'dedicated IPv4 first', [ { ip => $other, ip6 => $ip6, virt => 1 }, $dual ],
+		undef, [ [ 0, $ip, 'site1' ] ] ],
+	[ 'existing explicit IPv4 with wildcard IPv6', [ $dual, $dual ], [ $ip, '*' ],
+		[ [ 1, $other, 'site0' ] ] ],
 	[ 'existing wildcard IPv4 with explicit IPv6', [ $dual, $dual ], [ '*', "[$ip6]" ] ],
 	[ 'existing explicit addresses', [ $dual, $dual ], [ $ip, "[$ip6]" ] ],
 );
@@ -107,6 +119,19 @@ foreach my $case (@cases) {
 					}
 				}
 			}
+		# Explicit IPv4 sites must not answer through an unassigned IPv4.
+		foreach my $request (@{$case->[3] || []}) {
+			my ($i, $address, $expected) = @$request;
+			foreach my $port (@ports) {
+				my $scheme = $port == 18080 ? 'http' : 'https';
+				my ($status, $body) = run_command('curl', '--noproxy', '*',
+					'-ksS', '--fail', '--max-time', '10', '--resolve',
+					"site$i.invalid:$port:$address",
+					"$scheme://site$i.invalid:$port/index.html");
+				is($status, 0, "$scheme on unassigned IPv4 responds") or diag($body);
+				is($body, $expected, "$scheme does not expose site$i on $address");
+				}
+			}
 		stop_apache();
 		};
 	}
@@ -118,11 +143,15 @@ done_testing();
 sub make_config
 {
 my ($domains, $first) = @_;
+# Use separate files to verify that existing sites are saved as well as the new one.
+mkdir("$work/sites", 0755) unless -d "$work/sites";
+unlink(glob("$work/sites/*.conf"));
 open(my $fh, '>', $config) or die $!;
 print $fh "ServerRoot $server_root\nInclude $modules\nTypesConfig /etc/mime.types\n",
 	"User $user\nGroup $user\nServerName fixture.invalid\n",
 	"DefaultRuntimeDir $work\nPidFile $work/httpd.pid\n",
-	"ErrorLog $work/error.log\nLogLevel warn\nSSLSessionCache none\n";
+	"ErrorLog $work/error.log\nLogLevel warn\nSSLSessionCache none\n",
+	"Include $work/sites/*.conf\n";
 foreach my $port (@ports) {
 	# Bind only fixture addresses, leaving the normal Apache service untouched.
 	print $fh "Listen $ip:$port\nListen $other:$port\n",
@@ -144,7 +173,7 @@ foreach my $port (@ports) {
 		open(my $page, '>', "$dir/index.html") or die $!;
 		print $page "site$i";
 		close($page) or die $!;
-		open($fh, '>>', $config) or die $!;
+		open($fh, '>>', "$work/sites/site$i.conf") or die $!;
 		print $fh "<VirtualHost $value>\nServerName site$i.invalid\n",
 			"DocumentRoot $dir\n<Directory $dir>\nRequire all granted\n</Directory>\n";
 		if ($port == 18443) {

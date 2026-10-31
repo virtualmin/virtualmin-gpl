@@ -11,6 +11,10 @@ do "$FindBin::Bin/../feature-web.pl" or die "$@ $!";
 local *main::require_apache = sub { };
 local %apache::httpd_modules = ( 'core' => 2.4 );
 local *apache::find_directive_struct = sub { @{$_[1]} };
+local *apache::save_directive_struct = sub {
+	$_[0]->{'words'} = [ split(/ /, $_[1]->{'value'}) ];
+	};
+local *main::flush_file_lines = sub { };
 my ($ip, $ip6) = ('192.0.2.10', '2001:db8::10');
 my ($other, $other6) = ('192.0.2.20', '2001:db8::20');
 local *main::is_shared_ip = sub { $_[0] eq $ip || $_[0] eq $ip6 };
@@ -42,6 +46,8 @@ subtest $label => sub {
 }
 
 # Empty configurations keep the wildcard default, including IPv6-only hosts.
+check_sequence('shared IPv4-only hosts', [
+	[ { ip => $ip }, [ '*' ] ], [ { ip => $ip }, [ '*' ] ] ]);
 check_sequence('shared dual-stack hosts', [ [ $dual, [ '*' ] ], [ $dual, [ '*' ] ] ]);
 check_sequence('IPv4-only then dual-stack', [
 	[ { ip => $ip }, [ '*' ] ], [ $dual, [ '*' ] ] ]);
@@ -61,12 +67,17 @@ check_sequence('shared hosts around a dedicated IPv6 host', [
 	[ $dual, [ '*' ] ] ]);
 check_sequence('shared hosts around a dedicated IPv4 host', [
 	[ $dual, [ '*' ] ],
-	[ { ip => $other, ip6 => $ip6, virt => 1 }, [ $other, '*' ] ],
-	[ $dual, [ '*' ] ] ]);
+	[ { ip => $other, ip6 => $ip6, virt => 1 }, [ $other, "[$ip6]" ] ],
+	[ $dual, [ '*', "[$ip6]" ] ] ]);
+check_sequence('dedicated IPv4 first', [
+	[ { ip => $other, ip6 => $ip6, virt => 1 }, [ $other, "[$ip6]" ] ],
+	[ $dual, [ '*', "[$ip6]" ] ] ]);
 
 # Existing explicit groups remain explicit, independently for each family.
+check_sequence('explicit IPv4-only hosts',
+	[ [ { ip => $ip }, [ $ip ] ], [ { ip => $ip }, [ $ip ] ] ], [ [ $ip ] ]);
 check_sequence('explicit IPv4 with wildcard IPv6',
-	[ [ $dual, [ $ip, '*' ] ], [ $dual, [ $ip, '*' ] ] ], [ [ $ip, '*' ] ]);
+	[ [ $dual, [ $ip, "[$ip6]" ] ], [ $dual, [ $ip, "[$ip6]" ] ] ], [ [ $ip, '*' ] ]);
 check_sequence('wildcard IPv4 with explicit IPv6',
 	[ [ $dual, [ '*', "[$ip6]" ] ], [ $dual, [ '*', "[$ip6]" ] ] ],
 	[ [ '*', "[$ip6]" ] ]);
@@ -82,6 +93,30 @@ foreach my $port (80, 443) {
 	my $star6 = main::add_name_virtual($dual, $conf, $port, 1, $ip6);
 	is(main::get_apache_vhost_ips($dual, $star4, $star6, $port), "*:$port",
 		"other ports do not affect port $port");
+	}
+
+# Promoting a shared IPv6 group preserves wildcard sites and port priority.
+foreach my $port (80, 443) {
+	foreach my $wild ('*', '_default_', '0.0.0.0', '[::]') {
+		my @conf = map { { words => [ $_ ] } }
+			("$wild:*", "$wild:$port", "$wild:$port", "$wild:8080");
+		my $d = { ip => $other, ip6 => $ip6, virt => 1 };
+		is(main::add_name_virtual($d, \@conf, $port, 1, $ip6), 0,
+			"explicit IPv4 requires explicit IPv6 with $wild on $port");
+		is_deeply([ map { $_->{'words'} } @conf ],
+			[ [ "$wild:*" ], [ "$wild:$port", "[$ip6]:$port" ],
+			  [ "$wild:$port", "[$ip6]:$port" ], [ "$wild:8080" ] ],
+			'only the matching wildcard group gains the IPv6 address');
+		main::add_name_virtual($d, \@conf, $port, 1, $ip6);
+		is(scalar(@{$conf[1]->{'words'}}), 2, 'repeated preparation adds no duplicate');
+		is(main::get_apache_vhost_ips($d, 1, 1, $port), "$other:$port [$ip6]:$port",
+			'address generation never broadens explicit IPv4 with a wildcard');
+		}
+	my @conf = map { { words => [ $_ ] } } ('*:*', '_default_', '*:8080');
+	main::add_name_virtual({ ip => $other, ip6 => $ip6, virt => 1 }, \@conf, $port, 1, $ip6);
+	is_deeply([ map { $_->{'words'} } @conf ],
+		[ [ '*:*', "[$ip6]:$port" ], [ '_default_', "[$ip6]:$port" ], [ '*:8080' ] ],
+		"wildcard ports are preserved when no exact port $port exists");
 	}
 
 done_testing();
