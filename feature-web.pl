@@ -4469,14 +4469,11 @@ return undef;
 sub get_apache_vhost_ips
 {
 my ($d, $nvstar, $nvstar6, $port) = @_;
-if (defined($nvstar) && !$nvstar || defined($nvstar6) && !$nvstar6) {
-	# If either of the IPv4 or v6 addresses is in the Virtualhost, then
-	# both of them need to be
-	$nvstar = $nvstar6 = 0;
-	}
 my $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 $port ||= $d->{'web_port'};
 &require_apache();
+# Keep each address family in its existing matching group. An explicit IPv6
+# address must not move IPv4 out of a wildcard group, or vice versa.
 my @vips;
 if ($d->{'ip'}) {
 	my $vip = !$d->{'virt'} && &is_shared_ip($d->{'ip'}) && $nvstar ?
@@ -4487,9 +4484,12 @@ if ($d->{'ip6'}) {
 	my $vip6 = !$d->{'virt6'} && &is_shared_ip($d->{'ip6'}) && $nvstar6 ?
 			"*" : $d->{'ip6'};
 	if ($vip6 ne "*") {
-		# If already matching *:port for the IPv4 part, no need to
-		# repeat it for IPv6
+		# Explicit IPv6 addresses need brackets to separate the port.
 		push(@vips, "[$vip6]:$port");
+		}
+	elsif (!@vips || $vips[0] ne "*:$port") {
+		# A wildcard covers both families, but IPv4 may be explicit or absent.
+		push(@vips, "*:$port");
 		}
 	}
 return join(" ", @vips);
