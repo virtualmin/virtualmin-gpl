@@ -1,10 +1,8 @@
 # Defines the function for validating the Virtualmin license, by making an
 # HTTP request to the license CGI.
 
-$virtualmin_licence_host = "software.virtualmin.com";
 $virtualmin_licence_port = 443;
 $virtualmin_licence_ssl = 1;
-$virtualmin_licence_prog = "/cgi-bin/vlicence.cgi";
 $virtualmin_licence_page = "/api/license/client";
 $virtualmin_renewal_url = $config{'renewal_url'} ||
 			  $virtualmin_shop_link;
@@ -16,38 +14,75 @@ $virtualmin_renewal_url = $config{'renewal_url'} ||
 sub licence_scheduled
 {
 my ($hostid, $serial, $key) = @_;
-my ($out, $error, $regerr, %serial);
+my ($out, %serial);
 if (!$serial || !$key) {
 	# Read from license file only if not provided
 	&read_env_file($virtualmin_license_file, \%serial);
 	$serial = $serial{'SerialNumber'};
 	$key = $serial{'LicenseKey'};
 	}
-# New API call using POST
-my $params = 'id='.&urlize($hostid).'&serial='.&urlize($key);
-&http_post($virtualmin_host_domain, $virtualmin_licence_port, $virtualmin_licence_page,
-	   $params, \$out, \$error, undef, $virtualmin_licence_ssl, undef, undef, 10);
-if ($error) {
-	# Try the old API if the new fails (why would it?)
-	$error = undef;
-	&http_download($virtualmin_licence_host,
-		       $virtualmin_licence_port,
-		       "$virtualmin_licence_prog?id=$hostid&serial=$key",
-		       \$out, \$error, undef, $virtualmin_licence_ssl,
-		       undef, undef, 10, 0, 1);
+# Transport failures retain the existing outage grace without exposing the key.
+$out = &licence_request($hostid, $key);
+return (2, undef, $text{'licence_echk'}) if (!defined($out));
+# The other product is invalid, even if it has not expired.
+if ($out =~ /\A(?:OK|EXP)\s[^\r\n]*\sproduct=cloudmin\s*\z/) {
+	$out = 'ERR Invalid host or serial number';
 	}
-return (2, undef, "$text{'licence_efailed'} : @{[lcfirst($error)]}") if ($error);
-return $out =~ /^EXP\s+(?<exp>\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\d+)(?:\s+([\w])(?:\s+(\d+))?)?)?/ ?
-	(3, "$+{exp}", &text("licence_eexp", "$+{exp}"), $2, $3, $4, $5, $6, $7) :
-       $out =~ /^ERR\s+(?<err>.*)/ && ($regerr = $+{err}) &&
-       	       $regerr !~ /invalid\s+host\s+or\s+serial\s+number/i ?
-	(2, undef, "$text{'licence_echk'} : $regerr", undef) :
-       $out =~ /^OK\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\d+)(?:\s+([\w])(?:\s+(\d+))?)?)?/ ?
-	(0, $1, undef, $2, $3, $4, $5, $6, $7) :
-	(1, undef,
-	 	(!$serial || uc($serial) eq 'GPL') ? 
-		    $text{"licence_evalidnone"} :
-		    &text("licence_evalid", "<tt data-evalid>$serial</tt>"));
+# Only a complete response for this product may validate the license.
+if ($out =~ /\A(OK|EXP)\s+(\d{4}-\d{2}-\d{2})\s+(\d+)\s+(\d+)\s+(\d+)\s+([01])\s+([NDTQPHY])(?:\s+(\d+))?\s+product=virtualmin\s*\z/) {
+	my ($code, $expiry, $domains, $max_hosts, $hosts, $renew, $allowance, $subscription) =
+		($1, $2, $3, $4, $5, $6, $7, $8);
+	return ($code eq 'EXP' ? 3 : 0, $expiry,
+		$code eq 'EXP' ? &text('licence_eexp', $expiry) : undef,
+		$domains, $max_hosts, $hosts, $renew, $allowance, $subscription);
+	}
+# Malformed replies are server failures, not proof of an invalid license.
+return (2, undef, $text{'licence_echk'})
+	if ($out !~ /\AERR Invalid host or serial number\s*\z/);
+return (1, undef, (!$serial || uc($serial) eq 'GPL') ?
+	$text{'licence_evalidnone'} :
+	&text('licence_evalid', "<tt data-evalid>$serial</tt>"));
+}
+
+# licence_request(hostid, key) checks the product over authenticated HTTPS.
+# Redirects, oversized replies and transport failures return undef.
+sub licence_request
+{
+my ($hostid, $key) = @_;
+my ($ca) = grep { -r $_ } ('/etc/pki/tls/certs/ca-bundle.crt',
+	'/etc/ssl/certs/ca-certificates.crt', '/etc/ssl/ca-bundle.pem');
+return undef if (!$ca);
+my ($handle, $body);
+local $SIG{'ALRM'} = sub { die "License check timed out\n" };
+my $ok = eval {
+	alarm(20);
+	my $params = 'id='.&urlize($hostid).'&serial='.&urlize($key).'&product=virtualmin';
+	$handle = &make_http_connection($virtualmin_host_domain, 443, 1, 'POST',
+		$virtualmin_licence_page,
+		[['Host', $virtualmin_host_domain], ['Connection', 'close'],
+		 ['User-Agent', 'Webmin'], ['Accept-Language', 'en'],
+		 ['Content-Type', 'application/x-www-form-urlencoded'],
+		 ['Content-Length', length($params)]], undef,
+		{capath => $ca, host => $virtualmin_host_domain});
+	die "License connection failed\n" if (!ref($handle));
+	die "Cannot send license check\n" if (!&write_http_connection($handle, $params));
+	# Bounded HTTP/1.0 close framing avoids redirects and unlimited reads.
+	my $raw = '';
+	while (defined(my $part = &read_http_connection($handle, 1024))) {
+		$raw .= $part;
+		die "License response is too large\n" if (length($raw) > 16384);
+		}
+	my ($headers, $content) = split(/\r?\n\r?\n/, $raw, 2);
+	die "Invalid license response\n" if (!defined($content) || length($content) > 4096 ||
+		$headers !~ /\AHTTP\/1\.[01] 200\b/ || $headers =~ /^Transfer-Encoding:/mi);
+	my ($length) = $headers =~ /^Content-Length:\s*(\d+)\s*$/mi;
+	die "Incomplete license response\n" if (defined($length) && $length != length($content));
+	$body = $content;
+	1;
+	};
+alarm(0);
+eval { &close_http_connection($handle) } if (ref($handle));
+return $ok ? $body : undef;
 }
 
 # change_licence(serial, key, [nocheck], [force-update], [no-repos], [offline])
