@@ -634,6 +634,7 @@ return { 'path' => '^/(?!.well-known)',
 	 'alias' => 0,
 	 'regexp' => 1,
 	 'code' => 301,
+	 'last' => 1,
 	 'http' => 1,
 	 'https' => 0 };
 }

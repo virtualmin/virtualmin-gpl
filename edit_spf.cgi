@@ -18,7 +18,7 @@ push(@opts, [ 'services', $text{'dns_cloud_services'} ])
 foreach my $c (&list_dns_clouds()) {
 	my $sfunc = "dnscloud_".$c->{'name'}."_get_state";
 	my $s = &$sfunc();
-	if ($s->{'ok'} && (&can_dns_cloud($d) || $c->{'name'} eq $cloud)) {
+	if ($s->{'ok'} && (&can_dns_cloud($c) || $c->{'name'} eq $cloud)) {
 		push(@opts, [ $c->{'name'}, $c->{'desc'} ]);
 		}
 	}
