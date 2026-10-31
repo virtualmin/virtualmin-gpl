@@ -61,6 +61,8 @@ sub set_all_text_print {
 	$outdent_print = sub { $indent_text = substr($indent_text, 4); };
 }
 sub master_admin { !$ENV{'TEST_DENY'} }
+# api_access_system_command(): simulate the dispatcher's system grant.
+sub api_access_system_command { $ENV{'TEST_SYSTEM'} }
 sub is_readonly_mode { $ENV{'TEST_READONLY'} }
 sub has_command { $ENV{'TEST_SH_COMMAND'} || '/bin/sh' }
 sub virtualmin_api_log {
@@ -108,7 +110,7 @@ SH
 my %cli_env = (
 	TEST_ROOT => $tmp, TEST_MODULE => $module,
 	TEST_ENTRY => "$root/configure-swap.pl",
-	TEST_REMOTE => '', TEST_DENY => '', TEST_READONLY => '',
+	TEST_REMOTE => '', TEST_DENY => '', TEST_READONLY => '', TEST_SYSTEM => '',
 	TEST_SIGNAL => '', TEST_READ_INPUT => '', TEST_STATUS => 0,
 	TEST_MESSAGES => '', TEST_DOWNLOAD_FAIL => '', TEST_EARLY_FAIL => '',
 );
@@ -160,6 +162,13 @@ subtest 'host-wide changes require administrator access' => sub {
 		is($st, 1, 'unsafe invocation rejected');
 		ok(!-e "$tmp/called", 'no setup started');
 	}
+	# An explicit system grant permits delegation but never bypasses read-only.
+	my ($api_st, $api_out) = run_cli({ TEST_DENY => 1, TEST_SYSTEM => 1 }, '');
+	is($api_st, 0, 'granted system command works without a master role');
+	($api_st, $api_out) = run_cli(
+		{ TEST_DENY => 1, TEST_SYSTEM => 1, TEST_READONLY => 1 }, '');
+	is($api_st, 1, 'delegated command still respects read-only mode');
+	ok(!-e "$tmp/called", 'read-only delegation does not start setup');
 	my ($st) = run_cli({ TEST_REMOTE => 1 }, '');
 	is($st, 0, 'master API request needs no confirmation flag');
 	is(read_file("$tmp/called"), "swap\n--yes\n", 'API setup skips confirmation');

@@ -42,6 +42,9 @@ while(@ARGV > 0) {
 # Find the command
 $cmd || &usage("Missing --command parameter");
 $cmd =~ s/\.pl$//;
+# Do not spawn a terminal-only command to fetch its help over HTTP.
+&is_api_account_command($cmd) && &is_remote_api_request() &&
+	&usage("API account management is available only to root on the command line");
 !&master_admin() && $cmd !~ /^[a-z0-9_\-]+$/i &&
 	&usage("API command $cmd was not found");
 &require_remote_api_command();
@@ -52,12 +55,21 @@ if (my $msg = &api_command_unavailable_message($cmd)) {
 	exit(1);
 	}
 $cmd .= ".pl" if ($cmd !~ /\.pl$/);
-foreach $dir ($module_root_directory,
-	      map { &module_root_directory($_) } @plugins) {
-	if (-r "$dir/$cmd") {
-		$cmdpath = "$dir/$cmd";
-		$cmddir = $dir;
-		last;
+if (&is_api_access_user()) {
+	# Use the authorized provider, including commands stored only under pro/.
+	my $entry = &get_api_access_command($cmd);
+	$cmdpath = $entry->{'path'};
+	}
+else {
+	# Keep the existing lookup order for ordinary accounts.
+	foreach $dir ($module_root_directory,
+		      map { &module_root_directory($_) } @plugins) {
+		if (-r "$dir/$cmd") {
+			# Keep the first readable script for ordinary callers.
+			$cmdpath = "$dir/$cmd";
+			$cmddir = $dir;
+			last;
+			}
 		}
 	}
 $cmdpath || &usage("API command $cmd was not found");
@@ -69,10 +81,24 @@ if ($src =~ /=head1\s+(.*)\n\n(.*)\n/) {
 	}
 
 # Run with --help to get command line flags
+if (&is_api_access_user()) {
+	# Retain the caller's policy, including the selected command provider.
+	my $entry = &prepare_api_access_command($cmd, [ '--help' ]);
+	pipe(my $read, my $write) || &usage("Cannot open command pipe: $!");
+	my $pid = &execute_webmin_script($entry->{'path'},
+		$entry->{'provider'}, [ '--help' ], $write);
+	# Collect help from the authorized child for the metadata parser below.
+	$out = join('', <$read>);
+	close($read);
+	waitpid($pid, 0);
+	}
+else {
+# Preserve standalone help execution for ordinary administrator and owner calls.
 &clean_environment();
 $ENV{'WEBMIN_CONFIG'} = $config_directory;
 $out = &backquote_command(quotemeta($cmdpath)." --help 2>&1 </dev/null");
 &reset_environment();
+}
 @helpargs = ( );
 foreach my $l (split(/\r?\n/, $out)) {
 	$l =~ s/^(virtualmin|cloudmin)\s+(\S+)//;	# strip command

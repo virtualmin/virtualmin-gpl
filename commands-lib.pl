@@ -21,6 +21,32 @@ return (
 	);
 }
 
+# These operations need Pro only when delegated to a dedicated API account.
+# Ordinary administrator, reseller, owner and terminal access is unchanged.
+# Map canonical command names to language keys explaining the restriction.
+our %api_account_pro_features = (
+	'create-domain' => 'apiaccess_procreate',
+	'clone-domain' => 'apiaccess_proclone',
+	'disable-domain' => 'apiaccess_prodisable',
+	'enable-domain' => 'apiaccess_proenable',
+	);
+
+# api_account_pro_message(command)
+# Returns a Pro requirement message on GPL, or undef if no restriction applies.
+# Accepts a canonical command name or script path; callers must resolve aliases.
+# Checks only the edition; callers apply it only to API accounts.
+sub api_account_pro_message
+{
+my ($command) = @_;
+# Pro permits these operations when the account has the required grants.
+return undef if ($virtualmin_pro);
+# Match names and paths to the same rule, regardless of the .pl suffix.
+$command = &normalize_api_command_name($command);
+$command =~ s/\.pl$//;
+my $reason = $api_account_pro_features{$command};
+return $reason ? &text('apiaccess_epro', $text{$reason}) : undef;
+}
+
 # normalize_api_command_name(command)
 # Returns a command name with a .pl suffix, for matching against known API
 # script names.
@@ -30,6 +56,25 @@ my ($cmd) = @_;
 $cmd =~ s/^.*\///;
 $cmd .= ".pl" if ($cmd !~ /\.pl$/);
 return $cmd;
+}
+
+# is_api_account_command(command)
+# Identifies root-only account commands by name or script path.
+sub is_api_account_command
+{
+my ($cmd) = @_;
+$cmd = &normalize_api_command_name($cmd);
+return $cmd =~ /^(?:(?:create|modify|delete)-api-account|list-api-accounts)\.pl$/;
+}
+
+# is_remote_api_request()
+# Recognizes HTTP requests and their children. The API environment marker
+# survives CGI environment cleanup when a request spawns another command.
+sub is_remote_api_request
+{
+return $main::virtualmin_remote_api || $ENV{'VIRTUALMIN_REMOTE_API'} ||
+	$ENV{'REQUEST_METHOD'} || $ENV{'GATEWAY_INTERFACE'} ||
+	$main::webmin_script_type eq 'web';
 }
 
 # api_command_unavailable_message(command)
@@ -216,6 +261,54 @@ return ( "upload-api-docs.pl",
 	 # Keep the old command callable without listing or publishing it.
 	 "setup-repos.pl",
 	 );
+}
+
+# list_api_commands([&patterns], [&providers])
+# Returns documented command files with names, providers, paths, descriptions
+# and canonical names for aliases. Defaults to *.pl in core, Pro and plugins.
+# Patterns and providers retain their order; callers apply access checks and
+# choose whether to show aliases. Descriptions retain their source line breaks.
+sub list_api_commands
+{
+my ($patterns, $providers) = @_;
+$patterns ||= [ '*.pl' ];
+$providers ||= [ $module_name, "$module_name/pro", @plugins ];
+my %skip = map { $_ => 1 } &list_api_skip_scripts();
+my @commands;
+foreach my $pattern (@$patterns) {
+	foreach my $provider (@$providers) {
+		# Missing providers contribute no matching files.
+		my $dir = &module_root_directory($provider);
+		foreach my $path (glob("$dir/$pattern")) {
+			my ($file) = $path =~ /([^\/]+)$/;
+			next if (!-f $path || $skip{$file});
+			# The opening POD paragraph identifies a documented command.
+			my $src = &read_file_contents($path);
+			next if ($src !~ /^=head1([^\n]*)\n\s*\n(.+?)(?:\n[ \t]*\r?\n|\n=|\z)/ms);
+			my ($title, $desc) = ($1, $2);
+			(my $name = $file) =~ s/\.pl$//;
+			my $canonical = $name;
+			my %seen;
+			while (-l "$dir/$canonical.pl" && !$seen{$canonical}++) {
+				# Local symlink aliases share the target's command grant.
+				my $target = readlink("$dir/$canonical.pl");
+				last if ($target !~ /^([a-z0-9][a-z0-9-]*)\.pl$/);
+				$canonical = $1;
+				}
+			if ($title =~ /^\s+([a-z0-9][a-z0-9-]*)\.pl\s*$/) {
+				# Packages may replace symlinks with copies. A POD title alone
+				# cannot give different code the target's command grant.
+				my $target = $1;
+				$canonical = $target if ($target ne $canonical &&
+					-x "$dir/$target.pl" &&
+					&read_file_contents("$dir/$target.pl") eq $src);
+				}
+			push(@commands, { 'name' => $name, 'canonical' => $canonical,
+				'provider' => $provider, 'path' => $path, 'desc' => $desc });
+			}
+		}
+	}
+return @commands;
 }
 
 # list_api_directories(pwd)
@@ -602,20 +695,33 @@ return $user_remote_api_commands{$program};
 sub remote_api_can_domain
 {
 my ($d, $program) = @_;
+# Masters bypass delegation checks; other callers need remote API access.
 return 1 if (&master_admin());
 return 0 if (!&can_use_remote_api());
+# Check the API account's command permission before its domain access.
+return 0 if ($access{'api_id'} && !&api_access_can_command($program));
+# A saved grant still requires a registered capability and an accessible target.
 my $capfunc = &get_user_remote_api_command($program);
 return 0 if (!$capfunc || !$d || !&can_edit_domain($d));
 return &$capfunc($d);
 }
 
 # require_remote_api_command([program-name])
-# Exits if the current user cannot run a registered command without a domain.
+# Exits unless the caller may run program-name, which defaults to $0.
+# Dedicated accounts use their allowlist; owners use the capability registry.
 sub require_remote_api_command
 {
 my ($program) = @_;
 $program ||= $0;
 return if (&master_admin());
+if ($access{'api_id'}) {
+	# Check the command grant here; target resolution checks domain access.
+	return if (&api_access_can_command($program));
+	# Deny before the command can resolve or modify any target.
+	print $text{'remote_ecannotcmd'},"\n";
+	exit(1);
+	}
+# Ordinary owners need a capability that permits calling without a domain.
 my $capfunc = &get_user_remote_api_command($program);
 return if (&can_use_remote_api() && $capfunc && &$capfunc());
 print $text{'remote_ecannotcmd'},"\n";
@@ -623,14 +729,19 @@ exit(1);
 }
 
 # require_remote_api_domain(&domain, requested-domain, [program-name])
-# Exits with a non-leaking error if the current user cannot run the calling
-# API command for the requested domain.
+# Exits unless the caller may run the command for the domain hashref.
+# requested-domain labels errors; program-name defaults to $0. Errors do not
+# reveal whether an inaccessible domain exists.
 sub require_remote_api_domain
 {
 my ($d, $requested, $program) = @_;
 # Default to the API script set by the dispatcher or standalone command
 $program ||= $0;
-return if (&remote_api_can_domain($d, $program));
+if (&remote_api_can_domain($d, $program)) {
+	# Owner limits must be evaluated for the customer, not the API login.
+	$api_access_domain = $d if ($access{'api_id'});
+	return;
+	}
 # Only distinguish capability failures for domains the caller can see
 my $msg = $d && &can_edit_domain($d) ?
 	&text('remote_ecannotcap', $requested) :
@@ -703,19 +814,27 @@ return @rv;
 }
 
 # can_remote(program-name)
-# Returns 1 if the current user can execute remote commands
+# Checks whether the current user may run the named API command.
 sub can_remote
 {
 my ($program) = @_;
+# Terminal-only commands must never be offered to an HTTP caller.
+return 0 if (&is_api_account_command($program) &&
+	(&is_remote_api_request() || !&master_admin()));
+# API accounts use explicit grants instead of the legacy owner command list.
+return &api_access_can_command($program) if ($access{'api_id'});
 return &master_admin() || &can_remote_as_user($program);
 }
 
 # can_remote_as_user(program-name)
-# Returns 1 if given API supports remote commands
-# as the current user (not root)
+# Checks whether the caller may run program-name without a master role.
 sub can_remote_as_user
 {
 my ($program) = @_;
+# Account management cannot be delegated, even with a hand-edited grant.
+return 0 if (&is_api_account_command($program));
+# API accounts use explicit grants instead of the legacy owner command list.
+return &api_access_can_command($program) if ($access{'api_id'});
 return 0 if (!&can_use_remote_api());
 $program =~ s/\.pl$//;
 if ($program eq "configure-script" ||

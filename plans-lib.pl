@@ -41,58 +41,52 @@ else {
 }
 
 # list_available_plans()
-# Returns a list of plans the current user can use
+# Returns plan hashrefs the current user can use, in list_plans() order.
 sub list_available_plans
 {
-my $canmode = &can_edit_plans();
-my @plans = &list_plans();
-if (&master_admin()) {
-	# Master admin can use all
-	return @plans;
-	}
-elsif (&reseller_admin()) {
-	# Resellers can use their plans, and those granted to them by the 
-	# master admin.
-	return grep { $_->{'owner'} eq $base_remote_user ||
-		      !$_->{'resellers'} ||
-		      &indexof($base_remote_user,
-			       split(/\s+/, $_->{'resellers'})) >= 0 } @plans;
-	}
-else {
-	# Domain owners? Can't happen ..
-	return ( );
-	}
+# Listings and individual selections must apply the same permission rules.
+return grep { &can_use_plan($_) } &list_plans();
 }
 
 # can_use_plan(&plan)
-# Returns 1 if the current user can use a plan
+# Checks whether the current user may use the supplied plan hashref.
 sub can_use_plan
 {
 my ($plan) = @_;
+# API accounts use their saved selections; a missing plan never matches.
+return $plan && &api_access_contains($access{'api_plans'}, $plan->{'id'})
+	if ($access{'api_id'});
 if (&master_admin()) {
-	# Masters can use all plans
+	# Master administrators can use every plan.
 	return 1;
 	}
 elsif (&reseller_admin()) {
-	# Resellers can use their plans, and granted
+	# Allow owned plans, unrestricted plans and explicit reseller grants.
+	# In this reseller list, * is a literal name, not a wildcard.
 	return $plan->{'owner'} eq $base_remote_user ||
 	       !$plan->{'resellers'} ||
-	       &indexof($base_remote_user,
-                        split(/\s+/, $plan->{'resellers'})) >= 0;
+	       &acl_list_contains($plan->{'resellers'}, $base_remote_user);
 	}
 else {
-	# Domain owners can use none
+	# Ordinary domain owners cannot select plans.
 	return 0;
 	}
 }
 
 # get_default_plan([allow-undef])
-# Returns the default plan for the current user - may be undef if none is set
+# Returns the caller's default plan. By default, non-API callers fall back to
+# their first available plan; allow-undef disables that fallback. API accounts
+# return undef when their configured default is missing or not allowed.
 sub get_default_plan
 {
 my ($allowundef) = @_;
 my @plans = sort { $a->{'id'} <=> $b->{'id'} } &list_available_plans();
 my $defplan;
+if ($access{'api_id'}) {
+	# A missing or revoked default must not fall back to a different plan.
+	($defplan) = grep { $_->{'id'} eq $access{'api_plan'} } @plans;
+	return $defplan;
+	}
 if (&reseller_admin()) {
 	($defplan) = grep { $_->{'id'} eq $access{'defplan'} } @plans;
 	}

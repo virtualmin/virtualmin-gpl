@@ -1,15 +1,39 @@
 #!/usr/local/bin/perl
-# This program is designed to be called via HTTP requests from programs, and
-# simply passes on parameters to a specified command-line program
+# Dispatches API requests using the Webmin-authenticated caller's ACL.
+# Dedicated API accounts also need a saved grant for the resolved provider.
 
 $main::allow_rpc_only = 1;
+# Opt in before Webmin checks the account's endpoint restriction.
+$main::allow_api_only = 'virtual-server/remote.cgi';
 package virtual_server;
 use POSIX;
 use Socket;
 $trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &ReadParse();
-&can_remote($in{'program'}) || &api_error($text{'remote_ecannot'});
+# Choose the response format before authorization so denials use it too.
+$format = exists($in{'json'}) ? 'json' :
+          exists($in{'xml'}) ? 'xml' :
+          exists($in{'perl'}) ? 'perl' : undef;
+# An API-only login without a Virtualmin policy cannot use ordinary role checks.
+if (&webmin_user_api_only() eq 'virtual-server/remote.cgi' &&
+    !&is_api_access_user()) {
+	&api_error($text{'remote_ecannot'});
+	}
+# A master HTTP login cannot invoke terminal-only account management either.
+&is_api_account_command($in{'program'}) &&
+	&api_error($text{'remote_eclionly'});
+# Explain edition limits for enabled API accounts before the grant denial.
+if (&is_api_access_user() && !$access{'api_disabled'}) {
+	# Resolve aliases before applying the command's edition restriction.
+	my $entry = &get_api_access_command($in{'program'});
+	my $err = $entry && &api_account_pro_message($entry->{'name'});
+	&api_error($err) if ($err);
+	}
+# Explain whether the request omitted a command or the caller cannot run it.
+&can_remote($in{'program'}) || &api_error($in{'program'} ?
+	&text('remote_ecannotprogram', $in{'program'}) :
+	$text{'remote_enoprogram'});
 
 if (!$in{'program'}) {
 	# Tell the user what needs to be done
@@ -30,12 +54,6 @@ if (!$in{'program'}) {
 	print "All output from the command will be returned to the caller.\n";
 	exit;
 	}
-
-# Get output format
-$format = exists($in{'json'}) ? 'json' :
-          exists($in{'xml'}) ? 'xml' :
-          exists($in{'perl'}) ? 'perl' :
-                undef;
 
 # Build the arg list
 $main::virtualmin_remote_api = 1;
@@ -59,18 +77,39 @@ if ($format && !defined($in{'simple-multiline'})) {
 
 # Build list of command-line args
 @args = ( );
-foreach $iv (@in) {
-	($i, $v) = split(/=/, $iv, 2);
-	$i =~ tr/\+/ /;
-	$v =~ tr/\+/ /;
-	$i =~ s/%(..)/pack("c",hex($1))/ge;
-	$v =~ s/%(..)/pack("c",hex($1))/ge;
-	next if ($i eq "program" || $i eq $format);
-	if ($v eq "") {
-		push(@args, "--$i");
-		}
-	else {
-		push(@args, "--$i", split(/\n/, $v));
+if ($access{'api_id'}) {
+	# Keep values intact and bind authorization to the resolved provider.
+	eval {
+		@args = &api_access_request_args(\@in, $format);
+		if ($format && $in{'program'} =~ /^(list-|get-dns)/ &&
+		    !defined($in{'simple-multiline'}) &&
+		    !grep { $_ eq '--multiline' } @args) {
+			# Listing conversion needs actual multiline command output.
+			push(@args, '--multiline');
+			}
+		# Execute the canonical path tied to the account's saved grant.
+		my $entry = &prepare_api_access_command($in{'program'}, \@args);
+		$cmd = $entry->{'path'};
+		};
+	# Return validation and grant errors in the selected format.
+	&api_error($@) if ($@);
+	}
+else {
+	# Preserve newline-separated arguments for ordinary Webmin accounts.
+	foreach $iv (@in) {
+		# Use form decoding; API accounts use stricter parsing.
+		($i, $v) = split(/=/, $iv, 2);
+		$i = &un_urlize($i);
+		$v = &un_urlize($v);
+		next if ($i eq "program" || $i eq $format);
+		if ($v eq "") {
+			# Empty values represent flags without an argument.
+			push(@args, "--$i");
+			}
+		else {
+			# Legacy clients can send multiple arguments per value.
+			push(@args, "--$i", split(/\n/, $v));
+			}
 		}
 	}
 
@@ -114,16 +153,22 @@ else {
 	print "Exit status: $?\n";
 	}
 
+# api_error(message, [more-messages...])
+# Joins message fragments without a separator, emits the dispatch error in the
+# requested format, and terminates the request.
 sub api_error
 {
-print "Content-type: text/plain\n\n";
+print "Content-type: ",($format eq 'json' ? 'application/json' :
+	$format eq 'xml' ? 'application/xml' : 'text/plain'),"\n\n";
 if ($format) {
+	# Return dispatch errors using the requested structured format.
 	$data = { 'status' => 'error',
 		  'error' => join("", @_) };
 	$ffunc = "create_".$format."_format";
 	print &$ffunc($data);
 	}
 else {
+	# Text clients retain the legacy ERROR prefix.
 	print "ERROR: ",@_,"\n";
 	}
 CORE::exit(0);

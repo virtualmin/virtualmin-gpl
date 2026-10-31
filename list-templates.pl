@@ -48,6 +48,8 @@ while(@ARGV > 0) {
 
 # Get templates to show
 @tmpls = &list_templates();
+# Apply the API allowlist before the normal display filters.
+@tmpls = grep { &can_use_template($_) } @tmpls if ($access{'api_id'});
 if (!$deleted) {
 	@tmpls = grep { !$_->{'deleted'} } @tmpls;
 	}

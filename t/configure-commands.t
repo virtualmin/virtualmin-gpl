@@ -44,7 +44,14 @@ $module_var_directory = "$ENV{'TEST_MODULE'}/logs";
 do "$ENV{'TEST_SOURCE'}/commands-lib.pl";
 die $@ if $@;
 sub master_admin { !$ENV{'TEST_NONMASTER'} }
+# is_api_access_user(): this fixture checks ordinary administrator commands.
+sub is_api_access_user { 0 }
 sub reseller_admin { 0 }
+# module_root_directory(provider): keep shared command discovery in the fixture.
+sub module_root_directory {
+	return $_[0] eq 'virtual-server' ? $module_root_directory :
+		"$module_root_directory/pro";
+}
 sub indexof {
 	my ($item, @list) = @_;
 	for (my $i=0; $i<@list; $i++) { return $i if $list[$i] eq $item; }

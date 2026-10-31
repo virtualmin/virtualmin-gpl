@@ -143,8 +143,9 @@ else {
 $virt6 = 0;
 $anylimits = 0;
 $email = $config{'contact_email'};
-# Remote API callers that are not the master admin may only create sub-servers
+# Dedicated API accounts may create top-level servers within their permissions.
 my $is_master = &master_admin();
+my $is_api = &is_api_access_user();
 while(@ARGV > 0) {
 	my $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -322,8 +323,8 @@ while(@ARGV > 0) {
 		$anylimits = 1;
 		}
 	elsif ($a eq "--template") {
-		# If no template given (as seen by AWBS), use the default
-		if ($ARGV[0] && $ARGV[0] !~ /^\-\-/) {
+		# Accept template ID 0; an omitted value uses the default.
+		if (defined($ARGV[0]) && $ARGV[0] ne '' && $ARGV[0] !~ /^\-\-/) {
 			$templatename = shift(@ARGV);
 			foreach $t (&list_templates()) {
 				if ($t->{'name'} eq $templatename ||
@@ -335,9 +336,10 @@ while(@ARGV > 0) {
 			}
 		}
 	elsif ($a eq "--plan") {
-		$is_master ||
-			&usage("--plan is only available to the master ".
-			       "administrator");
+		# Check the API account's selected plan after parsing options.
+		$is_master || $is_api ||
+			&usage("--plan requires the master administrator ".
+			       "or a dedicated API account");
 		$planname = shift(@ARGV);
 		foreach $p (&list_plans()) {
 			if ($p->{'id'} eq $planname ||
@@ -586,15 +588,16 @@ if (!$is_master) {
 	  !&can_edit_redirect() &&
 		&usage("You are not allowed to configure redirects");
 	}
-# Non-master callers may only ever create a sub-server, so bail out early
-# before any settings that only apply to top-level servers are looked up
-if (!$is_master) {
+# Ordinary owners may only create a sub-server under an existing account.
+if (!$is_master && !$is_api) {
 	$parentdomain || &usage("Only sub-servers can be created, so the ".
 				"--parent, --alias or --subdom flag must ".
 				"be given");
 	}
 if ($template eq "") {
-	$template = &get_init_template($parentdomain);
+	# API accounts have their own default template.
+	$template = $is_api ? $access{'api_template'} :
+		&get_init_template($parentdomain);
 	}
 $tmpl = &get_template($template);
 $is_master || &can_use_template($tmpl) || &usage($text{'setup_etmpl'});
@@ -602,6 +605,13 @@ $plan = $planid ne '' ? &get_plan($planid) : &get_default_plan();
 # Sub-servers always inherit the plan from their parent, and domain owners
 # have no plans of their own to default to
 $plan || $parentdomain || &usage("Plan does not exist");
+if ($is_api) {
+	# Apply the allowed plan's limits and features, and reject quota overrides.
+	$anylimits && &usage("API accounts must use the limits from a plan");
+	$parentdomain || &can_use_plan($plan) ||
+		&usage("The selected plan is not permitted");
+	$tlimit = $planfeatures = 1;
+	}
 $defip = &get_default_ip($resel);
 $defip6 = &get_default_ip6($resel);
 if ($sharedip) {
@@ -740,9 +750,9 @@ if ($parentdomain) {
 		}
 	}
 
-# Enforce the same restrictions as the user interface for non-master callers,
-# who may only ever create a sub-server under a domain that they own
-if (!$is_master) {
+# Child creation requires access to the parent and its available capacity.
+if (!$is_master && $parent) {
+	$api_access_domain = $parent if ($is_api);
 	&can_create_sub_servers() ||
 		&usage("You are not allowed to create sub-servers");
 	&can_edit_domain($parent) ||
@@ -760,6 +770,14 @@ if (!$is_master) {
 		&usage($text{'setup_eip'});
 	($virt6 || $sharedip6) && !&can_select_ip6() &&
 		&usage($text{'setup_eip6'});
+	}
+if ($is_api && !$parent) {
+	# A new customer must not inherit the previous target's quota context.
+	$api_access_domain = undef;
+	# Apply the installation's domain limits to independent account creation.
+	&can_create_master_servers() || &usage("Account creation is not permitted");
+	my ($left, undef, $max) = &count_domains('realdoms');
+	$left == 0 && &usage("The maximum of $max virtual servers has been reached");
 	}
 
 # Allow user and group names
@@ -1197,7 +1215,8 @@ if (!defined($content)) {
 		}
 	}
 
-# Do it
+# Record ownership before the first save, including partially created servers.
+$dom{'api_owner'} = $access{'api_id'} if ($is_api);
 print "Beginning server creation ..\n\n";
 &lock_domain(\%dom);
 $config{'pre_command'} = $precommand if ($precommand);
