@@ -3255,6 +3255,7 @@ if ($ok) {
 			# Disable quotas for this domain, so that restores work
 			my $qd = $d->{'parent'} ? &get_domain($d->{'parent'})
 						: $d;
+			local $restore_quotas_disabled{$qd->{'id'}} = &has_home_quotas();
 			if (&has_home_quotas()) {
 				&set_server_quotas($qd, 0, 0);
 				}
@@ -3342,6 +3343,7 @@ if ($ok) {
 			&save_domain($d);
 
 			# Re-enable quotas for this domain, or parent
+			$restore_quotas_disabled{$qd->{'id'}} = 0;
 			if (&has_home_quotas()) {
 				&set_server_quotas($qd);
 				}
