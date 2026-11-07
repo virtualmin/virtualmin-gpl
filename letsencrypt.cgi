@@ -68,6 +68,7 @@ if ($in{'only'}) {
 	$d->{'letsencrypt_dname'} = $custom_dname;
 	$d->{'letsencrypt_dwild'} = $in{'dwild'};
 	$d->{'letsencrypt_renew'} = $in{'renew'};
+	$d->{'letsencrypt_ctype'} = $in{'ctype'} =~ /^ec/ ? "ecdsa" : "rsa";
 	$d->{'letsencrypt_nodnscheck'} = $nodnscheck;
 	$d->{'letsencrypt_subset'} = $subset;
 	$d->{'letsencrypt_email'} = $in{'email'};
