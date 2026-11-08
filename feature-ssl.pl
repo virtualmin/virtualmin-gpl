@@ -2439,9 +2439,12 @@ if (!-s $d->{'ssl_cert'} && !-s $d->{'ssl_key'}) {
 	&$first_print($text{'setup_openssl'});
 	&lock_file($d->{'ssl_cert'});
 	&lock_file($d->{'ssl_key'});
-	my @alts = ( $d->{'dom'}, "localhost",
-			&get_system_hostname(0),
-			&get_system_hostname(1) );
+	my @alts = ( $d->{'dom'} );
+	if ($d->{'defaultdomain'}) {
+		push(@alts, "localhost",
+			    &get_system_hostname(0),
+			    &get_system_hostname(1) );
+		}
 	@alts = &unique(@alts);
 	my $err = &generate_self_signed_cert(
 		$d->{'ssl_cert'}, $d->{'ssl_key'}, undef, 1825,
