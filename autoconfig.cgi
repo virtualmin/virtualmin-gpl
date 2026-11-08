@@ -53,7 +53,16 @@ elsif ($ENV{'REQUEST_METHOD'} eq 'POST') {
 	$mode = "outlook";
 	}
 else {
-	&error_exit("Missing emailaddress parameter");
+	# Thunderbird, but with no email
+        my $h = lc($ENV{'HTTP_HOST'} || $ENV{'SERVER_NAME'});
+        $h =~ s/:\d+$//;
+        $h =~ s/^(autoconfig|autodiscover|www)\.//;
+        $h =~ /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/ ||
+	    &error_exit("Missing emailaddress parameter and invalid hostname");
+        $SMTP_DOMAIN = $h;
+        $mailbox = '%EMAILLOCALPART%';
+        $email = '%EMAILADDRESS%';
+        $mode = "thunderbird";
 	}
 
 # Work out the full username
