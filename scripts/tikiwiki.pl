@@ -197,9 +197,8 @@ if (!$upgrade) {
 	}
 	# Rename _htaccess to .htaccess
 	if (&domain_has_website($d) eq 'web') {
-		&run_as_domain_user(
-			$d, "mv ".quotemeta("$opts->{'dir'}/_htaccess")." ".
-			    quotemeta("$opts->{'dir'}/.htaccess"));
+		&rename_as_domain_user($d, "$opts->{'dir'}/_htaccess",
+				      "$opts->{'dir'}/.htaccess");
 		}
 } else {
 	&tikiwiki_postinstallation($d, $upgrade, $opts);
