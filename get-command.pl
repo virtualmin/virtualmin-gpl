@@ -78,8 +78,8 @@ foreach my $l (split(/\r?\n/, $out)) {
 $args = join(" ", @helpargs);
 while($args =~ /\S/) {
 	$args =~ s/^\s*\|\s*//;
-	if ($args =~ /^\s*\[([^\]]+)\](\*|\+|)(.*)$/) {
-		# One or more optional args
+	if ($args =~ /^\s*\[((?:[^\[\]]|\[[^\[\]]*\])+)\](\*|\+|)(.*)$/) {
+		# One or more optional args, allowing brackets inside a value
 		$opt = 1;
 		$flags = $1;
 		$repeat = $2;
