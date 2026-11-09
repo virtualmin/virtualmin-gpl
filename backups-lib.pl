@@ -426,7 +426,7 @@ foreach my $desturl (@$desturls) {
 				quotemeta($qserver || $server);
 		my $rmcmd = $sshcmd." rm -f ".quotemeta($testfile);
 		my $rmerr;
-		&run_ssh_command($rmcmd, $pass, \$rmerr);
+		&run_ssh_command($rmcmd, $pass, \$rmerr, $asuser);
 
 		if ($dirfmt && $path ne "/") {
 			# Also create the destination directory now, by running
@@ -612,14 +612,17 @@ foreach my $desturl (@$desturls) {
 		if ($dirfmt) {
 			# Directory should already exist
 			my $mkdirerr;
-			&sftp_commands($r, $pass, $port, ["mkdir $path"], \$mkdirerr);
-			$out = &sftp_commands($r, $pass, $port, ["ls $path"], \$err);
+			&sftp_commands($r, $pass, $port, ["mkdir $path"],
+				       \$mkdirerr, $asuser);
+			$out = &sftp_commands($r, $pass, $port, ["ls $path"],
+				     \$err, $asuser);
 			}
 		else {
 			# Parent should exist
 			my $ppath = $path;
 			$ppath =~ s/\/[^\/]+$//;
-			$out = &sftp_commands($r, $pass, $port, ["ls $ppath"], \$err);
+			$out = &sftp_commands($r, $pass, $port, ["ls $ppath"],
+				     \$err, $asuser);
 			}
 		if ($err || $out =~ /not\s+found/) {
 			&$second_print(&text('backup_esftpdir', &html_escape($err || $out)));
