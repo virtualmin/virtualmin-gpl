@@ -143,6 +143,47 @@ is(scalar(@virtual_server::ssh_calls), 3, 'each backup file is removed');
 is($virtual_server::ssh_calls[0]->[3], "owner",
 	'SSH deletion is passed the owner as the executing user');
 
+# Purging old local backups also runs as the owner when a domain is given.
+my $purge = "$home/virtualmin-backup";
+mkdir($purge) || die $!;
+my $old = time() - 10*24*60*60;
+foreach my $f ("2020-01-01.tar.gz", "2020-01-01.tar.gz.info",
+	       "2020-01-01.tar.gz.dom") {
+	open($fh, '>', "$purge/$f") || die $!;
+	close($fh);
+	utime($old, $old, "$purge/$f") || die $!;
+	}
+@virtual_server::unlinked = ( );
+@virtual_server::user_unlinked = ( );
+virtual_server::purge_domain_backups("$purge/%Y-%m-%d.tar.gz", 1, undef, $d);
+is_deeply(\@virtual_server::unlinked, [ ], 'owner purge never runs as root');
+is_deeply(\@virtual_server::user_unlinked,
+	[ [ $d, "$purge/2020-01-01.tar.gz", "$purge/2020-01-01.tar.gz.info",
+	    "$purge/2020-01-01.tar.gz.dom" ] ],
+	'owner purge deletes the old backup and its metadata as the owner');
+{
+	# A permission failure must reach the caller and not count as a deletion.
+	no warnings 'redefine';
+	local *virtual_server::unlink_file_as_domain_user = sub {
+		return (0, 'Permission denied');
+		};
+	my @messages;
+	local $virtual_server::second_print = sub { push(@messages, @_) };
+	ok(!virtual_server::purge_domain_backups(
+		"$purge/%Y-%m-%d.tar.gz", 1, undef, $d),
+		'owner purge reports a failed deletion');
+	like(join("\n", @messages), qr/Permission denied/,
+		'purge reports the deletion error');
+	unlike(join("\n", @messages), qr/backup_deleted /,
+		'failed deletion is not reported as successful');
+}
+@virtual_server::user_unlinked = ( );
+virtual_server::purge_domain_backups("$purge/%Y-%m-%d.tar.gz", 1);
+is_deeply([ sort @virtual_server::unlinked ],
+	[ "$purge/2020-01-01.tar.gz", "$purge/2020-01-01.tar.gz.dom",
+	  "$purge/2020-01-01.tar.gz.info" ],
+	'root purge deletes the same files directly');
+
 # Deleting from a log finds the owner itself, for every caller of it.
 my $log = { 'dest' => "ssh://u:p\@backup.test:/srv/x.tar.gz",
 	    'doms' => 'sub.test top.test' };

@@ -6213,9 +6213,24 @@ if ($mode == 0) {
 					             : 'backup_deletingfile',
 				            "<tt>$path</tt>", $old));
 			my $sz = &nice_size(&disk_usage_kb($path)*1024);
-			&unlink_file($path.".info") if (!-d $path);
-			&unlink_file($path.".dom") if (!-d $path);
-			&unlink_file($path);
+			my @del = ( $path );
+			push(@del, $path.".info", $path.".dom") if (!-d $path);
+			if ($asd) {
+				# Delete as the domain owner, who wrote the files
+				my ($deleted, $err) =
+					&unlink_file_as_domain_user($asd, @del);
+				if (!$deleted) {
+					# Report failures without counting a deletion
+					&$second_print(&text('backup_edelbucket',
+							    &html_escape($err)));
+					$ok = 0;
+					next;
+					}
+				}
+			else {
+				# Master backups retain root permissions
+				&unlink_file(@del);
+				}
 			&$second_print(&text('backup_deleted', $sz));
 			$pcount++;
 			}
