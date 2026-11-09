@@ -210,7 +210,9 @@ my $homebin = "$d->{'home'}/bin";
 my $wpcli = "$homebin/wp";
 my $wpcli_old = "$opts->{'dir'}/wp-cli.phar";
 &unlink_file_as_domain_user($d, $wpcli_old) if (-f $wpcli_old);
-my $wp = "cd $opts->{'dir'} && $dom_php_bin $wpcli --path=\"$opts->{'dir'}\"";
+# Quote paths so that the install directory cannot alter the shell command
+my $qdir = quotemeta($opts->{'dir'});
+my $wp = "cd $qdir && $dom_php_bin ".quotemeta($wpcli)." --path=$qdir";
 
 # Copy WP-CLI
 &make_dir_as_domain_user($d, $opts->{'dir'}, 0755) if (!-d $opts->{'dir'});
@@ -248,7 +250,7 @@ if (!$upgrade) {
 				"$wp config set table_prefix ".
 				quotemeta($opts->{'dbtbpref'}).
 				" --type=variable".
-				" --path=".$opts->{'dir'}." 2>&1");
+				" --path=".quotemeta($opts->{'dir'})." 2>&1");
 			if ($?) {
 				return (-1, "\`wp config set table_prefix\` failed : $out$err_continue");
 				}
