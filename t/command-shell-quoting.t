@@ -79,6 +79,31 @@ is_deeply(retrieve($capture),
 	'user wrapper removes all selectors and preserves auxiliary values');
 ok(!-e $marker, 'user wrapper does not execute input');
 
+# A quoted Git path must work for both exact and wildcard file requests.
+my $work = File::Spec->catdir($dir, "work 'quoted'");
+mkdir($work) || die "Cannot create $work: $!";
+mkdir("$work/webmin") || die "Cannot create config directory: $!";
+mkdir("$work/files") || die "Cannot create fixture directory: $!";
+my $filename = "files/file'\$(touch injected)`touch injected`";
+open($fh, '>', "$work/$filename") || die "Cannot write fixture: $!";
+print {$fh} "literal configuration\n";
+close($fh);
+is(system('git', 'init', '-q', $work), 0, 'initialize private Git fixture');
+is(system('git', '-C', $work, 'add', '--', $filename), 0,
+	'add file with shell syntax in its name');
+is(system('git', '-C', $work, '-c', 'user.name=Fixture',
+	'-c', 'user.email=fixture@example.test', '-c', 'commit.gpgsign=false',
+	'commit', '-qm', 'fixture'), 0, 'commit private Git fixture');
+local $ENV{'WEBMIN_CONFIG'} = "$work/webmin";
+foreach my $file ($filename, "files/file'*") {
+	($status, $output) = run_script('list-config-revisions.pl',
+		'--file', $file);
+	is($status, 0, 'configuration history command completes');
+	like($output, qr/literal configuration/,
+		'configuration history reads literal shell characters');
+	ok(!-e "$dir/injected", 'configuration history does not execute paths');
+	}
+
 done_testing();
 
 # run_script(file, arguments...)
