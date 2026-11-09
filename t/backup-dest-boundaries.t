@@ -96,6 +96,23 @@ foreach my $url (sort keys %providers) {
 	$virtual_server::master = 0;
 	}
 
+# Remote file listing code keeps the directory as data, not code.
+my $quoted = "$dir/it's \\ \"odd\" dir";
+mkdir($quoted) || die $!;
+foreach my $f ("a.info", "b.info", "c.dom") {
+	open(my $fh, '>', "$quoted/$f") || die $!;
+	close($fh);
+	}
+my $code = virtual_server::remote_glob_code($quoted, ".info");
+my $list = eval $code;
+is($@, '', 'generated listing code compiles with quotes and backslashes');
+is_deeply([ sort @$list ], [ "$quoted/a.info", "$quoted/b.info" ],
+	'generated listing code finds only matching files');
+$code = virtual_server::remote_glob_code("$dir/none'; die 'injected", "");
+$list = eval $code;
+is($@, '', 'quote characters in the directory cannot alter the code');
+is_deeply($list, [ ], 'unmatched directory lists nothing');
+
 # Stored Webmin server logins are only used by the master administrator.
 @virtual_server::servers = ( { 'host' => 'backup.test', 'port' => 10000,
 			       'user' => 'root', 'pass' => 'stored' } );

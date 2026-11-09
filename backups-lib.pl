@@ -4328,7 +4328,7 @@ elsif ($mode == 9) {
 			eval {
 				local $main::error_must_die = 1;
 				my $fls = &remote_eval($w, "webmin",
-						     "[ glob('$path/*$sfx') ]");
+					&remote_glob_code($path, $sfx));
 				foreach my $f (@$fls) {
 					$f =~ s/^.*\///;
 					&remote_read($w, "$temp/$f",
@@ -4367,7 +4367,7 @@ elsif ($mode == 9) {
 			eval {
 				local $main::error_must_die = 1;
 				my $fls = &remote_eval($w, "webmin",
-						     "[ glob('$path/*') ]");
+					&remote_glob_code($path, ""));
 				foreach my $f (@$fls) {
 					$f =~ s/^.*\///;
 					&remote_read($w, "$temp/$f",
@@ -4786,6 +4786,18 @@ $file =~ s/\/+$//;
 $file =~ /^\S+$/ || return (undef, $text{'backup_edest2'});
 $file =~ /\.\./ && return (undef, $text{'backup_edest3'});
 return ("$d->{'home'}/$home_virtualmin_backup/$file", undef);
+}
+
+# remote_glob_code(directory, suffix)
+# Returns Perl code that lists files ending with suffix in a directory on a
+# remote Webmin server. The directory is embedded as a quoted literal so that
+# its contents cannot change the code that is evaluated.
+sub remote_glob_code
+{
+my ($dir, $sfx) = @_;
+$dir =~ s/([\\'])/\\$1/g;
+$sfx =~ s/([\\'])/\\$1/g;
+return "my \$d = '$dir'; [ glob(\"\\Q\$d\\E/*$sfx\") ]";
 }
 
 # nice_backup_url(string, [caps-first], [show-backup-path-opts])
