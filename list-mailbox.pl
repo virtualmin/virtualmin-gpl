@@ -93,6 +93,13 @@ if ($folderid) {
 else {
 	$folder = $folders[0];
 	}
+# Domain owners control their users' folder lists, so only read mail files
+# that the mail user actually owns
+$checkowner = !&master_admin();
+if ($checkowner &&
+    !&list_mailbox_file_owned($folder->{'file'}, $user->{'uid'})) {
+	&usage("Mail folder is not owned by $uname");
+	}
 if ($filesonly) {
 	# Just filenames
 	@mails = &mailboxes::mailbox_list_mails(undef, undef, $folder, 1);
@@ -102,6 +109,8 @@ if ($filesonly) {
                 next if ($first && $i > $first);
                 next if ($last && $i < @mails - $last);
 		my $f = $m->{'file'} || $folder->{'file'};
+		next if ($checkowner &&
+			 !&list_mailbox_file_owned($f, $user->{'uid'}));
 		print $f,"\n" if (!$done{$f}++);
 		}
 	}
@@ -113,11 +122,24 @@ else {
 		my $m = $mails[$i];
 		next if ($first && $i > $first);
 		next if ($last && $i < @mails - $last);
+		next if ($checkowner &&
+			 !&list_mailbox_file_owned($m->{'file'} || $folder->{'file'},
+						   $user->{'uid'}));
 		&mailboxes::send_mail($m, $temp);
 		print &read_file_contents($temp);
 		unlink($temp);
 		}
 	}
+
+# list_mailbox_file_owned(file, uid)
+# Returns 1 if a mail file or directory exists and is owned by the given uid.
+# Links are followed, so a link to another user's file is rejected.
+sub list_mailbox_file_owned
+{
+my ($file, $uid) = @_;
+my @st = stat($file);
+return @st && $st[4] == $uid ? 1 : 0;
+}
 
 sub usage
 {
