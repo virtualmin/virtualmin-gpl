@@ -113,6 +113,56 @@ $list = eval $code;
 is($@, '', 'quote characters in the directory cannot alter the code');
 is_deeply($list, [ ], 'unmatched directory lists nothing');
 
+# Local deletion runs as the owner when a domain is given, and as root
+# otherwise.
+mkdir("$dir/target") || die $!;
+open(my $fh, '>', "$dir/target/victim.tar.gz") || die $!;
+close($fh);
+@virtual_server::unlinked = ( );
+@virtual_server::user_unlinked = ( );
+$err = virtual_server::delete_backup("$dir/target/victim.tar.gz");
+ok(!$err, 'deletion of a plain path succeeds');
+is_deeply(\@virtual_server::unlinked, [ "$dir/target/victim.tar.gz" ],
+	'root deletion unlinks the file directly');
+is_deeply(\@virtual_server::user_unlinked, [ ],
+	'root deletion does not switch user');
+@virtual_server::unlinked = ( );
+$err = virtual_server::delete_backup("$dir/target/victim.tar.gz", $d);
+ok(!$err, 'owner local deletion succeeds');
+is_deeply(\@virtual_server::unlinked, [ ], 'owner deletion never runs as root');
+is($virtual_server::user_unlinked[0]->[0], $d,
+	'local deletion receives the owner domain');
+is($virtual_server::user_unlinked[0]->[1],
+	"$dir/target/victim.tar.gz", 'local deletion runs on the requested path');
+
+# Remote deletion over SSH runs as the given Unix user.
+@virtual_server::ssh_calls = ( );
+virtual_server::delete_backup("ssh://u:p\@backup.test:/srv/x.tar.gz",
+			      $d);
+is(scalar(@virtual_server::ssh_calls), 3, 'each backup file is removed');
+is($virtual_server::ssh_calls[0]->[3], "owner",
+	'SSH deletion is passed the owner as the executing user');
+
+# Deleting from a log finds the owner itself, for every caller of it.
+my $log = { 'dest' => "ssh://u:p\@backup.test:/srv/x.tar.gz",
+	    'doms' => 'sub.test top.test' };
+$virtual_server::master = 0;
+@virtual_server::ssh_calls = ( );
+virtual_server::delete_backup_from_log($log);
+is($virtual_server::ssh_calls[0]->[3], "owner",
+	'owner log deletion uses the top-level domain owner');
+$virtual_server::reseller = 1;
+@virtual_server::ssh_calls = ( );
+virtual_server::delete_backup_from_log($log);
+ok(!defined($virtual_server::ssh_calls[0]->[3]),
+	'reseller log deletion does not borrow a customer identity');
+$virtual_server::reseller = 0;
+$virtual_server::master = 1;
+@virtual_server::ssh_calls = ( );
+virtual_server::delete_backup_from_log($log);
+ok(!defined($virtual_server::ssh_calls[0]->[3]),
+	'master log deletion keeps the current identity');
+
 # Stored Webmin server logins are only used by the master administrator.
 @virtual_server::servers = ( { 'host' => 'backup.test', 'port' => 10000,
 			       'user' => 'root', 'pass' => 'stored' } );

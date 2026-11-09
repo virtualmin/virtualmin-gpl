@@ -7591,10 +7591,17 @@ return @rv;
 }
 
 # delete_backup_from_log(&log)
-# If a backup log used a separate file for each domain, delete them all
+# If a backup log used a separate file for each domain, delete them all.
+# Domain owners delete files as their Unix user, like the backup did.
 sub delete_backup_from_log
 {
 my ($log) = @_;
+my $asd;
+if (!&master_admin() && !&reseller_admin()) {
+	my @ods = &get_domains_by_names(split(/\s+/, $log->{'doms'}));
+	$asd = &get_backup_as_domain(\@ods);
+	$asd || return "Could not determine the owner of this backup";
+	}
 my $dest = $log->{'dest'};
 my $c = defined($log->{'compression'}) ? $log->{'compression'}
 				       : $config{'compression'};
@@ -7603,20 +7610,23 @@ if ($log->{'separate'}) {
 	my $err;
 	foreach my $dname (split(/\s+/, $log->{'doms'})) {
 		my $ddest = $dest."/".$dname.".".$sfx;
-		$err ||= &delete_backup($ddest);
+		$err ||= &delete_backup($ddest, $asd);
 		}
 	return $err;
 	}
 else {
-	return &delete_backup($dest);
+	return &delete_backup($dest, $asd);
 	}
 }
 
-# delete_backup(dest)
-# Delete the backup from some destination path, like /backup/foo.com.tar.gz
+# delete_backup(dest, [&as-domain])
+# Delete the backup from some destination path, like /backup/foo.com.tar.gz.
+# If as-domain is given, local and SSH deletion runs as that domain's Unix
+# user rather than as root.
 sub delete_backup
 {
-my ($dest) = @_;
+my ($dest, $asd) = @_;
+my $asuser = $asd ? $asd->{'user'} : undef;
 my ($proto, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
 my $rsh;
 foreach my $sfx ("", ".info", ".dom") {
@@ -7625,9 +7635,18 @@ foreach my $sfx ("", ".info", ".dom") {
 	if ($proto == 0) {
 		# File on this system (but skip if missing)
 		if (-e $spath) {
-			# Avoid loading backup files into memory (can be huge)
-			my $no_log_file_changes = 1;
-			$err = &unlink_logged($spath) ? undef : $!;
+			if ($asd) {
+				# Delete as the domain owner, who wrote the file
+				my ($deleted, $delete_err) =
+					&unlink_file_as_domain_user($asd, $spath);
+				$err = $deleted ? undef :
+					($delete_err || "Failed to delete backup");
+				}
+			else {
+				# Avoid loading backup files into memory (can be huge)
+				my $no_log_file_changes = 1;
+				$err = &unlink_logged($spath) ? undef : $!;
+				}
 			}
 		}
 	elsif ($proto == 1 || $proto == 14) {
@@ -7645,7 +7664,7 @@ foreach my $sfx ("", ".info", ".dom") {
 			     ($user ? quotemeta($user)."\@" : "").
 			     quotemeta($qhost);
 		my $rmcmd = $sshcmd." rm -rf ".quotemeta($spath);
-		&run_ssh_command($rmcmd, $pass, \$err);
+		&run_ssh_command($rmcmd, $pass, \$err, $asuser);
 		}
 	elsif ($proto == 3) {
 		# S3 bucket file
