@@ -502,6 +502,10 @@ if ($keyid) {
 $asowner = 1 if (!$safe_backup);
 if ($asowner && @rdoms) {
 	$asd = &get_domain_by("dom", $rdoms[0]);
+	# Authorize the Unix identity before reading a remote archive.
+	if (!$safe_backup && (!$asd || !&can_edit_domain($asd))) {
+		&usage(&text('remote_ecannotdom', $rdoms[0]));
+		}
 	}
 
 # Find the selected domains

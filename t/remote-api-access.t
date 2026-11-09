@@ -487,6 +487,15 @@ foreach my $command (sort keys %expected_commands) {
 			"$command checks the restore permission");
 		like($source, qr/can_edit_domain\s*\(\s*\$dinfo\s*\)/,
 			"$command checks ownership of each restored domain");
+		my $preauth = index($source,
+			'if ($asowner && @rdoms) {');
+		my $archive_read = index($source,
+			'($cont, $contdoms) = &backup_contents(');
+		ok($preauth >= 0 && $preauth < $archive_read,
+			"$command authorizes targets before reading the archive");
+		like($source,
+			qr/!\$safe_backup && \(!\$asd \|\| !&can_edit_domain\(\$asd\)\)/,
+			"$command uses an authorized domain for remote source access");
 		like($source, qr/safe_backup_features/,
 			"$command limits non-master restores to safe features");
 		}
