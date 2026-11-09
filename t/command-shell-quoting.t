@@ -69,6 +69,16 @@ is_deeply(retrieve($capture),
 	'batch wrapper preserves literal values without injecting options');
 ok(!-e $marker, 'batch wrapper does not execute input');
 
+($status, $output) = run_script('modify-users.pl', '--domain', 'owned.test',
+	'--domain', 'second.test', '--user', 'one', '--user', 'two',
+	'--real', $value);
+is($status, 0, 'user wrapper executes its child');
+is_deeply(retrieve($capture),
+	[ 'modify-user', '--domain', 'owned.test', '--user', 'one',
+	  '--real', $value ],
+	'user wrapper removes all selectors and preserves auxiliary values');
+ok(!-e $marker, 'user wrapper does not execute input');
+
 done_testing();
 
 # run_script(file, arguments...)
