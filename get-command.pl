@@ -42,7 +42,7 @@ while(@ARGV > 0) {
 # Find the command
 $cmd || &usage("Missing --command parameter");
 $cmd =~ s/\.pl$//;
-!&master_admin() && $cmd !~ /^[a-z0-9_\-]+$/i &&
+$cmd !~ /^[a-z0-9_\-]+$/i &&
 	&usage("API command $cmd was not found");
 &require_remote_api_command();
 !&master_admin() && !&can_remote_as_user($cmd) &&
@@ -52,14 +52,7 @@ if (my $msg = &api_command_unavailable_message($cmd)) {
 	exit(1);
 	}
 $cmd .= ".pl" if ($cmd !~ /\.pl$/);
-foreach $dir ($module_root_directory,
-	      map { &module_root_directory($_) } @plugins) {
-	if (-r "$dir/$cmd") {
-		$cmdpath = "$dir/$cmd";
-		$cmddir = $dir;
-		last;
-		}
-	}
+($cmdpath, $cmddir) = &resolve_remote_api_command($cmd);
 $cmdpath || &usage("API command $cmd was not found");
 
 # Extract description

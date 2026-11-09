@@ -5,6 +5,7 @@ use warnings;
 use Test::More;
 use File::Basename qw(dirname);
 use File::Spec;
+use File::Temp qw(tempdir);
 use Cwd qw(abs_path);
 
 my $root = abs_path(File::Spec->catdir(dirname(__FILE__), '..'));
@@ -145,6 +146,29 @@ my %expected_commands = (
 {
 	no warnings qw(once redefine);
 	local %main::access = ( 'edit_remote_api' => 1 );
+	local @main::plugins = qw(unsafe-plugin safe-plugin);
+	local *main::master_admin = sub { 0 };
+	local *main::reseller_admin = sub { 0 };
+	local *main::plugin_defined = sub {
+		return $_[0] eq 'safe-plugin' &&
+			$_[1] eq 'feature_remote_api_commands';
+		};
+	local *main::plugin_call = sub {
+		return ('plugin-command.pl');
+		};
+	ok(&plugin_remote_api_command('safe-plugin', 'plugin-command'),
+		'exact declaring plugin authorizes its command');
+	ok(!&plugin_remote_api_command('unsafe-plugin', 'plugin-command'),
+		'other plugins cannot inherit a command declaration');
+	ok(&can_remote_as_user('plugin-command'),
+		'declared plugin command is available to permitted users');
+	ok(!&can_remote_as_user('other-plugin-command'),
+		'undeclared plugin command remains unavailable');
+}
+
+{
+	no warnings qw(once redefine);
+	local %main::access = ( 'edit_remote_api' => 1 );
 	local *main::master_admin = sub { 0 };
 	local *main::reseller_admin = sub { 0 };
 	local *main::can_edit_domain = sub { $_[0]->{'allowed'} };
@@ -200,6 +224,73 @@ my %expected_commands = (
 	local *main::master_admin = sub { 1 };
 	ok(&remote_api_can_domain(undef, 'not-allowed.pl'),
 		'master API and standalone root behavior remains unrestricted');
+	}
+
+{
+	# Bind command authorization to the module containing the executable. A
+	# declaration from one plugin must not expose core or another plugin's file.
+	no warnings qw(once redefine);
+	my $tree = tempdir(DIR => '/tmp', CLEANUP => 1);
+	my %dirs = (
+		'virtual-server' => File::Spec->catdir($tree, 'core'),
+		'virtual-server/pro' => File::Spec->catdir($tree, 'pro'),
+		'unsafe-plugin' => File::Spec->catdir($tree, 'unsafe'),
+		'safe-plugin' => File::Spec->catdir($tree, 'safe'),
+		);
+	mkdir($_) || die $! foreach (values %dirs);
+	my @fixtures = (
+		[ 'virtual-server', 'create-domain.pl' ],
+		[ 'safe-plugin', 'create-domain.pl' ],
+		[ 'virtual-server', 'modify-limits.pl' ],
+		[ 'safe-plugin', 'modify-limits.pl' ],
+		[ 'unsafe-plugin', 'plugin-only.pl' ],
+		[ 'safe-plugin', 'plugin-only.pl' ],
+		[ 'unsafe-plugin', 'unsafe-only.pl' ],
+		);
+	foreach my $fixture (@fixtures) {
+		my ($module, $name) = @$fixture;
+		my $path = File::Spec->catfile($dirs{$module}, $name);
+		open(my $fh, '>', $path) || die $!;
+		print $fh "=head1 $name\n\nFixture command.\n\n=cut\n";
+		close($fh) || die $!;
+		chmod(0755, $path) || die $!;
+		}
+	local $main::module_name = 'virtual-server';
+	local $main::module_root_directory = $dirs{'virtual-server'};
+	local @main::plugins = qw(unsafe-plugin safe-plugin);
+	local %main::access = ( 'edit_remote_api' => 1 );
+	my $master = 0;
+	local *main::master_admin = sub { $master };
+	local *main::reseller_admin = sub { 0 };
+	local *main::module_root_directory = sub { return $dirs{$_[0]} };
+	local *main::plugin_defined = sub {
+		return $_[0] eq 'safe-plugin' &&
+			$_[1] eq 'feature_remote_api_commands';
+		};
+	local *main::plugin_call = sub {
+		return qw(create-domain.pl modify-limits.pl plugin-only.pl
+			  unsafe-only.pl);
+		};
+
+	my ($path, $dir, $module) = &resolve_remote_api_command('create-domain');
+	is($path, File::Spec->catfile($dirs{'virtual-server'},
+		'create-domain.pl'), 'audited core command keeps precedence');
+	is($module, 'virtual-server', 'core command reports its source module');
+	ok(&can_remote_as_user('modify-limits'),
+		'plugin declaration makes its own colliding command available');
+	($path, $dir, $module) = &resolve_remote_api_command('modify-limits');
+	is($path, File::Spec->catfile($dirs{'safe-plugin'},
+		'modify-limits.pl'), 'plugin declaration cannot expose core collision');
+	is($module, 'safe-plugin', 'collision resolves to declaring plugin');
+	($path, $dir, $module) = &resolve_remote_api_command('plugin-only');
+	is($path, File::Spec->catfile($dirs{'safe-plugin'},
+		'plugin-only.pl'), 'other plugin cannot inherit the declaration');
+	($path) = &resolve_remote_api_command('unsafe-only');
+	ok(!$path, 'declaration without an executable in that plugin fails closed');
+	$master = 1;
+	($path, $dir, $module) = &resolve_remote_api_command('modify-limits');
+	is($path, File::Spec->catfile($dirs{'virtual-server'},
+		'modify-limits.pl'), 'master caller can use the core command');
 	}
 
 {

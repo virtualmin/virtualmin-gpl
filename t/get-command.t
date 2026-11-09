@@ -18,6 +18,7 @@ sub write_file {
 
 # Exercise the real metadata parser without loading Webmin or running commands.
 write_file("$tmp/example.pl", "=head1 example.pl\n\nFixture command.\n\n=cut\n");
+chmod(0755, "$tmp/example.pl") or die "$tmp/example.pl: $!";
 write_file("$tmp/driver.pl", <<'PERL');
 package virtual_server;
 $module_name = 'virtual-server';
@@ -27,6 +28,10 @@ sub parse_common_cli_flags { }
 sub master_admin { 1 }
 sub require_remote_api_command { }
 sub api_command_unavailable_message { return undef; }
+sub resolve_remote_api_command {
+	return ("$ENV{'TEST_MODULE'}/example.pl", $ENV{'TEST_MODULE'},
+		'virtual-server');
+}
 sub clean_environment { }
 sub reset_environment { }
 sub read_file_contents {

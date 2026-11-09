@@ -9,6 +9,8 @@ use Socket;
 $trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &ReadParse();
+$in{'program'} =~ /^[a-z0-9\.\-]+$/i || &api_error($text{'remote_eprogram'})
+	if ($in{'program'});
 &can_remote($in{'program'}) || &api_error($text{'remote_ecannot'});
 
 if (!$in{'program'}) {
@@ -40,16 +42,7 @@ $format = exists($in{'json'}) ? 'json' :
 # Build the arg list
 $main::virtualmin_remote_api = 1;
 $ENV{'VIRTUALMIN_REMOTE_API'} = 1;
-$in{'program'} =~ /^[a-z0-9\.\-]+$/i || &api_error($text{'remote_eprogram'});
-$cmd = $dir = undef;
-foreach $m ($module_name, "$module_name/pro", @plugins) {
-	$mdir = &module_root_directory($m);
-	$mcmd = "$mdir/$in{'program'}.pl";
-	if (-x $mcmd) {
-		$cmd = $mcmd;
-		$dir = $mdir;
-		}
-	}
+($cmd, $dir, $mod) = &resolve_remote_api_command($in{'program'});
 $cmd || &api_error(&text('remote_eprogram2', $in{'program'}));
 if ($format && !defined($in{'simple-multiline'})) {
 	# Always force multiline format, as JSON output makes no sense
