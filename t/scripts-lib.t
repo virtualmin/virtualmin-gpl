@@ -29,6 +29,17 @@ is_deeply(
 	[ 'php84-mysqlnd' ],
 	'other package managers retain the legacy dotless form');
 
+ok(&valid_script_install_path('/'), 'root install path is valid');
+ok(&valid_script_install_path('/apps/my_app-1.2'),
+	'plain nested install path is valid');
+ok(&valid_script_install_path("/apps/\xC3\xA9"),
+	'non-ASCII install path bytes are valid');
+foreach my $path ('relative', '/two words', q{/quote'value}, '/$(id)',
+		  "/line\nbreak", '/apps/../other') {
+	ok(!&valid_script_install_path($path),
+		"unsafe install path is rejected: $path");
+	}
+
 {
 	no warnings qw(once redefine);
 	my $dir = tempdir(CLEANUP => 1);
@@ -91,6 +102,22 @@ foreach my $installer (qw(script_install.cgi install-script.pl)) {
 	close($fh);
 	like($source, qr/script_path_used_by_proxy\s*\(/,
 		"$installer checks active and feature-plugin proxy paths");
+	like($source, qr/valid_script_install_path\s*\(\$opts->\{'path'\}\)/,
+		"$installer validates the URL path it is given");
+	if ($installer eq 'install-script.pl') {
+		# Flags are validated when parsed, and --opt cannot replace them.
+		# Upgrades reuse stored options and are not re-validated.
+		like($source, qr/valid_script_install_path\s*\(\$forcedir\)/,
+			"$installer validates the forced directory flag");
+		like($source,
+			qr/indexof\(\$oname,\s*"path",\s*"dir",\s*"db",\s*"newdb"\)/,
+			"$installer stops --opt from replacing validated options");
+		}
+	else {
+		like($source,
+			qr/if \(!\$sinfo\) \{.*?valid_script_install_path\s*\(\$opts->\{'dir'\}\)/s,
+			"$installer validates the directory for new installs only");
+		}
 	like($source,
 		qr/if \(!\$sinfo && &script_path_used_by_proxy\s*\(/,
 		"$installer checks proxy paths independently of script overlap");
