@@ -537,6 +537,9 @@ foreach my $command (sort keys %expected_commands) {
 			"$command validates owner-supplied proxy URLs");
 		like($source, qr/defined\(\$aliasredir\).*can_edit_redirect/s,
 			"$command requires redirect permission");
+		like($source,
+			qr/\$subprefix !~ \/\^\[a-z0-9.*?\\z\/i.*?\$subprefix =~ \/\\\.\\\.\//s,
+			"$command validates the sub-server document directory");
 		}
 	else {
 		like($source, qr/get_remote_api_domain(?:s)?\s*\(/,

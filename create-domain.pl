@@ -747,6 +747,14 @@ if (!$is_master) {
 		&usage("You are not allowed to create sub-servers");
 	&can_edit_domain($parent) ||
 		&usage(&text('remote_ecannotdom', $parentdomain));
+	# The sub-domain document directory must stay under the parent's web
+	# root, as modify-web.pl also requires
+	if ($subprefix &&
+	    ($subprefix !~ /^[a-z0-9\.\_\/-]+\z/i ||
+	     $subprefix =~ /^\// || $subprefix =~ /\/\z/ ||
+	     $subprefix =~ /\.\./)) {
+		&usage("Invalid sub-domain document directory");
+		}
 	# Check the sub-server limit that applies to this parent
 	my ($dleft, $dreason, $dmax) = &count_domains(
 		$aliasdomain ? "aliasdoms" : "realdoms");
