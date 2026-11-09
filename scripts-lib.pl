@@ -57,6 +57,10 @@ sub get_script
 {
 my ($name, $coreonly) = @_;
 
+# Reject names that could load a file outside an installer directory
+return undef if (!defined($name) ||
+		 $name !~ /^[A-Za-z0-9][A-Za-z0-9_.-]*$/);
+
 # Find all .pl files for this script, which may come from plugins or
 # the core
 my @sfiles;

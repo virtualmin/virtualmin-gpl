@@ -5,6 +5,7 @@ use warnings;
 use Test::More;
 use File::Basename qw(dirname);
 use File::Spec;
+use File::Temp qw(tempdir);
 use Cwd qw(abs_path);
 
 my $root = abs_path(File::Spec->catdir(dirname(__FILE__), '..'));
@@ -27,6 +28,28 @@ is_deeply(
 	[ &php_versioned_module_packages('mysqlnd', '8.4', 'other') ],
 	[ 'php84-mysqlnd' ],
 	'other package managers retain the legacy dotless form');
+
+{
+	no warnings qw(once redefine);
+	my $dir = tempdir(CLEANUP => 1);
+	my $scripts = File::Spec->catdir($dir, 'scripts');
+	mkdir($scripts) || die "Cannot create $scripts: $!";
+	my $marker = File::Spec->catfile($dir, 'loaded');
+	my $escape = File::Spec->catfile($dir, 'escape.pl');
+	open(my $fh, '>', $escape) || die "Cannot write $escape: $!";
+	print {$fh} 'open(my $fh, \'>\', \''.$marker.
+		    '\') || die $!; print {$fh} \'loaded\'; close($fh); 1;'."\n";
+	close($fh);
+	# Confirm the fixture can execute before testing the rejected lookup.
+	ok(do($escape), 'traversal fixture is executable Perl');
+	ok(-e $marker, 'traversal fixture creates its marker when loaded');
+	unlink($marker) || die "Cannot remove $marker: $!";
+	local @main::scripts_directories = ($scripts);
+	local *main::list_script_plugins = sub { return (); };
+	local *main::check_script_plugins_extensions = sub { return (); };
+	ok(!&get_script('../escape'), 'script names cannot traverse directories');
+	ok(!-e $marker, 'rejected script names are not loaded');
+}
 
 {
 	no warnings qw(once redefine);
