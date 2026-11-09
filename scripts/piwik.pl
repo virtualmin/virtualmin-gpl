@@ -20,7 +20,7 @@ return "Matomo is an open source web analytics software. It gives interesting re
 # script_piwik_versions()
 sub script_piwik_versions
 {
-return ( "5.14.1" );
+return ( "5.14.2" );
 }
 
 sub script_piwik_can_upgrade
