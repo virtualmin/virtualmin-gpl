@@ -4526,6 +4526,8 @@ elsif ($url =~ /^rs:([^\/]+)(\/(.*))?$/ && $config{'rs_user'} &&
 elsif ($url =~ /^gcs:\/\/([^\/]+)(\/(\S+))?$/) {
 	# Google cloud storage
 	my $st = &cloud_google_get_state();
+	return (-1, "Google Cloud Storage cannot be used by this user")
+		if (!&can_use_cloud("google"));
 	if ($st->{'ok'}) {
 		@rv = (7, undef, undef, $1, $3, undef);
 		}
@@ -4535,15 +4537,21 @@ elsif ($url =~ /^gcs:\/\/([^\/]+)(\/(\S+))?$/) {
 	}
 elsif ($url =~ /^dropbox:\/\/([^\/]+\.(gz|zip|bz2|tar))$/) {
 	# Dropbox file at the top level
+	return (-1, "Dropbox cannot be used by this user")
+		if (!&can_use_cloud("dropbox"));
 	@rv = (8, undef, undef, "", $1, undef);
 	}
 elsif ($url =~ /^dropbox:\/\/([^\/]+)(\/(\S+))?$/) {
 	# Dropbox folder
+	return (-1, "Dropbox cannot be used by this user")
+		if (!&can_use_cloud("dropbox"));
 	@rv = (8, undef, undef, $1, $3, undef);
 	}
 elsif ($url =~ /^bb:\/\/([^\/]*)(\/(\S+))?$/) {
 	# Backblaze bucket and file
 	my $st = &cloud_bb_get_state();
+	return (-1, "Backblaze cannot be used by this user")
+		if (!&can_use_cloud("bb"));
 	if ($st->{'ok'}) {
 		@rv = (10, undef, undef, $1, $3, undef);
 		}
@@ -4554,6 +4562,8 @@ elsif ($url =~ /^bb:\/\/([^\/]*)(\/(\S+))?$/) {
 elsif ($url =~ /^azure:\/\/([^\/]+)(\/(\S+))?$/) {
 	# Azure container and file
 	my $st = &cloud_azure_get_state();
+	return (-1, "Azure Blob Storage cannot be used by this user")
+		if (!&can_use_cloud("azure"));
 	if ($st->{'ok'}) {
 		@rv = (11, undef, undef, $1, $3, undef);
 		}
@@ -4565,6 +4575,8 @@ elsif ($url =~ /^drive:\/\/(.*\.(gz|zip|bz2|tar))$/) {
 	# Google drive folder and file
 	my @w = split(/\//, $1);
 	my $st = &cloud_drive_get_state();
+	return (-1, "Google Drive cannot be used by this user")
+		if (!&can_use_cloud("drive"));
 	if ($st->{'ok'}) {
 		my $f = pop(@w);
 		return (12, undef, undef, join("/", @w), $f, undef);
@@ -4576,6 +4588,8 @@ elsif ($url =~ /^drive:\/\/(.*\.(gz|zip|bz2|tar))$/) {
 elsif ($url =~ /^drive:\/\/(.*)$/) {
 	# Google drive folder
 	my $st = &cloud_drive_get_state();
+	return (-1, "Google Drive cannot be used by this user")
+		if (!&can_use_cloud("drive"));
 	if ($st->{'ok'}) {
 		@rv = (12, undef, undef, $1, undef, undef);
 		}
@@ -7743,9 +7757,12 @@ if (!$already) {
 	($already) = grep { $_->{'host'} eq $server } @servers;
 	}
 
-# Construct a server object using provided and stored info
-$user ||= $already->{'user'} if ($already);
-$pass ||= $already->{'pass'} if ($already);
+# Construct a server object using provided and stored info. Stored logins
+# belong to the master administrator and are never lent to other users.
+if ($already && &master_admin()) {
+	$user ||= $already->{'user'};
+	$pass ||= $already->{'pass'};
+	}
 $port ||= $already->{'port'} if ($already);
 return { 'host' => $server,
 	 'ip' => $already ? $already->{'ip'} : undef,
