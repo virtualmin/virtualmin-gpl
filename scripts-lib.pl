@@ -51,11 +51,26 @@ if ($access{'allowedscripts'}) {
 return @rv;
 }
 
+# valid_script_install_path(path)
+# Returns 1 for an absolute installer URL or filesystem path containing only
+# characters that cannot alter shell commands or generated configuration.
+sub valid_script_install_path
+{
+my ($path) = @_;
+return defined($path) &&
+	$path =~ /^\/[A-Za-z0-9_.\/\x80-\xff-]*\z/ &&
+	$path !~ /\.\./;
+}
+
 # get_script(name, [core-only])
 # Returns the structure for some script
 sub get_script
 {
 my ($name, $coreonly) = @_;
+
+# Reject names that could load a file outside an installer directory
+return undef if (!defined($name) ||
+		 $name !~ /^[A-Za-z0-9][A-Za-z0-9_.-]*$/);
 
 # Find all .pl files for this script, which may come from plugins or
 # the core

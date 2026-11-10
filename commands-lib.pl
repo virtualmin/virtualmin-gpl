@@ -826,6 +826,59 @@ return &api_access_can_command($program) if ($access{'api_id'});
 return &master_admin() || &can_remote_as_user($program);
 }
 
+# plugin_remote_api_command(plugin, program-name)
+# Returns true when one specific plugin declares a command as safe for
+# non-master remote API callers.
+sub plugin_remote_api_command
+{
+my ($plugin, $program) = @_;
+return 0 if (!$plugin ||
+	!&plugin_defined($plugin, "feature_remote_api_commands"));
+$program = &normalize_api_command_name($program);
+foreach my $command (&plugin_call($plugin, "feature_remote_api_commands")) {
+	return 1 if (&normalize_api_command_name($command) eq $program);
+	}
+return 0;
+}
+
+# resolve_remote_api_command(program-name)
+# Returns the path, directory and module of an API command the current user
+# can run. API accounts use their exact provider grants. Other non-master
+# users get allowed core commands or commands declared by their own plugin.
+sub resolve_remote_api_command
+{
+my ($program) = @_;
+if ($access{'api_id'}) {
+	# Keep dedicated accounts bound to the provider in their saved grant.
+	return ( ) if (!&api_access_can_command($program));
+	my $entry = &get_api_access_command($program);
+	return ( ) if (!-x $entry->{'path'});
+	return ($entry->{'path'},
+		&module_root_directory($entry->{'provider'}),
+		$entry->{'provider'});
+	}
+# Ordinary accounts retain core precedence and per-plugin declarations.
+my $cmd = &normalize_api_command_name($program);
+foreach my $m ($module_name, "$module_name/pro", @plugins) {
+	my $dir = &module_root_directory($m);
+	next if (!$dir || !-x "$dir/$cmd");
+	if (!&master_admin()) {
+		if ($m eq $module_name || $m eq "$module_name/pro") {
+			# Only allowed commands and the script configurators
+			next if (!&get_user_remote_api_command($cmd) &&
+				 $cmd ne "configure-script.pl" &&
+				 $cmd ne "configure-all-scripts.pl");
+			}
+		elsif (!&plugin_remote_api_command($m, $cmd)) {
+			# Plugins must declare their own commands
+			next;
+			}
+		}
+	return ("$dir/$cmd", $dir, $m);
+	}
+return ( );
+}
+
 # can_remote_as_user(program-name)
 # Checks whether the caller may run program-name without a master role.
 sub can_remote_as_user
@@ -847,11 +900,7 @@ return 1 if (&get_user_remote_api_command($program));
 # over the remote API as a non-master (domain owner or reseller) user. Each such
 # script must enforce its own per-domain access checks.
 foreach my $p (@plugins) {
-	next if (!&plugin_defined($p, "feature_remote_api_commands"));
-	foreach my $c (&plugin_call($p, "feature_remote_api_commands")) {
-		(my $cn = $c) =~ s/\.pl$//;
-		return 1 if ($cn eq $program);
-		}
+	return 1 if (&plugin_remote_api_command($p, $program));
 	}
 return 0;
 }

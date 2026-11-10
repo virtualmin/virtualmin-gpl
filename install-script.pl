@@ -94,12 +94,19 @@ while(@ARGV > 0) {
 		$unsupported = 1;
 		}
 	elsif ($a eq "--path") {
+		# Reject shell syntax in installer paths.
 		$opts->{'path'} = shift(@ARGV);
-		$opts->{'path'} =~ /^\/\S*$/ ||&usage("Path must start with /");
+		&valid_script_install_path($opts->{'path'}) ||
+			&usage("Path must start with / and contain only ".
+			       "letters, numbers, dots, dashes, underscores ".
+			       "and slashes");
 		}
 	elsif ($a eq "--force-dir") {
 		$forcedir = shift(@ARGV);
-		$forcedir =~ /^\/\S*$/ ||&usage("Forced directory must start with /");
+		&valid_script_install_path($forcedir) ||
+			&usage("Forced directory must start with / and ".
+			       "contain only letters, numbers, dots, dashes, ".
+			       "underscores and slashes");
 		}
 	elsif ($a eq "--db") {
 		$dbtype = shift(@ARGV);
@@ -131,6 +138,9 @@ while(@ARGV > 0) {
 		else {
 			$ovalue = shift(@ARGV);
 			}
+		# Options with their own validated flags cannot be set this way
+		&indexof($oname, "path", "dir", "db", "newdb") < 0 ||
+			&usage("--opt cannot be used to set $oname");
 		$opts->{$oname} = $ovalue;
 		}
 	elsif ($a eq "--upgrade") {

@@ -110,6 +110,13 @@ else {
 	$cbmode = 1;
 	}
 
+# Run with the owner's permissions, so that cloud storage and stored Webmin
+# server logins are only used when the owner is allowed to use them
+if ($owner) {
+	%access = &get_module_acl($owner);
+	$base_remote_user = $owner;
+	}
+
 # Get the backup key
 if ($sched->{'key'} && defined(&get_backup_key)) {
 	$key = &get_backup_key($sched->{'key'});

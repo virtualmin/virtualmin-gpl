@@ -45,7 +45,7 @@ $cmd =~ s/\.pl$//;
 # Do not spawn a terminal-only command to fetch its help over HTTP.
 &is_api_account_command($cmd) && &is_remote_api_request() &&
 	&usage("API account management is available only to root on the command line");
-!&master_admin() && $cmd !~ /^[a-z0-9_\-]+$/i &&
+$cmd !~ /^[a-z0-9_\-]+$/i &&
 	&usage("API command $cmd was not found");
 &require_remote_api_command();
 !&master_admin() && !&can_remote_as_user($cmd) &&
@@ -55,23 +55,7 @@ if (my $msg = &api_command_unavailable_message($cmd)) {
 	exit(1);
 	}
 $cmd .= ".pl" if ($cmd !~ /\.pl$/);
-if (&is_api_access_user()) {
-	# Use the authorized provider, including commands stored only under pro/.
-	my $entry = &get_api_access_command($cmd);
-	$cmdpath = $entry->{'path'};
-	}
-else {
-	# Keep the existing lookup order for ordinary accounts.
-	foreach $dir ($module_root_directory,
-		      map { &module_root_directory($_) } @plugins) {
-		if (-r "$dir/$cmd") {
-			# Keep the first readable script for ordinary callers.
-			$cmdpath = "$dir/$cmd";
-			$cmddir = $dir;
-			last;
-			}
-		}
-	}
+($cmdpath, $cmddir) = &resolve_remote_api_command($cmd);
 $cmdpath || &usage("API command $cmd was not found");
 
 # Extract description
@@ -111,8 +95,8 @@ foreach my $l (split(/\r?\n/, $out)) {
 $args = join(" ", @helpargs);
 while($args =~ /\S/) {
 	$args =~ s/^\s*\|\s*//;
-	if ($args =~ /^\s*\[([^\]]+)\](\*|\+|)(.*)$/) {
-		# One or more optional args
+	if ($args =~ /^\s*\[((?:[^\[\]]|\[[^\[\]]*\])+)\](\*|\+|)(.*)$/) {
+		# One or more optional args, allowing brackets inside a value
 		$opt = 1;
 		$flags = $1;
 		$repeat = $2;

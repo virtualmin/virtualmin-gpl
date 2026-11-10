@@ -60,6 +60,14 @@ $opts = &{$script->{'parse_func'}}($d, $ver, \%incopy, $sinfo);
 if ($opts && !ref($opts)) {
 	&error($opts);
 	}
+if (!$sinfo) {
+	# New installs take the directory from the form, and it is later used
+	# in installer commands. Upgrades reuse the stored options.
+	&valid_script_install_path($opts->{'path'}) ||
+		&error("Missing or invalid install path");
+	&valid_script_install_path($opts->{'dir'}) ||
+		&error("Missing or invalid install directory");
+	}
 
 # Check for a clash, unless upgrading
 if (!$sinfo && !$script->{'overlap'}) {

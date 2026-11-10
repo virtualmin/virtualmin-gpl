@@ -23058,6 +23058,17 @@ return "Could not update the Virtualmin GPL package from current repository befo
        ". Please resolve the package update issue and try the Pro upgrade again.";
 }
 
+# shell_quote_command_args(argument, ...)
+# Returns arguments quoted for lossless use in a POSIX shell command.
+sub shell_quote_command_args
+{
+return join(" ", map {
+	my $arg = defined($_) ? $_ : '';
+	$arg =~ s/'/'"'"'/g;
+	"'$arg'";
+	} @_);
+}
+
 $done_virtual_server_lib_funcs = 1;
 
 1;

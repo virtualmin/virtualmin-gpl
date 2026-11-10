@@ -41,8 +41,8 @@ if (!$module_name) {
 	}
 &licence_status();
 
-# Parse command-line args
-my $argvs = "@ARGV";
+# Parse command-line args and keep only options for the child command
+my @subargs;
 while(@ARGV > 0) {
 	my $a = shift(@ARGV);
 	if ($a eq "--all-domains") {
@@ -62,16 +62,11 @@ while(@ARGV > 0) {
 	elsif ($a eq "--help") {
 		&usage();
 		}
+	else {
+		# Forward auxiliary options without flattening their values
+		push(@subargs, $a);
+		}
 	}
-
-# Prepare argvs string for subprogram
-$argvs =~ s/--domain\s+(?:(?!--)(\S+))//;
-$argvs =~ s/--domain(?!\w)//;
-$argvs =~ s/--user\s+(?:(?!--)(\S+))//;
-$argvs =~ s/--user(?!\w)//;
-$argvs =~ s/--all-domains//;
-$argvs =~ s/--all-users//;
-$argvs = &trim($argvs);
 
 # Sanity check for args in this program
 if (!$all_doms && !$domain) {
@@ -80,7 +75,7 @@ if (!$all_doms && !$domain) {
 elsif (!$all_users && !$user) {
     &usage("No --user or --all-users flag given");
     }
-elsif ($argvs !~ /\S/) {
+elsif (!@subargs) {
     &usage("No additional auxiliary subcommand parameters given");
     }
 
@@ -106,7 +101,9 @@ foreach my $d (@doms) {
     foreach my $user (map { $_->{'user'} } @users) {
         $dom_done++;
         # Run subcommand
-        my $ex = &execute_command("virtualmin modify-user --domain @{[quotemeta($d->{'dom'})]} --user @{[$user]} $argvs", undef, \$out);
+        my $cmd = &shell_quote_command_args("virtualmin", "modify-user",
+            "--domain", $d->{'dom'}, "--user", $user, @subargs);
+        my $ex = &execute_command($cmd, undef, \$out);
 
         my ($out_before_new_empty_line) = $out =~ /(.*?)(?:\n\s*\n|\z)/;
         my $out_ = &trim($out_before_new_empty_line || $out);

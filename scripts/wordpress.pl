@@ -26,7 +26,7 @@ return "A semantic personal publishing platform with a focus on aesthetics, web 
 # script_wordpress_versions()
 sub script_wordpress_versions
 {
-return ( "7.1.3", "5.9.9", "4.9.25", "3.9.40" );
+return ( "7.1.4", "5.9.9", "4.9.25", "3.9.40" );
 }
 
 sub script_wordpress_category
@@ -216,7 +216,10 @@ my $wpcli = "$homebin/wp";
 my $wpcli_old = "$opts->{'dir'}/wp-cli.phar";
 &unlink_file_as_domain_user($d, $wpcli_old) if (-f $wpcli_old);
 my $ini = &get_domain_php_ini($d, $opts->{'phpver'}, 1);
-my $wp = "cd $opts->{'dir'} && PHPRC=$ini $dom_php_bin $wpcli --path=\"$opts->{'dir'}\"";
+# Quote paths so that the install directory cannot alter the shell command
+my $qdir = quotemeta($opts->{'dir'});
+my $wp = "cd $qdir && PHPRC=".quotemeta($ini)." $dom_php_bin ".
+	 quotemeta($wpcli)." --path=$qdir";
 
 # Copy WP-CLI
 &make_dir_as_domain_user($d, $opts->{'dir'}, 0755) if (!-d $opts->{'dir'});
@@ -268,7 +271,7 @@ if (!$upgrade) {
 				"$wp config set table_prefix ".
 				quotemeta($opts->{'dbtbpref'}).
 				" --type=variable".
-				" --path=".$opts->{'dir'}." 2>&1");
+				" --path=".quotemeta($opts->{'dir'})." 2>&1");
 			if ($?) {
 				return (-1, "\`wp config set table_prefix\` failed : $out");
 				}

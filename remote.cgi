@@ -15,6 +15,9 @@ require './virtual-server-lib.pl';
 $format = exists($in{'json'}) ? 'json' :
           exists($in{'xml'}) ? 'xml' :
           exists($in{'perl'}) ? 'perl' : undef;
+# Reject invalid command names before any role or provider lookup.
+$in{'program'} =~ /^[a-z0-9\.\-]+$/i || &api_error($text{'remote_eprogram'})
+	if ($in{'program'});
 # An API-only login without a Virtualmin policy cannot use ordinary role checks.
 if (&webmin_user_api_only() eq 'virtual-server/remote.cgi' &&
     !&is_api_access_user()) {
@@ -58,16 +61,7 @@ if (!$in{'program'}) {
 # Build the arg list
 $main::virtualmin_remote_api = 1;
 $ENV{'VIRTUALMIN_REMOTE_API'} = 1;
-$in{'program'} =~ /^[a-z0-9\.\-]+$/i || &api_error($text{'remote_eprogram'});
-$cmd = $dir = undef;
-foreach $m ($module_name, "$module_name/pro", @plugins) {
-	$mdir = &module_root_directory($m);
-	$mcmd = "$mdir/$in{'program'}.pl";
-	if (-x $mcmd) {
-		$cmd = $mcmd;
-		$dir = $mdir;
-		}
-	}
+($cmd, $dir, $mod) = &resolve_remote_api_command($in{'program'});
 $cmd || &api_error(&text('remote_eprogram2', $in{'program'}));
 if ($format && !defined($in{'simple-multiline'})) {
 	# Always force multiline format, as JSON output makes no sense
@@ -89,7 +83,7 @@ if ($access{'api_id'}) {
 			}
 		# Execute the canonical path tied to the account's saved grant.
 		my $entry = &prepare_api_access_command($in{'program'}, \@args);
-		$cmd = $entry->{'path'};
+		($cmd, $mod) = @$entry{ 'path', 'provider' };
 		};
 	# Return validation and grant errors in the selected format.
 	&api_error($@) if ($@);

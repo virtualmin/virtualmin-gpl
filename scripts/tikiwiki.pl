@@ -197,8 +197,8 @@ if (!$upgrade) {
 	}
 	# Rename _htaccess to .htaccess
 	if (&domain_has_website($d) eq 'web') {
-		&run_as_domain_user(
-			$d, "mv $opts->{'dir'}/_htaccess $opts->{'dir'}/.htaccess");
+		&rename_as_domain_user($d, "$opts->{'dir'}/_htaccess",
+				      "$opts->{'dir'}/.htaccess");
 		}
 } else {
 	&tikiwiki_postinstallation($d, $upgrade, $opts);
@@ -328,7 +328,7 @@ sub tikiwiki_postinstallation
 my ($d, $upgrade, $opts) = @_;
 my $dom_php_bin = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
 $dom_php_bin || return (0, "Could not find PHP CLI command");
-my $cmd_prefix = "$dom_php_bin $opts->{'dir'}/console.php";
+my $cmd_prefix = "$dom_php_bin ".quotemeta("$opts->{'dir'}/console.php");
 my $email = $d->{'emailto'};
 my $password = $opts->{'password'};
 my @steps = (

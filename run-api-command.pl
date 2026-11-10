@@ -257,8 +257,8 @@ elsif ($disabled eq '0') {
 # Run the command
 @doms || &usage("No matching virtual servers found");
 foreach my $d (@doms) {
-	$cmd = "virtualmin ".$apicmd." --domain $d->{'dom'} ".
-	       join(" ", map { &quotameta_ifneeded($_) } @ARGV);
+	$cmd = &shell_quote_command_args("virtualmin", $apicmd, "--domain",
+		$d->{'dom'}, @ARGV);
 	if ($testmode) {
 		print "Would run $cmd ..\n";
 		}
@@ -299,10 +299,4 @@ if ($virtualmin_pro) {
 print "                           [--test]\n";
 print "                           command [flags]\n";
 exit(1);
-}
-
-sub quotameta_ifneeded
-{
-my ($cmd) = @_;
-return $cmd =~ /[ \t;&<>()]/ ? quotemeta($cmd) : $cmd;
 }
