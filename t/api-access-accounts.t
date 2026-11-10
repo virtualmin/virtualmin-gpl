@@ -201,6 +201,51 @@ $api_access_commands_loaded = 0;
 is(get_api_access_command('copied-create')->{name}, 'copied-create',
 	'different command cannot share a grant just by copying its POD title');
 
+# Importing an unmanaged database grants access beyond the destination domain.
+{
+	no warnings qw(redefine once);
+	foreach my $name ('import-database', 'disconnect-database') {
+		open(my $fh, '>', "$catalog_dir/$name.pl") or die $!;
+		print $fh "#!/usr/bin/perl\n\n=head1 $name.pl\n\n".
+			  "Manage a database.\n\n=cut\n";
+		close($fh);
+		chmod(0755, "$catalog_dir/$name.pl") or die $!;
+		}
+	symlink('import-database.pl', "$catalog_dir/import-alias.pl") or die $!;
+	$api_access_commands_loaded = 0;
+	ok(!get_api_access_command('import-database')->{scoped},
+		'database import is a server-wide grant');
+	ok(!get_api_access_command('import-alias')->{scoped},
+		'import aliases retain the server-wide classification');
+	ok(get_api_access_command('disconnect-database')->{scoped},
+		'disconnecting an owned database remains domain-scoped');
+
+	local %access = ( api_id => 'import-test', api_domains => '1' );
+	ok(!api_access_can_command('import-database'),
+		'domain access alone cannot authorize database import');
+	$access{api_commands} = 'virtual-server:import-database';
+	local $api_access_command;
+	prepare_api_access_command('import-alias', [ ]);
+	ok(api_access_system_command(),
+		'explicit import grant authorizes the server-wide command');
+
+	# Use an allowed target so the batch check must reject the command itself.
+	local *get_domain_by = sub { return $domains{1}; };
+	my $executed = 0;
+	local *execute_webmin_script = sub {
+		$executed++;
+		die "Unexpected child execution\n";
+		};
+	foreach my $name ('import-database', 'import-alias') {
+		eval { run_api_access_batch([ '--domain', 'selected.example',
+			'--command', $name, '--name', 'unmanaged',
+			'--type', 'postgres' ]) };
+		like($@, qr/Batch commands must support domain access checks/,
+			"domain batch rejects $name even when granted");
+		}
+	is($executed, 0, 'rejected batches never execute the import command');
+}
+
 # Descriptions use complete opening paragraphs, regardless of source wrapping.
 my @descriptions = (
 	[ 'wrapped',

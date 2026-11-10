@@ -74,6 +74,8 @@ foreach my $entry (&list_api_commands()) {
 	my $scoped = $core ? (&get_user_remote_api_command($canonical) ||
 		$canonical =~ /^(list-templates|list-plans|run-api-command)$/) :
 		$plugin_scoped{$provider}->{$canonical};
+	# Database import can claim a source outside every permitted domain.
+	$scoped = 0 if ($core && $canonical eq 'import-database');
 	# Tooltips use the full opening paragraph and end with a period.
 	my $desc = $entry->{'desc'};
 	$desc =~ s/\s+/ /g;
