@@ -8127,6 +8127,7 @@ transfer_enewttl=New TTL must be a number of seconds
 transfer_deleting=Deleting $1 from this system ..
 transfer_edelete=.. deletion failed : $1
 transfer_disabling=Disabling $1 on this system ..
+transfer_edisable=.. disabling failed : $1
 transfer_ereplication=Both replication and deletion of the domain cannot be enabled at the same time
 transfer_ehost=Missing destination hostname
 transfer_ehost2=Destination hostname cannot be resolved

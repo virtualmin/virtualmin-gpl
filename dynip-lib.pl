@@ -246,66 +246,105 @@ else {
 	}
 }
 
-# update_all_domain_ip_addresses(oldip, newip)
+# update_all_domain_ip_addresses(newip, oldip)
 # Update any virtual servers using some old IP to the new one. May print stuff.
 sub update_all_domain_ip_addresses
 {
 my ($ip, $oldip) = @_;
 my $dc = 0;
-foreach my $d (&list_domains()) {
-	my $oldd = { %$d };
+foreach my $domain (&list_domains()) {
+	my ($d, $oldd);
+	my $prepare = sub {
+		my ($current) = @_;
+		$oldd = { %$current };
+		$d = { %$current };
+		my $changed = 0;
+		if ($d->{'ip'} &&
+		    ($d->{'ip'} eq $oldip || $d->{'dns_ip'} eq $oldip) &&
+		    !$d->{'virt'}) {
+			# Need to fix this server's IPv4 address
+			$d->{'ip'} = $ip if ($d->{'ip'} eq $oldip);
+			$d->{'dns_ip'} = $ip if ($d->{'dns_ip'} eq $oldip);
+			$changed++;
+			}
+		if ($d->{'ip6'} &&
+		    ($d->{'ip6'} eq $oldip || $d->{'dns_ip6'} eq $oldip) &&
+		    !$d->{'virt6'}) {
+			# Need to fix this server's IPv6 address
+			$d->{'ip6'} = $ip if ($d->{'ip6'} eq $oldip);
+			$d->{'dns_ip6'} = $ip if ($d->{'dns_ip6'} eq $oldip);
+			$changed++;
+			}
+		return $changed;
+		};
+
+	# Read current settings for the before command, then recheck the IP afterward.
+	my $locked;
+	my $current = &get_lock_domain($domain, \$locked);
+	next if (!$current);
+	my $ready;
+	eval {
+		local $main::error_must_die = 1;
+		$ready = &$prepare($current);
+		};
+	my $failure = $@;
+	&unlock_domain($current) if ($locked);
+	&error($failure) if ($failure);
+	next if (!$ready);
+	&set_domain_envs($oldd, "MODIFY_DOMAIN", $d);
+	my $merr = &making_changes();
+	&reset_domain_envs($oldd);
+	&error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
+	$current = &get_lock_domain($domain, \$locked);
+	next if (!$current);
 	my $changed;
-	if ($d->{'ip'} &&
-	    ($d->{'ip'} eq $oldip || $d->{'dns_ip'} eq $oldip) &&
-	    !$d->{'virt'}) {
-		# Need to fix this server's IPv4 address
-		$d->{'ip'} = $ip if ($d->{'ip'} eq $oldip);
-		$d->{'dns_ip'} = $ip if ($d->{'dns_ip'} eq $oldip);
-		$changed++;
-		}
-	if ($d->{'ip6'} &&
-	    ($d->{'ip6'} eq $oldip || $d->{'dns_ip6'} eq $oldip) &&
-	    !$d->{'virt6'}) {
-		# Need to fix this server's IPv6 address
-		$d->{'ip6'} = $ip if ($d->{'ip6'} eq $oldip);
-		$d->{'dns_ip6'} = $ip if ($d->{'dns_ip6'} eq $oldip);
-		$changed++;
-		}
+	{
+		# Feature helpers must not release this update's domain lock.
+		local $domain_lock_scope{$domain->{'id'}} = $$;
+		local $main::get_domain_cache{$domain->{'id'}} = $current;
+		eval {
+			local $main::error_must_die = 1;
+			if (&$prepare($current)) {
+				$main::get_domain_cache{$d->{'id'}} = $d;
+				# Update all features
+				foreach my $f (@features) {
+					my $mfunc = "modify_$f";
+					if ($config{$f} && $d->{$f}) {
+						&try_function($f, $mfunc, $d, $oldd);
+						}
+					}
+				foreach my $f (&list_feature_plugins()) {
+					if ($d->{$f}) {
+						&plugin_call($f, "feature_modify", $d, $oldd);
+						}
+					}
 
-	if ($changed) {
-		# Run the before command
-		&set_domain_envs(\%oldd, "MODIFY_DOMAIN", $d);
-		$merr = &making_changes();
-		&reset_domain_envs(\%oldd);
-		&error(&text('save_emaking', "<tt>$merr</tt>"))
-			if (defined($merr));
-
-		# Update all features
-		foreach my $f (@features) {
-			my $mfunc = "modify_$f";
-			if ($config{$f} && $d->{$f}) {
-				&try_function($f, $mfunc, $d, $oldd);
+				# Save new domain details
+				&$first_print($text{'save_domain'});
+				&save_domain($d);
+				&$second_print($text{'setup_done'});
+				$changed = 1;
 				}
-			}
-		foreach my $f (&list_feature_plugins()) {
-			if ($d->{$f}) {
-				&plugin_call($f, "feature_modify", $d, $oldd);
-				}
-			}
-
-		# Save new domain details
-		&$first_print($text{'save_domain'});
-		&save_domain($d);
-		&$second_print($text{'setup_done'});
-
-		# Run the after command
-		&set_domain_envs($d, "MODIFY_DOMAIN", undef, \%oldd);
-		my $merr = &made_changes();
-		&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
-			if (defined($merr));
-		&reset_domain_envs($d);
-		$dc++;
+			};
+		$failure = $@;
+	}
+	&unlock_domain($current) if ($locked);
+	if ($failure) {
+		# Discard a cached copy if a feature failed after changing it.
+		delete($main::get_domain_cache{$domain->{'id'}});
+		&error($failure);
 		}
+	next if (!$changed);
+	%$domain = %$d;
+	# Make cache lookups use the caller's updated object.
+	$main::get_domain_cache{$domain->{'id'}} = $domain;
+	# Run the after command
+	&set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
+	$merr = &made_changes();
+	&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
+		if (defined($merr));
+	&reset_domain_envs($d);
+	$dc++;
 	}
 return $dc;
 }

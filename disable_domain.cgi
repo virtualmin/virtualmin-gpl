@@ -49,6 +49,11 @@ if ($in{'confirm'} || $in{'confirm_auto'}) {
 				       $text{'disable_domain_return'} );
 		}
 	elsif ($in{'confirm_auto'}) {
+		# Recheck permission and disabled status before changing the schedule.
+		$d = &get_lock_domain($d);
+		&error($text{'edit_egone'}) if (!$d);
+		&can_disable_domain($d) || &error($text{'edit_ecannot'});
+		$d->{'disabled'} && &error($text{'disable_ealready'});
 		# Update auto-disabled flag
 		&error_setup($text{'disable_edomain_sched2'});
 		my $auto_disable =
@@ -62,10 +67,10 @@ if ($in{'confirm'} || $in{'confirm_auto'}) {
 			    $auto_disable < $ts) {
 				&error($text{'disable_save_eautodisable2'});
 				}
-			my $tlabel = !$d->{'disabled_auto'} ? 
+			my $tlabel = !$d->{'disabled_auto'} ?
 				'disable_save_autodisable3' :
-				'disable_save_autodisable'; 
-			$d->{'disabled_auto'} = 
+				'disable_save_autodisable';
+			$d->{'disabled_auto'} =
 				$auto_disable >= $ts ? $auto_disable :
 				$ts + $auto_disable * 86400;
 			if ($auto_disable < $ts) {
@@ -82,10 +87,9 @@ if ($in{'confirm'} || $in{'confirm_auto'}) {
 				}
 			}
 		print $text{'save_domain'},"<br>\n";
-		&lock_domain($d);
 		&save_domain($d);
-		&unlock_domain($d);
 		&$second_print($text{'setup_done'});
+		&unlock_domain($d);
 		# Add link to show domain schedule
 		@auto_disable_link =
 			( "disable_domain.cgi?dom=$d->{'id'}&mode=schedule",
