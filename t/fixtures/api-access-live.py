@@ -119,6 +119,14 @@ def request(path, params=None, admin=False, password=None, ajax=False):
         return error.code, error.read().decode(errors='replace')
 
 
+def api_only_denied(status, response):
+    """api_only_denied(status, response): require Webmin's explicit API denial."""
+    # Webmin's standard error page uses HTTP 200; older guards returned 403.
+    return (status in (200, 403) and
+            'This account can only use its assigned API' in response or
+            status == 403 and 'restricted' in response.lower())
+
+
 def wait_for_server():
     """wait_for_server(): wait up to 20 seconds for HTTPS after a restart."""
     deadline = time.monotonic() + 20
@@ -797,7 +805,7 @@ try:
     for path in ('api_access.cgi', 'edit_api_access.cgi?new=1',
                  'edit_api_access.cgi?user=' + fixture['user'], '../rpc.cgi'):
         status, out = request(path)
-        check(status == 403, 'all mode cannot access ' + path, out)
+        check(api_only_denied(status, out), 'all mode cannot access ' + path, out)
     # Keep the remaining tests on their original restricted command selection.
     save_policy()
 
@@ -855,7 +863,7 @@ try:
     for path in ('api_access.cgi', 'domain_setup.cgi', '../index.cgi',
                  '../rpc.cgi', '../xmlrpc.cgi', '../acl/index.cgi'):
         status, page = request(path)
-        check(status == 403 and 'restricted' in page.lower(),
+        check(api_only_denied(status, page),
               'API credential cannot access ' + path, page)
 
     # Trying the normal interactive login must not open the UI either.
@@ -873,7 +881,8 @@ try:
     except urllib.error.HTTPError as error:
         # Expected authorization failures are responses for the test to inspect.
         page = error.read().decode(errors='replace')
-    check('restricted' in page.lower() or 'session_login' in page,
+    check('This account can only use its assigned API' in page or
+          'restricted' in page.lower() or 'session_login' in page,
           'interactive login does not open the Webmin UI', page)
 
     # Provision a new customer and check ownership, plan, template, and quotas.
@@ -1039,7 +1048,8 @@ try:
     state = json.loads(helper_call('inspect'))
     check(state['noconfig'] == '1', 'system command grant still has no master login')
     status, out = request('../rpc.cgi')
-    check(status == 403, 'system command grant still cannot use generic RPC', out)
+    check(api_only_denied(status, out),
+          'system command grant still cannot use generic RPC', out)
 
     # Deletion revokes authentication before the same username is reused.
     page = save_policy(delete=True)

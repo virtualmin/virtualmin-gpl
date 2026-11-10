@@ -70,7 +70,8 @@ foreach my $provider (&unique(map { $_->{'provider'} } @catalog)) {
 	'attrs' => { 'title' => $_->{'desc'} },
 	'group' => { 'label' => $text{$_->{'scoped'} ? 'apiaccess_scoped' :
 		'apiaccess_system'}, 'state' => $_->{'scoped'} ? 'info' : 'warning',
-		'icon' => $_->{'scoped'} ? 'shield' : 'server' }
+		'icon' => $_->{'scoped'} ? 'shield' : 'server',
+		'help' => $_->{'scoped'} ? '' : $text{'apiaccess_systemhelp'} }
 	} } sort { $b->{'scoped'} <=> $a->{'scoped'} ||
 		$a->{'name'} cmp $b->{'name'} } @catalog;
 # Keep command permissions collapsible and open by default.

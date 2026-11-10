@@ -8876,6 +8876,7 @@ apiaccess_exclude=Allow all current commands except selected
 apiaccess_allcommands=Allow all current commands
 apiaccess_scoped=Commands limited to allowed virtual servers
 apiaccess_system=Server-wide commands
+apiaccess_systemhelp=Server-wide commands can affect the whole server and grant root access. Virtual server, template and plan restrictions do not limit them.
 apiaccess_resources=Virtual servers and defaults
 apiaccess_domains=Existing virtual servers
 apiaccess_selected=Selected only
