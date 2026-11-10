@@ -384,8 +384,8 @@ else {
 my $records_change = @addrecs || @delrecs || @uprecs || $ttl || $allttl ||
 	$bumpsoa;
 my $ip_change = defined($dns_ip) || defined($dns_ip6);
-my $master_change = @addslaves || @delslaves || $addallslaves ||
-	$syncallslaves || defined($submode);
+my $slaves_change = @addslaves || @delslaves || $addallslaves ||
+	$syncallslaves;
 my $options_change = defined($spf) || %add || %rem ||
 	defined($spfall) || @addslaves || @delslaves || $addallslaves ||
 	$syncallslaves || defined($dmarc) || $dmarcp || defined($dmarcpct) ||
@@ -399,7 +399,12 @@ foreach my $d (@doms) {
 	&require_remote_api_capability($d, &can_dnsip()) if ($ip_change);
 	&require_remote_api_capability($d, &can_edit_dns($d))
 		if ($options_change);
-	&require_remote_api_capability($d, 0) if ($master_change);
+	# Shared DNS changes need separate grants in addition to target access.
+	&require_remote_api_capability($d,
+		&api_access_can_option('modify-dns-slaves')) if ($slaves_change);
+	&require_remote_api_capability($d,
+		&api_access_can_option('modify-dns-subdomain'))
+		if (defined($submode));
 	if (defined($parentds) && !&master_admin()) {
 		my $pname = $d->{'dom'};
 		$pname =~ s/^[^\.]+\.//;

@@ -69,10 +69,12 @@ while(@ARGV > 0) {
 		$newuser = "auto";
 		}
 	elsif ($a eq "--new-home") {
-		# An arbitrary home directory can only be set by the master
+		# Arbitrary home paths require explicit privileged filesystem access
 		&can_rehome_domains() == 2 ||
+			&api_access_can_option('rename-domain-home') ||
 			&usage("--new-home is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with rename-domain-home permission");
 		$newhome = lc(shift(@ARGV));
 		}
 	elsif ($a eq "--auto-home") {

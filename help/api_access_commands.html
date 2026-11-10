@@ -1,81 +1,61 @@
 <header>Allowed commands</header>
 
-<p>Choose which commands this API account can run. The label beside each command
-names the module that provides it.</p>
+<p>Choose which commands this API account can run. Each command shows the module
+that provides it.</p>
 
-<p><tt>create-domain</tt>, <tt>clone-domain</tt>, <tt>disable-domain</tt> and
-<tt>enable-domain</tt> require Virtualmin Pro when used by an API account.
-They are disabled in this selector on GPL. Plan changes with
-<tt>modify-domain</tt> remain available under the account's permissions.</p>
+<p>Allow selected commands permits only the checked entries. With nothing checked,
+the account cannot run any commands. Allow all current commands except selected
+permits every available entry except the checked ones. With nothing checked, it
+allows all available entries.</p>
 
-<ul>
-<li><b>Allow selected commands</b>: allow only the checked commands. An empty
-selection allows no commands.</li>
-<li><b>Allow all current commands except selected</b>: allow every available
-command except the checked ones. An empty selection allows all available commands.</li>
-<li><b>Allow all current commands</b>: allow every available command in the current
-list.</li>
-</ul>
+<p>Allow all current commands permits every available entry, including server-wide
+commands and extra permissions with warnings.</p>
 
-<p>All three modes save the commands allowed when you click <b>Save</b>. Commands
-added later need permission before the account can use them. When you edit the
-account again, its allowed commands are checked under
-<b>Allow selected commands</b>.</p>
+<p>All three modes save the commands allowed when you click Save. New commands and
+extra permissions are not added automatically. When you reopen the account, its
+saved permissions appear under Allow selected commands.</p>
 
-<p>Upgrading to Pro does not add commands to existing accounts automatically.
-Select the additional commands, or choose <b>Allow all current commands</b>,
-and save again.</p>
-
-<p>After a downgrade, Pro command permissions stay saved, but those commands
-cannot run on GPL. Saving <b>Allow all current commands</b> or
-<b>Allow all current commands except selected</b> on GPL removes these inactive
-permissions.</p>
+<p>Some commands have several names. Allowing or blocking one applies to all its
+names. If a different module takes over a command, you must allow it again.
+Updates within the same module keep the existing permission.</p>
 
 <h4>Commands limited to allowed virtual servers</h4>
 
-<p>These commands check which virtual servers the account may manage. They also
-check template and plan permissions where needed. <tt>create-domain</tt>
-requires an allowed default template and plan.</p>
+<p>These commands check access to the target virtual server and apply template and
+plan restrictions where needed. <tt>create-domain</tt> requires an allowed default
+template and plan. Initial quotas come from an allowed plan. Overriding plan
+quotas and reapplying saved quotas have separate extra permissions.</p>
 
 <h4>Server-wide commands</h4>
 
-<p>These permissions can affect the whole server or grant root access, even
-when virtual servers, templates and plans are restricted. Allow them only for
-integrations you trust with this access.</p>
+<p>These commands can affect the whole server, and some can grant root access.
+Virtual server, template and plan restrictions do not limit them. Allow them only
+for integrations you trust with this access.</p>
 
-<p>The selection mode above applies to these commands too.
-<b>Allow all current commands</b> includes them.</p>
+<h4>Extra permission</h4>
 
-<p>If a different module takes over a command, this account loses access to it.
-Review the replacement before allowing it again. Updates within the same module
-keep the existing permission.</p>
+<p>These entries allow additional options or sensitive output from another command.
+They cannot run on their own, and that command must also be allowed. Hover over an
+entry to see what it permits, its risks and which command it requires. Blue badges
+mark ordinary extra permissions. Yellow badges warn about permissions that can
+weaken security, expose secrets, disrupt services or affect other resources.</p>
 
-<p>Entries marked Extra permission unlock specific command options. They require
-the base command to be allowed too and still check access to the target virtual
-server. <tt>modify-domain-quotas</tt> allows
-<tt>--quota</tt> and <tt>--uquota</tt> to override plan quotas.
-<tt>modify-domain-2fa</tt> allows <tt>--disable-2fa</tt>.</p>
+<p>Input checks and access checks for the target virtual server still apply.
+Server-wide extra permissions can also read or change resources outside that
+virtual server, and some allow commands to run as root. They cannot be used through
+<tt>run-api-command</tt>.</p>
 
-<p><tt>modify-domain-quotas-reapply</tt> allows <tt>--apply-all-quotas</tt> to
-reapply saved domain and mailbox quotas without changing their saved values.
-<tt>modify-domain-bandwidth</tt> allows <tt>--bw</tt>, <tt>--bw-disable</tt> and
-<tt>--bw-no-disable</tt>. <tt>modify-domain-protection</tt> allows
-<tt>--protected</tt> and <tt>--unprotected</tt>.</p>
+<h4>Virtualmin Pro</h4>
 
-<p><tt>rename-domain-user</tt> requires <tt>rename-domain</tt> and allows
-<tt>--new-user</tt> and <tt>--auto-user</tt>. It does not allow custom home paths.
-<tt>create-user-encpass</tt> requires <tt>create-user</tt> and allows
-<tt>--encpass</tt> for importing password hashes. Password strength cannot be
-checked when importing a hash.</p>
+<p><tt>create-domain</tt>, <tt>clone-domain</tt>, <tt>disable-domain</tt> and
+<tt>enable-domain</tt> require Virtualmin Pro when used by an API account. They and
+their extra permissions are disabled in this list on GPL. Plan changes through
+<tt>modify-domain</tt> remain available within the account's permissions. After
+upgrading to Pro, allow the additional commands and save the account again.</p>
 
-<p><tt>modify-domain-home</tt> allows <tt>--home</tt>, and
-<tt>modify-domain-hooks</tt> allows <tt>--pre-command</tt> and
-<tt>--post-command</tt>. These are server-wide permissions because paths and
-hooks use root privileges. They cannot be used through <tt>run-api-command</tt>.
-Extra permissions are not commands you can call directly. Existing grants do
-not gain them automatically. The selection modes apply to these entries too.</p>
-
-<p>Some commands have more than one name. Allowing or blocking a command applies
-to all of its names. Each command still checks its own permissions.</p>
+<p>After a downgrade, saved Pro permissions remain but cannot be used on GPL.
+Saving with Allow selected commands preserves them. Saving with either
+Allow all current commands or Allow all current commands except selected removes
+these inactive permissions.</p>
 
 <footer>

@@ -80,8 +80,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--passfile") {
 		# Reject password files that are blank after removing line endings
-		$is_master ||
-			&usage("--passfile is only available to the master administrator");
+		$is_master || &api_access_can_option('modify-admin-passfile') ||
+			&usage("--passfile is only available to the master administrator ".
+			       "or an API account with modify-admin-passfile permission");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		$pass =~ /\S/ || &usage("Missing password");

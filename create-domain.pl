@@ -173,10 +173,12 @@ while(@ARGV > 0) {
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
-		# Prevent non-master callers from reading server-side files
+		# Server-side password files require a separate API grant
 		$is_master ||
+			&api_access_can_option('create-domain-passfile') ||
 			&usage("--passfile is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with create-domain-passfile permission");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
@@ -385,9 +387,12 @@ while(@ARGV > 0) {
 		$subdomain = $parentdomain = lc(shift(@ARGV));
 		}
 	elsif ($a eq "--reseller") {
+		# Reseller assignment can grant access to this domain.
 		$is_master ||
+			&api_access_can_option('create-domain-reseller') ||
 			&usage("--reseller is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with create-domain-reseller permission");
 		$resel = shift(@ARGV);
 		}
 	elsif ($a eq "--content") {
@@ -403,15 +408,19 @@ while(@ARGV > 0) {
 		$nosecondaries = 1;
 		}
 	elsif ($a eq "--pre-command") {
-		$is_master ||
+		# Creation hooks run as root and need an explicit grant.
+		$is_master || &api_access_can_option('create-domain-hooks') ||
 			&usage("--pre-command is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with create-domain-hooks permission");
 		$precommand = shift(@ARGV);
 		}
 	elsif ($a eq "--post-command") {
-		$is_master ||
+		# Post-creation hooks also run as root.
+		$is_master || &api_access_can_option('create-domain-hooks') ||
 			&usage("--post-command is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with create-domain-hooks permission");
 		$postcommand = shift(@ARGV);
 		}
 	elsif ($a eq "--skip-warnings") {
@@ -472,9 +481,9 @@ while(@ARGV > 0) {
 		$sshmode = 2;
 		$sshkey = shift(@ARGV);
 		if ($sshkey =~ /^\//) {
-			# Only the master administrator can load a key from a
-			# server-side file
+			# Server-side keys require explicit privileged file access
 			$is_master ||
+				&api_access_can_option('create-domain-ssh-key-file') ||
 				&usage("--use-ssh-key must be followed by key ".
 				       "data rather than a file");
 			$sshkey = &read_file_contents($sshkey);
@@ -537,6 +546,7 @@ while(@ARGV > 0) {
 		($f) = grep { $_->{'name'} eq $fn } @fields;
 		$f || &usage("Custom field $fn does not exist");
 		$is_master || $f->{'visible'} == 0 ||
+			&api_access_can_option('create-domain-admin-fields') ||
 			&usage("Custom field $fn cannot be edited by domain owners");
 		$fields{'field_'.$fn} = $fv;
 		}
@@ -549,15 +559,20 @@ while(@ARGV > 0) {
 	}
 # Enforce option-specific permissions before looking up global configuration
 if (!$is_master) {
-	defined($jail) &&
+	defined($jail) && !&api_access_can_option('create-domain-jail') &&
 		&usage("--enable-jail and --disable-jail are only available to ".
-		       "the master administrator");
+		       "the master administrator ".
+		       "or an API account with create-domain-jail permission");
 	($myserver || $pgserver) &&
+	  !&api_access_can_option('create-domain-database-server') &&
 		&usage("--mysql-server and --postgres-server are only available ".
-		       "to the master administrator");
+		       "to the master administrator ".
+		       "or an API account with create-domain-database-server permission");
 	($noslaves || $nosecondaries || defined($dns_submode) || $dns_subany) &&
+	  !&api_access_can_option('create-domain-dns-placement') &&
 		&usage("DNS server placement options are only available to the ".
-		       "master administrator");
+		       "master administrator ".
+		       "or an API account with create-domain-dns-placement permission");
 	(defined($dns_ip) || defined($dns_ip6)) && !&can_dnsip() &&
 		&usage("You are not allowed to change the DNS IP address");
 	defined($db) && !&can_edit_databases() &&

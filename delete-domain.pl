@@ -54,8 +54,10 @@ while(@ARGV > 0) {
 		# Leaves the underlying objects on the system, which has no
 		# equivalent in the user interface
 		&master_admin() ||
+			&api_access_can_option('delete-domain-only') ||
 			&usage("--only is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with delete-domain-only permission");
 		$only = 1;
 		}
 	elsif ($a eq "--preserve-remote") {
@@ -65,16 +67,21 @@ while(@ARGV > 0) {
 		$preserve = 1;
 		}
 	elsif ($a eq "--pre-command") {
-		# Commands are run as root, so only the master can set them
+		# Commands run as root and require an explicit API grant
 		&master_admin() ||
+			&api_access_can_option('delete-domain-hooks') ||
 			&usage("--pre-command is only available to the ".
-			       "master administrator");
+			       "master administrator ".
+			       "or an API account with delete-domain-hooks permission");
 		$precommand = shift(@ARGV);
 		}
 	elsif ($a eq "--post-command") {
+		# Post-deletion hooks also execute with root privileges.
 		&master_admin() ||
+			&api_access_can_option('delete-domain-hooks') ||
 			&usage("--post-command is only available to the ".
-			       "master administrator");
+			       "master administrator ".
+			       "or an API account with delete-domain-hooks permission");
 		$postcommand = shift(@ARGV);
 		}
 	elsif ($a eq "--multiline") {

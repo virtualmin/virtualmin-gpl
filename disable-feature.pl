@@ -92,10 +92,11 @@ if ($dnssub) {
 	}
 @doms = &get_remote_api_domains(\@doms, $all_doms);
 
-# Disconnecting objects from a domain is always a master-only operation
+# Disconnecting existing objects requires an explicit API grant
 if (!&master_admin()) {
-	$disassociate && &usage("The --disassociate flag is only available ".
-				"to the master administrator");
+	$disassociate && !&api_access_can_option('disable-feature-disassociate') &&
+		&usage("--disassociate requires the master administrator ".
+		       "or disable-feature-disassociate permission");
 	foreach my $f (keys %feature, keys %plugin) {
 		&can_use_feature($f) ||
 			&usage("You are not allowed to disable the $f feature");

@@ -130,9 +130,12 @@ while(@ARGV > 0) {
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
+		# File reads can reach beyond the selected domain.
 		$is_master ||
+			&api_access_can_option('modify-domain-passfile') ||
 			&usage("--passfile is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-passfile permission");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
@@ -141,14 +144,16 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--protected") {
 		# Changing domain protection needs its own API permission.
-		$is_master || &api_access_can_option('modify-domain-protection') ||
+		$is_master ||
+			&api_access_can_option('modify-domain-protection') ||
 			&usage("--protected requires the master administrator ".
 			       "or modify-domain-protection permission");
 		$protected = 1;
 		}
 	elsif ($a eq "--unprotected") {
 		# Changing domain protection needs its own API permission.
-		$is_master || &api_access_can_option('modify-domain-protection') ||
+		$is_master ||
+			&api_access_can_option('modify-domain-protection') ||
 			&usage("--unprotected requires the master administrator ".
 			       "or modify-domain-protection permission");
 		$protected = 0;
@@ -168,10 +173,18 @@ while(@ARGV > 0) {
 		$uquota =~ /^\d+$/ || &usage("Quota must be a number of blocks");
 		}
 	elsif ($a eq "--user") {
-		$is_master ||
+		# Renaming requires its grant and a valid username.
+		$is_master || &api_access_can_option('modify-domain-user') ||
 			&usage("--user is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-user permission");
 		$user = shift(@ARGV);
+		# API username changes retain the normal account-name validation.
+		if (&is_api_access_user()) {
+			my $err = &valid_mailbox_name($user);
+			&usage($err) if ($err);
+			$user !~ /[\s\0]/ || &usage("Invalid username");
+			}
 		$user =~ /^[^\t :]+$/ || &usage($text{'setup_euser2'});
 		defined(getpwnam($user)) &&
 			&usage("A user named $user already exists");
@@ -286,23 +299,32 @@ while(@ARGV > 0) {
 			&usage("Invalid shared IPv6 address");
 		}
 	elsif ($a eq "--reseller") {
+		# Replacing the reseller changes who can manage this domain.
 		$is_master ||
+			&api_access_can_option('modify-domain-reseller') ||
 			&usage("--reseller is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-reseller permission");
 		# Changing the reseller
 		$resel = shift(@ARGV);
 		}
 	elsif ($a eq "--add-reseller") {
+		# Adding a reseller gives another account access to this domain.
 		$is_master ||
+			&api_access_can_option('modify-domain-reseller') ||
 			&usage("--add-reseller is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-reseller permission");
 		# Adding a reseller
 		push(@add_resel, shift(@ARGV));
 		}
 	elsif ($a eq "--delete-reseller") {
+		# Removing reseller access requires the same ownership grant.
 		$is_master ||
+			&api_access_can_option('modify-domain-reseller') ||
 			&usage("--delete-reseller is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-reseller permission");
 		# Removing a reseller
 		push(@del_resel, shift(@ARGV));
 		}
@@ -391,27 +413,36 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	elsif ($a eq "--enable-jail") {
-		$is_master ||
+		# Changing filesystem isolation requires the jail permission.
+		$is_master || &api_access_can_option('modify-domain-jail') ||
 			&usage("--enable-jail is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-jail permission");
 		$jail = 1;
 		}
 	elsif ($a eq "--disable-jail") {
-		$is_master ||
+		# Removing isolation needs the same explicit jail permission.
+		$is_master || &api_access_can_option('modify-domain-jail') ||
 			&usage("--disable-jail is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-jail permission");
 		$jail = 0;
 		}
 	elsif ($a eq "--copy-jail") {
-		$is_master ||
+		# Refreshing jail files also changes the domain isolation setup.
+		$is_master || &api_access_can_option('modify-domain-jail') ||
 			&usage("--copy-jail is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-jail permission");
 		$copyjail = 1;
 		}
 	elsif ($a eq "--mysql-server") {
+		# Database moves may affect another server.
 		$is_master ||
+			&api_access_can_option('modify-domain-database-server') ||
 			&usage("--mysql-server is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-database-server permission");
 		$myserver = shift(@ARGV);
 		}
 	elsif ($a eq "--link-domain") {
@@ -435,7 +466,8 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--apply-all-quotas") {
 		# Reapplying saved quotas is separate from changing their values.
-		$is_master || &api_access_can_option('modify-domain-quotas-reapply') ||
+		$is_master ||
+			&api_access_can_option('modify-domain-quotas-reapply') ||
 			&usage("--apply-all-quotas requires the master administrator ".
 			       "or modify-domain-quotas-reapply permission");
 		$applyquotas = 2;

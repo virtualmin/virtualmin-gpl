@@ -16,6 +16,8 @@ do "$FindBin::Bin/../security-lib.pl" or die $@ || $!;
 do "$FindBin::Bin/../commands-lib.pl" or die $@ || $!;
 do "$FindBin::Bin/../api-access-lib.pl" or die $@ || $!;
 
+# text(key, [arguments...]): return the key; this fixture tests grants only.
+sub text { return $_[0]; }
 # list_feature_plugins(): keep the ACL fixture independent of installed plugins.
 sub list_feature_plugins { return (); }
 # Cover explicit grants, inherited access, creator IDs, and cyclic ancestry.
@@ -182,7 +184,7 @@ $api_access_commands_loaded = 0;
 my @catalog = list_api_access_commands();
 ok(!get_api_access_command('create-api-account'), 'root CLI is absent from the permission catalog');
 ok(!get_api_access_command('account-alias'), 'a root CLI alias is absent from the permission catalog');
-is(scalar(@catalog), 1, 'aliases appear as one grant in the real catalog');
+is(scalar(grep { !$_->{virtual} } @catalog), 1, 'aliases appear as one grant in the real catalog');
 is(get_api_access_command('older-create')->{name}, 'create-domain', 'alias chain resolves to canonical command');
 is(get_api_access_command('copied-create')->{name}, 'create-domain', 'packaged alias copy resolves to canonical command');
 # Alias spellings must share both grants and denials with their target.

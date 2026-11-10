@@ -5,7 +5,8 @@
 # Modes: setup, catalog, make-alias, module-root, inspect, block-policy,
 # unblock-policy, edition-info, seed-pro-grants, make-pro-alias,
 # theme-authentic, theme-gray, clear-policy, restore-policy, inspect-options,
-# seed-options-2fa, seed-options-hash, drift-options-quota, and cleanup.
+# seed-options-2fa, seed-options-hash, drift-options-quota, inspect-warning,
+# and cleanup.
 
 use strict;
 use warnings;
@@ -182,6 +183,21 @@ elsif ($mode eq 'inspect-options' || $mode eq 'seed-options-2fa') {
 	local %access = &get_module_acl($fixture->{user}, $module_name);
 	$state{'master'} = &master_admin() ? 1 : 0;
 	print encode_json(\%state);
+	}
+elsif ($mode eq 'inspect-warning') {
+	# Return only the tested pool setting and a password comparison result.
+	my $d = &get_domain_by('dom', $fixture->{'domain'});
+	$d || die "Missing fixture domain";
+	&require_useradmin();
+	my ($user) = grep { $_->{'user'} eq $d->{'user'} }
+		&useradmin::list_users();
+	$user || die "Missing fixture Unix user";
+	# Keep the password and its stored hash inside this guest process.
+	my $matches = defined($fixture->{'file_password'}) &&
+		crypt($fixture->{'file_password'}, $user->{'pass'}) eq $user->{'pass'};
+	print encode_json({ file_password_matches => $matches ? 1 : 0,
+		php_admin_memory =>
+		&get_php_fpm_config_value($d, 'php_admin_value[memory_limit]') });
 	}
 elsif ($mode eq 'clear-policy') {
 	# Remove only the fixture's module policy while retaining its login.

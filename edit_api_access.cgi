@@ -62,11 +62,13 @@ foreach my $provider (&unique(map { $_->{'provider'} } @catalog)) {
 	}
 # Group commands by scope, with descriptions available as tooltips.
 # Keep Pro entries visible but disabled on GPL, with a badge explaining why.
+# Sensitive extra permissions use warning badges with consequence tooltips.
 @command_options = map { {
 	'value' => $_->{'key'}, 'label' => $_->{'name'},
 	'tag' => $provider_labels{$_->{'provider'}},
 	'badges' => [ $_->{'virtual'} ?
-		[ $text{'apiaccess_option'}, 'info' ] : ( ),
+		[ $text{'apiaccess_option'},
+		  $_->{'warning'} ? 'warning' : 'info' ] : ( ),
 		$_->{'pro'} && !$virtualmin_pro ? [ 'Pro', 'warning' ] : ( ) ],
 	'disabled' => $_->{'pro'} && !$virtualmin_pro,
 	'attrs' => { 'title' => $_->{'desc'} },

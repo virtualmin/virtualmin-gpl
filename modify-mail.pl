@@ -138,7 +138,10 @@ while(@ARGV > 0) {
 		$autoconfig = 0;
 		}
 	elsif ($a eq "--dkim-key") {
-		$is_master || &usage("The --dkim-key option is only available to the master administrator");
+		# The key file is read as root and may belong to another domain.
+		$is_master ||
+			&api_access_can_option('modify-mail-dkim-file') || &usage("The --dkim-key option is only available to the master administrator ".
+			       "or an API account with modify-mail-dkim-file permission");
 		$keyfile = shift(@ARGV);
 		$key = &read_file_contents($keyfile);
 		$key || &usage("DKIM key file $keyfile does not exist");
@@ -193,7 +196,9 @@ if (!$is_master) {
 	defined($rbcc) && $rbcc ne "" && $rbcc !~ /^\S+\@\S+$/ &&
 		&usage("The recipient BCC must be an email address");
 	defined($autoconfig) &&
-		&usage("Mail auto-configuration can only be changed by the master administrator");
+	  !&api_access_can_option('modify-mail-autoconfig') &&
+		&usage("Mail auto-configuration can only be changed by the master administrator ".
+		       "or an API account with modify-mail-autoconfig permission");
 	}
 
 # Get domains to update

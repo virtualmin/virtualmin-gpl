@@ -94,9 +94,11 @@ else {
 	}
 
 # Global defaults affect other virtual servers
-if (!&master_admin() && $sinfo->{'opts'}->{'global_def'}) {
+if (!&master_admin() && $sinfo->{'opts'}->{'global_def'} &&
+    !&api_access_can_option('start-stop-script-global')) {
 	&usage("Global default scripts can only be managed by the ".
-	       "master administrator");
+	       "master administrator ".
+	       "or an API account with start-stop-script-global permission");
 	}
 
 # Do the action

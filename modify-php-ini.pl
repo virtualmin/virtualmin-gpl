@@ -94,8 +94,11 @@ while(@ARGV > 0) {
 @ini_names == @ini_values ||
 	&usage("The number of names and values must be the same");
 !&master_admin() && $type &&
-	&usage("--fpm-admin-value is only available to the master administrator");
+    !&api_access_can_option('modify-php-ini-admin') &&
+	&usage("--fpm-admin-value is only available to the master administrator ".
+	       "or an API account with modify-php-ini-admin permission");
 if (!&master_admin()) {
+	# The extra grant permits admin values, never configuration injection.
 	foreach my $name (@ini_names) {
 		$name =~ /^[a-z0-9_\.\-]+$/i ||
 			&usage("Invalid PHP configuration setting $name");
@@ -104,8 +107,8 @@ if (!&master_admin()) {
 		$value !~ /[\r\n]/ ||
 			&usage("PHP configuration values cannot contain newlines");
 		}
-	# Never preserve or create an administrator-only FPM value
-	$type = 0;
+	# Only an explicit API grant may create administrator-only FPM values.
+	$type = 0 if (!&api_access_can_option('modify-php-ini-admin'));
 	}
 
 # Get the domains

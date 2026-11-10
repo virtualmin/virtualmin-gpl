@@ -12,9 +12,12 @@ and are removed during cleanup. Never run this on the workstation.
 --commands-only stops after account creation and command selection checks.
 --catalog-only also checks aliases and available Pro command metadata, then
 stops before domain creation. Choose only one of these shortened modes.
---options-only tests separate modify-domain option grants with real domain
+--options-only tests separate API option grants with real domain
 changes, quota updates and reapplication, protection, bandwidth, username changes,
-password hash imports, 2FA removal, home relocation and harmless root hooks.
+password hash imports, privileged file inputs, warning badges, secret output,
+web directives, custom logs, 2FA removal, home relocation and harmless root hooks.
+--warnings-only runs just the extended permission checks on fresh domains.
+--input-validation-only checks database options and undefined custom fields.
 --cli-only tests root CLI account management and checks that HTTP calls are
 rejected.
 --editions-only checks command permissions, direct and batch requests, and plan
@@ -603,6 +606,68 @@ def check_account_cli(form):
     print('All root-only CLI account tests passed.', flush=True)
 
 
+def check_option_ui(extra_entries):
+    """check_option_ui(extra_entries): verify catalog entries in both themes.
+
+    extra_entries contains the option-permission records returned by the guest.
+    Check each group, dependency description and badge against that catalog.
+    """
+    # Check real HTML grouping and dependency tooltips in both supported themes.
+    class Groups(HTMLParser):
+        """Collect command groups, checkbox attributes and adjacent badges."""
+
+        def __init__(self):
+            """__init__(): start with no group or current checkbox."""
+            super().__init__()
+            self.heading, self.group, self.fields = False, '', {}
+            self.current, self.badges = None, {}
+        def handle_starttag(self, tag, attrs):
+            """handle_starttag(tag, attrs): associate controls with their group."""
+            attrs = dict(attrs)
+            if 'data-ui-multi-heading' in attrs:
+                # A group heading applies to the command rows that follow it.
+                self.heading, self.group = True, ''
+            if tag == 'input' and attrs.get('type') == 'checkbox':
+                # Keep tooltip attributes on the actual selectable control.
+                self.current = attrs.get('value')
+                self.fields[self.current] = (self.group, attrs)
+            if 'ui_badge' in attrs.get('class', '').split() and self.current:
+                # The badge following a checkbox belongs to that permission.
+                self.badges.setdefault(self.current, []).extend(attrs['class'].split())
+
+        def handle_data(self, value):
+            """handle_data(value): collect visible fragments of a group title."""
+            if self.heading:
+                # Icons or spans can divide the heading into separate fragments.
+                self.group += value
+
+        def handle_endtag(self, tag):
+            """handle_endtag(tag): stop collecting a completed group title."""
+            if tag == 'div':
+                # Text in later rows must not become part of the group name.
+                self.heading = False
+    # Change only the fixture administrator and compare the actual form HTML.
+    for theme in ('authentic', 'gray'):
+        helper_call('theme-' + theme)
+        status, page = request('edit_api_access.cgi?user=' + fixture['user'], admin=True)
+        groups = Groups()
+        groups.feed(page)
+        for entry in extra_entries:
+            key = entry['key']
+            expected = 'Commands limited to allowed virtual servers' if entry['scoped'] else \
+                       'Server-wide commands'
+            check(key in groups.fields and expected in groups.fields[key][0] and
+                  groups.fields[key][1].get('aria-description') == entry['desc'],
+                  theme + ': correct group and tooltip for ' + entry['name'])
+            badge = 'ui_badge_warning' if entry.get('warning') else 'ui_badge_info'
+            check(badge in groups.badges.get(key, []),
+                  theme + ': correct warning badge for ' + entry['name'])
+        check(status == 200 and 'Extra permission' in page and
+              'Requires modify-domain.' in page,
+              theme + ': option badges and dependency tooltips are rendered')
+    helper_call('theme-authentic')
+
+
 def check_option_permissions():
     """check_option_permissions(): verify extra grants against real guest domains.
 
@@ -665,39 +730,7 @@ def check_option_permissions():
         'home': [('home', new_home)],
         'hooks': [('pre-command', pre), ('post-command', post)],
     }
-    # Check real HTML grouping and dependency tooltips in both supported themes.
-    class Groups(HTMLParser):
-        def __init__(self):
-            super().__init__()
-            self.heading, self.group, self.fields = False, '', {}
-        def handle_starttag(self, tag, attrs):
-            attrs = dict(attrs)
-            if 'data-ui-multi-heading' in attrs:
-                self.heading, self.group = True, ''
-            if tag == 'input' and attrs.get('type') == 'checkbox':
-                self.fields[attrs.get('value')] = (self.group, attrs)
-        def handle_data(self, value):
-            if self.heading:
-                self.group += value
-        def handle_endtag(self, tag):
-            if tag == 'div':
-                self.heading = False
-    for theme in ('authentic', 'gray'):
-        helper_call('theme-' + theme)
-        status, page = request('edit_api_access.cgi?user=' + fixture['user'], admin=True)
-        groups = Groups()
-        groups.feed(page)
-        for entry in extra_entries:
-            key = entry['key']
-            expected = 'Commands limited to allowed virtual servers' if entry['scoped'] else \
-                       'Server-wide commands'
-            check(key in groups.fields and expected in groups.fields[key][0] and
-                  groups.fields[key][1].get('aria-description') == entry['desc'],
-                  theme + ': correct group and tooltip for ' + entry['name'])
-        check(status == 200 and 'Extra permission' in page and
-              'Requires modify-domain.' in page,
-              theme + ': option badges and dependency tooltips are rendered')
-    helper_call('theme-authentic')
+    check_option_ui(extra_entries)
     for suffix, params in cases.items():
         out = api('modify-domain', [('domain', fixture['domain']), *params])
         check('API option requires permission modify-domain-' + suffix in out and
@@ -763,7 +796,7 @@ def check_option_permissions():
                   'home grant moves files and updates the Unix home directory')
             out = api('rename-domain', [('domain', fixture['domain']),
                       ('new-home', str(original_home) + '-rename')])
-            check('only available to the master' in out,
+            check('API option requires permission rename-domain-home' in out,
                   'modify home permission does not unlock rename-domain options', out)
         else:
             check((task / 'option-hook-pre').read_text() == '0' and
@@ -791,8 +824,8 @@ def check_option_permissions():
           'virtual permissions are not advertised as executable API commands', out)
     for flag in ('passfile', 'user'):
         out = api('modify-domain', [('domain', fixture['domain']), (flag, 'unused')])
-        check('only available to the master' in out,
-              'all option grants still cannot use unrelated master-only flag ' + flag, out)
+        check('API option requires permission modify-domain-' + flag in out,
+              'original grants cannot use an ungranted privileged flag ' + flag, out)
     save_policy(commands=grants, domains=domain_id, enabled=False)
     current = snapshot()
     out = api('modify-domain', [('domain', fixture['domain']), *cases['quotas']])
@@ -868,7 +901,7 @@ def check_more_option_permissions():
                 check('Exit status: 0' not in out and snapshot() == current,
                       'username validation rejects collisions and unsafe syntax', out)
             out = api(command, [('domain', fixture['domain']), ('new-home', '/etc')])
-            check('only available to the master' in out and snapshot() == current,
+            check('API option requires permission rename-domain-home' in out and snapshot() == current,
                   'username permission does not allow custom home paths', out)
         elif grant == 'create-user-encpass':
             # Hash data must not inject fields or records, including a final newline.
@@ -961,6 +994,288 @@ def check_more_option_permissions():
     print('All five additional API permission checks passed.', flush=True)
 
 
+def check_warning_permissions(validation_only=False):
+    """check_warning_permissions([validation_only]): exercise extra grants.
+
+    validation_only defaults to False. True stops after database and field
+    validation; otherwise also test privileged files, settings and root hooks.
+    The outer finally block removes all generated accounts and domains.
+    """
+    import pwd
+    # Build the base-command policy from the installed permission catalog.
+    entries = [e for e in json.loads(helper_call('edition-info'))['commands']
+               if e.get('virtual')]
+    parents = sorted({e['parent'].split(':', 1)[1] for e in entries})
+    basic = parents + ['run-api-command']
+    initial = json.loads(helper_call('inspect'))
+    if not initial['domain']:
+        # The focused mode creates the same disposable domains as the full suite.
+        for domain in (fixture['domain'], fixture['outside']):
+            out = api('create-domain', [('domain', domain),
+                      ('pass', fixture['domain_password']), ('unix', ''), ('dir', ''),
+                      ('webmin', ''), ('web', ''), ('plan', fixture['allowed_plan']),
+                      ('template', '0')], admin=True)
+            check('Exit status: 0' in out, 'create isolated warning-test domain', out)
+    # Restrict both fresh and reused fixture accounts to the same target.
+    initial = json.loads(helper_call('inspect'))
+    domain_id = initial['domain']['id']
+    target = [('domain', fixture['domain'])]
+    snapshot = lambda: json.loads(helper_call('inspect-options'))
+    save_policy(new=not initial['account_exists'], commands=basic, domains=domain_id)
+    fixture['id'] = json.loads(helper_call('inspect'))['api_id']
+    check_option_ui(entries)
+    # Free the three-user fixture plan's slots after the earlier quota/hash tests.
+    for user in ('quotaprobe', 'importprobe'):
+        if user in snapshot()['domain']['users']:
+            # Earlier option tests already checked these temporary mailboxes.
+            out = api('delete-user', target + [('user', user)], admin=True)
+            check('Exit status: 0' in out, 'remove earlier mailbox fixture ' + user, out)
+    hook = task / 'option-hook.py'
+    if not hook.exists():
+        # The harmless hook records its effective UID in the task directory.
+        hook.write_text('import os, sys\nfrom pathlib import Path\n'
+                        'p = Path(__file__).parent / ("option-hook-" + sys.argv[1])\n'
+                        'p.write_text(str(os.geteuid()))\n')
+    # Every declared option must fail before parsing or touching any resources.
+    for entry in entries:
+        parent = entry['parent'].split(':', 1)[1]
+        for flag in entry.get('options', []):
+            out = api(parent, target + [(flag[2:], 'fixture-value')])
+            check('API option requires permission ' + entry['name'] in out,
+                  'HTTP denies ungranted option ' + entry['name'] + ' ' + flag, out)
+    # A warning is metadata only; it never grants a base command or master role.
+    state = json.loads(helper_call('inspect'))
+    check(state['noconfig'] == '1', 'new permissions preserve the non-master role')
+
+    def allow(*grants):
+        """allow([grants...]): replace extra grants while retaining base commands."""
+        save_policy(commands=basic + list(grants), domains=domain_id)
+
+    # Grant database options without allowing them to become SQL statements.
+    out = api('enable-feature', target + [('mysql', '')], admin=True)
+    check('Exit status: 0' in out, 'enable MySQL on the disposable domain', out)
+    allow('create-database-options')
+    db_target = target + [('type', 'mysql'), ('name', 'permission_options')]
+    for option, value in (('charset', 'utf8mb4;SELECT/**/1'),
+                          ('collate', 'utf8mb4_general_ci;SELECT/**/1')):
+        out = api('create-database', db_target + [('opt', option + ' ' + value)])
+        check('Invalid MySQL ' + option + ' name' in out and 'Exit status: 0' not in out,
+              'database grant rejects SQL syntax in ' + option, out)
+    # Valid options must still create a database with the requested settings.
+    out = api('create-database', db_target + [('opt', 'charset utf8mb4'),
+              ('opt', 'collate utf8mb4_unicode_ci')])
+    check('Exit status: 0' in out, 'database grant accepts valid charset and collation', out)
+    match = re.search(r'Database (\S+) created successfully', out)
+    check(match is not None, 'database creation reports its actual prefixed name', out)
+    database = match.group(1)
+    # The generated name is verified before using it in a read-only SQL query.
+    check(re.fullmatch(r'[A-Za-z0-9_]+', database) is not None, 'fixture database name is safe')
+    result = subprocess.run(['mysql', '-N', '-e',
+        "SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME "
+        "FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='" + database + "'"],
+        capture_output=True, text=True, check=True, timeout=30)
+    check(result.stdout.strip() == 'utf8mb4\tutf8mb4_unicode_ci',
+          'new database uses the requested charset and collation')
+    # The option grant must not authorize a different target domain.
+    out = api('create-database', [('domain', fixture['outside']), ('type', 'mysql'),
+              ('name', 'forbidden'), ('opt', 'charset utf8mb4')])
+    check('Exit status: 0' not in out, 'database options cannot target an outside domain', out)
+    out = api('delete-database', target + [('type', 'mysql'), ('name', database)], admin=True)
+    check('Exit status: 0' in out, 'remove the extra database fixture', out)
+
+    # Undefined field names must remain one key in the domain configuration.
+    allow('modify-custom-admin-fields')
+    out = api('modify-custom', target + [('allow-missing', ''),
+              ('set', 'api_permissions_fixture allowed')])
+    check('Exit status: 0' in out, 'custom-field grant accepts a new ordinary field', out)
+    domain_file = Path('/etc/webmin/virtual-server/domains') / str(domain_id)
+    check('field_api_permissions_fixture=allowed' in domain_file.read_text().splitlines(),
+          'undefined custom field is saved as one configuration entry')
+    # Both API parsing and direct CLI validation must reject key separators.
+    for field in ('fixture=invalid', 'fixture\napi_validation_escape=1\nignored'):
+        out = api('modify-custom', target + [('allow-missing', ''), ('set', field + ' value')])
+        check(('Invalid custom field name' in out or
+               '--set must be followed by a field name and value' in out) and
+              'Exit status: 0' not in out,
+              'custom-field API rejects configuration delimiters', out)
+        # Separate CLI arguments reach name validation without HTTP parsing.
+        result = subprocess.run(['virtualmin', 'modify-custom', '--domain', fixture['domain'],
+            '--allow-missing', '--set', field, 'value'], capture_output=True,
+            text=True, timeout=60)
+        check(result.returncode != 0 and 'Invalid custom field name' in result.stdout,
+              'custom-field CLI rejects configuration delimiters', result.stdout + result.stderr)
+    check(not any(line.startswith('api_validation_escape=')
+                  for line in domain_file.read_text().splitlines()),
+          'invalid field input cannot add a domain configuration entry')
+    if validation_only:
+        # The focused rerun leaves domain deletion to the shared cleanup block.
+        print('All API option input validation checks passed.', flush=True)
+        return
+
+    # Exercise a privileged server-file read with a root-owned fixture password.
+    fixture['file_password'] = secrets.token_urlsafe(32)
+    fixture_file.write_text(json.dumps(fixture))
+    password_file = task / 'warning-password'
+    password_file.write_text(fixture['file_password'] + '\n')
+    password_file.chmod(0o600)
+    allow('modify-domain-passfile')
+    out = api('modify-domain', target + [('passfile', str(password_file))])
+    check('Exit status: 0' in out, 'explicit passfile grant changes a real domain password', out)
+    # Perl checks the hash inside the guest and returns only the comparison.
+    check(json.loads(helper_call('inspect-warning'))['file_password_matches'],
+          'domain password matches the privileged file input')
+    out = api('run-api-command', target + [('command', 'modify-domain'),
+              ('passfile', str(password_file))])
+    check('server-wide option permissions' in out, 'batch rejects privileged password files', out)
+
+    # Stored secret output is opt-in and limited to permitted domains.
+    out = api('list-domains', target + [('multiline', '')])
+    check('    Password:' not in out and '    Hashed password:' not in out,
+          'ordinary domain listings hide stored credentials')
+    allow('list-domains-secrets')
+    out = api('list-domains', target + [('multiline', '')])
+    check('    Password:' in out or '    Hashed password:' in out,
+          'explicit secrets grant reveals the fixture credential')
+    out = api('list-domains', [('domain', fixture['outside']), ('multiline', '')])
+    check('Exit status: 0' not in out and '    Password:' not in out,
+          'secret output cannot target another domain', out)
+    allow()
+    out = api('list-domains', target + [('multiline', '')])
+    check('    Password:' not in out and '    Hashed password:' not in out,
+          'revoking the secrets grant hides credentials again')
+
+    # A root-owned public-key file is read only with its separate capability.
+    key_file = task / 'warning-ssh-key'
+    subprocess.run(['ssh-keygen', '-q', '-t', 'ed25519', '-N', '', '-f', str(key_file)],
+                   check=True, timeout=30)
+    public_file = Path(str(key_file) + '.pub')
+    mailbox = fixture['user'] + 'box'
+    allow('create-user-noappend', 'create-user-passfile', 'create-user-ssh-key-file')
+    out = api('create-user', target + [('user', mailbox), ('noappend', ''), ('noemail', ''),
+              ('passfile', str(password_file)), ('ssh-pubkey', str(public_file))])
+    check('Exit status: 0' in out, 'create mailbox with file inputs and an unprefixed username', out)
+    mailbox_info = pwd.getpwnam(mailbox)
+    authorized = Path(mailbox_info.pw_dir) / '.ssh' / 'authorized_keys'
+    check(public_file.read_text().strip() in authorized.read_text(),
+          'mailbox receives the key from the privileged fixture file')
+    # File detection happens inside the command, including a batch child.
+    allow('modify-user-ssh-key-file')
+    out = api('run-api-command', target + [('command', 'modify-user'),
+              ('user', mailbox), ('ssh-pubkey', str(public_file))])
+    check('Exit status: 0' not in out,
+          'batch child denies conditional file reads even with the saved grant', out)
+    out = api('modify-user', target + [('user', mailbox), ('ssh-pubkey', str(public_file))])
+    check('Exit status: 0' in out, 'direct request can use its explicit SSH file grant', out)
+    # Each listing has its own secrets grant; one cannot authorize the other.
+    out = api('list-users', target + [('multiline', '')])
+    check('    Encrypted password:' not in out, 'ordinary user listings hide password hashes')
+    allow('list-users-secrets')
+    out = api('list-users', target + [('multiline', '')])
+    check('    Encrypted password:' in out, 'user listing reveals hashes only with its own grant')
+
+    # Apply a harmless web directive, verify the real config, and remove it.
+    allow('modify-web-directives')
+    directive = 'ErrorDocument 404 /api-permission-fixture-notfound'
+    out = api('modify-web', target + [('add-directive', directive)])
+    check('Exit status: 0' in out, 'explicit directive grant updates the web server', out)
+    out = api('get-apache-config', target, admin=True)
+    check(directive in out, 'web configuration contains the granted directive', out)
+    out = api('modify-web', [('domain', fixture['outside']), ('add-directive', directive)])
+    check('Exit status: 0' not in out, 'privileged web grant retains target-domain checks', out)
+    out = api('modify-web', target + [('remove-directive', 'ErrorDocument')])
+    check('Exit status: 0' in out, 'remove the fixture web directive', out)
+    out = api('modify-web', target + [('access-log', str(task / 'warning-access.log'))])
+    check('modify-web-logs' in out, 'directive grant does not permit custom log paths', out)
+    # The log grant must not also permit arbitrary directives.
+    allow('modify-web-logs')
+    out = api('modify-web', target + [('access-log', str(task / 'warning-access.log'))])
+    check('Exit status: 0' in out, 'separate log grant accepts a root-managed log path', out)
+    out = api('get-apache-config', target, admin=True)
+    check(str(task / 'warning-access.log') in out, 'real web configuration uses the custom log path')
+
+    # Administrator-only PHP settings still validate their names and values.
+    out = api('modify-web', target + [('mode', 'fpm')], admin=True)
+    check('Exit status: 0' in out, 'prepare the fixture PHP-FPM pool', out)
+    allow('modify-php-ini-admin')
+    php_args = [('ini-name', 'memory_limit'), ('ini-value', '193M'), ('fpm-admin-value', '')]
+    out = api('modify-php-ini', target + php_args)
+    check('Exit status: 0' in out and
+          json.loads(helper_call('inspect-warning'))['php_admin_memory'] == '193M',
+          'PHP grant writes a real administrator-only pool setting', out)
+    # Permission to set admin values must not permit new configuration lines.
+    out = api('modify-php-ini', target + [('ini-name', 'memory_limit'),
+              ('ini-value', '193M\ninvalid=1'), ('fpm-admin-value', '')])
+    check('values cannot contain newlines' in out,
+          'PHP administrator grant retains configuration-injection checks', out)
+    allow()
+    out = api('modify-php-ini', target + php_args)
+    check('modify-php-ini-admin' in out, 'PHP admin permission revocation takes effect', out)
+
+    # Generate a fixture key on the guest; never export it in diagnostic output.
+    cert_file, tls_key = task / 'warning-cert.pem', task / 'warning-key.pem'
+    subprocess.run(['openssl', 'req', '-x509', '-newkey', 'rsa:2048', '-nodes',
+                    '-subj', '/CN=' + fixture['domain'], '-days', '1',
+                    '-keyout', str(tls_key), '-out', str(cert_file)],
+                   capture_output=True, check=True, timeout=60)
+    out = api('modify-web', target + [('break-ssl-cert', '')], admin=True)
+    check('Exit status: 0' in out, 'keep the fixture certificate independent', out)
+    cert_args = [('cert', str(cert_file)), ('key', str(tls_key))]
+    out = api('install-cert', target + cert_args)
+    check('Certificate files are only available' in out,
+          'certificate file input is denied without its grant', out)
+    allow('install-cert-files')
+    out = api('install-cert', target + cert_args)
+    check('Exit status: 0' in out, 'certificate file permission installs the guest fixture certificate', out)
+    # Installing a key and exporting it require different permissions.
+    out = api('list-certs', target + [('key', '')])
+    check('list-certs-private-keys' in out and 'PRIVATE KEY-----' not in out,
+          'install permission does not grant private-key export')
+    allow('list-certs-private-keys')
+    out = api('list-certs', target + [('key', '')])
+    check('Exit status: 0' in out and 'PRIVATE KEY-----' in out,
+          'explicit private-key grant exports the fixture key')
+    out = api('run-api-command', target + [('command', 'list-certs'), ('key', '')])
+    check('server-wide option permissions' in out and 'PRIVATE KEY-----' not in out,
+          'domain batches cannot export shared private keys')
+
+    # Actual username and home changes must preserve the domain's identity.
+    initial = snapshot()['domain']
+    original_user, original_home = initial['user'], initial['home']
+    new_user = fixture['user'] + 'owner'
+    allow('modify-domain-user')
+    out = api('modify-domain', target + [('user', new_user)])
+    check('Exit status: 0' in out and snapshot()['domain']['user'] == new_user,
+          'modify-domain username permission performs a real rename', out)
+    out = api('modify-domain', target + [('user', original_user)])
+    check('Exit status: 0' in out, 'restore the fixture username', out)
+    # Move only the disposable home, then restore it before cleanup.
+    allow('rename-domain-home')
+    new_home = original_home + '-warning'
+    check(not Path(new_home).exists(), 'custom home test destination is unused')
+    out = api('rename-domain', target + [('new-home', new_home)])
+    check('Exit status: 0' in out and snapshot()['domain']['home'] == new_home,
+          'rename-domain home permission moves the real fixture directory', out)
+    out = api('rename-domain', target + [('new-home', original_home)])
+    check('Exit status: 0' in out, 'restore the fixture home directory', out)
+
+    # Root hooks are deliberately delegated, without giving a master role.
+    hook = task / 'option-hook.py'
+    allow('create-domain-hooks', 'delete-domain-hooks')
+    out = api('create-domain', [('domain', fixture['clone']),
+              ('pass', fixture['domain_password']), ('unix', ''), ('dir', ''),
+              ('webmin', ''), ('web', ''), ('plan', fixture['allowed_plan']),
+              ('template', '0'), ('post-command', 'python3 ' + str(hook) + ' create')])
+    check('Exit status: 0' in out and (task / 'option-hook-create').read_text() == '0',
+          'explicit creation hook executes as root on the disposable guest', out)
+    out = api('delete-domain', [('domain', fixture['clone']),
+              ('post-command', 'python3 ' + str(hook) + ' delete')])
+    check('Exit status: 0' in out and (task / 'option-hook-delete').read_text() == '0',
+          'explicit deletion hook executes as root on the disposable guest', out)
+    check(json.loads(helper_call('inspect'))['noconfig'] == '1',
+          'dangerous option grants never turn the account into a master administrator')
+    print('All warning permission integration checks passed.', flush=True)
+
+
 try:
     # Create the temporary administrator and plans before using the real form.
     helper_call('setup')
@@ -1000,10 +1315,15 @@ try:
         check_account_cli(page)
         sys.exit(0)
     check_help(page)
+    if '--warnings-only' in sys.argv[2:] or '--input-validation-only' in sys.argv[2:]:
+        # Focused runs create their own domains and share the normal cleanup.
+        check_warning_permissions('--input-validation-only' in sys.argv[2:])
+        sys.exit(0)
     if '--options-only' in sys.argv[2:]:
-        # These grants exist on both editions; the master creates test domains.
+        # Exercise the original grants before the expanded permission checks.
         check_option_permissions()
         check_more_option_permissions()
+        check_warning_permissions()
         sys.exit(0)
     if '--help-only' in sys.argv[2:]:
         # Stop before account creation; the finally block removes the admin fixture.
@@ -1435,7 +1755,7 @@ finally:
                    fixture['user'] + '-blocked.example.test'):
         try:
             # A failed protection test must not prevent removal of its fixture.
-            if '--options-only' in sys.argv[2:]:
+            if any(mode in sys.argv[2:] for mode in ('--options-only', '--warnings-only', '--input-validation-only')):
                 api('modify-domain', [('domain', domain), ('unprotected', '')], admin=True)
             api('delete-domain', [('domain', domain)], admin=True)
         except Exception:
@@ -1446,7 +1766,10 @@ finally:
     finally:
         # Remove the credential file even when helper cleanup reports a failure.
         fixture_file.unlink(missing_ok=True)
-        # Remove only this mode's harmless hook script and result markers.
-        if '--options-only' in sys.argv[2:]:
-            for name in ('option-hook.py', 'option-hook-pre', 'option-hook-post'):
+        # Remove generated keys, passwords, hooks and logs.
+        if any(mode in sys.argv[2:] for mode in ('--options-only', '--warnings-only', '--input-validation-only')):
+            for name in ('option-hook.py', 'option-hook-pre', 'option-hook-post',
+                         'option-hook-create', 'option-hook-delete', 'warning-password',
+                         'warning-ssh-key', 'warning-ssh-key.pub', 'warning-access.log',
+                         'warning-cert.pem', 'warning-key.pem'):
                 (task / name).unlink(missing_ok=True)

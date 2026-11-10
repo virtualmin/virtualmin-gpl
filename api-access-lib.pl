@@ -91,29 +91,170 @@ foreach my $entry (&list_api_commands()) {
 	}
 # Extra option permissions are selectable grants, never executable scripts.
 # Bind them to the core provider so a plugin replacement cannot inherit them.
+# Rows contain the base command, suffix, domain scope, flags, optional help
+# key and warning flag. Empty flag lists are checked inside the command.
+# Server-wide entries always warn; domain-scoped entries can warn too.
 foreach my $option (
 	[ 'modify-domain', 'quotas', 1, [ '--quota', '--uquota' ] ],
 	[ 'modify-domain', 'quotas-reapply', 1, [ '--apply-all-quotas' ] ],
 	[ 'modify-domain', 'bandwidth', 1,
 	  [ '--bw', '--bw-disable', '--bw-no-disable' ] ],
 	[ 'modify-domain', 'protection', 1, [ '--protected', '--unprotected' ] ],
-	[ 'modify-domain', '2fa', 1, [ '--disable-2fa' ] ],
+	[ 'modify-domain', '2fa', 1, [ '--disable-2fa' ], '2fa', 1 ],
 	[ 'modify-domain', 'home', 0, [ '--home' ] ],
 	[ 'modify-domain', 'hooks', 0, [ '--pre-command', '--post-command' ] ],
 	[ 'rename-domain', 'user', 1, [ '--new-user', '--auto-user' ] ],
-	[ 'create-user', 'encpass', 1, [ '--encpass' ] ]) {
-	my ($base, $suffix, $scoped, $args) = @$option;
+	[ 'create-user', 'encpass', 1, [ '--encpass' ], 'encpass', 1 ],
+	# Provisioning overrides can change ownership, isolation or placement.
+	[ 'create-domain', 'reseller', 0, [ '--reseller' ],
+	  'reseller', 1 ],
+	[ 'create-domain', 'jail', 1, [ '--enable-jail', '--disable-jail' ],
+	  'jail', 1 ],
+	[ 'create-domain', 'database-server', 0, [ '--mysql-server', '--postgres-server' ],
+	  'database_server', 1 ],
+	[ 'create-domain', 'passfile', 0, [ '--passfile' ],
+	  'passfile', 1 ],
+	# Existing domains need separate grants for the same privileged changes.
+	[ 'modify-domain', 'reseller', 0, [
+	  '--reseller', '--add-reseller', '--delete-reseller' ],
+	  'reseller', 1 ],
+	[ 'modify-domain', 'jail', 1, [
+	  '--enable-jail', '--disable-jail', '--copy-jail' ],
+	  'jail', 1 ],
+	[ 'modify-domain', 'database-server', 0, [ '--mysql-server' ],
+	  'database_server', 1 ],
+	[ 'modify-domain', 'passfile', 0, [ '--passfile' ],
+	  'passfile', 1 ],
+	# Password file inputs read as root, regardless of the target account.
+	[ 'create-user', 'passfile', 0, [ '--passfile' ],
+	  'passfile', 1 ],
+	[ 'modify-user', 'passfile', 0, [ '--passfile' ],
+	  'passfile', 1 ],
+	[ 'create-admin', 'passfile', 0, [ '--passfile' ],
+	  'passfile', 1 ],
+	[ 'modify-admin', 'passfile', 0, [ '--passfile' ],
+	  'passfile', 1 ],
+	# File paths and stored key selection need privileged read access.
+	[ 'create-domain', 'ssh-key-file', 0, [ ],
+	  'ssh_key_file', 1 ],
+	[ 'create-user', 'ssh-key-file', 0, [ '--ssh-pubkey-id' ],
+	  'ssh_key_file', 1 ],
+	[ 'modify-user', 'ssh-key-file', 0, [ '--ssh-pubkey-id' ],
+	  'ssh_key_file', 1 ],
+	# Hooks and home paths can give access beyond the selected domain.
+	[ 'create-domain', 'hooks', 0, [ '--pre-command', '--post-command' ],
+	  'hooks', 1 ],
+	[ 'delete-domain', 'hooks', 0, [ '--pre-command', '--post-command' ],
+	  'hooks', 1 ],
+	[ 'rename-domain', 'home', 0, [ '--new-home' ],
+	  'home', 1 ],
+	# Username changes retain validation and existing-account clash checks.
+	[ 'modify-domain', 'user', 1, [ '--user' ],
+	  'user', 0 ],
+	[ 'create-user', 'noappend', 1, [ '--noappend' ],
+	  'create_user_noappend', 1 ],
+	# DNS placement and custom fields may affect shared server settings.
+	[ 'create-domain', 'dns-placement', 0, [
+	  '--no-slaves', '--no-secondaries', '--separate-dns-subdomain',
+	  '--any-dns-subdomain' ],
+	  'create_domain_dns_placement', 1 ],
+	[ 'create-domain', 'admin-fields', 0, [ ],
+	  'create_domain_admin_fields', 1 ],
+	[ 'modify-custom', 'admin-fields', 0, [ '--allow-missing' ],
+	  'modify_custom_admin_fields', 1 ],
+	# Mail behavior and private-key file access are independent permissions.
+	[ 'modify-mail', 'autoconfig', 1, [ '--autoconfig', '--no-autoconfig' ],
+	  'modify_mail_autoconfig', 0 ],
+	[ 'modify-mail', 'dkim-file', 0, [ '--dkim-key' ],
+	  'modify_mail_dkim_file', 1 ],
+	# Secondary servers and parent zones can serve other domains as well.
+	[ 'modify-dns', 'slaves', 0, [
+	  '--add-slave', '--remove-slave', '--add-all-slaves',
+	  '--sync-all-slaves' ],
+	  'modify_dns_slaves', 1 ],
+	[ 'modify-dns', 'subdomain', 0, [ '--enable-subdomain', '--disable-subdomain' ],
+	  'modify_dns_subdomain', 1 ],
+	# Scanner and notification choices stay limited to selected domains.
+	[ 'modify-spam', 'scanners', 1, [
+	  '--use-spamc', '--use-spamassassin', '--use-clamscan',
+	  '--use-clamdscan', '--use-clamd-stream-client', '--use-clamdscan-remote' ],
+	  'modify_spam_scanners', 1 ],
+	[ 'generate-acme-cert', 'email-master', 1, [ '--email-master', '--no-email-master' ],
+	  'generate_acme_cert_email_master', 0 ],
+	# These options cross file, PHP or database administrator boundaries.
+	[ 'install-cert', 'files', 0, [ ],
+	  'install_cert_files', 1 ],
+	[ 'modify-php-ini', 'admin', 1, [ '--fpm-admin-value' ],
+	  'modify_php_ini_admin', 1 ],
+	[ 'create-database', 'options', 0, [ '--opt' ],
+	  'create_database_options', 1 ],
+	# Keep each privileged web-server effect independently selectable.
+	[ 'modify-web', 'logs', 0, [
+	  '--access-log', '--error-log', '--php-log' ],
+	  'modify_web_logs', 1 ],
+	[ 'modify-web', 'cert-paths', 0, [
+	  '--ssl-cert', '--ssl-key', '--ssl-ca',
+	  '--default-ssl-cert', '--default-ssl-key', '--default-ssl-ca',
+	  '--default-ssl-paths' ],
+	  'modify_web_cert_paths', 1 ],
+	# Directives and ports can affect the shared web-server process.
+	[ 'modify-web', 'directives', 0, [ '--add-directive', '--remove-directive' ],
+	  'modify_web_directives', 1 ],
+	[ 'modify-web', 'ports', 0, [
+	  '--port', '--ssl-port', '--url-port',
+	  '--ssl-url-port' ],
+	  'modify_web_ports', 1 ],
+	# Repairs and process limits can disrupt the selected domain.
+	[ 'modify-web', 'repair', 1, [
+	  '--fix-document-dir', '--fix-options', '--cleanup-mod-php' ],
+	  'modify_web_repair', 1 ],
+	[ 'modify-web', 'php-limits', 1, [ '--php-children-no-check' ],
+	  'modify_web_php_limits', 1 ],
+	# Resource association changes what Virtualmin manages or leaves behind.
+	[ 'enable-feature', 'associate', 0, [ '--associate' ],
+	  'enable_feature_associate', 1 ],
+	[ 'disable-feature', 'disassociate', 0, [ '--disassociate' ],
+	  'disable_feature_disassociate', 1 ],
+	[ 'delete-domain', 'only', 0, [ '--only' ],
+	  'delete_domain_only', 1 ],
+	# Version overrides and registration can bypass normal installer checks.
+	[ 'install-script', 'unsupported', 1, [ '--unsupported' ],
+	  'install_script_unsupported', 1 ],
+	[ 'install-script', 'log-only', 1, [ '--log-only' ],
+	  'install_script_log_only', 1 ],
+	# Global applications can serve domains outside the target list.
+	[ 'install-script', 'global', 0, [ ],
+	  'global_scripts', 1 ],
+	[ 'delete-script', 'global', 0, [ ],
+	  'global_scripts', 1 ],
+	[ 'start-stop-script', 'global', 0, [ ],
+	  'global_scripts', 1 ],
+	# TLS keys may be shared; other secret output follows domain selection.
+	[ 'list-certs', 'private-keys', 0, [ '--key', '--newkey' ],
+	  'list_certs_private_keys', 1 ],
+	[ 'list-domains', 'secrets', 1, [ ],
+	  'secrets', 1 ],
+	[ 'list-users', 'secrets', 1, [ ],
+	  'secrets', 1 ],
+	[ 'list-admins', 'secrets', 1, [ ],
+	  'secrets', 1 ],
+	[ 'list-scripts', 'secrets', 1, [ ],
+	  'secrets', 1 ]) {
+	my ($base, $suffix, $scoped, $args, $label, $warning) = @$option;
 	my $parent = $commands{$base};
 	# Replaced or unavailable base commands cannot expose core option grants.
 	next if (!$parent || $parent->{'provider'} ne $module_name);
 	my $name = "$base-$suffix";
-	my $label = $suffix;
+	$label ||= $suffix;
 	$label =~ tr/-/_/;
+	# Inherit edition requirements and keep risk separate from domain scope.
 	$commands{$name} = { 'name' => $name,
 		'provider' => $module_name, 'key' => "$module_name:$name",
 		'parent' => $parent->{'key'}, 'virtual' => 1,
-		'options' => $args, 'scoped' => $scoped, 'pro' => 0,
-		'desc' => $text{'apiaccess_option_'.$label} };
+		'options' => $args, 'scoped' => $scoped,
+		'pro' => $parent->{'pro'},
+		'warning' => !$scoped || $warning ? 1 : 0,
+		'desc' => &text('apiaccess_option_'.$label, $base) };
 	}
 # Present aliases as one permission while retaining each accepted spelling.
 my %grants;
@@ -163,10 +304,14 @@ return $command && !$command->{'virtual'} &&
 # api_access_can_option(name)
 # Checks an extra grant for the current command without granting a master role.
 # The base command must still be authorized by the same provider.
+# Domain batches deny server-wide grants, including checks made at runtime.
 sub api_access_can_option
 {
 my ($name) = @_;
 my $option = &get_api_access_command($name);
+# Batch children may never acquire effects outside their target domains.
+return 0 if ($option && !$option->{'scoped'} &&
+	     $api_access_domain_batch);
 return $option && $option->{'virtual'} && $api_access_command &&
 	$option->{'parent'} eq $api_access_command->{'key'} &&
 	&api_access_can_command($api_access_command->{'name'}) &&
@@ -369,7 +514,9 @@ foreach my $d (@domains) {
 		print "Would run $name for $d->{'dom'}\n";
 		next;
 		}
-	# Child execution preserves the ACL and the caller's identity.
+	# The fork retains this flag even when it clears the environment.
+	# Runtime checks then reject file inputs and global applications too.
+	local $api_access_domain_batch = 1;
 	pipe(my $read, my $write) || die "Cannot open command pipe: $!\n";
 	my $pid = &execute_webmin_script($command->{'path'},
 		$command->{'provider'}, \@childargs, $write);
