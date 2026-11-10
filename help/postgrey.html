@@ -11,5 +11,15 @@ a new entry. Whitelist entries can be removed by checking the boxes
 next to them and clicking the <b>Delete Selected</b> button at the bottom
 of the page. <p>
 
+By default, enabling greylisting sets a five-minute minimum delay for both
+Postgrey and milter-greylist. Retries for greylisted mail are temporarily rejected
+until this delay has passed since the first attempt. The sending server decides
+when to retry. <p>
+
+To change the delay, set <tt>postgrey_delay</tt> in
+<tt>/etc/webmin/virtual-server/config</tt> to the desired delay in seconds, then
+disable and re-enable greylisting. For example,
+<tt>postgrey_delay=60</tt> sets a one-minute delay. <p>
+
 <footer>
 

@@ -163,6 +163,109 @@ if ($init::init_mode eq 'init') {
 return undef;
 }
 
+# get_postgrey_options_file()
+# Returns the first readable package options file, or undef if none is found.
+sub get_postgrey_options_file
+{
+foreach my $file ('/etc/default/postgrey', '/etc/sysconfig/postgrey') {
+	return $file if (-r $file);
+	}
+return undef;
+}
+
+# save_postgrey_delay()
+# Saves $config{'postgrey_delay'} in seconds, defaulting to 300 when unset.
+# Does not enable greylisting or restart the service.
+sub save_postgrey_delay
+{
+# Reject invalid overrides before changing configuration or services.
+my $delay = defined($config{'postgrey_delay'})
+	? $config{'postgrey_delay'} : 300;
+defined($delay) && $delay =~ /^\d+\z/ &&
+    $delay > 0 && $delay <= 2147483647 ||
+	&error($text{'postgrey_edelay'});
+$delay = int($delay);
+if (&get_postgrey_type() eq 'milter') {
+	# Change only the default ACL, preserving custom rules and options.
+	my $file = &get_ratelimit_config_file();
+	&lock_file($file);
+	my $conf = &get_ratelimit_config();
+	my ($old) = grep {
+		my ($idx, $action) = &postgrey_milter_acl_action($_);
+		defined($idx) && &postgrey_milter_acl_is_default($_, $idx)
+		} @$conf;
+	my $lref = &read_file_lines($file);
+	if ($old) {
+		# Preserve quoted messages and comments in the original rule.
+		my $found;
+		my @lines;
+		for(my $i=$old->{'line'}; $i<@$lref; $i++) {
+			# A hash inside a quoted message is part of the message.
+			my ($code, $comment) = $lref->[$i] =~
+				/^((?:"(?:\\.|[^"\\])*"|[^"#])*)(#.*)?$/;
+			if (!defined($code)) {
+				# Release the lock and discard pending edits.
+				&unlock_file($file);
+				&error(&text('postgrey_eparse', $i+1,
+					"<tt>".&html_escape($file)."</tt>"));
+				}
+			# Track continuations and replace unquoted delays.
+			my $continued = $code =~ /\\\s*$/;
+			$code =~ s{("(?:\\.|[^"\\])*")|\bdelay\s+\d+[smhdw]?\b}
+				{defined($1) ? $1 : do {
+					$found = 1; "delay ${delay}s" }}ge;
+			# Add a missing delay before the final line's comment.
+			$code =~ s/(\s*)$/ delay ${delay}s$1/
+				if (!$continued && !$found);
+			push(@lines, $code.($comment || ''));
+			last if (!$continued);
+			}
+		# Keep the cached file unchanged until the whole rule parses.
+		splice(@$lref, $old->{'line'}, scalar(@lines), @lines);
+		}
+	else {
+		# Create a whitelist rule until greylisting is enabled.
+		&save_ratelimit_directive($conf, undef,
+			{ 'name' => 'racl',
+			  'values' => [ 'whitelist', 'default',
+					'delay', $delay.'s' ] });
+		}
+	&flush_file_lines($file);
+	&unlock_file($file);
+	}
+else {
+	# POSTGREY_OPTS is read by both Debian and RPM package startup scripts.
+	my $file = &get_postgrey_options_file();
+	$file || &error($text{'postgrey_eoptions'});
+	&lock_file($file);
+	my (%opts, %lines);
+	&read_env_file($file, \%opts, 0, \%lines);
+	my $lref = &read_file_lines($file);
+	my $line = $lines{'POSTGREY_OPTS'};
+	my ($args, $quote, $comment) = ($opts{'POSTGREY_OPTS'} || '', '"', '');
+	if (defined($line) && $lref->[$line] =~
+	    /^\s*(?:export\s+)?POSTGREY_OPTS\s*=\s*(["'])(.*?)\1(\s*(?:#.*)?)$/) {
+		# Retain shell quoting and literal hashes in existing options.
+		($quote, $args, $comment) = ($1, $2, $3);
+		}
+	# Put one delay in POSTGREY_OPTS, after any RPM POSTGREY_DELAY argument.
+	$args =~ s/(^|\s)--delay(?:=|\s+)\d+(?=\s|$)/$1/g;
+	$args =~ s/\s+$//;
+	$args .= ($args eq '' ? '' : ' ').'--delay='.$delay;
+	my $setting = 'POSTGREY_OPTS='.$quote.$args.$quote.$comment;
+	if (defined($line)) {
+		# Replace this variable without changing other package settings.
+		$lref->[$line] = $setting;
+		}
+	else {
+		# Add POSTGREY_OPTS when the package has not defined it.
+		push(@$lref, $setting);
+		}
+	&flush_file_lines($file);
+	&unlock_file($file);
+	}
+}
+
 # get_postgrey_port()
 # Returns the port on which postgrey listens
 sub get_postgrey_port
@@ -262,11 +365,14 @@ return 0;
 }
 
 # enable_postgrey()
-# Turns on greylisting by starting the daemon and configuring Postfix. May
-# print stuff. Returns 1 on success or 0 on failure.
+# Enables greylisting and configures Postfix, reporting progress through the
+# print callbacks. Returns 1 on success or 0 if a service setup step fails.
 sub enable_postgrey
 {
+# Apply the configured delay before starting either backend.
+&save_postgrey_delay();
 if (&get_postgrey_type() eq 'milter') {
+	# Use the milter service and Postfix socket setup for this backend.
 	return &enable_postgrey_milter();
 	}
 
@@ -276,8 +382,9 @@ my $init = &get_postgrey_init();
 my $port = &get_postgrey_port();
 &$first_print($text{'postgrey_init'});
 if (&init::action_status($init) != 2) {
+	# Enable the package service or create a startup action if needed.
 	if (!$port) {
-		# Pick a random port now
+		# Allocate a listener when no existing port or socket is known.
 		$port = &allocate_random_port(60000);
 		}
 	my $postgrey = &has_command("postgrey");
@@ -290,44 +397,43 @@ if (&init::action_status($init) != 2) {
 	&$second_print($text{'postgrey_initdone'});
 	}
 else {
+	# Keep the existing boot configuration.
 	&$second_print($text{'postgrey_initalready'});
 	}
 
-# Start process
+# Restart a running daemon so it picks up the saved startup options.
 &$first_print($text{'postgrey_proc'});
-if (!&find_byname("postgrey")) {
-	my ($ok, $out) = &init::start_action($init);
-	if (!$ok) {
-		&$second_print(&text('postgrey_procfailed',
-				     "<tt>".&html_escape($out)."</tt>"));
-		return 0;
-		}
-	&$second_print($text{'postgrey_procdone'});
+my ($ok, $out) = &find_byname("postgrey")
+	? &init::restart_action($init) : &init::start_action($init);
+if (!$ok) {
+	# Do not direct Postfix to a service that failed to start.
+	&$second_print(&text('postgrey_procfailed',
+			     "<tt>".&html_escape($out)."</tt>"));
+	return 0;
 	}
-else {
-	&$second_print($text{'postgrey_procalready'});
-	}
+&$second_print($text{'postgrey_procdone'});
 $port = &get_postgrey_port();	# In case we got it from the running
 				# process after the init script started
 
-# Configure Postfix and restart
+# Connect Postfix to the policy service and reload it if the endpoint changes.
 &$first_print($text{'postgrey_postfix'});
 &require_mail();
 my $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
 if ($rr =~ /check_policy_service\s+inet:\S+:\Q$port\E/ ||
     $rr =~ /check_policy_service\s+unix:\Q$port\E/) {
-	# Already OK
+	# Keep a policy service entry that already points to this listener.
 	&$second_print($text{'postgrey_postfixalready'});
 	}
 else {
+	# Use a local TCP endpoint or the configured Unix socket.
 	my $wantport = $port =~ /^\// ? "unix:$port"
 					 : "inet:127.0.0.1:$port";
 	if ($rr =~ /(.*)check_policy_service\s+(inet|unix):[^, ]+(.*)/) {
-		# Wrong port?!
+		# Replace the old endpoint without changing other restrictions.
 		$rr = $1."check_policy_service ".$wantport.$3;
 		}
 	else {
-		# Need to setup
+		# Add greylisting after the existing recipient restrictions.
 		$rr .= " check_policy_service ".$wantport;
 		}
 	&postfix::set_current_value("smtpd_recipient_restrictions", $rr);

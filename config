@@ -262,3 +262,4 @@ dns_default_ip6=2001:4860:4860::8888
 show_backuppath=2
 appendadmin=0
 gen_ssh_key=0
+postgrey_delay=300

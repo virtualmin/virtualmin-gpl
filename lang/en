@@ -7095,6 +7095,9 @@ dplans_enone=None selected
 dplans_eall=At least one plan must exist
 
 postgrey_title=Email Greylisting
+postgrey_edelay=The postgrey_delay setting must be a whole number of seconds from 1 to 2147483647.
+postgrey_eoptions=No supported Postgrey startup options file was found.
+postgrey_eparse=Cannot read the greylisting rule on line $1 of $2. Check for unclosed quotes.
 newpostgrey_title=Email Greylisting
 postgrey_emailfeat=Greylisting can only be used when email is enabled globally.
 postgrey_epostfix=Greylisting can only be used in conjunction with the Postfix mail server
