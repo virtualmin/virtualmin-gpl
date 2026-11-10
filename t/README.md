@@ -90,6 +90,17 @@ removes a DNS-only `.invalid` domain and does not contact Cloudflare.
 
 ## Current tests
 
+`prove t/postgrey-delay.t` checks greylisting delay configuration with temporary
+files without changing services.
+
+On a disposable Linux VM with Virtualmin and Postgrey or milter-greylist installed,
+run `VIRTUALMIN_GREYLIST_VM_TEST=1 python3 t/postgrey-delay-live-vm.py` from the
+candidate checkout as root. The live test checks the five-minute default and
+manual overrides. It uses a two-second delay, private sockets and databases to
+check that early retries are rejected and later retries are accepted. For Postgrey,
+it also restarts the package service with the saved delay, then restores its
+configuration and original running state.
+
 | File | What it checks |
 | --- | --- |
 | `compile.t` | Every discovered `.pl` and `.cgi` parses cleanly with `perl -c`. It catches syntax and compile-time module-loading breakage without running normal script bodies. |
