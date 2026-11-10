@@ -25,6 +25,13 @@ if (@ARGV && $ARGV[0] eq '--child') {
 
 my $tmp = tempdir('clone-domain-exit-XXXXXX', TMPDIR => 1, CLEANUP => 1);
 
+subtest 'invalid cloned username' => sub {
+	my ($status, $output) = run_cli('username', 'invalid_user', '');
+	is($status, 1, 'CLI exits with failure');
+	like($output, qr/Controlled invalid username/,
+		'CLI applies the shared account-name validator');
+	};
+
 # Exercise the real Apache early returns, through the real CLI entry point.
 foreach my $feature (qw(web ssl)) {
 	foreach my $missing (qw(source target)) {
@@ -217,6 +224,9 @@ sub text {
 }
 sub parse_domain_name { $_[0] }
 sub valid_domain_name { undef }
+sub valid_mailbox_name {
+	return $result eq 'invalid_user' ? 'Controlled invalid username' : undef;
+}
 sub master_admin { 1 }
 sub get_remote_api_domain { $source }
 sub get_domain_by { undef }

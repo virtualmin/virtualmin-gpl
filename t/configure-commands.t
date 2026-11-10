@@ -45,6 +45,9 @@ do "$ENV{'TEST_SOURCE'}/commands-lib.pl";
 die $@ if $@;
 sub master_admin { !$ENV{'TEST_NONMASTER'} }
 sub reseller_admin { 0 }
+sub module_root_directory {
+	return $_[0] eq $module_name ? $module_root_directory : undef;
+}
 sub indexof {
 	my ($item, @list) = @_;
 	for (my $i=0; $i<@list; $i++) { return $i if $list[$i] eq $item; }

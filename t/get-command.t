@@ -18,6 +18,7 @@ sub write_file {
 
 # Exercise the real metadata parser without loading Webmin or running commands.
 write_file("$tmp/example.pl", "=head1 example.pl\n\nFixture command.\n\n=cut\n");
+chmod(0755, "$tmp/example.pl") or die "$tmp/example.pl: $!";
 write_file("$tmp/driver.pl", <<'PERL');
 package virtual_server;
 $module_name = 'virtual-server';
@@ -27,6 +28,10 @@ sub parse_common_cli_flags { }
 sub master_admin { 1 }
 sub require_remote_api_command { }
 sub api_command_unavailable_message { return undef; }
+sub resolve_remote_api_command {
+	return ("$ENV{'TEST_MODULE'}/example.pl", $ENV{'TEST_MODULE'},
+		'virtual-server');
+}
 sub clean_environment { }
 sub reset_environment { }
 sub read_file_contents {
@@ -86,6 +91,9 @@ my @cases = (
 		[ 'domain', 'name', 0, '1 or more times' ], [ 'id', 'number', 0, '1 or more times' ] ],
 	[ 'optional alternatives and repetition', '[--file <path> | --stdin]*',
 		[ 'file', 'path', 1, '0 or more times' ], [ 'stdin', undef, 1, '0 or more times' ] ],
+	[ 'optional value notation inside a repeated group',
+		'[--add-webmin-module module[=level]]*',
+		[ 'add-webmin-module', 'module[=level]', 1, '0 or more times' ] ],
 	[ 'mixed quoted and bracketed values', '[--label "display name" --size <size>]',
 		[ 'label', 'display name', 1 ], [ 'size', 'size', 1 ] ],
 	[ 'required groups after bare flags are not values', '--yes <--domain name> <--verbose>',

@@ -426,7 +426,7 @@ foreach my $desturl (@$desturls) {
 				quotemeta($qserver || $server);
 		my $rmcmd = $sshcmd." rm -f ".quotemeta($testfile);
 		my $rmerr;
-		&run_ssh_command($rmcmd, $pass, \$rmerr);
+		&run_ssh_command($rmcmd, $pass, \$rmerr, $asuser);
 
 		if ($dirfmt && $path ne "/") {
 			# Also create the destination directory now, by running
@@ -612,14 +612,17 @@ foreach my $desturl (@$desturls) {
 		if ($dirfmt) {
 			# Directory should already exist
 			my $mkdirerr;
-			&sftp_commands($r, $pass, $port, ["mkdir $path"], \$mkdirerr);
-			$out = &sftp_commands($r, $pass, $port, ["ls $path"], \$err);
+			&sftp_commands($r, $pass, $port, ["mkdir $path"],
+				       \$mkdirerr, $asuser);
+			$out = &sftp_commands($r, $pass, $port, ["ls $path"],
+				     \$err, $asuser);
 			}
 		else {
 			# Parent should exist
 			my $ppath = $path;
 			$ppath =~ s/\/[^\/]+$//;
-			$out = &sftp_commands($r, $pass, $port, ["ls $ppath"], \$err);
+			$out = &sftp_commands($r, $pass, $port, ["ls $ppath"],
+				     \$err, $asuser);
 			}
 		if ($err || $out =~ /not\s+found/) {
 			&$second_print(&text('backup_esftpdir', &html_escape($err || $out)));
@@ -4328,7 +4331,7 @@ elsif ($mode == 9) {
 			eval {
 				local $main::error_must_die = 1;
 				my $fls = &remote_eval($w, "webmin",
-						     "[ glob('$path/*$sfx') ]");
+					&remote_glob_code($path, $sfx));
 				foreach my $f (@$fls) {
 					$f =~ s/^.*\///;
 					&remote_read($w, "$temp/$f",
@@ -4367,7 +4370,7 @@ elsif ($mode == 9) {
 			eval {
 				local $main::error_must_die = 1;
 				my $fls = &remote_eval($w, "webmin",
-						     "[ glob('$path/*') ]");
+					&remote_glob_code($path, ""));
 				foreach my $f (@$fls) {
 					$f =~ s/^.*\///;
 					&remote_read($w, "$temp/$f",
@@ -4526,6 +4529,8 @@ elsif ($url =~ /^rs:([^\/]+)(\/(.*))?$/ && $config{'rs_user'} &&
 elsif ($url =~ /^gcs:\/\/([^\/]+)(\/(\S+))?$/) {
 	# Google cloud storage
 	my $st = &cloud_google_get_state();
+	return (-1, "Google Cloud Storage cannot be used by this user")
+		if (!&can_use_cloud("google"));
 	if ($st->{'ok'}) {
 		@rv = (7, undef, undef, $1, $3, undef);
 		}
@@ -4535,15 +4540,21 @@ elsif ($url =~ /^gcs:\/\/([^\/]+)(\/(\S+))?$/) {
 	}
 elsif ($url =~ /^dropbox:\/\/([^\/]+\.(gz|zip|bz2|tar))$/) {
 	# Dropbox file at the top level
+	return (-1, "Dropbox cannot be used by this user")
+		if (!&can_use_cloud("dropbox"));
 	@rv = (8, undef, undef, "", $1, undef);
 	}
 elsif ($url =~ /^dropbox:\/\/([^\/]+)(\/(\S+))?$/) {
 	# Dropbox folder
+	return (-1, "Dropbox cannot be used by this user")
+		if (!&can_use_cloud("dropbox"));
 	@rv = (8, undef, undef, $1, $3, undef);
 	}
 elsif ($url =~ /^bb:\/\/([^\/]*)(\/(\S+))?$/) {
 	# Backblaze bucket and file
 	my $st = &cloud_bb_get_state();
+	return (-1, "Backblaze cannot be used by this user")
+		if (!&can_use_cloud("bb"));
 	if ($st->{'ok'}) {
 		@rv = (10, undef, undef, $1, $3, undef);
 		}
@@ -4554,6 +4565,8 @@ elsif ($url =~ /^bb:\/\/([^\/]*)(\/(\S+))?$/) {
 elsif ($url =~ /^azure:\/\/([^\/]+)(\/(\S+))?$/) {
 	# Azure container and file
 	my $st = &cloud_azure_get_state();
+	return (-1, "Azure Blob Storage cannot be used by this user")
+		if (!&can_use_cloud("azure"));
 	if ($st->{'ok'}) {
 		@rv = (11, undef, undef, $1, $3, undef);
 		}
@@ -4565,6 +4578,8 @@ elsif ($url =~ /^drive:\/\/(.*\.(gz|zip|bz2|tar))$/) {
 	# Google drive folder and file
 	my @w = split(/\//, $1);
 	my $st = &cloud_drive_get_state();
+	return (-1, "Google Drive cannot be used by this user")
+		if (!&can_use_cloud("drive"));
 	if ($st->{'ok'}) {
 		my $f = pop(@w);
 		return (12, undef, undef, join("/", @w), $f, undef);
@@ -4576,6 +4591,8 @@ elsif ($url =~ /^drive:\/\/(.*\.(gz|zip|bz2|tar))$/) {
 elsif ($url =~ /^drive:\/\/(.*)$/) {
 	# Google drive folder
 	my $st = &cloud_drive_get_state();
+	return (-1, "Google Drive cannot be used by this user")
+		if (!&can_use_cloud("drive"));
 	if ($st->{'ok'}) {
 		@rv = (12, undef, undef, $1, undef, undef);
 		}
@@ -4772,6 +4789,18 @@ $file =~ s/\/+$//;
 $file =~ /^\S+$/ || return (undef, $text{'backup_edest2'});
 $file =~ /\.\./ && return (undef, $text{'backup_edest3'});
 return ("$d->{'home'}/$home_virtualmin_backup/$file", undef);
+}
+
+# remote_glob_code(directory, suffix)
+# Returns Perl code that lists files ending with suffix in a directory on a
+# remote Webmin server. The directory is embedded as a quoted literal so that
+# its contents cannot change the code that is evaluated.
+sub remote_glob_code
+{
+my ($dir, $sfx) = @_;
+$dir =~ s/([\\'])/\\$1/g;
+$sfx =~ s/([\\'])/\\$1/g;
+return "my \$d = '$dir'; [ glob(\"\\Q\$d\\E/*$sfx\") ]";
 }
 
 # nice_backup_url(string, [caps-first], [show-backup-path-opts])
@@ -6184,9 +6213,24 @@ if ($mode == 0) {
 					             : 'backup_deletingfile',
 				            "<tt>$path</tt>", $old));
 			my $sz = &nice_size(&disk_usage_kb($path)*1024);
-			&unlink_file($path.".info") if (!-d $path);
-			&unlink_file($path.".dom") if (!-d $path);
-			&unlink_file($path);
+			my @del = ( $path );
+			push(@del, $path.".info", $path.".dom") if (!-d $path);
+			if ($asd) {
+				# Delete as the domain owner, who wrote the files
+				my ($deleted, $err) =
+					&unlink_file_as_domain_user($asd, @del);
+				if (!$deleted) {
+					# Report failures without counting a deletion
+					&$second_print(&text('backup_edelbucket',
+							    &html_escape($err)));
+					$ok = 0;
+					next;
+					}
+				}
+			else {
+				# Master backups retain root permissions
+				&unlink_file(@del);
+				}
 			&$second_print(&text('backup_deleted', $sz));
 			$pcount++;
 			}
@@ -7562,10 +7606,17 @@ return @rv;
 }
 
 # delete_backup_from_log(&log)
-# If a backup log used a separate file for each domain, delete them all
+# If a backup log used a separate file for each domain, delete them all.
+# Domain owners delete files as their Unix user, like the backup did.
 sub delete_backup_from_log
 {
 my ($log) = @_;
+my $asd;
+if (!&master_admin() && !&reseller_admin()) {
+	my @ods = &get_domains_by_names(split(/\s+/, $log->{'doms'}));
+	$asd = &get_backup_as_domain(\@ods);
+	$asd || return "Could not determine the owner of this backup";
+	}
 my $dest = $log->{'dest'};
 my $c = defined($log->{'compression'}) ? $log->{'compression'}
 				       : $config{'compression'};
@@ -7574,20 +7625,23 @@ if ($log->{'separate'}) {
 	my $err;
 	foreach my $dname (split(/\s+/, $log->{'doms'})) {
 		my $ddest = $dest."/".$dname.".".$sfx;
-		$err ||= &delete_backup($ddest);
+		$err ||= &delete_backup($ddest, $asd);
 		}
 	return $err;
 	}
 else {
-	return &delete_backup($dest);
+	return &delete_backup($dest, $asd);
 	}
 }
 
-# delete_backup(dest)
-# Delete the backup from some destination path, like /backup/foo.com.tar.gz
+# delete_backup(dest, [&as-domain])
+# Delete the backup from some destination path, like /backup/foo.com.tar.gz.
+# If as-domain is given, local and SSH deletion runs as that domain's Unix
+# user rather than as root.
 sub delete_backup
 {
-my ($dest) = @_;
+my ($dest, $asd) = @_;
+my $asuser = $asd ? $asd->{'user'} : undef;
 my ($proto, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
 my $rsh;
 foreach my $sfx ("", ".info", ".dom") {
@@ -7596,9 +7650,18 @@ foreach my $sfx ("", ".info", ".dom") {
 	if ($proto == 0) {
 		# File on this system (but skip if missing)
 		if (-e $spath) {
-			# Avoid loading backup files into memory (can be huge)
-			my $no_log_file_changes = 1;
-			$err = &unlink_logged($spath) ? undef : $!;
+			if ($asd) {
+				# Delete as the domain owner, who wrote the file
+				my ($deleted, $delete_err) =
+					&unlink_file_as_domain_user($asd, $spath);
+				$err = $deleted ? undef :
+					($delete_err || "Failed to delete backup");
+				}
+			else {
+				# Avoid loading backup files into memory (can be huge)
+				my $no_log_file_changes = 1;
+				$err = &unlink_logged($spath) ? undef : $!;
+				}
 			}
 		}
 	elsif ($proto == 1 || $proto == 14) {
@@ -7616,7 +7679,7 @@ foreach my $sfx ("", ".info", ".dom") {
 			     ($user ? quotemeta($user)."\@" : "").
 			     quotemeta($qhost);
 		my $rmcmd = $sshcmd." rm -rf ".quotemeta($spath);
-		&run_ssh_command($rmcmd, $pass, \$err);
+		&run_ssh_command($rmcmd, $pass, \$err, $asuser);
 		}
 	elsif ($proto == 3) {
 		# S3 bucket file
@@ -7743,9 +7806,12 @@ if (!$already) {
 	($already) = grep { $_->{'host'} eq $server } @servers;
 	}
 
-# Construct a server object using provided and stored info
-$user ||= $already->{'user'} if ($already);
-$pass ||= $already->{'pass'} if ($already);
+# Construct a server object using provided and stored info. Stored logins
+# belong to the master administrator and are never lent to other users.
+if ($already && &master_admin()) {
+	$user ||= $already->{'user'};
+	$pass ||= $already->{'pass'};
+	}
 $port ||= $already->{'port'} if ($already);
 return { 'host' => $server,
 	 'ip' => $already ? $already->{'ip'} : undef,

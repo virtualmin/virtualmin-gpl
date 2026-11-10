@@ -217,7 +217,8 @@ foreach my $pp (@$paths) {
 &$indent_print();
 
 # Common Git prefix to specify the repo and work-tree
-my $git_prefix = "git --git-dir=".quotemeta($git_repo)." --work-tree=$etcdir";
+my $git_prefix = &shell_quote_command_args("git", "--git-dir=$git_repo",
+	"--work-tree=$etcdir");
 
 # For each path we want to list
 foreach my $path (@paths) {
@@ -225,7 +226,7 @@ foreach my $path (@paths) {
 	my $type = (-d $original_path) ? "directory" : "file";
 
 	# Build a command that returns up to the given number of commits
-	my $pathspec = "':(glob)$path'";
+	my $pathspec = &shell_quote_command_args(":(glob)$path");
 	my $log_cmd = $depth > 0
 		? "$git_prefix log -n $depth --format='%H' -- $pathspec"
 		: "$git_prefix log --format='%H' -- $pathspec";
@@ -278,13 +279,13 @@ foreach my $path (@paths) {
 			
 			# List directory contents matching the pattern
 			my $ls_cmd = "$git_prefix ls-tree -r ".quotemeta($commit).
-				" --name-only ".quotemeta($dir_part);
+				" --name-only -- ".&shell_quote_command_args($dir_part);
 			my $ls_out;
 			&execute_command($ls_cmd, undef, \$ls_out);
 			
 			# Filter the output to match the pattern
-			my $pattern = $path;
-			$pattern =~ s/\*/.*/g;  # Convert * to .* for regex
+			my $pattern = quotemeta($path);
+			$pattern =~ s/\\\*/.*/g;  # Convert quoted * to .*
 			
 			# Display content for each matching file
 			my @files = grep(/$pattern/, split(/\n/, $ls_out));
@@ -292,7 +293,7 @@ foreach my $path (@paths) {
 			foreach my $file (@files) {
 				# Get the file content
 				my $file_cat_cmd = "$git_prefix show ".
-					quotemeta($commit).":$file";
+					&shell_quote_command_args("$commit:$file");
 				my $file_content;
 				my $file_err;
 				my $file_ec = &execute_command($file_cat_cmd, 
@@ -323,8 +324,8 @@ foreach my $path (@paths) {
 			}
 		else {
 			# Original approach for non-wildcard paths
-			$cat_cmd = "$git_prefix show ".quotemeta($commit).":".
-				quotemeta($path);
+			$cat_cmd = "$git_prefix show ".
+				&shell_quote_command_args("$commit:$path");
 			my $catout;
 			my $caterr;
 			my $catec = &execute_command($cat_cmd, undef,

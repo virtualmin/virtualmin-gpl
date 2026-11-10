@@ -115,6 +115,12 @@ if (!$d->{'parent'}) {
 		$newuser || &usage("No free new username could be found - use ".
 				   "the --newuser flag to specify one");
 		}
+	else {
+		# The name becomes a Unix account and home directory, so apply
+		# the same validation as domain creation
+		my $uerr = &valid_mailbox_name($newuser);
+		$uerr && &usage($uerr);
+		}
 	}
 else {
 	$newuser && &usage("The --newuser flag makes no sense when cloning ".
