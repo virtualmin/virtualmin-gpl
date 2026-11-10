@@ -5,7 +5,7 @@
 # Modes: setup, catalog, make-alias, module-root, inspect, block-policy,
 # unblock-policy, edition-info, seed-pro-grants, make-pro-alias,
 # theme-authentic, theme-gray, clear-policy, restore-policy, inspect-options,
-# seed-options-2fa, and cleanup.
+# seed-options-2fa, seed-options-hash, drift-options-quota, and cleanup.
 
 use strict;
 use warnings;
@@ -130,6 +130,24 @@ elsif ($mode eq 'inspect') {
 			qw(id dom user api_owner plan template quota uquota) } : undef,
 		unix_user => scalar(getpwnam($fixture->{user})) });
 	}
+elsif ($mode eq 'seed-options-hash') {
+	# Keep the imported password hash inside the guest credential file.
+	$fixture->{'import_hash'} = &acl::encrypt_password(
+		$fixture->{'domain_password'}, '$6$optionfixture$');
+	$fixture->{'import_hash'} =~ /^\$6\$/ || die "Missing SHA-512 crypt support";
+	open($fh, '>', $file) or die $!;
+	print $fh encode_json($fixture);
+	close($fh) or die $!;
+	}
+elsif ($mode eq 'drift-options-quota') {
+	# Alter only the generated user's filesystem quota, preserving its cache.
+	my $d = &get_domain_by('dom', $fixture->{'domain'});
+	$d && &has_home_quotas() || die "Missing fixture domain or quota support";
+	my ($u) = grep { &remove_userdom($_->{'user'}, $d) eq 'quotaprobe' }
+		&list_domain_users($d, 1, 1, 0, 1);
+	$u && !$u->{'noquota'} || die "Missing quota fixture user";
+	&set_user_quotas($u->{'user'}, 1024, $d);
+	}
 elsif ($mode eq 'inspect-options' || $mode eq 'seed-options-2fa') {
 	# Inspect only fixture domains and seed 2FA only on their Webmin logins.
 	my %state;
@@ -145,8 +163,20 @@ elsif ($mode eq 'inspect-options' || $mode eq 'seed-options-2fa') {
 			&acl::modify_user($u->{'name'}, $u);
 			}
 		$state{$kind} = { map { $_ => $d->{$_} }
-			qw(id dom user home quota uquota) };
+			qw(id dom user home quota uquota bw_limit bw_no_disable protected) };
 		$state{$kind}->{'twofactor'} = $u->{'twofactor_provider'} ? 1 : 0;
+		# Report quota values and hash checks, never the stored hashes themselves.
+		$state{$kind}->{'users'} = { map {
+			my $mailuser = $_;
+			my $name = &remove_userdom($mailuser->{'user'}, $d);
+			($name, { (map { $_ => $mailuser->{$_} }
+				qw(user quota quota_cache)),
+				'hash_matches' => $fixture->{'import_hash'} &&
+					$mailuser->{'pass'} eq $fixture->{'import_hash'} ? 1 : 0,
+				'password_matches' => $fixture->{'import_hash'} &&
+					crypt($fixture->{'domain_password'}, $mailuser->{'pass'}) eq
+					$mailuser->{'pass'} ? 1 : 0 })
+			} &list_domain_users($d, 1, 1, 0, 1) };
 		}
 	# Check the API account's role without exposing credentials or ACL data.
 	local %access = &get_module_acl($fixture->{user}, $module_name);

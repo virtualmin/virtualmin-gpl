@@ -16,7 +16,9 @@ do "$FindBin::Bin/../api-access-lib.pl" or die $@ || $!;
 # Provide executable fixture commands without initializing the host's Webmin.
 my $dir = tempdir(CLEANUP => 1);
 my $provider = $module_name;
-foreach my $name (qw(modify-domain create-domain list-domains)) {
+my %aliases = ( 'modify-alias' => 'modify-domain',
+	'rename-alias' => 'rename-domain', 'user-alias' => 'create-user' );
+foreach my $name (qw(modify-domain rename-domain create-user create-domain list-domains)) {
 	open(my $fh, '>', "$dir/$name.pl") or die $!;
 	close($fh);
 	chmod(0700, "$dir/$name.pl") or die $!;
@@ -28,10 +30,11 @@ sub module_root_directory { return $dir; }
 	no warnings qw(redefine once);
 	*list_api_commands = sub {
 		return map { { name => $_,
-			canonical => $_ eq 'modify-alias' ? 'modify-domain' : $_,
+			canonical => $aliases{$_} || $_,
 			provider => $provider, desc => 'Fixture command.',
-			path => "$dir/".($_ eq 'modify-alias' ? 'modify-domain' : $_).'.pl' } }
-			qw(modify-domain modify-alias create-domain list-domains);
+			path => "$dir/".($aliases{$_} || $_).'.pl' } }
+			qw(modify-domain modify-alias rename-domain rename-alias
+			    create-user user-alias create-domain list-domains);
 		};
 	}
 # plugin_defined(provider, function): no fixture plugin declares domain access.
@@ -52,39 +55,46 @@ sub get_domain { return undef; }
 # execute_webmin_script(): every batch here is denied or a dry run.
 sub execute_webmin_script { die "Unexpected command execution\n"; }
 my %options = (
-	quotas => [ 1, '--quota', '--uquota' ],
-	'2fa' => [ 1, '--disable-2fa' ],
-	home => [ 0, '--home' ],
-	hooks => [ 0, '--pre-command', '--post-command' ],
+	'modify-domain-quotas' => [ 'modify-domain', 1, '--quota', '--uquota' ],
+	'modify-domain-quotas-reapply' => [ 'modify-domain', 1, '--apply-all-quotas' ],
+	'modify-domain-bandwidth' =>
+		[ 'modify-domain', 1, '--bw', '--bw-disable', '--bw-no-disable' ],
+	'modify-domain-protection' => [ 'modify-domain', 1, '--protected', '--unprotected' ],
+	'modify-domain-2fa' => [ 'modify-domain', 1, '--disable-2fa' ],
+	'modify-domain-home' => [ 'modify-domain', 0, '--home' ],
+	'modify-domain-hooks' => [ 'modify-domain', 0, '--pre-command', '--post-command' ],
+	'rename-domain-user' => [ 'rename-domain', 1, '--new-user', '--auto-user' ],
+	'create-user-encpass' => [ 'create-user', 1, '--encpass' ],
 );
 my $base = 'virtual-server:modify-domain';
 my @catalog = list_api_access_commands();
-is(scalar(grep { $_->{virtual} } @catalog), 4, 'four separate option grants');
+is(scalar(grep { $_->{virtual} } @catalog), 9, 'nine separate option grants');
 %access = (api_id => 'fixture', api_commands => $base, api_domains => 1);
 prepare_api_access_command('modify-domain', [ '--desc', 'ordinary edit' ]);
 ok(!api_access_system_command(), 'ordinary modification has no system authority');
 
 # Each option needs its own grant, the base command, and its current context.
-foreach my $suffix (sort keys %options) {
-	my $name = "modify-domain-$suffix";
+foreach my $name (sort keys %options) {
+	my ($parent, $scoped, @flags) = @{$options{$name}};
+	my $base = "virtual-server:$parent";
+	my ($alias) = grep { $aliases{$_} eq $parent } keys %aliases;
 	my $entry = get_api_access_command($name);
 	is($entry->{parent}, $base, "$name is bound to the core command");
-	is($entry->{scoped}, $options{$suffix}[0], "$name has the correct scope");
+	is($entry->{scoped}, $scoped, "$name has the correct scope");
 	ok(!$entry->{path}, "$name has no executable path");
-	like($entry->{desc}, qr/Requires modify-domain\./, "$name explains its dependency");
-	my @flags = @{$options{$suffix}}[1 .. $#{$options{$suffix}}];
+	like($entry->{desc}, qr/Requires \Q$parent\E\./, "$name explains its dependency");
 	foreach my $flag (@flags) {
 		local $access{api_commands} = $base;
-		eval { prepare_api_access_command('modify-alias', [ $flag, 'value' ]) };
+		eval { prepare_api_access_command($alias, [ $flag, 'value' ]) };
 		like($@, qr/\Q$name\E/, "$flag denied without its extra grant");
 		$access{api_commands} .= " virtual-server:$name";
-		eval { prepare_api_access_command('modify-alias', [ $flag, 'value' ]) };
+		eval { prepare_api_access_command($alias, [ $flag, 'value' ]) };
 		is($@, '', "$flag accepted with its own grant through an alias");
 		ok(api_access_can_option($name), "$flag permission reaches the command");
 		ok(!api_access_system_command(), 'an option grant does not elevate the base command');
 		ok(!api_access_can_domain({ id => 2 }), 'extra permission does not widen domain access');
-		foreach my $other (grep { $_ ne $suffix } keys %options) {
-			ok(!api_access_can_option("modify-domain-$other"), 'other options remain blocked');
+		foreach my $other (grep { $_ ne $name } keys %options) {
+			ok(!api_access_can_option($other), 'other options remain blocked');
 			}
 		# Domain-only options support dry-run batches; root effects do not.
 		my $output = '';
@@ -92,11 +102,11 @@ foreach my $suffix (sort keys %options) {
 			local *STDOUT;
 			open(STDOUT, '>', \$output) or die $!;
 			eval { run_api_access_batch([ '--domain', $domain{dom},
-				'--test', '--command', 'modify-alias', $flag, 'value' ]) };
+				'--test', '--command', $alias, $flag, 'value' ]) };
 			}
 		if ($entry->{scoped}) {
 			is($@, '', "$flag can run in an authorized domain batch");
-			like($output, qr/Would run modify-domain/, 'dry run validates the base command');
+			like($output, qr/Would run \Q$parent\E/, 'dry run validates the base command');
 			}
 		else {
 			like($@, qr/server-wide option permissions/, "$flag cannot enter domain batches");
@@ -116,10 +126,10 @@ foreach my $suffix (sort keys %options) {
 		}
 	$access{api_commands} = "virtual-server:$name";
 	ok(!api_access_can_option($name), 'option alone cannot authorize the base command');
-	eval { prepare_api_access_command('modify-domain', [ ]) };
+	eval { prepare_api_access_command($parent, [ ]) };
 	like($@, qr/not permitted/, 'base command still needs its own grant');
 	$access{api_commands} = "$base virtual-server:$name";
-	prepare_api_access_command('modify-domain', [ ]);
+	prepare_api_access_command($parent, [ ]);
 	local $access{api_disabled} = 1;
 	ok(!api_access_can_option($name), 'disabling the account revokes option grants');
 	}

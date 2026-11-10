@@ -18,6 +18,11 @@ disable two-factor authentication, choose a home directory or run command hooks.
 These permissions require C<modify-domain> and access to the target domain.
 Home directories and hooks use root privileges and can affect the whole server.
 
+C<modify-domain-bandwidth> permits C<--bw>, C<--bw-disable> and C<--bw-no-disable>.
+C<modify-domain-protection> permits C<--protected> and C<--unprotected>.
+C<modify-domain-quotas-reapply> permits C<--apply-all-quotas> to reapply saved
+domain and mailbox quotas. It does not permit changing quota values.
+
 To make domain protected from deletion and disabling, the C<--protected> flag
 can be used. To remove the protection, use C<--unprotected> flag.
 
@@ -104,8 +109,7 @@ if (!$module_name) {
 @OLDARGV = @ARGV;
 &set_all_text_print();
 
-# Remote API callers that are not the master admin can only change the
-# settings that the user interface offers them
+# Preserve ordinary caller checks alongside explicit API option permissions.
 my $is_master = &master_admin();
 
 # Parse command-line args
@@ -136,15 +140,17 @@ while(@ARGV > 0) {
 		$email = shift(@ARGV);
 		}
 	elsif ($a eq "--protected") {
-		$is_master ||
-			&usage("--protected is only available to the master ".
-			       "administrator");
+		# Changing domain protection needs its own API permission.
+		$is_master || &api_access_can_option('modify-domain-protection') ||
+			&usage("--protected requires the master administrator ".
+			       "or modify-domain-protection permission");
 		$protected = 1;
 		}
 	elsif ($a eq "--unprotected") {
-		$is_master ||
-			&usage("--unprotected is only available to the master ".
-			       "administrator");
+		# Changing domain protection needs its own API permission.
+		$is_master || &api_access_can_option('modify-domain-protection') ||
+			&usage("--unprotected requires the master administrator ".
+			       "or modify-domain-protection permission");
 		$protected = 0;
 		}
 	elsif ($a eq "--quota") {
@@ -193,6 +199,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--bw") {
 		$is_master || &can_edit_bandwidth() ||
+			&api_access_can_option('modify-domain-bandwidth') ||
 			&usage("You are not allowed to change bandwidth limits");
 		# Setting or removing the bandwidth limit
 		$bw = shift(@ARGV);
@@ -200,12 +207,14 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--bw-disable") {
 		$is_master || &can_edit_bandwidth() ||
+			&api_access_can_option('modify-domain-bandwidth') ||
 			&usage("You are not allowed to change bandwidth limits");
 		# Set over-bw limit disable to yes
 		$bw_no_disable = 0;
 		}
 	elsif ($a eq "--bw-no-disable") {
 		$is_master || &can_edit_bandwidth() ||
+			&api_access_can_option('modify-domain-bandwidth') ||
 			&usage("You are not allowed to change bandwidth limits");
 		# Set over-bw limit disable to no
 		$bw_no_disable = 1;
@@ -425,9 +434,10 @@ while(@ARGV > 0) {
 		$applyquotas = 1;
 		}
 	elsif ($a eq "--apply-all-quotas") {
-		$is_master ||
-			&usage("--apply-all-quotas is only available to the master ".
-			       "administrator");
+		# Reapplying saved quotas is separate from changing their values.
+		$is_master || &api_access_can_option('modify-domain-quotas-reapply') ||
+			&usage("--apply-all-quotas requires the master administrator ".
+			       "or modify-domain-quotas-reapply permission");
 		$applyquotas = 2;
 		}
 	elsif ($a eq "--disable-2fa") {

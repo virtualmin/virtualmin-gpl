@@ -50,11 +50,23 @@ integrations you trust with this access.</p>
 Review the replacement before allowing it again. Updates within the same module
 keep the existing permission.</p>
 
-<p>Entries marked Extra permission unlock specific options of
-<tt>modify-domain</tt>. They require that command to be allowed too and still
-check access to the target virtual server. <tt>modify-domain-quotas</tt> allows
+<p>Entries marked Extra permission unlock specific command options. They require
+the base command to be allowed too and still check access to the target virtual
+server. <tt>modify-domain-quotas</tt> allows
 <tt>--quota</tt> and <tt>--uquota</tt> to override plan quotas.
 <tt>modify-domain-2fa</tt> allows <tt>--disable-2fa</tt>.</p>
+
+<p><tt>modify-domain-quotas-reapply</tt> allows <tt>--apply-all-quotas</tt> to
+reapply saved domain and mailbox quotas without changing their saved values.
+<tt>modify-domain-bandwidth</tt> allows <tt>--bw</tt>, <tt>--bw-disable</tt> and
+<tt>--bw-no-disable</tt>. <tt>modify-domain-protection</tt> allows
+<tt>--protected</tt> and <tt>--unprotected</tt>.</p>
+
+<p><tt>rename-domain-user</tt> requires <tt>rename-domain</tt> and allows
+<tt>--new-user</tt> and <tt>--auto-user</tt>. It does not allow custom home paths.
+<tt>create-user-encpass</tt> requires <tt>create-user</tt> and allows
+<tt>--encpass</tt> for importing password hashes. Password strength cannot be
+checked when importing a hash.</p>
 
 <p><tt>modify-domain-home</tt> allows <tt>--home</tt>, and
 <tt>modify-domain-hooks</tt> allows <tt>--pre-command</tt> and

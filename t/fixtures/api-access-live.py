@@ -13,7 +13,8 @@ and are removed during cleanup. Never run this on the workstation.
 --catalog-only also checks aliases and available Pro command metadata, then
 stops before domain creation. Choose only one of these shortened modes.
 --options-only tests separate modify-domain option grants with real domain
-changes, quota updates, 2FA removal, home relocation and harmless root hooks.
+changes, quota updates and reapplication, protection, bandwidth, username changes,
+password hash imports, 2FA removal, home relocation and harmless root hooks.
 --cli-only tests root CLI account management and checks that HTTP calls are
 rejected.
 --editions-only checks command permissions, direct and batch requests, and plan
@@ -79,7 +80,7 @@ def helper_call(mode):
 def redact(message):
     """redact(message): remove generated passwords from diagnostic text."""
     for key, value in fixture.items():
-        if 'password' in key:
+        if 'password' in key or key == 'import_hash':
             # Preserve useful names and IDs while masking credential values.
             message = message.replace(value, '[redacted]')
     return message
@@ -610,9 +611,11 @@ def check_option_permissions():
     """
     import pwd
     # Neither account creation path may save extra permissions on their own.
-    for suffix in ('quotas', '2fa', 'home', 'hooks'):
-        grant = 'modify-domain-' + suffix
-        expected = grant + ' requires modify-domain to be allowed too.'
+    extra_entries = [entry for entry in json.loads(helper_call('edition-info'))['commands']
+                     if entry.get('virtual')]
+    for entry in extra_entries:
+        grant = entry['name']
+        expected = grant + ' requires ' + entry['parent'].split(':', 1)[1] + ' to be allowed too.'
         page = save_policy(new=True, commands=[grant])
         check(expected in html.unescape(page) and
               not json.loads(helper_call('inspect'))['account_exists'],
@@ -684,12 +687,13 @@ def check_option_permissions():
         status, page = request('edit_api_access.cgi?user=' + fixture['user'], admin=True)
         groups = Groups()
         groups.feed(page)
-        for suffix in cases:
-            key = 'virtual-server:modify-domain-' + suffix
-            expected = 'Server-wide commands' if suffix in ('home', 'hooks') else \
-                       'Commands limited to allowed virtual servers'
-            check(key in groups.fields and expected in groups.fields[key][0],
-                  theme + ': correct option permission group for ' + suffix)
+        for entry in extra_entries:
+            key = entry['key']
+            expected = 'Commands limited to allowed virtual servers' if entry['scoped'] else \
+                       'Server-wide commands'
+            check(key in groups.fields and expected in groups.fields[key][0] and
+                  groups.fields[key][1].get('aria-description') == entry['desc'],
+                  theme + ': correct group and tooltip for ' + entry['name'])
         check(status == 200 and 'Extra permission' in page and
               'Requires modify-domain.' in page,
               theme + ': option badges and dependency tooltips are rendered')
@@ -746,8 +750,8 @@ def check_option_permissions():
                       ('command', 'modify-domain'), ('quota', '294912')])
             check('Exit status: 0' in out and int(snapshot()['domain']['quota']) == 294912,
                   'domain batch can apply an explicitly granted quota override', out)
-            out = api('modify-domain', [('domain', fixture['domain']), ('bandwidth', '999')])
-            check('limits from a plan' in out, 'disk quota permission does not unlock bandwidth', out)
+            out = api('modify-domain', [('domain', fixture['domain']), ('bw', '999')])
+            check('modify-domain-bandwidth' in out, 'disk quota permission does not unlock bandwidth', out)
         elif suffix == '2fa':
             check(not after['domain']['twofactor'] and after['outside']['twofactor'],
                   '2FA grant clears only the permitted domain login factor')
@@ -797,6 +801,166 @@ def check_option_permissions():
     print('All separate API option permission checks passed.', flush=True)
 
 
+def check_more_option_permissions():
+    """check_more_option_permissions(): exercise the new grants on existing fixtures."""
+    import pwd
+    # Reuse the isolated domains after the original option-grant checks.
+    snapshot = lambda: json.loads(helper_call('inspect-options'))
+    initial = snapshot()
+    domain_id = initial['domain']['id']
+    original_user = initial['domain']['user']
+    original_uid = pwd.getpwnam(original_user).pw_uid
+    original_home = initial['domain']['home']
+    basic = ['modify-domain', 'rename-domain', 'create-user', 'run-api-command', 'list-commands']
+    save_policy(commands=basic, domains=domain_id)
+    helper_call('seed-options-hash')
+    fixture.update(json.loads(fixture_file.read_text()))
+    password_hash = fixture['import_hash']
+    out = api('create-user', [('domain', fixture['domain']), ('user', 'quotaprobe'),
+              ('pass', fixture['domain_password']), ('quota', '8192'), ('noemail', '')], admin=True)
+    check('created successfully' in out, 'create a user with a saved mailbox quota', out)
+    helper_call('drift-options-quota')
+    before = snapshot()
+    quota_user = before['domain']['users']['quotaprobe']
+    check(int(quota_user['quota']) == 1024 and int(quota_user['quota_cache']) == 8192,
+          'filesystem quota differs from the saved mailbox quota')
+    cases = {
+        'modify-domain-bandwidth': ('modify-domain', [('bw', '1048576'), ('bw-no-disable', '')]),
+        'modify-domain-protection': ('modify-domain', [('protected', '')]),
+        'modify-domain-quotas-reapply': ('modify-domain', [('apply-all-quotas', '')]),
+        'rename-domain-user': ('rename-domain', [('new-user', fixture['user'] + 'owner')]),
+        'create-user-encpass': ('create-user', [('user', 'importprobe'),
+                                ('encpass', password_hash), ('noemail', '')]),
+    }
+    for grant, (command, params) in cases.items():
+        # Neither direct calls nor the batch wrapper can omit the extra grant.
+        for program, args in ((command, params),
+                              ('run-api-command', [('command', command), *params])):
+            out = api(program, [('domain', fixture['domain']), *args])
+            check('API option requires permission ' + grant in out and snapshot() == before,
+                  grant + ': deny missing permission through ' + program, out)
+    for grant, (command, params) in cases.items():
+        # Both account editors must reject a permission without its own base.
+        saved = json.loads(helper_call('inspect'))['api_commands']
+        expected = grant + ' requires ' + command + ' to be allowed too.'
+        page = save_policy(commands=[grant], domains=domain_id)
+        check(expected in html.unescape(page) and
+              json.loads(helper_call('inspect'))['api_commands'] == saved,
+              grant + ': UI rejects the missing base command', page)
+        code, out = account_cli('modify-api-account',
+            ['--name', fixture['user'], '--command', grant])
+        check(code != 0 and expected in out and
+              json.loads(helper_call('inspect'))['api_commands'] == saved,
+              grant + ': CLI rejects the missing base command', out)
+        save_policy(commands=basic + [grant], domains=domain_id)
+        current = snapshot()
+        out = api(command, [('domain', fixture['outside']), *params])
+        check('does not exist' in out and snapshot() == current,
+              grant + ': cannot change an existing domain outside its scope', out)
+        # A new option permission must not imply the separate quota override.
+        out = api('modify-domain', [('domain', fixture['domain']), ('quota', '1')])
+        check('modify-domain-quotas' in out and snapshot() == current,
+              grant + ': cannot change saved disk quotas', out)
+        if grant == 'rename-domain-user':
+            # Existing names and account-file or shell syntax must stay invalid.
+            for name in ('root', current['outside']['user'], 'bad:name', 'bad;id', '../bad', 'bad\nname', 'bad\n'):
+                out = api(command, [('domain', fixture['domain']), ('new-user', name)])
+                check('Exit status: 0' not in out and snapshot() == current,
+                      'username validation rejects collisions and unsafe syntax', out)
+            out = api(command, [('domain', fixture['domain']), ('new-home', '/etc')])
+            check('only available to the master' in out and snapshot() == current,
+                  'username permission does not allow custom home paths', out)
+        elif grant == 'create-user-encpass':
+            # Hash data must not inject fields or records, including a final newline.
+            for bad_hash in (password_hash + '\n', password_hash + '\r',
+                             password_hash + ':extra', password_hash + ' ', password_hash + '\0'):
+                out = api(command, [('domain', fixture['domain']), ('user', 'invalidprobe'),
+                          ('encpass', bad_hash), ('noemail', '')])
+                check('Exit status: 0' not in out and snapshot() == current,
+                      'hash validation rejects password-file delimiters', out)
+        # Apply the requested change through the real API and inspect its effects.
+        out = api(command, [('domain', fixture['domain']), *params])
+        check('Exit status: 0' in out, grant + ': granted operation succeeds', out)
+        after = snapshot()
+        check(not after['master'] and after['outside'] == before['outside'],
+              grant + ': preserves other domains and the non-master role')
+        if grant == 'modify-domain-bandwidth':
+            check(int(after['domain']['bw_limit']) == 1048576 and
+                  int(after['domain']['bw_no_disable']) == 1,
+                  'bandwidth grant saves the limit and suspension setting')
+            batch_params = [('bw', 'NONE'), ('bw-disable', '')]
+        elif grant == 'modify-domain-protection':
+            check(int(after['domain']['protected']) == 1, 'protection grant protects the domain')
+            batch_params = [('unprotected', '')]
+        elif grant == 'modify-domain-quotas-reapply':
+            user = after['domain']['users']['quotaprobe']
+            check(int(user['quota']) == 8192 and int(user['quota_cache']) == 8192 and
+                  after['domain']['quota'] == current['domain']['quota'],
+                  'reapply restores the actual mailbox quota from its saved value', out)
+            helper_call('drift-options-quota')
+            batch_params = params
+        elif grant == 'rename-domain-user':
+            new_user = after['domain']['user']
+            check(new_user == fixture['user'] + 'owner' and
+                  pwd.getpwnam(new_user).pw_uid == original_uid and
+                  pwd.getpwnam(new_user).pw_dir == original_home,
+                  'username changes preserve the Unix identity and home directory')
+            batch_params = [('auto-user', '')]
+        else:
+            user = after['domain']['users']['importprobe']
+            check(user['hash_matches'] and user['password_matches'],
+                  'imported hash is preserved and verifies the original password')
+            out = api('delete-user', [('domain', fixture['domain']), ('user', 'importprobe')], admin=True)
+            check('Exit status: 0' in out, 'remove the direct hash-import fixture', out)
+            batch_params = params
+        out = api('run-api-command', [('domain', fixture['domain']),
+                  ('command', command), *batch_params])
+        check('Exit status: 0' in out, grant + ': authorized domain batch succeeds', out)
+        after = snapshot()
+        if grant == 'modify-domain-bandwidth':
+            check(not after['domain']['bw_limit'] and not int(after['domain']['bw_no_disable']),
+                  'bandwidth batch removes the limit and restores automatic suspension')
+        elif grant == 'modify-domain-protection':
+            check(not int(after['domain']['protected']), 'protection batch removes protection')
+        elif grant == 'modify-domain-quotas-reapply':
+            check(int(after['domain']['users']['quotaprobe']['quota']) == 8192,
+                  'quota reapplication also repairs the filesystem through a batch')
+        elif grant == 'rename-domain-user':
+            check(after['domain']['user'] == original_user and
+                  pwd.getpwnam(original_user).pw_uid == original_uid and
+                  after['domain']['home'] == original_home,
+                  'automatic username selection restores the expected login without moving its home')
+        else:
+            check(after['domain']['users']['importprobe']['hash_matches'] and
+                  after['domain']['users']['importprobe']['password_matches'],
+                  'batch hash import preserves a usable password')
+        # Revocation takes effect immediately, including through the batch wrapper.
+        save_policy(commands=basic, domains=domain_id)
+        current = snapshot()
+        for program, args in ((command, params),
+                              ('run-api-command', [('command', command), *params])):
+            out = api(program, [('domain', fixture['domain']), *args])
+            check('API option requires permission ' + grant in out and snapshot() == current,
+                  grant + ': revocation blocks ' + program, out)
+    grants = basic + list(cases)
+    args = ['--name', fixture['user']]
+    for grant in grants:
+        args.extend(['--command', grant])
+    code, out = account_cli('modify-api-account', args)
+    check(code == 0 and set(json.loads(helper_call('inspect'))['api_commands'].split()) ==
+          {'virtual-server:' + name for name in grants}, 'CLI saves all five new grants', out)
+    for grant in cases:
+        out = api(grant, [('help', '')])
+        check('not allowed to run' in out, grant + ': cannot execute as a standalone command', out)
+    save_policy(commands=grants, domains=domain_id, enabled=False)
+    current = snapshot()
+    for grant, (command, params) in cases.items():
+        out = api(command, [('domain', fixture['domain']), *params])
+        check('not allowed' in out and snapshot() == current,
+              grant + ': disabled account cannot use its saved permission', out)
+    print('All five additional API permission checks passed.', flush=True)
+
+
 try:
     # Create the temporary administrator and plans before using the real form.
     helper_call('setup')
@@ -839,6 +1003,7 @@ try:
     if '--options-only' in sys.argv[2:]:
         # These grants exist on both editions; the master creates test domains.
         check_option_permissions()
+        check_more_option_permissions()
         sys.exit(0)
     if '--help-only' in sys.argv[2:]:
         # Stop before account creation; the finally block removes the admin fixture.
@@ -1269,6 +1434,9 @@ finally:
     for domain in (fixture['clone'], fixture['domain'], fixture['outside'],
                    fixture['user'] + '-blocked.example.test'):
         try:
+            # A failed protection test must not prevent removal of its fixture.
+            if '--options-only' in sys.argv[2:]:
+                api('modify-domain', [('domain', domain), ('unprotected', '')], admin=True)
             api('delete-domain', [('domain', domain)], admin=True)
         except Exception:
             # Report domain cleanup failures without interrupting login cleanup.

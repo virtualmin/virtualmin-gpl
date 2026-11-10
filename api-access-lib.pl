@@ -91,21 +91,29 @@ foreach my $entry (&list_api_commands()) {
 	}
 # Extra option permissions are selectable grants, never executable scripts.
 # Bind them to the core provider so a plugin replacement cannot inherit them.
-my $modify = $commands{'modify-domain'};
-if ($modify && $modify->{'provider'} eq $module_name) {
-	foreach my $option (
-		[ 'quotas', 1, [ '--quota', '--uquota' ] ],
-		[ '2fa', 1, [ '--disable-2fa' ] ],
-		[ 'home', 0, [ '--home' ] ],
-		[ 'hooks', 0, [ '--pre-command', '--post-command' ] ]) {
-		my ($suffix, $scoped, $args) = @$option;
-		my $name = "modify-domain-$suffix";
-		$commands{$name} = { 'name' => $name,
-			'provider' => $module_name, 'key' => "$module_name:$name",
-			'parent' => $modify->{'key'}, 'virtual' => 1,
-			'options' => $args, 'scoped' => $scoped, 'pro' => 0,
-			'desc' => $text{'apiaccess_option_'.$suffix} };
-		}
+foreach my $option (
+	[ 'modify-domain', 'quotas', 1, [ '--quota', '--uquota' ] ],
+	[ 'modify-domain', 'quotas-reapply', 1, [ '--apply-all-quotas' ] ],
+	[ 'modify-domain', 'bandwidth', 1,
+	  [ '--bw', '--bw-disable', '--bw-no-disable' ] ],
+	[ 'modify-domain', 'protection', 1, [ '--protected', '--unprotected' ] ],
+	[ 'modify-domain', '2fa', 1, [ '--disable-2fa' ] ],
+	[ 'modify-domain', 'home', 0, [ '--home' ] ],
+	[ 'modify-domain', 'hooks', 0, [ '--pre-command', '--post-command' ] ],
+	[ 'rename-domain', 'user', 1, [ '--new-user', '--auto-user' ] ],
+	[ 'create-user', 'encpass', 1, [ '--encpass' ] ]) {
+	my ($base, $suffix, $scoped, $args) = @$option;
+	my $parent = $commands{$base};
+	# Replaced or unavailable base commands cannot expose core option grants.
+	next if (!$parent || $parent->{'provider'} ne $module_name);
+	my $name = "$base-$suffix";
+	my $label = $suffix;
+	$label =~ tr/-/_/;
+	$commands{$name} = { 'name' => $name,
+		'provider' => $module_name, 'key' => "$module_name:$name",
+		'parent' => $parent->{'key'}, 'virtual' => 1,
+		'options' => $args, 'scoped' => $scoped, 'pro' => 0,
+		'desc' => $text{'apiaccess_option_'.$label} };
 	}
 # Present aliases as one permission while retaining each accepted spelling.
 my %grants;

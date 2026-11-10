@@ -51,6 +51,8 @@ If you only have a pre-encrypted password that you want the new user
 to use, the C<--encpass> flag can be used to set it instead of C<--pass>.
 However, this will prevent Virtualmin from enabling MySQL access for the user,
 as it needs to know the plaintext password to re-hash it for MySQL.
+API accounts need C<create-user-encpass> in addition to C<create-user>.
+Password strength cannot be checked when importing a hash.
 
 All mail users can have a password recovery address set, used by the forgotten
 password feature in Virtualmin. For new users, this can be set with the 
@@ -114,9 +116,16 @@ while(@ARGV > 0) {
 		$pass = &random_password();
 		}
 	elsif ($a eq "--encpass") {
-		$is_master ||
-			&usage("--encpass is only available to the master administrator");
+		# Importing hashes bypasses checks that need the original password.
+		$is_master || &api_access_can_option('create-user-encpass') ||
+			&usage("--encpass requires the master administrator ".
+			       "or create-user-encpass permission");
 		$encpass = shift(@ARGV);
+		# Never let an API-supplied hash inject another password-file field.
+		if (!$is_master && $encpass !~ /\A[^\s:\0]+\z/) {
+			&usage("Encrypted passwords cannot be empty or contain ".
+			       "whitespace, colons or NUL characters");
+			}
 		}
 	elsif ($a eq "--ssh-pubkey") {
 		$sshpubkey = shift(@ARGV);
@@ -493,7 +502,9 @@ if (!$nocreationmail && $user->{'email'}) {
 &run_post_actions();
 &release_lock_unix($d);
 &release_lock_mail($d);
-&virtualmin_api_log(\@OLDARGV, $d, $d->{'hashpass'} ? [ "pass" ] : [ ]);
+# Password hashes must not be recorded in the API audit log.
+&virtualmin_api_log(\@OLDARGV, $d,
+	[ 'encpass', $d->{'hashpass'} ? ( 'pass' ) : ( ) ]);
 print "User $user->{'user'} created successfully\n";
 
 sub usage

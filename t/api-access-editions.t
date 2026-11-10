@@ -30,7 +30,7 @@ close($lang);
 # A fixed catalog tests canonical names and aliases without scanning providers.
 $module_name = 'virtual-server';
 my @gated = qw(create-domain clone-domain disable-domain enable-domain);
-my @free = qw(modify-domain list-users list-domains run-api-command);
+my @free = qw(modify-domain rename-domain create-user list-users list-domains run-api-command);
 @api_access_commands = map { { name => $_, key => "$module_name:$_",
     scoped => 1, aliases => [ $_, "alias-$_" ] } } (@gated, @free);
 $api_access_commands_loaded = 1;
@@ -259,10 +259,15 @@ is(save_cli('delete', { name => $name }), '', 'GPL can delete a downgraded accou
 ok(!$users{$name}, 'account is removed');
 # Extra permissions must retain their parent in every saved selection mode.
 {
-    my @extra = map { "modify-domain-$_" } qw(quotas 2fa home hooks);
+    my @parents = qw(modify-domain rename-domain create-user);
+    my @extra = ((map { "modify-domain-$_" }
+        qw(quotas quotas-reapply bandwidth protection 2fa home hooks)),
+        'rename-domain-user', 'create-user-encpass');
+    my %parent = map { my $entry = $_;
+        ($entry, (grep { index($entry, $_.'-') == 0 } @parents)[0]) } @extra;
     local @api_access_commands = (@api_access_commands, map {
         { name => $_, key => "$module_name:$_", virtual => 1,
-          parent => "$module_name:modify-domain" }
+          parent => "$module_name:$parent{$_}" }
     } @extra);
     for my $edition (0, 1) {
         local $virtualmin_pro = $edition;
@@ -271,7 +276,7 @@ ok(!$users{$name}, 'account is removed');
             { name => $name, password => 'x' x 32 });
         for my $extra (@extra) {
             my $before = $writes;
-            my $message = "$extra requires modify-domain to be allowed too.\n";
+            my $message = "$extra requires $parent{$extra} to be allowed too.\n";
             eval { save_api_access_accounts({ %$new,
                 commands => "$module_name:$extra" }) };
             is($@, $message, "UI rejects creating $extra without its parent");
@@ -282,13 +287,13 @@ ok(!$users{$name}, 'account is removed');
             ok(!$users{$name}, 'rejected creation leaves no account');
         }
         is(save_cli('create', { name => $name, password => 'x' x 32,
-            commands => ['modify-domain', @extra] }), '',
+            commands => [@parents, @extra] }), '',
             'create an account with all extra permissions and their parent');
         my $saved = grants($name);
         my $form = api_account_cli_params('modify', { name => $name });
         for my $extra (@extra) {
             my $before = $writes;
-            my $message = "$extra requires modify-domain to be allowed too.\n";
+            my $message = "$extra requires $parent{$extra} to be allowed too.\n";
             eval { save_api_access_accounts({ %$form,
                 commands => "$module_name:$extra" }) };
             is($@, $message, "UI rejects removing the parent of $extra");
@@ -303,13 +308,13 @@ ok(!$users{$name}, 'account is removed');
             'excluding the parent alone rejects the resolved selection');
         is($writes, $before, 'invalid exclusion writes nothing');
         is(save_cli('modify', { name => $name, command_mode => 'exclude',
-            commands => ['modify-domain', @extra] }), '',
+            commands => [@parents, @extra] }), '',
             'excluding the parent together with its extra permissions succeeds');
         unlike(grants($name), qr/modify-domain/, 'exclusion grants none of the removed entries');
         is(save_cli('modify', { name => $name, command_mode => 'all' }), '',
             'all mode saves extra permissions together with their parent');
         is(save_cli('modify', { name => $name,
-            commands => ['alias-modify-domain', @extra] }), '',
+            commands => [(map { 'alias-'.$_ } @parents), @extra] }), '',
             'a parent alias satisfies the same provider-bound dependency');
         is(grants($name), $saved, 'alias selection saves the same grant keys');
         is(save_cli('modify', { name => $name, command_mode => 'include' }), '',
