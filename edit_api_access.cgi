@@ -65,7 +65,9 @@ foreach my $provider (&unique(map { $_->{'provider'} } @catalog)) {
 @command_options = map { {
 	'value' => $_->{'key'}, 'label' => $_->{'name'},
 	'tag' => $provider_labels{$_->{'provider'}},
-	'badges' => $_->{'pro'} && !$virtualmin_pro ? [ [ 'Pro', 'warning' ] ] : [],
+	'badges' => [ $_->{'virtual'} ?
+		[ $text{'apiaccess_option'}, 'info' ] : ( ),
+		$_->{'pro'} && !$virtualmin_pro ? [ 'Pro', 'warning' ] : ( ) ],
 	'disabled' => $_->{'pro'} && !$virtualmin_pro,
 	'attrs' => { 'title' => $_->{'desc'} },
 	'group' => { 'label' => $text{$_->{'scoped'} ? 'apiaccess_scoped' :

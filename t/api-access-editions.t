@@ -257,4 +257,65 @@ like(save_cli('modify', { name => $name, commands => ['create-domain', 'clone-do
     qr/requires Virtualmin Pro/, 'GPL rejects re-adding a removed Pro grant');
 is(save_cli('delete', { name => $name }), '', 'GPL can delete a downgraded account');
 ok(!$users{$name}, 'account is removed');
+# Extra permissions must retain their parent in every saved selection mode.
+{
+    my @extra = map { "modify-domain-$_" } qw(quotas 2fa home hooks);
+    local @api_access_commands = (@api_access_commands, map {
+        { name => $_, key => "$module_name:$_", virtual => 1,
+          parent => "$module_name:modify-domain" }
+    } @extra);
+    for my $edition (0, 1) {
+        local $virtualmin_pro = $edition;
+        my $name = 'api-dependency-fixture-93457';
+        my $new = api_account_cli_params('create',
+            { name => $name, password => 'x' x 32 });
+        for my $extra (@extra) {
+            my $before = $writes;
+            my $message = "$extra requires modify-domain to be allowed too.\n";
+            eval { save_api_access_accounts({ %$new,
+                commands => "$module_name:$extra" }) };
+            is($@, $message, "UI rejects creating $extra without its parent");
+            is(save_cli('create', { name => $name, password => 'x' x 32,
+                commands => [$extra] }), $message,
+                "CLI rejects creating $extra without its parent");
+            is($writes, $before, 'rejected creation writes nothing');
+            ok(!$users{$name}, 'rejected creation leaves no account');
+        }
+        is(save_cli('create', { name => $name, password => 'x' x 32,
+            commands => ['modify-domain', @extra] }), '',
+            'create an account with all extra permissions and their parent');
+        my $saved = grants($name);
+        my $form = api_account_cli_params('modify', { name => $name });
+        for my $extra (@extra) {
+            my $before = $writes;
+            my $message = "$extra requires modify-domain to be allowed too.\n";
+            eval { save_api_access_accounts({ %$form,
+                commands => "$module_name:$extra" }) };
+            is($@, $message, "UI rejects removing the parent of $extra");
+            is(save_cli('modify', { name => $name, commands => [$extra] }),
+                $message, "CLI rejects removing the parent of $extra");
+            is(grants($name), $saved, 'failed edit preserves saved permissions');
+            is($writes, $before, 'failed edit writes nothing');
+        }
+        my $before = $writes;
+        like(save_cli('modify', { name => $name, command_mode => 'exclude',
+            commands => ['modify-domain'] }), qr/requires modify-domain/,
+            'excluding the parent alone rejects the resolved selection');
+        is($writes, $before, 'invalid exclusion writes nothing');
+        is(save_cli('modify', { name => $name, command_mode => 'exclude',
+            commands => ['modify-domain', @extra] }), '',
+            'excluding the parent together with its extra permissions succeeds');
+        unlike(grants($name), qr/modify-domain/, 'exclusion grants none of the removed entries');
+        is(save_cli('modify', { name => $name, command_mode => 'all' }), '',
+            'all mode saves extra permissions together with their parent');
+        is(save_cli('modify', { name => $name,
+            commands => ['alias-modify-domain', @extra] }), '',
+            'a parent alias satisfies the same provider-bound dependency');
+        is(grants($name), $saved, 'alias selection saves the same grant keys');
+        is(save_cli('modify', { name => $name, command_mode => 'include' }), '',
+            'revoking all command permissions still succeeds');
+        is(grants($name), '', 'empty selection saves no permissions');
+        is(save_cli('delete', { name => $name }), '', 'remove the dependency fixture');
+    }
+}
 done_testing();

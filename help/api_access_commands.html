@@ -39,8 +39,8 @@ requires an allowed default template and plan.</p>
 
 <h4>Server-wide commands</h4>
 
-<p>These commands can affect the whole server or grant root access. Virtual
-server, template and plan restrictions do not limit them. Allow them only for
+<p>These permissions can affect the whole server or grant root access, even
+when virtual servers, templates and plans are restricted. Allow them only for
 integrations you trust with this access.</p>
 
 <p>The selection mode above applies to these commands too.
@@ -49,6 +49,19 @@ integrations you trust with this access.</p>
 <p>If a different module takes over a command, this account loses access to it.
 Review the replacement before allowing it again. Updates within the same module
 keep the existing permission.</p>
+
+<p>Entries marked Extra permission unlock specific options of
+<tt>modify-domain</tt>. They require that command to be allowed too and still
+check access to the target virtual server. <tt>modify-domain-quotas</tt> allows
+<tt>--quota</tt> and <tt>--uquota</tt> to override plan quotas.
+<tt>modify-domain-2fa</tt> allows <tt>--disable-2fa</tt>.</p>
+
+<p><tt>modify-domain-home</tt> allows <tt>--home</tt>, and
+<tt>modify-domain-hooks</tt> allows <tt>--pre-command</tt> and
+<tt>--post-command</tt>. These are server-wide permissions because paths and
+hooks use root privileges. They cannot be used through <tt>run-api-command</tt>.
+Extra permissions are not commands you can call directly. Existing grants do
+not gain them automatically. The selection modes apply to these entries too.</p>
 
 <p>Some commands have more than one name. Allowing or blocking a command applies
 to all of its names. Each command still checks its own permissions.</p>

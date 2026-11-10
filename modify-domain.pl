@@ -12,6 +12,12 @@ C<--pass> to set a new password, C<--desc> to change the server description,
 and C<--quota> and C<--uquota> to change the disk quota. If the domain's Webmin
 user has two-factor enabled, use the C<--disable-2fa> flag to turn it off.
 
+API accounts need the additional C<modify-domain-quotas>, C<modify-domain-2fa>,
+C<modify-domain-home> or C<modify-domain-hooks> permission to override disk quotas,
+disable two-factor authentication, choose a home directory or run command hooks.
+These permissions require C<modify-domain> and access to the target domain.
+Home directories and hooks use root privileges and can affect the whole server.
+
 To make domain protected from deletion and disabling, the C<--protected> flag
 can be used. To remove the protection, use C<--unprotected> flag.
 
@@ -165,9 +171,10 @@ while(@ARGV > 0) {
 			&usage("A user named $user already exists");
 		}
 	elsif ($a eq "--home") {
-		$is_master ||
-			&usage("--home is only available to the master ".
-			       "administrator");
+		# Dedicated accounts need this option's separate permission.
+		$is_master || &api_access_can_option('modify-domain-home') ||
+			&usage("--home requires the master administrator ".
+			       "or modify-domain-home permission");
 		$home = shift(@ARGV);
 		$home =~ /^\/\S+$/ || &usage("Home directory must be an absolute path");
 		-d $home && &usage("New home directory already exists");
@@ -343,15 +350,17 @@ while(@ARGV > 0) {
 		push(@remove_db_excludes, shift(@ARGV));
 		}
 	elsif ($a eq "--pre-command") {
-		$is_master ||
-			&usage("--pre-command is only available to the master ".
-			       "administrator");
+		# Dedicated accounts need this option's separate permission.
+		$is_master || &api_access_can_option('modify-domain-hooks') ||
+			&usage("--pre-command requires the master administrator ".
+			       "or modify-domain-hooks permission");
 		$precommand = shift(@ARGV);
 		}
 	elsif ($a eq "--post-command") {
-		$is_master ||
-			&usage("--post-command is only available to the master ".
-			       "administrator");
+		# Dedicated accounts need this option's separate permission.
+		$is_master || &api_access_can_option('modify-domain-hooks') ||
+			&usage("--post-command requires the master administrator ".
+			       "or modify-domain-hooks permission");
 		$postcommand = shift(@ARGV);
 		}
 	elsif ($a eq "--dns-ip") {
@@ -422,9 +431,10 @@ while(@ARGV > 0) {
 		$applyquotas = 2;
 		}
 	elsif ($a eq "--disable-2fa") {
-		$is_master ||
-			&usage("--disable-2fa is only available to the master ".
-			       "administrator");
+		# Dedicated accounts need this option's separate permission.
+		$is_master || &api_access_can_option('modify-domain-2fa') ||
+			&usage("--disable-2fa requires the master administrator ".
+			       "or modify-domain-2fa permission");
 		$no2fa = 1;
 		}
 	elsif ($a eq "--help") {
@@ -433,6 +443,12 @@ while(@ARGV > 0) {
 	else {
 		&usage("Unknown parameter $a");
 		}
+	}
+
+# Keep API quota overrides gated even when invoked outside remote.cgi.
+if (&is_api_access_user() && (defined($quota) || defined($uquota)) &&
+    !&api_access_can_option('modify-domain-quotas')) {
+	&usage("--quota and --uquota require modify-domain-quotas permission");
 	}
 
 # Find the domain

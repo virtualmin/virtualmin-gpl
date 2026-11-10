@@ -5,13 +5,15 @@ api-access-live.py(task-directory, [options...]): test the installed API.
 The directory must contain api-access-account.pl. With no options, run the full
 account and domain lifecycle on Pro. On GPL, this and the shortened account
 modes stop with status 2 after the form checks, because they grant provisioning
-commands; use --editions-only or --cli-only there. Credentials stay in the guest
+commands; use --editions-only, --cli-only or --options-only there. Credentials stay in the guest
 and are removed during cleanup. Never run this on the workstation.
 
 --help-only stops after checking the form and help pages.
 --commands-only stops after account creation and command selection checks.
 --catalog-only also checks aliases and available Pro command metadata, then
 stops before domain creation. Choose only one of these shortened modes.
+--options-only tests separate modify-domain option grants with real domain
+changes, quota updates, 2FA removal, home relocation and harmless root hooks.
 --cli-only tests root CLI account management and checks that HTTP calls are
 rejected.
 --editions-only checks command permissions, direct and batch requests, and plan
@@ -600,6 +602,201 @@ def check_account_cli(form):
     print('All root-only CLI account tests passed.', flush=True)
 
 
+def check_option_permissions():
+    """check_option_permissions(): verify extra grants against real guest domains.
+
+    Only the generated fixture domains, logins and files are changed. The outer
+    finally block deletes domains even after their home directories have moved.
+    """
+    import pwd
+    # Neither account creation path may save extra permissions on their own.
+    for suffix in ('quotas', '2fa', 'home', 'hooks'):
+        grant = 'modify-domain-' + suffix
+        expected = grant + ' requires modify-domain to be allowed too.'
+        page = save_policy(new=True, commands=[grant])
+        check(expected in html.unescape(page) and
+              not json.loads(helper_call('inspect'))['account_exists'],
+              'UI rejects creating an account with only ' + grant, page)
+        code, out = account_cli('create-api-account',
+            ['--name', fixture['user'], '--command', grant, '--pass-stdin'],
+            password=fixture['password'] + '\n')
+        check(code != 0 and expected in out and
+              not json.loads(helper_call('inspect'))['account_exists'],
+              'CLI rejects creating an account with only ' + grant, out)
+    # Create independent domains as master so the API has no creation ownership.
+    for domain in (fixture['domain'], fixture['outside']):
+        out = api('create-domain', [('domain', domain),
+                  ('pass', fixture['domain_password']), ('unix', ''), ('dir', ''),
+                  ('webmin', ''), ('web', ''), ('plan', fixture['allowed_plan']),
+                  ('template', '0')], admin=True)
+        check('Exit status: 0' in out, 'create isolated option-test domain', out)
+    initial = json.loads(helper_call('inspect'))
+    domain_id = initial['domain']['id']
+    basic = ['modify-domain', 'run-api-command', 'rename-domain', 'list-commands']
+    page = save_policy(new=True, commands=basic, domains=domain_id)
+    state = json.loads(helper_call('inspect'))
+    check(state['account_exists'] and state['api_domains'] == domain_id,
+          'create API account restricted to one existing domain', page)
+    fixture['id'] = state['api_id']
+    check(set(state['api_commands'].split()) == {'virtual-server:' + n for n in basic},
+          'ordinary command grants do not acquire extra option permissions')
+    # Seed only fixture login settings; no real user's second factor is touched.
+    helper_call('seed-options-2fa')
+    snapshot = lambda: json.loads(helper_call('inspect-options'))
+    before = snapshot()
+    original_home = Path(before['domain']['home'])
+    new_home = str(original_home) + '-api-options'
+    check(not Path(new_home).exists(), 'home relocation destination is unused')
+    marker = original_home / 'api-options-marker'
+    marker.write_text('fixture home marker\n')
+    # Harmless hooks prove the explicit grant can execute as root in the guest.
+    hook = task / 'option-hook.py'
+    hook.write_text('import os, sys\nfrom pathlib import Path\n'
+                    'p = Path(__file__).parent / ("option-hook-" + sys.argv[1])\n'
+                    'p.write_text(str(os.geteuid()))\n')
+    pre = 'python3 ' + str(hook) + ' pre'
+    post = 'python3 ' + str(hook) + ' post'
+    cases = {
+        'quotas': [('quota', '262144'), ('uquota', '196608')],
+        '2fa': [('disable-2fa', '')],
+        'home': [('home', new_home)],
+        'hooks': [('pre-command', pre), ('post-command', post)],
+    }
+    # Check real HTML grouping and dependency tooltips in both supported themes.
+    class Groups(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.heading, self.group, self.fields = False, '', {}
+        def handle_starttag(self, tag, attrs):
+            attrs = dict(attrs)
+            if 'data-ui-multi-heading' in attrs:
+                self.heading, self.group = True, ''
+            if tag == 'input' and attrs.get('type') == 'checkbox':
+                self.fields[attrs.get('value')] = (self.group, attrs)
+        def handle_data(self, value):
+            if self.heading:
+                self.group += value
+        def handle_endtag(self, tag):
+            if tag == 'div':
+                self.heading = False
+    for theme in ('authentic', 'gray'):
+        helper_call('theme-' + theme)
+        status, page = request('edit_api_access.cgi?user=' + fixture['user'], admin=True)
+        groups = Groups()
+        groups.feed(page)
+        for suffix in cases:
+            key = 'virtual-server:modify-domain-' + suffix
+            expected = 'Server-wide commands' if suffix in ('home', 'hooks') else \
+                       'Commands limited to allowed virtual servers'
+            check(key in groups.fields and expected in groups.fields[key][0],
+                  theme + ': correct option permission group for ' + suffix)
+        check(status == 200 and 'Extra permission' in page and
+              'Requires modify-domain.' in page,
+              theme + ': option badges and dependency tooltips are rendered')
+    helper_call('theme-authentic')
+    for suffix, params in cases.items():
+        out = api('modify-domain', [('domain', fixture['domain']), *params])
+        check('API option requires permission modify-domain-' + suffix in out and
+              snapshot() == before,
+              'deny ' + suffix + ' without its own permission and preserve state', out)
+    check(not (task / 'option-hook-pre').exists(), 'denied hooks never execute')
+    # Invalid edits must leave both the saved policy and domain state unchanged.
+    stored = json.loads(helper_call('inspect'))['api_commands']
+    for suffix in cases:
+        grant = 'modify-domain-' + suffix
+        expected = grant + ' requires modify-domain to be allowed too.'
+        page = save_policy(commands=[grant], domains=domain_id)
+        check(expected in html.unescape(page) and
+              json.loads(helper_call('inspect'))['api_commands'] == stored,
+              'UI rejects saving ' + grant + ' without its parent', page)
+        code, out = account_cli('modify-api-account',
+            ['--name', fixture['user'], '--command', grant])
+        check(code != 0 and expected in out and
+              json.loads(helper_call('inspect'))['api_commands'] == stored and
+              snapshot() == before,
+              'CLI rejects saving ' + grant + ' without its parent', out)
+    for suffix, params in cases.items():
+        grant = 'modify-domain-' + suffix
+        save_policy(commands=basic + [grant], domains=domain_id)
+        current = snapshot()
+        out = api('modify-domain', [('domain', fixture['outside']), *params])
+        check('does not exist' in out and snapshot() == current,
+              suffix + ': deny an existing domain outside the account scope', out)
+        # One extra permission must not unlock any of the other three options.
+        other = '2fa' if suffix != '2fa' else 'quotas'
+        out = api('modify-domain', [('domain', fixture['domain']), *cases[other]])
+        check('API option requires permission modify-domain-' + other in out and
+              snapshot() == current, suffix + ': unrelated options stay blocked', out)
+        if suffix in ('home', 'hooks'):
+            out = api('run-api-command', [('domain', fixture['domain']),
+                      ('command', 'modify-domain'), *params])
+            check('Batch commands cannot use server-wide option permissions' in out and
+                  snapshot() == current, suffix + ': reject server-wide effects in batches', out)
+        # Real direct execution must apply exactly the permitted change.
+        out = api('modify-domain.pl', [('domain', fixture['domain']), *params])
+        check('Exit status: 0' in out, suffix + ': explicit option grant succeeds', out)
+        after = snapshot()
+        check(not after['master'] and after['outside'] == before['outside'],
+              suffix + ': preserve the outside domain and never become master')
+        if suffix == 'quotas':
+            check(int(after['domain']['quota']) == 262144 and
+                  int(after['domain']['uquota']) == 196608,
+                  'quota grant stores values above the plan limits')
+            out = api('run-api-command', [('domain', fixture['domain']),
+                      ('command', 'modify-domain'), ('quota', '294912')])
+            check('Exit status: 0' in out and int(snapshot()['domain']['quota']) == 294912,
+                  'domain batch can apply an explicitly granted quota override', out)
+            out = api('modify-domain', [('domain', fixture['domain']), ('bandwidth', '999')])
+            check('limits from a plan' in out, 'disk quota permission does not unlock bandwidth', out)
+        elif suffix == '2fa':
+            check(not after['domain']['twofactor'] and after['outside']['twofactor'],
+                  '2FA grant clears only the permitted domain login factor')
+        elif suffix == 'home':
+            check(after['domain']['home'] == new_home and
+                  pwd.getpwnam(after['domain']['user']).pw_dir == new_home and
+                  (Path(new_home) / marker.name).read_text() == 'fixture home marker\n' and
+                  not original_home.exists(),
+                  'home grant moves files and updates the Unix home directory')
+            out = api('rename-domain', [('domain', fixture['domain']),
+                      ('new-home', str(original_home) + '-rename')])
+            check('only available to the master' in out,
+                  'modify home permission does not unlock rename-domain options', out)
+        else:
+            check((task / 'option-hook-pre').read_text() == '0' and
+                  (task / 'option-hook-post').read_text() == '0',
+                  'explicit hook permission runs both harmless fixture hooks as root')
+        # Revoke each grant and prove it is checked again on the next request.
+        save_policy(commands=basic, domains=domain_id)
+        current = snapshot()
+        out = api('modify-domain', [('domain', fixture['domain']), *params])
+        check('API option requires permission ' + grant in out and snapshot() == current,
+              suffix + ': revocation takes effect on the next request', out)
+    grants = basic + ['modify-domain-' + suffix for suffix in cases]
+    # Root CLI edits must accept these same virtual permission names.
+    args = ['--name', fixture['user']]
+    for grant in grants:
+        args.extend(['--command', grant])
+    code, out = account_cli('modify-api-account', args)
+    check(code == 0 and set(json.loads(helper_call('inspect'))['api_commands'].split()) ==
+          {'virtual-server:' + n for n in grants}, 'CLI saves all four option grants', out)
+    for suffix in cases:
+        out = api('modify-domain-' + suffix, [('help', '')])
+        check('not allowed to run' in out, 'virtual permission cannot execute: ' + suffix, out)
+    out = api('list-commands', [('name-only', '')])
+    check(all('modify-domain-' + suffix not in out.splitlines() for suffix in cases),
+          'virtual permissions are not advertised as executable API commands', out)
+    for flag in ('passfile', 'user'):
+        out = api('modify-domain', [('domain', fixture['domain']), (flag, 'unused')])
+        check('only available to the master' in out,
+              'all option grants still cannot use unrelated master-only flag ' + flag, out)
+    save_policy(commands=grants, domains=domain_id, enabled=False)
+    current = snapshot()
+    out = api('modify-domain', [('domain', fixture['domain']), *cases['quotas']])
+    check('not allowed' in out and snapshot() == current,
+          'disabling the account also revokes its option access', out)
+    print('All separate API option permission checks passed.', flush=True)
+
+
 try:
     # Create the temporary administrator and plans before using the real form.
     helper_call('setup')
@@ -639,6 +836,10 @@ try:
         check_account_cli(page)
         sys.exit(0)
     check_help(page)
+    if '--options-only' in sys.argv[2:]:
+        # These grants exist on both editions; the master creates test domains.
+        check_option_permissions()
+        sys.exit(0)
     if '--help-only' in sys.argv[2:]:
         # Stop before account creation; the finally block removes the admin fixture.
         print('All API Access help checks passed.', flush=True)
@@ -646,7 +847,7 @@ try:
     if not json.loads(helper_call('edition-info'))['pro']:
         # The remaining checks grant provisioning commands, which GPL refuses by
         # design before validating anything else on the form.
-        print('Remaining checks need Virtualmin Pro; use --editions-only or --cli-only on GPL.',
+        print('Remaining checks need Virtualmin Pro; use --editions-only, --cli-only or --options-only on GPL.',
               flush=True)
         sys.exit(2)
     # Only run the Pro metadata case when that command is actually installed.
@@ -1077,3 +1278,7 @@ finally:
     finally:
         # Remove the credential file even when helper cleanup reports a failure.
         fixture_file.unlink(missing_ok=True)
+        # Remove only this mode's harmless hook script and result markers.
+        if '--options-only' in sys.argv[2:]:
+            for name in ('option-hook.py', 'option-hook-pre', 'option-hook-post'):
+                (task / name).unlink(missing_ok=True)

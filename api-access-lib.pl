@@ -46,7 +46,8 @@ die "Unknown API resource type: $kind\n";
 }
 
 # list_api_access_commands()
-# Returns command hashrefs with provider keys, script paths, scope, and aliases.
+# Returns command and option grants with provider keys, scope, and aliases.
+# Virtual option grants have a parent command instead of an executable path.
 # The pro flag marks commands that need Pro when run by a dedicated API account.
 # Scoped commands enforce account permissions themselves. Other commands may
 # affect resources outside the account's domain list.
@@ -88,6 +89,24 @@ foreach my $entry (&list_api_commands()) {
 		'desc' => $desc, 'scoped' => $scoped ? 1 : 0,
 		'pro' => exists($api_account_pro_features{$canonical}) ? 1 : 0 };
 	}
+# Extra option permissions are selectable grants, never executable scripts.
+# Bind them to the core provider so a plugin replacement cannot inherit them.
+my $modify = $commands{'modify-domain'};
+if ($modify && $modify->{'provider'} eq $module_name) {
+	foreach my $option (
+		[ 'quotas', 1, [ '--quota', '--uquota' ] ],
+		[ '2fa', 1, [ '--disable-2fa' ] ],
+		[ 'home', 0, [ '--home' ] ],
+		[ 'hooks', 0, [ '--pre-command', '--post-command' ] ]) {
+		my ($suffix, $scoped, $args) = @$option;
+		my $name = "modify-domain-$suffix";
+		$commands{$name} = { 'name' => $name,
+			'provider' => $module_name, 'key' => "$module_name:$name",
+			'parent' => $modify->{'key'}, 'virtual' => 1,
+			'options' => $args, 'scoped' => $scoped, 'pro' => 0,
+			'desc' => $text{'apiaccess_option_'.$suffix} };
+		}
+	}
 # Present aliases as one permission while retaining each accepted spelling.
 my %grants;
 foreach my $name (sort keys %commands) {
@@ -128,9 +147,33 @@ return 0 if (&is_api_account_command($name));
 # Both scoped and server-wide commands need a saved grant for this provider
 # and must be available in this edition.
 my $command = &get_api_access_command($name);
-return $command &&
+return $command && !$command->{'virtual'} &&
 	!&api_account_pro_message($command->{'name'}) &&
 	&api_access_contains($access{'api_commands'}, $command->{'key'});
+}
+
+# api_access_can_option(name)
+# Checks an extra grant for the current command without granting a master role.
+# The base command must still be authorized by the same provider.
+sub api_access_can_option
+{
+my ($name) = @_;
+my $option = &get_api_access_command($name);
+return $option && $option->{'virtual'} && $api_access_command &&
+	$option->{'parent'} eq $api_access_command->{'key'} &&
+	&api_access_can_command($api_access_command->{'name'}) &&
+	&api_access_contains($access{'api_commands'}, $option->{'key'});
+}
+
+# api_access_command_options(&command, &args)
+# Returns extra permissions required by options in an API argv arrayref.
+sub api_access_command_options
+{
+my ($command, $args) = @_;
+my %args = map { $_ => 1 } @$args;
+return grep { $_->{'virtual'} && $_->{'parent'} eq $command->{'key'} &&
+	      grep { $args{$_} } @{$_->{'options'}} }
+	&list_api_access_commands();
 }
 
 # api_access_can_domain(&domain)
@@ -220,9 +263,21 @@ if ($command && (my $err = &api_account_pro_message($command->{'name'}))) {
 	}
 # Check the saved grant before recording any command as authorized.
 &api_access_can_command($name) || die "API command is not permitted\n";
+{
+	# Validate option grants against this command, not a previous batch target.
+	local $api_access_command = $command;
+	foreach my $option (&api_access_command_options($command, $args)) {
+		&api_access_can_option($option->{'name'}) ||
+			die "API option requires permission $option->{'name'}\n";
+		}
+	}
 if ($command->{'name'} =~ /^(create|modify)-domain$/) {
-	# Resource limits must come from an allowed plan, not caller overrides.
+	# Only explicit quota grants may override plan limits on existing domains.
+	local $api_access_command = $command;
 	foreach my $arg (@$args) {
+		next if ($command->{'name'} eq 'modify-domain' &&
+			 $arg =~ /^--(quota|uquota)$/ &&
+			 &api_access_can_option('modify-domain-quotas'));
 		$arg !~ /^--(quota|uquota|bandwidth|mailboxlimit|dbslimit|domslimit|aliaslimit|aliasdomslimit|realdomslimit|max-mailboxes|max-dbs|max-doms|max-aliases|max-aliasdoms|max-realdoms)$/ ||
 			die "API accounts must use the limits from a plan\n";
 		}
@@ -294,6 +349,11 @@ my $command = &prepare_api_access_command($name, \@args);
 $name = $command->{'name'};
 $name ne 'run-api-command' || die "Recursive batch command is not permitted\n";
 $command->{'scoped'} || die "Batch commands must support domain access checks\n";
+# A domain command's server-wide options must not enter the batch wrapper.
+foreach my $option (&api_access_command_options($command, \@args)) {
+	$option->{'scoped'} ||
+		die "Batch commands cannot use server-wide option permissions\n";
+	}
 foreach my $d (@domains) {
 	my @childargs = ('--domain', $d->{'dom'}, @args);
 	if ($test) {
@@ -449,6 +509,16 @@ eval {
 			# Resolve exclusions now; future commands are never implicitly allowed.
 			my %excluded = map { $_ => 1 } @chosen;
 			@chosen = grep { !$excluded{$_} } @available;
+			}
+		# Extra permissions need their parent in the resolved command selection.
+		my %chosen = map { $_ => 1 } @chosen;
+		foreach my $key (@chosen) {
+			my $parent = $known{$key}->{'parent'};
+			if ($parent && !$chosen{$parent}) {
+				# Reject incomplete grants before writing any account changes.
+				die &text('apiaccess_edependency', $known{$key}->{'name'},
+					$known{$parent}->{'name'})."\n";
+				}
 			}
 		# Include mode may resubmit existing Pro grants on GPL.
 		# All/exclude replace them with this edition's commands.

@@ -4,7 +4,8 @@
 # Requires a disposable VM. API_TEST_WEBMIN_ROOT overrides /usr/share/webmin.
 # Modes: setup, catalog, make-alias, module-root, inspect, block-policy,
 # unblock-policy, edition-info, seed-pro-grants, make-pro-alias,
-# theme-authentic, theme-gray, clear-policy, restore-policy, and cleanup.
+# theme-authentic, theme-gray, clear-policy, restore-policy, inspect-options,
+# seed-options-2fa, and cleanup.
 
 use strict;
 use warnings;
@@ -128,6 +129,29 @@ elsif ($mode eq 'inspect') {
 		domain => $d ? { map { $_ => $d->{$_} }
 			qw(id dom user api_owner plan template quota uquota) } : undef,
 		unix_user => scalar(getpwnam($fixture->{user})) });
+	}
+elsif ($mode eq 'inspect-options' || $mode eq 'seed-options-2fa') {
+	# Inspect only fixture domains and seed 2FA only on their Webmin logins.
+	my %state;
+	foreach my $kind ('domain', 'outside') {
+		my $d = &get_domain_by('dom', $fixture->{$kind});
+		$d && $d->{'webmin'} || die "Missing fixture domain $kind";
+		my $u = &acl::get_user($d->{'user'});
+		$u || die "Missing fixture domain login";
+		if ($mode eq 'seed-options-2fa') {
+			# The generated fixture secret stays on this disposable guest.
+			$u->{'twofactor_provider'} = 'totp';
+			$u->{'twofactor_id'} = &acl::generate_random_id();
+			&acl::modify_user($u->{'name'}, $u);
+			}
+		$state{$kind} = { map { $_ => $d->{$_} }
+			qw(id dom user home quota uquota) };
+		$state{$kind}->{'twofactor'} = $u->{'twofactor_provider'} ? 1 : 0;
+		}
+	# Check the API account's role without exposing credentials or ACL data.
+	local %access = &get_module_acl($fixture->{user}, $module_name);
+	$state{'master'} = &master_admin() ? 1 : 0;
+	print encode_json(\%state);
 	}
 elsif ($mode eq 'clear-policy') {
 	# Remove only the fixture's module policy while retaining its login.
