@@ -815,7 +815,8 @@ if ($mods{'logviewer'} && !$noextra && $d->{'webmin'}) {
 			}
 		# Add PHP log
 		my $phplog = &get_domain_php_error_log($d);
-		if ($phplog && !$done{$phplog}++) {
+		if ($phplog && !$done{$phplog}++ &&
+		    &is_under_directory($d->{'home'}, $phplog)) {
 			push(@extras, $phplog." ".&text('webmin_plog',
 							$sd->{'dom'}));
 			}
