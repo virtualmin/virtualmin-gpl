@@ -565,7 +565,7 @@ sub list_api_access_users
 &require_acl();
 my @rv;
 # Module access and an API account ID distinguish these from ordinary users.
-foreach my $user (@_ ? &acl::get_user($_[0]) : &acl::list_users()) {
+foreach my $user (@_ ? &acl::get_user($_[0]) : &acl::list_users(undef, 1)) {
 	next if (!$user || !grep { $_ eq $module_name } @{$user->{'modules'}});
 	my %acl = &get_module_acl($user->{'name'}, $module_name);
 	push(@rv, { %$user, 'policy' => \%acl }) if ($acl{'api_id'});

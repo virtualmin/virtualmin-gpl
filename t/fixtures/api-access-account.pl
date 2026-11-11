@@ -241,7 +241,7 @@ elsif ($mode eq 'cleanup') {
 	# Remove the directory left by an interrupted write-failure test.
 	rmdir($policy_file) || die "Cannot remove fixture fault: $!" if (-d $policy_file);
 	# Delete only fixture logins; leave other accounts unchanged.
-	my %names = map { $_->{name} => 1 } &acl::list_users();
+	my %names = map { $_->{name} => 1 } &acl::list_users(undef, 1);
 	for my $name ($fixture->{user}, $fixture->{admin}) {
 		# Setup may have failed before creating both accounts.
 		&acl::delete_user($name) if ($names{$name});
