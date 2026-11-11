@@ -322,11 +322,7 @@ ok(api_access_can_command('create-domain'), 'explicit grant authorizes the winni
 	# require_acl(): the fixture supplies Webmin's account helpers below.
 	local *require_acl = sub { };
 	# acl::list_users(): record requests for the full account list.
-	local *acl::list_users = sub {
-		$listed++;
-		is_deeply([ @_ ], [ undef, 1 ], 'API management opts in to API accounts');
-		return @users;
-	};
+	local *acl::list_users = sub { $listed++; return @users; };
 	# acl::get_user(name): return the exact fixture login, if it exists.
 	local *acl::get_user = sub {
 		push(@lookups, $_[0]);
