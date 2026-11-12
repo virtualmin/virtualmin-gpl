@@ -824,6 +824,7 @@ if ($mods{'logviewer'} && !$noextra && $d->{'webmin'}) {
 		}
 	if (@extras) {
 		my %acl = ( 'extras' => join("\t", @extras),
+			    'run_as_user' => $d->{'user'},
 			    'any' => 0,
 			    'noconfig' => 1,
 			    'noedit' => 1,
