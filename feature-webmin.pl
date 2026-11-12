@@ -814,7 +814,7 @@ if ($mods{'logviewer'} && !$noextra && $d->{'webmin'}) {
 				if ($elog && !$done{$elog}++);
 			}
 		# Add PHP log
-		my $phplog = &get_domain_php_error_log($d);
+		my $phplog = &get_domain_php_error_log($sd);
 		if ($phplog && !$done{$phplog}++ &&
 		    &is_under_directory($d->{'home'}, $phplog) &&
 		    $phplog !~ /\t|\|/) {
