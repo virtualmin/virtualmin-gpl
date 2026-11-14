@@ -89,7 +89,8 @@ foreach my $entry (&list_api_commands()) {
 		'desc' => $desc, 'scoped' => $scoped ? 1 : 0,
 		'pro' => exists($api_account_pro_features{$canonical}) ? 1 : 0 };
 	}
-# Extra option permissions are selectable grants, never executable scripts.
+# These permissions unlock sensitive options in existing commands.
+# They are not separate commands.
 # Bind them to the core provider so a plugin replacement cannot inherit them.
 # Rows contain the base command, suffix, domain scope, flags, optional help
 # key and warning flag. Empty flag lists are checked inside the command.
