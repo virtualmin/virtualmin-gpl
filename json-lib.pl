@@ -212,28 +212,35 @@ return Dumper($data);
 }
 
 # execute_webmin_script(command, module, &args, output-fh)
-# Run some Virtualmin or Cloudmin API command in a forked sub-process, but with
-# out executing a new perl instance. Returns the PID.
+# Runs command (a script path) with args in a fork of this Perl interpreter.
+# The child retains the caller's ACL and writes to output-fh. Returns its PID.
+# module is accepted for compatibility; this implementation does not use it.
+# args is an argv arrayref. The parent closes output-fh after forking.
 sub execute_webmin_script
 {
 my ($cmd, $mod, $args, $fh) = @_;
+# Stop if a child process cannot be started.
 my $pid = fork();
+defined($pid) || die "Cannot fork API command: $!";
+# Preserve the request's identity before the child rebuilds its environment.
 my $remote_addr = $ENV{'REMOTE_ADDR'} || &to_ipaddress($ENV{'REMOTE_HOST'});
 my $remote_host = $ENV{'REMOTE_HOST'};
 my $miniserv_pid = $ENV{'MINISERV_PID'};
 my $miniserv_config = $ENV{'MINISERV_CONFIG'};
 if (!$pid) {
-	# Make this process have its own list of temp files to clean up
+	# Keep child cleanup from removing temporary files owned by the parent.
 	$main::initial_process_id = undef;
 	@main::temporary_files = undef;
 	$main::webmin_script_type = 'cmd';
 
+	# Send both output streams to the supplied named or lexical handle.
 	untie(*STDOUT);
 	close(STDOUT);
-	open(STDOUT, ">&$fh");
+	open(STDOUT, '>&', $fh) || die "Cannot redirect API output: $!";
 	untie(*STDERR);
 	close(STDERR);
-	open(STDERR, ">&$fh");
+	open(STDERR, '>&', $fh) || die "Cannot redirect API errors: $!";
+	# Rebuild the command environment while retaining the remote caller.
 	&clean_environment();
 	$ENV{'WEBMIN_CONFIG'} = $config_directory;
 	$ENV{'WEBMIN_VAR'} = $var_directory;
@@ -244,6 +251,7 @@ if (!$pid) {
 	$ENV{'MINISERV_CONFIG'} = $miniserv_config;
 	$ENV{'DISABLE_REFERERS_CHECK'} = 1;
 	$main::no_referers_check = 1;
+	# Set CLI arguments and use the command's directory for relative paths.
 	my $pkg = $cmd;
 	$pkg =~ s/[^A-Za-z0-9]/_/g;
 	@ARGV = @$args;
@@ -251,6 +259,7 @@ if (!$pid) {
 	my $dir = $cmd;
 	$dir =~ s/\/([^\/]+)$//;
 	chdir($dir);
+	# Run in the forked interpreter so module state and API policy survive.
 	eval "
 		\%pkg::ENV = \%ENV;
 		package $pkg;
@@ -259,6 +268,7 @@ if (!$pid) {
 		";
 	exit($@ ? 1 : 0);
 	}
+# The parent must release its writer so readers see EOF when the child exits.
 close($fh);
 return $pid;
 }

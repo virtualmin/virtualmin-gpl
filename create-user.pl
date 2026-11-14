@@ -51,6 +51,8 @@ If you only have a pre-encrypted password that you want the new user
 to use, the C<--encpass> flag can be used to set it instead of C<--pass>.
 However, this will prevent Virtualmin from enabling MySQL access for the user,
 as it needs to know the plaintext password to re-hash it for MySQL.
+API accounts need C<create-user-encpass> in addition to C<create-user>.
+Password strength cannot be checked when importing a hash.
 
 All mail users can have a password recovery address set, used by the forgotten
 password feature in Virtualmin. For new users, this can be set with the 
@@ -105,8 +107,10 @@ while(@ARGV > 0) {
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
-		$is_master ||
-			&usage("--passfile is only available to the master administrator");
+		# Password files are read as root, not as the new mailbox user.
+		$is_master || &api_access_can_option('create-user-passfile') ||
+			&usage("--passfile is only available to the master administrator ".
+			       "or an API account with create-user-passfile permission");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
@@ -114,16 +118,26 @@ while(@ARGV > 0) {
 		$pass = &random_password();
 		}
 	elsif ($a eq "--encpass") {
-		$is_master ||
-			&usage("--encpass is only available to the master administrator");
+		# Importing hashes bypasses checks that need the original password.
+		$is_master || &api_access_can_option('create-user-encpass') ||
+			&usage("--encpass requires the master administrator ".
+			       "or create-user-encpass permission");
 		$encpass = shift(@ARGV);
+		# Never let an API-supplied hash inject another password-file field.
+		if (!$is_master && $encpass !~ /\A[^\s:\0]+\z/) {
+			&usage("Encrypted passwords cannot be empty or contain ".
+			       "whitespace, colons or NUL characters");
+			}
 		}
 	elsif ($a eq "--ssh-pubkey") {
 		$sshpubkey = shift(@ARGV);
 		}
 	elsif ($a eq "--ssh-pubkey-id") {
+		# Stored key selection can reach other accounts' keys.
 		$is_master ||
-			&usage("--ssh-pubkey-id is only available to the master administrator");
+			&api_access_can_option('create-user-ssh-key-file') ||
+			&usage("--ssh-pubkey-id is only available to the master administrator ".
+			       "or an API account with create-user-ssh-key-file permission");
 		$sshpubkeyid = shift(@ARGV);
 		}
 	elsif ($a eq "--real" || $a eq "--desc") {
@@ -199,8 +213,10 @@ while(@ARGV > 0) {
 		    &usage("--recovery must be followed by an email address");
 		}
 	elsif ($a eq "--noappend") {
-		$is_master ||
-			&usage("--noappend is only available to the master administrator");
+		# Bypassing the username prefix requires a separate grant.
+		$is_master || &api_access_can_option('create-user-noappend') ||
+			&usage("--noappend is only available to the master administrator ".
+			       "or an API account with create-user-noappend permission");
 		$noappend = 1;
 		}
 	elsif ($a eq "--multiline") {
@@ -346,11 +362,15 @@ else {
 	$user->{'passmode'} = 2;
 	$user->{'pass'} = $encpass;
 	}
-# SSH public key
+# Literal public keys remain allowed; server files require a separate grant.
 my $pubkey;
 if ($sshpubkey) {
-	my $sshpubkeyfile = $is_master && -r $sshpubkey ? $sshpubkey : undef;
+	my $sshpubkeyfile =
+		($is_master ||
+		&api_access_can_option('create-user-ssh-key-file')) &&
+			-r $sshpubkey ? $sshpubkey : undef;
 	if ($sshpubkeyfile) {
+		# Read the server file only after checking its permission.
 		$pubkey = &get_ssh_pubkey_from_file($sshpubkeyfile, $sshpubkeyid);
 		}
 	else {
@@ -493,7 +513,9 @@ if (!$nocreationmail && $user->{'email'}) {
 &run_post_actions();
 &release_lock_unix($d);
 &release_lock_mail($d);
-&virtualmin_api_log(\@OLDARGV, $d, $d->{'hashpass'} ? [ "pass" ] : [ ]);
+# Password hashes must not be recorded in the API audit log.
+&virtualmin_api_log(\@OLDARGV, $d,
+	[ 'encpass', $d->{'hashpass'} ? ( 'pass' ) : ( ) ]);
 print "User $user->{'user'} created successfully\n";
 
 sub usage

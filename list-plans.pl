@@ -58,6 +58,8 @@ else {
 	@plans = &list_plans();
 	}
 
+# API accounts may discover only plans their policy allows them to use.
+@plans = grep { &can_use_plan($_) } @plans if ($access{'api_id'});
 $bsize = &quota_bsize("home");
 if ($nameonly) {
 	# Just plan names

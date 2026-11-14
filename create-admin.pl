@@ -80,8 +80,10 @@ while(@ARGV > 0) {
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
-		$is_master ||
-			&usage("--passfile is only available to the master administrator");
+		# Server files are read as root and need an explicit grant.
+		$is_master || &api_access_can_option('create-admin-passfile') ||
+			&usage("--passfile is only available to the master administrator ".
+			       "or an API account with create-admin-passfile permission");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}

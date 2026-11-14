@@ -12,6 +12,17 @@ C<--pass> to set a new password, C<--desc> to change the server description,
 and C<--quota> and C<--uquota> to change the disk quota. If the domain's Webmin
 user has two-factor enabled, use the C<--disable-2fa> flag to turn it off.
 
+API accounts need the additional C<modify-domain-quotas>, C<modify-domain-2fa>,
+C<modify-domain-home> or C<modify-domain-hooks> permission to override disk quotas,
+disable two-factor authentication, choose a home directory or run command hooks.
+These permissions require C<modify-domain> and access to the target domain.
+Home directories and hooks use root privileges and can affect the whole server.
+
+C<modify-domain-bandwidth> permits C<--bw>, C<--bw-disable> and C<--bw-no-disable>.
+C<modify-domain-protection> permits C<--protected> and C<--unprotected>.
+C<modify-domain-quotas-reapply> permits C<--apply-all-quotas> to reapply saved
+domain and mailbox quotas. It does not permit changing quota values.
+
 To make domain protected from deletion and disabling, the C<--protected> flag
 can be used. To remove the protection, use C<--unprotected> flag.
 
@@ -98,8 +109,7 @@ if (!$module_name) {
 @OLDARGV = @ARGV;
 &set_all_text_print();
 
-# Remote API callers that are not the master admin can only change the
-# settings that the user interface offers them
+# Preserve ordinary caller checks alongside explicit API option permissions.
 my $is_master = &master_admin();
 
 # Parse command-line args
@@ -120,9 +130,12 @@ while(@ARGV > 0) {
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
+		# File reads can reach beyond the selected domain.
 		$is_master ||
+			&api_access_can_option('modify-domain-passfile') ||
 			&usage("--passfile is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-passfile permission");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
@@ -130,15 +143,19 @@ while(@ARGV > 0) {
 		$email = shift(@ARGV);
 		}
 	elsif ($a eq "--protected") {
+		# Changing domain protection needs its own API permission.
 		$is_master ||
-			&usage("--protected is only available to the master ".
-			       "administrator");
+			&api_access_can_option('modify-domain-protection') ||
+			&usage("--protected requires the master administrator ".
+			       "or modify-domain-protection permission");
 		$protected = 1;
 		}
 	elsif ($a eq "--unprotected") {
+		# Changing domain protection needs its own API permission.
 		$is_master ||
-			&usage("--unprotected is only available to the master ".
-			       "administrator");
+			&api_access_can_option('modify-domain-protection') ||
+			&usage("--unprotected requires the master administrator ".
+			       "or modify-domain-protection permission");
 		$protected = 0;
 		}
 	elsif ($a eq "--quota") {
@@ -156,18 +173,27 @@ while(@ARGV > 0) {
 		$uquota =~ /^\d+$/ || &usage("Quota must be a number of blocks");
 		}
 	elsif ($a eq "--user") {
-		$is_master ||
+		# Renaming requires its grant and a valid username.
+		$is_master || &api_access_can_option('modify-domain-user') ||
 			&usage("--user is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-user permission");
 		$user = shift(@ARGV);
+		# API username changes retain the normal account-name validation.
+		if (&is_api_access_user()) {
+			my $err = &valid_mailbox_name($user);
+			&usage($err) if ($err);
+			$user !~ /[\s\0]/ || &usage("Invalid username");
+			}
 		$user =~ /^[^\t :]+$/ || &usage($text{'setup_euser2'});
 		defined(getpwnam($user)) &&
 			&usage("A user named $user already exists");
 		}
 	elsif ($a eq "--home") {
-		$is_master ||
-			&usage("--home is only available to the master ".
-			       "administrator");
+		# Dedicated accounts need this option's separate permission.
+		$is_master || &api_access_can_option('modify-domain-home') ||
+			&usage("--home requires the master administrator ".
+			       "or modify-domain-home permission");
 		$home = shift(@ARGV);
 		$home =~ /^\/\S+$/ || &usage("Home directory must be an absolute path");
 		-d $home && &usage("New home directory already exists");
@@ -186,6 +212,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--bw") {
 		$is_master || &can_edit_bandwidth() ||
+			&api_access_can_option('modify-domain-bandwidth') ||
 			&usage("You are not allowed to change bandwidth limits");
 		# Setting or removing the bandwidth limit
 		$bw = shift(@ARGV);
@@ -193,12 +220,14 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--bw-disable") {
 		$is_master || &can_edit_bandwidth() ||
+			&api_access_can_option('modify-domain-bandwidth') ||
 			&usage("You are not allowed to change bandwidth limits");
 		# Set over-bw limit disable to yes
 		$bw_no_disable = 0;
 		}
 	elsif ($a eq "--bw-no-disable") {
 		$is_master || &can_edit_bandwidth() ||
+			&api_access_can_option('modify-domain-bandwidth') ||
 			&usage("You are not allowed to change bandwidth limits");
 		# Set over-bw limit disable to no
 		$bw_no_disable = 1;
@@ -270,23 +299,32 @@ while(@ARGV > 0) {
 			&usage("Invalid shared IPv6 address");
 		}
 	elsif ($a eq "--reseller") {
+		# Replacing the reseller changes who can manage this domain.
 		$is_master ||
+			&api_access_can_option('modify-domain-reseller') ||
 			&usage("--reseller is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-reseller permission");
 		# Changing the reseller
 		$resel = shift(@ARGV);
 		}
 	elsif ($a eq "--add-reseller") {
+		# Adding a reseller gives another account access to this domain.
 		$is_master ||
+			&api_access_can_option('modify-domain-reseller') ||
 			&usage("--add-reseller is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-reseller permission");
 		# Adding a reseller
 		push(@add_resel, shift(@ARGV));
 		}
 	elsif ($a eq "--delete-reseller") {
+		# Removing reseller access requires the same ownership grant.
 		$is_master ||
+			&api_access_can_option('modify-domain-reseller') ||
 			&usage("--delete-reseller is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-reseller permission");
 		# Removing a reseller
 		push(@del_resel, shift(@ARGV));
 		}
@@ -308,9 +346,10 @@ while(@ARGV > 0) {
 		$template eq "" && &usage("Unknown template name");
 		}
 	elsif ($a eq "--plan" || $a eq "--apply-plan") {
-		$is_master ||
-			&usage("--plan is only available to the master ".
-			       "administrator");
+		# Check the API account's selected plan after parsing options.
+		$is_master || &is_api_access_user() ||
+			&usage("--plan requires the master administrator ".
+			       "or a dedicated API account");
 		# Changing the plan
 		$planname = shift(@ARGV);
 		foreach $p (&list_plans()) {
@@ -323,9 +362,10 @@ while(@ARGV > 0) {
 		$planapply = 1 if ($a eq "--apply-plan");
 		}
 	elsif ($a eq "--plan-features") {
-		$is_master ||
-			&usage("--plan-features is only available to the master ".
-			       "administrator");
+		# API callers may request features from the permitted plan.
+		$is_master || &is_api_access_user() ||
+			&usage("--plan-features requires the master administrator ".
+			       "or a dedicated API account");
 		$planfeatures = 1;
 		}
 	elsif ($a eq "--add-exclude") {
@@ -341,15 +381,17 @@ while(@ARGV > 0) {
 		push(@remove_db_excludes, shift(@ARGV));
 		}
 	elsif ($a eq "--pre-command") {
-		$is_master ||
-			&usage("--pre-command is only available to the master ".
-			       "administrator");
+		# Dedicated accounts need this option's separate permission.
+		$is_master || &api_access_can_option('modify-domain-hooks') ||
+			&usage("--pre-command requires the master administrator ".
+			       "or modify-domain-hooks permission");
 		$precommand = shift(@ARGV);
 		}
 	elsif ($a eq "--post-command") {
-		$is_master ||
-			&usage("--post-command is only available to the master ".
-			       "administrator");
+		# Dedicated accounts need this option's separate permission.
+		$is_master || &api_access_can_option('modify-domain-hooks') ||
+			&usage("--post-command requires the master administrator ".
+			       "or modify-domain-hooks permission");
 		$postcommand = shift(@ARGV);
 		}
 	elsif ($a eq "--dns-ip") {
@@ -371,27 +413,36 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	elsif ($a eq "--enable-jail") {
-		$is_master ||
+		# Changing filesystem isolation requires the jail permission.
+		$is_master || &api_access_can_option('modify-domain-jail') ||
 			&usage("--enable-jail is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-jail permission");
 		$jail = 1;
 		}
 	elsif ($a eq "--disable-jail") {
-		$is_master ||
+		# Removing isolation needs the same explicit jail permission.
+		$is_master || &api_access_can_option('modify-domain-jail') ||
 			&usage("--disable-jail is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-jail permission");
 		$jail = 0;
 		}
 	elsif ($a eq "--copy-jail") {
-		$is_master ||
+		# Refreshing jail files also changes the domain isolation setup.
+		$is_master || &api_access_can_option('modify-domain-jail') ||
 			&usage("--copy-jail is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-jail permission");
 		$copyjail = 1;
 		}
 	elsif ($a eq "--mysql-server") {
+		# Database moves may affect another server.
 		$is_master ||
+			&api_access_can_option('modify-domain-database-server') ||
 			&usage("--mysql-server is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with modify-domain-database-server permission");
 		$myserver = shift(@ARGV);
 		}
 	elsif ($a eq "--link-domain") {
@@ -414,15 +465,18 @@ while(@ARGV > 0) {
 		$applyquotas = 1;
 		}
 	elsif ($a eq "--apply-all-quotas") {
+		# Reapplying saved quotas is separate from changing their values.
 		$is_master ||
-			&usage("--apply-all-quotas is only available to the master ".
-			       "administrator");
+			&api_access_can_option('modify-domain-quotas-reapply') ||
+			&usage("--apply-all-quotas requires the master administrator ".
+			       "or modify-domain-quotas-reapply permission");
 		$applyquotas = 2;
 		}
 	elsif ($a eq "--disable-2fa") {
-		$is_master ||
-			&usage("--disable-2fa is only available to the master ".
-			       "administrator");
+		# Dedicated accounts need this option's separate permission.
+		$is_master || &api_access_can_option('modify-domain-2fa') ||
+			&usage("--disable-2fa requires the master administrator ".
+			       "or modify-domain-2fa permission");
 		$no2fa = 1;
 		}
 	elsif ($a eq "--help") {
@@ -431,6 +485,12 @@ while(@ARGV > 0) {
 	else {
 		&usage("Unknown parameter $a");
 		}
+	}
+
+# Keep API quota overrides gated even when invoked outside remote.cgi.
+if (&is_api_access_user() && (defined($quota) || defined($uquota)) &&
+    !&api_access_can_option('modify-domain-quotas')) {
+	&usage("--quota and --uquota require modify-domain-quotas permission");
 	}
 
 # Find the domain
@@ -452,9 +512,10 @@ if (!$is_master && defined($newdomain)) {
 	&usage($err) if ($err);
 	}
 if (!$is_master && defined($template)) {
-	# Only templates that are available to this user can be selected
+	# API accounts use their template allowlist; ordinary owners also need
+	# a template marked for users.
 	&can_use_template($tmpl) &&
-	  (&reseller_admin() || $tmpl->{'for_users'}) ||
+	  (&reseller_admin() || &is_api_access_user() || $tmpl->{'for_users'}) ||
 		&usage($text{'setup_etmpl'});
 	}
 if (!$is_master && (@add_excludes || @remove_excludes ||
@@ -583,6 +644,11 @@ if (defined($template)) {
 
 # Plans can only be used with top-level servers
 if ($plan) {
+	if (&is_api_access_user()) {
+		# Apply the new plan's limits instead of keeping old quotas.
+		&can_use_plan($plan) || &usage("The selected plan is not permitted");
+		$planapply = 1;
+		}
 	$dom->{'parent'} && &usage("--plan can only be used with top ".
 				 "level virtual servers");
 	}

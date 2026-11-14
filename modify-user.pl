@@ -116,9 +116,10 @@ while(@ARGV > 0) {
 		$pass = shift(@ARGV);
 		}
 	elsif ($a eq "--passfile") {
-		# Prevent non-master callers from reading server-side files
-		$is_master ||
-			&usage("--passfile is only available to the master administrator");
+		# Server-side password files require a separate API grant
+		$is_master || &api_access_can_option('modify-user-passfile') ||
+			&usage("--passfile is only available to the master administrator ".
+			       "or an API account with modify-user-passfile permission");
 		$pass = &read_file_contents(shift(@ARGV));
 		$pass =~ s/\r|\n//g;
 		}
@@ -303,9 +304,11 @@ if (defined($quota) && !$is_master && !&can_mailbox_quota()) {
 	&usage("You are not allowed to change mailbox quotas");
 	}
 
-# Server-side SSH key selection is only safe for the master administrator
-if (defined($sshpubkeyid) && !$is_master) {
-	&usage("--ssh-pubkey-id is only available to the master administrator");
+# Stored SSH key selection requires explicit privileged file access
+if (defined($sshpubkeyid) && !$is_master &&
+    !&api_access_can_option('modify-user-ssh-key-file')) {
+	&usage("--ssh-pubkey-id is only available to the master administrator ".
+	       "or an API account with modify-user-ssh-key-file permission");
 	}
 if (!$is_master) {
 	if (defined($newusername)) {
@@ -631,9 +634,11 @@ else {
 	# Update SSH key if given
 	if ($sshpubkey) {
 		my $pubkey;
-		# Only the master administrator can load a key from a server file
+		# Server-side keys require explicit privileged file access
 		my $sshpubkeyfile =
-			$is_master && -r $sshpubkey ? $sshpubkey : undef;
+			($is_master ||
+				&api_access_can_option('modify-user-ssh-key-file')) &&
+			-r $sshpubkey ? $sshpubkey : undef;
 		if ($sshpubkeyfile) {
 			# Select the requested key from the server-side file
 			$pubkey = &get_ssh_pubkey_from_file(

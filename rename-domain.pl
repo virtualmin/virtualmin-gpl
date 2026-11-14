@@ -10,8 +10,11 @@ C<--domain> flag, and changed to the name set with the C<--new-domain> option.
 By default, the administration username, home directory and prefix for mailboxes
 will remaining unchanged. You can have these selected automatically based on
 the new domain name with the C<--auto-user>, C<--auto-home> and C<--auto-prefix>
-flags. Alternately, you can set them directly with the C<--new-user>, 
+flags. Alternately, you can set them directly with the C<--new-user>,
 C<--new-home> and C<--new-prefix> flags followed by the settings you want.
+
+API accounts need C<rename-domain-user> in addition to C<rename-domain>
+to use C<--new-user> or C<--auto-user>. This does not allow custom home paths.
 
 This command can also be used to change the home directory or username for
 a domain without even changing the domain name, just set the C<--new-home>
@@ -47,24 +50,31 @@ while(@ARGV > 0) {
 		$newdomain = lc(shift(@ARGV));
 		}
 	elsif ($a eq "--new-user") {
-		# Selecting a Unix login is only offered to those who can
-		# rename and choose a username
+		# Keep username changes separate from ordinary domain renaming.
 		&can_rename_domains() == 2 ||
-			&usage("--new-user is only available to the master ".
-			       "administrator");
+			&api_access_can_option('rename-domain-user') ||
+			&usage("--new-user requires permission to select usernames ".
+			       "or rename-domain-user permission");
 		$newuser = lc(shift(@ARGV));
+		# Reject account-file delimiters regardless of username policy settings.
+		if (&is_api_access_user() && $newuser =~ /[\s\0]/) {
+			&usage("Username cannot contain whitespace or NUL characters");
+			}
 		}
 	elsif ($a eq "--auto-user") {
 		&can_rename_domains() == 2 ||
-			&usage("--auto-user is only available to the master ".
-			       "administrator");
+			&api_access_can_option('rename-domain-user') ||
+			&usage("--auto-user requires permission to select usernames ".
+			       "or rename-domain-user permission");
 		$newuser = "auto";
 		}
 	elsif ($a eq "--new-home") {
-		# An arbitrary home directory can only be set by the master
+		# Arbitrary home paths require explicit privileged filesystem access
 		&can_rehome_domains() == 2 ||
+			&api_access_can_option('rename-domain-home') ||
 			&usage("--new-home is only available to the master ".
-			       "administrator");
+			       "administrator ".
+			       "or an API account with rename-domain-home permission");
 		$newhome = lc(shift(@ARGV));
 		}
 	elsif ($a eq "--auto-home") {

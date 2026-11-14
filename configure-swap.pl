@@ -66,8 +66,9 @@ while (@ARGV > 0) {
 		}
 	}
 
-# Swap affects the whole host, including when invoked through the remote API.
-&master_admin() || &usage("Only the master administrator can configure swap");
+# Swap affects the whole host, so API accounts need permission for this command.
+&master_admin() || &api_access_system_command() ||
+	&usage("You are not allowed to configure swap");
 &is_readonly_mode() && &usage("Swap cannot be configured in read-only mode");
 
 # Set the log directory and request noninteractive output with download progress.

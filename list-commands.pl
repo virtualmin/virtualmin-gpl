@@ -57,29 +57,24 @@ foreach my $c (&list_api_categories()) {
 		}
 	}
 
-# Go through the categories
-my @skips = &list_api_skip_scripts();
-my %cdescs = &list_api_category_descs();
+# Use shared discovery while retaining category order and CLI formatting.
 my %done;
 my $fmt = "\%-${maxlen}.${maxlen}s \%s\n";
 foreach my $c (&list_api_categories()) {
 	my ($cname, @cglobs) = @$c;
-	@cglobs = map { my $g = $_; ($g, "pro/$g", map { "$root_directory/$_/$g" } @plugins) } @cglobs;
-	my @cmds = map { glob($_) } @cglobs;
 
 	# Print a line for each command
 	my $donehead = 0;
-	foreach my $cmd (@cmds) {
+	foreach my $entry (&list_api_commands(\@cglobs)) {
+		my $cmd = $entry->{'path'};
 		next if (-l $cmd);
-		next if (&indexof($cmd, @skips) >= 0);
 		(my $remote_cmd = $cmd) =~ s/^.*\///;
 		next if (!&can_remote($remote_cmd));
 		my $spellcmd = $cmd;
 		$spellcmd =~ s/licence/license/g;
 		next if ($done{$spellcmd}++);
-		my $src = &read_file_contents($cmd);
-		next if ($src !~ /=head1\s+(.*)\n\n(.*)\n/);
-		my $desc = $2;
+		# CLI summaries keep the first line; API tooltips use the full paragraph.
+		my ($desc) = split(/\n/, $entry->{'desc'}, 2);
 		my $scmd = $cmd;
 		$scmd =~ s/^.*\///;
 		$scmd =~ s/\.pl$// if ($short);

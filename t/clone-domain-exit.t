@@ -228,6 +228,8 @@ sub valid_mailbox_name {
 	return $result eq 'invalid_user' ? 'Controlled invalid username' : undef;
 }
 sub master_admin { 1 }
+# is_api_access_user(): these clone cases use an ordinary master account.
+sub is_api_access_user { 0 }
 sub get_remote_api_domain { $source }
 sub get_domain_by { undef }
 sub get_template { {} }

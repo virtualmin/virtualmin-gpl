@@ -190,9 +190,11 @@ if (!&master_admin()) {
 	$script->{'avail'} && $script->{'enabled'} ||
 		&usage("Script type $sname is not available to this user");
 	$unsupported && !&can_unsupported_scripts() &&
+	  !&api_access_can_option('install-script-unsupported') &&
 		&usage("Unsupported script versions cannot be installed");
-	$logonly &&
-		&usage("--log-only is only available to the master administrator");
+	$logonly && !&api_access_can_option('install-script-log-only') &&
+		&usage("--log-only is only available to the master administrator ".
+		       "or an API account with install-script-log-only permission");
 	if ($forcedir) {
 		&is_under_directory(&public_html_dir($d), $forcedir) ||
 			&usage("The forced install directory must be under the website root");
@@ -273,9 +275,11 @@ else {
 	}
 
 # Global defaults affect other virtual servers
-if (!&master_admin() && $opts->{'global_def'}) {
+if (!&master_admin() && $opts->{'global_def'} &&
+    !&api_access_can_option('install-script-global')) {
 	&usage("Global default scripts can only be installed by the ".
-	       "master administrator");
+	       "master administrator ".
+	       "or an API account with install-script-global permission");
 	}
 
 # Check domain features

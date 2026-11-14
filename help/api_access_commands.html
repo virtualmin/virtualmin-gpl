@@ -1,0 +1,61 @@
+<header>Allowed commands</header>
+
+<p>Choose which commands this API account can run. Each command shows the module
+that provides it.</p>
+
+<p>Allow selected commands permits only the checked entries. With nothing checked,
+the account cannot run any commands. Allow all current commands except selected
+permits every available entry except the checked ones. With nothing checked, it
+allows all available entries.</p>
+
+<p>Allow all current commands permits every available entry, including server-wide
+commands and extra permissions with warnings.</p>
+
+<p>All three modes save the commands allowed when you click Save. New commands and
+extra permissions are not added automatically. When you reopen the account, its
+saved permissions appear under Allow selected commands.</p>
+
+<p>Some commands have several names. Allowing or blocking one applies to all its
+names. If a different module takes over a command, you must allow it again.
+Updates within the same module keep the existing permission.</p>
+
+<h4>Commands limited to allowed virtual servers</h4>
+
+<p>These commands check access to the target virtual server and apply template and
+plan restrictions where needed. <tt>create-domain</tt> requires an allowed default
+template and plan. Initial quotas come from an allowed plan. Overriding plan
+quotas and reapplying saved quotas have separate extra permissions.</p>
+
+<h4>Server-wide commands</h4>
+
+<p>These commands can affect the whole server, and some can grant root access.
+Virtual server, template and plan restrictions do not limit them. Allow them only
+for integrations you trust with this access.</p>
+
+<h4>Extra permission</h4>
+
+<p>These entries allow additional options or sensitive output from another command.
+They cannot run on their own, and that command must also be allowed. Hover over an
+entry to see what it permits, its risks and which command it requires. Blue badges
+mark ordinary extra permissions. Yellow badges warn about permissions that can
+weaken security, expose secrets, disrupt services or affect other resources.</p>
+
+<p>Input checks and access checks for the target virtual server still apply.
+Server-wide extra permissions can also read or change resources outside that
+virtual server, and some allow commands to run as root. They cannot be used through
+<tt>run-api-command</tt>.</p>
+
+<h4>Virtualmin Pro</h4>
+
+<p><tt>create-domain</tt>, <tt>clone-domain</tt>, <tt>disable-domain</tt> and
+<tt>enable-domain</tt> require Virtualmin Pro when used by an API account. They and
+their extra permissions are disabled in this list on GPL. Plan changes through
+<tt>modify-domain</tt> remain available within the account's permissions. After
+upgrading to Pro, allow the additional commands and save the account again.</p>
+
+<p>After a downgrade, saved Pro permissions remain but cannot be used on GPL.
+Saving with Allow selected commands preserves them. Saving with either
+Allow all current commands or Allow all current commands except selected removes
+these inactive permissions.</p>
+
+<footer>

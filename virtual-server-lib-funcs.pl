@@ -26,7 +26,7 @@ foreach my $lib ("scripts", "resellers", "admins", "users", "simple", "s3",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
 		 "jailkit", "ports", "bb", "dnscloud", "dnscloudpro",
 		 "smtpcloud", "pro-tip", "azure", "remotedns", "drive",
-		 "acme", "api-create-domain", "btrfs") {
+		 "acme", "api-create-domain", "api-access", "btrfs") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
 		$libfile = "$virtual_server_root/$lib-lib.pl";
@@ -3103,38 +3103,40 @@ return @rv;
 }
 
 # can_edit_domain(&domain)
-# Returns 1 if the current user can edit some domain (ie. change users, aliases
-# databases, and so on)
+# Checks whether the current user can access the supplied domain hashref.
+# Individual editing capabilities are checked separately.
 sub can_edit_domain
 {
+# API visibility comes from saved domain grants and creation ownership.
+return &api_access_can_domain($_[0]) if ($access{'api_id'});
 if ($access{'reseller'}) {
-	# User is a reseller .. is this one of his domains?
+	# Resellers can access their customers and child servers.
 	if ($_[0]->{'parent'}) {
-		# Parent domain permissions apply
+		# A child server inherits its parent's reseller access.
 		return &can_edit_domain(&get_domain($_[0]->{'parent'}));
 		}
 	else {
-		return &indexof($base_remote_user,
-				split(/\s+/, $_[0]->{'reseller'})) >= 0;
+		# Reseller names are exact entries, with no wildcard expansion.
+		return &acl_list_contains($_[0]->{'reseller'}, $base_remote_user);
 		}
 	}
 else {
+	# Ordinary domain lists allow all only when * is the entire field.
 	return 1 if ($access{'domains'} eq "*");
+	# A selected-domain grant requires a domain ID.
 	return 0 if (!$_[0]->{'id'});
-	my $d;
-	foreach $d (split(/\s+/, $access{'domains'})) {
-		return 1 if ($d eq $_[0]->{'id'});
-		}
-	return 0;
+	return &acl_list_contains($access{'domains'}, $_[0]->{'id'});
 	}
 }
 
 # can_delete_domain(&domain)
+# Checks scope, protection, and role. API dispatch checks the command grant.
 sub can_delete_domain
 {
 my ($d) = @_;
 return &can_edit_domain($d) && !$d->{'protected'} &&
-       (&master_admin() || &reseller_admin() && !$access{'nodelete'} ||
+       (&master_admin() || $access{'api_id'} ||
+	&reseller_admin() && !$access{'nodelete'} ||
 	$_[0]->{'parent'} && $access{'edit_delete'});
 }
 
@@ -3157,9 +3159,12 @@ sub can_transfer_domain
 return &master_admin();
 }
 
+# master_admin()
 # Returns 1 if the current user is the master Virtualmin admin
 sub master_admin
 {
+# API accounts never gain a master role, even if their base ACL is incomplete.
+return 0 if ($access{'api_id'});
 return !$access{'noconfig'};
 }
 
@@ -3289,30 +3294,29 @@ return $config{'show_ugroup'} && &master_admin();
 }
 
 # can_use_feature(feature)
-# Returns 1 if the current user can use some feature at domain creation time,
-# or enable or disable it for existing domains
+# Checks whether the caller may use the named feature when creating a server
+# or changing its features. API calls also check the current target's plan.
 sub can_use_feature
 {
 my ($f) = @_;
-if (&master_admin()) {
-	# Master admin can use anything
-	return 1;
+if ($access{'api_id'} && $api_access_domain) {
+	# API callers must also satisfy the target customer's plan. A child uses
+	# its parent's plan; create-domain handles plans for new customers itself.
+	my $d = $api_access_domain->{'parent'} ?
+		&get_domain($api_access_domain->{'parent'}) : $api_access_domain;
+	my $plan = &get_plan($d->{'plan'});
+	# A missing plan cannot authorize any feature.
+	return 0 if (!$plan);
+	# A nonempty feature list also limits forced features for API accounts.
+	return 0 if ($plan->{'featurelimits'} &&
+		!&api_access_contains($plan->{'featurelimits'}, $f));
 	}
-elsif (&reseller_admin()) {
-	# Resellers can use features they have been granted, or features
-	# that are forced on
-	return $config{$f} == 3 || $access{"feature_".$f};
-	}
-else {
-	# Domain owners can use granted features (but never change the Unix
-	# account, which will be always on)
-	if ($f eq 'unix') {
-		return 0;
-		}
-	else {
-		return $config{$f} == 3 || $access{"feature_".$f};
-		}
-	}
+# Master administrators can use any feature.
+return 1 if (&master_admin());
+# Domain owners cannot enable or disable the Unix account feature.
+return 0 if (!&reseller_admin() && !$access{'api_id'} && $f eq 'unix');
+# Other callers need a granted feature or one configured as always enabled.
+return $config{$f} == 3 || $access{"feature_".$f};
 }
 
 # Returns 1 if the current user is allowed to select a private or shared
@@ -3539,12 +3543,13 @@ sub can_edit_mail
 return &master_admin() || &reseller_admin() || $access{'edit_mail'};
 }
 
-# Returns 1 if the current user can disable and enable the given domain
+# can_disable_domain(&domain)
+# Checks scope and protection; API dispatch separately checks the action grant.
 sub can_disable_domain
 {
 my ($d) = @_;
 return &can_edit_domain($d) && !$d->{'protected'} &&
-       (&master_admin() || &reseller_admin() ||
+       (&master_admin() || &reseller_admin() || $access{'api_id'} ||
         $d->{'parent'} && !$d->{'alias'} && $access{'edit_disable'});
 }
 
@@ -3615,35 +3620,37 @@ return &master_admin() || $config{'edit_quota'};
 }
 
 # can_use_template(&template)
-# Returns 1 if some template can be used by the current user, or his reseller
+# Checks whether the current user may use the supplied template hashref.
 sub can_use_template
 {
 my ($tmpl) = @_;
+# API accounts use their saved selections instead of owner and reseller lists.
+return $tmpl && &api_access_contains($access{'api_templates'}, $tmpl->{'id'})
+	if ($access{'api_id'});
 if (&master_admin()) {
-	# Root can use all templates
+	# Master administrators can use every template.
 	return 1;
 	}
 if ($tmpl->{'resellers'} ne '*') {
-	# Template has a reseller restriction, check it
-	my %resels = map { $_, 1 } split(/\s+/, $tmpl->{'resellers'});
+	# A reseller list containing only * allows every reseller.
 	if (&reseller_admin()) {
-		# Is current user in the reseller list?
-		return 0 if (!$resels{$base_remote_user});
+		# Resellers must appear under their own login name.
+		return 0 if (!&acl_list_contains($tmpl->{'resellers'}, $base_remote_user));
 		}
 	else {
-		# Is user's reseller in list?
+		# Domain owners must belong to one of the listed resellers.
 		my $dom = &get_domain_by("user", $base_remote_user,
 					    "parent", undef);
 		if (!($dom && $dom->{'reseller'} &&
-		      $resels{$dom->{'reseller'}})) {
+		      &acl_list_contains($tmpl->{'resellers'}, $dom->{'reseller'}))) {
+			# Deny missing domains and unlisted resellers.
 			return 0;
 			}
 		}
 	}
 if ($tmpl->{'owners'} ne '*' && !&reseller_admin()) {
-	# Template has owner restrictions, check them
-	my %owners = map { $_, 1 } split(/\s+/, $tmpl->{'owners'});
-	return 0 if (!$owners{$base_remote_user});
+	# Owner limits also apply, except for reseller logins.
+	return 0 if (!&acl_list_contains($tmpl->{'owners'}, $base_remote_user));
 	}
 return 1;
 }
@@ -8019,11 +8026,17 @@ return ( $count, $parent->{'mailboxlimit'} ? $parent->{'mailboxlimit'} : 0,
 # limit should be hidden from the user.
 # Feature can be "doms", "aliasdoms", "realdoms", "topdoms", "mailboxes",
 # "aliases", "quota", "uquota", "dbs", "bw" or a feature
+# user defaults to the API target's owner when set, otherwise the current login.
 sub count_feature
 {
 my ($f) = @_;
 my $user = $_[1] || $base_remote_user;
+# Count resources against the target customer, unless a user was supplied.
+my $api_customer = $access{'api_id'} && $api_access_domain;
+$user = $api_access_domain->{'user'} if ($api_customer && !$_[1]);
 local %access = &get_module_acl($user);
+# Customer limits still apply when that customer has no Webmin login.
+$access{'noconfig'} = 1 if ($api_customer);
 
 # Master admin has no limit
 return (-1, 0) if (&master_admin());
@@ -15149,8 +15162,12 @@ if (&can_edit_templates()) {
 		}
 	}
 
-# Add module config page
+# Add API account management and module configuration for administrators.
 if (!$access{'noconfig'}) {
+	# API accounts are managed only by the master administrator.
+	push(@rv, { 'url' => "$vm/api_access.cgi",
+		    'title' => $text{'apiaccess_title'},
+		    'cat' => 'setting', 'icon' => 'admins' });
 	push(@rv, { 'url' => "/config.cgi?$module_name",
 		    'title' => $text{'index_virtualminconfig'},
 		    'cat' => 'setting',
@@ -20830,6 +20847,16 @@ my ($oldd, $newdom, $newuser, $newpass, $ip, $virtalready) = @_;
 # Create the new domain object, with changes
 &$first_print($text{'clone_object'});
 my $d = { %$oldd };
+if ($access{'api_id'}) {
+	# Record the API creator's ID for later domain access checks.
+	$d->{'api_owner'} = $access{'api_id'};
+	# Independent customers start with plan limits, not source overrides.
+	&set_limits_from_plan($d, &get_plan($d->{'plan'})) if (!$d->{'parent'});
+	}
+else {
+	# Non-API clones must not inherit the source's API owner grant.
+	delete($d->{'api_owner'});
+	}
 my $parent;
 my $tmpl = &get_template($d->{'template'});
 $d->{'id'} = &domain_id();

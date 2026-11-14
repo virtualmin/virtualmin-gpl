@@ -93,13 +93,24 @@ else {
 	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
 	}
 @doms = &get_remote_api_domains(\@doms, $all_doms);
+if (&is_api_access_user()) {
+	# Check every customer's plan before making any bulk changes.
+	foreach my $target (@doms) {
+		local $api_access_domain = $target;
+		foreach my $f (keys %feature, keys %plugin) {
+			&can_use_feature($f) ||
+				&usage("The $f feature is not permitted by the customer's plan");
+			}
+		}
+	}
 
 # Only features the caller has been granted can be enabled, and connecting
-# existing objects to a domain is always a master-only operation
+# existing objects to a domain needs an explicit API grant
 my $is_master = &master_admin();
 if (!$is_master) {
-	$associate && &usage("The --associate flag is only available to the ".
-			     "master administrator");
+	$associate && !&api_access_can_option('enable-feature-associate') &&
+		&usage("--associate requires the master administrator ".
+		       "or enable-feature-associate permission");
 	foreach my $f (keys %feature, keys %plugin) {
 		&can_use_feature($f) ||
 			&usage("You are not allowed to enable the $f feature");

@@ -99,9 +99,11 @@ else {
 
 $script = &get_script($sinfo->{'name'});
 # Global defaults affect other virtual servers
-if (!&master_admin() && $sinfo->{'opts'}->{'global_def'}) {
+if (!&master_admin() && $sinfo->{'opts'}->{'global_def'} &&
+    !&api_access_can_option('delete-script-global')) {
 	&usage("Global default scripts can only be removed by the ".
-	       "master administrator");
+	       "master administrator ".
+	       "or an API account with delete-script-global permission");
 	}
 if ($dereg) {
 	# Just un-register it

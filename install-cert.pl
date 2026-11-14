@@ -59,15 +59,17 @@ while(@ARGV > 0) {
 		$g = substr($a, 2);
 		$f = shift(@ARGV);
 		if ($f =~ /^\//) {
-			# In some file on the server
+			# Server files are read as root and need a grant.
 			$is_master ||
-				&usage("Certificate files are only available to the master administrator");
+				&api_access_can_option('install-cert-files') ||
+				&usage("Certificate files are only available to the master administrator ".
+				       "or an API account with install-cert-files permission");
 			$data = &read_file_contents($f);
 			$data || &usage("File $f does not exist");
 			push(@got, [ $g, $data ]);
 			}
 		else {
-			# In parameter
+			# Inline data needs no server-file access.
 			$f =~ s/\r//g;
 			$f =~ s/\t+/\n/g;
 			push(@got, [ $g, $f ]);

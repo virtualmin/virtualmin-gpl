@@ -509,21 +509,21 @@ foreach my $command (sort keys %expected_commands) {
 		like($source, qr/allowed_domain_name\s*\(\s*\$parent\s*,/,
 			"$command checks name restrictions against the parent");
 		like($source,
-			qr/elsif \(\$a eq "--pre-command"\) \{\s*\$is_master \|\|/s,
-			"$command keeps pre-creation commands master-only");
+			qr/elsif \(\$a eq "--pre-command"\) \{\s*(?:\#[^\n]*\n\s*)*\$is_master \|\|\s*&api_access_can_option\('create-domain-hooks'\) \|\|/s,
+			"$command requires master or explicit hook permission for pre-creation commands");
 		like($source,
-			qr/elsif \(\$a eq "--post-command"\) \{\s*\$is_master \|\|/s,
-			"$command keeps post-creation commands master-only");
+			qr/elsif \(\$a eq "--post-command"\) \{\s*(?:\#[^\n]*\n\s*)*\$is_master \|\|\s*&api_access_can_option\('create-domain-hooks'\) \|\|/s,
+			"$command requires master or explicit hook permission for post-creation commands");
 		like($source,
 			qr/if \(!\$skipwarnings \|\| !\$is_master\) \{\s*\$err = &valid_domain_name/s,
 			"$command always validates owner-supplied domain names");
 		like($source,
 			qr/if \(!\$skipwarnings \|\| !\$is_master\) \{\s*foreach my \$ff \(&forbidden_domain_features/s,
 			"$command does not let owners skip forbidden features");
-		like($source, qr/defined\(\$jail\).*master administrator/s,
-			"$command keeps jail selection master-only");
-		like($source, qr/\(\$myserver \|\| \$pgserver\).*master administrator/s,
-			"$command keeps database server selection master-only");
+		like($source, qr/defined\(\$jail\) && !&api_access_can_option\('create-domain-jail'\)/,
+			"$command checks the extra jail permission for non-masters");
+		like($source, qr/\(\$myserver \|\| \$pgserver\) &&\s*!&api_access_can_option\('create-domain-database-server'\)/s,
+			"$command checks the extra database-server permission for non-masters");
 		like($source, qr/defined\(\$dns_ip\).*can_dnsip/s,
 			"$command requires DNS IP permission");
 		like($source, qr/\$fwdto.*can_edit_catchall/s,
