@@ -814,16 +814,17 @@ if ($mods{'logviewer'} && !$noextra && $d->{'webmin'}) {
 				if ($elog && !$done{$elog}++);
 			}
 		# Add PHP log
-		my $phplog = &get_domain_php_error_log($d);
+		my $phplog = &get_domain_php_error_log($sd);
 		if ($phplog && !$done{$phplog}++ &&
 		    &is_under_directory($d->{'home'}, $phplog) &&
-		    $phplog !~ /\t|\|/) {
+		    $phplog !~ /[\s|]/) {
 			push(@extras, $phplog." ".&text('webmin_plog',
 							$sd->{'dom'}));
 			}
 		}
 	if (@extras) {
 		my %acl = ( 'extras' => join("\t", @extras),
+			    'run_as_user' => $d->{'user'},
 			    'any' => 0,
 			    'noconfig' => 1,
 			    'noedit' => 1,

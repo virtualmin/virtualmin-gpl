@@ -1452,9 +1452,11 @@ eval {
 	local $main::error_must_die = 1;
 	# Views have no rows to dump. The subquery limits both metadata lookups
 	# to this schema, avoiding a join that can scan tables in other schemas.
+	# Keep SQL NULL out of charset names when the CLI returns it as text.
 	my $data = &execute_dom_sql($d, $db,
-		"select distinct TABLE_NAME, CHARACTER_SET_NAME, DATA_TYPE ".
-		"from information_schema.COLUMNS ".
+		"select distinct TABLE_NAME, ".
+		"COALESCE(CHARACTER_SET_NAME, '') AS CHARACTER_SET_NAME, ".
+		"DATA_TYPE from information_schema.COLUMNS ".
 		"where TABLE_SCHEMA = ? and TABLE_NAME in ".
 		"(select TABLE_NAME from information_schema.TABLES ".
 		"where TABLE_SCHEMA = ? and TABLE_TYPE <> 'VIEW')", $db, $db);
