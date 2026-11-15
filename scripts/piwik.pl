@@ -506,14 +506,8 @@ return undef;
 sub script_piwik_latest
 {
 my ($ver) = @_;
-if ($ver >= 5) {
-	return ( 'https://matomo.org/download/',
-		 'Download\\s+Matomo\\s+([0-9\\.]+)' );
-	}
-else {
-	return ( 'https://matomo.org/download/',
-		 'Download\\s+Matomo\\s+(4\\.[0-9\\.]+)' );
-	}
+return ( 'https://matomo.org/download/',
+	 'Matomo\\s+([0-9\\.]+)' );
 }
 
 sub script_piwik_site
