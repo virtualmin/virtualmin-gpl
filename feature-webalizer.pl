@@ -144,7 +144,9 @@ if ($p ne 'web') {
 	&webalizer::write_custom_logs(@custom);
 	}
 
-my $job = &find_module_cron_job("$webalizer::cron_cmd $alog");
+# Match both shell-quoted log paths and legacy commands.
+my $job = &find_module_cron_job($webalizer::cron_cmd." ".quotemeta($alog)) ||
+	  &find_module_cron_job("$webalizer::cron_cmd $alog");
 if (!$job) {
 	# Create a Cron job to process the log
 	&setup_webalizer_cron($lconf, $alog);
@@ -169,7 +171,7 @@ my $job = { 'user' => 'root',
 	    'months' => $lconf->{'months'},
 	    'weekdays' => $lconf->{'weekdays'},
 	    'special' => $lconf->{'special'},
-	    'command' => "$webalizer::cron_cmd $alog" };
+	    'command' => $webalizer::cron_cmd." ".quotemeta($alog) };
 if (!-r $webalizer::cron_cmd) {
 	&cron::create_wrapper($webalizer::cron_cmd,
 			      "webalizer", "webalizer.pl");
@@ -222,11 +224,12 @@ if ($alog ne $oldalog) {
 
 	# Change the log file path in the Cron job
 	&foreign_require("cron");
-	my ($job) = grep
-		{ $_->{'command'} eq "$webalizer::cron_cmd $oldalog" }
-		&cron::list_cron_jobs();
+	my ($job) = grep {
+		$_->{'command'} eq "$webalizer::cron_cmd $oldalog" ||
+		$_->{'command'} eq $webalizer::cron_cmd." ".quotemeta($oldalog)
+		} &cron::list_cron_jobs();
 	if ($job) {
-		$job->{'command'} = "$webalizer::cron_cmd $alog";
+		$job->{'command'} = $webalizer::cron_cmd." ".quotemeta($alog);
 		&cron::change_cron_job($job);
 		}
 
@@ -340,8 +343,10 @@ if ($d->{'deleting'}) {
  
 # Turn off cron job for webalizer config
 &foreign_require("cron");
-my ($job) = grep { $_->{'command'} eq "$webalizer::cron_cmd $alog" }
-		    &cron::list_cron_jobs();
+my ($job) = grep {
+	$_->{'command'} eq "$webalizer::cron_cmd $alog" ||
+	$_->{'command'} eq $webalizer::cron_cmd." ".quotemeta($alog)
+	} &cron::list_cron_jobs();
 if ($job) {
 	&cron::delete_cron_job($job);
         }
@@ -430,8 +435,10 @@ my $cfile = &webalizer::config_file_name($alog);
 return &text('validate_ewebalizer', "<tt>$cfile</tt>") if (!-r $cfile);
 if (!$config{'webalizer_nocron'}) {
 	&foreign_require("cron");
-	my ($job) = grep { $_->{'command'} eq "$webalizer::cron_cmd $alog" }
-			    &cron::list_cron_jobs();
+	my ($job) = grep {
+		$_->{'command'} eq "$webalizer::cron_cmd $alog" ||
+		$_->{'command'} eq $webalizer::cron_cmd." ".quotemeta($alog)
+		} &cron::list_cron_jobs();
 	return &text('validate_ewebalizercron') if (!$job);
 	}
 return undef;
@@ -522,8 +529,10 @@ else {
 	# Delete and re-create the cron job
 	&obtain_lock_cron($d);
 	&foreign_require("cron");
-	my ($job) = grep { $_->{'command'} eq "$webalizer::cron_cmd $alog" }
-			    &cron::list_cron_jobs();
+	my ($job) = grep {
+		$_->{'command'} eq "$webalizer::cron_cmd $alog" ||
+		$_->{'command'} eq $webalizer::cron_cmd." ".quotemeta($alog)
+		} &cron::list_cron_jobs();
 	if ($job) {
 		&cron::delete_cron_job($job);
 		}
