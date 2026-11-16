@@ -79,10 +79,24 @@ $d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 @dbs = &domain_databases($d);
 $d->{$type} || &usage("The specified database type is not enabled in this virtual server");
+# Extra creation options do not remove the domain database-count limit.
 if (!&master_admin()) {
-	%opts && &usage("--opt is only available to the master administrator");
+	%opts && !&api_access_can_option('create-database-options') &&
+		&usage("--opt is only available to the master administrator ".
+		       "or an API account with create-database-options permission");
 	my ($dleft) = &count_feature("dbs");
 	$dleft == 0 && &usage($text{'database_emax'});
+	}
+
+# MySQL uses these options as SQL identifiers, not quoted string values.
+if ($type eq "mysql") {
+	# These names enter SQL directly, so accept only identifier characters.
+	foreach my $opt ('charset', 'collate') {
+		if (defined($opts{$opt}) && $opts{$opt} !~ /\A[A-Za-z0-9_]+\z/) {
+			# SQL punctuation must not reach the database query.
+			&usage("Invalid MySQL $opt name");
+			}
+		}
 	}
 
 # Append prefix, if any

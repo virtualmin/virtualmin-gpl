@@ -91,6 +91,14 @@ my $dnerr = &valid_domain_name($newdomain);
 &usage($dnerr) if ($dnerr);
 $d = &get_remote_api_domain("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
+if (&is_api_access_user()) {
+	# The source must use a template and plan this API account may select.
+	&can_use_template(&get_template($d->{'template'})) &&
+	    &can_use_plan(&get_plan($d->{'plan'})) ||
+		&usage("The source template or plan is not permitted");
+	# A top-level clone is a separate customer with its own plan limits.
+	$api_access_domain = undef if (!$d->{'parent'});
+	}
 
 # Cloning creates a new virtual server, so enforce the same restrictions as
 # the user interface for non-master callers

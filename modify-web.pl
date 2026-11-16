@@ -477,10 +477,14 @@ my $phpmode_change = $mode || $rubymode || defined($children) ||
 	$subprefix || $protocols || $fix_mod_php || defined($phpmail) ||
 	defined($proxyhost) || $fixoptions;
 my $ssl_change = defined($renew) || $breakcert || $linkcert;
-my $master_change = $accesslog || $errorlog || $port || $sslport ||
-	$urlport || $sslurlport || @add_dirs || @remove_dirs || $ssl_cert ||
-	$ssl_key || $ssl_ca || $custom_phplog || $fixhtmldir || $fixoptions ||
-	$fix_mod_php;
+# Check each privileged effect independently, including direct invocations.
+my @extra_changes = (
+	[ 'logs', $accesslog || $errorlog || $custom_phplog ],
+	[ 'ports', $port || $sslport || $urlport || $sslurlport ],
+	[ 'directives', scalar(@add_dirs) || scalar(@remove_dirs) ],
+	[ 'cert-paths', $ssl_cert || $ssl_key || $ssl_ca ],
+	[ 'repair', $fixhtmldir || $fixoptions || $fix_mod_php ],
+	[ 'php-limits', $children_no_check ] );
 foreach my $d (@doms) {
 	&require_remote_api_capability($d, &can_edit_phpmode($d))
 		if ($phpmode_change);
@@ -497,8 +501,12 @@ foreach my $d (@doms) {
 		&can_edit_ssl($d) && &can_edit_dns($d)) if ($tlsa);
 	&require_remote_api_capability($d, &can_default_website($d))
 		if ($defwebsite);
-	&require_remote_api_capability($d, 0) if ($master_change);
-	&require_remote_api_capability($d, 0) if ($children_no_check);
+	# Every requested effect needs its own grant for this target domain.
+	foreach my $extra (@extra_changes) {
+		&require_remote_api_capability($d,
+			&api_access_can_option('modify-web-'.$extra->[0]))
+			if ($extra->[1]);
+		}
 	}
 if (!&master_admin() && $htmldir && $htmldir =~ /^domains(?:\/|$)/i) {
 	&usage("Document directory cannot be under the domains directory");

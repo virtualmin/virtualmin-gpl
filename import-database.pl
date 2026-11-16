@@ -2,7 +2,7 @@
 
 =head1 import-database.pl
 
-Adds an existing database to a virtual server
+Grants a virtual server access to an existing unmanaged database.
 
 This command finds a MySQL or PostgreSQL database that is not currently
 owned by any virtual server and associates it with the server specified with
@@ -12,6 +12,10 @@ The database to import is set with the C<--type> flag followed by either
 C<mysql> or C<postgres> , and the C<--name> flag followed by a database name.
 You cannot import a DB that is owned by another domain, or has a special purpose
 like the C<mysql> or C<template0> databases.
+
+For API accounts, this is a server-wide command because the source database
+is outside Virtualmin's domain permissions. The destination must still be
+an allowed virtual server.
 
 =cut
 

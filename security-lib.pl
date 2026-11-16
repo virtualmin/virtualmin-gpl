@@ -3,7 +3,19 @@ use feature 'state';
 use Fcntl ':mode';
 use IO::Handle;
 
-# Functions for accessing files and running commands as a domain owner
+# Permission checks, plus file access and command execution as a domain owner.
+
+# acl_list_contains(list, value, [allow-all])
+# Checks exact, case-sensitive entries in a whitespace-separated string.
+# allow-all defaults to false. When true, * matches any nonempty value, even
+# alongside other entries. Empty or undefined values never match.
+sub acl_list_contains
+{
+my ($list, $value, $all) = @_;
+# Keep template ID 0 valid; only undefined or empty values are missing.
+return 0 if (!defined($value) || $value eq '');
+return scalar(grep { $_ eq $value || $all && $_ eq '*' } split(/\s+/, $list));
+}
 
 # has_domain_user(&domain)
 # Returns 1 if some domain has a Unix user

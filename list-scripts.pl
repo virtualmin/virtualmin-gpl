@@ -115,8 +115,10 @@ foreach my $d (@doms) {
 				}
 			if ($sinfo->{'user'}) {
 				print "    Initial login: $sinfo->{'user'}\n";
+				# Application passwords need a separate grant.
 				print "    Initial password: $sinfo->{'pass'}\n"
-					if (&master_admin());
+					if (&master_admin() ||
+						&api_access_can_option('list-scripts-secrets'));
 				}
 			if ($script->{'site'}) {
 				print "    Website: @{[&script_link($script->{'site'}, undef, 2)]}\n";

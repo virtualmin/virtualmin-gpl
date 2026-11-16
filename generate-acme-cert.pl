@@ -159,10 +159,12 @@ $d = &get_remote_api_domain("dom", $dname);
 $d || &usage("No virtual server named $dname found");
 $d->{'ssl_same'} && &usage("This server shares it's SSL certificate ".
 			   "with another domain");
-# Only the master administrator can enable notifications to the master
-if (!&master_admin() && defined($email_master)) {
-	&usage("Master administrator notifications can only be changed by ".
-	       "the master administrator");
+# Changing renewal emails sent to the master admin needs its own API grant
+if (!&master_admin() && defined($email_master) &&
+    !&api_access_can_option('generate-acme-cert-email-master')) {
+	&usage("Using --email-master or --no-email-master requires ".
+	       "master administrator access or the ".
+	       "generate-acme-cert-email-master permission");
 	}
 if ($ctype =~ /^ec/) {
 	&letsencrypt_supports_ec() ||

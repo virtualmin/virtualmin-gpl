@@ -191,8 +191,11 @@ while(@ARGV > 0) {
 defined($mode{'spam'}) || defined($mode{'virus'}) || $spam_client ||
     $virus_scanner || defined($auto) || defined($spamlevel) ||
     defined($spamtrap) || &usage("Nothing to do");
+# Scanner changes can interrupt filtering and need their own API grant.
 !&master_admin() && ($spam_client || $virus_scanner) &&
-	&usage("Spam and virus scanning clients can only be changed by the master administrator");
+    !&api_access_can_option('modify-spam-scanners') &&
+	&usage("Changing spam and virus scanners requires the master administrator ".
+	       "or modify-spam-scanners permission");
 
 # Get domains to update
 if ($all_doms) {

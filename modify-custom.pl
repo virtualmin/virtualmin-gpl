@@ -74,7 +74,9 @@ $domain && @set || &usage("No domain or fields to set specified");
 $dom = &get_remote_api_domain("dom", $domain);
 $dom || usage("Virtual server $domain does not exist.");
 !&master_admin() && $allow_missing &&
-	&usage("--allow-missing is only available to the master administrator");
+    !&api_access_can_option('modify-custom-admin-fields') &&
+	&usage("--allow-missing requires the master administrator ".
+	       "or modify-custom-admin-fields permission");
 $old = { %$dom };
 
 # Run the before script
@@ -90,7 +92,14 @@ foreach $f (@set) {
 			  $_->{'desc'} eq $f->[0] } @fields;
 	$field || $allow_missing ||
 		&usage("No custom field named $f->[0] exists");
+	# Undefined names become configuration keys and must not add entries.
+	if (!$field && $f->[0] =~ /[\s=\0]/) {
+		# Separators could inject another domain setting.
+		&usage("Invalid custom field name");
+		}
+	# Administrator fields may feed root hooks or server-wide templates.
 	!$field || &master_admin() || $field->{'visible'} == 0 ||
+		&api_access_can_option('modify-custom-admin-fields') ||
 		&usage("Custom field $f->[0] cannot be edited by domain owners");
 	$dom->{'field_'.($field->{'name'} || $f->[0])} = $f->[1];
 	}

@@ -81,7 +81,8 @@ else {
 if (!@types) {
 	@types = @alltypes;
 	}
-if (!&master_admin()) {
+# Default listings include keys, so filter them even without a key flag.
+if (!&master_admin() && !&api_access_can_option('list-certs-private-keys')) {
 	@types = grep { $_ ne 'key' && $_ ne 'newkey' } @types;
 	@types || &usage("Private keys cannot be retrieved by domain owners");
 	}

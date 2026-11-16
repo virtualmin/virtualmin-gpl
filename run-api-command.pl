@@ -59,6 +59,15 @@ if (!$module_name) {
 	}
 &require_mail();
 
+if (&is_api_access_user()) {
+	# Use the batch runner that retains the caller's permissions. The Unix
+	# CLI wrapper would lose the API account's restrictions.
+	eval { &run_api_access_batch(\@ARGV); };
+	# Return a failure status for denied commands or failed children.
+	print $@ if ($@);
+	exit($@ ? 1 : 0);
+	}
+
 # Parse command-line args
 $owner = 1;
 @allplans = &list_plans();

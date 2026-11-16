@@ -365,7 +365,9 @@ if ($multiline) {
 		print "    Mailbox username prefix: $d->{'prefix'}\n";
 		print "    Password storage: ",
 		      ($d->{'hashpass'} ? "Hashed" : "Plain text"),"\n";
-		if (&master_admin()) {
+		# Listing a domain does not grant password access.
+		if (&master_admin() ||
+			&api_access_can_option('list-domains-secrets')) {
 			if ($d->{'pass'}) {
 				print "    Password: $d->{'pass'}\n";
 				}
@@ -380,7 +382,10 @@ if ($multiline) {
 				print "    Username for ${f}: $u\n";
 				}
 			my $pfunc = "${f}_pass";
-			if (&master_admin() && defined(&$pfunc)) {
+			# Database passwords need the same secrets grant.
+			if ((&master_admin() ||
+				&api_access_can_option('list-domains-secrets')) &&
+			    defined(&$pfunc)) {
 				my $p = &$pfunc($d);
 				print "    Password for ${f}: $p\n";
 				}

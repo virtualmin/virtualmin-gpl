@@ -148,7 +148,9 @@ foreach $d (@doms) {
 				}
 			$pass = $u->{'pass'};
 			$disable = ($pass =~ s/^\!// ? 1 : 0);
-			if (&master_admin()) {
+			# Password hashes need more than list access.
+			if (&master_admin() ||
+				&api_access_can_option('list-users-secrets')) {
 				if (defined($u->{'plainpass'})) {
 					print "    Password: ",$u->{'plainpass'},"\n";
 					}

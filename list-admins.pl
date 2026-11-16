@@ -53,7 +53,9 @@ if ($multiline) {
 			print "    Email: $admin->{'email'}\n";
 			}
 		print "    Base username: $admin->{'origname'}\n";
-		print "    Password: $admin->{'pass'}\n" if (&master_admin());
+		# Ordinary listings must not expose administrator credentials.
+		print "    Password: $admin->{'pass'}\n" if (&master_admin() ||
+			&api_access_can_option('list-admins-secrets'));
 		print "    Create servers: ",($admin->{'create'} ? "Yes" : "No"),"\n";
 		print "    Rename servers: ",($admin->{'norename'} ? "No" : "Yes"),"\n";
 		print "    Configure features: ",($admin->{'features'} ? "Yes" : "No"),"\n";
