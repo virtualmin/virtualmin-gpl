@@ -403,7 +403,7 @@ if ($features{'mysql'} && $mods{'mysql'}) {
 		    'user' => &mysql_user($d),
 		    'pass' => &mysql_pass($d),
 		    'buser' => $d->{'user'},
-		    'bpath' => "/" );
+		    'bpath' => &resolve_links($d->{'home'}) );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, $mymod)
 		if (!$hasmods{$mymod});
 	}
@@ -427,7 +427,9 @@ if ($features{'postgres'} && $mods{'postgres'}) {
 		    'pass' => &postgres_pass($d, 1),
 		    'sameunix' => 1,
 		    'backup' => 0,
-		    'restore' => 0 );
+		    'restore' => 0,
+		    'buser' => $d->{'user'},
+		    'bpath' => &resolve_links($d->{'home'}) );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "postgresql")
 		if (!$hasmods{'postgresql'});
 	}
