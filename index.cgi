@@ -260,8 +260,8 @@ if (&can_stop_servers()) {
 				&ui_hidden("feature", $status->{'feature'}).
 				&ui_hidden("id", $status->{'id'}),
 				undef,
-				$status->{'status'} ? "<img src=images/up.gif>"
-					: "<img src=images/down.gif>");
+				&ui_img($status->{'status'} ? "images/up.gif"
+							    : "images/down.gif"));
 			}
 		print &ui_buttons_end();
 		}

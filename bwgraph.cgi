@@ -170,12 +170,12 @@ if ($max) {
 
 			# Show limit, or grey box if unlimited
 			if ($d->{'bw_limit'}) {
-				printf "<img src=images/red.gif width=%s height=10>\n",
-					int($width*$d->{'bw_limit'}/$max)+1;
+				print &bandwidth_image("red",
+					int($width*$d->{'bw_limit'}/$max)+1), "\n";
 				}
 			else {
-				printf "<img src=images/grey.gif width=%s height=10>\n",
-					$width;
+				print &bandwidth_image("grey",
+					$width), "\n";
 				}
 
 			# Show usage by feature
@@ -213,8 +213,8 @@ if ($max) {
 					next;
 					}
 
-				printf "<img src=images/white.gif width=%s height=10>",
-					int($width*$space/$max);
+				print &bandwidth_image("white",
+					int($width*$space/$max));
 				&usage_colours($sd, $in{'mode'} ? \%fusage_only
 							        : \%fusage);
 				print "</td>\n";
@@ -264,8 +264,8 @@ if ($max) {
 								@bands);
 				$usage += $fusage;
 				if ($fusage) {
-					printf "<img src=images/usage-$f.gif width=%s height=10>",
-						int($width*$fusage/$max)+($f eq "web" ? 1 : 0);
+					print &bandwidth_image("usage-$f",
+						int($width*$fusage/$max)+($f eq "web" ? 1 : 0));
 					$donecolour{$f} += $fusage;
 					}
 				}
@@ -332,8 +332,8 @@ if ($max) {
 					$istart[$i], $iend[$i], $f, @bands);
 				$usage += $fusage;
 				if ($fusage) {
-					printf "<img src=images/usage-$f.gif width=%s height=10>",
-						int($width*$fusage/$max)+($f eq "web" ? 1 : 0);
+					print &bandwidth_image("usage-$f",
+						int($width*$fusage/$max)+($f eq "web" ? 1 : 0));
 					$donecolour{$f} += $fusage;
 					}
 				}
@@ -349,8 +349,7 @@ if ($max) {
 	print "<br>\n";
 	foreach $f (@bandwidth_features) {
 		if ($donecolour{$f}) {
-			print "<img src=images/usage-$f.gif ",
-			      "width=10 height=10>\n";
+			print &bandwidth_image("usage-$f", 10), "\n";
 			my $label = $text{'bandwidth_'.$f} ||
 				       $text{'feature_'.$f};
 			print $label," (",
@@ -406,6 +405,14 @@ if (&can_edit_templates() && $in{'dom'}) {
 push(@rets, "", $text{'index_return'});
 &ui_print_footer(@rets);
 
+# bandwidth_image(name, width)
+# Returns a graph segment with its width in pixels.
+sub bandwidth_image
+{
+my ($name, $width) = @_;
+return &ui_img("images/$name.gif", "", "", undef, "width=$width height=10");
+}
+
 # usage_colours(&domain, &usage)
 sub usage_colours
 {
@@ -414,14 +421,14 @@ my ($f, $total);
 foreach $f (@bandwidth_features) {
 	my $fusage = $usage->{$f}->{$d->{'id'}};
 	if ($fusage) {
-		printf "<img src=images/usage-$f.gif width=%s height=10>",
-			int($width*$fusage/$max)+($f eq "web" ? 1 : 0);
+		print &bandwidth_image("usage-$f",
+			int($width*$fusage/$max)+($f eq "web" ? 1 : 0));
 		$donecolour{$f} += $fusage;
 		$total += $fusage;
 		}
 	}
 if (!$total) {
-	print "<img src=images/usage-web.gif width=1 height=10>";
+	print &bandwidth_image("usage-web", 1);
 	}
 }
 
