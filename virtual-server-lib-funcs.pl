@@ -5777,6 +5777,10 @@ sub set_server_quotas
 my ($d, $uquota, $quota) = @_;
 $uquota = $d->{'uquota'} if (!defined($uquota));
 $quota = $d->{'quota'} if (!defined($quota));
+# Feature restores may try to re-enable limits before the restore is complete.
+if ($restore_quotas_disabled{$d->{'id'}}) {
+	$uquota = $quota = 0;
+	}
 my $tmpl = &get_template($d->{'template'});
 # Btrfs enforces owner and whole-server limits on separate qgroups.
 if (&has_btrfs_quotas()) {
