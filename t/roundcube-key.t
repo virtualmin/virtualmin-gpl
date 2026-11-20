@@ -71,6 +71,70 @@ $config['db_dsnw'] = 'mysql://roundcube:pass@localhost/roundcubemail';
 $config['des_key'] = 'rcmail-!24ByteDESkey*Str';
 PHP
 
+subtest 'Fresh installs and repeat upgrades' => sub {
+	my @keys;
+	for my $version ('1.6.21', '1.7.6') {
+		my ($opts, $file) = fixture($sample);
+		my ($ok, $msg) = install($version, $opts);
+		is($ok, 1, "$version installation succeeds") || diag($msg);
+		my $saved = read_config($file);
+		my ($key) = $saved =~ /\['des_key'\] = '([^']+)';/;
+		like($key, qr/\A[A-Za-z0-9]{24}\z/, 'saved key has the required format');
+		push(@keys, $key);
+		my $before_writes = $writes;
+		($ok, $msg) = install($version, $opts, 1);
+		is($ok, 1, 'upgrade succeeds');
+		is(read_config($file), $saved, 'upgrade preserves the generated key');
+		is($writes, $before_writes, 'custom configuration is not rewritten');
+		unlike($msg, qr/must sign in again/, 'no rotation notice for a preserved key');
+		}
+	isnt($keys[0], $keys[1], 'fresh installations receive different keys');
+	};
+
+subtest 'Upgrades replace only literal sample keys' => sub {
+	for my $case (
+		[ $sample, 0 ],
+		[ qq{<?php\n  \$config [ "des_key" ] = "rcmail-!24ByteDESkey*Str"; // keep\n}, 0 ],
+		[ $sample =~ s/\$config/\$rcmail_config/gr, 1 ],
+		[ $sample.q{$config['des_key'] = 'rcmail-!24ByteDESkey*Str';}."\n", 0 ],
+		) {
+		my ($opts, $file) = fixture($case->[0], 1, $case->[1]);
+		my $before = $generations;
+		my ($ok, $msg) = install('1.7.6', $opts, 1);
+		is($ok, 1, 'sample-key upgrade succeeds') || diag($msg);
+		is($generations, $before + 1, 'one key is generated for the installation');
+		my $saved = read_config($file);
+		my @keys = $saved =~ /['"]des_key['"]\s*\]\s*=\s*['"]([A-Za-z0-9]{24})['"]/g;
+		ok(@keys, 'upgrade writes a 24-character key');
+		my $expected = $case->[0];
+		$expected =~ s/rcmail-!24ByteDESkey\*Str/$keys[0]/g;
+		is($saved, $expected, 'all other config bytes are preserved');
+		like($msg, qr/must sign in again/, 'upgrade explains session invalidation');
+		install('1.7.6', $opts, 1);
+		is(read_config($file), $saved, 'a later upgrade does not rotate it again');
+		}
+	for my $key ("'custom-owner-key-1234567'", 'getenv("ROUNDCUBE_KEY")',
+		     "'rcmail-!24ByteDESkey*Str-custom'") {
+		my $config = $sample;
+		$config =~ s/'rcmail-!24ByteDESkey\*Str'/$key/;
+		my ($opts, $file) = fixture($config, 1);
+		install('1.7.6', $opts, 1);
+		is(read_config($file), $config, 'custom key or expression is preserved');
+		}
+	};
+
+subtest 'Older Webmin without the secure randomness API' => sub {
+	local *main::secure_random_bytes;
+	local *WebminCore::secure_random_bytes;
+	for my $upgrade (0, 1) {
+		my ($opts, $file) = fixture($sample, $upgrade);
+		my ($ok, $msg) = install('1.7.6', $opts, $upgrade);
+		is($ok, 1, 'installation or upgrade succeeds without the new API') || diag($msg);
+		like(read_config($file), qr/\['des_key'\] = '[A-Za-z0-9]{24}';/,
+			'the sample key is replaced using the existing generator');
+		}
+	};
+
 subtest 'Updater failures stop the upgrade' => sub {
 	for my $output ("Update failed: <database>& error\n", '') {
 		my ($opts, $file) = fixture($sample, 1);
