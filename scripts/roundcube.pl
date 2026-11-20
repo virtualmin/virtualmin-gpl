@@ -71,7 +71,7 @@ return ([ 'memory_limit', '64M', '+' ],
 
 sub script_roundcube_release
 {
-return 8;	# Fix Nginx alias trailing slash
+return 9;	# Fix shared Roundcube encryption key
 }
 
 sub script_roundcube_php_fullver
@@ -309,6 +309,10 @@ if (!$upgrade) {
 	&copy_source_dest_as_domain_user($d, $mcfileorig, $mcfile);
 	my $lref = &read_file_lines_as_domain_user($d, $mcfile);
 	foreach my $l (@$lref) {
+		if ($l =~ /^\$(rcmail_config|config)\['des_key'\]\s*=/) {
+			$l = "\$${1}['des_key'] = '".
+			     &substitute_pattern('[A-Za-z0-9]{24}')."';";
+			}
 		if ($l =~ /^\$(rcmail_config|config)\['enable_caching'\]\s+=/) {
 			$l = "\$${1}['enable_caching'] = FALSE;";
 			}
