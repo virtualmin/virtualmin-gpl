@@ -363,10 +363,12 @@ if (!$upgrade) {
 			   "<tt>$out</tt>.");
 	}
 else {
-	# Run update script
+	# Stop on updater failure before changing config or recording success.
 	my $php_bin = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
-	my $upd_cmd = "$php_bin $opts->{'dir'}/bin/update.sh -v $upgrade->{'version'} -y";
-	&run_as_domain_user($d, $upd_cmd);
+	my $upd_cmd = "$php_bin $opts->{'dir'}/bin/update.sh -v $upgrade->{'version'} -y 2>&1";
+	($out, $ex) = &run_as_domain_user($d, $upd_cmd);
+	return (0, "Failed to run RoundCube update script : <pre>".
+		   &html_escape($out)."</pre>") if ($ex);
 	}
 
 # Add an alias to the public_html sub-dir for version 1.7.0+
