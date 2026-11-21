@@ -77,7 +77,6 @@ if ($max) {
 	print &ui_links_row(\@links),"<p>\n";
 
 	# Show table
-	$width = 500;
 	print "<table width=100%>\n";
 	if ($in{'mode'} == 0 || $in{'mode'} == 1 || $in{'mode'} == 4) {
 		# By domain .. start by computing usage for the selected
@@ -139,7 +138,7 @@ if ($max) {
 		# Show the table of domains
 		if (@doms) {
 			print "<tr> <td><b>$text{'newbw_dom'}</b></td>\n";
-			print "<td><b>",&text('edit_bwpast_'.$config{'bw_past'},
+			print "<td width=60%><b>",&text('edit_bwpast_'.$config{'bw_past'},
 			      $text{'newbw_graph'}, $config{'bw_period'}),
 			      "</b></td>\n";
 			print "<td><b>$text{'newbw_glimit'}</b></td>\n";
@@ -168,20 +167,15 @@ if ($max) {
 				next;
 				}
 
-			# Show limit, or grey box if unlimited
-			if ($d->{'bw_limit'}) {
-				print &bandwidth_image("red",
-					int($width*$d->{'bw_limit'}/$max)+1), "\n";
-				}
-			else {
-				print &bandwidth_image("grey",
-					$width), "\n";
-				}
+			# Show limit, or a full grey bar if unlimited
+			print &bandwidth_bar($d->{'bw_limit'} ?
+				{ 'value' => $d->{'bw_limit'}, 'state' => 'danger' } :
+				{ 'pct' => 100, 'series' => 6 });
 
-			# Show usage by feature
+			# Show usage by feature, on a line of its own
 			print "<br>";
-			&usage_colours($d, $in{'mode'} ? \%fusage_only
-						       : \%fusage);
+			print &bandwidth_bar(&usage_segments($d,
+				$in{'mode'} ? \%fusage_only : \%fusage));
 
 			print "</td>\n";
 			print "<td>\n";
@@ -213,10 +207,11 @@ if ($max) {
 					next;
 					}
 
-				print &bandwidth_image("white",
-					int($width*$space/$max));
-				&usage_colours($sd, $in{'mode'} ? \%fusage_only
-							        : \%fusage);
+				# Start where the servers above it left off
+				print &bandwidth_bar(
+					{ 'value' => $space, 'empty' => 1 },
+					&usage_segments($sd,
+						$in{'mode'} ? \%fusage_only : \%fusage));
 				print "</td>\n";
 				print "<td></td>\n";
 				print "<td>",&nice_size($usage_only{$sd->{'id'}}),"</td>\n";
@@ -228,7 +223,7 @@ if ($max) {
 	elsif ($in{'mode'} == 2) {
 		# By date, for current billing period
 		print "<tr> <td><b>$text{'newbw_date'}</b></td>\n";
-		print "<td><b>$text{'newbw_dusage'}</b></td>\n";
+		print "<td width=70%><b>$text{'newbw_dusage'}</b></td>\n";
 		print "<td><b>$text{'newbw_gusage'}</b></td>\n";
 		print "</tr>\n";
 
@@ -259,16 +254,17 @@ if ($max) {
 			print "<td>",&make_date($i*24*60*60, 1),"</td>\n";
 			print "<td>";
 			my $usage = 0;
+			my @segs;
 			foreach $f (@bandwidth_features) {
 				my $fusage = &usage_for_days($i, $i, $f,
 								@bands);
 				$usage += $fusage;
 				if ($fusage) {
-					print &bandwidth_image("usage-$f",
-						int($width*$fusage/$max)+($f eq "web" ? 1 : 0));
+					push(@segs, &bandwidth_segment($f, $fusage));
 					$donecolour{$f} += $fusage;
 					}
 				}
+			print &bandwidth_bar(@segs);
 			print "</td>";
 			print "<td>",&nice_size($usage),"</td>\n";
 			print "</tr>\n";
@@ -277,7 +273,7 @@ if ($max) {
 	elsif ($in{'mode'} == 3) {
 		# By month
 		print "<tr> <td><b>$text{'newbw_month'}</b></td>\n";
-		print "<td><b>$text{'newbw_dusage'}</b></td>\n";
+		print "<td width=70%><b>$text{'newbw_dusage'}</b></td>\n";
 		print "<td><b>$text{'newbw_gusage'}</b></td>\n";
 		print "</tr>\n";
 
@@ -327,16 +323,17 @@ if ($max) {
 			print "<td>",strftime("%m/%Y", @tm),"</td>\n";
 			print "<td>";
 			my $usage = 0;
+			my @segs;
 			foreach $f (@bandwidth_features) {
 				my $fusage = &usage_for_days(
 					$istart[$i], $iend[$i], $f, @bands);
 				$usage += $fusage;
 				if ($fusage) {
-					print &bandwidth_image("usage-$f",
-						int($width*$fusage/$max)+($f eq "web" ? 1 : 0));
+					push(@segs, &bandwidth_segment($f, $fusage));
 					$donecolour{$f} += $fusage;
 					}
 				}
+			print &bandwidth_bar(@segs);
 			print "</td>";
 			print "<td>",&nice_size($usage),"</td>\n";
 			print "</tr>\n";
@@ -345,16 +342,26 @@ if ($max) {
 
 	print "</table>\n";
 
-	# Show colour keys
-	print "<br>\n";
-	foreach $f (@bandwidth_features) {
-		if ($donecolour{$f}) {
-			print &bandwidth_image("usage-$f", 10), "\n";
-			my $label = $text{'bandwidth_'.$f} ||
-				       $text{'feature_'.$f};
-			print $label," (",
-			      &nice_size($donecolour{$f}),")\n";
+	# Show what each color stands for, on one bar of the totals
+	my @keys = grep { $donecolour{$_} } @bandwidth_features;
+	if (@keys) {
+		my $all = 0;
+		$all += $donecolour{$_} foreach (@keys);
+		my @segs;
+		foreach $f (@keys) {
+			# A theme can return a size as HTML, so the label and
+			# the total are passed as HTML too
+			my $seg = &bandwidth_segment($f, $donecolour{$f});
+			$seg->{'label_html'} = ($text{'bandwidth_'.$f} ||
+						$text{'feature_'.$f})." (".
+					       &nice_size($donecolour{$f}).")";
+			push(@segs, $seg);
 			}
+		print "<br>\n";
+		print &ui_progress(undef, { 'max' => $all,
+					    'label' => $text{'newbw_gusage'},
+					    'value_html' => &nice_size($all),
+					    'segments' => \@segs });
 		}
 	print "<br>\n";
 
@@ -405,31 +412,44 @@ if (&can_edit_templates() && $in{'dom'}) {
 push(@rets, "", $text{'index_return'});
 &ui_print_footer(@rets);
 
-# bandwidth_image(name, width)
-# Returns a graph segment with its width in pixels.
-sub bandwidth_image
+# bandwidth_bar(&segment, ...)
+# Returns a bar made of the given segments, each sized against the largest
+# usage or limit shown on the page
+sub bandwidth_bar
 {
-my ($name, $width) = @_;
-return &ui_img("images/$name.gif", "", "", undef, "width=$width height=10");
+my (@segs) = @_;
+return &ui_progress(undef, { 'small' => 1, 'max' => $max,
+			     'segments' => \@segs });
 }
 
-# usage_colours(&domain, &usage)
-sub usage_colours
+# bandwidth_segment(feature, bytes)
+# Returns the bar segment for the traffic of one feature. Each feature that
+# counts traffic has a color of its own, and features from plugins share one.
+sub bandwidth_segment
+{
+my ($f, $bytes) = @_;
+my %series = ( 'web' => 1, 'mail' => 2, 'ftp' => 3, 'unix' => 4,
+	       'backup' => 5, 'restore' => 6 );
+return { 'value' => $bytes,
+	 $series{$f} ? ( 'series' => $series{$f} )
+		     : ( 'state' => 'neutral' ) };
+}
+
+# usage_segments(&domain, &usage)
+# Returns the bar segments for a domain's traffic by feature, and adds that
+# traffic to the totals shown with the color key
+sub usage_segments
 {
 my ($d, $usage) = @_;
-my ($f, $total);
-foreach $f (@bandwidth_features) {
+my @segs;
+foreach my $f (@bandwidth_features) {
 	my $fusage = $usage->{$f}->{$d->{'id'}};
 	if ($fusage) {
-		print &bandwidth_image("usage-$f",
-			int($width*$fusage/$max)+($f eq "web" ? 1 : 0));
+		push(@segs, &bandwidth_segment($f, $fusage));
 		$donecolour{$f} += $fusage;
-		$total += $fusage;
 		}
 	}
-if (!$total) {
-	print &bandwidth_image("usage-web", 1);
-	}
+return @segs;
 }
 
 # minimum_day(&bandwidth)
