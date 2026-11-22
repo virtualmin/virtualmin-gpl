@@ -332,9 +332,9 @@ my ($textid, $upper, $class) = @_;
 # theme that does not set these variables
 my $styles = "font-size: 10px;";
    $styles .= "font-weight: bold;";
-   $styles .= "background-color: var(--bg-color-neutral, #bdbdbd);";
+   $styles .= "background-color: var(--bg-color-neutral, #bdbdbd77);";
    $styles .= "border-radius: 50px;";
-   $styles .= "border: 0.5px solid var(--border-color-darker);";
+   $styles .= "border: 0.75px solid var(--border-color-darker, #999);";
    $styles .= "color: var(--text-color-neutral-stressed, #fff);";
    $styles .= "line-height: inherit;";
    $styles .= "margin: 0 5px 0 10px;";
