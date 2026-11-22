@@ -2519,7 +2519,8 @@ my @confs = &list_php_fpm_configs();
 if ($ver) {
 	# Start specific version
 	my ($fpm) = grep { $_->{'version'} eq $ver } @confs;
-	return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
+	return "Invalid version ".&html_escape($ver)
+		if (!$fpm || !$fpm->{'init'});
 	&foreign_require("init");
 	my ($ok, $err) = &init::start_action($fpm->{'init'});
 	return $ok ? undef : $err;
@@ -2544,7 +2545,8 @@ my @confs = &list_php_fpm_configs();
 if ($ver) {
 	# Stop specific version
 	my ($fpm) = grep { $_->{'version'} eq $ver } @confs;
-	return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
+	return "Invalid version ".&html_escape($ver)
+		if (!$fpm || !$fpm->{'init'});
 	&foreign_require("init");
 	my ($ok, $err) = &init::stop_action($fpm->{'init'});
 	return $ok ? undef : $err;
@@ -2569,7 +2571,8 @@ my @confs = &list_php_fpm_configs();
 if ($ver) {
 	# Restart one specific version
 	my ($fpm) = grep { $_->{'version'} eq $ver } @confs;
-	return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
+	return "Invalid version ".&html_escape($ver)
+		if (!$fpm || !$fpm->{'init'});
 	&foreign_require("init");
 	my ($ok, $err) = &init::reload_action($fpm->{'init'});
 	if (!$ok && $err =~ /Not\s+implemented/i) {
