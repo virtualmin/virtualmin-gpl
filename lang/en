@@ -8787,6 +8787,8 @@ acme_eemail=Missing or invalid-looking email address
 
 readonly_mode=The ability to make changes is disabled for your system at the moment. This mode is typically enabled manually by an administrator.
 
+monitor_service=Virtualmin service
+monitor_eservice=No available Virtualmin service selected
 monitor_validate=Validate Virtualmin Domains
 monitor_doms=Domains to check
 monitor_edoms=No domains to check selected
