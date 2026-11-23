@@ -849,9 +849,9 @@ if ($cf == 4) {
 	}
 else {
 	my $comp = $cf == 1 ? &get_gunzip_command()." -c" :
-		      $cf == 2 ? "uncompress -c" :
-		      $cf == 3 ? &get_bunzip2_command()." -c" :
-		      $cf == 6 ? &get_unzstd_command() : "cat";
+		   $cf == 2 ? "uncompress -c" :
+		   $cf == 3 ? &get_bunzip2_command()." -c" :
+		   $cf == 6 ? &get_unzstd_command() : "cat";
 	my $tarcmd = &make_tar_command("xvfX", "-", $xtemp);
 	my $reader = $catter." | ".$comp;
 	if ($asd) {
