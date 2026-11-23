@@ -324,58 +324,6 @@ if (!$data->{'noupdates'} && $hasvposs && $canvposs && @vposs) {
 		    'veto_module' => 'server-manager' });
 	}
 
-# Status of various servers
-if (!$data->{'nostatus'} && $info->{'startstop'} &&
-    &can_stop_servers()) {
-	my @ss = @{$info->{'startstop'}};
-	my @down = grep { !$_->{'status'} } @ss;
-	my @table;
-	my $idir = &get_webprefix_safe() . '/'.$module_name.'/images';
-	foreach my $status (@ss) {
-		# Work out label, possibly with link
-		my $label;
-		foreach my $l (@{$status->{'links'}}) {
-			if ($l->{'manage'}) {
-				$label = &ui_link(&get_webprefix_safe() . $l->{'link'},
-						  $status->{'name'});
-				}
-			}
-		$label ||= $status->{'name'};
-
-		# Stop / start icon
-		my $action = ($status->{'status'} ? "stop_feature.cgi" :
-			      "start_feature.cgi");
-		my $action_icon = ($status->{'status'} ?
-		   "<img src='$idir/stop.png' alt='$status->{'desc'}' />" :
-		   "<img src='$idir/start.png' alt='$status->{'desc'}' />");
-		my $action_link = "<a href='@{[&get_webprefix_safe()]}/$module_name/$action?".
-		   "feature=$status->{'feature'}&id=$status->{'id'}'".
-		   " title='$status->{'desc'}'>".
-		   "$action_icon</a>";
-
-		# Restart link 
-		my $restart_link_style = $status->{'status'} ? "" : "style='visibility: hidden; pointer-events: none;' ";
-		my $restart_link =
-		     "<a ${restart_link_style}href='@{[&get_webprefix_safe()]}/$module_name/restart_feature.cgi?".
-		     "feature=$status->{'feature'}&id=$status->{'id'}'".
-		     " title='$status->{'restartdesc'}'>".
-		     "<img src='$idir/reload.png'".
-		     "alt='$status->{'restartdesc'}'></a>\n";
-
-		push(@table, { 'desc' => "&nbsp;".
-				  (!$status->{'status'} ?
-				  "<img src='$idir/down.gif' alt='Stopped'>" :
-				  "<img src='$idir/up.gif' alt='Running'>").
-					"&nbsp;&nbsp;$label",
-			       'value' => $action_link."&nbsp;".$restart_link });
-		}
-	push(@rv, { 'type' => 'table',
-		    'id' => 'status',
-		    'desc' => $text{'right_statusheader'},
-		    'open' => @down ? 1 : 0,
-		    'table' => \@table });
-	}
-
 # New features
 if ($data->{'dom'}) {
 	$defdom = &get_domain($data->{'dom'});

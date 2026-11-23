@@ -35,8 +35,9 @@ elsif ($in{'redirect'}) {
 	&redirect($in{'redirect'});
 	}
 else {
+	# Use the referrer's local path so themes can track the return page
 	&run_post_actions_silently();
-	&redirect($ENV{'HTTP_REFERER'});
+	&redirect(&get_referer_relative());
 	}
 
 

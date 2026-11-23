@@ -3579,8 +3579,8 @@ return "&nbsp;&nbsp;" .
 }
 
 # startstop_fpm()
-# Returns a hash containing the current status of the PHP-FPM services and short
-# and long descriptions for the action to switch statuses
+# Returns PHP-FPM service hashrefs with status and action labels. The init
+# name identifies each monitor; the version remains the action ID.
 sub startstop_fpm
 {
 return () if (!&domain_has_website());	# No website feature enabled
@@ -3596,6 +3596,7 @@ foreach my $fpm (&list_php_fpm_configs()) {
 		push(@rv, { 'status' => 1,
 			    'feature' => 'fpm',
 			    'id' => $fpm->{'version'},
+			    'init' => $fpm->{'init'},
 			    'name' => &text('index_fpmname', $fpm->{'version'}),
 			    'desc' => $text{'index_fpmstop'},
 			    'restartdesc' => $text{'index_fpmrestart'},
@@ -3607,6 +3608,7 @@ foreach my $fpm (&list_php_fpm_configs()) {
 		push(@rv, { 'status' => 0,
 			    'feature' => 'fpm',
 			    'id' => $fpm->{'version'},
+			    'init' => $fpm->{'init'},
 			    'name' => &text('index_fpmname', $fpm->{'version'}),
 			    'desc' => $text{'index_fpmstart'},
 			    'longdesc' => &text('index_fpmstartdesc',

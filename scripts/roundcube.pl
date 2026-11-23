@@ -71,7 +71,7 @@ return ([ 'memory_limit', '64M', '+' ],
 
 sub script_roundcube_release
 {
-return 8;	# Fix Nginx alias trailing slash
+return 10;	# Replace sample encryption keys on upgrades
 }
 
 sub script_roundcube_php_fullver
@@ -243,6 +243,10 @@ sub script_roundcube_install
 {
 my ($d, $version, $opts, $files, $upgrade) = @_;
 my ($out, $ex);
+my $keychanged = 0;
+
+# Generate a key for fresh installs or replacement of the sample key.
+my $deskey = &substitute_pattern('[A-Za-z0-9]{24}');
 
 # Create and get DB
 if ($opts->{'newdb'} && !$upgrade) {
@@ -309,6 +313,9 @@ if (!$upgrade) {
 	&copy_source_dest_as_domain_user($d, $mcfileorig, $mcfile);
 	my $lref = &read_file_lines_as_domain_user($d, $mcfile);
 	foreach my $l (@$lref) {
+		if ($l =~ /^\$(rcmail_config|config)\['des_key'\]\s*=/) {
+			$l = "\$${1}['des_key'] = '$deskey';";
+			}
 		if ($l =~ /^\$(rcmail_config|config)\['enable_caching'\]\s+=/) {
 			$l = "\$${1}['enable_caching'] = FALSE;";
 			}
@@ -359,10 +366,24 @@ if (!$upgrade) {
 			   "<tt>$out</tt>.");
 	}
 else {
-	# Run update script
+	# Stop on updater failure before changing config or recording success.
 	my $php_bin = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
-	my $upd_cmd = "$php_bin $opts->{'dir'}/bin/update.sh -v $upgrade->{'version'} -y";
-	&run_as_domain_user($d, $upd_cmd);
+	my $upd_cmd = "$php_bin $opts->{'dir'}/bin/update.sh -v $upgrade->{'version'} -y 2>&1";
+	($out, $ex) = &run_as_domain_user($d, $upd_cmd);
+	return (0, "Failed to run RoundCube update script : <pre>".
+		   &html_escape($out)."</pre>") if ($ex);
+
+	# Replace the known sample key while preserving custom keys.
+	my $mcfile = "$opts->{'dir'}/config/config.inc.php";
+	$mcfile = "$opts->{'dir'}/config/main.inc.php" if (!-r $mcfile);
+	my $lref = &read_file_lines_as_domain_user($d, $mcfile);
+	foreach my $l (@$lref) {
+		if ($l =~ /^(\s*\$(?:rcmail_config|config)\s*\[\s*(['"])des_key\2\s*\]\s*=\s*)(['"])rcmail-!24ByteDESkey\*Str\3(\s*;.*)$/) {
+			$l = $1.$3.$deskey.$3.$4;
+			$keychanged = 1;
+			}
+		}
+	&flush_file_lines_as_domain_user($d, $mcfile) if ($keychanged);
 	}
 
 # Add an alias to the public_html sub-dir for version 1.7.0+
@@ -395,7 +416,8 @@ my $url = &script_path_url($d, $opts);
 my $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
 my $installtype = $upgrade ? 'upgrade' : 'installation';
-return (1, "RoundCube $installtype complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $url);
+my $keymsg = $keychanged ? " The encryption key was replaced. Existing users must sign in again." : "";
+return (1, "RoundCube $installtype complete. It can be accessed at <a target=_blank href='$url'>$url</a>.$keymsg", "Under $rp using $dbphptype database $dbname", $url);
 }
 
 # script_roundcube_db_conn_desc()
