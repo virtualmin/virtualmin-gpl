@@ -16,12 +16,14 @@ $sinfo && $script || &error($text{'stopscript_egone'});
 &ui_print_header(&domain_in($d), $text{'scripts_urestart'}, "");
 
 print &text('stopscript_doing', "<i>$script->{'desc'}</i>"),"<br>";
-&{$script->{'stop_server_func'}}($d, $sinfo->{'opts'});
-sleep(1);	# Give it time to shut down
-&$second_print($text{'setup_done'});
-
-print &text('startscript_doing', "<i>$script->{'desc'}</i>"),"<br>";
-$err = &{$script->{'start_server_func'}}($d, $sinfo->{'opts'});
+$err = &{$script->{'stop_server_func'}}($d, $sinfo->{'opts'});
+if (!$err) {
+	# Start again only after the stop succeeds.
+	sleep(1);	# Give it time to shut down
+	&$second_print($text{'setup_done'});
+	print &text('startscript_doing', "<i>$script->{'desc'}</i>"),"<br>";
+	$err = &{$script->{'start_server_func'}}($d, $sinfo->{'opts'});
+	}
 if ($err) {
 	&$second_print(&text('startscript_failed', $err));
 	}

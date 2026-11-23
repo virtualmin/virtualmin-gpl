@@ -16,13 +16,20 @@ $sinfo && $script || &error($text{'stopscript_egone'});
 &ui_print_header(&domain_in($d), $text{'stopscript_title'}, "");
 
 print &text('stopscript_doing', "<i>$script->{'desc'}</i>"),"<br>";
-&{$script->{'stop_server_func'}}($d, $sinfo->{'opts'});
-&$second_print($text{'setup_done'});
+$err = &{$script->{'stop_server_func'}}($d, $sinfo->{'opts'});
+if ($err) {
+	&$second_print(&text('startscript_failed', $err));
+	}
+else {
+	&$second_print($text{'setup_done'});
+	}
 &run_post_actions();
-&webmin_log("stop", "script", $sinfo->{'name'},
-	    { 'ver' => $sinfo->{'version'},
-	      'desc' => $sinfo->{'desc'},
-	      'dom' => $d->{'dom'} });
+if (!$err) {
+	&webmin_log("stop", "script", $sinfo->{'name'},
+		    { 'ver' => $sinfo->{'version'},
+		      'desc' => $sinfo->{'desc'},
+		      'dom' => $d->{'dom'} });
+	}
 
 &ui_print_footer("edit_script.cgi?dom=$in{'dom'}&script=$in{'script'}",
 		  $text{'scripts_ereturn'},

@@ -115,9 +115,12 @@ elsif ($mode eq "stop") {
 	}
 elsif ($mode eq "restart") {
 	&$first_print("Restarting server for $script->{'desc'} ..");
-	&{$script->{'stop_server_func'}}($d, $sinfo->{'opts'});
-	sleep(1);	# Give it time to shut down
-	$err = &{$script->{'start_server_func'}}($d, $sinfo->{'opts'});
+	$err = &{$script->{'stop_server_func'}}($d, $sinfo->{'opts'});
+	if (!$err) {
+		# Start again only after the stop succeeds.
+		sleep(1);	# Give it time to shut down
+		$err = &{$script->{'start_server_func'}}($d, $sinfo->{'opts'});
+		}
 	}
 if ($err) {
 	&$second_print(".. failed : $err");
