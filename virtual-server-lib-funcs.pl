@@ -13824,14 +13824,15 @@ return $config{'quota_commands'} ? 1 : 0;
 }
 
 # has_quotacheck()
-# Returns 1 if the home or mail filesystems support quota checking
+# Returns 1 if the home filesystem supports quota checking
 sub has_quotacheck
 {
 return 0 if (&has_quota_commands());
 # Btrfs repairs qgroup accounting with quota rescans, not quotacheck.
 return 0 if (&has_btrfs_quotas());
 &require_useradmin();
-return 1 if (&quota::can_quotacheck($config{'home_quotas'}));
+return 1 if (!defined(&quota::can_quotacheck) ||
+	     &quota::can_quotacheck($config{'home_quotas'}));
 return 0;
 }
 
