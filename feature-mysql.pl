@@ -2937,7 +2937,8 @@ if ($dbtypes{'mysql'}) {
 	}
 
 # Save settings that only apply to PostgreSQL
-&parse_template_postgres($tmpl) if ($dbtypes{'postgres'});
+&parse_template_postgres($tmpl)
+	if ($dbtypes{'postgres'} && defined($in{'postgres_encoding'}));
 }
 
 # creation_form_mysql(&domain)

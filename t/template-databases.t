@@ -162,4 +162,24 @@ is($tmpl->{'mysql_charset'}, 'utf8mb4', 'MySQL character set saved');
 is($tmpl->{'postgres_encoding'}, 'LATIN1',
 	'hidden PostgreSQL encoding is kept');
 
+# A page opened before the upgrade has no encoding field, so saving it must
+# keep the stored encoding. An empty choice still means the default.
+set_databases('both', 'both');
+my %stale = %in;
+delete($stale{'postgres_encoding'});
+{
+	local %in = %stale;
+	$tmpl = { %saved };
+	&parse_template_mysql($tmpl);
+	is($tmpl->{'postgres_encoding'}, 'LATIN1',
+		'page without the encoding field keeps the encoding');
+}
+{
+	local %in = ( %stale, 'postgres_encoding' => '' );
+	$tmpl = { %saved };
+	&parse_template_mysql($tmpl);
+	is($tmpl->{'postgres_encoding'}, '',
+		'empty encoding is saved to use the default');
+}
+
 done_testing();
