@@ -3156,14 +3156,26 @@ return $rv;
 }
 
 # check_mysql_login(&domain, dbname, dbuser, dbpass)
-# Tries to login to MySQL with the given credentials, returning undef on failure
+# Tries to login to MySQL with the given credentials, returning an error message
+# on failure or undef on success
 sub check_mysql_login
 {
 my ($d, $dbname, $dbuser, $dbpass) = @_;
 &require_mysql();
 local $main::error_must_die = 1;
-local $mysql::mysql_login = $dbuser;
-local $mysql::mysql_pass = $dbpass;
+# Log in through the domain's own MySQL module, which may be a clone in its
+# own package for a remote server
+my $mod = &require_dom_mysql($d);
+my $pkg = $mod;
+$pkg =~ s/[^A-Za-z0-9]/_/g;
+local ${$pkg."::mysql_login"} = $dbuser;
+local ${$pkg."::mysql_pass"} = $dbpass;
+# The mysql command uses login options and a password variable built when the
+# module loaded, so rebuild them for this login and restore them afterwards
+local ${$pkg."::make_authstr_pass"};
+local $ENV{'MYSQL_PWD'};
+local ${$pkg."::authstr"} =
+	&foreign_call($mod, "make_authstr", $dbuser, $dbpass);
 eval { &execute_dom_sql($d, $dbname, "show tables") };
 my $err = $@;
 if ($err) {
