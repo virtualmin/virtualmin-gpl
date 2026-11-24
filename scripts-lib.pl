@@ -2445,8 +2445,8 @@ return undef;
 #			     [dbhost])
 # Returns an error message if connection to the database with the given details
 # would fail, undef otherwise. The host is the one the app connects to, or an
-# empty string for a local socket. Without it, the domain's database host is
-# checked.
+# empty string for a local socket. Only the PostgreSQL check uses it, and
+# without it checks the domain's database host.
 sub check_script_db_connection
 {
 my $myd = ref($_[0]) ? shift(@_) : $d;
