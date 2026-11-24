@@ -894,7 +894,7 @@ if (defined($jail)) {
 
 	# Update scripts hostnames, if jail changed
 	if (!$err) {
-		foreach my $dbt ('mysql', 'psql') {
+		foreach my $dbt ('mysql', 'postgres') {
 			&update_scripts_creds($dom, $old, 'dbhost', undef, $dbt);
 			}
 		}

@@ -253,7 +253,7 @@ if ($pass ne $oldpass && !$d->{'parent'} &&
 		# Update all installed scripts database password which are
 		# using PostgreSQL
 		&update_scripts_creds(
-			$d, $oldd, 'dbpass', &postgres_pass($d), 'psql');
+			$d, $oldd, 'dbpass', &postgres_pass($d, 1), 'postgres');
 		}
 	else {
 		&$second_print($text{'save_nopostgres'});
@@ -319,7 +319,7 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 			# Update all installed scripts database username which
 			# are using PostgreSQL
 			&update_scripts_creds(
-				$d, $oldd, 'dbuser', $user, 'psql');
+				$d, $oldd, 'dbuser', $user, 'postgres');
 			}
 		else {
 			# Cannot
