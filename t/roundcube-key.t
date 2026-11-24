@@ -37,7 +37,7 @@ local *main::extract_script_archive = sub { undef };
 local *main::get_domain_spam_delivery = sub { (0, '') };
 local *main::php_quotemeta = sub { $_[0] };
 local *main::require_mysql = sub { };
-local *mysql::execute_sql_file = sub { (0, '') };
+local *main::execute_dom_sql_file = sub { (0, '') };
 local *main::substitute_pattern = sub {
 	$generations++;
 	is(scalar(@_), 1, 'installer uses the existing pattern API');

@@ -128,7 +128,7 @@ return $r->{'dest'} eq $dest ||
 }
 
 # script_roundcube_params(&domain, version, &upgrade-info)
-# Returns HTML for table rows for options for installing PHP-NUKE
+# Returns HTML rows for RoundCube installation options
 sub script_roundcube_params
 {
 my ($d, $ver, $upgrade) = @_;
@@ -358,7 +358,7 @@ if (!$upgrade) {
 	my ($ex, $out);
 	if ($dbtype eq "mysql") {
 		&require_mysql();
-		($ex, $out) = &mysql::execute_sql_file($dbname,
+		($ex, $out) = &execute_dom_sql_file($d, $dbname,
 			"$opts->{'dir'}/SQL/mysql.initial.sql",
 			$dbuser, $dbpass);
 		}

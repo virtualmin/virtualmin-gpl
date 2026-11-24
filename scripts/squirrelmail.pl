@@ -59,7 +59,7 @@ return $opts->{'db'} ? ( "DB" ) : ( );
 }
 
 # script_squirrelmail_params(&domain, version, &upgrade-info)
-# Returns HTML for table rows for options for installing PHP-NUKE
+# Returns HTML rows for SquirrelMail installation options
 sub script_squirrelmail_params
 {
 my ($d, $ver, $upgrade) = @_;
@@ -268,7 +268,7 @@ if (!$upgrade) {
 	if ($dbname) {
 		# Create the database tables
 		&require_mysql();
-		&mysql::execute_sql_logged($dbname, "
+		&execute_dom_sql($d, $dbname, "
 			CREATE TABLE address (
 				owner varchar(128) DEFAULT '' NOT NULL,
 				nickname varchar(16) DEFAULT '' NOT NULL,
@@ -279,7 +279,7 @@ if (!$upgrade) {
 				PRIMARY KEY (owner,nickname),
 				KEY firstname (firstname,lastname)
 			)");
-		&mysql::execute_sql_logged($dbname, "
+		&execute_dom_sql($d, $dbname, "
 			CREATE TABLE global_abook (
 				owner varchar(128) DEFAULT '' NOT NULL,
 				nickname varchar(16) DEFAULT '' NOT NULL,
@@ -290,7 +290,7 @@ if (!$upgrade) {
 				PRIMARY KEY (owner,nickname),
 				KEY firstname (firstname,lastname)
 			)");
-		&mysql::execute_sql_logged($dbname, "
+		&execute_dom_sql($d, $dbname, "
 			CREATE TABLE userprefs (
 				user varchar(128) DEFAULT '' NOT NULL,
 				prefkey varchar(64) DEFAULT '' NOT NULL,
