@@ -2444,7 +2444,7 @@ if (&indexof($dbtype, @database_features) >= 0) {
 	# Core feature
 	my $cfunc = "check_".$dbtype."_login";
 	if (defined(&$cfunc)) {
-		return &$cfunc($d, $dbname, $dbuser, $dbpass);
+		return &$cfunc($myd, $dbname, $dbuser, $dbpass);
 		}
 	}
 elsif (&indexof($dbtype, &list_database_plugins()) >= 0) {

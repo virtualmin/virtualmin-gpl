@@ -1496,6 +1496,7 @@ return &foreign_call($mod, "list_databases");
 # this domain
 sub get_dom_postgres_creds
 {
+my ($d) = @_;
 my $mod = &require_dom_postgres($d);
 my %rqconfig = &foreign_config($mod);
 return ($rqconfig{'sameunix'}, $rqconfig{'login'}, $rqconfig{'pass'});
