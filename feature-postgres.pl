@@ -194,7 +194,7 @@ my ($d, $noquote) = @_;
 if ($d->{'parent'}) {
 	# Password comes from parent domain
 	my $parent = &get_domain($d->{'parent'});
-	return &postgres_pass($parent);
+	return &postgres_pass($parent, $noquote);
 	}
 &require_postgres();
 my $pass = defined($d->{'postgres_pass'}) ? $d->{'postgres_pass'}
