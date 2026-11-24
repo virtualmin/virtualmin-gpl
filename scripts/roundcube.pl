@@ -257,6 +257,8 @@ my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
 my $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
 my $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
 my $dbphptype = $dbtype eq "mysql" ? "mysql" : "psql";
+# Roundcube names its PostgreSQL driver pgsql
+my $dbscheme = $dbtype eq "mysql" ? "mysql" : "pgsql";
 my $dbhost = &get_database_host($dbtype, $d);
 my $dberr = &check_script_db_connection(
 	$d, $dbtype, $dbname, $dbuser, $dbpass);
@@ -279,7 +281,8 @@ if (!$upgrade) {
 		my $lref = &read_file_lines_as_domain_user($d, $dbcfile);
 		foreach my $l (@$lref) {
 			if ($l =~ /^\$rcmail_config\['db_dsnw'\]\s+=/) {
-				$l = "\$rcmail_config['db_dsnw'] = 'mysql://$dbuser:".
+				$l = "\$rcmail_config['db_dsnw'] = ".
+				     "'$dbscheme://$dbuser:".
 				     &php_quotemeta($dbpass, 1).
 				     "\@$dbhost/$dbname';";
 				}
@@ -341,7 +344,7 @@ if (!$upgrade) {
 			$l = "\$${1}['mail_domain'] = '$d->{'dom'}';";
 			}
 		if ($l =~ /^\$(rcmail_config|config)\['db_dsnw'\]\s+=/) {
-			$l = "\$${1}['db_dsnw'] = 'mysql://$dbuser:".
+			$l = "\$${1}['db_dsnw'] = '$dbscheme://$dbuser:".
 			     &php_quotemeta($dbpass, 1)."\@$dbhost/$dbname';";
 			}
 		if ($l =~ /^\$(rcmail_config|config)\['(\S+)_mbox'\]\s+=/ &&
@@ -352,16 +355,25 @@ if (!$upgrade) {
 	&flush_file_lines_as_domain_user($d, $mcfile);
 
 	# Run SQL setup script
-	&require_mysql();
-	my $sqlfile;
+	my ($ex, $out);
 	if ($dbtype eq "mysql") {
-		$sqlfile = "$opts->{'dir'}/SQL/mysql.initial.sql";
+		&require_mysql();
+		($ex, $out) = &mysql::execute_sql_file($dbname,
+			"$opts->{'dir'}/SQL/mysql.initial.sql",
+			$dbuser, $dbpass);
 		}
 	else {
-		$sqlfile = "$opts->{'dir'}/SQL/postgres.initial.sql";
+		# Log in as the web app's PostgreSQL user, as the login check
+		# does, so its tables belong to that user
+		my $mod = &require_dom_postgres($d);
+		my %pgconfig = &foreign_config($mod);
+		&foreign_call($mod, "set_login_pass", $pgconfig{'sameunix'},
+			      $dbuser, $dbpass);
+		($ex, $out) = &foreign_call($mod, "execute_sql_file", $dbname,
+			"$opts->{'dir'}/SQL/postgres.initial.sql");
+		&foreign_call($mod, "set_login_pass", $pgconfig{'sameunix'},
+			      $pgconfig{'login'}, $pgconfig{'pass'});
 		}
-	my ($ex, $out) = &mysql::execute_sql_file($dbname, $sqlfile,
-					       	     $dbuser, $dbpass);
 	$ex && return (-1, "Failed to run database setup script : ".
 			   "<tt>$out</tt>.");
 	}
@@ -424,10 +436,15 @@ return (1, "RoundCube $installtype complete. It can be accessed at <a target=_bl
 # Returns a list of options for config file to update
 sub script_roundcube_db_conn_desc
 {
+my ($d, $opts) = @_;
+# Roundcube names its PostgreSQL driver pgsql, not postgres
+my ($dbtype) = split(/_/, $opts->{'db'}, 2);
+my $dbscheme = $dbtype eq "postgres" ? "pgsql" : "mysql";
 my $conn_desc =
     {
       'replace' => [ '\$(rcmail_config|config)\[[\'"]db_dsnw[\'"]\]\s*=\s*' =>
-                     '\'$$sdbtype://$$sdbuser:$$sdbpass@$$sdbhost/$$sdbname\';' ],
+                     "'$dbscheme://".
+                     '$$sdbuser:$$sdbpass@$$sdbhost/$$sdbname\';' ],
       'func' => 'php_quotemeta',
       'func_params' => 1,
       'multi' => 1,
