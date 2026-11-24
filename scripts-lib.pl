@@ -818,7 +818,19 @@ sub update_all_installed_scripts_database_credentials
 sub update_scripts_creds
 {
 my ($d, $oldd, $type, $value, $dbtype, $sinfo) = @_;
-my @domain_scripts = $sinfo ? ($sinfo) : &list_domain_scripts($d);
+# Sub-servers use their parent's database login, so their web apps need the
+# same update. Each entry holds the app's own domain and its install details.
+my @domain_scripts;
+if ($sinfo) {
+	@domain_scripts = ( [ $d, $sinfo ] );
+	}
+else {
+	my @subs = $d->{'parent'} ? ( ) : &get_domain_by("parent", $d->{'id'});
+	foreach my $sd ($d, @subs) {
+		push(@domain_scripts,
+		     map { [ $sd, $_ ] } &list_domain_scripts($sd));
+		}
+	}
 my $do_wapp_conf_file = sub
 {
 my ($wapp_conf_file, $wapp_conf_types, $sdata,
@@ -975,7 +987,8 @@ return 0;
 };
 
 my ($printed_type, @printed_name);
-foreach my $script (@domain_scripts) {
+foreach my $ds (@domain_scripts) {
+	my ($sd, $script) = @$ds;
 	my $sname = $script->{'name'};
 	my $sdata = &get_script($sname);
 	my $sproject = $script->{'opts'}->{'project'};
@@ -989,7 +1002,7 @@ foreach my $script (@domain_scripts) {
 		}
 	if (defined(&$db_conn_func) && $dbtype eq $sdbtype) {
 		# Check if a script has a description sub
-		my $db_conn_desc = &$db_conn_func($d, $script->{'opts'});
+		my $db_conn_desc = &$db_conn_func($sd, $script->{'opts'});
 		if (ref($db_conn_desc)) {
 			&$first_print($text{"save_installed_scripts_${type}_".
 				      "${dbtype}"}) if (!$printed_type++);
@@ -1015,7 +1028,7 @@ foreach my $script (@domain_scripts) {
 				}
 			if ($updated && defined(&$db_conn_update_func)) {
 				my $err = &$db_conn_update_func(
-					$d, $script->{'opts'}, $type,
+					$sd, $script->{'opts'}, $type,
 					$value, $dbtype);
 				&$first_print($err) if ($err);
 				}
