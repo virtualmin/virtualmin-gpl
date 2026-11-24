@@ -8657,7 +8657,7 @@ if ($dom->{'hashpass'} && !$dom->{'parent'} && !$dom->{'postgres_pass'}) {
 	$dom->{'postgres_pass'} = &random_password();
 	delete($dom->{'postgres_enc_pass'});
 	}
-elsif ($tmpl->{'postgres_nopass'} == 2 && !$dom->{'parent'} &&
+elsif ($tmpl->{'mysql_nopass'} == 2 && !$dom->{'parent'} &&
        !$dom->{'postgres_pass'}) {
 	# Using random password by default
 	$dom->{'postgres_pass'} = &random_password();
