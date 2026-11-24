@@ -898,6 +898,14 @@ if ($wapp_conf_type_curr) {
 			       'sdbname' => $sdbname,
 			       'sdbuser' => $sdbuser,
 			       'sdbpass' => $sdbpass );
+		# The rebuilt line holds every value, so escape the unchanged
+		# ones the same way as the new value
+		if (defined(&$value_func)) {
+			foreach my $o (keys %opts_mult) {
+				$opts_mult{$o} = &$value_func(
+					$opts_mult{$o}, @value_func_params);
+				}
+			}
 		}
 	else {
 		# Construct simple replacement based on type
