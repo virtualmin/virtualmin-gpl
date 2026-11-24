@@ -26,16 +26,27 @@ local *main::get_dom_remote_postgres_version = sub { return '16.4'; };
 
 # Top-level domains quote their own password for SQL unless asked not to.
 my $top = $doms{1};
-is(main::postgres_pass($top), "'parent''pass'",
+is(main::postgres_pass($top), "E'parent''pass'",
 	'top-level password is quoted for SQL');
 is(main::postgres_pass($top, 1), "parent'pass",
 	'top-level password can be returned unquoted');
 is(main::postgres_pass($doms{2}, 1), "db'pass",
 	'separate PostgreSQL password is preferred');
 
+# The Webmin module doubles every backslash before running SQL. An escape
+# string turns each pair back into one, so the server gets the exact value.
+foreach my $value ("a\\\\b", "a\\'b", "q'\\n") {
+	my $sql = &postgres_quote($value);
+	(my $sent = $sql) =~ s/\\/\\\\/g;
+	my ($body) = $sent =~ /^E'(.*)'$/s;
+	$body =~ s/''/'/g;
+	$body =~ s/\\(.)/$1/gs;
+	is($body, $value, "PostgreSQL receives $value exactly");
+	}
+
 # Sub-servers use the parent's login, with the same quoting choice.
 my $sub = { 'id' => 3, 'parent' => 1, 'pass' => 'ignored' };
-is(main::postgres_pass($sub), "'parent''pass'",
+is(main::postgres_pass($sub), "E'parent''pass'",
 	'sub-server password is quoted for SQL');
 is(main::postgres_pass($sub, 1), "parent'pass",
 	'sub-server password can be returned unquoted');
@@ -59,7 +70,7 @@ foreach my $mode (1, 2) {
 	@sql = ();
 	my $new = { 'id' => 5, 'user' => 'fixture', 'pass' => "first'pass" };
 	main::setup_postgres($new);
-	like($sql[0], qr/with password 'first''pass'/,
+	like($sql[0], qr/with password E'first''pass'/,
 		"mode $mode creates the login with the initial password");
 	$new->{'pass'} = 'changed';
 	is(main::postgres_pass($new, 1), "first'pass",

@@ -204,12 +204,14 @@ return !$noquote && &get_dom_remote_postgres_version($d) >= 7 ?
 }
 
 # postgres_quote(string)
-# Returns a string in '' quotes, with escaping if needed
+# Returns a string in '' quotes, with escaping if needed. The Webmin PostgreSQL
+# module doubles every backslash before running SQL, so this returns an escape
+# string, which turns each doubled backslash back into one on any server.
 sub postgres_quote
 {
 my ($str) = @_;
 $str =~ s/'/''/g;
-return "'$str'";
+return "E'$str'";
 }
 
 # postgres_uquote(string)
