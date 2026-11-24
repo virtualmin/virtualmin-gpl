@@ -19132,6 +19132,12 @@ foreach my $t (@template_features) {
 	my $sfunc = "show_template_".$t;
 	next if (!defined(&$sfunc));
 	next if ($t eq 'plugins' && !&has_template_plugins());
+	if ($t eq 'mysql' || $t eq 'postgres') {
+		# MySQL and PostgreSQL settings share the mysql section
+		push(@rv, 'mysql')
+			if ($t eq 'mysql' && &list_template_database_types());
+		next;
+		}
 	my $cfunc = "check_module_".$t;
 	next if (defined(&$cfunc) && !&$cfunc());
 	if ($config{$t} || !$isfeature{$t} ||
@@ -19160,6 +19166,15 @@ foreach my $f (@plugins) {
 		}
 	}
 return @rvdesc;
+}
+
+# list_template_database_types()
+# Returns the database types with template settings to edit. These are the
+# enabled MySQL and PostgreSQL features whose Webmin modules are available.
+sub list_template_database_types
+{
+return grep { my $cfunc = "check_module_".$_;
+	      $config{$_} && &$cfunc() } ( 'mysql', 'postgres' );
 }
 
 # substitute_domain_template(string, &domain, [&extra-hash], [html-escape])

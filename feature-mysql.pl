@@ -2725,11 +2725,12 @@ return $db;
 }
 
 # show_template_mysql(&tmpl)
-# Outputs HTML for editing MySQL related template options
+# Outputs HTML for the database template options. Settings shared by MySQL and
+# PostgreSQL come first, followed by those for each enabled database type.
 sub show_template_mysql
 {
 my ($tmpl) = @_;
-&require_mysql();
+my %dbtypes = map { $_, 1 } &list_template_database_types();
 
 # Default database name template
 print &ui_table_row(&hlink($text{'tmpl_mysql'}, "template_mysql"),
@@ -2745,38 +2746,19 @@ print &ui_table_row(&hlink($text{'tmpl_mysql_suffix'}, "template_mysql_suffix"),
 	&ui_textbox("mysql_suffix", $tmpl->{'mysql_suffix'} eq "none" ?
 					undef : $tmpl->{'mysql_suffix'}, 20));
 
-# Additional host wildcards to add
-# Deprecated, so only show if already set
-if ($tmpl->{'mysql_wild'}) {
-	print &ui_table_row(&hlink($text{'tmpl_mysql_wild'},
-				   "template_mysql_wild"),
-		&none_def_input("mysql_wild", $tmpl->{'mysql_wild'},
-				$text{'tmpl_mysqlpat'}, 1, 0, undef,
-				[ "mysql_wild" ]).
-		&ui_textbox("mysql_wild", $tmpl->{'mysql_wild'}, 20));
-	}
-
-# Additonal allowed hosts
-print &ui_table_row(&hlink($text{'tmpl_mysql_hosts'}, "template_mysql_hosts"),
-	&none_def_input("mysql_hosts", $tmpl->{'mysql_hosts'},
-			$text{'tmpl_mysqlh'}, 0, 0, undef,
-			[ "mysql_hosts" ]).
-	&ui_textbox("mysql_hosts", $tmpl->{'mysql_hosts'} eq "none" ? "" :
-					$tmpl->{'mysql_hosts'}, 40));
-
 # Create DB at virtual server creation?
 print &ui_table_row(&hlink($text{'tmpl_mysql_mkdb'}, "template_mysql_mkdb"),
 	&ui_radio("mysql_mkdb", $tmpl->{'mysql_mkdb'},
 		[ [ 1, $text{'yes'} ], [ 0, $text{'no'} ],
 		  ($tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ) )]));
 
-# Update MySQL username to match domain?
+# Update database usernames to match domain?
 print &ui_table_row(&hlink($text{'tmpl_mysql_nouser'}, "template_mysql_nouser"),
 	&ui_radio("mysql_nouser", $tmpl->{'mysql_nouser'},
 		[ [ 0, $text{'yes'} ], [ 1, $text{'no'} ],
 		  ($tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ) )]));
 
-# Update MySQL password to match domain?
+# Update database passwords to match domain?
 if (!$tmpl->{'hashpass'}) {
 	print &ui_table_row(&hlink($text{'tmpl_mysql_nopass2'},
 				   "template_mysql_nopass"),
@@ -2788,96 +2770,113 @@ if (!$tmpl->{'hashpass'}) {
 			     ( [ "", $text{'default'} ] ) )]));
 	}
 
-# Make MySQL DBs group-owned by domain, for quotas?
-if (-d $mysql::config{'mysql_data'} &&
-    !$config{'provision_mysql'}) {
-	print &ui_table_row(&hlink($text{'tmpl_mysql_chgrp'},
-				   "template_mysql_chgrp"),
-		&ui_radio("mysql_chgrp", $tmpl->{'mysql_chgrp'},
-			[ [ 1, $text{'yes'} ],
-			  [ 0, $text{'no'} ],
-			  ($tmpl->{'default'} ? ( ) :
-				( [ "", $text{'default'} ] ) )]));
+if ($dbtypes{'mysql'}) {
+	# Settings that only apply to MySQL
+	&require_mysql();
+	print &ui_table_hr();
+
+	# Additional host wildcards to add
+	# Deprecated, so only show if already set
+	if ($tmpl->{'mysql_wild'}) {
+		print &ui_table_row(&hlink($text{'tmpl_mysql_wild'},
+					   "template_mysql_wild"),
+			&none_def_input("mysql_wild", $tmpl->{'mysql_wild'},
+					$text{'tmpl_mysqlpat'}, 1, 0, undef,
+					[ "mysql_wild" ]).
+			&ui_textbox("mysql_wild", $tmpl->{'mysql_wild'}, 20));
+		}
+
+	# Additonal allowed hosts
+	print &ui_table_row(&hlink($text{'tmpl_mysql_hosts'},
+				   "template_mysql_hosts"),
+		&none_def_input("mysql_hosts", $tmpl->{'mysql_hosts'},
+				$text{'tmpl_mysqlh'}, 0, 0, undef,
+				[ "mysql_hosts" ]).
+		&ui_textbox("mysql_hosts", $tmpl->{'mysql_hosts'} eq "none" ?
+					   "" : $tmpl->{'mysql_hosts'}, 40));
+
+	# Make MySQL DBs group-owned by domain, for quotas?
+	if (-d $mysql::config{'mysql_data'} &&
+	    !$config{'provision_mysql'}) {
+		print &ui_table_row(&hlink($text{'tmpl_mysql_chgrp'},
+					   "template_mysql_chgrp"),
+			&ui_radio("mysql_chgrp", $tmpl->{'mysql_chgrp'},
+				[ [ 1, $text{'yes'} ],
+				  [ 0, $text{'no'} ],
+				  ($tmpl->{'default'} ? ( ) :
+					( [ "", $text{'default'} ] ) )]));
+		}
+
+	# Character set and collation menus share the default choice
+	my $csdef = "&lt;$text{'tmpl_mysql_charsetdef'}&gt;";
+	if (&get_dom_remote_mysql_version() >= 4.1) {
+		# Default MySQL character set
+		print &ui_table_row(&hlink($text{'tmpl_mysql_charset'},
+					   "template_mysql_charset"),
+		    &ui_select("mysql_charset",  $tmpl->{'mysql_charset'},
+			[ $tmpl->{'default'} ? ( ) :
+			    ( [ "", $csdef ] ),
+			  [ "none", "&lt;$text{'tmpl_mysql_charsetnone'}&gt;" ],
+			  map { [ $_->[0], $_->[0]." (".$_->[1].")" ] }
+			      &list_mysql_character_sets() ]));
+		}
+
+	if (&get_dom_remote_mysql_version() >= 5) {
+		# Default MySQL collation order
+		print &ui_table_row(&hlink($text{'tmpl_mysql_collate'},
+					   "template_mysql_collate"),
+		    &ui_select("mysql_collate",  $tmpl->{'mysql_collate'},
+			[ $tmpl->{'default'} ? ( ) :
+			    ( [ "", $csdef ] ),
+			  [ "none", "&lt;$text{'tmpl_mysql_charsetnone'}&gt;" ],
+			  map { $_->[0] } &list_mysql_collation_orders() ]));
+		}
+
+	# Max DB connections for domain owner
+	my $c = $tmpl->{'mysql_conns'};
+	$c = "" if ($c eq "none");
+	print &ui_table_row(&hlink($text{'tmpl_mysql_conns'},
+				   "template_mysql_conns"),
+			    &none_def_input("mysql_conns",
+					    $tmpl->{'mysql_conns'},
+					    $text{'tmpl_mysql_maxconns'}, 0, 0,
+					    $text{'tmpl_mysql_unlimited'}).
+			    &ui_textbox("mysql_conns", $c, 5));
+
+	# Max DB connections for mailbox users
+	my $uc = $tmpl->{'mysql_uconns'};
+	$uc = "" if ($uc eq "none");
+	print &ui_table_row(&hlink($text{'tmpl_mysql_uconns'},
+				   "template_mysql_uconns"),
+			    &none_def_input("mysql_uconns",
+					    $tmpl->{'mysql_uconns'},
+					    $text{'tmpl_mysql_maxconns'}, 0, 0,
+					    $text{'tmpl_mysql_unlimited'}).
+			    &ui_textbox("mysql_uconns", $uc, 5));
 	}
 
-if (&get_dom_remote_mysql_version() >= 4.1 && $config{'mysql'}) {
-	# Default MySQL character set
-	print &ui_table_row(&hlink($text{'tmpl_mysql_charset'},
-				   "template_mysql_charset"),
-	    &ui_select("mysql_charset",  $tmpl->{'mysql_charset'},
-		[ $tmpl->{'default'} ? ( ) :
-		    ( [ "", "&lt;$text{'tmpl_mysql_charsetdef'}&gt;" ] ),
-		  [ "none", "&lt;$text{'tmpl_mysql_charsetnone'}&gt;" ],
-		  map { [ $_->[0], $_->[0]." (".$_->[1].")" ] }
-		      &list_mysql_character_sets() ]));
+if ($dbtypes{'postgres'}) {
+	# Settings that only apply to PostgreSQL
+	print &ui_table_hr();
+	&show_template_postgres($tmpl);
 	}
-
-if (&get_dom_remote_mysql_version() >= 5 && $config{'mysql'}) {
-	# Default MySQL collation order
-	print &ui_table_row(&hlink($text{'tmpl_mysql_collate'},
-				   "template_mysql_collate"),
-	    &ui_select("mysql_collate",  $tmpl->{'mysql_collate'},
-		[ $tmpl->{'default'} ? ( ) :
-		    ( [ "", "&lt;$text{'tmpl_mysql_charsetdef'}&gt;" ] ),
-		  [ "none", "&lt;$text{'tmpl_mysql_charsetnone'}&gt;" ],
-		  map { $_->[0] } &list_mysql_collation_orders() ]));
-	}
-
-# Max DB connections for domain owner
-my $c = $tmpl->{'mysql_conns'};
-$c = "" if ($c eq "none");
-print &ui_table_row(&hlink($text{'tmpl_mysql_conns'},
-			   "template_mysql_conns"),
-		    &none_def_input("mysql_conns", $tmpl->{'mysql_conns'},
-				    $text{'tmpl_mysql_maxconns'}, 0, 0,
-				    $text{'tmpl_mysql_unlimited'}).
-		    &ui_textbox("mysql_conns", $c, 5));
-
-# Max DB connections for mailbox users
-my $uc = $tmpl->{'mysql_uconns'};
-$uc = "" if ($uc eq "none");
-print &ui_table_row(&hlink($text{'tmpl_mysql_uconns'},
-			   "template_mysql_uconns"),
-		    &none_def_input("mysql_uconns", $tmpl->{'mysql_uconns'},
-				    $text{'tmpl_mysql_maxconns'}, 0, 0,
-				    $text{'tmpl_mysql_unlimited'}).
-		    &ui_textbox("mysql_uconns", $uc, 5));
 }
 
 # parse_template_mysql(&tmpl)
-# Updates MySQL related template options from %in
+# Updates the database template options from %in. Only settings for enabled
+# database types are shown, so only those are saved.
 sub parse_template_mysql
 {
 my ($tmpl) = @_;
-&require_mysql();
+my %dbtypes = map { $_, 1 } &list_template_database_types();
 
-# Save MySQL-related settings
+# Save settings shared by MySQL and PostgreSQL
 if ($in{'mysql_mode'} == 1) {
 	$tmpl->{'mysql'} = undef;
 	}
 else {
 	$in{'mysql'} =~ /^\S+$/ || &error($text{'tmpl_emysql'});
 	$tmpl->{'mysql'} = $in{'mysql'};
-	}
-if (defined($in{'mysql_wild_mode'})) {
-	if ($in{'mysql_wild_mode'} == 1) {
-		$tmpl->{'mysql_wild'} = undef;
-		}
-	else {
-		$in{'mysql_wild'} =~ /^\S*$/ ||
-			&error($text{'tmpl_emysql_wild'});
-		$tmpl->{'mysql_wild'} = $in{'mysql_wild'};
-		}
-	}
-if ($in{'mysql_hosts_mode'} == 0) {
-	$tmpl->{'mysql_hosts'} = "none";
-	}
-elsif ($in{'mysql_hosts_mode'} == 1) {
-	$tmpl->{'mysql_hosts'} = undef;
-	}
-else {
-	$in{'mysql_hosts'} =~ /\S/ || &error($text{'tmpl_emysql_hosts'});
-	$tmpl->{'mysql_hosts'} = $in{'mysql_hosts'};
 	}
 if ($in{'mysql_suffix_mode'} == 0) {
 	$tmpl->{'mysql_suffix'} = "none";
@@ -2894,22 +2893,51 @@ if (!$tmpl->{'hashpass'}) {
 	$tmpl->{'mysql_nopass'} = $in{'mysql_nopass'};
 	}
 $tmpl->{'mysql_nouser'} = $in{'mysql_nouser'};
-if (-d $mysql::config{'mysql_data'} &&
-    !$config{'provision_mysql'}) {
-	$tmpl->{'mysql_chgrp'} = $in{'mysql_chgrp'};
-	}
-if (&get_dom_remote_mysql_version() >= 4.1 && $config{'mysql'}) {
-	$tmpl->{'mysql_charset'} = $in{'mysql_charset'};
-	$tmpl->{'mysql_collate'} = $in{'mysql_collate'};
+
+if ($dbtypes{'mysql'}) {
+	# Save settings that only apply to MySQL
+	&require_mysql();
+	if (defined($in{'mysql_wild_mode'})) {
+		if ($in{'mysql_wild_mode'} == 1) {
+			$tmpl->{'mysql_wild'} = undef;
+			}
+		else {
+			$in{'mysql_wild'} =~ /^\S*$/ ||
+				&error($text{'tmpl_emysql_wild'});
+			$tmpl->{'mysql_wild'} = $in{'mysql_wild'};
+			}
+		}
+	if ($in{'mysql_hosts_mode'} == 0) {
+		$tmpl->{'mysql_hosts'} = "none";
+		}
+	elsif ($in{'mysql_hosts_mode'} == 1) {
+		$tmpl->{'mysql_hosts'} = undef;
+		}
+	else {
+		$in{'mysql_hosts'} =~ /\S/ ||
+			&error($text{'tmpl_emysql_hosts'});
+		$tmpl->{'mysql_hosts'} = $in{'mysql_hosts'};
+		}
+	if (-d $mysql::config{'mysql_data'} &&
+	    !$config{'provision_mysql'}) {
+		$tmpl->{'mysql_chgrp'} = $in{'mysql_chgrp'};
+		}
+	if (&get_dom_remote_mysql_version() >= 4.1) {
+		$tmpl->{'mysql_charset'} = $in{'mysql_charset'};
+		$tmpl->{'mysql_collate'} = $in{'mysql_collate'};
+		}
+
+	$in{'mysql_conns_mode'} < 2 || $in{'mysql_conns'} =~ /^[1-9]\d*$/ ||
+		&error($text{'tmpl_emysql_conns'});
+	$tmpl->{'mysql_conns'} = &parse_none_def("mysql_conns");
+
+	$in{'mysql_uconns_mode'} < 2 || $in{'mysql_uconns'} =~ /^[1-9]\d*$/ ||
+		&error($text{'tmpl_emysql_conns'});
+	$tmpl->{'mysql_uconns'} = &parse_none_def("mysql_uconns");
 	}
 
-$in{'mysql_conns_mode'} < 2 || $in{'mysql_conns'} =~ /^[1-9]\d*$/ ||
-	&error($text{'tmpl_emysql_conns'});
-$tmpl->{'mysql_conns'} = &parse_none_def("mysql_conns");
-
-$in{'mysql_uconns_mode'} < 2 || $in{'mysql_uconns'} =~ /^[1-9]\d*$/ ||
-	&error($text{'tmpl_emysql_conns'});
-$tmpl->{'mysql_uconns'} = &parse_none_def("mysql_uconns");
+# Save settings that only apply to PostgreSQL
+&parse_template_postgres($tmpl) if ($dbtypes{'postgres'});
 }
 
 # creation_form_mysql(&domain)

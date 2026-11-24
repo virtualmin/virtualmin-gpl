@@ -1134,7 +1134,8 @@ return @postgres_encodings_cache;
 }
 
 # show_template_postgres(&tmpl)
-# Outputs HTML for editing PostgreSQL related template options
+# Outputs HTML for PostgreSQL-only template options. These appear in the
+# shared database section, so there is no separate PostgreSQL section.
 sub show_template_postgres
 {
 my ($tmpl) = @_;
@@ -1151,7 +1152,8 @@ print &ui_table_row(&hlink($text{'tmpl_postgres_encoding'},
 }
 
 # parse_template_postgres(&tmpl)
-# Updates PostgreSQL related template options from %in
+# Updates PostgreSQL-only template options from %in, for the shared database
+# section
 sub parse_template_postgres
 {
 my ($tmpl) = @_;
