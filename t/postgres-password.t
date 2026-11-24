@@ -42,4 +42,35 @@ is(main::postgres_pass($sub, 1), "parent'pass",
 is(main::postgres_pass({ 'id' => 4, 'parent' => 2 }, 1), "db'pass",
 	"sub-server uses the parent's separate PostgreSQL password");
 
+# Create the login without a server, recording the password it is given.
+my ($nopass, @sql);
+local *main::get_template = sub {
+	return { 'mysql_nopass' => $nopass, 'mysql_mkdb' => 0 };
+	};
+local *main::get_default_postgres_module = sub { return 'postgresql'; };
+local *main::postgres_user_exists = sub { return 0; };
+local *main::get_postgresql_user_flags = sub { return ''; };
+local *main::execute_dom_psql = sub { push(@sql, $_[2]); };
+local $main::first_print = local $main::second_print = sub { };
+
+# Without syncing, later admin password changes must not change the login.
+foreach my $mode (1, 2) {
+	$nopass = $mode;
+	@sql = ();
+	my $new = { 'id' => 5, 'user' => 'fixture', 'pass' => "first'pass" };
+	main::setup_postgres($new);
+	like($sql[0], qr/with password 'first''pass'/,
+		"mode $mode creates the login with the initial password");
+	$new->{'pass'} = 'changed';
+	is(main::postgres_pass($new, 1), "first'pass",
+		"mode $mode keeps reporting the login's actual password");
+	}
+
+# Synced logins keep following the admin password.
+$nopass = 0;
+my $synced = { 'id' => 6, 'user' => 'fixture', 'pass' => 'first' };
+main::setup_postgres($synced);
+ok(!exists($synced->{'postgres_pass'}),
+	'synced login stores no separate password');
+
 done_testing();

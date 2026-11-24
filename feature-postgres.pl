@@ -167,8 +167,8 @@ else {
 	}
 
 # Save the initial password
-if ($tmpl->{'postgres_nopass'}) {
-	&set_postgres_pass(&postgres_pass($d, 1));
+if ($tmpl->{'mysql_nopass'}) {
+	&set_postgres_pass($d, &postgres_pass($d, 1));
 	}
 return 1;
 }
