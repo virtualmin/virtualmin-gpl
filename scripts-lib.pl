@@ -2441,18 +2441,21 @@ else {
 return undef;
 }
 
-# check_script_db_connection([&domain], dbtype, dbname, dbuser, dbpass)
+# check_script_db_connection([&domain], dbtype, dbname, dbuser, dbpass,
+#			     [dbhost])
 # Returns an error message if connection to the database with the given details
-# would fail, undef otherwise
+# would fail, undef otherwise. The host is the one the app connects to, or an
+# empty string for a local socket. Without it, the domain's database host is
+# checked.
 sub check_script_db_connection
 {
 my $myd = ref($_[0]) ? shift(@_) : $d;
-my ($dbtype, $dbname, $dbuser, $dbpass) = @_;
+my ($dbtype, $dbname, $dbuser, $dbpass, $dbhost) = @_;
 if (&indexof($dbtype, @database_features) >= 0) {
 	# Core feature
 	my $cfunc = "check_".$dbtype."_login";
 	if (defined(&$cfunc)) {
-		return &$cfunc($myd, $dbname, $dbuser, $dbpass);
+		return &$cfunc($myd, $dbname, $dbuser, $dbpass, $dbhost);
 		}
 	}
 elsif (&indexof($dbtype, &list_database_plugins()) >= 0) {

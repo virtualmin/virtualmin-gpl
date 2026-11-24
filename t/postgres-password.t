@@ -84,4 +84,65 @@ main::setup_postgres($synced);
 ok(!exists($synced->{'postgres_pass'}),
 	'synced login stores no separate password');
 
+# Installers check logins through scripts-lib.pl, which passes the app's host.
+my $scripts = File::Spec->catfile($root, 'scripts-lib.pl');
+do $scripts or die $@ || "Failed to load $scripts: $!";
+local @main::database_features = ( 'mysql', 'postgres' );
+local *main::indexof = sub {
+	my ($value, @values) = @_;
+	for (0 .. $#values) { return $_ if $values[$_] eq $value; }
+	return -1;
+	};
+
+# A fake module where the local socket uses peer authentication, which accepts
+# any password, and TCP logins must give the right one. A silent login stands
+# for psql reporting a failed connection as an empty result.
+my (@login, $host, $silent);
+*postgresql::set_login_pass = sub { @login = @_; };
+local *main::require_dom_postgres = sub { return 'postgresql'; };
+local *main::foreign_config = sub { return %postgresql::config; };
+local *main::foreign_call = sub {
+	my ($mod, $func, @args) = @_;
+	no strict 'refs';
+	return &{$mod."::".$func}(@args);
+	};
+local *main::execute_dom_psql = sub {
+	$host = $postgresql::config{'host'};
+	return { 'data' => [ ] } if ($silent);
+	!$host || $login[2] eq 'right' ||
+		die "password authentication failed\n";
+	return { 'data' => [ [ 'PostgreSQL 16.4' ] ] };
+	};
+
+# Login checks must test the password over the host web apps use.
+%postgresql::config = ( 'sameunix' => 1, 'login' => 'postgres' );
+my $app = { 'id' => 7 };
+ok(main::check_postgres_login($app, 'db', 'app', 'wrong'),
+	'a wrong password fails the login check');
+is($host, 'localhost', 'the check connects to localhost over TCP');
+is(main::check_postgres_login($app, 'db', 'app', 'right'), undef,
+	'the right password passes the login check');
+ok(!exists($postgresql::config{'host'}),
+	'the module goes back to its local socket');
+is($login[1], 'postgres', 'the module login is restored');
+
+# Remote servers are checked on their own host.
+$postgresql::config{'host'} = 'db.example.com';
+main::check_postgres_login($app, 'db', 'app', 'right');
+is($host, 'db.example.com', 'a remote server is checked on its host');
+delete($postgresql::config{'host'});
+
+# Apps that use the local socket are checked there, the way they connect.
+my @check = ( $app, 'postgres', 'db', 'app', 'right' );
+is(main::check_script_db_connection(@check, ''), undef,
+	'an app using the local socket passes its check');
+ok(!$host, 'the check for that app uses the local socket');
+main::check_script_db_connection(@check);
+is($host, 'localhost', 'other apps are still checked over TCP');
+
+# A login that returns no result has not been checked.
+$silent = 1;
+like(main::check_postgres_login($app, 'db', 'app', 'right'), qr/no result/,
+	'a login check with no result fails');
+
 done_testing();

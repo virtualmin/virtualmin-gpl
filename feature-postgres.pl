@@ -1061,19 +1061,29 @@ sub start_service_postgres
 return &postgresql::start_postgresql();
 }
 
-# check_postgres_login(&domain, dbname, dbuser, dbpass)
-# Tries to login to PostgreSQL with the given credentials, returning undef
-# on failure
+# check_postgres_login(&domain, dbname, dbuser, dbpass, [dbhost])
+# Tries to login to PostgreSQL with the given credentials, returning an error
+# message on failure or undef on success. The host is the one the app connects
+# to, or an empty string for a local socket. Without it, the host web apps
+# normally use is checked.
 sub check_postgres_login
 {
-my ($d, $dbname, $dbuser, $dbpass) = @_;
+my ($d, $dbname, $dbuser, $dbpass, $dbhost) = @_;
 &require_postgres();
 my $mod = &require_dom_postgres($d);
 my @defcreds = &get_dom_postgres_creds($d);
+# Connect the way the app does. Web apps normally use TCP, while a local socket
+# login may use peer authentication, which accepts any password.
+$dbhost = &get_database_host_postgres($d) if (!defined($dbhost));
+my $pkg = $mod;
+$pkg =~ s/[^A-Za-z0-9]/_/g;
+local ${$pkg."::config"}{'host'} = $dbhost;
 &foreign_call($mod, "set_login_pass", $defcreds[0], $dbuser, $dbpass);
 eval {
 	local $main::error_must_die = 1;
-	&execute_dom_psql($d, $dbname, "select version()");
+	my $rv = &execute_dom_psql($d, $dbname, "select version()");
+	# The psql command can report a failed connection as an empty result
+	@{$rv->{'data'} || [ ]} || die "PostgreSQL returned no result\n";
 	};
 my $err = $@;
 &foreign_call($mod, "set_login_pass", @defcreds);
