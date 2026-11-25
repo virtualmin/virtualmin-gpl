@@ -1327,7 +1327,8 @@ foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
 	eval {
 		local $main::error_must_die = 1;
 		my @dbs = map { $_->{'name'} }
-			      grep { $_->{'type'} eq $dt } @{$user->{'dbs'}};
+			      grep { $_->{'type'} eq $dt }
+			      &filter_user_databases($d, $user->{'dbs'});
 		if (&indexof($dt, &list_database_plugins()) < 0) {
 			# Create in core database
 			my $crfunc = "create_${dt}_database_user";
@@ -1689,7 +1690,8 @@ if ($_[1] && !$_[0]->{'domainowner'}) {
 		eval {
 			local $main::error_must_die = 1;
 			my @dbs = map { $_->{'name'} }
-				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
+				 grep { $_->{'type'} eq $dt }
+				 &filter_user_databases($_[1], $_[0]->{'dbs'});
 			next if (!@dbs);
 			if (&indexof($dt, &list_database_plugins()) < 0) {
 				# Create in core database
@@ -2439,7 +2441,8 @@ if ($_[2] && !$_[0]->{'domainowner'} &&
      $_[0]->{'user'} ne $_[1]->{'user'})) {
 	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($_[2]))) {
 		my @dbs = map { $_->{'name'} }
-				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
+				 grep { $_->{'type'} eq $dt }
+				 &filter_user_databases($_[2], $_[0]->{'dbs'});
 		my @olddbs = map { $_->{'name'} }
 				 grep { $_->{'type'} eq $dt } @{$_[1]->{'dbs'}};
 		my $plugin = &indexof($dt, &list_database_plugins()) >= 0;
@@ -2717,6 +2720,16 @@ if ($d && $user->{'home'} &&
 	return &text('user_ehomehome', $d->{'home'});
 	}
 return undef;
+}
+
+# filter_user_databases(&domain, &dbs)
+# Returns only those databases in a list that belong to the domain
+sub filter_user_databases
+{
+my ($d, $dbs) = @_;
+return ( ) if (!$dbs || !@$dbs);
+my %domdbs = map { $_->{'type'}."_".$_->{'name'}, 1 } &domain_databases($d);
+return grep { $domdbs{$_->{'type'}."_".$_->{'name'}} } @$dbs;
 }
 
 # set_user_quotas(username, home-quota, [&domain], [deleting])
@@ -11678,7 +11691,8 @@ if ($d) {
 				     'name' => $name,
 				     'desc' => $text{'databases_'.$type} });
 			}
-		$user->{'dbs'} = \@dbs;
+		# Skip databases the domain no longer has
+		$user->{'dbs'} = [ &filter_user_databases($d, \@dbs) ];
 		}
 	}
 
