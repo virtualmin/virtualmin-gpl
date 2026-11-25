@@ -2022,7 +2022,7 @@ sub create_mail_file
 {
 my ($user, $d, $nofolders) = @_;
 &require_mail();
-my $mf;
+my ($mf, $mfreal);
 my $md;
 my ($uid, $gid) = ($user->{'uid'}, $user->{'gid'});
 my @rv;
