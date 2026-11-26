@@ -678,6 +678,21 @@ else {
 		$err = &validate_user($d, $user, \%old);
 		&error($err) if ($err);
 
+		# Check the shell and key before moving the user's files.
+		if (defined($in{'shell'}) && $in{'shell'} ne $user->{'shell'} &&
+		    (!$mailbox || &master_admin())) {
+			&check_available_shell($in{'shell'}, 'mailbox', $user->{'shell'}) ||
+				&error($text{'user_eshell'});
+			$user->{'shell'} = $in{'shell'};
+			}
+		my $sshkey = $in{'sshkey'};
+		if ($sshkey_mode) {
+			$sshkey =~ s/\r|\n/ /g;
+			$sshkey = &trim($sshkey);
+			$sshkeyerr = &validate_ssh_pubkey($sshkey);
+			&error($sshkeyerr) if ($sshkeyerr);
+			}
+
 		if (!$mailbox) {
 			# Rename homedir
 			if ($user->{'home'} ne $home &&
@@ -687,15 +702,6 @@ else {
 					&rename_file($user->{'home'}, $home);
 					}
 				$user->{'home'} = $home;
-				}
-
-			# Update shell
-			if (defined($in{'shell'}) && 
-			    $in{'shell'} ne $user->{'shell'}) {
-				&check_available_shell($in{'shell'}, 'mailbox',
-						       $user->{'shell'}) ||
-					&error($text{'user_eshell'});
-				$user->{'shell'} = $in{'shell'};
 				}
 
 			# Set mail file location
@@ -710,25 +716,9 @@ else {
 				&rename_mail_file($user, \%old);
 				}
 			}
-		elsif (&master_admin()) {
-			# Update shell if called in master admin mode, and
-			# only if available 
-			if (defined($in{'shell'}) && 
-			    $in{'shell'} ne $user->{'shell'}) {
-				&check_available_shell($in{'shell'}, 'mailbox',
-						       $user->{'shell'}) ||
-					&error($text{'user_eshell'});
-				$user->{'shell'} = $in{'shell'};
-				}
-			}
 
 		# Update SSH public key
 		if ($sshkey_mode) {
-			my $sshkey = $in{'sshkey'};
-			$sshkey =~ s/\r|\n/ /g;
-			$sshkey = &trim($sshkey);
-			$sshkeyerr = &validate_ssh_pubkey($sshkey);
-			&error($sshkeyerr) if ($sshkeyerr);
 			my $existing_key = &get_domain_user_ssh_pubkey(
 						$d, \%old);
 			if ($existing_key) {
