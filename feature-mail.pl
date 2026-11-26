@@ -2071,8 +2071,9 @@ elsif ($mail_system == 2) {
 		}
 	}
 
+my $inhome = $user->{'home'} && ($mf || $md || '') =~ /^\Q$user->{'home'}\E\//;
 if ($mf) {
-	if (!-r $mf) {
+	if (!$inhome && !-r $mf) {
 		# Create the mailbox, owned by the user
 		if ($mfreal) {
 			# Create real file, and link to it
@@ -2093,7 +2094,7 @@ if ($mf) {
 	@rv = ( $mf, 0 );
 	}
 elsif ($md) {
-	if (!-d $md) {
+	if (!$inhome && !-d $md) {
 		# Create the Maildir, owned by the user
 		my $d;
 		&unlink_file($md);
@@ -2105,6 +2106,7 @@ elsif ($md) {
 	@rv = ( $md, 1 );
 	}
 
+my $umail;
 if (-d $user->{'home'}) {
 	# Create Usermin ~/mail directory (if installed)
 	if (&foreign_installed("usermin")) {
@@ -2117,17 +2119,13 @@ if (-d $user->{'home'}) {
 		&read_file("$usermin::config{'usermin_dir'}/$mod/uconfig",
 			   \%uconfig);
 		my $umd = $uconfig{'mailbox_dir'} || "mail";
-		my $umail = "$user->{'home'}/$umd";
-		if (!-e $umail) {
-			&make_dir($umail, 0755);
-			&set_ownership_permissions($uid, $gid, undef, $umail);
-			}
+		$umail = "$user->{'home'}/$umd";
 		}
 	}
 
 # Create spam, virus, drafts, sent and trash Maildir sub-directories
+my @folders;
 if ($md && $md =~ /\/Maildir$/ && !$nofolders) {
-	my @folders;
 	foreach my $n ("trash", "drafts", "sent") {
 		my $tname = $config{$n.'_folder'};
 		$tname ||= $n;
@@ -2153,6 +2151,48 @@ if ($md && $md =~ /\/Maildir$/ && !$nofolders) {
 			push(@folders, "$md/$1");
 			}
 		}
+	}
+
+# A home the mailbox user cannot write to gets the top of its mail store, a
+# file or a directory, from the domain owner. Root then gives the opened entry
+# to the user, but only while the domain owner still owns it, so swapping in a
+# link gains nothing.
+my ($top) = $inhome && ($mf || $md) =~ /^(\Q$user->{'home'}\E\/[^\/]+)/;
+if ($top && !-e $top && $d->{'uid'} && !&is_readonly_mode() &&
+    !&write_as_mailbox_user($user, sub { -w $user->{'home'} })) {
+	my $fh = &write_as_domain_user($d, sub {
+		&make_dir($top, 0700) if ($top ne $mf);
+		sysopen(my $h, $top, Fcntl::O_RDONLY() | Fcntl::O_NOFOLLOW() |
+			($top eq $mf ? Fcntl::O_CREAT() | Fcntl::O_EXCL()
+				     : Fcntl::O_DIRECTORY()), 0600) || return;
+		return $h;
+		});
+	if ($fh && (stat($fh))[4] == $d->{'uid'} && chown($uid, $gid, $fh) &&
+	    $top eq $md) {
+		&write_as_mailbox_user($user, sub {
+			foreach my $s ("cur", "tmp", "new") {
+				&make_dir("$md/$s", 0700);
+				}
+			});
+		}
+	}
+
+# The user controls their home, so mail there is created as the user. Webmin
+# calls that can run a shell, such as unlink_file and open_tempfile, are
+# avoided, as the shell would switch back to root.
+&write_as_mailbox_user($user, sub {
+	return if (&is_readonly_mode());
+	if ($inhome && $mf && !-e $mf) {
+		# Just one file
+		unlink($mf);
+		open(my $fh, ">", $mf) && close($fh);
+		&set_ownership_permissions($uid, $gid, 0600, $mf);
+		}
+	if ($inhome && $md && !-d $md) {
+		# Create the Maildir, owned by the user
+		unlink($md);
+		unshift(@folders, $md);
+		}
 
 	# Actually create the folders
 	my @subs;
@@ -2162,22 +2202,19 @@ if ($md && $md =~ /\/Maildir$/ && !$nofolders) {
 			}
 		next if (-d $f);
 		foreach $d ($f, "$f/cur", "$f/tmp", "$f/new") {
-			&make_dir($d, 0700, 1);
+			&make_dir_recursive($d, 0700);
 			&set_ownership_permissions($uid, $gid, undef, $d);
 			}
 		}
+	&make_dir($umail, 0755) if ($umail && !-e $umail);
 
-	# Create subscriptions file for Dovecot
-	if (@subs && !-e "$md/subscriptions") {
-		&open_tempfile(SUBS, ">$md/subscriptions");
-		foreach my $s (@subs) {
-			&print_tempfile(SUBS, $s."\n");
-			}
-		&close_tempfile(SUBS);
-		&set_ownership_permissions($uid, $gid, undef,
-					   "$md/subscriptions");
+	# Create subscriptions file for Dovecot, removed if the quota is full
+	if (@subs && !-e "$md/subscriptions" &&
+	    open(my $fh, ">", "$md/subscriptions")) {
+		print $fh map { $_."\n" } @subs;
+		close($fh) || unlink("$md/subscriptions");
 		}
-	}
+	});
 
 return @rv;
 }
