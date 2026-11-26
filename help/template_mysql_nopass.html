@@ -1,19 +1,21 @@
-<header>MySQL password for new domains</header>
+<header>Database password for new domains</header>
 
-This option controls the initial MySQL password for new virtual servers. The
-options are :
+This option sets the initial MySQL and PostgreSQL password for new virtual
+servers, and whether it changes when the administration password changes.
+Sub-servers use the database login of their parent virtual server. <p>
 
-<dl>
-<dt><b>Sync with administration login</b>
-<dd>The password for MySQL is always kept the same as the virtual server's
- administration login.<p>
+When the password is synced with the administration login, changing the
+administration password also changes the database password, unless a separate
+database password has been set. <p>
 
-<dt><b>Same as initial administration login</b>
-<dd>The password is initially the same as the administration login, but is not modified if the administration password is changed.<p>
+When it is the same as the initial administration login, the database password
+starts out as the administration password, but later administration password
+changes leave it unchanged. <p>
 
-<dt><b>Generate randomly</b>
-<dd>When the virtual server is created, a randomly generated MySQL password is chosen and not changed.<p>
-</dl>
+When it is generated randomly, each new virtual server gets its own random
+database password, which administration password changes leave unchanged. <p>
+
+Virtual servers that store hashed passwords always get a random database
+password, so this option does not apply to them. <p>
 
 <footer>
-

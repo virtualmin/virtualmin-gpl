@@ -1327,7 +1327,8 @@ foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
 	eval {
 		local $main::error_must_die = 1;
 		my @dbs = map { $_->{'name'} }
-			      grep { $_->{'type'} eq $dt } @{$user->{'dbs'}};
+			      grep { $_->{'type'} eq $dt }
+			      &filter_user_databases($d, $user->{'dbs'});
 		if (&indexof($dt, &list_database_plugins()) < 0) {
 			# Create in core database
 			my $crfunc = "create_${dt}_database_user";
@@ -1689,7 +1690,8 @@ if ($_[1] && !$_[0]->{'domainowner'}) {
 		eval {
 			local $main::error_must_die = 1;
 			my @dbs = map { $_->{'name'} }
-				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
+				 grep { $_->{'type'} eq $dt }
+				 &filter_user_databases($_[1], $_[0]->{'dbs'});
 			next if (!@dbs);
 			if (&indexof($dt, &list_database_plugins()) < 0) {
 				# Create in core database
@@ -2439,7 +2441,8 @@ if ($_[2] && !$_[0]->{'domainowner'} &&
      $_[0]->{'user'} ne $_[1]->{'user'})) {
 	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($_[2]))) {
 		my @dbs = map { $_->{'name'} }
-				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
+				 grep { $_->{'type'} eq $dt }
+				 &filter_user_databases($_[2], $_[0]->{'dbs'});
 		my @olddbs = map { $_->{'name'} }
 				 grep { $_->{'type'} eq $dt } @{$_[1]->{'dbs'}};
 		my $plugin = &indexof($dt, &list_database_plugins()) >= 0;
@@ -2707,8 +2710,10 @@ if ($d && @{$user->{'dbs'}} && (!$old || !@{$old->{'dbs'}})) {
 		return $text{'user_edbpass'};
 		}
 	# Check for username clash
-	return &check_any_database_user_clash($d, $user->{'user'})
-		if (!$user->{'nocheck'});
+	if (!$user->{'nocheck'}) {
+		my $err = &check_any_database_user_clash($d, $user->{'user'});
+		return $err if ($err);
+		}
 	}
 if ($d && $user->{'home'} &&
     (!$old || $old->{'home'} ne $user->{'home'}) &&
@@ -2717,6 +2722,16 @@ if ($d && $user->{'home'} &&
 	return &text('user_ehomehome', $d->{'home'});
 	}
 return undef;
+}
+
+# filter_user_databases(&domain, &dbs)
+# Returns only those databases in a list that belong to the domain
+sub filter_user_databases
+{
+my ($d, $dbs) = @_;
+return ( ) if (!$dbs || !@$dbs);
+my %domdbs = map { $_->{'type'}."_".$_->{'name'}, 1 } &domain_databases($d);
+return grep { $domdbs{$_->{'type'}."_".$_->{'name'}} } @$dbs;
 }
 
 # set_user_quotas(username, home-quota, [&domain], [deleting])
@@ -8657,7 +8672,7 @@ if ($dom->{'hashpass'} && !$dom->{'parent'} && !$dom->{'postgres_pass'}) {
 	$dom->{'postgres_pass'} = &random_password();
 	delete($dom->{'postgres_enc_pass'});
 	}
-elsif ($tmpl->{'postgres_nopass'} == 2 && !$dom->{'parent'} &&
+elsif ($tmpl->{'mysql_nopass'} == 2 && !$dom->{'parent'} &&
        !$dom->{'postgres_pass'}) {
 	# Using random password by default
 	$dom->{'postgres_pass'} = &random_password();
@@ -11678,7 +11693,8 @@ if ($d) {
 				     'name' => $name,
 				     'desc' => $text{'databases_'.$type} });
 			}
-		$user->{'dbs'} = \@dbs;
+		# Skip databases the domain no longer has
+		$user->{'dbs'} = [ &filter_user_databases($d, \@dbs) ];
 		}
 	}
 
@@ -13824,14 +13840,15 @@ return $config{'quota_commands'} ? 1 : 0;
 }
 
 # has_quotacheck()
-# Returns 1 if the home or mail filesystems support quota checking
+# Returns 1 if the home filesystem supports quota checking
 sub has_quotacheck
 {
 return 0 if (&has_quota_commands());
 # Btrfs repairs qgroup accounting with quota rescans, not quotacheck.
 return 0 if (&has_btrfs_quotas());
 &require_useradmin();
-return 1 if (&quota::can_quotacheck($config{'home_quotas'}));
+return 1 if (!defined(&quota::can_quotacheck) ||
+	     &quota::can_quotacheck($config{'home_quotas'}));
 return 0;
 }
 
@@ -19131,6 +19148,12 @@ foreach my $t (@template_features) {
 	my $sfunc = "show_template_".$t;
 	next if (!defined(&$sfunc));
 	next if ($t eq 'plugins' && !&has_template_plugins());
+	if ($t eq 'mysql' || $t eq 'postgres') {
+		# MySQL and PostgreSQL settings share the mysql section
+		push(@rv, 'mysql')
+			if ($t eq 'mysql' && &list_template_database_types());
+		next;
+		}
 	my $cfunc = "check_module_".$t;
 	next if (defined(&$cfunc) && !&$cfunc());
 	if ($config{$t} || !$isfeature{$t} ||
@@ -19159,6 +19182,15 @@ foreach my $f (@plugins) {
 		}
 	}
 return @rvdesc;
+}
+
+# list_template_database_types()
+# Returns the database types with template settings to edit. These are the
+# enabled MySQL and PostgreSQL features whose Webmin modules are available.
+sub list_template_database_types
+{
+return grep { my $cfunc = "check_module_".$_;
+	      $config{$_} && &$cfunc() } ( 'mysql', 'postgres' );
 }
 
 # substitute_domain_template(string, &domain, [&extra-hash], [html-escape])

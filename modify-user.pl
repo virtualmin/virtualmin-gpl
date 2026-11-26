@@ -502,17 +502,11 @@ if (defined($newusername)) {
 	if (!$user->{'fixedhome'} &&
 	    $user->{'home'} eq "$d->{'home'}/$config{'homes_dir'}/$shortusername") {
 		$user->{'home'} = "$d->{'home'}/$config{'homes_dir'}/$newusername";
-		&rename_file($olduser->{'home'}, $user->{'home'});
 		}
 
 	# Update his email address
 	if ($user->{'email'} && !$user->{'noprimary'}) {
 		$user->{'email'} = $newusername."\@".$d->{'dom'};
-		}
-
-	if (!$user->{'nomailfile'}) {
-		# Rename his mail file, if needed
-		&rename_mail_file($user, $olduser);
 		}
 	}
 if ($shell) {
@@ -527,6 +521,29 @@ if (defined($nospam)) {
 %delgroups = map { $_, 1 } @delgroups;
 @newsecs = grep { !$delgroups{$_} } @newsecs;
 $user->{'secs'} = \@newsecs;
+
+# Validate the proposed account before moving its home or mail.
+$user->{'nocheck'} = 1 if ($user->{'extra'});
+$err = &validate_user($d, $user, $olduser);
+&usage($err) if ($err);
+
+my ($pubkey, $existing_pubkey);
+if ($sshpubkey && !$user->{'extra'}) {
+	# Only the master administrator can select a key from a server file.
+	$pubkey = $is_master && -r $sshpubkey
+		? &get_ssh_pubkey_from_file($sshpubkey, $sshpubkeyid)
+		: $sshpubkey;
+	$err = &validate_ssh_pubkey($pubkey);
+	&usage($err) if ($err);
+	$existing_pubkey = &get_domain_user_ssh_pubkey($d, $olduser);
+	}
+
+if (defined($newusername)) {
+	if ($user->{'home'} ne $olduser->{'home'}) {
+		&rename_file($olduser->{'home'}, $user->{'home'});
+		}
+	&rename_mail_file($user, $olduser) if (!$user->{'nomailfile'});
+	}
 
 if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
 	# Parse using the original username so local delivery survives a rename.
@@ -609,11 +626,6 @@ if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
 		}
 	}
 
-# Validate user
-$user->{'nocheck'} = 1 if ($user->{'extra'});
-$err = &validate_user($d, $user, $olduser);
-&usage($err) if ($err);
-
 # Save the user
 if ($user->{'extra'}) {
 	if ($user->{'type'} eq 'db') {
@@ -628,24 +640,9 @@ if ($user->{'extra'}) {
 		}
 	}
 else {
-	# Update SSH key if given
-	if ($sshpubkey) {
-		my $pubkey;
-		# Only the master administrator can load a key from a server file
-		my $sshpubkeyfile =
-			$is_master && -r $sshpubkey ? $sshpubkey : undef;
-		if ($sshpubkeyfile) {
-			# Select the requested key from the server-side file
-			$pubkey = &get_ssh_pubkey_from_file(
-				$sshpubkeyfile, $sshpubkeyid);
-			}
-		else {
-			# Treat direct input as literal public key content
-			$pubkey = $sshpubkey;
-			}
-		my $pubkeyerr = &validate_ssh_pubkey($pubkey);
-		&usage($pubkeyerr) if ($pubkeyerr);
-		my $existing_pubkey = &get_domain_user_ssh_pubkey($d, $olduser);
+	# Save the Unix login before using it to update authorized_keys.
+	&modify_user($user, $olduser, $d);
+	if ($pubkey) {
 		if ($existing_pubkey) {
 			&update_domain_user_ssh_pubkey(
 				$d, $user, $olduser, $pubkey)
@@ -656,8 +653,6 @@ else {
 			&usage($err) if ($err);
 			}
 		}
-	# Modify user
-	&modify_user($user, $olduser, $d);
 	}
 
 if ($remail) {

@@ -166,7 +166,7 @@ if (!&check_jailkit_support()) {
 	# Update scripts hostnames, if jail changed
 	if ($jailupd) {
 		&modify_webmin($d, $d);
-		foreach my $dbt ('mysql', 'psql') {
+		foreach my $dbt ('mysql', 'postgres') {
 			&update_scripts_creds($d, $d, 'dbhost', undef, $dbt);
 			}
 		}

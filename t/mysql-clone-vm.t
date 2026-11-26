@@ -194,7 +194,9 @@ $attempted{$names[5]} = 1;
 	$names[0], $names[5], $users[5]);
 is($status, 1 << 8, 'restore failure reaches the CLI exit status') or diag($output);
 like($output, qr/Corrupted primary clone dump/, 'corrupts the intended dump');
-like($output, qr/restore into .* failed : .*ERROR 1064/, 'real importer rejects the invalid SQL');
+my $restore_db = domain($names[5])->{'db'};
+like($output, qr/restore into \Q$restore_db\E failed : .*?ERROR 1064\b/s,
+	'real importer rejects the invalid SQL');
 check_later_database($names[5]);
 }
 

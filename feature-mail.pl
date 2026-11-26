@@ -2022,7 +2022,7 @@ sub create_mail_file
 {
 my ($user, $d, $nofolders) = @_;
 &require_mail();
-my $mf;
+my ($mf, $mfreal);
 my $md;
 my ($uid, $gid) = ($user->{'uid'}, $user->{'gid'});
 my @rv;
@@ -2215,7 +2215,15 @@ sub delete_mail_file
 &mailboxes::delete_user_index_files($_[0]->{'user'});
 
 my $umf = &user_mail_file($_[0]);
-if ($umf) {
+if ($umf && $_[0]->{'home'} && $umf =~ /^\Q$_[0]->{'home'}\E\//) {
+	# Remove mail in the home with the mailbox user's permissions.
+	my $user = $_[0];
+	if ($user->{'uid'} && $user->{'gid'} && !&is_readonly_mode()) {
+		require File::Path;
+		&write_as_mailbox_user($user, sub { File::Path::remove_tree($umf) });
+		}
+	}
+elsif ($umf) {
 	&system_logged("rm -rf ".quotemeta($umf));
 	}
 my $noat;

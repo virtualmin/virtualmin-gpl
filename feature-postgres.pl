@@ -167,8 +167,8 @@ else {
 	}
 
 # Save the initial password
-if ($tmpl->{'postgres_nopass'}) {
-	&set_postgres_pass(&postgres_pass($d, 1));
+if ($tmpl->{'mysql_nopass'}) {
+	&set_postgres_pass($d, &postgres_pass($d, 1));
 	}
 return 1;
 }
@@ -194,7 +194,7 @@ my ($d, $noquote) = @_;
 if ($d->{'parent'}) {
 	# Password comes from parent domain
 	my $parent = &get_domain($d->{'parent'});
-	return &postgres_pass($parent);
+	return &postgres_pass($parent, $noquote);
 	}
 &require_postgres();
 my $pass = defined($d->{'postgres_pass'}) ? $d->{'postgres_pass'}
@@ -204,12 +204,14 @@ return !$noquote && &get_dom_remote_postgres_version($d) >= 7 ?
 }
 
 # postgres_quote(string)
-# Returns a string in '' quotes, with escaping if needed
+# Returns a string in '' quotes, with escaping if needed. The Webmin PostgreSQL
+# module doubles every backslash before running SQL, so this returns an escape
+# string, which turns each doubled backslash back into one on any server.
 sub postgres_quote
 {
 my ($str) = @_;
 $str =~ s/'/''/g;
-return "'$str'";
+return "E'$str'";
 }
 
 # postgres_uquote(string)
@@ -253,7 +255,7 @@ if ($pass ne $oldpass && !$d->{'parent'} &&
 		# Update all installed scripts database password which are
 		# using PostgreSQL
 		&update_scripts_creds(
-			$d, $oldd, 'dbpass', &postgres_pass($d), 'psql');
+			$d, $oldd, 'dbpass', &postgres_pass($d, 1), 'postgres');
 		}
 	else {
 		&$second_print($text{'save_nopostgres'});
@@ -319,7 +321,7 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 			# Update all installed scripts database username which
 			# are using PostgreSQL
 			&update_scripts_creds(
-				$d, $oldd, 'dbuser', $user, 'psql');
+				$d, $oldd, 'dbuser', $user, 'postgres');
 			}
 		else {
 			# Cannot
@@ -1059,19 +1061,29 @@ sub start_service_postgres
 return &postgresql::start_postgresql();
 }
 
-# check_postgres_login(&domain, dbname, dbuser, dbpass)
-# Tries to login to PostgreSQL with the given credentials, returning undef
-# on failure
+# check_postgres_login(&domain, dbname, dbuser, dbpass, [dbhost])
+# Tries to login to PostgreSQL with the given credentials, returning an error
+# message on failure or undef on success. The host is the one the app connects
+# to, or an empty string for a local socket. Without it, the host web apps
+# normally use is checked.
 sub check_postgres_login
 {
-my ($d, $dbname, $dbuser, $dbpass) = @_;
+my ($d, $dbname, $dbuser, $dbpass, $dbhost) = @_;
 &require_postgres();
 my $mod = &require_dom_postgres($d);
 my @defcreds = &get_dom_postgres_creds($d);
+# Connect the way the app does. Web apps normally use TCP, while a local socket
+# login may use peer authentication, which accepts any password.
+$dbhost = &get_database_host_postgres($d) if (!defined($dbhost));
+my $pkg = $mod;
+$pkg =~ s/[^A-Za-z0-9]/_/g;
+local ${$pkg."::config"}{'host'} = $dbhost;
 &foreign_call($mod, "set_login_pass", $defcreds[0], $dbuser, $dbpass);
 eval {
 	local $main::error_must_die = 1;
-	&execute_dom_psql($d, $dbname, "select version()");
+	my $rv = &execute_dom_psql($d, $dbname, "select version()");
+	# The psql command can report a failed connection as an empty result
+	@{$rv->{'data'} || [ ]} || die "PostgreSQL returned no result\n";
 	};
 my $err = $@;
 &foreign_call($mod, "set_login_pass", @defcreds);
@@ -1134,7 +1146,8 @@ return @postgres_encodings_cache;
 }
 
 # show_template_postgres(&tmpl)
-# Outputs HTML for editing PostgreSQL related template options
+# Outputs HTML for PostgreSQL-only template options. These appear in the
+# shared database section, so there is no separate PostgreSQL section.
 sub show_template_postgres
 {
 my ($tmpl) = @_;
@@ -1151,7 +1164,8 @@ print &ui_table_row(&hlink($text{'tmpl_postgres_encoding'},
 }
 
 # parse_template_postgres(&tmpl)
-# Updates PostgreSQL related template options from %in
+# Updates PostgreSQL-only template options from %in, for the shared database
+# section
 sub parse_template_postgres
 {
 my ($tmpl) = @_;
@@ -1494,6 +1508,7 @@ return &foreign_call($mod, "list_databases");
 # this domain
 sub get_dom_postgres_creds
 {
+my ($d) = @_;
 my $mod = &require_dom_postgres($d);
 my %rqconfig = &foreign_config($mod);
 return ($rqconfig{'sameunix'}, $rqconfig{'login'}, $rqconfig{'pass'});

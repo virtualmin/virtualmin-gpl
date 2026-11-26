@@ -818,7 +818,19 @@ sub update_all_installed_scripts_database_credentials
 sub update_scripts_creds
 {
 my ($d, $oldd, $type, $value, $dbtype, $sinfo) = @_;
-my @domain_scripts = $sinfo ? ($sinfo) : &list_domain_scripts($d);
+# Sub-servers use their parent's database login, so their web apps need the
+# same update. Each entry holds the app's own domain and its install details.
+my @domain_scripts;
+if ($sinfo) {
+	@domain_scripts = ( [ $d, $sinfo ] );
+	}
+else {
+	my @subs = $d->{'parent'} ? ( ) : &get_domain_by("parent", $d->{'id'});
+	foreach my $sd ($d, @subs) {
+		push(@domain_scripts,
+		     map { [ $sd, $_ ] } &list_domain_scripts($sd));
+		}
+	}
 my $do_wapp_conf_file = sub
 {
 my ($wapp_conf_file, $wapp_conf_types, $sdata,
@@ -886,6 +898,14 @@ if ($wapp_conf_type_curr) {
 			       'sdbname' => $sdbname,
 			       'sdbuser' => $sdbuser,
 			       'sdbpass' => $sdbpass );
+		# The rebuilt line holds every value, so escape the unchanged
+		# ones the same way as the new value
+		if (defined(&$value_func)) {
+			foreach my $o (keys %opts_mult) {
+				$opts_mult{$o} = &$value_func(
+					$opts_mult{$o}, @value_func_params);
+				}
+			}
 		}
 	else {
 		# Construct simple replacement based on type
@@ -975,7 +995,8 @@ return 0;
 };
 
 my ($printed_type, @printed_name);
-foreach my $script (@domain_scripts) {
+foreach my $ds (@domain_scripts) {
+	my ($sd, $script) = @$ds;
 	my $sname = $script->{'name'};
 	my $sdata = &get_script($sname);
 	my $sproject = $script->{'opts'}->{'project'};
@@ -989,7 +1010,7 @@ foreach my $script (@domain_scripts) {
 		}
 	if (defined(&$db_conn_func) && $dbtype eq $sdbtype) {
 		# Check if a script has a description sub
-		my $db_conn_desc = &$db_conn_func($d, $script->{'opts'});
+		my $db_conn_desc = &$db_conn_func($sd, $script->{'opts'});
 		if (ref($db_conn_desc)) {
 			&$first_print($text{"save_installed_scripts_${type}_".
 				      "${dbtype}"}) if (!$printed_type++);
@@ -1015,7 +1036,7 @@ foreach my $script (@domain_scripts) {
 				}
 			if ($updated && defined(&$db_conn_update_func)) {
 				my $err = &$db_conn_update_func(
-					$d, $script->{'opts'}, $type,
+					$sd, $script->{'opts'}, $type,
 					$value, $dbtype);
 				&$first_print($err) if ($err);
 				}
@@ -2420,18 +2441,21 @@ else {
 return undef;
 }
 
-# check_script_db_connection([&domain], dbtype, dbname, dbuser, dbpass)
+# check_script_db_connection([&domain], dbtype, dbname, dbuser, dbpass,
+#			     [dbhost])
 # Returns an error message if connection to the database with the given details
-# would fail, undef otherwise
+# would fail, undef otherwise. The host is the one the app connects to, or an
+# empty string for a local socket. Only the PostgreSQL check uses it, and
+# without it checks the domain's database host.
 sub check_script_db_connection
 {
 my $myd = ref($_[0]) ? shift(@_) : $d;
-my ($dbtype, $dbname, $dbuser, $dbpass) = @_;
+my ($dbtype, $dbname, $dbuser, $dbpass, $dbhost) = @_;
 if (&indexof($dbtype, @database_features) >= 0) {
 	# Core feature
 	my $cfunc = "check_".$dbtype."_login";
 	if (defined(&$cfunc)) {
-		return &$cfunc($d, $dbname, $dbuser, $dbpass);
+		return &$cfunc($myd, $dbname, $dbuser, $dbpass, $dbhost);
 		}
 	}
 elsif (&indexof($dbtype, &list_database_plugins()) >= 0) {
