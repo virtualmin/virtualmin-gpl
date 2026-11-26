@@ -115,6 +115,49 @@ my $completed = eval {
 		ok(!-d $home && $newhome && -f "$newhome/$name",
 		   "$case retry moves the account and its files");
 		}
+
+	# Keep only the public halves of the two disposable test keys.
+	require URI::Escape;
+	my @keys;
+	foreach my $name (qw(managed manual)) {
+		my $file = "$tmp/$name";
+		system('ssh-keygen', '-q', '-t', 'ed25519', '-N', '', '-C', $name,
+		       '-f', $file) == 0 or die 'Cannot generate fixture key';
+		unlink($file) or die $!;
+		open(my $fh, '<', "$file.pub") or die $!;
+		chomp(my $key = <$fh>);
+		push(@keys, $key);
+		close($fh);
+		}
+	my ($managed, $manual) = @keys;
+
+	# A form rename can supply a first key or resubmit the current one.
+	foreach my $case (qw(first existing)) {
+		my $old = "keys$case";
+		my $new = "renamed$case";
+		cli('create-user', @domain, '--user', $old, '--passfile', $passfile,
+		    '--quota', 'UNLIMITED', $case eq 'existing' ? ('--ssh-pubkey', $managed) : ());
+		if ($case eq 'existing') {
+			chomp(my $login = cli('list-users', @domain, '--user', $old, '--name-only'));
+			my $home = (getpwnam($login))[7] or die 'Missing fixture account';
+			open(my $fh, '>>', "$home/.ssh/authorized_keys") or die $!;
+			print $fh "\n$manual\n" or die $!;
+			close($fh) or die $!;
+			}
+		my $html = form($id, $old, $new, 'sshkey_mode=2',
+				'sshkey='.URI::Escape::uri_escape($managed));
+		ok($html =~ /^Location: .*list_users\.cgi\?dom=\Q$id\E\s*$/mi,
+		   "form saves rename with $case key");
+		chomp(my $login = cli('list-users', @domain, '--user', $new, '--name-only'));
+		my $home = (getpwnam($login))[7];
+		my @lines;
+		if ($home && open(my $fh, '<', "$home/.ssh/authorized_keys")) {
+			chomp(@lines = <$fh>);
+			}
+		is_deeply([ grep { length } @lines ],
+			  [ "$managed [$id:$new]", $case eq 'existing' ? ($manual) : () ],
+			  "renamed account has the expected keys ($case)");
+		}
 	1;
 	};
 my $error = $@;

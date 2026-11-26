@@ -527,7 +527,7 @@ $user->{'nocheck'} = 1 if ($user->{'extra'});
 $err = &validate_user($d, $user, $olduser);
 &usage($err) if ($err);
 
-my $pubkey;
+my ($pubkey, $existing_pubkey);
 if ($sshpubkey && !$user->{'extra'}) {
 	# Only the master administrator can select a key from a server file.
 	$pubkey = $is_master && -r $sshpubkey
@@ -535,6 +535,7 @@ if ($sshpubkey && !$user->{'extra'}) {
 		: $sshpubkey;
 	$err = &validate_ssh_pubkey($pubkey);
 	&usage($err) if ($err);
+	$existing_pubkey = &get_domain_user_ssh_pubkey($d, $olduser);
 	}
 
 if (defined($newusername)) {
@@ -639,9 +640,9 @@ if ($user->{'extra'}) {
 		}
 	}
 else {
-	# Update SSH key if given
+	# Save the Unix login before using it to update authorized_keys.
+	&modify_user($user, $olduser, $d);
 	if ($pubkey) {
-		my $existing_pubkey = &get_domain_user_ssh_pubkey($d, $olduser);
 		if ($existing_pubkey) {
 			&update_domain_user_ssh_pubkey(
 				$d, $user, $olduser, $pubkey)
@@ -652,8 +653,6 @@ else {
 			&usage($err) if ($err);
 			}
 		}
-	# Modify user
-	&modify_user($user, $olduser, $d);
 	}
 
 if ($remail) {

@@ -685,12 +685,14 @@ else {
 				&error($text{'user_eshell'});
 			$user->{'shell'} = $in{'shell'};
 			}
+		my $existing_key;
 		my $sshkey = $in{'sshkey'};
 		if ($sshkey_mode) {
 			$sshkey =~ s/\r|\n/ /g;
 			$sshkey = &trim($sshkey);
 			$sshkeyerr = &validate_ssh_pubkey($sshkey);
 			&error($sshkeyerr) if ($sshkeyerr);
+			$existing_key = &get_domain_user_ssh_pubkey($d, \%old);
 			}
 
 		if (!$mailbox) {
@@ -717,10 +719,11 @@ else {
 				}
 			}
 
+		# Save the Unix login before writing its SSH key.
+		&modify_user($user, \%old, $d);
+
 		# Update SSH public key
 		if ($sshkey_mode) {
-			my $existing_key = &get_domain_user_ssh_pubkey(
-						$d, \%old);
 			if ($existing_key) {
 				&update_domain_user_ssh_pubkey(
 					$d, $user, \%old, $sshkey)
@@ -735,9 +738,6 @@ else {
 		else {
 			&delete_domain_user_ssh_pubkey($d, \%old);
 			}
-
-		# Update the user and any virtusers and aliases
-		&modify_user($user, \%old, $d);
 
 		# Send an email upon changes
 		if ($newmailto) {
