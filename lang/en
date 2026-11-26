@@ -5424,6 +5424,7 @@ move_ok=Move Now
 move_err=Failed to move virtual server
 move_esame=Same parent server selected
 move_eparent=A virtual server cannot be moved under itself
+move_esub=A virtual server cannot be moved under a sub-server
 move_ebtrfs=Virtual servers cannot be moved between ownership trees while Btrfs subvolume quotas are enabled
 move_doing=Moving virtual server $1 under $2 ..
 move_doing2=Converting virtual server $1 to a parent server ..

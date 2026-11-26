@@ -15647,14 +15647,23 @@ foreach my $k (keys %$d) {
 	}
 }
 
-# move_virtual_server(&domain, &parent)
-# Moves some virtual server so that it is now owned by the new parent domain
+# move_virtual_server(&domain, &target)
+# Moves a server to a new owner or changes where an alias points.
 sub move_virtual_server
 {
-my ($d, $parent) = @_;
+my ($d, $target) = @_;
 # Moving a home across ownership trees requires atomically rebuilding its
 # subvolume and parent-qgroup hierarchy, which is not supported yet.
 &error($text{'move_ebtrfs'}) if (&has_btrfs_quotas());
+&error($text{'move_eparent'}) if ($target->{'id'} == $d->{'id'});
+# An alias can point to a sub-server. Its owner is the top-level server.
+my $parent = $target;
+if ($d->{'alias'} && !$target->{'alias'} && $target->{'parent'}) {
+	$parent = &get_domain($target->{'parent'});
+	}
+&error($text{'move_esub'}) if (!$parent || $parent->{'parent'});
+&error($text{'move_esame'}) if ($d->{'parent'} == $parent->{'id'} &&
+	(!$d->{'alias'} || $d->{'alias'} == $target->{'id'}));
 my $oldd = { %$d };
 my $oldparent;
 if ($d->{'parent'}) {
@@ -15666,12 +15675,11 @@ my (@doms, @olddoms, @remove_feats);
 &set_parent_attributes($d, $parent);
 &change_home_directory($d, &server_home_directory($d, $parent));
 if ($d->{'alias'}) {
-	# Set new alias target to new parent
-	$d->{'alias'} = $parent->{'id'};
+	$d->{'alias'} = $target->{'id'};
 
 	# Clear any alias features that the new domain doesn't have
 	foreach my $f (@alias_features) {
-		if ($d->{$f} && !$parent->{$f}) {
+		if ($d->{$f} && !$target->{$f}) {
 			$d->{$f} = 0;
 			push(@remove_feats, $f);
 			}
@@ -15878,8 +15886,8 @@ if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 	}
 
 # If the domain was an alias, re-copy any mail aliases
-if ($d->{'alias'} && $d->{'mail'} && $parent->{'mail'}) {
-	&sync_alias_virtuals($parent);
+if ($d->{'alias'} && $d->{'mail'} && $target->{'mail'}) {
+	&sync_alias_virtuals($target);
 	}
 
 &run_post_actions();

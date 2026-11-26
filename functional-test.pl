@@ -2953,6 +2953,26 @@ $movealias_tests = [
 	  'grep' => 'Test new home page',
 	},
 
+	# A sub-server can be the alias target while its parent owns the alias.
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_rename_domain ],
+		      [ 'parent', $test_target_domain ], [ 'dir' ], [ 'mail' ],
+		      @create_args ],
+	},
+	{ 'command' => 'move-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_rename_domain ] ],
+	},
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'alias', $test_rename_domain ],
+		      [ 'parent', $test_target_domain ], [ 'name-only' ] ],
+	  'grep' => $test_subdomain,
+	},
+	{ 'command' => 'move-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_target_domain ] ],
+	},
+
 	# Cleanup the original parent domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],

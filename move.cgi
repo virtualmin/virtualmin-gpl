@@ -11,12 +11,6 @@ $oldd = { %$d };
 if ($in{'parent'}) {
 	# Get the selected parent domain object
 	$parent = &get_domain($in{'parent'});
-	if ($d->{'parent'}) {
-		$parent->{'id'} == $d->{'parent'} && &error($text{'move_esame'});
-		}
-	else {
-		$parent->{'id'} == $d->{'id'} && &error($text{'move_eparent'});
-		}
 	&can_config_domain($parent) || &error($text{'move_ecannot2'});
 
 	# Check if parent has MySQL feature enabled too
