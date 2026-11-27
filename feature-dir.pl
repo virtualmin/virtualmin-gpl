@@ -272,9 +272,14 @@ if (-d $d->{'home'} && &safe_delete_dir($d, $d->{'home'})) {
 		return 1;
 		}
 
+	# Unlock PHP wrappers before removing the home.
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable($d, 1, 1, 1);
+		}
+
 	# Walk from the owner's home before removing a sub-server.
 	if ($d->{'parent'}) {
-		my ($ok, $err) = &delete_dir_beneath($d, $d->{'home'}, 1);
+		my ($ok, $err) = &delete_dir_beneath($d, $d->{'home'});
 		# As for a top-level home, rm may leave a mount point behind.
 		$ok = 1 if (!$ok && defined($err) &&
 			    &sub_mount_points($d->{'home'}));
@@ -285,9 +290,6 @@ if (-d $d->{'home'} && &safe_delete_dir($d, $d->{'home'})) {
 		return $ok ? 1 : 0;
 		}
 
-	if (defined(&set_php_wrappers_writable)) {
-		&set_php_wrappers_writable($d, 1);
-		}
 	my $err;
 	# Detect subvolumes independently of quota editing so they remain deletable.
 	my $btrfs_id = !$d->{'parent'} && !$d->{'alias'} &&
@@ -302,16 +304,6 @@ if (-d $d->{'home'} && &safe_delete_dir($d, $d->{'home'})) {
 		$err = &backquote_logged("rm -rf ".quotemeta($d->{'home'}).
 					       " 2>&1");
 		$err = undef if (!$?);
-		}
-	if ($err) {
-		# Try again after running chattr
-		if (!defined($btrfs_id) && &has_command("chattr")) {
-			&system_logged("chattr -i -R ".
-				       quotemeta($d->{'home'}));
-			$err = &backquote_logged(
-				"rm -rf ".quotemeta($d->{'home'})." 2>&1");
-			$err = undef if (!$?);
-			}
 		}
 	if ($err) {
 		# Ignore an error deleting a mount point

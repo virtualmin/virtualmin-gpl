@@ -16,13 +16,14 @@ plan skip_all => 'Set WEBMIN_ROOT to the Webmin source tree' if (!$webmin);
 }
 
 require "$FindBin::Bin/../feature-dir.pl";
+require "$FindBin::Bin/../php-lib.pl";
 require "$FindBin::Bin/../security-lib.pl";
 require "$FindBin::Bin/../virtual-server-lib-funcs.pl";
 
 my $base = abs_path(tempdir(CLEANUP => 1));
 my $domains = "$base/domains";
 mkdir($domains) or die $!;
-my $child = { parent => '123', home => "$domains/child" };
+my $child = { parent => '123', home => "$domains/child", uid => $< };
 mkdir($child->{home}) or die $!;
 my $parent = { home => $base };
 my (@calls, @messages);
@@ -42,7 +43,9 @@ local *main::backquote_logged = sub {
 	return '';
 	};
 local *main::system_logged = sub { push(@calls, [ getcwd(), @_ ]); return 0 };
-local *main::set_php_wrappers_writable = sub { push(@calls, [ getcwd(), 'wrappers' ]) };
+local *main::has_command = sub { 1 };
+local *main::cgi_bin_dir = sub { $_[0]->{cgi_bin_path} || "$_[0]->{home}/cgi-bin" };
+local *main::get_domain_by = sub { () };
 local *main::html_escape = sub { $_[0] };
 local *main::text = sub { join(' ', @_) };
 local *main::error = sub { die "$_[0]\n" };
@@ -54,6 +57,37 @@ is_deeply([ map { $_->[0] } @calls ], [ $domains ],
 	'removal runs from inside the verified parent directory');
 is($calls[0]->[1], "rm -rf -- './child' 2>&1", 'removal uses only the final name');
 is(getcwd(), $cwd, 'original working directory restored');
+{
+	my $cgi = "$child->{home}/cgi-bin";
+	mkdir($cgi) or die $!;
+	foreach my $file ('php8.cgi', 'keep.cgi', 'php7.cgi') {
+		open(my $fh, '>', "$cgi/$file") or die $!;
+		close($fh) or die $!;
+		}
+	link("$cgi/php7.cgi", "$cgi/shared.cgi") or die $!;
+	my $subcgi = "$cgi/shop";
+	mkdir($subcgi) or die $!;
+	open(my $wrapper, '>', "$subcgi/php8.cgi") or die $!;
+	close($wrapper) or die $!;
+	local *main::get_domain_by = sub {
+		return { %$child, cgi_bin_path => $subcgi } if ($_[0] eq 'subdom');
+		return ();
+		};
+	@calls = ();
+	local *main::backquote_logged = sub {
+		push(@calls, [ getcwd(), @_ ]);
+		$? = 256;
+		return "protected file";
+		};
+	local *main::sub_mount_points = sub { () };
+	ok(!main::delete_dir($child), 'a protected file leaves the home in place');
+	is_deeply(\@calls, [
+		[ $cgi, "chattr -i './php8.cgi' >/dev/null 2>&1" ],
+		[ $subcgi, "chattr -i './php8.cgi' >/dev/null 2>&1" ],
+		[ $domains, "rm -rf -- './child' 2>&1" ],
+		], 'only the unshared wrappers, including the subdomain wrapper, are unlocked before one removal');
+	is($messages[-1], 'delete_ehome protected file', 'the removal error is reported');
+}
 {
 	local $child->{home} = "$base/./domains/child";
 	ok(main::delete_dir($child), 'a relative component naming the same directory is valid');

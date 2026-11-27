@@ -672,30 +672,23 @@ die $err if ($err);
 return $ok;
 }
 
-# delete_dir_beneath(&domain, dir, [clear-immutable])
-# Remove a tree from its verified parent. In list context, also return rm's
-# output when immutable cleanup was requested.
+# delete_dir_beneath(&domain, dir)
+# Remove a tree from its verified parent. In list context, include rm's output.
 sub delete_dir_beneath
 {
-my ($d, $dir, $clear_immutable) = @_;
+my ($d, $dir) = @_;
 $dir =~ s!/+$!!;
 my ($parent, $name) = $dir =~ m!^(.+)/([^/]+)$!;
 return 0 if (!$parent || $name eq '.' || $name eq '..');
 my $err;
+my $report = wantarray;
 my $ok = &in_domain_home($d, $parent, sub {
-	return &system_logged("rm", "-rf", "--", $name) == 0 if (!$clear_immutable);
+	return &system_logged("rm", "-rf", "--", $name) == 0 if (!$report);
 	my $target = &shell_quote_command_args("./$name");
-	my $rm = "rm -rf -- $target 2>&1";
-	$err = &backquote_logged($rm);
-	return 1 if (!$?);
-	return 0 if (!&has_command("chattr"));
-	# PHP wrappers can be immutable. Leave shared files alone.
-	&backquote_logged("find $target -depth \\( -type d -o -type f ".
-			"-links 1 \\) -execdir chattr -i {} + 2>&1");
-	$err = &backquote_logged($rm);
+	$err = &backquote_logged("rm -rf -- $target 2>&1");
 	return !$?;
 	});
-return wantarray ? ($ok, $err) : $ok;
+return $report ? ($ok, $err) : $ok;
 }
 
 # set_mailbox_home_owner(&domain, &user)
