@@ -602,8 +602,7 @@ foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
 
 	# Fix home directory permissions
 	if (-d $newu->{'home'} && &is_under_directory($hb, $newu->{'home'})) {
-		&execute_command("chown -R $newu->{'uid'}:$newu->{'gid'} ".
-                       quotemeta($newu->{'home'}));
+		&set_mailbox_home_owner($d, $newu);
 		}
 
 	# Create the user
@@ -3566,8 +3565,7 @@ my $hb = "$d->{'home'}/$config{'homes_dir'}";
 foreach $u (&list_domain_users($d, 1)) {
 	if (-d $u->{'home'} && &is_under_directory($hb, $u->{'home'}) &&
 	    (!$opts->{'mailuser'} || $u->{'user'} eq $foundmailuser)) {
-		&execute_command("chown -R $u->{'uid'}:$u->{'gid'} ".
-		       quotemeta($u->{'home'}));
+		&set_mailbox_home_owner($d, $u);
 		}
 	}
 

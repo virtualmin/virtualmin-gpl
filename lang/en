@@ -965,6 +965,7 @@ user_ehome2=User's home directory is relative to the domain, and so must not sta
 user_emkhome=Home directory $1 already exists
 user_erenamehome=Home directory $1 could not be renamed
 user_edeletehome=Mailbox account deleted, but home directory $1 could not be removed
+user_ehomeowner=Could not set ownership of mailbox home $1
 user_edelete=You cannot delete the virtual server administration user!
 user_aliases=Email forwarding destinations
 user_return=user

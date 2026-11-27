@@ -1091,11 +1091,9 @@ my $hd = $config{'homes_dir'};
 $hd =~ s/^\.\///;
 my $homes = "$d->{'home'}/$hd";
 foreach my $user (&list_domain_users($d, 1, 1, 1, 1)) {
-	if (&is_under_directory($homes, $user->{'home'}) &&
-	    !$user->{'webowner'} && $user->{'home'}) {
-		&system_logged("find ".quotemeta($user->{'home'}).
-			       " | sed -e 's/^/\"/' | sed -e 's/\$/\"/' ".
-			       " | xargs chown $user->{'uid'}:$user->{'gid'}");
+	if ($user->{'home'} && -d $user->{'home'} && !$user->{'webowner'} &&
+	    &is_under_directory($homes, $user->{'home'})) {
+		&set_mailbox_home_owner($d, $user);
 		}
 	}
 }

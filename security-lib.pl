@@ -698,6 +698,19 @@ my $ok = &in_domain_home($d, $parent, sub {
 return wantarray ? ($ok, $err) : $ok;
 }
 
+# set_mailbox_home_owner(&domain, &user)
+# Give the mailbox user ownership from inside the verified home.
+# Report a failed ownership change and let the restore or clone continue.
+sub set_mailbox_home_owner
+{
+my ($d, $u) = @_;
+return 1 if (&in_domain_home($d, $u->{'home'}, sub {
+	&system_logged("chown", "-hRP", "$u->{'uid'}:$u->{'gid'}", ".") == 0
+	}));
+&$second_print(&text('user_ehomeowner', &html_escape($u->{'home'})));
+return 0;
+}
+
 # copy_source_dest_as_domain_user(&domain, source, dest)
 # Copy a file or directory, with commands run as a domain owner
 sub copy_source_dest_as_domain_user

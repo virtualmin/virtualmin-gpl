@@ -59,7 +59,27 @@ is(getcwd(), $cwd, 'original working directory restored');
 	ok(main::delete_dir($child), 'a relative component naming the same directory is valid');
 }
 
+# Mail restore changes ownership from inside the mailbox it verified.
+@calls = ();
 my $user = { home => $child->{home}, uid => 1234, gid => 1235 };
+main::set_mailbox_home_owner($child, $user);
+is_deeply(\@calls, [ [ $child->{home}, 'chown', '-hRP', '1234:1235', '.' ] ],
+	'restored ownership is limited to the open mailbox');
+{
+	local *main::system_logged = sub { return 256 };
+	is(eval { main::set_mailbox_home_owner($child, $user) }, 0,
+	   'an ownership failure lets the caller continue');
+	is($messages[-1], "user_ehomeowner $user->{home}",
+	   'the restore output identifies the affected mailbox');
+}
+{
+	local $user->{home} = "$domains/missing";
+	@calls = ();
+	is(eval { main::set_mailbox_home_owner($child, $user) }, 0,
+	   'a home that cannot be opened is skipped');
+	is_deeply(\@calls, [], 'a skipped home reaches no ownership command');
+	is($messages[-1], "user_ehomeowner $user->{home}", 'the skipped home is reported');
+}
 {
 	local *main::delete_btrfs_user_home = sub { undef };
 	local *main::system_logged = sub { return 256 };
