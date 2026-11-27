@@ -2176,9 +2176,9 @@ if ($top && !-e $top && $d->{'uid'} && !&is_readonly_mode() &&
 		}
 	}
 
-# The user controls their home, so mail there is created as the user. Webmin
-# calls that can run a shell, such as unlink_file and open_tempfile, are
-# avoided, as the shell would switch back to root.
+# Create mail in the user's home with the mailbox user's permissions.
+# Use Perl's open and unlink here. Webmin's unlink_file and close_tempfile
+# can start a shell that switches back to root.
 &write_as_mailbox_user($user, sub {
 	return if (&is_readonly_mode());
 	if ($inhome && $mf && !-e $mf) {
