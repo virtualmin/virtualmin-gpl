@@ -30,8 +30,9 @@ chdir("$root/virtual-server") or die $!;
 sub form
 {
 my ($id, $old, $new, @fields) = @_;
+push(@fields, 'home_def=1') unless grep { /^home=/ } @fields;
 my $post = join('&', "dom=$id", "old=$old", "oldpop3=$old", "mailuser=$new",
-		'mailpass_def=1', 'quota_def=1', 'home_def=1', 'mailbox=1', @fields);
+		'mailpass_def=1', 'quota_def=1', 'mailbox=1', @fields);
 local @ENV{qw(WEBMIN_CONFIG WEBMIN_VAR REMOTE_USER SCRIPT_NAME REQUEST_METHOD
 	      CONTENT_TYPE CONTENT_LENGTH SERVER_ROOT)} =
 	('/etc/webmin', '/var/webmin', 'root', '/virtual-server/save_user.cgi',
@@ -114,6 +115,50 @@ my $completed = eval {
 		my $newhome = (getpwnam($renamed))[7];
 		ok(!-d $home && $newhome && -f "$newhome/$name",
 		   "$case retry moves the account and its files");
+		if ($case eq 'cli') {
+			rename($newhome, "$newhome.saved") or die $!;
+			my $ok = eval { cli('modify-user', @domain, '--user', $new,
+					    '--newuser', 'recovered'); 1 };
+			chomp(my $login = cli('list-users', @domain, '--user', 'recovered',
+					      '--name-only'));
+			my $recovered = $login && (getpwnam($login))[7];
+			ok($ok && $recovered && $recovered ne $newhome && -d $recovered,
+			   'CLI creates the new home when the old home is missing');
+			ok($recovered && -d $recovered &&
+			   (stat($recovered))[4] == (getpwnam($login))[2],
+			   'the recovered home belongs to the mailbox user');
+			}
+		elsif ($case eq 'key') {
+			my $custom = (getpwnam($owner))[7].'/custom';
+			my $html = form($id, $new, $new, 'home=custom');
+			like($html, qr/^Location: .*list_users\.cgi/mi, 'form accepts a custom home');
+			is((getpwnam($renamed))[7], $custom, 'account uses the custom home');
+			ok(!-d $newhome && -f "$custom/$name", 'mailbox files moved with the account');
+
+			# An existing default home must survive an attempted move back.
+			mkdir($newhome, 0700) or die $!;
+			my $inode = (stat($newhome))[1];
+			$html = form($id, $new, $new);
+			like($html, qr/Home directory \Q$newhome\E already exists/i,
+			     'form refuses an occupied default home');
+			is((getpwnam($renamed))[7], $custom, 'refused move keeps the custom home');
+			ok(-f "$custom/$name" && -d $newhome && (stat($newhome))[1] == $inode,
+			   'refused move preserves the mailbox files and the existing directory');
+
+			rmdir($newhome) or die $!;
+			$html = form($id, $new, $new);
+			like($html, qr/^Location: .*list_users\.cgi/mi, 'form accepts the default home');
+			is((getpwnam($renamed))[7], $newhome, 'account uses the default home again');
+			ok(!-d $custom && -f "$newhome/$name", 'files return to the default home');
+
+			# A new destination inside a root-only parent reaches the move itself.
+			mkdir($custom, 0700) or die $!;
+			$html = form($id, $new, $new, 'home=custom/blocked');
+			like($html, qr/Home directory \Q$newhome\E could not be renamed/i,
+			     'form refuses a move into a root-only parent');
+			ok((getpwnam($renamed))[7] eq $newhome && -f "$newhome/$name" &&
+			   !-e "$custom/blocked", 'failed move keeps the account and files together');
+			}
 		}
 
 	# Keep only the public halves of the two disposable test keys.

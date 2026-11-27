@@ -539,8 +539,9 @@ if ($sshpubkey && !$user->{'extra'}) {
 	}
 
 if (defined($newusername)) {
-	if ($user->{'home'} ne $olduser->{'home'}) {
-		&rename_file($olduser->{'home'}, $user->{'home'});
+	if ($user->{'home'} ne $olduser->{'home'} && -d $olduser->{'home'}) {
+		&rename_user_home($d, $olduser->{'home'}, $user->{'home'}) ||
+			&usage(&text('user_erenamehome', $olduser->{'home'}));
 		}
 	&rename_mail_file($user, $olduser) if (!$user->{'nomailfile'});
 	}

@@ -963,6 +963,7 @@ user_homeunder2=Website subdirectory
 user_ehome=Missing or invalid home directory
 user_ehome2=User's home directory is relative to the domain, and so must not start with a /
 user_emkhome=Home directory $1 already exists
+user_erenamehome=Home directory $1 could not be renamed
 user_edelete=You cannot delete the virtual server administration user!
 user_aliases=Email forwarding destinations
 user_return=user

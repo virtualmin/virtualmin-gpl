@@ -2992,6 +2992,34 @@ if (-d $user->{'home'} &&
 	}
 }
 
+# rename_user_home(&domain, old-home, new-home)
+# Move a mailbox home between directories controlled by its domain owner.
+sub rename_user_home
+{
+my ($d, $old, $new) = @_;
+return 1 if (&is_readonly_mode());
+return &write_as_domain_user($d, sub {
+	return 0 if (!$>);
+	return 1 if (rename($old, $new));
+	return 0 if ($^O ne 'linux' || (!$!{'EACCES'} && !$!{'EPERM'}));
+
+	# Moving a mailbox-owned directory to a different parent can need root.
+	# Linux procfs keeps both paths tied to the open parent directories.
+	my (@parents, @paths);
+	foreach my $path ($old, $new) {
+		my ($dir, $name) = $path =~ m!^(.+)/([^/]+)/?\z!s;
+		return 0 if (!defined($name) || $name eq '.' || $name eq '..');
+		sysopen(my $parent, $dir,
+			Fcntl::O_RDONLY() | Fcntl::O_DIRECTORY()) || return 0;
+		return 0 if (!-o $parent || !-w $parent || !-x $parent);
+		push(@parents, $parent);
+		push(@paths, "/proc/self/fd/".fileno($parent)."/".$name);
+		}
+	local $> = 0;
+	return rename($paths[0], $paths[1]);
+	});
+}
+
 # domain_title(&domain)
 sub domain_title
 {

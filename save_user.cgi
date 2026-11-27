@@ -701,7 +701,10 @@ else {
 			    (-d $user->{'home'} || $user->{'nocreatehome'}) &&
 			    !$user->{'fixedhome'} && !$user->{'brokenhome'}) {
 				if (!$user->{'nocreatehome'}) {
-					&rename_file($user->{'home'}, $home);
+					&rename_user_home($d, $user->{'home'},
+							  $home) ||
+					    &error(&text('user_erenamehome',
+						&html_escape($user->{'home'})));
 					}
 				$user->{'home'} = $home;
 				}
