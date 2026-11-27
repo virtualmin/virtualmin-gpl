@@ -87,9 +87,9 @@ elsif ($in{'delete'}) {
 		# Delete the user, his virtusers and aliases
 		&delete_user($user, $d);
 
+		my $home_err;
 		if (!$user->{'nocreatehome'} && $user->{'home'}) {
-			# Remove home directory
-			&delete_user_home($user, $d);
+			$home_err = &delete_user_home($user, $d);
 			}
 
 		# Delete in plugins
@@ -111,6 +111,7 @@ elsif ($in{'delete'}) {
 		&release_lock_mail($d);
 		&webmin_log("delete", "user",
 			    &remove_userdom($user->{'user'}, $d), $user);
+		&error($home_err) if ($home_err);
 		}
 	else {
 		# Confirm deletion first

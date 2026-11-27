@@ -31,7 +31,7 @@ foreach $du (@del) {
 	}
 
 if ($in{'confirm'}) {
-	# Do it!
+	my @home_errors;
 	foreach $user (@dusers) {
 		# Delete mail file
 		if (!$user->{'nomailfile'}) {
@@ -52,7 +52,8 @@ if ($in{'confirm'}) {
 
 		# Remove home directory
 		if (!$user->{'nocreatehome'} && $user->{'home'}) {
-			&delete_user_home($user, $d);
+			my $err = &delete_user_home($user, $d);
+			push(@home_errors, $err) if ($err);
 			}
 
 		# Delete in plugins
@@ -71,6 +72,7 @@ if ($in{'confirm'}) {
 	&release_lock_mail($d);
 	&webmin_log("delete", "users", scalar(@dusers),
 		    { 'dom' => $d->{'dom'} });
+	&error(join("<br>\n", @home_errors)) if (@home_errors);
 	&redirect("list_users.cgi?dom=$in{'dom'}");
 	}
 else {

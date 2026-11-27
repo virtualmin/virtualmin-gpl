@@ -80,9 +80,9 @@ if (defined(&get_simple_alias)) {
 # Delete the user, his virtusers and aliases
 &delete_user($user, $d);
 
+my $home_err;
 if (!$user->{'nocreatehome'}) {
-	# Remove home directory
-	&delete_user_home($user, $d);
+	$home_err = &delete_user_home($user, $d);
 	}
 
 # Delete in plugins
@@ -101,6 +101,8 @@ if ($config{'other_users'}) {
 &release_lock_mail($d);
 &release_lock_unix($d);
 &virtualmin_api_log(\@OLDARGV, $d);
+# The account is gone even when its home could not be removed.
+print &entities_to_ascii($home_err),"\n" if ($home_err);
 print "User $user->{'user'} deleted successfully\n";
 
 sub usage

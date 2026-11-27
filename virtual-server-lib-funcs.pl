@@ -251,6 +251,14 @@ if ($rv) {
 return $d;
 }
 
+# get_top_domain(&domain)
+# Returns the top-level server that owns this domain.
+sub get_top_domain
+{
+my ($d) = @_;
+return $d && $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+}
+
 # complete_domain(&domain)
 # Fills in any missing fields in a domain object
 sub complete_domain
@@ -2974,7 +2982,7 @@ if ($home) {
 }
 
 # delete_user_home(&user, &domain)
-# Deletes the home directory of a user, if valid
+# Remove the home if eligible. Return an error message if removal fails.
 sub delete_user_home
 {
 my ($user, $d) = @_;
@@ -2983,13 +2991,12 @@ if (-d $user->{'home'} &&
     &safe_delete_dir($d, $user->{'home'})) {
 	# Detach Btrfs qgroups before falling back to ordinary directory removal.
 	my $err = &delete_btrfs_user_home($user, $d);
-	if ($err) {
-		&error($err);
-		}
-	elsif (-d $user->{'home'}) {
-		&system_logged("rm -rf ".quotemeta($user->{'home'}));
+	return $err if ($err);
+	if (-d $user->{'home'} && !&delete_dir_beneath($d, $user->{'home'})) {
+		return &text('user_edeletehome', &html_escape($user->{'home'}));
 		}
 	}
+return undef;
 }
 
 # rename_user_home(&domain, old-home, new-home)
@@ -9570,7 +9577,8 @@ foreach my $dd (@alldoms) {
 						     @{$u->{'dbs'}} ];
 				&delete_user($u, $dd);
 				if (!$u->{'nocreatehome'} && !$remote{'dir'}) {
-					&delete_user_home($u, $d);
+					my $err = &delete_user_home($u, $d);
+					&$second_print($err) if ($err);
 					}
 				}
 			&$second_print($text{'setup_done'});

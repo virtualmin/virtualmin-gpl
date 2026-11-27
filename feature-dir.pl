@@ -272,6 +272,19 @@ if (-d $d->{'home'} && &safe_delete_dir($d, $d->{'home'})) {
 		return 1;
 		}
 
+	# Walk from the owner's home before removing a sub-server.
+	if ($d->{'parent'}) {
+		my ($ok, $err) = &delete_dir_beneath($d, $d->{'home'}, 1);
+		# As for a top-level home, rm may leave a mount point behind.
+		$ok = 1 if (!$ok && defined($err) &&
+			    &sub_mount_points($d->{'home'}));
+		&$second_print($ok ? $text{'setup_done'} :
+			&text(defined($err) ? 'delete_ehome'
+					    : 'delete_ehomepath',
+			      &html_escape($err || $d->{'home'})));
+		return $ok ? 1 : 0;
+		}
+
 	if (defined(&set_php_wrappers_writable)) {
 		&set_php_wrappers_writable($d, 1);
 		}

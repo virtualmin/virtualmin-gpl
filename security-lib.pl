@@ -639,6 +639,65 @@ if ($err) {
 return wantarray ? @rv : $rv[0];
 }
 
+# in_domain_home(&domain, dir, &code)
+# Run a file operation beneath the owner's home without following links.
+sub in_domain_home
+{
+my ($d, $dir, $code) = @_;
+return 1 if (&is_readonly_mode());
+my $top = &get_top_domain($d) || return 0;
+my $base = $top->{'home'};
+$base =~ s!/+\z!!;
+return 0 if ($base !~ m!^/!);
+$dir =~ s!(?:/\.?)+\z!!;
+my $fh;
+if ($dir eq $base) {
+	# A custom mailbox home can be directly inside the owner's home.
+	opendir($fh, $base) || return 0;
+	}
+else {
+	return 0 if (!defined(&open_beneath));
+	$fh = &open_beneath($base, $dir, Fcntl::O_DIRECTORY()) || return 0;
+	}
+
+# Never look up commands or Perl modules relative to the open directory.
+local $ENV{'PATH'} = join(":", grep { m!^/! } split(/:/, $ENV{'PATH'}));
+local @INC = grep { ref($_) || m!^/! } @INC;
+opendir(my $cwd, ".") || return 0;
+my $ok = eval { chdir($fh) && &$code() };
+my $err = $@;
+chdir($cwd) || &error("Cannot return to the original working directory ($!)");
+closedir($cwd);
+die $err if ($err);
+return $ok;
+}
+
+# delete_dir_beneath(&domain, dir, [clear-immutable])
+# Remove a tree from its verified parent. In list context, also return rm's
+# output when immutable cleanup was requested.
+sub delete_dir_beneath
+{
+my ($d, $dir, $clear_immutable) = @_;
+$dir =~ s!/+$!!;
+my ($parent, $name) = $dir =~ m!^(.+)/([^/]+)$!;
+return 0 if (!$parent || $name eq '.' || $name eq '..');
+my $err;
+my $ok = &in_domain_home($d, $parent, sub {
+	return &system_logged("rm", "-rf", "--", $name) == 0 if (!$clear_immutable);
+	my $target = &shell_quote_command_args("./$name");
+	my $rm = "rm -rf -- $target 2>&1";
+	$err = &backquote_logged($rm);
+	return 1 if (!$?);
+	return 0 if (!&has_command("chattr"));
+	# PHP wrappers can be immutable. Leave shared files alone.
+	&backquote_logged("find $target -depth \\( -type d -o -type f ".
+			"-links 1 \\) -execdir chattr -i {} + 2>&1");
+	$err = &backquote_logged($rm);
+	return !$?;
+	});
+return wantarray ? ($ok, $err) : $ok;
+}
+
 # copy_source_dest_as_domain_user(&domain, source, dest)
 # Copy a file or directory, with commands run as a domain owner
 sub copy_source_dest_as_domain_user
