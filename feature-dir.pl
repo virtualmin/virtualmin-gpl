@@ -272,9 +272,14 @@ if (-d $d->{'home'} && &safe_delete_dir($d, $d->{'home'})) {
 		return 1;
 		}
 
+	# Unlock PHP wrappers before removing the home.
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable($d, 1, 1, 1);
+		}
+
 	# Walk from the owner's home before removing a sub-server.
 	if ($d->{'parent'}) {
-		my ($ok, $err) = &delete_dir_beneath($d, $d->{'home'}, 1);
+		my ($ok, $err) = &delete_dir_beneath($d, $d->{'home'});
 		# As for a top-level home, rm may leave a mount point behind.
 		$ok = 1 if (!$ok && defined($err) &&
 			    &sub_mount_points($d->{'home'}));
@@ -285,9 +290,6 @@ if (-d $d->{'home'} && &safe_delete_dir($d, $d->{'home'})) {
 		return $ok ? 1 : 0;
 		}
 
-	if (defined(&set_php_wrappers_writable)) {
-		&set_php_wrappers_writable($d, 1);
-		}
 	my $err;
 	# Detect subvolumes independently of quota editing so they remain deletable.
 	my $btrfs_id = !$d->{'parent'} && !$d->{'alias'} &&
@@ -302,16 +304,6 @@ if (-d $d->{'home'} && &safe_delete_dir($d, $d->{'home'})) {
 		$err = &backquote_logged("rm -rf ".quotemeta($d->{'home'}).
 					       " 2>&1");
 		$err = undef if (!$?);
-		}
-	if ($err) {
-		# Try again after running chattr
-		if (!defined($btrfs_id) && &has_command("chattr")) {
-			&system_logged("chattr -i -R ".
-				       quotemeta($d->{'home'}));
-			$err = &backquote_logged(
-				"rm -rf ".quotemeta($d->{'home'})." 2>&1");
-			$err = undef if (!$?);
-			}
 		}
 	if ($err) {
 		# Ignore an error deleting a mount point
@@ -998,13 +990,13 @@ else {
 }
 
 # set_home_ownership(&domain)
-# Update the ownership of all files in a server's home directory, EXCEPT
-# the homes directory which is used by mail users
+# Restore the domain owner's files and give mailbox users their own files.
 sub set_home_ownership
 {
 my ($d) = @_;
 my $hd = $config{'homes_dir'};
 $hd =~ s/^\.\///;
+my $homes = "$d->{'home'}/$hd";
 my @users = grep { $_->{'unix'} && !$_->{'webowner'} }
 		    &list_domain_users($d, 1, 1, 1, 1);
 my $gid = $d->{'gid'} || $d->{'ugid'};
@@ -1014,65 +1006,71 @@ foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 		}
 	}
 
-# Track changed files
+# Leave mailbox and custom user homes out of the domain owner's repair.
+my @subhomes = grep { m!^\Q$d->{'home'}\E(?:/|\z)! && index($_, "$homes/") != 0 }
+		    map { $_->{'home'} } @users;
+if (!$d->{'parent'}) {
+	push(@subhomes, map { "$_->{'home'}/$hd/" }
+			  &get_domain_by("parent", $d->{'id'}));
+	}
+
+# Permission repair reports changes. Restore only needs to apply them.
+my $report = defined(wantarray);
 my @changed_files;
 my $check_file_change = sub {
-	my ($f, $uid, $gid, $changed_files) = @_;
-	my ($curr_uid, $curr_gid) = (stat($f))[4,5];
+	my ($path, $uid, $gid, $curr_uid, $curr_gid) = @_;
+	return if (!defined($curr_uid) || $curr_uid == $uid && $curr_gid == $gid);
 	my $curr_user = getpwuid($curr_uid) || $curr_uid;
 	my $curr_group = getgrgid($curr_gid) || $curr_gid;
 	my $new_user = getpwuid($uid) || $uid;
 	my $new_group = getgrgid($gid) || $gid;
-	if ($curr_uid != $uid || $curr_gid != $gid) {
-		push(@$changed_files, 
-			[$f, "$curr_user:$curr_group", "$new_user:$new_group"]);
-		}
+	push(@changed_files, [$path, "$curr_user:$curr_group", "$new_user:$new_group"]);
 };
 
-# Build list of dirs to skip (sub-domain homes and user homes)
-my @subhomes;
-if (!$d->{'parent'}) {
-	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
-		push(@subhomes, "$sd->{'home'}/$hd/");
+# Open each directory before reading it. Change only names inside that directory.
+my $repair_tree = sub {
+	my ($home, $uid, $gid, $mailbox) = @_;
+	my @dirs = ($home);
+	while (@dirs) {
+		my $dir = pop(@dirs);
+		my $opened = &in_domain_home($d, $dir, sub {
+			opendir(my $dh, ".") || return;
+			while (defined(my $name = readdir($dh))) {
+				next if ($name eq ".." || $name eq "." && $dir ne $home);
+				my $path = $name eq "." ? $dir : "$dir/$name";
+				next if (!$mailbox && ($path eq $homes ||
+					grep { index($path, $_) == 0 } @subhomes));
+				my @st = lstat($name);
+				next if (!@st || -l _);
+				push(@dirs, $path) if (-d _ && $name ne ".");
+				next if (!$mailbox && $name eq ".nodelete");
+				$check_file_change->($path, $uid, $gid, @st[4,5]) if ($report);
+				POSIX::lchown($uid, $gid, $name) ||
+					warn "chown: $path: $!\n";
+				}
+			return 1;
+			});
+		if (!$opened && $dir eq $d->{'home'}) {
+			&$second_print(&text('fixperms_ehome', &html_escape($dir)));
+			}
 		}
-	}
-foreach my $user (@users) {
-	push(@subhomes, $user->{'home'});
-	}
-my $find = "FIND";
-&open_execute_command($find, "find ".quotemeta($d->{'home'})." ! -type l", 1);
-LOOP: while(my $f = <$find>) {
-	$f =~ s/\r|\n//;
-	next LOOP if ($f =~ /\/\.nodelete$/);
-	next LOOP if ($f =~ /^\Q$d->{'home'}\/$hd\/\E/);
-	foreach my $s (@subhomes) {
-		next LOOP if ($f =~ /^\Q$s\E/);
-		}
-	$check_file_change->($f, $d->{'uid'}, $gid, \@changed_files);
-	&set_ownership_permissions($d->{'uid'}, $gid, undef, $f);
-	}
-close($find);
-$check_file_change->($d->{'home'}."/".$hd, $d->{'uid'}, $gid, \@changed_files);
-&set_ownership_permissions($d->{'uid'}, $gid, undef, $d->{'home'}."/".$hd);
+	};
+$repair_tree->($d->{'home'}, $d->{'uid'}, $gid);
 foreach my $dir (&virtual_server_directories($d)) {
-	&set_ownership_permissions(undef, undef, oct($dir->[1]),
-				   $d->{'home'}."/".$dir->[0]);
+	my $path = "$d->{'home'}/$dir->[0]";
+	&in_domain_home($d, $path, sub {
+		my ($uid, $group);
+		if ($dir->[2] eq 'homes') {
+			($uid, $group) = ($d->{'uid'}, $gid);
+			$check_file_change->($path, $uid, $group, (stat("."))[4,5])
+				if ($report);
+			}
+		&set_ownership_permissions($uid, $group, oct($dir->[1]), ".");
+		});
 	}
 foreach my $user (@users) {
-	next if ($user->{'nocreatehome'});
-	next if (!&is_under_directory("$d->{'home'}/$hd", $user->{'home'}));
-	next if ("$d->{'home'}/$hd" eq $user->{'home'});
-	my $find = "FIND";
-	&open_execute_command($find, "find ".
-		quotemeta($user->{'home'})." ! -type l", 1);
-	while (my $f = <$find>) {
-		$f =~ s/\r|\n//;
-		$check_file_change->($f, $user->{'uid'}, $user->{'gid'},
-				     \@changed_files);
-		&set_ownership_permissions($user->{'uid'}, $user->{'gid'},
-					   undef, $f);
-		}
-	close($find);
+	next if ($user->{'nocreatehome'} || $user->{'home'} !~ m!^\Q$homes\E/!);
+	$repair_tree->($user->{'home'}, $user->{'uid'}, $user->{'gid'}, 1);
 	}
 foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 	if (defined(&set_php_wrappers_writable)) {

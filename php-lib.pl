@@ -912,27 +912,38 @@ if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 &set_php_wrappers_writable($d, 0);
 }
 
-# set_php_wrappers_writable(&domain, flag, [subdomains-too])
+# set_php_wrappers_writable(&domain, flag, [subdomains-too], [deleting-home])
 # If possible, make PHP wrapper scripts mutable or immutable
 sub set_php_wrappers_writable
 {
-my ($d, $writable, $subs) = @_;
+my ($d, $writable, $subs, $deleting) = @_;
 if (&has_command("chattr")) {
-	foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
+	my $update = sub {
+		my ($dir) = @_;
 		foreach my $f (glob("$dir/php?.*cgi")) {
-			my @st = stat($f);
+			my @st = lstat($f);
+			next if ($deleting && (!-f _ || $st[3] != 1));
 			if (-r $f && !-l $f && $st[4] == $d->{'uid'}) {
-				&system_logged("chattr ".
-				   ($writable ? "-i" : "+i")." ".quotemeta($f).
-				   " >/dev/null 2>&1");
+				my $flag = $writable ? "-i" : "+i";
+				&system_logged("chattr $flag ".&shell_quote_command_args($f).
+					       " >/dev/null 2>&1");
 				}
+			}
+		};
+	foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
+		if ($deleting) {
+			# Unlock wrappers only inside a verified directory.
+			&in_domain_home($d, $dir, sub { $update->(".") });
+			}
+		else {
+			$update->($dir);
 			}
 		}
 	if ($subs) {
 		# Also do sub-domains, as their CGI directories are under
 		# parent's domain.
 		foreach my $sd (&get_domain_by("subdom", $d->{'id'})) {
-			&set_php_wrappers_writable($sd, $writable);
+			&set_php_wrappers_writable($sd, $writable, 0, $deleting);
 			}
 		}
 	}
