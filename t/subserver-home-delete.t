@@ -12,7 +12,7 @@ plan skip_all => 'Set WEBMIN_ROOT to the Webmin source tree' if (!$webmin);
 {
 	local @INC = ($webmin, @INC);
 	require WebminCore;
-	WebminCore->import('open_beneath');
+	WebminCore->import(qw(open_beneath is_under_directory));
 }
 
 require "$FindBin::Bin/../feature-dir.pl";
@@ -113,5 +113,73 @@ my $external = abs_path(tempdir(CLEANUP => 1));
 $child->{home} = $external;
 ok(!main::delete_dir($child), "a sub-server home outside the owner's home is kept");
 is_deeply(\@calls, [], 'no removal command runs for the external home');
+
+# Exercise the actual file listing, with ownership and mode changes recorded.
+{
+	local $main::config{'homes_dir'} = 'homes';
+	my (@users, @perms);
+	local *POSIX::lchown = sub { push(@calls, [ getcwd(), @_ ]); return 1 };
+	local *main::list_domain_users = sub { @users };
+	local *main::get_domain_by = sub { () };
+	local *main::virtual_server_directories = sub { [ 'homes', '755', 'homes' ] };
+	local *main::open_execute_command = sub {
+		open(main::FIND, '-|', '/bin/sh', '-c', $_[1]) or die $!;
+		};
+	local *main::set_php_wrappers_writable = sub { };
+	local *main::set_ownership_permissions = sub {
+		push(@perms, [ getcwd(), @_ ]) if (defined($_[2]));
+		};
+	my $domain = { home => $base, uid => 1234, gid => 1235 };
+	my $homes = "$base/homes";
+	mkdir($homes) or die $!;
+	my $mailbox = "$homes/mailuser";
+	mkdir($mailbox) or die $!;
+	push(@users, { unix => 1, home => $mailbox, uid => 1236, gid => 1235 });
+	my $file = "invoice\n2025";
+	foreach my $dir ($base, $mailbox) {
+		open(my $fh, '>', "$dir/$file") or die $!;
+		close($fh) or die $!;
+		}
+	symlink($file, "$mailbox/mail-link") or die $!;
+	my $custom = "$base/ftp[1]";
+	mkdir($custom) or die $!;
+	push(@users, { unix => 1, home => $custom, uid => 1237, gid => 1235 });
+	open(my $marker, '>', "$base/.nodelete") or die $!;
+	close($marker) or die $!;
+	@calls = ();
+	my @changes = main::set_home_ownership($domain);
+	is_deeply([ sort map { $_->[0] } grep { $_->[0] =~ /\Q$file\E\z/ } @changes ],
+		  [ sort ("$base/$file", "$mailbox/$file") ],
+		  'owner and mailbox reports each keep a multiline filename intact');
+	is_deeply([ grep { $_->[-1] eq $file } @calls ],
+		  [ [ $base, 1234, 1235, $file ], [ $mailbox, 1236, 1235, $file ] ],
+		  'each multiline name is repaired inside its own directory');
+	ok(!grep({ $_->[-1] eq 'mail-link' } @calls), 'repair leaves mailbox links alone');
+	is_deeply([ grep { $_->[0] eq $custom || $_->[-1] eq 'ftp[1]' ||
+			   $_->[-1] eq '.nodelete' } @calls ], [],
+		  'repair leaves custom user homes and .nodelete alone');
+	is_deeply(\@perms, [ [ $homes, $domain->{uid}, $domain->{gid}, 0755, '.' ] ],
+		  'restore sets the owner and mode inside the verified homes directory');
+	rename($homes, "$base/saved-homes") && symlink('domains', $homes) or die $!;
+	@perms = ();
+	main::set_home_ownership($domain);
+	is_deeply(\@perms, [], 'restore skips the shared directory when it is a link');
+
+	local *main::virtual_server_directories = sub { [ 'cgi-bin', '750', 'cgi' ] };
+	my $cgi = "$base/cgi-bin";
+	mkdir($cgi) or die $!;
+	main::set_home_ownership($domain);
+	is_deeply(\@perms, [ [ $cgi, undef, undef, 0750, '.' ] ],
+		  'repair sets the configured mode inside the CGI directory');
+	rmdir($cgi) && symlink('domains', $cgi) or die $!;
+	@perms = ();
+	main::set_home_ownership($domain);
+	is_deeply(\@perms, [], 'repair skips the CGI directory when it is a link');
+
+	@messages = ();
+	main::set_home_ownership({ %$domain, parent => '123', home => $external });
+	is_deeply(\@messages, [ "fixperms_ehome $external" ],
+		  'repair reports a sub-server home outside its parent');
+}
 
 done_testing();
