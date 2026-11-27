@@ -341,6 +341,7 @@ if (!$d->{'parent'}) {
 		&foreign_call($usermodule, "making_changes");
 		&foreign_call($usermodule, "modify_group", \%old, $ginfo);
 		&foreign_call($usermodule, "made_changes");
+		&flush_quota_caches();
 		&$second_print($text{'setup_done'});
 		}
 
@@ -592,7 +593,7 @@ foreach my $r (&list_running_backups()) {
 if (&has_home_quotas() && !$backing) {
 	# Domain owner's Unix quota
 	my $want = $tmpl->{'quotatype'} eq 'hard' ? $user->{'hardquota'}
-						     : $user->{'softquota'};
+						  : $user->{'softquota'};
 	my $bsize = &quota_bsize("home");
 	if ($want != $d->{'uquota'}) {
 		return &text('validate_euquota',

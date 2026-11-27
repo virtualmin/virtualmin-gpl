@@ -2050,6 +2050,12 @@ if ($config{'generics'} && $echanged) {
 &sync_alias_virtuals($d);
 NOALIASES:
 
+# If user was renamed, the in-memory cache of quotas mapped by username is
+# no longer valid
+if ($user->{'user'} != $olduser->{'user'}) {
+	&flush_quota_caches();
+	}
+
 # Save his quotas if changed (unless this is the domain owner)
 if ($d && $user->{'user'} ne $d->{'user'} &&
     !$user->{'noquota'} &&
@@ -19608,12 +19614,23 @@ undef(%main::get_domain_cache);
 undef(@main::list_domains_cache);
 undef(%bsize_cache);
 undef(%get_bandwidth_cache);
+undef(@useradmin::list_users_cache);
+undef(@useradmin::list_groups_cache);
+&flush_quota_caches();
+}
+
+# flush_quota_caches()
+# Clear in-memory caches of user filesystem quotas
+sub flush_quota_caches
+{
 undef(%main::soft_home_quota);
 undef(%main::hard_home_quota);
 undef(%main::used_home_quota);
 undef(%main::used_home_fquota);
-undef(@useradmin::list_users_cache);
-undef(@useradmin::list_groups_cache);
+undef(%main::gsoft_home_quota);
+undef(%main::ghard_home_quota);
+undef(%main::gused_home_quota);
+undef(%main::gused_home_fquota);
 }
 
 # list_shared_ips()
