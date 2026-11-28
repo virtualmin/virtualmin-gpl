@@ -2052,7 +2052,7 @@ NOALIASES:
 
 # If user was renamed, the in-memory cache of quotas mapped by username is
 # no longer valid
-if ($user->{'user'} != $olduser->{'user'}) {
+if ($user->{'user'} ne $olduser->{'user'}) {
 	&flush_quota_caches();
 	}
 
@@ -16622,6 +16622,7 @@ foreach my $ld (@doms) {
 # Update all features in all domains. Include the mail feature always, as this
 # covers FTP users
 local $doing_dom;	# Has to be local for scoping
+my $rv = undef;
 foreach my $f (&unique(@features, 'mail')) {
 	my $mfunc = "modify_$f";
 	for(my $i=0; $i<@doms; $i++) {
@@ -16663,6 +16664,7 @@ foreach my $f (&unique(@features, 'mail')) {
 			if ($@) {
 				&$second_print(&text('setup_failure',
 					$text{'feature_'.$f}, "$@"));
+				$rv = $text{'rename_efeat'};
 				}
 			}
 		}
@@ -16673,12 +16675,20 @@ foreach $f (&list_feature_plugins(1)) {
 	for(my $i=0; $i<@doms; $i++) {
 		my $p = &domain_has_website($doms[$i]);
 		$doing_dom = $doms[$i];
-		if ($doms[$i]->{$f} && $f ne $p) {
-			&try_plugin_call($f, "feature_modify",
+		local $main::error_must_die = 1;
+		eval {
+			if ($doms[$i]->{$f} && $f ne $p) {
+				&try_plugin_call($f, "feature_modify",
+						 $doms[$i], $olddoms[$i]);
+				}
+			&try_plugin_call($f, "feature_always_modify",
 					 $doms[$i], $olddoms[$i]);
+			};
+		if ($@) {
+			&$second_print(&text('setup_failure',
+				&plugin_call($f, "feature_name"), "$@"));
+			$rv = $text{'rename_efeat'};
 			}
-		&try_plugin_call($f, "feature_always_modify",
-				 $doms[$i], $olddoms[$i]);
 		}
 	}
 
@@ -16746,7 +16756,7 @@ my $merr = &made_changes();
 &clear_links_cache();
 &unlock_domain($d);
 
-return undef;
+return $rv;
 }
 
 # check_virtual_server_config([&lastconfig], [skip_dns_network])
